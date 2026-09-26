@@ -32106,6 +32106,9 @@ function runPresenterAction(action, serviceId = state.selectedServiceId, options
     return;
   }
 
+  // A board selection is for offline editing. Once the controller is live, the
+  // active output slide is the only meaningful focus state.
+  if (presenterControllerIsLive(serviceId)) clearPresenterBoardSelection({ render: false });
   preparePresenterNavigation(serviceId);
 
   state.presenter.jumpDraft = "";
