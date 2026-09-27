@@ -474,8 +474,8 @@
 }
 .presenter-output-root.no-chromakey .presenter-slide--liturgical-body {
   /* Center against the full stage without vertical safe padding, while keeping
-     the 45px horizontal reading margin on both sides. */
-  padding: 0 calc(45 * var(--presenter-stage-unit));
+     a shared reading margin for every fullscreen liturgical layout. */
+  padding-inline: 7.5cqw;
 }
 .presenter-liturgical-body {
   display: block;
