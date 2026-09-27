@@ -29571,9 +29571,6 @@ function renderPresenterServiceTextInputs(item, index, model, memo) {
   const titlePlaceholder = presenterServiceTitleInputPlaceholder(item, memo, titleLabel);
   const assigneeLabel = presenterServiceAssigneeInputLabel(item);
   const assigneePlaceholder = inferServiceItemAssignee(item) || assigneeLabel;
-  const sermonReference = isPresenterPreparationSermonTitleItem(item)
-    ? formatServiceScriptureReferenceList(serviceScriptureReadingReferencesForService(model?.service))
-    : "";
   const titleFieldClass = [
     "svc-presenter-input-field",
     announcementText ? "svc-presenter-input-field--announcement" : "",
@@ -29595,12 +29592,7 @@ function renderPresenterServiceTextInputs(item, index, model, memo) {
         <span>${escapeHtml(assigneeLabel)}</span>
         <input class="svc-presenter-input-control" type="text" data-service-item-field="assignee" data-service-item-index="${index}"
           value="${escapeAttr(model.assigneeValue || "")}" placeholder="${escapeAttr(assigneePlaceholder)}" onkeydown="handleDetailKeydown(event)" aria-label="${escapeAttr(`${item.label || "항목"} 담당`)}" />
-      </label>` : ""}
-    ${sermonReference ? `
-      <div class="svc-presenter-input-field svc-presenter-input-field--linked-scripture" aria-label="성경봉독 본문">
-        <span>본문</span>
-        <output>${escapeHtml(sermonReference)}</output>
-      </div>` : ""}`;
+      </label>` : ""}`;
 }
 
 function presenterServiceTitleInputLabel(item = {}, memo = parseServiceItemMemo(item?.memo), options = {}) {
