@@ -27425,9 +27425,9 @@ function renderServicePraiseLinkControl(item, index) {
   if (item?.song_id) {
     return `<button class="svc-item-link svc-item-link--linked" type="button" data-service-db-song="${escapeAttr(item.song_id)}" aria-label="찬양 DB 새 탭에서 열기" title="찬양 DB 새 탭에서 열기">DB</button>`;
   }
-  if (isOneOffSpecialPraiseItem(item, selectedServiceForEditor())) {
-    return `<span class="svc-item-link svc-item-link--manual" aria-label="일회성 특송">일회성</span>`;
-  }
+  // A manually entered special song needs no database badge. It remains fully
+  // editable and presentable through its worship item content.
+  if (isOneOffSpecialPraiseItem(item, selectedServiceForEditor())) return "";
   if (serviceItemRequiresSongSelection(item, selectedServiceForEditor())) return "";
   const title = String(item?.raw_title || "").trim();
   if (!title) return "";
