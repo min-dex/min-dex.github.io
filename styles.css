@@ -5773,6 +5773,17 @@ textarea.svc-presenter-input-control--multiline {
 .svc-presenter-input-field--announcement {
   grid-column: 1 / -1;
 }
+.svc-presenter-input-field--linked-scripture output {
+  display: block;
+  min-width: 0;
+  padding: 10px 12px;
+  color: var(--ink-2);
+  font: inherit;
+  font-weight: var(--ui-field-weight);
+  line-height: 1.35;
+  background: color-mix(in srgb, var(--panel-2) 78%, transparent);
+  border-radius: 4px;
+}
 .svc-presenter-input-field--lyrics textarea.svc-presenter-input-control {
   min-height: 180px;
   max-height: 65vh;
