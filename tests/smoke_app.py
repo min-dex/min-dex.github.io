@@ -3883,21 +3883,21 @@ def main() -> int:
                               id: '__smoke_fullscreen_reading_body_item__',
                               service_id: service.id,
                               label: '성경봉독',
-                              raw_title: '요 21:15-25',
+                              raw_title: '',
                               _worshipSectionId: '__smoke_fullscreen_reading_section__',
                               _worshipSectionKey: 'scripture_reading',
                               _worshipSectionTitle: '성경봉독',
-                              memo: serializeServiceItemMemo({ elementType: 'scripture_body', inputMode: 'scripture', scriptureReferences: ['요 21:15–25'] })
+                              memo: serializeServiceItemMemo({ elementType: 'scripture_body', inputMode: 'scripture' })
                             });
                             const item = normalizeServiceItem({
                               id: '__smoke_fullscreen_sermon_body_item__',
                               service_id: service.id,
                               label: '설교 본문',
-                              raw_title: '',
+                              raw_title: '요 21:15-25',
                               _worshipSectionId: '__smoke_fullscreen_sermon_section__',
                               _worshipSectionKey: 'sermon',
                               _worshipSectionTitle: '설교',
-                              memo: serializeServiceItemMemo({ elementType: 'scripture_body', inputMode: 'scripture' })
+                              memo: serializeServiceItemMemo({ elementType: 'scripture_body', inputMode: 'scripture', scriptureReferences: ['요 21:15–25'] })
                             });
                             state.serviceItems = {
                               ...state.serviceItems,
@@ -3909,6 +3909,11 @@ def main() -> int:
                             const staticInput = presenterServiceInputIsStatic(item, memo);
                             const rows = buildWorshipPersistenceRows(service, [readingItem, item], {}, {}).elements;
                             const sermonRow = rows[1] || null;
+                            const readingFallbackReferences = serviceItemScriptureReferences(
+                              readingItem,
+                              parseServiceItemMemo(readingItem.memo),
+                              service,
+                            );
                             state.services = previousServices;
                             state.serviceItems = previousItems;
                             return {
@@ -3918,6 +3923,7 @@ def main() -> int:
                               slideCount: slides.length,
                               savedTitle: sermonRow?.title || '',
                               savedReference: sermonRow?.scripture_reference || '',
+                              readingFallbackReferences,
                             };
                           })(),
                           worshipSongVersionFkGuard: (() => {
@@ -4645,6 +4651,7 @@ def main() -> int:
                             "slideCount": 1,
                             "savedTitle": "요한복음 21:15–25",
                             "savedReference": "요한복음 21:15–25",
+                            "readingFallbackReferences": ["요한복음 21:15–25"],
                         }
                         and template_terms["worshipSongVersionFkGuard"] == {
                             "staleInvalid": True,
