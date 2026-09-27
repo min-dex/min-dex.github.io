@@ -7328,7 +7328,11 @@ async function syncSharedSundayContentAfterSave(sourceService, sourceItems = [],
     if (previous.length !== 1 || !sundayEditSyncEligible(savedItem, sourceService)
       || !sundayEditSyncEligible(previous[0], sourceService)
       || sundayEditSyncSignature(previous[0]) === sundayEditSyncSignature(savedItem)) continue;
-    const types = sundaySharedContentTypesForItem(item, sourceService);
+    // Decide the scope from the persisted item, not the editor's stale object.
+    // This keeps a cleared or retyped 1st-service item from inheriting an old
+    // shared-content classification during the follow-up sync.
+    const types = sundaySharedContentTypesForItem(savedItem, sourceService);
+    if (!types.length) continue;
     for (const target of state.services.filter((service) => service.id !== sourceService.id
       && service.date === sourceService.date && types.includes(worshipAppServiceTypeId(service.type_id)))) {
       const jobKey = `${sourceService.id}:${target.id}:${key}`;

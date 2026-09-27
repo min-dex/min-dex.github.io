@@ -34,6 +34,14 @@ def main():
                   check(jobs.length===1,'unchanged save resynced');
                   const first={id:'first',date:source.date,type_id:'sunday-first'};
                   const second={id:'second',date:source.date,type_id:'sunday-second'};
+                  const firstCitation=normalizeServiceItem({id:'first:citation',service_id:first.id,label:'인용 구절',raw_title:'요한복음 3:16',
+                    _worshipSectionKey:'sermon',_worshipSectionTitle:'설교',_worshipSlotKey:'sermon.citation',
+                    memo:serializeServiceItemMemo({elementType:'scripture_body',scriptureReferences:['요한복음 3:16']})});
+                  const clearedFirstCitation={...firstCitation,raw_title:'',memo:serializeServiceItemMemo({elementType:'scripture_body'})};
+                  clearedFirstCitation._worshipSharedContentDirty=true;
+                  jobs=[];state.services=[first,second,target];pendingSundayEditSync.clear();
+                  await syncSharedSundayContentAfterSave(first,[clearedFirstCitation],{previousItems:[firstCitation]});
+                  check(jobs.length===0,'first-service citation deletion leaked to linked services');
                   const praiseItem=(service,songId)=>normalizeServiceItem({id:`${service.id}:praise`,service_id:service.id,label:'찬양 1',song_id:songId,
                     _worshipSectionKey:'praise',_worshipSectionTitle:'찬양',_worshipSlotKey:'praise.song.1',
                     memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db'})});
