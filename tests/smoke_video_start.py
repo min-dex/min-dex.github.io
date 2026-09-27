@@ -18,7 +18,15 @@ def main():
                       // Model the browser refusing the first audible autoplay attempt.
                       HTMLMediaElement.prototype.play=function(){calls++;this.autoplay=false;return Promise.reject(new DOMException('blocked','NotAllowedError'))};
                       window.payload={serviceId:'start-test',index:0,chromakey:true,slides:[{id:'first',type:'video',elementType:'video',layout:'media',videoSrc:'assets/presenter/chromakey-ready-loop-pingpong.mp4',playback:{autoplay:true,muted:false,controls:false}}]};
-                      renderPresenterOutput(payload);
+                      const themed={...payload,backgroundImages:['assets/test-autumn-background.png'],serviceType:'sunday-main'};
+                      window.payload=themed;
+                      const frame=presenterOutputFrameStateForSlide(payload.slides[0],themed);
+                      if(frame.showBackground||!frame.videoOutput)throw Error('video inherits service background');
+                      if(presenterOutputShouldAnimateFrameTransition(document.querySelector('#presenterOutputRoot'),frame))throw Error('video fades over prior frame');
+                      renderPresenterOutput(themed);
+                      const root=document.querySelector('#presenterOutputRoot');
+                      if(root.classList.contains('has-background')||document.body.classList.contains('has-background'))throw Error('theme visible before video starts');
+                      if(getComputedStyle(root).backgroundImage!=='none')throw Error('video loading background is not plain');
                       await Promise.resolve();await Promise.resolve();
                       window.video=document.querySelector('.is-active video');
                       if(calls!==1 || video.controls || video.muted)throw Error('first-start recovery or audio changed');

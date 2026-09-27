@@ -22,6 +22,7 @@ def main():
             page.route('**/swap-test.png', lambda route: pending.append(route))
             page.goto(url + '?output=presenter', wait_until='domcontentloaded')
             page.wait_for_function("typeof renderPresenterOutput === 'function'")
+            page.wait_for_selector('#presenterOutputRoot', state='attached')
             page.evaluate("""() => {
               window.swapPayload = {serviceId:'swap', serviceType:'sunday-main', chromakey:true,
                 slides:[{id:'text',type:'scripture',elementType:'scripture_text',
@@ -46,6 +47,7 @@ def main():
             for route in pending:
                 route.fulfill(body=data.getvalue(), content_type='image/png')
             page.wait_for_function("document.querySelector('.presenter-output-layer.is-active img')?.naturalWidth > 0")
+            page.wait_for_function("!document.querySelector('#presenterOutputRoot').classList.contains('is-transitioning')")
             after = Image.open(BytesIO(page.screenshot())).convert('RGB')
             assert after.getpixel((480, 200)) == (20, 80, 220)
             for index in range(6):

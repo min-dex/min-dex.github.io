@@ -3818,17 +3818,19 @@ function presenterOutputFrameStateForSlide(slide, payload = {}) {
   const cleanOutput = !slideChromakey;
   const blankSlide = presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.BLANK;
   const scoreOutput = presenterSlideIsScoreLike(slide);
+  const videoOutput = presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.VIDEO || Boolean(slide?.videoSrc);
   const scriptureReadingOutput = slide?.scriptureContext === "reading";
   const suppressBackground = Boolean(slide?.suppressBackgroundImage || slide?.noBackgroundImage);
   const usesDedicatedScriptureBackground = slide?.scriptureContext === "reading" && !suppressBackground;
   // A fullscreen blank stays inside the service visual system: retain the same
   // background while the cross draws over it. Chromakey remains background-free.
-  const showBackground = Boolean(backgroundImages.length && cleanOutput && !suppressBackground && !usesDedicatedScriptureBackground);
+  const showBackground = Boolean(backgroundImages.length && cleanOutput && !videoOutput && !suppressBackground && !usesDedicatedScriptureBackground);
   return {
     cleanOutput,
     showBackground,
     blankOutput: Boolean(blankSlide && cleanOutput),
     scoreOutput,
+    videoOutput,
     scriptureReadingOutput,
     backgroundImage: backgroundImages[0] || "",
     backgroundImages,
@@ -4029,6 +4031,8 @@ function presenterOutputFrameKey(payload = {}, slide = null, frameState = {}) {
 
 function presenterOutputShouldAnimateFrameTransition(root, frameState = {}) {
   if (!frameState.cleanOutput) return false;
+  // A video must not reveal the previous frame while its first frame loads.
+  if (frameState.videoOutput || root?.querySelector?.(":scope > .presenter-output-layer.is-active video.presenter-video")) return false;
   if (frameState.scoreOutput) return false;
   if (frameState.blankOutput) return false;
   if (frameState.scriptureReadingOutput) return false;
