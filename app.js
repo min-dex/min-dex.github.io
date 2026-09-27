@@ -33499,10 +33499,23 @@ function buildServicePresenterSlidesUncached(serviceId, options = {}) {
     return documentFallbackSlides;
   }
   if (outputItems.length) {
+    const scriptureReading = outputItems.find(isSharedScriptureReadingServiceItem);
     let slides = outputItems
       .sort((a, b) => a.sort_order - b.sort_order)
       .flatMap((item, index) => {
         const slides = buildPresenterSlidesForServiceItem(item, service, index, options);
+        if (scriptureReading && isPresenterPreparationSermonTitleItem(item)) {
+          const sermonScripture = {
+            ...scriptureReading,
+            id: `${item.id || index}:sermon-scripture-output`,
+            label: "설교 본문",
+            _worshipSectionId: item._worshipSectionId,
+            _worshipSectionKey: "sermon",
+            _worshipSectionTitle: item._worshipSectionTitle || "설교",
+            _worshipSlotKey: "sermon.scripture",
+          };
+          slides.push(...buildPresenterSlidesForServiceItem(sermonScripture, service, index + 0.1, options));
+        }
         const hidden = parseServiceItemMemo(item?.memo).hiddenInPresentation;
         return hidden ? slides.map((slide) => ({ ...slide, hiddenInPresentation: true })) : slides;
       })
