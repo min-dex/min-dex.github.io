@@ -7587,6 +7587,8 @@ body.right-sidebar-open .svc-present-btn.svc-presenter-launch--sidebar:not(.svc-
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
   width: 100%;
+  column-gap: 8px;
+  row-gap: 0;
 }
 .svc-board-subgroup-control-item:has(> .svc-presenter-input-field--scripture-parts) > label {
   grid-column: 1;
@@ -7602,6 +7604,14 @@ body.right-sidebar-open .svc-present-btn.svc-presenter-launch--sidebar:not(.svc-
   grid-column: 2;
   grid-row: 1;
   align-self: start;
+}
+.svc-board-subgroup-control-item:has(> .svc-presenter-input-field--scripture-parts) > .svc-presenter-input-field--scripture-parts:not([open]) > .svc-presenter-scripture-parts {
+  /* `details` becomes display: contents above, so retain the native closed
+     behavior explicitly instead of leaving its empty grid row and gap behind. */
+  display: none;
+}
+.svc-board-subgroup-control-item:has(> .svc-presenter-input-field--scripture-parts[open]) {
+  row-gap: 8px;
 }
 .svc-board-subgroup-control-item:has(> .svc-presenter-input-field--scripture-parts) > .svc-presenter-input-field--scripture-parts > .svc-presenter-scripture-parts {
   grid-column: 1 / -1;
