@@ -7347,6 +7347,17 @@ async function syncSharedSundayContentAfterSave(sourceService, sourceItems = [],
   const failures = [];
   let retryRecordPersisted = persistPendingSundayEditSync();
   for (const [jobKey, job] of pendingSundayEditSync) {
+    const jobSource = state.services.find((service) => service.id === job.sourceServiceId);
+    const jobTarget = state.services.find((service) => service.id === job.targetId);
+    const targetTypeId = worshipAppServiceTypeId(jobTarget?.type_id);
+    const jobTypes = sundaySharedContentTypesForItem(job.item, jobSource);
+    // Rules can become narrower after an old retry was saved locally. Drop
+    // those obsolete jobs instead of surfacing a false linked-service error.
+    if (!jobSource || !jobTarget || !sundayEditSyncEligible(job.item, jobSource) || !jobTypes.includes(targetTypeId)) {
+      pendingSundayEditSync.delete(jobKey);
+      retryRecordPersisted = persistPendingSundayEditSync() && retryRecordPersisted;
+      continue;
+    }
     if (job.sourceServiceId !== sourceService.id) continue;
     const savedSourceItems = groupWorshipElements(
       state.worshipSections.filter((section) => section.service_id === sourceService.id),
@@ -27879,8 +27890,14 @@ function sundaySharedContentTypesForItem(item = {}, service = null) {
   if (key.startsWith("main-praise:") && ["sunday-first", "sunday-second"].includes(typeId)) {
     return ["sunday-first", "sunday-second"];
   }
-  if (["scripture-reading", "sermon-title", "sermon-scripture", "sermon-citation"].includes(key) && ["sunday-first", "sunday-second", "sunday-main"].includes(typeId)) {
+  if (key === "scripture-reading" && ["sunday-first", "sunday-second", "sunday-main"].includes(typeId)) {
     return ["sunday-first", "sunday-second", "sunday-main"];
+  }
+  // 1부 설교는 별도 메시지로 준비한다. 설교 제목·인용 구절은 2부와
+  // 3부(주일대예배) 사이에서만 공유하고, 1부 저장을 다른 예배에 전파하지 않는다.
+  if (["sermon-title", "sermon-scripture", "sermon-citation"].includes(key)
+    && ["sunday-second", "sunday-main"].includes(typeId)) {
+    return ["sunday-second", "sunday-main"];
   }
   if (key === "offering-hymn" && ["sunday-first", "sunday-second", "sunday-main"].includes(typeId)) {
     return ["sunday-first", "sunday-second", "sunday-main"];
