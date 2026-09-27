@@ -23786,9 +23786,12 @@ function adaptServiceItemsForPresenterView(service, items = [], options = {}) {
 }
 
 function visibleServiceItemsForPresentation(items = []) {
-  // 성경봉독 is the single source of truth, but 설교 본문 is its own output
-  // position. Its empty value resolves from 성경봉독 and renders there.
-  return items;
+  const hasCanonicalScriptureReading = items.some(isSharedScriptureReadingServiceItem);
+  // Historical records can retain a sermon-body row. Once a service has its
+  // canonical reading, that duplicate must neither invite editing nor render.
+  return hasCanonicalScriptureReading
+    ? items.filter((item) => !isSermonScriptureBodyServiceItem(item))
+    : items;
 }
 
 function normalizeServicePresenterConclusionItems(service = null, items = []) {
@@ -33505,16 +33508,15 @@ function buildServicePresenterSlidesUncached(serviceId, options = {}) {
       .flatMap((item, index) => {
         const slides = buildPresenterSlidesForServiceItem(item, service, index, options);
         if (scriptureReading && isPresenterPreparationSermonTitleItem(item)) {
-          const sermonScripture = {
-            ...scriptureReading,
-            id: `${item.id || index}:sermon-scripture-output`,
-            label: "설교 본문",
-            _worshipSectionId: item._worshipSectionId,
-            _worshipSectionKey: "sermon",
-            _worshipSectionTitle: item._worshipSectionTitle || "설교",
-            _worshipSlotKey: "sermon.scripture",
-          };
-          slides.push(...buildPresenterSlidesForServiceItem(sermonScripture, service, index + 0.1, options));
+          // Reuse the reading payload, but keep every derived slide in the sermon element.
+          const section = presenterSectionForServiceItem(item, index, serviceItemDisplayText(item));
+          const bodySlides = buildPresenterScriptureTextSlides(scriptureReading, section, index, service);
+          const pending = bodySlides.length ? null : presenterPendingScriptureSlide(scriptureReading, section, index, service);
+          slides.push(...(bodySlides.length ? bodySlides : pending ? [pending] : []).map((slide) => ({
+            ...slide,
+            id: `${item.id || index}:sermon:${slide.id}`,
+            label: item.label,
+          })));
         }
         const hidden = parseServiceItemMemo(item?.memo).hiddenInPresentation;
         return hidden ? slides.map((slide) => ({ ...slide, hiddenInPresentation: true })) : slides;
