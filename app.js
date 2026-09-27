@@ -29570,6 +29570,12 @@ function renderPresenterServiceTextInputs(item, index, model, memo) {
   if (!needsTitle && !needsAssignee && !manualPraise) return "";
   const specialSong = isSpecialSongServiceItem(item);
   const announcementText = isAnnouncementTextInputItem(item);
+  // Announcement slides already treat memo.slides as their canonical body.
+  // Read that same source into the editor so legacy first-line raw_title values
+  // cannot make a populated announcement look empty.
+  const announcementValue = announcementText && memo.slides?.length
+    ? memo.slides.join("\n\n")
+    : item.raw_title || "";
   const titleLabel = presenterServiceTitleInputLabel(item, memo, { manualPraise });
   const titlePlaceholder = presenterServiceTitleInputPlaceholder(item, memo, titleLabel);
   const assigneeLabel = presenterServiceAssigneeInputLabel(item);
@@ -29584,7 +29590,7 @@ function renderPresenterServiceTextInputs(item, index, model, memo) {
         ${presenterServiceTitleFieldShowsLabel(titleLabel) ? `<span>${escapeHtml(titleLabel)}</span>` : ""}
         ${manualPraise ? renderServiceEditorTitleControl(item, index, { service: model?.service, hideFormControls: true }, model) : announcementText ? `
           <textarea class="svc-presenter-input-control svc-presenter-input-control--multiline" data-service-item-field="raw_title" data-service-item-index="${index}"
-            rows="4" placeholder="1. 다음 주 모임 안내&#10;같은 항목의 추가 내용&#10;2. 새가족 환영" onkeydown="handleDetailKeydown(event)" aria-label="${escapeAttr(`${item.label || "항목"} ${titleLabel}`)}">${escapeHtml(item.raw_title || "")}</textarea>
+            rows="4" placeholder="1. 다음 주 모임 안내&#10;같은 항목의 추가 내용&#10;2. 새가족 환영" onkeydown="handleDetailKeydown(event)" aria-label="${escapeAttr(`${item.label || "항목"} ${titleLabel}`)}">${escapeHtml(announcementValue)}</textarea>
           <small class="svc-presenter-input-hint">줄 맨 앞의 1., 2.마다 새 항목으로 표시됩니다. 번호 없는 다음 줄은 같은 항목에 포함됩니다.</small>` : `
           <input class="svc-presenter-input-control" type="text" data-service-item-field="raw_title" data-service-item-index="${index}"
             value="${escapeAttr(item.raw_title || "")}" placeholder="${escapeAttr(titlePlaceholder)}" onkeydown="handleDetailKeydown(event)" ${specialSong ? `autocomplete="off" spellcheck="false"` : ""} aria-label="${escapeAttr(`${item.label || "항목"} ${titleLabel}`)}" />`}
