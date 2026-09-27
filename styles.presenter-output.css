@@ -473,9 +473,9 @@
   text-align: left;
 }
 .presenter-output-root.no-chromakey .presenter-slide--liturgical-body {
-  /* Fullscreen liturgical copy has a fixed stage-grid safe area. Chromakey
-     keeps the ordinary presenter slide padding. */
-  padding: calc(75 * var(--presenter-stage-unit)) calc(45 * var(--presenter-stage-unit));
+  /* Fullscreen liturgical copy centers against the full stage. Keep only the
+     requested 45px starting inset; it must not inherit generic safe padding. */
+  padding: 0 0 0 calc(45 * var(--presenter-stage-unit));
 }
 .presenter-liturgical-body {
   display: block;
@@ -643,6 +643,13 @@
 .presenter-fullscreen-song-detail {
   font-size: calc(75 * var(--presenter-stage-unit));
   font-weight: var(--presenter-weight-body);
+}
+.presenter-output-root.no-chromakey .presenter-fullscreen-song-heading,
+.presenter-output-root.no-chromakey .presenter-fullscreen-order-heading {
+  font-size: calc(80 * var(--presenter-stage-unit));
+}
+.presenter-output-root.no-chromakey .presenter-fullscreen-song-detail {
+  font-size: calc(60 * var(--presenter-stage-unit));
 }
 .presenter-slide--lyrics,
 .presenter-slide--song-title,
