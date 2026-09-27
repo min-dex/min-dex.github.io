@@ -3368,42 +3368,10 @@ function setupPresenterStartupFullscreen() {
   window.history.replaceState(window.history.state, "", url.toString());
   const target = document.documentElement;
   if (!target.requestFullscreen || document.fullscreenEnabled === false) return;
-  let pending = false;
-  let fallback = true;
-  const cancelFallback = () => {
-    fallback = false;
-    window.removeEventListener("click", onClick, true);
-    window.removeEventListener("keydown", onKey, true);
-    document.removeEventListener("fullscreenchange", onFullscreenChange);
-  };
-  const request = async () => {
-    if (pending || !fallback) return;
-    if (document.fullscreenElement) { cancelFallback(); return; }
-    pending = true;
-    try {
-      await target.requestFullscreen({ navigationUI: "hide" });
-      cancelFallback();
-    } catch {
-      // A blocked startup request is retried only by an explicit output click.
-    } finally { pending = false; }
-  };
-  function onClick(event) {
-    if (!event.isTrusted || event.button !== 0 || event.ctrlKey || event.metaKey || event.altKey
-      || event.target?.closest?.("button, a, input, select, textarea, [contenteditable='true']")) return;
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    void request();
-  }
-  function onKey(event) {
-    if (event.key === "Escape") cancelFallback();
-  }
-  function onFullscreenChange() {
-    if (document.fullscreenElement) cancelFallback();
-  }
-  window.addEventListener("click", onClick, true);
-  window.addEventListener("keydown", onKey, true);
-  document.addEventListener("fullscreenchange", onFullscreenChange);
-  void request();
+  if (document.fullscreenElement) return;
+  // A startup attempt is intentionally one-shot. Retrying from a later slide
+  // click causes Chrome's native "Press Esc" notice during the service.
+  void target.requestFullscreen({ navigationUI: "hide" }).catch(() => {});
 }
 
 function initPresenterOutputCore() {
