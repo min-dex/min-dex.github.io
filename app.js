@@ -7219,7 +7219,7 @@ async function saveWorshipServiceElementPatch(service, itemId) {
   const previousDocument = serviceDocumentSnapshotFromRef(documentService);
   delete documentService._worshipSourceTextDraft;
   if (previousDocument?.sourceText && previousItem && committedItem) {
-    documentService._worshipSourceTextDraft = sundayEditSyncSourceText(previousDocument, previousItem, committedItem, documentService);
+    documentService._worshipSourceTextDraft = sundayEditSyncSourceText(previousDocument, previousItem, committedItem, documentService, committedItems);
   }
   let sourceRef = withServiceDocumentSnapshot(documentService, committedItems);
   const atomic = await worshipAtomicClient();
@@ -7465,7 +7465,7 @@ function sundayEditSyncHasLocalDraft(serviceId) {
     || (state.selectedServiceId === serviceId && state.dirty.service));
 }
 
-function sundayEditSyncSourceText(document, item, next, service) {
+function sundayEditSyncSourceText(document, item, next, service, canonicalItems = null) {
   const source = String(document.sourceText || "").replace(/\r\n?/g, "\n");
   const portable = /^\s*\[\[[^\]]+\]\]/m.test(source);
   const records = parseServiceSourceText(source, { includeRanges: true });
@@ -7480,7 +7480,15 @@ function sundayEditSyncSourceText(document, item, next, service) {
     const heading = portable ? `[[${serviceSourceSectionTitle(item)}]]` : `[${serviceSourceSectionTitle(item)}]`;
     return `${source.trimEnd()}\n\n${heading}\n${appendLines.join("\n")}`.trim();
   }
-  if (candidates.length !== 1) throw new Error("연결 예배 원문의 항목 위치가 중복되어 반영하지 않았습니다.");
+  // Older source snapshots did not retain stable record identities. If a
+  // label now resolves to several candidates, rebuilding from canonical rows
+  // is safer than guessing a text range or blocking the linked save.
+  if (candidates.length !== 1) {
+    if (Array.isArray(canonicalItems)) {
+      return buildServiceSourceText(service, { items: canonicalItems, ignoreSnapshotFallback: true });
+    }
+    return source;
+  }
   const record = candidates[0];
   const replacementLines = portable
     ? serviceSourceItemLines(next, service)
@@ -7577,7 +7585,7 @@ async function persistSundayEditSync(job, options = {}) {
   const nextItems = items.map((candidate) => candidate.id === item.id ? next : candidate);
   const previousDocument = serviceDocumentSnapshotFromRef(freshService);
   const sourceText = previousDocument?.sourceText
-    ? sundayEditSyncSourceText(previousDocument, item, next, freshService)
+    ? sundayEditSyncSourceText(previousDocument, item, next, freshService, nextItems)
     : buildServiceSourceText(freshService, { items: nextItems, ignoreSnapshotFallback: true });
   const documentService = { ...freshService, _worshipSourceTextDraft: sourceText };
   let ref = withServiceDocumentSnapshot(documentService, nextItems);
