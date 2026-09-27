@@ -7832,6 +7832,7 @@ def main() -> int:
                 chromakey_pixels = {
                     "thumbTop": rgb_at(thumb_shot, 0.5, 0.2),
                     "thumbBar": rgb_at(thumb_shot, 0.02, 0.92),
+                    "thumbBottom": rgb_at(thumb_shot, 0.5, 0.995),
                     "thumbFrameBottomLeft": rgb_at(thumb_frame_shot, 0.025, 0.96),
                     "thumbFrameBottomRight": rgb_at(thumb_frame_shot, 0.975, 0.96),
                     "thumbHostBackground": thumb_host_state["hostBackground"],
@@ -7844,6 +7845,7 @@ def main() -> int:
                     and is_chromakey_green(chromakey_pixels["outputTop"])
                     and chromakey_pixels["thumbHostBackground"] == "rgba(0, 0, 0, 0)"
                     and is_dark_bar(chromakey_pixels["thumbBar"])
+                    and is_dark_bar(chromakey_pixels["thumbBottom"])
                     and is_dark_bar(chromakey_pixels["thumbFrameBottomLeft"])
                     and is_dark_bar(chromakey_pixels["thumbFrameBottomRight"])
                     and is_dark_bar(chromakey_pixels["outputBar"])
