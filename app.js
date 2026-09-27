@@ -23786,12 +23786,9 @@ function adaptServiceItemsForPresenterView(service, items = [], options = {}) {
 }
 
 function visibleServiceItemsForPresentation(items = []) {
-  const hasCanonicalScriptureReading = items.some(isSharedScriptureReadingServiceItem);
-  // Historical records can retain a sermon-body row. Once a service has its
-  // canonical reading, that duplicate must neither invite editing nor render.
-  return hasCanonicalScriptureReading
-    ? items.filter((item) => !isSermonScriptureBodyServiceItem(item))
-    : items;
+  // 성경봉독 is the single source of truth, but 설교 본문 is its own output
+  // position. Its empty value resolves from 성경봉독 and renders there.
+  return items;
 }
 
 function normalizeServicePresenterConclusionItems(service = null, items = []) {
