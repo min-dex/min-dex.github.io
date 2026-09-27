@@ -2271,6 +2271,7 @@ function readTheme() {
 
 function applyTheme(theme) {
   state.theme = theme;
+  document.documentElement.dataset.theme = theme;
   document.body.dataset.theme = theme;
   if (!refs.themeBtn) return;
   const themeLabel = theme === "dark" ? "라이트 모드 사용" : "다크 모드 사용";

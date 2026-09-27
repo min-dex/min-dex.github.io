@@ -22,10 +22,17 @@
       body {
         min-height: 100%;
         margin: 0;
-        background: #181816;
-        color: #f3f3ef;
+        background: var(--mindex-boot-bg, #181816);
+        color: var(--mindex-boot-ink, #f3f3ef);
         color-scheme: dark;
       }
+      html[data-theme="dark"] { color-scheme: dark; }
+      html[data-theme="light"] {
+        --mindex-boot-bg: #ffffff;
+        --mindex-boot-ink: #101010;
+        color-scheme: light;
+      }
+      body.ui-booting { background: var(--mindex-boot-bg, #181816); }
       body.ui-booting .app-shell,
       body.ui-booting .toast-region {
         visibility: hidden;
@@ -40,6 +47,12 @@
     </style>
     <script>
       (() => {
+        let savedTheme = "";
+        try { savedTheme = localStorage.getItem("mindex.theme"); } catch (_) {}
+        const theme = savedTheme === "dark" || savedTheme === "light"
+          ? savedTheme
+          : window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ? "dark" : "light";
+        document.documentElement.dataset.theme = theme;
         const params = new URLSearchParams(window.location.search);
         if (params.get("output") === "presenter" || params.get("mindex-output") === "presenter") {
           document.documentElement.classList.add("presenter-output-document", "presenter-output-pending");
@@ -50,6 +63,7 @@
   <body class="ui-booting">
     <script>
       (() => {
+        document.body.dataset.theme = document.documentElement.dataset.theme;
         try {
           const moduleName = sessionStorage.getItem("mindex.ui.module");
           if (moduleName) {
