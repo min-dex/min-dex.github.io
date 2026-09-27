@@ -1543,10 +1543,14 @@ function bindStaticEvents() {
     });
   }
   window.addEventListener("visibilitychange", () => {
-    if (document.visibilityState !== "visible") return;
+    if (document.visibilityState !== "visible") {
+      persistListScrollState();
+      return;
+    }
     if (state.module === "presenter") schedulePresenterPreviewLayoutUpdate(refs.detailPane);
     scheduleServiceMusicResume("visibility");
   });
+  window.addEventListener("pagehide", persistListScrollState);
 
   SYSTEM_THEME_QUERY?.addEventListener("change", () => {
     if (!safeStorageGet("local", STORAGE.theme)) applyTheme(readTheme());
@@ -1614,6 +1618,7 @@ function bindStaticEvents() {
   });
 
   window.addEventListener("beforeunload", (event) => {
+    persistListScrollState();
     // Presenter changes are persisted through its own save flow. A browser-native
     // prompt here is both misleading and unable to trigger that save operation.
     if (state.module === "presenter") return;
@@ -2106,6 +2111,29 @@ function safeStorageRemove(scope, key) {
   }
 }
 
+function readListScrollState() {
+  const raw = safeStorageGet("session", STORAGE.listScroll, "{}");
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+    return Object.fromEntries(Object.entries(parsed)
+      .filter(([key, value]) => typeof key === "string" && key.length <= 200 && Number.isFinite(value) && value > 0)
+      .slice(-48)
+      .map(([key, value]) => [key, Math.floor(value)]));
+  } catch {
+    return {};
+  }
+}
+
+function persistListScrollState() {
+  const entries = Object.entries(state.listScroll || {})
+    .filter(([key, value]) => typeof key === "string" && key.length <= 200 && Number.isFinite(value) && value > 0)
+    .slice(-48)
+    .map(([key, value]) => [key, Math.floor(value)]);
+  if (entries.length) safeStorageSet("session", STORAGE.listScroll, JSON.stringify(Object.fromEntries(entries)));
+  else safeStorageRemove("session", STORAGE.listScroll);
+}
+
 function readWorshipRecoverySnapshots() {
   const raw = safeStorageGet("local", WORSHIP_RECOVERY_SNAPSHOTS_STORAGE_KEY, "[]");
   try {
@@ -2324,6 +2352,7 @@ function readUiState() {
   state.selectedBibleTranslationId = safeStorageGet("session", STORAGE.bibleTranslationId) || null;
   state.selectedBibleChapter = Number.isFinite(bibleChapter) && bibleChapter > 0 ? bibleChapter : 1;
   state.bibleCopyReference = bibleCopyReference !== "false";
+  state.listScroll = readListScrollState();
   state.presenter.selectedScreenId = safeStorageGet("local", PRESENTER_TARGET_SCREEN_STORAGE_KEY) || null;
   state.presenter.alwaysOnTop = safeStorageGet("local", PRESENTER_ALWAYS_ON_TOP_STORAGE_KEY) === "true";
 }
@@ -17190,7 +17219,7 @@ function getListScrollKey() {
   if (state.module === "home") return `home:${search}`;
   if (state.module === "scripture") return `scripture:${state.scriptureFilter}:${search}`;
   if (state.module === "service") return `service:${state.serviceFilter}:${search}`;
-  if (state.module === "presenter") return `presenter:${search}`;
+  if (state.module === "presenter") return `presenter:${state.selectedServiceId || state.presenter.viewServiceId || "none"}:${search}`;
   if (state.module === "calendar") return `calendar:${search}`;
   if (state.module === "references") return `references:${search}`;
   if (state.module === "manuals") return "manuals";

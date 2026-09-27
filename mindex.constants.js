@@ -325,6 +325,7 @@
       bibleTranslationId: "mindex.ui.bibleTranslationId",
       bibleChapter: "mindex.ui.bibleChapter",
       bibleCopyReference: "mindex.ui.bibleCopyReference",
+      listScroll: "mindex.ui.listScroll",
       selectedSongId: "mindex.ui.selectedSongId",
       selectedVersionId: "mindex.ui.selectedVersionId",
       selectedScriptureId: "mindex.ui.selectedScriptureId",
