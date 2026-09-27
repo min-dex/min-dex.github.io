@@ -27944,15 +27944,7 @@ function serviceScriptureReadingReferencesForService(service = null) {
   if (!serviceId) return [];
   const readingItem = (state.serviceItems[serviceId] || []).find((candidate) => isSharedScriptureReadingServiceItem(candidate));
   if (!readingItem) return [];
-  return serviceItemDirectScriptureReferences(readingItem, parseServiceItemMemo(readingItem.memo));
-}
-
-function serviceSermonScriptureReferencesForService(service = null) {
-  const serviceId = String(service?.id || "").trim();
-  if (!serviceId) return [];
-  const sermonItem = (state.serviceItems[serviceId] || []).find((candidate) => isSermonScriptureBodyServiceItem(candidate));
-  if (!sermonItem) return [];
-  return serviceItemDirectScriptureReferences(sermonItem, parseServiceItemMemo(sermonItem.memo));
+  return serviceItemScriptureReferences(readingItem, parseServiceItemMemo(readingItem.memo), service);
 }
 
 function serviceItemScriptureReferences(item = {}, memo = parseServiceItemMemo(item.memo), service = null) {
@@ -27961,9 +27953,6 @@ function serviceItemScriptureReferences(item = {}, memo = parseServiceItemMemo(i
   const direct = serviceItemDirectScriptureReferences(effectiveItem, effectiveMemo);
   if (!direct.length && isSermonScriptureBodyServiceItem(item)) {
     return serviceScriptureReadingReferencesForService(service);
-  }
-  if (!direct.length && isSharedScriptureReadingServiceItem(item)) {
-    return serviceSermonScriptureReferencesForService(service);
   }
   return direct;
 }
