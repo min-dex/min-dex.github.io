@@ -729,6 +729,7 @@ const state = {
     outputPendingAt: 0,
     outputBlockedAt: 0,
     outputAttemptServiceId: "",
+    outputGeneration: 0,
     outputStopAt: 0,
     outputStoppingClientId: "",
     outputClientId: "",
@@ -32479,6 +32480,7 @@ function scrollPresenterOutlineToItem(serviceId, itemIndex) {
 
 function stopPresenterOutput(serviceId = state.presenter.serviceId) {
   liveScriptureRequestSerial += 1;
+  state.presenter.outputGeneration += 1;
   const activeServiceId = serviceId || state.presenter.serviceId;
   const outputWindow = state.presenter.outputWindow;
   state.presenter.channel?.postMessage({ type: "presenter-output-close" });
@@ -32596,6 +32598,7 @@ async function openPresenterOutput(serviceId = state.selectedServiceId) {
   if (!serviceId) return;
   if (serviceNavigationBlocked(serviceId)) return;
   preparePresenterService(serviceId);
+  const outputGeneration = beginPresenterOutputGeneration(serviceId);
   publishPresenterState({ force: true });
   state.presenter.outputStopAt = 0;
   state.presenter.outputStoppingClientId = "";
@@ -32609,17 +32612,17 @@ async function openPresenterOutput(serviceId = state.selectedServiceId) {
     publishPresenterState();
     startPresenterOutputWindowMonitor(serviceId);
     existingWindow.focus?.();
-    window.setTimeout(() => publishPresenterState(), 250);
+    schedulePresenterOutputPublish(serviceId, outputGeneration);
     renderPresenterControlState(serviceId);
-    hydratePresenterOutputInBackground(serviceId);
+    hydratePresenterOutputInBackground(serviceId, null, outputGeneration);
     return;
   }
   if (isPresenterOutputHeartbeatOpen()) {
     publishPresenterState();
     startPresenterOutputWindowMonitor(serviceId);
-    window.setTimeout(() => publishPresenterState(), 250);
+    schedulePresenterOutputPublish(serviceId, outputGeneration);
     renderPresenterControlState(serviceId);
-    hydratePresenterOutputInBackground(serviceId);
+    hydratePresenterOutputInBackground(serviceId, null, outputGeneration);
     return;
   }
 
@@ -32632,12 +32635,13 @@ async function openPresenterOutput(serviceId = state.selectedServiceId) {
   if (window.mindexElectron?.openPresenterOutput) {
     try {
       await window.mindexElectron.openPresenterOutput({ url, targetRect, alwaysOnTop: state.presenter.alwaysOnTop });
+      if (!isCurrentPresenterOutputGeneration(serviceId, outputGeneration)) return;
       preparePresenterService(serviceId);
       publishPresenterState();
       startPresenterOutputWindowMonitor(serviceId);
-      window.setTimeout(() => publishPresenterState(), 250);
+      schedulePresenterOutputPublish(serviceId, outputGeneration);
       renderPresenterControlState(serviceId);
-      hydratePresenterOutputInBackground(serviceId);
+      hydratePresenterOutputInBackground(serviceId, null, outputGeneration);
       return;
     } catch (error) {
       console.warn("Electron presenter window failed; falling back to browser popup.", error);
@@ -32661,21 +32665,43 @@ async function openPresenterOutput(serviceId = state.selectedServiceId) {
   startPresenterOutputWindowMonitor(serviceId);
   outputWindow.focus();
   outputWindow.addEventListener?.("load", () => {
+    if (!isCurrentPresenterOutputGeneration(serviceId, outputGeneration)) return;
     publishPresenterState();
   }, { once: true });
   publishPresenterState();
-  window.setTimeout(() => publishPresenterState(), 250);
+  schedulePresenterOutputPublish(serviceId, outputGeneration);
   renderPresenterControlState(serviceId);
-  hydratePresenterOutputInBackground(serviceId, outputWindow);
+  hydratePresenterOutputInBackground(serviceId, outputWindow, outputGeneration);
 }
 
-function hydratePresenterOutputInBackground(serviceId, outputWindow = null) {
+function beginPresenterOutputGeneration(serviceId) {
+  state.presenter.outputGeneration += 1;
+  state.presenter.outputAttemptServiceId = serviceId;
+  return state.presenter.outputGeneration;
+}
+
+function isCurrentPresenterOutputGeneration(serviceId, generation) {
+  return state.presenter.outputGeneration === generation
+    && state.presenter.serviceId === serviceId
+    && !state.presenter.outputStopAt;
+}
+
+function schedulePresenterOutputPublish(serviceId, generation, delay = 250) {
+  window.setTimeout(() => {
+    if (!isCurrentPresenterOutputGeneration(serviceId, generation)) return;
+    publishPresenterState();
+  }, delay);
+}
+
+function hydratePresenterOutputInBackground(serviceId, outputWindow = null, generation = state.presenter.outputGeneration) {
   void hydratePresenterServiceData(serviceId).then(() => {
+    if (!isCurrentPresenterOutputGeneration(serviceId, generation)) return;
     preparePresenterService(serviceId);
     publishPresenterState();
     renderPresenterControlState(serviceId);
   }).catch((error) => {
     console.warn("Could not hydrate presenter output data.", error);
+    if (!isCurrentPresenterOutputGeneration(serviceId, generation)) return;
     if (!outputWindow) return;
     stopPresenterOutputWindowMonitor();
     state.presenter.outputWindow = null;
@@ -33131,9 +33157,13 @@ function patchServiceOutlineActiveState(serviceId = state.selectedServiceId) {
   activeGroups.forEach((group) => group.classList.add("active"));
 }
 
+let presenterLaunchRequestSerial = 0;
+
 async function startPresenterAtSlide(serviceId, index) {
   if (!serviceId || !Number.isFinite(Number(index))) return;
+  const requestSerial = ++presenterLaunchRequestSerial;
   await hydratePresenterServiceData(serviceId);
+  if (requestSerial !== presenterLaunchRequestSerial) return;
   preparePresenterService(serviceId);
   state.presenter.index = clampPresenterIndex(index, state.presenter.slides.length);
   clearPresenterBoardSelection({ render: false });
@@ -33148,7 +33178,8 @@ async function startPresenterAtSlide(serviceId, index) {
   syncSelectedServiceItemToPresenterSlide(serviceId);
   syncServiceMusicWithPresenterContext(serviceId, { render: false });
   publishPresenterState();
-  openPresenterOutput(serviceId);
+  await openPresenterOutput(serviceId);
+  if (requestSerial !== presenterLaunchRequestSerial) return;
   renderPresenterControlState(serviceId);
   scrollPresenterOutlineToActive(serviceId);
 }
