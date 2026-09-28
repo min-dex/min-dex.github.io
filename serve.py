@@ -59,8 +59,9 @@ class NoCacheHandler(http.server.SimpleHTTPRequestHandler):
         self.byte_range = None
         parts = pathlib.Path(unquote(urlsplit(self.path).path)).parts
         target = pathlib.Path(self.translate_path(self.path)).resolve()
+        server_root = pathlib.Path(self.directory or ROOT).resolve()
         try:
-            relative = target.relative_to(ROOT.resolve())
+            relative = target.relative_to(server_root)
         except ValueError:
             self.send_error(404)
             return None

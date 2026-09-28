@@ -14,7 +14,7 @@ def main():
                 page = browser.new_page()
                 page.route('**/*supabase*/**', lambda route: route.abort())
                 page.goto(url, wait_until='domcontentloaded')
-                page.wait_for_function("typeof handlePresenterShortcut === 'function'")
+                page.wait_for_function("typeof handlePresenterShortcut === 'function' && typeof state !== 'undefined' && refs?.rightSidebar")
                 page.evaluate('''() => {
                   state.module='presenter';state.selectedServiceId='fixture';state.presenter.serviceId='fixture';
                   state.presenter.slides=Array.from({length:100},(_,i)=>({id:'s'+i}));

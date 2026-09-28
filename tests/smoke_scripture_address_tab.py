@@ -10,7 +10,7 @@ def main():
                 page = browser.new_page(viewport={'width': 1920, 'height': 1080})
                 page.route('**/*supabase*/**', lambda r: r.abort())
                 page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-                page.wait_for_function("typeof presenterScriptureContextUsesAddressTab === 'function'")
+                page.wait_for_function("typeof presenterScriptureContextUsesAddressTab === 'function' && typeof PRESENTER_ELEMENT_TYPES !== 'undefined' && typeof PRESENTER_SLIDE_LAYOUTS !== 'undefined'")
                 for width in [1920, 400]:
                     page.set_viewport_size({'width': width, 'height': round(width * 9 / 16)})
                     for context in ['citation-chromakey', 'sermon-chromakey', 'sermon', 'citation', 'reading']:

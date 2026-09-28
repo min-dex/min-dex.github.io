@@ -10,7 +10,7 @@ def main():
                 page = browser.new_page(viewport={'width': 1920, 'height': 1080})
                 page.route('**/*supabase*/**', lambda route: route.abort())
                 page.goto(url, wait_until='domcontentloaded')
-                page.wait_for_function("typeof renderPresenterSlideFrame === 'function'")
+                page.wait_for_function("typeof renderPresenterSlideFrame === 'function' && typeof PRESENTER_ELEMENT_TYPES !== 'undefined' && typeof PRESENTER_SLIDE_LAYOUTS !== 'undefined'")
                 result = page.evaluate('''() => {
                   const root=document.createElement('div');
                   root.className='presenter-output-root no-chromakey';
@@ -29,7 +29,7 @@ def main():
                       const detail=root.querySelector('.presenter-fullscreen-song-detail');
                       if(detail?.textContent!=='Original title') throw Error('Missing song detail');
                       const detailSize=parseFloat(getComputedStyle(detail).fontSize),headingSize=parseFloat(getComputedStyle(heading).fontSize);
-                      if(Math.abs(detailSize-75*width/1920)>.1 || getComputedStyle(detail).fontWeight!=='700' || getComputedStyle(title).fontWeight!=='800') throw Error('Incorrect type hierarchy');
+                      if(Math.abs(detailSize-60*width/1920)>.1 || getComputedStyle(detail).fontWeight!=='700' || getComputedStyle(title).fontWeight!=='800') throw Error('Incorrect type hierarchy');
                       // Output headings omit order numbers (b088437a): '찬양 1' renders as '찬양'.
                       if(heading?.textContent!==label.replace(/\s*\d+$/,'') || !title?.textContent.includes('하늘 보좌')) throw Error('Missing title');
                       const h=heading.getBoundingClientRect(),t=title.getBoundingClientRect(),r=root.getBoundingClientRect();

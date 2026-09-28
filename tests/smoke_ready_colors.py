@@ -14,7 +14,7 @@ def main():
             page = browser.new_page(viewport={'width': 1920, 'height': 1080})
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-            page.wait_for_function("typeof renderPresenterFullscreenReadySlide === 'function'")
+            page.wait_for_function("typeof renderPresenterFullscreenReadySlide === 'function' && document.getElementById('presenterOutputRoot')")
             result = page.evaluate("""() => {
               const root = document.getElementById('presenterOutputRoot');
               root.className = 'presenter-output-root no-chromakey';

@@ -10,6 +10,9 @@ def run(browser, url):
     output = context.new_page()
     output.goto(url + '?output=presenter', wait_until='domcontentloaded')
     output.wait_for_selector('#presenterOutputRoot', state='attached')
+    # Let the output's ready/heartbeat handshake settle before replacing the
+    # renderer and publishing this test's isolated fixture.
+    output.wait_for_timeout(120)
     output.evaluate('''() => {
       window.renders=[];
       const original=renderPresenterOutput;

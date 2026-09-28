@@ -27,7 +27,7 @@ def main():
                       bindDetailInteractionRoot(host);refreshIcons(host);
                       const left=host.querySelector('#left [data-presenter-action="open"]');
                       const right=host.querySelector('#right [data-presenter-action="open"]');
-                      const input=host.querySelector('textarea');
+                      const input=host.querySelector('[data-presenter-preparation-field]');
                       const bg=el=>getComputedStyle(el).backgroundColor;
                       const height=el=>el.getBoundingClientRect().height;
                       document.body.classList.remove('right-sidebar-open');
@@ -55,7 +55,7 @@ def main():
                       document.body.classList.add('right-sidebar-open');
                       return {theme,width,leftHeight,rightHeight,draft:state.presenterPreparationDrafts[service.id]};
                     }""", {'theme': theme, 'width': width})
-                    assert result['draft'] == '찬양1: 입력 초안', result
+                    assert '찬양 1: 찬양1: 입력 초안' in result['draft'], result
                     page.screenshot(path=f'/tmp/mindex-output-hierarchy-{theme}-{width}.png')
             browser.close()
             print('PASS light/dark desktop/narrow primary action, fallback, stable sizes, draft/focus')

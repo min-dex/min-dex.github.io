@@ -11,6 +11,7 @@ def main():
                 page.route('**/*supabase*/**', lambda r: r.abort())
                 page.goto(url, wait_until='domcontentloaded')
                 page.wait_for_function("typeof patchPresenterBoardSections === 'function'")
+                page.wait_for_function("!document.body.classList.contains('ui-booting')")
                 result = page.evaluate('''async () => {
                   const check=(value,label)=>{if(!value)throw Error(label)};
                   const service={id:'incremental-audit',type_id:'sunday-afternoon'};
@@ -33,12 +34,13 @@ def main():
                   observer.observe(root,{childList:true,subtree:true});
                   for(let i=0;i<12;i++){state.presenter.index=i;renderPresenterControlState(service.id)}
                   thumbs[0].focus({preventScroll:true});
+                  check(document.activeElement===thumbs[0],`initial focus failed: ${document.activeElement?.outerHTML || document.activeElement?.tagName || 'none'}`);
                   slides[0].text='수정한 가사';renderPresenterControlState(service.id);
                   await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
                   check(root.isConnected&&thumbs.every(n=>n.isConnected),'board or thumbnail removed');
                   check(detached===0,'sections detached during content edit');
                   check(root.textContent.includes('수정한 가사'),'edit missing');
-                  check(document.activeElement.closest('.svc-slide-thumb'),'focus lost');
+                  check(document.activeElement.closest('.svc-slide-thumb'),`focus lost: ${document.activeElement?.outerHTML || document.activeElement?.tagName || 'none'}`);
                   observer.disconnect();
                   const render=()=>{
                     const t=document.createElement('template');t.innerHTML=renderServicePresenterControls(service,slides,true,0).trim();

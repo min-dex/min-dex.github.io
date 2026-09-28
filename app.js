@@ -844,13 +844,20 @@ const referenceInputNormalizationCache = {
   books: null,
   values: new Map(),
 };
+const scheduleMicrotask = typeof globalThis.queueMicrotask === "function"
+  ? globalThis.queueMicrotask.bind(globalThis)
+  : (callback) => Promise.resolve().then(callback);
 
 function startMindexRuntime() {
+  // The desktop/web app always has a complete DOM. Keeping the bootstrap inert
+  // in non-DOM contexts also makes preload, static analysis, and isolated
+  // model tests safe to import without accidentally starting the UI runtime.
+  if (typeof document === "undefined" || typeof document.getElementById !== "function") return;
   if (window.__mindexRuntimeStarted) return;
   window.__mindexRuntimeStarted = true;
   // Dynamic release loading can append app.js after DOMContentLoaded. Defer
   // until this script has finished initializing its top-level constants.
-  queueMicrotask(() => void init());
+  scheduleMicrotask(() => void init());
 }
 
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", startMindexRuntime, { once: true });
@@ -20904,7 +20911,7 @@ function showToast(message, type = "info") {
   toast.addEventListener("mouseleave", () => { hovered = false; toast.scheduleRemoval(); });
   toast.addEventListener("focusin", () => window.clearTimeout(toast.removeTimer));
   toast.addEventListener("focusout", (event) => {
-    if (!toast.contains(event.relatedTarget)) queueMicrotask(() => {
+    if (!toast.contains(event.relatedTarget)) scheduleMicrotask(() => {
       if (toast.isConnected) toast.scheduleRemoval();
     });
   });

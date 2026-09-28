@@ -53,7 +53,8 @@ def main():
                     document.body.append(host);
                     const inputs=[...host.querySelectorAll('[data-presenter-preparation-field]')];
                     check(inputs.length===(expected.length?examples.split('\\n').length:0),`${type}: rendered field count differs`);
-                    check(inputs.every(input=>input.dataset.presenterPreparationFieldLabel&&input.value===''),`${type}: labels or empty values missing`);
+                    const fieldValues=presenterPreparationFieldValues(service,presenterPreparationDisplayTextForService(service));
+                    check(inputs.every((input,index)=>input.dataset.presenterPreparationFieldLabel&&input.value===fieldValues[index]?.value),`${type}: labels or default values missing`);
                     check(!host.querySelector('[data-presenter-preparation-form]'),`${type}: form button remains`);
                     host.remove();
                     results.push({type,date,lines:parsed.entries.length});

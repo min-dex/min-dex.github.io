@@ -36,12 +36,12 @@ def main():
                     new File(['original JPEG bytes'],'three.jpg',{type:'image/jpeg'})];
                   const input=fs=>({files:fs,dataset:{serviceId:id,presenterReferenceMediaSection:'announcements'},disabled:false,value:'chosen'});
                   reset();const control=input(files);await addAndUploadPresenterReferenceMedia(control);
-                  check(getServiceItems(id).length===4,'one item per file');
-                  check(getServiceItems(id).slice(1).map(i=>parseServiceItemMemo(i.memo).asset.name).join(',')==='one.png,two.mp4,three.jpg','order');
+                  check(getServiceItems(id).length===2,'one reference item for the selected files');
+                  check(parseServiceItemMemo(getServiceItems(id)[1].memo).asset.slides.map(s=>s.name).join(',')==='one.png,two.mp4,three.jpg','slide order');
                   check(sent.every((f,i)=>f===files[i]),'file re-encoded or replaced');
                   check(!control.disabled && !control.value,'input not reset');
                   reset();sent.length=0;fail='two.mp4';await addAndUploadPresenterReferenceMedia(input(files));
-                  check(getServiceItems(id).length===2,'failed dummy retained or success removed');
+                  check(getServiceItems(id).length===2,'failed placeholder retained or success removed');
                   check(getServiceItems(id)[0].raw_title==='동시 수정','concurrent edit lost');
                   check(sent.length===2,'continued after failure');
                   check(!presenterReferenceMediaBatchServices.has(id),'lock leaked');
@@ -69,12 +69,12 @@ def main():
                   const existingInput=input(files);existingInput.dataset.serviceItemIndex='1';
                   await uploadPresenterReferenceMediaFile(existingInput);
                   check(getServiceItems(id).map(i=>i.id).at(-1)==='tail','files not inserted after current reference');
-                  check(getServiceItems(id).slice(1,4).map(i=>parseServiceItemMemo(i.memo).asset.name).join(',')==='one.png,two.mp4,three.jpg','existing chooser order');
+                  check(parseServiceItemMemo(getServiceItems(id)[1].memo).asset.slides.map(s=>s.name).join(',')==='one.png,two.mp4,three.jpg','existing chooser order');
                   check(getServiceItems(id)[1].id==='existing','existing item replaced rather than reused');
                   const originalMemo=getServiceItems(id)[1].memo;
                   saveServiceItemMutation=async()=>{throw Error('save failed')};
                   await uploadPresenterReferenceMediaFile(existingInput);
-                  check(getServiceItems(id)[1].memo===originalMemo && getServiceItems(id).length===5,'failed existing replacement lost original');
+                  check(getServiceItems(id)[1].memo===originalMemo && getServiceItems(id).length===3,'failed existing replacement lost original');
                   return 'PASS ordered batch, original File identity, partial failure, concurrent edits, validation and lock';
                 }'''), flush=True)
                 browser.close()

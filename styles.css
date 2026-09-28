@@ -852,6 +852,9 @@ body[data-module="presenter"] #newSongBtn {
   color: currentColor;
   stroke-width: var(--ui-icon-stroke);
 }
+.nav-rail-tab[data-home-module="service"] .lucide-church path[d="M14 21v-3a2 2 0 0 0-4 0v3"] {
+  display: none;
+}
 .sidebar {
   grid-column: 2;
   grid-row: 1 / -1;

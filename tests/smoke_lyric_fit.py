@@ -13,7 +13,7 @@ def main():
             page = browser.new_page()
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-            page.wait_for_function("typeof renderPresenterOutput === 'function'")
+            page.wait_for_function("typeof renderPresenterOutput === 'function' && document.getElementById('presenterOutputRoot')")
             page.evaluate('document.fonts.ready')
             for width, height in [(1920,1080), (1366,768), (900,900), (406,228)]:
                 page.set_viewport_size({'width':width,'height':height})

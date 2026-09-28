@@ -1,12 +1,12 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-const c={console,document:{addEventListener(){}},localStorage:{getItem(){return null}},setTimeout,clearTimeout,URL,URLSearchParams,crypto:require('node:crypto').webcrypto};c.window=c;c.location={search:'',hash:'',pathname:'/'};vm.createContext(c);
-for(const f of ['mindex.constants.js','mindex.presenter.js','mindex.worship-input.js','mindex.setlist-links.js','app.js'])vm.runInContext(fs.readFileSync(f,'utf8'),c,{filename:f});
+const c={console,document:{addEventListener(){}},localStorage:{getItem(){return null}},setTimeout,clearTimeout,URL,URLSearchParams,crypto:require('node:crypto').webcrypto};c.window=c;c.__mindexRuntimeStarted=true;c.location={search:'',hash:'',pathname:'/'};vm.createContext(c);
+for(const f of ['mindex.constants.js','mindex.worship-model.js','mindex.worship-persistence.js','mindex.presenter.js','mindex.worship-input.js','mindex.setlist-links.js','app.js'])vm.runInContext(fs.readFileSync(f,'utf8'),c,{filename:f});
 c.assert=assert;
 (async()=>{try{await vm.runInContext(`(async()=>{
  state.calendarLoaded=true;state.calendarData=[{date:'2026-09-13',nursery_prayer:'유치부 담당',children_prayer:'어린이 담당',youth_prayer:'청소년 담당',young_adult_prayer:'청년 담당',youth_offering_prayer:'봉헌 담당'}];
  const stored={mindex_worship_services:[],mindex_worship_sections:[],mindex_worship_elements:[]};let fail=false;let writes=0;
  state.client={from(table){return {insert(rows){writes++;if(fail&&table==='mindex_worship_elements')return Promise.resolve({error:new Error('fixture write failure')});stored[table].push(...JSON.parse(JSON.stringify(rows)));return table==='mindex_worship_services'?{select:async()=>({data:rows,error:null})}:Promise.resolve({error:null})},delete(){return {in:async(_,ids)=>{stored.mindex_worship_services=stored.mindex_worship_services.filter(x=>!ids.includes(x.id));const sections=stored.mindex_worship_sections.filter(x=>ids.includes(x.service_id));stored.mindex_worship_sections=stored.mindex_worship_sections.filter(x=>!ids.includes(x.service_id));stored.mindex_worship_elements=stored.mindex_worship_elements.filter(x=>!sections.some(s=>s.id===x.section_id));return {error:null}}}}}}};
- assert.equal(calendarAssigneeRowsForNewService({id:'child-original',type_id:'children',date:'2026-09-13'}).elements.length,0,'Do not invent a prayer slot absent from the template');
+ assert.equal((await calendarAssigneeRowsForNewService({id:'child-original',type_id:'children',date:'2026-09-13'})).elements.length,0,'Do not invent a prayer slot absent from the template');
  SERVICE_ORDER_TEMPLATE_FALLBACKS.nursery=[...SERVICE_ORDER_TEMPLATE_FALLBACKS.nursery,publicWorshipPrayerStep()];
  SERVICE_ORDER_TEMPLATE_FALLBACKS.children=[...SERVICE_ORDER_TEMPLATE_FALLBACKS.children,publicWorshipPrayerStep()];
  const payloads=['nursery','children','youth','young-adult'].map(type=>autoWorshipServicePayload({typeId:type,date:'2026-09-13'}));

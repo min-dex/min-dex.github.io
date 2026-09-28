@@ -13,7 +13,7 @@ def main():
             page = browser.new_page(viewport={'width': 1366, 'height': 768})
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-            page.wait_for_function("typeof presenterLyricFitKey === 'function'")
+            page.wait_for_function("typeof presenterLyricFitKey === 'function' && document.getElementById('presenterOutputRoot')")
             page.evaluate('document.fonts.ready')
             result = page.evaluate('''async () => {
               const slide = {id:'cache-test',type:'lyrics',elementType:'praise',layout:'lower_bar_text',

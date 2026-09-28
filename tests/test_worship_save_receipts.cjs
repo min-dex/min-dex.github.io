@@ -8,7 +8,13 @@ const sdk = {fetch, Headers, Request, Response, URL, URLSearchParams, AbortContr
 vm.createContext(sdk);
 vm.runInContext(fs.readFileSync(path.join(__dirname, '../vendor/supabase-js.min.js'), 'utf8'), sdk);
 const {createClient} = sdk.supabase;
-const source = fs.readFileSync(path.join(__dirname, '../app.js'), 'utf8');
+// Service-document history owns its persistence contract in this module. The
+// display-only summary remains in the app shell, so load each helper from its
+// actual owner instead of assuming the shell owns the full history contract.
+const sources = [
+  fs.readFileSync(path.join(__dirname, '../mindex.worship-persistence.js'), 'utf8'),
+  fs.readFileSync(path.join(__dirname, '../app.js'), 'utf8'),
+];
 const context = {
   MINDEX_SERVICE_DOCUMENT_KIND: 'worship-service',
   MINDEX_SERVICE_DOCUMENT_VERSION: 1,
@@ -34,7 +40,9 @@ for (const name of ['serviceDocumentHistoryWithPrevious', 'compactServiceDocumen
   'serviceDocumentHistoryEntryKey', 'trimServiceDocumentHistory',
   'normalizeServiceDocumentSnapshot', 'normalizeServiceDocumentSourceRecords',
   'normalizeServiceDocumentSlides', 'normalizeServiceDocumentExceptions',
-  'serviceDocumentRecordKey', 'serviceDocumentSlideKey'].filter(name => source.includes('function ' + name + '('))) {
+  'serviceDocumentRecordKey', 'serviceDocumentSlideKey']) {
+  const source = sources.find(candidate => candidate.includes('function ' + name + '('));
+  if (!source) continue;
   const start = source.indexOf('function ' + name + '(');
   assert.ok(start >= 0);
   vm.runInContext(source.slice(start, source.indexOf('\n}\n', start) + 2), context);

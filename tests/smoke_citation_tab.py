@@ -10,7 +10,7 @@ def main():
                 page = browser.new_page(viewport={'width': 1920, 'height': 1080})
                 page.route('**/*supabase*/**', lambda r: r.abort())
                 page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-                page.wait_for_function("typeof renderPresenterCitationTabSlide === 'function'")
+                page.wait_for_function("typeof renderPresenterCitationTabSlide === 'function' && typeof PRESENTER_ELEMENT_TYPES !== 'undefined' && !document.body.classList.contains('ui-booting')")
                 for width in [1920, 400]:
                     page.set_viewport_size({'width': width, 'height': round(width * 9 / 16)})
                     widths = []

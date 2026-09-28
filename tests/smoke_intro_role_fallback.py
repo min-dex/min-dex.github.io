@@ -11,7 +11,7 @@ def main():
             page = browser.new_page()
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url, wait_until='domcontentloaded')
-            page.wait_for_function("typeof presenterPreparationSlide === 'function'")
+            page.wait_for_function("typeof presenterPreparationSlide === 'function' && typeof presenterServiceUsesChromakey === 'function' && typeof normalizeServiceItem === 'function'")
             result = page.evaluate("""() => {
               const check = (ok, message) => { if (!ok) throw new Error(message); };
               const item = (role, assetUrl) => normalizeServiceItem({ id: 'prep', service_id: 's', label: '대기 영상', raw_title: '', _worshipSectionKey: 'ready', _worshipSectionTitle: '준비',

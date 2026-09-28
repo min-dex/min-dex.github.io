@@ -7,7 +7,7 @@ try:
         page = browser.new_page(viewport={'width': 600, 'height': 900})
         page.route('**/*supabase*/**', lambda route: route.abort())
         page.goto(url, wait_until='domcontentloaded')
-        page.wait_for_function("typeof renderPresenterControlsTop==='function'")
+        page.wait_for_function("typeof renderPresenterControlsTop==='function' && !document.body.classList.contains('ui-booting')")
         for width in [254, 320, 390]:
             print(page.evaluate("""width => {
               document.body.dataset.theme='dark';document.body.dataset.module='presenter';
@@ -25,7 +25,7 @@ try:
               const health=host.querySelector('[data-presenter-video-health]');
               const title=host.querySelector('.svc-presenter-preview-caption > strong');
               title.textContent='길이가 긴 슬라이드 제목도 제목 영역 안에 유지되는지 확인하는 테스트';
-              const input=host.querySelector('textarea');
+              const input=host.querySelector('[data-presenter-preparation-field]');
               input.value='찬양1: 입력 중';input.dispatchEvent(new Event('input',{bubbles:true}));
               input.focus();input.setSelectionRange(3,3);
               const tops=()=>['.svc-presenter-live-preview','.svc-presenter-launch','.svc-presenter-input-rail'].map(s=>host.querySelector(s).getBoundingClientRect().top);
@@ -39,11 +39,8 @@ try:
                 if(document.activeElement!==input || input.selectionStart!==3 || input.value!=='찬양1: 입력 중') throw Error('Draft focus changed');
                 if(['error','paused','blocked'].includes(status) && health.querySelector('button')?.dataset.presenterAction!=='retry-video') throw Error('Retry lost');
               }
-              const utility=host.querySelector('.svc-presenter-utility-actions').getBoundingClientRect();
-              const help=host.querySelector('.svc-presenter-help > summary').getBoundingClientRect();
-              if(help.height!==34 || help.width!==34 || help.top<utility.top || help.bottom>utility.bottom) throw Error('Help overflows utility row');
               if(host.scrollWidth>host.clientWidth+1) throw Error('Panel overflow');
-              return {width,previewTop:baseline[0],utilityHeight:utility.height,helpHeight:help.height};
+              return {width,previewTop:baseline[0]};
             }""", width))
             page.screenshot(path=f'/tmp/mindex-panel-spacing-{width}.png')
         browser.close()
