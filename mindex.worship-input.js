@@ -155,6 +155,45 @@ function handleDetailServiceWorkspaceClick(event) {
   return false;
 }
 
+function handleServiceItemDetailClick(event) {
+  const serviceSongCreate = event.target.closest("[data-service-song-create]");
+  if (serviceSongCreate) {
+    createPraiseSongFromServiceItem(Number(serviceSongCreate.dataset.serviceSongCreate));
+    return true;
+  }
+  const serviceSongSelect = event.target.closest("[data-service-song-select]");
+  if (serviceSongSelect) {
+    selectServiceSongForItem(Number(serviceSongSelect.dataset.serviceSongIndex), serviceSongSelect.dataset.serviceSongSelect);
+    return true;
+  }
+  const serviceSongClear = event.target.closest("[data-service-song-clear]");
+  if (serviceSongClear) {
+    clearServiceSongForItem(Number(serviceSongClear.dataset.serviceSongClear));
+    return true;
+  }
+  const serviceSongRetry = event.target.closest("[data-service-song-retry]");
+  if (serviceSongRetry) {
+    const songId = serviceSongRetry.dataset.serviceSongRetry;
+    if (!linkedSongLoadPromises.has(songId) && canUseClientData()) {
+      serviceSongRetry.disabled = true;
+      loadSongsForIdsInBackground([songId], {
+        render: "detail",
+        serviceId: state.selectedServiceId,
+      });
+    }
+    return true;
+  }
+  const serviceBulletinAction = event.target.closest("[data-service-bulletin-action]");
+  if (serviceBulletinAction) {
+    void runServiceBulletinAction(
+      serviceBulletinAction.dataset.serviceBulletinAction,
+      serviceBulletinAction.dataset.serviceId || state.selectedServiceId,
+    );
+    return true;
+  }
+  return false;
+}
+
 function updateServiceMetaField(field) {
   const service = state.services.find((candidate) => candidate.id === state.selectedServiceId);
   if (!service) return;

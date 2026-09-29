@@ -8939,45 +8939,7 @@ function handleDetailClick(event) {
 
   if (handleDetailServiceWorkspaceClick(event)) return;
 
-  const serviceSongCreate = event.target.closest("[data-service-song-create]");
-  if (serviceSongCreate) {
-    createPraiseSongFromServiceItem(Number(serviceSongCreate.dataset.serviceSongCreate));
-    return;
-  }
-
-  const serviceSongSelect = event.target.closest("[data-service-song-select]");
-  if (serviceSongSelect) {
-    selectServiceSongForItem(Number(serviceSongSelect.dataset.serviceSongIndex), serviceSongSelect.dataset.serviceSongSelect);
-    return;
-  }
-
-  const serviceSongClear = event.target.closest("[data-service-song-clear]");
-  if (serviceSongClear) {
-    clearServiceSongForItem(Number(serviceSongClear.dataset.serviceSongClear));
-    return;
-  }
-
-  const serviceSongRetry = event.target.closest("[data-service-song-retry]");
-  if (serviceSongRetry) {
-    const songId = serviceSongRetry.dataset.serviceSongRetry;
-    if (!linkedSongLoadPromises.has(songId) && canUseClientData()) {
-      serviceSongRetry.disabled = true;
-      loadSongsForIdsInBackground([songId], {
-        render: "detail",
-        serviceId: state.selectedServiceId,
-      });
-    }
-    return;
-  }
-
-  const serviceBulletinAction = event.target.closest("[data-service-bulletin-action]");
-  if (serviceBulletinAction) {
-    void runServiceBulletinAction(
-      serviceBulletinAction.dataset.serviceBulletinAction,
-      serviceBulletinAction.dataset.serviceId || state.selectedServiceId,
-    );
-    return;
-  }
+  if (handleServiceItemDetailClick(event)) return;
 
   if (handlePresenterDetailClick(event)) return;
 
