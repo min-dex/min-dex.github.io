@@ -28995,105 +28995,11 @@ async function applyPresenterPreparationInput(serviceId = state.selectedServiceI
       return;
     }
 
-    if (textFieldUpdates.length) {
-      items = items.filter((item) => {
-        const itemId = String(item.id || "");
-        const itemSlotKey = serviceItemSlotKey(item);
-        const itemSectionKey = String(item._worshipSectionKey || "").trim();
-        const itemLabelKey = compactSearchValue(item.label || "");
-        return !textFieldUpdates.some((update) => {
-          if (String(update.id || "") === itemId) return false;
-          const updateSectionKey = String(update.sectionKey || "").trim();
-          const updateLabelKey = compactSearchValue(update.label || "");
-          if (update.slotKey && itemSlotKey && update.slotKey === itemSlotKey) return true;
-          return Boolean(
-            updateSectionKey
-            && updateLabelKey
-            && updateSectionKey === itemSectionKey
-            && updateLabelKey === itemLabelKey,
-          );
-        });
-      });
-    }
-
-    const projectedItems = projectWorshipServiceItemsFromTemplate(
-      service,
-      normalizeServiceItemsInCurrentOrder(items),
-    );
-    textFieldUpdates.forEach((update) => {
-      const labelKey = compactSearchValue(update.label || "");
-      const sectionKey = String(update.sectionKey || "").trim();
-      const indexes = [
-        projectedItems.findIndex((item) => item.id === update.id),
-        projectedItems.findIndex((item) =>
-          update.slotKey
-          && serviceItemSlotKey(item) === update.slotKey
-          && (!sectionKey || String(item._worshipSectionKey || "").trim() === sectionKey)),
-        projectedItems.findIndex((item) =>
-          labelKey
-          && sectionKey
-          && compactSearchValue(item.label || "") === labelKey
-          && String(item._worshipSectionKey || "").trim() === sectionKey),
-        projectedItems.findIndex((item) => update.slotKey && serviceItemSlotKey(item) === update.slotKey),
-        projectedItems.findIndex((item) => labelKey && compactSearchValue(item.label || "") === labelKey),
-      ];
-      const index = indexes.find((candidate) => candidate >= 0) ?? -1;
-      if (index < 0) return;
-      projectedItems[index] = {
-        ...projectedItems[index],
-        assignee: update.assignee,
-        raw_title: update.raw_title,
-        memo: update.memo,
-        _worshipElementTemplateModified: true,
-      };
-      markServiceItemSharedContentDirty(projectedItems[index], service);
-      projectedItems[index]._worshipTemplatePlaceholder = false;
-      applyPresenterPreparationTextUpdateToWorshipElementCache(service, update);
+    finalizePresenterPreparationApply({
+      service, serviceId, items, entries, skipped, scriptureItemIds, textFieldUpdates,
+      createdSongTitles, versionWarnings,
     });
-    entries.forEach((entry) => {
-      const entryKey = compactSearchValue(entry.rawLabel || entry.label || "");
-      if (entryKey !== "기도" && entryKey !== "대표기도") return;
-      const contentParts = String(entry.content || "").split(/\s+\/\s+/);
-      const content = String(contentParts.shift() || "").trim();
-      const assignee = contentParts.join(" / ").trim() || content;
-      if (!assignee) return;
-      projectedItems.forEach((item) => {
-        const sectionKey = String(item._worshipSectionKey || "").trim();
-        const labelKey = compactSearchValue(item.label || "");
-        if (sectionKey !== "prayer" || !["기도", "대표기도"].includes(labelKey)) return;
-        item.assignee = assignee;
-        item._worshipElementTemplateModified = true;
-        item._worshipTemplatePlaceholder = false;
-        markServiceItemSharedContentDirty(item, service);
-      });
-    });
-    state.serviceItems[serviceId] = projectedItems;
-    state.dirty.service = true;
-    delete state.presenterPreparationDrafts[serviceId];
     applied = true;
-    refreshPresenterForService(serviceId);
-    updateSaveState();
-
-    const scriptureIndexes = [...scriptureItemIds]
-      .map((itemId) => state.serviceItems[serviceId].findIndex((item) => item.id === itemId))
-      .filter((index) => index >= 0);
-    scriptureIndexes.forEach((index) => scheduleServiceScriptureBodyResolve(serviceId, index));
-
-    renderCurrentServiceModuleDetail();
-    renderServiceList();
-    updateSaveState();
-    const createdNote = createdSongTitles.length ? `빈 곡 ${createdSongTitles.length}개를 찬양 DB에 만들었습니다.` : "";
-    const versionNote = versionWarnings.length
-      ? `${versionWarnings.join(", ")}에 여러 버전이 있어 첫 번째 버전을 우선 선택했습니다. 필요하면 버전을 골라 주세요.`
-      : "";
-    const skippedNote = skipped.length ? `비어 있는 ${skipped.length}개 항목은 건너뛰었습니다.` : "";
-    showToast(toastLines(
-      `예배 입력 ${entries.length}개 항목을 반영했습니다.`,
-      skippedNote,
-      createdNote,
-      versionNote,
-      "상단 저장을 눌러 확정해 주세요.",
-    ), "info");
   } finally {
     state.presenterPreparationApplyingServiceIds.delete(serviceId);
     renderServiceList();
