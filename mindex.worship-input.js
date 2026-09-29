@@ -194,6 +194,31 @@ function handleServiceItemDetailClick(event) {
   return false;
 }
 
+function handleServiceNavigationDetailClick(event) {
+  const serviceTypeCard = event.target.closest("[data-select-service-type]");
+  if (serviceTypeCard) {
+    if (!confirmDiscardServiceChanges()) return true;
+    state.selectedServiceTypeId = worshipAppServiceTypeId(serviceTypeCard.dataset.selectServiceType);
+    state.selectedServiceId = null;
+    state.selectedServiceItemIndex = null;
+    renderServiceList();
+    renderCurrentServiceModuleDetail();
+    syncBrowserHistory();
+    return true;
+  }
+  const serviceDateCard = event.target.closest(".service-date-card[data-service-id], .service-week-card[data-service-id]");
+  if (serviceDateCard) {
+    if (state.module === "home") {
+      void openHomeNextService("service", serviceDateCard.dataset.serviceId);
+      return true;
+    }
+    selectService(serviceDateCard.dataset.serviceId);
+    renderServiceList();
+    return true;
+  }
+  return false;
+}
+
 function updateServiceMetaField(field) {
   const service = state.services.find((candidate) => candidate.id === state.selectedServiceId);
   if (!service) return;

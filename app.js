@@ -8982,28 +8982,7 @@ function handleDetailClick(event) {
     return;
   }
 
-  const serviceTypeCard = event.target.closest("[data-select-service-type]");
-  if (serviceTypeCard) {
-    if (!confirmDiscardServiceChanges()) return;
-    state.selectedServiceTypeId = worshipAppServiceTypeId(serviceTypeCard.dataset.selectServiceType);
-    state.selectedServiceId = null;
-    state.selectedServiceItemIndex = null;
-    renderServiceList();
-    renderCurrentServiceModuleDetail();
-    syncBrowserHistory();
-    return;
-  }
-
-  const serviceDateCard = event.target.closest(".service-date-card[data-service-id], .service-week-card[data-service-id]");
-  if (serviceDateCard) {
-    if (state.module === "home") {
-      void openHomeNextService("service", serviceDateCard.dataset.serviceId);
-      return;
-    }
-    selectService(serviceDateCard.dataset.serviceId);
-    renderServiceList();
-    return;
-  }
+  if (handleServiceNavigationDetailClick(event)) return;
 
   const closeMetadata = event.target.closest("[data-close-metadata]");
   if (closeMetadata || (state.metadataPopupOpen && event.target.matches(".metadata-popover-layer"))) {
