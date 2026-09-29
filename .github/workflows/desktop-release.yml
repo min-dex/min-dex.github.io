@@ -68,6 +68,8 @@ jobs:
         run: |
           node --check app.js
           node --check mindex.presenter.js
+          node --check mindex.worship-input.js
+          node tests/test_worship_input_module_contract.cjs
 
       - name: Validate Python smoke syntax
         run: python -m py_compile tests/smoke_app.py tests/smoke_worship_presenter.py
