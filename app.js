@@ -1532,63 +1532,13 @@ function bindStaticEvents() {
   window.addEventListener("pointerup", handleWindowPointerUp);
   window.addEventListener("mousedown", handleMouseSideButtonNavigation, { capture: true });
   window.addEventListener("popstate", handleBrowserHistoryPop);
-  window.addEventListener("resize", () => {
-    if (state.module !== "presenter") return;
-    schedulePresenterPreviewLayoutUpdate(refs.detailPane);
-  });
-  window.visualViewport?.addEventListener?.("resize", () => {
-    if (state.module !== "presenter") return;
-    schedulePresenterPreviewLayoutUpdate(refs.detailPane);
-  });
-  if (typeof MutationObserver !== "undefined") {
-    const presenterViewportObserver = new MutationObserver(() => {
-      if (state.module !== "presenter") return;
-      schedulePresenterPreviewLayoutUpdate(refs.detailPane);
-    });
-    presenterViewportObserver.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class", "style"],
-    });
-  }
-  window.addEventListener("visibilitychange", () => {
-    if (document.visibilityState !== "visible") {
-      persistListScrollState();
-      return;
-    }
-    if (state.module === "presenter") schedulePresenterPreviewLayoutUpdate(refs.detailPane);
-    scheduleServiceMusicResume("visibility");
-  });
-  window.addEventListener("pagehide", persistListScrollState);
+  bindPresenterViewportLifecycleEvents();
 
   SYSTEM_THEME_QUERY?.addEventListener("change", () => {
     if (!safeStorageGet("local", STORAGE.theme)) applyTheme(readTheme());
   });
 
-  window.addEventListener("keydown", (event) => {
-    if (event.target.closest?.(".worship-conflict-dialog")) return;
-    scheduleServiceMusicResume("keydown");
-    const presenterJumpInput = event.target.closest?.("[data-presenter-jump-input]");
-    if (presenterJumpInput && event.key === "Escape") {
-      event.preventDefault();
-      event.target.blur?.();
-      clearPresenterJumpDraft(presenterJumpInput.dataset.serviceId || state.presenter.serviceId);
-      event.stopImmediatePropagation?.();
-      event.stopPropagation();
-      return;
-    }
-    if (shouldBlockPresenterMusicControlNavigationKeydown(event)) {
-      event.preventDefault();
-      event.target.blur?.();
-      event.stopImmediatePropagation?.();
-      event.stopPropagation();
-      return;
-    }
-  }, { capture: true });
-
-  window.addEventListener("pointerup", (event) => {
-    if (event.target.closest?.(".worship-conflict-dialog")) return;
-    scheduleServiceMusicResume("pointerup");
-  }, { capture: true });
+  bindPresenterInputGuardEvents();
 
   window.addEventListener("keydown", handleSaveShortcut, { capture: true });
 
@@ -34499,43 +34449,8 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   }
 
   if (song && forms.length) {
-    const lyricsSlides = forms.flatMap((form, formIndex) => {
-      if (form._presenterBlank) {
-        return [{
-          id: `${item.id || index}:blank:${form._presenterToken || formIndex}:${formIndex}`,
-          ...section,
-          elementType: PRESENTER_ELEMENT_TYPES.BLANK,
-          layout: PRESENTER_SLIDE_LAYOUTS.BLANK,
-          type: "blank",
-          label,
-          title: form.label || "빈 화면",
-          marker: "",
-          formKey: `blank:${form._presenterToken || formIndex}:${formIndex}`,
-          segment: "",
-          text: "",
-          warnings: formWarnings,
-          sort: index + formIndex / 100,
-        }];
-      }
-      const chunks = splitPresenterLyricChunks(form.lyrics);
-      const formId = form._localId || form.id || formIndex;
-      const formKey = `${formId}:${formIndex}`;
-      return chunks.map((chunk, chunkIndex) => ({
-        id: `${item.id || index}:form:${formId}:seq:${formIndex}:chunk:${chunkIndex}`,
-        ...section,
-        elementType: PRESENTER_ELEMENT_TYPES.PRAISE,
-        layout: PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT,
-        type: "lyrics",
-        label,
-        title: presenterPraiseTitle(song, displayText),
-        subtitle: versionDisplayName(song, version),
-        marker: chunkIndex === 0 ? presenterFormMarker(form) : "",
-        formKey,
-        segment: "",
-        text: chunk,
-        warnings: formWarnings,
-        sort: index + formIndex / 100 + chunkIndex / 10000,
-      }));
+    const lyricsSlides = presenterLyricsSlidesForServiceItem({
+      item, section, index, song, version, displayText, label, forms, formWarnings,
     });
     const syncConfig = presenterSyncedLyricsConfigFromAsset(configuredAsset);
     const slides = shouldIncludeSongTitleSlide(item, label)
