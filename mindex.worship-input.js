@@ -1,6 +1,110 @@
 // Worship preparation input parsing and song-resolution helpers.
 // Loaded before app.js so these browser globals stay available to app orchestration.
 
+function handleServiceManagementDetailClick(event) {
+  const cancelNewServiceBtn = event.target.closest("[data-cancel-new-service]");
+  if (cancelNewServiceBtn) {
+    state.newServiceForm = null;
+    renderCurrentServiceModuleDetail();
+    return true;
+  }
+  const createServiceBtn = event.target.closest("[data-create-service]");
+  if (createServiceBtn) {
+    createService();
+    return true;
+  }
+  const newServiceBtn = event.target.closest("[data-new-service]");
+  if (newServiceBtn) {
+    startNewServiceForm(newServiceBtn.dataset.newService || state.selectedServiceTypeId);
+    return true;
+  }
+  const servicePrepEditorOpenBtn = event.target.closest("[data-service-prep-editor-open]");
+  if (servicePrepEditorOpenBtn) {
+    openServicePrepEditor(servicePrepEditorOpenBtn.dataset.servicePrepEditorOpen || state.selectedServiceId);
+    return true;
+  }
+  const servicePrepEditorCloseBtn = event.target.closest("[data-service-prep-editor-close]");
+  if (servicePrepEditorCloseBtn) {
+    closeServicePrepEditor();
+    return true;
+  }
+  const serviceTemplatesBtn = event.target.closest("[data-service-templates]");
+  if (serviceTemplatesBtn) {
+    if (!confirmDiscardServiceChanges()) return true;
+    state.selectedServiceTypeId = SERVICE_TEMPLATES_PANEL_ID;
+    state.selectedServiceId = null;
+    state.newServiceForm = null;
+    renderServiceList();
+    renderCurrentServiceModuleDetail();
+    syncBrowserHistory();
+    return true;
+  }
+  const serviceSetlistArchiveBtn = event.target.closest("[data-service-setlist-archive]");
+  if (serviceSetlistArchiveBtn) {
+    if (!confirmDiscardServiceChanges()) return true;
+    state.selectedServiceTypeId = SERVICE_SETLIST_ARCHIVE_PANEL_ID;
+    state.selectedServiceId = null;
+    state.selectedServiceItemIndex = null;
+    state.newServiceForm = null;
+    renderServiceList();
+    renderCurrentServiceModuleDetail();
+    syncBrowserHistory();
+    void loadWorshipSetlistArchive({ force: true });
+    return true;
+  }
+  const setlistServiceLink = event.target.closest("[data-setlist-open-service]");
+  if (setlistServiceLink) {
+    const id = setlistServiceLink.dataset.setlistOpenService;
+    if (state.services.some((service) => service.id === id)) selectService(id);
+    return true;
+  }
+  const setlistJump = event.target.closest("[data-setlist-jump]");
+  if (setlistJump) {
+    const heading = document.getElementById(setlistJump.dataset.setlistJump);
+    heading?.scrollIntoView({ block: "start", behavior: "instant" });
+    heading?.focus({ preventScroll: true });
+    return true;
+  }
+  const serviceSetlistViewBtn = event.target.closest("[data-service-setlist-view]");
+  if (serviceSetlistViewBtn) {
+    const view = serviceSetlistViewBtn.dataset.serviceSetlistView;
+    if (["date", "service"].includes(view) && state.worshipSetlistArchiveView !== view) {
+      state.worshipSetlistArchiveView = view;
+      renderServiceSetlistArchiveDetail();
+      refs.detailPane.querySelector(`[data-service-setlist-view="${view}"]`)?.focus();
+    }
+    return true;
+  }
+  const serviceSetlistRefreshBtn = event.target.closest("[data-service-setlist-refresh]");
+  if (serviceSetlistRefreshBtn) {
+    void loadWorshipSetlistArchive({ force: true });
+    return true;
+  }
+  const deleteServiceBtn = event.target.closest("[data-delete-service]");
+  if (deleteServiceBtn) {
+    deleteService(deleteServiceBtn.dataset.deleteService);
+    return true;
+  }
+  const serviceDefaultAction = event.target.closest("[data-service-default-action]");
+  if (serviceDefaultAction) {
+    runServiceDefaultItemAction(
+      serviceDefaultAction.dataset.serviceDefaultAction,
+      Number(serviceDefaultAction.dataset.serviceDefaultIndex),
+    );
+    return true;
+  }
+  const benedictionToggle = event.target.closest("[data-service-benediction-toggle]");
+  if (benedictionToggle) {
+    void setServiceBenedictionReplacement(
+      benedictionToggle.dataset.serviceId,
+      benedictionToggle.dataset.serviceItemId,
+      benedictionToggle.dataset.serviceBenedictionToggle === "lords_prayer",
+    );
+    return true;
+  }
+  return false;
+}
+
 function presenterPreparationHasEnteredValues(value = "") {
   return String(value || "").split(/\r\n?|\n/).some((line) => {
     const text = String(line || "").trim();
