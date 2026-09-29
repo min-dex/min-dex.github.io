@@ -105,6 +105,56 @@ function handleServiceManagementDetailClick(event) {
   return false;
 }
 
+function handleDetailServiceWorkspaceClick(event) {
+  const serviceSourceCopyBtn = event.target.closest("[data-service-source-copy]");
+  if (serviceSourceCopyBtn) {
+    const service = state.services.find((candidate) => candidate.id === serviceSourceCopyBtn.dataset.serviceSourceCopy);
+    if (service) void copyText(serviceSourceTextForEditor(service));
+    return true;
+  }
+  const serviceSourceApplyBtn = event.target.closest("[data-service-source-apply]");
+  if (serviceSourceApplyBtn) {
+    applyServiceSourceText(serviceSourceApplyBtn.dataset.serviceSourceApply || state.selectedServiceId);
+    return true;
+  }
+  const serviceSourceHistoryBtn = event.target.closest("[data-service-source-history]");
+  if (serviceSourceHistoryBtn) {
+    restoreServiceSourceHistory(serviceSourceHistoryBtn.dataset.serviceSourceHistory || state.selectedServiceId, Number(serviceSourceHistoryBtn.dataset.serviceSourceHistoryIndex));
+    return true;
+  }
+  const serviceSourceRecoveryBtn = event.target.closest("[data-service-source-recovery]");
+  if (serviceSourceRecoveryBtn) {
+    restoreServiceSourceRecovery(serviceSourceRecoveryBtn.dataset.serviceSourceRecovery || state.selectedServiceId);
+    return true;
+  }
+  const serviceItemCommit = event.target.closest("[data-service-item-commit]");
+  if (serviceItemCommit) {
+    void commitServiceItemInputs(serviceItemCommit.dataset.serviceId || state.selectedServiceId, Number(serviceItemCommit.dataset.serviceItemIndex));
+    return true;
+  }
+  const serviceItemAction = event.target.closest("[data-service-item-action]");
+  if (serviceItemAction) {
+    runServiceItemAction(serviceItemAction.dataset.serviceItemAction, Number(serviceItemAction.dataset.serviceItemIndex), serviceItemAction.dataset.serviceItemLabel || "", serviceItemAction.dataset.serviceItemTitle || "");
+    return true;
+  }
+  const serviceMusicAction = event.target.closest("[data-service-music-action]");
+  if (serviceMusicAction) {
+    runServiceMusicAction(serviceMusicAction.dataset.serviceMusicAction, serviceMusicAction.closest("[data-service-music-source]")?.dataset);
+    return true;
+  }
+  const liveScriptureAction = event.target.closest("[data-live-scripture-action]");
+  if (liveScriptureAction) {
+    void runLiveScriptureAction(liveScriptureAction.dataset.liveScriptureAction, liveScriptureAction.dataset.serviceId);
+    return true;
+  }
+  const presenterJumpButton = event.target.closest("[data-presenter-jump-button]");
+  if (presenterJumpButton) {
+    jumpPresenterToSlideInput(presenterJumpButton.closest(".svc-slide-counter")?.querySelector("[data-presenter-jump-input]"));
+    return true;
+  }
+  return false;
+}
+
 function applyServiceItemMetadataField(item, field, service) {
   const key = field.dataset.serviceItemField;
   const parsed = parseServiceItemMemo(item.memo);
