@@ -4,6 +4,20 @@ from PIL import Image
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 
+def boot_background_pixels(page):
+    """Return pixels spanning the viewport while the application remains hidden."""
+    image = Image.open(BytesIO(page.screenshot())).convert('RGB')
+    width, height = image.size
+    points = {
+        'top-left': (0, 0),
+        'top-right': (width - 1, 0),
+        'center': (width // 2, height // 2),
+        'bottom-left': (0, height - 1),
+        'bottom-right': (width - 1, height - 1),
+    }
+    return {name: image.getpixel(point) for name, point in points.items()}
+
+
 def main():
     server, url = start_local_app_server()
     try:
@@ -33,9 +47,10 @@ def main():
                             for r in releases:
                                 r.fulfill(json={'version':'theme-bootstrap-test'})
                             page.wait_for_function("[...document.querySelectorAll('link[rel=stylesheet]')].some(l=>l.href.includes('styles.css')&&l.sheet)")
+                        assert page.evaluate("document.body.classList.contains('ui-booting')")
                         assert page.evaluate('document.body.dataset.theme') == expected_theme
-                        pixels = Image.open(BytesIO(page.screenshot())).convert('RGB')
-                        assert pixels.getpixel((400,300)) == expected, (engine,saved,system,output,phase,pixels.getpixel((400,300)))
+                        pixels = boot_background_pixels(page)
+                        assert set(pixels.values()) == {expected}, (engine, saved, system, output, phase, pixels)
                     for r in modules:
                         r.abort()
                     print('PASS', engine, saved, system, 'output' if output else 'app', flush=True)
