@@ -10949,59 +10949,7 @@ function updateServiceItemField(field, options = {}) {
     }
   }
   if (key === "memo_note" || key === "slide_overrides" || key === "manual_praise_lyrics" || key === "form_hint" || key === "element_type" || key === "component_type" || key === "asset_name" || key === "asset_url" || key === "presenter_role" || key === "auto_advance_at") {
-    const parsed = parseServiceItemMemo(item.memo);
-    if (key === "memo_note") parsed.note = field.value;
-    if (key === "slide_overrides") parsed.slides = parseServiceSlideOverrideInput(field.value);
-    if (key === "manual_praise_lyrics") {
-      parsed.slides = parseServiceManualPraiseLyricsInput(field.value);
-      parsed.inputMode = "manual_praise";
-      parsed.outputMode = "lyrics";
-      parsed.elementType = "praise";
-      item.song_id = null;
-      item.version_id = null;
-      item.song_version_id = null;
-    }
-    if (key === "form_hint") {
-      const formHint = normalizeServiceFormHint(field.value);
-      parsed.formHint = formHint;
-      parsed.formPreset = formHint
-        ? normalizeServiceFormPreset(formHint, formHint, "manual")
-        : null;
-      parsed.formPresetDisabled = !formHint;
-    }
-    if (key === "element_type" || key === "component_type") {
-      parsed.elementType = normalizeServiceElementType(field.value);
-      parsed.componentType = parsed.elementType;
-      const assetKind = serviceAssetKindForElementType(parsed.elementType);
-      if (assetKind) parsed.asset = { ...normalizeServiceAsset(parsed.asset), kind: assetKind };
-    }
-    if (key === "asset_name" || key === "asset_url") {
-      const asset = normalizeServiceAsset(parsed.asset);
-      asset[key === "asset_name" ? "name" : "url"] = field.value;
-      if (key === "asset_url" && isPresenterReferenceMediaItem(item, parsed)) {
-        const detectedKind = presenterReferenceMediaKindForSource(asset.url);
-        if (detectedKind) {
-          parsed.elementType = detectedKind;
-          parsed.componentType = detectedKind;
-          asset.kind = detectedKind;
-        }
-      }
-      const elementType = serviceMemoElementType(parsed);
-      const assetKind = serviceAssetKindForElementType(elementType);
-      if (!asset.kind && assetKind) asset.kind = assetKind;
-      parsed.asset = asset;
-    }
-    if (key === "presenter_role") {
-      parsed.presenterRole = normalizeServicePresenterRole(field.value);
-    }
-    if (key === "auto_advance_at") {
-      const playback = { ...(parsed.playback || {}) };
-      const autoAdvanceAt = String(field.value || "").trim();
-      if (autoAdvanceAt) playback.autoAdvanceAt = autoAdvanceAt;
-      else delete playback.autoAdvanceAt;
-      parsed.playback = normalizeServicePlaybackConfig(playback, serviceMemoElementType(parsed));
-    }
-    item.memo = serializeServiceItemMemo(parsed);
+    applyServiceItemMetadataField(item, field, service);
   }
   if (key === "label") {
     item.raw_title = normalizeServiceItemRawTitle(item.label, item.raw_title);
