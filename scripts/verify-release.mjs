@@ -1,3 +1,5 @@
+import { spawnSync } from "node:child_process";
+
 const hasAll = (names) => names.every((name) => String(process.env[name] || "").trim());
 
 const missing = [];
@@ -14,4 +16,12 @@ if (!hasNotaryCredentials) {
 if (missing.length) {
   console.error(`Release stopped. Missing: ${missing.join(", ")}`);
   process.exit(1);
+}
+
+const contract = spawnSync(process.execPath, ["tests/test_worship_input_module_contract.cjs"], {
+  stdio: "inherit",
+});
+if (contract.status !== 0) {
+  console.error("Release stopped. Worship input module contract failed.");
+  process.exit(contract.status || 1);
 }
