@@ -9,7 +9,7 @@ def main():
             page = browser.new_page()
             page.route('**/*supabase*/**', lambda r: r.abort())
             page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-            page.wait_for_function("typeof renderPresenterReadingAssigneeTab === 'function'")
+            page.wait_for_function("typeof renderPresenterReadingAssigneeTab === 'function' && typeof PRESENTER_ELEMENT_TYPES !== 'undefined' && typeof PRESENTER_SLIDE_LAYOUTS !== 'undefined'")
             for width in [1920, 400]:
                 page.set_viewport_size({'width': width, 'height': round(width * 9 / 16)})
                 for name in ['', '이예울 학생', '<이예울> 학생']:

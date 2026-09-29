@@ -9,7 +9,7 @@ def main():
             page = browser.new_page()
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-            page.wait_for_function("typeof renderPresenterSlideFrame === 'function'")
+            page.wait_for_function("typeof renderPresenterSlideFrame === 'function' && typeof PRESENTER_ELEMENT_TYPES !== 'undefined' && typeof PRESENTER_SLIDE_LAYOUTS !== 'undefined'")
             for width in [1920, 960, 320]:
                 page.set_viewport_size({'width': width, 'height': round(width * 9 / 16)})
                 for context in ['reading', 'sermon', 'citation', 'citation-chromakey', 'sermon-chromakey']:

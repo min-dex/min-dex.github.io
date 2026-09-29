@@ -22,7 +22,7 @@ def main():
                 source = subprocess.check_output(['git', 'show', 'HEAD:mindex.presenter.js'], text=True)
                 page.route('**/mindex.presenter.js?*', lambda route: route.fulfill(body=source, content_type='text/javascript'))
             page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-            page.wait_for_function("typeof renderPresenterOutput === 'function'")
+            page.wait_for_function("typeof renderPresenterOutput === 'function' && typeof PRESENTER_ELEMENT_TYPES !== 'undefined' && typeof PRESENTER_SLIDE_LAYOUTS !== 'undefined' && document.getElementById('presenterOutputRoot')")
             page.evaluate('document.fonts.ready')
             texts = [
                 '여호와는 나의 목자시니 내게 부족함이 없으리로다',
