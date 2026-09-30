@@ -73,8 +73,32 @@ def main():
             assert abs(gutter['centers'][0] - gutter['centers'][1]) < 1, gutter
             assert gutter['markerContent'].strip('"') == '1', gutter
             assert gutter['markerPosition'] == 'absolute', gutter
+            page.evaluate('''() => {
+              renderPresenterOutput({
+                serviceId: 'test',
+                chromakey: false,
+                slides: [{
+                  id: 'inline-verse-number',
+                  type: 'lyrics',
+                  elementType: 'praise',
+                  layout: 'lower_bar_text',
+                  text: ['1 예수 이름으로', '승리를 얻었네'].join(String.fromCharCode(10)),
+                  outputContext: 'fullscreen',
+                }],
+                index: 0,
+              }, {});
+            }''')
+            page.wait_for_selector('.presenter-lyric-line--numbered', timeout=2000)
+            inline_number = page.evaluate('''() => {
+              const line = document.querySelector('.is-active .presenter-lyric-line--numbered');
+              return {
+                marker: getComputedStyle(line, '::before').content,
+                text: line.textContent.trim(),
+              };
+            }''')
+            assert inline_number == {'marker': '"1"', 'text': '예수 이름으로'}, inline_number
             browser.close()
-            print('PASS lyric bounds: 24 cases, repeated transitions, resizing, and verse gutter alignment')
+            print('PASS lyric bounds: 24 cases, repeated transitions, verse gutter alignment, and inline verse normalization')
     finally:
         if server:
             server.shutdown()

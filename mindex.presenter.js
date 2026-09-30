@@ -5305,13 +5305,15 @@ function renderPresenterFileSlide(slide) {
 }
 
 function renderPresenterSlideText(slide) {
-  const verseNumber = presenterLyricVerseNumber(slide);
+  const lines = presenterDisplayLines(slide);
+  const verseNumber = presenterLyricVerseNumber(slide, lines);
   let verseNumberUsed = false;
-  return presenterDisplayLines(slide)
+  return lines
     .map((line) => {
       const showVerseNumber = verseNumber && !verseNumberUsed && String(line || "").trim();
       if (showVerseNumber) verseNumberUsed = true;
-      return `<span${showVerseNumber ? ` class="presenter-lyric-line presenter-lyric-line--numbered" data-verse-no="${escapeAttr(verseNumber)}"` : ""} style="--line-chars: ${presenterLineCharEstimate(line)}">${escapePresenterSlideLine(line, slide)}</span>`;
+      const displayLine = showVerseNumber ? presenterLyricLineWithoutInlineVerseNumber(line, verseNumber) : line;
+      return `<span${showVerseNumber ? ` class="presenter-lyric-line presenter-lyric-line--numbered" data-verse-no="${escapeAttr(verseNumber)}"` : ""} style="--line-chars: ${presenterLineCharEstimate(displayLine)}">${escapePresenterSlideLine(displayLine, slide)}</span>`;
     })
     .join("");
 }
@@ -5325,14 +5327,24 @@ function renderPresenterSongText(text, slide) {
   return `${escapeHtml(leading)}<span class="presenter-song-note" aria-hidden="true">${escapeHtml(PRESENTER_SONG_NOTE)}</span>${escapeHtml(spacing || " ")}${renderPresenterHighlightedText(rest || " ", slide)}`;
 }
 
-function presenterLyricVerseNumber(slide) {
+function presenterLyricVerseNumber(slide, lines = presenterDisplayLines(slide)) {
   if (presenterSlideElementType(slide) !== PRESENTER_ELEMENT_TYPES.PRAISE) return "";
   if (presenterSlideLayout(slide) !== PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT) return "";
   if (slide?.type !== "lyrics") return "";
   const marker = String(slide?.marker || slide?.formLabel || "").trim();
   const match = marker.match(/^(?:verse|v)\s*(\d{1,2})$/i)
     || marker.match(/^(\d{1,2})\s*절$/);
-  return match ? String(Number(match[1])) : "";
+  if (match) return String(Number(match[1]));
+  const firstLine = lines.find((line) => String(line || "").trim());
+  const inlineMatch = String(firstLine || "").match(/^\s*(\d{1,2})(?:\s*[.)])?\s+(?=\S)/);
+  return inlineMatch ? String(Number(inlineMatch[1])) : "";
+}
+
+function presenterLyricLineWithoutInlineVerseNumber(line, verseNumber) {
+  const raw = String(line || "");
+  const inlineMatch = raw.match(/^(\s*)(\d{1,2})(?:\s*[.)])?\s+(?=\S)/);
+  if (!inlineMatch || String(Number(inlineMatch[2])) !== verseNumber) return raw;
+  return `${inlineMatch[1]}${raw.slice(inlineMatch[0].length)}`;
 }
 
 function escapePresenterSlideLine(line, slide) {

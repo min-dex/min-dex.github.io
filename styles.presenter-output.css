@@ -273,16 +273,20 @@
 }
 .presenter-slide-text .presenter-lyric-line--numbered {
   display: inline-block;
+  align-self: center;
   position: relative;
 }
 .presenter-slide-text .presenter-lyric-line--numbered::before {
   content: attr(data-verse-no);
   position: absolute;
-  left: 0;
-  top: -.42em;
+  right: calc(100% + .22em);
+  top: .08em;
   font-size: .625em;
   font-weight: var(--presenter-weight-body);
   line-height: 1;
+}
+:is(.svc-slide-mini-output, .presenter-output-root) .presenter-slide--lyrics[data-element-type="praise"] > .presenter-slide-text > .presenter-lyric-line {
+  align-self: center;
 }
 .presenter-slide--component .presenter-slide-text,
 .presenter-slide--ready .presenter-slide-text { align-items: center; font-size: var(--presenter-size-display); font-weight: var(--presenter-weight-display); text-align: center; }
