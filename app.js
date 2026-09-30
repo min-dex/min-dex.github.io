@@ -31378,14 +31378,20 @@ function renderPresenterSlideMiniPreview(slide, serviceId = state.presenter.serv
     outputTheme: theme,
   });
   const frameClasses = presenterOutputFrameClassNames(frameState);
+  const previewRenderClass = presenterSlideRenderClass(previewSlide);
+  const hasChromakeyLowerBar = !frameState.noChromakey
+    && ["lyrics", "song-title", "scripture", "title-assignee"].includes(previewRenderClass);
   const backgroundStyle = presenterOutputFrameBackgroundStyle(frameState);
   const outputClasses = [
     "svc-slide-mini-output",
+    "is-scaled-stage",
+    hasChromakeyLowerBar ? "has-chromakey-lower-bar" : "",
     frameClasses,
   ].filter(Boolean).join(" ");
   const canvasClasses = [
     "svc-slide-mini-canvas",
     "presenter-output-root",
+    hasChromakeyLowerBar ? "has-chromakey-lower-bar" : "",
     frameClasses,
   ].filter(Boolean).join(" ");
   if (!slide) {

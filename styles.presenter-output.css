@@ -679,11 +679,9 @@
 .presenter-slide--title-assignee::before {
   position: absolute;
   right: 0;
-  /* Mini previews scale a 1920x1080 stage fractionally. Extend the bar by one
-     stage pixel so the chromakey backing cannot peek through at its lower edge. */
-  bottom: -1px;
+  bottom: 0;
   left: 0;
-  height: calc(var(--presenter-output-bar-height) + 1px);
+  height: var(--presenter-output-bar-height);
   background: var(--presenter-output-bar);
   content: "";
 }
