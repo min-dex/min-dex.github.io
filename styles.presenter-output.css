@@ -271,14 +271,6 @@
   font-size: var(--presenter-size-lyrics);
   font-weight: var(--presenter-weight-body);
 }
-.presenter-slide--lyrics[data-element-type="praise"] .presenter-lyric-lines {
-  display: grid;
-  grid-template-columns: max-content;
-  max-width: 100%;
-  margin-inline: auto;
-  padding-inline-start: 1.2em;
-  text-align: start;
-}
 .presenter-slide-text .presenter-lyric-line--numbered {
   display: inline-block;
   position: relative;
@@ -286,8 +278,8 @@
 .presenter-slide-text .presenter-lyric-line--numbered::before {
   content: attr(data-verse-no);
   position: absolute;
-  right: calc(100% + .22em);
-  top: .08em;
+  left: 0;
+  top: -.42em;
   font-size: .625em;
   font-weight: var(--presenter-weight-body);
   line-height: 1;

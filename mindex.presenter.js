@@ -5295,16 +5295,13 @@ function renderPresenterFileSlide(slide) {
 function renderPresenterSlideText(slide) {
   const verseNumber = presenterLyricVerseNumber(slide);
   let verseNumberUsed = false;
-  const lines = presenterDisplayLines(slide)
+  return presenterDisplayLines(slide)
     .map((line) => {
       const showVerseNumber = verseNumber && !verseNumberUsed && String(line || "").trim();
       if (showVerseNumber) verseNumberUsed = true;
       return `<span${showVerseNumber ? ` class="presenter-lyric-line presenter-lyric-line--numbered" data-verse-no="${escapeAttr(verseNumber)}"` : ""} style="--line-chars: ${presenterLineCharEstimate(line)}">${escapePresenterSlideLine(line, slide)}</span>`;
     })
     .join("");
-  const isLowerBarPraise = presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE
-    && presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT;
-  return isLowerBarPraise ? '<div class="presenter-lyric-lines">' + lines + '</div>' : lines;
 }
 
 function renderPresenterSongText(text, slide) {

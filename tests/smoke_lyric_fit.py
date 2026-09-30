@@ -59,15 +59,18 @@ def main():
             }''')
             page.wait_for_selector('.presenter-lyric-line', timeout=2000)
             gutter = page.evaluate('''() => {
-              const lines = [...document.querySelectorAll('.is-active .presenter-lyric-lines > span')];
+              const lines = [...document.querySelectorAll('.is-active .presenter-slide-text > span')];
               const marker = getComputedStyle(lines[0], '::before');
               return {
-                starts: lines.map((line) => line.getBoundingClientRect().left),
+                centers: lines.map((line) => {
+                  const rect = line.getBoundingClientRect();
+                  return rect.left + rect.width / 2;
+                }),
                 markerContent: marker.content,
                 markerPosition: marker.position,
               };
             }''')
-            assert abs(gutter['starts'][0] - gutter['starts'][1]) < 1, gutter
+            assert abs(gutter['centers'][0] - gutter['centers'][1]) < 1, gutter
             assert gutter['markerContent'].strip('"') == '1', gutter
             assert gutter['markerPosition'] == 'absolute', gutter
             browser.close()
