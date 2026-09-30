@@ -19,7 +19,7 @@ def main():
                   const host=document.createElement('div');
                   host.className='svc-presenter-side-panel';host.id='edge-fixture';
                   host.style.cssText='position:fixed;left:10.25px;top:10px;width:296px;z-index:99999';
-                  host.innerHTML='<div class="svc-presenter-live-preview"><span class="svc-slide-mini-output is-scaled-stage has-chromakey-lower-bar"><span class="svc-slide-mini-canvas presenter-output-root has-chromakey-lower-bar">'+renderPresenterSlideFrame({type:'lyrics',elementType:'lyrics',layout:'lower_bar_text',text:'가장자리 확인',title:'찬양'}, {previewStage:true})+'</span></span></div>';
+                  host.innerHTML='<div class="svc-presenter-live-preview"><span class="svc-slide-mini-output lower-bar-underlay"><span class="svc-slide-mini-canvas presenter-output-root">'+renderPresenterSlideFrame({type:'lyrics',elementType:'lyrics',layout:'lower_bar_text',text:'가장자리 확인',title:'찬양'}, {previewStage:true})+'</span></span></div>';
                   document.body.append(host);
                 }''')
                 for width in [220, 254.5, 296, 296.75, 360]:
@@ -34,7 +34,7 @@ def main():
                 print('PASS sidebar edge pixels', engine, 'DPR', dpr, flush=True)
                 page.evaluate('''() => {
                   const host=document.getElementById('edge-fixture');
-                  host.innerHTML='<div class="svc-presenter-live-preview"><span class="svc-slide-mini-output is-scaled-stage"><span class="svc-slide-mini-canvas presenter-output-root">'+renderPresenterSlideFrame({type:'ready',elementType:'video',layout:'media',presenterRole:'waiting_loop',videoSrc:'assets/presenter/chromakey-ready-loop-pingpong.mp4'}, {previewStage:true})+'</span></span></div>';
+                  host.innerHTML='<div class="svc-presenter-live-preview"><span class="svc-slide-mini-output"><span class="svc-slide-mini-canvas presenter-output-root">'+renderPresenterSlideFrame({type:'ready',elementType:'video',layout:'media',presenterRole:'waiting_loop',videoSrc:'assets/presenter/chromakey-ready-loop-pingpong.mp4'}, {previewStage:true})+'</span></span></div>';
                   // Model a fractional compositor seam without changing stage dimensions.
                   host.querySelector('.presenter-slide').style.transform='translateX(8px)';
                   applyPresenterPreviewScales(host);

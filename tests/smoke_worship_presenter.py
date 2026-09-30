@@ -7823,7 +7823,6 @@ def main() -> int:
                       const frame = document.querySelector(`.svc-slide-thumb[data-presenter-index="${index}"] .svc-slide-thumb-frame`);
                       return {
                         hostBackground: host ? getComputedStyle(host).backgroundColor : "",
-                        hostBackgroundImage: host ? getComputedStyle(host).backgroundImage : "",
                         frameBackground: frame ? getComputedStyle(frame).backgroundColor : "",
                       };
                     }
@@ -7837,7 +7836,6 @@ def main() -> int:
                     "thumbFrameBottomLeft": rgb_at(thumb_frame_shot, 0.025, 0.96),
                     "thumbFrameBottomRight": rgb_at(thumb_frame_shot, 0.975, 0.96),
                     "thumbHostBackground": thumb_host_state["hostBackground"],
-                    "thumbHostBackgroundImage": thumb_host_state["hostBackgroundImage"],
                     "thumbFrameBackground": thumb_host_state["frameBackground"],
                     "outputTop": rgb_at(output_shot, 0.5, 0.2),
                     "outputBar": rgb_at(output_shot, 0.02, 0.92),
@@ -7845,7 +7843,7 @@ def main() -> int:
                 if (
                     is_chromakey_green(chromakey_pixels["thumbTop"])
                     and is_chromakey_green(chromakey_pixels["outputTop"])
-                    and "linear-gradient" in chromakey_pixels["thumbHostBackgroundImage"]
+                    and chromakey_pixels["thumbHostBackground"] == "rgb(0, 10, 50)"
                     and is_dark_bar(chromakey_pixels["thumbBar"])
                     and is_dark_bar(chromakey_pixels["thumbBottom"])
                     and is_dark_bar(chromakey_pixels["thumbFrameBottomLeft"])

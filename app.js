@@ -31384,14 +31384,12 @@ function renderPresenterSlideMiniPreview(slide, serviceId = state.presenter.serv
   const backgroundStyle = presenterOutputFrameBackgroundStyle(frameState);
   const outputClasses = [
     "svc-slide-mini-output",
-    "is-scaled-stage",
-    hasChromakeyLowerBar ? "has-chromakey-lower-bar" : "",
+    hasChromakeyLowerBar ? "lower-bar-underlay" : "",
     frameClasses,
   ].filter(Boolean).join(" ");
   const canvasClasses = [
     "svc-slide-mini-canvas",
     "presenter-output-root",
-    hasChromakeyLowerBar ? "has-chromakey-lower-bar" : "",
     frameClasses,
   ].filter(Boolean).join(" ");
   if (!slide) {

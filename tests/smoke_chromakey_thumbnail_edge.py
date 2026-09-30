@@ -71,10 +71,10 @@ def main():
                     }"""
                 )
                 assert (
-                    "has-chromakey-lower-bar" in backing["outputClass"]
-                    and "has-chromakey-lower-bar" in backing["canvasClass"]
-                    and "gradient" in backing["outputBackground"]
-                    and "gradient" in backing["canvasBackground"]
+                    "lower-bar-underlay" in backing["outputClass"]
+                    and "lower-bar-underlay" not in backing["canvasClass"]
+                    and backing["outputBackground"] == "none"
+                    and backing["canvasBackground"] == "none"
                 ), backing
                 for width in [220, 254.5, 296, 360, 404.5, 405, 405.5, 406.25]:
                     page.evaluate(
@@ -90,6 +90,15 @@ def main():
                     ).convert("RGB")
                     green_pixels = lower_edge_green_pixels(image)
                     assert not green_pixels, (engine, dpr, width, image.size, green_pixels[:8])
+                    geometry = page.evaluate(
+                        """() => {
+                          const frame = document.getElementById("thumbnail-edge-fixture").getBoundingClientRect();
+                          const canvas = document.querySelector("#thumbnail-edge-fixture .svc-slide-mini-canvas").getBoundingClientRect();
+                          return { frame: { width: frame.width, height: frame.height }, canvas: { width: canvas.width, height: canvas.height } };
+                        }"""
+                    )
+                    assert abs(geometry["canvas"]["width"] - geometry["frame"]["width"]) <= 1, (engine, dpr, width, geometry)
+                    assert abs(geometry["canvas"]["height"] - geometry["frame"]["height"]) <= 1, (engine, dpr, width, geometry)
                 print("PASS thumbnail lower edge", engine, "DPR", dpr, flush=True)
                 browser.close()
     finally:
