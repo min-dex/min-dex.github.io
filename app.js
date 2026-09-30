@@ -4239,8 +4239,8 @@ const FRIDAY_SERVICE_VARIANTS = {
     key: "monthly",
     typeId: "monthly",
     title: "",
-    alias: "",
-    displayName: "월삭예배",
+    alias: "온세대 월삭예배",
+    displayName: "온세대 월삭예배",
     templateNote: "monthly",
   },
   2: {

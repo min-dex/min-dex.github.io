@@ -26,4 +26,10 @@ for (const date of ['2026-07-17','2026-09-11','2026-09-18','2026-10-09',
   assert.equal(target.alias, undefined);
 }
 assert.equal(context.fridayServiceVariantForDate('2026-09-13'), null);
+assert.equal(context.fridayServiceVariantForDate('2026-07-03'), null);
+for (const date of ['2026-08-07', '2026-09-04', '2026-10-02', '2027-01-01']) {
+  const target = context.autoFridayServiceTarget(date);
+  assert.equal(target.typeId, 'monthly');
+  assert.equal(target.alias, '온세대 월삭예배', date);
+}
 console.log('PASS August-only special Fridays; later regular Fridays; first/fourth weeks preserved');
