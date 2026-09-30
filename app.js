@@ -10233,7 +10233,7 @@ function addVersion(sourceVersionId = getSelectedVersionId()) {
       part_number: form.part_number,
       part_variant: form.part_variant || "",
       label: displayLabel(form),
-      lyrics: form.lyrics || "",
+      lyrics: normalizeLyricsForStorage(form.lyrics),
       sort_order: index + 1,
     }),
   );
@@ -18208,7 +18208,7 @@ function normalizeForms(forms) {
       part_type: partType,
       part_number: partNumber,
       part_variant: partVariant,
-      lyrics: form.lyrics || "",
+      lyrics: normalizeLyricsForStorage(form.lyrics),
       review_status: form.review_status || null,
       import_source: form.import_source || null,
       sort_order: index + 1,
@@ -18576,7 +18576,7 @@ function splitFreeShowParagraphs(lyrics) {
 function splitFreeShowLines(lyrics) {
   return String(lyrics || "")
     .split("\n")
-    .map((line) => line.trimEnd())
+    .map((line) => line.trim())
     .filter((line) => line.trim().length > 0);
 }
 
@@ -18597,6 +18597,20 @@ function getCopyableForms(forms = state.forms) {
 
 function normalizeLyricsForCopy(lyrics) {
   return String(lyrics || "").replace(/\r\n?/g, "\n").trim();
+}
+
+function normalizeLyricsForStorage(lyrics) {
+  const lines = String(lyrics || "")
+    .replace(/\r\n?/g, "\n")
+    .split("\n")
+    .map((line) => line.trim());
+  while (lines[0] === "") lines.shift();
+  while (lines.at(-1) === "") lines.pop();
+  return lines.reduce((normalized, line) => {
+    if (!line && normalized.at(-1) === "") return normalized;
+    normalized.push(line);
+    return normalized;
+  }, []).join("\n");
 }
 
 function getShowFileName(song, version) {

@@ -40,8 +40,38 @@ def main():
                         if width == 1920 and not chromakey and text.startswith('1 '):
                             page.screenshot(path='/tmp/mindex-lyric-fit-reported.png')
                 page.screenshot(path=f'/tmp/mindex-lyric-fit-{width}.png')
+            page.set_viewport_size({'width': 1920, 'height': 1080})
+            page.evaluate('''() => {
+              renderPresenterOutput({
+                serviceId: 'test',
+                chromakey: false,
+                slides: [{
+                  id: 'verse-gutter',
+                  type: 'lyrics',
+                  elementType: 'praise',
+                  layout: 'lower_bar_text',
+                  marker: 'Verse 1',
+                  text: ['첫 번째 가사 줄', '둘째 가사 줄'].join(String.fromCharCode(10)),
+                  outputContext: 'fullscreen',
+                }],
+                index: 0,
+              }, {});
+            }''')
+            page.wait_for_selector('.presenter-lyric-line', timeout=2000)
+            gutter = page.evaluate('''() => {
+              const lines = [...document.querySelectorAll('.is-active .presenter-lyric-lines > span')];
+              const marker = getComputedStyle(lines[0], '::before');
+              return {
+                starts: lines.map((line) => line.getBoundingClientRect().left),
+                markerContent: marker.content,
+                markerPosition: marker.position,
+              };
+            }''')
+            assert abs(gutter['starts'][0] - gutter['starts'][1]) < 1, gutter
+            assert gutter['markerContent'].strip('"') == '1', gutter
+            assert gutter['markerPosition'] == 'absolute', gutter
             browser.close()
-            print('PASS lyric bounds: 24 cases, repeated transitions and resizing')
+            print('PASS lyric bounds: 24 cases, repeated transitions, resizing, and verse gutter alignment')
     finally:
         if server:
             server.shutdown()
