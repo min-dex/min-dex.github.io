@@ -7843,7 +7843,7 @@ def main() -> int:
                 if (
                     is_chromakey_green(chromakey_pixels["thumbTop"])
                     and is_chromakey_green(chromakey_pixels["outputTop"])
-                    and chromakey_pixels["thumbHostBackground"] == "rgb(0, 10, 50)"
+                    and chromakey_pixels["thumbHostBackground"] == "rgba(0, 0, 0, 0)"
                     and is_dark_bar(chromakey_pixels["thumbBar"])
                     and is_dark_bar(chromakey_pixels["thumbBottom"])
                     and is_dark_bar(chromakey_pixels["thumbFrameBottomLeft"])

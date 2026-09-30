@@ -71,10 +71,10 @@ def main():
                     }"""
                 )
                 assert (
-                    "lower-bar-underlay" in backing["outputClass"]
+                    "lower-bar-underlay" not in backing["outputClass"]
                     and "lower-bar-underlay" not in backing["canvasClass"]
                     and backing["outputBackground"] == "none"
-                    and backing["canvasBackground"] == "none"
+                    and "gradient" in backing["canvasBackground"]
                 ), backing
                 for width in [220, 254.5, 296, 360, 404.5, 405, 405.5, 406.25]:
                     page.evaluate(
@@ -97,8 +97,10 @@ def main():
                           return { frame: { width: frame.width, height: frame.height }, canvas: { width: canvas.width, height: canvas.height } };
                         }"""
                     )
-                    assert abs(geometry["canvas"]["width"] - geometry["frame"]["width"]) <= 1, (engine, dpr, width, geometry)
-                    assert abs(geometry["canvas"]["height"] - geometry["frame"]["height"]) <= 1, (engine, dpr, width, geometry)
+                    assert geometry["canvas"]["width"] >= geometry["frame"]["width"], (engine, dpr, width, geometry)
+                    assert geometry["canvas"]["height"] >= geometry["frame"]["height"], (engine, dpr, width, geometry)
+                    assert geometry["canvas"]["width"] - geometry["frame"]["width"] <= 2, (engine, dpr, width, geometry)
+                    assert geometry["canvas"]["height"] - geometry["frame"]["height"] <= 2, (engine, dpr, width, geometry)
                 print("PASS thumbnail lower edge", engine, "DPR", dpr, flush=True)
                 browser.close()
     finally:

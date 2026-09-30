@@ -31378,13 +31378,9 @@ function renderPresenterSlideMiniPreview(slide, serviceId = state.presenter.serv
     outputTheme: theme,
   });
   const frameClasses = presenterOutputFrameClassNames(frameState);
-  const previewRenderClass = presenterSlideRenderClass(previewSlide);
-  const hasChromakeyLowerBar = !frameState.noChromakey
-    && ["lyrics", "song-title", "scripture", "title-assignee"].includes(previewRenderClass);
   const backgroundStyle = presenterOutputFrameBackgroundStyle(frameState);
   const outputClasses = [
     "svc-slide-mini-output",
-    hasChromakeyLowerBar ? "lower-bar-underlay" : "",
     frameClasses,
   ].filter(Boolean).join(" ");
   const canvasClasses = [

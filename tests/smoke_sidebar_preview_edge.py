@@ -19,7 +19,7 @@ def main():
                   const host=document.createElement('div');
                   host.className='svc-presenter-side-panel';host.id='edge-fixture';
                   host.style.cssText='position:fixed;left:10.25px;top:10px;width:296px;z-index:99999';
-                  host.innerHTML='<div class="svc-presenter-live-preview"><span class="svc-slide-mini-output lower-bar-underlay"><span class="svc-slide-mini-canvas presenter-output-root">'+renderPresenterSlideFrame({type:'lyrics',elementType:'lyrics',layout:'lower_bar_text',text:'가장자리 확인',title:'찬양'}, {previewStage:true})+'</span></span></div>';
+                  host.innerHTML='<div class="svc-presenter-live-preview"><span class="svc-slide-mini-output"><span class="svc-slide-mini-canvas presenter-output-root">'+renderPresenterSlideFrame({type:'lyrics',elementType:'lyrics',layout:'lower_bar_text',text:'가장자리 확인',title:'찬양'}, {previewStage:true})+'</span></span></div>';
                   document.body.append(host);
                 }''')
                 for width in [220, 254.5, 296, 296.75, 360]:
