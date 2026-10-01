@@ -14044,6 +14044,7 @@ function buildWorshipServiceScaffold(serviceId, typeId, options = {}) {
       const manualSlides = Array.isArray(elementStep.slides)
         ? elementStep.slides.map((slide) => String(slide || "").trim()).filter(Boolean)
         : [];
+      const corporatePrayers = normalizeCorporatePrayers(elementStep.corporatePrayers);
       const templateKey = String(elementStep.templateKey || elementStep.template_key || "").trim();
       const templateVariant = String(elementStep.templateVariant || elementStep.template_variant || "").trim();
       const asset = worshipTemplateElementAsset(elementStep, elementLabel);
@@ -14081,6 +14082,7 @@ function buildWorshipServiceScaffold(serviceId, typeId, options = {}) {
           ...(introSlide ? { introSlide } : {}),
           ...(textHighlights.length ? { textHighlights } : {}),
           ...(manualSlides.length ? { slides: manualSlides } : {}),
+          ...(corporatePrayers.length ? { corporatePrayers } : {}),
           ...(templateKey ? { templateKey } : {}),
           ...(templateVariant ? { templateVariant } : {}),
           ...(asset.url ? { asset: { ...asset, kind: asset.kind || elementType } } : {}),
@@ -21381,6 +21383,7 @@ function publicMonthlyCorporatePrayerStep() {
     elementType: "title_person",
     default_text: label,
     templateKey: "monthly_corporate_prayer_group",
+    corporatePrayers: topics.slice(startIndex, startIndex + 2).map((title) => ({ title, assignee: "" })),
     slides: topics.slice(startIndex, startIndex + 2).map((topic) => `'${topic}'`),
   });
   const prayerElements = [
