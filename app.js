@@ -21371,12 +21371,7 @@ function publicSundayAfternoonTemplate(options = {}) {
 }
 
 function publicMonthlyCorporatePrayerStep() {
-  const topics = [
-    "교회 부흥을 위해",
-    "선교와 민족을 위해",
-    "치유와 회복을 위해",
-    "교회학교를 위해",
-  ];
+  const topics = monthlyCorporatePrayerDefaultTopics();
   const group = (label, startIndex) => ({
     label,
     name: label,
@@ -22883,6 +22878,14 @@ function linkServiceItemToPraiseSong(item, song, service = selectedServiceForEdi
   const defaultVersion = defaultServiceSongVersion(song, item, service);
   item.version_id = defaultVersion?.id || null;
   item.song_version_id = item.version_id;
+  if (!parsed.formPresetDisabled && !parsed.formPreset?.forms?.length && !parsed.formHint) {
+    const preset = presenterServiceItemFormPreset(defaultVersion || {}, item, song);
+    if (preset?.forms?.length) {
+      parsed.formPreset = normalizeServiceFormPreset({ ...preset, strength: "manual" });
+      parsed.formHint = serviceFormPresetSummary(parsed.formPreset);
+      item.memo = serializeServiceItemMemo(parsed);
+    }
+  }
   return true;
 }
 
@@ -23175,10 +23178,10 @@ function serviceItemApplicableFormPresetRule(item = {}) {
 function serviceItemEffectiveFormHint(item = {}) {
   const parsed = parseServiceItemMemo(item?.memo);
   if (parsed.formPresetDisabled) return "";
-  return parsed.formHint
-    || serviceFormPresetSummary(parsed.formPreset)
-    || serviceFormPresetSummary(serviceItemMetadataFormPreset(item))
-    || serviceFormPresetSummary(serviceItemApplicableFormPresetRule(item)?.formPreset);
+  const song = serviceItemLinkedSong(item);
+  const version = serviceItemLinkedVersion(item, song);
+  return serviceFormPresetSummary(presenterServiceItemFormPreset(version || {}, item, song))
+    || parsed.formHint;
 }
 
 function serviceFormPresetSummary(preset) {
@@ -28782,9 +28785,24 @@ function normalizeCorporatePrayers(entries = []) {
   }));
 }
 
+function monthlyCorporatePrayerDefaultTopics() {
+  return [
+    "교회 부흥을 위해",
+    "선교와 민족을 위해",
+    "치유와 회복을 위해",
+    "교회학교를 위해",
+  ];
+}
+
 function monthlyCorporatePrayerEntries(item, memo = parseServiceItemMemo(item?.memo)) {
   if (memo.corporatePrayers?.length === 2) return normalizeCorporatePrayers(memo.corporatePrayers);
-  return [0, 1].map((index) => ({ title: String(memo.slides?.[index] || ""), assignee: "", sourceElementId: "" }));
+  const defaults = monthlyCorporatePrayerOrdinalsForItem(item)
+    .map((ordinal) => monthlyCorporatePrayerDefaultTopics()[ordinal - 1] || "");
+  return [0, 1].map((index) => ({
+    title: String(memo.slides?.[index] || defaults[index] || ""),
+    assignee: "",
+    sourceElementId: "",
+  }));
 }
 
 function mergeMonthlyCorporatePrayerItems(items = []) {

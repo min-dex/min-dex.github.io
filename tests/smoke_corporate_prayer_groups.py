@@ -29,6 +29,8 @@ def main():
               const merged=mergeMonthlyCorporatePrayerItems(original);
               check(JSON.stringify(original)===before,'input mutated');
               check(merged.map(x=>x.label).join('|')==='공동기도 1·2|기도찬양|공동기도 3·4','wrong grouping');
+              const legacyEmpty={...merged[2],memo:serializeServiceItemMemo({elementType:'title_person',templateKey:'monthly_corporate_prayer_group'})};
+              check(monthlyCorporatePrayerEntries(legacyEmpty).map(entry=>entry.title).join('|')===topics.slice(2).join('|'),'legacy defaults missing');
               check(merged[1]===song,'song changed');
               check(JSON.stringify(mergeMonthlyCorporatePrayerItems(merged))===JSON.stringify(merged),'not idempotent');
               check(mergeMonthlyCorporatePrayerItems([...merged,prayers[1],prayers[3]]).length===3,'saved legacy rows reappear');
