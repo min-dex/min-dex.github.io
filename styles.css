@@ -539,7 +539,7 @@ body[data-module="praise"] .list-filter {
   border-radius: var(--r);
   background: transparent;
   color: var(--sidebar-label);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   line-height: 1;
   padding: 0;
@@ -901,7 +901,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   flex: 0 0 22px;
   justify-content: flex-start;
   color: var(--sidebar-label);
-  font-size: 11px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   font-weight: 500;
   line-height: 18px;
@@ -939,9 +939,9 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   opacity: .9;
 }
 .global-search-result .song-meta-line { padding-left: 0; }
-.song-list-empty { display: grid; gap: 3px; padding: var(--s3) var(--sidebar-item-pad-x); color: var(--ink-4); font-size: 11px; line-height: 1.35; }
+.song-list-empty { display: grid; gap: 3px; padding: var(--s3) var(--sidebar-item-pad-x); color: var(--ink-4); font-size: 12px; line-height: 1.35; }
 .song-list-empty--loading { padding-top: 7px; }
-.song-list-empty strong { color: var(--ink-3); font-size: 12px; font-weight: 700; }
+.song-list-empty strong { color: var(--ink-3); font-size: 13px; font-weight: 700; }
 .song-list-empty span { color: var(--ink-4); }
 .attention-icon {
   display: inline-flex;
@@ -984,7 +984,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   display: block;
   margin-top: var(--s3);
   color: var(--ink-4);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: .05em;
   text-transform: uppercase;
@@ -1004,7 +1004,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 }
 .home-search-head span {
   color: var(--accent);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0;
   text-transform: none;
@@ -1020,7 +1020,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 }
 .home-search-head small {
   flex: 0 0 auto;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 .home-search-results {
@@ -1134,7 +1134,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .manuals-notice strong {
   flex: 0 0 auto;
   color: var(--ink);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 18px;
 }
@@ -1180,7 +1180,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .manuals-index a span,
 .manual-section-head > span {
   color: var(--accent);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
@@ -1350,7 +1350,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 }
 .background-manager-head span {
   color: var(--accent);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0;
   line-height: 14px;
@@ -1376,7 +1376,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 }
 .background-field span {
   color: var(--ink-4);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0;
   line-height: 13px;
@@ -1407,7 +1407,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   gap: var(--s2);
   color: var(--ink-4);
   font-family: ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 16px;
 }
 .background-path-row span:first-child {
@@ -1477,7 +1477,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .background-tile-main small,
 .background-tile-main em {
   color: var(--ink-4);
-  font-size: 11px;
+  font-size: 12px;
   font-style: normal;
   line-height: 15px;
 }
@@ -1506,7 +1506,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   justify-content: center;
   border-radius: var(--r);
   color: var(--ink-4);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1;
   padding: 0 7px;
@@ -1614,7 +1614,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .reference-group-count {
   flex: 0 0 auto;
   color: var(--ink-4);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 14px;
 }
@@ -1666,7 +1666,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .reference-group-edit span {
   display: inline;
   color: var(--ink-4);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
 }
 .reference-link-grid {
@@ -1720,7 +1720,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .reference-card small {
   overflow: hidden;
   color: var(--ink-4);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   line-height: 15px;
   text-overflow: ellipsis;
@@ -1729,7 +1729,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .reference-card em {
   overflow: hidden;
   color: var(--ink-4);
-  font-size: 10px;
+  font-size: 12px;
   font-style: normal;
   font-weight: 500;
   line-height: 14px;
@@ -1780,7 +1780,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .reference-editor-main span,
 .reference-active-toggle span {
   color: var(--ink-4);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: .06em;
   line-height: 12px;
@@ -3946,7 +3946,7 @@ body[data-theme="dark"] .service-week-card:hover {
   white-space: nowrap;
 }
 .service-week-card-preview .service-card-sermon-reference {
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   line-height: 1.15;
   white-space: nowrap;
 }
