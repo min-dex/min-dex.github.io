@@ -13,7 +13,7 @@ def main():
             page = browser.new_page()
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-            page.wait_for_function("typeof presenterSpecialSongHymnFormPreset === 'function'")
+            page.wait_for_function("typeof presenterSpecialSongHymnFormPreset === 'function' && typeof isSpecialSongServiceItem === 'function'")
             result = page.evaluate('''() => {
               const assert=(test,message)=>{if(!test)throw Error(message)};
               const song={hymn_no:'304',title:'찬송가'};
@@ -54,6 +54,28 @@ def main():
               assert(normalizeServiceFormPresetRulePreset(custom,when)===custom,'custom rule changed');
               assert(presenterSpecialSongHymnFormPreset({label:'찬양 1'},song,{})===null,'ordinary praise changed');
               assert(presenterSpecialSongHymnFormPreset({label:'특송'},{title:'CCM'},{praise_types:['ccm']})===null,'CCM changed');
+              const savedHint='V1-C-V2-C-V4-C';
+              for(const strength of ['manual','default','suggested','forced','song-default']) {
+                const item={label:'특송',_worshipSectionKey:'special_song',memo:serializeServiceItemMemo({
+                  formHint:savedHint,formPreset:{forms:savedHint.split('-'),hint:savedHint,strength}
+                })};
+                const plan=presenterFormPlanForServiceItem({forms:all},item,song);
+                assert(JSON.stringify(plan.forms.map(f=>f.id))===JSON.stringify(['v1','c','v2','c','v4','c']), 'saved sequence overwritten: '+strength);
+                assert(serviceItemEffectiveFormHint(item)===savedHint,'shown sequence differs: '+strength);
+              }
+              const linkedSong={...song,id:'preset-test-song',versions:[{id:'preset-test-version',praise_types:['hymn'],forms:all}]};
+              const fresh={id:'preset-test-item',label:'특송',_worshipSectionKey:'special_song'};
+              linkServiceItemToPraiseSong(fresh,linkedSong,{type_id:'monthly'});
+              assert(serviceItemFormPreset(fresh)?.hint==='V1-C-V2-C-Int-VL-C-Coda','default not materialized');
+              const frozen=fresh.memo;
+              linkServiceItemToPraiseSong(fresh,linkedSong,{type_id:'monthly'});
+              assert(fresh.memo===frozen,'relink changed saved default');
+              const reopened={...fresh,memo:serializeServiceItemMemo(parseServiceItemMemo(fresh.memo))};
+              assert(JSON.stringify(presenterFormPlanForServiceItem({forms:all},reopened,linkedSong).forms.map(f=>f._presenterBlank?'Int':f.id))===JSON.stringify(['v1','c','v2','c','Int','v4','c','coda']),'round trip changed playback');
+              assert(!presenterFormPlanForServiceItem({forms:all.filter(f=>f.id!=='coda')},reopened,linkedSong).warnings.length,'saved default warns about optional coda');
+              const disabled={label:'특송',memo:serializeServiceItemMemo({formPresetDisabled:true})};
+              linkServiceItemToPraiseSong(disabled,linkedSong,{type_id:'monthly'});
+              assert(serviceItemFormPresetDisabled(disabled) && !serviceItemFormPreset(disabled),'cleared sequence refilled');
               return cases;
             }''')
             print('PASS special hymn default, aliases, optional forms, saved defaults and custom preservation:', result)

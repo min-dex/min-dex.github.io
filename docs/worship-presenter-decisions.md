@@ -973,3 +973,9 @@ Small visual polish that does not alter behavior does not need an entry.
 - Live setlist metadata includes explicit deletion markers and omits suppressed praise items before numbering. Presentation-only visibility remains independent. Cache version advances to avoid stale metadata.
 - Failed song-catalog requests may retry without force; loaded/in-flight requests remain deduplicated. Archive re-entry and refresh already force a reload.
 - Corrected canonical song e5759f4b-8de7-4b85-af7d-6713fa23c196 normalized title base to 예수로나의구주삼고e, preserving the thisismystory variant and all linked IDs.
+
+### 2026-10-01 Stored song-form sequence is authoritative
+- Default form rules fill an empty sequence when a song is linked. Existing sequences and explicitly cleared sequences are preserved.
+- Once stored, automatic/manual origin does not change playback order. Special-hymn rules must not override an item's saved sequence.
+- The form input and presenter use the same resolver. Legacy items without a stored sequence retain their default fallback until linked/edited; production worship content is not bulk rewritten.
+- Regression coverage includes the monthly special-song mismatch, identical playback across strength values, default materialization, relinking, memo round trips, and explicit clearing.

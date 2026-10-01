@@ -634,23 +634,7 @@ function presenterFormPlanForServiceItem(version = {}, item, song = null) {
   version = version || {};
   const forms = normalizeForms(version.forms || []).filter((form) => normalizeLyricsForCopy(form.lyrics));
   if (typeof serviceItemFormPresetDisabled === "function" && serviceItemFormPresetDisabled(item)) return { forms, warnings: [] };
-  const isHymn = versionEffectivePraiseTypes(song, version).includes("hymn");
-  const itemPreset = serviceItemFormPreset(item);
-  const matchedRule = matchedServiceItemFormPresetRule(item, song, version);
-  const songDefaultPreset = presenterSongDefaultFormPreset(song, version);
-  const specialHymnRulePreset = presenterSpecialSongHymnFormPreset(item, song, version, matchedRule);
-  const preset = isHymn
-    ? specialHymnRulePreset
-      || itemPreset
-      || matchedRule?.formPreset
-      || songDefaultPreset
-      || presenterDefaultVerseChorusFormPreset(forms, song, version)
-      || null
-    : presenterExplicitNonHymnFormPreset(itemPreset)
-      || matchedRule?.formPreset
-      || presenterExplicitNonHymnFormPreset(songDefaultPreset)
-      || presenterDefaultVerseChorusFormPreset(forms, song, version)
-      || null;
+  const preset = presenterServiceItemFormPreset(version, item, song);
   const effectivePreset = presenterFormPresetWithAvailableForms(preset, forms);
   if (!effectivePreset?.forms?.length) return { forms, warnings: [] };
   const resolved = resolvePresenterFormPresetSequence(forms, effectivePreset);
@@ -664,6 +648,34 @@ function presenterFormPlanForServiceItem(version = {}, item, song = null) {
       : forms,
     warnings,
   };
+}
+
+function presenterServiceItemFormPreset(version = {}, item = {}, song = null) {
+  if (serviceItemFormPresetDisabled(item)) return null;
+  const itemPreset = serviceItemFormPreset(item);
+  // Once a sequence is stored, its origin must not change playback semantics.
+  if (itemPreset?.forms?.length) {
+    const saved = { ...itemPreset, strength: "manual" };
+    return isPresenterSpecialSongItem(item)
+      && versionEffectivePraiseTypes(song, version).includes("hymn")
+      ? presenterSpecialSongHymnDisplayPreset(saved)
+      : saved;
+  }
+  const forms = normalizeForms(version?.forms || []).filter((form) => normalizeLyricsForCopy(form.lyrics));
+  const isHymn = versionEffectivePraiseTypes(song, version).includes("hymn");
+  const matchedRule = matchedServiceItemFormPresetRule(item, song, version);
+  const songDefaultPreset = presenterSongDefaultFormPreset(song, version);
+  const specialHymnRulePreset = presenterSpecialSongHymnFormPreset(item, song, version, matchedRule);
+  return isHymn
+    ? specialHymnRulePreset
+      || matchedRule?.formPreset
+      || songDefaultPreset
+      || presenterDefaultVerseChorusFormPreset(forms, song, version)
+      || null
+    : matchedRule?.formPreset
+      || presenterExplicitNonHymnFormPreset(songDefaultPreset)
+      || presenterDefaultVerseChorusFormPreset(forms, song, version)
+      || null;
 }
 
 function presenterMissingFormWarnings(missing = [], forms = [], preset = null) {
@@ -709,7 +721,7 @@ function presenterSpecialSongHymnDisplayPreset(preset = null) {
     forms,
     hint: forms.join("-"),
     omitUnlisted: true,
-    omitMissingForms: String(preset.strength || "").toLowerCase() === "default",
+    omitMissingForms: true,
   };
 }
 
