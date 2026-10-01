@@ -88,7 +88,7 @@
 @property --shell-left-w {
   syntax: "<length>";
   inherits: true;
-  initial-value: 276px;
+  initial-value: 280px;
 }
 @property --shell-right-w {
   syntax: "<length>";
@@ -366,7 +366,9 @@ body[data-module="presenter"].right-sidebar-open { --shell-right-w: var(--right-
   gap: 0;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 0;
+  margin-left: var(--s1);
+  padding: 0 0 0 var(--s1);
+  box-shadow: inset 1px 0 0 var(--line-faint);
   scrollbar-width: none;
 }
 .primary-switcher::-webkit-scrollbar { display: none; }
@@ -8690,7 +8692,9 @@ body[data-module="presenter"] .nav-sidebar { --sidebar-reference-w: 280px; }
 
 @media (max-width: 560px) {
   /* Keep the drawer control and all module destinations reachable in one bar. */
-  .module-switcher-tab { width: 30px; }
+  .module-switcher-tab {
+    width: clamp(22px, calc((100vw - var(--topbar-compact-w) - var(--topbar-btn-size)) / 5), 36px);
+  }
   .topbar-leading .primary-switcher { display: none; }
 }
 
