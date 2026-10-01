@@ -2070,6 +2070,29 @@ function safeStorageRemove(scope, key) {
   }
 }
 
+function readListScrollState() {
+  const raw = safeStorageGet("session", STORAGE.listScroll, "{}");
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+    return Object.fromEntries(Object.entries(parsed)
+      .filter(([key, value]) => typeof key === "string" && key.length <= 200 && Number.isFinite(value) && value > 0)
+      .slice(-48)
+      .map(([key, value]) => [key, Math.floor(value)]));
+  } catch {
+    return {};
+  }
+}
+
+function persistListScrollState() {
+  const entries = Object.entries(state.listScroll || {})
+    .filter(([key, value]) => typeof key === "string" && key.length <= 200 && Number.isFinite(value) && value > 0)
+    .slice(-48)
+    .map(([key, value]) => [key, Math.floor(value)]);
+  if (entries.length) safeStorageSet("session", STORAGE.listScroll, JSON.stringify(Object.fromEntries(entries)));
+  else safeStorageRemove("session", STORAGE.listScroll);
+}
+
 function readWorshipRecoverySnapshots() {
   const raw = safeStorageGet("local", WORSHIP_RECOVERY_SNAPSHOTS_STORAGE_KEY, "[]");
   try {
@@ -2289,6 +2312,7 @@ function readUiState() {
   state.selectedBibleTranslationId = safeStorageGet("session", STORAGE.bibleTranslationId) || null;
   state.selectedBibleChapter = Number.isFinite(bibleChapter) && bibleChapter > 0 ? bibleChapter : 1;
   state.bibleCopyReference = bibleCopyReference !== "false";
+  state.listScroll = readListScrollState();
   state.presenter.selectedScreenId = safeStorageGet("local", PRESENTER_TARGET_SCREEN_STORAGE_KEY) || null;
   state.presenter.alwaysOnTop = safeStorageGet("local", PRESENTER_ALWAYS_ON_TOP_STORAGE_KEY) === "true";
 }
