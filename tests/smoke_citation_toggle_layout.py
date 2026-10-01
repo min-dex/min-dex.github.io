@@ -22,6 +22,10 @@ def main():
               document.body.append(host);
               const slide={id:'fixture',type:'blank',elementId:'citation',sectionKey:'sermon',liveScriptureControl:true};
               const subgroup={slides:[{slide,slideIndex:0},{slide:{...slide,id:'second'},slideIndex:1}]};
+              const hiddenCitation={label:'인용 구절',_worshipSlotKey:'sermon.citation.1',memo:JSON.stringify({hiddenInPresentation:true})};
+              const hiddenNormal={label:'광고',memo:JSON.stringify({hiddenInPresentation:true})};
+              if(serviceItemPresentationHidden(hiddenCitation)) throw Error('citation inherited hidden state');
+              if(!serviceItemPresentationHidden(hiddenNormal)) throw Error('normal hidden state lost');
               const trailingBlank={id:'normal-trailing-blank',type:'blank',elementId:'normal',autoTrailingBlank:true,citationQuickInsert:true};
               if(renderPresenterCitationComposer({slides:[{slide:trailingBlank,slideIndex:0}]},'fixture')) throw Error('composer attached to normal trailing blank');
               const section=document.createElement('div');

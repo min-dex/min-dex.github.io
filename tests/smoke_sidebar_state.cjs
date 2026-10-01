@@ -62,16 +62,20 @@ const server=http.createServer((req,res)=>{
         const result=await page.evaluate(async module=>{
           state.module=module;document.body.dataset.module=module;state.search='';
           document.body.classList.remove('sidebar-collapsed');renderModuleSwitcher();
+          syncSidebarCollapsedState();
+          const drawer=matchMedia('(max-width: 900px)').matches;
           refs.searchInput.focus();handleSidebarToggle();
-          const collapsed=refs.sidebar.inert&&refs.sidebar.getAttribute('aria-hidden')==='true'&&document.activeElement===refs.sidebarToggleBtn;
-          handleSidebarToggle();await new Promise(r=>setTimeout(r,300));
+          const collapsed=drawer&&refs.sidebar.inert&&refs.sidebar.getAttribute('aria-hidden')==='true'&&document.activeElement===refs.sidebarToggleBtn;
+          if(drawer) handleSidebarToggle();
+          await new Promise(r=>setTimeout(r,300));
           const visible=refs.sidebar.getBoundingClientRect().width>150&&!refs.sidebar.inert;
-          const active=[...document.querySelectorAll('.nav-rail-tab.active')].map(b=>b.dataset.homeModule);
+          const active=[...document.querySelectorAll('.module-switcher-tab.active')].map(b=>b.dataset.homeModule);
           const toggle=refs.sidebarToggleBtn.getBoundingClientRect(),bar=document.querySelector('.topbar').getBoundingClientRect();
           const aligned=Math.abs((toggle.top+toggle.height/2)-(bar.top+bar.height/2))<1;
-          return {collapsed,visible,active,aligned};
+          return {drawer,collapsed,visible,active,aligned,toggleHidden:refs.sidebarToggleBtn.hidden};
         },module);
-        assert.ok(result.collapsed&&result.visible&&result.aligned,JSON.stringify({width,module,...result}));
+        if(width>900) assert.ok(!result.drawer&&result.visible&&result.toggleHidden,JSON.stringify({width,module,...result}));
+        else assert.ok(result.drawer&&result.collapsed&&result.visible&&result.aligned&&!result.toggleHidden,JSON.stringify({width,module,...result}));
         assert.deepEqual(result.active,[module==='presenter'?'service':module]);
       }
     }

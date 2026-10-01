@@ -16,8 +16,6 @@ def boot_background_pixels(page):
         'bottom-right': (width - 1, height - 1),
     }
     return {name: image.getpixel(point) for name, point in points.items()}
-
-
 def main():
     server, url = start_local_app_server()
     try:

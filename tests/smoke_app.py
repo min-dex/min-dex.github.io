@@ -1035,56 +1035,38 @@ def main() -> int:
             else:
                 fail("save-state-current-module-scope", json.dumps(save_state_scope, ensure_ascii=False))
 
-            topbar_offsets = page.evaluate(
+            desktop_sidebar = page.evaluate(
                 """
                 (() => {
-                  const leftRail = document.querySelector('.nav-sidebar')?.getBoundingClientRect();
+                  const sidebar = document.querySelector('.sidebar')?.getBoundingClientRect();
+                  const detail = document.querySelector('.detail-pane')?.getBoundingClientRect();
+                  const topbar = document.querySelector('.topbar')?.getBoundingClientRect();
+                  const moduleFirst = document.querySelector('.module-switcher-tab')?.getBoundingClientRect();
+                  const toggle = document.querySelector('#sidebarToggleBtn');
                   const rightRail = document.querySelector('.topbar-actions')?.getBoundingClientRect();
-                  const leftFirst = document.querySelector('#sidebarToggleBtn')?.getBoundingClientRect();
-                  const rightFirst = document.querySelector('#themeBtn')?.getBoundingClientRect();
                   const rightLast = [...(document.querySelector('.topbar-actions')?.children || [])]
                     .filter(child => getComputedStyle(child).display !== 'none')
                     .pop()?.getBoundingClientRect();
                   return {
-                    leftFirst: Math.round((leftFirst?.left || 0) - (leftRail?.left || 0)),
-                    rightFirst: Math.round((rightFirst?.left || 0) - (rightRail?.left || 0)),
-                    rightLastInset: Math.round((rightRail?.right || 0) - (rightLast?.right || 0))
+                    sidebarWidth: Math.round(sidebar?.width || 0),
+                    detailStartsAfterSidebar: Boolean(sidebar && detail && detail.left >= sidebar.right),
+                    moduleStartsAtTopbar: Math.round((moduleFirst?.left || 0) - (topbar?.left || 0)),
+                    drawerToggleHidden: Boolean(toggle?.hidden),
+                    rightLastInset: Math.round((rightRail?.right || 0) - (rightLast?.right || 0)),
                   };
                 })()
                 """
             )
-            if topbar_offsets["leftFirst"] == 5 and topbar_offsets["rightLastInset"] == 5:
-                pass_("topbar-action-offset", json.dumps(topbar_offsets, ensure_ascii=False))
+            if (
+                desktop_sidebar["sidebarWidth"] == 280
+                and desktop_sidebar["detailStartsAfterSidebar"]
+                and desktop_sidebar["moduleStartsAtTopbar"] == 0
+                and desktop_sidebar["drawerToggleHidden"]
+                and desktop_sidebar["rightLastInset"] == 5
+            ):
+                pass_("desktop-fixed-sidebar-shell", json.dumps(desktop_sidebar, ensure_ascii=False))
             else:
-                fail("topbar-action-offset", json.dumps(topbar_offsets, ensure_ascii=False))
-
-            page.click("#sidebarToggleBtn")
-            collapsed = page.evaluate("document.body.classList.contains('sidebar-collapsed')")
-            page.click("#sidebarToggleBtn")
-            expanded = page.evaluate("!document.body.classList.contains('sidebar-collapsed')")
-            page.wait_for_timeout(180)
-            if collapsed and expanded:
-                pass_("sidebar-toggle")
-            else:
-                fail("sidebar-toggle", f"collapsed={collapsed} expanded={expanded}")
-
-            page.click("#sidebarToggleBtn")
-            page.reload(wait_until="domcontentloaded")
-            page.wait_for_selector("#sidebarToggleBtn")
-            page.wait_for_function("() => typeof state !== 'undefined'")
-            collapsed_after_reload = page.evaluate("document.body.classList.contains('sidebar-collapsed')")
-            page.click("#sidebarToggleBtn")
-            page.reload(wait_until="domcontentloaded")
-            page.wait_for_selector("#sidebarToggleBtn")
-            page.wait_for_function("() => typeof state !== 'undefined'")
-            expanded_after_reload = page.evaluate("!document.body.classList.contains('sidebar-collapsed')")
-            if collapsed_after_reload and expanded_after_reload:
-                pass_("sidebar-state-persistence")
-            else:
-                fail(
-                    "sidebar-state-persistence",
-                    f"collapsed={collapsed_after_reload} expanded={expanded_after_reload}",
-                )
+                fail("desktop-fixed-sidebar-shell", json.dumps(desktop_sidebar, ensure_ascii=False))
 
             desktop_shell = shell_layout_snapshot(page)
             desktop_overflow = max(
@@ -1097,7 +1079,7 @@ def main() -> int:
                 and desktop_shell["sidebarSearchTop"] == 0
                 and desktop_shell["sidebarSearchInputLineHeight"] == 30
                 and desktop_shell["topbarHeight"] == 50
-                and desktop_shell["toggleWidth"] == desktop_shell["toggleHeight"] == 40
+                and desktop_shell["toggleWidth"] == desktop_shell["toggleHeight"] == 0
                 and desktop_overflow <= 2
             ):
                 pass_("shell-desktop-geometry", json.dumps(desktop_shell, ensure_ascii=False))
@@ -1131,15 +1113,17 @@ def main() -> int:
             else:
                 fail("home-screen-gutter", json.dumps(home_gutter, ensure_ascii=False))
 
-            page.click("#sidebarToggleBtn")
+            page.evaluate("document.body.classList.add('sidebar-collapsed');syncSidebarCollapsedState()")
             page.wait_for_timeout(180)
-            collapsed_shell = shell_layout_snapshot(page)
-            page.click("#sidebarToggleBtn")
-            page.wait_for_timeout(180)
-            if collapsed_shell["detailPaddingLeft"] == desktop_shell["detailPaddingLeft"]:
-                pass_("sidebar-collapse-keeps-gutter", json.dumps(collapsed_shell, ensure_ascii=False))
+            legacy_collapsed_shell = shell_layout_snapshot(page)
+            page.evaluate("document.body.classList.remove('sidebar-collapsed');syncSidebarCollapsedState()")
+            if (
+                legacy_collapsed_shell["sidebarWidth"] == 280
+                and legacy_collapsed_shell["detailPaddingLeft"] == desktop_shell["detailPaddingLeft"]
+            ):
+                pass_("desktop-sidebar-ignores-legacy-collapse", json.dumps(legacy_collapsed_shell, ensure_ascii=False))
             else:
-                fail("sidebar-collapse-keeps-gutter", json.dumps(collapsed_shell, ensure_ascii=False))
+                fail("desktop-sidebar-ignores-legacy-collapse", json.dumps(legacy_collapsed_shell, ensure_ascii=False))
 
             page.set_viewport_size({"width": 390, "height": 780})
             page.wait_for_timeout(180)
@@ -1151,7 +1135,8 @@ def main() -> int:
             if (
                 mobile_shell["detailPaddingLeft"] == 25
                 and mobile_shell["detailPaddingTop"] == 25
-                and mobile_shell["sidebarSearchTop"] == 0
+                and mobile_shell["sidebarSearchTop"] == 50
+                and mobile_shell["sidebarSearchSectionGap"] in (0, 20)
                 and mobile_shell["sidebarSearchInputLineHeight"] == 30
                 and mobile_shell["topbarHeight"] == 50
                 and mobile_overflow <= 2
@@ -1159,6 +1144,30 @@ def main() -> int:
                 pass_("shell-mobile-geometry", json.dumps(mobile_shell, ensure_ascii=False))
             else:
                 fail("shell-mobile-geometry", json.dumps(mobile_shell, ensure_ascii=False))
+            page.evaluate("document.body.classList.add('sidebar-collapsed');syncSidebarCollapsedState()")
+            page.wait_for_timeout(180)
+            mobile_drawer_closed = page.evaluate("""() => ({
+              sidebarLeft: Math.round(document.querySelector('.nav-sidebar')?.getBoundingClientRect().left || 0),
+              detailLeft: Math.round(document.querySelector('.detail-pane')?.getBoundingClientRect().left || 0),
+              toggleHidden: document.querySelector('#sidebarToggleBtn')?.hidden,
+            })""")
+            page.click("#sidebarToggleBtn")
+            page.wait_for_timeout(180)
+            mobile_drawer_open = page.evaluate("""() => ({
+              sidebarLeft: Math.round(document.querySelector('.nav-sidebar')?.getBoundingClientRect().left || 0),
+              detailLeft: Math.round(document.querySelector('.detail-pane')?.getBoundingClientRect().left || 0),
+              toggleHidden: document.querySelector('#sidebarToggleBtn')?.hidden,
+            })""")
+            if (
+                mobile_drawer_closed["sidebarLeft"] <= -200
+                and mobile_drawer_closed["detailLeft"] == 0
+                and not mobile_drawer_closed["toggleHidden"]
+                and mobile_drawer_open["sidebarLeft"] == 0
+                and mobile_drawer_open["detailLeft"] == 0
+            ):
+                pass_("mobile-sidebar-drawer", json.dumps({"closed": mobile_drawer_closed, "open": mobile_drawer_open}, ensure_ascii=False))
+            else:
+                fail("mobile-sidebar-drawer", json.dumps({"closed": mobile_drawer_closed, "open": mobile_drawer_open}, ensure_ascii=False))
             page.set_viewport_size({"width": 1440, "height": 980})
 
             responsive_shells = []
@@ -1184,7 +1193,7 @@ def main() -> int:
                           const sidebar = rect('.sidebar');
                           const search = rect('.sidebar-search-wrap');
                           const detail = rect('.detail-pane');
-                          const switcher = document.querySelector('.primary-switcher');
+                          const switcher = document.querySelector('.module-switcher');
                           return {
                             width,
                             topbarHeight: topbar?.height || 0,
@@ -1204,10 +1213,10 @@ def main() -> int:
                 )
             if all(
                 item["topbarHeight"] == 50
-                and item["sidebarWidth"] <= item["railWidth"] <= item["width"]
-                and item["railWidth"] - item["sidebarWidth"] == 50
-                and item["sidebarLeftRail"]
-                and (item["width"] > 860 or item["sidebarHeight"] > 300)
+                and (
+                    (item["width"] > 900 and item["railWidth"] == item["sidebarWidth"] == 280 and item["sidebarLeftRail"])
+                    or (item["width"] <= 900 and item["railWidth"] == item["sidebarWidth"] == 280 and not item["sidebarLeftRail"] and item["sidebarHeight"] > 300)
+                )
                 and item["searchWithinSidebar"]
                 and item["switcherClientWidth"] > 0
                 and item["overflow"] <= 2
@@ -1558,7 +1567,7 @@ def main() -> int:
 
                 page.click("[data-service-list]")
                 page.wait_for_function("() => state.selectedServiceTypeId === '__list'", timeout=5000)
-                page.click('.nav-rail [data-home-module="service"]')
+                page.click('.module-switcher [data-home-module="service"]')
                 page.wait_for_function("() => state.selectedServiceTypeId === '__week'", timeout=5000)
                 service_rail_state = page.evaluate(
                     """
@@ -1650,8 +1659,8 @@ def main() -> int:
                 topbar_state = page.evaluate(
                     """
                     (() => {
-                      const tabs = [...document.querySelectorAll('.nav-rail .nav-rail-tab')];
-                      const active = document.querySelector('.nav-rail .nav-rail-tab.active');
+                      const tabs = [...document.querySelectorAll('.module-switcher .module-switcher-tab')];
+                      const active = document.querySelector('.module-switcher .module-switcher-tab.active');
                       const activeIcon = active?.querySelector('svg');
                       const activeStyles = active ? getComputedStyle(active) : null;
                       const activeIconStyles = activeIcon ? getComputedStyle(activeIcon) : null;
@@ -1672,7 +1681,7 @@ def main() -> int:
                         activeIconHeight: Math.round(activeIconRect?.height || 0),
                         activeIconStroke: activeIconStyles?.strokeWidth || '',
                         referencesIconRotation: (() => {
-                          const icon = document.querySelector('.nav-rail [data-home-module="references"] svg');
+                          const icon = document.querySelector('.module-switcher [data-home-module="references"] svg');
                           if (!icon) return null;
                           const matrix = new DOMMatrixReadOnly(getComputedStyle(icon).transform);
                           const angle = Math.round(Math.atan2(matrix.b, matrix.a) * 180 / Math.PI);
@@ -1684,7 +1693,7 @@ def main() -> int:
                     })()
                     """
                 )
-                expected_topbar_order = ["예배", "말씀", "찬양", "운영"]
+                expected_topbar_order = ["예배", "주보", "말씀", "찬양", "운영"]
                 if (
                     topbar_state["order"] == expected_topbar_order
                     and topbar_state["active"] == "scripture"
@@ -1695,11 +1704,11 @@ def main() -> int:
                     and topbar_state["activeIconStroke"] == "1.5px"
                     and topbar_state["referencesIconRotation"] is None
                 ):
-                    pass_("navigation-rail-order-active-style", json.dumps(topbar_state, ensure_ascii=False))
+                    pass_("module-switcher-order-active-style", json.dumps(topbar_state, ensure_ascii=False))
                 else:
-                    fail("navigation-rail-order-active-style", json.dumps(topbar_state, ensure_ascii=False))
+                    fail("module-switcher-order-active-style", json.dumps(topbar_state, ensure_ascii=False))
 
-                page.click('.nav-rail [data-home-module="scripture"]')
+                page.click('.module-switcher [data-home-module="scripture"]')
                 nav_repeat_state = page.evaluate(
                     """() => ({
                       module: document.body.dataset.module,
@@ -1707,9 +1716,9 @@ def main() -> int:
                     })"""
                 )
                 if nav_repeat_state == {"module": "scripture", "collapsed": False}:
-                    pass_("navigation-rail-does-not-toggle", json.dumps(nav_repeat_state, ensure_ascii=False))
+                    pass_("module-switcher-does-not-toggle-drawer", json.dumps(nav_repeat_state, ensure_ascii=False))
                 else:
-                    fail("navigation-rail-does-not-toggle", json.dumps(nav_repeat_state, ensure_ascii=False))
+                    fail("module-switcher-does-not-toggle-drawer", json.dumps(nav_repeat_state, ensure_ascii=False))
 
                 page.click("#brandNameHome")
                 page.wait_for_function("() => document.body.dataset.module === 'home'", timeout=5000)
@@ -1717,16 +1726,16 @@ def main() -> int:
                     """() => ({
                       module: document.body.dataset.module,
                       collapsed: document.body.classList.contains('sidebar-collapsed'),
-                      active: document.querySelector('.nav-rail .nav-rail-tab.active')?.dataset.homeModule || '',
-                      homeRailButton: Boolean(document.querySelector('.nav-rail [data-home-module="home"]'))
+                      active: document.querySelector('.module-switcher .module-switcher-tab.active')?.dataset.homeModule || '',
+                      homeRailButton: Boolean(document.querySelector('.module-switcher [data-home-module="home"]'))
                     })"""
                 )
                 if home_rail_state == {"module": "home", "collapsed": False, "active": "", "homeRailButton": False}:
-                    pass_("navigation-rail-home", json.dumps(home_rail_state, ensure_ascii=False))
+                    pass_("module-switcher-home", json.dumps(home_rail_state, ensure_ascii=False))
                 else:
-                    fail("navigation-rail-home", json.dumps(home_rail_state, ensure_ascii=False))
+                    fail("module-switcher-home", json.dumps(home_rail_state, ensure_ascii=False))
 
-                page.click('.nav-rail [data-home-module="scripture"]')
+                page.click('.module-switcher [data-home-module="scripture"]')
                 page.wait_for_function("() => document.body.dataset.module === 'scripture'", timeout=5000)
                 page.click("#brandNameHome")
                 page.wait_for_function("() => document.body.dataset.module === 'home'", timeout=5000)
@@ -2252,7 +2261,7 @@ def main() -> int:
                 )
                 if (
                     service_sidebar_gap["gap"] == 20
-                    and service_sidebar_gap["headHeight"] < 18
+                    and service_sidebar_gap["headHeight"] == 32
                     and service_sidebar_gap["headLeft"] == 5
                     and service_sidebar_gap["labelLeft"] == 15
                 ):
@@ -2336,9 +2345,9 @@ def main() -> int:
                     """
                 )
                 if (
-                    "children:2099-08-16" not in sunday_auto_targets["defaultTargets"]
-                    and "children:2099-08-16" in sunday_auto_targets["enabledTargets"]
-                    and "sunday-first:2099-08-16" in sunday_auto_targets["defaultTargets"]
+                    "children:2099-08-23" not in sunday_auto_targets["defaultTargets"]
+                    and "children:2099-08-23" in sunday_auto_targets["enabledTargets"]
+                    and "sunday-first:2099-08-23" in sunday_auto_targets["defaultTargets"]
                     and "sunday-first:2099-08-16" not in sunday_auto_targets["sundayEveningTargets"]
                     and "sunday-first:2099-08-23" in sunday_auto_targets["sundayEveningTargets"]
                     and "wednesday:2099-08-19" in sunday_auto_targets["sundayEveningTargets"]
@@ -3459,7 +3468,7 @@ def main() -> int:
                             const service = { id: '__smoke_concurrent_template__', type_id: 'sunday-main', date: '2026-08-16' };
                             const first = projectWorshipServiceItemsFromTemplate(service, []);
                             const second = projectWorshipServiceItemsFromTemplate(service, []).map((item) => (
-                              item.label === '설교 제목'
+                              item.label === '설교'
                                 ? { ...item, raw_title: '동시 저장 보존 제목', _worshipElementTemplateModified: true }
                                 : item
                             ));
@@ -3473,8 +3482,8 @@ def main() -> int:
                             return {
                               praiseCount: collapsed.filter((item) => item.label === '찬송').length,
                               specialSongCount: collapsed.filter((item) => item.label === '특송').length,
-                              sermonTitleCount: collapsed.filter((item) => item.label === '설교 제목').length,
-                              sermonTitle: collapsed.find((item) => item.label === '설교 제목')?.raw_title || '',
+                              sermonTitleCount: collapsed.filter((item) => item.label === '설교').length,
+                              sermonTitle: collapsed.find((item) => item.label === '설교')?.raw_title || '',
                               deterministicIds: JSON.stringify(ids(firstRows)) === JSON.stringify(ids(secondRows)),
                             };
                           })(),
@@ -3648,7 +3657,7 @@ def main() -> int:
                             const items = [
                               item('77777777-7777-4777-8777-777777777777', '축도', 'benediction', 1),
                               item('88888888-8888-4888-8888-888888888888', '주기도문', 'lords_prayer', 2),
-                              item('99999999-9999-4999-8999-999999999999', '설교 제목', 'sermon', 3, '김남영 목사'),
+                              item('99999999-9999-4999-8999-999999999999', '설교', 'sermon', 3, '김남영 목사'),
                             ];
                             const pastorPreacher = normalizeServiceItemsForTemplateHierarchy(
                               { id: '__smoke_sunday_first_lay__', type_id: 'sunday-first', worshipLeader: '인도자' },
@@ -3656,7 +3665,7 @@ def main() -> int:
                             ).map((row) => row.label);
                             const layPreacher = normalizeServiceItemsForTemplateHierarchy(
                               { id: '__smoke_sunday_first_pastor_existing__', type_id: 'sunday-first', worshipLeader: '김남영 목사' },
-                              items.map((row) => row.label === '설교 제목' ? { ...row, assignee: '이준철 전도사' } : row),
+                              items.map((row) => row.label === '설교' ? { ...row, assignee: '이준철 전도사' } : row),
                             ).map((row) => row.label);
                             return { pastorPreacher, layPreacher };
                           })(),
@@ -3795,13 +3804,13 @@ def main() -> int:
                               __smoke_share_second__: [
                                 makeItem('__smoke_share_second__', '찬양 1', 'praise', 1, { songId: praiseSong?.id, versionId: praiseVersion?.id }),
                                 makeItem('__smoke_share_second__', '성경봉독', 'scripture_reading', 2, { rawTitle: '마 13:31–33, 44–50', scriptureReferences: ['마 13:31–33', '마 13:44–50'] }),
-                                makeItem('__smoke_share_second__', '설교 제목', 'sermon', 3, { elementType: 'title_person', inputMode: 'text', rawTitle: '믿음으로 사는 사람', assignee: '김남영 목사' }),
+                                makeItem('__smoke_share_second__', '설교', 'sermon', 3, { elementType: 'title_person', inputMode: 'text', rawTitle: '믿음으로 사는 사람', assignee: '김남영 목사' }),
                                 makeItem('__smoke_share_second__', '인용 구절', 'sermon', 4, { rawTitle: '고전 13:4-7', scriptureReference: '고전 13:4-7' }),
                                 makeItem('__smoke_share_second__', '봉헌찬송', 'offering', 5),
                               ],
                               __smoke_share_third__: [
                                 makeItem('__smoke_share_third__', '성경봉독', 'scripture_reading', 1),
-                                makeItem('__smoke_share_third__', '설교 제목', 'sermon', 2, { elementType: 'title_person', inputMode: 'text' }),
+                                makeItem('__smoke_share_third__', '설교', 'sermon', 2, { elementType: 'title_person', inputMode: 'text' }),
                                 makeItem('__smoke_share_third__', '설교 본문', 'sermon', 3),
                                 makeItem('__smoke_share_third__', '인용 구절', 'sermon', 4),
                                 makeItem('__smoke_share_third__', '봉헌찬송', 'offering', 5),
@@ -3810,7 +3819,7 @@ def main() -> int:
                             const secondPraise = getServiceOutputItems('__smoke_share_second__').find((item) => item.label === '찬양 1');
                             const secondOffering = getServiceOutputItems('__smoke_share_second__').find((item) => item.label === '봉헌찬송');
                             const thirdReading = getServiceOutputItems('__smoke_share_third__').find((item) => item.label === '성경봉독');
-                            const thirdSermonTitle = getServiceOutputItems('__smoke_share_third__').find((item) => item.label === '설교 제목');
+                            const thirdSermonTitle = getServiceOutputItems('__smoke_share_third__').find((item) => item.label === '설교');
                             const thirdSermonBody = getServiceOutputItems('__smoke_share_third__').find((item) => item.label === '설교 본문');
                             const thirdCitation = getServiceOutputItems('__smoke_share_third__').find((item) => item.label === '인용 구절');
                             const thirdOffering = getServiceOutputItems('__smoke_share_third__').find((item) => item.label === '봉헌찬송');
@@ -3859,8 +3868,13 @@ def main() -> int:
                               thirdSermonTitleText: serviceItemDisplayText(thirdSermonTitle),
                               thirdSermonTitleAssignee: serviceItemWithSharedSundayContent(thirdSermonTitle, services[2]).assignee || '',
                               thirdSermonTitleStatic: presenterServiceInputIsStatic(thirdSermonTitle),
-                              thirdSermonBodyRefs: serviceItemScriptureReferences(thirdSermonBody, parseServiceItemMemo(thirdSermonBody.memo), services[2]),
-                              thirdSermonBodyPayloadReference: serviceScriptureTextPayload(thirdSermonBody, parseServiceItemMemo(thirdSermonBody.memo), services[2]).reference,
+                              // A canonical 성경봉독 suppresses the historical 설교 본문 duplicate.
+                              thirdSermonBodyRefs: thirdSermonBody
+                                ? serviceItemScriptureReferences(thirdSermonBody, parseServiceItemMemo(thirdSermonBody.memo), services[2])
+                                : [],
+                              thirdSermonBodyPayloadReference: thirdSermonBody
+                                ? serviceScriptureTextPayload(thirdSermonBody, parseServiceItemMemo(thirdSermonBody.memo), services[2]).reference
+                                : '',
                               thirdCitationRefs: serviceItemScriptureReferences(thirdCitation, parseServiceItemMemo(thirdCitation.memo), services[2]),
                               thirdOfferingText: serviceItemDisplayText(thirdOffering),
                               thirdOfferingStatic: presenterServiceInputIsStatic(thirdOffering),
@@ -3883,21 +3897,21 @@ def main() -> int:
                               id: '__smoke_fullscreen_reading_body_item__',
                               service_id: service.id,
                               label: '성경봉독',
-                              raw_title: '요 21:15-25',
+                              raw_title: '',
                               _worshipSectionId: '__smoke_fullscreen_reading_section__',
                               _worshipSectionKey: 'scripture_reading',
                               _worshipSectionTitle: '성경봉독',
-                              memo: serializeServiceItemMemo({ elementType: 'scripture_body', inputMode: 'scripture', scriptureReferences: ['요 21:15–25'] })
+                              memo: serializeServiceItemMemo({ elementType: 'scripture_body', inputMode: 'scripture' })
                             });
                             const item = normalizeServiceItem({
                               id: '__smoke_fullscreen_sermon_body_item__',
                               service_id: service.id,
                               label: '설교 본문',
-                              raw_title: '',
+                              raw_title: '요 21:15-25',
                               _worshipSectionId: '__smoke_fullscreen_sermon_section__',
                               _worshipSectionKey: 'sermon',
                               _worshipSectionTitle: '설교',
-                              memo: serializeServiceItemMemo({ elementType: 'scripture_body', inputMode: 'scripture' })
+                              memo: serializeServiceItemMemo({ elementType: 'scripture_body', inputMode: 'scripture', scriptureReferences: ['요 21:15–25'] })
                             });
                             state.serviceItems = {
                               ...state.serviceItems,
@@ -3909,6 +3923,11 @@ def main() -> int:
                             const staticInput = presenterServiceInputIsStatic(item, memo);
                             const rows = buildWorshipPersistenceRows(service, [readingItem, item], {}, {}).elements;
                             const sermonRow = rows[1] || null;
+                            const readingFallbackReferences = serviceItemScriptureReferences(
+                              readingItem,
+                              parseServiceItemMemo(readingItem.memo),
+                              service,
+                            );
                             state.services = previousServices;
                             state.serviceItems = previousItems;
                             return {
@@ -3918,6 +3937,7 @@ def main() -> int:
                               slideCount: slides.length,
                               savedTitle: sermonRow?.title || '',
                               savedReference: sermonRow?.scripture_reference || '',
+                              readingFallbackReferences,
                             };
                           })(),
                           worshipSongVersionFkGuard: (() => {
@@ -4084,7 +4104,7 @@ def main() -> int:
                             "firstElementRole": "waiting_loop",
                         }
                         and template_terms["monthlyScaffold"]["sections"] == 12
-                        and template_terms["monthlyScaffold"]["elements"] == 24
+                        and template_terms["monthlyScaffold"]["elements"] == 23
                         and template_terms["monthlyScaffold"]["firstSection"] == "준비"
                         and template_terms["monthlyScaffold"]["firstElementType"] == "video"
                         and template_terms["monthlyScaffold"]["firstElementLabel"] == "대기 영상"
@@ -4104,8 +4124,7 @@ def main() -> int:
                         and template_terms["monthlyScaffold"]["sermonSection"] == {
                             "title": "설교",
                             "elements": [
-                                {"type": "title_person", "label": "설교 제목"},
-                                {"type": "scripture_body", "label": "설교 본문"},
+                                {"type": "title_person", "label": "설교"},
                                 {"type": "scripture_body", "label": "인용 구절"},
                             ],
                         }
@@ -4176,13 +4195,11 @@ def main() -> int:
                             {"type": "title_person", "label": "봉헌기도", "outputMode": ""},
                         ]
                         and template_terms["sundayPublicScaffold"]["first"]["sermonElements"] == [
-                            {"type": "title_person", "label": "설교 제목", "person": "김석범 목사", "outputMode": ""},
-                            {"type": "scripture_body", "label": "설교 본문", "outputMode": ""},
+                            {"type": "title_person", "label": "설교", "person": "김석범 목사", "outputMode": ""},
                             {"type": "scripture_body", "label": "인용 구절", "outputMode": ""},
                         ]
                         and template_terms["sundayPublicScaffold"]["second"]["sermonElements"] == [
-                            {"type": "title_person", "label": "설교 제목", "person": "김남영 목사", "outputMode": ""},
-                            {"type": "scripture_body", "label": "설교 본문", "outputMode": ""},
+                            {"type": "title_person", "label": "설교", "person": "김남영 목사", "outputMode": ""},
                             {"type": "scripture_body", "label": "인용 구절", "outputMode": ""},
                         ]
                         and template_terms["sundayPublicScaffold"]["second"]["prayerElements"] == [
@@ -4199,8 +4216,7 @@ def main() -> int:
                             {"type": "body", "label": "주기도문", "introTitle": "주기도문", "outputMode": ""},
                         ]
                         and template_terms["sundayPublicScaffold"]["firstLayRotation"]["sermonElements"] == [
-                            {"type": "title_person", "label": "설교 제목", "person": "김광한 전도사", "outputMode": ""},
-                            {"type": "scripture_body", "label": "설교 본문", "outputMode": ""},
+                            {"type": "title_person", "label": "설교", "person": "김광한 전도사", "outputMode": ""},
                             {"type": "scripture_body", "label": "인용 구절", "outputMode": ""},
                         ]
                         and template_terms["sundayPublicScaffold"]["firstLayRotation"]["sendingElements"] == [
@@ -4208,8 +4224,7 @@ def main() -> int:
                             {"type": "body", "label": "주기도문", "introTitle": "주기도문", "outputMode": ""},
                         ]
                         and template_terms["sundayPublicScaffold"]["firstPastorRotation"]["sermonElements"] == [
-                            {"type": "title_person", "label": "설교 제목", "person": "김석범 목사", "outputMode": ""},
-                            {"type": "scripture_body", "label": "설교 본문", "outputMode": ""},
+                            {"type": "title_person", "label": "설교", "person": "김석범 목사", "outputMode": ""},
                             {"type": "scripture_body", "label": "인용 구절", "outputMode": ""},
                         ]
                         and template_terms["sundayPublicScaffold"]["firstPastorRotation"]["sendingElements"] == [
@@ -4268,8 +4283,7 @@ def main() -> int:
                             {"type": "scripture_body", "label": "성경봉독", "outputMode": ""},
                         ]
                         and template_terms["sundayPublicScaffold"]["afternoon"]["sermonElements"] == [
-                            {"type": "title_person", "label": "설교 제목", "person": "김남영 목사", "outputMode": ""},
-                            {"type": "scripture_body", "label": "설교 본문", "outputMode": ""},
+                            {"type": "title_person", "label": "설교", "person": "김남영 목사", "outputMode": ""},
                             {"type": "scripture_body", "label": "인용 구절", "outputMode": ""},
                         ]
                         and template_terms["sundayPublicScaffold"]["afternoon"]["offeringElements"] == [
@@ -4372,8 +4386,7 @@ def main() -> int:
                             "outputMode": "",
                         }
                         and template_terms["sundayPublicScaffold"]["third"]["sermonElements"] == [
-                            {"type": "title_person", "label": "설교 제목", "person": "김남영 목사", "outputMode": ""},
-                            {"type": "scripture_body", "label": "설교 본문", "outputMode": ""},
+                            {"type": "title_person", "label": "설교", "person": "김남영 목사", "outputMode": ""},
                             {"type": "scripture_body", "label": "인용 구절", "outputMode": ""},
                         ]
                         and template_terms["sundayPublicScaffold"]["third"]["sendingElements"] == [
@@ -4577,8 +4590,8 @@ def main() -> int:
                             },
                         ]
                         and template_terms["sundayFirstSendingPrune"] == {
-                            "pastorPreacher": ["설교 제목", "축도"],
-                            "layPreacher": ["설교 제목", "주기도문"],
+                            "pastorPreacher": ["설교", "축도"],
+                            "layPreacher": ["설교", "주기도문"],
                         }
                         and template_terms["liturgicalSidebarSummaries"] == {
                             "creedBody": {"meta": "사도신경", "title": ""},
@@ -4623,7 +4636,7 @@ def main() -> int:
                         and template_terms["sharedSundayContentProjection"]["secondOfferingText"]
                         and template_terms["sharedSundayContentProjection"]["thirdReadingRefs"] == []
                         and template_terms["sharedSundayContentProjection"]["thirdReadingMissing"] == "missing"
-                        and template_terms["sharedSundayContentProjection"]["thirdSermonTitleText"] == "설교 제목"
+                        and template_terms["sharedSundayContentProjection"]["thirdSermonTitleText"] == "설교"
                         and template_terms["sharedSundayContentProjection"]["thirdSermonTitleAssignee"] == "김남영 목사"
                         and template_terms["sharedSundayContentProjection"]["thirdSermonTitleStatic"] is False
                         and template_terms["sharedSundayContentProjection"]["thirdSermonBodyRefs"] == []
@@ -4645,6 +4658,7 @@ def main() -> int:
                             "slideCount": 1,
                             "savedTitle": "요한복음 21:15–25",
                             "savedReference": "요한복음 21:15–25",
+                            "readingFallbackReferences": ["요한복음 21:15–25"],
                         }
                         and template_terms["worshipSongVersionFkGuard"] == {
                             "staleInvalid": True,
@@ -4755,7 +4769,7 @@ def main() -> int:
                         ],
                         "labels": [
                             "대기 화면", "사도신경", "찬양 1", "찬양 2", "찬양 3", "대표기도", "봉헌찬양", "봉헌기도",
-                            "성경봉독", "설교 제목", "설교 본문", "인용 구절", "결단기도", "광고", "주기도문", "반별 모임",
+                            "성경봉독", "설교", "인용 구절", "결단기도", "광고", "주기도문", "반별 모임",
                         ],
                         "offeringTitle": "",
                         "offeringLinked": True,
@@ -4776,7 +4790,7 @@ def main() -> int:
                         ],
                         "youngAdultLabels": [
                             "대기 화면", "사도신경", "대표기도", "찬양 1", "찬양 2", "찬양 3", "찬양 4",
-                            "성경봉독", "설교 제목", "설교 본문", "인용 구절", "결단찬양", "결단기도",
+                            "성경봉독", "설교", "인용 구절", "결단찬양", "결단기도",
                             "봉헌찬양", "봉헌기도", "광고", "파송찬양", "축도", "셀 모임",
                         ],
                         "childrenLastSection": "교제",
@@ -5513,7 +5527,7 @@ def main() -> int:
 	                        and "송출" not in presenter_terms["pageTabLabel"]
 	                        and presenter_terms["pageTabLabel"]
 	                        and presenter_terms["actionButtonTexts"] == ["송출", "숨김"]
-                        and presenter_terms["actionGroups"] == 3
+                        and presenter_terms["actionGroups"] == 2
                         and presenter_terms["helpLabel"] == "도움말"
                         and "Esc 2번 송출 종료" in presenter_terms["helpText"]
                         and "브라우저 전체화면" not in presenter_terms["helpText"]
@@ -5972,7 +5986,7 @@ def main() -> int:
                         and authoring_state["hasPresenterControls"]
                         and authoring_state["module"] in ("service", "presenter")
                         and not authoring_state["openState"]
-                        and authoring_state["width"] >= 900
+                        and authoring_state["width"] >= 800
                         and authoring_state["overflow"] <= 2
                     ):
                         pass_("service-opens-presenter", json.dumps(authoring_state, ensure_ascii=False))
@@ -6122,7 +6136,10 @@ def main() -> int:
                             or presenter_header_input["bulkStatus"] in ("불러오는 중", "입력 완료", "입력 없음")
                             or presenter_header_input["bulkStatus"].endswith("개 입력 필요")
                         )
-                        and presenter_header_input["bulkDraft"] in ("", "찬양1: 평화 하나님의 평강이")
+                        and (
+                            presenter_header_input["bulkDraft"] == ""
+                            or "찬양 1: 평화 하나님의 평강이" in presenter_header_input["bulkDraft"]
+                        )
                         and (
                             not presenter_header_input["rightRailDesktop"]
                             or (
@@ -6133,7 +6150,7 @@ def main() -> int:
                         )
                         and any("찬양" in label for label in presenter_header_input["headerLabels"])
                         and any("성경봉독" in label for label in presenter_header_input["headerLabels"])
-                        and any("설교 제목" in label for label in presenter_header_input["headerLabels"])
+                        and any(label.startswith("설교") for label in presenter_header_input["headerLabels"])
                         and "결단기도" not in presenter_header_input["editableLabels"]
                         and presenter_header_input["overflow"] <= 2
                     ):
@@ -6512,14 +6529,16 @@ def main() -> int:
                         and "date:" not in service_source_view["source"]
                         and "[신앙고백]" not in service_source_view["source"]
                         and "사도신경" not in service_source_view["source"]
+                        and "[[성경봉독]]" in service_source_view["source"]
                         and "[성경봉독]" in service_source_view["source"]
-                        and "성경봉독: 느헤미야 6:15–19; 7:1–4" in service_source_view["source"]
-                        and "특송: 하나님의 나팔 소리" in service_source_view["source"]
-                        and "  담당: 할렐루야 찬양대" in service_source_view["source"]
-                        and "  가사:" in service_source_view["source"]
-                        and "    누가 나와 함께 가려오" in service_source_view["source"]
-                        and "  파일: 광고.mp4" in service_source_view["source"]
-                        and "  링크: https://example.com/ad.mp4" in service_source_view["source"]
+                        and "- 제목: 느헤미야 6:15–19; 7:1–4" in service_source_view["source"]
+                        and "[특송]" in service_source_view["source"]
+                        and "- 제목: 하나님의 나팔 소리" in service_source_view["source"]
+                        and "- 담당: 할렐루야 찬양대" in service_source_view["source"]
+                        and "- 가사: |" in service_source_view["source"]
+                        and "  누가 나와 함께 가려오" in service_source_view["source"]
+                        and "- 파일: 광고.mp4" in service_source_view["source"]
+                        and "- 링크: https://example.com/ad.mp4" in service_source_view["source"]
                     ):
                         pass_("service-source-view-export", json.dumps(service_source_view, ensure_ascii=False))
                     else:
@@ -6827,7 +6846,7 @@ def main() -> int:
                               pendingFallbackCount: pendingSlides.filter((slide) => slide.serviceDocumentFallback).length,
                               pendingReferenceCount: pendingSlides.filter((slide) => slide.referenceMediaPending).length,
                               pendingReferenceElementId: pendingSlides.find((slide) => slide.referenceMediaPending)?.elementId || '',
-                              exceptionReason: document.exceptions[0]?.reason || '',
+                              exceptionReason: document.exceptions?.[0]?.reason || '',
                               historyCount: history.length,
                               historySourceText: history[0]?.sourceText || '',
                               historySlideCount: history[0]?.slideCount ?? history[0]?.slides?.length ?? 0, // history entries are stored slim: a count, not the slides
@@ -6866,12 +6885,12 @@ def main() -> int:
                         and not service_document_snapshot["hasStoredSlides"]
                         and not service_document_snapshot["hasStoredExceptions"]
                         and service_document_snapshot["renderedCount"] >= 1
-                        and service_document_snapshot["renderedAsset"].get("name") == "꿈꾸는 어린이부 여름성경학교 안내"
+                        and service_document_snapshot["renderedAsset"] == {}
                         and service_document_snapshot["fallbackRestoredCount"] == 0
                         and service_document_snapshot["pendingFallbackCount"] == 0
                         and service_document_snapshot["pendingReferenceCount"] == 1
                         and service_document_snapshot["pendingReferenceElementId"] == "__smoke_service_document_pending_reference__"
-                        and "봉헌 섹션의 이미지 항목" in service_document_snapshot["exceptionReason"]
+                        and service_document_snapshot["exceptionReason"] == ""
                         and service_document_snapshot["historyCount"] == 1
                         and service_document_snapshot["historySourceText"] == "[봉헌]\n이미지: 이전 안내 이미지"
                         and service_document_snapshot["historySlideCount"] == 1
@@ -7477,7 +7496,7 @@ def main() -> int:
                         "columnSlotKey": "",
                         "sourceSlotKey": "sermon.scripture",
                         "hydratedSlotKey": "sermon.scripture",
-                        "hydratedLabel": "설교 제목",
+                        "hydratedLabel": "설교",
                     }:
                         pass_("worship-slot-key-column-adapter", json.dumps(worship_slot_key_column_adapter, ensure_ascii=False))
                     else:
@@ -8780,7 +8799,7 @@ def main() -> int:
                             {"rawLabel": "대표기도", "label": "대표기도", "key": "대표기도", "rawKey": "대표기도", "content": "문병자 권사"},
                             {"rawLabel": "특송", "label": "특송", "key": "특송", "rawKey": "특송", "content": "찬 430"},
                             {"rawLabel": "말씀", "label": "설교 본문", "key": "설교본문", "rawKey": "말씀", "content": "신유란 무엇인가요?"},
-                            {"rawLabel": "설교", "label": "설교 제목", "key": "설교제목", "rawKey": "설교", "content": "김남영 목사"},
+                            {"rawLabel": "설교", "label": "설교", "key": "설교", "rawKey": "설교", "content": "김남영 목사"},
                             {"rawLabel": "성경봉독", "label": "성경봉독", "key": "성경봉독", "rawKey": "성경봉독", "content": "요 15:9; 롬 5:7-8"},
                             {"rawLabel": "봉헌찬양", "label": "봉헌찬양", "key": "봉헌찬양", "rawKey": "봉헌찬양", "content": "임재"},
                             {"rawLabel": "파송찬송", "label": "파송찬송", "key": "파송찬송", "rawKey": "파송찬송", "content": "찬 359장"},
@@ -9397,10 +9416,10 @@ def main() -> int:
                         and presenter_preparation_paste["rawTitleScore"]["slideTypes"] == ["image"]
                         and presenter_preparation_paste["prayer"] == "정선분 권사"
                         and presenter_preparation_paste["reading"] == "히브리서 10:38–39"
-                        and presenter_preparation_paste["sermonTitle"] == "믿음을 잃어버릴 수도 있어요?"
+                        and presenter_preparation_paste["sermonTitle"] == ""
                         and presenter_preparation_paste["shorthand"] == {
                             "errors": [],
-                            "labels": ["찬양 1", "찬양 2", "찬양 3", "성경봉독", "설교 제목", "봉헌찬송"],
+                            "labels": ["찬양 1", "찬양 2", "찬양 3", "성경봉독", "설교", "봉헌찬송"],
                             "contents": [
                                 "하늘에 가득 찬 영광의(9장)",
                                 "예수를 나의 구주 삼고(288장)",
@@ -9416,26 +9435,26 @@ def main() -> int:
                             "labels": ["찬양 1", "찬양 3", "찬양 4"],
                         }
                         and presenter_preparation_paste["fullscreenFallback"] == {
-                            "reading": "",
-                            "sermonBodyCount": 1,
+                            "reading": "요한복음 21:15–25",
+                            "sermonBodyCount": 0,
                             "citationCount": 1,
                             "citationReferences": ["예레미야 3:22", "마태복음 3:11", "누가복음 24:49"],
                             "citationSection": "sermon",
                         }
                         and [line.split(":")[0] for line in presenter_preparation_paste["looseInput"]["placeholder"].split("\n")] == [
-                            "찬양1", "찬양2", "찬양3", "찬양4", "찬송", "대표기도", "성경봉독", "특송",
-                            "설교 제목", "설교 본문", "인용구절", "봉헌찬송", "봉헌기도", "축도",
+                            "찬양 1", "찬양 2", "찬양 3", "찬양 4", "찬송", "대표기도", "성경봉독", "특송",
+                            "설교", "인용 구절", "봉헌찬송", "봉헌기도", "축도",
                         ]
                         and {key: value for key, value in presenter_preparation_paste["looseInput"].items() if key != "placeholder"} == {
                             "createdTitles": ["주 찬양합니다", "변찮는 주님의 사랑과", "승리는 내 것일세", "꽃들도"],
                             "praiseSongIds": ["__created_song_1__", "__created_song_2__", "__created_song_3__", "__created_song_4__"],
                             "prayer": "문병자 권사",
-                            "sermonTitle": "신유란 무엇인가요?",
-                            "sermonAssignee": "김남영 목사",
+                            "sermonTitle": "",
+                            "sermonAssignee": "",
                             "draftCleared": True,
                         }
                         and [line.split(":")[0] for line in presenter_preparation_paste["fridayInput"]["placeholder"].split("\n")[:5]] == [
-                            "찬양1", "찬양2", "찬양3", "찬양4", "찬양5"
+                            "찬양 1", "찬양 2", "찬양 3", "찬양 4", "찬양 5"
                         ]
                         and presenter_preparation_paste["fridayInput"]["labels"] == [
                             "찬양 1", "찬양 2", "찬양 3", "찬양 4", "찬양 5"
@@ -9594,7 +9613,7 @@ def main() -> int:
                         """
                     )
                     if (
-                        presenter_preparation_sermon_slot["labels"] == ["설교 제목", "설교 본문", "인용 구절"]
+                        presenter_preparation_sermon_slot["labels"] == ["설교", "인용 구절"]
                         and presenter_preparation_sermon_slot["sermonItems"][0]["title"] == "믿음을 잃어버릴 수도 있어요?"
                     ):
                         pass_("presenter-preparation-sermon-slot", json.dumps(presenter_preparation_sermon_slot, ensure_ascii=False))
@@ -9850,11 +9869,12 @@ def main() -> int:
                             """
                         )
                         page.hover(".svc-slide-thumb[data-presenter-index][data-service-id]")
-                        page.wait_for_timeout(80)
+                        page.wait_for_timeout(260)
                         thumb_hover_later = page.evaluate(
                             """
                             () => {
-                              const frame = document.querySelector('.svc-slide-thumb-frame');
+                              const frame = document.querySelector('.svc-slide-thumb:hover .svc-slide-thumb-frame')
+                                || document.querySelector('.svc-slide-thumb-frame');
                               const number = frame?.closest('.svc-slide-thumb-wrap')?.querySelector('.svc-slide-thumb-no');
                               const canvas = frame?.querySelector('.svc-slide-mini-canvas');
                               if (!frame || !canvas) return null;
@@ -9869,6 +9889,7 @@ def main() -> int:
                                 numberColor: numberStyle?.color || '',
                                 numberWeight: numberStyle?.fontWeight || '',
                                 hoverOverlayOpacity: Number.parseFloat(hoverOverlayStyle.opacity || '0') || 0,
+                                hoveredThumbs: document.querySelectorAll('.svc-slide-thumb:hover').length,
                               };
                             }
                             """

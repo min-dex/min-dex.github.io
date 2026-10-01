@@ -10,10 +10,11 @@ rules, while `docs/ui-contracts.md` owns screen-level behavior contracts.
 shared by multiple screens without turning `app.js` into a styling glossary.
 It loads after `mindex.constants.js` and before `mindex.presenter.js`/`app.js`.
 
-The DEX-family numeric baseline lives at workspace-level
-`docs/dex-design-tokens.json`. Mindex may add domain tokens, but shared role,
-icon, button, and tab values must remain compatible with that baseline and
-`tools/check_dex_shell.py`.
+Mindex owns its design tokens locally. Workspace EX-series tokens and
+`tools/check_ex_shell.py` do not govern this product. Existing numeric values
+may remain where they serve the workflow, but future changes are judged by
+ministry operations, live presenter reliability, accessibility, and internal
+consistency rather than cross-product parity.
 
 Keep presenter output typography and layout rules in `mindex.presenter.js` and
 `styles.presenter-output.css`. The design-token file is for the controller app
@@ -21,16 +22,16 @@ shell, navigation, buttons, labels, and shared UI copy.
 
 ## Token Rules
 
-- Use the shared `5px` rhythm for shell spacing and `10px` steps for larger UI spacing.
-- Use the shared typography ladder before adding a new one-off size:
+- Use the current `5px` rhythm for shell spacing and `10px` steps for larger UI spacing.
+- Use the local typography ladder before adding a new one-off size:
   `12/700` labels, `12/500` metadata, `14/600` rows and controls,
   `16/700` compact titles, `20/700` page titles.
-- Use shared icon sizes before adding local values: 14px helper, 16px normal,
+- Use established icon sizes before adding local values: 14px helper, 16px normal,
   20px large. Navigation rail and tab-bar controls both use 16px.
-- Use the shared 1.5 stroke for Lucide controls. Scope icon defaults to `.lucide`,
+- Use the established 1.5 stroke for Lucide controls. Scope icon defaults to `.lucide`,
   never all SVGs; document previews and illustrations own their dimensions.
 - Size both Lucide placeholders and rendered SVGs when styling an icon control.
-- Use shared button sizes: 40px topbar, 35px icon, 30px dense, 28px compact.
+- Use established button sizes: 40px topbar, 35px icon, 30px dense, 28px compact.
 - Do not add accent color to neutral shell controls. Accent is for selected
   state, primary creation actions, or explicit attention.
 

@@ -1239,7 +1239,7 @@ function cacheRefs() {
   refs.pageTabAddBtn = document.getElementById("pageTabAddBtn");
   refs.pageTabLabel = document.getElementById("pageTabLabel");
   refs.navSidebar = document.querySelector(".nav-sidebar");
-  refs.navButtons = [...document.querySelectorAll(".nav-sidebar [data-home-module]")];
+  refs.navButtons = [...document.querySelectorAll(".module-switcher [data-home-module]")];
   refs.connectionStatus = document.getElementById("connectionStatus");
   refs.themeBtn = document.getElementById("themeBtn");
   refs.newSongBtn = document.getElementById("newSongBtn");
@@ -1261,6 +1261,7 @@ function cacheRefs() {
 
 function bindStaticEvents() {
   refs.sidebarToggleBtn?.addEventListener("click", handleSidebarToggle);
+  window.addEventListener("resize", syncSidebarCollapsedState);
   refs.brandNameHome?.addEventListener("click", goHome);
   refs.pageTabAddBtn?.addEventListener("click", () => { void openNewPageTab(); });
   refs.pageTabs?.addEventListener("click", handlePageTabClick);
@@ -1576,7 +1577,6 @@ function bindStaticEvents() {
   });
 
   window.addEventListener("beforeunload", (event) => {
-    persistListScrollState();
     // Presenter changes are persisted through its own save flow. A browser-native
     // prompt here is both misleading and unable to trigger that save operation.
     if (state.module === "presenter") return;
@@ -1661,6 +1661,7 @@ function normalizeSidebarCreateSongButton() {
 }
 
 const handleSidebarToggle = () => {
+  if (!window.matchMedia?.("(max-width: 900px)")?.matches) return;
   document.body.classList.toggle("sidebar-collapsed");
   safeStorageSet("local", STORAGE.sidebarCollapsed, String(document.body.classList.contains("sidebar-collapsed")));
   syncSidebarCollapsedState();
@@ -2069,29 +2070,6 @@ function safeStorageRemove(scope, key) {
   }
 }
 
-function readListScrollState() {
-  const raw = safeStorageGet("session", STORAGE.listScroll, "{}");
-  try {
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
-    return Object.fromEntries(Object.entries(parsed)
-      .filter(([key, value]) => typeof key === "string" && key.length <= 200 && Number.isFinite(value) && value > 0)
-      .slice(-48)
-      .map(([key, value]) => [key, Math.floor(value)]));
-  } catch {
-    return {};
-  }
-}
-
-function persistListScrollState() {
-  const entries = Object.entries(state.listScroll || {})
-    .filter(([key, value]) => typeof key === "string" && key.length <= 200 && Number.isFinite(value) && value > 0)
-    .slice(-48)
-    .map(([key, value]) => [key, Math.floor(value)]);
-  if (entries.length) safeStorageSet("session", STORAGE.listScroll, JSON.stringify(Object.fromEntries(entries)));
-  else safeStorageRemove("session", STORAGE.listScroll);
-}
-
 function readWorshipRecoverySnapshots() {
   const raw = safeStorageGet("local", WORSHIP_RECOVERY_SNAPSHOTS_STORAGE_KEY, "[]");
   try {
@@ -2287,7 +2265,7 @@ function renderPresenterThumbScaleControl() {
 
 function readUiState() {
   const storedSidebarState = safeStorageGet("local", STORAGE.sidebarCollapsed);
-  const useCompactSidebar = window.matchMedia?.("(max-width: 560px)")?.matches;
+  const useCompactSidebar = window.matchMedia?.("(max-width: 900px)")?.matches;
   document.body.classList.toggle(
     "sidebar-collapsed",
     storedSidebarState === "true" || (!storedSidebarState && useCompactSidebar),
@@ -2311,7 +2289,6 @@ function readUiState() {
   state.selectedBibleTranslationId = safeStorageGet("session", STORAGE.bibleTranslationId) || null;
   state.selectedBibleChapter = Number.isFinite(bibleChapter) && bibleChapter > 0 ? bibleChapter : 1;
   state.bibleCopyReference = bibleCopyReference !== "false";
-  state.listScroll = readListScrollState();
   state.presenter.selectedScreenId = safeStorageGet("local", PRESENTER_TARGET_SCREEN_STORAGE_KEY) || null;
   state.presenter.alwaysOnTop = safeStorageGet("local", PRESENTER_ALWAYS_ON_TOP_STORAGE_KEY) === "true";
 }
@@ -7207,7 +7184,7 @@ async function saveWorshipServiceElementPatch(service, itemId) {
   const previousDocument = serviceDocumentSnapshotFromRef(documentService);
   delete documentService._worshipSourceTextDraft;
   if (previousDocument?.sourceText && previousItem && committedItem) {
-    documentService._worshipSourceTextDraft = sundayEditSyncSourceText(previousDocument, previousItem, committedItem, documentService, committedItems);
+    documentService._worshipSourceTextDraft = sundayEditSyncSourceText(previousDocument, previousItem, committedItem, documentService);
   }
   let sourceRef = withServiceDocumentSnapshot(documentService, committedItems);
   const atomic = await worshipAtomicClient();
@@ -7468,7 +7445,7 @@ function sundayEditSyncHasLocalDraft(serviceId) {
     || (state.selectedServiceId === serviceId && state.dirty.service));
 }
 
-function sundayEditSyncSourceText(document, item, next, service, canonicalItems = null) {
+function sundayEditSyncSourceText(document, item, next, service) {
   const source = String(document.sourceText || "").replace(/\r\n?/g, "\n");
   const portable = /^\s*\[\[[^\]]+\]\]/m.test(source);
   const records = parseServiceSourceText(source, { includeRanges: true });
@@ -7483,15 +7460,7 @@ function sundayEditSyncSourceText(document, item, next, service, canonicalItems 
     const heading = portable ? `[[${serviceSourceSectionTitle(item)}]]` : `[${serviceSourceSectionTitle(item)}]`;
     return `${source.trimEnd()}\n\n${heading}\n${appendLines.join("\n")}`.trim();
   }
-  // Older source snapshots did not retain stable record identities. If a
-  // label now resolves to several candidates, rebuilding from canonical rows
-  // is safer than guessing a text range or blocking the linked save.
-  if (candidates.length !== 1) {
-    if (Array.isArray(canonicalItems)) {
-      return buildServiceSourceText(service, { items: canonicalItems, ignoreSnapshotFallback: true });
-    }
-    return source;
-  }
+  if (candidates.length !== 1) throw new Error("연결 예배 원문의 항목 위치가 중복되어 반영하지 않았습니다.");
   const record = candidates[0];
   const replacementLines = portable
     ? serviceSourceItemLines(next, service)
@@ -7588,7 +7557,7 @@ async function persistSundayEditSync(job, options = {}) {
   const nextItems = items.map((candidate) => candidate.id === item.id ? next : candidate);
   const previousDocument = serviceDocumentSnapshotFromRef(freshService);
   const sourceText = previousDocument?.sourceText
-    ? sundayEditSyncSourceText(previousDocument, item, next, freshService, nextItems)
+    ? sundayEditSyncSourceText(previousDocument, item, next, freshService)
     : buildServiceSourceText(freshService, { items: nextItems, ignoreSnapshotFallback: true });
   const documentService = { ...freshService, _worshipSourceTextDraft: sourceText };
   let ref = withServiceDocumentSnapshot(documentService, nextItems);
@@ -8324,7 +8293,11 @@ function serviceElementConfigForSave(existingConfig = {}, parsed = emptyServiceI
     delete config.connectedPraise;
     delete config.connected_praise;
   }
-  if (parsed.hiddenInPresentation) config.hiddenInPresentation = true;
+  if (isOptionalCitationScriptureServiceItem(options.item || {})) {
+    delete config.hiddenInPresentation;
+    delete config.hidden_in_presentation;
+    delete config.hidden;
+  } else if (parsed.hiddenInPresentation) config.hiddenInPresentation = true;
   else delete config.hiddenInPresentation;
   if (!options.omitSlides && parsed.slides.length) config.slides = parsed.slides;
   return config;
@@ -15072,17 +15045,19 @@ function syncPraiseCreateControls() {
 }
 
 function syncSidebarCollapsedState() {
-  const collapsed = document.body.classList.contains("sidebar-collapsed");
-  refs.sidebarToggleBtn?.classList.toggle("active", !collapsed);
-  refs.sidebarToggleBtn?.setAttribute("aria-pressed", String(!collapsed));
-  refs.sidebarToggleBtn?.setAttribute("aria-expanded", String(!collapsed));
+  const drawer = window.matchMedia?.("(max-width: 900px)")?.matches;
+  const collapsed = drawer && document.body.classList.contains("sidebar-collapsed");
+  refs.sidebarToggleBtn?.toggleAttribute("hidden", !drawer);
+  refs.sidebarToggleBtn?.classList.toggle("active", drawer && !collapsed);
+  refs.sidebarToggleBtn?.setAttribute("aria-pressed", String(drawer && !collapsed));
+  refs.sidebarToggleBtn?.setAttribute("aria-expanded", String(drawer && !collapsed));
   refs.sidebarToggleBtn?.setAttribute("aria-label", collapsed ? "사이드바 열기" : "사이드바 닫기");
   refs.sidebarToggleBtn?.setAttribute("title", collapsed ? "사이드바 열기" : "사이드바 닫기");
   if (refs.sidebarToggleBtn) {
     refs.sidebarToggleBtn.innerHTML = `<i data-lucide="panel-left"></i>`;
     refreshIcons();
   }
-  if (refs.sidebarToggleBtn) refs.sidebarToggleBtn.disabled = false;
+  if (refs.sidebarToggleBtn) refs.sidebarToggleBtn.disabled = !drawer;
   if (refs.sidebar) {
     refs.sidebar.inert = collapsed;
     refs.sidebar.setAttribute("aria-hidden", String(collapsed));
@@ -16703,7 +16678,7 @@ function getListScrollKey() {
   if (state.module === "home") return `home:${search}`;
   if (state.module === "scripture") return `scripture:${state.scriptureFilter}:${search}`;
   if (state.module === "service") return `service:${state.serviceFilter}:${search}`;
-  if (state.module === "presenter") return `presenter:${state.selectedServiceId || state.presenter.viewServiceId || "none"}:${search}`;
+  if (state.module === "presenter") return `presenter:${search}`;
   if (state.module === "calendar") return `calendar:${search}`;
   if (state.module === "references") return `references:${search}`;
   if (state.module === "manuals") return "manuals";
@@ -25590,7 +25565,7 @@ function buildServiceSourceText(service, options = {}) {
 
 function serviceSourceItemIsUserDiscretionary(item = {}, service = null) {
   const memo = parseServiceItemMemo(item.memo);
-  if (memo.hiddenInPresentation) return false;
+  if (serviceItemPresentationHidden(item, memo)) return false;
   const asset = normalizeServiceAsset(memo.asset);
   if (serviceMemoInputMode(memo, item) === "asset" || asset.name || asset.url) return true;
   return presenterServiceInputHasEditableField(item, service);
@@ -27465,6 +27440,10 @@ function isSermonCitationSlotKey(slotKey = "") {
   return normalizeWorshipSlotKey(slotKey) === "sermon.citation";
 }
 
+function serviceItemPresentationHidden(item = {}, memo = parseServiceItemMemo(item?.memo)) {
+  return !isOptionalCitationScriptureServiceItem(item) && Boolean(memo.hiddenInPresentation);
+}
+
 function serviceItemDirectScriptureReferences(item = {}, memo = parseServiceItemMemo(item.memo)) {
   const configured = normalizeServiceScriptureReferenceList(memo.scriptureReferences);
   const titleReferences = normalizeServiceScriptureReferenceList(item.raw_title);
@@ -27485,7 +27464,15 @@ function serviceScriptureReadingReferencesForService(service = null) {
   if (!serviceId) return [];
   const readingItem = (state.serviceItems[serviceId] || []).find((candidate) => isSharedScriptureReadingServiceItem(candidate));
   if (!readingItem) return [];
-  return serviceItemScriptureReferences(readingItem, parseServiceItemMemo(readingItem.memo), service);
+  return serviceItemDirectScriptureReferences(readingItem, parseServiceItemMemo(readingItem.memo));
+}
+
+function serviceSermonScriptureReferencesForService(service = null) {
+  const serviceId = String(service?.id || "").trim();
+  if (!serviceId) return [];
+  const sermonItem = (state.serviceItems[serviceId] || []).find((candidate) => isSermonScriptureBodyServiceItem(candidate));
+  if (!sermonItem) return [];
+  return serviceItemDirectScriptureReferences(sermonItem, parseServiceItemMemo(sermonItem.memo));
 }
 
 function serviceItemScriptureReferences(item = {}, memo = parseServiceItemMemo(item.memo), service = null) {
@@ -27494,6 +27481,9 @@ function serviceItemScriptureReferences(item = {}, memo = parseServiceItemMemo(i
   const direct = serviceItemDirectScriptureReferences(effectiveItem, effectiveMemo);
   if (!direct.length && isSermonScriptureBodyServiceItem(item)) {
     return serviceScriptureReadingReferencesForService(service);
+  }
+  if (!direct.length && isSharedScriptureReadingServiceItem(item)) {
+    return serviceSermonScriptureReferencesForService(service);
   }
   return direct;
 }
@@ -30914,7 +30904,7 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
   const itemIndexAttr = context ? ` data-service-item-index="${escapeAttr(String(context.index))}"` : "";
   const elementIdAttr = context?.item?.id ? ` data-service-element-id="${escapeAttr(context.item.id)}"` : "";
   const hidden = context?.item
-    ? Boolean(parseServiceItemMemo(context.item.memo).hiddenInPresentation)
+    ? serviceItemPresentationHidden(context.item)
     : subgroup.slides.length > 0 && subgroup.slides.every(({ slide }) => presenterSlideIsHidden(slide));
   const showHead = hidden || Boolean(options.showHead && (visibleLabel || visibleTitle || warnings.length || headerActions));
   return `
@@ -32964,7 +32954,7 @@ function buildServicePresenterSlidesUncached(serviceId, options = {}) {
             label: item.label,
           })));
         }
-        const hidden = parseServiceItemMemo(item?.memo).hiddenInPresentation;
+        const hidden = serviceItemPresentationHidden(item);
         return hidden ? slides.map((slide) => ({ ...slide, hiddenInPresentation: true })) : slides;
       })
       .filter(Boolean);
@@ -33538,7 +33528,7 @@ function resolvePresenterServiceItemContentState(item = {}, memo = emptyServiceI
   const filled = (reason) => result("filled", true, reason);
   const missing = (reason) => result("missing", false, reason);
   const loading = (reason) => result("loading", false, reason);
-  if (memo.hiddenInPresentation) return filled("hidden_in_presentation");
+  if (serviceItemPresentationHidden(item, memo)) return filled("hidden_in_presentation");
   if (presenterFixedTitleText(item)) return filled("fixed_title");
   if (isConfessionPrayerServiceItem(item)) return filled("confession_title");
   if (elementType === "title_content" && labelKey === "환영") return filled("title_content");

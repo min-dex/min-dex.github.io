@@ -49,7 +49,7 @@ Schema direction:
 - Use `service_alias` for an optional date-specific public name such as
   `온세대 찬양예배` or `청소년부 제자헌신예배`. Do not restore generic service
   tags. Calendar occasions belong to the church calendar, praise-team names
-  belong to the relevant praise section assignee, and machine state belongs to
+  belong to the relevant praise element's person field, and machine state belongs to
   typed `source_ref` keys.
 - Do not add new Worship concepts by expanding `raw_title`, `memo`, or
   `order_template`; create/import into the normalized Worship domain instead.

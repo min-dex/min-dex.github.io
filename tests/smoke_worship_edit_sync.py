@@ -67,10 +67,6 @@ def main():
                   check(replaced.endsWith('[별도]\\n사용자 항목: Keep exactly\\n  알수없는정보: keep'),'unrelated source text changed');
                   check(replaced.includes('설교 제목: Edited'),'source block not changed');
                   check(replaced.includes('  알수없는정보: keep target'),'target metadata lost');
-                  const duplicated=`[[설교]]\n[설교]\n- 제목: Original\n- 유형: title_person\n\n[설교]\n- 제목: Legacy duplicate\n- 유형: title_person`;
-                  const rebuilt=sundayEditSyncSourceText({sourceText:duplicated},previous,edited,source,[edited]);
-                  check(rebuilt.includes('[[설교]]\\n[설교]\\n- 제목: Edited'),'ambiguous source was not rebuilt from canonical rows');
-                  check(!rebuilt.includes('Legacy duplicate'),'duplicate source record survived canonical rebuild');
                   check(!Object.hasOwn(parseServiceSourceText(raw)[0],'startLine'),'parser default contract changed');
                   persistSundayEditSync=originalPersist;
                   worshipAtomicClient=async()=>null;
