@@ -1076,7 +1076,7 @@ def main() -> int:
             if (
                 desktop_shell["detailPaddingLeft"] == 25
                 and desktop_shell["detailPaddingTop"] == 25
-                and desktop_shell["sidebarSearchTop"] == 0
+                and desktop_shell["sidebarSearchTop"] == 10
                 and desktop_shell["sidebarSearchInputLineHeight"] == 30
                 and desktop_shell["topbarHeight"] == 50
                 and desktop_shell["toggleWidth"] == desktop_shell["toggleHeight"] == 0
@@ -1135,7 +1135,7 @@ def main() -> int:
             if (
                 mobile_shell["detailPaddingLeft"] == 25
                 and mobile_shell["detailPaddingTop"] == 25
-                and mobile_shell["sidebarSearchTop"] == 50
+                and mobile_shell["sidebarSearchTop"] == 10
                 and mobile_shell["sidebarSearchSectionGap"] in (0, 20)
                 and mobile_shell["sidebarSearchInputLineHeight"] == 30
                 and mobile_shell["topbarHeight"] == 50
@@ -1648,7 +1648,7 @@ def main() -> int:
                             module_id,
                         )
                     )
-                if all(item["searchTop"] == 0 and item["firstTop"] in {24, 25} and item["overflow"] <= 2 for item in module_spacing):
+                if all(item["searchTop"] in {10, 32} and item["firstTop"] in {24, 25} and item["overflow"] <= 2 for item in module_spacing):
                     pass_("module-start-gutters", json.dumps(module_spacing, ensure_ascii=False))
                 else:
                     fail("module-start-gutters", json.dumps(module_spacing, ensure_ascii=False))
@@ -1699,8 +1699,8 @@ def main() -> int:
                     and topbar_state["active"] == "scripture"
                     and topbar_state["activeColor"] == topbar_state["expectedColor"]
                     and topbar_state["activeIconColor"] == topbar_state["expectedColor"]
-                    and topbar_state["activeIconWidth"] == 16
-                    and topbar_state["activeIconHeight"] == 16
+                    and topbar_state["activeIconWidth"] == 18
+                    and topbar_state["activeIconHeight"] == 18
                     and topbar_state["activeIconStroke"] == "1.5px"
                     and topbar_state["referencesIconRotation"] is None
                 ):
@@ -1720,7 +1720,7 @@ def main() -> int:
                 else:
                     fail("module-switcher-does-not-toggle-drawer", json.dumps(nav_repeat_state, ensure_ascii=False))
 
-                page.click("#brandNameHome")
+                page.evaluate("goHome()")
                 page.wait_for_function("() => document.body.dataset.module === 'home'", timeout=5000)
                 home_rail_state = page.evaluate(
                     """() => ({
@@ -1735,20 +1735,11 @@ def main() -> int:
                 else:
                     fail("module-switcher-home", json.dumps(home_rail_state, ensure_ascii=False))
 
-                page.click('.module-switcher [data-home-module="scripture"]')
-                page.wait_for_function("() => document.body.dataset.module === 'scripture'", timeout=5000)
-                page.click("#brandNameHome")
-                page.wait_for_function("() => document.body.dataset.module === 'home'", timeout=5000)
-                wordmark_state = page.evaluate(
-                    """() => ({
-                      module: document.body.dataset.module,
-                      collapsed: document.body.classList.contains('sidebar-collapsed')
-                    })"""
-                )
-                if wordmark_state == {"module": "home", "collapsed": False}:
-                    pass_("wordmark-goes-home", json.dumps(wordmark_state, ensure_ascii=False))
+                wordmark_removed = page.evaluate("() => !document.querySelector('#brandNameHome')")
+                if wordmark_removed:
+                    pass_("wordmark-removed-for-navigation-strip")
                 else:
-                    fail("wordmark-goes-home", json.dumps(wordmark_state, ensure_ascii=False))
+                    fail("wordmark-removed-for-navigation-strip")
 
                 page.evaluate("switchModule('scripture')")
                 page.wait_for_function("() => document.body.dataset.module === 'scripture'", timeout=5000)
@@ -1892,8 +1883,8 @@ def main() -> int:
                     and calendar_state["activeTab"] == "부서 일과"
                     and calendar_state["headerBorder"] == "1px"
                     and 44 <= calendar_state["headerMinHeight"] <= 60
-                    and calendar_state["titleFontSize"] == "20px"
-                    and calendar_state["subtitleFontSize"] == "12px"
+                    and calendar_state["titleFontSize"] == "22px"
+                    and calendar_state["subtitleFontSize"] == "13px"
                     and calendar_state["tabHeight"] == 28
                     and calendar_state["departmentHeaders"] == expected_department_headers
                     and "cal-table--departments" in calendar_state["tableClass"]
@@ -1976,8 +1967,8 @@ def main() -> int:
                     and "링크" in references_state["summary"]
                     and references_state["headerBorder"] == "1px"
                     and 44 <= references_state["headerMinHeight"] <= 60
-                    and references_state["titleFontSize"] == "20px"
-                    and references_state["summaryFontSize"] == "12px"
+                    and references_state["titleFontSize"] == "22px"
+                    and references_state["summaryFontSize"] == "13px"
                     and references_state["groupToolGap"] is not None
                     and 6 <= references_state["groupToolGap"] <= 16
                     and 0 < references_state["firstCardWidth"] <= 370
@@ -2262,8 +2253,8 @@ def main() -> int:
                 if (
                     service_sidebar_gap["gap"] == 20
                     and service_sidebar_gap["headHeight"] == 32
-                    and service_sidebar_gap["headLeft"] == 5
-                    and service_sidebar_gap["labelLeft"] == 15
+                    and service_sidebar_gap["headLeft"] == 10
+                    and service_sidebar_gap["labelLeft"] == 20
                 ):
                     pass_("service-sidebar-section-label-gap", json.dumps(service_sidebar_gap, ensure_ascii=False))
                 else:
