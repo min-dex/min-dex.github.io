@@ -650,7 +650,7 @@ function presenterFormPlanForServiceItem(version = {}, item, song = null) {
   };
 }
 
-function presenterServiceItemFormPreset(version = {}, item = {}, song = null) {
+function presenterServiceItemFormPreset(version = {}, item = {}, song = null, { includePlaybackFallback = true } = {}) {
   if (serviceItemFormPresetDisabled(item)) return null;
   const itemPreset = serviceItemFormPreset(item);
   // Once a sequence is stored, its origin must not change playback semantics.
@@ -670,11 +670,11 @@ function presenterServiceItemFormPreset(version = {}, item = {}, song = null) {
     ? specialHymnRulePreset
       || matchedRule?.formPreset
       || songDefaultPreset
-      || presenterDefaultVerseChorusFormPreset(forms, song, version)
+      || (includePlaybackFallback && presenterDefaultVerseChorusFormPreset(forms, song, version))
       || null
     : matchedRule?.formPreset
       || presenterExplicitNonHymnFormPreset(songDefaultPreset)
-      || presenterDefaultVerseChorusFormPreset(forms, song, version)
+      || (includePlaybackFallback && presenterDefaultVerseChorusFormPreset(forms, song, version))
       || null;
 }
 

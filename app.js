@@ -22886,7 +22886,7 @@ function linkServiceItemToPraiseSong(item, song, service = selectedServiceForEdi
   item.version_id = defaultVersion?.id || null;
   item.song_version_id = item.version_id;
   if (!parsed.formPresetDisabled && !parsed.formPreset?.forms?.length && !parsed.formHint) {
-    const preset = presenterServiceItemFormPreset(defaultVersion || {}, item, song);
+    const preset = presenterServiceItemFormPreset(defaultVersion || {}, item, song, { includePlaybackFallback: false });
     if (preset?.forms?.length) {
       parsed.formPreset = normalizeServiceFormPreset({ ...preset, strength: "manual" });
       parsed.formHint = serviceFormPresetSummary(parsed.formPreset);
@@ -23187,7 +23187,7 @@ function serviceItemEffectiveFormHint(item = {}) {
   if (parsed.formPresetDisabled) return "";
   const song = serviceItemLinkedSong(item);
   const version = serviceItemLinkedVersion(item, song);
-  return serviceFormPresetSummary(presenterServiceItemFormPreset(version || {}, item, song))
+  return serviceFormPresetSummary(presenterServiceItemFormPreset(version || {}, item, song, { includePlaybackFallback: false }))
     || parsed.formHint;
 }
 

@@ -1,5 +1,9 @@
 # Worship / Presenter Decision Log
 
+## Playback Fallback Is Not An Editable Default (2026-10-02)
+- Generic verse/chorus playback expansion must not populate the form input or persist on song linking. Explicit item/template/song defaults still fill an empty form, including the special-hymn default.
+- Removed the accidentally materialized form from October 4 first-service offering only, using revision-checked RPC; other content was unchanged.
+
 ## Linked Source Integrity (2026-10-02)
 - Portable source records must expose an exclusive endLine when includeRanges is requested. Missing ranges must abort updates, never splice the entire original document back into itself.
 - Repeated linked saves must preserve record count and unrelated source blocks.
