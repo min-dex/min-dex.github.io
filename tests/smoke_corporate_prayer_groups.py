@@ -31,6 +31,12 @@ def main():
               check(merged.map(x=>x.label).join('|')==='공동기도 1·2|기도찬양|공동기도 3·4','wrong grouping');
               const legacyEmpty={...merged[2],memo:serializeServiceItemMemo({elementType:'title_person',templateKey:'monthly_corporate_prayer_group'})};
               check(monthlyCorporatePrayerEntries(legacyEmpty).map(entry=>entry.title).join('|')===topics.slice(2).join('|'),'legacy defaults missing');
+              const untaggedLegacy={...merged[0],memo:serializeServiceItemMemo({elementType:'title_person'})};
+              check(isMonthlyCorporatePrayerGroupItem(untaggedLegacy),'untagged paired label not recognized');
+              check((renderPresenterMonthlyCorporatePrayerInputs(untaggedLegacy,0,parseServiceItemMemo(untaggedLegacy.memo),service.id).match(/corporate_prayer_topic/g)||[]).length===2,'untagged pair missing topic inputs');
+              check(presenterMonthlyCorporatePrayerSlides(untaggedLegacy,{sectionKey:'corporate_prayer'},0,parseServiceItemMemo(untaggedLegacy.memo)).length===2,'untagged pair missing output slides');
+              const untaggedConfig=serviceElementConfigForSave({},parseServiceItemMemo(untaggedLegacy.memo),{item:untaggedLegacy,service});
+              check(untaggedConfig.templateKey==='monthly_corporate_prayer_group'&&untaggedConfig.corporatePrayers?.length===2,'untagged pair not upgraded on save');
               check(merged[1]===song,'song changed');
               check(JSON.stringify(mergeMonthlyCorporatePrayerItems(merged))===JSON.stringify(merged),'not idempotent');
               check(mergeMonthlyCorporatePrayerItems([...merged,prayers[1],prayers[3]]).length===3,'saved legacy rows reappear');

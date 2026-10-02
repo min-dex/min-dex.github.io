@@ -400,6 +400,7 @@ function updateServiceItemField(field, options = {}) {
       prayers[topicIndex][key === "corporate_prayer_topic" ? "title" : "assignee"] = String(field.value || "").trim();
       parsed.corporatePrayers = prayers;
       parsed.slides = prayers.map((prayer) => prayer.title);
+      parsed.templateKey = "monthly_corporate_prayer_group";
       item.memo = serializeServiceItemMemo(parsed);
     }
   }

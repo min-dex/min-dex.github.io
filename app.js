@@ -8234,7 +8234,10 @@ function serviceElementConfigForSave(existingConfig = {}, parsed = emptyServiceI
     delete config.inputMode;
     delete config.input_mode;
   }
-  if (parsed.corporatePrayers?.length) {
+  if (isMonthlyCorporatePrayerGroupItem(options.item || {}, parsed)) {
+    config.corporatePrayers = monthlyCorporatePrayerEntries(options.item, parsed);
+    config.templateKey = "monthly_corporate_prayer_group";
+  } else if (parsed.corporatePrayers?.length) {
     config.corporatePrayers = parsed.corporatePrayers;
     if (parsed.templateKey === "monthly_corporate_prayer_group") config.templateKey = parsed.templateKey;
   }
@@ -28772,9 +28775,14 @@ function renderPresenterServiceScriptureInput(item, index, memo, service = null)
 }
 
 function isMonthlyCorporatePrayerGroupItem(item = {}, memo = parseServiceItemMemo(item?.memo)) {
-  return String(item?._worshipSectionKey || item?.section_key || "").trim() === "corporate_prayer"
+  const sectionKey = String(item?._worshipSectionKey || item?.section_key || "").trim();
+  const ordinals = String(item?.label || "").match(/\d+/g)?.map(Number) || [];
+  const pairedMonthlyLabel = /^공동기도/.test(compactSearchValue(item?.label || ""))
+    && ([1, 2].every((ordinal, index) => ordinals[index] === ordinal)
+      || [3, 4].every((ordinal, index) => ordinals[index] === ordinal));
+  return sectionKey === "corporate_prayer"
     && serviceMemoElementType(memo) === "title_person"
-    && memo.templateKey === "monthly_corporate_prayer_group";
+    && (memo.templateKey === "monthly_corporate_prayer_group" || pairedMonthlyLabel);
 }
 
 function normalizeCorporatePrayers(entries = []) {
@@ -33958,7 +33966,7 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
 
 function presenterMonthlyCorporatePrayerSlides(item = {}, section = {}, index = 0, memo = emptyServiceItemMemo()) {
   if (section.sectionKey !== "corporate_prayer") return [];
-  if (memo.templateKey !== "monthly_corporate_prayer_group") return [];
+  if (!isMonthlyCorporatePrayerGroupItem(item, memo)) return [];
   const label = String(item.label || section.elementLabel || "").trim();
   const ordinals = label.match(/\d+/g)?.map((value) => Number(value)).filter((value) => Number.isFinite(value) && value > 0) || [];
   if (!ordinals.length) return [];
