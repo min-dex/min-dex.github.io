@@ -100,10 +100,10 @@
 
       <header class="topbar">
         <div class="topbar-leading">
-          <div class="topbar-brand" aria-label="Mindex">
-            <span class="topbar-brand-mark">MX</span>
-            <div id="loadingStatus" class="loading-status" role="status" aria-live="polite" aria-atomic="true" hidden></div>
-          </div>
+          <button id="brandNameHome" class="topbar-brand" type="button" aria-label="Mindex 홈으로 이동" title="홈">
+            <span class="topbar-brand-mark">M<span class="brand-accent">X</span></span>
+            <span id="loadingStatus" class="loading-status" role="status" aria-live="polite" aria-atomic="true" hidden></span>
+          </button>
           <button id="sidebarToggleBtn" class="top-left-tool active" type="button" aria-label="사이드바 열기" aria-controls="mindexSidebarPanel" aria-expanded="false" aria-pressed="false">
             <i data-lucide="panel-left"></i>
           </button>
@@ -163,7 +163,7 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261002-1930";
+        const fallbackVersion = "20261002-1940";
         const modules = [
           "mindex.constants.js", "mindex.design-tokens.js", "mindex.worship-model.js",
           "mindex.worship-persistence.js", "mindex.presenter.js", "mindex.worship-input.js",

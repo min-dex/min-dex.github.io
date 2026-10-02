@@ -1052,6 +1052,7 @@ def main() -> int:
                     sidebarWidth: Math.round(sidebar?.width || 0),
                     detailStartsAfterSidebar: Boolean(sidebar && detail && detail.left >= sidebar.right),
                     moduleStartsAtTopbar: Math.round((moduleFirst?.left || 0) - (topbar?.left || 0)),
+                    moduleWidth: Math.round(moduleFirst?.width || 0),
                     brandWidth: Math.round(brand?.width || 0),
                     drawerToggleHidden: Boolean(toggle?.hidden),
                     rightLastInset: Math.round((rightRail?.right || 0) - (rightLast?.right || 0)),
@@ -1062,8 +1063,9 @@ def main() -> int:
             if (
                 desktop_sidebar["sidebarWidth"] == 280
                 and desktop_sidebar["detailStartsAfterSidebar"]
-                and desktop_sidebar["brandWidth"] == 80
-                and desktop_sidebar["moduleStartsAtTopbar"] == 80
+                and desktop_sidebar["brandWidth"] == 40
+                and desktop_sidebar["moduleStartsAtTopbar"] == 40
+                and desktop_sidebar["moduleWidth"] == 48
                 and desktop_sidebar["drawerToggleHidden"]
                 and desktop_sidebar["rightLastInset"] == 5
             ):
@@ -1738,11 +1740,16 @@ def main() -> int:
                 else:
                     fail("module-switcher-home", json.dumps(home_rail_state, ensure_ascii=False))
 
-                wordmark_removed = page.evaluate("() => !document.querySelector('#brandNameHome')")
-                if wordmark_removed:
-                    pass_("wordmark-removed-for-navigation-strip")
+                page.click("#brandNameHome")
+                page.wait_for_function("() => document.body.dataset.module === 'home'", timeout=5000)
+                compact_wordmark = page.evaluate("""() => ({
+                  text: document.querySelector('#brandNameHome')?.textContent.trim() || '',
+                  current: document.querySelector('#brandNameHome')?.getAttribute('aria-current') || ''
+                })""")
+                if compact_wordmark == {"text": "MX", "current": "page"}:
+                    pass_("compact-wordmark-goes-home", json.dumps(compact_wordmark, ensure_ascii=False))
                 else:
-                    fail("wordmark-removed-for-navigation-strip")
+                    fail("compact-wordmark-goes-home", json.dumps(compact_wordmark, ensure_ascii=False))
 
                 page.evaluate("switchModule('scripture')")
                 page.wait_for_function("() => document.body.dataset.module === 'scripture'", timeout=5000)
