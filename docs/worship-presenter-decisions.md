@@ -1,5 +1,9 @@
 # Worship / Presenter Decision Log
 
+## Controller Refresh Projection Scope (2026-10-02)
+- Controller refreshes and standalone board rendering reuse the existing synchronous service-item scope. A monthly board must not rebuild the same template for each input or thumbnail.
+- The scope ends after each render, including exceptions; subsequent edits receive a fresh projection. Persistence, prayer grouping and slide order are unchanged.
+
 ## Playback Fallback Is Not An Editable Default (2026-10-02)
 - Generic verse/chorus playback expansion must not populate the form input or persist on song linking. Explicit item/template/song defaults still fill an empty form, including the special-hymn default.
 - Removed the accidentally materialized form from October 4 first-service offering only, using revision-checked RPC; other content was unchanged.

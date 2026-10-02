@@ -25379,6 +25379,10 @@ function renderPresenterDetailUnscoped() {
 }
 
 function renderServicePresenterControls(service, slides = [], active = false, index = 0) {
+  return withServiceItemsScope(() => renderServicePresenterControlsUnscoped(service, slides, active, index));
+}
+
+function renderServicePresenterControlsUnscoped(service, slides = [], active = false, index = 0) {
   const chromakey = presenterServiceUsesChromakey(service);
   const boardKey = presenterControlBoardKey(service, slides, active, chromakey);
   return `
@@ -32246,6 +32250,10 @@ function stopPresenterOutputWindowMonitor() {
 }
 
 function renderPresenterControlState(serviceId = state.selectedServiceId) {
+  return withServiceItemsScope(() => renderPresenterControlStateUnscoped(serviceId));
+}
+
+function renderPresenterControlStateUnscoped(serviceId) {
   updateServiceMusicTransportControls();
   renderLiveServiceReturnControl();
   if (state.module === "presenter" && state.selectedServiceId === serviceId) {
