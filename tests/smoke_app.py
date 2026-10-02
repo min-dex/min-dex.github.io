@@ -1743,13 +1743,13 @@ def main() -> int:
                 page.click("#brandNameHome")
                 page.wait_for_function("() => document.body.dataset.module === 'home'", timeout=5000)
                 compact_wordmark = page.evaluate("""() => ({
-                  text: document.querySelector('#brandNameHome')?.textContent.trim() || '',
+                  icon: document.querySelector('#brandNameHome .topbar-brand-icon')?.getAttribute('src') || '',
                   current: document.querySelector('#brandNameHome')?.getAttribute('aria-current') || ''
                 })""")
-                if compact_wordmark == {"text": "MX", "current": "page"}:
-                    pass_("compact-wordmark-goes-home", json.dumps(compact_wordmark, ensure_ascii=False))
+                if compact_wordmark == {"icon": "./assets/favicon.svg", "current": "page"}:
+                    pass_("favicon-home-goes-home", json.dumps(compact_wordmark, ensure_ascii=False))
                 else:
-                    fail("compact-wordmark-goes-home", json.dumps(compact_wordmark, ensure_ascii=False))
+                    fail("favicon-home-goes-home", json.dumps(compact_wordmark, ensure_ascii=False))
 
                 page.evaluate("switchModule('scripture')")
                 page.wait_for_function("() => document.body.dataset.module === 'scripture'", timeout=5000)
