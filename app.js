@@ -7486,6 +7486,10 @@ function sundayEditSyncSourceText(document, item, next, service) {
   }
   if (candidates.length !== 1) throw new Error("연결 예배 원문의 항목 위치가 중복되어 반영하지 않았습니다.");
   const record = candidates[0];
+  if (!Number.isInteger(record.startLine) || !Number.isInteger(record.endLine)
+    || record.startLine < 0 || record.endLine <= record.startLine || record.endLine > sourceLines.length) {
+    throw new Error("연결 예배 원문의 항목 범위를 확인하지 못해 반영하지 않았습니다.");
+  }
   const replacementLines = portable
     ? serviceSourceItemLines(next, service)
     : sundayEditSyncLegacySourceItemLines(sourceLines, record, next, service);
@@ -27384,10 +27388,10 @@ function sundaySharedContentTypesForItem(item = {}, service = null) {
   if (key.startsWith("main-praise:") && ["sunday-first", "sunday-second"].includes(typeId)) {
     return ["sunday-first", "sunday-second"];
   }
-  if (key === "scripture-reading" && ["sunday-first", "sunday-second", "sunday-main"].includes(typeId)) {
-    return ["sunday-first", "sunday-second", "sunday-main"];
+  if (key === "scripture-reading" && ["sunday-second", "sunday-main"].includes(typeId)) {
+    return ["sunday-second", "sunday-main"];
   }
-  // 1부 설교는 별도 메시지로 준비한다. 설교 제목·인용 구절은 2부와
+  // 1부 설교는 별도 메시지로 준비한다. 본문·설교 제목·인용 구절은 2부와
   // 3부(주일대예배) 사이에서만 공유하고, 1부 저장을 다른 예배에 전파하지 않는다.
   if (["sermon-title", "sermon-scripture", "sermon-citation"].includes(key)
     && ["sunday-second", "sunday-main"].includes(typeId)) {

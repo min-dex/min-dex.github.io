@@ -91,16 +91,20 @@ function parseServiceSourceText(value = "", options = {}) {
 
 function parsePortableServiceSourceText(value = "", options = {}) {
   const records = [];
+  const lines = String(value || "").replace(/\r\n?/g, "\n").split("\n");
+  let lineNumber = 0;
   let sectionTitle = "";
   let current = null;
   let blockKey = "";
   const finish = () => {
     if (!current) return;
+    if (options.includeRanges) current.endLine = lineNumber;
     if (blockKey) current[blockKey] = current._blockLines.join("\n").replace(/\s+$/g, "");
     delete current._blockLines;
     records.push(current);
   };
-  String(value || "").replace(/\r\n?/g, "\n").split("\n").forEach((rawLine, index) => {
+  lines.forEach((rawLine, index) => {
+    lineNumber = index;
     const line = rawLine.replace(/\s+$/g, "");
     const section = line.match(/^\[\[([^\]]+)\]\]$/);
     if (section) { finish(); current = null; blockKey = ""; sectionTitle = section[1].trim(); return; }
@@ -146,6 +150,7 @@ function parsePortableServiceSourceText(value = "", options = {}) {
     }
     if (blockKey && /^\s{2}/.test(rawLine)) current._blockLines.push(rawLine.replace(/^\s{2}/, ""));
   });
+  lineNumber = lines.length;
   finish();
   return records.filter((record) => record.label);
 }

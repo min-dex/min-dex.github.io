@@ -42,6 +42,16 @@ def main():
                   jobs=[];state.services=[first,second,target];pendingSundayEditSync.clear();
                   await syncSharedSundayContentAfterSave(first,[clearedFirstCitation],{previousItems:[firstCitation]});
                   check(jobs.length===0,'first-service citation deletion leaked to linked services');
+                  const readingItem=(service,reference)=>normalizeServiceItem({id:service.id+':reading',service_id:service.id,label:'성경봉독',raw_title:reference,
+                    _worshipSectionKey:'scripture_reading',_worshipSlotKey:'word.body',
+                    memo:serializeServiceItemMemo({elementType:'scripture_body',inputMode:'scripture',scriptureReferences:[reference]})});
+                  for(const origin of [first,second,target]) {
+                    const before=readingItem(origin,'요한복음 13:34-35'),after=readingItem(origin,'마태복음 21:33-46');
+                    after._worshipSharedContentDirty=true;
+                    jobs=[];pendingSundayEditSync.clear();state.services=[first,second,target];
+                    await syncSharedSundayContentAfterSave(origin,[after],{previousItems:[before]});
+                    check(origin===first ? jobs.length===0 : jobs.length===1&&jobs[0].targetId===(origin===second?target.id:second.id),'reading sync crossed first-service boundary');
+                  }
                   const praiseItem=(service,songId)=>normalizeServiceItem({id:`${service.id}:praise`,service_id:service.id,label:'찬양 1',song_id:songId,
                     _worshipSectionKey:'praise',_worshipSectionTitle:'찬양',_worshipSlotKey:'praise.song.1',
                     memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db'})});
@@ -68,6 +78,13 @@ def main():
                   check(replaced.includes('설교 제목: Edited'),'source block not changed');
                   check(replaced.includes('  알수없는정보: keep target'),'target metadata lost');
                   check(!Object.hasOwn(parseServiceSourceText(raw)[0],'startLine'),'parser default contract changed');
+                  const portable='[[설교]]\\n[설교 제목]\\n- 제목: Original\\n- 유형: title_person\\n- 입력: text\\n\\n[[별도]]\\n[사용자 항목]\\n- 제목: Keep exactly';
+                  const portableRecords=parseServiceSourceText(portable,{includeRanges:true});
+                  check(portableRecords.every(r=>Number.isInteger(r.endLine)&&r.endLine>r.startLine),'portable source missing ranges');
+                  let updatedPortable=portable;
+                  for(let n=0;n<3;n++) updatedPortable=sundayEditSyncSourceText({sourceText:updatedPortable},previous,edited,source);
+                  check(parseServiceSourceText(updatedPortable).length===2,'portable sync duplicated source');
+                  check(updatedPortable.endsWith('[[별도]]\\n[사용자 항목]\\n- 제목: Keep exactly'),'portable sync changed unrelated content');
                   persistSundayEditSync=originalPersist;
                   worshipAtomicClient=async()=>null;
                   const typed={inputMode:true,contentState:true};

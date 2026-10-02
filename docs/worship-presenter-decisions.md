@@ -1,5 +1,11 @@
 # Worship / Presenter Decision Log
 
+## Linked Source Integrity (2026-10-02)
+- Portable source records must expose an exclusive endLine when includeRanges is requested. Missing ranges must abort updates, never splice the entire original document back into itself.
+- Repeated linked saves must preserve record count and unrelated source blocks.
+- Scripture reading supplies sermon text; first-service reading is independent, while second/third share reading, sermon and citations. Existing praise/offering sharing is unchanged.
+- October 4 first/second service source duplicates were conservatively deduplicated through revision-checked RPCs. All element/section rows were preserved. Divergent offering song forms still require the user's choice, not forced overwrite.
+
 ## Live Citation Composer And Scroll (2026-09-18)
 
 - The live scripture composer sits below the citation element's slide grid.

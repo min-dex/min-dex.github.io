@@ -30,7 +30,13 @@ try:
               check(sundaySharedContentTypesForItem(sermon, first).length === 0, 'first sermon must be independent');
               check(JSON.stringify(sundaySharedContentTypesForItem(sermon, second)) === JSON.stringify(['sunday-second', 'sunday-main']), 'second sermon must link only to third');
               check(JSON.stringify(sundaySharedContentTypesForItem(sermon, third)) === JSON.stringify(['sunday-second', 'sunday-main']), 'third sermon must link only to second');
-              check(JSON.stringify(sundaySharedContentTypesForItem(reading, first)) === JSON.stringify(['sunday-first', 'sunday-second', 'sunday-main']), 'reading scope changed unexpectedly');
+              for (const slot of ['word.reading', 'word.body']) {
+                const body={...reading,_worshipSlotKey:slot};
+                check(sundaySharedContentTypesForItem(body, first).length===0,'first reading must be independent: '+slot);
+                for(const service of [second,third]) {
+                  check(JSON.stringify(sundaySharedContentTypesForItem(body,service))===JSON.stringify(['sunday-second','sunday-main']),'reading must link only second/third: '+slot);
+                }
+              }
               return 'PASS first sermon stays independent; second and third stay linked';
             }"""), flush=True)
             browser.close()
