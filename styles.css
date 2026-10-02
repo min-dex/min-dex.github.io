@@ -118,7 +118,7 @@
   --sidebar-reference-w-compact: 170px;
   --rail-w: var(--sidebar-reference-w); --topbar-h: 50px; --sidebar-row-h: 40px; --sidebar-sub-row-h: 35px; --sidebar-pad-x: 18px; --topbar-edge-x: 12px;
   --topbar-left-compact-w: 0px;
-  --sidebar-item-x: var(--s1); --sidebar-item-end: var(--s2); --sidebar-item-pad-x: 10px; --sidebar-icon-gap: var(--s2);
+  --sidebar-item-x: var(--s2); --sidebar-item-end: var(--s2); --sidebar-item-pad-x: 10px; --sidebar-icon-gap: var(--s2);
   --sidebar-section-x: var(--sidebar-item-x); --sidebar-section-label-x: var(--sidebar-item-pad-x); --sidebar-section-label-gap: var(--s2);
   --content-pad-y: 25px; --content-pad-x: 25px; --content-pad-tight: 25px;
   --content-pad-bottom: calc(var(--content-pad-y) + var(--s5) + env(safe-area-inset-bottom, 0px));
@@ -335,7 +335,7 @@ body[data-module="presenter"].right-sidebar-open { --shell-right-w: var(--right-
   flex: 0 0 40px;
   align-items: center;
   gap: 14px;
-  padding: 0 var(--sidebar-item-pad-x);
+  padding: 0 calc(var(--sidebar-item-x) + var(--sidebar-item-pad-x));
 }
 .sidebar-wordmark {
   appearance: none;
@@ -3063,7 +3063,7 @@ body[data-module="praise"] .song-count-badge {
   .primary-switcher { width: auto; height: 100%; padding: 0; }
   .global-search-wrap { width: 100%; max-width: none; min-width: 0; }
   .sidebar-search-wrap {
-    width: calc(100% - var(--sidebar-item-end));
+    width: calc(100% - var(--sidebar-item-x) - var(--sidebar-item-end));
   }
   .topbar-actions, .head-actions, .form-actions { justify-content: flex-start; }
   .topbar-actions {
