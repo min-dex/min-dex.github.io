@@ -78,7 +78,6 @@
     <div class="app-shell">
       <aside class="nav-sidebar" aria-label="Mindex 탐색 및 목록">
         <div id="mindexSidebarPanel" class="sidebar" aria-label="Mindex 목록">
-          <div id="loadingStatus" class="loading-status" role="status" aria-live="polite" aria-atomic="true" hidden></div>
           <div class="search-wrap global-search-wrap sidebar-search-wrap">
             <i data-lucide="search"></i>
             <input id="searchInput" type="search" placeholder="검색..." autocomplete="off" />
@@ -101,6 +100,10 @@
 
       <header class="topbar">
         <div class="topbar-leading">
+          <div class="topbar-brand" aria-label="Mindex">
+            <span class="topbar-brand-mark">MX</span>
+            <div id="loadingStatus" class="loading-status" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+          </div>
           <button id="sidebarToggleBtn" class="top-left-tool active" type="button" aria-label="사이드바 열기" aria-controls="mindexSidebarPanel" aria-expanded="false" aria-pressed="false">
             <i data-lucide="panel-left"></i>
           </button>
@@ -160,7 +163,7 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261002-1900";
+        const fallbackVersion = "20261002-1920";
         const modules = [
           "mindex.constants.js", "mindex.design-tokens.js", "mindex.worship-model.js",
           "mindex.worship-persistence.js", "mindex.presenter.js", "mindex.worship-input.js",

@@ -1042,6 +1042,7 @@ def main() -> int:
                   const detail = document.querySelector('.detail-pane')?.getBoundingClientRect();
                   const topbar = document.querySelector('.topbar')?.getBoundingClientRect();
                   const moduleFirst = document.querySelector('.module-switcher-tab')?.getBoundingClientRect();
+                  const brand = document.querySelector('.topbar-brand')?.getBoundingClientRect();
                   const toggle = document.querySelector('#sidebarToggleBtn');
                   const rightRail = document.querySelector('.topbar-actions')?.getBoundingClientRect();
                   const rightLast = [...(document.querySelector('.topbar-actions')?.children || [])]
@@ -1051,6 +1052,7 @@ def main() -> int:
                     sidebarWidth: Math.round(sidebar?.width || 0),
                     detailStartsAfterSidebar: Boolean(sidebar && detail && detail.left >= sidebar.right),
                     moduleStartsAtTopbar: Math.round((moduleFirst?.left || 0) - (topbar?.left || 0)),
+                    brandWidth: Math.round(brand?.width || 0),
                     drawerToggleHidden: Boolean(toggle?.hidden),
                     rightLastInset: Math.round((rightRail?.right || 0) - (rightLast?.right || 0)),
                   };
@@ -1060,7 +1062,8 @@ def main() -> int:
             if (
                 desktop_sidebar["sidebarWidth"] == 280
                 and desktop_sidebar["detailStartsAfterSidebar"]
-                and desktop_sidebar["moduleStartsAtTopbar"] == 0
+                and desktop_sidebar["brandWidth"] == 80
+                and desktop_sidebar["moduleStartsAtTopbar"] == 80
                 and desktop_sidebar["drawerToggleHidden"]
                 and desktop_sidebar["rightLastInset"] == 5
             ):

@@ -338,9 +338,9 @@ body[data-module="presenter"].right-sidebar-open { --shell-right-w: var(--right-
   gap: 0;
   overflow-x: auto;
   overflow-y: hidden;
-  margin-left: var(--s1);
-  padding: 0 0 0 var(--s1);
-  box-shadow: inset 1px 0 0 var(--line-faint);
+  margin-left: 0;
+  padding: 0;
+  box-shadow: none;
   scrollbar-width: none;
 }
 .primary-switcher::-webkit-scrollbar { display: none; }
@@ -2887,10 +2887,7 @@ body[data-module="praise"] .song-count-badge {
 }
 
 .loading-status {
-  position: absolute;
-  top: 10px;
-  right: var(--sidebar-item-end);
-  z-index: 1;
+  position: static;
   display: inline-flex;
   margin: 0;
   min-width: 0;
@@ -8579,6 +8576,33 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
   height: 100%;
   align-items: center;
 }
+.topbar-brand {
+  position: relative;
+  display: inline-flex;
+  width: 80px;
+  height: 100%;
+  flex: 0 0 80px;
+  align-items: center;
+  justify-content: center;
+  color: var(--sidebar-ink);
+}
+.topbar-brand-mark {
+  font-family: "Mindex Wordmark", var(--font-sans);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+}
+.topbar-brand .loading-status {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  max-width: none;
+  justify-content: center;
+  color: var(--ink-3);
+  font-size: 12px;
+}
+.topbar-brand:has(.loading-status:not([hidden])) .topbar-brand-mark { visibility: hidden; }
 .topbar-leading > .top-left-tool { display: none; }
 .module-switcher {
   display: flex;
@@ -8649,6 +8673,7 @@ body[data-module="presenter"] .nav-sidebar { --sidebar-reference-w: 280px; }
   body[data-module="praise"],
   body.sidebar-collapsed { --shell-left-w: 0px; }
   .topbar { grid-column: 1 / -1; }
+  .topbar-brand { display: none; }
   .topbar-leading > .top-left-tool { display: inline-flex; flex: 0 0 var(--topbar-btn-size); }
   .nav-sidebar {
     position: fixed;
