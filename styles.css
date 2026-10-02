@@ -3104,6 +3104,9 @@ body[data-module="service"] .detail-pane,
 body[data-module="presenter"] .detail-pane {
   overflow-x: hidden;
 }
+body[data-module="presenter"] .detail-pane {
+  padding-bottom: calc(var(--content-pad-y) + env(safe-area-inset-bottom, 0px));
+}
 .service-sidebar {
   display: flex;
   min-width: 0;
