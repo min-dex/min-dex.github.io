@@ -129,11 +129,12 @@
   --ui-icon-btn-size: 35px; --ui-icon-btn-dense: 30px; --ui-icon-btn-inline: 28px;
   --topbar-btn-size: 40px;
   --module-nav-btn-size: 48px;
+  --topbar-action-slot-count: 6;
   --shell-face-inset: 5px;
   --sidebar-icon-size: var(--ui-icon-size);
   --rail-motion: 120ms cubic-bezier(.2, 0, .2, 1);
   --module-tab-w: 180px;
-  --topbar-compact-w: calc((var(--topbar-btn-size) * 4) + (var(--shell-edge-inset) * 2));
+  --topbar-compact-w: calc((var(--topbar-btn-size) * var(--topbar-action-slot-count)) + (var(--shell-edge-inset) * 2));
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-presenter: "Mindex Presenter", "Freesentation", sans-serif;
   font-family: var(--font-sans);
@@ -579,15 +580,12 @@ body[data-module="backgrounds"] .sidebar-list-head,
 }
 .topbar-actions {
   position: relative;
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: var(--topbar-btn-size);
-  grid-template-columns: repeat(4, var(--topbar-btn-size));
+  display: flex;
   align-items: center;
   align-self: center;
   justify-content: end;
   height: var(--topbar-btn-size);
-  column-gap: 0;
+  gap: 0;
   grid-column: 2;
   justify-self: stretch;
   width: 100%;
@@ -3054,6 +3052,7 @@ body[data-module="praise"] .song-count-badge {
 }
 
 @media (max-width: 560px) {
+  :root { --topbar-action-slot-count: 4; }
   .topbar-actions { width: 100%; }
   .form-buttons { width: 100%; }
   .topbar-actions .btn,
@@ -8604,8 +8603,8 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .topbar-brand-icon {
   position: relative;
   display: block;
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 22px;
 }
 .topbar-brand .loading-status {
   position: absolute;

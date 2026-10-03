@@ -1746,10 +1746,10 @@ def main() -> int:
                   icon: document.querySelector('#brandNameHome .topbar-brand-icon')?.getAttribute('src') || '',
                   current: document.querySelector('#brandNameHome')?.getAttribute('aria-current') || ''
                 })""")
-                if compact_wordmark == {"icon": "./assets/favicon.svg", "current": "page"}:
-                    pass_("favicon-home-goes-home", json.dumps(compact_wordmark, ensure_ascii=False))
+                if compact_wordmark == {"icon": "./assets/mindex-cross.svg?v=20261004a", "current": "page"}:
+                    pass_("cross-home-goes-home", json.dumps(compact_wordmark, ensure_ascii=False))
                 else:
-                    fail("favicon-home-goes-home", json.dumps(compact_wordmark, ensure_ascii=False))
+                    fail("cross-home-goes-home", json.dumps(compact_wordmark, ensure_ascii=False))
 
                 page.evaluate("switchModule('scripture')")
                 page.wait_for_function("() => document.body.dataset.module === 'scripture'", timeout=5000)
