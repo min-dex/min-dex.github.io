@@ -3821,7 +3821,7 @@ function renderPresenterOutput(payload, options = {}) {
         renderPresenterOutput(payload, options);
       }
     };
-    preloadPresenterOutputImage(activeImageSource)?.finally(rerenderIfReady);
+    preloadPresenterOutputImage(activeImageSource, { retry: true })?.finally(rerenderIfReady);
     nextAnimationFrame().then(rerenderIfReady);
     window.setTimeout(rerenderIfReady, 40);
     window.setTimeout(rerenderIfReady, 160);
@@ -4885,38 +4885,52 @@ function preloadPresenterOutputImage(source, options = {}) {
   if (!normalized || !presenterMediaSourceIsImage(normalized)) return null;
   const cached = presenterOutputImagePreloadCache.get(normalized);
   if (cached) {
-    if (cached.image?.complete && cached.image.naturalWidth > 0) cached.ready = true;
     cached.lastUsed = Date.now();
-    return cached.promise;
+    if (options.priority !== "low") {
+      cached.priority = "high";
+      if (cached.image && "fetchPriority" in cached.image) cached.image.fetchPriority = "high";
+    }
+    if (!cached.failed || !options.retry) return cached.promise;
   }
-  const image = new Image();
-  image.decoding = "async";
-  image.loading = "eager";
-  if ("fetchPriority" in image) image.fetchPriority = options.priority === "low" ? "low" : "high";
-  image.src = normalized;
-  const promise = typeof image.decode === "function"
-    ? image.decode().catch(() => {})
-    : new Promise((resolve) => {
-      image.onload = resolve;
-      image.onerror = resolve;
-    });
-  const record = { image, promise, lastUsed: Date.now(), ready: false };
-  promise.finally(() => { record.ready = true; });
+  const record = { image: null, promise: null, lastUsed: Date.now(), ready: false,
+    failed: false, priority: options.priority === "low" ? "low" : "high" };
   presenterOutputImagePreloadCache.set(normalized, record);
+  record.promise = (async () => {
+    // Retry a transient failure once; a later explicit selection can retry again.
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      if (attempt) await new Promise((resolve) => window.setTimeout(resolve, 300));
+      const image = new Image();
+      record.image = image;
+      image.decoding = "async";
+      image.loading = "eager";
+      if ("fetchPriority" in image) image.fetchPriority = record.priority;
+      const loaded = new Promise((resolve) => {
+        image.onload = () => resolve(true);
+        image.onerror = () => resolve(false);
+      });
+      image.src = normalized;
+      const success = typeof image.decode === "function"
+        ? await image.decode().then(() => true, () => false)
+        : await loaded;
+      image.onload = null;
+      image.onerror = null;
+      if (success && image.complete && image.naturalWidth > 0) {
+        record.ready = true;
+        return true;
+      }
+    }
+    record.failed = true;
+    return false;
+  })();
   trimPresenterOutputImagePreloadCache();
-  return promise;
+  return record.promise;
 }
 
 function presenterOutputImageIsReady(source) {
   const normalized = normalizePresenterMediaSource(source);
   const cached = normalized ? presenterOutputImagePreloadCache.get(normalized) : null;
   if (!cached) return false;
-  if (cached.ready) return true;
-  if (cached.image?.complete && cached.image.naturalWidth > 0) {
-    cached.ready = true;
-    return true;
-  }
-  return false;
+  return Boolean(cached.ready && cached.image?.complete && cached.image.naturalWidth > 0);
 }
 
 function trimPresenterOutputImagePreloadCache() {

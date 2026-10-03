@@ -1,5 +1,10 @@
 # Worship / Presenter Decision Log
 
+## Image Load Failure Recovery (2026-10-04)
+- Image preload readiness requires successful decode/load and nonzero natural width. Failed loads never become ready cache entries.
+- Retry a transient load failure once; background preloading does not repeatedly retry exhausted failures. Selecting a failed image explicitly starts a fresh bounded attempt and retains the previous output until ready.
+- Promote an in-flight low-priority image when selected for output. Keep the same URL and reuse valid cached images.
+
 ## Controller Refresh Projection Scope (2026-10-02)
 - Controller refreshes and standalone board rendering reuse the existing synchronous service-item scope. A monthly board must not rebuild the same template for each input or thumbnail.
 - The scope ends after each render, including exceptions; subsequent edits receive a fresh projection. Persistence, prayer grouping and slide order are unchanged.
