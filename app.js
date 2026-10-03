@@ -11229,13 +11229,37 @@ function canonicalServiceFormToken(value = "") {
 }
 
 function normalizeServiceFormPresetForms(value) {
-  if (Array.isArray(value)) return cleanList(value).map(canonicalServiceFormToken).filter(Boolean);
-  return String(value || "")
+  const forms = Array.isArray(value)
+    ? cleanList(value).map(canonicalServiceFormToken).filter(Boolean)
+    : String(value || "")
     .replace(/\bpre-chorus\b/gi, "PC")
     .replace(/\bp-c\b/gi, "PC")
     .split(/\s*(?:,|[-+>→])\s*/)
     .map(canonicalServiceFormToken)
     .filter(Boolean);
+  return collapseSingletonServiceFormPartNumbers(forms);
+}
+
+function collapseSingletonServiceFormPartNumbers(forms = []) {
+  const parts = forms.map((token) => {
+    const match = String(token || "").match(/^(V|C|PC|B)(\d+)([A-Z]?|@[A-Z]?)$/);
+    return match ? { token, prefix: match[1], number: Number(match[2]), suffix: match[3] || "" } : null;
+  });
+  const types = new Map();
+  parts.forEach((part) => {
+    if (!part) return;
+    const state = types.get(part.prefix) || { numbers: new Set(), hasVariant: false };
+    state.numbers.add(part.number);
+    if (part.suffix) state.hasVariant = true;
+    types.set(part.prefix, state);
+  });
+  return forms.map((token, index) => {
+    const part = parts[index];
+    const state = part && types.get(part.prefix);
+    return part && part.number === 1 && !part.suffix && !state.hasVariant && state.numbers.size === 1
+      ? part.prefix
+      : token;
+  });
 }
 
 function normalizeServiceFormHint(value = "") {
@@ -18237,6 +18261,7 @@ function normalizeForms(forms) {
     const count = baseCounts.get(form.part_type) || 0;
     const hasExplicitNumber = Number(form.part_number) > 0;
     let partNumber = hasExplicitNumber ? Number(form.part_number) : null;
+    if (!isAtVariant && count === 1 && !form.part_variant && partNumber === 1) partNumber = null;
     if (!partNumber && !isAtVariant && count > 1) {
       const used = assignedNumbers.get(form.part_type) || new Set();
       partNumber = (seen.get(form.part_type) || 0) + 1;
@@ -31297,7 +31322,14 @@ function presenterFormGroupLabel(slide) {
   const label = String(slide?.formLabel || slide?.marker || "").trim();
   if (isGenericPresenterFormLabel(label)) return "";
   const form = normalizePresenterFormPresetLabel(label);
-  if (slide?.controllerSingleVerse && form.type === "verse" && form.number === 1 && !form.group) return "Verse";
+  const singleType = Array.isArray(slide?.controllerSingleFormTypes)
+    && slide.controllerSingleFormTypes.includes(form.type);
+  if ((singleType || (slide?.controllerSingleVerse && form.type === "verse"))
+    && form.number === 1 && !form.group && !form.variant) {
+    return { verse: "Verse", chorus: "Chorus", "pre-chorus": "Pre-Chorus", bridge: "Bridge" }[form.type]
+      || songFormPresetDisplayLabel(label)
+      || label;
+  }
   return songFormPresetDisplayLabel(label) || label;
 }
 

@@ -28,6 +28,12 @@ def check_flow(browser, url, engine, width, theme):
       }});
     }''', {'theme': theme})
     assert page.evaluate("state.forms.map(displayLabel).join('|')") == 'Verse 1|Verse 2 A|Verse 2 B'
+    singleton_labels = page.evaluate('''() => normalizeForms([
+      {part_type:'Verse',part_number:1,lyrics:'Only verse'},
+      {part_type:'Chorus',part_number:1,lyrics:'Only chorus'},
+      {part_type:'Bridge',part_number:1,lyrics:'Only bridge'},
+    ]).map(displayLabel).join('|')''')
+    assert singleton_labels == 'Verse|Chorus|Bridge', singleton_labels
     at_labels = page.evaluate('''() => normalizeForms([
       {part_type:'Chorus',lyrics:'Original chorus'},
       {part_type:'Chorus',label:'Chorus@',lyrics:'Short chorus'},

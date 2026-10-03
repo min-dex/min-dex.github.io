@@ -38,11 +38,13 @@ def main():
                       sample([form('Verse 1')],'Verse 1','Verse');
                       sample([form('Verse')],'Verse','Verse');
                       sample([form('Verse 1'),form('Chorus')],'Verse 1','Verse');
+                      sample([form('Verse 1'),form('Chorus 1')],'Chorus 1','Chorus');
+                      sample([form('Chorus 1'),form('Chorus 2')],'Chorus 1','Chorus 1');
                       sample([form('Verse 1'),form('Verse 2')],'Verse 1','Verse 1');
                       sample([form('Verse 1'),form('Verse 2')],'Verse 2','Verse 2');
                       sample([form('Verse 2')],'Verse 2','Verse 2');
                       sample([form('Verse A')],'Verse A','Verse A');
-                      sample([form('Verse 1'),form('Chorus 1')],'Chorus 1','Chorus 1');
+                      sample([form('Verse 1'),form('Chorus 1')],'Chorus 1','Chorus');
                       sample([],'Verse 1','Verse 1');
                       // Editor state belongs to another song and must not affect the source count.
                       state.forms=[form('Verse 1'),form('Verse 2')];

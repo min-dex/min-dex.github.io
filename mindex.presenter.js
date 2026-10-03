@@ -2630,10 +2630,19 @@ function presenterSectionForServiceItem(item, index, displayText, song = null, v
   const elementTitle = linkedElementTitle || [no, title].filter(Boolean).join(" ") || displayText || label || `항목 ${index + 1}`;
   const sectionLabelText = cleanList([label, formHint]).join(" · ");
   // Count the source version, not the selected/repeated performance sequence.
-  const verseForms = normalizeForms(version?.forms || []).filter((form) =>
-    normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form)).type === "verse");
+  const sourceForms = normalizeForms(version?.forms || []);
+  const sourceFormTypes = sourceForms.reduce((types, form) => {
+    const target = normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form));
+    if (!target.type || target.group || target.variant) return types;
+    types.set(target.type, (types.get(target.type) || 0) + 1);
+    return types;
+  }, new Map());
+  const controllerSingleFormTypes = [...sourceFormTypes]
+    .filter(([, count]) => count === 1)
+    .map(([type]) => type);
   return {
-    ...(verseForms.length === 1 ? { controllerSingleVerse: true } : {}),
+    ...(controllerSingleFormTypes.length ? { controllerSingleFormTypes } : {}),
+    ...(controllerSingleFormTypes.includes("verse") ? { controllerSingleVerse: true } : {}),
     sectionId: item?._worshipSectionId || item?.id || `section:${index}:${normalizeTitle([label, displayText].filter(Boolean).join(" "))}`,
     elementId: item?.id || `element:${index}:${normalizeTitle([label, displayText].filter(Boolean).join(" "))}`,
     sectionIndex: Number(item?._worshipSectionOrder) || index + 1,
