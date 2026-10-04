@@ -29069,7 +29069,8 @@ function renderPresenterReferenceMediaPreview(asset, kind, emptyMessage = "파�
   const source = String(asset?.url || "").trim();
   if (!source) return `<div class="svc-reference-media-preview is-empty"><i data-lucide="image-plus"></i><span>${escapeHtml(emptyMessage)}</span></div>`;
   const normalizedKind = String(kind || asset?.kind || "file").trim().toLowerCase();
-  const slideCount = normalizeServiceAssetSlides(asset.slides).length;
+  const slides = normalizeServiceAssetSlides(asset.slides);
+  const slideCount = slides.length;
   const statusLabel = normalizedKind === "imported_deck"
     ? (slideCount ? `슬라이드 ${slideCount}장 연결됨` : "슬라이드 연결됨")
     : normalizedKind === "video" ? "영상 연결됨"
@@ -29085,7 +29086,18 @@ function renderPresenterReferenceMediaPreview(asset, kind, emptyMessage = "파�
     : normalizedKind === "audio"
       ? `<audio controls preload="metadata" src="${escapeAttr(source)}"></audio>`
       : renderPresenterStaticAssetPreview(asset, icon, statusLabel);
-  return `
+  const slideStrip = normalizedKind === "image" && slideCount > 1
+    ? `<div class="svc-reference-media-slide-strip" aria-label="연결된 이미지 ${slideCount}장">
+      ${slides.map((slide, index) => {
+        const slideName = String(slide.name || `${index + 1}번 이미지`).trim();
+        return `<figure class="svc-reference-media-slide-chip" title="${escapeAttr(`${index + 1}. ${slideName}`)}">
+          <img src="${escapeAttr(slide.url)}" alt="${escapeAttr(slideName)}" loading="lazy" />
+          <figcaption>${escapeHtml(`${index + 1}. ${slideName}`)}</figcaption>
+        </figure>`;
+      }).join("")}
+    </div>`
+    : "";
+  return `<div class="svc-reference-media-preview-group">
     <details class="svc-reference-media-preview svc-reference-media-preview--collapsible svc-reference-media-preview--${escapeAttr(normalizedKind)}">
       <summary>
         <i data-lucide="${escapeAttr(icon)}"></i>
@@ -29094,7 +29106,9 @@ function renderPresenterReferenceMediaPreview(asset, kind, emptyMessage = "파�
         <b><i data-lucide="eye"></i>미리보기</b>
       </summary>
       <div class="svc-reference-media-preview-content">${body}</div>
-    </details>`;
+    </details>
+    ${slideStrip}
+  </div>`;
 }
 
 function renderPresenterStaticAssetPreview(asset, icon, statusLabel) {
