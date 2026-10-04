@@ -10619,7 +10619,9 @@ async function resolveServiceSongSelectionBeforeSave(serviceId, index) {
   markServiceItemSharedContentDirty(item, service);
   item._worshipElementTemplateModified = true;
   item._worshipTemplatePlaceholder = false;
-  state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(items);
+  state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(
+    normalizeMainPraiseSlots(state.services.find((service) => service.id === serviceId), items),
+  );
   return true;
 }
 
@@ -12857,7 +12859,9 @@ function selectServiceSongForItem(index, songId) {
   item.raw_title = "";
   item.version_id = defaultServiceSongVersion(song, item, service)?.id || null;
   item.song_version_id = item.version_id;
-  state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(items);
+  state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(
+    normalizeMainPraiseSlots(service, items),
+  );
   state.dirty.service = true;
   markServiceElementDirty(serviceId, item);
   refreshPresenterForService(serviceId);
@@ -12952,7 +12956,9 @@ function runServiceItemAction(action, index, label = "", title = "") {
     nextSelectedIndex = Math.min(index, items.length - 1);
   }
 
-  state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(items);
+  state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(
+    normalizeMainPraiseSlots(state.services.find((service) => service.id === serviceId), items),
+  );
   state.selectedServiceItemIndex = Number.isFinite(nextSelectedIndex) && nextSelectedIndex >= 0 ? nextSelectedIndex : null;
   state.dirty.service = true;
   markServiceStructureDirty(serviceId);
@@ -13047,7 +13053,9 @@ function runPresenterSectionItemAction(action, index) {
       sectionKey: context.groupKey,
     };
   }
-  state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(items);
+  state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(
+    normalizeMainPraiseSlots(service, items),
+  );
   state.dirty.service = true;
   markServiceStructureDirty(serviceId);
   refreshPresenterForService(serviceId);

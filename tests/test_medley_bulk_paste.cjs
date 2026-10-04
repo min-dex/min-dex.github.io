@@ -22,6 +22,8 @@ const context = {
   getServiceItems: () => [],
   parseServiceItemMemo: memo => (memo ? JSON.parse(memo) : {}),
   isSongServiceLabel: label => label.startsWith('찬양'), isSpecialSongServiceItem: () => false,
+  isMainPraiseServiceItem: item => String(item?.label || '').startsWith('찬양'),
+  isMainPraiseLabel: label => /^찬양\s*\d*$/u.test(String(label || '').trim()),
   serviceItemRequiresSongSelection: () => false,
   servicePraiseInputMode: () => 'lyrics_db', serviceMemoInputMode: () => 'scripture',
   isScriptureBodyServiceItem: () => false,
@@ -70,6 +72,7 @@ vm.runInContext(app.slice(start,app.indexOf('\n}\n',start)+2),context);
   const items = context.state.serviceItems.fixture;
   assert.equal(items.length, 2, 'creates primary + one secondary row');
   const [primary, secondary] = items;
+  assert.deepEqual(items.map(item => item.label), ['찬양 1', '찬양 2'], 'a medley materializes consecutive praise slots');
   assert.equal(primary.song_id, 'song-a');
   assert.equal(secondary.song_id, 'song-b');
   const primaryMemo = JSON.parse(primary.memo);

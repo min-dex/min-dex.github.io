@@ -293,6 +293,7 @@ function updateServiceItemField(field, options = {}) {
   }
   const service = state.services.find((candidate) => candidate.id === serviceId) || selectedServiceForEditor();
   const persistenceBefore = serviceItemPersistenceSignature(item);
+  let connectedPraiseApplied = false;
   item._worshipElementTemplateModified = true;
   markServiceItemSharedContentDirty(item, service);
   item._worshipTemplatePlaceholder = false;
@@ -325,7 +326,12 @@ function updateServiceItemField(field, options = {}) {
       }
       if (serviceItemUsesFlexibleOfferingSlot(item) && !serviceItemUsesScoreInputMode(item, parsed)) parsed.outputMode = "";
       item.memo = serializeServiceItemMemo(parsed);
-      if (options.resolveSongSelection !== false) applyServiceSongSelectionWithService(item, service);
+      const hasConnectedPraiseInput = strictSongInput && presenterPreparationSongContentHasConnection(item.raw_title);
+      connectedPraiseApplied = hasConnectedPraiseInput
+        && applyInlineConnectedPraiseInput(service, items, item, item.raw_title);
+      if (options.resolveSongSelection !== false && (!hasConnectedPraiseInput || connectedPraiseApplied)) {
+        applyServiceSongSelectionWithService(item, service);
+      }
       scheduleServiceScriptureBodyResolve(serviceId, index);
     }
   }
@@ -423,7 +429,9 @@ function updateServiceItemField(field, options = {}) {
     return;
   }
   if (service && !options.preserveServiceSourceDraft) delete service._worshipSourceTextDraft;
-  state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(items);
+  state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(
+    normalizeMainPraiseSlots(service, items),
+  );
   state.dirty.service = true;
   markServiceElementDirty(serviceId, item);
   const presenterRefreshOptions = {
@@ -961,15 +969,74 @@ function materializePresenterPreparationItem(service, items, projectedItem) {
   return items.length - 1;
 }
 
-// Pushes a new real row for one additional song in a "+"-joined bulk-paste
-// medley line, sharing the primary item's section placement so it sorts
-// immediately after it. Grouping for display/editing is carried entirely by
-// memo.connectedPraise (set by the caller on every row in the group), not by
-// this row's label or numbering.
+function isMainPraiseSlotItem(item = {}) {
+  const slotKey = typeof serviceItemSlotKey === "function" ? String(serviceItemSlotKey(item) || "").trim() : "";
+  const memo = parseServiceItemMemo(item.memo);
+  const numberedLabel = typeof isMainPraiseLabel === "function"
+    ? isMainPraiseLabel(item.label)
+    : /^찬양\s*\d*$/u.test(String(item.label || "").trim());
+  const mainPraise = typeof isMainPraiseServiceItem === "function" && isMainPraiseServiceItem(item);
+  return Boolean(
+    mainPraise && (
+      /^praise\.song\.\d+$/.test(slotKey)
+      || numberedLabel
+      || memo.connectedPraise?.groupId
+    ),
+  );
+}
+
+function connectedPraiseItemTitle(item = {}, connected = {}, ordinal = 0) {
+  const song = typeof serviceItemLinkedSong === "function" ? serviceItemLinkedSong(item) : null;
+  const fallback = String(connected.title || "").split(/\s+[+＋]\s+/u)[ordinal] || connected.title;
+  return String(song?.title || item.raw_title || fallback || item.label || "").trim();
+}
+
+function normalizeMainPraiseSlots(service, items = []) {
+  const slots = items.filter(isMainPraiseSlotItem);
+  slots.forEach((item, index) => {
+    const ordinal = index + 1;
+    item.label = `찬양 ${ordinal}`;
+    item._worshipSectionKey = item._worshipSectionKey || "praise";
+    item._worshipSectionTitle = item._worshipSectionTitle || "찬양";
+    item._worshipElementOrder = ordinal * 10;
+    item._worshipSlotKey = `praise.song.${ordinal}`;
+    item._worshipElementTemplateModified = true;
+    item._worshipTemplatePlaceholder = false;
+  });
+  const groups = new Map();
+  slots.forEach((item) => {
+    const connected = parseServiceItemMemo(item.memo).connectedPraise;
+    const groupId = String(connected?.groupId || "").trim();
+    if (!groupId) return;
+    if (!groups.has(groupId)) groups.set(groupId, []);
+    groups.get(groupId).push({ item, connected });
+  });
+  groups.forEach((members, groupId) => {
+    if (members.length === 1) {
+      const parsed = parseServiceItemMemo(members[0].item.memo);
+      delete parsed.connectedPraise;
+      members[0].item.memo = serializeServiceItemMemo(parsed);
+      return;
+    }
+    const itemIds = members.map(({ item }) => item.id);
+    const title = members.map(({ item, connected }, index) => connectedPraiseItemTitle(item, connected, index)).filter(Boolean).join(" + ");
+    members.forEach(({ item }, index) => {
+      const parsed = parseServiceItemMemo(item.memo);
+      parsed.connectedPraise = { groupId, role: index === 0 ? "primary" : "secondary", primaryItemId: itemIds[0], itemIds, title };
+      item.memo = serializeServiceItemMemo(parsed);
+    });
+  });
+  return items;
+}
+
+// Inserts a real row right after the selected song. The common slot
+// normalization above assigns its final label and sequence position.
 function materializeSecondaryConnectedPraiseItem(service, items, primaryItem, ordinal) {
   const { _serviceItemIndex, _origIndex, id, raw_title, song_id, version_id, song_version_id,
     assignee, memo, sort_order, ...shared } = primaryItem;
-  items.push(normalizeServiceItem({
+  const primaryIndex = items.findIndex((item) => item.id === primaryItem.id);
+  const insertIndex = primaryIndex < 0 ? items.length : primaryIndex + ordinal;
+  items.splice(insertIndex, 0, normalizeServiceItem({
     ...shared,
     id: createLocalId(),
     service_id: service.id,
@@ -980,14 +1047,53 @@ function materializeSecondaryConnectedPraiseItem(service, items, primaryItem, or
     song_version_id: null,
     assignee: "",
     memo: "",
-    sort_order: items.length + 1,
+    sort_order: insertIndex + 1,
     _worshipElementOrder: (Number(primaryItem._worshipElementOrder) || 0) + ordinal * 0.01,
     _worshipTemplateProjected: false,
     _worshipTemplatePlaceholder: false,
     _worshipElementTemplateModified: true,
     _worshipSharedContentDirty: true,
-  }, items.length));
-  return items.length - 1;
+  }, insertIndex));
+  return insertIndex;
+}
+
+// The compact per-row editor and bulk preparation input create the same data
+// shape. Expand only when every segment resolves, preventing partial medleys.
+function applyInlineConnectedPraiseInput(service, items, item, rawValue) {
+  if (!service || !item || !isMainPraiseSlotItem(item) || !presenterPreparationSongContentHasConnection(rawValue)) return false;
+  const segments = String(rawValue || "").split(/\s+[+＋]\s+/u).map((part) => part.trim()).filter(Boolean);
+  if (segments.length < 2) return false;
+  const songs = segments.map((segment) => resolvePresenterPreparationSong(segment, item, service));
+  if (songs.some((song) => !song)) return false;
+  const previousGroupId = String(parseServiceItemMemo(item.memo).connectedPraise?.groupId || "").trim();
+  if (previousGroupId) {
+    for (let index = items.length - 1; index >= 0; index -= 1) {
+      if (items[index] === item) continue;
+      if (String(parseServiceItemMemo(items[index].memo).connectedPraise?.groupId || "").trim() === previousGroupId) items.splice(index, 1);
+    }
+  }
+  const groupId = createLocalId();
+  const groupIndexes = [items.findIndex((candidate) => candidate === item)];
+  for (let ordinal = 1; ordinal < songs.length; ordinal += 1) groupIndexes.push(materializeSecondaryConnectedPraiseItem(service, items, item, ordinal));
+  const itemIds = groupIndexes.map((index) => items[index]?.id).filter(Boolean);
+  const title = songs.map((song) => song.title).filter(Boolean).join(" + ");
+  groupIndexes.forEach((index, ordinal) => {
+    const groupItem = items[index];
+    const song = songs[ordinal];
+    const memo = parseServiceItemMemo(groupItem.memo);
+    groupItem.song_id = song.id;
+    groupItem.raw_title = "";
+    groupItem.version_id = defaultServiceSongVersion(song, groupItem, service)?.id || null;
+    groupItem.song_version_id = groupItem.version_id;
+    groupItem._worshipElementTemplateModified = true;
+    groupItem._worshipTemplatePlaceholder = false;
+    markServiceItemSharedContentDirty(groupItem, service);
+    groupItem.memo = serializeServiceItemMemo({ ...memo, connectedPraise: {
+      groupId, role: ordinal === 0 ? "primary" : "secondary", primaryItemId: itemIds[0], itemIds, title,
+    } });
+  });
+  normalizeMainPraiseSlots(service, items);
+  return true;
 }
 
 function applyPresenterPreparationTextUpdateToWorshipElementCache(service = null, update = {}) {
@@ -1309,6 +1415,7 @@ function finalizePresenterPreparationApply({
         && updateSectionKey === itemSectionKey && updateLabelKey === itemLabelKey);
     });
   }) : items;
+  normalizeMainPraiseSlots(service, uniqueItems);
   const projectedItems = projectWorshipServiceItemsFromTemplate(
     service,
     normalizeServiceItemsInCurrentOrder(uniqueItems),
@@ -1353,7 +1460,9 @@ function finalizePresenterPreparationApply({
       markServiceItemSharedContentDirty(item, service);
     });
   });
-  state.serviceItems[serviceId] = projectedItems;
+  state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(
+    normalizeMainPraiseSlots(service, projectedItems),
+  );
   state.dirty.service = true;
   delete state.presenterPreparationDrafts[serviceId];
   refreshPresenterForService(serviceId);
