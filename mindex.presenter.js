@@ -3851,6 +3851,10 @@ function presenterSlideUsesServiceBackground(slide) {
   if (slide.type === "ready") return true;
   const layout = presenterSlideLayout(slide);
   const type = presenterSlideElementType(slide);
+  // Reference images preserve the service background around letterboxed edges.
+  if (layout === PRESENTER_SLIDE_LAYOUTS.MEDIA) {
+    return Boolean(slide.referenceMedia && type === PRESENTER_ELEMENT_TYPES.IMAGE);
+  }
   if (layout === PRESENTER_SLIDE_LAYOUTS.BLANK) return type === PRESENTER_ELEMENT_TYPES.BLANK;
   if (![PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT, PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT].includes(layout)) return false;
   return [

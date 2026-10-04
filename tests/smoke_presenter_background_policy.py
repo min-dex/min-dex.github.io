@@ -21,6 +21,7 @@ def main():
                     {type:'lyrics',elementType:'praise',layout:'lower_bar_text'},
                     {type:'blank',elementType:'blank',layout:'blank'},
                     {type:'ready',elementType:'video',layout:'media',videoSrc:'ready.mp4'},
+                    {type:'image',elementType:'image',layout:'media',referenceMedia:true},
                   ];
                   const denied=[null,{}, {type:'unknown'},
                     ...['image','video','audio','file'].map(type=>({type,elementType:type,layout:['audio','file'].includes(type)?'file':'media'})),
