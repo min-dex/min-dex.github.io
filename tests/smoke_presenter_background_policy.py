@@ -21,10 +21,11 @@ def main():
                     {type:'lyrics',elementType:'praise',layout:'lower_bar_text'},
                     {type:'blank',elementType:'blank',layout:'blank'},
                     {type:'ready',elementType:'video',layout:'media',videoSrc:'ready.mp4'},
-                    {type:'image',elementType:'image',layout:'media',referenceMedia:true},
+                    {type:'image',elementType:'image',layout:'media',referenceMedia:true,sectionKey:'sermon'},
                   ];
                   const denied=[null,{}, {type:'unknown'},
                     ...['image','video','audio','file'].map(type=>({type,elementType:type,layout:['audio','file'].includes(type)?'file':'media'})),
+                    {type:'image',elementType:'image',layout:'media',referenceMedia:true,sectionKey:'announcements'},
                     {type:'image',elementType:'image',layout:'media',scoreBackground:true},
                     {type:'scripture',elementType:'scripture_text',layout:'lower_bar_text',scriptureContext:'reading'},
                     {...allowed[0],suppressBackgroundImage:true},
