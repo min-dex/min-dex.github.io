@@ -503,9 +503,6 @@ body[data-module="presenter"].right-sidebar-open { --shell-right-w: var(--right-
   margin-top: 0;
   padding: 4px var(--sidebar-item-end) 7px var(--sidebar-item-x);
 }
-body[data-module="praise"] .list-filter {
-  grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
-}
 .filter-tab {
   height: 28px;
   min-width: 0;

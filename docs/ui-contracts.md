@@ -4,6 +4,8 @@ Read `HANDOFF.md` first. This file is the short UI contract for Codex threads so
 
 ## Shell
 
+- Praise sidebar filters use three equal columns: all/empty/review, then hymn/CCM/children. Keep this 3-by-2 layout at every sidebar width; do not override it with auto-fit.
+
 - Detail pane page padding: `25px` on all sides on desktop and narrow layouts,
   unless a feature has an explicit fullscreen/presenter reason to override it.
 - New app-layout spacing should use the shared `5px`/`10px` rhythm instead of
