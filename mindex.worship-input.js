@@ -992,14 +992,17 @@ function connectedPraiseItemTitle(item = {}, connected = {}, ordinal = 0) {
 }
 
 function normalizeMainPraiseSlots(service, items = []) {
-  const entranceIndex = items.findIndex((item) => serviceItemSlotKey(item) === "praise.entrance");
+  const slotKeyForItem = (item) => typeof serviceItemSlotKey === "function"
+    ? serviceItemSlotKey(item)
+    : item?._worshipSlotKey;
+  const entranceIndex = items.findIndex((item) => slotKeyForItem(item) === "praise.entrance");
   if (entranceIndex >= 0) {
     const misplacedSlots = items.filter((item, index) => index > entranceIndex && isMainPraiseSlotItem(item));
     if (misplacedSlots.length) {
       for (let index = items.length - 1; index > entranceIndex; index -= 1) {
         if (isMainPraiseSlotItem(items[index])) items.splice(index, 1);
       }
-      const nextEntranceIndex = items.findIndex((item) => serviceItemSlotKey(item) === "praise.entrance");
+      const nextEntranceIndex = items.findIndex((item) => slotKeyForItem(item) === "praise.entrance");
       items.splice(nextEntranceIndex, 0, ...misplacedSlots);
     }
   }
