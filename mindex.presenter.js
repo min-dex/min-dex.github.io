@@ -1857,14 +1857,14 @@ function presenterElementSlideFromMemoCore(item, section, index, memo, displayTe
     if (!source) return null;
     const referenceMedia = compactSearchValue(label) === "참고화면"
       && String(memo?.inputMode || "").trim() === "asset";
-    const referenceSlides = referenceMedia ? normalizeServiceAssetSlides(asset.slides) : [];
-    if (referenceSlides.length > 1) {
-      return referenceSlides.map((slide, slideIndex) => {
+    const assetSlides = normalizeServiceAssetSlides(asset.slides);
+    if (assetSlides.length > 1) {
+      return assetSlides.map((slide, slideIndex) => {
         const slideSource = normalizePresenterMediaSource(slide.url);
         if (!slideSource) return null;
         const slideTitle = slide.name || title;
         return {
-          id: `${item.id || index}:reference-image:${slideIndex}`,
+          id: `${item.id || index}:image:${slideIndex}`,
           ...section,
           sectionLabel: label || "Image",
           sectionTitle: title,

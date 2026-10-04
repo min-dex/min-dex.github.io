@@ -13185,6 +13185,9 @@ async function uploadServiceItemAssetFile(input) {
   if (serviceAssetKindForUploadTarget(item, memo) === "imported_deck" || isDeckAssetFile(file)) {
     return importServiceItemDeckAssetFile(input);
   }
+  if (input?.files?.length > 1 && serviceAssetKindForUploadTarget(item, memo) === "image") {
+    return addAndUploadPresenterReferenceMedia(input, item);
+  }
   return uploadPresenterReferenceMediaAsset({
     file,
     serviceId,
@@ -13304,7 +13307,7 @@ async function uploadPresenterReferenceMediaAsset({ file, serviceId, item, input
     memo.elementType = kind;
     memo.componentType = kind;
     memo.inputMode = "asset";
-    if (referenceMedia && ["replace", "append"].includes(slideMode)) {
+    if (kind === "image" && ["replace", "append"].includes(slideMode)) {
       const previousAsset = normalizeServiceAsset(memo.asset);
       const previousSlides = slideMode === "append"
         ? normalizeServiceAssetSlides(previousAsset.slides)
@@ -13382,14 +13385,17 @@ async function addAndUploadPresenterReferenceMedia(input, initialItem = null) {
   const sectionKey = (initialItem && presenterReferenceMediaItemSectionKey(initialItem))
     || input?.dataset?.presenterReferenceMediaSection || "sermon";
   if (!files.length || !serviceId) return;
+  const initialMemo = parseServiceItemMemo(initialItem?.memo);
+  const initialItemIsImage = Boolean(initialItem)
+    && serviceAssetKindForUploadTarget(initialItem, initialMemo) === "image";
   if (presenterReferenceMediaBatchServices.has(serviceId)) {
     showToast("이 예배의 파일을 추가 중입니다. 완료 후 다시 선택해 주세요.", "info");
     return;
   }
   for (const file of files) {
     const kind = presenterReferenceMediaKindForFile(file);
-    if (!kind || Number(file.size) > presenterMediaMaxBytesForKind(kind)) {
-      showToast(!kind ? `${file.name}: 이미지, 영상, 음원 파일만 넣을 수 있습니다.`
+    if (!kind || (initialItemIsImage && kind !== "image") || Number(file.size) > presenterMediaMaxBytesForKind(kind)) {
+      showToast(!kind || (initialItemIsImage && kind !== "image") ? `${file.name}: 이미지 파일만 넣을 수 있습니다.`
         : `${file.name}: ${presenterMediaMaxSizeLabel(kind)} 이하로 올려 주세요.`, "error");
       input.value = "";
       return;
@@ -13424,7 +13430,10 @@ async function addAndUploadPresenterReferenceMedia(input, initialItem = null) {
       }
       completed += 1;
     }
-    if (completed === files.length) showToast(isBatch ? `참고 화면 1개에 ${completed}장을 추가했습니다.` : `참고 화면 ${completed}개를 추가했습니다.`);
+    const destination = initialItem
+      ? String(initialItem.label || initialItem.raw_title || "이미지").trim()
+      : "참고 화면";
+    if (completed === files.length) showToast(isBatch ? `${destination}에 ${completed}장을 추가했습니다.` : `${destination}에 추가했습니다.`);
     else showToast(`${files.length}개 중 ${completed}개 저장됨. 나머지 ${files.length - completed}개는 추가되지 않았습니다.`, "error");
   } finally {
     presenterReferenceMediaBatchServices.delete(serviceId);
@@ -28949,8 +28958,9 @@ function renderPresenterAssetUpload(item, index, memo, serviceId) {
   const reference = isPresenterReferenceMediaItem(item, memo);
   const asset = normalizeServiceAsset(memo.asset);
   const kind = asset.kind || serviceMemoElementType(memo);
+  const acceptsMultiple = reference || kind === "image";
   return `<label class="svc-reference-media-upload">
-    <input type="file" ${reference ? "multiple" : ""} accept="${escapeAttr(reference ? PRESENTER_REFERENCE_MEDIA_ACCEPT : serviceAssetFileAcceptForKind(kind))}"
+    <input type="file" ${acceptsMultiple ? "multiple" : ""} accept="${escapeAttr(reference ? PRESENTER_REFERENCE_MEDIA_ACCEPT : serviceAssetFileAcceptForKind(kind))}"
       ${reference ? "data-presenter-reference-media-file" : "data-service-item-asset-file"}
       data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${index}" />
     <i data-lucide="upload"></i><span>파일 선택</span>
