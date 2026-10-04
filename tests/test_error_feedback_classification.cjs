@@ -41,7 +41,11 @@ for (const [code, expected] of [
   assert.match(serviceMessage({ message: code }), expected);
   assert.doesNotMatch(serviceMessage({ message: code }), new RegExp(`^${code}$`));
 }
-assert.equal(serviceMessage({ message: "Network request failed" }), "Network request failed");
+assert.match(serviceMessage({ message: "Network request failed" }), /저장 완료 여부를 확인하지 못했습니다/);
+assert.match(serviceMessage({ code: "42501", message: "" }), /42501/);
+assert.doesNotMatch(serviceMessage({}), /\[object Object\]/);
+assert.match(serviceMessage({}), /UNKNOWN_SAVE_ERROR/);
+assert.match(serviceMessage({ name: "QuotaExceededError" }), /저장 복구 정보를 기록하지 못했습니다/);
 
 for (const staleEnglish of ["Could not load calendar.", "File read failed.",
   "Image is too large for local storage.", "Background update failed.",
@@ -77,6 +81,23 @@ const remote = vm.createContext({
 });
 vm.runInContext(between(monitor, "  async function rpc(", "  async function leave("), remote);
 (async () => {
+  const failures = [], draft = { text: "unsaved" };
+  const saveContext = vm.createContext({
+    state: { saving: false, draft }, activeServiceSavePromise: null,
+    emitMonitorSaveEvent() {}, beginServiceInputFeedback: () => [],
+    finishServiceInputFeedback() {}, updateSaveState() {}, saveDirtyServiceTypes: async () => {},
+    serviceSaveErrorMessage: serviceMessage, showToast: (message, kind) => failures.push({message,kind}),
+    console: { warn() {} },
+  });
+  vm.runInContext(between(app, "async function runServiceSave(", "async function saveService("), saveContext);
+  assert.equal(await saveContext.runServiceSave({silent:true}, async () => {throw {code:'42501',message:''};}), false);
+  assert.equal(failures.length, 1);
+  assert.match(failures[0].message, /42501/);
+  assert.equal(failures[0].kind, 'error');
+  assert.equal(saveContext.state.saving, false);
+  assert.equal(draft.text, 'unsaved');
+  assert.equal(await saveContext.runServiceSave({silent:true}, async () => true), true);
+  assert.equal(failures.length, 1, 'silent success must stay quiet');
   await assert.rejects(remote.rpc("test", {}), /DB 클라이언트가 준비되지 않았습니다/);
   remote.state.client = { rpc: () => ({ abortSignal: async () => ({ data: "ok" }) }) };
   assert.equal(await remote.rpc("test", {}), "ok");

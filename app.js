@@ -6495,7 +6495,14 @@ async function saveScripture() {
 }
 
 function serviceSaveErrorMessage(error) {
-  const message = String(error?.message || error || "").trim();
+  const message = String(error?.message || (typeof error === "string" ? error : "") || "").trim();
+  const code = String(error?.code || error?.name || "").trim();
+  if (/Failed to fetch|Failed to send a request|NetworkError|Load failed|Network request failed/i.test(message)) {
+    return "서버 응답을 받지 못해 저장 완료 여부를 확인하지 못했습니다. 입력은 유지됩니다. 연결을 확인한 뒤 다시 저장해 주세요.";
+  }
+  if (/QuotaExceededError|SecurityError/.test(code)) {
+    return "브라우저에 저장 복구 정보를 기록하지 못했습니다. 입력은 유지됩니다. 브라우저 저장 공간과 사이트 저장 권한을 확인해 주세요.";
+  }
   if (/PENDING_PROJECT_UNKNOWN/.test(message)) {
     return "이전 저장 요청의 프로젝트를 확인할 수 없어 재전송하지 않았습니다. 입력과 이전 요청은 유지됩니다.";
   }
@@ -6529,7 +6536,7 @@ function serviceSaveErrorMessage(error) {
   if (/duplicate key value violates unique constraint/i.test(message)) {
     return "같은 항목이 이미 저장되어 있습니다. 화면을 새로고침한 뒤 다시 시도해 주세요.";
   }
-  return message || "예배를 저장하지 못했습니다.";
+  return message || `예배를 저장하지 못했습니다. 입력은 유지됩니다. 오류: ${code || "UNKNOWN_SAVE_ERROR"}`;
 }
 
 let worshipConflictReview = null;
@@ -6809,7 +6816,9 @@ async function runServiceSave(options, save) {
     finishServiceInputFeedback(feedback, false);
     emitMonitorSaveEvent("save_failed");
     const message = serviceSaveErrorMessage(error);
-    if (!options.silent) showToast(message, "error");
+    console.warn("Worship save failed", { code: error?.code || error?.name || "UNKNOWN_SAVE_ERROR", message });
+    // Silent saves suppress success notices, not errors needed to recover a draft.
+    showToast(message, "error");
     if (!options.silent && /REVISION_CONFLICT|ATOMIC_(?:RELOAD_REQUIRED|RETRY_COMMITTED_RELOAD_REQUIRED)/.test(String(error?.message || ""))) {
       void openWorshipConflictReview(options.feedbackServiceId).catch(reviewError => console.warn("Could not open conflict review.", reviewError));
     }

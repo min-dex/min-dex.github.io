@@ -1,5 +1,9 @@
 # Worship / Presenter Decision Log
 
+## Save Failure Feedback (2026-10-04)
+- Silent element saves suppress success notices, not failure notices. Empty error messages fall back to an error code instead of an object string or unexplained failure.
+- Network failures mean the save outcome is unconfirmed, not necessarily rolled back. Preserve pending requests and drafts; do not bypass revision checks or clear recovery state.
+
 ## Image Load Failure Recovery (2026-10-04)
 - Image preload readiness requires successful decode/load and nonzero natural width. Failed loads never become ready cache entries.
 - Retry a transient load failure once; background preloading does not repeatedly retry exhausted failures. Selecting a failed image explicitly starts a fresh bounded attempt and retains the previous output until ready.
