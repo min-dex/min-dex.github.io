@@ -4,6 +4,8 @@ Read `HANDOFF.md` first. This file is the short UI contract for Codex threads so
 
 ## Shell
 
+- At widths up to 900px, only the shared outer nav sidebar owns drawer positioning. Inner sidebar panels remain in normal layout in every module; no praise/presenter fixed-position exceptions or second topbar offset.
+
 - Praise sidebar filters use three equal columns: all/empty/review, then hymn/CCM/children. Keep this 3-by-2 layout at every sidebar width; do not override it with auto-fit.
 
 - Detail pane page padding: `25px` on all sides on desktop and narrow layouts,
