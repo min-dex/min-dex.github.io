@@ -998,3 +998,10 @@ Small visual polish that does not alter behavior does not need an entry.
 - Once stored, automatic/manual origin does not change playback order. Special-hymn rules must not override an item's saved sequence.
 - The form input and presenter use the same resolver. Legacy items without a stored sequence retain their default fallback until linked/edited; production worship content is not bulk rewritten.
 - Regression coverage includes the monthly special-song mismatch, identical playback across strength values, default materialization, relinking, memo round trips, and explicit clearing.
+
+
+### 2026-10-01 Bulletin editorial redesign
+- User authorized substantial redesign for reader convenience, production workflow, and aesthetics; old InDesign files remain their historical source.
+- New October drafts use the editorial four-face layout with clear worship order, sermon notes, and consolidated weekly/monthly information. Existing artwork supplies the cover band.
+- Content editing emphasizes weekly news/outline; monthly and common copy are collapsed. Editable preview text focuses its input.
+- Design and frames persist in the existing layout payload. No production content or schema migration is required.

@@ -82,10 +82,12 @@ const server=http.createServer((req,res)=>{
     assert.equal(await field('meeting').inputValue(),'새 예배실');
     assert.equal(await field('eventsText').inputValue(),'이번 달 확정 일정');
     assert.ok(!(await field('news').inputValue()).includes('이번 주만 수정한 소식'));
+    await page.locator('details.bulletin-property-section:has([data-bulletin-setting="rosterMonth"])').evaluate(el=>el.open=true);
     await page.locator('[data-bulletin-setting="eventsMonth"]').fill('2026-10');
     await page.locator('[data-bulletin-setting="eventsMonth"]').dispatchEvent('change');await ready();
     assert.equal(await field('eventsText').inputValue(),'');
     await field('eventsText').fill('다음 달 확정 일정');
+    await page.locator('details.bulletin-property-section:has([data-bulletin-setting="rosterMonth"])').evaluate(el=>el.open=true);
     await page.locator('[data-bulletin-setting="eventsMonth"]').fill('2026-09');
     await page.locator('[data-bulletin-setting="eventsMonth"]').dispatchEvent('change');await ready();
     assert.equal(await field('eventsText').inputValue(),'이번 달 확정 일정');

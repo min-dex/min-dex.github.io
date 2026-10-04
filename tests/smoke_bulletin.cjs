@@ -179,9 +179,11 @@ const server=http.createServer((req,res)=>{
     await page.evaluate(()=>{window.bulletinTest.fail=false;});await page.locator('[data-bulletin-refresh]').click();
     await page.waitForFunction(()=>document.querySelector('[data-bulletin-print]')?.disabled===false);
     assert.equal(await page.evaluate(()=>window.bulletinTest.drafts[window.bulletinTest.id].content.fields.church),'샘플 교회');
+    await page.locator('details.bulletin-property-section:has([data-bulletin-setting="rosterMonth"])').evaluate(el=>el.open=true);
     await page.locator('[data-bulletin-setting="rosterMonth"]').fill('2026-08');
     await page.locator('[data-bulletin-setting="rosterMonth"]').press('Tab');
     await page.waitForFunction(()=>document.querySelector('.bulletin-canvas').textContent.includes('8월 30일'));
+    await page.locator('details.bulletin-property-section:has([data-bulletin-setting="rosterMonth"])').evaluate(el=>el.open=true);
     await page.locator('[data-bulletin-setting="rosterMonth"]').fill('2026-09');
     await page.locator('[data-bulletin-setting="rosterMonth"]').press('Tab');
     await page.waitForFunction(()=>!document.querySelector('[data-bulletin-print]').disabled);
@@ -367,7 +369,7 @@ const server=http.createServer((req,res)=>{
         loadSource:async()=>structuredClone(raceAudit.source),loadDraft:async()=>raceAudit.row,
         saveDraft:async(id,value,revision)=>{if(raceAudit.delay)await new Promise(resolve=>raceAudit.release=resolve);raceAudit.row={...structuredClone(value),revision:revision+1};return raceAudit.row;}});
     });
-    await page.waitForFunction(()=>document.querySelector('[data-bulletin-print]')?.disabled===false);
+    await page.waitForFunction(()=>document.querySelector('[data-bulletin-print]')?.disabled===false).catch(async error=>{console.error(await page.locator('.bulletin-status').textContent());throw error;});
     await page.locator('[data-bulletin-refresh]').click();
     await page.waitForFunction(()=>!document.querySelector('[data-bulletin-print]').disabled);
     await page.evaluate(()=>saveAll());
@@ -391,6 +393,7 @@ const server=http.createServer((req,res)=>{
     await page.waitForFunction(()=>!raceAudit.documents.get('race-audit').saving);
     assert.equal(await page.evaluate(()=>raceAudit.documents.get('race-audit').sourceSnapshot),null,'An older save must not restore a source snapshot cleared by a later edit');
     await page.locator('[data-bulletin-mode="content"]').click();
+    await page.locator('details.bulletin-property-section:has([data-bulletin-setting="rosterMonth"])').evaluate(el=>el.open=true);
     await page.locator('[data-bulletin-setting="rosterMonth"]').fill('2026-11');
     await page.locator('[data-bulletin-setting="rosterMonth"]').press('Tab');
     await page.waitForFunction(()=>!document.querySelector('[data-bulletin-print]').disabled);

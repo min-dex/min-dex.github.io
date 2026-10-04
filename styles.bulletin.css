@@ -58,3 +58,7 @@ body:has(.bulletin-workbench) .right-sidebar{display:none}
 
 .bulletin-property-section>summary{cursor:pointer;font-size:var(--ui-label-size);font-weight:700;color:var(--ink)}
 .bulletin-property-section[open]>summary{margin-bottom:15px}
+
+.bulletin-connected{display:flex;flex-direction:column;gap:5px;padding:15px;margin-bottom:20px;border-left:2px solid var(--accent);background:var(--panel-2);font-size:var(--ui-meta-size);color:var(--ink-3)}
+.bulletin-connected strong{font-size:var(--ui-body-size);color:var(--ink);line-height:1.5}.bulletin-connected small{font-size:inherit}
+.bulletin-properties details>summary{padding:5px 0;line-height:1.5}
