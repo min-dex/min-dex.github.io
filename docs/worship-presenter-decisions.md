@@ -1,5 +1,11 @@
 # Worship / Presenter Decision Log
 
+## Live Citation Save Scope (2026-10-04)
+- Element patches serialize only the target while retaining counters from the full order. Unloaded unrelated songs must not block a scripture patch; full saves still validate every element.
+- Collapse duplicate source blocks only when their contents and section are identical and exactly one canonical item matches. Ambiguous or differing content remains an error; never regenerate the whole source to hide it.
+- Keep the live-input pending guard through persistence, save by stable item ID, and restore the submitted reference on failure without discarding resolved live content.
+- Regression: `smoke_citation_patch_scope.py`, `smoke_citation_output_navigation.py`, worship edit sync and Sunday sermon scope. Read-only copies of six Oct 4 services reached mocked commit; no production test writes were performed.
+
 ## Liturgical Heading Inset (2026-10-04)
 - Fullscreen liturgical body text stays centered against the full stage. Its heading independently retains the former top inset (8cqh position plus 1cqh padding); removing body padding must not pull the heading toward the screen edge.
 - Chromakey heading placement is unchanged. Verify title position and body center at full output and thumbnail sizes.

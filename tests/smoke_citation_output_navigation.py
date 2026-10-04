@@ -71,7 +71,7 @@ def main():
               renderPresenterControlState=()=>{};
               updateSaveState=()=>{};
               scrollPresenterBoardToIndex=()=>{scrolls++};
-              saveServiceItemPatch=async()=>{saves++};
+              saveServiceItemPatch=async()=>{saves++;return true};
               showToast=()=>{};
               presenterSlidesForService=()=>[{...slide,elementId:'different'}, {...slide,elementId}, {...slide,elementId,title:'마태복음 5:46'}];
               resolveServiceScriptureBeforeSave=()=>{resolutions++;return new Promise(resolve=>{release=resolve})};
@@ -91,6 +91,17 @@ def main():
                 assert(scrolls===priorScrolls,'citation submission scrolled away from input');
                 assert(input.value==='' && !pendingPresenterCitationRequests.size,'input or lock not cleared');
               }
+              setup();presenterCitationAutoOutput=false;live=true;input.value='마 5:45';
+              resolveServiceScriptureBeforeSave=async()=>{};
+              let finishSave,saveOptions;
+              saveServiceItemPatch=async(id,index,options)=>{saveOptions=options;return new Promise(resolve=>{finishSave=resolve})};
+              const saving=appendPresenterCitationReference(input);
+              while(!finishSave) await Promise.resolve();
+              assert(pendingPresenterCitationRequests.size===1,'lock released before persistence');
+              assert(saveOptions._itemId===elementId,'save target is not stable identity');
+              finishSave(false);await saving;
+              assert(input.value==='마 5:45' && !pendingPresenterCitationRequests.size,'failed save did not retain retry input');
+              saveServiceItemPatch=async()=>true;
               presenterCitationAutoOutput=true;live=false;
               setup();actions=[];input.value='잘못된 성경 주소';
               const before=resolutions;await appendPresenterCitationReference(input);

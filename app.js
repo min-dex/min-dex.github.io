@@ -7196,6 +7196,7 @@ async function saveWorshipServiceElementPatch(service, itemId) {
   const elementTypedStateColumns = await worshipElementTypedStateColumns();
   const rows = buildWorshipPersistenceRows(service, items, existingSectionById, existingElementById, {
     elementTypedStateColumns,
+    targetElementId: targetItemId,
   });
   sanitizeWorshipPersistenceRows(rows, { elementTypedStateColumns });
   compactWorshipPersistenceRows(rows);
@@ -7492,7 +7493,23 @@ function sundayEditSyncSourceText(document, item, next, service) {
     const heading = portable ? `[[${serviceSourceSectionTitle(item)}]]` : `[${serviceSourceSectionTitle(item)}]`;
     return `${source.trimEnd()}\n\n${heading}\n${appendLines.join("\n")}`.trim();
   }
-  if (candidates.length !== 1) throw new Error("연결 예배 원문의 항목 위치가 중복되어 반영하지 않았습니다.");
+  if (candidates.length !== 1) {
+    const sameSection = candidates.every(record => record.sectionTitle === candidates[0].sectionTitle);
+    const validRanges = candidates.every(record => Number.isInteger(record.startLine) && Number.isInteger(record.endLine)
+      && record.startLine >= 0 && record.endLine > record.startLine && record.endLine <= sourceLines.length);
+    const blocks = validRanges ? candidates.map(record => sourceLines.slice(record.startLine, record.endLine).join("\n").trimEnd()) : [];
+    const liveMatches = getServiceItems(service?.id).filter(candidate =>
+      serviceSourceLabelsMatch(candidate.label, item.label)
+      && serviceSourceSectionTitle(candidate) === serviceSourceSectionTitle(item));
+    if (!sameSection || !validRanges || liveMatches.length !== 1 || !blocks.every(block => block === blocks[0])) {
+      throw new Error("연결 예배 원문의 항목 위치가 중복되어 반영하지 않았습니다.");
+    }
+    // Only identical source copies of one canonical item can be collapsed.
+    for (const duplicate of candidates.slice(1).sort((a, b) => b.startLine - a.startLine)) {
+      sourceLines.splice(duplicate.startLine, duplicate.endLine - duplicate.startLine);
+    }
+    return sundayEditSyncSourceText({ ...document, sourceText: sourceLines.join("\n") }, item, next, service);
+  }
   const record = candidates[0];
   if (!Number.isInteger(record.startLine) || !Number.isInteger(record.endLine)
     || record.startLine < 0 || record.endLine <= record.startLine || record.endLine > sourceLines.length) {
@@ -8029,6 +8046,9 @@ function buildWorshipPersistenceRows(service, items, existingSectionById = {}, e
     usedElementIds.add(elementId);
     if (!sectionSort.has(sectionId)) sectionSort.set(sectionId, sectionSort.size + 1);
     sectionElementCounts.set(sectionId, (sectionElementCounts.get(sectionId) || 0) + 1);
+
+    // Keep positional counters, but do not rebuild unrelated drafts for a patch.
+    if (options.targetElementId && item.id !== options.targetElementId) return;
 
     const sectionModified = Boolean(existingSection?.template_modified || item._worshipSectionTemplateModified);
     const sectionLabel = String(
@@ -30018,7 +30038,10 @@ async function appendPresenterCitationReference(input) {
     } else {
       renderPresenterControlState(serviceId);
     }
-    void saveServiceItemPatch(serviceId, index, { renderAfterSave: false, silent: true });
+    const saved = await saveServiceItemPatch(serviceId, index, {
+      _itemId: targetElementId, renderAfterSave: false, silent: true,
+    });
+    if (!saved && !input.value.trim()) input.value = rawValue;
   } catch (error) {
     restoreCitationDraft();
     showToast(error.message || "성구를 불러오지 못했습니다.", "error");
