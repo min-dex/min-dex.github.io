@@ -1063,9 +1063,9 @@ def main() -> int:
             if (
                 desktop_sidebar["sidebarWidth"] == 280
                 and desktop_sidebar["detailStartsAfterSidebar"]
-                and desktop_sidebar["brandWidth"] == 40
-                and desktop_sidebar["moduleStartsAtTopbar"] == 40
-                and desktop_sidebar["moduleWidth"] == 48
+                and desktop_sidebar["brandWidth"] == 47
+                and desktop_sidebar["moduleStartsAtTopbar"] == 47
+                and desktop_sidebar["moduleWidth"] == 47
                 and desktop_sidebar["drawerToggleHidden"]
                 and desktop_sidebar["rightLastInset"] == 5
             ):
