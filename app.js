@@ -3592,7 +3592,6 @@ const WORSHIP_SECTION_LIST_SELECT = [
   "sort_order",
   "section_key",
   "title",
-  "person",
   "template_id",
   "template_modified",
   "source_kind",

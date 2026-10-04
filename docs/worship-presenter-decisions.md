@@ -1,5 +1,9 @@
 # Worship / Presenter Decision Log
 
+## Section Query Schema (2026-10-04)
+- Section list queries must match the section table schema; `person` belongs only to elements. Both initial loading and DB refresh use the shared section select.
+- Check the actual client select against the schema, not only a separately maintained minimal column list. Regression: `tests/test_worship_section_select.cjs`.
+
 ## Save Failure Feedback (2026-10-04)
 - Silent element saves suppress success notices, not failure notices. Empty error messages fall back to an error code instead of an object string or unexplained failure.
 - Network failures mean the save outcome is unconfirmed, not necessarily rolled back. Preserve pending requests and drafts; do not bypass revision checks or clear recovery state.
