@@ -1,5 +1,9 @@
 # Worship / Presenter Decision Log
 
+## Liturgical Heading Inset (2026-10-04)
+- Fullscreen liturgical body text stays centered against the full stage. Its heading independently retains the former top inset (8cqh position plus 1cqh padding); removing body padding must not pull the heading toward the screen edge.
+- Chromakey heading placement is unchanged. Verify title position and body center at full output and thumbnail sizes.
+
 ## Image Upload Round Trip (2026-10-04)
 - Image selections append in order to one element, including one-file selections and legacy single-image assets. The chooser says image addition rather than implying replacement.
 - Stage an image batch before one element save; do not repeatedly save under a transient element ID. Reacquire the current item after asynchronous storage uploads.

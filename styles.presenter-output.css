@@ -572,6 +572,10 @@
   font-weight: var(--presenter-weight-display);
   line-height: .95;
 }
+.presenter-output-root.no-chromakey .presenter-liturgical-body-heading {
+  /* Preserve the former 7cqh top inset without shifting the centered body. */
+  top: 8cqh;
+}
 .presenter-slide--liturgical-body .presenter-title-content {
   width: 100%;
   gap: 2.2cqh;
