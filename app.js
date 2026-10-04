@@ -18263,6 +18263,14 @@ function normalizeForms(forms) {
   }, new Map());
   const assignedNumbers = new Map();
   const seen = new Map();
+  const variantCounts = next.reduce((map, form) => {
+    const variant = String(form.part_variant || "");
+    if (variant.startsWith("@")) {
+      const key = `${form.part_type}:${variant}`;
+      map.set(key, (map.get(key) || 0) + 1);
+    }
+    return map;
+  }, new Map());
   return next.map((form) => {
     if (form.part_type === "Lyrics") return { ...form, part_number: null, part_variant: "", label: "Lyrics" };
     const isAtVariant = String(form.part_variant || "").startsWith("@");
@@ -18275,6 +18283,14 @@ function normalizeForms(forms) {
       partNumber = (seen.get(form.part_type) || 0) + 1;
       while (used.has(partNumber)) partNumber += 1;
       seen.set(form.part_type, partNumber);
+    }
+    // A lone Chorus does not need a number. Older entries sometimes encoded
+    // its variation as "Chorus 2@"; drop that synthetic number only when the
+    // version has one real chorus and doing so cannot merge two @ variants.
+    const isOnlyAnonymousVariant = isAtVariant
+      && variantCounts.get(`${form.part_type}:${form.part_variant}`) === 1;
+    if (form.part_type === "Chorus" && count === 1 && (!isAtVariant || isOnlyAnonymousVariant)) {
+      partNumber = null;
     }
     if (partNumber) {
       if (!assignedNumbers.has(form.part_type)) assignedNumbers.set(form.part_type, new Set());

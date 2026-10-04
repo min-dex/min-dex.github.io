@@ -40,6 +40,17 @@ def check_flow(browser, url, engine, width, theme):
       {part_type:'Verse',label:'Verse 1@A',lyrics:'Variant verse'},
     ]).map(displayLabel).join('|')''')
     assert at_labels == 'Chorus|Chorus@|Verse 1@A', at_labels
+    legacy_variant_labels = page.evaluate('''() => normalizeForms([
+      {part_type:'Chorus',label:'Chorus 1',lyrics:'Original chorus'},
+      {part_type:'Chorus',label:'Chorus 2@',lyrics:'Variant chorus'},
+    ]).map(displayLabel).join('|')''')
+    assert legacy_variant_labels == 'Chorus|Chorus@', legacy_variant_labels
+    distinct_chorus_labels = page.evaluate('''() => normalizeForms([
+      {part_type:'Chorus',label:'Chorus 1',lyrics:'First original chorus'},
+      {part_type:'Chorus',label:'Chorus 2',lyrics:'Second original chorus'},
+      {part_type:'Chorus',label:'Chorus 2@',lyrics:'Second chorus variation'},
+    ]).map(displayLabel).join('|')''')
+    assert distinct_chorus_labels == 'Chorus 1|Chorus 2|Chorus 2@', distinct_chorus_labels
     at_variant_target = page.evaluate('''() => {
       const forms=normalizeForms([
         {id:'base',part_type:'Chorus',lyrics:'Original chorus'},
