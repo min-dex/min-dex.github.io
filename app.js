@@ -13175,7 +13175,7 @@ async function uploadPresenterReferenceMediaFile(input) {
   const serviceId = input?.dataset?.serviceId || state.selectedServiceId;
   const index = Number(input?.dataset?.serviceItemIndex);
   const item = getServiceItems(serviceId)[index];
-  if (input?.files?.length > 1) return addAndUploadPresenterReferenceMedia(input, item);
+  if (input?.files?.length > 1 || presenterReferenceMediaKindForFile(file) === "image") return addAndUploadPresenterReferenceMedia(input, item);
   return uploadPresenterReferenceMediaAsset({
     file,
     serviceId,
@@ -13193,7 +13193,7 @@ async function uploadServiceItemAssetFile(input) {
   if (serviceAssetKindForUploadTarget(item, memo) === "imported_deck" || isDeckAssetFile(file)) {
     return importServiceItemDeckAssetFile(input);
   }
-  if (input?.files?.length > 1 && serviceAssetKindForUploadTarget(item, memo) === "image") {
+  if (serviceAssetKindForUploadTarget(item, memo) === "image") {
     return addAndUploadPresenterReferenceMedia(input, item);
   }
   return uploadPresenterReferenceMediaAsset({
@@ -13271,10 +13271,10 @@ function currentServiceItemForMutation(serviceId, item) {
   return getServiceItems(serviceId).find((candidate) => candidate.id === itemId) || item;
 }
 
-async function uploadPresenterReferenceMediaAsset({ file, serviceId, item, input = null, silentSuccess = false, slideMode = "single" } = {}) {
-  const targetItem = currentServiceItemForMutation(serviceId, item);
+async function uploadPresenterReferenceMediaAsset({ file, imageFiles = null, serviceId, item, input = null, silentSuccess = false, slideMode = "single" } = {}) {
+  let targetItem = currentServiceItemForMutation(serviceId, item);
   const kind = presenterReferenceMediaKindForFile(file);
-  const memo = parseServiceItemMemo(targetItem?.memo);
+  let memo = parseServiceItemMemo(targetItem?.memo);
   const referenceMedia = isPresenterReferenceMediaItem(targetItem, memo);
   if (!file || !targetItem || !kind || !serviceItemAcceptsMediaAssetFile(targetItem, memo, kind)) {
     const expectedKind = serviceMemoElementType(memo);
@@ -13297,38 +13297,50 @@ async function uploadPresenterReferenceMediaAsset({ file, serviceId, item, input
   }
 
   if (input) input.disabled = true;
-  let uploadedPath = "";
-  const previousMemo = targetItem.memo;
-  const previousModified = targetItem._worshipElementTemplateModified;
+  const uploadedPaths = [];
+  let previousMemo = targetItem.memo;
+  let previousModified = targetItem._worshipElementTemplateModified;
   let writtenMemo = "";
   try {
-    const path = presenterReferenceMediaUploadPath(serviceId, targetItem, file);
-    uploadedPath = path;
-    const { error } = await state.client.storage
-      .from(PRESENTER_MEDIA_STORAGE_BUCKET)
-      .upload(path, file, { cacheControl: PRESENTER_MEDIA_CACHE_CONTROL, contentType: file.type || undefined, upsert: false });
-    if (error) throw error;
-    const { data } = state.client.storage.from(PRESENTER_MEDIA_STORAGE_BUCKET).getPublicUrl(path);
-    const url = String(data?.publicUrl || "").trim();
-    if (!url) throw new Error("업로드한 파일의 공개 주소를 만들지 못했습니다.");
+    const uploadedSlides = [];
+    for (const selectedFile of imageFiles || [file]) {
+      const path = presenterReferenceMediaUploadPath(serviceId, targetItem, selectedFile);
+      const { error } = await state.client.storage
+        .from(PRESENTER_MEDIA_STORAGE_BUCKET)
+        .upload(path, selectedFile, { cacheControl: PRESENTER_MEDIA_CACHE_CONTROL, contentType: selectedFile.type || undefined, upsert: false });
+      if (error) throw error;
+      uploadedPaths.push(path);
+      const { data } = state.client.storage.from(PRESENTER_MEDIA_STORAGE_BUCKET).getPublicUrl(path);
+      const url = String(data?.publicUrl || "").trim();
+      if (!url) throw new Error("업로드한 파일의 공개 주소를 만들지 못했습니다.");
+      uploadedSlides.push({ url, name: selectedFile.name });
+    }
+    const url = uploadedSlides[0].url;
+    // Upload yields to other renders; mutate the current projection, not a stale object.
+    targetItem = getServiceItems(serviceId).find(candidate => candidate.id === targetItem.id);
+    if (!targetItem) throw new Error("저장할 예배 항목을 다시 찾지 못했습니다.");
+    previousMemo = targetItem.memo;
+    previousModified = targetItem._worshipElementTemplateModified;
+    memo = parseServiceItemMemo(previousMemo);
 
     memo.elementType = kind;
     memo.componentType = kind;
     memo.inputMode = "asset";
-    if (kind === "image" && ["replace", "append"].includes(slideMode)) {
+    if ((kind === "image" || referenceMedia) && ["replace", "append"].includes(slideMode)) {
       const previousAsset = normalizeServiceAsset(memo.asset);
       const previousSlides = slideMode === "append"
-        ? normalizeServiceAssetSlides(previousAsset.slides)
+        ? (previousAsset.slides?.length ? normalizeServiceAssetSlides(previousAsset.slides)
+          : previousAsset.url ? [{ url: previousAsset.url, name: previousAsset.name, order: 1 }] : [])
         : [];
       const slides = [
         ...previousSlides,
-        { url, name: file.name, order: previousSlides.length + 1 },
+        ...uploadedSlides.map((slide, index) => ({ ...slide, order: previousSlides.length + index + 1 })),
       ];
       memo.asset = {
         ...previousAsset,
         kind,
         name: previousAsset.name || file.name,
-        url: previousAsset.url || url,
+        url: slides[0].url,
         slides,
       };
     } else {
@@ -13344,21 +13356,22 @@ async function uploadPresenterReferenceMediaAsset({ file, serviceId, item, input
     // and discard its just-uploaded asset before the persistence payload is built.
     const targetIndex = getServiceItems(serviceId).findIndex((candidate) => candidate.id === targetItem.id);
     if (targetIndex < 0) throw new Error("저장할 예배 항목을 다시 찾지 못했습니다.");
-    await saveServiceItemMutation(serviceId, targetIndex, { silent: true, renderAfterSave: false, throwOnError: true });
+    const saved = await saveServiceItemMutation(serviceId, targetIndex, { silent: true, renderAfterSave: false, throwOnError: true });
+    if (!saved) throw new Error("미디어 항목을 저장하지 못했습니다.");
     renderCurrentServiceModuleDetail();
     renderServiceList();
     const destination = referenceMedia ? "참고 화면" : String(targetItem.label || targetItem.raw_title || "항목").trim();
     if (!silentSuccess) showToast(`${serviceAssetFileKindLabel(kind)}을 ${destination}에 추가했습니다.`);
     return true;
   } catch (error) {
-    const current = getServiceItems(serviceId).find((candidate) => candidate.id === targetItem.id);
+    const current = getServiceItems(serviceId).find((candidate) => candidate.id === targetItem?.id);
     if (writtenMemo && current?.memo === writtenMemo) {
       current.memo = previousMemo;
       current._worshipElementTemplateModified = previousModified;
     }
-    if (uploadedPath && state.client?.storage?.from) {
+    if (uploadedPaths.length && state.client?.storage?.from) {
       try {
-        await state.client.storage.from(PRESENTER_MEDIA_STORAGE_BUCKET).remove([uploadedPath]);
+        await state.client.storage.from(PRESENTER_MEDIA_STORAGE_BUCKET).remove(uploadedPaths);
       } catch (cleanupError) {
         console.warn("Failed to clean up uploaded reference media after save failure.", cleanupError);
       }
@@ -13395,6 +13408,7 @@ async function addAndUploadPresenterReferenceMedia(input, initialItem = null) {
   if (!files.length || !serviceId) return;
   const initialMemo = parseServiceItemMemo(initialItem?.memo);
   const initialItemIsImage = Boolean(initialItem)
+    && !isPresenterReferenceMediaItem(initialItem, initialMemo)
     && serviceAssetKindForUploadTarget(initialItem, initialMemo) === "image";
   if (presenterReferenceMediaBatchServices.has(serviceId)) {
     showToast("이 예배의 파일을 추가 중입니다. 완료 후 다시 선택해 주세요.", "info");
@@ -13415,6 +13429,21 @@ async function addAndUploadPresenterReferenceMedia(input, initialItem = null) {
   let targetItem = initialItem || null;
   const isBatch = files.length > 1;
   try {
+    if (files.every(file => presenterReferenceMediaKindForFile(file) === "image")) {
+      if (!targetItem) targetItem = addPresenterReferenceMedia(serviceId, sectionKey, { focus: false, render: false });
+      const uploaded = targetItem && await uploadPresenterReferenceMediaAsset({
+        file: files[0], imageFiles: files, serviceId, item: targetItem, silentSuccess: true, slideMode: "append",
+      });
+      if (uploaded) showToast(`이미지 ${files.length}장을 추가했습니다.`);
+      else if (!initialItem && targetItem) {
+        const current = getServiceItems(serviceId).find(candidate => candidate.id === targetItem.id);
+        if (current && !hasServiceAsset(parseServiceItemMemo(current.memo).asset)) {
+          state.serviceItems[serviceId] = getServiceItems(serviceId).filter(candidate => candidate.id !== targetItem.id);
+          markServiceStructureDirty(serviceId);
+        }
+      }
+      return;
+    }
     for (const file of files) {
       if (!targetItem) {
         targetItem = addPresenterReferenceMedia(serviceId, sectionKey, { focus: false, render: false });
@@ -28971,7 +29000,7 @@ function renderPresenterAssetUpload(item, index, memo, serviceId) {
     <input type="file" ${acceptsMultiple ? "multiple" : ""} accept="${escapeAttr(reference ? PRESENTER_REFERENCE_MEDIA_ACCEPT : serviceAssetFileAcceptForKind(kind))}"
       ${reference ? "data-presenter-reference-media-file" : "data-service-item-asset-file"}
       data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${index}" />
-    <i data-lucide="upload"></i><span>파일 선택</span>
+    <i data-lucide="upload"></i><span>${kind === "image" ? "이미지 추가" : "파일 선택"}</span>
   </label>`;
 }
 

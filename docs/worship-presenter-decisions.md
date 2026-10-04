@@ -1,5 +1,11 @@
 # Worship / Presenter Decision Log
 
+## Image Upload Round Trip (2026-10-04)
+- Image selections append in order to one element, including one-file selections and legacy single-image assets. The chooser says image addition rather than implying replacement.
+- Stage an image batch before one element save; do not repeatedly save under a transient element ID. Reacquire the current item after asynchronous storage uploads.
+- A nonempty image slide list is authoritative even when it contains one page. Keep existing images on upload failure.
+- Test the upload handler through persistence row construction and rehydration, including projection refresh, ID assignment, sequential additions and failures (`smoke_image_upload_roundtrip.py`); synthetic rendering alone is insufficient.
+
 ## Section Query Schema (2026-10-04)
 - Section list queries must match the section table schema; `person` belongs only to elements. Both initial loading and DB refresh use the shared section select.
 - Check the actual client select against the schema, not only a separately maintained minimal column list. Regression: `tests/test_worship_section_select.cjs`.

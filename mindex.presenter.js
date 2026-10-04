@@ -1858,7 +1858,7 @@ function presenterElementSlideFromMemoCore(item, section, index, memo, displayTe
     const referenceMedia = compactSearchValue(label) === "참고화면"
       && String(memo?.inputMode || "").trim() === "asset";
     const assetSlides = normalizeServiceAssetSlides(asset.slides);
-    if (assetSlides.length > 1) {
+    if (assetSlides.length) {
       return assetSlides.map((slide, slideIndex) => {
         const slideSource = normalizePresenterMediaSource(slide.url);
         if (!slideSource) return null;
