@@ -69,6 +69,7 @@ def main():
               runPresenterAction=(action,id,options)=>actions.push(['live',action,options.index]);
               setPresenterPendingSlide=(id,index)=>actions.push(['pending',index]);
               renderPresenterControlState=()=>{};
+              updateSaveState=()=>{};
               scrollPresenterBoardToIndex=()=>{scrolls++};
               saveServiceItemPatch=async()=>{saves++};
               showToast=()=>{};
@@ -98,6 +99,13 @@ def main():
               await appendPresenterCitationReference(input);
               assert(!actions.length && input.value && !pendingPresenterCitationRequests.size,'failed lookup navigation/lock');
               assert(closed===1,'failed lookup left reserved window');
+              const beforeMissingTarget=JSON.stringify(state.serviceItems[serviceId][0]);
+              const beforeMissingDirty=state.dirty.service;
+              resolveServiceScriptureBeforeSave=async()=>{};
+              presenterSlidesForService=()=>[{...slide,elementId:'different'}];
+              input.value='마 5:46';await appendPresenterCitationReference(input);
+              assert(JSON.stringify(state.serviceItems[serviceId][0])===beforeMissingTarget,'missing target left citation draft behind');
+              assert(state.dirty.service===beforeMissingDirty,'missing target changed dirty state');
               const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.dataset.presenterCitationAutoOutput='';
               document.body.append(checkbox);checkbox.addEventListener('change',handleDetailChange);
               checkbox.checked=false;checkbox.dispatchEvent(new Event('change'));

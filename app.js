@@ -29858,6 +29858,23 @@ async function appendPresenterCitationReference(input) {
     return;
   }
 
+  const previousItem = { ...item };
+  const previousServiceDirty = state.dirty.service;
+  const previousElementDirtyIds = new Set(state.dirtyServiceElementIds.get(serviceId) || []);
+  const restoreCitationDraft = () => {
+    const currentItems = state.serviceItems[serviceId] || [];
+    const currentIndex = currentItems.findIndex((candidate) => String(candidate.id || "") === String(item.id || ""));
+    if (currentIndex >= 0) {
+      currentItems[currentIndex] = { ...previousItem };
+      state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(currentItems);
+    }
+    state.dirty.service = previousServiceDirty;
+    if (previousElementDirtyIds.size) state.dirtyServiceElementIds.set(serviceId, previousElementDirtyIds);
+    else state.dirtyServiceElementIds.delete(serviceId);
+    renderPresenterControlState(serviceId);
+    updateSaveState();
+  };
+
   const addedReferences = normalizeServiceScriptureReferenceList(rawValue);
   if (!addedReferences.length || addedReferences.some((reference) => !parseBibleReference(reference))) {
     showToast("성경 주소를 확인해 주세요.", "error");
@@ -29897,6 +29914,7 @@ async function appendPresenterCitationReference(input) {
       && presenterSlideMatchesScriptureReference(slide, targetReference)
     ));
     if (targetIndex < 0) {
+      restoreCitationDraft();
       showToast("해당 성구를 찾지 못했습니다.", "error");
       return;
     }
@@ -29917,6 +29935,7 @@ async function appendPresenterCitationReference(input) {
     }
     void saveServiceItemPatch(serviceId, index, { renderAfterSave: false, silent: true });
   } catch (error) {
+    restoreCitationDraft();
     showToast(error.message || "성구를 불러오지 못했습니다.", "error");
   } finally {
     if (reservedWindow && !reservedWindow.closed) reservedWindow.close();
