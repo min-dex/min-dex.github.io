@@ -5249,6 +5249,20 @@ def main() -> int:
                             });
                             return group.subgroups.map((subgroup) => subgroup.label);
                           })(),
+                          entrancePraiseSubgroupLabel: (() => {
+                            const group = { kind: 'main-praise', label: '찬양', subgroups: [] };
+                            addPresenterSlideToSubgroup(group, {
+                              slideIndex: 0,
+                              slide: {
+                                type: 'lyrics',
+                                sectionKey: 'praise',
+                                sectionLabel: '찬양',
+                                elementLabel: '입례찬양',
+                                elementId: 'entrance-praise',
+                              },
+                            });
+                            return group.subgroups.map((subgroup) => subgroup.label);
+                          })(),
                           formBadgeLabelContract: [
                             presenterFormGroupLabel({ marker: 'CB' }),
                             presenterFormGroupLabel({ formLabel: 'Chorus B' }),
@@ -5481,6 +5495,7 @@ def main() -> int:
                         )
                         and presenter_terms["collapsedBoardSubgroups"] == 0
                         and presenter_terms["mainPraiseSubgroupLabels"] == ["환영", "찬양 1"]
+                        and presenter_terms["entrancePraiseSubgroupLabel"] == ["입례찬양"]
                         and presenter_terms["formBadgeLabelContract"] == ["Chorus B", "Chorus B", "Chorus B"]
                         and presenter_terms["formBadgeRenderContract"] == {"hasDisplay": True, "hasRaw": False, "aria": True}
                         and presenter_terms["elementNameTitleContract"] == {

@@ -30737,11 +30737,14 @@ function addPresenterSlideToSubgroup(group, entry) {
   let subgroup = group.subgroups.find((item) => item.id === id);
   if (!subgroup) {
     const mainPraiseMarker = group.kind === "main-praise" && isPresenterPraiseSectionMarkerSlide(slide);
+    const entrancePraise = group.kind === "main-praise" && isPresenterEntrancePraiseSlide(slide);
     const number = group.kind === "main-praise" ? presenterMainPraiseSongSubgroupCount(group) + 1 : group.subgroups.length;
     const label = group.kind === "main-praise"
       ? mainPraiseMarker
         ? slide.elementLabel || "환영"
-        : presenterPraiseSubgroupLabel(slide.sectionLabel, number)
+        : entrancePraise
+          ? slide.elementLabel || "입례찬양"
+          : presenterPraiseSubgroupLabel(slide.sectionLabel, number)
       : slide.elementLabel || slide.sectionLabel || "";
     const title = presenterBoardSubgroupContentTitle(slide, label);
     subgroup = {
