@@ -18,12 +18,13 @@ vm.runInContext(source.slice(start, end), context);
 const group = { groupId: 'medley', role: 'primary', primaryItemId: 'a', itemIds: ['a', 'b'], title: '곡 A + 곡 B' };
 const items = [
   { id: 'a', label: '찬양 4', song_id: 'a', memo: JSON.stringify({ connectedPraise: group }), _worshipSectionKey: 'praise', _worshipSlotKey: 'praise.song.4' },
+  { id: 'entrance', label: '입례찬양', memo: '', _worshipSectionKey: 'entrance_praise', _worshipSlotKey: 'praise.entrance' },
   { id: 'b', label: '찬양 4', song_id: 'b', memo: JSON.stringify({ connectedPraise: { ...group, role: 'secondary' } }), _worshipSectionKey: 'praise', _worshipSlotKey: 'praise.song.4' },
   { id: 'c', label: '찬양 5', song_id: 'c', memo: '', _worshipSectionKey: 'praise', _worshipSlotKey: 'praise.song.5' },
-  { id: 'entrance', label: '입례찬양', memo: '', _worshipSectionKey: 'entrance_praise', _worshipSlotKey: 'praise.entrance' },
 ];
 context.normalizeMainPraiseSlots({}, items);
 assert.deepEqual(items.map(item => item.label), ['찬양 1', '찬양 2', '찬양 3', '입례찬양']);
+assert.deepEqual(items.map(item => item.id), ['a', 'b', 'c', 'entrance']);
 assert.deepEqual(JSON.parse(items[0].memo).connectedPraise.itemIds, ['a', 'b']);
 items.splice(1, 1);
 context.normalizeMainPraiseSlots({}, items);

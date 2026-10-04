@@ -992,12 +992,26 @@ function connectedPraiseItemTitle(item = {}, connected = {}, ordinal = 0) {
 }
 
 function normalizeMainPraiseSlots(service, items = []) {
+  const entranceIndex = items.findIndex((item) => serviceItemSlotKey(item) === "praise.entrance");
+  if (entranceIndex >= 0) {
+    const misplacedSlots = items.filter((item, index) => index > entranceIndex && isMainPraiseSlotItem(item));
+    if (misplacedSlots.length) {
+      for (let index = items.length - 1; index > entranceIndex; index -= 1) {
+        if (isMainPraiseSlotItem(items[index])) items.splice(index, 1);
+      }
+      const nextEntranceIndex = items.findIndex((item) => serviceItemSlotKey(item) === "praise.entrance");
+      items.splice(nextEntranceIndex, 0, ...misplacedSlots);
+    }
+  }
   const slots = items.filter(isMainPraiseSlotItem);
+  const canonicalSlot = slots.find((item) => String(item._worshipSectionKey || "").trim() === "praise") || slots[0];
   slots.forEach((item, index) => {
     const ordinal = index + 1;
     item.label = `찬양 ${ordinal}`;
-    item._worshipSectionKey = item._worshipSectionKey || "praise";
-    item._worshipSectionTitle = item._worshipSectionTitle || "찬양";
+    item._worshipSectionId = canonicalSlot?._worshipSectionId || item._worshipSectionId || "";
+    item._worshipSectionKey = canonicalSlot?._worshipSectionKey || "praise";
+    item._worshipSectionTitle = canonicalSlot?._worshipSectionTitle || "찬양";
+    item._worshipSectionOrder = Number(canonicalSlot?._worshipSectionOrder) || Number(item._worshipSectionOrder) || 0;
     item._worshipElementOrder = ordinal * 10;
     item._worshipSlotKey = `praise.song.${ordinal}`;
     item._worshipElementTemplateModified = true;
