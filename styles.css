@@ -5553,9 +5553,14 @@ body[data-theme="dark"] .service-week-card:hover {
   font-weight: var(--ui-row-weight);
   outline: 0;
   padding: 0 9px;
+  transition: background-color 120ms ease, box-shadow 120ms ease;
 }
 .svc-presenter-preparation-field-value::placeholder { color: color-mix(in srgb, var(--ink-5) 56%, transparent); opacity: 1; font-weight: var(--ui-meta-weight); }
-.svc-presenter-preparation-field-value:focus { background: color-mix(in srgb, var(--panel-2) 68%, transparent); }
+.svc-presenter-preparation-field-value:hover { background: color-mix(in srgb, var(--panel-2) 58%, transparent); }
+.svc-presenter-preparation-field-value:focus {
+  background: color-mix(in srgb, var(--panel-2) 68%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 82%, transparent);
+}
 .svc-presenter-preparation-empty { margin: 2px 0; color: var(--ink-4); font-size: var(--ui-meta-size); font-weight: var(--ui-meta-weight); }
 .svc-presenter-preparation-actions {
   display: flex;
@@ -5609,7 +5614,11 @@ body[data-theme="dark"] .service-week-card:hover {
   font-size: var(--ui-meta-size);
   padding: 0 8px;
 }
-.svc-presenter-preparation-fields--sidebar .svc-presenter-preparation-field-value:focus { background: var(--sidebar-hover-bg); }
+.svc-presenter-preparation-fields--sidebar .svc-presenter-preparation-field-value:hover { background: color-mix(in srgb, var(--sidebar-hover-bg) 76%, var(--sidebar-active-bg)); }
+.svc-presenter-preparation-fields--sidebar .svc-presenter-preparation-field-value:focus {
+  background: var(--sidebar-hover-bg);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 82%, transparent);
+}
 .svc-presenter-preparation-apply--sidebar {
   justify-self: start;
   height: 28px;
