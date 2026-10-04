@@ -480,6 +480,7 @@
 .presenter-output-root.no-chromakey .presenter-slide--liturgical-body {
   /* Center against the full stage without vertical safe padding, while keeping
      the same horizontal reading margin as fullscreen scripture. */
+  padding-block: 0;
   padding-inline: var(--presenter-text-inset);
 }
 .presenter-liturgical-body {

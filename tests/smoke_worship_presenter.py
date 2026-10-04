@@ -709,8 +709,9 @@ def main() -> int:
                 announcement_center_state = page.evaluate(
                     """
                     (() => {
-                      const host = document.createElement('div');
-                      host.style.cssText = 'position:fixed;left:-10000px;top:0;width:800px;height:450px;';
+                      const host = document.createElement('main');
+                      host.className = 'presenter-output-root no-chromakey';
+                      host.style.cssText = 'position:fixed;left:-10000px;top:0;transform:none;width:800px;height:450px;';
                       host.innerHTML = `
                         <section class="presenter-slide presenter-slide--liturgical-body" style="width:100%;height:100%;">
                           <div class="presenter-liturgical-body">
@@ -729,6 +730,7 @@ def main() -> int:
                       document.body.appendChild(host);
                       const bodyRect = host.querySelector('.presenter-liturgical-body').getBoundingClientRect();
                       const listRect = host.querySelector('.presenter-announcement-items').getBoundingClientRect();
+                      const stageRect = host.getBoundingClientRect();
                       const items = [...host.querySelectorAll('.presenter-announcement-item')];
                       const firstRect = items[0].getBoundingClientRect();
                       const lastRect = items[items.length - 1].getBoundingClientRect();
@@ -736,6 +738,7 @@ def main() -> int:
                         bodyHeight: Math.round(bodyRect.height),
                         listHeight: Math.round(listRect.height),
                         centerDelta: Math.round(((firstRect.top + lastRect.bottom) / 2) - ((bodyRect.top + bodyRect.bottom) / 2)),
+                        stageCenterDelta: Math.round(((firstRect.top + lastRect.bottom) / 2) - ((stageRect.top + stageRect.bottom) / 2)),
                       };
                       host.remove();
                       return state;
@@ -745,6 +748,7 @@ def main() -> int:
                 if (
                     announcement_center_state["bodyHeight"] == announcement_center_state["listHeight"]
                     and abs(announcement_center_state["centerDelta"]) <= 2
+                    and abs(announcement_center_state["stageCenterDelta"]) <= 2
                 ):
                     pass_("presenter-department-announcement-vertical-center", json.dumps(announcement_center_state, ensure_ascii=False))
                 else:
