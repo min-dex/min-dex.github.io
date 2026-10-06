@@ -20,6 +20,9 @@ The order is checked by `tests/solid_audit.py`.
 - `mindex.design-tokens.js` owns app-shell design tokens, button grammar
   labels, and shared UI copy. It must not own worship domain data.
 - `mindex.presenter.js` owns slide construction and presenter-output helpers.
+- `mindex.worship-model.js` owns pure worship slot and media-payload rules,
+  including media kind aliases, ordered image decks, audio, and timing. These
+  rules run without controller state, DOM, storage, or database dependencies.
 - `mindex.worship-persistence.js` owns source-reference normalization, history
   compaction, and save-row construction, validation, preservation, and ordering.
   It loads before `app.js`; its helpers run after app bootstrap. It does not

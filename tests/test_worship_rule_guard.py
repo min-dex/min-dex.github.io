@@ -11,7 +11,9 @@ WORSHIP_INPUT_JS = Path(__file__).resolve().parents[1] / "mindex.worship-input.j
 
 
 def read_app_js() -> str:
-    return APP_JS.read_text(encoding="utf-8") + "\n" + APP_JS.with_name("mindex.worship-persistence.js").read_text(encoding="utf-8")
+    return "\n".join(path.read_text(encoding="utf-8") for path in (
+        APP_JS, APP_JS.with_name("mindex.worship-persistence.js"), APP_JS.with_name("mindex.worship-model.js"),
+    ))
 
 
 def read_styles_css() -> str:

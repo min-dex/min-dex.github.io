@@ -95,3 +95,16 @@ not a passing audit and no thresholds were raised:
 This narrows ownership, but does not reduce the total runtime code size or
 global coupling. Function-name collisions remain zero and navigation geometry
 remains 47/47. Further extractions require independent regression coverage.
+
+### Media Model Checkpoint
+
+The next bounded extraction moves seven media-payload helpers and their two
+kind constants into `mindex.worship-model.js`. Declaration bodies and all
+remaining app statements are unchanged. The model executes in an isolated VM
+without app globals; tests cover ordered decks, alias normalization, audio,
+timing, input immutability, and canonical round-trips. UI, upload orchestration,
+and RPC behavior remain with their existing owners.
+
+After this phase, app.js has 33440 lines and 1795 functions: 129 lines and seven
+functions fewer than the persistence checkpoint. All other audit metrics above
+are unchanged. The six global ratchet failures remain baseline debt, not a pass.
