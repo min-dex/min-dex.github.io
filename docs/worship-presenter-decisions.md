@@ -1,6 +1,7 @@
 # Worship / Presenter Decision Log
 
 ## Source Duplicate Maintenance (2026-10-06)
+- Follow-up approved by the user: Sep 27 second/third citations restored to Exodus 17:1-7; 15:22-25; Psalm 119:105 in both canonical elements and source. Afternoon citations retain the filled superset including Philippians 4:6-7; reference image source uses the canonical `I must tell Jesus.jpg` display name without changing its URL. Three revision-checked transactions/readbacks are backed up under `backups/source-review-20261006/`. Six other differing groups remain; their contents were not chosen automatically.
 - Removed 49 identical source-block groups across six services through document-only aggregate RPC saves. Each group matched exactly one canonical element; differing groups were preserved.
 - Backed up the original aggregates and exact revision-checked requests locally under `backups/source-cleanup-20261006/`. Readback verified every section, element and slide row unchanged and exactly one revision increment per service.
 - Ten differing groups remain for review: Sep 27 second/third citations; Sep 27 afternoon citations/reference image; Oct 4 youth praise 2; Oct 4 afternoon sermon/benediction; Oct 2 monthly praise 5/reading/sermon. Never choose a source copy solely by position.
