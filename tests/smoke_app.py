@@ -505,7 +505,7 @@ def main() -> int:
 
     full_save_end = app_source.find("async function saveServiceItemPatch", full_save_start)
     full_save_body = app_source[full_save_start:full_save_end]
-    service_update_index = full_save_body.find('.from("mindex_worship_services")')
+    service_update_index = full_save_body.find('await atomic.commit(')
     full_save_snapshot_index = full_save_body.find('captureWorshipRecoverySnapshot(service, "before-full-save")')
     full_save_validate_index = full_save_body.find("validateWorshipPersistenceRows(rows, { serviceId });")
     if (
@@ -521,14 +521,12 @@ def main() -> int:
     element_patch_start = app_source.find("async function saveWorshipServiceElementPatch")
     element_patch_end = app_source.find("async function syncSharedSundayContentAfterSave", element_patch_start)
     element_patch_body = app_source[element_patch_start:element_patch_end]
-    element_upsert_index = element_patch_body.find('.from("mindex_worship_sections")')
-    element_service_update_index = element_patch_body.find('.from("mindex_worship_services")')
+    element_commit_index = element_patch_body.find('await atomic.commit(')
     element_snapshot_index = element_patch_body.find('captureWorshipRecoverySnapshot(service, "before-element-patch")')
     if (
         element_snapshot_index >= 0
-        and element_upsert_index >= 0
-        and element_service_update_index >= 0
-        and element_snapshot_index < element_upsert_index < element_service_update_index
+        and element_commit_index >= 0
+        and element_snapshot_index < element_commit_index
     ):
         pass_("worship-element-patch-captures-recovery-snapshot")
     else:
@@ -537,7 +535,7 @@ def main() -> int:
     delete_start = app_source.find("async function deleteService(serviceId)")
     delete_end = app_source.find("function renderServiceTypeFilters", delete_start)
     delete_body = app_source[delete_start:delete_end]
-    delete_index = delete_body.find('.delete()')
+    delete_index = delete_body.find('await atomic.remove(serviceId)')
     delete_snapshot_index = delete_body.find('captureWorshipRecoverySnapshot(service, "before-service-delete")')
     if delete_snapshot_index >= 0 and delete_index >= 0 and delete_snapshot_index < delete_index:
         pass_("worship-delete-captures-recovery-snapshot")

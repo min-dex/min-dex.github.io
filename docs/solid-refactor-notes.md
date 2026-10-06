@@ -123,3 +123,18 @@ functions. The audit's coupling marker count drops from 3156 to 3152 because
 the extracted singleton helper has a local variable named `state`; this is
 not a reduction in actual global state access. Presenter/CSS metrics, thresholds,
 and geometry are unchanged; the same six global ratchets still fail.
+
+### Release Integration
+
+Release `20261006-domain-rules` integrates the three checkpoints on top of
+`7a2047b4`. Its upstream repeated-form numbering fix is preserved in the moved
+model; repeated `V1-C1-V1-C1` therefore retains its numbers. Upstream's updated
+audit thresholds are retained unchanged, not attributed to this refactor.
+The stricter pre-integration thresholds above remain outstanding structural
+debt even if the current upstream audit passes.
+
+Integration testing also caught an upstream regression where a saved preset
+with `suggested` strength could be replaced during playback. The release restores
+stored-sequence precedence for every strength, covered by the special-hymn
+browser test; repeated-number handling remains unchanged. Three stale recovery
+snapshot assertions now check capture-before-RPC-commit/remove ordering.

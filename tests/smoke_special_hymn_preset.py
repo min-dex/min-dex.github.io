@@ -59,6 +59,8 @@ def main():
                 const item={label:'특송',_worshipSectionKey:'special_song',memo:serializeServiceItemMemo({
                   formHint:savedHint,formPreset:{forms:savedHint.split('-'),hint:savedHint,strength}
                 })};
+                assert(presenterServiceItemFormPreset({forms:all},item,song).forms.join('-')===savedHint,
+                  'saved preset replaced before slide planning: '+strength);
                 const plan=presenterFormPlanForServiceItem({forms:all},item,song);
                 assert(JSON.stringify(plan.forms.map(f=>f.id))===JSON.stringify(['v1','c','v2','c','v4','c']), 'saved sequence overwritten: '+strength);
                 assert(serviceItemEffectiveFormHint(item)===savedHint,'shown sequence differs: '+strength);

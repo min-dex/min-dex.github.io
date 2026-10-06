@@ -653,10 +653,8 @@ function presenterFormPlanForServiceItem(version = {}, item, song = null) {
 function presenterServiceItemFormPreset(version = {}, item = {}, song = null, { includePlaybackFallback = true } = {}) {
   if (serviceItemFormPresetDisabled(item)) return null;
   const itemPreset = serviceItemFormPreset(item);
-  const itemPresetStrength = String(itemPreset?.strength || "").trim().toLowerCase();
-  // A suggested template only fills a gap. A song's explicit DB form remains
-  // authoritative; manually saved service forms still win over both.
-  if (itemPreset?.forms?.length && itemPresetStrength !== "suggested") {
+  // Defaults only fill an empty item; a stored sequence keeps its playback order.
+  if (itemPreset?.forms?.length) {
     const saved = { ...itemPreset, strength: "manual" };
     return isPresenterSpecialSongItem(item)
       && versionEffectivePraiseTypes(song, version).includes("hymn")
