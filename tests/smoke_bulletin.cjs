@@ -435,6 +435,22 @@ const server=http.createServer((req,res)=>{
     await page.waitForFunction(()=>!document.querySelector('[data-bulletin-print]').disabled);
     assert.equal(await page.locator('[data-bulletin-field="church"]').inputValue(),'기독교대한성결교회 검단우리교회','Dated common copy automatically supplies new bulletins');
     assert.equal(await page.locator('[data-bulletin-field="issue"]').inputValue(),'','Unknown future issue must not be guessed');
+    await page.evaluate(async()=>{
+      await leaveBulletinForTest();
+      const id='33333333-3333-4333-8333-333333333333';
+      bulletinSaved.service={...bulletinSaved.service,id,service_type_id:'children',service_date:'2026-10-04',title:'어린이부'};
+      state.services.push(normalizeWorshipService(bulletinSaved.service));
+      state.serviceTypes.push({id:'children',name:'어린이부',display_name:'어린이부'});
+      await runServiceBulletinAction('open',id);
+    });
+    await page.waitForFunction(()=>document.querySelector('[data-bulletin-print]')?.disabled===false);
+    assert.equal(await page.evaluate(()=>bulletinPageTabTitle('33333333-3333-4333-8333-333333333333')),'어린이부 주보');
+    assert.match(await page.locator('.bulletin-canvas').textContent(),/꿈꾸는 어린이부/);
+    assert.doesNotMatch(await page.locator('.bulletin-canvas').textContent(),/RIA|청년부 기도 모임|김석범/);
+    assert.equal(await page.locator('[data-bulletin-field="memoryVerse"]').count(),1);
+    await page.locator('[data-bulletin-save]').click();
+    await page.waitForFunction(()=>bulletinTest.drafts['33333333-3333-4333-8333-333333333333']?.layout.design==='children');
+    console.log('PASS children entry, tab identity, isolated content and shared DB adapter');
     assert.deepEqual(errors,[]);
     if(process.env.BULLETIN_LIVE_STDIN) {
       const snapshot=JSON.parse(fs.readFileSync(0,'utf8'));

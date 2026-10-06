@@ -14608,7 +14608,7 @@ function presenterViewServiceId() {
 
 function bulletinPageTabTitle(serviceId) {
   const service = state.services.find(s => s.id === serviceId);
-  return service ? "청년부 주보" : "주보";
+  return service ? `${worshipAppServiceTypeId(service.type_id)==="children"?"어린이부":"청년부"} 주보` : "주보";
 }
 
 function currentPageTabTitle() {
@@ -14999,13 +14999,13 @@ function renderWorshipModeTabs(serviceId, activeMode = state.module === "present
 }
 
 function serviceSupportsBulletin(service = null) {
-  return Boolean(service?.id && !service._expected && worshipAppServiceTypeId(service.type_id || service.service_type_id) === "young-adult"
+  return Boolean(service?.id && !service._expected && ["young-adult","children"].includes(worshipAppServiceTypeId(service.type_id || service.service_type_id))
     && !serviceIsNoGathering(service));
 }
 
 function getBulletinSidebarServices() {
   const query=normalizeSearchValue(state.search);
-  return state.services.filter(serviceSupportsBulletin).filter(service=>!query||normalizeSearchValue(`${service.date} 청년부 주보 ${service.title||""}`).includes(query)).sort((a,b)=>b.date.localeCompare(a.date));
+  return state.services.filter(serviceSupportsBulletin).filter(service=>!query||normalizeSearchValue(`${service.date} ${bulletinPageTabTitle(service.id)} ${service.title||""}`).includes(query)).sort((a,b)=>b.date.localeCompare(a.date));
 }
 
 function renderBulletinList() {
@@ -15013,7 +15013,7 @@ function renderBulletinList() {
   if (!state.client || state.connectionError) {refs.songList.innerHTML=renderConnectionList(state.connectionError);return;}
   if (state.serviceError || !state.serviceTypes.length) {refs.songList.innerHTML=state.serviceError?renderListEmptyState("주보 목록을 불러오지 못했습니다",state.serviceError):renderLoadingList();return;}
   const services=getBulletinSidebarServices();
-  refs.songList.innerHTML=`<div class="service-sidebar"><section class="service-sidebar-section"><div class="service-sidebar-head"><span>청년부 주보</span></div><div class="service-sidebar-stack service-sidebar-stack--navigation">${services.map(service=>`<button type="button" class="service-type-row${state.presenterBulletinServiceId===service.id?" active":""}" data-bulletin-open="${escapeAttr(service.id)}" aria-current="${state.presenterBulletinServiceId===service.id?"page":"false"}"><span>${escapeHtml(formatServiceDate(service))}</span></button>`).join("")||'<p class="muted">표시할 주보가 없습니다.</p>'}</div></section></div>`;
+  refs.songList.innerHTML=`<div class="service-sidebar"><section class="service-sidebar-section"><div class="service-sidebar-head"><span>주보</span></div><div class="service-sidebar-stack service-sidebar-stack--navigation">${services.map(service=>`<button type="button" class="service-type-row${state.presenterBulletinServiceId===service.id?" active":""}" data-bulletin-open="${escapeAttr(service.id)}" aria-current="${state.presenterBulletinServiceId===service.id?"page":"false"}"><span>${escapeHtml(formatServiceDate(service))} · ${escapeHtml(bulletinPageTabTitle(service.id))}</span></button>`).join("")||'<p class="muted">표시할 주보가 없습니다.</p>'}</div></section></div>`;
   finishListRender();
 }
 
@@ -15059,7 +15059,7 @@ async function loadServiceBulletinSource(serviceId, settings = {}) {
   }
   if (!aggregate?.service || !Array.isArray(aggregate.sections) || !Array.isArray(aggregate.elements)) throw new Error("저장된 예배 자료를 확인하지 못했습니다.");
   const normalized = normalizeWorshipService(aggregate.service);
-  if (!serviceSupportsBulletin(normalized)) throw new Error("청년부 예배를 선택해 주세요.");
+  if (!serviceSupportsBulletin(normalized)) throw new Error("청년부 또는 어린이부 예배를 선택해 주세요.");
   const months = [normalized.date.slice(0, 7), settings.eventsMonth, settings.rosterMonth]
     .filter(v => /^\d{4}-(0[1-9]|1[0-2])$/.test(v || "")).sort();
   const monthStart = `${months[0]}-01`;
@@ -15070,12 +15070,12 @@ async function loadServiceBulletinSource(serviceId, settings = {}) {
   const [songs, scriptures, calendar, bulletinServices, history] = await Promise.all([
     songIds.length ? read(state.client.from("mindex_songs").select("id,title,hymn_no").in("id", songIds)) : [],
     scriptureIds.length ? read(state.client.from("mindex_scriptures").select("id,reference").in("id", scriptureIds)) : [],
-    read(state.client.from("mindex_sunday_calendar").select("date,liturgical,note,church_schedule,young_adult_prayer").gte("date", monthStart).lte("date", rangeEnd).order("date")),
+    read(state.client.from("mindex_sunday_calendar").select("date,liturgical,note,church_schedule,young_adult_prayer,children_prayer").gte("date", monthStart).lte("date", rangeEnd).order("date")),
     read(state.client.from("mindex_worship_services").select("id,service_type_id,service_date,title,service_alias,source_ref").gte("service_date", monthStart).lte("service_date", rangeEnd).order("service_date")),
     loadBulletinReusableContent(aggregate.service),
   ]);
   const source = window.MindexBulletin.resolveSource({...aggregate, songs: songs || [], scriptures: scriptures || [], calendar: calendar || [], settings, history,
-    services: (bulletinServices || []).map(normalizeWorshipService).filter(s => worshipAppServiceTypeId(s.type_id) === "young-adult")
+    services: (bulletinServices || []).map(normalizeWorshipService).filter(s => worshipAppServiceTypeId(s.type_id) === worshipAppServiceTypeId(normalized.type_id))
       .map(s => ({date: s.date, noGathering: serviceIsNoGathering(s), label: s.alias || (serviceIsNoGathering(s) ? (/연합|헌신예배/.test(s._worshipSourceRef?.no_gathering_reason||"")?"연합예배":"집회 없음") : s.title) || "집회 없음"}))});
   source.autoBackground = bulletinBackgroundForService(normalized, (calendar || []).find(row => row.date === normalized.date));
   return source;

@@ -9,10 +9,11 @@
   const artworkPath=key=>`assets/worship-backgrounds/${themeArtwork[key]}`;
   const logoPath="assets/bulletin/ria-mark.webp";
   const inkLogoPath="assets/bulletin/ria-mark-ink.svg";
+  const childrenLogoPath="assets/bulletin/children-mark.png";
   const assets = [logoPath,inkLogoPath];
-  const fields = {eventsText:"교회 일정 (주보용)",issue:"호수", church:"교회명", news:"청년부 소식", welcome:"환영 문구", notices:"상시 안내", staff:"섬김이 명단",
-    motto:"공동체 표어", verse:"표어 성구", website:"웹사이트", address:"주소", meeting:"예배 시간·장소", outline:"설교 요점", leader:"인도자", announcer:"광고 담당", sermonReference:"요약 본문·쪽수", outlineTitle:"요약 표제"};
-  const frameLabels={eventsMonth:"일정 월",prayersMonth:"위원표 월",insideChurch:"안쪽 교회명",insideBrand:"안쪽 공동체명",eventsTitle:"교회 일정 제목",events:"교회 일정",newsTitle:"청년부 소식 제목",liturgical:"교회력 명칭",
+  const fields = {eventsText:"교회 일정 (주보용)",issue:"호수", church:"교회명", news:"부서 소식", welcome:"환영 문구", notices:"상시 안내", staff:"섬김이 명단",
+    motto:"공동체 표어", verse:"표어 성구", website:"웹사이트", address:"주소", meeting:"예배 시간·장소", outline:"설교 요점", leader:"인도자", announcer:"광고 담당", sermonReference:"요약 본문·쪽수", outlineTitle:"요약 표제",monthlyTheme:"이달의 주제",memoryVerse:"새길 말씀",memoryReference:"새길 말씀 출처",readingPlan:"잠잠성경 읽기표"};
+  const frameLabels={eventsMonth:"일정 월",prayersMonth:"위원표 월",insideChurch:"안쪽 교회명",insideBrand:"안쪽 공동체명",eventsTitle:"교회 일정 제목",events:"교회 일정",newsTitle:"부서 소식 제목",monthlyThemeTitle:"이달의 주제 제목",themeMonth:"주제 월",memoryTitle:"새길 말씀 제목",readingTitle:"잠잠성경 제목",readingHelp:"읽기 안내",readingFooter:"확인 안내",liturgical:"교회력 명칭",
     orderTitle:"예배 순서 제목",order:"예배 순서",leader:"인도자",prayersTitle:"예배 위원 제목",prayers:"예배 위원",
     sermon:"설교 제목·본문",notesTitle:"설교 노트 제목",notes:"노트 줄"};
   const frameLabel=id=>fields[id]||frameLabels[id]||id;
@@ -35,7 +36,14 @@
       || (Object.hasOwn(themeArtwork,doc.settings?.theme||"")?{key,url:artworkPath(doc.settings.theme)}:null);
   }
   const validMonth=v=>/^\d{4}-(0[1-9]|1[0-2])$/.test(v||"");
-  function profileForDate(date) {
+  function profileForDate(date,department="young-adult") {
+    if(department==="children")return {church:"기독교대한성결교회 검단우리교회",website:"gdwoori.org",
+      address:`인천광역시 ${date>="2026-07-05"?"검단구":"서구"} 완정로 178번안길 1`,
+      welcome:"오늘도 어린이부 예배에 오신 여러분을\n환영하고 축복합니다 :)",meeting:"주일 오전 10:50 · 2층 교육관",
+      motto:"말씀이 기준이 되어 하나님이 함께하심으로\n말씀 안에서 사랑을 실천하는 예배자가 되겠습니다",
+      verse:"이 예언의 말씀을 읽는 자와 듣는 자와 그 가운데에 기록한 것을 지키는 자는 복이 있나니 때가 가까움이라\n— 요한계시록 1:3",
+      notices:"◈ 잠들기 전, 잠언 읽기! 잠잠성경을 매일 읽고 체크해서 선생님들께 확인 받아요!\n◈ 연말에 잠잠성경과 주보 모으기 시상식이 있습니다!",
+      staff:"위임목사 김남영 목사 · 담당 교역자 박소영 전도사\n부장 유기숙 권사 · 총무 박지훈 청년"};
     if(!date||date<"2024-11-24")return {};
     const modern=date>="2025-02-02";
     const hour=date>="2026-05-31"?"오후 3시":date>="2025-09-14"?"오전 11시":"오전 10시";
@@ -48,7 +56,7 @@
       notices:[date>="2025-04-13"?`◈ 청년부 기도 모임(매주 토요일 ${hour} / 1층 청년부실)에 많은 참여 바랍니다.`:"예배 시작 10분 전에 모여 함께 기도로 준비해 주세요.","◈ 검단우리교회는 신천지 추수꾼 및 각종 이단의 출입을 금지합니다."].join("\n"),
       staff:date>="2025-12-07"?"위임목사 김남영 목사 · 담당 교역자 김석범 목사\n회장 김음파 청년 · 총무 이재희 청년\n서기 박지훈 청년 · 회계 서영윤 청년":""};
   }
-  function monthlyView(calendar,date,settings={},services=[]) {
+  function monthlyView(calendar,date,settings={},services=[],department="young-adult") {
     const selectedEventsMonth=validMonth(settings.eventsMonth);
     const eventsMonth=selectedEventsMonth?settings.eventsMonth:date.slice(0,7);
     const rosterMonth=validMonth(settings.rosterMonth)?settings.rosterMonth:date.slice(0,7);
@@ -58,8 +66,8 @@
     const nextDate=next.toISOString().slice(0,10),prayers=[];
     do {
       const day=cursor.toISOString().slice(0,10),row=calendar.find(r=>r.date===day)||{};
-      const exception=services.find(r=>r.date===day&&r.noGathering)||(/청년부\s*야외예배/.test(row.church_schedule||"")?{label:"야외예배"}:null);
-      prayers.push({date:day,person:exception?`(${exception.label||"집회 없음"})`:clean(row.young_adult_prayer)||"미정",next:day===nextDate});
+      const exception=services.find(r=>r.date===day&&r.noGathering)||(department!=="children"&&/청년부\s*야외예배/.test(row.church_schedule||"")?{label:"야외예배"}:null);
+      prayers.push({date:day,person:exception?`(${exception.label||"집회 없음"})`:clean(row[department==="children"?"children_prayer":"young_adult_prayer"])||"미정",next:day===nextDate});
       cursor.setUTCDate(cursor.getUTCDate()+7);
     } while(prayers[prayers.length-1].date.slice(0,7)===rosterMonth);
     return {eventsMonth,rosterMonth,prayers,events:calendar.filter(r=>r.date.slice(0,7)===eventsMonth&&clean(r.church_schedule))
@@ -107,9 +115,9 @@
 ];
 
   // Reuse only explicitly shared content, never last week's worship or news.
-  function reusableContent(date,month,history=[]) {
-    const common=profileForDate(date),commonOverrides={};
-    let events=archiveMonthlyEvents.filter(row=>row.date<=date&&row.date.slice(0,7)===month).at(-1)?.events;
+  function reusableContent(date,month,history=[],department="young-adult") {
+    const common=profileForDate(date,department),commonOverrides={};
+    let events=department==="children"?undefined:archiveMonthlyEvents.filter(row=>row.date<=date&&row.date.slice(0,7)===month).at(-1)?.events;
     let eventsOrigin=events!==undefined?"실주보 월간 일정":"교회력 일정";
     const rows=history.filter(row=>row.date<=date).slice().sort((a,b)=>a.date.localeCompare(b.date)||String(a.id||"").localeCompare(String(b.id||"")));
     for(const row of rows) {
@@ -128,10 +136,10 @@
     const parts={news:[],welcome:[],notices:[]};
     for(const paragraph of raw.split(/\n(?=\s*(?:\d+[.)]|[①-⑳◈])\s*)|\n\s*\n/)) {
       const lines=paragraph.trim().split("\n");
-      if(/^오늘도 청년부 예배에 오신 여러분을/.test(lines[0])&&/환영.*축복/.test(lines[0]))parts.welcome.push(lines.shift());
+      if(/^오늘도 (?:청년부|어린이부) 예배에 오신 여러분을/.test(lines[0])&&/환영.*축복/.test(lines[0]))parts.welcome.push(lines.shift());
       const text=lines.join("\n").trim();if(!text)continue;
       const body=text.replace(/^(?:\d+[.)]|[①-⑳◈])\s*/,"");
-      if(/^(?:청년부\s*기도 모임\s*\(매주|검단우리교회는 신천지)/.test(body))parts.notices.push(`◈ ${body}`);
+      if(/^(?:청년부\s*기도 모임\s*\(매주|검단우리교회는 신천지|잠들기 전, 잠언 읽기!|연말에 잠잠성경과 주보 모으기)/.test(body))parts.notices.push(`◈ ${body}`);
       else parts.news.push(text);
     }
     return Object.fromEntries(Object.entries(parts).map(([key,lines])=>[key,lines.join("\n")]));
@@ -294,8 +302,9 @@
     const scriptureById = new Map(scriptures.map(s=>[s.id,s]));
     const sectionById = new Map(sections.map(s=>[s.id,s]));
     const date = service.service_date;
+    const department=service.service_type_id==="children"?"children":"young-adult";
     const today = calendar.find(r=>r.date===date) || {};
-    const source = {id:service.id, date, leader:clean(service.worship_leader), liturgical:[clean(today.liturgical),clean(today.note)].filter(Boolean).join(" / "),
+    const source = {id:service.id, date, department, leader:clean(service.worship_leader), liturgical:[clean(today.liturgical),clean(today.note)].filter(Boolean).join(" / "),
       sermon:"", scripture:"", news:"", order:[], prayers:[], events:"", loadedAt:new Date().toISOString()};
     const hasReading=elements.some(e=>sectionById.get(e.section_id)?.section_key==="scripture_reading");
     const ordered = elements.filter(e=>sectionById.has(e.section_id)).sort((a,b)=>
@@ -332,7 +341,7 @@
         continue;
       }
       let person=clean(el.person);
-      if (label.replace(/\s/g,"")==="대표기도") person=clean(today.young_adult_prayer)||person;
+      if (label.replace(/\s/g,"")==="대표기도"||(department==="children"&&label.replace(/\s/g,"")==="봉헌기도")) person=clean(today[department==="children"?"children_prayer":"young_adult_prayer"])||person;
       if(compactOrder&&!person&&["사도신경","찬양","찬송","기도","성경봉독","결단찬양","결단기도","봉헌찬양","봉헌","파송찬양"].includes(label))person="다같이";
       if (content===label||(compactOrder&&["title_person","title_assignee"].includes(type)&&content===person)) content="";
       if(compactOrder&&["사도신경","주기도문","공동체 고백"].includes(label))content="";
@@ -342,8 +351,8 @@
     }
     source.announcements=source.news;
     Object.assign(source,announcementParts(source.news));
-    Object.assign(source,monthlyView(calendar,date,settings,services));
-    const reused=reusableContent(date,source.eventsMonth,history);
+    Object.assign(source,monthlyView(calendar,date,settings,services,department));
+    const reused=reusableContent(date,source.eventsMonth,history,department);
     source.common=reused.common;source.commonOverrides=reused.commonOverrides;
     source.calendarEvents=source.events;
     if(reused.events!==undefined){source.events=reused.events;source.eventsOrigin=reused.eventsOrigin;}
@@ -366,10 +375,28 @@
       const lastPraise=source.order.findLastIndex(r=>["찬양","찬송"].includes(r.label));
       if(lastPraise>=0&&source.order[lastPraise+1]?.label==="성경봉독")source.order.splice(lastPraise+1,0,{id:"bulletin-communal-prayer",label:"기도",content:"",person:"다같이"});
     }
+    if(department==="children"){
+      source.curriculumMonth=date.slice(0,7);
+      source.monthlyTheme=({"2026-09":"문화\n빛의 자녀다운 생활\n우리는 세상의 빛","2026-10":"사회질서\n사회질서를 지켜요\n말씀에 따라 사회의 규범을 지켜요"})[date.slice(0,7)]||"";
+      for(const row of history.filter(r=>r.date<=date&&r.date.slice(0,7)===date.slice(0,7)).sort((a,b)=>a.date.localeCompare(b.date)))if(typeof row.content?.fields?.monthlyTheme==="string")source.monthlyTheme=row.content.fields.monthlyTheme;
+      source.memoryVerse=date==="2026-10-04"?"너희가 이방인 중에서 행실을 선하게 가져\n너희를 악행한다고 비방하는 자들로 하여금\n너희 선한 일을 보고 오시는 날에\n하나님께 영광을 돌리게 하려 함이라":"";
+      source.memoryReference=date==="2026-10-04"?"베드로전서 2:12":"";
+      source.readingPlan="";
+      if(date>="2026-08-30"){
+        let days=7;
+        while(days<28&&services.some(r=>r.noGathering&&r.date===new Date(Date.parse(date+"T00:00:00Z")+days*86400000).toISOString().slice(0,10)))days+=7;
+        source.readingPlan=Array.from({length:days},(_,i)=>{
+          const day=new Date(Date.parse(date+"T00:00:00Z")+i*86400000),elapsed=Math.round((day-Date.parse("2026-10-04T00:00:00Z"))/86400000);
+          return `${shortDate(day.toISOString().slice(0,10))} (${"일월화수목금토"[day.getUTCDay()]}) · 잠언 ${((15+elapsed)%31+31)%31+1}장`;
+        }).join("\n");
+      }
+      if(date==="2026-10-04")source.issue="29";
+    }
     return source;
   }
 
   function defaultFrames(design) {
+    if(design==="children")return childrenFrames();
     if(design==="editorial")return editorialFrames();
     const frames=[];
     const text=(id,page,x,y,w,h,size,binding,align="left",weight=500)=>frames.push({id,page,x,y,w,h,size,binding,align,weight,type:"text"});
@@ -401,6 +428,29 @@
     frames.push({id:"notes",page:1,x:158.5,y:160,w:128.5,h:30,size:10,type:"rules",binding:""});
     text("insideChurch",1,10,2.5,128.5,5,10,"field:church");
     text("insideBrand",1,158.5,202.5,128.5,5,10,"label:RIA 청년부","right");
+    return frames;
+  }
+
+  function childrenFrames(){
+    const frames=defaultFrames().filter(f=>!["prayersTitle","prayersMonth","prayers","sermon","outline","notesTitle","notes"].includes(f.id));
+    for(const f of frames){
+      if(f.id==="newsTitle")f.binding="label:어린이부 소식";
+      if(f.id==="insideBrand")f.binding="label:꿈꾸는 어린이부";
+      if(f.id==="leader")Object.assign(f,{x:85,w:53.5});
+      if(f.id==="motto")Object.assign(f,{y:167.5,h:15,size:12.5});
+      if(f.id==="verse")Object.assign(f,{y:185,h:12.5,size:10});
+    }
+    const add=(id,x,y,w,h,size,binding,type="text",align="left",weight=500)=>frames.push({id,page:1,x,y,w,h,size,binding,type,align,weight});
+    add("monthlyThemeTitle",158.5,20,90,10,17.5,"label:이달의 주제","text","left",700);
+    add("themeMonth",257,20,30,12.5,10,"month:curriculumMonth","text","right");
+    add("monthlyTheme",158.5,35,128.5,30,15,"field:monthlyTheme","text","center",700);
+    add("memoryTitle",158.5,72.5,60,10,17.5,"label:새길 말씀","text","left",700);
+    add("memoryReference",221,72.5,66,12.5,10,"field:memoryReference","text","right");
+    add("memoryVerse",158.5,87.5,128.5,35,12.5,"field:memoryVerse");
+    add("readingTitle",158.5,127.5,75,10,17.5,"label:잠잠성경","text","left",700);
+    add("readingHelp",233.5,127.5,53.5,10,10,"label:잠들기 전, 잠언 읽기!","text","right");
+    add("readingPlan",158.5,142.5,128.5,52.5,10,"field:readingPlan","reading");
+    add("readingFooter",158.5,195,128.5,7.5,10,"label:부모님께 확인받고, 선생님께 달란트 받자!","text","right");
     return frames;
   }
 
@@ -520,6 +570,7 @@
   }
   async function readyBackground(doc) {
     await readyAssets();
+    if(doc.source?.department==="children")await new Promise((resolve,reject)=>{const image=new Image();image.onload=resolve;image.onerror=()=>reject(new Error("어린이부 로고를 불러오지 못했습니다."));image.src=new URL(childrenLogoPath,document.baseURI).href;});
     const background=backgroundFor(doc);
     if(backgroundKey(doc.settings?.theme)==="auto"&&!background)throw new Error("날짜·부서에 맞는 배경이 없습니다. 민덱스 배경에 등록하거나 직접 선택해 주세요.");
     if(doc.settings?.theme&&!background&&!["paper","ink"].includes(doc.settings.theme))throw new Error("이 기기에 선택한 배경이 없습니다. 민덱스 배경 목록에 등록해 주세요.");
@@ -627,10 +678,10 @@
     if(Object.hasOwn(doc.fields,key))return doc.fields[key];
     if(Object.hasOwn(doc.inherited?.common||{},key))return doc.inherited.common[key];
     if(Object.hasOwn(doc.source?.commonOverrides||{},key))return doc.source.commonOverrides[key];
-    if(["news","welcome","notices","leader","announcer","outline","sermonReference","outlineTitle"].includes(key)&&doc.source?.[key])return doc.source[key];
+    if(["news","welcome","notices","leader","announcer","outline","sermonReference","outlineTitle","monthlyTheme","memoryVerse","memoryReference","readingPlan","issue"].includes(key)&&doc.source?.[key])return doc.source[key];
     if(key==="eventsText")return doc.source?.events||"";
     if(Object.hasOwn(doc.source?.common||{},key))return doc.source.common[key];
-    if(key==="issue")return archiveIssues[doc.source?.date]||"";
+    if(key==="issue")return doc.source?.department==="children"?"":archiveIssues[doc.source?.date]||"";
     return doc.profile?.[key]??"";
   }
 
@@ -674,10 +725,18 @@
       else root.append(svg("rect",{width:297,height:210,fill:theme==="ink"?"#202b35":"#fff"}));
       const ink=doc.settings?.design==="ink"||(!doc.settings?.design||doc.settings.design==="auto")&&inkLayout(doc.source?.date);
       for(const x of ink?[0]:[5,153.5])root.append(svg("rect",{x,y:10,width:ink?297:138.5,height:190,fill:"white","fill-opacity":1}));
-      if(page===0)root.append(svg("image",{href:new URL(ink?inkLogoPath:logoPath,document.baseURI).href,x:170,y:67.5,width:105,height:72.5}));
+      if(page===0)root.append(svg("image",{href:new URL(doc.source?.department==="children"?childrenLogoPath:ink?inkLogoPath:logoPath,document.baseURI).href,x:170,y:doc.source?.department==="children"?57.5:67.5,width:105,height:doc.source?.department==="children"?97.5:72.5}));
       for(const f of doc.frames.filter(f=>f.page===page&&(!f.hidden||mode==="layout"))) {
         const group=svg("g",{"data-frame-id":f.id}),frameIssues=f.hidden?new Set():issues;
-        if(f.type==="rules") {
+        if(doc.source?.department==="children"&&(f.y<10||f.y>=200))group.append(svg("rect",{x:f.x,y:f.y,width:f.w,height:f.h,fill:"white","fill-opacity":.9}));
+        if(f.type==="reading") {
+          const lines=boundText(doc,f).split("\n").filter(Boolean),rows=Math.ceil(lines.length/2),w=(f.w-7.5)/2;
+          lines.forEach((text,i)=>{const x=f.x+Math.floor(i/rows)*(w+7.5),y=f.y+(i%rows)*7.5;
+            group.append(svg("rect",{x,y:y+1,width:3,height:3,fill:"none",stroke:"#333","stroke-width":.2}));
+            writeText(group,text,{...f,x:x+5,y,w:w-5,h:7.5},frameIssues,f.id);
+          });
+          if(rows*7.5>f.h)frameIssues.add(f.id);
+        } else if(f.type==="rules") {
           for(let y=0;y<=f.h;y+=7.5)group.append(svg("line",{x1:f.x,y1:f.y+y,x2:f.x+f.w,y2:f.y+y,stroke:"#555","stroke-width":.15}));
         } else if(f.binding.startsWith("month:")) {
           const [year,month]=boundText(doc,f).split("\n");
@@ -695,8 +754,8 @@
           renderList(group,boundText(doc,f),f,frameIssues,f.id==="outline"?(doc.settings.outlineColumns||doc.source?.outlineColumns||1):1);
         } else if(f.type==="staff") {
           const value=boundText(doc,f),pairs=value.split(/\n|\s*·\s*/).filter(Boolean);
-          const parsed=pairs.map(t=>t.match(/^(위임목사|담당 교역자|회장|총무|서기|회계)\s+(.+)$/));
-          if(parsed.every(Boolean)&&parsed.length===6)parsed.forEach((row,i)=>{
+          const parsed=pairs.map(t=>t.match(/^(위임목사|담당 교역자|회장|총무|서기|회계|부장)\s+(.+)$/));
+          if(parsed.every(Boolean)&&(parsed.length===6||(doc.source?.department==="children"&&parsed.length===4)))parsed.forEach((row,i)=>{
             const col=(f.w-7.5)/2,x=f.x+(i%2)*(col+7.5),y=f.y+Math.floor(i/2)*7.5;
             writeText(group,row[1],{...f,x,y,w:col,h:7.5},frameIssues,f.id);
             writeText(group,row[2],{...f,x,y,w:col,h:7.5,align:"right"},frameIssues,f.id);
@@ -753,7 +812,7 @@
             writeStyled(group,personRuns(r.person,f.size),{...f,x:x+38.5,y,w:col-38.5,h:10,align:"right"},frameIssues,f.id);
             if(y+10>f.y+f.h+.01)frameIssues.add(f.id);
           });
-        } else writeText(group,boundText(doc,f),{...f,color:(f.y<10||f.y>=200)&&(background||theme==="ink")?"#fff":"#231f20"},frameIssues,f.id);
+        } else writeText(group,boundText(doc,f),{...f,color:doc.source?.department!=="children"&&(f.y<10||f.y>=200)&&(background||theme==="ink")?"#fff":"#231f20"},frameIssues,f.id);
         if(mode==="layout") {
           group.append(svg("rect",{class:`bulletin-frame-hit${selected===f.id?" is-selected":""}`,x:f.x,y:f.y,width:f.w,height:f.h,
             fill:"transparent",stroke:selected===f.id?"#477953":"#47795380","stroke-width":.25,"data-frame-hit":f.id}));
@@ -775,7 +834,7 @@
     if(typeof value.settings?.theme==="string")settings.theme=value.settings.theme;
     settings.compactOrder=value.settings?.compactOrder!==false;
     settings.archiveReference=value.settings?.archiveReference!==false;
-    if(["auto","ink","panels","editorial"].includes(value.settings?.design))settings.design=value.settings.design;
+    if(["auto","ink","panels","editorial","children"].includes(value.settings?.design))settings.design=value.settings.design;
     if([1,2].includes(value.settings?.outlineColumns))settings.outlineColumns=value.settings.outlineColumns;
     for(const f of frames){
       const patch=Array.isArray(value.frames)?value.frames.find(p=>isRecord(p)&&p.id===f.id):null;
@@ -929,19 +988,20 @@
       const p=q(".bulletin-properties");
       if(!doc){p.replaceChildren();return;}
       if(mode==="content") {
+        const child=doc.source?.department==="children";
         const field=key=>`<label>${escape(fields[key])}${["issue","church","website"].includes(key)?
           `<input data-bulletin-field="${key}" value="${escape(fieldValue(doc,key))}" ${key==="issue"?'inputmode="numeric"':''}>`:
           `<textarea data-bulletin-field="${key}" rows="${key==="news"?5:3}">${escape(fieldValue(doc,key))}</textarea>`}</label>`;
         const modern=doc.settings.design==="editorial";
-        p.innerHTML=`${modern?`<div class="bulletin-connected"><span>예배에서 연결됨</span><strong>${escape(doc.source?.sermon||"설교 제목 미입력")}</strong><small>${escape(doc.source?.scripture||"본문 미입력")}</small></div>`:""}<section class="bulletin-property-section"><h3>이번 주 편집</h3><p class="bulletin-help">찬양·본문·설교·기도자는 예배와 교회력에서 가져옵니다. 소식은 광고를 바탕으로 편집하고, 설교 요점과 누락된 인도자만 보완해 주세요.</p>${doc.source?.hasArchiveReference?`<label><input type="checkbox" data-bulletin-setting="archiveReference" ${doc.settings.archiveReference!==false?"checked":""}> 발행 원본의 소식·담당·요점·위원표 사용</label><p class="bulletin-help">이 날짜의 실제 PDF에서 확인한 내용입니다. 찬양·설교는 연결된 예배 자료를 사용합니다.</p>`:""}${(modern?["news","outline"]:["news","outline","leader","issue"]).map(field).join("")}<details class="bulletin-property-section"><summary>담당·발행 정보</summary>${(modern?["leader","issue","announcer","sermonReference","outlineTitle"]:["announcer","sermonReference","outlineTitle"]).map(field).join("")}</details></section>
-          <details class="bulletin-property-section" ${modern?"":"open"}><summary>이번 달 · 일정과 위원</summary><p class="bulletin-help">${escape(doc.source?.eventsOrigin||"교회력 일정")}을 사용합니다. 일정 수정은 같은 달 주보에 이어집니다. 저장하면 이번 호의 예배 내용과 위원표도 보존합니다. 최신 배정은 예배 자료 갱신으로 가져옵니다.</p>${field("eventsText")}<button type="button" data-bulletin-calendar-events>교회력 일정 불러오기</button><div class="bulletin-number-grid">
+        p.innerHTML=`${modern?`<div class="bulletin-connected"><span>예배에서 연결됨</span><strong>${escape(doc.source?.sermon||"설교 제목 미입력")}</strong><small>${escape(doc.source?.scripture||"본문 미입력")}</small></div>`:""}<section class="bulletin-property-section"><h3>이번 주 편집</h3><p class="bulletin-help">찬양·본문·설교·기도자는 예배와 교회력에서 가져옵니다. 소식은 광고를 바탕으로 편집하고, ${child?"새길 말씀과 누락된 인도자를 보완해 주세요. 잠잠성경은 기존 잠언 순환표를 이어 생성하며 직접 수정할 수 있어요.":"설교 요점과 누락된 인도자만 보완해 주세요."}</p>${doc.source?.hasArchiveReference?`<label><input type="checkbox" data-bulletin-setting="archiveReference" ${doc.settings.archiveReference!==false?"checked":""}> 발행 원본의 소식·담당·요점·위원표 사용</label><p class="bulletin-help">이 날짜의 실제 PDF에서 확인한 내용입니다. 찬양·설교는 연결된 예배 자료를 사용합니다.</p>`:""}${(child?["news","memoryVerse","memoryReference","readingPlan","leader","issue"]:modern?["news","outline"]:["news","outline","leader","issue"]).map(field).join("")}<details class="bulletin-property-section"><summary>담당·발행 정보</summary>${(child?["announcer"]:modern?["leader","issue","announcer","sermonReference","outlineTitle"]:["announcer","sermonReference","outlineTitle"]).map(field).join("")}</details></section>
+          <details class="bulletin-property-section" ${modern?"":"open"}><summary>이번 달 · ${child?"일정과 주제":"일정과 위원"}</summary><p class="bulletin-help">${escape(doc.source?.eventsOrigin||"교회력 일정")}을 사용합니다. 일정 수정은 같은 달 주보에 이어집니다. 저장하면 이번 호의 예배 내용${child?"":"과 위원표"}도 보존합니다. 최신 자료는 예배 자료 갱신으로 가져옵니다.</p>${child?field("monthlyTheme"):""}${field("eventsText")}<button type="button" data-bulletin-calendar-events>교회력 일정 불러오기</button><div class="bulletin-number-grid">
           <label>교회 일정<input type="month" data-bulletin-setting="eventsMonth" value="${escape(doc.settings.eventsMonth||doc.source?.eventsMonth||"")}"></label>
-          <label>예배 위원<input type="month" data-bulletin-setting="rosterMonth" value="${escape(doc.settings.rosterMonth||doc.source?.rosterMonth||"")}"></label></div></details>
+          ${child?"":`<label>예배 위원<input type="month" data-bulletin-setting="rosterMonth" value="${escape(doc.settings.rosterMonth||doc.source?.rosterMonth||"")}"></label>`}</div></details>
           <details class="bulletin-property-section" data-bulletin-common><summary>공통 내용</summary><p class="bulletin-help">실주보에서 확인한 내용을 기본으로 사용합니다. 여기서 수정·저장한 내용은 이 날짜부터 새로 만드는 주보에도 적용됩니다. 이번 호만 빼려면 양식에서 해당 영역을 숨겨 주세요.</p><button type="button" data-bulletin-common-reset>공통 내용 다시 연결</button>${profileKeys.map(field).join("")}</details>`;
 
       } else {
         const f=doc.frames.find(f=>f.id===selected)||doc.frames[0];selected=f.id;
-        p.innerHTML=`<button type="button" data-bulletin-reset-layout>배치 초기화</button><p class="bulletin-help">문구는 유지하고 선택한 디자인의 기본 배치로 바꿉니다. 실행 취소할 수 있어요.</p><label>배경<select data-bulletin-setting="theme"><option value="auto" ${backgroundKey(doc.settings.theme)==="auto"?"selected":""}>자동 · 날짜/부서</option><option value="" ${doc.settings.theme===""?"selected":""}>배경 없음</option>${(doc.backgrounds||[]).map(({key})=>`<option value="${escape(key)}" ${backgroundKey(doc.settings.theme)===key?"selected":""}>${escape(key)}</option>`).join("")}${doc.settings.theme&&doc.settings.theme!=="auto"&&!(doc.backgrounds||[]).some(b=>b.key===backgroundKey(doc.settings.theme))?`<option value="${escape(doc.settings.theme)}" selected>기존 초안: ${escape(backgroundKey(doc.settings.theme))}</option>`:""}</select></label><p class="bulletin-help">${backgroundKey(doc.settings.theme)==="auto"?`자동 배경: ${escape(doc.source?.autoBackground?.key||"등록 필요")}`:"민덱스 배경 목록에 등록된 이미지를 사용합니다."}</p><label><input type="checkbox" data-bulletin-setting="compactOrder" ${doc.settings.compactOrder?"checked":""}> 인쇄용 순서로 간추리기</label><p class="bulletin-help">선택하면 준비·마침·교제·보조 성구를 빼고, 고백 전문을 생략하며 같은 순서를 묶습니다.</p><label>지면<select data-bulletin-setting="design">${[["editorial","2026년 10월"],["auto","기존 자동 양식"],["ink","연속 지면 · 검정 로고"],["panels","분리 지면 · 물결 로고"]].map(([value,label])=>`<option value="${value}" ${(doc.settings.design||"auto")===value?"selected":""}>${label}</option>`).join("")}</select></label><label>설교 요점 배치<select data-bulletin-setting="outlineColumns"><option value="1" ${(doc.settings.outlineColumns||doc.source?.outlineColumns||1)===1?"selected":""}>한 열</option><option value="2" ${(doc.settings.outlineColumns||doc.source?.outlineColumns)===2?"selected":""}>두 열</option></select></label><label>프레임<select data-bulletin-frame>${doc.frames.map(f=>`<option value="${f.id}" ${f.id===selected?"selected":""}>${escape(frameLabel(f.id))} · ${f.page?"안쪽":"겉면"}</option>`).join("")}</select></label>
+        p.innerHTML=`<button type="button" data-bulletin-reset-layout>배치 초기화</button><p class="bulletin-help">문구는 유지하고 선택한 디자인의 기본 배치로 바꿉니다. 실행 취소할 수 있어요.</p><label>배경<select data-bulletin-setting="theme"><option value="auto" ${backgroundKey(doc.settings.theme)==="auto"?"selected":""}>자동 · 날짜/부서</option><option value="" ${doc.settings.theme===""?"selected":""}>배경 없음</option>${(doc.backgrounds||[]).map(({key})=>`<option value="${escape(key)}" ${backgroundKey(doc.settings.theme)===key?"selected":""}>${escape(key)}</option>`).join("")}${doc.settings.theme&&doc.settings.theme!=="auto"&&!(doc.backgrounds||[]).some(b=>b.key===backgroundKey(doc.settings.theme))?`<option value="${escape(doc.settings.theme)}" selected>기존 초안: ${escape(backgroundKey(doc.settings.theme))}</option>`:""}</select></label><p class="bulletin-help">${backgroundKey(doc.settings.theme)==="auto"?`자동 배경: ${escape(doc.source?.autoBackground?.key||"등록 필요")}`:"민덱스 배경 목록에 등록된 이미지를 사용합니다."}</p><label><input type="checkbox" data-bulletin-setting="compactOrder" ${doc.settings.compactOrder?"checked":""}> 인쇄용 순서로 간추리기</label><p class="bulletin-help">선택하면 준비·마침·교제·보조 성구를 빼고, 고백 전문을 생략하며 같은 순서를 묶습니다.</p><label>지면<select data-bulletin-setting="design">${(doc.source?.department==="children"?[["children","어린이부 · 2026년"]]:[["editorial","2026년 10월"],["auto","기존 자동 양식"],["ink","연속 지면 · 검정 로고"],["panels","분리 지면 · 물결 로고"]]).map(([value,label])=>`<option value="${value}" ${(doc.settings.design||"auto")===value?"selected":""}>${label}</option>`).join("")}</select></label>${doc.source?.department==="children"?"":`<label>설교 요점 배치<select data-bulletin-setting="outlineColumns"><option value="1" ${(doc.settings.outlineColumns||doc.source?.outlineColumns||1)===1?"selected":""}>한 열</option><option value="2" ${(doc.settings.outlineColumns||doc.source?.outlineColumns)===2?"selected":""}>두 열</option></select></label>`}<label>프레임<select data-bulletin-frame>${doc.frames.map(f=>`<option value="${f.id}" ${f.id===selected?"selected":""}>${escape(frameLabel(f.id))} · ${f.page?"안쪽":"겉면"}</option>`).join("")}</select></label>
           <label><input type="checkbox" data-bulletin-hidden ${f.hidden?"":"checked"}> 출력에 표시</label><p class="bulletin-help">${escape(frameLabel(f.id))}<br>이동·크기 2.5mm · 글자 2.5pt 단계</p><div class="bulletin-number-grid">`+
           [["x","가로 위치"],["y","세로 위치"],["w","너비"],["h","높이"]].map(([key,label])=>`<label>${label} (mm)<input type="number" step="2.5" data-bulletin-dimension="${key}" value="${f[key]}"></label>`).join("")+`</div>
           <label>글자 크기 (pt)<select data-bulletin-dimension="size">${TOKENS.fontSizes.map(n=>`<option ${f.size===n?"selected":""}>${n}</option>`).join("")}</select></label>
@@ -976,11 +1036,12 @@
         }
         const source=await options.loadSource(id,target.settings);if(request!==serial||signal.aborted)return;
         target.source=applySourceSnapshot(source,target.sourceSnapshot);
+        if(source.department==="children"&&!target.settings.design&&!target.revision&&!target.hasLocal){target.settings.design="children";target.frames=defaultFrames("children");}
         if(!target.settings.design&&source.date>="2026-10-01"&&!target.revision&&!target.hasLocal){target.settings.design="editorial";target.frames=defaultFrames("editorial");}
         if(Object.hasOwn(target.fields,"eventsText")){target.months[source.eventsMonth]=target.fields.eventsText;delete target.fields.eventsText;}
         target.profile=target.revision?{}:loadProfile(source.date);
         // Preserve explicitly saved legacy common copy as ordinary content when migrating.
-        if(!target.revision)for(const [key,value] of Object.entries(target.profile))if(!Object.hasOwn(target.fields,key))target.fields[key]=value;
+        if(!target.revision&&source.department!=="children")for(const [key,value] of Object.entries(target.profile))if(!Object.hasOwn(target.fields,key))target.fields[key]=value;
         target.backgrounds=options.getBackgrounds?.()||[];await readyBackground(target);if(request!==serial||signal.aborted)return;assetLoaded=true;
       }catch(e){if(request===serial&&!signal.aborted)error=e.message||"자료를 불러오지 못했습니다.";}
       finally{if(request===serial&&!signal.aborted){loading=false;properties();preview();status();}}
