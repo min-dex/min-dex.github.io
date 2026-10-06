@@ -20,7 +20,11 @@ The order is checked by `tests/solid_audit.py`.
 - `mindex.design-tokens.js` owns app-shell design tokens, button grammar
   labels, and shared UI copy. It must not own worship domain data.
 - `mindex.presenter.js` owns slide construction and presenter-output helpers.
-- `app.js` owns bootstrap, state, persistence, DOM events, canonical shared
+- `mindex.worship-persistence.js` owns source-reference normalization, history
+  compaction, and save-row construction, validation, preservation, and ordering.
+  It loads before `app.js`; its helpers run after app bootstrap. It does not
+  perform database I/O or access controller state/DOM directly.
+- `app.js` owns bootstrap, state, persistence orchestration, DOM events, canonical shared
   helpers, and controller integration.
 - A top-level function name has exactly one owner. Do not shadow or redeclare a
   function in another runtime file to change behavior through load order.

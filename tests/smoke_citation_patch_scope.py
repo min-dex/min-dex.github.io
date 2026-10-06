@@ -11,7 +11,7 @@ def main():
                 page = browser.new_page()
                 page.route("**/*supabase*/**", lambda r: r.abort())
                 page.goto(os.environ.get("MINDEX_TEST_URL", url), wait_until="domcontentloaded")
-                page.wait_for_function("typeof buildWorshipPersistenceRows === 'function'")
+                page.wait_for_function("typeof buildWorshipPersistenceRows === 'function' && typeof serializeServiceItemMemo === 'function'")
                 print(engine, page.evaluate(r"""() => {
                   const check=(v,m)=>{if(!v)throw Error(m)};
                   const service={id:'11111111-1111-4111-8111-111111111111',type_id:'fixture',date:'2026-10-04'};

@@ -70,3 +70,28 @@ python3 tests/solid_audit.py
 The audit is intentionally conservative. It does not demand a perfect SOLID
 score today. It prevents the known large functions and global coupling markers
 from growing silently while Mindex is still being stabilized.
+
+## 2026-10-06 Persistence Checkpoint
+
+Save-row construction, validation, ordering, and preservation now have one
+owner in `mindex.worship-persistence.js`. The 19 moved function bodies are
+unchanged; RPC orchestration remains in `app.js`. Local functional checks cover
+atomic full/partial saves, linked services, rollback, lifecycle, citation
+editing/deletion, image round-trips, and the app shell. Production-config-dependent
+smoke cases were skipped; this is not production-data verification.
+
+The unchanged SOLID audit still fails against existing baseline debt. This is
+not a passing audit and no thresholds were raised:
+
+| Metric | Baseline `06e800e7` | Checkpoint | Limit |
+| --- | ---: | ---: | ---: |
+| app.js lines | 34209 | 33569 | 27268 |
+| presenter lines | 5495 | 5495 | 4259 |
+| styles lines | 8837 | 8837 | 7629 |
+| app functions | 1821 | 1802 | 1472 |
+| presenter functions | 305 | 305 | 251 |
+| global coupling markers | 3156 | 3156 | 2519 |
+
+This narrows ownership, but does not reduce the total runtime code size or
+global coupling. Function-name collisions remain zero and navigation geometry
+remains 47/47. Further extractions require independent regression coverage.

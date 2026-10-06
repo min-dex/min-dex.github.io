@@ -11,7 +11,7 @@ WORSHIP_INPUT_JS = Path(__file__).resolve().parents[1] / "mindex.worship-input.j
 
 
 def read_app_js() -> str:
-    return APP_JS.read_text(encoding="utf-8")
+    return APP_JS.read_text(encoding="utf-8") + "\n" + APP_JS.with_name("mindex.worship-persistence.js").read_text(encoding="utf-8")
 
 
 def read_styles_css() -> str:
@@ -127,8 +127,10 @@ class WorshipRuleGuardTests(unittest.TestCase):
         self.assertIn("previousItems", sync_after_save)
         self.assertIn("persistSundayEditSync(job, options)", sync_after_save)
         edit_sync = function_block(self.source, "persistSundayEditSync")
-        self.assertIn('count: "exact"', edit_sync)
-        self.assertIn('.eq("updated_at", existing.updated_at)', edit_sync)
+        self.assertIn('await atomic.read(target.id)', edit_sync)
+        self.assertIn('await atomic.commit({ serviceId: target.id,', edit_sync)
+        self.assertIn('sundayEditSyncSignature(item) !== sundayEditSyncSignature(job.previous)', edit_sync)
+        self.assertIn('throw conflict()', edit_sync)
         self.assertNotIn(".upsert(", edit_sync)
         main_praise_branch = shared.split('key.startsWith("main-praise:")', 1)[1].split('if (key === "scripture-reading"', 1)[0]
         self.assertIn('return ["sunday-first", "sunday-second"]', main_praise_branch)
@@ -245,7 +247,7 @@ class WorshipRuleGuardTests(unittest.TestCase):
         self.assertIn("fetchWorshipRowsForServiceIds([id])", helper)
         self.assertIn("state.loadedWorshipServiceIds.add(id)", helper)
         self.assertLess(
-            shared.index("fetchWorshipRowsForServiceIds([target.id])"),
+            shared.index("atomic.read(target.id)"),
             shared.index("const existing = elements.find"),
         )
         self.assertNotIn("removedElementIds", shared)
@@ -253,7 +255,7 @@ class WorshipRuleGuardTests(unittest.TestCase):
         self.assertNotIn(".delete()", shared)
         self.assertIn("const sectionIds = new Set", shared)
         self.assertIn("element.id === saved.id ? saved : element", shared)
-        self.assertIn('.from("mindex_worship_elements")', shared)
+        self.assertNotIn('.from("mindex_worship_elements")', shared)
         self.assertIn("atomic.commit({ serviceId: target.id", shared)
 
     def test_committed_item_edits_use_element_patch_save(self) -> None:
@@ -268,10 +270,10 @@ class WorshipRuleGuardTests(unittest.TestCase):
         self.assertIn("activeServiceSavePromise = savePromise", lifecycle)
         self.assertIn("const result = await savePromise", lifecycle)
         self.assertIn("return result;", lifecycle)
-        self.assertIn('.from("mindex_worship_sections")', patch)
-        self.assertIn('.upsert([sectionRow], { onConflict: "id" })', patch)
-        self.assertIn('.from("mindex_worship_elements")', patch)
-        self.assertIn('.upsert([elementRow], { onConflict: "id" })', patch)
+        self.assertNotIn('.from("mindex_worship_sections")', patch)
+        self.assertNotIn('.from("mindex_worship_elements")', patch)
+        self.assertIn('await atomic.commit({ serviceId,', patch)
+        self.assertIn('rows: { sections: sectionRow ? [sectionRow] : [], elements: [elementRow] }', patch)
         self.assertNotIn(".delete()", patch)
         self.assertIn("await saveServiceItemPatch(serviceId, index, options)", committed)
         self.assertNotIn("await saveService(serviceId, options)", committed)

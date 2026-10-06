@@ -3,7 +3,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const source = fs.readFileSync(path.join(__dirname, '../app.js'), 'utf8');
-function extract(name, async = false) {
+const persistence = fs.readFileSync(path.join(__dirname, '../mindex.worship-persistence.js'), 'utf8');
+function extract(name, async = false, sourceText = source) {
+  const source = sourceText;
   const start = source.indexOf(`${async ? 'async ' : ''}function ${name}(`);
   assert.ok(start >= 0, `Missing function ${name}`);
   return source.slice(start, source.indexOf('\n}\n', start) + 2);
@@ -25,7 +27,7 @@ const validation = {
   normalizeWorshipSlotKey: x => x || '',
 };
 vm.createContext(validation);
-vm.runInContext(extract('validateWorshipPersistenceRows'), validation);
+vm.runInContext(extract('validateWorshipPersistenceRows', false, persistence), validation);
 const validRows = {
   sections: [{id:'section',service_id:'service',created_at:'now',updated_at:'now'}],
   elements: [{id:'item',section_id:'section',element_type:'plain_text',created_at:'now',updated_at:'now'}],

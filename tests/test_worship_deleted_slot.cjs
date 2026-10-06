@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const source = fs.readFileSync('app.js', 'utf8');
+const source = fs.readFileSync('mindex.worship-persistence.js', 'utf8');
 const context = vm.createContext({ console: {warn() {}}, normalizeWorshipSlotKey: v => String(v || '').trim(),
  normalizeServiceAsset: v => v || {}, hasServiceAsset: v => Boolean(v.url) });
 for (const name of ['worshipElementPersistenceSlotKey','worshipElementHasPersistedContent','shouldPreserveExistingWorshipElement','preserveExistingWorshipContentRows']) {

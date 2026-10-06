@@ -11,7 +11,7 @@ def main():
                     page = browser.new_page()
                     page.route('**/*supabase*/**', lambda r:r.abort())
                     page.goto(url+'?output=presenter', wait_until='domcontentloaded')
-                    page.wait_for_function("typeof buildWorshipPersistenceRows === 'function'")
+                    page.wait_for_function("typeof buildWorshipPersistenceRows === 'function' && typeof serializeServiceItemMemo === 'function'")
                     print(engine, page.evaluate('''async () => {
                       const check=(v,m)=>{if(!v)throw Error(m)};
                       const service={id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',type_id:'audit-fixture',date:'2026-09-13'};

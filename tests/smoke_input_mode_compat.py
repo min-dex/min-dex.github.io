@@ -16,7 +16,7 @@ def main():
             page = browser.new_page()
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-            page.wait_for_function("typeof buildWorshipPersistenceRows === 'function'")
+            page.wait_for_function("typeof buildWorshipPersistenceRows === 'function' && typeof serializeServiceItemMemo === 'function'")
             result = page.evaluate("""() => {
               const allowed = ['', 'praise_db', 'text', 'scripture', 'asset', 'config', 'none'];
               const mapped = [...WORSHIP_DB_ELEMENT_INPUT_MODES].map(worshipDbInputModeForSave);
