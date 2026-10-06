@@ -54,8 +54,6 @@ stale document in the same change.
   `mindexServiceDocumentHistory`: slim entries first, separate table only if needed.
 - `ux-audit-2026-09-18.md`: bounded UX/code/documentation audit, regression
   coverage, preserved recovery data, and unverified production boundaries.
-- `css-audit-2026-09-05.md`: historical CSS/UX verification evidence. It is not
-  a current styling contract.
 - `full-hymn-audit-2026-08-19.md`: full hymn dataset audit evidence.
 - `hymn-reference-audit-2026-08-19.md`: read-only hymn audit and verified
   repair record. Use only as data review evidence, not as app behavior.
