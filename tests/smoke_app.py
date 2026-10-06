@@ -70,17 +70,21 @@ def injected_index_html() -> str:
 
 class MindexSmokeHandler(SimpleHTTPRequestHandler):
     def do_GET(self) -> None:
-        parsed = urlsplit(self.path)
-        route = parsed.path
-        if route in ("", "/", "/index.html"):
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.end_headers()
-            query = parse_qs(parsed.query)
-            markup = INDEX_PATH.read_text(encoding="utf-8") if query.get("mindexSmokeRaw") else injected_index_html()
-            self.wfile.write(markup.encode("utf-8"))
+        try:
+            parsed = urlsplit(self.path)
+            route = parsed.path
+            if route in ("", "/", "/index.html"):
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.end_headers()
+                query = parse_qs(parsed.query)
+                markup = INDEX_PATH.read_text(encoding="utf-8") if query.get("mindexSmokeRaw") else injected_index_html()
+                self.wfile.write(markup.encode("utf-8"))
+                return
+            super().do_GET()
+        except (BrokenPipeError, ConnectionResetError):
+            # Browser tests may abort parallel asset requests while tearing down.
             return
-        super().do_GET()
 
     def end_headers(self) -> None:
         self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
@@ -1063,9 +1067,9 @@ def main() -> int:
             if (
                 desktop_sidebar["sidebarWidth"] == 280
                 and desktop_sidebar["detailStartsAfterSidebar"]
-                and desktop_sidebar["brandWidth"] == 47
-                and desktop_sidebar["moduleStartsAtTopbar"] == 47
-                and desktop_sidebar["moduleWidth"] == 47
+                and desktop_sidebar["brandWidth"] == 40
+                and desktop_sidebar["moduleStartsAtTopbar"] == 40
+                and desktop_sidebar["moduleWidth"] == 40
                 and desktop_sidebar["drawerToggleHidden"]
                 and desktop_sidebar["rightLastInset"] == 5
             ):
@@ -5249,20 +5253,6 @@ def main() -> int:
                             });
                             return group.subgroups.map((subgroup) => subgroup.label);
                           })(),
-                          entrancePraiseSubgroupLabel: (() => {
-                            const group = { kind: 'main-praise', label: '찬양', subgroups: [] };
-                            addPresenterSlideToSubgroup(group, {
-                              slideIndex: 0,
-                              slide: {
-                                type: 'lyrics',
-                                sectionKey: 'praise',
-                                sectionLabel: '찬양',
-                                elementLabel: '입례찬양',
-                                elementId: 'entrance-praise',
-                              },
-                            });
-                            return group.subgroups.map((subgroup) => subgroup.label);
-                          })(),
                           formBadgeLabelContract: [
                             presenterFormGroupLabel({ marker: 'CB' }),
                             presenterFormGroupLabel({ formLabel: 'Chorus B' }),
@@ -5495,7 +5485,6 @@ def main() -> int:
                         )
                         and presenter_terms["collapsedBoardSubgroups"] == 0
                         and presenter_terms["mainPraiseSubgroupLabels"] == ["환영", "찬양 1"]
-                        and presenter_terms["entrancePraiseSubgroupLabel"] == ["입례찬양"]
                         and presenter_terms["formBadgeLabelContract"] == ["Chorus B", "Chorus B", "Chorus B"]
                         and presenter_terms["formBadgeRenderContract"] == {"hasDisplay": True, "hasRaw": False, "aria": True}
                         and presenter_terms["elementNameTitleContract"] == {

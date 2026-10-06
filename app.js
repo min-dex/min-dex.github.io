@@ -11121,15 +11121,16 @@ function collapseSingletonServiceFormPartNumbers(forms = []) {
   const types = new Map();
   parts.forEach((part) => {
     if (!part) return;
-    const state = types.get(part.prefix) || { numbers: new Set(), hasVariant: false };
+    const state = types.get(part.prefix) || { numbers: new Set(), hasVariant: false, count: 0 };
     state.numbers.add(part.number);
+    state.count += 1;
     if (part.suffix) state.hasVariant = true;
     types.set(part.prefix, state);
   });
   return forms.map((token, index) => {
     const part = parts[index];
     const state = part && types.get(part.prefix);
-    return part && part.number === 1 && !part.suffix && !state.hasVariant && state.numbers.size === 1
+    return part && part.number === 1 && !part.suffix && !state.hasVariant && state.numbers.size === 1 && state.count === 1
       ? part.prefix
       : token;
   });

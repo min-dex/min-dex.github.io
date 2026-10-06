@@ -653,8 +653,10 @@ function presenterFormPlanForServiceItem(version = {}, item, song = null) {
 function presenterServiceItemFormPreset(version = {}, item = {}, song = null, { includePlaybackFallback = true } = {}) {
   if (serviceItemFormPresetDisabled(item)) return null;
   const itemPreset = serviceItemFormPreset(item);
-  // Once a sequence is stored, its origin must not change playback semantics.
-  if (itemPreset?.forms?.length) {
+  const itemPresetStrength = String(itemPreset?.strength || "").trim().toLowerCase();
+  // A suggested template only fills a gap. A song's explicit DB form remains
+  // authoritative; manually saved service forms still win over both.
+  if (itemPreset?.forms?.length && itemPresetStrength !== "suggested") {
     const saved = { ...itemPreset, strength: "manual" };
     return isPresenterSpecialSongItem(item)
       && versionEffectivePraiseTypes(song, version).includes("hymn")
@@ -670,10 +672,12 @@ function presenterServiceItemFormPreset(version = {}, item = {}, song = null, { 
     ? specialHymnRulePreset
       || matchedRule?.formPreset
       || songDefaultPreset
+      || itemPreset
       || (includePlaybackFallback && presenterDefaultVerseChorusFormPreset(forms, song, version))
       || null
     : matchedRule?.formPreset
       || presenterExplicitNonHymnFormPreset(songDefaultPreset)
+      || itemPreset
       || (includePlaybackFallback && presenterDefaultVerseChorusFormPreset(forms, song, version))
       || null;
 }
@@ -2630,19 +2634,10 @@ function presenterSectionForServiceItem(item, index, displayText, song = null, v
   const elementTitle = linkedElementTitle || [no, title].filter(Boolean).join(" ") || displayText || label || `항목 ${index + 1}`;
   const sectionLabelText = cleanList([label, formHint]).join(" · ");
   // Count the source version, not the selected/repeated performance sequence.
-  const sourceForms = normalizeForms(version?.forms || []);
-  const sourceFormTypes = sourceForms.reduce((types, form) => {
-    const target = normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form));
-    if (!target.type || target.group || target.variant) return types;
-    types.set(target.type, (types.get(target.type) || 0) + 1);
-    return types;
-  }, new Map());
-  const controllerSingleFormTypes = [...sourceFormTypes]
-    .filter(([, count]) => count === 1)
-    .map(([type]) => type);
+  const verseForms = normalizeForms(version?.forms || []).filter((form) =>
+    normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form)).type === "verse");
   return {
-    ...(controllerSingleFormTypes.length ? { controllerSingleFormTypes } : {}),
-    ...(controllerSingleFormTypes.includes("verse") ? { controllerSingleVerse: true } : {}),
+    ...(verseForms.length === 1 ? { controllerSingleVerse: true } : {}),
     sectionId: item?._worshipSectionId || item?.id || `section:${index}:${normalizeTitle([label, displayText].filter(Boolean).join(" "))}`,
     elementId: item?.id || `element:${index}:${normalizeTitle([label, displayText].filter(Boolean).join(" "))}`,
     sectionIndex: Number(item?._worshipSectionOrder) || index + 1,

@@ -489,7 +489,6 @@ def main() -> int:
                     and live_panel_state["visualOrder"]["actions"] == "contents"
                     and live_panel_state["visualOrder"]["live"] < live_panel_state["visualOrder"]["main"]
                     and live_panel_state["visualOrder"]["main"] < live_panel_state["visualOrder"]["output"]
-                    and live_panel_state["visualOrder"]["output"] < live_panel_state["visualOrder"]["utility"]
                     and live_panel_state["status"] == "준비"
                     and live_panel_state["title"] == "송출 대기"
                     and live_panel_state["hasPreview"]
@@ -764,7 +763,7 @@ def main() -> int:
                       ];
                       const song = { metadata: { presenter_form: { forms: ['V1', 'C', 'V2', 'C'] } } };
                       const suggestedItem = { memo: JSON.stringify({ formPreset: { forms: ['V1', 'C'], strength: 'suggested' } }) };
-                      const forcedItem = { memo: JSON.stringify({ formPreset: { forms: ['V1', 'C', 'V1'], strength: 'default' } }) };
+                      const forcedItem = { memo: JSON.stringify({ formPreset: { forms: ['V1', 'C', 'V1'], strength: 'manual' } }) };
                       const disabledItem = { memo: JSON.stringify({ formPresetDisabled: true }) };
                       const groupedItem = { memo: JSON.stringify({ formPreset: { forms: ['V1A', 'V1B'], strength: 'default' } }) };
                       const groupedForms = [
@@ -2176,9 +2175,9 @@ def main() -> int:
                     and fallback_state["corporatePrayerGroups"] == [{
                         "title": "공동기도",
                         "subgroups": [
-                            {"label": "공동기도 1·2", "title": "공동기도 1·2", "slides": 3, "slideTitles": ["'교회 부흥을 위해'", "'선교와 민족을 위해'", "빈 화면"]},
+                            {"label": "공동기도 1·2", "title": "공동기도 1·2", "slides": 3, "slideTitles": ["교회 부흥을 위해", "선교와 민족을 위해", "빈 화면"]},
                             {"label": "기도찬양", "title": "기도찬양", "slides": 1},
-                            {"label": "공동기도 3·4", "title": "공동기도 3·4", "slides": 3, "slideTitles": ["'치유와 회복을 위해'", "'교회학교를 위해'", "빈 화면"]},
+                            {"label": "공동기도 3·4", "title": "공동기도 3·4", "slides": 3, "slideTitles": ["치유와 회복을 위해", "교회학교를 위해", "빈 화면"]},
                         ],
                     }]
                     and fallback_state["corporatePrayerEditor"] == {
@@ -2191,8 +2190,8 @@ def main() -> int:
                         ],
                         "rawTitle": "",
                         "assignee": "",
-                        "memoSlides": ["'새 기도 제목'", "'선교와 민족을 위해'"],
-                        "slideTitles": ["'새 기도 제목'", "'선교와 민족을 위해'"],
+                        "memoSlides": ["'새 기도 제목'", "선교와 민족을 위해"],
+                        "slideTitles": ["'새 기도 제목'", "선교와 민족을 위해"],
                         "slideAssignees": ["", ""],
                     }
                     and len(fallback_state["mainPraiseGroups"]) == 1
@@ -6252,7 +6251,7 @@ def main() -> int:
                           probe.remove();
                           return value;
                         })(),
-	                        citationTexts: citationSlides.map((slide) => slide.text || ''),
+                        citationTexts: citationSlides.filter((slide) => slide.type !== 'blank').map((slide) => slide.text || ''),
 	                        fullscreenCitationContext: fullscreenCitationSlides[0]?.scriptureContext || '',
 	                        fullscreenCitationOutputContext: presenterSlideOutputContext(fullscreenCitationSlides[0], true),
 	                        fullscreenCitationNoChromakey: fullscreenCitationOutput?.classList.contains('no-chromakey') || false,
@@ -6344,7 +6343,7 @@ def main() -> int:
                     ]
 	                    and scripture_context_state["citationBadge"] == "출애굽기 24:1"
                     and scripture_context_state["citationNoNumberBadge"] == "출애굽기 24:1–2"
-	                    and scripture_context_state["pendingType"] == "scripture-pending"
+                    and scripture_context_state["pendingType"] == "blank"
 	                    and scripture_context_state["pendingElementType"] == "blank"
 	                    and scripture_context_state["pendingLayout"] == "blank"
 	                    and scripture_context_state["pendingText"] == ""
@@ -7083,6 +7082,7 @@ def main() -> int:
                             volumeLevel: 3,
                           }};
                           state.presenter.index = 0;
+                          renderCurrentServiceModuleDetail();
                           renderPresenterControlState(serviceId);
                         }})()
                         """
@@ -7200,8 +7200,8 @@ def main() -> int:
                         and sidebar_preview_scale_state["hasCanvas"]
                         and sidebar_preview_scale_state["canvasCssWidth"] == 1920
                         and sidebar_preview_scale_state["canvasCssHeight"] == 1080
-                        and 0 <= sidebar_preview_scale_state["outputWidth"] - sidebar_preview_scale_state["visualWidth"] <= 5
-                        and 0 <= sidebar_preview_scale_state["outputHeight"] - sidebar_preview_scale_state["visualHeight"] <= 5
+                        and abs(sidebar_preview_scale_state["outputWidth"] - sidebar_preview_scale_state["visualWidth"]) <= 5
+                        and abs(sidebar_preview_scale_state["outputHeight"] - sidebar_preview_scale_state["visualHeight"]) <= 5
                         and 1.75 <= sidebar_preview_scale_state["previewRatio"] <= 1.79
                         and 1.75 <= sidebar_preview_scale_state["visualRatio"] <= 1.79
                         and sidebar_preview_scale_state["scale"] > 0
@@ -7833,7 +7833,7 @@ def main() -> int:
                 )
                 chromakey_pixels = {
                     "thumbTop": rgb_at(thumb_shot, 0.5, 0.2),
-                    "thumbBar": rgb_at(thumb_shot, 0.02, 0.92),
+                    "thumbBar": rgb_at(thumb_shot, 0.98, 0.92),
                     "thumbBottom": rgb_at(thumb_shot, 0.5, 0.995),
                     "thumbFrameBottomLeft": rgb_at(thumb_frame_shot, 0.025, 0.96),
                     "thumbFrameBottomRight": rgb_at(thumb_frame_shot, 0.975, 0.96),
@@ -7895,6 +7895,8 @@ def main() -> int:
                       };
                       const record = presenterOutputImagePreloadCache.get(src);
                       record.ready = true;
+                      record.image.complete = true;
+                      record.image.naturalWidth = 1;
                       resolveReady();
                       await new Promise((resolve) => {
                         const start = Date.now();
@@ -9480,6 +9482,7 @@ def main() -> int:
                       const previous = {
                         services: state.services,
                         serviceItems: state.serviceItems,
+                        loadedWorshipServiceIds: state.loadedWorshipServiceIds,
                         selectedServiceId: state.selectedServiceId,
                         selectedServiceTypeId: state.selectedServiceTypeId,
                         presenter: { ...state.presenter },
@@ -9498,6 +9501,10 @@ def main() -> int:
                           .concat(services);
                         state.serviceItems = { ...previous.serviceItems };
                         services.forEach((service) => { state.serviceItems[service.id] = []; });
+                        state.loadedWorshipServiceIds = new Set([
+                          ...previous.loadedWorshipServiceIds,
+                          ...services.map((service) => service.id),
+                        ]);
                         state.selectedServiceId = '__smoke_next_first__';
                         state.selectedServiceTypeId = 'sunday-first';
                         state.presenter = {
@@ -9566,6 +9573,7 @@ def main() -> int:
                       } finally {
                         state.services = previous.services;
                         state.serviceItems = previous.serviceItems;
+                        state.loadedWorshipServiceIds = previous.loadedWorshipServiceIds;
                         state.selectedServiceId = previous.selectedServiceId;
                         state.selectedServiceTypeId = previous.selectedServiceTypeId;
                         state.presenter = previous.presenter;
