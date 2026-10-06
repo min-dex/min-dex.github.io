@@ -26,13 +26,14 @@ def run(browser, url):
       renderServiceList = () => {};
       render = () => {};
       captureCleanFingerprint = () => {};
-      worshipAtomicClient = async () => null;
       let fail = false, writes = [];
-      state.client = {from:table => ({
-        upsert:async rows => { writes.push({table, rows:clone(rows)}); return {error:fail ? Error('injected failure') : null}; },
-        update:() => ({eq:async () => ({error:null, count:1})}),  // save receipts require count === 1 (e4158878)
-        delete:() => ({in:async () => ({error:null})}),
-      })};
+      state.client = {from:()=>{throw Error('Direct table write attempted')}};
+      worshipAtomicClient = async () => ({commit:async request => {
+        writes.push(clone(request));
+        if(fail)throw Error('injected failure');
+        return {sections:clone(request.rows.sections),elements:clone(request.rows.elements),
+          service:{source_ref:{mindexServiceDocument:clone(request.document)}}};
+      }});
       const fixture = type => {
         // 2026-09-13 is a 김석범 Sunday, so the 1부 template has a 축도 (not 주기도문).
         const service = {id:sid, type_id:type, date:'2026-09-13'};
@@ -100,7 +101,7 @@ def run(browser, url):
       let target = getServiceItems(sid).find(x => x.label === '축도');
       const other = clone(target);
       check(await setServiceBenedictionReplacement(sid, target.id, true), 'save failed');
-      check(writes.some(x => x.table === 'mindex_worship_elements' && x.rows.some(e => e.config.benedictionReplacement)), 'replacement not sent to DB');
+      check(writes.some(x => x.rows.elements.some(e => e.config.benedictionReplacement)), 'replacement not sent to RPC');
       check(other.label === '축도', 'separate instance changed');
       target = getServiceItems(sid).find(x => parseServiceItemMemo(x.memo).benedictionReplacement);
       check(await setServiceBenedictionReplacement(sid, target.id, false), 'restore save failed');

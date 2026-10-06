@@ -1,5 +1,11 @@
 # Worship / Presenter Decision Log
 
+## RPC-Only Instance Persistence (2026-10-06)
+- Removed the temporary protocol switch and all direct-table instance-write fallbacks. Aggregate reads, full/element saves, linked sync, creation, deletion, automatic cleanup and live leader edits require the RPC client. Read-only list/archive queries and import-source editing remain separate contracts.
+- Retain revision checks, project-scoped pending requests, local recovery, and draft isolation. An uncertain request is replayed exactly; its receipt requires reload and cannot acknowledge a newer draft.
+- Replaced legacy partial-commit fixtures with RPC safety checks. Chromium/WebKit coverage includes rollback, lost response, linked saves, creation/deletion retries, save queues, conflict review and benediction replacement.
+- No production records, grants or schema were changed. Historical document arrays remain readable until their fallback/recovery content is proven equivalent to canonical rows.
+
 ## Source Round-Trip Integrity (2026-10-06)
 - Historical reproduction confirms that pre-`a4afef7b` portable parsing omitted `endLine`; the old patch appended the full original source after the replacement. The Oct 2 range fix prevents that growth; retain range validation and repeated-patch tests.
 - Source Apply validates record multiplicity before creating or modifying any items. Previously it applied only matched records while retaining the entire duplicate draft. Reject newly introduced duplicates without changing drafts or canonical items.

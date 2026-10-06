@@ -20,7 +20,6 @@ def run(browser, url):
       requireClient = () => true;
       ensureWorshipServiceRowsLoadedForPersistence = async () => {};
       worshipElementTypedStateColumns = async () => columns;
-      worshipAtomicClient = async () => null;
       captureWorshipRecoverySnapshot = () => {};
       updateSaveState = () => {};
       const realRefresh = refreshPresenterForService;
@@ -52,16 +51,20 @@ def run(browser, url):
         state.dirty.service = false;
         refs.detailPane.innerHTML = '';
         writes = []; renders = 0; hook = null; refreshOptions = null;
-        const write = async (table, value) => {
-          writes.push({table, value:clone(value)});
-          const result = hook ? await hook(table, value) : {error:null};
-          return {count:1, ...result};
-        };
-        state.client = {from:table => ({
-          upsert:rows => write(table, rows),
-          update:value => ({eq:() => write(table, value)}),
-          delete:() => ({in:() => write(table, [])}),
-        })};
+        let committed = clone(rows);
+        state.client = {from:() => {throw Error('Direct table write attempted')}};
+        worshipAtomicClient = async () => ({commit: async request => {
+          writes.push(clone(request));
+          const result = hook ? await hook() : {};
+          if (result?.error) throw result.error;
+          for (const key of ['sections', 'elements']) {
+            const incoming = request.rows[key];
+            const deleted = request[key === 'sections' ? 'deleteSectionIds' : 'deleteElementIds'] || [];
+            committed[key] = committed[key].filter(row => !deleted.includes(row.id)
+              && !incoming.some(next => next.id === row.id)).concat(clone(incoming));
+          }
+          return {...clone(committed), service:{source_ref:{mindexServiceDocument:clone(request.document)}}};
+        }});
         return state.serviceItems[sid].map(item => item.id);
       };
       const item = id => getServiceItems(sid).find(item => item.id === id);
@@ -76,8 +79,7 @@ def run(browser, url):
         let release, entered;
         const started = new Promise(resolve => { entered = resolve; });
         const gate = new Promise(resolve => { release = resolve; });
-        hook = async table => {
-          if (table !== 'mindex_worship_elements') return {error:null};
+        hook = async () => {
           hook = null;
           entered(); await gate;
           return {error:fail ? new Error('injected failure') : null};
@@ -105,31 +107,29 @@ def run(browser, url):
         check(!state.saving && !activeServiceSavePromise, mode+' rejected save kept lock');
       }
       results.push('full and element saves reject foreign sections before any DB write');
-      for (const count of [0, null]) {
+      for (const message of ['REVISION_CONFLICT', 'INVALID_RECEIPT']) {
         const [target] = fixture();
         edit(target, 'Keep this draft');
-        hook = async table => table === 'mindex_worship_services'
-          ? {error:null, count} : {error:null};
+        hook = async () => ({error:new Error(message)});
         let failed = false;
         try { await save(target); } catch (_) { failed = true; }
         check(failed && state.dirty.service, 'unconfirmed patch acknowledged');
         check(item(target).raw_title === 'Keep this draft', 'patch failure lost draft');
       }
-      results.push('zero/missing affected count rejects patch and retains draft');
+      results.push('rejected RPC receipt retains element draft');
 
       let [fullTarget] = fixture();
       edit(fullTarget, 'Keep full draft');
       const originalRef = state.services[0]._worshipSourceRef;
-      hook = async () => ({error:null, count:0});
+      hook = async () => ({error:new Error('REVISION_CONFLICT')});
       let fullFailed = false;
       try {
         await saveService(sid, {silent:true, renderAfterSave:false, throwOnError:true});
       } catch (_) { fullFailed = true; }
       check(fullFailed && state.dirty.service, 'unconfirmed full save acknowledged');
-      check(writes.length === 1 && writes[0].table === 'mindex_worship_services',
-        'full save wrote children after zero-row update');
+      check(writes.length === 1, 'failed full save attempted another commit');
       check(state.services[0]._worshipSourceRef === originalRef, 'failed save replaced source baseline');
-      results.push('zero-row full save stops before children and preserves baseline');
+      results.push('rejected full commit preserves baseline');
 
       let [a,b] = fixture();
       state.services[0]._worshipSourceRef = withServiceDocumentSnapshot(state.services[0], getServiceItems(sid));

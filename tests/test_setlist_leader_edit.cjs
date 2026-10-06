@@ -1,6 +1,6 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const c={console,document:{addEventListener(){},querySelectorAll(){return []}},localStorage:{getItem(){return null}},setTimeout,clearTimeout,URL,URLSearchParams,crypto:require('node:crypto').webcrypto};c.window=c;c.location={search:'',hash:'',pathname:'/'};vm.createContext(c);
-for(const f of ['mindex.constants.js','mindex.worship-model.js','mindex.presenter.js','mindex.worship-input.js','mindex.setlist-links.js','app.js'])vm.runInContext(fs.readFileSync(f,'utf8'),c,{filename:f});
+for(const f of ['mindex.constants.js','mindex.worship-model.js','mindex.presenter.js','mindex.worship-input.js','mindex.worship-persistence.js','mindex.setlist-links.js','app.js'])vm.runInContext(fs.readFileSync(f,'utf8'),c,{filename:f});
 c.assert=assert;
 (async()=>{try{await vm.runInContext(`(async()=>{
  state.config.authRequired=true;state.services=[{id:'live',praiseLeader:'old',leader:'old'}];
@@ -8,6 +8,8 @@ c.assert=assert;
  const db={mindex_worship_services:{id:'live',praise_leader:'old',worship_leader:'',other:'keep'},mindex_worship_import_sources:{id:'archive',updated_at:'v1',raw_payload:{other:'keep',service:{leader:'old',songs:['keep']}}}};
  let fail=false;let writes=0;
  state.client={from(table){let patch=null;const filters=[];const q={update(p){patch=p;return q},select(){return q},eq(k,v){filters.push([k,v]);return q},single(){return Promise.resolve({data:db[table],error:null})},maybeSingle(){writes++;if(fail)return Promise.resolve({error:new Error('fixture failure')});const row=db[table];if(!filters.every(([k,v])=>row[k]===v))return Promise.resolve({data:null,error:null});Object.assign(row,patch);return Promise.resolve({data:row,error:null})}};return q}};
+ worshipAtomicClient=async()=>({read:async()=>({service:{...db.mindex_worship_services,source_ref:{mindexServiceDocument:{sourceText:'Keep'}}},sections:[],elements:[]}),
+   commit:async request=>{writes++;if(fail)throw Error('fixture failure');assert.equal(request.serviceId,'live');assert.deepEqual(Object.keys(request.metadata),['praise_leader']);assert.equal(request.rows.elements.length,0);Object.assign(db.mindex_worship_services,request.metadata);return {service:{...db.mindex_worship_services}};}});
  assert.match(renderWorshipSetlistLeaderEditor({id:'archive',leader:''}),/—/);
  assert.equal(await persistWorshipSetlistLeader('worship:live','  김광한   전도사 ','old'),'김광한 전도사');
  assert.equal(db.mindex_worship_services.other,'keep');assert.equal(db.mindex_worship_services.worship_leader,'');assert.equal(state.services[0].praiseLeader,'김광한 전도사');

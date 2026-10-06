@@ -29,10 +29,6 @@ def main():
                         return {serviceId:id, draft:frozen, baseline:{revision:'3'},
                           latest:{revision:'4',service:{id,source_ref:{mindexServiceDocument:{sourceText:'서버의 새 원문\\n'.repeat(18)}}}}};
                       }});
-                      delete window.MINDEX_WORSHIP_ATOMIC_PROTOCOL;
-                      await openWorshipConflictReview(service.id);
-                      check(!document.querySelector('.worship-conflict-dialog'), 'disabled protocol opened dialog');
-                      window.MINDEX_WORSHIP_ATOMIC_PROTOCOL = 1;
                       const opening = openWorshipConflictReview(service.id);
                       await new Promise(resolve => setTimeout(resolve, 0));
                       const dialog = document.querySelector('.worship-conflict-dialog');

@@ -86,7 +86,16 @@ def main():
                   check(parseServiceSourceText(updatedPortable).length===2,'portable sync duplicated source');
                   check(updatedPortable.endsWith('[[별도]]\\n[사용자 항목]\\n- 제목: Keep exactly'),'portable sync changed unrelated content');
                   persistSundayEditSync=originalPersist;
-                  worshipAtomicClient=async()=>null;
+                  worshipAtomicClient=async()=>({
+                    read:async()=>({service:clone(serviceRow),...clone(db)}),
+                    commit:async request=>{
+                      writes.push(clone(request));
+                      if(mode!=='ok')throw Error('REVISION_CONFLICT');
+                      db.elements=db.elements.map(row=>request.rows.elements.find(next=>next.id===row.id)||row);
+                      serviceRow.source_ref={mindexServiceDocument:clone(request.document)};
+                      return {service:clone(serviceRow),...clone(db)};
+                    }
+                  });
                   const typed={inputMode:true,contentState:true};
                   let db,serviceRow,writes,mode;
                   const reset=()=>{
@@ -100,26 +109,11 @@ def main():
                   };
                   fetchWorshipRowsForServiceIds=async()=>clone(db);
                   refreshPresenterForService=()=>{};
-                  state.client={from:table=>({
-                    select:()=>({eq:()=>({single:async()=>({data:clone(serviceRow),error:null})})}),
-                    update:(payload,options)=>{
-                      const filters={};
-                      const q={eq:(k,v)=>{filters[k]=v;return q},then:resolve=>{
-                        check(options.count==='exact','missing receipt request');
-                        check(filters.id,'missing row id');
-                        check(table==='mindex_worship_services'?filters.source_ref:filters.updated_at,'missing optimistic lock');
-                        writes.push({table,payload:clone(payload),filters});
-                        const count=mode==='conflict'||(mode==='document-conflict'&&table==='mindex_worship_services')?0:1;
-                        if(count===1&&table==='mindex_worship_elements')db.elements=db.elements.map(r=>r.id===filters.id?{...r,...payload}:r);
-                        if(count===1&&table==='mindex_worship_services')serviceRow={...serviceRow,...payload};
-                        return Promise.resolve({error:null,count}).then(resolve);
-                      }};return q;
-                    }
-                  })};
+                  state.client={from:()=>{throw Error('Direct table write attempted')}};
                   const job={sourceServiceId:sid,targetId:tid,key:'sermon-title',previous,item:edited};
                   reset();await persistSundayEditSync(job,{elementTypedStateColumns:typed});
-                  check(writes.length===2&&writes[0].table==='mindex_worship_elements'&&writes[1].table==='mindex_worship_services'&&db.elements[0].title==='Edited','target not saved');
-                  check(!Object.hasOwn(writes[0].payload,'sort_order')&&!Object.hasOwn(writes[0].payload,'section_id'),'structure overwritten');
+                  check(writes.length===1&&writes[0].rows.sections.length===0&&db.elements[0].title==='Edited','target not saved atomically');
+                  check(db.elements[0].section_id===db.sections[0].id,'structure overwritten');
                   reset();db.elements[0].title='Independent';
                   let failed=false;try{await persistSundayEditSync(job,{elementTypedStateColumns:typed})}catch{failed=true}
                   check(failed&&writes.length===0,'independent value overwritten');
@@ -138,7 +132,7 @@ def main():
                   check(!('slides' in doc)&&!('sourceRecords' in doc)&&!('exceptions' in doc),'derived presentation snapshot persisted');
                   reset();serviceRow.source_ref={mindexServiceDocument:{sourceText:'Original',slides:[]}};mode='document-conflict';failed=false;
                   try{await persistSundayEditSync(job,{elementTypedStateColumns:typed})}catch{failed=true}
-                  check(failed&&db.elements[0].title==='Edited','partial save not reported');
+                  check(failed&&db.elements[0].title==='Original','rejected commit partially saved');
                   mode='ok';await persistSundayEditSync(job,{elementTypedStateColumns:typed});
                   check(serviceRow.source_ref.mindexServiceDocument.sourceText.includes('Edited'),'partial retry did not repair source');
                   reset();db.elements=[];await persistSundayEditSync(job,{elementTypedStateColumns:typed});

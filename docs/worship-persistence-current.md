@@ -2,18 +2,23 @@
 
 ## Production Boundary (2026-10-06)
 
-- The deployed entry point enables `MINDEX_WORSHIP_ATOMIC_PROTOCOL = 1`.
-  Worship reads and writes use the aggregate RPC client and expected revisions.
-  RPC errors never trigger direct-table fallback.
+- Worship aggregate reads and instance writes require the RPC client and expected
+  revisions. The cutover switch and direct-table fallback branches are removed.
+  Card/archive listings and the read-only refresh module still use table reads.
 - Pending writes are tab-scoped and project-scoped. Unknown outcomes retain the
   exact request for retry; a conflict must not silently replace newer data.
 - An element patch serializes only its target, preserves other local drafts,
   and updates only the corresponding source block. Identical duplicate source
   blocks may be collapsed only for a single canonical item. Differing duplicates
   remain blocked for review.
-- Direct-table branches still exist for the disabled protocol path. They are
-  legacy code, not the deployed persistence guarantee. Removing them requires
-  updating the explicitly non-atomic test fixtures together.
+- Full/element saves, linked-service sync, creation, deletion, automatic cleanup
+  and live setlist-leader edits have only one instance-write path. Import-source
+  archive edits are a separate, unchanged storage contract.
+- Offline browser fixtures now exercise RPC rollback, frozen-request replay,
+  conflict review, draft isolation and save queues. A resolved uncertain request
+  requires reload; it never acknowledges a newer editable draft.
+- Existing document slide arrays remain readable for fallback/recovery. This
+  code cleanup does not remove production content or change DB permissions.
 - `tests/test_worship_store.mjs` and `tests/test_worship_atomic_client.mjs`
   cover retry/revision handling. `tests/check_worship_atomic_live.py` checks a
   read-only production aggregate; it does not prove write permissions or writes.
@@ -22,9 +27,8 @@
 
 The remainder records the September 11-16 non-atomic implementation. Its gaps
 and proposed next steps do not describe the enabled production RPC path.
-`audit_worship_persistence_contract.cjs` explicitly mocks the atomic client as
-null to characterize that legacy branch; its reproductions are not evidence
-that an enabled RPC save partially commits.
+The former non-atomic fixtures were replaced on October 6. References to those
+reproductions below describe historical tests, not the current test behavior.
 
 ## Element document isolation (2026-09-16)
 

@@ -23,7 +23,6 @@ def main():
                     page.wait_for_function("typeof saveWorshipServiceInstance==='function'")
                     fixtures.append(page.evaluate('''async () => {
                       const check=(ok,msg)=>{if(!ok)throw Error(msg)};
-                      window.MINDEX_WORSHIP_ATOMIC_PROTOCOL=1;
                       const sid=crypto.randomUUID();
                       const service={id:sid,type_id:'fixture',date:'2026-10-12',title:'Fixture',_worshipSourceRef:{}};
                       state.services=[service]; state.selectedServiceId=sid;state.songs=[];

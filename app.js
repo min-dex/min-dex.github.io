@@ -3874,11 +3874,6 @@ async function fetchWorshipServiceListRows() {
   }
 }
 
-function worshipRowsCacheKey(serviceIds = [], elementSelect = WORSHIP_ELEMENT_BASE_LIST_SELECT) {
-  const slotKeyMode = String(elementSelect || "").split(",").includes("slot_key") ? "slot-key" : "base";
-  return `service-rows:${slotKeyMode}:${serviceIds.slice().sort().join(",")}`;
-}
-
 async function loadEmergencyWorshipSnapshot(date = localDateStringWithOffset(new Date(), 0)) {
   const snapshotDate = String(date || "").trim();
   if (!snapshotDate) return null;
@@ -3905,24 +3900,8 @@ async function readEmergencyWorshipServices() {
   return Array.isArray(snapshot?.services) ? snapshot.services : null;
 }
 
-async function readEmergencyWorshipRows(serviceIds = []) {
-  if (!WORSHIP_EMERGENCY_TODAY_ONLY) return null;
-  const ids = new Set(serviceIds.map((id) => String(id || "").trim()).filter(Boolean));
-  const snapshot = await loadEmergencyWorshipSnapshot();
-  const sections = Array.isArray(snapshot?.sections)
-    ? snapshot.sections.filter((section) => ids.has(section.service_id))
-    : [];
-  const sectionIds = new Set(sections.map((section) => section.id).filter(Boolean));
-  const elements = Array.isArray(snapshot?.elements)
-    ? snapshot.elements.filter((element) => sectionIds.has(element.section_id))
-    : [];
-  return sections.length || elements.length ? { sections, elements } : null;
-}
-
 let worshipAtomicRuntime = null;
 async function worshipAtomicClient() {
-  // Enabled only by the coordinated server/client cutover, never by RPC failure.
-  if (window.MINDEX_WORSHIP_ATOMIC_PROTOCOL !== 1) return null;
   if (!state.client) throw new Error("DB 연결을 확인해 주세요.");
   if (!worshipAtomicRuntime || worshipAtomicRuntime.client !== state.client) {
     const client = state.client;
@@ -3940,52 +3919,21 @@ async function fetchWorshipRowsForServiceIds(serviceIds = []) {
   if (!ids.length) return { sections: [], elements: [] };
 
   const atomic = await worshipAtomicClient();
-  if (atomic) {
-    const sections = [], elements = [];
-    for (const id of ids) {
-      const aggregate = await atomic.read(id, {
-        adopt: () => !state.loadedWorshipServiceIds.has(id) && !sundayEditSyncHasLocalDraft(id),
-      });
-      sections.push(...aggregate.sections);
-      elements.push(...aggregate.elements);
-      // On the initial load the document and row baseline must come from the
-      // same read. Never replace metadata belonging to an active local draft.
-      if (!state.loadedWorshipServiceIds.has(id) && !sundayEditSyncHasLocalDraft(id)) {
-        const service = state.services.find(candidate => candidate.id === id);
-        if (service) Object.assign(service, normalizeWorshipService(aggregate.service));
-      }
+  const sections = [], elements = [];
+  for (const id of ids) {
+    const aggregate = await atomic.read(id, {
+      adopt: () => !state.loadedWorshipServiceIds.has(id) && !sundayEditSyncHasLocalDraft(id),
+    });
+    sections.push(...aggregate.sections);
+    elements.push(...aggregate.elements);
+    // On the initial load the document and row baseline must come from the
+    // same read. Never replace metadata belonging to an active local draft.
+    if (!state.loadedWorshipServiceIds.has(id) && !sundayEditSyncHasLocalDraft(id)) {
+      const service = state.services.find(candidate => candidate.id === id);
+      if (service) Object.assign(service, normalizeWorshipService(aggregate.service));
     }
-    return { sections, elements };
   }
-
-  const elementSelect = await worshipElementListSelect();
-  const cacheKey = worshipRowsCacheKey(ids, elementSelect);
-  try {
-    const sections = await fetchSupabaseBatches(ids, (batch) =>
-      fetchSupabasePaged("mindex_worship_sections", WORSHIP_SECTION_LIST_SELECT, (query) =>
-        query.in("service_id", batch).order("service_id", { ascending: true })
-          .order("sort_order", { ascending: true }).order("id", { ascending: true })));
-    const sectionIds = sections.map((section) => section.id).filter(Boolean);
-    const elements = await fetchSupabaseBatches(sectionIds, (batch) =>
-      fetchSupabasePaged("mindex_worship_elements", elementSelect, (query) =>
-        query.in("section_id", batch).order("section_id", { ascending: true })
-          .order("sort_order", { ascending: true }).order("id", { ascending: true })));
-
-    writeStaticSupabaseCache("mindex_worship_rows", cacheKey, [{ sections, elements }]);
-    return { sections, elements };
-  } catch (error) {
-    const cached = readStaticSupabaseCache("mindex_worship_rows", cacheKey)?.[0];
-    if (cached?.sections && cached?.elements) {
-      console.warn("Using cached worship rows after Supabase fetch failed.", error);
-      return cached;
-    }
-    const emergency = await readEmergencyWorshipRows(ids);
-    if (emergency) {
-      console.warn("Using emergency worship row snapshot after Supabase fetch failed.", error);
-      return emergency;
-    }
-    throw error;
-  }
+  return { sections, elements };
 }
 
 async function loadWorshipSetlistSongCatalog({ force = false } = {}) {
@@ -4181,55 +4129,30 @@ async function purgeAutoGeneratedUnavailableSundayServices(baseDate = new Date()
   if (!removableTypeIds.length) return 0;
 
   const atomic = await worshipAtomicClient();
-  if (atomic) {
-    const result = await state.client.from("mindex_worship_services").select("id")
-      .eq("service_date", sundayDate).in("service_type_id", removableTypeIds)
-      .contains("source_ref", { created_from: "mindex_auto_schedule", auto_generated: true });
-    if (result.error) throw result.error;
-    let removed = 0;
-    for (const { id } of result.data || []) {
-      if (sundayEditSyncHasLocalDraft(id) || atomic.pending(id)) continue;
-      const aggregate = await atomic.read(id);
-      const row = aggregate.service, ref = row.source_ref || {};
-      // Auto cleanup is restricted to empty generated instances. Assigned people
-      // and any persisted content require an explicit user deletion.
-      if (sundayEditSyncHasLocalDraft(id) || row.service_date !== sundayDate
-        || !removableTypeIds.includes(row.service_type_id)
-        || ref.created_from !== "mindex_auto_schedule" || ref.auto_generated !== true
-        || row.status !== "draft" || row.title || row.notes || aggregate.sections.length
-        || aggregate.elements.length || aggregate.slides.length
-        || ref.mindexServiceDocument?.sourceRecords?.length) continue;
-      await atomic.remove(id);
-      state.services = state.services.filter(service => service.id !== id);
-      delete state.serviceItems[id];
-      state.loadedWorshipServiceIds.delete(id);
-      removed += 1;
-    }
-    return removed;
+  const result = await state.client.from("mindex_worship_services").select("id")
+    .eq("service_date", sundayDate).in("service_type_id", removableTypeIds)
+    .contains("source_ref", { created_from: "mindex_auto_schedule", auto_generated: true });
+  if (result.error) throw result.error;
+  let removed = 0;
+  for (const { id } of result.data || []) {
+    if (sundayEditSyncHasLocalDraft(id) || atomic.pending(id)) continue;
+    const aggregate = await atomic.read(id);
+    const row = aggregate.service, ref = row.source_ref || {};
+    // Auto cleanup is restricted to empty generated instances. Assigned people
+    // and any persisted content require an explicit user deletion.
+    if (sundayEditSyncHasLocalDraft(id) || row.service_date !== sundayDate
+      || !removableTypeIds.includes(row.service_type_id)
+      || ref.created_from !== "mindex_auto_schedule" || ref.auto_generated !== true
+      || row.status !== "draft" || row.title || row.notes || aggregate.sections.length
+      || aggregate.elements.length || aggregate.slides.length
+      || ref.mindexServiceDocument?.sourceRecords?.length) continue;
+    await atomic.remove(id);
+    state.services = state.services.filter(service => service.id !== id);
+    delete state.serviceItems[id];
+    state.loadedWorshipServiceIds.delete(id);
+    removed += 1;
   }
-
-  const { data, error } = await state.client
-    .from("mindex_worship_services")
-    .delete()
-    .eq("service_date", sundayDate)
-    .in("service_type_id", removableTypeIds)
-    .contains("source_ref", { created_from: "mindex_auto_schedule", auto_generated: true })
-    .select("id");
-
-  if (error) {
-    const message = error?.message || error?.details || String(error || "");
-    if (!isConnectionUnavailableMessage(message)) {
-      console.warn("Could not purge auto-generated unavailable Sunday services", error);
-    }
-    return 0;
-  }
-
-  const removedIds = new Set((data || []).map((row) => String(row?.id || "")).filter(Boolean));
-  if (removedIds.size) {
-    state.services = (state.services || []).filter((service) => !removedIds.has(String(service.id || "")));
-  }
-
-  return data?.length || 0;
+  return removed;
 }
 
 const FRIDAY_SERVICE_VARIANT_START_DATE = "2026-08-01";
@@ -6620,7 +6543,7 @@ function preserveWorshipConflictServerSnapshot(review = {}) {
 }
 
 async function openWorshipConflictReview(serviceId) {
-  if (worshipConflictReview || !serviceId || window.MINDEX_WORSHIP_ATOMIC_PROTOCOL !== 1) return;
+  if (worshipConflictReview || !serviceId) return;
   const service = state.services.find(candidate => candidate.id === serviceId);
   if (!service) return;
   const draft = worshipConflictDraft(serviceId);
@@ -7006,61 +6929,19 @@ async function saveWorshipServiceInstance(service) {
   validateWorshipPersistenceRows(rows, { serviceId });
 
   const atomic = await worshipAtomicClient();
-  if (atomic) {
-    const committedItems = groupWorshipElements(rows.sections, rows.elements)[serviceId] || [];
-    sourceRef = withServiceDocumentSnapshot(structuredClone(service), committedItems);
-    const nextElementIds = new Set(rows.elements.map(element => element.id));
-    const nextSectionIds = new Set(rows.sections.map(section => section.id));
-    const committed = await atomic.commit({ serviceId, rows,
-      metadata: { ...servicePayload, source_ref: sourceRef },
-      document: sourceRef[MINDEX_SERVICE_DOCUMENT_SOURCE_REF_KEY],
-      deleteElementIds: existingElements.map(row => row.id).filter(id => !nextElementIds.has(id)),
-      deleteSectionIds: existingSections.map(row => row.id).filter(id => !nextSectionIds.has(id)),
-    });
-    rows.sections = committed.sections;
-    rows.elements = committed.elements;
-    sourceRef = committed.service.source_ref;
-  } else {
-  const { error: serviceError, count: serviceCount } = await state.client
-    .from("mindex_worship_services")
-    .update(servicePayload, { count: "exact" })
-    .eq("id", serviceId);
-  if (serviceError) throw serviceError;
-  if (serviceCount !== 1) throw new Error("예배 저장 결과를 확인하지 못했습니다. 입력은 유지됩니다. 예배 상태와 권한을 확인해 주세요.");
-
-  if (rows.sections.length) {
-    const { error } = await state.client
-      .from("mindex_worship_sections")
-      .upsert(rows.sections, { onConflict: "id" });
-    if (error) throw error;
-  }
-  if (rows.elements.length) {
-    const { error } = await state.client
-      .from("mindex_worship_elements")
-      .upsert(rows.elements, { onConflict: "id" });
-    if (error) throw error;
-  }
-
-  const nextElementIds = new Set(rows.elements.map((element) => element.id));
-  const removedElementIds = existingElements.map((element) => element.id).filter((id) => !nextElementIds.has(id));
-  if (removedElementIds.length) {
-    const { error } = await state.client
-      .from("mindex_worship_elements")
-      .delete()
-      .in("id", removedElementIds);
-    if (error) throw error;
-  }
-
-  const nextSectionIds = new Set(rows.sections.map((section) => section.id));
-  const removedSectionIds = existingSections.map((section) => section.id).filter((id) => !nextSectionIds.has(id));
-  if (removedSectionIds.length) {
-    const { error } = await state.client
-      .from("mindex_worship_sections")
-      .delete()
-      .in("id", removedSectionIds);
-    if (error) throw error;
-  }
-  }
+  const committedItems = groupWorshipElements(rows.sections, rows.elements)[serviceId] || [];
+  sourceRef = withServiceDocumentSnapshot(structuredClone(service), committedItems);
+  const nextElementIds = new Set(rows.elements.map(element => element.id));
+  const nextSectionIds = new Set(rows.sections.map(section => section.id));
+  const committed = await atomic.commit({ serviceId, rows,
+    metadata: { ...servicePayload, source_ref: sourceRef },
+    document: sourceRef[MINDEX_SERVICE_DOCUMENT_SOURCE_REF_KEY],
+    deleteElementIds: existingElements.map(row => row.id).filter(id => !nextElementIds.has(id)),
+    deleteSectionIds: existingSections.map(row => row.id).filter(id => !nextSectionIds.has(id)),
+  });
+  rows.sections = committed.sections;
+  rows.elements = committed.elements;
+  sourceRef = committed.service.source_ref;
 
   service._worshipSourceRef = sourceRef;
   const unchanged = inputSignature === JSON.stringify(getServiceItems(serviceId))
@@ -7221,32 +7102,13 @@ async function saveWorshipServiceElementPatch(service, itemId) {
   }
   let sourceRef = withServiceDocumentSnapshot(documentService, committedItems);
   const atomic = await worshipAtomicClient();
-  if (atomic) {
-    const committed = await atomic.commit({ serviceId,
-      rows: { sections: sectionRow ? [sectionRow] : [], elements: [elementRow] },
-      document: sourceRef[MINDEX_SERVICE_DOCUMENT_SOURCE_REF_KEY],
-    });
-    elementRow = committed.elements.find(row => row.id === targetItemId);
-    sectionRow = committed.sections.find(row => row.id === elementRow.section_id);
-    sourceRef = committed.service.source_ref;
-  } else {
-  if (sectionRow) {
-    const { error } = await state.client
-      .from("mindex_worship_sections")
-      .upsert([sectionRow], { onConflict: "id" });
-    if (error) throw error;
-  }
-  const { error } = await state.client
-    .from("mindex_worship_elements")
-    .upsert([elementRow], { onConflict: "id" });
-  if (error) throw error;
-  const { error: serviceError, count: serviceCount } = await state.client
-    .from("mindex_worship_services")
-    .update({ source_ref: sourceRef }, { count: "exact" })
-    .eq("id", serviceId);
-  if (serviceError) throw serviceError;
-  if (serviceCount !== 1) throw new Error("예배 저장 결과를 확인하지 못했습니다. 입력은 유지됩니다. 예배 상태와 권한을 확인해 주세요.");
-  }
+  const committed = await atomic.commit({ serviceId,
+    rows: { sections: sectionRow ? [sectionRow] : [], elements: [elementRow] },
+    document: sourceRef[MINDEX_SERVICE_DOCUMENT_SOURCE_REF_KEY],
+  });
+  elementRow = committed.elements.find(row => row.id === targetItemId);
+  sectionRow = committed.sections.find(row => row.id === elementRow.section_id);
+  sourceRef = committed.service.source_ref;
   service._worshipSourceRef = sourceRef;
 
   const currentItems = getServiceItems(serviceId);
@@ -7562,17 +7424,10 @@ async function persistSundayEditSync(job, options = {}) {
   if (sundayEditSyncHasLocalDraft(target.id)) throw conflict();
   const atomic = await worshipAtomicClient();
   let serviceRow, sections, elements;
-  if (atomic) {
-    const aggregate = await atomic.read(target.id);
-    serviceRow = aggregate.service;
-    sections = aggregate.sections;
-    elements = aggregate.elements;
-  } else {
-    const result = await state.client.from("mindex_worship_services").select("*").eq("id", target.id).single();
-    if (result.error) throw result.error;
-    serviceRow = result.data;
-    ({ sections, elements } = await fetchWorshipRowsForServiceIds([target.id]));
-  }
+  const aggregate = await atomic.read(target.id);
+  serviceRow = aggregate.service;
+  sections = aggregate.sections;
+  elements = aggregate.elements;
   const freshService = normalizeWorshipService(serviceRow);
   if (freshService.date !== state.services.find((service) => service.id === job.sourceServiceId)?.date
     || freshService.type_id !== target.type_id || !worshipServiceParticipatesInSharedSundayContent(freshService)) return;
@@ -7615,24 +7470,12 @@ async function persistSundayEditSync(job, options = {}) {
   const documentService = { ...freshService, _worshipSourceTextDraft: sourceText };
   let ref = withServiceDocumentSnapshot(documentService, nextItems);
   let saved = { ...existing, ...patch };
-  if (atomic) {
-    const committed = await atomic.commit({ serviceId: target.id,
-      rows: { sections: [], elements: [saved] },
-      document: ref[MINDEX_SERVICE_DOCUMENT_SOURCE_REF_KEY],
-    });
-    saved = committed.elements.find(row => row.id === existing.id);
-    ref = committed.service.source_ref;
-  } else {
-    const { error, count } = await state.client.from("mindex_worship_elements")
-      .update(patch, { count: "exact" }).eq("id", existing.id).eq("updated_at", existing.updated_at);
-    if (error) throw error;
-    if (count !== 1) throw conflict();
-    const { error: refError, count: refCount } = await state.client.from("mindex_worship_services")
-      .update({ source_ref: ref, updated_at: patch.updated_at }, { count: "exact" }).eq("id", target.id).eq("source_ref", JSON.stringify(serviceRow.source_ref));
-    if (refError || refCount !== 1) {
-      throw new Error(`${label}: 항목은 저장됐지만 원문 기록 갱신이 완료되지 않았습니다. 다시 저장해 주세요.`);
-    }
-  }
+  const committed = await atomic.commit({ serviceId: target.id,
+    rows: { sections: [], elements: [saved] },
+    document: ref[MINDEX_SERVICE_DOCUMENT_SOURCE_REF_KEY],
+  });
+  saved = committed.elements.find(row => row.id === existing.id);
+  ref = committed.service.source_ref;
   target._worshipSourceRef = ref;
   if (!sundayEditSyncHasLocalDraft(target.id)) {
     const sectionIds = new Set(sections.map((section) => section.id));
@@ -13965,72 +13808,40 @@ async function insertWorshipServicesWithCalendarAssignees(payloads = []) {
     praise_leader: payload.praise_leader ?? defaultServicePraiseLeader(payload.service_type_id, payload),
   }));
   const atomic = await worshipAtomicClient();
-  if (atomic) {
-    const created = [];
-    try {
-      for (const payload of payloads) {
-        const identity = [payload.service_type_id, payload.service_date, payload.service_date_end || null,
-          payload.title || "", payload.service_alias || "", payload.source_ref?.created_from || ""];
-        const row = { ...payload, id: atomic.creationId(identity) };
-        const service = normalizeWorshipService(row);
-        const pending = atomic.pending(row.id);
-        // A scaffold allocates child UUIDs. Reuse the frozen children on retry,
-        // not a newly generated scaffold or newly changed calendar assignments.
-        const rows = pending?.operation === "create" ? {
-          sections: pending.request.sections.map(section => ({ id: section.id, service_id: row.id, ...section.patch })),
-          elements: pending.request.elements.map(element => ({ id: element.id, section_id: element.sectionId, ...element.patch })),
-        } : await calendarAssigneeRowsForNewService(service);
-        const items = groupWorshipElements(rows.sections, rows.elements)[row.id] || [];
-        const aggregate = await atomic.create({ service: row, rows,
-          document: pending?.operation === "create" ? pending.request.document : buildServiceDocumentSnapshot(service, items) });
-        const oldSectionIds = new Set(state.worshipSections.filter(section => section.service_id === row.id).map(section => section.id));
-        state.worshipSections = [...state.worshipSections.filter(section => section.service_id !== row.id), ...aggregate.sections];
-        state.worshipElements = [...state.worshipElements.filter(element => !oldSectionIds.has(element.section_id)), ...aggregate.elements];
-        state.serviceItems[row.id] = groupWorshipElements(aggregate.sections, aggregate.elements)[row.id] || [];
-        state.loadedWorshipServiceIds.add(row.id);
-        created.push(aggregate.service);
-        atomic.finishCreation(identity, row.id);
-      }
-      return created;
-    } catch (error) {
-      // Each service is its own transaction. Never delete an already-confirmed
-      // service because a later member of an automatic batch failed.
-      const ids = new Set(created.map(row => row.id));
-      state.services = sortServicesByDate([...state.services.filter(service => !ids.has(service.id)),
-        ...created.map(normalizeWorshipService)]);
-      throw error;
-    }
-  }
-  const seeds = await Promise.all(payloads.map((payload) =>
-    calendarAssigneeRowsForNewService(normalizeWorshipService(payload))));
-  const sections = seeds.flatMap((seed) => seed.sections);
-  const elements = seeds.flatMap((seed) => seed.elements);
-  const { data, error } = await state.client.from("mindex_worship_services").insert(payloads).select("*");
-  if (error) throw error;
-  const created = data || payloads;
+  const created = [];
   try {
-    if (sections.length) {
-      const result = await state.client.from("mindex_worship_sections").insert(sections);
-      if (result.error) throw result.error;
+    for (const payload of payloads) {
+      const identity = [payload.service_type_id, payload.service_date, payload.service_date_end || null,
+        payload.title || "", payload.service_alias || "", payload.source_ref?.created_from || ""];
+      const row = { ...payload, id: atomic.creationId(identity) };
+      const service = normalizeWorshipService(row);
+      const pending = atomic.pending(row.id);
+      // A scaffold allocates child UUIDs. Reuse the frozen children on retry,
+      // not a newly generated scaffold or newly changed calendar assignments.
+      const rows = pending?.operation === "create" ? {
+        sections: pending.request.sections.map(section => ({ id: section.id, service_id: row.id, ...section.patch })),
+        elements: pending.request.elements.map(element => ({ id: element.id, section_id: element.sectionId, ...element.patch })),
+      } : await calendarAssigneeRowsForNewService(service);
+      const items = groupWorshipElements(rows.sections, rows.elements)[row.id] || [];
+      const aggregate = await atomic.create({ service: row, rows,
+        document: pending?.operation === "create" ? pending.request.document : buildServiceDocumentSnapshot(service, items) });
+      const oldSectionIds = new Set(state.worshipSections.filter(section => section.service_id === row.id).map(section => section.id));
+      state.worshipSections = [...state.worshipSections.filter(section => section.service_id !== row.id), ...aggregate.sections];
+      state.worshipElements = [...state.worshipElements.filter(element => !oldSectionIds.has(element.section_id)), ...aggregate.elements];
+      state.serviceItems[row.id] = groupWorshipElements(aggregate.sections, aggregate.elements)[row.id] || [];
+      state.loadedWorshipServiceIds.add(row.id);
+      created.push(aggregate.service);
+      atomic.finishCreation(identity, row.id);
     }
-    if (elements.length) {
-      const result = await state.client.from("mindex_worship_elements").insert(elements);
-      if (result.error) throw result.error;
-    }
+    return created;
   } catch (error) {
-    // Roll back only service IDs just inserted by this creation attempt.
-    const rollback = await state.client.from("mindex_worship_services").delete().in("id", created.map((row) => row.id));
-    if (rollback.error) throw new Error(`${error.message} (생성 항목 정리 실패: ${rollback.error.message})`);
+    // Each service is its own transaction. Never delete an already-confirmed
+    // service because a later member of an automatic batch failed.
+    const ids = new Set(created.map(row => row.id));
+    state.services = sortServicesByDate([...state.services.filter(service => !ids.has(service.id)),
+      ...created.map(normalizeWorshipService)]);
     throw error;
   }
-  state.worshipSections.push(...sections);
-  state.worshipElements.push(...elements);
-  const grouped = groupWorshipElements(sections, elements);
-  for (const row of created) {
-    state.serviceItems[row.id] = grouped[row.id] || [];
-    state.loadedWorshipServiceIds.add(row.id);
-  }
-  return created;
 }
 
 function defaultServicePrayerLeader(service = null) {
@@ -15049,14 +14860,7 @@ async function loadServiceBulletinSource(serviceId, settings = {}) {
   // Read an independent committed aggregate. Never adopt it into the active
   // Presenter draft/baseline and never fall back to cached/emergency content.
   const atomic = await worshipAtomicClient();
-  let aggregate;
-  if (atomic) aggregate = await atomic.read(serviceId, {adopt: false});
-  else {
-    const service = await read(state.client.from("mindex_worship_services").select("*").eq("id", serviceId).single());
-    const sections = await read(state.client.from("mindex_worship_sections").select("*").eq("service_id", serviceId).order("sort_order")) || [];
-    const elements = sections.length ? await read(state.client.from("mindex_worship_elements").select("*").in("section_id", sections.map(row => row.id)).order("sort_order")) : [];
-    aggregate = {service, sections, elements};
-  }
+  const aggregate = await atomic.read(serviceId, {adopt: false});
   if (!aggregate?.service || !Array.isArray(aggregate.sections) || !Array.isArray(aggregate.elements)) throw new Error("저장된 예배 자료를 확인하지 못했습니다.");
   const normalized = normalizeWorshipService(aggregate.service);
   if (!serviceSupportsBulletin(normalized)) throw new Error("청년부 또는 어린이부 예배를 선택해 주세요.");
@@ -24778,25 +24582,17 @@ async function persistWorshipSetlistLeader(id, value, expectedLeader) {
   let row;
   if (serviceId) {
     const atomic = await worshipAtomicClient();
-    if (atomic) {
-      if (sundayEditSyncHasLocalDraft(serviceId)) throw new Error("이 예배에 편집 중인 내용이 있습니다. 먼저 저장한 뒤 인도자를 변경해 주세요.");
-      const aggregate = await atomic.read(serviceId);
-      if (sundayEditSyncHasLocalDraft(serviceId) || String(aggregate.service.praise_leader || "").trim() !== expectedLeader) {
-        throw new Error("다른 곳에서 인도자가 변경됐거나 편집 중입니다. 최신 예배를 확인해 주세요.");
-      }
-      const service = normalizeWorshipService(aggregate.service);
-      const document = aggregate.service.source_ref?.[MINDEX_SERVICE_DOCUMENT_SOURCE_REF_KEY]
-        || buildServiceDocumentSnapshot(service, groupWorshipElements(aggregate.sections, aggregate.elements)[serviceId] || []);
-      const committed = await atomic.commit({ serviceId, rows: { sections: [], elements: [] },
-        metadata: { praise_leader: leader }, document });
-      row = committed.service;
-    } else {
-    const result = await state.client.from("mindex_worship_services")
-      .update({ praise_leader: leader }).eq("id", serviceId)
-      .eq("praise_leader", expectedLeader).select("id,praise_leader").maybeSingle();
-    if (result.error) throw result.error;
-    row = result.data;
+    if (sundayEditSyncHasLocalDraft(serviceId)) throw new Error("이 예배에 편집 중인 내용이 있습니다. 먼저 저장한 뒤 인도자를 변경해 주세요.");
+    const aggregate = await atomic.read(serviceId);
+    if (sundayEditSyncHasLocalDraft(serviceId) || String(aggregate.service.praise_leader || "").trim() !== expectedLeader) {
+      throw new Error("다른 곳에서 인도자가 변경됐거나 편집 중입니다. 최신 예배를 확인해 주세요.");
     }
+    const service = normalizeWorshipService(aggregate.service);
+    const document = aggregate.service.source_ref?.[MINDEX_SERVICE_DOCUMENT_SOURCE_REF_KEY]
+      || buildServiceDocumentSnapshot(service, groupWorshipElements(aggregate.sections, aggregate.elements)[serviceId] || []);
+    const committed = await atomic.commit({ serviceId, rows: { sections: [], elements: [] },
+      metadata: { praise_leader: leader }, document });
+    row = committed.service;
   } else {
     const current = await state.client.from("mindex_worship_import_sources")
       .select("id,raw_payload,updated_at").eq("id", id).single();
@@ -34284,40 +34080,9 @@ async function deleteService(serviceId) {
     await ensureWorshipServiceRowsLoadedForPersistence(serviceId);
     captureWorshipRecoverySnapshot(service, "before-service-delete");
     const cachedSections = state.worshipSections.filter((section) => section.service_id === serviceId);
-    let sectionIds = cachedSections.map(section => section.id);
+    const sectionIds = cachedSections.map(section => section.id);
     const atomic = await worshipAtomicClient();
-    if (atomic) {
-      await atomic.remove(serviceId);
-    } else {
-    const { data: dbSections, error: sectionsLookupError } = await state.client
-      .from("mindex_worship_sections")
-      .select("id")
-      .eq("service_id", serviceId);
-    if (sectionsLookupError) throw sectionsLookupError;
-    sectionIds = [...new Set([
-      ...cachedSections.map((section) => section.id),
-      ...(dbSections || []).map((section) => section.id),
-    ].filter(Boolean))];
-    if (sectionIds.length) {
-      const { error: elementsError } = await state.client
-        .from("mindex_worship_elements")
-        .delete()
-        .in("section_id", sectionIds);
-      if (elementsError) throw elementsError;
-    }
-
-    const { error: sectionsError } = await state.client
-      .from("mindex_worship_sections")
-      .delete()
-      .eq("service_id", serviceId);
-    if (sectionsError) throw sectionsError;
-
-    const { error: serviceError } = await state.client
-      .from("mindex_worship_services")
-      .delete()
-      .eq("id", serviceId);
-    if (serviceError) throw serviceError;
-    }
+    await atomic.remove(serviceId);
 
     const removedSectionIds = new Set(sectionIds);
     state.services = state.services.filter((svc) => svc.id !== serviceId);

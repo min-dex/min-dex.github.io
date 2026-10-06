@@ -22,7 +22,6 @@ def main():
                     page.wait_for_function("typeof isSongServiceLabel==='function'")
                     fixtures.append(page.evaluate('''async () => {
                       const check=(ok,msg)=>{if(!ok)throw Error(msg)};
-                      window.MINDEX_WORSHIP_ATOMIC_PROTOCOL=1;
                       state.services=[];state.worshipSections=[];state.worshipElements=[];state.serviceItems={};
                       state.serviceTypes=[normalizeWorshipServiceType({id:'sun_1st',display_name:'주일예배 [1부]'})];
                       state.loadedWorshipServiceIds.clear();state.dirtyServiceElementIds.clear();state.dirtyServiceStructureIds.clear();
