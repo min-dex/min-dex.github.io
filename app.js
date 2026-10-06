@@ -20290,7 +20290,7 @@ function publicMonthlyCorporatePrayerStep() {
     default_text: label,
     templateKey: "monthly_corporate_prayer_group",
     corporatePrayers: topics.slice(startIndex, startIndex + 2).map((title) => ({ title, assignee: "" })),
-    slides: topics.slice(startIndex, startIndex + 2).map((topic) => `'${topic}'`),
+    slides: topics.slice(startIndex, startIndex + 2),
   });
   const prayerElements = [
     group("공동기도 1·2", 0),
