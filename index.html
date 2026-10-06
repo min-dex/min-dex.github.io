@@ -37,6 +37,18 @@
       body.ui-booting .toast-region {
         visibility: hidden;
       }
+      body[data-boot-failed="true"]::before {
+        content: "MINDEX를 시작하지 못했습니다. 새로고침해 주세요.";
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        box-sizing: border-box;
+        color: var(--mindex-boot-ink, #f3f3ef);
+        font: 600 16px/1.5 system-ui, sans-serif;
+        text-align: center;
+      }
       html.presenter-output-document,
       html.presenter-output-document body,
       body.presenter-output-body {
@@ -174,9 +186,18 @@
           "styles.css", "styles.presenter-output.css", "styles.bulletin.css",
           "styles.calendar.css", "styles.monitor.css",
         ];
+        const assetUrl = (path, version) => `./${path}?v=${encodeURIComponent(version)}`;
+        const preloadScript = (path, version) => {
+          const preload = document.createElement("link");
+          preload.rel = "preload";
+          preload.as = "script";
+          preload.href = assetUrl(path, version);
+          if (path === "app.js") preload.fetchPriority = "high";
+          document.head.append(preload);
+        };
         const load = (path, version) => new Promise((resolve, reject) => {
           const script = document.createElement("script");
-          script.src = `./${path}?v=${encodeURIComponent(version)}`;
+          script.src = assetUrl(path, version);
           script.onload = resolve;
           script.onerror = () => reject(new Error(`${path}을 불러오지 못했습니다.`));
           document.body.append(script);
@@ -184,7 +205,7 @@
         const loadStyle = (path, version) => new Promise((resolve, reject) => {
           const stylesheet = document.createElement("link");
           stylesheet.rel = "stylesheet";
-          stylesheet.href = `./${path}?v=${encodeURIComponent(version)}`;
+          stylesheet.href = assetUrl(path, version);
           stylesheet.onload = resolve;
           stylesheet.onerror = () => reject(new Error(`${path}을 불러오지 못했습니다.`));
           document.head.append(stylesheet);
@@ -201,9 +222,14 @@
         void (async () => {
           const version = await resolveVersion();
           window.MINDEX_RELEASE = version;
+          modules.forEach((module) => preloadScript(module, version));
           void Promise.all(styles.map((style) => loadStyle(style, version))).catch((error) => console.error(error));
           for (const module of modules) await load(module, version);
-        })();
+        })().catch((error) => {
+          console.error(error);
+          document.body.dataset.bootFailed = "true";
+          document.body.classList.remove("ui-booting");
+        });
       })();
     </script>
   </body>
