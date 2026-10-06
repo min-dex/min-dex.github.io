@@ -405,7 +405,7 @@ function updateServiceItemField(field, options = {}) {
       const prayers = monthlyCorporatePrayerEntries(item, parsed);
       prayers[topicIndex][key === "corporate_prayer_topic" ? "title" : "assignee"] = String(field.value || "").trim();
       parsed.corporatePrayers = prayers;
-      parsed.slides = prayers.map((prayer) => prayer.title);
+      parsed.slides = [];
       parsed.templateKey = "monthly_corporate_prayer_group";
       item.memo = serializeServiceItemMemo(parsed);
     }

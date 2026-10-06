@@ -29,6 +29,8 @@ def main():
               const merged=mergeMonthlyCorporatePrayerItems(original);
               check(JSON.stringify(original)===before,'input mutated');
               check(merged.map(x=>x.label).join('|')==='공동기도 1·2|기도찬양|공동기도 3·4','wrong grouping');
+              check(parseServiceItemMemo(merged[0].memo).slides.length===0,'canonical group retains legacy slides mirror');
+              check(publicMonthlyCorporatePrayerStep().elements.filter(item=>item.templateKey==='monthly_corporate_prayer_group').every(item=>!item.slides),'new template retains legacy slides mirror');
               const legacyEmpty={...merged[2],memo:serializeServiceItemMemo({elementType:'title_person',templateKey:'monthly_corporate_prayer_group'})};
               check(monthlyCorporatePrayerEntries(legacyEmpty).map(entry=>entry.title).join('|')===topics.slice(2).join('|'),'legacy defaults missing');
               const partialMemo=parseServiceItemMemo(merged[0].memo);

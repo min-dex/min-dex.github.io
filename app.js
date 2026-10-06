@@ -20290,7 +20290,6 @@ function publicMonthlyCorporatePrayerStep() {
     default_text: label,
     templateKey: "monthly_corporate_prayer_group",
     corporatePrayers: topics.slice(startIndex, startIndex + 2).map((title) => ({ title, assignee: "" })),
-    slides: topics.slice(startIndex, startIndex + 2),
   });
   const prayerElements = [
     group("공동기도 1·2", 0),
@@ -27258,7 +27257,7 @@ async function applyPresenterPreparationInput(serviceId = state.selectedServiceI
         const prayers = monthlyCorporatePrayerEntries(item, memo);
         prayers[corporatePrayerIndex] = { ...prayers[corporatePrayerIndex], title: content,
           assignee: assignee || prayers[corporatePrayerIndex].assignee };
-        item.memo = serializeServiceItemMemo({ ...memo, corporatePrayers: prayers, slides: prayers.map((prayer) => prayer.title) });
+        item.memo = serializeServiceItemMemo({ ...memo, corporatePrayers: prayers, slides: [] });
         item._worshipElementTemplateModified = true;
         item._worshipTemplatePlaceholder = false;
         continue;
@@ -27761,7 +27760,7 @@ function mergeMonthlyCorporatePrayerItems(items = []) {
       _worshipElementTemplateModified: true,
       memo: serializeServiceItemMemo({ ...parseServiceItemMemo(base.memo),
         elementType: "title_person", templateKey: "monthly_corporate_prayer_group",
-        corporatePrayers: prayers, slides: prayers.map((entry) => entry.title) }),
+        corporatePrayers: prayers, slides: [] }),
     };
     const insertion = Math.min(...[group, ...pair].filter(Boolean).map((item) => result.indexOf(item)));
     result = result.filter((item) => item !== group && !pair.includes(item));
