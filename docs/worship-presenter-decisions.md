@@ -1,5 +1,11 @@
 # Worship / Presenter Decision Log
 
+## Source Round-Trip Integrity (2026-10-06)
+- Historical reproduction confirms that pre-`a4afef7b` portable parsing omitted `endLine`; the old patch appended the full original source after the replacement. The Oct 2 range fix prevents that growth; retain range validation and repeated-patch tests.
+- Source Apply validates record multiplicity before creating or modifying any items. Previously it applied only matched records while retaining the entire duplicate draft. Reject newly introduced duplicates without changing drafts or canonical items.
+- Snapshot construction applies the same guard for non-UI save paths. An existing conflicting group may pass only unchanged, so unrelated edits are not blocked. Never guess between differing copies. Real repeated labels retain their canonical item count; a new portable label/section may occur once.
+- Regression: `smoke_source_roundtrip_integrity.py` reproduces the historical bug and checks 50 portable/20 legacy patches, idempotence, preflight non-mutation, snapshot protection and legitimate repeated labels in Chromium/WebKit.
+
 ## Source Duplicate Maintenance (2026-10-06)
 - Follow-up approved by the user: Sep 27 second/third citations restored to Exodus 17:1-7; 15:22-25; Psalm 119:105 in both canonical elements and source. Afternoon citations retain the filled superset including Philippians 4:6-7; reference image source uses the canonical `I must tell Jesus.jpg` display name without changing its URL. Three revision-checked transactions/readbacks are backed up under `backups/source-review-20261006/`. Six other differing groups remain; their contents were not chosen automatically.
 - Removed 49 identical source-block groups across six services through document-only aggregate RPC saves. Each group matched exactly one canonical element; differing groups were preserved.

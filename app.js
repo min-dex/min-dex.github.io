@@ -22768,7 +22768,10 @@ function buildServiceDocumentSnapshot(service = null, items = null) {
   const serviceId = String(service?.id || "").trim();
   const sourceItems = Array.isArray(items) ? items : getServiceOutputItems(serviceId);
   const sourceText = serviceDocumentSourceTextForSnapshot(service, sourceItems);
-  const sourceRecordCount = parseServiceSourceText(sourceText).length;
+  const sourceRecords = parseServiceSourceText(sourceText);
+  validateServiceSourceRecordMultiplicity(sourceRecords, sourceItems,
+    parseServiceSourceText(serviceDocumentSnapshotFromRef(service)?.sourceText || ""));
+  const sourceRecordCount = sourceRecords.length;
   const presentationSignature = serviceDocumentPresentationSignature(sourceItems);
   return normalizeServiceDocumentSnapshot({
     kind: MINDEX_SERVICE_DOCUMENT_KIND,
@@ -25865,6 +25868,12 @@ function applyServiceSourceText(serviceId = state.selectedServiceId, options = {
   const textarea = serviceSourceTextareaForService(id);
   if (!textarea) return false;
   const records = parseServiceSourceText(textarea.value);
+  try {
+    validateServiceSourceRecordMultiplicity(records, getServiceItems(id));
+  } catch (error) {
+    showToast(error.message, "error");
+    return false;
+  }
   ensurePortableSourceItems(service, records);
   const realItems = getServiceItems(id);
   const candidates = getServiceOutputItems(id)
@@ -25903,6 +25912,28 @@ function applyServiceSourceText(serviceId = state.selectedServiceId, options = {
     "상단 저장을 눌러 확정해 주세요.",
   ), "info");
   return true;
+}
+
+function validateServiceSourceRecordMultiplicity(records = [], items = [], previousRecords = []) {
+  const checked = new Set();
+  for (const record of records) {
+    const section = compactSearchValue(record.sectionTitle);
+    const key = JSON.stringify([section, compactSearchValue(record.label)]);
+    if (checked.has(key)) continue;
+    checked.add(key);
+    const matches = candidate => compactSearchValue(candidate.sectionTitle) === section
+      && serviceSourceLabelsMatch(candidate.label, record.label);
+    const group = records.filter(matches);
+    const count = group.length;
+    const capacity = items.filter(item => compactSearchValue(serviceSourceSectionTitle(item)) === section
+      && serviceSourceLabelsMatch(item.label, record.label)).length;
+    // A new portable item is allowed once; repeated real items retain their capacity.
+    if (count > Math.max(1, capacity)) {
+      // Unrelated edits may preserve an existing conflict, never introduce or alter it.
+      if (JSON.stringify(group) === JSON.stringify(previousRecords.filter(matches))) continue;
+      throw new Error(`예배 원문에 ${record.sectionTitle || "구역 없음"} / ${record.label} 항목이 ${count}번 있습니다. 중복 내용을 확인해 하나로 정리해 주세요. 입력은 유지됩니다.`);
+    }
+  }
 }
 
 function serviceSourceFindTarget(record = {}, candidates = [], usedIndexes = new Set()) {
