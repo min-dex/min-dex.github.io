@@ -1,5 +1,46 @@
 /* Worship source text grammar. Dependencies are provided by the app shell. */
 
+// Values are resolved by the caller; this formatter does not look up app state.
+function serializePortableServiceSourceItem(fields) {
+  const { label, value, elementType, inputMode, outputMode, formHint, songTitle,
+    songId, versionId, assignee, hasTranslation, translationLabel, translationId, sermonReference,
+    lyrics, slides, manualScripture, manualTranslation, asset, audio } = fields;
+  const lines = [`[${label}]`, `- 제목: ${value}`];
+  if (elementType) lines.push(`- 유형: ${elementType}`);
+  if (inputMode) lines.push(`- 입력: ${inputMode}`);
+  if (outputMode) lines.push(`- 출력: ${outputMode}`);
+  if (formHint) lines.push(`- 송폼: ${formHint}`);
+  if (songTitle) lines.push(`- 곡: ${songTitle}`);
+  if (songId) lines.push(`- 곡 ID: ${songId}`);
+  if (versionId) lines.push(`- 버전 ID: ${versionId}`);
+  if (assignee) lines.push(`- 담당: ${assignee}`);
+  if (hasTranslation) lines.push(`- 역본: ${translationLabel}`);
+  if (translationId) lines.push(`- 역본 ID: ${translationId}`);
+  if (sermonReference !== null) lines.push(`- 성경 본문: ${sermonReference}`);
+  if (lyrics) {
+    lines.push("- 가사: |");
+    lines.push(...lyrics.split(/\r?\n/).map((line) => `  ${line}`));
+  }
+  if (!lyrics && Array.isArray(slides) && slides.length) {
+    lines.push("- 슬라이드: |");
+    lines.push(...slides.join("\n---\n").split(/\r?\n/).map((line) => `  ${line}`));
+  }
+  if (manualScripture) {
+    if (manualTranslation) lines.push(`- 수동 역본: ${manualTranslation}`);
+    lines.push("- 수동 본문: |");
+    lines.push(...manualScripture.split(/\r?\n/).map((line) => `  ${line}`));
+  }
+  if (asset.name || asset.url) {
+    lines.push(`- 파일: ${asset.name || asset.url}`);
+    if (asset.name && asset.url) lines.push(`- 링크: ${asset.url}`);
+  }
+  if (audio.name || audio.url) {
+    lines.push(`- 음원 파일: ${audio.name || audio.url}`);
+    if (audio.name && audio.url) lines.push(`- 음원 링크: ${audio.url}`);
+  }
+  return lines;
+}
+
 function parseServiceSourceText(value = "", options = {}) {
   if (/^\s*\[\[[^\]]+\]\]/m.test(String(value || ""))) return parsePortableServiceSourceText(value, options);
   const records = [];

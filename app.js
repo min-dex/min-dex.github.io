@@ -24518,57 +24518,32 @@ function serviceSourceSectionTitle(item = {}) {
 function serviceSourceItemLines(item = {}, service = null, memo = parseServiceItemMemo(item.memo)) {
   const label = String(item.label || "").trim() || "항목";
   const value = serviceSourceItemValue(item, service, memo);
-  const lines = [`[${label}]`, `- 제목: ${value}`];
   const elementType = serviceMemoElementType(memo);
-  if (elementType) lines.push(`- 유형: ${elementType}`);
   const inputMode = serviceMemoInputMode(memo, item);
-  if (inputMode) lines.push(`- 입력: ${inputMode}`);
   const outputMode = normalizeServiceOutputMode(memo.outputMode || memo.output_mode);
-  if (outputMode) lines.push(`- 출력: ${outputMode}`);
-  if (memo.formHint) lines.push(`- 송폼: ${memo.formHint}`);
   const song = serviceItemLinkedSong(item);
-  if (song?.title) lines.push(`- 곡: ${song.title}`);
-  if (item.song_id) lines.push(`- 곡 ID: ${item.song_id}`);
-  if (item.version_id || item.song_version_id) lines.push(`- 버전 ID: ${item.version_id || item.song_version_id}`);
   const assignee = serviceItemEditableAssigneeValue(item, service);
-  if (assignee) lines.push(`- 담당: ${assignee}`);
   const translationId = String(memo.scriptureTranslationId || memo.scripture_translation_id || "").trim();
   const translation = serviceBibleTranslationById(translationId);
-  if (translation) lines.push(`- 역본: ${serviceBibleTranslationDisplayLabel(translation)}`);
-  if (translationId) lines.push(`- 역본 ID: ${translationId}`);
+  const translationLabel = translation ? serviceBibleTranslationDisplayLabel(translation) : null;
+  let sermonReference = null;
   if (isPresenterPreparationSermonTitleItem(item)) {
     const references = serviceScriptureReadingReferencesForService(service);
-    if (references.length) lines.push(`- 성경 본문: ${formatServiceScriptureReferenceList(references)}`);
+    if (references.length) sermonReference = formatServiceScriptureReferenceList(references);
   }
   const lyrics = servicePraiseInputMode(item, memo, service) === "manual_praise"
     ? formatServiceManualPraiseLyricsInput(item.memo)
     : "";
-  if (lyrics) {
-    lines.push("- 가사: |");
-    lines.push(...lyrics.split(/\r?\n/).map((line) => `  ${line}`));
-  }
-  if (!lyrics && Array.isArray(memo.slides) && memo.slides.length) {
-    lines.push("- 슬라이드: |");
-    lines.push(...memo.slides.join("\n---\n").split(/\r?\n/).map((line) => `  ${line}`));
-  }
   const manualScripture = formatServiceManualScriptureInput(memo.manualScripture);
-  if (manualScripture) {
-    const manualTranslation = normalizeServiceManualScripture(memo.manualScripture)?.translationLabel || "";
-    if (manualTranslation) lines.push(`- 수동 역본: ${manualTranslation}`);
-    lines.push("- 수동 본문: |");
-    lines.push(...manualScripture.split(/\r?\n/).map((line) => `  ${line}`));
-  }
+  const manualTranslation = manualScripture ? normalizeServiceManualScripture(memo.manualScripture)?.translationLabel || "" : "";
   const asset = normalizeServiceAsset(memo.asset);
-  if (asset.name || asset.url) {
-    lines.push(`- 파일: ${asset.name || asset.url}`);
-    if (asset.name && asset.url) lines.push(`- 링크: ${asset.url}`);
-  }
   const audio = normalizeServiceAudioAsset(memo.audioAsset || memo.audio_asset);
-  if (audio.name || audio.url) {
-    lines.push(`- 음원 파일: ${audio.name || audio.url}`);
-    if (audio.name && audio.url) lines.push(`- 음원 링크: ${audio.url}`);
-  }
-  return lines;
+  return serializePortableServiceSourceItem({
+    label, value, elementType, inputMode, outputMode, formHint: memo.formHint,
+    songTitle: song?.title, songId: item.song_id, versionId: item.version_id || item.song_version_id,
+    assignee, hasTranslation: Boolean(translation), translationLabel, translationId, sermonReference,
+    lyrics, slides: memo.slides, manualScripture, manualTranslation, asset, audio,
+  });
 }
 
 function serviceSourceItemValue(item = {}, service = null, memo = parseServiceItemMemo(item.memo)) {

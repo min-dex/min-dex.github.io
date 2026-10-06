@@ -26,6 +26,11 @@ The order is checked by `tests/solid_audit.py`.
   rules run without controller state, DOM, storage, or database dependencies.
   Applying a default to an editable item stays with the caller; normalization
   does not turn an existing manual or song-default preset into a suggested one.
+- `mindex.worship-source.js` owns the portable source grammar and serialization
+  of resolved item fields. Song/translation lookups, source item selection,
+  document snapshots, and save/conflict orchestration stay in `app.js`.
+  `serializePortableServiceSourceItem` must run without app globals and preserve
+  field ordering, empty-field distinctions, and multiline indentation.
 - `mindex.worship-persistence.js` owns source-reference normalization, history
   compaction, and save-row construction, validation, preservation, and ordering.
   It loads before `app.js`; its helpers run after app bootstrap. It does not

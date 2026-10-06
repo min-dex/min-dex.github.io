@@ -138,3 +138,25 @@ with `suggested` strength could be replaced during playback. The release restore
 stored-sequence precedence for every strength, covered by the special-hymn
 browser test; repeated-number handling remains unchanged. Three stale recovery
 snapshot assertions now check capture-before-RPC-commit/remove ordering.
+
+### Pure Source Serialization Checkpoint
+
+Based on deployed `0db4e94e`, only portable item text emission is extracted into
+`serializePortableServiceSourceItem` in the existing source grammar module.
+The app wrapper still resolves songs, translations, sermon references, and
+normalized media in the same order. Item selection, document ownership, RPCs,
+save timing, and conflict handling are untouched. This is intentionally smaller
+than moving the state-dependent source builder wholesale.
+
+Golden byte tests were run before and after extraction. A comparison against
+the deployed implementation covered 256 field combinations; an isolated VM
+test proves the formatter needs no app globals. Existing source parsing and all
+other app AST nodes remain unchanged. Browser tests cover source round-trips,
+duplicate preflight, sermon references, linked saves, and conflict review.
+
+App size changes from 33191 to 33166 lines (-25); app function count 1785,
+presenter 5488 lines/305 functions, styles 8867 lines, coupling markers 3152,
+and zero collisions remain unchanged. The current upstream audit passes; the
+prior strict thresholds still fail in six metrics. No thresholds were changed.
+This reduces the stateful wrapper's responsibility, not total runtime size.
+Production-config-dependent smoke cases remain unverified without credentials.
