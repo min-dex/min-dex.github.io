@@ -59,6 +59,13 @@ password separately in the trusted server editor.
 
 ## Verification
 
+The panel separates local sharing settings from authenticated remote viewing.
+Device facts use labeled rows for editing, output and save state. Failed reads
+remain explicitly unverified, including in the attention filter and empty state.
+Polling preserves focus on the recent-activity disclosure; manually locking the
+viewer returns focus to the password field. No telemetry fields or RPC contracts
+change with this presentation update.
+
 Run `tests/smoke_monitor.py`, `tests/smoke_monitor_isolation.py`, existing presenter
 latency/video tests and service-save safety tests. SQL permission and validation
 tests use `tests/test_monitor_sql.mjs` with PGLite installed outside the repository.

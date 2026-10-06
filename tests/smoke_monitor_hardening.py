@@ -49,7 +49,8 @@ def main():
                     assert '자동 재시도' in page.locator('.monitor-share-status').inner_text()
                     assert page.locator('[data-devices] .monitor-device').count() == 3
                     assert '시각 확인 불가' in page.locator('[data-devices]').inner_text()
-                    assert '마지막 보고: 송출 예배' in page.locator('[data-devices]').inner_text()
+                    assert '아래는 마지막 보고 상태' in page.locator('[data-devices]').inner_text()
+                    assert page.locator('[data-devices] .monitor-facts dt').all_text_contents().count('송출 예배') == 3
                     page.locator('[data-device-filter]').select_option('fresh')
                     assert page.locator('[data-devices] .monitor-device').count() == 1
                     page.locator('[data-device-filter]').select_option('stale')

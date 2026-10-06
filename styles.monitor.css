@@ -1,4 +1,4 @@
-.monitor-panel { box-sizing: border-box; width: min(880px, calc(100% - 24px)); max-height: 85vh; padding: 24px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+.monitor-panel { box-sizing: border-box; width: min(880px, calc(100% - 24px)); max-height: 85vh; padding: 20px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); overflow-y: auto; }
 .monitor-panel::backdrop { background: #0008; }
 .monitor-panel header, .monitor-panel form, .monitor-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
 .monitor-panel h2 { margin: 0; flex: 1; font-size: 20px; }
@@ -14,5 +14,20 @@
 .monitor-panel summary { cursor: pointer; font-size: 14px; margin-top: 8px; }
 .monitor-panel .monitor-message { min-height: 22px; }
 .monitor-panel .monitor-message:empty { display: none; }
+.monitor-section { padding: 15px 0; border-top: 1px solid var(--line); }
+.monitor-section-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.monitor-section-heading h3 { flex: 1; margin: 0; }
+.monitor-section > h3 { margin: 0 0 15px; }
+.monitor-panel .monitor-toolbar { gap: 10px; margin-bottom: 10px; }
+.monitor-panel #monitorName { flex: 1 1 160px; }
+.monitor-panel .monitor-device { border-top: 0; padding: 15px 0; }
+.monitor-panel .monitor-device + .monitor-device { border-top: 1px solid var(--line); }
+.monitor-health { display: inline-block; margin-left: 10px; font-size: 12px; color: var(--muted); }
+.monitor-panel .monitor-environment { color: var(--muted); font-size: 12px; }
+.monitor-facts { display: grid; grid-template-columns: 85px minmax(0, 1fr); gap: 8px 15px; margin: 15px 0; font-size: 14px; }
+.monitor-facts dt { color: var(--muted); }
+.monitor-facts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.monitor-panel [data-count] { margin-left: auto; font-size: 12px; color: var(--muted); }
+.monitor-panel summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .monitor-panel [hidden] { display: none !important; }
 @media (max-width: 480px) { .monitor-panel { padding: 16px; } .monitor-panel form label { flex-basis: 100%; } }

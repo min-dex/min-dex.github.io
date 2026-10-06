@@ -23,11 +23,12 @@
   const panel = document.createElement("dialog");
   panel.className = "monitor-panel"; panel.setAttribute("aria-labelledby", "monitorTitle");
   panel.innerHTML = `<header><h2 id="monitorTitle">제어판</h2><span>읽기 전용</span><button class="icon-btn" data-close title="닫기" aria-label="닫기"><i data-lucide="x"></i></button></header>
-    <div class="monitor-toolbar"><label for="monitorName">기기 이름</label><input id="monitorName" maxlength="60" autocomplete="off"></div>
-    <div class="monitor-toolbar"><label><input type="checkbox" data-share>이 기기 상태 공유</label><button class="icon-btn" data-refresh title="새로고침" aria-label="새로고침"><i data-lucide="refresh-cw"></i></button><button class="btn secondary" data-lock hidden>잠금</button></div>
-    <p class="monitor-share-status" role="status"></p><p class="monitor-message" role="status"></p><h3>현재 기기</h3><div data-local></div>
-    <h3>접속 기기</h3><form><label for="monitorPassword">관리자 비밀번호</label><input id="monitorPassword" type="password" autocomplete="current-password" required maxlength="128"><button class="btn secondary" type="submit">확인</button></form>
-    <div class="monitor-toolbar" data-filters hidden><label>기기<select data-device-filter><option value="all">전체</option><option value="fresh">응답 있음</option><option value="stale">응답 끊김</option><option value="error">오류 보고</option></select></label><label>작업<select data-event-filter><option value="all">전체</option><option value="save">저장</option><option value="error">저장 오류</option></select></label><span data-count></span></div><div data-devices></div>`;
+    <section class="monitor-section" aria-labelledby="monitorLocalTitle"><h3 id="monitorLocalTitle">현재 기기</h3>
+    <div class="monitor-toolbar"><label for="monitorName">기기 이름</label><input id="monitorName" maxlength="60" autocomplete="off"><label><input type="checkbox" data-share>상태 공유</label></div>
+    <p class="monitor-share-status" role="status"></p><div data-local></div></section>
+    <section class="monitor-section" aria-labelledby="monitorRemoteTitle"><div class="monitor-section-heading"><h3 id="monitorRemoteTitle">접속 기기</h3><button class="icon-btn" data-refresh title="상태 새로고침" aria-label="상태 새로고침"><i data-lucide="refresh-cw"></i></button><button class="icon-btn" data-lock hidden title="조회 잠금" aria-label="조회 잠금"><i data-lucide="lock"></i></button></div>
+    <form><label for="monitorPassword">관리자 비밀번호</label><input id="monitorPassword" type="password" autocomplete="current-password" required maxlength="128"><button class="btn secondary" type="submit">조회</button></form><p class="monitor-message" role="status"></p>
+    <div class="monitor-toolbar" data-filters hidden><label>기기<select data-device-filter><option value="all">전체</option><option value="fresh">응답 있음</option><option value="stale">상태 확인 필요</option><option value="error">오류 보고</option></select></label><label>최근 작업<select data-event-filter><option value="all">전체</option><option value="save">저장</option><option value="error">저장 오류</option></select></label><span data-count></span></div><div data-devices></div></section>`;
   document.body.append(panel);
   const $ = (selector) => panel.querySelector(selector);
   $("[data-share]").checked = enabled; $("#monitorName").value = name || `${os} ${browser}`;
@@ -78,12 +79,20 @@
     const row = document.createElement("section"); row.className = "monitor-device";
     row.dataset.health = stale || unverified ? "stale" : hasError(data) ? "error" : "fresh";
     const heading = document.createElement("strong"); heading.textContent = String(data.name || `${data.os} ${data.browser}`).slice(0, 80); row.append(heading);
-    const lines = [`${data.os} · ${data.browser} · ${data.version}`, `${modules[data.module] || data.module || ""} · 편집 예배: ${serviceName(data.serviceId, data.serviceDate, data.serviceType)}`,
-      stale ? "응답 없음 · 아래는 마지막 보고 상태" : unverified ? "최신 상태 확인 실패 · 아래는 이전 조회 결과" : "",
-      `${stale || unverified ? "마지막 보고: " : ""}송출 예배: ${serviceName(data.outputServiceId)} · ${data.output ? `송출창 연결 · 선택 슬라이드 ${data.slide} / ${data.count}` : "송출창 미연결"}${videoNames[data.video] ? ` · 영상 ${videoNames[data.video]}` : ""}`,
-      data.saving ? "저장 처리 중" : data.dirty ? "미저장 예배 변경 있음" : "미저장 예배 변경 없음",
-      local ? "현재 상태" : `마지막 응답 ${dateLabel(lastSeen)} · 접속 ${id.slice(0, 8)}`];
-    for (const text of lines.filter(Boolean)) { const p = document.createElement("p"); p.textContent = String(text).slice(0, 300); row.append(p); }
+    const status = document.createElement("span"); status.className = "monitor-health";
+    status.textContent = local ? "현재 기기" : unverified ? "확인 실패" : stale ? "응답 끊김" : "응답 있음"; row.append(status);
+    const environment = document.createElement("p"); environment.className = "monitor-environment";
+    environment.textContent = `${data.os} · ${data.browser} · ${data.version}`; row.append(environment);
+    if (stale || unverified) { const notice = document.createElement("p"); notice.textContent = unverified ? "최신 상태 확인 실패 · 아래는 이전 조회 결과" : "응답 없음 · 아래는 마지막 보고 상태"; row.append(notice); }
+    const facts = document.createElement("dl"); facts.className = "monitor-facts";
+    const lines = [["편집 예배", serviceName(data.serviceId, data.serviceDate, data.serviceType)],
+      ["현재 화면", modules[data.module] || data.module || "미선택"],
+      ["송출 예배", serviceName(data.outputServiceId)],
+      ["송출 상태", `${data.output ? `송출창 연결 · 선택 슬라이드 ${data.slide} / ${data.count}` : "송출창 미연결"}${videoNames[data.video] ? ` · 영상 ${videoNames[data.video]}` : ""}`],
+      ["저장 상태", data.saving ? "저장 처리 중" : data.dirty ? "미저장 예배 변경 있음" : "미저장 예배 변경 없음"]];
+    for (const [label, value] of lines) { const dt = document.createElement("dt"); dt.textContent = label; const dd = document.createElement("dd"); dd.textContent = String(value).slice(0, 300); facts.append(dt, dd); }
+    row.append(facts);
+    if (!local) { const seen = document.createElement("p"); seen.className = "monitor-environment"; seen.textContent = `마지막 응답 ${dateLabel(lastSeen)} · 접속 ${id.slice(0, 8)}`; row.append(seen); }
     const details = document.createElement("details"); details.dataset.device = id;
     const summary = document.createElement("summary"); summary.textContent = "최근 작업"; details.append(summary);
     const list = document.createElement("ul");
@@ -102,16 +111,18 @@
     if (renderKeys.get(root) === key) return;
     renderKeys.set(root, key);
     const expanded = new Set([...root.querySelectorAll("details[open]")].map((d) => d.dataset.device));
+    const focusedDevice = root.contains(document.activeElement) ? document.activeElement.closest("details")?.dataset.device : null;
     root.replaceChildren();
     for (const row of rows) renderDevice(root, row.status, row.last_seen, row.id);
     root.querySelectorAll("details").forEach((d) => { d.open = expanded.has(d.dataset.device); });
+    if (focusedDevice) [...root.querySelectorAll("details")].find((d) => d.dataset.device === focusedDevice)?.querySelector("summary")?.focus({ preventScroll: true });
   }
   function renderRemote() {
     const filter = $("[data-device-filter]").value;
-    const rows = remoteRows.filter((row) => filter === "all" || (filter === "fresh" ? !isStale(row) && remoteVerified : filter === "stale" ? isStale(row) : hasError(row.status)));
-    $("[data-count]").textContent = `${rows.length} / ${remoteRows.length}`;
+    const rows = remoteRows.filter((row) => filter === "all" || (filter === "fresh" ? !isStale(row) && remoteVerified : filter === "stale" ? isStale(row) || !remoteVerified : hasError(row.status)));
+    $("[data-count]").textContent = `${rows.length} / ${remoteRows.length}개 접속`;
     renderRows($("[data-devices]"), rows);
-    if (!rows.length) $("[data-devices]").textContent = "해당 기기 없음";
+    if (!rows.length) $("[data-devices]").textContent = !remoteVerified ? "기기 상태를 확인하지 못했습니다." : remoteRows.length ? "조건에 맞는 기기 없음" : "공유 중인 기기 없음";
   }
   async function rpc(name, args) {
     if (!state.client?.rpc) throw Error("원격 조회에 필요한 DB 클라이언트가 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.");
@@ -176,7 +187,7 @@
   }
   trigger.onclick = () => { if (!panel.open) panel.showModal(); lastActivityAt = Date.now(); void refresh(); window.lucide?.createIcons({ root: panel }); };
   $("[data-close]").onclick = () => panel.close(); panel.addEventListener("close", lock);
-  $("[data-lock]").onclick = lock;
+  $("[data-lock]").onclick = () => { lock(); $("#monitorPassword").focus(); };
   $("[data-refresh]").onclick = () => { void refresh(); if (enabled && Date.now() - lastReportAt >= 10000) { retryAt = 0; void upload(); } };
   $("[data-device-filter]").onchange = renderRemote;
   $("[data-event-filter]").onchange = () => { renderRemote(); renderRows($("[data-local]"), [{ id: "local", status: snapshot() }]); };

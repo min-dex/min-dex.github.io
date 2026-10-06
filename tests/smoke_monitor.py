@@ -50,13 +50,31 @@ def main():
                     page.wait_for_function("!!document.querySelector('[data-devices] strong')")
                     assert page.locator('[data-devices] img').count() == 0
                     assert page.locator('#monitorPassword').input_value() == ''
+                    assert page.locator('[data-local] .monitor-facts dt').all_text_contents() == ['편집 예배', '현재 화면', '송출 예배', '송출 상태', '저장 상태']
+                    page.locator('[data-local] summary').focus()
+                    page.evaluate("emitMonitorSaveEvent('save_start')")
+                    page.wait_for_timeout(2200)
+                    assert page.locator('[data-local] summary').evaluate('(e)=>e===document.activeElement')
+                    page.evaluate("monitorMode='missing'")
+                    page.locator('[data-refresh]').click()
+                    page.wait_for_function("document.querySelector('.monitor-message').textContent.includes('이전 조회')")
+                    page.locator('[data-device-filter]').select_option('stale')
+                    assert page.locator('[data-devices] .monitor-device').count() == 1
+                    assert '확인 실패' in page.locator('[data-devices]').inner_text()
+                    page.evaluate("monitorMode='ok'")
+                    page.locator('[data-device-filter]').select_option('all')
+                    page.locator('[data-refresh]').click()
+                    page.wait_for_function("!document.querySelector('.monitor-message').textContent.includes('이전 조회')")
                     assert page.evaluate("Object.values(localStorage).every(v=>!v.includes('test-secret')&&!v.includes('admin-token'))")
-                    for width in [1280, 390]:
+                    for width, theme in [(1280, 'light'), (390, 'light'), (1280, 'dark'), (390, 'dark')]:
+                        page.evaluate('(theme)=>{document.body.dataset.theme=theme;document.documentElement.dataset.theme=theme}', theme)
                         page.set_viewport_size({'width': width, 'height': 900})
                         assert page.locator('.monitor-panel').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
-                        page.screenshot(path=f'/tmp/mindex-monitor-{engine}-{width}.png')
+                        page.screenshot(path=f'/tmp/mindex-monitor-{engine}-{width}-{theme}.png')
                     page.locator('[data-share]').uncheck()
                     page.wait_for_function("monitorCalls.some(c=>c.name==='mindex_monitor_leave'&&c.args.p_token==='report-token')")
+                    page.locator('[data-lock]').click()
+                    assert page.locator('#monitorPassword').evaluate('(e)=>e===document.activeElement')
                     page.locator('[data-close]').click()
                     page.wait_for_function("monitorCalls.some(c=>c.name==='mindex_monitor_leave'&&c.args.p_token==='admin-token')")
                     assert page.locator('[data-devices]').inner_text() == ''
