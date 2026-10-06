@@ -15143,8 +15143,11 @@ function mountServiceBulletinWorkbench(service) {
     saveDraft: saveBulletinDraft,
     loadSource: loadServiceBulletinSource,
     onServiceChange: id => {
+      const selected = state.services.find(candidate => candidate.id === id);
+      if (!selected || !serviceSupportsBulletin(selected)) return false;
       state.presenterBulletinServiceId = id;
       state.selectedServiceId = id;
+      state.selectedServiceTypeId = selected.type_id;
       if (state.module === "presenter") state.presenter.viewServiceId = id;
       renderBulletinList();
       host.dataset.bulletinOwner = id;

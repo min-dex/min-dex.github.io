@@ -321,7 +321,7 @@
         || /^(ready|preparation|closing|fellowship)$/.test(section.section_key)
         || /^(준비|폐회|실시간 성구 송출)$/.test(label)))
         || ["blank","image","video","audio","file","ppt","pdf","live_scripture"].includes(type)
-        || config.templateSuppressed || el.content_state?.status==="suppressed") continue;
+        || config.templateSuppressed || el.content_state?.status==="suppressed" || el.content_state?.state==="suppressed") continue;
       if(compactOrder)label=label.replace(/^(찬양|찬송)\s*\d+(?:\s*[–~-]\s*\d+)?$/, "$1");
       const linked = songById.get(el.song_id);
       const scripture = scriptureById.get(el.scripture_id);
@@ -864,7 +864,7 @@
   }
   function snapshot(doc){return {fields:clone(doc.fields),settings:clone(doc.settings||{}),frames:clone(doc.frames),months:clone(doc.months||{}),inherited:clone(doc.inherited||{common:{},months:{}}),sourceSnapshot:clone(doc.sourceSnapshot||null)};}
 
-  const weeklySourceKeys=["leader","announcer","sermon","scripture","news","notices","welcome","outline","outlineTitle","sermonReference","liturgical"];
+  const weeklySourceKeys=["leader","announcer","sermon","scripture","news","notices","welcome","outline","outlineTitle","sermonReference","liturgical","monthlyTheme","memoryVerse","memoryReference","readingPlan","issue"];
   function normalizeSourceSnapshot(value) {
     if(!isRecord(value)||typeof value.serviceId!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(value.date||""))return null;
     const weekly={};for(const key of weeklySourceKeys)if(typeof value.weekly?.[key]==="string")weekly[key]=value.weekly[key];
@@ -911,7 +911,7 @@
   function mount(host,options) {
     const controller=new AbortController(),signal=controller.signal;
     let doc,mode="content",selected="news",loading=false,assetLoaded=false,error="",serial=0,saveError="",printError="",printing=false,issues=new Set();
-    const documents=options.documents||new Map();
+    const documents=options.documents||new Map(),disclosureState=new Map();
     const on=(target,event,fn)=>target.addEventListener(event,fn,{signal});
     host.innerHTML=`<section class="bulletin-workbench" aria-label="주보 편집">
       <header class="bulletin-toolbar">
@@ -985,7 +985,8 @@
     }
     function properties(){
       root.querySelectorAll("[data-bulletin-mode]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.bulletinMode===mode)));
-      const p=q(".bulletin-properties");
+      const p=q(".bulletin-properties"),sections=[...p.querySelectorAll("details[data-bulletin-section]")];
+      if(sections.length&&p.dataset.documentId&&p.dataset.sectionsReady==="true")disclosureState.set(p.dataset.documentId,Object.fromEntries(sections.map(el=>[el.dataset.bulletinSection,el.open])));
       if(!doc){p.replaceChildren();return;}
       if(mode==="content") {
         const child=doc.source?.department==="children";
@@ -993,11 +994,11 @@
           `<input data-bulletin-field="${key}" value="${escape(fieldValue(doc,key))}" ${key==="issue"?'inputmode="numeric"':''}>`:
           `<textarea data-bulletin-field="${key}" rows="${key==="news"?5:3}">${escape(fieldValue(doc,key))}</textarea>`}</label>`;
         const modern=doc.settings.design==="editorial";
-        p.innerHTML=`${modern?`<div class="bulletin-connected"><span>예배에서 연결됨</span><strong>${escape(doc.source?.sermon||"설교 제목 미입력")}</strong><small>${escape(doc.source?.scripture||"본문 미입력")}</small></div>`:""}<section class="bulletin-property-section"><h3>이번 주 편집</h3><p class="bulletin-help">찬양·본문·설교·기도자는 예배와 교회력에서 가져옵니다. 소식은 광고를 바탕으로 편집하고, ${child?"새길 말씀과 누락된 인도자를 보완해 주세요. 잠잠성경은 기존 잠언 순환표를 이어 생성하며 직접 수정할 수 있어요.":"설교 요점과 누락된 인도자만 보완해 주세요."}</p>${doc.source?.hasArchiveReference?`<label><input type="checkbox" data-bulletin-setting="archiveReference" ${doc.settings.archiveReference!==false?"checked":""}> 발행 원본의 소식·담당·요점·위원표 사용</label><p class="bulletin-help">이 날짜의 실제 PDF에서 확인한 내용입니다. 찬양·설교는 연결된 예배 자료를 사용합니다.</p>`:""}${(child?["news","memoryVerse","memoryReference","readingPlan","leader","issue"]:modern?["news","outline"]:["news","outline","leader","issue"]).map(field).join("")}<details class="bulletin-property-section"><summary>담당·발행 정보</summary>${(child?["announcer"]:modern?["leader","issue","announcer","sermonReference","outlineTitle"]:["announcer","sermonReference","outlineTitle"]).map(field).join("")}</details></section>
-          <details class="bulletin-property-section" ${modern?"":"open"}><summary>이번 달 · ${child?"일정과 주제":"일정과 위원"}</summary><p class="bulletin-help">${escape(doc.source?.eventsOrigin||"교회력 일정")}을 사용합니다. 일정 수정은 같은 달 주보에 이어집니다. 저장하면 이번 호의 예배 내용${child?"":"과 위원표"}도 보존합니다. 최신 자료는 예배 자료 갱신으로 가져옵니다.</p>${child?field("monthlyTheme"):""}${field("eventsText")}<button type="button" data-bulletin-calendar-events>교회력 일정 불러오기</button><div class="bulletin-number-grid">
+        p.innerHTML=`${modern?`<div class="bulletin-connected"><span>예배에서 연결됨</span><strong>${escape(doc.source?.sermon||"설교 제목 미입력")}</strong><small>${escape(doc.source?.scripture||"본문 미입력")}</small></div>`:""}<section class="bulletin-property-section"><h3>이번 주 편집</h3><p class="bulletin-help">찬양·본문·설교·기도자는 예배와 교회력에서 가져옵니다. 소식은 광고를 바탕으로 편집하고, ${child?"새길 말씀과 누락된 인도자를 보완해 주세요. 잠잠성경은 기존 잠언 순환표를 이어 생성하며 직접 수정할 수 있어요.":"설교 요점과 누락된 인도자만 보완해 주세요."}</p>${doc.source?.hasArchiveReference?`<label><input type="checkbox" data-bulletin-setting="archiveReference" ${doc.settings.archiveReference!==false?"checked":""}> 발행 원본의 소식·담당·요점·위원표 사용</label><p class="bulletin-help">이 날짜의 실제 PDF에서 확인한 내용입니다. 찬양·설교는 연결된 예배 자료를 사용합니다.</p>`:""}${(child?["news","memoryVerse","memoryReference","readingPlan","leader","issue"]:modern?["news","outline"]:["news","outline","leader","issue"]).map(field).join("")}<details class="bulletin-property-section" data-bulletin-section="weekly"><summary>담당·발행 정보</summary>${(child?["announcer"]:modern?["leader","issue","announcer","sermonReference","outlineTitle"]:["announcer","sermonReference","outlineTitle"]).map(field).join("")}</details></section>
+          <details class="bulletin-property-section" data-bulletin-section="monthly" ${modern?"":"open"}><summary>이번 달 · ${child?"일정과 주제":"일정과 위원"}</summary><p class="bulletin-help">${escape(doc.source?.eventsOrigin||"교회력 일정")}을 사용합니다. 일정 수정은 같은 달 주보에 이어집니다. 저장하면 이번 호의 예배 내용${child?"":"과 위원표"}도 보존합니다. 최신 자료는 예배 자료 갱신으로 가져옵니다.</p>${child?field("monthlyTheme"):""}${field("eventsText")}<button type="button" data-bulletin-calendar-events>교회력 일정 불러오기</button><div class="bulletin-number-grid">
           <label>교회 일정<input type="month" data-bulletin-setting="eventsMonth" value="${escape(doc.settings.eventsMonth||doc.source?.eventsMonth||"")}"></label>
           ${child?"":`<label>예배 위원<input type="month" data-bulletin-setting="rosterMonth" value="${escape(doc.settings.rosterMonth||doc.source?.rosterMonth||"")}"></label>`}</div></details>
-          <details class="bulletin-property-section" data-bulletin-common><summary>공통 내용</summary><p class="bulletin-help">실주보에서 확인한 내용을 기본으로 사용합니다. 여기서 수정·저장한 내용은 이 날짜부터 새로 만드는 주보에도 적용됩니다. 이번 호만 빼려면 양식에서 해당 영역을 숨겨 주세요.</p><button type="button" data-bulletin-common-reset>공통 내용 다시 연결</button>${profileKeys.map(field).join("")}</details>`;
+          <details class="bulletin-property-section" data-bulletin-common data-bulletin-section="common"><summary>공통 내용</summary><p class="bulletin-help">실주보에서 확인한 내용을 기본으로 사용합니다. 여기서 수정·저장한 내용은 이 날짜부터 새로 만드는 주보에도 적용됩니다. 이번 호만 빼려면 양식에서 해당 영역을 숨겨 주세요.</p><button type="button" data-bulletin-common-reset>공통 내용 다시 연결</button>${profileKeys.map(field).join("")}</details>`;
 
       } else {
         const f=doc.frames.find(f=>f.id===selected)||doc.frames[0];selected=f.id;
@@ -1008,6 +1009,10 @@
           <label>정렬<select data-bulletin-align>${[["left","왼쪽"],["center","가운데"],["right","오른쪽"]].map(([v,t])=>`<option value="${v}" ${f.align===v?"selected":""}>${t}</option>`).join("")}</select></label>
           <p class="bulletin-help">페이지에서 드래그해 이동하거나 선택 모서리로 크기를 바꿀 수 있어요. 방향키로 2.5mm씩 이동합니다.</p>`;
       }
+      p.dataset.documentId=doc.id;
+      p.dataset.sectionsReady=String(!!doc.source&&assetLoaded);
+      const savedSections=disclosureState.get(doc.id);
+      if(savedSections)for(const el of p.querySelectorAll("details[data-bulletin-section]"))if(Object.hasOwn(savedSections,el.dataset.bulletinSection))el.open=savedSections[el.dataset.bulletinSection];
     }
     async function load(id,force=false) {
       endDrag();

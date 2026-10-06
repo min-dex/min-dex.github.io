@@ -44,6 +44,16 @@ const server=http.createServer((req,res)=>{
  await page.locator('[data-bulletin-field="memoryVerse"]').fill('이번 주 새길 말씀');await page.locator('[data-bulletin-save]').click();await page.waitForFunction(()=>audit.row?.revision===1);
  await page.evaluate(()=>{audit.handle.destroy();audit.documents.clear();localStorage.clear();audit.handle=audit.mount();});await page.waitForFunction(()=>document.querySelector('[data-bulletin-print]')?.disabled===false);
  assert.equal(await page.locator('[data-bulletin-field="memoryVerse"]').inputValue(),'이번 주 새길 말씀');
+ await page.locator('[data-bulletin-common] summary').click();
+ await page.locator('[data-bulletin-field="church"]').fill('공통 문구 편집');
+ await page.locator('[data-bulletin-undo]').click();
+ assert.equal(await page.locator('[data-bulletin-common]').evaluate(el=>el.open),true,'Undo must keep the edited section open');
+ await page.locator('[data-bulletin-mode="layout"]').click();
+ await page.locator('[data-bulletin-mode="content"]').click();
+ assert.equal(await page.locator('[data-bulletin-common]').evaluate(el=>el.open),true,'Mode switching keeps disclosure state');
+ await page.locator('[data-bulletin-setting="eventsMonth"]').fill('2026-11');await page.locator('[data-bulletin-setting="eventsMonth"]').press('Tab');
+ await page.waitForFunction(()=>document.querySelector('[data-bulletin-print]')?.disabled===false);
+ assert.equal(await page.locator('[data-bulletin-common]').evaluate(el=>el.open),true,'Reloading source keeps disclosure state');
  console.log('PASS children identity, actual four-face content, prayer isolation, reading cycle, missed Sunday, monthly boundaries, DB save and reload');
  }finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});

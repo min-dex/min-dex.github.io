@@ -451,6 +451,25 @@ const server=http.createServer((req,res)=>{
     await page.locator('[data-bulletin-save]').click();
     await page.waitForFunction(()=>bulletinTest.drafts['33333333-3333-4333-8333-333333333333']?.layout.design==='children');
     console.log('PASS children entry, tab identity, isolated content and shared DB adapter');
+    await page.locator('[data-bulletin-service]').selectOption(await page.evaluate(()=>bulletinTest.id));
+    await page.waitForFunction(()=>document.querySelector('[data-bulletin-print]')?.disabled===false);
+    assert.equal(await page.evaluate(()=>state.selectedServiceTypeId),'young-adult','Dropdown must update the selected department');
+    await page.locator('[data-bulletin-service]').selectOption('33333333-3333-4333-8333-333333333333');
+    await page.waitForFunction(()=>document.querySelector('[data-bulletin-print]')?.disabled===false);
+    assert.equal(await page.evaluate(()=>state.selectedServiceTypeId),'children');
+    for(const width of [1440,1024,768,390]){
+      await page.setViewportSize({width,height:1000});
+      await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+      const layout=await page.locator('.bulletin-workbench').evaluate(el=>({width:el.clientWidth,scroll:el.scrollWidth}));
+      assert.ok(layout.scroll<=layout.width+1,`Bulletin must not overflow at ${width}px: ${JSON.stringify(layout)}`);
+      for(const selector of ['[data-bulletin-service]','[data-bulletin-save]','[data-bulletin-print]']){
+        const box=await page.locator(selector).boundingBox();
+        assert.ok(box&&box.x>=0&&box.x+box.width<=width+1,selector+' must be reachable at '+width);
+      }
+    }
+    await page.setViewportSize({width:1500,height:1000});
+    console.log('PASS department dropdown state and responsive bulletin controls');
+
     assert.deepEqual(errors,[]);
     if(process.env.BULLETIN_LIVE_STDIN) {
       const snapshot=JSON.parse(fs.readFileSync(0,'utf8'));

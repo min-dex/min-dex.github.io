@@ -192,3 +192,23 @@ assert.equal(future.leader,'');
 assert.equal(future.outline,undefined);
 assert.equal(future.order.filter(r=>r.label==='기도').length,1,'The printed prayer belongs to the youth template, not individual issue exceptions');
 console.log('PASS published source freezing, explicit refresh, month isolation, layout storage and no historical weekly-copy leakage');
+
+
+const childSource=B.resolveSource({...actual,service:{...actual.service,service_type_id:'children',service_date:'2026-10-04'}});
+const childDoc={...baseDoc(childSource),settings:{design:'children'},frames:B.defaultFrames('children')};
+const childPublication=B.storedValue(childDoc);
+const childKeys=['monthlyTheme','memoryVerse','memoryReference','readingPlan','issue'];
+const changedChild={...childSource,...Object.fromEntries(childKeys.map(k=>[k,'changed '+k]))};
+const restoredChild=B.applySourceSnapshot(changedChild,childPublication.content.sourceSnapshot);
+for(const key of childKeys)assert.equal(restoredChild[key],childSource[key],key+' must stay at publication time');
+const refreshedChild=B.applySourceSnapshot(changedChild,null);
+assert.equal(refreshedChild.monthlyTheme,'changed monthlyTheme');
+const oldChild=JSON.parse(JSON.stringify(childPublication.content.sourceSnapshot));
+for(const key of childKeys)delete oldChild.weekly[key];
+assert.equal(B.applySourceSnapshot(changedChild,oldChild).monthlyTheme,'changed monthlyTheme','Older snapshots retain live fallback for previously unsaved fields');
+for(const content_state of [{state:'suppressed'},{status:'suppressed'}]){
+ const hiddenId=actual.elements[0].id;
+ const hidden=B.resolveSource({...actual,elements:actual.elements.map(el=>el.id===hiddenId?{...el,content_state}:el)});
+ assert.ok(!hidden.order.some(row=>row.id===hiddenId),'Both persisted suppression shapes must stay out of print');
+}
+console.log('PASS children publication snapshot, explicit refresh, old snapshot fallback and suppressed print items');
