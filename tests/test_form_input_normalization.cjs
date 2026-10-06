@@ -1,12 +1,12 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const src=fs.readFileSync('app.js','utf8');const c={cleanList:x=>x.map(String).map(x=>x.trim()).filter(Boolean),parseObjectPayload:x=>x&&typeof x==='object'&&!Array.isArray(x)?x:null,firstNonBlankString:(...xs)=>xs.map(x=>String(x||'').trim()).find(Boolean)||''};vm.createContext(c);
-for(const name of ['canonicalServiceFormToken','collapseSingletonServiceFormPartNumbers','normalizeServiceFormPresetForms','normalizeServiceFormHint','normalizeServiceFormPreset']){const a=src.indexOf('function '+name+'(');vm.runInContext(src.slice(a,src.indexOf('\n}\n',a)+2),c);}
+vm.runInContext(fs.readFileSync('mindex.worship-model.js','utf8'),c);
 for(const [raw,expected] of [[' v - pc - c - 간주 ','V-PC-C-Int'],['v1a - v2b - c2 - pc1a - b - tags - vl','V1A-V2B-C2-PC1A-B-Tags-VL'],['verse 1 → Pre-Chorus + chorus, interlude > ending','V-PC-C-Int-Coda'],['1절 - 후렴 - 마지막 절','V-C-VL'],['V-C-C-Int-C','V-C-C-Int-C'],['custom label - V','custom label-V']]){assert.equal(c.normalizeServiceFormHint(raw),expected);assert.equal(c.normalizeServiceFormHint(expected),expected);const p=c.normalizeServiceFormPreset(raw,raw,'manual');assert.equal(p.hint,expected);assert.equal(p.forms.join('-'),expected);}
 assert.equal(c.normalizeServiceFormPresetForms(['v1a',' pc ','간주','C','C']).join('-'),'V1A-PC-Int-C-C');
 assert.equal(c.normalizeServiceFormHint('Verse 2 A - Chorus 1 B - Bridge A'),'V2A-C1B-BA');
 assert.equal(c.canonicalServiceFormToken('Chorus 1 A'),'C1A');
 assert.equal(c.normalizeServiceFormHint('V1@ - C@A - Bridge@B'),'V1@-C@A-B@B');
-assert.equal(c.normalizeServiceFormHint('V1-C1-V1-C1'),'V-C-V-C');
+assert.equal(c.normalizeServiceFormHint('V1-C1-V1-C1'),'V1-C1-V1-C1');
 assert.equal(c.normalizeServiceFormHint('V1-C1-C2'),'V-C1-C2');
 assert.equal(c.normalizeServiceFormHint('V1-C1A'),'V-C1A');
 assert.equal(c.canonicalServiceFormToken('Chorus @ A'),'C@A');

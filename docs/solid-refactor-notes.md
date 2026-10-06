@@ -108,3 +108,18 @@ and RPC behavior remain with their existing owners.
 After this phase, app.js has 33440 lines and 1795 functions: 129 lines and seven
 functions fewer than the persistence checkpoint. All other audit metrics above
 are unchanged. The six global ratchet failures remain baseline debt, not a pass.
+
+### Form Preset Checkpoint
+
+Ten form-preset normalization helpers and four related constants move from
+app.js to the existing model. Default application and editable item state stay
+with the caller. The declarations and remaining app AST are unchanged. Tests
+pin token aliases, order/repeats, singleton and variant identity, default hymn
+upgrades, explicit manual/forced/song-default preservation, metadata precedence,
+and JSON persistence round-trips.
+
+Against `c593f5f4`, app.js drops from 33440 to 33191 lines and from 1795 to 1785
+functions. The audit's coupling marker count drops from 3156 to 3152 because
+the extracted singleton helper has a local variable named `state`; this is
+not a reduction in actual global state access. Presenter/CSS metrics, thresholds,
+and geometry are unchanged; the same six global ratchets still fail.
