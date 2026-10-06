@@ -100,7 +100,7 @@
         || (Number(a.element.sort_order)||0)-(Number(b.element.sort_order)||0)
         || String(a.element.id).localeCompare(String(b.element.id)));
       let mainNumber = 0;
-      rows.forEach(({element, section}, i) => {
+      const serviceCandidates = rows.map(({element, section}, i) => {
         let label = String(element.label || element.source_ref?.label || section.title || "찬양").trim();
         if (/^찬양(?:\s*\d+)?$/.test(label)) {
           const count = element.song_id ? 1 : Math.max(1, split(element.title).length);
@@ -108,12 +108,38 @@
           mainNumber += count;
           label = `찬양 ${first}${count > 1 ? `–${mainNumber}` : ""}`;
         }
-        candidates.push({id:element.id, import_source_id:id, sort_order:i+1, archive_display_order:i+1,
+        return {id:element.id, import_source_id:id, sort_order:i+1, archive_display_order:i+1,
           candidate_level:"element", candidate_key:section.section_key || "praise", suggested_type:"praise",
           raw_label:label, raw_title:String(index?.byId.get(element.song_id)?.title || element.title || "").trim(), suggested_song_id:element.song_id || null,
           archive_live:true,
-          archive_manual_song:!element.song_id, review_status:"approved"});
+          archive_manual_song:!element.song_id, review_status:"approved"};
       });
+      const connection = element => element.connectedPraise || element.connected_praise
+        || element.config?.connectedPraise || element.config?.connected_praise
+        || element.source_connectedPraise || element.source_connected_praise
+        || element.source_ref?.connectedPraise || element.source_ref?.connected_praise;
+      const groupId = element => {
+        const value = connection(element);
+        return String(value?.groupId || value?.group_id || value?.id || "").trim();
+      };
+      // Fold only adjacent members in the same section; retain each member's link.
+      for (let i = 0; i < rows.length;) {
+        const first = i;
+        const group = groupId(rows[i].element);
+        while (group && i + 1 < rows.length && rows[i + 1].section.id === rows[first].section.id
+          && groupId(rows[i + 1].element) === group) i++;
+        const members = serviceCandidates.slice(first, i + 1);
+        const candidate = members[0];
+        if (members.length > 1) {
+          const start = candidate.raw_label.match(/^찬양 (\d+)(?:–(\d+))?$/u);
+          const end = members.at(-1).raw_label.match(/^찬양 (\d+)(?:–(\d+))?$/u);
+          candidates.push({...candidate,
+            raw_label: start && end ? `찬양 ${start[1]}–${end[2] || end[1]}` : candidate.raw_label,
+            raw_title: members.map(member => member.raw_title).join(" + "),
+            suggested_song_id: null, archive_members: members});
+        } else candidates.push(candidate);
+        i++;
+      }
     }
     return {sources, candidates};
   }

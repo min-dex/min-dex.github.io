@@ -1048,3 +1048,9 @@ Small visual polish that does not alter behavior does not need an entry.
 - New October drafts use the editorial four-face layout with clear worship order, sermon notes, and consolidated weekly/monthly information. Existing artwork supplies the cover band.
 - Content editing emphasizes weekly news/outline; monthly and common copy are collapsed. Editable preview text focuses its input.
 - Design and frames persist in the existing layout payload. No production content or schema migration is required.
+
+
+### 2026-10-06 Setlist viewing consistency
+- Live archive cards read existing `connectedPraise` metadata and fold adjacent members within the same section into one medley row. Numbering counts every song; each member retains its own canonical title and song link. Missing/suppressed members are not recreated, and independent songs are never grouped by title inference.
+- Both home and service routes refresh the archive immediately after search changes or song-catalog loading. Service grouping keeps nursery before children, consistent with period viewing, without changing saved service-type order.
+- This is a read projection only; worship records, lyrics and presenter output remain unchanged.

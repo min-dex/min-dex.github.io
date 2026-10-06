@@ -13,7 +13,7 @@ for (const flags of [{template_suppressed:true},{legacy_template_suppressed:true
 const source=fs.readFileSync('app.js','utf8');
 const start=source.indexOf('async function loadWorshipSetlistSongCatalog(');
 let calls=0,fail=true;
-const context=vm.createContext({state:{client:{},config:{url:'test'},worshipSetlistSongCatalog:{status:'idle'}},window:{MindexSetlistLinks},console:{warn(){}},fetchSupabasePaged:async()=>{calls++;if(fail)throw new Error('offline');return []}});
+const context=vm.createContext({state:{client:{},config:{url:'test'},worshipSetlistSongCatalog:{status:'idle'}},window:{MindexSetlistLinks},isServiceDataModule:()=>false,console:{warn(){}},fetchSupabasePaged:async()=>{calls++;if(fail)throw new Error('offline');return []}});
 vm.runInContext(source.slice(start,source.indexOf('\n}\n',start)+2),context);
 (async()=>{
  await context.loadWorshipSetlistSongCatalog();assert.equal(context.state.worshipSetlistSongCatalog.status,'failed');

@@ -3957,7 +3957,7 @@ async function loadWorshipSetlistSongCatalog({ force = false } = {}) {
     catalog.status = "failed";
     console.warn("Could not load setlist song links.", error);
   }
-  if (state.worshipSetlistSongCatalog === catalog && state.module === "service"
+  if (state.worshipSetlistSongCatalog === catalog && isServiceDataModule()
     && state.selectedServiceTypeId === SERVICE_SETLIST_ARCHIVE_PANEL_ID) renderCurrentServiceModuleDetail();
 }
 
@@ -3966,7 +3966,7 @@ async function fetchWorshipSetlistServices() {
   const results = await Promise.allSettled([
     fetchSupabasePaged("mindex_worship_services", "id,service_type_id,service_date,title,service_alias,status,praise_leader,worship_leader,no_gathering:source_ref->no_gathering", q => q.order("id")),
     fetchSupabasePaged("mindex_worship_sections", "id,service_id,sort_order,section_key,title", q => q.order("id")),
-    fetchSupabasePaged("mindex_worship_elements", "id,section_id,sort_order,element_type,title,song_id,label:source_ref->>label,template_suppressed:config->templateSuppressed,legacy_template_suppressed:config->template_suppressed", q => q.eq("element_type", "praise").order("id")),
+    fetchSupabasePaged("mindex_worship_elements", "id,section_id,sort_order,element_type,title,song_id,label:source_ref->>label,template_suppressed:config->templateSuppressed,legacy_template_suppressed:config->template_suppressed,connectedPraise:config->connectedPraise,connected_praise:config->connected_praise,source_connectedPraise:source_ref->connectedPraise,source_connected_praise:source_ref->connected_praise", q => q.eq("element_type", "praise").order("id")),
   ]);
   const failure = results.find(result => result.status === "rejected");
   if (failure) throw failure.reason;
@@ -3979,7 +3979,7 @@ async function loadWorshipSetlistArchive({ force = false } = {}) {
   if (state.worshipSetlistArchive.loading) return;
   if (state.worshipSetlistArchive.loaded && !force) return;
   // Keep a complete snapshot only; authenticated projects never use this public cache.
-  const cacheKey = `${state.config.url}:live-services-v3:${WORSHIP_IMPORT_SOURCE_LIST_SELECT}:${WORSHIP_IMPORT_CANDIDATE_LIST_SELECT}`;
+  const cacheKey = `${state.config.url}:live-services-v4:${WORSHIP_IMPORT_SOURCE_LIST_SELECT}:${WORSHIP_IMPORT_CANDIDATE_LIST_SELECT}`;
   const useCache = !state.config.authRequired;
   if (!state.worshipSetlistArchive.loaded && useCache && !force) {
     const cached = readStaticSupabaseCache("worship_setlist_archive", cacheKey)?.[0];
@@ -14688,7 +14688,7 @@ function scheduleSearchRender(delay = 180) {
 
 function renderSearchResultsForCurrentModule() {
   renderSongList();
-  if (state.module === "service" && state.selectedServiceTypeId === SERVICE_SETLIST_ARCHIVE_PANEL_ID) {
+  if (isServiceDataModule() && state.selectedServiceTypeId === SERVICE_SETLIST_ARCHIVE_PANEL_ID) {
     renderServiceSetlistArchiveDetail();
     return;
   }
@@ -23345,7 +23345,10 @@ function worshipSetlistArchiveTypeName(typeId) {
 }
 
 function worshipSetlistArchiveTypeOrder(typeId) {
-  return worshipAppServiceTypeId(typeId) === "sunday-main" ? -1 : serviceTypeSortOrder(worshipAppServiceTypeId(typeId));
+  const type = worshipAppServiceTypeId(typeId);
+  if (type === "sunday-main") return -1;
+  const order = serviceTypeSortOrder(type);
+  return type === "nursery" ? Math.min(order, serviceTypeSortOrder("children") - 0.5) : order;
 }
 
 function worshipSetlistArchiveEntries() {
@@ -23598,7 +23601,7 @@ async function persistWorshipSetlistLeader(id, value, expectedLeader) {
     if (source) source.leader = leader;
   }
   if (!state.config.authRequired && archive.loaded) {
-    const cacheKey = `${state.config.url}:live-services-v3:${WORSHIP_IMPORT_SOURCE_LIST_SELECT}:${WORSHIP_IMPORT_CANDIDATE_LIST_SELECT}`;
+    const cacheKey = `${state.config.url}:live-services-v4:${WORSHIP_IMPORT_SOURCE_LIST_SELECT}:${WORSHIP_IMPORT_CANDIDATE_LIST_SELECT}`;
     writeStaticSupabaseCache("worship_setlist_archive", cacheKey, [{ sources: archive.sources, candidates: archive.candidates, live: archive.live }]);
   }
   return leader;
@@ -23683,6 +23686,8 @@ function renderWorshipSetlistArchiveEntry(entry) {
 }
 
 function worshipSetlistCandidateLinks(candidate) {
+  if (candidate.archive_members?.length) return candidate.archive_members.flatMap(member =>
+    worshipSetlistCandidateLinks({...member, archive_source_service_type:candidate.archive_source_service_type}));
   const title = String(candidate.raw_title || candidate.raw_label || "").trim() || "제목 없음";
   const links = window.MindexSetlistLinks;
   if (candidate.archive_manual_song || links?.isExcluded(candidate, candidate.archive_source_service_type)) {
