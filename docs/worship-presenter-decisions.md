@@ -1,5 +1,11 @@
 # Worship / Presenter Decision Log
 
+## Source Duplicate Maintenance (2026-10-06)
+- Removed 49 identical source-block groups across six services through document-only aggregate RPC saves. Each group matched exactly one canonical element; differing groups were preserved.
+- Backed up the original aggregates and exact revision-checked requests locally under `backups/source-cleanup-20261006/`. Readback verified every section, element and slide row unchanged and exactly one revision increment per service.
+- Ten differing groups remain for review: Sep 27 second/third citations; Sep 27 afternoon citations/reference image; Oct 4 youth praise 2; Oct 4 afternoon sermon/benediction; Oct 2 monthly praise 5/reading/sermon. Never choose a source copy solely by position.
+- Historical document arrays and disabled non-atomic branches are retained pending equivalence testing. Song title collisions alone are not deletion criteria; the HisShow record is distinct metadata, not an automatic merge candidate.
+
 ## Live Citation Save Scope (2026-10-04)
 - Element patches serialize only the target while retaining counters from the full order. Unloaded unrelated songs must not block a scripture patch; full saves still validate every element.
 - Collapse duplicate source blocks only when their contents and section are identical and exactly one canonical item matches. Ambiguous or differing content remains an error; never regenerate the whole source to hide it.

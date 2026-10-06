@@ -1,5 +1,10 @@
 # Atomic Client Preparation
 
+Historical preparation record. For the current enabled client boundary, see
+[Current Worship Persistence Contract](worship-persistence-current.md).
+The rollout/grant statements below describe the preparation stage, not a fresh
+inspection of current database permissions.
+
 2026-09-22: the additive production migration is installed and the live aggregate
 read RPC matches REST. `MINDEX_WORSHIP_ATOMIC_PROTOCOL` is enabled in index.html;
 existing write permissions remain available until the client deployment and

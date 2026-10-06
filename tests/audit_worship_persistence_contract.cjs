@@ -1,4 +1,5 @@
-// Offline characterization of current gaps, not a claim that persistence is safe.
+// Historical non-atomic branch characterization: the fixture forces the RPC
+// client to null. These reproductions do not describe the enabled RPC path.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');

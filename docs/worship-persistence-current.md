@@ -1,5 +1,31 @@
 # Current Worship Persistence Contract
 
+## Production Boundary (2026-10-06)
+
+- The deployed entry point enables `MINDEX_WORSHIP_ATOMIC_PROTOCOL = 1`.
+  Worship reads and writes use the aggregate RPC client and expected revisions.
+  RPC errors never trigger direct-table fallback.
+- Pending writes are tab-scoped and project-scoped. Unknown outcomes retain the
+  exact request for retry; a conflict must not silently replace newer data.
+- An element patch serializes only its target, preserves other local drafts,
+  and updates only the corresponding source block. Identical duplicate source
+  blocks may be collapsed only for a single canonical item. Differing duplicates
+  remain blocked for review.
+- Direct-table branches still exist for the disabled protocol path. They are
+  legacy code, not the deployed persistence guarantee. Removing them requires
+  updating the explicitly non-atomic test fixtures together.
+- `tests/test_worship_store.mjs` and `tests/test_worship_atomic_client.mjs`
+  cover retry/revision handling. `tests/check_worship_atomic_live.py` checks a
+  read-only production aggregate; it does not prove write permissions or writes.
+
+## Historical Pre-Cutover Audit
+
+The remainder records the September 11-16 non-atomic implementation. Its gaps
+and proposed next steps do not describe the enabled production RPC path.
+`audit_worship_persistence_contract.cjs` explicitly mocks the atomic client as
+null to characterize that legacy branch; its reproductions are not evidence
+that an enabled RPC save partially commits.
+
 ## Element document isolation (2026-09-16)
 
 An element Apply now builds its document from committed section/element rows

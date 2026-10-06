@@ -1,4 +1,4 @@
-// Staged transport, deliberately not loaded by index.html before RPC cutover.
+// Aggregate revision and durable retry transport used by the atomic RPC client.
 const clone = value => JSON.parse(JSON.stringify(value));
 const revision = value => {
   if (typeof value !== 'string' || !/^(0|[1-9][0-9]*)$/.test(value)) throw new Error('INVALID_REVISION');
