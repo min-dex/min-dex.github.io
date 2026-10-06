@@ -2175,9 +2175,9 @@ def main() -> int:
                     and fallback_state["corporatePrayerGroups"] == [{
                         "title": "공동기도",
                         "subgroups": [
-                            {"label": "공동기도 1·2", "title": "공동기도 1·2", "slides": 3, "slideTitles": ["교회 부흥을 위해", "선교와 민족을 위해", "빈 화면"]},
+                            {"label": "공동기도 1·2", "title": "공동기도 1·2", "slides": 3, "slideTitles": ["'교회 부흥을 위해'", "'선교와 민족을 위해'", "빈 화면"]},
                             {"label": "기도찬양", "title": "기도찬양", "slides": 1},
-                            {"label": "공동기도 3·4", "title": "공동기도 3·4", "slides": 3, "slideTitles": ["치유와 회복을 위해", "교회학교를 위해", "빈 화면"]},
+                            {"label": "공동기도 3·4", "title": "공동기도 3·4", "slides": 3, "slideTitles": ["'치유와 회복을 위해'", "'교회학교를 위해'", "빈 화면"]},
                         ],
                     }]
                     and fallback_state["corporatePrayerEditor"] == {
@@ -2191,7 +2191,7 @@ def main() -> int:
                         "rawTitle": "",
                         "assignee": "",
                         "memoSlides": ["'새 기도 제목'", "선교와 민족을 위해"],
-                        "slideTitles": ["'새 기도 제목'", "선교와 민족을 위해"],
+                        "slideTitles": ["'새 기도 제목'", "'선교와 민족을 위해'"],
                         "slideAssignees": ["", ""],
                     }
                     and len(fallback_state["mainPraiseGroups"]) == 1

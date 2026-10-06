@@ -32961,7 +32961,7 @@ function presenterMonthlyCorporatePrayerSlides(item = {}, section = {}, index = 
   if (!topics.length) return [];
   const topicSlides = topics.map((topic, topicIndex) => {
     const ordinal = ordinals[topicIndex] || ordinals[0] + topicIndex;
-    const title = topic;
+    const title = presenterCorporatePrayerTopicTitle(topic);
     return {
       id: `${item.id || index}:corporate-prayer-topic:${ordinal}`,
       ...section,
@@ -32977,6 +32977,12 @@ function presenterMonthlyCorporatePrayerSlides(item = {}, section = {}, index = 
     };
   });
   return topicSlides;
+}
+
+function presenterCorporatePrayerTopicTitle(value = "") {
+  const topic = String(value || "").trim();
+  if (!topic) return "";
+  return /^['"“”‘’].*['"“”‘’]$/u.test(topic) ? topic : `'${topic}'`;
 }
 
 function shouldSuppressMainPraiseScoreSongTitle(item = {}, service = {}) {
