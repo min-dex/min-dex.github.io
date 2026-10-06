@@ -27713,13 +27713,17 @@ function monthlyCorporatePrayerDefaultTopics() {
 }
 
 function monthlyCorporatePrayerEntries(item, memo = parseServiceItemMemo(item?.memo)) {
-  if (memo.corporatePrayers?.length === 2) return normalizeCorporatePrayers(memo.corporatePrayers);
+  const stored = normalizeCorporatePrayers(memo.corporatePrayers);
+  if (stored.length === 2) return stored;
   const defaults = monthlyCorporatePrayerOrdinalsForItem(item)
     .map((ordinal) => monthlyCorporatePrayerDefaultTopics()[ordinal - 1] || "");
   return [0, 1].map((index) => ({
-    title: String(memo.slides?.[index] || defaults[index] || ""),
-    assignee: "",
-    sourceElementId: "",
+    // Preserve a partially saved group exactly; only the missing slot needs a fallback.
+    ...(stored[index] || {
+      title: String(memo.slides?.[index] || defaults[index] || ""),
+      assignee: "",
+      sourceElementId: "",
+    }),
   }));
 }
 
