@@ -8767,7 +8767,7 @@ body[data-module="presenter"] .nav-sidebar { --sidebar-reference-w: 280px; }
 @media (max-width: 560px) {
   /* Keep the drawer control and all module destinations reachable in one bar. */
   .module-switcher-tab {
-    width: clamp(22px, calc((100vw - var(--topbar-compact-w) - var(--topbar-btn-size)) / 5), 36px);
+    width: clamp(22px, calc((100vw - var(--topbar-compact-w) - var(--topbar-btn-size)) / 5), var(--topbar-btn-size));
   }
   .topbar-leading .primary-switcher { display: none; }
 }
