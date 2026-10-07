@@ -27,6 +27,7 @@ scripts/*
 !scripts/song-relations-schema.sql
 !scripts/worship-schema.sql
 !scripts/update_hymn_score_form_labels.py
+!scripts/build_hymn_score_runtime.py
 !scripts/vision_ocr_text.swift
 !scripts/youtube-live-source-rpc.sql
 !scripts/youtube_live_source.py
