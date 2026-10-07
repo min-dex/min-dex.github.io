@@ -112,20 +112,22 @@
 
       <header class="topbar">
         <div class="topbar-leading">
-          <button id="brandNameHome" class="topbar-brand" type="button" aria-label="Mindex 홈으로 이동" title="홈">
-            <img class="topbar-brand-icon" src="./assets/mindex-cross.svg?v=20261004a" alt="" aria-hidden="true" />
-            <span id="loadingStatus" class="loading-status" role="status" aria-live="polite" aria-atomic="true" hidden></span>
-          </button>
-          <button id="sidebarToggleBtn" class="top-left-tool active" type="button" aria-label="사이드바 열기" aria-controls="mindexSidebarPanel" aria-expanded="false" aria-pressed="false">
-            <i data-lucide="panel-left"></i>
-          </button>
-          <nav class="module-switcher" aria-label="Mindex 페이지">
-            <button class="module-switcher-tab" type="button" data-home-module="service" aria-label="예배" title="예배"><i data-lucide="church"></i></button>
-            <button class="module-switcher-tab" type="button" data-home-module="bulletin" aria-label="주보" title="주보"><i data-lucide="newspaper"></i></button>
-            <button class="module-switcher-tab" type="button" data-home-module="scripture" aria-label="말씀" title="말씀"><i data-lucide="book-open"></i></button>
-            <button class="module-switcher-tab" type="button" data-home-module="praise" aria-label="찬양" title="찬양"><i data-lucide="music-2"></i></button>
-            <button class="module-switcher-tab" type="button" data-home-module="calendar" data-operations-nav aria-label="운영" title="운영"><i data-lucide="notebook-tabs"></i></button>
-          </nav>
+          <div class="topbar-module-strip">
+            <button id="brandNameHome" class="topbar-brand" type="button" aria-label="Mindex 홈으로 이동" title="홈">
+              <img class="topbar-brand-icon" src="./assets/mindex-cross.svg?v=20261004a" alt="" aria-hidden="true" />
+              <span id="loadingStatus" class="loading-status" role="status" aria-live="polite" aria-atomic="true" hidden></span>
+            </button>
+            <button id="sidebarToggleBtn" class="top-left-tool active" type="button" aria-label="사이드바 열기" aria-controls="mindexSidebarPanel" aria-expanded="false" aria-pressed="false">
+              <i data-lucide="panel-left"></i>
+            </button>
+            <nav class="module-switcher" aria-label="Mindex 페이지">
+              <button class="module-switcher-tab" type="button" data-home-module="service" aria-label="예배" title="예배"><i data-lucide="church"></i></button>
+              <button class="module-switcher-tab" type="button" data-home-module="bulletin" aria-label="주보" title="주보"><i data-lucide="newspaper"></i></button>
+              <button class="module-switcher-tab" type="button" data-home-module="scripture" aria-label="말씀" title="말씀"><i data-lucide="book-open"></i></button>
+              <button class="module-switcher-tab" type="button" data-home-module="praise" aria-label="찬양" title="찬양"><i data-lucide="music-2"></i></button>
+              <button class="module-switcher-tab" type="button" data-home-module="calendar" data-operations-nav aria-label="운영" title="운영"><i data-lucide="notebook-tabs"></i></button>
+            </nav>
+          </div>
           <nav class="primary-switcher" aria-label="열린 페이지">
             <div id="pageTabs" class="page-tabs" role="tablist" aria-label="열린 Mindex 탭">
               <button class="page-tab active" type="button" role="tab" aria-current="page"><span id="pageTabLabel">예배</span></button>

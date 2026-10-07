@@ -964,8 +964,9 @@
     on(root,"mindex-bulletin-save",event=>{const result=save();if(event.detail)event.detail.result=result;});
     function status(){
       const text=error||saveError||printError||(loading?"저장된 예배 자료를 불러오는 중…":!assetLoaded?"글꼴과 이미지를 준비하는 중…":
-        `주보 ${doc?.saving?"DB 저장 중…":doc?.dirty?"수정됨 · DB 저장 전":doc?.revision?"DB 저장됨":"새 주보 · DB 저장 전"}${issues.size?` · 영역 넘침: ${[...issues].map(frameLabel).join(", ")}`:""}`);
+        issues.size?`영역 넘침: ${[...issues].map(frameLabel).join(", ")}`:"");
       q(".bulletin-status").textContent=text+(doc?.backupUnavailable?" · 브라우저 임시 저장 불가":"");
+      q(".bulletin-status").hidden=!q(".bulletin-status").textContent;
       q(".bulletin-status").dataset.state=error||saveError||printError||doc?.backupUnavailable||issues.size?"warning":loading||!assetLoaded?"loading":"saved";
       q("[data-bulletin-print]").disabled=printing||loading||!assetLoaded||!!error||!doc?.source?.order.length||issues.size>0;
       q("[data-bulletin-undo]").disabled=loading||!doc?.history.length;
