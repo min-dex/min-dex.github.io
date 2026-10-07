@@ -31587,7 +31587,14 @@ function patchServiceOutlineActiveState(serviceId = state.selectedServiceId) {
     const group = row.closest(".service-outline-group");
     if (active && group) activeGroups.add(group);
   });
-  activeGroups.forEach((group) => group.classList.add("active"));
+  activeGroups.forEach((group) => {
+    group.classList.add("active");
+    // A live child still belongs to this section. Keep the section-level
+    // marker visible instead of showing it only while the first item is live.
+    const sectionRow = group.querySelector(".service-outline-row--section");
+    sectionRow?.classList.add("active");
+    sectionRow?.classList.remove("is-complete");
+  });
 }
 
 let presenterLaunchRequestSerial = 0;
