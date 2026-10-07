@@ -120,8 +120,9 @@
   --topbar-left-compact-w: 0px;
   --sidebar-item-x: var(--s2); --sidebar-item-end: var(--s2); --sidebar-item-pad-x: 10px; --sidebar-icon-gap: var(--s2);
   --sidebar-section-x: var(--sidebar-item-x); --sidebar-section-label-x: var(--sidebar-item-pad-x); --sidebar-section-label-gap: var(--s2);
-  --content-pad-y: 25px; --content-pad-x: 25px; --content-pad-tight: 25px;
-  --content-pad-bottom: calc(var(--content-pad-y) + var(--s5) + env(safe-area-inset-bottom, 0px));
+  --content-pad-y: 25px; --content-pad-x: 25px; --content-pad-tight: 15px;
+  --content-pad-bottom: calc(var(--content-pad-y) + env(safe-area-inset-bottom, 0px));
+  --content-pad-bottom-tight: calc(var(--content-pad-tight) + env(safe-area-inset-bottom, 0px));
   --page-title-size: 20px; --page-title-weight: 700; --page-subtitle-size: 12px;
   --ui-label-size: 13px; --ui-meta-size: 13px; --ui-body-size: 15px; --ui-row-size: 15px; --ui-card-title-size: 17px; --ui-page-title-size: 22px;
   --ui-label-weight: 600; --ui-meta-weight: 500; --ui-row-weight: 600; --ui-title-weight: 700;
@@ -3044,7 +3045,7 @@ body[data-module="praise"] .song-count-badge {
   }
   .metadata-popover-grid { grid-template-columns: 1fr; }
   .nav-sidebar, .sidebar { max-height: none; border-bottom: 0; }
-  .detail-pane { overflow: auto; padding: var(--content-pad-tight); padding-bottom: var(--content-pad-bottom); }
+  .detail-pane { overflow: auto; padding: var(--content-pad-tight); padding-bottom: var(--content-pad-bottom-tight); }
 }
 
 @media (max-width: 560px) {
@@ -3074,7 +3075,12 @@ body[data-module="presenter"] .detail-pane {
   overflow-x: hidden;
 }
 body[data-module="presenter"] .detail-pane {
-  padding-bottom: calc(var(--content-pad-y) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: var(--content-pad-bottom);
+}
+@media (max-width: 860px) {
+  body[data-module="presenter"] .detail-pane {
+    padding-bottom: var(--content-pad-bottom-tight);
+  }
 }
 .service-sidebar {
   display: flex;
