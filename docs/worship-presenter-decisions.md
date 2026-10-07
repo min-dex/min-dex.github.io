@@ -1054,3 +1054,9 @@ Small visual polish that does not alter behavior does not need an entry.
 - Live archive cards read existing `connectedPraise` metadata and fold adjacent members within the same section into one medley row. Numbering counts every song; each member retains its own canonical title and song link. Missing/suppressed members are not recreated, and independent songs are never grouped by title inference.
 - Both home and service routes refresh the archive immediately after search changes or song-catalog loading. Service grouping keeps nursery before children, consistent with period viewing, without changing saved service-type order.
 - This is a read projection only; worship records, lyrics and presenter output remain unchanged.
+
+### 2026-10-07 Service-opening performance
+- After service-item hydration, update the selected presenter through the existing control patch path instead of replacing its entire detail tree. A late response for another service must not redraw the currently selected service.
+- Preview scale measurement reads all frame sizes before writing styles. Overlapping text-fit requests share one animation frame; disconnected hosts are discarded and ancestor hosts cover their descendants.
+- Startup downloads vendor dependencies alongside app modules but executes them in the original order. Only presenter/output routes preload presenter fonts; other routes load those fonts when CSS actually needs them. Vendor cache URLs stay unchanged.
+- Verification: Chromium/WebKit startup ordering, theme first paint, scale controls, output latency, service handoff, linked-song hydration, outline refresh and layout batching tests. Synthetic 150-thumbnail measurement reduced style recalculations from 149 to 2; this is not an end-to-end service latency claim. Production reads were used for profiling with all writes blocked. No persisted worship data or output rules changed.

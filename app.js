@@ -1180,11 +1180,22 @@ function fitPresenterPreviewText(host = refs.detailPane) {
   if (typeof fitPresenterSermonTitlePreviews === "function") fitPresenterSermonTitlePreviews(host);
 }
 
+let presenterPreviewTextFitRaf = 0;
+const presenterPreviewTextFitHosts = new Set();
+
 function schedulePresenterPreviewLayoutUpdate(host = refs.detailPane) {
   schedulePresenterPreviewScaleUpdate(host);
-  window.requestAnimationFrame(() => {
-    if (!host?.isConnected && host !== document) return;
-    fitPresenterPreviewText(host);
+  if (!host?.querySelectorAll) return;
+  presenterPreviewTextFitHosts.add(host);
+  if (presenterPreviewTextFitRaf) return;
+  presenterPreviewTextFitRaf = window.requestAnimationFrame(() => {
+    presenterPreviewTextFitRaf = 0;
+    const hosts = [...presenterPreviewTextFitHosts].filter((node) => node === document || node.isConnected);
+    presenterPreviewTextFitHosts.clear();
+    for (const node of hosts) {
+      if (hosts.some((parent) => parent !== node && parent.contains(node))) continue;
+      fitPresenterPreviewText(node);
+    }
   });
 }
 
@@ -5555,7 +5566,10 @@ async function loadServiceItems(serviceId) {
     }
     warmWorshipScriptureReferencesForService(serviceId);
     warmServiceItemScriptureReferencesForService(serviceId);
-    renderCurrentServiceModuleDetail();
+    if (state.selectedServiceId === serviceId) {
+      if (state.module === "presenter") renderPresenterControlState(serviceId);
+      else renderCurrentServiceModuleDetail();
+    }
   })();
   serviceItemLoadPromises.set(serviceId, loadPromise);
   renderLoadingStatus();

@@ -14,9 +14,6 @@
     <meta name="apple-mobile-web-app-title" content="MINDEX" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="preload" href="./vendor/fonts/pretendard/MindexSans-Common.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="./vendor/fonts/freesentation/Freesentation-6SemiBold.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="./vendor/fonts/freesentation/Freesentation-7Bold.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="./vendor/fonts/freesentation/Freesentation-8ExtraBold.woff2" as="font" type="font/woff2" crossorigin />
     <style>
       html,
       body {
@@ -68,6 +65,16 @@
         const params = new URLSearchParams(window.location.search);
         if (params.get("output") === "presenter" || params.get("mindex-output") === "presenter") {
           document.documentElement.classList.add("presenter-output-document", "presenter-output-pending");
+        }
+        let presenterController = false;
+        try { presenterController = sessionStorage.getItem("mindex.ui.module") === "presenter"; } catch (_) {}
+        if (document.documentElement.classList.contains("presenter-output-document") || presenterController) {
+          for (const weight of ["6SemiBold", "7Bold", "8ExtraBold"]) {
+            const font = document.createElement("link");
+            font.rel = "preload"; font.as = "font"; font.type = "font/woff2"; font.crossOrigin = "anonymous";
+            font.href = `./vendor/fonts/freesentation/Freesentation-${weight}.woff2`;
+            document.head.append(font);
+          }
         }
       })();
     </script>
@@ -165,8 +172,6 @@
 
     <div id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="true"></div>
 
-    <script src="./vendor/lucide.min.js"></script>
-    <script src="./vendor/supabase-js.min.js"></script>
     <script>
       window.MINDEX_SUPABASE = {
         url: "https://tdulobbnppmpiqqxbvqy.supabase.co",
@@ -176,8 +181,9 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261006-monitor-panel";
+        const fallbackVersion = "20261007-sidebar-breathing-room";
         const modules = [
+          "vendor/lucide.min.js", "vendor/supabase-js.min.js",
           "mindex.constants.js", "mindex.design-tokens.js", "mindex.worship-model.js",
           "mindex.worship-persistence.js", "mindex.presenter.js", "mindex.worship-input.js",
           "mindex.presenter-ui.js", "mindex.worship-week.js", "mindex.setlist-links.js",
@@ -188,7 +194,7 @@
           "styles.css", "styles.presenter-output.css", "styles.bulletin.css",
           "styles.calendar.css", "styles.monitor.css",
         ];
-        const assetUrl = (path, version) => `./${path}?v=${encodeURIComponent(version)}`;
+        const assetUrl = (path, version) => path.startsWith("vendor/") ? `./${path}` : `./${path}?v=${encodeURIComponent(version)}`;
         const preloadScript = (path, version) => {
           const preload = document.createElement("link");
           preload.rel = "preload";

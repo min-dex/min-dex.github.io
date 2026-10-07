@@ -3357,7 +3357,8 @@ function applyPresenterOutputViewportScale(root = document.getElementById("prese
 
 function applyPresenterPreviewScales(host = document) {
   if (!host?.querySelectorAll) return;
-  host.querySelectorAll(".svc-slide-mini-canvas.presenter-output-root").forEach((canvas) => {
+  // Read every frame before writing styles, avoiding one forced layout per slide.
+  const updates = [...host.querySelectorAll(".svc-slide-mini-canvas.presenter-output-root")].map((canvas) => {
     const frame = canvas.closest(".svc-slide-thumb-frame, .svc-presenter-live-preview") || canvas.parentElement;
     const rect = frame?.getBoundingClientRect?.();
     const scale = presenterPreviewScaleForBox(
@@ -3365,7 +3366,11 @@ function applyPresenterPreviewScales(host = document) {
       rect?.height || 0,
     );
     const currentScale = Number(canvas.style.getPropertyValue("--presenter-preview-scale"));
-    if (Number.isFinite(currentScale) && Math.abs(currentScale - scale) < 0.000001) return;
+    return Number.isFinite(currentScale) && Math.abs(currentScale - scale) < 0.000001 ? null : { canvas, scale };
+  });
+  updates.forEach((update) => {
+    if (!update) return;
+    const { canvas, scale } = update;
     canvas.style.setProperty("--presenter-preview-scale", String(scale));
   });
 }
