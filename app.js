@@ -15297,18 +15297,30 @@ function renderAuthRequiredDetail() {
 
 function renderLoadingDetail() {
   return `
-      <div class="empty-detail">
-        <div class="empty-detail-inner">
-          <p class="empty-verse">${escapeHtml(LOADING_MESSAGE)}</p>
+      <section class="detail-loading-skeleton" aria-busy="true" aria-label="${escapeAttr(LOADING_MESSAGE)}">
+        <div class="detail-loading-status">
+          <span class="loading-status-dot" aria-hidden="true"></span>
+          <span>${escapeHtml(LOADING_MESSAGE)}</span>
         </div>
-      </div>
+        <div class="detail-loading-lines" aria-hidden="true">
+          <span class="detail-loading-line detail-loading-line--title"></span>
+          <span class="detail-loading-line detail-loading-line--meta"></span>
+          <span class="detail-loading-line"></span>
+          <span class="detail-loading-line detail-loading-line--short"></span>
+        </div>
+      </section>
     `;
 }
 
 function renderLoadingList() {
   return `
-    <div class="song-list-empty song-list-empty--loading" aria-busy="true">
-      <strong>${escapeHtml(LOADING_MESSAGE)}</strong>
+    <div class="sidebar-loading-skeleton" aria-busy="true" aria-label="${escapeAttr(LOADING_MESSAGE)}">
+      <span class="sidebar-loading-row"></span>
+      <span class="sidebar-loading-row sidebar-loading-row--short"></span>
+      <span class="sidebar-loading-row"></span>
+      <span class="sidebar-loading-row sidebar-loading-row--medium"></span>
+      <span class="sidebar-loading-row sidebar-loading-row--short"></span>
+      <span class="sidebar-loading-row sidebar-loading-row--medium"></span>
     </div>
   `;
 }
