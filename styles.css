@@ -540,7 +540,7 @@ body[data-module="presenter"].right-sidebar-open { --shell-right-w: var(--right-
   align-items: center;
   justify-content: space-between;
   gap: var(--s2);
-  padding: 0 var(--sidebar-item-end) 0 var(--sidebar-item-x);
+  padding: 0 var(--sidebar-search-inset) 0 calc(var(--sidebar-search-inset) + var(--sidebar-item-pad-x));
 }
 body[data-module="home"] .sidebar-list-head,
 body[data-module="calendar"] .sidebar-list-head,
@@ -852,7 +852,7 @@ body[data-module="backgrounds"] .sidebar-count,
 }
 body[data-module="calendar"] .detail-pane { overflow: hidden; }
 
-.song-list { display: grid; flex: 1 1 auto; gap: 4px; align-content: start; padding: 0; }
+.song-list { display: grid; flex: 1 1 auto; gap: 4px; align-content: start; padding: 0 var(--sidebar-search-inset); }
 .song-item { position: relative; display: grid; width: 100%; min-height: var(--sidebar-row-h); align-content: center; border: 0; border-radius: var(--r); background: transparent; color: var(--sidebar-sub); padding: 6px var(--sidebar-item-pad-x); text-align: left; transition: background .14s ease, color .14s ease, transform .08s ease; }
 .song-item.has-meta { min-height: 50px; align-content: start; row-gap: 3px; padding-top: 8px; padding-bottom: 10px; }
 .song-item:hover { background: var(--sidebar-hover-bg); color: var(--sidebar-ink); }
