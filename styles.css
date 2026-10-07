@@ -8611,7 +8611,8 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
   min-width: 0;
   height: 100%;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 0;
 }
 .topbar-brand {
   appearance: none;
@@ -8666,7 +8667,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
   height: 100%;
   flex: 0 0 auto;
   align-items: center;
-  gap: 8px;
+  gap: 0;
 }
 .module-switcher-tab {
   position: relative;
