@@ -913,6 +913,48 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .song-list-empty--loading { padding-top: 7px; }
 .song-list-empty strong { color: var(--ink-3); font-size: 13px; font-weight: 700; }
 .song-list-empty span { color: var(--ink-4); }
+.sidebar-loading-skeleton {
+  display: grid;
+  gap: 4px;
+  padding: var(--s1) 0;
+}
+.sidebar-loading-row {
+  display: block;
+  width: 100%;
+  height: var(--sidebar-row-h);
+  border-radius: var(--r);
+  background: color-mix(in srgb, var(--panel-2) 58%, transparent);
+}
+.sidebar-loading-row--medium { width: 76%; }
+.sidebar-loading-row--short { width: 58%; }
+.detail-loading-skeleton {
+  display: grid;
+  width: min(100%, 560px);
+  gap: var(--s3);
+  align-content: start;
+  padding-top: var(--s1);
+}
+.detail-loading-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  min-height: var(--h);
+  color: var(--ink-3);
+  font-size: var(--ui-meta-size);
+  font-weight: 600;
+}
+.detail-loading-status .loading-status-dot { width: 14px; height: 14px; }
+.detail-loading-lines { display: grid; gap: var(--s2); }
+.detail-loading-line {
+  display: block;
+  width: 86%;
+  height: 14px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel-2) 58%, transparent);
+}
+.detail-loading-line--title { width: 46%; height: 22px; }
+.detail-loading-line--meta { width: 28%; }
+.detail-loading-line--short { width: 62%; }
 .attention-icon {
   display: inline-flex;
   flex: 0 0 auto;
@@ -8642,8 +8684,8 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .topbar-brand-icon {
   position: relative;
   display: block;
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   object-fit: contain;
 }
 .topbar-brand .loading-status {
@@ -8657,6 +8699,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
   font-size: 12px;
 }
 .topbar-brand .loading-status-text { display: none; }
+.topbar-brand .loading-status-dot { width: 16px; height: 16px; }
 .topbar-brand:has(.loading-status:not([hidden])) .topbar-brand-icon { visibility: hidden; }
 .topbar-module-strip > .top-left-tool { display: none; }
 .module-switcher {
@@ -8703,7 +8746,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
   background: currentColor;
   content: "";
 }
-.module-switcher-tab svg { width: 18px; height: 18px; stroke-width: var(--ui-icon-stroke); }
+.module-switcher-tab svg { width: 16px; height: 16px; stroke-width: var(--ui-icon-stroke); }
 .topbar-leading .primary-switcher { grid-column: 2; min-width: 0; }
 .topbar-actions { grid-column: 3; }
 .nav-sidebar {
