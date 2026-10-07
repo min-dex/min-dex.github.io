@@ -7,6 +7,7 @@ import re
 import subprocess
 import sys
 import tempfile
+from build_hymn_score_runtime import build as build_runtime_manifest
 from pathlib import Path
 from typing import Any
 
@@ -200,6 +201,7 @@ def main() -> int:
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     if not args.dry_run:
         args.manifest.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        build_runtime_manifest(args.manifest)
     return 0
 
 

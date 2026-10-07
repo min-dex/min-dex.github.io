@@ -434,7 +434,7 @@ const PRAISE_LIST_FILTER_ALIASES = {
 };
 const MINDEX_TAB_STATE_STORAGE_KEY = "mindex.pageTabs.v1";
 const HOME_PAGE_TAB_ID = "tab-home";
-const HYMN_SCORE_MANIFEST_URL = "assets/hymn-scores/manifest.json";
+const HYMN_SCORE_MANIFEST_URL = "assets/hymn-scores/manifest.runtime.json";
 const SERVICE_ELEMENT_TYPE_UI_OPTIONS = [
   ["praise", "찬양"],
   ["scripture_reading", "성경봉독"],
@@ -1225,13 +1225,15 @@ async function loadHymnScoreManifest({ silent = false } = {}) {
   if (hymnScoreManifestLoadPromise) return hymnScoreManifestLoadPromise;
   hymnScoreManifestLoadPromise = (async () => {
     try {
-      const response = await fetch(HYMN_SCORE_MANIFEST_URL, { cache: "no-cache" });
+      const version = encodeURIComponent(window.MINDEX_RELEASE || "score-runtime-v1");
+      const response = await fetch(`${HYMN_SCORE_MANIFEST_URL}?v=${version}`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       state.hymnScoreManifest = data && typeof data === "object" && !Array.isArray(data) ? data : {};
       state.hymnScoreManifestLoaded = true;
       presenterSlideBuildCache.clear();
-      if (isServiceDataModule()) render();
+      if (state.module === "presenter") renderPresenterControlState(presenterViewServiceId());
+      else if (isServiceDataModule()) render();
     } catch (err) {
       if (!Object.keys(state.hymnScoreManifest || {}).length) state.hymnScoreManifest = {};
       state.hymnScoreManifestLoaded = false;
