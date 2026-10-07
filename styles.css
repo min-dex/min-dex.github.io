@@ -8611,6 +8611,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
   min-width: 0;
   height: 100%;
   align-items: center;
+  gap: 8px;
 }
 .topbar-brand {
   appearance: none;
@@ -8665,6 +8666,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
   height: 100%;
   flex: 0 0 auto;
   align-items: center;
+  gap: 8px;
 }
 .module-switcher-tab {
   position: relative;
@@ -8734,7 +8736,8 @@ body[data-module="presenter"] .nav-sidebar { --sidebar-reference-w: 280px; }
   body.sidebar-collapsed { --shell-left-w: 0px; }
   .topbar { grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) max(var(--topbar-compact-w), var(--shell-right-w)); }
   .topbar-leading { display: flex; grid-column: 1; min-width: 0; height: 100%; align-items: center; }
-  .topbar-module-strip { display: flex; grid-column: auto; flex: 0 0 auto; }
+  .topbar-module-strip { display: flex; grid-column: auto; flex: 0 0 auto; gap: 0; }
+  .module-switcher { gap: 0; }
   .topbar-brand { display: none; }
   .module-switcher-tab { width: var(--topbar-btn-size); }
   .topbar-module-strip > .top-left-tool { display: inline-flex; flex: 0 0 var(--topbar-btn-size); }
