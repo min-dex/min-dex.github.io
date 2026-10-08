@@ -381,16 +381,16 @@ calendar, reference, and presenter controller behavior.
 
 Current UI baseline:
 
-- App shell spacing uses the reviewed `24px` detail gutter, with new local
-  spacing on 5px/10px steps unless an existing area is still on the legacy 4px
-  shell rhythm.
+- App shell detail gutters use `25px` by default and `15px` at viewport widths
+  up to `860px`, with bottom safe-area padding. Feature-specific fullscreen
+  layouts may override these defaults. New local spacing uses 5px/10px steps.
 - App UI typography follows the compact role ladder documented in
   `docs/design-system.md`; presenter output typography remains separate.
 - Button geometry and icon sizing come from `mindex.design-tokens.js`.
 - Sidebar/ambient utility actions should be quiet icon-only controls with
   accessible labels.
-- Do not use retired 25px/20px gutter or 32x32 icon-button notes as current
-  design guidance.
+- Use the current spacing tokens and `docs/ui-contracts.md`; do not restore
+  retired 24px/20px gutter or 32x32 icon-button guidance.
 
 ## Testing And Verification
 

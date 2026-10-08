@@ -6,6 +6,15 @@ const http=require('node:http');
 const {chromium}=require('playwright');
 const {PDFDocument}=require('pdf-lib');
 const root=path.resolve(__dirname,'..');
+async function waitForSavedBulletin(page, news) {
+  await page.waitForFunction(expected=>{
+    const button=document.querySelector('[data-bulletin-save]');
+    return button?.disabled && button.getAttribute('aria-busy')==='false'
+      && window.bulletinTest.drafts[window.bulletinTest.id]?.content.fields.news===expected;
+  },news,{timeout:3000});
+  assert.equal(await page.locator('.bulletin-status').isVisible(),false,'Successful saves keep status quiet');
+}
+
 const server=http.createServer((req,res)=>{
   const pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
   const file=path.resolve(root,pathname==='/'?'index.html':pathname.slice(1));
@@ -122,7 +131,7 @@ const server=http.createServer((req,res)=>{
     await page.evaluate(async()=>{const confirm=confirmSaveBeforeLeaving;try{confirmSaveBeforeLeaving=async()=>true;await activatePageTab(0);}finally{confirmSaveBeforeLeaving=confirm;}});
     await page.waitForFunction(()=>document.querySelector('[data-bulletin-print]')?.disabled===false);
     await page.evaluate(()=>{bulletinTest.delaySave=false;bulletinTest.releaseSave();});
-    await page.waitForFunction(()=>document.querySelector('.bulletin-status').textContent.includes('DB 저장됨'),{},{timeout:3000});
+    await waitForSavedBulletin(page,'저장 중 탭 전환');
     await page.evaluate(()=>closePageTab(1));
     await page.locator('[data-bulletin-field="news"]').fill('탭 A의 미저장 내용');
     await page.evaluate(()=>openNewPageTab(currentBrowserHistorySnapshot()));
@@ -236,7 +245,7 @@ const server=http.createServer((req,res)=>{
     await page.waitForFunction(()=>!document.querySelector('[data-bulletin-print]').disabled);
     assert.equal(await page.locator('[data-bulletin-field="news"]').inputValue(),'내가 수정한 원문 ③');
     await page.locator('[data-bulletin-save]').click();
-    await page.waitForFunction(()=>document.querySelector('.bulletin-status').textContent.includes('DB 저장됨'));
+    await waitForSavedBulletin(page,'내가 수정한 원문 ③');
     assert.equal(await page.evaluate(()=>window.bulletinTest.drafts[window.bulletinTest.id].layout.background),'26-S6.png');
     // A clean browser-local state still loads the same content and layout from DB.
     await page.evaluate(()=>localStorage.clear());
@@ -253,11 +262,12 @@ const server=http.createServer((req,res)=>{
     await page.locator('[data-bulletin-field="news"]').fill('저장 중에 계속 입력');
     await page.evaluate(()=>{window.bulletinTest.delaySave=false;window.bulletinTest.releaseSave();});
     await page.waitForFunction(()=>!document.querySelector('[data-bulletin-save]').disabled);
-    assert.match(await page.locator('.bulletin-status').textContent(),/수정됨/);
+    assert.equal(await page.locator('[data-bulletin-save]').isEnabled(),true,'Newer edits remain available to save');
+    assert.equal(await page.locator('[data-bulletin-save]').getAttribute('aria-busy'),'false');
     assert.equal(await page.locator('[data-bulletin-field="news"]').inputValue(),'저장 중에 계속 입력');
     assert.equal(await page.evaluate(()=>window.bulletinTest.drafts[window.bulletinTest.id].content.fields.news),'저장 요청 시점');
     await page.locator('[data-bulletin-save]').click();
-    await page.waitForFunction(()=>document.querySelector('.bulletin-status').textContent.includes('DB 저장됨'));
+    await waitForSavedBulletin(page,'저장 중에 계속 입력');
     console.log('PASS DB save, failure recovery, revision conflicts, local recovery, clean-browser reload and edits during save');
     // Local storage is optional: quota/security failures must never mask or block DB work.
     await page.evaluate(()=>{
@@ -265,9 +275,13 @@ const server=http.createServer((req,res)=>{
       Storage.prototype.setItem=function(key,value){if(key.startsWith('mindex.bulletin'))throw new DOMException('quota','QuotaExceededError');return window.bulletinStorage.set.call(this,key,value);};
     });
     await page.locator('[data-bulletin-field="news"]').fill('복구 공간이 없어도 DB 저장');
-    assert.match(await page.locator('.bulletin-status').textContent(),/수정됨.*브라우저 임시 저장 불가/);
+    assert.equal(await page.locator('[data-bulletin-save]').isEnabled(),true);
+    assert.equal(await page.locator('.bulletin-status').textContent(),'브라우저 임시 저장 불가');
     assert.equal(await page.evaluate(()=>saveAll()),true);
-    assert.match(await page.locator('.bulletin-status').textContent(),/DB 저장됨.*브라우저 임시 저장 불가/);
+    assert.equal(await page.locator('[data-bulletin-save]').isDisabled(),true);
+    assert.equal(await page.locator('[data-bulletin-save]').getAttribute('aria-busy'),'false');
+    assert.equal(await page.evaluate(()=>bulletinTest.drafts[bulletinTest.id].content.fields.news),'복구 공간이 없어도 DB 저장');
+    assert.equal(await page.locator('.bulletin-status').textContent(),'브라우저 임시 저장 불가');
     await page.locator('[data-bulletin-field="news"]').fill('공간 부족 중 새 수정');
     await page.locator('[data-bulletin-reload]').click();
     await page.waitForFunction(()=>document.querySelector('[data-bulletin-field="news"]').value==='복구 공간이 없어도 DB 저장');
