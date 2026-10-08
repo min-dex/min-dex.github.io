@@ -73,6 +73,7 @@
     return { status: "linked", song, text: `${prefix}${title}${part.verse ? ` ${part.verse}` : ""}`, candidates: numbered };
   }
   function fromServices(snapshot = {}, archivedSources = [], index = null) {
+    const hasSong = element => Boolean(element.song_id || String(element.title || "").trim());
     const occupied = new Set(archivedSources.map(s => s.service_date + "|" + s.service_type_id));
     const sections = new Map((snapshot.sections || []).map(s => [s.id, s]));
     const grouped = new Map();
@@ -80,7 +81,7 @@
       if (element.template_suppressed || element.legacy_template_suppressed
         || element.config?.templateSuppressed || element.config?.template_suppressed) continue;
       const section = sections.get(element.section_id);
-      if (!section || element.element_type !== "praise" || (!element.song_id && !String(element.title || "").trim())) continue;
+      if (!section || element.element_type !== "praise") continue;
       if (!grouped.has(section.service_id)) grouped.set(section.service_id, []);
       grouped.get(section.service_id).push({element, section});
     }
@@ -89,7 +90,7 @@
       const identity = service.service_date + "|" + service.service_type_id;
       if (!service.service_date || occupied.has(identity)) continue;
       const rows = grouped.get(service.id) || [];
-      if (!rows.length) continue;
+      if (!rows.some(({element}) => hasSong(element))) continue;
       occupied.add(identity);
       const id = "worship:" + service.id;
       sources.push({id, service_id: service.id, source_kind: "worship", source_name: service.title || "",
@@ -124,9 +125,12 @@
       };
       // Fold only adjacent members in the same section; retain each member's link.
       for (let i = 0; i < rows.length;) {
+        // Empty slots reserve their number, but are not archive songs or medley members.
+        if (!hasSong(rows[i].element)) { i++; continue; }
         const first = i;
         const group = groupId(rows[i].element);
         while (group && i + 1 < rows.length && rows[i + 1].section.id === rows[first].section.id
+          && hasSong(rows[i + 1].element)
           && groupId(rows[i + 1].element) === group) i++;
         const members = serviceCandidates.slice(first, i + 1);
         const candidate = members[0];

@@ -23,6 +23,21 @@ for (const name of ['setlistCandidateDisplayOrder', 'compareSetlistCandidatesFor
   vm.runInContext(source.slice(start, source.indexOf('\n}\n', start) + 2), context);
 }
 const prepare = context.prepareWorshipSetlistArchiveCandidates;
+const liveSource = {id:'live',service_date:'2026-10-07',service_type_id:'wed'};
+const liveSections = [{id:'praise',service_id:'live',title:'찬양'}];
+const liveElements = [1,2,3,4].map(n => ({id:`p${n}`,section_id:'praise',element_type:'praise',
+  sort_order:n,source_ref:{label:`찬양 ${n}`},title:n === 1 ? '첫 곡' : n === 4 ? '넷째 곡' : ''}));
+const archive = elements => globalThis.MindexSetlistLinks.fromServices({services:[liveSource],sections:liveSections,elements});
+const gap = archive(liveElements);
+assert.equal(gap.candidates.map(c=>c.raw_label).join('|'),'찬양 1|찬양 4');
+assert.equal(prepare(gap.candidates,gap.sources[0]).map(c=>c.archive_display_label).join('|'),'찬양 1|찬양 4');
+const deleted = archive(liveElements.filter(e=>e.title));
+assert.equal(prepare(deleted.candidates,deleted.sources[0]).map(c=>c.archive_display_label).join('|'),'찬양 1|찬양 2');
+assert.equal(archive(liveElements.map(e=>({...e,title:''}))).sources.length,0);
+const connectedGap = archive(liveElements.map(e=>({...e,config:{connectedPraise:{groupId:'g'}}})));
+assert.equal(connectedGap.candidates.length,2);
+assert.ok(connectedGap.candidates.every(c=>!c.archive_members));
+console.log('PASS: live empty-slot numbering survives archive display, deletion renumbers, empty slots break medleys');
 const friday = { service_type_id: 'fri', source_kind: 'setlist' };
 const song = (raw_label, raw_title, sort_order) => ({ raw_label, raw_title, sort_order });
 const opening = ['밤이나 낮이나', '예수 열방의 소망', '새 힘 얻으리', '하나님은 우리의 피난처가 되시며', '보라 너희는 두려워 말고']

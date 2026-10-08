@@ -1066,3 +1066,8 @@ Small visual polish that does not alter behavior does not need an entry.
 - Keep `assets/hymn-scores/manifest.json` as the unchanged authoring source. Generate `manifest.runtime.json` with `python3 scripts/build_hymn_score_runtime.py`; check drift with `--check`. The form-label updater rebuilds the runtime index after writing the source.
 - The runtime index retains exactly the fields consumed by `presenterHymnScoreAssetSlides`. Verify every hymn's rendered projection with `tests/test_hymn_score_runtime.cjs`. All 645 hymns and 5,855 slides preserve URL, title, order and form metadata.
 - Version the runtime request with the app release and use normal HTTP caching. Keep in-flight deduplication and failed-load retry. Manifest arrival patches current presenter controls rather than rebuilding the full app; persisted data and playback rules remain unchanged.
+
+### 2026-10-08 Archive numbering with empty slots
+- Live worship archive numbering counts existing praise slots before omitting empty rows. Filled slots 1 and 4 remain 1 and 4 when slots 2 and 3 are empty, rather than appearing as 1 and 2. Actual deletion/suppression still removes a slot from numbering.
+- The display stage preserves numbering already derived by the live adapter. Historical import numbering remains unchanged. Empty slots break connected-song groups and are not rendered as songs; wholly empty services do not create archive cards.
+- Regression coverage: `tests/test_setlist_archive_display.cjs`, connected-view and deletion tests. This changes only the read-only archive projection, not worship records or slide ordering.

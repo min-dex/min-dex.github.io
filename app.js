@@ -23359,6 +23359,8 @@ function prepareWorshipSetlistArchiveCandidates(candidates = [], source = {}) {
       return { ...candidate, archive_display_label: "입례찬양", archive_display_order: 40 };
     }
     if (/^찬양(?:\s*\d+(?:[–-]\d+)?)?$/.test(label)) {
+      // Live rows were numbered against all existing slots, including empty ones.
+      if (candidate.archive_live) return candidate;
       const count = Math.max(1, window.MindexSetlistLinks?.split(candidate.raw_title).length || 1);
       const first = praiseNumber + 1;
       praiseNumber += count;
