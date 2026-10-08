@@ -90,10 +90,13 @@ explicitly approved test service for operational save/retry/conflict/restore tes
 Worktree: /private/tmp/mindex-db-integrity (detached HEAD).
 Base: 6ad02ebb. Prepared commits: d2336bb8 followed by 069533ff. At the original
 handoff, main integration, push and web deployment had not been performed.
-The follow-up fetched origin/main at 6ad02ebb: both prepared commits descend
-linearly from it, with no divergent main commits or merge conflicts. Local main
-integration uses a fast-forward preserving that order, followed by this catalog
-verification/documentation update. Push and web deployment remain out of scope.
+The follow-up initially fetched origin/main at 6ad02ebb. Before integration,
+concurrent work advanced local main to 1b9622e8 through 82c15e16 (setlist navigation
+and artist hints). Integration merges that main into the integrity worktree,
+preserving d2336bb8 → 069533ff → 956c6732 and the concurrent commits. The only
+conflict was appended entries in worship-presenter-decisions.md; both entries were
+retained and the recovery entry updated to reflect the operator's installation
+result. Push and web deployment were not performed for the integrity changes.
 No other worktrees were modified or cleaned.
 
 Follow-up validation on 2026-10-08: PostgreSQL 17.6 migration tests passed again
@@ -113,8 +116,8 @@ The direct production catalog connection failed certificate-chain verification
 (`SELF_SIGNED_CERT_IN_CHAIN`); no catalog result was retrieved and certificate
 verification was not disabled. Run the postflight SQL in the operator's SQL Editor
 and return the JSON result, or configure a trusted database CA for direct access.
-No authorized test service ID has been supplied in this handoff, so production
-save/retry/conflict/restore smoke testing remains pending. Backup status remains
+The user confirmed that no approved test service is available, so production
+save/retry/conflict/restore smoke testing is deferred. Backup status remains
 unconfirmed.
 
 Verification: PostgreSQL 17.6 migration tests passed with the operator's six
