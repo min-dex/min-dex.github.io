@@ -1,9 +1,18 @@
 -- Modern Korean Bible only. Verified against the supplied EasySlides XML.
 -- 2,428 leading square-bracket headings; existing eight headings stay unchanged.
 -- Stores complete before-images privately. A mismatch aborts the transaction.
-begin;
-set local lock_timeout = '5s';
-set local statement_timeout = '60s';
+-- Run this entire DO block; the final SELECT only reports the outcome.
+do $repair$
+declare
+  tid uuid;
+  item record;
+  current_row jsonb;
+  expected_row jsonb;
+  row_count integer;
+  source_hash text;
+  expected_hash constant text := '133cb99aacef492ea1a2064299c39a6d';
+begin
+perform set_config('lock_timeout','5s',true);
 lock table public.mindex_bible_translations in share mode;
 lock table public.mindex_bible_verses in share row exclusive mode;
 create schema if not exists mindex_maintenance;
@@ -16,13 +25,7 @@ create table if not exists mindex_maintenance.modern_bible_headings_20261008 (
 revoke all on mindex_maintenance.modern_bible_headings_20261008
   from public, anon, authenticated;
 
-do $repair$
-declare
-  tid uuid;
-  row_count integer;
-  source_hash text;
-  expected_hash constant text := '133cb99aacef492ea1a2064299c39a6d';
-begin
+
   select id into strict tid from public.mindex_bible_translations
     where translation_key='현대어' and name='현대어' and is_active;
 
@@ -56,48 +59,39 @@ begin
         or original_row->>'is_active' is distinct from 'true') then
     raise exception 'MODERN_HEADING_BACKUP_MISMATCH';
   end if;
+  -- Keep backup, transformation and verification inside this one atomic statement.
+  -- No temporary table or cross-statement session state is required.
+  for item in
+    select verse_id,original_row,
+      regexp_replace(substring(original_row->>'text' from 2
+        for strpos(original_row->>'text',']')-2), '^\s+|\s+$', '', 'g') as heading,
+      regexp_replace(substring(original_row->>'text' from
+        strpos(original_row->>'text',']')+1), '^\s+|\s+$', '', 'g') as body
+    from mindex_maintenance.modern_bible_headings_20261008
+  loop
+    if item.heading='' or item.body='' then
+      raise exception 'MODERN_HEADING_EMPTY_RESULT';
+    end if;
+    expected_row := item.original_row || jsonb_build_object(
+      'text',item.body,'section_title',item.heading);
+    select to_jsonb(v) into current_row from public.mindex_bible_verses v
+      where v.id=item.verse_id;
+    if current_row is distinct from item.original_row
+      and current_row is distinct from expected_row then
+      raise exception 'MODERN_HEADING_CURRENT_ROW_CHANGED';
+    end if;
+    if current_row=item.original_row then
+      update public.mindex_bible_verses set text=item.body,section_title=item.heading
+        where id=item.verse_id;
+    end if;
+    select to_jsonb(v) into current_row from public.mindex_bible_verses v
+      where v.id=item.verse_id;
+    if current_row is distinct from expected_row then
+      raise exception 'MODERN_HEADING_POSTCHECK_FAILED';
+    end if;
+  end loop;
 end
 $repair$;
-
-create temporary table modern_heading_expected on commit drop as
-select verse_id,original_row,
-  regexp_replace(substring(original_row->>'text' from 2
-    for strpos(original_row->>'text',']')-2), '^\s+|\s+$', '', 'g') as heading,
-  regexp_replace(substring(original_row->>'text' from
-    strpos(original_row->>'text',']')+1), '^\s+|\s+$', '', 'g') as body
-from mindex_maintenance.modern_bible_headings_20261008;
-
-do $check$
-begin
-  if exists(select from modern_heading_expected where heading='' or body='') then
-    raise exception 'MODERN_HEADING_EMPTY_RESULT';
-  end if;
-  if exists(select from modern_heading_expected e
-    left join public.mindex_bible_verses v on v.id=e.verse_id
-    where v.id is null or (
-      to_jsonb(v) is distinct from e.original_row and
-      to_jsonb(v) is distinct from (e.original_row || jsonb_build_object(
-        'text',e.body,'section_title',e.heading)))) then
-    raise exception 'MODERN_HEADING_CURRENT_ROW_CHANGED';
-  end if;
-end
-$check$;
-
-update public.mindex_bible_verses v set text=e.body,section_title=e.heading
-from modern_heading_expected e
-where v.id=e.verse_id and to_jsonb(v)=e.original_row;
-
-do $verify$
-begin
-  if exists(select from modern_heading_expected e
-    left join public.mindex_bible_verses v on v.id=e.verse_id
-    where to_jsonb(v) is distinct from (e.original_row || jsonb_build_object(
-      'text',e.body,'section_title',e.heading))) then
-    raise exception 'MODERN_HEADING_POSTCHECK_FAILED';
-  end if;
-end
-$verify$;
-commit;
 
 select 'modern_bible_headings_installed' as status,
   (select count(*) from mindex_maintenance.modern_bible_headings_20261008) as backed_up,

@@ -42,7 +42,13 @@ try {
   await assert.rejects(db.exec(sql),/INJECTED_FAILURE/);
   await db.exec('rollback; drop trigger reject_heading on public.mindex_bible_verses');
   assert.equal((await db.query("select to_regclass('mindex_maintenance.modern_bible_headings_20261008') as backup")).rows[0].backup,null);
-  await db.exec(sql);
+  // SQL Editor/pooler may run the report in a separate autocommit session.
+  const blockEnd=sql.indexOf('$repair$;')+'$repair$;'.length;
+  await db.exec(sql.slice(0,blockEnd));
+  const reportClient=await db.connect();
+  const report=(await reportClient.query(sql.slice(blockEnd))).rows[0];
+  assert.equal(report.status,'modern_bible_headings_installed');
+  assert.equal(Number(report.backed_up),2428);
   const after=(await db.query('select * from public.mindex_bible_verses')).rows;
   const byId=new Map(after.map(r=>[r.id,r]));
   for (const row of seeded) {
