@@ -2,8 +2,9 @@
 
 Status: history table, journaling triggers, slot uniqueness guard and operator-only
 restore_revision were applied in production, according to the user’s SQL Editor
-results. Independent post-install catalog verification and production smoke tests
-remain pending. Do not rerun the full migrations.
+results. The operator-provided post-install catalog was verified on 2026-10-08
+at 13:59:56 KST. Production smoke tests remain deferred because no approved test
+service is available. Do not rerun the full migrations.
 
 ## Scope
 
@@ -78,25 +79,27 @@ The user subsequently reported `slot_guard_and_restore_installed` from SQL Edito
 This confirms installation of assert_unique_slots, the extended validate_document,
 the preserved validate_document_before_slot_guard and administrator-only
 restore_revision using the existing restore_checkpoint validation path. The applied
-SQL revokes restore execution from browser roles and mindex_atomic_writer; verify
-effective ACLs independently in the post-install catalog check. No existing worship
+SQL revokes restore execution from browser roles and mindex_atomic_writer; the
+operator-provided post-install catalog confirms those effective ACLs. No existing worship
 content was restored or changed as part of this rollout.
 
 Do NOT rerun either full migration in production. Keep code integration separate
-from database installation. Next, inspect installed function definitions, trigger
-enabled states and effective ACLs in a read-only transaction, then use only an
-explicitly approved test service for operational save/retry/conflict/restore tests.
+from database installation. Installed function definitions, trigger enabled states
+and effective ACLs have now been checked from the operator-provided read-only
+result. Operational save/retry/conflict/restore tests still require an explicitly
+approved test service.
 
 Worktree: /private/tmp/mindex-db-integrity (detached HEAD).
 Base: 6ad02ebb. Prepared commits: d2336bb8 followed by 069533ff. At the original
 handoff, main integration, push and web deployment had not been performed.
 The follow-up initially fetched origin/main at 6ad02ebb. Before integration,
 concurrent work advanced local main to 1b9622e8 through 82c15e16 (setlist navigation
-and artist hints). Integration merges that main into the integrity worktree,
+and artist hints). Integration merged that main into the integrity worktree,
 preserving d2336bb8 → 069533ff → 956c6732 and the concurrent commits. The only
 conflict was appended entries in worship-presenter-decisions.md; both entries were
 retained and the recovery entry updated to reflect the operator's installation
-result. Push and web deployment were not performed for the integrity changes.
+result. Local main was advanced to integration commit 48d8d173. Push and web
+deployment were not performed for the integrity changes.
 No other worktrees were modified or cleaned.
 
 Follow-up validation on 2026-10-08: PostgreSQL 17.6 migration tests passed again
@@ -114,8 +117,32 @@ operator-only as before. All reported history table permissions should be false.
 
 The direct production catalog connection failed certificate-chain verification
 (`SELF_SIGNED_CERT_IN_CHAIN`); no catalog result was retrieved and certificate
-verification was not disabled. Run the postflight SQL in the operator's SQL Editor
-and return the JSON result, or configure a trusted database CA for direct access.
+verification was not disabled. The user subsequently supplied the SQL Editor
+postflight JSON, checked at `2026-10-08T04:59:56.14429+00:00` (13:59:56 KST).
+The catalog verification is complete based on that operator-provided result;
+this does not establish that direct DB connectivity is fixed.
+
+- All eight expected functions are postgres-owned and set search_path to
+  pg_catalog, pg_temp. Each supplied definition_hash matches the MD5 of its
+  supplied definition. All eight SQL bodies match the checked-in migration
+  bodies after ignoring comments, whitespace and unquoted keyword/identifier
+  case. The preserved validator matches the original validator body.
+- remember_revision, journal_checkpoint and journal_receipt use SECURITY DEFINER;
+  the other five functions use invoker security, as designed.
+- anon and authenticated cannot execute any of the eight private functions.
+  mindex_atomic_writer can execute only assert_unique_slots, validate_document
+  and validate_document_before_slot_guard among these functions. Both restore
+  functions and the three journal/history functions deny writer execution.
+- preserve_worship_checkpoint is enabled (`O`) BEFORE INSERT OR UPDATE on
+  checkpoints; preserve_worship_committed_revision is enabled (`O`) AFTER INSERT
+  on receipts. Both point to the expected journaling functions.
+- revision_history is postgres-owned, with only the owner in its table ACL.
+  SELECT/INSERT/UPDATE/DELETE/TRUNCATE are false for anon, authenticated and
+  mindex_atomic_writer. Physical size is 2,449,408 bytes (2,392 KiB); this catalog
+  result does not include version/service counts or remaining storage quota.
+
+This was a review of the supplied catalog, not an operational write/restore test.
+No production migration, save or restore was executed during verification.
 The user confirmed that no approved test service is available, so production
 save/retry/conflict/restore smoke testing is deferred. Backup status remains
 unconfirmed.
@@ -132,9 +159,8 @@ requires a versioned contract compatible with compact documents; linked-service
 transactions require server/client protocol work; duplicate state fields require
 a compatibility migration. None of these three has been implemented here and
 none should be advertised as solved by history or slot uniqueness. Confirm
-backup, inspect installed ACLs/triggers, then authorize a disposable-service
-operational test. The SQL installation stages are complete according to the user’s
-execution results. Restore requires a reviewed diff
+backup and authorize a disposable-service operational test when one is available.
+The SQL installation stages and operator-provided catalog checks are complete. Restore requires a reviewed diff
 and an expected revision, not an automatic overwrite of real worship content.
 
 ## Remaining Work
