@@ -1072,10 +1072,10 @@ Small visual polish that does not alter behavior does not need an entry.
 - The display stage preserves numbering already derived by the live adapter. Historical import numbering remains unchanged. Empty slots break connected-song groups and are not rendered as songs; wholly empty services do not create archive cards.
 - Regression coverage: `tests/test_setlist_archive_display.cjs`, connected-view and deletion tests. This changes only the read-only archive projection, not worship records or slide ordering.
 
-### 2026-10-08 Server recovery foundation (operator reports installed)
+### 2026-10-08 Server recovery foundation (catalog verified)
 - Preserve multiple server revisions rather than depending on a single overwritten checkpoint or browser storage. History failure must roll back its save; deletion must retain history. Recovery is operator-only and creates a new revision.
 - Validate slot uniqueness at the final aggregate boundary, preserving legitimate slot swaps and existing document checks. Do not auto-repair existing data.
-- See `docs/worship-integrity-20261008.md` for migration order, real PostgreSQL tests, capacity/backup requirements and remaining work. The operator reports successful installation; independent production catalog verification and an authorized smoke test remain pending.
+- See `docs/worship-integrity-20261008.md` for migration order, real PostgreSQL tests, capacity/backup requirements and remaining work. Installation and the operator-provided read-only catalog are verified; an authorized production smoke test remains deferred because no approved test service is available.
 
 ### 2026-10-08 Setlist handoff: homonyms and return navigation
 - Keep canonical song titles and explicit links unchanged. Where same-title/same-hymn-number/same-subtitle records have different existing artists, show the known artist as secondary metadata in Praise lists/search and setlist links. Do not invent a label for missing metadata or resolve ambiguous titles automatically.
