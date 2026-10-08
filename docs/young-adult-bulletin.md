@@ -204,3 +204,21 @@ A4 가로 양면을 접는 4면 구조는 유지하고 `layout.design: editorial
 - 내용 편집의 담당·월간·공통 영역 펼침 상태는 같은 편집기 내 날짜별로 유지한다. 실행 취소·모드 전환·원본 재조회가 이 상태를 초기화하지 않는다.
 - 검증 범위: 저장·충돌·복구·날짜 전환·부서 전환·원본 갱신, 숨김 순서, 주차별 18쪽 출력 회귀,
   어린이부 7/14일 읽기표, 사이드바 상태, 390/768/1024/1440px 편집 도구 너비. 운영 DB를 변경하지 않는 로컬 Chromium 검사다.
+
+
+## Children print reference alignment (2026-10-07)
+
+The 2026-10-04 issued PDF remains the children's layout reference. Restore its
+12.5pt reading text, mixed-size monthly theme and scripture reference, 25pt
+single-week reading row pitch, two-line reading footer, 15mm staff row pitch,
+logo bounds, and memory-verse positions. Remove added white footer strips.
+For fourteen days, retain 7.5mm row pitch and move the compact footer beneath
+the reading table. Untouched legacy default frames upgrade on load; customized
+frames and source content stay intact. No production rows are rewritten.
+
+
+## Next-week roster cue (2026-10-07)
+
+The October youth layout prints an explicit `다음 주` label alongside the next
+Sunday's date and assignee. Keep the existing light row emphasis, but never
+rely on color alone. The calendar-based next-week rule remains unchanged.

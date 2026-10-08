@@ -11,6 +11,7 @@ const server=http.createServer((req,res)=>{
   const file=path.resolve(root,pathname.slice(1));
   if(!file.startsWith(root+path.sep)||!fs.existsSync(file)||fs.statSync(file).isDirectory()){res.writeHead(404);res.end();return;}
   if(file.endsWith('.svg'))res.setHeader('Content-Type','image/svg+xml');
+  if(file.endsWith('.js'))res.setHeader('Content-Type','application/javascript');
   res.end(fs.readFileSync(file));
 });
 (async()=>{
@@ -29,6 +30,16 @@ const server=http.createServer((req,res)=>{
  window.childData=data;window.childSource=source;await B.readyAssets();
  const doc={source,fields:{news:"① 오늘 2부 활동은 '사도신경·주기도문 쓰기 대회'로 진행합니다."},settings:{design:'children',theme:'auto'},frames:B.defaultFrames('children'),inherited:{common:{},months:{}}};
  const rendered=B.renderPages(doc,'print');window.childDoc=doc;
+ const defaults=B.defaultFrames('children');
+ if(defaults.find(f=>f.id==='readingPlan').size!==12.5)throw Error('Original reading type is 12.5pt');
+ if(defaults.find(f=>f.id==='memoryVerse').y!==75)throw Error('Original memory verse position');
+ const old={...doc,frames:structuredClone(defaults)};
+ Object.assign(old.frames.find(f=>f.id==='readingPlan'),{y:142.5,h:52.5,size:10});
+ const upgraded={};B.applyStored(upgraded,{...B.storedValue(old),revision:1});
+ if(upgraded.frames.find(f=>f.id==='readingPlan').size!==12.5)throw Error('Untouched old defaults must upgrade');
+ old.frames.find(f=>f.id==='readingPlan').x=160;
+ const custom={};B.applyStored(custom,{...B.storedValue(old),revision:1});
+ if(custom.frames.find(f=>f.id==='readingPlan').x!==160||custom.frames.find(f=>f.id==='readingPlan').size!==10)throw Error('Custom frames must stay intact');
  document.body.style.cssText='margin:0;background:#ddd';rendered.pages.forEach(svg=>{svg.style.cssText='width:1200px;height:auto;display:block';document.body.append(svg);});
  const restored={};B.applyStored(restored,{...B.storedValue(doc),revision:1});
  const two=B.resolveSource({...data,service:{...data.service,service_date:'2026-09-13'},services:[{date:'2026-09-20',noGathering:true}]});

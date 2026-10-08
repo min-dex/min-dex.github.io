@@ -11,6 +11,7 @@ const server=http.createServer((req,res)=>{
   const file=path.resolve(root,pathname.slice(1));
   if(!file.startsWith(root+path.sep)||!fs.existsSync(file)||fs.statSync(file).isDirectory()){res.writeHead(404);res.end();return;}
   if(file.endsWith('.svg'))res.setHeader('Content-Type','image/svg+xml');
+  if(file.endsWith('.js'))res.setHeader('Content-Type','application/javascript');
   res.end(fs.readFileSync(file));
 });
 (async()=>{
@@ -36,6 +37,17 @@ const server=http.createServer((req,res)=>{
   if(process.env.BULLETIN_DESIGN_IMAGE)console.log('IMAGE:'+(await page.screenshot({type:'jpeg',quality:60,fullPage:true})).toString('base64'));
   assert.deepEqual(result.issues,[]);
   assert.equal(result.stored.layout.design,'editorial');
+  const nextMarker=await page.evaluate(()=>{
+   const d=structuredClone(designDoc);
+   d.source.prayers=[{date:'2026-10-04',person:'김음파 청년',next:false},{date:'2026-10-11',person:'서영윤 청년',next:true},{date:'2026-10-18',person:'(연합예배)',next:false},{date:'2026-10-25',person:'이재희 청년',next:false}];
+   const r=MindexBulletin.renderPages(d,'print');
+   const roster=r.pages[0].querySelector('[data-frame-id="prayers"]');
+   return {issues:[...r.issues],markers:[...roster.querySelectorAll('text')].filter(t=>t.textContent==='다음 주').length,text:roster.textContent};
+  });
+  assert.deepEqual(nextMarker.issues,[]);
+  assert.equal(nextMarker.markers,1);
+  assert.match(nextMarker.text,/10월 11일다음 주서영윤 청년/);
+
   const roundTrip=await page.evaluate(()=>{const B=window.MindexBulletin,d={};B.applyStored(d,{...B.storedValue(designDoc),revision:1});return d.frames.every((f,i)=>Object.entries(designDoc.frames[i]).every(([k,v])=>f[k]===v));});
   assert.ok(roundTrip,'New print layout must survive DB round trip');
   const invalid=await page.evaluate(()=>{const B=window.MindexBulletin,d=structuredClone(designDoc);d.fields.news='긴 문구 '.repeat(500);return [...B.renderPages(d,'print').issues];});

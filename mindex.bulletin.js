@@ -431,7 +431,7 @@
     return frames;
   }
 
-  function childrenFrames(){
+  function legacyChildrenFrames(){
     const frames=defaultFrames().filter(f=>!["prayersTitle","prayersMonth","prayers","sermon","outline","notesTitle","notes"].includes(f.id));
     for(const f of frames){
       if(f.id==="newsTitle")f.binding="label:어린이부 소식";
@@ -451,6 +451,19 @@
     add("readingHelp",233.5,127.5,53.5,10,10,"label:잠들기 전, 잠언 읽기!","text","right");
     add("readingPlan",158.5,142.5,128.5,52.5,10,"field:readingPlan","reading");
     add("readingFooter",158.5,195,128.5,7.5,10,"label:부모님께 확인받고, 선생님께 달란트 받자!","text","right");
+    return frames;
+  }
+
+  // Measured from the issued children's bulletin, 2026-10-04 (A4 landscape).
+  function childrenFrames(){
+    const frames=legacyChildrenFrames();
+    const changes={
+      verse:{y:180},order:{h:145},
+      memoryTitle:{y:62.5},memoryReference:{y:62.5,size:12.5},memoryVerse:{y:75},
+      readingPlan:{y:140,h:55,size:12.5},readingFooter:{y:180,h:12.5,size:12.5},
+      website:{x:8.5},address:{x:8.5},insideChurch:{x:8.5},
+    };
+    for(const f of frames)Object.assign(f,changes[f.id]||{});
     return frames;
   }
 
@@ -510,8 +523,10 @@
           else list.forEach((row,i)=>{
             const x=f.x+Math.floor(i/rows)*(col+7.5),y=f.y+(i%rows)*7.5;
             if(row.next)group.append(svg("rect",{x:x-1,y,width:col+2,height:7.5,fill:"#EDF2EC"}));
-            writeText(group,shortDate(row.date),{...box,x,y,w:27.5,h:7.5,size:f.size,color:muted},check,f.id);
-            writeText(group,row.person,{...box,x:x+27.5,y,w:col-27.5,h:7.5,align:"right",weight:row.next?700:500},check,f.id);
+            const personOffset=row.next?35:27.5;
+            writeText(group,shortDate(row.date),{...box,x,y,w:row.next?20:27.5,h:7.5,size:f.size,color:muted},check,f.id);
+            if(row.next)writeText(group,"다음 주",{...box,x:x+20,y,w:12.5,h:7.5,size:10,weight:700},check,f.id);
+            writeText(group,row.person,{...box,x:x+personOffset,y,w:col-personOffset,h:7.5,align:"right",weight:row.next?700:500},check,f.id);
             if(y+7.5>f.y+f.h+.01)check.add(f.id);
           });
         }else if(f.type==="events"){
@@ -725,17 +740,32 @@
       else root.append(svg("rect",{width:297,height:210,fill:theme==="ink"?"#202b35":"#fff"}));
       const ink=doc.settings?.design==="ink"||(!doc.settings?.design||doc.settings.design==="auto")&&inkLayout(doc.source?.date);
       for(const x of ink?[0]:[5,153.5])root.append(svg("rect",{x,y:10,width:ink?297:138.5,height:190,fill:"white","fill-opacity":1}));
-      if(page===0)root.append(svg("image",{href:new URL(doc.source?.department==="children"?childrenLogoPath:ink?inkLogoPath:logoPath,document.baseURI).href,x:170,y:doc.source?.department==="children"?57.5:67.5,width:105,height:doc.source?.department==="children"?97.5:72.5}));
+      if(page===0)root.append(svg("image",{href:new URL(doc.source?.department==="children"?childrenLogoPath:ink?inkLogoPath:logoPath,document.baseURI).href,x:doc.source?.department==="children"?172.75:170,y:doc.source?.department==="children"?53.75:67.5,width:doc.source?.department==="children"?100:105,height:doc.source?.department==="children"?85.89:72.5}));
       for(const f of doc.frames.filter(f=>f.page===page&&(!f.hidden||mode==="layout"))) {
         const group=svg("g",{"data-frame-id":f.id}),frameIssues=f.hidden?new Set():issues;
-        if(doc.source?.department==="children"&&(f.y<10||f.y>=200))group.append(svg("rect",{x:f.x,y:f.y,width:f.w,height:f.h,fill:"white","fill-opacity":.9}));
         if(f.type==="reading") {
           const lines=boundText(doc,f).split("\n").filter(Boolean),rows=Math.ceil(lines.length/2),w=(f.w-7.5)/2;
-          lines.forEach((text,i)=>{const x=f.x+Math.floor(i/rows)*(w+7.5),y=f.y+(i%rows)*7.5;
+          const step=rows>4?7.5:25/MM;
+          lines.forEach((text,i)=>{const x=f.x+Math.floor(i/rows)*(w+7.5),y=f.y+(i%rows)*step;
             group.append(svg("rect",{x,y:y+1,width:3,height:3,fill:"none",stroke:"#333","stroke-width":.2}));
-            writeText(group,text,{...f,x:x+5,y,w:w-5,h:7.5},frameIssues,f.id);
+            const parts=text.match(/^(\d+월 \d+일) \(([^)]+)\) [·–-] (.+)$/);
+            const runs=parts?[{text:parts[1]+" "},{text:`(${parts[2]==="일"?"주일":parts[2]})`,size:Math.max(7.5,f.size-2.5)},{text:" – "+parts[3],weight:700}]:[{text}];
+            writeStyled(group,runs,{...f,x:x+5,y,w:w-5,h:step},frameIssues,f.id);
           });
-          if(rows*7.5>f.h)frameIssues.add(f.id);
+          if(rows*step>f.h+.01)frameIssues.add(f.id);
+        } else if(doc.source?.department==="children"&&f.id==="monthlyTheme"){
+          const lines=boundText(doc,f).split("\n");
+          writeStyled(group,lines.map((text,i)=>({text:(i?"\n":"")+text,size:i?Math.max(7.5,f.size-2.5):f.size,weight:i?500:700})),{...f,leading:15},frameIssues,f.id);
+        } else if(doc.source?.department==="children"&&f.id==="memoryReference"){
+          const value=boundText(doc,f),parts=value.match(/^(.+?)\s+(\d+):(\d+(?:[–-]\d+)?)$/);
+          writeStyled(group,parts?[{text:parts[1],weight:700},{text:`\n${parts[2]}장 ${parts[3]}절`,size:Math.max(7.5,f.size-2.5)}]:[{text:value}],{...f,leading:15},frameIssues,f.id);
+        } else if(doc.source?.department==="children"&&f.id==="readingHelp"){
+          writeStyled(group,[{text:"잠들기 전,\n"},{text:"잠언 읽기!",size:f.size+2.5,weight:700}],{...f,h:12.5,leading:15},frameIssues,f.id);
+        } else if(doc.source?.department==="children"&&f.id==="readingFooter"){
+          const reading=doc.frames.find(r=>r.id==="readingPlan"),rows=Math.ceil(fieldValue(doc,"readingPlan").split("\n").filter(Boolean).length/2);
+          const extended=rows>4&&reading;
+          const box=extended?{...f,y:Math.max(f.y,reading.y+rows*7.5),size:10,h:7.5}:f;
+          writeText(group,extended?"부모님께 확인받고, 선생님께 달란트 받자!":"부모님께 확인받고,\n선생님께 달란트 받자!",box,frameIssues,f.id);
         } else if(f.type==="rules") {
           for(let y=0;y<=f.h;y+=7.5)group.append(svg("line",{x1:f.x,y1:f.y+y,x2:f.x+f.w,y2:f.y+y,stroke:"#555","stroke-width":.15}));
         } else if(f.binding.startsWith("month:")) {
@@ -756,7 +786,7 @@
           const value=boundText(doc,f),pairs=value.split(/\n|\s*·\s*/).filter(Boolean);
           const parsed=pairs.map(t=>t.match(/^(위임목사|담당 교역자|회장|총무|서기|회계|부장)\s+(.+)$/));
           if(parsed.every(Boolean)&&(parsed.length===6||(doc.source?.department==="children"&&parsed.length===4)))parsed.forEach((row,i)=>{
-            const col=(f.w-7.5)/2,x=f.x+(i%2)*(col+7.5),y=f.y+Math.floor(i/2)*7.5;
+            const col=(f.w-7.5)/2,x=f.x+(i%2)*(col+7.5),y=f.y+Math.floor(i/2)*(doc.source?.department==="children"?15:7.5);
             writeText(group,row[1],{...f,x,y,w:col,h:7.5},frameIssues,f.id);
             writeText(group,row[2],{...f,x,y,w:col,h:7.5,align:"right"},frameIssues,f.id);
           });else writeText(group,value,f,frameIssues,f.id);
@@ -812,7 +842,7 @@
             writeStyled(group,personRuns(r.person,f.size),{...f,x:x+38.5,y,w:col-38.5,h:10,align:"right"},frameIssues,f.id);
             if(y+10>f.y+f.h+.01)frameIssues.add(f.id);
           });
-        } else writeText(group,boundText(doc,f),{...f,color:doc.source?.department!=="children"&&(f.y<10||f.y>=200)&&(background||theme==="ink")?"#fff":"#231f20"},frameIssues,f.id);
+        } else writeText(group,boundText(doc,f),{...f,color:(doc.source?.department==="children"?["website","meeting"].includes(f.id):f.y<10||f.y>=200)&&(background||theme==="ink")?"#fff":"#231f20"},frameIssues,f.id);
         if(mode==="layout") {
           group.append(svg("rect",{class:`bulletin-frame-hit${selected===f.id?" is-selected":""}`,x:f.x,y:f.y,width:f.w,height:f.h,
             fill:"transparent",stroke:selected===f.id?"#477953":"#47795380","stroke-width":.25,"data-frame-hit":f.id}));
@@ -837,7 +867,12 @@
     if(["auto","ink","panels","editorial","children"].includes(value.settings?.design))settings.design=value.settings.design;
     if([1,2].includes(value.settings?.outlineColumns))settings.outlineColumns=value.settings.outlineColumns;
     for(const f of frames){
-      const patch=Array.isArray(value.frames)?value.frames.find(p=>isRecord(p)&&p.id===f.id):null;
+      let patch=Array.isArray(value.frames)?value.frames.find(p=>isRecord(p)&&p.id===f.id):null;
+      if(patch&&value.settings?.design==="children"){
+        const old=legacyChildrenFrames().find(p=>p.id===f.id);
+        // Upgrade only an untouched old default; preserve every custom frame.
+        if(old&&["x","y","w","h","size","align"].every(key=>patch[key]===old[key])&&!patch.hidden)patch=null;
+      }
       if(!patch)continue;
       for(const key of ["x","y","w","h","size"]){
         const n=patch[key];
@@ -919,12 +954,28 @@
       <span class="bulletin-spacer"></span><div class="bulletin-history" role="group" aria-label="편집 기록">
       <button type="button" data-bulletin-undo aria-label="주보 실행 취소" title="실행 취소"><i data-lucide="undo-2"></i></button><button type="button" data-bulletin-redo aria-label="주보 다시 실행" title="다시 실행"><i data-lucide="redo-2"></i></button></div>
       <button type="button" data-bulletin-save><i data-lucide="save"></i><span>저장</span></button><button class="bulletin-primary" type="button" data-bulletin-print disabled><i data-lucide="printer"></i><span>인쇄 / PDF</span></button></header>
-      <div class="bulletin-meta"><div class="bulletin-status" role="status"></div><div class="bulletin-source-actions" role="group" aria-label="주보 자료"><button type="button" data-bulletin-local>임시 초안</button><button type="button" data-bulletin-reload>저장본 불러오기</button><button type="button" data-bulletin-refresh title="저장된 예배 자료 다시 불러오기"><i data-lucide="refresh-cw"></i><span>예배 자료 갱신</span></button></div></div>
+      <div class="bulletin-meta"><div class="bulletin-status" role="status"></div><div class="bulletin-source-actions" role="group" aria-label="주보 자료"><button type="button" data-bulletin-local title="이 브라우저에 남아 있는 복구 초안을 불러옵니다">임시 초안</button><button type="button" data-bulletin-reload title="DB에 저장한 주보 내용과 양식을 다시 불러옵니다">저장본 불러오기</button><button type="button" data-bulletin-refresh title="연결된 예배·교회력에서 최신 자료를 가져옵니다"><i data-lucide="refresh-cw"></i><span>예배 자료 갱신</span></button></div></div>
       <div class="bulletin-body"><aside class="bulletin-inspector" aria-label="주보 편집 도구">
-      <div class="bulletin-modes"><button type="button" data-bulletin-mode="content">내용</button><button type="button" data-bulletin-mode="layout">양식</button></div>
-      <div class="bulletin-properties"></div></aside><section class="bulletin-preview" aria-label="인쇄 미리보기"><div class="bulletin-preview-head"><strong>미리보기</strong><span>A4 가로 · 2쪽</span></div><div class="bulletin-canvas" tabindex="0" aria-label="주보 페이지"></div></section></div></section>`;
+      <div class="bulletin-modes" role="group" aria-label="편집 방식"><button type="button" data-bulletin-mode="content">내용</button><button type="button" data-bulletin-mode="layout">양식</button></div>
+      <div class="bulletin-properties"></div></aside><section class="bulletin-preview" aria-label="인쇄 미리보기"><div class="bulletin-preview-head"><strong>미리보기</strong><div class="bulletin-page-nav" role="group" aria-label="주보 면 이동"><button type="button" data-bulletin-page="0">겉면</button><button type="button" data-bulletin-page="1">안쪽</button></div><span>A4 가로 · 2쪽</span></div><div class="bulletin-canvas" tabindex="0" aria-label="주보 페이지"></div></section></div></section>`;
     const root=host.firstElementChild,q=selector=>root.querySelector(selector);
     window.lucide?.createIcons({root});
+    root.querySelectorAll("[data-bulletin-page]").forEach(button=>on(button,"click",()=>{
+      const canvas=q(".bulletin-canvas"),page=canvas.querySelectorAll(".bulletin-sheet")[Number(button.dataset.bulletinPage)];
+      if(page)canvas.scrollTo({top:canvas.scrollTop+page.getBoundingClientRect().top-canvas.getBoundingClientRect().top-15,behavior:"instant"});
+    }));
+    function pageNavigation(){
+      const canvas=q(".bulletin-canvas"),bounds=canvas.getBoundingClientRect();
+      const pages=[...canvas.querySelectorAll(".bulletin-sheet")];
+      const areas=pages.map(page=>{const r=page.getBoundingClientRect();return Math.max(0,Math.min(r.bottom,bounds.bottom)-Math.max(r.top,bounds.top));});
+      const current=areas.length?areas.indexOf(Math.max(...areas)):-1;
+      root.querySelectorAll("[data-bulletin-page]").forEach((button,i)=>{
+        button.disabled=loading||!assetLoaded||!pages[i];
+        if(i===current)button.setAttribute("aria-current","page");else button.removeAttribute("aria-current");
+      });
+    }
+    on(q(".bulletin-canvas"),"scroll",pageNavigation);
+    const previewResize=new ResizeObserver(pageNavigation);previewResize.observe(q(".bulletin-canvas"));
     function loadProfile(date) {
       let versions=[];try{versions=JSON.parse(localStorage.getItem(`mindex.bulletin.profiles:${options.scope}`)||"[]");}catch{}
       const profile={};
@@ -965,7 +1016,7 @@
     function status(){
       const text=error||saveError||printError||(loading?"저장된 예배 자료를 불러오는 중…":!assetLoaded?"글꼴과 이미지를 준비하는 중…":
         issues.size?`영역 넘침: ${[...issues].map(frameLabel).join(", ")}`:"");
-      q(".bulletin-status").textContent=text+(doc?.backupUnavailable?" · 브라우저 임시 저장 불가":"");
+      q(".bulletin-status").textContent=[text,doc?.backupUnavailable?"브라우저 임시 저장 불가":""].filter(Boolean).join(" · ");
       q(".bulletin-status").hidden=!q(".bulletin-status").textContent;
       q(".bulletin-status").dataset.state=error||saveError||printError||doc?.backupUnavailable||issues.size?"warning":loading||!assetLoaded?"loading":"saved";
       q("[data-bulletin-print]").disabled=printing||loading||!assetLoaded||!!error||!doc?.source?.order.length||issues.size>0;
@@ -973,7 +1024,11 @@
       q("[data-bulletin-redo]").disabled=loading||!doc?.future.length;
       q("[data-bulletin-refresh]").disabled=loading||!!doc?.saving;
       q("[data-bulletin-save]").disabled=loading||!!error||!!doc?.saving||!doc?.dbLoaded||(!doc?.dirty&&!!doc?.revision);
+      q("[data-bulletin-save] span").textContent=doc?.saving?"저장 중…":"저장";
+      q("[data-bulletin-save]").setAttribute("aria-busy",String(!!doc?.saving));
+      q("[data-bulletin-print] span").textContent=printing?"인쇄 준비 중…":"인쇄 / PDF";
       q("[data-bulletin-reload]").disabled=loading||!!doc?.saving;
+      pageNavigation();
       q("[data-bulletin-local]").hidden=!doc?.localDraft;
       q("[data-bulletin-local]").disabled=loading||!!doc?.saving;
       root.querySelectorAll(".bulletin-properties input,.bulletin-properties select,.bulletin-properties textarea,.bulletin-properties button").forEach(el=>el.disabled=loading||(!doc?.dbLoaded&&!!error));
@@ -991,7 +1046,7 @@
       if(!doc){p.replaceChildren();return;}
       if(mode==="content") {
         const child=doc.source?.department==="children";
-        const field=key=>`<label>${escape(fields[key])}${["issue","church","website"].includes(key)?
+        const field=key=>`<label>${escape(fields[key])}${["issue","church","website","memoryReference"].includes(key)?
           `<input data-bulletin-field="${key}" value="${escape(fieldValue(doc,key))}" ${key==="issue"?'inputmode="numeric"':''}>`:
           `<textarea data-bulletin-field="${key}" rows="${key==="news"?5:3}">${escape(fieldValue(doc,key))}</textarea>`}</label>`;
         const modern=doc.settings.design==="editorial";
@@ -1178,7 +1233,7 @@
     }
     const observer=new MutationObserver(()=>{if(!root.isConnected)destroy();});
     observer.observe(document.body,{childList:true,subtree:true});
-    function destroy(){endDrag();serial++;controller.abort();observer.disconnect();printFrame?.remove();}
+    function destroy(){endDrag();serial++;controller.abort();observer.disconnect();previewResize.disconnect();printFrame?.remove();}
 
     void load(options.serviceId);
     return {destroy, reload(){return load(q("[data-bulletin-service]").value);}};

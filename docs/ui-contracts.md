@@ -179,3 +179,21 @@ Presenter details live in `docs/thread-worship-presenter.md`. Keep shell edits o
   기본값 판별은 두지 않는다. 예배 DB 10개 테이블 전수 검사에서 옛 명칭이 없음을
   확인한 뒤 해당 호환 처리를 제거했다 (2026-09-06).
 - 내부 `person`/`assignee` 필드와 DB 값은 이 용어 정리를 위해 변경하지 않는다.
+
+## Bulletin Workbench
+
+- Keep service selection, history, save, and print in the primary toolbar; source
+  reload actions stay in the quieter secondary row, with errors visible there.
+- Content/layout controls and the preview header share a 45px height. The desktop
+  inspector is 300px wide; narrower workbenches use 240px before stacking.
+- Respond to the workbench container width, including when the app sidebar is
+  open. Do not infer available editing width only from the browser viewport.
+- Preview face controls scroll to the existing outside/inside sheets without
+  switching documents, changing output, or resetting edits.
+
+- Bulletin face navigation indicates the sheet with the greatest visible height,
+  updates on scrolling/resizing, and is disabled until sheets are available.
+- Respect hidden recovery actions in CSS. Saving shows progress on the existing
+  save button; normal successful saves do not add a persistent status sentence.
+- Source-action tooltips distinguish reloading the saved bulletin from refreshing
+  its worship/calendar source. Short scripture references use a single-line input.
