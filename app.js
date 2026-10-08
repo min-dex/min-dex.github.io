@@ -3592,7 +3592,7 @@ function yieldToBrowser() {
 const SUPABASE_STATIC_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 const SUPABASE_STATIC_CACHE_PREFIX = "mindex.supabase.static.v1.";
 const BIBLE_CHAPTER_CACHE_TTL_MS = 12 * 60 * 60 * 1000;
-const BIBLE_CHAPTER_CACHE_PREFIX = "mindex.bible.chapter.v1.";
+const BIBLE_CHAPTER_CACHE_PREFIX = "mindex.bible.chapter.v2.";
 const WORSHIP_SERVICE_TYPE_SELECT = [
   "id",
   "display_name",
@@ -5684,7 +5684,7 @@ async function loadBibleBookVerses({ silent = false } = {}) {
   try {
     const { data, error } = await state.client
       .from("mindex_bible_verses")
-      .select("book_code,chapter,verse,verse_end,text")
+      .select("book_code,chapter,verse,verse_end,text,section_title")
       .eq("is_active", true)
       .eq("translation_id", selectedTranslationId)
       .eq("book_code", selectedBookCode)
@@ -5805,7 +5805,7 @@ async function fetchBibleTextSearchRowsByBook(query, translationId, page = 0) {
   const requestedEnd = requestedStart + pageSize - 1;
   const { data, error, count } = await state.client
     .from("mindex_bible_verses")
-    .select("id,book_code,chapter,verse,verse_end,text", { count: "estimated" })
+    .select("id,book_code,chapter,verse,verse_end,text,section_title", { count: "estimated" })
     .eq("is_active", true)
     .eq("translation_id", translationId)
     .ilike("text", `%${escapePostgrestLikePattern(query)}%`)
@@ -11274,7 +11274,7 @@ async function fetchServiceScriptureVerses(reference, requestedTranslation = nul
   const requestPromise = (async () => {
     const { data, error } = await state.client
       .from("mindex_bible_verses")
-      .select("book_code,chapter,verse,verse_end,text")
+      .select("book_code,chapter,verse,verse_end,text,section_title")
       .eq("is_active", true)
       .eq("translation_id", translation.id)
       .eq("book_code", reference.book.code)
