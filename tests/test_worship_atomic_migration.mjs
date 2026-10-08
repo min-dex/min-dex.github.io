@@ -197,6 +197,15 @@ try {
   await assert.rejects(db.query('select mindex_atomic.restore_revision($1)',[restore]),/permission denied/);
   await db.exec('reset session authorization');
   console.log('PASS operator restores an older revision after deletion; replay, confirmation, missing-version and ACL guards hold');
+  const catalogResults = await db.exec(await load('../migrations/2026-10-08-worship-integrity-postflight.sql'));
+  const catalog = catalogResults.flatMap(result => result.rows).find(row => row.integrity_catalog).integrity_catalog;
+  assert.equal(catalog.functions.length, 8);
+  assert.equal(catalog.triggers.length, 2);
+  assert.ok(catalog.triggers.every(trigger => trigger.enabled === 'O'));
+  const restoreCatalog = catalog.functions.find(fn => fn.signature === 'mindex_atomic.restore_revision(jsonb)');
+  assert.deepEqual(restoreCatalog.effective_execute, {anon:false, authenticated:false, mindex_atomic_writer:false});
+  assert.ok(Object.values(catalog.history.role_privileges).every(privileges => Object.values(privileges).every(value => value === false)));
+  console.log('PASS read-only postflight reports installed functions, enabled triggers and effective ACLs');
 } finally {
   await db.close();
 }
