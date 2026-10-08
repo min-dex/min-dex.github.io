@@ -246,17 +246,6 @@ h1, h2, h3, p { margin: 0; }
   grid-template-rows: var(--topbar-h) minmax(0, 1fr);
   overflow: hidden;
 }
-.app-shell::after {
-  display: block;
-  grid-column: 3;
-  grid-row: 1;
-  min-width: 0;
-  min-height: 0;
-  background: var(--sidebar-bg);
-  content: "";
-  pointer-events: none;
-  z-index: 2;
-}
 .topbar {
   position: relative;
   z-index: 3;
@@ -265,7 +254,7 @@ h1, h2, h3, p { margin: 0; }
   grid-row: 1;
   height: 100%;
   align-items: center;
-  grid-template-columns: var(--shell-left-w) minmax(0, 1fr) max(var(--topbar-compact-w), var(--shell-right-w));
+  grid-template-columns: var(--sidebar-reference-w) minmax(0, 1fr) var(--topbar-compact-w);
   gap: 0;
   border-bottom: 0;
   background: var(--sidebar-bg);
@@ -3095,7 +3084,7 @@ body[data-module="praise"] .song-count-badge {
   }
   .topbar {
     height: var(--topbar-h);
-    grid-template-columns: minmax(0, 1fr) max(var(--topbar-compact-w), var(--shell-right-w));
+    grid-template-columns: minmax(0, 1fr) var(--topbar-compact-w);
     padding: 0;
   }
   .primary-switcher { width: auto; height: 100%; padding: 0; }
@@ -8803,7 +8792,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
   body[data-module="presenter"],
   body[data-module="praise"],
   body.sidebar-collapsed { --shell-left-w: 0px; }
-  .topbar { grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) max(var(--topbar-compact-w), var(--shell-right-w)); }
+  .topbar { grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) var(--topbar-compact-w); }
   .topbar-leading { display: flex; grid-column: 1; min-width: 0; height: 100%; align-items: center; }
   .topbar-module-strip { display: flex; grid-column: auto; flex: 0 0 auto; gap: 0; }
   .module-switcher { gap: 0; }
