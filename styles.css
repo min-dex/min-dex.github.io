@@ -388,6 +388,7 @@ body[data-module="presenter"].right-sidebar-open { --shell-right-w: var(--right-
   background: var(--tab-active-bg);
   color: var(--ink);
   font-weight: 700;
+  box-shadow: inset 1px 0 var(--shell-separator), inset -1px 0 var(--shell-separator);
 }
 .page-tab.active::after {
   position: absolute;
