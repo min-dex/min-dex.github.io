@@ -382,14 +382,14 @@ body[data-module="presenter"].right-sidebar-open { --shell-right-w: var(--right-
 }
 .page-tab[draggable="true"] { cursor: grab; }
 .page-tab.dragging { cursor: grabbing; opacity: .55; }
-.page-tab.drag-before { box-shadow: inset 2px 0 0 var(--accent); }
-.page-tab.drag-after { box-shadow: inset -2px 0 0 var(--accent); }
 .page-tab.active {
   background: var(--tab-active-bg);
   color: var(--ink);
   font-weight: 700;
   box-shadow: inset 1px 0 var(--shell-separator), inset -1px 0 var(--shell-separator);
 }
+.page-tab.drag-before { box-shadow: inset 2px 0 0 var(--accent); }
+.page-tab.drag-after { box-shadow: inset -2px 0 0 var(--accent); }
 .page-tab.active::after {
   position: absolute;
   right: 0;
