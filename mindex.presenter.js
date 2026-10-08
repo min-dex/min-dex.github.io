@@ -3207,6 +3207,7 @@ function handlePresenterShortcut(event) {
   }
 
   if (!activeServiceSelected) return false;
+  const focusActiveSlide = presenterBoardFocusShouldFollowLiveSlide(presenterServiceId);
 
   if (/^\d$/.test(event.key)) {
     consumePresenterShortcutEvent(event);
@@ -3218,35 +3219,35 @@ function handlePresenterShortcut(event) {
   if (event.key === "Enter" && state.presenter.jumpDraft) {
     consumePresenterShortcutEvent(event);
     state.presenter.exitArmedAt = 0;
-    commitPresenterJumpDraft(presenterServiceId);
+    commitPresenterJumpDraft(presenterServiceId, { focusActiveSlide });
     return true;
   }
 
   if (event.key === "Enter" || event.key === "ArrowRight" || event.key === "ArrowDown" || event.key === "PageDown" || event.key === " ") {
     consumePresenterShortcutEvent(event);
     state.presenter.exitArmedAt = 0;
-    runPresenterAction("next", presenterServiceId);
+    runPresenterAction("next", presenterServiceId, { focusActiveSlide });
     return true;
   }
 
   if (event.key === "ArrowLeft" || event.key === "ArrowUp" || event.key === "PageUp") {
     consumePresenterShortcutEvent(event);
     state.presenter.exitArmedAt = 0;
-    runPresenterAction("prev", presenterServiceId);
+    runPresenterAction("prev", presenterServiceId, { focusActiveSlide });
     return true;
   }
 
   if (event.key === "Home") {
     consumePresenterShortcutEvent(event);
     state.presenter.exitArmedAt = 0;
-    runPresenterAction("first", presenterServiceId);
+    runPresenterAction("first", presenterServiceId, { focusActiveSlide });
     return true;
   }
 
   if (event.key === "End") {
     consumePresenterShortcutEvent(event);
     state.presenter.exitArmedAt = 0;
-    runPresenterAction("last", presenterServiceId);
+    runPresenterAction("last", presenterServiceId, { focusActiveSlide });
     return true;
   }
 

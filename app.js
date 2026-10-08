@@ -30552,18 +30552,34 @@ function clearPresenterJumpDraft(serviceId = state.presenter.serviceId) {
   }
 }
 
-function commitPresenterJumpDraft(serviceId = state.presenter.serviceId) {
+function commitPresenterJumpDraft(serviceId = state.presenter.serviceId, options = {}) {
   if (!serviceId || !state.presenter.jumpDraft) return;
   const requested = Number(state.presenter.jumpDraft);
   if (!Number.isFinite(requested)) return;
   state.presenter.jumpDraft = "";
   const index = requested - 1;
-  runPresenterAction("jump", serviceId, { index, scroll: false });
+  runPresenterAction("jump", serviceId, { index, scroll: false, focusActiveSlide: options.focusActiveSlide === true });
   if (isValidPresenterIndex(index, state.presenter.slides.length)) {
     scrollPresenterBoardToIndex(serviceId, index, { force: true });
   } else {
     clearPresenterJumpDraft(serviceId);
   }
+}
+
+function presenterBoardFocusShouldFollowLiveSlide(serviceId = state.presenter.serviceId) {
+  const thumb = document.activeElement?.closest?.(".svc-slide-thumb[data-presenter-index][data-service-id]");
+  return Boolean(thumb && thumb.dataset.serviceId === serviceId);
+}
+
+function focusPresenterBoardLiveSlide(serviceId, index) {
+  if (!serviceId || !Number.isInteger(index) || index < 0) return;
+  window.requestAnimationFrame(() => {
+    const root = document.getElementById("servicePresenterControls");
+    const thumb = root?.querySelector(
+      `.svc-slide-thumb[data-service-id="${CSS.escape(serviceId)}"][data-presenter-index="${CSS.escape(String(index))}"]`,
+    );
+    thumb?.focus({ preventScroll: true });
+  });
 }
 
 function runPresenterAction(action, serviceId = state.selectedServiceId, options = {}) {
@@ -30651,6 +30667,7 @@ function runPresenterAction(action, serviceId = state.selectedServiceId, options
   if (options.scroll !== false && ["next", "prev", "first", "last", "jump"].includes(action)) {
     scrollPresenterBoardToIndexStable(serviceId, state.presenter.index, { force: false });
   }
+  if (options.focusActiveSlide === true) focusPresenterBoardLiveSlide(serviceId, state.presenter.index);
 }
 
 let prepareNextServiceRequestSerial = 0;
