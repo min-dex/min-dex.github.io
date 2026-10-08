@@ -8802,11 +8802,24 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 }
 
 @media (max-width: 560px) {
+  body { --topbar-h: 90px; }
+  .topbar { grid-template-rows: 50px 40px; }
+  .topbar-leading { display: contents; }
+  .topbar-module-strip { grid-column: 1; grid-row: 1; }
+  .topbar-actions { grid-column: 2; grid-row: 1; }
   /* Keep the drawer control and all module destinations reachable in one bar. */
   .module-switcher-tab {
     width: clamp(22px, calc((100vw - var(--topbar-compact-w) - var(--topbar-btn-size)) / 5), var(--topbar-btn-size));
   }
-  .topbar-leading .primary-switcher { display: none; }
+  .topbar-leading .primary-switcher {
+    display: flex;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    height: 40px;
+    min-width: 0;
+  }
+  .page-tab { --module-tab-w: 150px; }
+  .page-tab-close { display: inline-flex; }
 }
 
 /* Setlist card titles use the existing service navigation. */

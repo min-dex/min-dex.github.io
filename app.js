@@ -1275,6 +1275,7 @@ function cacheRefs() {
 function bindStaticEvents() {
   refs.sidebarToggleBtn?.addEventListener("click", handleSidebarToggle);
   window.addEventListener("resize", syncSidebarCollapsedState);
+  window.addEventListener("resize", keepActivePageTabVisible);
   refs.brandNameHome?.addEventListener("click", goHome);
   refs.pageTabAddBtn?.addEventListener("click", () => { void openNewPageTab(); });
   refs.pageTabs?.addEventListener("click", handlePageTabClick);
@@ -13606,6 +13607,18 @@ function renderPageTabs() {
     `;
   }).join("");
   if (addButton) refs.pageTabs.appendChild(addButton);
+  keepActivePageTabVisible();
+}
+
+function keepActivePageTabVisible() {
+  if (!window.matchMedia("(max-width: 560px)").matches) return;
+  const list = refs.pageTabs;
+  const active = list?.querySelector('.page-tab[aria-selected="true"]');
+  if (!active || !list.clientWidth) return;
+  const bounds = list.getBoundingClientRect();
+  const tab = active.getBoundingClientRect();
+  if (tab.left < bounds.left) list.scrollLeft += tab.left - bounds.left;
+  else if (tab.right > bounds.right) list.scrollLeft += tab.right - bounds.right;
 }
 
 let pageTabDragIndex = null;
