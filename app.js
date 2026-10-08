@@ -24294,6 +24294,7 @@ function renderPresenterDetailUnscoped() {
   const presenterSlides = presenterSlidesForService(serviceId);
   const presenterIndex = presenterActive ? clampPresenterIndex(state.presenter.index, presenterSlides.length) : 0;
   const viewportSnapshot = capturePresenterViewportSnapshot(serviceId);
+  const focusedThumb = capturePresenterFocusedThumb(document.getElementById("servicePresenterControls"));
   setRightSidebarContent(renderPresenterRightSidebar(svc, presenterSlides, presenterActive, presenterIndex));
   refs.detailPane.innerHTML = `
     <div class="service-viewer presenter-viewer">
@@ -24305,6 +24306,7 @@ function renderPresenterDetailUnscoped() {
   patchPresenterSidebarOutline(svc, presenterSlides);
   refreshIcons();
   mountDeferredPresenterBoardSections(document.getElementById("servicePresenterControls"), serviceId, presenterSlides);
+  restorePresenterFocusedThumb(document.getElementById("servicePresenterControls"), focusedThumb);
   restorePresenterViewportSnapshot(viewportSnapshot);
   updateSaveState();
   observePresenterPreviewScaleFrames(document);
@@ -30574,6 +30576,11 @@ function presenterBoardFocusShouldFollowLiveSlide(serviceId = state.presenter.se
 function focusPresenterBoardLiveSlide(serviceId, index) {
   if (!serviceId || !Number.isInteger(index) || index < 0) return;
   window.requestAnimationFrame(() => {
+    // A newer navigation or a move to another control owns focus now.
+    if (state.module !== "presenter" || state.selectedServiceId !== serviceId
+      || state.presenter.serviceId !== serviceId || state.presenter.index !== index
+      || state.presenter.safetyBlank
+      || (document.activeElement !== document.body && !presenterBoardFocusShouldFollowLiveSlide(serviceId))) return;
     const root = document.getElementById("servicePresenterControls");
     const thumb = root?.querySelector(
       `.svc-slide-thumb[data-service-id="${CSS.escape(serviceId)}"][data-presenter-index="${CSS.escape(String(index))}"]`,

@@ -1,5 +1,18 @@
 # Worship / Presenter Decision Log
 
+## Keyboard Focus Across Board Refreshes (2026-10-08)
+
+- A full presenter board render preserves a focused thumbnail using the same
+  capture/restore helpers as incremental patches. Live navigation restores the
+  current output index; unrelated controls do not acquire thumbnail focus.
+- A scheduled keyboard focus move is discarded if the module, selected service,
+  live service, slide index or blank state has changed, or another control owns
+  focus. Preserve focus at the render boundary instead of adding a timed retry.
+- Offline Chromium/WebKit coverage in `tests/smoke_presenter_focus.py` uses real
+  keyboard events, delayed full renders, control handoff and route changes.
+  The main presenter smoke checks the focused index after deferred work and
+  retains the current stored-form and `corporatePrayers` contracts.
+
 ## RPC-Only Instance Persistence (2026-10-06)
 - Removed the temporary protocol switch and all direct-table instance-write fallbacks. Aggregate reads, full/element saves, linked sync, creation, deletion, automatic cleanup and live leader edits require the RPC client. Read-only list/archive queries and import-source editing remain separate contracts.
 - Retain revision checks, project-scoped pending requests, local recovery, and draft isolation. An uncertain request is replayed exactly; its receipt requires reload and cannot acknowledge a newer draft.

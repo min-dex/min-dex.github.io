@@ -813,7 +813,7 @@ def main() -> int:
                     """
                 )
                 if ccm_form_order_state == {
-                    "metadataOrder": ["v1", "c", "v2", "c"],
+                    "metadataOrder": ["v1", "c"],  # stored sequence wins over song metadata
                     "disabledOrder": ["v1", "c", "v2"],
                     "inferredOrder": ["v1", "c", "v2", "c"],
                     "forcedOrder": ["v1", "c", "v1"],
@@ -2190,7 +2190,7 @@ def main() -> int:
                         ],
                         "rawTitle": "",
                         "assignee": "",
-                        "memoSlides": ["'새 기도 제목'", "선교와 민족을 위해"],
+                        "memoSlides": [],  # corporatePrayers owns the grouped prayer content
                         "slideTitles": ["'새 기도 제목'", "'선교와 민족을 위해'"],
                         "slideAssignees": ["", ""],
                     }
@@ -9275,6 +9275,7 @@ def main() -> int:
                     "() => (readPresenterStoredPayload() || {}).index === 2",
                     timeout=5000,
                 )
+                page.wait_for_timeout(100)  # include deferred board/layout work
                 thumb_focus_keyboard_state = page.evaluate(
                     """
                     (() => {
@@ -9282,6 +9283,7 @@ def main() -> int:
                       return {
                         presenterIndex: state.presenter.index,
                         outputIndex: payload.index,
+                        focusedIndex: Number(document.activeElement?.dataset.presenterIndex ?? -1),
                         focusedThumb: document.activeElement?.matches('.svc-slide-thumb[data-presenter-index][data-service-id]') || false,
                       };
                     })()
@@ -9290,6 +9292,7 @@ def main() -> int:
                 if (
                     thumb_focus_keyboard_state["presenterIndex"] == 2
                     and thumb_focus_keyboard_state["outputIndex"] == 2
+                    and thumb_focus_keyboard_state["focusedIndex"] == 2
                     and thumb_focus_keyboard_state["focusedThumb"]
                 ):
                     pass_("presenter-keyboard-thumb-focus-advances", json.dumps(thumb_focus_keyboard_state, ensure_ascii=False))
