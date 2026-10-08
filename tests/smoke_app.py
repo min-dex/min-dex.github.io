@@ -1063,10 +1063,10 @@ def main() -> int:
                 """
             )
             if (
-                desktop_sidebar["sidebarWidth"] == 280
+                desktop_sidebar["sidebarWidth"] == 260
                 and desktop_sidebar["detailStartsAfterSidebar"]
                 and desktop_sidebar["brandWidth"] == 40
-                and desktop_sidebar["moduleStartsAtTopbar"] == 40
+                and desktop_sidebar["moduleStartsAtTopbar"] == 50
                 and desktop_sidebar["moduleWidth"] == 40
                 and desktop_sidebar["drawerToggleHidden"]
                 and desktop_sidebar["rightLastInset"] == 5
@@ -1125,7 +1125,7 @@ def main() -> int:
             legacy_collapsed_shell = shell_layout_snapshot(page)
             page.evaluate("document.body.classList.remove('sidebar-collapsed');syncSidebarCollapsedState()")
             if (
-                legacy_collapsed_shell["sidebarWidth"] == 280
+                legacy_collapsed_shell["sidebarWidth"] == 260
                 and legacy_collapsed_shell["detailPaddingLeft"] == desktop_shell["detailPaddingLeft"]
             ):
                 pass_("desktop-sidebar-ignores-legacy-collapse", json.dumps(legacy_collapsed_shell, ensure_ascii=False))
@@ -1140,8 +1140,8 @@ def main() -> int:
                 mobile_shell["bodyScrollWidth"] - mobile_shell["viewport"],
             )
             if (
-                mobile_shell["detailPaddingLeft"] == 25
-                and mobile_shell["detailPaddingTop"] == 25
+                mobile_shell["detailPaddingLeft"] == 15
+                and mobile_shell["detailPaddingTop"] == 15
                 and mobile_shell["sidebarSearchTop"] == 10
                 and mobile_shell["sidebarSearchSectionGap"] in (0, 20)
                 and mobile_shell["sidebarSearchInputLineHeight"] == 30
@@ -1166,7 +1166,7 @@ def main() -> int:
               toggleHidden: document.querySelector('#sidebarToggleBtn')?.hidden,
             })""")
             if (
-                mobile_drawer_closed["sidebarLeft"] <= -200
+                mobile_drawer_closed["sidebarLeft"] <= -170
                 and mobile_drawer_closed["detailLeft"] == 0
                 and not mobile_drawer_closed["toggleHidden"]
                 and mobile_drawer_open["sidebarLeft"] == 0
@@ -1221,8 +1221,9 @@ def main() -> int:
             if all(
                 item["topbarHeight"] == 50
                 and (
-                    (item["width"] > 900 and item["railWidth"] == item["sidebarWidth"] == 280 and item["sidebarLeftRail"])
-                    or (item["width"] <= 900 and item["railWidth"] == item["sidebarWidth"] == 280 and not item["sidebarLeftRail"] and item["sidebarHeight"] > 300)
+                    (item["width"] > 900 and item["railWidth"] == item["sidebarWidth"] == 240 and item["sidebarLeftRail"])
+                    or (item["width"] == 900 and item["railWidth"] == item["sidebarWidth"] == 240 and not item["sidebarLeftRail"] and item["sidebarHeight"] > 300)
+                    or (item["width"] < 900 and item["railWidth"] == item["sidebarWidth"] == 170 and not item["sidebarLeftRail"] and item["sidebarHeight"] > 300)
                 )
                 and item["searchWithinSidebar"]
                 and item["switcherClientWidth"] > 0
@@ -1745,10 +1746,18 @@ def main() -> int:
                 page.click("#brandNameHome")
                 page.wait_for_function("() => document.body.dataset.module === 'home'", timeout=5000)
                 compact_wordmark = page.evaluate("""() => ({
-                  icon: document.querySelector('#brandNameHome .topbar-brand-icon')?.getAttribute('src') || '',
-                  current: document.querySelector('#brandNameHome')?.getAttribute('aria-current') || ''
+                  icon: Boolean(document.querySelector('#brandNameHome .topbar-brand-icon')),
+                  current: document.querySelector('#brandNameHome')?.getAttribute('aria-current') || '',
+                  color: getComputedStyle(document.querySelector('#brandNameHome')).color,
+                  moduleColors: [...document.querySelectorAll('.module-switcher-tab')]
+                    .map((item) => getComputedStyle(item).color)
                 })""")
-                if compact_wordmark == {"icon": "./assets/mindex-cross.svg?v=20261004a", "current": "page"}:
+                if (
+                    compact_wordmark["icon"]
+                    and compact_wordmark["current"] == "page"
+                    and len(set(compact_wordmark["moduleColors"])) == 1
+                    and compact_wordmark["color"] != compact_wordmark["moduleColors"][0]
+                ):
                     pass_("cross-home-goes-home", json.dumps(compact_wordmark, ensure_ascii=False))
                 else:
                     fail("cross-home-goes-home", json.dumps(compact_wordmark, ensure_ascii=False))
