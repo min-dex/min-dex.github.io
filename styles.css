@@ -261,17 +261,6 @@ h1, h2, h3, p { margin: 0; }
   box-shadow: none;
   padding: 0;
 }
-.topbar::after {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 0;
-  height: 1px;
-  background: var(--shell-separator);
-  content: "";
-  pointer-events: none;
-}
 .topbar .topbar-module-strip,
 .topbar .primary-switcher,
 .topbar .topbar-actions { position: relative; z-index: 1; }
@@ -344,6 +333,7 @@ body[data-module="presenter"].right-sidebar-open { --shell-right-w: var(--right-
   margin: var(--shell-edge-inset);
 }
 .primary-switcher {
+  position: relative;
   display: flex;
   height: 100%;
   min-width: 0;
@@ -357,6 +347,18 @@ body[data-module="presenter"].right-sidebar-open { --shell-right-w: var(--right-
   box-shadow: none;
   scrollbar-width: none;
 }
+.primary-switcher::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+  height: 1px;
+  background: var(--shell-separator);
+  content: "";
+  pointer-events: none;
+}
+.primary-switcher > * { position: relative; z-index: 1; }
 .primary-switcher::-webkit-scrollbar { display: none; }
 .page-tabs {
   display: flex;
@@ -8667,7 +8669,6 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
   align-items: center;
   justify-content: center;
   gap: 0;
-  box-shadow: inset -1px 0 var(--shell-separator);
 }
 .topbar-brand {
   appearance: none;
