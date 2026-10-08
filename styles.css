@@ -410,6 +410,16 @@ body[data-module="presenter"].right-sidebar-open { --shell-right-w: var(--right-
   color: var(--ink);
   font-weight: 700;
 }
+.page-tab.active::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: var(--tab-active-bg);
+  content: "";
+  pointer-events: none;
+}
 .page-tab:not(.active):hover {
   background: var(--tab-hover-bg);
   color: var(--ink);
