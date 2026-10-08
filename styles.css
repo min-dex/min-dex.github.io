@@ -765,6 +765,7 @@ body[data-module="presenter"] #newSongBtn {
   min-height: 0;
   flex-direction: column;
   background: var(--sidebar-bg);
+  box-shadow: inset -1px 0 var(--shell-separator);
   overflow: hidden;
   padding: var(--s1) 0 var(--s3);
   opacity: 1;
@@ -8772,7 +8773,6 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .nav-sidebar {
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
-  box-shadow: inset -1px 0 var(--shell-separator);
 }
 .sidebar {
   grid-column: 1;
