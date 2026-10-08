@@ -2516,7 +2516,21 @@ function currentBrowserHistorySnapshot() {
     presenterBulletinServiceId: ["presenter", "bulletin"].includes(state.module) ? state.presenterBulletinServiceId : null,
     bibleTextSearchQuery: state.bibleTextSearchQuery,
     bibleTextSearchPage: state.bibleTextSearchPage,
+    ...(isSetlistArchiveView() ? {setlistArchive: {
+      view: state.worshipSetlistArchiveView,
+      month: state.worshipSetlistArchiveMonth,
+      viewport: captureDetailViewportSnapshot(),
+    }} : {}),
   };
+}
+
+function isSetlistArchiveView() {
+  return ["home", "service"].includes(state.module)
+    && state.selectedServiceTypeId === SERVICE_SETLIST_ARCHIVE_PANEL_ID && !state.selectedServiceId;
+}
+
+function rememberSetlistArchiveHistory() {
+  if (isSetlistArchiveView()) syncBrowserHistory({replace:true});
 }
 
 function syncBrowserHistory({ replace = false } = {}) {
@@ -2568,6 +2582,10 @@ async function applyBrowserHistorySnapshot(snapshot) {
       state.presenter.viewServiceId = state.selectedServiceId;
     }
     state.selectedServiceItemIndex = null;
+    if (snapshot.setlistArchive && isSetlistArchiveView()) {
+      state.worshipSetlistArchiveView = snapshot.setlistArchive.view === "service" ? "service" : "date";
+      state.worshipSetlistArchiveMonth = /^(0[1-9]|1[0-2])$/.test(snapshot.setlistArchive.month) ? snapshot.setlistArchive.month : "";
+    }
     clearBibleTextSearch();
     state.bibleTextSearchQuery = snapshot.bibleTextSearchQuery || "";
     state.bibleTextSearchPage = Math.max(0, Number(snapshot.bibleTextSearchPage) || 0);
@@ -2604,6 +2622,9 @@ async function applyBrowserHistorySnapshot(snapshot) {
     if (isServiceDataModule() && state.module !== "bulletin" && state.selectedServiceId && !state.presenterBulletinServiceId) {
       markWorshipServiceExplicitlyRequested(state.selectedServiceId);
       await loadServiceItems(state.selectedServiceId);
+    }
+    if (snapshot.setlistArchive && isSetlistArchiveView()) {
+      restoreDetailViewportSnapshot(snapshot.setlistArchive.viewport);
     }
   } finally {
     state.applyingBrowserHistory = false;
@@ -3959,7 +3980,7 @@ async function loadWorshipSetlistSongCatalog({ force = false } = {}) {
   try {
     // Metadata only: links must not wait on the complete lyrics catalogue.
     const results = await Promise.allSettled([
-      fetchSupabasePaged("mindex_songs", "id,title,subtitle,original_title,hymn_no", (query) => query.order("id")),
+      fetchSupabasePaged("mindex_songs", "id,title,subtitle,original_title,hymn_no,artist", (query) => query.order("id")),
       fetchSupabasePaged("mindex_song_versions", "id,source_song_id,canonical_song_id,version_label,curated_version_name,subtitle,original_title,hymn_no", (query) => query.order("id")),
     ]);
     const failure = results.find((result) => result.status === "rejected");
@@ -14687,6 +14708,7 @@ function renderLoadingStatus() {
 }
 
 function clearSearchCaches(options = {}) {
+  songTitlePeers = null;
   state.searchCache.global.clear();
   if (options.songs !== false) state.searchCache.songPicker.clear();
   state.searchCache.songFields = new WeakMap();
@@ -15043,6 +15065,7 @@ function renderGlobalServiceResult(service) {
 
 async function openGlobalSongResult(songId) {
   if (!songId) return;
+  rememberSetlistArchiveHistory();
   if (state.module !== "praise") {
     await switchModule("praise", { clearSearch: false, syncHistory: false });
     if (state.module !== "praise") return;
@@ -15051,7 +15074,8 @@ async function openGlobalSongResult(songId) {
   if (state.selectedSongId !== songId) return;
   clearGlobalSearchInput();
   renderSongList();
-  syncBrowserHistory();
+  // selectSong already pushed the destination; clearing its search is the same visit.
+  syncBrowserHistory({replace:true});
 }
 
 async function openGlobalBookResult(bookCode, options = {}) {
@@ -15695,6 +15719,11 @@ function renderDetail() {
   if (isAuthRequired() && !state.auth.session) {
     refs.detailPane.innerHTML = renderAuthRequiredDetail();
     refreshIcons(refs.detailPane);
+    return;
+  }
+
+  if (isSetlistArchiveView()) {
+    renderServiceSetlistArchiveDetail();
     return;
   }
 
@@ -18004,6 +18033,8 @@ function stripTitleDecorations(value) {
     .trim();
 }
 
+let songTitlePeers = null;
+
 function songTitleMetaLine(song) {
   const titles = new Set();
   const metadata = normalizeSongMetadata(song?.metadata);
@@ -18022,7 +18053,9 @@ function songTitleMetaLine(song) {
 function songListView(song) {
   const listVersion = getPraiseFilterListVersion(song);
   const title = song?.hymn_no ? stripHymnNumber(song.title) : song?.title || "";
-  const canonicalMeta = songTitleMetaLine(song);
+  songTitlePeers ||= window.MindexSetlistLinks?.buildTitlePeers(state.songs);
+  const hint = window.MindexSetlistLinks?.artistHint(song, songTitlePeers?.get(window.MindexSetlistLinks.titleKey(song?.title)) || []);
+  const canonicalMeta = cleanList([songTitleMetaLine(song), hint]).join(" · ");
   return {
     listVersion,
     title,
@@ -23415,7 +23448,7 @@ function filterWorshipSetlistArchiveEntries(entries = []) {
     const source = entry.source || {};
     const candidateText = entry.candidates.map((candidate) =>
       [candidate.raw_label, candidate.archive_display_label, candidate.raw_title, candidate.review_status,
-        ...worshipSetlistCandidateLinks(candidate).map((link) => link.text)].join(" ")).join(" ");
+        ...worshipSetlistCandidateLinks(candidate).map((link) => [link.text, link.detail].filter(Boolean).join(" "))].join(" ")).join(" ");
     return normalizeSearchValue([
       source.service_date,
       worshipSetlistArchiveTypeName(source.service_type_id),
@@ -23732,7 +23765,7 @@ function renderWorshipSetlistCandidate(candidate) {
   const title = String(candidate.raw_title || candidate.raw_label || "").trim() || "제목 없음";
   const label = String(candidate.archive_display_label || candidate.raw_label || "").trim();
   const matches = worshipSetlistCandidateLinks(candidate);
-  const displayTitle = matches.map((match) => match.text).join(" + ");
+  const displayTitle = matches.map((match) => [match.text, match.detail].filter(Boolean).join(" · ")).join(" + ");
   const content = matches.map((match) => {
     if (match.status !== "linked") return escapeHtml(match.text);
     const hymnNo = String(match.song.hymn_no || "").trim();
@@ -23740,7 +23773,7 @@ function renderWorshipSetlistCandidate(candidate) {
     const content = prefix && match.text.startsWith(prefix)
       ? `<span class="svc-setlist-hymn-no">${escapeHtml(hymnNo)}</span> ${escapeHtml(match.text.slice(prefix.length))}`
       : escapeHtml(match.text);
-    return `<button class="svc-setlist-song-link" type="button" data-global-song-id="${escapeAttr(match.song.id)}" title="${escapeAttr(match.text)}">${content}</button>`;
+    return `<button class="svc-setlist-song-link" type="button" data-global-song-id="${escapeAttr(match.song.id)}" title="${escapeAttr([match.text, match.detail].filter(Boolean).join(" · "))}">${content}${match.detail ? ` <small class="svc-setlist-song-detail">${escapeHtml(match.detail)}</small>` : ""}</button>`;
   }).join(" + ");
   return `
     <li>
@@ -33167,6 +33200,7 @@ async function deleteService(serviceId) {
 function selectService(id) {
   if (serviceNavigationBlocked(id)) return;
   if (id !== state.selectedServiceId && !confirmDiscardServiceChanges()) return;
+  rememberSetlistArchiveHistory();
   markWorshipServiceExplicitlyRequested(id);
   if (state.module === "presenter") state.presenter.viewServiceId = id;
   state.selectedServiceId = id;

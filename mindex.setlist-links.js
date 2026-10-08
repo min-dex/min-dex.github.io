@@ -1,6 +1,23 @@
 (function (root) {
   "use strict";
   const key = (value) => String(value || "").normalize("NFKC").replace(/\s+/gu, "").toLowerCase();
+  function buildTitlePeers(songs = []) {
+    const peers = new Map();
+    for (const song of songs) {
+      const title = key(song.title);
+      if (!peers.has(title)) peers.set(title, []);
+      peers.get(title).push(song);
+    }
+    return peers;
+  }
+  function artistHint(song, peers = []) {
+    const artist = String(song?.artist || song?.metadata?.artist || "").trim();
+    if (!artist) return "";
+    return peers.some(other => other.id !== song.id
+      && key(other.hymn_no) === key(song.hymn_no)
+      && key(other.subtitle) === key(song.subtitle)
+      && key(other.artist || other.metadata?.artist) !== key(artist)) ? artist : "";
+  }
   function titleParts(value) {
     let text = String(value || "").trim();
     const verse = text.match(/\s*([⑴-⒇①-⑳](?:\s*[,·]\s*[⑴-⒇①-⑳])*)$/u)?.[1] || "";
@@ -70,7 +87,7 @@
     const needsSubtitle = sameTitle.some(other => other.id !== song.id
       && Boolean(other.modernNumbers.size || other.oldNumbers.size) === Boolean(song.modernNumbers.size || song.oldNumbers.size));
     const title = needsSubtitle && song.subtitle ? `${song.title} (${song.subtitle})` : song.title;
-    return { status: "linked", song, text: `${prefix}${title}${part.verse ? ` ${part.verse}` : ""}`, candidates: numbered };
+    return { status: "linked", song, detail: artistHint(song, sameTitle), text: `${prefix}${title}${part.verse ? ` ${part.verse}` : ""}`, candidates: numbered };
   }
   function fromServices(snapshot = {}, archivedSources = [], index = null) {
     const hasSong = element => Boolean(element.song_id || String(element.title || "").trim());
@@ -170,5 +187,5 @@
         needsReview:rows.filter(row => row.review_status === "needs_review").length};
     });
   }
-  root.MindexSetlistLinks = { buildIndex, resolve, split, isExcluded, fromServices, mergeSundayEntries };
+  root.MindexSetlistLinks = { buildTitlePeers, artistHint, titleKey:key, buildIndex, resolve, split, isExcluded, fromServices, mergeSundayEntries };
 })(typeof window === "undefined" ? globalThis : window);
