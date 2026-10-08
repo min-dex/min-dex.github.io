@@ -30,7 +30,8 @@ Renderer
 
 ## Update Strategy
 
-Mindex uses GitHub Releases (`min-dex/Mindex`) through `electron-updater`.
+Mindex uses GitHub Releases (`min-dex/min-dex.github.io`) through `electron-updater`,
+matching `build.publish` in `package.json`.
 Packaged apps check on startup, show an update prompt, download only after the
 operator confirms, and install on restart. Set `MINDEX_DISABLE_UPDATES=1` only
 when an installed test build must stay offline. Dev builds never check.

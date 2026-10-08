@@ -52,6 +52,21 @@ try {
   await db.exec("insert into public.mindex_worship_service_types values ('fixture')");
 
   await db.exec(await load('../migrations/2026-09-22-worship-atomic-additive.sql'));
+  // Optional operator export: exercise the installed function bodies locally,
+  // without connecting this disposable test cluster to the production database.
+  if (process.env.WORSHIP_PREFLIGHT_JSON) {
+    const preflight = JSON.parse(await fs.readFile(process.env.WORSHIP_PREFLIGHT_JSON, 'utf8'));
+    const expected = ['create_service', 'delete_service', 'read_service',
+      'restore_checkpoint', 'save_existing', 'validate_document'];
+    assert.deepEqual(preflight.functions.map(fn => fn.name).sort(), expected);
+    for (const fn of preflight.functions) {
+      assert.equal(fn.owner, 'postgres');
+      assert.equal(fn.security_definer, false);
+      assert.ok(fn.definition.startsWith(`CREATE OR REPLACE FUNCTION mindex_atomic.${fn.name}(`));
+      await db.exec(fn.definition);
+    }
+    console.log('PASS loaded reviewed production function definitions into disposable cluster');
+  }
   assert.equal(await scalar(`select count(*)::int from pg_proc p join pg_namespace n on n.oid=p.pronamespace
     where n.nspname='public' and p.proname in ('get_worship_service_v1','save_worship_service_v1',
       'create_worship_service_v1','delete_worship_service_v1')`), 4);
