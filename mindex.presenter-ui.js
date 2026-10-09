@@ -210,7 +210,12 @@ function renderPresenterRightSidebar(service, slides, active, index) {
   return `
     <div class="svc-presenter-side-panel" data-presenter-right-sidebar data-service-id="${escapeAttr(service.id)}">
       ${renderPresenterControlsTop(service, slides, active, index)}
-      ${renderPresenterServiceInputRail(service)}
+      <div class="svc-presenter-input-stack">
+        ${slides.filter((slide, index) => slide.liveScriptureControl && slide.elementId
+          && slides.findIndex((candidate) => candidate.liveScriptureControl && candidate.elementId === slide.elementId) === index)
+          .map((slide) => renderPresenterCitationComposer({ slides: [{ slide }] }, service.id)).join("")}
+        ${renderPresenterServiceInputRail(service)}
+      </div>
     </div>`;
 }
 

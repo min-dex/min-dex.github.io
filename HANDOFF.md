@@ -187,7 +187,7 @@ Presenter elements:
 - PPTX/Keynote import/reference should be an element type, not a replacement for Mindex data.
 - Blank screen should remain an available element.
 - Video should be an available element.
-- Live scripture lookup during sermon is implemented: the live citation composer sits below the citation element's slide grid in the controller (see `docs/worship-presenter-decisions.md`, "Live Citation Composer And Scroll").
+- Live scripture lookup during sermon is implemented: the live citation composer sits in the right controller panel, immediately above worship order input in the controller (see `docs/worship-presenter-decisions.md`, "Live Citation Composer And Scroll").
 - Pre/post worship music player with volume control is implemented in the controller (`renderServiceMusicPlayer`, slot audio via `SERVICE_SLOT_MUSIC`; covered by `tests/smoke_friday_music.py`).
 
 Presenter UI:

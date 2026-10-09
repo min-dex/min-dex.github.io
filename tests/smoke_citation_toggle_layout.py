@@ -12,7 +12,7 @@ def main():
             browser = p.webkit.launch() if args.webkit else launch_chromium(p)
             page = browser.new_page(viewport={"width": 900, "height": 700})
             page.route('**/*supabase*/**', lambda route: route.abort())
-            page.goto(url, wait_until='domcontentloaded')
+            page.goto(url+'?mindexSmokeRaw=1', wait_until='domcontentloaded')
             page.wait_for_function("typeof renderPresenterSlideThumb === 'function'")
             result = page.evaluate('''() => {
               document.body.classList.remove('ui-booting');
@@ -30,7 +30,7 @@ def main():
               if(renderPresenterCitationComposer({slides:[{slide:trailingBlank,slideIndex:0}]},'fixture')) throw Error('composer attached to normal trailing blank');
               const section=document.createElement('div');
               section.innerHTML=renderPresenterBoardSubgroup(subgroup,-1,'fixture');
-              if(!section.querySelector('.svc-board-grid + .svc-citation-composer')) throw Error('composer not below element slides');
+              if(section.querySelector('.svc-citation-composer') || !section.querySelector('[data-presenter-citation-focus]')) throw Error('board composer not relocated');
               if(section.querySelectorAll('.svc-slide-thumb').length!==2) throw Error('empty citation blank slide was not visible');
               if(section.querySelector('.svc-element-hidden-badge')) throw Error('citation control hid the element');
               if(renderPresenterSlideThumb(slide,0,-1,'fixture').includes('data-presenter-citation-reference-input')) throw Error('input still on thumbnail');

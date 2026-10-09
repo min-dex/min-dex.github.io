@@ -8120,6 +8120,14 @@ function handleDetailSearchResultClick(event) {
 
 function handleDetailClick(event) {
   if (event.target.closest("button:disabled")) return;
+  const citationFocus = event.target.closest("[data-presenter-citation-focus]");
+  if (citationFocus) {
+    applyRightSidebarVisibility();
+    const input = refs.rightSidebar?.querySelector(`[data-presenter-citation-reference-input][data-service-id="${CSS.escape(citationFocus.dataset.serviceId)}"][data-presenter-citation-element-id="${CSS.escape(citationFocus.dataset.presenterCitationFocus)}"]`);
+    input?.focus({ preventScroll: true });
+    input?.scrollIntoView({ block: "nearest" });
+    return;
+  }
   const citationAdd = event.target.closest("[data-presenter-citation-add]");
   if (citationAdd) {
     const input = citationAdd.closest(".svc-citation-composer")?.querySelector("[data-presenter-citation-reference-input]");
@@ -30020,7 +30028,10 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
         ${slides.map(({ slide, slideIndex, formLabel }) =>
           renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, formLabel)).join("")}
       </div>
-      ${renderPresenterCitationComposer(subgroup, serviceId)}
+      ${subgroup.slides.some(({ slide }) => slide?.liveScriptureControl) ? `
+        <button class="svc-output-action" type="button" data-presenter-citation-focus="${escapeAttr(subgroup.slides.find(({ slide }) => slide?.liveScriptureControl).slide.elementId)}" data-service-id="${escapeAttr(serviceId)}">
+          <i data-lucide="radio"></i><span>실시간 말씀 입력</span>
+        </button>` : ""}
     </div>`;
 }
 
