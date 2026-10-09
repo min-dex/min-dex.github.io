@@ -1020,6 +1020,13 @@ function normalizeMainPraiseSlots(service, items = []) {
     item._worshipElementTemplateModified = true;
     item._worshipTemplatePlaceholder = false;
   });
+  // Hierarchy projection sorts again by element order. Moving the array alone
+  // leaves a same-section entrance at its old order, ahead of the 10/20/... slots.
+  const entrance = items.find((item) => slotKeyForItem(item) === "praise.entrance");
+  if (slots.length && entrance && String(entrance._worshipSectionKey || "").trim() === "praise") {
+    entrance._worshipElementOrder = (slots.length + 1) * 10;
+    entrance._worshipElementTemplateModified = true;
+  }
   const groups = new Map();
   slots.forEach((item) => {
     const connected = parseServiceItemMemo(item.memo).connectedPraise;
