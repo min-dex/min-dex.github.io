@@ -105,6 +105,10 @@ Inactive module tabs should stay visually quiet. Active tabs may show a clearer 
 
 ## Sidebar
 
+- The left sidebar separator paints one pixel outside its right edge, in the
+  same pixel column as the first active tab's inset left separator. Keep the
+  wrapper unclipped and above adjacent content so the stroke remains visible;
+  do not change column widths to compensate for stroke placement.
 - Sidebar width should stay consistent unless a module has a strong reason.
 - Sidebar row padding should align visually with the sidebar toggle x-position.
 - Sidebar content should feel relaxed, not cramped.

@@ -733,6 +733,7 @@ body[data-module="presenter"] #newSongBtn {
 .nav-sidebar {
   grid-column: 1;
   grid-row: 2 / -1;
+  z-index: 1;
   display: grid;
   width: 100%;
   min-width: 0;
@@ -741,7 +742,7 @@ body[data-module="presenter"] #newSongBtn {
   grid-template-rows: minmax(0, 1fr);
   border-right: 0;
   background: var(--sidebar-bg);
-  overflow: hidden;
+  overflow: visible;
   padding: 0;
 }
 .sidebar {
@@ -754,7 +755,7 @@ body[data-module="presenter"] #newSongBtn {
   min-height: 0;
   flex-direction: column;
   background: var(--sidebar-bg);
-  box-shadow: inset -1px 0 var(--shell-separator);
+  box-shadow: 1px 0 var(--shell-separator);
   overflow: hidden;
   padding: var(--s1) 0 var(--s3);
   opacity: 1;
