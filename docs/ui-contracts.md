@@ -27,6 +27,8 @@ Read `HANDOFF.md` first. This file is the short UI contract for Codex threads so
   `30px` or `28px` only when they sit inside compact editor/tool rows.
 - Sidebar open or closed must not change the detail pane gutter.
 - Topbar icon buttons are square, `40px` by `40px`.
+- At viewport widths up to `560px`, the topbar uses two rows and is `90px`
+  tall; the module tabs occupy the second `40px` row.
 - Sidebar toggle, home, theme, and save controls should share the same button geometry.
 - Left topbar actions align to the left rail edge. Right topbar actions align to
   the right rail edge because they belong to the app-level utility side.

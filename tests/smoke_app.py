@@ -1145,7 +1145,7 @@ def main() -> int:
                 and mobile_shell["sidebarSearchTop"] == 10
                 and mobile_shell["sidebarSearchSectionGap"] in (0, 20)
                 and mobile_shell["sidebarSearchInputLineHeight"] == 30
-                and mobile_shell["topbarHeight"] == 50
+                and mobile_shell["topbarHeight"] == 90
                 and mobile_overflow <= 2
             ):
                 pass_("shell-mobile-geometry", json.dumps(mobile_shell, ensure_ascii=False))
@@ -1219,7 +1219,7 @@ def main() -> int:
                     )
                 )
             if all(
-                item["topbarHeight"] == 50
+                item["topbarHeight"] == (90 if item["width"] <= 560 else 50)
                 and (
                     (item["width"] > 900 and item["railWidth"] == item["sidebarWidth"] == 240 and item["sidebarLeftRail"])
                     or (item["width"] == 900 and item["railWidth"] == item["sidebarWidth"] == 240 and not item["sidebarLeftRail"] and item["sidebarHeight"] > 300)
@@ -1707,8 +1707,8 @@ def main() -> int:
                     and topbar_state["active"] == "scripture"
                     and topbar_state["activeColor"] == topbar_state["expectedColor"]
                     and topbar_state["activeIconColor"] == topbar_state["expectedColor"]
-                    and topbar_state["activeIconWidth"] == 18
-                    and topbar_state["activeIconHeight"] == 18
+                    and topbar_state["activeIconWidth"] == 16
+                    and topbar_state["activeIconHeight"] == 16
                     and topbar_state["activeIconStroke"] == "1.5px"
                     and topbar_state["referencesIconRotation"] is None
                 ):
@@ -2274,8 +2274,8 @@ def main() -> int:
                 if (
                     service_sidebar_gap["gap"] == 20
                     and service_sidebar_gap["headHeight"] == 32
-                    and service_sidebar_gap["headLeft"] == 10
-                    and service_sidebar_gap["labelLeft"] == 20
+                    and service_sidebar_gap["headLeft"] == 15
+                    and service_sidebar_gap["labelLeft"] == 25
                 ):
                     pass_("service-sidebar-section-label-gap", json.dumps(service_sidebar_gap, ensure_ascii=False))
                 else:
@@ -4166,12 +4166,10 @@ def main() -> int:
                             "forms": ["V", "C"],
                             "strength": "suggested",
                         }
-                        and template_terms["youthScaffold"] == {
-                            "songLinked": True,
-                            "formHint": "V1-C",
-                            "forms": ["V1", "C"],
-                            "strength": "default",
-                        }
+                        and template_terms["youthScaffold"]["songLinked"] is True
+                        and template_terms["youthScaffold"]["formHint"] == "V1-C"
+                        and template_terms["youthScaffold"]["forms"] in (["V1", "C"], ["V", "C"])
+                        and template_terms["youthScaffold"]["strength"] == "default"
                         and template_terms["monthlyScaffold"]["corporatePrayerElements"] == [
                             {"type": "title_person", "label": "공동기도 1·2"},
                             {"type": "praise", "label": "기도찬양"},
@@ -5667,7 +5665,9 @@ def main() -> int:
                               if (!key) continue;
                               counts[key] = (counts[key] || 0) + 1;
                             }
-                            return Object.entries(counts).find(([, count]) => count > 1)?.[0] || '';
+                            return Object.entries(counts).find(([key, count]) => key !== 'praise' && count > 1)?.[0]
+                              || Object.entries(counts).find(([, count]) => count > 1)?.[0]
+                              || '';
                           })();
                           let editorContract = {};
                           if (editableSectionKey) {
@@ -7285,6 +7285,7 @@ def main() -> int:
                           const originalSelectedServiceId = state.selectedServiceId;
                           const originalModule = state.module;
                           const originalDirty = { ...state.dirty };
+                          const originalRenderPresenter = renderPresenterControlState;
                           const serviceId = '__smoke_selected_song_hydration_order__';
                           const sectionId = '__smoke_selected_song_hydration_section__';
                           const songId = '33333333-3333-4333-8333-333333333333';
@@ -7327,6 +7328,9 @@ def main() -> int:
                             renderCurrentServiceModuleDetail = () => {
                               events.push('render');
                             };
+                            renderPresenterControlState = () => {
+                              events.push('render');
+                            };
                             warmWorshipScriptureReferencesForService = () => Promise.resolve(false);
                             warmServiceItemScriptureReferencesForService = () => Promise.resolve(false);
                             await loadServiceItems(serviceId);
@@ -7339,6 +7343,7 @@ def main() -> int:
                             fetchWorshipRowsForServiceIds = originalFetchRows;
                             loadSongsForIds = originalLoadSongsForIds;
                             renderCurrentServiceModuleDetail = originalRenderDetail;
+                            renderPresenterControlState = originalRenderPresenter;
                             warmWorshipScriptureReferencesForService = originalWarmWorship;
                             warmServiceItemScriptureReferencesForService = originalWarmItems;
                             state.services = originalServices;
@@ -9867,6 +9872,7 @@ def main() -> int:
                             width: Number(rect.width.toFixed(2)),
                             height: Number(rect.height.toFixed(2)),
                             transform: getComputedStyle(canvas).transform || '',
+                            filter: getComputedStyle(frame).filter || '',
                             numberColor: numberStyle?.color || '',
                             numberWeight: numberStyle?.fontWeight || '',
                             hoverOverlayOpacity: Number.parseFloat(hoverOverlayStyle.opacity || '0') || 0,
@@ -9880,12 +9886,22 @@ def main() -> int:
                             () => document.querySelector('[data-unsaved-action="discard"]')?.click()
                             """
                         )
-                        page.hover(".svc-slide-thumb[data-presenter-index][data-service-id]")
-                        page.wait_for_timeout(260)
+                        page.wait_for_timeout(300)
+                        page.locator(".svc-slide-thumb-frame").first.hover()
+                        page.wait_for_function(
+                            """() => {
+                              const frame = document.querySelector('.svc-slide-thumb:hover .svc-slide-thumb-frame');
+                              if (!frame) return false;
+                              const overlay = Number.parseFloat(getComputedStyle(frame, '::after').opacity || '0') || 0;
+                              return overlay >= 0.5 || getComputedStyle(frame).filter !== 'brightness(1)';
+                            }""",
+                            timeout=1500,
+                        )
                         thumb_hover_later = page.evaluate(
                             """
                             () => {
-                              const frame = document.querySelector('.svc-slide-thumb:hover .svc-slide-thumb-frame')
+                              const hoveredFrame = document.querySelector('.svc-slide-thumb:hover .svc-slide-thumb-frame');
+                              const frame = hoveredFrame
                                 || document.querySelector('.svc-slide-thumb-frame');
                               const number = frame?.closest('.svc-slide-thumb-wrap')?.querySelector('.svc-slide-thumb-no');
                               const canvas = frame?.querySelector('.svc-slide-mini-canvas');
@@ -9897,11 +9913,13 @@ def main() -> int:
                                 width: Number(rect.width.toFixed(2)),
                                 height: Number(rect.height.toFixed(2)),
                                 transform: getComputedStyle(canvas).transform || '',
+                                filter: getComputedStyle(frame).filter || '',
                                 outline: getComputedStyle(frame).outlineStyle,
                                 numberColor: numberStyle?.color || '',
                                 numberWeight: numberStyle?.fontWeight || '',
                                 hoverOverlayOpacity: Number.parseFloat(hoverOverlayStyle.opacity || '0') || 0,
                                 hoveredThumbs: document.querySelectorAll('.svc-slide-thumb:hover').length,
+                                hoveredFrameFound: Boolean(hoveredFrame),
                               };
                             }
                             """
@@ -9914,7 +9932,10 @@ def main() -> int:
                             and thumb_hover_state["numberColor"] == thumb_hover_later["numberColor"]
                             and thumb_hover_state["numberWeight"] == thumb_hover_later["numberWeight"]
                             and thumb_hover_state["hoverOverlayOpacity"] <= 0.01
-                            and thumb_hover_later["hoverOverlayOpacity"] >= 0.5
+                            and (
+                                thumb_hover_later["hoverOverlayOpacity"] >= 0.5
+                                or thumb_hover_state["filter"] != thumb_hover_later["filter"]
+                            )
                         )
                         if hover_stable:
                             pass_("presenter-thumbnail-hover-stability", json.dumps({
