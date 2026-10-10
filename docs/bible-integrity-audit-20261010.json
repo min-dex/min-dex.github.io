@@ -1,0 +1,1625 @@
+{
+  "read_only": true,
+  "archive_sha256": "8c3db522536bb8697f5a0f406b241c13bf995e406a03bd337cf8b9d489245c28",
+  "checked_at_utc": "2026-10-10T04:00:11Z",
+  "missing_sources": [],
+  "xml_not_in_database": [
+    "ASV",
+    "Darby",
+    "NAS",
+    "NRS",
+    "New King James Version",
+    "ReWebst",
+    "Webster",
+    "일본어성경"
+  ],
+  "errors": [],
+  "translations": [
+    {
+      "translation": "King James Version",
+      "active_translation": true,
+      "source_rows": 31102,
+      "live_rows": 31102,
+      "source_sha256": "9f85a408c64db7b6df5c54de76c4d6252b46f7e4811e9227365469a05a363b6d",
+      "books": 66,
+      "chapters": 1189,
+      "duplicate_books": 0,
+      "duplicate_chapters": 0,
+      "invalid_verses": [],
+      "missing": [],
+      "extra": [],
+      "source_duplicate_addresses": [],
+      "live_duplicate_addresses": [],
+      "inactive_rows": 0,
+      "invalid_addresses": [],
+      "empty_body": [],
+      "verse_end_rows": [],
+      "replacement_character_rows": [],
+      "differences": [],
+      "headings": 0,
+      "source_gap_chapters": [],
+      "residual_heading_candidates": [],
+      "snapshot_sha256": "30839b9b8ed30309ada3b75ee054cc535b82d9e1ae9b56f5db41635d59b5bd91",
+      "elapsed_seconds": 8.8
+    },
+    {
+      "translation": "NIV",
+      "active_translation": true,
+      "source_rows": 31086,
+      "live_rows": 31086,
+      "source_sha256": "ddde250698617f15bfdca665207413e27d0e0238e47e95e883923caaaae20f07",
+      "books": 66,
+      "chapters": 1189,
+      "duplicate_books": 0,
+      "duplicate_chapters": 0,
+      "invalid_verses": [],
+      "missing": [],
+      "extra": [],
+      "source_duplicate_addresses": [],
+      "live_duplicate_addresses": [],
+      "inactive_rows": 0,
+      "invalid_addresses": [],
+      "empty_body": [],
+      "verse_end_rows": [],
+      "replacement_character_rows": [],
+      "differences": [],
+      "headings": 0,
+      "source_gap_chapters": [
+        {
+          "book": "MAT",
+          "chapter": 17,
+          "missing": [
+            21
+          ]
+        },
+        {
+          "book": "MAT",
+          "chapter": 18,
+          "missing": [
+            11
+          ]
+        },
+        {
+          "book": "MAT",
+          "chapter": 23,
+          "missing": [
+            14
+          ]
+        },
+        {
+          "book": "MRK",
+          "chapter": 7,
+          "missing": [
+            16
+          ]
+        },
+        {
+          "book": "MRK",
+          "chapter": 9,
+          "missing": [
+            44,
+            46
+          ]
+        },
+        {
+          "book": "MRK",
+          "chapter": 11,
+          "missing": [
+            26
+          ]
+        },
+        {
+          "book": "MRK",
+          "chapter": 15,
+          "missing": [
+            28
+          ]
+        },
+        {
+          "book": "LUK",
+          "chapter": 17,
+          "missing": [
+            36
+          ]
+        },
+        {
+          "book": "LUK",
+          "chapter": 23,
+          "missing": [
+            17
+          ]
+        },
+        {
+          "book": "JHN",
+          "chapter": 5,
+          "missing": [
+            4
+          ]
+        },
+        {
+          "book": "ACT",
+          "chapter": 8,
+          "missing": [
+            37
+          ]
+        },
+        {
+          "book": "ACT",
+          "chapter": 15,
+          "missing": [
+            34
+          ]
+        },
+        {
+          "book": "ACT",
+          "chapter": 24,
+          "missing": [
+            7
+          ]
+        },
+        {
+          "book": "ACT",
+          "chapter": 28,
+          "missing": [
+            29
+          ]
+        },
+        {
+          "book": "ROM",
+          "chapter": 16,
+          "missing": [
+            24
+          ]
+        }
+      ],
+      "residual_heading_candidates": [
+        {
+          "address": [
+            "PSA",
+            141,
+            7
+          ]
+        }
+      ],
+      "snapshot_sha256": "68ed7c3ceb3691905616eaeb26c2a1110af9b1a98a0d317aee80c9e234a0efe6",
+      "elapsed_seconds": 8.2
+    },
+    {
+      "translation": "RSV",
+      "active_translation": true,
+      "source_rows": 31103,
+      "live_rows": 31103,
+      "source_sha256": "7cb81cb2df528adc2da15ce069d2483004dfe5dfd680b5f346baf71d3950ba36",
+      "books": 66,
+      "chapters": 1189,
+      "duplicate_books": 0,
+      "duplicate_chapters": 0,
+      "invalid_verses": [],
+      "missing": [],
+      "extra": [],
+      "source_duplicate_addresses": [],
+      "live_duplicate_addresses": [],
+      "inactive_rows": 0,
+      "invalid_addresses": [],
+      "empty_body": [],
+      "verse_end_rows": [],
+      "replacement_character_rows": [],
+      "differences": [],
+      "headings": 0,
+      "source_gap_chapters": [],
+      "residual_heading_candidates": [],
+      "snapshot_sha256": "dd139eba31841c2c14a767ab0cfbb95133ba86e01671fc2818cc7bf37c499bd0",
+      "elapsed_seconds": 8.4
+    },
+    {
+      "translation": "개역개정",
+      "active_translation": true,
+      "source_rows": 31101,
+      "live_rows": 31101,
+      "source_sha256": "73ba3031f6b2fabef12be95e61d50544bc105225d32530a30f6778a52ecb892e",
+      "books": 66,
+      "chapters": 1189,
+      "duplicate_books": 0,
+      "duplicate_chapters": 0,
+      "invalid_verses": [],
+      "missing": [],
+      "extra": [],
+      "source_duplicate_addresses": [],
+      "live_duplicate_addresses": [],
+      "inactive_rows": 0,
+      "invalid_addresses": [],
+      "empty_body": [],
+      "verse_end_rows": [],
+      "replacement_character_rows": [],
+      "differences": [],
+      "headings": 0,
+      "source_gap_chapters": [
+        {
+          "book": "DEU",
+          "chapter": 6,
+          "missing": [
+            19
+          ]
+        }
+      ],
+      "residual_heading_candidates": [],
+      "snapshot_sha256": "0cf2957653623ca19876239fa3f17f606dc32653d8cb373d15aa51627ea0495c",
+      "elapsed_seconds": 8.6
+    },
+    {
+      "translation": "개역한글",
+      "active_translation": true,
+      "source_rows": 31101,
+      "live_rows": 31101,
+      "source_sha256": "a67a39a8e08d1352b699622ec889a5fddb71773c37cf4482a2ad6afad3f5c587",
+      "books": 66,
+      "chapters": 1189,
+      "duplicate_books": 0,
+      "duplicate_chapters": 0,
+      "invalid_verses": [],
+      "missing": [],
+      "extra": [],
+      "source_duplicate_addresses": [],
+      "live_duplicate_addresses": [],
+      "inactive_rows": 0,
+      "invalid_addresses": [],
+      "empty_body": [],
+      "verse_end_rows": [],
+      "replacement_character_rows": [],
+      "differences": [],
+      "headings": 0,
+      "source_gap_chapters": [],
+      "residual_heading_candidates": [],
+      "snapshot_sha256": "a7690e79aad9d4d6df0da732eadeb7c5ef5a7e5b2d7cbe42fae474522b9aa976",
+      "elapsed_seconds": 8.2
+    },
+    {
+      "translation": "공동번역",
+      "active_translation": true,
+      "source_rows": 31102,
+      "live_rows": 31102,
+      "source_sha256": "c02c508c331d896897991f289dd17f6e6ae4e036546d75410cf46d06b665f982",
+      "books": 66,
+      "chapters": 1189,
+      "duplicate_books": 0,
+      "duplicate_chapters": 0,
+      "invalid_verses": [],
+      "missing": [],
+      "extra": [],
+      "source_duplicate_addresses": [],
+      "live_duplicate_addresses": [],
+      "inactive_rows": 0,
+      "invalid_addresses": [],
+      "empty_body": [],
+      "verse_end_rows": [],
+      "replacement_character_rows": [],
+      "differences": [],
+      "headings": 4,
+      "source_gap_chapters": [],
+      "residual_heading_candidates": [],
+      "snapshot_sha256": "13af8c32ec779297321711968868d5d8e344d49ca4beb61e320e195b701ab5f9",
+      "elapsed_seconds": 8.8
+    },
+    {
+      "translation": "바른성경",
+      "active_translation": true,
+      "source_rows": 31102,
+      "live_rows": 31102,
+      "source_sha256": "3ba7016542bd00264b5a4bab28722bf3b34543f3422b5e232392e8e1b9639deb",
+      "books": 66,
+      "chapters": 1189,
+      "duplicate_books": 0,
+      "duplicate_chapters": 0,
+      "invalid_verses": [],
+      "missing": [],
+      "extra": [],
+      "source_duplicate_addresses": [],
+      "live_duplicate_addresses": [],
+      "inactive_rows": 0,
+      "invalid_addresses": [],
+      "empty_body": [],
+      "verse_end_rows": [],
+      "replacement_character_rows": [],
+      "differences": [],
+      "headings": 112,
+      "source_gap_chapters": [],
+      "residual_heading_candidates": [],
+      "snapshot_sha256": "6c5bfd520de3d52e98f6d2ab86f1edb0e11aade6766c2d7845bd04333185af36",
+      "elapsed_seconds": 8.1
+    },
+    {
+      "translation": "쉬운성경",
+      "active_translation": true,
+      "source_rows": 31102,
+      "live_rows": 31102,
+      "source_sha256": "34738ce20df1aef4a814f421b1c973e83944eaba7734c3e058cc0ed843d8c91c",
+      "books": 66,
+      "chapters": 1189,
+      "duplicate_books": 0,
+      "duplicate_chapters": 0,
+      "invalid_verses": [],
+      "missing": [],
+      "extra": [],
+      "source_duplicate_addresses": [],
+      "live_duplicate_addresses": [],
+      "inactive_rows": 0,
+      "invalid_addresses": [],
+      "empty_body": [
+        [
+          "1KI",
+          8,
+          42
+        ],
+        [
+          "2SA",
+          4,
+          7
+        ],
+        [
+          "JDG",
+          20,
+          23
+        ]
+      ],
+      "verse_end_rows": [],
+      "replacement_character_rows": [],
+      "differences": [],
+      "headings": 2341,
+      "source_gap_chapters": [],
+      "residual_heading_candidates": [
+        {
+          "address": [
+            "PSA",
+            60,
+            1
+          ]
+        }
+      ],
+      "snapshot_sha256": "649fb946137de322cbc5048a9d4209836772bfe1e4725a24f1edf891c5a617c8",
+      "elapsed_seconds": 8.7
+    },
+    {
+      "translation": "우리말",
+      "active_translation": true,
+      "source_rows": 31101,
+      "live_rows": 31101,
+      "source_sha256": "e8f583ec999e65141075b1de29f89fc9caff8803324a7b5f8cb87df8ebc35f4c",
+      "books": 66,
+      "chapters": 1189,
+      "duplicate_books": 0,
+      "duplicate_chapters": 0,
+      "invalid_verses": [],
+      "missing": [],
+      "extra": [],
+      "source_duplicate_addresses": [],
+      "live_duplicate_addresses": [],
+      "inactive_rows": 0,
+      "invalid_addresses": [],
+      "empty_body": [],
+      "verse_end_rows": [],
+      "replacement_character_rows": [],
+      "differences": [],
+      "headings": 1810,
+      "source_gap_chapters": [],
+      "residual_heading_candidates": [
+        {
+          "address": [
+            "REV",
+            17,
+            1
+          ]
+        }
+      ],
+      "snapshot_sha256": "c05cb991ccc009ac92c6a7939fad58df1f5f6236362fb440be42ccf340fab599",
+      "elapsed_seconds": 8.3
+    },
+    {
+      "translation": "표준새번역",
+      "active_translation": true,
+      "source_rows": 31102,
+      "live_rows": 31102,
+      "source_sha256": "8c379e1b27ef12d91fbfd831109d6b90e5704141749baa5e2734e44111f57999",
+      "books": 66,
+      "chapters": 1189,
+      "duplicate_books": 0,
+      "duplicate_chapters": 0,
+      "invalid_verses": [],
+      "missing": [],
+      "extra": [],
+      "source_duplicate_addresses": [],
+      "live_duplicate_addresses": [],
+      "inactive_rows": 0,
+      "invalid_addresses": [],
+      "empty_body": [],
+      "verse_end_rows": [],
+      "replacement_character_rows": [],
+      "differences": [],
+      "headings": 0,
+      "source_gap_chapters": [],
+      "residual_heading_candidates": [],
+      "snapshot_sha256": "1f0bf2e34ac192834e20a16dce8e324c5ea20e03e196197167ace7b6196abe1a",
+      "elapsed_seconds": 9.5
+    },
+    {
+      "translation": "한글KJV",
+      "active_translation": true,
+      "source_rows": 31102,
+      "live_rows": 31102,
+      "source_sha256": "7a334490bebb7e494e35c70e2ebe23b5410c83234ee85aa2d32d398995bf578a",
+      "books": 66,
+      "chapters": 1189,
+      "duplicate_books": 0,
+      "duplicate_chapters": 0,
+      "invalid_verses": [],
+      "missing": [],
+      "extra": [],
+      "source_duplicate_addresses": [],
+      "live_duplicate_addresses": [],
+      "inactive_rows": 0,
+      "invalid_addresses": [],
+      "empty_body": [],
+      "verse_end_rows": [],
+      "replacement_character_rows": [],
+      "differences": [],
+      "headings": 0,
+      "source_gap_chapters": [],
+      "residual_heading_candidates": [
+        {
+          "address": [
+            "PSA",
+            6,
+            9
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            7,
+            8
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            9,
+            9
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            9,
+            16
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            10,
+            16
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            10,
+            17
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            11,
+            4
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            11,
+            5
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            12,
+            3
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            12,
+            5
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            12,
+            6
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            14,
+            2
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            14,
+            6
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            16,
+            5
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            18,
+            2
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            18,
+            20
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            18,
+            31
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            18,
+            46
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            19,
+            7
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            19,
+            8
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            19,
+            9
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            20,
+            6
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            20,
+            9
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            21,
+            13
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            22,
+            8
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            22,
+            23
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            24,
+            3
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            25,
+            8
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            25,
+            10
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            25,
+            12
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            25,
+            14
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            26,
+            8
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            28,
+            6
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            28,
+            7
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            28,
+            8
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            29,
+            2
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            29,
+            3
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            29,
+            4
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            29,
+            5
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            29,
+            7
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            29,
+            8
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            29,
+            9
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            29,
+            10
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            29,
+            11
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            30,
+            7
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            31,
+            21
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            31,
+            24
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            33,
+            6
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            33,
+            10
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            33,
+            11
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            33,
+            12
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            33,
+            13
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            34,
+            7
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            34,
+            15
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            34,
+            16
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            34,
+            18
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            34,
+            22
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            37,
+            3
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            37,
+            7
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            37,
+            18
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            37,
+            23
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            37,
+            33
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            37,
+            34
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            37,
+            40
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            39,
+            4
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            40,
+            4
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            41,
+            2
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            41,
+            3
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            41,
+            13
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            72,
+            18
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            81,
+            15
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            87,
+            2
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            87,
+            6
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            88,
+            14
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            89,
+            46
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            89,
+            52
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            90,
+            17
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            92,
+            13
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            93,
+            1
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            94,
+            3
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            94,
+            11
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            94,
+            17
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            94,
+            22
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            96,
+            2
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            96,
+            8
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            96,
+            13
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            97,
+            1
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            97,
+            10
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            98,
+            2
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            98,
+            9
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            99,
+            1
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            99,
+            2
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            100,
+            3
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            100,
+            5
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            103,
+            6
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            103,
+            8
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            103,
+            17
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            103,
+            19
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            104,
+            16
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            104,
+            31
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            105,
+            4
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            107,
+            2
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            107,
+            24
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            109,
+            14
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            110,
+            2
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            110,
+            4
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            111,
+            2
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            111,
+            10
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            113,
+            4
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            113,
+            5
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            115,
+            11
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            115,
+            12
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            115,
+            14
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            116,
+            1
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            116,
+            5
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            116,
+            6
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            116,
+            12
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            116,
+            14
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            116,
+            15
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            116,
+            19
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            118,
+            6
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            118,
+            7
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            118,
+            8
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            118,
+            9
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            118,
+            14
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            118,
+            16
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            118,
+            18
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            118,
+            26
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            119,
+            166
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            121,
+            5
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            121,
+            7
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            121,
+            8
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            122,
+            9
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            126,
+            3
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            128,
+            5
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            129,
+            4
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            132,
+            5
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            132,
+            11
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            135,
+            2
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            135,
+            3
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            135,
+            6
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            138,
+            6
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            138,
+            8
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            144,
+            3
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            145,
+            3
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            145,
+            8
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            145,
+            9
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            145,
+            14
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            145,
+            17
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            145,
+            18
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            145,
+            20
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            146,
+            8
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            146,
+            9
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            147,
+            2
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            147,
+            6
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            147,
+            11
+          ]
+        },
+        {
+          "address": [
+            "PSA",
+            148,
+            13
+          ]
+        }
+      ],
+      "snapshot_sha256": "bb036ecd1cb860f89a4a936c7e63f46d0f7ba2fe70079b3bc0e2237315c204bb",
+      "elapsed_seconds": 9.3
+    },
+    {
+      "translation": "현대어",
+      "active_translation": true,
+      "source_rows": 31099,
+      "live_rows": 31099,
+      "source_sha256": "a38d0dc3d5ed8fe65eef8e7a28435d208ed70eb9505896f026b6c0de2c539294",
+      "books": 66,
+      "chapters": 1189,
+      "duplicate_books": 0,
+      "duplicate_chapters": 0,
+      "invalid_verses": [],
+      "missing": [],
+      "extra": [],
+      "source_duplicate_addresses": [],
+      "live_duplicate_addresses": [],
+      "inactive_rows": 0,
+      "invalid_addresses": [],
+      "empty_body": [],
+      "verse_end_rows": [],
+      "replacement_character_rows": [],
+      "differences": [],
+      "headings": 2436,
+      "source_gap_chapters": [],
+      "residual_heading_candidates": [],
+      "snapshot_sha256": "ac2330f88cdf8f5a90440c12d2db1677e2499b02c34831613abb7b3f552f568c",
+      "elapsed_seconds": 9.5
+    },
+    {
+      "translation": "현대인",
+      "active_translation": true,
+      "source_rows": 31056,
+      "live_rows": 31056,
+      "source_sha256": "0659c197baaf9da32d3585713dbf4828bffb342471ebf760615419c3aa852595",
+      "books": 66,
+      "chapters": 1189,
+      "duplicate_books": 0,
+      "duplicate_chapters": 0,
+      "invalid_verses": [],
+      "missing": [],
+      "extra": [],
+      "source_duplicate_addresses": [],
+      "live_duplicate_addresses": [],
+      "inactive_rows": 0,
+      "invalid_addresses": [],
+      "empty_body": [],
+      "verse_end_rows": [],
+      "replacement_character_rows": [],
+      "differences": [],
+      "headings": 0,
+      "source_gap_chapters": [],
+      "residual_heading_candidates": [],
+      "snapshot_sha256": "a15c19271c5332626bad5b2b36037ee2d4ce9441074d243069967b49651d8eb4",
+      "elapsed_seconds": 8.5
+    }
+  ]
+}
