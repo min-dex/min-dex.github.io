@@ -30058,7 +30058,7 @@ function renderPresenterCitationComposer(subgroup, serviceId) {
           data-presenter-citation-reference-input data-service-id="${escapeAttr(serviceId)}"
           data-presenter-citation-element-id="${escapeAttr(slide.elementId)}"
           data-presenter-citation-slot-key="${escapeAttr(slide.slotKey || "")}"
-          placeholder="성경 구절 · 예: 롬 5:7–8; 요 15:9" aria-label="실시간 인용 구절" autocomplete="off" />
+          placeholder="예: 롬 5:7–8; 요 15:9" aria-label="실시간 인용 구절" autocomplete="off" />
         <label class="svc-slide-citation-auto-output">
           <input type="checkbox" data-presenter-citation-auto-output ${presenterCitationAutoOutput ? "checked" : ""} />
           <span>추가 즉시 송출</span>
