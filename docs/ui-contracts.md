@@ -107,6 +107,11 @@ Inactive module tabs should stay visually quiet. Active tabs may show a clearer 
 
 ## Sidebar
 
+- On desktop (above 900px), the module strip and sidebar form one continuous
+  left panel: same background and right boundary, with no horizontal divider
+  between module navigation and search. Module controls and search remain fixed;
+  only the list scrolls. Compact screens retain the separate header and drawer.
+
 - The left sidebar separator paints one pixel outside its right edge, in the
   same pixel column as the first active tab's inset left separator. Keep the
   wrapper unclipped and above adjacent content so the stroke remains visible;

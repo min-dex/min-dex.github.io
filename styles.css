@@ -8775,6 +8775,11 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 }
 
 @media (min-width: 901px) {
+  /* One continuous left panel: mask the header divider only over navigation. */
+  .topbar-module-strip {
+    background: var(--sidebar-bg);
+    box-shadow: 1px 0 var(--shell-separator);
+  }
   body.sidebar-collapsed .sidebar {
     opacity: 1;
     pointer-events: auto;
