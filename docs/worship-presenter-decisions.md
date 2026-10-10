@@ -1134,3 +1134,8 @@ Small visual polish that does not alter behavior does not need an entry.
 - Liturgical body and announcement text use the bundled 500 Medium face in both
   fullscreen and chromakey output. Explicit announcement bold stays 700, so it
   remains visibly distinct from the default body.
+
+### 2026-10-10 Mixed bold selections
+- Applying bold to a selection containing complete bold spans removes their
+  inner delimiters before wrapping the selection. Avoid nested marker corruption
+  and preserve the original visible words. Shared bulletin editing uses this rule.

@@ -134,11 +134,15 @@
   // Only recognize explicit paragraphs; unknown wording stays in the news field.
   function announcementParts(raw) {
     const parts={news:[],welcome:[],notices:[]};
-    for(const paragraph of raw.split(/\n(?=\s*(?:\d+[.)]|[①-⑳◈])\s*)|\n\s*\n/)) {
+    for(const paragraph of raw.split(/\n(?=\s*(?:\*\*)?(?:\d+[.)]|[①-⑳◈])\s*)|\n\s*\n/)) {
       const lines=paragraph.trim().split("\n");
       if(/^오늘도 (?:청년부|어린이부) 예배에 오신 여러분을/.test(window.MindexInlineText.plain(lines[0]))&&/환영.*축복/.test(window.MindexInlineText.plain(lines[0])))parts.welcome.push(lines.shift());
       const text=lines.join("\n").trim();if(!text)continue;
-      const body=text.replace(/^(?:\d+[.)]|[①-⑳◈])\s*/,"");
+      let skip=window.MindexInlineText.plain(text).match(/^(?:\d+[.)]|[①-⑳◈])\s*/)?.[0].length||0;
+      const body=window.MindexInlineText.runs(text).map(run=>{
+        const value=run.text.slice(skip);skip=Math.max(0,skip-run.text.length);
+        return value&&run.bold?`**${value}**`:value;
+      }).join("");
       const plainBody=window.MindexInlineText.plain(body);
       if(/^(?:청년부\s*기도 모임\s*\(매주|검단우리교회는 신천지|잠들기 전, 잠언 읽기!|연말에 잠잠성경과 주보 모으기)/.test(plainBody))parts.notices.push(`◈ ${body}`);
       else parts.news.push(text);

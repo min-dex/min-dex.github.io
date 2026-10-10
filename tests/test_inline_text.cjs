@@ -6,3 +6,12 @@ for(const text of ['미완성 **강조','***중첩***','**여러\n줄**','***','
 assert.equal(B.runs('앞 **강조** 뒤').filter(r=>r.bold)[0].text,'강조');
 assert.equal(B.runs('**하나** **둘**').filter(r=>r.bold).length,2);
 console.log('PASS limited paired bold, plain text, incomplete/triple markers and line boundaries');
+function toggle(value,start=0,end=value.length){
+ const input={value,selectionStart:start,selectionEnd:end,focus(){},setRangeText(text,a,b){this.value=this.value.slice(0,a)+text+this.value.slice(b);},setSelectionRange(a,b){this.selectionStart=a;this.selectionEnd=b;},dispatchEvent(){}};
+ B.toggle(input);return input;
+}
+c.Event=class Event {};
+assert.equal(toggle('첫 **강조**와 일반 문장').value,'**첫 강조와 일반 문장**','Whole mixed selection must not nest bold markers');
+assert.equal(toggle('**첫 강조와 일반 문장**').value,'첫 강조와 일반 문장');
+assert.equal(B.plain(toggle('첫 **강조**와 일반 문장').value),'첫 강조와 일반 문장');
+console.log('PASS mixed bold selection remains readable and toggles off');

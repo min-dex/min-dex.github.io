@@ -23,7 +23,7 @@
     const nonempty=lines.filter(line=>line.trim());
     const remove=nonempty.length>0&&nonempty.every(isBold);
     const replacement=selected==='****'?'':lines.map(line=>
-      !line.trim()?line:remove?line.slice(2,-2):isBold(line)?line:`**${line}**`).join('\n')||(!selected?'****':'');
+      !line.trim()?line:remove?line.slice(2,-2):isBold(line)?line:`**${runs(line).map(r=>r.text).join('')}**`).join('\n')||(!selected?'****':'');
     const offset=!remove&&lines.length===1&&replacement.startsWith('**')?2:0;
     input.focus({preventScroll:true});input.setRangeText(replacement,from,to,'select');
     input.setSelectionRange(from+offset,from+replacement.length-offset);

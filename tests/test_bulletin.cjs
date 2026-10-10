@@ -232,3 +232,8 @@ console.log('PASS department announcements preserve all-generation monthly servi
 const marked=B.resolveSource({service:{id:'bold',service_date:'2026-10-04',service_type_id:'young_adult'},sections:[{id:'a',section_key:'announcements'}],elements:[{id:'b',section_id:'a',element_type:'body',body:'오늘도 **청년부 예배**에 오신 여러분을 환영하고 축복합니다 :)\n1. **온세대 월삭예배** 안내\n2. 청년부 **기도 모임**(매주 토요일 오후 3시)에 참여 바랍니다.'}]});
 assert.match(marked.news,/온세대 월삭예배/);assert.doesNotMatch(marked.news,/환영|기도 모임/);assert.match(marked.notices,/\*\*기도 모임\*\*/);
 console.log('PASS explicit bold retains welcome and recurring-notice classification');
+const wholeBold=B.resolveSource({service:{id:'whole-bold',service_date:'2026-10-04',service_type_id:'young_adult'},sections:[{id:'a',section_key:'announcements'}],elements:[{id:'b',section_id:'a',element_type:'body',body:'**1. 온세대 월삭예배 안내**\n**2. 청년부 기도 모임(매주 토요일 오후 3시)에 참여 바랍니다.**'}]});
+assert.doesNotMatch(wholeBold.news,/기도 모임/,'Whole-line bold must not move recurring notices into weekly news');
+assert.match(wholeBold.notices,/기도 모임/);
+assert.equal(wholeBold.notices.replace(/\*\*/g,''),'◈ 청년부 기도 모임(매주 토요일 오후 3시)에 참여 바랍니다.');
+console.log('PASS whole-line bold announcements retain recurring-notice classification');

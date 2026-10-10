@@ -282,3 +282,12 @@ runs so explicit emphasis and line breaks survive printing. List markers are
 recognized from rendered text, including a whole bold numbered line and leading
 spaces; the body keeps its emphasis and hanging indent. Formatting controls sit
 beside field labels. Saved content, custom frames, and source records are unchanged.
+
+
+## Bold boundary corrections (2026-10-10)
+
+Whole-line bold announcement numbering must still separate paragraphs and route
+recurring notices correctly. Strip the printed marker from styled runs without
+unbalancing their delimiters. Applying bold to a mixed plain/bold selection
+normalizes complete inner pairs before wrapping, rather than nesting markers.
+These are rendering/editing fixes; stored announcements are not rewritten.
