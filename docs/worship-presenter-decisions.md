@@ -1110,3 +1110,7 @@ Small visual polish that does not alter behavior does not need an entry.
 - Before leaving an archive via service/song links, replace the current common browser-history entry with its search, view mode, month and detail viewport. Back restores that entry. An archive with a search remains the archive rather than becoming the Home global-search page.
 - Song selection already creates its destination history entry; clearing the global search updates that entry instead of adding a second visit. No new return button or separate navigation stack.
 - Keep `885259ea` empty-slot numbering and existing medley projection unchanged. No DB repair or lyric collection is part of this handoff; the English Goodness of God text remains user-input pending.
+
+### 2026-10-09 Untitled special-song bulk input
+- Leave the bulk preparation field empty when a special song has an assignee but no song title. Serializing the assignee alone makes the input parser treat it as a song title.
+- Preserve the item's assignee default. Once a title exists, continue rendering `title / assignee`; linked song titles remain authoritative. No stored worship content or existing user drafts are rewritten.

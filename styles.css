@@ -104,7 +104,7 @@
   --control-surface: var(--bg); --control-line: color-mix(in srgb, var(--line) 70%, transparent); --control-line-strong: color-mix(in srgb, var(--line-2) 88%, transparent);
   --line-soft: color-mix(in srgb, var(--line) 36%, transparent);
   --line-faint: color-mix(in srgb, var(--line) 24%, transparent);
-  --shell-separator: color-mix(in srgb, var(--line) 24%, transparent);
+  --shell-separator: color-mix(in srgb, var(--line) 16%, transparent);
   --accent: #0068aa; --accent-ink: #ffffff; --accent-soft: #e0f2ff; --warn: #8a4b00; --warn-bg: #fff0d6; --warning: var(--warn); --danger: #b42318; --info: #0068aa; --success: #247a4b;
   --placeholder-ink: color-mix(in srgb, var(--ink-5) 68%, transparent);
   --shadow: 0 1px 2px rgba(16, 16, 16, .04), 0 10px 30px rgba(16, 16, 16, .055);
@@ -115,7 +115,7 @@
   --tab-hover-bg: color-mix(in srgb, var(--panel-2) 46%, transparent);
   --right-sidebar-w: var(--rail-w);
   --shell-right-w: 0px;
-  --sidebar-reference-w: clamp(240px, calc(50vw - 455px), 260px);
+  --sidebar-reference-w: 260px;
   --sidebar-reference-w-compact: 170px;
   --rail-w: var(--sidebar-reference-w); --topbar-h: 50px; --sidebar-row-h: 40px; --sidebar-sub-row-h: 35px; --sidebar-pad-x: 18px; --topbar-edge-x: 12px;
   --topbar-left-compact-w: 0px;
@@ -8646,7 +8646,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 
 /* App shell: desktop keeps one stable sidebar; compact screens use it as a drawer. */
 :root {
-  --sidebar-reference-w: clamp(240px, calc(50vw - 455px), 260px);
+  --sidebar-reference-w: 260px;
   --rail-w: var(--sidebar-reference-w);
 }
 @media (orientation: portrait) {

@@ -26985,7 +26985,9 @@ function presenterPreparationDefaultDraftForService(service) {
     if (songMode) {
       const song = serviceItemLinkedSong(item);
       const title = song?.title || String(item.raw_title || "").trim();
-      const value = isSpecialSongServiceItem(item)
+      // An assignee alone would be parsed as the song title on bulk apply.
+      // Leave an untitled slot empty; its existing assignee stays on the item.
+      const value = isSpecialSongServiceItem(item) && title
         ? [title, cleanServiceAssignee(item.assignee)].filter(Boolean).join(" / ")
         : title;
       setValue(presenterPreparationPlaceholderSongLabel(item), value);
