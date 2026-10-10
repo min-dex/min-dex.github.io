@@ -509,6 +509,34 @@ function ensureUniqueServiceItemPersistenceIds(items = []) {
   });
 }
 
+// Reprojection may replace a temporary ID, but it must not create a second
+// database row for the same template slot. Never steal another visible item's ID.
+function existingElementForWorshipSave(service, item, items, sections, elements) {
+  if (isUuid(item.id) && elements[item.id]) return elements[item.id];
+  if (!item._worshipTemplateProjected) return null;
+  const slotKey = serviceItemSlotKey(item);
+  if (!slotKey) return null;
+  const claimedIds = new Set(items.filter((other) => other !== item).map((other) => other.id));
+  const candidates = Object.values(elements).filter((element) =>
+    sections[element.section_id]?.service_id === service.id
+    && worshipElementPersistenceSlotKey(element) === slotKey
+    && !(element.config?.templateSuppressed || element.config?.template_suppressed)
+    && !claimedIds.has(element.id));
+  return candidates.length === 1 ? candidates[0] : null;
+}
+
+// An explicit active replacement supersedes an older deletion marker for that
+// slot. Two active bodies still fail validation; neither may be discarded.
+function removeSupersededWorshipSuppressionRows(rows = {}) {
+  const activeSlots = new Set((rows.elements || [])
+    .filter((row) => !(row.config?.templateSuppressed || row.config?.template_suppressed))
+    .map(worshipElementPersistenceSlotKey).filter(Boolean));
+  rows.elements = (rows.elements || []).filter((row) =>
+    !(row.config?.templateSuppressed || row.config?.template_suppressed)
+    || !activeSlots.has(worshipElementPersistenceSlotKey(row)));
+  return rows;
+}
+
 function buildWorshipPersistenceRows(service, items, existingSectionById = {}, existingElementById = {}, options = {}) {
   const sectionRows = [];
   const elementRows = [];
@@ -519,7 +547,7 @@ function buildWorshipPersistenceRows(service, items, existingSectionById = {}, e
   const persistedAt = new Date().toISOString();
 
   items.forEach((item, index) => {
-    const existingElement = isUuid(item.id) ? existingElementById[item.id] : null;
+    const existingElement = existingElementForWorshipSave(service, item, items, existingSectionById, existingElementById);
     const targetSection = isUuid(item._worshipSectionId) ? existingSectionById[item._worshipSectionId] : null;
     const existingElementSection = existingElement
       ? existingSectionById[existingElement.section_id]
