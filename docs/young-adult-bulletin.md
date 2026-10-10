@@ -291,3 +291,10 @@ recurring notices correctly. Strip the printed marker from styled runs without
 unbalancing their delimiters. Applying bold to a mixed plain/bold selection
 normalizes complete inner pairs before wrapping, rather than nesting markers.
 These are rendering/editing fixes; stored announcements are not rewritten.
+
+
+## Youth welcome recognition (2026-10-11)
+
+The explicit welcome paragraph recognizer also accepts 청소년부 예배. Preserve
+its inline bold markers and separate it from weekly news, as for 청년부 and
+어린이부. This does not add a new department print template or rewrite records.

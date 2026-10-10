@@ -237,3 +237,9 @@ assert.doesNotMatch(wholeBold.news,/기도 모임/,'Whole-line bold must not mov
 assert.match(wholeBold.notices,/기도 모임/);
 assert.equal(wholeBold.notices.replace(/\*\*/g,''),'◈ 청년부 기도 모임(매주 토요일 오후 3시)에 참여 바랍니다.');
 console.log('PASS whole-line bold announcements retain recurring-notice classification');
+
+const youthWelcome='오늘도 **청소년부 예배**에 오신 여러분을 **환영**하고 **축복**합니다 :)';
+const youthGreeting=B.resolveSource({service:{id:'youth-greeting',service_date:'2026-10-11',service_type_id:'youth'},sections:[{id:'a',section_key:'announcements'}],elements:[{id:'b',section_id:'a',element_type:'body',body:youthWelcome+'\n1. 이번 주 모임 안내'}]});
+assert.equal(youthGreeting.welcome,youthWelcome);
+assert.equal(youthGreeting.news,'1. 이번 주 모임 안내');
+console.log('PASS youth welcome retains explicit bold and stays separate from news');

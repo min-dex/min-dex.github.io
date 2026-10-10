@@ -136,7 +136,7 @@
     const parts={news:[],welcome:[],notices:[]};
     for(const paragraph of raw.split(/\n(?=\s*(?:\*\*)?(?:\d+[.)]|[①-⑳◈])\s*)|\n\s*\n/)) {
       const lines=paragraph.trim().split("\n");
-      if(/^오늘도 (?:청년부|어린이부) 예배에 오신 여러분을/.test(window.MindexInlineText.plain(lines[0]))&&/환영.*축복/.test(window.MindexInlineText.plain(lines[0])))parts.welcome.push(lines.shift());
+      if(/^오늘도 (?:청년부|청소년부|어린이부) 예배에 오신 여러분을/.test(window.MindexInlineText.plain(lines[0]))&&/환영.*축복/.test(window.MindexInlineText.plain(lines[0])))parts.welcome.push(lines.shift());
       const text=lines.join("\n").trim();if(!text)continue;
       let skip=window.MindexInlineText.plain(text).match(/^(?:\d+[.)]|[①-⑳◈])\s*/)?.[0].length||0;
       const body=window.MindexInlineText.runs(text).map(run=>{
