@@ -15161,8 +15161,8 @@ function renderModuleSidebarContext() {
         <div class="service-sidebar-head"><span>운영</span></div>
         <div class="service-sidebar-stack service-sidebar-stack--navigation">
         ${OPERATIONS_MODULES.map(([moduleName, label]) => `
-          <button class="song-item${state.module === moduleName ? " active" : ""}" type="button" data-home-module="${moduleName}" aria-current="${state.module === moduleName ? "page" : "false"}">
-            <span class="song-title"><span class="song-title-text">${label}</span></span>
+          <button class="service-type-row${state.module === moduleName ? " active" : ""}" type="button" data-home-module="${moduleName}" aria-current="${state.module === moduleName ? "page" : "false"}">
+            <span>${label}</span>
           </button>
         `).join("")}
         </div>
