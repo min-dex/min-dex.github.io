@@ -23508,7 +23508,7 @@ function renderServiceSetlistArchiveDetail() {
   const archive = state.worshipSetlistArchive;
   const rawEntries = worshipSetlistArchiveEntries();
   const allEntries = window.MindexWorshipWeek
-    ? window.MindexWorshipWeek.build(rawEntries, archive.live?.services || [], { statusStartDate: "2026-01-01" }).flatMap(group => group.entries)
+    ? window.MindexWorshipWeek.build(rawEntries, archive.live?.services || []).flatMap(group => group.entries)
     : rawEntries;
   const entries = filterWorshipSetlistArchivePeriod(filterWorshipSetlistArchiveEntries(allEntries));
   refs.detailPane.innerHTML = `
