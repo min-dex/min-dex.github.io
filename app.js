@@ -26024,7 +26024,7 @@ function formatServiceWeekRange(start, end) {
 }
 
 function renderServiceWeekDay(date, services) {
-  const weekdays = ["일","월","화","수","목","금","토"];
+  const weekdays = ["주일","월","화","수","목","금","토"];
   const dateStr = toLocalDateStr(date);
   const today = toLocalDateStr(new Date());
   return `

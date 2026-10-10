@@ -81,6 +81,8 @@ Home hierarchy:
 - The Home action resets the detail and list scroll positions. Re-rendering the
   current screen still preserves scroll normally.
 - The dashboard and sidebar `전체 예배` actions share the same navigation handler.
+- Week headers use `주일` for Sunday and keep weekday/date labels at readable
+  row size and contrast, including days with no service.
 - Today stays visually highlighted and explicitly labeled even without a service;
   its day section exposes `aria-current="date"`.
 
