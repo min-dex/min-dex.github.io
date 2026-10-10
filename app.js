@@ -6958,6 +6958,7 @@ async function saveWorshipServiceInstance(service) {
   sanitizeWorshipPersistenceRows(rows, { elementTypedStateColumns });
   compactWorshipPersistenceRows(rows);
   preserveExistingWorshipContentRows(rows, existingSections, existingElements);
+  removeSupersededWorshipSuppressionRows(rows);
   normalizeWorshipPersistenceSortOrders(rows);
   validateWorshipPersistenceRows(rows, { serviceId });
 
@@ -6988,6 +6989,9 @@ async function saveWorshipServiceInstance(service) {
     ...state.worshipElements.filter((element) => !existingSectionIdsForService.has(element.section_id)),
     ...rows.elements,
   ];
+  suppressedItems.forEach((item) => {
+    if (suppressedIds.get(item.id) === item) suppressedIds.delete(item.id);
+  });
   if (unchanged) {
     state.serviceItems[serviceId] = projectWorshipServiceItemsFromTemplate(
       service,
@@ -7009,9 +7013,7 @@ async function saveWorshipServiceInstance(service) {
     if (dirtyIds) state.dirtyServiceElementIds.set(serviceId,
       new Set([...dirtyIds].map((id) => savedIdentities.get(id)?.id || id)));
   }
-  suppressedItems.forEach((item) => {
-    if (suppressedIds.get(item.id) === item) suppressedIds.delete(item.id);
-  });
+
   await syncSharedSundayContentAfterSave(service, items, {
     elementTypedStateColumns,
     previousItems: groupWorshipElements(existingSections, existingElements)[serviceId] || [],
