@@ -48,6 +48,23 @@ const server=http.createServer((req,res)=>{
   assert.equal(nextMarker.markers,1);
   assert.match(nextMarker.text,/10월 11일다음 주서영윤 청년/);
 
+  const formatted=await page.evaluate(()=>{
+   const d=structuredClone(designDoc);
+   d.fields.news='**1. 온세대 월삭예배 안내**\n  2. **셀 모임**으로 모입니다.';
+   d.fields.welcome='오늘도 **함께** 예배합니다.\n환영합니다!';
+   const r=MindexBulletin.renderPages(d,'print');
+   const news=r.pages[0].querySelector('[data-frame-id="news"]');
+   const welcome=r.pages[0].querySelector('[data-frame-id="welcome"]');
+   return {issues:[...r.issues],text:news.textContent,bold:[...news.querySelectorAll('tspan[font-weight="700"]')].map(t=>t.textContent),xs:[...news.querySelectorAll('text')].map(t=>Number(t.getAttribute('x'))),color:news.querySelector('text').getAttribute('fill'),welcome:welcome.textContent,welcomeBold:welcome.querySelector('tspan[font-weight="700"]')?.textContent};
+  });
+  assert.deepEqual(formatted.issues,[]);
+  assert.equal(formatted.text,'①온세대 월삭예배 안내②셀 모임으로 모입니다.');
+  assert.deepEqual(formatted.bold,['온세대 월삭예배 안내','셀 모임']);
+  assert.deepEqual(formatted.xs,[12.5,17.5,12.5,17.5]);
+  assert.equal(formatted.color,'#222E29');
+  assert.equal(formatted.welcomeBold,'함께');
+  assert.doesNotMatch(formatted.welcome,/\*\*/);
+
   const roundTrip=await page.evaluate(()=>{const B=window.MindexBulletin,d={};B.applyStored(d,{...B.storedValue(designDoc),revision:1});return d.frames.every((f,i)=>Object.entries(designDoc.frames[i]).every(([k,v])=>f[k]===v));});
   assert.ok(roundTrip,'New print layout must survive DB round trip');
   const invalid=await page.evaluate(()=>{const B=window.MindexBulletin,d=structuredClone(designDoc);d.fields.news='긴 문구 '.repeat(500);return [...B.renderPages(d,'print').issues];});

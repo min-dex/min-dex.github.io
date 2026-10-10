@@ -81,3 +81,8 @@ body:has(.bulletin-workbench) .right-sidebar{display:none}
 .bulletin-toolbar [aria-busy=true]{cursor:progress}
 
 .bulletin-properties [data-inline-bold-button]{align-self:flex-start;min-height:30px;width:30px;padding:0}
+
+/* Keep formatting beside its label so the text remains close to the heading. */
+.bulletin-properties label[data-inline-bold-editor]{display:grid;grid-template-columns:minmax(0,1fr) 30px;align-items:center}
+.bulletin-properties [data-inline-bold-editor] textarea{grid-column:1/-1}
+.bulletin-properties [data-inline-bold-button]{border:0;background:transparent;font-weight:700}

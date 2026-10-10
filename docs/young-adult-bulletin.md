@@ -272,3 +272,13 @@ highlights. Incomplete markers stay literal. Remove sentence-specific inferred
 news emphasis; historical emphasis is applied only from matching issued PDFs.
 Stored text retains the markers, and source snapshots preserve them like ordinary
 content. Existing explicit manual bulletin content is not replaced by source news.
+
+
+## Print and editor polish (2026-10-10)
+
+Editorial news and sermon points use dark reading text beneath green headings;
+recurring notices use the existing muted ink. Cover welcome text uses styled
+runs so explicit emphasis and line breaks survive printing. List markers are
+recognized from rendered text, including a whole bold numbered line and leading
+spaces; the body keeps its emphasis and hanging indent. Formatting controls sit
+beside field labels. Saved content, custom frames, and source records are unchanged.

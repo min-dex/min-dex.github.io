@@ -544,13 +544,14 @@
           const title=f.id==="outline"?fieldValue(doc,"outlineTitle"):"";
           let offset=0;
           if(title)offset=writeText(group,title,{...box,weight:700},check,f.id)+2.5;
-          renderList(group,value,{...box,y:f.y+offset,h:f.h-offset},check,f.id==="outline"?(doc.settings.outlineColumns||doc.source?.outlineColumns||1):1);
+          renderList(group,value,{...box,color:f.id==="notices"?muted:"#222E29",y:f.y+offset,h:f.h-offset},check,f.id==="outline"?(doc.settings.outlineColumns||doc.source?.outlineColumns||1):1);
         }
         else if(f.id==="sermon"){
           const h=writeText(group,doc.source?.sermon||"",{...box,h:f.h-10,weight:700},check,f.id);
           writeText(group,Object.hasOwn(doc.fields,"sermonReference")?fieldValue(doc,"sermonReference"):fieldValue(doc,"sermonReference")||doc.source?.scripture||"",{...box,y:f.y+h+2.5,h:f.h-h-2.5,size:12.5,color:muted},check,f.id);
         }else if(f.id==="leader")writeText(group,fieldValue(doc,"leader")?`인도  ${personText(fieldValue(doc,"leader"))}`:"",box,check,f.id);
         else if(f.binding.startsWith("month:"))writeText(group,(doc.source?.[f.binding.split(":")[1]]||"").replace(/^(\d+)-(\d+)$/,(_,y,m)=>`${Number(m)}월`),box,check,f.id);
+        else if(f.id==="welcome")writeStyled(group,copyRuns(value,"welcome",f.size),box,check,f.id);
         else writeText(group,value,{...box,color:["address","website","staff","insideBrand","insideChurch","meeting","notices"].includes(f.id)?muted:ink},check,f.id);
         if(mode==="layout"){
           group.append(svg("rect",{x:f.x,y:f.y,width:f.w,height:f.h,fill:"transparent",stroke:selected===f.id?ink:line,"stroke-width":.25,"data-frame-hit":f.id,class:"bulletin-frame-hit"}));
@@ -682,7 +683,6 @@
       {text:"오늘도 ",size},{text:"청년부 예배",size,weight:700},{text:"에 오신 여러분을\n",size},
       {text:"환영",size:size+2.5,weight:700},{text:"하고 ",size:size+2.5},{text:"축복",size:size+2.5,weight:800},{text:"합니다 ",size:size+2.5},{text:":)",size:size+2.5,weight:700}];
     if(kind==="verse")return value.split("\n").flatMap((text,i)=>[{text:(i?"\n":"")+text,size:/^—/.test(text)?Math.max(7.5,size-2.5):size}]);
-    if(["news","outline","notices"].includes(kind))return window.MindexInlineText.runs(value).map(r=>({text:r.text,...(r.bold?{weight:700}:{})}));
     return window.MindexInlineText.runs(value).map(r=>({text:r.text,...(r.bold?{weight:700}:{})}));
   }
 
@@ -717,20 +717,25 @@
   function renderList(group,value,f,issues,columns=1) {
     const lines=String(value||"").replace(/ +(?=(?:일시|장소|교재):)/g,"\n").split("\n").filter(Boolean);
     const columnSize=Math.ceil(lines.length/columns),width=(f.w-(columns-1)*7.5)/columns;
-    const mainCount=lines.filter(t=>/^(?:[①-⑳]|\d+[.)])/.test(t)).length;
+    const mainCount=lines.filter(t=>/^(?:[①-⑳]|\d+[.)])/.test(window.MindexInlineText.plain(t).trimStart())).length;
     let y=f.y,lastColumn=0,number=0,indented=false;
     lines.forEach((paragraph,index)=>{
       const col=Math.min(columns-1,Math.floor(index/columnSize));
       if(col!==lastColumn){y=f.y;lastColumn=col;indented=false;}
-      const marker=paragraph.match(/^(?:([①-⑳◈])|(\d{1,2})[.)])\s*(.*)$/);
-      const detail=f.id==="news"&&/^\s*(?:-\s*)?(?:일시|장소|교재):/.test(paragraph);
+      const plain=window.MindexInlineText.plain(paragraph);
+      const marker=plain.match(/^\s*(?:([①-⑳◈])|(\d{1,2})[.)])\s*(.*)$/);
+      const detail=f.id==="news"&&/^\s*(?:-\s*)?(?:일시|장소|교재):/.test(plain);
       if(marker&&index>0&&y>f.y)y+=f.id==="news"?(mainCount>2?0:5):2.5;
-      const body=marker?marker[3]:paragraph;
+      let skip=marker?plain.length-marker[3].length:0;
+      const bodyRuns=copyRuns(paragraph,f.id,f.size).flatMap(run=>{
+        const text=run.text.slice(skip);skip=Math.max(0,skip-run.text.length);
+        return text?[{...run,text}]:[];
+      });
       if(marker)indented=true;
       const label=marker?(marker[1]==="◈"?"◈":String.fromCodePoint(0x2460+number++)):"";
       const x=f.x+col*(width+7.5),size=detail?Math.max(7.5,f.size-2.5):f.size;
       if(marker)writeText(group,label,{...f,x,y,w:5,h:f.y+f.h-y,align:"center"},issues,f.id);
-      y+=writeStyled(group,copyRuns(body,f.id,size),{...f,x:x+(indented?7.5:0),y,w:width-(indented?7.5:0),h:f.y+f.h-y,size},issues,f.id);
+      y+=writeStyled(group,bodyRuns,{...f,x:x+(indented?7.5:0),y,w:width-(indented?7.5:0),h:f.y+f.h-y,size},issues,f.id);
     });
   }
   function renderPages(doc,mode,selected) {
@@ -1051,7 +1056,7 @@
       if(!doc){p.replaceChildren();return;}
       if(mode==="content") {
         const child=doc.source?.department==="children";
-        const field=key=>`<label ${["news","outline","notices"].includes(key)?'data-inline-bold-editor':''}>${escape(fields[key])}${["issue","church","website","memoryReference"].includes(key)?
+        const field=key=>`<label ${["news","outline","notices"].includes(key)?'data-inline-bold-editor':''}><span class="bulletin-field-label">${escape(fields[key])}</span>${["issue","church","website","memoryReference"].includes(key)?
           `<input data-bulletin-field="${key}" value="${escape(fieldValue(doc,key))}" ${key==="issue"?'inputmode="numeric"':''}>`:
           `${["news","outline","notices"].includes(key)?'<button type="button" data-inline-bold-button aria-label="선택한 문구 굵게" title="굵게 (⌘B / Ctrl+B)"><b>B</b></button>':''}<textarea ${["news","outline","notices"].includes(key)?'data-inline-bold':''} data-bulletin-field="${key}" rows="${key==="news"?5:3}">${escape(fieldValue(doc,key))}</textarea>`}</label>`;
         const modern=doc.settings.design==="editorial";
