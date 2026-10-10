@@ -22737,6 +22737,7 @@ function renderPresenterSidebarServiceSummary(service) {
   return `
     <section class="service-sidebar-section service-sidebar-section--presenter-context" aria-label="현재 예배">
       <div class="service-sidebar-presenter-context">
+        ${renderServiceDateStatus(service)}
         <strong class="service-sidebar-presenter-title">${escapeHtml(serviceName)}</strong>
         ${details.length ? `<span class="service-sidebar-presenter-date">${escapeHtml(details.join(" · "))}</span>` : ""}
         ${noGathering ? '<span class="service-sidebar-presenter-date">집회 없음</span>' : `<button class="svc-present-btn svc-presenter-launch svc-presenter-launch--sidebar svc-presenter-launch--${launchTone}${anyOutputOpen ? " is-stop" : ""}" type="button" data-presenter-action="${escapeAttr(launchAction)}" data-service-id="${escapeAttr(service.id)}" aria-label="${escapeAttr(launchLabel)}">
@@ -24378,6 +24379,7 @@ function renderServicePresenterControlsUnscoped(service, slides = [], active = f
       data-board-key="${escapeAttr(boardKey)}"
       aria-label="${escapeAttr(uiText("presenter.controls"))}"
     >
+      ${renderPastServiceEditingNotice(service)}
       <div class="svc-presenter-toolbar">
         ${renderServiceSourcePanel(service)}
         ${renderPresenterThumbScaleControl()}
@@ -25121,6 +25123,7 @@ function renderServicePrepEditorDialog(service) {
             </button>
           </div>
         </header>
+        ${renderPastServiceEditingNotice(service)}
         <div class="svc-prep-editor-body">
           <div class="svc-authoring-tools">
             ${renderServiceAuthoringPanel("Service", "예배 정보", renderServiceMetaEditor(service))}
@@ -26025,16 +26028,37 @@ function formatServiceWeekRange(start, end) {
   return `${start.getMonth() + 1}월 ${start.getDate()}일–${end.getMonth() + 1}월 ${end.getDate()}일`;
 }
 
+function serviceDateStatus(service) {
+  const today = toLocalDateStr(new Date());
+  const start = String(service?.date || "");
+  const end = String(service?.date_end || start);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(start)) return {key:"", label:""};
+  return end < today ? {key:"past", label:"지난 예배"}
+    : start > today ? {key:"upcoming", label:"다가오는 예배"}
+    : {key:"today", label:"오늘 예배"};
+}
+
+function renderServiceDateStatus(service) {
+  const status = serviceDateStatus(service);
+  return status.key ? `<span class="service-date-status is-${status.key}">${status.label}</span>` : "";
+}
+
+function renderPastServiceEditingNotice(service) {
+  return serviceDateStatus(service).key === "past"
+    ? `<p class="service-past-editing-notice">지난 예배 · ${escapeHtml(formatServiceIsoDate(service))} — 편집하면 이 날짜의 예배에 저장됩니다.</p>` : "";
+}
+
 function renderServiceWeekDay(date, services) {
   const weekdays = ["주일","월","화","수","목","금","토"];
   const dateStr = toLocalDateStr(date);
   const today = toLocalDateStr(new Date());
   return `
-    <section class="service-week-day${dateStr === today ? " is-today" : ""}${services.length ? "" : " is-empty"}"${dateStr === today ? ' aria-current="date"' : ""}>
+    <section class="service-week-day${dateStr < today ? " is-past" : dateStr > today ? " is-upcoming" : ""}${dateStr === today ? " is-today" : ""}${services.length ? "" : " is-empty"}"${dateStr === today ? ' aria-current="date"' : ""}>
       <header>
         <strong>${escapeHtml(weekdays[date.getDay()])}</strong>
         <span>${dateStr === today ? "오늘 · " : ""}${escapeHtml(`${date.getMonth() + 1}/${date.getDate()}`)}</span>
       </header>
+      ${services.length ? renderServiceDateStatus({date:dateStr}) : ""}
       <div class="service-week-stack">
         ${services.length
           ? services.map((service) => renderServiceWeekCard(service)).join("")
@@ -26074,7 +26098,7 @@ function renderServiceDateCard(service, options = {}) {
   ]).filter((value) => compactSearchValue(value) !== compactSearchValue(serviceName)).join(" · ");
   return `
     <button
-      class="service-date-card"
+      class="service-date-card ${serviceDateStatus(service).key === "past" ? "is-past" : ""}"
       type="button"
       ${noGathering ? 'disabled aria-disabled="true"' : `data-service-id="${escapeAttr(service.id)}"`}
       aria-label="${escapeAttr(`${formatServiceDate(service, { compact: true })} ${cleanList([serviceName, variant]).join(" ")} ${noGathering ? "집회 없음" : "열기"}`)}"
@@ -26083,6 +26107,7 @@ function renderServiceDateCard(service, options = {}) {
         <span class="service-date-card-date">${escapeHtml(formatServiceDate(service, { compact: true }))}</span>
         ${noGathering ? "" : '<span class="service-date-card-open">열기</span>'}
       </span>
+      ${renderServiceDateStatus(service)}
       ${options.showType ? `<span class="service-date-card-type">${escapeHtml(serviceName)}</span>` : ""}
       ${note ? `<span class="service-date-card-note">${escapeHtml(note)}</span>` : ""}
       ${preview.text ? renderServiceCardPreviewHtml(preview, "service-date-card-preview") : ""}

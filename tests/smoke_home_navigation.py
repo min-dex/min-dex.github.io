@@ -16,6 +16,21 @@ try:
     document.body.classList.remove('ui-booting');
     await goHome();
    }''')
+   page.evaluate('''()=>{
+    const check=(ok,msg)=>{if(!ok)throw Error(msg)};
+    const day=offset=>{const d=new Date();d.setDate(d.getDate()+offset);return toLocalDateStr(d)};
+    for(const [offset,key,label] of [[-1,'past','지난 예배'],[0,'today','오늘 예배'],[1,'upcoming','다가오는 예배']]) {
+     const service={id:'date-'+key,type_id:'young-adult',date:day(offset)};
+     check(serviceDateStatus(service).key===key,'date classification');
+     check(renderServiceDateCard(service).includes(label),'card status missing');
+     check(renderServiceWeekDay(new Date(service.date+'T12:00:00'),[service]).includes(label),'week status missing');
+     check(renderPresenterSidebarServiceSummary(service).includes(label),'sidebar status missing');
+     const notice=renderPastServiceEditingNotice(service);
+     check(key==='past'?notice.includes(service.date)&&notice.includes('저장됩니다'):notice==='','past edit notice');
+    }
+    check(serviceDateStatus({date:day(-1),date_end:day(1)}).key==='today','ongoing multi-day service');
+    check(renderServiceDateStatus({date:''})==='','unknown date');
+   }''')
    page.locator('#detailPane [data-service-list]').click()
    assert page.evaluate("state.selectedServiceTypeId===SERVICE_LIST_PANEL_ID"),'home all-services button did not navigate'
    page.evaluate('goHome()')

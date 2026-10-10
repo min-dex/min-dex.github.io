@@ -231,3 +231,10 @@ Presenter details live in `docs/thread-worship-presenter.md`. Keep shell edits o
 - Do not synthesize missing departments or empty weeks from a weekly template.
   Preserve explicitly recorded 집회 없음 and mark saved services without praise
   as 콘티 미등록.
+
+## Worship date context
+
+- Week boards and service cards explicitly distinguish 지난 예배, 오늘 예배 and
+  다가오는 예배 by local calendar date, without relying on color alone.
+- Past-service controllers and order editors show the full date and explain that
+  edits save to that historical service. These cues never enter output slides.
