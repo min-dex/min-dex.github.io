@@ -4001,7 +4001,7 @@ def main() -> int:
                             }
                           })(),
                           scriptureRangeInference: inferBibleVerseEndRanges([
-                            { book_code: 'DEU', chapter: 6, verse: 18, text: '18-19가 함께 저장된 본문' },
+                            { book_code: 'DEU', chapter: 6, verse: 18, verse_end: 19, text: '18-19가 함께 저장된 본문' },
                             { book_code: 'DEU', chapter: 6, verse: 20, text: '다음 절' },
                           ]).map((verse) => ({ verse: verse.verse, verseEnd: verse.verse_end })),
                           cards: document.querySelectorAll('.svc-template-draft-card, .svc-template-inventory-card').length,

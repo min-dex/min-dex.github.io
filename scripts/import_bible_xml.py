@@ -83,7 +83,7 @@ def clean_verse_text(value: str) -> str:
 
 
 def split_section_title(text: str) -> tuple[str, str]:
-    match = re.match(r"^\s*<([^<>\n]{1,100})>\s*(.*)$", text, re.DOTALL)
+    match = re.match(r"^\s*<([^<>\n]+)>\s*(.*)$", text, re.DOTALL)
     if not match:
         return "", text
     return match.group(1).strip(), match.group(2).strip()

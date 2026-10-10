@@ -22,7 +22,7 @@ const context=vm.createContext({state,requireClient:()=>true,getBibleChapterOpti
 vm.runInContext([
   source.match(/const BIBLE_CHAPTER_CACHE_PREFIX = .*;/)[0],source.match(/const BIBLE_CHAPTER_CACHE_TTL_MS = .*;/)[0],
   ...['bibleVerseCacheKey','persistentBibleChapterCacheKey','readPersistentBibleChapterCache','writePersistentBibleChapterCache',
-    'normalizeServerBibleVerse','loadBibleBookVerses','renderBibleVerseList'].map(fn),
+    'normalizeServerBibleVerse','bibleVerseNumberLabel','loadBibleBookVerses','renderBibleVerseList'].map(fn),
 ].join('\n'),context);
 (async()=>{
   await context.loadBibleBookVerses();

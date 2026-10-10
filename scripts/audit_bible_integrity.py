@@ -94,7 +94,7 @@ class Api:
                 if attempt==2:raise
                 time.sleep(attempt+1)
 
-def audit_one(api,t,source,cache):
+def audit_one(api,t,source,cache,repairs=None):
     name=t['name'];start=time.time();rows=[];total=None
     while total is None or len(rows)<total:
         page,count=api.get('mindex_bible_verses',{'translation_id':'eq.'+t['id'],'select':'id,book_code,chapter,verse,verse_end,text,section_title,is_active',
@@ -105,14 +105,20 @@ def audit_one(api,t,source,cache):
         rows.extend(page)
     assert len(rows)==total
     (cache/(t['translation_key']+'.json')).write_text(json.dumps(rows,ensure_ascii=False))
-    expected=[expected_row(name,r) for r in source['rows']]
+    expected=[dict(expected_row(name,r),verse_end=None,is_active=True) for r in source['rows']]
+    for r in expected:
+        repair=(repairs or {}).get((name,address(r)))
+        if repair:
+            for field in ['text','section_title','verse_end','is_active']:
+                if r[field]!=repair['before'][field]:raise ValueError('Repair source mismatch')
+            r.update(repair['patch'])
     source_counts=collections.Counter(map(address,expected));live_counts=collections.Counter(map(address,rows))
     smap={address(r):r for r in expected};lmap={address(r):r for r in rows}
     differences=[]
     for a in sorted(smap.keys() & lmap.keys()):
         s,l=smap[a],lmap[a]
-        for field in ['text','section_title']:
-            if s[field]!=l[field]:differences.append({'address':a,'field':field,'source_sha256':digest(s[field]),'live_sha256':digest(l[field])})
+        for field in ['text','section_title','verse_end','is_active']:
+            if s[field]!=l[field]:differences.append({'address':a,'field':field,'source_sha256':digest(json.dumps(s[field],ensure_ascii=False)),'live_sha256':digest(json.dumps(l[field],ensure_ascii=False))})
     gaps=[]
     chapter_verses=collections.defaultdict(list)
     for r in source['rows']:chapter_verses[(r['book_code'],r['chapter'])].append(r['verse'])
@@ -131,6 +137,7 @@ def audit_one(api,t,source,cache):
       'inactive_rows':sum(not r['is_active'] for r in rows),
       'invalid_addresses':[address(r) for r in rows if r['book_code'] not in BOOKS or r['chapter']<1 or r['verse']<1],
       'empty_body':[address(r) for r in rows if not r['text'].strip()],
+      'active_empty_body':[address(r) for r in rows if r['is_active'] and not r['text'].strip()],
       'verse_end_rows':[{'address':address(r),'verse_end':r['verse_end']} for r in rows if r['verse_end'] is not None],
       'replacement_character_rows':[address(r) for r in rows if '\ufffd' in r['text']],
       'differences':differences,'headings':sum(bool(r['section_title']) for r in rows),
@@ -142,7 +149,8 @@ def audit_one(api,t,source,cache):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('archive',type=Path);p.add_argument('--env',type=Path,default=Path('.env.supabase.local'))
-    p.add_argument('--output',type=Path,required=True);p.add_argument('--cache-dir',type=Path,required=True);args=p.parse_args()
+    p.add_argument('--output',type=Path,required=True);p.add_argument('--cache-dir',type=Path,required=True);p.add_argument('--repair-manifest',type=Path);args=p.parse_args()
+    repairs={(i['translation'],address(i['before'])):i for i in json.loads(args.repair_manifest.read_text())} if args.repair_manifest else {}
     sources=parse_archive(args.archive);api=Api(args.env);translations,count=api.get('mindex_bible_translations',{'select':'id,name,translation_key,is_active','order':'name'})
     assert len(translations)==count
     args.cache_dir.mkdir(parents=True,exist_ok=True)
@@ -150,11 +158,11 @@ def main():
     print('Inventory:',len(translations),'DB translations;',len(sources),'XML translations; missing sources:',missing_sources,flush=True)
     results=[];errors=[]
     with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
-        futures={pool.submit(audit_one,api,t,sources[t['name']],args.cache_dir):t['name'] for t in matched}
+        futures={pool.submit(audit_one,api,t,sources[t['name']],args.cache_dir,repairs):t['name'] for t in matched}
         for f in concurrent.futures.as_completed(futures):
             try:results.append(f.result())
             except Exception as e:errors.append({'translation':futures[f],'error_type':type(e).__name__});print('FAILED',futures[f],type(e).__name__,flush=True)
-    report={'read_only':True,'archive_sha256':hashlib.sha256(args.archive.read_bytes()).hexdigest(),
+    report={'read_only':True,'repair_manifest_sha256':hashlib.sha256(args.repair_manifest.read_bytes()).hexdigest() if args.repair_manifest else None,'archive_sha256':hashlib.sha256(args.archive.read_bytes()).hexdigest(),
       'checked_at_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'missing_sources':missing_sources,
       'xml_not_in_database':sorted(set(sources)-{t['name'] for t in translations}),'errors':errors,
       'translations':sorted(results,key=lambda r:r['translation'])}

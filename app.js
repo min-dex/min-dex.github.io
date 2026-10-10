@@ -3587,7 +3587,7 @@ function yieldToBrowser() {
 const SUPABASE_STATIC_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 const SUPABASE_STATIC_CACHE_PREFIX = "mindex.supabase.static.v1.";
 const BIBLE_CHAPTER_CACHE_TTL_MS = 12 * 60 * 60 * 1000;
-const BIBLE_CHAPTER_CACHE_PREFIX = "mindex.bible.chapter.v2.";
+const BIBLE_CHAPTER_CACHE_PREFIX = "mindex.bible.chapter.v3.";
 const WORSHIP_SERVICE_TYPE_SELECT = [
   "id",
   "display_name",
@@ -11603,7 +11603,7 @@ function getCachedServiceScriptureVerses(reference, translation = selectedPresen
   const end = reference.verseEnd || reference.verse || Number.MAX_SAFE_INTEGER;
   return rows
     .map(normalizeServerBibleVerse)
-    .filter((verse) => verse.verse >= start && verse.verse <= end)
+    .filter((verse) => (verse.verse_end || verse.verse) >= start && verse.verse <= end)
     .sort(sortBibleVerseRows);
 }
 
@@ -11620,30 +11620,26 @@ function cacheServiceScriptureVerses(reference, verses = [], translation = selec
 }
 
 function inferBibleVerseEndRanges(verses = []) {
-  const rows = (Array.isArray(verses) ? verses : [])
+  // Number gaps can be omitted verses (NIV); only explicit ranges are combined.
+  return (Array.isArray(verses) ? verses : [])
     .map(normalizeServerBibleVerse)
-    .sort(sortBibleVerseRows);
-  return rows.map((verse, index) => {
-    const next = rows[index + 1];
-    const start = Number(verse.verse) || 0;
-    const explicitEnd = Number(verse.verse_end) || 0;
-    const nextStart = Number(next?.verse) || 0;
-    // Preserve source rows whose printed label covers skipped verse numbers.
-    const inferredEnd = !explicitEnd
-      && next
-      && String(next.book_code || "") === String(verse.book_code || "")
-      && Number(next.chapter) === Number(verse.chapter)
-      && nextStart > start + 1
-      ? nextStart - 1
-      : 0;
-    return { ...verse, verse_end: explicitEnd || inferredEnd || null };
-  });
+    .sort(sortBibleVerseRows)
+    .map((verse) => ({
+      ...verse,
+      verse_end: Number(verse.verse_end) > Number(verse.verse) ? Number(verse.verse_end) : null,
+    }));
+}
+
+function bibleVerseNumberLabel(verse) {
+  const start = Number(verse.verse) || 0;
+  const end = Number(verse.verse_end) || 0;
+  return end > start ? `${start}–${end}` : String(start);
 }
 
 function formatServiceScriptureBodySlideBlocks(verses = []) {
   return verses
     .map((verse) => {
-      const number = String(verse?.verse || "").trim();
+      const number = bibleVerseNumberLabel(verse);
       const text = String(verse?.text || "").trim();
       return [number, text].filter(Boolean).join("   ");
     })
@@ -15711,7 +15707,9 @@ function focusSelectedBibleVerseAfterRender() {
   if (!state.selectedBibleVerses.length && state.selectedBibleVerse) {
     state.selectedBibleVerses = [state.selectedBibleVerse];
   }
-  const verseNumber = state.selectedBibleVerses[0] || state.selectedBibleVerse;
+  const requestedVerse = state.selectedBibleVerses[0] || state.selectedBibleVerse;
+  const coveringVerse = state.bibleBookVerses.find((row) => Number(row.verse) <= requestedVerse && Number(row.verse_end || row.verse) >= requestedVerse);
+  const verseNumber = coveringVerse?.verse || requestedVerse;
   if (!verseNumber) return;
   requestAnimationFrame(() => {
     const verse = refs.detailPane?.querySelector(`[data-bible-verse="${CSS.escape(String(verseNumber))}"]`);
@@ -17080,13 +17078,14 @@ function renderBibleVerseList(verses) {
       ${verses.map((verse) => {
         const sectionTitle = verse.section_title && verse.section_title !== previousSection ? verse.section_title : "";
         previousSection = verse.section_title || previousSection;
-        const selected = selectedVerses.has(Number(verse.verse));
+        const selected = [...selectedVerses].some((number) => number >= Number(verse.verse) && number <= Number(verse.verse_end || verse.verse));
+        const verseLabel = bibleVerseNumberLabel(verse);
         return `
           ${sectionTitle ? `<div class="bible-section-title">${escapeHtml(sectionTitle)}</div>` : ""}
-          <p class="bible-verse${selected ? " selected" : ""}" data-bible-verse="${escapeAttr(String(verse.verse))}" role="button" tabindex="0" aria-selected="${selected ? "true" : "false"}" aria-label="${escapeAttr(String(verse.verse))}절 선택">
-            <span>${escapeHtml(String(verse.verse))}</span>
+          <p class="bible-verse${selected ? " selected" : ""}" data-bible-verse="${escapeAttr(String(verse.verse))}" role="button" tabindex="0" aria-selected="${selected ? "true" : "false"}" aria-label="${escapeAttr(verseLabel)}절 선택">
+            <span>${escapeHtml(verseLabel)}</span>
             <strong>${escapeHtml(verse.text || "")}</strong>
-            <button class="bible-verse-copy" type="button" data-copy-bible-verse="${escapeAttr(String(verse.verse))}" aria-label="${escapeAttr(String(verse.verse))}절 복사">
+            <button class="bible-verse-copy" type="button" data-copy-bible-verse="${escapeAttr(String(verse.verse))}" aria-label="${escapeAttr(verseLabel)}절 복사">
               <i data-lucide="copy"></i>
             </button>
           </p>
@@ -17343,19 +17342,19 @@ function selectedBibleVerseRows(verseNumbers = state.selectedBibleVerses) {
   const selected = new Set(verseNumbers.map(Number).filter((verse) => verse > 0));
   if (!selected.size) return [];
   return state.bibleBookVerses
-    .filter((verse) => Number(verse.chapter) === state.selectedBibleChapter && selected.has(Number(verse.verse)))
+    .filter((verse) => Number(verse.chapter) === state.selectedBibleChapter && [...selected].some((number) => number >= Number(verse.verse) && number <= Number(verse.verse_end || verse.verse)))
     .sort((a, b) => Number(a.verse) - Number(b.verse));
 }
 
 function formatBibleVerseForCopy(verse) {
   const book = findBibleBookByCode(state.selectedBookCode);
-  const reference = formatBibleVerseReference(book, state.selectedBibleChapter, verse.verse, getSelectedBibleTranslation());
+  const reference = formatBibleVerseReference(book, state.selectedBibleChapter, bibleVerseNumberLabel(verse), getSelectedBibleTranslation());
   return state.bibleCopyReference ? joinScriptureReferenceAndText(reference, verse.text) : collapseInlineText(verse.text);
 }
 
 function formatBibleSearchResultForCopy(verse) {
   const book = findBibleBookByCode(verse.book_code);
-  const reference = formatBibleVerseReference(book, verse.chapter, verse.verse, getSelectedBibleTranslation());
+  const reference = formatBibleVerseReference(book, verse.chapter, bibleVerseNumberLabel(verse), getSelectedBibleTranslation());
   return state.bibleCopyReference ? joinScriptureReferenceAndText(reference, verse.text) : collapseInlineText(verse.text);
 }
 

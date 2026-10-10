@@ -1,0 +1,175 @@
+[
+  {
+    "translation": "쉬운성경",
+    "before": {
+      "id": "0cd4b058-44f0-40bd-80dd-c151dae78455",
+      "translation_id": "e1a705f1-4579-49ea-976f-3ed3914506d5",
+      "book_code": "PSA",
+      "chapter": 60,
+      "verse": 1,
+      "verse_end": null,
+      "text": "<도움심을 간구하는 기도-수산에둣에 맞춰 지휘자를 따라 부른 노래. 교육을 위한 다윗의 믹담 시. 다윗이 아람 나하라임과 아람 소바와 싸우는 중에 요압이 돌아와 에돔을 소금 골짜기에서 쳐서 만 이천 명을 죽인 때> 오 하나님, 주는 우리를 버리시고 흩어지게 하셨습니다. 주는 우리에게 분노를 퍼부으셨습니다. 그러나 이제 우리에게 다시 마음을 돌리소서.",
+      "paragraph_index": null,
+      "section_title": "",
+      "metadata": {},
+      "is_active": true
+    },
+    "patch": {
+      "section_title": "도움심을 간구하는 기도-수산에둣에 맞춰 지휘자를 따라 부른 노래. 교육을 위한 다윗의 믹담 시. 다윗이 아람 나하라임과 아람 소바와 싸우는 중에 요압이 돌아와 에돔을 소금 골짜기에서 쳐서 만 이천 명을 죽인 때",
+      "text": "오 하나님, 주는 우리를 버리시고 흩어지게 하셨습니다. 주는 우리에게 분노를 퍼부으셨습니다. 그러나 이제 우리에게 다시 마음을 돌리소서."
+    }
+  },
+  {
+    "translation": "우리말",
+    "before": {
+      "id": "f99cf1f3-b18f-4692-9ce1-131542680ef4",
+      "translation_id": "ead292a9-0330-4f7b-952b-567583ac269f",
+      "book_code": "REV",
+      "chapter": 17,
+      "verse": 1,
+      "verse_end": null,
+      "text": "<큰 창녀와 일곱 머리와 열 뿔을 가진 붉은 짐승 일곱 대접을 가진 일곱 천사 가운데 하나가 와서 내게 말했습니다. \"이리로 오너라. 많은 물위에 앉아 있는 큰 창녀가 받을 심판을 네게 보여 주겠다.",
+      "paragraph_index": null,
+      "section_title": "",
+      "metadata": {},
+      "is_active": true
+    },
+    "patch": {
+      "section_title": "큰 창녀와 일곱 머리와 열 뿔을 가진 붉은 짐승",
+      "text": "일곱 대접을 가진 일곱 천사 가운데 하나가 와서 내게 말했습니다. \"이리로 오너라. 많은 물위에 앉아 있는 큰 창녀가 받을 심판을 네게 보여 주겠다."
+    }
+  },
+  {
+    "translation": "개역개정",
+    "before": {
+      "id": "ee5770c6-2482-4338-8052-807f02372625",
+      "translation_id": "dbf38d4d-3c8f-4407-a2dc-ca6af3233277",
+      "book_code": "DEU",
+      "chapter": 6,
+      "verse": 18,
+      "verse_end": null,
+      "text": "여호와께서 보시기에 정직하고 선량한 일을 행하라 그리하면 네가 복을 받고 그 땅에 들어가서 여호와께서 모든 대적을 네 앞에서 쫓아내시겠다고 네 조상들에게 맹세하신 아름다운 땅을 차지하리니 여호와의 말씀과 같으니라",
+      "paragraph_index": null,
+      "section_title": "",
+      "metadata": {},
+      "is_active": true
+    },
+    "patch": {
+      "verse_end": 19
+    }
+  },
+  {
+    "translation": "쉬운성경",
+    "before": {
+      "id": "6630b3aa-b0d5-456e-968a-d190610312b8",
+      "translation_id": "e1a705f1-4579-49ea-976f-3ed3914506d5",
+      "book_code": "JDG",
+      "chapter": 20,
+      "verse": 22,
+      "verse_end": null,
+      "text": "이스라엘 사람들은 여호와 앞에 나아가서 저녁 때까지 소리내어 울었습니다. 그들은 여호와께 “우리 친척인 베냐민 사람들과 다시 싸우러 나가야 합니까?” 하고 물었습니다. 여호와께서는 “나가서 그들과 싸워라” 하고 대답하셨습니다. 이스라엘 사람들은 서로 용기를 북돋웠습니다. 그리고 나서 그들은 첫째 날과 같은 대형으로 베냐민 사람들과 마주 섰습니다.",
+      "paragraph_index": null,
+      "section_title": "",
+      "metadata": {},
+      "is_active": true
+    },
+    "patch": {
+      "verse_end": 23
+    }
+  },
+  {
+    "translation": "쉬운성경",
+    "before": {
+      "id": "2f75f754-7907-4134-8e65-d1d11301902a",
+      "translation_id": "e1a705f1-4579-49ea-976f-3ed3914506d5",
+      "book_code": "JDG",
+      "chapter": 20,
+      "verse": 23,
+      "verse_end": null,
+      "text": "",
+      "paragraph_index": null,
+      "section_title": "",
+      "metadata": {},
+      "is_active": true
+    },
+    "patch": {
+      "is_active": false
+    }
+  },
+  {
+    "translation": "쉬운성경",
+    "before": {
+      "id": "3e983b8b-9616-47c1-9fdf-a13e545b00ab",
+      "translation_id": "e1a705f1-4579-49ea-976f-3ed3914506d5",
+      "book_code": "2SA",
+      "chapter": 4,
+      "verse": 6,
+      "verse_end": null,
+      "text": "그들은 집 한가운데로 들어갔습니다. 레갑과 바아나는 밀을 가지러 온 체했습니다. 이스보셋은 안방 침대 위에 누워 있었습니다. 레갑과 바아나는 이스보셋의 배를 찌르고, 이스보셋의 머리를 베어 가지고 도망쳤습니다. 그들은 밤새도록 요단 강 계곡을 따라 걸었습니다.",
+      "paragraph_index": null,
+      "section_title": "",
+      "metadata": {},
+      "is_active": true
+    },
+    "patch": {
+      "verse_end": 7
+    }
+  },
+  {
+    "translation": "쉬운성경",
+    "before": {
+      "id": "d06bd45e-9347-46a5-b384-3c3ad3473c2f",
+      "translation_id": "e1a705f1-4579-49ea-976f-3ed3914506d5",
+      "book_code": "2SA",
+      "chapter": 4,
+      "verse": 7,
+      "verse_end": null,
+      "text": "",
+      "paragraph_index": null,
+      "section_title": "",
+      "metadata": {},
+      "is_active": true
+    },
+    "patch": {
+      "is_active": false
+    }
+  },
+  {
+    "translation": "쉬운성경",
+    "before": {
+      "id": "c38cb1ac-2c82-4840-97d5-aae98acee0f7",
+      "translation_id": "e1a705f1-4579-49ea-976f-3ed3914506d5",
+      "book_code": "1KI",
+      "chapter": 8,
+      "verse": 41,
+      "verse_end": null,
+      "text": "이스라엘에 속하지 아니한 외국인이 주의 크신 이름과 주께서 행하신 큰 일에 대해 듣고 먼 땅에서 와서 이 성전을 향하여 기도하면,",
+      "paragraph_index": null,
+      "section_title": "",
+      "metadata": {},
+      "is_active": true
+    },
+    "patch": {
+      "verse_end": 42
+    }
+  },
+  {
+    "translation": "쉬운성경",
+    "before": {
+      "id": "d5fa5e60-add4-439d-9a8a-14109a04fbd5",
+      "translation_id": "e1a705f1-4579-49ea-976f-3ed3914506d5",
+      "book_code": "1KI",
+      "chapter": 8,
+      "verse": 42,
+      "verse_end": null,
+      "text": "",
+      "paragraph_index": null,
+      "section_title": "",
+      "metadata": {},
+      "is_active": true
+    },
+    "patch": {
+      "is_active": false
+    }
+  }
+]
