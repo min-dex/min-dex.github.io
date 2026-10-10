@@ -25511,8 +25511,7 @@ function renderServiceEditorTitleControl(item, origIndex, attrs = {}, model = se
     return `<div class="svc-edit-title-wrap svc-edit-title-wrap--empty">${renderServiceItemLinkControl(item, origIndex)}</div>`;
   }
   return `
-    <div class="svc-edit-title-wrap${model.strictSong ? " svc-edit-title-wrap--song" : ""}${invalidClass}" ${isAnnouncementTextInputItem(item)?"data-inline-bold-editor":""}>
-      ${isAnnouncementTextInputItem(item)?'<button class="icon-btn" type="button" data-inline-bold-button aria-label="선택한 광고 문구 굵게"><b>B</b></button>':""}
+    <div class="svc-edit-title-wrap${model.strictSong ? " svc-edit-title-wrap--song" : ""}${invalidClass}">
       ${renderServicePraiseInputModeControl(item, origIndex, model)}
       <input
         class="svc-edit-title${invalidClass}"
@@ -28069,10 +28068,9 @@ function renderPresenterServiceTextInputs(item, index, model, memo) {
   ].filter(Boolean).join(" ");
   return `
     ${needsTitle ? `
-      <label class="${titleFieldClass}" ${announcementText?"data-inline-bold-editor":""}>
+      <label class="${titleFieldClass}">
         ${presenterServiceTitleFieldShowsLabel(titleLabel) ? `<span>${escapeHtml(titleLabel)}</span>` : ""}
         ${manualPraise ? renderServiceEditorTitleControl(item, index, { service: model?.service, hideFormControls: true }, model) : announcementText ? `
-          <button class="icon-btn" type="button" data-inline-bold-button aria-label="선택한 광고 문구 굵게" title="굵게 (⌘B / Ctrl+B)"><b>B</b></button>
           <textarea data-inline-bold class="svc-presenter-input-control svc-presenter-input-control--multiline" data-service-item-field="raw_title" data-service-item-index="${index}"
             rows="4" placeholder="1. 다음 주 모임 안내&#10;같은 항목의 추가 내용&#10;2. 새가족 환영" onkeydown="handleDetailKeydown(event)" aria-label="${escapeAttr(`${item.label || "항목"} ${titleLabel}`)}">${escapeHtml(announcementValue)}</textarea>
           <small class="svc-presenter-input-hint">줄 맨 앞의 1., 2.마다 새 항목으로 표시됩니다. 번호 없는 다음 줄은 같은 항목에 포함됩니다.</small>` : `

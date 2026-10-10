@@ -6,16 +6,17 @@ try{for(const engine of [chromium,...(fs.existsSync(webkit.executablePath())?[we
 const oldTests=fs.readFileSync(path.join(__dirname,'smoke_announcement_parentheses.py'),'utf8').match(/page.evaluate\('''([\s\S]*?)'''\)/)[1];
 console.log(engine.name(),await page.evaluate(`(${oldTests})()`));
 await page.evaluate(()=>{const service={id:'inline-test',type_id:'young-adult'};const item={id:'inline-ad',label:'광고',raw_title:'온세대 월삭예배',_worshipSectionKey:'announcements',memo:serializeServiceItemMemo({elementType:'body',inputMode:'text'})};state.module='presenter';state.selectedServiceId=service.id;state.services=[service];state.serviceItems={[service.id]:[item]};const host=document.createElement('div');host.id='inline-test';host.innerHTML=renderPresenterServiceTextInputs(item,getServiceItems(service.id).findIndex(row=>row.id===item.id),{service},parseServiceItemMemo(item.memo));document.body.prepend(host);host.querySelector('textarea').value='온세대 월삭예배';host.addEventListener('input',()=>window.inlineInputEvents=(window.inlineInputEvents||0)+1);});
-const input=page.locator('#inline-test textarea');await input.evaluate(el=>el.setSelectionRange(0,el.value.length));await input.press('Meta+b');assert.equal(await input.inputValue(),'**온세대 월삭예배**');await page.locator('#inline-test [data-inline-bold-button]').click();assert.equal(await input.inputValue(),'온세대 월삭예배');assert.equal(await page.evaluate(()=>inlineInputEvents),2);
-console.log('PASS announcement keyboard/button toggle and existing input events');
+assert.equal(await page.locator('#inline-test [data-inline-bold-button]').count(),0);
+const input=page.locator('#inline-test textarea');await input.evaluate(el=>el.setSelectionRange(0,el.value.length));await input.press('Meta+b');assert.equal(await input.inputValue(),'**온세대 월삭예배**');await input.press('Control+b');assert.equal(await input.inputValue(),'온세대 월삭예배');assert.equal(await page.evaluate(()=>inlineInputEvents),2);
+console.log('PASS announcement keyboard toggle and existing input events');
 await input.fill('첫째 안내\n\n둘째 안내');await input.selectText();await input.press('Control+b');
 assert.equal(await input.inputValue(),'**첫째 안내**\n\n**둘째 안내**');
 await input.press('Control+b');assert.equal(await input.inputValue(),'첫째 안내\n\n둘째 안내','multiline toggle must remove every marker pair');
 await input.fill('새 안내');await input.selectText();
 await input.evaluate(el=>{window.boldBlurCount=0;el.addEventListener('blur',()=>window.boldBlurCount++);});
-await page.locator('#inline-test [data-inline-bold-button]').click();
-assert.equal(await input.inputValue(),'**새 안내**');assert.equal(await page.evaluate(()=>boldBlurCount),0,'bold toolbar must preserve editing focus');
-console.log('PASS multiline toggle and toolbar preserves editing focus');
+await input.press('Control+b');
+assert.equal(await input.inputValue(),'**새 안내**');assert.equal(await page.evaluate(()=>boldBlurCount),0,'bold shortcut must preserve editing focus');
+console.log('PASS multiline toggle and shortcut preserves editing focus');
 await page.evaluate(()=>{
  const field=document.querySelector('#inline-test textarea');field.dataset.initialValue='새 안내';
  if(!commitDeferredServiceTextInput(field,{save:false}))throw Error('edit not committed');
