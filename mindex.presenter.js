@@ -5068,9 +5068,10 @@ function renderPresenterGeneratedWaitingLoopSlide(slide) {
 }
 
 function presenterReadySlideServiceName(slide) {
-  return String(slide?.readyServiceName || "").trim()
+  const name = String(slide?.readyServiceName || "").trim()
     || String(slide?.text || "").split("\n").map((line) => line.trim()).filter(Boolean)[1]
     || "예배";
+  return /^주일예배\s*\[[123]부\]$/.test(name) ? "주일예배" : name;
 }
 
 function renderPresenterFullscreenReadySlide(slide) {
