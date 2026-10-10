@@ -46,6 +46,10 @@ stale document in the same change.
 - `solid-refactor-notes.md`: refactor notes only. Do not treat as a required
   migration plan unless the user asks to resume it.
 
+## UI Review Evidence
+
+- `ui-audit-20261010.md`: cross-module UI audit, verified fixes and test boundaries.
+
 ## Data Review Evidence
 
 - `handoff-worship-service-list-payload.md`: UX->Data handoff for the light service

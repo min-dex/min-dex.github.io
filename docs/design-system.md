@@ -48,9 +48,8 @@ shell, navigation, buttons, labels, and shared UI copy.
 ## Service Navigation Copy
 
 - Home tab default: show `이번 주 예배` and `다가오는 예배`.
-- Worship tab default: show `전체 예배`.
-- Service week panel title: `이번 주 예배`. Keep it available as a sidebar panel,
-  but do not use it as the Worship tab's default screen.
+- Worship tab default: show the weekly board (`최근 예배`), matching the September 3 navigation decision.
+- The weekly board groups this week and next week; `전체 예배` remains a separate list action.
 - Service list title: `전체 예배`.
 - Template surfaces should not appear as ordinary default navigation unless
   the user is explicitly managing templates.

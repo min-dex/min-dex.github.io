@@ -80,8 +80,8 @@ Home hierarchy:
 
 - Worship is the primary operational area.
 - Home shows the week dashboard: `이번 주 예배` plus `다가오는 예배`.
-- The Worship/Service tab opens to `전체 예배` by default. `이번 주 예배` remains
-  a secondary sidebar panel, not the default Worship tab landing screen.
+- The Worship/Service tab opens to the weekly board (`최근 예배`) by default.
+  `전체 예배` remains a separate list action (navigation commit `91fba0fd`).
 - Praise and Scripture are major resources.
 - Calendar and References are home utilities.
 - Template structure is an internal management concept. Do not surface it in
@@ -116,7 +116,8 @@ Inactive module tabs should stay visually quiet. Active tabs may show a clearer 
   one pixel outside the sidebar edge. Do not split it between header and list
   shadows or duplicate it on the first tab. Active-tab bottom masking is inset
   one pixel on each side so it never erases the vertical strokes at corners.
-- Sidebar width should stay consistent unless a module has a strong reason.
+- Desktop sidebar width stays at 260px, including narrower landscape windows;
+  the compact portrait drawer retains its existing 170px width.
 - Sidebar row padding should align visually with the sidebar toggle x-position.
 - Sidebar content should feel relaxed, not cramped.
 - Home utility pages should keep the integrated Mindex search available.

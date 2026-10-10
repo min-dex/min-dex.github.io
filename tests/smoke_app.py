@@ -1221,8 +1221,8 @@ def main() -> int:
             if all(
                 item["topbarHeight"] == (90 if item["width"] <= 560 else 50)
                 and (
-                    (item["width"] > 900 and item["railWidth"] == item["sidebarWidth"] == 240 and item["sidebarLeftRail"])
-                    or (item["width"] == 900 and item["railWidth"] == item["sidebarWidth"] == 240 and not item["sidebarLeftRail"] and item["sidebarHeight"] > 300)
+                    (item["width"] > 900 and item["railWidth"] == item["sidebarWidth"] == 260 and item["sidebarLeftRail"])
+                    or (item["width"] == 900 and item["railWidth"] == item["sidebarWidth"] == 260 and not item["sidebarLeftRail"] and item["sidebarHeight"] > 300)
                     or (item["width"] < 900 and item["railWidth"] == item["sidebarWidth"] == 170 and not item["sidebarLeftRail"] and item["sidebarHeight"] > 300)
                 )
                 and item["searchWithinSidebar"]
