@@ -5317,7 +5317,7 @@ function renderPresenterLiturgicalBodySlide(slide) {
       const itemLines = item.lines.map((line) => String(line || ""));
       return `<div class="presenter-announcement-item${marker ? "" : " presenter-announcement-item--plain"}">
         ${marker ? `<span class="presenter-announcement-marker">${escapeHtml(marker)}</span>` : ""}
-        <span class="presenter-announcement-copy">${itemLines.map((line) => `<span style="--line-chars: ${presenterLineCharEstimate(line)}">${line ? escapePresenterSlideLine(line, slide) : "<br>"}</span>`).join("")}</span>
+        <span class="presenter-announcement-copy">${itemLines.map((line) => `<span style="--line-chars: ${presenterLineCharEstimate(window.MindexInlineText?.plain(line)??line)}">${line ? escapePresenterSlideLine(line, slide) : "<br>"}</span>`).join("")}</span>
       </div>`;
     }).join("")}</div>`
     : `<div class="presenter-liturgical-body-lines">
@@ -5418,7 +5418,17 @@ function presenterAnnouncementParenthesisRanges(text) {
 }
 
 function renderPresenterHighlightedText(line, slide) {
-  const text = String(line || " ");
+  const inline = slide?.announcementItems?.length && window.MindexInlineText
+    ? window.MindexInlineText.runs(line || " ") : [{text:String(line || " "),bold:false}];
+  const text = inline.map(run=>run.text).join("");
+  const boldRanges=[];let inlineOffset=0;
+  for(const run of inline){if(run.bold)boldRanges.push({start:inlineOffset,end:inlineOffset+run.text.length});inlineOffset+=run.text.length;}
+  const renderInline=(start,end)=>{
+    let cursor=start;const parts=[];
+    for(const range of boldRanges){const from=Math.max(start,range.start),to=Math.min(end,range.end);if(from>=to)continue;
+      parts.push(escapeHtml(text.slice(cursor,from)),`<strong>${escapeHtml(text.slice(from,to))}</strong>`);cursor=to;}
+    parts.push(escapeHtml(text.slice(cursor,end)));return parts.join("");
+  };
   const highlights = normalizeServiceTextHighlights(slide?.textHighlights || slide?.text_highlights || slide?.highlights);
   const parentheses = slide?.announcementItems?.length ? presenterAnnouncementParenthesisRanges(text) : [];
   const renderRange = (start, end) => {
@@ -5428,11 +5438,11 @@ function renderPresenterHighlightedText(line, slide) {
       const from = Math.max(start, range.start);
       const to = Math.min(end, range.end);
       if (from >= to) continue;
-      parts.push(escapeHtml(text.slice(cursor, from)));
-      parts.push(`<span class="presenter-announcement-paren">${escapeHtml(text.slice(from, to))}</span>`);
+      parts.push(renderInline(cursor, from));
+      parts.push(`<span class="presenter-announcement-paren">${renderInline(from, to)}</span>`);
       cursor = to;
     }
-    parts.push(escapeHtml(text.slice(cursor, end)));
+    parts.push(renderInline(cursor, end));
     return parts.join("");
   };
   if (!highlights.length) return renderRange(0, text.length);

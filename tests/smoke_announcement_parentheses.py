@@ -40,6 +40,13 @@ try:
      check(Math.abs(parseFloat(getComputedStyle(paren).fontSize)/parseFloat(getComputedStyle(paren.parentElement).fontSize)-.8)<.001,'output ratio '+type);
      check(JSON.stringify(item)===before,'stored source changed');
     }
+    const markdown='온세대 **월삭예배 (오후 8시)** <img src=x> **강조**';
+    host.innerHTML=renderPresenterHighlightedText(markdown,{announcementItems:[{lines:[markdown]}],textHighlights:[{text:'월삭예배 (오후 8시)',bold:true}]});
+    check(host.textContent==='온세대 월삭예배 (오후 8시) <img src=x> 강조','Markdown symbols leaked');
+    check(host.querySelector('strong')?.textContent.includes('월삭예배'),'bold missing');
+    check(host.querySelector('.presenter-announcement-paren strong')?.textContent==='(오후 8시)','paren/bold overlap');
+    check(!host.querySelector('img'),'Markdown HTML unsafe');
+    check(renderPresenterHighlightedText('**가사**',{}).includes('**가사**'),'Other text unexpectedly changed');
     return 'PASS 80% output, nested/fullwidth/unmatched pairs, escaping, overlapping highlights, unchanged source and other text';
    }'''),flush=True)
    browser.close()

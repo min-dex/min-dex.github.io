@@ -249,3 +249,26 @@ Arrow-key frame movement is scoped to focus inside the preview canvas. Toolbar
 buttons and inspector controls must not move print content. Selecting a frame
 from the layout dropdown reveals its outside/inside sheet without changing the
 document or its saved content.
+
+
+## Department news comes from announcements (2026-10-10)
+
+Department news is derived from the selected service's announcement body,
+including all-generation monthly worship notices. Historical PDF reference
+mode may supply assignees, sermon outlines, and rosters, but must not replace
+news or restore news when the current announcement is empty. This supersedes
+the older reference-mode news override. Explicit bulletin edits and published
+source snapshots remain preserved; use the existing source refresh action to
+update a saved snapshot. No production records are rewritten.
+
+
+## Explicit inline bold (2026-10-10)
+
+Announcement and bulletin news/outline/notice editors support paired `**bold**`
+within one line, a B button, and Cmd/Ctrl+B. No HTML or other Markdown is parsed.
+Print wrapping measures rendered characters and their weights. Presenter output
+shares the same parser and retains announcement parentheses and existing text
+highlights. Incomplete markers stay literal. Remove sentence-specific inferred
+news emphasis; historical emphasis is applied only from matching issued PDFs.
+Stored text retains the markers, and source snapshots preserve them like ordinary
+content. Existing explicit manual bulletin content is not replaced by source news.

@@ -7,7 +7,7 @@ const fixture=require('./fixtures/bulletin-20260920.json');
 const root=path.resolve(__dirname,'..');
 const server=http.createServer((req,res)=>{
   const pathname=new URL(req.url,'http://localhost').pathname;
-  if(pathname==='/'){res.setHeader('Content-Type','text/html');res.end('<meta charset="utf-8"><script src="/mindex.bulletin.js"></script>');return;}
+  if(pathname==='/'){res.setHeader('Content-Type','text/html');res.end('<meta charset="utf-8"><script src="/mindex.inline-text.js"></script><script src="/mindex.bulletin.js"></script>');return;}
   const file=path.resolve(root,pathname.slice(1));
   if(!file.startsWith(root+path.sep)||!fs.existsSync(file)||fs.statSync(file).isDirectory()){res.writeHead(404);res.end();return;}
   if(file.endsWith('.svg'))res.setHeader('Content-Type','image/svg+xml');
@@ -24,6 +24,7 @@ const server=http.createServer((req,res)=>{
     const result=await page.evaluate(async fixture=>{
       const B=window.MindexBulletin;await B.readyAssets();
       const source=B.resolveSource(fixture);
+      source.news=source.news.replace("셀 모임","**셀 모임**").replace("셀 구성","**셀 구성**");
       source.autoBackground={key:'26-A5.png',url:'assets/worship-backgrounds/26-A5.png'};
       // A fresh document needs no manual common-copy import.
       const doc={source,fields:{},settings:{theme:'auto'},frames:B.defaultFrames()};

@@ -136,10 +136,11 @@
     const parts={news:[],welcome:[],notices:[]};
     for(const paragraph of raw.split(/\n(?=\s*(?:\d+[.)]|[①-⑳◈])\s*)|\n\s*\n/)) {
       const lines=paragraph.trim().split("\n");
-      if(/^오늘도 (?:청년부|어린이부) 예배에 오신 여러분을/.test(lines[0])&&/환영.*축복/.test(lines[0]))parts.welcome.push(lines.shift());
+      if(/^오늘도 (?:청년부|어린이부) 예배에 오신 여러분을/.test(window.MindexInlineText.plain(lines[0]))&&/환영.*축복/.test(window.MindexInlineText.plain(lines[0])))parts.welcome.push(lines.shift());
       const text=lines.join("\n").trim();if(!text)continue;
       const body=text.replace(/^(?:\d+[.)]|[①-⑳◈])\s*/,"");
-      if(/^(?:청년부\s*기도 모임\s*\(매주|검단우리교회는 신천지|잠들기 전, 잠언 읽기!|연말에 잠잠성경과 주보 모으기)/.test(body))parts.notices.push(`◈ ${body}`);
+      const plainBody=window.MindexInlineText.plain(body);
+      if(/^(?:청년부\s*기도 모임\s*\(매주|검단우리교회는 신천지|잠들기 전, 잠언 읽기!|연말에 잠잠성경과 주보 모으기)/.test(plainBody))parts.notices.push(`◈ ${body}`);
       else parts.news.push(text);
     }
     return Object.fromEntries(Object.entries(parts).map(([key,lines])=>[key,lines.join("\n")]));
@@ -363,7 +364,7 @@
     source.archiveReference=!!reference;
     source.announcer=source.order.find(r=>r.label==="광고")?.person||"";
     if(reference){
-      for(const key of ["news","outline","sermonReference","outlineTitle","outlineColumns"])source[key]=reference[key];
+      for(const key of ["outline","sermonReference","outlineTitle","outlineColumns"])source[key]=reference[key];
       if(!source.leader)source.leader=reference.leader;
       if(!source.announcer)source.announcer=reference.announcer;
       if(source.rosterMonth===date.slice(0,7))source.prayers=source.prayers.map((r,i)=>({...r,person:reference.roster[i]||r.person}));
@@ -677,17 +678,12 @@
   }
   function copyRuns(value,kind,size) {
     if(kind==="church"&&value.startsWith("기독교대한성결교회 "))return [{text:"기독교대한성결교회 ",weight:500},{text:value.slice("기독교대한성결교회 ".length),weight:700}];
-    if(kind==="welcome"&&value.replace(/\s/g,"")==="오늘도청년부예배에오신여러분을환영하고축복합니다:)")return [
+    if(kind==="welcome"&&window.MindexInlineText.plain(value).replace(/\s/g,"")==="오늘도청년부예배에오신여러분을환영하고축복합니다:)")return [
       {text:"오늘도 ",size},{text:"청년부 예배",size,weight:700},{text:"에 오신 여러분을\n",size},
       {text:"환영",size:size+2.5,weight:700},{text:"하고 ",size:size+2.5},{text:"축복",size:size+2.5,weight:800},{text:"합니다 ",size:size+2.5},{text:":)",size:size+2.5,weight:700}];
     if(kind==="verse")return value.split("\n").flatMap((text,i)=>[{text:(i?"\n":"")+text,size:/^—/.test(text)?Math.max(7.5,size-2.5):size}]);
-    const emphasis={"오늘 2부 활동은 셀 모임으로 진행합니다.":"셀 모임","추석 이후, 다음 주일부터 셀 구성이 개편됩니다.":"셀 구성"}[value];
-    if(kind==="news"&&emphasis){const at=value.indexOf(emphasis);return [{text:value.slice(0,at)},{text:emphasis,weight:700},{text:value.slice(at+emphasis.length)}];}
-    if(kind==="notices"){
-      const match=value.match(/^(청년부 )(기도 모임)(\(매주[^)]+\))(.*)$/);
-      if(match)return [{text:match[1]},{text:match[2],weight:700},{text:match[3],size:Math.max(7.5,size-2.5)},{text:match[4]}];
-    }
-    return [{text:value}];
+    if(["news","outline","notices"].includes(kind))return window.MindexInlineText.runs(value).map(r=>({text:r.text,...(r.bold?{weight:700}:{})}));
+    return window.MindexInlineText.runs(value).map(r=>({text:r.text,...(r.bold?{weight:700}:{})}));
   }
 
   function fieldValue(doc,key) {
@@ -1055,11 +1051,11 @@
       if(!doc){p.replaceChildren();return;}
       if(mode==="content") {
         const child=doc.source?.department==="children";
-        const field=key=>`<label>${escape(fields[key])}${["issue","church","website","memoryReference"].includes(key)?
+        const field=key=>`<label ${["news","outline","notices"].includes(key)?'data-inline-bold-editor':''}>${escape(fields[key])}${["issue","church","website","memoryReference"].includes(key)?
           `<input data-bulletin-field="${key}" value="${escape(fieldValue(doc,key))}" ${key==="issue"?'inputmode="numeric"':''}>`:
-          `<textarea data-bulletin-field="${key}" rows="${key==="news"?5:3}">${escape(fieldValue(doc,key))}</textarea>`}</label>`;
+          `${["news","outline","notices"].includes(key)?'<button type="button" data-inline-bold-button aria-label="선택한 문구 굵게" title="굵게 (⌘B / Ctrl+B)"><b>B</b></button>':''}<textarea ${["news","outline","notices"].includes(key)?'data-inline-bold':''} data-bulletin-field="${key}" rows="${key==="news"?5:3}">${escape(fieldValue(doc,key))}</textarea>`}</label>`;
         const modern=doc.settings.design==="editorial";
-        p.innerHTML=`${modern?`<div class="bulletin-connected"><span>예배에서 연결됨</span><strong>${escape(doc.source?.sermon||"설교 제목 미입력")}</strong><small>${escape(doc.source?.scripture||"본문 미입력")}</small></div>`:""}<section class="bulletin-property-section"><h3>이번 주 편집</h3><p class="bulletin-help">찬양·본문·설교·기도자는 예배와 교회력에서 가져옵니다. 소식은 광고를 바탕으로 편집하고, ${child?"새길 말씀과 누락된 인도자를 보완해 주세요. 잠잠성경은 기존 잠언 순환표를 이어 생성하며 직접 수정할 수 있어요.":"설교 요점과 누락된 인도자만 보완해 주세요."}</p>${doc.source?.hasArchiveReference?`<label><input type="checkbox" data-bulletin-setting="archiveReference" ${doc.settings.archiveReference!==false?"checked":""}> 발행 원본의 소식·담당·요점·위원표 사용</label><p class="bulletin-help">이 날짜의 실제 PDF에서 확인한 내용입니다. 찬양·설교는 연결된 예배 자료를 사용합니다.</p>`:""}${(child?["news","memoryVerse","memoryReference","readingPlan","leader","issue"]:modern?["news","outline"]:["news","outline","leader","issue"]).map(field).join("")}<details class="bulletin-property-section" data-bulletin-section="weekly"><summary>담당·발행 정보</summary>${(child?["announcer"]:modern?["leader","issue","announcer","sermonReference","outlineTitle"]:["announcer","sermonReference","outlineTitle"]).map(field).join("")}</details></section>
+        p.innerHTML=`${modern?`<div class="bulletin-connected"><span>예배에서 연결됨</span><strong>${escape(doc.source?.sermon||"설교 제목 미입력")}</strong><small>${escape(doc.source?.scripture||"본문 미입력")}</small></div>`:""}<section class="bulletin-property-section"><h3>이번 주 편집</h3><p class="bulletin-help">찬양·본문·설교·기도자는 예배와 교회력에서 가져옵니다. 소식은 광고를 바탕으로 편집하고, ${child?"새길 말씀과 누락된 인도자를 보완해 주세요. 잠잠성경은 기존 잠언 순환표를 이어 생성하며 직접 수정할 수 있어요.":"설교 요점과 누락된 인도자만 보완해 주세요."}</p>${doc.source?.hasArchiveReference?`<label><input type="checkbox" data-bulletin-setting="archiveReference" ${doc.settings.archiveReference!==false?"checked":""}> 발행 원본의 담당·요점·위원표 사용</label><p class="bulletin-help">이 날짜의 실제 PDF에서 확인한 내용입니다. 소식·찬양·설교는 연결된 예배 자료를 사용합니다.</p>`:""}${(child?["news","memoryVerse","memoryReference","readingPlan","leader","issue"]:modern?["news","outline"]:["news","outline","leader","issue"]).map(field).join("")}<details class="bulletin-property-section" data-bulletin-section="weekly"><summary>담당·발행 정보</summary>${(child?["announcer"]:modern?["leader","issue","announcer","sermonReference","outlineTitle"]:["announcer","sermonReference","outlineTitle"]).map(field).join("")}</details></section>
           <details class="bulletin-property-section" data-bulletin-section="monthly" ${modern?"":"open"}><summary>이번 달 · ${child?"일정과 주제":"일정과 위원"}</summary><p class="bulletin-help">${escape(doc.source?.eventsOrigin||"교회력 일정")}을 사용합니다. 일정 수정은 같은 달 주보에 이어집니다. 저장하면 이번 호의 예배 내용${child?"":"과 위원표"}도 보존합니다. 최신 자료는 예배 자료 갱신으로 가져옵니다.</p>${child?field("monthlyTheme"):""}${field("eventsText")}<button type="button" data-bulletin-calendar-events>교회력 일정 불러오기</button><div class="bulletin-number-grid">
           <label>교회 일정<input type="month" data-bulletin-setting="eventsMonth" value="${escape(doc.settings.eventsMonth||doc.source?.eventsMonth||"")}"></label>
           ${child?"":`<label>예배 위원<input type="month" data-bulletin-setting="rosterMonth" value="${escape(doc.settings.rosterMonth||doc.source?.rosterMonth||"")}"></label>`}</div></details>

@@ -2,6 +2,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 const c=vm.createContext({window:{}});
+vm.runInContext(fs.readFileSync('mindex.inline-text.js','utf8'),c);
 vm.runInContext(fs.readFileSync('mindex.bulletin.js','utf8'),c);
 const fixture={service:{id:'service',service_date:'2026-09-20',worship_leader:'인도자'},
   sections:[{id:'s',service_id:'service',title:'찬양',section_key:'praise',sort_order:1},
@@ -212,3 +213,22 @@ for(const content_state of [{state:'suppressed'},{status:'suppressed'}]){
  assert.ok(!hidden.order.some(row=>row.id===hiddenId),'Both persisted suppression shapes must stay out of print');
 }
 console.log('PASS children publication snapshot, explicit refresh, old snapshot fallback and suppressed print items');
+
+// Announcement content remains authoritative even for dates with an issued PDF.
+for (const department of ['young-adult','children']) {
+  const input={service:{id:'monthly-news',service_date:'2026-09-20',service_type_id:department},
+    sections:[{id:'ads',section_key:'announcements',title:'광고',sort_order:1}],
+    elements:[{id:'news',section_id:'ads',element_type:'body',body:'① 부서 모임 안내\n② 온세대 월삭예배 안내',sort_order:1}]};
+  for (const archiveReference of [undefined,true,false]) {
+    const news=B.resolveSource({...input,settings:{archiveReference}});
+    assert.equal(news.news,input.elements[0].body,'Issued PDF copy must not replace the service announcements');
+    assert.equal(B.fieldValue({...baseDoc(news),fields:{news:''}},'news'),'','An explicit bulletin edit stays authoritative');
+  }
+  input.elements[0].body='';input.elements[0].title='';
+  assert.equal(B.resolveSource(input).news,'','Cleared announcements must not restore old PDF news');
+}
+console.log('PASS department announcements preserve all-generation monthly service notices over archive copy');
+
+const marked=B.resolveSource({service:{id:'bold',service_date:'2026-10-04',service_type_id:'young_adult'},sections:[{id:'a',section_key:'announcements'}],elements:[{id:'b',section_id:'a',element_type:'body',body:'오늘도 **청년부 예배**에 오신 여러분을 환영하고 축복합니다 :)\n1. **온세대 월삭예배** 안내\n2. 청년부 **기도 모임**(매주 토요일 오후 3시)에 참여 바랍니다.'}]});
+assert.match(marked.news,/온세대 월삭예배/);assert.doesNotMatch(marked.news,/환영|기도 모임/);assert.match(marked.notices,/\*\*기도 모임\*\*/);
+console.log('PASS explicit bold retains welcome and recurring-notice classification');

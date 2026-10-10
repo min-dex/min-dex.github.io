@@ -1115,3 +1115,14 @@ Small visual polish that does not alter behavior does not need an entry.
 ### 2026-10-09 Untitled special-song bulk input
 - Leave the bulk preparation field empty when a special song has an assignee but no song title. Serializing the assignee alone makes the input parser treat it as a song title.
 - Preserve the item's assignee default. Once a title exists, continue rendering `title / assignee`; linked song titles remain authoritative. No stored worship content or existing user drafts are rewritten.
+
+
+### 2026-10-10 Explicit announcement bold
+- Paired `**text**` on one line is explicit bold in announcement output only.
+  Other Markdown and HTML remain literal; lyrics/scripture are unchanged.
+- B controls and Cmd/Ctrl+B update the existing text input/draft path.
+- Strip delimiters before output measurement; preserve parentheses sizing and
+  existing highlights while escaping source text.
+- Historical advertisement changes add markers only where same-date issued
+  department PDFs provide font-weight evidence. Preserve original characters,
+  keep a pre-change backup, and write through revision-checked aggregate RPC.

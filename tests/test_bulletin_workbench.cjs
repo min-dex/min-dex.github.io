@@ -5,7 +5,7 @@ const {chromium}=require('playwright');
 const root=path.resolve(__dirname,'..');
 const server=http.createServer((req,res)=>{
  const route=new URL(req.url,'http://localhost').pathname;
- if(route==='/'){res.setHeader('Content-Type','text/html');res.end('<meta charset="utf-8"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/styles.bulletin.css"><script src="/mindex.bulletin.js"></script><main id="host" style="height:calc(100dvh - 40px);margin:20px"></main>');return;}
+ if(route==='/'){res.setHeader('Content-Type','text/html');res.end('<meta charset="utf-8"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/styles.bulletin.css"><script src="/mindex.inline-text.js"></script><script src="/mindex.bulletin.js"></script><main id="host" style="height:calc(100dvh - 40px);margin:20px"></main>');return;}
  const file=path.resolve(root,route.slice(1));
  if(!file.startsWith(root+path.sep)||!fs.existsSync(file)||fs.statSync(file).isDirectory()){res.writeHead(404);res.end();return;}
  res.setHeader('Content-Type',({'.js':'application/javascript','.css':'text/css','.svg':'image/svg+xml'})[path.extname(file)]||'application/octet-stream');res.end(fs.readFileSync(file));
@@ -28,7 +28,15 @@ const server=http.createServer((req,res)=>{
  await page.waitForFunction(()=>document.querySelector('[data-bulletin-print]')?.disabled===false,{},{timeout:5000}).catch(async e=>{console.error(await page.locator('.bulletin-status').textContent(),errors);throw e;});
  assert.equal(await page.locator('[data-bulletin-local]').isVisible(),false,'Hidden recovery control must stay hidden');
  assert.equal(await page.locator('[data-bulletin-field="memoryReference"]').evaluate(el=>el.tagName),'INPUT');
- await page.locator('[data-bulletin-field="news"]').fill('편집 중인 소식');
+ const news=page.locator('[data-bulletin-field="news"]');
+ await news.fill('온세대 월삭예배');
+ await news.evaluate(el=>el.setSelectionRange(0,el.value.length));
+ await news.press('Meta+b');
+ assert.equal(await news.inputValue(),'**온세대 월삭예배**');
+ assert.equal(await page.locator('[data-frame-id="news"] tspan[font-weight="700"]').textContent(),'온세대 월삭예배');
+ await news.locator('..').locator('[data-inline-bold-button]').click();
+ assert.equal(await news.inputValue(),'온세대 월삭예배');
+ await news.fill('편집 중인 소식');
  for(const width of [1200,760,380]){
  await page.setViewportSize({width,height:900});
  const bounds=await page.evaluate(()=>{const w=document.querySelector('.bulletin-workbench'),c=document.querySelector('.bulletin-canvas');return {overflow:w.scrollWidth-w.clientWidth,canvas:c.clientWidth,head:document.querySelector('.bulletin-preview-head').getBoundingClientRect().height};});

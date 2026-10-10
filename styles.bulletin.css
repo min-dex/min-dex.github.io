@@ -79,3 +79,5 @@ body:has(.bulletin-workbench) .right-sidebar{display:none}
 .bulletin-workbench [hidden]{display:none!important}
 .bulletin-page-nav button[aria-current=page]{background:var(--sidebar-active-bg);color:var(--ink);font-weight:700}
 .bulletin-toolbar [aria-busy=true]{cursor:progress}
+
+.bulletin-properties [data-inline-bold-button]{align-self:flex-start;min-height:30px;width:30px;padding:0}

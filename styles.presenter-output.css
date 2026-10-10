@@ -1409,3 +1409,5 @@ span.presenter-announcement-paren {
   line-height: inherit;
   vertical-align: baseline;
 }
+
+.presenter-announcement-copy strong{font-weight:700}
