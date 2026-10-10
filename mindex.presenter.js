@@ -5399,10 +5399,43 @@ function escapePresenterSlideLine(line, slide) {
   return renderPresenterHighlightedText(text, slide);
 }
 
+function presenterAnnouncementParenthesisRanges(text) {
+  const ranges = [];
+  const stack = [];
+  let start = -1;
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    if (char === "(" || char === "（") {
+      if (!stack.length) start = index;
+      stack.push(char === "(" ? ")" : "）");
+    } else if (char === ")" || char === "）") {
+      if (stack.at(-1) !== char) { stack.length = 0; start = -1; continue; }
+      stack.pop();
+      if (!stack.length) ranges.push({ start, end: index + 1 });
+    }
+  }
+  return ranges;
+}
+
 function renderPresenterHighlightedText(line, slide) {
   const text = String(line || " ");
   const highlights = normalizeServiceTextHighlights(slide?.textHighlights || slide?.text_highlights || slide?.highlights);
-  if (!highlights.length) return escapeHtml(text);
+  const parentheses = slide?.announcementItems?.length ? presenterAnnouncementParenthesisRanges(text) : [];
+  const renderRange = (start, end) => {
+    let cursor = start;
+    const parts = [];
+    for (const range of parentheses) {
+      const from = Math.max(start, range.start);
+      const to = Math.min(end, range.end);
+      if (from >= to) continue;
+      parts.push(escapeHtml(text.slice(cursor, from)));
+      parts.push(`<span class="presenter-announcement-paren">${escapeHtml(text.slice(from, to))}</span>`);
+      cursor = to;
+    }
+    parts.push(escapeHtml(text.slice(cursor, end)));
+    return parts.join("");
+  };
+  if (!highlights.length) return renderRange(0, text.length);
   const ranges = [];
   highlights
     .filter((highlight) => highlight.text)
@@ -5418,18 +5451,18 @@ function renderPresenterHighlightedText(line, slide) {
         index = text.indexOf(needle, end);
       }
     });
-  if (!ranges.length) return escapeHtml(text);
+  if (!ranges.length) return renderRange(0, text.length);
   ranges.sort((a, b) => a.start - b.start);
   let cursor = 0;
   const parts = [];
   ranges.forEach((range) => {
-    if (range.start > cursor) parts.push(escapeHtml(text.slice(cursor, range.start)));
-    const content = escapeHtml(text.slice(range.start, range.end));
+    if (range.start > cursor) parts.push(renderRange(cursor, range.start));
+    const content = renderRange(range.start, range.end);
     const style = presenterTextHighlightStyle(range.highlight);
     parts.push(`<span class="presenter-text-highlight"${style ? ` style="${style}"` : ""}>${content}</span>`);
     cursor = range.end;
   });
-  if (cursor < text.length) parts.push(escapeHtml(text.slice(cursor)));
+  if (cursor < text.length) parts.push(renderRange(cursor, text.length));
   return parts.join("");
 }
 

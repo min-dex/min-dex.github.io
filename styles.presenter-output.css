@@ -1402,3 +1402,10 @@
 .presenter-output-root:not(.no-chromakey) .presenter-slide--caption-cadaros .presenter-song-note {
   color: var(--cadaros-gold);
 }
+
+/* Announcement asides share the authored text and emphasis at 80% size. */
+span.presenter-announcement-paren {
+  font-size: .8em;
+  line-height: inherit;
+  vertical-align: baseline;
+}

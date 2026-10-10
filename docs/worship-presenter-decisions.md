@@ -1,3 +1,12 @@
+## Announcement Parenthetical Text (2026-10-10)
+
+- User requested the Vita/Studium parenthesis display behavior for announcements.
+- Render paired parentheses and their contents at 80% in announcement output and
+  previews. Nested pairs shrink once; unmatched pairs remain normal text.
+- Keep authored text, whitespace, emphasis and persisted values unchanged.
+- Scope this to announcement body slides, including chromakey output; other
+  worship text such as lyrics, scripture and confessions keeps its typography.
+
 ## Live Scripture In Right Panel (2026-10-09)
 
 - User approved moving live scripture input immediately above worship order input.
