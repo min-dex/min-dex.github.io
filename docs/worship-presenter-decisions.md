@@ -1129,3 +1129,8 @@ Small visual polish that does not alter behavior does not need an entry.
 - Historical advertisement changes add markers only where same-date issued
   department PDFs provide font-weight evidence. Preserve original characters,
   keep a pre-change backup, and write through revision-checked aggregate RPC.
+
+### 2026-10-10 Liturgical and announcement weight
+- Liturgical body and announcement text use the bundled 500 Medium face in both
+  fullscreen and chromakey output. Explicit announcement bold stays 700, so it
+  remains visibly distinct from the default body.

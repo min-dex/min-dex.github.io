@@ -1,6 +1,13 @@
 /* ── Presenter output ───────────────────────────────────────────────────── */
 @font-face {
   font-family: "Mindex Presenter";
+  src: url("./vendor/fonts/freesentation/Freesentation-5Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Mindex Presenter";
   src: url("./vendor/fonts/freesentation/Freesentation-6SemiBold.woff2") format("woff2");
   font-weight: 600;
   font-style: normal;
@@ -64,7 +71,7 @@
   --presenter-scripture-font: var(--presenter-font-family);
   --presenter-reading-font-family: "Eulyoo1945", "을유1945", "AppleMyungjo", "Nanum Myeongjo", serif;
   --presenter-weight-support: 600;
-  --presenter-weight-liturgical: 600;
+  --presenter-weight-liturgical: 500;
   /* Typography scale, ordered by presenter role. Keep output rules on these
      semantic tokens; the size aliases below preserve the existing selectors. */
   /* Fixed stage measurements use the 5px grid. Ratios stay semantic. */
@@ -128,7 +135,6 @@
 }
 .presenter-output-root.no-chromakey {
   --presenter-weight-support: 700;
-  --presenter-weight-liturgical: 700;
   --presenter-text-inset: 7.5cqw;
   /* Fullscreen output is read from a distance; chromakey keeps its lower-bar scale. */
   --presenter-type-title: calc(170 * var(--presenter-stage-unit));
@@ -505,9 +511,6 @@
   font-weight: var(--presenter-weight-liturgical);
   line-height: 1.18;
   word-break: keep-all;
-}
-.presenter-output-root.no-chromakey .presenter-liturgical-body-lines {
-  font-weight: 600;
 }
 .presenter-liturgical-body-lines span {
   max-width: none;

@@ -47,6 +47,13 @@ try:
     check(host.querySelector('.presenter-announcement-paren strong')?.textContent==='(오후 8시)','paren/bold overlap');
     check(!host.querySelector('img'),'Markdown HTML unsafe');
     check(renderPresenterHighlightedText('**가사**',{}).includes('**가사**'),'Other text unexpectedly changed');
+    for(const mode of ['presenter-output-root','presenter-output-root no-chromakey']) {
+     host.className=mode;
+     host.innerHTML='<div class="presenter-liturgical-body-lines">전례문</div><div class="presenter-announcement-items"><div class="presenter-announcement-copy">일반 광고 <strong>강조</strong></div></div>';
+     check(getComputedStyle(host.querySelector('.presenter-liturgical-body-lines')).fontWeight==='500','liturgy weight '+mode);
+     check(getComputedStyle(host.querySelector('.presenter-announcement-copy')).fontWeight==='500','announcement base weight '+mode);
+     check(getComputedStyle(host.querySelector('strong')).fontWeight==='700','announcement bold weight '+mode);
+    }
     return 'PASS 80% output, nested/fullwidth/unmatched pairs, escaping, overlapping highlights, unchanged source and other text';
    }'''),flush=True)
    browser.close()
