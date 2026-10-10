@@ -51,9 +51,10 @@ try:
    result=page.evaluate('''()=>{
     const host=document.createElement('div');host.innerHTML=renderServiceWeekDay(new Date(),[]);document.body.append(host);
     const today=host.firstElementChild;
-    return {current:today.getAttribute('aria-current'),label:today.innerText,bg:getComputedStyle(today).backgroundColor};
+    return {current:today.getAttribute('aria-current'),label:today.innerText,bg:getComputedStyle(today).backgroundColor,stroke:getComputedStyle(today).boxShadow};
    }''')
    assert result['current']=='date' and '오늘' in result['label'] and result['bg'] not in ['transparent','rgba(0, 0, 0, 0)'],result
+   assert 'inset' in result['stroke'] and '1px' in result['stroke'],result
    print('PASS home list navigation, reset scroll, 14 days, current empty day, responsive layout',engine,flush=True)
    page.screenshot(path='/tmp/mindex-home-checked.png')
    browser.close()

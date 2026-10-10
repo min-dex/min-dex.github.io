@@ -14,9 +14,9 @@ Read `HANDOFF.md` first. This file is the short UI contract for Codex threads so
 - New app-layout spacing should use the shared `5px`/`10px` rhythm instead of
   adding one-off numbers.
 - App UI typography is separate from presenter output typography. Use the
-  compact app scale by role: labels `12px / 700`, supporting metadata
-  `12px / 500`, normal rows and form controls `14px / 600`, card titles
-  `16px / 700`, and page titles `20px / 700`.
+  compact app scale by role: labels `13px / 600`, supporting metadata
+  `13px / 500`, normal rows and form controls `15px / 600`, card titles
+  `17px / 700`, and page titles `22px / 700`.
 - Weight should communicate hierarchy, not decoration: primary labels and
   titles may use `700`, routine editable values should usually use `600`, and
   helper/meta text should stay at `500` unless it is an actionable label.

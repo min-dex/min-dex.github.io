@@ -14,7 +14,7 @@ def main():
             page = browser.new_page(viewport={'width': 1440, 'height': 900})
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-            page.wait_for_function("typeof renderPresenterRightSidebar === 'function'")
+            page.wait_for_function("typeof state !== 'undefined' && typeof renderPresenterRightSidebar === 'function'")
             for width in (254, 320, 390):
                 result = page.evaluate('''width => {
                   document.body.className = '';

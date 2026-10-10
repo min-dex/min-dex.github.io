@@ -24,8 +24,8 @@ shell, navigation, buttons, labels, and shared UI copy.
 
 - Use the current `5px` rhythm for shell spacing and `10px` steps for larger UI spacing.
 - Use the local typography ladder before adding a new one-off size:
-  `12/700` labels, `12/500` metadata, `14/600` rows and controls,
-  `16/700` compact titles, `20/700` page titles.
+  `13/600` labels, `13/500` metadata, `15/600` rows and controls,
+  `17/700` compact titles, `22/700` page titles.
 - Use established icon sizes before adding local values: 14px helper, 16px normal,
   20px large. Navigation rail and tab-bar controls both use 16px.
 - Use the established 1.5 stroke for Lucide controls. Scope icon defaults to `.lucide`,

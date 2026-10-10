@@ -104,3 +104,5 @@ record.
 Completed one-time hymn repair tools and their dedicated tests were retired on
 2026-09-22 after read-only production postcondition checks. See the hymn audit
 records above for the retained repair evidence and Git reference.
+
+- `ui-review-20261011.md`: current cross-module UI review, fixes, verification and limits.
