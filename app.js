@@ -1470,16 +1470,8 @@ function bindStaticEvents() {
       return;
     }
 
-    const serviceListItem = event.target.closest("[data-service-list]");
-    if (serviceListItem) {
-      if (!confirmDiscardServiceChanges()) return;
-      state.selectedServiceTypeId = SERVICE_LIST_PANEL_ID;
-      state.selectedServiceId = null;
-      state.selectedServiceItemIndex = null;
-      state.newServiceForm = null;
-      renderServiceList();
-      renderCurrentServiceModuleDetail();
-      syncBrowserHistory();
+    if (event.target.closest("[data-service-list]")) {
+      openServiceListPanel();
       return;
     }
 
@@ -2488,6 +2480,9 @@ async function goHome() {
     activeTab.label = "홈";
   }
   persistPageTabsState();
+  // Home is an explicit navigation reset, not an in-place detail refresh.
+  detailViewportRestoreSerial += 1;
+  if (refs.detailPane) refs.detailPane.scrollTop = 0;
   render();
   if (refs.songList) refs.songList.scrollTop = 0;
   syncBrowserHistory();
@@ -25965,6 +25960,17 @@ function renderServiceScriptureLinkControl(item) {
   return `<button class="svc-item-link svc-item-link--linked" type="button" data-service-db-reference="${escapeAttr(reference)}" aria-label="말씀 DB 새 탭에서 열기" title="말씀 DB 새 탭에서 열기">DB</button>`;
 }
 
+function openServiceListPanel() {
+  if (!confirmDiscardServiceChanges()) return;
+  state.selectedServiceTypeId = SERVICE_LIST_PANEL_ID;
+  state.selectedServiceId = null;
+  state.selectedServiceItemIndex = null;
+  state.newServiceForm = null;
+  renderServiceList();
+  renderCurrentServiceModuleDetail();
+  syncBrowserHistory();
+}
+
 function renderServiceDashboard(options = {}) {
   if (!state.serviceTypes.length) {
     refs.detailPane.innerHTML = state.serviceError
@@ -26022,10 +26028,10 @@ function renderServiceWeekDay(date, services) {
   const dateStr = toLocalDateStr(date);
   const today = toLocalDateStr(new Date());
   return `
-    <section class="service-week-day${dateStr === today ? " is-today" : ""}${services.length ? "" : " is-empty"}">
+    <section class="service-week-day${dateStr === today ? " is-today" : ""}${services.length ? "" : " is-empty"}"${dateStr === today ? ' aria-current="date"' : ""}>
       <header>
         <strong>${escapeHtml(weekdays[date.getDay()])}</strong>
-        <span>${escapeHtml(`${date.getMonth() + 1}/${date.getDate()}`)}</span>
+        <span>${dateStr === today ? "오늘 · " : ""}${escapeHtml(`${date.getMonth() + 1}/${date.getDate()}`)}</span>
       </header>
       <div class="service-week-stack">
         ${services.length
