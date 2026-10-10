@@ -3889,11 +3889,11 @@ body[data-module="presenter"] .detail-pane {
 .service-week-day.is-today {
   background: color-mix(in srgb, var(--accent-soft) 24%, transparent);
 }
-.service-week-day.is-empty {
+.service-week-day.is-empty:not(.is-today) {
   background: transparent;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line) 36%, transparent);
 }
-.service-week-day.is-empty header {
+.service-week-day.is-empty:not(.is-today) header {
   opacity: 0.66;
 }
 .service-week-day header {

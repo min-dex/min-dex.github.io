@@ -78,6 +78,12 @@ Primary app modules:
 
 Home hierarchy:
 
+- The Home action resets the detail and list scroll positions. Re-rendering the
+  current screen still preserves scroll normally.
+- The dashboard and sidebar `전체 예배` actions share the same navigation handler.
+- Today stays visually highlighted and explicitly labeled even without a service;
+  its day section exposes `aria-current="date"`.
+
 - Worship is the primary operational area.
 - Home shows the week dashboard: `이번 주 예배` plus `다가오는 예배`.
 - The Worship/Service tab opens to the weekly board (`최근 예배`) by default.
