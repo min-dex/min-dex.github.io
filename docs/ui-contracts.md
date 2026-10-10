@@ -223,3 +223,11 @@ Presenter details live in `docs/thread-worship-presenter.md`. Keep shell edits o
   save button; normal successful saves do not add a persistent status sentence.
 - Source-action tooltips distinguish reloading the saved bulletin from refreshing
   its worship/calendar source. Short scripture references use a single-line input.
+
+## Setlist archive record scope
+
+- 역대 콘티 includes actual imported worship records and saved worship services,
+  regardless of date or whether praise items are filled in.
+- Do not synthesize missing departments or empty weeks from a weekly template.
+  Preserve explicitly recorded 집회 없음 and mark saved services without praise
+  as 콘티 미등록.

@@ -10,12 +10,12 @@
   const week = text => {const d=date(text);return Number.isNaN(+d)?'':add(text,-d.getUTCDay());};
   const aliases = s => [s.source_name,s.title,s.service_alias,...(Array.isArray(s.aliases)?s.aliases:[s.aliases])].filter(Boolean).join(' ');
   const absent = s => s && (s.no_gathering === true || s.no_gathering === 'true' || s.source_ref?.no_gathering === true || s.source_ref?.no_gathering === 'true' || /집회\s*없음/.test(aliases(s)));
-  function build(entries = [], services = [], options = {}) {
+  function build(entries = [], services = []) {
     const usable = services.filter(s=>!['sunday-first','sunday-second'].includes(type(s.service_type_id)));
     const keys=[...entries.map(e=>week(e.source.service_date)),...usable.map(s=>week(s.service_date))].filter(Boolean).sort();
     if (!keys.length) return [];
     const groups=[];
-    for(let key=keys[0];key<=keys[keys.length-1];key=add(key,7)) {
+    for(const key of new Set(keys)) {
       const actual=entries.filter(e=>week(e.source.service_date)===key);
       const scheduled=usable.filter(s=>week(s.service_date)===key);
       const main=actual.find(e=>type(e.source.service_type_id)==='sunday-main')?.source || scheduled.find(s=>type(s.service_type_id)==='sunday-main');
@@ -32,7 +32,7 @@
             weeklyReason:e.source.weekly_reason||(noGathering?(saved?.service_alias||saved?.title||''):'찬양 목록이 아직 등록되지 않았습니다')};
         });
         const saved=scheduled.find(s=>type(s.service_type_id)===id);
-        if (!saved && options.statusStartDate && add(key,day) < options.statusStartDate) return [];
+        if (!saved) return [];
         const merged=allGeneration && ['children','youth'].includes(id);
         const noGathering=absent(saved);
         return [{source:{...(saved||{}),service_type_id:saved?.service_type_id||id,service_date:saved?.service_date||add(key,day),aliases:saved?.service_alias||''},
@@ -40,7 +40,7 @@
           weeklyReason:merged?'온세대 찬양예배':noGathering?(saved.service_alias||saved.title||''):saved?'찬양 목록이 아직 등록되지 않았습니다':'집회 여부 미확인'}];
       });
       for(const e of actual) if(!used.has(e)) cells.push(e);
-      groups.push({key,title:key+' ~ '+add(key,6),entries:cells});
+      if (cells.length) groups.push({key,title:key+' ~ '+add(key,6),entries:cells});
     }
     return groups.reverse();
   }
