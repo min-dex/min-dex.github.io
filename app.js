@@ -7184,11 +7184,11 @@ async function syncSharedSundayContentAfterSave(sourceService, sourceItems = [],
   )[sourceService.id] || [];
   for (const item of sourceItems) {
     if (!item._worshipSharedContentDirty && !state.dirtyServiceElementIds.get(sourceService.id)?.has(item.id)) continue;
-    const key = sundaySharedContentKey(item);
-    const persisted = persistedItems.filter((candidate) => sundaySharedContentKey(candidate) === key);
+    const key = sundaySharedContentKey(item, sourceService);
+    const persisted = persistedItems.filter((candidate) => sundaySharedContentKey(candidate, sourceService) === key);
     if (persisted.length > 1) continue;
     const savedItem = persisted[0] || item;
-    const previous = previousItems.filter((candidate) => sundaySharedContentKey(candidate) === key);
+    const previous = previousItems.filter((candidate) => sundaySharedContentKey(candidate, sourceService) === key);
     if (previous.length !== 1 || !sundayEditSyncEligible(savedItem, sourceService)
       || !sundayEditSyncEligible(previous[0], sourceService)
       || sundayEditSyncSignature(previous[0]) === sundayEditSyncSignature(savedItem)) continue;
@@ -7232,7 +7232,7 @@ async function syncSharedSundayContentAfterSave(sourceService, sourceItems = [],
       state.worshipSections.filter((section) => section.service_id === sourceService.id),
       state.worshipElements,
     )[sourceService.id] || [];
-    const savedSource = savedSourceItems.filter((item) => sundaySharedContentKey(item) === job.key);
+    const savedSource = savedSourceItems.filter((item) => sundaySharedContentKey(item, jobSource) === job.key);
     if (savedSource.length === 1 && sundayEditSyncSignature(savedSource[0]) !== sundayEditSyncSignature(job.item)) {
       pendingSundayEditSync.delete(jobKey);
       retryRecordPersisted = persistPendingSundayEditSync() && retryRecordPersisted;
@@ -7318,9 +7318,12 @@ function sundayEditSyncEligible(item = {}, service = null) {
   const memo = parseServiceItemMemo(item.memo);
   if (memo.asset?.url || memo.templateSuppressed || memo.hiddenInPresentation
     || (memo.slides || []).some((slide) => slide && typeof slide === "object")) return false;
-  const key = sundaySharedContentKey(item);
+  const key = sundaySharedContentKey(item, service);
   const label = compactSearchValue(item.label || "");
   const type = serviceMemoElementType(memo);
+  if (key === "main-praise:3" && worshipAppServiceTypeId(service?.type_id) === "sunday-main") {
+    return label === "찬송" && type === "praise" && !isAllGenerationsWorshipService(service);
+  }
   if (key.startsWith("main-praise:")) return /^찬양[1-3]$/.test(label) && type === "praise";
   if (key === "offering-hymn") return label === "봉헌찬송" && type === "praise";
   if (key === "sermon-title") return ["설교", "설교제목"].includes(label) && ["title_person", "title_assignee"].includes(type);
@@ -7467,11 +7470,13 @@ async function persistSundayEditSync(job, options = {}) {
   if (freshService.date !== state.services.find((service) => service.id === job.sourceServiceId)?.date
     || freshService.type_id !== target.type_id || !worshipServiceParticipatesInSharedSundayContent(freshService)) return;
   const items = groupWorshipElements(sections, elements)[target.id] || [];
-  const matches = items.filter((item) => sundaySharedContentKey(item) === job.key);
+  const matches = items.filter((item) => sundaySharedContentKey(item, freshService) === job.key);
   // Never create template placeholders or reinterpret substitute elements as shared content.
   if (matches.length !== 1 || !sundayEditSyncEligible(matches[0], freshService)) return;
   const item = matches[0];
-  if (sundayEditSyncSignature(item) !== sundayEditSyncSignature(job.previous)
+  const emptyThirdHymn = job.key === "main-praise:3" && freshService.type_id === "sunday-main"
+    && !serviceItemHasDirectSundaySharedContent(item, freshService);
+  if (!emptyThirdHymn && sundayEditSyncSignature(item) !== sundayEditSyncSignature(job.previous)
     && !(job.previousSignatures || []).includes(sundayEditSyncSignature(item))
     && sundayEditSyncSignature(item) !== sundayEditSyncSignature(job.item)) throw conflict();
   await loadSongsForIds(uniqueList(items.map((candidate) => candidate.song_id).filter(Boolean)
@@ -26387,16 +26392,20 @@ function markServiceItemSharedContentDirty(item = {}, service = null) {
   item._worshipSharedContentDirty = true;
 }
 
-function sundaySharedContentKey(item = {}) {
+function sundaySharedContentKey(item = {}, service = null) {
   const slotKey = serviceItemSlotKey(item);
+  const typeId = worshipAppServiceTypeId(service?.type_id);
+  const sectionKey = String(item?._worshipSectionKey || item?.sectionKey || item?.section_key || "").trim();
+  const label = compactSearchValue(item?.label || item?.raw_title || "");
+  if (slotKey === "hymn.main" || (sectionKey === "hymn_praise" && label === "찬송")) return "main-praise:3";
+  // Third-service praise is independent; only its separate hymn receives song 3.
+  if (typeId === "sunday-main" && (sectionKey === "praise" || /^praise\.song\./.test(slotKey))) return "";
   if (/^praise\.song\.[1-3]$/.test(slotKey)) return `main-praise:${slotKey.split(".").pop()}`;
   if (slotKey === "word.reading" || slotKey === "word.body") return "scripture-reading";
   if (slotKey === "sermon.title") return "sermon-title";
   if (slotKey === "sermon.scripture") return "sermon-scripture";
   if (isSermonCitationSlotKey(slotKey)) return "sermon-citation";
   if (slotKey === "offering.praise") return "offering-hymn";
-  const sectionKey = String(item?._worshipSectionKey || item?.sectionKey || item?.section_key || "").trim();
-  const label = compactSearchValue(item?.label || item?.raw_title || "");
   const praiseMatch = label.match(/^찬양(\d+)$/);
   if (sectionKey === "praise" && praiseMatch && Number(praiseMatch[1]) >= 1 && Number(praiseMatch[1]) <= 3) {
     return `main-praise:${Number(praiseMatch[1])}`;
@@ -26412,9 +26421,10 @@ function sundaySharedContentKey(item = {}) {
 function sundaySharedContentTypesForItem(item = {}, service = null) {
   if (!worshipServiceParticipatesInSharedSundayContent(service)) return [];
   const typeId = worshipAppServiceTypeId(service?.type_id);
-  const key = sundaySharedContentKey(item);
+  const key = sundaySharedContentKey(item, service);
   if (!key) return [];
   if (key.startsWith("main-praise:") && ["sunday-first", "sunday-second"].includes(typeId)) {
+    if (key === "main-praise:3") return ["sunday-first", "sunday-second", "sunday-main"];
     return ["sunday-first", "sunday-second"];
   }
   if (key === "scripture-reading" && ["sunday-second", "sunday-main"].includes(typeId)) {
@@ -26441,7 +26451,7 @@ function sundaySharedContentItemIndex(items = [], key = "", service = null) {
       && compactSearchValue(item?.label || item?.raw_title || "") === "찬양3");
     if (praiseIndex >= 0) return praiseIndex;
   }
-  return items.findIndex((item) => sundaySharedContentKey(item) === key);
+  return items.findIndex((item) => sundaySharedContentKey(item, service) === key);
 }
 
 function serviceItemHasDirectSundaySharedContent(item = {}, service = null) {

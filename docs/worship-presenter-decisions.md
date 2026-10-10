@@ -1139,3 +1139,13 @@ Small visual polish that does not alter behavior does not need an entry.
 - Applying bold to a selection containing complete bold spans removes their
   inner delimiters before wrapping the selection. Avoid nested marker corruption
   and preserve the original visible words. Shared bulletin editing uses this rule.
+
+### 2026-10-10 Third-service hymn linkage
+- Saving a changed first/second-service `praise.song.3` also updates the same-date
+  ordinary third-service `hymn.main`. The third service's own `praise.song.3`
+  remains independent; editing its hymn does not propagate back to services 1/2.
+- An existing empty hymn can receive the initial selection. Separate content,
+  unsaved edits, live presentation, custom media and all-generation services
+  retain their existing protection. No missing target elements are created.
+- Verified dispatch, target identity and conflict guards with
+  `tests/test_sunday_third_hymn_sync.cjs`, plus the worship rule guard suite.

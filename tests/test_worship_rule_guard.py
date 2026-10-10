@@ -136,7 +136,7 @@ class WorshipRuleGuardTests(unittest.TestCase):
         self.assertNotIn(".upsert(", edit_sync)
         main_praise_branch = shared.split('key.startsWith("main-praise:")', 1)[1].split('if (key === "scripture-reading"', 1)[0]
         self.assertIn('return ["sunday-first", "sunday-second"]', main_praise_branch)
-        self.assertNotIn('"sunday-main"', main_praise_branch)
+        self.assertIn('if (key === "main-praise:3") return ["sunday-first", "sunday-second", "sunday-main"]', main_praise_branch)
         self.assertIn('key === "scripture-reading"', shared)
         self.assertIn('["sermon-title", "sermon-scripture", "sermon-citation"]', shared)
         self.assertIn('"sermon-citation"', shared)
