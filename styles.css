@@ -3893,16 +3893,14 @@ body[data-module="presenter"] .detail-pane {
   background: transparent;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line) 36%, transparent);
 }
-.service-week-day.is-empty:not(.is-today) header {
-  opacity: 0.66;
-}
 .service-week-day header {
   display: flex;
+  flex-wrap: wrap;
   min-height: 24px;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--s2);
-  color: var(--ink-4);
+  color: var(--ink-2);
 }
 .service-week-day header strong {
   color: var(--ink);
@@ -3910,8 +3908,10 @@ body[data-module="presenter"] .detail-pane {
   font-weight: var(--ui-title-weight);
 }
 .service-week-day header span {
-  font-size: var(--ui-meta-size);
-  font-weight: var(--ui-meta-weight);
+  font-size: var(--ui-row-size);
+  font-weight: var(--ui-title-weight);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .service-week-stack {
   display: flex;
