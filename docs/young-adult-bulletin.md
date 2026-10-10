@@ -222,3 +222,30 @@ frames and source content stay intact. No production rows are rewritten.
 The October youth layout prints an explicit `다음 주` label alongside the next
 Sunday's date and assignee. Keep the existing light row emphasis, but never
 rely on color alone. The calendar-based next-week rule remains unchanged.
+
+
+## Empty layout and month inputs (2026-10-09)
+
+Clearing a frame coordinate or size restores its previous value on change; an
+empty input is not a request to move to zero or shrink to the minimum. Clearing
+an events/roster month likewise restores the active month so the selector stays
+aligned with the displayed content. Rejected edits do not change history or mark
+the document dirty. Explicit numeric zero still follows the existing frame bounds.
+
+
+## Person/title spacing (2026-10-09)
+
+Print person labels with a space between Korean names and recognized church
+titles, including honorifics and 어린이. Preserve that space in worship order
+rows instead of distributing the name/title as individual characters. Apply the
+same display formatting to leaders, rosters, and staff in all layouts; retain
+original stored fields and source snapshots. Group labels such as 다같이 keep
+the existing distribution.
+
+
+## Layout keyboard and frame navigation (2026-10-10)
+
+Arrow-key frame movement is scoped to focus inside the preview canvas. Toolbar
+buttons and inspector controls must not move print content. Selecting a frame
+from the layout dropdown reveals its outside/inside sheet without changing the
+document or its saved content.

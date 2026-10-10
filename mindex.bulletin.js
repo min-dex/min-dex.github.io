@@ -509,7 +509,7 @@
         }else if(f.type==="order"){
           let y=f.y;
           for(const row of doc.source?.order||[]){
-            const person=row.label==="광고"?fieldValue(doc,"announcer"):row.person;
+            const person=personText(row.label==="광고"?fieldValue(doc,"announcer"):row.person);
             const widths=[25,f.w-55,25],texts=[row.label,row.content,person];
             if(widths[1]<15){check.add(f.id);break;}
             const leading=snap(f.size*1.3),count=Math.max(...texts.map((t,i)=>wrap(t,widths[i],f.size,i===1?700:500).length));
@@ -526,7 +526,7 @@
             const personOffset=row.next?35:27.5;
             writeText(group,shortDate(row.date),{...box,x,y,w:row.next?20:27.5,h:7.5,size:f.size,color:muted},check,f.id);
             if(row.next)writeText(group,"다음 주",{...box,x:x+20,y,w:12.5,h:7.5,size:10,weight:700},check,f.id);
-            writeText(group,row.person,{...box,x:x+personOffset,y,w:col-personOffset,h:7.5,align:"right",weight:row.next?700:500},check,f.id);
+            writeText(group,personText(row.person),{...box,x:x+personOffset,y,w:col-personOffset,h:7.5,align:"right",weight:row.next?700:500},check,f.id);
             if(y+7.5>f.y+f.h+.01)check.add(f.id);
           });
         }else if(f.type==="events"){
@@ -548,7 +548,7 @@
         else if(f.id==="sermon"){
           const h=writeText(group,doc.source?.sermon||"",{...box,h:f.h-10,weight:700},check,f.id);
           writeText(group,Object.hasOwn(doc.fields,"sermonReference")?fieldValue(doc,"sermonReference"):fieldValue(doc,"sermonReference")||doc.source?.scripture||"",{...box,y:f.y+h+2.5,h:f.h-h-2.5,size:12.5,color:muted},check,f.id);
-        }else if(f.id==="leader")writeText(group,fieldValue(doc,"leader")?`인도  ${fieldValue(doc,"leader")}`:"",box,check,f.id);
+        }else if(f.id==="leader")writeText(group,fieldValue(doc,"leader")?`인도  ${personText(fieldValue(doc,"leader"))}`:"",box,check,f.id);
         else if(f.binding.startsWith("month:"))writeText(group,(doc.source?.[f.binding.split(":")[1]]||"").replace(/^(\d+)-(\d+)$/,(_,y,m)=>`${Number(m)}월`),box,check,f.id);
         else writeText(group,value,{...box,color:["address","website","staff","insideBrand","insideChurch","meeting","notices"].includes(f.id)?muted:ink},check,f.id);
         if(mode==="layout"){
@@ -665,8 +665,14 @@
     if(bottom>box.y+box.h+.01)issues.add(id);
     return bottom-box.y;
   }
+  // Format person labels only; retain the saved/source spelling.
+  function personText(value) {
+    return String(value||"").replace(/(^|[\s/·,])([가-힣]{2,5})[ \t]*(선생님|어린이|청년|(?:목사|전도사|집사|권사|장로|서기)(?:님)?)(?=$|[\s/·,])/gu,
+      (all,prefix,name,title)=>["위임","담임","원로","부담임","교육","담당"].includes(name)?all:`${prefix}${name} ${title}`);
+  }
   function personRuns(value,size=12.5) {
-    const match=String(value||"").match(/^(.+?)( (?:청년|목사|전도사|집사|권사|장로|서기|선생님))$/);
+    value=personText(value);
+    const match=value.match(/^(.+?)( (?:청년|어린이|선생님|(?:목사|전도사|집사|권사|장로|서기)(?:님)?))$/);
     return match?[{text:match[1],weight:700,size},{text:match[2],weight:500,size}]:[{text:value,size}];
   }
   function copyRuns(value,kind,size) {
@@ -704,6 +710,7 @@
     const [kind,key]=frame.binding.split(":");
     if(kind==="label")return key;
     if(kind==="month"){const [y,m]=(doc.source?.[key]||"").split("-");return y&&m?`${y}년\n${Number(m)}월`:"";}
+    if(kind==="field"&&key==="staff")return personText(fieldValue(doc,key));
     if(kind==="field")return frame.id==="insideChurch"?fieldValue(doc,key).replace(/^기독교대한성결교회\s+/,""):fieldValue(doc,key);
     if(kind==="source")return doc.source?.[key]||"";
     if(kind==="leader")return fieldValue(doc,"leader")?`인도자\n${fieldValue(doc,"leader")}`:"";
@@ -806,7 +813,7 @@
             if(y>f.y+f.h+.01)frameIssues.add(f.id);
           }
         } else if(f.type==="order") {
-          const list=(doc.source?.order||[]).map(row=>row.label==="광고"?{...row,person:fieldValue(doc,"announcer")}:row),inner=f.w-60;
+          const list=(doc.source?.order||[]).map(row=>({...row,person:personText(row.label==="광고"?fieldValue(doc,"announcer"):row.person)})),inner=f.w-60;
           if(inner<10){frameIssues.add(f.id);root.append(group);continue;}
           const leading=snap(f.size*1.2)/MM;
           const counts=list.map(row=>Math.max(wrap(row.label,30,f.size).length,wrap(row.content,inner,f.size,700).length,wrap(row.person,30,f.size).length));
@@ -826,7 +833,7 @@
             });
             writeStyled(group,songRuns,{...base,x:f.x+30,w:inner,align:"center",weight:700},frameIssues,f.id);
             const personLetters=Array.from(row.person.replace(/\s/g,""));
-            if(personLetters.length>1&&personLetters.length<=6)personLetters.forEach((letter,j)=>writeText(group,letter,{...base,y:centered,x:f.x+f.w-30+j*25/(personLetters.length-1),w:5},frameIssues,f.id));
+            if(!/\s/.test(row.person)&&personLetters.length>1&&personLetters.length<=6)personLetters.forEach((letter,j)=>writeText(group,letter,{...base,y:centered,x:f.x+f.w-30+j*25/(personLetters.length-1),w:5},frameIssues,f.id));
             else writeText(group,row.person,{...base,y:centered,x:f.x+f.w-30,w:30,align:"right"},frameIssues,f.id);
             y+=height+(i<list.length-1?gap:0);
           });
@@ -960,10 +967,12 @@
       <div class="bulletin-properties"></div></aside><section class="bulletin-preview" aria-label="인쇄 미리보기"><div class="bulletin-preview-head"><strong>미리보기</strong><div class="bulletin-page-nav" role="group" aria-label="주보 면 이동"><button type="button" data-bulletin-page="0">겉면</button><button type="button" data-bulletin-page="1">안쪽</button></div><span>A4 가로 · 2쪽</span></div><div class="bulletin-canvas" tabindex="0" aria-label="주보 페이지"></div></section></div></section>`;
     const root=host.firstElementChild,q=selector=>root.querySelector(selector);
     window.lucide?.createIcons({root});
-    root.querySelectorAll("[data-bulletin-page]").forEach(button=>on(button,"click",()=>{
-      const canvas=q(".bulletin-canvas"),page=canvas.querySelectorAll(".bulletin-sheet")[Number(button.dataset.bulletinPage)];
+    function showPage(index){
+      const canvas=q(".bulletin-canvas"),page=canvas.querySelectorAll(".bulletin-sheet")[index];
       if(page)canvas.scrollTo({top:canvas.scrollTop+page.getBoundingClientRect().top-canvas.getBoundingClientRect().top-15,behavior:"instant"});
-    }));
+      pageNavigation();
+    }
+    root.querySelectorAll("[data-bulletin-page]").forEach(button=>on(button,"click",()=>showPage(Number(button.dataset.bulletinPage))));
     function pageNavigation(){
       const canvas=q(".bulletin-canvas"),bounds=canvas.getBoundingClientRect();
       const pages=[...canvas.querySelectorAll(".bulletin-sheet")];
@@ -1132,7 +1141,7 @@
     on(root,"change",event=>{
       const t=event.target;
       if(t.dataset.bulletinSetting){
-        const key=t.dataset.bulletinSetting;if(!["theme","design","compactOrder","archiveReference","outlineColumns"].includes(key)&&!validMonth(t.value))return;
+        const key=t.dataset.bulletinSetting;if(!["theme","design","compactOrder","archiveReference","outlineColumns"].includes(key)&&!validMonth(t.value)){t.value=doc.settings[key]||doc.source?.[key]||"";return;}
         remember();doc.settings[key]=["compactOrder","archiveReference"].includes(key)?t.checked:key==="outlineColumns"?Number(t.value):t.value;
         if(key==="design")doc.frames=defaultFrames(t.value);
         if(["compactOrder","archiveReference"].includes(key))doc.sourceSnapshot=null;
@@ -1141,9 +1150,9 @@
       }
       if(t.matches("[data-bulletin-hidden]")){remember();doc.frames.find(f=>f.id===selected).hidden=!t.checked;persist();preview();return;}
       if(t.matches("[data-bulletin-service]")){if(options.onServiceChange?.(t.value)===false){t.value=doc.id;return;}void load(t.value);return;}
-      if(t.matches("[data-bulletin-frame]")){selected=t.value;properties();preview();return;}
+      if(t.matches("[data-bulletin-frame]")){selected=t.value;properties();preview();showPage(doc.frames.find(f=>f.id===selected).page);return;}
       const f=doc.frames.find(f=>f.id===selected);
-      if(t.dataset.bulletinDimension){const n=Number(t.value);if(!Number.isFinite(n)){properties();return;}remember();setDimension(f,t.dataset.bulletinDimension,n);persist();properties();preview();}
+      if(t.dataset.bulletinDimension){const n=Number(t.value);if(!t.value.trim()||!Number.isFinite(n)){t.value=String(f[t.dataset.bulletinDimension]);return;}remember();setDimension(f,t.dataset.bulletinDimension,n);persist();properties();preview();}
       if(t.matches("[data-bulletin-align]")){remember();f.align=t.value;persist();preview();}
     });
     on(root,"click",event=>{
@@ -1197,7 +1206,7 @@
       if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="p"){event.preventDefault();event.stopPropagation();void print();return;}
       if(event.target.matches("input,textarea,select"))return;
       if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="z"){event.preventDefault();event.stopPropagation();history(event.shiftKey);return;}
-      if(loading||!doc?.dbLoaded||mode!=="layout"||!selected||!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key))return;
+      if(!event.target.closest(".bulletin-canvas")||loading||!doc?.dbLoaded||mode!=="layout"||!selected||!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key))return;
       event.preventDefault();event.stopPropagation();remember();const f=doc.frames.find(f=>f.id===selected),step=event.shiftKey?10:2.5;
       if(event.key==="ArrowLeft")setDimension(f,"x",f.x-step);if(event.key==="ArrowRight")setDimension(f,"x",f.x+step);
       if(event.key==="ArrowUp")setDimension(f,"y",f.y-step);if(event.key==="ArrowDown")setDimension(f,"y",f.y+step);

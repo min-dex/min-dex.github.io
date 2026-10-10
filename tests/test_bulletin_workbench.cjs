@@ -54,6 +54,28 @@ const server=http.createServer((req,res)=>{
  await page.waitForFunction(()=>document.querySelector('[data-bulletin-page="1"]').getAttribute('aria-current')==='page');
  await page.locator('.bulletin-canvas').evaluate(el=>el.scrollTop=0);
  await page.waitForFunction(()=>document.querySelector('[data-bulletin-page="0"]').getAttribute('aria-current')==='page');
+ // Clearing numeric/date controls must not silently move content or mislabel its month.
+ await page.locator('[data-bulletin-mode="layout"]').click();
+ const x=page.locator('[data-bulletin-dimension="x"]');
+ const originalX=await x.inputValue();
+ await page.locator('[data-bulletin-page="0"]').press('ArrowRight');
+ assert.equal(await x.inputValue(),originalX,'Arrow keys on toolbar controls must not move a print frame');
+ assert.equal(await page.locator('[data-bulletin-save]').isDisabled(),true);
+ await x.fill('');await x.press('Tab');
+ assert.equal(await x.inputValue(),originalX,'An empty coordinate restores the previous position');
+ assert.equal(await page.locator('[data-bulletin-save]').isDisabled(),true,'Rejected input must not dirty the saved bulletin');
+ await page.locator('[data-bulletin-mode="content"]').click();
+ const month=page.locator('[data-bulletin-setting="eventsMonth"]');
+ const originalMonth=await month.inputValue();
+ await month.evaluate(el=>{el.value='';el.dispatchEvent(new Event('change',{bubbles:true}));});
+ assert.equal(await month.inputValue(),originalMonth,'The month control must match the displayed schedule after a rejected edit');
+ assert.equal(await page.locator('[data-bulletin-save]').isDisabled(),true);
+ await page.locator('[data-bulletin-mode="layout"]').click();
+ await page.locator('[data-bulletin-frame]').selectOption('leader');
+ await page.waitForFunction(()=>document.querySelector('[data-bulletin-page="1"]').getAttribute('aria-current')==='page');
+ const leaderX=Number(await x.inputValue());
+ await page.locator('.bulletin-canvas').press('ArrowLeft');
+ assert.equal(Number(await x.inputValue()),leaderX-2.5,'Canvas arrow keys still move the selected frame');
  assert.deepEqual(errors,[]);
  if(process.env.BULLETIN_UI_IMAGE)console.log('IMAGE:'+(await page.screenshot({type:'jpeg',quality:55})).toString('base64'));
  console.log('PASS responsive workbench, container resize, face navigation, draft preservation and save');

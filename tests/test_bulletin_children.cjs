@@ -30,6 +30,16 @@ const server=http.createServer((req,res)=>{
  window.childData=data;window.childSource=source;await B.readyAssets();
  const doc={source,fields:{news:"① 오늘 2부 활동은 '사도신경·주기도문 쓰기 대회'로 진행합니다."},settings:{design:'children',theme:'auto'},frames:B.defaultFrames('children'),inherited:{common:{},months:{}}};
  const rendered=B.renderPages(doc,'print');window.childDoc=doc;
+ const spacedSource=structuredClone(source);
+ spacedSource.order=[{id:'spacing',label:'설교',content:'',person:'박소영전도사님'},{id:'prayer-spacing',label:'봉헌기도',content:'',person:'김예담 어린이'}];
+ const spacingDoc={...doc,source:spacedSource,fields:{...doc.fields,leader:'서영윤선생님 / 박소영전도사님',staff:'위임목사 김남영목사 · 담당 교역자 박소영전도사\n부장 유기숙권사 · 총무 박지훈청년'}};
+ const beforeSpacing=JSON.stringify(spacingDoc);
+ for(const design of ['children','auto','editorial']){
+   const output=B.renderPages({...spacingDoc,settings:{...spacingDoc.settings,design},frames:B.defaultFrames(design)},'print');
+   const text=output.pages.map(p=>p.textContent).join(' ');
+   for(const expected of ['박소영 전도사님','김예담 어린이','서영윤 선생님','김남영 목사','위임목사'])if(!text.includes(expected))throw Error(design+' missing spaced person: '+expected);
+ }
+ if(JSON.stringify(spacingDoc)!==beforeSpacing)throw Error('Person formatting must not modify saved content');
  const defaults=B.defaultFrames('children');
  if(defaults.find(f=>f.id==='readingPlan').size!==12.5)throw Error('Original reading type is 12.5pt');
  if(defaults.find(f=>f.id==='memoryVerse').y!==75)throw Error('Original memory verse position');
