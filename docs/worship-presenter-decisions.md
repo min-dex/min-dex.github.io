@@ -1118,6 +1118,8 @@ Small visual polish that does not alter behavior does not need an entry.
 
 
 ### 2026-10-10 Explicit announcement bold
+- Multiple selected lines toggle bold per nonempty line; toggling off removes all
+  paired markers while preserving blank lines. Clicking B retains editor focus.
 - Paired `**text**` on one line is explicit bold in announcement output only.
   Other Markdown and HTML remain literal; lyrics/scripture are unchanged.
 - B controls and Cmd/Ctrl+B update the existing text input/draft path.
