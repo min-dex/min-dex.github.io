@@ -386,15 +386,15 @@ body[data-module="presenter"].right-sidebar-open { --shell-right-w: var(--right-
   background: var(--tab-active-bg);
   color: var(--ink);
   font-weight: 700;
-  box-shadow: inset 1px 0 var(--shell-separator), inset -1px 0 var(--shell-separator);
+  box-shadow: inset 1px 0 var(--page-tab-left-separator, var(--shell-separator)), inset -1px 0 var(--shell-separator);
 }
 .page-tab.drag-before { box-shadow: inset 2px 0 0 var(--accent); }
 .page-tab.drag-after { box-shadow: inset -2px 0 0 var(--accent); }
 .page-tab.active::after {
   position: absolute;
-  right: 0;
+  right: 1px;
   bottom: 0;
-  left: 0;
+  left: 1px;
   height: 1px;
   background: var(--tab-active-bg);
   content: "";
@@ -8776,9 +8776,19 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 
 @media (min-width: 901px) {
   /* One continuous left panel: mask the header divider only over navigation. */
-  .topbar-module-strip {
-    background: var(--sidebar-bg);
-    box-shadow: 1px 0 var(--shell-separator);
+  .topbar-module-strip { background: var(--sidebar-bg); }
+  .sidebar { box-shadow: none; }
+  .page-tab:first-child { --page-tab-left-separator: transparent; }
+  .app-shell::after {
+    position: absolute;
+    z-index: 4;
+    top: 0;
+    bottom: 0;
+    left: var(--shell-left-w);
+    width: 1px;
+    background: var(--shell-separator);
+    pointer-events: none;
+    content: "";
   }
   body.sidebar-collapsed .sidebar {
     opacity: 1;

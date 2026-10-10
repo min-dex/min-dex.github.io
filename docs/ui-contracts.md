@@ -112,10 +112,10 @@ Inactive module tabs should stay visually quiet. Active tabs may show a clearer 
   between module navigation and search. Module controls and search remain fixed;
   only the list scrolls. Compact screens retain the separate header and drawer.
 
-- The left sidebar separator paints one pixel outside its right edge, in the
-  same pixel column as the first active tab's inset left separator. Keep the
-  wrapper unclipped and above adjacent content so the stroke remains visible;
-  do not change column widths to compensate for stroke placement.
+- Desktop's left-panel right boundary is drawn once by the full-height shell,
+  one pixel outside the sidebar edge. Do not split it between header and list
+  shadows or duplicate it on the first tab. Active-tab bottom masking is inset
+  one pixel on each side so it never erases the vertical strokes at corners.
 - Sidebar width should stay consistent unless a module has a strong reason.
 - Sidebar row padding should align visually with the sidebar toggle x-position.
 - Sidebar content should feel relaxed, not cramped.
