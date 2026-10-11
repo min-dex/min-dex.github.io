@@ -8972,15 +8972,14 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .service-date-card.is-past { border-style:dashed; }
 .service-past-editing-notice { margin:0 0 12px; padding:10px 12px; border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:var(--r); background:var(--panel-2); color:var(--ink); font-size:var(--ui-label-size); line-height:1.5; }
 
-.svc-announcement-editor{display:flex;flex-direction:column;gap:15px;min-width:0;width:100%}
+.svc-announcement-editor{display:flex;flex-direction:column;flex:1 1 100%;grid-column:1/-1;gap:10px;min-width:0;width:100%}
 .svc-announcement-editor details>summary{cursor:pointer;font-size:var(--ui-label-size);font-weight:700;color:var(--ink-3);padding:5px 0}
 .svc-announcement-editor details[open]>summary{margin-bottom:10px}
 /* Announcement regions are vertical fields, not the board's compact inline rows. */
-.svc-announcement-editor{flex:1 1 100%;grid-column:1/-1;gap:10px}
 .svc-announcement-editor .svc-presenter-input-field,
 .svc-board-subgroup-controls .svc-announcement-editor .svc-presenter-input-field{flex:none;display:flex;flex-direction:column;align-items:stretch;gap:5px;margin:0;min-width:0}
 .svc-announcement-editor .svc-presenter-input-field>span{padding:0;line-height:1.5}
-.svc-announcement-editor textarea.svc-presenter-input-control{box-sizing:border-box;min-height:65px;max-height:55vh;line-height:1.55;padding:10px;font-weight:500}
+.svc-announcement-editor textarea.svc-presenter-input-control{box-sizing:border-box;field-sizing:content;height:auto;min-height:calc(1lh + 20px);max-height:55vh;line-height:1.55;padding:10px 5px;font-weight:500;resize:none;overflow-y:auto}
 .svc-announcement-editor details{min-width:0}
 .svc-announcement-editor details>summary{display:flex;align-items:center;gap:10px;list-style:none;min-height:30px;box-sizing:border-box}
 .svc-announcement-editor details>summary::-webkit-details-marker{display:none}
@@ -8989,4 +8988,3 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .svc-announcement-editor details>.svc-presenter-input-field+.svc-presenter-input-field{margin-top:10px}
 /* Avoid nesting an announcement input surface inside another padded panel. */
 .svc-board-subgroup-controls:has(.svc-announcement-editor){padding:5px 0;background:transparent;border-radius:0}
-.svc-announcement-editor textarea.svc-presenter-input-control{padding:10px 5px}

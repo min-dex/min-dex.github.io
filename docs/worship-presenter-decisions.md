@@ -1264,3 +1264,9 @@ Small visual polish that does not alter behavior does not need an entry.
 - Chrome checks cover insertion/deletion, paste, Korean composition events,
   styled numbers, undo/redo, mobile beforeinput events, 20+ items, blank lines,
   persistence round-trip and output. Mobile events are simulated, not device-tested.
+
+### 2026-10-11 Announcement editor content height
+- All three announcement inputs use the same content-sized height, with a single
+  line minimum and shared padding. Remove region-specific row counts and manual
+  resize handles. Grow/shrink with input and wrapping, including reopened common
+  fields; cap at 55vh with internal scrolling for unusually long copy.
