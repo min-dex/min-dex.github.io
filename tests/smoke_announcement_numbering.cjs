@@ -1,0 +1,26 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),http=require('node:http');
+const {chromium,webkit}=require('playwright');const root=path.resolve(__dirname,'..');
+const server=http.createServer((req,res)=>{const pathname=new URL(req.url,'http://localhost').pathname;const file=path.resolve(root,pathname==='/'?'index.html':pathname.slice(1));if(!file.startsWith(root+path.sep)||!fs.existsSync(file)||fs.statSync(file).isDirectory()){res.writeHead(404);res.end();return;}res.setHeader('Content-Type',({'.js':'application/javascript','.mjs':'application/javascript','.css':'text/css','.html':'text/html'})[path.extname(file)]||'application/octet-stream');res.end(fs.readFileSync(file));});
+(async()=>{await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port;
+try{for(const engine of [chromium,...(fs.existsSync(webkit.executablePath())?[webkit]:[])]){const browser=await engine.launch({headless:true,...(engine===chromium?{executablePath:process.env.BULLETIN_CHROME}:{})});try{const page=await browser.newPage({viewport:{width:1440,height:900}});await page.route('**/*',r=>r.request().url().startsWith(base)?r.continue():r.abort());await page.goto(base);await page.waitForFunction(()=>typeof renderPresenterHighlightedText==='function'&&typeof state!=='undefined');
+await page.evaluate(()=>{
+ const item={id:'ui-ad',label:'광고',raw_title:'오늘도 **청소년부 예배**에 오신 여러분을 **환영**하고 **축복**합니다 :)\n1. 첫 번째 소식\n2. 두 번째 소식\n◇ 정기 안내',_worshipSectionKey:'announcements',memo:serializeServiceItemMemo({elementType:'body',inputMode:'text'})};
+ document.body.innerHTML='<main style="padding:20px"><div class="svc-board-subgroup-controls"><div class="svc-board-subgroup-control-item">'+renderServiceAnnouncementEditor(item,0,'ui',parseServiceItemMemo(item.memo))+'</div></div></main>';
+});
+const field=page.locator('[data-announcement-numbered]');
+await field.fill('① 첫 안내');await field.press('End');await field.press('Enter');
+assert.equal(await field.inputValue(),'① 첫 안내\n② ');
+await field.type('둘째');await field.press('Shift+Enter');await field.type('자세한 설명');
+assert.equal(await field.inputValue(),'① 첫 안내\n② 둘째\n　 자세한 설명');
+await field.press('Enter');assert.match(await field.inputValue(),/\n③ $/);
+await field.press('Enter');assert.match(await field.inputValue(),/자세한 설명\n$/);
+await field.evaluate(el=>{el.value='3. 첫 안내\n일시: 내일\n8. 다음 안내';el.setSelectionRange(el.value.length,el.value.length);el.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertFromPaste'}));});
+assert.equal(await field.inputValue(),'① 첫 안내\n　 일시: 내일\n② 다음 안내');
+await field.evaluate(el=>el.setSelectionRange(6,6));await field.press('Enter');
+assert.equal(await field.inputValue(),'① 첫 안내\n② \n　 일시: 내일\n③ 다음 안내');
+assert.equal(await field.evaluate(el=>el.selectionStart),9);
+await field.evaluate(el=>el.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',isComposing:true,bubbles:true})));
+assert.equal(await field.inputValue(),'① 첫 안내\n② \n　 일시: 내일\n③ 다음 안내');
+console.log('PASS input numbering, continuation indentation, empty-item exit, pasted copy, middle insertion and IME');
+if(process.env.INLINE_BOLD_SCREENSHOT)await page.screenshot({path:process.env.INLINE_BOLD_SCREENSHOT,fullPage:false});
+}finally{await browser.close();}}}finally{server.close();}})().catch(e=>{console.error(e);server.close();process.exitCode=1;});

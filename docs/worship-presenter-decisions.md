@@ -1210,3 +1210,12 @@ Small visual polish that does not alter behavior does not need an entry.
 - Fullscreen announcement welcome copy uses the same 4cqh base size as weekly
   news. Preserve its top anchor, heading clearance, 600/800 weights, and fitting
   for unusually long copy. Footer sizing remains unchanged.
+
+### 2026-10-11 Announcement list typing
+- Weekly-news inputs display sequential circled numbers and indent unnumbered
+  continuation lines. Enter inserts the next number; Shift+Enter continues the
+  current item. Enter on an empty numbered row exits the list. Pasted copy is
+  normalized and middle insertions renumber later items. IME composition and
+  modified save shortcuts are not intercepted. Welcome/footer fields are unchanged.
+- The presenter removes the editor's continuation-space prefix before applying
+  its own hanging indent so output does not acquire a double indent.

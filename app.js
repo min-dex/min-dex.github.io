@@ -10494,8 +10494,9 @@ function serviceAnnouncementRegions(item,memo=parseServiceItemMemo(item.memo)) {
 
 function renderServiceAnnouncementEditor(item,index,serviceId,memo) {
   const regions=serviceAnnouncementRegions(item,memo);
-  const field=(key,label,rows)=>`<label class="svc-presenter-input-field"><span>${label}</span><textarea data-inline-bold class="svc-presenter-input-control svc-presenter-input-control--multiline" data-service-id="${escapeAttr(serviceId||"")}" data-service-item-index="${index}" data-service-item-field="announcement_${key}" data-initial-value="${escapeAttr(regions[key])}" rows="${rows}" aria-label="${label}" onkeydown="handleDetailKeydown(event)">${escapeHtml(regions[key])}</textarea></label>`;
-  return `<div class="svc-announcement-editor">${field("news","주간 소식",5)}<details><summary>상단 환영 · 하단 안내</summary>${field("welcome","상단 환영 문구",2)}${field("footer","하단 안내",3)}</details></div>`;
+  regions.news=window.MindexInlineText.numbered(regions.news).value;
+  const field=(key,label,rows)=>`<label class="svc-presenter-input-field"><span>${label}</span><textarea data-inline-bold ${key==="news"?'data-announcement-numbered':''} class="svc-presenter-input-control svc-presenter-input-control--multiline" data-service-id="${escapeAttr(serviceId||"")}" data-service-item-index="${index}" data-service-item-field="announcement_${key}" data-initial-value="${escapeAttr(regions[key])}" rows="${rows}" aria-label="${label}" onkeydown="handleDetailKeydown(event)">${escapeHtml(regions[key])}</textarea></label>`;
+  return `<div class="svc-announcement-editor">${field("news","주간 소식",5)}<small class="svc-presenter-input-hint">Enter 다음 번호 · Shift+Enter 이어 쓰기</small><details><summary>상단 환영 · 하단 안내</summary>${field("welcome","상단 환영 문구",2)}${field("footer","하단 안내",3)}</details></div>`;
 }
 
 function parseServiceItemMemo(value) {

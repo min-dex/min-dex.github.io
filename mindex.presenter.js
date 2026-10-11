@@ -1441,7 +1441,7 @@ function presenterAnnouncementItems(text = "") {
         return;
       }
       if (current) {
-        current.lines.push(line);
+        current.lines.push(line.replace(/^　 /u,""));
         return;
       }
       current = { marker: "", lines: [line] };
