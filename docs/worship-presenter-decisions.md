@@ -1240,3 +1240,18 @@ Small visual polish that does not alter behavior does not need an entry.
 - Keep the previous slide index; ordinary number/next/previous navigation exits
   blackout through the existing navigation rules. Regular in-sequence blank
   slides retain their existing background/keying behavior. No stored data changes.
+
+
+### 2026-10-11 Announcement numbering audit
+- Parse numbered rows through the shared inline-text helper, including a marker
+  inside `**bold**`. Keep emphasis on the body without duplicate output markers;
+  preserve authored output spacing and editor continuation indentation.
+- Enter at the start of an item inserts a preceding item without duplicating its
+  marker; Enter replaces a selected range. Mobile beforeinput paragraph/line-break
+  events add the next item. Desktop Shift+Enter remains continuation indentation.
+- Keep bounded per-input undo/redo snapshots for native edits, numbering,
+  composition completion and bold toggles. Restore text and selection together,
+  including deletion followed by automatic renumbering. Common fields are unchanged.
+- Chrome checks cover insertion/deletion, paste, Korean composition events,
+  styled numbers, undo/redo, mobile beforeinput events, 20+ items, blank lines,
+  persistence round-trip and output. Mobile events are simulated, not device-tested.

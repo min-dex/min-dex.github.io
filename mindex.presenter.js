@@ -1421,8 +1421,6 @@ function presenterCircledNumber(index) {
 }
 
 function presenterAnnouncementItems(text = "") {
-  const circledNumbers = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫", "⑬", "⑭", "⑮", "⑯", "⑰", "⑱", "⑲", "⑳"];
-  const circledIndex = new Map(circledNumbers.map((marker, index) => [marker, index]));
   const items = [];
   let current = null;
 
@@ -1430,12 +1428,12 @@ function presenterAnnouncementItems(text = "") {
     .replace(/\r\n?/g, "\n")
     .split("\n")
     .forEach((line) => {
-      const match = line.match(/^\s*(?:(\d+)[.)]|([①-⑳]))[ \t]?(.*)$/u);
+      const match = window.MindexInlineText.listLine(line,true);
       if (match) {
-        const numericIndex = match[1] ? Number(match[1]) - 1 : circledIndex.get(match[2]);
+        const numericIndex = match.number-1;
         current = {
-          marker: Number.isInteger(numericIndex) && numericIndex >= 0 ? presenterCircledNumber(numericIndex) : match[2] || "",
-          lines: [String(match[3] || "")],
+          marker: Number.isInteger(numericIndex) && numericIndex >= 0 ? presenterCircledNumber(numericIndex) : "",
+          lines: [match.body],
         };
         items.push(current);
         return;
