@@ -238,3 +238,11 @@ Presenter details live in `docs/thread-worship-presenter.md`. Keep shell edits o
   다가오는 예배 by local calendar date, without relying on color alone.
 - Past-service controllers and order editors show the full date and explain that
   edits save to that historical service. These cues never enter output slides.
+
+## Announcement region editor geometry
+
+Announcement region labels stack above their textareas inside worship boards.
+Reset the board's inline-field flex basis inside this column editor; otherwise
+its 220px basis creates an empty vertical gap. Keep common fields collapsed by
+default and use the shared compact disclosure rhythm. Verify open/closed states
+at desktop and narrow widths with `tests/smoke_announcement_editor_layout.cjs`.

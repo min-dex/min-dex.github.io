@@ -8975,3 +8975,15 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .svc-announcement-editor{display:flex;flex-direction:column;gap:15px;min-width:0;width:100%}
 .svc-announcement-editor details>summary{cursor:pointer;font-size:var(--ui-label-size);font-weight:700;color:var(--ink-3);padding:5px 0}
 .svc-announcement-editor details[open]>summary{margin-bottom:10px}
+/* Announcement regions are vertical fields, not the board's compact inline rows. */
+.svc-announcement-editor{flex:1 1 100%;grid-column:1/-1;gap:10px}
+.svc-announcement-editor .svc-presenter-input-field,
+.svc-board-subgroup-controls .svc-announcement-editor .svc-presenter-input-field{flex:none;display:flex;flex-direction:column;align-items:stretch;gap:5px;margin:0;min-width:0}
+.svc-announcement-editor .svc-presenter-input-field>span{padding:0;line-height:1.5}
+.svc-announcement-editor textarea.svc-presenter-input-control{box-sizing:border-box;min-height:65px;max-height:55vh;line-height:1.55;padding:10px;font-weight:500}
+.svc-announcement-editor details{min-width:0}
+.svc-announcement-editor details>summary{display:flex;align-items:center;gap:10px;list-style:none;min-height:30px;box-sizing:border-box}
+.svc-announcement-editor details>summary::-webkit-details-marker{display:none}
+.svc-announcement-editor details>summary::before{content:"";width:5px;height:5px;border-right:1px solid currentColor;border-bottom:1px solid currentColor;transform:rotate(-45deg);flex-shrink:0;margin-left:2px}
+.svc-announcement-editor details[open]>summary::before{transform:rotate(45deg)}
+.svc-announcement-editor details>.svc-presenter-input-field+.svc-presenter-input-field{margin-top:10px}
