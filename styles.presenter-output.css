@@ -1455,3 +1455,10 @@ span.presenter-announcement-paren {
 
 .presenter-slide--lyrics[data-section-key="announcements"]>.presenter-slide-text{font-weight:600}
 .presenter-slide--lyrics[data-section-key="announcements"]>.presenter-slide-text strong{font-weight:800}
+
+/* Number 0 is an immediate black frame, independent of service theme/keying. */
+.presenter-output-body.is-blackout,
+.presenter-output-root.no-chromakey.is-blackout {
+  --presenter-output-bg: #000;
+  background: #000;
+}

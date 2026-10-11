@@ -1225,3 +1225,12 @@ Small visual polish that does not alter behavior does not need an entry.
   Deleting all content leaves the input empty. During Korean IME composition,
   defer numbering until composition completes and keep the caret after the text.
   Welcome/footer inputs do not receive automatic numbers.
+
+## 2026-10-11 — Number zero means blackout
+
+- Entering slide number `0` uses the existing safetyBlank transport state but
+  renders solid black immediately, in both chromakey and fullscreen services.
+  Do not display the service background or decorative blank cross.
+- Keep the previous slide index; ordinary number/next/previous navigation exits
+  blackout through the existing navigation rules. Regular in-sequence blank
+  slides retain their existing background/keying behavior. No stored data changes.
