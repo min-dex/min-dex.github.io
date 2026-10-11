@@ -1149,3 +1149,11 @@ Small visual polish that does not alter behavior does not need an entry.
   retain their existing protection. No missing target elements are created.
 - Verified dispatch, target identity and conflict guards with
   `tests/test_sunday_third_hymn_sync.cjs`, plus the worship rule guard suite.
+
+### 2026-10-11 Youth worship order
+- From service date 2026-10-11, youth worship follows sermon, response prayer,
+  Lords Prayer, announcements/fellowship, then second-part class activities.
+- Reuse the existing response_song, lords_prayer, announcements and fellowship
+  sections; only move Lords Prayer before announcements. Preserve authored text,
+  assignees and media. Earlier service dates retain the previous order.
+- User explicitly authorized applying this to already-created services from today.

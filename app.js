@@ -19502,6 +19502,10 @@ function allGenerationsOfferingMediaSpec(service = null) {
 }
 
 const PUBLIC_WORSHIP_TEMPLATE_VERSIONS = {
+  youth: [
+    publicWorshipTemplateVersion(() => youthWorshipTemplate()),
+    publicWorshipTemplateVersion(() => youthWorshipTemplate({ revisedOrder: true }), "2026-q4-youth-order", "2026-10-11"),
+  ],
   "sunday-first": [
     publicWorshipTemplateVersion((options = {}) => {
         const pastorLeader = serviceHasPastorSermonLeader(options.service, options.items);
@@ -19933,8 +19937,8 @@ function publicWorshipResponseStep() {
   };
 }
 
-function youthWorshipTemplate() {
-  return [
+function youthWorshipTemplate({ revisedOrder = false } = {}) {
+  const steps = [
     publicWorshipReadyStep(),
     publicWorshipCreedStep(),
     publicWorshipPraiseStep({ count: 3, required: true }),
@@ -19973,6 +19977,14 @@ function youthWorshipTemplate() {
       elements: [{ label: "반별 모임", name: "반별 모임", elementType: "title", default_text: "반별 모임" }],
     },
   ];
+  if (!revisedOrder) return steps;
+  const prayer = steps.find(step => step.sectionKey === "lords_prayer");
+  const announcementIndex = steps.findIndex(step => step.sectionKey === "announcements");
+  if (prayer && announcementIndex >= 0) {
+    steps.splice(steps.indexOf(prayer), 1);
+    steps.splice(announcementIndex, 0, prayer);
+  }
+  return steps;
 }
 
 function youngAdultWorshipTemplate() {
