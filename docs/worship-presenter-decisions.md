@@ -1240,3 +1240,13 @@ Small visual polish that does not alter behavior does not need an entry.
 - Keep the previous slide index; ordinary number/next/previous navigation exits
   blackout through the existing navigation rules. Regular in-sequence blank
   slides retain their existing background/keying behavior. No stored data changes.
+
+## 2026-10-11 — Desktop update safety
+
+- Installed-app updates retain `electron-updater`; no Sparkle integration.
+- Defer update prompts while presenter output is open; the main process blocks
+  installation independently of renderer state. Number-zero blackout is still
+  active output and does not permit installation. No install-on-quit behavior.
+- Require explicit download and restart actions, with unsaved/save-in-progress
+  protection and a native update menu for retry/later. See
+  `electron-packaging-plan.md` for platform-specific build and release gates.

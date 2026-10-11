@@ -920,35 +920,62 @@ function applyRuntimePlatformClass() {
 function bindElectronDesktopEvents() {
   const desktop = window.mindexElectron;
   if (!desktop?.isDesktop) return;
-  desktop.onUpdateAvailable?.((info) => {
-    const version = info?.version ? ` ${info.version}` : "";
-    showToast(`새 버전${version}이 있습니다.`);
-    window.setTimeout(() => {
-      if (window.confirm("Mindex 새 버전을 내려받을까요?")) {
-        desktop.downloadUpdate?.().catch((error) => {
-          showToast(error?.message || "업데이트 다운로드를 시작하지 못했습니다.", "error");
-        });
+  let prompted = "";
+  let promptPending = false;
+  const showFailure = result => {
+    if (result?.ok) return;
+    const messages = {
+      "presenter-active": "송출을 종료한 뒤 업데이트를 설치해 주세요.",
+      "updates-unavailable": "자동 업데이트는 배포용 설치 앱에서 사용할 수 있습니다.",
+      "update-not-ready": "업데이트 다운로드가 아직 끝나지 않았습니다.",
+    };
+    showToast(messages[result?.reason] || "업데이트를 진행하지 못했습니다. 다시 확인해 주세요.", "error");
+  };
+  const handleState = async update => {
+    if (!update || promptPending) return;
+    if (update.status === "error") { showToast(update.message, "error"); return; }
+    if (!["available", "downloaded"].includes(update.status)) return;
+    if (update.presenterOpen || isPresenterOutputWindowOpen()) return;
+    const key = `${update.status}:${update.version}`;
+    if (prompted === key) return;
+    prompted = key;
+    promptPending = true;
+    try {
+      const installing = update.status === "downloaded";
+      const message = installing
+        ? "업데이트 준비가 끝났습니다. 지금 재시작해서 설치할까요?"
+        : `Mindex 새 버전 ${update.version || ""}을 내려받을까요?`;
+      if (!window.confirm(message)) return;
+      if (installing) {
+        if (isPresenterOutputWindowOpen()) { showFailure({ reason: "presenter-active" }); return; }
+        if (hasDirtyChanges({ reconcile: true }) || currentSaveButtonState().dirty) {
+          showToast("편집 내용을 먼저 저장한 뒤 업데이트 메뉴에서 다시 설치해 주세요.", "error");
+          return;
+        }
       }
-    }, 300);
+      showFailure(await (installing ? desktop.installUpdate() : desktop.downloadUpdate()));
+    } catch { showFailure(); }
+    finally {
+      promptPending = false;
+      // A cached download may finish before the download command resolves.
+      const result = await desktop.getUpdateState().catch(() => null);
+      if (result?.ok) void handleState(result.state);
+    }
+  };
+  desktop.onUpdateState?.(update => { void handleState(update); });
+  desktop.onCheckUpdateRequested?.(async () => {
+    prompted = "";
+    try {
+      const result = await desktop.checkForUpdates();
+      if (!result?.ok) { showFailure(result); return; }
+      const update = result.state;
+      if (update.presenterOpen) showToast("송출 종료 후 업데이트를 진행할 수 있습니다.");
+      else if (update.status === "current") showToast("최신 버전입니다.");
+      else if (update.status === "downloading") showToast(`업데이트 다운로드 중 · ${Math.round(update.percent)}%`);
+      else void handleState(update);
+    } catch { showFailure(); }
   });
-  desktop.onUpdateProgress?.((progress) => {
-    const percent = Number(progress?.percent);
-    if (Number.isFinite(percent) && percent >= 99) showToast("업데이트 다운로드를 마무리하고 있습니다.");
-  });
-  desktop.onUpdateDownloaded?.(() => {
-    showToast("업데이트 준비가 끝났습니다.");
-    window.setTimeout(() => {
-      if (window.confirm("지금 재시작해서 업데이트할까요?")) {
-        desktop.installUpdate?.().catch((error) => {
-          showToast(error?.message || "업데이트를 설치하지 못했습니다.", "error");
-        });
-      }
-    }, 300);
-  });
-  desktop.onUpdateError?.((error) => {
-    showToast(error?.message || "업데이트 확인에 실패했습니다.", "error");
-  });
-  desktop.checkForUpdates?.().catch(() => {});
+  desktop.getUpdateState?.().then(result => { if (result?.ok) void handleState(result.state); }).catch(() => {});
 }
 
 function loadInitialData() {

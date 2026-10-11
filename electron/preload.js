@@ -12,16 +12,15 @@ contextBridge.exposeInMainWorld("mindexElectron", {
   installUpdate: () => ipcRenderer.invoke("mindex:install-update"),
   importKeynoteDeck: (payload) => ipcRenderer.invoke("mindex:import-keynote-deck", payload),
   filePathForFile: (file) => webUtils.getPathForFile(file),
-  onUpdateAvailable: (callback) => {
-    ipcRenderer.on("mindex:update-available", (_event, info) => callback(info));
+  getUpdateState: () => ipcRenderer.invoke("mindex:get-update-state"),
+  onUpdateState: (callback) => {
+    const handler = (_event, state) => callback(state);
+    ipcRenderer.on("mindex:update-state", handler);
+    return () => ipcRenderer.removeListener("mindex:update-state", handler);
   },
-  onUpdateDownloaded: (callback) => {
-    ipcRenderer.on("mindex:update-downloaded", (_event, info) => callback(info));
-  },
-  onUpdateProgress: (callback) => {
-    ipcRenderer.on("mindex:update-progress", (_event, progress) => callback(progress));
-  },
-  onUpdateError: (callback) => {
-    ipcRenderer.on("mindex:update-error", (_event, error) => callback(error));
+  onCheckUpdateRequested: (callback) => {
+    const handler = () => callback();
+    ipcRenderer.on("mindex:check-update-requested", handler);
+    return () => ipcRenderer.removeListener("mindex:check-update-requested", handler);
   },
 });

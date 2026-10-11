@@ -12,13 +12,17 @@
     "dist:clean": "node scripts/clean-electron-dist.mjs",
     "dist:prune": "node scripts/prune-electron-dist.mjs",
     "package:audit": "node scripts/audit-electron-package.mjs",
-    "electron:pack": "pnpm run dist:clean && electron-builder --dir && node scripts/clear-local-quarantine.mjs",
-    "electron:pack:raw": "pnpm run dist:clean && electron-builder --dir",
-    "electron:dist": "pnpm run dist:clean && electron-builder && pnpm run dist:prune",
-    "electron:dist:mac:arm64": "pnpm run dist:clean && electron-builder --mac dmg --arm64 && pnpm run dist:prune",
-    "electron:dist:mac:x64": "pnpm run dist:clean && electron-builder --mac dmg --x64 && pnpm run dist:prune",
-    "electron:dist:win:x64": "pnpm run dist:clean && electron-builder --win nsis --x64 && pnpm run dist:prune",
-    "electron:release": "node scripts/verify-release.mjs && pnpm run dist:clean && electron-builder --publish always && pnpm run dist:prune"
+    "electron:pack": "pnpm run dist:clean && electron-builder --publish never --dir && node scripts/clear-local-quarantine.mjs",
+    "electron:pack:raw": "pnpm run dist:clean && electron-builder --publish never --dir",
+    "electron:dist": "pnpm run dist:clean && electron-builder --publish never && pnpm run dist:prune",
+    "electron:dist:mac:arm64": "pnpm run dist:clean && electron-builder --publish never --mac dmg zip --arm64 && pnpm run dist:prune",
+    "electron:dist:mac:x64": "pnpm run dist:clean && electron-builder --publish never --mac dmg zip --x64 && pnpm run dist:prune",
+    "electron:dist:win:x64": "pnpm run dist:clean && electron-builder --publish never --win nsis --x64 && pnpm run dist:prune",
+    "electron:release": "node scripts/release-electron.mjs",
+    "test:desktop": "node --test tests/test_electron_updater.cjs tests/test_release_preflight.mjs tests/test_desktop_update_ui.cjs && python3 tests/test_electron_runtime_files.py && node tests/test_worship_input_module_contract.cjs",
+    "electron:check": "node scripts/verify-release.mjs --offline",
+    "electron:release:mac": "node scripts/release-electron.mjs --platform=mac",
+    "electron:release:win": "node scripts/release-electron.mjs --platform=win"
   },
   "build": {
     "appId": "kr.mindex.app",
@@ -73,7 +77,8 @@
     ],
     "mac": {
       "target": [
-        "dmg"
+        "dmg",
+        "zip"
       ],
       "hardenedRuntime": true,
       "notarize": true
@@ -87,7 +92,8 @@
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": false
-    }
+    },
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}"
   },
   "devDependencies": {
     "electron": "^31.7.7",

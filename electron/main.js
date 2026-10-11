@@ -1,11 +1,11 @@
-const { app, BrowserWindow, ipcMain, screen } = require("electron");
+const { app, BrowserWindow, ipcMain, screen, Menu, MenuItem } = require("electron");
 const path = require("node:path");
+const { createUpdateController } = require("./updater");
 const { importKeynoteDeck } = require("./keynote-importer");
 
 let mainWindow = null;
 let presenterWindow = null;
-let pendingUpdateInfo = null;
-let autoUpdater = null;
+let updateController = null;
 let mainWindowEnsureTimer = null;
 
 function updatesEnabled() {
@@ -174,6 +174,7 @@ function createPresenterWindow({ url, targetRect, alwaysOnTop = false } = {}) {
   });
   presenterWindow.on("closed", () => {
     presenterWindow = null;
+    updateController?.publish();
   });
 
   if (url) {
@@ -184,32 +185,43 @@ function createPresenterWindow({ url, targetRect, alwaysOnTop = false } = {}) {
 }
 
 function configureAutoUpdater() {
+  if (updateController || !updatesEnabled()) return updateController;
   try {
-    ({ autoUpdater } = require("electron-updater"));
-  } catch (error) {
-    console.warn("Mindex updater unavailable", error?.message || error);
-    return;
-  }
-  autoUpdater.autoDownload = false;
-  autoUpdater.on("update-available", (info) => {
-    pendingUpdateInfo = info;
-    mainWindow?.webContents.send("mindex:update-available", info);
-  });
-  autoUpdater.on("update-not-available", (info) => {
-    mainWindow?.webContents.send("mindex:update-not-available", info);
-  });
-  autoUpdater.on("download-progress", (progress) => {
-    mainWindow?.webContents.send("mindex:update-progress", progress);
-  });
-  autoUpdater.on("update-downloaded", (info) => {
-    pendingUpdateInfo = info;
-    mainWindow?.webContents.send("mindex:update-downloaded", info);
-  });
-  autoUpdater.on("error", (error) => {
-    mainWindow?.webContents.send("mindex:update-error", {
-      message: error?.message || "Update check failed.",
+    const { autoUpdater } = require("electron-updater");
+    updateController = createUpdateController({
+      updater: autoUpdater,
+      enabled: updatesEnabled,
+      presenterOpen: () => Boolean(presenterWindow && !presenterWindow.isDestroyed()),
+      notify: (state) => {
+        if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send("mindex:update-state", state);
+      },
     });
-  });
+  } catch {
+    console.warn("Mindex updater unavailable");
+  }
+  return updateController;
+}
+
+function bindUpdateMenu() {
+  const menu = Menu.getApplicationMenu() || Menu.buildFromTemplate([
+    ...(process.platform === "darwin" ? [{ role: "appMenu" }] : []),
+    { role: "fileMenu" }, { role: "editMenu" }, { role: "viewMenu" }, { role: "windowMenu" },
+  ]);
+  menu.append(new MenuItem({ label: "업데이트", submenu: [{
+    label: "업데이트 확인…",
+    click: () => {
+      ensureMainWindowVisible();
+      mainWindow.webContents.send("mindex:check-update-requested");
+    },
+  }] }));
+  Menu.setApplicationMenu(menu);
+}
+
+function updateRequest(event, action) {
+  if (!mainWindow || event.sender !== mainWindow.webContents) return { ok: false, reason: "untrusted-window" };
+  const controller = configureAutoUpdater();
+  if (!controller) return { ok: false, reason: "updates-unavailable" };
+  return action === "state" ? { ok: true, state: controller.snapshot() } : controller[action]();
 }
 
 ipcMain.handle("mindex:open-presenter", (_event, payload = {}) => {
@@ -219,7 +231,7 @@ ipcMain.handle("mindex:open-presenter", (_event, payload = {}) => {
 
 ipcMain.handle("mindex:close-presenter", () => {
   if (presenterWindow && !presenterWindow.isDestroyed()) presenterWindow.close();
-  presenterWindow = null;
+  // Keep the live-window guard until Electron confirms the window is closed.
   return { ok: true };
 });
 
@@ -239,23 +251,10 @@ ipcMain.handle("mindex:set-presenter-always-on-top", (_event, payload = {}) => (
   ok: applyPresenterAlwaysOnTop(Boolean(payload.enabled)),
 }));
 
-ipcMain.handle("mindex:check-for-updates", async () => {
-  if (!app.isPackaged || !updatesEnabled() || !autoUpdater) return { ok: false, reason: "updates-unavailable" };
-  const result = await autoUpdater.checkForUpdates();
-  return { ok: true, updateInfo: result?.updateInfo || pendingUpdateInfo };
-});
-
-ipcMain.handle("mindex:download-update", async () => {
-  if (!app.isPackaged || !updatesEnabled() || !autoUpdater) return { ok: false, reason: "updates-unavailable" };
-  await autoUpdater.downloadUpdate();
-  return { ok: true };
-});
-
-ipcMain.handle("mindex:install-update", () => {
-  if (!app.isPackaged || !updatesEnabled() || !autoUpdater) return { ok: false, reason: "updates-unavailable" };
-  autoUpdater.quitAndInstall(false, true);
-  return { ok: true };
-});
+ipcMain.handle("mindex:get-update-state", event => updateRequest(event, "state"));
+ipcMain.handle("mindex:check-for-updates", event => updateRequest(event, "check"));
+ipcMain.handle("mindex:download-update", event => updateRequest(event, "download"));
+ipcMain.handle("mindex:install-update", event => updateRequest(event, "install"));
 
 ipcMain.handle("mindex:import-keynote-deck", async (_event, payload = {}) => {
   const outputDir = payload.outputDir || path.join(app.getPath("userData"), "imported-decks");
@@ -268,6 +267,7 @@ ipcMain.handle("mindex:import-keynote-deck", async (_event, payload = {}) => {
 
 app.whenReady().then(() => {
   createMainWindow();
+  bindUpdateMenu();
   let attempts = 0;
   mainWindowEnsureTimer = setInterval(() => {
     attempts += 1;
@@ -279,8 +279,7 @@ app.whenReady().then(() => {
   }, 500);
   setTimeout(() => {
     if (!updatesEnabled()) return;
-    configureAutoUpdater();
-    if (app.isPackaged && autoUpdater) autoUpdater.checkForUpdates().catch(() => {});
+    void configureAutoUpdater()?.check();
   }, 2500);
 
   app.on("activate", () => {

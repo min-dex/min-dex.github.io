@@ -24,6 +24,7 @@ scripts/*
 !scripts/calendar-lectionary-2026.sql
 !scripts/render_hymn_score_assets.py
 !scripts/prune-electron-dist.mjs
+!scripts/release-electron.mjs
 !scripts/song-relations-schema.sql
 !scripts/worship-schema.sql
 !scripts/update_hymn_score_form_labels.py
