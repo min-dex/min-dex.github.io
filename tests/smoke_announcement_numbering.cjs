@@ -8,6 +8,24 @@ await page.evaluate(()=>{
  document.body.innerHTML='<main style="padding:20px"><div class="svc-board-subgroup-controls"><div class="svc-board-subgroup-control-item">'+renderServiceAnnouncementEditor(item,0,'ui',parseServiceItemMemo(item.memo))+'</div></div></main>';
 });
 const field=page.locator('[data-announcement-numbered]');
+await field.fill('');await field.type('First');
+assert.equal(await field.inputValue(),'① First');
+assert.equal(await field.evaluate(el=>el.selectionStart),7);
+await field.selectText();await field.press('Backspace');
+assert.equal(await field.inputValue(),'','Clearing must stay empty');
+await field.evaluate(el=>{
+ el.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));
+ el.value='ㅎ';el.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertCompositionText',isComposing:true}));
+ if(el.value!=='ㅎ')throw Error('IME was changed while composing');
+ el.value='환영';el.setSelectionRange(2,2);
+ el.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true,data:'환영'}));
+});
+await page.waitForFunction(()=>document.querySelector('[data-announcement-numbered]').value==='① 환영');
+assert.equal(await field.evaluate(el=>el.selectionStart),4);
+const welcome=page.locator('[data-service-item-field="announcement_welcome"]');
+await page.locator('summary').click();await welcome.fill('');await welcome.type('Welcome');
+assert.equal(await welcome.inputValue(),'Welcome');
+console.log('PASS first character numbering, clear, IME completion and non-news fields');
 await field.fill('① 첫 안내');await field.press('End');await field.press('Enter');
 assert.equal(await field.inputValue(),'① 첫 안내\n② ');
 await field.type('둘째');await field.press('Shift+Enter');await field.type('자세한 설명');

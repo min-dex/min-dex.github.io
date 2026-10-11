@@ -1219,3 +1219,9 @@ Small visual polish that does not alter behavior does not need an entry.
   modified save shortcuts are not intercepted. Welcome/footer fields are unchanged.
 - The presenter removes the editor's continuation-space prefix before applying
   its own hanging indent so output does not acquire a double indent.
+
+### 2026-10-11 First announcement number
+- In an empty weekly-news input, the first inserted content gains ① immediately.
+  Deleting all content leaves the input empty. During Korean IME composition,
+  defer numbering until composition completes and keep the caret after the text.
+  Welcome/footer inputs do not receive automatic numbers.

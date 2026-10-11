@@ -72,8 +72,36 @@
     }
     input.dispatchEvent(new Event('input',{bubbles:true}));
   },true);
+  const firstNumberPending=new WeakSet();
+  const numberedInput=input=>input.matches?.('[data-announcement-numbered]')&&!input.disabled&&!input.readOnly;
+  document.addEventListener('beforeinput',event=>{
+    const input=event.target;
+    if(numberedInput(input)&&!input.value.trim()&&event.inputType?.startsWith('insert'))firstNumberPending.add(input);
+  },true);
+  document.addEventListener('compositionstart',event=>{
+    if(numberedInput(event.target)&&!event.target.value.trim())firstNumberPending.add(event.target);
+  },true);
+  function finishFirstNumber(input) {
+    if(!firstNumberPending.has(input)||!input.value.trim())return false;
+    firstNumberPending.delete(input);
+    const before=input.value;
+    applyNumbered(input);
+    return before!==input.value;
+  }
+  document.addEventListener('compositionend',event=>{
+    const input=event.target;
+    if(!numberedInput(input))return;
+    // Wait for the IME's final input before moving the caret or changing text.
+    queueMicrotask(()=>{
+      if(input.isConnected&&finishFirstNumber(input))input.dispatchEvent(new Event('input',{bubbles:true}));
+    });
+  },true);
   document.addEventListener('input',event=>{
-    if(event.target.matches?.('[data-announcement-numbered]')&&event.inputType==='insertFromPaste'&&!event.isComposing)applyNumbered(event.target);
+    const input=event.target;
+    if(!numberedInput(input)||event.isComposing)return;
+    if(event.inputType==='insertFromPaste'){
+      applyNumbered(input);firstNumberPending.delete(input);
+    }else if(event.inputType?.startsWith('insert'))finishFirstNumber(input);
   },true);
   document.addEventListener('keydown',event=>{
     if(event.isComposing||event.altKey||!(event.metaKey||event.ctrlKey)||event.key.toLowerCase()!=='b'||!event.target.matches('[data-inline-bold]'))return;
