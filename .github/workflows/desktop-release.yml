@@ -12,6 +12,8 @@ on:
     paths:
       - .github/workflows/desktop-release.yml
       - electron-builder.test.cjs
+      - tests/test_electron_runtime_files.py
+      - scripts/verify-release.mjs
 
 permissions:
   contents: read
