@@ -14,6 +14,7 @@
   }
   function toggle(input) {
     if(!input||input.disabled||input.readOnly)return;
+    const before=typeof document!=='undefined'&&numberedInput(input)?snapshot(input):null;
     const {value,selectionStart:start,selectionEnd:end}=input;
     let from=start,to=end;
     // Include markers around the retained selection before toggling line by line.
@@ -27,31 +28,44 @@
     const offset=!remove&&lines.length===1&&replacement.startsWith('**')?2:0;
     input.focus({preventScroll:true});input.setRangeText(replacement,from,to,'select');
     input.setSelectionRange(from+offset,from+replacement.length-offset);
+    if(before){applyNumbered(input,true);remember(input,before);}
     input.dispatchEvent(new Event('input',{bubbles:true}));
   }
-  const numberPattern=/^\s*(?:(\d+)[.)]|([①-⑳]))[ \t]*/u;
+  const numberPattern=/^[ \t　]*(?:(\d+)[.)]|([①-⑳]))[ \t]*/u;
   const numberLabel=n=>n<=20?String.fromCodePoint(0x2460+n-1):`${n}.`;
   const continuation="　 ";
+  function listLine(line,preserveSpacing=false) {
+    const styled=runs(line),plain=styled.map(r=>r.text).join(''),match=plain.match(numberPattern);
+    if(!match)return null;
+    let skip=match[0].length;
+    if(preserveSpacing)skip-=Math.max(0,(match[0].match(/[ \t]+$/)?.[0].length||0)-1);
+    const body=styled.map(run=>{
+      const text=run.text.slice(skip);skip=Math.max(0,skip-run.text.length);
+      return text&&run.bold?`**${text}**`:text;
+    }).join('');
+    return {number:match[1]?Number(match[1]):match[2].codePointAt(0)-0x2460+1,body};
+  }
+  function mapColumn(before,after,column,markersOnly) {
+    let prefix=0,suffix=0;
+    while(prefix<Math.min(before.length,after.length)&&before[prefix]===after[prefix])prefix++;
+    while(suffix<Math.min(before.length,after.length)-prefix&&before[before.length-1-suffix]===after[after.length-1-suffix])suffix++;
+    if(column<prefix)return column;
+    if(column>=before.length-suffix)return after.length-(before.length-column);
+    return markersOnly?Math.min(column,after.length-suffix):after.length-suffix;
+  }
   function numbered(value,caret=String(value).length,markersOnly=false) {
-    let count=0;
-    const lines=String(value).split("\n").map(line=>{
-      const marker=line.match(numberPattern),indent=line.match(/^\s*/u)[0];
-      const prefix=marker?marker[0]:indent;
-      let replacement=prefix;
-      if(markersOnly){if(marker)replacement=`${numberLabel(++count)} `;}
-      else if(line.trim())replacement=marker||count===0?`${numberLabel(++count)} `:continuation;
-      const result=replacement+line.slice(prefix.length);
-      return result;
+    value=String(value);let count=0;
+    const originals=value.split('\n');
+    const lines=originals.map(line=>{
+      const marker=listLine(line);
+      if(marker)return `${numberLabel(++count)} ${marker.body}`;
+      if(markersOnly||!line.trim())return line;
+      return (count===0?`${numberLabel(++count)} `:continuation)+line.trimStart();
     });
-    // Map the caret by formatting only the preceding complete lines as well.
-    const before=String(value).slice(0,caret).split("\n"),row=before.length-1;
-    const original=String(value).split("\n")[row]||"",changed=lines[row]||"";
-    const oldPrefix=(original.match(numberPattern)||original.match(/^\s*/u))[0].length;
-    const newPrefix=(changed.match(numberPattern)||changed.match(/^\s*/u))[0].length;
-    const column=before.at(-1).length;
-    const mappedColumn=markersOnly&&column<=oldPrefix?Math.min(column,newPrefix):Math.max(newPrefix,column+newPrefix-oldPrefix);
-    const nextCaret=lines.slice(0,row).reduce((n,line)=>n+line.length+1,0)+mappedColumn;
-    return {value:lines.join("\n"),caret:Math.min(lines.join("\n").length,nextCaret)};
+    const before=value.slice(0,caret).split('\n'),row=before.length-1;
+    const mapped=mapColumn(originals[row]||'',lines[row]||'',before.at(-1).length,markersOnly);
+    const result=lines.join('\n');
+    return {value:result,caret:Math.min(result.length,lines.slice(0,row).reduce((n,line)=>n+line.length+1,0)+mapped)};
   }
   function applyNumbered(input,markersOnly=false) {
     const result=numbered(input.value,input.selectionStart,markersOnly);
@@ -59,56 +73,83 @@
     const end=numbered(input.value,input.selectionEnd,markersOnly).caret,direction=input.selectionDirection;
     input.value=result.value;input.setSelectionRange(result.caret,end,direction);
   }
-  window.MindexInlineText=Object.freeze({runs,plain:value=>runs(value).map(r=>r.text).join(''),toggle,numbered});
+  window.MindexInlineText=Object.freeze({runs,plain:value=>runs(value).map(r=>r.text).join(''),toggle,numbered,listLine});
   if(typeof document==='undefined')return;
+  const numberedInput=input=>input.matches?.('[data-announcement-numbered]')&&!input.disabled&&!input.readOnly;
+  const histories=new WeakMap(),pending=new WeakMap(),composing=new WeakSet();
+  const snapshot=input=>({value:input.value,start:input.selectionStart,end:input.selectionEnd,direction:input.selectionDirection});
+  function remember(input,before) {
+    if(!before||before.value===input.value)return;
+    const h=histories.get(input)||{undo:[],redo:[]};
+    h.undo.push(before);if(h.undo.length>100)h.undo.shift();h.redo=[];histories.set(input,h);
+  }
+  function restore(input,redo=false) {
+    const h=histories.get(input),from=redo?h?.redo:h?.undo,to=redo?h?.undo:h?.redo;
+    if(!from?.length)return;
+    to.push(snapshot(input));const saved=from.pop();
+    input.value=saved.value;input.setSelectionRange(saved.start,saved.end,saved.direction);
+    input.dispatchEvent(new Event('input',{bubbles:true}));
+  }
+  function enter(input,shift=false) {
+    const before=snapshot(input),start=input.selectionStart,end=input.selectionEnd;
+    const lineStart=start===0?0:input.value.lastIndexOf('\n',start-1)+1;
+    const lineEnd=input.value.indexOf('\n',start),tailEnd=lineEnd<0?input.value.length:lineEnd;
+    const line=input.value.slice(lineStart,tailEnd),marker=listLine(line);
+    const prefix=line.match(numberPattern)?.[0]||'';
+    if(!shift&&marker&&!marker.body.trim()){
+      input.setRangeText('',lineStart,Math.max(lineStart+prefix.length,end),'end');
+    }else if(!shift&&marker&&start===end&&start<=lineStart+prefix.length){
+      input.setRangeText('1. \n',lineStart,lineStart,'start');input.setSelectionRange(lineStart+3,lineStart+3);
+    }else{
+      input.setRangeText('\n'+(shift?continuation:'1. '),start,end,'end');
+    }
+    applyNumbered(input,true);remember(input,before);
+    input.dispatchEvent(new Event('input',{bubbles:true}));
+  }
   document.addEventListener('keydown',event=>{
     const input=event.target;
-    if(!input.matches?.('[data-announcement-numbered]')||input.disabled||input.readOnly||event.isComposing||event.key!=='Enter'||event.metaKey||event.ctrlKey||event.altKey)return;
-    event.preventDefault();event.stopPropagation();
-    const start=input.selectionStart,end=input.selectionEnd,lineStart=input.value.lastIndexOf('\n',start-1)+1;
-    const line=input.value.slice(lineStart,start),marker=line.match(numberPattern);
-    if(!event.shiftKey&&marker&&!line.slice(marker[0].length).trim()){
-      input.setRangeText('',lineStart,end,'end');
-      applyNumbered(input,true);
-    }else{
-      const prefix=event.shiftKey?continuation:'1. ';
-      input.setRangeText('\n'+prefix,start,end,'end');
-      applyNumbered(input);
+    if(!numberedInput(input)||event.isComposing||composing.has(input)||event.altKey)return;
+    if((event.metaKey||event.ctrlKey)&&['z','y'].includes(event.key.toLowerCase())){
+      event.preventDefault();event.stopPropagation();restore(input,event.shiftKey||event.key.toLowerCase()==='y');return;
     }
-    input.dispatchEvent(new Event('input',{bubbles:true}));
+    if(event.key!=='Enter'||event.metaKey||event.ctrlKey)return;
+    event.preventDefault();event.stopPropagation();enter(input,event.shiftKey);
   },true);
-  const firstNumberPending=new WeakSet();
-  const numberedInput=input=>input.matches?.('[data-announcement-numbered]')&&!input.disabled&&!input.readOnly;
   document.addEventListener('beforeinput',event=>{
     const input=event.target;
-    if(numberedInput(input)&&!input.value.trim()&&event.inputType?.startsWith('insert'))firstNumberPending.add(input);
+    if(!numberedInput(input))return;
+    if(!event.isComposing&&!composing.has(input)&&event.cancelable){
+      if(['historyUndo','historyRedo'].includes(event.inputType)){event.preventDefault();restore(input,event.inputType==='historyRedo');return;}
+      if(['insertParagraph','insertLineBreak'].includes(event.inputType)){event.preventDefault();enter(input);return;}
+    }
+    if(!composing.has(input))pending.set(input,snapshot(input));
   },true);
   document.addEventListener('compositionstart',event=>{
-    if(numberedInput(event.target)&&!event.target.value.trim())firstNumberPending.add(event.target);
+    const input=event.target;
+    if(!numberedInput(input))return;
+    pending.set(input,snapshot(input));composing.add(input);
   },true);
-  function finishFirstNumber(input) {
-    if(!firstNumberPending.has(input)||!input.value.trim())return false;
-    firstNumberPending.delete(input);
-    const before=input.value;
-    applyNumbered(input);
-    return before!==input.value;
+  function finishInput(input,type) {
+    const before=pending.get(input);pending.delete(input);
+    if(type==='insertFromPaste')applyNumbered(input);
+    else if(type?.startsWith('delete'))applyNumbered(input,true);
+    else if(type?.startsWith('insert')&&before&&!before.value.trim()&&input.value.trim())applyNumbered(input);
+    remember(input,before);
   }
   document.addEventListener('compositionend',event=>{
     const input=event.target;
     if(!numberedInput(input))return;
-    // Wait for the IME's final input before moving the caret or changing text.
     queueMicrotask(()=>{
-      if(input.isConnected&&finishFirstNumber(input))input.dispatchEvent(new Event('input',{bubbles:true}));
+      composing.delete(input);
+      if(!input.isConnected)return;
+      finishInput(input,'insertCompositionText');
+      input.dispatchEvent(new Event('input',{bubbles:true}));
     });
   },true);
   document.addEventListener('input',event=>{
     const input=event.target;
-    if(!numberedInput(input)||event.isComposing)return;
-    if(event.inputType==='insertFromPaste'){
-      applyNumbered(input);firstNumberPending.delete(input);
-    }else if(event.inputType?.startsWith('delete')){
-      applyNumbered(input,true);
-    }else if(event.inputType?.startsWith('insert'))finishFirstNumber(input);
+    if(!numberedInput(input)||event.isComposing||composing.has(input)||!event.inputType)return;
+    finishInput(input,event.inputType);
   },true);
   document.addEventListener('keydown',event=>{
     if(event.isComposing||event.altKey||!(event.metaKey||event.ctrlKey)||event.key.toLowerCase()!=='b'||!event.target.matches('[data-inline-bold]'))return;

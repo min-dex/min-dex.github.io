@@ -12,11 +12,12 @@ for(const width of [1100,390]){
  for(const open of [false,true]){
  const result=await page.evaluate(open=>{
  const editor=document.querySelector('.svc-announcement-editor');editor.querySelector('details').open=open;
- const field=editor.querySelector('label'),label=field.querySelector('span').getBoundingClientRect(),input=field.querySelector('textarea').getBoundingClientRect(),summary=editor.querySelector('summary').getBoundingClientRect();
- return {labelBottom:label.bottom,inputTop:input.top,gap:summary.top-input.bottom,overflow:document.documentElement.scrollWidth-innerWidth,fieldHeight:field.getBoundingClientRect().height,inputHeight:input.height};
+ const field=editor.querySelector('label'),label=field.querySelector('span').getBoundingClientRect(),input=field.querySelector('textarea').getBoundingClientRect(),summary=editor.querySelector('summary').getBoundingClientRect(),hint=editor.querySelector('.svc-presenter-input-hint').getBoundingClientRect();
+ return {labelBottom:label.bottom,inputTop:input.top,gap:summary.top-hint.bottom,hintGap:hint.top-input.bottom,overflow:document.documentElement.scrollWidth-innerWidth,fieldHeight:field.getBoundingClientRect().height,inputHeight:input.height};
  },open);
  assert.ok(result.inputTop>=result.labelBottom,JSON.stringify(result));
  assert.ok(result.gap>=0&&result.gap<=20,JSON.stringify(result));
+ assert.ok(result.hintGap>=0&&result.hintGap<=20,JSON.stringify(result));
  assert.ok(result.fieldHeight-result.inputHeight<40,JSON.stringify(result));
  assert.ok(result.overflow<=1,JSON.stringify(result));
  }

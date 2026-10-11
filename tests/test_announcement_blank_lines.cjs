@@ -6,12 +6,17 @@ const source = fs.readFileSync(path.join(__dirname, '../mindex.presenter.js'), '
 const context = {presenterCircledNumber: n => ['①','②','③'][n],
   presenterLiturgicalBodyLines: () => [], presenterLineCharEstimate: s => s.length,
   escapeAttr: String, escapeHtml: String, escapePresenterSlideLine: String};
+context.window={};
 vm.createContext(context);
-for (const name of ['presenterAnnouncementItems','presenterAnnouncementBodyText','renderPresenterLiturgicalBodySlide']) {
+vm.runInContext(fs.readFileSync(path.join(__dirname, '../mindex.inline-text.js'),'utf8'),context);
+for (const name of ['presenterAnnouncementItems','presenterAnnouncementBodyText','presenterAnnouncementRegions','renderPresenterAnnouncementItems','renderPresenterLiturgicalBodySlide']) {
   const start = source.indexOf(`function ${name}(`);
   assert.ok(start >= 0);
   vm.runInContext(source.slice(start, source.indexOf('\n}\n', start) + 2), context);
 }
+const appSource=fs.readFileSync(path.join(__dirname,'../app.js'),'utf8');
+const normalizeStart=appSource.indexOf('function normalizeAnnouncementRegions(');
+vm.runInContext(appSource.slice(normalizeStart,appSource.indexOf('\n}\n',normalizeStart)+2),context);
 const input = '1. First\r\n\r\nDetails\r\n\r\n\r\n2. Second';
 const items = context.presenterAnnouncementItems(input);
 assert.deepEqual(JSON.parse(JSON.stringify(items)), [
