@@ -3872,7 +3872,8 @@ function presenterSlideUsesServiceBackground(slide) {
 function presenterOutputFrameStateForSlide(slide, payload = {}) {
   const backgroundImages = presenterPayloadBackgroundImages(payload);
   const fallbackChromakey = Boolean(payload?.chromakey);
-  const slideChromakey = presenterFrameSlideOutputContext(slide, fallbackChromakey) === "chromakey";
+  const blackoutOutput = slide?.id === "presenter:safety-blank";
+  const slideChromakey = !blackoutOutput && presenterFrameSlideOutputContext(slide, fallbackChromakey) === "chromakey";
   const cleanOutput = !slideChromakey;
   const blankSlide = presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.BLANK;
   const scoreOutput = presenterSlideIsScoreLike(slide);
@@ -3880,11 +3881,12 @@ function presenterOutputFrameStateForSlide(slide, payload = {}) {
   const scriptureReadingOutput = slide?.scriptureContext === "reading";
   // A fullscreen blank stays inside the service visual system: retain the same
   // background while the cross draws over it. Chromakey remains background-free.
-  const showBackground = Boolean(backgroundImages.length && cleanOutput && presenterSlideUsesServiceBackground(slide));
+  const showBackground = Boolean(!blackoutOutput && backgroundImages.length && cleanOutput && presenterSlideUsesServiceBackground(slide));
   return {
     cleanOutput,
     showBackground,
-    blankOutput: Boolean(blankSlide && cleanOutput),
+    blankOutput: Boolean(blankSlide && cleanOutput && !blackoutOutput),
+    blackoutOutput,
     scoreOutput,
     videoOutput,
     scriptureReadingOutput,
@@ -3937,6 +3939,7 @@ function presenterOutputFrameClassNames(frameState = {}) {
     frameState.noChromakey ? "no-chromakey" : "",
     frameState.showBackground ? "has-background" : "",
     frameState.blankOutput ? "is-blank" : "",
+    frameState.blackoutOutput ? "is-blackout" : "",
   ].filter(Boolean).join(" ");
 }
 
@@ -4091,7 +4094,7 @@ function presenterOutputShouldAnimateFrameTransition(root, frameState = {}) {
   // Self-contained media must not blend with the previous slide's visual theme.
   if (root?.querySelector?.(":scope > .presenter-output-layer :is([data-slide-layout='media'], [data-slide-layout='file'])")) return false;
   if (frameState.scoreOutput) return false;
-  if (frameState.blankOutput) return false;
+  if (frameState.blankOutput || frameState.blackoutOutput) return false;
   if (frameState.scriptureReadingOutput) return false;
   if (root?.classList?.contains("svc-slide-mini-canvas")) return false;
   if (root?.querySelector?.(":scope > .presenter-output-layer.is-active .presenter-slide--score")) return false;
@@ -4466,6 +4469,8 @@ function applyPresenterOutputFrameState(root, frameState = {}) {
   root.classList.toggle("no-chromakey", Boolean(frameState.noChromakey));
   root.classList.toggle("has-background", Boolean(frameState.showBackground));
   root.classList.toggle("is-blank", Boolean(frameState.blankOutput));
+  document.body.classList.toggle("is-blackout", Boolean(frameState.blackoutOutput));
+  root.classList.toggle("is-blackout", Boolean(frameState.blackoutOutput));
   root.dataset.serviceType = frameState.serviceType || "";
   root.dataset.outputTheme = frameState.outputTheme || presenterOutputTheme(frameState.serviceType);
   if (frameState.showBackground) {
@@ -5000,10 +5005,11 @@ function presenterSlideExtraClasses(slide) {
 function presenterSafetyBlankSlide() {
   return {
     id: "presenter:safety-blank",
+    outputContext: "clean",
     elementType: PRESENTER_ELEMENT_TYPES.BLANK,
     layout: PRESENTER_SLIDE_LAYOUTS.BLANK,
     type: "blank",
-    title: "빈 화면",
+    title: "암전",
     text: "",
   };
 }

@@ -1232,3 +1232,11 @@ Small visual polish that does not alter behavior does not need an entry.
   caret position; do not recreate a deliberately removed marker or cleared text.
   Exiting an empty numbered item also renumbers subsequent items. Ignore deletion
   events during active IME composition.
+## 2026-10-11 — Number zero means blackout
+
+- Entering slide number `0` uses the existing safetyBlank transport state but
+  renders solid black immediately, in both chromakey and fullscreen services.
+  Do not display the service background or decorative blank cross.
+- Keep the previous slide index; ordinary number/next/previous navigation exits
+  blackout through the existing navigation rules. Regular in-sequence blank
+  slides retain their existing background/keying behavior. No stored data changes.
