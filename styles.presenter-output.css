@@ -751,6 +751,33 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* Inline vector edges snap at output resolution; text remains antialiased. */
+.presenter-tab-background { display: none; }
+.presenter-output-root:not(.no-chromakey) .presenter-citation-tab {
+  border-radius: 0;
+  background: transparent;
+  isolation: isolate;
+}
+.presenter-output-root:not(.no-chromakey) .presenter-tab-background {
+  display: block;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  fill: #fff;
+  shape-rendering: crispEdges;
+}
+.presenter-assignee-tab .presenter-tab-background {
+  left: auto;
+  right: 0;
+}
+.presenter-tab-background .presenter-tab-curve {
+  rx: calc(28 * var(--presenter-stage-unit));
+  ry: calc(28 * var(--presenter-stage-unit));
+}
 .presenter-song-note {
   display: inline-block;
   font-family: var(--presenter-font-family);

@@ -1171,3 +1171,17 @@ Small visual polish that does not alter behavior does not need an entry.
   share the same renderer. Chromakey chunking and ordinary liturgy are unchanged.
 - Verified with `tests/smoke_announcement_regions.cjs` and existing inline-bold
   output tests in Chromium. No production data rewrite is needed.
+
+## 2026-10-11 — Hard chromakey tab corners
+
+- Keep rounded scripture-reference and assignee tabs in chromakey output.
+  Draw only their white panel with an inline SVG alpha threshold (0 or 1),
+  rather than CSS border-radius blending white against green. Each instance
+  owns a unique filter ID, including multiple controller thumbnails.
+- Keep glyph antialiasing, tab text, dimensions and fullscreen styling intact.
+- Browser pixel checks cover Chromium/WebKit at 1280×720, 1920×1080,
+  3840×2160 and 1920×1080 at device scale 2. External capture scaling, video
+  compression and fractional-size compositing can still mix edge colors;
+  this is not a guarantee for arbitrary downstream keyers. A separate
+  1366-wide WebKit probe still showed mixed pixels at fractional geometry.
+- No service data or output-control state changes.

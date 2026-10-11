@@ -30,7 +30,7 @@ def main():
                           const t=tab.getBoundingClientRect(), b=body.getBoundingClientRect(), css=getComputedStyle(tab);
                           return {tab:true,label:tab.textContent,text:body.textContent,
                             font:parseFloat(css.fontSize),weight:css.fontWeight,clip:css.clipPath,
-                            radius:parseFloat(css.borderTopRightRadius),
+                            radius:parseFloat(getComputedStyle(tab.querySelector('.presenter-tab-curve')).rx),
                             fits:tab.scrollWidth<=tab.clientWidth+1 && t.right<=innerWidth+1,
                             overlap:t.bottom>b.top+1};
                         }''', context)

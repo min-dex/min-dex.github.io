@@ -5089,6 +5089,12 @@ function renderPresenterFullscreenReadySlide(slide) {
   `;
 }
 
+let presenterTabBackgroundId = 0;
+function presenterTabBackground(assignee = false) {
+  const id = `presenter-tab-edge-${++presenterTabBackgroundId}`;
+  return `<svg class="presenter-tab-background" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><filter id="${id}" x="0" y="0" width="100%" height="100%"><feComponentTransfer><feFuncA type="discrete" tableValues="0 1"/></feComponentTransfer></filter></defs><g filter="url(#${id})"><rect class="presenter-tab-curve" width="100%" height="100%"/><rect x="${assignee ? "50%" : "0"}" width="50%" height="100%"/><rect y="50%" width="100%" height="50%"/></g></svg>`;
+}
+
 function renderPresenterCitationTabSlide(slide) {
   const raw = String(slide?.text || "");
   const number = presenterScriptureVerseParts(raw).number || presenterScriptureVerseNumber({
@@ -5097,7 +5103,7 @@ function renderPresenterCitationTabSlide(slide) {
   const reference = presenterScriptureReadingHeaderReference(slide, number);
   // Older slide snapshots store the reference and body separated by whitespace.
   const body = slide?.citationBodyText ?? raw.replace(/^.*?\s{2,}/, "");
-  return `<div class="presenter-citation-tab">${escapeHtml(reference)}</div>
+  return `<div class="presenter-citation-tab">${presenterTabBackground()}${escapeHtml(reference)}</div>
     <div class="presenter-slide-text"><span>${escapeHtml(body)}</span></div>`;
 }
 
@@ -5210,7 +5216,7 @@ function renderPresenterReadingAssigneeTab(slide) {
     ? cleanPresenterAssignee(slide.scriptureReadingAssignee)
     : "";
   return assignee
-    ? `<div class="presenter-citation-tab presenter-assignee-tab">${escapeHtml(assignee)}</div>`
+    ? `<div class="presenter-citation-tab presenter-assignee-tab">${presenterTabBackground(true)}${escapeHtml(assignee)}</div>`
     : "";
 }
 
