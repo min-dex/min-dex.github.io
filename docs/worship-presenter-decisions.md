@@ -1225,3 +1225,10 @@ Small visual polish that does not alter behavior does not need an entry.
   Deleting all content leaves the input empty. During Korean IME composition,
   defer numbering until composition completes and keep the caret after the text.
   Welcome/footer inputs do not receive automatic numbers.
+
+### 2026-10-11 Renumber after deleting announcement items
+- Weekly-news deletion (including selection deletion/cut) immediately renumbers
+  surviving numbered rows. Keep unnumbered continuation content and the deletion
+  caret position; do not recreate a deliberately removed marker or cleared text.
+  Exiting an empty numbered item also renumbers subsequent items. Ignore deletion
+  events during active IME composition.

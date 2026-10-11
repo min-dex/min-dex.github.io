@@ -32,13 +32,14 @@
   const numberPattern=/^\s*(?:(\d+)[.)]|([①-⑳]))[ \t]*/u;
   const numberLabel=n=>n<=20?String.fromCodePoint(0x2460+n-1):`${n}.`;
   const continuation="　 ";
-  function numbered(value,caret=String(value).length) {
+  function numbered(value,caret=String(value).length,markersOnly=false) {
     let count=0;
     const lines=String(value).split("\n").map(line=>{
       const marker=line.match(numberPattern),indent=line.match(/^\s*/u)[0];
       const prefix=marker?marker[0]:indent;
       let replacement=prefix;
-      if(line.trim())replacement=marker||count===0?`${numberLabel(++count)} `:continuation;
+      if(markersOnly){if(marker)replacement=`${numberLabel(++count)} `;}
+      else if(line.trim())replacement=marker||count===0?`${numberLabel(++count)} `:continuation;
       const result=replacement+line.slice(prefix.length);
       return result;
     });
@@ -47,13 +48,16 @@
     const original=String(value).split("\n")[row]||"",changed=lines[row]||"";
     const oldPrefix=(original.match(numberPattern)||original.match(/^\s*/u))[0].length;
     const newPrefix=(changed.match(numberPattern)||changed.match(/^\s*/u))[0].length;
-    const nextCaret=lines.slice(0,row).reduce((n,line)=>n+line.length+1,0)+Math.max(newPrefix,before.at(-1).length+newPrefix-oldPrefix);
+    const column=before.at(-1).length;
+    const mappedColumn=markersOnly&&column<=oldPrefix?Math.min(column,newPrefix):Math.max(newPrefix,column+newPrefix-oldPrefix);
+    const nextCaret=lines.slice(0,row).reduce((n,line)=>n+line.length+1,0)+mappedColumn;
     return {value:lines.join("\n"),caret:Math.min(lines.join("\n").length,nextCaret)};
   }
-  function applyNumbered(input) {
-    const result=numbered(input.value,input.selectionStart);
+  function applyNumbered(input,markersOnly=false) {
+    const result=numbered(input.value,input.selectionStart,markersOnly);
     if(result.value===input.value)return;
-    input.value=result.value;input.setSelectionRange(result.caret,result.caret);
+    const end=numbered(input.value,input.selectionEnd,markersOnly).caret,direction=input.selectionDirection;
+    input.value=result.value;input.setSelectionRange(result.caret,end,direction);
   }
   window.MindexInlineText=Object.freeze({runs,plain:value=>runs(value).map(r=>r.text).join(''),toggle,numbered});
   if(typeof document==='undefined')return;
@@ -65,6 +69,7 @@
     const line=input.value.slice(lineStart,start),marker=line.match(numberPattern);
     if(!event.shiftKey&&marker&&!line.slice(marker[0].length).trim()){
       input.setRangeText('',lineStart,end,'end');
+      applyNumbered(input,true);
     }else{
       const prefix=event.shiftKey?continuation:'1. ';
       input.setRangeText('\n'+prefix,start,end,'end');
@@ -101,6 +106,8 @@
     if(!numberedInput(input)||event.isComposing)return;
     if(event.inputType==='insertFromPaste'){
       applyNumbered(input);firstNumberPending.delete(input);
+    }else if(event.inputType?.startsWith('delete')){
+      applyNumbered(input,true);
     }else if(event.inputType?.startsWith('insert'))finishFirstNumber(input);
   },true);
   document.addEventListener('keydown',event=>{
