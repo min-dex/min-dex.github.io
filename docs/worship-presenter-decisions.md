@@ -1205,3 +1205,8 @@ Small visual polish that does not alter behavior does not need an entry.
   explicit Markdown emphasis, including fixed regions and chromakey body text.
   Supersedes the earlier advertisement 500/700 rule. The 광고 heading remains
   800; editing controls and other liturgical text retain their existing weights.
+
+### 2026-10-11 Welcome text size
+- Fullscreen announcement welcome copy uses the same 4cqh base size as weekly
+  news. Preserve its top anchor, heading clearance, 600/800 weights, and fitting
+  for unusually long copy. Footer sizing remains unchanged.

@@ -1445,7 +1445,7 @@ span.presenter-announcement-paren {
 /* Bulletin-like announcement zones: authored copy changes, anchors stay put. */
 .presenter-announcement-layout{position:absolute;inset:8cqh 0 10cqh;display:grid;grid-template-rows:10% minmax(0,1fr) 24%;gap:3cqh;font-weight:600;line-height:1.25}
 .presenter-announcement-region{display:flex;flex-direction:column;gap:.7em;min-width:0;min-height:0;font-size:4cqh}
-.presenter-announcement-region--welcome{width:80%;font-size:3.2cqh}
+.presenter-announcement-region--welcome{width:80%}
 .presenter-announcement-region--news{padding-top:1cqh}
 .presenter-announcement-region--footer{font-size:3.6cqh}
 .presenter-announcement-region--footer>.presenter-announcement-item:first-child{margin-top:auto}
