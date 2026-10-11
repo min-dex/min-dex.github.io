@@ -7099,6 +7099,36 @@ body.right-sidebar-open .svc-present-btn.svc-presenter-launch--sidebar:not(.svc-
   width: 100%;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 84px), 1fr));
 }
+/* Image names and preview controls share a row; expanded content stays below. */
+.svc-reference-media-input:has(.svc-reference-media-preview--image) > .svc-reference-media-title {
+  flex: 1 1 180px;
+}
+.svc-reference-media-input:has(.svc-reference-media-preview--image) > .svc-reference-media-preview-group,
+.svc-reference-media-input .svc-reference-media-preview--image {
+  display: contents;
+}
+.svc-reference-media-input .svc-reference-media-preview--image > summary {
+  flex: 0 0 auto;
+  grid-template-columns: auto auto;
+}
+.svc-reference-media-input .svc-reference-media-preview--image > summary > :is(i, strong) {
+  display: none;
+}
+.svc-reference-media-input .svc-reference-media-preview--image:not([open]) > .svc-reference-media-preview-content {
+  display: none;
+}
+.svc-reference-media-input .svc-reference-media-preview--image > .svc-reference-media-preview-content {
+  flex: 0 0 100%;
+  width: 100%;
+  margin-top: 0;
+  background: transparent;
+}
+.svc-reference-media-input .svc-reference-media-preview--image > .svc-reference-media-preview-content img {
+  max-width: 420px;
+}
+.svc-reference-media-input:has(.svc-reference-media-preview--image) .svc-reference-media-slide-strip {
+  flex: 0 0 100%;
+}
 .svc-reference-media-slide-chip {
   display: grid;
   min-width: 0;
