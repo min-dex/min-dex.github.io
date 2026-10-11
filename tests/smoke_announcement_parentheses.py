@@ -29,13 +29,15 @@ try:
     }
     for(const type of ['young-adult','sunday-main']) {
      const service={id:'ad-parenthesis',type_id:type};
-     const text='1. 모임 안내 (오후 2시, 교육관)';
+     const text='1. **모임** 안내 (오후 2시, 교육관)';
      const item={id:'ad',label:'광고',raw_title:text,_worshipSectionKey:'announcements',memo:serializeServiceItemMemo({elementType:'body',inputMode:'text'})};
      const before=JSON.stringify(item);
      const slide=buildPresenterSlidesForServiceItem(item,service,0).find(x=>x.announcementItems?.length);
      check(slide,'announcement slide missing');
      host.className=type==='young-adult'?'presenter-output-root no-chromakey':'presenter-output-root';
-     host.innerHTML=`<div class="presenter-slide presenter-slide--${slide.type}">${renderPresenterSlideBody(slide)}</div>`;
+     host.innerHTML=renderPresenterSlideFrame(slide);
+     check(getComputedStyle(host.querySelector(".presenter-announcement-copy, .presenter-slide-text")).fontWeight==='600','output body weight '+type);
+     check(getComputedStyle(host.querySelector("strong")).fontWeight==='800','output emphasis weight '+type);
      const paren=host.querySelector('.presenter-announcement-paren');check(paren,'output parentheses missing');
      check(Math.abs(parseFloat(getComputedStyle(paren).fontSize)/parseFloat(getComputedStyle(paren.parentElement).fontSize)-.8)<.001,'output ratio '+type);
      check(JSON.stringify(item)===before,'stored source changed');
@@ -51,8 +53,8 @@ try:
      host.className=mode;
      host.innerHTML='<div class="presenter-liturgical-body-lines">전례문</div><div class="presenter-announcement-items"><div class="presenter-announcement-copy">일반 광고 <strong>강조</strong></div></div>';
      check(getComputedStyle(host.querySelector('.presenter-liturgical-body-lines')).fontWeight==='500','liturgy weight '+mode);
-     check(getComputedStyle(host.querySelector('.presenter-announcement-copy')).fontWeight==='500','announcement base weight '+mode);
-     check(getComputedStyle(host.querySelector('strong')).fontWeight==='700','announcement bold weight '+mode);
+     check(getComputedStyle(host.querySelector('.presenter-announcement-copy')).fontWeight==='600','announcement base weight '+mode);
+     check(getComputedStyle(host.querySelector('strong')).fontWeight==='800','announcement bold weight '+mode);
     }
     return 'PASS 80% output, nested/fullwidth/unmatched pairs, escaping, overlapping highlights, unchanged source and other text';
    }'''),flush=True)

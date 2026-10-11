@@ -1199,3 +1199,9 @@ Small visual polish that does not alter behavior does not need an entry.
 - The existing input/draft/save path handles each field. Loading alone does not
   write production records. Verified editable common copy, config/read-adapter
   round trip, arbitrary wording, explicit blanks, bold and output regression.
+
+### 2026-10-11 Announcement output weight
+- Advertisement output uses 600 SemiBold for regular copy and 800 ExtraBold for
+  explicit Markdown emphasis, including fixed regions and chromakey body text.
+  Supersedes the earlier advertisement 500/700 rule. The 광고 heading remains
+  800; editing controls and other liturgical text retain their existing weights.
