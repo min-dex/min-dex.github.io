@@ -544,6 +544,7 @@ function buildWorshipPersistenceRows(service, items, existingSectionById = {}, e
   const sectionElementCounts = new Map();
   const generatedSectionIds = new Map();
   const usedElementIds = new Set();
+  const persistedItemIds = new Map();
   const persistedAt = new Date().toISOString();
 
   items.forEach((item, index) => {
@@ -673,7 +674,22 @@ function buildWorshipPersistenceRows(service, items, existingSectionById = {}, e
     if (options.elementTypedStateColumns?.inputMode) elementRow.input_mode = worshipDbInputModeForSave(contentState.inputMode);
     if (options.elementTypedStateColumns?.contentState) elementRow.content_state = contentState;
     elementRows.push(elementRow);
+    if (item.id) persistedItemIds.set(item.id, elementId);
   });
+
+  // New/projected items receive their final IDs above. Resolve cross-item
+  // references only after every emitted row has an ID; never mutate drafts.
+  for (const element of elementRows) {
+    for (const field of ["config", "source_ref"]) {
+      const connected = element[field]?.connectedPraise;
+      if (!connected) continue;
+      element[field] = { ...element[field], connectedPraise: {
+        ...connected,
+        primaryItemId: persistedItemIds.get(connected.primaryItemId) || connected.primaryItemId,
+        itemIds: connected.itemIds.map(id => persistedItemIds.get(id) || id),
+      } };
+    }
+  }
 
   sectionRows.forEach((section) => {
     section.sort_order = sectionSort.get(section.id) || section.sort_order;

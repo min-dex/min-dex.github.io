@@ -1277,3 +1277,8 @@ Small visual polish that does not alter behavior does not need an entry.
   earlier archive-documented time transitions. The October 4 announcement and
   saved bulletin were corrected with revision checks; September remains 3 PM
   and October 11 already contained 10:30 AM.
+
+### 2026-10-11 Persisted medley member identities
+- Resolve `connectedPraise.primaryItemId` and `itemIds` to the final element IDs after save-row allocation, in both config and source_ref. Preserve group identity, order, roles and titles without mutating editor drafts.
+- Partial saves remap only emitted rows and preserve references to other persisted members. Existing worship content is not bulk rewritten.
+- Coverage: `tests/smoke_medley_persistence_ids.py` exercises new IDs, reload/resave, isolated patches and independent songs in Chromium/WebKit.
