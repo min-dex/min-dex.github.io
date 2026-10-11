@@ -1,150 +1,121 @@
-name: Desktop Release
+name: Desktop Packages
 
 on:
   workflow_dispatch:
     inputs:
       publish_release:
-        description: "Upload installers to a GitHub Release"
-        required: true
-        default: false
+        description: Build signed packages and upload to a DRAFT release
         type: boolean
-      release_tag:
-        description: "Release tag to publish when publish_release is true"
-        required: false
-        type: string
+        default: false
   push:
-    tags:
-      - "v*"
+    branches: [codex/mindex-presenter-handoff]
+    paths:
+      - .github/workflows/desktop-release.yml
+      - electron-builder.test.cjs
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
-    name: Build ${{ matrix.label }}
+    name: Build ${{ matrix.platform }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
         include:
-          - label: macOS arm64
-            os: macos-14
-            platform: mac
-            arch: arm64
-            target: dmg
-          - label: macOS x64
-            os: macos-13
-            platform: mac
-            arch: x64
-            target: dmg
-          - label: Windows x64
+          - platform: mac
+            os: macos-15
+          - platform: win
             os: windows-latest
-            platform: win
-            arch: x64
-            target: nsis
-
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: pnpm/action-setup@v4
         with:
           version: 11.9.0
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-python@v5
         with:
-          node-version: 20
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Check package weight
-        run: pnpm run package:audit
-
-      - name: Validate JavaScript
-        run: |
-          node --check app.js
-          node --check mindex.presenter.js
-          node --check mindex.worship-input.js
-          node tests/test_worship_input_module_contract.cjs
-
-      - name: Validate Python smoke syntax
-        run: python -m py_compile tests/smoke_app.py tests/smoke_worship_presenter.py
-
-      - name: Clean local dist
-        run: pnpm run dist:clean
-
-      - name: Build macOS installer
-        if: matrix.platform == 'mac'
-        run: pnpm exec electron-builder --mac ${{ matrix.target }} --${{ matrix.arch }} --publish never
+          python-version: '3.12'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm electron:check
+      - name: Build isolated unsigned test installers
+        if: ${{ !inputs.publish_release }}
+        run: pnpm electron:test:${{ matrix.platform }}
         env:
-          CSC_LINK: ${{ secrets.CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Build signed packages (no public release)
+        if: ${{ inputs.publish_release }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CSC_LINK: ${{ matrix.platform == 'mac' && secrets.CSC_LINK || secrets.WIN_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ matrix.platform == 'mac' && secrets.CSC_KEY_PASSWORD || secrets.WIN_CSC_KEY_PASSWORD }}
+          APPLE_API_KEY_CONTENTS: ${{ secrets.APPLE_API_KEY_CONTENTS }}
           APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
           APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
-
-      - name: Build Windows installer
-        if: matrix.platform == 'win'
-        run: pnpm exec electron-builder --win ${{ matrix.target }} --${{ matrix.arch }} --publish never
-        env:
-          CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
-
-      - name: Remove unpacked intermediates
-        run: pnpm run dist:prune
-
-      - name: Upload installer artifact
+          BUILD_PLATFORM: ${{ matrix.platform }}
+        run: |
+          if [[ "$BUILD_PLATFORM" == mac ]]; then
+            test -n "$APPLE_API_KEY_CONTENTS" || { echo 'Missing APPLE_API_KEY_CONTENTS'; exit 1; }
+            export APPLE_API_KEY="$RUNNER_TEMP/notary-key.p8"
+            printf '%s' "$APPLE_API_KEY_CONTENTS" > "$APPLE_API_KEY"
+            chmod 600 "$APPLE_API_KEY"
+            trap 'rm -f "$APPLE_API_KEY"' EXIT
+          fi
+          node scripts/verify-release.mjs --platform="$BUILD_PLATFORM"
+          if [[ "$BUILD_PLATFORM" == mac ]]; then
+            pnpm exec electron-builder --mac dmg zip --arm64 --x64 --publish never -c.forceCodeSigning=true
+          else
+            pnpm exec electron-builder --win nsis --x64 --publish never -c.forceCodeSigning=true
+          fi
+      - name: Upload packages without renaming update assets
         uses: actions/upload-artifact@v4
         with:
-          name: mindex-${{ matrix.platform }}-${{ matrix.arch }}
+          name: mindex-${{ matrix.platform }}-${{ inputs.publish_release && 'signed' || 'test' }}
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 7
+          compression-level: 0
           path: |
             dist/*.dmg
+            dist/*.zip
             dist/*.exe
+            dist/*.blockmap
+            dist/latest*.yml
+            dist/test/*.dmg
+            dist/test/*.exe
 
-  release:
-    name: Publish GitHub Release
+  draft-release:
+    if: ${{ inputs.publish_release }}
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/') || inputs.publish_release
+    permissions:
+      contents: write
     steps:
-      - name: Download installers
-        uses: actions/download-artifact@v4
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
         with:
+          pattern: mindex-*-signed
           path: release-artifacts
-          merge-multiple: false
-
-      - name: Resolve release tag
-        id: release
-        shell: bash
-        run: |
-          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-            echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
-          elif [[ -n "${{ inputs.release_tag }}" ]]; then
-            echo "tag=${{ inputs.release_tag }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "release_tag is required when publishing from workflow_dispatch" >&2
-            exit 1
-          fi
-
-      - name: Upload release assets
+          merge-multiple: true
+      - name: Create draft for this exact commit
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          tag="${{ steps.release.outputs.tag }}"
-          if ! gh release view "$tag" >/dev/null 2>&1; then
-            gh release create "$tag" --title "Mindex ${tag}" --notes "Mindex desktop release ${tag}"
+          version="$(node -p 'require("./package.json").version')"
+          tag="v$version"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo 'A release with this version already exists. Increment package.json version.' >&2
+            exit 1
           fi
-          mkdir -p release-upload
-          while IFS= read -r -d '' file; do
-            artifact="$(basename "$(dirname "$file")")"
-            cp "$file" "release-upload/${artifact}-$(basename "$file")"
-          done < <(find release-artifacts -type f \( -name '*.dmg' -o -name '*.exe' \) -print0)
-          find release-upload -type f \( -name '*.dmg' -o -name '*.exe' \) -print0 \
-            | xargs -0 gh release upload "$tag" --clobber
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
+            echo 'Tag already exists. Use a new desktop version.' >&2
+            exit 1
+          fi
+          test -f release-artifacts/latest-mac.yml
+          test -f release-artifacts/latest.yml
+          gh release create "$tag" release-artifacts/* --target "$GITHUB_SHA" --draft --title "Mindex $tag" --notes 'Signed desktop packages. Validate upgrade and presenter output before publishing.'

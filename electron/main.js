@@ -9,7 +9,8 @@ let updateController = null;
 let mainWindowEnsureTimer = null;
 
 function updatesEnabled() {
-  return app.isPackaged && process.env.MINDEX_DISABLE_UPDATES !== "1";
+  return app.isPackaged && require("../package.json").mindexTestBuild !== true
+    && process.env.MINDEX_DISABLE_UPDATES !== "1";
 }
 
 function appRoot() {

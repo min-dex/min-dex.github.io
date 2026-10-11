@@ -42,7 +42,7 @@ test('late install attempt rechecks live output, and current-version state clear
 });
 test('main-process IPC accepts controller only and blocks install while presenter exists',async()=>{
  const vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
- const handlers={},windows=[];let installed=0;
+ const handlers={},windows=[];let installed=0,testBuild=false;
  class Window extends EventEmitter {
   constructor(){super();this.webContents=new EventEmitter();this.webContents.send=()=>{};windows.push(this);}
   isDestroyed(){return false;} isVisible(){return true;} isMinimized(){return false;}
@@ -54,7 +54,7 @@ test('main-process IPC accepts controller only and blocks install while presente
  const display={id:1,bounds:{x:0,y:0,width:1920,height:1080}};
  const electron={app,BrowserWindow:Window,ipcMain:{handle:(k,h)=>handlers[k]=h},
   screen:{getAllDisplays:()=>[display],getPrimaryDisplay:()=>display},Menu:{getApplicationMenu:()=>null,buildFromTemplate:()=>({append(){}}),setApplicationMenu(){}},MenuItem:class {}};
- const context={require:name=>name==='electron'?electron:name==='electron-updater'?{autoUpdater:updater}:name==='./updater'?{createUpdateController}:name==='./keynote-importer'?{}:require(name),
+ const context={require:name=>name==='../package.json'?{mindexTestBuild:testBuild}:name==='electron'?electron:name==='electron-updater'?{autoUpdater:updater}:name==='./updater'?{createUpdateController}:name==='./keynote-importer'?{}:require(name),
   process:{platform:'darwin',env:{}},__dirname:path.resolve(__dirname,'../electron'),console,setTimeout:()=>0,setInterval:()=>0,clearInterval(){}};
  vm.runInNewContext(fs.readFileSync(path.resolve(__dirname,'../electron/main.js'),'utf8'),context);
  await new Promise(r=>setImmediate(r));const event={sender:windows[0].webContents};
@@ -65,4 +65,5 @@ test('main-process IPC accepts controller only and blocks install while presente
  handlers['mindex:close-presenter'](event);
  assert.equal(handlers['mindex:install-update'](event).reason,'presenter-active');
  windows[1].emit('closed');assert.equal(handlers['mindex:install-update'](event).ok,true);assert.equal(installed,1);
+ testBuild=true;assert.equal((await handlers['mindex:check-for-updates'](event)).reason,'updates-unavailable');
 });

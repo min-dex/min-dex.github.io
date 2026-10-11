@@ -117,3 +117,28 @@ A release is not validated until a genuinely older signed installation upgrades
 to the newer signed build on each supported OS/architecture. Verify relaunch,
 version, preserved local drafts/session, and native presenter output. No signed
 installer, notarization submission or GitHub Release was produced in this work.
+
+## Isolated test packages and GitHub builds
+
+- `pnpm electron:test:mac` builds Apple Silicon and Intel DMGs;
+  `pnpm electron:test:win` builds the x64 NSIS installer. Outputs live in
+  `dist/test/`. `electron-builder.test.cjs` uses the distinct `Mindex Test`
+  name, `kr.mindex.app.test` identity and `mindex-test` package name, isolating
+  user data from the production app. Do not copy production session files.
+- These unsigned/unnotarized packages have a baked-in update-disable flag.
+  They cannot download a production update or install over the official app
+  through the updater. OS security prompts are expected; they are for local
+  acceptance testing, not public distribution.
+- GitHub `Desktop Packages` defaults to unsigned test artifacts, retained for
+  seven days. Download them from the workflow run; no release is created. The
+  packaging work branch triggers this same test path when build config changes.
+- For a future signed build, manual `publish_release=true` requires the platform
+  certificate secrets and, on macOS, `APPLE_API_KEY_CONTENTS` (p8 contents),
+  `APPLE_API_KEY_ID`, `APPLE_API_ISSUER`. The key is written only to runner temp
+  and removed after the build. Do not paste credentials into chats or source.
+- Signed jobs build both Mac architectures together so `latest-mac.yml` is not
+  overwritten by competing jobs. Upload ZIP/DMG/EXE, blockmaps and latest YAML
+  with original filenames. The final job creates a DRAFT for the exact source
+  commit; existing releases/tags are rejected. Validate upgrades before manually
+  publishing it. Tag pushes no longer publish anything automatically.
+- Use current runners (`macos-15`, `windows-latest`) and Node 22 for pnpm 11.

@@ -16,3 +16,14 @@ test('missing ZIP/provider/signing blocks release without printing credential va
  const problems=releaseProblems(bad,{},'mac').join(' ');
  assert.match(problems,/ZIP/);assert.match(problems,/provider/);assert.match(problems,/CSC_LINK/);
 });
+
+test('test installers are isolated, unsigned and cannot join the update channel',async()=>{
+ const {default:config}=await import('../electron-builder.test.cjs');
+ assert.notEqual(config.appId,pkg.build.appId);
+ assert.equal(config.extraMetadata.mindexTestBuild,true);
+ assert.notEqual(config.extraMetadata.name,pkg.name);
+ assert.equal(config.publish,null);
+ assert.equal(config.mac.identity,null);assert.equal(config.mac.notarize,false);
+ assert.equal(config.win.signAndEditExecutable,false);
+ assert.match(config.directories.output,/test/);
+});
