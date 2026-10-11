@@ -7087,6 +7087,18 @@ body.right-sidebar-open .svc-present-btn.svc-presenter-launch--sidebar:not(.svc-
   grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
   gap: 5px;
 }
+/* Multiple images use the available input width instead of a narrow preview column. */
+.svc-reference-media-input > .svc-reference-media-preview-group:has(> .svc-reference-media-slide-strip) {
+  flex: 1 0 100%;
+  width: 100%;
+}
+.svc-reference-media-preview-group:has(> .svc-reference-media-slide-strip) > .svc-reference-media-preview--collapsible {
+  max-width: 100%;
+}
+.svc-reference-media-preview-group > .svc-reference-media-slide-strip {
+  width: 100%;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 84px), 1fr));
+}
 .svc-reference-media-slide-chip {
   display: grid;
   min-width: 0;
