@@ -1157,3 +1157,17 @@ Small visual polish that does not alter behavior does not need an entry.
   sections; only move Lords Prayer before announcements. Preserve authored text,
   assignees and media. Earlier service dates retain the previous order.
 - User explicitly authorized applying this to already-created services from today.
+
+### 2026-10-11 Bulletin-style announcement anchors
+- Fullscreen announcement slides with an authored department welcome or footer
+  use stable top welcome, middle weekly-news, and bottom recurring-notice zones.
+  Existing slide backgrounds and the upper-right 광고 heading remain in place.
+- Recognize department welcome copy and explicit ◇/◈/◆/♢ footer markers; known
+  recurring notices also retain their footer role. A changed footer sentence
+  keeps its placement through the marker, without hardcoding its full wording.
+  Unknown text remains news; missing greetings/notices are not synthesized.
+- Preserve explicit bold, parentheses, numbering, and source records. Measure
+  each zone independently for long text and font loading; thumbnails and output
+  share the same renderer. Chromakey chunking and ordinary liturgy are unchanged.
+- Verified with `tests/smoke_announcement_regions.cjs` and existing inline-bold
+  output tests in Chromium. No production data rewrite is needed.

@@ -4221,6 +4221,7 @@ document.fonts?.addEventListener("loadingerror", () => {
 });
 
 function fitPresenterLyricText(host) {
+  if(host)fitPresenterAnnouncementRegions(host);
   host.querySelectorAll('.presenter-slide--lyrics[data-element-type="praise"] > .presenter-slide-text').forEach((textBox) => {
     textBox.style.removeProperty("font-size");
     const baseSize = Number.parseFloat(getComputedStyle(textBox).fontSize);
@@ -5307,20 +5308,70 @@ function renderPresenterTitleContentSlide(slide, options = {}) {
   `;
 }
 
+// Layout roles come from authored welcome copy and explicit footer markers.
+function presenterAnnouncementRegions(items) {
+  const regions={welcome:[],news:[],footer:[]};
+  let current=null,role="news";
+  for(const item of items)for(const [index,raw] of item.lines.entries()) {
+    const line=String(raw||""),plain=window.MindexInlineText.plain(line).trim();
+    if(!plain)continue;
+    const welcome=/^(?:[＊*]\s*)?(?:오늘도\s*)?(?:청년부|청소년부|어린이부) 예배에 오신 여러분을/.test(plain);
+    const footer=/^[◈◇◆♢]/.test(plain)||/^(?:청년부\s*기도 모임\s*\(매주|검단우리교회는 신천지|잠들기 전, 잠언 읽기!|연말에 잠잠성경과 주보 모으기)/.test(plain);
+    const numbered=plain.match(/^(?:(\d+)[.)]|([①-⑳]))\s*/u);
+    if(welcome||footer||numbered||index===0||role==="welcome") {
+      role=welcome?"welcome":footer?"footer":"news";
+      current={marker:footer?"◇":numbered?(numbered[1]?presenterCircledNumber(Number(numbered[1])-1):numbered[2]):index===0?item.marker:"",lines:[]};
+      regions[role].push(current);
+    }
+    if(!current){current={marker:"",lines:[]};regions.news.push(current);}
+    // Remove only the displayed footer symbol, preserving authored bold runs.
+    let skip=footer?(window.MindexInlineText.plain(line).match(/^\s*[◈◇◆♢]\s*/)?.[0].length||0):numbered?(window.MindexInlineText.plain(line).match(/^\s*/)[0].length+numbered[0].length):0;
+    const copy=window.MindexInlineText.runs(line).map(run=>{
+      const text=run.text.slice(skip);skip=Math.max(0,skip-run.text.length);
+      return text&&run.bold?`**${text}**`:text;
+    }).join("");
+    current.lines.push(copy);
+  }
+  return regions;
+}
+
+function renderPresenterAnnouncementItems(items,slide) {
+  return items.map(item=>{
+    const marker=String(item.marker||"").trim();
+    return `<div class="presenter-announcement-item${marker?"":" presenter-announcement-item--plain"}">
+      ${marker?`<span class="presenter-announcement-marker">${escapeHtml(marker)}</span>`:""}
+      <span class="presenter-announcement-copy">${item.lines.map(line=>`<span style="--line-chars: ${presenterLineCharEstimate(window.MindexInlineText.plain(line))}">${line?escapePresenterSlideLine(line,slide):"<br>"}</span>`).join("")}</span>
+    </div>`;
+  }).join("");
+}
+
+function fitPresenterAnnouncementRegions(host) {
+  host.querySelectorAll(".presenter-announcement-region").forEach(box=>{
+    box.style.removeProperty("font-size");
+    const base=parseFloat(getComputedStyle(box).fontSize);
+    if(!box.clientWidth||!box.clientHeight||!Number.isFinite(base))return;
+    const fits=()=>box.scrollWidth<=box.clientWidth+1&&box.scrollHeight<=box.clientHeight+1;
+    if(fits())return;
+    let low=0,high=base;
+    for(let i=0;i<12;i++){
+      const size=(low+high)/2;box.style.fontSize=`${size}px`;
+      if(fits())low=size;else high=size;
+    }
+    box.style.fontSize=`${low}px`;
+  });
+}
+
 function renderPresenterLiturgicalBodySlide(slide) {
   const title = String(slide.title || slide.sectionTitle || "").trim();
   const lines = presenterLiturgicalBodyLines(slide);
   const titleChars = presenterLineCharEstimate(title);
   const announcementItems = Array.isArray(slide?.announcementItems) ? slide.announcementItems.filter((item) => item?.lines?.length) : [];
+  const regions=presenterAnnouncementRegions(announcementItems);
+  const anchored=regions.welcome.length||regions.footer.length;
   const body = announcementItems.length
-    ? `<div class="presenter-announcement-items">${announcementItems.map((item) => {
-      const marker = String(item.marker || "").trim();
-      const itemLines = item.lines.map((line) => String(line || ""));
-      return `<div class="presenter-announcement-item${marker ? "" : " presenter-announcement-item--plain"}">
-        ${marker ? `<span class="presenter-announcement-marker">${escapeHtml(marker)}</span>` : ""}
-        <span class="presenter-announcement-copy">${itemLines.map((line) => `<span style="--line-chars: ${presenterLineCharEstimate(window.MindexInlineText?.plain(line)??line)}">${line ? escapePresenterSlideLine(line, slide) : "<br>"}</span>`).join("")}</span>
-      </div>`;
-    }).join("")}</div>`
+    ? anchored
+      ? `<div class="presenter-announcement-layout">${["welcome","news","footer"].map(role=>`<div class="presenter-announcement-region presenter-announcement-region--${role}">${renderPresenterAnnouncementItems(regions[role],slide)}</div>`).join("")}</div>`
+      : `<div class="presenter-announcement-items">${renderPresenterAnnouncementItems(announcementItems,slide)}</div>`
     : `<div class="presenter-liturgical-body-lines">
         ${lines.map((line) => `<span style="--line-chars: ${presenterLineCharEstimate(line)}">${escapePresenterSlideLine(line, slide)}</span>`).join("")}
       </div>`;
