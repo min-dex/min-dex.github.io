@@ -8987,3 +8987,6 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .svc-announcement-editor details>summary::before{content:"";width:5px;height:5px;border-right:1px solid currentColor;border-bottom:1px solid currentColor;transform:rotate(-45deg);flex-shrink:0;margin-left:2px}
 .svc-announcement-editor details[open]>summary::before{transform:rotate(45deg)}
 .svc-announcement-editor details>.svc-presenter-input-field+.svc-presenter-input-field{margin-top:10px}
+/* Avoid nesting an announcement input surface inside another padded panel. */
+.svc-board-subgroup-controls:has(.svc-announcement-editor){padding:5px 0;background:transparent;border-radius:0}
+.svc-announcement-editor textarea.svc-presenter-input-control{padding:10px 5px}

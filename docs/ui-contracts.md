@@ -246,3 +246,6 @@ Reset the board's inline-field flex basis inside this column editor; otherwise
 its 220px basis creates an empty vertical gap. Keep common fields collapsed by
 default and use the shared compact disclosure rhythm. Verify open/closed states
 at desktop and narrow widths with `tests/smoke_announcement_editor_layout.cjs`.
+
+Announcement editors use a transparent, horizontally unpadded board container
+and 5px textarea side padding to avoid nested panel gutters.
