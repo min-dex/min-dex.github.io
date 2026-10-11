@@ -125,6 +125,9 @@ installer, notarization submission or GitHub Release was produced in this work.
   `dist/test/`. `electron-builder.test.cjs` uses the distinct `Mindex Test`
   name, `kr.mindex.app.test` identity and `mindex-test` package name, isolating
   user data from the production app. Do not copy production session files.
+  The Supabase backend is still the same operational database: package isolation
+  does not make edits disposable. Test navigation/output without creating fake
+  services or altering curated worship data.
 - These unsigned/unnotarized packages have a baked-in update-disable flag.
   They cannot download a production update or install over the official app
   through the updater. OS security prompts are expected; they are for local
