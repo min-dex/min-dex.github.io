@@ -1518,6 +1518,7 @@ function buildPresenterLiturgicalBodySlides(item, section, index, service, memo,
     marker: "",
     textHighlights,
     announcementItems,
+    announcementRegions: normalizeAnnouncementRegions(memo.announcementRegions),
   };
   if (!presenterServiceUsesChromakey(service)) {
     return [{
@@ -5372,8 +5373,9 @@ function renderPresenterLiturgicalBodySlide(slide) {
   const lines = presenterLiturgicalBodyLines(slide);
   const titleChars = presenterLineCharEstimate(title);
   const announcementItems = Array.isArray(slide?.announcementItems) ? slide.announcementItems.filter((item) => item?.lines?.length) : [];
-  const regions=presenterAnnouncementRegions(announcementItems);
-  const anchored=regions.welcome.length||regions.footer.length;
+  const explicit=normalizeAnnouncementRegions(slide.announcementRegions);
+  const regions=explicit?Object.fromEntries(Object.entries(explicit).map(([key,text])=>[key,presenterAnnouncementItems(text)])):presenterAnnouncementRegions(announcementItems);
+  const anchored=explicit||regions.welcome.length||regions.footer.length;
   const body = announcementItems.length
     ? anchored
       ? `<div class="presenter-announcement-layout">${["welcome","news","footer"].map(role=>`<div class="presenter-announcement-region presenter-announcement-region--${role}">${renderPresenterAnnouncementItems(regions[role],slide)}</div>`).join("")}</div>`

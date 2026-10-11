@@ -302,6 +302,15 @@ function updateServiceItemField(field, options = {}) {
   markServiceItemSharedContentDirty(item, service);
   item._worshipTemplatePlaceholder = false;
   const strictSongInput = key === "raw_title" && serviceItemRequiresSongSelection(item, service);
+  if (["announcement_welcome","announcement_news","announcement_footer"].includes(key) && isAnnouncementTextInputItem(item)) {
+    const parsed=parseServiceItemMemo(item.memo);
+    const regions=serviceAnnouncementRegions(item,parsed);
+    regions[key.slice("announcement_".length)]=field.value;
+    parsed.announcementRegions=regions;
+    item.raw_title=[regions.welcome,regions.news,regions.footer].filter(text=>text.trim()).join("\n\n");
+    parsed.slides=item.raw_title?[item.raw_title]:[];
+    item.memo=serializeServiceItemMemo(parsed);
+  }
   if (key === "label" || key === "assignee" || key === "raw_title") {
     item[key] = key === "raw_title" ? normalizeServiceItemRawTitleForItem(item, field.value) : field.value;
     if (key === "raw_title") {
@@ -311,6 +320,7 @@ function updateServiceItemField(field, options = {}) {
         item.song_version_id = null;
       }
       const parsed = clearGeneratedServiceScriptureSlides(item);
+      if(isAnnouncementTextInputItem(item))delete parsed.announcementRegions;
       if (isScriptureBodyServiceItem(item)) {
         const references = serviceItemSupportsScriptureReferenceList(item)
           ? normalizeServiceScriptureReferenceList(field.value)

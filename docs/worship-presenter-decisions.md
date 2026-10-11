@@ -1185,3 +1185,17 @@ Small visual polish that does not alter behavior does not need an entry.
   this is not a guarantee for arbitrary downstream keyers. A separate
   1366-wide WebKit probe still showed mixed pixels at fractional geometry.
 - No service data or output-control state changes.
+
+### 2026-10-11 Explicit announcement region editor
+- Announcement preparation and service editors show weekly news immediately.
+  Welcome and footer fields live inside a collapsed common-copy disclosure.
+- Persist `announcementRegions: {welcome, news, footer}` in the existing element
+  config via memo serialization and the atomic save adapter. Keep the joined
+  raw body/slides for existing document and chromakey consumers. No schema change.
+- Legacy announcements derive initial fields from the previous recognition rules.
+  Once edited, explicit region values, including blanks, own output placement;
+  arbitrary welcome/footer wording no longer requires a recognized prefix or ◇.
+  Editing a whole raw body through legacy paths clears stale explicit regions.
+- The existing input/draft/save path handles each field. Loading alone does not
+  write production records. Verified editable common copy, config/read-adapter
+  round trip, arbitrary wording, explicit blanks, bold and output regression.

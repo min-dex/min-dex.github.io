@@ -4842,6 +4842,7 @@ function groupWorshipElements(sections = [], elements = []) {
         scriptureReferencePayloads: config.scriptureReferencePayloads || config.scripture_reference_payloads,
         manualScripture: config.manualScripture || config.manual_scripture,
         textHighlights,
+        announcementRegions: config.announcementRegions,
         introSlide,
         slides: manualSlides,
         asset,
@@ -10478,6 +10479,25 @@ async function setServiceBenedictionReplacement(serviceId, itemId, enabled) {
   return saved;
 }
 
+function normalizeAnnouncementRegions(value) {
+  if(!value||typeof value!=="object"||Array.isArray(value))return null;
+  return Object.fromEntries(["welcome","news","footer"].map(key=>[key,String(value[key]??"")]));
+}
+
+function serviceAnnouncementRegions(item,memo=parseServiceItemMemo(item.memo)) {
+  const saved=normalizeAnnouncementRegions(memo.announcementRegions);
+  if(saved)return saved;
+  const text=memo.slides?.length?memo.slides.join("\n\n"):item.raw_title||"";
+  const regions=presenterAnnouncementRegions(presenterAnnouncementItems(text));
+  return Object.fromEntries(Object.entries(regions).map(([key,items])=>[key,items.map(item=>item.lines.map((line,i)=>i===0&&item.marker?`${item.marker} ${line}`:line).join("\n")).join("\n")]));
+}
+
+function renderServiceAnnouncementEditor(item,index,serviceId,memo) {
+  const regions=serviceAnnouncementRegions(item,memo);
+  const field=(key,label,rows)=>`<label class="svc-presenter-input-field"><span>${label}</span><textarea data-inline-bold class="svc-presenter-input-control svc-presenter-input-control--multiline" data-service-id="${escapeAttr(serviceId||"")}" data-service-item-index="${index}" data-service-item-field="announcement_${key}" data-initial-value="${escapeAttr(regions[key])}" rows="${rows}" aria-label="${label}" onkeydown="handleDetailKeydown(event)">${escapeHtml(regions[key])}</textarea></label>`;
+  return `<div class="svc-announcement-editor">${field("news","주간 소식",5)}<details><summary>상단 환영 · 하단 안내</summary>${field("welcome","상단 환영 문구",2)}${field("footer","하단 안내",3)}</details></div>`;
+}
+
 function parseServiceItemMemo(value) {
   const raw = String(value || "").trim();
   if (!raw) return emptyServiceItemMemo();
@@ -10512,6 +10532,7 @@ function parseServiceItemMemo(value) {
         componentType: elementType,
         outputMode: normalizeServiceOutputMode(parsed.outputMode || parsed.output_mode || parsed.renderMode || parsed.render_mode),
         inputMode: normalizeServiceInputMode(parsed.inputMode || parsed.input_mode),
+        announcementRegions: normalizeAnnouncementRegions(parsed.announcementRegions),
         textHighlights: normalizeServiceTextHighlights(parsed.textHighlights || parsed.text_highlights || parsed.highlights),
         asset,
         audioAsset,
@@ -10759,8 +10780,9 @@ function serializeServiceItemMemo(value = {}) {
   const templateSuppressed = Boolean(value.templateSuppressed || value.template_suppressed);
   const defaultAssetKind = serviceAssetKindForElementType(elementType);
   if (!asset.kind && defaultAssetKind && hasServiceAsset(asset)) asset.kind = defaultAssetKind;
-  if (!slides.length && !scriptureReference && !scriptureReferences.length && !scriptureTranslationId && !scriptureReferencePayloads.length && !manualScripture && !hasServiceIntroSlide(introSlide) && !formHint && !formPreset && !formPresetDisabled && !formPresetRules.length && !templateKey && !templateVariant && !elementType && !outputMode && !inputMode && !textHighlights.length && !hasServiceAsset(asset) && !hasServiceAsset(audioAsset) && !hasServicePlaybackConfig(playback) && !presenterRole && !connectedPraise && !benedictionReplacement && !hiddenInPresentation && !templateSuppressed) return note;
+  if (!normalizeAnnouncementRegions(value.announcementRegions) && !slides.length && !scriptureReference && !scriptureReferences.length && !scriptureTranslationId && !scriptureReferencePayloads.length && !manualScripture && !hasServiceIntroSlide(introSlide) && !formHint && !formPreset && !formPresetDisabled && !formPresetRules.length && !templateKey && !templateVariant && !elementType && !outputMode && !inputMode && !textHighlights.length && !hasServiceAsset(asset) && !hasServiceAsset(audioAsset) && !hasServicePlaybackConfig(playback) && !presenterRole && !connectedPraise && !benedictionReplacement && !hiddenInPresentation && !templateSuppressed) return note;
   const payload = { note };
+  if(normalizeAnnouncementRegions(value.announcementRegions))payload.announcementRegions=normalizeAnnouncementRegions(value.announcementRegions);
   if (scriptureReference) payload.scriptureReference = scriptureReference;
   if (scriptureReferences.length) payload.scriptureReferences = scriptureReferences;
   if (scriptureTranslationId) payload.scriptureTranslationId = scriptureTranslationId;
@@ -25520,6 +25542,7 @@ function renderServiceEditorAssigneeControl(item, origIndex, attrs = {}, model =
 function renderServiceEditorTitleControl(item, origIndex, attrs = {}, model = serviceItemEditorModel(item, attrs)) {
   const fieldAttr = attrs.fieldAttr || "data-service-item-field";
   const indexAttr = attrs.indexAttr || "data-service-item-index";
+  if(fieldAttr==="data-service-item-field" && !attrs.isDefault && isAnnouncementTextInputItem(item))return renderServiceAnnouncementEditor(item,origIndex,attrs.service?.id||state.selectedServiceId,parseServiceItemMemo(item.memo));
   const listAttr = model.scripture
       ? `list="serviceScriptureOptions"`
       : "";
@@ -28114,7 +28137,8 @@ function renderPresenterServiceTextInputs(item, index, model, memo) {
     announcementText ? "svc-presenter-input-field--announcement" : "",
   ].filter(Boolean).join(" ");
   return `
-    ${needsTitle ? `
+    ${announcementText ? renderServiceAnnouncementEditor(item,index,model?.service?.id,memo):""}
+    ${needsTitle && !announcementText ? `
       <label class="${titleFieldClass}">
         ${presenterServiceTitleFieldShowsLabel(titleLabel) ? `<span>${escapeHtml(titleLabel)}</span>` : ""}
         ${manualPraise ? renderServiceEditorTitleControl(item, index, { service: model?.service, hideFormControls: true }, model) : announcementText ? `

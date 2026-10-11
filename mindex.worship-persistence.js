@@ -849,6 +849,8 @@ function serviceElementConfigForSave(existingConfig = {}, parsed = emptyServiceI
     delete config.manual_scripture;
   }
   delete config.content_state;
+  if(parsed.announcementRegions)config.announcementRegions=normalizeAnnouncementRegions(parsed.announcementRegions);
+  else delete config.announcementRegions;
   if (parsed.textHighlights?.length) config.textHighlights = parsed.textHighlights;
   else {
     delete config.textHighlights;

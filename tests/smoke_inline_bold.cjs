@@ -5,9 +5,9 @@ const server=http.createServer((req,res)=>{const pathname=new URL(req.url,'http:
 try{for(const engine of [chromium,...(fs.existsSync(webkit.executablePath())?[webkit]:[])]){const browser=await engine.launch({headless:true,...(engine===chromium?{executablePath:process.env.BULLETIN_CHROME}:{})});try{const page=await browser.newPage({viewport:{width:1440,height:900}});await page.route('**/*',r=>r.request().url().startsWith(base)?r.continue():r.abort());await page.goto(base);await page.waitForFunction(()=>typeof renderPresenterHighlightedText==='function'&&typeof state!=='undefined');
 const oldTests=fs.readFileSync(path.join(__dirname,'smoke_announcement_parentheses.py'),'utf8').match(/page.evaluate\('''([\s\S]*?)'''\)/)[1];
 console.log(engine.name(),await page.evaluate(`(${oldTests})()`));
-await page.evaluate(()=>{const service={id:'inline-test',type_id:'young-adult'};const item={id:'inline-ad',label:'광고',raw_title:'온세대 월삭예배',_worshipSectionKey:'announcements',memo:serializeServiceItemMemo({elementType:'body',inputMode:'text'})};state.module='presenter';state.selectedServiceId=service.id;state.services=[service];state.serviceItems={[service.id]:[item]};const host=document.createElement('div');host.id='inline-test';host.innerHTML=renderPresenterServiceTextInputs(item,getServiceItems(service.id).findIndex(row=>row.id===item.id),{service},parseServiceItemMemo(item.memo));document.body.prepend(host);host.querySelector('textarea').value='온세대 월삭예배';host.addEventListener('input',()=>window.inlineInputEvents=(window.inlineInputEvents||0)+1);});
+await page.evaluate(()=>{const service={id:'inline-test',type_id:'young-adult'};const item={id:'inline-ad',label:'광고',raw_title:'온세대 월삭예배',_worshipSectionKey:'announcements',memo:serializeServiceItemMemo({elementType:'body',inputMode:'text'})};state.module='presenter';state.selectedServiceId=service.id;state.services=[service];state.serviceItems={[service.id]:[item]};const host=document.createElement('div');host.id='inline-test';host.innerHTML=renderPresenterServiceTextInputs(item,getServiceItems(service.id).findIndex(row=>row.id===item.id),{service},parseServiceItemMemo(item.memo));document.body.prepend(host);host.querySelector('[data-service-item-field=announcement_news]').value='온세대 월삭예배';host.addEventListener('input',()=>window.inlineInputEvents=(window.inlineInputEvents||0)+1);});
 assert.equal(await page.locator('#inline-test [data-inline-bold-button]').count(),0);
-const input=page.locator('#inline-test textarea');await input.evaluate(el=>el.setSelectionRange(0,el.value.length));await input.press('Meta+b');assert.equal(await input.inputValue(),'**온세대 월삭예배**');await input.press('Control+b');assert.equal(await input.inputValue(),'온세대 월삭예배');assert.equal(await page.evaluate(()=>inlineInputEvents),2);
+const input=page.locator('#inline-test [data-service-item-field=announcement_news]');await input.evaluate(el=>el.setSelectionRange(0,el.value.length));await input.press('Meta+b');assert.equal(await input.inputValue(),'**온세대 월삭예배**');await input.press('Control+b');assert.equal(await input.inputValue(),'온세대 월삭예배');assert.equal(await page.evaluate(()=>inlineInputEvents),2);
 console.log('PASS announcement keyboard toggle and existing input events');
 await input.fill('첫째 안내\n\n둘째 안내');await input.selectText();await input.press('Control+b');
 assert.equal(await input.inputValue(),'**첫째 안내**\n\n**둘째 안내**');
@@ -18,7 +18,7 @@ await input.press('Control+b');
 assert.equal(await input.inputValue(),'**새 안내**');assert.equal(await page.evaluate(()=>boldBlurCount),0,'bold shortcut must preserve editing focus');
 console.log('PASS multiline toggle and shortcut preserves editing focus');
 await page.evaluate(()=>{
- const field=document.querySelector('#inline-test textarea');field.dataset.initialValue='새 안내';
+ const field=document.querySelector('#inline-test [data-service-item-field=announcement_news]');field.dataset.initialValue='새 안내';
  if(!commitDeferredServiceTextInput(field,{save:false}))throw Error('edit not committed');
  const item=getServiceItems('inline-test').find(row=>row.id==='inline-ad');
  if(item.raw_title!=='**새 안내**')throw Error('bold markers lost in service model');
@@ -28,6 +28,34 @@ await page.evaluate(()=>{
 });
 console.log('PASS committed announcement model and rebuilt output preserve bold');
 
+
+await page.evaluate(()=>{
+ const host=document.querySelector('#inline-test');
+ const rows=getServiceItems('inline-test');let item=rows.find(row=>row.id==='inline-ad');
+ const index=rows.indexOf(item),service=state.services[0];
+ item.raw_title='오늘도 청소년부 예배에 오신 여러분을 환영하고 축복합니다 :)\n1. 기존 소식\n◇ 기존 하단';
+ item.memo=serializeServiceItemMemo({elementType:'body',inputMode:'text'});
+ host.innerHTML=renderPresenterServiceTextInputs(item,index,{service},parseServiceItemMemo(item.memo));
+ if(host.querySelector('details').open)throw Error('common copy should start collapsed');
+ const edit=(key,value)=>{const field=host.querySelector(`[data-service-item-field="announcement_${key}"]`);field.value=value;updateServiceItemField(field,{deferPresenterRefresh:true});};
+ edit('news','1. 새 주간 소식');edit('welcome','새롭게 바꾼 **인사말**');edit('footer','기호 없이 바꾼 하단 안내');
+ item=getServiceItems('inline-test').find(row=>row.id==='inline-ad');
+ const memo=parseServiceItemMemo(item.memo);
+ const config=serviceElementConfigForSave({},memo,{item,service});
+ if(config.announcementRegions.welcome!=='새롭게 바꾼 **인사말**')throw Error('config lost header');
+ const elements=[{id:'roundtrip-ad',service_id:service.id,section_id:'roundtrip-section',element_type:'body',title:item.raw_title,body:item.raw_title,config,sort_order:1}];
+ const sections=[{id:'roundtrip-section',service_id:service.id,section_key:'announcements',title:'광고',sort_order:1}];
+ const restored=groupWorshipElements(sections,elements)[service.id][0];
+ if(JSON.stringify(parseServiceItemMemo(restored.memo).announcementRegions)!==JSON.stringify(memo.announcementRegions))throw Error('reload lost regions');
+ const slide=buildPresenterSlidesForServiceItem(restored,service,0).find(s=>s.type==='liturgical-body');
+ const output=document.createElement('div');output.innerHTML=renderPresenterSlideBody(slide);
+ if(output.querySelector('.presenter-announcement-region--welcome').textContent.trim()!=='새롭게 바꾼 인사말')throw Error('header inferred from words');
+ if(output.querySelector('.presenter-announcement-region--footer').textContent.trim()!=='기호 없이 바꾼 하단 안내')throw Error('footer requires marker');
+ edit('welcome','');edit('footer','');
+ item=getServiceItems('inline-test').find(row=>row.id==='inline-ad');
+ if(serviceAnnouncementRegions(item).welcome!==''||serviceAnnouncementRegions(item).footer!=='')throw Error('explicit blank restored');
+});
+console.log('PASS collapsed common editor, independent fields, persistence config reload, arbitrary wording and explicit blanks');
 
 if(process.env.INLINE_BOLD_SCREENSHOT)await page.screenshot({path:process.env.INLINE_BOLD_SCREENSHOT,fullPage:false});
 }finally{await browser.close();}}}finally{server.close();}})().catch(e=>{console.error(e);server.close();process.exitCode=1;});
