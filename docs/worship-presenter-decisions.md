@@ -1270,3 +1270,10 @@ Small visual polish that does not alter behavior does not need an entry.
   line minimum and shared padding. Remove region-specific row counts and manual
   resize handles. Grow/shrink with input and wrapping, including reopened common
   fields; cap at 55vh with internal scrolling for unusually long copy.
+
+### 2026-10-11 Young-adult prayer meeting time
+- User correction: the Saturday prayer meeting changes from 3 PM to 10:30 AM
+  effective 2026-10-01. Date-based bulletin defaults follow this boundary; retain
+  earlier archive-documented time transitions. The October 4 announcement and
+  saved bulletin were corrected with revision checks; September remains 3 PM
+  and October 11 already contained 10:30 AM.

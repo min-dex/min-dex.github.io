@@ -55,6 +55,8 @@ assert.match(profileForDate('2026-06-28').address,/서구/);
 assert.match(profileForDate('2026-07-05').address,/검단구/);
 assert.match(profileForDate('2026-05-24').notices,/오전 11시/);
 assert.match(profileForDate('2026-05-31').notices,/오후 3시/);
+assert.match(profileForDate('2026-09-30').notices,/오후 3시/);
+assert.match(profileForDate('2026-10-01').notices,/오전 10시 30분/);
 assert.match(profileForDate('2025-01-26').verse,/시편/);
 assert.match(profileForDate('2025-02-02').verse,/이사야/);
 console.log('PASS dated profiles, complete Sunday roster, exceptions, NEXT and independent months');
