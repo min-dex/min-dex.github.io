@@ -5817,13 +5817,15 @@ textarea.svc-presenter-input-control--multiline {
   gap: 6px;
 }
 .svc-presenter-scripture-part {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
   min-width: 0;
-  grid-template-columns: minmax(92px, .72fr) minmax(120px, 1fr) auto;
   align-items: center;
   gap: 6px;
 }
+.svc-presenter-scripture-part > .svc-presenter-input-control { flex: 1 1 120px; min-width: 0; }
 .svc-presenter-scripture-part > strong {
+  flex: 1 1 92px;
   min-width: 0;
   overflow: hidden;
   color: var(--ink-2);
@@ -5853,7 +5855,7 @@ textarea.svc-presenter-input-control--multiline {
   display: none;
 }
 .svc-presenter-scripture-manual[open] {
-  grid-column: 1 / -1;
+  flex: 0 0 100%;
 }
 .svc-presenter-scripture-manual[open] > summary {
   margin-bottom: 6px;
@@ -5861,7 +5863,7 @@ textarea.svc-presenter-input-control--multiline {
 }
 .svc-presenter-scripture-manual > div {
   display: grid;
-  grid-template-columns: minmax(120px, .32fr) minmax(220px, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
   gap: 6px;
 }
 .svc-presenter-scripture-manual textarea.svc-presenter-input-control {
@@ -7620,63 +7622,28 @@ body.right-sidebar-open .svc-present-btn.svc-presenter-launch--sidebar:not(.svc-
   flex: 0 0 116px;
   max-width: 116px;
 }
-.svc-board-subgroup-controls .svc-presenter-input-field--scripture-parts {
-  grid-column: 1 / -1;
-}
+/* Scripture controls wrap by available width, like the other input rows. */
 .svc-board-subgroup-control-item:has(> .svc-presenter-input-field--scripture-parts) {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  display: flex;
+  flex-wrap: wrap;
   align-items: start;
+  gap: 8px;
   width: 100%;
-  column-gap: 8px;
-  row-gap: 0;
 }
-.svc-board-subgroup-control-item:has(> .svc-presenter-input-field--scripture-parts) > label {
-  grid-column: 1;
-  grid-row: 1;
-}
-.svc-board-subgroup-control-item:has(> .svc-presenter-input-field--scripture-parts) > .svc-presenter-input-field--scripture-parts {
-  /* Let the summary occupy the input row while its expanded controls use the
-     full row below. Keeping the native details element preserves its toggle
-     behavior without a second state source. */
+.svc-board-subgroup-control-item > .svc-presenter-input-field--scripture-parts,
+.svc-board-subgroup-control-item > .svc-presenter-input-field--scripture-parts::details-content {
   display: contents;
 }
-.svc-board-subgroup-control-item:has(> .svc-presenter-input-field--scripture-parts) > .svc-presenter-input-field--scripture-parts > summary {
-  grid-column: 2;
-  grid-row: 1;
-  align-self: start;
+.svc-board-subgroup-control-item > .svc-presenter-input-field--scripture-parts > summary {
+  flex: 0 0 auto;
+  margin-bottom: 0;
 }
-.svc-board-subgroup-control-item:has(> .svc-presenter-input-field--scripture-parts) > .svc-presenter-input-field--scripture-parts:not([open]) > .svc-presenter-scripture-parts {
-  /* `details` becomes display: contents above, so retain the native closed
-     behavior explicitly instead of leaving its empty grid row and gap behind. */
+.svc-board-subgroup-control-item > .svc-presenter-input-field--scripture-parts:not([open]) > .svc-presenter-scripture-parts {
   display: none;
 }
-.svc-board-subgroup-control-item:has(> .svc-presenter-input-field--scripture-parts[open]) {
-  row-gap: 8px;
-}
-.svc-board-subgroup-control-item:has(> .svc-presenter-input-field--scripture-parts) > .svc-presenter-input-field--scripture-parts > .svc-presenter-scripture-parts {
-  grid-column: 1 / -1;
-  grid-row: 2;
+.svc-board-subgroup-control-item > .svc-presenter-input-field--scripture-parts > .svc-presenter-scripture-parts {
+  flex: 0 0 100%;
   width: 100%;
-}
-.svc-board-subgroup-control-item:has(> .svc-presenter-input-field--scripture-parts) > .svc-board-subgroup-flow {
-  grid-column: 2;
-  grid-row: 1;
-}
-.svc-board-subgroup-control-item:has(> .svc-presenter-input-field--scripture-parts) .svc-presenter-input-control {
-  min-width: 0;
-}
-.svc-board-subgroup-controls .svc-presenter-scripture-part {
-  grid-template-columns: minmax(92px, .72fr) minmax(120px, 1fr) auto;
-}
-.svc-board-subgroup-controls .svc-presenter-scripture-manual[open] {
-  grid-column: 1 / -1;
-}
-.svc-board-subgroup-controls .svc-presenter-scripture-manual textarea.svc-presenter-input-control {
-  height: 52px;
-  min-height: 52px;
-  padding-top: 7px;
-  resize: vertical;
 }
 .svc-presenter-form-control {
   display: inline-flex;
