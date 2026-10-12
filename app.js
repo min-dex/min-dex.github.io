@@ -8512,6 +8512,12 @@ function handlePresenterDetailClick(event) {
     return true;
   }
 
+  const mediaPreviewSlide = event.target.closest("[data-reference-media-slide]");
+  if (mediaPreviewSlide) {
+    selectPresenterMediaPreviewSlide(mediaPreviewSlide);
+    return true;
+  }
+
   const referenceMediaAdd = event.target.closest("[data-presenter-reference-media-add]");
   if (referenceMediaAdd) {
     referenceMediaAdd.closest("details")?.removeAttribute("open");
@@ -28090,8 +28096,10 @@ function renderPresenterReferenceMediaPreview(asset, kind, emptyMessage = "파�
       : normalizedKind === "audio" ? "audio-lines"
         : normalizedKind === "image" ? "image" : "file";
   const name = String(asset?.name || "").trim() || statusLabel;
+  const previewLabel = normalizedKind === "image" ? "미리보기" : normalizedKind === "audio" ? "듣기" : "파일 정보";
   const body = normalizedKind === "image"
-    ? `<img src="${escapeAttr(source)}" alt="${escapeAttr(name)}" loading="lazy" />`
+    ? `<img data-reference-media-preview-image src="${escapeAttr(source)}" alt="${escapeAttr(name)}" loading="lazy" onerror="handlePresenterMediaPreviewError(this)" />
+       <span data-reference-media-preview-error role="status" hidden>이미지를 불러오지 못했습니다. 파일 연결을 확인해 주세요.</span>`
     : normalizedKind === "audio"
       ? `<audio controls preload="metadata" src="${escapeAttr(source)}"></audio>`
       : renderPresenterStaticAssetPreview(asset, icon, statusLabel);
@@ -28099,10 +28107,11 @@ function renderPresenterReferenceMediaPreview(asset, kind, emptyMessage = "파�
     ? `<div class="svc-reference-media-slide-strip" aria-label="연결된 이미지 ${slideCount}장">
       ${slides.map((slide, index) => {
         const slideName = String(slide.name || `${index + 1}번 이미지`).trim();
-        return `<figure class="svc-reference-media-slide-chip" title="${escapeAttr(`${index + 1}. ${slideName}`)}">
-          <img src="${escapeAttr(slide.url)}" alt="${escapeAttr(slideName)}" loading="lazy" />
-          <figcaption>${escapeHtml(`${index + 1}. ${slideName}`)}</figcaption>
-        </figure>`;
+        return `<button type="button" class="svc-reference-media-slide-chip" data-reference-media-slide="${escapeAttr(slide.url)}" data-reference-media-name="${escapeAttr(slideName)}" aria-label="${escapeAttr(`${index + 1}. ${slideName} 미리보기`)}" aria-pressed="${index === 0}" title="${escapeAttr(`${index + 1}. ${slideName}`)}">
+          <img src="${escapeAttr(slide.url)}" alt="${escapeAttr(slideName)}" loading="lazy" onerror="handlePresenterMediaPreviewError(this)" />
+          <span class="svc-reference-media-slide-error" data-reference-media-preview-error hidden>불러오기 실패</span>
+          <span class="svc-reference-media-slide-caption">${escapeHtml(`${index + 1}. ${slideName}`)}</span>
+        </button>`;
       }).join("")}
     </div>`
     : "";
@@ -28112,12 +28121,34 @@ function renderPresenterReferenceMediaPreview(asset, kind, emptyMessage = "파�
         <i data-lucide="${escapeAttr(icon)}"></i>
         <strong title="${escapeAttr(name)}">${escapeHtml(name)}</strong>
         <span>${escapeHtml(statusLabel)}</span>
-        <b><i data-lucide="eye"></i>미리보기</b>
+        <b><i data-lucide="${normalizedKind === "audio" ? "headphones" : normalizedKind === "image" ? "eye" : "info"}"></i>${previewLabel}</b>
       </summary>
       <div class="svc-reference-media-preview-content">${body}</div>
     </details>
     ${slideStrip}
   </div>`;
+}
+
+function handlePresenterMediaPreviewError(image) {
+  image.hidden = true;
+  const message = image.parentElement?.querySelector("[data-reference-media-preview-error]");
+  if (message) message.hidden = false;
+}
+
+function selectPresenterMediaPreviewSlide(button) {
+  const group = button.closest(".svc-reference-media-preview-group");
+  const image = group?.querySelector("[data-reference-media-preview-image]");
+  const details = group?.querySelector("details");
+  if (!image || !details) return;
+  const message = group.querySelector("[data-reference-media-preview-error]");
+  if (message) message.hidden = true;
+  image.hidden = false;
+  image.alt = button.dataset.referenceMediaName || "이미지";
+  image.src = button.dataset.referenceMediaSlide;
+  details.open = true;
+  group.querySelectorAll("[data-reference-media-slide]").forEach((candidate) => {
+    candidate.setAttribute("aria-pressed", String(candidate === button));
+  });
 }
 
 function renderPresenterStaticAssetPreview(asset, icon, statusLabel) {
