@@ -28118,8 +28118,6 @@ function renderPresenterReferenceMediaPreview(asset, kind, emptyMessage = "íŒŒì
   return `<div class="svc-reference-media-preview-group">
     <details class="svc-reference-media-preview svc-reference-media-preview--collapsible svc-reference-media-preview--${escapeAttr(normalizedKind)}">
       <summary>
-        <i data-lucide="${escapeAttr(icon)}"></i>
-        <strong title="${escapeAttr(name)}">${escapeHtml(name)}</strong>
         <span>${escapeHtml(statusLabel)}</span>
         <b><i data-lucide="${normalizedKind === "audio" ? "headphones" : normalizedKind === "image" ? "eye" : "info"}"></i>${previewLabel}</b>
       </summary>
