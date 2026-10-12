@@ -7355,9 +7355,9 @@ body.right-sidebar-open .svc-present-btn.svc-presenter-launch--sidebar:not(.svc-
   white-space: nowrap;
 }
 .svc-board-subgroup-audio {
-  display: grid;
-  grid-column: 3;
-  grid-template-columns: auto auto;
+  display: flex;
+  flex-wrap: wrap;
+  min-width: 0;
   width: max-content;
   max-width: 100%;
   min-height: 28px;
@@ -7368,26 +7368,26 @@ body.right-sidebar-open .svc-present-btn.svc-presenter-launch--sidebar:not(.svc-
   font-size: var(--ui-label-size);
   font-weight: 800;
 }
-.svc-board-subgroup-audio:not(.has-audio) {
-  grid-template-columns: auto;
-}
 .svc-board-subgroup-audio.has-audio {
-  grid-column: 1 / -1;
+  flex: 1 1 360px;
   width: min(100%, 520px);
-  grid-template-columns: minmax(100px, 1fr) minmax(0, 150px) auto auto;
 }
 .svc-board-subgroup-audio audio {
-  width: 100%;
-  height: 28px;
+  flex: 1 1 200px;
+  min-width: min(100%, 180px);
+  width: 200px;
+  max-width: 100%;
+  height: 40px;
 }
 .svc-board-subgroup-audio strong {
+  flex: 1 1 120px;
+  max-width: 150px;
   min-width: 0;
   overflow: hidden;
   color: var(--ink-3);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.svc-board-subgroup-audio > span,
 .svc-board-subgroup-audio-upload {
   display: inline-flex;
   height: 30px;
@@ -7400,6 +7400,7 @@ body.right-sidebar-open .svc-present-btn.svc-presenter-launch--sidebar:not(.svc-
   padding: 0 8px;
   white-space: nowrap;
 }
+.svc-board-subgroup-audio-actions { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 6px; }
 .svc-board-subgroup-audio-upload {
   background: color-mix(in srgb, var(--accent-soft) 20%, var(--panel-2));
   color: var(--accent);
@@ -7452,33 +7453,6 @@ body.right-sidebar-open .svc-present-btn.svc-presenter-launch--sidebar:not(.svc-
 .svc-board-subgroup-controls--stacked {
   gap: 10px;
 }
-.svc-board-subgroup-controls--stacked .svc-board-subgroup-control-item {
-  grid-template-columns: minmax(0, 1fr) minmax(180px, 0.35fr);
-}
-.svc-board-subgroup-controls--stacked .svc-presenter-input-field--assignee {
-  grid-column: 1;
-}
-/* Medley rows: let the song input yield space so the 음원/저장 actions stay on the
-   same line even for the row that also carries a version select and a form hint. */
-.svc-board-subgroup-controls.svc-board-subgroup-controls--stacked .svc-presenter-input-field--song .svc-edit-title {
-  flex: 1 1 96px;
-  min-width: 96px;
-}
-/* Native selects size themselves from their longest option. Give every linked
-   version picker the same slot so medley title fields stay aligned. */
-.svc-board-subgroup-controls.svc-board-subgroup-controls--stacked .svc-presenter-input-field--song .svc-song-picker--linked:has(.svc-song-version-select) {
-  flex: 0 0 184px;
-  width: 184px;
-  max-width: 184px;
-}
-.svc-board-subgroup-controls.svc-board-subgroup-controls--stacked .svc-presenter-input-field--song .svc-song-picker--linked:has(.svc-song-version-select) .svc-song-version-select {
-  flex: 1 1 0;
-  width: 0;
-  max-width: none;
-}
-.svc-board-subgroup-controls--stacked .svc-board-subgroup-audio {
-  grid-column: 2;
-}
 .svc-board-subgroup-flow {
   flex: 0 1 auto;
   max-width: 100%;
@@ -7497,6 +7471,8 @@ body.right-sidebar-open .svc-present-btn.svc-presenter-launch--sidebar:not(.svc-
   min-height: 30px;
   white-space: nowrap;
 }
+
+.svc-input-status:empty { display: none; }
 
 .svc-input-status {
   min-width: 5.5em;
@@ -7691,6 +7667,16 @@ body.right-sidebar-open .svc-present-btn.svc-presenter-launch--sidebar:not(.svc-
   flex: 0 1 auto;
   max-width: 100%;
   flex-wrap: wrap;
+}
+.svc-board-subgroup-controls .svc-song-picker--linked:has(.svc-song-version-select) {
+  flex: 0 1 184px;
+  width: 184px;
+}
+.svc-board-subgroup-controls .svc-song-picker--linked .svc-song-version-select {
+  flex: 1 1 0;
+  min-width: 0;
+  width: 0;
+  max-width: none;
 }
 .svc-board-subgroup-controls .svc-presenter-input-field--song .svc-edit-title {
   flex: 1 1 160px;

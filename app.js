@@ -25602,7 +25602,7 @@ function renderServiceEditorTitleControl(item, origIndex, attrs = {}, model = se
         ${songInputAttrs}
         ${strictAttr}
         ${invalidAttr}
-        aria-label="${attrs.isDefault ? "기본 항목 내용" : "항목 내용"}"
+        aria-label="${escapeAttr(attrs.titleAriaLabel || (attrs.isDefault ? "기본 항목 내용" : "항목 내용"))}"
       />
       ${renderServiceSongPicker(item, origIndex, model)}
       ${attrs.hideFormControls ? "" : renderServiceEditorFormControls(item, origIndex, model, { compact: true, placeholder: "송폼" })}
@@ -27807,10 +27807,10 @@ function presenterServiceInputHasEditableField(item, service) {
 function renderPresenterServicePraiseInput(item, index, model) {
   const assigneeLabel = presenterServiceAssigneeInputLabel(item);
   return `
-    <label class="svc-presenter-input-field svc-presenter-input-field--song">
+    <div class="svc-presenter-input-field svc-presenter-input-field--song" role="group" aria-label="찬양 입력">
       <span>찬양</span>
-      ${renderServiceEditorTitleControl(item, index, { service: model.service }, model)}
-    </label>
+      ${renderServiceEditorTitleControl(item, index, { service: model.service, titleAriaLabel: "곡명" }, model)}
+    </div>
     ${model.showAssignee ? `
       <label class="svc-presenter-input-field svc-presenter-input-field--assignee">
         <span>${escapeHtml(assigneeLabel)}</span>
@@ -30183,29 +30183,6 @@ function renderPresenterCitationComposer(subgroup, serviceId) {
     </div>`;
 }
 
-function renderPresenterBoardSubgroupAudioControls(serviceId, subgroup = {}) {
-  const context = presenterBoardSubgroupItemContext(serviceId, subgroup);
-  if (!context || !serviceItemSupportsHeaderAudio(context.item)) return "";
-  const memo = parseServiceItemMemo(context.item.memo);
-  const audioAsset = normalizeServiceAudioAsset(memo.audioAsset);
-  const source = String(audioAsset.url || "").trim();
-  const label = audioAsset.name || "연결된 음원";
-  return `
-    <div class="svc-board-subgroup-audio${source ? " has-audio" : ""}" aria-label="${escapeAttr(`${context.item.label || "찬양"} 음원`)}">
-      ${source ? `
-        <audio controls preload="metadata" src="${escapeAttr(source)}"></audio>
-        <strong title="${escapeAttr(label)}">${escapeHtml(label)}</strong>
-        <button class="icon-btn" type="button" data-service-item-audio-clear
-          data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${context.index}"
-          aria-label="음원 연결 해제" title="음원 연결 해제"><i data-lucide="x"></i></button>` : ""}
-      <label class="svc-board-subgroup-audio-upload" title="${source ? "음원 교체" : "음원 추가"}">
-        <input type="file" accept="${SERVICE_ITEM_AUDIO_ACCEPT}" data-service-item-audio-file
-          data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${context.index}" />
-        <i data-lucide="${source ? "refresh-cw" : "upload"}"></i><span>${source ? "교체" : "음원"}</span>
-      </label>
-    </div>`;
-}
-
 function renderPresenterBoardItemActions(serviceId, context) {
   const audioControls = serviceItemSupportsHeaderAudio(context.item)
     ? renderPresenterBoardItemAudioControls(serviceId, context) : "";
@@ -30329,15 +30306,17 @@ function renderPresenterBoardItemAudioControls(serviceId, context = {}) {
     <div class="svc-board-subgroup-audio${source ? " has-audio" : ""}" aria-label="${escapeAttr(`${context.item.label || "찬양"} 음원`)}">
       ${source ? `
         <audio controls preload="metadata" src="${escapeAttr(source)}"></audio>
-        <strong title="${escapeAttr(label)}">${escapeHtml(label)}</strong>
-        <button class="icon-btn" type="button" data-service-item-audio-clear
-          data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${context.index}"
+        <strong title="${escapeAttr(label)}">${escapeHtml(label)}</strong>` : ""}
+      <div class="svc-board-subgroup-audio-actions">
+        ${source ? `<button class="icon-btn" type="button" data-service-item-audio-clear
+            data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${context.index}"
           aria-label="음원 연결 해제" title="음원 연결 해제"><i data-lucide="x"></i></button>` : ""}
-      <label class="svc-board-subgroup-audio-upload" title="${source ? "음원 교체" : "음원 추가"}">
-        <input type="file" accept="${SERVICE_ITEM_AUDIO_ACCEPT}" data-service-item-audio-file
-          data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${context.index}" />
-        <i data-lucide="${source ? "refresh-cw" : "upload"}"></i><span>${source ? "교체" : "음원"}</span>
-      </label>
+        <label class="svc-board-subgroup-audio-upload" title="${source ? "음원 교체" : "음원 추가"}">
+          <input type="file" accept="${SERVICE_ITEM_AUDIO_ACCEPT}" data-service-item-audio-file
+            data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${context.index}" />
+          <i data-lucide="${source ? "refresh-cw" : "upload"}"></i><span>${source ? "교체" : "음원"}</span>
+        </label>
+      </div>
     </div>`;
 }
 
