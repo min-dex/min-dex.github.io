@@ -74,6 +74,12 @@ def main():
                 route.fulfill(body=data.getvalue(), content_type='image/png')
             page.wait_for_function("document.getElementById('presenterOutputRoot').classList.contains('has-background')")
             page.wait_for_function("!document.getElementById('presenterOutputRoot').classList.contains('is-transitioning')")
+            assert page.evaluate("""() => {
+              const root=document.getElementById('presenterOutputRoot');
+              const source=backgroundPayload.backgroundImages[0];
+              return root.querySelector('.presenter-output-background img') === presenterOutputImagePreloadCache.get(source).image
+                && getComputedStyle(root).backgroundImage === 'none';
+            }"""), 'Output must reuse the decoded bitmap instead of starting a CSS image load'
             painted = Image.open(BytesIO(page.screenshot())).convert('RGB')
             assert painted.getpixel((100, 100)) == (20, 80, 220), 'Background was not ready on transition'
             # A late background load must never override an explicit blackout.

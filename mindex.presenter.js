@@ -4370,6 +4370,27 @@ function applyPresenterOutputFrameState(root, frameState = {}) {
   root.classList.toggle("is-blackout", Boolean(frameState.blackoutOutput));
   root.dataset.serviceType = frameState.serviceType || "";
   root.dataset.outputTheme = frameState.outputTheme || presenterOutputTheme(frameState.serviceType);
+  // Reuse decoded image nodes for output backgrounds. Assigning the URL to CSS
+  // can start another fetch/decode after the readiness gate (notably cold caches).
+  const sources = frameState.showBackground ? (frameState.backgroundImages?.length
+    ? frameState.backgroundImages : [frameState.backgroundImage].filter(Boolean)) : [];
+  const images = sources.map((source) => presenterOutputImagePreloadCache.get(normalizePresenterMediaSource(source)))
+    .filter((record) => record?.ready && record.image?.naturalWidth > 0)
+    .map((record) => record.image);
+  let background = root.querySelector(":scope > .presenter-output-background");
+  if (images.length) {
+    if (!background) {
+      background = document.createElement("div");
+      background.className = "presenter-output-background";
+      background.setAttribute("aria-hidden", "true");
+      root.prepend(background);
+    }
+    // CSS background sources are ordered front to back.
+    background.replaceChildren(...images.reverse());
+  } else {
+    background?.remove();
+  }
+  root.classList.toggle("has-decoded-background", images.length > 0);
   if (frameState.showBackground) {
     const backgroundCssValue = presenterBackgroundCssValue(frameState.backgroundImages?.length ? frameState.backgroundImages : [frameState.backgroundImage]);
     document.body.style.setProperty("--presenter-bg-image", backgroundCssValue);

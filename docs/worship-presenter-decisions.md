@@ -1384,3 +1384,12 @@ automatically deletes an existing service after calendar changes.
   retains the previous frame; later navigation/blackout invalidates pending work.
 - Regression uses a one-second delayed background and checks rendered pixels,
   then verifies late completion cannot replace an explicit blackout.
+
+### 2026-10-13 Reuse decoded output backgrounds
+- Live-data click verification still found a dark first special-song frame after
+  the decode gate: applying the source URL to CSS could request/decode it again.
+- Output now attaches the already decoded image nodes behind the slide layers,
+  preserving CSS source stacking and centered 100%-width sizing. Other contexts
+  remove the layer; blackout remains immediate. Preview CSS behavior is unchanged.
+- Verified the October 11 third-service scripture-to-special-song UI transition
+  using read-only production data, including first-use/cold-cache screenshots.

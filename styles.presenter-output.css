@@ -1462,3 +1462,8 @@ span.presenter-announcement-paren {
   --presenter-output-bg: #000;
   background: #000;
 }
+
+/* Keep the decoded background bitmap attached when switching output contexts. */
+.presenter-output-root.no-chromakey.has-decoded-background { background-image: none; }
+.presenter-output-background { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.presenter-output-background > img { position: absolute; left: 0; top: 50%; width: 100%; height: auto; max-width: none; transform: translateY(-50%); }
