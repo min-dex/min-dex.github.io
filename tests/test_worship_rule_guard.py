@@ -111,7 +111,6 @@ class WorshipRuleGuardTests(unittest.TestCase):
         self.assertIn("matchesAlternative", skip_guard)
         self.assertIn("calendarSkippedServiceTypesForDate(sunday)", self.source)
         self.assertIn("!skippedSundayServiceTypes.has(target.typeId)", self.source)
-        self.assertIn("calendarSkippedServiceTypesForDate(sundayDate)", self.source)
         self.assertIn("auto_generated: true", self.source)
 
     def test_sunday_shared_content_contract_stays_linked(self) -> None:
@@ -147,8 +146,6 @@ class WorshipRuleGuardTests(unittest.TestCase):
         save = function_block(self.source, "saveWorshipServiceInstance")
         element_patch = function_block(self.source, "saveWorshipServiceElementPatch")
         preserve = function_block(self.source, "preserveExistingWorshipContentRows")
-        self.assertNotIn("materializeSharedSundayContentForPersistence", save)
-        self.assertNotIn("materializeSharedSundayContentForPersistence", element_patch)
         self.assertLess(
             save.index("preserveExistingWorshipContentRows(rows, existingSections, existingElements)"),
             save.index("normalizeWorshipPersistenceSortOrders(rows)"),

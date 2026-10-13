@@ -23,13 +23,13 @@ const c={console,JSON,Map,Set,
   sundayEditSyncItemSnapshot:x=>x,persistSundayEditSync:async job=>jobs.push(job),
 };
 vm.createContext(c);
-for(const name of ['sundaySharedContentKey','sundaySharedContentTypesForItem','sundaySharedContentItemIndex','sundayEditSyncEligible','sundayEditSyncContent','sundayEditSyncSignature','applySundayEditSync','syncSharedSundayContentAfterSave']){
+for(const name of ['sundaySharedContentKey','sundaySharedContentTypesForItem','sundayEditSyncEligible','sundayEditSyncContent','sundayEditSyncSignature','applySundayEditSync','syncSharedSundayContentAfterSave']){
   const re=new RegExp(`(?:async )?function ${name}\\(`),start=source.search(re);
   assert(start>=0);vm.runInContext(source.slice(start,source.indexOf('\n}\n',start)+2),c);
 }
 (async()=>{
  assert.equal(c.sundaySharedContentKey(independent,third),'');
- assert.equal(c.sundaySharedContentItemIndex([independent,hymn],'main-praise:3',third),1);
+ assert.equal([independent,hymn].findIndex(item=>c.sundaySharedContentKey(item,third)==='main-praise:3'),1);
  assert.equal(c.sundayEditSyncEligible(independent,third),false);
  assert.equal(c.sundayEditSyncEligible(hymn,third),true);
  assert.equal(c.sundayEditSyncEligible(hymn,{...third,allGenerations:true}),false);

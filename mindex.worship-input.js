@@ -513,15 +513,6 @@ function applyServiceItemMetadataField(item, field, service) {
   item.memo = serializeServiceItemMemo(parsed);
 }
 
-function presenterPreparationHasEnteredValues(value = "") {
-  return String(value || "").split(/\r\n?|\n/).some((line) => {
-    const text = String(line || "").trim();
-    if (!text || isPresenterPreparationContextLine(text)) return false;
-    if (/^[^:：]+[:：]\s*$/.test(text)) return false;
-    return true;
-  });
-}
-
 function syncPresenterPreparationControls(field) {
   const root = field?.closest?.(".svc-presenter-input-rail");
   if (!root) return;

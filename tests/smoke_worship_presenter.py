@@ -137,6 +137,7 @@ def main() -> int:
         with sync_playwright() as playwright:
             browser = launch_chromium(playwright)
             context = browser.new_context(viewport={"width": 1440, "height": 980})
+            context.add_init_script(path=str(Path(__file__).parent / "helpers/presenter-diagnostics.js"))
             page = context.new_page()
             page.add_init_script("localStorage.clear(); sessionStorage.clear();")
             page.on("pageerror", lambda error: page_errors.append(str(error)))
@@ -2807,9 +2808,9 @@ def main() -> int:
                           layout: dbSlide.layout || '',
                           type: dbSlide.type || '',
                           chromakeyContext: presenterSlideOutputContext(dbSlide, true),
-                          chromakey: presenterSlideUsesChromakey(dbSlide, true),
+                          chromakey: (presenterSlideOutputContext(dbSlide, true) === "chromakey"),
                           cleanContext: presenterSlideOutputContext(dbSlide, false),
-                          cleanChromakey: presenterSlideUsesChromakey(dbSlide, false),
+                          cleanChromakey: (presenterSlideOutputContext(dbSlide, false) === "chromakey"),
                           renderClass: presenterSlideRenderClass(dbSlide),
                           title: dbSlide.title || '',
                           assignee: dbSlide.assignee || '',
@@ -2822,9 +2823,9 @@ def main() -> int:
                           layout: fallbackSlide.layout || '',
                           type: fallbackSlide.type || '',
                           chromakeyContext: presenterSlideOutputContext(fallbackSlide, true),
-                          chromakey: presenterSlideUsesChromakey(fallbackSlide, true),
+                          chromakey: (presenterSlideOutputContext(fallbackSlide, true) === "chromakey"),
                           cleanContext: presenterSlideOutputContext(fallbackSlide, false),
-                          cleanChromakey: presenterSlideUsesChromakey(fallbackSlide, false),
+                          cleanChromakey: (presenterSlideOutputContext(fallbackSlide, false) === "chromakey"),
                           renderClass: presenterSlideRenderClass(fallbackSlide),
                           title: fallbackSlide.title || '',
                           assignee: fallbackSlide.assignee || '',
@@ -3275,7 +3276,7 @@ def main() -> int:
                           title: slide.title || '',
                           text: slide.text || '',
                           lineCount: String(slide.text || '').split('\\n').length,
-                          chromakey: presenterSlideUsesChromakey(slide, true),
+                          chromakey: (presenterSlideOutputContext(slide, true) === "chromakey"),
                           outputContext: presenterSlideOutputContext(slide, true),
                           renderClass: presenterSlideRenderClass(slide),
                         }));
@@ -3287,7 +3288,7 @@ def main() -> int:
                           type: slide.type || '',
                           title: slide.title || '',
                           imageSrc: slide.imageSrc || '',
-                          chromakey: presenterSlideUsesChromakey(slide, true),
+                          chromakey: (presenterSlideOutputContext(slide, true) === "chromakey"),
                           outputContext: presenterSlideOutputContext(slide, true),
                         }));
                       const scaffoldOutputContexts = scaffoldAllSlides.reduce((contexts, slide) => {
@@ -3311,7 +3312,7 @@ def main() -> int:
                           elementType: slide.elementType || '',
                           layout: slide.layout || '',
                           type: slide.type || '',
-                          chromakey: presenterSlideUsesChromakey(slide, true),
+                          chromakey: (presenterSlideOutputContext(slide, true) === "chromakey"),
                           outputContext: presenterSlideOutputContext(slide, true),
                           renderClass: presenterSlideRenderClass(slide),
                           title: slide.title || '',
@@ -3322,7 +3323,7 @@ def main() -> int:
                           elementType: slide.elementType || '',
                           layout: slide.layout || '',
                           type: slide.type || '',
-                          chromakey: presenterSlideUsesChromakey(slide, false),
+                          chromakey: (presenterSlideOutputContext(slide, false) === "chromakey"),
                           outputContext: presenterSlideOutputContext(slide, false),
                           renderClass: presenterSlideRenderClass(slide),
                           title: slide.title || '',

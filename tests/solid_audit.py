@@ -17,13 +17,13 @@ STYLES_CSS = APP_DIR / "styles.css"
 # target architecture sizes.
 # Ratchets lowered after unused runtime cleanup on 2026-10-13.
 # Lower a limit when code is extracted; do not raise one without documenting why.
-MAX_APP_JS_LINES = 33_016
+MAX_APP_JS_LINES = 32_826
 MAX_PRESENTER_JS_LINES = 5_490
-MAX_STYLES_LINES = 8_436
+MAX_STYLES_LINES = 8_430
 MAX_FUNCTION_LINES = 450
-MAX_APP_FUNCTION_COUNT = 1_768
+MAX_APP_FUNCTION_COUNT = 1_755
 MAX_PRESENTER_FUNCTION_COUNT = 303
-MAX_GLOBAL_COUPLING_MARKERS = 3_136
+MAX_GLOBAL_COUPLING_MARKERS = 3_129
 
 WATCHED_FUNCTION_LIMITS = {
     "handleDetailClick": 440,

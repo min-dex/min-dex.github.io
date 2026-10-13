@@ -143,3 +143,30 @@ Integration note: concurrent commit `3eaa7f09` added three active helpers and
 17 app lines for parallel linked-song hydration/projection reuse. Preserve that
 reviewed change; set the integrated app ratchets to 33,016 lines / 1,768 functions.
 This does not restore the retired input or relax CSS/coupling limits.
+
+
+## Retired test-only runtime helpers — 2026-10-13
+
+Removed 14 unused runtime functions (13 in app.js and one in worship-input),
+including obsolete shared-content copying/materialization, the unused automatic
+service purge, and trivial preview, preparation, display and output wrappers.
+The linked-song hydration wrapper became unused after parallel loading; the
+active load/publish functions remain. Production single-slide validation remains;
+the test-only result aggregator now lives in tests/helpers/presenter-diagnostics.js.
+Tests are excluded from desktop runtime packaging.
+
+Regression assertions now exercise current parser, display, output context,
+sync and persistence functions. Persisted song-version IDs are checked against
+the real FK eligibility flag; memo-only versions must not become foreign keys.
+Existing guarded sync tests still cover conflicts, drafts, dates and one-way
+ownership. The scheduler fixture verifies that loading a changed calendar never
+removes existing services; explicit deletion retains its atomic retry tests.
+
+Validation: 59 non-browser CJS suites, 18 worship-rule checks, atomic store/client
+tests, syntax/diff checks and the tightened structural audit passed. Offline
+Chromium/WebKit checks passed for lifecycle retries/scheduler preservation,
+restored blank slides, 22 preparation cases and sidebar focus/reuse transitions.
+The migrated shared-content smoke block was also executed in both engines with
+local song/version fixtures. The full live-data app/presenter smoke suites were
+not run; no production data was written. Ratchets now match 32,826 app lines,
+1,755 app functions, 3,129 coupling markers and 8,430 CSS lines.

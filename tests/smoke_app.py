@@ -779,7 +779,7 @@ def main() -> int:
                     typeof normalizeServicePresenterRole !== 'function'
                     || typeof presenterPreparationRole !== 'function'
                     || typeof servicePreparationElementLabel !== 'function'
-                    || typeof servicePreparationDefaultRoleForType !== 'function'
+                    || typeof servicePreparationDefaultRoleForService !== 'function'
                   ) return { ready: false };
                   return {
                     ready: true,
@@ -787,9 +787,9 @@ def main() -> int:
                     waitingVideoAlias: normalizeServicePresenterRole('대기 영상'),
                     readyScreenRole: presenterPreparationRole({ label: '대기 화면', raw_title: '' }, {}),
                     waitingVideoRole: presenterPreparationRole({ label: '대기 영상', raw_title: '' }, {}),
-                    chromakeyDefaultRole: servicePreparationDefaultRoleForType('', 'monthly'),
-                    chromakeyReadyRole: servicePreparationDefaultRoleForType('대기 화면', 'monthly'),
-                    chromakeyWaitingRole: servicePreparationDefaultRoleForType('대기 영상', 'monthly'),
+                    chromakeyDefaultRole: servicePreparationDefaultRoleForService('', {type_id:'monthly'}),
+                    chromakeyReadyRole: servicePreparationDefaultRoleForService('대기 화면', {type_id:'monthly'}),
+                    chromakeyWaitingRole: servicePreparationDefaultRoleForService('대기 영상', {type_id:'monthly'}),
                     readyScreenLabel: servicePreparationElementLabel('ready'),
                     waitingVideoLabel: servicePreparationElementLabel('waiting_loop'),
                   };
@@ -2357,7 +2357,7 @@ def main() -> int:
                             id,
                             type: worshipAppServiceTypeId(service.type_id),
                             hasSermonTitle: Boolean(String(sermonTitle?.raw_title || '').trim()),
-                            preview: serviceItemPreview(id),
+                            preview: serviceItemPreviewParts(id).text,
                             loaded: state.loadedWorshipServiceIds?.has(id) || false,
                           };
                         })
@@ -3765,36 +3765,32 @@ def main() -> int:
                             const thirdSermonBody = getServiceOutputItems('__smoke_share_third__').find((item) => item.label === '설교 본문');
                             const thirdCitation = getServiceOutputItems('__smoke_share_third__').find((item) => item.label === '인용 구절');
                             const thirdOffering = getServiceOutputItems('__smoke_share_third__').find((item) => item.label === '봉헌찬송');
-                            const syncedPraise = applySharedSundayContentToItem(
+                            const syncedPraise = applySundayEditSync(
                               makeItem('__smoke_share_second__', '찬양 1', 'praise', 1),
                               makeItem('__smoke_share_first__', '찬양 1', 'praise', 1, { songId: praiseSong?.id, versionId: praiseVersion?.id })
                             );
-                            const clearedPraise = applySharedSundayContentToItem(
+                            const clearedPraise = applySundayEditSync(
                               syncedPraise,
                               makeItem('__smoke_share_first__', '찬양 1', 'praise', 1)
                             );
-                            const syncedScripture = applySharedSundayContentToItem(
+                            const syncedScripture = applySundayEditSync(
                               makeItem('__smoke_share_third__', '설교 본문', 'sermon', 3),
                               makeItem('__smoke_share_second__', '설교 본문', 'sermon', 3, { rawTitle: '마 13:31–33, 44–50', scriptureReferences: ['마 13:31–33', '마 13:44–50'] })
                             );
-                            const clearedScripture = applySharedSundayContentToItem(
+                            const clearedScripture = applySundayEditSync(
                               syncedScripture,
                               makeItem('__smoke_share_second__', '설교 본문', 'sermon', 3)
                             );
-                            const materializedSecondItems = materializeSharedSundayContentForPersistence(
-                              services[1],
-                              state.serviceItems.__smoke_share_second__
-                            );
-                            const materializedSecondPraise = materializedSecondItems.find((item) => item.label === '찬양 1');
-                            const materializedEmptySecondPraise = materializeSharedSundayContentForPersistence(
-                              services[1],
-                              [makeItem('__smoke_share_second__', '찬양 1', 'praise', 1)]
-                            )[0];
+                            const materializedSecondPraise = buildWorshipPersistenceRows(services[1],
+                              [state.serviceItems.__smoke_share_second__.find(item=>item.label==='찬양 1')], {}, {}).elements[0];
+                            const materializedEmptySecondPraise = buildWorshipPersistenceRows(services[1],
+                              [makeItem('__smoke_share_second__', '찬양 1', 'praise', 1)], {}, {}).elements[0];
                             const result = {
                               secondPraiseText: serviceItemDisplayText(secondPraise),
                               secondPraiseSongId: serviceItemWithSharedSundayContent(secondPraise, services[1]).song_id || '',
                               secondPraiseMaterializedSongId: materializedSecondPraise?.song_id || '',
-                              secondPraiseMaterializedVersionId: materializedSecondPraise?.version_id || materializedSecondPraise?.song_version_id || '',
+                              secondPraiseMaterializedVersionId: materializedSecondPraise?.song_version_id || '',
+                              expectedPersistedPraiseVersionId: praiseVersion?._worshipVersionPersisted ? praiseVersion.id : '',
                               emptySecondPraiseMaterializedSongId: materializedEmptySecondPraise?.song_id || '',
                               mainPraiseSharedTypes: services.map((service) =>
                                 sundaySharedContentTypesForItem(
@@ -4566,7 +4562,7 @@ def main() -> int:
                         and template_terms["sharedSundayContentProjection"]["secondPraiseText"]
                         and template_terms["sharedSundayContentProjection"]["secondPraiseSongId"]
                         and template_terms["sharedSundayContentProjection"]["secondPraiseMaterializedSongId"]
-                        and template_terms["sharedSundayContentProjection"]["secondPraiseMaterializedVersionId"]
+                        and template_terms["sharedSundayContentProjection"]["secondPraiseMaterializedVersionId"] == template_terms["sharedSundayContentProjection"]["expectedPersistedPraiseVersionId"]
                         and template_terms["sharedSundayContentProjection"]["emptySecondPraiseMaterializedSongId"] == ""
                         and template_terms["sharedSundayContentProjection"]["mainPraiseSharedTypes"] == [
                             ["sunday-first", "sunday-second"],
@@ -4585,9 +4581,9 @@ def main() -> int:
                         and template_terms["sharedSundayContentProjection"]["thirdOfferingText"]
                         and template_terms["sharedSundayContentProjection"]["thirdOfferingStatic"] is False
                         and template_terms["sharedSundayContentProjection"]["syncedPraiseSongId"]
-                        and template_terms["sharedSundayContentProjection"]["clearedPraiseSongId"] == template_terms["sharedSundayContentProjection"]["syncedPraiseSongId"]
+                        and template_terms["sharedSundayContentProjection"]["clearedPraiseSongId"] == ""
                         and template_terms["sharedSundayContentProjection"]["syncedScriptureRefs"] == ["마태복음 13:31–33", "마태복음 13:44–50"]
-                        and template_terms["sharedSundayContentProjection"]["clearedScriptureRefs"] == ["마태복음 13:31–33", "마태복음 13:44–50"]
+                        and template_terms["sharedSundayContentProjection"]["clearedScriptureRefs"] == []
                         and set(template_terms["sharedSundayContentProjection"]["thirdMissingSlides"]).issuperset([
                             "찬양 1", "찬양 2", "찬양 3", "찬양 4", "찬송", "대표기도", "특송",
                         ])
@@ -4993,7 +4989,7 @@ def main() -> int:
                             alias: '청소년부 제자헌신예배',
                             date: '2026-07-05',
                           }),
-                          fridayFamily: serviceFamilyDisplayName({
+                          fridayFamily: serviceDisplayTypeName({
                             type_id: 'friday',
                             date: '2026-08-21',
                             alias: '삼삼오오예배',
@@ -5011,7 +5007,7 @@ def main() -> int:
                             alias: '삼삼오오예배',
                             _worshipSourceRef: { friday_variant: '3355', friday_variant_name: '삼삼오오예배' },
                           }),
-                          monthlyFamily: serviceFamilyDisplayName({
+                          monthlyFamily: serviceDisplayTypeName({
                             type_id: 'monthly',
                             title: '8월 월삭예배',
                             date: '2026-08-07',
@@ -5049,10 +5045,10 @@ def main() -> int:
                         "specialCustomTitle": "청년 연합 월삭예배",
                         "allGenerationsAlias": "온세대 찬양예배",
                         "youthDedicationAlias": "청소년부 제자헌신예배",
-                        "fridayFamily": "금요예배",
+                        "fridayFamily": "삼삼오오예배",
                         "fridayVariant": "삼삼오오예배",
                         "fridayDetailTitle": "삼삼오오예배",
-                        "monthlyFamily": "금요예배",
+                        "monthlyFamily": "월삭예배",
                         "monthlyVariant": "월삭예배",
                         "normalizedRowTitle": "월삭예배",
                         "normalizedOtherMonthRowTitle": "월삭예배",
@@ -7154,7 +7150,6 @@ def main() -> int:
                             }], [songId]);
                             clearSearchCaches();
                             const afterSignature = presenterSlideBuildSourceSignature(service.id);
-                            const progress = presenterServiceInputProgress(service);
                             const slides = buildServicePresenterSlidesUncached(service.id);
                             const hydratedSong = songById(songId);
                             const hydratedVersion = hydratedSong?.versions?.find((version) => version.id === versionId);
@@ -7164,7 +7159,7 @@ def main() -> int:
                               beforeNeedsHydration,
                               afterNeedsHydration: songNeedsRelationalHydration(songId),
                               versionId: hydratedVersion?.id || '',
-                              missing: progress.missing,
+                              missing: slides.filter(slide=>slide.missingContent).length,
                               slideText: slides.map((slide) => slide.text || '').join(' '),
                               hasMissingSlide: slides.some((slide) => slide.missingContent),
                               signatureChangedOnHydration: beforeSignature !== afterSignature,
@@ -9225,11 +9220,8 @@ def main() -> int:
                             );
                             const allGenerationProjectedLabels = allGenerationProjectedFromRegular.map((entry) => entry.label || '');
                             const allGenerationProjectedSections = [...new Set(allGenerationProjectedFromRegular.map((entry) => entry._worshipSectionKey || ''))];
-                            const allGenerationSharedMainPraiseIndex = sundaySharedContentItemIndex(
-                              allGenerationItems,
-                              'main-praise:3',
-                              allGenerationService
-                            );
+                            const allGenerationSharedMainPraiseIndex = allGenerationItems.findIndex(item =>
+                              sundayEditSyncEligible(item, allGenerationService) && sundaySharedContentKey(item, allGenerationService)==='main-praise:3');
                             return {
                               songIds: ['찬양 1', '찬양 2', '찬양 3', '찬양 4', '결단찬양'].map((label) => byLabel(label).song_id || ''),
                               versionIds: ['찬양 1', '찬양 2', '찬양 3'].map((label) => byLabel(label).version_id || byLabel(label).song_version_id || ''),

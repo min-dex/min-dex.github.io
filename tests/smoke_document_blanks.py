@@ -1,14 +1,20 @@
+from pathlib import Path
+from urllib.parse import urlsplit
+import smoke_app
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 
 def main():
+    smoke_app.extract_supa_config = lambda: ('', '')
     server, url = start_local_app_server()
     try:
         with sync_playwright() as p:
             for engine in ['chromium', 'webkit']:
                 browser = launch_chromium(p) if engine == 'chromium' else p.webkit.launch()
                 page = browser.new_page()
-                page.route('**/*supabase*/**', lambda r: r.abort())
+                page.add_init_script(path=str(Path(__file__).parent / "helpers/presenter-diagnostics.js"))
+                page.route('**/*', lambda route: route.continue_()
+                           if urlsplit(route.request.url).netloc == urlsplit(url).netloc else route.abort())
                 page.goto(url + '?output=presenter', wait_until='domcontentloaded')
                 page.wait_for_function("typeof serviceDocumentPresenterSlides === 'function'")
                 print(engine, page.evaluate('''() => {

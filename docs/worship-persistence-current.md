@@ -11,7 +11,7 @@
   and updates only the corresponding source block. Identical duplicate source
   blocks may be collapsed only for a single canonical item. Differing duplicates
   remain blocked for review.
-- Full/element saves, linked-service sync, creation, deletion, automatic cleanup
+- Full/element saves, linked-service sync, creation, deletion
   and live setlist-leader edits have only one instance-write path. Import-source
   archive edits are a separate, unchanged storage contract.
 - Offline browser fixtures now exercise RPC rollback, frozen-request replay,
@@ -22,6 +22,14 @@
 - `tests/test_worship_store.mjs` and `tests/test_worship_atomic_client.mjs`
   cover retry/revision handling. `tests/check_worship_atomic_live.py` checks a
   read-only production aggregate; it does not prove write permissions or writes.
+
+## Scheduling preserves existing services (2026-10-13)
+
+Scheduling creates missing eligible instances only. Calendar changes never
+automatically delete existing services, including empty auto-generated drafts.
+Deletion requires an explicit user action through the atomic delete path. The
+unused automatic-cleanup helper was retired; lifecycle fixtures now call the
+actual scheduler and verify existing services remain unchanged.
 
 ## Historical Pre-Cutover Audit
 

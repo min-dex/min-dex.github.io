@@ -31,7 +31,7 @@
   retains the current stored-form and `corporatePrayers` contracts.
 
 ## RPC-Only Instance Persistence (2026-10-06)
-- Removed the temporary protocol switch and all direct-table instance-write fallbacks. Aggregate reads, full/element saves, linked sync, creation, deletion, automatic cleanup and live leader edits require the RPC client. Read-only list/archive queries and import-source editing remain separate contracts.
+- Removed the temporary protocol switch and all direct-table instance-write fallbacks. Aggregate reads, full/element saves, linked sync, creation, deletion and live leader edits require the RPC client. Read-only list/archive queries and import-source editing remain separate contracts.
 - Retain revision checks, project-scoped pending requests, local recovery, and draft isolation. An uncertain request is replayed exactly; its receipt requires reload and cannot acknowledge a newer draft.
 - Replaced legacy partial-commit fixtures with RPC safety checks. Chromium/WebKit coverage includes rollback, lost response, linked saves, creation/deletion retries, save queues, conflict review and benediction replacement.
 - No production records, grants or schema were changed. Historical document arrays remain readable until their fallback/recovery content is proven equivalent to canonical rows.
@@ -1308,3 +1308,14 @@ Small visual polish that does not alter behavior does not need an entry.
 - Reuse the existing synchronous service-item projection scope during item actions and dirty fingerprints. Array replacement still invalidates the projection, and the outer scope clears it before later edits.
 - Chromium/WebKit coverage retains retry, late-response isolation and medley persistence IDs. Controlled deferred-fetch coverage checks parallel loading, publication ordering, warm cache and unit-failure retry.
 - Read-only sample (28 items, 10 linked songs): add-action projections fell from five to two; measured add time fell from 219/264 ms to 176/245 ms. Network timings vary and are not a latency guarantee.
+
+
+## Runtime-only cleanup — 2026-10-13
+
+Retired unused wrappers and legacy shared-content copy helpers. Tests now use
+`applySundayEditSync`, `buildWorshipPersistenceRows`, service-aware preparation
+defaults, current display names and `presenterSlideOutputContext`. Existing
+sync conflict/draft guards remain authoritative. Slide-model diagnostics that
+only aggregate validation results belong in tests; production single-slide
+validation stays in place. Scheduling only creates missing instances and never
+automatically deletes an existing service after calendar changes.
