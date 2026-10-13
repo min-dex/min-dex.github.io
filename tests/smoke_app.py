@@ -9832,16 +9832,7 @@ def main() -> int:
                         )
                         page.wait_for_timeout(300)
                         page.locator(".svc-slide-thumb-frame").first.hover()
-                        page.wait_for_function(
-                            """() => {
-                              const frame = document.querySelector('.svc-slide-thumb:hover .svc-slide-thumb-frame');
-                              if (!frame) return false;
-                              const overlay = Number.parseFloat(getComputedStyle(frame, '::after').opacity || '0') || 0;
-                              return overlay >= 0.5 || getComputedStyle(frame).filter !== 'brightness(1)';
-                            }""",
-                            timeout=1500,
-                        )
-                        thumb_hover_later = page.evaluate(
+                        thumb_hover_later = page.wait_for_function(
                             """
                             () => {
                               const hoveredFrame = document.querySelector('.svc-slide-thumb:hover .svc-slide-thumb-frame');
@@ -9849,10 +9840,11 @@ def main() -> int:
                                 || document.querySelector('.svc-slide-thumb-frame');
                               const number = frame?.closest('.svc-slide-thumb-wrap')?.querySelector('.svc-slide-thumb-no');
                               const canvas = frame?.querySelector('.svc-slide-mini-canvas');
-                              if (!frame || !canvas) return null;
+                              if (!hoveredFrame || !frame || !canvas) return false;
                               const rect = frame.getBoundingClientRect();
                               const numberStyle = number ? getComputedStyle(number) : null;
                               const hoverOverlayStyle = getComputedStyle(frame, '::after');
+                              if (Number.parseFloat(hoverOverlayStyle.opacity || '0') < 0.5 && getComputedStyle(frame).filter === 'brightness(1)') return false;
                               return {
                                 width: Number(rect.width.toFixed(2)),
                                 height: Number(rect.height.toFixed(2)),
@@ -9867,7 +9859,7 @@ def main() -> int:
                               };
                             }
                             """
-                        )
+                        , timeout=3000).json_value()
                         hover_stable = (
                             thumb_hover_later
                             and abs(thumb_hover_state["width"] - thumb_hover_later["width"]) <= 1

@@ -207,3 +207,8 @@ Verification: app 130/130 and presenter 128/128 passed with live reads enabled,
 zero attempted production mutations, and both page/console-error checks passed.
 The guard's six mutation/unknown-RPC denial checks also passed without networking.
 No product runtime or production data change was required to resolve the failures.
+
+The presenter suite closes its browser context (including output popups) before
+closing the browser transport. Hover readiness and geometry are sampled in one
+poll result so a board refresh between separate evaluations cannot invalidate the
+sample. Concurrent browser-audit fixes from 153c295d were integrated and preserved.
