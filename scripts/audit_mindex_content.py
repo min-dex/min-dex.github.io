@@ -4,6 +4,7 @@ import json
 import os
 import re
 import argparse
+import unicodedata
 from datetime import date
 from collections import Counter
 from pathlib import Path
@@ -154,6 +155,17 @@ def normalize_title_key(value: Any) -> str:
     if not isinstance(value, str):
         return ""
     return re.sub(r"[\s\W_]+", "", value, flags=re.UNICODE).casefold()
+
+
+def canonical_title_keys(value: Any) -> set[str]:
+    """Accept current app keys and historical punctuation-free import keys.
+
+    These are validation representations, never instructions to rewrite IDs/keys.
+    """
+    if not isinstance(value, str):
+        return set()
+    current = re.sub(r"\s+", "", unicodedata.normalize("NFKC", value).strip().lower())
+    return {key for key in (current, normalize_title_key(value)) if key}
 
 
 def praise_type_signature(value: Any) -> tuple[str, ...]:
@@ -452,7 +464,7 @@ def audit(
             if not column_exists(supa_url, supa_key, table, column):
                 warnings.append({"type": "missing-optional-column", "table": table, "column": column})
 
-    seen_song_keys: dict[tuple[str, str, str], list[dict[str, Any]]] = {}
+    seen_song_keys: dict[tuple[str, str, str, str], list[dict[str, Any]]] = {}
     for row in songs:
         row_id = row["id"]
         title = row.get("title") or ""
@@ -462,6 +474,7 @@ def audit(
                 normalized,
                 (row.get("subtitle") or "").strip().casefold(),
                 (row.get("original_title") or "").strip().casefold(),
+                (row.get("artist") or "").strip().casefold(),
             )
             seen_song_keys.setdefault(identity, []).append(row)
         if TEST_PATTERNS.search(title):
@@ -471,7 +484,7 @@ def audit(
         issues.extend(edge_text_issues(row, row_id, ("title", "subtitle", "original_title", "hymn_no")))
         warnings.extend(edge_text_issues(row, row_id, ("memo",)))
 
-    for (title, subtitle, original_title), rows in seen_song_keys.items():
+    for (title, subtitle, original_title, artist), rows in seen_song_keys.items():
         if len(rows) > 1:
             hymn_numbers = [(row.get("hymn_no") or "").strip() for row in rows]
             if all(hymn_numbers) and len(set(hymn_numbers)) == len(hymn_numbers):
@@ -482,6 +495,7 @@ def audit(
             ids = [row["id"] for row in rows]
             warnings.append({
                 "type": "duplicate-song-identity",
+                "artist": artist,
                 "title": title,
                 "subtitle": subtitle,
                 "original_title": original_title,
@@ -506,7 +520,7 @@ def audit(
             issues.append({"type": "canonical-song-title-missing", "id": row_id})
         if not normalized_title:
             issues.append({"type": "canonical-song-normalized-title-missing", "id": row_id, "title": title})
-        elif "::" not in normalized_title and normalized_title != expected_title_key:
+        elif "::" not in normalized_title and normalized_title not in canonical_title_keys(title):
             warnings.append({
                 "type": "canonical-normalized-title-differs-from-title",
                 "id": row_id,
@@ -518,7 +532,7 @@ def audit(
             base, variant = normalized_title.split("::", 1)
             if not base or not variant:
                 issues.append({"type": "canonical-variant-key-malformed", "id": row_id, "normalized_title": normalized_title})
-            elif base != expected_title_key:
+            elif base not in canonical_title_keys(title):
                 issues.append({
                     "type": "canonical-variant-key-base-mismatch",
                     "id": row_id,
@@ -526,9 +540,9 @@ def audit(
                     "normalized_title": normalized_title,
                     "expected_base": expected_title_key,
                 })
-            elif normalize_title_key(variant) != variant:
+            elif variant not in canonical_title_keys(variant):
                 issues.append({"type": "canonical-variant-key-malformed", "id": row_id, "normalized_title": normalized_title})
-            elif variant not in explained_canonical_variant_keys(
+            elif normalize_title_key(variant) not in explained_canonical_variant_keys(
                 row,
                 title_collision_count=len(canonical_title_key_rows.get(expected_title_key, [])),
                 praise_types=praise_types_by_canonical_id.get(row_id, set()),

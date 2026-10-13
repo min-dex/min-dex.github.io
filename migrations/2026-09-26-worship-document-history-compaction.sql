@@ -46,8 +46,7 @@ where jsonb_typeof(svc.source_ref -> 'mindexServiceDocumentHistory') = 'array'
 on conflict (service_id) do nothing;
 
 update public.mindex_worship_services svc
-set source_ref = jsonb_set(svc.source_ref, '{mindexServiceDocumentHistory}', compacted.history, true)
-from lateral (
+set source_ref = jsonb_set(svc.source_ref, '{mindexServiceDocumentHistory}', (
   select coalesce(jsonb_agg(
     case
       when jsonb_typeof(entry.value) <> 'object' then entry.value
@@ -69,7 +68,7 @@ from lateral (
     order by entry.ordinality
   ), '[]'::jsonb) as history
   from jsonb_array_elements(svc.source_ref -> 'mindexServiceDocumentHistory') with ordinality as entry(value, ordinality)
-) compacted
+), true)
 where jsonb_typeof(svc.source_ref -> 'mindexServiceDocumentHistory') = 'array'
   and exists (
     select 1

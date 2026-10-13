@@ -25257,6 +25257,7 @@ function renderServiceSongPickerResult(song, index) {
   const meta = joinMetaItems([
     song.subtitle,
     song.original_title,
+    window.MindexSetlistLinks?.artistHint(song, state.songs.filter(peer => window.MindexSetlistLinks.titleKey(peer.title) === window.MindexSetlistLinks.titleKey(song.title))),
     songPraiseTypes(song).join(" · "),
   ]);
   return `

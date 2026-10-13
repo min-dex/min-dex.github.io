@@ -8,10 +8,14 @@ on:
         type: boolean
         default: false
   push:
-    branches: [codex/mindex-presenter-handoff]
+    branches: [main, codex/mindex-presenter-handoff]
     paths:
       - .github/workflows/desktop-release.yml
       - electron-builder.test.cjs
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - electron/**
       - tests/test_electron_runtime_files.py
       - scripts/verify-release.mjs
 
@@ -43,6 +47,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pnpm install --frozen-lockfile
+      - run: pnpm audit --audit-level=moderate
       - run: pnpm electron:check
       - name: Build isolated unsigned test installers
         if: ${{ !inputs.publish_release }}

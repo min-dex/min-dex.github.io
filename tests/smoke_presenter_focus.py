@@ -11,6 +11,7 @@ def setup(page, url):
       const items=Array.from({length:8},(_,i)=>({id:'item-'+i,service_id:service.id,
         label:'찬양 '+(i+1),raw_title:'곡 '+i,sort_order:i,
         memo:JSON.stringify({elementType:'praise',slides:['첫 줄','둘째 줄']})}));
+      state.client=state.client||{};state.auth.session={user:{id:'offline-fixture'}};state.connectionError='';
       state.module='presenter'; state.selectedServiceId=service.id;
       state.services=[service]; state.serviceTypes=[{id:'young-adult',name:'청년부 예배'}];
       state.serviceItems={[service.id]:items}; state.serviceError=''; state.connectionError='';

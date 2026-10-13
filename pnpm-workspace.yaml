@@ -1,2 +1,9 @@
 allowBuilds:
   electron: true
+  # Only NSIS is supported; Squirrel installer downloads are unused.
+  electron-winstaller: false
+
+# @electron/get 3 pins global-agent 3, whose logger pulls vulnerable sprintf-js.
+# v4 preserves bootstrap/createGlobalProxyAgent and removes that logger dependency.
+overrides:
+  'global-agent@3.0.0': 4.1.3

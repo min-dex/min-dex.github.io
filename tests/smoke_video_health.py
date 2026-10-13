@@ -34,7 +34,23 @@ def run(browser, url, engine):
         if failed:
             route.abort()
         else:
-            route.fulfill(path=str(Path(__file__).resolve().parents[1] / 'assets/presenter/chromakey-ready-loop-pingpong.mp4'), content_type='video/mp4')
+            path = Path(__file__).resolve().parents[1] / 'assets/presenter/chromakey-ready-loop-pingpong.mp4'
+            size = path.stat().st_size
+            byte_range = route.request.headers.get('range', '')
+            if byte_range.startswith('bytes='):
+                first, last = byte_range[6:].split('-', 1)
+                start = int(first) if first else max(0, size - int(last))
+                end = min(int(last), size - 1) if first and last else size - 1
+                if start > end:
+                    route.fulfill(status=416, headers={'Content-Range': f'bytes */{size}'})
+                    return
+                with path.open('rb') as media_file:
+                    media_file.seek(start)
+                    body = media_file.read(end - start + 1)
+                route.fulfill(status=206, body=body, content_type='video/mp4',
+                              headers={'Accept-Ranges': 'bytes', 'Content-Range': f'bytes {start}-{end}/{size}'})
+            else:
+                route.fulfill(path=str(path), content_type='video/mp4')
 
     output.route('**/probe-health.mp4', media)
     output.goto(url+'?output=presenter', wait_until='domcontentloaded')

@@ -12,7 +12,8 @@ try:
             page.wait_for_function("typeof renderPresenterDetail === 'function'")
             page.evaluate('''() => {
               const service={id:'citation-sidebar',type_id:'young-adult',date:'2026-10-11',title:'테스트'};
-              state.module='presenter';state.selectedServiceId=service.id;
+              state.client=state.client||{};state.auth.session={user:{id:'offline-fixture'}};state.connectionError='';
+      state.module='presenter';state.selectedServiceId=service.id;
               state.services=[service];state.serviceTypes=[{id:'young-adult',name:'청년부 예배'}];
               state.serviceItems={[service.id]:[{id:'citation',service_id:service.id,label:'인용 구절',sort_order:0,memo:JSON.stringify({elementType:'scripture_body'})}]};
               state.serviceError='';state.connectionError='';

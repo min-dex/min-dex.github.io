@@ -11,6 +11,34 @@ import audit_mindex_content  # type: ignore  # noqa: E402
 
 
 class AuditMindexContentTest(unittest.TestCase):
+    def test_canonical_keys_accept_current_app_and_historical_imports(self):
+        keys = audit_mindex_content.canonical_title_keys('예수로 나의 구주 삼고(E)')
+        self.assertEqual(keys, {'예수로나의구주삼고(e)', '예수로나의구주삼고e'})
+        self.assertNotIn('다른곡', keys)
+        self.assertIn('ab(c)', audit_mindex_content.canonical_title_keys('ＡＢ (Ｃ)'))
+        self.assertNotIn('MixedCase', audit_mindex_content.canonical_title_keys('MixedCase'))
+        self.assertEqual(audit_mindex_content.canonical_title_keys(None), set())
+
+    def test_audit_preserves_distinct_artists_and_rejects_wrong_canonical_base(self):
+        songs = [{'id': 'one', 'title': '문들아 머리 들어라'},
+                 {'id': 'two', 'title': '문들아 머리 들어라', 'artist': '히즈쇼'}]
+        canonical = [{'id': 'current', 'title': '곡 (E)', 'subtitle': 'Variant',
+                      'normalized_title': '곡(e)::variant'},
+                     {'id': 'legacy', 'title': '곡 (F)', 'subtitle': 'Variant',
+                      'normalized_title': '곡f::variant'},
+                     {'id': 'wrong', 'title': '곡 (G)', 'subtitle': 'Variant',
+                      'normalized_title': '다른곡::variant'}]
+        tables = {'mindex_songs': songs, 'mindex_canonical_songs': canonical}
+        with patch.object(audit_mindex_content, 'fetch_rows', side_effect=lambda u, k, table, *a: tables.get(table, [])), \
+             patch.object(audit_mindex_content, 'table_count', return_value=0), \
+             patch.object(audit_mindex_content, 'urlopen', side_effect=AssertionError('live I/O forbidden')):
+            _, issues, warnings = audit_mindex_content.audit('https://example.test', 'fake')
+            self.assertEqual([x['id'] for x in issues], ['wrong'])
+            self.assertFalse(any(x['type'] == 'duplicate-song-identity' for x in warnings))
+            songs[1].pop('artist')
+            _, _, warnings = audit_mindex_content.audit('https://example.test', 'fake')
+            self.assertTrue(any(x['type'] == 'duplicate-song-identity' for x in warnings))
+
     def test_count_requires_an_exact_total(self):
         for header, expected in [('0-0/12', 12), ('*/0', 0), ('0-0/0', 0)]:
             response = MagicMock()

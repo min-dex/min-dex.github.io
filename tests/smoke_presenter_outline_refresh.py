@@ -18,7 +18,8 @@ def main():
               const service={id:'outline-fixture',type_id:'young-adult',date:'2026-09-06',title:'테스트 예배'};
               const item={id:'praise-fixture',service_id:service.id,label:'찬양 2',raw_title:'250 구주의 십자가 보혈로',
                 song_id:'song-fixture',version_id:'old',sort_order:1};
-              state.module='presenter'; state.selectedServiceId=service.id;
+              state.client=state.client||{};state.auth.session={user:{id:'offline-fixture'}};state.connectionError='';
+      state.module='presenter'; state.selectedServiceId=service.id;
               state.services=[service]; state.serviceItems={[service.id]:[item]};
               state.songs=[]; clearSearchCaches();
               refs.songList.innerHTML=renderServiceCurrentSidebar(service);

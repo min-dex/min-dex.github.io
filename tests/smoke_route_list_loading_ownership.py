@@ -27,7 +27,8 @@ def main():
                   const copiedPraiseNine={label:'찬양 9',_worshipSectionKey:'praise',_worshipSlotKey:'praise.song.1',memo:''};
                   check(serviceItemSlotKey(copiedPraiseNine)==='praise.song.9','second renamed copied praise retained stale slot');
 
-                  state.module='scripture';state.loadingModules=new Set(['praise']);
+                  state.client=state.client||{};state.auth.session={user:{id:'offline-fixture'}};state.connectionError='';
+      state.module='scripture';state.loadingModules=new Set(['praise']);
                   check(!currentLoadingStatusItems().includes('찬양 데이터'),'off-screen praise load leaked into scripture status');
                   state.module='praise';
                   check(currentLoadingStatusItems().includes('찬양 데이터'),'active praise load missing');

@@ -9,6 +9,7 @@ def check_flow(browser, url, engine, width, theme):
     page.goto(url, wait_until='domcontentloaded')
     page.wait_for_function("typeof renderSingleVersionForms === 'function'")
     page.evaluate('''({theme}) => {
+      state.client=state.client||{};state.auth.session={user:{id:'offline-fixture'}};state.connectionError='';
       state.module='praise';state.selectedSongId='fixture';state.selectedVersionId='v1';
       const forms=normalizeForms([
         {id:'f1',song_id:'v1',part_type:'Verse',part_number:1,sort_order:0,lyrics:'Line 1'},

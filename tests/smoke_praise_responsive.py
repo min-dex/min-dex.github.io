@@ -7,6 +7,7 @@ def run(browser, url, engine):
     page.goto(url, wait_until='domcontentloaded')
     page.wait_for_function("typeof renderSingleVersionForms === 'function'")
     page.evaluate('''() => {
+      state.client=state.client||{};state.auth.session={user:{id:'offline-fixture'}};state.connectionError='';
       state.module='praise';state.selectedSongId='fixture';state.selectedVersionId='v1';
       const forms=[{id:'f1',part_type:'Verse',part_number:1,sort_order:0,
         lyrics:'A long lyric line that must wrap inside the editor without clipping.'}];
@@ -14,6 +15,19 @@ def run(browser, url, engine):
       state.forms=forms;state.dirty.forms=false;
       render();
     }''')
+    page.evaluate("""() => {
+      const songs=state.songs;
+      try {
+        state.songs=[{id:'one',title:'문들아 머리 들어라',versions:[]},
+          {id:'two',title:'문들아 머리 들어라',artist:'히즈쇼',versions:[]}];
+        const before=JSON.stringify(state.songs);
+        const a=renderServiceSongPickerResult(state.songs[0],0);
+        const b=renderServiceSongPickerResult(state.songs[1],1);
+        if(!a.includes('data-service-song-select="one"') || !b.includes('data-service-song-select="two"')
+          || a.includes('히즈쇼') || !b.includes('히즈쇼') || before!==JSON.stringify(state.songs))
+          throw Error('Existing artist must distinguish homonyms without changing IDs or records');
+      } finally {state.songs=songs;}
+    }""")
     for width in (1440, 1024, 768, 390, 320):
         page.set_viewport_size({'width': width, 'height': 900})
         if width <= 560:

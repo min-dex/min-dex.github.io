@@ -1,6 +1,6 @@
 # Mindex Handoff
 
-Last updated: 2026-09-24
+Last updated: 2026-10-13
 
 Mindex is a church ministry operations app. It is not only a song database and not only a presenter. It should support weekly worship preparation, lyrics/scripture management, worship presentation, calendar, and references while sharing one Supabase-backed data model and one coherent UI system. Activities/event screens are deferred to standalone utilities unless promoted later.
 
@@ -40,6 +40,25 @@ outrank reviewed decisions.
   requirement and expected fields; Data records the schema/data decision and
   reports the stable contract back. Neither thread silently broadens the other
   thread's scope.
+
+## Integrity remediation (2026-10-13)
+
+- Electron 43.7.9 / builder 26.15.3 / updater 6.8.9 and the refreshed pnpm
+  lockfile pass a full dependency audit with zero advisories at verification time.
+- The history-compaction SQL target correlation is repaired and locally tested;
+  no production schema/permission migration was run.
+- Canonical-key auditing accepts current app keys and historical import keys;
+  artist-aware song identity does not merge homonyms. Worship picker artist
+  hints use existing metadata only.
+- One verified production correction changed only three section sort numbers
+  in the 2026-10-11 afternoon service, revision 34 to 35, through atomic save.
+  Read-back confirmed unchanged elements, slides and source document.
+- Verification: 93 unit/contract/SQL entry points and 163 offline smoke entry
+  points passed; the read-only live suites passed 130 + 128 assertions. The
+  final content audit reports zero issues/warnings across all 125 aggregates.
+- Verification includes disposable PostgreSQL backup/restore and isolated native
+  Electron startup/presenter IPC. Signed OS installation/upgrades and physical
+  NTU mixer acceptance remain operational checks, not claims of these tests.
 
 ## Repository And Runtime
 

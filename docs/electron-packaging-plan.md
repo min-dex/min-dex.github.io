@@ -145,3 +145,19 @@ installer, notarization submission or GitHub Release was produced in this work.
   commit; existing releases/tags are rejected. Validate upgrades before manually
   publishing it. Tag pushes no longer publish anything automatically.
 - Use current runners (`macos-15`, `windows-latest`) and Node 22 for pnpm 11.
+
+## Integrity remediation — 2026-10-13
+
+Electron is pinned to 43.7.9 (the maintained 43 line), electron-builder to
+26.15.3 and electron-updater to 6.8.9. Transitive packages were refreshed within
+their supported ranges. The global-agent 3 override to 4.1.3 removes roarr's
+vulnerable sprintf-js dependency; bootstrap/createGlobalProxyAgent stay available.
+Squirrel Windows installer build scripts are explicitly disabled because the
+Windows distribution uses NSIS. The pnpm lockfile and workspace policy are part
+of the release input. Desktop CI audits the complete dependency graph, including
+Electron even though it is classified as a development dependency.
+
+Local validation uses an isolated unsigned Apple Silicon app and an ephemeral
+Electron profile with external network blocked. Signed installation/upgrade on
+customer Macs and Windows remains a separate physical acceptance test; it is
+not implied by a successful web deployment or unsigned package build.

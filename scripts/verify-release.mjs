@@ -13,7 +13,7 @@ export function releaseProblems(pkg, env = {}, platform = 'mac') {
   if (!pkg.build.publish.some(p => p.provider === 'github' && p.owner === 'min-dex' && p.repo === 'min-dex.github.io')) missing.push('GitHub update provider');
   if (!hasAll(['GH_TOKEN'])) missing.push('GH_TOKEN');
   if (!hasAll(['CSC_LINK','CSC_KEY_PASSWORD'])) missing.push('CSC_LINK + CSC_KEY_PASSWORD');
-  // Pinned builder 24 supports notarytool API credentials or a keychain profile.
+  // Pinned builder 26 supports notarytool API credentials or a keychain profile.
   // Its APPLE_ID path is legacy; do not advertise it as a release-ready option.
   if (platform === 'mac') {
     if (!pkg.build.mac.hardenedRuntime || !pkg.build.mac.notarize) missing.push('hardened runtime + notarization');

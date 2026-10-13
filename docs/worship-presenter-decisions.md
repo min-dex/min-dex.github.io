@@ -1349,3 +1349,23 @@ automatically deletes an existing service after calendar changes.
 - After integrating main through a9f48e5f, reran all 169 browser entry points
   on the combined code: 169 successful, zero failures, with the same two live-DB
   scenario groups explicitly skipped. Web cache version: `20261013-browser-audit`.
+
+### 2026-10-13 Integrity remediation
+- Worship song picker reuses the existing homonym artist hint without changing
+  stored titles, artists, IDs, or automatic matching. Missing credits stay blank.
+- Content audit validates both current NFKC/whitespace-normalized canonical keys
+  and historical punctuation-free import keys. A wrong title base is still an
+  error; neither representation triggers a data rewrite. Song identity includes
+  the existing artist, matching the UI's homonym distinction.
+- The October 11 afternoon service source explicitly orders announcements,
+  ceremony, sending, closing. Three section sort numbers were repaired through
+  the atomic client under expected revision 34; revision 35 was read back with
+  identical elements, slides and source document. No schema or permission change.
+- History compaction SQL uses a correlated SET subquery rather than an invalid
+  UPDATE target reference in FROM LATERAL. Verified in disposable databases only;
+  this migration was not applied to production.
+- Six offline browser fixtures now explicitly set the mock client/session and
+  clear the offline connection error rather than relying on shipped configuration.
+- Video retry smoke now serves valid HTTP 206 byte ranges. Returning the whole
+  MP4 with HTTP 200 for offset requests left Chromium loading indefinitely; the
+  fixture now verifies recovery without weakening playback assertions.

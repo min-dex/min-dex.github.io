@@ -7,4 +7,4 @@
 - Safety: do not change production data, schema, permissions, or deployment without the Data/UX boundary and explicit approval.
 - Verification: use the project-required tests and record local, commit, deploy, and operational status separately.
 - Design governance: `docs/design-system.md` and `docs/ui-contracts.md` own the current shell and interaction rules. Similarity to another app is not a requirement.
-- Next source of truth: `docs/app-inventory.json` for routing; `HANDOFF.md` and current contracts for behavior.
+- Next source of truth: workspace `/Users/parkjihun/Code/docs/app-inventory.json` for routing; `HANDOFF.md` and current contracts for behavior.
