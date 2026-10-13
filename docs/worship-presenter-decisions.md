@@ -1376,3 +1376,11 @@ automatically deletes an existing service after calendar changes.
   rows and prayer summaries do not repeat names. Full text stays available in
   the tooltip and accessible label. This changes display only, not saved items
   or output slides.
+
+### 2026-10-13 Background-ready output swaps
+- Service backgrounds participate in the output image decode gate, including
+  clean special-song screens in a chromakey service. Preserve the active frame
+  and its output context until a background source is ready. Failed loading
+  retains the previous frame; later navigation/blackout invalidates pending work.
+- Regression uses a one-second delayed background and checks rendered pixels,
+  then verifies late completion cannot replace an explicit blackout.

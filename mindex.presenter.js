@@ -3710,22 +3710,32 @@ function renderPresenterOutput(payload, options = {}) {
   const activeImageSource = presenterSlideImageSource(slide);
   preloadPresenterOutputImages(payload, slide);
   warmPresenterOutputNextVideo(payload);
-  if (activeImageSource && !presenterOutputImageIsReady(activeImageSource)) {
+  const backgroundSources = frameState.showBackground
+    ? presenterPayloadBackgroundImages(payload).map(normalizePresenterMediaSource).filter(presenterMediaSourceIsImage)
+    : [];
+  const imagesReady = () => (!activeImageSource || presenterOutputImageIsReady(activeImageSource))
+    && (!backgroundSources.length || backgroundSources.some(presenterOutputImageIsReady));
+  if (!imagesReady()) {
     const token = ++presenterOutputRenderState.token;
-    presenterOutputRenderState.pendingImageSource = activeImageSource;
-    root.dataset.presenterPendingImageSource = activeImageSource;
+    const pendingSource = activeImageSource || backgroundSources[0];
+    presenterOutputRenderState.pendingImageSource = pendingSource;
+    root.dataset.presenterPendingImageSource = pendingSource;
     root.setAttribute("aria-busy", "true");
     presenterOutputLayers(root);
     const rerenderIfReady = () => {
       if (
         token === presenterOutputRenderState.token
-        && root.dataset.presenterPendingImageSource === activeImageSource
-        && presenterOutputImageIsReady(activeImageSource)
+        && root.dataset.presenterPendingImageSource === pendingSource
+        && imagesReady()
       ) {
         renderPresenterOutput(payload, options);
       }
     };
-    preloadPresenterOutputImage(activeImageSource, { retry: true })?.finally(rerenderIfReady);
+    // CSS backgrounds need the same decode gate as slide images. Keep the old
+    // frame (including its keying mode) until at least one background is ready.
+    [activeImageSource, ...backgroundSources].filter(Boolean).forEach((source) => {
+      preloadPresenterOutputImage(source, { retry: true })?.finally(rerenderIfReady);
+    });
     nextAnimationFrame().then(rerenderIfReady);
     window.setTimeout(rerenderIfReady, 40);
     window.setTimeout(rerenderIfReady, 160);
