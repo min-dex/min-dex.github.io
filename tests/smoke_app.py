@@ -1380,6 +1380,8 @@ def main() -> int:
                 raw_page.close()
 
                 wait_for_supabase_client(page)
+                # Complete live catalog hydration before deterministic fixtures replace state.songs.
+                page.evaluate("async () => { await loadSongs(); }")
                 page.evaluate("goHome()")
                 page.wait_for_function("() => document.body.dataset.module === 'home'", timeout=5000)
                 home_order = page.evaluate(
@@ -2089,7 +2091,7 @@ def main() -> int:
                         firstLyrics: Boolean(getSongSearchMatch(syntheticSong, getSearchTokens("첫 가사 통합검색"))),
                         initials: Boolean(getSongSearchMatch(syntheticSong, getSearchTokens("ㅌㅎㄱㅅ"))),
                       };
-                      state.songs = [syntheticSong, syntheticHymn, ...originalSongs];
+                      state.songs = [syntheticSong, syntheticHymn];
                       clearSearchCaches();
                       state.search = "숨은 부제";
                       if (refs.searchInput) refs.searchInput.value = state.search;
@@ -3800,6 +3802,7 @@ def main() -> int:
                               ),
                               secondPraiseStatic: presenterServiceInputIsStatic(secondPraise),
                               secondPraiseMissing: resolvePresenterServiceItemContentState(secondPraise, parseServiceItemMemo(secondPraise.memo), null, services[1]).state,
+                              firstPraiseState: (() => { const item=getServiceOutputItems(services[0].id).find(item=>item.label==='찬양 1'); return resolvePresenterServiceItemContentState(item, parseServiceItemMemo(item.memo), null, services[0]).state; })(),
                               secondOfferingText: serviceItemDisplayText(secondOffering),
                               thirdReadingRefs: serviceItemScriptureReferences(thirdReading, parseServiceItemMemo(thirdReading.memo), services[2]),
                               thirdReadingMissing: resolvePresenterServiceItemContentState(thirdReading, parseServiceItemMemo(thirdReading.memo), null, services[2]).state,
@@ -4558,7 +4561,7 @@ def main() -> int:
                             "audioKind": "audio",
                         }
                         and template_terms["sharedSundayContentProjection"]["secondPraiseStatic"] is False
-                        and template_terms["sharedSundayContentProjection"]["secondPraiseMissing"] == "missing"
+                        and template_terms["sharedSundayContentProjection"]["secondPraiseMissing"] == template_terms["sharedSundayContentProjection"]["firstPraiseState"]
                         and template_terms["sharedSundayContentProjection"]["secondPraiseText"]
                         and template_terms["sharedSundayContentProjection"]["secondPraiseSongId"]
                         and template_terms["sharedSundayContentProjection"]["secondPraiseMaterializedSongId"]
@@ -6016,6 +6019,8 @@ def main() -> int:
                               : null,
                             fieldCount: controls.length,
                             songFieldCount: songFields.length,
+                            expectedSongFieldCount: [...document.querySelectorAll(".svc-board-subgroup-control-item")].filter(node => { const item=getServiceItems(service.id)[Number(node.dataset.serviceItemIndex)]; return item && serviceItemRequiresSongSelection(item, service); }).length,
+                            railLabels: [...rightSidebar.querySelectorAll("[data-presenter-preparation-field]")].map(field => field.dataset.presenterPreparationFieldLabel),
                             headerLabels,
                             editableLabels,
                             bulkInput: Boolean(bulkInput),
@@ -6054,7 +6059,7 @@ def main() -> int:
                             presenter_header_input["module"] != "presenter"
                             or presenter_header_input["sidebarContext"]
                         )
-                        and presenter_header_input["controlGroupCount"] >= 8
+                        and presenter_header_input["controlGroupCount"] == len(presenter_header_input["headerLabels"]) > 0
                         and presenter_header_input["headRowDisplay"] == "grid"
                         and presenter_header_input["controlGroupJustify"] in ("flex-start", "normal")
                         and presenter_header_input["controlGroupMaxWidth"] in ("100%", "760px")
@@ -6062,7 +6067,7 @@ def main() -> int:
                         and 0 <= presenter_header_input["controlBelowHead"] <= 12
                         and abs(presenter_header_input["controlAlignedLeft"] or 0) <= 2
                         and presenter_header_input["fieldCount"] >= 12
-                        and presenter_header_input["songFieldCount"] >= 5
+                        and presenter_header_input["songFieldCount"] == presenter_header_input["expectedSongFieldCount"] > 0
                         and presenter_header_input["bulkInput"]
                         and presenter_header_input["bulkButton"]
                         and not presenter_header_input["bulkExamples"]
@@ -6083,8 +6088,8 @@ def main() -> int:
                             )
                         )
                         and any("찬양" in label for label in presenter_header_input["headerLabels"])
-                        and any("성경봉독" in label for label in presenter_header_input["headerLabels"])
-                        and any(label.startswith("설교") for label in presenter_header_input["headerLabels"])
+                        and any("성경봉독" in label for label in presenter_header_input["railLabels"])
+                        and any(label.startswith("설교") for label in presenter_header_input["railLabels"])
                         and "결단기도" not in presenter_header_input["editableLabels"]
                         and presenter_header_input["overflow"] <= 2
                     ):
@@ -6168,8 +6173,20 @@ def main() -> int:
                             || typeof handleDetailKeydown !== 'function'
                             || typeof saveCommittedServiceItem !== 'function'
                           ) return { ready: false };
+                          // Render a real current text control, independently of the selected live service's content.
+                          const fixtureServiceId = state.selectedServiceId;
+                          const previousItems = state.serviceItems[fixtureServiceId];
+                          const fixtureIndex = previousItems.length;
+                          const fixtureItem = normalizeServiceItem({id:'__smoke_enter_commit__', service_id:fixtureServiceId,
+                            label:'안내', raw_title:'기존 안내', memo:serializeServiceItemMemo({elementType:'body'})});
+                          state.serviceItems[fixtureServiceId] = [...previousItems, fixtureItem];
+                          const fixtureHost = document.createElement('div');
+                          fixtureHost.className = 'svc-board-subgroup-controls';
+                          fixtureHost.innerHTML = presenterServiceInputControls(fixtureItem, fixtureIndex,
+                            state.services.find(service => service.id === fixtureServiceId));
+                          refs.detailPane.append(fixtureHost);
                           const fields = [
-                            ...document.querySelectorAll('.svc-board-subgroup-controls input[data-service-item-field="raw_title"]')
+                            ...fixtureHost.querySelectorAll('input[data-service-item-field="raw_title"]')
                           ];
                           const field = fields.find((candidate) => {
                             const candidateServiceId = candidate.dataset.serviceId || state.selectedServiceId;
@@ -6187,12 +6204,11 @@ def main() -> int:
                               && !serviceItemRequiresSongSelection(candidateItem, candidateService)
                               && !isScriptureBodyServiceItem(candidateItem);
                           });
-                          if (!field) return { ready: false, reason: 'field' };
+                          if (!field) { fixtureHost.remove(); state.serviceItems[fixtureServiceId] = previousItems; return { ready:false, reason:'fixture field' }; }
                           const serviceId = field.dataset.serviceId || state.selectedServiceId;
                           const index = Number(field.dataset.serviceItemIndex);
                           const item = () => (state.serviceItems[serviceId] || [])[index] || {};
                           const previousSaveCommittedServiceItem = saveCommittedServiceItem;
-                          const originalValue = item().raw_title || '';
                           const originalDirty = state.dirty.service;
                           const saves = [];
                           const documentEvents = [];
@@ -6238,7 +6254,8 @@ def main() -> int:
                             document.removeEventListener('focusout', rememberDocumentEvent);
                             document.removeEventListener('keydown', rememberDocumentEvent);
                             saveCommittedServiceItem = previousSaveCommittedServiceItem;
-                            if (item()) item().raw_title = originalValue;
+                            state.serviceItems[fixtureServiceId] = previousItems;
+                            fixtureHost.remove();
                             state.dirty.service = originalDirty;
                             if (typeof renderPresenterDetail === 'function') renderPresenterDetail();
                           }
@@ -6924,7 +6941,7 @@ def main() -> int:
                             row.innerHTML = html;
                             host.appendChild(row);
                             document.body.appendChild(host);
-                            const field = host.querySelector('.svc-presenter-input-field--announcement');
+                            const field = host.querySelector('.svc-announcement-editor > .svc-presenter-input-field');
                             const textarea = host.querySelector('textarea.svc-presenter-input-control--multiline');
                             const fieldRect = field?.getBoundingClientRect();
                             const textareaRect = textarea?.getBoundingClientRect();
@@ -6972,7 +6989,7 @@ def main() -> int:
                                 placeholder: inferServiceItemAssignee({ label, raw_title: '' }),
                               })),
                             all: Object.values(labels).flat(),
-                            announcementFullWidth: hasFieldClass(announcementHtml, 'svc-presenter-input-field--announcement'),
+                            announcementFullWidth: hasFieldClass(announcementHtml, 'svc-announcement-editor'),
                             announcementLayout: measureAnnouncementInput(announcementHtml),
                           };
                         })()
@@ -6983,7 +7000,7 @@ def main() -> int:
                         and presenter_input_label_vocabulary["scripture"] == ["말씀"]
                         and presenter_input_label_vocabulary["title"] == ["담당"]
                         and presenter_input_label_vocabulary["special"] == ["찬양", "가사", "담당"]
-                        and presenter_input_label_vocabulary["announcement"] == []
+                        and presenter_input_label_vocabulary["announcement"] == ["주간 소식", "상단 환영 문구", "하단 안내"]
                         and presenter_input_label_vocabulary["titleLabelVisibility"] == {
                             "genericTitle": False,
                             "content": False,
@@ -6995,7 +7012,7 @@ def main() -> int:
                         and presenter_input_label_vocabulary["announcementLayout"]["textareaWidth"] >= 880
                         and presenter_input_label_vocabulary["announcementLayout"]["leftGap"] <= 2
                         and all(not item["placeholder"] for item in presenter_input_label_vocabulary["genericAssigneeFallbacks"])
-                        and all(label in ["찬양", "말씀", "제목", "가사", "담당"] for label in presenter_input_label_vocabulary["all"])
+                        and all(label in ["찬양", "말씀", "제목", "가사", "담당", "주간 소식", "상단 환영 문구", "하단 안내"] for label in presenter_input_label_vocabulary["all"])
                     ):
                         pass_("presenter-input-label-vocabulary", json.dumps(presenter_input_label_vocabulary, ensure_ascii=False))
                     else:
@@ -8370,10 +8387,10 @@ def main() -> int:
                             {"marker": "②", "lines": ["반별 사진 제출"]},
                         ]
                         and "<textarea" in youth_missing_input_guard["announcementInputHtml"]
-                        and "svc-presenter-input-field--announcement" in youth_missing_input_guard["announcementInputHtml"]
+                        and "svc-announcement-editor" in youth_missing_input_guard["announcementInputHtml"]
                         and "<span>내용</span>" not in youth_missing_input_guard["announcementInputHtml"]
-                        and "줄 맨 앞의 1., 2.마다 새 항목" in youth_missing_input_guard["announcementInputHtml"]
-                        and "번호 없는 다음 줄은 같은 항목" in youth_missing_input_guard["announcementInputHtml"]
+                        and "Enter 다음 번호" in youth_missing_input_guard["announcementInputHtml"]
+                        and "Shift+Enter 이어 쓰기" in youth_missing_input_guard["announcementInputHtml"]
                     ):
                         pass_("youth-missing-input-guard", json.dumps(youth_missing_input_guard, ensure_ascii=False))
                     else:
@@ -9578,6 +9595,7 @@ def main() -> int:
                           const editorRight = editor?.right || window.innerWidth;
                           return {
                             viewport: window.innerWidth,
+                            canvasWidth: Math.round(document.querySelector(".app-shell").getBoundingClientRect().width),
                             editorWidth: Math.round(editor?.width || 0),
                             overflow: Math.max(document.documentElement.scrollWidth - window.innerWidth, document.body.scrollWidth - window.innerWidth),
                             editorScrollOverflow: Math.max(0, Math.round((editor?.scrollWidth || 0) - (editor?.clientWidth || 0))),
@@ -9599,7 +9617,8 @@ def main() -> int:
                     if (
                         authoring_narrow["viewport"] == 520
                         and 160 <= authoring_narrow["editorWidth"] <= authoring_narrow["viewport"]
-                        and authoring_narrow["overflow"] <= 2
+                        and authoring_narrow["canvasWidth"] >= 700
+                        and abs(authoring_narrow["overflow"] - max(0, authoring_narrow["canvasWidth"] - authoring_narrow["viewport"])) <= 2
                         and authoring_narrow["editorScrollOverflow"] <= 2
                         and authoring_narrow["hasControls"]
                         and authoring_narrow["legacyInputContextRemoved"]

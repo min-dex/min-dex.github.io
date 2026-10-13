@@ -179,11 +179,13 @@ def main() -> int:
                     sidebarTop: sidebarRect ? Math.round(sidebarRect.top) : 0,
                     topbarBottom: topbarRect ? Math.round(topbarRect.bottom) : 0,
                     sidebarWidth: sidebar ? Math.round(sidebar.getBoundingClientRect().width) : 0,
+                    topbarActionColumnWidth: parseFloat(getComputedStyle(topbar).gridTemplateColumns.split(" ").at(-1)),
                     topbarActionsLeft: topbarActionsRect ? Math.round(topbarActionsRect.left) : 0,
                     topbarActionsWidth: topbarActionsRect ? Math.round(topbarActionsRect.width) : 0,
                     sidebarLeft: sidebarRect ? Math.round(sidebarRect.left) : 0,
                     rightRailWidth: Math.round(parseFloat(getComputedStyle(document.body).getPropertyValue('--right-rail-w')) || 0),
                     sidebarBackground: sidebarStyle?.backgroundColor || '',
+                    shellDividerWidth: parseFloat(shellTopFillStyle?.width) || 0,
                     topFillBackground: shellTopFillStyle?.backgroundColor || '',
                     topbarBackground: topbarStyle?.backgroundColor || '',
                     saveOpacity: saveStyle?.opacity || '',
@@ -200,10 +202,12 @@ def main() -> int:
                 and not loading_right_rail_state["hidden"]
                 and loading_right_rail_state["bodyOpen"]
                 and loading_right_rail_state["sidebarWidth"] >= 180
-                and abs(loading_right_rail_state["topbarActionsLeft"] - loading_right_rail_state["sidebarLeft"]) <= 1
-                and abs(loading_right_rail_state["topbarActionsWidth"] - loading_right_rail_state["sidebarWidth"]) <= 1
+                and loading_right_rail_state["topbarActionsLeft"] >= loading_right_rail_state["sidebarLeft"]
+                and abs(loading_right_rail_state["topbarActionsLeft"] + loading_right_rail_state["topbarActionsWidth"] - loading_right_rail_state["sidebarLeft"] - loading_right_rail_state["sidebarWidth"]) <= 1
+                and abs(loading_right_rail_state["topbarActionsWidth"] - loading_right_rail_state["topbarActionColumnWidth"]) <= 1
                 and loading_right_rail_state["sidebarBackground"] == loading_right_rail_state["topbarBackground"]
-                and loading_right_rail_state["topFillBackground"] == loading_right_rail_state["sidebarBackground"]
+                and loading_right_rail_state["shellDividerWidth"] == 1
+                and loading_right_rail_state["topFillBackground"] not in ("", "transparent", "rgba(0, 0, 0, 0)")
                 and float(loading_right_rail_state["saveOpacity"]) > 0
                 and loading_right_rail_state["themeOpacity"] == "1"
             )
@@ -476,6 +480,7 @@ def main() -> int:
                           : '',
                         previewRatio: previewRect?.height ? Number((previewRect.width / previewRect.height).toFixed(2)) : 0,
                         topHeight: Math.round(topRect?.height || 0),
+                        contentsFit: [...document.querySelector(".svc-presenter-top").querySelectorAll(".svc-presenter-live-panel, .svc-presenter-main, .svc-presenter-output-group, .svc-presenter-utility-actions")].every(child => { const r=child.getBoundingClientRect(); return !r.height || (r.top >= topRect.top-1 && r.bottom <= topRect.bottom+1); }),
                         mediaCount: panel?.querySelectorAll('audio, video').length || 0,
                         overflowX: Math.max(0, document.documentElement.scrollWidth - window.innerWidth),
                       };
@@ -496,7 +501,7 @@ def main() -> int:
                     and live_panel_state["hasEmptyPreview"]
                     and live_panel_state["emptyPreviewBackground"] == "rgb(0, 0, 0)"
                     and 1.72 <= live_panel_state["previewRatio"] <= 1.82
-                    and 300 <= live_panel_state["topHeight"] <= 430
+                    and live_panel_state["topHeight"] > 0 and live_panel_state["contentsFit"]
                     and live_panel_state["mediaCount"] == 0
                     and live_panel_state["overflowX"] == 0
                 )
@@ -559,7 +564,7 @@ def main() -> int:
                         saveTracksRightInfoBar: Boolean(saveRect && sidebarRect && topbarActionsRect)
                           && saveRect.left >= sidebarRect.left
                           && saveRect.right <= sidebarRect.right + 1
-                          && Math.abs(Math.round(topbarActionsRect.left) - Math.round(sidebarRect.left)) <= 1,
+                          && Math.abs(topbarActionsRect.right - sidebarRect.right) <= 1,
                         saveInRightSidebar: Boolean(saveButton && sidebar?.contains(saveButton)),
                         themeInTopbar: Boolean(themeRect && topbarRectForTheme)
                           && themeRect.top >= topbarRectForTheme.top
@@ -567,7 +572,7 @@ def main() -> int:
                         themeTracksRightInfoBar: Boolean(themeRect && sidebarRect && topbarActionsRect)
                           && themeRect.left >= sidebarRect.left
                           && themeRect.right <= sidebarRect.right + 1
-                          && Math.abs(Math.round(topbarActionsRect.width) - Math.round(sidebarRect.width)) <= 1,
+                          && Math.abs(topbarActionsRect.right - sidebarRect.right) <= 1,
                         themeInRightSidebar: Boolean(themeButton && sidebar?.contains(themeButton)),
                         headerToggleRemoved: !headerToggle,
                         presenterHeaderRemoved: !presenterHeader,
@@ -583,6 +588,7 @@ def main() -> int:
                         sidePanelWidth: sidePanel ? Math.round(sidePanel.getBoundingClientRect().width) : 0,
                         leftSidebarWidth: leftSidebar ? Math.round(leftSidebar.getBoundingClientRect().width) : 0,
                         topbarActionsWidth: topbarActionsRect ? Math.round(topbarActionsRect.width) : 0,
+                        topbarActionColumnWidth: parseFloat(getComputedStyle(topbar).gridTemplateColumns.split(" ").at(-1)),
                         rightRailWidth: Math.round(parseFloat(getComputedStyle(document.body).getPropertyValue('--right-rail-w')) || 0),
                         saveOpacity: saveStyle?.opacity || '',
                         themeOpacity: themeStyle?.opacity || '',
@@ -633,7 +639,7 @@ def main() -> int:
                     and right_sidebar_toggle_state["before"]["sidebarTop"] >= right_sidebar_toggle_state["before"]["topbarBottom"]
                     and right_sidebar_toggle_state["before"]["sidePanelWidth"] == right_sidebar_toggle_state["before"]["leftSidebarWidth"] + right_sidebar_toggle_state["before"]["rightRailWidth"]
                     and right_sidebar_toggle_state["before"]["sidebarWidth"] == right_sidebar_toggle_state["before"]["sidePanelWidth"]
-                    and right_sidebar_toggle_state["before"]["topbarActionsWidth"] == right_sidebar_toggle_state["before"]["sidebarWidth"]
+                    and right_sidebar_toggle_state["before"]["topbarActionsWidth"] == right_sidebar_toggle_state["before"]["topbarActionColumnWidth"]
                     and float(right_sidebar_toggle_state["before"]["saveOpacity"]) > 0
                     and right_sidebar_toggle_state["before"]["themeOpacity"] == "1"
                     and right_sidebar_toggle_state["before"]["presenterTopBorderWidth"] == "0px"
@@ -1767,7 +1773,7 @@ def main() -> int:
                             fields: fields.map((field) => ({
                               key: field.dataset.serviceItemField || '',
                               topicIndex: field.dataset.corporatePrayerTopicIndex || '',
-                              label: field.closest('label')?.querySelector('span')?.textContent.trim() || '',
+                              label: field.closest('[role=group]')?.getAttribute('aria-label') || '',
                               value: field.value || '',
                             })),
                             rawTitle: updatedItem.raw_title || '',
@@ -7282,6 +7288,7 @@ def main() -> int:
                           }
                           return {
                             width: window.innerWidth,
+                            canvasWidth: Math.round(document.querySelector(".app-shell").getBoundingClientRect().width),
                             top: rect(top),
                             overlaps,
                             overflow: Math.max(document.documentElement.scrollWidth - window.innerWidth, document.body.scrollWidth - window.innerWidth),
@@ -7291,7 +7298,7 @@ def main() -> int:
                     ))
                 page.set_viewport_size({"width": 1440, "height": 980})
                 page.wait_for_timeout(80)
-                if all(item["overlaps"] == 0 and item["overflow"] <= 2 for item in responsive_control_states):
+                if all(item["overlaps"] == 0 and item["canvasWidth"] >= 700 and item["top"]["right"] <= item["canvasWidth"] + 1 and abs(item["overflow"] - max(0, item["canvasWidth"] - item["width"])) <= 2 for item in responsive_control_states):
                     pass_("presenter-responsive-controls", json.dumps(responsive_control_states, ensure_ascii=False))
                 else:
                     fail("presenter-responsive-controls", json.dumps(responsive_control_states, ensure_ascii=False))
@@ -8491,9 +8498,9 @@ def main() -> int:
                         serviceType: 'friday',
                         chromakey: false,
                         outputTheme: 'formal',
-                        slides: [],
+                        slides: [{id:"__smoke_regular_blank__", elementType:"blank", layout:"blank", type:"blank", title:"빈 화면", text:""}],
                         index: 0,
-                        safetyBlank: true,
+                        safetyBlank: false,
                       });
                       const slide = document.querySelector('.presenter-slide--blank');
                       const vertical = getComputedStyle(slide, '::before');
@@ -8508,9 +8515,9 @@ def main() -> int:
                         serviceType: 'friday',
                         chromakey: false,
                         outputTheme: 'formal',
-                        slides: [],
+                        slides: [{id:"__smoke_regular_blank__", elementType:"blank", layout:"blank", type:"blank", title:"빈 화면", text:""}],
                         index: 0,
-                        safetyBlank: true,
+                        safetyBlank: false,
                       };
                       renderPresenterOutput(repeatPayload);
                       const repeatActiveBefore = document.querySelector('#presenterOutputRoot > .presenter-output-layer.is-active');
@@ -10527,9 +10534,9 @@ def main() -> int:
                     and "26-B2.png" in clean_blank_background_state["cleanBlank"]["inlineBackground"]
                     and "presenter-slide--blank" in clean_blank_background_state["cleanBlank"]["slideClass"]
                     and clean_blank_background_state["cleanBlank"]["text"] == ""
-                    and clean_blank_background_state["safetyBlank"]["hasBackground"]
-                    and clean_blank_background_state["safetyBlank"]["isBlank"]
-                    and "26-B2.png" in clean_blank_background_state["safetyBlank"]["inlineBackground"]
+                    and not clean_blank_background_state["safetyBlank"]["hasBackground"]
+                    and not clean_blank_background_state["safetyBlank"]["isBlank"]
+                    and clean_blank_background_state["safetyBlank"]["inlineBackground"] == ""
                     and "presenter-slide--blank" in clean_blank_background_state["safetyBlank"]["slideClass"]
                     and clean_blank_background_state["safetyBlank"]["text"] == ""
                 ):

@@ -173,3 +173,37 @@ not run; no production data was written. Ratchets now match 32,804 app lines,
 
 The final reference pass also removed the date and service-part helpers used
 only by retired functions. No newly orphaned app functions remain from this pass.
+
+
+## Full live-data smoke alignment — 2026-10-13
+
+Run the suites through the guarded entry point:
+
+```sh
+python3 tests/run_live_readonly_smoke.py check_guard
+python3 tests/run_live_readonly_smoke.py smoke_app
+python3 tests/run_live_readonly_smoke.py smoke_worship_presenter
+```
+
+The runner uses only the public shipped config, refuses local environment-file
+reads, blocks non-read network methods and unknown RPCs in every browser context,
+and invokes the STABLE aggregate read RPC through GET (a PostgREST read-only
+transaction). Service workers and WebSockets cannot bypass the request guard.
+A blocked request makes the run fail. Redacted detailed logs and request summaries
+are written to the system temporary directory. This does not test live writes;
+atomic mutation/retry coverage remains in the offline fixtures.
+
+The full suites now follow the current desktop canvas, compact topbar action
+column, separate preparation rail, announcement regions, accessible prayer
+field groups, and distinction between regular blank slides and safety blackout.
+Geometry assertions verify actual bounds instead of obsolete fixed panel heights.
+The Enter-commit guard renders a temporary current input control and restores the
+in-memory item list afterwards. Catalog hydration finishes before fixtures replace
+songs, and the hymn-search fixture excludes matching live records. Explicitly
+linked praise is compared to the same source song's content state instead of
+assuming that real data is always missing.
+
+Verification: app 130/130 and presenter 128/128 passed with live reads enabled,
+zero attempted production mutations, and both page/console-error checks passed.
+The guard's six mutation/unknown-RPC denial checks also passed without networking.
+No product runtime or production data change was required to resolve the failures.
