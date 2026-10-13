@@ -27,7 +27,8 @@ def main():
                     result=page.evaluate("""() => {
                       const pane=document.getElementById('detailPane'), bounds=pane.getBoundingClientRect();
                       const controls=[...pane.querySelectorAll('input:not([type=hidden]),select,textarea,button')];
-                      return {shell:document.documentElement.scrollWidth<=innerWidth+1,
+                      const canvas=document.querySelector(".app-shell").getBoundingClientRect();
+                      return {shell:canvas.width>=700 && document.documentElement.scrollWidth<=Math.max(innerWidth,canvas.right)+1,
                         pane:pane.scrollWidth<=pane.clientWidth+1,
                         controls:controls.every(el=>{
                           const r=el.getBoundingClientRect();

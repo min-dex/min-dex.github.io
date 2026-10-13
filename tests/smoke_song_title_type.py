@@ -17,6 +17,7 @@ def main():
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url + '?output=presenter', wait_until='domcontentloaded')
             page.wait_for_function("typeof renderPresenterOutput === 'function'")
+            page.wait_for_function("typeof state !== 'undefined' && !document.body.classList.contains('ui-booting')")
             page.evaluate('document.fonts.ready')
             for chromakey in [True, False]:
                 for key in ['praise', 'pre_scripture_praise', 'entrance_praise',
@@ -39,7 +40,8 @@ def main():
                           renderPresenterOutput({serviceId:'title-test', serviceType:'sunday-main',
                             chromakey, slides:[slide], index:0, safetyBlank:false}, {});
                           const measure = root => {
-                            const box = root.querySelector(chromakey
+                            const active = root.id==='presenterOutputRoot' ? root.querySelector('.presenter-output-layer.is-active') : root;
+                            const box = active.querySelector(chromakey
                               ? '.presenter-slide--song-title > .presenter-slide-text'
                               : '.presenter-slide--fullscreen-song-title .presenter-title-content-title');
                             const range = document.createRange();

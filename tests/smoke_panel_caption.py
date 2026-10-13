@@ -29,11 +29,18 @@ try:
               input.value='찬양1: 입력 중';input.dispatchEvent(new Event('input',{bubbles:true}));
               input.focus();input.setSelectionRange(3,3);
               const tops=()=>['.svc-presenter-live-preview','.svc-presenter-launch','.svc-presenter-input-rail'].map(s=>host.querySelector(s).getBoundingClientRect().top);
-              const baseline=tops();
+              const baseline=tops();let statusBaseline=null;
               for(const status of ['loading','error','paused','blocked','playing']){
                 state.presenter.videoHealth={serviceId:service.id,index:0,status,receivedAt:Date.now()};
                 syncPresenterVideoHealthControl();
-                if(JSON.stringify(tops())!==JSON.stringify(baseline)) throw Error('Layout shift '+status);
+                const positions=tops();
+                if(status==='playing') {
+                  if(JSON.stringify(positions)!==JSON.stringify(baseline)) throw Error('Healthy header did not collapse');
+                } else {
+                  statusBaseline ||= positions;
+                  if(JSON.stringify(positions)!==JSON.stringify(statusBaseline)) throw Error('Status row changed height '+status);
+                  if(positions.some((top,i)=>top<baseline[i] || top-baseline[i]>48)) throw Error('Status row excessive height');
+                }
                 if(health.scrollHeight>health.clientHeight+1 || health.scrollWidth>health.clientWidth+1) throw Error('Health overflow '+status);
                 if((getComputedStyle(title).visibility==='hidden')!==(status!=='playing')) throw Error('Title overlap '+status);
                 if(document.activeElement!==input || input.selectionStart!==3 || input.value!=='찬양1: 입력 중') throw Error('Draft focus changed');

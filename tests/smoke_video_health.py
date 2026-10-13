@@ -8,6 +8,7 @@ def run(browser, url, engine):
     controller = context.new_page()
     controller.goto(url, wait_until='domcontentloaded')
     controller.wait_for_function("typeof requestPresenterVideoRetry === 'function'")
+    controller.wait_for_function("typeof state !== 'undefined' && !document.body.classList.contains('ui-booting')")
     controller.evaluate('''() => {
       state.presenter.serviceId='video-health-test';
       state.presenter.index=0;
@@ -48,6 +49,7 @@ def run(browser, url, engine):
     controller.click('[data-presenter-action="retry-video"]')
     controller.wait_for_function("state.presenter.videoHealth?.status === 'playing'")
     output.wait_for_function('video.currentTime > .2')
+    output.wait_for_function("typeof state !== 'undefined' && !document.body.classList.contains('ui-booting')")
     assert output.evaluate('loads') == 1, 'two transports must not reload twice'
     assert controller.locator('[data-presenter-video-health]').inner_text() == ''
     controller.evaluate('publishPresenterPayload({...fixture,updatedAt:Date.now()},{force:true})')

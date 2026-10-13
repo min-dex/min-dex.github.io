@@ -34,13 +34,13 @@ def main():
                       const song=document.querySelector('.svc-presenter-input-field--song');
                       const songRow=song?.closest('.svc-board-subgroup-control-item');
                       if(songRow && songRow.getBoundingClientRect().width>780) {
-                        const fields=[...songRow.querySelectorAll('input,select,button')].filter(n=>n.getBoundingClientRect().height);
+                        const fields=[...songRow.querySelectorAll('input,select,button')].filter(n=>n.checkVisibility() && n.getBoundingClientRect().height);
                         const tops=fields.map(n=>n.getBoundingClientRect().top).sort((a,b)=>a-b);
                         const rows=[];for(const top of tops)if(!rows.length||top-rows[rows.length-1]>16)rows.push(top);
                         if(rows.length>2)errors.push('special song still uses three rows');
                       }
                       if(song && song.getBoundingClientRect().width>800) {
-                        const fields=[...song.querySelectorAll('input,select')].filter(n=>n.getBoundingClientRect().height);
+                        const fields=[...song.querySelectorAll('input,select')].filter(n=>n.checkVisibility() && n.getBoundingClientRect().height);
                         if(fields.some(n=>Math.abs(n.getBoundingClientRect().top-fields[0].getBoundingClientRect().top)>2))errors.push('linked song forced extra rows');
                       }
                       for(const row of document.querySelectorAll('.svc-presenter-input-group--corporate-prayer > label')) {
@@ -50,7 +50,7 @@ def main():
                       }
                       for(const group of document.querySelectorAll('.svc-board-subgroup-controls')) {
                         const g=group.getBoundingClientRect();
-                        const controls=[...group.querySelectorAll('input,textarea,select,button')].filter(n=>n.getBoundingClientRect().height);
+                        const controls=[...group.querySelectorAll('input,textarea,select,button')].filter(n=>n.checkVisibility() && n.getBoundingClientRect().height);
                         for(const n of controls){const r=n.getBoundingClientRect();if(r.left<g.left-1||r.right>g.right+1)errors.push('overflow '+n.outerHTML.slice(0,80))}
                         for(const label of group.querySelectorAll('label.svc-presenter-input-field')){
                           const span=label.querySelector(':scope > span'),field=label.querySelector('input,textarea');
@@ -78,8 +78,8 @@ def main():
                     assert not result, (engine, width, result)
                     if width in [960, 320]:
                         page.locator('#fixture').screenshot(path=f'/tmp/individual-inputs-{engine}-{width}.png')
-                page.locator('textarea[data-service-item-field="raw_title"]').fill('빈 줄\n\n유지')
-                assert page.locator('textarea[data-service-item-field="raw_title"]').input_value() == '빈 줄\n\n유지'
+                page.locator('textarea[data-service-item-field="announcement_news"]').fill('빈 줄\n\n유지')
+                assert page.locator('textarea[data-service-item-field="announcement_news"]').input_value() == '빈 줄\n\n유지'
                 print('PASS', engine, '960/600/320px labels, containment, actions and multiline input')
                 browser.close()
     finally:

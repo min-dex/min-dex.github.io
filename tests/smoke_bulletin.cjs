@@ -477,6 +477,7 @@ const server=http.createServer((req,res)=>{
       const layout=await page.locator('.bulletin-workbench').evaluate(el=>({width:el.clientWidth,scroll:el.scrollWidth}));
       assert.ok(layout.scroll<=layout.width+1,`Bulletin must not overflow at ${width}px: ${JSON.stringify(layout)}`);
       for(const selector of ['[data-bulletin-service]','[data-bulletin-save]','[data-bulletin-print]']){
+        await page.locator(selector).scrollIntoViewIfNeeded();
         const box=await page.locator(selector).boundingBox();
         assert.ok(box&&box.x>=0&&box.x+box.width<=width+1,selector+' must be reachable at '+width);
       }

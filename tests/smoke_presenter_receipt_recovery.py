@@ -7,6 +7,7 @@ def run(browser, url):
     controller = context.new_page()
     controller.goto(url, wait_until='domcontentloaded')
     controller.wait_for_function("typeof reconcilePresenterTransportReceipt === 'function'")
+    controller.wait_for_function("typeof state !== 'undefined' && !document.body.classList.contains('ui-booting')")
     controller.evaluate('''() => {
       state.presenter.serviceId='receipt-test';
       state.presenter.outputStopAt=0;
@@ -33,6 +34,7 @@ def run(browser, url):
     output = context.new_page()
     output.goto(url + '?output=presenter', wait_until='domcontentloaded')
     output.wait_for_function("document.querySelector('#presenterOutputRoot')?.textContent.includes('Receipt 0')")
+    output.wait_for_function("typeof state !== 'undefined' && !document.body.classList.contains('ui-booting')")
     output.evaluate('''() => {
       window.renderCount=0;const render=renderPresenterOutput;
       renderPresenterOutput=(...args)=>{renderCount++;return render(...args)};
