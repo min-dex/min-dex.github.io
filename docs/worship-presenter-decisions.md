@@ -1369,3 +1369,10 @@ automatically deletes an existing service after calendar changes.
 - Video retry smoke now serves valid HTTP 206 byte ranges. Returning the whole
   MP4 with HTTP 200 for offset requests left Chromium loading indefinitely; the
   fixture now verifies recovery without weakening playback assertions.
+
+### 2026-10-13 Outline assignees
+- Presenter sidebar child rows show title / assignee using the same assignee
+  resolver as the editor. Missing assignees leave titles unchanged; person-only
+  rows and prayer summaries do not repeat names. Full text stays available in
+  the tooltip and accessible label. This changes display only, not saved items
+  or output slides.

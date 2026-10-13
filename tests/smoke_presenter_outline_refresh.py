@@ -51,6 +51,33 @@ def main():
             assert result['slideIndex'] >= 0 and '구주의' in result['slide'], result
             assert result['immediate'], result
             print('PASS delayed song hydration refreshes outline title and slide target; outline jumps are immediate')
+            details = page.evaluate("""() => {
+              const service = state.services[0];
+              const cases = [
+                {label:'설교',raw_title:'하나님의 소원',assignee:'김목사 목사'},
+                {label:'특송',raw_title:'말씀 앞에서',assignee:'청년부 찬양팀'},
+                {label:'대표기도',raw_title:'정진화 장로',assignee:'정진화 장로'},
+                {label:'특송',raw_title:'말씀 앞에서',assignee:''},
+                {label:'특송',raw_title:'청년부 찬양팀',assignee:'청년부 찬양팀'},
+                {label:'특송',raw_title:'',assignee:'청년부 찬양팀'},
+              ];
+              const before = JSON.stringify(cases);
+              const rows = cases.map((item,index) => {
+                const host = document.createElement('div');
+                host.innerHTML = renderServiceOutlineChildRow(service,item,index,-1,[]);
+                return {text:host.querySelector('strong')?.textContent || '',
+                  hint:host.querySelector('button').title,
+                  aria:host.querySelector('button').getAttribute('aria-label')};
+              });
+              return {rows,unchanged:before === JSON.stringify(cases)};
+            }""")
+            expected = ['하나님의 소원 / 김목사 목사', '말씀 앞에서 / 청년부 찬양팀',
+                        '정진화 장로', '말씀 앞에서', '청년부 찬양팀', '청년부 찬양팀']
+            assert details['unchanged'], details
+            for row, text in zip(details['rows'], expected):
+                assert row['text'] == text, details
+                assert text in row['hint'] and text in row['aria'], details
+            print('PASS outline titles include assignees without duplicate names or source mutations')
             browser.close()
     finally:
         if server:

@@ -22695,6 +22695,14 @@ function renderServiceOutlineChildRow(service, item, index, selectedIndex, slide
   const activeSlide = presenterControllerIsLive(service.id) && slideIndex >= 0 && presenterSlideBelongsToItem(state.presenter.slides[state.presenter.index], item);
   const selected = index === selectedIndex;
   const titleParts = serviceSidebarChildItemDisplayParts(item, service);
+  const assignee = serviceSidebarOutlineFirstLine(serviceItemEditableAssigneeValue(item, service));
+  // Prayer summaries already include their assignee; keep person-only rows singular.
+  if (assignee && !serviceSidebarPersonSummary(item, service)) {
+    const titleNames = String(titleParts.title || "").split(/\s*[·/]\s*/u).map(compactSearchValue);
+    if (!titleNames.includes(compactSearchValue(assignee))) {
+      titleParts.title = [titleParts.title, assignee].filter(Boolean).join(" / ");
+    }
+  }
   const title = [titleParts.meta, titleParts.title].filter(Boolean).join(" · ") || serviceSidebarChildItemTitle(item, service);
   const interactionHint = presenterSlideInteractionHint(service.id, title);
   const missing = serviceOutlineMissingState(item, slides);
