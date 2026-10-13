@@ -1282,3 +1282,29 @@ Small visual polish that does not alter behavior does not need an entry.
 - Resolve `connectedPraise.primaryItemId` and `itemIds` to the final element IDs after save-row allocation, in both config and source_ref. Preserve group identity, order, roles and titles without mutating editor drafts.
 - Partial saves remap only emitted rows and preserve references to other persisted members. Existing worship content is not bulk rewritten.
 - Coverage: `tests/smoke_medley_persistence_ids.py` exercises new IDs, reload/resave, isolated patches and independent songs in Chromium/WebKit.
+
+### 2026-10-13 Desktop shell and print boundary
+- All window sizes use one 50px header and persistent 260px navigation sidebar.
+  Retire the mobile drawer, portrait sidebar, and automatic collapse state.
+- Preserve input wrapping and panel-local scrolling. Below the usable canvas
+  minimum, allow page scrolling rather than overlaying panels or hiding controls.
+- Apply the shell minimum width only to screen media. The current bulletin
+  editor prints through its separate A4 landscape frame and does not inherit
+  app-shell CSS. Retired service-bulletin styles were removed on latest main;
+  do not restore that obsolete path for print compatibility.
+- Shell regressions now live in `tests/smoke_shell_tabs.py` and
+  `tests/smoke_sidebar_shell_alignment.py`; no test should call retired drawer
+  handlers. Narrow-window tests assert panel bounds and intentional canvas scroll.
+- Verification: bulletin resolver/input contract Node tests and Python syntax
+  checks passed. CUA verified shell geometry and active-tab visibility at
+  390/560/900/1280px. Safari's native print preview showed the current bulletin
+  fixture as two A4 landscape pages (orientation selected in the print dialog).
+  `tests/smoke_bulletin_shell_print.py` preserves the current print iframe
+  isolation, two-page A4 dimensions, and unchanged screen canvas coverage. The full Python browser smoke suite and physical printing were not
+  run in this pass; browser checks used CUA.
+
+### 2026-10-13 Linked-song loading and worship action performance
+- Fetch missing song metadata concurrently with relational version/unit data. Publish relational data after metadata resolves; retain in-flight deduplication, explicit retry and unresolved-link save protection.
+- Reuse the existing synchronous service-item projection scope during item actions and dirty fingerprints. Array replacement still invalidates the projection, and the outer scope clears it before later edits.
+- Chromium/WebKit coverage retains retry, late-response isolation and medley persistence IDs. Controlled deferred-fetch coverage checks parallel loading, publication ordering, warm cache and unit-failure retry.
+- Read-only sample (28 items, 10 linked songs): add-action projections fell from five to two; measured add time fell from 219/264 ms to 176/245 ms. Network timings vary and are not a latency guarantee.

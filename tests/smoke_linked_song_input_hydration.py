@@ -39,7 +39,7 @@ def main():
                         if (fail) throw Error('simulated outage');
                         return response;
                       };
-                      attachRelationalSongVersionsForSongs = async () => {};
+                      loadRelationalSongVersionData = async () => undefined;
                       const model = serviceItemEditorModel(item, { service });
                       const before = JSON.stringify(item);
                       const renderPicker = () => renderServiceSongPicker(item, 0, serviceItemEditorModel(item, { service }));

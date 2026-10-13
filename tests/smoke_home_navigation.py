@@ -37,16 +37,15 @@ try:
    for width in [1440,1000,390,320]:
     page.set_viewport_size({'width':width,'height':600})
     page.evaluate('''()=>{
-     document.body.classList.add('sidebar-collapsed');syncSidebarCollapsedState();
      refs.detailPane.scrollTop=300;
     }''')
     page.evaluate('goHome()');page.wait_for_timeout(100)
     result=page.evaluate('''()=>({scroll:refs.detailPane.scrollTop,
-     overflow:document.documentElement.scrollWidth>innerWidth,
+     canvasFits:document.documentElement.scrollWidth<=Math.max(innerWidth,700)+1,
      paneOverflow:refs.detailPane.scrollWidth>refs.detailPane.clientWidth+1,
      weeks:document.querySelectorAll('.service-week-board').length,
      days:document.querySelectorAll('.service-week-day').length})''')
-    assert result['scroll']==0 and not result['overflow'] and not result['paneOverflow'],(engine,width,result)
+    assert result['scroll']==0 and result['canvasFits'] and not result['paneOverflow'],(engine,width,result)
     assert result['weeks']==2 and result['days']==14,result
    result=page.evaluate('''()=>{
     const host=document.createElement('div');host.innerHTML=renderServiceWeekDay(new Date(),[]);document.body.append(host);

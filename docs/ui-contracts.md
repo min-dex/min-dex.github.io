@@ -4,7 +4,7 @@ Read `HANDOFF.md` first. This file is the short UI contract for Codex threads so
 
 ## Shell
 
-- At widths up to 900px, only the shared outer nav sidebar owns drawer positioning. Inner sidebar panels remain in normal layout in every module; no praise/presenter fixed-position exceptions or second topbar offset.
+- Use one desktop shell at every viewport width: a persistent 260px left sidebar, a single 50px topbar, and an in-flow right panel. No mobile drawer, auto-collapse, portrait navigation variant, or stored sidebar-collapse state.
 
 - Praise sidebar filters use three equal columns: all/empty/review, then hymn/CCM/children. Keep this 3-by-2 layout at every sidebar width; do not override it with auto-fit.
 
@@ -25,15 +25,16 @@ Read `HANDOFF.md` first. This file is the short UI contract for Codex threads so
   for dense helper icons, and `20px` for large home/action tiles. Topbar buttons
   stay `40px`; normal icon buttons stay `35px`; dense inline controls may use
   `30px` or `28px` only when they sit inside compact editor/tool rows.
-- Sidebar open or closed must not change the detail pane gutter.
+- Opening the right panel must not change the detail pane gutter.
 - Topbar icon buttons are square, `40px` by `40px`.
-- At viewport widths up to `560px`, the topbar uses two rows and is `90px`
-  tall; the module tabs occupy the second `40px` row.
-- Sidebar toggle, home, theme, and save controls should share the same button geometry.
+- Home, theme, and save controls share the same button geometry at all widths.
 - Left topbar actions align to the left rail edge. Right topbar actions align to
   the right rail edge because they belong to the app-level utility side.
 - Mindex brand/home buttons may navigate home, but should not add hover motion.
-- Avoid horizontal page overflow on desktop and mobile.
+- Keep inputs responsive inside their panels. The screen canvas has a minimum
+  width of `max(700px, left sidebar + 320px content + right panel)`; below it,
+  horizontal page scrolling keeps all controls reachable. This minimum is
+  screen-only and must never constrain printed bulletins.
 
 ## Color And Surfaces
 
@@ -104,29 +105,25 @@ Inactive module tabs should stay visually quiet. Active tabs may show a clearer 
 - When two or more page tabs are open, tabs can be dragged to reorder them.
 - The active page remains active after reordering, and the new order is persisted with the existing tab session state.
 - The add-tab control is not part of the draggable sequence.
-- At widths up to 560px, the existing page tabs remain visible in a second
-  40px header row. Tabs scroll horizontally, expose their close commands on
-  touch screens and keep the active tab in view after selection or resizing.
-  Module destinations and utility actions retain the first header row; the
-  drawer starts below both rows. No separate mobile navigation state is stored.
+- Page tabs remain in the single header row, scroll horizontally, and keep the
+  active tab visible after selection or resizing at every width.
 - Page tabs use `13px / 600`; the active tab uses `700`. The add-tab control is
   a `40px` square command with a direct neutral hover surface and a centered
   `16px / 1.5` Lucide Plus icon.
 
 ## Sidebar
 
-- On desktop (above 900px), the module strip and sidebar form one continuous
+- At every width, the module strip and sidebar form one continuous
   left panel: same background and right boundary, with no horizontal divider
   between module navigation and search. Module controls and search remain fixed;
-  only the list scrolls. Compact screens retain the separate header and drawer.
+  only the list scrolls.
 
 - Desktop's left-panel right boundary is drawn once by the full-height shell,
   one pixel outside the sidebar edge. Do not split it between header and list
   shadows or duplicate it on the first tab. Active-tab bottom masking is inset
   one pixel on each side so it never erases the vertical strokes at corners.
-- Desktop sidebar width stays at 260px, including narrower landscape windows;
-  the compact portrait drawer retains its existing 170px width.
-- Sidebar row padding should align visually with the sidebar toggle x-position.
+- Sidebar width stays at 260px, independent of viewport orientation.
+- Sidebar row padding uses the shared sidebar spacing tokens.
 - Sidebar content should feel relaxed, not cramped.
 - Home utility pages should keep the integrated Mindex search available.
 
