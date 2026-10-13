@@ -316,7 +316,6 @@
       url: "mindex.supabase.url",
       key: "mindex.supabase.anonKey",
       theme: "mindex.theme",
-      sidebarCollapsed: "mindex.ui.sidebarCollapsed",
       presenterThumbScale: "mindex.ui.presenterThumbScale",
       module: "mindex.ui.module",
       praiseFilter: "mindex.ui.praiseFilter",
