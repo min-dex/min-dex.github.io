@@ -10925,6 +10925,9 @@ def main() -> int:
             else:
                 pass_("console-errors")
 
+            # Close the output popup/context before the browser transport; pending
+            # routed media requests can otherwise leave browser.close waiting.
+            context.close()
             browser.close()
     except PlaywrightTimeoutError as error:
         fail("playwright-timeout", str(error))
