@@ -147,7 +147,7 @@ This does not restore the retired input or relax CSS/coupling limits.
 
 ## Retired test-only runtime helpers — 2026-10-13
 
-Removed 14 unused runtime functions (13 in app.js and one in worship-input),
+Removed 16 unused runtime functions (15 in app.js and one in worship-input),
 including obsolete shared-content copying/materialization, the unused automatic
 service purge, and trivial preview, preparation, display and output wrappers.
 The linked-song hydration wrapper became unused after parallel loading; the
@@ -168,5 +168,8 @@ Chromium/WebKit checks passed for lifecycle retries/scheduler preservation,
 restored blank slides, 22 preparation cases and sidebar focus/reuse transitions.
 The migrated shared-content smoke block was also executed in both engines with
 local song/version fixtures. The full live-data app/presenter smoke suites were
-not run; no production data was written. Ratchets now match 32,826 app lines,
-1,755 app functions, 3,129 coupling markers and 8,430 CSS lines.
+not run; no production data was written. Ratchets now match 32,804 app lines,
+1,753 app functions, 3,129 coupling markers and 8,430 CSS lines.
+
+The final reference pass also removed the date and service-part helpers used
+only by retired functions. No newly orphaned app functions remain from this pass.

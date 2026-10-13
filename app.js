@@ -4147,18 +4147,6 @@ function autoUpcomingPublicServiceTargets(baseDate = new Date()) {
     && !(integratedSunday && INTEGRATED_SUNDAY_SKIP_SERVICE_TYPES.has(target.typeId)));
 }
 
-function upcomingSundayDate(baseDate = new Date()) {
-  const today = upcomingServiceBaseDate(baseDate);
-  if (Number.isNaN(today.getTime())) return "";
-  const weekStart = new Date(today);
-  weekStart.setDate(today.getDate() - today.getDay());
-  const sunday = new Date(weekStart);
-  const offset = 0 === sunday.getDay() && today.getDay() !== 0 ? 7 : 0;
-  sunday.setDate(weekStart.getDate() + offset);
-  if (sunday < today) sunday.setDate(sunday.getDate() + 7);
-  return toLocalDateStr(sunday);
-}
-
 const FRIDAY_SERVICE_VARIANT_START_DATE = "2026-08-01";
 
 const FRIDAY_SERVICE_VARIANTS = {
@@ -22990,16 +22978,6 @@ function isSetlistPraiseCandidate(candidate = {}) {
     candidate.raw_title,
   ].map((value) => String(value || "")).join(" ");
   return text.toLowerCase().includes("praise") || /찬양|특송/.test(text);
-}
-
-function setlistCandidateServicePart(candidate = {}) {
-  const text = [candidate.raw_label, candidate.raw_title]
-    .map((value) => String(value || ""))
-    .join(" ");
-  if (/(?:^|\D)1\s*부/u.test(text)) return "sunday-first";
-  if (/(?:^|\D)2\s*부/u.test(text)) return "sunday-second";
-  if (/(?:^|\D)3\s*부/u.test(text)) return "sunday-main";
-  return "";
 }
 
 function setlistCandidateDisplayOrder(candidate = {}) {
