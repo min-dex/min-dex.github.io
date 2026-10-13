@@ -113,10 +113,10 @@ Validation: 58 non-browser CJS test files passed; structural audit passed withou
 raising limits; syntax and diff checks passed. Offline browser coverage passed
 for blackout and number navigation in Chromium/WebKit, preparation defaults,
 citation rail at three widths in both engines, and bulletin workbench/children/
-editorial layouts. Sidebar-reuse focus coverage was intermittent on both the
-unchanged baseline and cleaned code; a diagnostic rerun passed on both engines,
-including 40 controller transitions. Do not report that intermittent test as
-reliably resolved. No production database mutation, web deployment or desktop
+editorial layouts. Sidebar-reuse focus coverage originally raced the two-animation-frame
+`ui-booting` visibility gate. The test now waits for the actual visible shell,
+asserts initial focus acquisition, and blocks all external requests. It does not
+weaken draft, selection, scroll or DOM-identity assertions. No production database mutation, web deployment or desktop
 rebuild was performed for this cleanup.
 
 Retain helpers still used by tests, externally exposed module APIs, saved-data

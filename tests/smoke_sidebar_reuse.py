@@ -1,18 +1,21 @@
+import smoke_app
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 
 def main():
+    smoke_app.extract_supa_config = lambda: ('', '')
     server, url = start_local_app_server()
     try:
         with sync_playwright() as p:
             for engine in ('chromium', 'webkit'):
                 browser = launch_chromium(p) if engine == 'chromium' else p.webkit.launch()
                 page = browser.new_page()
-                page.route('**/*supabase*/**', lambda route: route.abort())
+                page.route('**/*', lambda route: route.continue_() if route.request.url.startswith(url.rsplit('/', 1)[0] + '/') else route.abort())
                 page.goto(url, wait_until='domcontentloaded')
-                page.wait_for_function("typeof setRightSidebarContent === 'function'")
+                page.wait_for_function("typeof setRightSidebarContent === 'function' && !document.body.classList.contains('ui-booting')")
                 result = page.evaluate('''async () => {
                   state.module='presenter';
+                  document.body.dataset.module='presenter';
                   const markup=(id,title)=>`<div data-presenter-right-sidebar data-service-id="${id}">
                     <div style="height:600px">${title}</div>
                     <div class="svc-presenter-live-preview" style="width:254px"><span class="svc-slide-mini-output"><span class="svc-slide-mini-canvas presenter-output-root"><span>${title}</span></span></span></div>
@@ -23,6 +26,7 @@ def main():
                   const root=refs.rightSidebar.firstElementChild, canvas=root.querySelector('.svc-slide-mini-canvas');
                   const input=root.querySelector('[data-presenter-preparation-field]'), help=root.querySelector('details');
                   input.value='작성 중';input.focus();input.setSelectionRange(1,2);help.open=true;
+                  if(document.activeElement!==input) throw Error('fixture input must acquire focus before testing preservation');
                   refs.rightSidebar.scrollTop=200;
                   let removals=0;
                   const observer=new MutationObserver(records=>records.forEach(r=>r.removedNodes.forEach(n=>{if(n===root||n===canvas||n===input)removals++;})));
