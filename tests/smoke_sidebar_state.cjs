@@ -26,8 +26,7 @@ const server=http.createServer((req,res)=>{
     await page.goto(base);await page.waitForFunction(()=>typeof state!=='undefined');
     const findings=await page.evaluate(async()=>{
       const results={};
-      document.body.classList.remove('sidebar-collapsed');
-      state.module='presenter';document.body.dataset.module='presenter';syncSidebarCollapsedState();
+      state.module='presenter';document.body.dataset.module='presenter';
       await new Promise(r=>setTimeout(r,300));
       results.presenterOpenWidth=refs.sidebar.getBoundingClientRect().width;
       state.module='praise';state.search='';const praise=getListScrollKey();
@@ -52,7 +51,7 @@ const server=http.createServer((req,res)=>{
       return results;
     });
     console.log(findings);
-    assert.ok(findings.presenterOpenWidth>150,'Expanded Presenter sidebar must be visible at 800px');
+    assert.equal(findings.presenterOpenWidth,260,'Presenter sidebar must keep the desktop width at 800px');
     assert.ok(findings.distinctScroll,'Bulletin must not share praise scroll state');
     assert.ok(findings.searchStaysBulletin,'Enter must open the displayed bulletin result');
     assert.ok(findings.staleScrollCancelled,'Old scroll restoration must not move a different module');
@@ -61,21 +60,16 @@ const server=http.createServer((req,res)=>{
       for(const module of ['bulletin','presenter','calendar','praise']) {
         const result=await page.evaluate(async module=>{
           state.module=module;document.body.dataset.module=module;state.search='';
-          document.body.classList.remove('sidebar-collapsed');renderModuleSwitcher();
-          syncSidebarCollapsedState();
-          const drawer=matchMedia('(max-width: 900px)').matches;
-          refs.searchInput.focus();handleSidebarToggle();
-          const collapsed=drawer&&refs.sidebar.inert&&refs.sidebar.getAttribute('aria-hidden')==='true'&&document.activeElement===refs.sidebarToggleBtn;
-          if(drawer) handleSidebarToggle();
-          await new Promise(r=>setTimeout(r,300));
-          const visible=refs.sidebar.getBoundingClientRect().width>150&&!refs.sidebar.inert;
+          renderModuleSwitcher();
+          refs.searchInput.focus();
+          const focused=document.activeElement===refs.searchInput;
+          const visible=refs.sidebar.getBoundingClientRect().width===260&&!refs.sidebar.inert;
           const active=[...document.querySelectorAll('.module-switcher-tab.active')].map(b=>b.dataset.homeModule);
-          const toggle=refs.sidebarToggleBtn.getBoundingClientRect(),bar=document.querySelector('.topbar').getBoundingClientRect();
-          const aligned=Math.abs((toggle.top+toggle.height/2)-(bar.top+bar.height/2))<1;
-          return {drawer,collapsed,visible,active,aligned,toggleHidden:refs.sidebarToggleBtn.hidden};
+          const bar=document.querySelector('.topbar').getBoundingClientRect();
+          const nav=document.querySelector('.nav-sidebar');
+          return {focused,visible,active,headerHeight:bar.height,inFlow:getComputedStyle(nav).position!=='fixed'};
         },module);
-        if(width>900) assert.ok(!result.drawer&&result.visible&&result.toggleHidden,JSON.stringify({width,module,...result}));
-        else assert.ok(result.drawer&&result.collapsed&&result.visible&&result.aligned&&!result.toggleHidden,JSON.stringify({width,module,...result}));
+        assert.ok(result.focused&&result.visible&&result.inFlow&&result.headerHeight===50,JSON.stringify({width,module,...result}));
         assert.deepEqual(result.active,[module==='presenter'?'service':module]);
       }
     }
@@ -95,6 +89,6 @@ const server=http.createServer((req,res)=>{
     });
     assert.deepEqual(reused,{stable:true,switched:true,hidden:true});
     assert.deepEqual(errors,[]);
-    console.log('PASS sidebar scroll isolation, stale callbacks, search, responsive expansion, focus, navigation and header alignment');
+    console.log('PASS sidebar scroll isolation, stale callbacks, search, persistent desktop layout, focus, navigation and header alignment');
   } finally {await browser.close();server.close();}
 })().catch(error=>{console.error(error);server.close();process.exitCode=1;});

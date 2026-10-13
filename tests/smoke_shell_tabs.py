@@ -1,4 +1,4 @@
-"""Offline mobile tab visibility and existing tab lifecycle regression."""
+"""Offline desktop shell tab visibility and existing tab lifecycle regression."""
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 
@@ -26,19 +26,20 @@ def main():
                       const bar=rect('.topbar'),actions=rect('.topbar-actions');
                       return {barHeight:bar.height,tabsWidth:tabs.width,
                         activeVisible:active.left>=tabs.left-1 && active.right<=tabs.right+1,
-                        separate:tabs.top>=actions.bottom,
-                        drawerTop:parseFloat(getComputedStyle(document.querySelector('.nav-sidebar')).top),
+                        sameRow:Math.abs(tabs.top-actions.top)<1,
+                        sidebarTop:rect('.nav-sidebar').top,
+                        canvasWidth:rect('.app-shell').width,
                         overflow:Math.max(document.body.scrollWidth,document.documentElement.scrollWidth)>innerWidth,
                         modules:[...document.querySelectorAll('.module-switcher-tab')].every(e=>{
                           const r=e.getBoundingClientRect();return r.width>0 && r.left>=0 && r.right<=actions.left+1;
                         })};
                     }''')
-                    assert not result['overflow'], (engine, width, result)
+                    assert result['overflow'] == (width < 700), (engine, width, result)
+                    assert result['canvasWidth'] == max(width,700), result
                     assert result['tabsWidth'] > 0, (width, result)
-                    assert result['barHeight'] == (90 if width <= 560 else 50), (width, result)
-                    if width <= 560:
-                        assert result['activeVisible'] and result['separate'] and result['modules'], result
-                        assert result['drawerTop'] == 90, result
+                    assert result['barHeight'] == 50, (width, result)
+                    assert result['activeVisible'] and result['sameRow'] and result['modules'], result
+                    assert result['sidebarTop'] == 50, result
                 page.locator('.page-tabs').evaluate('(e)=>e.scrollLeft=0')
                 page.locator('[data-page-tab-index="0"]').click()
                 page.wait_for_function('state.pageTabIndex === 0')
@@ -50,7 +51,7 @@ def main():
                 page.reload(wait_until='load')
                 page.wait_for_function('typeof state !== "undefined" && state.pageTabs.length === 5 && state.pageTabIndex === 1')
                 page.locator('.page-tab.active').wait_for(state='visible')
-                print('PASS mobile tabs at 320/390/560, desktop resize, switch/close/add/reload', engine)
+                print('PASS desktop tabs at 320/390/560, desktop resize, switch/close/add/reload', engine)
                 browser.close()
     finally:
         server.shutdown()

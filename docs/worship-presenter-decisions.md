@@ -1282,3 +1282,23 @@ Small visual polish that does not alter behavior does not need an entry.
 - Resolve `connectedPraise.primaryItemId` and `itemIds` to the final element IDs after save-row allocation, in both config and source_ref. Preserve group identity, order, roles and titles without mutating editor drafts.
 - Partial saves remap only emitted rows and preserve references to other persisted members. Existing worship content is not bulk rewritten.
 - Coverage: `tests/smoke_medley_persistence_ids.py` exercises new IDs, reload/resave, isolated patches and independent songs in Chromium/WebKit.
+
+### 2026-10-13 Desktop shell and print boundary
+- All window sizes use one 50px header and persistent 260px navigation sidebar.
+  Retire the mobile drawer, portrait sidebar, and automatic collapse state.
+- Preserve input wrapping and panel-local scrolling. Below the usable canvas
+  minimum, allow page scrolling rather than overlaying panels or hiding controls.
+- Apply the shell minimum width only to screen media. The current bulletin
+  editor prints through its separate A4 landscape frame and does not inherit
+  app-shell CSS. Retired service-bulletin styles were removed on latest main;
+  do not restore that obsolete path for print compatibility.
+- Shell regressions now live in `tests/smoke_shell_tabs.py` and
+  `tests/smoke_sidebar_shell_alignment.py`; no test should call retired drawer
+  handlers. Narrow-window tests assert panel bounds and intentional canvas scroll.
+- Verification: bulletin resolver/input contract Node tests and Python syntax
+  checks passed. CUA verified shell geometry and active-tab visibility at
+  390/560/900/1280px. Safari's native print preview showed the current bulletin
+  fixture as two A4 landscape pages (orientation selected in the print dialog).
+  `tests/smoke_bulletin_shell_print.py` preserves the current print iframe
+  isolation, two-page A4 dimensions, and unchanged screen canvas coverage. The full Python browser smoke suite and physical printing were not
+  run in this pass; browser checks used CUA.

@@ -21,7 +21,6 @@ def check_flow(browser, url, engine, width, theme):
       // A truthy client allows cached version loading; no backend is available.
       state.client={};render();
       document.body.dataset.theme=theme;
-      document.body.classList.add('sidebar-collapsed');syncSidebarCollapsedState();
       window.copiedFixtureText=null;
       Object.defineProperty(navigator,'clipboard',{configurable:true,value:{
         writeText:async value=>{window.copiedFixtureText=value;}

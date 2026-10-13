@@ -254,11 +254,9 @@ def shell_layout_snapshot(page) -> dict[str, Any]:
           const search = document.querySelector('.sidebar-search-wrap');
           const searchInput = document.querySelector('.sidebar-search-wrap input');
           const firstSectionLabel = document.querySelector('.service-sidebar-head');
-          const toggle = document.querySelector('#sidebarToggleBtn');
           const styles = detail ? getComputedStyle(detail) : null;
           const searchInputStyles = searchInput ? getComputedStyle(searchInput) : null;
           const topbarRect = topbar?.getBoundingClientRect();
-          const toggleRect = toggle?.getBoundingClientRect();
           const sidebarRect = sidebar?.getBoundingClientRect();
           const searchRect = search?.getBoundingClientRect();
           const firstSectionLabelRect = firstSectionLabel?.getBoundingClientRect();
@@ -274,10 +272,6 @@ def shell_layout_snapshot(page) -> dict[str, Any]:
             sidebarSearchInputLineHeight: searchInputStyles ? Math.round(parseFloat(searchInputStyles.lineHeight)) : 0,
             topbarHeight: topbarRect ? Math.round(topbarRect.height) : 0,
             sidebarWidth: sidebarRect ? Math.round(sidebarRect.width) : 0,
-            toggleLeft: toggleRect ? Math.round(toggleRect.left) : 0,
-            toggleTop: toggleRect ? Math.round(toggleRect.top) : 0,
-            toggleWidth: toggleRect ? Math.round(toggleRect.width) : 0,
-            toggleHeight: toggleRect ? Math.round(toggleRect.height) : 0
           };
         })()
         """
@@ -937,7 +931,7 @@ def main() -> int:
 
             icon_metrics = page.evaluate(
                 """
-                [...document.querySelectorAll('#sidebarToggleBtn,#themeBtn,#saveAllBtn')]
+                [...document.querySelectorAll('#themeBtn,#saveAllBtn')]
                   .filter((node) => node.offsetParent !== null)
                   .map((node) => {
                     const rect = node.getBoundingClientRect();
@@ -1045,7 +1039,6 @@ def main() -> int:
                   const topbar = document.querySelector('.topbar')?.getBoundingClientRect();
                   const moduleFirst = document.querySelector('.module-switcher-tab')?.getBoundingClientRect();
                   const brand = document.querySelector('.topbar-brand')?.getBoundingClientRect();
-                  const toggle = document.querySelector('#sidebarToggleBtn');
                   const rightRail = document.querySelector('.topbar-actions')?.getBoundingClientRect();
                   const rightLast = [...(document.querySelector('.topbar-actions')?.children || [])]
                     .filter(child => getComputedStyle(child).display !== 'none')
@@ -1056,7 +1049,6 @@ def main() -> int:
                     moduleStartsAtTopbar: Math.round((moduleFirst?.left || 0) - (topbar?.left || 0)),
                     moduleWidth: Math.round(moduleFirst?.width || 0),
                     brandWidth: Math.round(brand?.width || 0),
-                    drawerToggleHidden: Boolean(toggle?.hidden),
                     rightLastInset: Math.round((rightRail?.right || 0) - (rightLast?.right || 0)),
                   };
                 })()
@@ -1068,7 +1060,6 @@ def main() -> int:
                 and desktop_sidebar["brandWidth"] == 40
                 and desktop_sidebar["moduleStartsAtTopbar"] == 50
                 and desktop_sidebar["moduleWidth"] == 40
-                and desktop_sidebar["drawerToggleHidden"]
                 and desktop_sidebar["rightLastInset"] == 5
             ):
                 pass_("desktop-fixed-sidebar-shell", json.dumps(desktop_sidebar, ensure_ascii=False))
@@ -1086,7 +1077,6 @@ def main() -> int:
                 and desktop_shell["sidebarSearchTop"] == 10
                 and desktop_shell["sidebarSearchInputLineHeight"] == 30
                 and desktop_shell["topbarHeight"] == 50
-                and desktop_shell["toggleWidth"] == desktop_shell["toggleHeight"] == 0
                 and desktop_overflow <= 2
             ):
                 pass_("shell-desktop-geometry", json.dumps(desktop_shell, ensure_ascii=False))
@@ -1119,63 +1109,6 @@ def main() -> int:
                 pass_("home-screen-gutter", json.dumps(home_gutter, ensure_ascii=False))
             else:
                 fail("home-screen-gutter", json.dumps(home_gutter, ensure_ascii=False))
-
-            page.evaluate("document.body.classList.add('sidebar-collapsed');syncSidebarCollapsedState()")
-            page.wait_for_timeout(180)
-            legacy_collapsed_shell = shell_layout_snapshot(page)
-            page.evaluate("document.body.classList.remove('sidebar-collapsed');syncSidebarCollapsedState()")
-            if (
-                legacy_collapsed_shell["sidebarWidth"] == 260
-                and legacy_collapsed_shell["detailPaddingLeft"] == desktop_shell["detailPaddingLeft"]
-            ):
-                pass_("desktop-sidebar-ignores-legacy-collapse", json.dumps(legacy_collapsed_shell, ensure_ascii=False))
-            else:
-                fail("desktop-sidebar-ignores-legacy-collapse", json.dumps(legacy_collapsed_shell, ensure_ascii=False))
-
-            page.set_viewport_size({"width": 390, "height": 780})
-            page.wait_for_timeout(180)
-            mobile_shell = shell_layout_snapshot(page)
-            mobile_overflow = max(
-                mobile_shell["documentScrollWidth"] - mobile_shell["viewport"],
-                mobile_shell["bodyScrollWidth"] - mobile_shell["viewport"],
-            )
-            if (
-                mobile_shell["detailPaddingLeft"] == 15
-                and mobile_shell["detailPaddingTop"] == 15
-                and mobile_shell["sidebarSearchTop"] == 10
-                and mobile_shell["sidebarSearchSectionGap"] in (0, 20)
-                and mobile_shell["sidebarSearchInputLineHeight"] == 30
-                and mobile_shell["topbarHeight"] == 90
-                and mobile_overflow <= 2
-            ):
-                pass_("shell-mobile-geometry", json.dumps(mobile_shell, ensure_ascii=False))
-            else:
-                fail("shell-mobile-geometry", json.dumps(mobile_shell, ensure_ascii=False))
-            page.evaluate("document.body.classList.add('sidebar-collapsed');syncSidebarCollapsedState()")
-            page.wait_for_timeout(180)
-            mobile_drawer_closed = page.evaluate("""() => ({
-              sidebarLeft: Math.round(document.querySelector('.nav-sidebar')?.getBoundingClientRect().left || 0),
-              detailLeft: Math.round(document.querySelector('.detail-pane')?.getBoundingClientRect().left || 0),
-              toggleHidden: document.querySelector('#sidebarToggleBtn')?.hidden,
-            })""")
-            page.click("#sidebarToggleBtn")
-            page.wait_for_timeout(180)
-            mobile_drawer_open = page.evaluate("""() => ({
-              sidebarLeft: Math.round(document.querySelector('.nav-sidebar')?.getBoundingClientRect().left || 0),
-              detailLeft: Math.round(document.querySelector('.detail-pane')?.getBoundingClientRect().left || 0),
-              toggleHidden: document.querySelector('#sidebarToggleBtn')?.hidden,
-            })""")
-            if (
-                mobile_drawer_closed["sidebarLeft"] <= -170
-                and mobile_drawer_closed["detailLeft"] == 0
-                and not mobile_drawer_closed["toggleHidden"]
-                and mobile_drawer_open["sidebarLeft"] == 0
-                and mobile_drawer_open["detailLeft"] == 0
-            ):
-                pass_("mobile-sidebar-drawer", json.dumps({"closed": mobile_drawer_closed, "open": mobile_drawer_open}, ensure_ascii=False))
-            else:
-                fail("mobile-sidebar-drawer", json.dumps({"closed": mobile_drawer_closed, "open": mobile_drawer_open}, ensure_ascii=False))
-            page.set_viewport_size({"width": 1440, "height": 980})
 
             responsive_shells = []
             for width in (1180, 900, 760, 520, 390):
@@ -1219,15 +1152,12 @@ def main() -> int:
                     )
                 )
             if all(
-                item["topbarHeight"] == (90 if item["width"] <= 560 else 50)
-                and (
-                    (item["width"] > 900 and item["railWidth"] == item["sidebarWidth"] == 260 and item["sidebarLeftRail"])
-                    or (item["width"] == 900 and item["railWidth"] == item["sidebarWidth"] == 260 and not item["sidebarLeftRail"] and item["sidebarHeight"] > 300)
-                    or (item["width"] < 900 and item["railWidth"] == item["sidebarWidth"] == 170 and not item["sidebarLeftRail"] and item["sidebarHeight"] > 300)
-                )
+                item["topbarHeight"] == 50
+                and item["railWidth"] == item["sidebarWidth"] == 260
+                and item["sidebarLeftRail"] and item["sidebarHeight"] > 300
                 and item["searchWithinSidebar"]
                 and item["switcherClientWidth"] > 0
-                and item["overflow"] <= 2
+                and abs(item["overflow"] - max(0, 700 - item["width"])) <= 2
                 for item in responsive_shells
             ):
                 pass_("shell-responsive-geometry", json.dumps(responsive_shells, ensure_ascii=False))
@@ -1720,25 +1650,25 @@ def main() -> int:
                 nav_repeat_state = page.evaluate(
                     """() => ({
                       module: document.body.dataset.module,
-                      collapsed: document.body.classList.contains('sidebar-collapsed')
+                      sidebarVisible: getComputedStyle(document.querySelector('.sidebar')).visibility === 'visible'
                     })"""
                 )
-                if nav_repeat_state == {"module": "scripture", "collapsed": False}:
-                    pass_("module-switcher-does-not-toggle-drawer", json.dumps(nav_repeat_state, ensure_ascii=False))
+                if nav_repeat_state == {"module": "scripture", "sidebarVisible": True}:
+                    pass_("module-switcher-keeps-sidebar-visible", json.dumps(nav_repeat_state, ensure_ascii=False))
                 else:
-                    fail("module-switcher-does-not-toggle-drawer", json.dumps(nav_repeat_state, ensure_ascii=False))
+                    fail("module-switcher-keeps-sidebar-visible", json.dumps(nav_repeat_state, ensure_ascii=False))
 
                 page.evaluate("goHome()")
                 page.wait_for_function("() => document.body.dataset.module === 'home'", timeout=5000)
                 home_rail_state = page.evaluate(
                     """() => ({
                       module: document.body.dataset.module,
-                      collapsed: document.body.classList.contains('sidebar-collapsed'),
+                      sidebarVisible: getComputedStyle(document.querySelector('.sidebar')).visibility === 'visible',
                       active: document.querySelector('.module-switcher .module-switcher-tab.active')?.dataset.homeModule || '',
                       homeRailButton: Boolean(document.querySelector('.module-switcher [data-home-module="home"]'))
                     })"""
                 )
-                if home_rail_state == {"module": "home", "collapsed": False, "active": "", "homeRailButton": False}:
+                if home_rail_state == {"module": "home", "sidebarVisible": True, "active": "", "homeRailButton": False}:
                     pass_("module-switcher-home", json.dumps(home_rail_state, ensure_ascii=False))
                 else:
                     fail("module-switcher-home", json.dumps(home_rail_state, ensure_ascii=False))

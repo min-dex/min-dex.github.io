@@ -13,14 +13,12 @@ def run(browser, url, engine):
       state.songs=[{id:'fixture',title:'Responsive title',versions:[{id:'v1',name:'기본',forms}]}];
       state.forms=forms;state.dirty.forms=false;
       render();
-      document.body.classList.remove('sidebar-collapsed');syncSidebarCollapsedState();
     }''')
     for width in (1440, 1024, 768, 390, 320):
         page.set_viewport_size({'width': width, 'height': 900})
         if width <= 560:
-            page.evaluate("document.body.classList.remove('sidebar-collapsed');syncSidebarCollapsedState()")
             page.locator('[data-song-id="fixture"]').click()
-            page.wait_for_function("document.body.classList.contains('sidebar-collapsed')")
+            assert page.locator('.sidebar').is_visible()
         page.wait_for_timeout(300)
         result = page.evaluate('''() => {
           const pane=document.getElementById('detailPane'),bounds=pane.getBoundingClientRect();
@@ -33,7 +31,7 @@ def run(browser, url, engine):
         }''')
         assert result['fits'] and result['gridFits'], (engine, width, result)
         if width <= 560:
-            assert result['paneWidth'] >= width - 60, result
+            assert result['paneWidth'] >= 320, result
         page.screenshot(path=f'/tmp/praise-responsive-{engine}-{width}.png')
         print('PASS', engine, width, result, flush=True)
     page.set_viewport_size({'width': 390, 'height': 900})

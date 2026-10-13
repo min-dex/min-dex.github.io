@@ -298,3 +298,11 @@ These are rendering/editing fixes; stored announcements are not rewritten.
 The explicit welcome paragraph recognizer also accepts 청소년부 예배. Preserve
 its inline bold markers and separate it from weekly news, as for 청년부 and
 어린이부. This does not add a new department print template or rewrite records.
+
+## Desktop shell print isolation (2026-10-13)
+The bulletin print iframe keeps its own A4 landscape dimensions and does not
+inherit the desktop shell minimum width. In Safari's native print dialog,
+select A4 and Landscape if the printer preset defaults to Portrait. The
+2026-10-13 offline fixture produced two pages in the native preview; no physical
+print job or production record change was made. Retired service-bulletin styles
+remain deleted; print regression coverage targets the current iframe builder.

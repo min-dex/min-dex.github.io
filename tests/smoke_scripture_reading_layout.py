@@ -28,7 +28,6 @@ def main():
                           state.bibleBookVerses=[1,2,3].map(verse=>({chapter:1,verse,
                             text:('길이가 긴 말씀 본문의 줄바꿈과 복사 영역을 확인합니다. ').repeat(6)}));
                           render();document.body.dataset.theme=theme;
-                          document.body.classList.add('sidebar-collapsed');syncSidebarCollapsedState();
                           refs.detailPane.innerHTML=renderBibleReader({koreanName:'창세기'});
                           refreshIcons();
                         }''', theme)
