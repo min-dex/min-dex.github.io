@@ -219,16 +219,6 @@ function renderPresenterRightSidebar(service, slides, active, index) {
     </div>`;
 }
 
-function renderPresenterRightSidebarToggle(options = {}) {
-  const open = presenterRightSidebarIsOpen();
-  const label = options.label || (open ? "컨트롤러 닫기" : "컨트롤러 열기");
-  const icon = options.icon || "panel-right";
-  return `
-    <button class="icon-btn svc-right-sidebar-toggle${open ? " is-active" : ""}" type="button" data-presenter-right-sidebar-toggle aria-pressed="${escapeAttr(String(open))}" aria-label="${escapeAttr(label)}" title="${escapeAttr(label)}">
-      <i data-lucide="${escapeAttr(icon)}"></i>
-    </button>`;
-}
-
 function renderPresenterServiceInputRail(service) {
   const draft = presenterPreparationDisplayTextForService(service);
   const applying = state.presenterPreparationApplyingServiceIds.has(service.id);

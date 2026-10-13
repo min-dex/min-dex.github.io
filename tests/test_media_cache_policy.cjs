@@ -7,7 +7,7 @@ const source = fs.readFileSync(path.join(__dirname, "../app.js"), "utf8");
 const lifetime = source.match(/const PRESENTER_MEDIA_CACHE_CONTROL = "(\d+)";/);
 assert.ok(lifetime, "shared upload cache lifetime exists");
 assert.equal(Number(lifetime[1]), 30 * 24 * 60 * 60);
-const uploads = [...source.matchAll(/\.upload\(path, file, \{([^}]+)\}\)/g)];
+const uploads = [...source.matchAll(/\.upload\(path, (?:file|selectedFile), \{([^}]+)\}\)/g)];
 assert.equal(uploads.length, 2, "reference media and audio upload paths covered");
 for (const [, options] of uploads) {
   assert.match(options, /cacheControl: PRESENTER_MEDIA_CACHE_CONTROL/);

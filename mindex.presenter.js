@@ -196,18 +196,6 @@ function presenterSpecialSongSectionTitleSlide(item = {}, section = {}, index = 
   };
 }
 
-function presenterSpecialSongDisplayTitle(item = {}, songTitleSlide = null) {
-  const rawTitle = String(item.raw_title || item.title || "").trim();
-  const genericLabel = compactSearchValue(item.label || "특송");
-  const fromSlideText = String(songTitleSlide?.text || "").replace(PRESENTER_SONG_NOTE_PATTERN, "").trim();
-  if (fromSlideText && (rawTitle || compactSearchValue(fromSlideText) !== genericLabel)) return fromSlideText;
-  const marker = String(songTitleSlide?.marker || "").trim();
-  const title = String(songTitleSlide?.title || "").trim();
-  const titleText = [marker, title].filter(Boolean).join(" ");
-  if (titleText && (rawTitle || compactSearchValue(titleText) !== genericLabel)) return titleText;
-  return rawTitle.replace(PRESENTER_SONG_NOTE_PATTERN, "").trim();
-}
-
 const PRESENTER_PUBLIC_LORDS_PRAYER_TEXT = `하늘에 계신 우리 아버지,
 아버지의 이름을 거룩하게 하시며
 아버지의 나라가 오게 하시며,
@@ -1319,32 +1307,6 @@ function presenterBlankFormPresetItem(label = "", target = {}) {
   };
 }
 
-function isServicePreparationItem(item, memo = parseServiceItemMemo(item?.memo)) {
-  const label = String(item?.label || "").replace(/\s+/g, "");
-  const title = String(item?.raw_title || "").replace(/\s+/g, "");
-  const sectionKey = String(item?._worshipSectionKey || "").trim();
-  const role = normalizeServicePresenterRole(memo?.presenterRole || memo?.templateKey || memo?.templateVariant);
-  return sectionKey === "ready"
-    || label === "준비"
-    || label === "예배준비"
-    || label === "대기"
-    || label === "대기화면"
-    || label === "대기영상"
-    || label === "인트로"
-    || label === "카운트다운"
-    || title === "준비"
-    || title === "예배준비"
-    || title === "대기"
-    || title === "대기화면"
-    || title === "대기영상"
-    || title === "인트로"
-    || title === "카운트다운"
-    || role === "ready"
-    || role === "waiting_loop"
-    || role === "intro"
-    || role === "still";
-}
-
 function isConfessionPrayerLabel(...values) {
   return values.some((value) => {
     const compact = compactSearchValue(value);
@@ -2060,25 +2022,6 @@ function presenterTitleAssigneeUsesWorshipLeader(compactLabel = "") {
   ].includes(compactLabel);
 }
 
-function presenterSlideUsesWorshipLeaderAssignee(slide = {}) {
-  if (isPresenterScriptureReadingSource(slide)) return false;
-  const key = compactSearchValue([
-    slide.elementLabel,
-    slide.sectionLabel,
-    slide.label,
-    slide.title,
-  ].filter(Boolean).join(" "));
-  return [
-    "봉헌기도",
-    "교회소식",
-    "광고",
-    "축도",
-    "예배의부름",
-    "사죄의선언",
-    "묵도",
-  ].some((label) => key.includes(label));
-}
-
 function isPresenterScriptureReadingSource(source = {}) {
   const key = compactSearchValue([
     source.elementType,
@@ -2318,48 +2261,6 @@ function isScriptureBodyServiceItem(item) {
     || label === "설교본문"
     || (scriptureReferenceLabel && elementType !== "scripture_reading" && hasScriptureReference)
     || (sectionKey === "scripture_reading" && elementType === "scripture_body");
-}
-
-function parsePresenterScriptureTextPayload(value) {
-  const lines = String(value || "")
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-  const verses = [];
-  let reference = "";
-  for (const line of lines) {
-    const match = line.match(/^(\d{1,3})\s{3,}(.+)$/);
-    if (match) {
-      verses.push({ number: match[1], text: match[2].trim() });
-      continue;
-    }
-    const inline = parsePresenterInlineScriptureText(line);
-    if (inline.verses.length) {
-      if (!reference && inline.reference) reference = inline.reference;
-      verses.push(...inline.verses);
-    } else if (!reference) {
-      reference = line;
-    }
-  }
-  return { reference, verses };
-}
-
-function parsePresenterInlineScriptureText(line) {
-  const text = String(line || "").trim();
-  const markerMatches = [...text.matchAll(/(?:^|\s)(\d{1,3})\s+(?=\S)/g)];
-  if (!markerMatches.length) return { reference: "", verses: [] };
-  const reference = text.slice(0, markerMatches[0].index).trim();
-  const verses = markerMatches
-    .map((match, index) => {
-      const start = match.index + match[0].length;
-      const end = markerMatches[index + 1]?.index ?? text.length;
-      return {
-        number: match[1],
-        text: text.slice(start, end).trim(),
-      };
-    })
-    .filter((verse) => verse.text);
-  return { reference, verses };
 }
 
 function shouldIncludeSongTitleSlide(item, label) {
@@ -3742,10 +3643,6 @@ function normalizeLiveScripturePayload(value) {
   };
 }
 
-function normalizeLivePraisePayload(value) {
-  return null;
-}
-
 function applyPresenterActionToPayload(payload, action, options = {}) {
   const next = normalizePresenterPayload(payload);
   const requestedIndex = Number(options.index);
@@ -4120,14 +4017,6 @@ function fitPresenterChromakeyScriptureText(host, frameState = {}) {
       && textBox.scrollWidth <= textBox.clientWidth + 1
     ) return;
   }
-}
-
-function presenterTextNaturalWidthFits(container, targetWidth) {
-  const limit = Number(targetWidth);
-  if (!container?.querySelectorAll || !Number.isFinite(limit) || limit <= 0) return true;
-  const nodes = [...container.querySelectorAll("span")];
-  const targets = nodes.length ? nodes : [container];
-  return targets.every((node) => presenterTextNaturalWidth(node) <= limit + 1);
 }
 
 function presenterTextNaturalWidth(node) {

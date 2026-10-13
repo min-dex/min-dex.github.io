@@ -92,3 +92,34 @@ The size and coupling limits in `tests/solid_audit.py` describe the current
 stable ceiling, not the desired final architecture. Lower the limits whenever
 code is safely extracted. Raising them requires a documented reason in the
 same change.
+
+
+## Unused runtime cleanup — 2026-10-13
+
+Audited tracked runtime JavaScript/HTML references against tests, scripts and
+current documentation at `8c60ad88`. Removed 39 unreferenced top-level functions
+(including newly orphaned helpers) and the two obsolete right-sidebar toggle
+functions with their event wiring. This is deletion-only runtime cleanup: the
+presenter rail remains fixed, and current templates, persistence, source/version
+normalization and output navigation remain authoritative.
+
+Removed CSS for the retired sidebar editor, authoring count strip, toggle button,
+and the old `service-bulletin-*` screen/print path. The current bulletin renderer
+uses `mindex.bulletin.js` and `styles.bulletin.css`; its saved content, layouts and
+print behavior are unchanged. Upload-cache tests now recognize both actual file
+variable names, retaining assertions for both upload paths and `upsert: false`.
+
+Validation: 58 non-browser CJS test files passed; structural audit passed without
+raising limits; syntax and diff checks passed. Offline browser coverage passed
+for blackout and number navigation in Chromium/WebKit, preparation defaults,
+citation rail at three widths in both engines, and bulletin workbench/children/
+editorial layouts. Sidebar-reuse focus coverage was intermittent on both the
+unchanged baseline and cleaned code; a diagnostic rerun passed on both engines,
+including 40 controller transitions. Do not report that intermittent test as
+reliably resolved. No production database mutation, web deployment or desktop
+rebuild was performed for this cleanup.
+
+Retain helpers still used by tests, externally exposed module APIs, saved-data
+compatibility adapters, operational SQL and historical recovery evidence until
+specific retirement evidence exists. Static non-use alone is not sufficient for
+those boundaries.

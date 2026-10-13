@@ -1283,7 +1283,6 @@ function cacheRefs() {
   refs.connectionStatus = document.getElementById("connectionStatus");
   refs.themeBtn = document.getElementById("themeBtn");
   refs.newSongBtn = document.getElementById("newSongBtn");
-  refs.presenterRightSidebarBtn = document.getElementById("presenterRightSidebarBtn");
   refs.sidebarCreateSongBtn = document.getElementById("sidebarCreateSongBtn");
   refs.saveAllBtn = document.getElementById("saveAllBtn");
   refs.searchInput = document.getElementById("searchInput");
@@ -1317,7 +1316,6 @@ function bindStaticEvents() {
   refs.themeBtn.addEventListener("click", toggleTheme);
   document.getElementById("returnLiveServiceBtn")?.addEventListener("click", returnToLiveService);
   refs.newSongBtn?.addEventListener("click", () => createPraiseSong());
-  refs.presenterRightSidebarBtn?.addEventListener("click", togglePresenterRightSidebar);
   refs.saveAllBtn.addEventListener("click", saveAll);
   refs.sidebar?.addEventListener("click", handleSidebarPresenterActionClick);
   refs.searchInput.addEventListener("input", (event) => {
@@ -5163,11 +5161,6 @@ async function detectSongVersionPraiseTypesSupport() {
   return detectTableColumnSupport("mindex_song_versions", "praise_types");
 }
 
-async function detectServiceItemColumnSupport(column) {
-  void column;
-  return true;
-}
-
 async function detectTableColumnSupport(table, column) {
   if (!state.client || !/^[a-z_][a-z0-9_]*$/i.test(table) || !/^[a-z_][a-z0-9_]*$/i.test(column)) return false;
   const cacheKey = `${table}.${column}`;
@@ -8447,12 +8440,6 @@ function handlePresenterDetailClick(event) {
     refreshIcons(lyricsToggle);
     return true;
   }
-  const rightSidebarToggle = event.target.closest("[data-presenter-right-sidebar-toggle]");
-  if (rightSidebarToggle) {
-    togglePresenterRightSidebar();
-    return true;
-  }
-
   const serviceAudioClear = event.target.closest("[data-service-item-audio-clear]");
   if (serviceAudioClear) {
     void clearServiceItemAudioAsset(
@@ -9278,10 +9265,6 @@ function syncBibleVerseSelectionClasses() {
   });
 }
 
-function isPresenterAdvanceShortcutKey(key = "") {
-  return ["Enter", "ArrowRight", "ArrowDown", "PageDown", " ", "ArrowLeft", "ArrowUp", "PageUp"].includes(key);
-}
-
 function shouldBlockPresenterMusicControlNavigationKeydown(event) {
   if (state.module !== "presenter") return false;
   if (event.metaKey || event.ctrlKey || event.altKey) return false;
@@ -9966,12 +9949,6 @@ function clearServiceElementDirty(serviceId = state.selectedServiceId, item = nu
 function markServiceStructureDirty(serviceId = state.selectedServiceId) {
   const id = String(serviceId || "").trim();
   if (id) state.dirtyServiceStructureIds.add(id);
-}
-
-function serviceHasOnlyElementDirty(serviceId = state.selectedServiceId) {
-  const id = String(serviceId || "").trim();
-  if (!id || state.dirtyServiceStructureIds.has(id)) return false;
-  return Boolean(state.dirtyServiceElementIds.get(id)?.size);
 }
 
 const SERVICE_ELEMENT_TYPES = new Set(["", ...SERVICE_ELEMENT_TYPE_UI_OPTIONS.map(([value]) => value)]);
@@ -13317,10 +13294,6 @@ function isCalendarInlineFeast(row) {
   return parseLocalDate(row.date).getDay() !== 0;
 }
 
-function calendarRowHasLectionaryData(row = {}) {
-  return cleanList(CALENDAR_LECTIONARY_FIELDS.map(([field]) => row[field])).length > 0;
-}
-
 function getCalendarDisplayRows() {
   const rows = (state.calendarData || []).filter((row) => {
     if (!isCalendarDisplayDate(row?.date)) return false;
@@ -13486,7 +13459,6 @@ function renderModuleSwitcher() {
   refs.searchInput.disabled = false;
   syncPraiseCreateControls();
   syncSaveButtonChrome();
-  updatePresenterRightSidebarToggleButtons();
   renderListFilter();
 }
 
@@ -13893,16 +13865,6 @@ async function handleNavigationRailClick(button) {
   await switchModule(moduleName);
 }
 
-function renderWorshipModeTabs(serviceId, activeMode = state.module === "presenter" ? "presenter" : "service") {
-  if (!serviceId) return "";
-  if (activeMode === "presenter") return "";
-  return `
-    <button class="svc-output-action" type="button" data-open-presenter-service="${escapeAttr(serviceId)}" aria-label="프레젠터 열기">
-      <i data-lucide="screen-share"></i>
-      <span>송출</span>
-    </button>`;
-}
-
 function serviceSupportsBulletin(service = null) {
   return Boolean(service?.id && !service._expected && ["young-adult","children"].includes(worshipAppServiceTypeId(service.type_id || service.service_type_id))
     && !serviceIsNoGathering(service));
@@ -14256,10 +14218,6 @@ function serviceTypeUsesChromakey(typeId) {
     return Boolean(type._worshipChromakey || CHROMAKEY_SERVICE_TYPES.has(appId) || CHROMAKEY_SERVICE_TYPES.has(rawId));
   }
   return CHROMAKEY_SERVICE_TYPES.has(appId) || CHROMAKEY_SERVICE_TYPES.has(rawId);
-}
-
-function servicePreparationElementTypeForType(typeId) {
-  return servicePreparationElementTypeForRoleAndService("ready", { type_id: typeId }, typeId);
 }
 
 function servicePreparationElementTypeForService(service = null, fallbackTypeId = "") {
@@ -15663,7 +15621,6 @@ function applyRightSidebarVisibility(hasContent = refs.rightSidebar?.dataset.has
   if ("inert" in refs.rightSidebar) refs.rightSidebar.inert = !(open && hasContent);
   document.body.classList.toggle("right-sidebar-available", Boolean(hasContent));
   document.body.classList.toggle("right-sidebar-open", open);
-  updatePresenterRightSidebarToggleButtons();
 }
 
 function setRightSidebarContent(html = "") {
@@ -15693,29 +15650,6 @@ function setRightSidebarContent(html = "") {
     fitPresenterPreviewText(refs.rightSidebar);
     schedulePresenterPreviewLayoutUpdate(refs.rightSidebar);
   }
-}
-
-function togglePresenterRightSidebar() {
-  applyRightSidebarVisibility();
-}
-
-function updatePresenterRightSidebarToggleButtons() {
-  const open = presenterRightSidebarIsOpen();
-  const hasContent = refs.rightSidebar?.dataset.hasContent === "true";
-  if (refs.presenterRightSidebarBtn) {
-    refs.presenterRightSidebarBtn.hidden = true;
-    refs.presenterRightSidebarBtn.disabled = true;
-    refs.presenterRightSidebarBtn.classList.toggle("is-active", open);
-    refs.presenterRightSidebarBtn.setAttribute("aria-pressed", String(open));
-    refs.presenterRightSidebarBtn.setAttribute("aria-label", "프레젠터 컨트롤러");
-    refs.presenterRightSidebarBtn.setAttribute("title", "프레젠터 컨트롤러");
-  }
-  document.querySelectorAll("[data-presenter-right-sidebar-toggle]").forEach((button) => {
-    button.classList.toggle("is-active", open);
-    button.setAttribute("aria-pressed", String(open));
-    button.setAttribute("aria-label", open ? "컨트롤러 사이드바 닫기" : "컨트롤러 사이드바 열기");
-    button.setAttribute("title", open ? "컨트롤러 닫기" : "컨트롤러 열기");
-  });
 }
 
 function getListScrollKey() {
@@ -16287,18 +16221,6 @@ function renderEditorMeta(primary, items = []) {
       ` : ""}
     </section>
   `;
-}
-
-function renderMetaItem(item) {
-  if (item && typeof item === "object" && "label" in item) {
-    return `
-      <span class="meta-attribute">
-        <span class="meta-attribute-label">${escapeHtml(item.label)}</span>
-        <strong>${escapeHtml(item.value)}</strong>
-      </span>
-    `;
-  }
-  return `<span>${escapeHtml(item)}</span>`;
 }
 
 function renderSongMetadataDialog(song) {
@@ -19116,7 +19038,6 @@ async function confirmSaveBeforeLeaving() {
 
 function updateSaveState() {
   syncSaveButtonChrome();
-  updatePresenterRightSidebarToggleButtons();
   if (state.module === "home" || state.module === "calendar" || state.module === "manuals") {
     renderConnectionStatus();
     return;
@@ -19697,10 +19618,6 @@ const PUBLIC_COMMUNITY_CONFESSION_HIGHLIGHTS = [
   { text: "검단우리교회 공동체", bold: true },
 ];
 
-function publicWorshipImageClosingStep() {
-  return publicWorshipClosingStep();
-}
-
 function legacyImageClosingStep() {
   return {
     label: "마무리",
@@ -20165,15 +20082,6 @@ function publicSundayThirdConfessionStep() {
   };
 }
 
-function publicWorshipDoxologyStep(options = {}) {
-  return {
-    ...publicWorshipDoxologyElement(options),
-    required: true,
-    flex: false,
-    sectionKey: "doxology",
-  };
-}
-
 function publicWorshipDoxologyElement(options = {}) {
   const defaultSong = options.defaultSong || (options.defaultText ? null : {
     title: "이 천지간 만물들아",
@@ -20187,10 +20095,6 @@ function publicWorshipDoxologyElement(options = {}) {
     ...(defaultSong ? { defaultSong } : {}),
     ...scoreOutputMode(options.score !== false),
   };
-}
-
-function publicWorshipBenedictionStep() {
-  return { label: "축도", name: "축도", required: true, flex: false, sectionKey: "benediction", elementType: "title_person" };
 }
 
 function publicWorshipBenedictionElement(options = {}) {
@@ -20228,17 +20132,6 @@ function publicWorshipLordsPrayerElement() {
     elementType: "body",
     default_text: PUBLIC_LORDS_PRAYER_TEXT,
     introSlide: { title: "주기도문" },
-  };
-}
-
-function publicWorshipCommunityConfessionStep() {
-  return {
-    label: "공동체고백",
-    name: "공동체고백",
-    required: false,
-    flex: true,
-    sectionKey: "community_confession",
-    elements: [publicWorshipCommunityConfessionElement()],
   };
 }
 
@@ -20694,13 +20587,6 @@ function normalizeServiceItemsInCurrentOrder(items) {
   return [...(items || [])]
     .map(normalizeServiceItem)
     .map((item, index) => ({ ...item, sort_order: index + 1 }));
-}
-
-function normalizeGroupedServiceItemsForTemplateHierarchy(grouped = {}) {
-  return Object.fromEntries(Object.entries(grouped).map(([serviceId, items]) => {
-    const service = state.services.find((svc) => svc.id === serviceId);
-    return [serviceId, normalizeServiceItemsForTemplateHierarchy(service, items)];
-  }));
 }
 
 function projectGroupedWorshipItemsFromTemplates(grouped = {}) {
@@ -22051,10 +21937,6 @@ function serviceSermonLeaderLabel(service = null, items = []) {
     || defaultServiceSermonLeader(service?.type_id, service);
 }
 
-function serviceHasPastorWorshipLeader(service = null) {
-  return compactSearchValue(serviceWorshipLeaderLabel(service)).includes("목사");
-}
-
 function withCommonServiceTemplateSteps(steps = [], typeId = "") {
   const hasClosingVisual = steps.some((step) => {
     const label = String(step?.label || step?.name || "").trim();
@@ -22087,12 +21969,6 @@ function normalizeFallbackServiceTemplateStep(step, index = 0, typeId = "") {
     ...(formPresetRules.length ? { formPresetRules } : {}),
     source: value.source || "Fallback",
   };
-}
-
-function withServiceTemplateImplicitRules(step = {}, typeId = "") {
-  const label = String(step.label || step.name || "").trim();
-  const formPresetRules = serviceTemplateImplicitFormPresetRules(step, typeId, label);
-  return formPresetRules.length ? { ...step, formPresetRules } : step;
 }
 
 function serviceTemplateImplicitFormPresetRules(step = {}, typeId = "", label = "") {
@@ -22216,27 +22092,6 @@ function serviceItemFormPresetRules(item) {
     rules.push(PUBLIC_SPECIAL_HYMN_FORM_PRESET_RULE);
   }
   return rules;
-}
-
-function serviceItemMetadataFormPreset(item = {}) {
-  const song = serviceItemLinkedSong(item);
-  const version = serviceItemLinkedVersion(item, song);
-  const versionMeta = normalizeSongMetadata(version?.metadata);
-  const songMeta = normalizeSongMetadata(song?.metadata);
-  return versionMeta.presenter_form || songMeta.presenter_form || null;
-}
-
-function serviceItemApplicableFormPresetRule(item = {}) {
-  const song = serviceItemLinkedSong(item);
-  if (!song) return null;
-  const version = serviceItemLinkedVersion(item, song);
-  const songTypes = new Set(versionEffectivePraiseTypes(song, version));
-  if (!songTypes.size) return null;
-  return serviceItemFormPresetRules(item).find((rule) => {
-    const when = rule.when && typeof rule.when === "object" ? rule.when : {};
-    const ruleTypes = normalizePraiseTypes(when.songType || when.song_type || when.praiseType || when.praise_type);
-    return ruleTypes.length && ruleTypes.some((type) => songTypes.has(type));
-  }) || null;
 }
 
 function serviceItemEffectiveFormHint(item = {}) {
@@ -22574,12 +22429,6 @@ function serviceTimeWindow(service) {
   return { start: atTime(range.start), end: atTime(range.end), timed: true };
 }
 
-function homeServiceScheduleLabel(service, options = {}) {
-  const date = formatServiceDate(service, options);
-  const range = SERVICE_TIME_WINDOWS[worshipAppServiceTypeId(service?.type_id)];
-  return range ? `${date} · ${range.start}-${range.end}` : date;
-}
-
 function getHomeNextService(baseDate = new Date()) {
   const now = new Date(baseDate);
   if (Number.isNaN(now.getTime())) return null;
@@ -22601,15 +22450,6 @@ function getHomeNextService(baseDate = new Date()) {
     return Number(a.service.sort_order || 0) - Number(b.service.sort_order || 0);
   });
   return candidates[0]?.service || null;
-}
-
-function currentServiceWeekRange(base = new Date()) {
-  const start = serviceDashboardWeekBaseDate(base);
-  start.setHours(0, 0, 0, 0);
-  start.setDate(start.getDate() - start.getDay());
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-  return { start, end };
 }
 
 function serviceBaseDateTime(base = new Date()) {
@@ -22637,23 +22477,6 @@ function upcomingServiceBaseDate(base = new Date()) {
   if (isAfterSundayServicePrepRollover(value)) value.setDate(value.getDate() + 1);
   value.setHours(0, 0, 0, 0);
   return value;
-}
-
-function serviceDashboardWeekBaseDate(base = new Date()) {
-  const value = serviceBaseDateTime(base);
-  if (Number.isNaN(value.getTime())) return value;
-  if (isAfterSundayServicePrepRollover(value)) value.setDate(value.getDate() + 7);
-  value.setHours(0, 0, 0, 0);
-  return value;
-}
-
-function serviceWeekDays(base = new Date()) {
-  const { start } = currentServiceWeekRange(base);
-  return Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(start);
-    date.setDate(start.getDate() + index);
-    return date;
-  });
 }
 
 function getServiceSidebarServices() {
@@ -23334,64 +23157,6 @@ function presenterSlideBelongsToItem(slide, item) {
     || String(slide.id || "").startsWith(`${id}:`);
 }
 
-function renderServiceSidebarItemEditor(service, items, selectedIndex) {
-  const item = items[selectedIndex];
-  if (!item) return "";
-  const memo = parseServiceItemMemo(item.memo);
-  const elementType = serviceMemoElementType(memo);
-  if (isMonthlyCorporatePrayerGroupItem(item, memo)) {
-    return `
-      <section class="service-sidebar-section service-sidebar-section--editor">
-        <div class="service-sidebar-head">
-          <span>편집</span>
-          <small>${escapeHtml(selectedIndex + 1)}</small>
-        </div>
-        <div class="service-sidebar-editor">
-          ${renderPresenterMonthlyCorporatePrayerInputs(item, selectedIndex, memo, service?.id)}
-        </div>
-      </section>`;
-  }
-  return `
-    <section class="service-sidebar-section service-sidebar-section--editor">
-      <div class="service-sidebar-head">
-        <span>편집</span>
-        <small>${escapeHtml(selectedIndex + 1)}</small>
-      </div>
-      <div class="service-sidebar-editor">
-        <label>
-          <span>섹션</span>
-          <input type="text" data-service-item-field="label" data-service-item-index="${selectedIndex}"
-            value="${escapeAttr(item.label || "")}" placeholder="찬양" />
-        </label>
-        <label>
-          <span>담당</span>
-          <input type="text" data-service-item-field="assignee" data-service-item-index="${selectedIndex}"
-            value="${escapeAttr(item.assignee || "")}" placeholder="${escapeAttr(inferServiceItemAssignee(item))}" />
-        </label>
-        <label>
-          <span>항목</span>
-          <input type="text" data-service-item-field="raw_title" data-service-item-index="${selectedIndex}"
-            value="${escapeAttr(item.raw_title || "")}"
-            placeholder="${isScriptureServiceLabel(item.label) ? "성경 구절" : "내용"}"
-            ${isSongServiceLabel(item.label) || isSpecialSongServiceItem(item) ? `autocomplete="off" spellcheck="false"` : ""}
-            ${isScriptureServiceLabel(item.label) ? `list="serviceScriptureOptions"` : ""} />
-        </label>
-        <label>
-          <span>타입</span>
-          <select data-service-item-field="element_type" data-service-item-index="${selectedIndex}">
-            ${renderServiceElementTypeOptions(elementType)}
-          </select>
-        </label>
-        <div class="service-sidebar-editor-actions">
-          ${renderServiceItemMoveButton({ actionAttr: "data-service-item-action", indexAttr: "data-service-item-index", index: selectedIndex, direction: "up", disabled: selectedIndex <= 0, label: "항목 위로 이동" })}
-          ${renderServiceItemMoveButton({ actionAttr: "data-service-item-action", indexAttr: "data-service-item-index", index: selectedIndex, direction: "down", disabled: selectedIndex >= items.length - 1, label: "항목 아래로 이동" })}
-          <button class="icon-btn" type="button" data-service-item-action="duplicate" data-service-item-index="${selectedIndex}" aria-label="항목 복제" title="항목 복제"><i data-lucide="copy"></i></button>
-          <button class="icon-btn danger" type="button" data-service-item-action="delete" data-service-item-index="${selectedIndex}" aria-label="항목 삭제" title="항목 삭제"><i data-lucide="trash-2"></i></button>
-        </div>
-      </div>
-    </section>`;
-}
-
 function worshipSetlistArchiveCandidatesBySource() {
   return (state.worshipSetlistArchive.candidates || []).reduce((grouped, candidate) => {
     const sourceId = String(candidate.import_source_id || "").trim();
@@ -23446,12 +23211,6 @@ function setlistCandidateDisplayOrder(candidate = {}) {
 function compareSetlistCandidatesForDisplay(a = {}, b = {}) {
   return setlistCandidateDisplayOrder(a) - setlistCandidateDisplayOrder(b)
     || (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0);
-}
-
-function setlistCandidateMatchedSong(candidate = {}) {
-  if (candidate.suggested_song_id) return { id: candidate.suggested_song_id };
-  const title = String(candidate.raw_title || candidate.raw_label || "").trim();
-  return title ? findServicePraiseSong(title) : null;
 }
 
 function worshipSetlistArchiveDisplayLabel(value) {
@@ -24295,39 +24054,6 @@ function renderServiceDetail() {
   // A concrete service has one working surface: the presenter. Do not open a
   // duplicate read-only outline between the service list and the presenter.
   void openServiceInPresenter(serviceId);
-}
-
-function serviceAuthoringSummary(service, items) {
-  const sectionKeys = [];
-  for (const item of items) {
-    const groupInfo = serviceEditorGroupInfo(item);
-    const label = groupInfo.label || item.label || "섹션";
-    if (sectionKeys[sectionKeys.length - 1] !== label) sectionKeys.push(label);
-  }
-  const slideCount = buildServicePresenterSlides(service.id).length;
-  return {
-    services: service ? 1 : 0,
-    sections: sectionKeys.length,
-    elements: items.length,
-    slides: slideCount,
-  };
-}
-
-function renderServiceAuthoringLevels(summary) {
-  const levels = [
-    ["섹션", summary.sections],
-    ["항목", summary.elements],
-    ["슬라이드", summary.slides],
-  ];
-  return `
-    <div class="svc-authoring-levels" aria-label="예배 구성 단위">
-      ${levels.map(([label, count]) => `
-        <span class="svc-authoring-level">
-          <strong>${escapeHtml(label)}</strong>
-          <span>${escapeHtml(formatCount(count))}</span>
-        </span>
-      `).join("")}
-    </div>`;
 }
 
 function renderServiceAuthoringPanel(kicker, title, body) {
@@ -25345,10 +25071,6 @@ function serviceDefaultMainPraiseTeamName(service) {
   return "";
 }
 
-function serviceMainPraiseTeamName(service, fallback = "") {
-  return cleanServiceAssignee(fallback) || serviceDefaultMainPraiseTeamName(service);
-}
-
 function serviceUsesPraiseLeader(typeId) {
   return Boolean(typeId);
 }
@@ -26319,28 +26041,6 @@ function serviceItemContentTitleWithoutElementName(item = {}, rawTitle = "") {
   return lines.slice(1).join("\n");
 }
 
-function isMainPraisePreviewItem(item) {
-  const label = compactSearchValue(item?.label || "");
-  if (!label) return Boolean(item?.song_id);
-  if (/특송|송영|결단|봉헌|파송/.test(label)) return false;
-  return /찬양|찬송/.test(label) || Boolean(item?.song_id && isSongServiceLabel(item.label));
-}
-
-function servicePreviewMarker(item) {
-  const label = compactSearchValue(item?.label || "");
-  if (!label) return "";
-  if (/특송/.test(label)) return "특송";
-  if (/성경봉독|성경/.test(label)) return "성경봉독";
-  if (/설교/.test(label)) return "설교";
-  if (/결단/.test(label)) return "결단";
-  if (/기도회|통성기도/.test(label)) return "통성기도";
-  if (/자율기도/.test(label)) return "자율기도";
-  if (/봉헌/.test(label)) return "봉헌";
-  if (/축도/.test(label)) return "축도";
-  if (/찬양|찬송/.test(label)) return "찬양";
-  return "";
-}
-
 function normalizeServiceItemReferenceSpacing(value) {
   const text = String(value || "").trim();
   if (!text) return "";
@@ -26876,10 +26576,6 @@ function servicePraiseBoardMetaCandidate(service, items = []) {
 
 function isPraiseTeamName(value = "") {
   return /(?:찬양\s*(?:팀|단)|성가대|콰이어|워십|밴드|썸프레이즈|praise\s*team|choir|worship|band|sum\s*praise|sumpraise)/i.test(String(value || ""));
-}
-
-function isServiceSeparatorItem(item) {
-  return String(item?.label || "").trim() === "—" && !String(item?.raw_title || "").trim();
 }
 
 function isCreedServiceItem(item = {}) {
@@ -30063,16 +29759,6 @@ function presenterBoardReferenceMediaSectionKey(group = {}, serviceId = state.se
       && compactSearchValue(presenterReferenceMediaSectionLabel(sectionKey)) === groupTitle) || "";
 }
 
-function presenterBoardSectionEditKey(group = {}) {
-  const id = String(group?.id || "").trim();
-  if (!id) return "";
-  const syntheticReadyOnly = (group.slides || []).length
-    && group.slides.every(({ slide }) => isPresenterPreparationSlide(slide) && !String(slide?.elementId || "").trim());
-  if (syntheticReadyOnly) return "";
-  if (/^(main-praise|section-id:|section-key:|item:)/.test(id)) return id;
-  return isUuid(id) ? `section-id:${id}` : id;
-}
-
 function renderPresenterNextPreparationButton(serviceId, nextTarget = null) {
   if (!nextTarget?.service?.id) return "";
   const nextService = nextTarget.service || null;
@@ -31093,18 +30779,6 @@ function scrollPresenterOutlineToActive(serviceId = state.presenter.serviceId) {
       || outline.querySelector(".service-outline-row--ready.active")
       || outline.querySelector(".service-outline-row--section.active");
     activeRow?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "auto" });
-  });
-}
-
-function scrollPresenterOutlineToItem(serviceId, itemIndex) {
-  if (state.module !== "presenter" || !serviceId || !Number.isInteger(itemIndex)) return;
-  window.requestAnimationFrame(() => {
-    const outline = refs.songList?.querySelector(".service-outline-list");
-    if (!outline?.isConnected) return;
-    const row = outline.querySelector(
-      `.service-outline-row--child[data-service-outline-service="${CSS.escape(serviceId)}"][data-service-outline-item-index="${itemIndex}"]`,
-    );
-    row?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "auto" });
   });
 }
 
@@ -32838,10 +32512,6 @@ function resolvePresenterServiceItemContentState(item = {}, memo = emptyServiceI
     return (title || person) ? filled("title_slide") : missing("title_slide_empty");
   }
   return missing("empty");
-}
-
-function presenterServiceItemHasOutputContent(item = {}, memo = emptyServiceItemMemo(), song = null, service = null) {
-  return resolvePresenterServiceItemContentState(item, memo, song, service).hasOutputContent;
 }
 
 function presenterMissingContentSlide(item = {}, section = {}, index = 0, contentState = null, service = null) {
