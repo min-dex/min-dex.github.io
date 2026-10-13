@@ -523,7 +523,7 @@ function presenterPreparationHasEnteredValues(value = "") {
 }
 
 function syncPresenterPreparationControls(field) {
-  const root = field?.closest?.(".svc-presenter-input-rail, .service-sidebar-section--preparation-input");
+  const root = field?.closest?.(".svc-presenter-input-rail");
   if (!root) return;
   const hasValues = [...root.querySelectorAll("[data-presenter-preparation-field]")]
     .some((input) => String(input.value || "").trim());

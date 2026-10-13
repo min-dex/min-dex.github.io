@@ -1,19 +1,21 @@
 """Audit bulk-input examples using each service's real template and parser."""
 import json
 
+import smoke_app
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 
 def main():
+    smoke_app.extract_supa_config = lambda: ('', '')
     server, url = start_local_app_server()
     try:
         with sync_playwright() as p:
             for engine in ("chrome", "webkit"):
                 browser = launch_chromium(p) if engine == "chrome" else p.webkit.launch()
                 page = browser.new_page()
-                page.route("**/*supabase*/**", lambda route: route.abort())
+                page.route("**/*", lambda route: route.continue_() if route.request.url.startswith(url.rsplit("/", 1)[0] + "/") else route.abort())
                 page.goto(url, wait_until="domcontentloaded")
-                page.wait_for_function("typeof presenterPreparationPlaceholderForService === 'function'")
+                page.wait_for_function("typeof presenterPreparationPlaceholderForService === 'function' && !document.body.classList.contains('ui-booting')")
                 result = page.evaluate("""() => {
                   const results=[];
                   const check=(value,message)=>{if(!value)throw Error(message)};
@@ -49,7 +51,7 @@ def main():
                     check(!blank.errors.length && !blank.entries.length,`${type}: blank form must apply nothing: ${blank.errors.join(', ')} ${blank.entries.map(e=>e.label+'='+e.content).join(', ')}`);
                     const host=document.createElement('div');
                     host.style.width='300px';
-                    host.innerHTML=renderPresenterSidebarPreparationInput(service);
+                    host.innerHTML=renderPresenterServiceInputRail(service);
                     document.body.append(host);
                     const inputs=[...host.querySelectorAll('[data-presenter-preparation-field]')];
                     check(inputs.length===(expected.length?examples.split('\\n').length:0),`${type}: rendered field count differs`);

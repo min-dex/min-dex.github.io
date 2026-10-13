@@ -8607,7 +8607,6 @@ function handleDetailKeydown(event) {
             state.services.find((service) => service.id === (preparationInput.dataset.serviceId || state.selectedServiceId)),
           ),
           focusTarget: {
-            scope: root?.classList.contains("svc-presenter-preparation-input--sidebar") ? "sidebar" : "controller",
             label: next?.dataset.presenterPreparationFieldLabel || "",
             apply: !next,
           },
@@ -22640,29 +22639,6 @@ function patchPresenterSidebarOutlineUnscoped(service, slides) {
   refreshIcons(next);
 }
 
-function renderPresenterSidebarPreparationInput(service) {
-  if (!service?.id) return "";
-  const draft = presenterPreparationDisplayTextForService(service);
-  const applying = state.presenterPreparationApplyingServiceIds.has(service.id);
-  const hasValues = presenterPreparationDraftHasValues(service, draft);
-  return `
-    <section class="service-sidebar-section service-sidebar-section--preparation-input" aria-label="예배 입력 붙여넣기">
-      <div class="service-sidebar-head">
-        <span>예배 순서 입력</span>
-      </div>
-      <div class="svc-presenter-preparation-input svc-presenter-preparation-input--sidebar">
-        ${renderPresenterPreparationFieldRows(service, draft, { sidebar: true })}
-        <div class="svc-presenter-preparation-actions">
-          <button class="svc-presenter-preparation-apply svc-presenter-preparation-apply--sidebar" type="button" data-presenter-preparation-apply data-service-id="${escapeAttr(service.id)}"
-            aria-label="${applying ? "예배 입력 반영 중" : "예배 입력 반영"}" title="${applying ? "반영 중" : hasValues ? "입력 반영" : "반영할 입력이 없습니다"}" ${applying || !hasValues ? "disabled" : ""}>
-            <i data-lucide="wand-sparkles"></i>
-            <span>${applying ? "반영 중" : "반영"}</span>
-          </button>
-        </div>
-      </div>
-    </section>`;
-}
-
 function renderUpcomingServiceShortcuts() {
   const services = getUpcomingServiceShortcuts();
   if (!services.length) return "";
@@ -26844,10 +26820,10 @@ function presenterPreparationDraftHasValues(service, draft = "") {
   return presenterPreparationFieldValues(service, draft).some((field) => field.value.trim());
 }
 
-function renderPresenterPreparationFieldRows(service, draft = "", options = {}) {
+function renderPresenterPreparationFieldRows(service, draft = "") {
   const fields = presenterPreparationFieldValues(service, draft);
   if (!fields.length) return '<p class="svc-presenter-preparation-empty">입력할 항목이 없습니다.</p>';
-  return `<div class="svc-presenter-preparation-fields${options.sidebar ? " svc-presenter-preparation-fields--sidebar" : ""}">
+  return `<div class="svc-presenter-preparation-fields">
     ${fields.map((field) => `
       <label class="svc-presenter-preparation-field-row">
         <span class="svc-presenter-preparation-field-label">${escapeHtml(field.label)}</span>
@@ -26899,14 +26875,10 @@ function presenterPreparationDraftNearApplyButton(button) {
 function focusPresenterPreparationTarget(serviceId, target = {}) {
   if (!serviceId || !target) return;
   requestAnimationFrame(() => {
-    const roots = target.scope === "sidebar"
-      ? [refs.songList]
-      : [refs.detailPane, refs.rightSidebar];
+    const roots = [refs.rightSidebar, refs.detailPane];
     const root = roots.find((candidate) => candidate?.querySelector?.(`[data-presenter-preparation-field][data-service-id="${cssEscape(serviceId)}"]`));
     if (!root) return;
-    const inputRoot = target.scope === "sidebar"
-      ? root.querySelector(".svc-presenter-preparation-input--sidebar")
-      : root.querySelector(".svc-presenter-input-rail .svc-presenter-preparation-input");
+    const inputRoot = root.querySelector(".svc-presenter-input-rail .svc-presenter-preparation-input");
     const selector = target.apply
       ? `[data-presenter-preparation-apply][data-service-id="${cssEscape(serviceId)}"]`
       : `[data-presenter-preparation-field][data-service-id="${cssEscape(serviceId)}"][data-presenter-preparation-field-label="${cssEscape(target.label || "")}"]`;
@@ -26922,7 +26894,6 @@ function presenterPreparationDraftForService(serviceId, options = {}) {
   const selector = `[data-presenter-preparation-field][data-service-id="${cssEscape(serviceId)}"]`;
   const input = refs.rightSidebar?.querySelector(selector)
     || refs.detailPane?.querySelector(selector)
-    || refs.songList?.querySelector(selector)
     || null;
   const draft = input && service
     ? presenterPreparationDraftFromRoot(input.closest(".svc-presenter-preparation-input"), service)

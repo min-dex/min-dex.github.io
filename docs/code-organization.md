@@ -123,3 +123,18 @@ Retain helpers still used by tests, externally exposed module APIs, saved-data
 compatibility adapters, operational SQL and historical recovery evidence until
 specific retirement evidence exists. Static non-use alone is not sufficient for
 those boundaries.
+
+
+## Retired left preparation input — 2026-10-13
+
+Removed the unused left-sidebar preparation renderer, its field-style option,
+left-only focus/draft lookup branches and associated CSS. The active right-rail
+renderer `renderPresenterServiceInputRail` remains the single preparation UI.
+Also removed unreferenced thumbnail-caption and old form-control styles.
+
+Preparation fixtures now render the actual right rail. Offline Chromium/WebKit
+coverage verifies 22 service/date cases, default values and retained drafts,
+Enter navigation to the next field and to the apply button from the last field.
+The broader app smoke assertion now checks the active rail instead of accepting
+an empty status from the retired renderer. No saved data format or database
+behavior changes; application of input still uses the existing save path.

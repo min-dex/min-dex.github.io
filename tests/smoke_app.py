@@ -6026,8 +6026,8 @@ def main() -> int:
                           const headerToggle = document.querySelector('.svc-header-actions [data-presenter-right-sidebar-toggle]');
                           const sidebarContext = document.querySelector('.service-sidebar-presenter-context');
                           const bulkTemplate = document.createElement('template');
-                          bulkTemplate.innerHTML = renderPresenterSidebarPreparationInput(service).trim();
-                          const bulkStatus = bulkTemplate.content.querySelector('.service-sidebar-head small')?.textContent.trim() || '';
+                          bulkTemplate.innerHTML = renderPresenterServiceInputRail(service).trim();
+                          const bulkRailPresent = Boolean(bulkTemplate.content.querySelector('.svc-presenter-input-rail'));
                           if (bulkInput) {
                             bulkInput.value = '평화 하나님의 평강이';
                             bulkInput.dispatchEvent(new Event('input', { bubbles: true }));
@@ -6101,7 +6101,7 @@ def main() -> int:
                             bulkButtonWidth: Math.round(bulkButtonRect?.width || 0),
                             bulkActionsWidth: Math.round(bulkActionsRect?.width || 0),
                             bulkInputWidth: Math.round(bulkInputRect?.width || 0),
-                            bulkStatus,
+                            bulkRailPresent,
                             bulkDraft: state.presenterPreparationDrafts[service?.id || ''] || '',
                             rightRailDesktop: document.body.dataset.module === 'presenter' && window.innerWidth > 900,
                             topbarActionButtons,
@@ -6143,11 +6143,7 @@ def main() -> int:
                         and presenter_header_input["bulkPlaceholder"]
                         and presenter_header_input["bulkButtonLabel"] == "반영"
                         and presenter_header_input["bulkButtonTitle"] == "입력 반영"
-                        and (
-                            presenter_header_input["bulkStatus"] == ""
-                            or presenter_header_input["bulkStatus"] in ("불러오는 중", "입력 완료", "입력 없음")
-                            or presenter_header_input["bulkStatus"].endswith("개 입력 필요")
-                        )
+                        and presenter_header_input["bulkRailPresent"]
                         and (
                             presenter_header_input["bulkDraft"] == ""
                             or "찬양 1: 평화 하나님의 평강이" in presenter_header_input["bulkDraft"]
