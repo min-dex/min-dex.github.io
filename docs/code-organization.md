@@ -138,3 +138,8 @@ Enter navigation to the next field and to the apply button from the last field.
 The broader app smoke assertion now checks the active rail instead of accepting
 an empty status from the retired renderer. No saved data format or database
 behavior changes; application of input still uses the existing save path.
+
+Integration note: concurrent commit `3eaa7f09` added three active helpers and
+17 app lines for parallel linked-song hydration/projection reuse. Preserve that
+reviewed change; set the integrated app ratchets to 33,016 lines / 1,768 functions.
+This does not restore the retired input or relax CSS/coupling limits.
