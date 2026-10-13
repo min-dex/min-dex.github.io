@@ -1274,7 +1274,6 @@ async function loadHymnScoreManifest({ silent = false } = {}) {
 
 function cacheRefs() {
   refs.brandNameHome = document.getElementById("brandNameHome");
-  refs.sidebarToggleBtn = document.getElementById("sidebarToggleBtn");
   refs.pageTabs = document.getElementById("pageTabs");
   refs.pageTabAddBtn = document.getElementById("pageTabAddBtn");
   refs.pageTabLabel = document.getElementById("pageTabLabel");
@@ -1299,8 +1298,6 @@ function cacheRefs() {
 }
 
 function bindStaticEvents() {
-  refs.sidebarToggleBtn?.addEventListener("click", handleSidebarToggle);
-  window.addEventListener("resize", syncSidebarCollapsedState);
   window.addEventListener("resize", keepActivePageTabVisible);
   refs.brandNameHome?.addEventListener("click", goHome);
   refs.pageTabAddBtn?.addEventListener("click", () => { void openNewPageTab(); });
@@ -1443,10 +1440,6 @@ function bindStaticEvents() {
     const songItem = event.target.closest("[data-song-id]");
     if (songItem) {
       await selectSong(songItem.dataset.songId);
-      if (state.selectedSongId === songItem.dataset.songId && window.matchMedia("(max-width: 560px)").matches) {
-        document.body.classList.add("sidebar-collapsed");
-        syncSidebarCollapsedState();
-      }
       return;
     }
 
@@ -1690,13 +1683,6 @@ function normalizeSidebarCreateSongButton() {
   button.setAttribute("aria-label", "곡 추가");
   button.setAttribute("title", "곡 추가");
 }
-
-const handleSidebarToggle = () => {
-  if (!window.matchMedia?.("(max-width: 900px)")?.matches) return;
-  document.body.classList.toggle("sidebar-collapsed");
-  safeStorageSet("local", STORAGE.sidebarCollapsed, String(document.body.classList.contains("sidebar-collapsed")));
-  syncSidebarCollapsedState();
-};
 
 function serviceOutlineSlideTarget(serviceOutlineItem) {
   const serviceId = serviceOutlineItem?.dataset?.serviceOutlineService || state.selectedServiceId;
@@ -2318,12 +2304,6 @@ function renderPresenterThumbScaleControl() {
 }
 
 function readUiState() {
-  const storedSidebarState = safeStorageGet("local", STORAGE.sidebarCollapsed);
-  const useCompactSidebar = window.matchMedia?.("(max-width: 900px)")?.matches;
-  document.body.classList.toggle(
-    "sidebar-collapsed",
-    storedSidebarState === "true" || (!storedSidebarState && useCompactSidebar),
-  );
   const moduleName = safeStorageGet("session", STORAGE.module);
   const praiseFilter = safeStorageGet("session", STORAGE.praiseFilter);
   const scriptureFilter = safeStorageGet("session", STORAGE.scriptureFilter);
@@ -13453,7 +13433,6 @@ function renderModuleSwitcher() {
   refs.brandNameHome?.setAttribute("aria-current", homeActive ? "page" : "false");
   renderPageTabTitle();
   renderNavigationSidebarState();
-  syncSidebarCollapsedState();
   refs.searchInput.placeholder = "검색...";
   refs.searchInput.setAttribute("aria-label", "검색");
   refs.searchInput.disabled = false;
@@ -13645,7 +13624,6 @@ function renderPageTabs() {
 }
 
 function keepActivePageTabVisible() {
-  if (!window.matchMedia("(max-width: 560px)").matches) return;
   const list = refs.pageTabs;
   const active = list?.querySelector('.page-tab[aria-selected="true"]');
   if (!active || !list.clientWidth) return;
@@ -14036,27 +14014,6 @@ function syncPraiseCreateControls() {
     button.hidden = !canCreate;
     button.disabled = !canCreate;
   });
-}
-
-function syncSidebarCollapsedState() {
-  const drawer = window.matchMedia?.("(max-width: 900px)")?.matches;
-  const collapsed = drawer && document.body.classList.contains("sidebar-collapsed");
-  refs.sidebarToggleBtn?.toggleAttribute("hidden", !drawer);
-  refs.sidebarToggleBtn?.classList.toggle("active", drawer && !collapsed);
-  refs.sidebarToggleBtn?.setAttribute("aria-pressed", String(drawer && !collapsed));
-  refs.sidebarToggleBtn?.setAttribute("aria-expanded", String(drawer && !collapsed));
-  refs.sidebarToggleBtn?.setAttribute("aria-label", collapsed ? "사이드바 열기" : "사이드바 닫기");
-  refs.sidebarToggleBtn?.setAttribute("title", collapsed ? "사이드바 열기" : "사이드바 닫기");
-  if (refs.sidebarToggleBtn) {
-    refs.sidebarToggleBtn.innerHTML = `<i data-lucide="panel-left"></i>`;
-    refreshIcons();
-  }
-  if (refs.sidebarToggleBtn) refs.sidebarToggleBtn.disabled = !drawer;
-  if (refs.sidebar) {
-    refs.sidebar.inert = collapsed;
-    refs.sidebar.setAttribute("aria-hidden", String(collapsed));
-    if (collapsed && refs.sidebar.contains(document.activeElement)) refs.sidebarToggleBtn?.focus();
-  }
 }
 
 const SERVICE_CATEGORIES = {
