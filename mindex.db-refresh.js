@@ -128,7 +128,6 @@
       const listSelect = state.serviceAliasSupported ? WORSHIP_SERVICE_LIST_SELECT : WORSHIP_SERVICE_BASE_LIST_SELECT;
       const listKey = WORSHIP_EMERGENCY_TODAY_ONLY ? `today:${localDateStringWithOffset(new Date(), 0)}` : listSelect;
       writeStaticSupabaseCache("mindex_worship_services", listKey, snapshot.serviceRows);
-      writeStaticSupabaseCache("mindex_worship_rows", worshipRowsCacheKey(snapshot.ids, snapshot.elementSelect), [{ sections: snapshot.sections, elements: snapshot.elements }]);
       captureCleanFingerprint("service");
     }
     if (snapshot.scriptures) {

@@ -53,7 +53,10 @@ def check_geometry(page):
       return {left: canvas.left - frame.left, top: canvas.top - frame.top,
         right: frame.right - canvas.right, bottom: frame.bottom - canvas.bottom};
     }""")
-    assert all(abs(value) <= 0.1 for value in geometry.values()), geometry
+    # Preview intentionally overscans one CSS pixel to avoid rasterization seams.
+    assert all(-1 <= value <= 0.1 for value in geometry.values()), geometry
+    assert abs(geometry["left"]-geometry["right"]) <= 0.1, geometry
+    assert abs(geometry["top"]-geometry["bottom"]) <= 0.1, geometry
     print('PASS sidebar preview fits after replacement/resize', geometry)
 
 

@@ -12,6 +12,7 @@ def main():
                 page.route("**/*supabase*/**", lambda route: route.abort())
                 page.goto(url, wait_until="domcontentloaded")
                 page.wait_for_function("typeof toastDisplayDuration === 'function' && typeof toastLines === 'function' && Boolean(refs.toastRegion)")
+                page.wait_for_function("typeof state !== 'undefined' && !document.body.classList.contains('ui-booting')")
                 print(engine, page.evaluate("""async () => {
                   const check=(value,message)=>{if(!value)throw Error(message)};
                   const originalSet=window.setTimeout,originalClear=window.clearTimeout;

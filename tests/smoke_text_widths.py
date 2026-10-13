@@ -43,15 +43,15 @@ def main():
             }''')
             for r in result:
                 if r['type'] == 'liturgical-body':
-                    # Only clean fullscreen liturgical copy has the fixed 45px inset.
+                    # Clean fullscreen liturgical copy uses the shared 7.5% safe area.
                     # Chromakey inherits the standard 2.5% slide inset (48px at 1920).
-                    expected_inset = 45 if r['clean'] else 48
+                    expected_inset = 144 if r['clean'] else 48
                     assert abs(r['width'] - (1 - expected_inset * 2 / 1920)) < 0.001, r
                     assert abs(r['left'] - (expected_inset / 1920)) < 0.001, r
                 else:
                     assert abs(r['width'] - (0.85 if r['clean'] else 0.95)) < 0.001, r
                     assert abs(r['left'] - (0.075 if r['clean'] else 0.025)) < 0.001, r
-            print('PASS 16 text layouts: standard margins plus fixed liturgical safe areas')
+            print('PASS 16 text layouts: standard fullscreen and chromakey safe areas')
             browser.close()
     finally:
         if server:

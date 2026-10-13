@@ -11,6 +11,7 @@ def main():
                 page.route('**/*supabase*/**', lambda r: r.abort())
                 page.goto(url + '?output=presenter', wait_until='domcontentloaded')
                 page.wait_for_function("typeof presenterReadySlide === 'function'")
+                page.wait_for_function("typeof state !== 'undefined' && !document.body.classList.contains('ui-booting')")
                 print(engine, page.evaluate('''() => {
                   const check=(v,m)=>{if(!v)throw Error(m)};
                   const root=document.createElement('div');root.className='presenter-output-root';
@@ -28,7 +29,7 @@ def main():
                     root.classList.toggle('no-chromakey',clean);
                     for(const node of root.querySelectorAll('div')) {
                       const css=getComputedStyle(node);
-                      const weight=node.classList.contains('presenter-citation-tab')?'700':'600';
+                      const weight=node.matches('.presenter-liturgical-body-lines,.presenter-slide--liturgical-body :is(.presenter-slide-text,.presenter-title-content-body)')?'500':node.classList.contains('presenter-citation-tab')?'700':'600';
                       if(Math.abs(parseFloat(css.fontSize)-50)<0.01)check(css.fontWeight===weight,node.className+' '+css.fontWeight);
                     }
                     const fin=getComputedStyle(root.querySelector('.presenter-scripture-reading-fin'));
@@ -39,7 +40,7 @@ def main():
                     if(clean)check(getComputedStyle(root.querySelector('.presenter-title-content-body')).fontWeight==='700','100px weight changed');
                   }
                   root.innerHTML='<div class="presenter-scripture-reading" style="position:absolute;inset:100px;width:auto;height:auto"><div class="presenter-scripture-reading-version">개역개정</div><div class="presenter-scripture-reading-text" style="margin-top:80px">하나님이 세상을 이처럼 사랑하사</div><div class="presenter-scripture-reading-fin">Fin.</div></div>';
-                  return 'PASS citation tab = 700, other tested 50px roles = 600; Fin family/italic; body and support preserved';
+                  return 'PASS citation tab = 700, liturgical body = 500, other tested 50px roles = 600; Fin family/italic; body and support preserved';
                 }'''))
                 page.screenshot(path=f'/private/tmp/mindex-meta-{engine}.png')
                 browser.close()

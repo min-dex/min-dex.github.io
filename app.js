@@ -12211,7 +12211,7 @@ async function addAndUploadPresenterReferenceMedia(input, initialItem = null) {
       if (uploaded) showToast(`이미지 ${files.length}장을 추가했습니다.`);
       else if (!initialItem && targetItem) {
         const current = getServiceItems(serviceId).find(candidate => candidate.id === targetItem.id);
-        if (current && !hasServiceAsset(parseServiceItemMemo(current.memo).asset)) {
+        if (current && !hasServiceAssetContent(parseServiceItemMemo(current.memo).asset)) {
           state.serviceItems[serviceId] = getServiceItems(serviceId).filter(candidate => candidate.id !== targetItem.id);
           markServiceStructureDirty(serviceId);
         }

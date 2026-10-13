@@ -1319,3 +1319,33 @@ sync conflict/draft guards remain authoritative. Slide-model diagnostics that
 only aggregate validation results belong in tests; production single-slide
 validation stays in place. Scheduling only creates missing instances and never
 automatically deletes an existing service after calendar changes.
+
+### 2026-10-13 Complete browser regression audit
+- Ran all 169 Playwright-backed test entry points on e5c9146c, then reran failures
+  individually after diagnosis. Final per-file results have no failures. Real
+  Supabase scenarios in `smoke_app.py` and `smoke_worship_presenter.py` remain
+  skipped; all runs used isolated browser profiles and blocked external traffic.
+- Remove a newly inserted, empty reference-media item when image persistence
+  fails. Asset kind alone is not content; retain successful assets and concurrent
+  edits. The image batch rollback regression now passes in Chromium and WebKit.
+- Manual DB refresh no longer writes the retired worship-row cache using the
+  deleted `worshipRowsCacheKey` helper. Detached snapshot refresh and failure
+  guards pass in both browser engines.
+- Align test fixtures with the current desktop canvas, module switcher, compact
+  preview status row, announcement region fields, and active output layer.
+  Wait for full app boot before testing module functions that load before state.
+  Ignore closed details when checking painted control overlaps. Preserve
+  overscan coverage rather than requiring a mathematically exact preview edge.
+- The compact preview header introduced on October 11 supersedes the fixed
+  status slot above: healthy output uses the title row; video errors/loading add
+  a bounded status row, stable across error states, then collapse on recovery.
+  Draft focus, selection, retry action, and narrow-panel containment remain tested.
+- `MINDEX_SMOKE_OFFLINE=1` removes embedded Supabase configuration only from the
+  local Python smoke server response and disables environment credential lookup.
+  It does not modify shipped configuration or replace external network isolation.
+- Bulletin coverage passes save failures, revision conflicts, local recovery,
+  draft reload, responsive control reachability, duplicate-print prevention and
+  two-page A4 landscape iframe isolation. No printer job or production write ran.
+- After integrating main through a9f48e5f, reran all 169 browser entry points
+  on the combined code: 169 successful, zero failures, with the same two live-DB
+  scenario groups explicitly skipped. Web cache version: `20261013-browser-audit`.

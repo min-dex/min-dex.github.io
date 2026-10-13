@@ -3,6 +3,7 @@ from __future__ import annotations
 import html
 import json
 import os
+import re
 import threading
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -44,6 +45,8 @@ def read_env_file(path: Path) -> dict[str, str]:
 
 
 def extract_supa_config() -> tuple[str, str]:
+    if os.environ.get("MINDEX_SMOKE_OFFLINE") == "1":
+        return "", ""
     values: dict[str, str] = {}
     for path in ENV_PATHS:
         values.update(read_env_file(path))
@@ -79,6 +82,8 @@ class MindexSmokeHandler(SimpleHTTPRequestHandler):
                 self.end_headers()
                 query = parse_qs(parsed.query)
                 markup = INDEX_PATH.read_text(encoding="utf-8") if query.get("mindexSmokeRaw") else injected_index_html()
+                if os.environ.get("MINDEX_SMOKE_OFFLINE") == "1":
+                    markup = re.sub(r"window\.MINDEX_SUPABASE\s*=\s*\{[^}]*\};", "window.MINDEX_SUPABASE = {};", markup)
                 self.wfile.write(markup.encode("utf-8"))
                 return
             super().do_GET()
@@ -1173,6 +1178,8 @@ def main() -> int:
             reference_page.evaluate(
                 """
                 (() => {
+                  state.client ||= {};
+                  state.connectionError = '';
                   state.module = 'references';
                   state.referenceError = '';
                   state.referenceLinksLoaded = true;

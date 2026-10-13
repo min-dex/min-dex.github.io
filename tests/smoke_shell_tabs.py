@@ -26,7 +26,8 @@ def main():
                       const bar=rect('.topbar'),actions=rect('.topbar-actions');
                       return {barHeight:bar.height,tabsWidth:tabs.width,
                         activeVisible:active.left>=tabs.left-1 && active.right<=tabs.right+1,
-                        sameRow:Math.abs(tabs.top-actions.top)<1,
+                        sameRow:tabs.top>=bar.top && tabs.bottom<=bar.bottom+1
+                          && actions.top>=bar.top && actions.bottom<=bar.bottom+1,
                         sidebarTop:rect('.nav-sidebar').top,
                         canvasWidth:rect('.app-shell').width,
                         overflow:Math.max(document.body.scrollWidth,document.documentElement.scrollWidth)>innerWidth,

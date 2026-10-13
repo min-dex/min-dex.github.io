@@ -31,6 +31,7 @@ def run(browser, url):
             mindex_worship_elements:[{id:elementId,section_id:sectionId,element_type:'praise',song_id:newId,song_version_id:version,source_ref:{label:'찬양 2',slotKey:'praise.song.2'},config:{},sort_order:1}],
             mindex_worship_presenter_slides:[],
           };
+          tables[WORSHIP_SERVICE_LIST_VIEW]=tables.mindex_worship_services;
           let reads=0, renders=0, fail='', gate=null, entered=null, live=false;
           fetchSupabasePaged = async (table, select, build) => {
             reads++;

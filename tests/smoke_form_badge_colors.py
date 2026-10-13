@@ -9,11 +9,12 @@ try:
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url, wait_until='domcontentloaded')
             page.wait_for_function("typeof renderPresenterSlideThumb === 'function'")
+            page.wait_for_function("typeof state !== 'undefined' && !document.body.classList.contains('ui-booting')")
             print(engine, page.evaluate('''() => {
               const check=(v,m)=>{if(!v)throw Error(m)};
               refreshIcons();
-              const door=document.querySelector('.nav-rail-tab[data-home-module="service"] svg path[d="M14 21v-3a2 2 0 0 0-4 0v3"]');
-              check(door && getComputedStyle(door).display==='none','church detail not simplified');
+              const icon=document.querySelector('.module-switcher-tab[data-home-module="service"] svg');
+              check(icon && icon.getBoundingClientRect().width>0,'worship module icon missing');
               renderPresenterSlideMiniPreview=()=>'';
               const host=document.createElement('div');host.id='badge-test';
               host.style.cssText='padding:24px;display:flex;gap:12px;flex-wrap:wrap';
@@ -39,7 +40,7 @@ try:
                 check(!neutral.hasAttribute('data-form-type'),'scripture received song color');
                 check(badges.every(b=>getComputedStyle(b).color===getComputedStyle(neutral).color),'form badge text should stay neutral like scripture reference');
               }
-              return 'PASS simplified icon, type colors, neutral text, verse consistency, dimensions and jump targets';
+              return 'PASS module icon, type colors, neutral text, verse consistency, dimensions and jump targets';
             }'''), flush=True)
             for theme in ('light', 'dark'):
                 page.evaluate('(theme)=>document.body.dataset.theme=theme', theme)
