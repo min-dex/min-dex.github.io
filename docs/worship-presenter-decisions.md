@@ -1302,3 +1302,9 @@ Small visual polish that does not alter behavior does not need an entry.
   `tests/smoke_bulletin_shell_print.py` preserves the current print iframe
   isolation, two-page A4 dimensions, and unchanged screen canvas coverage. The full Python browser smoke suite and physical printing were not
   run in this pass; browser checks used CUA.
+
+### 2026-10-13 Linked-song loading and worship action performance
+- Fetch missing song metadata concurrently with relational version/unit data. Publish relational data after metadata resolves; retain in-flight deduplication, explicit retry and unresolved-link save protection.
+- Reuse the existing synchronous service-item projection scope during item actions and dirty fingerprints. Array replacement still invalidates the projection, and the outer scope clears it before later edits.
+- Chromium/WebKit coverage retains retry, late-response isolation and medley persistence IDs. Controlled deferred-fetch coverage checks parallel loading, publication ordering, warm cache and unit-failure retry.
+- Read-only sample (28 items, 10 linked songs): add-action projections fell from five to two; measured add time fell from 219/264 ms to 176/245 ms. Network timings vary and are not a latency guarantee.

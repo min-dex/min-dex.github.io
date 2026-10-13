@@ -2390,7 +2390,7 @@ function dirtyModuleValue(moduleName) {
 }
 
 function dirtyModuleFingerprint(moduleName) {
-  return JSON.stringify(dirtyComparableValue(dirtyModuleValue(moduleName)));
+  return withServiceItemsScope(() => JSON.stringify(dirtyComparableValue(dirtyModuleValue(moduleName))));
 }
 
 function captureCleanFingerprint(moduleName) {
@@ -3199,6 +3199,8 @@ function songNeedsRelationalHydration(songId = "") {
 async function loadMissingSongsForIds(targetIds = []) {
   const existingSongs = songLookupMap();
   const missingIds = targetIds.filter((id) => !existingSongs.has(id));
+  // Song metadata and version lookup are independent; publish only when both finish.
+  const versionDataPromise = loadRelationalSongVersionData(targetIds);
   let songRows = [];
   if (missingIds.length) {
     try {
@@ -3219,8 +3221,9 @@ async function loadMissingSongsForIds(targetIds = []) {
     clearSearchCaches();
   }
   const hydratableIds = targetIds.filter((id) => songById(id));
-  if (!hydratableIds.length) return;
-  await attachRelationalSongVersionsForSongs(hydratableIds);
+  const versionData = await versionDataPromise;
+  if (!hydratableIds.length || !versionData) return;
+  await publishRelationalSongVersionData(versionData, hydratableIds);
 }
 
 function loadSongsForIdsInBackground(songIds = [], options = {}) {
@@ -3245,6 +3248,11 @@ function loadSongsForIdsInBackground(songIds = [], options = {}) {
 }
 
 async function attachRelationalSongVersionsForSongs(songIds = []) {
+  const data = await loadRelationalSongVersionData(songIds);
+  if (data) await publishRelationalSongVersionData(data, songIds);
+}
+
+async function loadRelationalSongVersionData(songIds = []) {
   const ids = [...new Set(songIds.map((id) => String(id || "").trim()).filter(Boolean))];
   if (!ids.length) return;
 
@@ -3269,8 +3277,7 @@ async function attachRelationalSongVersionsForSongs(songIds = []) {
 
   versionRows = [...new Map(versionRows.map((row) => [row.id, row])).values()];
   if (!versionRows.length) {
-    attachRelationalSongVersionRows([], [], ids);
-    return;
+    return { versionRows: [], unitRows: [] };
   }
 
   let unitRows = [];
@@ -3287,10 +3294,16 @@ async function attachRelationalSongVersionsForSongs(songIds = []) {
     return;
   }
 
-  state.songVersionTablesSupported = true;
-  state.songVersionPraiseTypesSupported = state.songVersionPraiseTypesSupported
-    || versionRows.some((row) => Object.prototype.hasOwnProperty.call(row, "praise_types"));
-  await yieldToBrowser();
+  return { versionRows, unitRows };
+}
+
+async function publishRelationalSongVersionData({ versionRows, unitRows }, ids) {
+  if (versionRows.length) {
+    state.songVersionTablesSupported = true;
+    state.songVersionPraiseTypesSupported = state.songVersionPraiseTypesSupported
+      || versionRows.some((row) => Object.prototype.hasOwnProperty.call(row, "praise_types"));
+    await yieldToBrowser();
+  }
   attachRelationalSongVersionRows(versionRows, unitRows, ids);
 }
 
@@ -11811,6 +11824,10 @@ function updateServiceDefaultItemField(field) {
 }
 
 function runServiceItemAction(action, index, label = "", title = "") {
+  return withServiceItemsScope(() => runServiceItemActionUnscoped(action, index, label, title));
+}
+
+function runServiceItemActionUnscoped(action, index, label = "", title = "") {
   const serviceId = state.selectedServiceId;
   if (!serviceId) return;
   const typeId = state.services.find((service) => service.id === serviceId)?.type_id || state.selectedServiceTypeId;
