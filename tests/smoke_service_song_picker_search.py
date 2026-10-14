@@ -63,6 +63,10 @@ try:
                 page.evaluate('finishCatalog()')
                 page.wait_for_function("document.querySelector('[data-service-song-select=range]')!==null")
                 assert buttons.count()==1 and page.evaluate('catalogCalls===1')
+                page.evaluate('savedSelections.length=0')
+                page.locator('[data-service-song-select="range"]').click()
+                assert page.evaluate("savedSelections.length===1 && savedSelections[0]==='range'"), 'Candidate click saved twice'
+
                 print(engine, 'PASS multiple results, range, focus, draft/output isolation, click selection, linked replacement, empty search and cold-load latest query')
             finally:
                 browser.close()

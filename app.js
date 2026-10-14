@@ -3135,6 +3135,7 @@ async function loadSongsOnce(context = {}) {
   songCatalogSummaryLoaded = true;
   clearSearchCaches();
   if (context.searchOnly && isGlobalSearchActive()) renderGlobalSearchList();
+  if (!context.searchOnly && state.module === "praise") renderSongList();
   await yieldToBrowser();
   await attachRelationalSongVersions();
   clearSearchCaches();
@@ -8673,6 +8674,11 @@ function handleDetailKeydown(event) {
 }
 
 function handleDetailPointerDown(event) {
+  // Candidate selection owns the commit. Do not blur/auto-save the query first.
+  if (event.button === 0 && event.target.closest("[data-service-song-select]")) {
+    event.preventDefault();
+    return;
+  }
   if (handlePresenterBoardPointerDown(event)) return;
   if (event.target.closest("[data-form-action], [data-version-action], [data-version-name-field], [data-service-item-action], [data-presenter-action]")) {
     event.stopPropagation();
@@ -11710,6 +11716,11 @@ function selectServiceSongForItem(index, songId) {
     showToast("악보 항목은 새찬송가 곡만 선택할 수 있습니다.", "error");
     return;
   }
+  const queryField = findDeferredServiceTextInput(serviceId, index, "raw_title");
+  if (queryField) {
+    clearDeferredServiceTextPreview(queryField);
+    queryField.dataset.initialValue = queryField.value;
+  }
   item.song_id = song.id;
   item.raw_title = "";
   item.version_id = defaultServiceSongVersion(song, item, service)?.id || null;
@@ -13578,8 +13589,14 @@ function renderPageTabs() {
     `;
   }).join("");
   if (addButton) refs.pageTabs.appendChild(addButton);
-  keepActivePageTabVisible();
+  if (pageTabVisibilityRaf) cancelAnimationFrame(pageTabVisibilityRaf);
+  pageTabVisibilityRaf = requestAnimationFrame(() => {
+    pageTabVisibilityRaf = 0;
+    keepActivePageTabVisible();
+  });
 }
+
+let pageTabVisibilityRaf = 0;
 
 function keepActivePageTabVisible() {
   const list = refs.pageTabs;
@@ -23984,21 +24001,9 @@ function renderServiceAuthoringPanel(kicker, title, body) {
     </details>`;
 }
 
-// The waiting-loop video (~4 MB) is only shown by presenter output, so it is fetched
-// the first time a presenter view is drawn instead of on every page load.
-let presenterReadyVideoPrefetched = false;
-function prefetchPresenterReadyVideo() {
-  if (presenterReadyVideoPrefetched || typeof document === "undefined" || !document.head) return;
-  presenterReadyVideoPrefetched = true;
-  const link = document.createElement("link");
-  link.rel = "prefetch";
-  link.type = "video/mp4";
-  link.href = PRESENTER_CHROMAKEY_READY_LOOP_VIDEO;
-  document.head.append(link);
-}
-
+// Output initializes its own ready video. Browsing the controller must not
+// prefetch the entire waiting-loop asset alongside service data and fonts.
 function renderPresenterDetail() {
-  prefetchPresenterReadyVideo();
   return withServiceItemsScope(() => renderPresenterDetailUnscoped());
 }
 

@@ -1514,3 +1514,27 @@ automatically deletes an existing service after calendar changes.
   Each source used 11 parts plus one manifest; the atomic save ran once per
   insertion. Original local-file hashes remained unchanged. This verifies the
   application path, not a real production upload or mixer hardware.
+
+### 2026-10-14 Loading, navigation and selection-save performance
+- Measured all eight primary modules on Chromium/WebKit: cold startup about
+  2.9–3.7 s, first praise load 2.0–2.3 s, and warm route paint mostly tens to
+  hundreds of milliseconds. Worship detail and write paths need separate checks.
+- Song catalog loading now paints title/metadata rows before all version lyrics
+  arrive; catalog-complete status still waits for full hydration. Existing
+  search-only isolation, shared requests and final version publication remain.
+- Controller browsing no longer issues a full prefetch of the roughly 27 MB
+  ready-loop video. Output retains its own loading/playback/first-frame handling.
+- Page-tab visibility geometry runs once in the next animation frame, after DOM
+  updates, instead of forcing layout midway through each shell render.
+- Candidate pointer selection prevents the input blur from saving a tentative
+  query before the chosen song. A committed candidate consumes that field's
+  pending text draft before rerendering; the normal explicit selection save runs
+  once. Enter/manual edits retain their existing commit behavior.
+- Tests cover single-save candidate clicks, delayed-lyrics list visibility,
+  controller prefetch absence, tab visibility, output first-frame/autoplay, global
+  searches and loading isolation. Operational saves use only a uniquely named
+  disposable test service; other service IDs/revisions are compared unchanged.
+- With production data and the revised local client, four candidate selections
+  each issued one atomic save (previously one or two), with read-back confirmation
+  around 0.55–0.70 s in this run. Fresh-context song/version/element IDs matched.
+  These are sampled timings, not a latency guarantee across networks/devices.
