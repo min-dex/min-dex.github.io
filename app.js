@@ -893,15 +893,18 @@ async function init() {
   bindPresenterChannel();
   connectClient();
   render();
-  finishUiBoot();
   syncBrowserHistory({ replace: true });
   void requestPresenterScreens({ silent: true });
 
-  if (state.client) {
-    await initializeAuth();
-    if (canUseClientData()) loadInitialData();
-  } else if (state.connectionError) {
-    showToast(state.connectionError, "error");
+  try {
+    if (state.client) {
+      await initializeAuth();
+      if (canUseClientData()) await loadInitialData();
+    } else if (state.connectionError) {
+      showToast(state.connectionError, "error");
+    }
+  } finally {
+    finishUiBoot();
   }
 }
 
@@ -985,23 +988,27 @@ function bindElectronDesktopEvents() {
 }
 
 function loadInitialData() {
+  const pending = [];
   if (state.module === "praise" || state.selectedSongId) {
-    loadSongs();
+    pending.push(loadSongs());
   } else if (!isServiceDataModule()) {
     scheduleBackgroundSongLoad();
   }
   if (state.module === "scripture" || state.selectedScriptureId || state.selectedBookCode) {
-    loadScriptureBooks({ silent: true });
-    loadScriptures({ silent: true });
-    loadBibleTranslations({ silent: true });
+    pending.push(loadScriptureBooks({ silent: true }));
+    pending.push(loadScriptures({ silent: true }));
+    pending.push(loadBibleTranslations({ silent: true }));
   }
   if (isServiceDataModule()) {
     // Load the read runtime alongside the list, before the first detail click.
     void worshipAtomicClient().catch(() => {});
-    loadServiceData({ silent: true });
+    pending.push(loadServiceData({ silent: true }).then(() => {
+      if (state.module === "setlists") return loadWorshipSetlistArchive();
+    }));
   }
-  if (state.module === "references") loadReferenceLinks({ silent: true });
-  if (state.module === "calendar") loadCalendarData({ silent: true });
+  if (state.module === "references") pending.push(loadReferenceLinks({ silent: true }));
+  if (state.module === "calendar") pending.push(loadCalendarData({ silent: true }));
+  return Promise.allSettled(pending);
 }
 
 function isServiceDataModule(moduleName = state.module) {
@@ -1304,7 +1311,7 @@ function cacheRefs() {
   refs.sidebar = document.querySelector(".sidebar");
   refs.detailPane = document.getElementById("detailPane");
   refs.rightSidebar = document.getElementById("mindexRightSidebar");
-  refs.loadingStatus = document.getElementById("loadingStatus");
+  refs.bootStatus = document.getElementById("bootStatus");
   refs.toastRegion = document.getElementById("toastRegion");
   normalizeSidebarCreateSongButton();
 }
@@ -14749,20 +14756,10 @@ function currentLoadingStatusItems() {
 }
 
 function renderLoadingStatus() {
-  const el = refs.loadingStatus;
-  if (!el) return;
+  const el = refs.bootStatus;
+  if (!el || !document.body.classList.contains("ui-booting")) return;
   const items = currentLoadingStatusItems();
-  if (!items.length) {
-    el.hidden = true;
-    el.innerHTML = "";
-    return;
-  }
-  el.hidden = false;
-  el.innerHTML = `
-    <span class="loading-status-dot" aria-hidden="true"></span>
-    <span class="loading-status-text">로딩 중</span>
-  `;
-  el.setAttribute("aria-label", `${items.join(", ")} 처리 중`);
+  el.setAttribute("aria-label", items.length ? `${items.join(", ")} 처리 중` : "MINDEX 시작 중");
 }
 
 function clearSearchCaches(options = {}) {
@@ -23369,7 +23366,7 @@ function renderWorshipSetlistArchiveNavigation(entries) {
 }
 
 function renderServiceSetlistArchiveDetail() {
-  if (!state.worshipSetlistArchive.loaded && !state.worshipSetlistArchive.loading) {
+  if (!document.body.classList.contains("ui-booting") && !state.worshipSetlistArchive.loaded && !state.worshipSetlistArchive.loading) {
     void loadWorshipSetlistArchive();
   }
   const archive = state.worshipSetlistArchive;

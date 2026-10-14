@@ -118,7 +118,7 @@
     </script>
   </head>
   <body class="ui-booting">
-    <div class="mindex-boot" role="status" aria-label="MINDEX 시작 중">
+    <div id="bootStatus" class="mindex-boot" role="status" aria-label="MINDEX 시작 중">
       <svg class="mindex-boot-cross" viewBox="128 104 256 304" fill="currentColor" aria-hidden="true">
         <path d="M224 104h64v80h96v64h-96v160h-64V248h-96v-64h96z" />
       </svg>
@@ -166,7 +166,6 @@
           <div class="topbar-module-strip">
             <button id="brandNameHome" class="topbar-brand" type="button" aria-label="Mindex 홈으로 이동" title="홈">
               <span class="topbar-brand-icon" aria-hidden="true"></span>
-              <span id="loadingStatus" class="loading-status" role="status" aria-live="polite" aria-atomic="true" hidden></span>
             </button>
             <nav class="module-switcher" aria-label="Mindex 페이지">
               <button class="module-switcher-tab" type="button" data-home-module="service" aria-label="예배" title="예배"><i data-lucide="church"></i></button>
@@ -222,7 +221,7 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261014-setlists-operations-v2";
+        const fallbackVersion = "20261014-initial-data-loading";
         const modules = [
           "vendor/lucide.min.js", "vendor/supabase-js.min.js",
           "mindex.constants.js", "mindex.inline-text.js", "mindex.design-tokens.js", "mindex.worship-model.js",

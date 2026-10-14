@@ -267,11 +267,14 @@ and 5px textarea side padding to avoid nested panel gutters.
 
 ## Initial loading identity
 
-- Before the shell is ready, show the existing cross silhouette and MINDEX
+- Until authentication and the initial active-page data settle, show the existing cross silhouette and MINDEX
   wordmark at viewport center, respecting the saved/system light or dark theme.
 - Keep the first paint self-contained (inline SVG/CSS), with one short reveal,
   no looping animation and no artificial minimum loading duration. Existing
-  runtime readiness dismisses it; do not wait for authentication/data fetches.
+  runtime readiness dismisses it after those requests complete or fail. Background
+  catalog warming does not block entry. Signed-out users reach sign-in without
+  waiting for unavailable data. The top-left cross remains a static home button;
+  it never becomes a global loading spinner. Later loads use their own view status.
 - Reduced-motion mode is static. The status is named for assistive technology
   and becomes hidden after readiness. Presenter output routes never show the
   branding; their existing black startup and safety behavior remain unchanged.
