@@ -1,3 +1,17 @@
+## Children Autumn Lyrics Contrast (2026-10-14)
+
+- Children services already select the C5 autumn background for September and
+  October. Output captures must use `presenterStatePayload`, including its
+  background sources, rather than a slide-only payload.
+- Fullscreen lyrics on `26-C5.png` use the original PPTX color `#594841`
+  (RGB 89, 72, 65). Verified explicit DrawingML `srgbClr` values in
+  `Elem_2026-01-04.pptx`, slides 6–7 (하나님의 뜻 이뤄지네), and
+  `Elem_2026-08-09.pptx`, slides 6–7. The available 2026 archive has no October 11
+  deck; do not claim direct comparison with that date's PPTX. This replaces the
+  ungrounded `#34271f` choice made before inspecting the sources.
+- Scope the color to that artwork and lyric frames; scripture keeps its own
+  reading background and white text, and chromakey remains unchanged.
+
 ## Medley Mode Save Ordering (2026-10-14)
 
 - Production test services exposed a partial-save acknowledgement bug: replacing
