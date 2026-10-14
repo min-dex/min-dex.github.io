@@ -4946,7 +4946,9 @@ function trimPresenterOutputImagePreloadCache() {
 }
 
 function renderPresenterSlideFrame(slide, options = {}) {
-  if (options.noChromakey && (slide?.songTitle || (slide?.type === "song-title" && presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE))) {
+  if (options.noChromakey && !slide?.autoTrailingBlank
+    && presenterSlideLayout(slide) !== PRESENTER_SLIDE_LAYOUTS.BLANK
+    && (slide?.songTitle || (slide?.type === "song-title" && presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE))) {
     const content = presenterSongTitleContent(slide);
     const title = formatPresenterSongTitleText(content.title);
     // Keep the order heading when adapting song titles for fullscreen output.

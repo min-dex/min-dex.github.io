@@ -31142,6 +31142,7 @@ function renderPresenterControlStateUnscoped(serviceId) {
       patchPresenterSidebarServiceSummary(serviceId);
       patchPresenterSidebarOutline(service, slides);
       if (root.dataset.boardKey === boardKey) {
+        delete root.dataset.presenterBoardPatchQueuedAt;
         root.className = presenterControlsClassName(active, presenterServiceUsesChromakey(service));
         if (sideRoot) patchPresenterControlsTop(sideRoot, service, slides, active, index);
         else setRightSidebarContent(renderPresenterRightSidebar(service, slides, active, index));
@@ -31160,7 +31161,10 @@ function renderPresenterControlStateUnscoped(serviceId) {
       const interactionAt = Number(root.dataset.presenterInteractionAt) || 0;
       const interactionDelay = 150 - (Date.now() - interactionAt);
       const hoveredThumbnail = sameService && root.querySelector(".svc-slide-thumb:hover");
-      if (sameService && (interactionDelay > 0 || hoveredThumbnail)) {
+      const patchQueuedAt = Number(root.dataset.presenterBoardPatchQueuedAt) || Date.now();
+      const hoverDelay = hoveredThumbnail && Date.now() - patchQueuedAt < 600;
+      if (sameService && (interactionDelay > 0 || hoverDelay)) {
+        root.dataset.presenterBoardPatchQueuedAt = String(patchQueuedAt);
         if (root.dataset.presenterBoardPatchPending !== "true") {
           root.dataset.presenterBoardPatchPending = "true";
           window.setTimeout(() => {
@@ -31170,6 +31174,7 @@ function renderPresenterControlStateUnscoped(serviceId) {
         }
         return;
       }
+      delete root.dataset.presenterBoardPatchQueuedAt;
       const focusedThumb = capturePresenterFocusedThumb(root);
       const focusedInRightSidebar = refs.rightSidebar?.contains(document.activeElement);
       const focusedRoot = focusedInRightSidebar ? refs.rightSidebar : root;
@@ -32197,6 +32202,13 @@ function presenterElementTrailingBlankSlide(slide, index, service = null) {
     hidden_in_presentation: false,
     hidden: false,
     autoTrailingBlank: true,
+    // A transition must never inherit the fullscreen song-title adapter.
+    songTitle: "",
+    songTitleContent: null,
+    fullscreenSongTitle: false,
+    fullscreenSongName: "",
+    sectionHeading: "",
+    subtitle: "",
     syncTimeline: null,
     songTimingKey: "",
     readyServiceName: "",

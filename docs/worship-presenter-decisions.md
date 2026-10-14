@@ -1905,3 +1905,15 @@ PSA146:10 is readable/searchable in SAE. COG GEN1:10, Easy EZK16:1 and GAE
 1CH22:1 were visible in actual output. Long KRV JER33 text fits at44.2px,
 404px text height within the available frame; no production service was saved.
 This refresh does not claim completion of all original-edition proofreading.
+
+
+### Pending hymn titles and transition blanks (2026-10-14)
+
+- Transition blanks clear inherited song-title/fullscreen metadata. The fullscreen
+  title adapter also excludes blank-layout and automatic trailing-blank slides,
+  including old restored snapshots. A pending score must not create two visible
+  copies of its song title. No song or worship records are rewritten.
+- Hover-only board refresh deferral is bounded to 600 ms. Active click interaction
+  still retains the existing 150 ms protection; viewport/focus restoration remains
+  in the existing patch path. Delayed hymn assets can replace the pending board
+  without requiring a pointer move or page reload.
