@@ -70,11 +70,23 @@ def main():
               ensurePortableSourceItems(service,records);
               applyServiceSourceRecord(service.id,0,records[0]);
               let ad=getServiceItems(service.id)[0], regions=parseServiceItemMemo(ad.memo).announcementRegions;
+              if(!serviceSourceItemIsUserDiscretionary(ad,service))throw Error('portable body filtered out');
               if(regions.welcome!=='**환영**'||regions.news!=='1. 첫 소식\n상세'||regions.footer!=='**마침**')throw Error('new announcement regions lost');
               source=buildServiceSourceText(service,{items:[ad]}).replace('첫 소식','바뀐 소식');
               applyServiceSourceRecord(service.id,0,parseServiceSourceText(source)[0]);
               ad=getServiceItems(service.id)[0];regions=parseServiceItemMemo(ad.memo).announcementRegions;
               if(regions.news!=='1. 바뀐 소식\n상세'||regions.welcome!=='**환영**'||!ad.raw_title.includes('바뀐 소식')||ad.raw_title.includes('첫 소식'))throw Error('announcement edit stale');
+              // Exercise the full Apply path, including its candidate filter.
+              const originalTextarea=serviceSourceTextareaForService;
+              const textarea={value:source,dataset:{}};
+              serviceSourceTextareaForService=()=>textarea;
+              try {
+                state.serviceItems[service.id]=[];
+                if(!applyServiceSourceText(service.id,{silent:true,renderAfterApply:false,refreshPresenter:false}))throw Error('full apply failed');
+                const created=getServiceItems(service.id).find(i=>i.label==='QA 광고');
+                if(!created||!parseServiceItemMemo(created.memo).announcementRegions?.news.includes('바뀐 소식'))throw Error('full apply omitted body');
+                if(!buildServiceSourceText(service,{items:getServiceItems(service.id)}).includes('바뀐 소식'))throw Error('full export omitted body');
+              } finally {serviceSourceTextareaForService=originalTextarea;}
               return results;
             }''')
             out=Path(__file__).resolve().parents[1]/'docs/source-input-audit-20261015.json'

@@ -24405,6 +24405,9 @@ function buildServiceSourceText(service, options = {}) {
 function serviceSourceItemIsUserDiscretionary(item = {}, service = null) {
   const memo = parseServiceItemMemo(item.memo);
   if (serviceItemPresentationHidden(item, memo)) return false;
+  // Explicit portable sections remain editable through source, even if the
+  // presenter has no specialized inline editor for their body/plain-text type.
+  if (String(item._worshipSectionKey || item.section_key || "").startsWith("source-")) return true;
   const asset = normalizeServiceAsset(memo.asset);
   if (serviceMemoInputMode(memo, item) === "asset" || asset.name || asset.url) return true;
   return presenterServiceInputHasEditableField(item, service);
