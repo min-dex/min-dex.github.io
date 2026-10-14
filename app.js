@@ -18394,8 +18394,42 @@ function getBibleBookLookups() {
 }
 
 
+// A recognized Bible address searches references only, avoiding lyric/title
+// substring matches (for example John versus 1 John).
+const songScriptureQueryCache = new WeakMap();
+
+function getSongScriptureSearchMatch(song, reference) {
+  const cached = state.searchCache.songFields.get(song) || {};
+  let references = cached.scriptureReferences;
+  if (!references || cached.scriptureBooks !== state.scriptureBooks) {
+    references = cleanList(song.scripture).map((text) => ({ text, reference: parseBibleReference(text) }));
+    state.searchCache.songFields.set(song, { ...cached, scriptureReferences: references, scriptureBooks: state.scriptureBooks });
+  }
+  const queryStart = reference.verse || 1;
+  const queryEnd = reference.verseEnd || reference.verse || Infinity;
+  let bestMatch = null;
+  for (const stored of references) {
+    const candidate = stored.reference;
+    if (!candidate || candidate.book.code !== reference.book.code || candidate.chapter !== reference.chapter) continue;
+    const start = candidate.verse || 1;
+    const end = candidate.verseEnd || candidate.verse || Infinity;
+    if (start > queryEnd || end < queryStart) continue;
+    const exact = start === queryStart && end === queryEnd;
+    const match = { score: exact ? 500 : 450, field: searchField("meta", stored.text, 70, "성구"), phraseMatched: true };
+    if (!bestMatch || match.score > bestMatch.score) bestMatch = match;
+  }
+  return bestMatch;
+}
+
 function getSongSearchMatch(song, tokens = getSearchTokens(state.search), options = {}) {
   if (!tokens.length) return null;
+
+  let query = songScriptureQueryCache.get(tokens);
+  if (!query || query.books !== state.scriptureBooks) {
+    query = { books: state.scriptureBooks, reference: parseBibleReference(tokens.map((token) => token.normalized).join(" ")) };
+    songScriptureQueryCache.set(tokens, query);
+  }
+  if (query.reference) return getSongScriptureSearchMatch(song, query.reference);
 
   const fields = getSongSearchFields(song, options);
   const phrase = getSearchPhrase(tokens);
@@ -18561,13 +18595,13 @@ function normalizeReferenceInput(value) {
       if (!findBibleBookByReferenceName(book)) return match;
       return `${book.trim()} ${chapter}${verse ? `:${verse}${verseEnd ? `-${verseEnd}` : ""}` : ""}`;
     })
-    .replace(/^(.+?)(\d{1,3})\s*장\s*(\d{1,3})(?:\s*-\s*(\d{1,3}))?\s*절?$/u, (match, book, chapter, verse, verseEnd) => {
+    .replace(/^(.+?)(\d{1,3})\s*[장편]\s*(\d{1,3})(?:\s*-\s*(\d{1,3}))?\s*절?$/u, (match, book, chapter, verse, verseEnd) => {
       if (!findBibleBookByReferenceName(book)) return match;
       return `${book.trim()} ${chapter} ${verse}${verseEnd ? `-${verseEnd}` : ""}`;
     })
-    .replace(/(\d{1,3})\s*장\s*(\d{1,3})(?:\s*-\s*(\d{1,3}))?\s*절?/g, (_, chapter, verse, verseEnd) =>
+    .replace(/(\d{1,3})\s*[장편]\s*(\d{1,3})(?:\s*-\s*(\d{1,3}))?\s*절?/g, (_, chapter, verse, verseEnd) =>
       `${chapter} ${verse}${verseEnd ? `-${verseEnd}` : ""}`)
-    .replace(/(\d{1,3})\s*장/g, "$1")
+    .replace(/(\d{1,3})\s*[장편]/g, "$1")
     .replace(/(\d{1,3})\s*절/g, "$1")
     .replace(/\s*:\s*/g, ":")
     .replace(/^([1-3])\s+([A-Za-z가-힣])/, "$1$2")

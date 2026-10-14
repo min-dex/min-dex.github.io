@@ -1411,3 +1411,19 @@ automatically deletes an existing service after calendar changes.
   fallback theme. The full smoke now checks that behavior and separately
   restores the registered asset to verify a decoded image node with no CSS
   image reload. Checks inspect the active output layer.
+
+### 2026-10-14 Hymn scripture reference search
+- Recognized Bible addresses search song scripture metadata by canonical book and
+  chapter, with inclusive verse-range overlap. Chapter-only queries match any
+  stored verse in the chapter; exact verse/range matches rank first.
+- Reuse the Bible alias parser for abbreviated/full Korean and English names,
+  compact addresses, and written chapter/verse notation, including Psalms 편.
+  Keep John separate from 1 John and exclude unrelated title/lyric substring hits
+  for recognized addresses. Ordinary title, lyrics and hymn-number search remain.
+- Cache parsed queries and stored references; existing search-cache invalidation
+  and Bible-book replacement invalidate parsed references without extra reads.
+- Chromium/WebKit regressions cover abbreviations, written notation, range edges,
+  wrong books/chapters, cache updates, and existing global/cold/loading searches.
+- Read-only live-data validation: all 639 referenced hymns passed 3,195 full,
+  abbreviated, written, interior-verse and overlapping-range queries per browser,
+  plus 10 actual search-input cases. The six Amen hymns retain empty references.
