@@ -298,3 +298,13 @@ and 5px textarea side padding to avoid nested panel gutters.
   child animations alive during overlay dismissal so a fast load does not snap
   them to their end positions. Readiness still controls dismissal without delay;
   reduced-motion and presenter-output exclusions remain in effect.
+
+## Tab-owned headings
+
+- All Worship, Setlist Archive, Calendar, References, Manuals and Bulletin use
+  their tab title instead of repeating a large generic body heading. Preserve
+  contextual search headings, selected content titles, dates and editing fields.
+- Keep setlist view controls/count/refresh on one wrapping toolbar. Keep calendar
+  year context/view tabs and reference summary/create actions, with compact header
+  padding. Manuals start with their specific introduction without extra top padding.
+  Bulletin begins with its service selector; save, print and history remain intact.

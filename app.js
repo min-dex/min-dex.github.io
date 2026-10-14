@@ -5381,10 +5381,7 @@ function renderCalendarView() {
   refs.detailPane.innerHTML = `
     <div class="cal-view">
       <div class="cal-header">
-        <div class="utility-title-block">
-          <h2 class="cal-title">교회력</h2>
-          <span class="cal-subtitle">${escapeHtml(churchYearSeriesSummary(calendarRows))}</span>
-        </div>
+        <span class="cal-subtitle">${escapeHtml(churchYearSeriesSummary(calendarRows))}</span>
         ${renderCalendarDetailTabs()}
       </div>
       <div class="cal-table-wrap">
@@ -15919,7 +15916,6 @@ function renderReferencesDetail() {
     <div class="editor-shell references-shell">
       <header class="editor-head">
         <div class="editor-title">
-          <h2>참고자료</h2>
           <p class="utility-summary">${escapeHtml(referenceDetailSummary())}</p>
         </div>
         <div class="head-actions">
@@ -15984,7 +15980,6 @@ function renderManualsDetail() {
       <header class="manuals-head">
         <div>
           <span>${escapeHtml(active.eyebrow)}</span>
-          <h2>예배 매뉴얼</h2>
           ${active.summary ? `<p>${escapeHtml(active.summary)}</p>` : ""}
         </div>
       </header>
@@ -23378,8 +23373,10 @@ function renderServiceSetlistArchiveDetail() {
   refs.detailPane.innerHTML = `
     <div class="service-date-list service-date-list--setlists">
       <div class="service-section-head">
-        <div class="service-section-title-block">
-          <h2 class="service-date-list-title">${escapeHtml(SERVICE_SETLIST_ARCHIVE_PANEL_TITLE)}</h2>
+        <div class="svc-setlist-view-switch" role="group" aria-label="콘티 보기 방식">
+          ${[["date", "기간별"], ["service", "예배별"]].map(([view, label]) => `
+            <button type="button" data-service-setlist-view="${view}" aria-pressed="${state.worshipSetlistArchiveView === view}">${label}</button>
+          `).join("")}
         </div>
         <div class="service-section-head-actions">
           <span class="service-search-count">${archive.loading ? "불러오는 중" : `${entries.filter(entry => entry.candidates.length).length}개 콘티`}</span>
@@ -23389,11 +23386,6 @@ function renderServiceSetlistArchiveDetail() {
         </div>
       </div>
       ${archive.error ? `<p class="service-no-results">${escapeHtml(archive.error)}</p>` : ""}
-      <div class="svc-setlist-view-switch" role="group" aria-label="콘티 보기 방식">
-        ${[["date", "기간별"], ["service", "예배별"]].map(([view, label]) => `
-          <button type="button" data-service-setlist-view="${view}" aria-pressed="${state.worshipSetlistArchiveView === view}">${label}</button>
-        `).join("")}
-      </div>
       ${renderWorshipSetlistArchiveNavigation(entries)}
       ${archive.loading && !archive.loaded ? renderLoadingDetail() : renderWorshipSetlistArchiveGroups(entries)}
     </div>`;
@@ -23892,10 +23884,10 @@ function renderServiceListDetail() {
   refs.detailPane.innerHTML = `
     <div class="service-date-list service-date-list--all">
       <div class="service-section-head">
-        <div class="service-section-title-block">
+        ${q ? `<div class="service-section-title-block">
           <h2 class="service-date-list-title">${escapeHtml(title)}</h2>
-          ${q ? `<p class="service-date-list-helper">${escapeHtml(`"${state.search.trim()}" 검색 결과`)}</p>` : ""}
-        </div>
+          <p class="service-date-list-helper">${escapeHtml(`"${state.search.trim()}" 검색 결과`)}</p>
+        </div>` : ""}
         <div class="service-section-head-actions">
           <span class="service-search-count">${count}${q ? "개 결과" : "개 예배"}</span>
         </div>

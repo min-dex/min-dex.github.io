@@ -1005,8 +1005,8 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .manuals-shell {
   display: grid;
   width: min(100%, 1180px);
-  gap: 18px;
-  padding: 8px 0 44px;
+  gap: 15px;
+  padding: 0 0 25px;
 }
 .sr-only {
   position: absolute;
@@ -1035,13 +1035,11 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   font-weight: 700;
   line-height: 16px;
 }
-.manuals-head h2,
 .manual-guide h3,
 .manual-guide h4 {
   margin: 0;
   color: var(--ink);
 }
-.manuals-head h2 { font-size: var(--page-title-size); font-weight: var(--page-title-weight); line-height: 1.2; }
 .manuals-head p {
   margin: 4px 0 0;
   color: var(--ink-3);
@@ -1784,18 +1782,17 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   gap: var(--s3);
 }
 .references-shell .editor-head {
-  grid-template-columns: minmax(0, 1fr) auto;
-  min-height: 44px;
-  align-items: flex-end;
+  display: flex;
+  flex-wrap: wrap;
+  min-height: 35px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   border-bottom: 1px solid color-mix(in srgb, var(--line) 44%, transparent);
-  padding-bottom: 12px;
+  padding-bottom: 10px;
 }
 .references-shell .editor-title {
   gap: 3px;
-}
-.references-shell .editor-title h2 {
-  font-size: var(--ui-page-title-size);
-  line-height: 1.2;
 }
 .references-shell .utility-summary {
   min-height: 0;
@@ -1822,9 +1819,6 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   }
   .reference-card-actions {
     justify-self: end;
-  }
-  .references-shell .editor-head {
-    grid-template-columns: minmax(0, 1fr);
   }
   .references-shell .head-actions {
     flex-wrap: wrap;
@@ -3193,6 +3187,16 @@ body[data-module="presenter"] .detail-pane {
 }
 .service-date-list--setlists .service-section-head {
   margin-bottom: 0;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.service-date-list--setlists > .service-section-head .svc-setlist-view-switch {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.service-date-list--all > .service-section-head:has(> .service-section-head-actions:only-child) {
+  min-height: 0;
 }
 .svc-setlist-month-groups {
   display: flex;

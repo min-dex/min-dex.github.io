@@ -25,19 +25,13 @@ body[data-theme="dark"] .cal-view {
 .cal-header {
   flex-shrink: 0;
   display: flex;
-  min-height: 44px;
-  align-items: flex-end;
+  min-height: 35px;
+  align-items: center;
   justify-content: space-between;
   gap: var(--s3);
   border-bottom: 1px solid color-mix(in srgb, var(--cal-line) 72%, transparent);
-  padding: 0 0 12px;
+  padding: 0 0 10px;
 }
-.utility-title-block {
-  display: grid;
-  min-width: 0;
-  gap: 3px;
-}
-.cal-title { margin: 0; color: var(--ink); font-size: var(--ui-page-title-size); font-weight: var(--page-title-weight); letter-spacing: 0; line-height: 1.2; }
 .cal-subtitle { display: block; color: var(--cal-soft); font-size: var(--ui-meta-size); font-weight: var(--ui-meta-weight); line-height: 16px; }
 .cal-tabs {
   display: inline-flex;
