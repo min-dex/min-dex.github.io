@@ -1159,5 +1159,8 @@
       }
     }
   },
-  "chapters": 976
+  "chapters": 976,
+  "chapterOverrides": {
+    "f98f4683-e3d5-4829-82aa-8e2e8b8d2adf:GEN:1": "cog-genesis-one-20261014"
+  }
 }

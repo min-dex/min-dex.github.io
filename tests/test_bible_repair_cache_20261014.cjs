@@ -25,3 +25,5 @@ const p=vm.createContext({state:{bibleTranslations:[],bibleVerseCache:new Map(),
 vm.runInContext(['readPersistentBibleChapterCache','writePersistentBibleChapterCache'].map(functionSource).join('\n'),p);
 assert.equal(p.readPersistentBibleChapterCache(...sample)[0].text,'PRE_REPAIR_CACHE_SENTINEL');vm.runInContext(source,p);assert.equal(p.readPersistentBibleChapterCache(...sample),null);p.writePersistentBibleChapterCache(...sample,[{text:'CORRECTED_LIVE_BODY'}]);assert.equal(p.readPersistentBibleChapterCache(...sample)[0].text,'CORRECTED_LIVE_BODY');assert.equal(disk.get(oldKey),JSON.stringify(stale));
 console.log('PASS actual persistent cache I/O: warm old body bypassed, fresh key populated, original cache retained without translation metadata loaded');
+
+assert.equal(c.persistentBibleChapterCacheKey('f98f4683-e3d5-4829-82aa-8e2e8b8d2adf','GEN',1),'f98f4683-e3d5-4829-82aa-8e2e8b8d2adf:GEN:1.cog-genesis-one-20261014');
