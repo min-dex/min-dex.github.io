@@ -99,3 +99,28 @@ canonical continuation was dropped in the eligible chapters; final tails are emp
 Full originals and source bytes remain private. No COGNEW wording substituted,
 no Bible/worship rows deleted. Cache renewal retains all earlier verified scopes
 and COG GEN1 override. Overall twelve-translation audit is incomplete.
+
+
+## Canonical KJV baseline replacement · 2026-10-15
+
+User explicitly authorized retiring the uncertain XML baseline when a trustworthy
+identified edition is acquired. This supersedes the prior same-printing hold for
+KJV replacement only; differences are not all classified as transcription errors.
+Pinned CrossWire KJV3.1 repository revision d490be7e34762deb2c76cb2c1306d4808e27890d
+(1769 Oxford-derived curated electronic edition) supplies all66 books /1189
+chapters /31102 verse bodies, plus138 canonical Psalm/acrostic headings.
+Study notes/Strong's/morphology stay outside verse bodies; exact source XML and
+config are archived. This is not a guaranteed facsimile of an original printing.
+
+Production transaction preserves ALL31102 original rows and the complete
+translation record privately. Independent public-API read-back matches all31102
+expected rows and edition metadata exactly. Stable UUIDs/addresses and personal
+annotations remain unchanged. Biblia installs identical text and source metadata;
+the prior XML-derived package and all earlier receipts remain recoverable.
+
+Local PostgreSQL18.4 verified full backup, transaction rollback, source drift,
+replay, future-edit protection and client backup ACL. Biblia37 Python (system3.9
+gzip environment) /46 Node tests pass. The6015-check cache release refreshes
+all1189 KJV chapters and retains earlier repair scopes. Deployment and live UI
+verification are recorded separately in docs/bible-canonical-sources-20261015.json.
+Other translations remain separately reviewed; no all-editions error-free claim.
