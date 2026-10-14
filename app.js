@@ -11677,12 +11677,15 @@ async function createPraiseSongFromServiceItem(index) {
   const service = state.services.find((svc) => svc.id === serviceId);
   const items = getServiceItems(serviceId);
   const item = items[index];
-  if (!service || !item) return;
-  if (presenterPreparationSongContentHasConnection(item.raw_title)) {
+  if (!service || !item || item.song_id) return;
+  const inputTitle = String(item.raw_title || "").trim()
+    || String(window.prompt("새 곡 제목을 입력해 주세요.", "") || "").trim();
+  if (!inputTitle) return;
+  if (presenterPreparationSongContentHasConnection(inputTitle)) {
     showToast("연결곡은 찬양 DB에 새 곡으로 만들지 않고 예배 항목에만 둡니다.", "info");
     return;
   }
-  const existing = await resolveExistingPraiseSongForServiceInputAfterCatalogLoad(item.raw_title, item, service);
+  const existing = await resolveExistingPraiseSongForServiceInputAfterCatalogLoad(inputTitle, item, service);
   if (existing) {
     linkServiceItemToPraiseSong(item, existing, service, {
       forceLyricsMode: isSpecialSongServiceItem(item)
@@ -11697,7 +11700,7 @@ async function createPraiseSongFromServiceItem(index) {
   }
 
   if (!requireClient()) return;
-  const title = stripHymnNo(presenterPreparationSongContent(item.raw_title)).title.trim();
+  const title = stripHymnNo(presenterPreparationSongContent(inputTitle)).title.trim();
   if (!title) return;
 
   const praiseType = ["children", "nursery"].includes(service?.type_id) ? "children" : "ccm";
@@ -11738,6 +11741,7 @@ async function createPraiseSongFromServiceItem(index) {
     }
     state.songs = [song, ...state.songs].sort(sortSongs);
     clearSearchCaches();
+    item.raw_title = title;
     item.song_id = song.id;
     item.version_id = getDefaultVersionId(song);
     item.song_version_id = item.version_id;
@@ -25724,15 +25728,10 @@ function renderServicePraiseLinkControl(item, index) {
   if (item?.song_id) {
     return `<button class="svc-item-link svc-item-link--linked" type="button" data-service-db-song="${escapeAttr(item.song_id)}" aria-label="찬양 DB 새 탭에서 열기" title="찬양 DB 새 탭에서 열기">DB</button>`;
   }
-  // A manually entered special song needs no database badge. It remains fully
-  // editable and presentable through its worship item content.
-  if (isOneOffSpecialPraiseItem(item, selectedServiceForEditor())) return "";
-  if (serviceItemRequiresSongSelection(item, selectedServiceForEditor())) return "";
-  const title = String(item?.raw_title || "").trim();
-  if (!title) return "";
+  // An unlinked praise slot must offer creation even before a title is entered.
   return `
     <button class="svc-song-create" type="button" data-service-song-create="${index}">
-      <span>추가</span>
+      <span>새 곡 추가</span>
     </button>`;
 }
 

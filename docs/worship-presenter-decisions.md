@@ -1824,3 +1824,8 @@ on frame changes, font readiness and resize. No scripture wording is embedded in
 the display helper. PostgreSQL rollback/replay guards, 90 corpus-flow assertions,
 cache/fitting fixtures and actual local reading-output verification passed.
 The user explicitly approved publication of this display/cache update.
+
+### 2026-10-14 Unlinked praise creation action
+
+- Unlinked praise/special-song inputs show `새 곡 추가`, including empty strict DB-selection slots. Linked songs retain the existing DB-open button; scripture and non-song rows are unchanged.
+- Empty slots ask for a title before creation; cancel/blank input writes nothing. Reuse existing exact-match song resolution and medley-title rejection. A newly created song receives the entered title; no sibling slots or medley links are normalized or rewritten by this UI change.
