@@ -220,10 +220,10 @@
   --presenter-output-fg: #f8f8f3;
   --presenter-output-muted: rgba(248, 248, 243, .66);
 }
-/* Original children PPTX lyrics: #594841 (Elem_2026-01-04, slides 6–7;
-   Elem_2026-08-09, slides 6–7). Scripture has its own dark reading frame. */
+/* User-approved darker autumn lyric color; original PPTX used #594841.
+   Scripture has its own dark reading frame. */
 .presenter-output-root.no-chromakey.has-background[data-output-theme="children"][style*="26-C5.png"] .presenter-slide--lyrics {
-  --presenter-output-fg: #594841;
+  --presenter-output-fg: #34271f;
 }
 
 .presenter-output-root[data-output-theme="youth"],
