@@ -8842,10 +8842,10 @@ function handleDetailInput(event) {
       }
       return;
     }
+    // Native selects emit input followed by change. Commit only in change;
+    // an input-time rerender/save duplicates writes and can replace the control.
+    if (serviceField.matches("select")) return;
     updateServiceItemField(serviceField);
-    if (serviceField.matches("select")) {
-      saveCommittedServiceItem(serviceField.dataset.serviceItemIndex, serviceField.dataset.serviceId || state.selectedServiceId, serviceItemSelectSaveOptions(serviceField));
-    }
     return;
   }
 
@@ -25136,7 +25136,7 @@ function renderServiceItemGroups(items) {
                 type="text"
                 data-service-item-field="raw_title"
                 data-service-item-index="${origIndex}"
-                value="${escapeAttr(item.raw_title || "")}"
+                value="${escapeAttr(subModel.titleValueOverride !== undefined ? subModel.titleValueOverride : subModel.titleValue || item.raw_title || "")}"
                 placeholder="${escapeAttr(subModel.titlePlaceholder)}"
                 onkeydown="handleDetailKeydown(event)"
                 ${subModel.song ? `autocomplete="off" spellcheck="false"` : ""}

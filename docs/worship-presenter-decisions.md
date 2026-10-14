@@ -1652,3 +1652,13 @@ automatically deletes an existing service after calendar changes.
 - `smoke_praise_mode_switch.py` reproduces the old score-to-lyrics version reset
   and covers compatible/incompatible versions, DB row roundtrip, medley retention,
   missing/partial catalog and manual unlink in Chromium/WebKit without DB writes.
+
+- Native service-item selects commit on `change` only: their preceding `input`
+  event must neither rebuild the control nor issue a duplicate save. Text-input
+  preview/commit rules remain unchanged.
+- Grouped preparation rows display the linked song title from the editor model,
+  matching individual rows; empty canonical raw_title no longer looks unlinked.
+- `smoke_praise_mode_ui.py` clicks real controls in both engines and verifies one
+  save per mode change, stable version/title, and non-overlapping contained
+  controls at 1440/1024/768 px. A production-page run uses isolated browser state;
+  persistence verification uses only a uniquely named disposable test service.
