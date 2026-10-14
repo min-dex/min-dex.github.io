@@ -1876,3 +1876,7 @@ The user explicitly approved publication of this display/cache update.
   a service enters its worship screen; Back restores the archive search, view,
   month and scroll. Existing legacy archive links remain readable.
 - This is navigation only: no record migration, backfill or worship writes.
+
+- Direct archive service links open the presenter working surface without an
+  intermediate service-route history entry. Late song-catalog completion also
+  refreshes direct `setlists` links, independent of a legacy panel selection.

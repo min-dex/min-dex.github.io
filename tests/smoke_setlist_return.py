@@ -52,7 +52,7 @@ def main():
                       state.worshipSetlistArchiveMonth='09';
                       return top;
                     }''', view)
-                    assert page.evaluate("state.module")=="service"
+                    page.wait_for_function("state.module==='presenter'")
                     assert page.locator('[data-service-setlist-archive]').count()==0
                     page.go_back()
                     page.wait_for_function("!state.applyingBrowserHistory && !state.selectedServiceId && !!document.querySelector('.svc-setlist-entry')")

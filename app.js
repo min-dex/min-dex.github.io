@@ -4037,8 +4037,7 @@ async function loadWorshipSetlistSongCatalog({ force = false } = {}) {
     catalog.status = "failed";
     console.warn("Could not load setlist song links.", error);
   }
-  if (state.worshipSetlistSongCatalog === catalog && isServiceDataModule()
-    && state.selectedServiceTypeId === SERVICE_SETLIST_ARCHIVE_PANEL_ID) renderCurrentServiceModuleDetail();
+  if (state.worshipSetlistSongCatalog === catalog && isSetlistArchiveView()) renderServiceSetlistArchiveDetail();
 }
 
 async function fetchWorshipSetlistServices() {
@@ -33032,8 +33031,10 @@ function selectService(id) {
   if (serviceNavigationBlocked(id)) return;
   if (id !== state.selectedServiceId && !confirmDiscardServiceChanges()) return;
   rememberSetlistArchiveHistory();
-  const fromOperationsArchive = state.module === "setlists";
-  if (fromOperationsArchive) state.module = "service";
+  if (state.module === "setlists") {
+    void openServiceInPresenter(id);
+    return;
+  }
   markWorshipServiceExplicitlyRequested(id);
   if (state.module === "presenter") state.presenter.viewServiceId = id;
   state.selectedServiceId = id;
@@ -33041,8 +33042,8 @@ function selectService(id) {
   const service = state.services.find((svc) => svc.id === id);
   if (service) state.selectedServiceTypeId = service.type_id;
   if (state.loadedWorshipServiceIds.has(id)) captureCleanFingerprint("service");
-  if (fromOperationsArchive) { persistUiState(); render(); }
-  else { renderCurrentServiceModuleDetail(); renderServiceList(); }
+  renderCurrentServiceModuleDetail();
+  renderServiceList();
   syncBrowserHistory();
   if (id) loadServiceItems(id);
 }
