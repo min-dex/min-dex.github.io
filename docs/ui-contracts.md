@@ -333,8 +333,8 @@ and 5px textarea side padding to avoid nested panel gutters.
 
 ## Startup branding and recovery · 2026-10-15
 
-- Keep the centered cross/MINDEX identity. The single reveal is 420ms with a
-  40ms wordmark offset and 4px rise; exit opacity takes 220ms. When initial data
+- Keep the centered cross/MINDEX identity. The single reveal is 460ms with a
+  40ms wordmark offset (500ms total) and 4px rise; exit opacity takes 220ms. When initial data
   finishes early, complete only the running reveal before exposing the shell.
   Reduced-motion users have no reveal or artificial minimum wait.
 - Initial auth/data readiness still owns dismissal. Never reopen startup
