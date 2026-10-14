@@ -62,3 +62,18 @@ revoked. Source bytes, per-chapter hashes and decisions are preserved.
 The corresponding cache release covers643 SAE chapters, including prior repairs.
 Local3181 cache assertions and existing output fitting test pass. Web deployment
 and live UI checks remain pending. Overall12-translation audit remains incomplete.
+
+
+## KJV independently confirmed damage batch ·2026-10-14
+
+Pinned CrossWire1769 official OSIS commitd490be7e provides a second complete
+31102-row comparison. Six unambiguous damages agree with both curated sources:
+EXO23:17, DEU19:14, JON1:15/4:11, GAL2:20 and HEB12:24. Existing American
+spellings and other punctuation remain; do not silently substitute another KJV
+printing. Official references can disagree and contain errors themselves.
+
+Guarded SQL passed exact backup, rollback, replay, drift and ACL tests. Production
+full-row read-back matches all6 corrected rows; Biblia applied identical updates
+with a reconstructible original package.31 Python tests pass. The overall KJV
+printing/orthographic comparison remains incomplete. New cache release retains
+all prior KRV, SAE, GAE, COG and Easy scopes; only the six new KJV chapters join.

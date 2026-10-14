@@ -3,7 +3,7 @@ const source=fs.readFileSync(require.resolve('../mindex.scripture-repair-display
 const scope=JSON.parse(fs.readFileSync(require.resolve('../docs/bible-cache-repair-scope-20261014.json'),'utf8'));
 const oldPersistent=new Map([['old','retained']]);
 const affected=Object.entries(scope.repairs).flatMap(([id,r])=>Object.entries(r.chapters).flatMap(([bk,chs])=>chs.map(ch=>[id,bk,ch])));
-assert.equal(affected.length,1587);
+assert.equal(affected.length,1593);
 const state={bibleTranslations:[{id:'krv',name:'개역한글'}],bibleVerseCache:new Map(),module:'scripture',selectedBibleTranslationId:affected[0][0],selectedBookCode:affected[0][1],selectedBibleChapter:affected[0][2],bibleBookVerses:[{text:'old chapter'}]};
 for(const a of affected)state.bibleVerseCache.set(a.join(':'),[{text:'stale'}]);state.bibleVerseCache.set('unrelated:GEN:1',[{text:'keep'}]);
 let reloads=0;const c=vm.createContext({state,persistentBibleChapterCacheKey:(...a)=>a.join(':'),loadBibleBookVerses:()=>{reloads++;},document:{body:{},fonts:null,querySelectorAll:()=>[]},window:{addEventListener(){}},MutationObserver:class{observe(){}},requestAnimationFrame:f=>f()});

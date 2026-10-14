@@ -1925,3 +1925,11 @@ Preserve previous repair scopes and COG GEN1 override. Bump only the independent
 verified SAE scopes after764-row production confirmation; old persistent caches
 remain recoverable. User authorized continuing original-edition repairs and
 operational cache renewal. Local3181 assertions and bounded fitting pass.
+
+
+### KJV confirmed damage cache renewal ·2026-10-14
+
+Add six independently verified KJV chapters after exact full-row production
+confirmation. Preserve SAE643 chapters and earlier repairs/COG GEN1 override.
+No spelling modernization or worship records change. Backup and provenance stay
+private; public release contains address scopes only.
