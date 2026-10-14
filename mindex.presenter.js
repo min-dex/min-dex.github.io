@@ -5349,10 +5349,14 @@ function fitPresenterAnnouncementRegions(host) {
     if(!box.clientWidth||!box.clientHeight||!Number.isFinite(base))return;
     const fits=()=>{
       const bounds=box.getBoundingClientRect();
+      const heading=box.matches(".presenter-announcement-items")
+        ? box.parentElement.querySelector(".presenter-liturgical-body-heading")?.getBoundingClientRect()
+        : null;
+      const top=heading?Math.max(bounds.top,heading.bottom):bounds.top;
       return box.scrollWidth<=box.clientWidth+1&&box.scrollHeight<=box.clientHeight+1
         && [...box.children].every(item=>{
           const rect=item.getBoundingClientRect();
-          return rect.top>=bounds.top-1&&rect.bottom<=bounds.bottom+1;
+          return rect.top>=top-1&&rect.bottom<=bounds.bottom+1;
         });
     };
     if(fits())return;

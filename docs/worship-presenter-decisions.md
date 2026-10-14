@@ -1967,9 +1967,10 @@ old persistent entries recoverable. Public release carries addresses only.
 - Lower-bar announcements share the existing complete-line lyric fitter and its
   typography-aware cache. Their authored line/chunk order, numbering, bold and
   smaller parenthetical text remain unchanged.
-- Ordinary full-screen lists use a bounded area below the fixed heading
-  (21cqh top, 10cqh bottom), sharing the existing region fitter. Check centered
-  child bounds as well as scroll size, so overflow above the box is detected.
+- Preserve the existing centered ordinary-list layout; do not introduce new
+  announcement forms or dedicated insets. The shared region fitter checks child
+  bounds and the existing heading as well as scroll size, detecting overflow
+  above the box without relocating the list.
 - Fit affects rendered font size only, never saved copy or pagination. Output
   and previews use the same fitting path. Validate Korean/English, long words,
   dense lists, both browser engines, and existing lyrics/aside behavior.

@@ -1504,12 +1504,7 @@ span.presenter-announcement-paren {
   text-shadow: none;
 }
 
-/* Ordinary announcement lists fit below the fixed heading, above the safe edge. */
-.presenter-liturgical-body > .presenter-announcement-items {
-  position: absolute;
-  inset: 21cqh 0 10cqh;
-  height: auto;
-}
+/* Keep item heights measurable while fitting the existing centered list. */
 .presenter-liturgical-body > .presenter-announcement-items > .presenter-announcement-item {
   flex-shrink: 0;
 }
