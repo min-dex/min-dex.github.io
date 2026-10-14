@@ -17,6 +17,9 @@ let serviceDataLoadPromise = null;
 let activeServiceSavePromise = null;
 let calendarLoadPromise = null;
 let scriptureBookLoadPromise = null;
+let scriptureLoadPromise = null;
+let referenceLinksLoadPromise = null;
+const bibleBookVerseLoadPromises = new Map();
 let bibleTranslationLoadPromise = null;
 const serviceItemLoadPromises = new Map();
 const presenterServiceHydrationPromises = new Map();
@@ -3441,6 +3444,16 @@ function chunkArray(items = [], size = 80) {
 }
 
 async function loadScriptures({ silent = false } = {}) {
+  if (scriptureLoadPromise) return scriptureLoadPromise;
+  scriptureLoadPromise = loadScripturesOnce({ silent });
+  try {
+    return await scriptureLoadPromise;
+  } finally {
+    scriptureLoadPromise = null;
+  }
+}
+
+async function loadScripturesOnce({ silent = false } = {}) {
   if (!requireClient({ silent })) return;
 
   beginDataLoading("scripture");
@@ -5044,6 +5057,16 @@ function worshipPresenterSlideType(slideType, elementType, layout) {
 }
 
 async function loadReferenceLinks({ silent = false } = {}) {
+  if (referenceLinksLoadPromise) return referenceLinksLoadPromise;
+  referenceLinksLoadPromise = loadReferenceLinksOnce({ silent });
+  try {
+    return await referenceLinksLoadPromise;
+  } finally {
+    referenceLinksLoadPromise = null;
+  }
+}
+
+async function loadReferenceLinksOnce({ silent = false } = {}) {
   if (!requireClient({ silent })) {
     state.referenceLinks = [];
     state.referenceError = "연결 없음";
@@ -5638,38 +5661,47 @@ async function loadBibleBookVerses({ silent = false } = {}) {
   state.bibleReaderLoading = true;
   if (state.module === "scripture") render();
 
-  try {
-    const { data, error } = await state.client
-      .from("mindex_bible_verses")
-      .select("book_code,chapter,verse,verse_end,text,section_title")
-      .eq("is_active", true)
-      .eq("translation_id", selectedTranslationId)
-      .eq("book_code", selectedBookCode)
-      .eq("chapter", selectedChapter)
-      .order("verse", { ascending: true });
+  if (bibleBookVerseLoadPromises.has(cacheKey)) return bibleBookVerseLoadPromises.get(cacheKey);
+  const request = (async () => {
+    try {
+      const { data, error } = await state.client
+        .from("mindex_bible_verses")
+        .select("book_code,chapter,verse,verse_end,text,section_title")
+        .eq("is_active", true)
+        .eq("translation_id", selectedTranslationId)
+        .eq("book_code", selectedBookCode)
+        .eq("chapter", selectedChapter)
+        .order("verse", { ascending: true });
 
-    if (error) throw error;
-    const rows = inferBibleVerseEndRanges((data || []).map(normalizeServerBibleVerse));
-    state.bibleVerseCache.set(cacheKey, rows);
-    writePersistentBibleChapterCache(selectedTranslationId, selectedBookCode, selectedChapter, rows);
-    if (cacheKey !== bibleVerseCacheKey(state.selectedBibleTranslationId, state.selectedBookCode, state.selectedBibleChapter)) {
-      return;
+      if (error) throw error;
+      const rows = inferBibleVerseEndRanges((data || []).map(normalizeServerBibleVerse));
+      state.bibleVerseCache.set(cacheKey, rows);
+      writePersistentBibleChapterCache(selectedTranslationId, selectedBookCode, selectedChapter, rows);
+      if (cacheKey !== bibleVerseCacheKey(state.selectedBibleTranslationId, state.selectedBookCode, state.selectedBibleChapter)) {
+        return;
+      }
+      state.bibleReaderError = "";
+      state.bibleBookVerses = rows;
+      persistUiState();
+    } catch (error) {
+      if (cacheKey !== bibleVerseCacheKey(state.selectedBibleTranslationId, state.selectedBookCode, state.selectedBibleChapter)) {
+        return;
+      }
+      state.bibleBookVerses = [];
+      state.bibleReaderError = "Bible verses could not be loaded.";
+      if (!silent && state.module === "scripture") showToast(error.message || state.bibleReaderError, "error");
+    } finally {
+      if (cacheKey === bibleVerseCacheKey(state.selectedBibleTranslationId, state.selectedBookCode, state.selectedBibleChapter)) {
+        state.bibleReaderLoading = false;
+        if (state.module === "scripture") render();
+      }
     }
-    state.bibleReaderError = "";
-    state.bibleBookVerses = rows;
-    persistUiState();
-  } catch (error) {
-    if (cacheKey !== bibleVerseCacheKey(state.selectedBibleTranslationId, state.selectedBookCode, state.selectedBibleChapter)) {
-      return;
-    }
-    state.bibleBookVerses = [];
-    state.bibleReaderError = "Bible verses could not be loaded.";
-    if (!silent && state.module === "scripture") showToast(error.message || state.bibleReaderError, "error");
+  })();
+  bibleBookVerseLoadPromises.set(cacheKey, request);
+  try {
+    return await request;
   } finally {
-    if (cacheKey === bibleVerseCacheKey(state.selectedBibleTranslationId, state.selectedBookCode, state.selectedBibleChapter)) {
-      state.bibleReaderLoading = false;
-      if (state.module === "scripture") render();
-    }
+    bibleBookVerseLoadPromises.delete(cacheKey);
   }
 }
 

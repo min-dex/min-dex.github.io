@@ -256,3 +256,11 @@ and 5px textarea side padding to avoid nested panel gutters.
   no visible rows. Tab reentry reuses that result; explicit refresh still reads
   the database, and a new client connection resets the completion marker.
 - Regression: `tests/smoke_scripture_loading.py` (Chromium and WebKit).
+
+- Concurrent first entries share the in-flight saved-scripture/reference-list
+  request. Explicit refresh after completion still performs a new read; errors
+  release the request so retry remains available.
+- Bible chapter reads share an in-flight request per translation/book/chapter.
+  A quick A → B → A return waits for the original A read, and only the currently
+  selected chapter owns reader text, errors, and loading completion.
+- Concurrent-entry regression: `tests/smoke_loading_reentry.py`.
