@@ -1466,7 +1466,7 @@ automatically deletes an existing service after calendar changes.
   Partial upload cleanup and uncertain atomic-save retention apply to all parts,
   the manifest and thumbnails together.
 - Persist an existing `imported_deck` asset with `pptx.url`, and per-thumbnail
-  `pptx: {page, clicks, hidden}`. The source URL is immutable per upload. These
+  `pptx: {page, clicks, hidden, mediaCount?}`. The source URL is immutable per upload. These
   fields survive canonical config/source/document normalization. Import targets
   one element via `saveServiceItemMutation` and its atomic revision path.
   Concurrent edits abort replacement. Pre-save upload failures remove only new
@@ -1483,9 +1483,9 @@ automatically deletes an existing service after calendar changes.
 - Explicit OOXML automatic-start entrance groups run on entry without an extra
   click. Zero-duration appearance stays instantaneous, including delayed items
   within the click batch. Basic effects use web-ppt 0.4.5 plus the recorded fixes;
-  unsupported media play/pause is not misrendered as an emphasis effect.
+  media play/pause commands are timed separately from visual effects.
   Automatic page advancement and hyperlinks do not bypass Mindex controls.
-- This is a subset renderer, not PowerPoint parity. Embedded audio/video,
+- This is a subset renderer, not PowerPoint parity. Unsupported media codecs,
   complex effects, original slide transitions and exact font/layout fidelity
   are not guaranteed. The controller shows a **PPT 정지 미리보기** with consumed
   click count; the output alone plays effects. Always preview a real deck before
@@ -1538,3 +1538,46 @@ automatically deletes an existing service after calendar changes.
   each issued one atomic save (previously one or two), with read-back confirmation
   around 0.55–0.70 s in this run. Fresh-context song/version/element IDs matched.
   These are sampled timings, not a latency guarantee across networks/devices.
+
+## PPT embedded video and audio (2026-10-14)
+
+- Embedded sources use their existing package blob URLs. Only the live output
+  instantiates native media players; thumbnails/controller previews remain
+  silent images. SVG geometry retains the media's original position and size.
+  Prepare decoded first frames before the output swap; do not substitute badges
+  or silently advance when a file fails to decode. No media is separately
+  uploaded, recompressed or removed from the original PPT.
+- Main-sequence `playFrom(seconds)`, `play`, `pause`, `togglePause` and `stop`
+  commands participate in Next click grouping and explicit automatic starts.
+  Media commands never become fade/emphasis effects. Object-click interactive
+  sequences do not become extra Next clicks. Node volume, mute and indefinite
+  repeat are honored. Browser-supported codecs are required (tested MP4 and
+  WAV); original interactive object triggers, trimming, finite repeat counts,
+  slide-spanning background music and media-end dependency timing are not yet
+  PowerPoint-compatible. See Microsoft's [OOXML Command contract](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.presentation.command).
+- The live PPT preview offers **PPT 영상·음원 재생 / 일시정지** when the current
+  page contains media. A transient, uniquely identified command travels inside
+  `pptxProgress`, scoped to its source/page key. Duplicate payloads preserve
+  playback position. Manual play resumes all media on that page; pause cancels
+  pending media timers. It does not save operational data.
+- Leaving the page, live scripture takeover, blackout and output teardown pause
+  media and cancel delayed starts immediately, before any visual crossfade.
+  Destroy releases player sources before parsed-deck eviction. Rewind restores
+  visual effect state with media paused, rather than replaying consumed sounds.
+- Playback rejection is reported to the controller. If a browser blocks sound,
+  Space in the output retries directly within the key gesture, consuming that
+  key without advancing the slide. Do not disguise blocked audio as successful
+  muted playback. See [play() and autoplay restrictions](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/play).
+- Previously saved PPTs require no replacement or DB backfill: output parsing
+  supplies current page click/media counts through the existing heartbeat; the
+  controller updates only its runtime slide metadata. New imports persist the
+  optional media count in the existing asset. Changed vendored ESM dependencies
+  use an explicit media1 URL revision so an older cached parser is not reused.
+- `tests/smoke_pptx_media.py` covers native WAV decoding/playback, automatic and
+  click commands, volume/repeat, duplicate state, explicit pause/resume, policy
+  recovery, legacy metadata, rewind and delayed-start cancellation on blackout
+  in Chromium/WebKit. Actual local children's PPT video pages (2026-08-09 page
+  88 and 2025-12-14 page 4) played in both engines at 1920×1080/1280×720, with
+  original 80% volume and click ordering; screenshots were visually inspected.
+  Production writes and church-file uploads were blocked; mixer/speaker
+  hardware output is not claimed as verified.

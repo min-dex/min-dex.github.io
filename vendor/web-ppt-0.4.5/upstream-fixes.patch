@@ -71,3 +71,95 @@
      var t, e;
      this.container.removeEventListener("click", this.handleClick), this.unsubscribe(), (t = this.playing) == null || t.cancel(), (e = this.cancelAuto) == null || e.call(this), this.state.destroy(), this.container.innerHTML = "", this.svgCache.clear();
    }
+diff --git a/vendor/web-ppt-0.4.5/core.js b/vendor/web-ppt-0.4.5/core.js
+index 1502605c..04fcfd62 100644
+--- a/vendor/web-ppt-0.4.5/core.js
++++ b/vendor/web-ppt-0.4.5/core.js
+@@ -1,5 +1,5 @@
+-import { k as N, c as de, n as Dt, e as dr, a as Me, b as Tt, w as _t, d as Ys, z as pr, u as mr, i as gr, m as br, p as os, s as wr, f as yr } from "./parser-CJhMJQf-.js";
+-import { h as Qu, g as tf, j as ef, l as nf } from "./parser-CJhMJQf-.js";
++import { k as N, c as de, n as Dt, e as dr, a as Me, b as Tt, w as _t, d as Ys, z as pr, u as mr, i as gr, m as br, p as os, s as wr, f as yr } from "./parser-CJhMJQf-.js?mindex=media1";
++import { h as Qu, g as tf, j as ef, l as nf } from "./parser-CJhMJQf-.js?mindex=media1";
+ import { presetGeom as xr } from "./geometry.js";
+ function qs(t) {
+   if (!(t != null && t.length)) return [];
+@@ -7435,8 +7435,8 @@ function rr(t, e, n = {}) {
+   const o = n.textMode ?? "html", s = {
+     defs: [],
+     textMode: o,
+-    // 'svg' 文本模式是给「交出去的文件」用的，里面不该出现只有浏览器认的 foreignObject
+-    media: n.media === "player" && o === "html" ? "player" : "badge",
++    // Explicit player mode also supports SVG text in the live Mindex output.
++    media: n.media === "player" ? "player" : "badge",
+     hidden: (f = n.hiddenElements) != null && f.length ? new Set(n.hiddenElements) : null
+   };
+   let r = "#fff";
+diff --git a/vendor/web-ppt-0.4.5/parser-CJhMJQf-.js b/vendor/web-ppt-0.4.5/parser-CJhMJQf-.js
+index 6195fe4f..728f92f6 100644
+--- a/vendor/web-ppt-0.4.5/parser-CJhMJQf-.js
++++ b/vendor/web-ppt-0.4.5/parser-CJhMJQf-.js
+@@ -1324,7 +1324,23 @@ function sourceAutoStart(effect) {
+   });
+ }
+ function sr(t, e, n) {
+-  if (h(t, "presetClass") === "mediacall") return null;
++  if (h(t, "presetClass") === "mediacall") {
++    // Interactive object clicks are separate from the main Next sequence.
++    for (let parent = t.parentElement; parent; parent = parent.parentElement) {
++      if (h(parent, "nodeType") === "interactiveSeq") return null;
++    }
++    const target = He(t);
++    const command = Array.from(t.getElementsByTagName("*")).find(node => node.localName === "cmd");
++    const value = h(command, "cmd") || "";
++    const from = /^playFrom\((\d+(?:\.\d+)?)\)$/i.exec(value);
++    const action = from ? "play" : ({ play: "play", pause: "pause", togglepause: "togglePause", stop: "stop" })[value.toLowerCase()];
++    if (target === null || !action) return null;
++    const nodeType = h(t, "nodeType");
++    return { target, kind: "media", effect: "media", action,
++      startSeconds: from ? Number(from[1]) : undefined,
++      delayMs: rr(t), durationMs: 0, autoStart: sourceAutoStart(t),
++      trigger: nodeType === "withEffect" ? "withPrev" : nodeType === "afterEffect" ? "afterPrev" : "click" };
++  }
+   const r = He(t);
+   if (r === null) return null;
+   const o = h(t, "presetClass") ?? "entr", s = Jn[o] ?? "entrance", l = v(t, "presetID") ?? 10, i = v(t, "presetSubtype") ?? 0, c = h(t, "nodeType") ?? "clickEffect", u = We(t), a = u ? tr(u) : null, d = (a == null ? void 0 : a.effect) ?? Qn[l] ?? "fade", m = (a == null ? void 0 : a.dir) ?? Kn[i], p = c === "withEffect" ? "withPrev" : c === "afterEffect" ? "afterPrev" : "click", b = Ue(t) ?? 500, g = s === "motion" ? Ge(t) : null, k = g && e > 0 && n > 0 ? er(g, e, n) : void 0;
+@@ -1340,6 +1356,17 @@ function sr(t, e, n) {
+     motionPath: k
+   };
+ }
++function sourceMediaSettings(slide) {
++  return Array.from(slide.getElementsByTagName("*")).filter(node => node.localName === "cMediaNode").map(node => {
++    const timing = f(node, "cTn");
++    const condition = f(f(timing, "stCondLst"), "cond");
++    const delay = h(condition, "delay");
++    return { target: He(node), volume: Math.min(1, Math.max(0, (v(node, "vol") ?? 100000) / 100000)),
++      muted: h(node, "mute") === "1", loop: h(timing, "repeatCount") === "indefinite",
++      autoStart: delay !== null && delay !== "indefinite" && !h(condition, "evt"),
++      delayMs: Number(delay) || 0 };
++  });
++}
+ function Xe(t) {
+   const e = {};
+   for (const n of H(t, "gd")) {
+@@ -3319,7 +3346,8 @@ function go(t, e, n, r, o, s, l, i) {
+     hidden: h(c, "show") === "0" || void 0,
+     layoutName: h(R(d, "cSld"), "name") ?? void 0,
+     transition: ke(c) ?? ke(d),
+-    animations: or(f(c, "timing"), L, B)
++    animations: or(f(c, "timing"), L, B),
++    mediaSettings: sourceMediaSettings(c)
+   };
+ }
+ export {
+diff --git a/vendor/web-ppt-0.4.5/viewer-core.js b/vendor/web-ppt-0.4.5/viewer-core.js
+index 4a1358f5..3f853b0a 100644
+--- a/vendor/web-ppt-0.4.5/viewer-core.js
++++ b/vendor/web-ppt-0.4.5/viewer-core.js
+@@ -1,5 +1,5 @@
+-import { hiddenBefore as C, staticHidden as w, groupSteps as M, slideText as S, renderSlideToSvg as v, slideToPng as T } from "./core.js";
+-import { groupSteps as R, hiddenBefore as W, staticHidden as G } from "./core.js";
++import { hiddenBefore as C, staticHidden as w, groupSteps as M, slideText as S, renderSlideToSvg as v, slideToPng as T } from "./core.js?mindex=media1";
++import { groupSteps as R, hiddenBefore as W, staticHidden as G } from "./core.js?mindex=media1";
+ const h = 1.15;
+ function $(s) {
+   switch (s) {

@@ -1,5 +1,5 @@
-import { k as N, c as de, n as Dt, e as dr, a as Me, b as Tt, w as _t, d as Ys, z as pr, u as mr, i as gr, m as br, p as os, s as wr, f as yr } from "./parser-CJhMJQf-.js";
-import { h as Qu, g as tf, j as ef, l as nf } from "./parser-CJhMJQf-.js";
+import { k as N, c as de, n as Dt, e as dr, a as Me, b as Tt, w as _t, d as Ys, z as pr, u as mr, i as gr, m as br, p as os, s as wr, f as yr } from "./parser-CJhMJQf-.js?mindex=media1";
+import { h as Qu, g as tf, j as ef, l as nf } from "./parser-CJhMJQf-.js?mindex=media1";
 import { presetGeom as xr } from "./geometry.js";
 function qs(t) {
   if (!(t != null && t.length)) return [];
@@ -7435,8 +7435,8 @@ function rr(t, e, n = {}) {
   const o = n.textMode ?? "html", s = {
     defs: [],
     textMode: o,
-    // 'svg' 文本模式是给「交出去的文件」用的，里面不该出现只有浏览器认的 foreignObject
-    media: n.media === "player" && o === "html" ? "player" : "badge",
+    // Explicit player mode also supports SVG text in the live Mindex output.
+    media: n.media === "player" ? "player" : "badge",
     hidden: (f = n.hiddenElements) != null && f.length ? new Set(n.hiddenElements) : null
   };
   let r = "#fff";

@@ -1324,7 +1324,23 @@ function sourceAutoStart(effect) {
   });
 }
 function sr(t, e, n) {
-  if (h(t, "presetClass") === "mediacall") return null;
+  if (h(t, "presetClass") === "mediacall") {
+    // Interactive object clicks are separate from the main Next sequence.
+    for (let parent = t.parentElement; parent; parent = parent.parentElement) {
+      if (h(parent, "nodeType") === "interactiveSeq") return null;
+    }
+    const target = He(t);
+    const command = Array.from(t.getElementsByTagName("*")).find(node => node.localName === "cmd");
+    const value = h(command, "cmd") || "";
+    const from = /^playFrom\((\d+(?:\.\d+)?)\)$/i.exec(value);
+    const action = from ? "play" : ({ play: "play", pause: "pause", togglepause: "togglePause", stop: "stop" })[value.toLowerCase()];
+    if (target === null || !action) return null;
+    const nodeType = h(t, "nodeType");
+    return { target, kind: "media", effect: "media", action,
+      startSeconds: from ? Number(from[1]) : undefined,
+      delayMs: rr(t), durationMs: 0, autoStart: sourceAutoStart(t),
+      trigger: nodeType === "withEffect" ? "withPrev" : nodeType === "afterEffect" ? "afterPrev" : "click" };
+  }
   const r = He(t);
   if (r === null) return null;
   const o = h(t, "presetClass") ?? "entr", s = Jn[o] ?? "entrance", l = v(t, "presetID") ?? 10, i = v(t, "presetSubtype") ?? 0, c = h(t, "nodeType") ?? "clickEffect", u = We(t), a = u ? tr(u) : null, d = (a == null ? void 0 : a.effect) ?? Qn[l] ?? "fade", m = (a == null ? void 0 : a.dir) ?? Kn[i], p = c === "withEffect" ? "withPrev" : c === "afterEffect" ? "afterPrev" : "click", b = Ue(t) ?? 500, g = s === "motion" ? Ge(t) : null, k = g && e > 0 && n > 0 ? er(g, e, n) : void 0;
@@ -1339,6 +1355,17 @@ function sr(t, e, n) {
     kind: s,
     motionPath: k
   };
+}
+function sourceMediaSettings(slide) {
+  return Array.from(slide.getElementsByTagName("*")).filter(node => node.localName === "cMediaNode").map(node => {
+    const timing = f(node, "cTn");
+    const condition = f(f(timing, "stCondLst"), "cond");
+    const delay = h(condition, "delay");
+    return { target: He(node), volume: Math.min(1, Math.max(0, (v(node, "vol") ?? 100000) / 100000)),
+      muted: h(node, "mute") === "1", loop: h(timing, "repeatCount") === "indefinite",
+      autoStart: delay !== null && delay !== "indefinite" && !h(condition, "evt"),
+      delayMs: Number(delay) || 0 };
+  });
 }
 function Xe(t) {
   const e = {};
@@ -3319,7 +3346,8 @@ function go(t, e, n, r, o, s, l, i) {
     hidden: h(c, "show") === "0" || void 0,
     layoutName: h(R(d, "cSld"), "name") ?? void 0,
     transition: ke(c) ?? ke(d),
-    animations: or(f(c, "timing"), L, B)
+    animations: or(f(c, "timing"), L, B),
+    mediaSettings: sourceMediaSettings(c)
   };
 }
 export {

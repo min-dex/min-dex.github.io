@@ -218,6 +218,7 @@ function normalizeServiceAssetSlides(value) {
         ...(slide.pptx ? { pptx: {
           page: Math.max(0, Math.floor(Number(slide.pptx.page) || 0)),
           clicks: Math.max(0, Math.floor(Number(slide.pptx.clicks) || 0)),
+          ...(slide.pptx.mediaCount ? { mediaCount: Math.max(0, Math.floor(Number(slide.pptx.mediaCount) || 0)) } : {}),
           hidden: Boolean(slide.pptx.hidden),
         } } : {}),
         formLabel: String(slide.formLabel || slide.form_label || slide.scoreFormLabel || slide.score_form_label || slide.form || "").trim(),

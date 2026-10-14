@@ -9,8 +9,8 @@ const PRESENTER_PPTX_PART_BYTES = 16 * 1024 * 1024;
 function presenterPptxRuntime() {
   if (!presenterPptxRuntimePromise) {
     presenterPptxRuntimePromise = Promise.all([
-      import("./vendor/web-ppt-0.4.5/core.js"),
-      import("./vendor/web-ppt-0.4.5/viewer-core.js"),
+      import("./vendor/web-ppt-0.4.5/core.js?mindex=media1"),
+      import("./vendor/web-ppt-0.4.5/viewer-core.js?mindex=media1"),
     ]).then(([core, viewer]) => ({ ...core, Viewer: viewer.Viewer }))
       .catch(error => { presenterPptxRuntimePromise = null; throw error; });
   }
@@ -166,63 +166,184 @@ function trimPresenterPptxCache() {
   }
 }
 
+function presenterPptxMediaElements(slide) {
+  const result = [];
+  const visit = elements => { for (const element of elements || []) {
+    if (element.media) result.push(element);
+    if (element.children) visit(element.children);
+  } };
+  visit(slide.elements);
+  return result;
+}
+
+function presenterPptxPageMetadata(entry, page) {
+  const slide = entry.value.deck.slides[page];
+  return { clicks: Math.max(0, entry.value.runtime.groupSteps(slide.animations).length - (slide.animations?.[0]?.autoStart ? 1 : 0)),
+    mediaCount: presenterPptxMediaElements(slide).length };
+}
+
+function requestPresenterPptxMedia(owner, action) {
+  const slide = owner.slides?.[owner.index];
+  if (!slide?.pptx || owner.safetyBlank || owner.liveScripture?.active) return false;
+  owner.pptxProgress = { key: presenterPptxKey(slide), step: presenterPptxStep(owner, slide),
+    mediaRequest: { id: crypto.randomUUID(), action } };
+  return true;
+}
+
+function adoptPresenterPptxMetadata(metadata) {
+  if (!metadata || metadata.serviceId !== state.presenter.serviceId) return;
+  let changed = false;
+  for (const slide of state.presenter.slides || []) {
+    if (presenterPptxKey(slide) !== metadata.key) continue;
+    if (slide.pptx.clicks !== metadata.clicks || slide.pptx.mediaCount !== metadata.mediaCount) {
+      Object.assign(slide.pptx, { clicks: metadata.clicks, mediaCount: metadata.mediaCount });
+      changed = true;
+    }
+  }
+  if (changed) { publishPresenterState(); renderPresenterControlState(state.presenter.serviceId); }
+}
+
 async function createPresenterPptxSession(host, entry, pageIndex) {
   const { deck, runtime } = entry.value;
-  if (!deck.slides[pageIndex]) throw new Error("PPT 페이지를 찾지 못했습니다.");
+  const slide = deck.slides[pageIndex];
+  if (!slide) throw new Error("PPT 페이지를 찾지 못했습니다.");
   entry.refs += 1;
-  // Output navigation is owned by Mindex, including offline/output-only control.
-  class OutputViewer extends runtime.Viewer { startAutoAdvance() {} }
-  let viewer;
-  let currentStep = -1;
-  let destroyed = false;
-  const automatic = deck.slides[pageIndex].animations?.[0]?.autoStart ? 1 : 0;
+  let viewer, currentStep = -1, lastRequest = null, destroyed = false, restoring = false;
+  const media = new Map(), timers = new Set();
+  const automatic = slide.animations?.[0]?.autoStart ? 1 : 0;
+  const report = message => {
+    if (!destroyed) {
+      const root = host.closest("#presenterOutputRoot");
+      if (root) { if (message) root.dataset.pptxError = message; else delete root.dataset.pptxError; }
+    }
+  };
+  const cancelTimers = () => { timers.forEach(clearTimeout); timers.clear(); };
+  const pause = () => { cancelTimers(); media.forEach(node => node.pause()); };
+  const play = async node => {
+    if (destroyed) return;
+    try { await node.play(); if (!destroyed) { delete node.dataset.autoplayBlocked; report(""); } }
+    catch (error) {
+      if (destroyed || error?.name === "AbortError") return;
+      if (error?.name === "NotAllowedError") {
+        node.dataset.autoplayBlocked = "true";
+        report("PPT 소리 재생이 차단됐습니다. 송출 창에서 스페이스 키를 눌러 재생해 주세요.");
+      } else report("PPT 영상·음원을 재생하지 못했습니다. 파일 형식을 확인해 주세요.");
+    }
+  };
+  const command = effect => {
+    const node = media.get(Number(effect.target));
+    if (!node || destroyed) return;
+    if (effect.action === "pause" || effect.action === "stop" || (effect.action === "togglePause" && !node.paused)) {
+      node.pause();
+      if (effect.action === "stop") node.currentTime = 0;
+    } else {
+      if (Number.isFinite(effect.startSeconds)) node.currentTime = effect.startSeconds;
+      void play(node);
+    }
+  };
+  const schedule = (effect, delay) => {
+    if (delay <= 0) { command(effect); return; }
+    const timer = setTimeout(() => { timers.delete(timer); command(effect); }, delay);
+    timers.add(timer);
+  };
+  class OutputViewer extends runtime.Viewer {
+    startAutoAdvance() {}
+    play(group) {
+      // Media calls participate in click grouping, never in visual fade effects.
+      super.play(group.filter(effect => effect.kind !== "media"));
+      if (restoring) return;
+      let end = 0;
+      for (const effect of group) {
+        const delay = effect.trigger === "afterPrev" ? end + effect.delayMs : effect.delayMs;
+        end = Math.max(end, delay + effect.durationMs);
+        if (effect.kind === "media") schedule(effect, delay);
+      }
+    }
+  }
+  const releaseMedia = () => {
+    pause();
+    media.forEach(node => { node.removeAttribute("src"); node.load(); });
+    media.clear();
+  };
   const build = () => {
-    viewer?.destroy();
-    viewer = new OutputViewer(host, deck, { index: pageIndex, animate: true, autoAdvance: false, media: "badge", textMode: "svg" });
-    // PPT hyperlinks cannot navigate the output or bypass controller state.
+    releaseMedia(); viewer?.destroy();
+    viewer = new OutputViewer(host, deck, { index: pageIndex, animate: true, autoAdvance: false, media: "player", textMode: "svg" });
     host.querySelectorAll("a").forEach(node => { node.removeAttribute("href"); node.removeAttribute("xlink:href"); node.removeAttribute("data-slide"); });
+    for (const element of presenterPptxMediaElements(slide)) {
+      const node = host.querySelector(`[data-el="${element.id}"] video, [data-el="${element.id}"] audio`);
+      if (!node) throw new Error("PPT 영상·음원 원본을 찾지 못했습니다.");
+      const settings = slide.mediaSettings?.find(value => value.target === element.id) || {};
+      node.controls = false; node.autoplay = false; node.preload = "auto";
+      node.playsInline = true; node.setAttribute("playsinline", "");
+      node.volume = settings.volume ?? 1; node.muted = Boolean(settings.muted); node.loop = Boolean(settings.loop);
+      node.classList.add("presenter-pptx-media");
+      if (element.media.kind === "audio") node.style.visibility = "hidden";
+      node.addEventListener("error", () => report("PPT 영상·음원을 읽지 못했습니다. MP4(H.264/AAC) 또는 MP3/WAV 형식인지 확인해 주세요."));
+      media.set(Number(element.id), node);
+    }
   };
   const finish = () => host.getAnimations({ subtree: true }).forEach(animation => { try { animation.finish(); } catch {} });
   try {
     build();
     const sources = [...new Set([...host.querySelectorAll("image")].map(node => node.getAttribute("href") || node.getAttribute("xlink:href")).filter(Boolean))];
-    await Promise.all(sources.map(source => new Promise((resolve, reject) => {
-      const image = new Image();
-      const timer = window.setTimeout(() => { image.onload = image.onerror = null; reject(new Error("PPT 이미지 준비 시간이 초과됐습니다. 다시 선택해 주세요.")); }, 15000);
-      image.onload = () => { clearTimeout(timer); resolve(); };
-      image.onerror = () => { clearTimeout(timer); reject(new Error("PPT 이미지를 읽지 못했습니다.")); };
-      image.src = source;
-    })));
-  } catch (error) { viewer?.destroy(); entry.refs -= 1; throw error; }
+    await Promise.all([
+      ...sources.map(source => new Promise((resolve, reject) => {
+        const image = new Image();
+        const timer = setTimeout(() => { image.onload = image.onerror = null; reject(new Error("PPT 이미지 준비 시간이 초과됐습니다.")); }, 15000);
+        image.onload = () => { clearTimeout(timer); resolve(); };
+        image.onerror = () => { clearTimeout(timer); reject(new Error("PPT 이미지를 읽지 못했습니다.")); };
+        image.src = source;
+      })),
+      ...[...media.values()].map(node => new Promise((resolve, reject) => {
+        const done = error => {
+          clearTimeout(timer); node.removeEventListener("loadeddata", ready); node.removeEventListener("error", failed);
+          error ? reject(error) : resolve();
+        };
+        const ready = () => done();
+        const failed = () => done(new Error("PPT 영상·음원을 읽지 못했습니다. 지원되는 형식으로 저장해 주세요."));
+        const timer = setTimeout(() => done(new Error("PPT 영상·음원 준비 시간이 초과됐습니다.")), 20000);
+        node.addEventListener("loadeddata", ready); node.addEventListener("error", failed);
+        if (node.error) failed(); else if (node.readyState >= 2) ready();
+      })),
+    ]);
+  } catch (error) { releaseMedia(); viewer?.destroy(); entry.refs -= 1; throw error; }
   return {
-    sync(step) {
-      if (destroyed || step === currentStep) return;
-      const target = Math.min(viewer.animationTotal, automatic + step);
-      if (currentStep >= 0 && step > currentStep) {
-        while (viewer.animationDone < target) viewer.playNextAnimation();
-      } else {
-        if (currentStep >= 0) build();
-        for (let i = 0; i < target; i += 1) {
-          viewer.playNextAnimation();
-          // Re-entry/rewind restores consumed clicks without replaying them.
-          if (step > 0 || currentStep >= 0) finish();
+    metadata: presenterPptxPageMetadata(entry, pageIndex),
+    pause,
+    recover() { media.forEach(node => { if (node.dataset.autoplayBlocked === "true") void play(node); }); },
+    sync(step, request) {
+      if (destroyed) return;
+      if (step !== currentStep) {
+        const target = Math.min(viewer.animationTotal, automatic + step);
+        restoring = step > 0 && currentStep < 0 || currentStep >= 0 && step < currentStep;
+        if (currentStep >= 0 && step < currentStep) build();
+        while (viewer.animationDone < target) { viewer.playNextAnimation(); if (restoring) finish(); }
+        if (currentStep < 0 && step === 0) {
+          for (const settings of slide.mediaSettings || []) {
+            if (settings.autoStart && !slide.animations?.some(effect => effect.kind === "media" && effect.target === settings.target)) {
+              schedule({ target: settings.target, action: "play" }, settings.delayMs);
+            }
+          }
         }
+        restoring = false; currentStep = step; host.dataset.pptxStep = String(step);
       }
-      currentStep = step;
-      host.dataset.pptxStep = String(step);
+      if (request?.id && request.id !== lastRequest) {
+        lastRequest = request.id;
+        if (request.action === "pause") pause();
+        else if (request.action === "play") media.forEach(node => { if (node.ended) node.currentTime = 0; void play(node); });
+      }
     },
     destroy() {
       if (destroyed) return;
-      destroyed = true;
-      viewer.destroy();
-      entry.refs -= 1;
-      trimPresenterPptxCache();
+      destroyed = true; releaseMedia(); viewer.destroy(); entry.refs -= 1; trimPresenterPptxCache();
     },
   };
 }
 
 function releasePresenterPptxOutput(root) {
   root._pptxRequest = null;
+  root._pptxMetadata = null;
+  presenterOutputLayers(root).active?._pptxSession?.pause();
   delete root.dataset.pptxError;
 }
 
@@ -233,10 +354,14 @@ async function renderPresenterPptxOutput(root, payload, slide, frameState) {
     root._pptxRequest = null;
     ++presenterOutputRenderState.token;
     root.removeAttribute("aria-busy");
-    layers.active._pptxSession.sync(presenterPptxStep(payload, slide));
+    Object.assign(slide.pptx, layers.active._pptxSession.metadata);
+    root._pptxMetadata = { serviceId: payload.serviceId, key: presenterPptxKey(slide), ...layers.active._pptxSession.metadata };
+    layers.active._pptxSession.sync(presenterPptxStep(payload, slide), payload.pptxProgress?.key === presenterPptxKey(slide) ? payload.pptxProgress.mediaRequest : null);
     return;
   }
   if (root._pptxRequest?.key === key) { root._pptxRequest.payload = payload; return; }
+  layers.active?._pptxSession?.pause();
+  root._pptxMetadata = null;
   const request = { key, payload, token: ++presenterOutputRenderState.token };
   root._pptxRequest = request;
   root.setAttribute("aria-busy", "true");
@@ -259,7 +384,12 @@ async function renderPresenterPptxOutput(root, payload, slide, frameState) {
     freshLayers.next._pptxSession = session;
     freshLayers.next.dataset.presenterFrameKey = key;
     activatePresenterOutputLayer(root, freshLayers.active, freshLayers.next, frameState, request.token, () => {
-      session.sync(presenterPptxStep(request.payload, slide));
+      Object.assign(slide.pptx, session.metadata);
+      const activeSlide = request.payload.slides?.[request.payload.index];
+      if (presenterPptxKey(activeSlide) === presenterPptxKey(slide)) Object.assign(activeSlide.pptx, session.metadata);
+      root._pptxMetadata = { serviceId: payload.serviceId, key: presenterPptxKey(slide), ...session.metadata };
+      session.sync(presenterPptxStep(request.payload, slide), request.payload.pptxProgress?.key === presenterPptxKey(slide) ? request.payload.pptxProgress.mediaRequest : null);
+      presenterOutputImageWarmupState.onProgress?.();
     });
     root.removeAttribute("aria-busy");
     root._pptxRequest = null;
@@ -300,7 +430,7 @@ async function importPresenterPptx(input, existingItem = null) {
     showToast("PPT를 검사하고 있습니다.", "info");
     parsed = await parsePresenterPptx(new Uint8Array(await file.arrayBuffer()));
     const { deck, runtime } = parsed;
-    if (!window.confirm(`${file.name} · ${deck.slides.length}장\n\n기본 나타내기·사라지기·이동 효과와 클릭 순서를 재생합니다. 복잡한 효과·영상·음원·글꼴은 PowerPoint와 다를 수 있어 송출 전 확인이 필요합니다.\n\n원본 PPTX(메모·숨긴 장 포함)와 미리보기를 기존 공개 자료 저장소에 올려 이 예배에 연결할까요?`)) return false;
+    if (!window.confirm(`${file.name} · ${deck.slides.length}장\n\n기본 나타내기·사라지기·이동 효과와 클릭 순서를 재생합니다. 포함된 영상·음원을 함께 재생합니다. 복잡한 효과·글꼴·슬라이드 간 이어지는 음원은 PowerPoint와 다를 수 있어 송출 전 확인이 필요합니다.\n\n원본 PPTX(메모·숨긴 장 포함)와 미리보기를 기존 공개 자료 저장소에 올려 이 예배에 연결할까요?`)) return false;
     const sourceUrl = await uploadPresenterPptxSource(file, upload);
     const slides = [];
     for (let page = 0; page < deck.slides.length; page += 1) {
@@ -309,7 +439,7 @@ async function importPresenterPptx(input, existingItem = null) {
       const url = await upload(thumbnail, `slide-${page + 1}.png`);
       const groups = runtime.groupSteps(slide.animations);
       slides.push({ url, name: `${page + 1}번 슬라이드`, order: page + 1, pptx: {
-        page, clicks: Math.max(0, groups.length - (slide.animations?.[0]?.autoStart ? 1 : 0)), hidden: Boolean(slide.hidden),
+        page, mediaCount: presenterPptxMediaElements(slide).length, clicks: Math.max(0, groups.length - (slide.animations?.[0]?.autoStart ? 1 : 0)), hidden: Boolean(slide.hidden),
       } });
       if (page === 0 || (page + 1) % 10 === 0) showToast(`PPT 준비 중 · ${page + 1}/${deck.slides.length}장`, "info");
     }

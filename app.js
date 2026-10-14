@@ -27900,6 +27900,10 @@ function renderPresenterLiveStatusPanel(service, slides = [], options = {}) {
     <aside class="svc-presenter-live-panel${options.outputOpen ? " is-live" : ""}" aria-label="송출 미리보기" aria-live="polite">
       <div class="svc-presenter-live-copy">
         <span class="svc-presenter-live-label">${previewSlide?.pptx ? `PPT 정지 미리보기 · 클릭 ${presenterPptxStep(state.presenter, previewSlide)}/${Number(previewSlide.pptx.clicks) || 0}` : "미리보기"}</span>
+        ${previewSlide?.pptx?.mediaCount && options.outputOpen ? `<span class="svc-presenter-action-group" aria-label="PPT 영상·음원 제어">
+          <button type="button" class="icon-btn" data-presenter-action="pptx-play" data-service-id="${escapeAttr(service.id)}" aria-label="PPT 영상·음원 재생" title="PPT 영상·음원 재생"><i data-lucide="play"></i></button>
+          <button type="button" class="icon-btn" data-presenter-action="pptx-pause" data-service-id="${escapeAttr(service.id)}" aria-label="PPT 영상·음원 일시정지" title="PPT 영상·음원 일시정지"><i data-lucide="pause"></i></button>
+        </span>` : ""}
         <span class="svc-presenter-state-group">
           <span class="svc-presenter-status svc-presenter-status--${escapeAttr(options.statusTone || "ready")}" aria-label="${escapeAttr(uiText("presenter.aria.status", { status: options.statusLabel || "" }))}">${escapeHtml(options.statusLabel || "")}</span>
           ${options.mode?.label ? `<span class="svc-presenter-mode svc-presenter-mode--${escapeAttr(options.mode.tone)}" aria-label="${escapeAttr(uiText("presenter.aria.mode", { mode: options.mode.label }))}">${escapeHtml(options.mode.label)}</span>` : ""}
@@ -30323,6 +30327,12 @@ function focusPresenterBoardLiveSlide(serviceId, index) {
 function runPresenterAction(action, serviceId = state.selectedServiceId, options = {}) {
   if (action === "fullscreen") {
     requestPresenterOutputFullscreenFromController();
+    return;
+  }
+  if (["pptx-play", "pptx-pause"].includes(action)) {
+    if (serviceId === state.presenter.serviceId && requestPresenterPptxMedia(state.presenter, action === "pptx-play" ? "play" : "pause")) {
+      publishPresenterState(); renderPresenterControlState(serviceId);
+    }
     return;
   }
   if (action === "retry-video") {

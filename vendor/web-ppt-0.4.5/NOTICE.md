@@ -8,6 +8,10 @@ reviewed OOXML automatic-start / instantaneous appearance / stale-paint fixes.
 viewer-core imports are relative to this directory for offline desktop use.
 This renderer supports a subset of PowerPoint; it is not the Microsoft engine.
 
-Mindex also omits mediacall timing entries: unsupported play/pause commands must
-not become visible emphasis/fade effects. The app owns all output navigation
-and disables independent hyperlinks and automatic slide advancement.
+Mindex preserves supported main-sequence mediacall play/pause/stop commands as
+nonvisual timing entries; object-click interactive sequences are not inserted
+into normal Next navigation. Volume/mute/repeat settings are exposed to the app.
+Explicit player mode works with SVG text; previews still use static badges.
+The app owns playback, all output navigation, timers and media teardown, and
+disables independent hyperlinks and automatic slide advancement. The media1
+module URL revision refreshes the changed ESM dependency graph after deployment.

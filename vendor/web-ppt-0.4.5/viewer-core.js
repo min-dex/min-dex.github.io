@@ -1,5 +1,5 @@
-import { hiddenBefore as C, staticHidden as w, groupSteps as M, slideText as S, renderSlideToSvg as v, slideToPng as T } from "./core.js";
-import { groupSteps as R, hiddenBefore as W, staticHidden as G } from "./core.js";
+import { hiddenBefore as C, staticHidden as w, groupSteps as M, slideText as S, renderSlideToSvg as v, slideToPng as T } from "./core.js?mindex=media1";
+import { groupSteps as R, hiddenBefore as W, staticHidden as G } from "./core.js?mindex=media1";
 const h = 1.15;
 function $(s) {
   switch (s) {

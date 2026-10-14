@@ -2914,6 +2914,7 @@ function handlePresenterControllerMessage(message = {}) {
     syncPresenterVideoHealthControl();
     if (message.pptxError && message.pptxError !== state.presenter.pptxError) showToast(message.pptxError, "error");
     state.presenter.pptxError = message.pptxError || "";
+    adoptPresenterPptxMetadata(message.pptxMetadata);
     return;
   }
   if (message.type === "presenter-output-disconnect") {
@@ -3371,6 +3372,7 @@ function initPresenterOutputCore() {
       transportVersion: 1,
       receivedMessageId: currentPayload?.messageId || "",
       pptxError: document.getElementById("presenterOutputRoot")?.dataset.pptxError || "",
+      pptxMetadata: document.getElementById("presenterOutputRoot")?._pptxMetadata || null,
       videoHealth: presenterOutputVideoHealth(currentPayload),
       warmup: presenterOutputWarmupSummary(),
     });
@@ -3988,6 +3990,7 @@ function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState =
         nextLayer.removeAttribute("data-presenter-entering-token");
       }, transitionEntryDelay);
     }
+    activeLayer._pptxSession?.pause();
     onActivated?.();
     const clearPreviousLayer = () => {
       if (token !== presenterOutputRenderState.token) return;
@@ -4505,7 +4508,12 @@ async function requestPresenterVideoPlayback(video) {
 function handlePresenterVideoRecoveryKey(event) {
   if (event.key !== " " || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey
     || event.target?.closest?.("input, textarea, select, button, [contenteditable='true']")) return false;
-  const video = document.querySelector("#presenterOutputRoot .presenter-output-layer.is-active video.presenter-video");
+  const layer = document.querySelector("#presenterOutputRoot .presenter-output-layer.is-active");
+  if (layer?._pptxSession && layer.querySelector('[data-autoplay-blocked="true"]')) {
+    if (!event.repeat) layer._pptxSession.recover();
+    return true;
+  }
+  const video = layer?.querySelector("video.presenter-video");
   if (!video || video.ended || (!video.error && !video.paused && video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA)) return false;
   // Call play in this key event, not through the controller's asynchronous channel.
   if (!event.repeat) {
