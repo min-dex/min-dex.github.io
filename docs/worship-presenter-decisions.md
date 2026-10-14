@@ -532,9 +532,9 @@ Small visual polish that does not alter behavior does not need an entry.
 - Scripture reference normalization for service inputs follows the Scripture
   search parser: Korean/English abbreviations, attached book+chapter text such
   as `요21:15~25`, `~` ranges, and comma-separated references are accepted.
-- 성경 원본 데이터가 한 행에 여러 절을 묶고 다음 절 번호를 생략한 경우에는
-  (예: 대한성서공회 `신 6:18-19`) 그 번호 공백을 읽어 화면 표기를 `18–19`로
-  복원한다. 이 규칙은 특정 역본이나 문장 종결 판단에 의존하지 않는다.
+- Combined scripture ranges use explicit `verse_end` from the Bible table.
+  A numbering gap alone does not imply a combined verse. Searches for a contained
+  verse resolve the combined body and preserve its reference range.
 - `인용 구절` is optional, separate from the sermon body, and may be entered
   before or during worship. An empty citation creates neither a missing warning
   nor an empty slide.
@@ -1807,3 +1807,20 @@ automatically deletes an existing service after calendar changes.
   guards and native UI controls), `smoke_progression_media_save.py` (full and
   partial atomic saves, new media insertion, upload cleanup and uncertain-save
   preservation). Fixtures do not write operational records or upload church files.
+
+
+## KRV corpus repair display (2026-10-14)
+
+Production KRV corrections were independently read back after guarded SQL:
+Exodus 9:16, 1 Chronicles 21–22, Psalms 72 and 83, Song 6–8, and Jeremiah
+32–33. Original rows remain in a private maintenance backup. Combined inclusion
+markers are inactive records, so contained-verse lookup emits the full body once.
+
+The dedicated scripture repair display helper renews only these ten KRV chapter
+cache keys; old persistent values and unrelated chapters/translations are retained.
+Long reading/citation/sermon bodies fit inside their scripture frame at the largest
+fitting font size. Short bodies retain their existing typography. Fitting reruns
+on frame changes, font readiness and resize. No scripture wording is embedded in
+the display helper. PostgreSQL rollback/replay guards, 90 corpus-flow assertions,
+cache/fitting fixtures and actual local reading-output verification passed.
+The user explicitly approved publication of this display/cache update.
