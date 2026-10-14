@@ -8440,3 +8440,14 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .song-timing-row label { flex: 1; min-width: 0; white-space: pre-line; font-size: 15px; }
 .song-timing-row input { display: block; width: 100px; margin-top: 5px; }
 .song-timing-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; }
+
+
+/* Service-instance media placement uses ordinary native controls. */
+.svc-progression-media { min-width: 0; font-size: 13px; }
+.svc-progression-media > summary { cursor: pointer; padding: 5px; }
+.svc-progression-media-controls { display: flex; flex-wrap: wrap; gap: 5px; padding: 5px; }
+.svc-progression-media-controls select { min-width: 0; max-width: 100%; flex: 1 1 120px; }
+
+.svc-media-order { display: grid; gap: 5px; min-width: 0; }
+.svc-media-order-row { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+.svc-media-order-row > span { flex: 1 1 100px; min-width: 0; overflow-wrap: anywhere; font-size: 13px; }

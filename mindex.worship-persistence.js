@@ -681,6 +681,12 @@ function buildWorshipPersistenceRows(service, items, existingSectionById = {}, e
   // New/projected items receive their final IDs above. Resolve cross-item
   // references only after every emitted row has an ID; never mutate drafts.
   for (const element of elementRows) {
+    if (element.config?.mediaPlacement) {
+      const placement = element.config.mediaPlacement;
+      element.config = { ...element.config, mediaPlacement: { ...placement,
+        parentItemId: persistedItemIds.get(placement.parentItemId) || placement.parentItemId,
+      } };
+    }
     for (const field of ["config", "source_ref"]) {
       const connected = element[field]?.connectedPraise;
       if (!connected) continue;
@@ -901,6 +907,8 @@ function serviceElementConfigForSave(existingConfig = {}, parsed = emptyServiceI
     delete config.presenter_role;
     delete config.role;
   }
+  if (parsed.mediaPlacement) config.mediaPlacement = parsed.mediaPlacement;
+  else delete config.mediaPlacement;
   if (parsed.connectedPraise) {
     config.connectedPraise = parsed.connectedPraise;
     delete config.connected_praise;

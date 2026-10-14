@@ -916,3 +916,13 @@ scripts/migrations/prune-unused-bible-translations-2026-08-02.sql
   round-trip was not exercised by this read-only verification.
 - Presenter `sectionAssignee` is slide metadata derived from the individual
   item assignee; its name does not make it the database section's `person`.
+
+### Instance media placement
+
+An ordinary reference-media element may store `config.mediaPlacement` with
+`parentItemId`, `formKey`, and `signature`. It references a song element within
+the same service/section and is persisted through the existing atomic aggregate
+path. It is not a Praise form or a reusable template slot. Temporary parent IDs
+are remapped along with newly emitted element IDs. Missing/stale anchors retain
+content but require an explicit location selection before output. See the
+2026-10-14 progression decision in `worship-presenter-decisions.md`.

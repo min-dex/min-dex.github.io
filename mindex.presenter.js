@@ -5575,3 +5575,178 @@ function presenterLineCharEstimate(line) {
   }
   return Math.max(1, Math.ceil(score));
 }
+
+// Placement is an instance-level reference between ordinary worship elements.
+// A complete form-sequence signature prevents repeated labels from drifting.
+
+function presenterProgressionPlan(item, slides = []) {
+  const groups = [];
+  for (const slide of slides) {
+    if (!slide.formKey) continue;
+    let group = groups.at(-1);
+    if (group?.key !== slide.formKey) {
+      group = { key: slide.formKey, label: slide.formLabel || slide.marker || slide.title || "구간", lastSlideId: slide.id };
+      groups.push(group);
+    }
+    group.lastSlideId = slide.id;
+  }
+  const memo = parseServiceItemMemo(item?.memo);
+  const signature = JSON.stringify([
+    item?.song_id || "", item?.version_id || item?.song_version_id || "",
+    serviceItemOutputMode(item, memo), groups.map(group => group.key),
+    // Manual slides have positional IDs: changed text requires reselection.
+    memo.slides,
+  ]);
+  return { groups, signature };
+}
+
+function presenterProgressionForItem(item, serviceId) {
+  const service = state.services.find(service => service.id === serviceId);
+  if (!service || !item || !serviceItemSupportsHeaderAudio(item)) return { groups: [], signature: "" };
+  return presenterProgressionPlan(item, buildPresenterSlidesForServiceItem(item, service, 0, { allowHydration: false }));
+}
+
+function presenterProgressionOptions(plan, selected = "") {
+  return plan.groups.map((group, index) => `<option value="${escapeAttr(group.key)}"${group.key === selected ? " selected" : ""}>${escapeHtml(`${index + 1}. ${group.label} 뒤`)}</option>`).join("");
+}
+
+function renderPresenterProgressionAdd(item) {
+  const serviceId = item?.service_id || state.selectedServiceId;
+  if (!item || item._isDefault) return "";
+  const plan = presenterProgressionForItem(item, serviceId);
+  if (!plan.groups.length) return "";
+  return `<details class="svc-progression-media">
+    <summary>진행 중 자료 추가</summary>
+    <div class="svc-progression-media-controls">
+      <select class="svc-presenter-input-control" data-progression-position aria-label="자료를 넣을 구간">${presenterProgressionOptions(plan)}</select>
+      <button class="btn ghost" type="button" data-progression-media-add data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(item.id)}">자료 추가</button>
+    </div>
+  </details>`;
+}
+
+function addPresenterProgressionMedia(button) {
+  const serviceId = button.dataset.serviceId;
+  const parent = getServiceItems(serviceId).find(item => item.id === button.dataset.serviceItemId);
+  const plan = presenterProgressionForItem(parent, serviceId);
+  const formKey = button.closest(".svc-progression-media")?.querySelector("[data-progression-position]")?.value;
+  if (!parent || !plan.groups.some(group => group.key === formKey)) {
+    showToast("곡 진행을 확인하고 넣을 위치를 다시 선택해 주세요.", "info");
+    return;
+  }
+  addPresenterReferenceMedia(serviceId, presenterReferenceMediaItemSectionKey(parent), {
+    afterItemId: parent.id, mediaPlacement: { parentItemId: parent.id, formKey, signature: plan.signature },
+  });
+}
+
+function renderPresenterMediaPlacementInput(item, serviceId) {
+  const placement = parseServiceItemMemo(item.memo).mediaPlacement;
+  if (!placement) return "";
+  const parent = getServiceItems(serviceId).find(candidate => candidate.id === placement.parentItemId);
+  const plan = presenterProgressionForItem(parent, serviceId);
+  const valid = plan.signature === placement.signature && plan.groups.some(group => group.key === placement.formKey);
+  return `<label class="svc-presenter-input-field">
+    <span>${escapeHtml(parent ? `${serviceItemDisplayText(parent) || parent.label} · 자료 위치` : "원래 곡이 없습니다")}</span>
+    <select class="svc-presenter-input-control" data-media-placement data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(item.id)}" aria-label="자료 위치">
+      ${valid ? "" : '<option value="" selected disabled>위치 재선택 필요 · 송출 제외</option>'}
+      ${presenterProgressionOptions(plan, valid ? placement.formKey : "")}
+      <option value="detach">독립된 예배 순서로 분리</option>
+    </select>
+  </label>`;
+}
+
+function updatePresenterMediaPlacement(field) {
+  const serviceId = field.dataset.serviceId;
+  const item = getServiceItems(serviceId).find(candidate => candidate.id === field.dataset.serviceItemId);
+  if (!item) return;
+  const memo = parseServiceItemMemo(item.memo);
+  if (!memo.mediaPlacement) return;
+  if (field.value === "detach") memo.mediaPlacement = null;
+  else {
+    const parent = getServiceItems(serviceId).find(candidate => candidate.id === memo.mediaPlacement.parentItemId);
+    const plan = presenterProgressionForItem(parent, serviceId);
+    if (!plan.groups.some(group => group.key === field.value)) return;
+    memo.mediaPlacement = { parentItemId: parent.id, formKey: field.value, signature: plan.signature };
+  }
+  item.memo = serializeServiceItemMemo(memo);
+  item._worshipElementTemplateModified = true;
+  state.dirty.service = true;
+  markServiceElementDirty(serviceId, item);
+  refreshPresenterForService(serviceId, { publish: false });
+  renderCurrentServiceModuleDetail();
+  updateSaveState();
+}
+
+function insertPresenterProgressionMedia(slides, items) {
+  const placements = items.map(item => ({ item, placement: parseServiceItemMemo(item.memo).mediaPlacement }))
+    .filter(entry => entry.placement);
+  if (!placements.length) return slides;
+  const byElement = new Map();
+  for (const slide of slides) {
+    if (!byElement.has(slide.elementId)) byElement.set(slide.elementId, []);
+    byElement.get(slide.elementId).push(slide);
+  }
+  const insertedIds = new Set(placements.map(entry => entry.item.id));
+  const after = new Map();
+  const invalidIds = new Set();
+  const parentIds = new Set();
+  for (const { item, placement } of placements) {
+    const parent = items.find(candidate => candidate.id === placement.parentItemId);
+    const parentSlides = byElement.get(parent?.id) || [];
+    const plan = presenterProgressionPlan(parent, parentSlides);
+    const target = plan.groups.find(group => group.key === placement.formKey);
+    if (!parent || insertedIds.has(parent.id) || !target || plan.signature !== placement.signature
+      || presenterReferenceMediaItemSectionKey(parent) !== presenterReferenceMediaItemSectionKey(item)) {
+      invalidIds.add(item.id);
+      continue;
+    }
+    parentIds.add(parent.id);
+    if (!after.has(target.lastSlideId)) after.set(target.lastSlideId, []);
+    after.get(target.lastSlideId).push(...(byElement.get(item.id) || []).map(slide => ({
+      ...slide, sectionId: parentSlides[0]?.sectionId || slide.sectionId,
+      progressionParentId: parent.id, progressionSequence: true,
+      hiddenInPresentation: Boolean(slide.hiddenInPresentation || serviceItemPresentationHidden(parent)),
+    })));
+  }
+  return slides.flatMap(slide => {
+    if (invalidIds.has(slide.elementId)) return [{ ...slide, hiddenInPresentation: true,
+      warnings: [...(slide.warnings || []), "자료 위치 재선택 필요 · 송출 제외"] }];
+    if (insertedIds.has(slide.elementId)) return [];
+    return [parentIds.has(slide.elementId) ? { ...slide, progressionSequence: true } : slide, ...(after.get(slide.id) || [])];
+  });
+}
+
+function renderPresenterMediaOrder(item, serviceId) {
+  const asset = normalizeServiceAsset(parseServiceItemMemo(item.memo).asset);
+  const slides = normalizeServiceAssetSlides(asset.slides);
+  if (asset.pptx || slides.length < 2) return "";
+  return `<div class="svc-media-order" aria-label="자료 순서">${slides.map((slide, index) => `
+    <div class="svc-media-order-row"><span>${escapeHtml(`${index + 1}. ${slide.name || "자료"}`)}</span>
+      ${[[-1, "앞으로"], [1, "뒤로"], [0, "제거"]].map(([move, label]) => `<button type="button" class="icon-btn" data-media-order="${move}"
+        data-media-index="${index}" data-media-url="${escapeAttr(slide.url)}" data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(item.id)}"
+        ${move === -1 && index === 0 || move === 1 && index === slides.length - 1 ? "disabled" : ""} aria-label="${escapeAttr(`${index + 1}번 자료 ${label}`)}" title="${label}">${move === -1 ? "↑" : move === 1 ? "↓" : "×"}</button>`).join("")}
+    </div>`).join("")}</div>`;
+}
+
+function updatePresenterMediaOrder(button) {
+  const serviceId = button.dataset.serviceId;
+  const item = getServiceItems(serviceId).find(candidate => candidate.id === button.dataset.serviceItemId);
+  if (!item) return;
+  const memo = parseServiceItemMemo(item.memo);
+  const asset = normalizeServiceAsset(memo.asset);
+  const slides = normalizeServiceAssetSlides(asset.slides);
+  const index = Number(button.dataset.mediaIndex);
+  const move = Number(button.dataset.mediaOrder);
+  if (asset.pptx || slides[index]?.url !== button.dataset.mediaUrl || ![-1, 0, 1].includes(move)) return;
+  if (move) {
+    if (!slides[index + move]) return;
+    [slides[index], slides[index + move]] = [slides[index + move], slides[index]];
+  } else slides.splice(index, 1);
+  memo.asset = { ...asset, url: slides[0]?.url || "", slides: slides.map((slide, i) => ({ ...slide, order: i + 1 })) };
+  item.memo = serializeServiceItemMemo(memo);
+  item._worshipElementTemplateModified = true;
+  state.dirty.service = true;
+  markServiceElementDirty(serviceId, item);
+  refreshPresenterForService(serviceId, { publish: false });
+  renderCurrentServiceModuleDetail();
+  updateSaveState();
+}

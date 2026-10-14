@@ -1771,3 +1771,39 @@ automatically deletes an existing service after calendar changes.
 - Validate format/version, header and total bounds, exact song/version identity, exact lyric pagination, audio byte count/SHA-256, decoded duration and ordered cues before installing an incoming bundle. Failure leaves the current local profile untouched. Replacing an existing draft requires confirmation in the editor.
 - Shared-save failure retains the previous shared object and reports separately when the local save succeeded. Shared operations disable editing until completion and recheck the currently selected element identity/content after asynchronous work.
 - Verification: unit bundle roundtrip/wrong-song/stale-lyrics/corruption rejection, plus Chromium/WebKit with independent browser contexts and an isolated Storage double: share/load, local reload, real controller playback/automatic advance, corrupt download and failed upload preservation; unchanged song/service fixtures.
+
+
+
+## Service-local media within song progression (2026-10-14)
+
+- `진행 중 자료 추가` inserts an ordinary reference-media element after a chosen
+  rendered form occurrence. Repeated `Int`/`C` labels are distinguished by their
+  sequence position. There is no song-specific or interlude-specific player.
+- Keep Praise versions/forms unchanged. The existing element `config` stores
+  `mediaPlacement: { parentItemId, formKey, signature }`; memo is its UI adapter.
+  Resolve temporary parent IDs when building atomic persistence rows. No new
+  table, schema migration, parallel asset store, or production backfill.
+- The signature covers song/version, output mode, the complete rendered form
+  sequence, and manual slide content. If it no longer matches, the parent is
+  absent, or the sections differ, preserve the files and exclude their slides
+  from output until the operator reselects the location or detaches the media.
+  Hiding the parent also hides attached media. Nested placements are unsupported.
+- Build media with existing image/video/audio paths and interleave only the
+  resulting slide sequence. Reuse image warmup, normal Next/Previous and numeric
+  navigation. Suppress automatic trailing blanks within the inserted sequence;
+  explicit song-form blanks remain. Audio-timed lyric advance stops at inserted
+  media boundaries in both seek directions; operators traverse media normally.
+  The thumbnail board follows playback order,
+  including the resumed song after the media element.
+- Reference media never consumes a song/template slot. Existing sermon,
+  announcement and offering media slots retain their established keys; media in
+  other sections uses its ordinary element identity without a template slot.
+- The existing image bundle editor supports ordering/removal without deleting
+  remote blobs. These edits use normal service save. Uploads use the atomic
+  mutation path; after a save has been attempted, retain blobs and the draft on
+  errors because an unknown outcome may already have committed.
+- Offline Chromium/WebKit coverage: `smoke_progression_media.py` (repeated
+  interludes, multi-chunk forms, board order, row roundtrip, stale/orphan/hidden
+  guards and native UI controls), `smoke_progression_media_save.py` (full and
+  partial atomic saves, new media insertion, upload cleanup and uncertain-save
+  preservation). Fixtures do not write operational records or upload church files.

@@ -489,3 +489,12 @@ function normalizeServiceFormPresetRulePreset(preset, when = {}) {
     omitUnlisted: true,
   };
 }
+
+function normalizeServiceMediaPlacement(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const parentItemId = String(value.parentItemId || "").trim();
+  const formKey = String(value.formKey || "").trim();
+  const signature = String(value.signature || "").trim();
+  if (!parentItemId || !formKey || !signature) return null;
+  return { parentItemId, formKey, signature };
+}

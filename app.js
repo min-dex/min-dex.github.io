@@ -4635,6 +4635,11 @@ function deriveWorshipSlotKey(context = {}) {
   const hasAsset = hasServiceAsset(normalizeServiceAsset(context.asset || context.parsed?.asset || context.config?.asset || context.element?.asset));
   const elementOrder = Number(context.element?.sort_order || context.item?._worshipElementOrder || context.item?.elementOrder || 0) || 0;
 
+  // Reference material is an ordinary media element, never a song/template slot.
+  if (label === "참고화면" && inputMode === "asset") {
+    return ({ sermon: "sermon.media", announcements: "announcements.media", offering: "offering.media" })[sectionKey] || "";
+  }
+
   // A duplicated praise item can retain its source slot while the operator
   // renames it. Numbered main-praise labels are canonical and must win.
   if (sectionKey === "praise") {
@@ -4838,6 +4843,7 @@ function groupWorshipElements(sections = [], elements = []) {
         playback,
         presenterRole,
         connectedPraise,
+        mediaPlacement: config.mediaPlacement,
         benedictionReplacement: config.benedictionReplacement,
         hiddenInPresentation: Boolean(config.hiddenInPresentation || config.hidden_in_presentation),
         templateSuppressed: Boolean(config.templateSuppressed || config.template_suppressed),
@@ -8424,6 +8430,18 @@ function handlePresenterDetailClick(event) {
     return true;
   }
 
+  const mediaOrder = event.target.closest("[data-media-order]");
+  if (mediaOrder) {
+    updatePresenterMediaOrder(mediaOrder);
+    return true;
+  }
+
+  const progressionAdd = event.target.closest("[data-progression-media-add]");
+  if (progressionAdd) {
+    addPresenterProgressionMedia(progressionAdd);
+    return true;
+  }
+
   const mediaPreviewSlide = event.target.closest("[data-reference-media-slide]");
   if (mediaPreviewSlide) {
     selectPresenterMediaPreviewSlide(mediaPreviewSlide);
@@ -8958,6 +8976,12 @@ function handleDetailChange(event) {
   if (pptxFile) {
     pptxFile.closest("details")?.removeAttribute("open");
     void importPresenterPptx(pptxFile);
+    return;
+  }
+
+  const placementField = event.target.closest("[data-media-placement]");
+  if (placementField) {
+    updatePresenterMediaPlacement(placementField);
     return;
   }
 
@@ -10317,6 +10341,7 @@ function emptyServiceItemMemo(rawNote = "") {
     playback: null,
     presenterRole: "",
     connectedPraise: null,
+    mediaPlacement: null,
     hiddenInPresentation: false,
     templateSuppressed: false,
   };
@@ -10517,6 +10542,7 @@ function parseServiceItemMemo(value) {
         playback: normalizeServicePlaybackConfig(parsed.playback, elementType),
         presenterRole,
         connectedPraise,
+        mediaPlacement: normalizeServiceMediaPlacement(parsed.mediaPlacement),
         benedictionReplacement: normalizeBenedictionReplacement(parsed.benedictionReplacement),
         hiddenInPresentation: Boolean(parsed.hiddenInPresentation || parsed.hidden_in_presentation || parsed.hidden),
         templateSuppressed: Boolean(parsed.templateSuppressed || parsed.template_suppressed),
@@ -10753,12 +10779,13 @@ function serializeServiceItemMemo(value = {}) {
   const playback = normalizeServicePlaybackConfig(value.playback, elementType);
   const presenterRole = normalizeServicePresenterRole(value.presenterRole || value.presenter_role || value.role);
   const connectedPraise = normalizeServiceConnectedPraise(value.connectedPraise || value.connected_praise);
+  const mediaPlacement = normalizeServiceMediaPlacement(value.mediaPlacement);
   const benedictionReplacement = normalizeBenedictionReplacement(value.benedictionReplacement);
   const hiddenInPresentation = Boolean(value.hiddenInPresentation || value.hidden_in_presentation || value.hidden);
   const templateSuppressed = Boolean(value.templateSuppressed || value.template_suppressed);
   const defaultAssetKind = serviceAssetKindForElementType(elementType);
   if (!asset.kind && defaultAssetKind && hasServiceAsset(asset)) asset.kind = defaultAssetKind;
-  if (!normalizeAnnouncementRegions(value.announcementRegions) && !slides.length && !scriptureReference && !scriptureReferences.length && !scriptureTranslationId && !scriptureReferencePayloads.length && !manualScripture && !hasServiceIntroSlide(introSlide) && !formHint && !formPreset && !formPresetDisabled && !formPresetRules.length && !templateKey && !templateVariant && !elementType && !outputMode && !inputMode && !textHighlights.length && !hasServiceAsset(asset) && !hasServiceAsset(audioAsset) && !hasServicePlaybackConfig(playback) && !presenterRole && !connectedPraise && !benedictionReplacement && !hiddenInPresentation && !templateSuppressed) return note;
+  if (!normalizeAnnouncementRegions(value.announcementRegions) && !slides.length && !scriptureReference && !scriptureReferences.length && !scriptureTranslationId && !scriptureReferencePayloads.length && !manualScripture && !hasServiceIntroSlide(introSlide) && !formHint && !formPreset && !formPresetDisabled && !formPresetRules.length && !templateKey && !templateVariant && !elementType && !outputMode && !inputMode && !textHighlights.length && !hasServiceAsset(asset) && !hasServiceAsset(audioAsset) && !hasServicePlaybackConfig(playback) && !presenterRole && !connectedPraise && !mediaPlacement && !benedictionReplacement && !hiddenInPresentation && !templateSuppressed) return note;
   const payload = { note };
   if(normalizeAnnouncementRegions(value.announcementRegions))payload.announcementRegions=normalizeAnnouncementRegions(value.announcementRegions);
   if (scriptureReference) payload.scriptureReference = scriptureReference;
@@ -10780,6 +10807,7 @@ function serializeServiceItemMemo(value = {}) {
   if (textHighlights.length) payload.textHighlights = textHighlights;
   if (presenterRole) payload.presenterRole = presenterRole;
   if (connectedPraise) payload.connectedPraise = connectedPraise;
+  if (mediaPlacement) payload.mediaPlacement = mediaPlacement;
   if (benedictionReplacement) payload.benedictionReplacement = benedictionReplacement;
   if (hiddenInPresentation) payload.hiddenInPresentation = true;
   if (templateSuppressed) payload.templateSuppressed = true;
@@ -11980,7 +12008,7 @@ function presenterReferenceMediaItemSectionKey(item = {}) {
 
 function isPresenterReferenceMediaItem(item = {}, memo = parseServiceItemMemo(item.memo)) {
   const sectionKey = presenterReferenceMediaItemSectionKey(item);
-  return PRESENTER_REFERENCE_MEDIA_SECTION_KEYS.has(sectionKey)
+  return Boolean(sectionKey)
     && compactSearchValue(item?.label || "") === "참고화면"
     && serviceMemoInputMode(memo, item) === "asset";
 }
@@ -12198,6 +12226,7 @@ async function uploadPresenterReferenceMediaAsset({ file, imageFiles = null, ser
   let previousMemo = targetItem.memo;
   let previousModified = targetItem._worshipElementTemplateModified;
   let writtenMemo = "";
+  let saveAttempted = false;
   try {
     const uploadedSlides = [];
     for (const selectedFile of imageFiles || [file]) {
@@ -12253,6 +12282,7 @@ async function uploadPresenterReferenceMediaAsset({ file, imageFiles = null, ser
     // and discard its just-uploaded asset before the persistence payload is built.
     const targetIndex = getServiceItems(serviceId).findIndex((candidate) => candidate.id === targetItem.id);
     if (targetIndex < 0) throw new Error("저장할 예배 항목을 다시 찾지 못했습니다.");
+    saveAttempted = true;
     const saved = await saveServiceItemMutation(serviceId, targetIndex, { silent: true, renderAfterSave: false, throwOnError: true });
     if (!saved) throw new Error("미디어 항목을 저장하지 못했습니다.");
     renderCurrentServiceModuleDetail();
@@ -12262,11 +12292,11 @@ async function uploadPresenterReferenceMediaAsset({ file, imageFiles = null, ser
     return true;
   } catch (error) {
     const current = getServiceItems(serviceId).find((candidate) => candidate.id === targetItem?.id);
-    if (writtenMemo && current?.memo === writtenMemo) {
+    if (!saveAttempted && writtenMemo && current?.memo === writtenMemo) {
       current.memo = previousMemo;
       current._worshipElementTemplateModified = previousModified;
     }
-    if (uploadedPaths.length && state.client?.storage?.from) {
+    if (!saveAttempted && uploadedPaths.length && state.client?.storage?.from) {
       try {
         await state.client.storage.from(PRESENTER_MEDIA_STORAGE_BUCKET).remove(uploadedPaths);
       } catch (cleanupError) {
@@ -12353,7 +12383,9 @@ async function addAndUploadPresenterReferenceMedia(input, initialItem = null) {
       const uploaded = await uploadPresenterReferenceMediaAsset({ file, serviceId, item, silentSuccess: true, slideMode });
       if (!uploaded) {
         // Remove only a newly inserted empty item; retain successful files and concurrent edits.
-        if (!initialItem && completed === 0) {
+        const failedItem = getServiceItems(serviceId).find(candidate => candidate.id === item.id);
+        if (!initialItem && completed === 0 && failedItem
+          && !hasServiceAssetContent(parseServiceItemMemo(failedItem.memo).asset)) {
           state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(
             getServiceItems(serviceId).filter((candidate) => candidate.id !== item.id));
         }
@@ -12475,7 +12507,9 @@ async function clearServiceItemAudioAsset(serviceId = state.selectedServiceId, i
 function addPresenterReferenceMedia(serviceId = state.selectedServiceId, requestedSectionKey = "", options = {}) {
   if (!serviceId) return;
   const items = normalizeServiceItemsInCurrentOrder(getServiceItems(serviceId));
-  const sectionKey = PRESENTER_REFERENCE_MEDIA_SECTION_KEYS.has(String(requestedSectionKey || "").trim())
+  const placementParent = options.mediaPlacement && items.find(item => item.id === options.mediaPlacement.parentItemId);
+  const sectionKey = placementParent ? presenterReferenceMediaItemSectionKey(placementParent)
+    : PRESENTER_REFERENCE_MEDIA_SECTION_KEYS.has(String(requestedSectionKey || "").trim())
     ? String(requestedSectionKey).trim()
     : "sermon";
   const sectionIndexes = items
@@ -12499,6 +12533,7 @@ function addPresenterReferenceMedia(serviceId = state.selectedServiceId, request
       componentType: "image",
       inputMode: "asset",
       asset: { kind: "image", name: "", url: "" },
+      mediaPlacement: options.mediaPlacement,
     }),
     _worshipSectionId: source._worshipSectionId || "",
     _worshipSectionKey: sectionKey,
@@ -25232,7 +25267,8 @@ function renderServiceEditorFormControls(item, origIndex, model = serviceItemEdi
   const hasFormData = Boolean(parsed.formHint || parsed.formPreset || parsed.formPresetRules?.length);
   if (!model.song && !hasFormData) return "";
   return `
-    ${renderServiceFormHintInput(item, origIndex, options)}`;
+    ${renderServiceFormHintInput(item, origIndex, options)}
+    ${renderPresenterProgressionAdd(item)}`;
 }
 
 function renderServiceEditorAssigneeControl(item, origIndex, attrs = {}, model = serviceItemEditorModel(item, attrs)) {
@@ -27657,6 +27693,7 @@ function renderPresenterServiceAssetInput(item, index, memo, options = {}) {
     const needsKindSelection = Boolean(asset.url && !detectedKind);
     return `
       <div class="svc-reference-media-input">
+        ${renderPresenterMediaPlacementInput(item, serviceId)}
         <div class="svc-reference-media-toolbar">
           ${needsKindSelection ? `<label class="svc-presenter-input-field">
             <span>종류</span>
@@ -27675,6 +27712,7 @@ function renderPresenterServiceAssetInput(item, index, memo, options = {}) {
         </label>
         ${renderPresenterServiceAssetUrlInput(asset, index, serviceId, "참고 화면 공개 링크", "공개 링크", "파일을 선택하거나 공개 URL 입력")}
         ${renderPresenterReferenceMediaPreview(asset, kind)}
+        ${renderPresenterMediaOrder(item, serviceId)}
       </div>`;
   }
   const kind = ["image", "video", "audio"].includes(elementType) ? elementType : "";
@@ -28515,10 +28553,19 @@ function presenterSyncedLyricsTargetForTime(slides = [], activeIndex = 0, curren
   if (!activeSync) return null;
   const time = Number(currentTime);
   if (!Number.isFinite(time) || time < 0) return null;
+  // Inserted service media is an operator-controlled boundary. A song's audio
+  // clock must not jump over it to a later lyric (or seek across it backwards).
+  const parentId = slides[activeIndex]?.elementId;
+  let segmentStart = -1, segmentEnd = slides.length;
+  slides.forEach((slide, index) => {
+    if (!slide.progressionParentId || slide.progressionParentId !== parentId || presenterSlideIsHidden(slide)) return;
+    if (index < activeIndex) segmentStart = index;
+    else if (index > activeIndex && segmentEnd === slides.length) segmentEnd = index;
+  });
   const groupSlides = slides
     .map((slide, index) => ({ slide, index, sync: presenterSyncTimelineForSlide(slide) }))
-    .filter(({ slide, sync }) =>
-      sync
+    .filter(({ slide, index, sync }) =>
+      index > segmentStart && index < segmentEnd && sync
       && !presenterSlideIsHidden(slide)
       && sync.groupId === activeSync.groupId
       && sync.audioSrc === activeSync.audioSrc
@@ -29471,12 +29518,18 @@ function addPresenterSlideToSubgroup(group, entry) {
   const id = connected?.groupId
     ? `connected-praise:${connected.groupId}`
     : slide.elementId || slide.sectionId || `${group.id}:slide:${entry.slideIndex}`;
-  let subgroup = group.subgroups.find((item) => item.id === id);
+  // Interleaved media must retain actual playback order on the thumbnail board.
+  const sequential = slide.progressionSequence || group.subgroups.at(-1)?.slides.at(-1)?.slide.progressionSequence;
+  let subgroup = sequential
+    ? (group.subgroups.at(-1)?.id === id ? group.subgroups.at(-1) : null)
+    : group.subgroups.find((item) => item.id === id);
   if (!subgroup) {
     const mainPraiseMarker = group.kind === "main-praise" && isPresenterPraiseSectionMarkerSlide(slide);
     const entrancePraise = group.kind === "main-praise" && isPresenterEntrancePraiseSlide(slide);
     const number = group.kind === "main-praise" ? presenterMainPraiseSongSubgroupCount(group) + 1 : group.subgroups.length;
-    const label = group.kind === "main-praise"
+    const earlierSegment = group.subgroups.find(subgroup => subgroup.id === id);
+    const referenceMedia = compactSearchValue(slide.elementLabel || slide.label || "") === "참고화면";
+    const label = earlierSegment ? earlierSegment.label : referenceMedia ? "참고 화면" : group.kind === "main-praise"
       ? mainPraiseMarker
         ? slide.elementLabel || "환영"
         : entrancePraise
@@ -29589,9 +29642,10 @@ function presenterBoardLinkedSongTitle(slide = {}) {
 }
 
 function presenterMainPraiseSongSubgroupCount(group = {}) {
-  return (group.subgroups || []).filter((subgroup) =>
-    !subgroup.slides?.every(({ slide }) => isPresenterPraiseSectionMarkerSlide(slide))
-  ).length;
+  return new Set((group.subgroups || []).filter((subgroup) =>
+    !subgroup.slides?.every(({ slide }) => isPresenterPraiseSectionMarkerSlide(slide)
+      || compactSearchValue(slide.elementLabel || slide.label || "") === "참고화면")
+  ).map(subgroup => subgroup.id)).size;
 }
 
 function isPresenterPraiseSectionMarkerSlide(slide = {}) {
@@ -29822,6 +29876,7 @@ function renderPresenterBoardItemActions(serviceId, context) {
     <div class="svc-board-subgroup-flow" data-service-item-actions data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}">
       <span class="svc-input-status" data-service-input-status role="status" aria-live="polite"></span>
       ${fileControls}
+      ${renderPresenterProgressionAdd(context.item)}
       ${audioControls}
       <button class="reference-new-btn svc-board-subgroup-commit" type="button" data-service-item-commit
         data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}">
@@ -31832,6 +31887,7 @@ function buildServicePresenterSlidesUncached(serviceId, options = {}) {
         return hidden ? slides.map((slide) => ({ ...slide, hiddenInPresentation: true })) : slides;
       })
       .filter(Boolean);
+    slides = insertPresenterProgressionMedia(slides, outputItems);
     slides = normalizePresenterSlidesForServiceOutput(slides, service);
     if (!slides[0] || !isPresenterPreparationSlide(slides[0])) slides = [presenterReadySlide(service), ...slides];
     return withPresenterElementTrailingBlanks(slides, service);
@@ -32030,7 +32086,10 @@ function withPresenterElementTrailingBlanks(slides = [], service = null) {
 
 function shouldAppendPresenterElementTrailingBlank(slide, nextSlide, context = {}) {
   if (!slide || slide.autoTrailingBlank) return false;
-  if (slide.skipTrailingBlank) return false;
+  if (slide.skipTrailingBlank || slide.hiddenInPresentation) return false;
+  const progressionParent = slide.progressionParentId || slide.elementId;
+  if (progressionParent && nextSlide && (slide.progressionParentId || nextSlide.progressionParentId)
+    && progressionParent === (nextSlide.progressionParentId || nextSlide.elementId)) return false;
   if (presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.BLANK) return false;
   const currentKey = presenterSlideElementGroupKey(slide);
   const nextKey = presenterSlideElementGroupKey(nextSlide);
