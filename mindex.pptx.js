@@ -2,7 +2,9 @@
 let presenterPptxRuntimePromise = null;
 const presenterPptxDeckCache = new Map();
 const presenterPptxImports = new Set();
-const PRESENTER_PPTX_MAX_BYTES = 50 * 1024 * 1024;
+const PRESENTER_PPTX_MAX_BYTES = 500 * 1024 * 1024;
+const PRESENTER_PPTX_SINGLE_BYTES = 50 * 1024 * 1024;
+const PRESENTER_PPTX_PART_BYTES = 16 * 1024 * 1024;
 
 function presenterPptxRuntime() {
   if (!presenterPptxRuntimePromise) {
@@ -36,7 +38,7 @@ function advancePresenterPptx(owner, delta) {
 }
 
 async function parsePresenterPptx(bytes) {
-  if (!bytes.byteLength || bytes.byteLength > PRESENTER_PPTX_MAX_BYTES) throw new Error("PPTX는 50MB 이하로 선택해 주세요.");
+  if (!bytes.byteLength || bytes.byteLength > PRESENTER_PPTX_MAX_BYTES) throw new Error("PPTX는 500MB 이하로 선택해 주세요.");
   if (bytes[0] !== 80 || bytes[1] !== 75) throw new Error("암호가 없는 PPTX 파일로 다시 저장해 주세요.");
   const runtime = await presenterPptxRuntime();
   const deck = await runtime.parse(bytes, { lazy: false });
@@ -55,6 +57,85 @@ async function parsePresenterPptx(bytes) {
   } catch (error) { deck.dispose?.(); throw error; }
 }
 
+// Chunking is storage transport only: the original ZIP bytes and existing asset
+// model stay intact. Small/previously saved PPTX URLs keep their direct path.
+async function presenterPptxDigest(bytes) {
+  return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes)), byte => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function fetchPresenterPptxBytes(url, limit) {
+  const response = await fetch(url, { signal: AbortSignal.timeout(120000), credentials: "omit" });
+  if (!response.ok) throw new Error("PPT 파일을 불러오지 못했습니다.");
+  if (Number(response.headers.get("content-length")) > limit) {
+    await response.body?.cancel();
+    throw new Error("PPT 파일 크기를 확인해 주세요.");
+  }
+  const reader = response.body.getReader();
+  const chunks = [];
+  let size = 0;
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > limit) throw new Error("PPT 파일 크기를 확인해 주세요.");
+      chunks.push(value);
+    }
+  } catch (error) { await reader.cancel().catch(() => {}); throw error; }
+  const bytes = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+  return bytes;
+}
+
+async function readPresenterPptxSource(source) {
+  if (!source.pathname.endsWith(".pptx.parts.json")) return fetchPresenterPptxBytes(source.href, PRESENTER_PPTX_MAX_BYTES);
+  const manifest = JSON.parse(new TextDecoder().decode(await fetchPresenterPptxBytes(source.href, 32768)));
+  if (manifest.format !== "mindex-pptx-parts-v1" || !Number.isSafeInteger(manifest.size)
+      || manifest.size <= 0 || manifest.size > PRESENTER_PPTX_MAX_BYTES || !Array.isArray(manifest.parts)
+      || manifest.parts.length !== Math.ceil(manifest.size / PRESENTER_PPTX_PART_BYTES)) {
+    throw new Error("PPT 저장 정보를 확인해 주세요.");
+  }
+  let total = 0;
+  const urls = new Set();
+  for (const [index, part] of manifest.parts.entries()) {
+    const url = new URL(part.url, source);
+    const expected = Math.min(PRESENTER_PPTX_PART_BYTES, manifest.size - index * PRESENTER_PPTX_PART_BYTES);
+    if (url.origin !== source.origin || !["http:", "https:"].includes(url.protocol) || url.username || url.password
+        || urls.has(url.href) || part.size !== expected || !/^[a-f0-9]{64}$/.test(part.sha256)) {
+      throw new Error("PPT 저장 정보를 확인해 주세요.");
+    }
+    urls.add(url.href);
+    total += part.size;
+  }
+  if (total !== manifest.size) throw new Error("PPT 파일 크기가 일치하지 않습니다.");
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  // One part at a time bounds download/hash memory even for large originals.
+  for (const part of manifest.parts) {
+    const chunk = await fetchPresenterPptxBytes(new URL(part.url, source).href, part.size);
+    if (chunk.byteLength !== part.size || await presenterPptxDigest(chunk) !== part.sha256) {
+      throw new Error("PPT 파일 일부가 손상됐습니다. 다시 불러오거나 PPT를 교체해 주세요.");
+    }
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return bytes;
+}
+
+async function uploadPresenterPptxSource(file, upload) {
+  if (file.size <= PRESENTER_PPTX_SINGLE_BYTES) return upload(file, "source.pptx");
+  const parts = [];
+  for (let offset = 0; offset < file.size; offset += PRESENTER_PPTX_PART_BYTES) {
+    const blob = file.slice(offset, offset + PRESENTER_PPTX_PART_BYTES, "application/octet-stream");
+    const sha256 = await presenterPptxDigest(await blob.arrayBuffer());
+    const url = await upload(blob, `source-part-${parts.length + 1}.bin`);
+    parts.push({ url, size: blob.size, sha256 });
+    showToast(`PPT 올리는 중 · ${Math.min(100, Math.round((offset + blob.size) / file.size * 100))}%`, "info");
+  }
+  return upload(new Blob([JSON.stringify({ format: "mindex-pptx-parts-v1", size: file.size, parts })], { type: "application/json" }), "source.pptx.parts.json");
+}
+
 async function loadPresenterPptx(url) {
   const source = new URL(url, location.href);
   if (!["https:", "http:", "blob:"].includes(source.protocol)) throw new Error("PPT 파일 주소를 확인해 주세요.");
@@ -62,10 +143,7 @@ async function loadPresenterPptx(url) {
   if (!entry) {
     entry = { refs: 0, used: Date.now(), value: null };
     entry.promise = (async () => {
-      const response = await fetch(source.href, { signal: AbortSignal.timeout(60000), credentials: "omit" });
-      if (!response.ok) throw new Error("PPT 파일을 불러오지 못했습니다.");
-      if (Number(response.headers.get("content-length")) > PRESENTER_PPTX_MAX_BYTES) throw new Error("PPT 파일이 50MB를 초과합니다.");
-      entry.value = await parsePresenterPptx(new Uint8Array(await response.arrayBuffer()));
+      entry.value = await parsePresenterPptx(await readPresenterPptxSource(source));
       return entry;
     })().catch(error => { presenterPptxDeckCache.delete(source.href); throw error; });
     presenterPptxDeckCache.set(source.href, entry);
@@ -200,7 +278,7 @@ async function importPresenterPptx(input, existingItem = null) {
   const serviceId = input?.dataset?.serviceId || state.selectedServiceId;
   if (!file || !serviceId) return false;
   if (presenterPptxImports.has(serviceId)) { showToast("PPT 삽입을 마친 뒤 다시 선택해 주세요.", "info"); return false; }
-  if (!/\.pptx$/i.test(file.name) || file.size > PRESENTER_PPTX_MAX_BYTES) { showToast("PPTX 파일을 50MB 이하로 선택해 주세요.", "error"); input.value = ""; return false; }
+  if (!/\.pptx$/i.test(file.name) || file.size > PRESENTER_PPTX_MAX_BYTES) { showToast("PPTX 파일을 500MB 이하로 선택해 주세요.", "error"); input.value = ""; return false; }
   if (!state.client?.storage) { showToast("파일 저장소 연결을 확인해 주세요.", "error"); input.value = ""; return false; }
   presenterPptxImports.add(serviceId);
   input.disabled = true;
@@ -223,7 +301,7 @@ async function importPresenterPptx(input, existingItem = null) {
     parsed = await parsePresenterPptx(new Uint8Array(await file.arrayBuffer()));
     const { deck, runtime } = parsed;
     if (!window.confirm(`${file.name} · ${deck.slides.length}장\n\n기본 나타내기·사라지기·이동 효과와 클릭 순서를 재생합니다. 복잡한 효과·영상·음원·글꼴은 PowerPoint와 다를 수 있어 송출 전 확인이 필요합니다.\n\n원본 PPTX(메모·숨긴 장 포함)와 미리보기를 기존 공개 자료 저장소에 올려 이 예배에 연결할까요?`)) return false;
-    const sourceUrl = await upload(file, "source.pptx");
+    const sourceUrl = await uploadPresenterPptxSource(file, upload);
     const slides = [];
     for (let page = 0; page < deck.slides.length; page += 1) {
       const slide = deck.slides[page];

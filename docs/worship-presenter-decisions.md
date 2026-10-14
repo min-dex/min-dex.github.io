@@ -1445,14 +1445,26 @@ automatically deletes an existing service after calendar changes.
 ## PPTX insertion and basic effects (2026-10-14)
 
 - Worship/Presenter section **추가 → PPT 삽입** accepts an unencrypted `.pptx`,
-  at most 50 MiB / 300 pages. Existing `.key` / `.ppt` desktop image-stage import
+  at most 500 MiB / 300 pages. Existing `.key` / `.ppt` desktop image-stage import
   is unchanged. A connected PPT has a **PPT 교체** action.
 - Inspection and thumbnails are local. Before uploading, show page count,
   renderer limitations and confirmation that the original file (including notes
   and hidden pages) plus PNG thumbnails go to the existing public worship media
   bucket. No production fixtures are uploaded by tests; no storage policy or
-  schema change accompanies this feature. Larger files require splitting or
-  compression in PowerPoint; do not silently strip their media to fit.
+  schema change accompanies this feature. Do not silently strip media or alter
+  the original file to fit storage limits.
+- Sources up to 50 MiB keep the direct `.pptx` URL. Larger sources use immutable
+  16 MiB binary objects plus `source.pptx.parts.json` in the same bucket. The
+  existing `pptx.url` points to this transport manifest (`mindex-pptx-parts-v1`,
+  total size, ordered parts with URL/size/SHA-256); no second asset model or DB
+  schema is introduced. Each storage object remains below the 50 MiB limit.
+  Readers validate the manifest bounds, same-origin unique part URLs, exact
+  part lengths and SHA-256 before parsing the reassembled original bytes.
+  Downloads are sequential, bounded and timed out; failures retain the previous
+  live frame and use the existing error/retry path. The source cache deduplicates
+  both direct and multipart sources. Upload progress is shown for large files.
+  Partial upload cleanup and uncertain atomic-save retention apply to all parts,
+  the manifest and thumbnails together.
 - Persist an existing `imported_deck` asset with `pptx.url`, and per-thumbnail
   `pptx: {page, clicks, hidden}`. The source URL is immutable per upload. These
   fields survive canonical config/source/document normalization. Import targets
@@ -1489,5 +1501,16 @@ automatically deletes an existing service after calendar changes.
   Real local RIA_2026-07-26 (43 pages) and TOV_2026-07-12 (52 pages) passed full
   thumbnail generation and mocked upload/save in both engines. Selected effect
   pages from Elem_2026-08-09 and 어린이부 예배 2025-12-14 also passed output
-  playback, using local parser fixtures: their 164/161 MB originals are correctly
-  rejected by the upload limit, not claimed as full-file import successes.
+  playback in the original integration audit. Large-file insertion is covered
+  by `tests/smoke_pptx_large.py`: full import, exact original-byte reconstruction,
+  click playback, corrupt/missing parts, foreign URLs, size limits, partial
+  cleanup and uncertain-save retention. Tests use isolated storage/save doubles;
+  real source files and operational records are never modified.
+
+- Large-source acceptance: Elem_2026-08-09 (171,690,294 bytes, 96 pages) and
+  어린이부 예배 2025-12-14 (168,362,655 bytes, 30 pages) both passed full
+  insertion, all thumbnail uploads to isolated storage, exact SHA-256 source
+  reconstruction and selected click-effect playback in Chromium and WebKit.
+  Each source used 11 parts plus one manifest; the atomic save ran once per
+  insertion. Original local-file hashes remained unchanged. This verifies the
+  application path, not a real production upload or mixer hardware.
