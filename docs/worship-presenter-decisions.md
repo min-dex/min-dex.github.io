@@ -1405,3 +1405,9 @@ automatically deletes an existing service after calendar changes.
   Cache cleanup must never unload the consumed active video.
 - Chromium/WebKit first-frame smoke verifies readiness, no preselection playback,
   manual playback, autoplay after selection, and active-node cache ownership.
+
+### 2026-10-14 Background smoke contract correction
+- A missing/unregistered clean-output background is black, not an inferred
+  fallback theme. The full smoke now checks that behavior and separately
+  restores the registered asset to verify a decoded image node with no CSS
+  image reload. Checks inspect the active output layer.

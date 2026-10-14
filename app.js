@@ -627,6 +627,7 @@ const state = {
   songById: new Map(),
   scriptureBooks: [],
   scriptures: [],
+  scripturesLoaded: false,
   bibleTranslations: [],
   bibleBookVerses: [],
   bibleVerseCache: new Map(),
@@ -2866,6 +2867,7 @@ function rememberConfig(config) {
 }
 
 function connectClient() {
+  state.scripturesLoaded = false;
   state.connectionError = "";
   if (!state.config.url || !state.config.anonKey) {
     state.client = null;
@@ -3023,7 +3025,7 @@ async function switchModule(moduleName, options = {}) {
 
 function runModuleEntryLoads(moduleName) {
   void (async () => {
-    if (moduleName === "scripture" && !state.scriptures.length && !state.scriptureError) {
+    if (moduleName === "scripture" && !state.scripturesLoaded && !state.scriptureError) {
       if (!state.scriptureBooks.length) await loadScriptureBooks();
       await loadScriptures();
     }
@@ -3471,6 +3473,7 @@ async function loadScriptures({ silent = false } = {}) {
   }
 
   state.scriptureError = "";
+  state.scripturesLoaded = true;
   const scriptures = (data || []).map(normalizeServerScripture);
   state.uiVerses = extractUiVerses(scriptures);
   state.scriptures = scriptures.filter((scripture) => !uiVerseSlot(scripture)).sort(sortScriptures);
@@ -5600,6 +5603,7 @@ async function loadBibleTranslationsOnce({ silent = false } = {}) {
 async function loadBibleBookVerses({ silent = false } = {}) {
   if (!requireClient({ silent })) return;
   if (!state.selectedBookCode || !state.selectedBibleTranslationId) {
+    state.bibleReaderLoading = false;
     state.bibleBookVerses = [];
     return;
   }
@@ -5613,6 +5617,7 @@ async function loadBibleBookVerses({ silent = false } = {}) {
   const selectedChapter = state.selectedBibleChapter;
   const cacheKey = bibleVerseCacheKey(selectedTranslationId, selectedBookCode, selectedChapter);
   if (state.bibleVerseCache.has(cacheKey)) {
+    state.bibleReaderLoading = false;
     state.bibleReaderError = "";
     state.bibleBookVerses = state.bibleVerseCache.get(cacheKey);
     persistUiState();
@@ -5621,6 +5626,7 @@ async function loadBibleBookVerses({ silent = false } = {}) {
   }
   const persistentCachedRows = readPersistentBibleChapterCache(selectedTranslationId, selectedBookCode, selectedChapter);
   if (persistentCachedRows) {
+    state.bibleReaderLoading = false;
     state.bibleReaderError = "";
     state.bibleVerseCache.set(cacheKey, persistentCachedRows);
     state.bibleBookVerses = persistentCachedRows;

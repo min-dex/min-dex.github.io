@@ -246,3 +246,13 @@ at desktop and narrow widths with `tests/smoke_announcement_editor_layout.cjs`.
 
 Announcement editors use a transparent, horizontally unpadded board container
 and 5px textarea side padding to avoid nested panel gutters.
+
+## Scripture loading ownership (2026-10-14)
+
+- Returning to a memory-cached or browser-cached Bible chapter immediately
+  clears the reader loading state and displays its text. Completion or failure
+  from another chapter must not replace it or clear a newer chapter's loading.
+- A successful saved-scripture list request is complete even when it returns
+  no visible rows. Tab reentry reuses that result; explicit refresh still reads
+  the database, and a new client connection resets the completion marker.
+- Regression: `tests/smoke_scripture_loading.py` (Chromium and WebKit).

@@ -10156,7 +10156,7 @@ def main() -> int:
                     """
                     (() => {
                       const root = document.getElementById('presenterOutputRoot');
-                      const slide = root?.querySelector('.presenter-slide');
+                      const slide = root?.querySelector('.presenter-output-layer.is-active .presenter-slide');
                       const styles = root ? getComputedStyle(root) : null;
                       return {
                         serviceType: root?.dataset.serviceType || '',
@@ -10185,9 +10185,10 @@ def main() -> int:
                     and no_chromakey_payload["backgroundImage"] == ""
                     and no_chromakey_state["serviceType"] == no_chromakey_payload["serviceType"]
                     and no_chromakey_state["noChromakey"]
-                    and no_chromakey_state["hasBackground"]
-                    and "url(" in no_chromakey_state["inlineBackground"]
-                    and "url(" in no_chromakey_state["computedBackground"]
+                    and not no_chromakey_state["hasBackground"]
+                    and not no_chromakey_state["inlineBackground"]
+                    and no_chromakey_state["computedBackground"] == "none"
+                    and no_chromakey_state["backgroundColor"] == "rgb(0, 0, 0)"
                     and no_chromakey_state["slideClass"] == "presenter-slide--lyrics"
                     and no_chromakey_state["elementType"] == "praise"
                     and no_chromakey_state["layout"] == "lower_bar_text"
@@ -10219,6 +10220,28 @@ def main() -> int:
                     pass_("presenter-output-pixel-match-no-chromakey", json.dumps(no_chromakey_pixels, ensure_ascii=False))
                 else:
                     fail("presenter-output-pixel-match-no-chromakey", json.dumps(no_chromakey_pixels, ensure_ascii=False))
+
+                # With the registered source restored, use the decoded background node.
+                restored_background = page.evaluate("""() => {
+                  publishPresenterState({ force: true });
+                  return presenterStatePayload(state.presenter.serviceId).backgroundImage;
+                }""")
+                output_page.wait_for_function("""source => {
+                  const root=document.getElementById('presenterOutputRoot');
+                  const image=root?.querySelector('.presenter-output-background img');
+                  return Boolean(source && root?.classList.contains('has-decoded-background')
+                    && image?.complete && image.naturalWidth>0 && image.src.endsWith(source));
+                }""", arg=restored_background, timeout=15000)
+                decoded_background = output_page.evaluate("""() => {
+                  const root=document.getElementById('presenterOutputRoot');
+                  return {background:root.classList.contains('has-background'),
+                    css:getComputedStyle(root).backgroundImage,
+                    image:root.querySelector('.presenter-output-background img')?.naturalWidth || 0};
+                }""")
+                if decoded_background['background'] and decoded_background['css']=='none' and decoded_background['image']>0:
+                    pass_('presenter-output-decoded-background', json.dumps(decoded_background))
+                else:
+                    fail('presenter-output-decoded-background', json.dumps(decoded_background))
 
                 fullscreen_transition_state = output_page.evaluate(
                     """
