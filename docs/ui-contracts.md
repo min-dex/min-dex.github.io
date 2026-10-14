@@ -288,3 +288,13 @@ and 5px textarea side padding to avoid nested panel gutters.
   a service enters its worship screen; Back restores the archive search, view,
   month and scroll. Existing legacy archive links remain readable.
 - This is navigation only: no record migration, backfill or worship writes.
+
+## Recent worship heading and boot motion
+
+- The recent-worship tab supplies the page title. Its body starts directly with
+  the first week heading/date; keep All Worship on that same row, not a separate
+  empty title/action row. Search results retain their contextual heading.
+- Boot reveal uses a short ease-out rise, with a slight wordmark stagger. Keep
+  child animations alive during overlay dismissal so a fast load does not snap
+  them to their end positions. Readiness still controls dismissal without delay;
+  reduced-motion and presenter-output exclusions remain in effect.

@@ -43,7 +43,7 @@
         pointer-events: none;
         opacity: 0;
         visibility: hidden;
-        transition: opacity 180ms ease, visibility 0s 180ms;
+        transition: opacity 220ms ease-out, visibility 0s 220ms;
       }
       body.ui-booting .mindex-boot {
         opacity: 1;
@@ -57,16 +57,16 @@
         font: 700 22px/1 system-ui, sans-serif;
         letter-spacing: .22em;
       }
-      body.ui-booting .mindex-boot-cross { animation: mindex-boot-reveal 450ms ease-out both; }
-      body.ui-booting .mindex-boot-wordmark { animation: mindex-boot-reveal 450ms 90ms ease-out both; }
+      .mindex-boot-cross { animation: mindex-boot-reveal 650ms cubic-bezier(.22, 1, .36, 1) both; }
+      .mindex-boot-wordmark { animation: mindex-boot-reveal 650ms 60ms cubic-bezier(.22, 1, .36, 1) both; }
       @keyframes mindex-boot-reveal {
-        from { opacity: 0; transform: translateY(5px); }
+        from { opacity: 0; transform: translateY(6px); }
         to { opacity: 1; transform: translateY(0); }
       }
       html.presenter-output-document .mindex-boot { display: none; }
       @media (prefers-reduced-motion: reduce) {
         .mindex-boot { transition: none; }
-        body.ui-booting :is(.mindex-boot-cross, .mindex-boot-wordmark) { animation: none; }
+        :is(.mindex-boot-cross, .mindex-boot-wordmark) { animation: none; }
       }
       body.ui-booting .app-shell,
       body.ui-booting .toast-region {
@@ -221,7 +221,7 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261014-initial-data-loading";
+        const fallbackVersion = "20261014-heading-boot-polish";
         const modules = [
           "vendor/lucide.min.js", "vendor/supabase-js.min.js",
           "mindex.constants.js", "mindex.inline-text.js", "mindex.design-tokens.js", "mindex.worship-model.js",

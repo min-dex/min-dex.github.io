@@ -25810,25 +25810,26 @@ function renderServiceDashboard(options = {}) {
     servicesByDate.get(key).push(service);
   }
   refs.detailPane.innerHTML = `
-    <div class="service-dashboard">
-      <section class="service-dashboard-section">
+    <div class="service-dashboard" role="region" aria-label="${escapeAttr(title)}">
+      ${q ? `<section class="service-dashboard-section">
         <div class="service-section-head">
           <div>
-            <h2 class="service-date-list-title">${q ? "검색 결과" : escapeHtml(title)}</h2>
+            <h2 class="service-date-list-title">검색 결과</h2>
           </div>
           <button class="reference-new-btn secondary" type="button" data-service-list>전체 예배</button>
         </div>
         ${q ? (services.length ? `<div class="service-date-grid service-date-grid--dashboard">
           ${services.map((service) => renderServiceDateCard(service, { showType: true })).join("")}
         </div>` : `<p class="service-no-results">검색 결과가 없습니다.</p>`) : ""}
-      </section>
-      ${!q ? weeks.map(week => `
+      </section>` : ""}
+      ${!q ? weeks.map((week, index) => `
         <section class="service-dashboard-section">
           <div class="service-section-head">
             <div>
               <h3 class="service-date-list-title">${week.label}</h3>
               <p class="service-week-range">${escapeHtml(formatServiceWeekRange(week.start, week.end))}</p>
             </div>
+            ${index === 0 ? '<button class="reference-new-btn secondary" type="button" data-service-list>전체 예배</button>' : ""}
           </div>
           <div class="service-week-board">
             ${week.days.map(date => renderServiceWeekDay(date, servicesByDate.get(toLocalDateStr(date)) || [])).join("")}
