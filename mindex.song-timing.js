@@ -1,4 +1,4 @@
-/* Elem-style manual song timing. Local assets only; never writes worship/song records. */
+/* Elem-style song timing. Optional immutable Storage sharing; never writes worship/song records. */
 (function (root) {
   'use strict';
   const profiles = new Map();
@@ -86,6 +86,79 @@
     if (old?.url) URL.revokeObjectURL(old.url);
     revision++;
   }
+  const PACKAGE_LIMIT = 50 * 1024 * 1024;
+  const digestBytes = async bytes => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)), b => b.toString(16).padStart(2, '0')).join('');
+  async function pack(profile, slides) {
+    const error = validate(profile, slides);
+    if (error) throw Error(error);
+    if (profile.audio.size > PACKAGE_LIMIT) throw Error('공유할 음원은 50MB보다 작아야 합니다.');
+    const bytes = await profile.audio.arrayBuffer();
+    const audioFingerprint = await digestBytes(bytes);
+    if (audioFingerprint !== profile.audioFingerprint) throw Error('음원이 변경됐어요. 시각을 다시 확인해 주세요.');
+    const header = new TextEncoder().encode(JSON.stringify({
+      format: 'mindex-song-timing', version: 1, key: profile.key,
+      audioName: String(profile.audioName || '음원'), audioType: profile.audio.type,
+      audioFingerprint, audioSize: bytes.byteLength, lyricsFingerprint: profile.lyricsFingerprint,
+      starts: profile.starts, duration: profile.duration, enabled: Boolean(profile.enabled),
+    }));
+    if (header.byteLength > 1024 * 1024) throw Error('타이밍 정보가 너무 큽니다.');
+    const length = new Uint8Array(4); new DataView(length.buffer).setUint32(0, header.byteLength);
+    const blob = new Blob(['MINDXST1', length, header, bytes], { type: 'application/octet-stream' });
+    if (blob.size > PACKAGE_LIMIT) throw Error('음원과 타이밍을 합쳐 50MB 이하여야 합니다.');
+    return blob;
+  }
+  async function unpack(blob, key, slides) {
+    if (!(blob instanceof Blob) || blob.size < 13 || blob.size > PACKAGE_LIMIT) throw Error('지원하지 않는 동기화 파일 크기입니다.');
+    const prefix = await blob.slice(0, 12).arrayBuffer();
+    if (new TextDecoder().decode(prefix.slice(0, 8)) !== 'MINDXST1') throw Error('민덱스 동기화 파일이 아닙니다.');
+    const length = new DataView(prefix).getUint32(8);
+    if (!length || length > 1024 * 1024 || length + 12 >= blob.size) throw Error('동기화 파일이 손상됐습니다.');
+    const header = JSON.parse(await blob.slice(12, 12 + length).text());
+    if (header.format !== 'mindex-song-timing' || header.version !== 1 || header.key !== key) throw Error('현재 곡·버전과 다른 동기화 자료입니다.');
+    const audio = blob.slice(12 + length, blob.size, typeof header.audioType === 'string' ? header.audioType : '');
+    if (audio.size !== header.audioSize || await digestBytes(await audio.arrayBuffer()) !== header.audioFingerprint) throw Error('음원 검증에 실패했습니다. 다시 불러와 주세요.');
+    const profile = { key, audio, audioName: String(header.audioName || '음원'), audioFingerprint: header.audioFingerprint,
+      lyricsFingerprint: header.lyricsFingerprint, starts: header.starts, duration: header.duration, enabled: header.enabled === true };
+    const error = validate(profile, slides);
+    if (error) throw Error(error);
+    return profile;
+  }
+  async function sharedPrefix(key) {
+    return 'song-timing/v1/' + await digestBytes(new TextEncoder().encode(key));
+  }
+  async function share(profile, slides, bucket) {
+    if (!bucket) throw Error('공유 저장소에 연결되지 않았습니다.');
+    const bundle = await pack(profile, slides);
+    const path = `${await sharedPrefix(profile.key)}/${Date.now()}-${crypto.randomUUID()}.mindex-timing`;
+    // Append-only: never overwrite/delete another computer's saved version.
+    const { error } = await bucket.upload(path, bundle, { contentType: 'application/octet-stream', upsert: false, cacheControl: '31536000' });
+    if (error) throw error;
+    return path;
+  }
+  async function loadShared(key, slides, bucket) {
+    if (!bucket) throw Error('공유 저장소에 연결되지 않았습니다.');
+    const prefix = await sharedPrefix(key);
+    const listing = await bucket.list(prefix, { limit: 1, sortBy: { column: 'created_at', order: 'desc' } });
+    if (listing.error) throw listing.error;
+    const entry = listing.data?.[0];
+    if (!entry) throw Error('이 곡·버전의 공유 저장본이 없습니다. 저장한 컴퓨터에서 공유 저장을 먼저 눌러 주세요.');
+    if (!/^\d+-[0-9a-f-]+\.mindex-timing$/.test(entry.name) || Number(entry.metadata?.size) > PACKAGE_LIMIT) throw Error('올바른 공유 저장본이 아닙니다.');
+    const result = await bucket.download(`${prefix}/${entry.name}`);
+    if (result.error) throw result.error;
+    return unpack(result.data, key, slides);
+  }
+  async function decodedDuration(blob) {
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(); audio.preload = 'metadata';
+    try {
+      return await new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(Error('음원 확인 시간이 초과됐습니다.')), 15000);
+        audio.onloadedmetadata = () => { clearTimeout(timer); Number.isFinite(audio.duration) && audio.duration > 0 ? resolve(audio.duration) : reject(Error('음원 길이를 확인하지 못했습니다.')); };
+        audio.onerror = () => { clearTimeout(timer); reject(Error('공유 음원을 재생할 수 없습니다.')); };
+        audio.src = url;
+      });
+    } finally { audio.removeAttribute('src'); audio.load(); URL.revokeObjectURL(url); }
+  }
   function controls(serviceId, entries) {
     const seen = new Set();
     return entries.filter(({ slide }) => slide.songTimingKey && !seen.has(slide.elementId) && seen.add(slide.elementId))
@@ -111,13 +184,14 @@
     dialog.setAttribute('aria-labelledby', 'song-timing-title');
     dialog.innerHTML = `<h2 id="song-timing-title">찬양 음원 동기화</h2>
       <p>${escapeHtml(all[0]?.elementTitle || all[0]?.title || '')}</p>
-      <p>이 브라우저에만 저장됩니다. 음원을 들으며 각 장의 시작을 기록하세요. 가사는 1초 먼저, 빈 화면·음표는 기록한 시각에 넘깁니다.</p>
+      <p>동기화 저장은 이 브라우저에 보관합니다. 다른 컴퓨터에서는 공유 저장 후 공유 불러오기를 사용하세요. 음원을 들으며 각 장의 시작을 기록하세요. 가사는 1초 먼저, 빈 화면·음표는 기록한 시각에 넘깁니다.</p>
       <label>음원 선택 <input type="file" accept="audio/*" data-timing-file></label>
       <p data-timing-filename></p><audio controls preload="metadata"></audio>
       <div class="song-timing-pages">${slides.map((slide, i) => `<div class="song-timing-row"><label>${i + 1}장 · ${escapeHtml(slide.text || '빈 화면')}<input aria-label="${i + 1}장 시작 초" type="number" min="0" step="0.1" data-timing-start="${i}" value="${draft.starts[i] ?? ''}" placeholder="초"></label><button type="button" class="btn secondary" data-timing-stamp="${i}">현재 시각 기록</button></div>`).join('')}</div>
       <label><input type="checkbox" data-timing-enabled ${draft.enabled ? 'checked' : ''}> 음악 재생 중 자동 넘김</label>
       <p role="status" data-timing-status>${old && !fresh ? '가사가 바뀌었어요. 모든 장의 시각을 다시 기록해 주세요.' : '음원과 시각을 저장한 뒤, 해당 곡에서 음악 재생을 누르세요.'}</p>
-      <div class="song-timing-actions"><button type="button" class="btn secondary" data-timing-close>닫기</button><button type="button" class="btn" data-timing-save>동기화 저장</button></div>`;
+      <p>공유 저장한 음원·타이밍은 공개 링크로 접근할 수 있습니다. 공유 파일은 음원 포함 50MB 이하입니다.</p>
+      <div class="song-timing-actions"><button type="button" class="btn secondary" data-timing-load-shared>공유 불러오기</button><button type="button" class="btn secondary" data-timing-share>공유 저장</button><button type="button" class="btn secondary" data-timing-close>닫기</button><button type="button" class="btn" data-timing-save>동기화 저장</button></div>`;
     const audio = dialog.querySelector('audio');
     const status = dialog.querySelector('[data-timing-status]');
     const saveButton = dialog.querySelector('[data-timing-save]');
@@ -164,6 +238,44 @@
         dialog.querySelector(`[data-timing-start="${i}"]`).value = draft.starts[i];
         status.textContent = `${i + 1}장 · ${draft.starts[i]}초 기록됨`;
       }
+      if (button.hasAttribute('data-timing-share') || button.hasAttribute('data-timing-load-shared')) {
+        const loading = button.hasAttribute('data-timing-load-shared');
+        if (loading && draft.audio && !window.confirm('공유 저장본으로 현재 음원·타이밍을 교체할까요? 기존 공유 저장본은 삭제하지 않습니다.')) return;
+        busy = true;
+        let savedLocally = false;
+        dialog.querySelectorAll('button,input').forEach(control => { control.disabled = true; });
+        status.textContent = loading ? '공유 음원·타이밍을 확인하고 있어요…' : '음원·타이밍을 공유 저장하고 있어요…';
+        try {
+          const currentSlides = () => {
+            const current = pagesFor(presenterSlidesForService(serviceId).filter(s => s.elementId === elementId));
+            if (current[0]?.songTimingKey !== key || fingerprint(current) !== draft.lyricsFingerprint) throw Error('편집 중 곡 또는 가사가 바뀌었어요. 닫고 다시 열어 주세요.');
+            return current;
+          };
+          const bucket = state.client?.storage?.from('mindex-worship-media');
+          if (loading) {
+            const incoming = await loadShared(key, currentSlides(), bucket);
+            incoming.duration = await decodedDuration(incoming.audio);
+            await save(incoming, currentSlides());
+            audio.pause();
+            if (previewUrl) URL.revokeObjectURL(previewUrl);
+            draft = incoming; previewUrl = URL.createObjectURL(draft.audio); audio.src = previewUrl;
+            dialog.querySelector('[data-timing-filename]').textContent = draft.audioName;
+            dialog.querySelector('[data-timing-enabled]').checked = draft.enabled;
+            dialog.querySelectorAll('[data-timing-start]').forEach(input => { input.value = draft.starts[Number(input.dataset.timingStart)]; });
+            refreshPresenterForService(serviceId);
+            status.textContent = '공유 음원·타이밍을 이 컴퓨터에 저장했어요. 다시 열어도 사용할 수 있어요.';
+          } else {
+            draft.enabled = dialog.querySelector('[data-timing-enabled]').checked;
+            await save(draft, currentSlides());
+            savedLocally = true;
+            await share(draft, currentSlides(), bucket);
+            audio.pause(); refreshPresenterForService(serviceId);
+            status.textContent = '공유 저장했어요. 다른 컴퓨터에서 같은 곡의 공유 불러오기를 누르세요.';
+          }
+        } catch (error) { status.textContent = `공유 ${loading ? '불러오기' : '저장'} 실패: ${error.message || '연결 상태를 확인해 주세요.'} ${savedLocally ? '이 컴퓨터에는 저장됐고 기존 공유본은 유지됩니다.' : '기존 저장본은 유지됩니다.'}`; }
+        finally { busy = false; dialog.querySelectorAll('button,input').forEach(control => { control.disabled = false; }); }
+        return;
+      }
       if (button.hasAttribute('data-timing-save')) {
         busy = true; saveButton.disabled = true;
         try {
@@ -180,7 +292,7 @@
     });
     document.body.append(dialog); dialog.showModal();
   }
-  root.MindexSongTiming = { keyFor, pagesFor, fingerprint, validate, decorate, controls, open, save, ready, ownsSource: source => [...profiles.values()].some(p => p.url === source), get revision() { return revision; } };
+  root.MindexSongTiming = { keyFor, pagesFor, fingerprint, validate, decorate, controls, open, save, ready, pack, unpack, share, loadShared, ownsSource: source => [...profiles.values()].some(p => p.url === source), get revision() { return revision; } };
   if (typeof document !== 'undefined') document.addEventListener('click', e => {
     const button = e.target.closest('[data-song-timing-open]');
     if (button) { e.preventDefault(); void open(button.dataset.serviceId, button.dataset.elementId).catch(error => showToast(error.message, 'error')); }
