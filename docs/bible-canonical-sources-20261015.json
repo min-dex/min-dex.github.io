@@ -25,5 +25,58 @@
   },
   "status": "production_db_exact_full_readback_verified",
   "backup": "Full original corpus and translation record retained privately; old XML no longer the KJV baseline",
-  "limits": "Pinned curated electronic edition; no guarantee of an error-free original printing; other translations remain separately reviewed"
+  "limits": "Pinned curated electronic edition; no guarantee of an error-free original printing; other translations remain separately reviewed",
+  "adoptedTranslations": [
+    {
+      "translationId": "t01",
+      "dbTranslationId": "bb12533e-261e-492b-914d-c745ff2acedc",
+      "source": {
+        "provider": "CrossWire Bible Society",
+        "translation": "King James Version",
+        "edition": "CrossWire KJV 3.1, substantially based on 1769 Oxford; curated electronic edition, not a facsimile transcription guarantee",
+        "repository": "https://gitlab.com/crosswire-bible-society/kjv",
+        "commit": "d490be7e34762deb2c76cb2c1306d4808e27890d",
+        "sourceFile": "kjv.osis.xml",
+        "sourceSHA256": "4bcbfe45722fca396adbeac9c81025bbb173cb1e30296da90864f0400cb0e3f5",
+        "retrievedAt": "2026-10-14",
+        "importedAt": "2026-10-15",
+        "license": "CrossWire module distribution: GPL; plain KJV text and source terms documented in kjv.conf and CrossWire attribution",
+        "attributionURL": "https://wiki.crosswire.org/CrossWire_KJV",
+        "conversion": "All 31102 milestone verses, whitespace folded only; study notes/Strong’s/morphology excluded from verse bodies; 116 canonical psalm titles +22 acrostic headings preserved as section_title; no XML baseline text used as fallback.",
+        "configSHA256": "d9a0d1a471f0f121fa7e31e40349cbf69823e3daeeb8cafd0c1cac65c4e4fa00"
+      },
+      "counts": {
+        "books": 66,
+        "chapters": 1189,
+        "verses": 31102,
+        "canonicalHeadings": 138
+      }
+    },
+    {
+      "translationId": "t10",
+      "dbTranslationId": "555482f7-28c5-437d-b958-ac2f5f800705",
+      "source": {
+        "provider": "대한성서공회",
+        "translation": "표준새번역",
+        "edition": "1993 Standard New Korean Version / original SAE publisher electronic edition; physical printing unspecified; not SAENEW(2001)",
+        "version": "SAE",
+        "url": "https://www.bskorea.or.kr/bible/korbibReadpage.php?version=SAE",
+        "editionHistoryURL": "https://bskorea.or.kr/biblecom/bibcome05_07.php",
+        "retrievedAt": "2026-10-14",
+        "importedAt": "2026-10-15",
+        "chapterSourceManifestSHA256": "3d8f4a3fb9d29dbe004b8b61f3cd4c3d5a163da1a10e01197e1b15d3542c325c",
+        "conversion": "Milestone number + outer span delimiting; notes excluded; all publisher section headings and26 external speaker labels retained as headings; inline speaker/absence notices retained as displayed by publisher. Explicit combined ranges produce6 covered UI markers;14 absent UI markers remain. No source bodies filled from XML.",
+        "license": "Copyright Korean Bible Society; this source adoption does not establish a new public redistribution permission."
+      },
+      "counts": {
+        "books": 66,
+        "chapters": 1189,
+        "readerRows": 31102,
+        "activeDbRows": 31096,
+        "totalDbRows": 31103,
+        "headingBearingRows": 2568
+      }
+    }
+  ],
+  "latestBatch": "sae-bsk-canonical-20261015"
 }

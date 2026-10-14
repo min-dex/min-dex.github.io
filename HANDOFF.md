@@ -565,3 +565,30 @@ gzip environment) /46 Node tests pass. The6015-check cache release refreshes
 all1189 KJV chapters and retains earlier repair scopes. Deployment and live UI
 verification are recorded separately in docs/bible-canonical-sources-20261015.json.
 Other translations remain separately reviewed; no all-editions error-free claim.
+
+
+## Canonical SAE source adoption ·2026-10-15
+
+User authorized trustworthy identified source replacement, not continued repair
+of an uncertain XML baseline. Entire SAE publisher electronic corpus (original
+1993 translation identity, not SAENEW2001; physical printing unspecified) now
+provides66 books /1189 chapters /31102 reader rows. All chapter source bytes and
+hashes are archived. The address/outer-span parser preserves canonical text
+through malformed font closures; all31082 numbered source rows match prior
+publisher-body extraction.2568 heading-bearing verses and26 outside speaker
+labels are retained, inline speaker/absence notices follow publisher display.
+Six covered markers remain inactive in the operational DB;14 absence markers
+are explicit. Existing inactive corrupt1SA14:53 stays inactive; no rows deleted.
+
+Production exact read-back verifies all31103 stored rows, including inactive
+records, and the entire translation metadata record. Biblia installs the same
+source-derived package. Full temporary new-batch originals remain pending
+operational QA/retirement. KJV previous local originals were explicitly retired
+and receipts compacted; historical reconstruction fixtures are deliberately
+retired, while full current-source conformance remains tested.
+
+Biblia37 Python /46 Node tests pass; PostgreSQL18.4 verified whole replacement
+backup/rollback/replay/drift/source metadata/client ACL.7107 cache checks pass.
+Cache release refreshes all1189 SAE chapters and preserves earlier source/repair
+scopes. Live deployment and reading/search/output verification are separate.
+See docs/bible-canonical-sources-20261015.json for source metadata and limits.
