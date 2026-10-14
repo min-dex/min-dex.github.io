@@ -1393,3 +1393,15 @@ automatically deletes an existing service after calendar changes.
   remove the layer; blackout remains immediate. Preview CSS behavior is unchanged.
 - Verified the October 11 third-service scripture-to-special-song UI transition
   using read-only production data, including first-use/cold-cache screenshots.
+
+### 2026-10-14 Video first-frame warmup
+- Keep the intentional black loading fallback for videos. Output warms the next
+  video within the existing 12-slide lookahead with preload=auto, without play()
+  or seeking. Save-data/2G skip behavior and the two-entry cache limit remain.
+  Controller preparation retains metadata-only loading.
+- When the cached video has a decoded first frame, consume that same paused
+  time-zero node into the output layer without resetting src or calling load().
+  Apply the selected slide's mute, autoplay, loop and controls configuration.
+  Cache cleanup must never unload the consumed active video.
+- Chromium/WebKit first-frame smoke verifies readiness, no preselection playback,
+  manual playback, autoplay after selection, and active-node cache ownership.

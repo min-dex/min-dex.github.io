@@ -3873,7 +3873,7 @@ function commitPresenterOutputFrame(root, payload, slide, frameState, token, opt
     }
     const nextLayer = layers.next;
     if (nextLayer.dataset.presenterFrameToken !== String(token)) {
-      nextLayer.innerHTML = html;
+      populatePresenterOutputLayer(nextLayer, html);
       nextLayer.dataset.presenterFrameToken = String(token);
     }
     nextLayer.dataset.presenterFrameKey = frameKey;
@@ -3899,7 +3899,7 @@ function commitPresenterOutputFrame(root, payload, slide, frameState, token, opt
     root.removeAttribute("aria-busy");
     return;
   }
-  layers.next.innerHTML = html;
+  populatePresenterOutputLayer(layers.next, html);
   layers.next.dataset.presenterFrameToken = String(token);
   layers.next.dataset.presenterFrameKey = frameKey;
   layers.next.classList.add("is-next");
@@ -3909,6 +3909,29 @@ function commitPresenterOutputFrame(root, payload, slide, frameState, token, opt
       root.removeAttribute("aria-busy");
       commit();
     });
+}
+
+function populatePresenterOutputLayer(layer, html) {
+  const template = document.createElement("template");
+  template.innerHTML = html;
+  layer.replaceChildren(template.content);
+  const placeholder = layer.querySelector("video.presenter-video");
+  const source = normalizePresenterMediaSource(placeholder?.getAttribute("src") || "");
+  const warmed = presenterOutputVideoWarmupCache.get(source)?.video;
+  if (warmed && !warmed.error && warmed.paused && warmed.currentTime === 0
+    && warmed.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+    presenterOutputVideoWarmupCache.delete(source);
+    // Keep the decoded first frame and network buffer; never reset src or load().
+    for (const attribute of [...warmed.attributes]) {
+      if (attribute.name !== "src") warmed.removeAttribute(attribute.name);
+    }
+    for (const attribute of placeholder.attributes) {
+      if (attribute.name !== "src") warmed.setAttribute(attribute.name, attribute.value);
+    }
+    warmed.muted = placeholder.muted;
+    warmed.defaultMuted = placeholder.defaultMuted;
+    placeholder.replaceWith(warmed);
+  }
 }
 
 function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState = {}, token = presenterOutputRenderState.token, onActivated = null) {
@@ -4600,7 +4623,9 @@ function warmPresenterOutputNextVideo(payload = {}) {
   const source = slides.slice(activeIndex + 1, end)
     .map(presenterOutputVideoSource)
     .find(Boolean);
-  if (source) warmPresenterOutputVideoMetadata(source);
+  if (source && source !== presenterOutputVideoSource(slides[activeIndex])) {
+    warmPresenterOutputVideoMetadata(source, { firstFrame: true });
+  }
 }
 
 function warmPresenterServiceAssets(serviceId = state.selectedServiceId) {
@@ -4640,16 +4665,17 @@ function presenterOutputVideoSource(slide = null) {
   return normalizePresenterMediaSource(slide.videoSrc || slide.text);
 }
 
-function warmPresenterOutputVideoMetadata(source = "") {
+function warmPresenterOutputVideoMetadata(source = "", options = {}) {
   const normalized = normalizePresenterMediaSource(source);
   if (!normalized) return null;
   const cached = presenterOutputVideoWarmupCache.get(normalized);
   if (cached) {
     cached.lastUsed = Date.now();
+    if (options.firstFrame) cached.video.preload = "auto";
     return cached.video;
   }
   const video = document.createElement("video");
-  video.preload = "metadata";
+  video.preload = options.firstFrame ? "auto" : "metadata";
   video.muted = true;
   video.playsInline = true;
   video.setAttribute("playsinline", "");
