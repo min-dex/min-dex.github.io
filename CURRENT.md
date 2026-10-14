@@ -43,3 +43,22 @@ with a separate chained receipt and retained pre-follow-up compressed original.
 No other-edition proofreading completion is implied. The cache release includes
 a distinct GEN1 key to bypass both pre-repair and earlier COG restoration caches.
 Deployment verification remains separate.
+
+
+## SAE complete electronic text comparison · 2026-10-14
+
+All1189 SAE publisher chapters compared with31102 local rows. Restored764
+punctuation/spacing differences only;19 speaker/absent-verse editorial notices
+are recorded separately. Six combined-range markers and14 absence markers are
+accounted for. No SAENEW wording imported. This is complete publisher electronic
+comparison, not independent print collation or assurance against publisher errors.
+
+Production transaction returned bible_sae_complete_repaired /764 /764. An
+independent public API read-back exactly matches every expected full row. Biblia
+applied the same correction and31 Python tests pass, including chained exact
+original gzip reconstruction. Full DB backups remain private, with client ACL
+revoked. Source bytes, per-chapter hashes and decisions are preserved.
+
+The corresponding cache release covers643 SAE chapters, including prior repairs.
+Local3181 cache assertions and existing output fitting test pass. Web deployment
+and live UI checks remain pending. Overall12-translation audit remains incomplete.

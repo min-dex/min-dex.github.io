@@ -1917,3 +1917,11 @@ This refresh does not claim completion of all original-edition proofreading.
   still retains the existing 150 ms protection; viewport/focus restoration remains
   in the existing patch path. Delayed hymn assets can replace the pending board
   without requiring a pointer move or page reload.
+
+
+### Verified SAE punctuation cache renewal ·2026-10-14
+
+Preserve previous repair scopes and COG GEN1 override. Bump only the independently
+verified SAE scopes after764-row production confirmation; old persistent caches
+remain recoverable. User authorized continuing original-edition repairs and
+operational cache renewal. Local3181 assertions and bounded fitting pass.
