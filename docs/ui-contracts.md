@@ -264,3 +264,14 @@ and 5px textarea side padding to avoid nested panel gutters.
   A quick A → B → A return waits for the original A read, and only the currently
   selected chapter owns reader text, errors, and loading completion.
 - Concurrent-entry regression: `tests/smoke_loading_reentry.py`.
+
+## Initial loading identity
+
+- Before the shell is ready, show the existing cross silhouette and MINDEX
+  wordmark at viewport center, respecting the saved/system light or dark theme.
+- Keep the first paint self-contained (inline SVG/CSS), with one short reveal,
+  no looping animation and no artificial minimum loading duration. Existing
+  runtime readiness dismisses it; do not wait for authentication/data fetches.
+- Reduced-motion mode is static. The status is named for assistive technology
+  and becomes hidden after readiness. Presenter output routes never show the
+  branding; their existing black startup and safety behavior remain unchanged.

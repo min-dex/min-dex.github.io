@@ -30,6 +30,44 @@
         color-scheme: light;
       }
       body.ui-booting { background: var(--mindex-boot-bg, #181816); }
+      .mindex-boot {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-content: center;
+        justify-items: center;
+        gap: 20px;
+        background: var(--mindex-boot-bg, #181816);
+        color: var(--mindex-boot-ink, #f3f3ef);
+        pointer-events: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 180ms ease, visibility 0s 180ms;
+      }
+      body.ui-booting .mindex-boot {
+        opacity: 1;
+        visibility: visible;
+        transition: none;
+      }
+      .mindex-boot-cross { width: 45px; height: 55px; color: #ff8bc2; }
+      html[data-theme="light"] .mindex-boot-cross { color: #b8467d; }
+      .mindex-boot-wordmark {
+        padding-left: .22em;
+        font: 700 22px/1 system-ui, sans-serif;
+        letter-spacing: .22em;
+      }
+      body.ui-booting .mindex-boot-cross { animation: mindex-boot-reveal 450ms ease-out both; }
+      body.ui-booting .mindex-boot-wordmark { animation: mindex-boot-reveal 450ms 90ms ease-out both; }
+      @keyframes mindex-boot-reveal {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      html.presenter-output-document .mindex-boot { display: none; }
+      @media (prefers-reduced-motion: reduce) {
+        .mindex-boot { transition: none; }
+        body.ui-booting :is(.mindex-boot-cross, .mindex-boot-wordmark) { animation: none; }
+      }
       body.ui-booting .app-shell,
       body.ui-booting .toast-region {
         visibility: hidden;
@@ -80,6 +118,12 @@
     </script>
   </head>
   <body class="ui-booting">
+    <div class="mindex-boot" role="status" aria-label="MINDEX 시작 중">
+      <svg class="mindex-boot-cross" viewBox="128 104 256 304" fill="currentColor" aria-hidden="true">
+        <path d="M224 104h64v80h96v64h-96v160h-64V248h-96v-64h96z" />
+      </svg>
+      <span class="mindex-boot-wordmark" aria-hidden="true">MINDEX</span>
+    </div>
     <script>
       (() => {
         document.body.dataset.theme = document.documentElement.dataset.theme;
@@ -178,7 +222,7 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261014-form-photo-background";
+        const fallbackVersion = "20261014-boot-brand";
         const modules = [
           "vendor/lucide.min.js", "vendor/supabase-js.min.js",
           "mindex.constants.js", "mindex.inline-text.js", "mindex.design-tokens.js", "mindex.worship-model.js",
