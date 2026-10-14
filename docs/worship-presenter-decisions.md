@@ -1642,3 +1642,13 @@ automatically deletes an existing service after calendar changes.
   synthetic OOXML fixtures, not a claim about the original church decks.
   Church files were neither uploaded nor modified; no operational DB writes.
   Physical mixer/speaker acceptance remains unverified.
+### 2026-10-14 Praise input mode preserves chosen versions
+- Switching between score/lyrics loading is a presentation-mode change, not a
+  new song selection. Keep the linked song and an eligible explicitly selected
+  version; choose a default only when the fully hydrated catalog proves that
+  version is unavailable for the target mode.
+- Missing/partially hydrated catalog rows retain saved IDs. Manual praise still
+  deliberately unlinks the DB song/version. Medley metadata remains intact.
+- `smoke_praise_mode_switch.py` reproduces the old score-to-lyrics version reset
+  and covers compatible/incompatible versions, DB row roundtrip, medley retention,
+  missing/partial catalog and manual unlink in Chromium/WebKit without DB writes.

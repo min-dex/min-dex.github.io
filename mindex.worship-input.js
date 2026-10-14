@@ -408,7 +408,20 @@ function updateServiceItemField(field, options = {}) {
     } else {
       parsed.slides = [];
       item.memo = serializeServiceItemMemo(parsed);
-      applyServiceSongSelectionWithService(item, service);
+      if (!item.song_id) {
+        applyServiceSongSelectionWithService(item, service);
+      } else {
+        // Switching presentation mode is not a new song selection. Keep a
+        // compatible chosen version, including IDs awaiting catalog hydration.
+        const song = serviceItemLinkedSong(item);
+        const versionId = item.version_id || item.song_version_id;
+        if (song && !songNeedsRelationalHydration(item.song_id)
+          && !serviceSelectableSongVersions(song, item, service).some((version) => version.id === versionId)) {
+          const version = defaultServiceSongVersion(song, item, service);
+          item.version_id = version?.id || null;
+          item.song_version_id = item.version_id;
+        }
+      }
     }
     item.memo = serializeServiceItemMemo(parsed);
   }
