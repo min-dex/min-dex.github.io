@@ -57,6 +57,16 @@ def main():
                   const records=parseServiceSourceText(source);
                   if(records.length!==1){rounds.push({error:'record_count',count:records.length,source});break;}
                   applyServiceSourceRecord(service.id,0,records[0]);
+                  const applied=getServiceItems(service.id)[0];
+                  const parsed=parseServiceItemMemo(applied.memo);
+                  const type=serviceMemoElementType(parsed);
+                  const body=serviceItemManualBodyForSave(applied,parsed,worshipDbElementTypeForSave(type));
+                  if(body){
+                    const config=serviceElementConfigForSave({},parsed,{item:applied,service,omitSlides:true,manualBody:body});
+                    const restored=serviceElementManualSlides({element_type:worshipDbElementTypeForSave(type),body},config);
+                    if(JSON.stringify(restored)!==JSON.stringify(parsed.slides))throw Error(c.name+' save/reload screen boundaries lost');
+                    applied.memo=serializeServiceItemMemo({...parsed,slides:restored});
+                  }
                   const after=snapshot(getServiceItems(service.id)[0]);
                   const changed=Object.keys(before).filter(k=>JSON.stringify(expected[k])!==JSON.stringify(after[k]));
                   rounds.push({changed,after,source});
@@ -87,6 +97,11 @@ def main():
                 if(!created||!parseServiceItemMemo(created.memo).announcementRegions?.news.includes('바뀐 소식'))throw Error('full apply omitted body');
                 if(!buildServiceSourceText(service,{items:getServiceItems(service.id)}).includes('바뀐 소식'))throw Error('full export omitted body');
               } finally {serviceSourceTextareaForService=originalTextarea;}
+              const legacy={element_type:'praise',body:'one\n\ntwo'};
+              for(const bodySlideLengths of [undefined,[999],[-1,7],[1.5,4.5],[3,3]]) {
+                const slides=serviceElementManualSlides(legacy,{bodySlideLengths});
+                if(JSON.stringify(slides)!==JSON.stringify(['one','two']))throw Error('legacy/corrupt boundary fallback failed');
+              }
               return results;
             }''')
             out=Path(__file__).resolve().parents[1]/'docs/source-input-audit-20261015.json'

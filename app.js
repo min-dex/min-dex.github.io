@@ -4893,6 +4893,18 @@ function serviceElementManualSlides(element = {}, config = {}, context = {}) {
   const body = String(element.body || "").trim();
   if (!body) return [];
   if (!["praise", "plain_text", "body"].includes(normalizeWorshipElementType(element.element_type))) return [];
+  const lengths = config.bodySlideLengths;
+  if (Array.isArray(lengths) && lengths.length
+    && lengths.every(length => Number.isSafeInteger(length) && length > 0 && length <= body.length)
+    && lengths.reduce((sum, length) => sum + length, 0) + 2 * (lengths.length - 1) === body.length) {
+    let offset = 0;
+    const screens = lengths.map(length => {
+      const screen = body.slice(offset, offset + length);
+      offset += length + 2;
+      return screen;
+    });
+    if (screens.join("\n\n") === body) return screens;
+  }
   return body
     .split(/\n\s*\n/g)
     .map((block) => block.trim())

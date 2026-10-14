@@ -624,6 +624,7 @@ function buildWorshipPersistenceRows(service, items, existingSectionById = {}, e
       item,
       service,
       omitSlides: Boolean(manualBody) || scriptureBody,
+      manualBody,
     });
     const asset = normalizeServiceAsset(parsed.asset || existingElement?.asset || existingConfig.asset);
     const sourceRefBase = serviceElementSourceRefForSave(existingSourceRef, item, parsed, Boolean(manualBody));
@@ -772,6 +773,12 @@ function serviceElementConfigForSave(existingConfig = {}, parsed = emptyServiceI
   delete config.slides;
   delete config.slideOverrides;
   delete config.slide_overrides;
+  // The body remains canonical; lengths preserve screen boundaries without
+  // duplicating its text in config (blank lines can also occur within a screen).
+  if (options.manualBody && parsed.slides.length
+    && parsed.slides.join("\n\n") === options.manualBody) {
+    config.bodySlideLengths = parsed.slides.map(slide => slide.length);
+  } else delete config.bodySlideLengths;
   if (parsed.note) config.note = parsed.note;
   else delete config.note;
   if (parsed.formHint) {
