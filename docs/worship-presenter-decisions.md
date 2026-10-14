@@ -1552,15 +1552,16 @@ automatically deletes an existing service after calendar changes.
   Media commands never become fade/emphasis effects. Object-click interactive
   sequences do not become extra Next clicks. Node volume, mute and indefinite
   repeat are honored. Browser-supported codecs are required (tested MP4 and
-  WAV); original interactive object triggers, trimming, finite repeat counts,
-  slide-spanning background music and media-end dependency timing are not yet
-  PowerPoint-compatible. See Microsoft's [OOXML Command contract](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.presentation.command).
+  WAV); the playback-conditions section below extends object clicks, trimming, repeats,
+  slide-spanning audio and media-end timing. Other unsupported PowerPoint
+  effects remain outside this renderer’s scope. See Microsoft's [OOXML Command contract](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.presentation.command).
 - The live PPT preview offers **PPT 영상·음원 재생 / 일시정지** when the current
   page contains media. A transient, uniquely identified command travels inside
   `pptxProgress`, scoped to its source/page key. Duplicate payloads preserve
   playback position. Manual play resumes all media on that page; pause cancels
   pending media timers. It does not save operational data.
-- Leaving the page, live scripture takeover, blackout and output teardown pause
+- Leaving the page pauses local media except explicitly spanning audio (below).
+  Live scripture takeover, blackout and output teardown pause
   media and cancel delayed starts immediately, before any visual crossfade.
   Destroy releases player sources before parsed-deck eviction. Rewind restores
   visual effect state with media paused, rather than replaying consumed sounds.
@@ -1601,3 +1602,43 @@ automatically deletes an existing service after calendar changes.
   one aggregate request, full-history adoption, loading reentry, refresh/draft
   isolation, picker selections and medley persistence. Operational timing runs
   block all writes and compare existing service IDs/revisions before and after.
+
+## PPT playback conditions and spanning audio (2026-10-14)
+
+- Honor `cMediaNode.numSld` for audio across forward pages of the same imported
+  item/source/service. Preserve the actual native player and its time, volume,
+  pause state and decoded source; do not restart from zero at a visual swap.
+  Pin the parsed deck while its blob URLs are in use. Page span includes the
+  source page. Reverse navigation, leaving the span/item/service, non-PPT
+  output, live scripture, blackout and failed page loading stop carried audio.
+  A direct jump into a later page does not invent/replay an unheard prior track.
+- Current-page metadata includes carried audio, so existing play/pause controls
+  remain available on pages without their own media. Preview remains silent.
+  Manual pause cancels pending starts; explicit resume continues current time.
+  Browser sound blocking remains visible and Space recovery includes carried
+  tracks. No new saved playback state or production backfill is introduced.
+- Parse Office media trim as removed start/end durations (milliseconds by
+  default, also h/min/s/ms/µs/ns). Prepare the trimmed first frame before showing
+  the page. Repetition uses the trimmed segment and honors thousandths-based
+  finite repeat counts, indefinite repeat and explicit repeat duration. End
+  dependencies wait for actual completed playback, including repeats/pauses,
+  rather than a guessed duration or a zero-duration visual effect.
+- Keep object-click sequences separate from Next groups. The output’s target
+  object supports click/Enter/Space for its media command. Main Next navigation
+  preserves existing click groups; duplicate payloads do not replay commands.
+- Primary references: [media span](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.presentation.commonmedianode),
+  [trim](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.office2010.powerpoint.mediatrim),
+  [time units](https://learn.microsoft.com/en-us/openspecs/office_standards/ms-pptx/a3ead080-d9cb-4b4a-8014-6d815248c23b),
+  [repeat timing](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.presentation.commontimenode).
+- Verification: `smoke_pptx_conditions.py` exercises native cross-page audio,
+  identity/time continuity, cache pinning, range stop, manual controls, reverse
+  navigation/service/scripture/blackout stop, trim, finite repeat, duration
+  limit, separate interactive click and completed-media entrance in Chromium
+  and WebKit. Existing media/import/large-source tests remain required.
+- Real unchanged local children's decks (2026-08-09 p88 and 2025-12-14 p4) were
+  parsed and played in both engines, including their original object-click
+  pause and keyboard resume. A read-only scan of 57 locally available worship
+  PPTs found no spanning-audio/trim/repeat example: those cases use explicit
+  synthetic OOXML fixtures, not a claim about the original church decks.
+  Church files were neither uploaded nor modified; no operational DB writes.
+  Physical mixer/speaker acceptance remains unverified.

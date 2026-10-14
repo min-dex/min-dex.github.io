@@ -13,5 +13,9 @@ nonvisual timing entries; object-click interactive sequences are not inserted
 into normal Next navigation. Volume/mute/repeat settings are exposed to the app.
 Explicit player mode works with SVG text; previews still use static badges.
 The app owns playback, all output navigation, timers and media teardown, and
-disables independent hyperlinks and automatic slide advancement. The media1
+disables independent hyperlinks and automatic slide advancement. The media2
 module URL revision refreshes the changed ESM dependency graph after deployment.
+
+Playback settings additionally expose slide span, start/end trim, finite repeat
+count/duration, separate object-click effects and media-end dependencies. These
+are interpreted by Mindex native output players, not by a Microsoft runtime.

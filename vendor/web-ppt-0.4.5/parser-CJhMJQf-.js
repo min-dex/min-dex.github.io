@@ -1323,12 +1323,26 @@ function sourceAutoStart(effect) {
       && Number(h(condition, "delay") || 0) === 0);
   });
 }
-function sr(t, e, n) {
-  if (h(t, "presetClass") === "mediacall") {
-    // Interactive object clicks are separate from the main Next sequence.
-    for (let parent = t.parentElement; parent; parent = parent.parentElement) {
-      if (h(parent, "nodeType") === "interactiveSeq") return null;
+function sourceInteractiveNode(t) {
+  for (let parent = t; parent; parent = parent.parentElement)
+    if (h(parent, "nodeType") === "interactiveSeq") return parent;
+  return null;
+}
+function sourceMediaDependency(t) {
+  const slide = t.ownerDocument;
+  for (let parent = t; parent && parent.localName !== "timing"; parent = parent.parentElement) {
+    for (const condition of Array.from(f(parent, "stCondLst")?.children || [])) {
+      if (h(condition, "evt") !== "onEnd") continue;
+      const id = h(f(condition, "tn"), "val");
+      const referenced = Array.from(slide.getElementsByTagName("*")).find(node => node.localName === "cTn" && h(node, "id") === id);
+      if (referenced?.parentElement?.localName === "cMediaNode") return He(referenced.parentElement);
+      if (referenced && Array.from(referenced.getElementsByTagName("*")).some(node => node.localName === "cmd")) return He(referenced);
     }
+  }
+}
+function sr(t, e, n, interactive = false) {
+  if (!interactive && sourceInteractiveNode(t)) return null;
+  if (h(t, "presetClass") === "mediacall") {
     const target = He(t);
     const command = Array.from(t.getElementsByTagName("*")).find(node => node.localName === "cmd");
     const value = h(command, "cmd") || "";
@@ -1336,7 +1350,7 @@ function sr(t, e, n) {
     const action = from ? "play" : ({ play: "play", pause: "pause", togglepause: "togglePause", stop: "stop" })[value.toLowerCase()];
     if (target === null || !action) return null;
     const nodeType = h(t, "nodeType");
-    return { target, kind: "media", effect: "media", action,
+    return { target, kind: "media", effect: "media", action, waitForMedia: sourceMediaDependency(t),
       startSeconds: from ? Number(from[1]) : undefined,
       delayMs: rr(t), durationMs: 0, autoStart: sourceAutoStart(t),
       trigger: nodeType === "withEffect" ? "withPrev" : nodeType === "afterEffect" ? "afterPrev" : "click" };
@@ -1346,6 +1360,7 @@ function sr(t, e, n) {
   const o = h(t, "presetClass") ?? "entr", s = Jn[o] ?? "entrance", l = v(t, "presetID") ?? 10, i = v(t, "presetSubtype") ?? 0, c = h(t, "nodeType") ?? "clickEffect", u = We(t), a = u ? tr(u) : null, d = (a == null ? void 0 : a.effect) ?? Qn[l] ?? "fade", m = (a == null ? void 0 : a.dir) ?? Kn[i], p = c === "withEffect" ? "withPrev" : c === "afterEffect" ? "afterPrev" : "click", b = Ue(t) ?? 500, g = s === "motion" ? Ge(t) : null, k = g && e > 0 && n > 0 ? er(g, e, n) : void 0;
   return {
     target: r,
+    waitForMedia: sourceMediaDependency(t),
     effect: d,
     dir: m,
     delayMs: rr(t),
@@ -1356,17 +1371,40 @@ function sr(t, e, n) {
     motionPath: k
   };
 }
+// Office time offsets default to milliseconds; trim.end is removed duration.
+function sourceMediaSeconds(value) {
+  const match = /^(\d+(?:\.\d+)?)(h|min|ms|s|µs|ns)?$/.exec(value || "");
+  return match ? Number(match[1]) * ({ h: 3600, min: 60, s: 1, ms: .001, "µs": .000001, ns: .000000001 }[match[2] || "ms"]) : 0;
+}
+function sourceInteractiveEffects(slide, width, height) {
+  return Array.from(slide.getElementsByTagName("*")).filter(node => node.localName === "cTn" && h(node, "presetClass") && sourceInteractiveNode(node)).map(node => {
+    const sequence = sourceInteractiveNode(node);
+    const condition = Array.from(f(sequence, "stCondLst")?.children || []).find(value => h(value, "evt") === "onClick");
+    const effect = sr(node, width, height, true);
+    return effect && condition ? { ...effect, clickTarget: He(condition) } : null;
+  }).filter(effect => effect && effect.clickTarget !== null);
+}
 function sourceMediaSettings(slide) {
-  return Array.from(slide.getElementsByTagName("*")).filter(node => node.localName === "cMediaNode").map(node => {
-    const timing = f(node, "cTn");
+  const all = Array.from(slide.getElementsByTagName("*"));
+  return all.filter(node => node.localName === "cMediaNode").map(node => {
+    const timing = f(node, "cTn"), target = He(node);
     const condition = f(f(timing, "stCondLst"), "cond");
     const delay = h(condition, "delay");
-    return { target: He(node), volume: Math.min(1, Math.max(0, (v(node, "vol") ?? 100000) / 100000)),
-      muted: h(node, "mute") === "1", loop: h(timing, "repeatCount") === "indefinite",
+    const shape = all.find(value => value.localName === "pic" && Array.from(value.getElementsByTagName("*")).some(child => child.localName === "cNvPr" && Number(h(child, "id")) === target));
+    const trim = Array.from(shape?.getElementsByTagName("*") || []).find(value => value.localName === "trim");
+    const repeat = h(timing, "repeatCount");
+    const durationLoop = repeat === null && sourceMediaSeconds(h(timing, "repeatDur")) > 0;
+    return { target, volume: Math.min(1, Math.max(0, (v(node, "vol") ?? 100000) / 100000)),
+      muted: ["1", "true"].includes(h(node, "mute")), loop: repeat === "indefinite" || durationLoop,
+      repeatCount: repeat === "indefinite" || durationLoop ? null : Math.max(0, Number(repeat ?? 1000) / 1000),
+      repeatSeconds: sourceMediaSeconds(h(timing, "repeatDur")),
+      trimStart: sourceMediaSeconds(h(trim, "st")), trimEnd: sourceMediaSeconds(h(trim, "end")),
+      slideCount: Math.max(1, v(node, "numSld") ?? 1),
       autoStart: delay !== null && delay !== "indefinite" && !h(condition, "evt"),
       delayMs: Number(delay) || 0 };
   });
 }
+
 function Xe(t) {
   const e = {};
   for (const n of H(t, "gd")) {
@@ -3347,7 +3385,8 @@ function go(t, e, n, r, o, s, l, i) {
     layoutName: h(R(d, "cSld"), "name") ?? void 0,
     transition: ke(c) ?? ke(d),
     animations: or(f(c, "timing"), L, B),
-    mediaSettings: sourceMediaSettings(c)
+    mediaSettings: sourceMediaSettings(c),
+    interactiveAnimations: sourceInteractiveEffects(c, L, B)
   };
 }
 export {

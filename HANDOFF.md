@@ -64,7 +64,7 @@ outrank reviewed decisions.
 
 PPT insertion and basic automatic/click effects are connected to the current
 worship presenter. See the current decision log's PPTX section for supported
-scope, 50 MiB limit, public-media confirmation, transient effect progress and
+scope, 500 MiB original-source limit, public-media confirmation, transient effect progress and
 verification boundaries. `mindex.pptx.js` lazily loads the licensed local renderer;
 no production data/schema/policy change is part of this implementation.
 
@@ -530,3 +530,13 @@ Each thread should read this document first, then inspect current files before e
 ## Final Reminder
 
 The user values practical church usability over technical cleverness. Make the app calmer, faster, clearer, and safer. Preserve curated data. When uncertain, inspect the source data and ask only when a wrong automatic edit could damage real worship material.
+
+## PPT playback handoff (2026-10-14)
+
+`mindex.pptx.js` now owns cross-slide audio lifetime independently of the SVG
+page viewer. The presenter decision log defines range/safety stop, object-click
+commands, trim, repeat count/duration and media-end dependencies. The vendor
+module revision is media2; changing the parser requires invalidating this ESM
+cache path as well as the application release. Use `smoke_pptx_conditions.py`
+with the existing PPT/media/large-source tests. Real-deck and synthetic-fixture
+verification are deliberately distinguished in the decision log.

@@ -4509,7 +4509,7 @@ function handlePresenterVideoRecoveryKey(event) {
   if (event.key !== " " || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey
     || event.target?.closest?.("input, textarea, select, button, [contenteditable='true']")) return false;
   const layer = document.querySelector("#presenterOutputRoot .presenter-output-layer.is-active");
-  if (layer?._pptxSession && layer.querySelector('[data-autoplay-blocked="true"]')) {
+  if (layer?._pptxSession && document.querySelector('#presenterOutputRoot [data-autoplay-blocked="true"]')) {
     if (!event.repeat) layer._pptxSession.recover();
     return true;
   }
