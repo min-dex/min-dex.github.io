@@ -2606,6 +2606,7 @@ function extractPresenterVideoSource(value) {
 function normalizePresenterMediaSource(value) {
   const source = String(value || "").trim();
   if (!source) return "";
+  if (globalThis.MindexSongTiming?.ownsSource(source)) return source;
   if (/^(javascript|data):/i.test(source)) return "";
   if (/^(https?:\/\/|\/|\.{1,2}\/)/i.test(source)) return source;
   const worshipBackgroundSource = normalizePresenterWorshipBackgroundSource(source);

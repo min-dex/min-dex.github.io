@@ -1,0 +1,17 @@
+const assert = require('node:assert/strict');
+require('../mindex.song-timing.js');
+const T = globalThis.MindexSongTiming;
+const slides = [{type:'lyrics',text:'첫 가사'}, {type:'blank',text:''}, {type:'lyrics',text:'마지막'}];
+const profile = {audio:new Blob(['audio']), audioFingerprint:'hash', lyricsFingerprint:T.fingerprint(slides), duration:20, starts:[2,6,10]};
+assert.equal(T.validate(profile,slides),'');
+for(const starts of [[2,null,10],[2,NaN,10],[2,Infinity,10],[2,1,10],[2,6,20],[2,6],[0,.1,10],[2,6,6.5]]) assert.ok(T.validate({...profile,starts},slides), JSON.stringify(starts));
+assert.ok(T.validate(profile,[...slides].reverse()));
+assert.ok(T.validate(profile,[...slides,{type:'lyrics',text:'새 장'}]));
+assert.notEqual(T.keyFor('song-a','v'),T.keyFor('song-b','v'));
+assert.notEqual(T.keyFor('song-a','v'),T.keyFor('song-a','v2'));
+assert.equal(T.fingerprint([{type:'lyrics',text:'가'}]),T.fingerprint([{type:'lyrics',text:'가'}]));
+const item={id:'keep',song_id:'song-a',memo:'medley unchanged',sort_order:4};
+const before=JSON.stringify(item);
+T.decorate(slides,item,{id:'song-a'},{id:'v'});
+assert.equal(JSON.stringify(item),before);
+console.log('PASS timing validation, effective cue order, identity isolation and immutable inputs');

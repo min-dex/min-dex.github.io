@@ -28501,7 +28501,7 @@ function presenterSyncTimelineForSlide(slide = null) {
   const groupId = String(sync.groupId || "").trim();
   const audioSrc = normalizePresenterMediaSource(sync.audioSrc || "");
   if (!groupId || !audioSrc) return null;
-  const start = Number(sync.start);
+  const start = sync.start == null ? NaN : Number(sync.start);
   return {
     groupId,
     audioSrc,
@@ -28515,7 +28515,6 @@ function presenterSyncedLyricsTargetForTime(slides = [], activeIndex = 0, curren
   if (!activeSync) return null;
   const time = Number(currentTime);
   if (!Number.isFinite(time) || time < 0) return null;
-  const effectiveTime = time + activeSync.lead;
   const groupSlides = slides
     .map((slide, index) => ({ slide, index, sync: presenterSyncTimelineForSlide(slide) }))
     .filter(({ slide, sync }) =>
@@ -28528,7 +28527,7 @@ function presenterSyncedLyricsTargetForTime(slides = [], activeIndex = 0, curren
     .sort((a, b) => a.sync.start - b.sync.start || a.index - b.index);
   let target = null;
   groupSlides.forEach((candidate) => {
-    if (candidate.sync.start <= effectiveTime) target = candidate;
+    if (Math.max(0, candidate.sync.start - candidate.sync.lead) <= time) target = candidate;
   });
   return target;
 }
@@ -29776,6 +29775,7 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
         </header>` : ""}
       ${inputControls}
       ${renderServiceSlotMusic(context)}
+      ${globalThis.MindexSongTiming?.controls(serviceId, subgroup.slides) || ""}
       <div class="svc-board-grid">
         ${slides.map(({ slide, slideIndex, formLabel }) =>
           renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, formLabel)).join("")}
@@ -30420,6 +30420,10 @@ function runPresenterAction(action, serviceId = state.selectedServiceId, options
   if (presenterControllerIsLive(serviceId)) clearPresenterBoardSelection({ render: false });
   preparePresenterNavigation(serviceId);
 
+  if (["next", "prev", "first", "last", "jump"].includes(action)
+    && state.presenter.slides[state.presenter.index]?.syncTimeline?.localTiming) {
+    stopServiceMusicPlayback({ render: false });
+  }
   state.presenter.jumpDraft = "";
   if (["next", "prev", "first", "last", "jump"].includes(action)) {
     const requestedIndex = Number(options.index);
@@ -31734,6 +31738,7 @@ function presenterSlideBuildSourceSignature(serviceId) {
   const items = state.serviceItems[serviceId] || [];
   const presenterRows = state.worshipPresenterSlides[serviceId] || [];
   return JSON.stringify({
+    songTimingRevision: globalThis.MindexSongTiming?.revision || 0,
     service: [
       service.id || "",
       service.type_id || "",
@@ -32113,6 +32118,8 @@ function presenterElementTrailingBlankSlide(slide, index, service = null) {
     hidden_in_presentation: false,
     hidden: false,
     autoTrailingBlank: true,
+    syncTimeline: null,
+    songTimingKey: "",
     readyServiceName: "",
     sort: (Number(slide.sort) || index) + 0.009,
   };
@@ -32730,7 +32737,8 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
           ...lyricsSlides,
         ], index, service)
       : lyricsSlides;
-    return withIntro(presenterApplySyncedLyricsConfig(slides, syncConfig, item, index));
+    const syncedSlides = presenterApplySyncedLyricsConfig(slides, syncConfig, item, index);
+    return withIntro(globalThis.MindexSongTiming?.decorate(syncedSlides, item, song, version) || syncedSlides);
   }
 
   if (!specialSongItem && song && presenterHymnScoreAssetSlides(song, version, displayText).length) {

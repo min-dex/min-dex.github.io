@@ -1753,3 +1753,13 @@ automatically deletes an existing service after calendar changes.
   repeated projection, edited-content preservation, original-object immutability
   and calendar-only automatic scheduling in Chromium/WebKit. Network writes
   are blocked; no production cleanup/backfill is included.
+
+### 2026-10-14 Elem manual song timing integration
+
+- Add manual per-page audio timing to linked-song lyric presenter groups. Save audio bytes and timings in a separate IndexedDB store (`mindex-song-timing-v1`), keyed by song and effective version ID; never update song, version, service memo, medley or ordering records.
+- This first integration is browser-local. It does not upload audio, import Elem library data, or sync devices. The editor explicitly labels this boundary. Closing without saving discards edits.
+- Exact normalized lyric/page content validates timing; changed lyrics, form sequence or pagination blocks local automatic advance until recalibrated. SHA-256 of a replacement audio file resets timing unless the bytes match. Do not infer timestamps or silently repair reversed times.
+- All pages must have finite ordered timestamps within decoded audio duration, with a 0.2-second minimum gap between both recorded times and effective cues. Lyrics advance one second early; blank/music-note pages have no lead. Final lyrics remain until manual navigation (no automatic postlude/cross insertion in this phase).
+- Reuse controller audio playback, source/group isolation, blank/live-scripture guards. Manual navigation pauses local synchronized playback; pause/seek/stop use the existing audio clock. Disabled/stale local profiles cannot fall back to an older asset timeline.
+- Local timing revision participates in presenter slide-cache invalidation. Adding timing never changes service item identity, order, version selection or connected-praise metadata. Legacy synced_lyrics assets retain their existing support.
+- Verification: `test_song_timing.cjs` plus medley bulk-paste, main-praise slot normalization, worship input application and title-disambiguation unit suites passed. `smoke_song_timing.py` passed Chromium and WebKit with decoded synthetic WAV playback, manual timestamp recording, save/reload, disable/re-enable, source/group isolation, backward seek, pause, manual navigation, stale-lyrics/audio replacement and unchanged source records. Existing content-identity and medley delete/reorder save smokes passed both engines. Browser requests were restricted to the isolated local server/Blob URLs; no production service or song write, deployment or library import occurred.
