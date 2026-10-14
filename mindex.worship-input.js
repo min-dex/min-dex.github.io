@@ -303,18 +303,12 @@ function updateServiceItemField(field, options = {}) {
   item._worshipTemplatePlaceholder = false;
   const strictSongInput = key === "raw_title" && serviceItemRequiresSongSelection(item, service);
   if (["announcement_welcome","announcement_news","announcement_footer"].includes(key) && isAnnouncementTextInputItem(item)) {
-    const parsed=parseServiceItemMemo(item.memo);
-    const regions=serviceAnnouncementRegions(item,parsed);
-    regions[key.slice("announcement_".length)]=field.value;
-    parsed.announcementRegions=regions;
-    item.raw_title=[regions.welcome,regions.news,regions.footer].filter(text=>text.trim()).join("\n\n");
-    parsed.slides=item.raw_title?[item.raw_title]:[];
-    item.memo=serializeServiceItemMemo(parsed);
+    applyServiceAnnouncementRegion(item, key.slice("announcement_".length), field.value);
   }
   if (key === "label" || key === "assignee" || key === "raw_title") {
     item[key] = key === "raw_title" ? normalizeServiceItemRawTitleForItem(item, field.value) : field.value;
     if (key === "raw_title") {
-      if (strictSongInput) {
+      if (strictSongInput && !options.preserveSongSelection) {
         item.song_id = null;
         item.version_id = null;
         item.song_version_id = null;
@@ -340,7 +334,7 @@ function updateServiceItemField(field, options = {}) {
       }
       if (serviceItemUsesFlexibleOfferingSlot(item) && !serviceItemUsesScoreInputMode(item, parsed)) parsed.outputMode = "";
       item.memo = serializeServiceItemMemo(parsed);
-      const hasConnectedPraiseInput = strictSongInput && presenterPreparationSongContentHasConnection(item.raw_title);
+      const hasConnectedPraiseInput = strictSongInput && !options.preserveSongSelection && presenterPreparationSongContentHasConnection(item.raw_title);
       connectedPraiseApplied = hasConnectedPraiseInput
         && applyInlineConnectedPraiseInput(service, items, item, item.raw_title);
       if (options.resolveSongSelection !== false && (!hasConnectedPraiseInput || connectedPraiseApplied)) {
@@ -475,6 +469,28 @@ function updateServiceItemField(field, options = {}) {
   updateSaveState();
 }
 
+function applyServiceAnnouncementRegion(item, key, value) {
+  const parsed = parseServiceItemMemo(item.memo);
+  const regions = serviceAnnouncementRegions(item, parsed);
+  regions[key] = value;
+  parsed.announcementRegions = regions;
+  item.raw_title = [regions.welcome, regions.news, regions.footer].filter(text => text.trim()).join("\n\n");
+  parsed.slides = item.raw_title ? [item.raw_title] : [];
+  item.memo = serializeServiceItemMemo(parsed);
+}
+
+function applyServiceManualPraiseSlides(item, slides) {
+  const parsed = parseServiceItemMemo(item.memo);
+  parsed.slides = slides;
+  parsed.inputMode = "manual_praise";
+  parsed.outputMode = "lyrics";
+  parsed.elementType = "praise";
+  item.song_id = null;
+  item.version_id = null;
+  item.song_version_id = null;
+  item.memo = serializeServiceItemMemo(parsed);
+}
+
 function applyServiceItemMetadataField(item, field, service) {
   const key = field.dataset.serviceItemField;
   const parsed = parseServiceItemMemo(item.memo);
@@ -483,13 +499,8 @@ function applyServiceItemMetadataField(item, field, service) {
   if (key === "memo_note") parsed.note = field.value;
   if (key === "slide_overrides") parsed.slides = parseServiceSlideOverrideInput(field.value);
   if (key === "manual_praise_lyrics") {
-    parsed.slides = parseServiceManualPraiseLyricsInput(field.value);
-    parsed.inputMode = "manual_praise";
-    parsed.outputMode = "lyrics";
-    parsed.elementType = "praise";
-    item.song_id = null;
-    item.version_id = null;
-    item.song_version_id = null;
+    applyServiceManualPraiseSlides(item, parseServiceManualPraiseLyricsInput(field.value));
+    return;
   }
   if (key === "form_hint") {
     const formHint = normalizeServiceFormHint(field.value);

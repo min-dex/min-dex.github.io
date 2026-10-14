@@ -4,8 +4,20 @@
 function serializePortableServiceSourceItem(fields) {
   const { label, value, elementType, inputMode, outputMode, formHint, songTitle,
     songId, versionId, assignee, hasTranslation, translationLabel, translationId, sermonReference,
-    lyrics, slides, manualScripture, manualTranslation, asset, audio } = fields;
-  const lines = [`[${label}]`, `- 제목: ${value}`];
+    lyrics, slides, manualScripture, manualTranslation, asset, audio, announcementRegions } = fields;
+  const lines = [`[${label}]`];
+  const textField = (key, text = "") => {
+    text = String(text).replace(/\r\n?/g, "\n");
+    if (text.includes("\n") || text === "|") {
+      lines.push(`- ${key}: |`, ...text.split("\n").map(line => `  ${line}`));
+    } else lines.push(`- ${key}: ${text}`);
+  };
+  if (!announcementRegions) textField("제목", value);
+  else {
+    textField("환영 문구", announcementRegions.welcome);
+    textField("주간 소식", announcementRegions.news);
+    textField("하단 안내", announcementRegions.footer);
+  }
   if (elementType) lines.push(`- 유형: ${elementType}`);
   if (inputMode) lines.push(`- 입력: ${inputMode}`);
   if (outputMode) lines.push(`- 출력: ${outputMode}`);
@@ -17,11 +29,17 @@ function serializePortableServiceSourceItem(fields) {
   if (hasTranslation) lines.push(`- 역본: ${translationLabel}`);
   if (translationId) lines.push(`- 역본 ID: ${translationId}`);
   if (sermonReference !== null) lines.push(`- 성경 본문: ${sermonReference}`);
-  if (lyrics) {
+  if (inputMode === "manual_praise" && Array.isArray(slides)) {
+    // Each block is one screen; internal blank lines and literal --- remain content.
+    for (const slide of slides) {
+      lines.push("- 가사 화면: |", ...String(slide).split(/\r?\n/).map(line => `  ${line}`));
+    }
+    if (!slides.length) lines.push("- 가사 화면: ");
+  } else if (lyrics) {
     lines.push("- 가사: |");
     lines.push(...lyrics.split(/\r?\n/).map((line) => `  ${line}`));
   }
-  if (!lyrics && Array.isArray(slides) && slides.length) {
+  if (!announcementRegions && inputMode !== "manual_praise" && !lyrics && Array.isArray(slides) && slides.length) {
     lines.push("- 슬라이드: |");
     lines.push(...slides.join("\n---\n").split(/\r?\n/).map((line) => `  ${line}`));
   }
@@ -31,12 +49,12 @@ function serializePortableServiceSourceItem(fields) {
     lines.push(...manualScripture.split(/\r?\n/).map((line) => `  ${line}`));
   }
   if (asset.name || asset.url) {
-    lines.push(`- 파일: ${asset.name || asset.url}`);
-    if (asset.name && asset.url) lines.push(`- 링크: ${asset.url}`);
+    lines.push(`- 파일: ${asset.name || ""}`);
+    if (asset.url) lines.push(`- 링크: ${asset.url}`);
   }
   if (audio.name || audio.url) {
-    lines.push(`- 음원 파일: ${audio.name || audio.url}`);
-    if (audio.name && audio.url) lines.push(`- 음원 링크: ${audio.url}`);
+    lines.push(`- 음원 파일: ${audio.name || ""}`);
+    if (audio.url) lines.push(`- 음원 링크: ${audio.url}`);
   }
   return lines;
 }
@@ -137,10 +155,18 @@ function parsePortableServiceSourceText(value = "", options = {}) {
   let sectionTitle = "";
   let current = null;
   let blockKey = "";
+  const finishBlock = () => {
+    if (!current || !blockKey) return;
+    const text = current._blockLines.join("\n").replace(/\s+$/g, "");
+    if (blockKey === "lyricSlides") current.lyricSlides.push(text);
+    else if (blockKey.startsWith("announcement:")) current.announcementRegions[blockKey.slice(13)] = text;
+    else current[blockKey] = text;
+    blockKey = "";
+  };
   const finish = () => {
     if (!current) return;
     if (options.includeRanges) current.endLine = lineNumber;
-    if (blockKey) current[blockKey] = current._blockLines.join("\n").replace(/\s+$/g, "");
+    finishBlock();
     delete current._blockLines;
     records.push(current);
   };
@@ -159,12 +185,24 @@ function parsePortableServiceSourceText(value = "", options = {}) {
     if (!current) return;
     const field = line.match(/^-\s*([^:]+):\s*(.*)$/);
     if (field) {
-      if (blockKey) current[blockKey] = current._blockLines.join("\n").replace(/\s+$/g, "");
+      finishBlock();
       const key = compactSearchValue(field[1]);
       const fieldValue = field[2].trim();
       blockKey = fieldValue === "|" ? key : "";
       current._blockLines = [];
-      if (key === "제목") current.value = fieldValue;
+      if (key === "제목") { current.hasValue = true; if (fieldValue === "|") blockKey = "value"; else current.value = fieldValue; }
+      else if (["환영문구", "주간소식", "하단안내"].includes(key)) {
+        const region = { "환영문구": "welcome", "주간소식": "news", "하단안내": "footer" }[key];
+        current.announcementRegions ||= {};
+        if (fieldValue === "|") blockKey = `announcement:${region}`;
+        else current.announcementRegions[region] = fieldValue;
+      }
+      else if (key === "가사화면") {
+        current.hasLyricSlides = true;
+        current.lyricSlides ||= [];
+        if (fieldValue === "|") blockKey = "lyricSlides";
+        else if (fieldValue) current.lyricSlides.push(fieldValue);
+      }
       else if (key === "담당") { current.assignee = fieldValue; current.hasAssignee = true; }
       else if (key === "유형") current.elementType = fieldValue;
       else if (key === "입력") current.inputMode = fieldValue;

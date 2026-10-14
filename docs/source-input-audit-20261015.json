@@ -1,0 +1,2015 @@
+[
+  {
+    "name": "linked_song_selected_version",
+    "before": {
+      "title": "",
+      "songId": "qa-song",
+      "versionId": "qa-v2",
+      "type": "praise",
+      "mode": "lyrics_db",
+      "output": "lyrics",
+      "form": "V1-C-V2-C-Coda",
+      "formDisabled": false,
+      "slides": [],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "expected": {
+      "title": "",
+      "songId": "qa-song",
+      "versionId": "qa-v2",
+      "type": "praise",
+      "mode": "lyrics_db",
+      "output": "lyrics",
+      "form": "V1-C-V2-C-Coda",
+      "formDisabled": false,
+      "slides": [],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "rounds": [
+      {
+        "changed": [],
+        "after": {
+          "title": "",
+          "songId": "qa-song",
+          "versionId": "qa-v2",
+          "type": "praise",
+          "mode": "lyrics_db",
+          "output": "lyrics",
+          "form": "V1-C-V2-C-Coda",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 연결 곡\n- 유형: praise\n- 입력: lyrics_db\n- 출력: lyrics\n- 송폼: V1-C-V2-C-Coda\n- 곡: QA 연결 곡\n- 곡 ID: qa-song\n- 버전 ID: qa-v2"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "",
+          "songId": "qa-song",
+          "versionId": "qa-v2",
+          "type": "praise",
+          "mode": "lyrics_db",
+          "output": "lyrics",
+          "form": "V1-C-V2-C-Coda",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 연결 곡\n- 유형: praise\n- 입력: lyrics_db\n- 출력: lyrics\n- 송폼: V1-C-V2-C-Coda\n- 곡: QA 연결 곡\n- 곡 ID: qa-song\n- 버전 ID: qa-v2"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "",
+          "songId": "qa-song",
+          "versionId": "qa-v2",
+          "type": "praise",
+          "mode": "lyrics_db",
+          "output": "lyrics",
+          "form": "V1-C-V2-C-Coda",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 연결 곡\n- 유형: praise\n- 입력: lyrics_db\n- 출력: lyrics\n- 송폼: V1-C-V2-C-Coda\n- 곡: QA 연결 곡\n- 곡 ID: qa-song\n- 버전 ID: qa-v2"
+      }
+    ],
+    "pass": true
+  },
+  {
+    "name": "unloaded_song_catalog",
+    "before": {
+      "title": "",
+      "songId": "qa-song",
+      "versionId": "qa-v2",
+      "type": "praise",
+      "mode": "lyrics_db",
+      "output": "",
+      "form": "V1-C-V2-C-Coda",
+      "formDisabled": false,
+      "slides": [],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "expected": {
+      "title": "",
+      "songId": "qa-song",
+      "versionId": "qa-v2",
+      "type": "praise",
+      "mode": "lyrics_db",
+      "output": "",
+      "form": "V1-C-V2-C-Coda",
+      "formDisabled": false,
+      "slides": [],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "rounds": [
+      {
+        "changed": [],
+        "after": {
+          "title": "",
+          "songId": "qa-song",
+          "versionId": "qa-v2",
+          "type": "praise",
+          "mode": "lyrics_db",
+          "output": "",
+          "form": "V1-C-V2-C-Coda",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: \n- 유형: praise\n- 입력: lyrics_db\n- 송폼: V1-C-V2-C-Coda\n- 곡 ID: qa-song\n- 버전 ID: qa-v2"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "",
+          "songId": "qa-song",
+          "versionId": "qa-v2",
+          "type": "praise",
+          "mode": "lyrics_db",
+          "output": "",
+          "form": "V1-C-V2-C-Coda",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: \n- 유형: praise\n- 입력: lyrics_db\n- 송폼: V1-C-V2-C-Coda\n- 곡 ID: qa-song\n- 버전 ID: qa-v2"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "",
+          "songId": "qa-song",
+          "versionId": "qa-v2",
+          "type": "praise",
+          "mode": "lyrics_db",
+          "output": "",
+          "form": "V1-C-V2-C-Coda",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: \n- 유형: praise\n- 입력: lyrics_db\n- 송폼: V1-C-V2-C-Coda\n- 곡 ID: qa-song\n- 버전 ID: qa-v2"
+      }
+    ],
+    "pass": true
+  },
+  {
+    "name": "unloaded_version_catalog",
+    "before": {
+      "title": "",
+      "songId": "qa-song",
+      "versionId": "qa-v2",
+      "type": "praise",
+      "mode": "lyrics_db",
+      "output": "",
+      "form": "V1-C-V2-C-Coda",
+      "formDisabled": false,
+      "slides": [],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "expected": {
+      "title": "",
+      "songId": "qa-song",
+      "versionId": "qa-v2",
+      "type": "praise",
+      "mode": "lyrics_db",
+      "output": "",
+      "form": "V1-C-V2-C-Coda",
+      "formDisabled": false,
+      "slides": [],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "rounds": [
+      {
+        "changed": [],
+        "after": {
+          "title": "",
+          "songId": "qa-song",
+          "versionId": "qa-v2",
+          "type": "praise",
+          "mode": "lyrics_db",
+          "output": "",
+          "form": "V1-C-V2-C-Coda",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 연결 곡\n- 유형: praise\n- 입력: lyrics_db\n- 송폼: V1-C-V2-C-Coda\n- 곡: QA 연결 곡\n- 곡 ID: qa-song\n- 버전 ID: qa-v2"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "",
+          "songId": "qa-song",
+          "versionId": "qa-v2",
+          "type": "praise",
+          "mode": "lyrics_db",
+          "output": "",
+          "form": "V1-C-V2-C-Coda",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 연결 곡\n- 유형: praise\n- 입력: lyrics_db\n- 송폼: V1-C-V2-C-Coda\n- 곡: QA 연결 곡\n- 곡 ID: qa-song\n- 버전 ID: qa-v2"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "",
+          "songId": "qa-song",
+          "versionId": "qa-v2",
+          "type": "praise",
+          "mode": "lyrics_db",
+          "output": "",
+          "form": "V1-C-V2-C-Coda",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 연결 곡\n- 유형: praise\n- 입력: lyrics_db\n- 송폼: V1-C-V2-C-Coda\n- 곡: QA 연결 곡\n- 곡 ID: qa-song\n- 버전 ID: qa-v2"
+      }
+    ],
+    "pass": true
+  },
+  {
+    "name": "score_mode",
+    "before": {
+      "title": "",
+      "songId": "qa-song",
+      "versionId": "qa-v2",
+      "type": "praise",
+      "mode": "score_db",
+      "output": "score",
+      "form": "1-3",
+      "formDisabled": false,
+      "slides": [],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "expected": {
+      "title": "",
+      "songId": "qa-song",
+      "versionId": "qa-v2",
+      "type": "praise",
+      "mode": "score_db",
+      "output": "score",
+      "form": "1-3",
+      "formDisabled": false,
+      "slides": [],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "rounds": [
+      {
+        "changed": [],
+        "after": {
+          "title": "",
+          "songId": "qa-song",
+          "versionId": "qa-v2",
+          "type": "praise",
+          "mode": "score_db",
+          "output": "score",
+          "form": "1-3",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 연결 곡\n- 유형: praise\n- 입력: score_db\n- 출력: score\n- 송폼: 1-3\n- 곡: QA 연결 곡\n- 곡 ID: qa-song\n- 버전 ID: qa-v2"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "",
+          "songId": "qa-song",
+          "versionId": "qa-v2",
+          "type": "praise",
+          "mode": "score_db",
+          "output": "score",
+          "form": "1-3",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 연결 곡\n- 유형: praise\n- 입력: score_db\n- 출력: score\n- 송폼: 1-3\n- 곡: QA 연결 곡\n- 곡 ID: qa-song\n- 버전 ID: qa-v2"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "",
+          "songId": "qa-song",
+          "versionId": "qa-v2",
+          "type": "praise",
+          "mode": "score_db",
+          "output": "score",
+          "form": "1-3",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 연결 곡\n- 유형: praise\n- 입력: score_db\n- 출력: score\n- 송폼: 1-3\n- 곡: QA 연결 곡\n- 곡 ID: qa-song\n- 버전 ID: qa-v2"
+      }
+    ],
+    "pass": true
+  },
+  {
+    "name": "manual_lyrics_v_c_coda",
+    "before": {
+      "title": "QA 직접 가사",
+      "songId": null,
+      "versionId": null,
+      "type": "praise",
+      "mode": "manual_praise",
+      "output": "lyrics",
+      "form": "V1-C-V2-C-Coda",
+      "formDisabled": false,
+      "slides": [
+        "[V1]\nQA 절 첫줄\nQA 절 둘째줄",
+        "[C]\nQA 후렴",
+        "[Coda]\nQA 마침"
+      ],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "expected": {
+      "title": "QA 직접 가사",
+      "songId": null,
+      "versionId": null,
+      "type": "praise",
+      "mode": "manual_praise",
+      "output": "lyrics",
+      "form": "V1-C-V2-C-Coda",
+      "formDisabled": false,
+      "slides": [
+        "[V1]\nQA 절 첫줄\nQA 절 둘째줄",
+        "[C]\nQA 후렴",
+        "[Coda]\nQA 마침"
+      ],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "rounds": [
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 직접 가사",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "V1-C-V2-C-Coda",
+          "formDisabled": false,
+          "slides": [
+            "[V1]\nQA 절 첫줄\nQA 절 둘째줄",
+            "[C]\nQA 후렴",
+            "[Coda]\nQA 마침"
+          ],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 직접 가사\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 송폼: V1-C-V2-C-Coda\n- 가사 화면: |\n  [V1]\n  QA 절 첫줄\n  QA 절 둘째줄\n- 가사 화면: |\n  [C]\n  QA 후렴\n- 가사 화면: |\n  [Coda]\n  QA 마침"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 직접 가사",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "V1-C-V2-C-Coda",
+          "formDisabled": false,
+          "slides": [
+            "[V1]\nQA 절 첫줄\nQA 절 둘째줄",
+            "[C]\nQA 후렴",
+            "[Coda]\nQA 마침"
+          ],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 직접 가사\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 송폼: V1-C-V2-C-Coda\n- 가사 화면: |\n  [V1]\n  QA 절 첫줄\n  QA 절 둘째줄\n- 가사 화면: |\n  [C]\n  QA 후렴\n- 가사 화면: |\n  [Coda]\n  QA 마침"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 직접 가사",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "V1-C-V2-C-Coda",
+          "formDisabled": false,
+          "slides": [
+            "[V1]\nQA 절 첫줄\nQA 절 둘째줄",
+            "[C]\nQA 후렴",
+            "[Coda]\nQA 마침"
+          ],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 직접 가사\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 송폼: V1-C-V2-C-Coda\n- 가사 화면: |\n  [V1]\n  QA 절 첫줄\n  QA 절 둘째줄\n- 가사 화면: |\n  [C]\n  QA 후렴\n- 가사 화면: |\n  [Coda]\n  QA 마침"
+      }
+    ],
+    "pass": true
+  },
+  {
+    "name": "manual_lyrics_internal_blank",
+    "before": {
+      "title": "QA 가사 빈줄",
+      "songId": null,
+      "versionId": null,
+      "type": "praise",
+      "mode": "manual_praise",
+      "output": "lyrics",
+      "form": "",
+      "formDisabled": false,
+      "slides": [
+        "QA 첫줄\n\nQA 같은 화면",
+        "QA 다음 화면"
+      ],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "expected": {
+      "title": "QA 가사 빈줄",
+      "songId": null,
+      "versionId": null,
+      "type": "praise",
+      "mode": "manual_praise",
+      "output": "lyrics",
+      "form": "",
+      "formDisabled": false,
+      "slides": [
+        "QA 첫줄\n\nQA 같은 화면",
+        "QA 다음 화면"
+      ],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "rounds": [
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 가사 빈줄",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "",
+          "formDisabled": false,
+          "slides": [
+            "QA 첫줄\n\nQA 같은 화면",
+            "QA 다음 화면"
+          ],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 가사 빈줄\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 가사 화면: |\n  QA 첫줄\n  \n  QA 같은 화면\n- 가사 화면: |\n  QA 다음 화면"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 가사 빈줄",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "",
+          "formDisabled": false,
+          "slides": [
+            "QA 첫줄\n\nQA 같은 화면",
+            "QA 다음 화면"
+          ],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 가사 빈줄\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 가사 화면: |\n  QA 첫줄\n  \n  QA 같은 화면\n- 가사 화면: |\n  QA 다음 화면"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 가사 빈줄",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "",
+          "formDisabled": false,
+          "slides": [
+            "QA 첫줄\n\nQA 같은 화면",
+            "QA 다음 화면"
+          ],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 가사 빈줄\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 가사 화면: |\n  QA 첫줄\n  \n  QA 같은 화면\n- 가사 화면: |\n  QA 다음 화면"
+      }
+    ],
+    "pass": true
+  },
+  {
+    "name": "form_clear",
+    "before": {
+      "title": "QA 송폼 삭제",
+      "songId": null,
+      "versionId": null,
+      "type": "praise",
+      "mode": "manual_praise",
+      "output": "lyrics",
+      "form": "V1-C-V2-C-Coda",
+      "formDisabled": false,
+      "slides": [
+        "QA"
+      ],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "expected": {
+      "title": "QA 송폼 삭제",
+      "songId": null,
+      "versionId": null,
+      "type": "praise",
+      "mode": "manual_praise",
+      "output": "lyrics",
+      "form": "",
+      "formDisabled": true,
+      "slides": [
+        "QA"
+      ],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "rounds": [
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 송폼 삭제",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "",
+          "formDisabled": true,
+          "slides": [
+            "QA"
+          ],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 송폼 삭제\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 송폼: \n- 가사 화면: |\n  QA"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 송폼 삭제",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "",
+          "formDisabled": true,
+          "slides": [
+            "QA"
+          ],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 송폼 삭제\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 가사 화면: |\n  QA"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 송폼 삭제",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "",
+          "formDisabled": true,
+          "slides": [
+            "QA"
+          ],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 송폼 삭제\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 가사 화면: |\n  QA"
+      }
+    ],
+    "pass": true
+  },
+  {
+    "name": "lyrics_clear",
+    "before": {
+      "title": "QA 가사 삭제",
+      "songId": null,
+      "versionId": null,
+      "type": "praise",
+      "mode": "manual_praise",
+      "output": "lyrics",
+      "form": "",
+      "formDisabled": false,
+      "slides": [
+        "QA 가사"
+      ],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "expected": {
+      "title": "QA 가사 삭제",
+      "songId": null,
+      "versionId": null,
+      "type": "praise",
+      "mode": "manual_praise",
+      "output": "lyrics",
+      "form": "",
+      "formDisabled": false,
+      "slides": [],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "rounds": [
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 가사 삭제",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 가사 삭제\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 가사 화면: "
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 가사 삭제",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 가사 삭제\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 가사 화면:"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 가사 삭제",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 가사 삭제\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 가사 화면:"
+      }
+    ],
+    "pass": true
+  },
+  {
+    "name": "form_disabled",
+    "before": {
+      "title": "QA 직접 가사",
+      "songId": null,
+      "versionId": null,
+      "type": "praise",
+      "mode": "manual_praise",
+      "output": "lyrics",
+      "form": "",
+      "formDisabled": true,
+      "slides": [
+        "QA"
+      ],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "expected": {
+      "title": "QA 직접 가사",
+      "songId": null,
+      "versionId": null,
+      "type": "praise",
+      "mode": "manual_praise",
+      "output": "lyrics",
+      "form": "",
+      "formDisabled": true,
+      "slides": [
+        "QA"
+      ],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "rounds": [
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 직접 가사",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "",
+          "formDisabled": true,
+          "slides": [
+            "QA"
+          ],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 직접 가사\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 가사 화면: |\n  QA"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 직접 가사",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "",
+          "formDisabled": true,
+          "slides": [
+            "QA"
+          ],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 직접 가사\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 가사 화면: |\n  QA"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 직접 가사",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "",
+          "formDisabled": true,
+          "slides": [
+            "QA"
+          ],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 직접 가사\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 가사 화면: |\n  QA"
+      }
+    ],
+    "pass": true
+  },
+  {
+    "name": "announcement_multiline_bold",
+    "before": {
+      "title": "**QA 환영**\n\n1. **QA 수료식**\n   오후 2시\n\n2. QA 안내",
+      "songId": null,
+      "versionId": null,
+      "type": "body",
+      "mode": "text",
+      "output": "",
+      "form": "",
+      "formDisabled": false,
+      "slides": [],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": {
+        "welcome": "",
+        "news": "**QA 환영**\n① **QA 수료식**\n   오후 2시\n② QA 안내",
+        "footer": ""
+      }
+    },
+    "expected": {
+      "title": "**QA 환영**\n\n1. **QA 수료식**\n   오후 2시\n\n2. QA 안내",
+      "songId": null,
+      "versionId": null,
+      "type": "body",
+      "mode": "text",
+      "output": "",
+      "form": "",
+      "formDisabled": false,
+      "slides": [],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": {
+        "welcome": "",
+        "news": "**QA 환영**\n① **QA 수료식**\n   오후 2시\n② QA 안내",
+        "footer": ""
+      }
+    },
+    "rounds": [
+      {
+        "changed": [],
+        "after": {
+          "title": "**QA 환영**\n\n1. **QA 수료식**\n   오후 2시\n\n2. QA 안내",
+          "songId": null,
+          "versionId": null,
+          "type": "body",
+          "mode": "text",
+          "output": "",
+          "form": "",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": {
+            "welcome": "",
+            "news": "**QA 환영**\n① **QA 수료식**\n   오후 2시\n② QA 안내",
+            "footer": ""
+          }
+        },
+        "source": "[[광고]]\n[광고]\n- 환영 문구: \n- 주간 소식: |\n  **QA 환영**\n  ① **QA 수료식**\n     오후 2시\n  ② QA 안내\n- 하단 안내: \n- 유형: body\n- 입력: text"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "**QA 환영**\n\n1. **QA 수료식**\n   오후 2시\n\n2. QA 안내",
+          "songId": null,
+          "versionId": null,
+          "type": "body",
+          "mode": "text",
+          "output": "",
+          "form": "",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": {
+            "welcome": "",
+            "news": "**QA 환영**\n① **QA 수료식**\n   오후 2시\n② QA 안내",
+            "footer": ""
+          }
+        },
+        "source": "[[광고]]\n[광고]\n- 환영 문구: \n- 주간 소식: |\n  **QA 환영**\n  ① **QA 수료식**\n     오후 2시\n  ② QA 안내\n- 하단 안내: \n- 유형: body\n- 입력: text"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "**QA 환영**\n\n1. **QA 수료식**\n   오후 2시\n\n2. QA 안내",
+          "songId": null,
+          "versionId": null,
+          "type": "body",
+          "mode": "text",
+          "output": "",
+          "form": "",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": {
+            "welcome": "",
+            "news": "**QA 환영**\n① **QA 수료식**\n   오후 2시\n② QA 안내",
+            "footer": ""
+          }
+        },
+        "source": "[[광고]]\n[광고]\n- 환영 문구: \n- 주간 소식: |\n  **QA 환영**\n  ① **QA 수료식**\n     오후 2시\n  ② QA 안내\n- 하단 안내: \n- 유형: body\n- 입력: text"
+      }
+    ],
+    "pass": true
+  },
+  {
+    "name": "announcement_regions",
+    "before": {
+      "title": "**QA 환영**\n\n1. **QA 소식**\nQA 상세\n\n**QA 마침**",
+      "songId": null,
+      "versionId": null,
+      "type": "body",
+      "mode": "text",
+      "output": "",
+      "form": "",
+      "formDisabled": false,
+      "slides": [
+        "**QA 환영**\n\n1. **QA 소식**\nQA 상세\n\n**QA 마침**"
+      ],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": {
+        "welcome": "**QA 환영**",
+        "news": "1. **QA 소식**\nQA 상세",
+        "footer": "**QA 마침**"
+      },
+      "visibleRegions": {
+        "welcome": "**QA 환영**",
+        "news": "1. **QA 소식**\nQA 상세",
+        "footer": "**QA 마침**"
+      }
+    },
+    "expected": {
+      "title": "**QA 환영**\n\n1. **QA 소식**\nQA 상세\n\n**QA 마침**",
+      "songId": null,
+      "versionId": null,
+      "type": "body",
+      "mode": "text",
+      "output": "",
+      "form": "",
+      "formDisabled": false,
+      "slides": [
+        "**QA 환영**\n\n1. **QA 소식**\nQA 상세\n\n**QA 마침**"
+      ],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": {
+        "welcome": "**QA 환영**",
+        "news": "1. **QA 소식**\nQA 상세",
+        "footer": "**QA 마침**"
+      },
+      "visibleRegions": {
+        "welcome": "**QA 환영**",
+        "news": "1. **QA 소식**\nQA 상세",
+        "footer": "**QA 마침**"
+      }
+    },
+    "rounds": [
+      {
+        "changed": [],
+        "after": {
+          "title": "**QA 환영**\n\n1. **QA 소식**\nQA 상세\n\n**QA 마침**",
+          "songId": null,
+          "versionId": null,
+          "type": "body",
+          "mode": "text",
+          "output": "",
+          "form": "",
+          "formDisabled": false,
+          "slides": [
+            "**QA 환영**\n\n1. **QA 소식**\nQA 상세\n\n**QA 마침**"
+          ],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": {
+            "welcome": "**QA 환영**",
+            "news": "1. **QA 소식**\nQA 상세",
+            "footer": "**QA 마침**"
+          },
+          "visibleRegions": {
+            "welcome": "**QA 환영**",
+            "news": "1. **QA 소식**\nQA 상세",
+            "footer": "**QA 마침**"
+          }
+        },
+        "source": "[[광고]]\n[광고]\n- 환영 문구: **QA 환영**\n- 주간 소식: |\n  1. **QA 소식**\n  QA 상세\n- 하단 안내: **QA 마침**\n- 유형: body\n- 입력: text"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "**QA 환영**\n\n1. **QA 소식**\nQA 상세\n\n**QA 마침**",
+          "songId": null,
+          "versionId": null,
+          "type": "body",
+          "mode": "text",
+          "output": "",
+          "form": "",
+          "formDisabled": false,
+          "slides": [
+            "**QA 환영**\n\n1. **QA 소식**\nQA 상세\n\n**QA 마침**"
+          ],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": {
+            "welcome": "**QA 환영**",
+            "news": "1. **QA 소식**\nQA 상세",
+            "footer": "**QA 마침**"
+          },
+          "visibleRegions": {
+            "welcome": "**QA 환영**",
+            "news": "1. **QA 소식**\nQA 상세",
+            "footer": "**QA 마침**"
+          }
+        },
+        "source": "[[광고]]\n[광고]\n- 환영 문구: **QA 환영**\n- 주간 소식: |\n  1. **QA 소식**\n  QA 상세\n- 하단 안내: **QA 마침**\n- 유형: body\n- 입력: text"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "**QA 환영**\n\n1. **QA 소식**\nQA 상세\n\n**QA 마침**",
+          "songId": null,
+          "versionId": null,
+          "type": "body",
+          "mode": "text",
+          "output": "",
+          "form": "",
+          "formDisabled": false,
+          "slides": [
+            "**QA 환영**\n\n1. **QA 소식**\nQA 상세\n\n**QA 마침**"
+          ],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": {
+            "welcome": "**QA 환영**",
+            "news": "1. **QA 소식**\nQA 상세",
+            "footer": "**QA 마침**"
+          },
+          "visibleRegions": {
+            "welcome": "**QA 환영**",
+            "news": "1. **QA 소식**\nQA 상세",
+            "footer": "**QA 마침**"
+          }
+        },
+        "source": "[[광고]]\n[광고]\n- 환영 문구: **QA 환영**\n- 주간 소식: |\n  1. **QA 소식**\n  QA 상세\n- 하단 안내: **QA 마침**\n- 유형: body\n- 입력: text"
+      }
+    ],
+    "pass": true
+  },
+  {
+    "name": "literal_title_block",
+    "before": {
+      "title": "|\n[[구역처럼 보이는 본문]]\n[항목처럼 보이는 본문]\n- 제목: 실제 본문",
+      "songId": null,
+      "versionId": null,
+      "type": "plain_text",
+      "mode": "text",
+      "output": "",
+      "form": "",
+      "formDisabled": false,
+      "slides": [],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "expected": {
+      "title": "|\n[[구역처럼 보이는 본문]]\n[항목처럼 보이는 본문]\n- 제목: 실제 본문",
+      "songId": null,
+      "versionId": null,
+      "type": "plain_text",
+      "mode": "text",
+      "output": "",
+      "form": "",
+      "formDisabled": false,
+      "slides": [],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "rounds": [
+      {
+        "changed": [],
+        "after": {
+          "title": "|\n[[구역처럼 보이는 본문]]\n[항목처럼 보이는 본문]\n- 제목: 실제 본문",
+          "songId": null,
+          "versionId": null,
+          "type": "plain_text",
+          "mode": "text",
+          "output": "",
+          "form": "",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[안내]\n- 제목: |\n  |\n  [[구역처럼 보이는 본문]]\n  [항목처럼 보이는 본문]\n  - 제목: 실제 본문\n- 유형: plain_text\n- 입력: text"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "|\n[[구역처럼 보이는 본문]]\n[항목처럼 보이는 본문]\n- 제목: 실제 본문",
+          "songId": null,
+          "versionId": null,
+          "type": "plain_text",
+          "mode": "text",
+          "output": "",
+          "form": "",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[안내]\n- 제목: |\n  |\n  [[구역처럼 보이는 본문]]\n  [항목처럼 보이는 본문]\n  - 제목: 실제 본문\n- 유형: plain_text\n- 입력: text"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "|\n[[구역처럼 보이는 본문]]\n[항목처럼 보이는 본문]\n- 제목: 실제 본문",
+          "songId": null,
+          "versionId": null,
+          "type": "plain_text",
+          "mode": "text",
+          "output": "",
+          "form": "",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[안내]\n- 제목: |\n  |\n  [[구역처럼 보이는 본문]]\n  [항목처럼 보이는 본문]\n  - 제목: 실제 본문\n- 유형: plain_text\n- 입력: text"
+      }
+    ],
+    "pass": true
+  },
+  {
+    "name": "lyrics_literal_separator",
+    "before": {
+      "title": "QA 구분자",
+      "songId": null,
+      "versionId": null,
+      "type": "praise",
+      "mode": "manual_praise",
+      "output": "lyrics",
+      "form": "",
+      "formDisabled": false,
+      "slides": [
+        "첫줄\n---\n마지막줄",
+        "다음 화면"
+      ],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "expected": {
+      "title": "QA 구분자",
+      "songId": null,
+      "versionId": null,
+      "type": "praise",
+      "mode": "manual_praise",
+      "output": "lyrics",
+      "form": "",
+      "formDisabled": false,
+      "slides": [
+        "첫줄\n---\n마지막줄",
+        "다음 화면"
+      ],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "rounds": [
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 구분자",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "",
+          "formDisabled": false,
+          "slides": [
+            "첫줄\n---\n마지막줄",
+            "다음 화면"
+          ],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 구분자\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 가사 화면: |\n  첫줄\n  ---\n  마지막줄\n- 가사 화면: |\n  다음 화면"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 구분자",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "",
+          "formDisabled": false,
+          "slides": [
+            "첫줄\n---\n마지막줄",
+            "다음 화면"
+          ],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 구분자\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 가사 화면: |\n  첫줄\n  ---\n  마지막줄\n- 가사 화면: |\n  다음 화면"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 구분자",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "",
+          "formDisabled": false,
+          "slides": [
+            "첫줄\n---\n마지막줄",
+            "다음 화면"
+          ],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 구분자\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 가사 화면: |\n  첫줄\n  ---\n  마지막줄\n- 가사 화면: |\n  다음 화면"
+      }
+    ],
+    "pass": true
+  },
+  {
+    "name": "plain_text_multiline",
+    "before": {
+      "title": "QA 첫줄\nQA 둘째줄",
+      "songId": null,
+      "versionId": null,
+      "type": "plain_text",
+      "mode": "text",
+      "output": "",
+      "form": "",
+      "formDisabled": false,
+      "slides": [],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "expected": {
+      "title": "QA 첫줄\nQA 둘째줄",
+      "songId": null,
+      "versionId": null,
+      "type": "plain_text",
+      "mode": "text",
+      "output": "",
+      "form": "",
+      "formDisabled": false,
+      "slides": [],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "rounds": [
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 첫줄\nQA 둘째줄",
+          "songId": null,
+          "versionId": null,
+          "type": "plain_text",
+          "mode": "text",
+          "output": "",
+          "form": "",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[안내]\n- 제목: |\n  QA 첫줄\n  QA 둘째줄\n- 유형: plain_text\n- 입력: text"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 첫줄\nQA 둘째줄",
+          "songId": null,
+          "versionId": null,
+          "type": "plain_text",
+          "mode": "text",
+          "output": "",
+          "form": "",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[안내]\n- 제목: |\n  QA 첫줄\n  QA 둘째줄\n- 유형: plain_text\n- 입력: text"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 첫줄\nQA 둘째줄",
+          "songId": null,
+          "versionId": null,
+          "type": "plain_text",
+          "mode": "text",
+          "output": "",
+          "form": "",
+          "formDisabled": false,
+          "slides": [],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[안내]\n- 제목: |\n  QA 첫줄\n  QA 둘째줄\n- 유형: plain_text\n- 입력: text"
+      }
+    ],
+    "pass": true
+  },
+  {
+    "name": "audio_name_and_url",
+    "before": {
+      "title": "QA 가사",
+      "songId": null,
+      "versionId": null,
+      "type": "praise",
+      "mode": "manual_praise",
+      "output": "lyrics",
+      "form": "",
+      "formDisabled": false,
+      "slides": [
+        "QA"
+      ],
+      "audio": {
+        "kind": "audio",
+        "name": "QA.mp3",
+        "url": "https://example.com/qa.mp3"
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "expected": {
+      "title": "QA 가사",
+      "songId": null,
+      "versionId": null,
+      "type": "praise",
+      "mode": "manual_praise",
+      "output": "lyrics",
+      "form": "",
+      "formDisabled": false,
+      "slides": [
+        "QA"
+      ],
+      "audio": {
+        "kind": "audio",
+        "name": "QA.mp3",
+        "url": "https://example.com/qa.mp3"
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "rounds": [
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 가사",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "",
+          "formDisabled": false,
+          "slides": [
+            "QA"
+          ],
+          "audio": {
+            "kind": "audio",
+            "name": "QA.mp3",
+            "url": "https://example.com/qa.mp3"
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 가사\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 가사 화면: |\n  QA\n- 음원 파일: QA.mp3\n- 음원 링크: https://example.com/qa.mp3"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 가사",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "",
+          "formDisabled": false,
+          "slides": [
+            "QA"
+          ],
+          "audio": {
+            "kind": "audio",
+            "name": "QA.mp3",
+            "url": "https://example.com/qa.mp3"
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 가사\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 가사 화면: |\n  QA\n- 음원 파일: QA.mp3\n- 음원 링크: https://example.com/qa.mp3"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 가사",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "",
+          "formDisabled": false,
+          "slides": [
+            "QA"
+          ],
+          "audio": {
+            "kind": "audio",
+            "name": "QA.mp3",
+            "url": "https://example.com/qa.mp3"
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 가사\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 가사 화면: |\n  QA\n- 음원 파일: QA.mp3\n- 음원 링크: https://example.com/qa.mp3"
+      }
+    ],
+    "pass": true
+  },
+  {
+    "name": "audio_url_only",
+    "before": {
+      "title": "QA 가사",
+      "songId": null,
+      "versionId": null,
+      "type": "praise",
+      "mode": "manual_praise",
+      "output": "lyrics",
+      "form": "",
+      "formDisabled": false,
+      "slides": [
+        "QA"
+      ],
+      "audio": {
+        "kind": "audio",
+        "name": "",
+        "url": "https://example.com/qa.mp3"
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "expected": {
+      "title": "QA 가사",
+      "songId": null,
+      "versionId": null,
+      "type": "praise",
+      "mode": "manual_praise",
+      "output": "lyrics",
+      "form": "",
+      "formDisabled": false,
+      "slides": [
+        "QA"
+      ],
+      "audio": {
+        "kind": "audio",
+        "name": "",
+        "url": "https://example.com/qa.mp3"
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "rounds": [
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 가사",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "",
+          "formDisabled": false,
+          "slides": [
+            "QA"
+          ],
+          "audio": {
+            "kind": "audio",
+            "name": "",
+            "url": "https://example.com/qa.mp3"
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 가사\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 가사 화면: |\n  QA\n- 음원 파일: \n- 음원 링크: https://example.com/qa.mp3"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 가사",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "",
+          "formDisabled": false,
+          "slides": [
+            "QA"
+          ],
+          "audio": {
+            "kind": "audio",
+            "name": "",
+            "url": "https://example.com/qa.mp3"
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 가사\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 가사 화면: |\n  QA\n- 음원 파일: \n- 음원 링크: https://example.com/qa.mp3"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 가사",
+          "songId": null,
+          "versionId": null,
+          "type": "praise",
+          "mode": "manual_praise",
+          "output": "lyrics",
+          "form": "",
+          "formDisabled": false,
+          "slides": [
+            "QA"
+          ],
+          "audio": {
+            "kind": "audio",
+            "name": "",
+            "url": "https://example.com/qa.mp3"
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[찬양 1]\n- 제목: QA 가사\n- 유형: praise\n- 입력: manual_praise\n- 출력: lyrics\n- 가사 화면: |\n  QA\n- 음원 파일: \n- 음원 링크: https://example.com/qa.mp3"
+      }
+    ],
+    "pass": true
+  },
+  {
+    "name": "text_slides",
+    "before": {
+      "title": "QA 안내",
+      "songId": null,
+      "versionId": null,
+      "type": "title_content",
+      "mode": "text",
+      "output": "",
+      "form": "",
+      "formDisabled": false,
+      "slides": [
+        "QA 첫 화면",
+        "QA 둘째 화면"
+      ],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "expected": {
+      "title": "QA 안내",
+      "songId": null,
+      "versionId": null,
+      "type": "title_content",
+      "mode": "text",
+      "output": "",
+      "form": "",
+      "formDisabled": false,
+      "slides": [
+        "QA 첫 화면",
+        "QA 둘째 화면"
+      ],
+      "audio": {
+        "kind": "",
+        "name": "",
+        "url": ""
+      },
+      "regions": null,
+      "visibleRegions": null
+    },
+    "rounds": [
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 안내",
+          "songId": null,
+          "versionId": null,
+          "type": "title_content",
+          "mode": "text",
+          "output": "",
+          "form": "",
+          "formDisabled": false,
+          "slides": [
+            "QA 첫 화면",
+            "QA 둘째 화면"
+          ],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[안내]\n- 제목: QA 안내\n- 유형: title_content\n- 입력: text\n- 슬라이드: |\n  QA 첫 화면\n  ---\n  QA 둘째 화면"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 안내",
+          "songId": null,
+          "versionId": null,
+          "type": "title_content",
+          "mode": "text",
+          "output": "",
+          "form": "",
+          "formDisabled": false,
+          "slides": [
+            "QA 첫 화면",
+            "QA 둘째 화면"
+          ],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[안내]\n- 제목: QA 안내\n- 유형: title_content\n- 입력: text\n- 슬라이드: |\n  QA 첫 화면\n  ---\n  QA 둘째 화면"
+      },
+      {
+        "changed": [],
+        "after": {
+          "title": "QA 안내",
+          "songId": null,
+          "versionId": null,
+          "type": "title_content",
+          "mode": "text",
+          "output": "",
+          "form": "",
+          "formDisabled": false,
+          "slides": [
+            "QA 첫 화면",
+            "QA 둘째 화면"
+          ],
+          "audio": {
+            "kind": "",
+            "name": "",
+            "url": ""
+          },
+          "regions": null,
+          "visibleRegions": null
+        },
+        "source": "[[QA]]\n[안내]\n- 제목: QA 안내\n- 유형: title_content\n- 입력: text\n- 슬라이드: |\n  QA 첫 화면\n  ---\n  QA 둘째 화면"
+      }
+    ],
+    "pass": true
+  }
+]

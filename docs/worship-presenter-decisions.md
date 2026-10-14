@@ -102,6 +102,12 @@
 - Replaced legacy partial-commit fixtures with RPC safety checks. Chromium/WebKit coverage includes rollback, lost response, linked saves, creation/deletion retries, save queues, conflict review and benediction replacement.
 - No production records, grants or schema were changed. Historical document arrays remain readable until their fallback/recovery content is proven equivalent to canonical rows.
 
+## Source Field Preservation (2026-10-15)
+- Multiline titles use indented blocks. Announcement welcome/news/footer have separate source fields, without duplicating their text in the title.
+- Direct praise exports one `가사 화면` block per screen; blank lines and literal `---` inside a screen remain content. Legacy `가사` blocks still parse.
+- Explicit song/version IDs survive catalog hydration gaps; normal save validation remains required. Blank form fields explicitly clear the form.
+- Source reapplication must preserve announcement regions, bold markup, manual lyric screens and audio URLs. Regression: `MINDEX_SOURCE_AUDIT_STRICT=1 python3 tests/audit_source_roundtrip.py`.
+
 ## Source Input Preservation (2026-10-15)
 - Editable source serializes actual content, never a display fallback label for an empty input.
 - Restore input modes as metadata rather than invoking praise-only mode conversion; classify asset/text values after restoring the new type/mode.

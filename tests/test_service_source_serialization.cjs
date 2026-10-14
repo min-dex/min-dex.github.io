@@ -5,6 +5,7 @@ const vm = require('node:vm');
 const root = path.resolve(__dirname, '..');
 const app = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
 const context = vm.createContext({
+  isAnnouncementTextInputItem: () => false,
   parseServiceItemMemo: value => value || {},
   serviceSourceItemValue: item => item.raw_title || '',
   serviceMemoElementType: memo => memo.elementType || '',
@@ -39,8 +40,8 @@ const before = JSON.stringify(item);
 assert.equal(render(item), [
   '[특송]','- 제목: 제목','- 유형: praise','- 입력: manual_praise','- 출력: lyrics',
   '- 송폼: V1-C1-V1-C1','- 곡: 연결 곡','- 곡 ID: song','- 버전 ID: version',
-  '- 담당: 담당','- 역본: 개역개정','- 역본 ID: kr','- 가사: |',
-  '  첫 줄','  둘째 줄','  ','  후렴','- 수동 역본: 직접역','- 수동 본문: |',
+  '- 담당: 담당','- 역본: 개역개정','- 역본 ID: kr','- 가사 화면: |',
+  '  첫 줄','  둘째 줄','- 가사 화면: |','  후렴','- 수동 역본: 직접역','- 수동 본문: |',
   '  16 본문','  17 다음','- 파일: 지도','- 링크: https://example.com/map.png',
   '- 음원 파일: 음원','- 음원 링크: https://example.com/a.mp3',
 ].join('\n'));
@@ -49,7 +50,7 @@ assert.equal(render({label:'설교',raw_title:'말씀',sermon:true,memo:{slides:
   {references:['창세기 1:1','요한복음 3:16']}),
   '[설교]\n- 제목: 말씀\n- 역본 ID: unknown\n- 성경 본문: 창세기 1:1; 요한복음 3:16\n- 슬라이드: |\n  A\n  ---\n  B');
 assert.equal(render({memo:{asset:{url:'only.png'},audio_asset:{name:'audio'},manualScripture:{translationLabel:'empty'}}}),
-  '[항목]\n- 제목: \n- 파일: only.png\n- 음원 파일: audio');
+  '[항목]\n- 제목: \n- 파일: \n- 링크: only.png\n- 음원 파일: audio');
 const isolated = vm.createContext({});
 vm.runInContext(fs.readFileSync(path.join(root, 'mindex.worship-source.js'), 'utf8'), isolated);
 const fields = Object.freeze({label:'제목',value:'내용',hasTranslation:false,sermonReference:null,

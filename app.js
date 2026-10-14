@@ -24442,6 +24442,7 @@ function serviceSourceItemLines(item = {}, service = null, memo = parseServiceIt
     songTitle: song?.title, songId: item.song_id, versionId: item.version_id || item.song_version_id,
     assignee, hasTranslation: Boolean(translation), translationLabel, translationId, sermonReference,
     lyrics, slides: memo.slides, manualScripture, manualTranslation, asset, audio,
+    announcementRegions: isAnnouncementTextInputItem(item) || memo.announcementRegions ? serviceAnnouncementRegions(item, memo) : null,
   });
 }
 
@@ -24658,7 +24659,7 @@ function applyServiceSourceRecord(serviceId, index, record = {}) {
   if (!item) return false;
   if (record.elementType) updateServiceItemField(serviceSourceVirtualField(serviceId, index, "element_type", record.elementType), { deferPresenterRefresh: true });
   if (record.inputMode) updateServiceItemField(serviceSourceVirtualField(serviceId, index, "input_mode", record.inputMode), { deferPresenterRefresh: true });
-  if (record.formHint) updateServiceItemField(serviceSourceVirtualField(serviceId, index, "form_hint", record.formHint), { deferPresenterRefresh: true });
+  if (Object.hasOwn(record, "formHint")) updateServiceItemField(serviceSourceVirtualField(serviceId, index, "form_hint", record.formHint), { deferPresenterRefresh: true });
   // Updates can replace normalized items; classify using the restored type/mode.
   item = getServiceItems(serviceId)[index];
   const memo = parseServiceItemMemo(item.memo);
@@ -24670,14 +24671,30 @@ function applyServiceSourceRecord(serviceId, index, record = {}) {
     if (record.hasAssetUrl) {
       updateServiceItemField(serviceSourceVirtualField(serviceId, index, "asset_url", record.assetUrl), { deferPresenterRefresh: true });
     }
-  } else {
-    updateServiceItemField(serviceSourceVirtualField(serviceId, index, "raw_title", record.value), { deferPresenterRefresh: true });
+  } else if ((!record.announcementRegions || record.hasValue)
+    && record.value !== serviceSourceItemValue(item, state.services.find(candidate => candidate.id === serviceId), memo)) {
+    updateServiceItemField(serviceSourceVirtualField(serviceId, index, "raw_title", record.value), {
+      deferPresenterRefresh: true, preserveSongSelection: Boolean(record.songId),
+      resolveSongSelection: !record.songId,
+    });
+  }
+  if (record.announcementRegions) {
+    for (const [key, value] of Object.entries(record.announcementRegions)) {
+      item = getServiceItems(serviceId)[index];
+      if (serviceAnnouncementRegions(item)[key] !== value) {
+        applyServiceAnnouncementRegion(item, key, value);
+      }
+    }
   }
   if (record.hasAssignee) {
     updateServiceItemField(serviceSourceVirtualField(serviceId, index, "assignee", record.assignee), { deferPresenterRefresh: true });
   }
   if (record.hasLyrics) {
     updateServiceItemField(serviceSourceVirtualField(serviceId, index, "manual_praise_lyrics", record.lyrics), { deferPresenterRefresh: true });
+  }
+  if (record.hasLyricSlides) {
+    item = getServiceItems(serviceId)[index];
+    applyServiceManualPraiseSlides(item, record.lyricSlides);
   }
   if (record.hasSlides) {
     updateServiceItemField(serviceSourceVirtualField(serviceId, index, "slide_overrides", record.slides || ""), { deferPresenterRefresh: true });
@@ -24694,16 +24711,12 @@ function applyServiceSourceRecord(serviceId, index, record = {}) {
     nextMemo.outputMode = normalizeServiceOutputMode(record.outputMode);
     item.memo = serializeServiceItemMemo(nextMemo);
   }
-  if (record.songId) {
-    const song = songById(record.songId);
-    if (song) {
-      item.song_id = song.id;
-      const versions = serviceSelectableSongVersions(song, item, state.services.find((candidate) => candidate.id === serviceId) || selectedServiceForEditor());
-      item.version_id = versions.some((version) => version.id === record.versionId) ? record.versionId : null;
-      item.song_version_id = item.version_id;
-    } else {
-      console.warn("Portable worship source references a song that is unavailable locally.", record.songId);
-    }
+  if (record.songId && !record.hasLyrics && !record.hasLyricSlides) {
+    // Catalog hydration is not evidence that an existing ID is invalid.
+    // Keep explicit source IDs; normal save validation still checks the selection.
+    item.song_id = record.songId;
+    item.version_id = record.versionId || null;
+    item.song_version_id = item.version_id;
   }
   if (record.hasManualScripture) {
     const nextMemo = parseServiceItemMemo(item.memo);
