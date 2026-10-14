@@ -319,3 +319,13 @@ and 5px textarea side padding to avoid nested panel gutters.
   13/15/17/22 scale. Presenter output and bulletin print typography stay separate.
 - Manuals and calendar use 5px/10px spacing. Calendar labels may wrap within the
   existing horizontally scrollable table; never shrink essential text to fit.
+
+## Operational utility geometry
+
+- Unsaved-change dialogs wrap actions within the viewport, including 320px, and
+  scroll internally in short windows. No save/discard semantics change.
+- Background inputs and upload/download actions align at 35px.
+- Presenter toolbar utility containers retain the documented 34px slot; nested
+  zoom/music controls use 28px. Preserve the toolbar's horizontal scrolling.
+- Conflict review and section editor use the shared typography and 5px/10px
+  spacing rhythm. Section editor contents scroll without losing draft or focus.
