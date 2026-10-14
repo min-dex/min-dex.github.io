@@ -76,7 +76,33 @@
         "totalDbRows": 31103,
         "headingBearingRows": 2568
       }
+    },
+    {
+      "translationId": "t04",
+      "dbTranslationId": "dbf38d4d-3c8f-4407-a2dc-ca6af3233277",
+      "source": {
+        "provider": "대한성서공회",
+        "translation": "개역개정",
+        "edition": "Korean Revised Version (개역개정), publisher GAE electronic edition; first published1998; exact physical printing unspecified",
+        "version": "GAE",
+        "url": "https://www.bskorea.or.kr/bible/korbibReadpage.php?version=GAE",
+        "editionHistoryURL": "https://bskorea.or.kr/biblecom/bibcome05_08.php",
+        "retrievedAt": "2026-10-14",
+        "importedAt": "2026-10-15",
+        "chapterSourceManifestSHA256": "45a825817b26bd3f190b3ae8527e83af77f6b170a23528aa5a9ca2101b799796",
+        "conversion": "Milestone number + outer span delimiting; notes excluded; all publisher section headings retained separately; inline speaker/absence notices retained as displayed by publisher. Explicit combined ranges produce12 covered UI markers; explicit ACT24:7 absence notice remains. No source bodies filled from XML.",
+        "license": "Copyright Korean Bible Society; this source adoption does not establish a new public redistribution permission."
+      },
+      "counts": {
+        "books": 66,
+        "chapters": 1189,
+        "readerRows": 31101,
+        "numberedSourceRows": 31088,
+        "activeDbRows": 31089,
+        "totalDbRows": 31101,
+        "headingBearingRows": 2429
+      }
     }
   ],
-  "latestBatch": "sae-bsk-canonical-20261015"
+  "latestBatch": "gae-bsk-canonical-20261015"
 }

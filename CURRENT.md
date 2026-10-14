@@ -151,3 +151,26 @@ backup/rollback/replay/drift/source metadata/client ACL.7107 cache checks pass.
 Cache release refreshes all1189 SAE chapters and preserves earlier source/repair
 scopes. Live deployment and reading/search/output verification are separate.
 See docs/bible-canonical-sources-20261015.json for source metadata and limits.
+
+
+## Canonical GAE source adoption ·2026-10-15
+
+Full publisher GAE electronic source now supplies all66 books /1189 chapters.
+Exact physical printing unspecified; original translation first published1998.
+All31088 numbered publisher rows are parsed without font-tail clipping;2429
+heading-bearing reader rows are preserved. Twelve explicit covered UI markers
+are derived from source ranges and become inactive in the operational DB; the
+ACT24:7 absence notice is explicitly grounded in the source. Existing DEU6:18–19
+range and earlier1CH21–22 address correction remain; stable verse IDs and notes
+are preserved. All31101 stored rows and the complete translation record match
+independent production read-back. No source verse body falls back to old XML.
+
+PostgreSQL18.4 tested whole replacement/source metadata backup, rollback, drift,
+replay, future edits and client ACL. New cache scope covers all1189 GAE andSAE
+chapters, all1189 KJV chapters, and earlier verified scopes (9481 checks).
+Production deploy and operational QA remain separately recorded.
+
+KJV obsolete local originals and both private KJV backup tables were permanently
+retired after explicit user cleanup and action-time DB confirmation. Compact
+hashes/addresses/source identity remain; old reconstruction is deliberately
+unsupported. Current pinned-source conformance stays checked.
