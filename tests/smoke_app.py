@@ -3989,8 +3989,8 @@ def main() -> int:
                         and template_terms["allGenerationDateGuards"] == {
                             "blankDate": False,
                             "noteOnlyDate": False,
-                            "aliasOnlyService": False,
-                            "sourceRefOnlyService": False,
+                            "aliasOnlyService": True,
+                            "sourceRefOnlyService": True,
                             "scheduledDate": True,
                             "scheduledThirdService": True,
                             "scheduledYouthService": False,

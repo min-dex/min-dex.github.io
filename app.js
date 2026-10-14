@@ -4313,14 +4313,15 @@ function calendarSkippedServiceTypesForDate(date) {
 function isAllGenerationsWorshipService(service = null) {
   if (!service || typeof service !== "object") return false;
   if (worshipAppServiceTypeId(service?.type_id || service?.service_type_id || "") !== "sunday-main") return false;
-  const sourceRef = service._worshipSourceRef && typeof service._worshipSourceRef === "object" ? service._worshipSourceRef : {};
-  const serviceDate = toLocalDateStr(service?.date || service?.service_date || service?.serviceDate || "");
-  const sundayMainVariant = String(sourceRef.sunday_main_variant || "").trim();
-  if (sundayMainVariant && sundayMainVariant.toLowerCase() === "all_generations") {
-    return isAllGenerationsWorshipDate(serviceDate);
-  }
-  return isAllGenerationsWorshipDate(serviceDate)
-    || isAllGenerationsWorshipDate(service?._worshipServiceDate || serviceDate);
+  const sourceRef = serviceRawSourceRef(service);
+  const variant = String(sourceRef.sunday_main_variant || "").trim().toLowerCase();
+  // A saved, explicitly named service must not turn into a regular 3rd service
+  // while calendar data is loading. Automatic scheduling still uses the calendar.
+  if (variant === "all_generations") return true;
+  if ([service.alias, service.service_alias].some(alias =>
+    compactSearchValue(alias || "") === compactSearchValue(ALL_GENERATION_MAIN_PRAISE_SERVICE_ALIAS))) return true;
+  return isAllGenerationsWorshipDate(service?.date || service?.service_date || service?.serviceDate || "")
+    || isAllGenerationsWorshipDate(service?._worshipServiceDate || "");
 }
 
 function worshipServiceParticipatesInSharedSundayContent(service = null) {
@@ -20599,7 +20600,19 @@ function projectWorshipServiceItemsFromTemplate(service, items = []) {
   const suppressedTemplateKeys = new Set(existing
     .filter(isTemplateSuppressedServiceItem)
     .map((item) => serviceItemTemplateProjectionKey(item, { includeLabel: true })));
-  const visibleExisting = existing.filter((item) => !isTemplateSuppressedServiceItem(item));
+  const visibleExisting = existing
+    .filter((item) => !isTemplateSuppressedServiceItem(item))
+    .flatMap((item) => {
+      if (!isAllGenerationsWorshipService(service)
+        || item._worshipSectionTemplateModified || item._worshipElementTemplateModified) return [item];
+      // Remove inherited regular-only slots before matching by section/order.
+      if (shouldDropAllGenerationsRegularThirdProjectionExtra(service, item)) return [];
+      const regularSpecial = sundayThirdSpecialSongTemplateForDate(service.date || service.service_date || "");
+      if (templateProjectionSectionKey(item) === "special_song"
+        && regularSpecial?.defaultAssignee
+        && cleanServiceAssignee(item.assignee) === regularSpecial.defaultAssignee) return [{ ...item, assignee: "" }];
+      return [item];
+    });
   const scaffold = buildWorshipServiceScaffold(service?.id || "__service__", appTypeId, { service, items: existing });
   const scaffoldItems = normalizeServiceItemsForTemplateHierarchy(
     service,

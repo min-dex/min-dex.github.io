@@ -843,8 +843,9 @@ Small visual polish that does not alter behavior does not need an entry.
 - 단, 해당 주일의 교회력 `church_schedule`에 `온세대 찬양예배`가
   명시된 경우에만 어린이부, 청소년부, 청년부 예배를 별도로 생성하지
   않는다. 그날은 3부 예배(`sunday-main`)가 통합 예배의 source of
-  truth다. `service_alias`, 절기명, 메모, 부서 담당 정보만으로는 온세대
-  variant를 자동 판정하지 않는다.
+  truth다. `service_alias`, 절기명, 메모, 부서 담당 정보만으로는 부서 예배의
+  자동 생성을 제외하지 않는다. 기존 예배의 명시적 온세대 지정은 아래
+  2026-10-14 projection 규칙에 따라 순서에 반영한다.
 - 부서별 외부 모임처럼 해당 부서의 MINDEX 예배가 따로 없는 날은
   교회력 `church_schedule`의 stable phrase를 기준으로 해당 부서
   자동 생성을 제외한다. 예: `청년부 야외예배`는 `young-adult` 예배를
@@ -1662,3 +1663,27 @@ automatically deletes an existing service after calendar changes.
   save per mode change, stable version/title, and non-overlapping contained
   controls at 1440/1024/768 px. A production-page run uses isolated browser state;
   persistence verification uses only a uniquely named disposable test service.
+
+
+## Explicit all-generation default isolation (2026-10-14)
+
+- User reported regular third-service defaults such as `할렐루야 찬양대`
+  and `내 한 가지 소원` appearing in an all-generation service.
+- For an existing `sunday-main` service, an explicit `all_generations` source
+  variant or exact `온세대 찬양예배` alias selects its all-generation template
+  even before calendar hydration. Other types, free-form titles, notes and
+  substring aliases do not grant that explicit designation. Calendar-based
+  designation remains supported. Automatic service scheduling and department
+  skip decisions still require the calendar's church_schedule, not an alias.
+- Before projection matching, omit untouched regular-only slots, including
+  entrance praise, and clear the exact inherited regular choir assignee from
+  an untouched special-song slot. Keep the special-song slot itself. Cleaning
+  before matching prevents an old entrance slot becoming another praise slot.
+- Respect element/section template_modified flags and preserve explicitly
+  edited content, other assignees, and song/version choices. Projection creates
+  new objects; it does not patch operational records or rewrite old services.
+- `tests/smoke_all_generation_defaults.py` verifies empty-calendar explicit
+  aliases, persisted variants, fresh scaffolds, inherited regular defaults,
+  repeated projection, edited-content preservation, original-object immutability
+  and calendar-only automatic scheduling in Chromium/WebKit. Network writes
+  are blocked; no production cleanup/backfill is included.
