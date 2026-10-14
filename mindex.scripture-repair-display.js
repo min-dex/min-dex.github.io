@@ -11,6 +11,10 @@
     const [id, book, chapter] = key.split(':');
     if (isRepairedChapter(id, book, chapter)) state.bibleVerseCache.delete(key);
   }
+  if (state.module === 'scripture' && isRepairedChapter(state.selectedBibleTranslationId, state.selectedBookCode, state.selectedBibleChapter)) {
+    state.bibleBookVerses = [];
+    void loadBibleBookVerses({ silent: true });
+  }
   function fit(host = document) {
     for (const text of host.querySelectorAll('.presenter-scripture-reading-text')) {
       const box = text.closest('.presenter-scripture-reading');
