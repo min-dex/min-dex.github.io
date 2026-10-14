@@ -1319,20 +1319,21 @@ function presenterPreparationHymnNumberCandidates(matches = []) {
 }
 
 function resolvePresenterPreparationSong(value, item, service) {
+  const eligible = song => !song ? null : servicePraiseInputMode(item, parseServiceItemMemo(item?.memo), service) !== "children_audio" || serviceSelectableSongVersions(song, item, service).length ? song : null;
   const songInput = presenterPreparationSongContent(value);
   const query = compactSearchValue(songInput);
   if (!query) return null;
   if (presenterPreparationSongContentHasConnection(songInput)) return null;
   const hymnSong = resolvePresenterPreparationHymnSong(songInput);
-  if (hymnSong) return hymnSong;
+  if (hymnSong) return eligible(hymnSong);
   const songIndex = presenterPreparationSongExactIndex();
   const exact = songIndex.labels.get(query) || [];
-  if (exact.length === 1) return exact[0];
+  if (exact.length === 1) return eligible(exact[0]);
   const titleExact = songIndex.strippedTitles.get(query) || [];
-  if (titleExact.length === 1) return titleExact[0];
+  if (titleExact.length === 1) return eligible(titleExact[0]);
   const praiseSong = findServicePraiseSong(songInput);
-  if (praiseSong) return praiseSong;
-  return findConfidentServicePraiseSong(songInput, item, service);
+  if (praiseSong) return eligible(praiseSong);
+  return eligible(findConfidentServicePraiseSong(songInput, item, service));
 }
 
 function resolveExistingPraiseSongForServiceInput(value, item = {}, service = selectedServiceForEditor()) {
@@ -1343,7 +1344,7 @@ function resolveExistingPraiseSongForServiceInput(value, item = {}, service = se
     const song = resolvePresenterPreparationSong(candidate, item, service)
       || findServicePraiseSong(candidate)
       || findConfidentServicePraiseSong(candidate, item, service);
-    if (song) return song;
+    if (song && (servicePraiseInputMode(item, parseServiceItemMemo(item?.memo), service) !== "children_audio" || serviceSelectableSongVersions(song, item, service).length)) return song;
   }
   return null;
 }

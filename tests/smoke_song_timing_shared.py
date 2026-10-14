@@ -49,8 +49,12 @@ try:
     a.locator('[data-timing-share]').click();a.wait_for_function("document.querySelector('[data-timing-status]').textContent.startsWith('공유 저장했어요')")
     assert len(store)==1
     assert not b.evaluate("presenterSlidesForService('timing-fixture').some(s=>s.syncTimeline?.localTiming)")
+    # The receiving service may have a different form; the package owns the sequence.
+    b.evaluate("const item=getServiceItems('timing-fixture').find(x=>x.id==='timing-item');item.memo=serializeServiceItemMemo({...parseServiceItemMemo(item.memo),formHint:'C-V-C',formPreset:{forms:['C','V','C'],hint:'C-V-C'}})")
     b.evaluate("MindexSongTiming.open('timing-fixture','timing-item')")
-    b.locator('[data-timing-load-shared]').click();b.wait_for_function("document.querySelector('[data-timing-status]').textContent.startsWith('공유 음원·타이밍을 이 컴퓨터에 저장')")
+    assert b.locator('[data-timing-start]').count()==3
+    b.locator('[data-timing-load-shared]').click();b.wait_for_function("document.querySelectorAll('[data-timing-start]').length===2 && document.querySelector('[data-timing-start=\"1\"]').value==='3'")
+    assert b.evaluate("presenterSlidesForService('timing-fixture').find(s=>s.elementId==='timing-item'&&s.type==='lyrics').text.startsWith('첫째')")
     assert b.locator('[data-timing-start="1"]').input_value()=='3'
     b.locator('[data-timing-close]').click()
     b.evaluate("state.presenter.safetyBlank=false;state.presenter.liveScripture={active:false};state.presenter.index=presenterSlidesForService('timing-fixture').findIndex(s=>s.type==='lyrics');runServiceMusicAction('toggle');")

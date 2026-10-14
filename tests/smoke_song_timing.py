@@ -10,12 +10,12 @@ fixture = r'''async () => {
  // Output-only test shell has no controller panel or external display.
  renderPresenterControlState=()=>{};publishPresenterState=()=>{};
  const service={id:'timing-fixture',type_id:'wednesday',date:'2026-10-14',title:'Timing fixture'};
- const song={id:'timing-song',title:'동기화 테스트',_relationalVersionsLoaded:true,versions:[{id:'timing-version',name:'Default',is_primary:true,forms:[
+ const song={id:'timing-song',title:'동기화 테스트',_relationalVersionsLoaded:true,versions:[{id:'timing-version',name:'Default',_worshipVersionPersisted:true,is_primary:true,praise_types:['children'],forms:[
  {id:'verse',part_type:'Verse',part_number:1,lyrics:'첫째 줄\n둘째 줄',sort_order:1},
  {id:'chorus',part_type:'Chorus',lyrics:'후렴 첫째\n후렴 둘째',sort_order:2}]}]};
  const item={id:'timing-item',service_id:service.id,label:'찬양 1',raw_title:song.title,song_id:song.id,version_id:'timing-version',sort_order:10,
  _worshipSectionKey:'praise',_worshipSectionTitle:'찬양',_worshipSlotKey:'praise.song.1',_worshipElementTemplateModified:true,
- memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',outputMode:'lyrics',forms:['V1','C']})};
+ memo:serializeServiceItemMemo({elementType:'praise',inputMode:'children_audio',outputMode:'lyrics',forms:['V1','C']})};
  const second={...item,id:'medley-member',label:'찬양 2',sort_order:20,_worshipSlotKey:'praise.song.2',memo:serializeServiceItemMemo({...parseServiceItemMemo(item.memo),connectedPraise:{groupId:'fixture-medley',order:1}})};
  state.services=[service];state.songs=[song];state.serviceItems={[service.id]:[item,second]};state.selectedServiceId=service.id;
  state.presenter.serviceId=service.id;state.presenter.sourceSignature='';state.presenter.slides=[];state.module='presenter';
@@ -65,12 +65,42 @@ try:
     page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('저장했어요')")
     dialog.screenshot(path='/tmp/mindex-song-timing-'+engine+'.png')
     dialog.locator('[data-timing-close]').click()
+    print(engine,page.evaluate(r'''() => {
+      const check=(ok,msg)=>{if(!ok)throw Error(msg)};
+      check(JSON.stringify(SERVICE_PRAISE_INPUT_MODES.map(x=>x[1]))===JSON.stringify(['가사 로드','가사 직접 입력','찬송가: 악보 로드','어린이: 음원 로드']),'four labels/order');
+      check(servicePraiseInputMode({label:'찬양 1'})==='lyrics_db','default mode');
+      const service=state.services[0],song=state.songs[0];
+      let item=getServiceItems(service.id).find(x=>x.id==='timing-item');
+      updateSaveState=()=>{};renderCurrentServiceModuleDetail=()=>{};
+      const originalItems=structuredClone(state.serviceItems[service.id]);
+      const memo=item.memo,identity=JSON.stringify([item.id,item.song_id,item.version_id,item.sort_order]);
+      const setMode=mode=>{updateServiceItemField({value:mode,dataset:{serviceId:service.id,serviceItemIndex:String(getServiceItems(service.id).findIndex(x=>x.id==='timing-item')),serviceItemField:'praise_input_mode'}});item=getServiceItems(service.id).find(x=>x.id==='timing-item');};
+      const lyrics=()=>presenterSlidesForService(service.id).filter(s=>s.elementId===item.id&&s.type==='lyrics');
+      setMode('lyrics_db');
+      check(lyrics().every(s=>!s.syncTimeline?.localTiming),'ordinary lyrics enabled audio');
+      item.memo=serializeServiceItemMemo({...parseServiceItemMemo(item.memo),forms:['C','V1'],formHint:'C-V1'});
+      setMode('children_audio');
+      check(lyrics()[0]?.text.startsWith('첫째'),'saved set form was replaced by worship form');
+      check(lyrics().every(s=>s.syncTimeline?.localTiming),'saved set failed after mode switch');
+      check(JSON.stringify([item.id,item.song_id,item.version_id,item.sort_order])===identity,'mode changed identity/order');
+      const ordinary={...song,versions:[{...song.versions[0],praise_types:['ccm']}]};
+      check(serviceSelectableSongVersions(ordinary,item,service).length===0,'nonchildren version accepted');
+      const typed={inputMode:true,contentState:true};
+      const rows=buildWorshipPersistenceRows(service,[item],{}, {},{elementTypedStateColumns:typed});
+      sanitizeWorshipPersistenceRows(rows,{elementTypedStateColumns:typed});compactWorshipPersistenceRows(rows);
+      const reopened=groupWorshipElements(rows.sections,rows.elements)[service.id].find(x=>x.song_id===song.id);
+      check(reopened&&servicePraiseInputMode(reopened,parseServiceItemMemo(reopened.memo),service)==='children_audio','mode lost on persistence round trip '+JSON.stringify({rows:rows.elements,reopened}));
+      check(reopened.version_id===item.version_id,'version link lost on persistence round trip');
+      state.serviceItems[service.id]=originalItems;
+      return 'PASS four modes/default, children-only versions, mode switch identity, designated form and persistence round trip';
+    }'''))
     # Real controller audio/timeupdate path, before deterministic clock boundary checks.
     page.evaluate("""() => {
       state.presenter.safetyBlank=false;state.presenter.liveScripture={active:false};
       state.presenter.index=presenterSlidesForService('timing-fixture').findIndex(s=>s.elementId==='timing-item'&&s.type==='lyrics');
-      runServiceMusicAction('toggle');
+      const play=document.createElement('button');play.id='fixture-play';play.textContent='Play';play.style.cssText='position:fixed;top:0;left:0;z-index:2147483647';play.onclick=()=>runServiceMusicAction('toggle');document.body.append(play);
     }""")
+    page.locator('#fixture-play').click()
     page.wait_for_function("state.serviceMusic.playing && state.serviceMusic.audio.currentTime>0")
     page.evaluate("state.serviceMusic.audio.currentTime=7.1")
     page.wait_for_function("state.presenter.slides[state.presenter.index]?.syncTimeline?.page===2")

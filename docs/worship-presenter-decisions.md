@@ -1835,3 +1835,34 @@ The user explicitly approved publication of this display/cache update.
 
 - Unlinked praise/special-song inputs show `새 곡 추가`, including empty strict DB-selection slots. Linked songs retain the existing DB-open button; scripture and non-song rows are unchanged.
 - Empty slots ask for a title before creation; cancel/blank input writes nothing. Reuse existing exact-match song resolution and medley-title rejection. A newly created song receives the entered title; no sibling slots or medley links are normalized or rewritten by this UI change.
+
+
+### 2026-10-14 Four praise loading modes
+
+- User-approved picker order and labels: `가사 로드` (default, `lyrics_db`),
+  `가사 직접 입력` (`manual_praise`), `찬송가: 악보 로드` (`score_db`),
+  `어린이: 음원 로드` (`children_audio`). Existing manual-entry and hymn-score
+  semantics remain; do not bulk-convert stored worship items.
+- Children audio is restricted to versions whose effective praise types include
+  `children`. It uses a saved set of designated lyrics/forms, audio bytes and
+  automatic page cues. Ordinary lyric loading does not activate that set's audio
+  timeline. The timing editor is available only for children versions, including
+  while preparing a set in ordinary lyric mode. Service form editing is hidden
+  in children-audio mode because the saved set owns its sequence.
+- Extend existing local/shared timing bundles with source-version signature and
+  the designated form sequence. Validate the source and rendered page fingerprint
+  before automatic playback. A missing, disabled or stale set displays a warning
+  and does not automatically advance. Older timing profiles remain stored; open
+  and save them as a children set before using the new mode. No library import
+  or automatic upload is part of this change.
+- Sharing restores the package's form sequence even if the receiving worship
+  item has a different form. Source lyrics/version mismatch rejects the package.
+  Audio, timing and forms remain separate from song/worship/medley records.
+- Persist exact modes in existing JSON config/content state; legacy typed DB
+  columns continue using `praise_db`. When reading that compatibility value,
+  restore the precise saved praise mode rather than losing it to `praise_db`.
+- Local verification: Chromium/WebKit timing and independent-profile sharing
+  suites cover mode switches, designated-form ownership, serialization/reopen,
+  changed-form shared loads, decoded audio playback and stale-data guards.
+  Content-identity regression preserves ordering through mode edits and saves.
+  No production record or schema changes; deployment is separate.

@@ -3,6 +3,7 @@ const src=fs.readFileSync(require('node:path').join(__dirname,'../app.js'),'utf8
 const take=(start,end)=>src.slice(src.indexOf(start),src.indexOf(end,src.indexOf(start)));
 let answer=null,inserts=0;
 const c={String,Number,window:{prompt:()=>answer},state:{selectedServiceId:'svc',services:[{id:'svc',type_id:'wednesday'}],songs:[],serviceItems:{},dirty:{}},
+ servicePraiseInputMode:()=>"lyrics_db",parseServiceItemMemo:()=>({}),
  isSongServiceLabel:x=>/^찬양/.test(x),isSpecialSongServiceItem:x=>x.label==='특송',escapeAttr:String,
  getServiceItems:()=>c.state.serviceItems.svc,showToast:()=>{},presenterPreparationSongContentHasConnection:x=>x.includes('+'),
  resolveExistingPraiseSongForServiceInputAfterCatalogLoad:async()=>null,requireClient:()=>true,

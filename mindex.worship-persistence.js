@@ -377,7 +377,7 @@ function sanitizeSongContentStateWithoutSong(contentState = null, element = {}) 
     || element.config?.inputMode
     || element.config?.input_mode,
   );
-  if (!["praise_db", "score_db", "lyrics_db"].includes(inputMode)) return;
+  if (!["praise_db", "score_db", "lyrics_db", "children_audio"].includes(inputMode)) return;
   if (contentState.state !== "filled" || contentState.reason !== "song") return;
   contentState.state = "missing";
   contentState.reason = String(element.title || "").trim() ? "song_selection_required" : "song_empty";

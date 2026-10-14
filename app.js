@@ -457,15 +457,17 @@ const SERVICE_ELEMENT_TYPE_UI_OPTIONS = [
 ];
 const SERVICE_ELEMENT_LABELS = Object.fromEntries(SERVICE_ELEMENT_TYPE_UI_OPTIONS.filter(([value]) => value));
 const SERVICE_PRAISE_INPUT_MODES = [
-  ["score_db", "악보 불러오기"],
-  ["lyrics_db", "가사 불러오기"],
-  ["manual_praise", "직접 입력하기"],
+  ["lyrics_db", "가사 로드"],
+  ["manual_praise", "가사 직접 입력"],
+  ["score_db", "찬송가: 악보 로드"],
+  ["children_audio", "어린이: 음원 로드"],
 ];
 const WORSHIP_DB_ELEMENT_INPUT_MODES = new Set([
   "",
   "praise_db",
   "score_db",
   "lyrics_db",
+  "children_audio",
   "manual_praise",
   "text",
   "scripture",
@@ -4758,9 +4760,13 @@ function groupWorshipElements(sections = [], elements = []) {
       || config.contentState?.inputMode
       || config.content_state?.input_mode,
     );
+    const precisePraiseMode = [configInputMode, contentInputMode]
+      .find(mode => ["lyrics_db", "score_db", "children_audio", "manual_praise"].includes(mode));
     const inputMode = [configInputMode, contentInputMode].includes("manual_praise")
       ? "manual_praise"
-      : (dbInputMode || contentInputMode || configInputMode);
+      : dbInputMode === "praise_db" && precisePraiseMode
+        ? precisePraiseMode
+        : (dbInputMode || contentInputMode || configInputMode);
     const asset = normalizeServiceAsset(config.asset || config.media || element.asset || sourceRef.asset);
     const mediaAnnouncement = sectionKey === "announcements"
       && !departmentAnnouncementBody
@@ -10042,6 +10048,7 @@ function normalizeServiceInputMode(value) {
     music_score: "score_db",
     sheet_music: "score_db",
     "악보": "score_db",
+    children_audio: "children_audio",
     lyrics_db: "lyrics_db",
     lyric_db: "lyrics_db",
     lyrics: "lyrics_db",
@@ -10075,14 +10082,14 @@ function normalizeServiceInputMode(value) {
 function worshipDbInputModeForSave(value) {
   const inputMode = normalizeServiceInputMode(value);
   // Older schemas accept praise_db only; config/content_state retain the exact mode.
-  if (["score_db", "lyrics_db", "manual_praise"].includes(inputMode)) return "praise_db";
+  if (["score_db", "lyrics_db", "children_audio", "manual_praise"].includes(inputMode)) return "praise_db";
   return WORSHIP_DB_ELEMENT_INPUT_MODES.has(inputMode) ? inputMode : "";
 }
 
 function serviceInputModeForElementType(elementType = "") {
   const type = normalizeServiceElementType(elementType) || normalizeWorshipElementType(elementType);
   if (type === "score") return "score_db";
-  if (type === "praise") return "praise_db";
+  if (type === "praise") return "lyrics_db";
   if (["scripture_reading", "scripture_body"].includes(type)) return "scripture";
   if (["image", "video", "audio", "file"].includes(type)) return "asset";
   if (type === "live_scripture") return "config";
@@ -10109,7 +10116,7 @@ function serviceItemUsesScoreInputMode(item = {}, memo = parseServiceItemMemo(it
 
 function servicePraiseInputMode(item = {}, memo = parseServiceItemMemo(item?.memo), service = selectedServiceForEditor()) {
   const mode = serviceMemoInputMode(memo, item);
-  if (["score_db", "lyrics_db", "manual_praise"].includes(mode)) return mode;
+  if (["score_db", "lyrics_db", "children_audio", "manual_praise"].includes(mode)) return mode;
   const outputMode = serviceItemOutputMode(item, memo);
   if (outputMode === "score") return "score_db";
   if (specialSongUsesManualPraiseFallback(item, memo, service)) {
@@ -10871,7 +10878,7 @@ function serviceItemRequiresSongSelection(item = {}, service = selectedServiceFo
   if (praiseInputMode === "manual_praise") return false;
   const songLikeItem = serviceMemoElementType(parseServiceItemMemo(item.memo)) === "praise"
     || isSongServiceLabel(item.label) || isSpecialSongServiceItem(item);
-  if (songLikeItem && ["score_db", "lyrics_db"].includes(praiseInputMode)) return true;
+  if (songLikeItem && ["score_db", "lyrics_db", "children_audio"].includes(praiseInputMode)) return true;
   return Boolean(songLikeItem && !serviceItemAllowsManualSongText(item, service));
 }
 
@@ -10880,6 +10887,8 @@ function serviceItemSongSelectionInvalid(item = {}, service = selectedServiceFor
   const song = resolvedSong || serviceItemLinkedSong(item);
   if (!song) return Boolean(item.song_id || String(item.raw_title || "").trim());
   if (serviceItemRequiresNewHymnalScoreSong(item) && !isNewHymnalScoreSong(song)) return true;
+  if (servicePraiseInputMode(item, parseServiceItemMemo(item.memo), service) === "children_audio"
+    && !serviceSelectableSongVersions(song, item, service).length) return true;
   if (resolvedSong && !item.song_id) return false;
   return serviceItemVersionSelectionInvalid(item, service);
 }
@@ -10969,6 +10978,9 @@ function serviceSelectableSongVersions(song = null, item = {}, service = selecte
   void service;
   const versions = song?.versions || [];
   if (!versions.length) return [];
+  if (servicePraiseInputMode(item, parseServiceItemMemo(item.memo), service) === "children_audio") {
+    return versions.filter(version => versionEffectivePraiseTypes(song, version).includes("children"));
+  }
   if (!serviceItemRequiresNewHymnalScoreSong(item)) return versions;
   const hymnVersions = versions.filter((version) => serviceVersionIsNewHymnalScoreVersion(song, version));
   return hymnVersions.length ? hymnVersions : versions;
@@ -11703,7 +11715,8 @@ async function createPraiseSongFromServiceItem(index) {
   const title = stripHymnNo(presenterPreparationSongContent(inputTitle)).title.trim();
   if (!title) return;
 
-  const praiseType = ["children", "nursery"].includes(service?.type_id) ? "children" : "ccm";
+  const praiseType = servicePraiseInputMode(item, parseServiceItemMemo(item.memo), service) === "children_audio"
+    || ["children", "nursery"].includes(service?.type_id) ? "children" : "ccm";
   const defaultVersion = {
     id: createUuid(),
     name: "기본",
@@ -25272,6 +25285,7 @@ function renderServiceEditorLabelCell(item, origIndex, attrs = {}, model = servi
 }
 
 function renderServiceEditorFormControls(item, origIndex, model = serviceItemEditorModel(item), options = {}) {
+  if (servicePraiseInputMode(item, model.parsed, model.service) === "children_audio") return `<span class="svc-song-picker-hint">음원 세트 지정 폼</span>`;
   const parsed = model.parsed || parseServiceItemMemo(item?.memo);
   const hasFormData = Boolean(parsed.formHint || parsed.formPreset || parsed.formPresetRules?.length);
   if (!model.song && !hasFormData) return "";
@@ -25431,10 +25445,11 @@ function serviceSongPickerResults(query, item = {}, service = selectedServiceFor
   const tokens = getSearchTokens(normalizedQuery);
   if (!tokens.length) return [];
   const requiresNewHymnal = serviceItemRequiresNewHymnalScoreSong(item);
+  const requiresChildren = servicePraiseInputMode(item, parseServiceItemMemo(item.memo), service) === "children_audio";
   const includeLyrics = getSearchPhrase(tokens).compact.length >= 4;
   const cacheKey = [
     normalizeSearchValue(normalizedQuery),
-    requiresNewHymnal ? "hymn" : "all",
+    requiresNewHymnal ? "hymn" : requiresChildren ? "children" : "all",
     includeLyrics ? "lyrics" : "summary",
     service?.id || "",
     state.songs.length,
@@ -25442,13 +25457,14 @@ function serviceSongPickerResults(query, item = {}, service = selectedServiceFor
   ].join("::");
   if (state.searchCache.songPicker.has(cacheKey)) return state.searchCache.songPicker.get(cacheKey);
   const candidates = state.songs
-    .filter((song) => !requiresNewHymnal || isNewHymnalScoreSong(song))
+    .filter((song) => (!requiresNewHymnal || isNewHymnalScoreSong(song))
+      && (!requiresChildren || serviceSelectableSongVersions(song, item, service).length))
     .map((song) => ({ song, match: getSongSearchMatch(song, tokens, { includeLyrics }) }))
     .filter((entry) => entry.match);
   const phraseMatches = candidates.filter((entry) => entry.match.phraseMatched);
   const results = phraseMatches.length ? phraseMatches : candidates;
   const songs = uniqueSongsById([
-    ...(directMatch && (!requiresNewHymnal || isNewHymnalScoreSong(directMatch)) ? [directMatch] : []),
+    ...(directMatch && (!requiresNewHymnal || isNewHymnalScoreSong(directMatch)) && (!requiresChildren || serviceSelectableSongVersions(directMatch, item, service).length) ? [directMatch] : []),
     ...results
     .sort((a, b) => b.match.score - a.match.score || sortSongsForCurrentList(a.song, b.song))
     .slice(0, limit)
@@ -25648,9 +25664,10 @@ function renderServiceItemMemoSummary({ parsed, preparation, elementType, autoAd
   const role = normalizeServicePresenterRole(parsed?.presenterRole);
   const inputMode = normalizeServiceInputMode(parsed?.inputMode || parsed?.input_mode);
   const praiseInputLabel = {
-    score_db: "악보 불러오기",
-    lyrics_db: "가사 불러오기",
-    manual_praise: "직접 입력",
+    score_db: "찬송가: 악보 로드",
+    lyrics_db: "가사 로드",
+    manual_praise: "가사 직접 입력",
+    children_audio: "어린이: 음원 로드",
   }[inputMode] || "";
   const chips = [];
   cleanList([
@@ -26784,7 +26801,7 @@ function presenterPreparationDefaultDraftForService(service) {
       continue;
     }
 
-    const songMode = ["praise_db", "score_db", "lyrics_db"].includes(mode)
+    const songMode = ["praise_db", "score_db", "lyrics_db", "children_audio"].includes(mode)
       || servicePraiseInputMode(item, memo, service) === "manual_praise"
       || serviceItemRequiresSongSelection(item, service);
     if (songMode) {
@@ -27002,7 +27019,7 @@ function presenterPreparationPlaceholderLinesForItem(item, service, context) {
     return [start, start + 1].map((ordinal) => `공동기도 ${ordinal}: 교회를 위해 / 홍길동 집사`);
   }
   if (isAnnouncementTextInputItem(item)) return ["광고: 다음 주 예배 후 모임이 있습니다."];
-  if (["praise_db", "score_db", "lyrics_db", "manual_praise"].includes(mode)
+  if (["praise_db", "score_db", "lyrics_db", "children_audio", "manual_praise"].includes(mode)
     || servicePraiseInputMode(item, context.memo, service) === "manual_praise"
     || serviceItemRequiresSongSelection(item, service)) {
     const base = presenterPreparationPlaceholderSongLabel(item);
@@ -27168,7 +27185,7 @@ async function applyPresenterPreparationInput(serviceId = state.selectedServiceI
         }
       }
 
-      if (["praise_db", "score_db", "lyrics_db"].includes(mode) || serviceItemRequiresSongSelection(item, service)) {
+      if (["praise_db", "score_db", "lyrics_db", "children_audio"].includes(mode) || serviceItemRequiresSongSelection(item, service)) {
         if (presenterPreparationSongContentHasConnection(content)) {
           const segments = content.split(/\s+[+＋]\s+/u).map((part) => part.trim()).filter(Boolean);
           const resolvedSongs = [];
@@ -27400,7 +27417,7 @@ function presenterServiceInputControls(item, index, service, options = {}) {
   if (isMonthlyCorporatePrayerGroupItem(item, memo)) {
     return renderPresenterMonthlyCorporatePrayerInputs(item, index, memo, service?.id || model?.service?.id);
   }
-  if (["praise_db", "score_db", "lyrics_db"].includes(mode)) {
+  if (["praise_db", "score_db", "lyrics_db", "children_audio"].includes(mode)) {
     return renderPresenterServicePraiseInput(item, index, model);
   }
   if (mode === "scripture") {
@@ -27468,7 +27485,7 @@ function presenterServiceInputHasEditableField(item, service) {
   if (!context) return false;
   if (context.mode === "benediction") return true;
   if (isMonthlyCorporatePrayerGroupItem(item, context.memo)) return true;
-  if (["praise_db", "score_db", "lyrics_db", "scripture", "asset"].includes(context.mode)) return true;
+  if (["praise_db", "score_db", "lyrics_db", "children_audio", "scripture", "asset"].includes(context.mode)) return true;
   if (context.mode === "text" && servicePraiseInputMode(item, context.memo, service) === "manual_praise") return true;
   const { needsTitle, needsAssignee } = presenterServiceTextInputSpec(item, context.model, context.memo);
   return needsTitle || needsAssignee;
@@ -32495,7 +32512,7 @@ function resolvePresenterServiceItemContentState(item = {}, memo = emptyServiceI
   if (inputMode === "asset") {
     return hasServiceAssetContent(asset) ? filled("asset") : missing("asset_empty");
   }
-  if (["praise_db", "score_db", "lyrics_db"].includes(effectiveInputMode) || requiresSongSelection) {
+  if (["praise_db", "score_db", "lyrics_db", "children_audio"].includes(effectiveInputMode) || requiresSongSelection) {
     if (item?.song_id && !song && songNeedsRelationalHydration(item.song_id)) return loading("song_hydrating");
     if (song && !serviceItemSongSelectionInvalid(item, service, song)) return filled("song");
     if (item?.song_id && !serviceItemSongSelectionInvalid(item, service, song)) return filled("song");
@@ -32639,7 +32656,7 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   const song = presenterSongForServiceItem(item, displayText, label, service);
   const version = song ? getPresenterServiceItemVersion(song, item, service) : null;
   const formPlan = version ? presenterFormPlanForServiceItem(version, item, song) : { forms: [], warnings: [] };
-  const forms = formPlan.forms;
+  const forms = globalThis.MindexSongTiming?.formsFor(item, song, version, formPlan.forms) || formPlan.forms;
   const formWarnings = formPlan.warnings;
   const memo = initialMemo;
   const linkedSongId = String(item.song_id || item.songId || "").trim();
