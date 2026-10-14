@@ -77,3 +77,25 @@ full-row read-back matches all6 corrected rows; Biblia applied identical updates
 with a reconstructible original package.31 Python tests pass. The overall KJV
 printing/orthographic comparison remains incomplete. New cache release retains
 all prior KRV, SAE, GAE, COG and Easy scopes; only the six new KJV chapters join.
+
+
+## COG regular chapter original-edition batch ·2026-10-14
+
+Original COG selected-option identity and exact address equality were checked
+for every eligible chapter.1125 chapters /29126 rows are completely collated
+with publisher electronic text.8103 remaining full-verse textual/punctuation
+restorations applied to production; independent full-row read-back matches all
+8103 expected rows. Biblia applied the identical batch;35 Python tests pass,
+including exact reconstruction through every earlier correction stage.
+
+64 structural chapters are quarantined: combined ranges, split parts, cross-chapter
+display relocations, absence markers and Joel/Malachi original numbering. A new
+address-aware parser preserves41:6 as chapter41 verse6, separately records split
+parts, and retains all1189 original-edition source pages (including Joel4). Earlier
+numeric-only candidate reports stay historical and must not approve structural
+corrections.46 non-final parser tails were checked as editorial headings; no
+canonical continuation was dropped in the eligible chapters; final tails are empty.
+
+Full originals and source bytes remain private. No COGNEW wording substituted,
+no Bible/worship rows deleted. Cache renewal retains all earlier verified scopes
+and COG GEN1 override. Overall twelve-translation audit is incomplete.

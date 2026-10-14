@@ -1933,3 +1933,11 @@ Add six independently verified KJV chapters after exact full-row production
 confirmation. Preserve SAE643 chapters and earlier repairs/COG GEN1 override.
 No spelling modernization or worship records change. Backup and provenance stay
 private; public release contains address scopes only.
+
+
+### COG original full-verse cache renewal ·2026-10-14
+
+After independent8103-row production confirmation, renew the COG regular chapter
+repair scopes and retain previous original restoration scopes/GEN1 override.
+Quarantined64 structural chapters are not implied completely proofread. Keep
+old persistent entries recoverable. Public release carries addresses only.
