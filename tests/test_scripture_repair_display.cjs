@@ -7,3 +7,12 @@ const c=vm.createContext({state:{module:'scripture',selectedBibleTranslationId:'
 vm.runInContext(fs.readFileSync(require.resolve('../mindex.scripture-repair-display.js'),'utf8'),c);
 assert.equal(c.persistentBibleChapterCacheKey('krv','PSA',72),'krv:PSA:72.krv-20261014');assert.equal(c.persistentBibleChapterCacheKey('krv','PSA',73),'krv:PSA:73');assert.equal(c.persistentBibleChapterCacheKey('rkb','PSA',72),'rkb:PSA:72');assert(!rows.has('krv:PSA:72'));assert(rows.has('krv:PSA:73')&&rows.has('rkb:PSA:72'));assert.equal(reloads,1);assert.equal(c.state.bibleBookVerses.length,0);assert(override);assert(text.scrollHeight<=387.5);assert(size>30);
 console.log('PASS bounded long scripture fitting; only repaired KRV caches renew; unrelated chapters/translations retained');
+// A single unbroken word can overflow horizontally without exceeding height.
+Object.defineProperty(text,'scrollHeight',{get:()=>size});
+Object.defineProperty(text,'scrollWidth',{get:()=>size*10});
+size=60;override=false;
+vm.runInContext(fs.readFileSync(require.resolve('../mindex.scripture-repair-display.js'),'utf8'),c);
+assert(override,'horizontal-only overflow must trigger fitting');
+assert(text.scrollWidth<=text.clientWidth+1);
+assert(size>25,'retain the largest readable size');
+console.log('PASS unbroken-word horizontal overflow triggers fitting');

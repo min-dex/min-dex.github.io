@@ -47,7 +47,7 @@
       const fin = box.querySelector('.presenter-scripture-reading-fin');
       const bottom = fin ? Math.min(bounds.bottom, fin.getBoundingClientRect().top) : bounds.bottom;
       const available = bottom - top - Math.max(4, bounds.height * .025);
-      if (available <= 0 || !base || text.scrollHeight <= available) continue;
+      if (available <= 0 || !base || (text.scrollHeight <= available && text.scrollWidth <= text.clientWidth + 1)) continue;
       // Binary search keeps the largest fitting size; short verses keep their original typography.
       let low = 1, high = base;
       for (let i = 0; i < 14; i++) {

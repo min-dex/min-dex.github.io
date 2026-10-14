@@ -1941,3 +1941,15 @@ After independent8103-row production confirmation, renew the COG regular chapter
 repair scopes and retain previous original restoration scopes/GEN1 override.
 Quarantined64 structural chapters are not implied completely proofread. Keep
 old persistent entries recoverable. Public release carries addresses only.
+
+## Scripture word-preserving justification · 2026-10-15
+
+- Korean scripture wraps at eojeol boundaries and English at word boundaries:
+  `word-break: keep-all`, `line-break: auto`, `overflow-wrap: normal`. Both the
+  chromakey bar and full-screen reading body retain justified lines and a
+  left-aligned last line; explicit source line breaks remain intact.
+- Word spacing supplies justification. Do not restore character-level breaking
+  to make a long verse fit. Existing text fitting handles the changed line count;
+  full-screen fitting checks horizontal overflow as well as height.
+- Verify Korean/English output and previews in Chromium/WebKit; never rewrite
+  canonical Bible text or saved worship content to alter wrapping.
