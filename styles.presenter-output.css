@@ -220,10 +220,19 @@
   --presenter-output-fg: #f8f8f3;
   --presenter-output-muted: rgba(248, 248, 243, .66);
 }
-/* User-approved darker autumn lyric color; original PPTX used #594841.
-   Scripture has its own dark reading frame. */
-.presenter-output-root.no-chromakey.has-background[data-output-theme="children"][style*="26-C5.png"] .presenter-slide--lyrics {
+/* User-approved autumn foreground across all frames using the C5 artwork. */
+.presenter-output-root.no-chromakey.has-background[data-output-theme="children"][style*="26-C5.png"] {
   --presenter-output-fg: #34271f;
+  --presenter-output-muted: rgba(52, 39, 31, .68);
+  --presenter-output-bar: transparent;
+}
+.presenter-output-root.no-chromakey.has-background[data-output-theme="children"][style*="26-C5.png"] :is(.presenter-slide-text, .presenter-output-empty, .presenter-ready-screen, .presenter-ready-screen-kicker, .presenter-ready-screen-message, .presenter-waiting-loop, .presenter-waiting-loop-script, .presenter-waiting-loop-title) {
+  color: var(--presenter-output-fg);
+}
+/* Reading frames replace C5 with their own dark artwork. */
+.presenter-output-root.no-chromakey.has-background[data-output-theme="children"][style*="26-C5.png"] .presenter-slide--scripture-reading {
+  --presenter-output-fg: #fff;
+  --presenter-output-muted: rgba(255, 255, 255, .64);
 }
 
 .presenter-output-root[data-output-theme="youth"],

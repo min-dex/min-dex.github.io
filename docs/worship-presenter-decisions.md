@@ -19,7 +19,7 @@
   Existing production order inconsistencies require an explicitly approved repair;
   ordinary editing must not silently rewrite them.
 
-## Children Autumn Lyrics Contrast (2026-10-14)
+## Children Autumn Foreground Contrast (2026-10-14)
 
 - Children services already select the C5 autumn background for September and
   October. Output captures must use `presenterStatePayload`, including its
@@ -30,8 +30,11 @@
 - Original-source evidence remains `#594841` in `Elem_2026-01-04.pptx`,
   slides 6–7, and `Elem_2026-08-09.pptx`, slides 6–7. The available 2026 archive
   has no October 11 deck.
-- Scope the color to that artwork and lyric frames; scripture keeps its own
-  reading background and white text, and chromakey remains unchanged.
+- Apply the foreground consistently to all frames using the C5 artwork, including
+  lyrics, titles, announcements, liturgy, and ready/waiting copy. Override legacy
+  fixed white text and remove the dark title bar on this light artwork.
+- Scripture keeps its own dark reading background and white text; chromakey and
+  other department/background themes remain unchanged.
 
 ## Medley Mode Save Ordering (2026-10-14)
 
