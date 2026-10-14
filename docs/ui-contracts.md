@@ -329,3 +329,21 @@ and 5px textarea side padding to avoid nested panel gutters.
   zoom/music controls use 28px. Preserve the toolbar's horizontal scrolling.
 - Conflict review and section editor use the shared typography and 5px/10px
   spacing rhythm. Section editor contents scroll without losing draft or focus.
+
+
+## Startup branding and recovery · 2026-10-15
+
+- Keep the centered cross/MINDEX identity. The single reveal is 420ms with a
+  40ms wordmark offset and 4px rise; exit opacity takes 220ms. When initial data
+  finishes early, complete only the running reveal before exposing the shell.
+  Reduced-motion users have no reveal or artificial minimum wait.
+- Initial auth/data readiness still owns dismissal. Never reopen startup
+  branding for later background requests or restore the home-icon spinner.
+- Release lookup aborts after 3s and uses the index-pinned version. Required
+  styles must load before scripts execute; CSS and script loads fail after 15s.
+- Asset/runtime failures show an inline-styled accessible recovery screen with
+  a manual retry; hide the incomplete shell. Keep presenter-output failures
+  black rather than showing app recovery UI on the projection screen.
+- Manual retry requests fresh asset URLs, bypassing cached failed preloads,
+  without clearing storage or saved content. Remove the retry stamp from the
+  address bar after capturing it. Normal startup retains normal asset caching.

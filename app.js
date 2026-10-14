@@ -863,7 +863,7 @@ function startMindexRuntime() {
   window.__mindexRuntimeStarted = true;
   // Dynamic release loading can append app.js after DOMContentLoaded. Defer
   // until this script has finished initializing its top-level constants.
-  scheduleMicrotask(() => void init());
+  scheduleMicrotask(() => void init().catch(error => window.MINDEX_BOOT_FAIL?.(error)));
 }
 
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", startMindexRuntime, { once: true });
@@ -915,7 +915,10 @@ function finishUiBoot() {
     window.setTimeout(clear, 0);
     return;
   }
-  requestAnimationFrame(() => requestAnimationFrame(clear));
+  // Complete only the short, already-running brand reveal; reduced motion has none.
+  const animations = document.getElementById("bootStatus")?.getAnimations?.({ subtree: true }) || [];
+  Promise.allSettled(animations.map(animation => animation.finished))
+    .then(() => requestAnimationFrame(() => requestAnimationFrame(clear)));
 }
 
 function applyRuntimePlatformClass() {

@@ -57,10 +57,10 @@
         font: 700 22px/1 system-ui, sans-serif;
         letter-spacing: .22em;
       }
-      .mindex-boot-cross { animation: mindex-boot-reveal 650ms cubic-bezier(.22, 1, .36, 1) both; }
-      .mindex-boot-wordmark { animation: mindex-boot-reveal 650ms 60ms cubic-bezier(.22, 1, .36, 1) both; }
+      .mindex-boot-cross { animation: mindex-boot-reveal 420ms cubic-bezier(.22, 1, .36, 1) both; }
+      .mindex-boot-wordmark { animation: mindex-boot-reveal 420ms 40ms cubic-bezier(.22, 1, .36, 1) both; }
       @keyframes mindex-boot-reveal {
-        from { opacity: 0; transform: translateY(6px); }
+        from { opacity: 0; transform: translateY(4px); }
         to { opacity: 1; transform: translateY(0); }
       }
       html.presenter-output-document .mindex-boot { display: none; }
@@ -72,17 +72,20 @@
       body.ui-booting .toast-region {
         visibility: hidden;
       }
-      body[data-boot-failed="true"]::before {
-        content: "MINDEX를 시작하지 못했습니다. 새로고침해 주세요.";
-        position: fixed;
-        inset: 0;
-        display: grid;
-        place-items: center;
-        padding: 24px;
-        box-sizing: border-box;
+      body[data-boot-failed="true"] :is(.app-shell, .app-shell *, .toast-region) { visibility: hidden !important; }
+      .mindex-boot-error {
+        position: fixed; inset: 0; z-index: 10001;
+        display: grid; place-content: center; justify-items: center; gap: 20px;
+        padding: 24px; box-sizing: border-box;
+        background: var(--mindex-boot-bg, #181816);
         color: var(--mindex-boot-ink, #f3f3ef);
-        font: 600 16px/1.5 system-ui, sans-serif;
-        text-align: center;
+        font: 500 16px/1.5 system-ui, sans-serif; text-align: center;
+      }
+      .mindex-boot-error[hidden], html.presenter-output-document .mindex-boot-error { display: none; }
+      .mindex-boot-error p { margin: 0; }
+      .mindex-boot-error button {
+        padding: 10px 20px; border: 1px solid currentColor; border-radius: 5px;
+        background: transparent; color: inherit; font: inherit; cursor: pointer;
       }
       html.presenter-output-document,
       html.presenter-output-document body,
@@ -123,6 +126,10 @@
         <path d="M224 104h64v80h96v64h-96v160h-64V248h-96v-64h96z" />
       </svg>
       <span class="mindex-boot-wordmark" aria-hidden="true">MINDEX</span>
+    </div>
+    <div id="bootError" class="mindex-boot-error" role="alert" hidden>
+      <p>MINDEX를 시작하지 못했습니다.<br>연결 상태를 확인하고 다시 시도해 주세요.</p>
+      <button type="button" onclick="const url = new window.URL(window.location.href); url.searchParams.set('mindex-retry', Date.now()); window.location.replace(url.href)">다시 시도</button>
     </div>
     <script>
       (() => {
@@ -221,7 +228,7 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261015-sae-source-screens";
+        const fallbackVersion = "20261015-boot-recovery";
         const modules = [
           "vendor/lucide.min.js", "vendor/supabase-js.min.js",
           "mindex.constants.js", "mindex.inline-text.js", "mindex.design-tokens.js", "mindex.worship-model.js",
@@ -235,7 +242,18 @@
           "styles.css", "styles.presenter-output.css", "styles.bulletin.css",
           "styles.calendar.css", "styles.monitor.css",
         ];
-        const assetUrl = (path, version) => path.startsWith("vendor/") ? `./${path}` : `./${path}?v=${encodeURIComponent(version)}`;
+        const retryUrl = new URL(location.href);
+        const retry = retryUrl.searchParams.get("mindex-retry");
+        const retryStamp = /^\d{1,16}$/.test(retry || "") ? retry : "";
+        if (retryStamp) {
+          retryUrl.searchParams.delete("mindex-retry");
+          history.replaceState(history.state, "", retryUrl.href);
+        }
+        const assetUrl = (path, version) => {
+          const url = path.startsWith("vendor/") ? `./${path}` : `./${path}?v=${encodeURIComponent(version)}`;
+          // A manual retry must not reuse a browser-cached failed preload.
+          return retryStamp ? `${url}${url.includes("?") ? "&" : "?"}retry=${retryStamp}` : url;
+        };
         const preloadScript = (path, version) => {
           const preload = document.createElement("link");
           preload.rel = "preload";
@@ -244,41 +262,58 @@
           if (path === "app.js") preload.fetchPriority = "high";
           document.head.append(preload);
         };
+        const failBoot = (error) => {
+          console.error(error);
+          document.body.dataset.bootFailed = "true";
+          document.body.classList.remove("ui-booting");
+          document.getElementById("bootError").hidden = false;
+        };
+        window.MINDEX_BOOT_FAIL = failBoot;
         const load = (path, version) => new Promise((resolve, reject) => {
           const script = document.createElement("script");
           script.src = assetUrl(path, version);
-          script.onload = resolve;
-          script.onerror = () => reject(new Error(`${path}을 불러오지 못했습니다.`));
+          const timer = setTimeout(() => finish(new Error(`${path} 응답 시간이 초과되었습니다.`)), 15000);
+          const finish = (error) => {
+            clearTimeout(timer); script.onload = script.onerror = null;
+            if (error) { script.remove(); reject(error); } else resolve();
+          };
+          script.onload = () => finish();
+          script.onerror = () => finish(new Error(`${path}을 불러오지 못했습니다.`));
           document.body.append(script);
         });
         const loadStyle = (path, version) => new Promise((resolve, reject) => {
           const stylesheet = document.createElement("link");
           stylesheet.rel = "stylesheet";
           stylesheet.href = assetUrl(path, version);
-          stylesheet.onload = resolve;
-          stylesheet.onerror = () => reject(new Error(`${path}을 불러오지 못했습니다.`));
+          const timer = setTimeout(() => finish(new Error(`${path} 응답 시간이 초과되었습니다.`)), 15000);
+          const finish = (error) => {
+            clearTimeout(timer); stylesheet.onload = stylesheet.onerror = null;
+            if (error) { stylesheet.remove(); reject(error); } else resolve();
+          };
+          stylesheet.onload = () => finish();
+          stylesheet.onerror = () => finish(new Error(`${path}을 불러오지 못했습니다.`));
           document.head.append(stylesheet);
         });
         const resolveVersion = async () => {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 3000);
           try {
-            const response = await fetch(`./mindex-release.json?t=${Date.now()}`, { cache: "no-store" });
+            const response = await fetch(`./mindex-release.json?t=${Date.now()}`, { cache: "no-store", signal: controller.signal });
             const release = await response.json();
             return /^[0-9A-Za-z._-]{4,80}$/.test(String(release?.version || "")) ? release.version : fallbackVersion;
           } catch {
             return fallbackVersion;
+          } finally {
+            clearTimeout(timer);
           }
         };
         void (async () => {
           const version = await resolveVersion();
           window.MINDEX_RELEASE = version;
           modules.forEach((module) => preloadScript(module, version));
-          void Promise.all(styles.map((style) => loadStyle(style, version))).catch((error) => console.error(error));
+          await Promise.all(styles.map((style) => loadStyle(style, version)));
           for (const module of modules) await load(module, version);
-        })().catch((error) => {
-          console.error(error);
-          document.body.dataset.bootFailed = "true";
-          document.body.classList.remove("ui-booting");
-        });
+        })().catch(failBoot);
       })();
     </script>
   </body>
