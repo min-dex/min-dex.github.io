@@ -34,11 +34,36 @@ SCRIPT=r'''async()=>{
  const mediaSlides=slides.filter(s=>s.elementId===media.id&&!s.autoTrailingBlank);
  check(mediaSlides.length===2,'photo bundle missing: '+JSON.stringify(slides.map(s=>[s.type,s.elementId,s.formKey])));
  const at=slides.findIndex(s=>s.id===mediaSlides[0].id);
- check(slides[at-1].formKey===placement.formKey,'photos are not after second Int');
+ check(slides[at].formKey===placement.formKey,'photos do not replace second Int');
  check(slides[at+2].formKey===plan.groups[6].key,'next chorus not immediately after photos');
- check(slides[at+1].imageSrc==='/assets/icon-512.png','photo order lost');
+ check(slides[at+1].formBackgroundImage==='/assets/icon-512.png','photo order lost');
  check(slides.filter(s=>s.formKey===plan.groups[2].key).length===1,'first Int changed');
  check(JSON.stringify(song)===canonical,'canonical song mutated');
+ check(slides.filter(s=>s.formKey===placement.formKey).length===2,'original Int still precedes background photos');
+ const frame=presenterOutputFrameStateForSlide(slides[at],{chromakey:true,backgroundImage:'/default.png'});
+ check(frame.noChromakey&&frame.showBackground&&!frame.blankOutput&&frame.backgroundImage==='/assets/icon-192.png','instrumental background/frame mode wrong');
+ check(!presenterOutputFrameStateForSlide(slides[at+2],{chromakey:true}).noChromakey,'following chorus did not restore chromakey');
+ check(presenterOutputFrameStateForSlide(presenterSafetyBlankSlide(),{chromakey:true}).blackoutOutput,'blackout lost');
+ const lyricItems=structuredClone(items),lyricMedia=lyricItems.find(i=>i.id===media.id);
+ const lm=parseServiceItemMemo(lyricMedia.memo);lm.mediaPlacement.formKey=plan.groups[1].key;lyricMedia.memo=serializeServiceItemMemo(lm);
+ const originals=build([parent]).filter(s=>s.formKey===plan.groups[1].key);
+ const lyricSlides=build(lyricItems).filter(s=>s.elementId===media.id);
+ check(lyricSlides.length===Math.max(originals.length,2),'lyric/photo page mapping wrong');
+ check(originals.every(s=>lyricSlides.some(p=>p.text===s.text)),'lyrics were dropped');
+ check(lyricSlides.every(s=>s.formBackgroundImage&&s.outputContext==='clean'),'lyric photo context wrong');
+ const more=structuredClone(lyricItems),moreMedia=more.find(i=>i.id===media.id),moreMemo=parseServiceItemMemo(moreMedia.memo);
+ moreMemo.asset.slides=Array.from({length:5},(_,i)=>({url:'/assets/icon-192.png?photo='+i,name:'사진 '+i,order:i+1}));
+ moreMedia.memo=serializeServiceItemMemo(moreMemo);
+ const five=build(more).filter(s=>s.elementId===media.id);
+ check(five.length===5&&new Set(five.map(s=>s.formBackgroundImage)).size===5,'extra photos discarded');
+ check(originals.every(s=>five.some(p=>p.text===s.text)),'extra photos lost lyrics');
+
+ check(presenterOutputWarmupSourcesForPayload({slides:lyricSlides,index:0},lyricSlides[0]).length===2,'photos missing from warmup');
+ check(renderPresenterSlideMiniPreview(lyricSlides[0],service.id).includes('icon-192.png'),'thumbnail lacks photo');
+ const lyricHtml=renderPresenterSlideFrame(lyricSlides[0],{noChromakey:true});
+ check(lyricHtml.includes('첫 줄'),'output lost lyric text');
+ window.__formPhotoFixture={slides,at,lyricSlides};
+
  const timed=slides.map((slide,index)=>({...slide,...(slide.elementId===parent.id?{syncTimeline:{groupId:'fixture',audioSrc:'/fixture.wav',start:index,lead:0}}:{})}));
  const beforeMedia=presenterSyncedLyricsTargetForTime(timed,at-1,999);
  check(beforeMedia?.index===at-1,'audio clock skipped inserted photos');
@@ -58,7 +83,7 @@ SCRIPT=r'''async()=>{
  const restoredMedia=restored.find(i=>i.id===saved.id);
  check(JSON.stringify(parseServiceItemMemo(restoredMedia.memo).mediaPlacement)===JSON.stringify({...placement,parentItemId:persistedParentId}),'placement roundtrip failed '+JSON.stringify({actual:parseServiceItemMemo(restoredMedia.memo).mediaPlacement,placement}));
  const again=build(restored);const next=again.findIndex(s=>s.elementId===saved.id);
- check(again[next-1].formKey===placement.formKey&&again[next+2].formKey===plan.groups[6].key,'saved placement drifted');
+ check(again[next].formKey===placement.formKey&&again[next+2].formKey===plan.groups[6].key,'saved placement drifted');
  const changed=structuredClone(restored);const changedParent=changed.find(i=>i.id===persistedParentId);
  const pm=parseServiceItemMemo(changedParent.memo);pm.formHint='V-C-Int-C';pm.formPreset=null;changedParent.memo=serializeServiceItemMemo(pm);
  const invalid=build(changed).filter(s=>s.elementId===saved.id);
@@ -82,6 +107,27 @@ def main():
     page.route('**/*',lambda r:r.continue_() if urlsplit(r.request.url).hostname in ('127.0.0.1','localhost') and r.request.method=='GET' else r.abort())
     page.goto(url);page.wait_for_function("typeof insertPresenterProgressionMedia==='function'&&typeof state!=='undefined'&&!!refs.saveAllBtn")
     result=page.evaluate(SCRIPT);print(engine,result,flush=True)
+    fixture=page.evaluate("window.__formPhotoFixture")
+    output=browser.new_page(viewport={'width':960,'height':540})
+    output.route('**/*',lambda r:r.continue_() if urlsplit(r.request.url).hostname in ('127.0.0.1','localhost') and r.request.method=='GET' else r.abort())
+    output.goto(url+'?output=presenter');output.wait_for_selector('#presenterOutputRoot',state='attached')
+    output.evaluate("f=>{window.photoPayload={chromakey:true,slides:f.lyricSlides,index:0};renderPresenterOutput(photoPayload)}",fixture)
+    output.wait_for_function("document.querySelector('#presenterOutputRoot.has-decoded-background .is-active')?.textContent.includes('첫 줄')")
+    assert output.locator('#presenterOutputRoot > .presenter-output-background img').count()==1
+    output.wait_for_function("getComputedStyle(document.querySelector('#presenterOutputRoot .is-active')).opacity==='1'")
+    assert output.evaluate("()=>{const root=document.getElementById('presenterOutputRoot').getBoundingClientRect();const caption=document.querySelector('#presenterOutputRoot .is-active .presenter-slide-text').getBoundingClientRect();return caption.top>root.top+root.height*.7&&Math.abs(caption.bottom-root.bottom)<2}")
+    output.screenshot(path='/private/tmp/mindex-form-background-lyrics-'+engine+'.png')
+    output.evaluate("f=>renderPresenterOutput({chromakey:true,slides:f.slides,index:f.at})",fixture)
+    output.wait_for_function("!!document.querySelector('#presenterOutputRoot.has-decoded-background .is-active .presenter-slide--blank')")
+    assert not output.evaluate("document.getElementById('presenterOutputRoot').classList.contains('is-blank')")
+    output.evaluate("f=>renderPresenterOutput({chromakey:true,slides:f.slides,index:f.at+2})",fixture)
+    output.wait_for_function("!document.getElementById('presenterOutputRoot').classList.contains('no-chromakey')")
+    assert output.locator('#presenterOutputRoot > .presenter-output-background').count()==0
+    output.evaluate("renderPresenterOutput({...photoPayload,safetyBlank:true})")
+    output.wait_for_function("document.getElementById('presenterOutputRoot').classList.contains('is-blackout')")
+    assert output.locator('#presenterOutputRoot > .presenter-output-background').count()==0
+    output.close()
+    print(engine,'PASS decoded lyric/photo output, instrumental photo, chromakey restoration and blackout',flush=True)
     page.locator('.svc-progression-media summary').click()
     check=page.locator('[data-progression-position] option').count()
     assert check==9,check
@@ -92,7 +138,7 @@ def main():
     field.select_option('detach')
     assert page.evaluate("id=>!parseServiceItemMemo(getServiceItems(state.selectedServiceId).find(i=>i.id===id).memo).mediaPlacement",result['mediaId'])
     page.locator('.svc-progression-media summary').first.click()
-    page.locator('[data-progression-position]').first.select_option(label='6. Int 뒤')
+    page.locator('[data-progression-position]').first.select_option(label='6. Int')
     page.locator('[data-progression-media-add]').first.click()
     assert page.evaluate("()=>getServiceItems(state.selectedServiceId).some(i=>parseServiceItemMemo(i.memo).mediaPlacement?.formKey==='blank:instrumental:5')")
     page.screenshot(path='/private/tmp/mindex-progression-board-'+engine+'.png',full_page=True)

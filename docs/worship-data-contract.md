@@ -920,7 +920,7 @@ scripts/migrations/prune-unused-bible-translations-2026-08-02.sql
 ### Instance media placement
 
 An ordinary reference-media element may store `config.mediaPlacement` with
-`parentItemId`, `formKey`, and `signature`. It references a song element within
+`parentItemId`, `formKey`, and `signature`. It selects that form occurrence for photo backgrounds on a song element within
 the same service/section and is persisted through the existing atomic aggregate
 path. It is not a Praise form or a reusable template slot. Temporary parent IDs
 are remapped along with newly emitted element IDs. Missing/stale anchors retain

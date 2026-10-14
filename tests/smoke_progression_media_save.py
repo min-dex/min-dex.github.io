@@ -53,7 +53,7 @@ ATOMIC=r'''async()=>{
  check(JSON.stringify(db.elements.find(e=>e.id===current().id).config.mediaPlacement)===original,'element patch lost placement');
  const after=buildServicePresenterSlidesUncached(sid,{service,items:getServiceItems(sid),allowHydration:false});
  const at=after.findIndex(s=>s.elementId===current().id);
- check(after[at-1].formKey===parseServiceItemMemo(current().memo).mediaPlacement.formKey,'atomic read-back location drift');
+ check(after[at].formKey===parseServiceItemMemo(current().memo).mediaPlacement.formKey,'atomic read-back location drift');
  // Newly inserted ordinary media takes the structural atomic path.
  const liveParent=getServiceItems(sid).find(i=>i.song_id);
  const livePlan=presenterProgressionForItem(liveParent,sid);

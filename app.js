@@ -12205,6 +12205,11 @@ async function uploadPresenterReferenceMediaAsset({ file, imageFiles = null, ser
   const kind = presenterReferenceMediaKindForFile(file);
   let memo = parseServiceItemMemo(targetItem?.memo);
   const referenceMedia = isPresenterReferenceMediaItem(targetItem, memo);
+  if (memo.mediaPlacement && (kind !== "image" || (imageFiles || []).some(image => presenterReferenceMediaKindForFile(image) !== "image"))) {
+    showToast("송폼 배경에는 사진 파일을 선택해 주세요.", "error");
+    if (input) input.value = "";
+    return false;
+  }
   if (!file || !targetItem || !kind || !serviceItemAcceptsMediaAssetFile(targetItem, memo, kind)) {
     const expectedKind = serviceMemoElementType(memo);
     const expectedLabel = serviceAssetFileKindLabel(expectedKind);
@@ -27675,7 +27680,7 @@ function renderPresenterAssetUpload(item, index, memo, serviceId) {
   const kind = asset.kind || serviceMemoElementType(memo);
   const acceptsMultiple = reference || kind === "image";
   return `<label class="svc-reference-media-upload">
-    <input type="file" ${acceptsMultiple ? "multiple" : ""} accept="${escapeAttr(reference ? PRESENTER_REFERENCE_MEDIA_ACCEPT : serviceAssetFileAcceptForKind(kind))}"
+    <input type="file" ${acceptsMultiple ? "multiple" : ""} accept="${escapeAttr(memo.mediaPlacement ? "image/*" : reference ? PRESENTER_REFERENCE_MEDIA_ACCEPT : serviceAssetFileAcceptForKind(kind))}"
       ${reference ? "data-presenter-reference-media-file" : "data-service-item-asset-file"}
       data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${index}" />
     <i data-lucide="upload"></i><span>${kind === "image" ? "이미지 추가" : "파일 선택"}</span>

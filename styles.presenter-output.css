@@ -1483,3 +1483,20 @@ span.presenter-announcement-paren {
 .presenter-output-root.no-chromakey.has-decoded-background { background-image: none; }
 .presenter-output-background { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
 .presenter-output-background > img { position: absolute; left: 0; top: 50%; width: 100%; height: auto; max-width: none; transform: translateY(-50%); }
+
+/* Song-form photos change the backing image, retaining the lyric caption bar. */
+.presenter-output-root.no-chromakey.has-form-background .presenter-slide--lyrics {
+  justify-content: flex-end;
+  align-items: stretch;
+  padding: 0;
+}
+.presenter-output-root.no-chromakey.has-form-background .presenter-slide--lyrics::before {
+  content: "";
+}
+.presenter-output-root.no-chromakey.has-form-background .presenter-slide--lyrics > .presenter-slide-text {
+  height: var(--presenter-output-bar-height);
+  gap: .06em;
+  line-height: 1.08;
+  padding: 1.35cqh var(--presenter-text-inset);
+  text-shadow: none;
+}

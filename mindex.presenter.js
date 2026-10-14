@@ -3731,7 +3731,7 @@ function renderPresenterOutput(payload, options = {}) {
   preloadPresenterOutputImages(payload, slide);
   warmPresenterOutputNextVideo(payload);
   const backgroundSources = frameState.showBackground
-    ? presenterPayloadBackgroundImages(payload).map(normalizePresenterMediaSource).filter(presenterMediaSourceIsImage)
+    ? frameState.backgroundImages.map(normalizePresenterMediaSource).filter(presenterMediaSourceIsImage)
     : [];
   const imagesReady = () => (!activeImageSource || presenterOutputImageIsReady(activeImageSource))
     && (!backgroundSources.length || backgroundSources.some(presenterOutputImageIsReady));
@@ -3795,7 +3795,8 @@ function presenterSlideUsesServiceBackground(slide) {
 }
 
 function presenterOutputFrameStateForSlide(slide, payload = {}) {
-  const backgroundImages = presenterPayloadBackgroundImages(payload);
+  const backgroundImages = slide?.formBackgroundImage
+    ? [slide.formBackgroundImage] : presenterPayloadBackgroundImages(payload);
   const fallbackChromakey = Boolean(payload?.chromakey);
   const blackoutOutput = slide?.id === "presenter:safety-blank";
   const slideChromakey = !blackoutOutput && presenterFrameSlideOutputContext(slide, fallbackChromakey) === "chromakey";
@@ -3809,8 +3810,9 @@ function presenterOutputFrameStateForSlide(slide, payload = {}) {
   const showBackground = Boolean(!blackoutOutput && backgroundImages.length && cleanOutput && presenterSlideUsesServiceBackground(slide));
   return {
     cleanOutput,
+    formBackground: Boolean(slide?.formBackgroundImage),
     showBackground,
-    blankOutput: Boolean(blankSlide && cleanOutput && !blackoutOutput),
+    blankOutput: Boolean(blankSlide && cleanOutput && !blackoutOutput && !slide?.formBackgroundImage),
     blackoutOutput,
     scoreOutput,
     videoOutput,
@@ -3863,6 +3865,7 @@ function presenterOutputFrameClassNames(frameState = {}) {
   return [
     frameState.noChromakey ? "no-chromakey" : "",
     frameState.showBackground ? "has-background" : "",
+    frameState.formBackground ? "has-form-background" : "",
     frameState.blankOutput ? "is-blank" : "",
     frameState.blackoutOutput ? "is-blackout" : "",
   ].filter(Boolean).join(" ");
@@ -4042,7 +4045,7 @@ function presenterOutputFrameKey(payload = {}, slide = null, frameState = {}) {
 }
 
 function presenterOutputShouldAnimateFrameTransition(root, frameState = {}) {
-  if (!frameState.cleanOutput) return false;
+  if (!frameState.cleanOutput || frameState.formBackground) return false;
   if (frameState.videoOutput) return false;
   // Self-contained media must not blend with the previous slide's visual theme.
   if (root?.querySelector?.(":scope > .presenter-output-layer :is([data-slide-layout='media'], [data-slide-layout='file'])")) return false;
@@ -4413,6 +4416,7 @@ function applyPresenterOutputFrameState(root, frameState = {}) {
   document.body.classList.toggle("is-blank", Boolean(frameState.blankOutput));
   root.classList.toggle("no-chromakey", Boolean(frameState.noChromakey));
   root.classList.toggle("has-background", Boolean(frameState.showBackground));
+  root.classList.toggle("has-form-background", Boolean(frameState.formBackground));
   root.classList.toggle("is-blank", Boolean(frameState.blankOutput));
   document.body.classList.toggle("is-blackout", Boolean(frameState.blackoutOutput));
   root.classList.toggle("is-blackout", Boolean(frameState.blackoutOutput));
@@ -4596,6 +4600,7 @@ function presenterOutputImageSourcesForPreload(payload = {}, activeSlide = null)
   const pushSlide = (slide) => {
     const source = presenterSlideImageSource(slide);
     if (source) sources.push(source);
+    if (slide?.formBackgroundImage) sources.push(slide.formBackgroundImage);
   };
   pushSlide(activeSlide);
 
@@ -4752,7 +4757,10 @@ function presenterOutputWarmupSourcesForPayload(payload = {}, activeSlide = null
     const normalized = normalizePresenterMediaSource(source);
     if (normalized && presenterMediaSourceIsImage(normalized)) sources.push(normalized);
   };
-  const pushSlide = (slide) => pushSource(presenterSlideImageSource(slide));
+  const pushSlide = (slide) => {
+    pushSource(presenterSlideImageSource(slide));
+    pushSource(slide?.formBackgroundImage);
+  };
   const serviceSlides = Array.isArray(payload?.slides) ? payload.slides : [];
   const serviceIndex = clampPresenterIndex(payload?.index, serviceSlides.length);
 
@@ -5607,7 +5615,7 @@ function presenterProgressionForItem(item, serviceId) {
 }
 
 function presenterProgressionOptions(plan, selected = "") {
-  return plan.groups.map((group, index) => `<option value="${escapeAttr(group.key)}"${group.key === selected ? " selected" : ""}>${escapeHtml(`${index + 1}. ${group.label} 뒤`)}</option>`).join("");
+  return plan.groups.map((group, index) => `<option value="${escapeAttr(group.key)}"${group.key === selected ? " selected" : ""}>${escapeHtml(`${index + 1}. ${group.label}`)}</option>`).join("");
 }
 
 function renderPresenterProgressionAdd(item) {
@@ -5616,10 +5624,10 @@ function renderPresenterProgressionAdd(item) {
   const plan = presenterProgressionForItem(item, serviceId);
   if (!plan.groups.length) return "";
   return `<details class="svc-progression-media">
-    <summary>진행 중 자료 추가</summary>
+    <summary>송폼 배경 사진</summary>
     <div class="svc-progression-media-controls">
-      <select class="svc-presenter-input-control" data-progression-position aria-label="자료를 넣을 구간">${presenterProgressionOptions(plan)}</select>
-      <button class="btn ghost" type="button" data-progression-media-add data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(item.id)}">자료 추가</button>
+      <select class="svc-presenter-input-control" data-progression-position aria-label="사진을 띄울 송폼">${presenterProgressionOptions(plan)}</select>
+      <button class="btn ghost" type="button" data-progression-media-add data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(item.id)}">사진 추가</button>
     </div>
   </details>`;
 }
@@ -5645,8 +5653,8 @@ function renderPresenterMediaPlacementInput(item, serviceId) {
   const plan = presenterProgressionForItem(parent, serviceId);
   const valid = plan.signature === placement.signature && plan.groups.some(group => group.key === placement.formKey);
   return `<label class="svc-presenter-input-field">
-    <span>${escapeHtml(parent ? `${serviceItemDisplayText(parent) || parent.label} · 자료 위치` : "원래 곡이 없습니다")}</span>
-    <select class="svc-presenter-input-control" data-media-placement data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(item.id)}" aria-label="자료 위치">
+    <span>${escapeHtml(parent ? `${serviceItemDisplayText(parent) || parent.label} · 배경 사진 구간` : "원래 곡이 없습니다")}</span>
+    <select class="svc-presenter-input-control" data-media-placement data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(item.id)}" aria-label="배경 사진 구간">
       ${valid ? "" : '<option value="" selected disabled>위치 재선택 필요 · 송출 제외</option>'}
       ${presenterProgressionOptions(plan, valid ? placement.formKey : "")}
       <option value="detach">독립된 예배 순서로 분리</option>
@@ -5686,32 +5694,56 @@ function insertPresenterProgressionMedia(slides, items) {
     byElement.get(slide.elementId).push(slide);
   }
   const insertedIds = new Set(placements.map(entry => entry.item.id));
-  const after = new Map();
+  const backgrounds = new Map();
   const invalidIds = new Set();
   const parentIds = new Set();
   for (const { item, placement } of placements) {
     const parent = items.find(candidate => candidate.id === placement.parentItemId);
     const parentSlides = byElement.get(parent?.id) || [];
     const plan = presenterProgressionPlan(parent, parentSlides);
-    const target = plan.groups.find(group => group.key === placement.formKey);
-    if (!parent || insertedIds.has(parent.id) || !target || plan.signature !== placement.signature
-      || presenterReferenceMediaItemSectionKey(parent) !== presenterReferenceMediaItemSectionKey(item)) {
+    const target = parentSlides.filter(slide => slide.formKey === placement.formKey);
+    const photos = byElement.get(item.id) || [];
+    if (!parent || insertedIds.has(parent.id) || !target.length || plan.signature !== placement.signature
+      || presenterReferenceMediaItemSectionKey(parent) !== presenterReferenceMediaItemSectionKey(item)
+      || target.some(slide => presenterSlideIsScoreLike(slide)
+        || ![PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT, PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT, PRESENTER_SLIDE_LAYOUTS.BLANK].includes(presenterSlideLayout(slide)))
+      || !photos.length || photos.some(slide => !presenterSlideImageSource(slide))) {
       invalidIds.add(item.id);
       continue;
     }
     parentIds.add(parent.id);
-    if (!after.has(target.lastSlideId)) after.set(target.lastSlideId, []);
-    after.get(target.lastSlideId).push(...(byElement.get(item.id) || []).map(slide => ({
-      ...slide, sectionId: parentSlides[0]?.sectionId || slide.sectionId,
-      progressionParentId: parent.id, progressionSequence: true,
+    const key = target[0].id;
+    if (!backgrounds.has(key)) backgrounds.set(key, { target, photos: [] });
+    backgrounds.get(key).photos.push(...photos.map(slide => ({ ...slide,
       hiddenInPresentation: Boolean(slide.hiddenInPresentation || serviceItemPresentationHidden(parent)),
     })));
   }
+  const replacements = new Map();
+  const replacedIds = new Set();
+  for (const [key, { target, photos }] of backgrounds) {
+    // Traverse both ordered lists once: retain every lyric page and photo, without
+    // restarting the lyrics for every photo. The shorter list holds its page.
+    const count = Math.max(target.length, photos.length);
+    replacements.set(key, Array.from({ length: count }, (_, index) => {
+      const lyric = target[Math.floor(index * target.length / count)];
+      const photo = photos[Math.floor(index * photos.length / count)];
+      return { ...lyric, id: `${photo.id}:form-background:${index}`,
+        elementId: photo.elementId, elementLabel: photo.elementLabel, connectedPraise: null,
+        progressionParentId: lyric.elementId,
+        progressionSequence: true, formBackgroundImage: presenterSlideImageSource(photo),
+        outputContext: "clean", syncTimeline: null,
+        hiddenInPresentation: Boolean(lyric.hiddenInPresentation || photo.hiddenInPresentation),
+      };
+    }));
+    target.forEach(slide => replacedIds.add(slide.id));
+  }
   return slides.flatMap(slide => {
     if (invalidIds.has(slide.elementId)) return [{ ...slide, hiddenInPresentation: true,
-      warnings: [...(slide.warnings || []), "자료 위치 재선택 필요 · 송출 제외"] }];
+      warnings: [...(slide.warnings || []), "배경 사진과 송폼을 확인해 주세요 · 송출 제외"] }];
     if (insertedIds.has(slide.elementId)) return [];
-    return [parentIds.has(slide.elementId) ? { ...slide, progressionSequence: true } : slide, ...(after.get(slide.id) || [])];
+    if (replacements.has(slide.id)) return replacements.get(slide.id);
+    if (replacedIds.has(slide.id)) return [];
+    return [parentIds.has(slide.elementId) ? { ...slide, progressionSequence: true } : slide];
   });
 }
 

@@ -1776,9 +1776,11 @@ automatically deletes an existing service after calendar changes.
 
 ## Service-local media within song progression (2026-10-14)
 
-- `진행 중 자료 추가` inserts an ordinary reference-media element after a chosen
-  rendered form occurrence. Repeated `Int`/`C` labels are distinguished by their
-  sequence position. There is no song-specific or interlude-specific player.
+- `송폼 배경 사진` replaces the selected rendered form occurrence's background,
+  not the following position. Repeated `Int`/`C` labels are distinguished by their
+  sequence position. Lyrics retain their caption bar over the photo; an instrumental shows photos
+  alone, without the clean-blank cross. The next form restores its own context.
+  This supersedes the initial same-day after-form insertion design.
 - Keep Praise versions/forms unchanged. The existing element `config` stores
   `mediaPlacement: { parentItemId, formKey, signature }`; memo is its UI adapter.
   Resolve temporary parent IDs when building atomic persistence rows. No new
@@ -1788,13 +1790,17 @@ automatically deletes an existing service after calendar changes.
   absent, or the sections differ, preserve the files and exclude their slides
   from output until the operator reselects the location or detaches the media.
   Hiding the parent also hides attached media. Nested placements are unsupported.
-- Build media with existing image/video/audio paths and interleave only the
-  resulting slide sequence. Reuse image warmup, normal Next/Previous and numeric
-  navigation. Suppress automatic trailing blanks within the inserted sequence;
-  explicit song-form blanks remain. Audio-timed lyric advance stops at inserted
-  media boundaries in both seek directions; operators traverse media normally.
-  The thumbnail board follows playback order,
-  including the resumed song after the media element.
+- Reuse ordinary image bundle storage and decoded background rendering. The
+  selected form emits max(lyric page count, photo count) frames, traversing both
+  lists in order and holding the shorter list's page. No lyric/photo is discarded
+  or repeated as a whole sequence. Next/Previous and numeric navigation remain
+  the normal controls. Audio-timed advance stops at these operator-controlled
+  frames in either seek direction. The board follows playback order.
+- Only images can be uploaded as form backgrounds. Non-image assets or score
+  forms remain preserved but excluded with a warning; detach permits ordinary
+  media playback. Do not silently replace score artwork. Image decode gates and
+  warmup include form backgrounds; previews share the exact background policy.
+  Safety blackout always removes the image and remains black.
 - Reference media never consumes a song/template slot. Existing sermon,
   announcement and offering media slots retain their established keys; media in
   other sections uses its ordinary element identity without a template slot.
