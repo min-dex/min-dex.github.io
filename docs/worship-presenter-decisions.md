@@ -1581,3 +1581,23 @@ automatically deletes an existing service after calendar changes.
   original 80% volume and click ordering; screenshots were visually inspected.
   Production writes and church-file uploads were blocked; mixer/speaker
   hardware output is not claimed as verified.
+
+### 2026-10-14 Startup and worship detail read latency
+- Read the lightweight service view immediately alongside service types. Its
+  successful response proves alias-column support without a preceding probe;
+  legacy table/column detection and offline cache fallback remain available.
+- Warm the atomic client module alongside initial service-list reads. This only
+  imports code, never reads or writes an aggregate. Failed imports remain retryable.
+- Initial detail hydration adopts full source/document history and rows from the
+  same atomic aggregate read; it no longer fetches source_ref separately first.
+  Already-loaded partial records and pre-save full-document guards remain intact.
+- Repeated praise title matching reuses normalized names in a weak cache, keyed
+  by the current title/version-name signature. In-place edits invalidate it;
+  homonym selection priority and song/version IDs are unchanged.
+- Local Chromium CPU sampling of four repeated detail renders reduced sampled
+  title-matching time from about 94 ms to 13 ms. This is a bounded CPU profile,
+  not a promise about network or total page latency.
+- Tests cover empty-view success, legacy/offline fallback, in-place name changes,
+  one aggregate request, full-history adoption, loading reentry, refresh/draft
+  isolation, picker selections and medley persistence. Operational timing runs
+  block all writes and compare existing service IDs/revisions before and after.

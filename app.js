@@ -993,7 +993,11 @@ function loadInitialData() {
     loadScriptures({ silent: true });
     loadBibleTranslations({ silent: true });
   }
-  if (isServiceDataModule()) loadServiceData({ silent: true });
+  if (isServiceDataModule()) {
+    // Load the read runtime alongside the list, before the first detail click.
+    void worshipAtomicClient().catch(() => {});
+    loadServiceData({ silent: true });
+  }
   if (state.module === "references") loadReferenceLinks({ silent: true });
   if (state.module === "calendar") loadCalendarData({ silent: true });
 }
@@ -3903,18 +3907,21 @@ async function fetchWorshipServiceListViewRows(select) {
 }
 
 async function fetchWorshipServiceListRows() {
-  const select = state.serviceAliasSupported
-    ? WORSHIP_SERVICE_LIST_SELECT
-    : WORSHIP_SERVICE_BASE_LIST_SELECT;
-  const cacheKey = WORSHIP_EMERGENCY_TODAY_ONLY
+  let select = WORSHIP_SERVICE_LIST_SELECT;
+  let cacheKey = WORSHIP_EMERGENCY_TODAY_ONLY
     ? `today:${localDateStringWithOffset(new Date(), 0)}`
     : select;
   try {
     const light = await fetchWorshipServiceListViewRows(select);
     if (light) {
+      // A successful view read already proves the alias column exists.
+      state.serviceAliasSupported = true;
       writeStaticSupabaseCache("mindex_worship_services", `view:${cacheKey}`, light);
       return light;
     }
+    state.serviceAliasSupported = await detectTableColumnSupport("mindex_worship_services", "service_alias");
+    select = state.serviceAliasSupported ? WORSHIP_SERVICE_LIST_SELECT : WORSHIP_SERVICE_BASE_LIST_SELECT;
+    if (!WORSHIP_EMERGENCY_TODAY_ONLY) cacheKey = select;
     const rows = await fetchSupabasePaged("mindex_worship_services", select, worshipServiceListQuery);
     writeStaticSupabaseCache("mindex_worship_services", cacheKey, rows);
     return rows;
@@ -3968,7 +3975,11 @@ async function worshipAtomicClient() {
     const release = encodeURIComponent(window.MINDEX_RELEASE || "atomic-production-20260922-001");
     const promise = import(`./mindex.worship-atomic-client.mjs?v=${release}`).then(({ createWorshipAtomicClient }) =>
       createWorshipAtomicClient({ rpc: (name, args) => client.rpc(name, args),
-        journal: sessionStorage, namespace: state.config.url }));
+        journal: sessionStorage, namespace: state.config.url })).catch((error) => {
+          // A failed speculative import must not poison the next detail/open retry.
+          if (worshipAtomicRuntime?.promise === promise) worshipAtomicRuntime = null;
+          throw error;
+        });
     worshipAtomicRuntime = { client, promise };
   }
   return worshipAtomicRuntime.promise;
@@ -4368,7 +4379,6 @@ function worshipAppServiceTypeId(typeId) {
 }
 
 async function loadWorshipData() {
-  state.serviceAliasSupported = await detectTableColumnSupport("mindex_worship_services", "service_alias");
   const [types, services] = await Promise.all([
     fetchCachedSupabasePaged("mindex_worship_service_types", WORSHIP_SERVICE_TYPE_SELECT, (query) =>
       query.order("sort_order", { ascending: true })).catch((error) => {
@@ -5504,8 +5514,8 @@ function calendarCellClassForField(field) {
 // ─── Worship data normalization and service persistence ──────────────────────
 async function loadServiceItems(serviceId) {
   if (!serviceId) return;
-  loadFullServiceSourceRefInBackground(serviceId);
   if (state.loadedWorshipServiceIds.has(serviceId)) {
+    loadFullServiceSourceRefInBackground(serviceId);
     if (state.selectedServiceId === serviceId && !state.dirty.service) {
       captureCleanFingerprint("service");
     }
@@ -11340,7 +11350,7 @@ async function hydratePresenterServiceData(serviceId = state.selectedServiceId) 
   const targetServiceId = String(serviceId || "").trim();
   if (!targetServiceId || !canUseClientData()) return false;
   if (shouldDeferPastWorshipServiceLoad(targetServiceId)) return false;
-  loadFullServiceSourceRefInBackground(targetServiceId);
+  // loadServiceItems adopts document + rows from one atomic read.
   if (presenterServiceHydrationPromises.has(targetServiceId)) {
     return presenterServiceHydrationPromises.get(targetServiceId);
   }
@@ -26355,6 +26365,9 @@ function servicePraiseExactTitlePriority(song = {}) {
   return 3;
 }
 
+// Title normalization is shared by repeated template/render lookups. The name
+// signature also detects in-place title/version edits; retired songs can be GC'd.
+const servicePraiseLookupNamesCache = new WeakMap();
 function servicePraiseSongMatchesLookupName(song = {}, lookups = [], options = {}) {
   const names = options.titleOnly
     ? [song.title, stripHymnNumber(song.title || "")]
@@ -26366,12 +26379,24 @@ function servicePraiseSongMatchesLookupName(song = {}, lookups = [], options = {
       song.original_title,
       ...(song.versions || []).map((version) => versionDisplayName(song, version)),
     ];
-  return names.some((name) => {
-    const stripped = stripTitleDecorations(stripHymnNo(name).title || name);
-    const normalized = normalizeTitle(stripped);
-    const compact = compactSearchValue(stripped);
-    return lookups.some((candidate) => normalized === candidate.lookup || compact === candidate.compact);
-  });
+  const signature = JSON.stringify(names);
+  const kind = options.titleOnly ? "title" : "all";
+  let entry = servicePraiseLookupNamesCache.get(song);
+  if (!entry) {
+    entry = {};
+    servicePraiseLookupNamesCache.set(song, entry);
+  }
+  if (entry[kind]?.signature !== signature) {
+    entry[kind] = {
+      signature,
+      names: names.map((name) => {
+        const stripped = stripTitleDecorations(stripHymnNo(name).title || name);
+        return { lookup: normalizeTitle(stripped), compact: compactSearchValue(stripped) };
+      }),
+    };
+  }
+  return entry[kind].names.some((name) =>
+    lookups.some((candidate) => name.lookup === candidate.lookup || name.compact === candidate.compact));
 }
 
 function findServicePraiseSong(value) {
