@@ -416,7 +416,7 @@ const TITLE_COLLATOR = new Intl.Collator("ko-KR", {
 });
 
 const HANGUL_INITIALS = ["ㄱ", "ㄲ", "ㄴ", "ㄷ", "ㄸ", "ㄹ", "ㅁ", "ㅂ", "ㅃ", "ㅅ", "ㅆ", "ㅇ", "ㅈ", "ㅉ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ"];
-const CONTENT_MODULES = ["service", "presenter", "bulletin", "scripture", "praise", "calendar", "references", "manuals"];
+const CONTENT_MODULES = ["service", "presenter", "bulletin", "scripture", "praise", "calendar", "references", "manuals", "setlists"];
 const ROUTE_MODULES = ["home", ...CONTENT_MODULES];
 const SERVICE_FILTERS = ["all", "public", "ministry", "special"];
 const PRAISE_LIST_FILTERS = [
@@ -1006,14 +1006,15 @@ function loadInitialData() {
 
 function isServiceDataModule(moduleName = state.module) {
   // The home screen is the weekly worship board, so it needs the same data.
-  return moduleName === "home" || moduleName === "service" || moduleName === "presenter" || moduleName === "bulletin";
+  return moduleName === "home" || moduleName === "service" || moduleName === "presenter" || moduleName === "bulletin" || moduleName === "setlists";
 }
 
 function isOperationsModule(moduleName = state.module) {
-  return ["calendar", "references", "manuals"].includes(moduleName);
+  return ["calendar", "references", "manuals", "setlists"].includes(moduleName);
 }
 
 const OPERATIONS_MODULES = [
+  ["setlists", "역대 콘티"],
   ["calendar", "교회력"],
   ["references", "참고자료"],
   ["manuals", "예배 매뉴얼"],
@@ -1024,6 +1025,7 @@ function renderCurrentServiceModuleDetail() {
 }
 
 function renderCurrentServiceModuleDetailUnscoped() {
+  if (isSetlistArchiveView()) return renderServiceSetlistArchiveDetail();
   if (state.module === "bulletin") renderBulletinDetail();
   else if (state.module === "presenter") renderPresenterDetail();
   else renderServiceDetail();
@@ -2536,8 +2538,8 @@ function currentBrowserHistorySnapshot() {
 }
 
 function isSetlistArchiveView() {
-  return ["home", "service"].includes(state.module)
-    && state.selectedServiceTypeId === SERVICE_SETLIST_ARCHIVE_PANEL_ID && !state.selectedServiceId;
+  return state.module === "setlists" || (["home", "service"].includes(state.module)
+    && state.selectedServiceTypeId === SERVICE_SETLIST_ARCHIVE_PANEL_ID && !state.selectedServiceId);
 }
 
 function rememberSetlistArchiveHistory() {
@@ -3012,6 +3014,11 @@ async function switchModule(moduleName, options = {}) {
   const syncHistory = options.syncHistory !== false;
   saveCurrentListScroll();
   state.module = moduleName;
+  if (moduleName === "setlists") {
+    state.selectedServiceTypeId = SERVICE_SETLIST_ARCHIVE_PANEL_ID;
+    state.selectedServiceId = null;
+    state.selectedServiceItemIndex = null;
+  }
   if (moduleName === "service" && !state.selectedServiceId) {
     state.selectedServiceTypeId = SERVICE_WEEK_PANEL_ID;
   }
@@ -4101,8 +4108,10 @@ async function loadWorshipSetlistArchive({ force = false } = {}) {
     state.worshipSetlistArchive.loading = false;
     state.worshipSetlistArchive.error = error.message || "역대 콘티를 불러오지 못했습니다.";
   }
-  renderServiceList();
-  renderCurrentServiceModuleDetail();
+  if (isSetlistArchiveView()) {
+    renderSongList();
+    renderServiceSetlistArchiveDetail();
+  }
 }
 
 const CHILDREN_WORSHIP_AUTO_GENERATION_DEFAULT = false;
@@ -13530,6 +13539,7 @@ function currentPageTabTitle() {
     const song = getSelectedSong();
     return song ? songListView(song).title || song.title || "찬양" : "찬양";
   }
+  if (state.module === "setlists") return SERVICE_SETLIST_ARCHIVE_PANEL_TITLE;
   if (state.module === "calendar") return "교회력";
   if (state.module === "references") return "참고자료";
   if (state.module === "manuals") return "예배 매뉴얼";
@@ -13611,6 +13621,7 @@ function pageTabTitleForSnapshot(snapshot = {}) {
     const song = songById(snapshot.selectedSongId);
     return song ? songListView(song).title || song.title || "찬양" : "찬양";
   }
+  if (moduleName === "setlists") return SERVICE_SETLIST_ARCHIVE_PANEL_TITLE;
   if (moduleName === "calendar") return "교회력";
   if (moduleName === "references") return "참고자료";
   if (moduleName === "manuals") return "예배 매뉴얼";
@@ -14774,7 +14785,7 @@ function scheduleSearchRender(delay = 180) {
 
 function renderSearchResultsForCurrentModule() {
   renderSongList();
-  if (isServiceDataModule() && state.selectedServiceTypeId === SERVICE_SETLIST_ARCHIVE_PANEL_ID) {
+  if (isSetlistArchiveView()) {
     renderServiceSetlistArchiveDetail();
     return;
   }
@@ -14810,13 +14821,13 @@ function renderSongList() {
     return;
   }
 
-  if (state.connectionError && !["calendar", "references", "manuals"].includes(state.module)) {
+  if (state.connectionError && !["calendar", "references", "manuals", "setlists"].includes(state.module)) {
     refs.songCount.textContent = "";
     refs.songList.innerHTML = renderConnectionList(state.connectionError);
     return;
   }
 
-  if (["calendar", "references", "manuals"].includes(state.module)) {
+  if (["calendar", "references", "manuals", "setlists"].includes(state.module)) {
     renderModuleSidebarContext();
     return;
   }
@@ -14884,7 +14895,7 @@ function renderSongList() {
 }
 
 function isGlobalSearchActive() {
-  return Boolean(normalizeSearchValue(state.search)) && state.module !== "references";
+  return Boolean(normalizeSearchValue(state.search)) && !["references", "setlists"].includes(state.module);
 }
 
 let globalPraiseSearchLoad = null;
@@ -22579,6 +22590,7 @@ function getHomeSidebarRecentServiceShortcuts(limit = 8, baseDate = new Date()) 
 }
 
 function renderServiceList() {
+  if (state.module === "setlists") { renderModuleSidebarContext(); return; }
   if (!state.client) {
     refs.songCount.textContent = "";
     refs.songList.innerHTML = renderConnectionList();
@@ -22622,10 +22634,6 @@ function renderServiceList() {
     <button class="service-type-row${state.selectedServiceTypeId === SERVICE_LIST_PANEL_ID && !state.selectedServiceId ? " active" : ""}" type="button" data-service-list>
       <span>${escapeHtml(SERVICE_LIST_PANEL_TITLE)}</span>
       <small>${state.services.length}</small>
-    </button>
-    <button class="service-type-row${state.selectedServiceTypeId === SERVICE_SETLIST_ARCHIVE_PANEL_ID && !state.selectedServiceId ? " active" : ""}" type="button" data-service-setlist-archive>
-      <span>${escapeHtml(SERVICE_SETLIST_ARCHIVE_PANEL_TITLE)}</span>
-      <small>${state.worshipSetlistArchive.loaded ? worshipSetlistArchiveEntries().filter(entry => entry.candidates.length).length : "DB"}</small>
     </button>
   `;
 
@@ -33024,6 +33032,8 @@ function selectService(id) {
   if (serviceNavigationBlocked(id)) return;
   if (id !== state.selectedServiceId && !confirmDiscardServiceChanges()) return;
   rememberSetlistArchiveHistory();
+  const fromOperationsArchive = state.module === "setlists";
+  if (fromOperationsArchive) state.module = "service";
   markWorshipServiceExplicitlyRequested(id);
   if (state.module === "presenter") state.presenter.viewServiceId = id;
   state.selectedServiceId = id;
@@ -33031,8 +33041,8 @@ function selectService(id) {
   const service = state.services.find((svc) => svc.id === id);
   if (service) state.selectedServiceTypeId = service.type_id;
   if (state.loadedWorshipServiceIds.has(id)) captureCleanFingerprint("service");
-  renderCurrentServiceModuleDetail();
-  renderServiceList();
+  if (fromOperationsArchive) { persistUiState(); render(); }
+  else { renderCurrentServiceModuleDetail(); renderServiceList(); }
   syncBrowserHistory();
   if (id) loadServiceItems(id);
 }

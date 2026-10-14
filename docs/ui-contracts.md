@@ -275,3 +275,13 @@ and 5px textarea side padding to avoid nested panel gutters.
 - Reduced-motion mode is static. The status is named for assistive technology
   and becomes hidden after readiness. Presenter output routes never show the
   branding; their existing black startup and safety behavior remain unchanged.
+
+
+## Setlist archive under Operations (2026-10-14)
+
+- Move the archive entry from the worship/home sidebar into the Operations
+  navigation alongside calendar, references and worship manuals (`setlists` route).
+- Reuse the same archive records, filtering, song links and service links. Opening
+  a service enters its worship screen; Back restores the archive search, view,
+  month and scroll. Existing legacy archive links remain readable.
+- This is navigation only: no record migration, backfill or worship writes.

@@ -1,11 +1,13 @@
+import os
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 
 def main():
-    server, url = start_local_app_server()
+    remote=os.environ.get('MINDEX_SETLIST_URL','').rstrip('/')
+    server, url = (None,remote+'/') if remote else start_local_app_server()
     try:
         with sync_playwright() as p:
-            browser = launch_chromium(p)
+            browser = p.webkit.launch() if os.environ.get('MINDEX_ENGINE')=='webkit' else launch_chromium(p)
             try:
                 page = browser.new_page(viewport={"width": 1280, "height": 720})
                 page.route('**/*supabase*/**', lambda r: r.abort())
@@ -28,6 +30,16 @@ def main():
                   renderCurrentServiceModuleDetail=()=>state.selectedServiceId ? (refs.detailPane.innerHTML='<h2>예배 fixture</h2>') : original();
                   render(); syncBrowserHistory({replace:true});
                 }''')
+                page.locator('[data-operations-nav]').click()
+                page.locator('#songList [data-home-module="setlists"]').click()
+                page.wait_for_function("state.module==='setlists' && !!document.querySelector('.svc-setlist-entry')")
+                assert page.locator('[data-operations-nav]').get_attribute('aria-current')=='page'
+                assert page.locator('#songList [data-home-module="setlists"]').get_attribute('aria-current')=='page'
+                assert page.evaluate('currentPageTabTitle()')=='역대 콘티'
+                page.locator('#searchInput').fill('fixture-song')
+                page.wait_for_function("state.search==='fixture-song' && !isGlobalSearchActive()")
+                page.screenshot(path='/tmp/mindex-setlists-operations-'+os.environ.get('MINDEX_ENGINE','chromium')+'.png')
+                print('PASS Operations entry, active navigation, route title and scoped archive search')
                 for view in ('date', 'service'):
                     expected = page.evaluate('''view => {
                       state.worshipSetlistArchiveView=view; renderServiceSetlistArchiveDetail();
@@ -40,9 +52,12 @@ def main():
                       state.worshipSetlistArchiveMonth='09';
                       return top;
                     }''', view)
+                    assert page.evaluate("state.module")=="service"
+                    assert page.locator('[data-service-setlist-archive]').count()==0
                     page.go_back()
                     page.wait_for_function("!state.applyingBrowserHistory && !state.selectedServiceId && !!document.querySelector('.svc-setlist-entry')")
                     page.wait_for_function("top => Math.abs(document.getElementById('detailPane').scrollTop-top)<2", arg=expected)
+                    assert page.evaluate("state.module")=="setlists"
                     result = page.evaluate("() => ({view:state.worshipSetlistArchiveView,month:state.worshipSetlistArchiveMonth,search:state.search,title:document.querySelector('#detailPane h2')?.textContent})")
                     assert result == dict(view=view, month='07', search='fixture-song', title='역대 콘티'), result
                     print('PASS browser Back restores', result, 'scroll', expected)
@@ -60,10 +75,15 @@ def main():
                 page.wait_for_function("!state.applyingBrowserHistory && isSetlistArchiveView() && !!document.querySelector('.svc-setlist-entry')")
                 assert page.evaluate("state.search") == 'fixture-song'
                 print('PASS song link returns in one Back; artist hint renders without changing title')
+                page.reload(wait_until='domcontentloaded')
+                page.wait_for_function("typeof isSetlistArchiveView==='function' && state.module==='setlists'")
+                page.wait_for_function("document.querySelector('[data-operations-nav]')?.getAttribute('aria-current')==='page'")
+                assert page.evaluate('currentPageTabTitle()')=='역대 콘티'
+                print('PASS reload restores Operations archive route')
             finally:
                 browser.close()
     finally:
-        server.shutdown()
+        if server: server.shutdown()
 
 
 if __name__ == '__main__':

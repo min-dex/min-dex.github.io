@@ -17,6 +17,8 @@ async function run({ cached = null, force = false, fail = false, auth = false, l
     renderCurrentServiceModuleDetail: () => snapshots.push(JSON.parse(JSON.stringify(ctx.state.worshipSetlistArchive))),
     loadWorshipSetlistSongCatalog: () => {},
     fetchWorshipSetlistServices: async () => { if (liveFail) throw new Error("live offline"); return {services:[{id:"live"}],sections:[],elements:[]}; },
+    isSetlistArchiveView: () => true, renderSongList: () => {},
+    renderServiceSetlistArchiveDetail: () => snapshots.push(JSON.parse(JSON.stringify(ctx.state.worshipSetlistArchive))),
     renderServiceList: () => {}, console: {warn: () => {}},
     fetchSupabasePaged: async (table, select, build) => {
       if (table.endsWith('sources')) return sources;

@@ -44,7 +44,7 @@ const context = {
   serviceTypeSortOrder:id=>({children:10,nursery:11,youth:12}[id] ?? 20),
 };
 vm.createContext(context);
-for(const name of ['worshipSetlistCandidateLinks','worshipSetlistArchiveTypeOrder','renderSearchResultsForCurrentModule']) {
+for(const name of ['worshipSetlistCandidateLinks','worshipSetlistArchiveTypeOrder','renderSearchResultsForCurrentModule','isSetlistArchiveView']) {
   const start=app.indexOf(`function ${name}(`);
   vm.runInContext(app.slice(start,app.indexOf('\n}\n',start)+2),context);
 }
@@ -59,11 +59,11 @@ Object.assign(context,{
   isServiceDataModule:()=>['home','service','presenter','bulletin'].includes(context.state.module),
   renderServiceSetlistArchiveDetail(){renders++;},renderDetail(){},
 });
-for(const module of ['home','service']) {
+for(const module of ['home','service','setlists']) {
   context.state.module=module;context.state.selectedServiceTypeId='archive';
   context.renderSearchResultsForCurrentModule();
 }
-assert.equal(renders,2,'search rerenders both home and service archive routes');
+assert.equal(renders,3,'search rerenders operations and legacy archive routes');
 context.state.module='home';context.state.selectedServiceTypeId='recent';
-context.renderSearchResultsForCurrentModule();assert.equal(renders,2);
+context.renderSearchResultsForCurrentModule();assert.equal(renders,3);
 console.log('PASS linked medley ranges, member IDs/manual text, suppressed members, nursery order and home archive search');

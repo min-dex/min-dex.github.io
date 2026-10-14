@@ -1866,3 +1866,13 @@ The user explicitly approved publication of this display/cache update.
   changed-form shared loads, decoded audio playback and stale-data guards.
   Content-identity regression preserves ordering through mode edits and saves.
   No production record or schema changes; deployment is separate.
+
+
+## Setlist archive under Operations (2026-10-14)
+
+- Move the archive entry from the worship/home sidebar into the Operations
+  navigation alongside calendar, references and worship manuals (`setlists` route).
+- Reuse the same archive records, filtering, song links and service links. Opening
+  a service enters its worship screen; Back restores the archive search, view,
+  month and scroll. Existing legacy archive links remain readable.
+- This is navigation only: no record migration, backfill or worship writes.
