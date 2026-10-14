@@ -4174,7 +4174,7 @@ document.fonts?.addEventListener("loadingerror", () => {
 
 function fitPresenterLyricText(host) {
   if(host)fitPresenterAnnouncementRegions(host);
-  host.querySelectorAll('.presenter-slide--lyrics[data-element-type="praise"] > .presenter-slide-text').forEach((textBox) => {
+  host.querySelectorAll('.presenter-slide--lyrics:is([data-element-type="praise"], [data-section-key="announcements"]) > .presenter-slide-text').forEach((textBox) => {
     textBox.style.removeProperty("font-size");
     const baseSize = Number.parseFloat(getComputedStyle(textBox).fontSize);
     if (!Number.isFinite(baseSize) || baseSize <= 0 || !textBox.clientWidth) return;
@@ -5343,11 +5343,18 @@ function renderPresenterAnnouncementItems(items,slide) {
 }
 
 function fitPresenterAnnouncementRegions(host) {
-  host.querySelectorAll(".presenter-announcement-region").forEach(box=>{
+  host.querySelectorAll(".presenter-announcement-region, .presenter-liturgical-body > .presenter-announcement-items").forEach(box=>{
     box.style.removeProperty("font-size");
     const base=parseFloat(getComputedStyle(box).fontSize);
     if(!box.clientWidth||!box.clientHeight||!Number.isFinite(base))return;
-    const fits=()=>box.scrollWidth<=box.clientWidth+1&&box.scrollHeight<=box.clientHeight+1;
+    const fits=()=>{
+      const bounds=box.getBoundingClientRect();
+      return box.scrollWidth<=box.clientWidth+1&&box.scrollHeight<=box.clientHeight+1
+        && [...box.children].every(item=>{
+          const rect=item.getBoundingClientRect();
+          return rect.top>=bounds.top-1&&rect.bottom<=bounds.bottom+1;
+        });
+    };
     if(fits())return;
     let low=0,high=base;
     for(let i=0;i<12;i++){

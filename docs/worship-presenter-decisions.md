@@ -1958,3 +1958,18 @@ old persistent entries recoverable. Public release carries addresses only.
   full-screen fitting checks horizontal overflow as well as height.
 - Verify Korean/English output and previews in Chromium/WebKit; never rewrite
   canonical Bible text or saved worship content to alter wrapping.
+
+
+## Announcement word boundaries and fitting · 2026-10-15
+
+- All announcement copy keeps Korean eojeol and English words intact. Use
+  `word-break: keep-all` and `overflow-wrap: normal`, including anchored zones.
+- Lower-bar announcements share the existing complete-line lyric fitter and its
+  typography-aware cache. Their authored line/chunk order, numbering, bold and
+  smaller parenthetical text remain unchanged.
+- Ordinary full-screen lists use a bounded area below the fixed heading
+  (21cqh top, 10cqh bottom), sharing the existing region fitter. Check centered
+  child bounds as well as scroll size, so overflow above the box is detected.
+- Fit affects rendered font size only, never saved copy or pagination. Output
+  and previews use the same fitting path. Validate Korean/English, long words,
+  dense lists, both browser engines, and existing lyrics/aside behavior.

@@ -564,6 +564,8 @@
   align-items: flex-start;
 }
 .presenter-announcement-copy span {
+  word-break: keep-all;
+  line-break: auto;
   max-width: none;
   white-space: pre-wrap;
   overflow-wrap: normal;
@@ -1469,7 +1471,6 @@ span.presenter-announcement-paren {
 .presenter-announcement-region--footer>.presenter-announcement-item:first-child{margin-top:auto}
 .presenter-announcement-region>.presenter-announcement-item{flex-shrink:0}
 .presenter-announcement-region .presenter-announcement-copy{align-items:stretch}
-.presenter-announcement-region .presenter-announcement-copy>span{overflow-wrap:anywhere;word-break:keep-all}
 
 .presenter-slide--lyrics[data-section-key="announcements"]>.presenter-slide-text{font-weight:600}
 .presenter-slide--lyrics[data-section-key="announcements"]>.presenter-slide-text strong{font-weight:800}
@@ -1501,4 +1502,14 @@ span.presenter-announcement-paren {
   line-height: 1.08;
   padding: 1.35cqh var(--presenter-text-inset);
   text-shadow: none;
+}
+
+/* Ordinary announcement lists fit below the fixed heading, above the safe edge. */
+.presenter-liturgical-body > .presenter-announcement-items {
+  position: absolute;
+  inset: 21cqh 0 10cqh;
+  height: auto;
+}
+.presenter-liturgical-body > .presenter-announcement-items > .presenter-announcement-item {
+  flex-shrink: 0;
 }
