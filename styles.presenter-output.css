@@ -223,6 +223,7 @@
 /* User-approved autumn foreground across all frames using the C5 artwork. */
 .presenter-output-root.no-chromakey.has-background[data-output-theme="children"][style*="26-C5.png"] {
   --presenter-output-fg: #34271f;
+  --presenter-blank-cross-color: var(--presenter-output-fg);
   --presenter-output-muted: rgba(52, 39, 31, .68);
   --presenter-output-bar: transparent;
 }
@@ -1316,7 +1317,7 @@
   position: absolute;
   display: block;
   content: "";
-  background: #fff;
+  background: var(--presenter-blank-cross-color, #fff);
   pointer-events: none;
 }
 .presenter-output-root.no-chromakey.is-blank .presenter-slide--blank::before {

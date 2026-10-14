@@ -31,7 +31,8 @@
   slides 6–7, and `Elem_2026-08-09.pptx`, slides 6–7. The available 2026 archive
   has no October 11 deck.
 - Apply the foreground consistently to all frames using the C5 artwork, including
-  lyrics, titles, announcements, liturgy, and ready/waiting copy. Override legacy
+  lyrics, titles, announcements, liturgy, ready/waiting copy, and the transition
+  cross (both strokes, including thumbnails). Override legacy
   fixed white text and remove the dark title bar on this light artwork.
 - Scripture keeps its own dark reading background and white text; chromakey and
   other department/background themes remain unchanged.
