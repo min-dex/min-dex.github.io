@@ -1,3 +1,16 @@
+## Medley Mode Save Ordering (2026-10-14)
+
+- Production test services exposed a partial-save acknowledgement bug: replacing
+  one editor item with its compact database ordinal mixed it with sibling editor
+  ordinals (10, 20), reversing medley members on the next template projection.
+- Preserve the acknowledged item's editor section/element order while adopting
+  saved content. A full reload still rebuilds the entire collection from rows.
+  Sibling drafts and concurrent edits retain the existing isolation rules.
+- `tests/smoke_medley_mode_save.py` exercises actual atomic save receipts,
+  repeated score/lyrics switches and reloads in Chromium/WebKit. The previous
+  code fails the member-order assertion; the fix preserves primary/member IDs
+  and unique persisted positions.
+
 ## Announcement Parenthetical Text (2026-10-10)
 
 - User requested the Vita/Studium parenthesis display behavior for announcements.

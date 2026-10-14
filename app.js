@@ -7170,7 +7170,16 @@ async function saveWorshipServiceElementPatch(service, itemId) {
     state.worshipElements,
   )[serviceId] || []).find((item) => item.id === targetItemId);
   state.serviceItems[serviceId] = currentItems.map((item) =>
-    unchanged && savedItem && item.id === targetItemId ? savedItem : item);
+    unchanged && savedItem && item.id === targetItemId
+      ? {
+        ...savedItem,
+        // A single receipt uses compact persisted ordinals, while sibling drafts
+        // can still use spaced editor ordinals. Keep one ordering scale until
+        // the whole collection is reloaded; otherwise projection moves this row.
+        _worshipSectionOrder: item._worshipSectionOrder,
+        _worshipElementOrder: item._worshipElementOrder,
+      }
+      : item);
   await syncSharedSundayContentAfterSave(
     service,
     items.filter((item) => item.id === targetItemId),
