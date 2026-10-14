@@ -8809,6 +8809,10 @@ function handleDetailInput(event) {
   if (serviceField) {
     markServiceInputFeedbackChanged(serviceField);
     if (isDeferredServiceTextInput(serviceField)) {
+      if (isServiceSongTitleInputField(serviceField)) {
+        scheduleServiceSongPickerPreview(serviceField);
+        return;
+      }
       if (isPresenterEnterCommittedServiceInput(serviceField)) {
         clearDeferredServiceTextPreview(serviceField);
         event.stopPropagation?.();
@@ -9578,6 +9582,42 @@ function clearDeferredServiceTextPreview(field) {
   const timer = deferredServiceTextPreviewTimers.get(key);
   if (timer) window.clearTimeout(timer);
   deferredServiceTextPreviewTimers.delete(key);
+}
+
+// Search the input draft without committing it to the service or live output.
+function scheduleServiceSongPickerPreview(field) {
+  const key = deferredServiceTextPreviewKey(field);
+  clearDeferredServiceTextPreview(field);
+  const serviceId = field.dataset.serviceId || state.selectedServiceId;
+  const index = Number(field.dataset.serviceItemIndex);
+  const itemId = getServiceItems(serviceId)[index]?.id;
+  const renderPreview = (message = "") => {
+    if (!field.isConnected || state.selectedServiceId !== serviceId) return;
+    const item = getServiceItems(serviceId)[index];
+    if (!item || item.id !== itemId) return;
+    const picker = field.closest(".svc-edit-title-wrap")?.querySelector(".svc-song-picker");
+    if (!picker) return;
+    const service = state.services.find((candidate) => candidate.id === serviceId);
+    const draft = { ...item, raw_title: field.value, song_id: null, version_id: null, song_version_id: null };
+    const model = { ...serviceItemEditorModel(draft, { service }), linkedSong: null, songVersions: [] };
+    picker.outerHTML = message
+      ? `<div class="svc-song-picker"><span class="svc-song-picker-hint">${escapeHtml(message)}</span></div>`
+      : renderServiceSongPicker(draft, index, model);
+  };
+  deferredServiceTextPreviewTimers.set(key, window.setTimeout(async () => {
+    deferredServiceTextPreviewTimers.delete(key);
+    if (!field.isConnected) return;
+    if (String(field.value).trim() && !songCatalogLoaded && canUseClientData()) {
+      renderPreview("찬양 목록 불러오는 중");
+      try {
+        await loadSongs({ searchOnly: true });
+      } catch (error) {
+        renderPreview("찬양 목록을 불러오지 못했습니다. 다시 입력해 주세요.");
+        return;
+      }
+    }
+    renderPreview();
+  }, 150));
 }
 
 function scheduleDeferredServiceTextPreview(field) {

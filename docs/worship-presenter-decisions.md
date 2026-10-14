@@ -1427,3 +1427,17 @@ automatically deletes an existing service after calendar changes.
 - Read-only live-data validation: all 639 referenced hymns passed 3,195 full,
   abbreviated, written, interior-verse and overlapping-range queries per browser,
   plus 10 actual search-input cases. The six Amen hymns retain empty references.
+
+### 2026-10-14 Service song search selection list
+- Song-title input previews matching candidates after a 150 ms typing debounce,
+  including ambiguous scripture references. Replace only the picker, preserving
+  input focus, draft service records and current presenter output. Existing click
+  selection and explicit commit/save behavior remain responsible for linking.
+- Preview uses an unlinked copy of the input draft even when replacing a linked
+  song. Clear input restores the hint; unmatched queries show no results.
+- A cold catalog uses the existing shared search-only loader. Completion reads
+  the latest input and ignores detached fields, changed services or replaced rows.
+- Chromium/WebKit cover multiple-result display and click selection, scripture
+  ranges, focus, draft/output isolation, empty/no-result queries and cold loading.
+  Actual production hymn records were also checked in an unsaved test service;
+  all persistence requests were blocked and no real service was changed.
