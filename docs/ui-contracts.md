@@ -308,3 +308,14 @@ and 5px textarea side padding to avoid nested panel gutters.
   year context/view tabs and reference summary/create actions, with compact header
   padding. Manuals start with their specific introduction without extra top padding.
   Bulletin begins with its service selector; save, print and history remain intact.
+
+## Resource UI rhythm
+
+- Empty states fill the detail pane's available content height, without adding
+  viewport-based overflow. Missing song/scripture descriptions render no empty row.
+- Resource edit/delete and song-form controls use 30px dense geometry; metadata
+  dialogs use 35px inputs/close controls, 13px labels and 15px editable values.
+- Legacy page-title CSS aliases and JavaScript tokens match the documented
+  13/15/17/22 scale. Presenter output and bulletin print typography stay separate.
+- Manuals and calendar use 5px/10px spacing. Calendar labels may wrap within the
+  existing horizontally scrollable table; never shrink essential text to fit.

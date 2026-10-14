@@ -16191,9 +16191,10 @@ function shortUrl(value) {
 
 function renderSongDescription(song, primary, items = [], relatedSongs = []) {
   const supportItems = items.filter(Boolean);
+  if (!primary && !supportItems.length && !relatedSongs.length) return "";
   return `
     <section class="song-description song-description--song" aria-label="찬양 설명">
-      ${primary ? `<p class="song-description-title">${escapeHtml(primary)}</p>` : `<p class="song-description-title empty" aria-hidden="true">&nbsp;</p>`}
+      ${primary ? `<p class="song-description-title">${escapeHtml(primary)}</p>` : ""}
       ${supportItems.length ? `
         <div class="song-description-meta">
           ${supportItems.map(renderDescriptionMetaItem).join("")}
@@ -16228,9 +16229,10 @@ function renderDescriptionMetaItem(item) {
 
 function renderEditorMeta(primary, items = []) {
   const supportItems = items.filter(Boolean);
+  if (!primary && !supportItems.length) return "";
   return `
     <section class="song-description" aria-label="메타데이터">
-      ${primary ? `<p class="song-description-title">${escapeHtml(primary)}</p>` : `<p class="song-description-title empty" aria-hidden="true">&nbsp;</p>`}
+      ${primary ? `<p class="song-description-title">${escapeHtml(primary)}</p>` : ""}
       ${supportItems.length ? `
         <div class="song-description-meta">
           ${supportItems.map(renderDescriptionMetaItem).join("")}

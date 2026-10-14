@@ -37,10 +37,10 @@ body[data-theme="dark"] .cal-view {
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
-  gap: 2px;
+  gap: 5px;
   border-radius: var(--r);
   background: color-mix(in srgb, var(--panel-2) 44%, transparent);
-  padding: 3px;
+  padding: 5px;
 }
 .cal-tab {
   min-width: 80px;
@@ -51,7 +51,7 @@ body[data-theme="dark"] .cal-view {
   background: transparent;
   color: var(--cal-muted);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--ui-meta-size);
   font-weight: 600;
   letter-spacing: 0;
   cursor: pointer;
@@ -69,14 +69,14 @@ body[data-theme="dark"] .cal-view {
 .cal-footnote {
   flex-shrink: 0;
   margin: 0;
-  padding-top: 8px;
+  padding-top: 10px;
   color: var(--cal-soft);
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-weight: 500;
   line-height: 1.45;
 }
 .cal-table {
-  --cal-date-width: 7%;
+  --cal-date-width: 9%;
   --cal-liturgical-width: 15%;
   --cal-occasion-schedule-width: 24%;
   --cal-detail-space: calc(100% - var(--cal-date-width) - var(--cal-liturgical-width) - var(--cal-occasion-schedule-width));
@@ -87,8 +87,9 @@ body[data-theme="dark"] .cal-view {
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
-  font-size: 12px;
-  line-height: 1.38;
+  font-size: var(--ui-body-size);
+  font-weight: var(--ui-row-weight);
+  line-height: 1.4;
 }
 .cal-table--departments,
 .cal-table--lectionary { min-width: 100%; }
@@ -107,16 +108,16 @@ body[data-theme="dark"] .cal-view {
   position: sticky;
   top: 0;
   z-index: 4;
-  height: 44px;
+  height: 45px;
   overflow: hidden;
   background: var(--bg);
   border: 0;
   box-shadow: none;
   color: var(--cal-muted);
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
   letter-spacing: 0;
-  padding: 6px 10px;
+  padding: 5px 10px;
   text-align: left;
   text-overflow: ellipsis;
   vertical-align: middle;
@@ -126,11 +127,11 @@ body[data-theme="dark"] .cal-view {
   border-left: 0;
 }
 .cal-th-dept,
-.cal-th-role { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.cal-th-dept { color: var(--cal-soft); font-size: 9px; font-weight: 500; line-height: 12px; }
-.cal-th-role { color: var(--ink-2); font-size: 11px; font-weight: 700; line-height: 16px; letter-spacing: 0; }
-.cal-th-simple .cal-th-role { font-size: 11px; line-height: 16px; }
-.cal-month-row td { background: var(--bg); border-top: 8px solid var(--bg); color: var(--accent); font-size: 11px; font-weight: 700; padding: 11px 8px 8px; letter-spacing: 0; }
+.cal-th-role { display: block; overflow-wrap: anywhere; white-space: normal; }
+.cal-th-dept { color: var(--cal-soft); font-size: var(--ui-meta-size); font-weight: 500; line-height: 18px; }
+.cal-th-role { color: var(--ink-2); font-size: var(--ui-meta-size); font-weight: 700; line-height: 16px; letter-spacing: 0; }
+.cal-th-simple .cal-th-role { font-size: var(--ui-meta-size); line-height: 16px; }
+.cal-month-row td { background: var(--bg); border-top: 10px solid var(--bg); color: var(--accent); font-size: var(--ui-meta-size); font-weight: 700; padding: 10px; letter-spacing: 0; }
 .cal-row td { border-bottom: 1px solid var(--cal-line); vertical-align: middle; background: var(--cal-row-bg); }
 .cal-row td + td { border-left: 1px solid color-mix(in srgb, var(--bg) 58%, transparent); }
 .cal-row td:first-child { border-radius: 0; }
@@ -141,23 +142,23 @@ body[data-theme="dark"] .cal-view {
 .cal-row.is-upcoming-sunday td { background: color-mix(in srgb, var(--accent) 5%, var(--cal-row-bg)); }
 .cal-row.is-upcoming-sunday .cal-date::after {
   display: block;
-  margin-top: 3px;
+  margin-top: 5px;
   color: var(--accent);
   content: "돌아오는 주일";
-  font-size: 9px;
+  font-size: var(--ui-meta-size);
   font-weight: 600;
-  line-height: 12px;
-  white-space: nowrap;
+  line-height: 18px;
+  white-space: normal;
 }
 .cal-row.is-past td { color: var(--cal-soft); }
 .cal-row.is-past .cal-lit,
 .cal-row.is-past .cal-cell { color: var(--cal-muted); }
-.cal-date { overflow: visible; padding: 9px 8px; color: var(--cal-muted); font-size: 11px; font-weight: 500; line-height: 1.35; white-space: normal; }
-.cal-lit { overflow: visible; padding: 9px 8px; color: var(--ink); font-weight: 600; line-height: 1.35; white-space: normal; }
+.cal-date { overflow: visible; padding: 10px; color: var(--cal-muted); font-size: var(--ui-meta-size); font-weight: 500; line-height: 1.35; white-space: normal; }
+.cal-lit { overflow: visible; padding: 10px; color: var(--ink); font-weight: 600; line-height: 1.35; white-space: normal; }
 .cal-cell {
   min-width: 0;
   overflow: hidden;
-  padding: 9px 8px;
+  padding: 10px;
   border-radius: 0;
   color: var(--cal-text);
   cursor: text;
@@ -190,24 +191,24 @@ body[data-theme="dark"] .cal-view {
   color: var(--danger);
 }
 .cal-occasion-schedule {
-  padding: 7px 8px;
+  padding: 10px;
   color: var(--cal-text);
   background: var(--cal-row-bg);
   vertical-align: middle;
 }
 .cal-occasion-schedule-item {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
-  gap: 7px;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 5px;
   align-items: baseline;
   min-height: 20px;
 }
 .cal-occasion-schedule-item + .cal-occasion-schedule-item {
-  margin-top: 2px;
+  margin-top: 5px;
 }
 .cal-occasion-schedule-label {
   color: var(--cal-soft);
-  font-size: 9px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
   line-height: 1.4;
 }
@@ -237,14 +238,14 @@ body[data-theme="dark"] .cal-view {
 .cal-inline-row.is-today td { background: var(--cal-today); }
 .cal-inline-row.is-upcoming-sunday td { background: color-mix(in srgb, var(--accent) 9%, var(--panel)); }
 .cal-inline-date {
-  padding: 3px 8px 3px 18px;
+  padding: 5px 10px;
   color: var(--cal-soft);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 500;
   white-space: nowrap;
 }
 .cal-inline-summary {
-  padding: 3px 8px;
+  padding: 5px 10px;
   color: var(--cal-soft);
 }
 .cal-inline-title {
@@ -252,13 +253,13 @@ body[data-theme="dark"] .cal-view {
   align-items: center;
   min-height: 18px;
   color: var(--accent);
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-weight: 500;
 }
 .cal-inline-title::before {
   width: 4px;
   height: 4px;
-  margin-right: 7px;
+  margin-right: 5px;
   border-radius: 999px;
   background: currentColor;
   content: "";
@@ -266,9 +267,9 @@ body[data-theme="dark"] .cal-view {
 }
 .cal-inline-chip {
   display: inline-flex;
-  margin-left: 8px;
+  margin-left: 10px;
   color: var(--cal-soft);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 500;
 }
 
@@ -330,6 +331,6 @@ body[data-theme="dark"] .cal-view {
   .cal-tab {
     flex: 1 1 80px;
     min-width: 0;
-    padding: 0 8px;
+    padding: 0 10px;
   }
 }

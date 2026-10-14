@@ -1,10 +1,10 @@
 (function () {
   const TYPOGRAPHY = Object.freeze({
-    label: Object.freeze({ size: 12, weight: 700 }),
-    meta: Object.freeze({ size: 12, weight: 500 }),
-    control: Object.freeze({ size: 14, weight: 600 }),
-    cardTitle: Object.freeze({ size: 16, weight: 700 }),
-    pageTitle: Object.freeze({ size: 20, weight: 700 }),
+    label: Object.freeze({ size: 13, weight: 600 }),
+    meta: Object.freeze({ size: 13, weight: 500 }),
+    control: Object.freeze({ size: 15, weight: 600 }),
+    cardTitle: Object.freeze({ size: 17, weight: 700 }),
+    pageTitle: Object.freeze({ size: 22, weight: 700 }),
   });
 
   const ICONS = Object.freeze({
