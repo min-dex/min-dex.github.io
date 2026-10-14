@@ -8928,6 +8928,13 @@ function handleDetailChange(event) {
     return;
   }
 
+  const pptxFile = event.target.closest("[data-presenter-pptx-file]");
+  if (pptxFile) {
+    pptxFile.closest("details")?.removeAttribute("open");
+    void importPresenterPptx(pptxFile);
+    return;
+  }
+
   const referenceMediaFile = event.target.closest("[data-presenter-reference-media-file]");
   if (referenceMediaFile) {
     void uploadPresenterReferenceMediaFile(referenceMediaFile);
@@ -11970,7 +11977,7 @@ function serviceAssetFileAcceptForKind(kind = "") {
   if (normalized === "video") return "video/*";
   if (normalized === "audio") return "audio/*";
   if (normalized === "imported_deck") return ".key,.keynote,.ppt,.pptx,application/vnd.apple.keynote,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation";
-  return PRESENTER_REFERENCE_MEDIA_ACCEPT;
+  return normalized === "file" ? `${PRESENTER_REFERENCE_MEDIA_ACCEPT},.pptx` : PRESENTER_REFERENCE_MEDIA_ACCEPT;
 }
 
 function serviceAssetFileKindLabel(kind = "") {
@@ -12062,6 +12069,7 @@ async function importServiceItemDeckAssetFile(input) {
   const index = Number(input?.dataset?.serviceItemIndex);
   const item = getServiceItems(serviceId)[index];
   const targetItem = currentServiceItemForMutation(serviceId, item);
+  if (/\.pptx$/i.test(file?.name || "")) return importPresenterPptx(input, targetItem);
   const desktop = window.mindexElectron;
   const inputPath = desktop?.filePathForFile?.(file) || file?.path || "";
   if (!file || !targetItem || !isDeckAssetFile(file)) {
@@ -27578,7 +27586,7 @@ function renderPresenterAssetUpload(item, index, memo, serviceId) {
       ${reference ? "data-presenter-reference-media-file" : "data-service-item-asset-file"}
       data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${index}" />
     <i data-lucide="upload"></i><span>${kind === "image" ? "이미지 추가" : "파일 선택"}</span>
-  </label>`;
+  </label>${asset.pptx ? `<label class="svc-reference-media-upload"><input type="file" accept=".pptx" data-presenter-pptx-file data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${index}" aria-label="PPT 교체" /><i data-lucide="presentation"></i><span>PPT 교체</span></label>` : ""}`;
 }
 
 function renderPresenterServiceAssetInput(item, index, memo, options = {}) {
@@ -27587,7 +27595,7 @@ function renderPresenterServiceAssetInput(item, index, memo, options = {}) {
   const serviceId = item.service_id || state.selectedServiceId;
   if (isPresenterReferenceMediaItem(item, memo)) {
     const detectedKind = presenterReferenceMediaKindForSource(asset.url);
-    const kind = detectedKind || (["image", "video", "audio"].includes(elementType) ? elementType : "image");
+    const kind = asset.pptx ? "imported_deck" : detectedKind || (["image", "video", "audio"].includes(elementType) ? elementType : "image");
     const needsKindSelection = Boolean(asset.url && !detectedKind);
     return `
       <div class="svc-reference-media-input">
@@ -27649,7 +27657,7 @@ function renderPresenterReferenceMediaPreview(asset, kind, emptyMessage = "파�
   const slides = normalizeServiceAssetSlides(asset.slides);
   const slideCount = slides.length;
   const statusLabel = normalizedKind === "imported_deck"
-    ? (slideCount ? `슬라이드 ${slideCount}장 연결됨` : "슬라이드 연결됨")
+    ? (slideCount ? `${asset.pptx ? "PPT · " : ""}슬라이드 ${slideCount}장 연결됨` : "슬라이드 연결됨")
     : normalizedKind === "video" ? "영상 연결됨"
       : normalizedKind === "audio" ? "음원 연결됨"
         : normalizedKind === "image" ? (slideCount > 1 ? `이미지 ${slideCount}장 연결됨` : "이미지 연결됨") : "파일 연결됨";
@@ -27664,7 +27672,7 @@ function renderPresenterReferenceMediaPreview(asset, kind, emptyMessage = "파�
        <span data-reference-media-preview-error role="status" hidden>이미지를 불러오지 못했습니다. 파일 연결을 확인해 주세요.</span>`
     : normalizedKind === "audio"
       ? `<audio controls preload="metadata" src="${escapeAttr(source)}"></audio>`
-      : renderPresenterStaticAssetPreview(asset, icon, statusLabel);
+      : renderPresenterStaticAssetPreview(asset.pptx ? { ...asset, url: asset.pptx.url } : asset, icon, statusLabel);
   const slideStrip = normalizedKind === "image" && slideCount > 1
     ? `<div class="svc-reference-media-slide-strip" aria-label="연결된 이미지 ${slideCount}장">
       ${slides.map((slide, index) => {
@@ -27886,7 +27894,7 @@ function renderPresenterLiveStatusPanel(service, slides = [], options = {}) {
   return `
     <aside class="svc-presenter-live-panel${options.outputOpen ? " is-live" : ""}" aria-label="송출 미리보기" aria-live="polite">
       <div class="svc-presenter-live-copy">
-        <span class="svc-presenter-live-label">미리보기</span>
+        <span class="svc-presenter-live-label">${previewSlide?.pptx ? `PPT 정지 미리보기 · 클릭 ${presenterPptxStep(state.presenter, previewSlide)}/${Number(previewSlide.pptx.clicks) || 0}` : "미리보기"}</span>
         <span class="svc-presenter-state-group">
           <span class="svc-presenter-status svc-presenter-status--${escapeAttr(options.statusTone || "ready")}" aria-label="${escapeAttr(uiText("presenter.aria.status", { status: options.statusLabel || "" }))}">${escapeHtml(options.statusLabel || "")}</span>
           ${options.mode?.label ? `<span class="svc-presenter-mode svc-presenter-mode--${escapeAttr(options.mode.tone)}" aria-label="${escapeAttr(uiText("presenter.aria.mode", { mode: options.mode.label }))}">${escapeHtml(options.mode.label)}</span>` : ""}
@@ -29600,6 +29608,11 @@ function renderPresenterReferenceMediaQuickAdd(sectionKey, serviceId) {
       </summary>
       <div class="svc-reference-media-quick-add-actions">
         <label class="svc-reference-media-upload">
+          <input type="file" accept=".pptx" data-presenter-pptx-file
+            data-presenter-reference-media-section="${escapeAttr(sectionKey)}" data-service-id="${escapeAttr(serviceId)}" aria-label="PPT 삽입" />
+          <i data-lucide="presentation"></i><span>PPT 삽입</span>
+        </label>
+        <label class="svc-reference-media-upload">
           <input type="file" multiple accept="${PRESENTER_REFERENCE_MEDIA_ACCEPT}" data-presenter-reference-media-direct-file
             data-presenter-reference-media-section="${escapeAttr(sectionKey)}" data-service-id="${escapeAttr(serviceId)}" aria-label="파일 선택" />
           <i data-lucide="upload"></i><span>파일 선택</span>
@@ -30325,6 +30338,7 @@ function runPresenterAction(action, serviceId = state.selectedServiceId, options
 
   if (action === "open") {
     preparePresenterService(serviceId);
+    state.presenter.pptxProgress = null;
     const launchIndex = presenterSelectedLaunchIndex(serviceId);
     if (isValidPresenterIndex(launchIndex, state.presenter.slides.length)) state.presenter.index = launchIndex;
     clearPresenterBoardSelection({ render: false });
@@ -30348,6 +30362,7 @@ function runPresenterAction(action, serviceId = state.selectedServiceId, options
       renderPresenterControlState(serviceId);
       return;
     }
+    if (["first", "last", "jump"].includes(action)) state.presenter.pptxProgress = null;
     liveScriptureRequestSerial += 1;
     state.presenter.liveScripture = {
       ...state.presenter.liveScripture,
@@ -31349,6 +31364,7 @@ async function startPresenterAtSlide(serviceId, index) {
   if (requestSerial !== presenterLaunchRequestSerial) return;
   preparePresenterService(serviceId);
   state.presenter.index = clampPresenterIndex(index, state.presenter.slides.length);
+  state.presenter.pptxProgress = null;
   clearPresenterBoardSelection({ render: false });
   state.presenter.safetyBlank = false;
   state.presenter.jumpDraft = "";
@@ -31504,6 +31520,7 @@ function refreshPresenterForServiceType(typeId, options = {}) {
 }
 
 function movePresenterSlide(delta) {
+  if (advancePresenterPptx(state.presenter, delta)) return;
   const count = state.presenter.slides.length;
   if (!count) return;
   const step = delta < 0 ? -1 : 1;

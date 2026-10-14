@@ -10,7 +10,8 @@ is a maintenance contract, not a request to split large files mechanically.
 1. `mindex.constants.js`
 2. `mindex.design-tokens.js`
 3. `mindex.presenter.js`
-4. `app.js`
+4. `mindex.pptx.js` (small adapter; renderer modules load only on demand)
+5. `app.js`
 
 The order is checked by `tests/solid_audit.py`.
 
@@ -20,6 +21,10 @@ The order is checked by `tests/solid_audit.py`.
 - `mindex.design-tokens.js` owns app-shell design tokens, button grammar
   labels, and shared UI copy. It must not own worship domain data.
 - `mindex.presenter.js` owns slide construction and presenter-output helpers.
+- `mindex.pptx.js` owns PPTX inspection/import, bounded parsed-deck caching, and
+  output effect sessions. It uses existing imported-deck asset normalization,
+  presenter navigation/transport and atomic element saves. Vendored browser
+  modules and their license/patch notice live in `vendor/web-ppt-0.4.5`.
 - `mindex.worship-model.js` owns pure worship slot, media-payload, and form-preset
   normalization rules, including media aliases, ordered decks, audio, timing,
   form tokens, singleton numbering, and default-preset normalization. These

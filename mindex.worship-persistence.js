@@ -144,6 +144,7 @@ function normalizeServiceDocumentSlides(slides = []) {
       linkedSource,
     };
     if (asset.name || asset.url || asset.kind) payload.asset = asset;
+    if (slide.pptx?.url) payload.pptx = { ...slide.pptx };
     if (slide.imageSrc || slide.image_src) payload.imageSrc = String(slide.imageSrc || slide.image_src || "").trim();
     if (slide.videoSrc || slide.video_src) payload.videoSrc = String(slide.videoSrc || slide.video_src || "").trim();
     if (slide.audioSrc || slide.audio_src) payload.audioSrc = String(slide.audioSrc || slide.audio_src || "").trim();

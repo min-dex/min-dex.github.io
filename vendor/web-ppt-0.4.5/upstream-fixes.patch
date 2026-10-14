@@ -1,0 +1,73 @@
+--- vendor/@web-ppt/core/dist/parser-CJhMJQf-.js
++++ vendor/@web-ppt/core/dist/parser-CJhMJQf-.js
+@@ -1306,6 +1306,23 @@
+     (l.trigger === "click" || s < 0) && s++, l.clickGroup = s;
+   return r;
+ }
++// Preserve an explicit main-sequence onBegin trigger, not just afterEffect.
++function sourceAutoStart(effect) {
++  const ancestors = [];
++  for (let node = effect.parentElement; node; node = node.parentElement) {
++    ancestors.push(node);
++    if (node.localName === "timing") break;
++  }
++  const main = ancestors.find(node => node.localName === "cTn" && h(node, "nodeType") === "mainSeq");
++  if (!main) return false;
++  return ancestors.some(node => {
++    const conditions = f(node, "stCondLst");
++    return conditions && Array.from(conditions.children).some(condition =>
++      condition.localName === "cond" && h(condition, "evt") === "onBegin"
++      && h(f(condition, "tn"), "val") === h(main, "id")
++      && Number(h(condition, "delay") || 0) === 0);
++  });
++}
+ function sr(t, e, n) {
+   const r = He(t);
+   if (r === null) return null;
+@@ -1315,7 +1332,8 @@
+     effect: d,
+     dir: m,
+     delayMs: rr(t),
+-    durationMs: Math.max(60, Math.min(1e4, b)),
++    durationMs: l === 1 && (o === "entr" || o === "exit") ? 0 : Math.max(60, Math.min(1e4, b)),
++    autoStart: sourceAutoStart(t),
+     trigger: p,
+     kind: s,
+     motionPath: k
+--- vendor/@web-ppt/viewer-core/dist/viewer-core.js
++++ vendor/@web-ppt/viewer-core/dist/viewer-core.js
+@@ -571,12 +571,13 @@
+     return T(this.presentation, this.presentation.slides[e], t);
+   }
+   paint(t) {
++    const epoch = this.paintEpoch = (this.paintEpoch || 0) + 1;
+     var i, c, o;
+     (i = this.playing) == null || i.cancel(), this.playing = null, (c = this.cancelAuto) == null || c.call(this);
+     const e = document.createElement("div");
+     e.style.cssText = "position:absolute;inset:0;display:flex;align-items:center;justify-content:center", e.innerHTML = this.slideSvg(this.index);
+     const a = this.container.firstElementChild, n = this.container.ownerDocument.defaultView;
+-    (!n || n.getComputedStyle(this.container).position === "static") && (this.container.style.position = "relative"), t && a ? (this.container.appendChild(e), N(a, e, t).then(() => this.startAutoAdvance())) : (this.container.innerHTML = "", this.container.appendChild(e), this.startAutoAdvance());
++    (!n || n.getComputedStyle(this.container).position === "static") && (this.container.style.position = "relative"), t && a ? (this.container.appendChild(e), N(a, e, t).then(() => { if (this.paintEpoch === epoch) this.startAutoAdvance(); })) : (this.container.innerHTML = "", this.container.appendChild(e), this.startAutoAdvance());
+     const r = e.querySelector("svg");
+     r && (r.style.display = "block", r.style.maxWidth = "none"), this.applyZoom(), this.applyVisibility(), (o = this.onAnimStep) == null || o.call(this, this.state.animationDone, this.state.animationTotal);
+   }
+@@ -603,9 +604,18 @@
+     e === 1 ? (t.style.width = "100%", t.style.height = "100%") : (t.style.width = `${this.presentation.width * e}px`, t.style.height = `${this.presentation.height * e}px`);
+   }
+   startAutoAdvance() {
+-    this.cancelAuto = this.state.scheduleAutoAdvance();
++    const epoch = this.paintEpoch;
++    queueMicrotask(() => {
++      if (this.paintEpoch !== epoch) return;
++      const first = this.state.slide.animations?.[0];
++      if (this.state.animate && this.state.animationDone === 0 && first?.autoStart) {
++        this.state.playNextAnimation();
++      }
++      this.cancelAuto = this.state.scheduleAutoAdvance();
++    });
+   }
+   destroy() {
++    this.paintEpoch = (this.paintEpoch || 0) + 1;
+     var t, e;
+     this.container.removeEventListener("click", this.handleClick), this.unsubscribe(), (t = this.playing) == null || t.cancel(), (e = this.cancelAuto) == null || e.call(this), this.state.destroy(), this.container.innerHTML = "", this.svgCache.clear();
+   }

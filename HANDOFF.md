@@ -60,6 +60,14 @@ outrank reviewed decisions.
   Electron startup/presenter IPC. Signed OS installation/upgrades and physical
   NTU mixer acceptance remain operational checks, not claims of these tests.
 
+## PPTX integration (2026-10-14)
+
+PPT insertion and basic automatic/click effects are connected to the current
+worship presenter. See the current decision log's PPTX section for supported
+scope, 50 MiB limit, public-media confirmation, transient effect progress and
+verification boundaries. `mindex.pptx.js` lazily loads the licensed local renderer;
+no production data/schema/policy change is part of this implementation.
+
 ## Repository And Runtime
 
 - Repository: this repo root

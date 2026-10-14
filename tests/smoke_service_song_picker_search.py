@@ -1,3 +1,5 @@
+import os
+os.environ["MINDEX_SMOKE_OFFLINE"] = "1"
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 server, url = start_local_app_server()
@@ -10,9 +12,9 @@ try:
                 page.set_default_timeout(5000)
                 page.route('**/*supabase*/**', lambda r:r.abort())
                 page.goto(url, wait_until='domcontentloaded')
-                page.wait_for_function("typeof scheduleServiceSongPickerPreview==='function'")
+                page.wait_for_function("typeof scheduleServiceSongPickerPreview==='function' && !document.body.classList.contains('ui-booting')")
                 page.evaluate('''() => {
-                  state.config={...state.config,authRequired:false};state.client={};
+                  state.config={...state.config,authRequired:false};state.client={};state.connectionError="";state.loading=false;
                   state.serviceTypes=[{id:'wednesday',name:'수요예배',fixed_items:[]}];
                   state.services=[{id:'picker-test',type_id:'wednesday',date:'2026-10-14'}];
                   state.serviceItems={'picker-test':[]};

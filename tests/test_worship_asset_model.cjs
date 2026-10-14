@@ -35,6 +35,13 @@ assert.equal(normalized.fingerprint, 'abc');
 assert.deepEqual(normalize(normalized), normalized, 'Canonical deck round-trip');
 assert.deepEqual(normalize({kind:'image',images:[' a.png ', '', 'b.png']}).slides,
   [{url:'a.png',name:''},{url:'b.png',name:''}]);
+const pptx = normalize({kind:'imported_deck', name:'PPT', url:'one.png', pptx:{url:'source.pptx'}, slides:[
+  {url:'one.png',pptx:{page:0,clicks:2,hidden:false}},
+  {url:'two.png',pptx:{page:1,clicks:0,hidden:true}},
+]});
+assert.deepEqual(normalize(pptx), pptx, 'PPT source/page/click metadata round-trip');
+assert.equal(pptx.slides[0].pptx.page, 0);
+assert.equal(pptx.slides[1].pptx.hidden, true);
 assert.equal(context.hasServiceAsset({kind:'image'}), true);
 assert.equal(context.hasServiceAssetContent({kind:'image'}), false);
 assert.equal(context.hasServiceAssetContent({slides:[{url:'a.png'}]}), true);

@@ -1441,3 +1441,53 @@ automatically deletes an existing service after calendar changes.
   ranges, focus, draft/output isolation, empty/no-result queries and cold loading.
   Actual production hymn records were also checked in an unsaved test service;
   all persistence requests were blocked and no real service was changed.
+
+## PPTX insertion and basic effects (2026-10-14)
+
+- Worship/Presenter section **추가 → PPT 삽입** accepts an unencrypted `.pptx`,
+  at most 50 MiB / 300 pages. Existing `.key` / `.ppt` desktop image-stage import
+  is unchanged. A connected PPT has a **PPT 교체** action.
+- Inspection and thumbnails are local. Before uploading, show page count,
+  renderer limitations and confirmation that the original file (including notes
+  and hidden pages) plus PNG thumbnails go to the existing public worship media
+  bucket. No production fixtures are uploaded by tests; no storage policy or
+  schema change accompanies this feature. Larger files require splitting or
+  compression in PowerPoint; do not silently strip their media to fit.
+- Persist an existing `imported_deck` asset with `pptx.url`, and per-thumbnail
+  `pptx: {page, clicks, hidden}`. The source URL is immutable per upload. These
+  fields survive canonical config/source/document normalization. Import targets
+  one element via `saveServiceItemMutation` and its atomic revision path.
+  Concurrent edits abort replacement. Pre-save upload failures remove only new
+  files; after an uncertain save, keep immutable files and the pending draft
+  for the existing reconciliation/retry workflow.
+- Each PPT page remains one numbered Mindex slide. Next consumes click-effect
+  groups before moving on; previous rewinds consumed clicks before moving to
+  the previous page. Direct jumps start that page again; invalid jumps do not
+  change progress. Original hidden pages are skipped by normal navigation.
+  Zero remains immediate black, and leaving a page destroys its effect session.
+- `pptxProgress` is transient navigation state, shared by compact transport,
+  standalone output controls and controller recovery. It is not an operational
+  DB edit. Thumbnail/editor selection remains separate from live output.
+- Explicit OOXML automatic-start entrance groups run on entry without an extra
+  click. Zero-duration appearance stays instantaneous, including delayed items
+  within the click batch. Basic effects use web-ppt 0.4.5 plus the recorded fixes;
+  unsupported media play/pause is not misrendered as an emphasis effect.
+  Automatic page advancement and hyperlinks do not bypass Mindex controls.
+- This is a subset renderer, not PowerPoint parity. Embedded audio/video,
+  complex effects, original slide transitions and exact font/layout fidelity
+  are not guaranteed. The controller shows a **PPT 정지 미리보기** with consumed
+  click count; the output alone plays effects. Always preview a real deck before
+  service use. Legacy native stage imports retain their original behavior.
+- Upcoming PPT files are prefetched near the active page. Parsed source requests
+  are deduplicated; retain at most two idle decks plus active sessions. First
+  frame image decoding holds the previous live frame. Stale loads cannot replace
+  a newer slide/blackout; errors clear busy state and reach the controller.
+- Verification: `tests/smoke_pptx.py` covers insertion/replacement, model round
+  trip, atomic-save boundary, upload cleanup, uncertain-save retention, click/
+  automatic/instant playback, rewind, repeated messages, blackout and delayed
+  loads in Chromium and WebKit. Synthetic fixtures never use the production DB.
+  Real local RIA_2026-07-26 (43 pages) and TOV_2026-07-12 (52 pages) passed full
+  thumbnail generation and mocked upload/save in both engines. Selected effect
+  pages from Elem_2026-08-09 and 어린이부 예배 2025-12-14 also passed output
+  playback, using local parser fixtures: their 164/161 MB originals are correctly
+  rejected by the upload limit, not claimed as full-file import successes.

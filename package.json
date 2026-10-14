@@ -50,6 +50,7 @@
       "mindex.worship-model.js",
       "mindex.worship-persistence.js",
       "mindex.presenter.js",
+      "mindex.pptx.js",
       "mindex.worship-input.js",
       "mindex.presenter-ui.js",
       "mindex.setlist-links.js",

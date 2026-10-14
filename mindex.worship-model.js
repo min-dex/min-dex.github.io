@@ -149,6 +149,7 @@ function normalizeServiceAsset(value) {
     url: String(value.url || value.path || value.href || "").trim(),
     ...(slides.length ? { slides } : {}),
   };
+  if (value.pptx?.url) normalized.pptx = { url: String(value.pptx.url).trim() };
   if (audio.url) normalized.audio = audio;
   if (timing.pages.length || timing.cross !== null || timing.duration) normalized.timing = timing;
   if (String(value.manifestUrl || value.manifest_url || manifest.url || "").trim()) {
@@ -214,6 +215,11 @@ function normalizeServiceAssetSlides(value) {
       return {
         url,
         name: String(slide.name || slide.title || slide.label || "").trim(),
+        ...(slide.pptx ? { pptx: {
+          page: Math.max(0, Math.floor(Number(slide.pptx.page) || 0)),
+          clicks: Math.max(0, Math.floor(Number(slide.pptx.clicks) || 0)),
+          hidden: Boolean(slide.pptx.hidden),
+        } } : {}),
         formLabel: String(slide.formLabel || slide.form_label || slide.scoreFormLabel || slide.score_form_label || slide.form || "").trim(),
         formKey: String(slide.formKey || slide.form_key || slide.scoreFormKey || slide.score_form_key || "").trim(),
         order: Number(slide.order || slide.sort || slide.index || index + 1) || index + 1,

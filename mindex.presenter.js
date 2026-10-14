@@ -411,7 +411,11 @@ function presenterImportedDeckSlidesFromAsset(asset, item, section, index, title
         marker: slide.name || `Stage ${slideIndex + 1}`,
         text: slide.name || title,
         imageSrc: source,
-        asset: { ...asset, url: source, name: slide.name || asset.name || "" },
+        ...(asset.pptx?.url && slide.pptx ? {
+          pptx: { ...slide.pptx, url: asset.pptx.url },
+          hiddenInPresentation: Boolean(slide.pptx.hidden),
+        } : {}),
+        asset: { ...(asset.pptx ? { kind: asset.kind, pptx: asset.pptx } : asset), url: source, name: slide.name || asset.name || "" },
         importedDeck: {
           manifestUrl: asset.manifestUrl || "",
           fingerprint: asset.fingerprint || "",
@@ -2804,6 +2808,7 @@ function presenterStatePayload(serviceId = state.presenter.serviceId) {
     slides,
     index: clampPresenterIndex(state.presenter.index, slides.length),
     slideAnchor: presenterSlideAnchor(slides[clampPresenterIndex(state.presenter.index, slides.length)]),
+    pptxProgress: state.presenter.pptxProgress || null,
     safetyBlank: Boolean(state.presenter.safetyBlank),
     liveScripture: state.presenter.liveScripture?.active ? state.presenter.liveScripture : null,
     livePraise: null,
@@ -2848,6 +2853,7 @@ function restorePresenterControllerSession() {
     payload.slideAnchor || presenterSlideAnchor(payload.slides?.[payload.index]),
     payload.index,
   );
+  state.presenter.pptxProgress = payload.pptxProgress || null;
   state.presenter.safetyBlank = Boolean(payload.safetyBlank);
   state.presenter.jumpDraft = "";
   state.presenter.liveScripture = payload.liveScripture?.active
@@ -2906,6 +2912,8 @@ function handlePresenterControllerMessage(message = {}) {
     state.presenter.videoHealth = message.videoHealth
       ? { ...message.videoHealth, clientId: message.clientId, receivedAt: Date.now() } : null;
     syncPresenterVideoHealthControl();
+    if (message.pptxError && message.pptxError !== state.presenter.pptxError) showToast(message.pptxError, "error");
+    state.presenter.pptxError = message.pptxError || "";
     return;
   }
   if (message.type === "presenter-output-disconnect") {
@@ -3042,7 +3050,7 @@ function readPresenterStoredPayload() {
 }
 
 function publishPresenterPayload(payload, options = {}) {
-  const { index, slideAnchor, safetyBlank, liveScripture, livePraise, updatedAt,
+  const { index, slideAnchor, pptxProgress, safetyBlank, liveScripture, livePraise, updatedAt,
     snapshotId: previousSnapshotId, messageId: previousMessageId, ...content } = payload;
   const contentKey = JSON.stringify(content);
   const messageId = `${presenterTransportSession}:${++presenterTransportSequence}`;
@@ -3050,7 +3058,7 @@ function publishPresenterPayload(payload, options = {}) {
     && presenterTransportSnapshot?.contentKey === contentKey;
   if (compact) {
     const navigation = { snapshotId: presenterTransportSnapshot.id, messageId,
-      index, slideAnchor, safetyBlank, liveScripture, livePraise, updatedAt };
+      index, slideAnchor, pptxProgress, safetyBlank, liveScripture, livePraise, updatedAt };
     presenterTransportLatest = { payload: { ...payload, ...navigation }, sentAt: Date.now(), retriedAt: 0 };
     safeStorageSet("local", PRESENTER_NAVIGATION_STORAGE_KEY, JSON.stringify(navigation));
     try {
@@ -3362,6 +3370,7 @@ function initPresenterOutputCore() {
       clientId: outputClientId,
       transportVersion: 1,
       receivedMessageId: currentPayload?.messageId || "",
+      pptxError: document.getElementById("presenterOutputRoot")?.dataset.pptxError || "",
       videoHealth: presenterOutputVideoHealth(currentPayload),
       warmup: presenterOutputWarmupSummary(),
     });
@@ -3627,6 +3636,7 @@ function normalizePresenterPayload(payload) {
     slides,
     index: clampPresenterIndex(payload?.index, slides.length),
     slideAnchor: payload?.slideAnchor || presenterSlideAnchor(slides[clampPresenterIndex(payload?.index, slides.length)]),
+    pptxProgress: payload?.pptxProgress || null,
     safetyBlank: Boolean(payload?.safetyBlank),
     liveScripture: normalizeLiveScripturePayload(payload?.liveScripture),
     livePraise: null,
@@ -3654,10 +3664,10 @@ function applyPresenterActionToPayload(payload, action, options = {}) {
   }
   if (action === "next" && next.slides.length) {
     next.safetyBlank = false;
-    next.index = presenterNextNavigableIndex(next.slides, next.index, 1);
+    if (!advancePresenterPptx(next, 1)) next.index = presenterNextNavigableIndex(next.slides, next.index, 1);
   } else if (action === "prev" && next.slides.length) {
     next.safetyBlank = false;
-    next.index = presenterNextNavigableIndex(next.slides, next.index, -1);
+    if (!advancePresenterPptx(next, -1)) next.index = presenterNextNavigableIndex(next.slides, next.index, -1);
   } else if (action === "first" && next.slides.length) {
     next.safetyBlank = false;
     next.index = presenterFirstNavigableIndex(next.slides);
@@ -3672,6 +3682,7 @@ function applyPresenterActionToPayload(payload, action, options = {}) {
       next.safetyBlank = false;
     }
   }
+  if (["first", "last", "jump"].includes(action) && appliesJump) next.pptxProgress = null;
   next.slideAnchor = presenterSlideAnchor(next.slides[clampPresenterIndex(next.index, next.slides.length)]);
   next.updatedAt = Date.now();
   return next;
@@ -3707,6 +3718,12 @@ function renderPresenterOutput(payload, options = {}) {
     ? presenterSafetyBlankSlide()
     : liveSlide || slides[clampPresenterIndex(payload?.index, slides.length)];
   const frameState = presenterOutputFrameStateForSlide(slide, payload);
+  if (slide?.pptx?.url) {
+    void renderPresenterPptxOutput(root, payload, slide, frameState);
+    return;
+  }
+  releasePresenterPptxOutput(root);
+  warmPresenterPptx(payload);
   const activeImageSource = presenterSlideImageSource(slide);
   preloadPresenterOutputImages(payload, slide);
   warmPresenterOutputNextVideo(payload);
@@ -3914,6 +3931,8 @@ function commitPresenterOutputFrame(root, payload, slide, frameState, token, opt
 function populatePresenterOutputLayer(layer, html) {
   const template = document.createElement("template");
   template.innerHTML = html;
+  layer._pptxSession?.destroy();
+  layer._pptxSession = null;
   layer.replaceChildren(template.content);
   const placeholder = layer.querySelector("video.presenter-video");
   const source = normalizePresenterMediaSource(placeholder?.getAttribute("src") || "");
@@ -3973,6 +3992,8 @@ function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState =
     const clearPreviousLayer = () => {
       if (token !== presenterOutputRenderState.token) return;
       if (activeLayer.classList.contains("is-active")) return;
+      activeLayer._pptxSession?.destroy();
+      activeLayer._pptxSession = null;
       activeLayer.innerHTML = "";
       activeLayer.removeAttribute("data-presenter-frame-token");
       activeLayer.removeAttribute("data-presenter-frame-key");
