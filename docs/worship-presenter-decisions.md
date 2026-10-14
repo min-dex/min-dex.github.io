@@ -43,9 +43,12 @@
   has no October 11 deck.
 - Apply the foreground consistently to all frames using the C5 artwork, including
   lyrics, titles, announcements, liturgy, ready/waiting copy, and the transition
-  cross (both strokes, including thumbnails). Override legacy
-  fixed white text and remove the dark title bar on this light artwork.
-- Scripture keeps its own dark reading background and white text; chromakey and
+  cross (both strokes, including thumbnails), and monochrome church logos.
+  Logos use an SVG color filter to preserve the original image and alpha edges.
+  Override legacy fixed white text and remove the dark title bar on this light artwork.
+- Only scripture reading replaces C5 with a dark background and white text.
+  Sermon scripture remains on C5 and inherits the brown foreground. Authored
+  community-confession highlight colors are preserved. Chromakey and
   other department/background themes remain unchanged.
 
 ## Medley Mode Save Ordering (2026-10-14)
