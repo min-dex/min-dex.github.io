@@ -9883,9 +9883,7 @@ async function resolveServiceSongSelectionBeforeSave(serviceId, index) {
   markServiceItemSharedContentDirty(item, service);
   item._worshipElementTemplateModified = true;
   item._worshipTemplatePlaceholder = false;
-  state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(
-    normalizeMainPraiseSlots(state.services.find((service) => service.id === serviceId), items),
-  );
+  state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(items);
   return true;
 }
 
@@ -11745,9 +11743,7 @@ function selectServiceSongForItem(index, songId) {
   item.raw_title = "";
   item.version_id = defaultServiceSongVersion(song, item, service)?.id || null;
   item.song_version_id = item.version_id;
-  state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(
-    normalizeMainPraiseSlots(service, items),
-  );
+  state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(items);
   state.dirty.service = true;
   markServiceElementDirty(serviceId, item);
   refreshPresenterForService(serviceId);

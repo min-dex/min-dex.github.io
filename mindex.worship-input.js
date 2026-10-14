@@ -462,6 +462,7 @@ function updateServiceItemField(field, options = {}) {
   state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(items);
   state.dirty.service = true;
   markServiceElementDirty(serviceId, item);
+  if (connectedPraiseApplied) markServiceStructureDirty(serviceId);
   const presenterRefreshOptions = {
     publish: !options.livePreview,
     renderControls: !options.livePreview,

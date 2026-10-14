@@ -1,3 +1,13 @@
+## Praise Input Path Audit (2026-10-14)
+
+- Search-result selection and pre-save title resolution are content edits, too:
+  preserve all existing slot identities instead of renumbering sibling drafts.
+- Expanding a persisted song into an inline medley changes collection structure.
+  Mark it structural so the save includes secondary rows, remapped member IDs
+  and any removed members in one atomic commit.
+- Regression coverage exercises both selection paths and expansion of an
+  already persisted UUID row, rather than only creating a medley in a blank slot.
+
 ## Content Edits Preserve Praise Slot Identity (2026-10-14)
 
 - A per-element title, form, note or mode edit must not renumber sibling praise

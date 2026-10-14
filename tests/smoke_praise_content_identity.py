@@ -78,7 +78,26 @@ try:
                         state.serviceItems[sid]=groupWorshipElements(db.sections,db.elements)[sid];
                         check(JSON.stringify(identity())===before,'reload changed slot identity');
                       }
-                      return 'PASS eight existing slots: form/mode/note edits preserve labels, keys and order across saves/reload';
+                      // Picking a search result and resolving an exact title are also content edits.
+                      const song={id:crypto.randomUUID(),title:'Replacement',hymn_no:1,praise_types:['hymn'],versions:[{id:crypto.randomUUID(),name:'새찬송가',praise_types:['hymn'],_worshipVersionPersisted:true}]};
+                      state.songs=[song];clearSearchCaches();
+                      renderCurrentServiceModuleDetail=()=>{};
+                      let pendingSave;
+                      saveCommittedServiceItem=(index)=>{pendingSave=saveWorshipServiceElementPatch(service,getServiceItems(sid)[index].id)};
+                      for(const id of ids){
+                        const index=getServiceItems(sid).findIndex(i=>i.id===id);
+                        selectServiceSongForItem(index,song.id);
+                        check(JSON.stringify(identity())===before,'picker changed sibling slot identity');
+                        check(pendingSave,'picker did not start save');
+                        await pendingSave;
+                        const item=getServiceItems(sid).find(i=>i.id===id);
+                        item.song_id=null;item.version_id=null;item.song_version_id=null;item.raw_title=song.title;
+                        resolveExistingPraiseSongForServiceInputAfterCatalogLoad=async()=>song;
+                        check(await resolveServiceSongSelectionBeforeSave(sid,index),'title did not resolve');
+                        check(JSON.stringify(identity())===before,'title resolution changed sibling slot identity');
+                        await saveWorshipServiceElementPatch(service,id);
+                      }
+                      return 'PASS existing slot identity: mode/form/note, picker and title resolution, save/reload';
     }"""))
    finally:browser.close()
 finally:server.shutdown()
