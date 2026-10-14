@@ -11837,6 +11837,16 @@ function runServiceItemActionUnscoped(action, index, label = "", title = "") {
     nextSelectedIndex = index + 1;
   }
   if (action === "delete" && item) {
+    // Match section-editor deletion: record intent before removing the draft,
+    // otherwise content-preservation restores the deleted row on full save.
+    if (item.id && TEMPLATE_PROJECTED_SERVICE_TYPES.has(worshipAppServiceTypeId(typeId))) {
+      state.templateElementSuppressions.set(item.id, {
+        ...item,
+        service_id: serviceId,
+        memo: serializeServiceItemMemo({ ...parseServiceItemMemo(item.memo), templateSuppressed: true }),
+        _worshipElementTemplateModified: true,
+      });
+    }
     markServiceItemSharedContentDirty(item, state.services.find((service) => service.id === serviceId));
     items.splice(index, 1);
     nextSelectedIndex = Math.min(index, items.length - 1);

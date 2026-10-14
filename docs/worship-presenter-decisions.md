@@ -1,3 +1,14 @@
+## Explicit Deletion In Worship Order Editor (2026-10-14)
+
+- The order editor now records the same template suppression intent as the
+  section editor before removing an item. Without it, full-save content
+  preservation restored a deliberately removed praise row and collided with
+  the remaining medley's renumbered slot.
+- Preserve the existing protection for accidentally omitted content. Reused
+  slots still remove superseded suppression rows through the existing pipeline.
+- Chromium/WebKit regression covers a saved three-song medley, up/down moves,
+  deleting the primary, deleting the secondary, singleton unlinking and reload.
+
 ## Praise Input Path Audit (2026-10-14)
 
 - Search-result selection and pre-save title resolution are content edits, too:
