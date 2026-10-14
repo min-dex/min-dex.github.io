@@ -102,6 +102,11 @@
 - Replaced legacy partial-commit fixtures with RPC safety checks. Chromium/WebKit coverage includes rollback, lost response, linked saves, creation/deletion retries, save queues, conflict review and benediction replacement.
 - No production records, grants or schema were changed. Historical document arrays remain readable until their fallback/recovery content is proven equivalent to canonical rows.
 
+## Source Input Preservation (2026-10-15)
+- Editable source serializes actual content, never a display fallback label for an empty input.
+- Restore input modes as metadata rather than invoking praise-only mode conversion; classify asset/text values after restoring the new type/mode.
+- Repeated source apply/save must preserve blank scripture, person, media, manual lyrics and text slides. See `source-roundtrip-20261015.md` and `smoke_source_input_roundtrip.py`.
+
 ## Source Round-Trip Integrity (2026-10-06)
 - Historical reproduction confirms that pre-`a4afef7b` portable parsing omitted `endLine`; the old patch appended the full original source after the replacement. The Oct 2 range fix prevents that growth; retain range validation and repeated-patch tests.
 - Source Apply validates record multiplicity before creating or modifying any items. Previously it applied only matched records while retaining the entire duplicate draft. Reject newly introduced duplicates without changing drafts or canonical items.

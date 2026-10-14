@@ -437,7 +437,7 @@ function updateServiceItemField(field, options = {}) {
       item.memo = serializeServiceItemMemo(parsed);
     }
   }
-  if (key === "memo_note" || key === "slide_overrides" || key === "manual_praise_lyrics" || key === "form_hint" || key === "element_type" || key === "component_type" || key === "asset_name" || key === "asset_url" || key === "presenter_role" || key === "auto_advance_at") {
+  if (key === "memo_note" || key === "slide_overrides" || key === "manual_praise_lyrics" || key === "form_hint" || key === "element_type" || key === "component_type" || key === "input_mode" || key === "asset_name" || key === "asset_url" || key === "presenter_role" || key === "auto_advance_at") {
     applyServiceItemMetadataField(item, field, service);
   }
   if (key === "label") {
@@ -478,6 +478,8 @@ function updateServiceItemField(field, options = {}) {
 function applyServiceItemMetadataField(item, field, service) {
   const key = field.dataset.serviceItemField;
   const parsed = parseServiceItemMemo(item.memo);
+  // Portable source restores metadata without the interactive praise-mode conversion.
+  if (key === "input_mode") parsed.inputMode = normalizeServiceInputMode(field.value);
   if (key === "memo_note") parsed.note = field.value;
   if (key === "slide_overrides") parsed.slides = parseServiceSlideOverrideInput(field.value);
   if (key === "manual_praise_lyrics") {

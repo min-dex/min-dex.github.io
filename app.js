@@ -24450,7 +24450,10 @@ function serviceSourceItemValue(item = {}, service = null, memo = parseServiceIt
   if (scriptureReferences.length) return formatServiceScriptureReferenceList(scriptureReferences);
   const asset = normalizeServiceAsset(memo.asset);
   if (asset.name || asset.url) return asset.name || asset.url;
-  return serviceItemDisplayText(item);
+  const song = serviceItemLinkedSong(item);
+  if (song) return songServiceOptionLabel(song) || cleanSongTitleForSave(song) || song.title || "";
+  // Source is editable data, not a display label (an empty scripture is not "성경봉독").
+  return String(item.raw_title || "").trim();
 }
 
 function serviceSourceTextareaForService(serviceId = state.selectedServiceId) {
@@ -24653,12 +24656,13 @@ function serviceSourceVirtualField(serviceId, index, key, value) {
 function applyServiceSourceRecord(serviceId, index, record = {}) {
   let item = getServiceItems(serviceId)[index];
   if (!item) return false;
-  const memo = parseServiceItemMemo(item.memo);
-  const asset = normalizeServiceAsset(memo.asset);
-  const assetMode = serviceMemoInputMode(memo, item) === "asset" || asset.name || asset.url;
   if (record.elementType) updateServiceItemField(serviceSourceVirtualField(serviceId, index, "element_type", record.elementType), { deferPresenterRefresh: true });
-  if (record.inputMode) updateServiceItemField(serviceSourceVirtualField(serviceId, index, "praise_input_mode", record.inputMode), { deferPresenterRefresh: true });
+  if (record.inputMode) updateServiceItemField(serviceSourceVirtualField(serviceId, index, "input_mode", record.inputMode), { deferPresenterRefresh: true });
   if (record.formHint) updateServiceItemField(serviceSourceVirtualField(serviceId, index, "form_hint", record.formHint), { deferPresenterRefresh: true });
+  // Updates can replace normalized items; classify using the restored type/mode.
+  item = getServiceItems(serviceId)[index];
+  const memo = parseServiceItemMemo(item.memo);
+  const assetMode = serviceMemoInputMode(memo, item) === "asset";
   if (assetMode) {
     if (record.hasAssetName || record.value) {
       updateServiceItemField(serviceSourceVirtualField(serviceId, index, "asset_name", record.hasAssetName ? record.assetName : record.value), { deferPresenterRefresh: true });
