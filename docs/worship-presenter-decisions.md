@@ -1,3 +1,14 @@
+## Content Edits Preserve Praise Slot Identity (2026-10-14)
+
+- A per-element title, form, note or mode edit must not renumber sibling praise
+  labels, slot keys or editor positions. Only structural operations normalize
+  the slot collection. Previously sibling drafts were renumbered while only one
+  row was saved, causing divergent source labels and ambiguous later patches.
+- Cover eight existing slots whose labels differ from their persisted order;
+  preserve that order and all slot identities through edits, receipts and reload.
+  Existing production order inconsistencies require an explicitly approved repair;
+  ordinary editing must not silently rewrite them.
+
 ## Children Autumn Lyrics Contrast (2026-10-14)
 
 - Children services already select the C5 autumn background for September and

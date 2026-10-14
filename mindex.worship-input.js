@@ -456,9 +456,10 @@ function updateServiceItemField(field, options = {}) {
     return;
   }
   if (service && !options.preserveServiceSourceDraft) delete service._worshipSourceTextDraft;
-  state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(
-    normalizeMainPraiseSlots(service, items),
-  );
+  // Content edits save one element. Renumbering every praise slot here changes
+  // sibling labels/slot keys without persisting them, corrupting later patches.
+  // Structural add/remove/medley operations normalize their own slot collection.
+  state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(items);
   state.dirty.service = true;
   markServiceElementDirty(serviceId, item);
   const presenterRefreshOptions = {
