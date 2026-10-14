@@ -1000,7 +1000,17 @@ function loadInitialData() {
   if (state.module === "scripture" || state.selectedScriptureId || state.selectedBookCode) {
     pending.push(loadScriptureBooks({ silent: true }));
     pending.push(loadScriptures({ silent: true }));
-    pending.push(loadBibleTranslations({ silent: true }));
+    const restoredSearch = state.bibleTextSearchQuery;
+    const restoredTranslationId = state.selectedBibleTranslationId;
+    const restoredPage = state.bibleTextSearchPage;
+    pending.push(loadBibleTranslations({ silent: true }).then(() => {
+      if (state.module === "scripture" && restoredSearch
+        && state.bibleTextSearchQuery === restoredSearch
+        && (!restoredTranslationId || state.selectedBibleTranslationId === restoredTranslationId)
+        && !state.bibleReaderError && !state.bibleTextSearchLoading && !state.bibleTextSearchRequestId) {
+        return runBibleTextSearch(restoredSearch, { page: restoredPage });
+      }
+    }));
   }
   if (isServiceDataModule()) {
     // Load the read runtime alongside the list, before the first detail click.

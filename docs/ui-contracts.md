@@ -347,3 +347,12 @@ and 5px textarea side padding to avoid nested panel gutters.
 - Manual retry requests fresh asset URLs, bypassing cached failed preloads,
   without clearing storage or saved content. Remove the retry stamp from the
   address bar after capturing it. Normal startup retains normal asset caching.
+
+## Restored Scripture text search (2026-10-15)
+
+On initial reload, a persisted Scripture text query reruns after translations
+load, preserving its selected translation and result page. A changed query,
+translation or module, a read error, or a user search already in flight suppresses
+this restoration. The initial loader still settles all required reads.
+Regression: tests/test_bible_search_restore_20261015.cjs; actual browser reload
+restored the combined GAE JER33:10–11 result without another Enter press.
