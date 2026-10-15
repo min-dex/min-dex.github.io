@@ -6579,7 +6579,8 @@ textarea.svc-presenter-input-control--multiline {
 .svc-reference-media-input:has(.svc-reference-media-preview--collapsible) .svc-reference-media-slide-strip {
   flex: 0 0 100%;
 }
-.svc-reference-media-preview-group > .svc-reference-media-slide-strip {
+.svc-reference-media-preview-content > .svc-reference-media-slide-strip {
+  margin-top: 10px;
   width: 100%;
   max-height: 240px;
   overflow-y: auto;
@@ -6628,19 +6629,12 @@ textarea.svc-presenter-input-control--multiline {
 }
 .svc-reference-media-preview img,
 .svc-reference-media-preview video { width: 100%; height: 100%; max-height: 180px; object-fit: contain; }
-.svc-reference-media-preview.is-empty {
-  min-height: 58px;
-  align-items: center;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 10px;
-  /* The dark media backdrop left this hint at ~1.9:1 in the light theme. */
-  background: color-mix(in srgb, var(--panel-2) 72%, transparent);
+.svc-reference-media-empty-hint {
+  flex: 1 1 100%;
   color: var(--ink-3);
   font-size: var(--ui-label-size);
-  font-weight: 700;
-  padding: 10px;
+  line-height: 1.5;
 }
-.svc-reference-media-preview.is-empty i { width: var(--ui-icon-lg); height: var(--ui-icon-lg); }
 .svc-reference-media-preview--audio:not(.svc-reference-media-preview--collapsible) {
   align-items: center;
   grid-template-columns: auto minmax(0, 1fr);

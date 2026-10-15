@@ -16874,10 +16874,8 @@ function renderScriptureBookTaxonomy() {
 
 function renderBibleTextSearchDetail() {
   const translation = getSelectedBibleTranslation();
-  const totalCount = Number.isFinite(state.bibleTextSearchTotal) ? state.bibleTextSearchTotal : state.bibleTextSearchResults.length;
   const supportMetaItems = [
     metaAttribute("역본", translation?.abbreviation || translation?.name),
-    !state.bibleTextSearchLoading ? metaAttribute("결과", String(totalCount)) : null,
   ].filter(Boolean);
   return `
     <div class="editor-shell scripture-editor bible-search-editor">
@@ -27808,7 +27806,7 @@ function renderPresenterServiceAssetUrlInput(asset, index, serviceId, ariaLabel,
 
 function renderPresenterReferenceMediaPreview(asset, kind, emptyMessage = "파일을 선택하면 이 예배의 참고 화면으로 바로 송출됩니다.") {
   const source = String(asset?.url || "").trim();
-  if (!source) return `<div class="svc-reference-media-preview is-empty"><i data-lucide="image-plus"></i><span>${escapeHtml(emptyMessage)}</span></div>`;
+  if (!source) return `<span class="svc-reference-media-empty-hint">${escapeHtml(emptyMessage)}</span>`;
   const normalizedKind = String(kind || asset?.kind || "file").trim().toLowerCase();
   const slides = normalizeServiceAssetSlides(asset.slides);
   const slideCount = slides.length;
@@ -27847,9 +27845,8 @@ function renderPresenterReferenceMediaPreview(asset, kind, emptyMessage = "파�
         <span>${escapeHtml(statusLabel)}</span>
         <b><i data-lucide="${normalizedKind === "audio" ? "headphones" : normalizedKind === "image" ? "eye" : "info"}"></i>${previewLabel}</b>
       </summary>
-      <div class="svc-reference-media-preview-content">${body}</div>
+      <div class="svc-reference-media-preview-content">${body}${slideStrip}</div>
     </details>
-    ${slideStrip}
   </div>`;
 }
 

@@ -1996,3 +1996,17 @@ old persistent entries recoverable. Public release carries addresses only.
   navigation in the number input, plus previous/next buttons.
 - Source Apply and Copy share two equal columns at all widths. Retain source
   history/recovery, input spacing and panel padding.
+
+### 2026-10-15 media preview space
+
+- Before attachment, use a plain helper line instead of an empty preview box.
+- Connected images and their thumbnail strip stay inside the collapsed preview.
+  Keep name/count and the preview toggle available; preserve editing gutters.
+- Bible search keeps the result range/count above the list, removing only the
+  repeated header count. Translation, paging and no-result states remain.
+
+Validation: Chromium/WebKit media collapse/selection and search-count tests,
+input polish, and bulletin print pass. `smoke_reference_batch.py` fails at
+`save failure retained dummy` on both this change and the unmodified baseline
+(d574445d app.js). This pre-existing batch-save test issue remains unresolved;
+this UI change does not modify upload/save behavior.
