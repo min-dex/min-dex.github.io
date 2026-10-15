@@ -374,3 +374,11 @@ han-bsk-canonical-20261015 key suffix by stable translation UUID, including
 before translation metadata loads. Prior KRV repair keys and their content
 remain recoverable; other canonical scopes are preserved. Explicit combined
 1SA30:30–31 resolves a31 lookup once, without duplicating its included body.
+
+## Publisher-directed Easy source cache (2026-10-15)
+
+All1189 chapters of the adopted GODpia Easy electronic corpus now use
+easy-godpia-canonical-20261015 keys by translation UUID, before edition metadata
+loads. Prior scopes and persistent originals remain recoverable; source literal
+combined labels retain their complete body through reference lookup and output.
+No old XML heading is used as canonical paratext when the source omits headings.
