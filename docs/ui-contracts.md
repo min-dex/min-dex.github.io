@@ -356,3 +356,12 @@ translation or module, a read error, or a user search already in flight suppress
 this restoration. The initial loader still settles all required reads.
 Regression: tests/test_bible_search_restore_20261015.cjs; actual browser reload
 restored the combined GAE JER33:10–11 result without another Enter press.
+
+## Worship editor spacing (2026-10-15)
+
+- Keep combined title/form/assignee/media rows, but separate preparation fields by
+  10px with 35px input height. Use balanced 15px input-rail padding.
+- Give board editors and the expanded source panel 15px padding; separate
+  board subgroups by 20px and their headings/content by 10px.
+- Preserve narrow-window wrapping and scrolling. Do not recreate a mobile view
+  or enlarge presenter output/printed content to loosen editor spacing.

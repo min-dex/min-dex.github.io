@@ -60,9 +60,11 @@ def main():
               patchPresenterControlTree(retained,fresh);
               if(retained.value!=='요 15:9') throw Error('unfocused draft lost');
               let submissions=0;appendPresenterCitationReference=async()=>{submissions++};
-              host.addEventListener('click',handleDetailClick);
-              host.querySelector('[data-presenter-citation-add]').click();
-              if(submissions!==1) throw Error('submit button');
+              host.addEventListener('keydown',handleDetailKeydown);
+              retained.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
+              if(submissions!==1) throw Error('Enter submission');
+              if(host.querySelector('[data-presenter-citation-add]')) throw Error('redundant submit button');
+              if(!host.querySelector('.svc-citation-composer-heading [data-presenter-citation-auto-output]')) throw Error('toggle outside heading');
               const outlineCitation={id:'citation',_worshipSectionKey:'sermon',label:'인용 구절'};
               state.services=[{id:'fixture'}];state.serviceItems.fixture=[outlineCitation];
               getServiceOutlineItems=()=>[outlineCitation];presenterSlidesForService=()=>[slide];

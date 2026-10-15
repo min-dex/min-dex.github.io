@@ -8125,12 +8125,6 @@ function handleDetailClick(event) {
     input?.scrollIntoView({ block: "nearest" });
     return;
   }
-  const citationAdd = event.target.closest("[data-presenter-citation-add]");
-  if (citationAdd) {
-    const input = citationAdd.closest(".svc-citation-composer")?.querySelector("[data-presenter-citation-reference-input]");
-    if (input) void appendPresenterCitationReference(input);
-    return;
-  }
   document.querySelectorAll(".svc-reference-media-quick-add[open]").forEach((menu) => {
     if (!menu.contains(event.target)) menu.removeAttribute("open");
   });
@@ -22716,12 +22710,13 @@ function renderPresenterSidebarServiceSummary(service) {
   return `
     <section class="service-sidebar-section service-sidebar-section--presenter-context" aria-label="현재 예배">
       <div class="service-sidebar-presenter-context">
-        ${renderServiceDateStatus(service)}
         <strong class="service-sidebar-presenter-title">${escapeHtml(serviceName)}</strong>
-        ${details.length ? `<span class="service-sidebar-presenter-date">${escapeHtml(details.join(" · "))}</span>` : ""}
-        ${noGathering ? '<span class="service-sidebar-presenter-date">집회 없음</span>' : `<button class="svc-present-btn svc-presenter-launch svc-presenter-launch--sidebar svc-presenter-launch--${launchTone}${anyOutputOpen ? " is-stop" : ""}" type="button" data-presenter-action="${escapeAttr(launchAction)}" data-service-id="${escapeAttr(service.id)}" aria-label="${escapeAttr(launchLabel)}">
+        <div class="service-sidebar-presenter-meta">
+          ${renderServiceDateStatus(service)}
+          ${details.length ? `<span class="service-sidebar-presenter-date">${escapeHtml(details.join(" · "))}</span>` : ""}
+        </div>
+        ${noGathering ? '<span class="service-sidebar-presenter-date">집회 없음</span>' : `<button class="svc-present-btn svc-presenter-launch svc-presenter-launch--sidebar svc-presenter-launch--${launchTone}${anyOutputOpen ? " is-stop" : ""}" type="button" data-presenter-action="${escapeAttr(launchAction)}" data-service-id="${escapeAttr(service.id)}" aria-label="${escapeAttr(launchLabel)}" title="${escapeAttr(launchLabel)}">
           <i data-lucide="${escapeAttr(launchIcon)}"></i>
-          <span>${escapeHtml(launchLabel)}</span>
         </button>`}
       </div>
     </section>`;
@@ -29913,6 +29908,10 @@ function renderPresenterCitationComposer(subgroup, serviceId) {
     <div class="svc-citation-composer" role="group" aria-label="실시간 말씀 입력">
       <div class="svc-citation-composer-heading">
         <span><i data-lucide="radio"></i>실시간 말씀</span>
+        <label class="svc-slide-citation-auto-output">
+          <input type="checkbox" data-presenter-citation-auto-output ${presenterCitationAutoOutput ? "checked" : ""} />
+          <span>즉시 송출</span>
+        </label>
       </div>
       <div class="svc-citation-composer-entry">
         <input class="svc-slide-citation-reference-input" type="text"
@@ -29920,13 +29919,6 @@ function renderPresenterCitationComposer(subgroup, serviceId) {
           data-presenter-citation-element-id="${escapeAttr(slide.elementId)}"
           data-presenter-citation-slot-key="${escapeAttr(slide.slotKey || "")}"
           placeholder="예: 롬 5:7–8; 요 15:9" aria-label="실시간 인용 구절" autocomplete="off" />
-        <label class="svc-slide-citation-auto-output">
-          <input type="checkbox" data-presenter-citation-auto-output ${presenterCitationAutoOutput ? "checked" : ""} />
-          <span>추가 즉시 송출</span>
-        </label>
-        <button class="icon-btn" type="button" data-presenter-citation-add aria-label="인용 구절 추가" title="인용 구절 추가">
-          <i data-lucide="corner-down-left"></i>
-        </button>
       </div>
     </div>`;
 }

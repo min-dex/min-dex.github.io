@@ -1980,3 +1980,12 @@ old persistent entries recoverable. Public release carries addresses only.
 - Fit affects rendered font size only, never saved copy or pagination. Output
   and previews use the same fitting path. Validate Korean/English, long words,
   dense lists, both browser engines, and existing lyrics/aside behavior.
+
+### 2026-10-15 compact live scripture and service summary
+
+- Live scripture places `즉시 송출` beside its heading. Remove the redundant
+  Enter icon button; Enter in the reference field still adds the passage, and
+  IME composition remains guarded. Preserve checkbox state and input drafts.
+- Left service summary uses a 35px pink icon-only output button beside the
+  title, with accessible label/title for start or stop. Date status and date
+  share a wrapping metadata row. Right output controls remain unchanged.
