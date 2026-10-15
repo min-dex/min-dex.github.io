@@ -1,4 +1,6 @@
 """Offline desktop shell tab visibility and existing tab lifecycle regression."""
+import os
+os.environ["MINDEX_SMOKE_OFFLINE"] = "1"
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 
@@ -17,6 +19,17 @@ def main():
                   state.pageTabs=Array.from({length:5},()=>newPageTab({module:'home'}));
                   state.pageTabIndex=4; renderPageTabs();
                 }''')
+                for refresh in ('renderPageTabs()', 'renderPageTabTitle()', 'syncBrowserHistory({replace:true})'):
+                    page.evaluate(refresh)
+                    assert page.locator('.page-tab-close svg[data-lucide="x"]').count() == 5, (engine, refresh)
+                    assert page.locator('.page-tab-close i').count() == 0
+                    active = page.locator('.page-tab.active')
+                    active.hover()
+                    icon = active.locator('.page-tab-close svg')
+                    assert icon.is_visible() and icon.bounding_box()['width'] == 14
+                    page.mouse.move(0, 800)
+                    active.focus()
+                    assert icon.is_visible(), 'Keyboard focus must reveal the close icon'
                 for width in (560, 390, 320, 768, 1440, 390):
                     page.set_viewport_size({'width': width, 'height': 900})
                     page.wait_for_timeout(150)

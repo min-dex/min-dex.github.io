@@ -13705,6 +13705,7 @@ function renderPageTabs() {
     `;
   }).join("");
   if (addButton) refs.pageTabs.appendChild(addButton);
+  refreshIcons(refs.pageTabs);
   if (pageTabVisibilityRaf) cancelAnimationFrame(pageTabVisibilityRaf);
   pageTabVisibilityRaf = requestAnimationFrame(() => {
     pageTabVisibilityRaf = 0;
@@ -13776,7 +13777,6 @@ function reorderPageTab(fromIndex, insertionIndex) {
   state.pageTabIndex = Math.max(0, state.pageTabs.findIndex((item) => item.id === activeId));
   persistPageTabsState();
   renderPageTabs();
-  refreshIcons(refs.pageTabs);
   return targetIndex !== fromIndex;
 }
 
@@ -13856,7 +13856,6 @@ async function closePageTab(index) {
     if (closingActive) await applyPageTabSnapshot(state.pageTabIndex);
     else {
       renderPageTabs();
-      refreshIcons(refs.pageTabs);
     }
   } finally {
     pageTabClosePending = false;
@@ -13883,7 +13882,6 @@ async function applyPageTabSnapshot(index) {
   persistPageTabsState();
   renderPageTabs();
   syncBrowserHistory({ replace: true });
-  refreshIcons(refs.pageTabs);
 }
 
 function renderNavigationSidebarState() {

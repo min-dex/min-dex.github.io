@@ -105,6 +105,9 @@ Inactive module tabs should stay visually quiet. Active tabs may show a clearer 
 - When two or more page tabs are open, tabs can be dragged to reorder them.
 - The active page remains active after reordering, and the new order is persisted with the existing tab session state.
 - The add-tab control is not part of the draggable sequence.
+- Every page-tab render hydrates its own icons, including title/history refreshes.
+  Close controls remain visible on tab hover or keyboard focus; a lone home tab
+  has no close control.
 - Page tabs remain in the single header row, scroll horizontally, and keep the
   active tab visible after selection or resizing at every width.
 - Page tabs use `13px / 600`; the active tab uses `700`. The add-tab control is
