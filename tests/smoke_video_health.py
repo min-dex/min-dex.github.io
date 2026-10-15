@@ -1,5 +1,55 @@
-from pathlib import Path
-from smoke_app import launch_chromium, start_local_app_server, sync_playwright
+from functools import partial
+import threading
+from smoke_app import APP_DIR, MindexSmokeHandler, MindexSmokeServer, launch_chromium, sync_playwright
+
+
+class VideoHealthHandler(MindexSmokeHandler):
+    """Stream real media over HTTP, without serializing 26 MB through Playwright."""
+    failed = True
+    media_statuses = []
+
+    def do_GET(self):
+        if self.path != '/probe-health.mp4':
+            return super().do_GET()
+        if self.failed:
+            self.media_statuses.append(503)
+            self.send_error(503, 'Injected media failure')
+            return
+        path = APP_DIR / 'assets/presenter/chromakey-ready-loop-pingpong.mp4'
+        size = path.stat().st_size
+        byte_range = self.headers.get('Range', '')
+        start, end = 0, size - 1
+        status = 200
+        if byte_range.startswith('bytes='):
+            first, last = byte_range[6:].split('-', 1)
+            start = int(first) if first else max(0, size - int(last))
+            end = min(int(last), size - 1) if first and last else size - 1
+            status = 206
+        if start > end:
+            self.send_response(416)
+            self.send_header('Content-Range', f'bytes */{size}')
+            self.end_headers()
+            return
+        self.media_statuses.append(status)
+        self.send_response(status)
+        self.send_header('Content-Type', 'video/mp4')
+        self.send_header('Accept-Ranges', 'bytes')
+        self.send_header('Content-Length', str(end - start + 1))
+        if status == 206:
+            self.send_header('Content-Range', f'bytes {start}-{end}/{size}')
+        self.end_headers()
+        try:
+            with path.open('rb') as media:
+                media.seek(start)
+                remaining = end - start + 1
+                while remaining:
+                    chunk = media.read(min(65536, remaining))
+                    if not chunk:
+                        break
+                    self.wfile.write(chunk)
+                    remaining -= len(chunk)
+        except (BrokenPipeError, ConnectionResetError):
+            pass  # Browsers cancel ranges after buffering enough or closing output.
 
 
 def run(browser, url, engine):
@@ -28,31 +78,8 @@ def run(browser, url, engine):
       publishPresenterPayload(fixture,{force:true});
     }''')
     output = context.new_page()
-    failed = True
-
-    def media(route):
-        if failed:
-            route.abort()
-        else:
-            path = Path(__file__).resolve().parents[1] / 'assets/presenter/chromakey-ready-loop-pingpong.mp4'
-            size = path.stat().st_size
-            byte_range = route.request.headers.get('range', '')
-            if byte_range.startswith('bytes='):
-                first, last = byte_range[6:].split('-', 1)
-                start = int(first) if first else max(0, size - int(last))
-                end = min(int(last), size - 1) if first and last else size - 1
-                if start > end:
-                    route.fulfill(status=416, headers={'Content-Range': f'bytes */{size}'})
-                    return
-                with path.open('rb') as media_file:
-                    media_file.seek(start)
-                    body = media_file.read(end - start + 1)
-                route.fulfill(status=206, body=body, content_type='video/mp4',
-                              headers={'Accept-Ranges': 'bytes', 'Content-Range': f'bytes {start}-{end}/{size}'})
-            else:
-                route.fulfill(path=str(path), content_type='video/mp4')
-
-    output.route('**/probe-health.mp4', media)
+    VideoHealthHandler.failed = True
+    VideoHealthHandler.media_statuses = []
     output.goto(url+'?output=presenter', wait_until='domcontentloaded')
     controller.wait_for_function("state.presenter.videoHealth?.status === 'error'")
     assert controller.locator('[data-presenter-video-health]').inner_text().strip() == '영상 재생 실패', repr(controller.locator('[data-presenter-video-health]').inner_text())
@@ -61,11 +88,12 @@ def run(browser, url, engine):
       window.loads=0;const load=video.load.bind(video);
       video.load=()=>{loads++;return load()};
     }''')
-    failed = False
+    VideoHealthHandler.failed = False
     controller.click('[data-presenter-action="retry-video"]')
     controller.wait_for_function("state.presenter.videoHealth?.status === 'playing'")
     output.wait_for_function('video.currentTime > .2')
     output.wait_for_function("typeof state !== 'undefined' && !document.body.classList.contains('ui-booting')")
+    assert 503 in VideoHealthHandler.media_statuses and 206 in VideoHealthHandler.media_statuses, VideoHealthHandler.media_statuses
     assert output.evaluate('loads') == 1, 'two transports must not reload twice'
     assert controller.locator('[data-presenter-video-health]').inner_text() == ''
     controller.evaluate('publishPresenterPayload({...fixture,updatedAt:Date.now()},{force:true})')
@@ -134,7 +162,9 @@ def run(browser, url, engine):
 
 
 def main():
-    server, url = start_local_app_server()
+    server = MindexSmokeServer(('127.0.0.1', 0), partial(VideoHealthHandler, directory=str(APP_DIR)))
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    url = f'http://127.0.0.1:{server.server_port}/index.html'
     try:
         with sync_playwright() as p:
             for engine in ['chromium', 'webkit']:

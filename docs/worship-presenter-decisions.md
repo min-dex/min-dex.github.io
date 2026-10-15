@@ -2010,3 +2010,23 @@ input polish, and bulletin print pass. `smoke_reference_batch.py` fails at
 `save failure retained dummy` on both this change and the unmodified baseline
 (d574445d app.js). This pre-existing batch-save test issue remains unresolved;
 this UI change does not modify upload/save behavior.
+
+### 2026-10-15 remaining audit failures resolved
+
+- Setlist Back restoration: the saved offset was 500px, but Chromium scroll
+  anchoring moved it to 338px while the animated shell rails reflowed the archive.
+  Wait for body animations to settle before restoring the history viewport.
+  The regression test now also checks the offset after animations and two frames,
+  preventing an early, transient matching offset from passing.
+- Video retry: the 26MB fixture was being serialized through Playwright routing;
+  retry results were intermittent (including standalone passes without runtime
+  changes). Serve the same video directly from a local HTTP server with real 503
+  failure and 206 byte-range responses. Assert those responses as well as actual
+  playback progress. Keep the existing timeout, single reload, healthy reuse,
+  stale-frame guard, pause/resume and autoplay-blocked checks. Video runtime is
+  unchanged; this removes the automation transport from the media data path.
+- Both tests pass Chromium and WebKit. Updated audit totals: 190 passed,
+  1 production-only check excluded, 0 unresolved. These totals combine the prior
+  full audit with targeted follow-up runs, not a second complete suite run.
+- External requests blocked during local checks; no production worship or Storage
+  changes. Web release: `20261015-history-scroll-retry`.
