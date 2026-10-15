@@ -148,6 +148,10 @@ Inactive module tabs should stay visually quiet. Active tabs may show a clearer 
 
 ## Calendar
 
+- Upcoming Sunday uses an accent date-edge marker and its date label, not a
+  full-row accent fill. Hover uses a neutral surface; keyboard editing uses a
+  stronger neutral cell surface and inset outline, independent of date status.
+
 - Calendar is a home utility, not a Praise or Scripture filter.
 - Active calendar handling starts at `2025-11-30`.
 - Opening Calendar should scroll to the current month when data exists.
