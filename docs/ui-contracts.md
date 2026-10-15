@@ -365,3 +365,11 @@ restored the combined GAE JER33:10–11 result without another Enter press.
   board subgroups by 20px and their headings/content by 10px.
 - Preserve narrow-window wrapping and scrolling. Do not recreate a mobile view
   or enlarge presenter output/printed content to loosen editor spacing.
+
+## Publisher HAN source cache (2026-10-15)
+
+All1189 chapters of the explicitly adopted HAN electronic edition use the
+han-bsk-canonical-20261015 key suffix by stable translation UUID, including
+before translation metadata loads. Prior KRV repair keys and their content
+remain recoverable; other canonical scopes are preserved. Explicit combined
+1SA30:30–31 resolves a31 lookup once, without duplicating its included body.
