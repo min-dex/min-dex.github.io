@@ -2657,6 +2657,9 @@ async function applyBrowserHistorySnapshot(snapshot) {
       await loadServiceItems(state.selectedServiceId);
     }
     if (snapshot.setlistArchive && isSetlistArchiveView()) {
+      // Rail width transitions reflow the archive and trigger scroll anchoring.
+      // Restore the saved offset only after the shell reaches its final width.
+      await Promise.allSettled(document.body.getAnimations().map(animation => animation.finished));
       restoreDetailViewportSnapshot(snapshot.setlistArchive.viewport);
     }
   } finally {

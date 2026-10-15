@@ -12,7 +12,7 @@ def main():
                 page = browser.new_page(viewport={"width": 1280, "height": 720})
                 page.route('**/*supabase*/**', lambda r: r.abort())
                 page.goto(url, wait_until='domcontentloaded')
-                page.wait_for_function("typeof rememberSetlistArchiveHistory === 'function'")
+                page.wait_for_function("typeof rememberSetlistArchiveHistory === 'function' && !document.body.classList.contains('ui-booting')")
                 page.evaluate('''() => {
                   state.client=null; state.connectionError=''; state.module='home';
                   state.serviceTypes=[{id:'sunday-main',name:'주일예배',sort_order:1}];
@@ -57,8 +57,15 @@ def main():
                     page.go_back()
                     page.wait_for_function("!state.applyingBrowserHistory && !state.selectedServiceId && !!document.querySelector('.svc-setlist-entry')")
                     page.wait_for_function("top => Math.abs(document.getElementById('detailPane').scrollTop-top)<2", arg=expected)
+                    # An early match can precede rail reflow and scroll anchoring.
+                    page.evaluate("""async () => {
+                      await Promise.allSettled(document.body.getAnimations().map(a => a.finished));
+                      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                    }""")
+                    assert abs(page.evaluate('refs.detailPane.scrollTop') - expected) < 2
+
                     assert page.evaluate("state.module")=="setlists"
-                    result = page.evaluate("() => ({view:state.worshipSetlistArchiveView,month:state.worshipSetlistArchiveMonth,search:state.search,title:document.querySelector('#detailPane h2')?.textContent})")
+                    result = page.evaluate("() => ({view:state.worshipSetlistArchiveView,month:state.worshipSetlistArchiveMonth,search:state.search,title:currentPageTabTitle()})")
                     assert result == dict(view=view, month='07', search='fixture-song', title='역대 콘티'), result
                     print('PASS browser Back restores', result, 'scroll', expected)
                 page.evaluate("""async () => {
