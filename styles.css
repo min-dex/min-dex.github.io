@@ -307,7 +307,7 @@ body[data-module="presenter"].right-sidebar-open { --shell-right-w: var(--right-
   color: var(--ink-3);
   cursor: pointer;
   font: inherit;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1;
   padding: 0 18px;
@@ -316,10 +316,16 @@ body[data-module="presenter"].right-sidebar-open { --shell-right-w: var(--right-
 .page-tab[draggable="true"] { cursor: grab; }
 .page-tab.dragging { cursor: grabbing; opacity: .55; }
 .page-tab.active {
-  background: var(--tab-active-bg);
+  background-color: var(--tab-active-bg);
+  background-image:
+    linear-gradient(var(--page-tab-left-separator, var(--shell-separator)), var(--page-tab-left-separator, var(--shell-separator))),
+    linear-gradient(var(--shell-separator), var(--shell-separator));
+  background-position: left center, right center;
+  background-repeat: no-repeat;
+  background-size: 1px 30px, 1px 30px;
   color: var(--ink);
   font-weight: 700;
-  box-shadow: inset 1px 0 var(--page-tab-left-separator, var(--shell-separator)), inset -1px 0 var(--shell-separator);
+  box-shadow: none;
 }
 .page-tab.drag-before { box-shadow: inset 2px 0 0 var(--accent); }
 .page-tab.drag-after { box-shadow: inset -2px 0 0 var(--accent); }

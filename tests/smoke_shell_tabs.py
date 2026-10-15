@@ -30,6 +30,16 @@ def main():
                     page.mouse.move(0, 800)
                     active.focus()
                     assert icon.is_visible(), 'Keyboard focus must reveal the close icon'
+                page.evaluate("state.pageTabs[0].label='MINDEX';persistPageTabsState()")
+                page.reload(wait_until='load')
+                page.wait_for_function("typeof state !== 'undefined' && state.pageTabs.length===5")
+                assert page.locator('.page-tab span').all_text_contents() == ['홈'] * 5
+                assert page.locator('.page-tab.active').evaluate("e=>getComputedStyle(e).fontSize") == '13px'
+                assert page.locator('.page-tab.active').evaluate("e=>getComputedStyle(e).backgroundSize") == '1px 30px, 1px 30px'
+                assert page.evaluate("sanitizePageTab({label:'보존할 이름',snapshot:{module:'praise'}}).label") == '보존할 이름'
+                page.wait_for_function("!document.body.classList.contains('ui-booting')")
+                page.locator('.page-tab.active').hover()
+                page.screenshot(path=f'/private/tmp/mindex-home-tabs-{engine}.png')
                 for width in (560, 390, 320, 768, 1440, 390):
                     page.set_viewport_size({'width': width, 'height': 900})
                     page.wait_for_timeout(150)

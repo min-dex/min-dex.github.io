@@ -437,6 +437,7 @@ const PRAISE_LIST_FILTER_ALIASES = {
 };
 const MINDEX_TAB_STATE_STORAGE_KEY = "mindex.pageTabs.v1";
 const HOME_PAGE_TAB_ID = "tab-home";
+const HOME_PAGE_TAB_LABEL = "홈";
 const HYMN_SCORE_MANIFEST_URL = "assets/hymn-scores/manifest.runtime.json";
 const SERVICE_ELEMENT_TYPE_UI_OPTIONS = [
   ["praise", "찬양"],
@@ -2514,7 +2515,7 @@ async function goHome() {
   const activeTab = state.pageTabs[state.pageTabIndex];
   if (activeTab) {
     activeTab.snapshot = homePageTabSnapshot();
-    activeTab.label = "홈";
+    activeTab.label = HOME_PAGE_TAB_LABEL;
   }
   persistPageTabsState();
   // Home is an explicit navigation reset, not an in-place detail refresh.
@@ -13565,7 +13566,7 @@ function currentPageTabTitle() {
   if (state.module === "calendar") return "교회력";
   if (state.module === "references") return "참고자료";
   if (state.module === "manuals") return "예배 매뉴얼";
-  return "홈";
+  return HOME_PAGE_TAB_LABEL;
 }
 
 const homePageTabSnapshot = () => ({
@@ -13598,7 +13599,9 @@ function sanitizePageTab(tab) {
   const snapshot = sanitizePageTabSnapshot(tab?.snapshot || defaultPageTabSnapshot());
   return {
     id: String(tab?.id || `tab-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`),
-    label: String(tab?.label || "").trim() || pageTabTitleForSnapshot(snapshot),
+    label: snapshot.module === "home"
+      ? HOME_PAGE_TAB_LABEL
+      : String(tab?.label || "").trim() || pageTabTitleForSnapshot(snapshot),
     openerTabId: String(tab?.openerTabId || ""),
     snapshot,
   };
@@ -13607,7 +13610,7 @@ function sanitizePageTab(tab) {
 function homePageTab() {
   return {
     id: HOME_PAGE_TAB_ID,
-    label: "홈",
+    label: HOME_PAGE_TAB_LABEL,
     snapshot: homePageTabSnapshot(),
   };
 }
@@ -13647,7 +13650,7 @@ function pageTabTitleForSnapshot(snapshot = {}) {
   if (moduleName === "calendar") return "교회력";
   if (moduleName === "references") return "참고자료";
   if (moduleName === "manuals") return "예배 매뉴얼";
-  return "홈";
+  return HOME_PAGE_TAB_LABEL;
 }
 
 function readPageTabsState() {

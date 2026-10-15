@@ -47,6 +47,8 @@ shell, navigation, buttons, labels, and shared UI copy.
 
 ## Service Navigation Copy
 
+- The root page tab label is `홈`; it names the location while the wordmark names
+  the product. The internal route remains `home`.
 - Home tab default: show `이번 주 예배` and `다가오는 예배`.
 - Worship tab default: show the weekly board (`최근 예배`), matching the September 3 navigation decision.
 - The weekly board groups this week and next week; `전체 예배` remains a separate list action.

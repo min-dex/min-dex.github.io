@@ -112,7 +112,8 @@ Inactive module tabs should stay visually quiet. Active tabs may show a clearer 
   active tab visible after selection or resizing at every width.
 - Page tabs use `13px / 600`; the active tab uses `700`. The add-tab control is
   a `40px` square command with a direct neutral hover surface and a centered
-  `16px / 1.5` Lucide Plus icon.
+  `16px / 1.5` Lucide Plus icon. Active tabs use centered `1px × 30px` side
+  separators, leaving `10px` clear above and below inside the `50px` topbar.
 
 ## Sidebar
 
