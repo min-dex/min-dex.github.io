@@ -5468,7 +5468,7 @@ def main() -> int:
                         and presenter_terms["elementTypes"] == []
                         and presenter_terms["status"] == "준비"
                         and presenter_terms["modeTabLabels"] == []
-	                        and presenter_terms["jumpLabel"] == "슬라이드로 이동"
+	                        and presenter_terms["jumpLabel"] == ""
 	                        and presenter_terms["controlLabels"] == ["슬라이드"]
 	                        and "송출" not in presenter_terms["pageTabLabel"]
 	                        and presenter_terms["pageTabLabel"]

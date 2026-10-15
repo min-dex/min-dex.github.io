@@ -1989,3 +1989,10 @@ old persistent entries recoverable. Public release carries addresses only.
 - Left service summary uses a 35px pink icon-only output button beside the
   title, with accessible label/title for start or stop. Date status and date
   share a wrapping metadata row. Right output controls remain unchanged.
+
+### 2026-10-15 navigation and source actions
+
+- Remove the duplicate slide-number jump button; keep Enter, Escape and arrow
+  navigation in the number input, plus previous/next buttons.
+- Source Apply and Copy share two equal columns at all widths. Retain source
+  history/recovery, input spacing and panel padding.

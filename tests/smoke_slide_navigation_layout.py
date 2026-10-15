@@ -27,11 +27,9 @@ try:
                       if(bounds.some(r=>r.height!==34 || Math.abs(r.top-bounds[0].top)>1)) throw Error('Misaligned control');
                       for(let i=1;i<bounds.length;i++) if(bounds[i].left<bounds[i-1].right) throw Error('Overlap');
                       if(row.scrollWidth>row.clientWidth || host.scrollWidth>host.clientWidth) throw Error('Overflow');
-                      const jump=row.querySelector('[data-presenter-jump-button]');
-                      if(!jump.title || jump.disabled!==(count===0)) throw Error('Tooltip/disabled state');
-                      const counter=row.querySelector('.svc-slide-counter');
-                      const total=counter.querySelector('span:not(.svc-presenter-mini-label)').getBoundingClientRect();
-                      if(Math.abs(jump.getBoundingClientRect().left-total.right-5)>1) throw Error('Jump not grouped with number');
+                      if(row.querySelector('[data-presenter-jump-button]')) throw Error('Redundant jump button');
+                      const input=row.querySelector('[data-presenter-jump-input]');
+                      if(!input.getAttribute('aria-label') || input.disabled!==(count===0)) throw Error('Input accessibility/disabled state');
                       return true;
                     }""", {'theme': theme, 'width': width, 'count': count})
                     assert result

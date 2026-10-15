@@ -147,11 +147,6 @@ function handleDetailServiceWorkspaceClick(event) {
     void runLiveScriptureAction(liveScriptureAction.dataset.liveScriptureAction, liveScriptureAction.dataset.serviceId);
     return true;
   }
-  const presenterJumpButton = event.target.closest("[data-presenter-jump-button]");
-  if (presenterJumpButton) {
-    jumpPresenterToSlideInput(presenterJumpButton.closest(".svc-slide-counter")?.querySelector("[data-presenter-jump-input]"));
-    return true;
-  }
   return false;
 }
 
