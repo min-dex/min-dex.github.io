@@ -1,3 +1,5 @@
+import os
+os.environ["MINDEX_SMOKE_OFFLINE"]="1"
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 server, url = start_local_app_server()
@@ -20,6 +22,7 @@ try:
           panel.innerHTML=renderPresenterControlsTop(service,[],false,0)+renderPresenterServiceInputRail(service);
           bindDetailInteractionRoot(panel);refreshIcons(panel);
           const input=panel.querySelector('[data-presenter-preparation-field]'),rail=panel.querySelector('.svc-presenter-input-rail');
+          panel.querySelector('.svc-presenter-preparation-field-label').textContent='길이가 긴 예배 순서 이름';
           input.value='찬양1: 초안 유지';input.dispatchEvent(new Event('input',{bubbles:true}));
           input.focus();input.setSelectionRange(3,3);
           const inputHeight=input.getBoundingClientRect().height;
@@ -29,6 +32,13 @@ try:
             const top=panel.querySelector('.svc-presenter-top').getBoundingClientRect();
             const padding=parseFloat(getComputedStyle(sidebar).paddingBottom);
             if(height===850 && r.bottom<s.bottom-padding-4) throw Error('Input rail floated above the panel bottom');
+            for(const row of panel.querySelectorAll('.svc-presenter-preparation-field-row')){
+              const label=row.querySelector('span'),field=row.querySelector('input');
+              const l=label.getBoundingClientRect(),f=field.getBoundingClientRect(),bounds=row.getBoundingClientRect();
+              if(Math.abs(l.width-55)>1 || Math.abs(f.left-l.right-5)>1) throw Error('Label allocation too wide');
+              if(label.scrollWidth>label.clientWidth+1 || f.right>bounds.right+1) throw Error('Label or input overflow');
+              if(f.width<bounds.width-61) throw Error('Input did not reclaim width');
+            }
             if(r.top<top.bottom) throw Error('Controls overlap');
             if(height===400 && sidebar.scrollHeight<=sidebar.clientHeight) throw Error('Short panel cannot scroll');
             if(getComputedStyle(rail).borderTopWidth!=='0px') throw Error('Divider remains');

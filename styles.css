@@ -5147,7 +5147,7 @@ body[data-theme="dark"] .service-week-card:hover {
 .svc-presenter-preparation-fields { display: grid; gap: 10px; }
 .svc-presenter-preparation-field-row {
   display: grid;
-  grid-template-columns: 76px minmax(0, 1fr);
+  grid-template-columns: 55px minmax(0, 1fr);
   min-height: 35px;
   align-items: center;
   gap: 5px;
@@ -5156,7 +5156,10 @@ body[data-theme="dark"] .service-week-card:hover {
   color: var(--ink-4);
   font-size: var(--ui-label-size);
   font-weight: var(--ui-label-weight);
-  white-space: nowrap;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
 }
 .svc-presenter-preparation-field-value {
   box-sizing: border-box;

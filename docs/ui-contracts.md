@@ -163,6 +163,9 @@ Inactive module tabs should stay visually quiet. Active tabs may show a clearer 
 
 ## Presenter
 
+- Preparation input rows reserve 55px for labels with a 5px column gap.
+  Longer labels wrap without covering the flexible value input.
+
 - The right-panel slide navigation row groups number input, total count and
   jump command on the left; previous/next remain on the right. Use a 48px
   input, 34px square command buttons and a 34px row with tabular numerals.
