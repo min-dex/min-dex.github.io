@@ -15160,6 +15160,7 @@ async function openGlobalSongResult(songId) {
 
 async function openGlobalBookResult(bookCode, options = {}) {
   if (!bookCode) return;
+  if (findBibleBookByCode(bookCode)?.testament === "Deuterocanon / Apocrypha") state.scriptureFilter = "extra";
   if (state.module !== "scripture") {
     await switchModule("scripture", { clearSearch: false, syncHistory: false });
     if (state.module !== "scripture") return;
@@ -16998,7 +16999,7 @@ function renderBibleReader(book) {
       ${renderBibleReaderControls({
         chapterControl: renderBibleChapterControl(chapters, hasPreviousChapter, hasNextChapter),
       })}
-      ${getBibleBooks().some(b=>b.code===({EST:"GKE",DAN:"DA1"}[book.code])) ? `<button class="btn secondary" type="button" data-book-code="${{EST:"GKE",DAN:"DA1"}[book.code]}">${escapeHtml(book.koreanName)} 추가 본문 →</button>` : ""}
+      ${getBibleBooks().some(b=>b.code===({EST:"GKE",DAN:"DA1"}[book.code])) ? `<button class="btn secondary" type="button" data-global-book-code="${{EST:"GKE",DAN:"DA1"}[book.code]}">${escapeHtml(book.koreanName)} 추가 본문 →</button>` : ""}
       ${
         state.bibleReaderLoading
           ? renderBibleVerseSkeleton()
