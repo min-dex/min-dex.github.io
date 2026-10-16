@@ -55,5 +55,10 @@ assert.equal(context.normalizeServiceFormPreset(null), null);
 const metadata = context.normalizeSongMetadataPresenterForm({forms:['B'],sourceForms:['V1','V2','C'],sourceHint:'V1-V2-C'});
 assert.equal(metadata.forms.join('-'), 'V1-V2-C');
 assert.equal(metadata.strength, 'song-default');
-assert.equal(context.songFormPresetDisplayLabel('C@A'), 'Chorus@A');
+assert.equal(context.songFormPresetDisplayLabel('C@A'), 'Chorus @A');
 console.log('PASS form defaults, manual preservation, singleton/variant/repeat identity, rule aliases and persistence round-trip');
+
+for (const [raw,shown] of [['C@','Chorus @'],['V1@','Verse 1 @'],['C@A','Chorus @A'],['Coda@','Coda @']]) {
+  assert.equal(context.songFormPresetDisplayLabel(raw),shown);
+  assert.equal(context.normalizeSongFormPresetLabel(raw).key,context.normalizeSongFormPresetLabel(shown).key);
+}

@@ -420,7 +420,7 @@ function songFormPresetDisplayLabel(value = "") {
   const target = normalizeSongFormPresetLabel(raw);
   if (target.lastVerse) return "VL";
   const group = String(target.group || "").trim().toUpperCase();
-  const suffix = target.variant ? `${target.number ? ` ${target.number}` : ""}@${group}` : target.number ? ` ${target.number}${group}` : group ? ` ${group}` : "";
+  const suffix = target.variant ? `${target.number ? ` ${target.number}` : ""} @${group}` : target.number ? ` ${target.number}${group}` : group ? ` ${group}` : "";
   if (target.type === "verse") return `Verse${suffix}`;
   if (target.type === "chorus") return `Chorus${suffix}`;
   if (target.type === "bridge") return `Bridge${suffix}`;
