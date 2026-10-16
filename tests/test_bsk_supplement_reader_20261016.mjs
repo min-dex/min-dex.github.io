@@ -44,3 +44,9 @@ vm.runInContext(fn('handleDetailSearchResultClick'),ctx);
 assert.equal(ctx.handleDetailSearchResultClick({target:{closest:selector=>selector==='[data-global-book-code]'?{dataset:{globalBookCode:target[1]}}:null}}),true);
 assert.equal(opened,'DA1');
 console.log('PASS canonical reader additional-text button reaches the detail event delegate');
+
+Object.assign(ctx,{persistUiState(){},syncBrowserHistory(){},isBibleTextSearchActive:()=>false,loadBibleBookVerses(){}});
+vm.runInContext(fn('switchBibleTranslation'),ctx);
+Object.assign(ctx.state,{selectedBookCode:'DA1',selectedBibleChapter:3,selectedBibleVerse:24,selectedBibleVerses:[24],lastSelectedBibleVerse:24});
+ctx.switchBibleTranslation('gae');assert.equal(ctx.state.selectedBookCode,'GEN');assert.equal(ctx.state.selectedBibleVerse,null);assert.equal(ctx.state.selectedBibleVerses.length,0);
+console.log('PASS switching to an edition without additions clears incompatible verse selection');

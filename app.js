@@ -5694,7 +5694,7 @@ async function loadBibleBookVerses({ silent = false } = {}) {
   if (!requireClient({ silent })) return;
   // Edition availability is meaningful only after both catalogs settle.
   if (!state.bibleTranslations.length || !state.scriptureBooks.length) return;
-  if(state.selectedBookCode && !getBibleBooks().some(b=>b.code===state.selectedBookCode)){state.selectedBookCode="GEN";state.selectedBibleChapter=1;state.scriptureFilter="all";}
+  if(state.selectedBookCode && !getBibleBooks().some(b=>b.code===state.selectedBookCode)){state.selectedBookCode="GEN";state.selectedBibleChapter=1;state.selectedBibleVerse=null;state.selectedBibleVerses=[];state.lastSelectedBibleVerse=null;state.scriptureFilter="all";}
   if (!state.selectedBookCode || !state.selectedBibleTranslationId) {
     state.bibleReaderLoading = false;
     state.bibleBookVerses = [];
@@ -9171,7 +9171,7 @@ function handleDetailChange(event) {
 
 function switchBibleTranslation(translationId) {
   state.selectedBibleTranslationId = translationId || null;
-  if (state.selectedBookCode && !getBibleBooks().some(b=>b.code===state.selectedBookCode)) {state.selectedBookCode="GEN";state.selectedBibleChapter=1;state.scriptureFilter="all";}
+  if (state.selectedBookCode && !getBibleBooks().some(b=>b.code===state.selectedBookCode)) {state.selectedBookCode="GEN";state.selectedBibleChapter=1;state.selectedBibleVerse=null;state.selectedBibleVerses=[];state.lastSelectedBibleVerse=null;state.scriptureFilter="all";}
   state.bibleBookVerses = [];
   persistUiState();
   syncBrowserHistory();
