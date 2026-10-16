@@ -1,5 +1,6 @@
 """First paint must preserve the chosen theme while app scripts are delayed."""
 from io import BytesIO
+from time import monotonic
 from PIL import Image
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
@@ -37,7 +38,9 @@ def main():
                     page.goto(url+'?mindexSmokeRaw=1'+('&output=presenter' if output else ''), wait_until='domcontentloaded')
                     expected_theme = saved if saved in ('dark','light') else system
                     expected = (0,0,0) if output else (24,24,22) if expected_theme == 'dark' else (255,255,255)
-                    page.wait_for_timeout(100)
+                    deadline = monotonic() + 5
+                    while not releases and monotonic() < deadline:
+                        page.wait_for_timeout(25)
                     assert releases, 'release request missing'
                     for phase in ('before-css','after-css'):
                         if phase == 'after-css':

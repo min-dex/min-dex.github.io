@@ -24,13 +24,14 @@ def main():
                   saveServiceItemMutation=async()=>true;
                   const messages=[];showToast=m=>messages.push(m);
                   let fail='', gate=null;
-                  const sent=[];
+                  const sent=[], removed=[], stored=new Set();
+                  let noUrl=false;
                   state.client={storage:{from:()=>({upload:async(path,file)=>{
                     sent.push(file);
                     if(gate)await gate;
                     if(file.name===fail){getServiceItems(id)[0].raw_title='동시 수정';return {error:new Error('fixture failure')};}
-                    return {};
-                  },getPublicUrl:path=>({data:{publicUrl:'https://example.test/'+path}}),remove:async()=>({})})}};
+                    stored.add(path);return {};
+                  },getPublicUrl:path=>({data:{publicUrl:noUrl?'':'https://example.test/'+path}}),remove:async(paths)=>{removed.push(...paths);paths.forEach(path=>stored.delete(path));return {};}})}};
                   const files=[new File(['original PNG bytes'],'one.png',{type:'image/png'}),
                     new File(['original video bytes'],'two.mp4',{type:'video/mp4'}),
                     new File(['original JPEG bytes'],'three.jpg',{type:'image/jpeg'})];
@@ -47,10 +48,28 @@ def main():
                   check(!presenterReferenceMediaBatchServices.has(id),'lock leaked');
                   reset();sent.length=0;fail='';await addAndUploadPresenterReferenceMedia(input([files[0],new File(['x'],'bad.txt')]));
                   check(sent.length===0 && getServiceItems(id).length===1,'invalid batch mutated');
-                  saveServiceItemMutation=async()=>{throw Error('save failed')};
-                  await addAndUploadPresenterReferenceMedia(input([files[0]]));
-                  check(getServiceItems(id).length===1,'save failure retained dummy');
-                  saveServiceItemMutation=async()=>true;sent.length=0;
+                  // A failed response may follow a committed DB write. Keep media and
+                  // the draft so the existing save/reconciliation path can retry it.
+                  const removedBefore=removed.length;
+                  let submittedMemo='';
+                  saveServiceItemMutation=async(sid,index)=>{submittedMemo=getServiceItems(sid)[index].memo;throw Error('save response lost')};
+                  const failedControl=input([files[0]]);
+                  await addAndUploadPresenterReferenceMedia(failedControl);
+                  check(getServiceItems(id).length===2,'uncertain save discarded draft');
+                  const retained=getServiceItems(id)[1];
+                  check(retained.memo===submittedMemo && hasServiceAssetContent(parseServiceItemMemo(retained.memo).asset),'uncertain save lost uploaded asset');
+                  check(removed.length===removedBefore,'uncertain save deleted possibly committed file');
+                  check(state.dirty.service && !failedControl.disabled && !failedControl.value && !presenterReferenceMediaBatchServices.has(id),'failed save cannot retry');
+                  // A URL failure occurs before DB save: clean the uploaded object and
+                  // remove only the newly created empty placeholder.
+                  reset();noUrl=true;const cleanupBefore=removed.length;
+                  let saveCalls=0;saveServiceItemMutation=async()=>{saveCalls++;return true};
+                  await addAndUploadPresenterReferenceMedia(input([files[0]]));noUrl=false;
+                  check(saveCalls===0 && removed.length===cleanupBefore+1 && getServiceItems(id).length===1,'pre-save failure not cleaned');
+                  // A first-file upload failure also removes an empty placeholder.
+                  reset();fail='one.png';await addAndUploadPresenterReferenceMedia(input([files[0]]));fail='';
+                  check(getServiceItems(id).length===1 && !presenterReferenceMediaBatchServices.has(id),'first upload failure retained placeholder');
+                  reset();saveServiceItemMutation=async()=>true;sent.length=0;
                   let resolve;gate=new Promise(r=>resolve=r);const first=addAndUploadPresenterReferenceMedia(input([files[0]]));
                   await Promise.resolve();await addAndUploadPresenterReferenceMedia(input([files[1]]));
                   check(sent.length===1,'duplicate batch allowed');resolve();await first;gate=null;
@@ -72,10 +91,15 @@ def main():
                   check(parseServiceItemMemo(getServiceItems(id)[1].memo).asset.slides.map(s=>s.name).join(',')==='one.png,two.mp4,three.jpg','existing chooser order');
                   check(getServiceItems(id)[1].id==='existing','existing item replaced rather than reused');
                   const originalMemo=getServiceItems(id)[1].memo;
-                  saveServiceItemMutation=async()=>{throw Error('save failed')};
+                  const originalUrl=parseServiceItemMemo(originalMemo).asset.url;
+                  const removeCount=removed.length;
+                  saveServiceItemMutation=async(sid,index)=>{submittedMemo=getServiceItems(sid)[index].memo;getServiceItems(sid)[0].raw_title='저장 중 수정';throw Error('save response lost')};
                   await uploadPresenterReferenceMediaFile(existingInput);
-                  check(getServiceItems(id)[1].memo===originalMemo && getServiceItems(id).length===3,'failed existing replacement lost original');
-                  return 'PASS ordered batch, original File identity, partial failure, concurrent edits, validation and lock';
+                  check(getServiceItems(id)[1].memo===submittedMemo && getServiceItems(id).length===3,'existing uncertain save discarded draft');
+                  check(getServiceItems(id)[0].raw_title==='저장 중 수정','uncertain save erased concurrent edit');
+                  check(removed.length===removeCount && stored.has(originalUrl.replace('https://example.test/','')),'replacement deleted existing file');
+                  check(!presenterReferenceMediaBatchServices.has(id) && !existingInput.disabled && !existingInput.value,'replacement lock/input leaked');
+                  return 'PASS ordered batch, original File identity, pre-save cleanup, uncertain-save draft/file retention, concurrent edits, validation and lock';
                 }'''), flush=True)
                 browser.close()
     finally:
