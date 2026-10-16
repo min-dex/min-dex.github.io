@@ -245,6 +245,10 @@ Presenter details live in `docs/thread-worship-presenter.md`. Keep shell edits o
 
 ## Worship date context
 
+- Past-service date labels remain plain text with no badge background or border.
+  Keep the date wording and historical editing notice; sidebar today/upcoming
+  labels retain their existing plain accent treatment.
+
 - Week boards and service cards explicitly distinguish 지난 예배, 오늘 예배 and
   다가오는 예배 by local calendar date, without relying on color alone.
 - Past-service controllers and order editors show the full date and explain that
