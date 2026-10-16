@@ -404,3 +404,11 @@ No old XML heading is used as canonical paratext when the source omits headings.
 Slot music controls remain with their worship item. Rendering them must not select or load the shared audio source; slot-owned playback is not exposed by the generic toolbar. Navigating or rendering never stops active audio.
 
 Live scripture drafts are keyed by service ID. Foreign-service clear actions do not change live output or invalidate pending requests; foreign show actions cannot replace an open output. Slot music ownership includes service ID as well as source URL. A foreign service cannot pause, stop, adjust volume, or replace active/pending playback; opening a view never changes playback.
+
+## Plain informational labels (2026-10-16)
+
+Worship date status, linked-song `Linked`, subsection sequence labels and background
+registry `등록됨`/`기본` use plain text without decorative fills or badge padding.
+Keep their wording/colors, missing-background warnings, interactive focus outlines
+and selectable control surfaces. This applies only to controller UI, not output
+slides or bulletin print.

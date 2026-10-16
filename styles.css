@@ -1443,11 +1443,13 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   text-transform: uppercase;
 }
 .background-status.registered {
-  background: color-mix(in srgb, var(--accent-soft) 42%, transparent);
+  background: transparent;
   color: var(--accent);
+  padding: 0;
 }
 .background-status.static {
-  background: color-mix(in srgb, var(--panel-2) 56%, transparent);
+  background: transparent;
+  padding: 0;
 }
 .background-status.missing {
   background: color-mix(in srgb, var(--danger) 12%, transparent);
@@ -2682,12 +2684,12 @@ body[data-module="scripture"] .scripture-editor .meta-attribute-label {
   flex: 0 0 auto;
   height: 20px;
   align-items: center;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--panel-2) 60%, transparent);
+  border-radius: 0;
+  background: transparent;
   color: var(--ink-4);
   font-size: var(--ui-meta-size);
   font-weight: 600;
-  padding: 0 7px;
+  padding: 0;
 }
 .linked-version-open {
   display: inline-grid;
@@ -4608,12 +4610,12 @@ body[data-theme="dark"] .service-week-card:hover {
   height: 22px;
   flex: 0 0 auto;
   align-items: center;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--panel-2) 34%, transparent);
+  border-radius: 0;
+  background: transparent;
   color: var(--ink-4);
   font-size: var(--ui-meta-size);
   font-weight: 700;
-  padding: 0 8px;
+  padding: 0;
   white-space: nowrap;
 }
 .svc-item-note {
@@ -8305,9 +8307,9 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 [data-inline-bold-editor] > [data-inline-bold-button]{justify-self:start;flex-shrink:0}
 
 /* Date context belongs to the editor and navigation, never the output slide. */
-.service-date-status { display:inline-flex; align-self:flex-start; width:fit-content; padding:3px 7px; border-radius:var(--r); font-size:var(--ui-label-size); font-weight:600; line-height:1.35; }
+.service-date-status { display:inline-flex; align-self:flex-start; width:fit-content; padding:0; border-radius:0; font-size:var(--ui-label-size); font-weight:600; line-height:1.35; }
 .service-date-status.is-past { color:var(--ink-2); background:transparent; border:0; }
-.service-date-status.is-upcoming, .service-date-status.is-today { color:var(--accent); background:var(--accent-soft); border:1px solid transparent; }
+.service-date-status.is-upcoming, .service-date-status.is-today { color:var(--accent); background:transparent; border:0; }
 .service-week-day.is-upcoming:not(.is-empty), .service-week-day.is-today { box-shadow:inset 0 0 0 1px var(--line); }
 .service-week-day.is-past:not(.is-empty) { background:transparent; box-shadow:inset 0 0 0 1px var(--line); }
 .service-date-card.is-past { border-style:dashed; }
