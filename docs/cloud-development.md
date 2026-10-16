@@ -5,8 +5,10 @@
 Repository preparation is separate from a published Codex Cloud environment.
 The local baseline passes seven Node checks and four Python smoke entry points
 (including Chromium/WebKit atomic-save, media retry and startup theme cases).
-A Linux GitHub Actions run must also pass. Environment publication and a real
-phone-initiated Cloud task are not yet verified; browser account login is pending.
+The same baseline passed on Ubuntu 24.04 in GitHub Actions run 38869180649
+(7f2289a2). Environment publication and a real phone-initiated Cloud task are
+not yet verified; browser account login is pending. The hourly Biblia monitor
+was deleted at user request. Finish/reconcile local work before resuming setup.
 
 ## Environment
 
