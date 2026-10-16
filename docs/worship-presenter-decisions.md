@@ -2030,3 +2030,19 @@ this UI change does not modify upload/save behavior.
   full audit with targeted follow-up runs, not a second complete suite run.
 - External requests blocked during local checks; no production worship or Storage
   changes. Web release: `20261015-history-scroll-retry`.
+
+## Edition-specific supplementary scripture ·2026-10-16
+
+Scripture taxonomy now includes Deuterocanon/Apocrypha only when supplied by the
+selected translation. COG uses separate GKE/DA1 additions; canonical Esther and
+Daniel link to them. Literal chapter labels and sparse chapter options survive
+reading, search, copy and service/presenter payloads. Global reference lookup
+retains known book identities when the reader switches to another edition,
+while the reader list filters by edition availability. Storage keys are never
+shown as publisher labels. Selection and output follow source order.
+
+Metadata is retained in Bible fetch/cache paths. The151 supplemental COG chapter
+keys receive a scoped cache suffix; all prior canonical/repair scopes persist.
+Existing services, source document identity, UUIDs and personal notes are not
+rewritten. Publisher paratext stays separate from verse body. See the supplemental
+Data/UX handoff contract and the full production readback receipt.

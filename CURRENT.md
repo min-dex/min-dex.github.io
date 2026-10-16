@@ -174,3 +174,26 @@ KJV obsolete local originals and both private KJV backup tables were permanently
 retired after explicit user cleanup and action-time DB confirmation. Compact
 hashes/addresses/source identity remain; old reconstruction is deliberately
 unsupported. Current pinned-source conformance stays checked.
+
+## COG supplemental texts ·2026-10-16
+
+User authorized matching additional-book reading/output support and direct DB
+application. Production now contains9 supplemental COG catalog items/4389 rows,
+with all66 original book records and all other translation fields unchanged.
+Exact readback matches the source-derived plan. This is an additive supplement,
+not certification/replacement of the still-partial COG66-book baseline. COGNEW
+was separately collected and remains uninstalled. Source inventory/version and
+empty Sirach preface are explicit; no old XML fallback.
+
+Direct SQL Editor execution resolved its query-size limit using checksum-verified
+Unicode LZW transport and reconciled the actual legacy18-column book schema,
+including NOT NULL division and unique sort order. Real PostgreSQL18.4 validates
+full decode/import/rollback, incomplete/tampered upload, drift, replay and private
+ACL. Supabase execution enabled RLS on the private staging/metadata-backup table.
+Initial failed attempts rolled back fully; no partial public corpus was installed.
+
+Local UI supports edition-aware taxonomy, Esther/Daniel addition links, literal
+chapter labels, original verse labels/order and output payload metadata. Scoped
+cache refresh covers151 added chapters. Web deployment remains a separate
+checkpoint. See docs/bible-supplements-contract-20261016.md and
+bible-supplement-readback-20261016.json.
