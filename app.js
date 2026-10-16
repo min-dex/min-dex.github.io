@@ -3657,6 +3657,22 @@ const SUPABASE_STATIC_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 const SUPABASE_STATIC_CACHE_PREFIX = "mindex.supabase.static.v1.";
 const BIBLE_CHAPTER_CACHE_TTL_MS = 12 * 60 * 60 * 1000;
 const BIBLE_CHAPTER_CACHE_PREFIX = "mindex.bible.chapter.v3.";
+// Discard reproducible corpus caches once; personal/service storage is untouched.
+function purgeLegacyBibleCaches(storage) {
+  const marker = "mindex.bible.source-cache-purged.20261016";
+  if (storage.getItem(marker) === "complete") return 0;
+  let removed = 0;
+  const catalogues = ["mindex_bible_translations", "mindex_bible_verses", "mindex_scripture_books"];
+  for (let i = storage.length - 1; i >= 0; i--) {
+    const key = storage.key(i);
+    if (key?.startsWith("mindex.bible.chapter.") || catalogues.some(table => key?.startsWith(`mindex.supabase.static.v1.${table}:`))) {
+      storage.removeItem(key);removed++;
+    }
+  }
+  storage.setItem(marker, "complete");return removed;
+}
+try { purgeLegacyBibleCaches(window.localStorage); } catch { /* Optional cache storage can be unavailable. */ }
+
 const WORSHIP_SERVICE_TYPE_SELECT = [
   "id",
   "display_name",

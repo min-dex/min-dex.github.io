@@ -210,3 +210,25 @@ packages. Explicit retired service editions never silently fallback. See
 `docs/bible-authoritative-library-20261016.md` and readback receipt. Web deployment
 and browser checks are recorded separately; CEV remains withheld pending154
 HTML/number-position investigations.
+
+
+## Legacy payload purge ·2026-10-16
+
+User explicitly requested a chat-only account of the old bundle and removal of
+its remnants. The original archive, whole legacy JSON/XML-derived corpora,
+rollback copies, old whole-body receipts and obsolete replay/import tools are
+permanently removed locally. Historical sections above describe past states:
+original-corpus reconstruction and old backup dependencies no longer apply.
+Compact source/hash receipts and reviewed encyclopedia excerpts retain their
+named witness and review scope; they do not certify the current publisher text.
+All eight official runtime package hashes are unchanged. Publisher HTML and
+the separately authoritative CrossWire OSIS source remain valid source evidence.
+No personal notes, bookmarks, service documents or lyrics were modified.
+
+Production retains eight inactive legacy/partial editions,253140 verse rows.
+Guarded deletion SQL and synthetic PostgreSQL rollback/replay/drift/FK/trigger
+tests pass; production permanent deletion is PENDING action-time confirmation.
+Do not report those rows or private production backups as deleted. Mindex
+clears only reproducible scripture/catalogue caches once; personal storage stays.
+See Biblia/reports/legacy-payload-purge-20261016.json and
+Mindex/migrations/2026-10-16-bible-legacy-purge.sql.
