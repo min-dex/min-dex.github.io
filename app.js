@@ -28200,9 +28200,14 @@ function presenterControllerMode(service, context = {}) {
   return { label: uiText("presenter.mode.noSlides"), tone: "empty" };
 }
 
+function serviceMusicSourceIsSlotOwned(source = state.serviceMusic.sourceKey) {
+  return Boolean(source) && Object.values(SERVICE_SLOT_MUSIC).some(config => config.source === source);
+}
+
 function renderServiceMusicPlayer(options = {}) {
-  const music = state.serviceMusic;
-  const context = currentPresenterAudioContext();
+  const slotOwned = !options.source && serviceMusicSourceIsSlotOwned();
+  const music = slotOwned ? { ...state.serviceMusic, sourceKey: "", sourceLabel: "", objectUrl: "", fileName: "", playing: false, pending: false } : state.serviceMusic;
+  const context = slotOwned ? {} : currentPresenterAudioContext();
   const activeLabel = music.sourceLabel && music.sourceKey ? music.sourceLabel : "";
   const fileLabel = activeLabel || context.label || (music.fileName ? music.fileName : uiText("presenter.music.default"));
   const hasSource = Boolean(options.source || music.sourceKey || context.source || music.objectUrl);
@@ -28262,12 +28267,6 @@ const SERVICE_SLOT_MUSIC = Object.freeze({
 function renderServiceSlotMusic(context) {
   const config = SERVICE_SLOT_MUSIC[context?.item?._worshipSlotKey];
   if (!config) return "";
-  // Preparing an idle player must never interrupt an already selected source.
-  if (!state.serviceMusic.sourceKey && !state.serviceMusic.objectUrl) {
-    const audio = getServiceMusicAudio();
-    setServiceMusicSource(audio, config.source, "manual", { loop: false, repeatAllowed: config.repeatAllowed }, config.label);
-    audio.load();
-  }
   return renderServiceMusicPlayer(config);
 }
 
@@ -28275,7 +28274,10 @@ function updateServiceMusicTransportControls() {
   const music = state.serviceMusic;
   document.querySelectorAll("[data-service-music-player]").forEach(root => {
     const source = root.dataset.serviceMusicSource;
-    const active = !source || source === music.sourceKey;
+    const slotOwned = !source && serviceMusicSourceIsSlotOwned();
+    const transport = root.querySelector(".svc-music-transport");
+    if (transport) transport.hidden = slotOwned;
+    const active = !slotOwned && (!source || source === music.sourceKey);
     const pending = active && music.pending;
     const playing = active && !pending && music.playing;
     const key = pending ? "loading" : playing ? "playing" : "idle";
@@ -28505,6 +28507,7 @@ function syncServiceMusicWithPresenterContext(serviceId = state.presenter.servic
 
 function runServiceMusicAction(action, binding = null) {
   const boundSource = binding?.serviceMusicSource || "";
+  if (!boundSource && action !== "choose" && serviceMusicSourceIsSlotOwned()) return;
   const boundActive = !boundSource || boundSource === state.serviceMusic.sourceKey;
   if (action === "stop") {
     if (!boundActive) return;

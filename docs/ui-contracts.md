@@ -112,8 +112,8 @@ Inactive module tabs should stay visually quiet. Active tabs may show a clearer 
   active tab visible after selection or resizing at every width.
 - Page tabs use `14px / 600`; the active tab uses `700`. The add-tab control is
   a `40px` square command with a direct neutral hover surface and a centered
-  `16px / 1.5` Lucide Plus icon. Active tabs use centered `1px × 30px` side
-  separators, leaving `10px` clear above and below inside the `50px` topbar.
+  `16px / 1.5` Lucide Plus icon. Active tabs use continuous full-height 1px side separators and mask the
+  bottom border edge to edge inside the 50px topbar.
 
 ## Sidebar
 
@@ -396,3 +396,5 @@ easy-godpia-canonical-20261015 keys by translation UUID, before edition metadata
 loads. Prior scopes and persistent originals remain recoverable; source literal
 combined labels retain their complete body through reference lookup and output.
 No old XML heading is used as canonical paratext when the source omits headings.
+
+Slot music controls remain with their worship item. Rendering them must not select or load the shared audio source; slot-owned playback is not exposed by the generic toolbar. Navigating or rendering never stops active audio.

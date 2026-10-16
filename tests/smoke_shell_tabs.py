@@ -35,7 +35,7 @@ def main():
                 page.wait_for_function("typeof state !== 'undefined' && state.pageTabs.length===5")
                 assert page.locator('.page-tab span').all_text_contents() == ['홈'] * 5
                 assert page.locator('.page-tab.active').evaluate("e=>getComputedStyle(e).fontSize") == '14px'
-                assert page.locator('.page-tab.active').evaluate("e=>getComputedStyle(e).backgroundSize") == '1px 30px, 1px 30px'
+                assert page.locator('.page-tab.active').evaluate("e=>getComputedStyle(e).backgroundSize") == '1px 100%, 1px 100%'
                 assert page.evaluate("sanitizePageTab({label:'보존할 이름',snapshot:{module:'praise'}}).label") == '보존할 이름'
                 page.wait_for_function("!document.body.classList.contains('ui-booting')")
                 page.locator('#bootStatus').wait_for(state='hidden')

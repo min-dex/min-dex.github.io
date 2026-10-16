@@ -322,7 +322,7 @@ body[data-module="presenter"].right-sidebar-open { --shell-right-w: var(--right-
     linear-gradient(var(--shell-separator), var(--shell-separator));
   background-position: left center, right center;
   background-repeat: no-repeat;
-  background-size: 1px 30px, 1px 30px;
+  background-size: 1px 100%, 1px 100%;
   color: var(--ink);
   font-weight: 700;
   box-shadow: none;
@@ -331,9 +331,9 @@ body[data-module="presenter"].right-sidebar-open { --shell-right-w: var(--right-
 .page-tab.drag-after { box-shadow: inset -2px 0 0 var(--accent); }
 .page-tab.active::after {
   position: absolute;
-  right: 1px;
+  right: 0;
   bottom: 0;
-  left: 1px;
+  left: 0;
   height: 1px;
   background: var(--tab-active-bg);
   content: "";
@@ -3399,14 +3399,14 @@ body[data-module="presenter"] .detail-pane {
   display: grid;
   gap: 3px;
   margin-left: 0;
-  padding: 3px 0 7px 4px;
+  padding: 3px 0 7px;
 }
 .service-outline-row--child {
   min-height: 28px;
   grid-template-columns: minmax(0, 1fr);
   gap: 5px;
   border-radius: 5px;
-  padding: 3px 6px;
+  padding: 3px var(--sidebar-item-pad-x);
 }
 .service-outline-row--child .service-outline-start {
   display: none;

@@ -1,3 +1,5 @@
+import os
+os.environ["MINDEX_SMOKE_OFFLINE"]="1"
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 server, url = start_local_app_server()
@@ -16,11 +18,11 @@ try:
  state.serviceMusic.audio=a;
  const m=document.createElement('div');m.id='music-test';m.style.width='254px';m.innerHTML=renderServiceSlotMusic({service,item});document.body.append(m);refreshIcons(m);
  check(!('prayerMusic' in state),'dedicated state left');
- check(a.loads===1&&a.paused,'preload autoplay');
- renderServiceSlotMusic({service,item});check(a.loads===1,'preload repeated');
+ check(!a.loads&&a.paused&&!state.serviceMusic.sourceKey,'render mutated player');
+ renderServiceSlotMusic({service,item});check(!a.loads,'render loaded audio');
  check(!m.querySelector('[data-service-music-action="repeat"]'),'repeat shown');
  const root=m.querySelector('[data-service-music-player]'),binding=root.dataset;
- const source=state.serviceMusic.sourceKey;
+ const source=binding.serviceMusicSource;
  const toggle=m.querySelector('[data-service-music-action="toggle"]');
  const pos=()=>JSON.stringify([...m.querySelectorAll('button,select')].map(e=>{const r=e.getBoundingClientRect();return [r.x,r.y,r.width]}));
  const positions=pos();let finish;
@@ -36,10 +38,13 @@ try:
  renderServiceSlotMusic({service,item});check(a.src==='other.mp3'&&!a.paused,'render interrupted music');
  check(state.serviceMusic.repeatAllowed,'other repeat disabled');
  a.play=function(){this.paused=false;return Promise.resolve()};await runServiceMusicAction('toggle',binding);check(a.src===source&&!a.loop&&!state.serviceMusic.repeatAllowed,'source switch');
- check(!renderServiceMusicPlayer().includes('data-service-music-action="repeat"'),'sidebar repeat');
+ check(!renderServiceMusicPlayer().includes('자율기도 음악'),'slot label leaked to toolbar');
+ check(!renderServiceMusicPlayer().includes('data-service-music-action="toggle"'),'slot transport leaked');
+ check(state.serviceMusic.playing&&!a.paused,'toolbar render stopped playback');
+ runServiceMusicAction('toggle');check(state.serviceMusic.playing&&!a.paused,'generic control changed slot playback');
  runServiceMusicAction('stop',binding);
  for(const theme of ['light','dark']){document.body.dataset.theme=theme;for(const width of [254,390,1000]){m.style.width=width+'px';check(m.scrollWidth<=width,'overflow '+width);}}
- clearServiceMusicSyncTimer();return 'PASS common player, preload, state, cancellation, source isolation, repeat disabled, volume, widths';
+ clearServiceMusicSyncTimer();return 'PASS shared engine, side-effect-free rendering, state, cancellation, source isolation, repeat disabled, volume, widths';
 }'''), flush=True)
             page.locator('#music-test').screenshot(path='/tmp/mindex-prayer-controls-'+engine+'.png')
             browser.close()
