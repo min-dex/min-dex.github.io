@@ -90,7 +90,7 @@ body[data-theme="dark"] .cal-view {
   border-spacing: 0;
   table-layout: fixed;
   font-size: var(--ui-body-size);
-  font-weight: var(--ui-row-weight);
+  font-weight: var(--ui-meta-weight);
   line-height: 1.4;
 }
 .cal-table--departments,
@@ -157,7 +157,7 @@ body[data-theme="dark"] .cal-view {
 .cal-row.is-past .cal-lit,
 .cal-row.is-past .cal-cell { color: var(--cal-muted); }
 .cal-date { overflow: visible; padding: 10px; color: var(--cal-muted); font-size: var(--ui-meta-size); font-weight: 500; line-height: 1.35; white-space: normal; }
-.cal-lit { overflow: visible; padding: 10px; color: var(--ink); font-weight: 600; line-height: 1.35; white-space: normal; }
+.cal-lit { overflow: visible; padding: 10px; color: var(--ink); font-weight: 500; line-height: 1.35; white-space: normal; }
 .cal-cell {
   min-width: 0;
   overflow: hidden;
@@ -182,7 +182,7 @@ body[data-theme="dark"] .cal-view {
   line-height: 1.42;
 }
 .cal-cell:empty::before { content: "—"; color: var(--cal-faint); pointer-events: none; }
-.cal-row .cal-cell:focus { background: var(--cal-focus); color: var(--ink); outline: 2px solid var(--ink-3); outline-offset: -2px; }
+.cal-row .cal-cell:focus { font-weight: 600; background: var(--cal-focus); color: var(--ink); outline: 2px solid var(--ink-3); outline-offset: -2px; }
 .cal-cell.is-saving {
   opacity: .72;
 }

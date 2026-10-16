@@ -14,9 +14,9 @@ Read `HANDOFF.md` first. This file is the short UI contract for Codex threads so
 - New app-layout spacing should use the shared `5px`/`10px` rhythm instead of
   adding one-off numbers.
 - App UI typography is separate from presenter output typography. Use the
-  compact app scale by role: labels `13px / 600`, supporting metadata
-  `13px / 500`, normal rows and form controls `15px / 600`, card titles
-  `17px / 700`, and page titles `22px / 700`.
+  compact app scale by role: labels `12px / 600`, supporting metadata
+  `12px / 500`, normal rows and form controls `14px / 600`, card titles
+  `16px / 700`, and page titles `22px / 700`.
 - Weight should communicate hierarchy, not decoration: primary labels and
   titles may use `700`, routine editable values should usually use `600`, and
   helper/meta text should stay at `500` unless it is an actionable label.
@@ -110,7 +110,7 @@ Inactive module tabs should stay visually quiet. Active tabs may show a clearer 
   has no close control.
 - Page tabs remain in the single header row, scroll horizontally, and keep the
   active tab visible after selection or resizing at every width.
-- Page tabs use `13px / 600`; the active tab uses `700`. The add-tab control is
+- Page tabs use `14px / 600`; the active tab uses `700`. The add-tab control is
   a `40px` square command with a direct neutral hover surface and a centered
   `16px / 1.5` Lucide Plus icon. Active tabs use centered `1px × 30px` side
   separators, leaving `10px` clear above and below inside the `50px` topbar.
@@ -147,6 +147,9 @@ Inactive module tabs should stay visually quiet. Active tabs may show a clearer 
 - References should remain visually neutral unless the design system intentionally changes.
 
 ## Calendar
+
+- Metadata and headers use 12px; table body uses 14px / 500. Editable
+  values use 14px / 600 while focused.
 
 - Upcoming Sunday uses an accent date-edge marker and its date label, not a
   full-row accent fill. Hover uses a neutral surface; keyboard editing uses a
@@ -322,9 +325,9 @@ and 5px textarea side padding to avoid nested panel gutters.
 - Empty states fill the detail pane's available content height, without adding
   viewport-based overflow. Missing song/scripture descriptions render no empty row.
 - Resource edit/delete and song-form controls use 30px dense geometry; metadata
-  dialogs use 35px inputs/close controls, 13px labels and 15px editable values.
+  dialogs use 35px inputs/close controls, 12px labels and 14px editable values.
 - Legacy page-title CSS aliases and JavaScript tokens match the documented
-  13/15/17/22 scale. Presenter output and bulletin print typography stay separate.
+  12/14/16/22 scale. Presenter output and bulletin print typography stay separate.
 - Manuals and calendar use 5px/10px spacing. Calendar labels may wrap within the
   existing horizontally scrollable table; never shrink essential text to fit.
 

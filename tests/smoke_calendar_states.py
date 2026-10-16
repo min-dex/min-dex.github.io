@@ -26,10 +26,14 @@ try:
      row.scroll_into_view_if_needed();page.mouse.move(0,0)
      bg=lambda l:l.evaluate('e=>getComputedStyle(e).backgroundColor')
      base=bg(other.locator('.cal-lit'));assert bg(row.locator('.cal-lit'))==base
+     assert row.locator('.cal-date').evaluate('e=>getComputedStyle(e).fontSize')=='12px'
+     assert row.locator('.cal-lit').evaluate('e=>[getComputedStyle(e).fontSize,getComputedStyle(e).fontWeight]')==['14px','500']
+     assert other.locator('td.cal-cell').first.evaluate('e=>[getComputedStyle(e).fontSize,getComputedStyle(e).fontWeight]')==['14px','500']
      marker=row.locator('.cal-date').evaluate('e=>getComputedStyle(e).boxShadow');assert marker!='none'
      other.hover();hover=bg(other.locator('.cal-lit'));assert hover!=base
      cell=other.locator('td.cal-cell').first;cell.focus();assert bg(cell)!=hover
      assert cell.evaluate('e=>getComputedStyle(e).outlineStyle')=='solid'
+     assert cell.evaluate('e=>[getComputedStyle(e).fontSize,getComputedStyle(e).fontWeight]')==['14px','600']
      row.hover();assert bg(row.locator('.cal-lit'))==hover
      assert row.locator('.cal-date').evaluate('e=>getComputedStyle(e).boxShadow')==marker
      row.locator('td.cal-cell').first.focus();assert bg(row.locator('td.cal-cell').first)!=hover
