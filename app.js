@@ -776,6 +776,7 @@ const state = {
     fileName: "",
     mode: "manual",
     sourceKey: "",
+    ownerServiceId: "",
     sourceLabel: "",
     pending: false,
     playSerial: 0,
@@ -8834,7 +8835,7 @@ function handleDetailInput(event) {
 
   const liveScriptureInput = event.target.closest("[data-live-scripture-input]");
   if (liveScriptureInput) {
-    updateLiveScriptureDraft(liveScriptureInput.value);
+    updateLiveScriptureDraft(liveScriptureInput.value, liveScriptureInput.dataset.serviceId);
     return;
   }
 
@@ -9009,7 +9010,7 @@ function handleDetailChange(event) {
 
   const serviceMusicVolume = event.target.closest("[data-service-music-volume]");
   if (serviceMusicVolume) {
-    setServiceMusicVolume(serviceMusicVolume.value);
+    setServiceMusicVolume(serviceMusicVolume.value, serviceMusicVolume.closest("[data-service-music-player]")?.dataset);
     return;
   }
 
@@ -27958,7 +27959,7 @@ function renderPresenterControlsTop(service, slides, active, index) {
   const count = slides.length;
   const safeIndex = clampPresenterIndex(index, count);
   const activeSlide = slides[safeIndex] || null;
-  const showLiveScriptureControl = state.presenter.liveScripture?.active || presenterSlideIsLiveScriptureElement(activeSlide);
+  const showLiveScriptureControl = (state.presenter.serviceId === service.id && state.presenter.liveScripture?.active) || presenterSlideIsLiveScriptureElement(activeSlide);
   const current = active && state.presenter.safetyBlank ? 0 : count ? safeIndex + 1 : 0;
   const anyOutputOpen = isPresenterOutputWindowOpen();
   const outputOpen = active && anyOutputOpen;
@@ -28212,14 +28213,14 @@ function renderServiceMusicPlayer(options = {}) {
   const fileLabel = activeLabel || context.label || (music.fileName ? music.fileName : uiText("presenter.music.default"));
   const hasSource = Boolean(options.source || music.sourceKey || context.source || music.objectUrl);
   const inline = Boolean(options.source);
-  const active = !inline || options.source === music.sourceKey;
+  const active = !inline || options.source === music.sourceKey && options.serviceId === music.ownerServiceId;
   const pending = active && music.pending;
   const playing = active && !pending && music.playing;
   const key = pending ? "loading" : playing ? "playing" : "idle";
   const volumeOptions = Array.from({ length: 6 }, (_, level) =>
     `<option value="${level}"${level === music.volumeLevel ? " selected" : ""}>${level}</option>`).join("");
   return `
-    <span class="svc-music-player${inline ? " svc-music-player--inline" : ""}" data-service-music-player data-service-music-source="${escapeAttr(options.source || "")}" data-service-music-label="${escapeAttr(options.label || "")}" data-service-music-repeat-allowed="${options.repeatAllowed !== false}">
+    <span class="svc-music-player${inline ? " svc-music-player--inline" : ""}" data-service-music-player data-service-music-service-id="${escapeAttr(options.serviceId || "")}" data-service-music-source="${escapeAttr(options.source || "")}" data-service-music-label="${escapeAttr(options.label || "")}" data-service-music-repeat-allowed="${options.repeatAllowed !== false}">
       ${inline ? `<span class="svc-music-label">${escapeHtml(options.label)}</span>` : `
       <input class="svc-music-file" type="file" accept="audio/*" data-service-music-file hidden />
       <button class="svc-music-name" type="button" data-service-music-action="choose" title="음악 선택">
@@ -28245,10 +28246,11 @@ function renderServiceMusicPlayer(options = {}) {
 }
 
 function renderLiveScriptureControl(serviceId) {
-  const live = state.presenter.liveScripture || {};
+  const live = state.presenter.serviceId === serviceId ? state.presenter.liveScripture || {} : {};
+  const draft = state.presenterScriptureDrafts?.[serviceId] ?? live.draft ?? live.reference ?? "";
   return `
     <span class="svc-live-scripture${live.active ? " is-active" : ""}">
-      <input class="svc-live-scripture-input" type="text" value="${escapeAttr(live.draft || live.reference || "")}" data-live-scripture-input data-service-id="${escapeAttr(serviceId)}" placeholder="${escapeAttr(uiText("presenter.scripture.placeholder"))}" />
+      <input class="svc-live-scripture-input" type="text" value="${escapeAttr(draft)}" data-live-scripture-input data-service-id="${escapeAttr(serviceId)}" placeholder="${escapeAttr(uiText("presenter.scripture.placeholder"))}" />
       <button class="icon-btn svc-action-text-btn svc-live-scripture-show" type="button" data-live-scripture-action="show" data-service-id="${escapeAttr(serviceId)}" aria-label="${escapeAttr(uiText("presenter.action.showScripture"))}" title="${escapeAttr(uiText("presenter.action.showScripture"))}">
         <i data-lucide="send"></i>
         <span>${escapeHtml(uiText("presenter.action.send"))}</span>
@@ -28267,7 +28269,7 @@ const SERVICE_SLOT_MUSIC = Object.freeze({
 function renderServiceSlotMusic(context) {
   const config = SERVICE_SLOT_MUSIC[context?.item?._worshipSlotKey];
   if (!config) return "";
-  return renderServiceMusicPlayer(config);
+  return renderServiceMusicPlayer({ ...config, serviceId: context.service?.id || "" });
 }
 
 function updateServiceMusicTransportControls() {
@@ -28277,7 +28279,7 @@ function updateServiceMusicTransportControls() {
     const slotOwned = !source && serviceMusicSourceIsSlotOwned();
     const transport = root.querySelector(".svc-music-transport");
     if (transport) transport.hidden = slotOwned;
-    const active = !slotOwned && (!source || source === music.sourceKey);
+    const active = !slotOwned && (!source || (source === music.sourceKey && root.dataset.serviceMusicServiceId === music.ownerServiceId));
     const pending = active && music.pending;
     const playing = active && !pending && music.playing;
     const key = pending ? "loading" : playing ? "playing" : "idle";
@@ -28461,6 +28463,7 @@ function setServiceMusicSource(audio, source, mode, playback = null, label = "")
   audio.src = source;
   audio.loop = Boolean(playback?.loop);
   state.serviceMusic.sourceKey = source;
+  state.serviceMusic.ownerServiceId = "";
   state.serviceMusic.sourceLabel = label || "";
   state.serviceMusic.mode = mode;
   state.serviceMusic.playing = false;
@@ -28508,7 +28511,12 @@ function syncServiceMusicWithPresenterContext(serviceId = state.presenter.servic
 function runServiceMusicAction(action, binding = null) {
   const boundSource = binding?.serviceMusicSource || "";
   if (!boundSource && action !== "choose" && serviceMusicSourceIsSlotOwned()) return;
-  const boundActive = !boundSource || boundSource === state.serviceMusic.sourceKey;
+  const owner = binding?.serviceMusicServiceId || "";
+  const boundActive = !boundSource || (boundSource === state.serviceMusic.sourceKey && owner === state.serviceMusic.ownerServiceId);
+  if (boundSource && !boundActive && (state.serviceMusic.playing || state.serviceMusic.pending || serviceMusicHasActivePlayback())) {
+    showToast("다른 예배의 음악이 재생 중입니다. 해당 예배에서 정지한 뒤 재생해 주세요.", "info");
+    return;
+  }
   if (action === "stop") {
     if (!boundActive) return;
     stopServiceMusicPlayback({ render: false });
@@ -28555,6 +28563,7 @@ function runServiceMusicAction(action, binding = null) {
     return;
   }
   setServiceMusicSource(audio, source, mode, playback, label);
+  state.serviceMusic.ownerServiceId = boundSource ? owner : "";
   const serial = ++state.serviceMusic.playSerial;
   state.serviceMusic.pending = true;
   updateServiceMusicTransportControls();
@@ -28586,7 +28595,8 @@ function loadServiceMusicFile(file) {
   renderPresenterControlState();
 }
 
-function setServiceMusicVolume(value) {
+function setServiceMusicVolume(value, binding = null) {
+  if (binding?.serviceMusicSource && binding.serviceMusicServiceId !== state.serviceMusic.ownerServiceId) return;
   const level = Math.min(Math.max(Number(value) || 0, 0), 5);
   state.serviceMusic.volumeLevel = level;
   getServiceMusicAudio().volume = level / 5;
@@ -28663,8 +28673,11 @@ function syncServiceMusicSyncedLyricsWithCurrentTime(options = {}) {
   return true;
 }
 
-function updateLiveScriptureDraft(value) {
-  state.presenter.liveScripture.draft = String(value || "");
+function updateLiveScriptureDraft(value, serviceId = state.selectedServiceId || state.presenter.serviceId) {
+  if (!serviceId) return;
+  state.presenterScriptureDrafts ||= {};
+  state.presenterScriptureDrafts[serviceId] = String(value || "");
+  if (state.presenter.serviceId === serviceId) state.presenter.liveScripture.draft = String(value || "");
 }
 
 const pendingPresenterCitationRequests = new Set();
@@ -28825,6 +28838,11 @@ let liveScriptureRequestSerial = 0;
 
 async function runLiveScriptureAction(action, serviceId = state.selectedServiceId) {
   if (action !== "clear" && action !== "show") return;
+  if (action === "clear" && serviceId !== state.presenter.serviceId) return;
+  if (action === "show" && state.presenter.serviceId !== serviceId && isPresenterOutputWindowOpen()) {
+    showToast("다른 예배가 송출 중입니다. 해당 예배에서 실시간 말씀을 조작해 주세요.", "info");
+    return;
+  }
   const requestSerial = ++liveScriptureRequestSerial;
   if (action === "clear") {
     state.presenter.liveScripture = { reference: "", draft: state.presenter.liveScripture.draft || "", active: false, slide: null };
@@ -28837,8 +28855,8 @@ async function runLiveScriptureAction(action, serviceId = state.selectedServiceI
   const input = serviceId
     ? document.querySelector(`[data-live-scripture-input][data-service-id="${CSS.escape(String(serviceId))}"]`)
     : document.querySelector("[data-live-scripture-input]");
-  const query = String(input?.value || state.presenter.liveScripture.draft || "").trim();
-  state.presenter.liveScripture.draft = query;
+  const query = String(input?.value ?? state.presenterScriptureDrafts?.[serviceId] ?? (state.presenter.serviceId === serviceId ? state.presenter.liveScripture.draft : "") ?? "").trim();
+  updateLiveScriptureDraft(query, serviceId);
   if (!query) {
     showToast("성구를 입력해 주세요.", "error");
     return;

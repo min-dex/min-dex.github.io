@@ -37,12 +37,22 @@ try:
  setServiceMusicSource(a,'other.mp3','manual',{loop:true},'Other');state.serviceMusic.playing=true;a.paused=false;
  renderServiceSlotMusic({service,item});check(a.src==='other.mp3'&&!a.paused,'render interrupted music');
  check(state.serviceMusic.repeatAllowed,'other repeat disabled');
- a.play=function(){this.paused=false;return Promise.resolve()};await runServiceMusicAction('toggle',binding);check(a.src===source&&!a.loop&&!state.serviceMusic.repeatAllowed,'source switch');
+ a.play=function(){this.paused=false;return Promise.resolve()};await runServiceMusicAction('toggle',binding);check(a.src==='other.mp3'&&!a.paused,'interrupted another track');state.serviceMusic.playing=false;a.paused=true;await runServiceMusicAction('toggle',binding);check(a.src===source&&!a.loop&&!state.serviceMusic.repeatAllowed,'source switch');
  check(!renderServiceMusicPlayer().includes('자율기도 음악'),'slot label leaked to toolbar');
  check(!renderServiceMusicPlayer().includes('data-service-music-action="toggle"'),'slot transport leaked');
  check(state.serviceMusic.playing&&!a.paused,'toolbar render stopped playback');
  runServiceMusicAction('toggle');check(state.serviceMusic.playing&&!a.paused,'generic control changed slot playback');
+ const other=document.createElement('div');other.innerHTML=renderServiceSlotMusic({service:{id:'other-friday'},item});document.body.append(other);
+ const otherRoot=other.querySelector('[data-service-music-player]');const otherBinding=otherRoot.dataset;
+ check(other.querySelector('[data-service-music-action="toggle"]').getAttribute('aria-pressed')==='false','another Friday claims playing');
+ const serial=state.serviceMusic.playSerial;const volume=a.volume;
+ for(const action of ['toggle','stop','repeat'])await runServiceMusicAction(action,otherBinding);
+ setServiceMusicVolume(5,otherBinding);
+ check(state.serviceMusic.playSerial===serial&&state.serviceMusic.playing&&!a.paused&&a.volume===volume,'other service changed active music');
+ updateServiceMusicTransportControls();check(other.querySelector('[data-service-music-action="toggle"]').getAttribute('aria-pressed')==='false','update leaked music state');
  runServiceMusicAction('stop',binding);
+ await runServiceMusicAction('toggle',otherBinding);check(state.serviceMusic.ownerServiceId==='other-friday'&&state.serviceMusic.playing,'idle ownership transfer failed');
+ runServiceMusicAction('stop',otherBinding);
  for(const theme of ['light','dark']){document.body.dataset.theme=theme;for(const width of [254,390,1000]){m.style.width=width+'px';check(m.scrollWidth<=width,'overflow '+width);}}
  clearServiceMusicSyncTimer();return 'PASS shared engine, side-effect-free rendering, state, cancellation, source isolation, repeat disabled, volume, widths';
 }'''), flush=True)

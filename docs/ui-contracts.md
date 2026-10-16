@@ -398,3 +398,5 @@ combined labels retain their complete body through reference lookup and output.
 No old XML heading is used as canonical paratext when the source omits headings.
 
 Slot music controls remain with their worship item. Rendering them must not select or load the shared audio source; slot-owned playback is not exposed by the generic toolbar. Navigating or rendering never stops active audio.
+
+Live scripture drafts are keyed by service ID. Foreign-service clear actions do not change live output or invalidate pending requests; foreign show actions cannot replace an open output. Slot music ownership includes service ID as well as source URL. A foreign service cannot pause, stop, adjust volume, or replace active/pending playback; opening a view never changes playback.
