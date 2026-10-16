@@ -232,3 +232,15 @@ Do not report those rows or private production backups as deleted. Mindex
 clears only reproducible scripture/catalogue caches once; personal storage stays.
 See Biblia/reports/legacy-payload-purge-20261016.json and
 Mindex/migrations/2026-10-16-bible-legacy-purge.sql.
+
+
+## Edition history display ·2026-10-16
+
+User authorized operational deployment of the reviewed edition/year display.
+A compact disclosure separates documented publication/revision history, the
+installed electronic witness, acquisition date and unconfirmed physical printing.
+Current eight Bible bodies/metadata and user/service records are unchanged.
+NIV2011 and ESV2025 are requested additions, not installed or falsely selectable.
+Official API application/access is pending; never expose provider keys in the
+frontend or mirror API corpora without the applicable permission. Mindex target
+is10 editions including NIV/ESV; Biblia's verified collection remains uncapped.

@@ -17029,6 +17029,7 @@ function renderBibleReader(book) {
       ${renderBibleReaderControls({
         chapterControl: renderBibleChapterControl(chapters, hasPreviousChapter, hasNextChapter),
       })}
+      ${renderBibleEditionInfo()}
       ${getBibleBooks().some(b=>b.code===({EST:"GKE",DAN:"DA1"}[book.code])) ? `<button class="btn secondary" type="button" data-global-book-code="${{EST:"GKE",DAN:"DA1"}[book.code]}">${escapeHtml(book.koreanName)} 추가 본문 →</button>` : ""}
       ${
         state.bibleReaderLoading
@@ -17049,6 +17050,19 @@ function renderBibleReaderControls(options = {}) {
     </div>
   `;
 }
+
+function renderBibleEditionInfo() {
+  const edition = window.BibleEditionInfo?.get(getSelectedBibleTranslation());
+  if (!edition) return "";
+  return `<details class="bible-reader-note bible-edition-info">
+    <summary>판본·연도</summary>
+    <p>${escapeHtml(edition.history)}</p>
+    <p>사용 본문: ${escapeHtml(edition.textEdition)} · 확보일 ${escapeHtml(edition.retrievedAt)}</p>
+    <p>${escapeHtml(edition.note)}</p>
+    <p><a href="${escapeAttr(edition.source)}" target="_blank" rel="noopener noreferrer">본문 출처</a> · <a href="${escapeAttr(edition.historySource)}" target="_blank" rel="noopener noreferrer">발행 연혁 근거</a>${edition.revisionSource ? ` · <a href="${escapeAttr(edition.revisionSource)}" target="_blank" rel="noopener noreferrer">제4판 발행 근거</a>` : ""}</p>
+  </details>`;
+}
+
 
 function renderBibleSidebarTranslation() {
   const host = refs.bibleSidebarTranslation;

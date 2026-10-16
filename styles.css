@@ -8378,3 +8378,9 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .bible-sidebar-translation .bible-control { display:flex; align-items:center; gap:10px; min-width:0; }
 .bible-sidebar-translation .bible-control > span { flex:0 0 auto; font-size:var(--ui-meta-size); color:var(--sidebar-sub); }
 .bible-sidebar-translation select { min-width:0; width:100%; flex:1; height:35px; padding:0 10px; border:0; border-radius:var(--r); background:var(--control-surface); color:var(--sidebar-ink); font-size:var(--ui-body-size); font-weight:600; }
+
+/* Edition metadata stays secondary to reading and outside copied scripture. */
+.bible-edition-info { margin: var(--s2) 0 var(--s3); line-height: 1.6; }
+.bible-edition-info summary { cursor: pointer; width: fit-content; }
+.bible-edition-info p { margin: var(--s1) 0; }
+.bible-edition-info a { color: inherit; text-underline-offset: 3px; }
