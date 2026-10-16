@@ -26,3 +26,8 @@ const slide={referenceBook:'에스델(제2경전/외경)',referenceRange:'13`:8'
 assert.equal(ctx.presenterScriptureReadingHeaderReference(slide,'8'),'에스델(제2경전/외경) 13`:8');
 assert.ok(ctx.renderPresenterScriptureReadingSlide(slide).includes('13`:8'));assert.ok(ctx.renderPresenterScriptureReadingSlide(slide).includes('확인할 본문 전체'));
 console.log('PASS actual presenter renderer retains literal chapter label and complete body');
+
+ctx.findBibleBookByReferenceName=name=>ctx.getBibleBooks(false).find(b=>b.koreanName===name||b.code===name);
+vm.runInContext(fn('parseBibleReferenceFromNormalizedText'),ctx);
+assert.equal(ctx.parseBibleReferenceFromNormalizedText('GKE 13`:0'),null);
+assert.equal(ctx.parseBibleReferenceFromNormalizedText('GKE 13`:8').chapter,1004);

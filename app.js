@@ -18760,7 +18760,7 @@ function parseBibleReferenceFromNormalizedText(text) {
   if (!text) return null;
   const special=text.match(/^(.+?)\s+([^:\s]+)(?::\s*(\d+)(?:\s*-\s*(\d+))?)?$/);
   if(special){const book=findBibleBookByReferenceName(special[1]);const option=book?.metadata?.chapter_options?.find(c=>c.label===special[2]);
-    if(option){const verse=Number(special[3])||null,verseEnd=Number(special[4])||null;if(verseEnd && verseEnd<(verse||1))return null;return {book,chapter:option.key,verse,verseEnd};}}
+    if(option){if(special[3] && Number(special[3])<1)return null;const verse=Number(special[3])||null,verseEnd=Number(special[4])||null;if(verseEnd && verseEnd<(verse||1))return null;return {book,chapter:option.key,verse,verseEnd};}}
 
   const match =
     text.match(/^(.+?)\s+(\d{1,3})\s+(\d{1,3})(?:\s*-\s*(\d{1,3}))?$/) ||
