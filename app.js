@@ -3569,6 +3569,7 @@ async function loadScriptureBooksOnce({ silent = false } = {}) {
     if(state.bibleTranslations.length)clearSelectedBookOutsideFilter();
     persistUiState();
     render();
+    if (state.selectedBookCode && state.bibleTranslations.length) await loadBibleBookVerses({ silent: true });
   } catch (error) {
     state.scriptureBooks = [];
     if (!silent && state.module === "scripture") showToast(error.message || "성경 권 목록을 불러오지 못했습니다.", "error");
@@ -5690,6 +5691,8 @@ async function loadBibleTranslationsOnce({ silent = false } = {}) {
 
 async function loadBibleBookVerses({ silent = false } = {}) {
   if (!requireClient({ silent })) return;
+  // Edition availability is meaningful only after both catalogs settle.
+  if (!state.bibleTranslations.length || !state.scriptureBooks.length) return;
   if(state.selectedBookCode && !getBibleBooks().some(b=>b.code===state.selectedBookCode)){state.selectedBookCode="GEN";state.selectedBibleChapter=1;state.scriptureFilter="all";}
   if (!state.selectedBookCode || !state.selectedBibleTranslationId) {
     state.bibleReaderLoading = false;

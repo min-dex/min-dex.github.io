@@ -12,7 +12,7 @@ const row={book_code:'GEN',chapter:1,verse:1,text:'본문 [본문 주석]',secti
 storage.set('mindex.bible.chapter.v1.t:GEN:1',JSON.stringify({cachedAt:Date.now(),rows:[{...row,text:'[이전 제목] 본문',section_title:''}]}));
 let requests=0;
 const query={select(columns){this.columns=columns.split(',');return this},eq(){return this},order(){requests++;return Promise.resolve({data:[Object.fromEntries(this.columns.map(k=>[k,row[k]]))],error:null})}};
-const state={selectedBibleTranslationId:'t',selectedBookCode:'GEN',selectedBibleChapter:1,
+const state={scriptureBooks:[{code:'GEN'}],bibleTranslations:[{id:'t'}],selectedBibleTranslationId:'t',selectedBookCode:'GEN',selectedBibleChapter:1,
   selectedBibleVerses:[],selectedBibleVerse:1,bibleVerseCache:new Map(),bibleBookVerses:[],
   client:{from:()=>query},module:'scripture'};
 const escape=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
