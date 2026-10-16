@@ -426,3 +426,8 @@ The Scripture edition selector lives above sidebar search and controls both the
 book catalogue and reader/search results. Reader/search controls do not repeat
 it. Keep the sidebar select DOM stable during renders to preserve focus. Hide
 it outside Scripture, and disable it while the edition catalogue is unavailable.
+
+Edition switches clear verse selections/anchors, normalize unavailable chapters
+and empty testament filters before persisting or syncing the URL. Source-native
+verse numbers are not assumed to align across editions. Empty reader/search
+states retain their message but do not repeat edition buttons; use the sidebar.

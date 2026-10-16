@@ -8310,12 +8310,6 @@ function handleDetailClick(event) {
     return;
   }
 
-  const switchTranslation = event.target.closest("[data-switch-bible-translation]");
-  if (switchTranslation) {
-    switchBibleTranslation(switchTranslation.dataset.switchBibleTranslation);
-    return;
-  }
-
   const copyBibleVerse = event.target.closest("[data-copy-bible-verse]");
   if (copyBibleVerse) {
     const selectedText = getSelectedTextWithin(copyBibleVerse.closest("[data-bible-verse]"));
@@ -9189,8 +9183,25 @@ function handleDetailChange(event) {
 }
 
 function switchBibleTranslation(translationId) {
-  state.selectedBibleTranslationId = translationId || null;
-  if (state.selectedBookCode && !getBibleBooks().some(b=>b.code===state.selectedBookCode)) {state.selectedBookCode="GEN";state.selectedBibleChapter=1;state.selectedBibleVerse=null;state.selectedBibleVerses=[];state.lastSelectedBibleVerse=null;state.scriptureFilter="all";}
+  const nextId = translationId || null;
+  const changed = state.selectedBibleTranslationId !== nextId;
+  state.selectedBibleTranslationId = nextId;
+  const books = getBibleBooks();
+  if (state.selectedBookCode && !books.some(book => book.code === state.selectedBookCode)) {
+    state.selectedBookCode = "GEN";
+    state.selectedBibleChapter = 1;
+    state.scriptureFilter = "all";
+  }
+  const chapters = getBibleChapterOptions();
+  if (chapters.length && !chapters.includes(state.selectedBibleChapter)) {
+    state.selectedBibleChapter = chapters[0];
+  }
+  if (changed) {
+    state.selectedBibleVerse = null;
+    state.selectedBibleVerses = [];
+    state.lastSelectedBibleVerse = null;
+  }
+  if (!getBibleBooksForScriptureFilter().length) state.scriptureFilter = "all";
   state.bibleBookVerses = [];
   persistUiState();
   syncBrowserHistory();
@@ -16951,7 +16962,7 @@ function renderBibleTextSearchResults() {
   if (state.bibleTextSearchLoading) return renderBibleVerseSkeleton();
   if (state.bibleTextSearchError) return `<div class="bible-reader-note">${escapeHtml(state.bibleTextSearchError)}</div>`;
   if (!state.bibleTextSearchResults.length) {
-    return `<div class="bible-reader-note">"${escapeHtml(state.bibleTextSearchQuery)}" 검색 결과가 없습니다.${renderOtherTranslationOptions()}</div>`;
+    return `<div class="bible-reader-note">"${escapeHtml(state.bibleTextSearchQuery)}" 검색 결과가 없습니다.</div>`;
   }
 
   const translation = getSelectedBibleTranslation();
@@ -17135,23 +17146,9 @@ function renderBibleVerseSkeleton() {
   `;
 }
 
-function renderOtherTranslationOptions() {
-  const others = state.bibleTranslations.filter((translation) => translation.id !== state.selectedBibleTranslationId);
-  if (!others.length) return "";
-  return `
-    <div class="bible-reader-translation-fallback">
-      <span>다른 역본 보기</span>
-      ${others.map((translation) => `
-        <button class="btn secondary" type="button" data-switch-bible-translation="${escapeAttr(translation.id)}">
-          ${escapeHtml(translation.abbreviation || translation.name)}
-        </button>
-      `).join("")}
-    </div>`;
-}
-
 function renderBibleVerseList(verses) {
-  if (!state.bibleBookVerses.length) return `<div class="bible-reader-note">이 권의 본문을 불러오지 못했습니다.${renderOtherTranslationOptions()}</div>`;
-  if (!verses.length) return `<div class="bible-reader-note">이 장에 본문이 없습니다.${renderOtherTranslationOptions()}</div>`;
+  if (!state.bibleBookVerses.length) return `<div class="bible-reader-note">이 권의 본문을 불러오지 못했습니다.</div>`;
+  if (!verses.length) return `<div class="bible-reader-note">이 장에 본문이 없습니다.</div>`;
   let previousSection = "";
   const selectedVerses = new Set(state.selectedBibleVerses.length ? state.selectedBibleVerses : [state.selectedBibleVerse].filter(Boolean));
   return `
