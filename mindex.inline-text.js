@@ -20,11 +20,15 @@
     // Include markers around the retained selection before toggling line by line.
     if(start>=2&&value.slice(start-2,start)==="**"&&value.slice(end,end+2)==="**") {from-=2;to+=2;}
     const selected=value.slice(from,to),lines=selected.split('\n');
+    // A list marker is structure, not part of the bold range.
+    const parts=lines.map(line=>{
+      const prefix=before?line.match(numberPattern)?.[0]||'':'';
+      return {prefix,body:line.slice(prefix.length)};
+    });
     const isBold=line=>/^\*\*[^*\r\n]+\*\*$/.test(line);
-    const nonempty=lines.filter(line=>line.trim());
+    const nonempty=parts.map(part=>part.body).filter(line=>line.trim());
     const remove=nonempty.length>0&&nonempty.every(isBold);
-    const replacement=selected==='****'?'':lines.map(line=>
-      !line.trim()?line:remove?line.slice(2,-2):isBold(line)?line:`**${runs(line).map(r=>r.text).join('')}**`).join('\n')||(!selected?'****':'');
+    const replacement=selected==='****'?'':parts.map(({prefix,body:line})=>prefix+(!line.trim()?line:remove?line.slice(2,-2):isBold(line)?line:`**${runs(line).map(r=>r.text).join('')}**`)).join('\n')||(!selected?'****':'');
     const offset=!remove&&lines.length===1&&replacement.startsWith('**')?2:0;
     input.focus({preventScroll:true});input.setRangeText(replacement,from,to,'select');
     input.setSelectionRange(from+offset,from+replacement.length-offset);
@@ -103,7 +107,7 @@
     }else{
       input.setRangeText('\n'+(shift?continuation:'1. '),start,end,'end');
     }
-    applyNumbered(input,true);remember(input,before);
+    applyNumbered(input);remember(input,before);
     input.dispatchEvent(new Event('input',{bubbles:true}));
   }
   document.addEventListener('keydown',event=>{

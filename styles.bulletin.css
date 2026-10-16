@@ -85,3 +85,8 @@ body:has(.bulletin-workbench) .right-sidebar{display:none}
 .bulletin-properties label[data-inline-bold-editor]{display:grid;grid-template-columns:minmax(0,1fr) 30px;align-items:center}
 .bulletin-properties [data-inline-bold-editor] textarea{grid-column:1/-1}
 .bulletin-properties [data-inline-bold-button]{border:0;background:transparent;font-weight:700}
+
+/* Fit the actual copy, including newly expanded common fields. */
+.bulletin-properties textarea{resize:none;overflow-y:auto;max-height:420px;min-height:35px}
+.bulletin-properties [data-bulletin-field="news"]{min-height:100px}
+.bulletin-input-help{grid-column:1/-1;font-size:var(--ui-meta-size);font-weight:500;color:var(--ink-3)}

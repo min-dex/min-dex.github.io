@@ -67,6 +67,8 @@ const server=http.createServer((req,res)=>{
 
   const roundTrip=await page.evaluate(()=>{const B=window.MindexBulletin,d={};B.applyStored(d,{...B.storedValue(designDoc),revision:1});return d.frames.every((f,i)=>Object.entries(designDoc.frames[i]).every(([k,v])=>f[k]===v));});
   assert.ok(roundTrip,'New print layout must survive DB round trip');
+  const collision=await page.evaluate(()=>{const B=MindexBulletin,d=structuredClone(designDoc),news=d.frames.find(f=>f.id==='news'),notices=d.frames.find(f=>f.id==='notices');news.x=notices.x;news.y=notices.y;const bad=[...B.renderPages(d,'print').issues];notices.hidden=true;return {bad,hidden:[...B.renderPages(d,'print').issues]};});
+  assert(collision.bad.includes('news')&&collision.bad.includes('notices'));assert(!collision.hidden.includes('notices'));
   const invalid=await page.evaluate(()=>{const B=window.MindexBulletin,d=structuredClone(designDoc);d.fields.news='긴 문구 '.repeat(500);return [...B.renderPages(d,'print').issues];});
   assert.ok(invalid.includes('news'));
   const welcome=await page.evaluate(()=>{const B=window.MindexBulletin,d=structuredClone(designDoc);d.fields.welcome=B.profileForDate('2026-10-04').welcome;return [...B.renderPages(d,'print').issues];});

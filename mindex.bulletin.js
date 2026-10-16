@@ -407,9 +407,9 @@
     const text=(id,page,x,y,w,h,size,binding,align="left",weight=500)=>frames.push({id,page,x,y,w,h,size,binding,align,weight,type:"text"});
     text("eventsTitle",0,10,20,90,10,17.5,"label:교회 일정","left",700);
     text("eventsMonth",0,108.5,20,30,12.5,10,"month:eventsMonth","right");
-    frames.push({id:"events",page:0,x:10,y:35,w:128.5,h:45,size:12.5,type:"events",binding:"field:eventsText"});
-    text("newsTitle",0,10,87.5,65,10,17.5,"label:청년부 소식","left",700);
-    text("welcome",0,88.5,87.5,50,12.5,10,"field:welcome","right");
+    frames.push({id:"events",page:0,x:10,y:35,w:128.5,h:42.5,size:12.5,type:"events",binding:"field:eventsText"});
+    text("newsTitle",0,10,77.5,128.5,10,17.5,"label:청년부 소식","left",700);
+    text("welcome",0,10,90,128.5,12.5,12.5,"field:welcome","left");
     frames.push({id:"news",page:0,x:10,y:102.5,w:128.5,h:42.5,size:12.5,type:"list",binding:"field:news"});
     frames.push({id:"notices",page:0,x:10,y:145,w:128.5,h:17.5,size:12.5,type:"list",binding:"field:notices"});
     frames.push({id:"staff",page:0,x:10,y:170,w:128.5,h:25,size:10,type:"staff",binding:"field:staff"});
@@ -479,7 +479,7 @@
       notices:[0,10,137.5,128.5,20,10],prayersTitle:[0,10,162.5,90,7.5,12.5],prayersMonth:[0,108.5,162.5,30,7.5,10],prayers:[0,10,172.5,128.5,22.5,10],
       website:[0,10,200,60,5,7.5],address:[0,70,200,68.5,5,7.5],
       church:[0,158.5,15,128.5,7.5,12.5],issue:[0,158.5,27.5,128.5,7.5,12.5],liturgical:[0,158.5,70,128.5,7.5,10],
-      motto:[0,158.5,145,128.5,15,22.5],verse:[0,158.5,165,128.5,17.5,12.5],welcome:[0,158.5,185,128.5,12.5,10],meeting:[0,158.5,200,128.5,5,10],
+      motto:[0,158.5,145,128.5,15,22.5],verse:[0,158.5,165,128.5,17.5,12.5],welcome:[0,158.5,185,128.5,12.5,12.5],meeting:[0,158.5,200,128.5,5,10],
       orderTitle:[1,10,15,128.5,12.5,20],leader:[1,10,30,128.5,7.5,10],order:[1,10,40,128.5,137.5,12.5],staff:[1,10,182.5,128.5,17.5,10],insideChurch:[1,10,202.5,128.5,5,7.5],
       notesTitle:[1,158.5,15,128.5,12.5,20],sermon:[1,158.5,35,128.5,35,25],outline:[1,158.5,77.5,128.5,35,12.5],notes:[1,158.5,122.5,128.5,72.5,10],insideBrand:[1,158.5,202.5,128.5,5,7.5]
     };
@@ -685,7 +685,7 @@
     if(kind==="church"&&value.startsWith("기독교대한성결교회 "))return [{text:"기독교대한성결교회 ",weight:500},{text:value.slice("기독교대한성결교회 ".length),weight:700}];
     if(kind==="welcome"&&window.MindexInlineText.plain(value).replace(/\s/g,"")==="오늘도청년부예배에오신여러분을환영하고축복합니다:)")return [
       {text:"오늘도 ",size},{text:"청년부 예배",size,weight:700},{text:"에 오신 여러분을\n",size},
-      {text:"환영",size:size+2.5,weight:700},{text:"하고 ",size:size+2.5},{text:"축복",size:size+2.5,weight:800},{text:"합니다 ",size:size+2.5},{text:":)",size:size+2.5,weight:700}];
+      {text:"환영",size,weight:700},{text:"하고 ",size},{text:"축복",size,weight:800},{text:"합니다 ",size},{text:":)",size,weight:700}];
     if(kind==="verse")return value.split("\n").flatMap((text,i)=>[{text:(i?"\n":"")+text,size:/^—/.test(text)?Math.max(7.5,size-2.5):size}]);
     return window.MindexInlineText.runs(value).map(r=>({text:r.text,...(r.bold?{weight:700}:{})}));
   }
@@ -743,6 +743,19 @@
     });
   }
   function renderPages(doc,mode,selected) {
+    const result=renderPageContent(doc,mode,selected);
+    // Advertising frames must not cover other populated copy on the same page.
+    const frames=doc.frames.filter(f=>!f.hidden&&['news','notices','welcome','newsTitle','events','eventsTitle','eventsMonth','staff'].includes(f.id)&&String(boundText(doc,f)).trim());
+    for(let i=0;i<frames.length;i++)for(let j=i+1;j<frames.length;j++){
+      const a=frames[i],b=frames[j];
+      if(a.page!==b.page||!['news','notices','welcome'].some(id=>a.id===id||b.id===id))continue;
+      if(Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x)>.1&&Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y)>.1){
+        result.issues.add(a.id);result.issues.add(b.id);
+      }
+    }
+    return result;
+  }
+  function renderPageContent(doc,mode,selected) {
     if(doc.settings?.design==="editorial")return renderEditorial(doc,mode,selected);
     const issues=new Set(); const pages=[];
     for(let page=0;page<2;page++) {
@@ -1029,7 +1042,7 @@
     on(root,"mindex-bulletin-save",event=>{const result=save();if(event.detail)event.detail.result=result;});
     function status(){
       const text=error||saveError||printError||(loading?"저장된 예배 자료를 불러오는 중…":!assetLoaded?"글꼴과 이미지를 준비하는 중…":
-        issues.size?`영역 넘침: ${[...issues].map(frameLabel).join(", ")}`:"");
+        issues.size?`영역 넘침·겹침: ${[...issues].map(frameLabel).join(", ")}`:"");
       q(".bulletin-status").textContent=[text,doc?.backupUnavailable?"브라우저 임시 저장 불가":""].filter(Boolean).join(" · ");
       q(".bulletin-status").hidden=!q(".bulletin-status").textContent;
       q(".bulletin-status").dataset.state=error||saveError||printError||doc?.backupUnavailable||issues.size?"warning":loading||!assetLoaded?"loading":"saved";
@@ -1053,6 +1066,15 @@
       const rendered=renderPages(doc,mode,selected);issues=rendered.issues;
       q(".bulletin-canvas").replaceChildren(...rendered.pages);status();
     }
+    function fitInputs(){
+      root.querySelectorAll('.bulletin-properties textarea').forEach(input=>{
+        if(!input.getClientRects().length)return;
+        input.style.height='auto';
+        input.style.height=`${input.scrollHeight+2}px`;
+      });
+    }
+    const inputResize=new ResizeObserver(()=>fitInputs());inputResize.observe(q('.bulletin-inspector'));
+    root.addEventListener('toggle',fitInputs,{capture:true,signal});
     function properties(){
       root.querySelectorAll("[data-bulletin-mode]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.bulletinMode===mode)));
       const p=q(".bulletin-properties"),sections=[...p.querySelectorAll("details[data-bulletin-section]")];
@@ -1060,9 +1082,9 @@
       if(!doc){p.replaceChildren();return;}
       if(mode==="content") {
         const child=doc.source?.department==="children";
-        const field=key=>`<label ${["news","outline","notices"].includes(key)?'data-inline-bold-editor':''}><span class="bulletin-field-label">${escape(fields[key])}</span>${["issue","church","website","memoryReference"].includes(key)?
+        const field=key=>`<label ${["news","outline","notices","welcome"].includes(key)?'data-inline-bold-editor':''}><span class="bulletin-field-label">${escape(fields[key])}</span>${["issue","church","website","memoryReference"].includes(key)?
           `<input data-bulletin-field="${key}" value="${escape(fieldValue(doc,key))}" ${key==="issue"?'inputmode="numeric"':''}>`:
-          `${["news","outline","notices"].includes(key)?'<button type="button" data-inline-bold-button aria-label="선택한 문구 굵게" title="굵게 (⌘B / Ctrl+B)"><b>B</b></button>':''}<textarea ${["news","outline","notices"].includes(key)?'data-inline-bold':''} data-bulletin-field="${key}" rows="${key==="news"?5:3}">${escape(fieldValue(doc,key))}</textarea>`}</label>`;
+          `${["news","outline","notices","welcome"].includes(key)?'<button type="button" data-inline-bold-button aria-label="선택한 문구 굵게" title="굵게 (⌘B / Ctrl+B)"><b>B</b></button>':''}<textarea ${["news","outline","notices","welcome"].includes(key)?'data-inline-bold':''} data-bulletin-field="${key}" ${key==="news"?'data-announcement-numbered aria-describedby="bulletin-news-help"':''} rows="1">${escape(fieldValue(doc,key))}</textarea>`}${key==="news"?'<small id="bulletin-news-help" class="bulletin-input-help">Enter 다음 번호 · Shift+Enter 이어 쓰기</small>':''}</label>`;
         const modern=doc.settings.design==="editorial";
         p.innerHTML=`${modern?`<div class="bulletin-connected"><span>예배에서 연결됨</span><strong>${escape(doc.source?.sermon||"설교 제목 미입력")}</strong><small>${escape(doc.source?.scripture||"본문 미입력")}</small></div>`:""}<section class="bulletin-property-section"><h3>이번 주 편집</h3><p class="bulletin-help">찬양·본문·설교·기도자는 예배와 교회력에서 가져옵니다. 소식은 광고를 바탕으로 편집하고, ${child?"새길 말씀과 누락된 인도자를 보완해 주세요. 잠잠성경은 기존 잠언 순환표를 이어 생성하며 직접 수정할 수 있어요.":"설교 요점과 누락된 인도자만 보완해 주세요."}</p>${doc.source?.hasArchiveReference?`<label><input type="checkbox" data-bulletin-setting="archiveReference" ${doc.settings.archiveReference!==false?"checked":""}> 발행 원본의 담당·요점·위원표 사용</label><p class="bulletin-help">이 날짜의 실제 PDF에서 확인한 내용입니다. 소식·찬양·설교는 연결된 예배 자료를 사용합니다.</p>`:""}${(child?["news","memoryVerse","memoryReference","readingPlan","leader","issue"]:modern?["news","outline"]:["news","outline","leader","issue"]).map(field).join("")}<details class="bulletin-property-section" data-bulletin-section="weekly"><summary>담당·발행 정보</summary>${(child?["announcer"]:modern?["leader","issue","announcer","sermonReference","outlineTitle"]:["announcer","sermonReference","outlineTitle"]).map(field).join("")}</details></section>
           <details class="bulletin-property-section" data-bulletin-section="monthly" ${modern?"":"open"}><summary>이번 달 · ${child?"일정과 주제":"일정과 위원"}</summary><p class="bulletin-help">${escape(doc.source?.eventsOrigin||"교회력 일정")}을 사용합니다. 일정 수정은 같은 달 주보에 이어집니다. 저장하면 이번 호의 예배 내용${child?"":"과 위원표"}도 보존합니다. 최신 자료는 예배 자료 갱신으로 가져옵니다.</p>${child?field("monthlyTheme"):""}${field("eventsText")}<button type="button" data-bulletin-calendar-events>교회력 일정 불러오기</button><div class="bulletin-number-grid">
@@ -1083,6 +1105,7 @@
       p.dataset.sectionsReady=String(!!doc.source&&assetLoaded);
       const savedSections=disclosureState.get(doc.id);
       if(savedSections)for(const el of p.querySelectorAll("details[data-bulletin-section]"))if(Object.hasOwn(savedSections,el.dataset.bulletinSection))el.open=savedSections[el.dataset.bulletinSection];
+      fitInputs();
     }
     async function load(id,force=false) {
       endDrag();
@@ -1141,7 +1164,7 @@
       remember();
       if(key==="eventsText"){doc.months[doc.source.eventsMonth]=event.target.value;delete doc.fields.eventsText;}
       else doc.fields[key]=event.target.value;
-      persist();preview();
+      fitInputs();persist();preview();
     });
     on(root,"change",event=>{
       const t=event.target;
@@ -1247,7 +1270,7 @@
     }
     const observer=new MutationObserver(()=>{if(!root.isConnected)destroy();});
     observer.observe(document.body,{childList:true,subtree:true});
-    function destroy(){endDrag();serial++;controller.abort();observer.disconnect();previewResize.disconnect();printFrame?.remove();}
+    function destroy(){endDrag();serial++;controller.abort();observer.disconnect();previewResize.disconnect();inputResize.disconnect();printFrame?.remove();}
 
     void load(options.serviceId);
     return {destroy, reload(){return load(q("[data-bulletin-service]").value);}};

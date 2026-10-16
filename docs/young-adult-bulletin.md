@@ -306,3 +306,12 @@ select A4 and Landscape if the printer preset defaults to Portrait. The
 2026-10-13 offline fixture produced two pages in the native preview; no physical
 print job or production record change was made. Retired service-bulletin styles
 remain deleted; print regression coverage targets the current iframe builder.
+
+## 2026-10-16 광고 편집·양식 점검 수정
+
+- 주보 소식 입력도 공용 광고 번호 편집기를 사용한다. Enter는 다음 번호, Shift+Enter는 이어 쓰기, 중간 삭제는 재번호 매김이다. 단순히 열어서 원문을 변경하지 않는다.
+- 소식·요점·환영·하단 안내에 굵게 편집을 제공한다. 번호는 굵게 범위에서 제외하며 다시 누르면 정상 해제한다.
+- 입력창은 내용과 너비, 접힌 영역 펼치기에 맞춰 높이를 조정한다. 소식 최소 100px, 최대 420px 이후 내부 스크롤을 사용한다.
+- 광고·환영·하단 안내가 같은 쪽의 다른 광고/일정/섬김이 영역과 겹치면 경고하고 인쇄를 막는다. 숨긴 영역과 빈 내용은 제외한다.
+- 새 기본 양식은 환영 문구를 본문 크기의 독립된 줄로 배치한다. 저장된 사용자 좌표는 보존하며 기본 양식 초기화로 적용할 수 있다.
+- 검증: 주보 7개 검사와 공용 번호/굵게/인라인 문자 검사 통과. 과거 9개 호의 18쪽 출력도 넘침 없이 유지된다.

@@ -32,11 +32,22 @@ const server=http.createServer((req,res)=>{
  await news.fill('온세대 월삭예배');
  await news.evaluate(el=>el.setSelectionRange(0,el.value.length));
  await news.press('Meta+b');
- assert.equal(await news.inputValue(),'**온세대 월삭예배**');
+ assert.equal(await news.inputValue(),'① **온세대 월삭예배**');
  assert.equal(await page.locator('[data-frame-id="news"] tspan[font-weight="700"]').textContent(),'온세대 월삭예배');
  await news.locator('..').locator('[data-inline-bold-button]').click();
- assert.equal(await news.inputValue(),'온세대 월삭예배');
- await news.fill('편집 중인 소식');
+ assert.equal(await news.inputValue(),'① 온세대 월삭예배');
+ await news.fill('첫 소식');await news.press('End');await news.press('Enter');await news.type('둘째');await news.press('Shift+Enter');await news.type('설명');await news.press('Enter');await news.type('셋째');
+ assert.equal(await news.inputValue(),'① 첫 소식\n② 둘째\n　 설명\n③ 셋째');
+ await news.evaluate(e=>{const start=e.value.indexOf('②'),end=e.value.indexOf('③');e.setSelectionRange(start,end);});await news.press('Backspace');
+ assert.equal(await news.inputValue(),'① 첫 소식\n② 셋째');
+ await news.fill(Array.from({length:12},(_,i)=>`${i+1}. 소식`).join('\n'));
+ const tall=await news.evaluate(e=>({height:e.clientHeight,scroll:e.scrollHeight}));assert(tall.height>=tall.scroll-1&&tall.height>150,JSON.stringify(tall));
+ await news.fill('짧은 소식');assert(await news.evaluate(e=>e.clientHeight)<tall.height);
+ await page.locator('[data-bulletin-common] summary').click();
+ const welcome=page.locator('[data-bulletin-field="welcome"]');assert.equal(await welcome.getAttribute('data-inline-bold'),'');
+ await welcome.fill('환영합니다');await welcome.evaluate(e=>e.setSelectionRange(0,e.value.length));await welcome.press('Meta+b');assert.equal(await welcome.inputValue(),'**환영합니다**');
+ await page.locator('[data-bulletin-common] summary').click();
+ await news.fill('');await news.fill('편집 중인 소식');
  for(const width of [1200,760,380]){
  await page.setViewportSize({width,height:900});
  const bounds=await page.evaluate(()=>{const w=document.querySelector('.bulletin-workbench'),c=document.querySelector('.bulletin-canvas');return {overflow:w.scrollWidth-w.clientWidth,canvas:c.clientWidth,head:document.querySelector('.bulletin-preview-head').getBoundingClientRect().height};});
@@ -46,7 +57,7 @@ const server=http.createServer((req,res)=>{
  assert(await page.locator('.bulletin-canvas').evaluate(el=>el.scrollHeight<=el.clientHeight+1||el.scrollTop>0));
  await page.locator('[data-bulletin-page="0"]').click();
  assert(await page.locator('.bulletin-canvas').evaluate(el=>el.scrollTop)<5);
- assert.equal(await page.locator('[data-bulletin-field="news"]').inputValue(),'편집 중인 소식');
+ assert.equal(await page.locator('[data-bulletin-field="news"]').inputValue(),'① 편집 중인 소식');
  }
  await page.setViewportSize({width:1200,height:900});
  await page.locator('#host').evaluate(el=>el.style.width='550px');
