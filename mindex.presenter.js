@@ -1069,6 +1069,12 @@ function findPresenterFormForPresetLabel(forms = [], label = "") {
     }).form;
   }
   if (target.groupIndex && !target.variant) {
+    const explicit = forms.find((form) => {
+      const candidate = normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form));
+      return !candidate.variant && candidate.type === target.type
+        && candidate.group === target.group && (!target.number || candidate.number === target.number);
+    });
+    if (explicit) return explicit;
     const form = findPresenterFormForPresetTarget(forms, target);
     return form ? presenterFormPresetGroupItem(label, target, form) : null;
   }
@@ -1109,14 +1115,14 @@ function findPresenterFormForPresetTarget(forms = [], target = {}) {
     const candidate = normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form));
     if (target.type && target.type === candidate.type) sameType.push({ form, target: candidate });
     if (target.key === candidate.key) return form;
-    if (!target.variant && !candidate.variant && target.type && target.type === candidate.type && (!target.number || target.number === candidate.number)) return form;
+    if (!target.variant && !candidate.variant && (!target.group || !candidate.group) && target.type && target.type === candidate.type && (!target.number || target.number === candidate.number)) return form;
   }
   // A single verse is stored without a number; V1 still denotes that first verse.
   if (target.type === "verse" && target.number === 1 && sameType.length === 1 && !sameType[0].target.number) {
     return sameType[0].form;
   }
   if (target.groupIndex && !target.variant && target.type) {
-    const unnumbered = sameType.filter(({ target: candidate }) => !candidate.number);
+    const unnumbered = sameType.filter(({ target: candidate }) => !candidate.number && !candidate.group && !candidate.variant);
     if (unnumbered.length === 1) return unnumbered[0].form;
   }
   return null;
@@ -1210,7 +1216,7 @@ function normalizePresenterFormPresetLabel(value = "") {
       ...(group ? { group, groupIndex: group.charCodeAt(0) - 64 } : {}),
     };
   }
-  const groupedType = raw.match(/^(pc|prechorus|pre-chorus|b|bridge|lyrics)\s*(\d*)\s*([a-z])?$/i);
+  const groupedType = raw.match(/^(pc|prechorus|pre-chorus|b|bridge|lyrics|coda|ending)\s*(\d*)\s*([a-z])?$/i);
   if (groupedType) {
     const type = normalizePresenterFormType(groupedType[1]);
     const number = groupedType[2] ? Number(groupedType[2]) : 0;
@@ -1222,9 +1228,6 @@ function normalizePresenterFormPresetLabel(value = "") {
       number,
       ...(group ? { group, groupIndex: group.charCodeAt(0) - 64 } : {}),
     };
-  }
-  if (/^(coda|ending)\s*[a-z]?$/i.test(raw)) {
-    return { key: "coda", type: "coda", number: 0 };
   }
   if (/^(int|간주|interlude|instrumental)\s*[a-z]?$/i.test(raw)) {
     return { key: "instrumental", type: "instrumental", number: 0, blank: true };
@@ -1293,7 +1296,7 @@ function normalizePresenterMissingFormLabel(value = "") {
   if (target.key === "chorus") return "C";
   if (target.key === "bridge") return "Bridge";
   if (target.key === "pre-chorus") return "Pre-Chorus";
-  if (target.type === "coda") return `Coda${target.variant ? `@${String(target.group || "").toUpperCase()}` : ""}`;
+  if (target.type === "coda") return presenterFormPresetDisplayLabel(raw);
   if (target.key === "tag") return "Tag";
   return raw || "송폼";
 }

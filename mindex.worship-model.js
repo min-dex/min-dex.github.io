@@ -297,8 +297,10 @@ function canonicalServiceFormToken(value = "") {
   if (instrumental) return "Int" + instrumental[2].toUpperCase();
   if (/^vl$/i.test(raw)) return "VL";
   if (/^tags$/i.test(raw)) return "Tags";
-  const ending = raw.match(/^(tag|coda|ending)\s*([a-z]?)$/i);
-  if (ending) return (/^tag$/i.test(ending[1]) ? "Tag" : "Coda") + ending[2].toUpperCase();
+  const ending = raw.match(/^(coda|ending)\s*(\d*)\s*([a-z]?)$/i);
+  if (ending) return "Coda" + ending[2] + ending[3].toUpperCase();
+  const tag = raw.match(/^tag\s*([a-z]?)$/i);
+  if (tag) return "Tag" + tag[1].toUpperCase();
   const hymnVerse = raw.match(/^(\d+)\s*절$/u);
   if (hymnVerse) return "V" + hymnVerse[1];
   if (raw === "후렴") return "C";
@@ -390,9 +392,12 @@ function normalizeSongFormPresetLabel(value = "") {
     const baseKey = number ? `pre-chorus:${number}` : "pre-chorus";
     return { key: group ? `${baseKey}:${group}` : baseKey, type: "pre-chorus", number, ...(group ? { group } : {}) };
   }
-  const coda = raw.match(/^(?:coda|ending)\s*[a-z]?$/i);
+  const coda = raw.match(/^(?:coda|ending)\s*(\d*)\s*([a-z])?$/i);
   if (coda) {
-    return { key: "coda", type: "coda" };
+    const number = Number(coda[1]) || 0;
+    const group = String(coda[2] || "").toLowerCase();
+    const baseKey = number ? `coda:${number}` : "coda";
+    return { key: group ? `${baseKey}:${group}` : baseKey, type: "coda", number, ...(group ? { group } : {}) };
   }
   const instrumental = raw.match(/^(?:int|간주|interlude|instrumental)\s*[a-z]?$/i);
   if (instrumental) {

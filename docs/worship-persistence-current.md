@@ -23,6 +23,18 @@
   cover retry/revision handling. `tests/check_worship_atomic_live.py` checks a
   read-only production aggregate; it does not prove write permissions or writes.
 
+## Element content patches preserve order (2026-10-16)
+
+A content-only patch retains the target's committed `sort_order` when its
+section is unchanged. Recomputing just that row from visible array position
+mixed compact ordinals with untouched sparse/hidden-row ordinals and could move
+an edited praise ahead of its siblings on reload. Full structural saves remain
+responsible for renumbering the complete payload after add/delete/move.
+
+Offline Chromium/WebKit coverage: sparse 10/20/30 positions, middle insertion,
+explicit deletion, repeated single-item edits and database projection/reopen.
+Production records are not repaired or reordered by this client fix.
+
 ## Scheduling preserves existing services (2026-10-13)
 
 Scheduling creates missing eligible instances only. Calendar changes never

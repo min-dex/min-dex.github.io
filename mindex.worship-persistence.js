@@ -656,7 +656,13 @@ function buildWorshipPersistenceRows(service, items, existingSectionById = {}, e
       // therefore need both audit timestamps in the client payload.
       created_at: existingElement?.created_at || persistedAt,
       updated_at: persistedAt,
-      sort_order: sectionElementCounts.get(sectionId),
+      // Content-only patches must retain the committed ordering scale. Siblings
+      // are not written here, so compacting just this row reorders spaced or
+      // hidden-slot ordinals on reload. Structural saves renumber all rows.
+      sort_order: options.targetElementId && existingElement?.section_id === sectionId
+        && Number.isInteger(existingElement.sort_order)
+        ? existingElement.sort_order
+        : sectionElementCounts.get(sectionId),
       element_type: worshipDbElementTypeForSave(elementType) || "plain_text",
       title: scriptureBody ? formatServiceScriptureReferenceList(scriptureReferences) || scriptureReference : (manualBody ? String(item.raw_title || "").trim() : serviceElementTitleForSave(item, elementType)),
       person: cleanServiceAssignee(item.assignee),

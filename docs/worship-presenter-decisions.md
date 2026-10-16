@@ -836,6 +836,12 @@ Small visual polish that does not alter behavior does not need an entry.
 
 ### Presenter Song Forms
 
+- Coda supports A/B groups, including numbered labels and `Ending` aliases.
+  Preserve their identity through relational label save/reload and form presets.
+  Explicit grouped blocks play their complete stored lyrics; only an ungrouped
+  source block is virtually split for an A/B request. Missing explicit groups
+  must not resolve to a different group. Existing `Coda@A` variants stay distinct.
+
 - Explicit song-form presets may intentionally omit unlisted forms when they
   are grouped (`V1A`, `V1B`), manual/forced/song-default presets, or contain
   deliberate consecutive repeats such as `C-C`.
