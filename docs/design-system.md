@@ -26,6 +26,9 @@ shell, navigation, buttons, labels, and shared UI copy.
 - Use the local typography ladder before adding a new one-off size:
   `12/600` labels, `12/500` metadata, `14/600` rows and controls,
   `16/700` compact titles, `22/700` page titles.
+- Controller badges, taxonomy metadata, setlist hymn numbers and song details use
+  the 12px metadata token; do not shrink these with percentage/em font sizes.
+  Source-panel labels use 12px / 600; auth and live scripture values use 14px / 600.
 - Use established icon sizes before adding local values: 14px helper, 16px normal,
   20px large. Navigation rail and tab-bar controls both use 16px.
 - Use the established 1.5 stroke for Lucide controls. Scope icon defaults to `.lucide`,

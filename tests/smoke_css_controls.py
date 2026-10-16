@@ -1,6 +1,8 @@
 """Check shared theme tokens and section-editor layout at narrow widths."""
 
 import argparse
+import os
+os.environ["MINDEX_SMOKE_OFFLINE"] = "1"
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 
@@ -16,6 +18,7 @@ def main():
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url, wait_until='domcontentloaded')
             page.wait_for_function("typeof renderPresenterSectionEditorItem === 'function'")
+            page.locator("#bootStatus").wait_for(state="hidden")
             page.evaluate("""() => {
               const service={id:'css-test', type_id:'sunday-main'};
               const items=[{id:'prayer',label:'공동기도',raw_title:'교회학교를 위해',assignee:'담당자',_origIndex:0},
@@ -43,6 +46,19 @@ def main():
                   </details>
                 </div>`;
               document.body.append(fixture); refreshIcons(fixture);
+            }""")
+            page.evaluate("""() => {
+              const host=document.createElement('section');host.id='typeFixture';
+              host.style.cssText='position:fixed;top:60px;left:20px;width:320px;padding:15px;z-index:2000;background:var(--bg);display:grid;gap:10px';
+              host.innerHTML=`<div class="svc-prep-editor-head"><h3>예배 준비</h3></div>
+                <div class="svc-presenter-toolbar"><summary class="svc-source-panel-head">예배 순서</summary></div>
+                <div><span class="song-count-badge">12</span> <span class="meta-attribute-label">곡 정보</span></div>
+                <div class="taxonomy-section-head">성경 분류</div><span class="taxonomy-book-order">01</span>
+                <div class="svc-setlist-song-link"><span class="svc-setlist-hymn-no">38</span> 예수 우리 왕이여 <small class="svc-setlist-song-detail">곡 버전</small></div>
+                <label class="auth-field">이메일<input value="name@example.org"></label>
+                <input class="svc-live-scripture-input" value="요 3:16">
+                <select class="svc-music-volume"><option>100</option></select>`;
+              document.body.append(host);
             }""")
             for theme in ('light','dark'):
                 page.evaluate('(theme)=>document.body.dataset.theme=theme',theme)
@@ -72,6 +88,16 @@ def main():
                         calendarToken:Boolean(getComputedStyle(fixture.querySelector('.cal-view')).getPropertyValue('--cal-text').trim())};
                     }""")
                     assert all(result.values()), (theme,width,result)
+                    for selector, size, weight in [
+                        ('.song-count-badge','12px','500'),('.meta-attribute-label','12px','600'),
+                        ('.taxonomy-section-head','12px',None),('.taxonomy-book-order','12px',None),
+                        ('.svc-setlist-hymn-no','12px','500'),('.svc-setlist-song-detail','12px','500'),
+                        ('.svc-source-panel-head','12px','600'),('.auth-field','12px','600'),
+                        ('.auth-field input','14px','600'),('.svc-live-scripture-input','14px','600'),
+                        ('.svc-music-volume','14px','600'),('.svc-prep-editor-head h3','16px','700')]:
+                        actual=page.locator('#typeFixture '+selector).evaluate('e=>[getComputedStyle(e).fontSize,getComputedStyle(e).fontWeight]')
+                        assert actual[0]==size and (weight is None or actual[1]==weight),(selector,actual)
+                    page.screenshot(path=f'/tmp/mindex-ui-type-{theme}-{width}.png')
                     print('PASS CSS controls',theme,width,flush=True)
             page.screenshot(path='/tmp/mindex-css-controls-mobile.png')
             browser.close()

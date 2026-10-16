@@ -799,7 +799,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .song-title-text { min-width: 0; overflow: hidden; color: currentColor; text-overflow: ellipsis; white-space: nowrap; }
 .song-title .attention-icon { margin-left: auto; }
 .song-meta-line { color: var(--sidebar-sub); font-size: var(--ui-meta-size); font-weight: var(--ui-meta-weight); line-height: 18px; }
-.song-count-badge { display: inline-flex; min-width: 14px; height: 14px; flex: 0 0 auto; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: var(--sidebar-active-bg); color: var(--sidebar-label); font-size: 9px; line-height: 1; }
+.song-count-badge { display: inline-flex; min-width: 18px; height: 18px; flex: 0 0 auto; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: var(--sidebar-active-bg); color: var(--sidebar-label); font-size: var(--ui-meta-size); line-height: 1;  font-weight: var(--ui-meta-weight);}
 .global-search-section { display: grid; gap: 1px; padding: 2px 0 6px; }
 .global-search-section + .global-search-section { margin-top: 5px; }
 .global-search-actions { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
@@ -1956,8 +1956,8 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 }
 .song-description-meta .meta-attribute-label {
   color: color-mix(in srgb, var(--accent) 48%, var(--ink-4));
-  font-size: 9px;
-  font-weight: 700;
+  font-size: var(--ui-meta-size);
+  font-weight: var(--ui-label-weight);
   letter-spacing: .05em;
   text-transform: uppercase;
 }
@@ -1972,8 +1972,8 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 }
 .meta-attribute-label {
   color: var(--ink-4);
-  font-size: 9px;
-  font-weight: 700;
+  font-size: var(--ui-meta-size);
+  font-weight: var(--ui-label-weight);
   letter-spacing: .05em;
   text-transform: uppercase;
 }
@@ -1991,7 +1991,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   flex-wrap: wrap;
   gap: 5px;
   color: var(--ink-4);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 500;
   letter-spacing: .02em;
   text-transform: none;
@@ -2008,7 +2008,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   background: color-mix(in srgb, var(--panel-2) 34%, transparent);
   color: var(--ink-3);
   cursor: pointer;
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-weight: 500;
   letter-spacing: 0;
   padding: 0 8px;
@@ -2026,7 +2026,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 }
 .related-song-marker {
   color: var(--accent);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
 }
 .field.wide { grid-column: 1 / -1; }
@@ -2075,7 +2075,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   border-radius: 999px;
   background: color-mix(in srgb, var(--accent-soft) 46%, transparent);
   color: var(--accent);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
   letter-spacing: 0;
   line-height: 1;
@@ -2093,7 +2093,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   align-items: center;
   justify-content: space-between;
   color: var(--ink-3);
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-weight: 500;
   letter-spacing: .04em;
   text-transform: uppercase;
@@ -2119,7 +2119,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 }
 .taxonomy-book-order {
   color: var(--accent);
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-weight: 900;
   line-height: 18px;
 }
@@ -2207,7 +2207,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 }
 .bible-reader-translation-fallback span {
   color: var(--ink-4);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
   letter-spacing: .04em;
   text-transform: uppercase;
@@ -2292,7 +2292,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 }
 .bible-verse span {
   color: var(--ink-4);
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-variant-numeric: tabular-nums;
   font-weight: 500;
   line-height: 23px;
@@ -2366,7 +2366,7 @@ body[data-module="scripture"] .scripture-editor .meta-attribute-label {
   display: flex;
   justify-content: flex-end;
   color: var(--ink-4);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
   line-height: 1;
   text-transform: uppercase;
@@ -2629,12 +2629,12 @@ body[data-module="scripture"] .scripture-editor .meta-attribute-label {
   gap: 4px;
   border-radius: 999px;
   color: var(--warn);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 500;
   line-height: 1;
 }
 .version-attention-mark {
-  font-size: 9px;
+  font-size: var(--ui-meta-size);
   font-weight: 800;
   opacity: .72;
 }
@@ -2667,7 +2667,7 @@ body[data-module="scripture"] .scripture-editor .meta-attribute-label {
   border: 1px solid color-mix(in srgb, var(--ink) 20%, transparent);
   background: transparent;
   color: color-mix(in srgb, var(--ink) 40%, transparent);
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-weight: 500;
   cursor: pointer;
   line-height: 1.5;
@@ -2685,7 +2685,7 @@ body[data-module="scripture"] .scripture-editor .meta-attribute-label {
   border-radius: 999px;
   background: color-mix(in srgb, var(--panel-2) 60%, transparent);
   color: var(--ink-4);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 600;
   padding: 0 7px;
 }
@@ -2752,7 +2752,7 @@ body[data-module="scripture"] .scripture-editor .meta-attribute-label {
   border-radius: var(--r);
   background: color-mix(in srgb, var(--accent-soft) 26%, transparent);
   color: var(--ink-2);
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-weight: 500;
   line-height: 1;
   padding: 0 10px;
@@ -3420,7 +3420,7 @@ body[data-module="presenter"] .detail-pane {
   min-width: 0;
   overflow: hidden;
   color: color-mix(in srgb, var(--accent) 74%, var(--sidebar-label));
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-weight: 800;
   line-height: 14px;
   text-overflow: ellipsis;
@@ -3470,7 +3470,7 @@ body[data-module="presenter"] .detail-pane {
 }
 .service-outline-start {
   color: var(--sidebar-label);
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
   line-height: 1;
   text-align: right;
@@ -3496,7 +3496,7 @@ body[data-module="presenter"] .detail-pane {
   border: 1px solid color-mix(in srgb, var(--warning, #f59e0b) 46%, transparent);
   border-radius: 4px;
   color: color-mix(in srgb, var(--warning, #f59e0b) 86%, var(--sidebar-ink));
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
   line-height: 13px;
   padding: 0 4px;
@@ -3840,8 +3840,8 @@ body[data-theme="dark"] .service-week-card:hover {
 }
 .svc-prep-editor-head h3 {
   color: var(--ink);
-  font-size: 18px;
-  font-weight: 600;
+  font-size: var(--ui-card-title-size);
+  font-weight: var(--ui-title-weight);
   line-height: 1.2;
   margin: 0;
 }
@@ -3934,7 +3934,7 @@ body[data-theme="dark"] .service-week-card:hover {
 }
 .svc-authoring-panel-head span {
   color: var(--accent);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 800;
   letter-spacing: 0;
   line-height: 12px;
@@ -3942,7 +3942,7 @@ body[data-theme="dark"] .service-week-card:hover {
 .svc-authoring-panel-head strong {
   overflow: hidden;
   color: var(--ink-3);
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
   line-height: 14px;
   text-overflow: ellipsis;
@@ -4017,7 +4017,7 @@ body[data-theme="dark"] .service-week-card:hover {
 }
 .svc-meta-editor .svc-meta-toggle span {
   color: var(--ink-2);
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   letter-spacing: 0;
   text-transform: none;
 }
@@ -4030,7 +4030,7 @@ body[data-theme="dark"] .service-week-card:hover {
   border-radius: var(--r);
   color: var(--ink-4);
   cursor: pointer;
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
   letter-spacing: .06em;
   list-style: none;
@@ -4050,7 +4050,7 @@ body[data-theme="dark"] .service-week-card:hover {
 .svc-template-guide[open] .svc-template-head::before { content: "−"; }
 .svc-template-flow { display: flex; flex-wrap: wrap; gap: 4px; }
 .svc-template-guide .svc-template-flow { margin-top: 6px; }
-.svc-template-step { display: inline-flex; min-height: 26px; align-items: center; gap: 6px; border: 0; border-radius: var(--r); background: color-mix(in srgb, var(--panel-2) 34%, transparent); color: var(--ink-3); cursor: pointer; padding: 0 8px; font-size: 11px; font-weight: 500; }
+.svc-template-step { display: inline-flex; min-height: 26px; align-items: center; gap: 6px; border: 0; border-radius: var(--r); background: color-mix(in srgb, var(--panel-2) 34%, transparent); color: var(--ink-3); cursor: pointer; padding: 0 8px; font-size: var(--ui-meta-size); font-weight: 500; }
 .svc-template-step:hover { background: color-mix(in srgb, var(--accent-soft) 36%, transparent); color: var(--ink); }
 .svc-template-step-label { white-space: nowrap; }
 .service-templates {
@@ -4105,7 +4105,7 @@ body[data-theme="dark"] .service-week-card:hover {
 }
 .svc-template-inventory-head small {
   color: var(--ink-4);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
 }
 .svc-template-inventory-list {
@@ -4139,7 +4139,7 @@ body[data-theme="dark"] .service-week-card:hover {
 .svc-template-inventory-card > summary small {
   flex: 0 0 auto;
   color: var(--ink-4);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
 }
 .svc-template-inventory-sections {
@@ -4158,7 +4158,7 @@ body[data-theme="dark"] .service-week-card:hover {
 }
 .svc-template-inventory-no {
   color: var(--ink-4);
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-weight: 800;
   line-height: 19px;
   text-align: right;
@@ -4186,7 +4186,7 @@ body[data-theme="dark"] .service-week-card:hover {
 .svc-template-inventory-section-title small {
   flex: 0 0 auto;
   color: var(--ink-4);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
 }
 .svc-template-draft-grid {
@@ -4221,7 +4221,7 @@ body[data-theme="dark"] .service-week-card:hover {
 .svc-template-draft-card > summary small {
   flex: 0 0 auto;
   color: var(--ink-4);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 600;
 }
 .svc-template-draft-body {
@@ -4236,7 +4236,7 @@ body[data-theme="dark"] .service-week-card:hover {
 .svc-template-draft-block h3 {
   margin: 0;
   color: var(--ink-4);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 800;
   letter-spacing: .08em;
   line-height: 12px;
@@ -4259,7 +4259,7 @@ body[data-theme="dark"] .service-week-card:hover {
   border-radius: var(--r);
   background: color-mix(in srgb, var(--bg) 44%, transparent);
   color: var(--ink-3);
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-weight: 600;
   padding: 0 8px;
 }
@@ -4268,7 +4268,7 @@ body[data-theme="dark"] .service-week-card:hover {
   overflow: hidden;
   max-width: 180px;
   color: var(--ink-2);
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -4276,7 +4276,7 @@ body[data-theme="dark"] .service-week-card:hover {
 .svc-template-pattern-chip small,
 .svc-template-type-chip small {
   color: var(--accent);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 800;
 }
 .svc-template-empty-chip {
@@ -4296,7 +4296,7 @@ body[data-theme="dark"] .service-week-card:hover {
   border-radius: 999px;
   background: color-mix(in srgb, var(--accent-soft) 32%, transparent);
   color: var(--accent);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 600;
   padding: 0 7px;
   white-space: nowrap;
@@ -4317,7 +4317,7 @@ body[data-theme="dark"] .service-week-card:hover {
   background: color-mix(in srgb, var(--panel-2) 32%, transparent);
   color: var(--ink-4);
   font: inherit;
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 600;
   outline: none;
   padding: 0 8px;
@@ -4326,7 +4326,7 @@ body[data-theme="dark"] .service-week-card:hover {
   width: 144px;
   flex-basis: 144px;
   height: 22px;
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
 }
 .svc-form-hint:focus {
   background: color-mix(in srgb, var(--accent-soft) 42%, transparent);
@@ -4341,7 +4341,7 @@ body[data-theme="dark"] .service-week-card:hover {
   min-height: 20px;
   padding: 0 var(--s2) 1px;
   color: var(--ink-4);
-  font-size: 9px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
   letter-spacing: .06em;
   text-transform: uppercase;
@@ -4370,7 +4370,7 @@ body[data-theme="dark"] .service-week-card:hover {
   border-radius: 999px;
   background: color-mix(in srgb, var(--panel-2) 48%, transparent);
   color: var(--ink-4);
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
   text-align: center;
 }
@@ -4413,7 +4413,7 @@ body[data-theme="dark"] .service-week-card:hover {
   color: var(--ink-4);
   cursor: pointer;
   font: inherit;
-  font-size: 8px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
   letter-spacing: .04em;
   padding: 0 5px;
@@ -4456,7 +4456,7 @@ body[data-theme="dark"] .service-week-card:hover {
 .svc-song-picker-hint,
 .svc-song-picker-warning {
   color: var(--ink-4);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
   white-space: nowrap;
 }
@@ -4487,12 +4487,12 @@ body[data-theme="dark"] .service-week-card:hover {
   white-space: nowrap;
 }
 .svc-song-picker-result strong {
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-weight: 800;
 }
 .svc-song-picker-result span {
   color: var(--ink-4);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 600;
 }
 .svc-song-version-select {
@@ -4504,8 +4504,8 @@ body[data-theme="dark"] .service-week-card:hover {
   background: color-mix(in srgb, var(--panel-2) 34%, transparent);
   color: var(--ink);
   font: inherit;
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--ui-body-size);
+  font-weight: var(--ui-row-weight);
   outline: none;
   padding: 0 6px;
 }
@@ -4547,7 +4547,7 @@ body[data-theme="dark"] .service-week-card:hover {
   color: var(--ink-4);
   cursor: pointer;
   font: inherit;
-  font-size: 9px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
   letter-spacing: .02em;
   padding: 0 6px;
@@ -4611,7 +4611,7 @@ body[data-theme="dark"] .service-week-card:hover {
   border-radius: 999px;
   background: color-mix(in srgb, var(--panel-2) 34%, transparent);
   color: var(--ink-4);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
   padding: 0 8px;
   white-space: nowrap;
@@ -4649,7 +4649,7 @@ body[data-theme="dark"] .service-week-card:hover {
   justify-content: flex-end;
   gap: 4px;
   color: var(--ink-4);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
 }
 .svc-item-note-summary span {
@@ -4666,7 +4666,7 @@ body[data-theme="dark"] .service-week-card:hover {
 }
 .svc-item-note-summary.is-empty {
   color: var(--ink-5);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
 }
 .svc-item-note.has-content:not([open]) {
   background: color-mix(in srgb, var(--panel-2) 8%, transparent);
@@ -4684,7 +4684,7 @@ body[data-theme="dark"] .service-week-card:hover {
 }
 .svc-item-note-grid label span {
   color: var(--ink-4);
-  font-size: 9px;
+  font-size: var(--ui-meta-size);
   font-weight: 800;
   letter-spacing: .06em;
   text-transform: uppercase;
@@ -4722,7 +4722,7 @@ body[data-theme="dark"] .service-week-card:hover {
 }
 .svc-manual-praise-lyrics > span {
   color: var(--ink-4);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: 800;
   letter-spacing: .06em;
 }
@@ -4892,7 +4892,7 @@ body[data-theme="dark"] .service-week-card:hover {
   padding: 0 var(--s3);
   color: var(--ink-2);
   font-size: var(--ui-body-size);
-  font-weight: 800;
+  font-weight: var(--ui-row-weight);
 }
 .svc-source-panel-head::-webkit-details-marker { display: none; }
 .svc-source-panel-head::after {
@@ -4979,7 +4979,7 @@ body[data-theme="dark"] .service-week-card:hover {
 }
 .svc-source-history-item small {
   color: var(--ink-4);
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-weight: var(--ui-meta-weight);
 }
 .svc-source-text {
@@ -5080,8 +5080,8 @@ body[data-theme="dark"] .service-week-card:hover {
   min-width: 0;
   overflow: hidden;
   color: var(--sidebar-ink);
-  font-size: 18px;
-  font-weight: 900;
+  font-size: var(--ui-card-title-size);
+  font-weight: var(--ui-title-weight);
   line-height: 22px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -5137,7 +5137,7 @@ body[data-theme="dark"] .service-week-card:hover {
 }
 .svc-presenter-input-rail-head small {
   color: var(--ink-4);
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
 }
 .svc-presenter-preparation-input {
@@ -5807,7 +5807,7 @@ textarea.svc-presenter-input-control--multiline {
   align-items: center;
   gap: 6px;
   color: var(--ink-3);
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
   letter-spacing: 0;
   padding: 0 4px 0 8px;
@@ -6106,7 +6106,7 @@ textarea.svc-presenter-input-control--multiline {
   color: var(--ink-3);
   cursor: pointer;
   font: inherit;
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-weight: 700;
   padding: 0 7px;
 }
@@ -6141,15 +6141,15 @@ textarea.svc-presenter-input-control--multiline {
   padding: 0 5px;
 }
 .svc-music-volume {
-  width: 34px;
+  width: 55px;
   height: var(--ui-icon-btn-inline);
   border: 0;
   border-radius: calc(var(--r) - 1px);
   background: transparent;
   color: var(--ink-3);
   font: inherit;
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--ui-body-size);
+  font-weight: var(--ui-row-weight);
   padding: 0 4px;
   outline: none;
 }
@@ -6161,8 +6161,8 @@ textarea.svc-presenter-input-control--multiline {
   background: transparent;
   color: var(--ink);
   font: inherit;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--ui-body-size);
+  font-weight: var(--ui-row-weight);
   padding: 0 8px;
   outline: none;
 }
@@ -6479,7 +6479,7 @@ textarea.svc-presenter-input-control--multiline {
   background: color-mix(in srgb, var(--accent) 14%, var(--panel-2));
   color: var(--accent);
   cursor: pointer;
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-weight: 800;
   line-height: 26px;
   padding: 0 9px;
@@ -6495,7 +6495,7 @@ textarea.svc-presenter-input-control--multiline {
   background: transparent;
   color: var(--ink-2);
   cursor: pointer;
-  font-size: 11px;
+  font-size: var(--ui-meta-size);
   font-weight: 800;
   line-height: 24px;
   padding: 0 9px;
@@ -6543,8 +6543,8 @@ textarea.svc-presenter-input-control--multiline {
 .svc-reference-media-preview--collapsible > summary::-webkit-details-marker { display: none; }
 .svc-reference-media-preview--collapsible > summary:hover,
 .svc-reference-media-preview--collapsible[open] > summary { background: color-mix(in srgb, var(--accent) 14%, var(--panel-2)); }
-.svc-reference-media-preview--collapsible > summary > span { color: var(--ink-4); font-size: 11px; font-weight: var(--ui-meta-weight); white-space: nowrap; }
-.svc-reference-media-preview--collapsible > summary > b { display: inline-flex; height: 22px; align-items: center; gap: 4px; border-radius: calc(var(--r) - 3px); background: color-mix(in srgb, var(--accent) 16%, var(--panel)); color: var(--accent); font-size: 11px; font-weight: 800; padding: 0 7px; white-space: nowrap; }
+.svc-reference-media-preview--collapsible > summary > span { color: var(--ink-4); font-size: var(--ui-meta-size); font-weight: var(--ui-meta-weight); white-space: nowrap; }
+.svc-reference-media-preview--collapsible > summary > b { display: inline-flex; height: 22px; align-items: center; gap: 4px; border-radius: calc(var(--r) - 3px); background: color-mix(in srgb, var(--accent) 16%, var(--panel)); color: var(--accent); font-size: var(--ui-meta-size); font-weight: 800; padding: 0 7px; white-space: nowrap; }
 .svc-reference-media-preview--collapsible > summary > b :is(i, svg) { width: 13px; height: 13px; }
 .svc-reference-media-preview-content { display: grid; width: min(100%, 420px); min-height: 0; margin-top: 8px; overflow: hidden; border-radius: calc(var(--r) - 2px); background: var(--panel-2); }
 .svc-reference-media-preview-content img { display: block; width: 100%; max-height: 280px; object-fit: contain; }
@@ -6621,13 +6621,13 @@ textarea.svc-presenter-input-control--multiline {
   object-fit: contain;
   background: var(--panel-2);
 }
-.svc-reference-media-slide-error { grid-row: 1; align-self: center; padding: 4px; font-size: 10px; text-align: center; }
+.svc-reference-media-slide-error { grid-row: 1; align-self: center; padding: 4px; font-size: var(--ui-meta-size); text-align: center; }
 .svc-reference-media-slide-caption {
   grid-row: 2;
   min-width: 0;
   overflow: hidden;
   color: var(--ink-3);
-  font-size: 10px;
+  font-size: var(--ui-meta-size);
   font-weight: var(--ui-meta-weight);
   line-height: 16px;
   text-overflow: ellipsis;
@@ -6651,7 +6651,7 @@ textarea.svc-presenter-input-control--multiline {
   padding: 10px;
 }
 .svc-reference-media-preview--audio i { width: var(--ui-icon-lg); height: var(--ui-icon-lg); color: var(--accent); }
-.svc-reference-media-preview--audio strong { overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.svc-reference-media-preview--audio strong { overflow: hidden; font-size: var(--ui-meta-size); text-overflow: ellipsis; white-space: nowrap; }
 .svc-reference-media-preview--audio audio { grid-column: 1 / -1; width: 100%; height: 24px; }
 .svc-reference-media-preview--file:not(.svc-reference-media-preview--collapsible) {
   grid-template-columns: auto minmax(0, 1fr) max-content;
@@ -7993,7 +7993,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
   background: none; color: inherit; font: inherit; line-height: inherit;
   text-align: left; cursor: pointer;
 }
-.svc-setlist-hymn-no { font-size: 75%; }
+.svc-setlist-hymn-no { font-size: var(--ui-meta-size); font-weight: var(--ui-meta-weight); }
 .svc-setlist-song-link:hover, .svc-setlist-song-link:focus-visible {
   text-decoration: underline; text-underline-offset: 3px;
 }
@@ -8268,7 +8268,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 /* A single presenter toolbar; expanded source stays in normal flow below it. */
 .svc-presenter-toolbar{display:grid;grid-template-columns:minmax(160px,1fr) max-content max-content max-content;gap:15px;align-items:center;margin-bottom:20px;overflow-x:auto}
 .svc-presenter-toolbar .svc-source-panel{display:contents}
-.svc-presenter-toolbar .svc-source-panel-head{grid-column:1;grid-row:1;min-height:34px;padding:0 10px;gap:10px;border:1px solid var(--line);border-radius:var(--r);font-size:13px;white-space:nowrap}
+.svc-presenter-toolbar .svc-source-panel-head{grid-column:1;grid-row:1;min-height:34px;padding:0 10px;gap:10px;border:1px solid var(--line);border-radius:var(--r);font-size: var(--ui-meta-size);white-space:nowrap;}
 .svc-presenter-toolbar .svc-source-panel-head small{display:none}
 .svc-presenter-toolbar .svc-source-panel-body{grid-column:1/-1;grid-row:2;padding:15px;gap:15px;border:1px solid var(--line);border-radius:var(--r)}
 .svc-presenter-toolbar .svc-source-panel:not([open]) .svc-source-panel-body{display:none}
@@ -8297,7 +8297,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .svc-presenter-toolbar .svc-board-scale button{height:28px;min-height:28px;padding:0 10px;font-size:var(--ui-meta-size);font-weight:500;font-variant-numeric:tabular-nums}
 .svc-presenter-toolbar .svc-board-scale button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 
-.svc-setlist-song-detail { color: var(--ink-3); font-size: .85em; font-weight: 400; }
+.svc-setlist-song-detail { color: var(--ink-3); font-size: var(--ui-meta-size); font-weight: var(--ui-meta-weight); }
 
 [data-inline-bold-editor] > [data-inline-bold-button]{justify-self:start;flex-shrink:0}
 
