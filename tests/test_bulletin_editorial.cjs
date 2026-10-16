@@ -107,7 +107,7 @@ const server=http.createServer((req,res)=>{
    editorAudit.handle=editorAudit.mount();
   },fixture);
   await page.waitForFunction(()=>document.querySelector('[data-bulletin-print]')?.disabled===false).catch(async e=>{console.error(await page.locator('.bulletin-status').textContent());throw e;});
-  assert.equal(await page.evaluate(()=>editorAudit.documents.get('october-design').settings.design),'editorial');
+  assert.equal(await page.evaluate(()=>editorAudit.documents.get('october-design').settings.design),'simple');
   const monthly=page.locator('details:has([data-bulletin-setting="rosterMonth"])');
   assert.equal(await monthly.getAttribute('open'),null);
   await page.locator('[data-frame-id="church"] text').first().click();
@@ -118,7 +118,7 @@ const server=http.createServer((req,res)=>{
   await page.evaluate(()=>{editorAudit.handle.destroy();editorAudit.documents.clear();localStorage.clear();editorAudit.handle=editorAudit.mount();});
   await page.waitForFunction(()=>document.querySelector('[data-bulletin-print]')?.disabled===false);
   assert.equal(await page.locator('[data-bulletin-field="news"]').inputValue(),'새 주보 편집 내용');
-  assert.equal(await page.evaluate(()=>editorAudit.documents.get('october-design').settings.design),'editorial');
+  assert.equal(await page.evaluate(()=>editorAudit.documents.get('october-design').settings.design),'simple');
   console.log('PASS editorial layout, October defaults, click-to-edit, DB reload and overflow detection');
  }finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});

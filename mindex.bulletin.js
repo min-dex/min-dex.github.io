@@ -401,6 +401,7 @@
   }
 
   function defaultFrames(design) {
+    if(design==="simple")return simpleFrames();
     if(design==="children")return childrenFrames();
     if(design==="editorial")return editorialFrames();
     const frames=[];
@@ -490,13 +491,60 @@
     });
   }
 
+  // Flow positions are derived for preview/print only; stored frames remain reusable.
+  function simpleFrames() {
+    const positions={
+      newsTitle:[0,10,15,128.5,10,20],news:[0,10,30,128.5,50,11.5],
+      notices:[0,10,85,128.5,20,10],eventsTitle:[0,10,110,90,7.5,12.5],eventsMonth:[0,108.5,110,30,7.5,10],events:[0,10,120,128.5,20,10],
+      staff:[0,10,165,128.5,25,9],
+      church:[0,158.5,12.5,128.5,7.5,10],issue:[0,158.5,23,128.5,7.5,10],
+      motto:[0,158.5,37,128.5,12.5,11.5],welcome:[0,158.5,88,128.5,20,12.5],verse:[0,158.5,147,128.5,30,12.5],liturgical:[0,158.5,185,128.5,7.5,9],meeting:[0,158.5,200,128.5,5,8],
+      order:[1,10,37.5,128.5,157.5,11],leader:[1,10,29,128.5,7.5,10],
+      sermon:[1,158.5,35,128.5,28,25],outline:[1,158.5,70,128.5,40,11.5],notes:[1,158.5,115,128.5,80,10]
+    };
+    return editorialFrames().map(f=>{
+      const p=positions[f.id];
+      return {...f,...(p?Object.fromEntries(['page','x','y','w','h','size'].map((k,i)=>[k,p[i]])):{}),
+        ...(f.id==='newsTitle'?{binding:'label:청년부 소식'}:{}),
+        ...(['prayersTitle','prayersMonth','prayers'].includes(f.id)?{hidden:true}:{})};
+    });
+  }
+  function isFlowFrame(doc,id) {return doc.settings?.design==="simple"&&["news","notices","eventsTitle","eventsMonth","events","staff","outline","notes"].includes(id);}
+  function simpleFlow(doc) {
+    const frames=clone(doc.frames),get=id=>frames.find(f=>f.id===id);
+    const height=f=>{
+      if(!f||f.hidden)return 0;
+      const value=boundText(doc,f);if(!String(value||'').trim())return 0;
+      const g=svg('g'),check=new Set(),box={...f,y:0,h:10000,leading:f.size*1.55,itemGap:3.5};
+      if(f.type==='list')return renderList(g,value,box,check)||0;
+      if(f.type==='events')return String(value).split('\n').filter(Boolean).reduce((h,t)=>h+Math.max(8,wrap(t,f.w,f.size,700).length*f.size*1.55/MM+2),0);
+      return writeStyled(g,copyRuns(value,f.id,f.size),box,check,f.id);
+    };
+    let y=get('news').y;
+    for(const id of ['news','notices','eventsTitle','events','staff']){
+      const f=get(id),h=height(f);if(!f)continue;
+      f.y=y;f.h=Math.max(.1,h+2);
+      if(id==='eventsTitle'){const month=get('eventsMonth');month.y=y;month.h=f.h;}
+      if(h)y+=f.h+(id==='news'?4:2.5);
+    }
+    const outline=get('outline'),notes=get('notes');
+    if(outline&&notes){outline.h=Math.max(.1,height(outline)+(fieldValue(doc,'outlineTitle')?8:0));notes.y=outline.y+outline.h+5;notes.h=Math.max(.1,195-notes.y);}
+    return {...doc,frames};
+  }
+
   function renderEditorial(doc,mode,selected) {
+    const simple=doc.settings?.design==="simple";
     const pages=[],issues=new Set(),ink="#234C43",muted="#69746E",line="#DCE2DD";
     for(let page=0;page<2;page++){
       const root=svg("svg",{viewBox:"0 0 297 210",class:"bulletin-sheet",role:"img","aria-label":page?"예배 순서 · 말씀과 기록":"우리의 한 주 · 표지"});
       root.append(svg("rect",{width:297,height:210,fill:"#fff"}));
-      for(const x of [10,158.5])root.append(svg("rect",{x,y:10,width:12.5,height:1,fill:ink}));
-      if(!page){
+      for(const x of (simple?[]:[10,158.5]))root.append(svg("rect",{x,y:10,width:12.5,height:1,fill:ink}));
+      if(!page&&simple){
+        root.append(svg('line',{x1:158.5,y1:21,x2:287,y2:21,stroke:ink,'stroke-width':.2}));
+        writeText(root,'RIA\n청년부',{x:158.5,y:51,w:128.5,h:34,size:40,leading:43,weight:700,color:ink},issues,'church');
+        root.append(svg('path',{d:'M222.75 116v23 M216.25 123h13',stroke:ink,'stroke-width':.25,fill:'none'}));
+      }
+      if(!page&&!simple){
         const background=backgroundFor(doc);
         if(background){
           const clip=svg("clipPath",{id:"bulletin-cover-art"});clip.append(svg("rect",{x:158.5,y:85,width:128.5,height:47.5}));
@@ -508,18 +556,21 @@
       }
       for(const f of doc.frames.filter(f=>f.page===page&&(!f.hidden||mode==="layout"))){
         const group=svg("g",{"data-frame-id":f.id}),check=f.hidden?new Set():issues;
-        const box={...f,color:ink},value=boundText(doc,f);
+        const box={...f,color:simple?"#272C29":ink,...(simple?{weight:/Title$/.test(f.id)?700:500,leading:f.size*1.55,itemGap:3.5}:{})},value=boundText(doc,f);
+        if(simple&&!f.hidden&&f.y+f.h>198&&!["website","address","meeting","insideChurch","insideBrand"].includes(f.id))check.add(f.id);
+        if(simple&&["notices","eventsTitle","staff","sermon"].includes(f.id)&&String(value).trim())group.append(svg("line",{x1:f.x,y1:f.y-2,x2:f.x+f.w,y2:f.y-2,stroke:line,"stroke-width":.2}));
         if(f.type==="rules"){
-          for(let y=0;y<=f.h;y+=7.5)group.append(svg("line",{x1:f.x,y1:f.y+y,x2:f.x+f.w,y2:f.y+y,stroke:line,"stroke-width":.2}));
+          for(let y=0;y<=f.h;y+=(simple?10:7.5))group.append(svg("line",{x1:f.x,y1:f.y+y,x2:f.x+f.w,y2:f.y+y,stroke:line,"stroke-width":.2}));
         }else if(f.type==="order"){
           let y=f.y;
           for(const row of doc.source?.order||[]){
             const person=personText(row.label==="광고"?fieldValue(doc,"announcer"):row.person);
             const widths=[25,f.w-55,25],texts=[row.label,row.content,person];
             if(widths[1]<15){check.add(f.id);break;}
-            const leading=snap(f.size*1.3),count=Math.max(...texts.map((t,i)=>wrap(t,widths[i],f.size,i===1?700:500).length));
-            const h=Math.max(7.5,count*leading/MM+2.5);
-            texts.forEach((text,i)=>writeText(group,text,{...box,x:f.x+[0,27.5,f.w-25][i],y,w:widths[i],h,leading,weight:i===1?700:500,align:i===2?"right":"left",color:i===1?"#222E29":muted},check,f.id));
+            const leading=simple?f.size*1.5:snap(f.size*1.3),count=Math.max(...texts.map((t,i)=>wrap(t,widths[i],f.size,i===1?700:500).length));
+            const h=Math.max(simple?10:7.5,count*leading/MM+(simple?3:2.5));
+            texts.forEach((text,i)=>writeText(group,text,{...box,x:f.x+[0,27.5,f.w-25][i],y,w:widths[i],h,leading,weight:simple?(i===0||row.label==="설교"?700:500):i===1?700:500,align:i===2?"right":"left",color:simple?(i===2?muted:"#272C29"):i===1?"#222E29":muted},check,f.id));
+            if(simple)group.append(svg("line",{x1:f.x,y1:y+h,x2:f.x+f.w,y2:y+h,stroke:line,"stroke-width":.15}));
             y+=h;if(y>f.y+f.h+.01)check.add(f.id);
           }
         }else if(f.type==="prayers"){
@@ -556,7 +607,7 @@
         }else if(f.id==="leader")writeText(group,fieldValue(doc,"leader")?`인도  ${personText(fieldValue(doc,"leader"))}`:"",box,check,f.id);
         else if(f.binding.startsWith("month:"))writeText(group,(doc.source?.[f.binding.split(":")[1]]||"").replace(/^(\d+)-(\d+)$/,(_,y,m)=>`${Number(m)}월`),box,check,f.id);
         else if(f.id==="welcome")writeStyled(group,copyRuns(value,"welcome",f.size),box,check,f.id);
-        else writeText(group,value,{...box,color:["address","website","staff","insideBrand","insideChurch","meeting","notices"].includes(f.id)?muted:ink},check,f.id);
+        else writeText(group,value,{...box,color:["address","website","staff","insideBrand","insideChurch","meeting","notices"].includes(f.id)?muted:simple?"#272C29":ink},check,f.id);
         if(mode==="layout"){
           group.append(svg("rect",{x:f.x,y:f.y,width:f.w,height:f.h,fill:"transparent",stroke:selected===f.id?ink:line,"stroke-width":.25,"data-frame-hit":f.id,class:"bulletin-frame-hit"}));
           if(selected===f.id)group.append(svg("rect",{x:f.x+f.w-1.5,y:f.y+f.h-1.5,width:3,height:3,fill:ink,"data-resize":f.id,class:"bulletin-resize"}));
@@ -591,6 +642,7 @@
   }
   async function readyBackground(doc) {
     await readyAssets();
+    if(doc.settings?.design==="simple")return;
     if(doc.source?.department==="children")await new Promise((resolve,reject)=>{const image=new Image();image.onload=resolve;image.onerror=()=>reject(new Error("어린이부 로고를 불러오지 못했습니다."));image.src=new URL(childrenLogoPath,document.baseURI).href;});
     const background=backgroundFor(doc);
     if(backgroundKey(doc.settings?.theme)==="auto"&&!background)throw new Error("날짜·부서에 맞는 배경이 없습니다. 민덱스 배경에 등록하거나 직접 선택해 주세요.");
@@ -729,7 +781,7 @@
       const plain=window.MindexInlineText.plain(paragraph);
       const marker=plain.match(/^\s*(?:([①-⑳◈])|(\d{1,2})[.)])\s*(.*)$/);
       const detail=f.id==="news"&&/^\s*(?:-\s*)?(?:일시|장소|교재):/.test(plain);
-      if(marker&&index>0&&y>f.y)y+=f.id==="news"?(mainCount>2?0:5):2.5;
+      if(marker&&index>0&&y>f.y)y+=f.itemGap??(f.id==="news"?(mainCount>2?0:5):2.5);
       let skip=marker?plain.length-marker[3].length:0;
       const bodyRuns=copyRuns(paragraph,f.id,f.size).flatMap(run=>{
         const text=run.text.slice(skip);skip=Math.max(0,skip-run.text.length);
@@ -741,8 +793,10 @@
       if(marker)writeText(group,label,{...f,x,y,w:5,h:f.y+f.h-y,align:"center"},issues,f.id);
       y+=writeStyled(group,bodyRuns,{...f,x:x+(indented?7.5:0),y,w:width-(indented?7.5:0),h:f.y+f.h-y,size},issues,f.id);
     });
+    return y-f.y;
   }
   function renderPages(doc,mode,selected) {
+    if(doc.settings?.design==="simple")doc=simpleFlow(doc);
     const result=renderPageContent(doc,mode,selected);
     // Advertising frames must not cover other populated copy on the same page.
     const frames=doc.frames.filter(f=>!f.hidden&&['news','notices','welcome','newsTitle','events','eventsTitle','eventsMonth','staff'].includes(f.id)&&String(boundText(doc,f)).trim());
@@ -756,7 +810,7 @@
     return result;
   }
   function renderPageContent(doc,mode,selected) {
-    if(doc.settings?.design==="editorial")return renderEditorial(doc,mode,selected);
+    if(["simple","editorial"].includes(doc.settings?.design))return renderEditorial(doc,mode,selected);
     const issues=new Set(); const pages=[];
     for(let page=0;page<2;page++) {
       const root=svg("svg",{viewBox:"0 0 297 210",class:"bulletin-sheet",role:"img","aria-label":page?"주보 안쪽":"주보 겉면"});
@@ -889,7 +943,7 @@
     if(typeof value.settings?.theme==="string")settings.theme=value.settings.theme;
     settings.compactOrder=value.settings?.compactOrder!==false;
     settings.archiveReference=value.settings?.archiveReference!==false;
-    if(["auto","ink","panels","editorial","children"].includes(value.settings?.design))settings.design=value.settings.design;
+    if(["auto","ink","panels","editorial","simple","children"].includes(value.settings?.design))settings.design=value.settings.design;
     if([1,2].includes(value.settings?.outlineColumns))settings.outlineColumns=value.settings.outlineColumns;
     for(const f of frames){
       let patch=Array.isArray(value.frames)?value.frames.find(p=>isRecord(p)&&p.id===f.id):null;
@@ -1085,18 +1139,19 @@
         const field=key=>`<label ${["news","outline","notices","welcome"].includes(key)?'data-inline-bold-editor':''}><span class="bulletin-field-label">${escape(fields[key])}</span>${["issue","church","website","memoryReference"].includes(key)?
           `<input data-bulletin-field="${key}" value="${escape(fieldValue(doc,key))}" ${key==="issue"?'inputmode="numeric"':''}>`:
           `${["news","outline","notices","welcome"].includes(key)?'<button type="button" data-inline-bold-button aria-label="선택한 문구 굵게" title="굵게 (⌘B / Ctrl+B)"><b>B</b></button>':''}<textarea ${["news","outline","notices","welcome"].includes(key)?'data-inline-bold':''} data-bulletin-field="${key}" ${key==="news"?'data-announcement-numbered aria-describedby="bulletin-news-help"':''} rows="1">${escape(fieldValue(doc,key))}</textarea>`}${key==="news"?'<small id="bulletin-news-help" class="bulletin-input-help">Enter 다음 번호 · Shift+Enter 이어 쓰기</small>':''}</label>`;
-        const modern=doc.settings.design==="editorial";
-        p.innerHTML=`${modern?`<div class="bulletin-connected"><span>예배에서 연결됨</span><strong>${escape(doc.source?.sermon||"설교 제목 미입력")}</strong><small>${escape(doc.source?.scripture||"본문 미입력")}</small></div>`:""}<section class="bulletin-property-section"><h3>이번 주 편집</h3><p class="bulletin-help">찬양·본문·설교·기도자는 예배와 교회력에서 가져옵니다. 소식은 광고를 바탕으로 편집하고, ${child?"새길 말씀과 누락된 인도자를 보완해 주세요. 잠잠성경은 기존 잠언 순환표를 이어 생성하며 직접 수정할 수 있어요.":"설교 요점과 누락된 인도자만 보완해 주세요."}</p>${doc.source?.hasArchiveReference?`<label><input type="checkbox" data-bulletin-setting="archiveReference" ${doc.settings.archiveReference!==false?"checked":""}> 발행 원본의 담당·요점·위원표 사용</label><p class="bulletin-help">이 날짜의 실제 PDF에서 확인한 내용입니다. 소식·찬양·설교는 연결된 예배 자료를 사용합니다.</p>`:""}${(child?["news","memoryVerse","memoryReference","readingPlan","leader","issue"]:modern?["news","outline"]:["news","outline","leader","issue"]).map(field).join("")}<details class="bulletin-property-section" data-bulletin-section="weekly"><summary>담당·발행 정보</summary>${(child?["announcer"]:modern?["leader","issue","announcer","sermonReference","outlineTitle"]:["announcer","sermonReference","outlineTitle"]).map(field).join("")}</details></section>
+        const modern=["editorial","simple"].includes(doc.settings.design);
+        p.innerHTML=`${!child&&doc.settings.design!=="simple"?'<button type="button" data-bulletin-use-simple>새 청년부 양식 적용</button><p class="bulletin-help">내용은 유지하고 담백한 양식으로 바꿉니다. 저장 전까지 실행 취소할 수 있어요.</p>':""}${modern?`<div class="bulletin-connected"><span>예배에서 연결됨</span><strong>${escape(doc.source?.sermon||"설교 제목 미입력")}</strong><small>${escape(doc.source?.scripture||"본문 미입력")}</small></div>`:""}<section class="bulletin-property-section"><h3>이번 주 편집</h3><p class="bulletin-help">찬양·본문·설교·기도자는 예배와 교회력에서 가져옵니다. 소식은 광고를 바탕으로 편집하고, ${child?"새길 말씀과 누락된 인도자를 보완해 주세요. 잠잠성경은 기존 잠언 순환표를 이어 생성하며 직접 수정할 수 있어요.":"설교 요점과 누락된 인도자만 보완해 주세요."}</p>${doc.source?.hasArchiveReference?`<label><input type="checkbox" data-bulletin-setting="archiveReference" ${doc.settings.archiveReference!==false?"checked":""}> 발행 원본의 담당·요점·위원표 사용</label><p class="bulletin-help">이 날짜의 실제 PDF에서 확인한 내용입니다. 소식·찬양·설교는 연결된 예배 자료를 사용합니다.</p>`:""}${(child?["news","memoryVerse","memoryReference","readingPlan","leader","issue"]:modern?["news","outline"]:["news","outline","leader","issue"]).map(field).join("")}<details class="bulletin-property-section" data-bulletin-section="weekly"><summary>담당·발행 정보</summary>${(child?["announcer"]:modern?["leader","issue","announcer","sermonReference","outlineTitle"]:["announcer","sermonReference","outlineTitle"]).map(field).join("")}</details></section>
+          ${modern?`<details class="bulletin-property-section" data-bulletin-section="greetings"><summary>환영 문구 · 정기 안내</summary><p class="bulletin-help">공통 문구입니다. 저장하면 이 날짜부터 새로 만드는 주보에도 이어집니다.</p>${field("welcome")}${field("notices")}</details>`:""}
           <details class="bulletin-property-section" data-bulletin-section="monthly" ${modern?"":"open"}><summary>이번 달 · ${child?"일정과 주제":"일정과 위원"}</summary><p class="bulletin-help">${escape(doc.source?.eventsOrigin||"교회력 일정")}을 사용합니다. 일정 수정은 같은 달 주보에 이어집니다. 저장하면 이번 호의 예배 내용${child?"":"과 위원표"}도 보존합니다. 최신 자료는 예배 자료 갱신으로 가져옵니다.</p>${child?field("monthlyTheme"):""}${field("eventsText")}<button type="button" data-bulletin-calendar-events>교회력 일정 불러오기</button><div class="bulletin-number-grid">
           <label>교회 일정<input type="month" data-bulletin-setting="eventsMonth" value="${escape(doc.settings.eventsMonth||doc.source?.eventsMonth||"")}"></label>
           ${child?"":`<label>예배 위원<input type="month" data-bulletin-setting="rosterMonth" value="${escape(doc.settings.rosterMonth||doc.source?.rosterMonth||"")}"></label>`}</div></details>
-          <details class="bulletin-property-section" data-bulletin-common data-bulletin-section="common"><summary>공통 내용</summary><p class="bulletin-help">실주보에서 확인한 내용을 기본으로 사용합니다. 여기서 수정·저장한 내용은 이 날짜부터 새로 만드는 주보에도 적용됩니다. 이번 호만 빼려면 양식에서 해당 영역을 숨겨 주세요.</p><button type="button" data-bulletin-common-reset>공통 내용 다시 연결</button>${profileKeys.map(field).join("")}</details>`;
+          <details class="bulletin-property-section" data-bulletin-common data-bulletin-section="common"><summary>공동체 · 공통 정보</summary><p class="bulletin-help">실주보에서 확인한 내용을 기본으로 사용합니다. 여기서 수정·저장한 내용은 이 날짜부터 새로 만드는 주보에도 적용됩니다. 이번 호만 빼려면 양식에서 해당 영역을 숨겨 주세요.</p><button type="button" data-bulletin-common-reset>공통 내용 다시 연결</button>${profileKeys.filter(key=>!modern||!["welcome","notices"].includes(key)).map(field).join("")}</details>`;
 
       } else {
         const f=doc.frames.find(f=>f.id===selected)||doc.frames[0];selected=f.id;
-        p.innerHTML=`<button type="button" data-bulletin-reset-layout>배치 초기화</button><p class="bulletin-help">문구는 유지하고 선택한 디자인의 기본 배치로 바꿉니다. 실행 취소할 수 있어요.</p><label>배경<select data-bulletin-setting="theme"><option value="auto" ${backgroundKey(doc.settings.theme)==="auto"?"selected":""}>자동 · 날짜/부서</option><option value="" ${doc.settings.theme===""?"selected":""}>배경 없음</option>${(doc.backgrounds||[]).map(({key})=>`<option value="${escape(key)}" ${backgroundKey(doc.settings.theme)===key?"selected":""}>${escape(key)}</option>`).join("")}${doc.settings.theme&&doc.settings.theme!=="auto"&&!(doc.backgrounds||[]).some(b=>b.key===backgroundKey(doc.settings.theme))?`<option value="${escape(doc.settings.theme)}" selected>기존 초안: ${escape(backgroundKey(doc.settings.theme))}</option>`:""}</select></label><p class="bulletin-help">${backgroundKey(doc.settings.theme)==="auto"?`자동 배경: ${escape(doc.source?.autoBackground?.key||"등록 필요")}`:"민덱스 배경 목록에 등록된 이미지를 사용합니다."}</p><label><input type="checkbox" data-bulletin-setting="compactOrder" ${doc.settings.compactOrder?"checked":""}> 인쇄용 순서로 간추리기</label><p class="bulletin-help">선택하면 준비·마침·교제·보조 성구를 빼고, 고백 전문을 생략하며 같은 순서를 묶습니다.</p><label>지면<select data-bulletin-setting="design">${(doc.source?.department==="children"?[["children","어린이부 · 2026년"]]:[["editorial","2026년 10월"],["auto","기존 자동 양식"],["ink","연속 지면 · 검정 로고"],["panels","분리 지면 · 물결 로고"]]).map(([value,label])=>`<option value="${value}" ${(doc.settings.design||"auto")===value?"selected":""}>${label}</option>`).join("")}</select></label>${doc.source?.department==="children"?"":`<label>설교 요점 배치<select data-bulletin-setting="outlineColumns"><option value="1" ${(doc.settings.outlineColumns||doc.source?.outlineColumns||1)===1?"selected":""}>한 열</option><option value="2" ${(doc.settings.outlineColumns||doc.source?.outlineColumns)===2?"selected":""}>두 열</option></select></label>`}<label>프레임<select data-bulletin-frame>${doc.frames.map(f=>`<option value="${f.id}" ${f.id===selected?"selected":""}>${escape(frameLabel(f.id))} · ${f.page?"안쪽":"겉면"}</option>`).join("")}</select></label>
+        p.innerHTML=`${doc.settings.design==="simple"?'<p class="bulletin-help">광고·정기 안내·일정·섬김이는 내용 길이에 맞춰 자동 배치합니다. 인쇄 영역을 넘으면 해당 항목을 표시하고 인쇄를 막습니다.</p>':""}<button type="button" data-bulletin-reset-layout>배치 초기화</button><p class="bulletin-help">문구는 유지하고 선택한 디자인의 기본 배치로 바꿉니다. 실행 취소할 수 있어요.</p><label>배경<select data-bulletin-setting="theme"><option value="auto" ${backgroundKey(doc.settings.theme)==="auto"?"selected":""}>자동 · 날짜/부서</option><option value="" ${doc.settings.theme===""?"selected":""}>배경 없음</option>${(doc.backgrounds||[]).map(({key})=>`<option value="${escape(key)}" ${backgroundKey(doc.settings.theme)===key?"selected":""}>${escape(key)}</option>`).join("")}${doc.settings.theme&&doc.settings.theme!=="auto"&&!(doc.backgrounds||[]).some(b=>b.key===backgroundKey(doc.settings.theme))?`<option value="${escape(doc.settings.theme)}" selected>기존 초안: ${escape(backgroundKey(doc.settings.theme))}</option>`:""}</select></label><p class="bulletin-help">${backgroundKey(doc.settings.theme)==="auto"?`자동 배경: ${escape(doc.source?.autoBackground?.key||"등록 필요")}`:"민덱스 배경 목록에 등록된 이미지를 사용합니다."}</p><label><input type="checkbox" data-bulletin-setting="compactOrder" ${doc.settings.compactOrder?"checked":""}> 인쇄용 순서로 간추리기</label><p class="bulletin-help">선택하면 준비·마침·교제·보조 성구를 빼고, 고백 전문을 생략하며 같은 순서를 묶습니다.</p><label>지면<select data-bulletin-setting="design">${(doc.source?.department==="children"?[["children","어린이부 · 2026년"]]:[["simple","청년부 · 담백한 양식"],["editorial","2026년 10월"],["auto","기존 자동 양식"],["ink","연속 지면 · 검정 로고"],["panels","분리 지면 · 물결 로고"]]).map(([value,label])=>`<option value="${value}" ${(doc.settings.design||"auto")===value?"selected":""}>${label}</option>`).join("")}</select></label>${doc.source?.department==="children"?"":`<label>설교 요점 배치<select data-bulletin-setting="outlineColumns"><option value="1" ${(doc.settings.outlineColumns||doc.source?.outlineColumns||1)===1?"selected":""}>한 열</option><option value="2" ${(doc.settings.outlineColumns||doc.source?.outlineColumns)===2?"selected":""}>두 열</option></select></label>`}<label>프레임<select data-bulletin-frame>${doc.frames.map(f=>`<option value="${f.id}" ${f.id===selected?"selected":""}>${escape(frameLabel(f.id))} · ${f.page?"안쪽":"겉면"}</option>`).join("")}</select></label>
           <label><input type="checkbox" data-bulletin-hidden ${f.hidden?"":"checked"}> 출력에 표시</label><p class="bulletin-help">${escape(frameLabel(f.id))}<br>이동·크기 2.5mm · 글자 2.5pt 단계</p><div class="bulletin-number-grid">`+
-          [["x","가로 위치"],["y","세로 위치"],["w","너비"],["h","높이"]].map(([key,label])=>`<label>${label} (mm)<input type="number" step="2.5" data-bulletin-dimension="${key}" value="${f[key]}"></label>`).join("")+`</div>
+          [["x","가로 위치"],["y","세로 위치"],["w","너비"],["h","높이"]].map(([key,label])=>`<label>${label} (mm)<input type="number" step="2.5" data-bulletin-dimension="${key}" ${isFlowFrame(doc,f.id)&&["y","h"].includes(key)?'readonly title="내용에 따라 자동 계산"':""} value="${isFlowFrame(doc,f.id)?simpleFlow(doc).frames.find(item=>item.id===f.id)[key]:f[key]}"></label>`).join("")+`</div>
           <label>글자 크기 (pt)<select data-bulletin-dimension="size">${TOKENS.fontSizes.map(n=>`<option ${f.size===n?"selected":""}>${n}</option>`).join("")}</select></label>
           <label>정렬<select data-bulletin-align>${[["left","왼쪽"],["center","가운데"],["right","오른쪽"]].map(([v,t])=>`<option value="${v}" ${f.align===v?"selected":""}>${t}</option>`).join("")}</select></label>
           <p class="bulletin-help">페이지에서 드래그해 이동하거나 선택 모서리로 크기를 바꿀 수 있어요. 방향키로 2.5mm씩 이동합니다.</p>`;
@@ -1135,7 +1190,7 @@
         const source=await options.loadSource(id,target.settings);if(request!==serial||signal.aborted)return;
         target.source=applySourceSnapshot(source,target.sourceSnapshot);
         if(source.department==="children"&&!target.settings.design&&!target.revision&&!target.hasLocal){target.settings.design="children";target.frames=defaultFrames("children");}
-        if(!target.settings.design&&source.date>="2026-10-01"&&!target.revision&&!target.hasLocal){target.settings.design="editorial";target.frames=defaultFrames("editorial");}
+        if(!target.settings.design&&source.date>="2026-10-01"&&!target.revision&&!target.hasLocal){target.settings.design="simple";target.frames=defaultFrames("simple");}
         if(Object.hasOwn(target.fields,"eventsText")){target.months[source.eventsMonth]=target.fields.eventsText;delete target.fields.eventsText;}
         target.profile=target.revision?{}:loadProfile(source.date);
         // Preserve explicitly saved legacy common copy as ordinary content when migrating.
@@ -1151,6 +1206,7 @@
       if(sourceState!==JSON.stringify([doc.settings,doc.sourceSnapshot]))void load(q("[data-bulletin-service]").value);
     }
     function setDimension(f,key,value){
+      if(isFlowFrame(doc,f.id)&&["y","h"].includes(key))return;
       if(key==="size"){if(TOKENS.fontSizes.includes(value))f.size=value;return;}
       const origin=key==="x"&&f.x>=TOKENS.fold?TOKENS.fold:0;
       value=snap(value-origin)+origin;
@@ -1192,6 +1248,7 @@
         }
       }
       const b=event.target.closest("button");if(!b)return;
+      if(b.hasAttribute("data-bulletin-use-simple")){remember();doc.settings.design="simple";doc.frames=defaultFrames("simple");persist();properties();preview();void readyBackground(doc).then(()=>{assetLoaded=true;preview();});return;}
       if(b.hasAttribute("data-bulletin-reset-layout")){remember();doc.frames=defaultFrames(doc.settings.design);persist();properties();preview();return;}
       if(b.hasAttribute("data-bulletin-calendar-events")){
         remember();doc.months[doc.source.eventsMonth]=doc.source.calendarEvents||"";delete doc.fields.eventsText;
