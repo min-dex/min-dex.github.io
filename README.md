@@ -241,16 +241,14 @@ short name, and chapter count in `metadata.chapters`. Broader learning metadata
 is maintained outside Mindex.
 
 The Notion export source has been normalized into `data/scripture-books.csv`.
-Future Bible XML imports should write a row to `mindex_bible_translations` and
-verse rows to `mindex_bible_verses` keyed by `translation_id`, `book_code`,
-`chapter`, and `verse`. These verse tables are read-only for browser links;
-imports should use a server-side/service-role script. `Text` copies the passage
+Bible corpus replacements must use independently verified, explicitly identified
+publisher sources and reviewed migrations into `mindex_bible_translations` and
+`mindex_bible_verses`. Only these source-derived texts may seed or refresh the
+active corpus. Browser clients remain read-only for these tables. `Text` copies the passage
 with its heading. `Slides` copies blank-line separated passage blocks with
 `[Scripture n]` labels.
 
-Import EasySlides XML Bible files after running `supabase-schema.sql`:
+Only the authoritative catalogue is available for new reading/search/citations.
+See `docs/bible-authoritative-library-20261016.md` for source identities and
+source-native numbering. The old import command is retired.
 
-```sh
-python3 scripts/import_bible_xml.py "/path/to/성경(.xml).zip" --dry-run
-python3 scripts/import_bible_xml.py "/path/to/성경(.xml).zip"
-```

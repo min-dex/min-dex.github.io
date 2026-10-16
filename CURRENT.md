@@ -197,3 +197,16 @@ chapter labels, original verse labels/order and output payload metadata. Scoped
 cache refresh covers151 added chapters. Web deployment remains a separate
 checkpoint. See docs/bible-supplements-contract-20261016.md and
 bible-supplement-readback-20261016.json.
+
+
+## Authoritative-only Bible library ·2026-10-16
+
+User authorized retiring the old bundle from active loading and using identified
+publisher/electronic witnesses. Production exact readback verifies102031 new
+COG/COGNEW/SAENEW source-native segments,8 active editions and8 reversible
+retirements. The five previously adopted editions retain their records; no old
+verse, note or service rows are rewritten. Biblia exposes only source-derived
+packages. Explicit retired service editions never silently fallback. See
+`docs/bible-authoritative-library-20261016.md` and readback receipt. Web deployment
+and browser checks are recorded separately; CEV remains withheld pending154
+HTML/number-position investigations.

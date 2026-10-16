@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-16",
+  "status": "production_exact_readback_verified",
+  "newRows": 102031,
+  "newEditions": [
+    {
+      "id": "129a9967-37f9-5119-b86a-a74d9efa0e31",
+      "name": "공동번역",
+      "translation_key": "bsk:cog"
+    },
+    {
+      "id": "26f5cbf7-4155-5b2b-bb3f-6bbd7e8b140f",
+      "name": "공동번역 개정판",
+      "translation_key": "bsk:cognew"
+    },
+    {
+      "id": "412ca3d7-d3b0-5094-8895-ce6df2be78e4",
+      "name": "새번역",
+      "translation_key": "bsk:saenew"
+    }
+  ],
+  "activeEditions": 8,
+  "retiredEditions": 8,
+  "readbackSHA256": "3e2876aa3f6a84dfd9d88bfd97d9602aa3027ac76925243d06e799090e646fe4",
+  "scope": "Every102031 new row, all original13 metadata records incl only expected active flag changes, and all3 complete new translation records; existing verse/service/note rows not rewritten."
+}

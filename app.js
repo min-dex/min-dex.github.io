@@ -5664,10 +5664,10 @@ async function loadBibleTranslationsOnce({ silent = false } = {}) {
   if (!requireClient({ silent })) return;
 
   try {
-    const data = await fetchCachedSupabasePaged("mindex_bible_translations", "id,translation_key,name,language,abbreviation,source,metadata", (query) =>
+    const data = await fetchCachedSupabasePaged("mindex_bible_translations", "id,translation_key,name,language,abbreviation,source,metadata,is_active", (query) =>
       query.eq("is_active", true).order("name", { ascending: true }));
     state.bibleReaderError = "";
-    state.bibleTranslations = (data || []).map(normalizeServerBibleTranslation).sort(sortBibleTranslations);
+    state.bibleTranslations = (data || []).filter(row => row.is_active !== false && row.metadata?.canonical_source).map(normalizeServerBibleTranslation).sort(sortBibleTranslations);
     if (state.selectedBibleTranslationId && !state.bibleTranslations.some((translation) => translation.id === state.selectedBibleTranslationId)) {
       state.selectedBibleTranslationId = null;
     }
@@ -11665,8 +11665,9 @@ function serviceBibleTranslationDisplayLabel(translation = null) {
 
 function serviceItemBibleTranslation(item = {}, memo = parseServiceItemMemo(item?.memo)) {
   const translationId = String(memo?.scriptureTranslationId || memo?.scripture_translation_id || "").trim();
-  return serviceBibleTranslationById(translationId)
-    || selectedPresenterBibleTranslation();
+  return translationId
+    ? serviceBibleTranslationById(translationId) || {id:"",retiredId:translationId,name:"이전 역본 · 다시 선택 필요"}
+    : selectedPresenterBibleTranslation();
 }
 
 function serviceItemBibleTranslationForReference(item = {}, memo = parseServiceItemMemo(item?.memo), referenceText = "") {
@@ -11674,7 +11675,9 @@ function serviceItemBibleTranslationForReference(item = {}, memo = parseServiceI
   const payloads = normalizeServiceScriptureReferencePayloads(memo?.scriptureReferencePayloads || memo?.scripture_reference_payloads, references);
   const key = normalizeServiceScriptureReferenceKey(referenceText);
   const payload = payloads.find((candidate) => normalizeServiceScriptureReferenceKey(candidate.reference) === key);
-  return serviceBibleTranslationById(payload?.scriptureTranslationId) || serviceItemBibleTranslation(item, memo);
+  return payload?.scriptureTranslationId
+    ? serviceBibleTranslationById(payload.scriptureTranslationId) || {id:"",retiredId:payload.scriptureTranslationId,name:"이전 역본 · 다시 선택 필요"}
+    : serviceItemBibleTranslation(item, memo);
 }
 
 function serviceBibleTranslationById(id = "") {
@@ -17394,7 +17397,7 @@ function formatBibleSearchResultForCopy(verse) {
 }
 
 function formatBibleVerseReference(book, chapter, verse, translation) {
-  return [scriptureBookCopyName(book, translation), `${bibleChapterDisplayLabel(book, chapter)}:${verse}`].filter(Boolean).join(" ");
+  return [scriptureBookCopyName(book, translation), String(verse).includes(':') ? String(verse) : `${bibleChapterDisplayLabel(book, chapter)}:${verse}`].filter(Boolean).join(" ");
 }
 
 function formatScriptureReferenceForCopy(reference, book, translation) {
@@ -17769,7 +17772,7 @@ function normalizeServerBibleTranslation(row) {
     translationKey: row.translation_key || "",
     name: row.name || row.translation_key || "Bible",
     language: row.language || "",
-    abbreviation: row.abbreviation || "",
+    abbreviation: row.metadata?.source_policy === "authoritative-only-20261016" ? row.name : row.abbreviation || "",
     source: row.source || "",
     metadata: row.metadata || {},
   };
@@ -18333,12 +18336,14 @@ function formatNumericMarker(value, width) {
 var supplementalBookProjection;
 function getBibleBooks(availableOnly = true) {
   const base = state.scriptureBooks.length ? state.scriptureBooks : BIBLE_BOOKS;
-  const identity = availableOnly ? state.selectedBibleTranslationId : "all-editions";
+  const identity = state.selectedBibleTranslationId + (availableOnly ? ":available" : ":all-editions");
   if (!supplementalBookProjection) supplementalBookProjection = new Map();
   const cached = supplementalBookProjection.get(identity);
   if(cached?.base===base && cached.translations===state.bibleTranslations)return cached.books;
   const supplements = availableOnly ? getSelectedBibleTranslation()?.metadata?.supplement_books : state.bibleTranslations.flatMap(t=>t.metadata?.supplement_books || []).filter((b,i,a)=>a.findIndex(x=>x.id===b.id)===i);
-  const books = base.filter(book => book.testament !== "Deuterocanon / Apocrypha");
+  const editionBooks = getSelectedBibleTranslation()?.metadata?.edition_books;
+  const project = (book, b) => ({...book,koreanName:b.name,chapterCount:b.chapterOptions.length,metadata:{...book.metadata,chapter_options:b.chapterOptions}});
+  const books = base.filter(book => book.testament !== "Deuterocanon / Apocrypha" && (!availableOnly || !editionBooks || editionBooks.some(b=>b.id===book.code))).map(book=>{const b=editionBooks?.find(b=>b.id===book.code);return b?project(book,b):book;});
   for (const b of supplements || []) {
     const original = base.find(book => book.code === b.id);
     if (original) books.push({...original, koreanName:b.name, chapterCount:b.chapterOptions.length, metadata:{...original.metadata, chapter_options:b.chapterOptions}});

@@ -5124,7 +5124,7 @@ function presenterScriptureReadingHeaderReference(slide = {}, verseNumber = "") 
   const referenceRange = String(slide?.referenceRange || "").trim();
   const chapter = referenceRange.match(/^(\d+`?|\(\d+\))/)?.[1] || "";
   const verse = String(verseNumber || "").trim();
-  const chapterReference = [referenceBook, chapter && verse ? `${chapter}:${verse}` : chapter ? `${chapter}장` : referenceRange].filter(Boolean).join(" ").trim();
+  const chapterReference = [referenceBook, verse.includes(":") ? verse : chapter && verse ? `${chapter}:${verse}` : chapter ? `${chapter}장` : referenceRange].filter(Boolean).join(" ").trim();
   const fallback = String(slide?.title || slide?.marker || "").trim();
   return chapterReference || presenterScriptureReadingDisplayReference(fallback);
 }
@@ -5137,7 +5137,7 @@ function presenterScriptureReadingBookName(value = "") {
 
 function presenterScriptureVerseParts(value = "") {
   const text = String(value || "").trim();
-  const match = text.match(/^(\d{1,3}(?:[–-]\d{1,3})?)\s{2,}(.+)$/);
+  const match = text.match(/^(\d{1,3}(?::\d{1,3})?(?:[상하ab])?(?:[–-]\d{1,3}(?::\d{1,3})?(?:[상하ab])?)?)\s{2,}(.+)$/);
   if (!match) return { number: "", text };
   return { number: match[1], text: match[2].trim() };
 }

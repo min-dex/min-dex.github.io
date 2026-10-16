@@ -2046,3 +2046,16 @@ keys receive a scoped cache suffix; all prior canonical/repair scopes persist.
 Existing services, source document identity, UUIDs and personal notes are not
 rewritten. Publisher paratext stays separate from verse body. See the supplemental
 Data/UX handoff contract and the full production readback receipt.
+
+
+## Authoritative-only Bible library ·2026-10-16
+
+User authorized retiring the old bundle from active loading and using identified
+publisher/electronic witnesses. Production exact readback verifies102031 new
+COG/COGNEW/SAENEW source-native segments,8 active editions and8 reversible
+retirements. The five previously adopted editions retain their records; no old
+verse, note or service rows are rewritten. Biblia exposes only source-derived
+packages. Explicit retired service editions never silently fallback. See
+`docs/bible-authoritative-library-20261016.md` and readback receipt. Web deployment
+and browser checks are recorded separately; CEV remains withheld pending154
+HTML/number-position investigations.
