@@ -3674,6 +3674,16 @@ function purgeLegacyBibleCaches(storage) {
   storage.setItem(marker, "complete");return removed;
 }
 try { purgeLegacyBibleCaches(window.localStorage); } catch { /* Optional cache storage can be unavailable. */ }
+function refreshAsvCatalogueCache(storage) {
+  const marker = "mindex.bible.asv-catalogue.20261016";
+  if (storage.getItem(marker) === "complete") return;
+  for (let i = storage.length - 1; i >= 0; i--) {
+    const key = storage.key(i);
+    if (key?.startsWith("mindex.supabase.static.v1.mindex_bible_translations:")) storage.removeItem(key);
+  }
+  storage.setItem(marker, "complete");
+}
+try { refreshAsvCatalogueCache(window.localStorage); } catch { /* Reproducible catalogue only. */ }
 
 const WORSHIP_SERVICE_TYPE_SELECT = [
   "id",
@@ -17167,6 +17177,7 @@ function renderBibleVerseList(verses) {
               <i data-lucide="copy"></i>
             </button>
           </p>
+          ${Array.isArray(verse.metadata?.notes) && verse.metadata.notes.length ? `<details class="bible-reader-note bible-source-annotations"><summary>출처 주석${verse.text ? "" : " · 독립 본문 없음"}</summary>${verse.metadata.notes.map(note => `<p>${escapeHtml(String(note))}</p>`).join("")}</details>` : ""}
         `;
       }).join("")}
     </div>

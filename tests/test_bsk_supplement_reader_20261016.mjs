@@ -35,7 +35,7 @@ assert.equal(ctx.parseBibleReferenceFromNormalizedText('GKE 13`:8').chapter,1004
 vm.runInContext(fn('renderScriptureBookMarker'),ctx);
 assert.equal(ctx.renderScriptureBookMarker({koreanName:'다니엘 추가 본문',shortName:'다니엘 추가 본문'}),'');
 
-Object.assign(ctx,{renderBibleReaderControls:()=>'',renderBibleChapterControl:()=>'',renderBibleVerseList:()=>'',renderBibleVerseSkeleton:()=>''});
+Object.assign(ctx,{renderBibleEditionInfo:()=>'',renderBibleReaderControls:()=>'',renderBibleChapterControl:()=>'',renderBibleVerseList:()=>'',renderBibleVerseSkeleton:()=>''});
 vm.runInContext(fn('renderBibleReader'),ctx);
 const additionHTML=ctx.renderBibleReader(ctx.findBibleBookByCode('DAN'));
 const target=additionHTML.match(/data-global-book-code="([^"]+)"/);assert.equal(target?.[1],'DA1');

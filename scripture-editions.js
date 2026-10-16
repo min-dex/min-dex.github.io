@@ -97,6 +97,30 @@
     "source": "https://www.bskorea.or.kr/bible/korbibReadpage.php?version=SAENEW",
     "historySource": "https://www.bskorea.or.kr/bbs/board.php?bo_table=copyright_faq&device=pc&wr_id=3",
     "retrievedAt": "2026-10-16"
+  },
+  {
+    "id": "t18",
+    "dbTranslationId": "e4d5a42f-1205-54ca-bffa-a67672f70c31",
+    "name": "ASV",
+    "history": "1901년 ASV",
+    "textEdition": "American Standard Version1901 · eBible electronic edition",
+    "printingStatus": "electronic-source",
+    "note": "공식 USFM·USFX 전 구절 대조 완료. 같은 전자본문의 두 형식 대조이며 인쇄본 대조는 아닙니다.",
+    "source": "https://ebible.org/details.php?id=eng-asv",
+    "historySource": "https://ebible.org/details.php?id=eng-asv",
+    "retrievedAt": "2026-10-16"
+  },
+  {
+    "id": "t19",
+    "dbTranslationId": "8c1d475e-6f0e-51b2-be66-2312358459d5",
+    "name": "WEB Classic",
+    "history": "2020년 WEB Classic 안정판",
+    "textEdition": "World English Bible Classic2020stable · eBible electronic edition",
+    "printingStatus": "electronic-source",
+    "note": "공식 USFM·USFX 전 구절 대조 완료. 같은 전자본문의 두 형식 대조이며 인쇄본 대조는 아닙니다.",
+    "source": "https://ebible.org/details.php?id=eng-web",
+    "historySource": "https://ebible.org/details.php?id=eng-web",
+    "retrievedAt": "2026-10-16"
   }
 ];
   window.BibleEditionInfo = Object.freeze({

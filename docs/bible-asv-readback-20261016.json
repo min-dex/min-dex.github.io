@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-16",
+  "status": "production_exact_readback_verified",
+  "translationId": "e4d5a42f-1205-54ca-bffa-a67672f70c31",
+  "rows": 31102,
+  "books": 66,
+  "chapters": 1189,
+  "rowsSHA256": "de5643968f25d5b027c3b33230824609e4b710fb699da58a28359b66c96ddb54",
+  "translationSHA256": "e2f25353abb296facdaf9a898fdd7b25fdfe6f9efee5381ee1c2707730e64811",
+  "activeEditions": 9,
+  "inactiveEditions": 0,
+  "scope": "All ASV full rows and complete translation record; other editions protected by atomic additive-only SQL and baseline guards. No existing notes/services rewritten."
+}
