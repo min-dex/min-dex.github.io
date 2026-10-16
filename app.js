@@ -1319,6 +1319,7 @@ function cacheRefs() {
   refs.sidebarCreateSongBtn = document.getElementById("sidebarCreateSongBtn");
   refs.saveAllBtn = document.getElementById("saveAllBtn");
   refs.searchInput = document.getElementById("searchInput");
+  refs.bibleSidebarTranslation = document.getElementById("bibleSidebarTranslation");
   refs.listFilter = document.getElementById("listFilter");
   refs.listFilterButtons = [...document.querySelectorAll("[data-list-filter]")];
   refs.songCount = document.getElementById("songCount");
@@ -1349,6 +1350,7 @@ function bindStaticEvents() {
   refs.newSongBtn?.addEventListener("click", () => createPraiseSong());
   refs.saveAllBtn.addEventListener("click", saveAll);
   refs.sidebar?.addEventListener("click", handleSidebarPresenterActionClick);
+  refs.bibleSidebarTranslation?.addEventListener("change", handleDetailChange);
   refs.searchInput.addEventListener("input", (event) => {
     saveCurrentListScroll();
     state.search = event.target.value;
@@ -14687,6 +14689,7 @@ const AUTO_UPCOMING_PUBLIC_SERVICE_TYPES = [
 ];
 
 function renderListFilter() {
+  renderBibleSidebarTranslation();
   if (state.module !== "praise" && state.module !== "scripture") {
     refs.listFilter.hidden = true;
     refs.listFilterButtons.forEach((button) => {
@@ -17040,7 +17043,6 @@ function renderBibleReaderControls(options = {}) {
   if (!state.bibleTranslations.length) return "";
   return `
     <div class="bible-reader-controls ${escapeAttr(options.className || "")}">
-      ${renderBibleTranslationControl()}
       ${options.chapterControl || ""}
       ${renderBibleCopyFormatControl()}
       ${options.chapterControl ? renderBibleChapterCopyButton() : ""}
@@ -17048,19 +17050,22 @@ function renderBibleReaderControls(options = {}) {
   `;
 }
 
-function renderBibleTranslationControl() {
-  return `
-    <label class="bible-control">
-      <span>역본</span>
-      <select data-bible-reader-field="translation">
-        ${state.bibleTranslations.map((translation) => `
-          <option value="${escapeAttr(translation.id)}" ${translation.id === state.selectedBibleTranslationId ? "selected" : ""}>
-            ${escapeHtml(translation.abbreviation || translation.name)}
-          </option>
-        `).join("")}
-      </select>
-    </label>
-  `;
+function renderBibleSidebarTranslation() {
+  const host = refs.bibleSidebarTranslation;
+  if (!host) return;
+  host.hidden = state.module !== "scripture";
+  if (host.hidden) return;
+  if (!host.firstElementChild) {
+    host.innerHTML = '<label class="bible-control"><span>역본</span><select data-bible-reader-field="translation" aria-label="성경 역본"></select></label>';
+  }
+  const select = host.querySelector("select");
+  const translations = state.bibleTranslations;
+  const options = translations.map(t => [t.id, t.abbreviation || t.name]);
+  if (JSON.stringify([...select.options].map(o => [o.value, o.textContent])) !== JSON.stringify(options)) {
+    select.replaceChildren(...options.map(([id, name]) => new Option(name, id)));
+  }
+  select.disabled = !translations.length;
+  select.value = state.selectedBibleTranslationId || "";
 }
 
 function renderBibleChapterControl(chapters, hasPreviousChapter, hasNextChapter) {

@@ -148,6 +148,7 @@
     <div class="app-shell">
       <aside class="nav-sidebar" aria-label="Mindex 탐색 및 목록">
         <div id="mindexSidebarPanel" class="sidebar" aria-label="Mindex 목록">
+          <div id="bibleSidebarTranslation" class="bible-sidebar-translation" hidden></div>
           <div class="search-wrap global-search-wrap sidebar-search-wrap">
             <i data-lucide="search"></i>
             <input id="searchInput" type="search" placeholder="검색..." autocomplete="off" />
@@ -228,7 +229,7 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261016-bible-edition-sidebar";
+        const fallbackVersion = "20261016-bible-sidebar-selector";
         const modules = [
           "vendor/lucide.min.js", "vendor/supabase-js.min.js",
           "mindex.constants.js", "mindex.inline-text.js", "mindex.design-tokens.js", "mindex.worship-model.js",
