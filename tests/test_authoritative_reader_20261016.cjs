@@ -8,3 +8,10 @@ Object.assign(c,{scriptureBookCopyName:b=>b.koreanName,bibleChapterDisplayLabel:
 Object.assign(c,{presenterScriptureReadingBookName:String,presenterScriptureReadingDisplayReference:String});vm.runInContext(['presenterScriptureVerseParts','presenterScriptureReadingHeaderReference'].map(n=>fn(presenter,n)).join('\n'),c);assert.equal(c.presenterScriptureVerseParts('41:6상   본문 전체').number,'41:6상');assert.equal(c.presenterScriptureReadingHeaderReference({referenceBook:'욥기',referenceRange:'40:100012'},'41:6상'),'욥기 41:6상');
 assert.ok(source.includes('row.is_active !== false && row.metadata?.canonical_source'));
 console.log('PASS retired explicit service editions never fallback; literal moved/split labels copy and output without internal slot IDs; stale catalogue source filter');
+
+for(const number of ["2ㄱ","3ㄴ","100_33","12_24","41:6","18하","18–20"]){assert.equal(c.presenterScriptureVerseParts(number+"   full body").number,number);}
+
+const privatePlan=require('node:path').join(__dirname,'../../Biblia/.local/bsk-source-library-20261016/extended-plan.json');
+if(fs.existsSync(privatePlan)){let checked=0;for(const p of JSON.parse(fs.readFileSync(privatePlan)))for(const chs of Object.values(p.data))for(const rows of Object.values(chs))for(const row of rows){const out=c.presenterScriptureVerseParts(row[4].label+'   '+row[2]);assert.equal(out.number,row[4].label);assert.equal(out.text,row[2]);checked++;}assert.equal(checked,102031);console.log('PASS every102031 publisher label and complete body survives actual presenter splitting');}
+
+Object.assign(c,{presenterCitationBookName:String,presenterCitationDisplayReference:String});vm.runInContext(fn(presenter,'presenterCitationVerseReference'),c);assert.equal(c.presenterCitationVerseReference({referenceBook:'욥기',referenceRange:'40:100012'},{},'41:6'),'욥기 41:6');assert.equal(c.presenterCitationVerseReference({referenceBook:'에스델',referenceRange:'13`:8'},{},'8'),'에스델 13`:8');assert.equal(c.presenterCitationVerseReference({referenceBook:'욥기',referenceRange:'(24):18'},{},'18'),'욥기 (24):18');

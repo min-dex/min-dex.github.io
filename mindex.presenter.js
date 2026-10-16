@@ -2198,9 +2198,9 @@ function presenterCitationScriptureText(verse = {}, payload = {}, context = "") 
 function presenterCitationVerseReference(verse = {}, payload = {}, verseNumber = "") {
   const book = presenterCitationBookName(verse.referenceBook || payload.referenceBook || "");
   const range = String(verse.referenceRange || payload.referenceRange || "").trim();
-  const chapter = range.match(/^(\d+)/)?.[1] || "";
+  const chapter = range.match(/^(\d+`?|\(\d+\))/)?.[1] || "";
   const number = String(verseNumber || "").trim();
-  if (book && chapter && number) return `${book} ${chapter}:${number}`;
+  if (book && chapter && number) return `${book} ${number.includes(":") ? number : chapter+":"+number}`;
   return presenterCitationDisplayReference(verse.reference || payload.reference || "");
 }
 
@@ -5137,7 +5137,7 @@ function presenterScriptureReadingBookName(value = "") {
 
 function presenterScriptureVerseParts(value = "") {
   const text = String(value || "").trim();
-  const match = text.match(/^(\d{1,3}(?::\d{1,3})?(?:[상하ab])?(?:[–-]\d{1,3}(?::\d{1,3})?(?:[상하ab])?)?)\s{2,}(.+)$/);
+  const match = text.match(/^(\d{1,3}(?::\d{1,3}|_\d{1,3})?(?:[상하abㄱㄴ])?(?:[–-]\d{1,3}(?::\d{1,3}|_\d{1,3})?(?:[상하abㄱㄴ])?)?)\s{2,}(.+)$/);
   if (!match) return { number: "", text };
   return { number: match[1], text: match[2].trim() };
 }
