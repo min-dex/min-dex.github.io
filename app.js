@@ -16385,7 +16385,9 @@ function renderScriptureDetail() {
   }
 
   if (!scripture) {
-    const titleMetaLine = selectedBook?.englishName || `전체 ${formatCount(getBibleBooks().length)}권`;
+    const titleMetaLine = selectedBook?.testament === "Deuterocanon / Apocrypha"
+      ? (["GKE", "DA1"].includes(selectedBook.code) ? "추가 본문" : "제2경전 / 외경")
+      : selectedBook?.englishName || `전체 ${formatCount(getBibleBooks().length)}권`;
     refs.detailPane.innerHTML = `
       <div class="editor-shell scripture-editor scripture-taxonomy-editor">
         <header class="editor-head">
@@ -16854,7 +16856,7 @@ function renderBibleBookOptions(testament, selectedCode) {
 }
 
 function renderScriptureBookMarker(book) {
-  if (!book?.shortName) return "";
+  if (!book?.shortName || book.shortName === book.koreanName) return "";
   const label = book.koreanName || book.englishName || book.code;
   return `<span class="scripture-book-marker" aria-label="${escapeAttr(label)}">${escapeHtml(book.shortName)}</span>`;
 }

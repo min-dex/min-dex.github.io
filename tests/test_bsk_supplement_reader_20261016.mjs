@@ -31,3 +31,6 @@ ctx.findBibleBookByReferenceName=name=>ctx.getBibleBooks(false).find(b=>b.korean
 vm.runInContext(fn('parseBibleReferenceFromNormalizedText'),ctx);
 assert.equal(ctx.parseBibleReferenceFromNormalizedText('GKE 13`:0'),null);
 assert.equal(ctx.parseBibleReferenceFromNormalizedText('GKE 13`:8').chapter,1004);
+
+vm.runInContext(fn('renderScriptureBookMarker'),ctx);
+assert.equal(ctx.renderScriptureBookMarker({koreanName:'다니엘 추가 본문',shortName:'다니엘 추가 본문'}),'');
