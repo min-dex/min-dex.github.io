@@ -5670,6 +5670,7 @@ async function loadBibleTranslationsOnce({ silent = false } = {}) {
     state.bibleTranslations = (data || []).filter(row => row.is_active !== false && row.metadata?.canonical_source).map(normalizeServerBibleTranslation).sort(sortBibleTranslations);
     if (state.selectedBibleTranslationId && !state.bibleTranslations.some((translation) => translation.id === state.selectedBibleTranslationId)) {
       state.selectedBibleTranslationId = null;
+      state.selectedBibleVerse = null;state.selectedBibleVerses = [];state.lastSelectedBibleVerse = null;
     }
     if (!state.selectedBibleTranslationId && state.bibleTranslations.length) {
       state.selectedBibleTranslationId = state.bibleTranslations[0].id;
@@ -11345,7 +11346,7 @@ async function fetchServiceScriptureVerses(reference, requestedTranslation = nul
   await ensureBibleBookLookups();
   if (!state.bibleTranslations.length && !state.bibleReaderError) await loadBibleTranslations({ silent: true });
   const translation = requestedTranslation || selectedPresenterBibleTranslation();
-  if (!translation?.id) return [];
+  if (!translation?.id || !state.bibleTranslations.some(t=>t.id===translation.id)) return [];
   if (state.client?.auth && !isUuid(translation.id)) return [];
   const cacheKey = bibleVerseCacheKey(translation.id, reference.book.code, reference.chapter);
   if (state.bibleVerseCache.has(cacheKey)) return getCachedServiceScriptureVerses(reference, translation);
