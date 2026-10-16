@@ -19,6 +19,7 @@ SMOKES = (
     "smoke_atomic_save_runtime.py",
     "smoke_reference_batch.py",
     "smoke_theme_bootstrap.py",
+    "smoke_scripture_aliases.py",
 )
 
 def main():

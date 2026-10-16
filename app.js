@@ -245,6 +245,15 @@ const BIBLE_BOOK_ALIASES = {
   "3JN": ["3 john", "3john", "3 jn", "3jn", "third john"],
   JUD: ["jude", "jud"],
   REV: ["rev", "revelation", "re"],
+  TOB: ["Tobit", "Tobias"],
+  JDT: ["Judith"],
+  WSD: ["Wisdom", "Wisdom of Solomon"],
+  SIR: ["Sirach", "Ecclesiasticus"],
+  BAR: ["Baruch"],
+  "1MA": ["1 Maccabees", "First Maccabees", "마카베오 상", "마카베오기 상권"],
+  "2MA": ["2 Maccabees", "Second Maccabees", "마카베오 하", "마카베오기 하권"],
+  GKE: ["에스델 추가 본문", "에스더 추가 본문", "Additions to Esther", "Esther additions"],
+  DA1: ["다니엘 추가 본문", "Additions to Daniel", "Daniel additions"],
 };
 
 const BIBLE_BOOKS = [];
@@ -11391,6 +11400,12 @@ async function fetchServiceScriptureVerses(reference, requestedTranslation = nul
   const translation = requestedTranslation || selectedPresenterBibleTranslation();
   if (!translation?.id || !state.bibleTranslations.some(t=>t.id===translation.id)) return [];
   if (state.client?.auth && !isUuid(translation.id)) return [];
+  const targetBook = bibleReferenceBookForTranslation(reference?.book, translation);
+  if (!targetBook) return [];
+  const options = targetBook.metadata?.chapter_options;
+  if (options ? !options.some(option => option.key === reference.chapter
+      && option.label === bibleChapterDisplayLabel(reference.book, reference.chapter))
+    : reference.chapter < 1 || (getBibleChapterCount(targetBook) > 0 && reference.chapter > getBibleChapterCount(targetBook))) return [];
   const cacheKey = bibleVerseCacheKey(translation.id, reference.book.code, reference.chapter);
   if (state.bibleVerseCache.has(cacheKey)) return getCachedServiceScriptureVerses(reference, translation);
   const persistentCachedRows = readPersistentBibleChapterCache(translation.id, reference.book.code, reference.chapter);
@@ -17863,15 +17878,38 @@ function getSelectedBibleTranslation() {
 }
 
 function findBibleTranslation(value) {
-  const key = normalizeTitle(value);
-  const compactKey = compactSearchValue(value);
+  const key = compactSearchValue(value);
   if (!key) return null;
-  return state.bibleTranslations.find((translation) => [
-    translation.id,
-    translation.translationKey,
-    translation.name,
-    translation.abbreviation,
-  ].some((item) => normalizeTitle(item) === key || compactSearchValue(item) === compactKey)) || null;
+  const labels = translation => [translation.id, translation.translationKey, translation.name, translation.abbreviation].map(compactSearchValue);
+  const exact = state.bibleTranslations.filter(translation => labels(translation).includes(key));
+  if (exact.length) return exact.length === 1 ? exact[0] : null;
+  // Explicit identities only: never erase revision/year qualifiers or fuzzy-match editions.
+  const aliases = [
+    ["공동번역 개정판", "공동번역 개정", "공동번역개정", "COGNEW"],
+    ["공동번역", "공동번역 성서", "COG"],
+    ["King James Version (CrossWire 1769)", "King James Version", "KJV"],
+    ["American Standard Version", "ASV"],
+  ];
+  const group = aliases.map(items => items.map(compactSearchValue)).find(items => items.includes(key));
+  if (!group) return null;
+  const matches = state.bibleTranslations.filter(translation => labels(translation).some(label => group.includes(label)));
+  return matches.length === 1 ? matches[0] : null;
+}
+
+function bibleReferenceBookForTranslation(book, translation) {
+  if (!book || !translation) return null;
+  const metadata = translation.metadata || {};
+  const supplement = metadata.supplement_books?.find(entry => entry.id === book.code);
+  const edition = metadata.edition_books?.find(entry => entry.id === book.code);
+  const isSupplement = ["TOB", "JDT", "WSD", "SIR", "BAR", "1MA", "2MA", "GKE", "DA1"].includes(book.code);
+  if (isSupplement && !supplement) return null;
+  if (!isSupplement && metadata.edition_books && !edition) return null;
+  const entry = supplement || edition;
+  if (entry) return {...book, koreanName: entry.name, chapterCount: entry.chapterOptions.length,
+    metadata: {...book.metadata, chapter_options: entry.chapterOptions}};
+  const base = state.scriptureBooks.find(entry => entry.code === book.code) || book;
+  const {chapter_options, ...rest} = base.metadata || {};
+  return {...base, metadata: rest};
 }
 
 function isKoreanBibleTranslation(translation) {
@@ -18823,34 +18861,39 @@ function getSearchTokens(value) {
     .filter((token) => token.compact || token.initials);
 }
 
-function parseBibleReference(value) {
+function parseBibleReference(value, translation = null) {
+  if (!translation?.id) translation = null; // Also used as an Array.map callback.
   const candidates = uniqueList([
     normalizeReferenceInput(value),
     normalizeReferenceInput(restoreKoreanKeyboardInput(value)),
   ]);
   for (const text of candidates) {
-    const reference = parseBibleReferenceFromNormalizedText(text);
+    const reference = parseBibleReferenceFromNormalizedText(text, translation);
     if (reference) return reference;
   }
   return null;
 }
 
-function parseBibleReferenceFromNormalizedText(text) {
+function parseBibleReferenceFromNormalizedText(text, translation = null) {
   if (!text) return null;
+  const lookup = name => { const book = findBibleBookByReferenceName(name); return translation ? bibleReferenceBookForTranslation(book, translation) : book; };
   const special=text.match(/^(.+?)\s+([^:\s]+)(?::\s*(\d+)(?:\s*-\s*(\d+))?)?$/);
-  if(special){const book=findBibleBookByReferenceName(special[1]);const option=book?.metadata?.chapter_options?.find(c=>c.label===special[2]);
+  if(special){const book=lookup(special[1]);const option=book?.metadata?.chapter_options?.find(c=>c.label===special[2]);
     if(option){if(special[3] && Number(special[3])<1)return null;const verse=Number(special[3])||null,verseEnd=Number(special[4])||null;if(verseEnd && verseEnd<(verse||1))return null;return {book,chapter:option.key,verse,verseEnd};}}
 
   const match =
     text.match(/^(.+?)\s+(\d{1,3})\s+(\d{1,3})(?:\s*-\s*(\d{1,3}))?$/) ||
     text.match(/^(.+?)\s+(\d{1,3})(?::\s*(\d{1,3})(?:\s*-\s*(\d{1,3}))?)?$/);
   if (!match) return null;
-  const book = findBibleBookByReferenceName(match[1]);
+  const book = lookup(match[1]);
   if (!book) return null;
   const chapter = Number(match[2]);
   const verse = match[3] ? Number(match[3]) : null;
   const verseEnd = match[4] ? Number(match[4]) : null;
   if (!chapter || chapter < 1 || (verse !== null && verse < 1) || (verseEnd !== null && verseEnd < verse)) return null;
+  const options = book.metadata?.chapter_options;
+  if (options ? !options.some(option => option.key === chapter && option.label === String(chapter))
+    : getBibleChapterCount(book) > 0 && chapter > getBibleChapterCount(book)) return null;
   return { book, chapter, verse, verseEnd };
 }
 
@@ -29037,8 +29080,8 @@ function parseLiveScriptureQuery(query) {
     const translation = findBibleTranslation(translationText);
     if (!translation) continue;
     const referenceText = tokens.slice(0, -count).join(" ");
-    const reference = parseBibleReference(referenceText);
-    if (reference) return { reference, referenceText, translation };
+    const reference = parseBibleReference(referenceText, translation);
+    return { reference, referenceText, translation };
   }
   return { reference: wholeReference, referenceText: text, translation: null };
 }
