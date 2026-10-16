@@ -14106,6 +14106,20 @@ async function saveBulletinDraft(serviceId, value, revision) {
   return data;
 }
 
+async function loadBulletinTemplate(key) {
+  const {data,error}=await state.client.from("mindex_bulletin_templates").select("template_key,title,department,effective_from,layout,common,revision").eq("template_key",key).maybeSingle();
+  if(error)throw new Error(`공통 양식 저장소를 불러오지 못했습니다: ${error.message}`);
+  return data;
+}
+async function saveBulletinTemplate(key,value,revision) {
+  const table=state.client.from("mindex_bulletin_templates");
+  const query=revision?table.update(value).eq("template_key",key).eq("revision",revision):table.insert({template_key:key,...value});
+  const {data,error}=await query.select("template_key,title,department,effective_from,layout,common,revision").maybeSingle();
+  if(error?.code==="23505"||(!error&&!data))throw new Error("다른 곳에서 공통 양식을 변경했습니다. 편집 내용은 유지됩니다. 창을 다시 열어 최신 양식을 확인해 주세요.");
+  if(error)throw new Error(`공통 양식 저장 실패: ${error.message}`);
+  return data;
+}
+
 function mountServiceBulletinWorkbench(service) {
   const tabId = state.pageTabs[state.pageTabIndex]?.id;
   const mounted = refs.detailPane.querySelector("[data-bulletin-owner]");
@@ -14126,6 +14140,8 @@ function mountServiceBulletinWorkbench(service) {
       .map(({fileName,path}) => ({key:fileName,url:state.worshipBackgroundRegistry[fileName]?.dataUrl || path})),
     loadDraft: loadBulletinDraft,
     saveDraft: saveBulletinDraft,
+    loadTemplate: loadBulletinTemplate,
+    saveTemplate: saveBulletinTemplate,
     loadSource: loadServiceBulletinSource,
     onServiceChange: id => {
       const selected = state.services.find(candidate => candidate.id === id);
