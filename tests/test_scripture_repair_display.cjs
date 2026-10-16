@@ -1,7 +1,7 @@
 const assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const rows=new Map([['krv:PSA:72',['old']],['krv:PSA:73',['keep']],['rkb:PSA:72',['other']]]);
 let size=60,override=false,reloads=0;
-const box={getBoundingClientRect:()=>({height:500,bottom:600}),querySelector:()=>null};
+const box={offsetHeight:500,getBoundingClientRect:()=>({height:500,bottom:600}),querySelector:()=>null};
 const text={closest:()=>box,style:{removeProperty(){size=60;override=false},set fontSize(v){size=parseFloat(v);override=true}},getBoundingClientRect:()=>({top:200}),get scrollHeight(){return size*12},get scrollWidth(){return 300},clientWidth:300};
 const c=vm.createContext({state:{module:'scripture',selectedBibleTranslationId:'krv',selectedBookCode:'PSA',selectedBibleChapter:72,bibleBookVerses:['stale'],bibleTranslations:[{id:'krv',name:'개역한글'},{id:'rkb',name:'개역개정'}],bibleVerseCache:rows},loadBibleBookVerses:()=>{reloads++;},persistentBibleChapterCacheKey:(t,b,ch)=>`${t}:${b}:${ch}`,document:{body:{},querySelectorAll:()=>[text],fonts:{ready:{then:f=>f()}}},window:{addEventListener(){}},getComputedStyle:()=>({fontSize:'60px'}),requestAnimationFrame:f=>f(),MutationObserver:class{observe(){}}});
 vm.runInContext(fs.readFileSync(require.resolve('../mindex.scripture-repair-display.js'),'utf8'),c);
@@ -24,3 +24,11 @@ for(const book of supplementary.supplementBooks)for(const ch of book.chapterOpti
  assert.equal(c.persistentBibleChapterCacheKey('other',book.id,ch.key),`other:${book.id}:${ch.key}`);supplementalChecks+=2;
 }
 console.log(`PASS ${supplementalChecks} supplemental cache assertions; existing chapter scopes retained`);
+
+// A transformed preview must retain the same layout-pixel fit as full output.
+const outputSize=size;
+box.getBoundingClientRect=()=>({height:62.5,bottom:75});
+text.getBoundingClientRect=()=>({top:25});
+vm.runInContext(fs.readFileSync(require.resolve('../mindex.scripture-repair-display.js'),'utf8'),c);
+assert.equal(size,outputSize,'preview scale must not shrink the layout font');
+console.log('PASS transformed preview retains output font size');
