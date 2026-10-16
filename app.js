@@ -14688,6 +14688,9 @@ function renderListFilter() {
       const [value, label] = filters[index];
       button.dataset.listFilter = value;
       button.textContent = label;
+      if (state.module === "scripture" && value === "extra") {
+        button.replaceChildren(document.createTextNode("제2경전"), document.createElement("wbr"), document.createTextNode("/외경"));
+      }
       button.hidden = false;
       const active = value === activeFilter;
       button.classList.toggle("active", active);

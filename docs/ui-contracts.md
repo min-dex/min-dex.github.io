@@ -412,3 +412,7 @@ registry `등록됨`/`기본` use plain text without decorative fills or badge p
 Keep their wording/colors, missing-background warnings, interactive focus outlines
 and selectable control surfaces. This applies only to controller UI, not output
 slides or bulletin print.
+
+Scripture sidebar filters occupy four equal columns in one row (전체, 구약, 신약,
+제2경전/외경). The longer label may wrap inside its own cell at narrow widths;
+never give the supplemental category a separate full-width row.
