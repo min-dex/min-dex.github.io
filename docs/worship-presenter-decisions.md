@@ -2065,3 +2065,13 @@ packages. Explicit retired service editions never silently fallback. See
 `docs/bible-authoritative-library-20261016.md` and readback receipt. Web deployment
 and browser checks are recorded separately; CEV remains withheld pending154
 HTML/number-position investigations.
+
+
+## Reading preview scale correction · 2026-10-16
+
+Reading text fitting converts transformed viewport bounds back to layout pixels
+before comparing scroll metrics. Thumbnail scale must not reduce the original
+reading font. Output and preview retain the same fitting size, including long
+verses and the final Fin. marker. Verified offline in Chromium and WebKit with
+`tests/smoke_scripture_reading_scale.py` and scripture word-boundary checks.
+No canonical text, service data, or cache renewal scope changes.

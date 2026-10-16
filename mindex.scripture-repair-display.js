@@ -48,7 +48,10 @@
       const bounds = box.getBoundingClientRect(), top = text.getBoundingClientRect().top;
       const fin = box.querySelector('.presenter-scripture-reading-fin');
       const bottom = fin ? Math.min(bounds.bottom, fin.getBoundingClientRect().top) : bounds.bottom;
-      const available = bottom - top - Math.max(4, bounds.height * .025);
+      // Preview canvases are transformed; scroll metrics remain in layout pixels.
+      const scale = bounds.height / box.offsetHeight;
+      if (!Number.isFinite(scale) || scale <= 0) continue;
+      const available = (bottom - top) / scale - Math.max(4, box.offsetHeight * .025);
       if (available <= 0 || !base || (text.scrollHeight <= available && text.scrollWidth <= text.clientWidth + 1)) continue;
       // Binary search keeps the largest fitting size; short verses keep their original typography.
       let low = 1, high = base;
