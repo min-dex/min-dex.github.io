@@ -1,4 +1,4 @@
-"""Korean eojeol and English words stay whole in actual scripture output."""
+"""Scripture uses character wrapping and stays justified inside actual output."""
 import os
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from urllib.parse import urlsplit
@@ -47,14 +47,15 @@ try:
        const reading=body.closest('.presenter-scripture-reading');const frame=reading||body.parentElement;const box=frame.getBoundingClientRect();
        const range=document.createRange();range.selectNodeContents(body);const rects=glyphs;
        return {split,align:style.textAlign,last:style.textAlignLast,space:style.whiteSpace,
-        box:{left:box.left,right:box.right,top:box.top,bottom:box.bottom},rects:rects.map(r=>({left:r.left,right:r.right,top:r.top,bottom:r.bottom})),inside:rects.every(r=>r.left>=box.left-2&&r.right<=box.right+2&&r.top>=box.top-2&&r.bottom<=box.bottom+2),
+        breakMode:style.wordBreak,justifyMode:style.textJustify,box:{left:box.left,right:box.right,top:box.top,bottom:box.bottom},rects:rects.map(r=>({left:r.left,right:r.right,top:r.top,bottom:r.bottom})),inside:rects.every(r=>r.left>=box.left-2&&r.right<=box.right+2&&r.top>=box.top-2&&r.bottom<=box.bottom+2),
         justified:lines.length<2||Math.abs(lines[0].right-bounds.right)<Math.max(3,parseFloat(style.fontSize)*.08),lines:lines.length,size:style.fontSize};
       }''',{'context':context,'text':text})
-      if not result['inside'] or result['split'] or not result['justified']:page.screenshot(path='/private/tmp/scripture-boundary-failure.png')
-      assert not result['split'] and result['inside'] and result['justified'],(engine,width,context,language,result)
+      if not result['inside'] or not result['justified']:page.screenshot(path='/private/tmp/scripture-boundary-failure.png')
+      assert result['inside'] and result['justified'],(engine,width,context,language,result)
+      assert result['breakMode']=='break-all'
       assert result['align']=='justify' and result['last']=='left' and result['space']=='pre-wrap',result
       if width==1920 and context in ('reading','sermon-chromakey'):
        page.screenshot(path=f'/private/tmp/scripture-words-{engine}-{context}-{language}.png')
-     print('PASS',engine,width,context,'Korean/English word boundaries, justification and fit',flush=True)
+     print('PASS',engine,width,context,'Korean/English character wrapping, justification and fit',flush=True)
    browser.close()
 finally:server.shutdown()

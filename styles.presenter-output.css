@@ -819,13 +819,13 @@
   display: block;
   width: 100%;
   font-size: var(--presenter-scripture-fitted-size, var(--presenter-scripture-bar-size));
-  line-break: auto;
-  overflow-wrap: normal;
+  line-break: anywhere;
+  overflow-wrap: anywhere;
   white-space: pre-wrap;
   text-align: justify;
   text-align-last: left;
-  word-break: keep-all;
-  text-justify: inter-word;
+  word-break: break-all;
+  text-justify: inter-character;
 }
 .presenter-output-root:not(.no-chromakey) .presenter-slide--scripture-sermon {
   --presenter-scripture-bar-size: var(--presenter-size-lyrics);
@@ -1269,15 +1269,15 @@
   font-weight: 700;
   letter-spacing: -.06em;
   line-height: 1.14;
-  line-break: auto;
-  overflow-wrap: normal;
+  line-break: anywhere;
+  overflow-wrap: anywhere;
   text-overflow: clip;
   -webkit-text-stroke: .01em currentColor;
   white-space: pre-wrap;
   text-align: justify;
   text-align-last: left;
-  word-break: keep-all;
-  text-justify: inter-word;
+  word-break: break-all;
+  text-justify: inter-character;
 }
 .presenter-slide--scripture-sermon .presenter-scripture-reading,
 .presenter-slide--scripture-citation .presenter-scripture-reading {

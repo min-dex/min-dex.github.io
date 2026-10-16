@@ -1959,17 +1959,16 @@ repair scopes and retain previous original restoration scopes/GEN1 override.
 Quarantined64 structural chapters are not implied completely proofread. Keep
 old persistent entries recoverable. Public release carries addresses only.
 
-## Scripture word-preserving justification · 2026-10-15
+## Scripture character justification · 2026-10-16
 
-- Korean scripture wraps at eojeol boundaries and English at word boundaries:
-  `word-break: keep-all`, `line-break: auto`, `overflow-wrap: normal`. Both the
-  chromakey bar and full-screen reading body retain justified lines and a
-  left-aligned last line; explicit source line breaks remain intact.
-- Word spacing supplies justification. Do not restore character-level breaking
-  to make a long verse fit. Existing text fitting handles the changed line count;
-  full-screen fitting checks horizontal overflow as well as height.
-- Verify Korean/English output and previews in Chromium/WebKit; never rewrite
-  canonical Bible text or saved worship content to alter wrapping.
+- User reverted word-only scripture wrapping because it made word gaps too wide.
+- Reading, sermon and live/citation scripture use character-level wrapping and
+  justification: `word-break: break-all`, `line-break: anywhere`,
+  `overflow-wrap: anywhere`, `text-justify: inter-character`.
+- Retain left-aligned last lines, explicit line breaks and bounded text fitting.
+  Transformed previews retain the same layout font size as output.
+- Verify Chromium/WebKit with `tests/smoke_scripture_character_wrap.py` and
+  `tests/smoke_scripture_reading_scale.py`. Canonical text is unchanged.
 
 
 ## Announcement word boundaries and fitting · 2026-10-15
