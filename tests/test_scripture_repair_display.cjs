@@ -16,3 +16,11 @@ assert(override,'horizontal-only overflow must trigger fitting');
 assert(text.scrollWidth<=text.clientWidth+1);
 assert(size>25,'retain the largest readable size');
 console.log('PASS unbroken-word horizontal overflow triggers fitting');
+
+const supplementary=JSON.parse(fs.readFileSync(require.resolve('../docs/bible-supplement-books-20261016.json'),'utf8'));
+let supplementalChecks=0;
+for(const book of supplementary.supplementBooks)for(const ch of book.chapterOptions){
+ assert(c.persistentBibleChapterCacheKey('f98f4683-e3d5-4829-82aa-8e2e8b8d2adf',book.id,ch.key).endsWith('.cog-supplement-20261016'));
+ assert.equal(c.persistentBibleChapterCacheKey('other',book.id,ch.key),`other:${book.id}:${ch.key}`);supplementalChecks+=2;
+}
+console.log(`PASS ${supplementalChecks} supplemental cache assertions; existing chapter scopes retained`);

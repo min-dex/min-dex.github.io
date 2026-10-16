@@ -2346,7 +2346,7 @@ function readUiState() {
 
   if (ROUTE_MODULES.includes(moduleName)) state.module = moduleName;
   state.praiseFilter = normalizePraiseListFilterKey(praiseFilter, state.praiseFilter);
-  if (["all", "old", "new"].includes(scriptureFilter)) state.scriptureFilter = scriptureFilter;
+  if (["all", "old", "new", "extra"].includes(scriptureFilter)) state.scriptureFilter = scriptureFilter;
   if (SERVICE_FILTERS.includes(serviceFilter)) state.serviceFilter = serviceFilter;
 
   state.selectedSongId = safeStorageGet("session", STORAGE.selectedSongId) || null;
@@ -2598,7 +2598,7 @@ async function applyBrowserHistorySnapshot(snapshot) {
     state.search = snapshot.search || "";
     refs.searchInput.value = state.search;
     state.praiseFilter = normalizePraiseListFilterKey(snapshot.praiseFilter, state.praiseFilter);
-    if (["all", "old", "new"].includes(snapshot.scriptureFilter)) state.scriptureFilter = snapshot.scriptureFilter;
+    if (["all", "old", "new", "extra"].includes(snapshot.scriptureFilter)) state.scriptureFilter = snapshot.scriptureFilter;
     if (SERVICE_FILTERS.includes(snapshot.serviceFilter)) state.serviceFilter = snapshot.serviceFilter;
     state.selectedSongId = snapshot.selectedSongId || null;
     state.selectedVersionId = snapshot.selectedVersionId || null;
@@ -2777,7 +2777,7 @@ function linkStateFromParams(params) {
   const normalizedPraiseFilter = normalizePraiseListFilterKey(praiseFilter);
   if (normalizedPraiseFilter) snapshot.praiseFilter = normalizedPraiseFilter;
   const scriptureFilter = firstParam(params, ["scriptureFilter"]);
-  if (["all", "old", "new"].includes(scriptureFilter)) snapshot.scriptureFilter = scriptureFilter;
+  if (["all", "old", "new", "extra"].includes(scriptureFilter)) snapshot.scriptureFilter = scriptureFilter;
   const serviceFilter = firstParam(params, ["serviceFilter"]);
   if (SERVICE_FILTERS.includes(serviceFilter)) snapshot.serviceFilter = serviceFilter;
 
@@ -3566,7 +3566,7 @@ async function loadScriptureBooksOnce({ silent = false } = {}) {
     if (state.selectedBookCode && !state.scriptureBooks.some((book) => book.code === state.selectedBookCode)) {
       state.selectedBookCode = null;
     }
-    clearSelectedBookOutsideFilter();
+    if(state.bibleTranslations.length)clearSelectedBookOutsideFilter();
     persistUiState();
     render();
   } catch (error) {
@@ -5662,7 +5662,7 @@ async function loadBibleTranslationsOnce({ silent = false } = {}) {
   if (!requireClient({ silent })) return;
 
   try {
-    const data = await fetchCachedSupabasePaged("mindex_bible_translations", "id,translation_key,name,language,abbreviation,source", (query) =>
+    const data = await fetchCachedSupabasePaged("mindex_bible_translations", "id,translation_key,name,language,abbreviation,source,metadata", (query) =>
       query.eq("is_active", true).order("name", { ascending: true }));
     state.bibleReaderError = "";
     state.bibleTranslations = (data || []).map(normalizeServerBibleTranslation).sort(sortBibleTranslations);
@@ -5690,6 +5690,7 @@ async function loadBibleTranslationsOnce({ silent = false } = {}) {
 
 async function loadBibleBookVerses({ silent = false } = {}) {
   if (!requireClient({ silent })) return;
+  if(state.selectedBookCode && !getBibleBooks().some(b=>b.code===state.selectedBookCode)){state.selectedBookCode="GEN";state.selectedBibleChapter=1;state.scriptureFilter="all";}
   if (!state.selectedBookCode || !state.selectedBibleTranslationId) {
     state.bibleReaderLoading = false;
     state.bibleBookVerses = [];
@@ -5731,7 +5732,7 @@ async function loadBibleBookVerses({ silent = false } = {}) {
     try {
       const { data, error } = await state.client
         .from("mindex_bible_verses")
-        .select("book_code,chapter,verse,verse_end,text,section_title")
+        .select("book_code,chapter,verse,verse_end,text,section_title,metadata")
         .eq("is_active", true)
         .eq("translation_id", selectedTranslationId)
         .eq("book_code", selectedBookCode)
@@ -5739,7 +5740,7 @@ async function loadBibleBookVerses({ silent = false } = {}) {
         .order("verse", { ascending: true });
 
       if (error) throw error;
-      const rows = inferBibleVerseEndRanges((data || []).map(normalizeServerBibleVerse));
+      const rows = inferBibleVerseEndRanges((data || []).map(normalizeServerBibleVerse)).sort(sortBibleVerseRows);
       state.bibleVerseCache.set(cacheKey, rows);
       writePersistentBibleChapterCache(selectedTranslationId, selectedBookCode, selectedChapter, rows);
       if (cacheKey !== bibleVerseCacheKey(state.selectedBibleTranslationId, state.selectedBookCode, state.selectedBibleChapter)) {
@@ -5859,7 +5860,7 @@ async function fetchBibleTextSearchRowsByBook(query, translationId, page = 0) {
   const requestedEnd = requestedStart + pageSize - 1;
   const { data, error, count } = await state.client
     .from("mindex_bible_verses")
-    .select("id,book_code,chapter,verse,verse_end,text,section_title", { count: "estimated" })
+    .select("id,book_code,chapter,verse,verse_end,text,section_title,metadata", { count: "estimated" })
     .eq("is_active", true)
     .eq("translation_id", translationId)
     .ilike("text", `%${escapePostgrestLikePattern(query)}%`)
@@ -9166,6 +9167,7 @@ function handleDetailChange(event) {
 
 function switchBibleTranslation(translationId) {
   state.selectedBibleTranslationId = translationId || null;
+  if (state.selectedBookCode && !getBibleBooks().some(b=>b.code===state.selectedBookCode)) {state.selectedBookCode="GEN";state.selectedBibleChapter=1;state.scriptureFilter="all";}
   state.bibleBookVerses = [];
   persistUiState();
   syncBrowserHistory();
@@ -9254,12 +9256,10 @@ function applyBibleVerseDragSelection(drag) {
 }
 
 function bibleVerseRange(start, end) {
-  const [from, to] = [Number(start), Number(end)].sort((a, b) => a - b);
-  return state.bibleBookVerses
-    .filter((verse) => Number(verse.chapter) === state.selectedBibleChapter)
-    .map((verse) => Number(verse.verse))
-    .filter((verse) => verse >= from && verse <= to)
-    .sort((a, b) => a - b);
+  const rows=state.bibleBookVerses.filter(v=>Number(v.chapter)===state.selectedBibleChapter);
+  const first=rows.findIndex(v=>Number(v.verse)===Number(start)),last=rows.findIndex(v=>Number(v.verse)===Number(end));
+  if(first<0 || last<0)return [];
+  return rows.slice(Math.min(first,last),Math.max(first,last)+1).map(v=>Number(v.verse));
 }
 
 function syncBibleVerseSelectionClasses() {
@@ -11359,14 +11359,14 @@ async function fetchServiceScriptureVerses(reference, requestedTranslation = nul
   const requestPromise = (async () => {
     const { data, error } = await state.client
       .from("mindex_bible_verses")
-      .select("book_code,chapter,verse,verse_end,text,section_title")
+      .select("book_code,chapter,verse,verse_end,text,section_title,metadata")
       .eq("is_active", true)
       .eq("translation_id", translation.id)
       .eq("book_code", reference.book.code)
       .eq("chapter", reference.chapter)
       .order("verse", { ascending: true });
     if (error) throw error;
-    const rows = inferBibleVerseEndRanges((data || []).map(normalizeServerBibleVerse));
+    const rows = inferBibleVerseEndRanges((data || []).map(normalizeServerBibleVerse)).sort(sortBibleVerseRows);
     cacheServiceScriptureVerses(reference, rows, translation);
     writePersistentBibleChapterCache(translation.id, reference.book.code, reference.chapter, rows);
   })();
@@ -11620,7 +11620,7 @@ function serviceScriptureTextPayloadFromBible(item = {}, memo = parseServiceItem
       }));
     }
     return getCachedServiceScriptureVerses(reference, translation).map((verse) => ({
-      number: String(verse.verse || "").trim(),
+      number: bibleVerseNumberLabel(verse),
       verseEnd: Number(verse.verse_end) || null,
       text: String(verse.text || "").trim(),
       reference: normalizedReference,
@@ -11649,8 +11649,8 @@ function serviceScriptureReferenceParts(reference, fallback = "") {
     || "";
   const book = fullBook;
   const range = reference.verse
-    ? `${reference.chapter}:${reference.verse}${reference.verseEnd ? `–${reference.verseEnd}` : ""}`
-    : String(reference.chapter);
+    ? `${bibleChapterDisplayLabel(reference.book,reference.chapter)}:${reference.verse}${reference.verseEnd ? `–${reference.verseEnd}` : ""}`
+    : bibleChapterDisplayLabel(reference.book,reference.chapter);
   return { referenceBook: book, referenceBookFull: fullBook, referenceRange: range };
 }
 
@@ -11713,6 +11713,7 @@ function inferBibleVerseEndRanges(verses = []) {
 }
 
 function bibleVerseNumberLabel(verse) {
+  if (verse.metadata?.source_label) return String(verse.metadata.source_label);
   const start = Number(verse.verse) || 0;
   const end = Number(verse.verse_end) || 0;
   return end > start ? `${start}–${end}` : String(start);
@@ -14671,7 +14672,7 @@ function renderListFilter() {
   refs.listFilter.hidden = false;
   refs.listFilter.setAttribute("aria-label", state.module === "scripture" ? "말씀 필터" : "찬양 필터");
   const filters = state.module === "scripture"
-    ? [["all", "전체"], ["old", "구약"], ["new", "신약"]]
+    ? [["all", "전체"], ["old", "구약"], ["new", "신약"], ["extra", "제2경전/외경"]]
     : PRAISE_LIST_FILTERS;
   const activeFilter = state.module === "scripture" ? state.scriptureFilter : state.praiseFilter;
   refs.listFilterButtons.forEach((button, index) => {
@@ -16829,13 +16830,14 @@ function renderScriptureBookSelect(scripture) {
         <option value="">Select book</option>
         ${renderBibleBookOptions("Old Testament", value)}
         ${renderBibleBookOptions("New Testament", value)}
+        ${renderBibleBookOptions("Deuterocanon / Apocrypha", value)}
       </select>
     </label>
   `;
 }
 
 function renderBibleBookOptions(testament, selectedCode) {
-  const label = testament === "Old Testament" ? "Old Testament" : "New Testament";
+  const label = testament === "Deuterocanon / Apocrypha" ? "제2경전 / 외경" : testament;
   return `
     <optgroup label="${label}">
       ${getBibleBooks()
@@ -16928,7 +16930,7 @@ function renderBibleTextSearchResults() {
     <div class="bible-verse-list bible-search-results">
       ${state.bibleTextSearchResults.map((verse, index) => {
         const book = findBibleBookByCode(verse.book_code);
-        const reference = formatBibleVerseReference(book, verse.chapter, verse.verse, translation);
+        const reference = formatBibleVerseReference(book, verse.chapter, bibleVerseNumberLabel(verse), translation);
         return `
           <p class="bible-verse bible-search-result" data-bible-search-result="${index}" role="button" tabindex="0" aria-label="${escapeAttr(reference)} 열기">
             <span class="bible-search-reference">${escapeHtml(reference)}</span>
@@ -16990,6 +16992,7 @@ function renderBibleReader(book) {
       ${renderBibleReaderControls({
         chapterControl: renderBibleChapterControl(chapters, hasPreviousChapter, hasNextChapter),
       })}
+      ${getBibleBooks().some(b=>b.code===({EST:"GKE",DAN:"DA1"}[book.code])) ? `<button class="btn secondary" type="button" data-book-code="${{EST:"GKE",DAN:"DA1"}[book.code]}">${escapeHtml(book.koreanName)} 추가 본문 →</button>` : ""}
       ${
         state.bibleReaderLoading
           ? renderBibleVerseSkeleton()
@@ -17036,7 +17039,7 @@ function renderBibleChapterControl(chapters, hasPreviousChapter, hasNextChapter)
         </button>
         <select data-bible-reader-field="chapter" ${chapters.length ? "" : "disabled"}>
           ${chapters.length
-            ? chapters.map((chapter) => `<option value="${chapter}" ${chapter === state.selectedBibleChapter ? "selected" : ""}>${chapter}</option>`).join("")
+            ? chapters.map((chapter) => `<option value="${chapter}" ${chapter === state.selectedBibleChapter ? "selected" : ""}>${escapeHtml(bibleChapterDisplayLabel(findBibleBookByCode(state.selectedBookCode),chapter))}</option>`).join("")
             : `<option value="1">1</option>`}
         </select>
         <button class="icon-btn" type="button" data-bible-reader-action="1" aria-label="다음 장" ${hasNextChapter ? "" : "disabled"}>
@@ -17107,7 +17110,7 @@ function renderBibleVerseList(verses) {
         const verseLabel = bibleVerseNumberLabel(verse);
         return `
           ${sectionTitle ? `<div class="bible-section-title">${escapeHtml(sectionTitle)}</div>` : ""}
-          <p class="bible-verse${selected ? " selected" : ""}" data-bible-verse="${escapeAttr(String(verse.verse))}" role="button" tabindex="0" aria-selected="${selected ? "true" : "false"}" aria-label="${escapeAttr(verseLabel)}절 선택">
+          <p class="bible-verse${verse.metadata?.source_label ? " bible-supplement-verse" : ""}${selected ? " selected" : ""}" data-bible-verse="${escapeAttr(String(verse.verse))}" role="button" tabindex="0" aria-selected="${selected ? "true" : "false"}" aria-label="${escapeAttr(verseLabel)}절 선택">
             <span>${escapeHtml(verseLabel)}</span>
             <strong>${escapeHtml(verse.text || "")}</strong>
             <button class="bible-verse-copy" type="button" data-copy-bible-verse="${escapeAttr(String(verse.verse))}" aria-label="${escapeAttr(verseLabel)}절 복사">
@@ -17368,7 +17371,7 @@ function selectedBibleVerseRows(verseNumbers = state.selectedBibleVerses) {
   if (!selected.size) return [];
   return state.bibleBookVerses
     .filter((verse) => Number(verse.chapter) === state.selectedBibleChapter && [...selected].some((number) => number >= Number(verse.verse) && number <= Number(verse.verse_end || verse.verse)))
-    .sort((a, b) => Number(a.verse) - Number(b.verse));
+    .sort((a, b) => Number(a.metadata?.source_order ?? a.verse) - Number(b.metadata?.source_order ?? b.verse));
 }
 
 function formatBibleVerseForCopy(verse) {
@@ -17384,7 +17387,7 @@ function formatBibleSearchResultForCopy(verse) {
 }
 
 function formatBibleVerseReference(book, chapter, verse, translation) {
-  return [scriptureBookCopyName(book, translation), `${chapter}:${verse}`].filter(Boolean).join(" ");
+  return [scriptureBookCopyName(book, translation), `${bibleChapterDisplayLabel(book, chapter)}:${verse}`].filter(Boolean).join(" ");
 }
 
 function formatScriptureReferenceForCopy(reference, book, translation) {
@@ -17733,6 +17736,7 @@ function normalizeServerBibleVerse(row) {
     verse_end: Number(row.verse_end) || null,
     text: row.text || "",
     section_title: row.section_title || "",
+    metadata: row.metadata || {},
   };
 }
 
@@ -17760,6 +17764,7 @@ function normalizeServerBibleTranslation(row) {
     language: row.language || "",
     abbreviation: row.abbreviation || "",
     source: row.source || "",
+    metadata: row.metadata || {},
   };
 }
 
@@ -18318,12 +18323,28 @@ function formatNumericMarker(value, width) {
   return /^\d+$/.test(text) ? text.padStart(width, "0") : text;
 }
 
-function getBibleBooks() {
-  return state.scriptureBooks.length ? state.scriptureBooks : BIBLE_BOOKS;
+var supplementalBookProjection;
+function getBibleBooks(availableOnly = true) {
+  const base = state.scriptureBooks.length ? state.scriptureBooks : BIBLE_BOOKS;
+  const identity = availableOnly ? state.selectedBibleTranslationId : "all-editions";
+  if (!supplementalBookProjection) supplementalBookProjection = new Map();
+  const cached = supplementalBookProjection.get(identity);
+  if(cached?.base===base && cached.translations===state.bibleTranslations)return cached.books;
+  const supplements = availableOnly ? getSelectedBibleTranslation()?.metadata?.supplement_books : state.bibleTranslations.flatMap(t=>t.metadata?.supplement_books || []).filter((b,i,a)=>a.findIndex(x=>x.id===b.id)===i);
+  const books = base.filter(book => book.testament !== "Deuterocanon / Apocrypha");
+  for (const b of supplements || []) {
+    const original = base.find(book => book.code === b.id);
+    if (original) books.push({...original, koreanName:b.name, chapterCount:b.chapterOptions.length, metadata:{...original.metadata, chapter_options:b.chapterOptions}});
+  }
+  supplementalBookProjection.set(identity,{base,translations:state.bibleTranslations,books});return books;
+}
+function bibleChapterDisplayLabel(book, chapter) {
+  return book?.metadata?.chapter_options?.find(c=>c.key===Number(chapter))?.label || String(chapter);
 }
 
 function getBibleChapterOptions() {
   const selectedBook = findBibleBookByCode(state.selectedBookCode);
+  if (selectedBook?.metadata?.chapter_options) return selectedBook.metadata.chapter_options.map(c=>c.key);
   const chapterCount = getBibleChapterCount(selectedBook);
   if (chapterCount) return Array.from({ length: chapterCount }, (_, index) => index + 1);
   return [...new Set(state.bibleBookVerses.map((verse) => Number(verse.chapter)).filter((chapter) => chapter > 0))].sort((a, b) => a - b);
@@ -18344,7 +18365,7 @@ function sortBibleVerseRows(a, b) {
   return (
     Number(bookA?.sortOrder || 999) - Number(bookB?.sortOrder || 999) ||
     Number(a.chapter) - Number(b.chapter) ||
-    Number(a.verse) - Number(b.verse)
+    Number(a.metadata?.source_order ?? a.verse) - Number(b.metadata?.source_order ?? b.verse)
   );
 }
 
@@ -18421,12 +18442,13 @@ function getBibleBooksForScriptureFilter() {
   const books = getBibleBooks();
   if (state.scriptureFilter === "old") return books.filter((book) => book.testament === "Old Testament");
   if (state.scriptureFilter === "new") return books.filter((book) => book.testament === "New Testament");
+  if (state.scriptureFilter === "extra") return books.filter((book) => book.testament === "Deuterocanon / Apocrypha");
   return books;
 }
 
 function getFilteredBibleBooks() {
   const reference = parseBibleReference(state.search);
-  if (reference) return [reference.book];
+  if (reference) return getBibleBooks().some(b=>b.code===reference.book.code) ? [reference.book] : [];
   const books = getBibleBooksForScriptureFilter();
   if (isBibleTextSearchActive()) return books;
   const tokens = getSearchTokens(state.search);
@@ -18454,7 +18476,7 @@ function getBibleBookSearchMatch(book, tokens = getSearchTokens(state.search)) {
 }
 
 function groupBibleBooksByTestament(books) {
-  return ["Old Testament", "New Testament"]
+  return ["Old Testament", "New Testament", "Deuterocanon / Apocrypha"]
     .map((testament) => ({ testament, books: books.filter((book) => book.testament === testament).sort(sortBibleBooks) }))
     .filter((group) => group.books.length);
 }
@@ -18542,7 +18564,7 @@ function findBibleBookByName(name) {
 }
 
 function getBibleBookLookups() {
-  const books = getBibleBooks();
+  const books = getBibleBooks(false);
   if (bibleBookLookupCache.books === books) return bibleBookLookupCache;
 
   const byCode = new Map();
@@ -18736,6 +18758,10 @@ function parseBibleReference(value) {
 
 function parseBibleReferenceFromNormalizedText(text) {
   if (!text) return null;
+  const special=text.match(/^(.+?)\s+([^:\s]+)(?::\s*(\d+)(?:\s*-\s*(\d+))?)?$/);
+  if(special){const book=findBibleBookByReferenceName(special[1]);const option=book?.metadata?.chapter_options?.find(c=>c.label===special[2]);
+    if(option){const verse=Number(special[3])||null,verseEnd=Number(special[4])||null;if(verseEnd && verseEnd<(verse||1))return null;return {book,chapter:option.key,verse,verseEnd};}}
+
   const match =
     text.match(/^(.+?)\s+(\d{1,3})\s+(\d{1,3})(?:\s*-\s*(\d{1,3}))?$/) ||
     text.match(/^(.+?)\s+(\d{1,3})(?::\s*(\d{1,3})(?:\s*-\s*(\d{1,3}))?)?$/);
@@ -26126,8 +26152,8 @@ function formatServiceScriptureReferenceList(value) {
       return `${formatted}${separator}${referenceText}`;
     }
     const versePart = reference.verse
-      ? `${reference.chapter}:${reference.verse}${reference.verseEnd ? `–${reference.verseEnd}` : ""}`
-      : String(reference.chapter);
+      ? `${bibleChapterDisplayLabel(reference.book,reference.chapter)}:${reference.verse}${reference.verseEnd ? `–${reference.verseEnd}` : ""}`
+      : bibleChapterDisplayLabel(reference.book,reference.chapter);
     const sameBook = previous
       && previous.book?.code === reference.book?.code;
     const sameBookAndChapter = sameBook
@@ -26412,8 +26438,8 @@ function formatServiceBibleReference(reference, fallback = "") {
   if (!reference?.book || !reference?.chapter) return normalizeServiceItemReferenceSpacing(fallback);
   const book = reference.book.koreanName || reference.book.shortName || reference.book.code;
   const versePart = reference.verse
-    ? `${reference.chapter}:${reference.verse}${reference.verseEnd ? `–${reference.verseEnd}` : ""}`
-    : String(reference.chapter);
+    ? `${bibleChapterDisplayLabel(reference.book,reference.chapter)}:${reference.verse}${reference.verseEnd ? `–${reference.verseEnd}` : ""}`
+    : bibleChapterDisplayLabel(reference.book,reference.chapter);
   return [book, versePart].filter(Boolean).join(" ");
 }
 
@@ -28926,7 +28952,7 @@ function formatLiveScriptureSlideText(reference, verses = []) {
   const multipleVerses = verses.length > 1;
   return verses.map((verse, index) => {
     const verseText = String(verse?.text || "").trim();
-    const versePrefix = multipleVerses ? String(verse?.verse || "").trim() : "";
+    const versePrefix = multipleVerses ? bibleVerseNumberLabel(verse) : "";
     const line = [versePrefix, verseText].filter(Boolean).join("   ");
     return [index === 0 ? title : "", line].filter(Boolean).join("   ");
   }).join("\n");
@@ -28944,11 +28970,11 @@ function selectedPresenterBibleTranslation() {
 
 function formatLiveScriptureReference(reference, translation = selectedPresenterBibleTranslation()) {
   const bookName = scriptureBookCopyName(reference.book, translation);
-  if (reference.verse === null) return isKoreanBibleTranslation(translation) ? `${bookName} ${reference.chapter}장` : `${bookName} ${reference.chapter}`;
+  if (reference.verse === null) return isKoreanBibleTranslation(translation) ? `${bookName} ${bibleChapterDisplayLabel(reference.book,reference.chapter)}장` : `${bookName} ${bibleChapterDisplayLabel(reference.book,reference.chapter)}`;
   const verseRange = reference.verseEnd && reference.verseEnd !== reference.verse
     ? `${reference.verse}-${reference.verseEnd}`
     : `${reference.verse}`;
-  return `${bookName} ${reference.chapter}:${verseRange}`;
+  return `${bookName} ${bibleChapterDisplayLabel(reference.book,reference.chapter)}:${verseRange}`;
 }
 
 function renderPresenterSlideBoard(slides, index, serviceId) {

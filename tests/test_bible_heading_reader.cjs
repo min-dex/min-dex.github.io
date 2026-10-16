@@ -16,7 +16,7 @@ const state={selectedBibleTranslationId:'t',selectedBookCode:'GEN',selectedBible
   selectedBibleVerses:[],selectedBibleVerse:1,bibleVerseCache:new Map(),bibleBookVerses:[],
   client:{from:()=>query},module:'scripture'};
 const escape=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
-const context=vm.createContext({state,requireClient:()=>true,getBibleChapterOptions:()=>[1],render:()=>{},persistUiState:()=>{},
+const context=vm.createContext({state,bibleBookVerseLoadPromises:new Map(),requireClient:()=>true,getBibleBooks:()=>[{code:"GEN"}],sortBibleVerseRows:(a,b)=>a.verse-b.verse,getBibleChapterOptions:()=>[1],render:()=>{},persistUiState:()=>{},
   inferBibleVerseEndRanges:rows=>rows,showToast:message=>{throw Error(message)},escapeHtml:escape,escapeAttr:escape,
   safeStorageGet:(_,key,fallback)=>storage.get(key)||fallback,safeStorageSet:(_,key,value)=>storage.set(key,value)});
 vm.runInContext([

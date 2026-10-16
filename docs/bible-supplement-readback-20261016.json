@@ -1,0 +1,11 @@
+{
+  "date": "2026-10-16",
+  "status": "supplement_full_production_readback_verified",
+  "rows": 4389,
+  "books": 9,
+  "original66BookRecords": "byte-equivalent JSON values",
+  "translationMetadata": "exact expected value, other fields unchanged",
+  "rowsSHA256": "e4e6e052c22dcccfdcfe149bbda8c0182ea0d2c7498e83870246c64723acfe02",
+  "storesFullBodies": false,
+  "webDeployment": "pending"
+}

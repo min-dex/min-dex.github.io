@@ -5122,7 +5122,7 @@ function renderPresenterScriptureReadingSlide(slide) {
 function presenterScriptureReadingHeaderReference(slide = {}, verseNumber = "") {
   const referenceBook = presenterScriptureReadingBookName(slide?.referenceBook);
   const referenceRange = String(slide?.referenceRange || "").trim();
-  const chapter = referenceRange.match(/^(\d+)/)?.[1] || "";
+  const chapter = referenceRange.match(/^(\d+`?|\(\d+\))/)?.[1] || "";
   const verse = String(verseNumber || "").trim();
   const chapterReference = [referenceBook, chapter && verse ? `${chapter}:${verse}` : chapter ? `${chapter}장` : referenceRange].filter(Boolean).join(" ").trim();
   const fallback = String(slide?.title || slide?.marker || "").trim();
