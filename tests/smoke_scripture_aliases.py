@@ -41,6 +41,7 @@ def main():
                   check(findBibleTranslation('공동번역 개정')?.id==='cognew','revision alias');
                   check(findBibleTranslation('공동 번역')?.id==='cog','original identity');
                   check(findBibleTranslation('King James Version')?.id==='kjv','English edition');
+                  check(parseLiveScriptureQuery('Genesis 1:1 King James Version (CrossWire 1769)').translation?.id==='kjv','full edition name over four words');
                   check(!findBibleTranslation('공동번역 2099'),'unknown revision');
                   for(const text of ['Tobit 99:1 공동번역','다니엘 추가 본문 1:1 공동번역','Tobit 1:1 개역개정','Additions to Esther 13`:8 개역개정','다니엘 14:1 개역개정','창세기 51:1'])check(!parseLiveScriptureQuery(text).reference,text);
                   check(parseLiveScriptureQuery('Additions to Esther 13`:8 공동번역').reference.chapter===1004,'literal chapter');

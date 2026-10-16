@@ -29074,7 +29074,7 @@ function parseLiveScriptureQuery(query) {
   const text = String(query || "").normalize("NFKC").trim().replace(/\s+/g, " ");
   const wholeReference = parseBibleReference(text);
   const tokens = text.split(" ").filter(Boolean);
-  const maxTranslationTokens = Math.min(4, Math.max(tokens.length - 2, 0));
+  const maxTranslationTokens = Math.max(tokens.length - 2, 0);
   for (let count = maxTranslationTokens; count >= 1; count -= 1) {
     const translationText = tokens.slice(-count).join(" ");
     const translation = findBibleTranslation(translationText);
