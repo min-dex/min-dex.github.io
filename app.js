@@ -9192,6 +9192,10 @@ function switchBibleTranslation(translationId) {
   state.bibleBookVerses = [];
   persistUiState();
   syncBrowserHistory();
+  if (state.module === "scripture") {
+    renderListFilter();
+    renderSongList();
+  }
   if (isBibleTextSearchActive()) {
     runBibleTextSearch(state.bibleTextSearchQuery, { page: 0 });
     return;

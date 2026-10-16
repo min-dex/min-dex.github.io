@@ -416,3 +416,8 @@ slides or bulletin print.
 Scripture sidebar filters occupy four equal columns in one row (전체, 구약, 신약,
 제2경전/외경). The longer label may wrap inside its own cell at narrow widths;
 never give the supplemental category a separate full-width row.
+
+Changing Bible editions synchronously refreshes the sidebar filter, book list
+and visible count before starting reader/search requests. Search-mode switches
+must not retain the previous edition catalogue; unavailable supplemental books
+reset to the existing GEN/all selection before rendering.
