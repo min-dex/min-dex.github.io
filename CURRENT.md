@@ -318,3 +318,11 @@ Stop clears prior selection/PPT progress and resets to preparation; newly select
 slides still launch explicitly. Pending start-at-slide requests cannot reopen
 a stopped output. No music-policy or operational-data change. Offline popup
 smoke covers both engines, actual close/reopen and delayed launch cancellation.
+
+
+## Output session isolation ·2026-10-18
+
+Native output-window close now uses the explicit stop/reset path. Transient
+disconnect preserves the Window and position; reload can reattach. New output
+sessions reject old control/heartbeat/disconnect/draft/close messages. See the
+worship presenter decision log and smoke_output_session_isolation.py.

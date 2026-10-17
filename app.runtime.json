@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-output-restart",
+  "version": "20261018-output-session",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "c923f5e95d5a49d685e254fd8d0254e0b2d5527869ecabcc2f03c9f79f2f45ad",
-  "runtime_sha256": "2fb006cec2f6e6b15f299e06e05fbf2a7dcb5c8c32bdcfa217d3fc99dc417ebd",
-  "source_bytes": 1471751,
-  "runtime_bytes": 1041710,
-  "source_gzip": 328618,
-  "runtime_gzip": 257633
+  "source_sha256": "3c679f6e5ae759054946f21b88a0c2b396e28e28770f88d95049bc546c1be2ab",
+  "runtime_sha256": "d21792db011fcd347e22db16ba6612a41dcf0157ac687fb2087e5980e08876e8",
+  "source_bytes": 1472331,
+  "runtime_bytes": 1042147,
+  "source_gzip": 328871,
+  "runtime_gzip": 257725
 }

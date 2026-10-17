@@ -2809,6 +2809,7 @@ function presenterStatePayload(serviceId = state.presenter.serviceId) {
   });
   return {
     serviceId,
+    outputSessionId: state.presenter.outputSessionId || "",
     serviceType: service?.type_id || "",
     serviceTitle: [serviceDisplayTypeName(service), service ? formatServiceDate(service) : ""].filter(Boolean).join(" · "),
     serviceDate: service?.date || "",
@@ -2892,6 +2893,14 @@ function restorePresenterControllerSession() {
 }
 
 function bindPresenterChannel() {
+  window.addEventListener("message", (event) => {
+    if (event.origin !== window.location.origin || !event.source
+      || !["presenter-ready", "presenter-heartbeat"].includes(event.data?.type)
+      || !acceptsPresenterOutputMessage(event.data)) return;
+    // Recover the real Window reference after a controller reload, without opening anything.
+    state.presenter.outputWindow = event.source;
+    handlePresenterControllerMessage(event.data);
+  });
   window.addEventListener("storage", handlePresenterStorageSignal);
   if (!("BroadcastChannel" in window)) return;
   try {
@@ -2906,7 +2915,27 @@ function bindPresenterChannel() {
   state.presenter.channel.postMessage({ type: "presenter-controller-ready" });
 }
 
+const retiredPresenterOutputClients = new Set();
+
+function acceptsPresenterOutputMessage(message) {
+  if (!message.type?.startsWith("presenter-")) return false;
+  if (state.presenter.outputStopAt) return false;
+  const expected = state.presenter.outputSessionId
+    || readPresenterStoredPayload()?.outputSessionId;
+  if (expected && message.outputSessionId !== expected) return false;
+  if (message.clientId && retiredPresenterOutputClients.has(message.clientId)) return false;
+  const current = state.presenter.outputClientId;
+  if (current && message.clientId !== current) {
+    const announcing = ["presenter-ready", "presenter-heartbeat"].includes(message.type);
+    if (!announcing || isPresenterOutputHeartbeatOpen()) return false;
+    retiredPresenterOutputClients.add(current);
+  }
+  if (expected) state.presenter.outputSessionId = expected;
+  return true;
+}
+
 function handlePresenterControllerMessage(message = {}) {
+  if (!acceptsPresenterOutputMessage(message)) return;
   if (["presenter-ready", "presenter-heartbeat"].includes(message.type)) {
     state.presenter.outputTransportVersion = Number(message.transportVersion) || 0;
   }
@@ -2978,12 +3007,10 @@ function markPresenterOutputConnected(clientId = "", warmup = null) {
 
 function markPresenterOutputDisconnected(clientId = "") {
   if (clientId && state.presenter.outputClientId && clientId !== state.presenter.outputClientId) return;
-  state.presenter.outputWindow = null;
   state.presenter.outputConnectedAt = 0;
   state.presenter.outputPendingAt = 0;
-  state.presenter.outputClientId = "";
   state.presenter.outputWarmup = null;
-  stopPresenterOutputWindowMonitor();
+  startPresenterOutputWindowMonitor(state.presenter.serviceId);
   refreshPresenterOutputConnectionState();
   if (state.presenter.serviceId) renderPresenterControlState(state.presenter.serviceId);
 }
@@ -3094,6 +3121,7 @@ function publishPresenterPayload(payload, options = {}) {
 function presenterOutputUrl(options = {}) {
   const url = new URL(window.location.href);
   url.searchParams.set("output", "presenter");
+  if (state.presenter.outputSessionId) url.searchParams.set("outputSession", state.presenter.outputSessionId);
   url.hash = "";
   return url.toString();
 }
@@ -3345,11 +3373,13 @@ function initPresenterOutputCore() {
   let jumpDraft = "";
   let exitArmedAt = 0;
   let outputStopping = false;
+  const outputSessionId = new URL(window.location.href).searchParams.get("outputSession") || "";
   const outputClientId = `presenter-output:${Date.now()}:${Math.random().toString(36).slice(2)}`;
   let heartbeatTimer = null;
   const receivedMessages = new Set();
   const receivedSequences = new Map();
   const applyPayload = (payload) => {
+    if (outputSessionId && payload?.outputSessionId && payload.outputSessionId !== outputSessionId) return;
     if (payload?.messageId && receivedMessages.has(payload.messageId)) return;
     if (payload?.messageId) {
       const split = payload.messageId.lastIndexOf(":");
@@ -3368,7 +3398,10 @@ function initPresenterOutputCore() {
     applyPayload(payload);
   };
   const sendControllerMessage = (message) => {
-    const payload = { ...message, updatedAt: Date.now() };
+    const payload = { ...message, outputSessionId, updatedAt: Date.now() };
+    if (["presenter-ready", "presenter-heartbeat"].includes(message.type)) {
+      try { window.opener?.postMessage(payload, window.location.origin); } catch {}
+    }
     if (channel) {
       channel.postMessage(payload);
       return true;
@@ -3489,6 +3522,7 @@ function initPresenterOutputCore() {
       return;
     }
     if (message?.type === "presenter-output-close") {
+      if (outputSessionId && message.outputSessionId !== outputSessionId) return;
       window.setTimeout(() => {
         closeOutputChannel();
         window.close();
@@ -3519,11 +3553,12 @@ function initPresenterOutputCore() {
         return;
       }
       if (event.data?.type === "presenter-controller-ready") {
-        channel.postMessage({ type: "presenter-ready", clientId: outputClientId });
+        sendControllerMessage({ type: "presenter-ready", clientId: outputClientId });
         postHeartbeat();
         return;
       }
       if (event.data?.type === "presenter-output-close") {
+        if (outputSessionId && event.data.outputSessionId !== outputSessionId) return;
         window.setTimeout(() => {
           closeOutputChannel();
           window.close();
@@ -3634,6 +3669,7 @@ function presenterOutputKeyAction(event) {
 function normalizePresenterPayload(payload) {
   const slides = Array.isArray(payload?.slides) ? payload.slides : [];
   return {
+    outputSessionId: payload?.outputSessionId || "",
     snapshotId: payload?.snapshotId || "",
     messageId: payload?.messageId || "",
     serviceId: payload?.serviceId || null,

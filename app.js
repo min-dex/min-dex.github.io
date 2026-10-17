@@ -29734,6 +29734,7 @@ function presenterSelectedLaunchIndex(serviceId = state.selectedServiceId) {
 }
 
 function selectPresenterBoardSlide(serviceId, slideIndex, options = {}) {
+  if (state.presenter.outputWindow?.closed) stopPresenterOutput(state.presenter.serviceId);
   const index = Number(slideIndex);
   if (!serviceId || !Number.isFinite(index) || index < 0) return;
   const slides = presenterSlidesForService(serviceId);
@@ -31144,6 +31145,7 @@ function runPresenterAction(action, serviceId = state.selectedServiceId, options
   if (action !== "open" && isPresenterOutputWindowOpen() && state.presenter.serviceId && state.presenter.serviceId !== serviceId) return;
 
   if (action === "open") {
+    if (state.presenter.outputWindow?.closed) stopPresenterOutput(state.presenter.serviceId);
     preparePresenterService(serviceId);
     state.presenter.pptxProgress = null;
     const launchIndex = presenterSelectedLaunchIndex(serviceId);
@@ -31479,7 +31481,7 @@ function stopPresenterOutput(serviceId = state.presenter.serviceId) {
   state.presenter.outputGeneration += 1;
   const activeServiceId = serviceId || state.presenter.serviceId;
   const outputWindow = state.presenter.outputWindow;
-  state.presenter.channel?.postMessage({ type: "presenter-output-close" });
+  state.presenter.channel?.postMessage({ type: "presenter-output-close", outputSessionId: state.presenter.outputSessionId || "" });
   const closeDesktopOutput = window.mindexElectron?.closePresenterOutput;
   if (closeDesktopOutput) closeDesktopOutput().catch?.(() => {});
   state.presenter.jumpDraft = "";
@@ -31599,6 +31601,10 @@ async function openPresenterOutput(serviceId = state.selectedServiceId) {
   if (!serviceId) return;
   if (serviceNavigationBlocked(serviceId)) return;
   preparePresenterService(serviceId);
+  if (!isPresenterOutputWindowOpen()) {
+    state.presenter.outputSessionId = crypto.randomUUID();
+    state.presenter.outputClientId = "";
+  }
   const outputGeneration = beginPresenterOutputGeneration(serviceId);
   publishPresenterState({ force: true });
   state.presenter.outputStopAt = 0;
@@ -31766,6 +31772,11 @@ function isPresenterOutputHeartbeatOpen() {
 function startPresenterOutputWindowMonitor(serviceId) {
   stopPresenterOutputWindowMonitor();
   state.presenter.outputWindowMonitor = window.setInterval(() => {
+    // A closed Window is proof of user exit; missing heartbeat alone is not.
+    if (state.presenter.outputWindow?.closed) {
+      stopPresenterOutput(serviceId);
+      return;
+    }
     if (isPresenterOutputWindowOpen()) {
       if (state.presenter.outputPendingAt && !isPresenterOutputHeartbeatOpen() && serviceId) {
         renderPresenterControlState(serviceId);
@@ -31776,11 +31787,9 @@ function startPresenterOutputWindowMonitor(serviceId) {
     if (state.serviceMusic.mode === "presenter-audio" && globalThis.MindexSongTiming?.ownsSource(state.serviceMusic.sourceKey)) {
       stopServiceMusicPlayback({ render: false });
     }
-    state.presenter.outputWindow = null;
     state.presenter.outputConnectedAt = 0;
     state.presenter.outputPendingAt = 0;
     state.presenter.outputAttemptServiceId = "";
-    state.presenter.outputClientId = "";
     state.presenter.outputWarmup = null;
     refreshPresenterOutputConnectionState();
     if (serviceId) renderPresenterControlState(serviceId);
@@ -32181,6 +32190,7 @@ let presenterLaunchRequestSerial = 0;
 
 async function startPresenterAtSlide(serviceId, index) {
   if (!serviceId || !Number.isFinite(Number(index))) return;
+  if (state.presenter.outputWindow?.closed) stopPresenterOutput(state.presenter.serviceId);
   const requestSerial = ++presenterLaunchRequestSerial;
   await hydratePresenterServiceData(serviceId);
   if (requestSerial !== presenterLaunchRequestSerial) return;

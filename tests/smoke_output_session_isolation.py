@@ -1,0 +1,75 @@
+"""Native close, reload recovery and stale output message isolation offline."""
+import os
+from urllib.parse import urlsplit
+os.environ['MINDEX_SMOKE_OFFLINE']='1'
+from smoke_app import start_local_app_server,sync_playwright,launch_chromium
+s,u=start_local_app_server()
+try:
+ with sync_playwright() as p:
+  for engine in ['chromium','webkit']:
+   b=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
+   try:
+    ctx=b.new_context();ctx.route('**/*',lambda r:r.continue_() if urlsplit(r.request.url).netloc==urlsplit(u).netloc else r.abort())
+    page=ctx.new_page();page.goto(u);page.wait_for_function("typeof runPresenterAction==='function'&&!document.body.classList.contains('ui-booting')")
+    page.evaluate('''()=>{
+     window.svc={id:'restart-fixture',type_id:'sunday-second',title:'재시작 검증'};state.services=[svc];state.serviceItems={[svc.id]:[]};state.selectedServiceId=svc.id;
+     canUseClientData=()=>false;songCatalogLoaded=true;
+     window.fixtureSlides=[presenterReadySlide(svc),{id:'old',type:'lyrics',layout:'lower_bar_text',title:'이전 화면',text:'이전 송출 내용'}, {id:'new',type:'lyrics',layout:'lower_bar_text',title:'새 선택',text:'새로 선택한 내용'}];
+     buildServicePresenterSlides=()=>fixtureSlides;presenterSlideBuildSourceSignature=()=> 'fixture';
+     hydratePresenterOutputInBackground=()=>{};renderPresenterControlState=()=>{};
+     state.serviceMusic.playing=true;state.serviceMusic.mode='manual';state.serviceMusic.sourceKey='background-fixture';
+     window.musicStops=0;stopServiceMusicPlayback=()=>{musicStops++;throw Error('background music stopped')};
+     preparePresenterService(svc.id);state.presenter.index=1;selectPresenterBoardSlide(svc.id,1,{render:false});
+     document.body.innerHTML='<button id="open">시작</button><button id="stop">종료</button>';
+     document.querySelector('#open').onclick=()=>runPresenterAction('open',svc.id);
+     document.querySelector('#stop').onclick=()=>runPresenterAction('stop',svc.id);
+    }''')
+    for expected in [1,0,2]:
+     if expected==2:page.evaluate("selectPresenterBoardSlide(svc.id,2,{render:false})")
+     with page.expect_popup() as pop:page.click('#open')
+     out=pop.value;out.wait_for_selector('#presenterOutputRoot');page.wait_for_function('(i)=>readPresenterStoredPayload()?.index===i',arg=expected)
+     if expected:out.wait_for_function('(text)=>document.body.textContent.includes(text)',arg='이전 송출 내용' if expected==1 else '새로 선택한 내용')
+     else:out.wait_for_function("!document.body.textContent.includes('이전 송출 내용')")
+     out.screenshot(path=f'/tmp/output-restart-{engine}-{expected}.png')
+     page.evaluate('window.lastOutputRef=state.presenter.outputWindow')
+     if expected==1:
+      page.evaluate("window.oldSession=state.presenter.outputSessionId;window.oldClient=state.presenter.outputClientId")
+     else:
+      page.evaluate("""()=>{
+       const id=state.presenter.outputClientId,index=state.presenter.index;
+       for(const message of [
+        {type:'presenter-ready'}, {type:'presenter-heartbeat',pptxError:'stale'},
+        {type:'presenter-output-disconnect'}, {type:'presenter-control',action:'stop'},
+        {type:'presenter-control',action:'next'}, {type:'presenter-jump-draft',value:'999'}
+       ])handlePresenterControllerMessage({...message,clientId:oldClient,outputSessionId:oldSession});
+       if(state.presenter.outputClientId!==id||state.presenter.index!==index||state.presenter.outputStopAt||state.presenter.jumpDraft==='999')throw Error('stale session changed current output');
+      }""")
+     if expected!=1:
+      page.evaluate("state.presenter.channel.postMessage({type:'presenter-output-close',outputSessionId:oldSession})")
+      page.wait_for_timeout(100);assert page.evaluate('!state.presenter.outputWindow.closed')
+     if expected==2:
+      page.evaluate('state.presenter.outputWindow=null')
+      page.wait_for_function('!!state.presenter.outputWindow')
+      page.evaluate('window.reloadClient=state.presenter.outputClientId')
+      out.reload();out.wait_for_selector('#presenterOutputRoot')
+      page.wait_for_function('state.presenter.outputClientId!==reloadClient && !!state.presenter.outputClientId')
+      assert page.evaluate('state.presenter.index===2 && !state.presenter.outputStopAt')
+      page.evaluate("""()=>{
+       const id=state.presenter.outputClientId;
+       handlePresenterControllerMessage({type:'presenter-heartbeat',clientId:reloadClient,outputSessionId:state.presenter.outputSessionId});
+       if(state.presenter.outputClientId!==id)throw Error('retired reload client reclaimed connection');
+       markPresenterOutputDisconnected(id);
+       handlePresenterControllerMessage({type:'presenter-heartbeat',clientId:id,outputSessionId:state.presenter.outputSessionId});
+       if(state.presenter.index!==2||!isPresenterOutputHeartbeatOpen())throw Error('temporary connection did not recover');
+      }""")
+      print(engine,'PASS reload and transient reconnect preserve slide, retired client rejected',flush=True)
+     out.evaluate('window.close()');page.wait_for_function('lastOutputRef.closed');page.wait_for_function('!!state.presenter.outputStopAt');page.wait_for_timeout(250)
+     # WebKit can retain a closed popup Page handle; Window.closed is authoritative.
+     assert page.evaluate("state.presenter.index===0 && presenterSelectedLaunchIndex(svc.id)===null && state.presenter.pptxProgress===null && musicStops===0 && state.serviceMusic.playing")
+     print(engine,'PASS actual popup start',expected,'stop clears selection, background music preserved',flush=True)
+    # A delayed explicit slide launch must not reopen output after stop.
+    page.evaluate('''()=>{window.resolveLaunch=null;hydratePresenterServiceData=()=>new Promise(r=>resolveLaunch=r);window.pendingLaunch=startPresenterAtSlide(svc.id,2);stopPresenterOutput(svc.id);resolveLaunch()}''')
+    page.evaluate('pendingLaunch');assert page.evaluate('state.presenter.outputWindow===null && state.presenter.index===0')
+    print(engine,'PASS delayed launch cancelled by stop',flush=True)
+   finally:b.close()
+finally:s.shutdown();s.server_close()
