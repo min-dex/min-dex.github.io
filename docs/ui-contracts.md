@@ -50,9 +50,7 @@ Read `HANDOFF.md` first. This file is the short UI contract for Codex threads so
   buttons should not pull accent color into the app chrome.
 - Use accent for active/primary/data emphasis, such as selected rows, brand
   accent, enabled primary save/present actions, and linked/reference states.
-- Search should read as an independent surface on the sidebar through background
-  contrast, not a visible stroke. Focus may strengthen the surface tone without
-  adding an accent or border line.
+- Search shares the global field surface; focus uses the same visible accent outline as other editable controls.
 
 ## Navigation
 

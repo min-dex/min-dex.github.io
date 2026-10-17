@@ -3082,3 +3082,18 @@ before reopening. switchModule("home") is not a supported route, so earlier
 “reentry” samples actually re-rendered the same presenter. They must not be used
 as evidence of a home-reentry regression. Fresh data, first visible board, full
 font readiness and same-view redraw remain distinct measurements.
+## 전역 화면 색상 역할 통일 · 2026-10-17
+
+- 본문·패널·입력창의 세 가지 불투명 배경을 전역 공통 토큰으로 통일한다. 중첩 패널은 새 명도 대신 여백과 선으로 구분한다.
+- 선택·주요 동작은 강조색, 미입력·검토는 경고색, 실패·삭제는 위험색, 실제 송출·성공은 성공색을 사용한다. 일반 제목·분류·다가오는 예배·대기 상태는 중립색이다.
+- 송출 CSS와 슬라이드의 기존 색상 상속은 보존한다. 실제 예배 데이터는 변경하지 않는다.
+
+
+## Secondary full-text hints · 2026-10-17
+
+List/search metadata, order song-picker title and metadata, linked version titles,
+reference URLs and Bible book English names now expose escaped full text with
+native title hints. Reference hints retain the original URL, including scheme
+and query; visible short URLs remain unchanged. Layout, click actions, output,
+print and operational data remain unchanged. Offline Chromium/WebKit hover and
+long quoted-text checks cover the actual renderers.

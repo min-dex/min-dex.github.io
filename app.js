@@ -15246,7 +15246,7 @@ function renderSongList() {
             ${song.versions?.length > 1 ? `<span class="song-count-badge">${song.versions.length}</span>` : ""}
             ${renderSongAttentionIcon(song)}
           </span>
-          ${view.meta ? `<span class="song-meta-line">${escapeHtml(view.meta)}</span>` : ""}
+          ${view.meta ? `<span class="song-meta-line" title="${escapeAttr(view.meta)}">${escapeHtml(view.meta)}</span>` : ""}
         </button>
       `;
     })
@@ -15420,7 +15420,7 @@ function renderGlobalPraiseResult(result) {
         ${song.versions?.length > 1 ? `<span class="song-count-badge">${song.versions.length}</span>` : ""}
         ${renderSongAttentionIcon(song)}
       </span>
-      ${meta ? `<span class="song-meta-line">${escapeHtml(meta)}</span>` : ""}
+      ${meta ? `<span class="song-meta-line" title="${escapeAttr(meta)}">${escapeHtml(meta)}</span>` : ""}
     </button>
   `;
 }
@@ -15469,7 +15469,7 @@ function renderGlobalScriptureResult(result) {
         <span class="song-title-text">${escapeHtml(`${book.koreanName || book.englishName}${suffix}`)}</span>
         ${renderScriptureChapterBadge(book)}
       </span>
-      ${meta ? `<span class="song-meta-line">${escapeHtml(meta)}</span>` : ""}
+      ${meta ? `<span class="song-meta-line" title="${escapeAttr(meta)}">${escapeHtml(meta)}</span>` : ""}
     </button>
   `;
 }
@@ -16516,7 +16516,7 @@ function renderReferenceCard(link, allLinks = getReferenceEditorLinks()) {
       <a class="reference-card-link${safeUrl ? "" : " disabled"}" href="${escapeAttr(safeUrl || "#")}" target="_blank" rel="noopener noreferrer" ${safeUrl ? "" : "aria-disabled=\"true\" tabindex=\"-1\""}>
         <span>
           <strong title="${escapeAttr(link.title)}">${escapeHtml(link.title)}</strong>
-          <em>${escapeHtml(shortUrl(link.url))}</em>
+          <em title="${escapeAttr(link.url)}">${escapeHtml(shortUrl(link.url))}</em>
         </span>
       </a>
       <div class="reference-card-actions">
@@ -17031,7 +17031,7 @@ function renderLinkedSongVersionHead(entry) {
   return `
     <div class="version-compare-title linked-version-title" data-open-song="${escapeAttr(entry.song.id)}" role="button" tabindex="0">
       <div class="version-title-main">
-        <span class="version-title-text">${escapeHtml(linkedSongVersionTitle(entry.song, entry.version))}</span>
+        <span class="version-title-text" title="${escapeAttr(linkedSongVersionTitle(entry.song, entry.version))}">${escapeHtml(linkedSongVersionTitle(entry.song, entry.version))}</span>
         <span class="linked-version-badge">Linked</span>
       </div>
       <div class="version-title-actions">
@@ -17457,7 +17457,7 @@ function renderScriptureBookCard(book) {
       <div class="taxonomy-book-order">${String(book.sortOrder).padStart(2, "0")}</div>
       <div class="taxonomy-book-main">
         <div class="taxonomy-book-title">${escapeHtml(book.koreanName)}</div>
-        <div class="taxonomy-book-subtitle">${escapeHtml(book.englishName)}</div>
+        <div class="taxonomy-book-subtitle" title="${escapeAttr(book.englishName)}">${escapeHtml(book.englishName)}</div>
       </div>
     </article>
   `;
@@ -25940,8 +25940,8 @@ function renderServiceSongPickerResult(song, index) {
       data-service-song-index="${index}"
       role="option"
     >
-      <strong>${escapeHtml(songServiceOptionLabel(song) || song.title || "제목 없음")}</strong>
-      ${meta ? `<span>${escapeHtml(meta)}</span>` : ""}
+      <strong title="${escapeAttr(songServiceOptionLabel(song) || song.title || "제목 없음")}">${escapeHtml(songServiceOptionLabel(song) || song.title || "제목 없음")}</strong>
+      ${meta ? `<span title="${escapeAttr(meta)}">${escapeHtml(meta)}</span>` : ""}
     </button>`;
 }
 
