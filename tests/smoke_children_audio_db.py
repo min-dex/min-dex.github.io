@@ -1,8 +1,9 @@
 """Children DB ownership, failed-save retry, fresh storage and live-output gating. Offline only."""
-import os,io,wave,json,re
+import os,io,wave,json,re,threading
+from functools import partial
 from urllib.parse import urlsplit
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
-from smoke_app import start_local_app_server,sync_playwright,launch_chromium
+from smoke_app import APP_DIR,MindexSmokeHandler,MindexSmokeServer,sync_playwright,launch_chromium
 buf=io.BytesIO()
 with wave.open(buf,'wb') as w:
  w.setnchannels(1);w.setsampwidth(2);w.setframerate(8000);w.writeframes(b'\0\0'*8000*20)
@@ -17,7 +18,23 @@ fixture=r'''async()=>{
  await MindexSongTiming.ready;
  return {sid,song:structuredClone(song),item:structuredClone(item)};
 }'''
-server,url=start_local_app_server()
+class AudioFixtureHandler(MindexSmokeHandler):
+ def do_GET(self):
+  if urlsplit(self.path).path!='/clock.wav':return super().do_GET()
+  # Native media decoding must consume a real HTTP byte stream. Playwright's
+  # fulfilled responses can stall Linux WebKit after a backward seek.
+  data=buf.getvalue();span=re.fullmatch(r'bytes=(\d+)-(\d*)',self.headers.get('Range',''))
+  start=int(span[1]) if span else 0
+  end=min(int(span[2]) if span and span[2] else len(data)-1,len(data)-1)
+  self.send_response(206 if span else 200)
+  self.send_header('Content-Type','audio/wav');self.send_header('Accept-Ranges','bytes')
+  if span:self.send_header('Content-Range',f'bytes {start}-{end}/{len(data)}')
+  self.send_header('Content-Length',str(end-start+1));self.end_headers()
+  try:self.wfile.write(data[start:end+1])
+  except (BrokenPipeError,ConnectionResetError):pass
+server=MindexSmokeServer(('127.0.0.1',0),partial(AudioFixtureHandler,directory=str(APP_DIR)))
+threading.Thread(target=server.serve_forever,daemon=True).start()
+url=f'http://127.0.0.1:{server.server_address[1]}/index.html'
 try:
  with sync_playwright() as p:
   for engine in ('chromium','webkit'):
@@ -25,16 +42,8 @@ try:
    b=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
    def load():
     ctx=b.new_context();page=ctx.new_page();page.set_default_timeout(15000)
-    def route(r):
-     if r.request.url.endswith('/clock.wav'):
-      data=buf.getvalue();span=re.fullmatch(r'bytes=(\d+)-(\d*)',r.request.headers.get('range',''))
-      if span:
-       start=int(span[1]);end=min(int(span[2]) if span[2] else len(data)-1,len(data)-1)
-       r.fulfill(status=206,body=data[start:end+1],content_type='audio/wav',headers={'Accept-Ranges':'bytes','Content-Range':f'bytes {start}-{end}/{len(data)}'})
-      else:r.fulfill(body=data,content_type='audio/wav',headers={'Accept-Ranges':'bytes'})
-     elif (urlsplit(r.request.url).netloc==urlsplit(url).netloc or r.request.url.startswith('blob:')) and r.request.method in ('GET','HEAD'):r.continue_()
-     else:r.abort()
-    page.route('**/*',route);page.goto(url+'?mindexSmokeRaw=1');page.wait_for_function("typeof presenterSlidesForService==='function' && !!globalThis.MindexSongTiming && !document.body.classList.contains('ui-booting')")
+    # Block every external request, but leave local HTTP media unintercepted.
+    page.route(re.compile(r'^https?://(?!'+re.escape(urlsplit(url).netloc)+r'/)'),lambda r:r.abort());page.goto(url+'?mindexSmokeRaw=1');page.wait_for_function("typeof presenterSlidesForService==='function' && !!globalThis.MindexSongTiming && !document.body.classList.contains('ui-booting')")
     page.evaluate(fixture);return ctx,page
    ctx,page=load()
    assert page.evaluate("renderServicePraiseInputModeControl(state.serviceItems[state.selectedServiceId][0],0).includes('어린이: 음원 로드')")

@@ -857,3 +857,36 @@ smoke (now in default gate), retained DOM on incremental edits/inserts/deletes,
 180-preview traversal with no clipping/mismatch (max gap30.5/41ms),32 lyric bounds
 per engine and output swaps/blackout all pass. Public/CI verification follows.
 No production worship data was modified. Private raw traces remain outside Git.
+
+Published follow-up: Pages39032664038 succeeded for2c3de742,
+release20261017-version-delete, retaining entry-layout plus concurrent surface,
+audio and version-management changes.14 public file hashes match, including
+runtime/source, CSS, manifest, timing/design modules and six common fonts.
+
+Corrected native after medians (3 fresh profiles/engine, goHome asserted):
+Chrome home1.063s /first board.697s /fonts ready1.147s /reentry board.154s /
+reentry ready.179s. WebKit1.060s /.849s /2.039s /.188s /.223s respectively.
+Corrected before first/reentry board: Chrome1.287/.178s, WebKit.646/.137s.
+Chrome samples improved; WebKit did NOT show an end-to-end improvement in this
+small live-network sample. Do not advertise a WebKit latency reduction based on
+removed forced layout alone. WebKit after first-frame samples1.140/.849/.609s,
+and before.646/.529/.975s overlap. First-entry network/asset wait still varies.
+
+Public Chrome/WebKit passes: runtime-only boot, common output fonts, actual save
+functions against fake RPC (rollback/linked aggregate/inflight draft isolation),
+180 previews with0 clipping/mismatch and29.2/40ms maximum event-loop gap,
+32 lyric-bound cases each and late-media swaps/blackout. No production writes,
+test records, schema or permissions changes. Existing worships remain untouched.
+
+Linux39032664241 passed the new mount/scroll regression, runtime/font tests and
+atomic save checks, then failed the newly upstream children-audio replay fixture
+on WebKit. Upstream0185df97 adds proper seekable WAV206 range responses plus
+failure diagnostics without reducing assertions; latest Linux outcome must be
+reported separately. This is not a claimed whole-CI pass yet.
+
+Linux39033021838 still stalled after backward seek with route.fulfill even with
+206 responses (play/seeking/seeked, readyState2, play promise pending). The fixture
+now serves WAV ranges through the actual local HTTP server without intercepting
+local requests; all external requests remain blocked. Same15s assertions and real
+click/clock/slide/replay/stop checks remain. Both local engines pass; Linux retry
+will distinguish media-fixture transport behavior from an app regression.
