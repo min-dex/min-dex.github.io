@@ -1,5 +1,5 @@
 """Children DB ownership, failed-save retry, fresh storage and live-output gating. Offline only."""
-import os,io,wave,json
+import os,io,wave,json,re
 from urllib.parse import urlsplit
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from smoke_app import start_local_app_server,sync_playwright,launch_chromium
@@ -26,7 +26,12 @@ try:
    def load():
     ctx=b.new_context();page=ctx.new_page();page.set_default_timeout(15000)
     def route(r):
-     if r.request.url.endswith('/clock.wav'):r.fulfill(body=buf.getvalue(),content_type='audio/wav')
+     if r.request.url.endswith('/clock.wav'):
+      data=buf.getvalue();span=re.fullmatch(r'bytes=(\d+)-(\d*)',r.request.headers.get('range',''))
+      if span:
+       start=int(span[1]);end=min(int(span[2]) if span[2] else len(data)-1,len(data)-1)
+       r.fulfill(status=206,body=data[start:end+1],content_type='audio/wav',headers={'Accept-Ranges':'bytes','Content-Range':f'bytes {start}-{end}/{len(data)}'})
+      else:r.fulfill(body=data,content_type='audio/wav',headers={'Accept-Ranges':'bytes'})
      elif (urlsplit(r.request.url).netloc==urlsplit(url).netloc or r.request.url.startswith('blob:')) and r.request.method in ('GET','HEAD'):r.continue_()
      else:r.abort()
     page.route('**/*',route);page.goto(url+'?mindexSmokeRaw=1');page.wait_for_function("typeof presenterSlidesForService==='function' && !!globalThis.MindexSongTiming && !document.body.classList.contains('ui-booting')")
@@ -82,11 +87,15 @@ try:
    page.locator('[data-song-timing-play]').click()
    page.wait_for_function('state.serviceMusic.playing && state.serviceMusic.audio.currentTime>0')
    page.evaluate('state.serviceMusic.audio.currentTime=7.2');page.wait_for_function('state.presenter.slides[state.presenter.index]?.syncTimeline?.page===2')
+   page.evaluate("window.mediaTrace=[];['play','playing','pause','waiting','seeking','seeked','error','abort','ended'].forEach(type=>state.serviceMusic.audio.addEventListener(type,()=>mediaTrace.push({type,time:state.serviceMusic.audio.currentTime,paused:state.serviceMusic.audio.paused})))")
    page.evaluate('isPresenterOutputWindowOpen=()=>false;startPresenterOutputWindowMonitor(state.selectedServiceId)')
    page.wait_for_function('!state.serviceMusic.playing')
    page.evaluate("isPresenterOutputWindowOpen=()=>true")
    page.locator('[data-song-timing-play]').click()
-   page.wait_for_function('state.serviceMusic.playing')
+   try:page.wait_for_function('state.serviceMusic.playing')
+   except Exception:
+    print(engine,page.evaluate('JSON.stringify({trace:mediaTrace,playing:state.serviceMusic.playing,pending:state.serviceMusic.pending,ready:state.serviceMusic.audio.readyState,network:state.serviceMusic.audio.networkState,source:state.serviceMusic.sourceKey,service:state.presenter.serviceId,toast:document.querySelector("#toast")?.textContent})'),flush=True)
+    raise
    page.evaluate(r'''()=>{
     stopPresenterOutput(state.selectedServiceId);if(state.serviceMusic.playing)throw Error('output stop left sync audio playing');const song=state.songs[0];song.versions[0].forms[0].lyrics='changed';
     if(presenterSlidesForService(state.selectedServiceId).some(s=>s.syncTimeline))throw Error('stale DB lyrics');
