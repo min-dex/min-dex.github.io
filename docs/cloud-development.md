@@ -98,3 +98,14 @@ Release0c02f90d passed Linux39025986389 (10+8). Subsequent integrated icon subse
 9bb20f43 passed Linux39026352491 (11+8); both corresponding Pages releases were
 verified separately. Stalled-download fixtures retain an unversioned vendor case
 alongside the new versioned icon module. No production writes were tested.
+
+
+Static delivery diagnosis is separate from the offline baseline. Run
+`python tools/probe_static_delivery.py` explicitly to compare four fresh Chromium
+profiles against public static files. It visits only favicon and fetches the
+reviewed JS/CSS list as bytes, never evaluates app scripts or contacts Supabase.
+The dedicated `Static delivery diagnostic` workflow runs manually or when its
+own diagnostic files change on main, with read-only permissions and a seven-day
+JSON artifact. It is not a scheduled monitor or a default setup/test dependency.
+Network timings across runner/Mac locations are evidence, not identical-path
+benchmarks; do not infer a specific ISP/CDN fault from a single fast remote run.

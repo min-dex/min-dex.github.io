@@ -23,12 +23,14 @@ SMOKES = (
     "smoke_presenter_font_cache.py",
     "smoke_startup_bootstrap.py",
     "smoke_atomic_save_runtime.py",
+    "smoke_worship_audio_bundle.py",
     "smoke_reference_batch.py",
     "smoke_theme_bootstrap.py",
     "smoke_scripture_aliases.py",
     "smoke_startup_projection.py",
     "smoke_ui_font_cache.py",
     "smoke_stalled_download_recovery.py",
+    "smoke_startup_overlap_recovery.py",
 )
 
 def main():
