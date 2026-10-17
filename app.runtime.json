@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261017-children-version-audio",
+  "version": "20261017-control-rhythm",
   "options": {
     "compress": false,
     "mangle": {

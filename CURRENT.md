@@ -290,3 +290,14 @@ Private evidence: original checkout output/elem-audio-refresh/version-linkage/.
 Chromium/WebKit rendered38 complete sets and checked cues/fingerprints/four
 inactive modes; latest live-output/replay regression passes. Deployment pending
 required Linux gate and production-byte verification.
+
+
+## Controller rhythm and button feedback ·2026-10-17
+
+Shared utility buttons now have transparent rest/visible field hover, with10px
+text inset and5px icon gaps. Primary hover retains its intent with an inset ring.
+Live scripture removes excess checkbox-row centering space and uses20px heading,
+10px spacing and35px field; controller toolbar heights align at35px.
+Offline Chromium/WebKit checks cover both themes, narrow composer, button hover,
+text contrast and keyboard focus; shared editor surfaces and praise row layouts
+are checked separately. Output/print/data are untouched. See design-system.md.

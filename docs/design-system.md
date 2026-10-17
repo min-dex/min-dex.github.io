@@ -90,3 +90,18 @@ Focus uses a visible accent outline. Placeholder ink is solid secondary text.
 
 Slide artwork/chromakey/preview content, presenter-output stylesheet and printed
 bulletin styling are excluded. Do not derive output colors from these UI roles.
+
+
+## Control rhythm and feedback ·2026-10-17
+
+Prefer multiples of5 for spacing/control dimensions, then even values. Keep
+justified values such as1px borders,14/16px icons and the typography ladder.
+Text utility controls have10px horizontal inset and5px icon gaps; bare DB links
+and square icon targets retain their distinct roles. Neutral utility buttons
+use transparent rest/field hover rather than an invisible panel-on-panel box.
+Primary buttons retain accent colors and gain an inset hover ring; warnings,
+keyboard focus and disabled feedback remain explicit.
+Live scripture uses10px outer inset/padding, a20px heading/checkbox line,10px
+heading-to-input gap and35px input. The previous28px checkbox row added invisible
+vertical centering space above the heading. Controller toolbar/panel controls
+also use35px. Output artwork and bulletin print rules are outside this cleanup.
