@@ -2,7 +2,7 @@ name: Cloud web checks
 on:
   pull_request:
   push:
-    branches: [main, codex/mindex-presenter-handoff]
+    branches: [main, 'codex/**']
   workflow_dispatch:
 permissions:
   contents: read
