@@ -2257,7 +2257,8 @@ execution or deployment. Existing production worship records are untouched.
   sequence, after form-background photos are composed. Key profiles by service,
   element, song and version; never inherit another service's timings. Children's
   designated-set behavior and one-second lyric lead remain unchanged.
-- Service timings use the recorded time exactly, for lyrics and photos alike.
+- Record when singing begins: lyrics advance one second early, including lyric
+  pages over photos. Instrumental/blank/photo-only pages use their recorded time.
   The editor shows photos and form labels, supports sequential or individual
   stamps, manual seconds, an existing linked audio download or a local file.
   Save uses the existing browser-local IndexedDB store. Optional immutable shared

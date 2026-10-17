@@ -6,7 +6,7 @@
   const keyFor = (songId, versionId) => JSON.stringify([String(songId || ''), String(versionId || '')]);
   const pagesFor = slides => slides.filter(s => !s.hiddenInPresentation && !s.autoTrailingBlank && (s.type === 'lyrics' || s.type === 'blank'));
   const fingerprint = slides => JSON.stringify(pagesFor(slides).map(s => [s.type, String(s.text || '').normalize('NFC'), ...(s.serviceTimingPage ? [s.formKey || '', s.formBackgroundImage || '', s.serviceTimingAudioSource || ''] : [])]));
-  const noLead = slide => slide.serviceTimingPage || slide.type === 'blank' || /^[\s♪♫♬♩]*$/.test(slide.text || '');
+  const noLead = slide => slide.type === 'blank' || /^[\s♪♫♬♩]*$/.test(slide.text || '');
   function validate(profile, slides) {
     const pages = pagesFor(slides);
     if (!pages.length || profile?.lyricsFingerprint !== fingerprint(slides)) return '가사·송폼·장 나눔이 바뀌었어요. 시각을 다시 맞춰 주세요.';
@@ -92,7 +92,7 @@
         if (valid && (timed || slide.type === 'song-title')) out.syncTimeline = {
           groupId: `${serviceId}:${item.id}:service-song-timing`, audioSrc: profile.url,
           audioTitle: profile.audioName, page: timed ? page + 1 : 0,
-          start: timed ? profile.starts[page] : null, lead: 0, intro: !timed,
+          start: timed ? profile.starts[page] : null, lead: timed && !noLead(slide) ? 1 : 0, intro: !timed,
           localTiming: true, serviceTiming: true,
         };
         if (timed) page++;
@@ -290,7 +290,7 @@
     dialog.innerHTML = `<h2 id="song-timing-title">${serviceTiming ? '가사·사진 음원 동기화' : '어린이 음원 세트'}</h2>
       <p>${escapeHtml(all[0]?.elementTitle || all[0]?.title || '')}</p>
       <p>${serviceTiming ? '이 예배의 현재 곡·가사·사진 순서에 전환 시각을 저장합니다. 사진을 먼저 배치한 뒤 타이밍을 기록하세요. 다른 예배에는 적용되지 않습니다.' : '현재 가사·폼과 음원·자동 넘김 시각을 한 세트로 저장합니다. 예배 순서에서 ‘어린이: 음원 로드’를 선택하면 이 세트를 사용합니다.'}</p>
-      <p>동기화 저장은 이 브라우저에 보관합니다. 다른 컴퓨터에서는 공유 저장 후 공유 불러오기를 사용하세요. 음원을 들으며 각 장의 시작을 기록하세요. ${serviceTiming ? '가사와 사진 모두 기록한 시각에 넘깁니다. 수동 넘김은 음악을 일시정지합니다.' : '가사는 1초 먼저, 빈 화면·음표는 기록한 시각에 넘깁니다.'}</p>
+      <p>동기화 저장은 이 브라우저에 보관합니다. 다른 컴퓨터에서는 공유 저장 후 공유 불러오기를 사용하세요. 음원을 들으며 각 장의 시작을 기록하세요. ${serviceTiming ? '가사는 부르기 시작하는 시각을 기록하면 1초 먼저 넘깁니다. 가사 없는 사진·간주는 기록한 시각에 넘깁니다. 수동 넘김은 음악을 일시정지합니다.' : '가사는 1초 먼저, 빈 화면·음표는 기록한 시각에 넘깁니다.'}</p>
       ${linkedAudio.url ? `<button type="button" class="btn secondary" data-timing-linked>연결된 음원 사용 · ${escapeHtml(linkedAudio.name || '음원')}</button>` : ''}
       <label>음원 선택 <input type="file" accept="audio/*" data-timing-file></label>
       <p data-timing-filename></p><audio controls preload="metadata"></audio>

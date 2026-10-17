@@ -73,9 +73,9 @@ try:
    print(engine,page.evaluate(r'''async()=>{
     const check=(v,m)=>{if(!v)throw Error(m)},T=MindexSongTiming,{serviceId,elementId}=photoTiming;
     const slides=presenterSlidesForService(serviceId),pages=T.pagesFor(slides.filter(s=>(s.progressionParentId||s.elementId)===elementId));
-    check(pages.every(s=>s.syncTimeline?.serviceTiming && s.syncTimeline.lead===0),'exact timing missing');
+    check(pages.every(s=>s.syncTimeline?.serviceTiming && s.syncTimeline.lead===(s.type==='blank'||/^[\s♪♫♬♩]*$/.test(s.text||'')?0:1)),'lyric lead / instrumental photo timing wrong');
     for(let i=1;i<pages.length;i++){
-     const at=slides.indexOf(pages[i-1]),time=pages[i].syncTimeline.start;
+     const at=slides.indexOf(pages[i-1]),time=Math.max(0,pages[i].syncTimeline.start-pages[i].syncTimeline.lead);
      check(presenterSyncedLyricsTargetForTime(slides,at,time-.01).slide.id===pages[i-1].id,'early transition');
      check(presenterSyncedLyricsTargetForTime(slides,at,time).slide.id===pages[i].id,'missed transition');
     }
@@ -98,7 +98,7 @@ try:
     check(!syncServiceMusicSyncedLyricsWithCurrentTime({render:false,publish:false,scroll:false}),'scripture advanced');
     state.presenter.liveScripture.active=false;
     runPresenterAction('next',serviceId,{scroll:false});check(!state.serviceMusic.playing,'manual did not pause');
-    return 'PASS exact cues, isolated service, photo reorder stale guard, blackout/scripture guards, manual pause, unchanged DB records';
+    return 'PASS one-second lyric lead and exact instrumental photo cues, isolated service, photo reorder stale guard, blackout/scripture guards, manual pause, unchanged DB records';
    }'''))
    # Persisted timing and audio survive a browser reload, with identical fixture identity.
    snapshot=page.evaluate('photoTimingSnapshot')
