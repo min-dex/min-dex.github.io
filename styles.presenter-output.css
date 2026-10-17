@@ -133,6 +133,11 @@
   transform-origin: center center;
   user-select: none;
 }
+/* Keep the stage backing navy under lower bars, including fractional output
+   window edges where the child layer can rasterize one device pixel short. */
+.presenter-output-root:not(.no-chromakey):has(> :is(.presenter-slide--lyrics, .presenter-slide--song-title, .presenter-slide--scripture, .presenter-slide--title-assignee), > .presenter-output-layer.is-active > :is(.presenter-slide--lyrics, .presenter-slide--song-title, .presenter-slide--scripture, .presenter-slide--title-assignee)) {
+  background: linear-gradient(to top, var(--presenter-output-bar-edge) 0 var(--presenter-output-bar-height), var(--presenter-chromakey) var(--presenter-output-bar-height) 100%);
+}
 .presenter-output-root.no-chromakey {
   --presenter-weight-support: 700;
   --presenter-text-inset: 7.5cqw;

@@ -2096,3 +2096,19 @@ third-service hymn; it does not replace third-service praise.
 
 Presenter secondary preparation/settings are folded under `편집·설정`. Core live
 controls remain visible; the explicit blackout button reuses jump index -1.
+
+## Output lower-bar backing (2026-10-17)
+
+The real output stage now owns the same navy lower-bar backing as thumbnails.
+A fractional child paint boundary must not expose the green stage beneath the
+caption bar. Applies only to chromakey lyrics/song-title/scripture/title-assignee
+slides; blank green and clean output retain their own background behavior.
+`tests/smoke_output_bar_edge.py` checks stage backing and fractional viewport/DPR
+edge pixels in Chromium/WebKit. The reported screenshot contains a mixed green
+bottom pixel; exact compositor reproduction was not observed in the test fixture.
+
+Release verification expands to all four output edges across eight viewport/DPR
+combinations using renderPresenterOutput, four lower-bar layouts and blank
+transition. Only active layers own backing; hidden previous frames cannot
+recolor blank output. The inherent one-device-pixel antialiased outer boundary
+of a fractional green stage is excluded from outside-letterbox checks.
