@@ -1408,6 +1408,12 @@ function bindStaticEvents() {
   });
   document.getElementById("globalPlaybackControls")?.addEventListener("click", handleGlobalPlaybackAction);
   bindDetailInteractionRoot(document.getElementById("globalPlaybackControls"));
+  document.getElementById("globalPlaybackControls")?.addEventListener("beforetoggle", (event) => {
+    if (event.target.id === "globalPlaybackPanel" && event.newState === "open") positionGlobalPlaybackPanel();
+  }, true);
+  window.addEventListener("resize", () => {
+    if (document.getElementById("globalPlaybackPanel")?.matches(":popover-open")) positionGlobalPlaybackPanel();
+  });
   document.getElementById("globalPlaybackControls")?.addEventListener("toggle", (event) => {
     if (event.target.id !== "globalPlaybackPanel" || event.newState !== "closed") return;
     if (document.activeElement === document.body || event.target.contains(document.activeElement)) {
@@ -28684,6 +28690,17 @@ function handleGlobalPlaybackAction(event) {
   void runServiceMusicAction(action, binding);
 }
 
+function positionGlobalPlaybackPanel() {
+  const panel = document.getElementById("globalPlaybackPanel");
+  const trigger = document.querySelector(".global-playback-trigger");
+  if (!panel || !trigger) return;
+  const rect = trigger.getBoundingClientRect();
+  const top = Math.min(rect.bottom + 8, window.innerHeight - 40);
+  panel.style.left = `clamp(8px, ${rect.left}px, calc(100vw - min(320px, calc(100vw - 16px)) - 8px))`;
+  panel.style.top = `${top}px`;
+  panel.style.maxHeight = `${Math.max(24, window.innerHeight - top - 8)}px`;
+}
+
 function renderGlobalPlaybackControls() {
   const root = document.getElementById("globalPlaybackControls");
   if (!root) return;
@@ -28725,6 +28742,7 @@ function renderGlobalPlaybackControls() {
     next.append(template.content);
     patchPresenterControlTree(root, next);
   } else root.append(template.content);
+  if (root.querySelector(":popover-open")) positionGlobalPlaybackPanel();
 }
 
 function renderLiveServiceReturnControl() {

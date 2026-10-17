@@ -2755,3 +2755,15 @@ Offline Chromium/WebKit checks cover editor save, fresh-page reload, actual audi
 playback/seek, cue boundaries, altered lyrics/audio, service isolation and no DB
 writes. Existing lyric/photo and shared timing checks plus the Cloud baseline
 pass locally. This does not certify any real song's calibration or deployment.
+
+## Playback toolbar placement and anchored panel (2026-10-17)
+
+The output/music launcher belongs beside theme/refresh/save in the toolbar, not
+among page tabs. Match the40px toolbar hit area and remove idle indicator space.
+The native popover opens8px below the launcher, left aligned when space permits,
+clamped inside the viewport, at320px maximum width with16px content padding.
+Resize clamping is CSS-based so it works before the resize event runs. Keep open
+panels anchored after state patches; retain native Escape/outside dismissal,
+focus return and playback ownership. Toolbar button styling targets direct children
+so panel controls do not inherit fixed toolbar widths. Browser checks cover desktop
+760–1440px, both themes, viewport clamping, updates and existing playback actions.
