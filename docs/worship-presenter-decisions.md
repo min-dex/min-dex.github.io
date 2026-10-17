@@ -2201,3 +2201,15 @@ names and option IDs are unchanged. Keep the native select inside a layout
 wrapper with a centered chevron inset 12px and 32px text padding so platform
 arrows cannot hug the outer edge. Chromium/WebKit fixture checks verify label,
 selection identity and chevron spacing. No worship data changes.
+
+
+## Full-pane empty/loading alignment (2026-10-17)
+
+Center the common loading skeleton only when it is a direct detail-pane child.
+Embedded list skeletons retain their normal flow and padding. No-gathering and
+deferred past-service notices use the shared centered empty-detail layout.
+The deferred action uses the existing data-open-presenter-service handler in
+both service and presenter contexts; sidebar-only data-service-id cannot open
+a service from the detail pane. No production data, output or print changes.
+Offline smoke_empty_state_layout.py covers Chromium/WebKit, four viewport sizes,
+both themes, nested loading preservation and actual deferred button clicks.

@@ -8414,3 +8414,10 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .svc-song-version-control > .svc-song-version-select { appearance:none; -webkit-appearance:none; width:100%; max-width:none; padding-right:32px; text-overflow:ellipsis; }
 .svc-board-subgroup-controls .svc-song-picker--linked .svc-song-version-control { flex:1 1 0; width:0; max-width:none; }
 .svc-board-subgroup-controls .svc-song-version-control > .svc-song-version-select { width:100%; padding-right:32px; }
+
+/* Center whole-pane loading only; embedded list skeletons keep their layout. */
+.detail-pane:has(> .detail-loading-skeleton) { padding:0; }
+.detail-pane > .detail-loading-skeleton { width:100%; min-height:100%; box-sizing:border-box; align-content:center; justify-items:center; padding:30px; }
+.detail-pane > .detail-loading-skeleton > .detail-loading-lines { width:min(100%, 400px); justify-items:center; }
+.service-deferred-empty { max-width:100%; }
+.service-deferred-empty > .btn { margin-top:15px; }

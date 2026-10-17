@@ -22083,7 +22083,7 @@ function serviceNavigationBlocked(serviceId) {
 
 function renderNoGatheringServiceDetail(service) {
   setRightSidebarContent("");
-  refs.detailPane.innerHTML = `<div class="service-dashboard"><h2>${escapeHtml(serviceDisplayTypeName(service))}</h2><p class="service-no-results">${escapeHtml(formatServiceDate(service))} · 집회 없음</p></div>`;
+  refs.detailPane.innerHTML = `<div class="empty-detail"><div class="empty-detail-inner"><h2>${escapeHtml(serviceDisplayTypeName(service))}</h2><p>${escapeHtml(formatServiceDate(service))} · 집회 없음</p></div></div>`;
 }
 
 function serviceOrderTemplate(typeId, options = {}) {
@@ -24362,7 +24362,7 @@ function renderServiceDetail() {
   const items = state.serviceItems[serviceId];
   if (!items) {
     if (shouldDeferPastWorshipServiceLoad(serviceId)) {
-      refs.detailPane.innerHTML = renderDeferredPastServiceDetail(svc, "service");
+      refs.detailPane.innerHTML = renderDeferredPastServiceDetail(svc);
       refreshIcons(refs.detailPane);
       return;
     }
@@ -24448,7 +24448,7 @@ function renderPresenterDetailUnscoped() {
   if (!items) {
     if (shouldDeferPastWorshipServiceLoad(serviceId)) {
       setRightSidebarContent("");
-      refs.detailPane.innerHTML = renderDeferredPastServiceDetail(svc, "presenter");
+      refs.detailPane.innerHTML = renderDeferredPastServiceDetail(svc);
       refreshIcons(refs.detailPane);
       return;
     }
@@ -26251,29 +26251,14 @@ function renderServiceDateCard(service, options = {}) {
     </button>`;
 }
 
-function renderDeferredPastServiceDetail(service, mode = "service") {
-  const isPresenter = mode === "presenter";
+function renderDeferredPastServiceDetail(service) {
   return `
-    <div class="service-dashboard">
-      <section class="service-dashboard-section">
-        <div class="service-section-head">
-          <div>
-            <h2 class="service-date-list-title">${escapeHtml(serviceDisplayTypeName(service))}</h2>
-            <p class="service-week-range">${escapeHtml(`${formatServiceDate(service)} · 지난 예배`)}</p>
-          </div>
-        </div>
-        <div class="service-date-grid service-date-grid--dashboard">
-          <button class="service-date-card" type="button" ${isPresenter
-            ? `data-open-presenter-service="${escapeAttr(service.id)}"`
-            : `data-service-id="${escapeAttr(service.id)}"`}>
-            <span class="service-date-card-top">
-              <span class="service-date-card-date">필요할 때만 불러오기</span>
-              <span class="service-date-card-open">열기</span>
-            </span>
-            <span class="service-date-card-type">${escapeHtml(serviceDisplayTypeName(service))}</span>
-            <span class="service-date-card-preview">날짜 지난 예배라서 아직 브라우저에 불러오지 않았습니다.</span>
-          </button>
-        </div>
+    <div class="empty-detail">
+      <section class="empty-detail-inner service-deferred-empty">
+        <h2>${escapeHtml(serviceDisplayTypeName(service))}</h2>
+        <p>${escapeHtml(`${formatServiceDate(service)} · 지난 예배`)}</p>
+        <p>아직 이 예배의 자료를 불러오지 않았습니다.</p>
+        <button class="btn secondary" type="button" data-open-presenter-service="${escapeAttr(service.id)}">예배 불러오기</button>
       </section>
     </div>`;
 }
