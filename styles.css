@@ -4544,24 +4544,25 @@ body[data-theme="dark"] .service-week-card:hover {
   flex: 0 0 auto;
   align-items: center;
   border: 0;
-  border-radius: var(--r);
-  background: color-mix(in srgb, var(--panel-2) 18%, transparent);
+  border-radius: 0;
+  background: transparent;
   color: var(--ink-4);
   cursor: pointer;
   font: inherit;
   font-size: var(--ui-meta-size);
   font-weight: 700;
   letter-spacing: .04em;
-  padding: 0 5px;
+  padding: 0;
+  text-underline-offset: 3px;
 }
 .svc-item-link--linked { color: var(--accent); }
 .svc-item-link--manual { cursor: default; opacity: .75; }
 .svc-item-link:hover {
-  background: color-mix(in srgb, var(--accent-soft) 40%, transparent);
+  text-decoration: underline;
   color: var(--accent);
 }
 .svc-item-link--manual:hover {
-  background: color-mix(in srgb, var(--panel-2) 28%, transparent);
+  text-decoration: none;
   color: var(--ink-4);
 }
 .svc-edit-title { min-width: 0; overflow: hidden; font-size: var(--ui-body-size); font-weight: var(--ui-row-weight); text-overflow: ellipsis; white-space: nowrap; }
@@ -7374,8 +7375,8 @@ textarea.svc-presenter-input-control--multiline {
 }
 .svc-board-subgroup-controls .svc-item-link {
   justify-content: center;
-  min-width: 36px;
-  padding: 0 8px;
+  min-width: 0;
+  padding: 0;
   font-size: var(--ui-label-size);
   letter-spacing: 0;
 }

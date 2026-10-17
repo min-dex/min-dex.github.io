@@ -2807,3 +2807,10 @@ error states. Auth is still awaited; no reads, saves or permissions are skipped.
 Chromium/WebKit tests cover one-off CSS/script failure, exactly one app execution,
 slow initial data, permanent failures, stalled resources, manual recovery,
 stylesheet-before-script requests and resolved-only execution.
+
+
+## DB shortcuts · 2026-10-17
+
+Element-heading and inline DB shortcuts use transparent text with no horizontal
+padding. Hover underlines actionable links; native keyboard focus remains visible.
+Manual/non-actionable labels do not acquire a hover underline.
