@@ -1,5 +1,21 @@
 # Read-only operations panel
 
+## Reload continuity and 60/180 cadence · 2026-10-17
+
+Reporter tokens (reporter-only, never viewer credentials) are stored in tab-scoped
+sessionStorage and reused on reload. Web Locks prevent copied tabs from using
+the same token concurrently where supported. Unavailable storage falls back to
+in-memory registration. Page hide stops uploads without deleting the session;
+bfcache restore resumes it. Invalid/expired tokens re-register once.
+
+Presence sends every 60 seconds; output changes are detected locally within
+2 seconds and sent without waiting for the interval. The minimal ping RPC accepts
+changed output even inside the old 10-second heartbeat throttle. Both the client
+and public query expire visibility at 180 seconds. A closed/offline tab may remain
+listed for up to three minutes. Migration: `2026-10-17-presence-session.sql`.
+This supersedes earlier 15/45 timing and memory-only/pagehide-delete notes below.
+
+
 ## Password-free presence · 2026-10-17
 
 The panel opens directly and calls `mindex_monitor_presence()` without a viewer

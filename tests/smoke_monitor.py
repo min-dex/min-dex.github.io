@@ -24,14 +24,14 @@ def main():
                         monitorCalls.push({name,args});
                         if(monitorMode==='pending')return new Promise(resolve=>window.monitorRelease=resolve);
                         if(monitorMode==='missing')return Promise.resolve({error:{code:'PGRST202'}});
-                        const data=name==='mindex_monitor_register'?'report-token':name==='mindex_monitor_login'?(args.p_password==='test-secret'?'admin-token':null):name==='mindex_monitor_presence'?[{
-                          id:'remote',last_seen:new Date(Date.now()-(monitorMode==='stale'?60000:0)).toISOString(),status:{name:'<img src=x onerror=alert(1)>',os:'Windows',browser:'Whale',version:'test',module:'praise',serviceId:'editing',outputServiceId:'output',output:true,slide:3,count:3,events:[{kind:'save_ok',at:new Date().toISOString()}]}
+                        const data=name==='mindex_monitor_register'?'a'.repeat(64):name==='mindex_monitor_login'?(args.p_password==='test-secret'?'admin-token':null):name==='mindex_monitor_presence'?[{
+                          id:'remote',last_seen:new Date(Date.now()-(monitorMode==='stale'?190000:0)).toISOString(),status:{name:'<img src=x onerror=alert(1)>',os:'Windows',browser:'Whale',version:'test',module:'praise',serviceId:'editing',outputServiceId:'output',output:true,slide:3,count:3,events:[{kind:'save_ok',at:new Date().toISOString()}]}
                         }]:true;
                         return Promise.resolve({data,error:null});
                       }})};
                     }''')
                     page.evaluate("window.dispatchEvent(new Event('online'))")
-                    page.wait_for_function("monitorCalls.some(c=>c.name==='mindex_monitor_heartbeat')")
+                    page.wait_for_function("monitorCalls.some(c=>c.name==='mindex_monitor_ping')")
                     assert not page.locator('.monitor-panel').is_visible()
                     page.locator('#monitorPanelBtn').click()
                     assert page.locator('.monitor-panel').is_visible()
@@ -39,7 +39,7 @@ def main():
                     assert page.locator('[data-local] .monitor-health').inner_text() in ('송출 중', '송출 안 함')
                     assert 'sunday-second' not in page.locator('[data-local]').inner_text()
                     page.get_by_text('접속 이름 설정', exact=True).click()
-                    page.wait_for_function("monitorCalls.some(c=>c.name==='mindex_monitor_heartbeat')")
+                    page.wait_for_function("monitorCalls.some(c=>c.name==='mindex_monitor_ping')")
                     page.evaluate("emitMonitorSaveEvent('save_start');emitMonitorSaveEvent('save_ok');emitMonitorSaveEvent('save_failed')")
                     page.locator('[data-refresh]').click()
                     page.wait_for_function("!!document.querySelector('[data-devices] strong')")
@@ -69,16 +69,17 @@ def main():
                     assert not page.evaluate("monitorCalls.some(c=>c.name==='mindex_monitor_login')")
                     page.wait_for_function("document.querySelector('[data-devices]').textContent === ''")
                     assert page.evaluate("state.presenter.index===2&&state.presenter.serviceId==='output'&&state.selectedServiceId==='editing'")
-                    payload = page.evaluate("monitorCalls.find(c=>c.name==='mindex_monitor_heartbeat').args.p_status")
+                    payload = page.evaluate("monitorCalls.find(c=>c.name==='mindex_monitor_ping').args.p_status")
                     assert set(payload) == {'name', 'os', 'browser', 'output'}
                     page.evaluate("monitorMode='missing'")
                     page.locator('#monitorPanelBtn').click()
                     page.evaluate("window.dispatchEvent(new Event('online'))")
                     page.wait_for_function("document.querySelector('.monitor-share-status').textContent.includes('서버 설정')")
                     page.evaluate("window.dispatchEvent(new PageTransitionEvent('pagehide'))")
-                    page.wait_for_function("monitorCalls.some(c=>c.name==='mindex_monitor_leave'&&c.args.p_token==='report-token')")
+                    assert not page.evaluate("monitorCalls.some(c=>c.name==='mindex_monitor_leave')")
                     page.evaluate("monitorMode='ok';window.dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true}))")
-                    page.wait_for_function("monitorCalls.filter(c=>c.name==='mindex_monitor_register').length>=2")
+                    page.wait_for_function("monitorCalls.filter(c=>c.name==='mindex_monitor_ping').length>=2")
+                    assert page.evaluate("monitorCalls.filter(c=>c.name==='mindex_monitor_register').length") == 1
                     assert page.evaluate('state.presenter.index') == 2
                     print(engine, 'PASS automatic presence despite previous opt-out, minimal payload, page lifecycle, password-free read, active-only sessions, failed-read clearing, output status, privacy, XSS, responsive layout, revoke, missing server isolation')
                 finally:

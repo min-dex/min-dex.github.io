@@ -3,10 +3,13 @@
   if (isPresenterOutputRoute()) return;
   const trigger = document.getElementById("monitorPanelBtn");
   if (!trigger) return;
+  const REPORT_MS = 60000, STALE_MS = 180000;
+  const TOKEN_KEY = "mindex.monitor.reporter";
+  let resumeReady = false, releaseTokenLock = null;
   const requests = new Map();
   const renderKeys = new WeakMap();
   let remoteRows = [];
-  let remoteVerified = false, lastReportAt = 0;
+  let remoteVerified = false, lastReportAt = 0, reportedOutput = null;
   let reporter = null, uploading = false, reading = false;
   let viewSerial = 0, shareSerial = 0, retryAt = 0, failures = 0;
   let enabled = true, name = "";
@@ -30,7 +33,7 @@
     const time = Date.parse(value);
     return Number.isFinite(time) && time <= Date.now() + 5000 ? time : 0;
   }
-  function isStale(row) { const time = timestamp(row.last_seen); return !time || Date.now() - time > 45000; }
+  function isStale(row) { const time = timestamp(row.last_seen); return !time || Date.now() - time > STALE_MS; }
   function snapshot() {
     const p = state.presenter;
     const output = Boolean(p.outputConnectedAt && Date.now() >= p.outputConnectedAt && Date.now() - p.outputConnectedAt <= PRESENTER_OUTPUT_HEARTBEAT_TTL_MS);
@@ -76,22 +79,51 @@
       throw Error(["원격 조회 서버 설정이 필요합니다.", "서버 요청에 실패했습니다."].includes(error?.message) ? error.message : "서버에 연결하지 못했습니다.");
     } finally { clearTimeout(timeout); requests.delete(controller); }
   }
-  async function leave(token) { if (token) { try { await rpc("mindex_monitor_leave", { p_token: token }); } catch {} } }
+  function rememberToken(token) {
+    reporter = token;
+    try { if (token) sessionStorage.setItem(TOKEN_KEY, token); else sessionStorage.removeItem(TOKEN_KEY); } catch {}
+  }
+  async function claimToken(token) {
+    if (!navigator.locks?.request) return true;
+    return new Promise(resolve => {
+      navigator.locks.request(`mindex-monitor:${token}`, {ifAvailable:true}, lock => {
+        if (!lock) { resolve(false); return; }
+        return new Promise(release => { releaseTokenLock = release; resolve(true); });
+      }).catch(() => resolve(false));
+    });
+  }
+  async function resume() {
+    let token = "";
+    try { token = sessionStorage.getItem(TOKEN_KEY) || ""; } catch {}
+    if (/^[a-f0-9]{64}$/.test(token) && await claimToken(token)) reporter = token;
+    else rememberToken(null);
+    resumeReady = true; void upload();
+  }
   async function upload() {
-    if (!enabled || uploading || Date.now() < retryAt || !state.client) return;
+    if (!resumeReady || !enabled || uploading || Date.now() < retryAt || !state.client) return;
     const serial = shareSerial; uploading = true;
     try {
-      const token = reporter || await rpc("mindex_monitor_register", {});
-      if (serial !== shareSerial || !enabled) { void leave(token); return; }
-      if (!token) throw Error("접속 등록 서버 설정 또는 접속 상한을 확인해 주세요.");
-      reporter = token;
-      if (!await rpc("mindex_monitor_heartbeat", { p_token: token, p_status: snapshot() })) { reporter = null; throw Error("접속 등록이 만료되었습니다."); }
+      let sent;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        let token = reporter;
+        if (!token) {
+          token = await rpc("mindex_monitor_register", {});
+          if (!token || !/^[a-f0-9]{64}$/.test(token)) throw Error("접속 등록 서버 설정 또는 접속 상한을 확인해 주세요.");
+          if (!await claimToken(token)) throw Error("접속을 다시 확인해 주세요.");
+          rememberToken(token);
+        }
+        if (serial !== shareSerial || !enabled) return;
+        sent = snapshot();
+        if (await rpc("mindex_monitor_ping", {p_token:token,p_status:sent})) break;
+        releaseTokenLock?.(); releaseTokenLock = null; rememberToken(null);
+        if (attempt === 1) throw Error("접속 등록이 만료되었습니다.");
+      }
       if (serial !== shareSerial || !enabled) return;
-      failures = 0; retryAt = 0; lastReportAt = Date.now();
+      failures = 0; retryAt = 0; lastReportAt = Date.now(); reportedOutput = sent.output;
       shareMessage(`자동 등록됨 · 마지막 응답 ${new Date(lastReportAt).toLocaleTimeString()}`);
     } catch (e) {
       if (serial !== shareSerial || !enabled) return;
-      retryAt = Date.now() + Math.min(300000, 15000 * 2 ** Math.min(++failures, 5));
+      retryAt = Date.now() + Math.min(300000, REPORT_MS * 2 ** Math.min(++failures - 1, 3));
       shareMessage(`${e.message} 자동 재시도 예정 · 마지막 전송 ${lastReportAt ? new Date(lastReportAt).toLocaleTimeString() : "없음"}`);
     } finally { uploading = false; }
   }
@@ -120,7 +152,7 @@
   }
   trigger.onclick = () => { if (!panel.open) panel.showModal(); void refresh(); window.lucide?.createIcons({ root: panel }); };
   $("[data-close]").onclick = () => panel.close(); panel.addEventListener("close", clearView);
-  $("[data-refresh]").onclick = () => { void refresh(); if (enabled && Date.now() - lastReportAt >= 10000) { retryAt = 0; void upload(); } };
+  $("[data-refresh]").onclick = () => { void refresh(); if (enabled && Date.now() - lastReportAt >= REPORT_MS) { retryAt = 0; void upload(); } };
   $("#monitorName").onchange = () => { try { localStorage.setItem("mindex.monitor.name", $("#monitorName").value.slice(0, 60)); } catch {} };
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) { clearView(); }
@@ -128,21 +160,21 @@
   });
   window.addEventListener("offline", () => { remoteVerified = false; if (panel.open) renderRemote(); if (enabled) shareMessage("네트워크 연결 끊김 · 전송 대기"); });
   window.addEventListener("online", () => { if (enabled) { retryAt = 0; void upload(); } void refresh(); });
-  window.addEventListener("pagehide", () => { shareSerial++; enabled = false; clearView(); const old = reporter; reporter = null; void leave(old); });
+  window.addEventListener("pagehide", () => { shareSerial++; enabled = false; clearView();  });
   window.addEventListener("pageshow", (e) => {
     if (!e.persisted) return;
     enabled = true; retryAt = 0; lastReportAt = 0; void upload();
   });
   shareMessage("접속 등록 중…");
-  void upload();
-  // Sample small state only; network writes retain the existing 15-second cadence.
+  void resume();
+  // Output changes are sampled locally; unchanged presence uploads once per minute.
   setInterval(() => {
-    if (enabled && !lastReportAt) void upload();
+    if (enabled && (!lastReportAt || snapshot().output !== reportedOutput)) void upload();
     if (panel.open) {
       renderRows($("[data-local]"), [{ id: "local", status: snapshot() }]);
       renderRemote();
     }
   }, 2000);
   // Telemetry never awaits, rebuilds, or publishes the presenter state.
-  setInterval(() => { if (enabled) { void upload(); } if (panel.open) void refresh(); }, 15000);
+  setInterval(() => { if (enabled) { void upload(); } if (panel.open) void refresh(); }, REPORT_MS);
 })();

@@ -11,7 +11,7 @@ def main():
                     context = browser.new_context()
                     context.route('**/*supabase*/**', lambda r: r.abort())
                     context.add_init_script('''const originalInterval=window.setInterval;
-                      window.setInterval=(fn,ms,...args)=>{if(ms===15000&&String(fn).includes('void upload()'))window.monitorTick=fn;return originalInterval(fn,ms,...args)};''')
+                      window.setInterval=(fn,ms,...args)=>{if(ms===60000&&String(fn).includes('void upload()'))window.monitorTick=fn;return originalInterval(fn,ms,...args)};''')
                     controller = context.new_page()
                     controller.goto(url, wait_until='networkidle')
                     controller.wait_for_function("typeof monitorTick==='function'")
