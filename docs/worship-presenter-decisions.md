@@ -2876,3 +2876,36 @@ wrapped content and scroll above 55vh. Collapsed board text remains hidden.
 The legacy scripture-record text editor is not the ordinary book/chapter reader;
 its selection can be restored by scriptureId/session state, but the current sidebar
 renders book-code buttons rather than scripture-record buttons. It is unchanged.
+
+
+Stalled-download release receipt:0c02f90d passed Pages39025985767 and Linux
+Cloud39025986389. Public index/release/app/main and output CSS exactly matched
+local bytes. Both engines passed public actual-app fake-RPC full/element/linked
+saves, rollback/draft isolation,24 lyric bounds and delayed media/background/
+blackout swaps. Existing services were read only; writes including monitor
+registration were blocked. No production records or permission changes occurred.
+
+Retained local finding: one real-HTTP-cache run reported a release mismatch
+without timing diagnostics. Diagnostics were added without relaxing assertions;
+the isolated test, complete final10+8 gate and Linux gate passed. The individual
+failure's cause was not established. Permanent errors/timeouts remain tested;
+this change does not claim that arbitrary network outages always recover.
+
+Native-cache production sample on0c02f90d: Chrome shell3311ms, current home data
+4365ms; app download2686ms (HTTP/2,461ms first-byte wait,2225ms body transfer).
+One service entry took12425ms with no per-request trace; its precise cause is
+not proven. A subsequent read-only sample on upstreamb27f306a (containing this
+change) measured fresh home shell/data1470/2050ms Chrome and3579/4245ms WebKit,
+service entry1695/828ms. Slow service resources in that trace were presenter
+fonts and the hymn manifest, not evidence establishing the earlier12s cause.
+First home samples each read7 fresh aggregates. Post-service reloads used a
+different restored/deferred-service workload and are not compared as home gains.
+No startup timeout occurred in these deployed samples; network variation still
+precludes a universal timing guarantee or controlled speedup claim.
+
+Upstream9bb20f43 icon subset was preserved; Pages39026352247 and Linux Cloud
+39026352491 succeeded. Public index/release/icon bytes matched and180-thumbnail
+checks passed in both engines (zero clipping/mismatch; maximum gaps31.6/41ms).
+The default gate is now11 Node +8 browser entries. Recovery coverage retains
+both the new icon module and an unversioned vendor script (Supabase), plus CSS,
+app/constants and both request-winner races. Local integrated recovery passed.

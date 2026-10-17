@@ -92,3 +92,9 @@ Stalled-download recovery adds smoke_stalled_download_recovery.py to the default
 Cloud gate:10 Node +8 browser entry points. Both request-winner races, current
 release selection and late-response non-execution are covered. Production data
 and credentials remain outside these offline checks.
+
+
+Release0c02f90d passed Linux39025986389 (10+8). Subsequent integrated icon subset
+9bb20f43 passed Linux39026352491 (11+8); both corresponding Pages releases were
+verified separately. Stalled-download fixtures retain an unversioned vendor case
+alongside the new versioned icon module. No production writes were tested.
