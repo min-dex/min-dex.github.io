@@ -2909,3 +2909,24 @@ checks passed in both engines (zero clipping/mismatch; maximum gaps31.6/41ms).
 The default gate is now11 Node +8 browser entries. Recovery coverage retains
 both the new icon module and an unversioned vendor script (Supabase), plus CSS,
 app/constants and both request-winner races. Local integrated recovery passed.
+
+
+## 2026-10-17 — 예배에 저장하는 음원·가사 양식 (기존 로컬 기본 방식 대체)
+
+사용자 요청에 따라 새 입력 선택지 ‘음원·가사’(audio_praise)는 어린이 음원 기능을
+예배 소유 양식으로 확장한다. 음원이 기준이고 직접 입력 가사 화면과 cue를 같은
+예배 항목에 보관한다. 찬양 DB의 곡·버전을 생성하거나 수정하지 않는다. 이전
+children_audio는 기존 자료 열기 용도로만 유지하며 새 선택지는 연령을 제한하지 않는다.
+
+음원 관리자를 가사보다 먼저 표시한다. 가사 입력은 직접 입력과 동일한 화면 분할을
+사용하며, 예배 음원·타이밍 편집기의 ‘예배에 저장’은 기존 atomic 항목 저장 경로로
+음원 주소·가사·타이밍을 함께 저장한다. 새 기기에서도 예배 조회만으로 타이밍을
+복원한다. 예배용 편집기에 별도의 로컬/공유 저장·불러오기 절차는 없다.
+
+기존 로컬 cue는 이관을 위해 읽을 수 있다. 저장된 예배 cue가 있으면 이를 우선하며,
+가사·사진 순서·음원 연결이 달라지면 자동 전환을 무효화한다. 가사 1초 선행,
+간주/사진 전용 정시, 수동 이동 시 일시정지 규칙은 유지한다. 기존 원본/로컬 자료는
+성공적인 예배 저장이 확인되기 전에 삭제하지 않는다.
+
+검증: 실제 atomic 저장 경로의 실패/재시도, 찬양 DB 쓰기 금지, 원문/DB 왕복,
+독립 Chromium/WebKit 저장소에서 공유 불러오기 없이 실제 음원 재생 및 cue 복원.

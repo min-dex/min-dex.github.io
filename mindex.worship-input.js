@@ -282,6 +282,7 @@ async function hydrateServiceManualPraiseBeforeSwitch(field, options, item, serv
   const signature = serviceItemPersistenceSignature(item);
   const songId = item.song_id;
   const itemId = item.id;
+  const requestedMode = field.value;
   const oldMode = servicePraiseInputMode(item);
   field.value = oldMode;
   try {
@@ -292,7 +293,7 @@ async function hydrateServiceManualPraiseBeforeSwitch(field, options, item, serv
     // Loading must never overwrite edits or a different item after navigation.
     if (!current || serviceItemPersistenceSignature(current) !== signature) return;
     if (songNeedsRelationalHydration(songId)) throw new Error("가사를 불러오지 못했습니다.");
-    updateServiceItemField({ value: "manual_praise", dataset: {
+    updateServiceItemField({ value: requestedMode, dataset: {
       serviceId, serviceItemIndex: String(currentIndex), serviceItemField: "praise_input_mode",
     } }, { ...options, manualPraiseHydrated: true });
   } catch (error) {
@@ -322,7 +323,7 @@ function updateServiceItemField(field, options = {}) {
     field.dataset.ordinalDisplayValue = field.value;
   }
   const service = state.services.find((candidate) => candidate.id === serviceId) || selectedServiceForEditor();
-  if (key === "praise_input_mode" && field.value === "manual_praise"
+  if (key === "praise_input_mode" && servicePraiseUsesDirectLyrics(field.value)
     && !parseServiceItemMemo(item.memo).slides.length && item.song_id
     && songNeedsRelationalHydration(item.song_id) && !options.manualPraiseHydrated) {
     return hydrateServiceManualPraiseBeforeSwitch(field, options, item, serviceId);
@@ -424,13 +425,17 @@ function updateServiceItemField(field, options = {}) {
     const parsed = parseServiceItemMemo(item.memo);
     const service = state.services.find((candidate) => candidate.id === serviceId) || selectedServiceForEditor();
     const inputMode = servicePraiseInputMode(item, { ...parsed, inputMode: field.value }, service);
-    if (inputMode === "manual_praise" && !parsed.slides.length) {
+    if (servicePraiseUsesDirectLyrics(inputMode) && !parsed.slides.length) {
       // Capture the selected version and effective form sequence before unlinking.
       parsed.slides = serviceManualPraiseSeedSlides(item, service);
     }
     parsed.inputMode = inputMode;
     parsed.outputMode = servicePraiseInputModeOutputMode(inputMode);
-    if (inputMode === "manual_praise") {
+    if (servicePraiseUsesDirectLyrics(inputMode)) {
+      if (inputMode === "audio_praise") {
+        item.raw_title ||= serviceItemLinkedSong(item)?.title || "";
+        item.song_id = null;
+      }
       item.version_id = null;
       item.song_version_id = null;
     } else {
@@ -516,7 +521,7 @@ function applyServiceAnnouncementRegion(item, key, value) {
 function applyServiceManualPraiseSlides(item, slides) {
   const parsed = parseServiceItemMemo(item.memo);
   parsed.slides = slides;
-  parsed.inputMode = "manual_praise";
+  parsed.inputMode = parsed.inputMode === "audio_praise" ? "audio_praise" : "manual_praise";
   parsed.outputMode = "lyrics";
   parsed.elementType = "praise";
   item.version_id = null;

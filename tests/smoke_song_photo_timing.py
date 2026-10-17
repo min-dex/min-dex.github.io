@@ -14,6 +14,7 @@ fixture=script.split(' const build=items=>')[0]+r'''
  await MindexSongTiming.ready;
  renderPresenterControlState=()=>{};publishPresenterState=()=>{};
  state.presenter.serviceId=service.id;state.presenter.sourceSignature='';state.presenter.slides=[];
+ state.client.storage={};saveServiceItemMutation=async()=>true;
  window.photoTiming={serviceId:service.id,elementId:parent.id};
  window.photoTimingSnapshot=JSON.stringify({services:state.services,songs:state.songs,items:state.serviceItems});
  return photoTiming;
@@ -30,7 +31,14 @@ try:
    page=browser.new_page(viewport={'width':1100,'height':800});page.set_default_timeout(15000)
    writes=[]
    def route(r):
-    if r.request.url.endswith('/fixture-clock.wav'):r.fulfill(body=audio_bytes,content_type='audio/mpeg' if os.environ.get('MINDEX_TIMING_AUDIO_FILE') else 'audio/wav');return
+    if r.request.url.endswith('/fixture-clock.wav'):
+     mime='audio/mpeg' if os.environ.get('MINDEX_TIMING_AUDIO_FILE') else 'audio/wav'
+     range_header=r.request.headers.get('range','')
+     if range_header.startswith('bytes='):
+      first,last=range_header[6:].split('-');start=int(first or 0);end=min(int(last) if last else len(audio_bytes)-1,len(audio_bytes)-1)
+      r.fulfill(status=206,body=audio_bytes[start:end+1],content_type=mime,headers={'Accept-Ranges':'bytes','Content-Range':f'bytes {start}-{end}/{len(audio_bytes)}'})
+     else:r.fulfill(body=audio_bytes,content_type=mime,headers={'Accept-Ranges':'bytes'})
+     return
     if r.request.method not in ('GET','HEAD'):writes.append(r.request.url);r.abort()
     elif urlsplit(r.request.url).netloc==urlsplit(url).netloc or r.request.url.startswith('blob:'):r.continue_()
     else:r.abort()
@@ -39,7 +47,7 @@ try:
    page.wait_for_function("!document.body.classList.contains('ui-booting')");page.locator('#bootStatus').wait_for(state='hidden')
    ids=page.evaluate(fixture)
    page.evaluate('({serviceId,elementId})=>MindexSongTiming.open(serviceId,elementId)',ids)
-   d=page.locator('[data-song-timing-dialog]');assert '가사·사진' in d.locator('h2').inner_text()
+   d=page.locator('[data-song-timing-dialog]');assert '예배 음원' in d.locator('h2').inner_text()
    assert d.locator('.song-timing-photo').count()>=4
    d.locator('[data-timing-linked]').click()
    page.wait_for_function("document.querySelector('[data-song-timing-dialog] audio').duration>90")
@@ -50,6 +58,7 @@ try:
     d.locator('[data-timing-next]').click()
     assert float(d.locator(f'[data-timing-start="{i}"]').input_value())==i*3
    d.locator('[data-timing-save]').click();page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('저장했어요')")
+   page.evaluate('photoTimingSnapshot=JSON.stringify({services:state.services,songs:state.songs,items:state.serviceItems})')
    for width in (390,1100):
     page.set_viewport_size({'width':width,'height':800});assert d.evaluate('(el)=>el.scrollWidth<=el.clientWidth+1')
     d.screenshot(path=f'/tmp/mindex-photo-timing-{engine}-{width}.png')
@@ -66,7 +75,9 @@ try:
    photos=[t for t in targets if t['photo']];assert len(photos)>=4
    for t in [photos[0],photos[-1],targets[-1],targets[0]]:
     page.evaluate('''t=>{const input=document.querySelector('[data-song-timing-seek]');if(!input)throw Error('seek control missing');input.max=state.serviceMusic.audio.duration;input.value=t;input.dispatchEvent(new Event('input',{bubbles:true}));}''',t['time']+.15)
-    page.wait_for_function('(i)=>state.presenter.index===i',arg=t['i'])
+    try:page.wait_for_function('(i)=>state.presenter.index===i',arg=t['i'])
+    except Exception:
+     print('SEEK FAILURE',t,page.evaluate('({index:state.presenter.index,time:state.serviceMusic.audio.currentTime,playing:state.serviceMusic.playing,mode:state.serviceMusic.mode,source:state.serviceMusic.sourceKey})'));raise
    print(engine,'PASS actual audio playback, photo and lyric advance, backward seek')
    page.evaluate('stopServiceMusicPlayback({render:false})')
    before=page.evaluate('state.presenter.index');page.evaluate('state.serviceMusic.audio.currentTime=90');page.wait_for_timeout(250);assert page.evaluate('state.presenter.index')==before
@@ -81,7 +92,7 @@ try:
     }
     check(JSON.stringify({services:state.services,songs:state.songs,items:state.serviceItems})===photoTimingSnapshot,'source data changed');
     const svc={...state.services[0],id:'other-service'};state.services.push(svc);state.serviceItems[svc.id]=structuredClone(state.serviceItems[serviceId]);
-    check(!presenterSlidesForService(svc.id).some(s=>s.syncTimeline?.serviceTiming),'other service inherited timeline');
+    check(presenterSlidesForService(svc.id).some(s=>s.syncTimeline?.serviceTiming),'copied worship bundle lost timeline');
     state.services.pop();delete state.serviceItems[svc.id];
     const media=getServiceItems(serviceId).find(i=>parseServiceItemMemo(i.memo).mediaPlacement),original=media.memo;
     let memo=parseServiceItemMemo(media.memo);memo.asset.slides.reverse().forEach((s,i)=>s.order=i+1);media.memo=serializeServiceItemMemo(memo);
@@ -98,12 +109,12 @@ try:
     check(!syncServiceMusicSyncedLyricsWithCurrentTime({render:false,publish:false,scroll:false}),'scripture advanced');
     state.presenter.liveScripture.active=false;
     runPresenterAction('next',serviceId,{scroll:false});check(!state.serviceMusic.playing,'manual did not pause');
-    return 'PASS one-second lyric lead and exact instrumental photo cues, isolated service, photo reorder stale guard, blackout/scripture guards, manual pause, unchanged DB records';
+    return 'PASS one-second lyric lead and exact instrumental photo cues, copied bundle, photo reorder stale guard, blackout/scripture guards, manual pause, no external DB writes';
    }'''))
    # Persisted timing and audio survive a browser reload, with identical fixture identity.
    snapshot=page.evaluate('photoTimingSnapshot')
    page.reload();page.wait_for_function("typeof buildPresenterSlidesForServiceItem==='function' && !!globalThis.MindexSongTiming")
-   page.evaluate('''async data=>{await MindexSongTiming.ready;const saved=JSON.parse(data.snapshot);state.services=saved.services;state.songs=saved.songs;state.serviceItems=saved.items;state.selectedServiceId=data.ids.serviceId;state.loadedWorshipServiceIds=new Set([data.ids.serviceId]);state.client={from(){throw Error('DB forbidden')}};renderPresenterControlState=()=>{};publishPresenterState=()=>{};}''',{'snapshot':snapshot,'ids':ids})
+   page.evaluate('''async data=>{await MindexSongTiming.ready;const saved=JSON.parse(data.snapshot);state.services=saved.services;state.songs=saved.songs;state.serviceItems=saved.items;state.selectedServiceId=data.ids.serviceId;state.loadedWorshipServiceIds=new Set([data.ids.serviceId]);state.client={storage:{},from(){throw Error('DB forbidden')}};saveServiceItemMutation=async()=>true;renderPresenterControlState=()=>{};publishPresenterState=()=>{};}''',{'snapshot':snapshot,'ids':ids})
    assert page.evaluate('(id)=>presenterSlidesForService(id).some(s=>s.syncTimeline?.serviceTiming)',ids['serviceId'])
    page.evaluate('({serviceId,elementId})=>MindexSongTiming.open(serviceId,elementId)',ids)
    page.locator('[data-timing-enabled]').uncheck();page.locator('[data-timing-save]').click()

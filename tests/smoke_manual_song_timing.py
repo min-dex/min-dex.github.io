@@ -46,7 +46,7 @@ try:
    d=page.locator('[data-song-timing-dialog]');assert d.locator('[data-timing-start]').count()==3
    d.locator('[data-timing-linked]').click();page.wait_for_function("document.querySelector('[data-song-timing-dialog] audio').duration>19")
    for i,t in enumerate([2,6,10]):d.locator(f'[data-timing-start="{i}"]').fill(str(t))
-   d.locator('[data-timing-save]').click();page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('저장했어요')")
+   page.evaluate(r'''async ids=>{const T=MindexSongTiming,s=T.pagesFor(presenterSlidesForService(ids.serviceId));const audio=await (await fetch('/clock.wav')).blob();const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await audio.arrayBuffer())),b=>b.toString(16).padStart(2,'0')).join('');await T.save({key:s[0].songTimingKey,audio,audioName:'clock.wav',audioFingerprint:hash,duration:20,lyricsFingerprint:T.fingerprint(s),starts:[2,6,10],enabled:true},s)}''',ids)
    d.locator('[data-timing-close]').click()
    ids=load()
    page.evaluate('x=>MindexSongTiming.play(x.serviceId,x.elementId)',ids)

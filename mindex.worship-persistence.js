@@ -719,7 +719,7 @@ function serviceElementContentStateForSave(item = {}, parsed = parseServiceItemM
     service,
   );
   const praiseInputMode = servicePraiseInputMode(item, parsed, service);
-  const inputMode = praiseInputMode === "manual_praise"
+  const inputMode = praiseInputMode === "audio_praise" ? "audio_praise" : praiseInputMode === "manual_praise"
     ? (serviceItemAllowsManualSongText(item, service) ? "manual_praise" : "lyrics_db")
     : contentState.inputMode;
   return {
@@ -907,6 +907,8 @@ function serviceElementConfigForSave(existingConfig = {}, parsed = emptyServiceI
   } else {
     delete config.asset;
   }
+  if (parsed.audioTiming) config.audioTiming = parsed.audioTiming;
+  else delete config.audioTiming;
   if (hasServiceAsset(parsed.audioAsset)) config.audioAsset = parsed.audioAsset;
   else {
     delete config.audioAsset;

@@ -43,6 +43,18 @@ Deletion requires an explicit user action through the atomic delete path. The
 unused automatic-cleanup helper was retired; lifecycle fixtures now call the
 actual scheduler and verify existing services remain unchanged.
 
+## Worship-owned audio bundle (2026-10-17)
+
+`audio_praise` is stored through the compatible DB input mode with its exact mode
+in config/content state. The item owns `audioAsset`, lyric screen boundaries and
+`config.audioTiming` version1 (audio URL/hash/duration, lyric-layout fingerprint,
+start times and enabled state). Portable source includes the same timing record.
+The existing atomic element-save path commits the bundle; no new schema, song DB
+write or separate shared-package lookup is involved. New uploaded objects are
+immutable. An uncertain commit must not delete audio that may already be referenced;
+the draft retains its upload URL for retry. Remote timing takes precedence over
+legacy local cache; changed lyrics/photos/audio invalidate playback cues.
+
 ## Historical Pre-Cutover Audit
 
 The remainder records the September 11-16 non-atomic implementation. Its gaps

@@ -4,7 +4,7 @@
 function serializePortableServiceSourceItem(fields) {
   const { label, value, elementType, inputMode, outputMode, formHint, songTitle,
     songId, versionId, assignee, hasTranslation, translationLabel, translationId, sermonReference,
-    lyrics, slides, manualScripture, manualTranslation, asset, audio, announcementRegions } = fields;
+    lyrics, slides, manualScripture, manualTranslation, asset, audio, audioTiming, announcementRegions } = fields;
   const lines = [`[${label}]`];
   const textField = (key, text = "") => {
     text = String(text).replace(/\r\n?/g, "\n");
@@ -29,7 +29,7 @@ function serializePortableServiceSourceItem(fields) {
   if (hasTranslation) lines.push(`- 역본: ${translationLabel}`);
   if (translationId) lines.push(`- 역본 ID: ${translationId}`);
   if (sermonReference !== null) lines.push(`- 성경 본문: ${sermonReference}`);
-  if (inputMode === "manual_praise" && Array.isArray(slides)) {
+  if (servicePraiseUsesDirectLyrics(inputMode) && Array.isArray(slides)) {
     // Each block is one screen; internal blank lines and literal --- remain content.
     for (const slide of slides) {
       lines.push("- 가사 화면: |", ...String(slide).split(/\r?\n/).map(line => `  ${line}`));
@@ -39,7 +39,7 @@ function serializePortableServiceSourceItem(fields) {
     lines.push("- 가사: |");
     lines.push(...lyrics.split(/\r?\n/).map((line) => `  ${line}`));
   }
-  if (!announcementRegions && inputMode !== "manual_praise" && !lyrics && Array.isArray(slides) && slides.length) {
+  if (!announcementRegions && !servicePraiseUsesDirectLyrics(inputMode) && !lyrics && Array.isArray(slides) && slides.length) {
     lines.push("- 슬라이드: |");
     lines.push(...slides.join("\n---\n").split(/\r?\n/).map((line) => `  ${line}`));
   }
@@ -56,6 +56,7 @@ function serializePortableServiceSourceItem(fields) {
     lines.push(`- 음원 파일: ${audio.name || ""}`);
     if (audio.url) lines.push(`- 음원 링크: ${audio.url}`);
   }
+  if (audioTiming) lines.push(`- 음원 타이밍: ${JSON.stringify(audioTiming)}`);
   return lines;
 }
 
@@ -219,6 +220,10 @@ function parsePortableServiceSourceText(value = "", options = {}) {
       else if (key === "슬라이드") { current.hasSlides = true; if (fieldValue !== "|") current.slides = fieldValue; else blockKey = "slides"; }
       else if (key === "수동본문") { current.hasManualScripture = true; if (fieldValue !== "|") current.manualScripture = fieldValue; else blockKey = "manualScripture"; }
       else if (key === "수동역본") current.manualTranslationLabel = fieldValue;
+      else if (key === "음원타이밍") {
+        try { current.audioTiming = normalizeServiceAudioTiming(JSON.parse(fieldValue)); current.hasAudioTiming = true; }
+        catch { throw new Error('음원 타이밍 형식을 확인해 주세요.'); }
+      }
       else if (key === "음원파일") { current.audioName = fieldValue; current.hasAudioName = true; }
       else if (key === "음원링크") { current.audioUrl = fieldValue; current.hasAudioUrl = true; }
       else if (["성경본문", "성경봉독본문", "설교본문", "말씀본문"].includes(key)) {
