@@ -3028,3 +3028,4 @@ local connection resets during concurrent asset loading; assertions are unchange
 
 - 넓은 입력 영역에서는 유형·곡명·버전·송폼·담당을 한 줄에 배치한다. 연결 전에는 빈 버전 열을 예약하지 않는다. 좁은 화면은 줄바꿈을 유지한다.
 - 담당과 말씀의 바깥 라벨은 입력창 안내로 옮기고 접근성 이름은 유지한다. 말씀 예시는 `말씀 (예: 렘 3:22; 마 3:11)` 형식으로 표시한다.
+Startup feedback proportions ·2026-10-17: keep the cross at45×55 and wordmark22px with5px tracking. Secondary feedback uses12px/20px text, a14px border-box spinner and5px gaps in a160px centered column. Short stages and a reserved40px detail area prevent retries/elapsed updates from shifting the logo. Feedback is muted to65%; brand spacing remains20px with10px extra separation before feedback.
