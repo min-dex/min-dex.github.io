@@ -57,6 +57,8 @@
 
   window.MINDEX_DESIGN_TOKENS = Object.freeze({
     version: "2026-08-30",
+    surfaces: Object.freeze({ canvas: "--ui-surface-canvas", panel: "--ui-surface-panel", field: "--ui-surface-field" }),
+    colorIntents: Object.freeze({ selected: "--accent", primary: "--accent", incomplete: "--warn", failed: "--danger", success: "--success", neutral: "--ink-3" }),
     typography: TYPOGRAPHY,
     icons: ICONS,
     tabs: TABS,

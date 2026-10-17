@@ -69,3 +69,24 @@ visual coverage. The safe sequence is:
 3. Replace narrow repeated literals.
 4. Add smoke coverage if behavior can regress.
 5. Only then extract larger CSS or JS modules.
+
+
+## Semantic surfaces · 2026-10-17
+
+The controller uses three opaque neutral surfaces in both themes: canvas
+(`--ui-surface-canvas`), panel (`--ui-surface-panel`), editable field
+(`--ui-surface-field`). Sidebar/chrome/cards share panel; nested grouping uses
+spacing or a separator, not another shade. Legacy bg/panel/panel-2 aliases map
+to these roles. Do not add percentage mixtures for routine neutral surfaces.
+Hover may use field; selection uses accent-soft, a semantic state rather than
+a fourth neutral depth. Editable inputs keep the same surface on every module.
+
+Accent marks selection/current location, actionable links, primary execution
+and active playback. Routine headings, counts, group labels, upcoming dates,
+ready-but-idle statuses and auxiliary upload buttons stay neutral. Incomplete
+or invalid input uses warning; failed/destructive work uses danger; confirmed
+success uses success. Text and explicit labels remain alongside status colors.
+Focus uses a visible accent outline. Placeholder ink is solid secondary text.
+
+Slide artwork/chromakey/preview content, presenter-output stylesheet and printed
+bulletin styling are excluded. Do not derive output colors from these UI roles.

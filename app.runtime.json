@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261017-list-name-tooltips",
+  "version": "20261017-semantic-ui-surfaces",
   "options": {
     "compress": false,
     "mangle": {
