@@ -23,6 +23,7 @@ SMOKES = (
     "smoke_theme_bootstrap.py",
     "smoke_scripture_aliases.py",
     "smoke_startup_projection.py",
+    "smoke_ui_font_cache.py",
 )
 
 def main():

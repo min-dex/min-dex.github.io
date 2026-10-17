@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="MINDEX" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <link rel="preload" href="./vendor/fonts/pretendard/MindexSans-Common.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="./vendor/fonts/pretendard/MindexSans-7030aecb3aac8126.woff2" as="font" type="font/woff2" crossorigin />
     <style>
       html,
       body {
@@ -235,7 +235,7 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261017-save-latency";
+        const fallbackVersion = "20261017-ui-font-segments";
         const modules = [
           "vendor/lucide.min.js", "vendor/supabase-js.min.js",
           "mindex.constants.js", "mindex.inline-text.js", "mindex.design-tokens.js", "mindex.worship-model.js",
@@ -309,7 +309,7 @@
           const controller = new AbortController();
           const timer = setTimeout(() => controller.abort(), 3000);
           try {
-            const response = await fetch(`./mindex-release.json?t=${Date.now()}`, { cache: "no-store", signal: controller.signal });
+            const response = await fetch(`./mindex-release.json?t=${Date.now()}`, { cache: "no-store", priority: "high", signal: controller.signal });
             const release = await response.json();
             return /^[0-9A-Za-z._-]{4,80}$/.test(String(release?.version || "")) ? release.version : fallbackVersion;
           } catch {
@@ -335,9 +335,19 @@
         };
         // Speculate downloads only. A stale HTML fallback never executes before
         // release resolution or bypasses ordered scripts and stylesheet readiness.
+        // Resolve fresh release metadata before filling the download queue.
+        const versionPromise = resolveVersion();
+        if (!document.documentElement.classList.contains("presenter-output-document") && window.MINDEX_SUPABASE?.url) {
+          try {
+            const origin = new URL(window.MINDEX_SUPABASE.url).origin;
+            const link = document.createElement("link");
+            link.rel = "preconnect"; link.href = origin; link.crossOrigin = "anonymous";
+            document.head.append(link);
+          } catch (_) {}
+        }
         preloadAssets(fallbackVersion);
         void (async () => {
-          const version = await resolveVersion();
+          const version = await versionPromise;
           window.MINDEX_RELEASE = version;
           preloadAssets(version);
           await Promise.all(styles.map((style) => loadStyle(style, version)));

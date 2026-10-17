@@ -2637,3 +2637,39 @@ on read without rewriting stored records. Explicit preset arrays take precedence
 Score sequence lookup may revisit an earlier, not-yet-selected labelled group;
 keep all continuation pages with that group and retain normal repeated-group
 selection. Unknown requested labels do not select unrelated pages. No DB writes.
+
+## UI font downloads and release priority (2026-10-17)
+
+The UI's512492-byte Common font is partitioned into20 content-addressed WOFF2
+segments. Latin, punctuation and symbols stay together for kerning; Hangul
+syllables use disjoint128-character groups. The exact2925-codepoint coverage,
+variable45–930 weight axis, glyph outlines and advances are retained. The
+unmodified full Pretendard font remains available for uncommon characters.
+The original Common file stays as reproducible source/evidence, not a runtime
+preload. Presenter/output Freesentation fonts and fitting geometry are unchanged.
+
+The base segment also supplies the MINDEX wordmark preload. CSS unicode-range
+selects only needed segments; filenames contain their SHA256 prefix, so unchanged
+fonts can reuse HTTP cache across app releases and changed bytes get a new URL.
+The generator pins group membership in ui-segments.json and disables timestamp
+rewrites. fontTools4.60.2/Brotli1.2.0 reproduce the assets. No operational data
+cache or service-worker cache is introduced; aggregate reads/writes stay intact.
+
+Release discovery still uses timestamped cache:no-store and the existing bounded
+fallback/retry behavior. It starts at high priority before speculative script
+downloads, which still cannot execute before the resolved release/styles. A
+non-output page preconnects to its configured Supabase origin during downloads.
+
+Verification:11700 source/segment glyph comparisons (all characters at45/400/
+700/930), disjoint complete coverage and hashes. Both engines pass30 actual
+wrapping/metric cases, full-font rare-character fallback, cached font reuse
+across two freshly resolved releases, and resolved-only script execution. The
+new real-HTTP-cache test joins the default Cloud gate (8 unit +7 smoke entries).
+
+Read-only candidate home visits fetched304096 bytes of UI fonts versus512492
+previously (40.7% less); subsequent service entry added33016 bytes. Actual use
+varies by visible text. All segments together total632912 bytes, so a screen
+requiring the whole common character set can download more than the old monolith.
+Network/DB variability remains significant; byte reduction is not a universal
+end-to-end startup timing guarantee. Production writes remain blocked in probes.
+Deployment and final output/save results are recorded separately below.
