@@ -33,6 +33,7 @@ SMOKES = (
     "smoke_atomic_save_runtime.py",
     "smoke_worship_audio_bundle.py",
     "smoke_independent_photo_timing.py",
+    "smoke_song_photo_timing.py",
     "smoke_children_audio_db.py",
     "smoke_reference_batch.py",
     "smoke_theme_bootstrap.py",

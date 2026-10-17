@@ -8546,6 +8546,11 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .song-timing-dialog::backdrop { background: #0008; }
 .song-timing-dialog h2 { font-size: 22px; }
 .song-timing-dialog p { font-size: 12px; margin: 10px 0; }
+.song-timing-dialog fieldset { min-width: 0; margin-top: 15px; border: 1px solid var(--line); }
+.song-timing-dialog fieldset label { display: block; min-width: 0; }
+.song-timing-dialog fieldset input[type="file"], .song-timing-dialog fieldset textarea { display: block; box-sizing: border-box; width: 100%; max-width: 100%; min-width: 0; }
+.song-timing-dialog fieldset textarea { min-height: 100px; }
+.song-timing-dialog [data-photo-names] { overflow-wrap: anywhere; }
 .song-timing-dialog audio { width: 100%; margin: 10px 0; }
 .song-timing-pages { display: grid; gap: 10px; margin: 15px 0; }
 .song-timing-row { display: flex; gap: 10px; align-items: center; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
