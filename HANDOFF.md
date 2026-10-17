@@ -806,11 +806,13 @@ Three fresh native-cache profiles per engine, same read-only service, medians:
 | Home current data | 4.231 / 1.563 | 2.197 / 2.207 |
 | Service first visible board | 3.446 / 1.656 | 1.236 / 1.592 |
 | Fonts and visible fit ready | 5.827 / 2.023 | 8.835 / 2.971 |
-| Same-profile reentry ready | .178 / 1.091 | .205 / .336 |
+| Same-view reopen ready (NOT home reentry; corrected below) | .178 / 1.091 | .205 / .336 |
 
 Before was `20261017-compact-boot-progress`; after was the release above.
 These small sequential live-network samples do not establish causal speedups for
-all timings. WebKit initial visibility did not improve, and reentry was slower.
+all timings. WebKit initial visibility did not improve. The prior reentry label
+was wrong: switchModule("home") returns without navigating; those samples reopen
+the already selected presenter. They do not establish a home-reentry regression.
 First-visible timing must not be conflated with all-font readiness. The former
 full UI font transfer (~2.06 MB, present in all three WebKit before entries) was
 absent from all after entries. Routed crossover and exact font coverage tests
@@ -829,3 +831,29 @@ inflight draft isolation, linked document save, 180-preview scrolling/fitting
 output swaps and late backgrounds preserving blackout. All production writes
 were blocked; existing worship data was only read, and no test records were
 created. Raw measurements/profiles stay in private /private/tmp/mindex-perf.
+
+### Reentry/layout follow-up · 2026-10-17
+
+Prior native scripts incorrectly called switchModule('home'), which deliberately
+ignores home. The former reentry timings therefore measure same-view reopening,
+not returning from home. The corrected script calls goHome() and asserts the
+module before each return. Corrected pre-change medians (3 fresh profiles per
+engine, release list-name-tooltips): Chrome first entry1.287s /home reentry.178s;
+WebKit first entry.646s /home reentry.137s. Fonts-ready reentry.192/.186s.
+The prior claim of a home-reentry regression is withdrawn.
+
+Profile-backed changes move sidebar scroll reads before large board insertion
+and remove synchronous rectangle reads at deferred-board mount. First/active
+groups remain mounted; observer preloading, immediate fast-scroll hydration,
+explicit jump hydration, data fetches and font metrics are unchanged.
+Routed before/candidate crossover (two each/engine) was noisy: first-entry median
+Chrome1.176/1.510s, WebKit1.599/1.382s; reentry.145/.132s and.141/.154s.
+These are not native-cache/network-independent speedup claims. The deterministic
+regression rejects original code (19 synchronous mount rectangle reads), passes
+candidate (zero), and verifies immediate initial board plus fast bottom scrolling.
+
+Local validation:13 unit +12 existing Cloud smoke entries, new deferred-board
+smoke (now in default gate), retained DOM on incremental edits/inserts/deletes,
+180-preview traversal with no clipping/mismatch (max gap30.5/41ms),32 lyric bounds
+per engine and output swaps/blackout all pass. Public/CI verification follows.
+No production worship data was modified. Private raw traces remain outside Git.

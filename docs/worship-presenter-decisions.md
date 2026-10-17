@@ -3066,3 +3066,19 @@ original filenames retain compact ellipsis layout and expose the full escaped
 display name through native title hints. No click, storage or output changes.
 Offline Chromium/WebKit checks hover actual rendered long quoted names and verify
 title values; native browser tooltip pixels are outside DOM screenshots.
+
+
+## Presenter entry layout and timing correction · 2026-10-17
+
+Patch the outline (including its scroll/focus reads) before inserting the large
+new presenter board. Mounting deferred sections registers IntersectionObserver
+without synchronously measuring every placeholder. The first two groups and
+active group remain real DOM; the observer preloads within720px. Fast scroll
+retains synchronous visible-placeholder hydration, and direct slide/item jumps
+retain their existing explicit hydration. No data/read cache or font-fit change.
+
+Native reentry measurements must call goHome() and assert state.module is home
+before reopening. switchModule("home") is not a supported route, so earlier
+“reentry” samples actually re-rendered the same presenter. They must not be used
+as evidence of a home-reentry regression. Fresh data, first visible board, full
+font readiness and same-view redraw remain distinct measurements.

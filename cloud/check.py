@@ -21,6 +21,7 @@ NODE_TESTS = (
     "test_worship_read_parallel.cjs",
 )
 SMOKES = (
+    "smoke_deferred_board_scroll.py",
     "smoke_presenter_font_cache.py",
     "smoke_startup_bootstrap.py",
     "smoke_atomic_save_runtime.py",

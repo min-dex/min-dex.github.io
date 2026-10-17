@@ -24,7 +24,15 @@ try:
               refs.detailPane.style.cssText='height:500px;overflow:auto';
               refs.detailPane.innerHTML=renderServicePresenterControls(service,slides,true,0);
               const root=document.getElementById('servicePresenterControls');
-              mountDeferredPresenterBoardSections(root,service.id,slides);
+              // Mount must not synchronously force layout of the newly inserted
+              // board. The initial groups render immediately; IO fills the rest.
+              const rect=Element.prototype.getBoundingClientRect;
+              let mountReads=0;
+              Element.prototype.getBoundingClientRect=function(...args){mountReads++;return rect.apply(this,args)};
+              try { mountDeferredPresenterBoardSections(root,service.id,slides); }
+              finally { Element.prototype.getBoundingClientRect=rect; }
+              check(mountReads===0,'mount forced synchronous layout: '+mountReads);
+              check(root.querySelector('.svc-slide-thumb')?.getBoundingClientRect().width>0,'initial board missing');
               check(root.querySelector('[data-presenter-deferred-board-section]'),'fixture did not defer');
               refs.detailPane.scrollTop=refs.detailPane.scrollHeight;
               refs.detailPane.dispatchEvent(new Event('scroll'));

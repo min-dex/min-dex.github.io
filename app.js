@@ -24575,6 +24575,9 @@ function renderPresenterDetailUnscoped() {
   const presenterIndex = presenterActive ? clampPresenterIndex(state.presenter.index, presenterSlides.length) : 0;
   const viewportSnapshot = capturePresenterViewportSnapshot(serviceId);
   const focusedThumb = capturePresenterFocusedThumb(document.getElementById("servicePresenterControls"));
+  // Read/restore sidebar scroll before replacing the much larger board DOM.
+  // Reading it afterwards forces layout of every newly inserted thumbnail.
+  patchPresenterSidebarOutline(svc, presenterSlides);
   setRightSidebarContent(renderPresenterRightSidebar(svc, presenterSlides, presenterActive, presenterIndex));
   refs.detailPane.innerHTML = `
     <div class="service-viewer presenter-viewer">
@@ -24583,7 +24586,6 @@ function renderPresenterDetailUnscoped() {
       ${renderServicePraiseDatalist()}
       ${renderServiceScriptureDatalist()}
     </div>`;
-  patchPresenterSidebarOutline(svc, presenterSlides);
   refreshIcons();
   mountDeferredPresenterBoardSections(document.getElementById("servicePresenterControls"), serviceId, presenterSlides);
   restorePresenterFocusedThumb(document.getElementById("servicePresenterControls"), focusedThumb);
@@ -29519,7 +29521,9 @@ function mountDeferredPresenterBoardSections(root, serviceId, slides) {
   }, { root: viewport, rootMargin: "720px 0px" });
   root._presenterBoardObserver = observer;
   deferredSections.forEach((section) => observer.observe(section));
-  hydrateVisible();
+  // Initial groups are already mounted. Let the observer measure the new board
+  // after layout; synchronous rectangle reads here block first paint. Explicit
+  // scrolling still hydrates visible placeholders immediately via the handler.
 }
 
 function hydrateVisibleDeferredPresenterBoardSections(root, serviceId, slides, viewport = refs.detailPane) {
