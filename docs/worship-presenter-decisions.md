@@ -3127,3 +3127,12 @@ WebKit에서 송출 연결 종료 후 currentTime=0만 설정하면 readyState=2
 play()가 끝나지 않는 경합을 재현했다. 일시정지/이어 재생은 이 초기화 경로를
 쓰지 않는다. 실제 버튼 클릭과 HTTP Range 음원으로 처음 재생·창 닫기·재시작을
 같은 회귀 검사에서 확인한다.
+
+
+## Tab, template and archive full-name hints · 2026-10-17
+
+Tab labels, template inventory/draft names and section/element chips, and archive
+weekly-status aliases expose their full escaped names using native title hints.
+Ellipsis geometry and click behavior remain unchanged. Offline Chromium/WebKit
+hover checks use long quoted names at narrow and desktop widths; output, print
+and operational data are outside this change.

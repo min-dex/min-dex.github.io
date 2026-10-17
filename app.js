@@ -14093,7 +14093,7 @@ function renderPageTabs() {
       : "";
     return `
       <div class="page-tab${active ? " active" : ""}" role="tab" tabindex="${active ? "0" : "-1"}" draggable="${state.pageTabs.length > 1 ? "true" : "false"}" data-page-tab-index="${escapeAttr(String(index))}" aria-selected="${active ? "true" : "false"}" ${active ? 'aria-current="page"' : ""}>
-        <span>${escapeHtml(tab.label)}</span>
+        <span title="${escapeAttr(tab.label)}">${escapeHtml(tab.label)}</span>
         ${close}
       </div>
     `;
@@ -23942,7 +23942,7 @@ function renderWorshipWeekStatus(entry) {
     : `<strong>${escapeHtml(title)}</strong>`;
   return `<article class="svc-setlist-entry svc-setlist-entry--status svc-setlist-entry--${kind}">
     <header><div class="svc-setlist-entry-title">
-      <div class="svc-setlist-entry-heading">${heading}${worshipSetlistArchiveAliases(entry.source) ? `<span class="svc-setlist-alias">${escapeHtml(worshipSetlistArchiveAliases(entry.source))}</span>` : ""}</div>
+      <div class="svc-setlist-entry-heading">${heading}${worshipSetlistArchiveAliases(entry.source) ? `<span class="svc-setlist-alias" title="${escapeAttr(worshipSetlistArchiveAliases(entry.source))}">${escapeHtml(worshipSetlistArchiveAliases(entry.source))}</span>` : ""}</div>
       ${state.worshipSetlistArchiveView !== "service" ? `<span class="svc-setlist-leader">${escapeHtml(entry.source.service_date)}</span>` : ""}
     </div></header>
     <div class="svc-setlist-week-status"><strong>${escapeHtml(status === "기록 없음" ? "집회 여부 미확인" : status)}</strong>
@@ -24263,7 +24263,7 @@ function renderWorshipTemplateInventoryCard(template, templatesById, itemsByTemp
   return `
     <details class="svc-template-inventory-card" open>
       <summary>
-        <span>${escapeHtml(template.name || "Service Template")}</span>
+        <span title="${escapeAttr(template.name || "Service Template")}">${escapeHtml(template.name || "Service Template")}</span>
         <small>${escapeHtml(status)} · ${sectionItems.length} sections</small>
       </summary>
       <div class="svc-template-inventory-sections">
@@ -24288,7 +24288,7 @@ function renderWorshipTemplateSectionRow(item, index, templatesById, itemsByTemp
       <span class="svc-template-inventory-no">${index + 1}</span>
       <div class="svc-template-inventory-section-main">
         <div class="svc-template-inventory-section-title">
-          <strong>${escapeHtml(section.name || item.default_title || "Section")}</strong>
+          <strong title="${escapeAttr(section.name || item.default_title || "Section")}">${escapeHtml(section.name || item.default_title || "Section")}</strong>
           ${flags ? `<small>${escapeHtml(flags)}</small>` : ""}
         </div>
         <div class="svc-template-chip-list">${elementChips}</div>
@@ -24301,7 +24301,7 @@ function renderWorshipTemplateElementChip(item, templatesById) {
   const count = element.config && typeof element.config === "object" ? element.config.count : "";
   return `
     <span class="svc-template-type-chip">
-      <strong>${escapeHtml(element.name || worshipElementTypeLabel(element.element_type))}</strong>
+      <strong title="${escapeAttr(element.name || worshipElementTypeLabel(element.element_type))}">${escapeHtml(element.name || worshipElementTypeLabel(element.element_type))}</strong>
       ${count ? `<small>${escapeHtml(count)}</small>` : ""}
     </span>`;
 }
@@ -24310,21 +24310,21 @@ function renderWorshipTemplateDraftCard(type) {
   const sectionChips = type.sections.length
     ? type.sections.map((section) => `
         <span class="svc-template-pattern-chip">
-          <strong>${escapeHtml(section.title)}</strong>
+          <strong title="${escapeAttr(section.title)}">${escapeHtml(section.title)}</strong>
           <small>${section.count}</small>
         </span>`).join("")
     : `<span class="svc-template-empty-chip">섹션 없음</span>`;
   const elementChips = type.elementTypes.length
     ? type.elementTypes.map((element) => `
         <span class="svc-template-type-chip">
-          <strong>${escapeHtml(worshipElementTypeLabel(element.key))}</strong>
+          <strong title="${escapeAttr(worshipElementTypeLabel(element.key))}">${escapeHtml(worshipElementTypeLabel(element.key))}</strong>
           <small>${element.count}</small>
         </span>`).join("")
     : `<span class="svc-template-empty-chip">요소 없음</span>`;
   return `
     <details class="svc-template-draft-card">
       <summary>
-        <span>${escapeHtml(type.name)}</span>
+        <span title="${escapeAttr(type.name)}">${escapeHtml(type.name)}</span>
         <small>${type.services} 예배 · ${type.slides} 슬라이드</small>
       </summary>
       <div class="svc-template-draft-body">
