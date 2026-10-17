@@ -2386,8 +2386,10 @@ function applyTheme(theme) {
   document.documentElement.dataset.theme = theme;
   document.body.dataset.theme = theme;
   if (changed) {
-    // Resolve the new palette while transitions are suppressed, before painting.
-    void getComputedStyle(document.body).backgroundColor;
+    // Resolve descendants too: a body-only flush can leave nested controls stale.
+    for (const element of document.querySelectorAll("body, body *")) {
+      void getComputedStyle(element).color;
+    }
     root.classList.remove("ui-theme-switching");
   }
   if (!refs.themeBtn) return;
@@ -30558,7 +30560,6 @@ function renderPresenterBoardSubgroupInputControls(serviceId, subgroup = {}, opt
         ${audioLed ? audioManager : ""}
         ${controls}
         ${options.headerActions || label ? "" : renderPresenterBoardItemActions(serviceId, context)}
-        ${servicePraiseInputMode(context.item) === "children_audio" ? '<p class="svc-praise-mode-help">가사·송폼·음원·자동 넘김을 함께 불러옵니다.</p>' : ""}
         ${audioLed ? "" : audioManager}
       </div>`;
   }).filter(Boolean);
@@ -30651,11 +30652,12 @@ function renderPresenterBoardItemAudioControls(serviceId, context = {}, options 
   if (Boolean(source) !== Boolean(options.manager)) return "";
   const label = audioAsset.url ? audioAsset.name || "연결된 음원" : timingAudio?.name || "연결된 음원";
   return `
-    <div class="svc-board-subgroup-audio${source ? " has-audio svc-audio-manager" : ""}" aria-label="${escapeAttr(`${context.item.label || "찬양"} 음원 관리`)}">
+    <div class="svc-board-subgroup-audio${source ? " has-audio svc-audio-manager" : ""}${childrenAudio ? " svc-children-audio" : ""}" aria-label="${escapeAttr(`${context.item.label || "찬양"} 음원 관리`)}">
       ${source ? `
-        <span class="svc-audio-manager-label">음원 관리</span>
+        ${childrenAudio ? "" : '<span class="svc-audio-manager-label">음원 관리</span>'}
         <audio controls preload="metadata" src="${escapeAttr(source)}"></audio>
         <strong title="${escapeAttr(label)}">${escapeHtml(label)}</strong>` : ""}
+      ${childrenAudio && source ? '<span class="svc-children-audio-hint">송출 중 제목에서 <kbd>P</kbd> 재생</span>' : ""}
       <div class="svc-board-subgroup-audio-actions">
         ${!source && servicePraiseInputMode(context.item) === "children_audio" ? `<button class="btn secondary" type="button" data-song-timing-open data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(context.item.id)}">버전 음원·타이밍</button>` : ""}
         ${source ? globalThis.MindexSongTiming?.controls(serviceId, entries, { audioSource: source }) || "" : ""}

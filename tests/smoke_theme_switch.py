@@ -12,7 +12,7 @@ try:
    page.goto(url+'?mindexSmokeRaw=1');page.wait_for_function("typeof toggleTheme==='function' && !document.body.classList.contains('ui-booting')")
    page.locator('.mindex-boot').wait_for(state='hidden')
    page.evaluate('''()=>{
-    refs.detailPane.innerHTML='<div class="panel"><button class="btn secondary"><i data-lucide="plus"></i>추가</button><textarea class="form-textarea">보존할 가사</textarea></div>';
+    refs.detailPane.innerHTML='<div class="panel"><button class="btn secondary"><i data-lucide="plus"></i>추가</button><div class="svc-progression-media-controls"><select><option>Verse</option></select><button class="btn ghost">사진 추가</button></div><textarea class="form-textarea">보존할 가사</textarea></div>';
     refreshIcons(refs.detailPane);
     window.themeNodes={icon:refs.detailPane.querySelector('svg'),field:refs.detailPane.querySelector('textarea')};
     themeNodes.field.focus();themeNodes.field.setSelectionRange(2,4);
@@ -21,6 +21,7 @@ try:
     values=page.evaluate('''async theme=>{
      applyTheme(theme);
      const immediate=[...refs.detailPane.querySelectorAll('*'),document.body].map(e=>[getComputedStyle(e).color,getComputedStyle(e).backgroundColor]);
+     await new Promise(requestAnimationFrame);
      await new Promise(requestAnimationFrame);
      const transitions=document.getAnimations().filter(a=>a instanceof CSSTransition);
      if(transitions.length)throw Error('palette still transitioning: '+transitions.map(a=>a.transitionProperty));
