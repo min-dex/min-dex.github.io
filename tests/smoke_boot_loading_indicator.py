@@ -17,7 +17,7 @@ try:
      if blocking and u.path.endswith('/mindex.constants.js'):held.append(r);return
      r.continue_()
     page.route('**/*',route);page.goto(url,wait_until='domcontentloaded')
-    page.wait_for_function("document.getElementById('bootStage').textContent==='화면 파일 불러오는 중…'")
+    page.wait_for_function("document.getElementById('bootStage').textContent==='화면 불러오는 중…'")
     assert page.locator('.mindex-boot-loading').is_visible()
     animation=page.locator('.mindex-boot-spinner').evaluate('e=>getComputedStyle(e).animationName')
     assert animation==('none' if reduced else 'mindex-boot-spin'),animation

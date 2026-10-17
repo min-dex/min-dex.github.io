@@ -53,15 +53,16 @@
       .mindex-boot-cross { width: 45px; height: 55px; color: #ff8bc2; }
       html[data-theme="light"] .mindex-boot-cross { color: #b8467d; }
       .mindex-boot-wordmark {
-        padding-left: .22em;
+        padding-left: 5px;
         font: 700 22px/1 system-ui, sans-serif;
-        letter-spacing: .22em;
+        letter-spacing: 5px;
       }
       .mindex-boot-cross { animation: mindex-boot-reveal 500ms ease-in-out both; }
       .mindex-boot-wordmark { animation: mindex-boot-reveal 500ms ease-in-out both; }
-      .mindex-boot-loading { display: flex; align-items: center; gap: 10px; margin-top: 5px; font: 500 14px/1.5 system-ui, sans-serif; }
-      .mindex-boot-spinner { width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: mindex-boot-spin 900ms linear infinite; }
-      .mindex-boot-detail { margin: 0; min-height: 3em; max-width: min(320px, 85vw); font: 500 12px/1.5 system-ui, sans-serif; text-align: center; }
+      .mindex-boot-feedback { display: grid; justify-items: center; gap: 5px; width: 160px; margin-top: 10px; opacity: .65; }
+      .mindex-boot-loading { display: flex; align-items: center; justify-content: center; gap: 5px; height: 20px; font: 500 12px/20px system-ui, sans-serif; white-space: nowrap; }
+      .mindex-boot-spinner { box-sizing: border-box; flex: 0 0 14px; width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: mindex-boot-spin 900ms linear infinite; }
+      .mindex-boot-detail { margin: 0; height: 40px; font: 500 12px/20px system-ui, sans-serif; text-align: center; font-variant-numeric: tabular-nums; }
       .mindex-boot-detail span { display: block; }
       @keyframes mindex-boot-spin { to { transform: rotate(360deg); } }
       @keyframes mindex-boot-reveal {
@@ -137,8 +138,10 @@
         <path d="M224 104h64v80h96v64h-96v160h-64V248h-96v-64h96z" />
       </svg>
       <span class="mindex-boot-wordmark" aria-hidden="true">MINDEX</span>
-      <div class="mindex-boot-loading"><span class="mindex-boot-spinner" aria-hidden="true"></span><span id="bootStage">시작 준비 중…</span></div>
-      <p class="mindex-boot-detail"><span id="bootElapsed" aria-hidden="true">0초 경과</span><span id="bootDelay"></span></p>
+      <div class="mindex-boot-feedback">
+        <div class="mindex-boot-loading"><span class="mindex-boot-spinner" aria-hidden="true"></span><span id="bootStage">시작 준비 중…</span></div>
+        <p class="mindex-boot-detail"><span id="bootElapsed" aria-hidden="true">0초 경과</span><span id="bootDelay"></span></p>
+      </div>
     </div>
     <div id="bootError" class="mindex-boot-error" role="alert" hidden>
       <p>MINDEX를 시작하지 못했습니다.<br>연결 상태를 확인하고 다시 시도해 주세요.</p>
@@ -156,7 +159,7 @@
           const seconds = Math.floor((performance.now() - started) / 1000);
           document.getElementById("bootElapsed").textContent = `${seconds}초 경과`;
           const delay = document.getElementById("bootDelay");
-          if (seconds >= 4 && !delay.textContent) delay.textContent = "평소보다 오래 걸리고 있어요.";
+          if (seconds >= 4 && !delay.textContent) delay.textContent = "연결이 지연되고 있어요.";
         }, 1000);
         const observer = new MutationObserver(() => {
           if (!document.body.classList.contains("ui-booting") || document.body.dataset.bootFailed === "true") {
@@ -310,7 +313,7 @@
             if (settled || (retry && retried)) return;
             if (retry) {
               retried = true;
-              window.MINDEX_BOOT_STATUS?.("연결이 지연되어 다시 시도 중…");
+              window.MINDEX_BOOT_STATUS?.("다시 시도 중…");
             }
             const url = href + (retry ? `${href.includes("?") ? "&" : "?"}boot-retry=1` : "");
             const link = document.createElement("link");
@@ -441,7 +444,7 @@
         void (async () => {
           const version = await versionPromise;
           window.MINDEX_RELEASE = version;
-          window.MINDEX_BOOT_STATUS?.("화면 파일 불러오는 중…");
+          window.MINDEX_BOOT_STATUS?.("화면 불러오는 중…");
           preloadAssets(version);
           // Arm recovery for every selected download now. Execution still waits
           // for CSS and dependency order; a stalled earlier file must not delay

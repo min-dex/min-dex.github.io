@@ -27947,9 +27947,8 @@ function renderPresenterServicePraiseInput(item, index, model, options = {}) {
     </div>
     ${model.showAssignee ? `
       <label class="svc-presenter-input-field svc-presenter-input-field--assignee">
-        <span>${escapeHtml(assigneeLabel)}</span>
         <input class="svc-presenter-input-control" type="text" data-service-item-field="assignee" data-service-item-index="${index}"
-          value="${escapeAttr(model.assigneeValue || "")}" placeholder="${escapeAttr(inferServiceItemAssignee(item))}" aria-label="${escapeAttr(`${item.label || "항목"} 담당`)}" />
+          value="${escapeAttr(model.assigneeValue || "")}" placeholder="${escapeAttr(`${assigneeLabel}${inferServiceItemAssignee(item) ? ` (예: ${inferServiceItemAssignee(item)})` : ""}`)}" aria-label="${escapeAttr(`${item.label || "항목"} 담당`)}" />
       </label>` : ""}`;
 }
 
@@ -28008,12 +28007,11 @@ function renderPresenterServiceScriptureInput(item, index, memo, service = null)
       </div>
     </details>` : "";
   return `
-    <label class="svc-presenter-input-field">
-      <span>말씀</span>
+    <label class="svc-presenter-input-field svc-presenter-input-field--scripture">
       <div class="svc-presenter-input-control-wrap">
         <input class="svc-presenter-input-control${serviceItemScriptureInputInvalid(item) ? " is-invalid" : ""}" type="text"
           data-service-item-field="raw_title" data-service-item-index="${index}"
-          value="${escapeAttr(value)}" list="serviceScriptureOptions" placeholder="${serviceItemSupportsScriptureReferenceList(item) ? "렘 3:22; 마 3:11" : "출애굽기 23:14-19"}" aria-label="${escapeAttr(`${item.label || "성경"} 구절`)}" />
+          value="${escapeAttr(value)}" list="serviceScriptureOptions" placeholder="말씀 (예: ${serviceItemSupportsScriptureReferenceList(item) ? "렘 3:22; 마 3:11" : "출애굽기 23:14-19"})" aria-label="${escapeAttr(`${item.label || "성경"} 구절`)}" />
         ${renderServiceItemLinkControl(item, index)}
       </div>
     </label>

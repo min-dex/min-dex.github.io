@@ -29,8 +29,26 @@ try:
       const boxes=[...host.querySelectorAll('input,select')].map(el=>({el,r:el.getBoundingClientRect()}));
       for(const {r} of boxes)if(r.width<=0||r.right>host.getBoundingClientRect().right+1)throw Error('overflow');
       for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){const a=boxes[i].r,b=boxes[j].r;if(Math.min(a.right,b.right)>Math.max(a.left,b.left)+1&&Math.min(a.bottom,b.bottom)>Math.max(a.top,b.top)+1)throw Error('overlap');}
+      if(host.clientWidth>960){
+       const title=host.querySelector('.svc-edit-title').getBoundingClientRect();
+       const assignee=host.querySelector('[data-service-item-field=assignee]').getBoundingClientRect();
+       if(Math.abs(title.top-assignee.top)>1)throw Error('desktop assignee wrapped');
+      }
       return 'PASS aligned arrows, no overlap, one progression control';
      }'''),flush=True)
      page.screenshot(path=f'/tmp/mindex-praise-layout-{engine}-{width}.png')
+    page.set_viewport_size({'width':1200,'height':650})
+    print(engine,page.evaluate("""()=>{
+     const host=document.querySelector('.svc-board-subgroup-controls');
+     const service=state.services[0],item=state.serviceItems[service.id][0];
+     item.song_id=null;item.version_id=null;item.raw_title='';
+     const model=serviceItemEditorModel(item,{service});model.showAssignee=true;model.assigneeValue='박남준 구역 일동';
+     host.querySelector('.svc-board-subgroup-control-item').innerHTML=renderPresenterServicePraiseInput(item,0,model,{headerActions:true});
+     const fields=[host.querySelector('.svc-edit-title'),host.querySelector('.svc-form-hint.compact'),host.querySelector('[data-service-item-field=assignee]')];
+     const boxes=fields.map(x=>x.getBoundingClientRect());
+     if(boxes.some(x=>Math.abs(x.top-boxes[0].top)>1||x.width<100))throw Error('unlinked row not compact');
+     if(host.querySelector('.svc-song-picker--linked'))throw Error('stale version picker');
+     return 'PASS empty song, form and assignee share one row';
+    }"""),flush=True)
    finally:browser.close()
 finally:server.shutdown();server.server_close()
