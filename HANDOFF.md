@@ -749,3 +749,24 @@ installer, auto-update publication or public desktop release was requested.
 Follow-up Linux Cloud run 39028460944 (`fee6416d`) also succeeded. Both macOS and
 Windows runners passed the corrected offline `pnpm electron:check`; unsigned
 installer CI is separate from web deployment and does not publish an update.
+
+## Entry-time measurement and follow-up · 2026-10-17
+
+The compact runtime byte reduction alone was not used as a latency claim.
+Native fresh Chrome/WebKit contexts, read-only GET/read-RPC guard, same service,
+three runs per engine distinguish shell/current home data/board/font readiness.
+An initial diagnostic found WebKit unnecessarily requesting the 2 MB full UI
+font (17–24s font-ready samples; board appeared much earlier). A separate routed
+before/candidate crossover reproduced full-font requests only before the fix;
+WebKit font-ready median was 5.442s before /3.050s candidate. These routed runs
+are a controlled mechanism check, not native-cache timing benchmarks.
+
+Fixes: disjoint supported-glyph fallback range (no glyph/file deletion), one
+completed-home render after state restoration, and no whole-editor render for
+background scripture-book lookup. The default gate adds a module-change/error
+unit test; font checks cover supported rare Hangul plus unsupported Han without
+wasted full-font downloads. Font cache fixtures share the existing 128-backlog
+HTTP server; original request/boot deadlines and assertions are unchanged.
+
+Integrated main through `1baf08a9` preserves audio timing resave, boot activity
+indicators and editor-pane bounds. Final release measurement/verification follows.
