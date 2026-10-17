@@ -235,7 +235,7 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261017-compact-editor-links";
+        const fallbackVersion = "20261017-stalled-download-recovery";
         const modules = [
           "vendor/lucide.min.js", "vendor/supabase-js.min.js",
           "mindex.constants.js", "mindex.inline-text.js", "mindex.design-tokens.js", "mindex.worship-model.js",
@@ -261,18 +261,54 @@
           // A manual retry must not reuse a browser-cached failed preload.
           return retryStamp ? `${url}${url.includes("?") ? "&" : "?"}retry=${retryStamp}` : url;
         };
-        const preloadedScripts = new Set();
-        const preloadScript = (path, version) => {
-          const href = assetUrl(path, version);
-          if (preloadedScripts.has(href)) return;
-          preloadedScripts.add(href);
-          const preload = document.createElement("link");
-          preload.rel = "preload";
-          preload.as = "script";
-          preload.href = href;
-          if (path === "app.js") preload.fetchPriority = "high";
-          document.head.append(preload);
+        const downloads = new Map();
+        const prepareAsset = (path, version, kind) => {
+          const href = assetUrl(path, version), key = `${kind}:${href}`;
+          if (downloads.has(key)) return downloads.get(key);
+          let resolve, reject, settled = false, waiting = false, retried = false;
+          let failures = 0, deadline, hedge, expiresAt;
+          const links = [];
+          const promise = new Promise((yes, no) => { resolve = yes; reject = no; });
+          // Speculative versions can remain unused. Only consumed assets retry.
+          promise.catch(() => {});
+          const finish = (url, error) => {
+            if (settled) return;
+            settled = true; clearTimeout(deadline); clearTimeout(hedge);
+            for (const link of links) link.onload = link.onerror = null;
+            if (error) reject(error); else resolve(url);
+          };
+          const launch = (retry = false) => {
+            if (settled || (retry && retried)) return;
+            if (retry) retried = true;
+            const url = href + (retry ? `${href.includes("?") ? "&" : "?"}boot-retry=1` : "");
+            const link = document.createElement("link");
+            link.rel = "preload"; link.as = kind; link.href = url;
+            if (kind === "style" || path === "app.js") link.fetchPriority = "high";
+            link.onload = () => finish(url);
+            link.onerror = () => {
+              failures += 1;
+              if (!waiting) return;
+              if (failures === 2) finish(null, new Error(`${path}을 불러오지 못했습니다.`));
+              else launch(true);
+            };
+            links.push(link); document.head.append(link);
+          };
+          const asset = { wait: () => {
+            if (!waiting) {
+              waiting = true; expiresAt = performance.now() + 15000;
+              if (settled) return promise;
+              // Same bounded wait, but a silent stalled request gets one alternate
+              // download. No script element exists yet, so late arrivals cannot run.
+              deadline = setTimeout(() => finish(null, new Error(`${path} 응답 시간이 초과되었습니다.`)), 15000);
+              hedge = setTimeout(() => launch(true), 4000);
+              if (failures) launch(true);
+            }
+            return promise;
+          }, remaining: () => Math.max(0, expiresAt - performance.now()) };
+          downloads.set(key, asset); launch();
+          return asset;
         };
+        const preloadScript = (path, version) => prepareAsset(path, version, "script");
         const failBoot = (error) => {
           console.error(error);
           document.body.dataset.bootFailed = "true";
@@ -280,44 +316,56 @@
           document.getElementById("bootError").hidden = false;
         };
         window.MINDEX_BOOT_FAIL = failBoot;
-        const load = (path, version, retry = false) => new Promise((resolve, reject) => {
-          const script = document.createElement("script");
-          script.src = assetUrl(path, version) + (retry ? (assetUrl(path, version).includes("?") ? "&" : "?") + "boot-retry=1" : "");
-          const timer = setTimeout(() => finish(new Error(`${path} 응답 시간이 초과되었습니다.`)), 15000);
-          const finish = (error) => {
-            clearTimeout(timer); script.onload = script.onerror = null;
-            if (error) { script.remove(); reject(error); } else resolve();
-          };
-          script.onload = () => finish();
-          script.onerror = () => {
-            if (retry) { finish(new Error(`${path}을 불러오지 못했습니다.`)); return; }
-            clearTimeout(timer); script.onload = script.onerror = null; script.remove();
-            // Network failure means this resource did not execute/apply. Retry
-            // once with a fresh URL; never replay a timed-out or executed script.
-            resolve(load(path, version, true));
-          };
-          document.body.append(script);
-        });
-        const loadStyle = (path, version, retry = false) => new Promise((resolve, reject) => {
-          const stylesheet = document.createElement("link");
-          stylesheet.rel = "stylesheet";
-          stylesheet.fetchPriority = "high";
-          stylesheet.href = assetUrl(path, version) + (retry ? "&boot-retry=1" : "");
-          const timer = setTimeout(() => finish(new Error(`${path} 응답 시간이 초과되었습니다.`)), 15000);
-          const finish = (error) => {
-            clearTimeout(timer); stylesheet.onload = stylesheet.onerror = null;
-            if (error) { stylesheet.remove(); reject(error); } else resolve();
-          };
-          stylesheet.onload = () => finish();
-          stylesheet.onerror = () => {
-            if (retry) { finish(new Error(`${path}을 불러오지 못했습니다.`)); return; }
-            clearTimeout(timer); stylesheet.onload = stylesheet.onerror = null; stylesheet.remove();
-            // Network failure means this resource did not execute/apply. Retry
-            // once with a fresh URL; never replay a timed-out or executed script.
-            resolve(loadStyle(path, version, true));
-          };
-          document.head.append(stylesheet);
-        });
+        const load = async (path, version, retry = false) => {
+          const asset = prepareAsset(path, version, "script");
+          const readyUrl = await asset.wait();
+          return new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = readyUrl + (retry ? (readyUrl.includes("?") ? "&" : "?") + "execute-retry=1" : "");
+            const timer = setTimeout(() => finish(new Error(`${path} 응답 시간이 초과되었습니다.`)), asset.remaining());
+            const finish = (error) => {
+              clearTimeout(timer); script.onload = script.onerror = null;
+              if (error) { script.remove(); reject(error); } else resolve();
+            };
+            script.onload = () => finish();
+            script.onerror = () => {
+              if (retry) { finish(new Error(`${path}을 불러오지 못했습니다.`)); return; }
+              clearTimeout(timer); script.onload = script.onerror = null; script.remove();
+              // Network failure means this resource did not execute/apply. Retry
+              // once with a fresh URL; never replay a timed-out or executed script.
+              resolve(load(path, version, true));
+            };
+            document.body.append(script);
+          });
+        };
+        const loadStyle = async (path, version, retry = false, existing = null) => {
+          // Reserve cascade order before awaiting downloads of different speeds.
+          const stylesheet = existing || document.createElement("link");
+          if (!existing) {
+            stylesheet.rel = "stylesheet"; stylesheet.fetchPriority = "high";
+            document.head.append(stylesheet);
+          }
+          const asset = prepareAsset(path, version, "style");
+          let readyUrl;
+          try { readyUrl = await asset.wait(); }
+          catch (error) { stylesheet.remove(); throw error; }
+          return new Promise((resolve, reject) => {
+            stylesheet.href = readyUrl + (retry ? "&apply-retry=1" : "");
+            const timer = setTimeout(() => finish(new Error(`${path} 응답 시간이 초과되었습니다.`)), asset.remaining());
+            const finish = (error) => {
+              clearTimeout(timer); stylesheet.onload = stylesheet.onerror = null;
+              if (error) { stylesheet.remove(); reject(error); } else resolve();
+            };
+            stylesheet.onload = () => finish();
+            stylesheet.onerror = () => {
+              if (retry) { finish(new Error(`${path}을 불러오지 못했습니다.`)); return; }
+              clearTimeout(timer); stylesheet.onload = stylesheet.onerror = null;
+              // Network failure means this resource did not execute/apply. Retry
+              // once with a fresh URL; never replay a timed-out or executed script.
+              resolve(loadStyle(path, version, true, stylesheet));
+            };
+          });
+        };
         const resolveVersion = async () => {
           const controller = new AbortController();
           const timer = setTimeout(() => controller.abort(), 3000);
@@ -332,12 +380,7 @@
           }
         };
         const preloadAssets = (version) => {
-          for (const path of styles) {
-            const href = assetUrl(path, version);
-            if ([...document.querySelectorAll('link[as="style"]')].some(link => link.getAttribute("href") === href)) continue;
-            const link = document.createElement("link");
-            link.rel = "preload"; link.as = "style"; link.fetchPriority = "high"; link.href = href; document.head.append(link);
-          }
+          styles.forEach((path) => prepareAsset(path, version, "style"));
           // Styles gate every script execution. Queue them before speculative
           // scripts so a cold connection does not starve the startup gate.
           preloadScript("app.js", version);

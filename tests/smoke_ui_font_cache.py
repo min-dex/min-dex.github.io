@@ -28,7 +28,8 @@ try:
    for version in ['fixture-cache-v1','fixture-cache-v2']:
     release=version;page.goto(url,wait_until='load');page.wait_for_function("typeof state!=='undefined'&&!document.body.classList.contains('ui-booting')")
     page.evaluate('document.fonts.ready')
-    assert page.evaluate('MINDEX_RELEASE')==version
+    actual=page.evaluate('MINDEX_RELEASE')
+    assert actual==version,(engine,version,actual,page.evaluate("performance.getEntriesByType('resource').filter(e=>e.name.includes('mindex-release')).map(e=>({name:e.name,duration:e.duration}))"))
     urls=page.locator('script[src]').evaluate_all('(nodes)=>nodes.map(n=>n.src)')
     assert all('/vendor/' in u or 'v='+version in u for u in urls),urls
     fonts={k:v for k,v in counts.items() if '/vendor/fonts/pretendard/' in k}

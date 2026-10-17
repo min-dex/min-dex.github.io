@@ -45,6 +45,8 @@ try:
      page.wait_for_function("!document.body.classList.contains('ui-booting')&&!document.body.dataset.bootFailed",timeout=12000)
      assert page.evaluate("bootSamples.length===2&&bootSamples.every(s=>Number(s.opacity)===1)")
      assert not page.locator('#bootError').is_visible()
+     sheets=page.locator('link[rel=stylesheet][href]').evaluate_all('(nodes)=>nodes.map(n=>new URL(n.href).pathname.split("/").pop())')
+     assert sheets==['styles.css','styles.presenter-output.css','styles.bulletin.css','styles.calendar.css','styles.monitor.css'],sheets
      if case=='fast':
       page.evaluate("document.body.classList.add('ui-booting');document.getElementById('bootStatus').getAnimations({subtree:true}).forEach(a=>{a.currentTime=0;a.play()});finishUiBoot()")
       page.wait_for_timeout(100)

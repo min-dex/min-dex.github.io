@@ -86,3 +86,9 @@ separate from the default browser dependencies and passed11700 comparisons.
 Startup read-pool update ·2026-10-17: default gate now10 Node +7 browser entry
 points, including bounded read scheduling, late drafts, failure settlement and
 retry. Local pass is separate from the next Linux Actions/deployment receipt.
+
+
+Stalled-download recovery adds smoke_stalled_download_recovery.py to the default
+Cloud gate:10 Node +8 browser entry points. Both request-winner races, current
+release selection and late-response non-execution are covered. Production data
+and credentials remain outside these offline checks.

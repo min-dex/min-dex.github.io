@@ -25,6 +25,7 @@ SMOKES = (
     "smoke_scripture_aliases.py",
     "smoke_startup_projection.py",
     "smoke_ui_font_cache.py",
+    "smoke_stalled_download_recovery.py",
 )
 
 def main():

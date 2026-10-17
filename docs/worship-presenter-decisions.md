@@ -2839,3 +2839,32 @@ Related-song links, linked-version headings and section-add controls use plain
 text with hover underlines; selected version surfaces and warnings remain.
 Collapsed direct lyrics hide their textarea without removing its draft value.
 Expanded lyrics occupy a full following row. Output and print CSS are untouched.
+
+
+## 2026-10-17 — Recover silently stalled downloads before execution
+
+The remaining reproduced startup failure is a request that neither completes
+nor emits a network error. Error-only retry cannot recover it. Static delivery
+latency itself was variable across unrelated files; no specific CDN/server fault
+is proven. Preloads now track completion and script insertion waits for a ready
+URL. Only an asset actively blocking startup gets one alternate URL after4s
+(or immediately after a network error). First successful download wins; losing
+preloads never execute scripts or apply styles. An unused stale-HTML speculative
+version never retries. All consumed assets still share their original15-second
+budget across download and application/execution, including error recovery.
+
+CSS placeholders preserve cascade order even when downloads complete out of
+order. Release freshness, original dependency execution order, CSS readiness and the
+existing manual failure/retry UI remain. Timed-out/already executed scripts are
+never replayed. The change does not cache worship data or alter saves/output,
+and does not reduce app.js source size. A stalled request may transfer extra
+bytes when its alternate is needed; ordinary successful downloads do not retry.
+An outage affecting both requests can still reach the bounded error UI.
+
+Chrome/WebKit fixtures hold app/constants/vendor/CSS downloads indefinitely, recover
+through the current release, then deliver the original late: no second execution
+or late style application. The opposite original-wins race is also covered.
+Existing permanent failure,15-second stall, runtime failure, manual recovery,
+version resolution, stylesheet gate, dependency and real font-cache tests remain.
+The default Cloud gate now10 Node +8 browser entry points includes this regression.
+Deployment and production measurements remain separate receipts.
