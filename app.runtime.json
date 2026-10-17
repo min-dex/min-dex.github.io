@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261017-semantic-ui-surfaces",
+  "version": "20261017-secondary-name-hints",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "24c0d6fd4332a6a2e8cdf2ba4b32b075aad43221c76ec1e4b0a27091ccd804ba",
-  "runtime_sha256": "cc23e11a35d4280583d2011a1f9a7b90d848fd0547d1ce4464f414284318d17e",
-  "source_bytes": 1461993,
-  "runtime_bytes": 1034685,
-  "source_gzip": 325749,
-  "runtime_gzip": 255804
+  "source_sha256": "41f1e57e365b3e1417beabc9077d9c25b973e0fc117ce0c0602d2788a311ec78",
+  "runtime_sha256": "44cf1f54cf5dc5e02848ea56ea018a2314455f70472d682353641f4bfc2040fb",
+  "source_bytes": 1462340,
+  "runtime_bytes": 1034995,
+  "source_gzip": 325796,
+  "runtime_gzip": 255856
 }
