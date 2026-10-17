@@ -24,7 +24,7 @@ def main():
                         monitorCalls.push({name,args});
                         if(monitorMode==='pending')return new Promise(resolve=>window.monitorRelease=resolve);
                         if(monitorMode==='missing')return Promise.resolve({error:{code:'PGRST202'}});
-                        const data=name==='mindex_monitor_register'?'report-token':name==='mindex_monitor_login'?(args.p_password==='test-secret'?'admin-token':null):name==='mindex_monitor_read'?[{
+                        const data=name==='mindex_monitor_register'?'report-token':name==='mindex_monitor_login'?(args.p_password==='test-secret'?'admin-token':null):name==='mindex_monitor_presence'?[{
                           id:'remote',last_seen:new Date(Date.now()-(monitorMode==='stale'?60000:0)).toISOString(),status:{name:'<img src=x onerror=alert(1)>',os:'Windows',browser:'Whale',version:'test',module:'praise',serviceId:'editing',outputServiceId:'output',output:true,slide:3,count:3,events:[{kind:'save_ok',at:new Date().toISOString()}]}
                         }]:true;
                         return Promise.resolve({data,error:null});
@@ -42,15 +42,10 @@ def main():
                     page.wait_for_function("monitorCalls.some(c=>c.name==='mindex_monitor_heartbeat')")
                     page.evaluate("emitMonitorSaveEvent('save_start');emitMonitorSaveEvent('save_ok');emitMonitorSaveEvent('save_failed')")
                     page.locator('[data-refresh]').click()
-                    assert not page.evaluate("monitorCalls.some(c=>c.name==='mindex_monitor_read')")
-                    page.locator('#monitorPassword').fill('wrong')
-                    page.locator('.monitor-panel button[type=submit]').click()
-                    page.wait_for_function("document.querySelector('.monitor-message').textContent.includes('시도 제한')")
-                    page.locator('#monitorPassword').fill('test-secret')
-                    page.locator('.monitor-panel button[type=submit]').click()
                     page.wait_for_function("!!document.querySelector('[data-devices] strong')")
+                    assert page.locator('#monitorPassword, [data-lock], .monitor-panel form').count() == 0
+                    assert not page.evaluate("monitorCalls.some(c=>c.name==='mindex_monitor_login')")
                     assert page.locator('[data-devices] img').count() == 0
-                    assert page.locator('#monitorPassword').input_value() == ''
                     assert page.locator('.monitor-facts, [data-event-filter], [data-device-filter]').count() == 0
                     assert '송출 중' in page.locator('[data-devices]').inner_text()
                     page.evaluate("monitorMode='stale'")
@@ -70,11 +65,9 @@ def main():
                         page.set_viewport_size({'width': width, 'height': 900})
                         assert page.locator('.monitor-panel').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
                         page.screenshot(path=f'/tmp/mindex-monitor-{engine}-{width}-{theme}.png')
-                    page.locator('[data-lock]').click()
-                    assert page.locator('#monitorPassword').evaluate('(e)=>e===document.activeElement')
                     page.locator('[data-close]').click()
-                    page.wait_for_function("monitorCalls.some(c=>c.name==='mindex_monitor_leave'&&c.args.p_token==='admin-token')")
-                    assert page.locator('[data-devices]').inner_text() == ''
+                    assert not page.evaluate("monitorCalls.some(c=>c.name==='mindex_monitor_login')")
+                    page.wait_for_function("document.querySelector('[data-devices]').textContent === ''")
                     assert page.evaluate("state.presenter.index===2&&state.presenter.serviceId==='output'&&state.selectedServiceId==='editing'")
                     payload = page.evaluate("monitorCalls.find(c=>c.name==='mindex_monitor_heartbeat').args.p_status")
                     assert set(payload) == {'name', 'os', 'browser', 'output'}
@@ -87,7 +80,7 @@ def main():
                     page.evaluate("monitorMode='ok';window.dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true}))")
                     page.wait_for_function("monitorCalls.filter(c=>c.name==='mindex_monitor_register').length>=2")
                     assert page.evaluate('state.presenter.index') == 2
-                    print(engine, 'PASS automatic presence despite previous opt-out, minimal payload, page lifecycle, authenticated read, active-only sessions, failed-read clearing, output status, privacy, XSS, responsive layout, revoke, missing server isolation')
+                    print(engine, 'PASS automatic presence despite previous opt-out, minimal payload, page lifecycle, password-free read, active-only sessions, failed-read clearing, output status, privacy, XSS, responsive layout, revoke, missing server isolation')
                 finally:
                     browser.close()
     finally:

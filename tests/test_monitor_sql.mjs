@@ -17,6 +17,7 @@ const scalar = async (sql, args = []) => Object.values((await db.query(sql, args
 try {
   await db.exec('create role anon; create role authenticated; create schema extensions;');
   await db.exec(await fs.readFile(new URL('../migrations/2026-09-13-readonly-monitor.sql', import.meta.url), 'utf8'));
+  await db.exec(await fs.readFile(new URL('../migrations/2026-10-17-public-presence.sql', import.meta.url), 'utf8'));
   await db.exec('set role anon');
   assert.equal(await scalar('select public.mindex_monitor_register()'), null);
   assert.equal(await scalar("select public.mindex_monitor_read('fake')"), null);
@@ -38,6 +39,23 @@ try {
   assert.equal(rows[0].status.slide, 3);
   assert.equal(rows[0].status.events.length, 1);
   assert(!JSON.stringify(rows).includes('NEVER STORE'));
+  const presence = await scalar('select public.mindex_monitor_presence()');
+  assert.equal(presence.length,1);
+  assert.deepEqual(Object.keys(presence[0]).sort(),['id','last_seen','status']);
+  assert.deepEqual(presence[0].status,{name:'Test',os:'Windows',browser:'Whale',output:true});
+  assert(!JSON.stringify(presence).includes('events'));
+  await db.exec('reset role');
+  for (const condition of ["last_seen=now()-interval '46 seconds'", "last_seen=now()+interval '6 seconds'", "last_seen=now(),expires_at=now()-interval '1 second'"]) {
+    await db.exec(`update mindex_monitor_private.sessions set ${condition} where kind='reporter'`);
+    await db.exec('set role anon');
+    assert.deepEqual(await scalar('select public.mindex_monitor_presence()'),[]);
+    await db.exec('reset role');
+  }
+  await db.exec("update mindex_monitor_private.sessions set last_seen=now(),expires_at=now()+interval '1 hour' where kind='reporter'");
+  await db.exec('set role authenticated');
+  assert.equal((await scalar('select public.mindex_monitor_presence()')).length,1);
+  await assert.rejects(db.exec('select * from mindex_monitor_private.sessions'), /permission denied/);
+  await db.exec('reset role');await db.exec('set role anon');
   for (let i = 0; i < 5; i++) assert.equal(await scalar('select public.mindex_monitor_login($1)', ['wrong']), null);
   assert.equal(await scalar('select public.mindex_monitor_login($1)', ['test-password']), null);
   await scalar('select public.mindex_monitor_leave($1)', [viewer]);

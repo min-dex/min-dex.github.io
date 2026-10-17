@@ -6,10 +6,9 @@
   const requests = new Map();
   const renderKeys = new WeakMap();
   let remoteRows = [];
-  let remoteVerified = false, lastReportAt = 0, lastActivityAt = 0;
-  let loginPending = false, viewerExpiresAt = 0;
-  let reporter = null, admin = null, uploading = false, reading = false;
-  let loginSerial = 0, viewSerial = 0, shareSerial = 0, retryAt = 0, failures = 0;
+  let remoteVerified = false, lastReportAt = 0;
+  let reporter = null, uploading = false, reading = false;
+  let viewSerial = 0, shareSerial = 0, retryAt = 0, failures = 0;
   let enabled = true, name = "";
   try { name = localStorage.getItem("mindex.monitor.name") || ""; } catch {}
   const ua = navigator.userAgent;
@@ -19,8 +18,8 @@
   panel.className = "monitor-panel"; panel.setAttribute("aria-labelledby", "monitorTitle");
   panel.innerHTML = `<header><h2 id="monitorTitle">접속 현황</h2><button class="icon-btn" data-close title="닫기" aria-label="닫기"><i data-lucide="x"></i></button></header>
     <section class="monitor-section"><div data-local></div></section>
-    <section class="monitor-section" aria-labelledby="monitorRemoteTitle"><div class="monitor-section-heading"><h3 id="monitorRemoteTitle">접속 중</h3><span data-count></span><button class="icon-btn" data-refresh title="새로고침" aria-label="새로고침"><i data-lucide="refresh-cw"></i></button><button class="icon-btn" data-lock hidden title="조회 잠금" aria-label="조회 잠금"><i data-lucide="lock"></i></button></div>
-    <form><label for="monitorPassword">관리자 비밀번호</label><input id="monitorPassword" type="password" autocomplete="current-password" required maxlength="128"><button class="btn secondary" type="submit">조회</button></form><p class="monitor-message" role="status"></p><div data-devices></div></section>
+    <section class="monitor-section" aria-labelledby="monitorRemoteTitle"><div class="monitor-section-heading"><h3 id="monitorRemoteTitle">접속 중</h3><span data-count></span><button class="icon-btn" data-refresh title="새로고침" aria-label="새로고침"><i data-lucide="refresh-cw"></i></button></div>
+    <p class="monitor-message" role="status"></p><div data-devices></div></section>
     <details class="monitor-section"><summary>접속 이름 설정</summary><div class="monitor-toolbar"><label for="monitorName">접속 이름</label><input id="monitorName" maxlength="60" autocomplete="off"></div><p class="monitor-share-status" role="status"></p><p>민덱스를 열면 자동으로 표시됩니다.</p></details>`;
   document.body.append(panel);
   const $ = (selector) => panel.querySelector(selector);
@@ -57,7 +56,7 @@
   }
   function renderRemote() {
     const rows = remoteVerified ? remoteRows.filter(row => !isStale(row)) : [];
-    $("[data-count]").textContent = admin && remoteVerified ? `${rows.length}개 접속` : "";
+    $("[data-count]").textContent = remoteVerified ? `${rows.length}개 접속` : "";
     renderRows($("[data-devices]"), rows);
     if (!rows.length) $("[data-devices]").textContent = !remoteVerified ? "접속 상태를 확인하지 못했습니다." : "현재 접속 중인 기기가 없습니다.";
   }
@@ -65,7 +64,7 @@
     if (!state.client?.rpc) throw Error("원격 조회에 필요한 DB 클라이언트가 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.");
     if (!navigator.onLine) throw Error("네트워크 연결이 끊겼습니다.");
     const controller = new AbortController();
-    requests.set(controller, ["mindex_monitor_login", "mindex_monitor_read"].includes(name) ? "viewer" : "reporter");
+    requests.set(controller, name === "mindex_monitor_presence" ? "viewer" : "reporter");
     const timeout = setTimeout(() => controller.abort(), 4000);
     try {
       const { data, error } = await state.client.rpc(name, args).abortSignal(controller.signal);
@@ -96,25 +95,22 @@
       shareMessage(`${e.message} 자동 재시도 예정 · 마지막 전송 ${lastReportAt ? new Date(lastReportAt).toLocaleTimeString() : "없음"}`);
     } finally { uploading = false; }
   }
-  function lock() {
-    loginSerial++; viewSerial++; const old = admin; admin = null; void leave(old);
+  function clearView() {
+    viewSerial++;
     for (const [controller, scope] of requests) if (scope === "viewer") controller.abort();
-    viewerExpiresAt = 0; $("#monitorPassword").value = "";
-    $("form").hidden = false; $("[data-lock]").hidden = true; $("[data-devices]").replaceChildren();
-    $("[data-count]").textContent = ""; remoteRows = []; remoteVerified = false;
-    renderKeys.delete($("[data-devices]"));
-    message("");
+    $("[data-devices]").replaceChildren(); $("[data-count]").textContent = "";
+    remoteRows = []; remoteVerified = false; renderKeys.delete($("[data-devices]")); message("");
   }
   async function refresh() {
-    if (!panel.open) return;
+    if (!panel.open || document.hidden) return;
     renderRows($("[data-local]"), [{ id: "local", status: snapshot() }]);
-    if (!admin || reading) return;
+    if (reading) return;
     renderRemote();
     const serial = viewSerial; reading = true;
     try {
-      const rows = await rpc("mindex_monitor_read", { p_token: admin });
+      const rows = await rpc("mindex_monitor_presence", {});
       if (serial !== viewSerial || !panel.open) return;
-      if (!Array.isArray(rows)) { lock(); message("인증이 만료되었습니다."); return; }
+      if (!Array.isArray(rows)) throw Error("접속 상태를 확인하지 못했습니다.");
       remoteRows = rows.filter((row) => row && typeof row.id === "string" && row.status && typeof row.status === "object" && !Array.isArray(row.status)).slice(0, 100);
       remoteVerified = true; renderRemote();
 
@@ -122,34 +118,17 @@
     } catch (e) { if (serial === viewSerial) { remoteVerified = false; renderRemote(); message(e.message); } }
     finally { reading = false; }
   }
-  trigger.onclick = () => { if (!panel.open) panel.showModal(); lastActivityAt = Date.now(); void refresh(); window.lucide?.createIcons({ root: panel }); };
-  $("[data-close]").onclick = () => panel.close(); panel.addEventListener("close", lock);
-  $("[data-lock]").onclick = () => { lock(); $("#monitorPassword").focus(); };
+  trigger.onclick = () => { if (!panel.open) panel.showModal(); void refresh(); window.lucide?.createIcons({ root: panel }); };
+  $("[data-close]").onclick = () => panel.close(); panel.addEventListener("close", clearView);
   $("[data-refresh]").onclick = () => { void refresh(); if (enabled && Date.now() - lastReportAt >= 10000) { retryAt = 0; void upload(); } };
   $("#monitorName").onchange = () => { try { localStorage.setItem("mindex.monitor.name", $("#monitorName").value.slice(0, 60)); } catch {} };
-  $("form").onsubmit = async (event) => {
-    event.preventDefault();
-    if (loginPending || !panel.open || document.hidden) return;
-    loginPending = true;
-    const serial = ++loginSerial; const submit = $("button[type=submit]"); submit.disabled = true;
-    const password = $("#monitorPassword").value; $("#monitorPassword").value = "";
-    try {
-      const token = await rpc("mindex_monitor_login", { p_password: password });
-      if (serial !== loginSerial || !panel.open) { void leave(token); return; }
-      if (!token) { message("비밀번호·서버 설정 또는 시도 제한을 확인해 주세요."); return; }
-      admin = token; viewerExpiresAt = Date.now() + 30 * 60 * 1000; lastActivityAt = Date.now();
-      $("form").hidden = true; $("[data-lock]").hidden = false; await refresh();
-    } catch (e) { if (serial === loginSerial) message(e.message); }
-    finally { submit.disabled = false; loginPending = false; }
-  };
-  for (const name of ["pointerdown", "keydown", "input"]) panel.addEventListener(name, () => { lastActivityAt = Date.now(); });
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) { lock(); }
+    if (document.hidden) { clearView(); }
     else { if (enabled) { retryAt = 0; void upload(); } void refresh(); }
   });
-  window.addEventListener("offline", () => { remoteVerified = false; if (panel.open && admin) renderRemote(); if (enabled) shareMessage("네트워크 연결 끊김 · 전송 대기"); });
+  window.addEventListener("offline", () => { remoteVerified = false; if (panel.open) renderRemote(); if (enabled) shareMessage("네트워크 연결 끊김 · 전송 대기"); });
   window.addEventListener("online", () => { if (enabled) { retryAt = 0; void upload(); } void refresh(); });
-  window.addEventListener("pagehide", () => { shareSerial++; enabled = false; lock(); const old = reporter; reporter = null; void leave(old); });
+  window.addEventListener("pagehide", () => { shareSerial++; enabled = false; clearView(); const old = reporter; reporter = null; void leave(old); });
   window.addEventListener("pageshow", (e) => {
     if (!e.persisted) return;
     enabled = true; retryAt = 0; lastReportAt = 0; void upload();
@@ -159,10 +138,9 @@
   // Sample small state only; network writes retain the existing 15-second cadence.
   setInterval(() => {
     if (enabled && !lastReportAt) void upload();
-    if (admin && (Date.now() >= viewerExpiresAt || Date.now() - lastActivityAt >= 5 * 60 * 1000)) { lock(); message("자동 잠금되었습니다."); }
     if (panel.open) {
       renderRows($("[data-local]"), [{ id: "local", status: snapshot() }]);
-      if (admin) renderRemote();
+      renderRemote();
     }
   }, 2000);
   // Telemetry never awaits, rebuilds, or publishes the presenter state.

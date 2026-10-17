@@ -1,5 +1,17 @@
 # Read-only operations panel
 
+## Password-free presence · 2026-10-17
+
+The panel opens directly and calls `mindex_monitor_presence()` without a viewer
+token. Its SECURITY DEFINER query returns at most 100 fresh reporter sessions,
+with id/last_seen and exactly name/os/browser/output. Expired, stale, future-dated
+and viewer sessions are excluded. Legacy details, token hashes and private tables
+remain inaccessible to browser roles; the old password RPCs are not loosened.
+Close/hide aborts pending reads and clears the list; reopen resumes direct reads.
+Migration: `migrations/2026-10-17-public-presence.sql`. This supersedes viewer
+authentication/locking descriptions below. No worship data changes.
+
+
 ## Automatic presence · 2026-10-17
 
 Opening a controller tab automatically registers presence, including browsers
