@@ -2674,7 +2674,8 @@ body[data-module="scripture"] .scripture-editor .meta-attribute-label {
 }
 .version-compare-grid { display: grid; min-width: 0; gap: var(--s3); overflow-x: auto; }
 .version-add-btn,
-.version-copy-btn {
+.version-copy-btn,
+.version-delete-btn {
   display: inline-grid;
   flex: 0 0 auto;
   width: 26px;
@@ -2687,20 +2688,24 @@ body[data-module="scripture"] .scripture-editor .meta-attribute-label {
   padding: 0;
 }
 .version-add-btn:hover,
-.version-copy-btn:hover {
+.version-copy-btn:hover,
+.version-delete-btn:hover {
   background: var(--ui-surface-field);
   color: var(--ink-2);
 }
-.version-copy-btn:disabled {
+.version-copy-btn:disabled,
+.version-delete-btn:disabled {
   cursor: not-allowed;
   opacity: 0.38;
 }
-.version-copy-btn:disabled:hover {
+.version-copy-btn:disabled:hover,
+.version-delete-btn:disabled:hover {
   background: transparent;
   color: var(--ink-4);
 }
 .version-add-btn svg,
-.version-copy-btn svg {
+.version-copy-btn svg,
+.version-delete-btn svg {
   width: 16px;
   height: 16px;
 }
@@ -8744,3 +8749,5 @@ body[data-theme="dark"].presenter-output-body, body[data-theme="dark"] .presente
 /* Live/attention states share meaning across presenter controls. */
 .svc-presenter-mode--other, .svc-presenter-mode--empty { background:var(--ui-surface-panel); color:var(--ink-3); }
 .svc-presenter-mode--scripture, .svc-presenter-mode--praise { background:var(--ui-surface-panel); color:var(--ink-3); }
+
+.version-delete-btn:not(:disabled):hover { color: var(--danger); }

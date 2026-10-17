@@ -6427,6 +6427,7 @@ async function saveAll() {
     clearSearchCaches();
     state.dirty.song = false;
     state.dirty.forms = false;
+    delete song._pendingVersionDeletes;
     captureCleanFingerprint("praise");
     showToast("저장했습니다.");
     render();
@@ -7977,6 +7978,13 @@ async function saveSongVersions(song) {
     fetchExistingSongVersions(song.id),
     fetchExistingCanonicalSongVersions(canonicalSongId),
   ]);
+  const retainedVersionIds = new Set(versions.map(version => version.id));
+  const approvedDeletes = new Set(song._pendingVersionDeletes || []);
+  const deletedVersionIds = existingVersions.map(version => version.id).filter(id => !retainedVersionIds.has(id));
+  if (deletedVersionIds.some(id => !approvedDeletes.has(id))) {
+    throw new Error("다른 곳에서 버전 목록이 변경되었습니다. 새로고침 후 다시 확인해 주세요.");
+  }
+  await assertPraiseVersionsUnused(deletedVersionIds);
   const versionOrders = assignStableVersionOrders(versions, existingCanonicalVersions, song.id);
   const versionRows = versions.map((version, index) => ({
     id: version.id,
@@ -8008,13 +8016,12 @@ async function saveSongVersions(song) {
     version._worshipVersionPersisted = true;
   });
 
-  const nextVersionIds = new Set(versionRows.map((version) => version.id));
-  const deletedVersionIds = existingVersionIds.filter((id) => !nextVersionIds.has(id));
   if (deletedVersionIds.length) {
     const { error: deleteError } = await state.client
       .from("mindex_song_versions")
       .delete()
-      .in("id", deletedVersionIds);
+      .in("id", deletedVersionIds)
+      .eq("source_song_id", song.id);
     if (deleteError) throw deleteError;
   }
 
@@ -8598,6 +8605,14 @@ function handleDetailClick(event) {
   const createSongButton = event.target.closest("[data-create-song]");
   if (createSongButton) {
     createPraiseSong();
+    return;
+  }
+
+  const deleteVersionButton = event.target.closest("[data-delete-version]");
+  if (deleteVersionButton) {
+    event.preventDefault();
+    event.stopPropagation();
+    void deletePraiseVersion(deleteVersionButton.dataset.deleteVersion);
     return;
   }
 
@@ -9783,6 +9798,54 @@ function renderVersionPraiseTypeTags(version) {
         ${escapeHtml(labels[type])}
       </button>`).join("")
   }</div>`;
+}
+
+async function assertPraiseVersionsUnused(versionIds) {
+  const ids = versionIds.filter(isUuid);
+  if (!ids.length) return;
+  if (!state.client) throw new Error("연결 상태를 확인한 뒤 다시 시도해 주세요.");
+  const { data, error } = await state.client.from("mindex_worship_elements")
+    .select("id").in("song_version_id", ids).limit(1);
+  if (error) throw new Error("버전 사용 여부를 확인하지 못했습니다. 다시 시도해 주세요.");
+  if (data?.length) throw new Error("예배에 연결된 버전은 삭제할 수 없습니다. 예배의 버전 연결을 먼저 변경해 주세요.");
+}
+
+let praiseVersionDeletePending = false;
+async function deletePraiseVersion(versionId) {
+  const song = getSelectedSong();
+  const version = song?.versions?.find(item => item.id === versionId);
+  if (!version || state.saving || praiseVersionDeletePending) return;
+  if (song.versions.length <= 1) {
+    showToast("마지막 버전은 삭제할 수 없습니다.", "error");
+    return;
+  }
+  const name = versionEditableName(song, version);
+  if (!confirm(`“${song.title}”의 “${name}” 버전을 삭제할까요?\n이 버전의 가사와 송폼도 함께 삭제됩니다. 저장하면 되돌릴 수 없습니다.`)) return;
+  praiseVersionDeletePending = true;
+  try {
+    if (version._worshipVersionPersisted || state.songVersionTablesSupported) await assertPraiseVersionsUnused([versionId]);
+    // A user may navigate or start saving while the usage check is pending.
+    if (getSelectedSong() !== song || state.saving || !song.versions.includes(version)) return;
+    writeFormsToSelectedVersion();
+    const selected = getSelectedVersionId();
+    song.versions = song.versions.filter(item => item.id !== versionId);
+    song._pendingVersionDeletes = [...new Set([...(song._pendingVersionDeletes || []), versionId])];
+    if (version.is_primary) song.versions[0].is_primary = true;
+    if (selected === versionId) {
+      state.selectedVersionId = getDefaultVersionId(song);
+      state.forms = normalizeForms((getSelectedVersion()?.forms || []).map(form => withLocalId({ ...form, song_id: state.selectedVersionId })));
+    }
+    updateSongPraiseTypesFromVersions(song);
+    clearSearchCaches();
+    state.dirty.forms = state.dirty.song = true;
+    persistUiState();
+    render();
+    syncBrowserHistory();
+    updateSaveState();
+    showToast("버전을 삭제했습니다. 저장하면 반영됩니다.");
+  } catch (error) {
+    showToast(error.message || "버전을 삭제하지 못했습니다.", "error");
+  } finally { praiseVersionDeletePending = false; }
 }
 
 function addVersion(sourceVersionId = getSelectedVersionId()) {
@@ -17065,6 +17128,7 @@ function renderVersionTitleContent(song, version, forms, options = {}) {
       ${active ? renderVersionPraiseTypeTags(version) : ""}
       ${renderCopyVersionButton(version, forms)}
       ${renderAddVersionButton(version?.id)}
+      <button class="version-delete-btn" type="button" data-delete-version="${escapeAttr(version?.id || "")}" aria-label="${escapeAttr(versionEditableName(song, version))} 버전 삭제" title="${song.versions.length <= 1 ? "마지막 버전은 삭제할 수 없습니다" : "버전 삭제"}" ${song.versions.length <= 1 ? "disabled" : ""}><i data-lucide="trash-2"></i></button>
     </div>
   `;
 }
