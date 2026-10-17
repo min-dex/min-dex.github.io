@@ -2831,3 +2831,11 @@ A manual praise group may begin with a person/title slide without a timing cue.
 Determine whether to show the restart button from the whole element group, not
 only that first slide. Keep one editor/restart pair per element. Chromium/WebKit
 regression covers an untimed title preceding a locally timed lyric.
+
+
+## Compact editor links · 2026-10-17
+
+Related-song links, linked-version headings and section-add controls use plain
+text with hover underlines; selected version surfaces and warnings remain.
+Collapsed direct lyrics hide their textarea without removing its draft value.
+Expanded lyrics occupy a full following row. Output and print CSS are untouched.

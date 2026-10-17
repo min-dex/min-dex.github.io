@@ -2159,17 +2159,17 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   overflow: hidden;
   border: 0;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--panel-2) 34%, transparent);
+  background: transparent;
   color: var(--ink-3);
   cursor: pointer;
   font-size: var(--ui-meta-size);
   font-weight: 500;
   letter-spacing: 0;
-  padding: 0 8px;
+  padding: 0;
   text-transform: none;
 }
 .related-song-link:hover {
-  background: color-mix(in srgb, var(--accent-soft) 46%, transparent);
+  background: transparent; text-decoration: underline; text-underline-offset: 3px;
   color: var(--ink);
 }
 .related-song-link span:first-child {
@@ -2703,11 +2703,12 @@ body[data-module="scripture"] .scripture-editor .meta-attribute-label {
   background: color-mix(in srgb, var(--accent-soft) 34%, transparent);
 }
 .version-compare-title.linked-version-title {
-  background: color-mix(in srgb, var(--panel-2) 22%, transparent);
+  background: transparent;
   color: var(--ink-3);
+  padding: 0;
 }
 .version-compare-title.linked-version-title:hover {
-  background: color-mix(in srgb, var(--panel-2) 42%, transparent);
+  background: transparent; text-decoration: underline; text-underline-offset: 3px;
   color: var(--ink-2);
 }
 .version-compare-title.placeholder {
@@ -4170,11 +4171,11 @@ body[data-theme="dark"] .service-week-card:hover {
   font-weight: 700;
   letter-spacing: .06em;
   list-style: none;
-  padding: 0 8px;
+  padding: 0;
   text-transform: uppercase;
 }
 .svc-template-head::-webkit-details-marker { display: none; }
-.svc-template-head:hover { background: color-mix(in srgb, var(--panel-2) 42%, transparent); color: var(--ink-2); }
+.svc-template-head:hover { background: transparent; text-decoration: underline; text-underline-offset: 3px; color: var(--ink-2); }
 .svc-template-head::before {
   width: 14px;
   color: var(--accent);
@@ -4186,8 +4187,8 @@ body[data-theme="dark"] .service-week-card:hover {
 .svc-template-guide[open] .svc-template-head::before { content: "−"; }
 .svc-template-flow { display: flex; flex-wrap: wrap; gap: 4px; }
 .svc-template-guide .svc-template-flow { margin-top: 6px; }
-.svc-template-step { display: inline-flex; min-height: 26px; align-items: center; gap: 6px; border: 0; border-radius: var(--r); background: color-mix(in srgb, var(--panel-2) 34%, transparent); color: var(--ink-3); cursor: pointer; padding: 0 8px; font-size: var(--ui-meta-size); font-weight: 500; }
-.svc-template-step:hover { background: color-mix(in srgb, var(--accent-soft) 36%, transparent); color: var(--ink); }
+.svc-template-step { display: inline-flex; min-height: 26px; align-items: center; gap: 6px; border: 0; border-radius: var(--r); background: transparent; color: var(--ink-2); cursor: pointer; padding: 0 5px; font-size: var(--ui-meta-size); font-weight: 500; }
+.svc-template-step:hover { background: transparent; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
 .svc-template-step-label { white-space: nowrap; }
 .service-templates {
   display: flex;
@@ -5423,8 +5424,7 @@ textarea.svc-presenter-input-control--multiline {
 }
 .svc-presenter-input-field--lyrics.is-collapsed textarea.svc-presenter-input-control {
   min-height: 0;
-  height: 6.65em;
-  overflow-y: auto;
+  display: none;
 }
 .svc-presenter-input-hint {
   color: var(--ink-4);
@@ -8652,3 +8652,9 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .svc-board-subgroup-head-row > .svc-item-link { margin-right:auto; }
 .svc-board-subgroup-control-head:has(> .svc-item-link) > .svc-board-subgroup-control-label { flex:0 1 auto; }
 .svc-board-subgroup-control-head > .svc-item-link { margin-right:auto; }
+
+/* Compact preparation controls; output and print styles are independent. */
+.linked-version-title:focus-visible, .svc-template-head:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.svc-board-subgroup-controls .svc-presenter-input-field--lyrics.is-collapsed { flex: 0 0 auto; grid-template-columns: max-content; }
+.svc-board-subgroup-controls .svc-presenter-input-field--lyrics:not(.is-collapsed) { flex: 1 0 100%; order: 1; grid-column: 1 / -1; grid-template-columns: minmax(0,1fr); }
+.svc-board-subgroup-controls .svc-presenter-input-field--lyrics:not(.is-collapsed) > .svc-presenter-lyrics-heading { justify-content: flex-start; }
