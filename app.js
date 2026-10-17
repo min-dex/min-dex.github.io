@@ -2386,8 +2386,10 @@ function applyTheme(theme) {
   document.documentElement.dataset.theme = theme;
   document.body.dataset.theme = theme;
   if (changed) {
-    // Resolve the new palette while transitions are suppressed, before painting.
-    void getComputedStyle(document.body).backgroundColor;
+    // Resolve descendants too: a body-only flush can leave nested controls stale.
+    for (const element of document.querySelectorAll("body, body *")) {
+      void getComputedStyle(element).color;
+    }
     root.classList.remove("ui-theme-switching");
   }
   if (!refs.themeBtn) return;
