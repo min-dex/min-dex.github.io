@@ -3151,3 +3151,20 @@ Linux WebKit의 seek 뒤 이어 재생에서 실제 음원이 진행·종료되�
 완료되지 않는 상태를 재현했다. unpaused·not seeking 상태의 실제 시간 증가도
 재생 시작 확인으로 사용한다. 자연 종료는 요청 serial을 무효화하고 pending을
 비워 늦은 재생 응답이 종료 상태를 되돌리지 못하게 한다.
+
+## Compact linked praise rows · 2026-10-17
+
+DB lyrics/score rows with their own action toolbar use one row when the input
+container is at least961px wide: mode, flexible title, DB link, bounded version
+and form, then photo/audio/save. No empty assignee column is reserved; an actual
+assignee remains below. Missing versions reserve no column. Smaller containers
+retain wrapping. Opening photos moves the action area below; audio managers
+retain their full-width area. Direct lyrics and output/print remain unchanged.
+Real renderer smoke checks cover three connected songs in Chromium/WebKit at
+600/800/1000/1100/1200/1600px, button bounds/overlap, actual photo expansion and the
+unlinked layout. Existing praise-input regression covers assignee/direct input.
+
+The individual-input regression previously applied its desktop row-count rule
+above780px even though the actual container wraps through960px. The same failure
+reproduced with unchanged HEAD styles. Align that condition with the960px
+container breakpoint; retain every containment, overlap and multiline assertion.

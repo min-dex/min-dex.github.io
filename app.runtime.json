@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261017-manual-sync-progress",
+  "version": "20261017-inline-song-controls",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "54e9386b4d77f2f0db564f8022898db30f8418435fbe9dc8eed36f6f7928e9f2",
-  "runtime_sha256": "43b4606e9e18990c2c83a356764f2d77b5bc8bc8dabba47e1c091d298fc06244",
-  "source_bytes": 1469858,
-  "runtime_bytes": 1040397,
-  "source_gzip": 328108,
-  "runtime_gzip": 257318
+  "source_sha256": "a474bdab6f58b085eff2bad11648eb7ee9b637677131f409d3a91665bfdc5146",
+  "runtime_sha256": "4f2b3b987010c9ee8a44e9e6a1585b1720d8863b99beb099883bca84024c35fa",
+  "source_bytes": 1469995,
+  "runtime_bytes": 1040509,
+  "source_gzip": 328167,
+  "runtime_gzip": 257359
 }
