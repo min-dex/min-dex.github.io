@@ -21,9 +21,10 @@ server,url=start_local_app_server()
 try:
  with sync_playwright() as p:
   for engine in ('chromium','webkit'):
+   print(engine,'starting DB audio checks',flush=True)
    b=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
    def load():
-    ctx=b.new_context();page=ctx.new_page()
+    ctx=b.new_context();page=ctx.new_page();page.set_default_timeout(15000)
     def route(r):
      if r.request.url.endswith('/clock.wav'):r.fulfill(body=buf.getvalue(),content_type='audio/wav')
      elif (urlsplit(r.request.url).netloc==urlsplit(url).netloc or r.request.url.startswith('blob:')) and r.request.method in ('GET','HEAD'):r.continue_()
@@ -48,6 +49,7 @@ try:
    assert 'injected' in d.locator('[data-timing-status]').inner_text()
    assert page.evaluate('uploads')==1
    page.evaluate('failSave=false');d.locator('[data-timing-save]').click();page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('곡 DB에 저장했어요')")
+   print(engine,'DB save/retry passed',flush=True)
    saved=page.evaluate('db');assert page.evaluate('uploads')==1
    assert json.loads(saved['memo'])['unknown']=='preserve'
    assert json.loads(saved['memo'])['childrenAudioSets']['other']=={'keep':True}
@@ -59,6 +61,7 @@ try:
     let rejected=false;try{await T.saveToSong(song,v,T.childProfile(song,v),T.pagesFor(presenterSlidesForService(state.selectedServiceId)))}catch(e){rejected=true;}
     if(!rejected || !JSON.parse(db.memo).concurrent)throw Error('concurrent edit overwritten');db.memo=before;
    }''')
+   print(engine,'opening independent storage context',flush=True)
    ctx.close();ctx,page=load()
    page.evaluate("db=>{window.db=db;state.songs[0].memo=db.memo}",saved)
    page.evaluate(r'''async()=>{
@@ -74,13 +77,15 @@ try:
     state.presenter.serviceId='other';await T.play(sid,item.id);if(state.serviceMusic.playing)throw Error('wrong service playback');state.presenter.serviceId=sid;
     const m=item.memo;item.memo=serializeServiceItemMemo({...parseServiceItemMemo(m),inputMode:'lyrics_db'});
     if(presenterSlidesForService(sid).some(s=>s.syncTimeline))throw Error('ordinary lyrics activated audio');item.memo=m;
-    await T.play(sid,item.id);
+    refs.detailPane.innerHTML=T.controls(sid,entries);
    }''')
+   page.locator('[data-song-timing-play]').click()
    page.wait_for_function('state.serviceMusic.playing && state.serviceMusic.audio.currentTime>0')
    page.evaluate('state.serviceMusic.audio.currentTime=7.2');page.wait_for_function('state.presenter.slides[state.presenter.index]?.syncTimeline?.page===2')
    page.evaluate('isPresenterOutputWindowOpen=()=>false;startPresenterOutputWindowMonitor(state.selectedServiceId)')
    page.wait_for_function('!state.serviceMusic.playing')
-   page.evaluate("isPresenterOutputWindowOpen=()=>true;MindexSongTiming.play(state.selectedServiceId,'children-db-item')")
+   page.evaluate("isPresenterOutputWindowOpen=()=>true")
+   page.locator('[data-song-timing-play]').click()
    page.wait_for_function('state.serviceMusic.playing')
    page.evaluate(r'''()=>{
     stopPresenterOutput(state.selectedServiceId);if(state.serviceMusic.playing)throw Error('output stop left sync audio playing');const song=state.songs[0];song.versions[0].forms[0].lyrics='changed';
