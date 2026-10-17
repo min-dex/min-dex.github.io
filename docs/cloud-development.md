@@ -109,3 +109,10 @@ own diagnostic files change on main, with read-only permissions and a seven-day
 JSON artifact. It is not a scheduled monitor or a default setup/test dependency.
 Network timings across runner/Mac locations are evidence, not identical-path
 benchmarks; do not infer a specific ISP/CDN fault from a single fast remote run.
+
+Compact runtime verification adds `test_app_runtime.cjs` (Node built-ins only)
+and `smoke_presenter_font_cache.py` (real HTTP cache, both engines). With the
+concurrent audio-bundle and startup-overlap checks the gate is now 12 Node + 11
+smoke entry points. No minifier, font builder or production credential is needed
+for default setup/tests. Optional regeneration and exact fontTools outline checks
+are documented in `code-organization.md`.

@@ -1,6 +1,7 @@
 """Compare every common glyph outline, advance, vertical metrics and kerning."""
 from pathlib import Path
-import hashlib,json
+import hashlib,json,re
+from bisect import bisect_right
 from fontTools.ttLib import TTFont
 from fontTools.pens.recordingPen import DecomposingRecordingPen
 ROOT=Path(__file__).resolve().parents[1]
@@ -33,5 +34,14 @@ for record in json.loads((D/'common-manifest.json').read_text())['fonts']:
  for filename in ['styles.css','styles.presenter-output.css']:
   css=(ROOT/filename).read_text()
   if filename=='styles.css' or record['weight'] in [500,600,700,800]:
-   assert record['file'] in css and record['source'] in css
+   def coverage(filename):
+    block=next(b for b in re.findall(r'@font-face \{[^}]+\}',css) if filename in b)
+    intervals=re.search(r'unicode-range: ([^;]+);',block)[1].split(',')
+    bounds=[]
+    for interval in intervals:
+     parts=interval.strip()[2:].split('-');bounds.append((int(parts[0],16),int(parts[-1],16)))
+    starts=[a for a,b in bounds]
+    return {cp for cp in original if (index:=bisect_right(starts,cp)-1)>=0 and cp<=bounds[index][1]}
+   assert coverage(record['file'])==set(cmap)
+   assert coverage(record['source'])==set(original)-set(cmap)
 print('PASS',checks,'exact glyph outlines/advances, vertical metrics, kern/GPOS pairs and full fallback')

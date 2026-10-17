@@ -712,3 +712,11 @@ fallback. Startup parallelism/recovery, latest-source resolution, delayed data,
 six caption sizes, manual song timing and lyric input sizing pass. Public/CI
 verification follows after reconciling concurrent main. Existing worship data
 and the primary dirty checkout remain untouched.
+
+Integrated main through `27e0dc73`, preserving audio-led aggregate persistence,
+selected-startup recovery overlap and song-title input guidance. Regenerated
+runtime is 325373 → 255717 gzip bytes (21.41% smaller). Final local gate is 12
+Node + 11 smoke entry points; integrated startup, input/timing, preview/output
+checks pass, including 32 lyric-bound cases per engine with rare glyphs. Exact
+font coverage additionally checks disjoint CSS ranges against all source glyphs;
+UI fonts retain their original unicode ranges and 11,700 outline/advance checks.

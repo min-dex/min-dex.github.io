@@ -19,7 +19,7 @@ def main():
             for width, height in [(1920,1080), (1366,768), (900,900), (406,228)]:
                 page.set_viewport_size({'width':width,'height':height})
                 for chromakey in [False, True]:
-                    for text in ['1 구주의 십자가 보혈로 죄 씻음 받기를 원하네\n내 죄를 씻으신 주 이름 찬송합시다', '짧은 가사', '아주 긴 가사를 온전히 표시합니다 ' * 6]:
+                    for text in ['1 구주의 십자가 보혈로 죄 씻음 받기를 원하네\n내 죄를 씻으신 주 이름 찬송합시다', '짧은 가사', '漢字 똠방각하 찬양 AV To\n희귀 글자와 일반 글자를 함께 표시', '아주 긴 가사를 온전히 표시합니다 ' * 6]:
                         page.evaluate('''({text, chromakey}) => {
                           const slide = {id:Math.random().toString(), type:'lyrics', elementType:'praise',
                             layout:'lower_bar_text', text, outputContext:chromakey?'chromakey':'fullscreen'};
@@ -107,7 +107,7 @@ def main():
             }''')
             assert inline_number == {'marker': '"1"', 'text': '예수 이름으로'}, inline_number
             browser.close()
-            print('PASS lyric bounds: 24 cases, repeated transitions, verse gutter alignment, and inline verse normalization')
+            print('PASS lyric bounds: 32 cases, repeated transitions, verse gutter alignment, and inline verse normalization')
     finally:
         if server:
             server.shutdown()
