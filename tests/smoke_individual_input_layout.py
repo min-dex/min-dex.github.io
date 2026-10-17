@@ -37,7 +37,11 @@ def main():
                         const fields=[...songRow.querySelectorAll('input,select,button')].filter(n=>n.checkVisibility() && n.getBoundingClientRect().height);
                         const tops=fields.map(n=>n.getBoundingClientRect().top).sort((a,b)=>a-b);
                         const rows=[];for(const top of tops)if(!rows.length||top-rows[rows.length-1]>16)rows.push(top);
-                        if(rows.length>2)errors.push('special song still uses three rows');
+                        // Current layout: song controls, assignee, then action/status row.
+                        if(rows.length>3)errors.push('special song has an extra control row');
+                        const assignee=songRow.querySelector('[data-service-item-field="assignee"]');
+                        const action=songRow.querySelector('.svc-board-subgroup-flow');
+                        if(assignee && action && action.getBoundingClientRect().top<assignee.getBoundingClientRect().bottom-1)errors.push('action row overlaps assignee');
                       }
                       if(song && song.getBoundingClientRect().width>800) {
                         const fields=[...song.querySelectorAll('input,select')].filter(n=>n.checkVisibility() && n.getBoundingClientRect().height);

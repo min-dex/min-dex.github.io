@@ -43,7 +43,8 @@ function normalizeServiceDocumentHistory(history = []) {
 
 function normalizeServiceDocumentSnapshot(document = null) {
   if (!document || typeof document !== "object") return null;
-  const sourceText = limitServiceDocumentText(document.sourceText || document.source_text || "");
+  // The current source is editable data, not an abbreviated history preview.
+  const sourceText = String(document.sourceText || document.source_text || "");
   const sourceRecords = normalizeServiceDocumentSourceRecords(document.sourceRecords || document.source_records);
   const slides = normalizeServiceDocumentSlides(document.slides);
   const exceptions = normalizeServiceDocumentExceptions(document.exceptions);

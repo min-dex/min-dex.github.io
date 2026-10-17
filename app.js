@@ -911,6 +911,7 @@ async function init() {
 
   try {
     if (state.client) {
+      window.MINDEX_BOOT_STATUS?.("연결 확인 중…");
       await initializeAuth();
       if (canUseClientData()) {
         const initialData = loadInitialData();
@@ -936,7 +937,8 @@ function finishUiBoot() {
   }
   // Complete only the short, already-running brand reveal; reduced motion has none.
   const animations = document.getElementById("bootStatus")?.getAnimations?.({ subtree: true }) || [];
-  Promise.allSettled(animations.map(animation => animation.finished))
+  const revealAnimations = animations.filter(animation => animation.effect?.getComputedTiming?.().iterations !== Infinity);
+  Promise.allSettled(revealAnimations.map(animation => animation.finished))
     .then(() => requestAnimationFrame(() => requestAnimationFrame(clear)));
 }
 
@@ -7421,7 +7423,9 @@ async function saveWorshipServiceElementPatch(service, itemId) {
   const committedItem = committedItems.find(item => item.id === targetItemId);
   const previousDocument = serviceDocumentSnapshotFromRef(documentService);
   delete documentService._worshipSourceTextDraft;
-  if (previousDocument?.sourceText && previousItem && committedItem) {
+  // A legacy truncated snapshot cannot supply a complete patch range. Rebuild from
+  // committed canonical rows (including only this item edit, never sibling drafts).
+  if (previousDocument?.sourceText && !previousDocument.sourceText.endsWith("\n[truncated]") && previousItem && committedItem) {
     documentService._worshipSourceTextDraft = sundayEditSyncSourceText(previousDocument, previousItem, committedItem, documentService);
   }
   let sourceRef = withServiceDocumentSnapshot(documentService, committedItems);
@@ -22082,7 +22086,7 @@ function buildServiceDocumentSnapshot(service = null, items = null) {
   const sourceText = serviceDocumentSourceTextForSnapshot(service, sourceItems);
   const sourceRecords = parseServiceSourceText(sourceText);
   validateServiceSourceRecordMultiplicity(sourceRecords, sourceItems,
-    parseServiceSourceText(serviceDocumentSnapshotFromRef(service)?.sourceText || ""));
+    parseServiceSourceText(serviceDocumentSnapshotFromRef(service)?.sourceText || "", { allowTruncatedSnapshot: true }));
   const sourceRecordCount = sourceRecords.length;
   const presentationSignature = serviceDocumentPresentationSignature(sourceItems);
   return normalizeServiceDocumentSnapshot({
