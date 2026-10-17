@@ -8844,3 +8844,13 @@ html.ui-theme-switching:not(.presenter-output-document) *::before,
 html.ui-theme-switching:not(.presenter-output-document) *::after {
   transition: none !important;
 }
+
+/* Children version audio: one compact preparation row below the song fields. */
+.svc-board-subgroup-controls .svc-children-audio.svc-audio-manager {
+  display:flex; flex-wrap:wrap; align-items:center; padding:10px 0 0; margin-top:0;
+}
+.svc-children-audio.svc-audio-manager audio { width:260px; max-width:100%; height:35px; }
+.svc-children-audio.svc-audio-manager strong { flex:1 1 140px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; font-weight:500; }
+.svc-children-audio-hint { font-size:12px; color:var(--ink-3); }
+.svc-children-audio-hint kbd { font:inherit; font-weight:600; }
+.svc-children-audio .svc-board-subgroup-audio-actions { margin-left:auto; }

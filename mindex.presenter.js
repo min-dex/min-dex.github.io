@@ -2933,6 +2933,10 @@ function handlePresenterControllerMessage(message = {}) {
     return;
   }
   if (message.type === "presenter-control") {
+    if (message.action === "children-play") {
+      playPresenterChildrenTitle(message);
+      return;
+    }
     if (message.action === "stop") {
       stopPresenterOutput(state.presenter.serviceId);
       return;
@@ -3098,6 +3102,25 @@ function presenterOutputUrl(options = {}) {
   return url.toString();
 }
 
+function presenterChildrenPlayKey(event) {
+  return !event.metaKey && !event.ctrlKey && !event.altKey && !event.isComposing
+    && event.keyCode !== 229 && (event.code === "KeyP" || event.key?.toLowerCase() === "p");
+}
+
+function playPresenterChildrenTitle(expected = null) {
+  const serviceId = state.presenter.serviceId;
+  const slide = state.presenter.slides[state.presenter.index];
+  if (!serviceId || !presenterControllerIsLive(serviceId) || state.selectedServiceId !== serviceId
+    || slide?.type !== "song-title" || !slide.songTimingEligible || !slide.syncTimeline?.localTiming
+    || !slide.syncTimeline.intro) return false;
+  if (expected && (expected.serviceId !== serviceId || expected.index !== state.presenter.index
+    || expected.groupId !== slide.syncTimeline.groupId)) return false;
+  if (!state.serviceMusic.playing && !state.serviceMusic.pending) {
+    void globalThis.MindexSongTiming?.play(serviceId, slide.songTimingElementId || slide.elementId);
+  }
+  return true;
+}
+
 function handlePresenterShortcut(event) {
   const presenterServiceId = state.presenter.serviceId;
   if (state.module !== "presenter" || !presenterServiceId) return false;
@@ -3106,6 +3129,15 @@ function handlePresenterShortcut(event) {
     state.presenter.exitArmedAt = 0;
     requestPresenterOutputFullscreenFromController();
     return true;
+  }
+  if (presenterChildrenPlayKey(event)) {
+    const target = event.target instanceof Element ? event.target : null;
+    if (target?.closest("input, textarea, select, [contenteditable]:not([contenteditable='false']), dialog, [role='dialog']")) return false;
+    if (shouldKeepPresenterShortcutInFocusedControl(event)
+      && !target?.closest(".svc-slide-thumb[data-presenter-index], .svc-slide-thumb-wrap[data-presenter-index]")) return false;
+    if (event.repeat) return false;
+    if (playPresenterChildrenTitle()) { consumePresenterShortcutEvent(event); return true; }
+    return false;
   }
   if (shouldKeepPresenterShortcutInFocusedControl(event)) return false;
   if (event.metaKey || event.ctrlKey || event.altKey) return false;
@@ -3563,6 +3595,15 @@ function initPresenterOutputCore() {
   });
   let videoRecoverySpaceHeld = false;
   window.addEventListener("keydown", (event) => {
+    if (presenterChildrenPlayKey(event)) {
+      const slide = currentPayload?.slides?.[currentPayload.index];
+      if (!event.repeat && slide?.type === "song-title" && slide.songTimingEligible && slide.syncTimeline?.intro) {
+        event.preventDefault();
+        sendControllerMessage({ type: "presenter-control", action: "children-play", serviceId: currentPayload.serviceId,
+          index: currentPayload.index, groupId: slide.syncTimeline.groupId, clientId: outputClientId });
+      }
+      return;
+    }
     if (event.key === " ") {
       if (!event.repeat) videoRecoverySpaceHeld = false;
       if (videoRecoverySpaceHeld || handlePresenterVideoRecoveryKey(event)) {

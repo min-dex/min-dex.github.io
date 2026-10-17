@@ -108,3 +108,5 @@ Completed one-time hymn repair tools and their dedicated tests were retired on
 records above for the retained repair evidence and Git reference.
 
 - `ui-review-20261011.md`: current cross-module UI review, fixes, verification and limits.
+
+- [Elem 통합 현황과 남은 기능](elem-migration-status-20261018.md): 2026-10-18 기준 소스 비교와 웹/데스크톱 지원 차이.
