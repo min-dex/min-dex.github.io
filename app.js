@@ -799,6 +799,7 @@ const state = {
     resumeTimer: null,
     resumeAttempts: 0,
     syncTimer: null,
+    autoSyncSuspended: false,
   },
   servicePrepEditorOpenId: null,
   calendarData: [],
@@ -28978,6 +28979,7 @@ function setServiceMusicSource(audio, source, mode, playback = null, label = "")
   audio.pause();
   audio.src = source;
   audio.loop = Boolean(playback?.loop);
+  state.serviceMusic.autoSyncSuspended = false;
   state.serviceMusic.sourceKey = source;
   state.serviceMusic.ownerServiceId = "";
   state.serviceMusic.sourceLabel = label || "";
@@ -29167,8 +29169,15 @@ function presenterSyncedLyricsTargetForTime(slides = [], activeIndex = 0, curren
   return target;
 }
 
+// Manual navigation owns the screen until an explicit synchronized restart.
+// Keep the media pipeline (including a pending play promise) untouched.
+function suspendServiceMusicAutoSync() {
+  if (state.serviceMusic.mode === "presenter-audio") state.serviceMusic.autoSyncSuspended = true;
+}
+
 function syncServiceMusicSyncedLyricsWithCurrentTime(options = {}) {
-  if (state.serviceMusic.mode !== "presenter-audio" || !state.serviceMusic.playing) return false;
+  if (state.serviceMusic.mode !== "presenter-audio" || !state.serviceMusic.playing
+    || state.serviceMusic.autoSyncSuspended) return false;
   if (state.presenter.safetyBlank || state.presenter.liveScripture?.active) return false;
   const audio = state.serviceMusic.audio;
   if (!audio) return false;
@@ -31102,10 +31111,6 @@ function runPresenterAction(action, serviceId = state.selectedServiceId, options
   if (presenterControllerIsLive(serviceId)) clearPresenterBoardSelection({ render: false });
   preparePresenterNavigation(serviceId);
 
-  if (["next", "prev", "first", "last", "jump"].includes(action)
-    && state.presenter.slides[state.presenter.index]?.syncTimeline?.localTiming) {
-    stopServiceMusicPlayback({ render: false });
-  }
   state.presenter.jumpDraft = "";
   if (["next", "prev", "first", "last", "jump"].includes(action)) {
     const requestedIndex = Number(options.index);
@@ -31116,6 +31121,7 @@ function runPresenterAction(action, serviceId = state.selectedServiceId, options
       renderPresenterControlState(serviceId);
       return;
     }
+    suspendServiceMusicAutoSync();
     if (["first", "last", "jump"].includes(action)) state.presenter.pptxProgress = null;
     liveScriptureRequestSerial += 1;
     state.presenter.liveScripture = {
@@ -32126,6 +32132,7 @@ async function startPresenterAtSlide(serviceId, index) {
   await hydratePresenterServiceData(serviceId);
   if (requestSerial !== presenterLaunchRequestSerial) return;
   preparePresenterService(serviceId);
+  suspendServiceMusicAutoSync();
   state.presenter.index = clampPresenterIndex(index, state.presenter.slides.length);
   state.presenter.pptxProgress = null;
   clearPresenterBoardSelection({ render: false });

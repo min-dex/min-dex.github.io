@@ -96,6 +96,15 @@ try:
    page.locator('[data-song-timing-play]').click()
    page.wait_for_function('state.serviceMusic.playing && state.serviceMusic.audio.currentTime>0')
    page.evaluate('state.serviceMusic.audio.currentTime=7.2');page.wait_for_function('state.presenter.slides[state.presenter.index]?.syncTimeline?.page===2')
+   page.evaluate("runPresenterAction('prev',state.selectedServiceId,{scroll:false});window.manualIndex=state.presenter.index;window.manualTime=state.serviceMusic.audio.currentTime")
+   page.wait_for_function('state.serviceMusic.audio.currentTime>manualTime+.3')
+   page.evaluate("if(state.serviceMusic.audio.paused || state.presenter.index!==manualIndex || !state.serviceMusic.autoSyncSuspended)throw Error('manual navigation interrupted music or snapped back')")
+   page.evaluate("state.serviceMusic.audio.currentTime=8.5")
+   page.wait_for_function('state.serviceMusic.audio.currentTime>8.7')
+   page.evaluate("if(state.presenter.index!==manualIndex)throw Error('seek re-enabled auto sync');stopServiceMusicPlayback({render:false});const resume=document.createElement('button');resume.id='resume-test';resume.textContent='resume';resume.onclick=()=>runServiceMusicAction('toggle');refs.detailPane.prepend(resume)")
+   page.locator('#resume-test').click()
+   page.wait_for_function('state.serviceMusic.playing && !state.serviceMusic.audio.paused')
+   page.evaluate("if(!state.serviceMusic.autoSyncSuspended || state.presenter.index!==manualIndex)throw Error('resume re-enabled auto sync')")
    page.evaluate("window.mediaTrace=[];['play','playing','pause','waiting','seeking','seeked','error','abort','ended'].forEach(type=>state.serviceMusic.audio.addEventListener(type,()=>mediaTrace.push({type,time:state.serviceMusic.audio.currentTime,paused:state.serviceMusic.audio.paused})))")
    page.evaluate('isPresenterOutputWindowOpen=()=>false;startPresenterOutputWindowMonitor(state.selectedServiceId)')
    page.wait_for_function('!state.serviceMusic.playing')
@@ -105,6 +114,7 @@ try:
    except Exception:
     print(engine,page.evaluate('JSON.stringify({trace:mediaTrace,playing:state.serviceMusic.playing,pending:state.serviceMusic.pending,ready:state.serviceMusic.audio.readyState,network:state.serviceMusic.audio.networkState,source:state.serviceMusic.sourceKey,service:state.presenter.serviceId,toast:document.querySelector("#toast")?.textContent})'),flush=True)
     raise
+   page.evaluate("if(state.serviceMusic.autoSyncSuspended)throw Error('explicit restart did not re-enable sync')")
    page.evaluate(r'''()=>{
     stopPresenterOutput(state.selectedServiceId);if(state.serviceMusic.playing)throw Error('output stop left sync audio playing');const song=state.songs[0];song.versions[0].forms[0].lyrics='changed';
     if(presenterSlidesForService(state.selectedServiceId).some(s=>s.syncTimeline))throw Error('stale DB lyrics');

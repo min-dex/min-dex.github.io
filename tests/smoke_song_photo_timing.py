@@ -108,8 +108,8 @@ try:
     state.presenter.safetyBlank=false;state.presenter.liveScripture={active:true};
     check(!syncServiceMusicSyncedLyricsWithCurrentTime({render:false,publish:false,scroll:false}),'scripture advanced');
     state.presenter.liveScripture.active=false;
-    runPresenterAction('next',serviceId,{scroll:false});check(!state.serviceMusic.playing,'manual did not pause');
-    return 'PASS one-second lyric lead and exact instrumental photo cues, copied bundle, photo reorder stale guard, blackout/scripture guards, manual pause, no external DB writes';
+    runPresenterAction('next',serviceId,{scroll:false});check(state.serviceMusic.playing && state.serviceMusic.autoSyncSuspended,'manual must keep music and suspend sync');
+    return 'PASS one-second lyric lead and exact instrumental photo cues, copied bundle, photo reorder stale guard, blackout/scripture guards, manual auto-sync release, no external DB writes';
    }'''))
    # Persisted timing and audio survive a browser reload, with identical fixture identity.
    snapshot=page.evaluate('photoTimingSnapshot')

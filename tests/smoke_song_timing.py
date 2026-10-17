@@ -144,7 +144,18 @@ try:
       state.presenter.liveScripture.active=false;
       check(syncServiceMusicSyncedLyricsWithCurrentTime({render:false,publish:false,scroll:false}),'backward seek failed');
       runPresenterAction('next','timing-fixture',{scroll:false});
-      check(!state.serviceMusic.playing,'manual navigation did not pause');
+      check(state.serviceMusic.playing,'manual navigation paused music');
+      const manualIndex=state.presenter.index;
+      audio.currentTime=2;
+      check(!syncServiceMusicSyncedLyricsWithCurrentTime({render:false,publish:false,scroll:false}) && state.presenter.index===manualIndex,'manual screen snapped back');
+      for(const action of ['prev','first','last','jump']) {
+        state.serviceMusic.autoSyncSuspended=false;
+        runPresenterAction(action,'timing-fixture',{index:first,scroll:false});
+        check(state.serviceMusic.playing && state.serviceMusic.autoSyncSuspended,'manual action failed '+action);
+      }
+      state.serviceMusic.autoSyncSuspended=false;
+      runPresenterAction('jump','timing-fixture',{index:99999,scroll:false});
+      check(!state.serviceMusic.autoSyncSuspended,'invalid jump disabled sync');
       stopServiceMusicPlayback({render:false});
       check(JSON.stringify({songs:state.songs,items:state.serviceItems})===window.timingFixtureBefore,'records changed: '+window.timingFixtureBefore+' AFTER '+JSON.stringify({songs:state.songs,items:state.serviceItems}));
       return 'PASS playback, seek, pause, source/group isolation, immutable song/service data';

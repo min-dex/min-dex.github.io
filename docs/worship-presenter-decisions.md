@@ -3136,3 +3136,12 @@ weekly-status aliases expose their full escaped names using native title hints.
 Ellipsis geometry and click behavior remain unchanged. Offline Chromium/WebKit
 hover checks use long quoted names at narrow and desktop widths; output, print
 and operational data are outside this change.
+
+
+## 수동 넘김과 음원 재생 · 2026-10-17
+
+송출 중 수동 다음/이전/처음/끝/직접 이동은 자동 싱킹만 해제하고 음원은 계속
+재생한다. 같은 음원의 일시정지·이어 재생과 seek도 해제를 유지한다.
+‘자동 넘김 재생’을 명시적으로 다시 실행하면 처음부터 재생하며 자동 싱킹을 켠다.
+이는 현재 재생 세션의 상태이며 저장된 타이밍·활성 설정을 바꾸지 않는다.
+송출 종료/출력 창 종료 시 동기화 음원을 정지하는 기존 동작은 유지한다.

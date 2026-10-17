@@ -900,3 +900,14 @@ pass again. Local real-HTTP children replay, manual-lyrics timing and output tes
 also pass. This supersedes the pending/failing CI status above. The timing table
 remains a measurement of the preceding version-delete release containing the
 same entry-layout change; no WebKit end-to-end speedup is claimed.
+
+
+## Manual slide navigation keeps synchronized audio playing · 2026-10-17
+
+Manual next/previous/first/last/jump and direct slide launch suspend automatic
+lyric following without pausing or replacing the media pipeline. Invalid jumps
+leave sync intact. The transient latch survives same-source pause/resume and
+seek; explicit synchronized restart or a new source resets it. Persisted cues
+and enabled flags remain unchanged. Output stop/window closure still stop the
+sync-owned audio. Chromium/WebKit checks cover continued real audio progression,
+no snap-back, seek/resume, restart, and existing ownership/save isolation.
