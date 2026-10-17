@@ -8829,3 +8829,5 @@ body[data-module="praise"] .praise-forms-panel .form-meta { gap: 5px; }
 /* Explicit feedback for the compact live-scripture label without a nested box. */
 .svc-slide-citation-auto-output:hover { color: var(--ink); }
 .svc-slide-citation-auto-output:hover > span { text-decoration: underline; text-underline-offset: 3px; }
+
+.svc-board-subgroup-control-item > .svc-praise-mode-help { grid-column:1 / -1; margin:0; font-size:12px; line-height:1.5; color:var(--ink-3); }

@@ -520,3 +520,19 @@ Praise visual refinement: version columns and headers share15px gutters. Lyric
 cards use panel surfaces without nested outlines; editable fields retain the
 shared field surface and10px inset. Keyboard focus stays explicit. Review-warning
 backgrounds retain their semantic styling; empty states use the same quiet panel.
+
+
+## Single-song board controls ·2026-10-18
+
+Single lyrics/score song rows share the medley inline control layout, including
+when their section label/title header is visible. Mode, song, version, form,
+photo disclosure, audio upload and Save occupy one row in a wide container.
+The header retains navigation and warnings; it does not duplicate action buttons.
+Narrow containers wrap, and expanded photos/audio management stay below.
+No input values, song/version links, medley order or persistence behavior change.
+
+
+찬양 출력 유형의 표시 순서는 DB: 가사, DB: 음원 (어린이),
+DB: 악보 (새찬송가), 직접 추가: 가사, 직접 추가: 음원이다.
+기존 내부 mode 값과 기본값 lyrics_db는 유지한다. 어린이 음원에는
+가사·송폼·음원·자동 넘김을 함께 불러온다는 안내를 표시한다.

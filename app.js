@@ -468,11 +468,11 @@ const SERVICE_ELEMENT_TYPE_UI_OPTIONS = [
 ];
 const SERVICE_ELEMENT_LABELS = Object.fromEntries(SERVICE_ELEMENT_TYPE_UI_OPTIONS.filter(([value]) => value));
 const SERVICE_PRAISE_INPUT_MODES = [
-  ["lyrics_db", "가사 로드"],
-  ["manual_praise", "가사 직접 입력"],
-  ["score_db", "찬송가: 악보 로드"],
-  ["children_audio", "어린이: 음원 불러오기"],
-  ["audio_praise", "음원·가사"],
+  ["lyrics_db", "DB: 가사"],
+  ["children_audio", "DB: 음원 (어린이)"],
+  ["score_db", "DB: 악보 (새찬송가)"],
+  ["manual_praise", "직접 추가: 가사"],
+  ["audio_praise", "직접 추가: 음원"],
 ];
 const WORSHIP_DB_ELEMENT_INPUT_MODES = new Set([
   "",
@@ -25886,7 +25886,8 @@ function renderServicePraiseInputModeControl(item, index, model = serviceItemEdi
       class="svc-song-version-select svc-praise-input-mode-select"
       data-service-item-field="praise_input_mode"
       data-service-item-index="${index}"
-      aria-label="찬양 입력 방식"
+      aria-label="찬양 출력 유형"
+      title="${escapeAttr(Object.fromEntries(SERVICE_PRAISE_INPUT_MODES)[selected] || "찬양 출력 유형")}"
     >
       ${SERVICE_PRAISE_INPUT_MODES.map(([value, label]) => `
         <option value="${escapeAttr(value)}"${value === selected ? " selected" : ""}>${escapeHtml(label)}</option>
@@ -26190,13 +26191,7 @@ function renderServiceItemMemoSummary({ parsed, preparation, elementType, autoAd
   const asset = normalizeServiceAsset(parsed?.asset);
   const role = normalizeServicePresenterRole(parsed?.presenterRole);
   const inputMode = normalizeServiceInputMode(parsed?.inputMode || parsed?.input_mode);
-  const praiseInputLabel = {
-    score_db: "찬송가: 악보 로드",
-    lyrics_db: "가사 로드",
-    audio_praise: "음원·가사",
-    manual_praise: "가사 직접 입력",
-    children_audio: "어린이: 음원 불러오기",
-  }[inputMode] || "";
+  const praiseInputLabel = Object.fromEntries(SERVICE_PRAISE_INPUT_MODES)[inputMode] || "";
   const chips = [];
   cleanList([
     elementType ? worshipElementTypeLabel(elementType) : "",
@@ -30446,7 +30441,10 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
   const interactionLabel = presenterSlideInteractionHint(serviceId, subgroup.name || visibleLabel);
   const warnings = presenterWarningsForEntries(subgroup.slides);
   const inputContexts = presenterBoardSubgroupInputContexts(serviceId, subgroup);
-  const headerContext = options.showHead && inputContexts.length === 1 ? { ...inputContexts[0], timingEntries: subgroup.slides } : null;
+  // Single-song rows use the same compact controls as medley rows.
+  const inlineSong = inputContexts.length === 1
+    && ["praise_db", "lyrics_db", "score_db"].includes(presenterServiceInputItem(inputContexts[0].item, inputContexts[0].service)?.mode);
+  const headerContext = options.showHead && inputContexts.length === 1 && !inlineSong ? { ...inputContexts[0], timingEntries: subgroup.slides } : null;
   const inputControls = renderPresenterBoardSubgroupInputControls(serviceId, subgroup, { headerActions: Boolean(headerContext) });
   const headerActions = headerContext && inputControls ? renderPresenterBoardItemActions(serviceId, headerContext) : "";
   const context = presenterBoardSubgroupItemContext(serviceId, subgroup);
@@ -30551,6 +30549,7 @@ function renderPresenterBoardSubgroupInputControls(serviceId, subgroup = {}, opt
         ${audioLed ? audioManager : ""}
         ${controls}
         ${options.headerActions || label ? "" : renderPresenterBoardItemActions(serviceId, context)}
+        ${servicePraiseInputMode(context.item) === "children_audio" ? '<p class="svc-praise-mode-help">가사·송폼·음원·자동 넘김을 함께 불러옵니다.</p>' : ""}
         ${audioLed ? "" : audioManager}
       </div>`;
   }).filter(Boolean);
