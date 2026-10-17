@@ -2327,4 +2327,6 @@ automatically; the user must select their song once.
   ready time from 15.2 s to 2.2 s in isolated Chromium. This is a measured sample,
   not a universal startup guarantee. No existing worship records, files or DB
   settings were changed; physical mixer output is not covered by browser tests.
-  Public deployment and its checks must be confirmed separately.
+  Installed Chrome repeated open/scroll checks passed three runs (2.1–3.8 s
+  ready time, maximum long task 286–785 ms), with no service errors or horizontal
+  overflow. Public deployment and its checks must be confirmed separately.

@@ -1,8 +1,12 @@
 """Large boards prioritize visible fits, yield to input, and keep exact text fitting."""
+import argparse
 import os
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
-server,url=start_local_app_server()
+parser=argparse.ArgumentParser()
+parser.add_argument("--url")
+args=parser.parse_args()
+server,url=(None,args.url) if args.url else start_local_app_server()
 try:
  with sync_playwright() as p:
   for engine in ('chromium','webkit'):
@@ -57,4 +61,5 @@ try:
    page.wait_for_function('presenterThumbnailFitQueue.size===0')
    print('PASS',engine,result,'font invalidation and detached cleanup',flush=True)
    browser.close()
-finally:server.shutdown()
+finally:
+ if server:server.shutdown()
