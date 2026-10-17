@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261017-visible-boot-progress",
+  "version": "20261017-editor-pane-bounds",
   "options": {
     "compress": false,
     "mangle": {
