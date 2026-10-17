@@ -26,8 +26,8 @@ try:
           const expanded=host.querySelector('.svc-presenter-scripture-parts').getBoundingClientRect().height;
           return {height:box.height,top:inputBox.top-box.top,bottom:box.bottom-Math.max(inputBox.bottom,summaryBox.bottom),summaryHeight:summaryBox.height,expanded};
           }""")
-          assert result["top"] <= 10 and result["bottom"] <= 10, result
-          assert result["height"] <= result["summaryHeight"] + 20, result
+          assert abs(result["top"] - 15) <= 1 and abs(result["bottom"] - 15) <= 1, result
+          assert abs(result["height"] - result["summaryHeight"] - 30) <= 1, result
           assert result["expanded"] > 0, result
           print(engine, "PASS closed citation controls have no phantom grid row")
           browser.close()

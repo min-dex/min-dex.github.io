@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261017-editor-pane-bounds",
+  "version": "20261017-compact-worship-inputs",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "a301dfc41a0835c658e6eb5761456d3c7996a55df77a244fd54c2817ff458d3b",
-  "runtime_sha256": "aa029b0674634f6871286ec9b676e4cd911139b34f1e9f4b6569cc91b9d17d2a",
-  "source_bytes": 1461824,
-  "runtime_bytes": 1035003,
-  "source_gzip": 325579,
-  "runtime_gzip": 255819
+  "source_sha256": "ccfb2fa93180ae867549195c65d0cd89f5bbeaeabbfbfc17589e032dcc0e10bc",
+  "runtime_sha256": "c647344b89bc68606cfd368535bf4ada8ff76d846e4fc435753a287363a9d14c",
+  "source_bytes": 1461871,
+  "runtime_bytes": 1035041,
+  "source_gzip": 325613,
+  "runtime_gzip": 255852
 }
