@@ -217,3 +217,20 @@ The presenter suite closes its browser context (including output popups) before
 closing the browser transport. Hover readiness and geometry are sampled in one
 poll result so a board refresh between separate evaluations cannot invalidate the
 sample. Concurrent browser-audit fixes from 153c295d were integrated and preserved.
+
+## Initial icon payload · 2026-10-17
+
+Bootstrap loads versioned `mindex.icons.js`, generated with
+`node tools/build_ui_icons.cjs` from the retained, SHA-256 pinned Lucide vendor.
+Its upstream SVG/createIcons runtime is copied unchanged, with a conservative
+icon set selected from root runtime JS/HTML tokens (including conditional names).
+Regenerate after adding icons; the Cloud gate checks freshness and upstream SVG
+parity. Dynamically assembled names must be added as full literal names to their
+runtime owner. Do not introduce arbitrary persisted icon names without extending
+this contract. The desktop package includes the same generated asset.
+
+The subset is 181 of 1,982 exported icon names, 35,688 instead of 409,163 decoded
+bytes. This reduces initial transfer, but does not establish a fixed cold-start
+latency: native uncached probes showed highly variable network receipt times,
+including tiny resources stalled together. Keep network timing separate from
+JavaScript execution and from warm-connection results.

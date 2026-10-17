@@ -9,7 +9,7 @@ try:
  with sync_playwright() as p:
   for engine in ('chromium','webkit'):
    browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
-   for case in ('app.js','mindex.constants.js','vendor/lucide.min.js','styles.css','original-wins'):
+   for case in ('app.js','mindex.constants.js','mindex.icons.js','styles.css','original-wins'):
     target='app.js' if case=='original-wins' else case
     page=browser.new_page();held=[];retries=[];errors=[]
     page.on('pageerror',lambda error:errors.append(str(error)))

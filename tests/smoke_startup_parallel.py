@@ -17,7 +17,7 @@ def main():
                         held = []
                         requested = []
                         errors = []
-                        page.route('**/vendor/lucide.min.js', lambda r: held.append(r))
+                        page.route('**/mindex.icons.js?*', lambda r: held.append(r))
                         page.on('request', lambda r: requested.append(r.url))
                         page.on('pageerror', lambda e: errors.append(str(e)))
                         page.goto(url + ('?output=presenter' if mode == 'output' else ''), wait_until='domcontentloaded')
