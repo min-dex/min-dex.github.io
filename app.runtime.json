@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261017-tab-template-hints",
+  "version": "20261017-praise-ui",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "e7200e1f5d0cc1303b998bf1c93107b1d6b5ab2a99a830ffeead8b5b8d71a3da",
-  "runtime_sha256": "9c897f979fe57dc0d6bedfba5cfe78296d8197039826aef95450fa1a3738d84b",
-  "source_bytes": 1467745,
-  "runtime_bytes": 1038871,
-  "source_gzip": 327507,
-  "runtime_gzip": 256933
+  "source_sha256": "e20f455c4111bffe9ff67503dc54eebe01a5a94e96db4fdd0f47abb8e576bccc",
+  "runtime_sha256": "916ccb5f63fbcdb57d8743045a09f87510f975eee62f1af44cd646b399556575",
+  "source_bytes": 1468611,
+  "runtime_bytes": 1039630,
+  "source_gzip": 327759,
+  "runtime_gzip": 257122
 }
