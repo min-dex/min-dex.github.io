@@ -3207,3 +3207,14 @@ slide numbering can expand because photo continuations are output frames.
 Invalid photo timelines fail closed without changing lyric playback. Stale lyric
 or audio profiles cannot generate photo continuations. Photos start no earlier
 than the first timed lyric/blank page. Normal background preload/decode gates apply.
+
+
+## Explicit output stop starts a fresh run ·2026-10-18
+
+Stopping output clears old board selection, PPT progress and pending explicit
+slide-launch requests, and resets the controller position to its preparation
+slide. Relaunch without a new selection starts there; a selection made after
+stop remains the explicit launch target. Live-output reconnection is distinct
+and retains its position. Existing music stop/preserve policy is unchanged:
+ordinary playing background music survives, synchronized output audio follows
+its existing stop rule. No operational data is written.

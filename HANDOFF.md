@@ -956,3 +956,11 @@ verified until those steps run with the user's actual assets.
 
 Local validation:16 unit +17 smoke entry points passed; additional 21-photo/19-lyric
 clock sampling passed. Production deployment and actual-user-photo playback remain pending.
+
+
+## Fresh output after explicit stop ·2026-10-18
+
+Stop clears prior selection/PPT progress and resets to preparation; newly selected
+slides still launch explicitly. Pending start-at-slide requests cannot reopen
+a stopped output. No music-policy or operational-data change. Offline popup
+smoke covers both engines, actual close/reopen and delayed launch cancellation.

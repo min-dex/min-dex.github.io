@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-disclosure-feedback",
+  "version": "20261018-independent-photo-timing",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "099b002c7a82a6f68da4ecc8145e1bfacb0557e18523f37c59e60b3b7379aa92",
-  "runtime_sha256": "2f59c55a5a1ed32f55e288ffc92cade16b99dbf578a6bd3b771d5b6957755088",
-  "source_bytes": 1471213,
-  "runtime_bytes": 1041462,
-  "source_gzip": 328485,
-  "runtime_gzip": 257619
+  "source_sha256": "6afc7e6f7283f56c5f32c4ae506eda71374dc9641af4adc0cdd604e808ea33ed",
+  "runtime_sha256": "84e082b3eace8aa1f436f87f6b0d334bd8321fcae1b03500f44bbc8362614961",
+  "source_bytes": 1471971,
+  "runtime_bytes": 1041886,
+  "source_gzip": 328686,
+  "runtime_gzip": 257701
 }

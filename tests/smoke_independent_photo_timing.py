@@ -1,23 +1,41 @@
 """Audio-led worship bundle: actual atomic save and fresh-device playback, no song writes."""
-import os,io,wave,json
+import os,io,wave,json,re,threading,struct,zlib
+from functools import partial
 from urllib.parse import urlsplit
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
-from smoke_app import start_local_app_server,sync_playwright,launch_chromium
+from smoke_app import APP_DIR,MindexSmokeHandler,MindexSmokeServer,sync_playwright,launch_chromium
 buf=io.BytesIO()
 with wave.open(buf,'wb') as w:
  w.setnchannels(1);w.setsampwidth(2);w.setframerate(8000);w.writeframes(b'\0\0'*8000*20)
-server,url=start_local_app_server()
+def chunk(kind,data):return struct.pack('>I',len(data))+kind+data+struct.pack('>I',zlib.crc32(kind+data)&0xffffffff)
+png=b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',2,2,8,2,0,0,0))+chunk(b'IDAT',zlib.compress((b'\x00'+b'\x28\x60\x90'*2)*2))+chunk(b'IEND',b'')
+class AudioFixtureHandler(MindexSmokeHandler):
+ def do_GET(self):
+  path=urlsplit(self.path).path
+  if path.startswith('/photo-') and path.endswith('.png'):
+   self.send_response(200);self.send_header('Content-Type','image/png');self.send_header('Content-Length',str(len(png)));self.end_headers();self.wfile.write(png);return
+  if path not in ('/clock.wav','/replacement.wav'):return super().do_GET()
+  # Native media decoding must consume a real HTTP byte stream. Playwright's
+  # fulfilled responses can stall Linux WebKit after a backward seek.
+  data=buf.getvalue();span=re.fullmatch(r'bytes=(\d+)-(\d*)',self.headers.get('Range',''))
+  start=int(span[1]) if span else 0
+  end=min(int(span[2]) if span and span[2] else len(data)-1,len(data)-1)
+  self.send_response(206 if span else 200)
+  self.send_header('Content-Type','audio/wav');self.send_header('Accept-Ranges','bytes')
+  if span:self.send_header('Content-Range',f'bytes {start}-{end}/{len(data)}')
+  self.send_header('Content-Length',str(end-start+1));self.end_headers()
+  try:self.wfile.write(data[start:end+1])
+  except (BrokenPipeError,ConnectionResetError):pass
+server=MindexSmokeServer(('127.0.0.1',0),partial(AudioFixtureHandler,directory=str(APP_DIR)))
+threading.Thread(target=server.serve_forever,daemon=True).start()
+url=f'http://127.0.0.1:{server.server_address[1]}/index.html'
 try:
  with sync_playwright() as p:
   for engine in ('chromium','webkit'):
    b=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
    def page_for(context):
     page=context.new_page()
-    def route(r):
-     if r.request.url.endswith(('/clock.wav','/replacement.wav')):r.fulfill(body=buf.getvalue(),content_type='audio/wav')
-     elif urlsplit(r.request.url).netloc==urlsplit(url).netloc or r.request.url.startswith('blob:'):r.continue_()
-     else:r.abort()
-    page.route('**/*',route);page.goto(url+'?mindexSmokeRaw=1')
+    page.route(re.compile(r'^https?://(?!'+re.escape(urlsplit(url).netloc)+r'/)'),lambda r:r.abort());page.goto(url+'?mindexSmokeRaw=1')
     page.wait_for_function("typeof buildWorshipPersistenceRows==='function' && !!globalThis.MindexSongTiming && !document.body.classList.contains('ui-booting')")
     return page
    context=b.new_context();page=page_for(context)
@@ -76,7 +94,7 @@ try:
    page.evaluate('window.failSave=false');d.locator('[data-timing-save]').click();page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('예배에 저장했어요')")
    assert page.evaluate('uploads')==1
    page.evaluate("window.photoUploads=0;state.client.storage.from=()=>({upload:async()=>{photoUploads++;return {error:null}},getPublicUrl:()=>({data:{publicUrl:location.origin+'/photo-'+photoUploads+'.png'}}),remove:()=>{throw Error('must not delete uncertain photos')}})")
-   d.locator('[data-timing-photos]').set_input_files([{'name':f'{i:02}.png','mimeType':'image/png','buffer':b'fixture-image'} for i in range(1,4)])
+   d.locator('[data-timing-photos]').set_input_files([{'name':f'{i:02}.png','mimeType':'image/png','buffer':png} for i in range(1,4)])
    d.locator('[data-photo-times]').fill('6\n7.5\n11')
    page.evaluate('window.failSave=true');d.locator('[data-timing-save]').click();page.wait_for_function("!document.querySelector('[data-timing-save]').disabled")
    page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('injected failure')")
@@ -124,7 +142,15 @@ try:
    page.wait_for_timeout(400)
    assert page.evaluate('state.presenter.index')==old_index
    assert page.evaluate('state.serviceMusic.playing')
-   page.evaluate('stopServiceMusicPlayback({render:false})')
+   page.evaluate('''()=>{stopServiceMusicPlayback({render:false});const root=document.createElement('div');root.id='presenterOutputRoot';root.style.cssText='position:fixed;inset:0;z-index:999999';document.body.append(root)}''')
+   for time,number,lyric in [(6.1,1,''),(7.6,2,''),(9.1,2,'마지막 가사'),(11.1,3,'마지막 가사'),(7.6,2,'')]:
+    page.evaluate('''t=>{const slides=state.presenter.slides,index=slides.findIndex(s=>s.syncTimeline?.page===1),target=presenterSyncedLyricsTargetForTime(slides,index,t);renderPresenterOutput({slides,index:target.index,serviceId:state.presenter.serviceId,chromakey:false})}''',time)
+    page.wait_for_function('''n=>{const root=document.querySelector('#presenterOutputRoot');return !root.hasAttribute('aria-busy')&&root.style.getPropertyValue('--presenter-bg-image').includes('/photo-'+n+'.png')}''',arg=number)
+    active=page.locator('#presenterOutputRoot .is-active').first
+    assert active.inner_text().strip()==lyric,active.inner_text()
+   page.evaluate('''()=>renderPresenterOutput({slides:state.presenter.slides,index:state.presenter.index,safetyBlank:true,chromakey:false})''')
+   page.wait_for_function("document.querySelector('#presenterOutputRoot').classList.contains('is-blackout')")
+
    print(engine,'PASS atomic save failure/retry, DB-independent audio mode, fresh-device cues/playback, changed lyrics/audio invalidation',flush=True)
    context.close();b.close()
 finally:server.shutdown();server.server_close()

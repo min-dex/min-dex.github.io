@@ -2378,16 +2378,24 @@ function readTheme() {
 }
 
 function applyTheme(theme) {
+  const root = document.documentElement;
+  const changed = document.body.dataset.theme !== theme;
+  // Hover transitions must not stagger a whole-document palette change.
+  if (changed) root.classList.add("ui-theme-switching");
   state.theme = theme;
   document.documentElement.dataset.theme = theme;
   document.body.dataset.theme = theme;
+  if (changed) {
+    // Resolve the new palette while transitions are suppressed, before painting.
+    void getComputedStyle(document.body).backgroundColor;
+    root.classList.remove("ui-theme-switching");
+  }
   if (!refs.themeBtn) return;
   const themeLabel = theme === "dark" ? "라이트 모드 사용" : "다크 모드 사용";
   refs.themeBtn.setAttribute("aria-label", themeLabel);
   refs.themeBtn.setAttribute("title", themeLabel);
   refs.themeBtn.innerHTML = `<i data-lucide="${theme === "dark" ? "sun" : "moon"}"></i>`;
-  refreshIcons();
-  resizeFormTextareas();
+  refreshIcons(refs.themeBtn);
 }
 
 function toggleTheme() {
@@ -31142,7 +31150,7 @@ function runPresenterAction(action, serviceId = state.selectedServiceId, options
     preparePresenterService(serviceId);
     state.presenter.pptxProgress = null;
     const launchIndex = presenterSelectedLaunchIndex(serviceId);
-    if (isValidPresenterIndex(launchIndex, state.presenter.slides.length)) state.presenter.index = launchIndex;
+    if (launchIndex !== null && isValidPresenterIndex(launchIndex, state.presenter.slides.length)) state.presenter.index = launchIndex;
     clearPresenterBoardSelection({ render: false });
     state.presenter.safetyBlank = false;
     openPresenterOutput(serviceId);
@@ -31470,6 +31478,7 @@ function scrollPresenterOutlineToActive(serviceId = state.presenter.serviceId) {
 
 function stopPresenterOutput(serviceId = state.presenter.serviceId) {
   liveScriptureRequestSerial += 1;
+  presenterLaunchRequestSerial += 1;
   state.presenter.outputGeneration += 1;
   const activeServiceId = serviceId || state.presenter.serviceId;
   const outputWindow = state.presenter.outputWindow;
@@ -31478,6 +31487,10 @@ function stopPresenterOutput(serviceId = state.presenter.serviceId) {
   if (closeDesktopOutput) closeDesktopOutput().catch?.(() => {});
   state.presenter.jumpDraft = "";
   state.presenter.restorePayload = null;
+  // Explicit stop ends this run. A later launch may use only a new selection.
+  state.presenter.index = Math.max(0, state.presenter.slides.findIndex(isPresenterPreparationSlide));
+  state.presenter.pptxProgress = null;
+  clearPresenterBoardSelection({ render: false });
   state.presenter.exitArmedAt = 0;
   state.presenter.safetyBlank = false;
   state.presenter.liveScripture = {

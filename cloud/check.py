@@ -24,6 +24,7 @@ NODE_TESTS = (
     "test_worship_read_parallel.cjs",
 )
 SMOKES = (
+    "smoke_output_restart.py",
     "smoke_disclosure_feedback.py",
     "smoke_control_rhythm.py",
     "smoke_deferred_board_scroll.py",
@@ -35,6 +36,7 @@ SMOKES = (
     "smoke_children_audio_db.py",
     "smoke_reference_batch.py",
     "smoke_theme_bootstrap.py",
+    "smoke_theme_switch.py",
     "smoke_scripture_aliases.py",
     "smoke_startup_projection.py",
     "smoke_ui_font_cache.py",
