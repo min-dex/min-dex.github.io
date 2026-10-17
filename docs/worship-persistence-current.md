@@ -295,3 +295,21 @@ are unchanged. No new write path or production repair is introduced.
 Validation covers both score/lyrics directions, clear, blank-mode comparison,
 custom/disabled/unconfigured hymn forms and atomic row read-back in offline
 Chromium/WebKit. Existing sync scope/CAS/retry and Cloud baseline checks remain.
+
+
+## Linked-song hydration and retry guards · 2026-10-17
+
+A vacant third-service hymn is determined from persisted song/version IDs, title
+and manual slides, never from whether its song catalogue is already loaded.
+Existing independent content retains the normal signature conflict guard. Form
+configuration alone still permits the existing vacant-hymn fill with local form
+preservation.
+
+Pending Sunday sync requires exactly one eligible saved source matching the
+queued content signature. Deleted, ambiguous, replaced or changed source items
+cancel the stale job and report incomplete linked propagation without writing
+the target. A unique unchanged source retains normal retry behavior.
+
+Offline Chromium/WebKit regressions exercise actual mocked atomic rows with an
+unhydrated independent hymn and pending retries with zero, one and two source
+matches. Production data and schema are unchanged.

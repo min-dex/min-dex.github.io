@@ -22,6 +22,8 @@ def main():
                     memo:serializeServiceItemMemo({elementType:'title_person',inputMode:'text'})});
                   const previous=make(source,'Original'),edited=make(source,'Edited');
                   edited._worshipSharedContentDirty=true;
+                  const originalGroup=groupWorshipElements;
+                  groupWorshipElements=()=>({[source.id]:[edited]});
                   const originalPersist=persistSundayEditSync;
                   const originalAtomic=worshipAtomicClient;
                   let jobs=[];
@@ -49,6 +51,7 @@ def main():
                     const before=readingItem(origin,'요한복음 13:34-35'),after=readingItem(origin,'마태복음 21:33-46');
                     after._worshipSharedContentDirty=true;
                     jobs=[];pendingSundayEditSync.clear();state.services=[first,second,target];
+                    groupWorshipElements=()=>({[origin.id]:[after]});
                     await syncSharedSundayContentAfterSave(origin,[after],{previousItems:[before]});
                     check(origin===first ? jobs.length===0 : jobs.length===1&&jobs[0].targetId===(origin===second?target.id:second.id),'reading sync crossed first-service boundary');
                   }
@@ -57,6 +60,7 @@ def main():
                     memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db'})});
                   const beforePraise=praiseItem(first,'old-song'),nextPraise=praiseItem(first,'new-song');nextPraise._worshipSharedContentDirty=true;
                   jobs=[];state.services=[first,second];pendingSundayEditSync.clear();
+                  groupWorshipElements=()=>({[first.id]:[nextPraise]});
                   await syncSharedSundayContentAfterSave(first,[nextPraise],{previousItems:[beforePraise]});
                   check(jobs.length===1&&jobs[0].targetId===second.id&&jobs[0].key==='main-praise:1','first-to-second praise sync missing');
                   check(!Object.hasOwn(JSON.parse(jobs[0].item.memo),'asset'),'sync retry snapshot kept arbitrary payload');
@@ -85,6 +89,7 @@ def main():
                   for(let n=0;n<3;n++) updatedPortable=sundayEditSyncSourceText({sourceText:updatedPortable},previous,edited,source);
                   check(parseServiceSourceText(updatedPortable).length===2,'portable sync duplicated source');
                   check(updatedPortable.endsWith('[[별도]]\\n[사용자 항목]\\n- 제목: Keep exactly'),'portable sync changed unrelated content');
+                  groupWorshipElements=originalGroup;
                   persistSundayEditSync=originalPersist;
                   worshipAtomicClient=async()=>({
                     read:async()=>({service:clone(serviceRow),...clone(db)}),
@@ -195,6 +200,7 @@ def main():
                   const restoredCitation=groupWorshipElements(db.sections,db.elements)[tid][0];
                   check(serviceItemScriptureReferences(restoredCitation).length===0,'linked citation deletion resurrected');
                   check(db.elements[0].source_ref.customNote==='keep','unrelated linked metadata lost');
+                  groupWorshipElements=()=>({[sid]:[edited]});
                   pendingSundayEditSync.clear();persistSundayEditSync=async()=>{throw Error('network')};failed=false;
                   try{await syncSharedSundayContentAfterSave(source,[edited],{previousItems:[previous]})}catch{failed=true}
                   check(failed&&pendingSundayEditSync.size===1,'failed job lost');
@@ -208,8 +214,36 @@ def main():
                   persistSundayEditSync=async()=>{};
                   await syncSharedSundayContentAfterSave(source,[edited],{previousItems:[edited]});
                   check(pendingSundayEditSync.size===0,'retry failed');
+                  groupWorshipElements=originalGroup;
+                  // Independent target song exists in stored rows, but is not hydrated yet.
+                  const catalogue=['prior','source-new','target-curated'].map((id,index)=>({id,title:id,hymn_no:index+1,praise_type:'hymn',versions:[]}));
+                  state.songs=catalogue;reset();
+                  const own=musicItem(target,'hymn.main','찬송','score_db','target-curated');
+                  db=clone(buildWorshipPersistenceRows(target,[own],{}, {},{elementTypedStateColumns:typed}));
+                  state.songs=[];
+                  loadSongsForIds=async()=>{state.songs=catalogue};
+                  worshipAtomicClient=async()=>({read:async()=>({service:clone(serviceRow),...clone(db)}),commit:async request=>{
+                    writes.push(clone(request));db.elements=db.elements.map(row=>request.rows.elements.find(next=>next.id===row.id)||row);
+                    serviceRow.source_ref={mindexServiceDocument:clone(request.document)};return {service:clone(serviceRow),...clone(db)};
+                  }});
+                  const prior=musicItem(source,'praise.song.3','찬양 3','lyrics_db','prior');
+                  prior._worshipSectionKey='praise';
+                  const incoming={...prior,song_id:'source-new'};
+                  let protectedTarget=false;
+                  try {await originalPersist({sourceServiceId:sid,targetId:tid,key:'main-praise:3',previous:prior,item:incoming},{elementTypedStateColumns:typed});} catch(error) {protectedTarget=error.message.includes('덮어쓰지 않았습니다');}
+                  check(protectedTarget&&writes.length===0&&db.elements[0].song_id==='target-curated','unhydrated independent hymn overwritten');
+                  for(const count of [0,1,2]) {
+                    state.services=[source,target];state.worshipSections=[];state.worshipElements=[];
+                    groupWorshipElements=()=>({[sid]:Array.from({length:count},()=>incoming)});
+                    pendingSundayEditSync.clear();
+                    pendingSundayEditSync.set('audit',{sourceServiceId:sid,targetId:tid,key:'main-praise:3',previous:prior,item:incoming});
+                    let dispatched=0;persistSundayEditSync=async()=>{dispatched++};
+                    let rejected=false;
+                    try {await syncSharedSundayContentAfterSave(source,[],{previousItems:[]});} catch {rejected=true;}
+                    check(dispatched===(count===1?1:0)&&rejected===(count!==1)&&pendingSundayEditSync.size===0,'retry source cardinality guard failed: '+count);
+                  }
                   worshipAtomicClient=originalAtomic;
-                  return 'PASS display-mode clear, vacant hymn form retention, populated form conflict, read isolation, scoped sync, drafts, CAS and retry';
+                  return 'PASS unhydrated hymn protection, retry source cardinality, display-mode clear, vacant hymn form retention, populated form conflict, read isolation, scoped sync, drafts, CAS and retry';
                 }'''))
                 browser.close()
     finally:

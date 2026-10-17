@@ -7386,7 +7386,8 @@ async function syncSharedSundayContentAfterSave(sourceService, sourceItems = [],
       state.worshipElements,
     )[sourceService.id] || [];
     const savedSource = savedSourceItems.filter((item) => sundaySharedContentKey(item, jobSource) === job.key);
-    if (savedSource.length === 1 && sundayEditSyncSignature(savedSource[0]) !== sundayEditSyncSignature(job.item)) {
+    if (savedSource.length !== 1 || !sundayEditSyncEligible(savedSource[0], jobSource)
+      || sundayEditSyncSignature(savedSource[0]) !== sundayEditSyncSignature(job.item)) {
       pendingSundayEditSync.delete(jobKey);
       retryRecordPersisted = persistPendingSundayEditSync() && retryRecordPersisted;
       failures.push(`${job.item.label}: 원본이 바뀌어 이전 동기화 요청을 취소했습니다.`);
@@ -7646,7 +7647,9 @@ async function persistSundayEditSync(job, options = {}) {
   if (matches.length !== 1 || !sundayEditSyncEligible(matches[0], freshService)) return;
   const item = matches[0];
   const emptyThirdHymn = job.key === "main-praise:3" && freshService.type_id === "sunday-main"
-    && !serviceItemHasDirectSundaySharedContent(item, freshService);
+    && !item.song_id && !item.version_id && !item.song_version_id
+    && !String(item.raw_title || "").trim()
+    && !(parseServiceItemMemo(item.memo).slides || []).some(slide => String(slide || "").trim());
   if (!emptyThirdHymn && sundayEditSyncSignature(item) !== sundayEditSyncSignature(job.previous)
     && !(job.previousSignatures || []).some(signature => sundayEditSyncPreviousSignatureMatches(signature, item))
     && sundayEditSyncSignature(item) !== sundayEditSyncSignature(job.item)) throw conflict();
