@@ -156,6 +156,16 @@ try:
     page.evaluate("refs.detailPane.innerHTML=keyTestMarkup;document.getElementById('title-key-test').focus()")
    page.keyboard.press('p')
    page.wait_for_function('state.serviceMusic.playing && state.serviceMusic.audio.currentTime>0')
+   page.evaluate(r'''()=>{
+    const sid=state.selectedServiceId,audio=state.serviceMusic.audio;audio.currentTime=.25;
+    runPresenterAction('next',sid,{scroll:false});
+    const intro=state.presenter.slides.find(s=>s.syncTimeline?.intro);
+    intro.hiddenInPresentation=true;
+    if(MindexSongTiming.resumeAutoSync(sid))throw Error('hidden title restored');
+    intro.hiddenInPresentation=false;const serial=state.serviceMusic.playSerial;
+    if(!MindexSongTiming.resumeAutoSync(sid) || !state.presenter.slides[state.presenter.index]?.syncTimeline?.intro)throw Error('intro resume failed');
+    if(audio.currentTime<.25 || state.serviceMusic.playSerial!==serial)throw Error('intro resume reset audio');
+   }''')
    page.evaluate('state.serviceMusic.audio.currentTime=7.2');page.wait_for_function('state.presenter.slides[state.presenter.index]?.syncTimeline?.page===2')
    page.evaluate("runPresenterAction('prev',state.selectedServiceId,{scroll:false});window.manualIndex=state.presenter.index;window.manualTime=state.serviceMusic.audio.currentTime")
    page.wait_for_function('state.serviceMusic.audio.currentTime>manualTime+.3')

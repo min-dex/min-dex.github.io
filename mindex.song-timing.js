@@ -321,7 +321,7 @@
     if (expected && (expected.serviceId !== serviceId || expected.index !== state.presenter.index || expected.groupId !== sync.groupId)) return false;
     const target = presenterSyncedLyricsTargetForTime(state.presenter.slides, state.presenter.index, audio.currentTime);
     if (!target) {
-      const intro = state.presenter.slides.findIndex(s => s.syncTimeline?.intro && s.syncTimeline.groupId === sync.groupId);
+      const intro = state.presenter.slides.findIndex(s => !presenterSlideIsHidden(s) && s.syncTimeline?.intro && s.syncTimeline.groupId === sync.groupId);
       if (intro < 0 || intro > state.presenter.index || state.presenter.slides.slice(intro,state.presenter.index+1)
         .some(s => !presenterSlideIsHidden(s) && s.syncTimeline?.groupId !== sync.groupId)) return false;
       state.presenter.index = intro;
