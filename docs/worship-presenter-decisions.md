@@ -2396,3 +2396,19 @@ pixels; both-engine180-thumbnail and background/output-source checks; both-engin
 24-case lyric bounds; cache invalidation; preview lifecycle/edge pixels; actual
 output caption edges; output latency; delayed media/background/blackout swaps.
 No assertions were lowered. Public deployment verification remains separate.
+
+
+Release e40eb3e6 /20261017-preview-backgrounds: Pages39012291699 and Linux
+Cloud39012292098 completed successfully. Public SHA256 matches all21 checked
+runtime/release/derived-asset files. Three unmodified public stress runs passed:
+WebKit39/43/43ms and Chromium28.6/42.6/32ms; all180 thumbnails fitted with zero
+clipping/font-size differences. Both engines passed public17-asset/source-scope,
+full-resolution output,24 lyric bounds cases, and delayed media/background/
+blackout transitions. Local long announcement/lyric wrapping also passed.
+
+Installed Chrome read-only service open/scroll checks:2435/1634/2067ms ready,
+185/241/192ms maximum long task, no service error or horizontal overflow.
+Requests capable of modifying production data were blocked. No service record,
+lyrics, media upload, DB permissions or schema was changed. This verifies the
+reproduced scenario; physical broadcast equipment and arbitrary uploaded images
+remain outside this browser performance result.
