@@ -54,7 +54,7 @@ try:
     renderPresenterControlState=()=>{};publishPresenterState=()=>{};
     state.presenter.serviceId=sid;state.presenter.sourceSignature='';state.presenter.slides=[];
     await MindexSongTiming.ready;
-    if(!renderServicePraiseInputModeControl(state.serviceItems[sid][0],0).includes('음원·가사'))throw Error('mode UI missing');
+    if(!renderServicePraiseInputModeControl(state.serviceItems[sid][0],0).includes('직접 추가: 음원'))throw Error('mode UI missing');
     if(serviceItemRequiresSongSelection(state.serviceItems[sid][0],service))throw Error('audio mode requires DB');
     return {serviceId:sid,elementId:state.serviceItems[sid][0].id};
    }''')

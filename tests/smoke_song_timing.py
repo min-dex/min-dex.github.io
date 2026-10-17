@@ -79,7 +79,7 @@ try:
     dialog.locator('[data-timing-close]').click()
     print(engine,page.evaluate(r'''() => {
       const check=(ok,msg)=>{if(!ok)throw Error(msg)};
-      check(JSON.stringify(SERVICE_PRAISE_INPUT_MODES.map(x=>x[1]))===JSON.stringify(['가사 로드','가사 직접 입력','찬송가: 악보 로드','어린이: 음원 로드','음원·가사']),'five labels/order');
+      check(JSON.stringify(SERVICE_PRAISE_INPUT_MODES.map(x=>x[1]))===JSON.stringify(['DB: 가사','DB: 음원 (어린이)','DB: 악보 (새찬송가)','직접 추가: 가사','직접 추가: 음원']),'five labels/order');
       check(servicePraiseInputMode({label:'찬양 1'})==='lyrics_db','default mode');
       const service=state.services[0],song=state.songs[0];
       let item=getServiceItems(service.id).find(x=>x.id==='timing-item');
