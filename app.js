@@ -7416,7 +7416,9 @@ async function saveWorshipServiceElementPatch(service, itemId) {
   const committedItem = committedItems.find(item => item.id === targetItemId);
   const previousDocument = serviceDocumentSnapshotFromRef(documentService);
   delete documentService._worshipSourceTextDraft;
-  if (previousDocument?.sourceText && previousItem && committedItem) {
+  // A legacy truncated snapshot cannot supply a complete patch range. Rebuild from
+  // committed canonical rows (including only this item edit, never sibling drafts).
+  if (previousDocument?.sourceText && !previousDocument.sourceText.endsWith("\n[truncated]") && previousItem && committedItem) {
     documentService._worshipSourceTextDraft = sundayEditSyncSourceText(previousDocument, previousItem, committedItem, documentService);
   }
   let sourceRef = withServiceDocumentSnapshot(documentService, committedItems);
@@ -22077,7 +22079,7 @@ function buildServiceDocumentSnapshot(service = null, items = null) {
   const sourceText = serviceDocumentSourceTextForSnapshot(service, sourceItems);
   const sourceRecords = parseServiceSourceText(sourceText);
   validateServiceSourceRecordMultiplicity(sourceRecords, sourceItems,
-    parseServiceSourceText(serviceDocumentSnapshotFromRef(service)?.sourceText || ""));
+    parseServiceSourceText(serviceDocumentSnapshotFromRef(service)?.sourceText || "", { allowTruncatedSnapshot: true }));
   const sourceRecordCount = sourceRecords.length;
   const presentationSignature = serviceDocumentPresentationSignature(sourceItems);
   return normalizeServiceDocumentSnapshot({

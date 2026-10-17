@@ -21,13 +21,22 @@ try:
     page.wait_for_function("typeof buildWorshipPersistenceRows==='function' && !!globalThis.MindexSongTiming && !document.body.classList.contains('ui-booting')")
     return page
    context=b.new_context();page=page_for(context)
+   page.evaluate(r'''()=>{
+    const source='[[찬양]]\n[특송]\n- 음원 타이밍: '+JSON.stringify({version:1,starts:[2,6,10],lyricsFingerprint:'x'.repeat(10000)});
+    if(normalizeServiceDocumentSnapshot({sourceText:source}).sourceText!==source)throw Error('current document truncated');
+    const cut=source.slice(0,8000)+'\n[truncated]';
+    if(parseServiceSourceText(cut,{allowTruncatedSnapshot:true}).length!==1)throw Error('legacy snapshot guard');
+    for(const [text,options] of [[cut,{}],['[[찬양]]\n[특송]\n- 음원 타이밍: invalid',{allowTruncatedSnapshot:true}]]){
+     let rejected=false;try{parseServiceSourceText(text,options)}catch{rejected=true}if(!rejected)throw Error('malformed current source accepted');
+    }
+   }''')
    ids=page.evaluate(r'''async()=>{
     const sid=crypto.randomUUID(),service={id:sid,type_id:'fixture',date:'2026-10-18',title:'Fixture',_worshipSourceRef:{}};
     state.services=[service];state.selectedServiceId=sid;state.module='presenter';state.serviceTypes=[{id:'fixture',name:'검증'}];state.songs=[];
     state.loadedWorshipServiceIds=new Set([sid]);state.templateElementSuppressions.clear();state.dirtyServiceElementIds.clear();state.dirtyServiceStructureIds.clear();
     state.serviceAliasSupported=true;
     const item=normalizeServiceItem({id:crypto.randomUUID(),service_id:sid,label:'특송',raw_title:'테스트 곡',_worshipSectionKey:'special_song',_worshipSectionTitle:'특송',_worshipElementTemplateModified:true,
-     memo:serializeServiceItemMemo({elementType:'praise',inputMode:'audio_praise',outputMode:'lyrics',slides:['첫 가사','[INT]','마지막 가사'],audioAsset:{kind:'audio',name:'clock.wav',url:location.origin+'/clock.wav'}})},0);
+     memo:serializeServiceItemMemo({elementType:'praise',inputMode:'audio_praise',outputMode:'lyrics',slides:['첫 가사','[INT]','마지막 가사'],audioAsset:{kind:'audio',name:'clock.wav',url:location.origin+'/'+'long-audio-path-'.repeat(150)+'/clock.wav'}})},0);
     const typed={inputMode:true,contentState:true};worshipElementTypedStateColumns=async()=>typed;
     const rows=buildWorshipPersistenceRows(service,[item],{}, {},{elementTypedStateColumns:typed});sanitizeWorshipPersistenceRows(rows,{elementTypedStateColumns:typed});compactWorshipPersistenceRows(rows);
     window.db={revision:'1',service:{id:sid,service_type_id:'fixture',service_date:service.date,title:'Fixture',source_ref:{}},...structuredClone(rows),slides:[]};
@@ -53,20 +62,22 @@ try:
    d=page.locator('[data-song-timing-dialog]');assert d.locator('[data-timing-share]').count()==0
    d.locator('[data-timing-linked]').click();page.wait_for_function("document.querySelector('[data-song-timing-dialog] audio').duration>19")
    for i,t in enumerate([2,6,10]):d.locator(f'[data-timing-start="{i}"]').fill(str(t))
-   page.evaluate('window.failSave=true');d.locator('[data-timing-save]').click();page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('injected failure')")
+   page.evaluate('window.failSave=true');d.locator('[data-timing-save]').click();page.wait_for_function("!document.querySelector('[data-timing-save]').disabled");assert 'injected failure' in d.locator('[data-timing-status]').inner_text(),d.locator('[data-timing-status]').inner_text()
    assert not page.evaluate('db.elements[0].config.audioTiming')
    page.evaluate('window.failSave=false');d.locator('[data-timing-save]').click();page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('예배에 저장했어요')")
+   page.evaluate("""()=>{const service=state.services[0],doc=service._worshipSourceRef.mindexServiceDocument;if(doc.sourceText.length<=8000)throw Error('long source fixture too short');doc.sourceText=doc.sourceText.slice(0,8000)+'\\n[truncated]';}""")
    # Replacing the audio uploads once; a failed commit retains the upload for retry.
    page.evaluate("window.uploads=0;state.client.storage.from=()=>({upload:async()=>{uploads++;return {error:null}},getPublicUrl:()=>({data:{publicUrl:location.origin+'/replacement.wav'}}),remove:()=>{throw Error('must not delete uncertain audio')}})")
    d.locator('[data-timing-file]').set_input_files({'name':'replacement.wav','mimeType':'audio/wav','buffer':buf.getvalue()})
    page.wait_for_function("document.querySelector('[data-song-timing-dialog] audio').duration>19")
    for i,t in enumerate([2,6,10]):d.locator(f'[data-timing-start="{i}"]').fill(str(t))
-   page.evaluate('window.failSave=true');d.locator('[data-timing-save]').click();page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('injected failure')")
+   page.evaluate('window.failSave=true');d.locator('[data-timing-save]').click();page.wait_for_function("!document.querySelector('[data-timing-save]').disabled");assert 'injected failure' in d.locator('[data-timing-status]').inner_text(),d.locator('[data-timing-status]').inner_text()
    assert page.evaluate('db.elements[0].config.audioAsset.url').endswith('/clock.wav')
    page.evaluate('window.failSave=false');d.locator('[data-timing-save]').click();page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('예배에 저장했어요')")
    assert page.evaluate('uploads')==1
    saved=page.evaluate('db');assert saved['elements'][0]['config']['audioTiming']['starts']==[2,6,10]
    assert '음원 타이밍' in saved['service']['source_ref']['mindexServiceDocument']['sourceText']
+   assert not saved['service']['source_ref']['mindexServiceDocument']['sourceText'].endswith('[truncated]')
    assert not saved['elements'][0].get('song_id');assert saved['elements'][0]['config']['inputMode']=='audio_praise'
    context.close()
    # A separate storage context models another computer: no IndexedDB import or share action.

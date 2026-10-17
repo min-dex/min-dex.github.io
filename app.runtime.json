@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261017-compact-runtime-fonts",
+  "version": "20261017-audio-timing-resave",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "2df5acc57866e19223dd82e2cc83f0f03274aaf5681607f99ed8552a2a584454",
-  "runtime_sha256": "443daf780833a9534a2c8ce2aef1fb50b85bf8ead466692657acba08e2345f47",
-  "source_bytes": 1461374,
-  "runtime_bytes": 1034805,
-  "source_gzip": 325373,
-  "runtime_gzip": 255717
+  "source_sha256": "5964d8de124a99aad89c78487597cfad4c2c523fa0b37f4feec714650d4f5020",
+  "runtime_sha256": "5d3111174b385b6e8cb011076dc6460024debd8bad7697ecb81753aa014f9656",
+  "source_bytes": 1461635,
+  "runtime_bytes": 1034876,
+  "source_gzip": 325500,
+  "runtime_gzip": 255749
 }

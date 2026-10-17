@@ -174,6 +174,7 @@ function parsePortableServiceSourceText(value = "", options = {}) {
   lines.forEach((rawLine, index) => {
     lineNumber = index;
     const line = rawLine.replace(/\s+$/g, "");
+    if (options.allowTruncatedSnapshot && index === lines.length - 1 && line === '[truncated]') return;
     const section = line.match(/^\[\[([^\]]+)\]\]$/);
     if (section) { finish(); current = null; blockKey = ""; sectionTitle = section[1].trim(); return; }
     const element = line.match(/^\[([^\[\]]+)\]$/);
@@ -222,7 +223,13 @@ function parsePortableServiceSourceText(value = "", options = {}) {
       else if (key === "수동역본") current.manualTranslationLabel = fieldValue;
       else if (key === "음원타이밍") {
         try { current.audioTiming = normalizeServiceAudioTiming(JSON.parse(fieldValue)); current.hasAudioTiming = true; }
-        catch { throw new Error('음원 타이밍 형식을 확인해 주세요.'); }
+        catch {
+          // Only the prior 8k snapshot cutoff may omit its unfinished final timing field.
+          // New/user-entered malformed JSON must still fail rather than erase timing.
+          const cutOff = options.allowTruncatedSnapshot && index === lines.length - 2
+            && lines[lines.length - 1] === '[truncated]';
+          if (!cutOff) throw new Error('음원 타이밍 형식을 확인해 주세요.');
+        }
       }
       else if (key === "음원파일") { current.audioName = fieldValue; current.hasAudioName = true; }
       else if (key === "음원링크") { current.audioUrl = fieldValue; current.hasAudioUrl = true; }
