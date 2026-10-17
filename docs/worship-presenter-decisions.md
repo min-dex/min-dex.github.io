@@ -2673,3 +2673,17 @@ requiring the whole common character set can download more than the old monolith
 Network/DB variability remains significant; byte reduction is not a universal
 end-to-end startup timing guarantee. Production writes remain blocked in probes.
 Deployment and final output/save results are recorded separately below.
+
+
+## 2026-10-17 — Blackout preview matches actual output
+
+The live preview reuses presenterSafetyBlankSlide() for number zero. Its previous
+ordinary blank identity could retain the worship background and decorative cross
+while actual output was black. Both surfaces now use the same blackout frame;
+ordinary in-sequence blank slides keep their existing styling.
+
+Chromium/WebKit regression covers two services and real output-window transport:
+browsing another service preserves current output, navigation from an inactive
+service cannot hijack output, explicit start switches to that service at index 0,
+and number zero/one blackens/restores both live preview and output. No worship
+records or service-switch semantics are changed.

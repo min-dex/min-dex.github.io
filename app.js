@@ -28448,17 +28448,7 @@ function syncPresenterVideoHealthControl() {
 function presenterLiveStatusPreviewSlide(slides = [], safeIndex = 0, options = {}) {
   if (!options.active || !options.outputOpen) return null;
   if (state.presenter.liveScripture?.active && state.presenter.liveScripture.slide) return state.presenter.liveScripture.slide;
-  if (state.presenter.safetyBlank) {
-    return {
-      id: "presenter-live-status-blank",
-      elementType: "blank",
-      layout: "blank",
-      type: "blank",
-      title: "빈 화면",
-      text: "",
-      outputContext: "clean",
-    };
-  }
+  if (state.presenter.safetyBlank) return presenterSafetyBlankSlide();
   return slides[clampPresenterIndex(safeIndex, slides.length)] || null;
 }
 
