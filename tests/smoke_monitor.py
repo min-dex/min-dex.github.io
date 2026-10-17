@@ -24,7 +24,7 @@ def main():
                         if(monitorMode==='pending')return new Promise(resolve=>window.monitorRelease=resolve);
                         if(monitorMode==='missing')return Promise.resolve({error:{code:'PGRST202'}});
                         const data=name==='mindex_monitor_register'?'report-token':name==='mindex_monitor_login'?(args.p_password==='test-secret'?'admin-token':null):name==='mindex_monitor_read'?[{
-                          id:'remote',last_seen:new Date().toISOString(),status:{name:'<img src=x onerror=alert(1)>',os:'Windows',browser:'Whale',version:'test',module:'praise',serviceId:'editing',outputServiceId:'output',output:true,slide:3,count:3,events:[{kind:'save_ok',at:new Date().toISOString()}]}
+                          id:'remote',last_seen:new Date(Date.now()-(monitorMode==='stale'?60000:0)).toISOString(),status:{name:'<img src=x onerror=alert(1)>',os:'Windows',browser:'Whale',version:'test',module:'praise',serviceId:'editing',outputServiceId:'output',output:true,slide:3,count:3,events:[{kind:'save_ok',at:new Date().toISOString()}]}
                         }]:true;
                         return Promise.resolve({data,error:null});
                       }})};
@@ -32,15 +32,13 @@ def main():
                     page.locator('#monitorPanelBtn').click()
                     assert page.locator('.monitor-panel').is_visible()
                     assert page.evaluate('monitorCalls.length') == 0
-                    assert 'sunday-second' in page.locator('[data-local]').inner_text()
-                    assert 'sunday-main' in page.locator('[data-local]').inner_text()
+                    assert page.locator('[data-local] .monitor-health').inner_text() in ('송출 중', '송출 안 함')
+                    assert 'sunday-second' not in page.locator('[data-local]').inner_text()
+                    page.get_by_text('이 기기 공유 설정', exact=True).click()
                     page.locator('[data-share]').check()
                     page.wait_for_function("monitorCalls.some(c=>c.name==='mindex_monitor_heartbeat')")
                     page.evaluate("emitMonitorSaveEvent('save_start');emitMonitorSaveEvent('save_ok');emitMonitorSaveEvent('save_failed')")
                     page.locator('[data-refresh]').click()
-                    page.locator('[data-local] summary').click()
-                    assert '예배 저장 완료' in page.locator('[data-local]').inner_text()
-                    assert '예배 저장 흐름 오류' in page.locator('[data-local]').inner_text()
                     assert not page.evaluate("monitorCalls.some(c=>c.name==='mindex_monitor_read')")
                     page.locator('#monitorPassword').fill('wrong')
                     page.locator('.monitor-panel button[type=submit]').click()
@@ -50,21 +48,19 @@ def main():
                     page.wait_for_function("!!document.querySelector('[data-devices] strong')")
                     assert page.locator('[data-devices] img').count() == 0
                     assert page.locator('#monitorPassword').input_value() == ''
-                    assert page.locator('[data-local] .monitor-facts dt').all_text_contents() == ['편집 예배', '현재 화면', '송출 예배', '송출 상태', '저장 상태']
-                    page.locator('[data-local] summary').focus()
-                    page.evaluate("emitMonitorSaveEvent('save_start')")
-                    page.wait_for_timeout(2200)
-                    assert page.locator('[data-local] summary').evaluate('(e)=>e===document.activeElement')
+                    assert page.locator('.monitor-facts, [data-event-filter], [data-device-filter]').count() == 0
+                    assert '송출 중' in page.locator('[data-devices]').inner_text()
+                    page.evaluate("monitorMode='stale'")
+                    page.locator('[data-refresh]').click()
+                    page.wait_for_function("document.querySelector('[data-devices]').textContent.includes('현재 공유 중인 접속이 없습니다')")
                     page.evaluate("monitorMode='missing'")
                     page.locator('[data-refresh]').click()
-                    page.wait_for_function("document.querySelector('.monitor-message').textContent.includes('이전 조회')")
-                    page.locator('[data-device-filter]').select_option('stale')
-                    assert page.locator('[data-devices] .monitor-device').count() == 1
-                    assert '확인 실패' in page.locator('[data-devices]').inner_text()
+                    page.wait_for_function("document.querySelector('.monitor-message').textContent.includes('서버 설정')")
+                    assert page.locator('[data-devices] .monitor-device').count() == 0
+                    assert '송출 중' not in page.locator('[data-devices]').inner_text()
                     page.evaluate("monitorMode='ok'")
-                    page.locator('[data-device-filter]').select_option('all')
                     page.locator('[data-refresh]').click()
-                    page.wait_for_function("!document.querySelector('.monitor-message').textContent.includes('이전 조회')")
+                    page.wait_for_function("!!document.querySelector('[data-devices] strong')")
                     assert page.evaluate("Object.values(localStorage).every(v=>!v.includes('test-secret')&&!v.includes('admin-token'))")
                     for width, theme in [(1280, 'light'), (390, 'light'), (1280, 'dark'), (390, 'dark')]:
                         page.evaluate('(theme)=>{document.body.dataset.theme=theme;document.documentElement.dataset.theme=theme}', theme)
@@ -86,7 +82,7 @@ def main():
                     page.locator('[data-share]').check()
                     page.wait_for_function("document.querySelector('.monitor-share-status').textContent.includes('서버 설정')")
                     assert page.evaluate('state.presenter.index') == 2
-                    print(engine, 'PASS opt-in, authenticated read, save results, separate edit/output, privacy, XSS, responsive layout, revoke, missing server isolation')
+                    print(engine, 'PASS opt-in, authenticated read, active-only sessions, failed-read clearing, output status, privacy, XSS, responsive layout, revoke, missing server isolation')
                 finally:
                     browser.close()
     finally:

@@ -1,4 +1,4 @@
-.monitor-panel { box-sizing: border-box; width: min(880px, calc(100% - 24px)); max-height: 85vh; padding: 20px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); overflow-y: auto; }
+.monitor-panel { box-sizing: border-box; width: min(560px, calc(100% - 24px)); max-height: 85vh; padding: 20px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); overflow-y: auto; }
 .monitor-panel::backdrop { background: #0008; }
 .monitor-panel header, .monitor-panel form, .monitor-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
 .monitor-panel h2 { margin: 0; flex: 1; font-size: var(--ui-page-title-size); }

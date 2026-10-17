@@ -3,10 +3,8 @@
   if (isPresenterOutputRoute()) return;
   const trigger = document.getElementById("monitorPanelBtn");
   if (!trigger) return;
-  const modules = { home: "홈", presenter: "예배", service: "예배", scripture: "말씀", praise: "찬양", calendar: "교회력", references: "참고자료" };
   const eventNames = { open: "접속", view: "화면 이동", service: "예배 선택", edit: "입력 편집", save_start: "예배 저장 시작", save_ok: "예배 저장 완료", save_failed: "예배 저장 흐름 오류", output_on: "송출창 응답 시작", output_off: "송출창 응답 끊김" };
   const events = [];
-  const videoNames = { playing: "재생 중", loading: "로딩 중", paused: "일시정지", blocked: "자동 재생 차단", error: "재생 오류", ended: "재생 종료" };
   const requests = new Map();
   const renderKeys = new WeakMap();
   let remoteRows = [];
@@ -22,13 +20,11 @@
   const version = window.MINDEX_RELEASE || document.querySelector('script[src*="/app.js?"]')?.src.split("?v=")[1] || "unknown";
   const panel = document.createElement("dialog");
   panel.className = "monitor-panel"; panel.setAttribute("aria-labelledby", "monitorTitle");
-  panel.innerHTML = `<header><h2 id="monitorTitle">기기 상태</h2><span>읽기 전용</span><button class="icon-btn" data-close title="닫기" aria-label="닫기"><i data-lucide="x"></i></button></header>
-    <section class="monitor-section" aria-labelledby="monitorLocalTitle"><h3 id="monitorLocalTitle">현재 기기</h3>
-    <div class="monitor-toolbar"><label for="monitorName">기기 이름</label><input id="monitorName" maxlength="60" autocomplete="off"><label><input type="checkbox" data-share>상태 공유</label></div>
-    <p class="monitor-share-status" role="status"></p><div data-local></div></section>
-    <section class="monitor-section" aria-labelledby="monitorRemoteTitle"><div class="monitor-section-heading"><h3 id="monitorRemoteTitle">접속 기기</h3><button class="icon-btn" data-refresh title="상태 새로고침" aria-label="상태 새로고침"><i data-lucide="refresh-cw"></i></button><button class="icon-btn" data-lock hidden title="조회 잠금" aria-label="조회 잠금"><i data-lucide="lock"></i></button></div>
-    <form><label for="monitorPassword">관리자 비밀번호</label><input id="monitorPassword" type="password" autocomplete="current-password" required maxlength="128"><button class="btn secondary" type="submit">조회</button></form><p class="monitor-message" role="status"></p>
-    <div class="monitor-toolbar" data-filters hidden><label>기기<select data-device-filter><option value="all">전체</option><option value="fresh">응답 있음</option><option value="stale">상태 확인 필요</option><option value="error">오류 보고</option></select></label><label>최근 작업<select data-event-filter><option value="all">전체</option><option value="save">저장</option><option value="error">저장 오류</option></select></label><span data-count></span></div><div data-devices></div></section>`;
+  panel.innerHTML = `<header><h2 id="monitorTitle">접속 현황</h2><button class="icon-btn" data-close title="닫기" aria-label="닫기"><i data-lucide="x"></i></button></header>
+    <section class="monitor-section"><div data-local></div></section>
+    <section class="monitor-section" aria-labelledby="monitorRemoteTitle"><div class="monitor-section-heading"><h3 id="monitorRemoteTitle">접속 중</h3><span data-count></span><button class="icon-btn" data-refresh title="새로고침" aria-label="새로고침"><i data-lucide="refresh-cw"></i></button><button class="icon-btn" data-lock hidden title="조회 잠금" aria-label="조회 잠금"><i data-lucide="lock"></i></button></div>
+    <form><label for="monitorPassword">관리자 비밀번호</label><input id="monitorPassword" type="password" autocomplete="current-password" required maxlength="128"><button class="btn secondary" type="submit">조회</button></form><p class="monitor-message" role="status"></p><div data-devices></div></section>
+    <details class="monitor-section"><summary>이 기기 공유 설정</summary><div class="monitor-toolbar"><label for="monitorName">접속 이름</label><input id="monitorName" maxlength="60" autocomplete="off"><label><input type="checkbox" data-share>상태 공유</label></div><p class="monitor-share-status" role="status"></p><p>공유한 브라우저 접속만 표시됩니다.</p></details>`;
   document.body.append(panel);
   const $ = (selector) => panel.querySelector(selector);
   $("[data-share]").checked = enabled; $("#monitorName").value = name || `${os} ${browser}`;
@@ -39,11 +35,6 @@
     return Number.isFinite(time) && time <= Date.now() + 5000 ? time : 0;
   }
   function isStale(row) { const time = timestamp(row.last_seen); return !time || Date.now() - time > 45000; }
-  function dateLabel(value) { return timestamp(value) ? new Date(value).toLocaleString() : "시각 확인 불가"; }
-  function hasError(data) {
-    const save = (Array.isArray(data.events) ? data.events : []).slice().reverse().find((e) => e?.kind === "save_ok" || e?.kind === "save_failed");
-    return save?.kind === "save_failed" || ["blocked", "error"].includes(data.video);
-  }
   function record(kind) {
     if (!enabled || !eventNames[kind]) return;
     events.push({ kind, at: new Date().toISOString() });
@@ -67,62 +58,29 @@
       video: output && p.videoHealth && Date.now() - p.videoHealth.receivedAt < 5000 ? p.videoHealth.status : "",
       events: events.map((event) => ({ ...event })) };
   }
-  function serviceName(id, date = "", typeId = "") {
-    const service = state.services.find((s) => s.id === id);
-    const type = state.serviceTypes.find((s) => s.id === (service?.type_id || typeId));
-    return id ? `${service?.date || date} ${type?.name || service?.type_id || typeId || id}`.trim() : "미선택";
-  }
   function renderDevice(root, data, lastSeen, id = "local") {
     const local = id === "local";
-    const stale = !local && isStale({ last_seen: lastSeen });
-    const unverified = !local && !remoteVerified;
     const row = document.createElement("section"); row.className = "monitor-device";
-    row.dataset.health = stale || unverified ? "stale" : hasError(data) ? "error" : "fresh";
-    const heading = document.createElement("strong"); heading.textContent = String(data.name || `${data.os} ${data.browser}`).slice(0, 80); row.append(heading);
+    row.dataset.health = "fresh";
+    const heading = document.createElement("strong");
+    heading.textContent = String(data.name || `${data.os || ""} ${data.browser || ""}`.trim() || "이름 없는 접속").slice(0, 80); row.append(heading);
     const status = document.createElement("span"); status.className = "monitor-health";
-    status.textContent = local ? "현재 기기" : unverified ? "확인 실패" : stale ? "응답 끊김" : "응답 있음"; row.append(status);
-    const environment = document.createElement("p"); environment.className = "monitor-environment";
-    environment.textContent = `${data.os} · ${data.browser} · ${data.version}`; row.append(environment);
-    if (stale || unverified) { const notice = document.createElement("p"); notice.textContent = unverified ? "최신 상태 확인 실패 · 아래는 이전 조회 결과" : "응답 없음 · 아래는 마지막 보고 상태"; row.append(notice); }
-    const facts = document.createElement("dl"); facts.className = "monitor-facts";
-    const lines = [["편집 예배", serviceName(data.serviceId, data.serviceDate, data.serviceType)],
-      ["현재 화면", modules[data.module] || data.module || "미선택"],
-      ["송출 예배", serviceName(data.outputServiceId)],
-      ["송출 상태", `${data.output ? `송출창 연결 · 선택 슬라이드 ${data.slide} / ${data.count}` : "송출창 미연결"}${videoNames[data.video] ? ` · 영상 ${videoNames[data.video]}` : ""}`],
-      ["저장 상태", data.saving ? "저장 처리 중" : data.dirty ? "미저장 예배 변경 있음" : "미저장 예배 변경 없음"]];
-    for (const [label, value] of lines) { const dt = document.createElement("dt"); dt.textContent = label; const dd = document.createElement("dd"); dd.textContent = String(value).slice(0, 300); facts.append(dt, dd); }
-    row.append(facts);
-    if (!local) { const seen = document.createElement("p"); seen.className = "monitor-environment"; seen.textContent = `마지막 응답 ${dateLabel(lastSeen)} · 접속 ${id.slice(0, 8)}`; row.append(seen); }
-    const details = document.createElement("details"); details.dataset.device = id;
-    const summary = document.createElement("summary"); summary.textContent = "최근 작업"; details.append(summary);
-    const list = document.createElement("ul");
-    for (const event of (Array.isArray(data.events) ? data.events : []).slice(-20).reverse()) {
-      if (!eventNames[event?.kind]) continue;
-      const filter = $("[data-event-filter]").value;
-      if (filter === "save" && !event.kind.startsWith("save_")) continue;
-      if (filter === "error" && event.kind !== "save_failed") continue;
-      const li = document.createElement("li"); li.textContent = `${dateLabel(event.at)} ${eventNames[event.kind]}`; list.append(li);
-    }
-    if (!list.children.length) { const li = document.createElement("li"); li.textContent = "기록 없음"; list.append(li); }
-    details.append(list); row.append(details); root.append(row);
+    status.textContent = data.output === true ? "송출 중" : "송출 안 함"; row.append(status);
+    const identity = document.createElement("p"); identity.className = "monitor-environment";
+    identity.textContent = local ? "이 기기" : `${data.os || ""} · ${data.browser || ""} · ${id.slice(0, 8)}`;
+    row.append(identity); root.append(row);
   }
   function renderRows(root, rows) {
-    const key = JSON.stringify([rows, $("[data-event-filter]").value, remoteVerified, rows.map((row) => isStale(row))]);
+    const key = JSON.stringify(rows.map(row=>[row.id,row.status.name,row.status.os,row.status.browser,row.status.output]));
     if (renderKeys.get(root) === key) return;
-    renderKeys.set(root, key);
-    const expanded = new Set([...root.querySelectorAll("details[open]")].map((d) => d.dataset.device));
-    const focusedDevice = root.contains(document.activeElement) ? document.activeElement.closest("details")?.dataset.device : null;
-    root.replaceChildren();
+    renderKeys.set(root, key); root.replaceChildren();
     for (const row of rows) renderDevice(root, row.status, row.last_seen, row.id);
-    root.querySelectorAll("details").forEach((d) => { d.open = expanded.has(d.dataset.device); });
-    if (focusedDevice) [...root.querySelectorAll("details")].find((d) => d.dataset.device === focusedDevice)?.querySelector("summary")?.focus({ preventScroll: true });
   }
   function renderRemote() {
-    const filter = $("[data-device-filter]").value;
-    const rows = remoteRows.filter((row) => filter === "all" || (filter === "fresh" ? !isStale(row) && remoteVerified : filter === "stale" ? isStale(row) || !remoteVerified : hasError(row.status)));
-    $("[data-count]").textContent = `${rows.length} / ${remoteRows.length}개 접속`;
+    const rows = remoteVerified ? remoteRows.filter(row => !isStale(row)) : [];
+    $("[data-count]").textContent = admin && remoteVerified ? `${rows.length}개 접속` : "";
     renderRows($("[data-devices]"), rows);
-    if (!rows.length) $("[data-devices]").textContent = !remoteVerified ? "기기 상태를 확인하지 못했습니다." : remoteRows.length ? "조건에 맞는 기기 없음" : "공유 중인 기기 없음";
+    if (!rows.length) $("[data-devices]").textContent = !remoteVerified ? "접속 상태를 확인하지 못했습니다." : "현재 공유 중인 접속이 없습니다.";
   }
   async function rpc(name, args) {
     if (!state.client?.rpc) throw Error("원격 조회에 필요한 DB 클라이언트가 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.");
@@ -164,7 +122,7 @@
     for (const [controller, scope] of requests) if (scope === "viewer") controller.abort();
     viewerExpiresAt = 0; $("#monitorPassword").value = "";
     $("form").hidden = false; $("[data-lock]").hidden = true; $("[data-devices]").replaceChildren();
-    $("[data-filters]").hidden = true; remoteRows = []; remoteVerified = false;
+    $("[data-count]").textContent = ""; remoteRows = []; remoteVerified = false;
     renderKeys.delete($("[data-devices]"));
     message("");
   }
@@ -180,17 +138,15 @@
       if (!Array.isArray(rows)) { lock(); message("인증이 만료되었습니다."); return; }
       remoteRows = rows.filter((row) => row && typeof row.id === "string" && row.status && typeof row.status === "object" && !Array.isArray(row.status)).slice(0, 100);
       remoteVerified = true; renderRemote();
-      if (!rows.length) $("[data-devices]").textContent = "공유 중인 기기 없음";
-      message("최근 24시간 · 기기 보고 상태");
-    } catch (e) { if (serial === viewSerial) { remoteVerified = false; renderRemote(); message(`${e.message} 이전 조회 결과입니다.`); } }
+
+      message("");
+    } catch (e) { if (serial === viewSerial) { remoteVerified = false; renderRemote(); message(e.message); } }
     finally { reading = false; }
   }
   trigger.onclick = () => { if (!panel.open) panel.showModal(); lastActivityAt = Date.now(); void refresh(); window.lucide?.createIcons({ root: panel }); };
   $("[data-close]").onclick = () => panel.close(); panel.addEventListener("close", lock);
   $("[data-lock]").onclick = () => { lock(); $("#monitorPassword").focus(); };
   $("[data-refresh]").onclick = () => { void refresh(); if (enabled && Date.now() - lastReportAt >= 10000) { retryAt = 0; void upload(); } };
-  $("[data-device-filter]").onchange = renderRemote;
-  $("[data-event-filter]").onchange = () => { renderRemote(); renderRows($("[data-local]"), [{ id: "local", status: snapshot() }]); };
   $("#monitorName").onchange = () => { try { localStorage.setItem("mindex.monitor.name", $("#monitorName").value.slice(0, 60)); } catch {} };
   $("[data-share]").onchange = () => {
     enabled = $("[data-share]").checked; shareSerial++; events.length = 0; previous = null;
@@ -209,7 +165,7 @@
       if (serial !== loginSerial || !panel.open) { void leave(token); return; }
       if (!token) { message("비밀번호·서버 설정 또는 시도 제한을 확인해 주세요."); return; }
       admin = token; viewerExpiresAt = Date.now() + 30 * 60 * 1000; lastActivityAt = Date.now();
-      $("form").hidden = true; $("[data-lock]").hidden = false; $("[data-filters]").hidden = false; await refresh();
+      $("form").hidden = true; $("[data-lock]").hidden = false; await refresh();
     } catch (e) { if (serial === loginSerial) message(e.message); }
     finally { submit.disabled = false; loginPending = false; }
   };

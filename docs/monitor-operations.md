@@ -1,5 +1,17 @@
 # Read-only operations panel
 
+## Current compact view · 2026-10-17
+
+The panel shows this browser and authenticated shared sessions with name, browser
+identity and output on/off only. Remote rows require a successful read and a valid
+heartbeat within 45 seconds; stale rows are excluded and failed reads clear the
+list. This is heartbeat-based presence, not proof of a physical device or displayed
+video. Local identity/sharing controls are collapsed. Sharing remains opt-in and
+viewer authentication/locking is unchanged. Existing reporting payload, retention
+and RPC permissions are unchanged; editing, save history and slide details are no
+longer displayed. The UI details below describe the previous full view.
+
+
 The Save-adjacent panel reports browser-tab sessions, not verified physical devices.
 Sharing is opt-in on each browser. It reports environment, selected/output worship
 identifiers, slide position, heartbeat/video state and the last 20 action categories.
