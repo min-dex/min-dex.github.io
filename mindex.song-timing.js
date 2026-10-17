@@ -235,7 +235,7 @@
     return entries.filter(({ slide }) => slide.songTimingKey && slide.songTimingEligible
       && (options.audioSource || slide.serviceTimingAudioSource || profiles.get(slide.songTimingKey)?.url)
       && !seen.has(slide.songTimingElementId || slide.elementId) && seen.add(slide.songTimingElementId || slide.elementId))
-      .map(({ slide }) => `<button type="button" class="btn secondary" data-song-timing-open data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(slide.songTimingElementId || slide.elementId)}">음원 동기화</button>${slide.syncTimeline?.localTiming ? `<button type="button" class="btn secondary" data-song-timing-play data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(slide.songTimingElementId || slide.elementId)}">동기화 처음부터 재생</button>` : ''}`).join('');
+      .map(({ slide }) => `<button type="button" class="btn secondary" data-song-timing-open data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(slide.songTimingElementId || slide.elementId)}">음원 동기화</button>${entries.some(({ slide: candidate }) => (candidate.songTimingElementId || candidate.elementId) === (slide.songTimingElementId || slide.elementId) && candidate.syncTimeline?.localTiming) ? `<button type="button" class="btn secondary" data-song-timing-play data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(slide.songTimingElementId || slide.elementId)}">동기화 처음부터 재생</button>` : ''}`).join('');
   }
   function transport() {
     const source = state.serviceMusic.sourceKey;

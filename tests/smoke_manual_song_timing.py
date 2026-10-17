@@ -59,6 +59,10 @@ try:
     const item=state.serviceItems[sid][0],pages=()=>T.pagesFor(presenterSlidesForService(sid));
     check(JSON.stringify(pages().map(s=>s.syncTimeline?.start))==='[2,6,10]','reload lost starts');
     check(JSON.stringify(pages().map(s=>s.syncTimeline?.lead))==='[1,0,1]','instrumental lead');
+    const timed=pages()[0],title={...timed,type:'title',syncTimeline:undefined};
+    const controls=T.controls(sid,[{slide:title},{slide:timed}],{audioSource:'fixture'});
+    check(controls.includes('data-song-timing-play'),'title-first group hid saved playback');
+    check((controls.match(/data-song-timing-play/g)||[]).length===1,'duplicate playback controls');
     const slides=presenterSlidesForService(sid),first=slides.findIndex(s=>s.syncTimeline?.page===1);
     check(presenterSyncedLyricsTargetForTime(slides,first,6).slide.syncTimeline.page===2,'instrumental clock');
     check(presenterSyncedLyricsTargetForTime(slides,first,9).slide.syncTimeline.page===3,'lyric lead');

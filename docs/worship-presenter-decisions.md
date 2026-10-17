@@ -2823,3 +2823,11 @@ font, horizontal padding and text offset are unchanged. Chromium/WebKit actual
 output checks at1920×1080,1366×768,960×540,900×900,406×228 and320×180 retain
 the crest and two-line Korean lyrics entirely within the bar without overlap.
 No service content or song/medley data is changed.
+
+
+## 2026-10-17 — Saved timing playback after section titles
+
+A manual praise group may begin with a person/title slide without a timing cue.
+Determine whether to show the restart button from the whole element group, not
+only that first slide. Keep one editor/restart pair per element. Chromium/WebKit
+regression covers an untimed title preceding a locally timed lyric.
