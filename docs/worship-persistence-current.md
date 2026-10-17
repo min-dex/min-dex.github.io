@@ -276,3 +276,22 @@ existing score/lyrics and output mode. Retry records with older signatures are
 normalized in memory, not rewritten. Shared song/version/form content and explicit
 formPresetDisabled differences retain existing conflict rules. Manual lyric
 conversion is still a content change. All writes keep the existing atomic path.
+
+
+## Linked-song clear and vacant-hymn protection · 2026-10-17
+
+Score/lyrics mode equivalence also covers an empty DB-song selection. Clearing
+a shared song preserves the target service's score/lyrics input and output mode;
+a subsequent mode-only edit of that empty slot does not enqueue sibling writes.
+Manual-lyrics conversion remains a content change.
+
+When the existing empty third-service hymn receives song 3 from service 1/2,
+fill song/version but preserve any existing form hint, preset, preset rules or
+explicit formPresetDisabled choice as a unit. A slot without form configuration
+receives the source form as before. Populated targets retain the previous-content
+conflict guard; local drafts, live output, all-generation and custom media guards
+are unchanged. No new write path or production repair is introduced.
+
+Validation covers both score/lyrics directions, clear, blank-mode comparison,
+custom/disabled/unconfigured hymn forms and atomic row read-back in offline
+Chromium/WebKit. Existing sync scope/CAS/retry and Cloud baseline checks remain.

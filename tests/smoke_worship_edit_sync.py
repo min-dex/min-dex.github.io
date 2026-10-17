@@ -110,6 +110,49 @@ def main():
                   fetchWorshipRowsForServiceIds=async()=>clone(db);
                   refreshPresenterForService=()=>{};
                   state.client={from:()=>{throw Error('Direct table write attempted')}};
+                  // Exercise persisted typed rows, not only the in-memory merge helper.
+                  const musicItem=(service,slot,label,mode,song,form={})=>normalizeServiceItem({
+                    id:service.id,service_id:service.id,label,song_id:song,raw_title:'',
+                    _worshipSlotKey:slot,_worshipSectionKey:slot==='hymn.main'?'hymn_praise':'offering',
+                    _worshipElementTemplateModified:true,
+                    memo:serializeServiceItemMemo({elementType:'praise',inputMode:mode,
+                      outputMode:mode==='score_db'?'score':'lyrics',...form})});
+                  const songsBeforeAudit=state.songs;
+                  state.songs=['old-song','new-song'].map((id,index)=>({id,title:'검증 찬송 '+index,hymn_no:index+1,praise_type:'hymn',versions:[]}));
+                  const loadSongsBeforeAudit=loadSongsForIds;loadSongsForIds=async()=>{};
+                  for(const [targetMode,sourceMode] of [['score_db','lyrics_db'],['lyrics_db','score_db']]) {
+                    reset();
+                    const local=musicItem(target,'offering.praise','봉헌찬송',targetMode,'old-song');
+                    const before=musicItem(source,'offering.praise','봉헌찬송',sourceMode,'old-song');
+                    db=clone(buildWorshipPersistenceRows(target,[local],{}, {},{elementTypedStateColumns:typed}));
+                    await persistSundayEditSync({sourceServiceId:sid,targetId:tid,key:'offering-hymn',previous:before,item:{...before,song_id:null}}, {elementTypedStateColumns:typed});
+                    const saved=groupWorshipElements(db.sections,db.elements)[tid][0];
+                    const memo=parseServiceItemMemo(saved.memo);
+                    check(writes.length===1&&!saved.song_id,'clear did not commit once');
+                    check(memo.inputMode===targetMode&&memo.outputMode===parseServiceItemMemo(local.memo).outputMode,'clear changed local display mode');
+                  }
+                  const incomingForm={formHint:'V1-C',formPreset:{forms:['V1','C'],strength:'manual'}};
+                  for(const choice of [{},{formHint:'V2-C-Tag',formPreset:{forms:['V2','C','Tag'],strength:'manual'}},{formPresetDisabled:true}]) {
+                    reset();
+                    const local=musicItem(target,'hymn.main','찬송','score_db',null,choice);
+                    const before=musicItem(source,'praise.song.3','찬양 3','lyrics_db','old-song',incomingForm);
+                    db=clone(buildWorshipPersistenceRows(target,[local],{}, {},{elementTypedStateColumns:typed}));
+                    await persistSundayEditSync({sourceServiceId:sid,targetId:tid,key:'main-praise:3',previous:before,item:{...before,song_id:'new-song'}},{elementTypedStateColumns:typed});
+                    const saved=groupWorshipElements(db.sections,db.elements)[tid][0],memo=parseServiceItemMemo(saved.memo);
+                    check(writes.length===1&&saved.song_id==='new-song','empty hymn not filled');
+                    check(memo.inputMode==='score_db','empty hymn display changed');
+                    check(memo.formPresetDisabled===Boolean(choice.formPresetDisabled),'disabled form overwritten');
+                    const expectedForm=parseServiceItemMemo(Object.keys(choice).length?local.memo:before.memo);
+                    check(memo.formHint===expectedForm.formHint&&JSON.stringify(memo.formPreset)===JSON.stringify(expectedForm.formPreset),'canonical form sequence overwritten');
+                  }
+                  reset();
+                  const ownForm=musicItem(target,'offering.praise','봉헌찬송','score_db','old-song',{formPresetDisabled:true});
+                  const sharedBefore=musicItem(source,'offering.praise','봉헌찬송','lyrics_db','old-song',incomingForm);
+                  db=clone(buildWorshipPersistenceRows(target,[ownForm],{}, {},{elementTypedStateColumns:typed}));
+                  let formConflict=false;
+                  try {await persistSundayEditSync({sourceServiceId:sid,targetId:tid,key:'offering-hymn',previous:sharedBefore,item:{...sharedBefore,song_id:'new-song'}},{elementTypedStateColumns:typed});} catch(error) {formConflict=error.message.includes('덮어쓰지 않았습니다');}
+                  check(formConflict&&writes.length===0,'populated independent form lost conflict guard');
+                  loadSongsForIds=loadSongsBeforeAudit;state.songs=songsBeforeAudit;
                   const job={sourceServiceId:sid,targetId:tid,key:'sermon-title',previous,item:edited};
                   reset();await persistSundayEditSync(job,{elementTypedStateColumns:typed});
                   check(writes.length===1&&writes[0].rows.sections.length===0&&db.elements[0].title==='Edited','target not saved atomically');
@@ -166,7 +209,7 @@ def main():
                   await syncSharedSundayContentAfterSave(source,[edited],{previousItems:[edited]});
                   check(pendingSundayEditSync.size===0,'retry failed');
                   worshipAtomicClient=originalAtomic;
-                  return 'PASS read isolation, editable blanks, scoped edit sync, explicit clear, exceptions, local drafts, CAS, no inserts, failure retry';
+                  return 'PASS display-mode clear, vacant hymn form retention, populated form conflict, read isolation, scoped sync, drafts, CAS and retry';
                 }'''))
                 browser.close()
     finally:

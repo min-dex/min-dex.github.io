@@ -7503,7 +7503,7 @@ function sundayEditSyncContent(item = {}) {
 
 function sundayEditSyncComparableContent(content) {
   // DB song selection is shared; score/lyrics presentation is local to each service.
-  return content.song && ["score_db", "lyrics_db"].includes(content.inputMode)
+  return ["score_db", "lyrics_db"].includes(content.inputMode)
     ? { ...content, inputMode: "linked-song" } : content;
 }
 
@@ -7517,7 +7517,7 @@ function sundayEditSyncPreviousSignatureMatches(signature, item) {
   } catch { return false; }
 }
 
-function applySundayEditSync(target, source) {
+function applySundayEditSync(target, source, { preserveExistingForm = false } = {}) {
   const content = sundayEditSyncContent(source);
   const next = { ...target, _worshipElementTemplateModified: true, _worshipTemplatePlaceholder: false };
   const memo = parseServiceItemMemo(target.memo);
@@ -7526,13 +7526,16 @@ function applySundayEditSync(target, source) {
     next.memo = serializeServiceItemMemo({ ...memo, scriptureReference: content.references[0] || "",
       scriptureReferences: content.references, scriptureReferencePayloads: content.payloads, slides: [] });
   } else if (Object.hasOwn(content, "song")) {
-    const preserveDisplayMode = Boolean(content.song)
-      && ["score_db", "lyrics_db"].includes(content.inputMode)
+    const preserveDisplayMode = ["score_db", "lyrics_db"].includes(content.inputMode)
       && ["score_db", "lyrics_db"].includes(memo.inputMode);
     Object.assign(next, { song_id: content.song || null, version_id: content.version || null,
       song_version_id: content.version || null, raw_title: content.title });
-    next.memo = serializeServiceItemMemo({ ...memo, formHint: content.formHint, formPreset: content.formPreset,
-      formPresetDisabled: content.formPresetDisabled, formPresetRules: content.formPresetRules, slides: content.slides,
+    // A vacant third-service hymn may already have an intentional form choice.
+    const keepForm = preserveExistingForm && Boolean(memo.formHint || memo.formPreset
+      || memo.formPresetDisabled || memo.formPresetRules?.length);
+    const form = keepForm ? {} : { formHint: content.formHint, formPreset: content.formPreset,
+      formPresetDisabled: content.formPresetDisabled, formPresetRules: content.formPresetRules };
+    next.memo = serializeServiceItemMemo({ ...memo, ...form, slides: content.slides,
       inputMode: preserveDisplayMode ? memo.inputMode : content.inputMode,
       outputMode: preserveDisplayMode || memo.inputMode === content.inputMode ? memo.outputMode : parseServiceItemMemo(source.memo).outputMode });
   } else Object.assign(next, { raw_title: content.title, assignee: content.assignee });
@@ -7650,7 +7653,7 @@ async function persistSundayEditSync(job, options = {}) {
   await loadSongsForIds(uniqueList(items.map((candidate) => candidate.song_id).filter(Boolean)
     .concat(job.item.song_id || []).filter(Boolean)));
   if (sundayEditSyncHasLocalDraft(target.id)) throw conflict();
-  const next = applySundayEditSync(item, job.item);
+  const next = applySundayEditSync(item, job.item, { preserveExistingForm: emptyThirdHymn });
   const existing = elements.find((row) => row.id === item.id);
   const typed = options.elementTypedStateColumns || await worshipElementTypedStateColumns();
   const rows = buildWorshipPersistenceRows(freshService, [next],

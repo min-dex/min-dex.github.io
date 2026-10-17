@@ -54,6 +54,21 @@ for(const name of ['sundaySharedContentKey','sundaySharedContentTypesForItem','s
    assert.equal(JSON.parse(result.memo).inputMode,JSON.parse(target.memo).inputMode);
    assert.equal(JSON.parse(result.memo).outputMode,JSON.parse(target.memo).outputMode);
  }
+ for(const [target,from] of [[lyrics,score],[score,lyrics]]) {
+   const cleared=c.applySundayEditSync(target,{...from,song_id:null,version_id:null,raw_title:''});
+   assert.equal(cleared.song_id,null);
+   assert.equal(JSON.parse(cleared.memo).inputMode,JSON.parse(target.memo).inputMode);
+   assert.equal(JSON.parse(cleared.memo).outputMode,JSON.parse(target.memo).outputMode);
+ }
+ assert.equal(c.sundayEditSyncSignature({...lyrics,song_id:null}),c.sundayEditSyncSignature({...score,song_id:null}));
+ const sourceForm={...edited,memo:JSON.stringify({...JSON.parse(edited.memo),formHint:'V1-C',formPreset:{forms:['V1','C'],strength:'manual'}})};
+ for(const choice of [{formHint:'V2-C-Tag',formPreset:{forms:['V2','C','Tag'],strength:'manual'}},{formPresetDisabled:true},{formPresetRules:[{id:'keep-rule'}]}]) {
+   const custom={...hymn,memo:JSON.stringify({...JSON.parse(hymn.memo),...choice})};
+   const result=c.applySundayEditSync(custom,sourceForm,{preserveExistingForm:true});
+   assert.equal(result.song_id,'new');
+   for(const [key,value] of Object.entries(choice))assert.deepEqual(JSON.parse(result.memo)[key],value);
+ }
+ assert.equal(JSON.parse(c.applySundayEditSync(hymn,sourceForm,{preserveExistingForm:true}).memo).formHint,'V1-C');
  jobs=[];c.groupWorshipElements=()=>({first:[score]});
  await c.syncSharedSundayContentAfterSave(first,[score],{previousItems:[lyrics]});
  assert.equal(jobs.length,0,'display-only edit must not dispatch');
