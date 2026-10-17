@@ -5444,7 +5444,7 @@ function presenterLyricVerseNumber(slide, lines = presenterDisplayLines(slide)) 
   if (presenterSlideLayout(slide) !== PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT) return "";
   if (slide?.type !== "lyrics") return "";
   const marker = String(slide?.marker || slide?.formLabel || "").trim();
-  const match = marker.match(/^(?:verse|v)\s*(\d{1,2})$/i)
+  const match = marker.match(/^(?:verse|v)\s*(\d{1,2})(?:\s*[a-z])?$/i)
     || marker.match(/^(\d{1,2})\s*절$/);
   if (match) return String(Number(match[1]));
   const firstLine = lines.find((line) => String(line || "").trim());

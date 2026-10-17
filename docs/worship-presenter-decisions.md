@@ -2412,3 +2412,33 @@ Requests capable of modifying production data were blocked. No service record,
 lyrics, media upload, DB permissions or schema was changed. This verifies the
 reproduced scenario; physical broadcast equipment and arbitrary uploaded images
 remain outside this browser performance result.
+
+
+## Verse number on split lyric forms (2026-10-17)
+
+Lower-bar lyric verse numbers accept a single letter suffix on numbered Verse
+markers (V1A/V1B, Verse 2 A). Display only the numeric verse in the existing gutter;
+the segment letter remains a form identity and does not become a verse number.
+Chorus/Pre-Chorus/Coda markers remain excluded. The first nonempty line receives
+one number and matching inline numbering is still removed.
+
+
+## Save completion preserves inline audio (2026-10-17)
+
+Full worship save must not replace the detail pane while its native board or
+attachment audio is playing. Persist and acknowledge normally, refresh the list
+and save feedback, and retain the current audio node/time. Existing presenter
+refresh still updates output. Paused/ended players retain ordinary full refresh.
+This does not resume deliberately paused audio or start any new audio source.
+Local Chromium/WebKit actual HTMLAudio playback checks exercise save completion
+and paused-player refresh with stubbed persistence; no production writes.
+
+## Save flushes pending order inputs (2026-10-17)
+
+Explicit full-service save (Ctrl+S, Cmd+S, Save) commits all changed deferred
+text fields belonging to the saved service, including blurred Enter-only
+presenter inputs. Unchanged fields and other-service inputs are excluded;
+active input is applied last if duplicated controls exist. Clear preview timers
+before committing, and retain the existing atomic persistence path. This is not
+an autosave or a change to Enter behavior. Chromium/WebKit shortcut tests cover
+active/blurred drafts, Save-button focus and cross-service exclusion.
