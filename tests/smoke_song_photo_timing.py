@@ -64,7 +64,7 @@ try:
     d.screenshot(path=f'/tmp/mindex-photo-timing-{engine}-{width}.png')
    d.evaluate('(el)=>el.scrollTop=0');d.screenshot(path=f'/tmp/mindex-photo-timing-{engine}-top.png')
    d.locator('[data-timing-close]').click()
-   page.evaluate('''()=>{const {serviceId,elementId}=photoTiming;
+   page.evaluate('''()=>{const {serviceId,elementId}=photoTiming;isPresenterOutputWindowOpen=()=>true;
     const entries=presenterSlidesForService(serviceId).map(slide=>({slide}));
     refs.detailPane.innerHTML=MindexSongTiming.controls(serviceId,entries);
    }''')

@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261017-secondary-name-hints",
+  "version": "20261017-children-audio-db",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "41f1e57e365b3e1417beabc9077d9c25b973e0fc117ce0c0602d2788a311ec78",
-  "runtime_sha256": "44cf1f54cf5dc5e02848ea56ea018a2314455f70472d682353641f4bfc2040fb",
-  "source_bytes": 1462340,
-  "runtime_bytes": 1034995,
-  "source_gzip": 325796,
-  "runtime_gzip": 255856
+  "source_sha256": "7d614807089721aa1a38c12c6cfbf2dfb67c4550b84fc22c1548a3db0d66cfb7",
+  "runtime_sha256": "45344c9fc5400e108a0c94e7720ac1807291a1323188f51e0055f63c07b2ca76",
+  "source_bytes": 1463270,
+  "runtime_bytes": 1035672,
+  "source_gzip": 326019,
+  "runtime_gzip": 255998
 }

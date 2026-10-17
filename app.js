@@ -471,6 +471,7 @@ const SERVICE_PRAISE_INPUT_MODES = [
   ["lyrics_db", "가사 로드"],
   ["manual_praise", "가사 직접 입력"],
   ["score_db", "찬송가: 악보 로드"],
+  ["children_audio", "어린이: 음원 로드"],
   ["audio_praise", "음원·가사"],
 ];
 const WORSHIP_DB_ELEMENT_INPUT_MODES = new Set([
@@ -7926,12 +7927,9 @@ async function saveSongMeta(song) {
     payload.scripture_refs = cleanList(song.scripture);
   }
 
-  const { data, error } = await state.client
-    .from("mindex_songs")
-    .update(payload)
-    .eq("id", song.id)
-    .select("*")
-    .single();
+  let songUpdate = state.client.from("mindex_songs").update(payload).eq("id", song.id);
+  songUpdate = song.memo == null ? songUpdate.is("memo", null) : songUpdate.eq("memo", song.memo);
+  const { data, error } = await songUpdate.select("*").single();
 
   if (error) throw error;
 
@@ -18253,6 +18251,7 @@ function parseSongMemo(value) {
   try {
     const parsed = typeof value === "string" ? JSON.parse(value) : value;
     return {
+      childrenAudioSets: parsed?.childrenAudioSets && typeof parsed.childrenAudioSets === "object" && !Array.isArray(parsed.childrenAudioSets) ? parsed.childrenAudioSets : {},
       versions: Array.isArray(parsed?.versions) ? parsed.versions : [],
       scripture: cleanList(parsed?.scripture),
       metadata: normalizeSongMetadata(parsed?.metadata),
@@ -18271,7 +18270,9 @@ function serializeSongMemo(song, options = {}) {
   const metadata = options.omitPromotedMetadata
     ? omitPromotedSongMetadata(song, normalizeSongMetadata(song.metadata))
     : normalizeSongMetadata(song.metadata);
+  const childrenAudioSets = parseSongMemo(song.memo).childrenAudioSets;
   const payload = {
+    ...(childrenAudioSets && Object.keys(childrenAudioSets).length ? { childrenAudioSets } : {}),
     ...(scripture.length ? { scripture } : {}),
     ...(relatedSongIds.length ? { related_song_ids: relatedSongIds } : {}),
     ...(Object.keys(metadata).length ? { metadata } : {}),
@@ -25799,7 +25800,7 @@ function renderServicePraiseInputModeControl(item, index, model = serviceItemEdi
       data-service-item-index="${index}"
       aria-label="찬양 입력 방식"
     >
-      ${(selected === "children_audio" ? [...SERVICE_PRAISE_INPUT_MODES, ["children_audio", "어린이: 기존 음원 세트"]] : SERVICE_PRAISE_INPUT_MODES).map(([value, label]) => `
+      ${SERVICE_PRAISE_INPUT_MODES.map(([value, label]) => `
         <option value="${escapeAttr(value)}"${value === selected ? " selected" : ""}>${escapeHtml(label)}</option>
       `).join("")}
     </select></span>`;
@@ -28539,6 +28540,8 @@ function presenterControlBoardKey(service, slides = [], active = false, chromake
     theme,
     chromakey ? "chroma" : "clean",
     active ? "active" : "preview",
+    presenterControllerIsLive(service?.id) ? "live" : "offline",
+    globalThis.MindexSongTiming?.revision || 0,
     slides.length,
     slideKey,
     scriptureDraftKey,
@@ -30514,7 +30517,8 @@ function presenterBoardConnectedPraiseItemTitles(contexts = []) {
 function renderPresenterBoardItemAudioControls(serviceId, context = {}, options = {}) {
   if (!context || !serviceItemSupportsHeaderAudio(context.item)) return "";
   const memo = parseServiceItemMemo(context.item.memo);
-  const audioAsset = normalizeServiceAudioAsset(memo.audioAsset);
+  const childrenAudio = servicePraiseInputMode(context.item, memo) === "children_audio";
+  const audioAsset = normalizeServiceAudioAsset(childrenAudio ? null : memo.audioAsset);
   const entries = (context.timingEntries || []).filter(({ slide }) =>
     (slide.songTimingElementId || slide.progressionParentId || slide.elementId) === context.item.id);
   const timingAudio = globalThis.MindexSongTiming?.audioFor(entries, context.item.id);
@@ -30528,15 +30532,15 @@ function renderPresenterBoardItemAudioControls(serviceId, context = {}, options 
         <audio controls preload="metadata" src="${escapeAttr(source)}"></audio>
         <strong title="${escapeAttr(label)}">${escapeHtml(label)}</strong>` : ""}
       <div class="svc-board-subgroup-audio-actions">
-        ${source ? globalThis.MindexSongTiming?.controls(serviceId, entries, { audioSource: source }) || "" : ""}
+        ${globalThis.MindexSongTiming?.controls(serviceId, entries, { audioSource: source }) || ""}
         ${audioAsset.url ? `<button class="icon-btn" type="button" data-service-item-audio-clear
             data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${context.index}"
           aria-label="음원 연결 해제" title="음원 연결 해제"><i data-lucide="x"></i></button>` : ""}
-        <label class="svc-board-subgroup-audio-upload" title="${source ? "음원 교체" : "음원 추가"}">
+        ${childrenAudio ? "" : `<label class="svc-board-subgroup-audio-upload" title="${source ? "음원 교체" : "음원 추가"}">
           <input type="file" accept="${SERVICE_ITEM_AUDIO_ACCEPT}" data-service-item-audio-file
             data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${context.index}" />
           <i data-lucide="${source ? "refresh-cw" : "upload"}"></i><span>${source ? "교체" : "음원"}</span>
-        </label>
+        </label>`}
       </div>
     </div>`;
 }
@@ -31365,7 +31369,8 @@ function stopPresenterOutput(serviceId = state.presenter.serviceId) {
     slide: null,
   };
   state.presenter.livePraise = emptyLivePraiseState(state.presenter.livePraise?.draft || state.presenter.livePraise?.query || "");
-  if (!state.serviceMusic.playing) {
+  if (!state.serviceMusic.playing || (state.serviceMusic.mode === "presenter-audio"
+    && globalThis.MindexSongTiming?.ownsSource(state.serviceMusic.sourceKey))) {
     stopServiceMusicPlayback({ clearSource: true, mode: "manual", render: false });
   }
   state.presenter.outputWindow = null;
@@ -31641,6 +31646,9 @@ function startPresenterOutputWindowMonitor(serviceId) {
       return;
     }
     stopPresenterOutputWindowMonitor();
+    if (state.serviceMusic.mode === "presenter-audio" && globalThis.MindexSongTiming?.ownsSource(state.serviceMusic.sourceKey)) {
+      stopServiceMusicPlayback({ render: false });
+    }
     state.presenter.outputWindow = null;
     state.presenter.outputConnectedAt = 0;
     state.presenter.outputPendingAt = 0;
