@@ -911,3 +911,14 @@ seek; explicit synchronized restart or a new source resets it. Persisted cues
 and enabled flags remain unchanged. Output stop/window closure still stop the
 sync-owned audio. Chromium/WebKit checks cover continued real audio progression,
 no snap-back, seek/resume, restart, and existing ownership/save isolation.
+
+### Children version audio - 2026-10-17
+
+User-approved audio_set schema and38-song import committed in production DB.
+28 existing versions/lyrics preserved;10 children audio versions added, including
+one new song.30 automatic sets and8 disabled review drafts.
+All38 Storage files re-downloaded and SHA-256 matched (229,417,423bytes).
+Private evidence: original checkout output/elem-audio-refresh/version-linkage/.
+Chromium/WebKit rendered38 complete sets and checked cues/fingerprints/four
+inactive modes; latest live-output/replay regression passes. Deployment pending
+required Linux gate and production-byte verification.

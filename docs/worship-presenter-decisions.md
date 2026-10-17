@@ -3151,3 +3151,27 @@ Linux WebKit의 seek 뒤 이어 재생에서 실제 음원이 진행·종료되�
 완료되지 않는 상태를 재현했다. unpaused·not seeking 상태의 실제 시간 증가도
 재생 시작 확인으로 사용한다. 자연 종료는 요청 serial을 무효화하고 pending을
 비워 늦은 재생 응답이 종료 상태를 되돌리지 못하게 한다.
+
+## Children version audio attachment - 2026-10-17
+
+Current contract supersedes the earlier song-memo storage design.
+mindex_song_versions.audio_set is optional JSONB, applied in production with
+explicit user approval. Version1 contains audioUrl/audioName/audioFingerprint
+(SHA-256)/duration, starts/enabled, lyricsFingerprint/sourceSignature and forms.
+Only children_audio reads this attachment. Worship-owned config.audioTiming is
+unchanged. Writes compare version ID, lyric_signature and prior audio_set.
+
+Audio-specific form fragments may carry audioSourceRange=[start,end] into the
+NFC/lowercase letter-and-number-only concatenation of version form lyrics.
+Every fragment must match its range; sourceSignature guards the complete
+original forms. Repeated ranges and blank interlude/outro forms are allowed.
+Ordinary lyric forms are not rewritten to fit audio page boundaries. Legacy
+song-memo childrenAudioSets remain read-only fallback. Live-output playback
+gates and explicit Audio.load() replay recovery are preserved.
+
+38 songs:28 existing versions and10 added children audio versions, including
+one new song (승리하신 예수). 문들아 머리 들어라 maps to the existing HisShow song.
+Existing28 versions/forms are unchanged apart from audio_set, verified through
+production REST readback.30 automatic sets,8 disabled review drafts.
+All38 Storage files re-downloaded and SHA-256 matched (229,417,423bytes).
+Audio, lyrics, original snapshots and operational SQL stay outside public Git.

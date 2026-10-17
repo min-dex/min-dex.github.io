@@ -9,12 +9,12 @@ with wave.open(buf,'wb') as w:
  w.setnchannels(1);w.setsampwidth(2);w.setframerate(8000);w.writeframes(b'\0\0'*8000*20)
 fixture=r'''async()=>{
  const sid='children-db-service',service={id:sid,type_id:'fixture',date:'2026-10-18',title:'Fixture'};
- const song={id:'children-db-song',title:'어린이 DB',_relationalVersionsLoaded:true,memo:JSON.stringify({unknown:'preserve',childrenAudioSets:{other:{keep:true}}}),praise_types:['children'],versions:[{id:'children-db-version',name:'기본',_worshipVersionPersisted:true,is_primary:true,praise_types:['children'],forms:[{id:'v',part_type:'Verse',part_number:1,lyrics:'첫 가사',sort_order:1},{id:'c',part_type:'Chorus',lyrics:'마지막 가사',sort_order:2}]}]};
+ const song={id:'children-db-song',title:'어린이 DB',_relationalVersionsLoaded:true,memo:JSON.stringify({unknown:'preserve',childrenAudioSets:{other:{keep:true}}}),praise_types:['children'],versions:[{id:'children-db-version',name:'기본',_worshipVersionPersisted:true,lyric_signature:'fixture-signature',audio_set:null,is_primary:true,praise_types:['children'],forms:[{id:'v',part_type:'Verse',part_number:1,lyrics:'첫 가사',sort_order:1},{id:'c',part_type:'Chorus',lyrics:'마지막 가사',sort_order:2}]}]};
  const item={id:'children-db-item',service_id:sid,label:'찬양 1',raw_title:song.title,song_id:song.id,version_id:song.versions[0].id,sort_order:10,_worshipSectionKey:'praise',_worshipSectionTitle:'찬양',_worshipElementTemplateModified:true,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'children_audio',outputMode:'lyrics',forms:['V1','C']})};
  state.services=[service];state.serviceTypes=[{id:'fixture',name:'검증'}];state.songs=[song];state.serviceItems={[sid]:[item]};state.selectedServiceId=sid;state.module='presenter';state.loadedWorshipServiceIds=new Set([sid]);state.templateElementSuppressions.clear();state.presenter.serviceId=sid;state.presenter.sourceSignature='';state.presenter.slides=[];state.loading=false;
  renderPresenterControlState=()=>{};publishPresenterState=()=>{};
- window.originalItems=JSON.stringify(state.serviceItems);window.db={id:song.id,memo:song.memo};window.uploads=0;window.failSave=false;
- state.client={storage:{from(){return {upload:async()=>{uploads++;return {error:null}},getPublicUrl:()=>({data:{publicUrl:location.origin+'/clock.wav'}})}}},from(table){if(table!=='mindex_songs')throw Error('wrong owner '+table);let patch=null,filters=[];const q={select(){return q},update(p){patch=p;return q},eq(k,v){filters.push([k,v]);return q},is(k,v){filters.push([k,v]);return q},async single(){if(patch){if(failSave)return {error:{message:'injected save failure'}};if(!filters.every(([k,v])=>db[k]===v))return {error:{message:'conflict'}};Object.assign(db,patch)}return {data:structuredClone(db)}}};return q;}};
+ window.originalItems=JSON.stringify(state.serviceItems);window.db={id:song.versions[0].id,lyric_signature:'fixture-signature',audio_set:null};window.uploads=0;window.failSave=false;
+ state.client={storage:{from(){return {upload:async()=>{uploads++;return {error:null}},getPublicUrl:()=>({data:{publicUrl:location.origin+'/clock.wav'}})}}},from(table){if(table!=='mindex_song_versions')throw Error('wrong owner '+table);let patch=null,filters=[];const q={update(p){if(Object.keys(p).join()!=='audio_set')throw Error('wrong fields');patch=p;return q},eq(k,v){filters.push([k,v]);return q},is(k,v){filters.push([k,v]);return q},async select(){if(failSave)return {error:{message:'injected save failure'}};if(!filters.every(([k,v])=>(k==='audio_set'&&v!==null?JSON.stringify(db[k]):db[k])===v))return {data:[]};Object.assign(db,patch);return {data:[structuredClone(db)]}}};return q;}};
  await MindexSongTiming.ready;
  return {sid,song:structuredClone(song),item:structuredClone(item)};
 }'''
@@ -46,7 +46,7 @@ try:
     page.route(re.compile(r'^https?://(?!'+re.escape(urlsplit(url).netloc)+r'/)'),lambda r:r.abort());page.goto(url+'?mindexSmokeRaw=1');page.wait_for_function("typeof presenterSlidesForService==='function' && !!globalThis.MindexSongTiming && !document.body.classList.contains('ui-booting')")
     page.evaluate(fixture);return ctx,page
    ctx,page=load()
-   assert page.evaluate("renderServicePraiseInputModeControl(state.serviceItems[state.selectedServiceId][0],0).includes('어린이: 음원 로드')")
+   assert page.evaluate("renderServicePraiseInputModeControl(state.serviceItems[state.selectedServiceId][0],0).includes('어린이: 음원 불러오기')")
    page.evaluate(r'''()=>{
     const sid=state.selectedServiceId,item=getServiceItems(sid).find(i=>i.id==='children-db-item'),entries=presenterSlidesForService(sid).map(slide=>({slide}));
     const html=renderPresenterBoardItemAudioControls(sid,{item,index:0,timingEntries:entries});
@@ -55,29 +55,28 @@ try:
     const after=presenterControlBoardKey(state.services[0],entries.map(e=>e.slide),true);if(before===after)throw Error('live buttons would not refresh');isPresenterOutputWindowOpen=()=>false;
    }''')
    page.evaluate("MindexSongTiming.open('children-db-service','children-db-item')")
-   d=page.locator('[data-song-timing-dialog]');assert d.locator('[data-timing-save]').inner_text()=='곡 DB에 저장'
+   d=page.locator('[data-song-timing-dialog]');assert d.locator('[data-timing-save]').inner_text()=='곡 버전에 저장'
    d.locator('[data-timing-file]').set_input_files({'name':'fixture.wav','mimeType':'audio/wav','buffer':buf.getvalue()})
    page.wait_for_function("document.querySelector('[data-song-timing-dialog] audio').duration>19")
    for i,t in enumerate([2,8]):d.locator(f'[data-timing-start="{i}"]').fill(str(t))
    page.evaluate('failSave=true');d.locator('[data-timing-save]').click();page.wait_for_function("!document.querySelector('[data-timing-save]').disabled")
    assert 'injected' in d.locator('[data-timing-status]').inner_text()
    assert page.evaluate('uploads')==1
-   page.evaluate('failSave=false');d.locator('[data-timing-save]').click();page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('곡 DB에 저장했어요')")
+   page.evaluate('failSave=false');d.locator('[data-timing-save]').click();page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('곡 버전에 음원·타이밍을 저장했어요')")
    print(engine,'DB save/retry passed',flush=True)
    saved=page.evaluate('db');assert page.evaluate('uploads')==1
-   assert json.loads(saved['memo'])['unknown']=='preserve'
-   assert json.loads(saved['memo'])['childrenAudioSets']['other']=={'keep':True}
+   assert saved['audio_set']['starts']==[2,8]
    assert page.evaluate('JSON.stringify(state.serviceItems)===originalItems')
-   assert page.evaluate("!!JSON.parse(serializeSongMemo(state.songs[0],{omitVersions:true})).childrenAudioSets['children-db-version']")
+   assert page.evaluate("JSON.parse(state.songs[0].memo).unknown==='preserve'")
    page.evaluate(r'''async()=>{
-    const T=MindexSongTiming,song=state.songs[0],v=song.versions[0],before=db.memo;
-    db.memo=JSON.stringify({...JSON.parse(before),concurrent:'keep'});
-    let rejected=false;try{await T.saveToSong(song,v,T.childProfile(song,v),T.pagesFor(presenterSlidesForService(state.selectedServiceId)))}catch(e){rejected=true;}
-    if(!rejected || !JSON.parse(db.memo).concurrent)throw Error('concurrent edit overwritten');db.memo=before;
+    const T=MindexSongTiming,song=state.songs[0],v=song.versions[0],before=db.audio_set;
+    db.audio_set={...before,concurrent:'keep'};
+    let rejected=false;try{await T.saveToVersion(song,v,{...v.audio_set},T.pagesFor(presenterSlidesForService(state.selectedServiceId)))}catch(e){rejected=true;}
+    if(!rejected || !db.audio_set.concurrent)throw Error('concurrent edit overwritten');db.audio_set=before;
    }''')
    print(engine,'opening independent storage context',flush=True)
    ctx.close();ctx,page=load()
-   page.evaluate("db=>{window.db=db;state.songs[0].memo=db.memo}",saved)
+   page.evaluate("db=>{window.db=db;state.songs[0].versions[0].audio_set=db.audio_set}",saved)
    page.evaluate(r'''async()=>{
     const T=MindexSongTiming,sid=state.selectedServiceId,item=state.serviceItems[sid][0];
     const pages=T.pagesFor(presenterSlidesForService(sid));

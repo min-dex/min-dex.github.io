@@ -471,7 +471,7 @@ const SERVICE_PRAISE_INPUT_MODES = [
   ["lyrics_db", "가사 로드"],
   ["manual_praise", "가사 직접 입력"],
   ["score_db", "찬송가: 악보 로드"],
-  ["children_audio", "어린이: 음원 로드"],
+  ["children_audio", "어린이: 음원 불러오기"],
   ["audio_praise", "음원·가사"],
 ];
 const WORSHIP_DB_ELEMENT_INPUT_MODES = new Set([
@@ -18289,6 +18289,9 @@ function normalizeRelationalVersion(row, index) {
   return {
     id: row.id,
     _worshipVersionPersisted: true,
+    audio_set: row.audio_set || null,
+    _audioSetSupported: Object.prototype.hasOwnProperty.call(row, "audio_set"),
+    lyric_signature: row.lyric_signature || null,
     version_order: Number(row.version_order) || index + 1,
     name: normalizeGeneratedVersionName(row.curated_version_name || row.version_label || `Version ${index + 1}`),
     curated_version_name: row.curated_version_name || null,
@@ -26192,7 +26195,7 @@ function renderServiceItemMemoSummary({ parsed, preparation, elementType, autoAd
     lyrics_db: "가사 로드",
     audio_praise: "음원·가사",
     manual_praise: "가사 직접 입력",
-    children_audio: "어린이: 음원 로드",
+    children_audio: "어린이: 음원 불러오기",
   }[inputMode] || "";
   const chips = [];
   cleanList([
@@ -30646,7 +30649,8 @@ function renderPresenterBoardItemAudioControls(serviceId, context = {}, options 
         <audio controls preload="metadata" src="${escapeAttr(source)}"></audio>
         <strong title="${escapeAttr(label)}">${escapeHtml(label)}</strong>` : ""}
       <div class="svc-board-subgroup-audio-actions">
-        ${globalThis.MindexSongTiming?.controls(serviceId, entries, { audioSource: source }) || ""}
+        ${!source && servicePraiseInputMode(context.item) === "children_audio" ? `<button class="btn secondary" type="button" data-song-timing-open data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(context.item.id)}">버전 음원·타이밍</button>` : ""}
+        ${source ? globalThis.MindexSongTiming?.controls(serviceId, entries, { audioSource: source }) || "" : ""}
         ${audioAsset.url ? `<button class="icon-btn" type="button" data-service-item-audio-clear
             data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${context.index}"
           aria-label="음원 연결 해제" title="음원 연결 해제"><i data-lucide="x"></i></button>` : ""}
@@ -32505,6 +32509,7 @@ function presenterSlideBuildSourceSignature(serviceId) {
         song?._relationalVersionsLoaded === true,
         song?.versions?.length || 0,
         version?.updated_at || "",
+        servicePraiseInputMode(item) === "children_audio" ? compactTextSignature(JSON.stringify(version?.audio_set || null)) : "",
         (version?.forms || []).map((form) => [
           form.id || "",
           form.label || form.name || form.type || "",

@@ -926,3 +926,28 @@ path. It is not a Praise form or a reusable template slot. Temporary parent IDs
 are remapped along with newly emitted element IDs. Missing/stale anchors retain
 content but require an explicit location selection before output. See the
 2026-10-14 progression decision in `worship-presenter-decisions.md`.
+
+
+## Children version audio attachment - 2026-10-17
+
+Current contract supersedes the earlier song-memo storage design.
+mindex_song_versions.audio_set is optional JSONB, applied in production with
+explicit user approval. Version1 contains audioUrl/audioName/audioFingerprint
+(SHA-256)/duration, starts/enabled, lyricsFingerprint/sourceSignature and forms.
+Only children_audio reads this attachment. Worship-owned config.audioTiming is
+unchanged. Writes compare version ID, lyric_signature and prior audio_set.
+
+Audio-specific form fragments may carry audioSourceRange=[start,end] into the
+NFC/lowercase letter-and-number-only concatenation of version form lyrics.
+Every fragment must match its range; sourceSignature guards the complete
+original forms. Repeated ranges and blank interlude/outro forms are allowed.
+Ordinary lyric forms are not rewritten to fit audio page boundaries. Legacy
+song-memo childrenAudioSets remain read-only fallback. Live-output playback
+gates and explicit Audio.load() replay recovery are preserved.
+
+38 songs:28 existing versions and10 added children audio versions, including
+one new song (승리하신 예수). 문들아 머리 들어라 maps to the existing HisShow song.
+Existing28 versions/forms are unchanged apart from audio_set, verified through
+production REST readback.30 automatic sets,8 disabled review drafts.
+All38 Storage files re-downloaded and SHA-256 matched (229,417,423bytes).
+Audio, lyrics, original snapshots and operational SQL stay outside public Git.

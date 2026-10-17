@@ -16,6 +16,8 @@ NODE_TESTS = (
     "test_worship_deleted_slot.cjs",
     "test_setlist_period.cjs",
     "test_song_timing.cjs",
+    "test_children_library.cjs",
+    "test_children_version_audio.cjs",
     "test_scripture_preload_parallel.cjs",
     "test_worship_unchanged_save.mjs",
     "test_worship_read_parallel.cjs",
