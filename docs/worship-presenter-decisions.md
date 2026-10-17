@@ -2967,3 +2967,23 @@ Loading and warning messages remain in flow and wrap in narrow controls.
 - 예배 매뉴얼의 상위 표기 `금요예배(기획예배)`와 금요예배 분류는 그대로 유지한다.
 - 넷째 주 안내는 `금요기도회 또는 구역연합예배`로 바꿔 금요기도회를 먼저 안내한다.
 - 이번 변경은 매뉴얼 문구에 한한다. 저장된 예배와 자동 생성 규칙은 변경하지 않는다.
+
+## Entry latency and background rendering · 2026-10-17
+
+Native fresh-profile read-only measurements separated shell, current home data,
+board insertion and font/visible-fit readiness. WebKit fetched the 2 MB full UI
+font for a common-character service despite segmented fonts; its full face had
+an overlapping unrestricted unicode range. The fallback now covers exactly
+source cmap minus common glyphs. Full originals and all supported glyphs remain;
+unsupported characters go directly to the existing system fallback. The old
+rare-character test used a Han character absent from the source font; it now
+checks both that unsupported character (no wasted request) and supported rare
+Hangul (full fallback requested). Common glyphs/metrics are unchanged.
+
+`loadWorshipData` retains the early list/loading render; its caller performs the
+single final render after restoration, error/dirty flag cleanup and fingerprints.
+It no longer builds the complete home cards immediately before that final render.
+Background scripture-book lookup updates data/UI persistence but only rebuilds
+the Scripture module. Service reference callers keep their existing resolved-slide
+refresh paths; a lookup must not replace the worship editor DOM or its input draft.
+No query caching, stored content, save algorithm or output sizing rule changes.

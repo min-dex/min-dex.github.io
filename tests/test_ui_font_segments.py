@@ -1,6 +1,7 @@
 """Every segmented glyph preserves source outlines/metrics at variable weights."""
 from pathlib import Path
-import hashlib,json
+import hashlib,json,re
+from bisect import bisect_right
 from fontTools.ttLib import TTFont
 from fontTools.pens.recordingPen import DecomposingRecordingPen
 ROOT=Path(__file__).resolve().parents[1]
@@ -22,5 +23,14 @@ for part in manifest['segments']:
    assert pa.value==pb.value,(cp,weight,'outline');checks+=1
 assert seen==set(original),'characters dropped or added'
 assert 'PretendardVariable.woff2' in css,'rare character fallback lost'
+full=set(TTFont(D/'PretendardVariable.woff2').getBestCmap())
+block=next(b for b in re.findall(r'@font-face \{[^}]+\}',css) if '/PretendardVariable.woff2' in b)
+intervals=re.search(r'unicode-range: ([^;]+);',block)[1].split(',')
+bounds=[]
+for interval in intervals:
+ parts=interval.strip()[2:].split('-');bounds.append((int(parts[0],16),int(parts[-1],16)))
+starts=[a for a,b in bounds]
+fallback={cp for cp in full if (index:=bisect_right(starts,cp)-1)>=0 and cp<=bounds[index][1]}
+assert fallback==full-seen,'fallback overlaps common faces or omits source glyphs'
 assert 'MindexSans-Common.woff2' not in css,'monolith still loaded'
 print('PASS',checks,'glyph/weight outline and advance comparisons; exact coverage, hashes, variable axes and fallback')

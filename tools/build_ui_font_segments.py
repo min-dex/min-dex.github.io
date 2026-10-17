@@ -1,4 +1,4 @@
-"""Reproduce immutable UI font segments; existing full-font fallback is untouched."""
+"""Reproduce immutable UI font segments; full-font glyphs remain intact with disjoint fallback coverage."""
 from pathlib import Path
 from collections import Counter
 import hashlib,json,re
@@ -32,6 +32,12 @@ def main():
   css.append('@font-face {\n  font-family: "Pretendard Variable";\n  src: url("./vendor/fonts/pretendard/'+name+'") format("woff2-variations");\n  font-weight: 45 930;\n  font-style: normal;\n  font-display: swap;\n  unicode-range: '+ranges(points)+';\n}')
  MANIFEST.write_text(json.dumps({'source_sha256':hashlib.sha256(SOURCE.read_bytes()).hexdigest(),'segments':records},ensure_ascii=False,indent=2)+'\n')
  styles=ROOT/'styles.css';s=styles.read_text()
+ full=TTFont(DEST/'PretendardVariable.woff2').getBestCmap()
+ fallback=ranges(set(full)-set(cmap))
+ first=re.search(r'@font-face \{[^}]+\}',s)
+ block=re.sub(r'\n  unicode-range: [^;]+;', '', first[0])
+ block=block.replace('\n}', '\n  unicode-range: '+fallback+';\n}')
+ s=s[:first.start()]+block+s[first.end():]
  start=s.index('@font-face {',s.index('@font-face {')+1);end=s.index('@font-face {\n  font-family: "Mindex Wordmark";',start)
  s=s[:start]+'\n'.join(css)+'\n'+s[end:];s=s.replace('src: url("./vendor/fonts/pretendard/MindexSans-Common.woff2")','src: url("./vendor/fonts/pretendard/'+records[0]['file']+'")');styles.write_text(s)
  p=ROOT/'index.html';s=p.read_text();s=re.sub(r'href="\./vendor/fonts/pretendard/(?:MindexSans-Common|MindexSans-[a-f0-9]{16})\.woff2" as="font"','href="./vendor/fonts/pretendard/'+records[0]['file']+'" as="font"',s);p.write_text(s)

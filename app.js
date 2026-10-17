@@ -3663,7 +3663,9 @@ async function loadScriptureBooksOnce({ silent = false } = {}) {
     }
     if(state.bibleTranslations.length)clearSelectedBookOutsideFilter();
     persistUiState();
-    render();
+    // Background reference lookup does not own the worship editor/board DOM.
+    // Its callers refresh resolved scripture slides through the normal path.
+    if (state.module === "scripture") render();
     if (state.selectedBookCode && state.bibleTranslations.length) await loadBibleBookVerses({ silent: true });
   } catch (error) {
     state.scriptureBooks = [];
@@ -4611,7 +4613,10 @@ async function loadWorshipData() {
   state.serviceItemVersionSupported = true;
   state.serviceItemMemoSupported = true;
 
-  if (!prioritizedPresenterSongLoad) render();
+  // loadServiceDataOnce renders the completed rows after restoring controller
+  // state and clearing load flags. Do not rebuild all home cards immediately
+  // before that same final render; other modules keep their intermediate view.
+  if (!prioritizedPresenterSongLoad && state.module !== "home") render();
   void hydrateSupplementalWorshipDataAfterInitialRender().catch((error) => {
     console.warn("Could not hydrate supplemental worship data.", error);
   });

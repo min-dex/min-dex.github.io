@@ -53,6 +53,18 @@ try:
     check(JSON.stringify(grouped[archive.id])===JSON.stringify(expectedSaved),'grouped saved rows dropped');
     check(Object.keys(grouped).length===1,'group scope ignored');
     check(Object.keys(projectGroupedWorshipItemsFromTemplates({[archive.id]:[saved]},['current'])).length===2,'grouped IDs omitted');
+    // One list/loading render and one final current-data render, never two
+    // complete home-card rebuilds for the same load completion.
+    const rendered=[];let restored=false;
+    requireClient=()=>true;
+    restorePresenterControllerSession=()=>{restored=true};
+    render=()=>rendered.push({loaded:state.loadedWorshipServiceIds.has('current'),restored,error:state.serviceError,dirty:state.dirty.service});
+    state.dirty.service=true;state.serviceError='old error';
+    await loadServiceData({silent:true});
+    check(rendered.length===2,'duplicate completion renders '+JSON.stringify(rendered));
+    check(!rendered[0].loaded,'list loading render lost');
+    check(rendered[1].loaded&&rendered[1].restored&&!rendered[1].error&&!rendered[1].dirty,'final render before restored/current state');
+    check(serviceDataLoadPromise===null,'load lock not released');
     return {archives:200,initialProjections:1,lazyItems:actual.length};
    }''')
    print('PASS',engine,result,'version identity, lazy template equality, grouped saved-row preservation',flush=True)

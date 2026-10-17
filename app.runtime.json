@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261017-compact-runtime-fonts",
+  "version": "20261017-entry-font-scope",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "2df5acc57866e19223dd82e2cc83f0f03274aaf5681607f99ed8552a2a584454",
-  "runtime_sha256": "443daf780833a9534a2c8ce2aef1fb50b85bf8ead466692657acba08e2345f47",
-  "source_bytes": 1461374,
-  "runtime_bytes": 1034805,
-  "source_gzip": 325373,
-  "runtime_gzip": 255717
+  "source_sha256": "9ece0cc406046c0729b2fffdb1f12740af8b3648e59444cf9ea495a8c98b0545",
+  "runtime_sha256": "5235a7f44818a87c735a77f0ffb552c7124dd747e0993d39988fdb9aa3e3a565",
+  "source_bytes": 1461828,
+  "runtime_bytes": 1034858,
+  "source_gzip": 325569,
+  "runtime_gzip": 255728
 }
