@@ -544,3 +544,8 @@ only during that update, then restore normal hover/disclosure transitions before
 returning. Do not animate opacity or replace editor nodes. Refresh only the theme
 button icon; keep other icons, focused fields, selection, scroll and textarea
 geometry intact. Presenter output documents retain their own transition rules.
+
+Theme suppression must resolve descendant computed styles before being removed.
+A body-only style flush can leave nested presenter controls transitioning later.
+Read-only real-tab DOM replay covers Scripture, service board, presenter inputs
+and bulletin editor/preview in Chromium and WebKit; no service data is saved.
