@@ -7560,7 +7560,7 @@ body.is-chromium .svc-slide-thumb-wrap.active:has(.svc-slide-thumb:focus-visible
   padding: 0;
   box-shadow: none;
   filter: brightness(1);
-  transform: translateZ(0);
+  transform: none;
   transition: filter .16s ease, outline-color .16s ease, transform .08s ease;
 }
 .svc-slide-thumb-frame::after {
@@ -7743,6 +7743,14 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
   transform-style: preserve-3d;
   will-change: transform;
 }
+/* Static thumbnails do not need a persistent full-HD GPU layer each. Keep the
+   live preview/output compositor policy separate from the scrolling board. */
+.svc-slide-thumb .svc-slide-mini-canvas {
+  will-change: auto;
+  transform-style: flat;
+  backface-visibility: visible;
+}
+
 .svc-slide-board--clean .svc-slide-thumb-frame {
   background: #050807;
 }

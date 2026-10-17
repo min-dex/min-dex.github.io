@@ -12,17 +12,26 @@ try:
   for engine in ('chromium','webkit'):
    browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
    page=browser.new_page(viewport={'width':1280,'height':800})
+   # Match the offline smoke server on a public URL too. A synthetic board
+   # must not also exercise production-auth/monitor retries from embedded config.
+   page.add_init_script("Object.defineProperty(window,'MINDEX_SUPABASE',{get:()=>({}),set:()=>{}})")
    page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(url.rsplit('/',1)[0]+'/') else r.abort())
    page.goto(url,wait_until='domcontentloaded')
    page.wait_for_function("typeof fitPresenterPreviewText==='function'&&!document.body.classList.contains('ui-booting')")
    page.evaluate('document.fonts.ready')
-   page.evaluate('''() => {
+   page.evaluate('''async () => {
     state.module='presenter'; document.body.dataset.module='presenter';
     const service={id:'budget-fixture',type_id:'young-adult'};state.services=[service];
     refs.detailPane.style.cssText='position:fixed;inset:60px auto 0 0;width:800px;overflow:auto';
     refs.detailPane.innerHTML='<div class="svc-presenter-board-column"><div class="svc-slide-board"><div class="svc-board-section"><div class="svc-board-subgroups"><div class="svc-board-subgroup">'+Array.from({length:180},(_,i)=>
       `<div class="svc-slide-thumb" data-fit-index="${i}" style="position:relative;width:300px;height:169px"><div class="svc-slide-thumb-frame" style="--presenter-preview-scale:.15625">${renderPresenterSlideMiniPreview({id:'fit-'+i,type:'lyrics',elementType:'praise',layout:'lower_bar_text',text:i+' 아주 긴 가사도 끝까지 보여야 합니다 '.repeat(5)+'\\n둘째 줄도 온전히 보여야 합니다'},service.id)}</div></div>`).join('')+'</div></div></div></div></div>';
     refs.detailPane.scrollTop=refs.detailPane.scrollHeight;
+    // The fixture introduces presenter fonts absent from the initial home UI.
+    // Wait for those real metrics before measuring a complete scroll traversal;
+    // font invalidation is exercised separately below with the same priorities.
+    refs.detailPane.getBoundingClientRect();
+    await document.fonts.ready;
+    await new Promise(requestAnimationFrame);
     window.fitOrder=[];window.gaps=[];window.lastTick=performance.now();
     window.tick=setInterval(()=>{const now=performance.now();gaps.push(now-lastTick);lastTick=now},20);
     const original=fitPresenterPreviewCanvas;

@@ -2312,7 +2312,11 @@ automatically; the user must select their song once.
 - Give the five nested single-column board grids explicit minmax(0, 1fr)
   columns to avoid repeated intrinsic-width layout. Fixed 1920x1080 miniature
   canvases contain their layout/size/paint. Keep existing gaps and narrow-window
-  layout. No content-visibility gating or hidden placeholder is introduced.
+  layout. Static board thumbnails no longer force a translateZ/will-change 3D
+  layer per full-HD canvas; live preview/output compositor rules are unchanged.
+  This removes a separately reproduced WebKit paint stall (about 1 s while fit
+  callbacks stayed below 17 ms). No content-visibility gating or hidden
+  placeholder is introduced.
 - New 180-preview Chromium/WebKit regression uses the nested board structure:
   visible-first ordering, dormant offscreen queue, rapid scrolling, input timer
   gaps below 500 ms, exact original font sizes, no clipping, font invalidation
@@ -2329,4 +2333,10 @@ automatically; the user must select their song once.
   settings were changed; physical mixer output is not covered by browser tests.
   Installed Chrome repeated open/scroll checks passed three runs (2.1–3.8 s
   ready time, maximum long task 286–785 ms), with no service errors or horizontal
-  overflow. Public deployment and its checks must be confirmed separately.
+  overflow. Initial release a0a235fa passed Pages39009837792 and Linux Cloud
+  checks39009837995; public JS/CSS hashes matched. Its installed Chrome repeated
+  read-only open/scroll checks took 1.8–2.8 s (maximum long task 170–254 ms).
+  The public-URL synthetic fixture disables DB configuration just like the local
+  offline server and awaits its introduced presenter fonts before traversal.
+  It retains the separate font-invalidation test and all 500 ms/clipping checks.
+  The board compositor follow-up requires its own deployment confirmation.
