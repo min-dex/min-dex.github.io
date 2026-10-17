@@ -49,6 +49,7 @@ try:
    page.evaluate(r'''async ids=>{const T=MindexSongTiming,s=T.pagesFor(presenterSlidesForService(ids.serviceId));const audio=await (await fetch('/clock.wav')).blob();const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await audio.arrayBuffer())),b=>b.toString(16).padStart(2,'0')).join('');await T.save({key:s[0].songTimingKey,audio,audioName:'clock.wav',audioFingerprint:hash,duration:20,lyricsFingerprint:T.fingerprint(s),starts:[2,6,10],enabled:true},s)}''',ids)
    d.locator('[data-timing-close]').click()
    ids=load()
+   page.evaluate('isPresenterOutputWindowOpen=()=>true')
    page.evaluate('x=>MindexSongTiming.play(x.serviceId,x.elementId)',ids)
    page.wait_for_function('state.serviceMusic.playing && state.serviceMusic.audio.currentTime>0')
    page.evaluate('state.serviceMusic.audio.currentTime=9.1')

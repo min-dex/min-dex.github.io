@@ -26,6 +26,7 @@ SMOKES = (
     "smoke_startup_bootstrap.py",
     "smoke_atomic_save_runtime.py",
     "smoke_worship_audio_bundle.py",
+    "smoke_children_audio_db.py",
     "smoke_reference_batch.py",
     "smoke_theme_bootstrap.py",
     "smoke_scripture_aliases.py",

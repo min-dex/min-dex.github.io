@@ -94,6 +94,7 @@ try:
     if(MindexSongTiming.pagesFor(presenterSlidesForService(sid)).some(s=>s.syncTimeline))throw Error('changed lyrics inherited timing');item.memo=original;
     m.slides=['첫 가사','[INT]','마지막 가사'];m.audioAsset.url+='?changed';item.memo=serializeServiceItemMemo(m);
     if(MindexSongTiming.pagesFor(presenterSlidesForService(sid)).some(s=>s.syncTimeline))throw Error('changed audio inherited timing');item.memo=original;
+    isPresenterOutputWindowOpen=()=>true;
     await MindexSongTiming.play(sid,item.id);
    }''',saved)
    page.wait_for_function('state.serviceMusic.playing')

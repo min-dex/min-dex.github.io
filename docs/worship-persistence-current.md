@@ -55,6 +55,15 @@ immutable. An uncertain commit must not delete audio that may already be referen
 the draft retains its upload URL for retry. Remote timing takes precedence over
 legacy local cache; changed lyrics/photos/audio invalidate playback cues.
 
+## Children song/version audio sets (2026-10-17)
+
+Children audio remains a separate DB-owned mode. The existing song memo stores
+`childrenAudioSets[versionId]`: immutable Storage audio URL/hash/duration, designated
+forms, source/page fingerprints, cues and enabled state. New browser contexts read
+the set with the song; local/shared bundles are migration inputs only. Normal song
+serialization retains sets, and memo CAS rejects concurrent replacement. This
+does not convert children items to worship-owned `audio_praise`.
+
 ## Historical Pre-Cutover Audit
 
 The remainder records the September 11-16 non-atomic implementation. Its gaps

@@ -3097,3 +3097,26 @@ native title hints. Reference hints retain the original URL, including scheme
 and query; visible short URLs remain unchanged. Layout, click actions, output,
 print and operational data remain unchanged. Offline Chromium/WebKit hover and
 long quoted-text checks cover the actual renderers.
+
+## 2026-10-17 — 어린이 DB 음원과 예배 음원의 소유권 분리
+
+앞의 ‘기존 children_audio는 열기 용도만 유지’ 결정은 사용자 정정으로 폐기한다.
+`어린이: 음원 로드`는 새 항목에도 계속 제공한다. 어린이 곡·버전은 DB에
+음원 주소·지정 폼·가사 fingerprint·타이밍 세트를 소유하고 여러 예배에서 사용한다.
+`음원·가사`는 해당 예배 항목 소유이며 찬양 DB를 쓰지 않는다. 양쪽은 cue 검증과
+재생 엔진만 공유한다. 음원 파일은 Storage, 연결과 타이밍은 기존 곡 memo의
+`childrenAudioSets[versionId]`에 저장하므로 스키마 변경은 없다. 새 저장은 곡 DB가
+우선이고 기존 로컬/공유 파일은 이관 호환용이다. 일반 가사 로드는 자동 넘김을
+활성화하지 않는다. 가사/폼 변경은 기존 세트를 무효화한다.
+
+‘자동 넘김 재생’은 해당 예배가 송출 중일 때 표시하며 실행 함수도 같은 조건을
+확인한다. 송출 종료/연결 종료 시 동기화 음원은 멈추며 일반 배경음 재생은 보존한다.
+준비 중에는 음원 미리 듣기와 타이밍 편집을 제공한다. 곡 메모의
+비교 후 저장(CAS)은 동시 저장의 덮어쓰기를 막는다. 업로드 후 저장 실패 시
+업로드 URL을 유지해 재시도하며 불확실한 업로드를 즉시 삭제하지 않는다.
+
+검증: Chromium/WebKit에서 어린이 DB 저장 실패/재시도, 기존 메모·다른 버전 보존,
+새 브라우저 저장소 복원, 일반 가사와 예배 소유 저장 격리, 송출 상태별 버튼·재생
+차단 및 송출 종료/창 닫기 정지 확인. 로컬/공유 세트 이관 호환과 직접 가사·사진
+싱킹 회귀 통과. Cloud 로컬 baseline 13 unit + 13 smoke 통과. 모든 DB 쓰기는
+격리 double이며 운영 어린이 곡 자료를 새로 만들거나 일괄 이관하지 않았다.

@@ -8,7 +8,7 @@ from smoke_app import start_local_app_server, sync_playwright, launch_chromium
 fixture = r'''async () => {
  await MindexSongTiming.ready;
  // Output-only test shell has no controller panel or external display.
- renderPresenterControlState=()=>{};publishPresenterState=()=>{};
+ renderPresenterControlState=()=>{};publishPresenterState=()=>{};isPresenterOutputWindowOpen=()=>true;
  const service={id:'timing-fixture',type_id:'wednesday',date:'2026-10-14',title:'Timing fixture'};
  const song={id:'timing-song',title:'동기화 테스트',_relationalVersionsLoaded:true,versions:[{id:'timing-version',name:'Default',_worshipVersionPersisted:true,is_primary:true,praise_types:['children'],forms:[
  {id:'verse',part_type:'Verse',part_number:1,lyrics:'첫째 줄\n둘째 줄',sort_order:1},
@@ -26,6 +26,18 @@ fixture = r'''async () => {
  if(!slides.some(s=>s.songTimingKey))throw Error('No timing-enabled lyrics: '+JSON.stringify(slides.map(s=>[s.type,s.text])));
  return slides.filter(s=>s.elementId===item.id).map(s=>({type:s.type,text:s.text}));
 }'''
+def save_legacy(page):
+ page.evaluate(r'''async()=>{
+  const T=MindexSongTiming,song=state.songs[0],version=song.versions[0],item=getServiceItems('timing-fixture').find(i=>i.id==='timing-item');
+  const slides=T.pagesFor(presenterSlidesForService('timing-fixture').filter(s=>s.elementId===item.id));
+  const d=document.querySelector('[data-song-timing-dialog]'),audio=d.querySelector('[data-timing-file]').files[0]||T.childProfile(song,version)?.audio;
+  const profile={key:T.keyFor(song.id,version.id),audio,audioName:audio.name||'fixture.wav',duration:Number.isFinite(d.querySelector('audio').duration)?d.querySelector('audio').duration:T.childProfile(song,version)?.duration,
+   audioFingerprint:Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await audio.arrayBuffer())),b=>b.toString(16).padStart(2,'0')).join(''),
+   lyricsFingerprint:T.fingerprint(slides),sourceSignature:T.sourceSignature(version),forms:version.forms,
+   starts:[...d.querySelectorAll('[data-timing-start]')].map(i=>i.value===''?null:Number(i.value)),enabled:d.querySelector('[data-timing-enabled]').checked};
+  try{await T.save(profile,slides);refreshPresenterForService('timing-fixture');d.querySelector('[data-timing-status]').textContent='로컬 저장했어요';}
+  catch(e){d.querySelector('[data-timing-status]').textContent=e.message;}
+ }''')
 remote_url=os.environ.get('MINDEX_TIMING_URL','').rstrip('/')
 server,url=(None,remote_url+'/') if remote_url else start_local_app_server()
 buffer=io.BytesIO()
@@ -59,7 +71,7 @@ try:
     dialog.locator('[data-timing-stamp=\"0\"]').click()
     assert float(inputs.nth(0).input_value())==2
     inputs.nth(1).fill('8')
-    dialog.locator('[data-timing-save]').click()
+    save_legacy(page)
     page.wait_for_function("!document.querySelector('[data-timing-save]').disabled")
     print('save status',dialog.locator('[data-timing-status]').text_content(),flush=True)
     page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('저장했어요')")
@@ -67,7 +79,7 @@ try:
     dialog.locator('[data-timing-close]').click()
     print(engine,page.evaluate(r'''() => {
       const check=(ok,msg)=>{if(!ok)throw Error(msg)};
-      check(JSON.stringify(SERVICE_PRAISE_INPUT_MODES.map(x=>x[1]))===JSON.stringify(['가사 로드','가사 직접 입력','찬송가: 악보 로드','어린이: 음원 로드']),'four labels/order');
+      check(JSON.stringify(SERVICE_PRAISE_INPUT_MODES.map(x=>x[1]))===JSON.stringify(['가사 로드','가사 직접 입력','찬송가: 악보 로드','어린이: 음원 로드','음원·가사']),'five labels/order');
       check(servicePraiseInputMode({label:'찬양 1'})==='lyrics_db','default mode');
       const service=state.services[0],song=state.songs[0];
       let item=getServiceItems(service.id).find(x=>x.id==='timing-item');
@@ -92,7 +104,7 @@ try:
       check(reopened&&servicePraiseInputMode(reopened,parseServiceItemMemo(reopened.memo),service)==='children_audio','mode lost on persistence round trip '+JSON.stringify({rows:rows.elements,reopened}));
       check(reopened.version_id===item.version_id,'version link lost on persistence round trip');
       state.serviceItems[service.id]=originalItems;
-      return 'PASS four modes/default, children-only versions, mode switch identity, designated form and persistence round trip';
+      return 'PASS five modes/default, children-only versions, mode switch identity, designated form and persistence round trip';
     }'''))
     # Real controller audio/timeupdate path, before deterministic clock boundary checks.
     page.evaluate("""() => {
@@ -142,16 +154,16 @@ try:
     assert page.evaluate("presenterSlidesForService('timing-fixture').some(s=>s.syncTimeline?.localTiming)")
     page.evaluate("MindexSongTiming.open('timing-fixture','timing-item')")
     assert page.locator('[data-timing-start="1"]').input_value()=='8'
-    page.locator('[data-timing-enabled]').uncheck();page.locator('[data-timing-save]').click()
+    page.locator('[data-timing-enabled]').uncheck();save_legacy(page)
     page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('저장했어요')")
     assert not page.evaluate("presenterSlidesForService('timing-fixture').some(s=>s.syncTimeline?.localTiming)")
-    page.locator('[data-timing-enabled]').check();page.locator('[data-timing-save]').click()
+    page.locator('[data-timing-enabled]').check();save_legacy(page)
     page.wait_for_function("presenterSlidesForService('timing-fixture').some(s=>s.syncTimeline?.localTiming)")
     # Replacement bytes invalidate all recorded timestamps; cancel keeps persisted data.
     replacement=bytearray(buffer.getvalue());replacement[-1]=1
     page.locator('[data-timing-file]').set_input_files({'name':'changed.wav','mimeType':'audio/wav','buffer':bytes(replacement)})
     page.wait_for_function("document.querySelector('[data-timing-start]').value===''")
-    page.locator('[data-timing-save]').click()
+    save_legacy(page)
     page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('시각')")
     page.locator('[data-timing-close]').click()
     assert page.evaluate("presenterSlidesForService('timing-fixture').some(s=>s.syncTimeline?.localTiming)")
