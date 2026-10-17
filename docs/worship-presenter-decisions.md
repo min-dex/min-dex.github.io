@@ -2249,3 +2249,35 @@ at desktop and narrow widths, including draft/caret/scroll retention and preview
 placement. Fixed-label preparation and live-controller stability pass both engines.
 Local Cloud baseline passes 7 unit + 5 smoke entry points; this is not Cloud
 execution or deployment. Existing production worship records are untouched.
+
+
+## Worship-specific recorded lyric/photo timing (2026-10-17)
+
+- Non-children `lyrics_db` songs expose 음원 동기화 for their final rendered
+  sequence, after form-background photos are composed. Key profiles by service,
+  element, song and version; never inherit another service's timings. Children's
+  designated-set behavior and one-second lyric lead remain unchanged.
+- Service timings use the recorded time exactly, for lyrics and photos alike.
+  The editor shows photos and form labels, supports sequential or individual
+  stamps, manual seconds, an existing linked audio download or a local file.
+  Save uses the existing browser-local IndexedDB store. Optional immutable shared
+  bundles use the existing explicit share/load flow for the same service/element.
+  No schema, worship/song record or automatic public upload changes.
+- Fingerprint the final visible text/page/form/photo order plus linked audio URL;
+  replaced bytes reset stamps. Stale/disabled profiles cannot activate an older
+  timeline. Excluded/hidden photos cannot be timed. A matching recorded photo
+  timeline may cross its own photo boundaries; unrecorded media still stops the
+  old lyric timeline as before. This supersedes the blanket manual-photo-only
+  boundary for explicitly recorded service profiles only.
+- 동기화 처음부터 재생 starts the controller's existing audio engine, never a
+  second player. Existing active music and another service's live output block
+  it. Manual navigation pauses synchronization; global music controls resume or
+  stop. The same panel exposes audio-position seeking for timing profiles.
+  Earlier manually chosen audio must not override an active presenter source.
+- Offline Chromium/WebKit validation covers sequential recording, linked audio,
+  lyric/photo playback, forward/backward UI seek, exact cue boundaries, paused
+  clock, manual navigation, blackout/live-scripture guards, changed photo order
+  and linked audio, cross-service isolation, reload, disable, and zero DB writes.
+  The same fixture also decoded the actual linked Cadaros MP3 (264.216 seconds);
+  its fixture timestamps are test data, NOT calibrated production cues.
+  Existing timing/sharing, photo placement/output and global playback checks pass.

@@ -28623,6 +28623,7 @@ function renderGlobalPlaybackControls() {
         <button type="button" class="icon-btn" data-global-playback-action="toggle" title="${toggleLabel}" aria-label="${toggleLabel}" aria-pressed="${Boolean(music.playing)}"><i data-lucide="${icon}"></i></button>
         <button type="button" class="btn secondary global-playback-stop" data-global-playback-action="stop" aria-label="음악 정지" ${music.pending || music.playing || music.audio?.currentTime ? "" : "disabled"}>음악 정지</button>
       </div>
+      ${globalThis.MindexSongTiming?.transport() || ""}
       <div class="svc-presenter-window-controls global-playback-settings">${renderPresenterScreenControl()}${renderPresenterAlwaysOnTopControl()}</div>
     </section>`;
   if (!available) root.querySelector(':popover-open')?.hidePopover();
@@ -28701,6 +28702,7 @@ function getServiceMusicAudio() {
       renderPresenterControlState();
     });
     audio.addEventListener("timeupdate", () => {
+      globalThis.MindexSongTiming?.updateTransport(audio);
       syncServiceMusicSyncedLyricsWithCurrentTime();
     });
     state.serviceMusic.audio = audio;
@@ -28876,7 +28878,7 @@ function runServiceMusicAction(action, binding = null) {
   }
   const manualSource = state.serviceMusic.mode === "manual"
     ? state.serviceMusic.sourceKey || state.serviceMusic.objectUrl
-    : state.serviceMusic.objectUrl;
+    : "";
   const presenterSource = state.serviceMusic.mode === "presenter-audio" ? state.serviceMusic.sourceKey : "";
   const source = boundSource || manualSource || presenterSource || context.source;
   const mode = boundSource || manualSource ? "manual" : "presenter-audio";
@@ -28956,10 +28958,12 @@ function presenterSyncedLyricsTargetForTime(slides = [], activeIndex = 0, curren
   if (!Number.isFinite(time) || time < 0) return null;
   // Inserted service media is an operator-controlled boundary. A song's audio
   // clock must not jump over it to a later lyric (or seek across it backwards).
-  const parentId = slides[activeIndex]?.elementId;
+  const parentId = slides[activeIndex]?.progressionParentId || slides[activeIndex]?.elementId;
   let segmentStart = -1, segmentEnd = slides.length;
   slides.forEach((slide, index) => {
     if (!slide.progressionParentId || slide.progressionParentId !== parentId || presenterSlideIsHidden(slide)) return;
+    const photoSync = presenterSyncTimelineForSlide(slide);
+    if (photoSync?.groupId === activeSync.groupId && photoSync.audioSrc === activeSync.audioSrc) return;
     if (index < activeIndex) segmentStart = index;
     else if (index > activeIndex && segmentEnd === slides.length) segmentEnd = index;
   });
@@ -32300,6 +32304,7 @@ function buildServicePresenterSlidesUncached(serviceId, options = {}) {
       .filter(Boolean);
     slides = insertPresenterProgressionMedia(slides, outputItems);
     slides = normalizePresenterSlidesForServiceOutput(slides, service);
+    slides = globalThis.MindexSongTiming?.decorateService(slides, outputItems, serviceId) || slides;
     if (!slides[0] || !isPresenterPreparationSlide(slides[0])) slides = [presenterReadySlide(service), ...slides];
     return withPresenterElementTrailingBlanks(slides, service);
   }

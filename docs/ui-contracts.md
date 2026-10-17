@@ -498,3 +498,10 @@ both service and presenter contexts; sidebar-only data-service-id cannot open
 a service from the detail pane. No production data, output or print changes.
 Offline smoke_empty_state_layout.py covers Chromium/WebKit, four viewport sizes,
 both themes, nested loading preservation and actual deferred button clicks.
+
+
+Worship lyric/photo timing uses the song's existing board controls and one
+dialog. Show form labels and photo thumbnails in ordered cue rows. Sequential
+recording follows the preview audio clock; individual timestamps remain editable.
+Start synchronized playback explicitly; pause/stop/seek stay in the existing
+송출·음악 panel. No new permanent sidebar or production timing auto-save.

@@ -4,9 +4,9 @@
   const profiles = new Map();
   let revision = 0;
   const keyFor = (songId, versionId) => JSON.stringify([String(songId || ''), String(versionId || '')]);
-  const pagesFor = slides => slides.filter(s => !s.autoTrailingBlank && (s.type === 'lyrics' || s.type === 'blank'));
-  const fingerprint = slides => JSON.stringify(pagesFor(slides).map(s => [s.type, String(s.text || '').normalize('NFC')]));
-  const noLead = slide => slide.type === 'blank' || /^[\s♪♫♬♩]*$/.test(slide.text || '');
+  const pagesFor = slides => slides.filter(s => !s.hiddenInPresentation && !s.autoTrailingBlank && (s.type === 'lyrics' || s.type === 'blank'));
+  const fingerprint = slides => JSON.stringify(pagesFor(slides).map(s => [s.type, String(s.text || '').normalize('NFC'), ...(s.serviceTimingPage ? [s.formKey || '', s.formBackgroundImage || '', s.serviceTimingAudioSource || ''] : [])]));
+  const noLead = slide => slide.serviceTimingPage || slide.type === 'blank' || /^[\s♪♫♬♩]*$/.test(slide.text || '');
   function validate(profile, slides) {
     const pages = pagesFor(slides);
     if (!pages.length || profile?.lyricsFingerprint !== fingerprint(slides)) return '가사·송폼·장 나눔이 바뀌었어요. 시각을 다시 맞춰 주세요.';
@@ -62,6 +62,44 @@
       if (timed) page++;
       return result;
     });
+  }
+  // Timing belongs to this worship occurrence, after photos and lyric pages are composed.
+  const serviceKeyFor = (serviceId, item, versionKey) => JSON.stringify(['service', serviceId, item.id, versionKey]);
+  const belongsTo = (slide, elementId) => (slide.progressionParentId || slide.elementId) === elementId;
+  function decorateService(slides, items, serviceId) {
+    let result = slides;
+    for (const item of items) {
+      if (servicePraiseInputMode(item) !== 'lyrics_db') continue;
+      const original = slides.find(s => belongsTo(s, item.id) && s.songTimingKey);
+      if (!original || original.songTimingEligible) continue;
+      const key = serviceKeyFor(serviceId, item, original.songTimingKey);
+      const linkedSource = normalizeServiceAudioAsset(parseServiceItemMemo(item.memo).audioAsset).url || '';
+      const group = slides.filter(s => belongsTo(s, item.id)).map(s => ({ ...s, serviceTimingPage: true, serviceTimingAudioSource: linkedSource }));
+      const pages = pagesFor(group);
+      if (!pages.length) continue;
+      const profile = profiles.get(key);
+      const valid = profile?.enabled && profile.url && !validate(profile, group);
+      let page = 0;
+      result = result.map(slide => {
+        if (!belongsTo(slide, item.id)) return slide;
+        const out = { ...slide, serviceTimingPage: true, serviceTimingAudioSource: linkedSource, songTimingKey: key,
+          songTimingElementId: item.id, songTimingEligible: !slide.hiddenInPresentation };
+        const timed = pagesFor([out]).length > 0;
+        if (profile) {
+          delete out.syncTimeline;
+          if (profile.enabled && !valid) out.warnings = [...(out.warnings || []), '음원 동기화 자료가 현재 가사·사진 순서와 달라요. 시각을 다시 확인하세요.'];
+        }
+        if (valid && (timed || slide.type === 'song-title')) out.syncTimeline = {
+          groupId: `${serviceId}:${item.id}:service-song-timing`, audioSrc: profile.url,
+          audioTitle: profile.audioName, page: timed ? page + 1 : 0,
+          start: timed ? profile.starts[page] : null, lead: 0, intro: !timed,
+          localTiming: true, serviceTiming: true,
+        };
+        if (timed) page++;
+        return out;
+      });
+    }
+    return result;
   }
   const dbPromise = typeof indexedDB === 'undefined' ? null : new Promise((resolve, reject) => {
     const request = indexedDB.open('mindex-song-timing-v1', 1);
@@ -183,25 +221,61 @@
   }
   function controls(serviceId, entries) {
     const seen = new Set();
-    return entries.filter(({ slide }) => slide.songTimingKey && slide.songTimingEligible && !seen.has(slide.elementId) && seen.add(slide.elementId))
-      .map(({ slide }) => `<button type="button" class="btn secondary" data-song-timing-open data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(slide.elementId)}">${escapeHtml(slide.elementTitle || slide.title || '찬양')} · 음원 동기화</button>`).join('');
+    return entries.filter(({ slide }) => slide.songTimingKey && slide.songTimingEligible && !seen.has(slide.songTimingElementId || slide.elementId) && seen.add(slide.songTimingElementId || slide.elementId))
+      .map(({ slide }) => `<button type="button" class="btn secondary" data-song-timing-open data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(slide.songTimingElementId || slide.elementId)}">${escapeHtml(slide.elementTitle || slide.title || '찬양')} · 음원 동기화</button>${slide.syncTimeline?.localTiming ? `<button type="button" class="btn secondary" data-song-timing-play data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(slide.songTimingElementId || slide.elementId)}">동기화 처음부터 재생</button>` : ''}`).join('');
+  }
+  function transport() {
+    const source = state.serviceMusic.sourceKey;
+    if (state.serviceMusic.mode !== 'presenter-audio' || ![...profiles.values()].some(p => p.url === source)) return '';
+    return `<label class="song-timing-seek">음원 위치 <input type="range" min="0" max="${Number(state.serviceMusic.audio?.duration) || 0}" step="0.1" value="${Number(state.serviceMusic.audio?.currentTime) || 0}" data-song-timing-seek data-source="${escapeAttr(source)}" aria-label="동기화 음원 위치"><span data-song-timing-clock></span></label>`;
+  }
+  function updateTransport(audio) {
+    const source = state.serviceMusic.sourceKey;
+    for (const input of document.querySelectorAll('[data-song-timing-seek]')) {
+      if (input.dataset.source !== source) continue;
+      input.max = Number.isFinite(audio.duration) ? audio.duration : 0;
+      if (document.activeElement !== input) input.value = audio.currentTime || 0;
+      const clock = seconds => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
+      input.parentElement.querySelector('[data-song-timing-clock]').textContent = `${clock(audio.currentTime || 0)} / ${clock(Number(input.max))}`;
+    }
+  }
+  function play(serviceId, elementId) {
+    if (state.serviceMusic.playing || state.serviceMusic.pending) {
+      showToast('재생 중인 음악을 일시정지한 뒤 시작해 주세요.', 'info'); return;
+    }
+    if (isPresenterOutputWindowOpen() && state.presenter.serviceId && state.presenter.serviceId !== serviceId) {
+      showToast('다른 예배가 송출 중입니다.', 'info'); return;
+    }
+    const slides = presenterSlidesForService(serviceId);
+    const index = slides.findIndex(s => belongsTo(s, elementId) && s.syncTimeline?.localTiming && !s.hiddenInPresentation);
+    if (index < 0) { showToast('현재 가사·사진 순서의 동기화를 먼저 저장해 주세요.', 'info'); return; }
+    runPresenterAction('jump', serviceId, {index, scroll:false});
+    const sync = state.presenter.slides[state.presenter.index]?.syncTimeline;
+    if (!sync?.localTiming) return;
+    const audio = getServiceMusicAudio();
+    setServiceMusicSource(audio, sync.audioSrc, 'presenter-audio', {loop:false, repeatAllowed:false}, sync.audioTitle);
+    audio.currentTime = 0;
+    state.serviceMusic.repeat = false;
+    return runServiceMusicAction('toggle');
   }
   async function open(serviceId, elementId) {
     await ready;
     if (loadError) { showToast('동기화 저장소를 열지 못했습니다. ' + loadError.message, 'error'); return; }
     if (document.querySelector('[data-song-timing-dialog]')) return;
-    const all = presenterSlidesForService(serviceId).filter(s => s.elementId === elementId);
+    const all = presenterSlidesForService(serviceId).filter(s => belongsTo(s, elementId));
     const slides = pagesFor(all);
     const key = all.find(s => s.songTimingKey)?.songTimingKey;
-    if (!key || !slides.length) { showToast('먼저 어린이 곡·버전과 가사 로드를 선택해 주세요.', 'error'); return; }
-    stopServiceMusicPlayback({ render: false });
+    if (!key || !slides.length) { showToast('먼저 곡·버전과 가사 로드를 선택해 주세요.', 'error'); return; }
+    if (state.serviceMusic.playing || state.serviceMusic.pending) { showToast('음악을 일시정지한 뒤 동기화를 편집해 주세요.', 'info'); return; }
     const item = getServiceItems(serviceId).find(i => i.id === elementId);
     const service = state.services.find(s => s.id === serviceId);
     const song = serviceItemLinkedSong(item);
     const version = getPresenterServiceItemVersion(song, item, service);
-    if (!isChildrenVersion(song, version)) { showToast('어린이 유형의 버전을 선택해 주세요.', 'error'); return; }
+    const serviceTiming = all.some(s => s.serviceTimingPage);
+    if (!serviceTiming && !isChildrenVersion(song, version)) { showToast('어린이 유형의 버전을 선택해 주세요.', 'error'); return; }
     const setForms = formsFor(item, song, version, presenterFormPlanForServiceItem(version, item, song).forms);
     const buildSetSlides = forms => presenterLyricsSlidesForServiceItem({item, section: {}, index: 0, song, version, displayText: song.title, label: item.label, forms, formWarnings: []});
+    const linkedAudio = normalizeServiceAudioAsset(parseServiceItemMemo(item.memo).audioAsset);
     const old = profiles.get(key);
     const fresh = Array.isArray(old?.starts) && old?.lyricsFingerprint === fingerprint(slides);
     let draft = { key, audio: old?.audio, audioName: old?.audioName || '', audioFingerprint: old?.audioFingerprint || '',
@@ -212,13 +286,15 @@
     const dialog = document.createElement('dialog');
     dialog.className = 'song-timing-dialog'; dialog.dataset.songTimingDialog = '';
     dialog.setAttribute('aria-labelledby', 'song-timing-title');
-    dialog.innerHTML = `<h2 id="song-timing-title">어린이 음원 세트</h2>
+    dialog.innerHTML = `<h2 id="song-timing-title">${serviceTiming ? '가사·사진 음원 동기화' : '어린이 음원 세트'}</h2>
       <p>${escapeHtml(all[0]?.elementTitle || all[0]?.title || '')}</p>
-      <p>현재 가사·폼과 음원·자동 넘김 시각을 한 세트로 저장합니다. 예배 순서에서 ‘어린이: 음원 로드’를 선택하면 이 세트를 사용합니다.</p>
-      <p>동기화 저장은 이 브라우저에 보관합니다. 다른 컴퓨터에서는 공유 저장 후 공유 불러오기를 사용하세요. 음원을 들으며 각 장의 시작을 기록하세요. 가사는 1초 먼저, 빈 화면·음표는 기록한 시각에 넘깁니다.</p>
+      <p>${serviceTiming ? '이 예배의 현재 곡·가사·사진 순서에 전환 시각을 저장합니다. 사진을 먼저 배치한 뒤 타이밍을 기록하세요. 다른 예배에는 적용되지 않습니다.' : '현재 가사·폼과 음원·자동 넘김 시각을 한 세트로 저장합니다. 예배 순서에서 ‘어린이: 음원 로드’를 선택하면 이 세트를 사용합니다.'}</p>
+      <p>동기화 저장은 이 브라우저에 보관합니다. 다른 컴퓨터에서는 공유 저장 후 공유 불러오기를 사용하세요. 음원을 들으며 각 장의 시작을 기록하세요. ${serviceTiming ? '가사와 사진 모두 기록한 시각에 넘깁니다. 수동 넘김은 음악을 일시정지합니다.' : '가사는 1초 먼저, 빈 화면·음표는 기록한 시각에 넘깁니다.'}</p>
+      ${linkedAudio.url ? `<button type="button" class="btn secondary" data-timing-linked>연결된 음원 사용 · ${escapeHtml(linkedAudio.name || '음원')}</button>` : ''}
       <label>음원 선택 <input type="file" accept="audio/*" data-timing-file></label>
       <p data-timing-filename></p><audio controls preload="metadata"></audio>
-      <div class="song-timing-pages">${slides.map((slide, i) => `<div class="song-timing-row"><label>${i + 1}장 · ${escapeHtml(slide.text || '빈 화면')}<input aria-label="${i + 1}장 시작 초" type="number" min="0" step="0.1" data-timing-start="${i}" value="${draft.starts[i] ?? ''}" placeholder="초"></label><button type="button" class="btn secondary" data-timing-stamp="${i}">현재 시각 기록</button></div>`).join('')}</div>
+      <div class="song-timing-record"><button type="button" class="btn secondary" data-timing-next>다음 장 전환 기록</button><span data-timing-next-label></span></div>
+      <div class="song-timing-pages">${slides.map((slide, i) => `<div class="song-timing-row"><label>${slide.formBackgroundImage ? `<img class="song-timing-photo" src="${escapeAttr(slide.formBackgroundImage)}" alt="${i + 1}장 배경 사진">` : ''}${i + 1}장 · ${escapeHtml(presenterFormGroupLabel(slide) || '')} · ${escapeHtml(slide.text || '빈 화면')}<input aria-label="${i + 1}장 시작 초" type="number" min="0" step="0.1" data-timing-start="${i}" value="${draft.starts[i] ?? ''}" placeholder="초"></label><button type="button" class="btn secondary" data-timing-stamp="${i}">현재 시각 기록</button></div>`).join('')}</div>
       <label><input type="checkbox" data-timing-enabled ${draft.enabled ? 'checked' : ''}> 음악 재생 중 자동 넘김</label>
       <p role="status" data-timing-status>${old && !fresh ? '가사가 바뀌었어요. 모든 장의 시각을 다시 기록해 주세요.' : '음원과 시각을 저장한 뒤, 해당 곡에서 음악 재생을 누르세요.'}</p>
       <p>공유 저장한 음원·타이밍은 공개 링크로 접근할 수 있습니다. 공유 파일은 음원 포함 50MB 이하입니다.</p>
@@ -229,6 +305,11 @@
     if (previewUrl) audio.src = previewUrl;
     dialog.querySelector('[data-timing-filename]').textContent = draft.audioName;
     let busy = false;
+    let nextStamp = Math.max(0, draft.starts.findIndex(value => value == null));
+    const updateNext = () => {
+      dialog.querySelector('[data-timing-next-label]').textContent = nextStamp < slides.length ? `${nextStamp + 1} / ${slides.length}장` : '모든 장 기록 완료';
+    };
+    updateNext();
     dialog.addEventListener('cancel', e => { if (busy) e.preventDefault(); });
     dialog.addEventListener('close', () => { audio.pause(); audio.removeAttribute('src'); if (previewUrl) URL.revokeObjectURL(previewUrl); dialog.remove(); });
     dialog.addEventListener('keydown', e => e.stopPropagation());
@@ -237,10 +318,9 @@
     });
     audio.addEventListener('loadedmetadata', () => { draft.duration = audio.duration; });
     audio.addEventListener('error', () => { draft.duration = 0; status.textContent = '음원을 재생할 수 없습니다. 다른 파일을 선택해 주세요.'; });
-    dialog.querySelector('[data-timing-file]').addEventListener('change', async e => {
-      const file = e.target.files[0];
+    const replaceAudio = async file => {
       if (!file) return;
-      busy = true; saveButton.disabled = true; e.target.disabled = true;
+      busy = true; dialog.querySelectorAll('button,input').forEach(control => { control.disabled = true; });
       try {
         if (file.size > 100 * 1024 * 1024) throw Error('음원은 100MB 이하로 선택해 주세요.');
         const digest = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', await file.arrayBuffer())), b => b.toString(16).padStart(2, '0')).join('');
@@ -248,7 +328,7 @@
         if (previewUrl) URL.revokeObjectURL(previewUrl);
         previewUrl = URL.createObjectURL(file);
         if (digest !== draft.audioFingerprint) {
-          draft.starts = slides.map(() => null);
+          draft.starts = slides.map(() => null); nextStamp = 0; updateNext();
           dialog.querySelectorAll('[data-timing-start]').forEach(input => { input.value = ''; });
         }
         draft.audio = file; draft.audioName = file.name; draft.audioFingerprint = digest; draft.duration = 0;
@@ -256,18 +336,33 @@
         dialog.querySelector('[data-timing-filename]').textContent = file.name;
         status.textContent = '각 장이 시작되는 순간에 현재 시각 기록을 누르세요.';
       } catch (error) { status.textContent = error.message; }
-      finally { busy = false; saveButton.disabled = false; e.target.disabled = false; }
-    });
+      finally { busy = false; dialog.querySelectorAll('button,input').forEach(control => { control.disabled = false; }); }
+    };
+    dialog.querySelector('[data-timing-file]').addEventListener('change', e => void replaceAudio(e.target.files[0]));
     dialog.addEventListener('click', async e => {
       const button = e.target.closest('button');
       if (!button || busy) return;
+      if (button.hasAttribute('data-timing-linked')) {
+        busy = true; button.disabled = true; status.textContent = '연결된 음원을 불러오고 있어요…';
+        try {
+          const response = await fetch(linkedAudio.url);
+          if (!response.ok || Number(response.headers.get('content-length')) > 100 * 1024 * 1024) throw Error('연결된 음원을 불러올 수 없습니다. 파일을 직접 선택해 주세요.');
+          const blob = await response.blob();
+          await replaceAudio(new File([blob], linkedAudio.name || '연결된 음원', {type:blob.type}));
+        } catch (error) { status.textContent = error.message; }
+        finally { busy = false; button.disabled = false; }
+        return;
+      }
       if (button.hasAttribute('data-timing-close')) { dialog.close(); return; }
-      if (button.hasAttribute('data-timing-stamp')) {
+      if (button.hasAttribute('data-timing-stamp') || button.hasAttribute('data-timing-next')) {
         if (!draft.duration || audio.readyState < 1) { status.textContent = '음원을 먼저 선택해 주세요.'; return; }
-        const i = Number(button.dataset.timingStamp);
+        const i = button.hasAttribute('data-timing-next') ? nextStamp : Number(button.dataset.timingStamp);
+        if (i >= slides.length) { status.textContent = '모든 장을 기록했어요. 개별 기록 버튼으로 수정할 수 있어요.'; return; }
         draft.starts[i] = Math.round(audio.currentTime * 100) / 100;
         dialog.querySelector(`[data-timing-start="${i}"]`).value = draft.starts[i];
         status.textContent = `${i + 1}장 · ${draft.starts[i]}초 기록됨`;
+        nextStamp = i + 1; updateNext();
+        dialog.querySelector(`[data-timing-start="${Math.min(nextStamp, slides.length - 1)}"]`).closest('.song-timing-row').scrollIntoView({block:'nearest'});
       }
       if (button.hasAttribute('data-timing-share') || button.hasAttribute('data-timing-load-shared')) {
         const loading = button.hasAttribute('data-timing-load-shared');
@@ -278,7 +373,7 @@
         status.textContent = loading ? '공유 음원·타이밍을 확인하고 있어요…' : '음원·타이밍을 공유 저장하고 있어요…';
         try {
           const currentSlides = () => {
-            const current = pagesFor(presenterSlidesForService(serviceId).filter(s => s.elementId === elementId));
+            const current = pagesFor(presenterSlidesForService(serviceId).filter(s => belongsTo(s, elementId)));
             if (current[0]?.songTimingKey !== key || fingerprint(current) !== draft.lyricsFingerprint) throw Error('편집 중 곡 또는 가사가 바뀌었어요. 닫고 다시 열어 주세요.');
             return current;
           };
@@ -314,7 +409,7 @@
       if (button.hasAttribute('data-timing-save')) {
         busy = true; saveButton.disabled = true;
         try {
-          const current = pagesFor(presenterSlidesForService(serviceId).filter(s => s.elementId === elementId));
+          const current = pagesFor(presenterSlidesForService(serviceId).filter(s => belongsTo(s, elementId)));
           if (current[0]?.songTimingKey !== key || fingerprint(current) !== draft.lyricsFingerprint) throw Error('편집 중 곡 또는 가사가 바뀌었어요. 닫고 다시 열어 주세요.');
           draft.enabled = dialog.querySelector('[data-timing-enabled]').checked;
           await save(draft, current);
@@ -327,8 +422,18 @@
     });
     document.body.append(dialog); dialog.showModal();
   }
-  root.MindexSongTiming = { keyFor, pagesFor, fingerprint, validate, decorate, controls, open, save, ready, pack, unpack, share, loadShared, formsFor, sourceSignature, ownsSource: source => [...profiles.values()].some(p => p.url === source), get revision() { return revision; } };
+  root.MindexSongTiming = { keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, controls, open, play, transport, updateTransport, save, ready, pack, unpack, share, loadShared, formsFor, sourceSignature, ownsSource: source => [...profiles.values()].some(p => p.url === source), get revision() { return revision; } };
+  if (typeof document !== 'undefined') document.addEventListener('input', e => {
+    const input = e.target.closest('[data-song-timing-seek]');
+    const audio = state.serviceMusic.audio;
+    if (!input || !audio || state.serviceMusic.mode !== 'presenter-audio' || input.dataset.source !== state.serviceMusic.sourceKey) return;
+    const time = Number(input.value);
+    if (Number.isFinite(time) && Number.isFinite(audio.duration)) audio.currentTime = Math.max(0, Math.min(time, audio.duration));
+    updateTransport(audio);
+  });
   if (typeof document !== 'undefined') document.addEventListener('click', e => {
+    const playButton = e.target.closest('[data-song-timing-play]');
+    if (playButton) { e.preventDefault(); void play(playButton.dataset.serviceId, playButton.dataset.elementId); return; }
     const button = e.target.closest('[data-song-timing-open]');
     if (button) { e.preventDefault(); void open(button.dataset.serviceId, button.dataset.elementId).catch(error => showToast(error.message, 'error')); }
   });
