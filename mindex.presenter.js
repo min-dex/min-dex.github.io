@@ -2079,7 +2079,7 @@ function parsePresenterCustomSlideBlock(block) {
   if (!lines.length) return { marker: "", text: "" };
   const first = lines[0];
   const bracketed = first.match(/^\[([^\]]+)\]$/)?.[1]?.trim();
-  if (lines.length === 1 && bracketed && /^(간주|interlude|instrumental)$/i.test(bracketed)) {
+  if (lines.length === 1 && bracketed && /^(int|간주|interlude|instrumental)$/i.test(bracketed)) {
     return { marker: "간주", text: "", blank: true };
   }
   const markerCandidate = bracketed || first;

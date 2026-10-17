@@ -1745,7 +1745,9 @@ function bindDetailInteractionRoot(root, options = {}) {
   root.addEventListener("focusin", (e) => {
     const serviceTextField = e.target.closest("input[data-service-item-field], textarea[data-service-item-field]");
     if (isDeferredServiceTextInput(serviceTextField)) {
-      serviceTextField.dataset.initialValue = serviceTextField.value;
+      if (serviceTextField.dataset.initialValue === undefined) {
+        serviceTextField.dataset.initialValue = serviceTextField.value;
+      }
       serviceTextField.dataset.presenterPreviewValue = serviceTextField.value;
     }
     const cell = e.target.closest(".cal-cell");
@@ -7074,7 +7076,12 @@ async function saveService(serviceId = state.selectedServiceId, options = {}) {
     if (!options.silent) showToast("예배를 저장했습니다.");
     // Field-level commits already refreshed the affected presenter content. Avoid
     // rebuilding the whole application after a small inline edit.
-    if (unchanged && !serviceHasPendingTextEdits(serviceId) && options.renderAfterSave !== false) render();
+    // Native board/attachment players belong to this DOM. Replacing the detail
+    // pane after a save would stop them even though their source did not change.
+    const playingInlineAudio = [...(refs.detailPane?.querySelectorAll("audio") || [])]
+      .some((audio) => !audio.paused && !audio.ended);
+    if (unchanged && !serviceHasPendingTextEdits(serviceId) && options.renderAfterSave !== false
+      && !playingInlineAudio) render();
     else renderServiceList();
     return { itemIds: saved?.itemIds };
   }));
@@ -10040,11 +10047,20 @@ async function commitServiceItemInputs(serviceId = state.selectedServiceId, inde
 }
 
 function commitActiveDeferredServiceTextInput(serviceId = state.selectedServiceId) {
-  const field = document.activeElement?.closest?.("input[data-service-item-field], textarea[data-service-item-field]");
-  if (!field || !isDeferredServiceTextInput(field)) return false;
-  const fieldServiceId = field.dataset.serviceId || state.selectedServiceId;
-  if (serviceId && fieldServiceId !== serviceId) return false;
-  return commitDeferredServiceTextInput(field);
+  // Enter-only editors may retain drafts after focus moves to another field or
+  // the Save button. Flush all changed inputs for this service before saving.
+  const fields = [...(refs.detailPane?.querySelectorAll("input[data-service-item-field], textarea[data-service-item-field]") || [])];
+  const active = document.activeElement;
+  if (fields.includes(active)) fields.push(...fields.splice(fields.indexOf(active), 1));
+  let committed = false;
+  for (const field of fields) {
+    if (!isDeferredServiceTextInput(field)) continue;
+    if ((field.dataset.serviceId || state.selectedServiceId) !== serviceId) continue;
+    if (field.dataset.initialValue === undefined || field.value === field.dataset.initialValue) continue;
+    clearDeferredServiceTextPreview(field);
+    committed = commitDeferredServiceTextInput(field) || committed;
+  }
+  return committed;
 }
 
 function saveCommittedServiceItem(index, serviceId = state.selectedServiceId, options = {}) {
@@ -10834,9 +10850,11 @@ function parseServiceSlideOverrideInput(value) {
 function parseServiceManualPraiseLyricsInput(value) {
   const text = String(value || "").trim();
   if (!text) return [];
-  if (/\n\s*---+\s*\n/.test(text)) return parseServiceSlideOverrideInput(text);
-  return text
-    .split(/\n[ \t]*\n+/g)
+  const blocks = /\n\s*---+\s*\n/.test(text)
+    ? parseServiceSlideOverrideInput(text)
+    : text.split(/\n[ \t]*\n+/g);
+  return blocks
+    .flatMap((block) => block.split(/(^[ \t]*\[(?:int|간주|interlude|instrumental)\][ \t]*\r?$)/gim))
     .map((block) => block.trim())
     .filter(Boolean);
 }
@@ -11385,6 +11403,8 @@ function serviceItemEditorModel(item = {}, options = {}) {
   const titlePersonParts = titlePerson ? serviceTitlePersonEffectiveParts(item, parsed, service) : null;
   const titleValue = strictSong && linkedSong
     ? songServiceOptionLabel(linkedSong)
+    : praiseInputMode === "manual_praise"
+      ? String(item.raw_title || "").trim() || (linkedSong ? songServiceOptionLabel(linkedSong) : "")
     : scripture
       ? scriptureTitleValue
       : titlePersonParts?.rawTitleAssignee
@@ -30294,6 +30314,7 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
             ${hidden ? `<span class="svc-element-hidden-badge">숨김</span>` : ""}
             ${renderPresenterWarnings(warnings)}
           </button>
+          ${headerContext ? renderServiceItemLinkControl(headerContext.item, headerContext.index) : ""}
           ${headerActions}
         </header>` : ""}
       ${inputControls}
@@ -30359,12 +30380,14 @@ function renderPresenterBoardSubgroupInputControls(serviceId, subgroup = {}, opt
   const medleyRows = contexts.length > 1 && contexts.every((context) => serviceItemConnectedPraise(context.item));
   const blocks = contexts.map((originalContext) => {
     const context = { ...originalContext, timingEntries: subgroup.slides };
-    const controls = presenterServiceInputControls(context.item, context.index, context.service, { headerActions: true });
+    let controls = presenterServiceInputControls(context.item, context.index, context.service, { headerActions: true });
     if (!controls) return "";
     const label = contexts.length > 1 && !medleyRows ? serviceElementDisplayLabel(serviceItemOrdinalDisplayLabel(context.item, context.service)) || "항목" : "";
+    const dbLink = renderServiceItemLinkControl(context.item, context.index);
+    if (dbLink && (options.headerActions || label)) controls = controls.replace(dbLink, "");
     return `
       <div class="svc-board-subgroup-control-item" data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(context.item.id || "")}" data-service-item-index="${escapeAttr(String(context.index))}">
-        ${label ? `<div class="svc-board-subgroup-control-head"><span class="svc-board-subgroup-control-label">${escapeHtml(label)}</span>${renderPresenterBoardItemActions(serviceId, context)}</div>` : ""}
+        ${label ? `<div class="svc-board-subgroup-control-head"><span class="svc-board-subgroup-control-label">${escapeHtml(label)}</span>${dbLink}${renderPresenterBoardItemActions(serviceId, context)}</div>` : ""}
         ${controls}
         ${options.headerActions || label ? "" : renderPresenterBoardItemActions(serviceId, context)}
         ${renderPresenterBoardItemAudioControls(serviceId, context, { manager: true })}

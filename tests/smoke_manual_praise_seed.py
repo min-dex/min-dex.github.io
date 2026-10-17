@@ -48,6 +48,13 @@ try:
       check(restored.song_id===songId&&!restored.version_id&&!parseServiceItemMemo(restored.memo).slides.length,'reverse roundtrip');
      }
      set(fresh(['my edited lyrics']));await updateServiceItemField(field());check(parseServiceItemMemo(getServiceItems(sid)[0].memo).slides[0]==='my edited lyrics','existing manual overwritten');
+     const titleItem={...fresh(),raw_title:'',memo:serializeServiceItemMemo({elementType:'praise',inputMode:'manual_praise',slides:['manual text']})};
+     const titleModel=serviceItemEditorModel(titleItem,{service});
+     check(titleModel.titleValue==='Fixture','linked manual title missing');
+     const host=document.createElement('div');host.innerHTML=renderServiceEditorTitleControl(titleItem,0,{service},titleModel);
+     check(host.querySelector('[data-service-item-field="raw_title"]').value==='Fixture','manual title input empty');
+     check(serviceItemEditorModel({...titleItem,raw_title:'My title'},{service}).titleValue==='My title','manual title overridden');
+     check(serviceItemEditorModel({...titleItem,song_id:null,version_id:null,song_version_id:null},{service}).titleValue==='','unlinked title invented');
      // A delayed load may not overwrite a newer user edit.
      set(fresh());song._relationalVersionsLoaded=false;let release;
      loadSongsForIds=()=>new Promise(r=>release=r);loadRelationalSongVersionData=async()=>{song._relationalVersionsLoaded=true};

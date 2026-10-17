@@ -10,14 +10,14 @@ def main():
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url + '?output=presenter', wait_until='domcontentloaded')
             page.wait_for_function("typeof buildPresenterCustomSlides === 'function'")
-            result = page.evaluate('''() => {
+            result = page.evaluate(r'''() => {
               const results=[];
               for (const label of ['특송','봉헌특송','봉헌찬송']) {
                 const special=label!=='봉헌찬송';
                 const item={id:'fixture',label,raw_title:'테스트 곡',assignee:'찬양대',
                   _worshipSectionKey:label==='특송'?'special_song':'offering',
                   memo:JSON.stringify({inputMode:'manual_praise',elementType:'praise',
-                    slides:['[Verse 1]\\n첫 줄\\n둘째 줄','[간주]','[Bridge]\\n마지막 줄']})};
+                    slides:['[Verse 1]\n첫 줄\n둘째 줄','[간주]','[Bridge]\n마지막 줄']})};
                 const section={sectionKey:item._worshipSectionKey,sectionLabel:label,sectionTitle:'테스트 곡'};
                 const raw=buildPresenterCustomSlides(item,section,0);
                 const slides=presenterSlidesWithSpecialSongTitle(item,section,raw,0,{type_id:'sunday-main'});
@@ -30,6 +30,14 @@ def main():
                 if(slides.find(s=>s.type==='blank').text!=='') throw Error('interlude text visible');
                 results.push(label);
               }
+              for (const token of ['[INT]', '[int]', '[Int]', '[간주]', '[Instrumental]']) {
+                for (const source of [`첫 가사\n${token}\n다음 가사`, `첫 가사\n\n${token}\n\n다음 가사`, `첫 가사\n---\n${token}\n---\n다음 가사`]) {
+                  const blocks=parseServiceManualPraiseLyricsInput(source);
+                  const parsed=blocks.map(parsePresenterCustomSlideBlock);
+                  if(parsed.length!==3 || !parsed[1].blank || parsed[1].text!=='' || parsed[0].text!=='첫 가사' || parsed[2].text!=='다음 가사') throw Error('INT split '+source);
+                }
+              }
+              if(parseServiceManualPraiseLyricsInput('가사 속 [INT] 그대로')[0]!=='가사 속 [INT] 그대로') throw Error('inline text altered');
               if(parsePresenterCustomSlideBlock('간주 후 다시 찬양').blank) throw Error('ordinary lyrics erased');
               return results;
             }''')

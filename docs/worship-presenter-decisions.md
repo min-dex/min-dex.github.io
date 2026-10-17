@@ -2500,6 +2500,45 @@ not establish a uniform end-to-end speedup. Service board appearance was
 All production probes block writes. No existing services or DB settings changed.
 
 
+## Save completion preserves inline audio (2026-10-17)
+
+Full worship save must not replace the detail pane while its native board or
+attachment audio is playing. Persist and acknowledge normally, refresh the list
+and save feedback, and retain the current audio node/time. Existing presenter
+refresh still updates output. Paused/ended players retain ordinary full refresh.
+This does not resume deliberately paused audio or start any new audio source.
+Local Chromium/WebKit actual HTMLAudio playback checks exercise save completion
+and paused-player refresh with stubbed persistence; no production writes.
+
+## Save flushes pending order inputs (2026-10-17)
+
+Explicit full-service save (Ctrl+S, Cmd+S, Save) commits all changed deferred
+text fields belonging to the saved service, including blurred Enter-only
+presenter inputs. Unchanged fields and other-service inputs are excluded;
+active input is applied last if duplicated controls exist. Clear preview timers
+before committing, and retain the existing atomic persistence path. This is not
+an autosave or a change to Enter behavior. Chromium/WebKit shortcut tests cover
+active/blurred drafts, Save-button focus and cross-service exclusion.
+
+## Direct lyric instrumental markers (2026-10-17)
+
+A standalone [INT] line (case-insensitive) in direct praise lyrics creates an
+instrumental blank slide, using the existing [간주]/[Interlude]/[Instrumental]
+semantics. It separates neighboring lyrics even without empty lines, and also
+works with explicit --- slide separators. Inline occurrences inside a lyric
+line remain literal text. The marker is not printed in output; background and
+manual navigation follow existing instrumental slides. No stored lyrics are
+rewritten automatically.
+
+## Manual lyric editor linked title (2026-10-17)
+
+Direct lyric mode displays a retained linked song's title when raw_title is
+empty; the strict DB-picker condition must not hide it. A user-entered raw title
+has priority. Rendering does not write source data, change the linked version,
+or seed/replace manual lyrics. Browser checks cover linked/manual/unlinked title
+values alongside existing manual-mode roundtrip preservation.
+
+
 ## Audio management below praise inputs (2026-10-17)
 
 Keep only audio registration in the item action row when no audio is attached.
@@ -2509,3 +2548,13 @@ No standalone per-song timing buttons are rendered. Existing local/shared-loaded
 children timing profiles also expose their audio in this manager; their timing
 editor remains accessible. Each medley row filters timing controls by element ID.
 Storage, timing keys, save paths, song links and ordering are unchanged.
+
+## Compact board song inputs and heading DB links (2026-10-17)
+
+At desktop widths, input mode, song title, version and song form share one row;
+form no longer reserves a second row. Narrow containers retain wrapping. For
+single-element board headers, the DB shortcut immediately follows the element
+heading, outside the jump button; labelled multi-element rows follow the same
+rule. Do not duplicate it inside the input controls. Headerless medley rows keep
+their per-song DB links. Isolated Chromium/WebKit rendering checks cover desktop
+alignment, a single actionable heading link, and narrow-width overflow.
