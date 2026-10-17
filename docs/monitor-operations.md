@@ -1,5 +1,23 @@
 # Read-only operations panel
 
+## Automatic presence · 2026-10-17
+
+Opening a controller tab automatically registers presence, including browsers
+with the former sharing preference disabled. The share toggle is removed; only
+the optional connection name remains editable. The client sends exactly name,
+os, browser and output. It no longer collects editing/save events, service IDs,
+slide positions, app version or video details. Existing RPC validation accepts
+this subset; no schema or permission changes are required.
+
+Registration starts when the DB client becomes available; uploads retain the
+15-second cadence, single-flight guard, timeout and backoff. Page hide requests
+reporter removal and stops uploads; bfcache restoration registers again. Remote
+rows still require a valid heartbeat within 45 seconds, so a lost close request
+or offline browser disappears by timeout. Output-only windows never register.
+Viewer authentication and automatic locking remain unchanged. The older sharing
+and full-payload sections below are historical and superseded by this contract.
+
+
 ## Current compact view · 2026-10-17
 
 The panel shows this browser and authenticated shared sessions with name, browser

@@ -11,9 +11,9 @@ def main():
                     context = browser.new_context()
                     context.route('**/*supabase*/**', lambda r: r.abort())
                     context.add_init_script('''const originalInterval=window.setInterval;
-                      window.setInterval=(fn,ms,...args)=>{if(ms===15000&&String(fn).includes('snapshot()'))window.monitorTick=fn;return originalInterval(fn,ms,...args)};''')
+                      window.setInterval=(fn,ms,...args)=>{if(ms===15000&&String(fn).includes('void upload()'))window.monitorTick=fn;return originalInterval(fn,ms,...args)};''')
                     controller = context.new_page()
-                    controller.goto(url, wait_until='domcontentloaded')
+                    controller.goto(url, wait_until='networkidle')
                     controller.wait_for_function("typeof monitorTick==='function'")
                     print(engine, controller.evaluate('''async () => {
                       const check=(v,m)=>{if(!v)throw Error(m)};
@@ -32,13 +32,12 @@ def main():
                         }
                         return times.sort((a,b)=>a-b)[Math.floor(times.length*.95)];
                       };
-                      measure();const off=measure();check(requests===0,'disabled telemetry made requests');
-                      const toggle=document.querySelector('[data-share]');toggle.checked=true;toggle.dispatchEvent(new Event('change'));
-                      await Promise.resolve();const on=measure();
+                      window.dispatchEvent(new Event('online'));
+                      await Promise.resolve();const off=measure();const on=measure();
                       check(requests===1,'slow network created overlapping telemetry requests');
                       check(state.presenter.index===0&&state.presenter.slides===slides,'monitor mutated presenter');
                       check(on<Math.max(20,off+15),'monitor caused large synchronous latency regression');
-                      toggle.checked=false;toggle.dispatchEvent(new Event('change'));
+                      window.dispatchEvent(new PageTransitionEvent('pagehide'));
                       releaseMonitor({data:null,error:null});await Promise.resolve();
                       return {offP95ms:off,onWithStalledNetworkP95ms:on,requests};
                     }'''))

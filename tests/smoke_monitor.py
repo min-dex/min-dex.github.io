@@ -11,7 +11,8 @@ def main():
                 try:
                     page = browser.new_page(viewport={'width': 1280, 'height': 900})
                     page.route('**/*supabase*/**', lambda r: r.abort())
-                    page.goto(url, wait_until='domcontentloaded')
+                    page.add_init_script("localStorage.setItem('mindex.monitor.share','false')")
+                    page.goto(url, wait_until='networkidle')
                     page.wait_for_function("!!document.querySelector('.monitor-panel')")
                     page.evaluate('''() => {
                       window.monitorCalls=[]; window.monitorMode='ok';
@@ -29,13 +30,15 @@ def main():
                         return Promise.resolve({data,error:null});
                       }})};
                     }''')
+                    page.evaluate("window.dispatchEvent(new Event('online'))")
+                    page.wait_for_function("monitorCalls.some(c=>c.name==='mindex_monitor_heartbeat')")
+                    assert not page.locator('.monitor-panel').is_visible()
                     page.locator('#monitorPanelBtn').click()
                     assert page.locator('.monitor-panel').is_visible()
-                    assert page.evaluate('monitorCalls.length') == 0
+                    assert page.locator('[data-share]').count() == 0
                     assert page.locator('[data-local] .monitor-health').inner_text() in ('송출 중', '송출 안 함')
                     assert 'sunday-second' not in page.locator('[data-local]').inner_text()
-                    page.get_by_text('이 기기 공유 설정', exact=True).click()
-                    page.locator('[data-share]').check()
+                    page.get_by_text('접속 이름 설정', exact=True).click()
                     page.wait_for_function("monitorCalls.some(c=>c.name==='mindex_monitor_heartbeat')")
                     page.evaluate("emitMonitorSaveEvent('save_start');emitMonitorSaveEvent('save_ok');emitMonitorSaveEvent('save_failed')")
                     page.locator('[data-refresh]').click()
@@ -52,7 +55,7 @@ def main():
                     assert '송출 중' in page.locator('[data-devices]').inner_text()
                     page.evaluate("monitorMode='stale'")
                     page.locator('[data-refresh]').click()
-                    page.wait_for_function("document.querySelector('[data-devices]').textContent.includes('현재 공유 중인 접속이 없습니다')")
+                    page.wait_for_function("document.querySelector('[data-devices]').textContent.includes('현재 접속 중인 기기가 없습니다')")
                     page.evaluate("monitorMode='missing'")
                     page.locator('[data-refresh]').click()
                     page.wait_for_function("document.querySelector('.monitor-message').textContent.includes('서버 설정')")
@@ -67,8 +70,6 @@ def main():
                         page.set_viewport_size({'width': width, 'height': 900})
                         assert page.locator('.monitor-panel').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
                         page.screenshot(path=f'/tmp/mindex-monitor-{engine}-{width}-{theme}.png')
-                    page.locator('[data-share]').uncheck()
-                    page.wait_for_function("monitorCalls.some(c=>c.name==='mindex_monitor_leave'&&c.args.p_token==='report-token')")
                     page.locator('[data-lock]').click()
                     assert page.locator('#monitorPassword').evaluate('(e)=>e===document.activeElement')
                     page.locator('[data-close]').click()
@@ -76,13 +77,17 @@ def main():
                     assert page.locator('[data-devices]').inner_text() == ''
                     assert page.evaluate("state.presenter.index===2&&state.presenter.serviceId==='output'&&state.selectedServiceId==='editing'")
                     payload = page.evaluate("monitorCalls.find(c=>c.name==='mindex_monitor_heartbeat').args.p_status")
-                    assert set(payload) <= set('name os browser version module serviceId serviceDate serviceType output outputServiceId slide count dirty saving video events'.split())
+                    assert set(payload) == {'name', 'os', 'browser', 'output'}
                     page.evaluate("monitorMode='missing'")
                     page.locator('#monitorPanelBtn').click()
-                    page.locator('[data-share]').check()
+                    page.evaluate("window.dispatchEvent(new Event('online'))")
                     page.wait_for_function("document.querySelector('.monitor-share-status').textContent.includes('서버 설정')")
+                    page.evaluate("window.dispatchEvent(new PageTransitionEvent('pagehide'))")
+                    page.wait_for_function("monitorCalls.some(c=>c.name==='mindex_monitor_leave'&&c.args.p_token==='report-token')")
+                    page.evaluate("monitorMode='ok';window.dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true}))")
+                    page.wait_for_function("monitorCalls.filter(c=>c.name==='mindex_monitor_register').length>=2")
                     assert page.evaluate('state.presenter.index') == 2
-                    print(engine, 'PASS opt-in, authenticated read, active-only sessions, failed-read clearing, output status, privacy, XSS, responsive layout, revoke, missing server isolation')
+                    print(engine, 'PASS automatic presence despite previous opt-out, minimal payload, page lifecycle, authenticated read, active-only sessions, failed-read clearing, output status, privacy, XSS, responsive layout, revoke, missing server isolation')
                 finally:
                     browser.close()
     finally:
