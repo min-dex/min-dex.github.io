@@ -2193,3 +2193,11 @@ replacement. Audio and output ownership remain unchanged. Asset/scripture
 background warmup retains its own loading behavior and does not block this gate.
 Offline Chromium/WebKit checks cover delayed rows/songs, genuine missing input
 after completion, cached revisits, failure/retry, stale completion and live controls.
+
+## Version picker label and chevron (2026-10-17)
+
+Worship song version options display `버전: <original version name>`; stored
+names and option IDs are unchanged. Keep the native select inside a layout
+wrapper with a centered chevron inset 12px and 32px text padding so platform
+arrows cannot hug the outer edge. Chromium/WebKit fixture checks verify label,
+selection identity and chevron spacing. No worship data changes.

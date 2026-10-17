@@ -25733,7 +25733,7 @@ function renderServiceSongVersionPicker(item, index, model = serviceItemEditorMo
     || preferredServiceSongVersion(model.linkedSong, item, model.service)?.id
     || "";
   return `
-    <select
+    <span class="svc-song-version-control"><select
       class="svc-song-version-select${selectedId ? "" : " is-invalid"}"
       data-service-item-field="version_id"
       data-service-item-index="${index}"
@@ -25743,10 +25743,10 @@ function renderServiceSongVersionPicker(item, index, model = serviceItemEditorMo
       <option value="">버전 선택</option>
       ${versions.map((version) => `
         <option value="${escapeAttr(version.id)}"${version.id === selectedId ? " selected" : ""}>
-          ${escapeHtml(versionDisplayName(model.linkedSong, version))}
+          버전: ${escapeHtml(versionDisplayName(model.linkedSong, version))}
         </option>
       `).join("")}
-	    </select>`;
+	    </select></span>`;
 }
 
 function renderServiceManualPraiseLyricsEditor(item, index, options = {}) {

@@ -8406,3 +8406,10 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .service-view-loading-spinner { width:28px; height:28px; margin-bottom:8px; border:2px solid var(--line); border-top-color:var(--accent); border-radius:50%; animation:service-view-spin 1s linear infinite; }
 @keyframes service-view-spin { to { transform:rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .service-view-loading-spinner { animation:none; } }
+
+/* Keep the native version picker, with a consistently inset chevron. */
+.svc-song-version-control { position:relative; display:inline-flex; min-width:0; max-width:190px; vertical-align:middle; }
+.svc-song-version-control::after { content:""; position:absolute; right:12px; top:50%; width:7px; height:7px; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor; transform:translateY(-70%) rotate(45deg); pointer-events:none; color:var(--ink); }
+.svc-song-version-control > .svc-song-version-select { appearance:none; -webkit-appearance:none; width:100%; max-width:none; padding-right:32px; text-overflow:ellipsis; }
+.svc-board-subgroup-controls .svc-song-picker--linked .svc-song-version-control { flex:1 1 0; width:0; max-width:none; }
+.svc-board-subgroup-controls .svc-song-version-control > .svc-song-version-select { width:100%; padding-right:32px; }
