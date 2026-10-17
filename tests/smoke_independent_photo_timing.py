@@ -14,7 +14,7 @@ class AudioFixtureHandler(MindexSmokeHandler):
   path=urlsplit(self.path).path
   if path.startswith('/photo-') and path.endswith('.png'):
    self.send_response(200);self.send_header('Content-Type','image/png');self.send_header('Content-Length',str(len(png)));self.end_headers();self.wfile.write(png);return
-  if path not in ('/clock.wav','/replacement.wav'):return super().do_GET()
+  if not path.endswith(('/clock.wav','/replacement.wav')):return super().do_GET()
   # Native media decoding must consume a real HTTP byte stream. Playwright's
   # fulfilled responses can stall Linux WebKit after a backward seek.
   data=buf.getvalue();span=re.fullmatch(r'bytes=(\d+)-(\d*)',self.headers.get('Range',''))
@@ -145,7 +145,7 @@ try:
    page.evaluate('''()=>{stopServiceMusicPlayback({render:false});const root=document.createElement('div');root.id='presenterOutputRoot';root.style.cssText='position:fixed;inset:0;z-index:999999';document.body.append(root)}''')
    for time,number,lyric in [(6.1,1,''),(7.6,2,''),(9.1,2,'마지막 가사'),(11.1,3,'마지막 가사'),(7.6,2,'')]:
     page.evaluate('''t=>{const slides=state.presenter.slides,index=slides.findIndex(s=>s.syncTimeline?.page===1),target=presenterSyncedLyricsTargetForTime(slides,index,t);renderPresenterOutput({slides,index:target.index,serviceId:state.presenter.serviceId,chromakey:false})}''',time)
-    page.wait_for_function('''n=>{const root=document.querySelector('#presenterOutputRoot');return !root.hasAttribute('aria-busy')&&root.style.getPropertyValue('--presenter-bg-image').includes('/photo-'+n+'.png')}''',arg=number)
+    page.wait_for_function('''n=>{const root=document.querySelector('#presenterOutputRoot');return !root.hasAttribute('aria-busy')&&root.querySelector('.presenter-output-background img')?.src.endsWith('/photo-'+n+'.png')}''',arg=number)
     active=page.locator('#presenterOutputRoot .is-active').first
     assert active.inner_text().strip()==lyric,active.inner_text()
    page.evaluate('''()=>renderPresenterOutput({slides:state.presenter.slides,index:state.presenter.index,safetyBlank:true,chromakey:false})''')
