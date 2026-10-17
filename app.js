@@ -1244,11 +1244,62 @@ function schedulePresenterPreviewScaleUpdate(host = refs.detailPane) {
   });
 }
 
+// Output layers keep their synchronous fit-before-paint path. Only board
+// thumbnails are queued: a large service must never monopolize one frame.
+const presenterThumbnailFitQueue = new Set();
+let presenterThumbnailFitRaf = 0;
+
+function fitPresenterPreviewCanvas(preview) {
+  if (!preview.classList.contains("no-chromakey")) fitPresenterChromakeyScriptureText(preview);
+  fitPresenterSongTitleText(preview);
+  fitPresenterSermonTitleText(preview);
+}
+
+function drainPresenterThumbnailFits() {
+  presenterThumbnailFitRaf = 0;
+  const visible = [];
+  const nearby = [];
+  const pane = refs.detailPane?.getBoundingClientRect();
+  const top = Math.max(0, pane?.top || 0);
+  const bottom = Math.min(window.innerHeight, pane?.bottom ?? window.innerHeight);
+  // Read geometry before any fitting writes. Reprioritize on every frame so
+  // scrolling to the end does not wait behind the old offscreen queue.
+  for (const preview of presenterThumbnailFitQueue) {
+    if (!preview.isConnected) { presenterThumbnailFitQueue.delete(preview); continue; }
+    const frame = preview.closest(".svc-slide-thumb-wrap, .svc-slide-thumb");
+    const rect = frame.getBoundingClientRect();
+    if (rect.right < 0 || rect.left > window.innerWidth) continue;
+    if (rect.bottom >= top && rect.top <= bottom) visible.push(preview);
+    else if (rect.bottom >= top - 200 && rect.top <= bottom + 200) nearby.push(preview);
+  }
+  const candidates = [...visible, ...nearby];
+  const started = performance.now();
+  for (const preview of candidates) {
+    presenterThumbnailFitQueue.delete(preview);
+    fitPresenterPreviewCanvas(preview);
+    if (performance.now() - started >= 8) break;
+  }
+  if (candidates.some(preview => presenterThumbnailFitQueue.has(preview))) {
+    presenterThumbnailFitRaf = requestAnimationFrame(drainPresenterThumbnailFits);
+  }
+}
+
+// Offscreen work sleeps until it approaches the viewport; no perpetual RAF loop.
+document.addEventListener("scroll", () => {
+  if (presenterThumbnailFitQueue.size && !presenterThumbnailFitRaf) {
+    presenterThumbnailFitRaf = requestAnimationFrame(drainPresenterThumbnailFits);
+  }
+}, { capture: true, passive: true });
+
 function fitPresenterPreviewText(host = refs.detailPane) {
   if (!host?.querySelectorAll) return;
-  if (typeof fitPresenterChromakeyScripturePreviews === "function") fitPresenterChromakeyScripturePreviews(host);
-  if (typeof fitPresenterSongTitlePreviews === "function") fitPresenterSongTitlePreviews(host);
-  if (typeof fitPresenterSermonTitlePreviews === "function") fitPresenterSermonTitlePreviews(host);
+  for (const preview of host.querySelectorAll(".svc-slide-mini-canvas.presenter-output-root")) {
+    if (preview.closest(".svc-slide-thumb")) presenterThumbnailFitQueue.add(preview);
+    else fitPresenterPreviewCanvas(preview); // Live controller preview is immediate.
+  }
+  if (presenterThumbnailFitQueue.size && !presenterThumbnailFitRaf) {
+    presenterThumbnailFitRaf = requestAnimationFrame(drainPresenterThumbnailFits);
+  }
 }
 
 let presenterPreviewTextFitRaf = 0;

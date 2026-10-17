@@ -2297,3 +2297,34 @@ explicit version selection resumes the corresponding output. Existing linked
 items without a version also require selection instead of silently using defaults.
 Old manual records whose song ID was already discarded cannot be recovered
 automatically; the user must select their song once.
+
+
+## Visible-first preview fitting and bounded board layout (2026-10-17)
+
+- Queue only board thumbnail text fits. Read viewport geometry together, process
+  visible thumbnails before the 200 px nearby band, and yield after an 8 ms
+  budget (one fit is indivisible). Distant work sleeps until scroll or layout
+  invalidation; detached previews are discarded. Font completion/error clears
+  the fit cache and uses the same queue instead of refitting the entire board.
+- Controller live preview and actual output retain synchronous fitting. The
+  complete-line measurement, binary search, font metrics, verse gutter, cache
+  keys and actual output render/commit path are unchanged.
+- Give the five nested single-column board grids explicit minmax(0, 1fr)
+  columns to avoid repeated intrinsic-width layout. Fixed 1920x1080 miniature
+  canvases contain their layout/size/paint. Keep existing gaps and narrow-window
+  layout. No content-visibility gating or hidden placeholder is introduced.
+- New 180-preview Chromium/WebKit regression uses the nested board structure:
+  visible-first ordering, dormant offscreen queue, rapid scrolling, input timer
+  gaps below 500 ms, exact original font sizes, no clipping, font invalidation
+  and detached-node cleanup. Additional lyric/cache, announcement, preview edge,
+  controller, output latency/swap and deferred-scroll checks pass. Local Cloud
+  baseline passes 7 unit + 5 smoke entry points.
+- Output-swap mock now releases subsequent requests for the same PNG after the
+  delayed preload succeeds (Playwright routing disables HTTP cache). All existing
+  delayed-frame, exact pixel, attached-layer and blackout assertions are retained
+  and pass in Chromium/WebKit; no output runtime workaround was introduced.
+- Read-only production measurement with candidate assets reduced one service's
+  ready time from 15.2 s to 2.2 s in isolated Chromium. This is a measured sample,
+  not a universal startup guarantee. No existing worship records, files or DB
+  settings were changed; physical mixer output is not covered by browser tests.
+  Public deployment and its checks must be confirmed separately.

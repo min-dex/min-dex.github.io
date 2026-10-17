@@ -4167,15 +4167,20 @@ function rememberPresenterLyricFit(key, fontSize) {
   presenterLyricFitCache.set(key, fontSize);
 }
 
-// Font metrics may change without a resize, including after an initial fallback-font fit.
-document.fonts?.addEventListener("loadingdone", () => {
+// Font changes invalidate every fit, but must not synchronously refit an
+// entire worship board. Actual output still finishes fitting before paint.
+let presenterFontRefitRaf = 0;
+function invalidatePresenterFontFits() {
   presenterLyricFitCache.clear();
-  window.requestAnimationFrame(() => fitPresenterLyricText(document));
-});
-document.fonts?.addEventListener("loadingerror", () => {
-  presenterLyricFitCache.clear();
-  window.requestAnimationFrame(() => fitPresenterLyricText(document));
-});
+  if (presenterFontRefitRaf) return;
+  presenterFontRefitRaf = requestAnimationFrame(() => {
+    presenterFontRefitRaf = 0;
+    document.querySelectorAll("#presenterOutputRoot").forEach(fitPresenterLyricText);
+    if (typeof fitPresenterPreviewText === "function") fitPresenterPreviewText(document);
+  });
+}
+document.fonts?.addEventListener("loadingdone", invalidatePresenterFontFits);
+document.fonts?.addEventListener("loadingerror", invalidatePresenterFontFits);
 
 function fitPresenterLyricText(host) {
   if(host)fitPresenterAnnouncementRegions(host);

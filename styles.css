@@ -4999,6 +4999,7 @@ body[data-theme="dark"] .service-week-card:hover {
 }
 .svc-presenter-board-column {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   min-width: 0;
   gap: 24px;
 }
@@ -6311,6 +6312,7 @@ textarea.svc-presenter-input-control--multiline {
 }
 .svc-slide-board {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   min-width: 0;
   max-width: 100%;
   gap: 16px;
@@ -6328,6 +6330,7 @@ textarea.svc-presenter-input-control--multiline {
 }
 .svc-board-section {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   width: 100%;
   min-width: 0;
   gap: 8px;
@@ -6707,12 +6710,14 @@ textarea.svc-presenter-input-control--multiline {
 }
 .svc-board-subgroups {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   width: 100%;
   min-width: 0;
   gap: 20px;
 }
 .svc-board-subgroup {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   width: 100%;
   gap: 10px;
   min-width: 0;
@@ -7716,6 +7721,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
   overflow-wrap: anywhere;
 }
 .svc-slide-mini-canvas {
+  contain: layout size paint;
   position: absolute;
   top: 50%;
   left: 50%;

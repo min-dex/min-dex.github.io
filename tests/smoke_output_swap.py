@@ -45,6 +45,13 @@ def main():
             assert pending, 'The delayed image was not requested'
             data = BytesIO()
             Image.new('RGB', (1920, 1080), (20, 80, 220)).save(data, format='PNG')
+            # Routing disables the HTTP cache: the committed <img> can request
+            # the same bytes again after the preload Image has decoded them.
+            # Release future requests too, while retaining the delayed-first-
+            # frame assertions above and exact output pixel assertions below.
+            page.unroute('**/swap-test.png')
+            page.route('**/swap-test.png', lambda route: route.fulfill(
+                body=data.getvalue(), content_type='image/png'))
             for route in pending:
                 route.fulfill(body=data.getvalue(), content_type='image/png')
             page.wait_for_function("document.querySelector('.presenter-output-layer.is-active img')?.naturalWidth > 0")
