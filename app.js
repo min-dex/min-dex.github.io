@@ -5730,6 +5730,7 @@ function serviceViewIsLoading(serviceId) {
 
 function renderServiceViewLoadState(service) {
   const failed = serviceViewLoadErrors.has(service.id);
+  if (!failed) return `<section class="service-view-loading" data-service-view-loading="${escapeAttr(service.id)}" aria-busy="true">${renderLoadingRow("예배 자료 불러오는 중…")}<p>${escapeHtml(service.title || serviceTypeDisplayName(service.type_id))}</p></section>`;
   return `<section class="service-view-loading" data-service-view-loading="${escapeAttr(service.id)}" aria-busy="${!failed}">
     ${failed ? '<i data-lucide="cloud-off" aria-hidden="true"></i>' : '<span class="service-view-loading-spinner" aria-hidden="true"></span>'}
     <h2>${failed ? "예배 자료를 불러오지 못했습니다" : "예배를 준비하고 있어요"}</h2>
@@ -15757,34 +15758,16 @@ function renderAuthRequiredDetail() {
     `;
 }
 
+function renderLoadingRow(message = LOADING_MESSAGE) {
+  return `<div class="mindex-loading-row" role="status"><span class="mindex-loading-spinner" aria-hidden="true"></span><span>${escapeHtml(message)}</span></div>`;
+}
+
 function renderLoadingDetail() {
-  return `
-      <section class="detail-loading-skeleton" aria-busy="true" aria-label="${escapeAttr(LOADING_MESSAGE)}">
-        <div class="detail-loading-status">
-          <span class="loading-status-dot" aria-hidden="true"></span>
-          <span>${escapeHtml(LOADING_MESSAGE)}</span>
-        </div>
-        <div class="detail-loading-lines" aria-hidden="true">
-          <span class="detail-loading-line detail-loading-line--title"></span>
-          <span class="detail-loading-line detail-loading-line--meta"></span>
-          <span class="detail-loading-line"></span>
-          <span class="detail-loading-line detail-loading-line--short"></span>
-        </div>
-      </section>
-    `;
+  return `<section class="detail-loading-skeleton" aria-busy="true" aria-label="${escapeAttr(LOADING_MESSAGE)}">${renderLoadingRow()}</section>`;
 }
 
 function renderLoadingList() {
-  return `
-    <div class="sidebar-loading-skeleton" aria-busy="true" aria-label="${escapeAttr(LOADING_MESSAGE)}">
-      <span class="sidebar-loading-row"></span>
-      <span class="sidebar-loading-row sidebar-loading-row--short"></span>
-      <span class="sidebar-loading-row"></span>
-      <span class="sidebar-loading-row sidebar-loading-row--medium"></span>
-      <span class="sidebar-loading-row sidebar-loading-row--short"></span>
-      <span class="sidebar-loading-row sidebar-loading-row--medium"></span>
-    </div>
-  `;
+  return `<div class="sidebar-loading-skeleton" aria-busy="true" aria-label="${escapeAttr(LOADING_MESSAGE)}">${renderLoadingRow()}</div>`;
 }
 
 function renderConnectionList(message = DB_CONNECTION_EMPTY_MESSAGE) {
@@ -17437,13 +17420,7 @@ function renderBibleChapterCopyButton() {
 }
 
 function renderBibleVerseSkeleton() {
-  return `
-    <div class="bible-verse-list bible-verse-list-loading" aria-busy="true" aria-label="본문 불러오는 중">
-      ${Array.from({ length: 6 }, (_, index) => `
-        <p class="bible-verse-placeholder" style="--line-width: ${index % 3 === 0 ? "82%" : index % 3 === 1 ? "68%" : "74%"}"></p>
-      `).join("")}
-    </div>
-  `;
+  return `<div class="bible-verse-list bible-verse-list-loading" aria-busy="true" aria-label="본문 불러오는 중">${renderLoadingRow("본문 불러오는 중…")}</div>`;
 }
 
 function renderBibleVerseList(verses) {

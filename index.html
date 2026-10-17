@@ -59,11 +59,10 @@
       }
       .mindex-boot-cross { animation: mindex-boot-reveal 500ms ease-in-out both; }
       .mindex-boot-wordmark { animation: mindex-boot-reveal 500ms ease-in-out both; }
-      .mindex-boot-feedback { display: grid; justify-items: center; gap: 5px; width: 160px; margin-top: 10px; opacity: .65; }
-      .mindex-boot-loading { display: flex; align-items: center; justify-content: center; gap: 5px; height: 20px; font: 500 12px/20px system-ui, sans-serif; white-space: nowrap; }
-      .mindex-boot-spinner { box-sizing: border-box; flex: 0 0 14px; width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: mindex-boot-spin 900ms linear infinite; }
-      .mindex-boot-detail { margin: 0; height: 40px; font: 500 12px/20px system-ui, sans-serif; text-align: center; font-variant-numeric: tabular-nums; }
-      .mindex-boot-detail span { display: block; }
+      .mindex-boot-feedback { display: grid; justify-items: center; gap: 5px; width: 200px; margin-top: 10px; }
+      .mindex-loading-row { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 20px; font: 500 14px/20px system-ui, sans-serif; color: var(--ink-3, color-mix(in srgb, var(--mindex-boot-ink, #f3f3ef) 70%, transparent)); }
+      .mindex-loading-spinner { box-sizing: border-box; flex: 0 0 16px; width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: mindex-boot-spin 1s linear infinite; }
+      .mindex-boot-detail { margin: 0; height: 20px; font: 500 12px/20px system-ui, sans-serif; text-align: center; opacity: .7; }
       @keyframes mindex-boot-spin { to { transform: rotate(360deg); } }
       @keyframes mindex-boot-reveal {
         from { opacity: 0; }
@@ -72,7 +71,7 @@
       html.presenter-output-document .mindex-boot { display: none; }
       @media (prefers-reduced-motion: reduce) {
         .mindex-boot { transition: none; }
-        :is(.mindex-boot-cross, .mindex-boot-wordmark, .mindex-boot-spinner) { animation: none; }
+        :is(.mindex-boot-cross, .mindex-boot-wordmark, .mindex-loading-spinner) { animation: none; }
       }
       body.ui-booting .app-shell,
       body.ui-booting .toast-region {
@@ -139,8 +138,8 @@
       </svg>
       <span class="mindex-boot-wordmark" aria-hidden="true">MINDEX</span>
       <div class="mindex-boot-feedback">
-        <div class="mindex-boot-loading"><span class="mindex-boot-spinner" aria-hidden="true"></span><span id="bootStage">시작 준비 중…</span></div>
-        <p class="mindex-boot-detail"><span id="bootElapsed" aria-hidden="true">0초 경과</span><span id="bootDelay"></span></p>
+        <div class="mindex-boot-loading mindex-loading-row"><span class="mindex-boot-spinner mindex-loading-spinner" aria-hidden="true"></span><span id="bootStage">시작 준비 중…</span></div>
+        <p class="mindex-boot-detail"><span id="bootDelay"></span></p>
       </div>
     </div>
     <div id="bootError" class="mindex-boot-error" role="alert" hidden>
@@ -150,20 +149,17 @@
     <script>
       (() => {
         document.body.dataset.theme = document.documentElement.dataset.theme;
-        const started = performance.now();
         const stage = document.getElementById("bootStage");
         window.MINDEX_BOOT_STATUS = (message) => {
           if (document.body.classList.contains("ui-booting") && stage.textContent !== message) stage.textContent = message;
         };
-        const timer = setInterval(() => {
-          const seconds = Math.floor((performance.now() - started) / 1000);
-          document.getElementById("bootElapsed").textContent = `${seconds}초 경과`;
+        const timer = setTimeout(() => {
           const delay = document.getElementById("bootDelay");
-          if (seconds >= 4 && !delay.textContent) delay.textContent = "연결이 지연되고 있어요.";
-        }, 1000);
+          if (!delay.textContent) delay.textContent = "연결이 지연되고 있어요.";
+        }, 4000);
         const observer = new MutationObserver(() => {
           if (!document.body.classList.contains("ui-booting") || document.body.dataset.bootFailed === "true") {
-            clearInterval(timer); observer.disconnect();
+            clearTimeout(timer); observer.disconnect();
           }
         });
         observer.observe(document.body, { attributes: true, attributeFilter: ["class", "data-boot-failed"] });
@@ -263,8 +259,8 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261017-entry-font-scope";
-        const compiledAppVersion = "20261017-entry-font-scope";
+        const fallbackVersion = "20261017-unified-loading";
+        const compiledAppVersion = "20261017-unified-loading";
         const modules = [
           "mindex.icons.js", "vendor/supabase-js.min.js",
           "mindex.constants.js", "mindex.inline-text.js", "mindex.design-tokens.js", "mindex.worship-model.js",

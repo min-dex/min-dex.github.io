@@ -1085,48 +1085,8 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .song-list-empty--loading { padding-top: 7px; }
 .song-list-empty strong { color: var(--ink-3); font-size: 12px; font-weight: 700; }
 .song-list-empty span { color: var(--ink-4); }
-.sidebar-loading-skeleton {
-  display: grid;
-  gap: 4px;
-  padding: var(--s1) 0;
-}
-.sidebar-loading-row {
-  display: block;
-  width: 100%;
-  height: var(--sidebar-row-h);
-  border-radius: var(--r);
-  background: color-mix(in srgb, var(--panel-2) 58%, transparent);
-}
-.sidebar-loading-row--medium { width: 76%; }
-.sidebar-loading-row--short { width: 58%; }
-.detail-loading-skeleton {
-  display: grid;
-  width: min(100%, 560px);
-  gap: var(--s3);
-  align-content: start;
-  padding-top: var(--s1);
-}
-.detail-loading-status {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s2);
-  min-height: var(--h);
-  color: var(--ink-3);
-  font-size: var(--ui-meta-size);
-  font-weight: 600;
-}
-.detail-loading-status .loading-status-dot { width: 14px; height: 14px; }
-.detail-loading-lines { display: grid; gap: var(--s2); }
-.detail-loading-line {
-  display: block;
-  width: 86%;
-  height: 14px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--panel-2) 58%, transparent);
-}
-.detail-loading-line--title { width: 46%; height: 22px; }
-.detail-loading-line--meta { width: 28%; }
-.detail-loading-line--short { width: 62%; }
+.sidebar-loading-skeleton { display: grid; justify-items: center; padding: 20px 10px; }
+.detail-loading-skeleton { display: grid; justify-items: center; align-content: center; width: 100%; padding: 30px 0; }
 .attention-icon {
   display: inline-flex;
   flex: 0 0 auto;
@@ -2461,29 +2421,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   gap: 6px;
   padding-top: var(--s1);
 }
-.bible-verse-list-loading {
-  opacity: .58;
-  pointer-events: none;
-}
-.bible-verse-placeholder {
-  height: 22px;
-  border-radius: var(--r);
-  background:
-    linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--panel-2) 42%, transparent),
-      color-mix(in srgb, var(--line) 18%, transparent),
-      color-mix(in srgb, var(--panel-2) 42%, transparent)
-    );
-  background-size: 200% 100%;
-  margin-left: 32px;
-  width: var(--line-width, 76%);
-  animation: bible-placeholder-pulse 1.4s ease-in-out infinite;
-}
-@keyframes bible-placeholder-pulse {
-  0% { background-position: 100% 0; }
-  100% { background-position: -100% 0; }
-}
+.bible-verse-list-loading { justify-items: center; padding: 30px 0; }
 .bible-section-title {
   margin-top: var(--s2);
   color: var(--accent);
@@ -8677,7 +8615,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 
 /* Service readiness is distinct from missing user input. */
 .detail-pane:has(> .service-view-loading) { padding:0; }
-.service-view-loading { min-height:100%; box-sizing:border-box; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:32px; text-align:center; }
+.service-view-loading { min-height:100%; box-sizing:border-box; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:30px; text-align:center; }
 .service-view-loading h2 { margin:0; font-size:20px; font-weight:600; }
 .service-view-loading p { margin:0; font-size:14px; color:var(--ink-2); }
 .service-view-loading-message, .service-outline-loading { font-size:12px; color:var(--ink-3); line-height:1.6; }
@@ -8692,10 +8630,9 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .svc-board-subgroup-controls .svc-song-picker--linked .svc-song-version-control { flex:1 1 0; width:0; max-width:none; }
 .svc-board-subgroup-controls .svc-song-version-control > .svc-song-version-select { width:100%; padding-right:32px; }
 
-/* Center whole-pane loading only; embedded list skeletons keep their layout. */
+/* Whole-pane and embedded loaders share the same indicator geometry. */
 .detail-pane:has(> .detail-loading-skeleton) { padding:0; }
 .detail-pane > .detail-loading-skeleton { width:100%; min-height:100%; box-sizing:border-box; align-content:center; justify-items:center; padding:30px; }
-.detail-pane > .detail-loading-skeleton > .detail-loading-lines { width:min(100%, 400px); justify-items:center; }
 .service-deferred-empty { max-width:100%; }
 .service-deferred-empty > .btn { margin-top:15px; }
 
