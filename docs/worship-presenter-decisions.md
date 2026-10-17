@@ -2350,3 +2350,16 @@ automatically; the user must select their song once.
   at most 17 ms per fit / 16 ms per drain / 3 ms per scroll assignment while both
   timer and animation-frame gaps approached 1 s. Further render/compositor-level
   investigation remains; do not weaken the assertion or claim all browsers pass.
+
+- A concurrent cold-font public output check initially measured invisible
+  font-display:block fallback glyph bounds while document.fonts.status was
+  loading (the captured output was blank). After font load, the actual face fit
+  correctly. The lyric-bound fixture now awaits fonts introduced by each slide
+  and two paint callbacks; all existing bounds, scale and gutter assertions stay
+  unchanged. Slow-network and 4x CPU diagnostic runs also passed the original
+  bounds checks. This does not promise instant text before fonts arrive.
+- Final ee29a659 public installed-Chrome read-only service open/scroll checks:
+  3127 / 1955 / 1776 ms ready times; 184 / 256 / 197 ms maximum long tasks;
+  no service error or horizontal overflow. Public output checks pass 24 lyric
+  bounds cases, cache/font invalidation and delayed image/background/blackout
+  transitions in Chromium/WebKit. Existing production services remain untouched.

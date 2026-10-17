@@ -25,6 +25,14 @@ def main():
                           renderPresenterOutput({serviceId:'test', chromakey, slides:[slide], index:0}, {});
                         }''', {'text':text,'chromakey':chromakey})
                         page.wait_for_timeout(100)
+                        # New glyphs can start a font load after the initial
+                        # document.fonts.ready. Presenter font-display:block
+                        # hides that fallback text; measure the painted face
+                        # after the existing font-refit callback has completed.
+                        page.evaluate("""async () => {
+                          await document.fonts.ready;
+                          await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                        }""")
                         result = page.evaluate('''() => {
                           const box = document.querySelector('.is-active .presenter-slide-text');
                           const bounds = box.getBoundingClientRect();
