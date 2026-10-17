@@ -105,3 +105,12 @@ Live scripture uses10px outer inset/padding, a20px heading/checkbox line,10px
 heading-to-input gap and35px input. The previous28px checkbox row added invisible
 vertical centering space above the heading. Controller toolbar/panel controls
 also use35px. Output artwork and bulletin print rules are outside this cleanup.
+
+
+## Disclosure headers ·2026-10-18
+
+Worship authoring panel headers and per-item settings summaries use the field
+surface on hover and a2px inset accent outline for keyboard focus. Apply these
+to the actual summary, not its details body; native Enter/Space toggling stays.
+Per-item summary metadata is plain text with5px gaps, without panel-colored
+pills or their horizontal padding. Preserve truncation and warning semantics.

@@ -933,3 +933,12 @@ Live scripture removes excess checkbox-row centering space and uses20px heading,
 Offline Chromium/WebKit checks cover both themes, narrow composer, button hover,
 text contrast and keyboard focus; shared editor surfaces and praise row layouts
 are checked separately. Output/print/data are untouched. See design-system.md.
+
+
+## Worship disclosure feedback ·2026-10-18
+
+Authoring panel and per-item settings summaries now share visible field hover
+and2px inset keyboard focus. Settings metadata drops invisible pill backgrounds
+and padding, retaining5px text gaps. Offline real-editor smoke covers both themes,
+Chromium/WebKit,1440/760/640px, Enter/Space, hover/focus and bounds. No output,
+print, persistence or operational-data changes.

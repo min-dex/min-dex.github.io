@@ -4118,6 +4118,15 @@ body[data-theme="dark"] .service-week-card:hover {
   list-style: none;
   padding: 0 10px;
 }
+.svc-authoring-panel-head:hover,
+.svc-item-note > summary:hover {
+  background: var(--ui-surface-field);
+}
+.svc-authoring-panel-head:focus-visible,
+.svc-item-note > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
 .svc-authoring-panel-head::-webkit-details-marker {
   display: none;
 }
@@ -4834,7 +4843,7 @@ body[data-theme="dark"] .service-week-card:hover {
   min-width: 0;
   align-items: center;
   justify-content: flex-end;
-  gap: 4px;
+  gap: 5px;
   color: var(--ink-4);
   font-size: var(--ui-meta-size);
   font-weight: 700;
@@ -4845,9 +4854,9 @@ body[data-theme="dark"] .service-week-card:hover {
   height: 20px;
   align-items: center;
   overflow: hidden;
-  border-radius: 999px;
-  background: var(--ui-surface-panel);
-  padding: 0 7px;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
