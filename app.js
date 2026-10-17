@@ -2378,16 +2378,24 @@ function readTheme() {
 }
 
 function applyTheme(theme) {
+  const root = document.documentElement;
+  const changed = document.body.dataset.theme !== theme;
+  // Hover transitions must not stagger a whole-document palette change.
+  if (changed) root.classList.add("ui-theme-switching");
   state.theme = theme;
   document.documentElement.dataset.theme = theme;
   document.body.dataset.theme = theme;
+  if (changed) {
+    // Resolve the new palette while transitions are suppressed, before painting.
+    void getComputedStyle(document.body).backgroundColor;
+    root.classList.remove("ui-theme-switching");
+  }
   if (!refs.themeBtn) return;
   const themeLabel = theme === "dark" ? "라이트 모드 사용" : "다크 모드 사용";
   refs.themeBtn.setAttribute("aria-label", themeLabel);
   refs.themeBtn.setAttribute("title", themeLabel);
   refs.themeBtn.innerHTML = `<i data-lucide="${theme === "dark" ? "sun" : "moon"}"></i>`;
-  refreshIcons();
-  resizeFormTextareas();
+  refreshIcons(refs.themeBtn);
 }
 
 function toggleTheme() {

@@ -33,6 +33,7 @@ SMOKES = (
     "smoke_children_audio_db.py",
     "smoke_reference_batch.py",
     "smoke_theme_bootstrap.py",
+    "smoke_theme_switch.py",
     "smoke_scripture_aliases.py",
     "smoke_startup_projection.py",
     "smoke_ui_font_cache.py",

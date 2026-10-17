@@ -536,3 +536,11 @@ No input values, song/version links, medley order or persistence behavior change
 DB: 악보 (새찬송가), 직접 추가: 가사, 직접 추가: 음원이다.
 기존 내부 mode 값과 기본값 lyrics_db는 유지한다. 어린이 음원에는
 가사·송폼·음원·자동 넘김을 함께 불러온다는 안내를 표시한다.
+
+## Synchronous theme switching ·2026-10-18
+
+Apply the entire controller palette in one style update. Suppress CSS transitions
+only during that update, then restore normal hover/disclosure transitions before
+returning. Do not animate opacity or replace editor nodes. Refresh only the theme
+button icon; keep other icons, focused fields, selection, scroll and textarea
+geometry intact. Presenter output documents retain their own transition rules.
