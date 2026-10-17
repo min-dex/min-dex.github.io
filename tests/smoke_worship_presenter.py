@@ -821,7 +821,7 @@ def main() -> int:
                 )
                 if ccm_form_order_state == {
                     "metadataOrder": ["v1", "c"],  # stored sequence wins over song metadata
-                    "disabledOrder": ["v1", "c", "v2"],
+                    "disabledOrder": ["v1", "c", "v2", "c"],
                     "inferredOrder": ["v1", "c", "v2", "c"],
                     "forcedOrder": ["v1", "c", "v1"],
                     "groupedLabels": ["V1A", "V1B"],

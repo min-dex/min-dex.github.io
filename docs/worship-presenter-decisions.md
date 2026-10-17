@@ -2617,3 +2617,12 @@ variance prevents claiming a uniform end-to-end home speedup; the archive
 projection reduction and independent request overlap are directly verified.
 All production probes block writes, including presence registration. Existing
 worship content, lyrics, media and DB settings remain unchanged by this task.
+
+## Empty song form retains playback inference (2026-10-17)
+
+Clearing the form input disables stored/template/song defaults but retains the
+normal V1-C-V2-C playback inference for hymn/CCM lyrics. Existing cleared items
+with formPresetDisabled receive the same read-time behavior, without DB writes.
+The form input remains empty; linking/saving must not materialize this inference.
+Explicit sequences, direct lyric blocks, children audio sets and score selection
+retain their existing rules. A source without verse/chorus stays in source order.

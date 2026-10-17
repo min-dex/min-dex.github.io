@@ -625,7 +625,6 @@ function presenterImageSourcesFromAssetUrl(value) {
 function presenterFormPlanForServiceItem(version = {}, item, song = null) {
   version = version || {};
   const forms = normalizeForms(version.forms || []).filter((form) => normalizeLyricsForCopy(form.lyrics));
-  if (typeof serviceItemFormPresetDisabled === "function" && serviceItemFormPresetDisabled(item)) return { forms, warnings: [] };
   const preset = presenterServiceItemFormPreset(version, item, song);
   const effectivePreset = presenterFormPresetWithAvailableForms(preset, forms);
   if (!effectivePreset?.forms?.length) return { forms, warnings: [] };
@@ -643,7 +642,12 @@ function presenterFormPlanForServiceItem(version = {}, item, song = null) {
 }
 
 function presenterServiceItemFormPreset(version = {}, item = {}, song = null, { includePlaybackFallback = true } = {}) {
-  if (serviceItemFormPresetDisabled(item)) return null;
+  // Clearing the editable form suppresses stored defaults, not the ordinary
+  // verse/chorus playback cycle. Keep the input empty and never persist inference.
+  if (serviceItemFormPresetDisabled(item)) {
+    const forms = normalizeForms(version?.forms || []).filter((form) => normalizeLyricsForCopy(form.lyrics));
+    return includePlaybackFallback ? presenterDefaultVerseChorusFormPreset(forms, song, version) : null;
+  }
   const itemPreset = serviceItemFormPreset(item);
   // Defaults only fill an empty item; a stored sequence keeps its playback order.
   if (itemPreset?.forms?.length) {
