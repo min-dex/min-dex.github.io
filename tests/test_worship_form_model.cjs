@@ -62,3 +62,8 @@ for (const [raw,shown] of [['C@','Chorus @'],['V1@','Verse 1 @'],['C@A','Chorus 
   assert.equal(context.songFormPresetDisplayLabel(raw),shown);
   assert.equal(context.normalizeSongFormPresetLabel(raw).key,context.normalizeSongFormPresetLabel(shown).key);
 }
+
+for (const hint of ['V2-C-V1-C','C-V1-C-V2','V1-C-C']) {
+ assert.equal(context.normalizeServiceFormPreset(undefined,hint).forms.join('-'),context.normalizeServiceFormHint(hint));
+}
+assert.equal(context.normalizeServiceFormPreset({forms:['C','V1']},'V2-C').forms.join('-'),'C-V');

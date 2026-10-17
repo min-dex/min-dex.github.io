@@ -513,7 +513,8 @@ function presenterScoreImageSourcesForFormSequence(imageSources = [], scoreForms
     const group = matchIndex >= 0
       ? groups[matchIndex]
       : lastMatchedByKey.get(target.key)
-        || (!target.number && target.type ? lastMatchedByKey.get(target.type) : null);
+        || (!target.number && target.type ? lastMatchedByKey.get(target.type) : null)
+        || groups.find((candidate) => candidate.target && presenterFormTargetsMatch(target, candidate.target));
     if (!group) return;
     selected.push(group);
     lastMatchedByKey.set(target.key, group);
@@ -768,7 +769,7 @@ function presenterFormPresetWithAvailableForms(preset = null, forms = []) {
   const genericVerseChorusPreset = originalTargets.length
     && originalTargets.every((target) => target.type === "verse" || target.type === "chorus");
   const presetStrength = String(preset?.strength || "").trim().toLowerCase();
-  const exactFormPreset = ["manual", "forced", "default"].includes(presetStrength);
+  const exactFormPreset = ["manual", "forced", "default", "song-default"].includes(presetStrength);
   const canPreserveSupplementalForms = genericVerseChorusPreset && !exactFormPreset;
   const base = presenterRepeatableVerseChorusPresetForms(preset, source) || cleanList(preset.forms);
   const merged = [];
@@ -854,7 +855,7 @@ function presenterFormPresetWithAvailableForms(preset = null, forms = []) {
 
 function presenterRepeatableVerseChorusPresetForms(preset = null, source = []) {
   const strength = String(preset?.strength || "").trim().toLowerCase();
-  if (["default", "forced", "manual"].includes(strength)) return null;
+  if (["default", "forced", "manual", "song-default"].includes(strength)) return null;
   const presetForms = cleanList(preset?.forms);
   const targets = presetForms.map((label) => normalizePresenterFormPresetLabel(label));
   const core = targets.filter((target) => target.type !== "pre-chorus");

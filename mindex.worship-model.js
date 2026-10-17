@@ -256,7 +256,7 @@ function normalizeServiceFormPreset(value, fallbackHint = "", fallbackStrength =
       ? normalizeServiceFormPresetForms(value)
       : source
         ? normalizeServiceFormPresetForms(source.forms || source.form || source.sequence || source.labels || source.items || sourceHint)
-        : [];
+        : normalizeServiceFormPresetForms(fallbackHint);
   const hint = firstNonBlankString(
     source?.hint,
     source?.formHint,

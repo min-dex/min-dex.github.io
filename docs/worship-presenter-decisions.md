@@ -2626,3 +2626,14 @@ with formPresetDisabled receive the same read-time behavior, without DB writes.
 The form input remains empty; linking/saving must not materialize this inference.
 Explicit sequences, direct lyric blocks, children audio sets and score selection
 retain their existing rules. A source without verse/chorus stays in source order.
+
+## Explicit form order across lyrics and scores (2026-10-17)
+
+Song/version metadata with song-default strength is an authored sequence: preserve
+its order, repetitions and omissions; do not expand it as a generic V/C suggestion.
+Automatic playback inference remains for empty forms, including cleared inputs.
+Legacy formHint/form_hint/forms-only memo strings normalize into a real sequence
+on read without rewriting stored records. Explicit preset arrays take precedence.
+Score sequence lookup may revisit an earlier, not-yet-selected labelled group;
+keep all continuation pages with that group and retain normal repeated-group
+selection. Unknown requested labels do not select unrelated pages. No DB writes.

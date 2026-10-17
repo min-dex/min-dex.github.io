@@ -852,10 +852,10 @@ sections:
 V1-C-V2-C-...-B-Coda
 ```
 
-Older metadata may still contain shapes such as `V1-V2-C-V3-Coda`. Treat those
-as legacy default metadata and normalize them at read time to the cycle above.
-Do not apply this rewrite to manual worship-item overrides; explicit manual
-forms are operator intent.
+Use this inferred cycle only when no authored sequence applies. Song/version
+metadata (including `song-default`) and manual worship-item overrides are operator
+intent: preserve their order, repetitions and omissions. Legacy formHint-only
+strings are authored sequences too. Do not rewrite stored metadata into a cycle.
 
 Public special-song hymns keep their separate public preset:
 

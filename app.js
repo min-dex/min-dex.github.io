@@ -10812,7 +10812,7 @@ function parseServiceItemMemo(value) {
         manualScripture: normalizeServiceManualScripture(parsed.manualScripture || parsed.manual_scripture),
         introSlide,
         formHint: String(parsed.formHint || parsed.form_hint || parsed.forms || "").trim(),
-        formPreset: normalizeServiceFormPreset(parsed.formPreset || parsed.form_preset, parsed.formHint || parsed.form_hint),
+        formPreset: normalizeServiceFormPreset(parsed.formPreset || parsed.form_preset, parsed.formHint || parsed.form_hint || parsed.forms),
         formPresetDisabled: Boolean(parsed.formPresetDisabled || parsed.form_preset_disabled || parsed.disableFormPreset || parsed.disable_form_preset),
         formPresetRules: normalizeServiceFormPresetRules(parsed.formPresetRules || parsed.form_preset_rules),
         templateKey: String(parsed.templateKey || parsed.template_key || "").trim(),
