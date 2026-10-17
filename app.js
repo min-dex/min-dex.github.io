@@ -1355,6 +1355,21 @@ function bindStaticEvents() {
     button.addEventListener("click", () => handleNavigationRailClick(button));
   });
   document.getElementById("globalPlaybackControls")?.addEventListener("click", handleGlobalPlaybackAction);
+  bindDetailInteractionRoot(document.getElementById("globalPlaybackControls"));
+  document.getElementById("globalPlaybackControls")?.addEventListener("toggle", (event) => {
+    if (event.target.id !== "globalPlaybackPanel" || event.newState !== "closed") return;
+    if (document.activeElement === document.body || event.target.contains(document.activeElement)) {
+      document.querySelector(".global-playback-trigger")?.focus({ preventScroll: true });
+    }
+  }, true);
+  document.getElementById("globalPlaybackControls")?.addEventListener("keydown", (event) => {
+    const panel = document.getElementById("globalPlaybackPanel");
+    if (event.key !== "Escape" || !panel?.matches(":popover-open")) return;
+    event.preventDefault();
+    event.stopPropagation();
+    panel.hidePopover();
+    document.querySelector(".global-playback-trigger")?.focus({ preventScroll: true });
+  });
   refs.themeBtn.addEventListener("click", toggleTheme);
   document.getElementById("returnLiveServiceBtn")?.addEventListener("click", returnToLiveService);
   refs.newSongBtn?.addEventListener("click", () => createPraiseSong());
@@ -25172,6 +25187,7 @@ function renderServicePrepEditorDialog(service) {
             ${renderServiceAuthoringPanel("Service", "예배 정보", renderServiceMetaEditor(service))}
             ${renderServiceAuthoringPanel("Section", "기본 섹션 추가", renderServiceOrderTemplate(typeObj))}
           </div>
+          ${renderPresenterServiceInputRail(service)}
           <section class="svc-prep-editor-section" aria-label="예배 순서 편집">
             ${renderServiceEditorHeader("")}
             <div class="svc-editor-items">
@@ -28496,6 +28512,9 @@ function updateServiceMusicTransportControls() {
 }
 
 function handleGlobalPlaybackAction(event) {
+  // Safari does not focus buttons on pointer clicks. Give the native popover
+  // a stable return target without overriding outside-click focus.
+  event.target.closest('.global-playback-trigger')?.focus({ preventScroll: true });
   const button = event.target.closest("[data-global-playback-action]");
   if (!button) return;
   const action = button.dataset.globalPlaybackAction;
@@ -28527,22 +28546,34 @@ function renderGlobalPlaybackControls() {
   const toggleLabel = music.pending ? "음악 준비 취소" : music.playing ? "음악 일시정지" : "음악 재생";
   const icon = music.pending ? "loader-circle" : music.playing ? "pause" : "play";
   const outputState = state.presenter.safetyBlank ? "송출 중 · 화면 가림" : "예배 송출 중";
-  const html = `${hasMusic ? `<div class="global-playback-group" role="group" aria-label="현재 음악">
-    <span class="global-playback-label" title="${escapeAttr(music.sourceLabel || music.fileName || "음악")}"><span class="global-playback-state" role="status">${musicState}</span><span class="global-playback-name">${escapeHtml(music.sourceLabel || music.fileName || "음악")}</span></span>
-    <button type="button" class="icon-btn" data-global-playback-action="toggle" title="${toggleLabel}" aria-label="${toggleLabel}" aria-pressed="${Boolean(music.playing)}"><i data-lucide="${icon}"></i></button>
-    <button type="button" class="icon-btn" data-global-playback-action="stop" title="음악 정지" aria-label="음악 정지" ${music.pending || music.playing || music.audio?.currentTime ? "" : "disabled"}><i data-lucide="square"></i></button>
-  </div>` : ""}${outputOpen ? `<div class="global-playback-group" role="group" aria-label="현재 예배 송출">
-    <button type="button" class="global-playback-return" data-global-playback-action="return" title="${escapeAttr(service?.title || "송출 예배로 돌아가기")}" aria-label="송출 예배로 돌아가기"><i data-lucide="radio"></i><span class="global-playback-label"><span class="global-playback-state" role="status">${outputState}</span><span class="global-playback-name">${escapeHtml(service?.title || "송출 예배로")}</span></span></button>
-    <button type="button" class="icon-btn" data-global-playback-action="output-stop" title="예배 송출 종료" aria-label="예배 송출 종료"><i data-lucide="square"></i></button>
-  </div>` : ""}`;
-  root.hidden = !hasMusic && !outputOpen;
+  const available = hasMusic || outputOpen || state.module === "presenter";
+  const html = `<button class="icon-btn global-playback-trigger" type="button" popovertarget="globalPlaybackPanel" title="송출·음악 제어" aria-label="송출·음악 제어" data-active="${Boolean(outputOpen || music.playing)}"><i data-lucide="sliders-horizontal"></i></button>
+    <section id="globalPlaybackPanel" class="global-playback-panel" popover aria-label="송출·음악 제어">
+      <header class="global-playback-panel-head"><strong>송출·음악</strong><button class="icon-btn" type="button" popovertarget="globalPlaybackPanel" popovertargetaction="hide" aria-label="송출·음악 제어 닫기"><i data-lucide="x"></i></button></header>
+      <div class="global-playback-group" role="group" aria-label="현재 예배 송출" ${outputOpen ? "" : "hidden"}>
+        <button type="button" class="global-playback-return" data-global-playback-action="return" title="송출 예배로 돌아가기" aria-label="송출 예배로 돌아가기"><i data-lucide="radio"></i><span class="global-playback-label"><span class="global-playback-state" role="status">${outputState}</span><span class="global-playback-name">${escapeHtml(service?.title || "송출 예배로")}</span></span></button>
+        <button type="button" class="btn secondary global-playback-stop" data-global-playback-action="output-stop" aria-label="예배 송출 종료">송출 종료</button>
+      </div>
+      <p class="global-playback-empty" ${outputOpen ? "hidden" : ""}>송출 중인 예배가 없습니다.</p>
+      <div class="global-playback-group" role="group" aria-label="현재 음악" ${hasMusic ? "" : "hidden"}>
+        <span class="global-playback-label"><span class="global-playback-state" role="status">${musicState}</span><span class="global-playback-name">${escapeHtml(music.sourceLabel || music.fileName || "음악")}</span></span>
+        <button type="button" class="icon-btn" data-global-playback-action="toggle" title="${toggleLabel}" aria-label="${toggleLabel}" aria-pressed="${Boolean(music.playing)}"><i data-lucide="${icon}"></i></button>
+        <button type="button" class="btn secondary global-playback-stop" data-global-playback-action="stop" aria-label="음악 정지" ${music.pending || music.playing || music.audio?.currentTime ? "" : "disabled"}>음악 정지</button>
+      </div>
+      <div class="svc-presenter-window-controls global-playback-settings">${renderPresenterScreenControl()}${renderPresenterAlwaysOnTopControl()}</div>
+    </section>`;
+  if (!available) root.querySelector(':popover-open')?.hidePopover();
+  root.hidden = !available;
   if (root._playbackMarkup === html) return;
-  const focusedAction = root.contains(document.activeElement)
-    ? document.activeElement?.dataset?.globalPlaybackAction : "";
   root._playbackMarkup = html;
-  root.innerHTML = html;
-  refreshIcons(root);
-  if (focusedAction) root.querySelector(`[data-global-playback-action="${focusedAction}"]`)?.focus({ preventScroll: true });
+  const template = document.createElement("template");
+  template.innerHTML = html;
+  refreshIcons(template.content);
+  if (root.childNodes.length) {
+    const next = root.cloneNode(false);
+    next.append(template.content);
+    patchPresenterControlTree(root, next);
+  } else root.append(template.content);
 }
 
 function renderLiveServiceReturnControl() {

@@ -436,10 +436,15 @@ states retain their message but do not repeat edition buttons; use the sidebar.
 ## Controller essentials and conflict choices · 2026-10-17
 
 The presenter keeps preview, slide navigation, start/stop, blackout and live
-scripture immediately available. Screen detection, always-on-top and preparation
-inputs live under collapsed `편집·설정`; an expanded section survives controller
-refreshes. Folding never clears input or changes output/music. Blackout uses the
-existing jump-to-zero pipeline and is available only for this service's open output.
+scripture immediately available. Preparation inputs live in the existing worship
+order editor, opened by `예배 순서 편집`; no expandable settings section extends
+the controller. Screen detection and always-on-top live in the `송출·음악` popover.
+A compact topbar launcher opens it without widening tabs or extending a sidebar.
+State refresh preserves the open panel; Esc closes it without stopping output.
+`송출 종료` and `음악 정지` use explicit text and keep independent owners/actions.
+The launcher is available before output in Presenter and across modules during
+active output/music. Blackout uses the existing jump-to-zero pipeline and is
+available only for this service's open output.
 
 Conflict review labels pending fields as `내 편집 항목`, not proven conflicts.
 `편집 계속하기` closes without saving and works even when inspection fails.

@@ -17,6 +17,7 @@ def main():
                       const check=(v,m)=>{if(!v)throw Error(m)};
                       const host=document.getElementById('globalPlaybackControls');
                       renderGlobalPlaybackControls();check(host.hidden,'idle transport shown');
+                      state.module='presenter';renderGlobalPlaybackControls();check(!host.hidden,'display setup unavailable before output');
                       state.module='service';state.selectedServiceId='other';
                       state.services=[{id:'owner',type_id:'friday',title:'금요기도회 자율기도'},{id:'other',title:'다른 예배'}];
                       const audio={paused:true,currentTime:0,src:'',pause(){this.paused=true},play(){this.paused=false;return Promise.resolve()},removeAttribute(){this.src=''}};
@@ -43,9 +44,30 @@ def main():
                       state.presenter.outputWindow={closed:false,close(){this.closed=true}};renderGlobalPlaybackControls();
                       clearServiceMusicSyncTimer();return 'PASS navigation, owner controls, pause/resume/stop, pending cancellation and independent output stop';
                     }'''),flush=True)
-                    for width in (1440,1000,800):
+                    launcher=page.locator('[popovertarget="globalPlaybackPanel"]').first
+                    launcher.click()
+                    panel=page.locator('#globalPlaybackPanel')
+                    assert panel.is_visible()
+                    assert panel.get_by_role('button',name='예배 송출 종료').inner_text()=='송출 종료'
+                    assert panel.locator('[data-presenter-action="detect-screens"]').is_visible()
+                    before=page.locator('#globalPlaybackControls').bounding_box()
+                    page.evaluate('renderGlobalPlaybackControls()')
+                    assert panel.is_visible()
+                    panel.locator('[data-global-playback-action="toggle"]').click()
+                    assert panel.is_visible(), 'playback refresh closed panel'
+                    assert page.locator('#globalPlaybackControls').bounding_box()['width']==before['width']
+                    for width in (1440,1000,800,390):
                         page.set_viewport_size({'width':width,'height':900})
                         assert page.evaluate('''()=>{const r=document.getElementById('globalPlaybackControls');return r.scrollWidth<=r.clientWidth+1}'''),f'overflow {width}'
+                        box=panel.bounding_box()
+                        assert box['x']>=0 and box['x']+box['width']<=width+1,box
+                        page.screenshot(path=f'/tmp/mindex-global-panel-{engine}-{width}.png')
+                    page.evaluate("applyTheme('dark')")
+                    page.set_viewport_size({'width':1440,'height':900})
+                    page.screenshot(path=f'/tmp/mindex-global-panel-{engine}-dark.png')
+                    page.keyboard.press('Escape')
+                    assert not panel.is_visible()
+                    page.wait_for_function('document.activeElement===document.querySelector(".global-playback-trigger")')
                     page.set_viewport_size({'width':1440,'height':900})
                     page.screenshot(path='/tmp/mindex-global-playback-'+engine+'.png')
                 finally:browser.close()

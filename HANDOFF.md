@@ -658,3 +658,20 @@ Validation: third-hymn sync unit tests, edit-sync/sermon-scope smoke, conflict r
 and controller essentials in Chromium/WebKit at desktop/mobile widths, global
 playback smoke, and Cloud baseline (7 unit + 5 smoke entry points). This is local
 isolated-browser verification, not hardware output or Cloud execution.
+
+
+## Transport popover and existing preparation editor · 2026-10-17
+
+Supersedes the collapsed controller settings introduced earlier today. Global
+output/music controls now open from a compact topbar launcher in a native popover;
+state updates preserve the panel and playback. Stop actions are labelled
+`송출 종료` and `음악 정지`. Screen selection and always-on-top share this panel.
+Preparation fields move into the existing order editor, preserving service-scoped
+drafts and Apply; the controller has an `예배 순서 편집` shortcut instead of
+`편집·설정`. No extra preparation panel and no production data changes.
+
+Local checks: Chromium/WebKit actual popover clicks, narrow/desktop layout, Esc
+focus return, playback owner isolation, preparation draft rerender retention,
+fixed-label preparation test, live-controller stability and Cloud baseline.
+The two linked-song audit findings (song-clear display mode and empty third hymn
+form protection) remain separate from this UI change.

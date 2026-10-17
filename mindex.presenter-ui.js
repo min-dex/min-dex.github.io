@@ -214,14 +214,7 @@ function renderPresenterRightSidebar(service, slides, active, index) {
         ${slides.filter((slide, index) => slide.liveScriptureControl && slide.elementId
           && slides.findIndex((candidate) => candidate.liveScriptureControl && candidate.elementId === slide.elementId) === index)
           .map((slide) => renderPresenterCitationComposer({ slides: [{ slide }] }, service.id)).join("")}
-        <details class="svc-presenter-secondary-controls" data-presenter-secondary-controls data-service-id="${escapeAttr(service.id)}" ${document.querySelector(`[data-presenter-secondary-controls][data-service-id="${cssEscape(service.id)}"]`)?.open ? "open" : ""}>
-          <summary>편집·설정</summary>
-          <div class="svc-presenter-window-controls">
-            ${renderPresenterScreenControl()}
-            ${renderPresenterAlwaysOnTopControl()}
-          </div>
-          ${renderPresenterServiceInputRail(service)}
-        </details>
+        <button class="btn secondary" type="button" data-service-prep-editor-open="${escapeAttr(service.id)}">예배 순서 편집</button>
       </div>
     </div>`;
 }

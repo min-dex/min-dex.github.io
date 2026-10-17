@@ -33,11 +33,21 @@ try:
     boxes=[host.locator(selector).bounding_box() for selector in ('.svc-slide-counter','[aria-label="암전"]','[data-presenter-action="next"]')]
     assert max(box['y'] for box in boxes)-min(box['y'] for box in boxes)<5,boxes
     page.screenshot(path=f'/tmp/mindex-core-{engine}-{width}.png')
-    host.locator('summary').click()
+    assert host.locator('[data-presenter-secondary-controls]').count()==0
+    page.evaluate("window.__openedEditor=null;openServicePrepEditor=id=>window.__openedEditor=id")
+    host.locator('[data-service-prep-editor-open]').click()
+    assert page.evaluate('window.__openedEditor')=='essentials'
+    page.evaluate("document.querySelector('#essentials').remove();state.selectedServiceId=state.services[0].id;refs.detailPane.innerHTML=renderServicePrepEditorDialog(state.services[0])")
+    host=page.locator('#detailPane')
     assert host.locator('[data-presenter-preparation-apply]').is_visible()
-    assert host.locator('[data-presenter-action="detect-screens"]').is_visible()
-    page.evaluate('''()=>{const host=document.querySelector('#essentials');host.innerHTML=renderPresenterRightSidebar(state.services[0],state.presenter.slides,true,0);if(!host.querySelector('details').open)throw Error('settings collapsed on update');}''')
+    assert host.locator('[data-presenter-action="detect-screens"]').count()==0
+    field=host.locator('[data-presenter-preparation-field]').first
+    field.fill('입력 초안 보존')
+    page.evaluate('refs.detailPane.innerHTML=renderServicePrepEditorDialog(state.services[0])')
+    assert host.locator('[data-presenter-preparation-field]').first.input_value()=='입력 초안 보존'
+    page.evaluate("applyTheme('dark')")
+    page.screenshot(path=f'/tmp/mindex-editor-{engine}-{width}.png')
     assert page.evaluate('window.__controllerCalls.length')==1
-    page.close();print('PASS',engine,width,'core visible, editing/settings folded, blackout routed, expanded state retained',flush=True)
+    page.close();print('PASS',engine,width,'core visible, editor shortcut, preparation in existing editor, blackout routed',flush=True)
    b.close()
 finally:server.shutdown()

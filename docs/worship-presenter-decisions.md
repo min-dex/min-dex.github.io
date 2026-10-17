@@ -2112,3 +2112,20 @@ combinations using renderPresenterOutput, four lower-bar layouts and blank
 transition. Only active layers own backing; hidden previous frames cannot
 recolor blank output. The inherent one-device-pixel antialiased outer boundary
 of a fractional green stage is excluded from outside-letterbox checks.
+
+
+## Transport popover and existing preparation editor · 2026-10-17
+
+Supersedes the collapsed controller settings introduced earlier today. Global
+output/music controls now open from a compact topbar launcher in a native popover;
+state updates preserve the panel and playback. Stop actions are labelled
+`송출 종료` and `음악 정지`. Screen selection and always-on-top share this panel.
+Preparation fields move into the existing order editor, preserving service-scoped
+drafts and Apply; the controller has an `예배 순서 편집` shortcut instead of
+`편집·설정`. No extra preparation panel and no production data changes.
+
+Local checks: Chromium/WebKit actual popover clicks, narrow/desktop layout, Esc
+focus return, playback owner isolation, preparation draft rerender retention,
+fixed-label preparation test, live-controller stability and Cloud baseline.
+The two linked-song audit findings (song-clear display mode and empty third hymn
+form protection) remain separate from this UI change.
