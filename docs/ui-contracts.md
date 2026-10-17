@@ -436,9 +436,9 @@ states retain their message but do not repeat edition buttons; use the sidebar.
 ## Controller essentials and conflict choices · 2026-10-17
 
 The presenter keeps preview, slide navigation, start/stop, blackout and live
-scripture immediately available. Preparation inputs live in the existing worship
-order editor, opened by `예배 순서 편집`; no expandable settings section extends
-the controller. Screen detection and always-on-top live in the `송출·음악` popover.
+scripture immediately available. Live scripture follows the preview, followed by always-visible `예배 순서 입력`
+fields and Apply in the right controller. The separate order editor retains
+structural editing without a duplicate preparation form. Screen detection and always-on-top live in the `송출·음악` popover.
 A compact topbar launcher opens it without widening tabs or extending a sidebar.
 State refresh preserves the open panel; Esc closes it without stopping output.
 `송출 종료` and `음악 정지` use explicit text and keep independent owners/actions.

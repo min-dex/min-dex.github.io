@@ -31,6 +31,8 @@ try:
                   assert(document.querySelectorAll('[data-presenter-citation-reference-input]').length===1,'duplicate input');
                   const composer=input.closest('.svc-citation-composer');
                   const rail=sidebar.querySelector('.svc-presenter-input-rail');
+                  const preview=sidebar.querySelector('.svc-presenter-live-panel');
+                  assert(preview.getBoundingClientRect().bottom<=composer.getBoundingClientRect().top+1,'live scripture must follow preview');
                   assert(composer.getBoundingClientRect().bottom<=rail.getBoundingClientRect().top+1,'input order/overlap');
                   assert(sidebar.scrollWidth<=sidebar.clientWidth+1,'sidebar overflow');
                   input.value='요 15:9';input.focus({preventScroll:true});input.setSelectionRange(2,4);

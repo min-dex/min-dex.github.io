@@ -2235,3 +2235,17 @@ labels keep their own row. Input mode uses the same inset chevron wrapper as
 version; other editor selects use a matching inset indicator. Native keyboard
 selection and data attributes remain unchanged. Board background-photo controls
 are offered once with header actions, not duplicated inside the field row.
+
+## Restore inline preparation inputs (2026-10-17)
+
+User reverted the preparation-editor relocation. Keep live scripture below the
+preview, then the always-visible preparation fields and Apply in the right rail.
+Remove the duplicate preparation fields from the structural order dialog and the
+replacement sidebar shortcut. Preserve per-service drafts, existing Apply and
+atomic saves. Transport popover and structural editing remain available.
+
+Validation: controller essentials and citation sidebar checks pass Chromium/WebKit
+at desktop and narrow widths, including draft/caret/scroll retention and preview
+placement. Fixed-label preparation and live-controller stability pass both engines.
+Local Cloud baseline passes 7 unit + 5 smoke entry points; this is not Cloud
+execution or deployment. Existing production worship records are untouched.

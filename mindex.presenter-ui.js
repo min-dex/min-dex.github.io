@@ -214,7 +214,7 @@ function renderPresenterRightSidebar(service, slides, active, index) {
         ${slides.filter((slide, index) => slide.liveScriptureControl && slide.elementId
           && slides.findIndex((candidate) => candidate.liveScriptureControl && candidate.elementId === slide.elementId) === index)
           .map((slide) => renderPresenterCitationComposer({ slides: [{ slide }] }, service.id)).join("")}
-        <button class="btn secondary" type="button" data-service-prep-editor-open="${escapeAttr(service.id)}">예배 순서 편집</button>
+        ${renderPresenterServiceInputRail(service)}
       </div>
     </div>`;
 }

@@ -25266,7 +25266,6 @@ function renderServicePrepEditorDialog(service) {
             ${renderServiceAuthoringPanel("Service", "예배 정보", renderServiceMetaEditor(service))}
             ${renderServiceAuthoringPanel("Section", "기본 섹션 추가", renderServiceOrderTemplate(typeObj))}
           </div>
-          ${renderPresenterServiceInputRail(service)}
           <section class="svc-prep-editor-section" aria-label="예배 순서 편집">
             ${renderServiceEditorHeader("")}
             <div class="svc-editor-items">
