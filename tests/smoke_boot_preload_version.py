@@ -1,6 +1,12 @@
 """Speculation overlaps release lookup but never executes a stale fallback version."""
 import os
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
+from pathlib import Path
+import re
+html=Path('index.html').read_text()
+fallback=re.search(r'const fallbackVersion = "([^"]+)"',html)[1]
+compiled=re.search(r'const compiledAppVersion = "([^"]+)"',html)[1]
+app_asset='app.runtime.js' if fallback==compiled else 'app.js'
 from urllib.parse import urlsplit,parse_qs
 from smoke_app import launch_chromium,start_local_app_server,sync_playwright
 server,url=start_local_app_server()
@@ -12,14 +18,14 @@ try:
    page.route('**/*',lambda r:r.continue_() if urlsplit(r.request.url).hostname=='127.0.0.1' else r.abort())
    page.route('**/mindex-release.json*',lambda r:held.append(r))
    page.on('request',lambda r:requests.append(r.url))
-   page.goto(url,wait_until='domcontentloaded');page.wait_for_function("document.querySelector('link[as=script][href*=\"app.runtime.js\"]')")
+   page.goto(url,wait_until='domcontentloaded');page.wait_for_function(f"document.querySelector('link[as=script][href*=\"{app_asset}\"]')")
    page.wait_for_timeout(150)
-   assert held and any('/app.runtime.js?' in u for u in requests) and any('/styles.css?' in u for u in requests)
-   assert next(i for i,u in enumerate(requests) if '/mindex-release.json' in u) < next(i for i,u in enumerate(requests) if '/app.runtime.js?' in u), 'release lookup queued behind speculative scripts'
+   assert held and any('/'+app_asset+'?' in u for u in requests) and any('/styles.css?' in u for u in requests)
+   assert next(i for i,u in enumerate(requests) if '/mindex-release.json' in u) < next(i for i,u in enumerate(requests) if '/'+app_asset+'?' in u), 'release lookup queued behind speculative scripts'
    script_preloads=page.locator('link[as=script]').evaluate_all('(nodes)=>nodes.map(n=>n.getAttribute("href"))')
-   assert script_preloads[0].startswith('./app.runtime.js?'),script_preloads
-   assert sum('/app.runtime.js?' in u for u in script_preloads)==1
-   assert next(i for i,u in enumerate(requests) if '/styles.css?' in u) < next(i for i,u in enumerate(requests) if '/app.runtime.js?' in u), 'stylesheet gate queued behind scripts'
+   assert script_preloads[0].startswith('./'+app_asset+'?'),script_preloads
+   assert sum('/'+app_asset+'?' in u for u in script_preloads)==1
+   assert next(i for i,u in enumerate(requests) if '/styles.css?' in u) < next(i for i,u in enumerate(requests) if '/'+app_asset+'?' in u), 'stylesheet gate queued behind scripts'
    assert page.evaluate("typeof state==='undefined'")
    for r in held:r.fulfill(json={'version':'test-resolved-release'})
    page.wait_for_function("typeof state!=='undefined'&&!document.body.classList.contains('ui-booting')")

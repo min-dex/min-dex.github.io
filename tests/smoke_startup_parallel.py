@@ -1,4 +1,10 @@
 """Bootstrap downloads overlap without changing dependency execution order."""
+from pathlib import Path
+import re
+html=Path('index.html').read_text()
+fallback=re.search(r'const fallbackVersion = "([^"]+)"',html)[1]
+compiled=re.search(r'const compiledAppVersion = "([^"]+)"',html)[1]
+app_asset='app.runtime.js' if fallback==compiled else 'app.js'
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 
@@ -21,9 +27,9 @@ def main():
                         page.on('request', lambda r: requested.append(r.url))
                         page.on('pageerror', lambda e: errors.append(str(e)))
                         page.goto(url + ('?output=presenter' if mode == 'output' else ''), wait_until='domcontentloaded')
-                        page.wait_for_function("!!document.querySelector('link[as=script][href*=\"app.runtime.js\"]')")
+                        page.wait_for_function(f"!!document.querySelector('link[as=script][href*=\"{app_asset}\"]')")
                         page.wait_for_timeout(200)
-                        assert held and any('/app.runtime.js?' in u for u in requested)
+                        assert held and any('/'+app_asset+'?' in u for u in requested)
                         assert page.evaluate("typeof window.lucide==='undefined'")
                         fonts = page.locator('link[rel=preload][as=font][href*=freesentation]').count()
                         assert fonts == (0 if mode == 'home' else 3 if mode == 'output' else 4), (mode, fonts)

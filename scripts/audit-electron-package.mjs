@@ -9,6 +9,8 @@ const roots = [
   "mindex.constants.js",
   "mindex.design-tokens.js",
   "mindex.presenter.js",
+  "mindex.song-timing.js",
+  "mindex.scripture-repair-display.js",
   "mindex.worship-input.js",
   "mindex.presenter-ui.js",
   "mindex.setlist-links.js",

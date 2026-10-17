@@ -720,3 +720,10 @@ Node + 11 smoke entry points; integrated startup, input/timing, preview/output
 checks pass, including 32 lyric-bound cases per engine with rare glyphs. Exact
 font coverage additionally checks disjoint CSS ranges against all source glyphs;
 UI fonts retain their original unicode ranges and 11,700 outline/advance checks.
+
+Automatic desktop CI exposed two pre-existing missing package entries:
+`mindex.song-timing.js` and `mindex.scripture-repair-display.js`. Both are now
+included with `app.runtime.js`; the runtime-file test also recognizes the compiled
+filename. `pnpm electron:check` passes (offline only, no credentials/signing or
+public desktop release). Startup tests derive speculative source/runtime choice
+from the release contract so future deliberate source fallback remains tested.
