@@ -272,10 +272,10 @@ Local read/search/copy and source display pass. Deployment status is recorded in
 docs/bible-asv-deployment-20261016.json. WEB is Biblia-only. NIV/ESV API access
 remains pending accounts/licensed access; this addition does not activate them.
 
-## Compact runtime/presenter-font candidate · 2026-10-17
+## Compact runtime/presenter fonts deployed · 2026-10-17
 
-Prepared a conservative generated app runtime and common-glyph presenter faces;
+Deployed a conservative generated app runtime and common-glyph presenter faces;
 source/full fonts remain intact. See docs/code-organization.md for regeneration
 and freshness fallback. Local hash, exact glyph, cache, save, startup recovery,
-preview fit and output checks pass; deployment verification is recorded separately
-in HANDOFF.md after integration. No production worship data was changed.
+preview fit and output checks pass locally and on the public deployment; exact
+verification is recorded in HANDOFF.md. No production worship data was changed.

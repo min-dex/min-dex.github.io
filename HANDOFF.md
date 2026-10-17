@@ -727,3 +727,25 @@ included with `app.runtime.js`; the runtime-file test also recognizes the compil
 filename. `pnpm electron:check` passes (offline only, no credentials/signing or
 public desktop release). Startup tests derive speculative source/runtime choice
 from the release contract so future deliberate source fallback remains tested.
+
+Public web verification: Pages run 39028460461 (`fee6416d`) succeeded; version
+`20261017-compact-runtime-fonts`. Twelve published runtime/CSS/font files match
+local SHA256 exactly. CDN gzip app response: 331280 → 258671 bytes (21.92% less).
+Ordinary output downloads only the three common faces, total 546004 bytes, with
+no duplicate full-font request. Rare glyph fallback remains available.
+
+Public Chromium/WebKit pass: actual save functions with isolated fake RPCs
+(full/element save, rollback, linked-service aggregate, inflight drafts, no legacy
+fallback), 180 preview fits each with zero clipped/mismatched results (max event
+loop gaps 50/42 ms), 32 lyric bounds each including rare glyphs, delayed-media
+frame preservation and blackout protection. Network routes disallow real DB
+writes; no existing worship was modified or test record inserted. Timing varies
+with network/CDN conditions; these byte reductions are not a fixed load-time SLA.
+
+Linux Cloud run 39028269079 passed 12 Node + 11 smoke entry points for the same
+web runtime. The packaging/test-only follow-up has its own CI run; no signed
+installer, auto-update publication or public desktop release was requested.
+
+Follow-up Linux Cloud run 39028460944 (`fee6416d`) also succeeded. Both macOS and
+Windows runners passed the corrected offline `pnpm electron:check`; unsigned
+installer CI is separate from web deployment and does not publish an update.
