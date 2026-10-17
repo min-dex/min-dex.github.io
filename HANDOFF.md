@@ -790,3 +790,42 @@ input/editor, 180-thumbnail fit, scripture lookup, 32 lyric-bound cases per engi
 output swaps and blackout checks passed. Existing read/write guards, atomic save
 and font/fit thresholds remain unchanged. All source glyphs remain covered with
 11,700 exact UI glyph/weight outline and advance comparisons.
+
+### Entry performance: deployed verification (2026-10-17)
+
+Published with upstream loading UI changes in `9375ee38`, release
+`20261017-unified-loading`. Pages run 39031119615 and Linux Cloud web checks
+39031119854 succeeded. Public SHA-256 matched 12 checked local files, including
+source/runtime, entry HTML, CSS, release manifest and six presenter common fonts.
+
+Three fresh native-cache profiles per engine, same read-only service, medians:
+
+| Measure (seconds) | Chrome before / after | WebKit before / after |
+| --- | --- | --- |
+| Shell visible | 2.030 / .900 | .929 / 1.571 |
+| Home current data | 4.231 / 1.563 | 2.197 / 2.207 |
+| Service first visible board | 3.446 / 1.656 | 1.236 / 1.592 |
+| Fonts and visible fit ready | 5.827 / 2.023 | 8.835 / 2.971 |
+| Same-profile reentry ready | .178 / 1.091 | .205 / .336 |
+
+Before was `20261017-compact-boot-progress`; after was the release above.
+These small sequential live-network samples do not establish causal speedups for
+all timings. WebKit initial visibility did not improve, and reentry was slower.
+First-visible timing must not be conflated with all-font readiness. The former
+full UI font transfer (~2.06 MB, present in all three WebKit before entries) was
+absent from all after entries. Routed crossover and exact font coverage tests
+independently support the fallback fix. No glyphs were removed.
+
+Follow-up Chrome CPU profile: completed home rendering totals ~195 ms; entry
+still has actual scripture-resolution/hydration updates. Reentry full render
+~349 ms includes ~166 ms rectangle/layout reads. These remain optimization
+candidates, not fixed or claimed eliminated here. Freshness-related scripture
+updates remain enabled; no stale cache was introduced to improve measurements.
+
+Public Chrome/WebKit checks passed: runtime-only boot and common output fonts,
+actual full/element atomic-save functions with fake RPC, rollback and sibling/
+inflight draft isolation, linked document save, 180-preview scrolling/fitting
+(no clipping or mismatches; max gaps 131/91 ms), 32 lyric bounds cases per engine,
+output swaps and late backgrounds preserving blackout. All production writes
+were blocked; existing worship data was only read, and no test records were
+created. Raw measurements/profiles stay in private /private/tmp/mindex-perf.
