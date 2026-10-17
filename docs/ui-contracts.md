@@ -520,3 +520,13 @@ Praise visual refinement: version columns and headers share15px gutters. Lyric
 cards use panel surfaces without nested outlines; editable fields retain the
 shared field surface and10px inset. Keyboard focus stays explicit. Review-warning
 backgrounds retain their semantic styling; empty states use the same quiet panel.
+
+
+## Single-song board controls ·2026-10-18
+
+Single lyrics/score song rows share the medley inline control layout, including
+when their section label/title header is visible. Mode, song, version, form,
+photo disclosure, audio upload and Save occupy one row in a wide container.
+The header retains navigation and warnings; it does not duplicate action buttons.
+Narrow containers wrap, and expanded photos/audio management stay below.
+No input values, song/version links, medley order or persistence behavior change.

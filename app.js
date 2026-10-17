@@ -30446,7 +30446,10 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
   const interactionLabel = presenterSlideInteractionHint(serviceId, subgroup.name || visibleLabel);
   const warnings = presenterWarningsForEntries(subgroup.slides);
   const inputContexts = presenterBoardSubgroupInputContexts(serviceId, subgroup);
-  const headerContext = options.showHead && inputContexts.length === 1 ? { ...inputContexts[0], timingEntries: subgroup.slides } : null;
+  // Single-song rows use the same compact controls as medley rows.
+  const inlineSong = inputContexts.length === 1
+    && ["praise_db", "lyrics_db", "score_db"].includes(presenterServiceInputItem(inputContexts[0].item, inputContexts[0].service)?.mode);
+  const headerContext = options.showHead && inputContexts.length === 1 && !inlineSong ? { ...inputContexts[0], timingEntries: subgroup.slides } : null;
   const inputControls = renderPresenterBoardSubgroupInputControls(serviceId, subgroup, { headerActions: Boolean(headerContext) });
   const headerActions = headerContext && inputControls ? renderPresenterBoardItemActions(serviceId, headerContext) : "";
   const context = presenterBoardSubgroupItemContext(serviceId, subgroup);

@@ -17,6 +17,13 @@ try:
      const item=normalizeServiceItem({id:crypto.randomUUID(),service_id:sid,label:'특송',raw_title:'교회',song_id:songId,version_id:vid,assignee:'카다로스 중창단',memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formHint:'V1-V2-C-Int-V3-C-Int-C'})});state.serviceItems={[sid]:[item]};
      const model=serviceItemEditorModel(item,{service});model.showAssignee=true;model.assigneeValue='카다로스 중창단';
      presenterBoardSubgroupInputContexts=()=>[0,1,2].map(index=>({item:{...item,id:'row'+index,connectedPraise:{groupId:'medley',role:index?'secondary':'primary'},label:'찬양 '+(index+1),assignee:''},index,service}));
+     window.renderSingleSong=()=>{
+      const context={item:{...item,label:'찬양 5',assignee:''},index:0,service};
+      presenterBoardSubgroupInputContexts=()=>[context];
+      presenterBoardSubgroupItemContext=()=>context;
+      presenterBoardSubgroupDisplay=()=>({label:'찬양 5',title:'교회'});
+      document.querySelector('#fixture').innerHTML=renderPresenterBoardSubgroup({slides:[],name:'찬양 5'},-1,sid,{showHead:true});
+     };
      document.body.innerHTML='<main id="fixture" style="padding:20px">'+renderPresenterBoardSubgroupInputControls(sid,{slides:[]})+'</main>';
     }''')
     for width in [1600,1200,1100,1000,800,600]:
@@ -57,5 +64,20 @@ try:
      if(Math.abs(title.top-form.top)>2||Math.abs(title.top-actions.top)>12||form.right>actions.left)throw Error('unlinked desktop layout');
      return 'PASS no reserved version column';
     }'''),flush=True)
+    page.evaluate('renderSingleSong()')
+    for width in [1600,1200,1100,1000,800,600]:
+     page.set_viewport_size({'width':width,'height':900})
+     page.wait_for_timeout(100)
+     print(engine,width,page.evaluate("""()=>{
+      const row=document.querySelector('.svc-inline-song'),head=document.querySelector('.svc-board-subgroup-head-row');
+      if(!row||head.querySelector('[data-service-item-commit]'))throw Error('single song kept header actions');
+      if(document.querySelectorAll('[data-service-item-commit]').length!==1)throw Error('duplicate/missing save');
+      const host=document.querySelector('.svc-board-subgroup-controls'),q=host.getBoundingClientRect();
+      const controls=[...row.querySelectorAll('input:not([type=file]),select,button,summary,label.svc-board-subgroup-audio-upload')].filter(e=>e.checkVisibility()&&e.getBoundingClientRect().width);
+      for(const e of controls){const r=e.getBoundingClientRect();if(r.left<q.left-1||r.right>q.right+1)throw Error('single song overflow');}
+      if(host.clientWidth>=961){const top=row.querySelector('.svc-edit-title').getBoundingClientRect().top;for(const e of controls)if(Math.abs(e.getBoundingClientRect().top-top)>12)throw Error('single song extra row');}
+      return 'PASS single song with visible header, one save and compact controls';
+     }"""),flush=True)
+     if width==1600:page.screenshot(path=f'/tmp/mindex-single-song-{engine}.png')
    finally:browser.close()
 finally:server.shutdown();server.server_close()
