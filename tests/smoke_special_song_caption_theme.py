@@ -60,7 +60,7 @@ try:
           check(!/data:image\/svg/.test(getComputedStyle(blankRoot.querySelector('.presenter-slide'), '::before').backgroundImage), 'blank slide ornament visible');
           // Nothing may be drawn over the chromakey area: no ::after ornament, and the crest lives in the bar.
           check(getComputedStyle(themedSlide, '::after').content === 'none', 'no element may extend above the bar');
-          check(getComputedStyle(themedSlide).getPropertyValue('--presenter-output-bar-height').trim() === '21%', 'themed bar height');
+          check(getComputedStyle(themedSlide).getPropertyValue('--presenter-output-bar-height').trim() === '20%', 'themed bar height');
           // The crest layer (first background layer of the bar) fits entirely inside the bar.
           const barStyle = getComputedStyle(themedSlide, '::before');
           const posY = parseFloat(barStyle.backgroundPositionY.split(',')[0]);

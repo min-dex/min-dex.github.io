@@ -2814,3 +2814,12 @@ stylesheet-before-script requests and resolved-only execution.
 Element-heading and inline DB shortcuts use transparent text with no horizontal
 padding. Hover underlines actionable links; native keyboard focus remains visible.
 Manual/non-actionable labels do not acquire a hover underline.
+
+## Cadaros caption bar height · 2026-10-17
+
+The Cadaros white/gold song-title and lyric bar uses20% of the stage height
+(previously21%). The standard title/assignee navy bar remains18%. Ornament,
+font, horizontal padding and text offset are unchanged. Chromium/WebKit actual
+output checks at1920×1080,1366×768,960×540,900×900,406×228 and320×180 retain
+the crest and two-line Korean lyrics entirely within the bar without overlap.
+No service content or song/medley data is changed.
