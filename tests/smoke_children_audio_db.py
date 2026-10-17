@@ -92,7 +92,41 @@ try:
     if(presenterSlidesForService(sid).some(s=>s.syncTimeline))throw Error('ordinary lyrics activated audio');item.memo=m;
     refs.detailPane.innerHTML=T.controls(sid,entries);
    }''')
-   page.locator('[data-song-timing-play]').click()
+   page.evaluate(r'''()=>{
+    const sid=state.selectedServiceId;
+    state.presenter.slides=presenterSlidesForService(sid);
+    state.presenter.index=state.presenter.slides.findIndex(s=>s.type==='song-title' && s.syncTimeline?.intro);
+    if(state.presenter.index<0)throw Error('missing title');
+    const original=MindexSongTiming.play;let calls=0;MindexSongTiming.play=()=>{calls++};
+    const titleIndex=state.presenter.index;
+    const key=(extra={})=>handlePresenterShortcut(new KeyboardEvent('keydown',{key:'p',code:'KeyP',...extra}));
+    key({ctrlKey:true});key({isComposing:true});key({repeat:true});
+    state.presenter.index++;key();state.presenter.index=titleIndex;
+    isPresenterOutputWindowOpen=()=>false;key();isPresenterOutputWindowOpen=()=>true;
+    if(calls)throw Error('unsafe P started playback');
+    key();if(calls!==1)throw Error('title P failed');
+    const input=document.createElement('input');refs.detailPane.append(input);input.focus();
+    input.dispatchEvent(new KeyboardEvent('keydown',{key:'p',code:'KeyP',bubbles:true}));
+    if(calls!==1)throw Error('typing P started playback');input.remove();
+    if(playPresenterChildrenTitle({serviceId:sid,index:titleIndex,groupId:'stale'}))throw Error('stale output shortcut accepted');
+    handlePresenterControllerMessage({type:'presenter-control',action:'children-play',serviceId:sid,index:titleIndex,groupId:state.presenter.slides[titleIndex].syncTimeline.groupId});
+    if(calls!==2)throw Error('output title P not routed to controller');
+    state.serviceMusic.pending=true;key();state.serviceMusic.pending=false;
+    if(calls!==2)throw Error('pending audio restarted');
+    MindexSongTiming.play=original;
+    const button=document.createElement('button');button.className='svc-slide-thumb';button.dataset.presenterIndex=titleIndex;button.dataset.serviceId=sid;button.id='title-key-test';refs.detailPane.append(button);button.focus();
+   }''')
+   if os.environ.get('MINDEX_CHILDREN_UI_CAPTURE'):
+    page.evaluate(r'''()=>{
+     const sid=state.selectedServiceId,item=getServiceItems(sid).find(i=>i.id==='children-db-item');
+     window.keyTestMarkup=refs.detailPane.innerHTML;
+     const slides=presenterSlidesForService(sid).map((slide,index)=>({slide,index}));
+     refs.detailPane.innerHTML=renderPresenterBoardSubgroupInputControls(sid,{id:item.id,slides});
+    }''')
+    page.add_style_tag(content='#bootLoadingOverlay,.boot-loading-overlay { display:none !important; }')
+    page.locator('.svc-board-subgroup-controls').screenshot(path='/private/tmp/mindex-children-input-'+engine+'.png')
+    page.evaluate("refs.detailPane.innerHTML=keyTestMarkup;document.getElementById('title-key-test').focus()")
+   page.keyboard.press('p')
    page.wait_for_function('state.serviceMusic.playing && state.serviceMusic.audio.currentTime>0')
    page.evaluate('state.serviceMusic.audio.currentTime=7.2');page.wait_for_function('state.presenter.slides[state.presenter.index]?.syncTimeline?.page===2')
    page.evaluate("runPresenterAction('prev',state.selectedServiceId,{scroll:false});window.manualIndex=state.presenter.index;window.manualTime=state.serviceMusic.audio.currentTime")

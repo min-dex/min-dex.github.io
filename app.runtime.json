@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-output-restart",
+  "version": "20261018-children-title-play",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "c923f5e95d5a49d685e254fd8d0254e0b2d5527869ecabcc2f03c9f79f2f45ad",
-  "runtime_sha256": "2fb006cec2f6e6b15f299e06e05fbf2a7dcb5c8c32bdcfa217d3fc99dc417ebd",
-  "source_bytes": 1471751,
-  "runtime_bytes": 1041710,
-  "source_gzip": 328618,
-  "runtime_gzip": 257633
+  "source_sha256": "943f4034ed7548655f197466c6d4899f77cd9694db51a31bc8cd625c925a3059",
+  "runtime_sha256": "2ba7ef360fe451d739fb370911e2b5aa45c50c950d322e2486e22d31403b2d23",
+  "source_bytes": 1471774,
+  "runtime_bytes": 1041690,
+  "source_gzip": 328622,
+  "runtime_gzip": 257637
 }
