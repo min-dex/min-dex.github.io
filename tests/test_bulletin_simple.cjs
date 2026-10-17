@@ -58,6 +58,25 @@ const server=http.createServer((req,res)=>{
   assert.ok(roundTrip,'New print layout must survive DB round trip');
   const flow=await page.evaluate(()=>{const B=MindexBulletin,d=structuredClone(designDoc);const before=B.renderPages(d,'layout').pages[0].querySelector('[data-frame-id="notices"] rect').getAttribute('y');const stored=JSON.stringify(d.frames);d.fields.news='① 추가 광고\n'.repeat(8);const after=B.renderPages(d,'layout').pages[0].querySelector('[data-frame-id="notices"] rect').getAttribute('y');return {before:+before,after:+after,unchanged:stored===JSON.stringify(d.frames)};});
   assert(flow.after>flow.before);assert(flow.unchanged);
+  const metrics=await page.evaluate(()=>{
+   const B=MindexBulletin,d=structuredClone(designDoc);
+   const stored=JSON.stringify(d.frames);
+   d.fields.eventsText='10월 25일 | '+ '함께 참여하는 교회 행사 안내 '.repeat(8);
+   d.fields.outlineTitle='함께 생각할 말씀';
+   d.fields.outline=['① '+ '긴 요점 '.repeat(24),'② 짧은 요점','③ 짧은 요점'].join('\n');
+   d.settings.outlineColumns=2;d.settings.lineHeight=1.9;
+   const r=B.renderPages(d,'layout'),host=document.createElement('div');
+   r.pages.forEach(p=>host.append(p));document.body.append(host);
+   const measure=id=>{const g=host.querySelector(`[data-frame-id="${id}"]`),rect=g.querySelector('[data-frame-hit]');return {y:+rect.getAttribute('y'),h:+rect.getAttribute('height'),bottom:Math.max(...[...g.querySelectorAll('text')].map(t=>{const b=t.getBBox();return b.y+b.height}))};};
+   const result={issues:[...r.issues],events:measure('events'),staff:measure('staff'),outline:measure('outline'),notes:measure('notes'),unchanged:stored===JSON.stringify(d.frames)};
+   host.remove();return result;
+  });
+  assert.deepEqual(metrics.issues,[]);
+  assert(metrics.events.bottom < metrics.staff.y-2,'Event text clears the next section rule');
+  assert(metrics.outline.bottom <= metrics.outline.y+metrics.outline.h+.1,'Tallest outline column determines height');
+  assert(Math.abs(metrics.notes.y-(metrics.outline.y+metrics.outline.h+5))<.01);
+  assert(metrics.unchanged,'Derived geometry must not rewrite saved frames');
+  for(const size of [8,9,11,11.5])assert((await page.evaluate(()=>MindexBulletin.TOKENS.fontSizes)).includes(size));
   const invalid=await page.evaluate(()=>{const B=window.MindexBulletin,d=structuredClone(designDoc);d.fields.news='긴 문구 '.repeat(500);return [...B.renderPages(d,'print').issues];});
   assert.ok(invalid.includes('news'));
   const welcome=await page.evaluate(()=>{const B=window.MindexBulletin,d=structuredClone(designDoc);d.fields.welcome=B.profileForDate('2026-10-04').welcome;return [...B.renderPages(d,'print').issues];});
@@ -109,6 +128,14 @@ const server=http.createServer((req,res)=>{
   await page.waitForFunction(()=>document.querySelector('[data-bulletin-print]')?.disabled===false);
   assert.equal(await page.locator('[data-bulletin-field="news"]').inputValue(),'새 주보 편집 내용');
   assert.equal(await page.evaluate(()=>editorAudit.documents.get('october-design').settings.design),'simple');
+  await page.locator('[data-bulletin-mode="layout"]').click();
+  for(const [id,size] of [['news','11.5'],['staff','9'],['order','11'],['meeting','8']]){
+   await page.locator('[data-bulletin-frame]').selectOption(id);
+   assert.equal(await page.locator('[data-bulletin-dimension="size"]').inputValue(),size);
+  }
+  await page.locator('[data-bulletin-frame]').selectOption('news');
+  const shown=await page.locator('[data-bulletin-dimension="h"]').inputValue();
+  assert.match(shown,/^\d+(?:\.\d{1,2})?$/);
   console.log('PASS editorial layout, October defaults, click-to-edit, DB reload and overflow detection');
  }finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});

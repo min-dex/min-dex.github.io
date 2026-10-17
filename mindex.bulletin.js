@@ -2,7 +2,7 @@
   "use strict";
   const MM = 72 / 25.4;
   const TOKENS = Object.freeze({width:297, height:210, fold:148.5, inset:5, content:10, grid:2.5, baseline:2.5,
-    fontSizes:[7.5,10,12.5,15,17.5,20,22.5,25,27.5,30,35,40,45]});
+    fontSizes:[7.5,8,9,10,11,11.5,12.5,15,17.5,20,22.5,25,27.5,30,35,40,45]});
   const SVG = "http://www.w3.org/2000/svg";
   // Reuse MINDEX's worship artwork. Legacy theme keys preserve saved drafts.
   const themeArtwork={water:"26-A5.png",aurora:"26-A1.png",lent:"26-A2.png",palm:"26-S4.png",pentecost:"26-S6.png",stars:"26-A3.png"};
@@ -514,22 +514,50 @@
     const frames=clone(doc.frames),get=id=>frames.find(f=>f.id===id);
     const height=f=>{
       if(!f||f.hidden)return 0;
-      const value=boundText(doc,f);if(!String(value||'').trim())return 0;
-      const g=svg('g'),check=new Set(),box={...f,y:0,h:10000,leading:f.size*(doc.settings.lineHeight||1.55),itemGap:doc.settings.itemGap??3.5};
-      if(f.type==='list')return renderList(g,value,box,check)||0;
-      if(f.type==='events')return String(value).split('\n').filter(Boolean).reduce((h,t)=>h+Math.max(8,wrap(t,f.w,f.size,700).length*f.size*1.55/MM+2),0);
-      return writeStyled(g,copyRuns(value,f.id,f.size),box,check,f.id);
+      const value=boundText(doc,f);if(!String(value||'').trim()&&!(f.id==='outline'&&fieldValue(doc,'outlineTitle')))return 0;
+      const g=svg('g'),check=new Set(),box={...f,h:10000,weight:/Title$/.test(f.id)?700:500,leading:f.size*(doc.settings.lineHeight||1.55),itemGap:doc.settings.itemGap??3.5};
+      if(f.type==='list')return renderEditorialList(g,value,box,check,doc);
+      if(f.type==='events')return renderEditorialEvents(g,value,box,check);
+      return writeText(g,value,box,check,f.id);
     };
     let y=get('news').y;
     for(const id of ['news','notices','eventsTitle','events','staff']){
-      const f=get(id),h=height(f);if(!f)continue;
-      f.y=y;f.h=Math.max(.1,h+2);
+      const f=get(id);if(!f)continue;
+      f.y=y;const h=height(f);f.h=Math.max(.1,h+2);
       if(id==='eventsTitle'){const month=get('eventsMonth');month.y=y;month.h=f.h;}
       if(h)y+=f.h+(id==='news'?4:2.5);
     }
     const outline=get('outline'),notes=get('notes');
-    if(outline&&notes){outline.h=Math.max(.1,height(outline)+(fieldValue(doc,'outlineTitle')?8:0));notes.y=outline.y+outline.h+5;notes.h=Math.max(.1,195-notes.y);}
+    if(outline&&notes){outline.h=Math.max(.1,height(outline));notes.y=outline.y+outline.h+5;notes.h=Math.max(.1,195-notes.y);}
     return {...doc,frames};
+  }
+
+  // Measure and paint through the same path, at the actual baseline origin.
+  function renderEditorialEvents(group,value,box,issues,muted="#69746E") {
+    let y=box.y;
+    for(const text of String(value||"").split("\n").filter(Boolean)){
+      const parts=text.split(/ \| |\s{2,}/),date=parts.length>1?parts.shift():"",body=parts.join(" ")||text;
+      if(box.w<=72.5){issues.add(box.id);break;}
+      if(!box.leading){
+        const h=Math.max(7.5,Math.max(wrap(date,57.5,box.size).length,wrap(body,date?box.w-62.5:box.w,box.size,700).length)*snap(box.size*1.3)/MM+1.5);
+        if(date)writeText(group,date,{...box,y,w:57.5,h,color:muted},issues,box.id);
+        writeText(group,body,{...box,x:date?box.x+62.5:box.x,y,w:date?box.w-62.5:box.w,h,weight:700},issues,box.id);
+        y+=h;if(y>box.y+box.h+.01)issues.add(box.id);
+        continue;
+      }
+      const row={...box,y,h:10000};
+      const dateHeight=date?writeText(group,date,{...row,w:57.5,color:muted},issues,box.id):0;
+      const bodyHeight=writeText(group,body,{...row,x:date?box.x+62.5:box.x,w:date?box.w-62.5:box.w,weight:700},issues,box.id);
+      y+=Math.max(7.5,Math.max(dateHeight,bodyHeight)+1.5);
+      if(y>box.y+box.h+.01)issues.add(box.id);
+    }
+    return y-box.y;
+  }
+  function renderEditorialList(group,value,box,issues,doc) {
+    const title=box.id==="outline"?fieldValue(doc,"outlineTitle"):"";
+    const offset=title?writeText(group,title,{...box,weight:700},issues,box.id)+2.5:0;
+    return offset+renderList(group,value,{...box,y:box.y+offset,h:box.h-offset},issues,
+      box.id==="outline"?(doc.settings.outlineColumns||doc.source?.outlineColumns||1):1);
   }
 
   function renderEditorial(doc,mode,selected) {
@@ -587,20 +615,9 @@
             if(y+7.5>f.y+f.h+.01)check.add(f.id);
           });
         }else if(f.type==="events"){
-          let y=f.y;
-          for(const text of String(value||"").split("\n").filter(Boolean)){
-            const parts=text.split(/ \| |\s{2,}/),date=parts.length>1?parts.shift():"",body=parts.join(" ")||text;
-            if(f.w<=72.5){check.add(f.id);break;}
-            const h=Math.max(7.5,Math.max(wrap(date,57.5,f.size).length,wrap(body,date?f.w-62.5:f.w,f.size,700).length)*snap(f.size*1.3)/MM+1.5);
-            if(date)writeText(group,date,{...box,y,w:57.5,h,color:muted},check,f.id);
-            writeText(group,body,{...box,x:date?f.x+62.5:f.x,y,w:date?f.w-62.5:f.w,h,weight:700},check,f.id);
-            y+=h;if(y>f.y+f.h+.01)check.add(f.id);
-          }
+          renderEditorialEvents(group,value,box,check,muted);
         }else if(f.type==="list"){
-          const title=f.id==="outline"?fieldValue(doc,"outlineTitle"):"";
-          let offset=0;
-          if(title)offset=writeText(group,title,{...box,weight:700},check,f.id)+2.5;
-          renderList(group,value,{...box,color:f.id==="notices"?muted:"#222E29",y:f.y+offset,h:f.h-offset},check,f.id==="outline"?(doc.settings.outlineColumns||doc.source?.outlineColumns||1):1);
+          renderEditorialList(group,value,{...box,color:f.id==="notices"?muted:"#222E29"},check,doc);
         }
         else if(f.id==="sermon"){
           const h=writeText(group,doc.source?.sermon||"",{...box,h:f.h-10,weight:700},check,f.id);
@@ -776,7 +793,7 @@
     const lines=String(value||"").replace(/ +(?=(?:일시|장소|교재):)/g,"\n").split("\n").filter(Boolean);
     const columnSize=Math.ceil(lines.length/columns),width=(f.w-(columns-1)*7.5)/columns;
     const mainCount=lines.filter(t=>/^(?:[①-⑳]|\d+[.)])/.test(window.MindexInlineText.plain(t).trimStart())).length;
-    let y=f.y,lastColumn=0,number=0,indented=false;
+    let y=f.y,bottom=f.y,lastColumn=0,number=0,indented=false;
     lines.forEach((paragraph,index)=>{
       const col=Math.min(columns-1,Math.floor(index/columnSize));
       if(col!==lastColumn){y=f.y;lastColumn=col;indented=false;}
@@ -794,8 +811,9 @@
       const x=f.x+col*(width+7.5),size=detail?Math.max(7.5,f.size-2.5):f.size;
       if(marker)writeText(group,label,{...f,x,y,w:5,h:f.y+f.h-y,align:"center"},issues,f.id);
       y+=writeStyled(group,bodyRuns,{...f,x:x+(indented?7.5:0),y,w:width-(indented?7.5:0),h:f.y+f.h-y,size},issues,f.id);
+      bottom=Math.max(bottom,y);
     });
-    return y-f.y;
+    return bottom-f.y;
   }
   function renderPages(doc,mode,selected) {
     if(doc.settings?.design==="simple")doc=simpleFlow(doc);
@@ -1199,7 +1217,7 @@
     function properties(){
       root.querySelectorAll("[data-bulletin-mode]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.bulletinMode===mode)));
       const p=q(".bulletin-properties"),sections=[...p.querySelectorAll("details[data-bulletin-section]")];
-      if(sections.length&&p.dataset.documentId&&p.dataset.sectionsReady==="true")disclosureState.set(p.dataset.documentId,Object.fromEntries(sections.map(el=>[el.dataset.bulletinSection,el.open])));
+      if(sections.length&&p.dataset.documentId&&p.dataset.sectionsReady==="true")disclosureState.set(p.dataset.documentId,{...disclosureState.get(p.dataset.documentId),...Object.fromEntries(sections.map(el=>[el.dataset.bulletinSection,el.open]))});
       if(!doc){p.replaceChildren();return;}
       if(mode==="content") {
         const child=doc.source?.department==="children";
@@ -1222,8 +1240,8 @@
         const f=doc.frames.find(f=>f.id===selected)||doc.frames[0];selected=f.id;
         p.innerHTML=`${templateSession?'<h3>2027 청년부 공통 양식</h3><p class="bulletin-help">새 주보에 사용할 양식입니다.</p><button type="button" data-bulletin-template-reload>공통 저장본 다시 불러오기</button>':""}${doc.settings.design==="simple"?`<div class="bulletin-number-grid">${[["lineHeight","줄간격",1.55,1.2,1.9,.05],["itemGap","광고 항목 간격 (mm)",3.5,1,8,.5],["orderPadding","예배 행 여백 (mm)",3,1,5,.5]].map(([k,label,fallback,min,max,step])=>`<label>${label}<input type="number" data-bulletin-setting="${k}" value="${doc.settings[k]??fallback}" min="${min}" max="${max}" step="${step}"></label>`).join("")}</div>`:""}<button type="button" data-bulletin-reset-layout title="문구는 유지하고 기본 배치로 되돌립니다.">배치 초기화</button><label>배경<select data-bulletin-setting="theme"><option value="auto" ${backgroundKey(doc.settings.theme)==="auto"?"selected":""}>자동 · 날짜/부서</option><option value="" ${doc.settings.theme===""?"selected":""}>배경 없음</option>${(doc.backgrounds||[]).map(({key})=>`<option value="${escape(key)}" ${backgroundKey(doc.settings.theme)===key?"selected":""}>${escape(key)}</option>`).join("")}${doc.settings.theme&&doc.settings.theme!=="auto"&&!(doc.backgrounds||[]).some(b=>b.key===backgroundKey(doc.settings.theme))?`<option value="${escape(doc.settings.theme)}" selected>기존 초안: ${escape(backgroundKey(doc.settings.theme))}</option>`:""}</select></label><label><input type="checkbox" data-bulletin-setting="compactOrder" ${doc.settings.compactOrder?"checked":""}> 인쇄용 순서로 간추리기</label><label>지면<select data-bulletin-setting="design">${(doc.source?.department==="children"?[["children","어린이부 · 2026년"]]:[["simple","청년부 · 담백한 양식"],["editorial","2026년 10월"],["auto","기존 자동 양식"],["ink","연속 지면 · 검정 로고"],["panels","분리 지면 · 물결 로고"]]).map(([value,label])=>`<option value="${value}" ${(doc.settings.design||"auto")===value?"selected":""}>${label}</option>`).join("")}</select></label>${doc.source?.department==="children"?"":`<label>설교 요점 배치<select data-bulletin-setting="outlineColumns"><option value="1" ${(doc.settings.outlineColumns||doc.source?.outlineColumns||1)===1?"selected":""}>한 열</option><option value="2" ${(doc.settings.outlineColumns||doc.source?.outlineColumns)===2?"selected":""}>두 열</option></select></label>`}<label>편집 영역<select data-bulletin-frame>${doc.frames.map(f=>`<option value="${f.id}" ${f.id===selected?"selected":""}>${escape(frameLabel(f.id))} · ${f.page?"안쪽":"겉면"}</option>`).join("")}</select></label>
           <label><input type="checkbox" data-bulletin-hidden ${f.hidden?"":"checked"}> 출력에 표시</label><div class="bulletin-number-grid">`+
-          [["x","가로 위치"],["y","세로 위치"],["w","너비"],["h","높이"]].map(([key,label])=>`<label>${label} (mm)<input type="number" step="2.5" data-bulletin-dimension="${key}" ${isFlowFrame(doc,f.id)&&["y","h"].includes(key)?'readonly title="내용에 따라 자동 계산"':""} value="${isFlowFrame(doc,f.id)?simpleFlow(doc).frames.find(item=>item.id===f.id)[key]:f[key]}"></label>`).join("")+`</div>
-          <label>글자 크기 (pt)<select data-bulletin-dimension="size">${TOKENS.fontSizes.map(n=>`<option ${f.size===n?"selected":""}>${n}</option>`).join("")}</select></label>
+          [["x","가로 위치"],["y","세로 위치"],["w","너비"],["h","높이"]].map(([key,label])=>`<label>${label} (mm)<input type="number" step="2.5" data-bulletin-dimension="${key}" ${isFlowFrame(doc,f.id)&&["y","h"].includes(key)?'readonly title="내용에 따라 자동 계산"':""} value="${isFlowFrame(doc,f.id)?Number(simpleFlow(doc).frames.find(item=>item.id===f.id)[key].toFixed(2)):f[key]}"></label>`).join("")+`</div>
+          <label>글자 크기 (pt)<select data-bulletin-dimension="size">${[...new Set([...TOKENS.fontSizes,f.size])].sort((a,b)=>a-b).map(n=>`<option ${f.size===n?"selected":""}>${n}</option>`).join("")}</select></label>
           <label>정렬<select data-bulletin-align>${[["left","왼쪽"],["center","가운데"],["right","오른쪽"]].map(([v,t])=>`<option value="${v}" ${f.align===v?"selected":""}>${t}</option>`).join("")}</select></label>
           <details class="bulletin-property-section" data-bulletin-section="layout-help"><summary>편집 도움말</summary><p class="bulletin-help">드래그로 이동하고 모서리로 크기를 조절합니다. 방향키는 2.5mm씩 이동합니다.</p><p class="bulletin-help">광고·안내·일정·섬김이는 내용에 맞춰 자동 배치됩니다.</p><p class="bulletin-help">순서 간추리기는 준비·마침·교제·보조 성구와 고백 전문을 생략하고 같은 순서를 묶습니다.</p>${templateSession?'<p class="bulletin-help">광고·설교는 예시입니다. 11월부터 새 주보에 적용되며, 저장된 주보는 유지됩니다.</p>':""}</details>`;
       }

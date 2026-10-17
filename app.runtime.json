@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-children-resume-beat",
+  "version": "20261018-bulletin-metrics",
   "options": {
     "compress": false,
     "mangle": {
