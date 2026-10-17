@@ -29,8 +29,9 @@ from this web gate. The desktop-release workflow retains platform build runners.
 
 Work on a task branch, fetch latest main and inspect the diff before integration.
 Use Cloud web checks in GitHub Actions as Linux verification. Integrate only after
-required checks pass. The existing Pages main-branch deployment remains the
-web publication path; verify its run and production bytes/version after a release.
+required checks pass. Pages must use the GitHub Actions publishing source. The Cloud web checks
+workflow deploys main only after its offline-web job succeeds; verify that run
+and production bytes/version after a release.
 Do not claim deployment merely from a successful push. Runtime changes must follow
 the existing index.html fallback/mindex-release.json version convention.
 No publishing credential belongs in setup scripts, public files or test output.
@@ -116,3 +117,25 @@ concurrent audio-bundle and startup-overlap checks the gate is now 12 Node + 11
 smoke entry points. No minifier, font builder or production credential is needed
 for default setup/tests. Optional regeneration and exact fontTools outline checks
 are documented in `code-organization.md`.
+
+
+## Test-gated Pages publication ·2026-10-17
+
+Repository Settings → Pages → Source must be **GitHub Actions**, not Deploy from
+a branch. This disables the independent automatic branch deployment path.
+`cloud-check.yml` runs the reviewed offline baseline, then `deploy-pages` depends
+on `offline-web` success in that same run and checks out the exact tested SHA.
+PRs, codex/* branch pushes and non-main manual runs only test. Failed/cancelled tests never invoke Pages,
+so the previously deployed site remains available. Setup failures also block
+publication; never use continue-on-error or always() to bypass this gate.
+
+Deployment is serialized without interrupting an active publication. A stale
+run/re-run whose SHA no longer matches main is rejected before artifact upload.
+The artifact comes from git archive HEAD, excluding untracked files, CI caches
+and test modifications; no production DB access is involved. CI failures must
+be fixed and rerun, not bypassed through branch-source publication.
+
+This gate covers the explicitly listed offline baseline, not every possible
+bug, production data integrity, physical output or signed desktop releases.
+GitHub source-setting activation and the first gated Linux run must be verified
+separately from local configuration tests.
