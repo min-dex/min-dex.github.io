@@ -2172,7 +2172,8 @@ matches. Production data and schema are unchanged.
 
 The transport launcher displays a monitor icon, 송출·음악 label and a reserved
 activity dot so playing/stopping does not resize the header. The separate read-only
-monitor uses an activity icon and 기기 상태 label; it is not an output controller.
+monitor uses only an activity icon, with 기기 상태 retained as its tooltip and
+accessible name; it is not an output controller.
 Right-click section editing labels 항목명, 담당, 내용 and 표시 형식 explicitly,
 with visible input surfaces and responsive columns. Existing stored strings,
 field bindings, playback ownership, keyboard focus and output are preserved.

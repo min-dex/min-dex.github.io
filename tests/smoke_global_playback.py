@@ -60,7 +60,8 @@ def main():
                     for width in (1440,1000,800,390):
                         page.set_viewport_size({'width':width,'height':900})
                         assert page.evaluate('''()=>{const r=document.getElementById('globalPlaybackControls');return r.scrollWidth<=r.clientWidth+1}'''),f'overflow {width}'
-                        assert page.locator('#monitorPanelBtn span').inner_text()=='기기 상태'
+                        assert page.locator('#monitorPanelBtn').inner_text()==''
+                        assert page.locator('#monitorPanelBtn').get_attribute('aria-label')=='기기 상태'
                         assert page.locator('#monitorPanelBtn').evaluate('e=>e.scrollWidth<=e.clientWidth+1')
                         box=panel.bounding_box()
                         assert box['x']>=0 and box['x']+box['width']<=width+1,box
