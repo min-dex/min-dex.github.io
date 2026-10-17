@@ -503,3 +503,15 @@ dialog. Show form labels and photo thumbnails in ordered cue rows. Sequential
 recording follows the preview audio clock; individual timestamps remain editable.
 Start synchronized playback explicitly; pause/stop/seek stay in the existing
 송출·음악 panel. No new permanent sidebar or production timing auto-save.
+
+
+## Praise workbench refinement ·2026-10-17
+
+Keep the existing side-by-side version comparison and three-by-two sidebar filters.
+Group version copy/add/delete controls separately from praise-type tags. Version
+names use14px text; the active header uses a thin accent border/left inset rather
+than a filled accent panel. Lyric blocks use16px/25px text,15px padding and10px
+internal spacing, with30px controls. The toolbar labels its block-add actions.
+Empty active versions offer first-verse creation; inactive empties offer selection.
+Adding a block focuses and reveals its new lyrics field. No song/version data is
+rewritten by rendering, and confirmed deletion/linked worship guards remain.

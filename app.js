@@ -9770,6 +9770,11 @@ function addForm(type) {
   state.dirty.forms = true;
   renderDetail();
   updateSaveState();
+  requestAnimationFrame(() => {
+    const field = refs.detailPane.querySelector(`[data-form-field="lyrics"][data-index="${state.forms.length - 1}"]`);
+    field?.focus({ preventScroll: true });
+    field?.scrollIntoView({ block: "nearest" });
+  });
 }
 
 function toggleVersionPraiseType(type) {
@@ -16960,7 +16965,7 @@ function renderFormsTab(song) {
   const versions = song.versions || [];
   const linkedEntries = linkedSongVersionEntries(song);
   return `
-    <section class="panel">
+    <section class="panel praise-forms-panel">
       ${renderFormToolbar(song)}
       ${
         versions.length > 1 || linkedEntries.length
@@ -17000,7 +17005,7 @@ function renderSingleVersionForms() {
                   ${renderFormBlock(form, index, { song, version })}
                 </div>
               `).join("")
-            : ""
+            : renderEmptyVersionState(version, true)
         }
       </div>
     </div>
@@ -17042,8 +17047,17 @@ function renderVersionCompareColumn(version, forms) {
           </div>
         `;
       }).join("")
-    : `<div class="version-empty-cell" aria-hidden="true"></div>`;
+    : renderEmptyVersionState(version, active);
   return `<div class="version-compare-column${active ? " active" : ""}">${content}</div>`;
+}
+
+function renderEmptyVersionState(version, active) {
+  return `<div class="version-empty-state">
+    <span>가사가 없습니다</span>
+    ${active
+      ? '<button class="btn secondary" type="button" data-add-form="Verse"><i data-lucide="plus"></i><span>첫 가사 추가</span></button>'
+      : `<button class="btn secondary" type="button" data-version-id="${escapeAttr(version.id)}">이 버전 편집</button>`}
+  </div>`;
 }
 
 function activeVersionForms(version) {
@@ -17127,9 +17141,11 @@ function renderVersionTitleContent(song, version, forms, options = {}) {
     </div>
     <div class="version-title-actions">
       ${active ? renderVersionPraiseTypeTags(version) : ""}
+      <div class="version-edit-actions" role="group" aria-label="버전 관리">
       ${renderCopyVersionButton(version, forms)}
       ${renderAddVersionButton(version?.id)}
       <button class="version-delete-btn" type="button" data-delete-version="${escapeAttr(version?.id || "")}" aria-label="${escapeAttr(versionEditableName(song, version))} 버전 삭제" title="${song.versions.length <= 1 ? "마지막 버전은 삭제할 수 없습니다" : "버전 삭제"}" ${song.versions.length <= 1 ? "disabled" : ""}><i data-lucide="trash-2"></i></button>
+      </div>
     </div>
   `;
 }
@@ -17172,6 +17188,7 @@ function getFormsForVersionId(versionId) {
 function renderFormToolbar(song) {
   return `
     <div class="section-bar form-toolbar" aria-label="찬양 입력 양식">
+      <h3 class="form-toolbar-title">가사 블록</h3>
       <div class="form-buttons">
         ${STRUCTURAL_PART_TYPES
           .map(
