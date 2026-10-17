@@ -28,8 +28,9 @@ try:
     state.songs=[];clearSearchCaches();change('score_db');check(current().version_id==='v2','missing catalog cleared version');
     const pending='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';current().song_id=pending;
     state.songs=[{id:pending,title:'pending',versions:[]}];clearSearchCaches();change('lyrics_db');check(current().version_id==='v2','pending versions cleared ID');
-    change('manual_praise');check(!current().song_id&&!current().version_id,'manual mode kept DB link');
-    return 'PASS compatible versions, roundtrip, missing/partial catalog and manual unlink';
+    current().memo=serializeServiceItemMemo({...parseServiceItemMemo(current().memo),slides:['manual draft']});
+    change('manual_praise');check(current().song_id===pending&&!current().version_id,'manual mode lost song or kept version');
+    return 'PASS compatible versions, roundtrip, missing/partial catalog and manual song retention';
    }'''));b.close()
 
 finally:server.shutdown()

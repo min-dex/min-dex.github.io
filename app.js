@@ -10086,7 +10086,6 @@ async function resolveServiceSongSelectionBeforeSave(serviceId, index) {
   if (rawItem && (isSongServiceLabel(rawItem.label) || isSpecialSongServiceItem(rawItem))) {
     const rawMemo = parseServiceItemMemo(rawItem.memo);
     if (servicePraiseInputMode(rawItem, rawMemo, service) === "manual_praise") {
-      rawItem.song_id = null;
       rawItem.version_id = null;
       rawItem.song_version_id = null;
       return false;
@@ -10099,20 +10098,12 @@ async function resolveServiceSongSelectionBeforeSave(serviceId, index) {
   const memo = parseServiceItemMemo(item.memo);
   const inputMode = servicePraiseInputMode(item, memo, service);
   if (inputMode === "manual_praise") {
-    item.song_id = null;
     item.version_id = null;
     item.song_version_id = null;
     return false;
   }
 
-  if (item.song_id) {
-    const linkedSong = serviceItemLinkedSong(item);
-    if (linkedSong && !item.version_id && !item.song_version_id) {
-      linkServiceItemToPraiseSong(item, linkedSong, service, { clearRawTitle: false });
-      return true;
-    }
-    return false;
-  }
+  if (item.song_id) return false;
 
   const rawTitle = String(item.raw_title || "").trim();
   if (!rawTitle) return false;
@@ -11113,12 +11104,17 @@ function serviceItemVersionSelectionInvalid(item = {}, service = selectedService
   const versions = serviceSelectableSongVersions(song, item, service);
   const selectedId = item.version_id || item.song_version_id || "";
   if (selectedId && !versions.some((version) => version.id === selectedId)) return true;
-  if (versions.length <= 1) return false;
-  if (!selectedId && preferredServiceSongVersion(song, item, service)) return false;
+  if (!selectedId || versions.length <= 1) return false;
   return !versions.some((version) => version.id === selectedId);
 }
 
+function serviceItemNeedsVersionChoice(item = {}) {
+  return Boolean(item.song_id && !item.version_id && !item.song_version_id
+    && servicePraiseInputMode(item) !== "manual_praise");
+}
+
 function serviceItemSongVersionIdForSave(item = {}, service = selectedServiceForEditor()) {
+  if (!item.version_id && !item.song_version_id) return null;
   const song = serviceItemLinkedSong(item);
   if (item.song_id && !song) {
     throw new Error(`${item.label || "이 항목"}의 연결된 찬양을 불러온 뒤 다시 저장해 주세요.`);
@@ -11127,7 +11123,6 @@ function serviceItemSongVersionIdForSave(item = {}, service = selectedServiceFor
   const selectedId = String(
     item.version_id
     || item.song_version_id
-    || preferredServiceSongVersion(song, item, service)?.id
     || "",
   ).trim();
   if (!selectedId) return null;
@@ -11231,6 +11226,7 @@ function preferredNewHymnalVersion(song = null, versions = song?.versions || [])
 }
 
 function preferredServiceSongVersion(song = null, item = {}, service = selectedServiceForEditor()) {
+  if (serviceItemNeedsVersionChoice(item)) return null;
   const versions = serviceSelectableSongVersions(song, item, service);
   if (!versions.length) return null;
   const fallbackVersion = versions.find((version) => version.id === getDefaultVersionId(song)) || versions[0] || null;
@@ -12866,11 +12862,11 @@ function applyServiceSongSelectionWithService(item, service = null) {
     return;
   }
   if (servicePraiseInputMode(item, memo, service) === "manual_praise") {
-    item.song_id = null;
     item.version_id = null;
     item.song_version_id = null;
     return;
   }
+  if (item.song_id && !item.version_id && !item.song_version_id) return;
   const manualSpecialSong = isSpecialSongServiceItem(item)
     && (memo.slides.length || memo.note || item.config?.manualSong || item.config?.disableAutoSongMatch);
   if (manualSpecialSong) {
@@ -25726,10 +25722,9 @@ function renderServiceSongPicker(item, index, model = serviceItemEditorModel(ite
 
 function renderServiceSongVersionPicker(item, index, model = serviceItemEditorModel(item)) {
   const versions = model.songVersions || [];
-  if (versions.length <= 1) return "";
+  if (!versions.length && !item.song_id) return "";
   const selectedId = item.version_id
     || item.song_version_id
-    || preferredServiceSongVersion(model.linkedSong, item, model.service)?.id
     || "";
   return `
     <span class="svc-song-version-control"><select
@@ -25739,7 +25734,7 @@ function renderServiceSongVersionPicker(item, index, model = serviceItemEditorMo
       aria-label="찬양 버전"
       ${selectedId ? "" : `aria-invalid="true"`}
     >
-      <option value="">버전 선택</option>
+      <option value="">버전을 선택해 주세요</option>
       ${versions.map((version) => `
         <option value="${escapeAttr(version.id)}"${version.id === selectedId ? " selected" : ""}>
           버전: ${escapeHtml(versionDisplayName(model.linkedSong, version))}
@@ -32916,6 +32911,7 @@ function resolvePresenterServiceItemContentState(item = {}, memo = emptyServiceI
   }
   if (["praise_db", "score_db", "lyrics_db", "children_audio"].includes(effectiveInputMode) || requiresSongSelection) {
     if (item?.song_id && !song && songNeedsRelationalHydration(item.song_id)) return loading("song_hydrating");
+    if (serviceItemNeedsVersionChoice(item)) return missing("song_version_required");
     if (song && !serviceItemSongSelectionInvalid(item, service, song)) return filled("song");
     if (item?.song_id && !serviceItemSongSelectionInvalid(item, service, song)) return filled("song");
     if (!requiresSongSelection && (rawText || hasCustomSlideText)) return filled("manual_praise");
@@ -33187,6 +33183,7 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
     }]);
   }
 
+  if (serviceItemNeedsVersionChoice(item)) return [];
   if (serviceItemRequiresSongSelection(item, service) && (!song || serviceItemSongSelectionInvalid(item, service, song))) return [];
 
   const customSlides = buildPresenterCustomSlides(item, section, index);
@@ -33235,6 +33232,7 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   const { no, title } = splitHymnNo(displayText);
   if (scoreOutput && !song && !templateOwnedScoreSong) return [];
   if (!songLikeItem) return [];
+  if (serviceItemNeedsVersionChoice(item)) return [];
   if (serviceItemRequiresSongSelection(item, service) && (!song || serviceItemSongSelectionInvalid(item, service, song))) return [];
   const sectionHeading = presenterSongTitleSectionHeading(item, section);
   return withIntro(presenterSlidesWithSpecialSongTitle(item, section, [{

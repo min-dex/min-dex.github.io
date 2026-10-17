@@ -431,7 +431,6 @@ function updateServiceItemField(field, options = {}) {
     parsed.inputMode = inputMode;
     parsed.outputMode = servicePraiseInputModeOutputMode(inputMode);
     if (inputMode === "manual_praise") {
-      item.song_id = null;
       item.version_id = null;
       item.song_version_id = null;
     } else {
@@ -444,7 +443,7 @@ function updateServiceItemField(field, options = {}) {
         // compatible chosen version, including IDs awaiting catalog hydration.
         const song = serviceItemLinkedSong(item);
         const versionId = item.version_id || item.song_version_id;
-        if (song && !songNeedsRelationalHydration(item.song_id)
+        if (versionId && song && !songNeedsRelationalHydration(item.song_id)
           && !serviceSelectableSongVersions(song, item, service).some((version) => version.id === versionId)) {
           const version = defaultServiceSongVersion(song, item, service);
           item.version_id = version?.id || null;
@@ -520,7 +519,6 @@ function applyServiceManualPraiseSlides(item, slides) {
   parsed.inputMode = "manual_praise";
   parsed.outputMode = "lyrics";
   parsed.elementType = "praise";
-  item.song_id = null;
   item.version_id = null;
   item.song_version_id = null;
   item.memo = serializeServiceItemMemo(parsed);

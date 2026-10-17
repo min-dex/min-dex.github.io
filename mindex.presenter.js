@@ -2674,6 +2674,7 @@ function splitPresenterLyricChunks(lyrics, linesPerSlide = 2) {
 }
 
 function getServiceItemVersion(song, item, service) {
+  if (typeof serviceItemNeedsVersionChoice === "function" && (serviceItemNeedsVersionChoice(item) || servicePraiseInputMode(item) === "manual_praise")) return null;
   const versions = song?.versions || [];
   if (!versions.length) return null;
 
@@ -2737,6 +2738,7 @@ function presenterSyntheticHymnSongFromDisplayText(displayText = "") {
 }
 
 function getPresenterServiceItemVersion(song, item, service) {
+  if (typeof serviceItemNeedsVersionChoice === "function" && (serviceItemNeedsVersionChoice(item) || servicePraiseInputMode(item) === "manual_praise")) return null;
   const preferred = getServiceItemVersion(song, item, service);
   if (presenterVersionHasUsableLyrics(preferred)) return preferred;
   return presenterFallbackLyricVersion(song, preferred) || preferred;

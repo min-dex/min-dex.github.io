@@ -26,10 +26,27 @@ try:
      const seed=serviceManualPraiseSeedSlides(getServiceItems(sid)[0],service);check(seed.length,'seed empty before switch '+JSON.stringify({id:getServiceItems(sid)[0].song_id,version:getPresenterServiceItemVersion(song,getServiceItems(sid)[0],service),plan:presenterFormPlanForServiceItem(song.versions[1],getServiceItems(sid)[0],song)}));
      await updateServiceItemField(field());let item=getServiceItems(sid)[0],memo=parseServiceItemMemo(item.memo);
      check(JSON.stringify(memo.slides)===JSON.stringify(['verse line','chorus line','verse line']),'version/form repeat seed '+JSON.stringify(memo.slides));
-     check(!item.song_id&&!item.version_id,'manual unlink semantics');check(JSON.stringify(memo.connectedPraise)===JSON.stringify(normalizeServiceConnectedPraise({...group,role:'primary'})),'medley changed');
+     check(item.song_id===songId&&!item.version_id,'manual song retention');check(JSON.stringify(memo.connectedPraise)===JSON.stringify(normalizeServiceConnectedPraise({...group,role:'primary'})),'medley changed');
      check(JSON.stringify(song)===before,'source mutated');check(JSON.stringify(getServiceItems(sid)[1])===sibling,'sibling changed');
      const rows=buildWorshipPersistenceRows(service,getServiceItems(sid),{},{},{elementTypedStateColumns:{inputMode:true,contentState:true}});
      const reopened=groupWorshipElements(rows.sections,rows.elements)[sid].find(x=>parseServiceItemMemo(x.memo).inputMode==='manual_praise');check(JSON.stringify(parseServiceItemMemo(reopened.memo).slides)===JSON.stringify(memo.slides),'roundtrip lost lyrics');
+     for(const mode of ['lyrics_db','score_db','children_audio']) {
+      set(fresh()); await updateServiceItemField(field());
+      applyServiceManualPraiseSlides(getServiceItems(sid)[0],['QA_MANUAL_SENTINEL']);
+      check(getServiceItems(sid)[0].song_id===songId,'manual edit lost song');
+      await updateServiceItemField({value:mode,dataset:{serviceId:sid,serviceItemIndex:'0',serviceItemField:'praise_input_mode'}});
+      const returned=getServiceItems(sid)[0],m=parseServiceItemMemo(returned.memo);
+      check(returned.song_id===songId&&!returned.version_id&&!returned.song_version_id,'reverse identity');
+      check(!m.slides.length&&m.formHint==='V-C-V','reverse residual/form');
+      check(serviceItemSongVersionIdForSave(returned,service)===null,'save chose version');
+      check(getPresenterServiceItemVersion(song,returned,service)===null,'presenter chose version');
+      check(renderServiceSongVersionPicker(returned,0,serviceItemEditorModel(returned,{service})).includes('버전을 선택해 주세요'),'missing prompt');
+      await resolveServiceSongSelectionBeforeSave(sid,0);
+      check(returned.song_id===songId&&!returned.version_id,'pre-save chose version');
+      const persisted=buildWorshipPersistenceRows(service,getServiceItems(sid),{},{},{elementTypedStateColumns:{inputMode:true,contentState:true}});
+      const restored=groupWorshipElements(persisted.sections,persisted.elements)[sid].find(x=>x.id===returned.id)||groupWorshipElements(persisted.sections,persisted.elements)[sid].find(x=>x.song_id===songId);
+      check(restored.song_id===songId&&!restored.version_id&&!parseServiceItemMemo(restored.memo).slides.length,'reverse roundtrip');
+     }
      set(fresh(['my edited lyrics']));await updateServiceItemField(field());check(parseServiceItemMemo(getServiceItems(sid)[0].memo).slides[0]==='my edited lyrics','existing manual overwritten');
      // A delayed load may not overwrite a newer user edit.
      set(fresh());song._relationalVersionsLoaded=false;let release;

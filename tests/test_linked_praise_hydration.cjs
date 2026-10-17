@@ -25,7 +25,7 @@ c.applyServiceSongSelectionWithService(item);
 assert.equal(JSON.stringify(item), before, 'Hydration resumes with the saved selection');
 mode = 'manual_praise';
 c.applyServiceSongSelectionWithService(item);
-assert.equal(item.song_id, null, 'Explicit manual mode still unlinks');
+assert.equal(item.song_id, 'saved-song', 'Manual mode retains the song while clearing the version');
 assert.equal(item.version_id, null);
 const presenter = vm.createContext({document: {}});
 vm.runInContext(fs.readFileSync('mindex.presenter.js', 'utf8'), presenter);

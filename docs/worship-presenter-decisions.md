@@ -2282,3 +2282,18 @@ execution or deployment. Existing production worship records are untouched.
   The same fixture also decoded the actual linked Cadaros MP3 (264.216 seconds);
   its fixture timestamps are test data, NOT calibrated production cues.
   Existing timing/sharing, photo placement/output and global playback checks pass.
+
+
+## Manual praise keeps song identity, not version (2026-10-17)
+
+Supersedes the manual unlink rule above. Switching to manual entry or editing its
+lyrics preserves the existing song_id and clears both version aliases. No backup
+identity or lyric field is added. Manual output uses only the entered blocks.
+Switching back to lyrics/score/children mode clears manual blocks, keeps song and
+form/medley metadata, and leaves the version empty. The existing picker shows
+“버전을 선택해 주세요”, including songs with one version. Empty-version drafts
+can be saved and reopened without inferred version IDs or fallback output; an
+explicit version selection resumes the corresponding output. Existing linked
+items without a version also require selection instead of silently using defaults.
+Old manual records whose song ID was already discarded cannot be recovered
+automatically; the user must select their song once.
