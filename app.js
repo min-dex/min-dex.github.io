@@ -25616,7 +25616,7 @@ function renderServiceEditorFormControls(item, origIndex, model = serviceItemEdi
   if (!model.song && !hasFormData) return "";
   return `
     ${renderServiceFormHintInput(item, origIndex, options)}
-    ${renderPresenterProgressionAdd(item)}`;
+    ${options.hideProgression ? "" : renderPresenterProgressionAdd(item)}`;
 }
 
 function renderServiceEditorAssigneeControl(item, origIndex, attrs = {}, model = serviceItemEditorModel(item, attrs)) {
@@ -25668,7 +25668,7 @@ function renderServiceEditorTitleControl(item, origIndex, attrs = {}, model = se
         aria-label="${escapeAttr(attrs.titleAriaLabel || (attrs.isDefault ? "기본 항목 내용" : "항목 내용"))}"
       />
       ${renderServiceSongPicker(item, origIndex, model)}
-      ${attrs.hideFormControls ? "" : renderServiceEditorFormControls(item, origIndex, model, { compact: true, placeholder: "송폼" })}
+      ${attrs.hideFormControls ? "" : renderServiceEditorFormControls(item, origIndex, model, { compact: true, placeholder: "송폼", hideProgression: attrs.hideProgression })}
       ${renderServiceItemLinkControl(item, origIndex)}
     </div>`;
 }
@@ -25677,7 +25677,7 @@ function renderServicePraiseInputModeControl(item, index, model = serviceItemEdi
   if (!model.song) return "";
   const selected = model.praiseInputMode || servicePraiseInputMode(item, model.parsed, model.service);
   return `
-    <select
+    <span class="svc-song-version-control svc-praise-input-mode-control"><select
       class="svc-song-version-select svc-praise-input-mode-select"
       data-service-item-field="praise_input_mode"
       data-service-item-index="${index}"
@@ -25686,7 +25686,7 @@ function renderServicePraiseInputModeControl(item, index, model = serviceItemEdi
       ${SERVICE_PRAISE_INPUT_MODES.map(([value, label]) => `
         <option value="${escapeAttr(value)}"${value === selected ? " selected" : ""}>${escapeHtml(label)}</option>
       `).join("")}
-    </select>`;
+    </select></span>`;
 }
 
 function renderServiceSongPicker(item, index, model = serviceItemEditorModel(item)) {
@@ -27729,7 +27729,7 @@ function presenterServiceInputControls(item, index, service, options = {}) {
     return renderPresenterMonthlyCorporatePrayerInputs(item, index, memo, service?.id || model?.service?.id);
   }
   if (["praise_db", "score_db", "lyrics_db", "children_audio"].includes(mode)) {
-    return renderPresenterServicePraiseInput(item, index, model);
+    return renderPresenterServicePraiseInput(item, index, model, options);
   }
   if (mode === "scripture") {
     return renderPresenterServiceScriptureInput(item, index, memo, service);
@@ -27802,12 +27802,12 @@ function presenterServiceInputHasEditableField(item, service) {
   return needsTitle || needsAssignee;
 }
 
-function renderPresenterServicePraiseInput(item, index, model) {
+function renderPresenterServicePraiseInput(item, index, model, options = {}) {
   const assigneeLabel = presenterServiceAssigneeInputLabel(item);
   return `
     <div class="svc-presenter-input-field svc-presenter-input-field--song" role="group" aria-label="찬양 입력">
       <span>찬양</span>
-      ${renderServiceEditorTitleControl(item, index, { service: model.service, titleAriaLabel: "곡명" }, model)}
+      ${renderServiceEditorTitleControl(item, index, { service: model.service, titleAriaLabel: "곡명", hideProgression: options.headerActions }, model)}
     </div>
     ${model.showAssignee ? `
       <label class="svc-presenter-input-field svc-presenter-input-field--assignee">

@@ -278,6 +278,37 @@ function updateNewServiceFormField(field) {
   }
 }
 
+async function hydrateServiceManualPraiseBeforeSwitch(field, options, item, serviceId) {
+  const signature = serviceItemPersistenceSignature(item);
+  const songId = item.song_id;
+  const itemId = item.id;
+  const oldMode = servicePraiseInputMode(item);
+  field.value = oldMode;
+  try {
+    await loadSongsForIds([songId]);
+    await loadRelationalSongVersionData([songId]);
+    const currentIndex = getServiceItems(serviceId).findIndex(candidate => candidate.id === itemId);
+    const current = getServiceItems(serviceId)[currentIndex];
+    // Loading must never overwrite edits or a different item after navigation.
+    if (!current || serviceItemPersistenceSignature(current) !== signature) return;
+    if (songNeedsRelationalHydration(songId)) throw new Error("가사를 불러오지 못했습니다.");
+    updateServiceItemField({ value: "manual_praise", dataset: {
+      serviceId, serviceItemIndex: String(currentIndex), serviceItemField: "praise_input_mode",
+    } }, { ...options, manualPraiseHydrated: true });
+  } catch (error) {
+    showToast("기존 가사를 불러오지 못했어요. 다시 시도해 주세요.", "error");
+  }
+}
+
+function serviceManualPraiseSeedSlides(item, service) {
+  const song = serviceItemLinkedSong(item);
+  const version = song ? getPresenterServiceItemVersion(song, item, service) : null;
+  if (!version) return [];
+  const plan = presenterFormPlanForServiceItem(version, item, song);
+  const forms = globalThis.MindexSongTiming?.formsFor(item, song, version, plan.forms) || plan.forms;
+  return parseServiceManualPraiseLyricsInput(forms.map(form => normalizeLyricsForCopy(form.lyrics)).filter(Boolean).join("\n\n"));
+}
+
 function updateServiceItemField(field, options = {}) {
   const serviceId = field.dataset.serviceId || state.selectedServiceId;
   const items = getServiceItems(serviceId);
@@ -291,6 +322,11 @@ function updateServiceItemField(field, options = {}) {
     field.dataset.ordinalDisplayValue = field.value;
   }
   const service = state.services.find((candidate) => candidate.id === serviceId) || selectedServiceForEditor();
+  if (key === "praise_input_mode" && field.value === "manual_praise"
+    && !parseServiceItemMemo(item.memo).slides.length && item.song_id
+    && songNeedsRelationalHydration(item.song_id) && !options.manualPraiseHydrated) {
+    return hydrateServiceManualPraiseBeforeSwitch(field, options, item, serviceId);
+  }
   const persistenceBefore = serviceItemPersistenceSignature(item);
   let connectedPraiseApplied = false;
   item._worshipElementTemplateModified = true;
@@ -388,6 +424,10 @@ function updateServiceItemField(field, options = {}) {
     const parsed = parseServiceItemMemo(item.memo);
     const service = state.services.find((candidate) => candidate.id === serviceId) || selectedServiceForEditor();
     const inputMode = servicePraiseInputMode(item, { ...parsed, inputMode: field.value }, service);
+    if (inputMode === "manual_praise" && !parsed.slides.length) {
+      // Capture the selected version and effective form sequence before unlinking.
+      parsed.slides = serviceManualPraiseSeedSlides(item, service);
+    }
     parsed.inputMode = inputMode;
     parsed.outputMode = servicePraiseInputModeOutputMode(inputMode);
     if (inputMode === "manual_praise") {

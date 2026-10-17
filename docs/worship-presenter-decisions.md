@@ -2213,3 +2213,24 @@ both service and presenter contexts; sidebar-only data-service-id cannot open
 a service from the detail pane. No production data, output or print changes.
 Offline smoke_empty_state_layout.py covers Chromium/WebKit, four viewport sizes,
 both themes, nested loading preservation and actual deferred button clicks.
+
+## Seed direct-entry praise lyrics (2026-10-17)
+
+Changing praise input to manual_praise copies the current presenter's selected
+lyric version and effective form sequence (including repeated forms and children
+synced form selection) into editable manual slide blocks before the existing
+manual-mode unlink step. Existing nonempty manual blocks are not overwritten.
+Source songs/versions and sibling/medley metadata are unchanged. No title or
+blank slide is copied. Relational lyrics are loaded before switching when needed;
+load failure keeps the old mode, and stale completion cannot overwrite newer
+item edits. This does not retain a separate draft after switching back to DB mode.
+Offline Chromium/WebKit regression: tests/smoke_manual_praise_seed.py.
+
+## Praise editor layout and shared select arrows (2026-10-17)
+
+Praise board inputs group mode/title/version/DB on the first row and form/assignee
+on the second, wrapping to additional rows inside narrow containers. Header
+labels keep their own row. Input mode uses the same inset chevron wrapper as
+version; other editor selects use a matching inset indicator. Native keyboard
+selection and data attributes remain unchanged. Board background-photo controls
+are offered once with header actions, not duplicated inside the field row.
