@@ -394,7 +394,7 @@
     dialog.innerHTML = `<h2 id="song-timing-title">${serviceTiming ? '예배 음원·가사·타이밍' : '어린이 음원 세트'}</h2>
       <p>${escapeHtml(all[0]?.elementTitle || all[0]?.title || '')}</p>
       <p>${serviceTiming ? '이 예배의 현재 곡·가사·사진 순서에 전환 시각을 저장합니다. 사진을 먼저 배치한 뒤 타이밍을 기록하세요. 다른 예배에는 적용되지 않습니다.' : '현재 가사·폼과 음원·자동 넘김 시각을 한 세트로 저장합니다. 예배 순서에서 ‘어린이: 음원 로드’를 선택하면 이 세트를 사용합니다.'}</p>
-      <p>${serviceTiming ? '음원·가사·타이밍을 이 예배에 함께 저장합니다. 다른 컴퓨터에서도 예배를 열면 그대로 사용할 수 있습니다.' : '음원과 지정 가사·자동 넘김 시각을 이 곡·버전의 DB 세트로 저장합니다. 다른 예배와 컴퓨터에서도 이 버전을 선택하면 불러옵니다.'} 음원을 들으며 각 장의 시작을 기록하세요. ${serviceTiming ? '가사는 부르기 시작하는 시각을 기록하면 1초 먼저 넘깁니다. 가사 없는 사진·간주는 기록한 시각에 넘깁니다. 수동으로 넘기면 음악은 계속 재생하고 자동 넘김만 해제됩니다.' : '가사는 1초 먼저, 빈 화면·음표는 기록한 시각에 넘깁니다.'}</p>
+      <p>${serviceTiming ? '음원·가사·타이밍을 이 예배에 함께 저장합니다. 다른 컴퓨터에서도 예배를 열면 그대로 사용할 수 있습니다.' : '음원과 지정 가사·자동 넘김 시각을 이 곡·버전의 DB 세트로 저장합니다. 다른 예배와 컴퓨터에서도 이 버전을 선택하면 불러옵니다.'} 음원을 들으며 각 장의 시작을 기록하세요. ${serviceTiming ? '가사는 부르기 시작하는 시각을 기록하면 1초 먼저 넘깁니다. 가사 없는 사진·간주는 기록한 시각에 넘깁니다.' : '가사는 1초 먼저, 빈 화면·음표는 기록한 시각에 넘깁니다.'} 수동으로 넘기면 음악은 계속 재생하고 자동 넘김만 해제됩니다.</p>
       ${linkedAudio.url ? `<button type="button" class="btn secondary" data-timing-linked>연결된 음원 사용 · ${escapeHtml(linkedAudio.name || '음원')}</button>` : ''}
       <label>음원 선택 <input type="file" accept="audio/*" data-timing-file></label>
       <p data-timing-filename></p><audio controls preload="metadata"></audio>
