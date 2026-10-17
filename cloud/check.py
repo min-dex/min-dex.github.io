@@ -43,7 +43,7 @@ def main():
     for key in list(env):
         if "SUPABASE" in key.upper():
             del env[key]
-    for name in NODE_TESTS + SMOKES:
+    for name in ("test_pages_gate.py",) + NODE_TESTS + SMOKES:
         command = ["node" if name in NODE_TESTS else sys.executable, "tests/" + name]
         print("RUN", name, flush=True)
         subprocess.run(command, cwd=ROOT, env=env, check=True, timeout=180)
