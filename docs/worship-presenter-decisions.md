@@ -2166,3 +2166,13 @@ the target. A unique unchanged source retains normal retry behavior.
 Offline Chromium/WebKit regressions exercise actual mocked atomic rows with an
 unhydrated independent hymn and pending retries with zero, one and two source
 matches. Production data and schema are unchanged.
+
+
+## Explicit transport and context-editor controls · 2026-10-17
+
+The transport launcher displays a monitor icon, 송출·음악 label and a reserved
+activity dot so playing/stopping does not resize the header. The separate read-only
+monitor uses an activity icon and 기기 상태 label; it is not an output controller.
+Right-click section editing labels 항목명, 담당, 내용 and 표시 형식 explicitly,
+with visible input surfaces and responsive columns. Existing stored strings,
+field bindings, playback ownership, keyboard focus and output are preserved.

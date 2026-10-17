@@ -22,7 +22,7 @@
   const version = window.MINDEX_RELEASE || document.querySelector('script[src*="/app.js?"]')?.src.split("?v=")[1] || "unknown";
   const panel = document.createElement("dialog");
   panel.className = "monitor-panel"; panel.setAttribute("aria-labelledby", "monitorTitle");
-  panel.innerHTML = `<header><h2 id="monitorTitle">제어판</h2><span>읽기 전용</span><button class="icon-btn" data-close title="닫기" aria-label="닫기"><i data-lucide="x"></i></button></header>
+  panel.innerHTML = `<header><h2 id="monitorTitle">기기 상태</h2><span>읽기 전용</span><button class="icon-btn" data-close title="닫기" aria-label="닫기"><i data-lucide="x"></i></button></header>
     <section class="monitor-section" aria-labelledby="monitorLocalTitle"><h3 id="monitorLocalTitle">현재 기기</h3>
     <div class="monitor-toolbar"><label for="monitorName">기기 이름</label><input id="monitorName" maxlength="60" autocomplete="off"><label><input type="checkbox" data-share>상태 공유</label></div>
     <p class="monitor-share-status" role="status"></p><div data-local></div></section>

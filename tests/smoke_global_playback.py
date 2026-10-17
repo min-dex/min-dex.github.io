@@ -45,6 +45,7 @@ def main():
                       clearServiceMusicSyncTimer();return 'PASS navigation, owner controls, pause/resume/stop, pending cancellation and independent output stop';
                     }'''),flush=True)
                     launcher=page.locator('[popovertarget="globalPlaybackPanel"]').first
+                    assert launcher.locator('span').first.inner_text()=='송출·음악', repr(launcher.inner_text())
                     launcher.click()
                     panel=page.locator('#globalPlaybackPanel')
                     assert panel.is_visible()
@@ -59,6 +60,8 @@ def main():
                     for width in (1440,1000,800,390):
                         page.set_viewport_size({'width':width,'height':900})
                         assert page.evaluate('''()=>{const r=document.getElementById('globalPlaybackControls');return r.scrollWidth<=r.clientWidth+1}'''),f'overflow {width}'
+                        assert page.locator('#monitorPanelBtn span').inner_text()=='기기 상태'
+                        assert page.locator('#monitorPanelBtn').evaluate('e=>e.scrollWidth<=e.clientWidth+1')
                         box=panel.bounding_box()
                         assert box['x']>=0 and box['x']+box['width']<=width+1,box
                         page.screenshot(path=f'/tmp/mindex-global-panel-{engine}-{width}.png')

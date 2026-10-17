@@ -25147,12 +25147,12 @@ function renderPresenterSectionEditorItem(item, localIndex, context) {
   return `
     <article class="presenter-section-editor-item">
       <span class="svc-edit-order">${localIndex + 1}</span>
-      <input class="svc-edit-label" type="text" data-service-item-field="label" data-service-item-index="${origIndex}" data-ordinal-display-value="${escapeAttr(displayLabel)}" value="${escapeAttr(displayLabel)}" aria-label="엘리멘트 이름" />
-      ${renderServiceEditorAssigneeControl(item, origIndex, { service: context.service }, model)}
-      ${renderServiceEditorTitleControl(item, origIndex, { service: context.service }, model)}
-      <select class="presenter-section-editor-type" data-service-item-field="element_type" data-service-item-index="${origIndex}" aria-label="엘리멘트 타입">
+      <label class="presenter-section-item-field"><span>항목명</span><input class="svc-edit-label" type="text" data-service-item-field="label" data-service-item-index="${origIndex}" data-ordinal-display-value="${escapeAttr(displayLabel)}" value="${escapeAttr(displayLabel)}" aria-label="엘리멘트 이름" /></label>
+      ${model.showAssignee ? `<label class="presenter-section-item-field"><span>담당</span>${renderServiceEditorAssigneeControl(item, origIndex, { service: context.service }, model)}</label>` : ""}
+      <div class="presenter-section-item-content"><span class="presenter-section-item-caption">내용</span>${renderServiceEditorTitleControl(item, origIndex, { service: context.service }, model)}</div>
+      <label class="presenter-section-item-field presenter-section-item-type"><span>표시 형식</span><select class="presenter-section-editor-type" data-service-item-field="element_type" data-service-item-index="${origIndex}" aria-label="엘리멘트 타입">
         ${renderServiceElementTypeOptions(serviceMemoElementType(model.parsed))}
-      </select>
+      </select></label>
       <div class="svc-edit-actions">
         <button class="icon-btn" type="button" data-presenter-section-item-action="toggle-visibility" data-service-item-index="${origIndex}" aria-pressed="${hidden}" aria-label="${hidden ? "송출에 표시" : "송출에서 숨기기"}" title="${hidden ? "송출에 표시" : "송출에서 숨기기"}"><i data-lucide="${hidden ? "eye-off" : "eye"}"></i></button>
         ${renderServiceItemMoveButton({ actionAttr: "data-presenter-section-item-action", indexAttr: "data-service-item-index", index: origIndex, direction: "up", disabled: first, label: "엘리멘트 위로 이동" })}
@@ -28553,7 +28553,7 @@ function renderGlobalPlaybackControls() {
   const icon = music.pending ? "loader-circle" : music.playing ? "pause" : "play";
   const outputState = state.presenter.safetyBlank ? "송출 중 · 화면 가림" : "예배 송출 중";
   const available = hasMusic || outputOpen || state.module === "presenter";
-  const html = `<button class="icon-btn global-playback-trigger" type="button" popovertarget="globalPlaybackPanel" title="송출·음악 제어" aria-label="송출·음악 제어" data-active="${Boolean(outputOpen || music.playing)}"><i data-lucide="sliders-horizontal"></i></button>
+  const html = `<button class="icon-btn global-playback-trigger" type="button" popovertarget="globalPlaybackPanel" title="송출·음악 제어" aria-label="송출·음악 제어" data-active="${Boolean(outputOpen || music.playing)}"><i data-lucide="monitor"></i><span>송출·음악</span><span class="global-playback-indicator" aria-hidden="true"></span></button>
     <section id="globalPlaybackPanel" class="global-playback-panel" popover aria-label="송출·음악 제어">
       <header class="global-playback-panel-head"><strong>송출·음악</strong><button class="icon-btn" type="button" popovertarget="globalPlaybackPanel" popovertargetaction="hide" aria-label="송출·음악 제어 닫기"><i data-lucide="x"></i></button></header>
       <div class="global-playback-group" role="group" aria-label="현재 예배 송출" ${outputOpen ? "" : "hidden"}>

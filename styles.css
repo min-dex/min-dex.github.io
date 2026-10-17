@@ -136,7 +136,7 @@
   --sidebar-icon-size: var(--ui-icon-size);
   --rail-motion: 120ms cubic-bezier(.2, 0, .2, 1);
   --module-tab-w: 180px;
-  --topbar-compact-w: calc((var(--topbar-btn-size) * var(--topbar-action-slot-count)) + (var(--shell-edge-inset) * 2));
+  --topbar-compact-w: calc((var(--topbar-btn-size) * var(--topbar-action-slot-count)) + (var(--shell-edge-inset) * 2) + 50px);
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-presenter: "Mindex Presenter", "Freesentation", sans-serif;
   font-family: var(--font-sans);
@@ -7864,10 +7864,10 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
   color: var(--accent);
   background: var(--accent-soft);
 }
-.presenter-section-editor-item > .svc-edit-title-wrap {
+.presenter-section-editor-item > .presenter-section-item-content {
   grid-column: 2 / -1;
 }
-.presenter-section-editor-item > .presenter-section-editor-type {
+.presenter-section-editor-item > .presenter-section-item-type {
   grid-column: 2;
 }
 .presenter-section-editor-add {
@@ -7887,8 +7887,8 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
   .presenter-section-editor-add {
     grid-template-columns: 1fr;
   }
-  .presenter-section-editor-item > .svc-edit-title-wrap,
-  .presenter-section-editor-item > .presenter-section-editor-type {
+  .presenter-section-editor-item > .presenter-section-item-content,
+  .presenter-section-editor-item > .presenter-section-item-type {
     grid-column: 1;
   }
 }
@@ -8370,7 +8370,11 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 /* Compact launcher opens transport outside the shell layout. */
 .global-playback-controls { display:flex; align-items:center; flex:0 0 auto; padding:0 5px; }
 .global-playback-controls[hidden], .global-playback-panel [hidden] { display:none; }
+.global-playback-trigger { display:inline-flex; align-items:center; justify-content:center; gap:8px; width:auto; min-height:36px; padding:0 10px; white-space:nowrap; font-size:14px; font-weight:600; }
+.global-playback-trigger svg { width:16px; height:16px; flex-shrink:0; }
+.global-playback-indicator { width:6px; height:6px; border-radius:50%; background:var(--accent); visibility:hidden; flex-shrink:0; }
 .global-playback-trigger[data-active="true"] { color:var(--accent); }
+.global-playback-trigger[data-active="true"] .global-playback-indicator { visibility:visible; }
 .global-playback-panel { position:fixed; inset:65px 15px auto auto; margin:0; width:min(360px, calc(100vw - 30px)); max-height:calc(100dvh - 80px); overflow:auto; box-sizing:border-box; padding:15px; border:1px solid var(--line); border-radius:var(--r); background:var(--panel); color:var(--ink); box-shadow:0 10px 30px #0003; }
 .global-playback-panel-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:15px; }
 .global-playback-panel-head strong { font-size:16px; font-weight:700; }
@@ -8385,3 +8389,11 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .global-playback-settings .svc-presenter-screen-label { display:inline; }
 .global-playback-empty { color:var(--ink-3); font-size:14px; }
 .worship-conflict-choice-help { margin:10px 0 0; color:var(--ink-2); font-size:var(--ui-meta-size); line-height:1.5; }
+
+/* Right-click editor fields retain explicit identity, even without focus. */
+.presenter-section-item-field, .presenter-section-item-content { display:grid; gap:5px; min-width:0; }
+.presenter-section-item-field > span, .presenter-section-item-caption { font-size:12px; font-weight:500; color:var(--ink-3); }
+.presenter-section-item-field input, .presenter-section-item-content .svc-edit-title { min-width:0; background:var(--control-surface); }
+.presenter-section-editor-item > .svc-edit-order { align-self:start; margin-top:20px; }
+#monitorPanelBtn { flex:0 0 auto; width:auto; gap:6px; padding:0 10px; }
+#monitorPanelBtn span { display:inline; font-size:12px; font-weight:600; white-space:nowrap; }

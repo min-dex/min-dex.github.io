@@ -451,3 +451,13 @@ Conflict review labels pending fields as `내 편집 항목`, not proven conflic
 `초안 보관 후 최신본 열기` retains the existing draft archive and revision guards.
 Show the first differing source line and offer inspection retry after read failure
 or unresolved save outcome; never imply automatic merge or successful save.
+
+
+## Explicit transport and context-editor controls · 2026-10-17
+
+The transport launcher displays a monitor icon, 송출·음악 label and a reserved
+activity dot so playing/stopping does not resize the header. The separate read-only
+monitor uses an activity icon and 기기 상태 label; it is not an output controller.
+Right-click section editing labels 항목명, 담당, 내용 and 표시 형식 explicitly,
+with visible input surfaces and responsive columns. Existing stored strings,
+field bindings, playback ownership, keyboard focus and output are preserved.

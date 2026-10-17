@@ -207,8 +207,8 @@
             <i data-lucide="save"></i>
           </button>
           <span id="connectionStatus" class="status-icon" hidden></span>
-          <button id="monitorPanelBtn" class="icon-btn" type="button" aria-label="제어판" title="제어판">
-            <i data-lucide="sliders-horizontal"></i>
+          <button id="monitorPanelBtn" class="icon-btn" type="button" aria-label="기기 상태" title="기기 상태">
+            <i data-lucide="activity"></i><span>기기 상태</span>
           </button>
         </div>
       </header>
@@ -230,7 +230,7 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261017-linked-song-guards";
+        const fallbackVersion = "20261017-clear-control-labels";
         const modules = [
           "vendor/lucide.min.js", "vendor/supabase-js.min.js",
           "mindex.constants.js", "mindex.inline-text.js", "mindex.design-tokens.js", "mindex.worship-model.js",

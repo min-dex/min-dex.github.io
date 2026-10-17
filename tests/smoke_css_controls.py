@@ -21,7 +21,7 @@ def main():
             page.locator("#bootStatus").wait_for(state="hidden")
             page.evaluate("""() => {
               const service={id:'css-test', type_id:'sunday-main'};
-              const items=[{id:'prayer',label:'공동기도',raw_title:'교회학교를 위해',assignee:'담당자',_origIndex:0},
+              const items=[{id:'prayer',label:'환영',raw_title:'헤세드 찬양단',assignee:'헤세드 찬양단',memo:serializeServiceItemMemo({elementType:'title_content'}),_origIndex:0},
                 {id:'song',label:'찬양 1',raw_title:'찬양 제목',_origIndex:1}];
               const fixture=document.createElement('div'); fixture.id='cssFixture';
               fixture.innerHTML=`<div class="presenter-section-editor-layer"><section class="presenter-section-editor">
@@ -74,7 +74,8 @@ def main():
                         const css=getComputedStyle(button);
                         return css.outlineStyle!=='none' && parseFloat(css.outlineWidth)>=2;
                       });
-                      return {rowsFit:rows.every(row=>row.scrollWidth<=row.clientWidth+1),
+                      return {identifiedFields:rows.every(row=>row.querySelector('.presenter-section-item-field > span')?.textContent==='항목명') && rows[0].querySelectorAll('.presenter-section-item-field')[1]?.textContent.trim()==='담당',
+                        rowsFit:rows.every(row=>row.scrollWidth<=row.clientWidth+1),
                         fieldsFit:rows.every(row=>[...row.querySelectorAll('input,select,button')].every(el=>{
                           const r=el.getBoundingClientRect(),b=row.getBoundingClientRect();
                           return !r.width || r.left>=b.left-1 && r.right<=b.right+1;
