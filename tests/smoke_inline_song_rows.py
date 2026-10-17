@@ -1,6 +1,9 @@
+import os
+os.environ["MINDEX_SMOKE_OFFLINE"]="1"
 from smoke_app import start_local_app_server,sync_playwright,launch_chromium
 from urllib.parse import urlsplit
 server,url=start_local_app_server()
+url=os.environ.get("MINDEX_VERIFY_URL",url)
 try:
  with sync_playwright() as p:
   for engine in ['chromium','webkit']:
@@ -17,6 +20,10 @@ try:
      const item=normalizeServiceItem({id:crypto.randomUUID(),service_id:sid,label:'특송',raw_title:'교회',song_id:songId,version_id:vid,assignee:'카다로스 중창단',memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formHint:'V1-V2-C-Int-V3-C-Int-C'})});state.serviceItems={[sid]:[item]};
      const model=serviceItemEditorModel(item,{service});model.showAssignee=true;model.assigneeValue='카다로스 중창단';
      presenterBoardSubgroupInputContexts=()=>[0,1,2].map(index=>({item:{...item,id:'row'+index,connectedPraise:{groupId:'medley',role:index?'secondary':'primary'},label:'찬양 '+(index+1),assignee:''},index,service}));
+     const expected=['DB: 가사','DB: 음원 (어린이)','DB: 악보 (새찬송가)','직접 추가: 가사','직접 추가: 음원'];
+     const picker=document.createElement('div');picker.innerHTML=renderServicePraiseInputModeControl(item,0);
+     if(JSON.stringify([...picker.querySelectorAll('option')].map(o=>o.textContent))!==JSON.stringify(expected))throw Error('output names/order');
+     if(picker.querySelector('select').getAttribute('aria-label')!=='찬양 출력 유형')throw Error('output type label');
      window.renderSingleSong=()=>{
       const context={item:{...item,label:'찬양 5',assignee:''},index:0,service};
       presenterBoardSubgroupInputContexts=()=>[context];
