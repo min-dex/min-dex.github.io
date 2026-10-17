@@ -313,3 +313,14 @@ the target. A unique unchanged source retains normal retry behavior.
 Offline Chromium/WebKit regressions exercise actual mocked atomic rows with an
 unhydrated independent hymn and pending retries with zero, one and two source
 matches. Production data and schema are unchanged.
+
+## Unchanged saves and document construction (2026-10-17)
+
+The atomic client skips a write only when prepared rows, structure, metadata and
+the document match its committed baseline. JSON object key order and the top-level
+generated document updatedAt are ignored; arrays, lyrics, versions, forms and
+medley order are not. Pending requests and known-conflict guards run first.
+An unchanged save is not a remote refresh: later real edits still use the stored
+revision and the server CAS guard. No schema or response contract is changed.
+Full saves construct the outgoing document once, after canonical rows are built,
+instead of building and discarding an earlier copy.

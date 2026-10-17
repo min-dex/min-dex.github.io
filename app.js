@@ -7145,7 +7145,7 @@ async function saveWorshipServiceInstance(service) {
       normalizeServiceItemsInCurrentOrder(getServiceItems(serviceId)),
     ),
   )).filter((item) => !isUnmodifiedTemplatePlaceholder(item));
-  let sourceRef = withServiceDocumentSnapshot(service, items);
+  let sourceRef;
   const servicePayload = {
     service_type_id: canonicalTypeId,
     service_date: service.date,
@@ -7154,7 +7154,6 @@ async function saveWorshipServiceInstance(service) {
     status: service._worshipStatus || "draft",
     worship_leader: worshipLeader,
     praise_leader: praiseLeader,
-    source_ref: sourceRef,
     notes: service.raw_text || "",
   };
   if (state.serviceAliasSupported) servicePayload.service_alias = String(service.alias || "").trim();

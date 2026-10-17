@@ -14,6 +14,7 @@ NODE_TESTS = (
     "test_setlist_period.cjs",
     "test_song_timing.cjs",
     "test_scripture_preload_parallel.cjs",
+    "test_worship_unchanged_save.mjs",
 )
 SMOKES = (
     "smoke_startup_bootstrap.py",

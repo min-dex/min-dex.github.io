@@ -89,6 +89,41 @@ export function prepareWorshipRowsCreate({service, rows, document}) {
   });
 }
 
+// JSONB object key order is not meaningful; array order and every value are.
+const sameJson = (a, b) => {
+  if (a === b) return true;
+  if (!a || !b || typeof a !== 'object' || typeof b !== 'object') return false;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  const keys = Object.keys(a);
+  return keys.length === Object.keys(b).length
+    && keys.every(key => Object.hasOwn(b, key) && sameJson(a[key], b[key]));
+};
+function unchangedCommit(payload, baseline) {
+  if (!baseline) return false;
+  if (['newSections', 'newElements', 'elementMoves', 'deleteElementIds', 'deleteSectionIds']
+    .some(key => payload[key].length)) return false;
+  for (const [patches, rows] of [[payload.sectionPatches, baseline.sections], [payload.elementPatches, baseline.elements]]) {
+    for (const patch of patches) {
+      const row = rows.find(row => row.id === patch.id);
+      if (!row || Object.values(patch.removeKeys || {}).some(keys => keys.length)
+        || Object.entries(patch.patch).some(([key, value]) => !sameJson(value, row[key]))) return false;
+    }
+  }
+  for (const [key, value] of Object.entries(payload.metadataPatch)) {
+    if (key === 'source_ref') {
+      if (Object.entries(value).some(([name, entry]) => !sameJson(entry, baseline.service.source_ref?.[name]))) return false;
+    } else if (!sameJson(value, baseline.service[key])) return false;
+  }
+  // Only the generated document timestamp is non-content. Never ignore lyrics,
+  // ordered signatures, metadata, version links or arbitrary nested timestamps.
+  const document = value => {
+    if (!value || typeof value !== 'object') return value;
+    const {updatedAt, ...content} = value;
+    return content;
+  };
+  return sameJson(document(payload.document), document(baseline.service.source_ref?.mindexServiceDocument));
+}
+
 export function createWorshipAtomicClient({rpc, journal, namespace = '', makeId = () => crypto.randomUUID()}) {
   const store = createWorshipStore({rpc, journal, namespace, makeId, methods:{
     save:'save_worship_service_v1', create:'create_worship_service_v1', delete:'delete_worship_service_v1',
@@ -208,7 +243,12 @@ export function createWorshipAtomicClient({rpc, journal, namespace = '', makeId 
         reloadRequired.add(id);
         throw new Error('ATOMIC_RETRY_COMMITTED_RELOAD_REQUIRED');
       }
-      const payload = prepareWorshipRowsCommit({...input, baseline:store.baseline(id)?.aggregate});
+      const baseline = store.baseline(id)?.aggregate;
+      const payload = prepareWorshipRowsCommit({...input, baseline});
+      // Pending retry and known-conflict guards above always run first. An
+      // unchanged editor does not write or refresh remote state; a later edit
+      // still uses the committed revision and normal server conflict checking.
+      if (unchangedCommit(payload, baseline)) return clone(baseline);
       try {
         const receipt = await store.save('save', payload);
         if (receipt.deleted || receipt.aggregate?.revision !== receipt.committedRevision) {

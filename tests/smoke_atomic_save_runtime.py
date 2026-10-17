@@ -89,6 +89,14 @@ def main():
                       check(JSON.stringify(writes[1].document).includes('Sibling UNSAVED'),'full save omitted captured draft');
                       check(!JSON.stringify(writes[1].document).includes('Newer local edit'),'inflight edit leaked');
                       check(state.serviceItems[sid].find(x=>x.id===second.id).raw_title==='Newer local edit','inflight edit lost');
+                      await saveWorshipServiceInstance(service);
+                      const beforeNoop=writes.length, revisionBeforeNoop=db.revision;
+                      await saveWorshipServiceInstance(service);
+                      check(writes.length===beforeNoop && db.revision===revisionBeforeNoop,'unchanged full save still wrote');
+                      await saveWorshipServiceElementPatch(service,first.id);
+                      const afterElement=writes.length;
+                      await saveWorshipServiceElementPatch(service,first.id);
+                      check(writes.length===afterElement,'repeated unchanged element still wrote');
                       // A background read while the user edits must not advance the write baseline.
                       const oldRevision=client.baseline(sid).revision;db.revision='99';
                       state.dirtyServiceElementIds.set(sid,new Set([second.id]));
