@@ -5,11 +5,12 @@ from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--url')
+    parser.add_argument('--engine', choices=['chromium', 'webkit'], default='chromium')
     args = parser.parse_args()
     server, url = (None, args.url) if args.url else start_local_app_server()
     try:
         with sync_playwright() as p:
-            browser = launch_chromium(p)
+            browser = launch_chromium(p) if args.engine == 'chromium' else p.webkit.launch()
             page = browser.new_page()
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url + '?output=presenter', wait_until='domcontentloaded')

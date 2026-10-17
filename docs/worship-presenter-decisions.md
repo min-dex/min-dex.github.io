@@ -2363,3 +2363,36 @@ automatically; the user must select their song once.
   no service error or horizontal overflow. Public output checks pass 24 lyric
   bounds cases, cache/font invalidation and delayed image/background/blackout
   transitions in Chromium/WebKit. Existing production services remain untouched.
+
+
+## WebKit background decode stall (2026-10-17)
+
+Supersedes the unresolved background-paint investigation above. Native sampling
+of an isolated Playwright WebContent process located the stall in background
+painting, PNG decoding and ShareableBitmap transfers, outside the fit queue.
+Built-in backgrounds are print-sized 3508×2480 PNGs. Async img decoding alone and
+moving images outside the transformed stage did not reliably meet 500 ms; those
+candidate changes were discarded, preserving the existing preview layout.
+
+Only miniature previews now map the 17 exact same-origin built-in background
+paths to derived WebP assets, bounded to 1280 pixels and lossless after Lanczos
+resizing. `tools/build_preview_backgrounds.py` reproduces them; originals remain
+untouched for output/print. Unknown names, uploaded/external/data/blob URLs and
+the scripture-reading illustration retain their source. No slide text, stage
+geometry, fitting rules, output readiness gate or persisted service changes.
+This fixes the reproduced built-in background case, not arbitrary oversized
+user uploads. Derived assets total approximately20MB versus140MB of originals.
+
+The 180-thumbnail test retains the500ms assertion and now includes background
+arrival/decode/two paint callbacks in its measurement window. Three cold candidate
+public-URL runs passed: WebKit44/39/39ms; Chromium30.1/27.7/27ms, zero clipping or
+font-size mismatches. Exact resized RGBA pixels of all17 assets, URL scope/query
+preservation, six untouched-source cases, preview text bounds, and actual output
+using the full-resolution original are independently tested. Local/deployed
+regression and publication status are recorded below when complete.
+
+Local regression passed: Cloud baseline7 unit +5 smoke entry points; exact asset
+pixels; both-engine180-thumbnail and background/output-source checks; both-engine
+24-case lyric bounds; cache invalidation; preview lifecycle/edge pixels; actual
+output caption edges; output latency; delayed media/background/blackout swaps.
+No assertions were lowered. Public deployment verification remains separate.

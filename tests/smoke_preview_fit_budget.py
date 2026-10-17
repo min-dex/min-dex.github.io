@@ -47,6 +47,13 @@ try:
     page.evaluate("i=>{refs.detailPane.scrollTop=refs.detailPane.querySelector('[data-fit-index=\"'+i+'\"]').offsetTop}",index)
     page.wait_for_function("i=>fitOrder.includes(i)&&!presenterThumbnailFitRaf",arg=index)
    page.wait_for_function('presenterThumbnailFitQueue.size===0',timeout=30000)
+   # Include late background decode/paint in the same responsiveness window.
+   page.evaluate("""async () => {
+    const sources=presenterBackgroundSourcesForService(state.services[0]).map(presenterPreviewBackgroundSource);
+    if(!sources.length)throw Error('background fixture is missing');
+    await Promise.all(sources.map(source=>{const image=new Image();image.src=source;return image.decode()}));
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+   }""")
    result=page.evaluate('''() => {
     clearInterval(tick);
     const boxes=[...refs.detailPane.querySelectorAll('.presenter-slide-text')];

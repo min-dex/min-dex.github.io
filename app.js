@@ -30701,6 +30701,21 @@ function presenterScriptureReferenceBadgeBookName(rawBook = "", slide = null) {
   return String(book?.koreanName || knownFullName || raw).trim();
 }
 
+// Built-in print-resolution PNGs are expensive to decode during WebKit paint.
+// Only miniature backgrounds use derived assets; output and custom sources retain
+// their originals. Exact origin/path matching must not rewrite an uploaded URL.
+function presenterPreviewBackgroundSource(source) {
+  try {
+    const url = new URL(source, document.baseURI);
+    const directory = new URL("assets/worship-backgrounds/", document.baseURI);
+    const name = url.pathname.slice(directory.pathname.length);
+    if (url.origin !== directory.origin || !url.pathname.startsWith(directory.pathname)
+      || !WORSHIP_BACKGROUND_STATIC_FILES.has(name)) return source;
+    url.pathname = `${directory.pathname}previews/${name.replace(/\.png$/i, ".webp")}`;
+    return url.href;
+  } catch { return source; }
+}
+
 function renderPresenterSlideMiniPreview(slide, serviceId = state.presenter.serviceId) {
   const service = state.services.find((svc) => svc.id === serviceId);
   const serviceChromakey = presenterServiceUsesChromakey(service);
@@ -30716,7 +30731,10 @@ function renderPresenterSlideMiniPreview(slide, serviceId = state.presenter.serv
     outputTheme: theme,
   });
   const frameClasses = presenterOutputFrameClassNames(frameState);
-  const backgroundStyle = presenterOutputFrameBackgroundStyle(frameState);
+  const backgroundStyle = presenterOutputFrameBackgroundStyle({
+    ...frameState,
+    backgroundImages: frameState.backgroundImages.map(presenterPreviewBackgroundSource),
+  });
   const outputClasses = [
     "svc-slide-mini-output",
     frameClasses,
