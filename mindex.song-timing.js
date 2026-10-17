@@ -69,10 +69,13 @@
   function decorateService(slides, items, serviceId) {
     let result = slides;
     for (const item of items) {
-      if (servicePraiseInputMode(item) !== 'lyrics_db') continue;
+      const mode = servicePraiseInputMode(item);
+      const manual = mode === 'manual_praise';
+      if (!manual && mode !== 'lyrics_db') continue;
       const original = slides.find(s => belongsTo(s, item.id) && s.songTimingKey);
-      if (!original || original.songTimingEligible) continue;
-      const key = serviceKeyFor(serviceId, item, original.songTimingKey);
+      if (!manual && (!original || original.songTimingEligible)) continue;
+      // Direct lyrics belong to this occurrence and never inherit a DB-version profile.
+      const key = serviceKeyFor(serviceId, item, manual ? 'manual_praise' : original.songTimingKey);
       const linkedSource = normalizeServiceAudioAsset(parseServiceItemMemo(item.memo).audioAsset).url || '';
       const group = slides.filter(s => belongsTo(s, item.id)).map(s => ({ ...s, serviceTimingPage: true, serviceTimingAudioSource: linkedSource }));
       const pages = pagesFor(group);
@@ -275,7 +278,7 @@
     const all = presenterSlidesForService(serviceId).filter(s => belongsTo(s, elementId));
     const slides = pagesFor(all);
     const key = all.find(s => s.songTimingKey)?.songTimingKey;
-    if (!key || !slides.length) { showToast('먼저 곡·버전과 가사 로드를 선택해 주세요.', 'error'); return; }
+    if (!key || !slides.length) { showToast('먼저 가사를 입력하거나 곡·버전의 가사를 로드해 주세요.', 'error'); return; }
     if (state.serviceMusic.playing || state.serviceMusic.pending) { showToast('음악을 일시정지한 뒤 동기화를 편집해 주세요.', 'info'); return; }
     const item = getServiceItems(serviceId).find(i => i.id === elementId);
     const service = state.services.find(s => s.id === serviceId);
@@ -283,7 +286,7 @@
     const version = getPresenterServiceItemVersion(song, item, service);
     const serviceTiming = all.some(s => s.serviceTimingPage);
     if (!serviceTiming && !isChildrenVersion(song, version)) { showToast('어린이 유형의 버전을 선택해 주세요.', 'error'); return; }
-    const setForms = formsFor(item, song, version, presenterFormPlanForServiceItem(version, item, song).forms);
+    const setForms = serviceTiming ? null : formsFor(item, song, version, presenterFormPlanForServiceItem(version, item, song).forms);
     const buildSetSlides = forms => presenterLyricsSlidesForServiceItem({item, section: {}, index: 0, song, version, displayText: song.title, label: item.label, forms, formWarnings: []});
     const linkedAudio = normalizeServiceAudioAsset(parseServiceItemMemo(item.memo).audioAsset);
     const old = profiles.get(key);

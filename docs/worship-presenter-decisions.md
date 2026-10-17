@@ -2739,3 +2739,19 @@ execution and startup recovery;180-thumbnail fitting (zero clipping/mismatch),
 actual output-window ownership/switch/zero restoration. Network latency remains
 variable; the synthetic scheduling gain is not a whole-app speedup guarantee.
 Deployment and production verification are recorded separately.
+
+## Direct-entry worship audio timing (2026-10-17)
+
+`manual_praise` uses the same occurrence-scoped audio timing editor and playback
+as linked lyrics. A song or version selection is not required. Its key includes
+the service, element and explicit manual-mode discriminator, so it never loads
+a linked-version timing profile. Final rendered lyrics, instrumental pages,
+photo order and linked audio URL still invalidate stale profiles. Direct lyrics
+and worship/song records are preserved; local save and explicit sharing retain
+their existing storage paths. Lyrics advance one second before their recorded
+onset; instrumental pages use their recorded time unchanged.
+
+Offline Chromium/WebKit checks cover editor save, fresh-page reload, actual audio
+playback/seek, cue boundaries, altered lyrics/audio, service isolation and no DB
+writes. Existing lyric/photo and shared timing checks plus the Cloud baseline
+pass locally. This does not certify any real song's calibration or deployment.
