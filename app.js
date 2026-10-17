@@ -27589,7 +27589,6 @@ async function applyPresenterPreparationInput(serviceId = state.selectedServiceI
       }
 
       if (mode === "manual_praise") {
-        item.song_id = null;
         item.version_id = null;
         item.song_version_id = null;
         item.raw_title = content;
