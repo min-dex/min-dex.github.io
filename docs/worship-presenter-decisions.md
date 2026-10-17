@@ -2593,3 +2593,27 @@ join the default Cloud gate (now8 unit +6 smoke entry points).
 Integrated upstream audio-manager and pending-input/playback save changes remain
 intact. Their actual browser tests, manual praise/interlude tests, both-engine
 lyric bounds and preview budget pass. Existing production records are read-only.
+
+
+Performance commit65c45f78 passed Linux Cloud39016994840. Its Pages run was
+superseded by downstream cd0bd081 (presence reporting), which includes all of
+these changes; Pages39017082202 and Linux Cloud39017082239 succeeded. Public
+index/release/app/presenter/monitor/song-timing/styles SHA256 values match that
+integrated checkout (release20261017-presence-60-180). No migration was executed
+by this performance task.
+
+Public Chromium/WebKit projection/version equivalence and actual app full/element
+save functions against isolated fake RPCs pass, including rollback, sibling and
+inflight draft isolation, and linked-document atomic commit. Actual output passes
+24 lyric-bound cases and delayed media/background/blackout transitions in both
+engines.180-thumbnail maximum timer gaps30.4/41ms, zero clipping and font-size
+mismatches; original500ms assertion unchanged.
+
+Final installed-Chrome/WebKit read-only probes (two runs each): home1035–3070ms,
+service board appearance204–253ms, revisit137–161ms, no service errors. Book and
+translation catalog requests start within0–1ms of one another when both uncached.
+Board appearance is not completion of all font/scripture/media loading. Network
+variance prevents claiming a uniform end-to-end home speedup; the archive
+projection reduction and independent request overlap are directly verified.
+All production probes block writes, including presence registration. Existing
+worship content, lyrics, media and DB settings remain unchanged by this task.

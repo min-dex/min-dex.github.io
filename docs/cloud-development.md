@@ -64,3 +64,12 @@ private-material access have been independently verified from Cloud.
 
 Official setup reference:
 https://learn.chatgpt.com/docs/environments/cloud-environments
+
+
+## Baseline extension · 2026-10-17
+
+The default gate now includes8 Node checks and6 Python smoke entry points.
+Added scripture-catalog overlap/readiness/error tests and actual browser
+initial projection/lazy archive/version equivalence coverage. Integrated commit
+cd0bd081 passes Ubuntu Cloud run39017082239; local checks pass too. This does not
+change the separate Cloud environment publication or hardware verification status.
