@@ -30546,7 +30546,7 @@ function renderPresenterBoardSubgroupInputControls(serviceId, subgroup = {}, opt
     const dbLink = renderServiceItemLinkControl(context.item, context.index);
     if (dbLink && (options.headerActions || label)) controls = controls.replace(dbLink, "");
     return `
-      <div class="svc-board-subgroup-control-item" data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(context.item.id || "")}" data-service-item-index="${escapeAttr(String(context.index))}">
+      <div class="svc-board-subgroup-control-item${!options.headerActions && !label && ["lyrics_db", "score_db"].includes(servicePraiseInputMode(context.item)) ? " svc-inline-song" : ""}" data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(context.item.id || "")}" data-service-item-index="${escapeAttr(String(context.index))}">
         ${label ? `<div class="svc-board-subgroup-control-head"><span class="svc-board-subgroup-control-label">${escapeHtml(label)}</span>${dbLink}${renderPresenterBoardItemActions(serviceId, context)}</div>` : ""}
         ${audioLed ? audioManager : ""}
         ${controls}

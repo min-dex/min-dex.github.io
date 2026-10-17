@@ -33,11 +33,11 @@ def main():
                       const errors=[];
                       const song=document.querySelector('.svc-presenter-input-field--song');
                       const songRow=song?.closest('.svc-board-subgroup-control-item');
-                      if(songRow && songRow.getBoundingClientRect().width>780) {
+                      if(songRow && songRow.closest('.svc-board-subgroup-controls').clientWidth>960) {
                         const fields=[...songRow.querySelectorAll('input,select,button')].filter(n=>n.checkVisibility() && n.getBoundingClientRect().height);
                         const tops=fields.map(n=>n.getBoundingClientRect().top).sort((a,b)=>a-b);
                         const rows=[];for(const top of tops)if(!rows.length||top-rows[rows.length-1]>16)rows.push(top);
-                        // Current layout: song controls, assignee, then action/status row.
+                        // Desktop rule starts above the actual 960px container breakpoint.
                         if(rows.length>3)errors.push('special song has an extra control row');
                         const assignee=songRow.querySelector('[data-service-item-field="assignee"]');
                         const action=songRow.querySelector('.svc-board-subgroup-flow');

@@ -3175,3 +3175,20 @@ Existing28 versions/forms are unchanged apart from audio_set, verified through
 production REST readback.30 automatic sets,8 disabled review drafts.
 All38 Storage files re-downloaded and SHA-256 matched (229,417,423bytes).
 Audio, lyrics, original snapshots and operational SQL stay outside public Git.
+
+## Compact linked praise rows · 2026-10-17
+
+DB lyrics/score rows with their own action toolbar use one row when the input
+container is at least961px wide: mode, flexible title, DB link, bounded version
+and form, then photo/audio/save. No empty assignee column is reserved; an actual
+assignee remains below. Missing versions reserve no column. Smaller containers
+retain wrapping. Opening photos moves the action area below; audio managers
+retain their full-width area. Direct lyrics and output/print remain unchanged.
+Real renderer smoke checks cover three connected songs in Chromium/WebKit at
+600/800/1000/1100/1200/1600px, button bounds/overlap, actual photo expansion and the
+unlinked layout. Existing praise-input regression covers assignee/direct input.
+
+The individual-input regression previously applied its desktop row-count rule
+above780px even though the actual container wraps through960px. The same failure
+reproduced with unchanged HEAD styles. Align that condition with the960px
+container breakpoint; retain every containment, overlap and multiline assertion.
