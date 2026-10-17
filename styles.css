@@ -8658,3 +8658,14 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .svc-board-subgroup-controls .svc-presenter-input-field--lyrics.is-collapsed { flex: 0 0 auto; grid-template-columns: max-content; }
 .svc-board-subgroup-controls .svc-presenter-input-field--lyrics:not(.is-collapsed) { flex: 1 0 100%; order: 1; grid-column: 1 / -1; grid-template-columns: minmax(0,1fr); }
 .svc-board-subgroup-controls .svc-presenter-input-field--lyrics:not(.is-collapsed) > .svc-presenter-lyrics-heading { justify-content: flex-start; }
+
+/* Direct lyrics grow with wrapped content, bounded to keep controls reachable. */
+.svc-manual-praise-lyrics textarea,
+.svc-presenter-input-field--lyrics:not(.is-collapsed) textarea.svc-presenter-input-control {
+  box-sizing: border-box;
+  field-sizing: content;
+  height: auto;
+  min-height: calc(2lh + 20px);
+  max-height: 55vh;
+  overflow-y: auto;
+}

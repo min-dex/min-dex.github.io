@@ -2868,3 +2868,11 @@ Existing permanent failure,15-second stall, runtime failure, manual recovery,
 version resolution, stylesheet gate, dependency and real font-cache tests remain.
 The default Cloud gate now10 Node +8 browser entry points includes this regression.
 Deployment and production measurements remain separate receipts.
+
+## Direct lyric content height · 2026-10-17
+
+Both order-editor and expanded board direct lyrics start at two lines, grow with
+wrapped content and scroll above 55vh. Collapsed board text remains hidden.
+The legacy scripture-record text editor is not the ordinary book/chapter reader;
+its selection can be restored by scriptureId/session state, but the current sidebar
+renders book-code buttons rather than scripture-record buttons. It is unchanged.
