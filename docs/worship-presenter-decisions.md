@@ -2176,3 +2176,20 @@ monitor uses an activity icon and 기기 상태 label; it is not an output contr
 Right-click section editing labels 항목명, 담당, 내용 and 표시 형식 explicitly,
 with visible input surfaces and responsive columns. Existing stored strings,
 field bindings, playback ownership, keyboard focus and output are preserved.
+
+
+## Worship view readiness · 2026-10-17
+
+Before an opened service has its stored rows and linked songs, show a dedicated
+예배를 준비하고 있어요 status in its content pane and a compact loading notice
+in its outline. Projected template placeholders are not missing-input warnings
+until readiness completes. No artificial minimum animation or global boot logo
+is used; already loaded services reopen immediately.
+
+Failures expose retry with aria-busy=false. Completion only replaces the selected
+service's loading view; navigating elsewhere cannot be undone by an old request.
+Local drafts and an existing live controller are protected from loading/error
+replacement. Audio and output ownership remain unchanged. Asset/scripture
+background warmup retains its own loading behavior and does not block this gate.
+Offline Chromium/WebKit checks cover delayed rows/songs, genuine missing input
+after completion, cached revisits, failure/retry, stale completion and live controls.
