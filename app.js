@@ -12775,7 +12775,7 @@ async function uploadServiceItemAudioAsset(input) {
     await saveServiceItemMutation(serviceId, targetIndex, { silent: true, renderAfterSave: false, throwOnError: true });
     renderCurrentServiceModuleDetail();
     renderServiceList();
-    showToast("찬양 헤더에 음원을 연결했습니다.");
+    showToast("음원을 등록했습니다. 입력창 아래에서 관리할 수 있어요.");
     return true;
   } catch (error) {
     if (uploadedPath && state.client?.storage?.from) {
@@ -12809,7 +12809,7 @@ async function clearServiceItemAudioAsset(serviceId = state.selectedServiceId, i
   await saveServiceItemMutation(serviceId, index, { silent: true, renderAfterSave: false, throwOnError: true });
   renderCurrentServiceModuleDetail();
   renderServiceList();
-  showToast("찬양 헤더 음원을 제거했습니다.");
+  showToast("음원 연결을 해제했습니다.");
 }
 
 function addPresenterReferenceMedia(serviceId = state.selectedServiceId, requestedSectionKey = "", options = {}) {
@@ -30268,7 +30268,7 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
   const interactionLabel = presenterSlideInteractionHint(serviceId, subgroup.name || visibleLabel);
   const warnings = presenterWarningsForEntries(subgroup.slides);
   const inputContexts = presenterBoardSubgroupInputContexts(serviceId, subgroup);
-  const headerContext = options.showHead && inputContexts.length === 1 ? inputContexts[0] : null;
+  const headerContext = options.showHead && inputContexts.length === 1 ? { ...inputContexts[0], timingEntries: subgroup.slides } : null;
   const inputControls = renderPresenterBoardSubgroupInputControls(serviceId, subgroup, { headerActions: Boolean(headerContext) });
   const headerActions = headerContext && inputControls ? renderPresenterBoardItemActions(serviceId, headerContext) : "";
   const context = presenterBoardSubgroupItemContext(serviceId, subgroup);
@@ -30298,7 +30298,6 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
         </header>` : ""}
       ${inputControls}
       ${renderServiceSlotMusic(context)}
-      ${globalThis.MindexSongTiming?.controls(serviceId, subgroup.slides) || ""}
       <div class="svc-board-grid">
         ${slides.map(({ slide, slideIndex, formLabel }) =>
           renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, formLabel)).join("")}
@@ -30358,7 +30357,8 @@ function renderPresenterBoardSubgroupInputControls(serviceId, subgroup = {}, opt
   // per-row "찬양 n" label only repeats the header range. Other multi-item groups
   // (e.g. 설교/인용 구절) hold different fields and keep their labels.
   const medleyRows = contexts.length > 1 && contexts.every((context) => serviceItemConnectedPraise(context.item));
-  const blocks = contexts.map((context) => {
+  const blocks = contexts.map((originalContext) => {
+    const context = { ...originalContext, timingEntries: subgroup.slides };
     const controls = presenterServiceInputControls(context.item, context.index, context.service, { headerActions: true });
     if (!controls) return "";
     const label = contexts.length > 1 && !medleyRows ? serviceElementDisplayLabel(serviceItemOrdinalDisplayLabel(context.item, context.service)) || "항목" : "";
@@ -30367,6 +30367,7 @@ function renderPresenterBoardSubgroupInputControls(serviceId, subgroup = {}, opt
         ${label ? `<div class="svc-board-subgroup-control-head"><span class="svc-board-subgroup-control-label">${escapeHtml(label)}</span>${renderPresenterBoardItemActions(serviceId, context)}</div>` : ""}
         ${controls}
         ${options.headerActions || label ? "" : renderPresenterBoardItemActions(serviceId, context)}
+        ${renderPresenterBoardItemAudioControls(serviceId, context, { manager: true })}
       </div>`;
   }).filter(Boolean);
   if (!blocks.length) return "";
@@ -30446,19 +30447,25 @@ function presenterBoardConnectedPraiseItemTitles(contexts = []) {
     });
 }
 
-function renderPresenterBoardItemAudioControls(serviceId, context = {}) {
+function renderPresenterBoardItemAudioControls(serviceId, context = {}, options = {}) {
   if (!context || !serviceItemSupportsHeaderAudio(context.item)) return "";
   const memo = parseServiceItemMemo(context.item.memo);
   const audioAsset = normalizeServiceAudioAsset(memo.audioAsset);
-  const source = String(audioAsset.url || "").trim();
-  const label = audioAsset.name || "연결된 음원";
+  const entries = (context.timingEntries || []).filter(({ slide }) =>
+    (slide.songTimingElementId || slide.progressionParentId || slide.elementId) === context.item.id);
+  const timingAudio = globalThis.MindexSongTiming?.audioFor(entries, context.item.id);
+  const source = String(audioAsset.url || timingAudio?.url || "").trim();
+  if (Boolean(source) !== Boolean(options.manager)) return "";
+  const label = audioAsset.url ? audioAsset.name || "연결된 음원" : timingAudio?.name || "연결된 음원";
   return `
-    <div class="svc-board-subgroup-audio${source ? " has-audio" : ""}" aria-label="${escapeAttr(`${context.item.label || "찬양"} 음원`)}">
+    <div class="svc-board-subgroup-audio${source ? " has-audio svc-audio-manager" : ""}" aria-label="${escapeAttr(`${context.item.label || "찬양"} 음원 관리`)}">
       ${source ? `
+        <span class="svc-audio-manager-label">음원 관리</span>
         <audio controls preload="metadata" src="${escapeAttr(source)}"></audio>
         <strong title="${escapeAttr(label)}">${escapeHtml(label)}</strong>` : ""}
       <div class="svc-board-subgroup-audio-actions">
-        ${source ? `<button class="icon-btn" type="button" data-service-item-audio-clear
+        ${source ? globalThis.MindexSongTiming?.controls(serviceId, entries, { audioSource: source }) || "" : ""}
+        ${audioAsset.url ? `<button class="icon-btn" type="button" data-service-item-audio-clear
             data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${context.index}"
           aria-label="음원 연결 해제" title="음원 연결 해제"><i data-lucide="x"></i></button>` : ""}
         <label class="svc-board-subgroup-audio-upload" title="${source ? "음원 교체" : "음원 추가"}">

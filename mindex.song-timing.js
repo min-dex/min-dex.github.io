@@ -219,10 +219,20 @@
       });
     } finally { audio.removeAttribute('src'); audio.load(); URL.revokeObjectURL(url); }
   }
-  function controls(serviceId, entries) {
+  function audioFor(entries = [], elementId = '') {
+    const slide = entries.map(entry => entry.slide || entry).find(slide =>
+      slide.songTimingKey && (slide.songTimingElementId || slide.elementId) === elementId);
+    const profile = slide && profiles.get(slide.songTimingKey);
+    // A disconnected/replaced service asset must not resurrect stale cached audio.
+    if (slide?.serviceTimingPage && profile?.lyricsFingerprint !== fingerprint(entries.map(entry => entry.slide || entry))) return null;
+    return profile?.url ? { url: profile.url, name: profile.audioName || '동기화 음원' } : null;
+  }
+  function controls(serviceId, entries, options = {}) {
     const seen = new Set();
-    return entries.filter(({ slide }) => slide.songTimingKey && slide.songTimingEligible && !seen.has(slide.songTimingElementId || slide.elementId) && seen.add(slide.songTimingElementId || slide.elementId))
-      .map(({ slide }) => `<button type="button" class="btn secondary" data-song-timing-open data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(slide.songTimingElementId || slide.elementId)}">${escapeHtml(slide.elementTitle || slide.title || '찬양')} · 음원 동기화</button>${slide.syncTimeline?.localTiming ? `<button type="button" class="btn secondary" data-song-timing-play data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(slide.songTimingElementId || slide.elementId)}">동기화 처음부터 재생</button>` : ''}`).join('');
+    return entries.filter(({ slide }) => slide.songTimingKey && slide.songTimingEligible
+      && (options.audioSource || slide.serviceTimingAudioSource || profiles.get(slide.songTimingKey)?.url)
+      && !seen.has(slide.songTimingElementId || slide.elementId) && seen.add(slide.songTimingElementId || slide.elementId))
+      .map(({ slide }) => `<button type="button" class="btn secondary" data-song-timing-open data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(slide.songTimingElementId || slide.elementId)}">음원 동기화</button>${slide.syncTimeline?.localTiming ? `<button type="button" class="btn secondary" data-song-timing-play data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(slide.songTimingElementId || slide.elementId)}">동기화 처음부터 재생</button>` : ''}`).join('');
   }
   function transport() {
     const source = state.serviceMusic.sourceKey;
@@ -423,7 +433,7 @@
     });
     document.body.append(dialog); dialog.showModal();
   }
-  root.MindexSongTiming = { keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, controls, open, play, transport, updateTransport, save, ready, pack, unpack, share, loadShared, formsFor, sourceSignature, ownsSource: source => [...profiles.values()].some(p => p.url === source), get revision() { return revision; } };
+  root.MindexSongTiming = { keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, save, ready, pack, unpack, share, loadShared, formsFor, sourceSignature, ownsSource: source => [...profiles.values()].some(p => p.url === source), get revision() { return revision; } };
   if (typeof document !== 'undefined') document.addEventListener('input', e => {
     const input = e.target.closest('[data-song-timing-seek]');
     const audio = state.serviceMusic.audio;

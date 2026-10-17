@@ -2498,3 +2498,14 @@ parallel200/199ms, identical full responses. End-to-end home samples ranged
 not establish a uniform end-to-end speedup. Service board appearance was
 0.24–0.51s and revisits0.12–0.22s; fonts/scripture warmup can finish later.
 All production probes block writes. No existing services or DB settings changed.
+
+
+## Audio management below praise inputs (2026-10-17)
+
+Keep only audio registration in the item action row when no audio is attached.
+Once audio exists, show its player, filename, replacement/disconnect actions and
+eligible timing controls in a full-width audio manager below that item's inputs.
+No standalone per-song timing buttons are rendered. Existing local/shared-loaded
+children timing profiles also expose their audio in this manager; their timing
+editor remains accessible. Each medley row filters timing controls by element ID.
+Storage, timing keys, save paths, song links and ordering are unchanged.

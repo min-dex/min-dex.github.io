@@ -8476,3 +8476,16 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 
 .song-timing-seek { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:10px; width:100%; font-size:12px; }
 .song-timing-seek input { width:100%; min-width:0; }
+
+.svc-board-subgroup-controls .svc-board-subgroup-audio.svc-audio-manager {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  border-top: 1px solid var(--line);
+  box-sizing: border-box;
+  gap: 10px;
+}
+.svc-audio-manager-label { flex-basis: 100%; color: var(--ink-3); }
+.svc-audio-manager .svc-board-subgroup-audio-actions { flex-wrap: wrap; max-width: 100%; }
+.svc-audio-manager .btn { white-space: normal; }
