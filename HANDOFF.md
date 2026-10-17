@@ -890,3 +890,13 @@ now serves WAV ranges through the actual local HTTP server without intercepting
 local requests; all external requests remain blocked. Same15s assertions and real
 click/clock/slide/replay/stop checks remain. Both local engines pass; Linux retry
 will distinguish media-fixture transport behavior from an app regression.
+
+Final verification: merged upstream explicit audio-pipeline restart with native
+HTTP media fixture in39dc32e7. Linux Cloud39033410319 succeeded (13 unit +14 smoke
+entry points), including WebKit replay. Pages39033410534 succeeded; final release
+20261017-audio-restart.14 public files exactly match local hashes. Public runtime
+and common-font checks pass on both engines; WebKit output swaps and blackout
+pass again. Local real-HTTP children replay, manual-lyrics timing and output tests
+also pass. This supersedes the pending/failing CI status above. The timing table
+remains a measurement of the preceding version-delete release containing the
+same entry-layout change; no WebKit end-to-end speedup is claimed.
