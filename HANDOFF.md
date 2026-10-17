@@ -770,3 +770,23 @@ HTTP server; original request/boot deadlines and assertions are unchanged.
 
 Integrated main through `1baf08a9` preserves audio timing resave, boot activity
 indicators and editor-pane bounds. Final release measurement/verification follows.
+
+Final pre-deploy native sample on `20261017-compact-boot-progress` (3 fresh
+profiles/engine, same service): Chrome shell/home-current-data medians 2.030/4.231s,
+first visible board 3.446s, font/visible-fit readiness 5.827s, reentry .178s.
+WebKit corresponding medians .929/2.197s, 1.236s, 8.835s, .205s. Individual
+WebKit font readiness was 33.492/8.835/8.632s; full UI font transfer was present.
+Earlier diagnostic runs had different network conditions and are kept separate.
+Native samples retain HTTP cache within each profile, with no request interception;
+only JS write guards are installed. The full font-ready measure includes hidden
+font loads and must not be described as the first visible frame time.
+
+Final integration also preserves upstream `239312a6` (compact boot feedback,
+weekly/input UI and audio-fixture metadata readiness). Runtime version remains
+`20261017-entry-font-scope`; no production data/schema/write path change.
+
+Final integrated local gate passed 13 Node +12 smoke entry points. Scoped current
+input/editor, 180-thumbnail fit, scripture lookup, 32 lyric-bound cases per engine,
+output swaps and blackout checks passed. Existing read/write guards, atomic save
+and font/fit thresholds remain unchanged. All source glyphs remain covered with
+11,700 exact UI glyph/weight outline and advance comparisons.
