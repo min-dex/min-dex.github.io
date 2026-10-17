@@ -20,3 +20,37 @@ jobs:
           python-version: '3.12'
       - run: bash cloud/setup.sh
       - run: .cache/cloud-venv/bin/python cloud/check.py
+  deploy-pages:
+    # A failed/cancelled check skips this entire job. No always() or bypass.
+    needs: offline-web
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Reject superseded commits
+        # A delayed/re-run old check must never overwrite a newer main release.
+        run: |
+          git fetch --no-tags origin main
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
+      - uses: actions/configure-pages@v5
+      - name: Stage the tested commit only
+        run: python3 cloud/stage_pages.py "$RUNNER_TEMP/mindex-pages"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/mindex-pages
+      - name: Deploy verified artifact
+        id: deployment
+        uses: actions/deploy-pages@v4
