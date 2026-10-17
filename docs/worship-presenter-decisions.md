@@ -2442,3 +2442,38 @@ active input is applied last if duplicated controls exist. Clear preview timers
 before committing, and retain the existing atomic persistence path. This is not
 an autosave or a change to Enter behavior. Chromium/WebKit shortcut tests cover
 active/blurred drafts, Save-button focus and cross-service exclusion.
+
+## Bounded home reads and startup overlap (2026-10-17)
+
+Home aggregate reads run in groups of at most3 through the existing atomic read
+client. Deduplicated input order is preserved; every group settles before an
+error escapes, and no later group starts after failure. Adoption and metadata
+publication still check loaded state/local drafts after awaiting. The write,
+revision, durable retry and conflict paths are unchanged.
+
+Bootstrap speculatively preloads scripts/styles using the HTML fallback version
+while resolving the release, plus the atomic client/store modules. It executes
+only the resolved version, in the original dependency order, after stylesheets
+are ready. A stale fallback is download-only; timeout/retry/theme gates remain.
+Controller font preloads include its existing four weights and start on entry/
+direct presenter links; output retains its three-weight preload. Links deduplicate. Font faces, glyphs,
+text fitting and output sizing are unchanged; rare-glyph full-font fallback is
+retained. No assertion of reduced total font bytes is made.
+
+The initial sidebar retains its rendered markup signature, so an identical
+outline refresh neither replaces DOM nor reads scroll geometry. Service-row
+loading now refreshes once after releasing its load lock, using the existing
+presenter patch path on success and full error rendering on failure. It no
+longer patches during loading and then unconditionally rebuilds the full view.
+
+Validation: controlled concurrent-read settlement/draft/order/retry cases;
+held release response proves concurrent downloads and resolved-only execution;
+Chrome/WebKit boot recovery, loading/error/retry/stale completion, sidebar
+identity/focus, layout batching, live-controller stability, conflict review,
+24-case lyric bounds, output caption edges, delayed media/background/blackout,
+and180-preview500ms budget pass. Cloud baseline7 unit +5 smoke entries passes.
+Existing outline and reentry fixtures now explicitly supply their already-loaded
+service/catalog state; both missing-state failures also reproduced before these
+runtime changes. Layout-batch assertions were retained and exposed the actual
+duplicate full-render path fixed above. Existing production services are not
+modified; production browser probes block write requests. Deployment is separate.

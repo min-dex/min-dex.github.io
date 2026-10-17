@@ -107,15 +107,20 @@
         if (params.get("output") === "presenter" || params.get("mindex-output") === "presenter") {
           document.documentElement.classList.add("presenter-output-document", "presenter-output-pending");
         }
-        let presenterController = false;
-        try { presenterController = sessionStorage.getItem("mindex.ui.module") === "presenter"; } catch (_) {}
-        if (document.documentElement.classList.contains("presenter-output-document") || presenterController) {
-          for (const weight of ["6SemiBold", "7Bold", "8ExtraBold"]) {
+        window.MINDEX_PRELOAD_PRESENTER_FONTS = ({ controller = true } = {}) => {
+          const weights = controller ? ["5Medium", "6SemiBold", "7Bold", "8ExtraBold"] : ["6SemiBold", "7Bold", "8ExtraBold"];
+          for (const weight of weights) {
+            const href = `./vendor/fonts/freesentation/Freesentation-${weight}.woff2`;
+            if ([...document.querySelectorAll('link[as="font"]')].some(link => link.getAttribute("href") === href)) continue;
             const font = document.createElement("link");
             font.rel = "preload"; font.as = "font"; font.type = "font/woff2"; font.crossOrigin = "anonymous";
-            font.href = `./vendor/fonts/freesentation/Freesentation-${weight}.woff2`;
-            document.head.append(font);
+            font.href = href; document.head.append(font);
           }
+        };
+        let presenterController = new URLSearchParams(location.hash.slice(1)).get("module") === "presenter";
+        try { presenterController ||= sessionStorage.getItem("mindex.ui.module") === "presenter"; } catch (_) {}
+        if (document.documentElement.classList.contains("presenter-output-document") || presenterController) {
+          window.MINDEX_PRELOAD_PRESENTER_FONTS({ controller: !document.documentElement.classList.contains("presenter-output-document") });
         }
       })();
     </script>
@@ -230,7 +235,7 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261017-verse-segment-number";
+        const fallbackVersion = "20261017-startup-overlap";
         const modules = [
           "vendor/lucide.min.js", "vendor/supabase-js.min.js",
           "mindex.constants.js", "mindex.inline-text.js", "mindex.design-tokens.js", "mindex.worship-model.js",
@@ -256,11 +261,15 @@
           // A manual retry must not reuse a browser-cached failed preload.
           return retryStamp ? `${url}${url.includes("?") ? "&" : "?"}retry=${retryStamp}` : url;
         };
+        const preloadedScripts = new Set();
         const preloadScript = (path, version) => {
+          const href = assetUrl(path, version);
+          if (preloadedScripts.has(href)) return;
+          preloadedScripts.add(href);
           const preload = document.createElement("link");
           preload.rel = "preload";
           preload.as = "script";
-          preload.href = assetUrl(path, version);
+          preload.href = href;
           if (path === "app.js") preload.fetchPriority = "high";
           document.head.append(preload);
         };
@@ -309,10 +318,28 @@
             clearTimeout(timer);
           }
         };
+        const preloadAssets = (version) => {
+          modules.forEach((module) => preloadScript(module, version));
+          for (const path of styles) {
+            const href = assetUrl(path, version);
+            if ([...document.querySelectorAll('link[as="style"]')].some(link => link.getAttribute("href") === href)) continue;
+            const link = document.createElement("link");
+            link.rel = "preload"; link.as = "style"; link.href = href; document.head.append(link);
+          }
+          if (!document.documentElement.classList.contains("presenter-output-document")) {
+            for (const href of [`./mindex.worship-atomic-client.mjs?v=${encodeURIComponent(version)}`, "./mindex.worship-store.mjs?v=atomic-recovery-prep-20260919-001"]) {
+              if ([...document.querySelectorAll('link[rel="modulepreload"]')].some(link => link.getAttribute("href") === href)) continue;
+              const link = document.createElement("link");link.rel = "modulepreload";link.href = href;document.head.append(link);
+            }
+          }
+        };
+        // Speculate downloads only. A stale HTML fallback never executes before
+        // release resolution or bypasses ordered scripts and stylesheet readiness.
+        preloadAssets(fallbackVersion);
         void (async () => {
           const version = await resolveVersion();
           window.MINDEX_RELEASE = version;
-          modules.forEach((module) => preloadScript(module, version));
+          preloadAssets(version);
           await Promise.all(styles.map((style) => loadStyle(style, version)));
           for (const module of modules) await load(module, version);
         })().catch(failBoot);

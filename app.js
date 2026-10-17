@@ -4131,17 +4131,23 @@ async function fetchWorshipRowsForServiceIds(serviceIds = []) {
 
   const atomic = await worshipAtomicClient();
   const sections = [], elements = [];
-  for (const id of ids) {
-    const aggregate = await atomic.read(id, {
+  for (const group of chunkArray(ids, 3)) {
+    // Bound database pressure, preserve input order, and settle in-flight reads
+    // before a failure releases the caller's loading lock.
+    const results = await Promise.allSettled(group.map((id) => atomic.read(id, {
       adopt: () => !state.loadedWorshipServiceIds.has(id) && !sundayEditSyncHasLocalDraft(id),
-    });
-    sections.push(...aggregate.sections);
-    elements.push(...aggregate.elements);
-    // On the initial load the document and row baseline must come from the
-    // same read. Never replace metadata belonging to an active local draft.
-    if (!state.loadedWorshipServiceIds.has(id) && !sundayEditSyncHasLocalDraft(id)) {
-      const service = state.services.find(candidate => candidate.id === id);
-      if (service) Object.assign(service, normalizeWorshipService(aggregate.service));
+    })));
+    const failure = results.find((result) => result.status === "rejected");
+    if (failure) throw failure.reason;
+    for (let index = 0; index < group.length; index += 1) {
+      const id = group[index], aggregate = results[index].value;
+      sections.push(...aggregate.sections);
+      elements.push(...aggregate.elements);
+      // Recheck after awaiting: a draft may have started while reads were pending.
+      if (!state.loadedWorshipServiceIds.has(id) && !sundayEditSyncHasLocalDraft(id)) {
+        const service = state.services.find(candidate => candidate.id === id);
+        if (service) Object.assign(service, normalizeWorshipService(aggregate.service));
+      }
     }
   }
   return { sections, elements };
@@ -5781,10 +5787,6 @@ async function loadServiceItems(serviceId) {
     }
     warmWorshipScriptureReferencesForService(serviceId);
     warmServiceItemScriptureReferencesForService(serviceId);
-    if (state.selectedServiceId === serviceId) {
-      if (state.module === "presenter") renderPresenterControlState(serviceId);
-      else renderCurrentServiceModuleDetail();
-    }
   })();
   serviceItemLoadPromises.set(serviceId, loadPromise);
   renderLoadingStatus();
@@ -5797,8 +5799,14 @@ async function loadServiceItems(serviceId) {
     serviceItemLoadPromises.delete(serviceId);
     renderLoadingStatus();
     if (state.selectedServiceId === serviceId && (state.module === "presenter" || state.module === "service")) {
-      renderCurrentServiceModuleDetail();
-      renderServiceList();
+      // Render once, after the loading lock is cleared. Existing presenter
+      // controls preserve focus/scroll through their normal patch path.
+      if (state.module === "presenter" && !serviceViewLoadErrors.has(serviceId)) {
+        renderPresenterControlState(serviceId);
+      } else {
+        renderCurrentServiceModuleDetail();
+        renderServiceList();
+      }
     }
   }
 }
@@ -22956,7 +22964,11 @@ function renderServiceList() {
   refs.songCount.textContent = q ? `${services.length}개 결과` : "";
   const selectedService = state.services.find((service) => service.id === state.selectedServiceId);
   if (state.module === "presenter") {
-    refs.songList.innerHTML = renderPresenterSidebar(q, services, selectedService);
+    const outlineMarkup = selectedService && !serviceIsNoGathering(selectedService)
+      ? renderServiceCurrentSidebar(selectedService).trim() : "";
+    refs.songList.innerHTML = renderPresenterSidebar(q, services, selectedService, outlineMarkup);
+    const outline = refs.songList.querySelector(".service-sidebar-section--current");
+    if (outline) outline._presenterOutlineMarkup = outlineMarkup;
     finishListRender();
     return;
   }
@@ -22992,7 +23004,8 @@ function renderServiceList() {
   finishListRender();
 }
 
-function renderPresenterSidebar(query, services, selectedService) {
+function renderPresenterSidebar(query, services, selectedService, outlineMarkup = selectedService && !serviceIsNoGathering(selectedService)
+  ? renderServiceCurrentSidebar(selectedService).trim() : "") {
   const visibleServices = query ? services : [];
   const searchSection = query ? `
       <section class="service-sidebar-section">
@@ -23008,9 +23021,7 @@ function renderPresenterSidebar(query, services, selectedService) {
     <div class="service-sidebar service-sidebar--presenter">
       ${searchSection}
       ${selectedService ? renderPresenterSidebarServiceSummary(selectedService) : ""}
-      ${selectedService && !serviceIsNoGathering(selectedService)
-        ? renderServiceCurrentSidebar(selectedService)
-        : !selectedService ? renderUpcomingServiceShortcuts() : ""}
+      ${outlineMarkup || (!selectedService ? renderUpcomingServiceShortcuts() : "")}
     </div>`;
 }
 
@@ -33536,6 +33547,7 @@ async function openServiceInPresenter(id) {
   if (!id) return;
   if (serviceNavigationBlocked(id)) return;
   if (id !== state.selectedServiceId && !confirmDiscardServiceChanges()) return;
+  window.MINDEX_PRELOAD_PRESENTER_FONTS?.();
   markWorshipServiceExplicitlyRequested(id);
   state.presenter.viewServiceId = id;
   state.selectedServiceId = id;

@@ -26,7 +26,7 @@ def main():
                         assert held and any('/app.js?' in u for u in requested)
                         assert page.evaluate("typeof window.lucide==='undefined'")
                         fonts = page.locator('link[rel=preload][as=font][href*=freesentation]').count()
-                        assert fonts == (0 if mode == 'home' else 3), (mode, fonts)
+                        assert fonts == (0 if mode == 'home' else 3 if mode == 'output' else 4), (mode, fonts)
                         for route in held:
                             route.continue_()
                         page.wait_for_function("typeof state!=='undefined' && typeof window.supabase?.createClient==='function' && !!window.lucide")

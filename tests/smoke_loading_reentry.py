@@ -17,6 +17,7 @@ def main():
                       const check=(v,m)=>{if(!v)throw Error(m)};
                       const tick=()=>new Promise(r=>setTimeout(r,20));
                       state.auth.session={user:{id:'fixture'}};state.connectionError='';state.module='manuals';
+                      state.bibleTranslations=[{id:'fixture',name:'fixture'}];
                       state.scriptureBooks=[{code:'GEN',koreanName:'창세기',chapterCount:50,testament:'old'}];
                       TABLE_COLUMN_SUPPORT_CACHE.delete('mindex_reference_links.group_name');
                       let reads=0,probes=0;const pending=[];
