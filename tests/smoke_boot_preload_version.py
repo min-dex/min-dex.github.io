@@ -19,6 +19,7 @@ try:
    script_preloads=page.locator('link[as=script]').evaluate_all('(nodes)=>nodes.map(n=>n.getAttribute("href"))')
    assert script_preloads[0].startswith('./app.js?'),script_preloads
    assert sum('/app.js?' in u for u in script_preloads)==1
+   assert next(i for i,u in enumerate(requests) if '/styles.css?' in u) < next(i for i,u in enumerate(requests) if '/app.js?' in u), 'stylesheet gate queued behind scripts'
    assert page.evaluate("typeof state==='undefined'")
    for r in held:r.fulfill(json={'version':'test-resolved-release'})
    page.wait_for_function("typeof state!=='undefined'&&!document.body.classList.contains('ui-booting')")

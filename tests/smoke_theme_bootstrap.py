@@ -33,8 +33,9 @@ def main():
                     page = context.new_page()
                     releases = []
                     modules = []
+                    fail_modules = False
                     page.route('**/mindex-release.json*', lambda r: releases.append(r))
-                    page.route('**/mindex.constants.js*', lambda r: modules.append(r))
+                    page.route('**/mindex.constants.js*', lambda r: r.abort() if fail_modules else modules.append(r))
                     page.goto(url+'?mindexSmokeRaw=1'+('&output=presenter' if output else ''), wait_until='domcontentloaded')
                     expected_theme = saved if saved in ('dark','light') else system
                     expected = (0,0,0) if output else (24,24,22) if expected_theme == 'dark' else (255,255,255)
@@ -61,6 +62,7 @@ def main():
                                 assert page.locator('.mindex-boot-cross').evaluate("e=>getComputedStyle(e).animationName") == 'none'
                         pixels = boot_background_pixels(page)
                         assert set(pixels.values()) == {expected}, (engine, saved, system, output, phase, pixels)
+                    fail_modules = True
                     for r in modules:
                         r.abort()
                     page.wait_for_function("document.body.dataset.bootFailed==='true'")

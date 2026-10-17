@@ -911,7 +911,13 @@ async function init() {
   try {
     if (state.client) {
       await initializeAuth();
-      if (canUseClientData()) await loadInitialData();
+      if (canUseClientData()) {
+        const initialData = loadInitialData();
+        // Module loading/error states own data readiness; do not hide the whole
+        // usable shell behind a slow initial network read.
+        finishUiBoot();
+        await initialData;
+      }
     } else if (state.connectionError) {
       showToast(state.connectionError, "error");
     }

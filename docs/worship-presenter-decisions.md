@@ -2787,3 +2787,23 @@ release (which contains this change). These are separate network samples, not
 controlled evidence of an overall speedup. Static delivery/DB latency remains
 variable; no universal3-second bound or completed download-size reduction is
 claimed. Concurrent upstream timing and toolbar changes were preserved.
+
+## 2026-10-17 — Startup network recovery and read visibility
+
+Production probes showed variable cold static downloads (app.js roughly8–20s),
+and one pre-runtime startup failure while the stylesheet gate was pending.
+Playwright routing disables normal HTTP caching, so routed capture probes are
+not representative of warm user reloads. Gzip is already enabled (app.js about
+330KB transferred); this change does not claim a server outage or fixed latency.
+
+Queue the stylesheet preloads before scripts and request them at high priority;
+app.js remains first among scripts, execution order and release freshness remain
+unchanged. A script/stylesheet network error retries once with a fresh URL.
+Timeouts and runtime exceptions do not replay scripts; permanent failure retains
+the bounded error/reload UI. Once authentication and module loading setup are
+ready, show the shell while initial reads settle through their existing loading/
+error states. Auth is still awaited; no reads, saves or permissions are skipped.
+
+Chromium/WebKit tests cover one-off CSS/script failure, exactly one app execution,
+slow initial data, permanent failures, stalled resources, manual recovery,
+stylesheet-before-script requests and resolved-only execution.

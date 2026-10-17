@@ -235,7 +235,7 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261017-playback-toolbar";
+        const fallbackVersion = "20261017-startup-network-recovery";
         const modules = [
           "vendor/lucide.min.js", "vendor/supabase-js.min.js",
           "mindex.constants.js", "mindex.inline-text.js", "mindex.design-tokens.js", "mindex.worship-model.js",
@@ -280,29 +280,42 @@
           document.getElementById("bootError").hidden = false;
         };
         window.MINDEX_BOOT_FAIL = failBoot;
-        const load = (path, version) => new Promise((resolve, reject) => {
+        const load = (path, version, retry = false) => new Promise((resolve, reject) => {
           const script = document.createElement("script");
-          script.src = assetUrl(path, version);
+          script.src = assetUrl(path, version) + (retry ? (assetUrl(path, version).includes("?") ? "&" : "?") + "boot-retry=1" : "");
           const timer = setTimeout(() => finish(new Error(`${path} 응답 시간이 초과되었습니다.`)), 15000);
           const finish = (error) => {
             clearTimeout(timer); script.onload = script.onerror = null;
             if (error) { script.remove(); reject(error); } else resolve();
           };
           script.onload = () => finish();
-          script.onerror = () => finish(new Error(`${path}을 불러오지 못했습니다.`));
+          script.onerror = () => {
+            if (retry) { finish(new Error(`${path}을 불러오지 못했습니다.`)); return; }
+            clearTimeout(timer); script.onload = script.onerror = null; script.remove();
+            // Network failure means this resource did not execute/apply. Retry
+            // once with a fresh URL; never replay a timed-out or executed script.
+            resolve(load(path, version, true));
+          };
           document.body.append(script);
         });
-        const loadStyle = (path, version) => new Promise((resolve, reject) => {
+        const loadStyle = (path, version, retry = false) => new Promise((resolve, reject) => {
           const stylesheet = document.createElement("link");
           stylesheet.rel = "stylesheet";
-          stylesheet.href = assetUrl(path, version);
+          stylesheet.fetchPriority = "high";
+          stylesheet.href = assetUrl(path, version) + (retry ? "&boot-retry=1" : "");
           const timer = setTimeout(() => finish(new Error(`${path} 응답 시간이 초과되었습니다.`)), 15000);
           const finish = (error) => {
             clearTimeout(timer); stylesheet.onload = stylesheet.onerror = null;
             if (error) { stylesheet.remove(); reject(error); } else resolve();
           };
           stylesheet.onload = () => finish();
-          stylesheet.onerror = () => finish(new Error(`${path}을 불러오지 못했습니다.`));
+          stylesheet.onerror = () => {
+            if (retry) { finish(new Error(`${path}을 불러오지 못했습니다.`)); return; }
+            clearTimeout(timer); stylesheet.onload = stylesheet.onerror = null; stylesheet.remove();
+            // Network failure means this resource did not execute/apply. Retry
+            // once with a fresh URL; never replay a timed-out or executed script.
+            resolve(loadStyle(path, version, true));
+          };
           document.head.append(stylesheet);
         });
         const resolveVersion = async () => {
@@ -319,16 +332,16 @@
           }
         };
         const preloadAssets = (version) => {
-          // Queue the largest critical script before smaller dependencies. Only
-          // download order changes; execution still follows modules below.
-          preloadScript("app.js", version);
-          modules.forEach((module) => preloadScript(module, version));
           for (const path of styles) {
             const href = assetUrl(path, version);
             if ([...document.querySelectorAll('link[as="style"]')].some(link => link.getAttribute("href") === href)) continue;
             const link = document.createElement("link");
-            link.rel = "preload"; link.as = "style"; link.href = href; document.head.append(link);
+            link.rel = "preload"; link.as = "style"; link.fetchPriority = "high"; link.href = href; document.head.append(link);
           }
+          // Styles gate every script execution. Queue them before speculative
+          // scripts so a cold connection does not starve the startup gate.
+          preloadScript("app.js", version);
+          modules.forEach((module) => preloadScript(module, version));
           if (!document.documentElement.classList.contains("presenter-output-document")) {
             for (const href of [`./mindex.worship-atomic-client.mjs?v=${encodeURIComponent(version)}`, "./mindex.worship-store.mjs?v=atomic-recovery-prep-20260919-001"]) {
               if ([...document.querySelectorAll('link[rel="modulepreload"]')].some(link => link.getAttribute("href") === href)) continue;
