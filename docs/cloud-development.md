@@ -125,7 +125,7 @@ Repository Settings → Pages → Source must be **GitHub Actions**, not Deploy 
 a branch. This disables the independent automatic branch deployment path.
 `cloud-check.yml` runs the reviewed offline baseline, then `deploy-pages` depends
 on `offline-web` success in that same run and checks out the exact tested SHA.
-PRs and non-main manual runs only test. Failed/cancelled tests never invoke Pages,
+PRs, codex/* branch pushes and non-main manual runs only test. Failed/cancelled tests never invoke Pages,
 so the previously deployed site remains available. Setup failures also block
 publication; never use continue-on-error or always() to bypass this gate.
 
