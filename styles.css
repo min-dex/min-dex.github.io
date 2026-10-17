@@ -8757,23 +8757,30 @@ body[data-module="praise"] .praise-forms-panel { gap: 20px; }
 .praise-forms-panel .form-toolbar { align-items: center; justify-content: flex-start; gap: 15px; padding: 0 0 15px; border-bottom: 1px solid var(--line); }
 .form-toolbar-title { margin: 0; flex: 0 0 auto; font-size: 14px; line-height: 20px; font-weight: 600; color: var(--ink-2); }
 .praise-forms-panel .form-buttons { gap: 5px; flex-wrap: wrap; }
-.praise-forms-panel .form-buttons .btn { height: 30px; padding: 0 10px; font-size: 12px; }
+.praise-forms-panel .form-buttons .btn { height: 30px; padding: 0 10px; font-size: 12px; color: var(--ink-2); }
 body[data-module="praise"] .praise-forms-panel .version-compare-title { padding: 10px 15px; gap: 10px; border: 1px solid var(--line); background: var(--ui-surface-panel); align-content: flex-start; }
 body[data-module="praise"] .praise-forms-panel .version-compare-title.active { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); box-shadow: inset 3px 0 var(--accent); }
 .praise-forms-panel .version-title-main { flex-basis: 100%; }
-.praise-forms-panel .version-title-input { height: 30px; padding: 0 5px; font-size: 14px; background: transparent; }
+.praise-forms-panel .version-title-input { height: 30px; padding: 0 10px; font-size: 14px; background: var(--ui-surface-field); }
 .praise-forms-panel .version-title-input:hover, .praise-forms-panel .version-title-input:focus { background: var(--ui-surface-field); }
 body[data-module="praise"] .praise-forms-panel .version-title-actions { flex: 1 1 100%; justify-content: space-between; gap: 10px; }
 .version-edit-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 5px; margin-left: auto; }
 .praise-forms-panel :is(.version-add-btn,.version-copy-btn,.version-delete-btn) { width: 30px; height: 30px; }
 .praise-forms-panel .version-delete-btn { margin-left: 5px; }
 body[data-module="praise"] .praise-forms-panel .version-type-tag { min-height: 25px; padding: 0 10px; }
-body[data-module="praise"] .praise-forms-panel .form-block { gap: 10px; padding: 15px; border: 1px solid var(--line); background: var(--ui-surface-panel); }
+body[data-module="praise"] .praise-forms-panel .form-block { gap: 10px; padding: 15px; border: 0; }
+body[data-module="praise"] .praise-forms-panel .form-block:not(.needs-review) { background: var(--ui-surface-panel); }
 .praise-forms-panel .form-head { flex-wrap: wrap; gap: 10px; }
+body[data-module="praise"] .praise-forms-panel .form-meta { gap: 5px; }
+.praise-forms-panel .form-type-select { min-width: 110px; }
+.praise-forms-panel .form-variant-input { width: 30px; min-width: 30px; }
 .praise-forms-panel .form-actions { margin-left: auto; opacity: 1; gap: 5px; }
-.praise-forms-panel .form-preview-text, .praise-forms-panel .form-textarea { font-size: 16px; line-height: 25px; font-weight: 500; padding: 5px; background: transparent; }
-.praise-forms-panel .form-preview-text { color: var(--ink-2); }
+.praise-forms-panel .form-preview-text, .praise-forms-panel .form-textarea { font-size: 16px; line-height: 25px; font-weight: 500; padding: 10px; }
+.praise-forms-panel .form-preview-text { color: var(--ink-2); background: transparent; }
+.praise-forms-panel .form-textarea { background: var(--ui-surface-field); }
+.praise-forms-panel .form-textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.praise-forms-panel :is(.version-compare-head, .version-compare-columns, .version-compare-row) { gap: 15px; }
 .praise-forms-panel .version-compare-grid { gap: 15px; }
-.praise-forms-panel .version-empty-state { display: grid; justify-items: center; align-content: center; gap: 15px; min-height: 150px; padding: 20px; border: 1px dashed var(--line); border-radius: var(--r); color: var(--ink-3); font-size: 14px; }
+.praise-forms-panel .version-empty-state { display: grid; justify-items: center; align-content: center; gap: 15px; min-height: 150px; padding: 20px; border: 0; background: var(--ui-surface-panel); border-radius: var(--r); color: var(--ink-3); font-size: 14px; }
 .praise-forms-panel .version-empty-state .btn { min-height: 30px; }
 .praise-forms-panel .linked-version-title { box-shadow: none; }

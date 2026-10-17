@@ -515,3 +515,8 @@ internal spacing, with30px controls. The toolbar labels its block-add actions.
 Empty active versions offer first-verse creation; inactive empties offer selection.
 Adding a block focuses and reveals its new lyrics field. No song/version data is
 rewritten by rendering, and confirmed deletion/linked worship guards remain.
+
+Praise visual refinement: version columns and headers share15px gutters. Lyric
+cards use panel surfaces without nested outlines; editable fields retain the
+shared field surface and10px inset. Keyboard focus stays explicit. Review-warning
+backgrounds retain their semantic styling; empty states use the same quiet panel.
