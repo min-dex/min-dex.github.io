@@ -2961,3 +2961,9 @@ Empty song search guidance lives in the title placeholder (new-hymnal wording
 where required). Keep a hidden picker target so deferred typing previews still
 replace it. Remove the absolute negative-top hint style in all shared editors.
 Loading and warning messages remain in flow and wrap in narrow controls.
+
+## 금요예배 매뉴얼 안내 · 2026-10-17
+
+- 예배 매뉴얼의 상위 표기 `금요예배(기획예배)`와 금요예배 분류는 그대로 유지한다.
+- 넷째 주 안내는 `금요기도회 또는 구역연합예배`로 바꿔 금요기도회를 먼저 안내한다.
+- 이번 변경은 매뉴얼 문구에 한한다. 저장된 예배와 자동 생성 규칙은 변경하지 않는다.
