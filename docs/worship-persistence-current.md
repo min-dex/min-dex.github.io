@@ -345,3 +345,12 @@ An unchanged save is not a remote refresh: later real edits still use the stored
 revision and the server CAS guard. No schema or response contract is changed.
 Full saves construct the outgoing document once, after canonical rows are built,
 instead of building and discarding an earlier copy.
+
+## Independent worship photo cues (2026-10-18)
+
+Worship-owned `audioTiming.photos` stores ordered `{at,url,name}` records in the
+existing atomic bundle. `at` is an absolute media time, with no lyric lead. The
+original lyric starts, fingerprint, text and audio identity remain unchanged.
+Photo assets use existing immutable worship media storage. Partial uploads and
+uncertain saves retain uploaded URLs for retry; unlinking does not delete blobs.
+No Praise DB or children-version attachment changes.
