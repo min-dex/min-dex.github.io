@@ -188,6 +188,7 @@
               <button class="page-tab active" type="button" role="tab" aria-current="page"><span id="pageTabLabel">예배</span></button>
               <button id="pageTabAddBtn" class="icon-btn page-tab-add" type="button" aria-label="새 탭" title="새 탭"><i data-lucide="plus"></i></button>
             </div>
+            <div id="globalPlaybackControls" class="global-playback-controls" aria-label="음악과 예배 송출" hidden></div>
           </nav>
         </div>
         <div class="topbar-actions">
@@ -229,7 +230,7 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261016-form-label-spacing";
+        const fallbackVersion = "20261017-global-playback";
         const modules = [
           "vendor/lucide.min.js", "vendor/supabase-js.min.js",
           "mindex.constants.js", "mindex.inline-text.js", "mindex.design-tokens.js", "mindex.worship-model.js",

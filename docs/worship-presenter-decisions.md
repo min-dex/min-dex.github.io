@@ -2074,3 +2074,11 @@ reading font. Output and preview retain the same fitting size, including long
 verses and the final Fin. marker. Verified offline in Chromium and WebKit with
 `tests/smoke_scripture_reading_scale.py` and scripture word-boundary checks.
 No canonical text, service data, or cache renewal scope changes.
+
+## Global music and output controls (2026-10-17)
+
+The topbar retains current music status/title and play/pause/stop controls across
+views. An active output similarly exposes its service, guarded return and stop.
+Controls target their active owners, not the currently viewed service. Music and
+output stop independently. See `friday-prayer-music.md` for the shared transport
+contract and offline Chromium/WebKit verification scope.

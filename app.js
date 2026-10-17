@@ -1354,6 +1354,7 @@ function bindStaticEvents() {
   refs.navButtons?.forEach((button) => {
     button.addEventListener("click", () => handleNavigationRailClick(button));
   });
+  document.getElementById("globalPlaybackControls")?.addEventListener("click", handleGlobalPlaybackAction);
   refs.themeBtn.addEventListener("click", toggleTheme);
   document.getElementById("returnLiveServiceBtn")?.addEventListener("click", returnToLiveService);
   refs.newSongBtn?.addEventListener("click", () => createPraiseSong());
@@ -28420,6 +28421,7 @@ function renderServiceSlotMusic(context) {
 }
 
 function updateServiceMusicTransportControls() {
+  renderGlobalPlaybackControls();
   const music = state.serviceMusic;
   document.querySelectorAll("[data-service-music-player]").forEach(root => {
     const source = root.dataset.serviceMusicSource;
@@ -28453,12 +28455,60 @@ function updateServiceMusicTransportControls() {
   });
 }
 
+function handleGlobalPlaybackAction(event) {
+  const button = event.target.closest("[data-global-playback-action]");
+  if (!button) return;
+  const action = button.dataset.globalPlaybackAction;
+  if (action === "return") { void returnToLiveService(); return; }
+  if (action === "output-stop") {
+    if (isPresenterOutputWindowOpen()) runPresenterAction("stop", state.presenter.serviceId);
+    return;
+  }
+  if (!["toggle", "stop"].includes(action)) return;
+  const music = state.serviceMusic;
+  const binding = serviceMusicSourceIsSlotOwned() ? {
+    serviceMusicSource: music.sourceKey,
+    serviceMusicServiceId: music.ownerServiceId,
+    serviceMusicLabel: music.sourceLabel,
+    serviceMusicRepeatAllowed: String(music.repeatAllowed !== false),
+  } : null;
+  void runServiceMusicAction(action, binding);
+}
+
+function renderGlobalPlaybackControls() {
+  const root = document.getElementById("globalPlaybackControls");
+  if (!root) return;
+  const music = state.serviceMusic;
+  const hasMusic = Boolean(music.sourceKey && music.audio);
+  const outputOpen = Boolean(state.presenter.serviceId && isPresenterOutputWindowOpen());
+  const service = state.services.find(item => item.id === state.presenter.serviceId);
+  const musicState = music.pending ? "음악 준비 중" : music.playing ? "음악 재생 중"
+    : music.audio?.currentTime ? "음악 일시정지" : "음악 정지";
+  const toggleLabel = music.pending ? "음악 준비 취소" : music.playing ? "음악 일시정지" : "음악 재생";
+  const icon = music.pending ? "loader-circle" : music.playing ? "pause" : "play";
+  const outputState = state.presenter.safetyBlank ? "송출 중 · 화면 가림" : "예배 송출 중";
+  const html = `${hasMusic ? `<div class="global-playback-group" role="group" aria-label="현재 음악">
+    <span class="global-playback-label" title="${escapeAttr(music.sourceLabel || music.fileName || "음악")}"><span class="global-playback-state" role="status">${musicState}</span><span class="global-playback-name">${escapeHtml(music.sourceLabel || music.fileName || "음악")}</span></span>
+    <button type="button" class="icon-btn" data-global-playback-action="toggle" title="${toggleLabel}" aria-label="${toggleLabel}" aria-pressed="${Boolean(music.playing)}"><i data-lucide="${icon}"></i></button>
+    <button type="button" class="icon-btn" data-global-playback-action="stop" title="음악 정지" aria-label="음악 정지" ${music.pending || music.playing || music.audio?.currentTime ? "" : "disabled"}><i data-lucide="square"></i></button>
+  </div>` : ""}${outputOpen ? `<div class="global-playback-group" role="group" aria-label="현재 예배 송출">
+    <button type="button" class="global-playback-return" data-global-playback-action="return" title="${escapeAttr(service?.title || "송출 예배로 돌아가기")}" aria-label="송출 예배로 돌아가기"><i data-lucide="radio"></i><span class="global-playback-label"><span class="global-playback-state" role="status">${outputState}</span><span class="global-playback-name">${escapeHtml(service?.title || "송출 예배로")}</span></span></button>
+    <button type="button" class="icon-btn" data-global-playback-action="output-stop" title="예배 송출 종료" aria-label="예배 송출 종료"><i data-lucide="square"></i></button>
+  </div>` : ""}`;
+  root.hidden = !hasMusic && !outputOpen;
+  if (root._playbackMarkup === html) return;
+  const focusedAction = root.contains(document.activeElement)
+    ? document.activeElement?.dataset?.globalPlaybackAction : "";
+  root._playbackMarkup = html;
+  root.innerHTML = html;
+  refreshIcons(root);
+  if (focusedAction) root.querySelector(`[data-global-playback-action="${focusedAction}"]`)?.focus({ preventScroll: true });
+}
+
 function renderLiveServiceReturnControl() {
   const button = document.getElementById("returnLiveServiceBtn");
-  if (!button) return;
-  const id = state.presenter.serviceId;
-  button.hidden = !id || !isPresenterOutputWindowOpen()
-    || (state.module === "presenter" && presenterViewServiceId() === id);
+  if (button) button.hidden = true;
+  renderGlobalPlaybackControls();
 }
 
 async function returnToLiveService() {

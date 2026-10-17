@@ -10,6 +10,19 @@
 - Presenter/editor button hover, pressed, busy and disabled states use existing theme tokens. Disabled pointer handling remains unchanged.
 - The section editor uses the existing ordinal display helper without rewriting untouched labels.
 
+## Global transport (2026-10-17)
+
+- The topbar shows the active music title/state with play/pause and stop across
+  module/tab navigation. Stopped/paused loaded music keeps a restart control.
+- Global controls target the active audio owner, even when a different service
+  is selected. They reuse the same Audio instance and never select another file.
+- An open output shows its service title, return-to-service and output-stop.
+  Returning keeps the existing unsaved-edit guard. Stopping output does not
+  stop independently playing music; stopping music does not close output.
+- Pending playback can be cancelled from the global toggle. Rendering never
+  starts playback. No fade, music data or worship-record changes are included.
+- Offline Chromium/WebKit coverage: `tests/smoke_global_playback.py`.
+
 ## Audio
 
 - Original supplied M4A, unchanged, approximately 46 minutes 42 seconds.
