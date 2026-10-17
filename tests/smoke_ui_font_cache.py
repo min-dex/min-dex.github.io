@@ -7,7 +7,7 @@ from collections import Counter
 from functools import partial
 from http.server import ThreadingHTTPServer,SimpleHTTPRequestHandler
 from urllib.parse import urlsplit
-from smoke_app import MindexSmokeHandler,launch_chromium,sync_playwright
+from smoke_app import MindexSmokeHandler,MindexSmokeServer,launch_chromium,sync_playwright
 ROOT=Path(__file__).resolve().parents[1]
 counts=Counter();release='fixture-cache-v1'
 class Handler(MindexSmokeHandler):
@@ -19,7 +19,8 @@ class Handler(MindexSmokeHandler):
  def end_headers(self):
   self.send_header('Cache-Control','public, max-age=600' if '/vendor/fonts/' in self.path else 'no-store')
   SimpleHTTPRequestHandler.end_headers(self)
-server=ThreadingHTTPServer(('127.0.0.1',0),partial(Handler,directory=str(ROOT)));threading.Thread(target=server.serve_forever,daemon=True).start();url=f'http://127.0.0.1:{server.server_port}/'
+# Use the shared backlog: parallel speculative/current assets exceed the stdlib default of five.
+server=MindexSmokeServer(('127.0.0.1',0),partial(Handler,directory=str(ROOT)));threading.Thread(target=server.serve_forever,daemon=True).start();url=f'http://127.0.0.1:{server.server_port}/'
 try:
  with sync_playwright() as p:
   for engine in ['chromium','webkit']:

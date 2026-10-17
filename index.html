@@ -59,6 +59,11 @@
       }
       .mindex-boot-cross { animation: mindex-boot-reveal 500ms ease-in-out both; }
       .mindex-boot-wordmark { animation: mindex-boot-reveal 500ms ease-in-out both; }
+      .mindex-boot-loading { display: flex; align-items: center; gap: 10px; margin-top: 5px; font: 500 14px/1.5 system-ui, sans-serif; }
+      .mindex-boot-spinner { width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: mindex-boot-spin 900ms linear infinite; }
+      .mindex-boot-detail { margin: 0; min-height: 3em; max-width: min(320px, 85vw); font: 500 12px/1.5 system-ui, sans-serif; text-align: center; }
+      .mindex-boot-detail span { display: block; }
+      @keyframes mindex-boot-spin { to { transform: rotate(360deg); } }
       @keyframes mindex-boot-reveal {
         from { opacity: 0; }
         to { opacity: 1; }
@@ -66,7 +71,7 @@
       html.presenter-output-document .mindex-boot { display: none; }
       @media (prefers-reduced-motion: reduce) {
         .mindex-boot { transition: none; }
-        :is(.mindex-boot-cross, .mindex-boot-wordmark) { animation: none; }
+        :is(.mindex-boot-cross, .mindex-boot-wordmark, .mindex-boot-spinner) { animation: none; }
       }
       body.ui-booting .app-shell,
       body.ui-booting .toast-region {
@@ -132,6 +137,8 @@
         <path d="M224 104h64v80h96v64h-96v160h-64V248h-96v-64h96z" />
       </svg>
       <span class="mindex-boot-wordmark" aria-hidden="true">MINDEX</span>
+      <div class="mindex-boot-loading"><span class="mindex-boot-spinner" aria-hidden="true"></span><span id="bootStage">시작 준비 중…</span></div>
+      <p class="mindex-boot-detail"><span id="bootElapsed" aria-hidden="true">0초 경과</span><span id="bootDelay"></span></p>
     </div>
     <div id="bootError" class="mindex-boot-error" role="alert" hidden>
       <p>MINDEX를 시작하지 못했습니다.<br>연결 상태를 확인하고 다시 시도해 주세요.</p>
@@ -140,6 +147,23 @@
     <script>
       (() => {
         document.body.dataset.theme = document.documentElement.dataset.theme;
+        const started = performance.now();
+        const stage = document.getElementById("bootStage");
+        window.MINDEX_BOOT_STATUS = (message) => {
+          if (document.body.classList.contains("ui-booting") && stage.textContent !== message) stage.textContent = message;
+        };
+        const timer = setInterval(() => {
+          const seconds = Math.floor((performance.now() - started) / 1000);
+          document.getElementById("bootElapsed").textContent = `${seconds}초 경과`;
+          const delay = document.getElementById("bootDelay");
+          if (seconds >= 4 && !delay.textContent) delay.textContent = "평소보다 오래 걸리고 있어요.";
+        }, 1000);
+        const observer = new MutationObserver(() => {
+          if (!document.body.classList.contains("ui-booting") || document.body.dataset.bootFailed === "true") {
+            clearInterval(timer); observer.disconnect();
+          }
+        });
+        observer.observe(document.body, { attributes: true, attributeFilter: ["class", "data-boot-failed"] });
         try {
           const moduleName = sessionStorage.getItem("mindex.ui.module");
           if (moduleName) {
@@ -236,8 +260,8 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261017-audio-timing-resave";
-        const compiledAppVersion = "20261017-audio-timing-resave";
+        const fallbackVersion = "20261017-visible-boot-progress";
+        const compiledAppVersion = "20261017-visible-boot-progress";
         const modules = [
           "mindex.icons.js", "vendor/supabase-js.min.js",
           "mindex.constants.js", "mindex.inline-text.js", "mindex.design-tokens.js", "mindex.worship-model.js",
@@ -284,7 +308,10 @@
           };
           const launch = (retry = false) => {
             if (settled || (retry && retried)) return;
-            if (retry) retried = true;
+            if (retry) {
+              retried = true;
+              window.MINDEX_BOOT_STATUS?.("연결이 지연되어 다시 시도 중…");
+            }
             const url = href + (retry ? `${href.includes("?") ? "&" : "?"}boot-retry=1` : "");
             const link = document.createElement("link");
             link.rel = "preload"; link.as = kind; link.href = url;
@@ -325,6 +352,7 @@
           const asset = prepareAsset(path, version, "script");
           const readyUrl = await asset.wait();
           return new Promise((resolve, reject) => {
+            if (path === "app.js") window.MINDEX_BOOT_STATUS?.("앱 시작 중…");
             const script = document.createElement("script");
             script.src = readyUrl + (retry ? (readyUrl.includes("?") ? "&" : "?") + "execute-retry=1" : "");
             const timer = setTimeout(() => finish(new Error(`${path} 응답 시간이 초과되었습니다.`)), asset.remaining());
@@ -413,6 +441,7 @@
         void (async () => {
           const version = await versionPromise;
           window.MINDEX_RELEASE = version;
+          window.MINDEX_BOOT_STATUS?.("화면 파일 불러오는 중…");
           preloadAssets(version);
           // Arm recovery for every selected download now. Execution still waits
           // for CSS and dependency order; a stalled earlier file must not delay

@@ -911,6 +911,7 @@ async function init() {
 
   try {
     if (state.client) {
+      window.MINDEX_BOOT_STATUS?.("연결 확인 중…");
       await initializeAuth();
       if (canUseClientData()) {
         const initialData = loadInitialData();
@@ -936,7 +937,8 @@ function finishUiBoot() {
   }
   // Complete only the short, already-running brand reveal; reduced motion has none.
   const animations = document.getElementById("bootStatus")?.getAnimations?.({ subtree: true }) || [];
-  Promise.allSettled(animations.map(animation => animation.finished))
+  const revealAnimations = animations.filter(animation => animation.effect?.getComputedTiming?.().iterations !== Infinity);
+  Promise.allSettled(revealAnimations.map(animation => animation.finished))
     .then(() => requestAnimationFrame(() => requestAnimationFrame(clear)));
 }
 

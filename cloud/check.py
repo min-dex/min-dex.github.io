@@ -31,6 +31,7 @@ SMOKES = (
     "smoke_ui_font_cache.py",
     "smoke_stalled_download_recovery.py",
     "smoke_startup_overlap_recovery.py",
+    "smoke_boot_loading_indicator.py",
 )
 
 def main():

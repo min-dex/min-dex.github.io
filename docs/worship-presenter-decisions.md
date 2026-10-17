@@ -2982,3 +2982,18 @@ Loading and warning messages remain in flow and wrap in narrow controls.
 타격음과 발성 잔차를 대조하고, 반복 프레이즈의 같은 위치를 확인한다. 자동
 음성인식은 합창·긴 음에서 시작 시각을 잘못 만들 수 있으므로 단독 기준으로
 사용하지 않는다. 반주 제거 잔차도 분리 추정치이며 독립 청감 확인을 대신하지 않는다.
+
+## Visible startup activity · 2026-10-17
+
+The inline boot screen retains its cross/wordmark and adds a small spinner,
+plain-language stage and elapsed seconds before any external asset is ready.
+After four seconds it explains that startup is taking longer; actual retry
+launches show retry status. Selected-release downloads, app execution and auth
+initialization own their respective stage messages. No invented percentage or
+claim of network progress is displayed. Existing bounded failure/retry UI stays.
+
+The elapsed timer stops on completion/failure. Reduced motion disables spinning
+while keeping readable status/time. Presenter output still hides all boot UI.
+finishUiBoot awaits only finite reveal animations so an infinite activity spinner
+cannot trap the app behind the logo. Chromium/WebKit tests cover stalled files,
+retry text, reduced motion, successful transition, timer cleanup and output hiding.
