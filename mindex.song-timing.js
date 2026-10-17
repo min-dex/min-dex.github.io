@@ -307,13 +307,130 @@
       && !seen.has(slide.songTimingElementId || slide.elementId) && seen.add(slide.songTimingElementId || slide.elementId))
       .map(({ slide }) => `<button type="button" class="btn secondary" data-song-timing-open data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(slide.songTimingElementId || slide.elementId)}">음원 동기화</button>${presenterControllerIsLive(serviceId) && entries.some(({ slide: candidate }) => (candidate.songTimingElementId || candidate.elementId) === (slide.songTimingElementId || slide.elementId) && candidate.syncTimeline?.localTiming) ? `<button type="button" class="btn secondary" data-song-timing-play data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(slide.songTimingElementId || slide.elementId)}">자동 넘김 재생</button>` : ''}`).join('');
   }
+  function resumeAutoSync(serviceId = state.presenter.serviceId, expected = null) {
+    const music = state.serviceMusic, audio = music.audio;
+    const slide = state.presenter.slides[state.presenter.index];
+    const sync = slide?.syncTimeline;
+    if (!presenterControllerIsLive(serviceId) || state.presenter.serviceId !== serviceId
+      || state.selectedServiceId !== serviceId || !music.autoSyncSuspended || music.mode !== 'presenter-audio'
+      || (music.ownerServiceId && music.ownerServiceId !== serviceId)
+      || !music.playing || music.pending || !audio || audio.paused || audio.ended
+      || state.presenter.safetyBlank || state.presenter.liveScripture?.active
+      || !sync?.localTiming || !slide.songTimingEligible
+      || normalizePresenterMediaSource(music.sourceKey) !== normalizePresenterMediaSource(sync.audioSrc)) return false;
+    if (expected && (expected.serviceId !== serviceId || expected.index !== state.presenter.index || expected.groupId !== sync.groupId)) return false;
+    const target = presenterSyncedLyricsTargetForTime(state.presenter.slides, state.presenter.index, audio.currentTime);
+    if (!target) {
+      const intro = state.presenter.slides.findIndex(s => s.syncTimeline?.intro && s.syncTimeline.groupId === sync.groupId);
+      if (intro < 0 || intro > state.presenter.index || state.presenter.slides.slice(intro,state.presenter.index+1)
+        .some(s => !presenterSlideIsHidden(s) && s.syncTimeline?.groupId !== sync.groupId)) return false;
+      state.presenter.index = intro;
+      syncSelectedServiceItemToPresenterSlide(serviceId);
+      publishPresenterState();renderPresenterControlState(serviceId);
+    }
+    music.autoSyncSuspended = false;
+    syncServiceMusicSyncedLyricsWithCurrentTime();
+    updateTransport(audio);
+    showToast('현재 재생 위치에서 자동 넘김을 다시 켰어요.', 'info');
+    return true;
+  }
+  // A fixed beat grid is an editing aid, never a lyric-onset detector.
+  function snapBeat(time, bpm, anchor) {
+    if (![time,bpm,anchor].every(Number.isFinite) || bpm < 40 || bpm > 240 || anchor < 0) return time;
+    const period = 60 / bpm;
+    return Math.max(0, anchor + Math.round((time-anchor)/period)*period);
+  }
+  function detectBeatGrid(samples, rate) {
+    if (!samples?.length || !(rate > 0) || samples.length/rate < 8 || samples.length/rate > 600) return null;
+    const size=2**Math.max(5,Math.min(10,Math.round(Math.log2(rate*.032)))), hop=Math.max(1,Math.round(rate*.01)), fps=rate/hop;
+    const real=new Float64Array(size), imag=new Float64Array(size), previous=new Float64Array(size/2);
+    const window=Float64Array.from({length:size},(_,i)=>.5-.5*Math.cos(2*Math.PI*i/(size-1)));
+    const flux=[];
+    for(let start=0;start+size<=samples.length;start+=hop){
+      for(let i=0;i<size;i++){real[i]=samples[start+i]*window[i];imag[i]=0;}
+      for(let i=1,j=0;i<size;i++){
+        let bit=size>>1;for(;j&bit;bit>>=1)j^=bit;j^=bit;
+        if(i<j){const t=real[i];real[i]=real[j];real[j]=t;}
+      }
+      for(let len=2;len<=size;len<<=1){
+        const angle=-2*Math.PI/len, wr=Math.cos(angle), wi=Math.sin(angle);
+        for(let i=0;i<size;i+=len){
+          let xr=1,xi=0;
+          for(let j=0;j<len/2;j++){
+            const a=i+j,b=a+len/2,vr=real[b]*xr-imag[b]*xi,vi=real[b]*xi+imag[b]*xr;
+            real[b]=real[a]-vr;imag[b]=imag[a]-vi;real[a]+=vr;imag[a]+=vi;
+            const next=xr*wr-xi*wi;xi=xr*wi+xi*wr;xr=next;
+          }
+        }
+      }
+      let rise=0;
+      for(let i=1;i<size/2;i++){
+        const magnitude=Math.hypot(real[i],imag[i]);rise+=Math.max(0,magnitude-previous[i]);previous[i]=magnitude;
+      }
+      flux.push(rise);
+    }
+    const sums=[0];for(const v of flux)sums.push(sums[sums.length-1]+v);
+    const envelope=flux.map((v,i)=>{const low=Math.max(0,i-25),high=Math.min(flux.length,i+26);return Math.max(0,v-(sums[high]-sums[low])/(high-low));});
+    const power=envelope.reduce((sum,v)=>sum+v*v,0);if(power<1e-8)return null;
+    const scores=[];let coarse=0,bestCorrelation=0,bestScore=0;
+    for(let lag=Math.ceil(60*fps/190);lag<=Math.floor(fps);lag++){
+      let dot=0;for(let i=lag;i<envelope.length;i++)dot+=envelope[i]*envelope[i-lag];
+      const correlation=dot/power,score=correlation*Math.exp(-.5*(Math.log2((60*fps/lag)/120)/.9)**2);
+      scores[lag]=score;
+      if(score>bestScore){bestScore=score;coarse=lag;bestCorrelation=correlation;}
+    }
+    if(bestCorrelation<.12)return null;
+    if(scores[coarse-1] && scores[coarse+1]){
+      const left=scores[coarse-1],middle=scores[coarse],right=scores[coarse+1],denom=left-2*middle+right;
+      if(denom)coarse+=Math.max(-.5,Math.min(.5,.5*(left-right)/denom));
+    }
+    // Lock period and phase across the complete excerpt; do not accumulate rounded BPM error.
+    let period=coarse,phase=0,best=-Infinity;
+    const sample=at=>{const i=Math.floor(at),f=at-i;return (envelope[i]||0)*(1-f)+(envelope[i+1]||0)*f;};
+    for(let step=0;step<=240;step++){
+      const candidate=coarse*(.97+.06*step/240);
+      for(let offset=0;offset<candidate;offset+=.5){
+        let total=0,count=0;for(let at=offset;at<envelope.length-1;at+=candidate){total+=sample(at);count++;}
+        const score=total/count;
+        if(score>best){best=score;period=candidate;phase=offset;}
+      }
+    }
+    let confidence=1;
+    for(let part=0;part<4;part++){
+      const low=Math.floor(part*envelope.length/4),high=Math.floor((part+1)*envelope.length/4);
+      let total=0,onBeat=0,count=0,hits=0;for(let i=low;i<high;i++)total+=envelope[i];
+      for(let at=phase+Math.ceil((low-phase)/period)*period;at<high-1;at+=period){const value=sample(at);onBeat+=value;count++;if(value>total/(high-low)*1.5)hits++;}
+      if(!count || total<=0 || hits/count<.55)return null;
+      const fit=(onBeat/count)/(total/(high-low));confidence=Math.min(confidence,Math.max(0,Math.min(1,(fit-1)/2)));
+    }
+    if(confidence<.4)return null;
+    return {bpm:60*fps/period,anchor:phase/fps+size/(2*rate),confidence};
+  }
+  function analyzeBeatSamples(samples, rate, signal) {
+    return new Promise((resolve,reject)=>{
+      const url=URL.createObjectURL(new Blob([`const detectBeatGrid=${detectBeatGrid.toString()};onmessage=e=>{try{postMessage({grid:detectBeatGrid(e.data.samples,e.data.rate)})}catch(error){postMessage({error:error.message})}};`],{type:'text/javascript'}));
+      let worker;
+      const finish=(error,value)=>{worker?.terminate();URL.revokeObjectURL(url);signal.removeEventListener('abort',abort);error?reject(error):resolve(value);};
+      const abort=()=>finish(new Error('분석이 취소됐어요.'));
+      try {
+        if(signal.aborted){abort();return;}
+        worker=new Worker(url);signal.addEventListener('abort',abort,{once:true});
+        worker.onmessage=e=>finish(e.data.error?new Error(e.data.error):null,e.data.grid);
+        worker.onerror=()=>finish(new Error('박자 분석을 실행하지 못했습니다. BPM을 직접 입력해 주세요.'));
+        worker.postMessage({samples,rate},[samples.buffer]);
+      } catch(error){finish(error);}
+    });
+  }
   function transport() {
     const source = state.serviceMusic.sourceKey;
     if (state.serviceMusic.mode !== 'presenter-audio' || !(remoteSources.has(source) || [...profiles.values()].some(p => p.url === source))) return '';
-    return `<label class="song-timing-seek">음원 위치 <input type="range" min="0" max="${Number(state.serviceMusic.audio?.duration) || 0}" step="0.1" value="${Number(state.serviceMusic.audio?.currentTime) || 0}" data-song-timing-seek data-source="${escapeAttr(source)}" aria-label="동기화 음원 위치"><span data-song-timing-clock></span></label>`;
+    return `<label class="song-timing-seek">음원 위치 <input type="range" min="0" max="${Number(state.serviceMusic.audio?.duration) || 0}" step="0.1" value="${Number(state.serviceMusic.audio?.currentTime) || 0}" data-song-timing-seek data-source="${escapeAttr(source)}" aria-label="동기화 음원 위치"><span data-song-timing-clock></span></label><button type="button" class="btn secondary" data-song-timing-resume ${!state.serviceMusic.autoSyncSuspended || !state.serviceMusic.playing ? 'hidden' : ''}>자동 넘김 복귀 · R</button>`;
   }
   function updateTransport(audio) {
     const source = state.serviceMusic.sourceKey;
+    for (const button of document.querySelectorAll('[data-song-timing-resume]')) {
+      button.hidden = !state.serviceMusic.autoSyncSuspended || !state.serviceMusic.playing || !state.presenter.slides[state.presenter.index]?.songTimingEligible;
+    }
     for (const input of document.querySelectorAll('[data-song-timing-seek]')) {
       if (input.dataset.source !== source) continue;
       input.max = Number.isFinite(audio.duration) ? audio.duration : 0;
@@ -450,8 +567,16 @@
       ${linkedAudio.url ? `<button type="button" class="btn secondary" data-timing-linked>연결된 음원 사용 · ${escapeHtml(linkedAudio.name || '음원')}</button>` : ''}
       <label>음원 선택 <input type="file" accept="audio/*" data-timing-file></label>
       <p data-timing-filename></p><audio controls preload="metadata"></audio>
+      <fieldset class="song-timing-beats"><legend>박자 맞춤</legend>
+        <button type="button" class="btn secondary" data-beat-analyze>음원 박자 분석</button>
+        <label>BPM <input type="number" min="40" max="240" step="0.001" data-beat-bpm aria-label="박자 BPM"></label>
+        <label>기준 박 (초) <input type="number" min="0" step="0.001" value="0" data-beat-anchor aria-label="기준 박 초"></label>
+        <button type="button" class="btn secondary" data-beat-anchor-now>현재 위치를 기준 박으로</button>
+        <label><input type="checkbox" data-beat-enabled> 새 기록을 가까운 박에 맞춤</label>
+        <p data-beat-status role="status">분석 또는 직접 입력 후 켜세요. 기존 시각은 바뀌지 않습니다. 박자가 달라지는 곡은 구간별로 기준을 다시 잡으세요.</p>
+      </fieldset>
       <div class="song-timing-record"><button type="button" class="btn secondary" data-timing-next>다음 장 전환 기록</button><span data-timing-next-label></span></div>
-      <div class="song-timing-pages">${slides.map((slide, i) => `<div class="song-timing-row"><label>${slide.formBackgroundImage ? `<img class="song-timing-photo" src="${escapeAttr(slide.formBackgroundImage)}" alt="${i + 1}장 배경 사진">` : ''}${i + 1}장 · ${formLabels.get(slide.formKey) ? escapeHtml(formLabels.get(slide.formKey)) + ' · ' : ''}${escapeHtml(slide.text || '빈 화면')}<input aria-label="${i + 1}장 시작 초" type="number" min="0" step="0.1" data-timing-start="${i}" value="${draft.starts[i] ?? ''}" placeholder="초"></label><button type="button" class="btn secondary" data-timing-stamp="${i}">현재 시각 기록</button></div>`).join('')}</div>
+      <div class="song-timing-pages">${slides.map((slide, i) => `<div class="song-timing-row"><label>${slide.formBackgroundImage ? `<img class="song-timing-photo" src="${escapeAttr(slide.formBackgroundImage)}" alt="${i + 1}장 배경 사진">` : ''}${i + 1}장 · ${formLabels.get(slide.formKey) ? escapeHtml(formLabels.get(slide.formKey)) + ' · ' : ''}${escapeHtml(slide.text || '빈 화면')}<input aria-label="${i + 1}장 시작 초" type="number" min="0" step="0.1" data-timing-start="${i}" value="${draft.starts[i] ?? ''}" placeholder="초"></label><button type="button" class="btn secondary" data-timing-stamp="${i}">현재 시각 기록</button><button type="button" class="btn secondary" data-timing-nudge="${i}" data-delta="-0.2" aria-label="${i+1}장 0.2초 앞당기기">−0.2초</button><button type="button" class="btn secondary" data-timing-nudge="${i}" data-delta="0.2" aria-label="${i+1}장 0.2초 늦추기">+0.2초</button></div>`).join('')}</div>
       ${serviceTiming ? `<fieldset><legend>사진 별도 자동 전환</legend>
         <p>가사 시각은 유지하고 사진만 음원 위치에 맞춰 바꿉니다. 사진 파일은 이름순으로 배치됩니다.</p>
         <label>사진 선택 <input type="file" accept="image/*" multiple data-timing-photos></label>
@@ -468,6 +593,12 @@
     const saveButton = dialog.querySelector('[data-timing-save]');
     if (previewUrl) audio.src = previewUrl;
     dialog.querySelector('[data-timing-filename]').textContent = draft.audioName;
+    let beatSerial = 0, beatAbort = null;
+    const beatStatus = dialog.querySelector('[data-beat-status]');
+    const beatBpm = dialog.querySelector('[data-beat-bpm]');
+    const beatAnchor = dialog.querySelector('[data-beat-anchor]');
+    const beatEnabled = dialog.querySelector('[data-beat-enabled]');
+    const resetBeat = () => { beatAbort?.abort(); beatSerial++; dialog.querySelector('[data-beat-analyze]').disabled=false; beatBpm.value=''; beatAnchor.value='0'; beatEnabled.checked=false; beatStatus.textContent='음원이 바뀌었어요. 박자를 다시 확인해 주세요.'; };
     let busy = false;
     let photoFiles = [];
     const uploadedPhotos = new Map();
@@ -518,9 +649,10 @@
     };
     updateNext();
     dialog.addEventListener('cancel', e => { if (busy) e.preventDefault(); });
-    dialog.addEventListener('close', () => { audio.pause(); audio.removeAttribute('src'); if (previewUrl) URL.revokeObjectURL(previewUrl); dialog.remove(); });
+    dialog.addEventListener('close', () => { beatAbort?.abort(); beatSerial++; audio.pause(); audio.removeAttribute('src'); if (previewUrl) URL.revokeObjectURL(previewUrl); dialog.remove(); });
     dialog.addEventListener('keydown', e => e.stopPropagation());
     dialog.addEventListener('input', e => {
+      if (e.target.matches('[data-beat-bpm],[data-beat-anchor]')) { beatAbort?.abort(); beatSerial++; dialog.querySelector('[data-beat-analyze]').disabled=false; }
       if (e.target.matches('[data-timing-start]')) draft.starts[Number(e.target.dataset.timingStart)] = e.target.value === '' ? null : Number(e.target.value);
     });
     audio.addEventListener('loadedmetadata', () => { draft.duration = audio.duration; });
@@ -531,7 +663,7 @@
       try {
         if (file.size > 100 * 1024 * 1024) throw Error('음원은 100MB 이하로 선택해 주세요.');
         const digest = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', await file.arrayBuffer())), b => b.toString(16).padStart(2, '0')).join('');
-        audio.pause();
+        resetBeat(); audio.pause();
         if (previewUrl) URL.revokeObjectURL(previewUrl);
         previewUrl = URL.createObjectURL(file);
         if (digest !== draft.audioFingerprint) {
@@ -562,12 +694,52 @@
         finally { busy = false; button.disabled = false; }
         return;
       }
+      if (button.hasAttribute('data-beat-anchor-now')) { beatAbort?.abort(); beatSerial++;dialog.querySelector('[data-beat-analyze]').disabled=false; beatAnchor.value=audio.currentTime.toFixed(2); return; }
+      if (button.hasAttribute('data-beat-analyze')) {
+        if (!previewUrl) { beatStatus.textContent='음원을 먼저 선택해 주세요.'; return; }
+        beatAbort?.abort();beatAbort=new AbortController();
+        const serial=++beatSerial, url=previewUrl, signal=beatAbort.signal;
+        button.disabled=true; beatEnabled.checked=false; beatStatus.textContent='이 기기에서 박자를 분석하고 있어요…';
+        let context;
+        try {
+          const blob=draft.audio || await fetch(url,{signal}).then(r=>{if(!r.ok)throw Error('음원을 불러오지 못했습니다.');return r.blob();});
+          if(blob.size>100*1024*1024)throw Error('100MB 이하 음원만 분석할 수 있어요.');
+          context=new (window.AudioContext || window.webkitAudioContext)({sampleRate:8000});
+          const decoded=await context.decodeAudioData(await blob.arrayBuffer());
+          if(serial!==beatSerial || !dialog.isConnected)return;
+          if(decoded.duration>600)throw Error('10분 이하 음원만 분석할 수 있어요. BPM을 직접 입력해 주세요.');
+          const mono=new Float32Array(decoded.length);
+          for(let channel=0;channel<decoded.numberOfChannels;channel++){
+            const data=decoded.getChannelData(channel);for(let i=0;i<mono.length;i++)mono[i]+=data[i]/decoded.numberOfChannels;
+          }
+          const grid=await analyzeBeatSamples(mono,decoded.sampleRate,signal);
+          if(serial!==beatSerial || !dialog.isConnected)return;
+          if(!grid){beatBpm.value='';throw Error('일정한 박자를 확신할 수 없어요. BPM·기준 박을 직접 지정하거나 맞춤을 끄고 기록하세요.');}
+          beatBpm.value=grid.bpm.toFixed(3);beatAnchor.value=grid.anchor.toFixed(3);
+          beatStatus.textContent='박자 후보를 찾았어요. 들어 보고 기준 박을 확인한 뒤 맞춤을 켜세요. 가사 시작 시각을 분석한 결과는 아닙니다.';
+        } catch(error) { if(serial===beatSerial && dialog.isConnected)beatStatus.textContent=error.message; }
+        finally { if(context)void context.close(); if(serial===beatSerial && dialog.isConnected)button.disabled=false; }
+        return;
+      }
+      if (button.hasAttribute('data-timing-nudge')) {
+        const i=Number(button.dataset.timingNudge), old=draft.starts[i];
+        if(!Number.isFinite(old)){status.textContent='먼저 이 장의 시각을 기록해 주세요.';return;}
+        const time=Math.round((old+Number(button.dataset.delta))*100)/100;
+        if(time<0 || time>=draft.duration){status.textContent='음원 길이 안에서 조정해 주세요.';return;}
+        draft.starts[i]=time;dialog.querySelector(`[data-timing-start="${i}"]`).value=time;
+        status.textContent=`${i+1}장 · ${time}초 (미세 조정은 박에 붙이지 않음)`;return;
+      }
       if (button.hasAttribute('data-timing-close')) { dialog.close(); return; }
       if (button.hasAttribute('data-timing-stamp') || button.hasAttribute('data-timing-next')) {
         if (!draft.duration || audio.readyState < 1) { status.textContent = '음원을 먼저 선택해 주세요.'; return; }
         const i = button.hasAttribute('data-timing-next') ? nextStamp : Number(button.dataset.timingStamp);
         if (i >= slides.length) { status.textContent = '모든 장을 기록했어요. 개별 기록 버튼으로 수정할 수 있어요.'; return; }
-        draft.starts[i] = Math.round(audio.currentTime * 100) / 100;
+        const raw = audio.currentTime;
+        const snapped = beatEnabled.checked ? snapBeat(raw, Number(beatBpm.value), Number(beatAnchor.value)) : raw;
+        if (beatEnabled.checked && (!beatBpm.value || !Number.isFinite(Number(beatBpm.value)) || Number(beatBpm.value)<40 || Number(beatBpm.value)>240 || !beatAnchor.value || !Number.isFinite(Number(beatAnchor.value)) || Number(beatAnchor.value)<0 || Number(beatAnchor.value)>=draft.duration)) { beatStatus.textContent='BPM과 기준 박을 확인해 주세요.'; return; }
+        if (snapped >= draft.duration) { status.textContent='가까운 박이 음원 끝을 벗어납니다. 박자 맞춤을 끄거나 시각을 직접 입력하세요.'; return; }
+        draft.starts[i] = Math.round(snapped * 100) / 100;
+        if (beatEnabled.checked) beatStatus.textContent=`${raw.toFixed(2)}초 → ${draft.starts[i]}초 (박자 맞춤)`;
         dialog.querySelector(`[data-timing-start="${i}"]`).value = draft.starts[i];
         status.textContent = `${i + 1}장 · ${draft.starts[i]}초 기록됨`;
         nextStamp = i + 1; updateNext();
@@ -670,7 +842,7 @@
     }
     return result;
   }
-  root.MindexSongTiming = { composePhotos, validatePhotos, saveToVersion, readElemLibrary, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, save, saveToWorship, ready, pack, unpack, share, loadShared, formsFor, sourceSignature, ownsSource: source => remoteSources.has(source) || [...profiles.values()].some(p => p.url === source), get revision() { return revision; } };
+  root.MindexSongTiming = { resumeAutoSync, snapBeat, detectBeatGrid, composePhotos, validatePhotos, saveToVersion, readElemLibrary, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, save, saveToWorship, ready, pack, unpack, share, loadShared, formsFor, sourceSignature, ownsSource: source => remoteSources.has(source) || [...profiles.values()].some(p => p.url === source), get revision() { return revision; } };
   if (typeof document !== 'undefined') document.addEventListener('input', e => {
     const input = e.target.closest('[data-song-timing-seek]');
     const audio = state.serviceMusic.audio;
@@ -680,6 +852,7 @@
     updateTransport(audio);
   });
   if (typeof document !== 'undefined') document.addEventListener('click', e => {
+    if (e.target.closest('[data-song-timing-resume]')) { e.preventDefault(); resumeAutoSync(); return; }
     const playButton = e.target.closest('[data-song-timing-play]');
     if (playButton) { e.preventDefault(); void play(playButton.dataset.serviceId, playButton.dataset.elementId); return; }
     const button = e.target.closest('[data-song-timing-open]');

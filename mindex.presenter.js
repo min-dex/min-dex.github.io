@@ -2962,6 +2962,10 @@ function handlePresenterControllerMessage(message = {}) {
     return;
   }
   if (message.type === "presenter-control") {
+    if (message.action === "children-resume") {
+      globalThis.MindexSongTiming?.resumeAutoSync(state.presenter.serviceId, message);
+      return;
+    }
     if (message.action === "children-play") {
       playPresenterChildrenTitle(message);
       return;
@@ -3130,9 +3134,9 @@ function presenterOutputUrl(options = {}) {
   return url.toString();
 }
 
-function presenterChildrenPlayKey(event) {
+function presenterChildrenPlayKey(event, key = "p") {
   return !event.metaKey && !event.ctrlKey && !event.altKey && !event.isComposing
-    && event.keyCode !== 229 && (event.code === "KeyP" || event.key?.toLowerCase() === "p");
+    && event.keyCode !== 229 && (event.code === `Key${key.toUpperCase()}` || event.key?.toLowerCase() === key);
 }
 
 function playPresenterChildrenTitle(expected = null) {
@@ -3158,13 +3162,15 @@ function handlePresenterShortcut(event) {
     requestPresenterOutputFullscreenFromController();
     return true;
   }
-  if (presenterChildrenPlayKey(event)) {
+  if (presenterChildrenPlayKey(event) || presenterChildrenPlayKey(event, "r")) {
     const target = event.target instanceof Element ? event.target : null;
     if (target?.closest("input, textarea, select, [contenteditable]:not([contenteditable='false']), dialog, [role='dialog']")) return false;
     if (shouldKeepPresenterShortcutInFocusedControl(event)
       && !target?.closest(".svc-slide-thumb[data-presenter-index], .svc-slide-thumb-wrap[data-presenter-index]")) return false;
     if (event.repeat) return false;
-    if (playPresenterChildrenTitle()) { consumePresenterShortcutEvent(event); return true; }
+    const handled = presenterChildrenPlayKey(event, "r")
+      ? globalThis.MindexSongTiming?.resumeAutoSync(presenterServiceId) : playPresenterChildrenTitle();
+    if (handled) { consumePresenterShortcutEvent(event); return true; }
     return false;
   }
   if (shouldKeepPresenterShortcutInFocusedControl(event)) return false;
@@ -3630,6 +3636,15 @@ function initPresenterOutputCore() {
   });
   let videoRecoverySpaceHeld = false;
   window.addEventListener("keydown", (event) => {
+    if (presenterChildrenPlayKey(event, "r")) {
+      const slide = currentPayload?.slides?.[currentPayload.index];
+      if (!event.repeat && slide?.songTimingEligible && slide.syncTimeline?.localTiming) {
+        event.preventDefault();
+        sendControllerMessage({ type: "presenter-control", action: "children-resume", serviceId: currentPayload.serviceId,
+          index: currentPayload.index, groupId: slide.syncTimeline.groupId, clientId: outputClientId });
+      }
+      return;
+    }
     if (presenterChildrenPlayKey(event)) {
       const slide = currentPayload?.slides?.[currentPayload.index];
       if (!event.repeat && slide?.type === "song-title" && slide.songTimingEligible && slide.syncTimeline?.intro) {

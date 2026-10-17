@@ -33,3 +33,23 @@ console.log('PASS timing validation, effective cue order, identity isolation and
   await assert.rejects(T.pack({...portable,audioFingerprint:'wrong'},slides),/변경/);
   console.log('PASS portable bytes/timestamps, wrong song/version, changed lyrics and corrupted audio rejection');
 })().catch(error=>{console.error(error);process.exitCode=1});
+
+// Beat detection must abstain on silence/free time and never rewrite cue arrays.
+assert.equal(T.snapBeat(1.13,120,.1),1.1);
+assert.equal(T.snapBeat(1.13,0,0),1.13);
+assert.equal(T.snapBeat(.01,120,.1),.1);
+function pulseTrack(times, duration=24) {
+ const rate=1000, pcm=new Float32Array(duration*rate);
+ for(const t of times)for(let k=0;k<30;k++)if(Math.round(t*rate)+k<pcm.length)pcm[Math.round(t*rate)+k]=Math.exp(-k/6);
+ return pcm;
+}
+const regular=Array.from({length:47},(_,i)=>.2+i*.5);
+const detected=T.detectBeatGrid(pulseTrack(regular),1000);
+assert.ok(detected && Math.abs(detected.bpm-120)<1 && Math.abs(detected.anchor-.2)<.03,JSON.stringify(detected));
+assert.equal(T.detectBeatGrid(new Float32Array(24000),1000),null);
+assert.equal(T.detectBeatGrid(pulseTrack(regular.map((t,i)=>t+Math.sin(i*2.7)*.18)),1000),null);
+assert.equal(T.detectBeatGrid(pulseTrack(regular.map((t,i)=>i<24?t:12.2+(i-24)*.7),30),1000),null);
+console.log('PASS beat grid, silence/free-time/tempo-drift abstention and explicit snap');
+
+const fractional=T.detectBeatGrid(pulseTrack(Array.from({length:220},(_,i)=>.2+i*60/138),100),1000);
+assert.ok(fractional && Math.abs(fractional.bpm-138)<.1,JSON.stringify(fractional));

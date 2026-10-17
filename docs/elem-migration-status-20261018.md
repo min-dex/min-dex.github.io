@@ -14,14 +14,14 @@
 - 이번 변경은 제목의 P 재생과 어린이 예배 입력 UI 정리다. P는 시작 전용이며 Elem의 S 토글과 동일하지 않다.
 - 예배별 편집·저장, 성경 조회, 미디어 입력, 미리보기/별도 송출은 Mindex 기존 기능을 사용한다.
 
-## 미이관 또는 부분 지원
+## 기능별 지원 차이
 
 | Elem 기능 | 현재 Mindex와 차이 | 근거 |
 | --- | --- | --- |
 | 아이패드 원격 조작 | QR/연결 번호로 붙어 현재 장·목록·좌우 터치/스와이프·음원을 제어하는 별도 원격 콘솔은 미이관. Mindex 접속 현황 패널은 상태 확인용이다. | Elem Remote/RemoteConsole*.swift, Mindex mindex.monitor.js |
-| 자동 넘김 복귀 R | 수동 전환 뒤 현재 재생 시각에 맞춰 자동 넘김만 복귀하는 기능은 없다. 기존 자동 넘김 재생 버튼은 곡 처음부터 재시작한다. | Elem SongAudioPlayer.resumeAutoAdvance, Mindex mindex.song-timing.js play |
+| 자동 넘김 복귀 R | 2026-10-18 이관: R/복귀 버튼으로 현재 재생 위치를 유지하며 자동 넘김 복귀. 기존 재생 버튼은 재시작 용도로 유지. | Elem SongAudioPlayer.resumeAutoAdvance, Mindex mindex.song-timing.js play |
 | 음원 서서히 끄기 | Elem S의 1.2초 fade-out 정지 동작은 미이관. 새 P는 제목에서 재생 시작만 한다. | Elem SongAudioPlayer.fadeOutAndStop, Mindex service music transport |
-| 박자 맞춤 타이밍 입력 | 시각 직접 입력/현재 시각 기록은 지원하지만 BPM 분석·가까운 박에 붙이기·±0.2초 전용 조정은 미이관. 오프라인 분석으로 38곡을 검수한 것과 앱의 자동 분석 UI는 다르다. | Elem BeatGrid.swift / SongTimingPanel.swift, Mindex mindex.song-timing.js open |
+| 박자 맞춤 타이밍 입력 | 2026-10-18 이관: 보수적 박자 후보 분석·BPM/기준 박 지정·새 기록에만 선택적 맞춤·±0.2초 조정. 가사 정렬 또는 기존 38곡 자동 수정은 아니다. | Elem BeatGrid.swift / SongTimingPanel.swift, Mindex mindex.song-timing.js open |
 | 어린이 성경책 쪽수 | 장별 실물 성경 쪽수표를 관리하여 봉독 표지에 p.152처럼 붙이는 기능은 미이관. 검색 결과의 페이지 번호와 별개다. | Elem Model/BiblePages.swift 및 README 성경 쪽수, Mindex scripture rendering |
 | 헌금위원 명단표 | 기존 Mindex 담당자 입력/교회력 연결은 있으나 Elem의 날짜별 헌금위원.md 읽기·명단대로 복귀·주차별 예외 편집 흐름은 미이관. | Elem OfferingCommitteeField / 명단 모델, Mindex service assignee handling |
 | Keynote 고급 처리 | Mindex macOS Electron에 Keynote 단계별 PNG 반입은 있다. Elem의 원본 CALayer 애니메이션 재생·타임라인 되감기와 첫 두 장의 안내 양식 자동 추출/제외는 동등하게 이관되지 않았다. 웹 Pages 배포에는 네이티브 .key 반입이 없다. 웹 PPTX 경로와는 별개다. | electron/keynote-importer.js keynoteExportScript, Elem KeynoteScene*.swift / KeynoteExporter.swift |
@@ -35,6 +35,6 @@
 
 ## 다음 적용 후보
 
-찬양 운영 편의는 현재 위치에서 자동 넘김 복귀 → fade-out 정지 → 박자 맞춤 편집 순으로 검토할 수 있다.
+사용자 우선순위에 따라 자동 넘김 복귀와 박자 맞춤 편집을 먼저 이관했다. 나머지 기능은 후속으로 남긴다.
 아이패드 원격 조작은 연결·권한·동시 조작 정책을 먼저 정해야 하므로 별도 기능으로 설계한다.
 이 문서는 후속 구현을 승인하거나 운영 DB를 변경하지 않는다.

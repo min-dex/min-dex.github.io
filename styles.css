@@ -8854,3 +8854,11 @@ html.ui-theme-switching:not(.presenter-output-document) *::after {
 .svc-children-audio-hint { font-size:12px; color:var(--ink-3); }
 .svc-children-audio-hint kbd { font:inherit; font-weight:600; }
 .svc-children-audio .svc-board-subgroup-audio-actions { margin-left:auto; }
+
+.song-timing-beats { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:15px 0; padding:10px; border:1px solid var(--line); border-radius:5px; }
+.song-timing-beats label { display:flex; align-items:center; gap:5px; font-size:12px; }
+.song-timing-beats input[type=number] { width:90px; }
+.song-timing-beats p { flex-basis:100%; margin:0; }
+.song-timing-row { flex-wrap:wrap; }
+.song-timing-row label { flex-basis:240px; }
+.song-timing-dialog input[type=number] { min-height:30px; box-sizing:border-box; padding:5px; border:1px solid var(--line); border-radius:5px; color:var(--ink); background:var(--ui-surface-panel); }

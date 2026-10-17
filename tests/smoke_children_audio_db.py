@@ -56,8 +56,36 @@ try:
    }''')
    page.evaluate("MindexSongTiming.open('children-db-service','children-db-item')")
    d=page.locator('[data-song-timing-dialog]');assert d.locator('[data-timing-save]').inner_text()=='곡 버전에 저장'
+   import math,struct
+   pulse=io.BytesIO()
+   with wave.open(pulse,'wb') as w:
+    w.setnchannels(1);w.setsampwidth(2);w.setframerate(8000)
+    w.writeframes(b''.join(struct.pack('<h',int(20000*math.exp(-((i-1600)%4000)/40))) if i>=1600 else b'\0\0' for i in range(160000)))
+   d.locator('[data-timing-file]').set_input_files({'name':'pulse.wav','mimeType':'audio/wav','buffer':pulse.getvalue()})
+   page.wait_for_function("document.querySelector('[data-song-timing-dialog] audio').duration>19")
+   d.locator('[data-beat-analyze]').click()
+   page.wait_for_function("document.querySelector('[data-beat-status]').textContent.includes('박자 후보')")
+   assert abs(float(d.locator('[data-beat-bpm]').input_value())-120)<1
+   assert not d.locator('[data-beat-enabled]').is_checked()
    d.locator('[data-timing-file]').set_input_files({'name':'fixture.wav','mimeType':'audio/wav','buffer':buf.getvalue()})
    page.wait_for_function("document.querySelector('[data-song-timing-dialog] audio').duration>19")
+   assert d.locator('[data-beat-bpm]').input_value()==''
+   d.locator('[data-beat-analyze]').click()
+   page.wait_for_function("document.querySelector('[data-beat-status]').textContent.includes('확신할 수 없어요')")
+   assert not d.locator('[data-beat-enabled]').is_checked()
+   d.locator('[data-beat-bpm]').fill('120');d.locator('[data-beat-anchor]').fill('0.1');d.locator('[data-beat-enabled]').check()
+   page.evaluate("document.querySelector('[data-song-timing-dialog] audio').currentTime=2.23")
+   d.locator('[data-timing-stamp="0"]').click()
+   assert d.locator('[data-timing-start="0"]').input_value()=='2.1'
+   d.locator('[data-timing-nudge="0"][data-delta="0.2"]').click()
+   assert d.locator('[data-timing-start="0"]').input_value()=='2.3'
+   if os.environ.get('MINDEX_CHILDREN_UI_CAPTURE'):
+    assert d.evaluate('(el)=>el.scrollWidth<=el.clientWidth+1')
+    d.screenshot(path='/private/tmp/mindex-beat-editor-'+engine+'.png')
+    page.set_viewport_size({'width':640,'height':800});page.evaluate("applyTheme('dark')")
+    assert d.evaluate('(el)=>el.scrollWidth<=el.clientWidth+1')
+    d.screenshot(path='/private/tmp/mindex-beat-editor-narrow-'+engine+'.png')
+    page.set_viewport_size({'width':1280,'height':720});page.evaluate("applyTheme('light')")
    for i,t in enumerate([2,8]):d.locator(f'[data-timing-start="{i}"]').fill(str(t))
    page.evaluate('failSave=true');d.locator('[data-timing-save]').click();page.wait_for_function("!document.querySelector('[data-timing-save]').disabled")
    assert 'injected' in d.locator('[data-timing-status]').inner_text()
@@ -134,6 +162,28 @@ try:
    page.evaluate("if(state.serviceMusic.audio.paused || state.presenter.index!==manualIndex || !state.serviceMusic.autoSyncSuspended)throw Error('manual navigation interrupted music or snapped back')")
    page.evaluate("state.serviceMusic.audio.currentTime=8.5")
    page.wait_for_function('state.serviceMusic.audio.currentTime>8.7')
+   page.evaluate(r'''()=>{
+    const T=MindexSongTiming,sid=state.selectedServiceId;
+    window.resumeTime=state.serviceMusic.audio.currentTime;window.resumeSerial=state.serviceMusic.playSerial;
+    state.presenter.safetyBlank=true;if(T.resumeAutoSync(sid))throw Error('blank resumed');state.presenter.safetyBlank=false;
+    const source=state.serviceMusic.sourceKey;state.serviceMusic.sourceKey='wrong';if(T.resumeAutoSync(sid))throw Error('wrong source resumed');state.serviceMusic.sourceKey=source;
+    if(T.resumeAutoSync('wrong-service'))throw Error('wrong service resumed');
+    if(T.resumeAutoSync(sid,{serviceId:sid,index:state.presenter.index,groupId:'stale'}))throw Error('stale R accepted');
+    const input=document.createElement('input');refs.detailPane.append(input);input.focus();
+    input.dispatchEvent(new KeyboardEvent('keydown',{key:'r',code:'KeyR',bubbles:true}));
+    if(!state.serviceMusic.autoSyncSuspended)throw Error('typing R resumed');input.remove();
+    isPresenterOutputWindowOpen=()=>false;if(T.resumeAutoSync(sid))throw Error('offline R accepted');isPresenterOutputWindowOpen=()=>true;
+    document.getElementById('title-key-test').focus();
+   }''')
+   page.keyboard.press('r')
+   page.wait_for_function('!state.serviceMusic.autoSyncSuspended && state.presenter.slides[state.presenter.index]?.syncTimeline?.page===2')
+   page.evaluate("if(state.serviceMusic.audio.currentTime<resumeTime || state.serviceMusic.playSerial!==resumeSerial)throw Error('R restarted or sought audio');runPresenterAction('prev',state.selectedServiceId,{scroll:false});window.manualIndex=state.presenter.index")
+   page.evaluate("MindexSongTiming.updateTransport(state.serviceMusic.audio)")
+   page.locator('.global-playback-trigger').click()
+   page.locator('[data-song-timing-resume]').click()
+   page.locator('[popovertargetaction=hide][popovertarget=globalPlaybackPanel]').click()
+   page.wait_for_function('!state.serviceMusic.autoSyncSuspended && state.presenter.slides[state.presenter.index]?.syncTimeline?.page===2')
+   page.evaluate("runPresenterAction('prev',state.selectedServiceId,{scroll:false});window.manualIndex=state.presenter.index")
    page.evaluate("if(state.presenter.index!==manualIndex)throw Error('seek re-enabled auto sync');stopServiceMusicPlayback({render:false});const resume=document.createElement('button');resume.id='resume-test';resume.textContent='resume';resume.onclick=()=>runServiceMusicAction('toggle');refs.detailPane.prepend(resume)")
    page.locator('#resume-test').click()
    try:page.wait_for_function('state.serviceMusic.playing && !state.serviceMusic.audio.paused')
