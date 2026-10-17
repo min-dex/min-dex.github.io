@@ -2767,3 +2767,23 @@ panels anchored after state patches; retain native Escape/outside dismissal,
 focus return and playback ownership. Toolbar button styling targets direct children
 so panel controls do not inherit fixed toolbar widths. Browser checks cover desktop
 760–1440px, both themes, viewport clamping, updates and existing playback actions.
+
+
+Read-pool release receipt:32a9196a passed Pages39023635774 and Linux Cloud
+39023636044. Public index/app/release bytes matched that commit. Both engines
+passed public actual-app fake-RPC full/element/linked saves, rollback/draft
+isolation,24 lyric-bounds cases and delayed media/background/blackout swaps.
+Production writes were blocked; no existing worship data was changed.
+
+Retained limitation: initial public save/output attempts timed out during boot;
+several static files (including small modules/fonts) simultaneously took about
+26 seconds. Identical limits/assertions subsequently passed, without a runtime
+change or increased timeout. This is not proof the initial startup failure is
+fixed. Native-cache samples were Chrome29084/3351/1295ms and WebKit18584/7439/
+5013ms; every navigation still performed7 fresh aggregate reads, and repeat app
+transfers were cached. After other browser tests ended, fresh sessions measured
+4792ms Chrome/2725ms WebKit on the subsequent upstream manual-song-timing
+release (which contains this change). These are separate network samples, not
+controlled evidence of an overall speedup. Static delivery/DB latency remains
+variable; no universal3-second bound or completed download-size reduction is
+claimed. Concurrent upstream timing and toolbar changes were preserved.
