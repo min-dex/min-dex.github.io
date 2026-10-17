@@ -2477,3 +2477,24 @@ service/catalog state; both missing-state failures also reproduced before these
 runtime changes. Layout-batch assertions were retained and exposed the actual
 duplicate full-render path fixed above. Existing production services are not
 modified; production browser probes block write requests. Deployment is separate.
+
+
+Release404b48ff /20261017-startup-overlap preserves remote6861bb67 split-Verse
+numbering. Integrated verse-number and24-case lyric bounds tests pass. Pages
+39015696435 and Linux Cloud39015696573 completed successfully; public SHA256
+matches boot/runtime/atomic-client/store/release files.
+
+Public Chrome/WebKit tests pass actual app save functions against isolated fake
+RPCs (full/element save, rollback, sibling/inflight drafts and linked-document
+commit), lyric bounds, delayed image/background/blackout transitions and split
+Verse numbers.180-thumbnail budget:33/41ms maximum timer gap, zero clipping or
+font-size differences, unchanged500ms threshold.
+
+Public read-only home/entry/reentry probes produced no service errors. Home
+read requests visibly overlap in3/3/1 groups. Same-session alternating read-only
+comparison of seven identical aggregates: sequential478/390ms versus bounded
+parallel200/199ms, identical full responses. End-to-end home samples ranged
+1.33–2.95s with variable network waits; these routed/profiler measurements do
+not establish a uniform end-to-end speedup. Service board appearance was
+0.24–0.51s and revisits0.12–0.22s; fonts/scripture warmup can finish later.
+All production probes block writes. No existing services or DB settings changed.
