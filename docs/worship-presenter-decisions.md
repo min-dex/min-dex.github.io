@@ -2930,3 +2930,26 @@ children_audio는 기존 자료 열기 용도로만 유지하며 새 선택지�
 
 검증: 실제 atomic 저장 경로의 실패/재시도, 찬양 DB 쓰기 금지, 원문/DB 왕복,
 독립 Chromium/WebKit 저장소에서 공유 불러오기 없이 실제 음원 재생 및 cue 복원.
+
+## 2026-10-17 — Overlapping stalled-download recovery
+
+All selected-release scripts now arm their existing bounded download/retry
+clocks together, before the CSS gate. Previously each clock began only when
+ordered execution reached that file: simultaneous CSS, icon and app stalls
+therefore accumulated separate four-second retry waits. Download recovery can
+overlap; CSS application and script execution retain their original order.
+Unused speculative release assets still do not retry, and late preload responses
+cannot execute or apply. No new origin, cached source execution or DB write path
+is introduced. Each selected asset retains its 15-second total deadline.
+
+The three-stall regression fails against the previous loader (not ready within
+8 seconds) and passes Chromium/WebKit with a single retry interval. It also
+checks current-release-only retries and no late second execution/application.
+The default Cloud gate includes this case.
+
+Transport investigation on the current Mac separately reproduced variable body
+receipt without executing the app: static fetch batches ranged from under one
+second to 5.8 seconds. CDN responses reported cache HIT; changing HTTP version,
+preload/fetch, or concurrency did not establish a consistent causal fix. This
+identifies an application-level delay multiplier, NOT a proven CDN/ISP fault or
+a guarantee against network outages. No comparison on another network exists.

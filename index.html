@@ -235,7 +235,7 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261017-worship-audio-bundle";
+        const fallbackVersion = "20261017-parallel-startup-recovery";
         const modules = [
           "mindex.icons.js", "vendor/supabase-js.min.js",
           "mindex.constants.js", "mindex.inline-text.js", "mindex.design-tokens.js", "mindex.worship-model.js",
@@ -409,6 +409,10 @@
           const version = await versionPromise;
           window.MINDEX_RELEASE = version;
           preloadAssets(version);
+          // Arm recovery for every selected download now. Execution still waits
+          // for CSS and dependency order; a stalled earlier file must not delay
+          // the retry clock of all later files by another four seconds each.
+          for (const module of modules) prepareAsset(module, version, "script").wait();
           await Promise.all(styles.map((style) => loadStyle(style, version)));
           for (const module of modules) await load(module, version);
         })().catch(failBoot);
