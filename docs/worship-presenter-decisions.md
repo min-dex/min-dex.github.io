@@ -3192,3 +3192,14 @@ The individual-input regression previously applied its desktop row-count rule
 above780px even though the actual container wraps through960px. The same failure
 reproduced with unchanged HEAD styles. Align that condition with the960px
 container breakpoint; retain every containment, overlap and multiline assertion.
+
+
+## Explicit output stop starts a fresh run ·2026-10-18
+
+Stopping output clears old board selection, PPT progress and pending explicit
+slide-launch requests, and resets the controller position to its preparation
+slide. Relaunch without a new selection starts there; a selection made after
+stop remains the explicit launch target. Live-output reconnection is distinct
+and retains its position. Existing music stop/preserve policy is unchanged:
+ordinary playing background music survives, synchronized output audio follows
+its existing stop rule. No operational data is written.

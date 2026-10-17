@@ -31139,7 +31139,7 @@ function runPresenterAction(action, serviceId = state.selectedServiceId, options
     preparePresenterService(serviceId);
     state.presenter.pptxProgress = null;
     const launchIndex = presenterSelectedLaunchIndex(serviceId);
-    if (isValidPresenterIndex(launchIndex, state.presenter.slides.length)) state.presenter.index = launchIndex;
+    if (launchIndex !== null && isValidPresenterIndex(launchIndex, state.presenter.slides.length)) state.presenter.index = launchIndex;
     clearPresenterBoardSelection({ render: false });
     state.presenter.safetyBlank = false;
     openPresenterOutput(serviceId);
@@ -31467,6 +31467,7 @@ function scrollPresenterOutlineToActive(serviceId = state.presenter.serviceId) {
 
 function stopPresenterOutput(serviceId = state.presenter.serviceId) {
   liveScriptureRequestSerial += 1;
+  presenterLaunchRequestSerial += 1;
   state.presenter.outputGeneration += 1;
   const activeServiceId = serviceId || state.presenter.serviceId;
   const outputWindow = state.presenter.outputWindow;
@@ -31475,6 +31476,10 @@ function stopPresenterOutput(serviceId = state.presenter.serviceId) {
   if (closeDesktopOutput) closeDesktopOutput().catch?.(() => {});
   state.presenter.jumpDraft = "";
   state.presenter.restorePayload = null;
+  // Explicit stop ends this run. A later launch may use only a new selection.
+  state.presenter.index = Math.max(0, state.presenter.slides.findIndex(isPresenterPreparationSlide));
+  state.presenter.pptxProgress = null;
+  clearPresenterBoardSelection({ render: false });
   state.presenter.exitArmedAt = 0;
   state.presenter.safetyBlank = false;
   state.presenter.liveScripture = {
