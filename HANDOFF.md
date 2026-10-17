@@ -943,6 +943,20 @@ and padding, retaining5px text gaps. Offline real-editor smoke covers both theme
 Chromium/WebKit,1440/760/640px, Enter/Space, hover/focus and bounds. No output,
 print, persistence or operational-data changes.
 
+## Independent photo timing preparation · 2026-10-18
+
+The worship timing editor can attach ordered image files with absolute photo cue
+seconds. The existing immutable media upload + atomic worship save owns the set;
+Praise DB and children audio remain untouched. Projected photo continuation frames
+hold the active lyric; pagesFor/fingerprint/editing recover the original lyric
+pages and cues. Physical slide indices can expand. Invalid/stale profiles cannot
+produce photo continuation frames. Manual navigation retains existing audio and
+suspends auto-follow. Do not call prepared code deployed or final-photo playback
+verified until those steps run with the user's actual assets.
+
+Local validation:16 unit +17 smoke entry points passed; additional 21-photo/19-lyric
+clock sampling passed. Production deployment and actual-user-photo playback remain pending.
+
 
 ## Fresh output after explicit stop ·2026-10-18
 

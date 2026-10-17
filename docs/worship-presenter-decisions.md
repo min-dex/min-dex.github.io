@@ -3193,6 +3193,21 @@ above780px even though the actual container wraps through960px. The same failure
 reproduced with unchanged HEAD styles. Align that condition with the960px
 container breakpoint; retain every containment, overlap and multiline assertion.
 
+## Independent photo clock (2026-10-18)
+
+The worship timing editor accepts ordered images and independent photo seconds.
+At projection time, merge photo events with effective lyric display events,
+retaining the currently displayed lyric until its original next cue. Generated
+continuation frames are excluded from lyric editing/fingerprints; original
+lyric onset values and the one-second lead stay unchanged. Photos on blank
+interludes render alone; lyrics retain their caption over subsequent photos.
+Same-clock seek and manual navigation use the existing presenter transport;
+manual movement suspends automatic following while audio continues. Original
+slide numbering can expand because photo continuations are output frames.
+Invalid photo timelines fail closed without changing lyric playback. Stale lyric
+or audio profiles cannot generate photo continuations. Photos start no earlier
+than the first timed lyric/blank page. Normal background preload/decode gates apply.
+
 
 ## Explicit output stop starts a fresh run ·2026-10-18
 

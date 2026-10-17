@@ -10906,7 +10906,10 @@ function normalizeServiceAudioTiming(value) {
   if (!value || value.version !== 1 || !Array.isArray(value.starts) || value.starts.length > 1000) return null;
   return {version:1, audioUrl:String(value.audioUrl || ''), audioFingerprint:String(value.audioFingerprint || ''),
     duration:Number(value.duration), lyricsFingerprint:String(value.lyricsFingerprint || ''),
-    starts:value.starts.map(t => typeof t === 'number' && Number.isFinite(t) ? t : null), enabled:value.enabled === true};
+    starts:value.starts.map(t => typeof t === 'number' && Number.isFinite(t) ? t : null), enabled:value.enabled === true,
+    photos:Array.isArray(value.photos) ? value.photos.slice(0,200).map(p=>({
+      at:typeof p?.at === 'number' && Number.isFinite(p.at) ? p.at : null,
+      url:String(p?.url || ''), name:String(p?.name || '')})) : []};
 }
 
 function parseServiceItemMemo(value) {

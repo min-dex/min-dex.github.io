@@ -311,6 +311,17 @@ and padding, retaining5px text gaps. Offline real-editor smoke covers both theme
 Chromium/WebKit,1440/760/640px, Enter/Space, hover/focus and bounds. No output,
 print, persistence or operational-data changes.
 
+## Independent worship photo timing · 2026-10-18
+
+Prepared in an isolated branch: absolute photo cues in worship audioTiming.photos,
+separate from stored lyric starts and fingerprints. Projection merges events while
+preserving lyric display times, blank/photo-only rendering and manual-sync release.
+User assets and production application are pending; local validation is distinct
+from Linux CI, deployment, and actual-photo full playback.
+
+Local validation:16 unit +17 smoke entry points passed; additional 21-photo/19-lyric
+clock sampling passed. Production deployment and actual-user-photo playback remain pending.
+
 
 ## Fresh output after explicit stop ·2026-10-18
 
