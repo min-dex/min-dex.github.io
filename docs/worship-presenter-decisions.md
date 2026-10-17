@@ -3120,3 +3120,10 @@ long quoted-text checks cover the actual renderers.
 차단 및 송출 종료/창 닫기 정지 확인. 로컬/공유 세트 이관 호환과 직접 가사·사진
 싱킹 회귀 통과. Cloud 로컬 baseline 13 unit + 13 smoke 통과. 모든 DB 쓰기는
 격리 double이며 운영 어린이 곡 자료를 새로 만들거나 일괄 이관하지 않았다.
+
+
+자동 넘김 처음부터 재생은 Audio.load()로 미디어 상태를 새로 준비한다. Linux
+WebKit에서 송출 연결 종료 후 currentTime=0만 설정하면 readyState=2에 머물고
+play()가 끝나지 않는 경합을 재현했다. 일시정지/이어 재생은 이 초기화 경로를
+쓰지 않는다. 실제 버튼 클릭과 HTTP Range 음원으로 처음 재생·창 닫기·재시작을
+같은 회귀 검사에서 확인한다.

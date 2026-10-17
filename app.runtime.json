@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261017-version-delete",
+  "version": "20261017-audio-restart",
   "options": {
     "compress": false,
     "mangle": {
