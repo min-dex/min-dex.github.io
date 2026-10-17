@@ -73,3 +73,11 @@ Added scripture-catalog overlap/readiness/error tests and actual browser
 initial projection/lazy archive/version equivalence coverage. Integrated commit
 cd0bd081 passes Ubuntu Cloud run39017082239; local checks pass too. This does not
 change the separate Cloud environment publication or hardware verification status.
+
+
+Baseline update ·2026-10-17: release861e07c8 adds the real-HTTP-cache UI font
+regression alongside the concurrent unchanged-save unit guard. The default
+gate is now9 Node checks +7 Python smoke entry points and passed Ubuntu run
+39022426589. Full glyph/variable-outline verification is additionally available
+as tests/test_ui_font_segments.py with fontTools4.60.2 and Brotli1.2.0; it is
+separate from the default browser dependencies and passed11700 comparisons.

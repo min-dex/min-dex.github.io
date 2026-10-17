@@ -2664,7 +2664,8 @@ Verification:11700 source/segment glyph comparisons (all characters at45/400/
 700/930), disjoint complete coverage and hashes. Both engines pass30 actual
 wrapping/metric cases, full-font rare-character fallback, cached font reuse
 across two freshly resolved releases, and resolved-only script execution. The
-new real-HTTP-cache test joins the default Cloud gate (8 unit +7 smoke entries).
+new real-HTTP-cache test joins the default Cloud gate (9 unit +7 smoke entries
+after integration of the concurrent unchanged-save guard).
 
 Read-only candidate home visits fetched304096 bytes of UI fonts versus512492
 previously (40.7% less); subsequent service entry added33016 bytes. Actual use
@@ -2687,3 +2688,30 @@ browsing another service preserves current output, navigation from an inactive
 service cannot hijack output, explicit start switches to that service at index 0,
 and number zero/one blackens/restores both live preview and output. No worship
 records or service-switch semantics are changed.
+Release861e07c8 /20261017-ui-font-segments includes upstream773f1feb explicit
+forms andc35663ab unchanged-save guards. Integrated Cloud baseline9 unit +7
+smoke entries, explicit-form tests and both-engine lyric bounds pass. Pages
+39022426835 and Linux Cloud39022426589 succeeded. Public SHA256 matches all26
+checked runtime/release/font files; regeneration reproduces the committed files.
+
+Public Chrome/WebKit pass30 original/segmented width, kerning and wrapping cases
+each, including rare-character fallback. Fully settled initial UI font downloads
+are approximately304KB. Actual app full/element/linked saves pass against fake
+RPCs, including rollback and draft isolation. Both engines pass24 lyric bounds
+cases and delayed image/background/blackout transitions. One initial public
+WebKit save-test attempt timed out before the app function became available;
+the identical test passed on retry without relaxing its30-second timeout. This
+transient boot failure is retained as evidence, not reclassified as a save failure
+or proof of universally reliable startup under arbitrary network delay.
+
+A separate production read-only probe preserves real browser HTTP caching (no
+Playwright routing): fresh-session home2972ms Chrome/3718ms WebKit; two reloads
+2221/2872ms Chrome and988/1553ms WebKit. Reloaded UI fonts transfer0 bytes.
+Release checks and service reads still occur; no service read/write cache was
+introduced. App JS alone took1440/2198ms on those cold samples, followed by
+service-list/aggregate requests. Network variation prevents a controlled overall
+speedup claim or a3-second ceiling. Production writes were blocked throughout;
+no existing worship, lyric, media, DB schema or permission was changed.
+
+Public180-thumbnail checks also pass: maximum timer gaps34.1ms Chrome/41ms
+WebKit, zero clipping or font-size mismatches, unchanged500ms response limit.
