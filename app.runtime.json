@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-output-restart",
+  "version": "20261018-theme-surfaces",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "c923f5e95d5a49d685e254fd8d0254e0b2d5527869ecabcc2f03c9f79f2f45ad",
-  "runtime_sha256": "2fb006cec2f6e6b15f299e06e05fbf2a7dcb5c8c32bdcfa217d3fc99dc417ebd",
-  "source_bytes": 1471751,
-  "runtime_bytes": 1041710,
-  "source_gzip": 328618,
-  "runtime_gzip": 257633
+  "source_sha256": "d9a6a3bbd254e3d7b5b9dcc521dcc4876ab9b7c2de8ccd3682d42cac5490d1a9",
+  "runtime_sha256": "dbd0f76799e3f5fdc1cc0fec8307800e283e09c6d06b2f4674693d78d3cfad90",
+  "source_bytes": 1471815,
+  "runtime_bytes": 1041746,
+  "source_gzip": 328642,
+  "runtime_gzip": 257646
 }
