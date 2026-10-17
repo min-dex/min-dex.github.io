@@ -3220,6 +3220,20 @@ ordinary playing background music survives, synchronized output audio follows
 its existing stop rule. No operational data is written.
 
 
+## Output lifetime and message ownership ·2026-10-18
+
+Each newly opened output receives a session ID in its URL and transport snapshot.
+The controller accepts messages only for that session and rejects retired clients
+after an output reload. Old close broadcasts are scoped too. An output reload
+keeps the session/slide; a fresh launch replaces the session. An existing output
+can restore its Window reference via same-origin ready/heartbeat postMessage after
+controller reload, without creating or focusing any window.
+Disconnect keeps the Window reference and slide: only Window.closed proves exit
+and invokes the existing stop/reset path. Missing heartbeat alone does not reset
+selection or position. Existing background-music policy and operational data are
+unchanged. Offline popup smoke covers close/relaunch, old message types, reload,
+reference recovery and temporary disconnect in Chromium/WebKit.
+
 ## 2026-10-18 — 어린이 제목 P 재생과 예배 입력 정리
 
 - 송출 중 어린이 음원 제목에서 P (한글 배열 KeyP 포함)로 기존 자동 넘김 재생 경로를 호출한다. 컨트롤러와 출력 창 모두 지원하며 오디오는 컨트롤러에서만 재생한다.

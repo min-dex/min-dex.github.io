@@ -331,6 +331,13 @@ a stopped output. No music-policy or operational-data change. Offline popup
 smoke covers both engines, actual close/reopen and delayed launch cancellation.
 
 
+## Output session isolation ·2026-10-18
+
+Native output-window close now uses the explicit stop/reset path. Transient
+disconnect preserves the Window and position; reload can reattach. New output
+sessions reject old control/heartbeat/disconnect/draft/close messages. See the
+worship presenter decision log and smoke_output_session_isolation.py.
+
 ## 2026-10-18 — 어린이 제목 P 재생과 예배 입력 정리
 
 - 송출 중 어린이 음원 제목에서 P (한글 배열 KeyP 포함)로 기존 자동 넘김 재생 경로를 호출한다. 컨트롤러와 출력 창 모두 지원하며 오디오는 컨트롤러에서만 재생한다.
