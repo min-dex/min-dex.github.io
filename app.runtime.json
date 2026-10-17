@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261017-unified-loading",
+  "version": "20261017-list-name-tooltips",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "ad600f7c3a27d877db6c76c39e1e4709daf9b9d8e333548bc038beafd981a946",
-  "runtime_sha256": "c28457d5fc357b109df6f9a8e48d807c01c1d8a95a8c3bd6d76c0962cc1fb09b",
-  "source_bytes": 1461725,
-  "runtime_bytes": 1034447,
-  "source_gzip": 325707,
-  "runtime_gzip": 255764
+  "source_sha256": "24c0d6fd4332a6a2e8cdf2ba4b32b075aad43221c76ec1e4b0a27091ccd804ba",
+  "runtime_sha256": "cc23e11a35d4280583d2011a1f9a7b90d848fd0547d1ce4464f414284318d17e",
+  "source_bytes": 1461993,
+  "runtime_bytes": 1034685,
+  "source_gzip": 325749,
+  "runtime_gzip": 255804
 }

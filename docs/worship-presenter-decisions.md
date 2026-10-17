@@ -3057,3 +3057,12 @@ Startup, sidebar, detail and service-data loading share one inline-defined row:
 Remove decorative gray skeleton rows/lines; retain busy/status semantics and error retry controls.
 Startup has no elapsed counter; a single4s timeout shows delay guidance, cancelled on completion/failure.
 The logo stays22px; feedback is subordinate without making in-app status illegibly small.
+
+
+## List full-name hints · 2026-10-17
+
+Praise list/search titles, linked praise titles, reference card titles and background
+original filenames retain compact ellipsis layout and expose the full escaped
+display name through native title hints. No click, storage or output changes.
+Offline Chromium/WebKit checks hover actual rendered long quoted names and verify
+title values; native browser tooltip pixels are outside DOM screenshots.

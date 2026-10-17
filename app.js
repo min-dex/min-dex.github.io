@@ -15242,7 +15242,7 @@ function renderSongList() {
         <button class="song-item${active}${muted}${hasMeta}" type="button" data-song-id="${escapeAttr(song.id)}">
           <span class="song-title">
             ${view.showHymnMarker ? `<span class="song-hymn-no">${escapeHtml(formatHymnMarker(song.hymn_no))}</span>` : ""}
-            <span class="song-title-text">${escapeHtml(view.title)}</span>
+            <span class="song-title-text" title="${escapeAttr(view.title)}">${escapeHtml(view.title)}</span>
             ${song.versions?.length > 1 ? `<span class="song-count-badge">${song.versions.length}</span>` : ""}
             ${renderSongAttentionIcon(song)}
           </span>
@@ -15416,7 +15416,7 @@ function renderGlobalPraiseResult(result) {
     <button class="song-item global-search-result" type="button" data-global-song-id="${escapeAttr(song.id)}">
       <span class="song-title">
         ${view.showHymnMarker ? `<span class="song-hymn-no">${escapeHtml(formatHymnMarker(song.hymn_no))}</span>` : ""}
-        <span class="song-title-text">${escapeHtml(view.title)}</span>
+        <span class="song-title-text" title="${escapeAttr(view.title)}">${escapeHtml(view.title)}</span>
         ${song.versions?.length > 1 ? `<span class="song-count-badge">${song.versions.length}</span>` : ""}
         ${renderSongAttentionIcon(song)}
       </span>
@@ -15695,7 +15695,7 @@ function renderWorshipBackgroundTile(target, selectedFileName) {
       </button>
       <div class="background-tile-main">
         <strong>${escapeHtml(target.fileName)}</strong>
-        <small>${entry?.originalName ? escapeHtml(entry.originalName) : escapeHtml(worshipBackgroundPath(target.fileName))}</small>
+        <small title="${escapeAttr(entry?.originalName || worshipBackgroundPath(target.fileName))}">${entry?.originalName ? escapeHtml(entry.originalName) : escapeHtml(worshipBackgroundPath(target.fileName))}</small>
         ${entry?.size ? `<em>${escapeHtml(formatFileSize(entry.size))}</em>` : ""}
       </div>
       <div class="background-tile-actions">
@@ -16515,7 +16515,7 @@ function renderReferenceCard(link, allLinks = getReferenceEditorLinks()) {
     <article class="reference-card">
       <a class="reference-card-link${safeUrl ? "" : " disabled"}" href="${escapeAttr(safeUrl || "#")}" target="_blank" rel="noopener noreferrer" ${safeUrl ? "" : "aria-disabled=\"true\" tabindex=\"-1\""}>
         <span>
-          <strong>${escapeHtml(link.title)}</strong>
+          <strong title="${escapeAttr(link.title)}">${escapeHtml(link.title)}</strong>
           <em>${escapeHtml(shortUrl(link.url))}</em>
         </span>
       </a>
@@ -16672,7 +16672,7 @@ function renderRelatedSongLinks(songs) {
       <span>연결됨</span>
       ${songs.map((song) => `
         <button class="related-song-link" type="button" data-open-song="${escapeAttr(song.id)}">
-          <span>${escapeHtml(songListView(song).title || song.title || "제목 없음")}</span>
+          <span title="${escapeAttr(songListView(song).title || song.title || "제목 없음")}">${escapeHtml(songListView(song).title || song.title || "제목 없음")}</span>
           ${song.hymn_no ? `<span class="related-song-marker">${escapeHtml(song.hymn_no)}</span>` : ""}
         </button>
       `).join("")}
