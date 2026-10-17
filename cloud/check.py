@@ -13,6 +13,7 @@ NODE_TESTS = (
     "test_worship_deleted_slot.cjs",
     "test_setlist_period.cjs",
     "test_song_timing.cjs",
+    "test_scripture_preload_parallel.cjs",
 )
 SMOKES = (
     "smoke_startup_bootstrap.py",
@@ -20,6 +21,7 @@ SMOKES = (
     "smoke_reference_batch.py",
     "smoke_theme_bootstrap.py",
     "smoke_scripture_aliases.py",
+    "smoke_startup_projection.py",
 )
 
 def main():

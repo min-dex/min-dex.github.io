@@ -2558,3 +2558,38 @@ heading, outside the jump button; labelled multi-element rows follow the same
 rule. Do not duplicate it inside the input controls. Headerless medley rows keep
 their per-song DB links. Isolated Chromium/WebKit rendering checks cover desktop
 alignment, a single actionable heading link, and narrow-width overflow.
+## Lazy initial service projection and scripture catalog overlap (2026-10-17)
+
+Initial worship loading retains the whole service list, but no longer materializes
+every archived service's template before and after the initial aggregate reads.
+Only requested/returned service groups are projected eagerly. Unopened services
+use the existing getServiceItems projection on access, and remain DB-unloaded
+until their aggregate is read. Saved rows, suppression markers and existing
+atomic writes are unchanged. Grouped row keys are always retained even when
+absent from the requested ID list; service lookup uses one local Map.
+
+Template version metadata now selects the same last applicable version without
+building/cloning all of its steps. Date, service-specific matcher and fallback
+selection still use the existing version resolver. Scripture warmup and direct
+verse lookup overlap
+independent book and translation catalog reads, then awaits both before parsing
+references; existing shared-load, cache, translation and error gates remain.
+No font faces, fitting rules, output layout or persisted content changed.
+
+Offline Chromium/WebKit checks compare lazy/eager template results with stable
+fixture IDs, version selection across service types/dates, saved grouped rows
+and archive loaded-state. With200 archived services plus1 current service and
+rendering isolated, initial load projects only the1 current service instead of
+all201 twice. Controlled catalog promises verify overlap, readiness and failure.
+Cloud baseline7 unit +5 smoke entries passes, including actual app atomic-save
+functions against fake RPCs. Home navigation, service load/retry, cached revisit,
+loading reentry, presenter patching and180-thumbnail budget also pass. Final
+output and deployment results are recorded separately below.
+
+Both-engine24-case lyric bounds, output caption edges and delayed media/blackout
+transitions pass with unchanged assertions. The new projection/catalog guards
+join the default Cloud gate (now8 unit +6 smoke entry points).
+
+Integrated upstream audio-manager and pending-input/playback save changes remain
+intact. Their actual browser tests, manual praise/interlude tests, both-engine
+lyric bounds and preview budget pass. Existing production records are read-only.

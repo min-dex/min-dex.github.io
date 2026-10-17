@@ -4551,7 +4551,8 @@ async function loadWorshipData() {
   state.worshipElements = [];
   state.loadedWorshipServiceIds = new Set();
   serviceViewLoadErrors.clear();
-  state.serviceItems = projectGroupedWorshipItemsFromTemplates({});
+  // Unopened services project lazily through getServiceItems; do not build every archive.
+  state.serviceItems = {};
   state.worshipPresenterSlides = {};
   state.worshipPresenterSlidesLoaded = false;
   state.loadedWorshipPresenterServiceIds = new Set();
@@ -4573,7 +4574,7 @@ async function loadWorshipData() {
     state.worshipSections = sections;
     state.worshipElements = elements;
     state.loadedWorshipServiceIds = new Set(preloadServiceIds);
-    state.serviceItems = projectGroupedWorshipItemsFromTemplates(groupWorshipElements(sections, elements));
+    state.serviceItems = projectGroupedWorshipItemsFromTemplates(groupWorshipElements(sections, elements), preloadServiceIds);
   }
   const prioritizedPresenterSongLoad = Boolean(
     state.module === "presenter"
@@ -11591,8 +11592,11 @@ async function resolveServiceScriptureBodyReference(serviceId, index, options = 
 
 async function fetchServiceScriptureVerses(reference, requestedTranslation = null) {
   if (!requireClient()) return [];
-  await ensureBibleBookLookups();
-  if (!state.bibleTranslations.length && !state.bibleReaderError) await loadBibleTranslations({ silent: true });
+  await Promise.all([
+    ensureBibleBookLookups(),
+    !state.bibleTranslations.length && !state.bibleReaderError
+      ? loadBibleTranslations({ silent: true }) : Promise.resolve(),
+  ]);
   const translation = requestedTranslation || selectedPresenterBibleTranslation();
   if (!translation?.id || !state.bibleTranslations.some(t=>t.id===translation.id)) return [];
   if (state.client?.auth && !isUuid(translation.id)) return [];
@@ -11757,8 +11761,11 @@ async function preloadServiceItemScriptureReferences(serviceId = state.selectedS
   if (!state.client || !service || !items.length) return false;
   let loaded = false;
   try {
-    await ensureBibleBookLookups();
-    if (!state.bibleTranslations.length && !state.bibleReaderError) await loadBibleTranslations({ silent: true });
+    await Promise.all([
+      ensureBibleBookLookups(),
+      !state.bibleTranslations.length && !state.bibleReaderError
+        ? loadBibleTranslations({ silent: true }) : Promise.resolve(),
+    ]);
     if (!selectedPresenterBibleTranslation()?.id) return false;
     const requests = [];
     const seen = new Set();
@@ -11794,8 +11801,11 @@ async function preloadWorshipScriptureReferences(sections = [], elements = [], o
   if (!state.client || !elements.length) return false;
   let loaded = false;
   try {
-    await ensureBibleBookLookups();
-    if (!state.bibleTranslations.length && !state.bibleReaderError) await loadBibleTranslations({ silent: true });
+    await Promise.all([
+      ensureBibleBookLookups(),
+      !state.bibleTranslations.length && !state.bibleReaderError
+        ? loadBibleTranslations({ silent: true }) : Promise.resolve(),
+    ]);
     if (!selectedPresenterBibleTranslation()?.id) return false;
     const serviceId = String(options.serviceId || "").trim();
     const matchingSections = serviceId
@@ -21015,13 +21025,14 @@ function normalizeServiceItemsInCurrentOrder(items) {
     .map((item, index) => ({ ...item, sort_order: index + 1 }));
 }
 
-function projectGroupedWorshipItemsFromTemplates(grouped = {}) {
+function projectGroupedWorshipItemsFromTemplates(grouped = {}, requestedIds = state.services.map((service) => service.id)) {
+  const serviceById = new Map(state.services.map(service => [service.id, service]));
   const serviceIds = new Set([
-    ...state.services.map((service) => service.id).filter(Boolean),
+    ...requestedIds.filter(Boolean),
     ...Object.keys(grouped),
   ]);
   return Object.fromEntries([...serviceIds].map((serviceId) => {
-    const service = state.services.find((svc) => svc.id === serviceId);
+    const service = serviceById.get(serviceId);
     return [serviceId, projectWorshipServiceItemsFromTemplate(service, grouped[serviceId] || [])];
   }));
 }
@@ -22205,7 +22216,8 @@ function materializePublicWorshipTemplate(typeId = "", options = {}) {
 }
 
 function resolvePublicWorshipTemplateVersion(typeId = "", options = {}) {
-  return materializePublicWorshipTemplate(typeId, options)?.version || null;
+  const versions = publicWorshipTemplateVersionsForDate(typeId, serviceTemplateDate(options.service), { service: options.service });
+  return versions[versions.length - 1] || null;
 }
 
 function publicWorshipTemplateVersionsForDate(typeId = "", dateValue = "", options = {}) {
