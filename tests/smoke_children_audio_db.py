@@ -103,7 +103,10 @@ try:
    page.wait_for_function('state.serviceMusic.audio.currentTime>8.7')
    page.evaluate("if(state.presenter.index!==manualIndex)throw Error('seek re-enabled auto sync');stopServiceMusicPlayback({render:false});const resume=document.createElement('button');resume.id='resume-test';resume.textContent='resume';resume.onclick=()=>runServiceMusicAction('toggle');refs.detailPane.prepend(resume)")
    page.locator('#resume-test').click()
-   page.wait_for_function('state.serviceMusic.playing && !state.serviceMusic.audio.paused')
+   try:page.wait_for_function('state.serviceMusic.playing && !state.serviceMusic.audio.paused')
+   except Exception:
+    print(engine,'resume diagnostic',page.evaluate("JSON.stringify({playing:state.serviceMusic.playing,pending:state.serviceMusic.pending,paused:state.serviceMusic.audio.paused,time:state.serviceMusic.audio.currentTime,seeking:state.serviceMusic.audio.seeking,ready:state.serviceMusic.audio.readyState,network:state.serviceMusic.audio.networkState,ended:state.serviceMusic.audio.ended,mode:state.serviceMusic.mode,source:state.serviceMusic.sourceKey,owner:state.serviceMusic.ownerServiceId,slotOwned:serviceMusicSourceIsSlotOwned(),slide:state.presenter.index,manualIndex,toast:document.querySelector('#toast')?.textContent})"),flush=True)
+    raise
    page.evaluate("if(!state.serviceMusic.autoSyncSuspended || state.presenter.index!==manualIndex)throw Error('resume re-enabled auto sync')")
    page.evaluate("window.mediaTrace=[];['play','playing','pause','waiting','seeking','seeked','error','abort','ended'].forEach(type=>state.serviceMusic.audio.addEventListener(type,()=>mediaTrace.push({type,time:state.serviceMusic.audio.currentTime,paused:state.serviceMusic.audio.paused})))")
    page.evaluate('isPresenterOutputWindowOpen=()=>false;startPresenterOutputWindowMonitor(state.selectedServiceId)')
