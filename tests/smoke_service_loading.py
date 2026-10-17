@@ -34,7 +34,19 @@ def main():
                     }""")
                     page.wait_for_selector('[data-service-view-loading="a"]')
                     assert not page.locator('.service-outline-badge').count()
-                    page.screenshot(path=f'/tmp/mindex-service-loading-{engine}.png')
+                    for theme in ('light','dark'):
+                        page.evaluate('(theme)=>applyTheme(theme)',theme)
+                        for width,height in ((1440,1000),(1280,800),(1000,600),(800,400),(390,640)):
+                            page.set_viewport_size({'width':width,'height':height})
+                            geometry=page.locator('.service-view-loading').evaluate("""el=>{
+                              const pane=el.parentElement.getBoundingClientRect(),box=el.getBoundingClientRect();
+                              const children=[...el.children].map(x=>{const r=x.getBoundingClientRect();return {top:r.top+(r.height-x.offsetHeight)/2,bottom:r.bottom-(r.height-x.offsetHeight)/2,height:x.offsetHeight}}).filter(x=>x.height);
+                              const top=Math.min(...children.map(x=>x.top)),bottom=Math.max(...children.map(x=>x.bottom));
+                              return {height:Math.abs(box.height-pane.height),center:Math.abs((top+bottom-pane.top-pane.bottom)/2),overflow:el.scrollWidth>el.clientWidth+1};
+                            }""")
+                            assert geometry['height']<2 and geometry['center']<2 and not geometry['overflow'],(engine,theme,width,height,geometry)
+                            if width in (1280,800):page.screenshot(path=f'/tmp/mindex-loading-center-{engine}-{theme}-{width}.png')
+                    page.set_viewport_size({'width':1280,'height':800})
                     page.evaluate("""()=>{
                       const item=normalizeServiceItem({id:'missing-prayer',service_id:'a',label:'대표기도',raw_title:'',assignee:'',_worshipSectionKey:'representative_prayer',memo:serializeServiceItemMemo({elementType:'title_person',inputMode:'text'})});
                       const rows=buildWorshipPersistenceRows(state.services[0],[item],{}, {},{elementTypedStateColumns:{inputMode:true,contentState:true}});
@@ -64,6 +76,10 @@ def main():
                     page.evaluate("selectLoadingTest('b');loadTest.queue.shift().reject(Error('offline'))")
                     page.wait_for_selector('[data-service-load-retry="b"]')
                     assert page.locator('[data-service-view-loading]').get_attribute('aria-busy')=='false'
+                    assert page.locator('.service-view-loading').evaluate("""el=>{
+                      const p=el.parentElement.getBoundingClientRect(),first=el.firstElementChild.getBoundingClientRect(),last=el.lastElementChild.getBoundingClientRect();
+                      return Math.abs((first.top+last.bottom-p.top-p.bottom)/2)<2 && el.scrollWidth<=el.clientWidth+1;
+                    }"""), 'retry layout off center'
                     page.locator('[data-service-load-retry="b"]').click()
                     page.wait_for_function('loadTest.queue.length===1')
                     page.evaluate("selectLoadingTest('c');loadTest.queue.shift().resolve({sections:[],elements:[]})")

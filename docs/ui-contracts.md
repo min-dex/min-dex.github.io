@@ -478,3 +478,10 @@ replacement. Audio and output ownership remain unchanged. Asset/scripture
 background warmup retains its own loading behavior and does not block this gate.
 Offline Chromium/WebKit checks cover delayed rows/songs, genuine missing input
 after completion, cached revisits, failure/retry, stale completion and live controls.
+
+
+Worship loading/error content fills the available detail pane height, with its
+normal asymmetric content padding removed only while that state is present.
+Do not center within a capped 480px/vh block. Chromium/WebKit layout checks
+measure actual content centering across five viewport sizes and both themes,
+including the failure/retry state. Regular editor padding is unchanged.
