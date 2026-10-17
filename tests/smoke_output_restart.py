@@ -36,6 +36,13 @@ try:
      # WebKit can retain a closed popup Page handle; Window.closed is authoritative.
      assert page.evaluate("state.presenter.index===0 && presenterSelectedLaunchIndex(svc.id)===null && state.presenter.pptxProgress===null && musicStops===0 && state.serviceMusic.playing")
      print(engine,'PASS actual popup start',expected,'stop clears selection, background music preserved',flush=True)
+    for attempt in range(3):
+     with page.expect_popup() as pop:page.click('#open')
+     out=pop.value;out.wait_for_selector('#presenterOutputRoot')
+     page.evaluate('window.lastOutputRef=state.presenter.outputWindow;stopPresenterOutput(svc.id)')
+     page.wait_for_function('lastOutputRef.closed')
+     assert page.evaluate('state.presenter.outputStopAt>0 && musicStops===0 && state.serviceMusic.playing')
+    print(engine,'PASS three rapid fullscreen app stops preserve controller and background music',flush=True)
     # A delayed explicit slide launch must not reopen output after stop.
     page.evaluate('''()=>{window.resolveLaunch=null;hydratePresenterServiceData=()=>new Promise(r=>resolveLaunch=r);window.pendingLaunch=startPresenterAtSlide(svc.id,2);stopPresenterOutput(svc.id);resolveLaunch()}''')
     page.evaluate('pendingLaunch');assert page.evaluate('state.presenter.outputWindow===null && state.presenter.index===0')

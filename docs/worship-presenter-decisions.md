@@ -3243,3 +3243,20 @@ reference recovery and temporary disconnect in Chromium/WebKit.
 ## 주간 날짜 중복 안내 제거 · 2026-10-18
 
 - 주간 카드 날짜 머리글은 `M/D`만 표시한다. 중복되는 `오늘 ·` 접두사는 제거하고 `오늘 예배` 상태 문구와 오늘 날짜 강조·접근성 표시는 유지한다.
+
+## Browser output close waits for fullscreen · 2026-10-18
+
+Script-driven browser output close coalesces duplicate requests, waits for pending
+fullscreen entry, then awaits fullscreen exit before closing. Controller stop
+still resets immediately and retains the established audio stop/preserve policy.
+Startup/delegated entry share the same pending operation; a closing output cannot
+start another entry. If native exit fails, leave the window available for native
+close and permit retry rather than destroy it mid-transition. Electron's existing
+window-close path is unchanged. No lyric/photo timing or operational data changes.
+
+Mac Playwright WebKit 2248 crashed in WebFullScreenManagerProxy /
+WKFullScreenWindowController when a window closed during native fullscreen entry.
+The same failure reproduces without app code; waiting for fullscreen exit removes
+it in the minimal reproduction. App rapid-stop regression exercises real fullscreen
+startup in both engines; native-close/session regression leaves fullscreen first.
+This mitigates app-driven close, not the browser's independent native close button.

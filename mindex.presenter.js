@@ -3356,6 +3356,49 @@ function applyPresenterPreviewScales(host = document) {
   });
 }
 
+// Serialize browser fullscreen transitions before script-driven output close.
+// Closing during native fullscreen entry can crash macOS WebKit itself.
+let presenterOutputFullscreenTask = null;
+let presenterOutputClosing = null;
+
+function enterPresenterOutputFullscreen() {
+  if (presenterOutputClosing) return Promise.resolve();
+  if (presenterOutputFullscreenTask) return presenterOutputFullscreenTask;
+  const task = (async () => {
+    if (!document.fullscreenElement) await document.documentElement.requestFullscreen({ navigationUI: "hide" });
+  })();
+  presenterOutputFullscreenTask = task;
+  void task.then(() => { presenterOutputFullscreenTask = null; }, () => { presenterOutputFullscreenTask = null; });
+  return task;
+}
+
+function closePresenterOutputBrowserWindow() {
+  if (presenterOutputClosing) return presenterOutputClosing;
+  presenterOutputClosing = (async () => {
+    await presenterOutputFullscreenTask?.catch(() => {});
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+    } catch (error) {
+      // Keep the window available for a native close if fullscreen exit fails.
+      console.warn("Presenter fullscreen exit failed:", error);
+      return false;
+    }
+    window.close();
+    return true;
+  })();
+  void presenterOutputClosing.then((closed) => { if (!closed) presenterOutputClosing = null; });
+  return presenterOutputClosing;
+}
+
+function closePresenterBrowserWindow(outputWindow) {
+  if (!outputWindow || outputWindow.closed) return;
+  if (typeof outputWindow.closePresenterOutputBrowserWindow === "function") {
+    void outputWindow.closePresenterOutputBrowserWindow();
+  } else {
+    outputWindow.close?.();
+  }
+}
+
 function setupPresenterDelegatedFullscreen() {
   window.addEventListener("message", async (event) => {
     if (event.origin !== window.location.origin || !window.opener || event.source !== window.opener
@@ -3363,7 +3406,7 @@ function setupPresenterDelegatedFullscreen() {
     let success = false;
     let errorMessage = "";
     try {
-      if (!document.fullscreenElement) await document.documentElement.requestFullscreen({ navigationUI: "hide" });
+      await enterPresenterOutputFullscreen();
       success = Boolean(document.fullscreenElement);
     } catch (error) {
       errorMessage = `${error?.name || "Error"}: ${error?.message || "Fullscreen request failed"}`;
@@ -3383,7 +3426,7 @@ function setupPresenterStartupFullscreen() {
   if (document.fullscreenElement) return;
   // A startup attempt is intentionally one-shot. Retrying from a later slide
   // click causes Chrome's native "Press Esc" notice during the service.
-  void target.requestFullscreen({ navigationUI: "hide" }).catch(() => {});
+  void enterPresenterOutputFullscreen().catch(() => {});
 }
 
 function initPresenterOutputCore() {
@@ -3487,7 +3530,7 @@ function initPresenterOutputCore() {
     sendControllerMessage(payload);
     window.setTimeout(() => {
       closeOutputChannel();
-      if (canCloseOutputWindow()) window.close();
+      if (canCloseOutputWindow()) void closePresenterOutputBrowserWindow();
     }, 120);
   };
   const applyPresenterOutputActionLocally = (action, detail = {}) => {
@@ -3557,7 +3600,7 @@ function initPresenterOutputCore() {
       if (outputSessionId && message.outputSessionId !== outputSessionId) return;
       window.setTimeout(() => {
         closeOutputChannel();
-        window.close();
+        void closePresenterOutputBrowserWindow();
       }, 40);
     }
   };
@@ -3593,7 +3636,7 @@ function initPresenterOutputCore() {
         if (outputSessionId && event.data.outputSessionId !== outputSessionId) return;
         window.setTimeout(() => {
           closeOutputChannel();
-          window.close();
+          void closePresenterOutputBrowserWindow();
         }, 40);
       }
     };

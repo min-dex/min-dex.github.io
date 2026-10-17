@@ -978,3 +978,13 @@ worship presenter decision log and smoke_output_session_isolation.py.
 - 송출 중 어린이 음원 제목에서 P (한글 배열 KeyP 포함)로 기존 자동 넘김 재생 경로를 호출한다. 컨트롤러와 출력 창 모두 지원하며 오디오는 컨트롤러에서만 재생한다.
 - 입력창·대화상자·IME 조합·수정키·키 반복은 제외한다. 이미 재생/준비 중이면 재시작하지 않는다. 출력 창 요청은 현재 예배·슬라이드 인덱스·타이밍 그룹이 일치해야 한다.
 - 예배 편집의 어린이 입력 영역은 반복 설명/음원 관리 제목을 없애고 미리 듣기·파일명·P 안내·타이밍 작업을 한 줄에 배치한다. 좁은 화면에서는 줄바꿈한다. 타이밍 편집 대화상자와 DB 저장 계약은 유지한다.
+
+## Browser fullscreen-close race · 2026-10-18
+
+Isolated worktree change only: coalesce fullscreen entry and app close requests,
+await native exit before closing, keep controller stop/audio policy unchanged.
+Confirmed a Mac WebKit 2248 native fullscreen trap in an app-free reproduction.
+Native-close smoke exits fullscreen explicitly; rapid app-stop smoke keeps real
+fullscreen startup and checks three immediate stop/reopen cycles per engine.
+Unit checks cover ordering, duplicate requests, denied entry and failed exit retry.
+No Cadaros lyrics, timing, photos or production records were written.
