@@ -119,7 +119,12 @@ try:
     raise
    page.evaluate("if(state.serviceMusic.autoSyncSuspended)throw Error('explicit restart did not re-enable sync')")
    page.evaluate(r'''()=>{
-    stopPresenterOutput(state.selectedServiceId);if(state.serviceMusic.playing)throw Error('output stop left sync audio playing');const song=state.songs[0];song.versions[0].forms[0].lyrics='changed';
+    stopPresenterOutput(state.selectedServiceId);if(state.serviceMusic.playing)throw Error('output stop left sync audio playing');
+    const serial=state.serviceMusic.playSerial;state.serviceMusic.pending=true;
+    state.serviceMusic.audio.dispatchEvent(new Event('ended'));
+    confirmServiceMusicPlayback({paused:false,ended:false},serial);
+    if(state.serviceMusic.pending || state.serviceMusic.playing)throw Error('late play completion revived ended audio');
+    const song=state.songs[0];song.versions[0].forms[0].lyrics='changed';
     if(presenterSlidesForService(state.selectedServiceId).some(s=>s.syncTimeline))throw Error('stale DB lyrics');
    }''')
    print(engine,'PASS children DB save/retry/fresh-context playback, owner isolation, live gating and stale lyrics')

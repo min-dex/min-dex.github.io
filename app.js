@@ -791,6 +791,7 @@ const state = {
     ownerServiceId: "",
     sourceLabel: "",
     pending: false,
+    pendingStartTime: 0,
     playSerial: 0,
     repeatAllowed: true,
     playing: false,
@@ -28892,6 +28893,8 @@ function getServiceMusicAudio() {
       scheduleServiceMusicResume("pause");
     });
     audio.addEventListener("ended", () => {
+      state.serviceMusic.playSerial += 1;
+      state.serviceMusic.pending = false;
       clearServiceMusicResumeTimer();
       clearServiceMusicSyncTimer();
       state.serviceMusic.playing = false;
@@ -28902,7 +28905,16 @@ function getServiceMusicAudio() {
       }
       renderPresenterControlState();
     });
+    audio.addEventListener("seeked", () => {
+      if (state.serviceMusic.pending) state.serviceMusic.pendingStartTime = audio.currentTime;
+    });
     audio.addEventListener("timeupdate", () => {
+      // Some native decoders advance after resume without settling play().
+      // A seek alone is not playback: require forward progress while unpaused.
+      if (state.serviceMusic.pending && !audio.seeking
+        && audio.currentTime > state.serviceMusic.pendingStartTime + 0.01) {
+        confirmServiceMusicPlayback(audio, state.serviceMusic.playSerial);
+      }
       globalThis.MindexSongTiming?.updateTransport(audio);
       syncServiceMusicSyncedLyricsWithCurrentTime();
     });
@@ -29043,6 +29055,16 @@ function syncServiceMusicWithPresenterContext(serviceId = state.presenter.servic
   stopServiceMusicPlayback({ clearSource: true, mode: "manual", render: options.render });
 }
 
+function confirmServiceMusicPlayback(audio, serial) {
+  if (serial !== state.serviceMusic.playSerial || audio.paused || audio.ended) return;
+  if (state.serviceMusic.playing && !state.serviceMusic.pending) return;
+  state.serviceMusic.pending = false;
+  state.serviceMusic.playing = true;
+  startServiceMusicSyncTimer();
+  syncServiceMusicSyncedLyricsWithCurrentTime();
+  renderPresenterControlState();
+}
+
 function runServiceMusicAction(action, binding = null) {
   const boundSource = binding?.serviceMusicSource || "";
   if (!boundSource && action !== "choose" && serviceMusicSourceIsSlotOwned()) return;
@@ -29100,14 +29122,12 @@ function runServiceMusicAction(action, binding = null) {
   setServiceMusicSource(audio, source, mode, playback, label);
   state.serviceMusic.ownerServiceId = boundSource ? owner : "";
   const serial = ++state.serviceMusic.playSerial;
+  state.serviceMusic.pendingStartTime = Number(audio.currentTime) || 0;
   state.serviceMusic.pending = true;
   updateServiceMusicTransportControls();
   return audio.play()
     .then(() => {
-      if (serial !== state.serviceMusic.playSerial) return;
-      state.serviceMusic.playing = true;
-      startServiceMusicSyncTimer();
-      syncServiceMusicSyncedLyricsWithCurrentTime();
+      confirmServiceMusicPlayback(audio, serial);
     })
     .catch((error) => {
       if (serial === state.serviceMusic.playSerial && error?.name !== "AbortError") showToast("브라우저가 음악 재생을 막았습니다. 다시 눌러 주세요.", "error");
