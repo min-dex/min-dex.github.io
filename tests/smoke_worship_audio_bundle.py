@@ -60,7 +60,7 @@ try:
    }''')
    page.evaluate('x=>MindexSongTiming.open(x.serviceId,x.elementId)',ids)
    d=page.locator('[data-song-timing-dialog]');assert d.locator('[data-timing-share]').count()==0
-   d.locator('[data-timing-linked]').click();page.wait_for_function("document.querySelector('[data-song-timing-dialog] audio').duration>19")
+   d.locator('[data-timing-linked]').click();page.wait_for_function("(()=>{const a=document.querySelector('[data-song-timing-dialog] audio');return a.src.startsWith('blob:')&&a.readyState>=1&&a.duration>19&&!document.querySelector('[data-timing-save]').disabled})()")
    for i,t in enumerate([2,6,10]):d.locator(f'[data-timing-start="{i}"]').fill(str(t))
    page.evaluate('window.failSave=true');d.locator('[data-timing-save]').click();page.wait_for_function("!document.querySelector('[data-timing-save]').disabled");assert 'injected failure' in d.locator('[data-timing-status]').inner_text(),d.locator('[data-timing-status]').inner_text()
    assert not page.evaluate('db.elements[0].config.audioTiming')
@@ -69,7 +69,7 @@ try:
    # Replacing the audio uploads once; a failed commit retains the upload for retry.
    page.evaluate("window.uploads=0;state.client.storage.from=()=>({upload:async()=>{uploads++;return {error:null}},getPublicUrl:()=>({data:{publicUrl:location.origin+'/replacement.wav'}}),remove:()=>{throw Error('must not delete uncertain audio')}})")
    d.locator('[data-timing-file]').set_input_files({'name':'replacement.wav','mimeType':'audio/wav','buffer':buf.getvalue()})
-   page.wait_for_function("document.querySelector('[data-song-timing-dialog] audio').duration>19")
+   page.wait_for_function("(()=>{const a=document.querySelector('[data-song-timing-dialog] audio');return a.src.startsWith('blob:')&&a.readyState>=1&&a.duration>19&&!document.querySelector('[data-timing-save]').disabled})()")
    for i,t in enumerate([2,6,10]):d.locator(f'[data-timing-start="{i}"]').fill(str(t))
    page.evaluate('window.failSave=true');d.locator('[data-timing-save]').click();page.wait_for_function("!document.querySelector('[data-timing-save]').disabled");assert 'injected failure' in d.locator('[data-timing-status]').inner_text(),d.locator('[data-timing-status]').inner_text()
    assert page.evaluate('db.elements[0].config.audioAsset.url').endswith('/clock.wav')
