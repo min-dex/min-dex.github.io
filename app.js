@@ -4132,24 +4132,34 @@ async function fetchWorshipRowsForServiceIds(serviceIds = []) {
   if (!ids.length) return { sections: [], elements: [] };
 
   const atomic = await worshipAtomicClient();
-  const sections = [], elements = [];
-  for (const group of chunkArray(ids, 3)) {
-    // Bound database pressure, preserve input order, and settle in-flight reads
-    // before a failure releases the caller's loading lock.
-    const results = await Promise.allSettled(group.map((id) => atomic.read(id, {
-      adopt: () => !state.loadedWorshipServiceIds.has(id) && !sundayEditSyncHasLocalDraft(id),
-    })));
-    const failure = results.find((result) => result.status === "rejected");
-    if (failure) throw failure.reason;
-    for (let index = 0; index < group.length; index += 1) {
-      const id = group[index], aggregate = results[index].value;
-      sections.push(...aggregate.sections);
-      elements.push(...aggregate.elements);
-      // Recheck after awaiting: a draft may have started while reads were pending.
-      if (!state.loadedWorshipServiceIds.has(id) && !sundayEditSyncHasLocalDraft(id)) {
-        const service = state.services.find(candidate => candidate.id === id);
-        if (service) Object.assign(service, normalizeWorshipService(aggregate.service));
+  const results = new Array(ids.length);
+  let nextIndex = 0, failed = false, failure;
+  // Keep three reads in flight without waiting for the slowest batch member.
+  // On failure stop scheduling, but settle every started read before releasing
+  // the loading lock. Results and metadata adoption retain input order.
+  const worker = async () => {
+    while (!failed && nextIndex < ids.length) {
+      const index = nextIndex++, id = ids[index];
+      try {
+        results[index] = await atomic.read(id, {
+          adopt: () => !state.loadedWorshipServiceIds.has(id) && !sundayEditSyncHasLocalDraft(id),
+        });
+      } catch (error) {
+        if (!failed) { failed = true; failure = error; }
       }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(3, ids.length) }, worker));
+  if (failed) throw failure;
+  const sections = [], elements = [];
+  for (let index = 0; index < ids.length; index += 1) {
+    const id = ids[index], aggregate = results[index];
+    sections.push(...aggregate.sections);
+    elements.push(...aggregate.elements);
+    // A local draft may have started while another service read was pending.
+    if (!state.loadedWorshipServiceIds.has(id) && !sundayEditSyncHasLocalDraft(id)) {
+      const service = state.services.find(candidate => candidate.id === id);
+      if (service) Object.assign(service, normalizeWorshipService(aggregate.service));
     }
   }
   return { sections, elements };

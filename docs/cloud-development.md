@@ -81,3 +81,8 @@ gate is now9 Node checks +7 Python smoke entry points and passed Ubuntu run
 39022426589. Full glyph/variable-outline verification is additionally available
 as tests/test_ui_font_segments.py with fontTools4.60.2 and Brotli1.2.0; it is
 separate from the default browser dependencies and passed11700 comparisons.
+
+
+Startup read-pool update ·2026-10-17: default gate now10 Node +7 browser entry
+points, including bounded read scheduling, late drafts, failure settlement and
+retry. Local pass is separate from the next Linux Actions/deployment receipt.

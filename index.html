@@ -235,7 +235,7 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261017-blackout-preview";
+        const fallbackVersion = "20261017-startup-read-pool";
         const modules = [
           "vendor/lucide.min.js", "vendor/supabase-js.min.js",
           "mindex.constants.js", "mindex.inline-text.js", "mindex.design-tokens.js", "mindex.worship-model.js",
@@ -319,6 +319,9 @@
           }
         };
         const preloadAssets = (version) => {
+          // Queue the largest critical script before smaller dependencies. Only
+          // download order changes; execution still follows modules below.
+          preloadScript("app.js", version);
           modules.forEach((module) => preloadScript(module, version));
           for (const path of styles) {
             const href = assetUrl(path, version);

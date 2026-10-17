@@ -16,6 +16,9 @@ try:
    page.wait_for_timeout(150)
    assert held and any('/app.js?' in u for u in requests) and any('/styles.css?' in u for u in requests)
    assert next(i for i,u in enumerate(requests) if '/mindex-release.json' in u) < next(i for i,u in enumerate(requests) if '/app.js?' in u), 'release lookup queued behind speculative scripts'
+   script_preloads=page.locator('link[as=script]').evaluate_all('(nodes)=>nodes.map(n=>n.getAttribute("href"))')
+   assert script_preloads[0].startswith('./app.js?'),script_preloads
+   assert sum('/app.js?' in u for u in script_preloads)==1
    assert page.evaluate("typeof state==='undefined'")
    for r in held:r.fulfill(json={'version':'test-resolved-release'})
    page.wait_for_function("typeof state!=='undefined'&&!document.body.classList.contains('ui-booting')")

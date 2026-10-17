@@ -2715,3 +2715,27 @@ no existing worship, lyric, media, DB schema or permission was changed.
 
 Public180-thumbnail checks also pass: maximum timer gaps34.1ms Chrome/41ms
 WebKit, zero clipping or font-size mismatches, unchanged500ms response limit.
+
+
+## 2026-10-17 — Continuous bounded startup reads
+
+Home aggregate loading now fills each free worker immediately, up to three
+concurrent reads, instead of waiting for an entire three-read batch. It retains
+fresh atomic reads, input-order results, deduplication and both adoption/draft
+guards. A failure stops scheduling new work and settles all started reads before
+releasing the caller; incomplete aggregate metadata is not published. No service
+cache, database schema, save path or production record is changed.
+
+The largest critical script (app.js) is the first speculative script queued,
+after the fresh release request. Script execution still follows dependency order
+and the stylesheet gate; fresh release resolution, retry and failure recovery
+remain intact. This changes download priority, not transferred source size.
+
+Local verification: default10 Node +7 browser entry points; deterministic slow
+response model300ms versus prior360ms batch barrier, concurrency<=3, late drafts,
+out-of-order results, failure settlement/retry; Chrome/WebKit fresh-release-only
+execution and startup recovery;180-thumbnail fitting (zero clipping/mismatch),
+24 lyric-bound cases each, delayed media/background/blackout transitions and
+actual output-window ownership/switch/zero restoration. Network latency remains
+variable; the synthetic scheduling gain is not a whole-app speedup guarantee.
+Deployment and production verification are recorded separately.
