@@ -153,7 +153,7 @@ function renderPresenterHelpControl() {
     ["→ / ↓ / Space", "다음 슬라이드"],
     ["← / ↑", "이전 슬라이드"],
     ["번호 + Enter", "해당 슬라이드로 이동"],
-    ["0 + Enter", "빈 화면"],
+    ["0 + Enter", "암전"],
     ["Home / End", "첫 / 마지막 슬라이드"],
     ["Esc 2번", "송출 종료 (빠르게 연속)"],
   ];
@@ -214,7 +214,14 @@ function renderPresenterRightSidebar(service, slides, active, index) {
         ${slides.filter((slide, index) => slide.liveScriptureControl && slide.elementId
           && slides.findIndex((candidate) => candidate.liveScriptureControl && candidate.elementId === slide.elementId) === index)
           .map((slide) => renderPresenterCitationComposer({ slides: [{ slide }] }, service.id)).join("")}
-        ${renderPresenterServiceInputRail(service)}
+        <details class="svc-presenter-secondary-controls" data-presenter-secondary-controls data-service-id="${escapeAttr(service.id)}" ${document.querySelector(`[data-presenter-secondary-controls][data-service-id="${cssEscape(service.id)}"]`)?.open ? "open" : ""}>
+          <summary>편집·설정</summary>
+          <div class="svc-presenter-window-controls">
+            ${renderPresenterScreenControl()}
+            ${renderPresenterAlwaysOnTopControl()}
+          </div>
+          ${renderPresenterServiceInputRail(service)}
+        </details>
       </div>
     </div>`;
 }

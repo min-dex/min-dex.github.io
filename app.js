@@ -6678,6 +6678,17 @@ function preserveWorshipConflictServerSnapshot(review = {}) {
   return true;
 }
 
+function worshipConflictTextSummary(localText, serverText) {
+  if (localText === serverText) return "원문은 같습니다. 순서·곡 연결 등 다른 저장 항목이 변경되었을 수 있습니다.";
+  const local = String(localText || "").split(/\r?\n/);
+  const remote = String(serverText || "").split(/\r?\n/);
+  let start = 0, end = 0;
+  while (start < local.length && start < remote.length && local[start] === remote[start]) start++;
+  while (end < local.length - start && end < remote.length - start
+    && local[local.length - 1 - end] === remote[remote.length - 1 - end]) end++;
+  return `${start + 1}행부터 차이가 있습니다 · 내 입력 ${local.length - start - end}행 / 최신본 ${remote.length - start - end}행. 원문 전체 비교에서 확인하세요.`;
+}
+
 async function openWorshipConflictReview(serviceId) {
   if (worshipConflictReview || !serviceId) return;
   const service = state.services.find(candidate => candidate.id === serviceId);
@@ -6713,7 +6724,7 @@ async function openWorshipConflictReview(serviceId) {
     <section class="worship-conflict-summary" aria-label="저장 충돌 요약">
       <dl class="worship-conflict-facts">
         <div><dt>예배</dt><dd>${escapeHtml(serviceName)}${serviceDate ? `<small>${escapeHtml(formatServiceDate({date:serviceDate}))}</small>` : ""}</dd></div>
-        <div><dt>충돌 항목</dt><dd data-conflict-items>${escapeHtml(itemSummary)}</dd></div>
+        <div><dt>내 편집 항목</dt><dd data-conflict-items>${escapeHtml(itemSummary)}</dd></div>
         <div><dt>확인 시각</dt><dd>${escapeHtml(detectedAt)}</dd></div>
       </dl>
       <div class="worship-conflict-server-change" data-conflict-server-change>
@@ -6722,6 +6733,7 @@ async function openWorshipConflictReview(serviceId) {
       </div>
     </section>
     <p class="worship-conflict-caution" role="status" data-conflict-status>내 입력은 이 기기에 그대로 유지됩니다. 자동 병합하거나 서버 내용을 덮어쓰지 않습니다.</p>
+    <p class="worship-conflict-choice-help">편집 계속하기는 저장하지 않고 창을 닫습니다. 최신본을 열면 내 초안은 원문의 로컬 복구본에 보관됩니다.</p>
     <details class="worship-conflict-details">
       <summary>원문 전체 비교</summary>
       <p>내 입력과 최신 서버 원문을 확인한 뒤 선택하세요.</p>
@@ -6733,8 +6745,9 @@ async function openWorshipConflictReview(serviceId) {
     </details>
     <footer class="worship-conflict-actions">
       <div>
-        <button class="btn primary" type="button" data-conflict-keep disabled>내 입력 계속 사용</button>
-        <button class="btn secondary" type="button" data-conflict-reopen disabled>내 입력 보관 후 최신본 열기</button>
+        <button class="btn secondary" type="button" data-conflict-keep>편집 계속하기</button>
+        <button class="btn secondary" type="button" data-conflict-retry hidden>최신본 다시 확인</button>
+        <button class="btn primary" type="button" data-conflict-reopen disabled>초안 보관 후 최신본 열기</button>
       </div>
     </footer>`;
   dialog.setAttribute("aria-label", "저장 충돌 원문 비교");
@@ -6756,13 +6769,14 @@ async function openWorshipConflictReview(serviceId) {
     setChoiceBusy(true);
     let serverSnapshotPreserved = true;
     try {
-      preserveWorshipConflictServerSnapshot(review);
+      if (review.latest) preserveWorshipConflictServerSnapshot(review);
+      else serverSnapshotPreserved = false;
     } catch (error) {
       serverSnapshotPreserved = false;
     }
     dialog.close();
     showToast(toastLines(
-      "내 입력을 계속 사용합니다.",
+      "편집을 계속합니다. 아직 저장하지 않았습니다.",
       serverSnapshotPreserved
         ? "서버 최신본은 예배 원문의 로컬 복구본에 보관했습니다."
         : "서버 최신본 복구본은 보관하지 못했지만, 현재 입력은 그대로 유지됩니다.",
@@ -6809,29 +6823,41 @@ async function openWorshipConflictReview(serviceId) {
   dialog.showModal();
   dialog.querySelector("[data-conflict-close]").focus();
   if (window.lucide) window.lucide.createIcons({root:dialog});
-  try {
-    const atomic = await worshipAtomicClient();
-    review = await atomic.inspectConflict(serviceId, draft);
-    if (!dialog.isConnected || !dialog.open) return;
-    const latest = review.latest;
-    keep.disabled = !latest || Boolean(review.pending);
-    reopen.disabled = !latest || Boolean(review.pending);
-    const serverText = latest?.service?.source_ref?.mindexServiceDocument?.sourceText || "";
-    dialog.querySelector('[aria-label="최신 서버 원문"]').value = serverText;
-    const serverLines = serverText ? serverText.split(/\r?\n/).length : 0;
-    dialog.querySelector("[data-conflict-server-summary]").textContent = latest
-      ? `내가 편집한 기준 ${review.baseline?.revision ?? "없음"} 이후 서버 저장본 ${latest.revision}이 생겼습니다${serverLines ? ` · 서버 원문 ${serverLines}행` : ""}.`
-      : "서버에서 이 예배를 찾지 못했습니다.";
-    dialog.querySelector("[data-conflict-status]").textContent = latest
-      ? "내 입력은 유지됩니다. 최신본으로 전환하려면 먼저 초안을 안전하게 보관합니다."
-      : "내 입력은 유지됩니다. 서버에서 삭제된 예배이므로 최신본으로 전환할 수 없습니다.";
-  } catch (error) {
-    if (dialog.isConnected && dialog.open) {
-      dialog.querySelector("[data-conflict-server-summary]").textContent = "서버 변경 내용을 불러오지 못했습니다.";
-      dialog.querySelector("[data-conflict-status]").textContent = "내 입력은 유지됩니다. 연결을 확인한 뒤 다시 비교해 주세요.";
+  const retry = dialog.querySelector('[data-conflict-retry]');
+  const loadLatest = async () => {
+    retry.hidden = true;
+    reopen.disabled = true;
+    dialog.querySelector('[data-conflict-server-summary]').textContent = '최신 저장본을 확인하고 있습니다.';
+    try {
+      const atomic = await worshipAtomicClient();
+      review = await atomic.inspectConflict(serviceId, draft);
+      if (!dialog.isConnected || !dialog.open) return;
+      const latest = review.latest;
+      keep.disabled = false;
+      retry.hidden = !review.pending;
+      reopen.disabled = !latest || Boolean(review.pending);
+      const serverText = latest?.service?.source_ref?.mindexServiceDocument?.sourceText || "";
+      dialog.querySelector('[aria-label="최신 서버 원문"]').value = serverText;
+
+      dialog.querySelector("[data-conflict-server-summary]").textContent = latest
+        ? worshipConflictTextSummary(draft.sourceText, serverText)
+        : "서버에서 이 예배를 찾지 못했습니다.";
+      dialog.querySelector("[data-conflict-status]").textContent = review.pending
+        ? "이전 저장 결과가 아직 확정되지 않았습니다. 내 입력은 유지되며, 결과 확인 전 최신본 전환은 잠겨 있습니다."
+        : latest
+        ? "내 입력은 아직 저장되지 않았습니다. 아래 원문을 비교한 뒤 최신본을 열거나 편집을 계속하세요."
+        : "내 입력은 유지됩니다. 서버에서 삭제된 예배이므로 최신본으로 전환할 수 없습니다.";
+    } catch (error) {
+      if (dialog.isConnected && dialog.open) {
+        dialog.querySelector("[data-conflict-server-summary]").textContent = "서버 변경 내용을 불러오지 못했습니다.";
+        dialog.querySelector("[data-conflict-status]").textContent = "내 입력은 유지됩니다. 연결을 확인한 뒤 다시 비교해 주세요.";
+      }
+      retry.hidden = false;
+      console.warn("Could not inspect worship save conflict.", error);
     }
-    console.warn("Could not inspect worship save conflict.", error);
-  }
+  };
+  retry.addEventListener('click', () => void loadLatest());
+  await loadLatest();
 }
 
 async function waitForServiceSave(options, resume, itemId = "") {
@@ -7460,8 +7486,20 @@ function sundayEditSyncContent(item = {}) {
   };
 }
 
+function sundayEditSyncComparableContent(content) {
+  // DB song selection is shared; score/lyrics presentation is local to each service.
+  return content.song && ["score_db", "lyrics_db"].includes(content.inputMode)
+    ? { ...content, inputMode: "linked-song" } : content;
+}
+
 function sundayEditSyncSignature(item) {
-  return JSON.stringify(sundayEditSyncContent(item));
+  return JSON.stringify(sundayEditSyncComparableContent(sundayEditSyncContent(item)));
+}
+
+function sundayEditSyncPreviousSignatureMatches(signature, item) {
+  try {
+    return JSON.stringify(sundayEditSyncComparableContent(JSON.parse(signature))) === sundayEditSyncSignature(item);
+  } catch { return false; }
 }
 
 function applySundayEditSync(target, source) {
@@ -7473,12 +7511,15 @@ function applySundayEditSync(target, source) {
     next.memo = serializeServiceItemMemo({ ...memo, scriptureReference: content.references[0] || "",
       scriptureReferences: content.references, scriptureReferencePayloads: content.payloads, slides: [] });
   } else if (Object.hasOwn(content, "song")) {
+    const preserveDisplayMode = Boolean(content.song)
+      && ["score_db", "lyrics_db"].includes(content.inputMode)
+      && ["score_db", "lyrics_db"].includes(memo.inputMode);
     Object.assign(next, { song_id: content.song || null, version_id: content.version || null,
       song_version_id: content.version || null, raw_title: content.title });
     next.memo = serializeServiceItemMemo({ ...memo, formHint: content.formHint, formPreset: content.formPreset,
       formPresetDisabled: content.formPresetDisabled, formPresetRules: content.formPresetRules, slides: content.slides,
-      inputMode: content.inputMode,
-      outputMode: memo.inputMode === content.inputMode ? memo.outputMode : parseServiceItemMemo(source.memo).outputMode });
+      inputMode: preserveDisplayMode ? memo.inputMode : content.inputMode,
+      outputMode: preserveDisplayMode || memo.inputMode === content.inputMode ? memo.outputMode : parseServiceItemMemo(source.memo).outputMode });
   } else Object.assign(next, { raw_title: content.title, assignee: content.assignee });
   return next;
 }
@@ -7589,7 +7630,7 @@ async function persistSundayEditSync(job, options = {}) {
   const emptyThirdHymn = job.key === "main-praise:3" && freshService.type_id === "sunday-main"
     && !serviceItemHasDirectSundaySharedContent(item, freshService);
   if (!emptyThirdHymn && sundayEditSyncSignature(item) !== sundayEditSyncSignature(job.previous)
-    && !(job.previousSignatures || []).includes(sundayEditSyncSignature(item))
+    && !(job.previousSignatures || []).some(signature => sundayEditSyncPreviousSignatureMatches(signature, item))
     && sundayEditSyncSignature(item) !== sundayEditSyncSignature(job.item)) throw conflict();
   await loadSongsForIds(uniqueList(items.map((candidate) => candidate.song_id).filter(Boolean)
     .concat(job.item.song_id || []).filter(Boolean)));
@@ -28152,9 +28193,7 @@ function renderPresenterControlsTop(service, slides, active, index) {
             <span>${escapeHtml(launchLabel)}</span>
           </button>
           <div class="svc-presenter-window-controls">
-          ${renderPresenterScreenControl()}
           ${anyOutputOpen ? fullscreenControl : `<span class="svc-presenter-disabled-control" title="${escapeAttr(fullscreenLabel)}">${fullscreenControl}</span>`}
-          ${renderPresenterAlwaysOnTopControl()}
           </div>
         </div>
         <div class="svc-presenter-main" aria-live="polite">
@@ -28163,6 +28202,7 @@ function renderPresenterControlsTop(service, slides, active, index) {
             <input class="svc-slide-jump-input" type="number" inputmode="numeric" min="0" max="${escapeAttr(count || 1)}" value="${escapeAttr(jumpInputValue)}" data-presenter-jump-input data-service-id="${escapeAttr(service.id)}" aria-label="${escapeAttr(uiText("presenter.aria.slideNumber"))}" ${count ? "" : "disabled"} />
             <span>/ ${escapeHtml(count)}</span>
           </span>
+          <button class="icon-btn" type="button" data-presenter-action="jump" data-presenter-index="${active && state.presenter.safetyBlank ? safeIndex : -1}" data-service-id="${escapeAttr(service.id)}" aria-label="${active && state.presenter.safetyBlank ? "암전 해제" : "암전"}" title="${active && state.presenter.safetyBlank ? "암전 해제" : "암전"}" aria-pressed="${Boolean(active && state.presenter.safetyBlank)}" ${count && outputOpen ? "" : "disabled"}><i data-lucide="${active && state.presenter.safetyBlank ? "eye" : "eye-off"}"></i></button>
           <span class="svc-presenter-action-group svc-presenter-action-group--nav" aria-label="${escapeAttr(uiText("presenter.aria.slideNav"))}">
             <button class="icon-btn" type="button" data-presenter-action="prev" data-service-id="${escapeAttr(service.id)}" ${count ? "" : "disabled"} aria-label="${escapeAttr(uiText("presenter.action.prev"))}" title="${escapeAttr(uiText("presenter.action.prev"))}">
               <i data-lucide="chevron-left"></i>

@@ -266,3 +266,13 @@ restored only the prior lookup in an in-memory module; no runtime file was rever
 Timing includes the complete mocked audit invocation, excludes fixture creation,
 imports and compilation, and makes no live network requests. These local samples
 are not a production database, UI latency, or guaranteed speedup measurement.
+
+
+### Linked-song presentation isolation · 2026-10-17
+
+Sunday sync compares linked DB song score/lyrics display modes equivalently.
+Mode-only changes do not enqueue sibling writes; song edits preserve each target's
+existing score/lyrics and output mode. Retry records with older signatures are
+normalized in memory, not rewritten. Shared song/version/form content and explicit
+formPresetDisabled differences retain existing conflict rules. Manual lyric
+conversion is still a content change. All writes keep the existing atomic path.

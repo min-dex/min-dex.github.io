@@ -11,7 +11,7 @@ def main():
                 page = browser.new_page(viewport={"width": 1200, "height": 800})
                 page.route("**/*supabase*/**", lambda route: route.abort())
                 page.goto(url, wait_until="domcontentloaded")
-                page.wait_for_function("typeof runLiveScriptureAction === 'function'")
+                page.wait_for_function("typeof runLiveScriptureAction === 'function' && !document.body.classList.contains('ui-booting')")
                 print(engine, page.evaluate("""async () => {
                   const check=(v,m)=>{if(!v)throw Error(m)};
                   const frame=()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));

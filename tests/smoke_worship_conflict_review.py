@@ -43,10 +43,10 @@ def main():
                       check(!dialog.querySelector('[data-conflict-keep]').disabled && !dialog.querySelector('[data-conflict-reopen]').disabled, 'loaded conflict choices remain disabled');
                       check(dialog.querySelector('[aria-label="내 입력"]').value.includes('<script>'), 'text not preserved');
                       check(!dialog.querySelector('script'), 'user text interpreted as HTML');
-                      check(dialog.querySelector('[data-conflict-server-summary]').textContent.includes('기준 3') && dialog.querySelector('[data-conflict-server-summary]').textContent.includes('저장본 4'), 'server revision summary missing');
+                      check(dialog.querySelector('[data-conflict-server-summary]').textContent.includes('1행부터 차이'), 'server revision summary missing');
                       check(!dialog.querySelector('[data-conflict-export]'), 'unnecessary draft download action remains');
-                      check(dialog.querySelector('[data-conflict-keep]').textContent.includes('내 입력 계속 사용'), 'keep choice unclear');
-                      check(dialog.querySelector('[data-conflict-reopen]').textContent.includes('내 입력 보관 후 최신본 열기'), 'latest choice unclear');
+                      check(dialog.querySelector('[data-conflict-keep]').textContent.includes('편집 계속하기'), 'keep choice unclear');
+                      check(dialog.querySelector('[data-conflict-reopen]').textContent.includes('초안 보관 후 최신본 열기'), 'latest choice unclear');
                       const button = dialog.querySelector('[data-conflict-close]');
                       button.dispatchEvent(new KeyboardEvent('keydown',{key:'s',code:'KeyS',metaKey:true,bubbles:true,cancelable:true}));
                       button.dispatchEvent(new PointerEvent('pointerup',{bubbles:true}));
@@ -65,6 +65,12 @@ def main():
                       const dialog = document.querySelector('.worship-conflict-dialog');
                       if (!dialog.textContent.includes('불러오지 못했습니다')) throw Error('missing failure state');
                       if (!dialog.querySelector('[aria-label="내 입력"]').value) throw Error('failure lost draft');
+                      if (dialog.querySelector('[data-conflict-keep]').disabled) throw Error('failure blocks continuing draft');
+                      if (dialog.querySelector('[data-conflict-retry]').hidden) throw Error('retry missing');
+                      worshipAtomicClient=async()=>({inspectConflict:async(id,draft)=>({serviceId:id,draft,latest:{revision:5,service:{source_ref:{mindexServiceDocument:{sourceText:'retry latest'}}}}})});
+                      dialog.querySelector('[data-conflict-retry]').click();
+                      await new Promise(resolve=>setTimeout(resolve,0));
+                      if (dialog.querySelector('[data-conflict-reopen]').disabled) throw Error('retry failed to enable reviewed latest');
                       await new Promise(resolve => {dialog.addEventListener('close', resolve, {once:true}); dialog.close();});
                       let release;
                       worshipAtomicClient = async () => ({inspectConflict: () => new Promise(resolve => {release=resolve})});

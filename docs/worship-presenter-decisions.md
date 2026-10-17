@@ -2082,3 +2082,17 @@ views. An active output similarly exposes its service, guarded return and stop.
 Controls target their active owners, not the currently viewed service. Music and
 output stop independently. See `friday-prayer-music.md` for the shared transport
 contract and offline Chromium/WebKit verification scope.
+
+
+## Service-local display modes · 2026-10-17
+
+Linked DB song content compares score/lyrics modes as equivalent, so changing
+only display mode does not issue sibling saves. A later song/version/form change
+preserves each target's score/lyrics inputMode and outputMode. Existing serialized
+retry signatures are normalized for comparison only. Manual lyric conversion,
+explicit form-disable choices, local draft guards and all-generation exclusion
+remain unchanged. First/second third-song sharing still supplies the ordinary
+third-service hymn; it does not replace third-service praise.
+
+Presenter secondary preparation/settings are folded under `편집·설정`. Core live
+controls remain visible; the explicit blackout button reuses jump index -1.

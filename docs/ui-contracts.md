@@ -431,3 +431,18 @@ Edition switches clear verse selections/anchors, normalize unavailable chapters
 and empty testament filters before persisting or syncing the URL. Source-native
 verse numbers are not assumed to align across editions. Empty reader/search
 states retain their message but do not repeat edition buttons; use the sidebar.
+
+
+## Controller essentials and conflict choices · 2026-10-17
+
+The presenter keeps preview, slide navigation, start/stop, blackout and live
+scripture immediately available. Screen detection, always-on-top and preparation
+inputs live under collapsed `편집·설정`; an expanded section survives controller
+refreshes. Folding never clears input or changes output/music. Blackout uses the
+existing jump-to-zero pipeline and is available only for this service's open output.
+
+Conflict review labels pending fields as `내 편집 항목`, not proven conflicts.
+`편집 계속하기` closes without saving and works even when inspection fails.
+`초안 보관 후 최신본 열기` retains the existing draft archive and revision guards.
+Show the first differing source line and offer inspection retry after read failure
+or unresolved save outcome; never imply automatic merge or successful save.

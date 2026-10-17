@@ -9,7 +9,7 @@ def main():
             page = browser.new_page()
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url, wait_until='domcontentloaded')
-            page.wait_for_function("typeof renderPresenterControlsTop === 'function'")
+            page.wait_for_function("typeof renderPresenterControlsTop === 'function' && !document.body.classList.contains('ui-booting')")
             for theme in ['light', 'dark']:
                 for width in [1440, 390]:
                     page.set_viewport_size({'width': width, 'height': 900})
@@ -36,7 +36,8 @@ def main():
                       input.value='찬양1: 입력 초안';input.dispatchEvent(new Event('input',{bubbles:true}));
                       input.focus();input.setSelectionRange(3,3);
                       document.body.classList.add('right-sidebar-open');
-                      if(bg(left)===primary || bg(right)!==primary) throw Error('Duplicated emphasis');
+                      if(bg(left)!==primary || bg(right)!==primary) throw Error('Pink output action lost');
+                      if(left.textContent.trim() || left.getBoundingClientRect().width!==35 || leftHeight!==35 || !left.getAttribute('aria-label')) throw Error('Compact accessible left action lost');
                       if(height(left)!==leftHeight || height(right)!==rightHeight) throw Error('Button resized');
                       if(document.activeElement!==input || input.selectionStart!==3 || input.value!=='찬양1: 입력 초안') throw Error('Draft/focus changed');
                       document.body.classList.remove('right-sidebar-open');

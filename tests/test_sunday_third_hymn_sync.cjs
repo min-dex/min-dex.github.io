@@ -23,7 +23,7 @@ const c={console,JSON,Map,Set,
   sundayEditSyncItemSnapshot:x=>x,persistSundayEditSync:async job=>jobs.push(job),
 };
 vm.createContext(c);
-for(const name of ['sundaySharedContentKey','sundaySharedContentTypesForItem','sundayEditSyncEligible','sundayEditSyncContent','sundayEditSyncSignature','applySundayEditSync','syncSharedSundayContentAfterSave']){
+for(const name of ['sundaySharedContentKey','sundaySharedContentTypesForItem','sundayEditSyncEligible','sundayEditSyncContent','sundayEditSyncComparableContent','sundayEditSyncPreviousSignatureMatches','sundayEditSyncSignature','applySundayEditSync','syncSharedSundayContentAfterSave']){
   const re=new RegExp(`(?:async )?function ${name}\\(`),start=source.search(re);
   assert(start>=0);vm.runInContext(source.slice(start,source.indexOf('\n}\n',start)+2),c);
 }
@@ -44,6 +44,19 @@ for(const name of ['sundaySharedContentKey','sundaySharedContentTypesForItem','s
  for(const n of [1,2])assert.deepEqual(Array.from(c.sundaySharedContentTypesForItem(item('first:'+n,'praise.song.'+n,'찬양 '+n,'praise','song'),first)),['sunday-first','sunday-second']);
  const applied=c.applySundayEditSync(hymn,edited);
  assert.equal(applied.id,hymn.id);assert.equal(applied.label,'찬송');assert.equal(applied._worshipSlotKey,'hymn.main');assert.equal(applied.song_id,'new');
+ const lyrics={...original,memo:JSON.stringify({elementType:'praise',inputMode:'lyrics_db',outputMode:'lyrics'})};
+ const score={...original,_worshipSharedContentDirty:true,memo:JSON.stringify({elementType:'praise',inputMode:'score_db',outputMode:'score'})};
+ assert.equal(c.sundayEditSyncSignature(lyrics),c.sundayEditSyncSignature(score));
+ assert(c.sundayEditSyncPreviousSignatureMatches(JSON.stringify(c.sundayEditSyncContent(lyrics)),score));
+ for(const [target,from] of [[lyrics,score],[score,lyrics]]) {
+   const result=c.applySundayEditSync(target,{...from,song_id:'new'});
+   assert.equal(result.song_id,'new');
+   assert.equal(JSON.parse(result.memo).inputMode,JSON.parse(target.memo).inputMode);
+   assert.equal(JSON.parse(result.memo).outputMode,JSON.parse(target.memo).outputMode);
+ }
+ jobs=[];c.groupWorshipElements=()=>({first:[score]});
+ await c.syncSharedSundayContentAfterSave(first,[score],{previousItems:[lyrics]});
+ assert.equal(jobs.length,0,'display-only edit must not dispatch');
  // Exercise the real persistence selection/conflict path before any write.
  let targetHymn=hymn;
  Object.assign(c,{
@@ -57,6 +70,8 @@ for(const name of ['sundaySharedContentKey','sundaySharedContentTypesForItem','s
  const start=source.indexOf('async function persistSundayEditSync(');
  vm.runInContext(source.slice(start,source.indexOf('\n}\n',start)+2),c);
  const job={sourceServiceId:first.id,targetId:third.id,key:'main-praise:3',previous:original,item:edited};
+ await assert.rejects(c.persistSundayEditSync(job),/TEST_REACHED_SAFE_WRITE_PREPARATION/);
+ targetHymn={...original,id:hymn.id,service_id:third.id,label:'찬송',_worshipSlotKey:'hymn.main',_worshipSectionKey:'hymn_praise',memo:lyrics.memo};
  await assert.rejects(c.persistSundayEditSync(job),/TEST_REACHED_SAFE_WRITE_PREPARATION/);
  targetHymn={...hymn,song_id:'separately-edited'};
  await assert.rejects(c.persistSundayEditSync(job),/덮어쓰지 않았습니다/);

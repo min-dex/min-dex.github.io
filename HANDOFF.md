@@ -642,3 +642,19 @@ chapter caches, notes and service records. ASV source/year information is added.
 Local read/search/copy and source display pass. Deployment status is recorded in
 docs/bible-asv-deployment-20261016.json. WEB is Biblia-only. NIV/ESV API access
 remains pending accounts/licensed access; this addition does not activate them.
+
+
+## Linked worship, save conflict review and controller · 2026-10-17
+
+Score/lyrics choices now stay local to each service during linked DB song edits.
+Mode-only edits no longer enqueue sibling saves; legacy retry signatures remain
+compatible. Content/form guards and all-generation exclusions remain unchanged.
+Conflict review clarifies unsaved editing vs archiving a draft and opening latest,
+shows the first differing source line, and supports retry after read failure.
+Controller core live actions remain visible; preparation/screen settings fold into
+`편집·설정` and retain expansion across refreshes. No production data was changed.
+
+Validation: third-hymn sync unit tests, edit-sync/sermon-scope smoke, conflict review
+and controller essentials in Chromium/WebKit at desktop/mobile widths, global
+playback smoke, and Cloud baseline (7 unit + 5 smoke entry points). This is local
+isolated-browser verification, not hardware output or Cloud execution.
