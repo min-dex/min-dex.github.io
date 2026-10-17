@@ -178,6 +178,8 @@ try:
     state.presenter.safetyBlank=true;if(T.resumeAutoSync(sid))throw Error('blank resumed');state.presenter.safetyBlank=false;
     const source=state.serviceMusic.sourceKey;state.serviceMusic.sourceKey='wrong';if(T.resumeAutoSync(sid))throw Error('wrong source resumed');state.serviceMusic.sourceKey=source;
     if(T.resumeAutoSync('wrong-service'))throw Error('wrong service resumed');
+    const group=state.serviceMusic.timingGroupId;state.serviceMusic.timingGroupId='other-occurrence';
+    if(T.resumeAutoSync(sid))throw Error('same audio from another occurrence resumed');state.serviceMusic.timingGroupId=group;
     if(T.resumeAutoSync(sid,{serviceId:sid,index:state.presenter.index,groupId:'stale'}))throw Error('stale R accepted');
     const input=document.createElement('input');refs.detailPane.append(input);input.focus();
     input.dispatchEvent(new KeyboardEvent('keydown',{key:'r',code:'KeyR',bubbles:true}));

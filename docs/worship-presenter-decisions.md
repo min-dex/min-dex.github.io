@@ -3271,3 +3271,5 @@ The same failure reproduces without app code; waiting for fullscreen exit remove
 it in the minimal reproduction. App rapid-stop regression exercises real fullscreen
 startup in both engines; native-close/session regression leaves fullscreen first.
 This mitigates app-driven close, not the browser's independent native close button.
+
+추가 검증: 같은 음원이 다른 순서에서 재사용돼도 재생 시작 당시 timingGroupId와 일치하는 순서에만 복귀한다. 최신 main의 전체화면 종료 안전 수정을 통합한 뒤 기존 WebKit 송출 창 검사도 통과했다.

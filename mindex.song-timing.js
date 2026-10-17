@@ -316,7 +316,7 @@
       || (music.ownerServiceId && music.ownerServiceId !== serviceId)
       || !music.playing || music.pending || !audio || audio.paused || audio.ended
       || state.presenter.safetyBlank || state.presenter.liveScripture?.active
-      || !sync?.localTiming || !slide.songTimingEligible
+      || !sync?.localTiming || !slide.songTimingEligible || music.timingGroupId !== sync.groupId
       || normalizePresenterMediaSource(music.sourceKey) !== normalizePresenterMediaSource(sync.audioSrc)) return false;
     if (expected && (expected.serviceId !== serviceId || expected.index !== state.presenter.index || expected.groupId !== sync.groupId)) return false;
     const target = presenterSyncedLyricsTargetForTime(state.presenter.slides, state.presenter.index, audio.currentTime);
@@ -429,7 +429,7 @@
   function updateTransport(audio) {
     const source = state.serviceMusic.sourceKey;
     for (const button of document.querySelectorAll('[data-song-timing-resume]')) {
-      button.hidden = !state.serviceMusic.autoSyncSuspended || !state.serviceMusic.playing || !state.presenter.slides[state.presenter.index]?.songTimingEligible;
+      button.hidden = !state.serviceMusic.autoSyncSuspended || !state.serviceMusic.playing || !state.presenter.slides[state.presenter.index]?.songTimingEligible || state.serviceMusic.timingGroupId !== state.presenter.slides[state.presenter.index]?.syncTimeline?.groupId;
     }
     for (const input of document.querySelectorAll('[data-song-timing-seek]')) {
       if (input.dataset.source !== source) continue;
@@ -461,6 +461,7 @@
     // seek after output disconnection, leaving play() pending at HAVE_CURRENT_DATA.
     // Resume/pause controls do not use this path and retain their current position.
     state.serviceMusic.autoSyncSuspended = false;
+    state.serviceMusic.timingGroupId = sync.groupId;
     audio.load();
     state.serviceMusic.repeat = false;
     return runServiceMusicAction('toggle');
