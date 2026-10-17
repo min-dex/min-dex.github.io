@@ -1,5 +1,5 @@
 """Recover a silent preload stall without executing its late script or stale release."""
-import os
+import os,json
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from pathlib import Path
 from urllib.parse import urlsplit,parse_qs
@@ -9,32 +9,33 @@ try:
  with sync_playwright() as p:
   for engine in ('chromium','webkit'):
    browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
-   for case in ('app.js','mindex.constants.js','mindex.icons.js','vendor/supabase-js.min.js','styles.css','original-wins'):
+   for case in ('app.js','app.runtime.js','mindex.constants.js','mindex.icons.js','vendor/supabase-js.min.js','styles.css','original-wins'):
     target='app.js' if case=='original-wins' else case
+    version=json.loads(Path('app.runtime.json').read_text())['version'] if case=='app.runtime.js' else 'qa-current-release'
     page=browser.new_page();held=[];retries=[];errors=[]
     page.on('pageerror',lambda error:errors.append(str(error)))
     def route(r):
      u=urlsplit(r.request.url);name=u.path.lstrip('/');query=parse_qs(u.query)
      if u.hostname!='127.0.0.1':r.abort();return
-     if name=='mindex-release.json':r.fulfill(json={'version':'qa-current-release'});return
+     if name=='mindex-release.json':r.fulfill(json={'version':version});return
      if name==target:
       if query.get('boot-retry')!=['1']:held.append(r);return
       retries.append(query)
       if case=='original-wins':
-       original=next(h for h in held if parse_qs(urlsplit(h.request.url).query).get('v')==['qa-current-release'])
+       original=next(h for h in held if parse_qs(urlsplit(h.request.url).query).get('v')==[version])
        held.remove(original)
        original.fulfill(body=Path('app.js').read_text()+"\nwindow.qaExecutions=(window.qaExecutions||0)+1;",content_type='text/javascript')
        held.append(r);return
-     if name=='app.js':
+     if name in ('app.js','app.runtime.js'):
       r.fulfill(body=Path(name).read_text()+"\nwindow.qaExecutions=(window.qaExecutions||0)+1;",content_type='text/javascript');return
      r.continue_()
     page.route('**/*',route);page.goto(url,wait_until='domcontentloaded')
     page.wait_for_function("typeof state!=='undefined'&&!document.body.classList.contains('ui-booting')&&!document.body.dataset.bootFailed",timeout=12000)
-    expected={'boot-retry':['1']} if target.startswith('vendor/') else {'v':['qa-current-release'],'boot-retry':['1']}
+    expected={'boot-retry':['1']} if target.startswith('vendor/') else {'v':[version],'boot-retry':['1']}
     assert retries==[expected],retries
     assert page.evaluate('qaExecutions')==1
-    assert page.evaluate('MINDEX_RELEASE')=='qa-current-release'
-    assert all('/vendor/' in u or parse_qs(urlsplit(u).query).get('v')==['qa-current-release'] for u in page.locator('script[src]').evaluate_all('(nodes)=>nodes.map(n=>n.src)'))
+    assert page.evaluate('MINDEX_RELEASE')==version
+    assert all('/vendor/' in u or parse_qs(urlsplit(u).query).get('v')==[version] for u in page.locator('script[src]').evaluate_all('(nodes)=>nodes.map(n=>n.src)'))
     assert held,'original download was not stalled'
     for r in held:
      suffix='\n:root{--qa-late-style:applied}' if target.endswith('.css') else '\nwindow.qaLateExecution=true;'

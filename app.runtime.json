@@ -1,0 +1,23 @@
+{
+  "generator": "terser@5.44.0",
+  "version": "20261017-compact-runtime-fonts",
+  "options": {
+    "compress": false,
+    "mangle": {
+      "toplevel": false,
+      "keep_fnames": true,
+      "keep_classnames": true
+    },
+    "keep_fnames": true,
+    "keep_classnames": true,
+    "format": {
+      "comments": "@license|@preserve|^!"
+    }
+  },
+  "source_sha256": "62a108e3b79396e6afa1493c1ef5935f09972b87d8a39ab605ce88dfd853697d",
+  "runtime_sha256": "a4d4e47fc3d088c2ce56236ba8e607496488d5b4aeff4463bb02e25309d03a28",
+  "source_bytes": 1459526,
+  "runtime_bytes": 1033379,
+  "source_gzip": 324875,
+  "runtime_gzip": 255344
+}

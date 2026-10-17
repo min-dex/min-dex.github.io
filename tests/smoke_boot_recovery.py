@@ -19,7 +19,7 @@ try:
      if (case=='release-stall' and path.endswith('mindex-release.json')) or (case=='slow-css' and path.endswith('/styles.css')) or (case=='asset-stall' and path.endswith('mindex.constants.js')):held.append(r);return
      if case=='css-failure' and path.endswith('/styles.css'):r.abort();return
      if case=='module-failure' and path.endswith('mindex.constants.js'):r.abort();return
-     if case=='runtime-failure' and path.endswith('/app.js'):r.fulfill(body=Path('app.js').read_text()+"\nrender=()=>{throw Error('fixture runtime failure')};",content_type='text/javascript');return
+     if case=='runtime-failure' and path.endswith(('/app.js','/app.runtime.js')):r.fulfill(body=Path(path.lstrip('/')).read_text()+"\nrender=()=>{throw Error('fixture runtime failure')};",content_type='text/javascript');return
      r.continue_()
     page.route('**/*',route);page.goto(url,wait_until='domcontentloaded')
     if case=='slow-css':

@@ -18,11 +18,11 @@ try:
      if case!='slow-data' and path==target:
       retry=parse_qs(u.query).get('boot-retry')==['1'];seen.append(retry)
       if not retry:r.abort();return
-     if path=='/app.js':
+     if path in ('/app.js','/app.runtime.js'):
       extra="\nwindow.qaAppExecutions=(window.qaAppExecutions||0)+1;"
       if case=='slow-data':extra+='''\nconnectClient=()=>{state.client={};};canUseClientData=()=>true;
 loadInitialData=()=>{window.qaInitialPending=true;return new Promise(resolve=>window.qaReleaseInitial=()=>{window.qaInitialPending=false;resolve()})};'''
-      r.fulfill(body=Path('app.js').read_text()+extra,content_type='text/javascript');return
+      r.fulfill(body=Path(path.lstrip('/')).read_text()+extra,content_type='text/javascript');return
      r.continue_()
     page.route('**/*',route);page.goto(url,wait_until='domcontentloaded')
     page.wait_for_function("typeof state!=='undefined'&&!document.body.classList.contains('ui-booting')&&!document.body.dataset.bootFailed",timeout=12000)

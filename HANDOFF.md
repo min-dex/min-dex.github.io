@@ -694,3 +694,21 @@ are unchanged. No new write path or production repair is introduced.
 Validation covers both score/lyrics directions, clear, blank-mode comparison,
 custom/disabled/unconfigured hymn forms and atomic row read-back in offline
 Chromium/WebKit. Existing sync scope/CAS/retry and Cloud baseline checks remain.
+
+## Compact runtime / presenter fonts · 2026-10-17
+
+Prepared version `20261017-compact-runtime-fonts` in the isolated release worktree.
+Runtime gzip (before concurrent-main reconciliation): 324875 → 255344 bytes.
+Common controller presenter fonts: 1940620 → 722648 bytes (62.76% reduction);
+output's three preloads: 1462948 → 546004 bytes (62.68%). Rare-glyph full fallback
+is retained and may add its original download. CSS gzip grows ~27 KB combined,
+so count it when comparing the complete payload.
+
+Local checks: 12 Node + 9 browser-smoke Cloud entry points; 19,296 exact glyph
+outline/advance comparisons with unchanged vertical metrics/kern/GPOS; 60 browser
+wrapping cases per engine, fresh releases with real font cache and stale-compiled
+fallback. Startup parallelism/recovery, latest-source resolution, delayed data,
+180-thumbnail fitting, 24 lyric-bound cases per engine, output swaps/blackout,
+six caption sizes, manual song timing and lyric input sizing pass. Public/CI
+verification follows after reconciling concurrent main. Existing worship data
+and the primary dirty checkout remain untouched.

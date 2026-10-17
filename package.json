@@ -42,6 +42,7 @@
       "index.html",
       "mindex-release.json",
       "app.js",
+      "app.runtime.js",
       "mindex.icons.js",
       "mindex.worship-week.js",
       "mindex.monitor.js",

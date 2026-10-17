@@ -109,8 +109,9 @@
         }
         window.MINDEX_PRELOAD_PRESENTER_FONTS = ({ controller = true } = {}) => {
           const weights = controller ? ["5Medium", "6SemiBold", "7Bold", "8ExtraBold"] : ["6SemiBold", "7Bold", "8ExtraBold"];
+          const commonFonts = {"5Medium":"MindexPresenterCommon-500-6adbca4cec793e77.woff2","6SemiBold":"MindexPresenterCommon-600-2a64611ab2151043.woff2","7Bold":"MindexPresenterCommon-700-bcbb2a5ba50e8fbe.woff2","8ExtraBold":"MindexPresenterCommon-800-15cd6ce3c77e9f74.woff2"};
           for (const weight of weights) {
-            const href = `./vendor/fonts/freesentation/Freesentation-${weight}.woff2`;
+            const href = `./vendor/fonts/freesentation/${commonFonts[weight]}`;
             if ([...document.querySelectorAll('link[as="font"]')].some(link => link.getAttribute("href") === href)) continue;
             const font = document.createElement("link");
             font.rel = "preload"; font.as = "font"; font.type = "font/woff2"; font.crossOrigin = "anonymous";
@@ -235,7 +236,8 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261017-startup-icon-subset";
+        const fallbackVersion = "20261017-compact-runtime-fonts";
+        const compiledAppVersion = "20261017-compact-runtime-fonts";
         const modules = [
           "mindex.icons.js", "vendor/supabase-js.min.js",
           "mindex.constants.js", "mindex.inline-text.js", "mindex.design-tokens.js", "mindex.worship-model.js",
@@ -257,6 +259,9 @@
           history.replaceState(history.state, "", retryUrl.href);
         }
         const assetUrl = (path, version) => {
+          // A newer release without a regenerated bundle always uses fresh source.
+          // Logical app.js retains dependency order and every public global name.
+          if (path === "app.js" && version === compiledAppVersion) path = "app.runtime.js";
           const url = path.startsWith("vendor/") ? `./${path}` : `./${path}?v=${encodeURIComponent(version)}`;
           // A manual retry must not reuse a browser-cached failed preload.
           return retryStamp ? `${url}${url.includes("?") ? "&" : "?"}retry=${retryStamp}` : url;

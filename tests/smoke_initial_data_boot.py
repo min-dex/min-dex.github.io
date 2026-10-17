@@ -25,7 +25,7 @@ def main():
      def route(r):
       parsed=urlsplit(r.request.url)
       if parsed.hostname not in ('127.0.0.1','localhost') or r.request.method!='GET':r.abort();return
-      if parsed.path=='/app.js':r.fulfill(body=Path('app.js').read_text()+OVERRIDES,content_type='text/javascript');return
+      if parsed.path in ('/app.js','/app.runtime.js'):r.fulfill(body=Path(parsed.path.lstrip('/')).read_text()+OVERRIDES,content_type='text/javascript');return
       r.continue_()
      page.route('**/*',route)
      page.goto(url,wait_until='domcontentloaded')

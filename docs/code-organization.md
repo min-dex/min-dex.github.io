@@ -234,3 +234,41 @@ bytes. This reduces initial transfer, but does not establish a fixed cold-start
 latency: native uncached probes showed highly variable network receipt times,
 including tiny resources stalled together. Keep network timing separate from
 JavaScript execution and from warm-connection results.
+
+## Compact runtime and presenter fonts · 2026-10-17
+
+The logical `app.js` dependency may load `app.runtime.js` when the resolved
+release equals `compiledAppVersion` in `index.html`. Source remains in `app.js`;
+never edit the generated runtime. A different release uses its fresh `app.js`
+until regenerated, so an old HTML shell cannot select a stale compiled bundle
+for a new release. Existing ordered execution, one-download retry and the shared
+startup deadline remain authoritative.
+
+After changing source/release, regenerate using the optional pinned tools:
+
+```
+pnpm --dir tools/builddeps --ignore-workspace install --frozen-lockfile --ignore-scripts
+node tools/build_app_runtime.cjs
+node tests/test_app_runtime.cjs
+```
+
+Terser 5.44.0 removes whitespace and shortens local bindings, with `compress:false`;
+properties, top-level APIs and named functions/classes are preserved. The default
+Cloud hash gate requires only Node, and rejects stale *active* compiled code.
+The Electron include list contains both source and runtime; this is not a signed
+desktop package certification.
+
+`tools/build_presenter_fonts.py` builds six immutable common-glyph WOFF2 faces
+from the retained Freesentation originals using fontTools 4.60.2 / Brotli 1.2.0.
+The 3,216 codepoints are fixed by the UI common charset, source symbols and all
+kerning pairs, never by live worship data. Original full faces remain the fallback
+for every other codepoint. CSS ranges are disjoint; common and fallback rule groups
+stay adjacent to compress efficiently. Preserve OFL copyright/license records;
+derived internal names are Mindex Presenter Common. Do not remove full originals.
+
+`tests/test_presenter_fonts.py` checks 19,296 exact outline/advance comparisons,
+vertical metrics and legacy/GPOS kerning. `smoke_presenter_font_cache.py` checks
+real browser cache across fresh releases, original-vs-subset wrapping including
+rare/common boundaries, and compiled-vs-source selection in Chromium/WebKit.
+Rare characters can download the original full face in addition to the common
+face; the reduction is for ordinary common-character output, not all scripts.
