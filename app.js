@@ -11467,7 +11467,7 @@ function serviceItemEditorModel(item = {}, options = {}) {
     titleValue,
     titleValueOverride,
     titlePlaceholder: song
-      ? (servicePraiseUsesDirectLyrics(praiseInputMode) ? "곡 제목" : "찬양 DB 곡 검색 후 선택")
+      ? (servicePraiseUsesDirectLyrics(praiseInputMode) ? "곡 제목" : serviceItemRequiresNewHymnalScoreSong(item) ? "새찬송가에서 검색" : "찬양 DB에서 검색")
       : scripture
         ? "성경 구절"
         : isDefault
@@ -25841,10 +25841,8 @@ function renderServiceSongPicker(item, index, model = serviceItemEditorModel(ite
         <button class="svc-song-clear icon-btn" type="button" data-service-song-clear="${index}" aria-label="곡 연결 해제" title="곡 연결 해제"><i data-lucide="x"></i></button>
       </div>`;
   }
-  if (!query) {
-    const modeHint = serviceItemRequiresNewHymnalScoreSong(item) ? "새찬송가에서 검색" : "찬양 DB에서 검색";
-    return `<div class="svc-song-picker svc-song-picker--hint"><span class="svc-song-picker-hint">${escapeHtml(modeHint)}</span></div>`;
-  }
+  // Keep the preview replacement target without floating text or layout space.
+  if (!query) return `<div class="svc-song-picker" hidden></div>`;
   const results = serviceSongPickerResults(query, item, model.service);
   if (!results.length) {
     return `<div class="svc-song-picker"><span class="svc-song-picker-warning">검색 결과 없음</span></div>`;

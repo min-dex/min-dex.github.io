@@ -2953,3 +2953,11 @@ second to 5.8 seconds. CDN responses reported cache HIT; changing HTTP version,
 preload/fetch, or concurrency did not establish a consistent causal fix. This
 identifies an application-level delay multiplier, NOT a proven CDN/ISP fault or
 a guarantee against network outages. No comparison on another network exists.
+
+
+## Song search guidance · 2026-10-17
+
+Empty song search guidance lives in the title placeholder (new-hymnal wording
+where required). Keep a hidden picker target so deferred typing previews still
+replace it. Remove the absolute negative-top hint style in all shared editors.
+Loading and warning messages remain in flow and wrap in narrow controls.

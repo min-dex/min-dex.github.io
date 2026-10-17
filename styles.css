@@ -4586,17 +4586,14 @@ body[data-theme="dark"] .service-week-card:hover {
 .svc-song-picker--linked {
   flex: 0 0 auto;
 }
-.svc-song-picker--hint {
-  position: absolute;
-  top: -14px;
-  right: 0;
-}
 .svc-song-picker-hint,
 .svc-song-picker-warning {
   color: var(--ink-4);
   font-size: var(--ui-meta-size);
   font-weight: 700;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 .svc-song-picker-warning { color: var(--accent); }
 .svc-song-picker-result {
@@ -7235,7 +7232,6 @@ textarea.svc-presenter-input-control--multiline {
   gap: 4px;
   padding-left: 0;
 }
-.svc-board-subgroup-controls .svc-song-picker--hint,
 .svc-board-subgroup-controls .svc-song-picker--linked,
 .svc-board-subgroup-controls .svc-song-picker:not([role="listbox"]) {
   flex: 1 1 100%;
