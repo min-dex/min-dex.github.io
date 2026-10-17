@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 NODE_TESTS = (
     "test_scripture_lookup_render.cjs",
     "test_app_runtime.cjs",
+    "test_output_fullscreen_close.cjs",
     "test_ui_icons.cjs",
     "test_bulletin.cjs",
     "test_bible_translation_sidebar.cjs",

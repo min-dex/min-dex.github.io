@@ -63,6 +63,8 @@ try:
        if(state.presenter.index!==2||!isPresenterOutputHeartbeatOpen())throw Error('temporary connection did not recover');
       }""")
       print(engine,'PASS reload and transient reconnect preserve slide, retired client rejected',flush=True)
+     # Native close is separate from the app stop path: leave fullscreen first.
+     out.evaluate('async()=>{await presenterOutputFullscreenTask?.catch(()=>{});if(document.fullscreenElement)await document.exitFullscreen()}')
      page.evaluate('lastOutputRef.close()');page.wait_for_function('lastOutputRef.closed');page.wait_for_function('!!state.presenter.outputStopAt');page.wait_for_timeout(250)
      # WebKit can retain a closed popup Page handle; Window.closed is authoritative.
      assert page.evaluate("state.presenter.index===0 && presenterSelectedLaunchIndex(svc.id)===null && state.presenter.pptxProgress===null && musicStops===0 && state.serviceMusic.playing")

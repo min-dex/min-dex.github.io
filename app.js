@@ -31520,7 +31520,7 @@ function stopPresenterOutput(serviceId = state.presenter.serviceId) {
   stopPresenterOutputWindowMonitor();
   if (!closeDesktopOutput) {
     try {
-      if (outputWindow && !outputWindow.closed) outputWindow.close?.();
+      closePresenterBrowserWindow(outputWindow);
     } catch {
       // Closing may be blocked for manually opened output tabs.
     }
@@ -31719,7 +31719,7 @@ function hydratePresenterOutputInBackground(serviceId, outputWindow = null, gene
     state.presenter.outputWindow = null;
     state.presenter.outputPendingAt = 0;
     try {
-      if (!outputWindow.closed) outputWindow.close?.();
+      closePresenterBrowserWindow(outputWindow);
     } catch {}
   });
 }

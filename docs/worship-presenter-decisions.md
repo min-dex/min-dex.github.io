@@ -3254,3 +3254,20 @@ reference recovery and temporary disconnect in Chromium/WebKit.
 - 박자 설정은 현재 편집 세션의 보조값이며 저장 버튼으로 기록된 시각만 기존 version audio_set/예배 audioTiming 경로에 저장한다. 운영 38곡을 자동 수정하거나 별도 DB/Notion을 만들지 않는다. 원본 음원·가사·폼·사진과 CAS/atomic 저장 규칙을 유지한다.
 
 검증: 실제 WAV 디코딩/Worker 분석/무음 거부/음원 교체 초기화/직접 입력·미세 조정/DB 저장·재조회/R 및 실제 메뉴 버튼 복귀를 Chromium·WebKit에서 통과했다. 순수 테스트는 무음·불규칙 박자·템포 변화 거부와 소수 BPM 누적 오차를 확인했다. 보관 음원 3곡의 후보 검출은 확인했으나 음악적 정답이나 전체 38곡 정확도를 인증하지 않는다. 로컬 기존 smoke_output_session_isolation의 WebKit 창 닫기 실패는 변경 전 main(2cc1330b)에서도 재현됐고, 나머지 20개 smoke와 16개 unit 검사는 통과했다. Linux 전체 검사는 배포 파이프라인에서 별도 확인한다.
+
+## Browser output close waits for fullscreen · 2026-10-18
+
+Script-driven browser output close coalesces duplicate requests, waits for pending
+fullscreen entry, then awaits fullscreen exit before closing. Controller stop
+still resets immediately and retains the established audio stop/preserve policy.
+Startup/delegated entry share the same pending operation; a closing output cannot
+start another entry. If native exit fails, leave the window available for native
+close and permit retry rather than destroy it mid-transition. Electron's existing
+window-close path is unchanged. No lyric/photo timing or operational data changes.
+
+Mac Playwright WebKit 2248 crashed in WebFullScreenManagerProxy /
+WKFullScreenWindowController when a window closed during native fullscreen entry.
+The same failure reproduces without app code; waiting for fullscreen exit removes
+it in the minimal reproduction. App rapid-stop regression exercises real fullscreen
+startup in both engines; native-close/session regression leaves fullscreen first.
+This mitigates app-driven close, not the browser's independent native close button.
