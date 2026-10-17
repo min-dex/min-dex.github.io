@@ -2314,9 +2314,10 @@ automatically; the user must select their song once.
   canvases contain their layout/size/paint. Keep existing gaps and narrow-window
   layout. Static board thumbnails no longer force a translateZ/will-change 3D
   layer per full-HD canvas; live preview/output compositor rules are unchanged.
-  This removes a separately reproduced WebKit paint stall (about 1 s while fit
-  callbacks stayed below 17 ms). No content-visibility gating or hidden
-  placeholder is introduced.
+  This avoids unnecessary persistent compositor layers. It is NOT proof that
+  the separately reproduced WebKit paint stall is eliminated: candidate testing
+  passed, but the final public-URL stress run still exceeded 500 ms. No
+  content-visibility gating or hidden placeholder is introduced.
 - New 180-preview Chromium/WebKit regression uses the nested board structure:
   visible-first ordering, dormant offscreen queue, rapid scrolling, input timer
   gaps below 500 ms, exact original font sizes, no clipping, font invalidation
@@ -2339,4 +2340,13 @@ automatically; the user must select their song once.
   The public-URL synthetic fixture disables DB configuration just like the local
   offline server and awaits its introduced presenter fonts before traversal.
   It retains the separate font-invalidation test and all 500 ms/clipping checks.
-  The board compositor follow-up requires its own deployment confirmation.
+  Follow-up ee29a659 / 20261017-visible-preview-fit-2 passed Pages39010778225
+  and Linux Cloud checks39010778547; all three public runtime file hashes match.
+  Public 180-preview Chromium check passed (30.2 ms maximum timer gap, zero
+  clipping/size differences). WebKit retained zero clipping/size differences but
+  FAILED the unchanged 500 ms responsiveness assertion at 809 ms. Local WebKit
+  passed (41 ms); a candidate remote run passed (213 ms), so neither is sufficient
+  to close the remote WebKit performance issue. Instrumented remote runs measured
+  at most 17 ms per fit / 16 ms per drain / 3 ms per scroll assignment while both
+  timer and animation-frame gaps approached 1 s. Further render/compositor-level
+  investigation remains; do not weaken the assertion or claim all browsers pass.
