@@ -5644,7 +5644,11 @@ function renderPresenterHighlightedText(line, slide) {
     parts.push(escapeHtml(text.slice(cursor,end)));return parts.join("");
   };
   const highlights = normalizeServiceTextHighlights(slide?.textHighlights || slide?.text_highlights || slide?.highlights);
-  const parentheses = slide?.announcementItems?.length ? presenterAnnouncementParenthesisRanges(text) : [];
+  const lyricParentheses = slide?.type === "lyrics"
+    && presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE;
+  const parentheses = slide?.announcementItems?.length || lyricParentheses
+    ? presenterAnnouncementParenthesisRanges(text) : [];
+  const parenthesisClass = lyricParentheses ? "presenter-lyric-paren" : "presenter-announcement-paren";
   const renderRange = (start, end) => {
     let cursor = start;
     const parts = [];
@@ -5653,7 +5657,7 @@ function renderPresenterHighlightedText(line, slide) {
       const to = Math.min(end, range.end);
       if (from >= to) continue;
       parts.push(renderInline(cursor, from));
-      parts.push(`<span class="presenter-announcement-paren">${renderInline(from, to)}</span>`);
+      parts.push(`<span class="${parenthesisClass}">${renderInline(from, to)}</span>`);
       cursor = to;
     }
     parts.push(renderInline(cursor, end));
