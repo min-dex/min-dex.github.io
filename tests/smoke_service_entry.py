@@ -13,6 +13,7 @@ try:
    page.wait_for_function("!!window.MINDEX_SERVICE_ENTRY")
    print(engine,page.evaluate('''async()=>{
     const check=(v,m)=>{if(!v)throw Error(m)};
+    const realDirty=hasDirtyChanges, realCapture=captureCleanFingerprint;
     const sid='dddddddd-dddd-4ddd-8ddd-dddddddddddd',sec='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
     let dirty=false,live=false,gate=null,entered=null,fail=false,renders=0,reads=0;
     state.client={};state.module='service';state.selectedServiceId=sid;state.loading=false;state.saving=false;state.presenter.outputPendingAt=0;
@@ -36,7 +37,29 @@ try:
     check(state.worshipElements[0].config.formHint==='V2-C-V1-C','manual form');
     check(JSON.stringify(state.presenter)===presenter&&JSON.stringify(state.songs)===songs&&state.serviceMusic===music,'transport or song modified');
     check(!document.getElementById('refreshDbBtn'),'button remains');
-    return 'PASS target-only read, drafts, edit/navigation/output races, atomic failure, form and transport preservation';
+    // Exercise actual tab activation with an isolated route renderer, no save or network writes.
+    confirmSaveBeforeLeaving=async()=>true;syncActivePageTabState=()=>{};
+    state.pageTabs=[{id:'tab-a',snapshot:{selectedServiceId:sid}},{id:'tab-b',snapshot:{selectedServiceId:'other'}}];state.pageTabIndex=0;
+    applyPageTabSnapshot=async i=>{state.selectedServiceId=state.pageTabs[i].snapshot.selectedServiceId;};
+    const tabs=document.createElement('div');tabs.innerHTML='<button>A</button><button>B</button>';document.body.append(tabs);
+    let tabTurn;tabs.children[0].onclick=()=>{tabTurn=activatePageTab(0)};tabs.children[1].onclick=()=>{tabTurn=activatePageTab(1)};
+    h=hold();pending=MINDEX_SERVICE_ENTRY.enter(sid);await h.started;
+    tabs.children[1].click();await tabTurn;tabs.children[0].click();await tabTurn;
+    const renderCount=renders;h.release();check(await pending===false&&renders===renderCount,'obsolete A response applied after tab return');
+    // Same-service click must preserve draft baseline, explicit selections and live DOM/caret.
+    hasDirtyChanges=realDirty;captureCleanFingerprint=realCapture;
+    serviceNavigationBlocked=()=>false;rememberSetlistArchiveHistory=()=>{};markWorshipServiceExplicitlyRequested=()=>{};renderCurrentServiceModuleDetail=()=>{throw Error('reselection rerendered')};renderServiceList=()=>{};syncBrowserHistory=()=>{};
+    Object.keys(state.dirty).forEach(k=>state.dirty[k]=false);state.module='service';state.selectedServiceId=sid;state.loadedWorshipServiceIds.add(sid);
+    state.serviceItems[sid]=[{id:'manual',song_id:'chosen-song',song_version_id:'chosen-version',memo:serializeServiceItemMemo({formHint:'V2-C-V1-C',inputMode:'lyrics_db'})}];
+    captureCleanFingerprint('service');const baseline=state.cleanFingerprints.service;state.services[0].title='unsaved edit';state.dirty.service=true;
+    const editor=document.createElement('textarea');editor.dataset.serviceItemField='raw_title';editor.dataset.initialValue='saved';editor.value='typed but not committed';document.body.append(editor);editor.focus();editor.setSelectionRange(3,7);
+    const items=JSON.stringify(state.serviceItems[sid]),button=document.createElement('button');button.onclick=()=>selectService(sid);document.body.append(button);button.click();
+    check(hasDirtyChanges({reconcile:true})&&state.cleanFingerprints.service===baseline,'draft re-baselined');
+    check(editor.isConnected&&editor.value==='typed but not committed'&&editor.selectionStart===3,'DOM draft lost');
+    check(JSON.stringify(state.serviceItems[sid])===items,'manual song/version/form lost');
+    state.module='presenter';state.presenter.viewServiceId=sid;await openServiceInPresenter(sid);
+    check(state.cleanFingerprints.service===baseline&&JSON.stringify(state.serviceItems[sid])===items&&editor.isConnected,'presenter reselection lost draft');
+    return 'PASS entry races, real reselection/tab handlers, draft DOM/baseline and chosen song/version/form preservation';
    }'''),flush=True)
    page.evaluate('''()=>{state.module='presenter';document.body.classList.remove('ui-booting');document.documentElement.classList.remove('ui-booting');document.querySelectorAll('.boot-screen,#bootScreen,#bootStatus').forEach(e=>e.remove());document.body.dataset.module='presenter';renderGlobalPlaybackControls();const host=document.createElement('main');host.style.cssText='position:fixed;top:100px;left:300px;width:300px';host.innerHTML=renderWorshipSetlistLeaderEditor({id:'fixture',leader:'김광한 전도사'});document.body.append(host);window.testLeader=host.querySelector('input');}''')
    for width in (1280,800):

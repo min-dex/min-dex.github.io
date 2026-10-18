@@ -1,6 +1,8 @@
 // Refresh one entered service using a detached snapshot. Never persist or touch transport.
 (() => {
   let busy = false;
+  let entryToken = 0;
+  const invalidate = () => { entryToken += 1; };
   let editRevision = 0;
   document.addEventListener("input", () => { editRevision += 1; }, true);
   document.addEventListener("change", () => { editRevision += 1; }, true);
@@ -8,6 +10,10 @@
     if (isPresenterOutputWindowOpen() || state.presenter.outputPendingAt) return "송출 중에는 DB 갱신을 보류합니다. 현재 화면은 유지됩니다.";
     if (document.querySelector('[data-input-status="error"]')) return "저장에 실패한 입력이 있어요. 해당 입력을 다시 저장한 뒤 새로고침해 주세요.";
     if (pendingSundayEditSync.size) return "연결된 예배에 반영하지 못한 변경이 남아 있어요. 해당 예배를 저장해 동기화를 완료해 주세요.";
+    const pendingText = [...document.querySelectorAll('[data-service-item-field]')].some(field =>
+      isDeferredServiceTextInput(field) && field.dataset.initialValue !== undefined
+      && field.value !== field.dataset.initialValue);
+    if (pendingText) return "미저장 입력이 있어요. 현재 입력을 유지합니다.";
     const pendingFeedback = [...document.querySelectorAll('[data-input-status="modified"]')].some(node => {
       const editor = node.closest('.svc-board-subgroup-control-item');
       if (!editor) return true;
@@ -63,15 +69,15 @@
 
     captureCleanFingerprint("service");
   }
-  async function check(serviceId) {
-    if (!serviceId || busy || !state.client || !["service", "presenter"].includes(state.module)
+  async function check(serviceId, token = entryToken) {
+    if (token !== entryToken || !serviceId || busy || !state.client || !["service", "presenter"].includes(state.module)
       || state.selectedServiceId !== serviceId || blockedReason()) return false;
     const context = () => JSON.stringify([state.module, state.selectedServiceId, presenterViewServiceId()]);
     const before = context(), revision = editRevision, model = dirtyModuleFingerprint("service");
     busy = true;
     try {
       const snapshot = await fetchSnapshot(serviceId);
-      if (before !== context() || revision !== editRevision || model !== dirtyModuleFingerprint("service") || blockedReason()) return false;
+      if (token !== entryToken || before !== context() || revision !== editRevision || model !== dirtyModuleFingerprint("service") || blockedReason()) return false;
       if (!snapshot.fullServices.length) return false;
       const viewport = captureDetailViewportSnapshot();
       applySnapshot(snapshot);
@@ -80,11 +86,10 @@
       return true;
     } catch (error) {
       console.error("[Service entry]", error);
-      if (before === context()) showToast("최신 예배를 확인하지 못했어요. 현재 내용은 유지됩니다.", "error");
+      if (token === entryToken && before === context()) showToast("최신 예배를 확인하지 못했어요. 현재 내용은 유지됩니다.", "error");
       return false;
     } finally { busy = false; }
   }
-  let entryToken = 0;
   async function enter(serviceId) {
     const token = ++entryToken, revision = editRevision;
     for (let attempt = 0; attempt < 100; attempt += 1) {
@@ -92,10 +97,10 @@
         || !["service", "presenter"].includes(state.module)) return false;
       const reason = blockedReason();
       if (reason && !reason.startsWith("저장 또는 불러오기")) return false;
-      if (!busy && !reason) return check(serviceId);
+      if (!busy && !reason) return check(serviceId, token);
       await new Promise(resolve => setTimeout(resolve, 100));
     }
     return false;
   }
-  window.MINDEX_SERVICE_ENTRY = { check, enter };
+  window.MINDEX_SERVICE_ENTRY = { check, enter, invalidate };
 })();

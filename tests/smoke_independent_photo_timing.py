@@ -76,7 +76,14 @@ try:
     if(serviceItemRequiresSongSelection(state.serviceItems[sid][0],service))throw Error('audio mode requires DB');
     return {serviceId:sid,elementId:state.serviceItems[sid][0].id};
    }''')
-   page.evaluate('x=>MindexSongTiming.open(x.serviceId,x.elementId)',ids)
+   page.evaluate("""x=>{
+    const service=state.services.find(s=>s.id===x.serviceId),item=state.serviceItems[x.serviceId][0];
+    const timingEntries=presenterSlidesForService(x.serviceId).filter(s=>s.elementId===item.id).map(slide=>({slide}));
+    const host=document.createElement('div');host.id='photo-entry-fixture';
+    host.innerHTML=renderPresenterBoardItemActions(x.serviceId,{service,item,index:0,timingEntries});document.body.append(host);
+   }""",ids)
+   page.get_by_role('button',name='사진·타이밍 편집',exact=True).click()
+   page.wait_for_function("document.activeElement?.matches('[data-photo-section]')")
    d=page.locator('[data-song-timing-dialog]');assert d.locator('[data-timing-share]').count()==0
    d.locator('[data-timing-linked]').click();page.wait_for_function("(()=>{const a=document.querySelector('[data-song-timing-dialog] audio');return a.src.startsWith('blob:')&&a.readyState>=1&&a.duration>19&&!document.querySelector('[data-timing-save]').disabled})()")
    for i,t in enumerate([2,6,10]):d.locator(f'[data-timing-start="{i}"]').fill(str(t))

@@ -2703,6 +2703,7 @@ async function handleBrowserHistoryPop(event) {
 }
 
 async function applyBrowserHistorySnapshot(snapshot) {
+  window.MINDEX_SERVICE_ENTRY?.invalidate();
   if (snapshot.module === "presenter" && snapshot.presenterBulletinServiceId) snapshot={...snapshot,module:"bulletin"};
   state.applyingBrowserHistory = true;
   try {
@@ -3145,6 +3146,7 @@ function authRedirectUrl() {
 async function switchModule(moduleName, options = {}) {
   if (!CONTENT_MODULES.includes(moduleName)) return;
   if (moduleName === state.module) return;
+  window.MINDEX_SERVICE_ENTRY?.invalidate();
   if (!(await confirmSaveBeforeLeaving())) return;
 
   const clearSearch = options.clearSearch !== false;
@@ -14369,6 +14371,7 @@ async function closePageTab(index) {
 async function activatePageTab(index, { force = false } = {}) {
   if (!Number.isInteger(index) || index < 0 || index >= state.pageTabs.length) return;
   if (!force && index === state.pageTabIndex) return;
+  window.MINDEX_SERVICE_ENTRY?.invalidate();
   if (!(state.module === "bulletin" || (state.module === "presenter" && state.presenterBulletinServiceId)) && !(await confirmSaveBeforeLeaving())) return;
   syncActivePageTabState();
   state.pageTabIndex = index;
@@ -30729,6 +30732,8 @@ function renderPresenterCitationComposer(subgroup, serviceId) {
 }
 
 function renderPresenterBoardItemActions(serviceId, context) {
+  const photoTiming = servicePraiseInputMode(context.item) === "audio_praise"
+    && (context.timingEntries || []).some(({slide}) => slide.serviceTimingPage && slide.songTimingEligible);
   const audioControls = serviceItemSupportsHeaderAudio(context.item)
     ? renderPresenterBoardItemAudioControls(serviceId, context) : "";
   const inputContext = presenterServiceInputItem(context.item, context.service);
@@ -30738,6 +30743,8 @@ function renderPresenterBoardItemActions(serviceId, context) {
     <div class="svc-board-subgroup-flow" data-service-item-actions data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}">
       <span class="svc-input-status" data-service-input-status role="status" aria-live="polite"></span>
       ${fileControls}
+      ${photoTiming ? `<button class="btn secondary" type="button" data-song-timing-open data-song-timing-focus="photos"
+        data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(context.item.id)}">사진·타이밍 편집</button>` : ""}
       ${renderPresenterProgressionAdd(context.item)}
       ${audioControls}
       <button class="reference-new-btn svc-board-subgroup-commit" type="button" data-service-item-commit
@@ -33930,6 +33937,12 @@ async function deleteService(serviceId) {
 
 function selectService(id) {
   if (serviceNavigationBlocked(id)) return;
+  window.MINDEX_SERVICE_ENTRY?.invalidate();
+  // Reselecting is not navigation: retain the live editor, selection and clean baseline.
+  if (id && id === state.selectedServiceId && ["service", "presenter"].includes(state.module)) {
+    void window.MINDEX_SERVICE_ENTRY?.enter(id);
+    return;
+  }
   if (id !== state.selectedServiceId && !confirmDiscardServiceChanges()) return;
   rememberSetlistArchiveHistory();
   if (state.module === "setlists") {
@@ -33976,6 +33989,11 @@ async function openHomeNextService(action = "presenter", serviceId = "") {
 async function openServiceInPresenter(id) {
   if (!id) return;
   if (serviceNavigationBlocked(id)) return;
+  window.MINDEX_SERVICE_ENTRY?.invalidate();
+  if (state.module === "presenter" && id === state.selectedServiceId && id === presenterViewServiceId()) {
+    await window.MINDEX_SERVICE_ENTRY?.enter(id);
+    return;
+  }
   if (id !== state.selectedServiceId && !confirmDiscardServiceChanges()) return;
   window.MINDEX_PRELOAD_PRESENTER_FONTS?.();
   markWorshipServiceExplicitlyRequested(id);
