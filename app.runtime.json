@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-device-photo-editor",
+  "version": "20261018-service-entry-rail",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "ea6f948097e1532f323da4b3c9cc45a69d09bf1adf549626883e62c6095093d3",
-  "runtime_sha256": "0c0ba5811e8db50eb672f127f939ac22c089cf97a3c92d585a36992486151efc",
-  "source_bytes": 1481364,
-  "runtime_bytes": 1048274,
-  "source_gzip": 331014,
-  "runtime_gzip": 259313
+  "source_sha256": "ca62c4419db0150980c2320748f29b0b5d22f294f929ff1ba395f0905fe55674",
+  "runtime_sha256": "584072f439aa323985b7c7f9d069a7379773ed4314bc89b4b220888ca8b1169b",
+  "source_bytes": 1481673,
+  "runtime_bytes": 1048563,
+  "source_gzip": 331096,
+  "runtime_gzip": 259407
 }

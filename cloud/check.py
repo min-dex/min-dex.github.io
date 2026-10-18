@@ -29,6 +29,7 @@ NODE_TESTS = (
     "test_worship_read_parallel.cjs",
 )
 SMOKES = (
+    "smoke_service_entry.py",
     "smoke_form_label_spacing.py",
     "smoke_monitor_session.py",
     "smoke_monitor.py",

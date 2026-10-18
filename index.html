@@ -229,9 +229,6 @@
             <i data-lucide="plus"></i>
             <span>새로 만들기</span>
           </button>
-          <button id="refreshDbBtn" class="icon-btn" type="button" aria-label="DB 새로고침" title="DB 새로고침">
-            <i data-lucide="refresh-cw"></i>
-          </button>
           <button id="saveAllBtn" class="icon-btn primary" type="button" aria-label="저장" disabled>
             <i data-lucide="save"></i>
           </button>
@@ -259,8 +256,8 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261018-device-photo-editor";
-        const compiledAppVersion = "20261018-device-photo-editor";
+        const fallbackVersion = "20261018-service-entry-rail";
+        const compiledAppVersion = "20261018-service-entry-rail";
         const modules = [
           "mindex.icons.js", "vendor/supabase-js.min.js",
           "mindex.constants.js", "mindex.inline-text.js", "mindex.design-tokens.js", "mindex.worship-model.js",
@@ -268,7 +265,7 @@
           "mindex.pptx.js", "mindex.worship-input.js", "mindex.song-timing.js",
           "mindex.presenter-ui.js", "mindex.worship-week.js", "mindex.setlist-links.js",
           "mindex.manuals.js", "mindex.bulletin.js", "mindex.worship-source.js", "scripture-editions.js", "app.js",
-          "mindex.db-refresh.js", "mindex.monitor.js", "mindex.scripture-repair-display.js",
+          "mindex.service-entry.js", "mindex.monitor.js", "mindex.scripture-repair-display.js",
         ];
         const styles = [
           "styles.css", "styles.presenter-output.css", "styles.bulletin.css",

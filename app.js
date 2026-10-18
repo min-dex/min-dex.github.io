@@ -2768,6 +2768,7 @@ async function applyBrowserHistorySnapshot(snapshot) {
     if (isServiceDataModule() && state.module !== "bulletin" && state.selectedServiceId && !state.presenterBulletinServiceId) {
       markWorshipServiceExplicitlyRequested(state.selectedServiceId);
       await loadServiceItems(state.selectedServiceId);
+      await window.MINDEX_SERVICE_ENTRY?.enter(state.selectedServiceId);
     }
     if (snapshot.setlistArchive && isSetlistArchiveView()) {
       // Rail width transitions reflow the archive and trigger scroll anchoring.
@@ -9125,7 +9126,7 @@ function handleDetailInput(event) {
     if (!draft.saving) {
       draft.value = leaderInput.value;
       worshipSetlistLeaderDrafts.set(id, draft);
-      leaderInput.style.width = `${worshipSetlistLeaderInputWidth(draft.value)}em`;
+      leaderInput.style.width = `calc(${worshipSetlistLeaderInputWidth(draft.value)}em + 20px)`;
     }
     return;
   }
@@ -24088,7 +24089,7 @@ function renderWorshipSetlistLeaderEditor(source) {
   const leader = String(source.leader || "").trim();
   const value = draft ? draft.value : leader;
   return `<label class="svc-setlist-leader svc-setlist-leader-form"><span>인도</span>
-    <input type="text" data-setlist-leader-input="${escapeAttr(id)}" data-leader-original="${escapeAttr(draft?.original ?? leader)}" aria-label="찬양인도자" title="입력 후 포커스를 옮기면 자동 저장" placeholder="—" value="${escapeAttr(value)}" maxlength="100" style="width:${worshipSetlistLeaderInputWidth(value)}em" ${draft?.saving ? "readonly" : ""}>
+    <input type="text" data-setlist-leader-input="${escapeAttr(id)}" data-leader-original="${escapeAttr(draft?.original ?? leader)}" aria-label="찬양인도자" title="입력 후 포커스를 옮기면 자동 저장" placeholder="—" value="${escapeAttr(value)}" maxlength="100" style="width:calc(${worshipSetlistLeaderInputWidth(value)}em + 20px)" ${draft?.saving ? "readonly" : ""}>
   </label>`;
 }
 
@@ -24151,7 +24152,7 @@ function updateWorshipSetlistLeaderInputs(id, value, saving, original) {
     if (input.dataset.setlistLeaderInput !== id) return;
     input.readOnly = saving;
     input.value = value;
-    input.style.width = `${worshipSetlistLeaderInputWidth(value)}em`;
+    input.style.width = `calc(${worshipSetlistLeaderInputWidth(value)}em + 20px)`;
     if (original !== undefined) input.dataset.leaderOriginal = original;
   });
 }
@@ -33884,7 +33885,7 @@ function selectService(id) {
   renderCurrentServiceModuleDetail();
   renderServiceList();
   syncBrowserHistory();
-  if (id) void loadServiceItems(id).catch(() => {});
+  if (id) void loadServiceItems(id).then(() => window.MINDEX_SERVICE_ENTRY?.enter(id)).catch(() => {});
 }
 
 async function openHomeNextService(action = "presenter", serviceId = "") {
@@ -33908,6 +33909,7 @@ async function openHomeNextService(action = "presenter", serviceId = "") {
   // selected service in the sidebar while the home dashboard remains visible.
   await switchModule("service", { clearSearch: false });
   await loadServiceItems(id);
+  await window.MINDEX_SERVICE_ENTRY?.enter(id);
 }
 
 async function openServiceInPresenter(id) {
@@ -33927,10 +33929,12 @@ async function openServiceInPresenter(id) {
     render();
     syncBrowserHistory();
     await loadServiceItems(id);
+    await window.MINDEX_SERVICE_ENTRY?.enter(id);
     return;
   }
   await switchModule("presenter", { clearSearch: false });
   await loadServiceItems(id);
+  await window.MINDEX_SERVICE_ENTRY?.enter(id);
 }
 
 // ─── end Service module ───────────────────────────────────────────────────────

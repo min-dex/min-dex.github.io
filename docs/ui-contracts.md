@@ -556,3 +556,10 @@ and bulletin editor/preview in Chromium and WebKit; no service data is saved.
 - Version columns share row heights by displayed block position, including linked songs. Editing/read-only headers reserve the same 30px minimum. Longer lyrics expand the corresponding row in every column; shorter versions do not fabricate lyric blocks. This is visual alignment only and never changes forms, order, or source lyrics.
 
 - Song form UI labels separate numbered parts from A/B and put a space before @ (Verse 2 B, Chorus @, Verse 1 @A). Stored/copy labels and canonical playback tokens are unchanged; readonly editor rendering formats the label only at display time.
+
+
+## Worship entry and controller rail
+
+- Presenter topbar utilities align to the fixed right rail width and continuous left boundary. Existing playback controls remain mounted; navigation never restarts transport.
+- Operations leader inputs use 30px minimum height, 5px/10px padding, standard corners and visible keyboard focus. Content width includes padding; blur-save behavior is unchanged.
+- The manual DB refresh button and module-wide refresh entry point are removed. Explicit service navigation and tab re-entry check that service only after hydration, with a bounded wait. Drafts, saves, output, navigation and input races defer application. Source song records, transport and other services are not replaced. A failed fetch retains current content.
