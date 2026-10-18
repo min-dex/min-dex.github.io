@@ -1,0 +1,10 @@
+{
+  "change": "Song-form photo backgrounds fill output viewport with centered cover crop; no stretching.",
+  "timingDataWrites": false,
+  "scope": "form-background photos only; preview retains its own 16:9 box",
+  "checks": [
+    "Chromium/WebKit: 30 photo/viewport combinations with no black edge bands",
+    "Chromium/WebKit progression media, lyric captions, instrumental, restoration and blackout"
+  ],
+  "deployment": "pending"
+}
