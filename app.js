@@ -21997,6 +21997,11 @@ function compareServiceItemsByTemplateHierarchy(a = {}, b = {}) {
   const sectionA = Number(a._worshipSectionOrder) || Number.POSITIVE_INFINITY;
   const sectionB = Number(b._worshipSectionOrder) || Number.POSITIVE_INFINITY;
   if (sectionA !== sectionB) return sectionA - sectionB;
+  if (templateProjectionSectionKey(a) === "offering" && templateProjectionSectionKey(b) === "offering") {
+    const aPrayer = compactSearchValue(a.label || "") === "봉헌기도";
+    const bPrayer = compactSearchValue(b.label || "") === "봉헌기도";
+    if (aPrayer !== bPrayer) return aPrayer ? 1 : -1;
+  }
   const elementA = Number(a._worshipElementOrder) || Number.POSITIVE_INFINITY;
   const elementB = Number(b._worshipElementOrder) || Number.POSITIVE_INFINITY;
   if (elementA !== elementB) return elementA - elementB;
