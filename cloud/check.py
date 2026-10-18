@@ -40,6 +40,7 @@ SMOKES = (
     "smoke_lyric_parentheses.py",
     "smoke_offering_projection.py",
     "smoke_offering_toggle.py",
+    "smoke_offering_layout.py",
     "smoke_global_playback.py",
     "smoke_output_session_isolation.py",
     "smoke_output_restart.py",

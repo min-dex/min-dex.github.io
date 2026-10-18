@@ -3366,3 +3366,10 @@ envelope, immediate stop after opt-out, and worship/lyric/photo timing are uncha
 Fullscreen order headings (including sermon headings) and assignees use 80 stage
 pixels at 1920×1080 and weight 800, in output and its thumbnails. Lower-bar
 typography, song titles, scripture, audio and stored worship data are unchanged.
+
+### Offering editor alignment · 2026-10-18
+
+Hymn, special and video offering editors share an in-card toolbar: choice at
+top left, one save action at top right. Variant inputs follow below; upload,
+background and audio tools follow the inputs. No duplicate outer-header save.
+Existing element commits and feedback remain unchanged.

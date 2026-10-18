@@ -28237,6 +28237,7 @@ function presenterServiceInputControls(item, index, service, options = {}) {
   const context = presenterServiceInputItem(item, service);
   if (!context) return "";
   const { mode, model, memo } = context;
+  const offeringToggle = options.offeringToolbar ? "" : renderServiceOfferingSpecialToggle(item, service);
   if (mode === "benediction") return `
     ${memo.benedictionReplacement ? "" : renderPresenterServiceTextInputs(item, index, model, memo)}
     <button class="btn ghost" type="button" data-service-benediction-toggle="${memo.benedictionReplacement ? "benediction" : "lords_prayer"}"
@@ -28247,15 +28248,15 @@ function presenterServiceInputControls(item, index, service, options = {}) {
     return renderPresenterMonthlyCorporatePrayerInputs(item, index, memo, service?.id || model?.service?.id);
   }
   if (["praise_db", "score_db", "lyrics_db", "children_audio"].includes(mode)) {
-    return renderPresenterServicePraiseInput(item, index, model, options) + renderServiceOfferingSpecialToggle(item, service);
+    return renderPresenterServicePraiseInput(item, index, model, options) + offeringToggle;
   }
   if (mode === "scripture") {
     return renderPresenterServiceScriptureInput(item, index, memo, service);
   }
   if (mode === "asset") {
-    return renderPresenterServiceAssetInput(item, index, memo, options) + renderServiceOfferingSpecialToggle(item, service);
+    return renderPresenterServiceAssetInput(item, index, memo, options) + offeringToggle;
   }
-  return renderPresenterServiceTextInputs(item, index, model, memo) + renderServiceOfferingSpecialToggle(item, service);
+  return renderPresenterServiceTextInputs(item, index, model, memo) + offeringToggle;
 }
 
 function presenterServiceTextInputSpec(item, model, memo) {
@@ -30799,7 +30800,7 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
   const headerContext = options.showHead && inputContexts.length === 1 && !inlineSong ? { ...inputContexts[0], timingEntries: subgroup.slides } : null;
   const headerDbContext = options.showHead && inputContexts.length === 1 ? inputContexts[0] : null;
   const inputControls = renderPresenterBoardSubgroupInputControls(serviceId, subgroup, { headerActions: Boolean(headerContext), headerDbLink: Boolean(headerDbContext) });
-  const headerActions = headerContext && inputControls ? renderPresenterBoardItemActions(serviceId, headerContext) : "";
+  const headerActions = headerContext && inputControls && !serviceItemCanToggleOfferingSpecial(headerContext.item) ? renderPresenterBoardItemActions(serviceId, headerContext) : "";
   const context = presenterBoardSubgroupItemContext(serviceId, subgroup);
   const itemIndexAttr = context ? ` data-service-item-index="${escapeAttr(String(context.index))}"` : "";
   const elementIdAttr = context?.item?.id ? ` data-service-element-id="${escapeAttr(context.item.id)}"` : "";
@@ -30861,7 +30862,7 @@ function renderPresenterCitationComposer(subgroup, serviceId) {
     </div>`;
 }
 
-function renderPresenterBoardItemActions(serviceId, context) {
+function renderPresenterBoardItemActions(serviceId, context, options = {}) {
   const photoTiming = servicePraiseInputMode(context.item) === "audio_praise"
     && (context.timingEntries || []).some(({slide}) => slide.serviceTimingPage && slide.songTimingEligible);
   const audioControls = serviceItemSupportsHeaderAudio(context.item)
@@ -30871,16 +30872,16 @@ function renderPresenterBoardItemActions(serviceId, context) {
     ? renderPresenterAssetUpload(context.item, context.index, inputContext.memo, serviceId) : "";
   return `
     <div class="svc-board-subgroup-flow" data-service-item-actions data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}">
-      <span class="svc-input-status" data-service-input-status role="status" aria-live="polite"></span>
-      ${fileControls}
-      ${photoTiming ? `<button class="btn secondary" type="button" data-song-timing-open data-song-timing-focus="photos"
+      ${options.omitCommit ? "" : `<span class="svc-input-status" data-service-input-status role="status" aria-live="polite"></span>`}
+      ${options.commitOnly ? "" : fileControls}
+      ${!options.commitOnly && photoTiming ? `<button class="btn secondary" type="button" data-song-timing-open data-song-timing-focus="photos"
         data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(context.item.id)}">사진·타이밍 편집</button>` : ""}
-      ${renderPresenterProgressionAdd(context.item)}
-      ${audioControls}
-      <button class="reference-new-btn svc-board-subgroup-commit" type="button" data-service-item-commit
+      ${options.commitOnly ? "" : renderPresenterProgressionAdd(context.item)}
+      ${options.commitOnly ? "" : audioControls}
+      ${options.omitCommit ? "" : `<button class="reference-new-btn svc-board-subgroup-commit" type="button" data-service-item-commit
         data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}">
         <i data-lucide="check"></i><span>저장</span>
-      </button>
+      </button>`}
     </div>`;
 }
 
@@ -30893,13 +30894,25 @@ function renderPresenterBoardSubgroupInputControls(serviceId, subgroup = {}, opt
   const medleyRows = contexts.length > 1 && contexts.every((context) => serviceItemConnectedPraise(context.item));
   const blocks = contexts.map((originalContext) => {
     const context = { ...originalContext, timingEntries: subgroup.slides };
-    let controls = presenterServiceInputControls(context.item, context.index, context.service, { headerActions: true });
+    const offering = serviceItemCanToggleOfferingSpecial(context.item);
+    let controls = presenterServiceInputControls(context.item, context.index, context.service, { headerActions: true, offeringToolbar: offering });
     if (!controls) return "";
     const label = contexts.length > 1 && !medleyRows ? serviceElementDisplayLabel(serviceItemOrdinalDisplayLabel(context.item, context.service)) || "항목" : "";
     const audioLed = servicePraiseInputMode(context.item) === "audio_praise";
     const audioManager = renderPresenterBoardItemAudioControls(serviceId, context, {manager:true});
     const dbLink = renderServiceItemLinkControl(context.item, context.index);
     if (dbLink && (options.headerActions || options.headerDbLink || label)) controls = controls.replace(dbLink, "");
+    if (offering) return `
+      <div class="svc-board-subgroup-control-item service-offering-editor" data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(context.item.id || "")}" data-service-item-index="${escapeAttr(String(context.index))}">
+        ${label ? `<div class="svc-board-subgroup-control-label">${escapeHtml(label)}</div>` : ""}
+        <div class="service-offering-toolbar">
+          ${renderServiceOfferingSpecialToggle(context.item, context.service)}
+          ${renderPresenterBoardItemActions(serviceId, context, { commitOnly: true })}
+        </div>
+        ${controls}
+        <div class="service-offering-tools">${renderPresenterBoardItemActions(serviceId, context, { omitCommit: true })}</div>
+        ${audioManager}
+      </div>`;
     return `
       <div class="svc-board-subgroup-control-item${!options.headerActions && !label && ["lyrics_db", "score_db"].includes(servicePraiseInputMode(context.item)) ? " svc-inline-song" : ""}" data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(context.item.id || "")}" data-service-item-index="${escapeAttr(String(context.index))}">
         ${label ? `<div class="svc-board-subgroup-control-head"><span class="svc-board-subgroup-control-label">${escapeHtml(label)}</span>${dbLink}${renderPresenterBoardItemActions(serviceId, context)}</div>` : ""}
