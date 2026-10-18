@@ -3360,3 +3360,9 @@ Output and music lifecycles remain independent. This supersedes the combined
 `페이드아웃 정지` defaults to checked when no device preference exists. Explicit
 on/off choices remain in `mindex.music.fadeStop` and survive reload. The fade
 envelope, immediate stop after opt-out, and worship/lyric/photo timing are unchanged.
+
+### Fullscreen order heading and assignee typography · 2026-10-18
+
+Fullscreen order headings (including sermon headings) and assignees use 80 stage
+pixels at 1920×1080 and weight 800, in output and its thumbnails. Lower-bar
+typography, song titles, scripture, audio and stored worship data are unchanged.

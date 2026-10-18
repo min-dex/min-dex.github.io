@@ -1229,6 +1229,12 @@
   justify-self: start;
   text-align: left;
 }
+/* Fullscreen order headings and assignees share the same visual weight. */
+:is(.svc-slide-mini-output, .presenter-output-root).no-chromakey :is(.presenter-title-assignee-title, .presenter-title-assignee-order, .presenter-title-assignee-person),
+:is(.svc-slide-mini-output, .presenter-output-root).no-chromakey .presenter-title-assignee--sermon .presenter-title-assignee-content {
+  font-size: calc(80 * var(--presenter-stage-unit));
+  font-weight: 800;
+}
 :is(.svc-slide-mini-output, .presenter-output-root).no-chromakey .presenter-slide--scripture .presenter-slide-text span {
   font-size: var(--presenter-scripture-clean-size);
 }
