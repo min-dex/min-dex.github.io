@@ -8938,3 +8938,5 @@ html.ui-theme-switching:not(.presenter-output-document) *::after {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+.global-playback-fade-stop { display:flex; align-items:center; gap:8px; margin:10px 0; color:var(--ink-2); font-size:12px; cursor:pointer; }
+.global-playback-fade-stop input { margin:0; }

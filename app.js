@@ -796,6 +796,8 @@ const state = {
     repeatAllowed: true,
     playing: false,
     volumeLevel: 3,
+    fadeStopEnabled: safeStorageGet("local", "mindex.music.fadeStop", "false") === "true",
+    fadeStop: null,
     intentionalPauseUntil: 0,
     resumeTimer: null,
     resumeAttempts: 0,
@@ -9259,6 +9261,14 @@ function handleDetailSubmit(event) {
 }
 
 function handleDetailChange(event) {
+  const fadeStop = event.target.closest("[data-service-music-fade-stop]");
+  if (fadeStop) {
+    state.serviceMusic.fadeStopEnabled = fadeStop.checked;
+    safeStorageSet("local", "mindex.music.fadeStop", String(fadeStop.checked));
+    if (!fadeStop.checked && state.serviceMusic.fadeStop) finishServiceMusicUserStop();
+    renderGlobalPlaybackControls();
+    return;
+  }
   const setlistPeriod = event.target.closest("[data-setlist-period]");
   if (setlistPeriod) {
     const field = setlistPeriod.dataset.setlistPeriod;
@@ -28861,7 +28871,7 @@ function renderGlobalPlaybackControls() {
   const hasMusic = Boolean(music.sourceKey && music.audio);
   const outputOpen = Boolean(state.presenter.serviceId && isPresenterOutputWindowOpen());
   const service = state.services.find(item => item.id === state.presenter.serviceId);
-  const musicState = music.pending ? "음악 준비 중" : music.playing ? "음악 재생 중"
+  const musicState = music.fadeStop ? "음악 서서히 정지 중" : music.pending ? "음악 준비 중" : music.playing ? "음악 재생 중"
     : music.audio?.currentTime ? "음악 일시정지" : "음악 정지";
   const toggleLabel = music.pending ? "음악 준비 취소" : music.playing ? "음악 일시정지" : "음악 재생";
   const icon = music.pending ? "loader-circle" : music.playing ? "pause" : "play";
@@ -28880,6 +28890,7 @@ function renderGlobalPlaybackControls() {
         <button type="button" class="icon-btn" data-global-playback-action="toggle" title="${toggleLabel}" aria-label="${toggleLabel}" aria-pressed="${Boolean(music.playing)}"><i data-lucide="${icon}"></i></button>
         <button type="button" class="btn secondary global-playback-stop" data-global-playback-action="stop" aria-label="음악 정지" ${music.pending || music.playing || music.audio?.currentTime ? "" : "disabled"}>음악 정지</button>
       </div>
+      <label class="global-playback-fade-stop"><input type="checkbox" data-service-music-fade-stop${music.fadeStopEnabled ? " checked" : ""}>페이드아웃 정지</label>
       ${globalThis.MindexSongTiming?.transport() || ""}
       <div class="svc-presenter-window-controls global-playback-settings">${renderPresenterScreenControl()}${renderPresenterAlwaysOnTopControl()}</div>
     </section>`;
@@ -28949,6 +28960,7 @@ function getServiceMusicAudio() {
       scheduleServiceMusicResume("pause");
     });
     audio.addEventListener("ended", () => {
+      cancelServiceMusicFadeStop();
       state.serviceMusic.playSerial += 1;
       state.serviceMusic.pending = false;
       clearServiceMusicResumeTimer();
@@ -28976,7 +28988,7 @@ function getServiceMusicAudio() {
     });
     state.serviceMusic.audio = audio;
   }
-  state.serviceMusic.audio.volume = state.serviceMusic.volumeLevel / 5;
+  if (!state.serviceMusic.fadeStop) state.serviceMusic.audio.volume = state.serviceMusic.volumeLevel / 5;
   return state.serviceMusic.audio;
 }
 
@@ -29008,7 +29020,7 @@ function startServiceMusicSyncTimer() {
 }
 
 function shouldResumeInterruptedServiceMusic(audio) {
-  if (!audio || audio.ended) return false;
+  if (!audio || audio.ended || state.serviceMusic.fadeStop) return false;
   if (serviceMusicPauseIsIntentional()) return false;
   if (!state.serviceMusic.playing) return false;
   return Boolean(state.serviceMusic.sourceKey || state.serviceMusic.objectUrl || audio.currentSrc || audio.src);
@@ -29031,13 +29043,16 @@ function resumeServiceMusicAfterInterruption(reason = "") {
     state.serviceMusic.resumeAttempts = 0;
     return;
   }
+  const serial = state.serviceMusic.playSerial;
   audio.play()
     .then(() => {
+      if (serial !== state.serviceMusic.playSerial || audio.paused || audio.ended || state.serviceMusic.fadeStop) return;
       state.serviceMusic.resumeAttempts = 0;
       state.serviceMusic.playing = true;
       renderPresenterControlState();
     })
     .catch(() => {
+      if (serial !== state.serviceMusic.playSerial) return;
       if (!shouldResumeInterruptedServiceMusic(audio)) {
         state.serviceMusic.resumeAttempts = 0;
         return;
@@ -29049,6 +29064,7 @@ function resumeServiceMusicAfterInterruption(reason = "") {
 }
 
 function setServiceMusicSource(audio, source, mode, playback = null, label = "") {
+  cancelServiceMusicFadeStop();
   if (state.serviceMusic.sourceKey === source && state.serviceMusic.mode === mode) {
     audio.loop = Boolean(playback?.loop);
     if (source && !audio.currentSrc && !audio.src) audio.src = source;
@@ -29080,7 +29096,41 @@ function serviceMusicHasActivePlayback() {
   );
 }
 
+function cancelServiceMusicFadeStop() {
+  const music = state.serviceMusic;
+  if (!music.fadeStop) return;
+  clearInterval(music.fadeStop.timer);
+  music.fadeStop = null;
+  if (music.audio) music.audio.volume = music.volumeLevel / 5;
+}
+
+function finishServiceMusicUserStop() {
+  stopServiceMusicPlayback({ render: false });
+  if (state.serviceMusic.audio) state.serviceMusic.audio.currentTime = 0;
+  renderPresenterControlState();
+}
+
+function requestServiceMusicUserStop() {
+  const music = state.serviceMusic, audio = music.audio;
+  // A second stop is an immediate stop; paused/pending audio never fades.
+  if (!music.fadeStopEnabled || music.fadeStop || music.pending || !audio || audio.paused || audio.ended || !music.playing) {
+    finishServiceMusicUserStop();
+    return;
+  }
+  clearServiceMusicResumeTimer();
+  const fade = { audio, started: Date.now(), timer: null };
+  music.fadeStop = fade;
+  fade.timer = setInterval(() => {
+    if (music.fadeStop !== fade || music.audio !== audio) return;
+    const remaining = Math.max(0, 1 - (Date.now() - fade.started) / 1200);
+    audio.volume = (music.volumeLevel / 5) * remaining;
+    if (!remaining) finishServiceMusicUserStop();
+  }, 30);
+  renderPresenterControlState();
+}
+
 function stopServiceMusicPlayback(options = {}) {
+  cancelServiceMusicFadeStop();
   state.serviceMusic.playSerial += 1;
   state.serviceMusic.pending = false;
   const audio = state.serviceMusic.audio;
@@ -29132,9 +29182,7 @@ function runServiceMusicAction(action, binding = null) {
   }
   if (action === "stop") {
     if (!boundActive) return;
-    stopServiceMusicPlayback({ render: false });
-    if (state.serviceMusic.audio) state.serviceMusic.audio.currentTime = 0;
-    renderPresenterControlState();
+    requestServiceMusicUserStop();
     return;
   }
   if (action === "choose") {
@@ -29210,7 +29258,9 @@ function setServiceMusicVolume(value, binding = null) {
   if (binding?.serviceMusicSource && binding.serviceMusicServiceId !== state.serviceMusic.ownerServiceId) return;
   const level = Math.min(Math.max(Number(value) || 0, 0), 5);
   state.serviceMusic.volumeLevel = level;
-  getServiceMusicAudio().volume = level / 5;
+  const audio = getServiceMusicAudio();
+  const fade = state.serviceMusic.fadeStop;
+  audio.volume = (level / 5) * (fade ? Math.max(0, 1 - (Date.now() - fade.started) / 1200) : 1);
   renderPresenterControlState();
 }
 
