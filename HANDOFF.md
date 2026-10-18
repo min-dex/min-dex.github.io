@@ -1021,3 +1021,9 @@ editable field. Non-linked edits use calendarOnly; merging linked notifications
 must retain service invalidation. `mindex.service-list-live.js` handles membership
 only, using complete fresh ID reads. Never use cached/partial reads to infer
 remote deletions or loadWorshipData to refresh the list during editing.
+
+## Common settings/reference realtime · 2026-10-18
+
+`docs/content-realtime.md` extends the shared transport to saved service type
+settings and reference links. Detached reads preserve drafts, open documents,
+playback and scroll. No schema changes or automatic worship rewrites.

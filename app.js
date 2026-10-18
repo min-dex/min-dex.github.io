@@ -6523,6 +6523,7 @@ async function createReferenceLink(options = {}) {
     state.editingReferenceId = data.id;
     state.dirty.references = false;
     captureCleanFingerprint("references");
+    window.MINDEX_CONTENT_LIVE?.publish("references", "all");
     render();
     focusEditingReference(data.id);
     showToast("링크를 추가했습니다.");
@@ -6786,6 +6787,7 @@ async function saveReferenceLinks() {
     state.dirty.references = false;
     captureCleanFingerprint("references");
     showToast("링크를 저장했습니다.");
+    window.MINDEX_CONTENT_LIVE?.publish("references", "all");
     render();
   } catch (error) {
     showToast(referenceTableErrorMessage(error), "error");
@@ -6956,6 +6958,8 @@ async function deleteReferenceLink(id) {
     if (error) throw error;
     state.referenceLinks = state.referenceLinks.filter((item) => item.id !== id);
     state.dirty.references = false;
+    captureCleanFingerprint("references");
+    window.MINDEX_CONTENT_LIVE?.publish("references", "all");
     render();
     showToast("링크를 삭제했습니다.");
   } catch (error) {
@@ -7459,6 +7463,7 @@ async function saveDirtyServiceTypes() {
       .update(payload)
       .eq("id", type._worshipId || canonicalWorshipServiceTypeId(type.id));
     if (error) throw error;
+    window.MINDEX_CONTENT_LIVE?.publish("service-settings", "all");
   }
   state.dirtyServiceTypeIds.clear();
 }

@@ -380,3 +380,9 @@ wake/reconnect and every minute. See `docs/content-realtime.md` for scope and li
 All editable calendar fields now update in place. Confirmed worship create/delete
 receipts refresh list membership without replacing open editors or aggregates.
 See `docs/operations-realtime.md` for guards, retained open deletions and recovery.
+
+## Common settings/reference realtime · 2026-10-18
+
+`docs/content-realtime.md` extends the shared transport to saved service type
+settings and reference links. Detached reads preserve drafts, open documents,
+playback and scroll. No schema changes or automatic worship rewrites.

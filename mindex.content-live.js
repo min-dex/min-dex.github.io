@@ -9,7 +9,7 @@
   function schedule(delay=200){if(!timer&&pending.size)timer=setTimeout(()=>{timer=null;void flush();},delay);}
   function remember(id){seen.add(id);if(seen.size>256)seen.delete(seen.values().next().value);}
   function receive(m){
-    if(!m||m.project!==state.config.url||typeof m.id!=='string'||!['song','bulletin','bulletin-template','service-list'].includes(m.kind)||typeof m.recordId!=='string'||!m.recordId||seen.has(m.id))return;
+    if(!m||m.project!==state.config.url||typeof m.id!=='string'||!['song','bulletin','bulletin-template','service-list','references','service-settings'].includes(m.kind)||typeof m.recordId!=='string'||!m.recordId||seen.has(m.id))return;
     remember(m.id);if(m.kind==='service-list')window.MINDEX_SERVICE_LIST_LIVE?.invalidate();pending.set(identity(m),m);schedule();
   }
   function publish(kind,recordId){
@@ -23,8 +23,12 @@
   function praiseBlocked(){return state.module!=='praise'||departmentRefreshBlocked()||songLoadPromise||state.dirty.song||state.dirty.forms
     ||(state.cleanFingerprints.praise&&dirtyModuleFingerprint('praise')!==state.cleanFingerprints.praise);}
   async function rows(client,table,filter){
-    const result=await fetchAllRows(()=>filter(client.from(table).select('*')));
-    if(result.error)throw result.error;return result.data||[];
+    const result=await fetchAllRows(()=>({async range(from,to){
+      const response=await filter(client.from(table).select('*')).range(from,to);
+      if(!response?.error&&!Array.isArray(response?.data))throw Error('Incomplete catalog page');
+      return response;
+    }}));
+    if(result.error)throw result.error;if(!Array.isArray(result.data))throw Error("Incomplete catalog response");return result.data;
   }
   async function refreshSong(id){
     if(praiseBlocked())return false;
@@ -61,6 +65,40 @@
     if(refs.songList&&listTop!=null)refs.songList.scrollTop=listTop;
     return true;
   }
+  const sharedContext=()=>JSON.stringify([state.module,state.selectedServiceId,state.selectedServiceTypeId,state.editingReferenceId,state.editingReferenceGroupKey,state.search,state.pageTabIndex]);
+  function sharedBlocked(kind){
+    if(departmentRefreshBlocked()||hasDirtyChanges()||serviceDataLoadPromise||activeServiceSavePromise)return true;
+    if(kind==='references')return state.module!=='references'||referenceLinksLoadPromise||state.editingReferenceId||state.editingReferenceGroupKey
+      ||(state.cleanFingerprints.references&&dirtyModuleFingerprint('references')!==state.cleanFingerprints.references);
+    // Defaults participate in projection: never switch them under an open document.
+    return !['home','service','presenter','bulletin'].includes(state.module)||state.dirtyServiceTypeIds.size||state.newServiceForm
+      ||(['service','presenter','bulletin'].includes(state.module)&&state.selectedServiceId)
+      ||(state.module==='service'&&state.cleanFingerprints.service&&dirtyModuleFingerprint('service')!==state.cleanFingerprints.service);
+  }
+  async function refreshShared(kind){
+    if(sharedBlocked(kind))return false;
+    const reference=kind==='references',client=state.client,project=state.config.url,revision=edit,context=sharedContext();
+    const previous=reference?state.referenceLinks:state.serviceTypes;
+    const signature=JSON.stringify(dirtyComparableValue(previous));
+    const result=await rows(client,reference?'mindex_reference_links':'mindex_worship_service_types',q=>q.order('id'));
+    if(client!==state.client||project!==state.config.url||revision!==edit||context!==sharedContext()||sharedBlocked(kind)
+      ||previous!==(reference?state.referenceLinks:state.serviceTypes)||signature!==JSON.stringify(dirtyComparableValue(previous)))return false;
+    const next=reference?result.map(normalizeReferenceLink).sort(sortReferenceLinks):result.map(normalizeWorshipServiceType).sort((a,b)=>a.sort_order-b.sort_order||a.id.localeCompare(b.id));
+    const comparable=value=>JSON.stringify(dirtyComparableValue([...value].sort((a,b)=>a.id.localeCompare(b.id))));
+    if(comparable(previous)===comparable(next))return true;
+    // An empty type catalogue cannot safely replace the installed defaults.
+    if(!reference&&!next.length)throw Error("Empty service settings response");
+    const viewport=captureDetailViewportSnapshot(),listTop=refs.songList?.scrollTop;
+    if(reference){state.referenceLinks=next;state.referenceLinksLoaded=true;state.referenceError='';captureCleanFingerprint('references');renderReferencesDetail();}
+    else{
+      state.serviceTypes=next;
+      if(state.module==='service')captureCleanFingerprint('service');
+      if(state.module==='bulletin')renderBulletinList();else renderServiceList();
+      if(state.module==='service'&&state.selectedServiceTypeId===SERVICE_TEMPLATES_PANEL_ID)renderServiceTemplatesDetail();
+    }
+    restoreDetailViewportSnapshot(viewport);if(refs.songList&&listTop!=null)refs.songList.scrollTop=listTop;
+    return true;
+  }
   async function flush(){
     if(busy||!pending.size)return;
     if(departmentRefreshBlocked()){schedule(2000);return;}
@@ -68,7 +106,7 @@
     try{
       for(const [id,m] of [...pending]){
         if(m.project!==state.config.url){if(pending.get(id)===m)pending.delete(id);continue;}
-        const done=m.kind==='service-list'?await window.MINDEX_SERVICE_LIST_LIVE?.refresh():m.kind==='song'?await refreshSong(m.recordId):await controller()?.refreshRemote(m.kind,m.recordId);
+        const done=['references','service-settings'].includes(m.kind)?await refreshShared(m.kind):m.kind==='service-list'?await window.MINDEX_SERVICE_LIST_LIVE?.refresh():m.kind==='song'?await refreshSong(m.recordId):await controller()?.refreshRemote(m.kind,m.recordId);
         if(done&&pending.get(id)===m)pending.delete(id);
       }
     }catch{delay=15000;}
@@ -79,6 +117,7 @@
     probing=true;
     try{
       window.MINDEX_SERVICE_LIST_LIVE?.reconcile();
+      for(const kind of ['references','service-settings'])if(!sharedBlocked(kind))receive({id:createUuid(),project:state.config.url,kind,recordId:'all'});
       // Only the visible record is fetched on recovery; no full lyrics corpus polling.
       if(state.module==='praise'&&state.selectedSongId)receive({id:createUuid(),project:state.config.url,kind:'song',recordId:state.selectedSongId});
       const target=controller()?.remoteIdentity();
