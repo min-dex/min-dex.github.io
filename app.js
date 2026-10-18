@@ -13352,8 +13352,10 @@ async function calendarAssigneeRowsForNewService(service) {
     const label = compactSearchValue(element.source_ref?.label || "");
     const person = label === "대표기도" || label === "기도"
       ? defaultServicePrayerLeader(service)
-      : label === "봉헌기도" && worshipAppServiceTypeId(service.type_id) === "youth"
-        ? calendarAssigneeValueForService(service, ["youth_offering_prayer"]) : "";
+      : label === "봉헌기도" && worshipAppServiceTypeId(service.type_id) === "children"
+        ? calendarAssigneeValueForService(service, ["children_prayer"])
+        : label === "봉헌기도" && worshipAppServiceTypeId(service.type_id) === "youth"
+          ? calendarAssigneeValueForService(service, ["youth_offering_prayer"]) : "";
     if (!person && !copiedAnnouncementElementIds.has(element.id)) return [];
     return [{ ...element, person: cleanServiceAssignee(person),
       source_ref: { ...element.source_ref, placeholder: false } }];
