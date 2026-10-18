@@ -56,3 +56,10 @@ assert.equal(replay.missing.length,0);
 assert.deepEqual(Array.from(replay.items,f=>f.id),['b','a','b']);
 assert.equal(c.findPresenterFormForPresetLabel(reopened,'Coda@A'),null);
 console.log('PASS Coda label-only persistence/reopen and B-A-B playback retain IDs and complete lyrics');
+
+for(const [raw,shown] of [['V2B','Verse 2 B'],['C1A','Chorus 1 A'],['PC2B','Pre-Chorus 2 B'],['B1A','Bridge 1 A'],['Coda2B','Coda 2 B'],['V2','Verse 2'],['CA','Chorus A']]) {
+ assert.equal(c.presenterFormPresetDisplayLabel(raw),shown);
+ assert.equal(c.songFormPresetDisplayLabel(raw),shown);
+ assert.equal(c.normalizePresenterFormPresetLabel(raw).key,c.normalizePresenterFormPresetLabel(shown).key);
+}
+console.log('PASS spaced A/B display labels and unchanged form identity');
