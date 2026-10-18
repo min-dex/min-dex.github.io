@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-hymn-reviewed-fixes",
+  "version": "20261018-controller-meta-order",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "a11df5717ad7c14f736a353b93e9568afbe32087e2d65e4c3325820954b52aaa",
-  "runtime_sha256": "e2d48d26909238e4be2fc6a610569f3399be55a70321ec13f2d03a2977e078c7",
+  "source_sha256": "7ba5b4da1d174644f6aee1d70f9197dde05b7d3ed53050c7e7a0fdd719e31cb3",
+  "runtime_sha256": "6d116c86342eb90abb46008622aaebae1d50e6e9d69e2f9f2fe0ae67bf9f7663",
   "source_bytes": 1513501,
   "runtime_bytes": 1070684,
-  "source_gzip": 338827,
-  "runtime_gzip": 265449
+  "source_gzip": 338824,
+  "runtime_gzip": 265446
 }

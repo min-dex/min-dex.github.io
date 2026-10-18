@@ -7618,6 +7618,8 @@ body.is-chromium .svc-slide-thumb-wrap.active:has(.svc-slide-thumb:focus-visible
   padding: 0 1px;
 }
 .svc-slide-thumb-no {
+  margin-left: auto;
+  flex-shrink: 0;
   display: inline-grid;
   min-width: 18px;
   height: 18px;
