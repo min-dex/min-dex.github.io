@@ -3282,3 +3282,7 @@ The bundled score manifest is keyed by new-hymnal numbers. A source song with
 as a new-hymnal score song. Lyrics remain available. Existing songs with an
 explicit numeric new-hymnal number keep their current score mapping, including
 linked old-edition lyric versions. No existing service links are rewritten.
+
+## 전체화면 대기 안내 굵기 · 2026-10-18
+
+전체화면 예배 대기 화면의 윗문구는 font-weight 600을 직접 지정한다. 기존 공통 meta 기본값도 600이었으며, 공통 토큰 변경과 무관하게 유지하기 위한 고정이다. 문구 크기·아랫문구·로고·배경은 유지한다.
