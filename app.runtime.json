@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-controller-meta-order",
+  "version": "20261019-live-latency",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "c409664ce6ff380f7b564a005a4c6a0ff5f479a4c96791f123970598358acc62",
-  "runtime_sha256": "4e987c5d04802d7bb8943be2b85a76c5fc55a6530e04baa2f305be17d4705e64",
-  "source_bytes": 1513832,
-  "runtime_bytes": 1070913,
-  "source_gzip": 338880,
-  "runtime_gzip": 265495
+  "source_sha256": "16ea254e3876054f53758b98be3a05cee3ecda75776c6eea88b77ecf23d15269",
+  "runtime_sha256": "7d0b7fa9978fa897cd944c30b9c2df752f1f32b4d7e25203fca65d1440781086",
+  "source_bytes": 1514321,
+  "runtime_bytes": 1071082,
+  "source_gzip": 339163,
+  "runtime_gzip": 265609
 }
