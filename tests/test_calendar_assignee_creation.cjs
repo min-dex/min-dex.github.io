@@ -18,14 +18,26 @@ c.assert=assert;
      return aggregate;
    }
  });
- assert.equal((await calendarAssigneeRowsForNewService({id:'child-original',type_id:'children',date:'2026-09-13'})).elements.length,0,'Do not invent a prayer slot absent from the template');
+ const childRows=await calendarAssigneeRowsForNewService({id:'child-original',type_id:'children',date:'2026-09-13'});
+ assert.equal(childRows.elements.length,1);
+ assert.equal(childRows.elements[0].source_ref.label,'봉헌기도');
+ assert.equal(childRows.elements[0].person,'어린이 담당');
+ const originalChildPrayer=state.calendarData[0].children_prayer;state.calendarData[0].children_prayer='';
+ assert.equal((await calendarAssigneeRowsForNewService({id:'child-blank',type_id:'children',date:'2026-09-13'})).elements.length,0,'Blank child roster must not borrow nursery names');
+ state.calendarData[0].children_prayer=originalChildPrayer;
  SERVICE_ORDER_TEMPLATE_FALLBACKS.nursery=[...SERVICE_ORDER_TEMPLATE_FALLBACKS.nursery,publicWorshipPrayerStep()];
  SERVICE_ORDER_TEMPLATE_FALLBACKS.children=[...SERVICE_ORDER_TEMPLATE_FALLBACKS.children,publicWorshipPrayerStep()];
  const payloads=['nursery','children','youth','young-adult'].map(type=>autoWorshipServicePayload({typeId:type,date:'2026-09-13'}));
- const created=await insertWorshipServicesWithCalendarAssignees(payloads);assert.equal(created.length,4);assert.equal(writes,4,'Each service must use one atomic aggregate creation');assert.equal(stored.mindex_worship_elements.length,5);
+ const created=await insertWorshipServicesWithCalendarAssignees(payloads);assert.equal(created.length,4);assert.equal(writes,4,'Each service must use one atomic aggregate creation');assert.equal(stored.mindex_worship_elements.length,6);
  state.services=created.map(normalizeWorshipService);
  state.calendarData[0].young_adult_prayer='바뀐 교회력';
  for(const service of state.services){const rows=groupWorshipElements(stored.mindex_worship_sections,stored.mindex_worship_elements)[service.id];const prayer=rows.find(x=>x.label==='대표기도');const expected=service.type_id==='nursery'?'유치부 담당':service.type_id==='children'?'어린이 담당':service.type_id==='youth'?'청소년 담당':'청년 담당';assert.equal(prayer.assignee,expected);assert.equal(serviceItemEditableAssigneeValue(prayer,service),expected);assert.equal(serviceItemEditableAssigneeValue({...prayer,assignee:''},service),'','Explicit clear must not refill');}
+ const child=state.services.find(s=>s.type_id==='children');
+ const offering=groupWorshipElements(stored.mindex_worship_sections,stored.mindex_worship_elements)[child.id].find(x=>x.label==='봉헌기도');
+ state.calendarData[0].children_prayer='바뀐 명단';
+ assert.equal(serviceItemEditableAssigneeValue(offering,child),'어린이 담당');
+ assert.equal(serviceItemEditableAssigneeValue({...offering,assignee:'직접 수정'},child),'직접 수정');
+ assert.equal(serviceItemEditableAssigneeValue({...offering,assignee:''},child),'');
  const before=stored.mindex_worship_services.length;fail=true;await assert.rejects(insertWorshipServicesWithCalendarAssignees([autoWorshipServicePayload({typeId:'young-adult',date:'2026-09-13'})]),/fixture write failure/);assert.equal(stored.mindex_worship_services.length,before,'Partial creation rollback');assert.equal(state.services.length,4);
  const oldLoad=loadCalendarData;loadCalendarData=async()=>{};state.calendarLoaded=false;const beforeWrites=writes;await assert.rejects(insertWorshipServicesWithCalendarAssignees([autoWorshipServicePayload({typeId:'youth',date:'2026-09-13'})]),/교회력/);assert.equal(writes,beforeWrites,'Calendar failure must precede writes');loadCalendarData=oldLoad;
  fail=false;state.calendarLoaded=true;
