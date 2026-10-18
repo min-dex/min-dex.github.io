@@ -69,6 +69,8 @@ try:
    assert not d.locator('[data-beat-enabled]').is_checked()
    d.locator('[data-timing-file]').set_input_files({'name':'fixture.wav','mimeType':'audio/wav','buffer':buf.getvalue()})
    page.wait_for_function("document.querySelector('[data-song-timing-dialog] audio').duration>19")
+   # Both fixtures exceed 19 seconds; old duration alone does not await replacement.
+   page.wait_for_function("document.querySelector('[data-beat-bpm]').value === ''")
    assert d.locator('[data-beat-bpm]').input_value()==''
    d.locator('[data-beat-analyze]').click()
    page.wait_for_function("document.querySelector('[data-beat-status]').textContent.includes('확신할 수 없어요')")
