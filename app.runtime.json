@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-union-hymn-score-guard",
+  "version": "20261018-bulletin-notices",
   "options": {
     "compress": false,
     "mangle": {

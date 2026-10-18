@@ -245,3 +245,22 @@ const youthGreeting=B.resolveSource({service:{id:'youth-greeting',service_date:'
 assert.equal(youthGreeting.welcome,youthWelcome);
 assert.equal(youthGreeting.news,'1. 이번 주 모임 안내');
 console.log('PASS youth welcome retains explicit bold and stays separate from news');
+
+const repeatedPrayer='◇ 청년부 **기도 모임**(매주 토요일 오전 10시 30분 / 1층 청년부실)에 많은 참여 바랍니다.';
+const repeatedBan='◇ 검단우리교회는 신천지 추수꾼 및 각종 이단의 출입을 금지합니다.';
+for(const marker of ['◇','◆','◈']){
+ const combined='① 이번 주 모임 안내\n'+repeatedPrayer.replace('◇',marker)+'\n'+repeatedBan.replace('◇',marker);
+ const legacy={fields:{news:combined,notices:'◈ 청년부 기도 모임(매주 토요일 오후 3시)에 참여 바랍니다.\n◈ 검단우리교회는 신천지 출입을 금지합니다.'},settings:{},source:{},profile:{}};
+ const before=JSON.stringify(legacy);
+ assert.equal(B.fieldValue(legacy,'news'),'① 이번 주 모임 안내');
+ assert.equal(B.fieldValue(legacy,'notices'),legacy.fields.notices,'Existing footer wording and date-specific time win');
+ assert.equal(JSON.stringify(legacy),before,'Display normalization never mutates saved data');
+ legacy.fields.notices='';
+ assert.equal((B.fieldValue(legacy,'notices').match(/기도 모임/g)||[]).length,1);
+ assert.match(B.fieldValue(legacy,'notices'),/\*\*기도 모임\*\*/);
+ assert.match(B.fieldValue(legacy,'notices'),/출입을 금지/);
+ const sourceOnly={fields:{},settings:{},source:{news:combined},profile:{notices:''}};
+ assert.equal(B.fieldValue(sourceOnly,'news'),'① 이번 주 모임 안내');
+ assert.match(B.fieldValue(sourceOnly,'notices'),/오전 10시 30분/);
+}
+console.log('PASS diamond recurring notices move to footer for old fields and snapshots, without duplicates or stored mutations');

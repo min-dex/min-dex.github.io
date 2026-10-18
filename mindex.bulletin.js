@@ -134,11 +134,11 @@
   // Only recognize explicit paragraphs; unknown wording stays in the news field.
   function announcementParts(raw) {
     const parts={news:[],welcome:[],notices:[]};
-    for(const paragraph of raw.split(/\n(?=\s*(?:\*\*)?(?:\d+[.)]|[①-⑳◈])\s*)|\n\s*\n/)) {
+    for(const paragraph of raw.split(/\n(?=\s*(?:\*\*)?(?:\d+[.)]|[①-⑳◈◇◆])\s*)|\n\s*\n/)) {
       const lines=paragraph.trim().split("\n");
       if(/^오늘도 (?:청년부|청소년부|어린이부) 예배에 오신 여러분을/.test(window.MindexInlineText.plain(lines[0]))&&/환영.*축복/.test(window.MindexInlineText.plain(lines[0])))parts.welcome.push(lines.shift());
       const text=lines.join("\n").trim();if(!text)continue;
-      let skip=window.MindexInlineText.plain(text).match(/^(?:\d+[.)]|[①-⑳◈])\s*/)?.[0].length||0;
+      let skip=window.MindexInlineText.plain(text).match(/^(?:\d+[.)]|[①-⑳◈◇◆])\s*/)?.[0].length||0;
       const body=window.MindexInlineText.runs(text).map(run=>{
         const value=run.text.slice(skip);skip=Math.max(0,skip-run.text.length);
         return value&&run.bold?`**${value}**`:value;
@@ -760,7 +760,24 @@
     return window.MindexInlineText.runs(value).map(r=>({text:r.text,...(r.bold?{weight:700}:{})}));
   }
 
+  function recurringNoticeKey(value) {
+    const plain=window.MindexInlineText.plain(value).replace(/^\s*(?:[①-⑳◈◇◆]|\d+[.)])\s*/,"").trim();
+    if(/^청년부\s*기도 모임\s*\(매주/.test(plain))return "prayer-meeting";
+    if(/^검단우리교회는 신천지/.test(plain))return "entry-notice";
+    return plain;
+  }
   function fieldValue(doc,key) {
+    if(key!=="news"&&key!=="notices")return rawFieldValue(doc,key);
+    // Saved drafts and source snapshots can still contain the old combined copy.
+    const parts=announcementParts(String(rawFieldValue(doc,"news")||""));
+    if(key==="news")return [parts.welcome,parts.news].filter(Boolean).join("\n");
+    const current=String(rawFieldValue(doc,"notices")||"");
+    if(!parts.notices)return current;
+    const seen=new Set(current.split("\n").filter(Boolean).map(recurringNoticeKey));
+    const extra=parts.notices.split("\n").filter(line=>{const key=recurringNoticeKey(line);if(seen.has(key))return false;seen.add(key);return true;});
+    return [current,...extra].filter(Boolean).join("\n");
+  }
+  function rawFieldValue(doc,key) {
     if(key==="brand"&&!Object.hasOwn(doc.fields,key)&&!Object.hasOwn(doc.inherited?.common||{},key))return "RIA\n청년부";
     if(key==="eventsText") {
       const month=doc.settings.eventsMonth||doc.source?.eventsMonth;
