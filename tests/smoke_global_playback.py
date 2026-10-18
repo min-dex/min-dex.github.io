@@ -1,4 +1,6 @@
 """Global transport uses the active owner across views; no real audio or DB writes."""
+import os
+os.environ["MINDEX_SMOKE_OFFLINE"] = "1"
 from urllib.parse import urlsplit
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
@@ -63,6 +65,24 @@ def main():
                         assert page.locator('#monitorPanelBtn').inner_text()==''
                         assert page.locator('#monitorPanelBtn').get_attribute('aria-label')=='기기 상태'
                         assert page.locator('#monitorPanelBtn').evaluate('e=>e.scrollWidth<=e.clientWidth+1')
+                        # Before icon hydration and after SVG replacement, the utility
+                        # control must keep the same topbar hit target and centered icon.
+                        for hydrated in (False, True):
+                            page.evaluate('''hydrated => {
+                              const button=document.getElementById('monitorPanelBtn');
+                              button.innerHTML='<i data-lucide="activity"></i>';
+                              if(hydrated) {
+                                refreshIcons(button);
+                                if(button.firstElementChild.tagName.toLowerCase()!=='svg') throw Error('SVG not rendered');
+                              }
+                            }''', hydrated)
+                            assert page.locator('#monitorPanelBtn').evaluate('''button => {
+                              const b=button.getBoundingClientRect(), i=button.firstElementChild.getBoundingClientRect();
+                              const size=parseFloat(getComputedStyle(button).getPropertyValue('--topbar-btn-size'));
+                              return b.width===size && b.height===size && i.width===16 && i.height===16
+                                && Math.abs(i.x+i.width/2-b.x-b.width/2)<1
+                                && button.scrollWidth<=button.clientWidth+1;
+                            }'''), (engine,width,hydrated)
                         box=panel.bounding_box()
                         assert box['x']>=0 and box['x']+box['width']<=width+1,box
                         page.screenshot(path=f'/tmp/mindex-global-panel-{engine}-{width}.png')

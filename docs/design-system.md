@@ -114,3 +114,10 @@ surface on hover and a2px inset accent outline for keyboard focus. Apply these
 to the actual summary, not its details body; native Enter/Space toggling stays.
 Per-item summary metadata is plain text with5px gaps, without panel-colored
 pills or their horizontal padding. Preserve truncation and warning semantics.
+
+## Device-status control · 2026-10-18
+
+The icon-only device-status button inherits the standard topbar hit target;
+remove obsolete text-button width/padding overrides. Both the Lucide placeholder
+and rendered SVG reserve a centered 16px box. The global playback smoke checks
+this at desktop and mobile widths and is included in the offline release gate.
