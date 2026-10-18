@@ -4,6 +4,7 @@ import html
 import json
 import os
 import re
+import sys
 import threading
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -20,6 +21,30 @@ except ModuleNotFoundError as error:
     PLAYWRIGHT_IMPORT_ERROR = error
 else:
     PLAYWRIGHT_IMPORT_ERROR = None
+
+
+    # WebKit may create native macOS Spaces even in headless mode. Apply to
+    # every new context, including its popups, without changing production code.
+    if sys.platform == "darwin" and os.environ.get("MINDEX_ALLOW_NATIVE_FULLSCREEN_TESTS") != "1":
+        from playwright.sync_api import Browser
+
+        _new_context_without_fullscreen_guard = Browser.new_context
+
+        def _background_test_context(self, *args, **kwargs):
+            context = _new_context_without_fullscreen_guard(self, *args, **kwargs)
+            context.add_init_script("""(() => {
+              const blocked = () => Promise.reject(new DOMException(
+                'Native fullscreen blocked by Mindex background test safety policy',
+                'NotAllowedError'));
+              for (const name of ['requestFullscreen', 'webkitRequestFullscreen',
+                                  'webkitRequestFullScreen']) {
+                Object.defineProperty(Element.prototype, name,
+                  {value: blocked, configurable: true, writable: true});
+              }
+            })();""")
+            return context
+
+        Browser.new_context = _background_test_context
 
 
 APP_DIR = Path(__file__).resolve().parents[1]
