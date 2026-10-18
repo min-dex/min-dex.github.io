@@ -575,3 +575,5 @@ and bulletin editor/preview in Chromium and WebKit; no service data is saved.
 - Link groups use an internal placeholder and explicit accessible name. Reference editor columns align at the bottom without stretching caption-free inputs; URL captions and focus indicators remain.
 
 - Worship item settings use 30px single-line input/select controls with identical vertical sizing. Keep field captions, focus styling and the existing multiline textarea sizing/resizing unchanged.
+
+- Timing dialogs constrain audio/photo file selectors to the available content width and wrap unbroken audio filenames. Labels, focus styles, multiline sizing and audio/playback/save behavior remain unchanged.
