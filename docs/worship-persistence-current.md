@@ -424,3 +424,8 @@ and draft protection clears. Existing aggregates/baselines are not list data.
 Common settings/reference invalidations now share content realtime; see
 `content-realtime.md`. Remote default changes are deferred while a worship,
 Presenter or bulletin document is open; atomic baselines/documents stay intact.
+
+List summary and archive invalidations now follow confirmed atomic saves as well
+as create/delete. Remote list reads never adopt atomic baselines; archive reads
+are detached metadata only. Existing live/import leader CAS paths are retained.
+See operations-realtime.md for draft, playback and mixed-snapshot guards.

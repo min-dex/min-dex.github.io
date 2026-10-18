@@ -9,12 +9,13 @@
   function schedule(delay=200){if(!timer&&pending.size)timer=setTimeout(()=>{timer=null;void flush();},delay);}
   function remember(id){seen.add(id);if(seen.size>256)seen.delete(seen.values().next().value);}
   function receive(m){
-    if(!m||m.project!==state.config.url||typeof m.id!=='string'||!['song','bulletin','bulletin-template','service-list','references','service-settings'].includes(m.kind)||typeof m.recordId!=='string'||!m.recordId||seen.has(m.id))return;
+    if(!m||m.project!==state.config.url||typeof m.id!=='string'||!['song','bulletin','bulletin-template','service-list','references','service-settings','setlist-archive'].includes(m.kind)||typeof m.recordId!=='string'||!m.recordId||seen.has(m.id))return;
     remember(m.id);if(m.kind==='service-list')window.MINDEX_SERVICE_LIST_LIVE?.invalidate();pending.set(identity(m),m);schedule();
   }
   function publish(kind,recordId){
     if(!state.config.url||!recordId)return;
     const m={id:createUuid(),project:state.config.url,kind,recordId};remember(m.id);
+    if(kind==='setlist-archive'){pending.set(identity(m),m);schedule();}
     try{channel?.postMessage(m);}catch{}
     try{localStorage.setItem(key,JSON.stringify(m));}catch{}
     connectDepartmentRealtime();
@@ -106,7 +107,7 @@
     try{
       for(const [id,m] of [...pending]){
         if(m.project!==state.config.url){if(pending.get(id)===m)pending.delete(id);continue;}
-        const done=['references','service-settings'].includes(m.kind)?await refreshShared(m.kind):m.kind==='service-list'?await window.MINDEX_SERVICE_LIST_LIVE?.refresh():m.kind==='song'?await refreshSong(m.recordId):await controller()?.refreshRemote(m.kind,m.recordId);
+        const done=m.kind==='setlist-archive'?await window.MINDEX_ARCHIVE_LIVE?.refresh():['references','service-settings'].includes(m.kind)?await refreshShared(m.kind):m.kind==='service-list'?await window.MINDEX_SERVICE_LIST_LIVE?.refresh():m.kind==='song'?await refreshSong(m.recordId):await controller()?.refreshRemote(m.kind,m.recordId);
         if(done&&pending.get(id)===m)pending.delete(id);
       }
     }catch{delay=15000;}
@@ -117,6 +118,7 @@
     probing=true;
     try{
       window.MINDEX_SERVICE_LIST_LIVE?.reconcile();
+      window.MINDEX_ARCHIVE_LIVE?.reconcile();
       for(const kind of ['references','service-settings'])if(!sharedBlocked(kind))receive({id:createUuid(),project:state.config.url,kind,recordId:'all'});
       // Only the visible record is fetched on recovery; no full lyrics corpus polling.
       if(state.module==='praise'&&state.selectedSongId)receive({id:createUuid(),project:state.config.url,kind:'song',recordId:state.selectedSongId});
