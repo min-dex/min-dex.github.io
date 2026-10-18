@@ -3407,3 +3407,8 @@ Offering cards at container widths of 550px and above place mode/title on one
 row and version/form/assignee on the next. Narrow cards retain wrapping; the
 shared choice/save toolbar and file editor remain unchanged. No save or data
 behavior changes.
+
+Offering choice/save/background/upload buttons use a shared 30px height and
+70px minimum width, with 50px choices on narrow cards. Keep the choice/save
+positions stable. Praise assignee placeholders show the field name only, without
+a repeated inferred example; accessible names and saved assignees are unchanged.

@@ -28521,7 +28521,7 @@ function renderPresenterServicePraiseInput(item, index, model, options = {}) {
     ${model.showAssignee ? `
       <label class="svc-presenter-input-field svc-presenter-input-field--assignee">
         <input class="svc-presenter-input-control" type="text" data-service-item-field="assignee" data-service-item-index="${index}"
-          value="${escapeAttr(model.assigneeValue || "")}" placeholder="${escapeAttr(`${assigneeLabel}${inferServiceItemAssignee(item) ? ` (예: ${inferServiceItemAssignee(item)})` : ""}`)}" aria-label="${escapeAttr(`${item.label || "항목"} 담당`)}" />
+          value="${escapeAttr(model.assigneeValue || "")}" placeholder="${escapeAttr(assigneeLabel)}" aria-label="${escapeAttr(`${item.label || "항목"} 담당`)}" />
       </label>` : ""}`;
 }
 

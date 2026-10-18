@@ -9044,3 +9044,20 @@ body[data-module="presenter"] .topbar-actions > .icon-btn { flex: 0 0 35px; widt
   .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-form-hint.compact { grid-column: 2; grid-row: 3; }
   .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor > .svc-presenter-input-field--assignee { grid-column: 3; grid-row: 3; }
 }
+
+.service-offering-editor :is(.service-offering-modes > .btn, .svc-board-subgroup-commit, .svc-reference-media-upload, .svc-board-subgroup-audio-upload, .svc-progression-media > summary) {
+  display: inline-flex; align-items: center; justify-content: center;
+  box-sizing: border-box; height: 30px; min-height: 30px; min-width: 70px;
+  padding: 0 10px; gap: 5px; line-height: 18px; font-size: var(--ui-label-size);
+  font-weight: 600; border: 1px solid var(--line); border-radius: var(--r);
+  background: var(--ui-surface-field); color: var(--ink);
+}
+.service-offering-editor .service-offering-modes { gap: 5px; }
+.service-offering-editor .service-offering-modes > .btn[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
+.service-offering-editor :is(.service-offering-modes > .btn, .svc-board-subgroup-commit, .svc-reference-media-upload, .svc-board-subgroup-audio-upload, .svc-progression-media > summary) svg { width: 14px; height: 14px; }
+@container (max-width: 400px) {
+  .service-offering-editor .service-offering-modes > .btn { min-width: 50px; padding: 0 5px; }
+}
+
+.service-offering-editor .svc-progression-media > summary::before { content: "▸"; font-size: 10px; }
+.service-offering-editor .svc-progression-media[open] > summary::before { content: "▾"; }

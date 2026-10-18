@@ -47,6 +47,11 @@ try:
        const save=editor.querySelector('[data-service-item-commit]');
        if(document.querySelectorAll('[data-service-item-commit]').length!==1)throw Error('duplicate save');
        if(editor.scrollWidth>editor.clientWidth+1)throw Error('editor overflow');
+       for(const button of editor.querySelectorAll('.service-offering-modes > .btn, .svc-board-subgroup-commit, .svc-reference-media-upload, .svc-board-subgroup-audio-upload, .svc-progression-media > summary')) {
+         if(Math.abs(box(button).h-30)>1)throw Error('inconsistent action height');
+       }
+       const assignee=editor.querySelector('.svc-presenter-input-field--assignee input');
+       if(assignee && assignee.placeholder.includes('예:'))throw Error('redundant assignee example');
        return {mode:box(editor.querySelector('.service-offering-modes')),save:box(save)};
      }'''))
     assert bounds[0]==bounds[1]==bounds[2], (width,bounds)
