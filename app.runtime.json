@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-hymn223-edge",
+  "version": "20261018-home-sermon-meta",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "c409664ce6ff380f7b564a005a4c6a0ff5f479a4c96791f123970598358acc62",
-  "runtime_sha256": "4e987c5d04802d7bb8943be2b85a76c5fc55a6530e04baa2f305be17d4705e64",
-  "source_bytes": 1513832,
-  "runtime_bytes": 1070913,
-  "source_gzip": 338880,
-  "runtime_gzip": 265495
+  "source_sha256": "89777805537c5c679d4f2a0daa540551eaae1b576b1544e914d486aa0fea30bc",
+  "runtime_sha256": "877cb3a7ea9f1943e92df0225bab805eab2caf6ea7b98210b90953474c5ced6b",
+  "source_bytes": 1514363,
+  "runtime_bytes": 1071238,
+  "source_gzip": 338982,
+  "runtime_gzip": 265592
 }

@@ -4003,7 +4003,8 @@ body[data-theme="dark"] .service-week-card:hover {
 .service-week-card-preview .service-card-sermon-reference {
   font-size: var(--ui-meta-size);
   line-height: 1.15;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 /* ── Service viewer (detail) ─────────────────────────────────────────────── */
 .service-viewer {

@@ -26946,7 +26946,7 @@ function renderServiceWeekDay(date, services) {
 
 function renderServiceWeekCard(service) {
   const noGathering = serviceIsNoGathering(service);
-  const preview = serviceItemPreviewParts(service.id);
+  const preview = serviceItemPreviewParts(service.id, { compact: true });
   const variant = serviceVariantDisplayName(service);
   const serviceName = serviceDisplayTypeName(service);
   return `
@@ -27035,7 +27035,7 @@ function formatServiceIsoDatePart(value) {
   return label ? `${value} (${label})` : value;
 }
 
-function serviceItemPreviewParts(serviceId) {
+function serviceItemPreviewParts(serviceId, options = {}) {
   const service = state.services.find((candidate) => candidate.id === serviceId) || null;
   const items = getServiceOutputItems(serviceId)
     .filter((item) => serviceItemDisplayText(item) && serviceItemDisplayText(item) !== "-")
@@ -27049,12 +27049,15 @@ function serviceItemPreviewParts(serviceId) {
   const sermonReferences = scriptureReadingItem
     ? serviceItemScriptureReferences(scriptureReadingItem, parseServiceItemMemo(scriptureReadingItem.memo), service)
     : [];
-  const sermonReference = formatServiceScriptureReferenceList(sermonReferences);
+  const sermonReference = formatServiceScriptureReferenceList(sermonReferences, { abbreviated: options.compact });
+  const assignee = options.compact && sermonTitleItem
+    ? serviceTitlePersonEffectiveParts(sermonTitleItem, parseServiceItemMemo(sermonTitleItem.memo), service).assignee
+    : "";
   if (sermonTitle) {
     return {
       text: sermonReference ? `${sermonTitle} (${sermonReference})` : sermonTitle,
       title: sermonTitle,
-      reference: sermonReference,
+      reference: [sermonReference, assignee].filter(Boolean).join(" / "),
     };
   }
   return { text: "", title: "", reference: "" };
@@ -27067,7 +27070,7 @@ function renderServiceCardPreviewHtml(preview = {}, className = "service-date-ca
     return `
       <span class="${escapeAttr(className)} service-card-sermon-preview">
         <span class="service-card-sermon-title">${escapeHtml(title)}</span>
-        <span class="service-card-sermon-reference">${escapeHtml(reference)}</span>
+        <span class="service-card-sermon-reference" title="${escapeAttr(reference)}">${escapeHtml(reference)}</span>
       </span>`;
   }
   return preview.text ? `<span class="${escapeAttr(className)}">${escapeHtml(preview.text)}</span>` : "";
@@ -27126,7 +27129,7 @@ function normalizeServiceScriptureReferenceList(value) {
     expandServiceScriptureReferenceText(text, context))));
 }
 
-function formatServiceScriptureReferenceList(value) {
+function formatServiceScriptureReferenceList(value, options = {}) {
   const references = normalizeServiceScriptureReferenceList(value);
   return references.reduce((formatted, referenceText, index) => {
     const reference = parseBibleReference(referenceText);
@@ -27146,7 +27149,9 @@ function formatServiceScriptureReferenceList(value) {
       ? versePart.replace(`${reference.chapter}:`, "")
       : sameBook
         ? versePart
-        : formatServiceBibleReference(reference, referenceText);
+        : options.abbreviated
+          ? `${KOREAN_BIBLE_BOOK_ABBREVIATIONS[reference.book.code] || reference.book.shortName || reference.book.koreanName || reference.book.code} ${versePart}`
+          : formatServiceBibleReference(reference, referenceText);
     const separator = index ? (sameBookAndChapter ? ", " : "; ") : "";
     return `${formatted}${separator}${display}`;
   }, "");

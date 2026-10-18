@@ -583,3 +583,5 @@ and bulletin editor/preview in Chromium and WebKit; no service data is saved.
 - Manual table-of-contents activation (click or Enter) scrolls only the detail pane and focuses the target heading. Preserve the app hash route and browser history; never invoke fragment navigation.
 
 - Operations navigation order: 교회력, 예배 매뉴얼, 역대 찬양 콘티, 참고자료. Manual source links remain external new-tab anchors with noopener/noreferrer; TOC links alone scroll internally.
+
+- Home weekly worship cards show abbreviated scripture references and the sermon assignee separated by ` / `. Omit the separator when either value is empty; allow wrapping and expose the complete metadata on hover. This is display-only and does not rewrite worship records or output/print references.
