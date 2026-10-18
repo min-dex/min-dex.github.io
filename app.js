@@ -10219,7 +10219,7 @@ function serviceInputFeedbackSignature(editor) {
 }
 
 function setServiceInputFeedback(editor, status) {
-  const labels = { modified: "수정됨", saving: "반영·저장 중", saved: "저장됨", error: "저장 실패" };
+  const labels = { modified: "수정됨", saving: "반영·저장 중", saved: "", error: "저장 실패" };
   if (editor.dataset.inputStatus !== status) editor.dataset.inputStatus = status;
   const actions = editor.querySelector("[data-service-item-actions]")
     || [...(editor.closest(".svc-board-subgroup")?.querySelectorAll("[data-service-item-actions]") || [])]

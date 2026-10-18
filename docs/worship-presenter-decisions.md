@@ -3303,3 +3303,8 @@ Assignee-only cards now follow the user's corrected reference: no visible 담당
 ## Controller action alignment · 2026-10-18
 
 Single-element DB shortcuts sit beside the board element heading, independent of inline song controls. Their input-grid column is removed. Multi-song rows retain their individual song DB links. Output start/stop and 전체 화면 share one row with 35px controls and 10px gap; the obsolete three-slot window-controls layout is replaced inside the side panel. Display wording includes the space in 전체 화면; action identifiers and output behavior are unchanged. Chromium/WebKit renderer checks cover 1600–600px board widths and ready/live mocked commands in a 260px panel without opening any output window.
+
+
+## Editor button surfaces and save feedback · 2026-10-18
+
+Photo disclosure, audio upload and save actions share a 30px bordered field-surface button with hover and visible keyboard focus. DB remains the heading link. The per-item saved text is empty because success is already toasted; modified/saving/error feedback and busy disabling remain. Song-form photo placement remains functional and unchanged: it attaches a reference image to a specific progression group, unlike timed photo playback. No stored media, timing or production records are changed.

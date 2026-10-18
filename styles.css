@@ -8914,3 +8914,27 @@ html.ui-theme-switching:not(.presenter-output-document) *::after {
   .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link, .svc-song-picker--linked)) .svc-form-hint.compact { grid-column: 3; }
   .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link, .svc-song-picker--linked)) > .svc-board-subgroup-flow { grid-column: 4; }
 }
+
+/* Repeated editing actions share a visible, compact button surface. */
+.svc-board-subgroup-flow :is(.svc-board-subgroup-commit, .svc-reference-media-upload, .svc-board-subgroup-audio-upload, .svc-progression-media > summary) {
+  box-sizing: border-box;
+  min-height: 30px;
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--ui-surface-field);
+  color: var(--ink);
+  font-size: var(--ui-label-size);
+  font-weight: 600;
+  line-height: 18px;
+  cursor: pointer;
+}
+.svc-board-subgroup-flow :is(.svc-board-subgroup-commit, .svc-reference-media-upload, .svc-board-subgroup-audio-upload, .svc-progression-media > summary):hover {
+  border-color: var(--ink-3);
+  background: var(--ui-surface-panel);
+}
+.svc-board-subgroup-flow :is(.svc-board-subgroup-commit, .svc-reference-media-upload, .svc-board-subgroup-audio-upload, .svc-progression-media > summary):focus-visible,
+.svc-board-subgroup-flow :is(.svc-reference-media-upload, .svc-board-subgroup-audio-upload):focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

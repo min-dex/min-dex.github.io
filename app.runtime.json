@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-controller-actions",
+  "version": "20261018-editor-buttons",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "a027504606e362ddc46e9196ef4fb32c6f6489439e8e1edda052e88879c58ba9",
-  "runtime_sha256": "16680e0395329bd13051776fdd6e5384d1f97b26c8c2861d435b0d9e24c0ada1",
-  "source_bytes": 1475546,
-  "runtime_bytes": 1044161,
+  "source_sha256": "67b4522b98397b3f76d4294c44265169b7353dfdb9c9e5b0dba08d2987917a3d",
+  "runtime_sha256": "292eddea502b9b2591edb1a50ddcbf785c8b00597a1b6ae0a352cc099f838944",
+  "source_bytes": 1475537,
+  "runtime_bytes": 1044152,
   "source_gzip": 329650,
-  "runtime_gzip": 258201
+  "runtime_gzip": 258199
 }
