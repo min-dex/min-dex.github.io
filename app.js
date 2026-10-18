@@ -4154,6 +4154,11 @@ async function worshipAtomicClient() {
     const promise = import(`./mindex.worship-atomic-client.mjs?v=${release}`).then(({ createWorshipAtomicClient }) =>
       createWorshipAtomicClient({ rpc: async (name, args) => {
         const result = await client.rpc(name, args);
+        if (!result.error && result.data && args?.req?.serviceId
+          && ["save_worship_service_v1", "create_worship_service_v1", "delete_worship_service_v1"].includes(name)
+          && typeof result.data.committedRevision === "string") {
+          window.MINDEX_WORSHIP_LIVE?.publish(args.req.serviceId);
+        }
         if (!result.error && result.data?.calendar) {
           adoptDepartmentCalendarReceipt(result.data.calendar);
           publishDepartmentTabChange(result.data.calendar, [args.req.serviceId]);
@@ -5484,7 +5489,8 @@ function publishDepartmentTabChange(calendar, serviceIds = []) {
 }
 function departmentRefreshBlocked() {
   const playingMedia = [...document.querySelectorAll("audio,video")].some(media => !media.paused && !media.ended);
-  return serviceMusicHasActivePlayback() || state.serviceMusic.pending || playingMedia || !canUseClientData() || document.hidden || state.calendarLoading || state.calendarCellSaves.size || departmentCalendarWrites.size
+  const dialogOpen = [...document.querySelectorAll('dialog[open],[aria-modal="true"]')].some(node => node.getClientRects().length);
+  return dialogOpen || serviceMusicHasActivePlayback() || state.serviceMusic.pending || playingMedia || !canUseClientData() || document.hidden || state.calendarLoading || state.calendarCellSaves.size || departmentCalendarWrites.size
     || state.saving || state.loading || isPresenterOutputWindowOpen() || state.presenter.outputPendingAt
     || document.activeElement?.matches('input,textarea,select,[contenteditable="true"]')
     || (["service", "presenter"].includes(state.module) && sundayEditSyncHasLocalDraft(state.selectedServiceId));
@@ -5503,8 +5509,13 @@ function connectDepartmentRealtime() {
     sync.remote = channel;
     channel.on("broadcast", { event: "committed" }, ({ payload }) => {
       if (sync.remote === channel && state.client === client && state.config.url === project) sync.receive(payload);
+    }).on("broadcast", { event: "worship-committed" }, ({ payload }) => {
+      if (sync.remote === channel && state.client === client && state.config.url === project) window.MINDEX_WORSHIP_LIVE?.receive(payload);
     }).subscribe(status => {
-      if (sync.remote === channel && status === "SUBSCRIBED") void reconcileDepartmentRealtime();
+      if (sync.remote === channel && status === "SUBSCRIBED") {
+        void reconcileDepartmentRealtime();
+        void window.MINDEX_WORSHIP_LIVE?.reconcile();
+      }
     });
   } catch { sync.remoteClient = null; }
 }

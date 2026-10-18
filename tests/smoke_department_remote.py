@@ -24,7 +24,7 @@ try:
       state.calendarData=[row];window.dbValue='A';window.reads=0;window.removed=0;window.created=0;
       window.query=async()=>{reads++;if(window.delayRead)await new Promise(r=>window.releaseRead=r);return {data:[{...row,children_prayer:dbValue}]}};
       state.client={from:()=>({select:()=>({eq:query,in:query})}),removeChannel:async()=>{removed++},
-        channel:()=>{created++;return {on(event,filter,fn){window.remoteReceive=fn;return this},subscribe(fn){window.remoteStatus=fn;return this},send:remoteSend}}};
+        channel:()=>{created++;return {on(event,filter,fn){if(filter.event==='committed')window.remoteReceive=fn;return this},subscribe(fn){window.remoteStatus=fn;return this},send:remoteSend}}};
       document.body.innerHTML='<table><tbody><tr><td contenteditable="true" data-cal-id="'+row.id+'" data-cal-field="children_prayer">A</td></tr></tbody></table><button id="outside">Outside</button>';
       window.cell=document.querySelector('td');connectDepartmentRealtime();
     }''')

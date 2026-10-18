@@ -394,3 +394,22 @@ Switching across praise/video retains separate compact content snapshots in
 Atomic saves and row reloads preserve both sets. Hymn/special share praise
 content; video restores its own title and asset. Video and special remain
 excluded from shared hymn synchronization. No historical instances are migrated.
+
+## Cross-device saved worship refresh (2026-10-18)
+
+Successful atomic save/create/delete receipts emit identifier-only invalidations
+through the shared Realtime socket and a local tab channel/storage fallback.
+Receivers never write. The currently open clean worship reads one atomic aggregate
+and adopts that exact revision and model together, including lyrics, ordering,
+versions, forms and attachment/timing configuration. Other cached services are
+invalidated for their next entry; new-list discovery remains the existing list load.
+Selected editor rows follow their IDs across reorder, presenter anchors and scroll
+are retained. Deleted open services retain their view and receive a one-time notice.
+
+Focused inputs, local drafts, failed/pending saves, visible dialogs, output and
+active media block adoption, including when they begin during the network read.
+Conflicted atomic clients cannot silently adopt a new baseline. Wake/reconnect and
+a visible idle 60-second check read only the selected service ID/save_revision to
+recover missed signals. Equal revisions do not re-render. Both clients must load
+the new release. This does not synchronize unsaved keystrokes, Praise DB/catalog
+edits, templates or bulletin edits. No production schema/permission changes.

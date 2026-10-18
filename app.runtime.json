@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-settings-input-height",
+  "version": "20261018-worship-live-devices",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "c23eb7a8b9a6ec8ae663e91efdab8b2189a473bdc7ac7101a496ebb4279817e8",
-  "runtime_sha256": "ccbe0b239831d6e605f71dc90c18eec31160a979455de41715cd203b1295523f",
-  "source_bytes": 1505046,
-  "runtime_bytes": 1064915,
-  "source_gzip": 336676,
-  "runtime_gzip": 263818
+  "source_sha256": "4119280448899757f2f91efb7ed1d891aa065218741f21751438a295e82e6f16",
+  "runtime_sha256": "9062940468fb1523cb538bea7a96e5c36caefd3120123a0319fd91ebcca8f9e7",
+  "source_bytes": 1505800,
+  "runtime_bytes": 1065465,
+  "source_gzip": 336863,
+  "runtime_gzip": 263972
 }

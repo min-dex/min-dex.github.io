@@ -151,6 +151,14 @@ export function createWorshipAtomicClient({rpc, journal, namespace = '', makeId 
     },
     baseline:id => store.baseline(id)?.aggregate || null,
     pending:id => store.pending(id),
+    adoptRemote(id, aggregate) {
+      if (store.pending(id) || reloadRequired.has(id)) throw new Error('PENDING_REQUEST_REQUIRES_RESOLUTION');
+      if (aggregate?.service?.id !== id || !Array.isArray(aggregate.sections) || !Array.isArray(aggregate.elements)
+        || typeof aggregate.revision !== 'string' || !/^(0|[1-9][0-9]*)$/.test(aggregate.revision)) throw new Error('INVALID_REMOTE_SNAPSHOT');
+      const previous = store.baseline(id);
+      if (previous && BigInt(previous.revision) > BigInt(aggregate.revision)) throw new Error('STALE_REMOTE_SNAPSHOT');
+      store.acceptRead(id, aggregate);
+    },
     async reopenReviewed(review, {beforeAdopt} = {}) {
       const id = review.serviceId;
       if (store.pending(id)) throw new Error('PENDING_REQUEST_REQUIRES_RESOLUTION');

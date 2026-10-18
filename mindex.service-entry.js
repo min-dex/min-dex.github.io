@@ -1,6 +1,7 @@
 // Refresh one entered service using a detached snapshot. Never persist or touch transport.
 (() => {
   let busy = false;
+  const deletedNotices = new Set();
   let entryToken = 0;
   const invalidate = () => { entryToken += 1; };
   let editRevision = 0;
@@ -77,23 +78,41 @@
     const before = context(), revision = editRevision, model = dirtyModuleFingerprint("service"), client = state.client;
     busy = true;
     try {
-      const snapshot = await fetchSnapshot(serviceId);
+      let snapshot;
       const safe = () => state.client === client && token === entryToken && before === context() && revision === editRevision
         && model === dirtyModuleFingerprint("service") && !blockedReason() && !focusedInput();
       if (!safe()) return false;
       if (background) {
         const atomic = await worshipAtomicClient();
         if (!safe() || atomic.pending(serviceId)) return false;
-        const aggregate = await atomic.read(serviceId, { adopt: safe });
-        if (!safe() || !aggregate?.service) return false;
-        snapshot.fullServices = [aggregate.service];
-        snapshot.sections = aggregate.sections; snapshot.elements = aggregate.elements;
-        const people = new Map(aggregate.elements.map(row => [row.id, row.person]));
-        snapshot.slides = snapshot.slides.map(row => people.has(row.element_id) ? { ...row, element_person: people.get(row.element_id) } : row);
+        const previousRevision = atomic.baseline(serviceId)?.revision;
+        // A null aggregate means remote deletion. Retain the open view; never navigate away automatically.
+        const aggregate = await atomic.read(serviceId, { adopt: () => false });
+        if (!safe()) return false;
+        if (!aggregate?.service) {
+          const key = `${state.config.url}:${serviceId}`;
+          if (!deletedNotices.has(key)) showToast("다른 곳에서 삭제된 예배예요. 현재 화면은 유지됩니다. 예배 목록에서 다시 확인해 주세요.", "error");
+          deletedNotices.add(key);
+          return true;
+        }
+        if (aggregate.revision === previousRevision) return true;
+        // Adopt this exact snapshot only after every interaction guard is rechecked.
+        atomic.adoptRemote(serviceId, aggregate);
+        snapshot = { ids: [serviceId], fullServices: [aggregate.service], sections: aggregate.sections,
+          elements: aggregate.elements, slides: [] };
+      } else {
+        snapshot = await fetchSnapshot(serviceId);
+        if (!safe()) return false;
       }
       if (!snapshot.fullServices.length) return false;
       const viewport = captureDetailViewportSnapshot();
+      const selectedId = Number.isInteger(state.selectedServiceItemIndex)
+        ? getServiceItems(serviceId)[state.selectedServiceItemIndex]?.id : null;
       applySnapshot(snapshot);
+      if (selectedId) {
+        const nextIndex = getServiceItems(serviceId).findIndex(item => item.id === selectedId);
+        state.selectedServiceItemIndex = nextIndex >= 0 ? nextIndex : null;
+      }
       render();
       restoreDetailViewportSnapshot(viewport);
       return true;

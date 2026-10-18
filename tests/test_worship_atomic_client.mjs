@@ -166,3 +166,17 @@ await assert.rejects(unknownProject.commit(input),/PENDING_PROJECT_UNKNOWN/);
 assert.equal(projectCalls.length,priorCalls);
 assert.ok(sharedJournal.getItem('mindex.atomic.pending.v1:service'));
 console.log('PASS project-scoped durable retries survive reload, preserve sibling project requests and block unscoped legacy replay');
+
+const remoteJournalMap = new Map();
+const remoteJournal = {getItem:k=>remoteJournalMap.get(k)||null,setItem:(k,v)=>remoteJournalMap.set(k,v),removeItem:k=>remoteJournalMap.delete(k)};
+const remoteClient = createWorshipAtomicClient({journal:remoteJournal,rpc:async()=>{throw Error('offline')}});
+remoteClient.adoptRemote('service',baseline);
+remoteClient.adoptRemote('service',{...baseline,revision:'3'});
+assert.equal(remoteClient.baseline('service').revision,'3');
+assert.throws(()=>remoteClient.adoptRemote('service',baseline),/STALE_REMOTE/);
+assert.throws(()=>remoteClient.adoptRemote('other',baseline),/INVALID_REMOTE/);
+assert.throws(()=>remoteClient.adoptRemote('service',{...baseline,elements:null}),/INVALID_REMOTE/);
+await assert.rejects(remoteClient.commit(input),/offline/);
+assert.throws(()=>remoteClient.adoptRemote('service',{...baseline,revision:'4'}),/PENDING_REQUEST/);
+assert.equal(remoteClient.baseline('service').revision,'3');
+console.log('PASS exact remote adoption rejects stale/malformed snapshots and unresolved writes');
