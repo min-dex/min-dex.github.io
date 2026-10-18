@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261019-home-sermon-meta",
+  "version": "20261019-home-card-integrated",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "16ece7d5672ca79beb7ca036abeb3b9c7985b6beedd9ed5689e1686fcdad25a1",
-  "runtime_sha256": "606e26bcdaeb8b4cc962c04e21c27107b570d27a9a58ba1f3492d3090eac10c9",
-  "source_bytes": 1514852,
-  "runtime_bytes": 1071407,
-  "source_gzip": 339263,
-  "runtime_gzip": 265711
+  "source_sha256": "9139c225afbd14ad825ae6448f95aca36668ab726bf7e3de7d5b51202cc441d2",
+  "runtime_sha256": "2a1dbe65f9f337b62762bbfc013e0be4c8d00d514af7227920ad7dc730bf2c1c",
+  "source_bytes": 1516006,
+  "runtime_bytes": 1072003,
+  "source_gzip": 339517,
+  "runtime_gzip": 265905
 }

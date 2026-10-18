@@ -7493,21 +7493,21 @@ textarea.svc-presenter-input-control--multiline {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.svc-slide-form-badge[data-form-type="verse"] { --form-color: #4f7cac; }
-.svc-slide-form-badge[data-form-type="chorus"] { --form-color: #2f8f83; }
-.svc-slide-form-badge[data-form-type="pre-chorus"] { --form-color: #c77d33; }
-.svc-slide-form-badge[data-form-type="bridge"] { --form-color: #8e5db7; }
-.svc-slide-form-badge[data-form-type="tag"],
-.svc-slide-form-badge[data-form-type="instrumental"],
-.svc-slide-form-badge[data-form-type="coda"] { --form-color: #6b7280; }
+/* Per-song occurrence order: R, Y, G, C, B, M. */
+.svc-board-slide-block[data-form-color="0"] { --form-color: #d65a62; }
+.svc-board-slide-block[data-form-color="1"] { --form-color: #c5a12d; }
+.svc-board-slide-block[data-form-color="2"] { --form-color: #4b9b60; }
+.svc-board-slide-block[data-form-color="3"] { --form-color: #329ca8; }
+.svc-board-slide-block[data-form-color="4"] { --form-color: #587ed2; }
+.svc-board-slide-block[data-form-color="5"] { --form-color: #b864b5; }
 .svc-slide-form-badge[data-form-type] {
-  background: color-mix(in srgb, var(--form-color, #6b7280) 48%, var(--panel));
+  background: color-mix(in srgb, var(--form-color, #6b7280) 30%, var(--panel));
   box-shadow: none;
   color: var(--ink-2);
   padding: 0 7px;
 }
 .svc-slide-form-badge[data-form-type]:is(:hover, :focus-visible) {
-  background: color-mix(in srgb, var(--form-color, #6b7280) 64%, var(--panel));
+  background: color-mix(in srgb, var(--form-color, #6b7280) 40%, var(--panel));
   color: var(--ink);
 }
 .svc-slide-form-badge:hover,
