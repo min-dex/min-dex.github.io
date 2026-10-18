@@ -9,8 +9,8 @@
   function schedule(delay=200){if(!timer&&pending.size)timer=setTimeout(()=>{timer=null;void flush();},delay);}
   function remember(id){seen.add(id);if(seen.size>256)seen.delete(seen.values().next().value);}
   function receive(m){
-    if(!m||m.project!==state.config.url||typeof m.id!=='string'||!['song','bulletin','bulletin-template'].includes(m.kind)||typeof m.recordId!=='string'||!m.recordId||seen.has(m.id))return;
-    remember(m.id);pending.set(identity(m),m);schedule();
+    if(!m||m.project!==state.config.url||typeof m.id!=='string'||!['song','bulletin','bulletin-template','service-list'].includes(m.kind)||typeof m.recordId!=='string'||!m.recordId||seen.has(m.id))return;
+    remember(m.id);if(m.kind==='service-list')window.MINDEX_SERVICE_LIST_LIVE?.invalidate();pending.set(identity(m),m);schedule();
   }
   function publish(kind,recordId){
     if(!state.config.url||!recordId)return;
@@ -68,7 +68,7 @@
     try{
       for(const [id,m] of [...pending]){
         if(m.project!==state.config.url){if(pending.get(id)===m)pending.delete(id);continue;}
-        const done=m.kind==='song'?await refreshSong(m.recordId):await controller()?.refreshRemote(m.kind,m.recordId);
+        const done=m.kind==='service-list'?await window.MINDEX_SERVICE_LIST_LIVE?.refresh():m.kind==='song'?await refreshSong(m.recordId):await controller()?.refreshRemote(m.kind,m.recordId);
         if(done&&pending.get(id)===m)pending.delete(id);
       }
     }catch{delay=15000;}
@@ -78,6 +78,7 @@
     if(probing||departmentRefreshBlocked())return;
     probing=true;
     try{
+      window.MINDEX_SERVICE_LIST_LIVE?.reconcile();
       // Only the visible record is fetched on recovery; no full lyrics corpus polling.
       if(state.module==='praise'&&state.selectedSongId)receive({id:createUuid(),project:state.config.url,kind:'song',recordId:state.selectedSongId});
       const target=controller()?.remoteIdentity();

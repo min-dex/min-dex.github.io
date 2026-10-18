@@ -1013,3 +1013,11 @@ invalidations, with bulletin controller guards inside `mindex.bulletin.js`.
 Do not replace these detached refresh paths with loadSongs/load(force): those
 paths can replace drafts or rebuild Presenter data. Remote receipt must stay
 read-only. Keep saved weekly bulletin snapshots independent of template changes.
+
+## Calendar/list realtime · 2026-10-18
+
+`docs/operations-realtime.md` extends department calendar invalidations to every
+editable field. Non-linked edits use calendarOnly; merging linked notifications
+must retain service invalidation. `mindex.service-list-live.js` handles membership
+only, using complete fresh ID reads. Never use cached/partial reads to infer
+remote deletions or loadWorshipData to refresh the list during editing.

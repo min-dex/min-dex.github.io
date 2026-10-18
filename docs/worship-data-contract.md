@@ -998,3 +998,11 @@ Migration: migrations/2026-10-18-department-assignee-links.sql. Private receipt
 storage has RLS and internal-writer-only policies. Tests: targeted request VM,
 Chromium/WebKit journal/queue smoke, and opt-in disposable PostgreSQL 17.6 tests
 for rollback, permissions, replay, stale revisions, and two-connection races.
+
+## Calendar realtime expansion · 2026-10-18
+
+`operations-realtime.md` supersedes the four-field-only notification/recovery
+scope above: all currently editable calendar fields are now read and reflected
+in place. The four assignee fields remain the only fields linked atomically to
+worship elements. Other fields keep their direct save path and calendar-only
+invalidation; no automatic worship-document rewrite is introduced.
