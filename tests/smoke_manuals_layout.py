@@ -9,13 +9,14 @@ try:
         for engine in ("chrome", "webkit"):
             browser = launch_chromium(p) if engine == "chrome" else p.webkit.launch()
             page = browser.new_page(viewport={"width": 1440, "height": 1100})
+            page.add_init_script("Element.prototype.requestFullscreen=async()=>{};window.open=()=>null")
             page.route("**/*supabase*/**", lambda route: route.abort())
             page.goto(url, wait_until="domcontentloaded")
             page.wait_for_function("typeof renderManualsDetail === 'function' && !document.body.classList.contains('ui-booting')")
             page.evaluate('document.fonts.ready')
             print(engine, page.evaluate('''() => {
               const check=(value,message)=>{if(!value)throw Error(message)};
-              state.module='manuals';state.search='';render();
+              state.module='manuals';state.search='';render();syncBrowserHistory({replace:true});
               const sections=[...refs.detailPane.querySelectorAll('.manual-section')];
               const links=[...refs.detailPane.querySelectorAll('.manuals-index a')];
               check(sections.length>8,'manual sections missing');
@@ -47,6 +48,31 @@ try:
               check(!refs.detailPane.querySelector('[data-song-timing-open],[data-service-item-commit],[data-presenter-action]'),'manual caused operational actions');
               return 'PASS grouped navigation, exact source department order, unknowns, current music/photo controls and read-only source links';
             }'''))
+            for width in (1440, 640, 390):
+                page.set_viewport_size({"width": width, "height": 900})
+                before = page.evaluate("({url:location.href,history:history.length})")
+                links = page.locator('.manuals-index a')
+                for activation in ('click', 'Enter'):
+                    for index in range(links.count()):
+                        link = links.nth(index)
+                        target = link.get_attribute('href')
+                        if activation == 'click':
+                            link.click()
+                        else:
+                            link.focus()
+                            page.keyboard.press('Enter')
+                        page.wait_for_function("([id,url])=>state.module==='manuals' && location.href===url && document.activeElement===document.querySelector(id+' h4')", arg=[target,before['url']])
+                        result = page.evaluate("""id=>{
+                            const pane=refs.detailPane,section=pane.querySelector(id),heading=section.querySelector('h4');
+                            const r=heading.getBoundingClientRect(),p=pane.getBoundingClientRect();
+                            return {visible:r.top>=p.top&&r.bottom<=p.bottom,history:history.length,outer:window.scrollY};
+                        }""",target)
+                        assert result['visible'], (engine,width,activation,index,result)
+                        assert result['history']==before['history'] and result['outer']==0, result
+                print(engine, width, links.count(), 'PASS all TOC click/Enter targets, route/history preserved, heading focus and internal scroll')
+                page.locator('#detailPane').screenshot(path=f'/tmp/mindex-manuals-{engine}-{width}-linked.png')
+            page.set_viewport_size({'width':1440,'height':1100})
+            page.evaluate('refs.detailPane.scrollTop=0')
             page.locator('#detailPane').screenshot(path=f'/tmp/mindex-manuals-{engine}-desktop.png')
             section=page.locator('.manual-section').filter(has=page.get_by_role('heading',name='RIA 청년부 예배',exact=True))
             section.screenshot(path=f'/tmp/mindex-manuals-{engine}-order.png')

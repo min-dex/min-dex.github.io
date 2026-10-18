@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-offering-compact-fields",
+  "version": "20261018-manual-navigation",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "fe1580131df80dafed94e327bbd6b8f1a6a1d96756cee6c3856bfc22381e8486",
-  "runtime_sha256": "e873af42858e7f49471771094ff7ab3a4184350652ec6c53a1bb73771e4c44c7",
-  "source_bytes": 1509219,
-  "runtime_bytes": 1067851,
-  "source_gzip": 337678,
-  "runtime_gzip": 264653
+  "source_sha256": "5a1b4a732c6b76213b676c733c4dfca04dfe3f794c00942070fdc77908ec7b3c",
+  "runtime_sha256": "e9c89b521d1d300b0167c373ece2cebc575890c21f68d4f118ea615bf499b09c",
+  "source_bytes": 1509949,
+  "runtime_bytes": 1068297,
+  "source_gzip": 337931,
+  "runtime_gzip": 264785
 }

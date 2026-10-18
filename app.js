@@ -16874,6 +16874,20 @@ function renderManualsDetail() {
       ${active.sources?.length ? `<footer class="manual-sources"><strong>원본·출처</strong><span>정리 기준: ${escapeHtml(active.reviewedAt || "확인 필요")}</span>${active.sources.filter(source => /^https:\/\//.test(source.url)).map(source => `<a href="${escapeAttr(source.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(source.title)}</a>`).join("")}<p>노션 원본은 보존하며, 이 매뉴얼에서는 현재 앱 사용법과 함께 안내합니다.</p></footer>` : ""}
     </div>
   `;
+  refs.detailPane.querySelectorAll('.manuals-index a').forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      const section = refs.detailPane.querySelector(link.getAttribute("href"));
+      if (!section) return;
+      const pane = refs.detailPane;
+      const top = pane.scrollTop + section.getBoundingClientRect().top - pane.getBoundingClientRect().top - pane.clientTop - 20;
+      const heading = section.querySelector("h4");
+      heading?.setAttribute("tabindex", "-1");
+      heading?.focus({ preventScroll: true });
+      // Fragment navigation would replace the app's hash route. Scroll only the manual pane.
+      pane.scrollTo({ top, behavior: "instant" });
+    });
+  });
   refreshIcons(refs.detailPane);
 }
 
