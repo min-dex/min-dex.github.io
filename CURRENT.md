@@ -398,3 +398,10 @@ reads, retaining leader drafts and rejecting mid-read saves.
 Saved excerpts now share guarded content invalidations and visible-screen
 recovery. Bible corpus/chapter caches and existing worship documents stay separate.
 See docs/content-realtime.md and tests/smoke_scripture_live.py.
+
+
+## Realtime scheduling latency · 2026-10-19
+
+Shared scheduler coalesces at80ms and advances deferred reads after focus/media/
+dialog exit, retaining all guards and15s failure backoff. No faster recovery polling.
+See docs/content-realtime.md and tests/test_live_refresh_scheduler.cjs.

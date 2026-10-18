@@ -6,6 +6,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 NODE_TESTS = (
+    "test_live_refresh_scheduler.cjs",
     "test_hymn_score_runtime.cjs",
     "test_hymn_intro_plan.cjs",
     "test_department_assignee_requests.cjs",
