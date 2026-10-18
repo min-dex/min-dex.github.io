@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-content-live-devices",
+  "version": "20261018-timing-file-layout",
   "options": {
     "compress": false,
     "mangle": {
