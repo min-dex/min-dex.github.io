@@ -8940,3 +8940,20 @@ html.ui-theme-switching:not(.presenter-output-document) *::after {
 }
 .global-playback-fade-stop { display:flex; align-items:center; gap:8px; margin:10px 0; color:var(--ink-2); font-size:12px; cursor:pointer; }
 .global-playback-fade-stop input { margin:0; }
+
+/* Version comparison shares row tracks, so editing controls cannot drift later verses. */
+.praise-forms-panel .version-compare-columns {
+  grid-template-rows: repeat(var(--version-compare-rows, 1), auto);
+  align-items: stretch;
+  row-gap: 10px;
+}
+body[data-module="praise"] .praise-forms-panel .version-compare-column {
+  grid-row: 1 / -1;
+  grid-template-rows: subgrid;
+  align-content: normal;
+  row-gap: inherit;
+}
+.praise-forms-panel .version-compare-column :is(.version-picker, .form-block) {
+  height: 100%;
+}
+.praise-forms-panel .form-head { min-height: 30px; }

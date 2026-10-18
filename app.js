@@ -17060,6 +17060,9 @@ function renderVersionCompare(song, versions, linkedEntries = []) {
     version,
     forms: getFormsForVersion(version),
   }));
+  const rowCount = Math.max(1,
+    ...versionForms.map(({ version, forms }) => (version.id === getSelectedVersionId() ? activeVersionForms(version) : forms).length),
+    ...linkedEntries.map((entry) => entry.forms.length));
   const columnCount = Math.max(1, versions.length + linkedEntries.length);
   const gridStyle = `grid-template-columns: repeat(${columnCount}, minmax(320px, 1fr));`;
 
@@ -17069,7 +17072,7 @@ function renderVersionCompare(song, versions, linkedEntries = []) {
         ${versions.map((version) => renderVersionCompareHead(song, version)).join("")}
         ${linkedEntries.map(renderLinkedSongVersionHead).join("")}
       </div>
-      <div class="version-compare-columns" style="${gridStyle}">
+      <div class="version-compare-columns" style="${gridStyle} --version-compare-rows: ${rowCount};">
         ${versionForms.map(({ version, forms }) => renderVersionCompareColumn(version, forms)).join("")}
         ${linkedEntries.map(renderLinkedSongVersionColumn).join("")}
       </div>

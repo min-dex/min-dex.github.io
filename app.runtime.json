@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-shared-offering-integrity-title-font",
+  "version": "20261018-version-row-alignment",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "96d58ce8678d99681a15759b9ffefaef7e5424e5e188551b2b13f2f16d8b0100",
-  "runtime_sha256": "94d9eaa44f83d185092c7a9e1859d3074dcbed2a5dcdbb8493adb0089d9f4968",
-  "source_bytes": 1480753,
-  "runtime_bytes": 1047821,
-  "source_gzip": 330889,
-  "runtime_gzip": 259227
+  "source_sha256": "3acee85a648d335ac3834ae265eae8b0704475e9d62e3616092cb6604653125e",
+  "runtime_sha256": "b9e8b99b05a1821063c0862c27a336c041d55b24920676ab6e6a074d5fc0cd58",
+  "source_bytes": 1481014,
+  "runtime_bytes": 1047995,
+  "source_gzip": 330942,
+  "runtime_gzip": 259259
 }
