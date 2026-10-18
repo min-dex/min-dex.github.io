@@ -30,6 +30,7 @@ NODE_TESTS = (
     "test_worship_read_parallel.cjs",
 )
 SMOKES = (
+    "smoke_manuals_layout.py",
     "smoke_department_tabs.py",
     "smoke_department_remote.py",
     "smoke_department_assignees.py",
@@ -73,6 +74,8 @@ def main():
     for key in list(env):
         if "SUPABASE" in key.upper():
             del env[key]
+    print("RUN manual content/document consistency", flush=True)
+    subprocess.run(["node", "tools/build_manual_docs.cjs", "--check"], cwd=ROOT, env=env, check=True, timeout=30)
     for name in ("test_pages_gate.py",) + NODE_TESTS + SMOKES:
         command = ["node" if name in NODE_TESTS else sys.executable, "tests/" + name]
         print("RUN", name, flush=True)

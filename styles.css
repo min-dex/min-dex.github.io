@@ -1326,6 +1326,20 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .manuals-index a:hover,
 .manuals-index a:focus-visible { color: var(--accent); }
 .manuals-index a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.manuals-index > .manuals-index-groups { display: grid; gap: 10px; min-width: 0; }
+.manuals-index-group { min-width: 0; }
+.manuals-index-group > strong { display: block; margin-bottom: 5px; color: var(--ink); font-size: var(--ui-meta-size); }
+.manuals-index-group > div { display: flex; flex-wrap: wrap; gap: 5px 15px; }
+.manual-guide h3.manual-category-title { margin: 0; padding: 25px 0 10px; border-bottom: 1px solid var(--line); font-size: var(--ui-card-title-size); line-height: 24px; }
+.manual-order { margin: 0; padding-left: 25px; line-height: 1.7; }
+.manual-order > li { padding: 5px 0; }
+.manual-order strong { font-weight: 600; }
+.manual-order ul { margin: 0; padding-left: 20px; }
+.manual-note { margin: 10px 0 0; color: var(--ink-3); font-size: var(--ui-meta-size); line-height: 1.7; }
+.manual-sources { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 0; color: var(--ink-3); font-size: var(--ui-meta-size); }
+.manual-sources p { flex-basis: 100%; margin: 0; }
+.manual-sources a { color: var(--ink); overflow-wrap: anywhere; }
+.manual-sources a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .manuals-index a span,
 .manual-section-head > span {
   color: var(--ink-3);

@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-worship-concise-copy",
+  "version": "20261018-worship-manual",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "c4a3ad7b8047aa1c356d3d374c0908da37d83ecb2fd4e51213a433c6cd2e67d1",
-  "runtime_sha256": "bcf0a76da29a352bf5376c788557334b757232e12d86a49c2af12e9185444313",
-  "source_bytes": 1504700,
-  "runtime_bytes": 1064607,
-  "source_gzip": 336586,
-  "runtime_gzip": 263735
+  "source_sha256": "6b393794a580587a10ee1e2fca32db30f420afa96023bc992e2fc96053a070a0",
+  "runtime_sha256": "b7962d8c9cac84da8e4c0dd4e6680d20c4897d8dbbdada16879e92f064bd7887",
+  "source_bytes": 1506347,
+  "runtime_bytes": 1065886,
+  "source_gzip": 337095,
+  "runtime_gzip": 264142
 }

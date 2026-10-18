@@ -16759,6 +16759,10 @@ function getMindexManuals() {
 }
 
 function renderManualSectionContent(section = {}) {
+  if (section.layout === "order") {
+    return `<ol class="manual-order">${(section.steps || []).map((step) => `<li><strong>${escapeHtml(step.title)}</strong>${step.items?.length ? `<ul>${step.items.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : ""}</li>`).join("")}</ol>
+      ${section.items?.length ? `<ul class="manual-checklist">${section.items.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : ""}`;
+  }
   if (section.layout === "schedule") {
     return `<div class="manual-schedule-grid">${(section.groups || []).map((group) => `
       <div class="manual-schedule-group">
@@ -16790,6 +16794,7 @@ function renderManualsDetail() {
     return;
   }
   const getSectionId = (index) => `manual-${escapeAttr(active.id)}-${index + 1}`;
+  const categories = [...new Set(active.sections.map(section => section.category || active.title))];
   refs.detailPane.innerHTML = `
     <div class="manuals-shell">
       <header class="manuals-head">
@@ -16800,12 +16805,13 @@ function renderManualsDetail() {
       </header>
       ${active.notice ? `<aside class="manuals-notice"><strong>현장 기준</strong><p>${escapeHtml(active.notice)}</p></aside>` : ""}
       <nav class="manuals-index" aria-label="예배 매뉴얼 목차">
-        <span class="manuals-index-title">전체 항목</span>
-        <div>
-        ${active.sections.map((section, index) => {
+        <span class="manuals-index-title">목차</span>
+        <div class="manuals-index-groups">
+        ${categories.map(category => `<div class="manuals-index-group"><strong>${escapeHtml(category)}</strong><div>${active.sections.map((section, index) => {
+          if ((section.category || active.title) !== category) return "";
           const sectionId = getSectionId(index);
           return `<a href="#${sectionId}"><span>${String(index + 1).padStart(2, "0")}</span>${escapeHtml(section.title)}</a>`;
-        }).join("")}
+        }).join("")}</div></div>`).join("")}
         </div>
       </nav>
       <article class="manual-guide" aria-labelledby="manualGuideTitle">
@@ -16813,7 +16819,10 @@ function renderManualsDetail() {
         <div class="manual-guide-grid">
           ${active.sections.map((section, index) => {
             const sectionId = getSectionId(index);
+            const category = section.category || active.title;
+            const startsCategory = index === 0 || category !== (active.sections[index - 1].category || active.title);
             return `
+            ${startsCategory ? `<h3 class="manual-category-title">${escapeHtml(category)}</h3>` : ""}
             <section id="${sectionId}" class="manual-section${section.layout ? ` manual-section--${escapeAttr(section.layout)}` : ""}" aria-labelledby="${sectionId}-title">
               <header class="manual-section-head">
                 <span>${String(index + 1).padStart(2, "0")}</span>
@@ -16821,12 +16830,14 @@ function renderManualsDetail() {
               </header>
               <div class="manual-section-content">
                 ${renderManualSectionContent(section)}
+                ${section.note ? `<p class="manual-note">${escapeHtml(section.note)}</p>` : ""}
               </div>
             </section>
           `;
           }).join("")}
         </div>
       </article>
+      ${active.sources?.length ? `<footer class="manual-sources"><strong>원본·출처</strong><span>정리 기준: ${escapeHtml(active.reviewedAt || "확인 필요")}</span>${active.sources.filter(source => /^https:\/\//.test(source.url)).map(source => `<a href="${escapeAttr(source.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(source.title)}</a>`).join("")}<p>노션 원본은 보존하며, 이 매뉴얼에서는 현재 앱 사용법과 함께 안내합니다.</p></footer>` : ""}
     </div>
   `;
   refreshIcons(refs.detailPane);
