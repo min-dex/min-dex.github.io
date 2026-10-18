@@ -31040,8 +31040,7 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
       ${inputControls}
       ${renderServiceSlotMusic(context)}
       <div class="svc-board-grid">
-        ${slides.map(({ slide, slideIndex, formLabel }) =>
-          renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, formLabel)).join("")}
+        ${renderPresenterBoardSlideBlocks(slides, activeIndex, serviceId)}
       </div>
       ${subgroup.slides.some(({ slide }) => slide?.liveScriptureControl) ? `
         <button class="svc-output-action" type="button" data-presenter-citation-focus="${escapeAttr(subgroup.slides.find(({ slide }) => slide?.liveScriptureControl).slide.elementId)}" data-service-id="${escapeAttr(serviceId)}">
@@ -31326,6 +31325,39 @@ function presenterVisibleTitle(label, title) {
   const cleanTitle = String(title || "").trim();
   // Titles stay in the model; the header just does not print the label twice.
   return compactSearchValue(cleanTitle) === compactSearchValue(label) ? "" : cleanTitle;
+}
+
+// Controller-only grouping: preserve slide objects, indexes and output order.
+function presenterBoardSlideBlocks(entries = []) {
+  const blocks = [];
+  for (const entry of entries) {
+    const slide = entry.slide;
+    if (slide?.controllerEditorOnly) continue;
+    const owner = presenterSlideElementGroupKey(slide) || "";
+    let key = "";
+    let label = "";
+    if (presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.SCRIPTURE_TEXT) {
+      label = [slide.referenceBook, slide.referenceRange].filter(Boolean).join(" ") || slide.title || "본문";
+      key = JSON.stringify([owner, "scripture", label, slide.translationLabel || ""]);
+    } else if (presenterSlideSupportsFormGrouping(slide) && slide.formKey) {
+      label = presenterFormGroupLabel(slide) || "송폼";
+      key = JSON.stringify([owner, "form", slide.formKey]);
+    }
+    const previous = blocks[blocks.length - 1];
+    if (key && previous?.key === key) previous.entries.push(entry);
+    else blocks.push({ key, label, entries: [entry] });
+  }
+  return blocks;
+}
+
+function renderPresenterBoardSlideBlocks(entries, activeIndex, serviceId) {
+  return presenterBoardSlideBlocks(entries).map((block) => {
+    const thumbs = block.entries.map(({ slide, slideIndex, formLabel }) =>
+      renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, formLabel)).join("");
+    return block.key
+      ? `<div class="svc-board-slide-block" role="group" aria-label="${escapeAttr(block.label)}">${thumbs}</div>`
+      : thumbs;
+  }).join("");
 }
 
 function annotatePresenterFormStarts(entries = [], initialPreviousKey = "") {

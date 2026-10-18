@@ -3429,3 +3429,12 @@ The requested retirement covers only the Notion 예배 page, not the separate
 snapshot. Report the page ready for user-led removal only after source coverage,
 committed generated documentation, browser readability and production publication
 are verified. This change never deletes or edits Notion pages or worship data.
+
+### Controller slide blocks · 2026-10-18
+
+Controller thumbnails share a subtle panel background per contiguous formKey
+occurrence or scripture range (including element and translation boundaries).
+Repeated forms after another block remain separate; ungrouped title/blank/media
+slides remain outside. Ten-pixel inset/gaps and an eight-pixel radius keep active
+rings visible. Slide objects, global indexes, navigation, output HTML and saves
+are unchanged. Group labels remain accessible without adding duplicate headings.
