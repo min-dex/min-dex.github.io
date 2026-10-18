@@ -1,3 +1,5 @@
+import sys
+sys.path.insert(0,'tests')
 import os
 os.environ["MINDEX_SMOKE_OFFLINE"]="1"
 from smoke_app import start_local_app_server,sync_playwright,launch_chromium
@@ -10,6 +12,7 @@ try:
    browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
    try:
     page=browser.new_page(viewport={'width':1200,'height':650})
+    page.add_init_script("Element.prototype.requestFullscreen=async()=>{};window.open=()=>null")
     page.route('**/*',lambda r:r.continue_() if urlsplit(r.request.url).netloc==urlsplit(url).netloc else r.abort())
     page.goto(url+'?mindexSmokeRaw=1');page.wait_for_function("typeof renderPresenterServicePraiseInput==='function' && typeof state!=='undefined' && !document.body.classList.contains('ui-booting')")
     page.evaluate('''()=>{
@@ -77,6 +80,7 @@ try:
      page.wait_for_timeout(100)
      print(engine,width,page.evaluate("""()=>{
       const row=document.querySelector('.svc-inline-song'),head=document.querySelector('.svc-board-subgroup-head-row');
+      if(!head.querySelector('.svc-item-link')||row.querySelector('.svc-item-link'))throw Error('DB heading location');
       if(!row||head.querySelector('[data-service-item-commit]'))throw Error('single song kept header actions');
       if(document.querySelectorAll('[data-service-item-commit]').length!==1)throw Error('duplicate/missing save');
       const host=document.querySelector('.svc-board-subgroup-controls'),q=host.getBoundingClientRect();
@@ -86,5 +90,10 @@ try:
       return 'PASS single song with visible header, one save and compact controls';
      }"""),flush=True)
      if width==1600:page.screenshot(path=f'/tmp/mindex-single-song-{engine}.png')
+    page.evaluate("""()=>{document.body.innerHTML='<aside class="svc-presenter-side-panel" style="width:260px"></aside>';window.renderOutputFixture=open=>{isPresenterOutputWindowOpen=()=>open;document.querySelector('aside').innerHTML=renderPresenterControlsTop(state.services[0],[],false,0);};}""")
+    for opened in [False,True]:
+     page.evaluate('(open)=>renderOutputFixture(open)',opened)
+     print(engine,'output',opened,page.evaluate("""()=>{const a=document.querySelector('.svc-presenter-launch'),b=document.querySelector('.svc-presenter-fullscreen');const x=a.getBoundingClientRect(),y=b.getBoundingClientRect();if(Math.abs(x.top-y.top)>1||y.left<x.right||y.right>260)throw Error('command alignment');if(b.textContent.trim()!=='전체 화면')throw Error('spacing');return 'PASS paired commands';}"""),flush=True)
+    page.screenshot(path=f'/tmp/output-paired-{engine}.png')
    finally:browser.close()
 finally:server.shutdown();server.server_close()

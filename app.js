@@ -28516,8 +28516,8 @@ function renderPresenterControlsTop(service, slides, active, index) {
   const launchLabel = uiText(anyOutputOpen ? "presenter.action.stop" : "presenter.action.present");
   const launchIcon = anyOutputOpen ? "screen-share-off" : "screen-share";
   const launchTone = anyOutputOpen ? "stop" : "start";
-  const fullscreenLabel = anyOutputOpen ? "송출 화면 전체화면" : "송출을 시작하면 전체화면을 사용할 수 있습니다";
-  const fullscreenControl = `<button class="icon-btn svc-presenter-fullscreen" type="button" data-presenter-action="fullscreen" aria-label="${escapeAttr(fullscreenLabel)}" title="${escapeAttr(fullscreenLabel)}" ${anyOutputOpen ? "" : "disabled"}><i data-lucide="maximize"></i><span>전체화면</span></button>`;
+  const fullscreenLabel = anyOutputOpen ? "송출 화면 전체 화면" : "송출을 시작하면 전체 화면을 사용할 수 있습니다";
+  const fullscreenControl = `<button class="icon-btn svc-presenter-fullscreen" type="button" data-presenter-action="fullscreen" aria-label="${escapeAttr(fullscreenLabel)}" title="${escapeAttr(fullscreenLabel)}" ${anyOutputOpen ? "" : "disabled"}><i data-lucide="maximize"></i><span>전체 화면</span></button>`;
   return `
       <div class="svc-presenter-top">
         <div class="svc-presenter-output-group">
@@ -30504,7 +30504,8 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
   const inlineSong = inputContexts.length === 1
     && ["praise_db", "lyrics_db", "score_db"].includes(presenterServiceInputItem(inputContexts[0].item, inputContexts[0].service)?.mode);
   const headerContext = options.showHead && inputContexts.length === 1 && !inlineSong ? { ...inputContexts[0], timingEntries: subgroup.slides } : null;
-  const inputControls = renderPresenterBoardSubgroupInputControls(serviceId, subgroup, { headerActions: Boolean(headerContext) });
+  const headerDbContext = options.showHead && inputContexts.length === 1 ? inputContexts[0] : null;
+  const inputControls = renderPresenterBoardSubgroupInputControls(serviceId, subgroup, { headerActions: Boolean(headerContext), headerDbLink: Boolean(headerDbContext) });
   const headerActions = headerContext && inputControls ? renderPresenterBoardItemActions(serviceId, headerContext) : "";
   const context = presenterBoardSubgroupItemContext(serviceId, subgroup);
   const itemIndexAttr = context ? ` data-service-item-index="${escapeAttr(String(context.index))}"` : "";
@@ -30529,7 +30530,7 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
             ${hidden ? `<span class="svc-element-hidden-badge">숨김</span>` : ""}
             ${renderPresenterWarnings(warnings)}
           </button>
-          ${headerContext ? renderServiceItemLinkControl(headerContext.item, headerContext.index) : ""}
+          ${headerDbContext ? renderServiceItemLinkControl(headerDbContext.item, headerDbContext.index) : ""}
           ${headerActions}
         </header>` : ""}
       ${inputControls}
@@ -30601,7 +30602,7 @@ function renderPresenterBoardSubgroupInputControls(serviceId, subgroup = {}, opt
     const audioLed = servicePraiseInputMode(context.item) === "audio_praise";
     const audioManager = renderPresenterBoardItemAudioControls(serviceId, context, {manager:true});
     const dbLink = renderServiceItemLinkControl(context.item, context.index);
-    if (dbLink && (options.headerActions || label)) controls = controls.replace(dbLink, "");
+    if (dbLink && (options.headerActions || options.headerDbLink || label)) controls = controls.replace(dbLink, "");
     return `
       <div class="svc-board-subgroup-control-item${!options.headerActions && !label && ["lyrics_db", "score_db"].includes(servicePraiseInputMode(context.item)) ? " svc-inline-song" : ""}" data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(context.item.id || "")}" data-service-item-index="${escapeAttr(String(context.index))}">
         ${label ? `<div class="svc-board-subgroup-control-head"><span class="svc-board-subgroup-control-label">${escapeHtml(label)}</span>${dbLink}${renderPresenterBoardItemActions(serviceId, context)}</div>` : ""}

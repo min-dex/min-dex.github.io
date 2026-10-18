@@ -8898,3 +8898,19 @@ html.ui-theme-switching:not(.presenter-output-document) *::after {
   margin-left: auto;
   gap: 10px;
 }
+
+/* Pair output commands without the obsolete three-slot utility row. */
+.svc-presenter-side-panel .svc-presenter-output-group { gap: 10px; }
+.svc-presenter-side-panel .svc-presenter-launch { grid-column: 1; height: 35px; min-width: 0; padding: 0 10px; }
+.svc-presenter-side-panel .svc-presenter-window-controls { grid-column: 2; grid-template-columns: minmax(0, 1fr); gap: 0; }
+.svc-presenter-side-panel .svc-presenter-fullscreen { height: 35px; padding: 0 10px; gap: 5px; white-space: nowrap; }
+/* A single element's DB shortcut belongs to its heading, not an input column. */
+@container (min-width: 961px) {
+  .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link)) { grid-template-columns: 130px minmax(180px, 1fr) 160px 160px max-content; }
+  .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link)) .svc-song-picker--linked { grid-column: 3; }
+  .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link)) .svc-form-hint.compact { grid-column: 4; }
+  .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link)) > .svc-board-subgroup-flow { grid-column: 5; }
+  .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link, .svc-song-picker--linked)) { grid-template-columns: 130px minmax(180px, 1fr) 160px max-content; }
+  .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link, .svc-song-picker--linked)) .svc-form-hint.compact { grid-column: 3; }
+  .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link, .svc-song-picker--linked)) > .svc-board-subgroup-flow { grid-column: 4; }
+}

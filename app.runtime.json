@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-offering-separation",
+  "version": "20261018-controller-actions",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "416a48e9f1593e3837e8669b2599183c019b1ae28be555244edb2f413eb32eb5",
-  "runtime_sha256": "5a5b623fa969d631ef6e388b0716e6e4f7e8c06777234940f9777468152abebd",
-  "source_bytes": 1475373,
-  "runtime_bytes": 1044075,
-  "source_gzip": 329620,
-  "runtime_gzip": 258181
+  "source_sha256": "a027504606e362ddc46e9196ef4fb32c6f6489439e8e1edda052e88879c58ba9",
+  "runtime_sha256": "16680e0395329bd13051776fdd6e5384d1f97b26c8c2861d435b0d9e24c0ada1",
+  "source_bytes": 1475546,
+  "runtime_bytes": 1044161,
+  "source_gzip": 329650,
+  "runtime_gzip": 258201
 }

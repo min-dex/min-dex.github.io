@@ -3298,3 +3298,8 @@ Assignee-only board fields omit the enclosing card padding/background. Non-child
 All-generations defaults remain prayer-only unless configured otherwise, but an explicitly populated offering hymn is retained. Offering labels are distinct during duplicate collapsing and positional fallback matching; a hymn cannot donate its song/version to a prayer. Legacy title-person offering prayers with a linked song are split in memory into a deterministic hymn projection and the original prayer identity/person. Existing output mode and form are retained on the hymn; source objects are untouched, with no migration or production writes. Repeat projection does not duplicate recovered hymns.
 
 Assignee-only cards now follow the user's corrected reference: no visible 담당 label, full-width input inside the usual padded card. Accessible input names remain.
+
+
+## Controller action alignment · 2026-10-18
+
+Single-element DB shortcuts sit beside the board element heading, independent of inline song controls. Their input-grid column is removed. Multi-song rows retain their individual song DB links. Output start/stop and 전체 화면 share one row with 35px controls and 10px gap; the obsolete three-slot window-controls layout is replaced inside the side panel. Display wording includes the space in 전체 화면; action identifiers and output behavior are unchanged. Chromium/WebKit renderer checks cover 1600–600px board widths and ready/live mocked commands in a 260px panel without opening any output window.
