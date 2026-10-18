@@ -609,7 +609,10 @@ function presenterHymnScoreAssetSlides(song = null, version = null, displayText 
 }
 
 function normalizedHymnScoreNumber(value = "") {
-  const match = String(value || "").match(/\d{1,3}/);
+  const text = String(value || "");
+  // The bundled score manifest uses new-hymnal numbers only.
+  if (/(?:^|[\s(])통(?:일)?\s*(?:찬송가\s*)?\d/.test(text)) return "";
+  const match = text.match(/\d{1,3}/);
   return match ? String(Number(match[0])) : "";
 }
 

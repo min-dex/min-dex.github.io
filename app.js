@@ -11384,7 +11384,7 @@ function serviceItemRequiresNewHymnalScoreSong(item = {}) {
 }
 
 function isNewHymnalScoreSong(song = null) {
-  return Boolean(song?.hymn_no && songHasPraiseType(song, "hymn"));
+  return Boolean(/^\d{1,3}$/.test(String(song?.hymn_no || "").trim()) && songHasPraiseType(song, "hymn"));
 }
 
 function serviceSelectableSongVersions(song = null, item = {}, service = selectedServiceForEditor()) {

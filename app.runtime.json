@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-bulletin-metrics",
+  "version": "20261018-union-hymn-score-guard",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "748e4b6efa7b2ae7fed083a5151310f3fd57fd2f669de097529a40392108200f",
-  "runtime_sha256": "cdb7e847345f0dd57ed5aa8049aa8c90fb1ea8ade54029d7507727de755e4f24",
-  "source_bytes": 1472568,
-  "runtime_bytes": 1042324,
-  "source_gzip": 328943,
-  "runtime_gzip": 257792
+  "source_sha256": "4b3257f39a3bf88f1081b986af9d4bac3b92e45aad2bd8116ea141de625a0890",
+  "runtime_sha256": "edc38018c0ad18d3dfce7827e51d28b7f2f31657b9f670c1af91cd0ae31c7c51",
+  "source_bytes": 1472607,
+  "runtime_bytes": 1042361,
+  "source_gzip": 328952,
+  "runtime_gzip": 257803
 }
