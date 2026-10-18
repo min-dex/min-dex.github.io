@@ -567,3 +567,5 @@ and bulletin editor/preview in Chromium and WebKit; no service data is saved.
 - Reselecting the currently open worship service retains the mounted editor, caret, selected item and clean fingerprint. Each navigation invalidates prior entry requests before awaiting navigation; completed responses require the same entry token. Deferred text is protected even without a modified-status badge.
 
 - Worship sidebar announcement entries show their label only, like liturgical entries. Announcement source text and output are unchanged.
+
+- Presenter text-item assignees use an internal 담당 placeholder instead of an external label; filled inputs show the name only and keep aria-label.

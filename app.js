@@ -28558,7 +28558,7 @@ function renderPresenterServiceTextInputs(item, index, model, memo) {
   const titleLabel = presenterServiceTitleInputLabel(item, memo, { manualPraise });
   const titlePlaceholder = presenterServiceTitleInputPlaceholder(item, memo, titleLabel);
   const assigneeLabel = presenterServiceAssigneeInputLabel(item);
-  const assigneePlaceholder = inferServiceItemAssignee(item) || assigneeLabel;
+  const assigneePlaceholder = assigneeLabel;
   return `
     ${announcementText ? renderServiceAnnouncementEditor(item,index,model?.service?.id,memo):""}
     ${needsTitle && !announcementText ? `
@@ -28571,7 +28571,6 @@ function renderPresenterServiceTextInputs(item, index, model, memo) {
     ${manualPraise ? renderPresenterManualLyricsField(item, index, model?.service?.id || state.presenter.serviceId) : ""}
     ${needsAssignee ? `
       <label class="svc-presenter-input-field">
-        <span>${escapeHtml(assigneeLabel)}</span>
         <input class="svc-presenter-input-control" type="text" data-service-item-field="assignee" data-service-item-index="${index}"
           value="${escapeAttr(model.assigneeValue || "")}" placeholder="${escapeAttr(assigneePlaceholder)}" onkeydown="handleDetailKeydown(event)" aria-label="${escapeAttr(`${item.label || "항목"} 담당`)}" />
       </label>` : ""}`;
