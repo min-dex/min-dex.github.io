@@ -16777,8 +16777,7 @@ function renderReferenceEditorRow(link, index = 0, total = 1) {
     <article class="reference-card reference-card--editing${disabled}">
       <div class="reference-editor-main">
         <label>
-          <span>제목</span>
-          <input data-reference-id="${escapeAttr(link.id)}" data-reference-field="title" value="${escapeAttr(link.title)}" placeholder="사이트 제목" />
+          <input data-reference-id="${escapeAttr(link.id)}" data-reference-field="title" value="${escapeAttr(link.title)}" placeholder="사이트 제목" aria-label="사이트 제목" />
         </label>
         <label>
           <span>URL</span>
@@ -28555,7 +28554,6 @@ function renderPresenterServiceAssetInput(item, index, memo, options = {}) {
           ${options.headerActions ? "" : renderPresenterAssetUpload(item, index, memo, serviceId)}
         </div>
         <label class="svc-presenter-input-field svc-reference-media-title">
-          <span>제목</span>
           <input class="svc-presenter-input-control" type="text" data-service-item-field="asset_name" data-service-item-index="${index}" data-service-id="${escapeAttr(serviceId)}"
             value="${escapeAttr(asset.name)}" placeholder="참고 화면 제목" aria-label="참고 화면 제목" />
         </label>
@@ -28573,7 +28571,6 @@ function renderPresenterServiceAssetInput(item, index, memo, options = {}) {
         ${options.headerActions ? "" : renderPresenterAssetUpload(item, index, memo, serviceId)}
       </div>
       <label class="svc-presenter-input-field svc-reference-media-title">
-        <span>이름</span>
         <input class="svc-presenter-input-control" type="text" data-service-item-field="asset_name" data-service-item-index="${index}" data-service-id="${escapeAttr(serviceId)}"
           value="${escapeAttr(asset.name)}" placeholder="${escapeAttr(`${typeLabel} 이름`)}" aria-label="${escapeAttr(`${item.label || "파일"} 이름`)}" title="${escapeAttr(asset.name)}" />
       </label>

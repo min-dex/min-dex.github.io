@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-offering-three-modes",
+  "version": "20261018-internal-labels",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "eee2c5451685885d776ec7e2fa64f7756781540a841de041eed0e24932bacb97",
-  "runtime_sha256": "3d7f6af3bfa4da7f759bca5f44a6a6a990296c5926544d5b8067c83bddcffd1e",
-  "source_bytes": 1494356,
-  "runtime_bytes": 1057338,
-  "source_gzip": 334004,
-  "runtime_gzip": 261725
+  "source_sha256": "6fd0121bbcb08031446f6bd6a445e0ec5ee9713125bd8f27cb8f5575e805381a",
+  "runtime_sha256": "6a2065048b76ec9e889bb85beb4b15ca42c6a82bc6f7666e0bc436f4b2585c2d",
+  "source_bytes": 1494298,
+  "runtime_bytes": 1057277,
+  "source_gzip": 333999,
+  "runtime_gzip": 261717
 }

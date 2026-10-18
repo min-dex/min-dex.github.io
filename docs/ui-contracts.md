@@ -569,3 +569,5 @@ and bulletin editor/preview in Chromium and WebKit; no service data is saved.
 - Worship sidebar announcement entries show their label only, like liturgical entries. Announcement source text and output are unchanged.
 
 - Presenter text-item assignees use an internal 담당 placeholder instead of an external label; filled inputs show the name only and keep aria-label.
+
+- Reference-screen titles, attached-file names and site-link titles use internal placeholders without duplicated external captions. Retain explicit accessible names, values and persistence attributes; other field labels remain unchanged.

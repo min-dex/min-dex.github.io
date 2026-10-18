@@ -6641,6 +6641,7 @@ textarea.svc-presenter-input-control--multiline {
   min-width: 0;
 }
 .svc-reference-media-input > .svc-presenter-input-field.svc-reference-media-title {
+  grid-template-rows: max-content;
   flex: 0 1 360px;
   min-width: 0;
   max-width: 100%;
