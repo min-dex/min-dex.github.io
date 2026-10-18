@@ -106,9 +106,9 @@ try:
    assert d.locator('[data-photo-at="1"]').input_value()=='7.5'
    d.locator('[data-photo-replace="1"]').set_input_files({'name':'replacement-photo.png','mimeType':'image/png','buffer':png})
    assert d.locator('[data-photo-at="1"]').input_value()=='7.5'
-   d.locator('[data-photo-editor]').screenshot(path=f'/private/tmp/mindex-photo-editor-{engine}.png')
+   d.locator('[data-photo-editor]').screenshot(path=f'/tmp/mindex-photo-editor-{engine}.png')
    page.set_viewport_size({'width':390,'height':844})
-   d.locator('[data-photo-editor]').screenshot(path=f'/private/tmp/mindex-photo-editor-{engine}-mobile.png')
+   d.locator('[data-photo-editor]').screenshot(path=f'/tmp/mindex-photo-editor-{engine}-mobile.png')
    assert d.evaluate('(el)=>el.scrollWidth<=el.clientWidth+2')
    page.set_viewport_size({'width':1280,'height':900})
 
