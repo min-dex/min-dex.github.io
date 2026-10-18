@@ -375,3 +375,13 @@ insertions retain the existing section identity and relative order. Projection
 deduplication includes semantic slot identity, not just ordinal; an entrance song
 and a numbered praise item cannot donate/drop each other's content. All writes
 still use the existing revision-checked atomic save. No schema change.
+
+## Offering hymn/special toggle (2026-10-18)
+
+The offering praise editor switches between 봉헌찬송 and 봉헌특송 using the
+existing atomic element patch. It preserves song/version, lyrics, form, assets,
+assignee and order; only the label, semantic slot and modified flag change.
+Projection matches both variants to one offering position, preserving the chosen
+slot. Special/media replacements are excluded from shared offering writes after
+a fresh aggregate read, including ordinary Sundays. Returning to hymn keeps the
+current content; it does not immediately replace it with another service's song.

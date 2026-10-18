@@ -120,5 +120,20 @@ try {
   assert.match(raced.find(x=>x.status==='rejected').reason.message,/CALENDAR_REVISION_CONFLICT/);
   const afterRace=await scalar('select public.get_department_assignee_context_v1($1,$2)',[cal,'children_prayer']);
   assert.ok(afterRace.services.every(x=>x.elements[0].person===afterRace.calendar.children_prayer));
+  // Exercise the other three mappings through both real RPC directions too.
+  for (const [offset,kind,label,field] of [[1,'youth','대표기도','youth_prayer'],[2,'youth','봉헌기도','youth_offering_prayer'],[3,'young-adult','대표기도','young_adult_prayer']]) {
+    const cid=randomUUID(),serviceId=randomUUID(),sectionId=randomUUID(),elementId=randomUUID(),date=`2026-11-0${offset}`;
+    await db.exec('reset session authorization');
+    await db.query(`insert into public.mindex_sunday_calendar(id,date,${field}) values($1,$2,'A')`,[cid,date]);
+    await db.exec('set session authorization anon');
+    await scalar('select public.create_worship_service_v1($1)',[{
+      protocolVersion:1,requestId:randomUUID(),serviceId,serviceTypeId:kind,serviceDate:date,metadataPatch:{title:'fixture'},
+      sections:[{id:sectionId,patch:{title:label}}],elements:[{id:elementId,sectionId,patch:{element_type:'plain_text',person:'A',source_ref:{label}}}],document:{sourceText:'A'}}]);
+    const patch=(revision,value)=>({protocolVersion:1,requestId:randomUUID(),serviceId,expectedRevision:revision,
+      metadataPatch:{},sectionPatches:[],elementPatches:[{id:elementId,patch:{person:value}}],document:{sourceText:value}});
+    const one=await scalar('select public.save_worship_service_v1($1)',[patch('1','B')]);assert.equal(one.calendar[field],'B');
+    const two=await scalar('select public.save_calendar_assignee_v1($1)',[{requestId:randomUUID(),calendarId:cid,field,expected:'B',value:'C',requests:[patch(one.committedRevision,'C')]}]);
+    assert.equal(two.calendar[field],'C');assert.equal(two.services[0].elements[0].person,'C');
+  }
   console.log('PASS department bidirectional commit, exact retry, stale/changed replay rejection, rollback, legacy bypass guard and explicit clear');
 } finally {await db.close();}

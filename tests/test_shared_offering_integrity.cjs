@@ -30,6 +30,12 @@ for(const name of ['allGenerationsHasOfferingReplacement','worshipServicePartici
  const job={sourceServiceId:'source',targetId:'target',key:'offering-hymn',previous:hymn,item:{...hymn,song_id:'new'}};
  await assert.rejects(c.persistSundayEditSync(job),/봉헌찬송 항목이 없습니다/);
  rows=[{label:'봉헌 영상',slot:'offering.media',section:'offering'}];await c.persistSundayEditSync(job);
+ for(const allGenerations of [true,false]){
+  target.allGenerations=allGenerations;
+  rows=[{...hymn,label:'봉헌특송',slot:'offering.special'},hymn];
+  await c.persistSundayEditSync(job);
+ }
+ target.allGenerations=true;
  rows=[{...hymn,song_id:null,raw_title:''}];await assert.rejects(c.persistSundayEditSync(job),/SAFE_PREPARATION/);
  rows=[{...hymn,song_id:'independent'}];await assert.rejects(c.persistSundayEditSync(job),/덮어쓰지 않았습니다/);
  assert.equal(writes,0);

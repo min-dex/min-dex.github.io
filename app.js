@@ -7923,7 +7923,7 @@ async function persistSundayEditSync(job, options = {}) {
   if (freshService.date !== state.services.find((service) => service.id === job.sourceServiceId)?.date
     || freshService.type_id !== target.type_id || !worshipServiceParticipatesInSharedSundayContent(freshService, job.item)) return;
   const items = groupWorshipElements(sections, elements)[target.id] || [];
-  if (isAllGenerationsWorshipService(freshService) && allGenerationsHasOfferingReplacement(freshService, items)) return;
+  if (job.key === "offering-hymn" && allGenerationsHasOfferingReplacement(freshService, items)) return;
   const matches = items.filter((item) => sundaySharedContentKey(item, freshService) === job.key);
   // Never create template placeholders or reinterpret substitute elements as shared content.
   if (!matches.length && job.key === "offering-hymn" && !allGenerationsHasOfferingReplacement(freshService, items)) {
@@ -11009,6 +11009,63 @@ async function setServiceBenedictionReplacement(serviceId, itemId, enabled) {
   const saved = await saveServiceItemPatch(serviceId,
     getServiceItems(serviceId).findIndex((candidate) => candidate.id === itemId), { renderAfterSave: false });
   if (saved) showToast(enabled ? "이 예배의 축도를 주기도문으로 변경했습니다." : "이 예배의 축도를 복원했습니다.");
+  return saved;
+}
+
+function serviceItemCanToggleOfferingSpecial(item = {}) {
+  return templateProjectionSectionKey(item) === "offering"
+    && ["봉헌찬송", "봉헌특송"].includes(compactSearchValue(item.label || ""))
+    && serviceMemoElementType(parseServiceItemMemo(item.memo)) === "praise";
+}
+
+function replaceServiceOfferingSpecial(item, enabled) {
+  if (!serviceItemCanToggleOfferingSpecial(item)
+    || (compactSearchValue(item.label) === "봉헌특송") === enabled) return false;
+  item.label = enabled ? "봉헌특송" : "봉헌찬송";
+  item._worshipSlotKey = enabled ? "offering.special" : "offering.praise";
+  item._worshipElementTemplateModified = true;
+  item._worshipTemplatePlaceholder = false;
+  return true;
+}
+
+function renderServiceOfferingSpecialToggle(item, service) {
+  if (!serviceItemCanToggleOfferingSpecial(item)) return "";
+  const special = compactSearchValue(item.label) === "봉헌특송";
+  return `<button class="btn ghost" type="button" data-service-offering-toggle="${special ? "hymn" : "special"}"
+    data-service-id="${escapeAttr(service.id)}" data-service-item-id="${escapeAttr(item.id)}">
+    <i data-lucide="repeat-2"></i>${special ? "봉헌찬송으로 변경" : "봉헌특송으로 변경"}</button>`;
+}
+
+async function setServiceOfferingSpecial(serviceId, itemId, enabled) {
+  if (state.saving) return waitForServiceSave({},
+    (id) => setServiceOfferingSpecial(serviceId, id, enabled), itemId);
+  const service = state.services.find((candidate) => candidate.id === serviceId);
+  const items = getServiceItems(serviceId);
+  const index = items.findIndex((candidate) => candidate.id === itemId);
+  const item = items[index];
+  if (!service || !item || !serviceItemCanToggleOfferingSpecial(item)) return false;
+  if (serviceSourceTextHasPendingChanges(serviceSourceTextareaForService(serviceId))) {
+    showToast("편집 중인 예배 원문을 먼저 반영한 뒤 변경해 주세요.", "info");
+    return false;
+  }
+  if ((compactSearchValue(item.label) === "봉헌특송") === enabled) return true;
+  for (const field of refs.detailPane?.querySelectorAll("[data-service-item-field]") || []) {
+    if ((field.dataset.serviceId || state.selectedServiceId) !== serviceId
+      || Number(field.dataset.serviceItemIndex) !== index) continue;
+    clearDeferredServiceTextPreview(field);
+    updateServiceItemField(field, { deferPresenterRefresh: true });
+    field.dataset.initialValue = field.value;
+    field.dataset.presenterPreviewValue = field.value;
+  }
+  const current = getServiceItems(serviceId).find((candidate) => candidate.id === itemId);
+  if (!replaceServiceOfferingSpecial(current, enabled)) return false;
+  delete service._worshipSourceTextDraft;
+  state.dirty.service = true;
+  markServiceElementDirty(serviceId, current);
+  refreshPresenterForService(serviceId, { renderControls: !serviceHasPendingTextEdits(serviceId) });
+  const saved = await saveServiceItemPatch(serviceId,
+    getServiceItems(serviceId).findIndex((candidate) => candidate.id === itemId), { renderAfterSave: false });
+  if (saved) showToast(enabled ? "이 예배의 봉헌을 특송으로 변경했습니다." : "이 예배의 봉헌을 찬송으로 변경했습니다.");
   return saved;
 }
 
@@ -21681,7 +21738,7 @@ function findTemplateProjectionMatchIndex(templateItem = {}, existingItems = [],
   const templateSectionCount = templateSectionCounts.get(sectionOnlyKey) || 0;
   const candidates = [...unmatched].map((index) => ({ index, item: existingItems[index] }))
     .filter(({ item }) => templateProjectionSectionKey(templateItem) !== "offering"
-      || compactSearchValue(templateItem.label || "") === compactSearchValue(item.label || ""));
+      || serviceItemTemplateProjectionKey(item, { includeLabel: true }) === exactKey);
 
   const exact = candidates.find(({ item }) => serviceItemTemplateProjectionKey(item, { includeLabel: true }) === exactKey);
   if (exact) return exact.index;
@@ -21716,7 +21773,8 @@ function serviceItemTemplateProjectionKey(item = {}, options = {}) {
   if (options.includeElementOrder) return `${sectionKey}:${Number(item._worshipElementOrder) || 0}`;
   const rawLabel = parseServiceItemMemo(item.memo).benedictionReplacement?.original.label || item.label || "";
   const rawLabelKey = compactSearchValue(rawLabel);
-  const labelKey = sectionKey === "sermon" && rawLabelKey === "설교제목" ? "설교" : rawLabelKey;
+  const labelKey = sectionKey === "offering" && rawLabelKey === "봉헌특송" ? "봉헌찬송"
+    : sectionKey === "sermon" && rawLabelKey === "설교제목" ? "설교" : rawLabelKey;
   return `${sectionKey}:${labelKey}`;
 }
 
@@ -21727,7 +21785,8 @@ function templateProjectionSectionKey(item = {}) {
 
 function mergeTemplateProjectionItem(templateItem = {}, existingItem = {}) {
   const sectionModified = Boolean(existingItem._worshipSectionTemplateModified);
-  const elementModified = Boolean(existingItem._worshipElementTemplateModified);
+  const elementModified = Boolean(existingItem._worshipElementTemplateModified
+    || (serviceItemCanToggleOfferingSpecial(existingItem) && compactSearchValue(existingItem.label) === "봉헌특송"));
   const templateLabel = String(templateItem.label || "").trim();
   const existingLabel = String(existingItem.label || "").trim();
   const isPreparation = isServicePreparationItemForEditor(templateItem, parseServiceItemMemo(templateItem.memo))
@@ -21764,6 +21823,7 @@ function mergeTemplateProjectionItem(templateItem = {}, existingItem = {}) {
       ))
       : (existingLabel || templateLabel);
     merged._worshipElementOrder = existingItem._worshipElementOrder || templateItem._worshipElementOrder;
+    if (serviceItemCanToggleOfferingSpecial(existingItem)) merged._worshipSlotKey = serviceItemSlotKey(existingItem);
   }
   if (parseServiceItemMemo(existingItem.memo).benedictionReplacement) merged.assignee = existingItem.assignee || "";
   return merged;
@@ -23750,6 +23810,7 @@ function serviceSidebarChildItemDisplayParts(item, service = null) {
     };
   }
   const label = serviceElementDisplayLabel(serviceItemOrdinalDisplayLabel(item, service));
+  if (serviceSidebarUsesLabelOnly(item)) return { meta: label || "항목", title: "" };
   const fallback = serviceSidebarChildItemTitle(item, service);
   if (!label) return { meta: "", title: serviceSidebarOutlineFirstLine(fallback || "항목", item) };
   const title = serviceSidebarChildItemDisplayText(item);
@@ -23847,7 +23908,9 @@ function serviceSidebarPersonSummary(item = {}, service = null) {
 
 function serviceSidebarUsesLabelOnly(item = {}) {
   const label = compactSearchValue(item.label || "");
-  return isCreedServiceItem(item)
+  return String(item._worshipSectionKey || item.section_key || "") === "announcements"
+    || ["광고", "교회소식", "청년부광고", "청소년부광고"].includes(label)
+    || isCreedServiceItem(item)
     || label === "주기도문"
     || label === "공동체고백";
 }
@@ -26912,6 +26975,7 @@ function sundaySharedContentKey(item = {}, service = null) {
   if (slotKey === "sermon.title") return "sermon-title";
   if (slotKey === "sermon.scripture") return "sermon-scripture";
   if (isSermonCitationSlotKey(slotKey)) return "sermon-citation";
+  if (["봉헌특송", "봉헌영상"].includes(label) || ["offering.special", "offering.media"].includes(slotKey)) return "";
   if (slotKey === "offering.praise") return "offering-hymn";
   const praiseMatch = label.match(/^찬양(\d+)$/);
   if (sectionKey === "praise" && praiseMatch && Number(praiseMatch[1]) >= 1 && Number(praiseMatch[1]) <= 3) {
@@ -28144,7 +28208,7 @@ function presenterServiceInputControls(item, index, service, options = {}) {
     return renderPresenterMonthlyCorporatePrayerInputs(item, index, memo, service?.id || model?.service?.id);
   }
   if (["praise_db", "score_db", "lyrics_db", "children_audio"].includes(mode)) {
-    return renderPresenterServicePraiseInput(item, index, model, options);
+    return renderPresenterServicePraiseInput(item, index, model, options) + renderServiceOfferingSpecialToggle(item, service);
   }
   if (mode === "scripture") {
     return renderPresenterServiceScriptureInput(item, index, memo, service);
@@ -28152,7 +28216,7 @@ function presenterServiceInputControls(item, index, service, options = {}) {
   if (mode === "asset") {
     return renderPresenterServiceAssetInput(item, index, memo, options);
   }
-  return renderPresenterServiceTextInputs(item, index, model, memo);
+  return renderPresenterServiceTextInputs(item, index, model, memo) + renderServiceOfferingSpecialToggle(item, service);
 }
 
 function presenterServiceTextInputSpec(item, model, memo) {
