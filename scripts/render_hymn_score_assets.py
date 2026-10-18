@@ -273,6 +273,13 @@ def collect_tasks(
         if hymns and hymn_no not in hymns:
             continue
         for slide in entry.get("slides", []):
+            reviewed = slide.get("reviewedAsset")
+            if reviewed:
+                asset = ROOT / slide["src"]
+                if not asset.is_file() or hashlib.sha256(asset.read_bytes()).hexdigest() != reviewed.get("sha256"):
+                    raise ValueError(f"Reviewed score asset missing or changed: {asset}")
+                # The original deck predates this reviewed correction.
+                continue
             source_slide = slide.get("sourceSlide")
             if not source_slide:
                 continue

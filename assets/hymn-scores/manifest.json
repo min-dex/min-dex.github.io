@@ -16586,11 +16586,17 @@
         "scoreFormKey": "score:verse-4"
       },
       {
-        "src": "assets/hymn-scores/223/slide-08.webp",
+        "src": "assets/hymn-scores/223/slide-08-reviewed.webp",
         "source": "DB_HYMN1.pptx",
         "sourceSlideId": "3739",
         "sourceSlide": 1923,
-        "text": "1.하나님은 우리들의 참된 2.예수님은 우리들의 참된 3.사도들은 우리들의 장한 4.아버지를 잘 섬기어 좋은"
+        "text": "1.하나님은 우리들의 참된 2.예수님은 우리들의 참된 3.사도들은 우리들의 장한 4.아버지를 잘 섬기어 좋은",
+        "reviewedAsset": {
+          "date": "2026-10-18",
+          "original": "assets/hymn-scores/223/slide-08.webp",
+          "sha256": "4cee008e543d6c54c7b8cea311adfa42b925b68284d8e5e447cf98ce3458c147",
+          "note": "귀하신 분 → 귀한 신분; 신 and its original eighth note translated 40 px right, no pitch/rhythm change."
+        }
       }
     ]
   },

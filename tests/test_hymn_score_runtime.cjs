@@ -12,6 +12,14 @@ assert(start >= 0 && end > start);
 const context = vm.createContext({state: {hymnScoreManifest: source}, stripHymnNumber: value => value});
 vm.runInContext(code.slice(start, end), context);
 assert.deepEqual(Object.keys(runtime), Object.keys(source));
+for (const entry of Object.values(source)) {
+  for (const slide of entry.slides) {
+    if (!slide.reviewedAsset) continue;
+    const bytes = fs.readFileSync(path.join(root, slide.src));
+    assert.equal(require('node:crypto').createHash('sha256').update(bytes).digest('hex'), slide.reviewedAsset.sha256);
+    assert(fs.existsSync(path.join(root, slide.reviewedAsset.original)), 'Original evidence must remain available');
+  }
+}
 let slides = 0;
 for (const number of Object.keys(source)) {
   context.state.hymnScoreManifest = source;
