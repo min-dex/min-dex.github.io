@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-department-live-devices",
+  "version": "20261018-worship-concise-copy",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "c23eb7a8b9a6ec8ae663e91efdab8b2189a473bdc7ac7101a496ebb4279817e8",
-  "runtime_sha256": "ccbe0b239831d6e605f71dc90c18eec31160a979455de41715cd203b1295523f",
-  "source_bytes": 1505046,
-  "runtime_bytes": 1064915,
-  "source_gzip": 336676,
-  "runtime_gzip": 263818
+  "source_sha256": "c4a3ad7b8047aa1c356d3d374c0908da37d83ecb2fd4e51213a433c6cd2e67d1",
+  "runtime_sha256": "bcf0a76da29a352bf5376c788557334b757232e12d86a49c2af12e9185444313",
+  "source_bytes": 1504700,
+  "runtime_bytes": 1064607,
+  "source_gzip": 336586,
+  "runtime_gzip": 263735
 }

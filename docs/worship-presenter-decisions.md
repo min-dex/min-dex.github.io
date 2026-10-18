@@ -3376,3 +3376,12 @@ Existing element commits and feedback remain unchanged.
 
 The empty offering video editor omits the redundant file-connection helper;
 name, file/link and upload controls remain, as does connected-file information.
+
+### Concise worship editor copy · 2026-10-18
+
+Shared reference/media editors across service types omit the empty file-link
+explanation. Upload/name/link controls already describe the action; connected
+file details and preview errors remain. The source disclosure drops its redundant
+edit/apply caption while retaining the Apply button and save/recovery feedback.
+Praise, scripture, prayer/sermon, announcements and source controls retain loading,
+validation, historical-date scope, empty-state and non-obvious keyboard guidance.

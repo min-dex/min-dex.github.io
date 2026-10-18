@@ -25174,7 +25174,6 @@ function renderServiceSourcePanel(service) {
     <details class="svc-source-panel">
       <summary class="svc-source-panel-head">
         <span>예배 원문</span>
-        <small>편집 후 반영</small>
       </summary>
       <div class="svc-source-panel-body">
         <textarea class="svc-source-text" data-service-source-text="${escapeAttr(service.id)}" data-service-source-signature="${escapeAttr(compactTextSignature(source))}" spellcheck="false" aria-label="예배 원문">${escapeHtml(source)}</textarea>
@@ -28728,7 +28727,7 @@ function renderPresenterServiceAssetInput(item, index, memo, options = {}) {
           value="${escapeAttr(asset.name)}" placeholder="${escapeAttr(`${typeLabel} 이름`)}" aria-label="${escapeAttr(`${item.label || "파일"} 이름`)}" title="${escapeAttr(asset.name)}" />
       </label>
       ${renderPresenterServiceAssetUrlInput(asset, index, serviceId, `${item.label || "파일"} 링크`, "파일/링크", "파일을 선택하거나 공개 URL 입력")}
-      ${serviceItemCanToggleOfferingSpecial(item) && !asset.url ? "" : renderPresenterReferenceMediaPreview(asset, assetKind, "파일을 선택하면 이 항목에 바로 연결됩니다.")}
+      ${renderPresenterReferenceMediaPreview(asset, assetKind)}
     </div>`;
 }
 
@@ -28745,9 +28744,9 @@ function renderPresenterServiceAssetUrlInput(asset, index, serviceId, ariaLabel,
     </label>`;
 }
 
-function renderPresenterReferenceMediaPreview(asset, kind, emptyMessage = "파일을 선택하면 이 예배의 참고 화면으로 바로 송출됩니다.") {
+function renderPresenterReferenceMediaPreview(asset, kind) {
   const source = String(asset?.url || "").trim();
-  if (!source) return `<span class="svc-reference-media-empty-hint">${escapeHtml(emptyMessage)}</span>`;
+  if (!source) return "";
   const normalizedKind = String(kind || asset?.kind || "file").trim().toLowerCase();
   const slides = normalizeServiceAssetSlides(asset.slides);
   const slideCount = slides.length;

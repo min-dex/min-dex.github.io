@@ -1,5 +1,6 @@
 """Collapsed attachments do not expose thumbnail strips; search count stays in list."""
 import argparse
+from urllib.parse import urlsplit
 from smoke_app import launch_chromium,start_local_app_server,sync_playwright
 parser=argparse.ArgumentParser();parser.add_argument('--url');args=parser.parse_args()
 server,url=(None,args.url) if args.url else start_local_app_server()
@@ -8,7 +9,8 @@ try:
   for engine in ['chromium','webkit']:
    browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
    page=browser.new_page(viewport={'width':1000,'height':700})
-   page.route('**/*supabase*/**',lambda r:r.abort())
+   page.add_init_script('Element.prototype.requestFullscreen=async()=>{};Element.prototype.webkitRequestFullscreen=()=>{};window.open=()=>null')
+   page.route('**/*',lambda r:r.continue_() if urlsplit(r.request.url).netloc==urlsplit(url).netloc else r.abort())
    page.goto(url,wait_until='load')
    page.wait_for_function("typeof renderPresenterReferenceMediaPreview==='function'")
    page.evaluate('''() => {
@@ -20,7 +22,7 @@ try:
     document.body.append(host);
     const details=host.querySelector('details'),strip=host.querySelector('.svc-reference-media-slide-strip');
     if(details.open||strip.getBoundingClientRect().height)throw Error('Collapsed thumbnails occupy space');
-    if(host.querySelector('.is-empty')||host.querySelector('.svc-reference-media-empty-hint').getBoundingClientRect().height>45)throw Error('Empty placeholder oversized');
+    if(host.querySelector('.is-empty')||host.querySelector('.svc-reference-media-empty-hint'))throw Error('Redundant empty helper remained');
     details.open=true;
     if(strip.getBoundingClientRect().height<=0||strip.querySelectorAll('button').length!==2)throw Error('Expanded thumbnails missing');
     selectPresenterMediaPreviewSlide(strip.querySelectorAll('button')[1]);
