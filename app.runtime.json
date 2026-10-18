@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-assignee-placeholder",
+  "version": "20261018-music-only-panel",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "2889c0eeda39edcbca9ac0f888803b0c3067506e34e1b30803f775891558400f",
-  "runtime_sha256": "7623c7ced514fec3b32bf8ff8af35b950e0883ac607b6a2690318a5d438f50c6",
-  "source_bytes": 1486686,
-  "runtime_bytes": 1052395,
-  "source_gzip": 331804,
-  "runtime_gzip": 260055
+  "source_sha256": "f8ee0f8d89bbe0b30e2f9f090bd60e6a255505dc6b46449774643dded3c47cb0",
+  "runtime_sha256": "68fa2f7f386434287d7f4cc84901bdc2de9b3ace6065d16ed42425313be63980",
+  "source_bytes": 1485605,
+  "runtime_bytes": 1051415,
+  "source_gzip": 331652,
+  "runtime_gzip": 259869
 }

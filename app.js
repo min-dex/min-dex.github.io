@@ -28653,6 +28653,7 @@ function renderPresenterControlsTop(service, slides, active, index) {
           <div class="svc-presenter-window-controls">
           ${anyOutputOpen ? fullscreenControl : `<span class="svc-presenter-disabled-control" title="${escapeAttr(fullscreenLabel)}">${fullscreenControl}</span>`}
           </div>
+          <div class="svc-presenter-display-settings">${renderPresenterScreenControl()}${renderPresenterAlwaysOnTopControl()}</div>
         </div>
         <div class="svc-presenter-main" aria-live="polite">
           <span class="svc-slide-counter" aria-label="${escapeAttr(uiText("presenter.aria.slideCount", { current, count }))}">
@@ -28984,22 +28985,15 @@ function renderGlobalPlaybackControls() {
   if (!root) return;
   const music = state.serviceMusic;
   const hasMusic = Boolean(music.sourceKey && music.audio);
-  const outputOpen = Boolean(state.presenter.serviceId && isPresenterOutputWindowOpen());
-  const service = state.services.find(item => item.id === state.presenter.serviceId);
   const musicState = music.fadeStop ? "음악 서서히 정지 중" : music.pending ? "음악 준비 중" : music.playing ? "음악 재생 중"
     : music.audio?.currentTime ? "음악 일시정지" : "음악 정지";
   const toggleLabel = music.pending ? "음악 준비 취소" : music.playing ? "음악 일시정지" : "음악 재생";
   const icon = music.pending ? "loader-circle" : music.playing ? "pause" : "play";
-  const outputState = state.presenter.safetyBlank ? "송출 중 · 화면 가림" : "예배 송출 중";
-  const available = hasMusic || outputOpen || state.module === "presenter";
-  const html = `<button class="icon-btn global-playback-trigger" type="button" popovertarget="globalPlaybackPanel" title="송출·음악 제어" aria-label="송출·음악 제어" data-active="${Boolean(outputOpen || music.playing)}"><i data-lucide="monitor"></i><span>송출·음악</span><span class="global-playback-indicator" aria-hidden="true"></span></button>
-    <section id="globalPlaybackPanel" class="global-playback-panel" popover aria-label="송출·음악 제어">
-      <header class="global-playback-panel-head"><strong>송출·음악</strong><button class="icon-btn" type="button" popovertarget="globalPlaybackPanel" popovertargetaction="hide" aria-label="송출·음악 제어 닫기"><i data-lucide="x"></i></button></header>
-      <div class="global-playback-group" role="group" aria-label="현재 예배 송출" ${outputOpen ? "" : "hidden"}>
-        <button type="button" class="global-playback-return" data-global-playback-action="return" title="송출 예배로 돌아가기" aria-label="송출 예배로 돌아가기"><i data-lucide="radio"></i><span class="global-playback-label"><span class="global-playback-state" role="status">${outputState}</span><span class="global-playback-name">${escapeHtml(service?.title || "송출 예배로")}</span></span></button>
-        <button type="button" class="btn secondary global-playback-stop" data-global-playback-action="output-stop" aria-label="예배 송출 종료">송출 종료</button>
-      </div>
-      <p class="global-playback-empty" ${outputOpen ? "hidden" : ""}>송출 중인 예배가 없습니다.</p>
+  const available = hasMusic || state.module === "presenter";
+  const html = `<button class="icon-btn global-playback-trigger" type="button" popovertarget="globalPlaybackPanel" title="음악 관리" aria-label="음악 관리" data-active="${Boolean(music.playing || music.pending)}"><i data-lucide="music"></i><span>음악 관리</span><span class="global-playback-indicator" aria-hidden="true"></span></button>
+    <section id="globalPlaybackPanel" class="global-playback-panel" popover aria-label="음악 관리">
+      <header class="global-playback-panel-head"><strong>음악 관리</strong><button class="icon-btn" type="button" popovertarget="globalPlaybackPanel" popovertargetaction="hide" aria-label="음악 관리 닫기"><i data-lucide="x"></i></button></header>
+      <p class="global-playback-empty" ${hasMusic ? "hidden" : ""}>선택된 음악이 없습니다.</p>
       <div class="global-playback-group" role="group" aria-label="현재 음악" ${hasMusic ? "" : "hidden"}>
         <span class="global-playback-label"><span class="global-playback-state" role="status">${musicState}</span><span class="global-playback-name">${escapeHtml(music.sourceLabel || music.fileName || "음악")}</span></span>
         <button type="button" class="icon-btn" data-global-playback-action="toggle" title="${toggleLabel}" aria-label="${toggleLabel}" aria-pressed="${Boolean(music.playing)}"><i data-lucide="${icon}"></i></button>
@@ -29007,7 +29001,6 @@ function renderGlobalPlaybackControls() {
       </div>
       <label class="global-playback-fade-stop"><input type="checkbox" data-service-music-fade-stop${music.fadeStopEnabled ? " checked" : ""}>페이드아웃 정지</label>
       ${globalThis.MindexSongTiming?.transport() || ""}
-      <div class="svc-presenter-window-controls global-playback-settings">${renderPresenterScreenControl()}${renderPresenterAlwaysOnTopControl()}</div>
     </section>`;
   if (!available) root.querySelector(':popover-open')?.hidePopover();
   root.hidden = !available;

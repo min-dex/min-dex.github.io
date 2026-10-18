@@ -8610,9 +8610,9 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .global-playback-controls[hidden], .global-playback-panel [hidden] { display:none; }
 .global-playback-trigger { position:relative; display:inline-flex; align-items:center; justify-content:center; gap:8px; width:auto; height:var(--topbar-btn-size); min-height:0; padding:0 12px; background:transparent; color:var(--sidebar-ink); white-space:nowrap; font-size:14px; font-weight:600; }
 .global-playback-trigger svg { width:16px; height:16px; flex-shrink:0; }
-.global-playback-indicator { width:6px; height:6px; border-radius:50%; background:var(--accent); display:none; flex-shrink:0; }
+.global-playback-indicator { width:6px; height:6px; border-radius:50%; background:var(--accent); display:block; visibility:hidden; flex-shrink:0; }
 .global-playback-trigger[data-active="true"] { color:var(--accent); }
-.global-playback-trigger[data-active="true"] .global-playback-indicator { display:block; }
+.global-playback-trigger[data-active="true"] .global-playback-indicator { visibility:visible; }
 .global-playback-panel { position:fixed; inset:auto; margin:0; width:min(320px, calc(100vw - 16px)); max-height:calc(100dvh - 16px); overflow:auto; box-sizing:border-box; padding:16px; border:1px solid var(--line); border-radius:var(--r); background: var(--ui-surface-panel); color:var(--ink); box-shadow:0 10px 30px #0003; }
 .global-playback-panel-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:12px; }
 .global-playback-panel-head strong { font-size:16px; font-weight:700; }
@@ -8975,3 +8975,8 @@ body[data-module="presenter"] .topbar { grid-template-columns: var(--sidebar-ref
 body[data-module="presenter"] .topbar-actions { width: 100%; height: 100%; min-width: 0; padding: 0 10px; gap: 5px; box-shadow: inset 1px 0 var(--shell-separator); background: var(--ui-surface-panel); }
 body[data-module="presenter"] .topbar-actions #globalPlaybackControls { margin-right: auto; }
 body[data-module="presenter"] .topbar-actions > .icon-btn { flex: 0 0 35px; width: 35px; }
+
+/* Display settings stay with the lower output controls, separate from music. */
+.svc-presenter-display-settings { grid-column:1 / -1; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px; min-width:0; }
+.svc-presenter-display-settings > .icon-btn { width:auto; padding:0 8px; gap:6px; }
+.svc-presenter-display-settings .svc-presenter-screen-select { min-width:0; max-width:100%; }

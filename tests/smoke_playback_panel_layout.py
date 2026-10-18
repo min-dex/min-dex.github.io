@@ -26,7 +26,7 @@ try:
    assert page.locator('#globalPlaybackPanel').evaluate("e=>e.matches(':popover-open')")
    page.keyboard.press('Escape');assert trigger.evaluate('e=>e===document.activeElement')
    assert not page.locator('#globalPlaybackPanel').evaluate("e=>e.matches(':popover-open')")
-   trigger.click();page.locator('[aria-label="송출·음악 제어 닫기"]').click()
+   trigger.click();page.locator('[aria-label="음악 관리 닫기"]').click()
    assert not page.locator('#globalPlaybackPanel').evaluate("e=>e.matches(':popover-open')")
    b.close()
 finally:server.shutdown()
