@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-timing-file-layout",
+  "version": "20261018-sidebar-divider-spacing",
   "options": {
     "compress": false,
     "mangle": {

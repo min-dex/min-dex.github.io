@@ -577,3 +577,5 @@ and bulletin editor/preview in Chromium and WebKit; no service data is saved.
 - Worship item settings use 30px single-line input/select controls with identical vertical sizing. Keep field captions, focus styling and the existing multiline textarea sizing/resizing unchanged.
 
 - Timing dialogs constrain audio/photo file selectors to the available content width and wrap unbroken audio filenames. Labels, focus styles, multiline sizing and audio/playback/save behavior remain unchanged.
+
+- Worship sidebar section dividers stay attached to the heading and leave 15px before the list (10px heading margin plus 5px section gap). Preserve title padding and list-row spacing.
