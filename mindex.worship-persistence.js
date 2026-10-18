@@ -771,6 +771,8 @@ function serviceElementTitleForSave(item = {}, elementType = "") {
 
 function serviceElementConfigForSave(existingConfig = {}, parsed = emptyServiceItemMemo(), options = {}) {
   const config = { ...(existingConfig && typeof existingConfig === "object" ? existingConfig : {}) };
+  if (parsed.offeringVariants) config.offeringVariants = parsed.offeringVariants;
+  else delete config.offeringVariants;
   if (parsed.benedictionReplacement) config.benedictionReplacement = parsed.benedictionReplacement;
   else delete config.benedictionReplacement;
   const outputMode = serviceItemUsesFlexibleOfferingSlot(options.item) && !serviceItemUsesScoreInputMode(options.item, parsed)

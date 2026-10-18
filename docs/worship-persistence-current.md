@@ -385,3 +385,12 @@ Projection matches both variants to one offering position, preserving the chosen
 slot. Special/media replacements are excluded from shared offering writes after
 a fresh aggregate read, including ordinary Sundays. Returning to hymn keeps the
 current content; it does not immediately replace it with another service's song.
+
+## Three-way offering choice (2026-10-18)
+
+The instance offering editor offers 찬송 / 특송 / 영상 at the same position.
+Switching across praise/video retains separate compact content snapshots in
+`config.offeringVariants`; snapshots exclude the snapshot container itself.
+Atomic saves and row reloads preserve both sets. Hymn/special share praise
+content; video restores its own title and asset. Video and special remain
+excluded from shared hymn synchronization. No historical instances are migrated.

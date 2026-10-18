@@ -8980,3 +8980,8 @@ body[data-module="presenter"] .topbar-actions > .icon-btn { flex: 0 0 35px; widt
 .svc-presenter-display-settings { grid-column:1 / -1; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px; min-width:0; }
 .svc-presenter-display-settings > .icon-btn { width:auto; padding:0 8px; gap:6px; }
 .svc-presenter-display-settings .svc-presenter-screen-select { min-width:0; max-width:100%; }
+
+.service-offering-modes { display: flex; gap: 8px; margin-top: 8px; }
+.service-offering-modes .btn[aria-pressed="true"] {
+  color: var(--accent); border-color: var(--accent);
+}

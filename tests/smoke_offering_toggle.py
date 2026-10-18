@@ -74,6 +74,27 @@ def run(browser, url):
       check(await setServiceOfferingSpecial(sid, target.id, false), 'restore save failed');
       check(writes.at(-1).document.sourceText.includes('[봉헌찬송]') && !writes.at(-1).document.sourceText.includes('[봉헌특송]'), 'source reversal failed');
       target = getServiceItems(sid).find(x => x.label === '봉헌찬송');
+      const praiseMemo = target.memo;
+      check(await setServiceOfferingSpecial(sid, target.id, 'video'), 'video save failed');
+      target = getServiceItems(sid).find(x => x.label === '봉헌영상');
+      check(target && serviceItemSlotKey(target) === 'offering.media', 'video lost in projection');
+      check(!getServiceItems(sid).some(x => x.label === '봉헌찬송'), 'duplicate hymn');
+      check(!sundaySharedContentKey(service, target), 'video linked to shared hymn');
+      check(writes.at(-1).document.sourceText.includes('[봉헌영상]'), 'video source missing');
+      target.raw_title = '봉헌 영상 제목';
+      target.memo = serializeServiceItemMemo({...parseServiceItemMemo(target.memo), asset:{url:'https://example.test/offering.mp4',type:'video'}});
+      Object.assign(state.serviceItems[sid].find(x => x.id === target.id), target);
+      const videoMemo = target.memo;
+      check(await setServiceOfferingSpecial(sid, target.id, 'special'), 'video to special failed');
+      target = getServiceItems(sid).find(x => x.label === '봉헌특송');
+      check(parseServiceItemMemo(target.memo).note === parseServiceItemMemo(praiseMemo).note, 'praise memo lost');
+      check(await setServiceOfferingSpecial(sid, target.id, 'video'), 'video restore failed');
+      target = getServiceItems(sid).find(x => x.label === '봉헌영상');
+      check(target.raw_title === '봉헌 영상 제목', 'video title lost');
+      check(parseServiceItemMemo(target.memo).asset.url === parseServiceItemMemo(videoMemo).asset.url, 'video asset lost');
+      check(await setServiceOfferingSpecial(sid, target.id, 'hymn'), 'hymn restore failed');
+      target = getServiceItems(sid).find(x => x.label === '봉헌찬송');
+      results.push('three modes / atomic reload / video asset restoration / shared exclusion');
       fail = true;
       check(await setServiceOfferingSpecial(sid, target.id, true) === false, 'failure reported success');
       check(state.dirty.service && getServiceItems(sid).some(x => x.label === '봉헌특송'), 'failure lost draft');
@@ -87,7 +108,7 @@ def run(browser, url):
     }""")
     for result in results:
         print('PASS', result, flush=True)
-    page.get_by_role('button', name='봉헌찬송으로 변경').click()
+    page.get_by_role('button', name='찬송', exact=True).click()
     page.wait_for_function("!state.saving && getServiceItems(state.selectedServiceId).some(x => x.label === '봉헌찬송')")
     print('PASS actual delegated button click', flush=True)
     context.close()

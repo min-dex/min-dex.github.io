@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-fullscreen-title-80",
+  "version": "20261018-offering-three-modes",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "a890c314951e6765ac348bbcd2d1b5ad5d3c67a46cf5e35e0f1440f536f95086",
-  "runtime_sha256": "cd6c278f5a25e887584f87bfdb2c7e7cd520099f8287419de1fc1bf34db902fc",
-  "source_bytes": 1491981,
-  "runtime_bytes": 1055685,
-  "source_gzip": 333475,
-  "runtime_gzip": 261267
+  "source_sha256": "eee2c5451685885d776ec7e2fa64f7756781540a841de041eed0e24932bacb97",
+  "runtime_sha256": "3d7f6af3bfa4da7f759bca5f44a6a6a990296c5926544d5b8067c83bddcffd1e",
+  "source_bytes": 1494356,
+  "runtime_bytes": 1057338,
+  "source_gzip": 334004,
+  "runtime_gzip": 261725
 }

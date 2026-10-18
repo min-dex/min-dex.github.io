@@ -96,7 +96,7 @@ function handleServiceManagementDetailClick(event) {
   const offeringToggle = event.target.closest("[data-service-offering-toggle]");
   if (offeringToggle) {
     void setServiceOfferingSpecial(offeringToggle.dataset.serviceId,
-      offeringToggle.dataset.serviceItemId, offeringToggle.dataset.serviceOfferingToggle === "special");
+      offeringToggle.dataset.serviceItemId, offeringToggle.dataset.serviceOfferingToggle);
     return true;
   }
   const benedictionToggle = event.target.closest("[data-service-benediction-toggle]");

@@ -70,12 +70,21 @@ for (const type of ['sunday-first','sunday-second','sunday-main']) {
    state.serviceItems[svc.id]=groupWorshipElements(rows.sections,rows.elements)[svc.id];
   }
   changed=state.serviceItems[svc.id].find(i=>i.label==='봉헌특송');
-  if(!renderServiceOfferingSpecialToggle(changed,svc).includes('봉헌찬송으로 변경'))throw Error('reverse control missing');
+  if(!renderServiceOfferingSpecialToggle(changed,svc).includes('data-service-offering-toggle="hymn"'))throw Error('reverse control missing');
   if(!replaceServiceOfferingSpecial(changed,false))throw Error('reverse toggle failed');
   const restored=projectWorshipServiceItemsFromTemplate(svc,state.serviceItems[svc.id]);
   if(restored.filter(i=>i.label==='봉헌찬송').length!==1||restored.some(i=>i.label==='봉헌특송'))throw Error('reverse duplicate');
   const h=restored.find(i=>i.label==='봉헌찬송');
   if(h.song_id!==hymn.song_id||h.version_id!==hymn.version_id||parseServiceItemMemo(h.memo).formHint!=='V2-C-V1-C')throw Error('round-trip content lost');
+  if(!replaceServiceOfferingSpecial(h,'video'))throw Error('video switch failed');
+  const videoRows=buildWorshipPersistenceRows(svc,[h,prayer],{},{});
+  let videoItems=projectWorshipServiceItemsFromTemplate(svc,groupWorshipElements(videoRows.sections,videoRows.elements)[svc.id]);
+  const v=videoItems.find(i=>i.label==='봉헌영상');
+  if(!v||videoItems.some(i=>i.label==='봉헌찬송')||v.song_id||v.version_id)throw Error('video projection lost type');
+  if(serviceMemoInputMode(parseServiceItemMemo(v.memo),v)!=='asset')throw Error('video input mode lost');
+  if(!replaceServiceOfferingSpecial(v,'hymn'))throw Error('return from video failed');
+  if(v.song_id!==hymn.song_id||v.version_id!==hymn.version_id||parseServiceItemMemo(v.memo).formHint!=='V2-C-V1-C')throw Error('video round-trip lost song/version/form');
+
  }
 }
 if(serviceItemCanToggleOfferingSpecial(prayer))throw Error('prayer has toggle');
