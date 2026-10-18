@@ -549,3 +549,8 @@ Theme suppression must resolve descendant computed styles before being removed.
 A body-only style flush can leave nested presenter controls transitioning later.
 Read-only real-tab DOM replay covers Scripture, service board, presenter inputs
 and bulletin editor/preview in Chromium and WebKit; no service data is saved.
+
+
+## Praise version comparison
+
+- Version columns share row heights by displayed block position, including linked songs. Editing/read-only headers reserve the same 30px minimum. Longer lyrics expand the corresponding row in every column; shorter versions do not fabricate lyric blocks. This is visual alignment only and never changes forms, order, or source lyrics.
