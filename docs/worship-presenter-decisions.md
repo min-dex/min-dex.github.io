@@ -3291,3 +3291,10 @@ linked old-edition lyric versions. No existing service links are rewritten.
 ## Compact assignee and audio preparation · 2026-10-18
 
 Assignee-only board fields omit the enclosing card padding/background. Non-children audio management uses a full row below the inputs, with a compact label, player, filename and actions; controls wrap at narrow widths. This is controller CSS only; saving, playback, output, print and operational records are unchanged. Actual app renderers were checked offline in Chromium/WebKit at 1200, 800 and 390px with external requests and native fullscreen/window opening blocked.
+
+
+## Offering projection separation · 2026-10-18
+
+All-generations defaults remain prayer-only unless configured otherwise, but an explicitly populated offering hymn is retained. Offering labels are distinct during duplicate collapsing and positional fallback matching; a hymn cannot donate its song/version to a prayer. Legacy title-person offering prayers with a linked song are split in memory into a deterministic hymn projection and the original prayer identity/person. Existing output mode and form are retained on the hymn; source objects are untouched, with no migration or production writes. Repeat projection does not duplicate recovered hymns.
+
+Assignee-only cards now follow the user's corrected reference: no visible 담당 label, full-width input inside the usual padded card. Accessible input names remain.

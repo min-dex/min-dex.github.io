@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-compact-audio-fields",
+  "version": "20261018-offering-separation",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "4b3257f39a3bf88f1081b986af9d4bac3b92e45aad2bd8116ea141de625a0890",
-  "runtime_sha256": "edc38018c0ad18d3dfce7827e51d28b7f2f31657b9f670c1af91cd0ae31c7c51",
-  "source_bytes": 1472607,
-  "runtime_bytes": 1042361,
-  "source_gzip": 328952,
-  "runtime_gzip": 257803
+  "source_sha256": "c1e3e73c60158f3018ffd440e8e6c105cfea8366db3057d0834ab4e4ed9f4d23",
+  "runtime_sha256": "e656eee7cdd9e612a08aafb27cb89cab47dfded010c04d2b4ac07c3d8df321e7",
+  "source_bytes": 1475061,
+  "runtime_bytes": 1043843,
+  "source_gzip": 329557,
+  "runtime_gzip": 258143
 }

@@ -21159,12 +21159,40 @@ function projectGroupedWorshipItemsFromTemplates(grouped = {}, requestedIds = st
   }));
 }
 
+// Recover only the invalid legacy combination produced by offering projection.
+// Pure projection: retain the persisted prayer identity and never write here.
+function recoverAllGenerationsOfferingItems(service, items = []) {
+  if (!isAllGenerationsWorshipService(service)) return items;
+  return items.flatMap((item) => {
+    const memo = parseServiceItemMemo(item.memo);
+    if (templateProjectionSectionKey(item) !== "offering"
+      || compactSearchValue(item.label || "") !== "봉헌기도"
+      || serviceMemoElementType(memo) !== "title_person" || !item.song_id) return [item];
+    const existingHymn = items.some((other) => other !== item
+      && templateProjectionSectionKey(other) === "offering"
+      && serviceMemoElementType(parseServiceItemMemo(other.memo)) === "praise"
+      && other.song_id === item.song_id
+      && (other.version_id || other.song_version_id || "") === (item.version_id || item.song_version_id || ""));
+    const hymn = {
+      ...item,
+      id: createDeterministicUuid(`${service?.id}:${item.id}:recovered-offering-hymn`),
+      label: "봉헌찬송", assignee: "", _worshipSlotKey: "offering.praise",
+      _worshipElementOrder: 1, _worshipTemplateProjected: true,
+      memo: serializeServiceItemMemo({ ...memo, elementType: "praise", componentType: "praise",
+        inputMode: memo.outputMode === "score" ? "score_db" : "lyrics_db" }),
+    };
+    const prayer = { ...item, raw_title: "", song_id: null, version_id: null,
+      song_version_id: null, _worshipSlotKey: "offering.prayer", _worshipElementOrder: 2 };
+    return existingHymn ? [prayer] : [hymn, prayer];
+  });
+}
+
 function projectWorshipServiceItemsFromTemplate(service, items = []) {
   const appTypeId = worshipAppServiceTypeId(service?.type_id);
   if (!TEMPLATE_PROJECTED_SERVICE_TYPES.has(appTypeId)) {
     return normalizeServiceItemsForTemplateHierarchy(service, items);
   }
-  const sourceItems = mergeMonthlyCorporatePrayerItems(mergeRememberedTemplateSuppressionItems(service?.id, items));
+  const sourceItems = mergeMonthlyCorporatePrayerItems(mergeRememberedTemplateSuppressionItems(service?.id, recoverAllGenerationsOfferingItems(service, items)));
 
   // Migrate legacy section ownership before hierarchy normalization. Otherwise
   // normalization recognizes the entrance-praise label but preserves its old
@@ -21352,7 +21380,11 @@ function collapseDuplicateTemplateProjectionItems(service = null, items = []) {
     if (!meta?.groupKey) return;
     const elementOrder = Number(meta.elementOrder) || Number(item._worshipElementOrder) || 0;
     if (!elementOrder) return;
-    const key = `${meta.groupKey}:${elementOrder}`;
+    // An optional hymn and a prayer can retain the same legacy position.
+    // Distinct offering roles must never donate their song/person fields.
+    const offeringRole = templateProjectionSectionKey(item) === "offering"
+      ? `:${compactSearchValue(item.label || "")}` : "";
+    const key = `${meta.groupKey}:${elementOrder}${offeringRole}`;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push({ item, index });
   });
@@ -21508,7 +21540,9 @@ function findTemplateProjectionMatchIndex(templateItem = {}, existingItems = [],
   const sectionOrderKey = serviceItemTemplateProjectionKey(templateItem, { includeElementOrder: true });
   const sectionOnlyKey = serviceItemTemplateProjectionKey(templateItem, { sectionOnly: true });
   const templateSectionCount = templateSectionCounts.get(sectionOnlyKey) || 0;
-  const candidates = [...unmatched].map((index) => ({ index, item: existingItems[index] }));
+  const candidates = [...unmatched].map((index) => ({ index, item: existingItems[index] }))
+    .filter(({ item }) => templateProjectionSectionKey(templateItem) !== "offering"
+      || compactSearchValue(templateItem.label || "") === compactSearchValue(item.label || ""));
 
   const exact = candidates.find(({ item }) => serviceItemTemplateProjectionKey(item, { includeLabel: true }) === exactKey);
   if (exact) return exact.index;
@@ -21671,7 +21705,13 @@ function shouldDropAllGenerationsRegularThirdProjectionExtra(service = null, ite
   if (regularOnlySections.has(sectionKey)) return true;
   if (labelKey === "공동체고백") return true;
   if (sectionKey === "praise" && labelKey === "입례찬양") return true;
-  if (sectionKey === "offering" && labelKey === "봉헌찬송") return true;
+  if (sectionKey === "offering" && labelKey === "봉헌찬송") {
+    // Drop only an empty inherited slot, never an explicitly selected hymn.
+    const memo = parseServiceItemMemo(item.memo);
+    const title = compactSearchValue(item.raw_title || "");
+    return !item.song_id && !item.version_id && !item.song_version_id
+      && (!title || title === labelKey) && !memo.slides?.length;
+  }
   if (sectionKey === "closing_visual" && labelKey === "폐회찬송") return true;
   return false;
 }

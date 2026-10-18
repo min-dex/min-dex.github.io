@@ -8861,15 +8861,13 @@ html.ui-theme-switching:not(.presenter-output-document) *::after {
 .song-timing-row label { flex-basis:240px; }
 .song-timing-dialog input[type=number] { min-height:30px; box-sizing:border-box; padding:5px; border:1px solid var(--line); border-radius:5px; color:var(--ink); background:var(--ui-surface-panel); }
 
-/* Compact assignee-only preparation fields without a second enclosing card. */
-.svc-board-subgroup-controls:has(> .svc-board-subgroup-control-item:only-child > .svc-presenter-input-field:only-child > [data-service-item-field="assignee"]) {
-  padding: 0;
-  background: transparent;
-  border-radius: 0;
+/* Assignee-only preparation uses the same full-width input card as text. */
+.svc-board-subgroup-controls .svc-board-subgroup-control-item > .svc-presenter-input-field:only-child:has(> [data-service-item-field="assignee"]) {
+  flex: 1 1 100%;
+  grid-template-columns: minmax(0, 1fr);
 }
-.svc-board-subgroup-control-item > .svc-presenter-input-field:only-child:has(> [data-service-item-field="assignee"]) {
-  flex: 0 1 320px;
-  gap: 10px;
+.svc-board-subgroup-controls .svc-board-subgroup-control-item > .svc-presenter-input-field:only-child:has(> [data-service-item-field="assignee"]) > span {
+  display: none;
 }
 
 /* Audio preparation is a single flowing row, not a nested full-width heading. */

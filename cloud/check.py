@@ -26,6 +26,7 @@ NODE_TESTS = (
     "test_worship_read_parallel.cjs",
 )
 SMOKES = (
+    "smoke_offering_projection.py",
     "smoke_global_playback.py",
     "smoke_output_session_isolation.py",
     "smoke_output_restart.py",
