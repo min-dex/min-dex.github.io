@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261019-home-card-integrated",
+  "version": "20261019-editor-fields",
   "options": {
     "compress": false,
     "mangle": {

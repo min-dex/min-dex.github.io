@@ -121,3 +121,17 @@ The icon-only device-status button inherits the standard topbar hit target;
 remove obsolete text-button width/padding overrides. Both the Lucide placeholder
 and rendered SVG reserve a centered 16px box. The global playback smoke checks
 this at desktop and mobile widths and is included in the offline release gate.
+
+## Unified editor fields ·2026-10-19
+
+Single-line text, date/month, number and selection fields share 35px height,
+10px horizontal inset, 5px radius and14px/600 type. Dense worship rows, section
+editors and praise block controls use30px through --ui-field-height. Selects
+reserve25px for the same chevron across engines; native selection behavior stays.
+Textareas retain content sizing/resizing and their lyrics typography, with10px
+insets and no border that would invalidate scrollHeight autosizing. Native
+checkbox/radio/range retain their hit targets and use the accent; file pickers
+retain filename and native selection. Search/transport geometry is excluded.
+Warnings, disabled and keyboard focus stay explicit. Section template actions
+use outlined neutral buttons with a plus,35px target and10px gaps; item-add
+buttons align to their30px editor row. Screen-only; no output/print changes.

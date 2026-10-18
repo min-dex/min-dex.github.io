@@ -61,6 +61,7 @@ SMOKES = (
     "smoke_output_restart.py",
     "smoke_disclosure_feedback.py",
     "smoke_control_rhythm.py",
+    "smoke_editor_field_system.py",
     "smoke_deferred_board_scroll.py",
     "smoke_presenter_font_cache.py",
     "smoke_startup_bootstrap.py",

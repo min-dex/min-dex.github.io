@@ -9075,3 +9075,139 @@ body[data-module="presenter"] .topbar-actions > .icon-btn { flex: 0 0 35px; widt
   border-radius: 8px;
   background: var(--ui-surface-panel);
 }
+
+/* Shared editor controls: ordinary fields and dense authoring rows use the
+   same surface, type and insets. Textareas keep their content-driven sizing.
+   Native search wrappers, transport controls and printed/output pages retain
+   their own geometry. */
+@media screen {
+  body:not(.presenter-output-body) {
+    --ui-field-height: 35px;
+    --ui-field-inset: 10px;
+  }
+  :is(.svc-prep-editor, .svc-board-subgroup-controls, .presenter-section-editor,
+      .praise-forms-panel, .svc-item-note-grid) { --ui-field-height: 30px; }
+  body:not(.presenter-output-body) :is(
+    input:not([type]), input[type="text"], input[type="email"], input[type="password"],
+    input[type="url"], input[type="tel"], input[type="number"], input[type="date"],
+    input[type="month"], input[type="search"], select
+  ):not(.search-wrap input):not(.svc-slide-jump-input):not(.svc-music-volume):not(.svc-presenter-side-panel input):not(.svc-presenter-side-panel select) {
+    box-sizing: border-box;
+    min-width: 0;
+    height: var(--ui-field-height);
+    min-height: var(--ui-field-height);
+    border: 1px solid transparent;
+    border-radius: var(--r);
+    padding: 0 var(--ui-field-inset);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: var(--ui-body-size);
+    font-weight: var(--ui-row-weight);
+    line-height: normal;
+  }
+  body:not(.presenter-output-body) select:not(.svc-music-volume):not(.svc-presenter-side-panel select) {
+    appearance: none;
+    padding-right: 25px;
+    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position: right 14px center, right 9px center;
+    background-size: 5px 5px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+  }
+  body:not(.presenter-output-body) textarea {
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+    border: 0;
+    border-radius: var(--r);
+    padding: 10px;
+    color: var(--ink);
+    font-family: inherit;
+  }
+  body:not(.presenter-output-body) .form-variant-input { --ui-field-inset: 5px; }
+  body:not(.presenter-output-body) :is(input, textarea, select):not(:disabled):not([readonly]):not(.is-invalid):not([aria-invalid="true"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]):not(.search-wrap input):not(.svc-presenter-side-panel input):not(.svc-presenter-side-panel select):hover {
+    border-color: var(--line-2);
+  }
+  body:not(.presenter-output-body) textarea:not(:disabled):not([readonly]):not(.is-invalid):hover {
+    box-shadow: inset 0 0 0 1px var(--line-2);
+  }
+  body:not(.presenter-output-body) :is(input, textarea, select):focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  body:not(.presenter-output-body) :is(input, textarea, select).is-invalid,
+  body:not(.presenter-output-body) :is(input, textarea, select)[aria-invalid="true"] {
+    color: var(--warn);
+    background-color: var(--warn-bg);
+    border-color: var(--warn);
+  }
+  body:not(.presenter-output-body) :is(input, textarea, select):disabled {
+    cursor: not-allowed;
+    opacity: .55;
+  }
+  body:not(.presenter-output-body) :is(input[type="checkbox"], input[type="radio"], input[type="range"]) { accent-color: var(--accent); }
+  body:not(.presenter-output-body) input[type="file"] {
+    height: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    max-width: 100%;
+    min-width: 0;
+    font: inherit;
+    color: var(--ink-2);
+  }
+  body:not(.presenter-output-body) input[type="file"]::file-selector-button {
+    min-height: 35px;
+    margin-right: 10px;
+    padding: 5px 10px;
+    border: 1px solid var(--line-2);
+    border-radius: var(--r);
+    background: var(--ui-surface-panel);
+    color: var(--ink);
+    font: inherit;
+    cursor: pointer;
+  }
+  body:not(.presenter-output-body) input[type="file"]:hover::file-selector-button {
+    background: var(--ui-surface-field);
+  }
+  .svc-template-head, .svc-template-step {
+    box-sizing: border-box;
+    min-height: 35px;
+    gap: 5px;
+    padding: 5px 10px;
+    border: 1px solid var(--line-2);
+    border-radius: var(--r);
+    background: var(--ui-surface-panel);
+    color: var(--ink-2);
+    font-size: var(--ui-body-size);
+    font-weight: 600;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+  .svc-template-head:hover, .svc-template-step:hover {
+    background: var(--ui-surface-field);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .svc-template-head:focus-visible, .svc-template-step:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .svc-template-flow { gap: 10px; }
+  .svc-template-guide .svc-template-flow { margin-top: 10px; }
+  .svc-template-step-label { white-space: normal; overflow-wrap: anywhere; }
+  .svc-template-step::before { content: "+"; flex: 0 0 auto; font-size: 16px; }
+  .presenter-section-editor-add .reference-new-btn {
+    box-sizing: border-box;
+    height: var(--ui-field-height);
+    min-height: var(--ui-field-height);
+    border: 1px solid var(--line-2);
+    padding: 0 10px;
+    background: var(--ui-surface-panel);
+    color: var(--ink);
+    gap: 5px;
+  }
+  .presenter-section-editor-add .reference-new-btn:hover { background: var(--ui-surface-field); }
+  .presenter-section-editor-item:hover,
+  .presenter-section-editor-item:focus-within { background: var(--ui-surface-panel); }
+}
