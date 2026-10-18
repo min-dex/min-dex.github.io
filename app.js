@@ -5576,6 +5576,7 @@ async function refreshDepartmentTabs() {
       if (!calendar) { if (sync.pending.get(calendarId) === message) sync.pending.delete(calendarId); continue; }
       let deferred = false;
       const previous = state.calendarData.find(row => row.id === calendarId);
+      const linkedChanged = previous && [...DEPARTMENT_ASSIGNEE_FIELDS].some(field => (previous[field] || "") !== (calendar[field] || ""));
       if (previous) {
         for (const field of CALENDAR_LIVE_FIELDS) {
           const cells = [...document.querySelectorAll("[data-cal-id][data-cal-field]")].filter(cell => cell.dataset.calId === calendarId && cell.dataset.calField === field);
@@ -5585,7 +5586,7 @@ async function refreshDepartmentTabs() {
           for (const cell of cells) { cell.textContent = calendar[field] || ""; cell.dataset.initialValue = calendar[field] || ""; }
         }
       } else state.calendarLoaded = false;
-      const ids = new Set([...message.serviceIds, ...(message.calendarOnly ? [] : state.services.filter(service => service.date === calendar.date
+      const ids = new Set([...message.serviceIds, ...((message.calendarOnly && !linkedChanged) ? [] : state.services.filter(service => service.date === calendar.date
         && ["children", "youth", "young-adult"].includes(worshipAppServiceTypeId(service.type_id))).map(service => service.id))]);
       for (const id of ids) {
         if (id === state.selectedServiceId && ["service", "presenter"].includes(state.module)) {

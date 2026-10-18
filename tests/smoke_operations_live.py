@@ -21,7 +21,7 @@ try:
       isPresenterOutputWindowOpen=()=>live;canUseClientData=()=>true;hasDirtyChanges=()=>false;sundayEditSyncHasLocalDraft=()=>false;
       window.row={id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',date:'2026-10-25',...Object.fromEntries(CALENDAR_LIVE_FIELDS.map(k=>[k,'Old '+k]))};
       state.calendarData=[row];window.calendarDB=structuredClone(row);window.serviceDB=[{id:sid,service_type_id:'children',service_date:'2026-10-25',title:'Original'}];
-      state.services=serviceDB.map(normalizeWorshipService);state.selectedServiceId=null;state.selectedServiceTypeId=SERVICE_LIST_PANEL_ID;
+      state.services=serviceDB.map(normalizeWorshipService);state.loadedWorshipServiceIds.add(sid);state.selectedServiceId=null;state.selectedServiceTypeId=SERVICE_LIST_PANEL_ID;
       state.client={channel:()=>({on(event,filter,fn){window.receivers??={};receivers[filter.event]=fn;return this},subscribe(fn){window.remoteStatus=fn;return this},send:remoteSend}),removeChannel:async()=>{},
         from(table){let fields='',ids=null,start=0,end=999,patch=null;
           const q={select(s){fields=s;return q},eq(){return q},in(k,value){if(k==='id')ids=value;return q},order(){return q},range(a,b){start=a;end=b;return q},update(value){patch=value;return q},
@@ -47,6 +47,7 @@ try:
     a.evaluate("MINDEX_CONTENT_LIVE.publish('service-list','all')");a.wait_for_timeout(20);deliver('content-committed')
    b.evaluate("for(const key of CALENDAR_LIVE_FIELDS)calendarDB[key]='New '+key")
    calendar_signal();b.wait_for_function("row.note==='New note'")
+   assert b.evaluate('!state.loadedWorshipServiceIds.has(sid)'), 'A concurrent linked-role change must still invalidate service caches'
    assert b.evaluate("CALENDAR_LIVE_FIELDS.every(k=>row[k]===calendarDB[k]&&document.querySelector('[data-cal-field='+k+']').textContent===calendarDB[k])&&refs.detailPane.scrollTop===200")
    b.evaluate("window.cell=document.querySelector('[data-cal-field=note]');cell.focus();cell.textContent='draft';calendarDB.note='Deferred'")
    calendar_signal();b.wait_for_timeout(300);assert b.evaluate("cell.textContent==='draft'&&row.note==='New note'")
