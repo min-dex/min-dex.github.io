@@ -684,7 +684,7 @@
   color: var(--presenter-output-fg);
   font-size: var(--presenter-size-section);
   font-weight: var(--presenter-weight-display);
-  line-height: 1.08;
+  line-height: 1;
   white-space: nowrap;
 }
 .presenter-title-content-body {
@@ -696,7 +696,7 @@
   color: color-mix(in srgb, var(--presenter-output-fg) 92%, transparent);
   font-size: var(--presenter-size-meta);
   font-weight: var(--presenter-weight-support);
-  line-height: 1.08;
+  line-height: 1;
 }
 .presenter-title-content-body span {
   max-width: 100%;
@@ -849,7 +849,7 @@
 .presenter-song-note {
   display: inline-block;
   font-family: var(--presenter-font-family);
-  font-size: .72em;
+  font-size: .55em;
   font-weight: var(--presenter-weight-body);
   line-height: 1;
   transform: translateY(-.04em);

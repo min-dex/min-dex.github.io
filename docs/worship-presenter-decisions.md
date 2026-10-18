@@ -607,7 +607,7 @@ Small visual polish that does not alter behavior does not need an entry.
   둔다. `교회소식`은 독립 `광고` 섹션에만 둔다. 기존 데이터의 위치를
   추정해 자동 이동하지 않고, 템플릿 매칭으로 각각의 섹션을 유지한다.
 - `인용 구절`은 optional `설교` 엘리멘트다. 풀스크린의
-  메인 찬양, 입례찬양, 기도찬양의 제목은 152px, weight 800으로 표시하며
+  메인 찬양, 입례찬양, 기도찬양의 제목은 150px, weight 800으로 표시하며
   봉헌·특송 등 다른 순서의 곡 제목과 구분한다.
 - `온세대 찬양예배`는 주일 3부 날짜 치환 서비스지만 찬양 곡 수가 고정되지
   않는다. 정확한 전체 순서가 확정되기 전에도 `예배 입력`에 `찬양 1`부터
@@ -3313,3 +3313,12 @@ Photo disclosure, audio upload and save actions share a 30px bordered field-surf
 ## Lyric parenthetical text · 2026-10-18
 
 Paired ASCII/fullwidth parentheses in praise lyric slides, including the delimiters, render at 80% of adjacent text size in the shared output/thumbnail renderer. Nested pairs shrink once; incomplete pairs remain unchanged. Highlight ranges, source text, scripture and song titles are preserved. Announcement parenthesis behavior is unchanged.
+
+
+### 2026-10-18 제목 양식 폰트 정리
+
+- 풀스크린 메인 찬양·입례찬양·기도찬양 제목은 현재 role token과 동일한 150px / 800을 사용한다. 이전 152px 설명을 대체한다.
+- 공통 title-content 양식의 주제목과 담당 등 보조 본문 line-height는 1로 통일한다. 해당 양식을 공유하는 preview와 출력에 함께 적용한다. 가사·대기 화면의 행간은 별도 규칙을 유지한다.
+- 보조 내용의 크기(담당 100px, 상단 순서명 80px, 곡 설명 60px)는 이번 변경에서 유지한다.
+
+- 찬양 제목 앞 ♬는 글리프의 시각적 크기를 고려해 .55em으로 표시한다(기존 .72em보다 축소). 제목 auto-fit 시 음표도 함께 축소되며 기존 baseline 보정은 유지한다. 공통 음표 규칙이므로 fullscreen·chromakey·preview에 함께 적용한다. 실제 시각적 균형은 출력 화면에서 추가 확인이 필요하다.
