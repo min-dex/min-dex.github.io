@@ -5511,10 +5511,13 @@ function connectDepartmentRealtime() {
       if (sync.remote === channel && state.client === client && state.config.url === project) sync.receive(payload);
     }).on("broadcast", { event: "worship-committed" }, ({ payload }) => {
       if (sync.remote === channel && state.client === client && state.config.url === project) window.MINDEX_WORSHIP_LIVE?.receive(payload);
+    }).on("broadcast", { event: "content-committed" }, ({ payload }) => {
+      if (sync.remote === channel && state.client === client && state.config.url === project) window.MINDEX_CONTENT_LIVE?.receive(payload);
     }).subscribe(status => {
       if (sync.remote === channel && status === "SUBSCRIBED") {
         void reconcileDepartmentRealtime();
         void window.MINDEX_WORSHIP_LIVE?.reconcile();
+        void window.MINDEX_CONTENT_LIVE?.reconcile();
       }
     });
   } catch { sync.remoteClient = null; }
@@ -6532,6 +6535,7 @@ async function createPraiseSong(options = {}) {
   if (state.module !== "praise") return;
 
   const draft = buildNewPraiseSongDraft(options);
+  const publishClient = state.client;
   state.saving = true;
   updateSaveState();
   try {
@@ -6579,6 +6583,7 @@ async function createPraiseSong(options = {}) {
     persistUiState();
     render();
     requestAnimationFrame(() => refs.detailPane.querySelector('[data-song-field="title"]')?.focus());
+    if (publishClient === state.client) window.MINDEX_CONTENT_LIVE?.publish("song", song.id);
     showToast("곡을 추가했습니다.");
   } catch (error) {
     showToast(error.message || "곡 추가 실패.", "error");
@@ -6642,6 +6647,7 @@ async function deleteSelectedSong() {
   }
   if (!confirm(`"${song.title}"을 삭제할까요?`)) return;
 
+  const publishClient = state.client;
   state.saving = true;
   updateSaveState();
   try {
@@ -6661,6 +6667,7 @@ async function deleteSelectedSong() {
     captureCleanFingerprint("praise");
     persistUiState();
     render();
+    if (publishClient === state.client) window.MINDEX_CONTENT_LIVE?.publish("song", song.id);
     showToast("빈 곡을 삭제했습니다.");
   } finally {
     state.saving = false;
@@ -6711,6 +6718,7 @@ async function saveAll() {
     return;
   }
 
+  const publishClient = state.client;
   state.saving = true;
   updateSaveState();
 
@@ -6723,6 +6731,7 @@ async function saveAll() {
     state.dirty.forms = false;
     delete song._pendingVersionDeletes;
     captureCleanFingerprint("praise");
+    if (publishClient === state.client) window.MINDEX_CONTENT_LIVE?.publish("song", song.id);
     showToast("저장했습니다.");
     render();
   } catch (error) {
@@ -12563,6 +12572,7 @@ async function createPraiseSongFromServiceItem(index) {
     memo: useVersionTables ? null : serializeSongMemo({ versions: [defaultVersion] }),
   };
 
+  const publishClient = state.client;
   try {
     const { data, error } = await state.client
       .from("mindex_songs")
@@ -12594,6 +12604,7 @@ async function createPraiseSongFromServiceItem(index) {
     state.dirty.service = true;
     renderCurrentServiceModuleDetail();
     updateSaveState();
+    if (publishClient === state.client) window.MINDEX_CONTENT_LIVE?.publish("song", song.id);
     showToast("찬양 DB에 빈 곡을 만들었습니다. 가사를 추가해 주세요.", "info");
   } catch (error) {
     showToast(error.message || "찬양 DB 곡 추가 실패.", "error");
@@ -14844,13 +14855,15 @@ async function loadBulletinDraft(serviceId) {
 }
 
 async function saveBulletinDraft(serviceId, value, revision) {
-  const table=state.client.from("mindex_bulletins");
+  const publishClient=state.client;
+  const table=publishClient.from("mindex_bulletins");
   const query=revision
     ? table.update(value).eq("service_id",serviceId).eq("revision",revision)
     : table.insert({service_id:serviceId,...value});
   const {data,error}=await query.select("service_id,content,layout,revision").maybeSingle();
   if(error?.code==="23505"||(!error&&!data))throw new Error("다른 곳에서 주보가 변경되었습니다. DB 다시 불러오기로 확인해 주세요. 현재 수정 내용은 이 화면에 남아 있습니다.");
   if(error)throw new Error(`주보 DB 저장 실패: ${error.message}`);
+  if(publishClient===state.client)window.MINDEX_CONTENT_LIVE?.publish("bulletin",serviceId);
   return data;
 }
 
@@ -14860,11 +14873,13 @@ async function loadBulletinTemplate(key) {
   return data;
 }
 async function saveBulletinTemplate(key,value,revision) {
-  const table=state.client.from("mindex_bulletin_templates");
+  const publishClient=state.client;
+  const table=publishClient.from("mindex_bulletin_templates");
   const query=revision?table.update(value).eq("template_key",key).eq("revision",revision):table.insert({template_key:key,...value});
   const {data,error}=await query.select("template_key,title,department,effective_from,layout,common,revision").maybeSingle();
   if(error?.code==="23505"||(!error&&!data))throw new Error("다른 곳에서 공통 양식을 변경했습니다. 편집 내용은 유지됩니다. 창을 다시 열어 최신 양식을 확인해 주세요.");
   if(error)throw new Error(`공통 양식 저장 실패: ${error.message}`);
+  if(publishClient===state.client)window.MINDEX_CONTENT_LIVE?.publish("bulletin-template",key);
   return data;
 }
 
@@ -14876,7 +14891,9 @@ function mountServiceBulletinWorkbench(service) {
   const host = refs.detailPane.firstElementChild;
   host.dataset.bulletinTab = tabId;
   if (!bulletinTabSessions.has(tabId)) bulletinTabSessions.set(tabId, new Map());
-  window.MindexBulletin.mount(host, {
+  const bulletinClient = state.client;
+  host.bulletinController = window.MindexBulletin.mount(host, {
+    remoteBlocked: () => state.client !== bulletinClient || departmentRefreshBlocked(),
     documents: bulletinTabSessions.get(tabId),
     onStateChange: () => syncSaveButtonChrome(),
     serviceId: service.id,

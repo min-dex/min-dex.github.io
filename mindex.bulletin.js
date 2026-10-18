@@ -1428,7 +1428,7 @@
       if(event.key==="ArrowUp")setDimension(f,"y",f.y-step);if(event.key==="ArrowDown")setDimension(f,"y",f.y+step);
       persist();properties();preview();
     });
-    let printFrame;
+    let printFrame,printSession=false;
     async function print(){
       if(q("[data-bulletin-print]").disabled)return;
       endDrag();
@@ -1452,16 +1452,48 @@
         await Promise.all([500,700,800].map(w=>frame.contentDocument.fonts.load(`${w} 12.5pt MindexBulletin`)));
         await frame.contentDocument.fonts.ready;
         if(signal.aborted||!frame.isConnected)return;
+        printSession=true;
+        frame.contentWindow.addEventListener("afterprint",()=>{printSession=false;},{once:true});
         frame.contentWindow.focus();frame.contentWindow.print();
-      }catch(e){if(!signal.aborted)printError=e.message;}
+      }catch(e){printSession=false;if(!signal.aborted)printError=e.message;}
       finally{printing=false;if(!signal.aborted)status();}
     }
     const observer=new MutationObserver(()=>{if(!root.isConnected)destroy();});
     observer.observe(document.body,{childList:true,subtree:true});
     function destroy(){endDrag();serial++;controller.abort();observer.disconnect();previewResize.disconnect();inputResize.disconnect();printFrame?.remove();}
 
+    // Build the remote document off-screen; recheck every edit/interaction guard before adoption.
+    let remoteBusy=false,interactionRevision=0;
+    for(const event of ["input","change","pointerdown","keydown"])on(root,event,()=>interactionRevision++);
+    const remoteBlocked=()=>signal.aborted||!root.isConnected||!doc||loading||printing||printSession||drag||doc.dirty||doc.saving||!!doc.saveError||!!error
+      ||root.contains(document.activeElement)&&document.activeElement.matches("input,textarea,select,[contenteditable]")||options.remoteBlocked?.();
+    async function refreshRemote(kind,id){
+      if(remoteBusy||remoteBlocked())return false;
+      const isTemplate=!!templateSession;
+      if(kind!== (isTemplate?"bulletin-template":"bulletin")||id!==(isTemplate?TEMPLATE_KEY:q("[data-bulletin-service]").value))return false;
+      const target=doc,request=serial,edit=interactionRevision,before=JSON.stringify(snapshot(target));
+      remoteBusy=true;
+      try{
+        const row=await (isTemplate?options.loadTemplate(id):options.loadDraft(id));
+        const stale=()=>remoteBlocked()||doc!==target||request!==serial||edit!==interactionRevision||JSON.stringify(snapshot(target))!==before;
+        if(stale())return false;
+        if(!row)return true; // A deletion never erases the visible document.
+        if(Number(row.revision)<=Number(target.revision))return true;
+        const next={...target,...normalizeSnapshot(snapshot(target))};
+        if(isTemplate){const value=normalizeTemplate(row);applyTemplate(next,value);next.fields={...value.common};next.revision=value.revision;next.history=[];next.future=[];next.dirty=false;}
+        else{applyStored(next,row);next.source=applySourceSnapshot(await options.loadSource(id,next.settings),next.sourceSnapshot);next.profile={};}
+        await readyBackground(next);
+        if(stale())return false;
+        const positions=[".bulletin-canvas",".bulletin-inspector"].map(selector=>[selector,q(selector).scrollTop,q(selector).scrollLeft]);
+        Object.assign(target,next);if(isTemplate)templateRow=normalizeTemplate(row);
+        backup(target);properties();preview();status();
+        for(const [selector,top,left] of positions){q(selector).scrollTop=top;q(selector).scrollLeft=left;}
+        return true;
+      }finally{remoteBusy=false;}
+    }
+    function remoteIdentity(){return doc?{kind:templateSession?"bulletin-template":"bulletin",recordId:templateSession?TEMPLATE_KEY:q("[data-bulletin-service]").value}:null;}
     void load(options.serviceId);
-    return {destroy, reload(){return load(q("[data-bulletin-service]").value);}};
+    return {destroy, refreshRemote, remoteIdentity, reload(){return load(q("[data-bulletin-service]").value);}};
   }
   window.MindexBulletin=Object.freeze({mount,resolveSource,reusableContent,fieldValue,defaultFrames,renderPages,readyAssets,TOKENS,wrap,profileForDate,monthlyView,storedValue,applyStored,normalizeSnapshot,applySourceSnapshot,templateValue,normalizeTemplate,applyTemplate,TEMPLATE_KEY});
 })();

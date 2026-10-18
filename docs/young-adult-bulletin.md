@@ -357,3 +357,10 @@ remain deleted; print regression coverage targets the current iframe builder.
 - 원번호와 ◈뿐 아니라 원문에 쓰인 ◇·◆도 문단 구분자로 인식한다. 기도 모임·이단 출입 금지의 명시적인 정기 안내는 부서 소식에서 분리한다.
 - 과거 저장 필드와 발행 시점 snapshot도 편집·출력 시 같은 분리를 적용한다. 하단에 해당 안내가 있으면 그 문구와 날짜별 시간을 우선하며, 없으면 광고의 원문과 볼드를 옮겨 표시한다. 관련 없는 광고는 유지한다.
 - 예배 원문이나 저장된 주보를 일괄 덮어쓰지 않는다. 사용자가 주보를 저장할 때만 기존 저장 경로를 따른다.
+
+## Saved-edit realtime · 2026-10-18
+
+Cross-device saved bulletin/template updates follow `content-realtime.md`.
+Only clean idle workbenches adopt detached snapshots; dirty drafts, active
+inputs, drags and print sessions defer updates. Template notifications never
+apply a new template to a saved weekly bulletin implicitly.

@@ -367,3 +367,10 @@ Four calendar prayer fields now share atomic saves with children/youth/young-adu
 worship elements. Teacher honorific is 교사. See worship-data-contract.md for
 field scope, retry/conflict behavior and duplicate-service restrictions.
 Production verification and deployment receipts are recorded separately.
+
+## Praise and bulletin realtime · 2026-10-18
+
+Saved Praise records and bulletin/template revisions now share the existing
+cross-device Broadcast transport. Detached reads protect local drafts, playback,
+output, printing and input races; the current visible record is reconciled on
+wake/reconnect and every minute. See `docs/content-realtime.md` for scope and limits.

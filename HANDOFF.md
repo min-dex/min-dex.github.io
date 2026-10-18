@@ -1005,3 +1005,11 @@ Four calendar prayer fields now share atomic saves with children/youth/young-adu
 worship elements. Teacher honorific is 교사. See worship-data-contract.md for
 field scope, retry/conflict behavior and duplicate-service restrictions.
 Production verification and deployment receipts are recorded separately.
+
+## Praise/bulletin realtime · 2026-10-18
+
+See `docs/content-realtime.md`. `mindex.content-live.js` handles saved-record
+invalidations, with bulletin controller guards inside `mindex.bulletin.js`.
+Do not replace these detached refresh paths with loadSongs/load(force): those
+paths can replace drafts or rebuild Presenter data. Remote receipt must stay
+read-only. Keep saved weekly bulletin snapshots independent of template changes.

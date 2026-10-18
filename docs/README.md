@@ -110,3 +110,4 @@ records above for the retained repair evidence and Git reference.
 - `ui-review-20261011.md`: current cross-module UI review, fixes, verification and limits.
 
 - [Elem 통합 현황과 남은 기능](elem-migration-status-20261018.md): 2026-10-18 기준 소스 비교와 웹/데스크톱 지원 차이.
+- [찬양·주보 실시간 연동](content-realtime.md): 저장 알림, 초안·재생·인쇄 보호, 현재 레코드 복구 범위.

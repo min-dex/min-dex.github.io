@@ -34,6 +34,7 @@ SMOKES = (
     "smoke_department_tabs.py",
     "smoke_department_remote.py",
     "smoke_worship_live.py",
+    "smoke_content_live.py",
     "smoke_department_assignees.py",
     "smoke_service_entry.py",
     "smoke_form_label_spacing.py",
