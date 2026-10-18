@@ -354,3 +354,20 @@ original lyric starts, fingerprint, text and audio identity remain unchanged.
 Photo assets use existing immutable worship media storage. Partial uploads and
 uncertain saves retain uploaded URLs for retry; unlinking does not delete blobs.
 No Praise DB or children-version attachment changes.
+
+
+## Shared offering integrity · 2026-10-18
+
+All-generation services share only the ordinary offering hymn with same-date
+first/second services. Their praise sets and other formerly independent content
+stay independent. Dated or explicit offering media/special songs remain replacements;
+suppressed/hidden slots and concurrent/independent edits keep their existing guards.
+An empty persisted offering can receive shared content while retaining local forms
+and score/lyrics mode. A missing ordinary offering target reports incomplete sync
+instead of silently succeeding; sync never creates a substitute element.
+
+Ordinary all-generation templates include offering hymn then prayer. Source-text
+insertions retain the existing section identity and relative order. Projection
+deduplication includes semantic slot identity, not just ordinal; an entrance song
+and a numbered praise item cannot donate/drop each other's content. All writes
+still use the existing revision-checked atomic save. No schema change.

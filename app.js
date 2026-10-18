@@ -4513,8 +4513,22 @@ function isAllGenerationsWorshipService(service = null) {
     || isAllGenerationsWorshipDate(service?._worshipServiceDate || "");
 }
 
-function worshipServiceParticipatesInSharedSundayContent(service = null) {
-  return !isAllGenerationsWorshipService(service);
+function allGenerationsHasOfferingReplacement(service, items = null) {
+  if (allGenerationsOfferingMediaSpec(service)) return true;
+  const candidates = items || state.serviceItems[service?.id] || [];
+  return candidates.some(item => {
+    const slot = serviceItemSlotKey(item);
+    const label = compactSearchValue(item.label || "");
+    return ["offering.special", "offering.media"].includes(slot)
+      || (templateProjectionSectionKey(item) === "offering"
+        && ["봉헌특송", "봉헌영상", "감사이미지"].includes(label));
+  });
+}
+
+function worshipServiceParticipatesInSharedSundayContent(service = null, item = null) {
+  if (!isAllGenerationsWorshipService(service)) return true;
+  return Boolean(item && sundaySharedContentKey(item, service) === "offering-hymn"
+    && !allGenerationsHasOfferingReplacement(service));
 }
 
 function worshipServiceExistsForTarget(target = {}) {
@@ -7632,7 +7646,7 @@ function persistPendingSundayEditSync() {
 }
 
 function sundayEditSyncEligible(item = {}, service = null) {
-  if (!worshipServiceParticipatesInSharedSundayContent(service)) return false;
+  if (!worshipServiceParticipatesInSharedSundayContent(service, item)) return false;
   const memo = parseServiceItemMemo(item.memo);
   if (memo.asset?.url || memo.templateSuppressed || memo.hiddenInPresentation
     || (memo.slides || []).some((slide) => slide && typeof slide === "object")) return false;
@@ -7792,7 +7806,7 @@ function serviceSourceLabelsMatch(left = "", right = "") {
 
 async function persistSundayEditSync(job, options = {}) {
   const target = state.services.find((service) => service.id === job.targetId);
-  if (!target || !worshipServiceParticipatesInSharedSundayContent(target)) return;
+  if (!target || !worshipServiceParticipatesInSharedSundayContent(target, job.item)) return;
   const label = `${target.date} ${serviceTypeDisplayName(target.type_id)} ${job.item.label}`;
   const conflict = () => new Error(`${label}: 별도 편집·송출 상태 또는 저장 충돌을 확인해 주세요. 덮어쓰지 않았습니다.`);
   if (sundayEditSyncHasLocalDraft(target.id)) throw conflict();
@@ -7804,13 +7818,18 @@ async function persistSundayEditSync(job, options = {}) {
   elements = aggregate.elements;
   const freshService = normalizeWorshipService(serviceRow);
   if (freshService.date !== state.services.find((service) => service.id === job.sourceServiceId)?.date
-    || freshService.type_id !== target.type_id || !worshipServiceParticipatesInSharedSundayContent(freshService)) return;
+    || freshService.type_id !== target.type_id || !worshipServiceParticipatesInSharedSundayContent(freshService, job.item)) return;
   const items = groupWorshipElements(sections, elements)[target.id] || [];
+  if (isAllGenerationsWorshipService(freshService) && allGenerationsHasOfferingReplacement(freshService, items)) return;
   const matches = items.filter((item) => sundaySharedContentKey(item, freshService) === job.key);
   // Never create template placeholders or reinterpret substitute elements as shared content.
+  if (!matches.length && job.key === "offering-hymn" && !allGenerationsHasOfferingReplacement(freshService, items)) {
+    throw new Error(`${label}: 봉헌찬송 항목이 없습니다. 해당 예배 순서를 확인해 주세요. 다른 항목은 덮어쓰지 않았습니다.`);
+  }
   if (matches.length !== 1 || !sundayEditSyncEligible(matches[0], freshService)) return;
   const item = matches[0];
-  const emptyThirdHymn = job.key === "main-praise:3" && freshService.type_id === "sunday-main"
+  const emptyThirdHymn = (job.key === "offering-hymn"
+    || (job.key === "main-praise:3" && freshService.type_id === "sunday-main"))
     && !item.song_id && !item.version_id && !item.song_version_id
     && !String(item.raw_title || "").trim()
     && !(parseServiceItemMemo(item.memo).slides || []).some(slide => String(slide || "").trim());
@@ -20070,6 +20089,7 @@ const PUBLIC_WORSHIP_TEMPLATE_VERSIONS = {
           includeClosingHymn: false,
           mainPraiseCount: 7,
           offeringMedia: allGenerationsOfferingMediaSpec(options.service),
+          sharedOffering: !allGenerationsHasOfferingReplacement(options.service, options.items),
           specialSong: {},
         } : {}),
       }),
@@ -20282,7 +20302,9 @@ function publicAllGenerationsOfferingStep(options = {}) {
   const hasSpecialOfferingPraise = Boolean(options.specialOffering || options.special_offering || mediaSpec?.specialOffering);
   const elements = hasSpecialOfferingPraise
     ? [{ label: "봉헌특송", name: "봉헌특송", elementType: "praise" }]
-    : [];
+    : options.sharedOffering && !mediaSpec
+      ? [{ label: "봉헌찬송", name: "봉헌찬송", elementType: "praise", ...scoreOutputMode(true) }]
+      : [];
   if (mediaSpec) {
     const mediaLabel = String(mediaSpec.label || "봉헌 영상").trim();
     const mediaType = normalizeServiceElementType(mediaSpec.elementType || mediaSpec.element_type || mediaSpec.asset?.kind) || "video";
@@ -20833,6 +20855,7 @@ function publicSundayThirdTemplate(options = {}) {
     allGenerations
       ? publicAllGenerationsOfferingStep({
         offeringMedia: options.offeringMedia,
+        sharedOffering: options.sharedOffering,
       })
       : publicWorshipOfferingStep({ score: true, praiseLabel: "봉헌찬송", typeId }),
     publicSundayThirdAnnouncementsStep(),
@@ -21380,11 +21403,9 @@ function collapseDuplicateTemplateProjectionItems(service = null, items = []) {
     if (!meta?.groupKey) return;
     const elementOrder = Number(meta.elementOrder) || Number(item._worshipElementOrder) || 0;
     if (!elementOrder) return;
-    // An optional hymn and a prayer can retain the same legacy position.
-    // Distinct offering roles must never donate their song/person fields.
-    const offeringRole = templateProjectionSectionKey(item) === "offering"
-      ? `:${compactSearchValue(item.label || "")}` : "";
-    const key = `${meta.groupKey}:${elementOrder}${offeringRole}`;
+    // Position alone is not identity: separate semantic slots can share a legacy ordinal.
+    const roleKey = serviceItemSlotKey(item) || compactSearchValue(item.label || "");
+    const key = `${meta.groupKey}:${elementOrder}:${roleKey}`;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push({ item, index });
   });
@@ -21706,6 +21727,7 @@ function shouldDropAllGenerationsRegularThirdProjectionExtra(service = null, ite
   if (labelKey === "공동체고백") return true;
   if (sectionKey === "praise" && labelKey === "입례찬양") return true;
   if (sectionKey === "offering" && labelKey === "봉헌찬송") {
+    if (!allGenerationsHasOfferingReplacement(service)) return false;
     // Drop only an empty inherited slot, never an explicitly selected hymn.
     const memo = parseServiceItemMemo(item.memo);
     const title = compactSearchValue(item.raw_title || "");
@@ -25176,7 +25198,9 @@ function ensurePortableSourceItems(service, records = []) {
   if (!serviceId) return 0;
   const items = normalizeServiceItemsInCurrentOrder(getServiceItems(serviceId));
   let added = 0;
-  for (const record of records.filter((candidate) => candidate.portable)) {
+  const changedSections = new Set();
+  for (const [recordIndex, record] of records.entries()) {
+    if (!record.portable) continue;
     const exists = items.some((item) => compactSearchValue(item.label) === compactSearchValue(record.label)
       && compactSearchValue(serviceSourceSectionTitle(item)) === compactSearchValue(record.sectionTitle));
     if (exists) continue;
@@ -25188,22 +25212,40 @@ function ensurePortableSourceItems(service, records = []) {
     };
     if (record.formHint) memo.formHint = normalizeServiceFormHint(record.formHint);
     const sectionKey = `source-${compactSearchValue(record.sectionTitle || "section").replace(/[^a-z0-9가-힣]+/g, "-") || "section"}`;
-    items.push(normalizeServiceItem({
+    const sectionPeer = items.find(item => compactSearchValue(serviceSourceSectionTitle(item)) === compactSearchValue(record.sectionTitle));
+    // Place new source records beside their source neighbours, retaining section identity.
+    const nextRecord = records.slice(recordIndex + 1).find(candidate => items.some(item =>
+      serviceSourceLabelsMatch(item.label, candidate.label)
+      && compactSearchValue(serviceSourceSectionTitle(item)) === compactSearchValue(candidate.sectionTitle)));
+    const nextIndex = nextRecord ? items.findIndex(item => serviceSourceLabelsMatch(item.label, nextRecord.label)
+      && compactSearchValue(serviceSourceSectionTitle(item)) === compactSearchValue(nextRecord.sectionTitle)) : -1;
+    const insertIndex = nextIndex < 0 ? items.length : nextIndex;
+    items.splice(insertIndex, 0, normalizeServiceItem({
       service_id: serviceId,
       sort_order: items.length + 1,
       label: record.label,
       raw_title: "",
       memo: serializeServiceItemMemo(memo),
-      _worshipSectionKey: sectionKey,
+      _worshipSectionId: sectionPeer?._worshipSectionId || "",
+      _worshipSectionKey: sectionPeer?._worshipSectionKey || sectionKey,
       _worshipSectionTitle: record.sectionTitle || "기타",
       _worshipSectionTemplateModified: true,
-      _worshipSectionOrder: items.length + 1,
+      _worshipSectionOrder: sectionPeer?._worshipSectionOrder || insertIndex + 1,
       _worshipElementOrder: 1,
       _worshipElementTemplateModified: true,
-    }, items.length));
+    }, insertIndex));
+    changedSections.add(sectionPeer?._worshipSectionId || sectionPeer?._worshipSectionKey || sectionKey);
     added += 1;
   }
   if (added) {
+    const sectionCounts = new Map();
+    for (const item of items) {
+      const key = item._worshipSectionId || item._worshipSectionKey;
+      if (!changedSections.has(key)) continue;
+      const count = (sectionCounts.get(key) || 0) + 1;
+      sectionCounts.set(key, count);
+      item._worshipElementOrder = count;
+    }
     state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(items);
     state.dirty.service = true;
     markServiceStructureDirty(serviceId);
@@ -26766,7 +26808,7 @@ function sundaySharedContentKey(item = {}, service = null) {
 }
 
 function sundaySharedContentTypesForItem(item = {}, service = null) {
-  if (!worshipServiceParticipatesInSharedSundayContent(service)) return [];
+  if (!worshipServiceParticipatesInSharedSundayContent(service, item)) return [];
   const typeId = worshipAppServiceTypeId(service?.type_id);
   const key = sundaySharedContentKey(item, service);
   if (!key) return [];

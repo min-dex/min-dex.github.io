@@ -97,7 +97,7 @@ Initial slot examples:
 | `prayer.corporate.song` | 기도찬양 | `corporate_prayer` | `praise` | `lyrics_db` / `score_db` | lyrics/score | Monthly prayer praise within corporate prayer. |
 | `prayer.meeting.song.N` | 기도찬양 N | `prayer_meeting_praise` | `praise` | `lyrics_db` / `score_db` | lyrics/score | Friday/prayer-meeting praise slots. |
 | `prayer.meeting.free` | 자율기도 | `prayer_meeting_praise` | `plain_text` / `title_person` | `text` | title/body | Free prayer slot. |
-| `offering.praise` | 봉헌찬송 | `offering` | `praise` | `score_db` / `lyrics_db` | score/lyrics | Regular public services only unless explicitly enabled. |
+| `offering.praise` | 봉헌찬송 | `offering` | `praise` | `score_db` / `lyrics_db` | score/lyrics | Shared public-service hymn, including ordinary all-generation offering; omitted on media/special replacement dates. |
 | `offering.special` | 봉헌특송 | `offering` | `praise` | `lyrics_db` / `manual_praise` / `score_db` | lyrics/score | Optional dated/manual slot. |
 | `offering.media` | 봉헌 영상 | `offering` | `video` / `image` | `asset` | media | Optional dated/manual slot; must not imply `offering.praise`. |
 | `offering.prayer` | 봉헌기도 | `offering` | `title_person` | `text` | title-assignee | Usually required when offering module exists. |

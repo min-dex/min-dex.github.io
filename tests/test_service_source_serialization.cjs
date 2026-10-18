@@ -19,6 +19,8 @@ const context = vm.createContext({
   serviceScriptureReadingReferencesForService: service => service.references || [],
   formatServiceScriptureReferenceList: values => values.join('; '),
   servicePraiseInputMode: (item, memo) => memo.inputMode,
+  servicePraiseUsesDirectLyrics: mode => ['manual_praise', 'audio_praise'].includes(mode),
+  normalizeServiceAudioTiming: value => value || null,
   formatServiceManualPraiseLyricsInput: memo => (memo.slides || []).join('\n\n'),
   formatServiceManualScriptureInput: value => value?.text || '',
   normalizeServiceManualScripture: value => value || null,
@@ -51,7 +53,7 @@ assert.equal(render({label:'설교',raw_title:'말씀',sermon:true,memo:{slides:
   '[설교]\n- 제목: 말씀\n- 역본 ID: unknown\n- 성경 본문: 창세기 1:1; 요한복음 3:16\n- 슬라이드: |\n  A\n  ---\n  B');
 assert.equal(render({memo:{asset:{url:'only.png'},audio_asset:{name:'audio'},manualScripture:{translationLabel:'empty'}}}),
   '[항목]\n- 제목: \n- 파일: \n- 링크: only.png\n- 음원 파일: audio');
-const isolated = vm.createContext({});
+const isolated = vm.createContext({servicePraiseUsesDirectLyrics: context.servicePraiseUsesDirectLyrics});
 vm.runInContext(fs.readFileSync(path.join(root, 'mindex.worship-source.js'), 'utf8'), isolated);
 const fields = Object.freeze({label:'제목',value:'내용',hasTranslation:false,sermonReference:null,
   asset:Object.freeze({}),audio:Object.freeze({})});

@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-controller-actions",
+  "version": "20261018-shared-offering-integrity",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "a027504606e362ddc46e9196ef4fb32c6f6489439e8e1edda052e88879c58ba9",
-  "runtime_sha256": "16680e0395329bd13051776fdd6e5384d1f97b26c8c2861d435b0d9e24c0ada1",
-  "source_bytes": 1475546,
-  "runtime_bytes": 1044161,
-  "source_gzip": 329650,
-  "runtime_gzip": 258201
+  "source_sha256": "e863b18acab09481e3809e6a46f4dd77824e476545ec3fd0317b8765082ec9e7",
+  "runtime_sha256": "4694b3801ff79f876d808a937be0d5b91a573fad7ba2fb59c9080ec3632bcf14",
+  "source_bytes": 1478422,
+  "runtime_bytes": 1046087,
+  "source_gzip": 330305,
+  "runtime_gzip": 258731
 }
