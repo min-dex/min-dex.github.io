@@ -33,7 +33,8 @@ def main():
                         return times.sort((a,b)=>a-b)[Math.floor(times.length*.95)];
                       };
                       window.dispatchEvent(new Event('online'));
-                      await Promise.resolve();const off=measure();const on=measure();
+                      for(let i=0;i<100&&!requests;i++)await new Promise(r=>setTimeout(r,10));
+                      const off=measure();const on=measure();
                       check(requests===1,'slow network created overlapping telemetry requests');
                       check(state.presenter.index===0&&state.presenter.slides===slides,'monitor mutated presenter');
                       check(on<Math.max(20,off+15),'monitor caused large synchronous latency regression');

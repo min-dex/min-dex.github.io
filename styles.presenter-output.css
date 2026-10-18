@@ -1540,6 +1540,7 @@ span.presenter-announcement-paren,
 
 /* Fill photo output without letter/pillar bars; crop overflow, never stretch. */
 .presenter-output-root.no-chromakey.has-form-background {
+  --presenter-output-bar-height: 20%;
   background-size: cover;
 }
 .presenter-output-root.no-chromakey.has-form-background:not(.svc-slide-mini-canvas) {

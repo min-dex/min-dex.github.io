@@ -8957,3 +8957,15 @@ body[data-module="praise"] .praise-forms-panel .version-compare-column {
   height: 100%;
 }
 .praise-forms-panel .form-head { min-height: 30px; }
+
+/* Independent photo timeline: thumbnail and explicit attachment per photo. */
+.song-photo-row { display:flex; gap:14px; padding:14px 0; border-bottom:1px solid var(--line); }
+.song-photo-row > img { width:144px; height:96px; object-fit:cover; border-radius:8px; }
+.song-photo-fields { flex:1; min-width:0; display:grid; gap:8px; }
+.song-photo-fields strong { overflow-wrap:anywhere; }
+.song-photo-fields label { display:grid; gap:4px; }
+.song-photo-fields select { max-width:100%; width:100%; min-height:36px; padding:6px 8px; border:1px solid var(--line); border-radius:var(--r); background:var(--ui-surface-panel); color:var(--ink); }
+.song-photo-fields input[type=number] { width:120px; }
+.song-photo-actions { display:flex; flex-wrap:wrap; gap:6px; }
+.song-photo-actions input[type=file] { max-width:160px; }
+@media(max-width:600px) { .song-photo-row { flex-direction:column; } .song-photo-row > img { width:100%; height:150px; } }

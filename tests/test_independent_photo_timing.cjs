@@ -31,3 +31,13 @@ for(let t=2;t<264;t+=.05){
  assert.equal(actual.formBackgroundImage,twentyOne.filter(p=>p.at<=t).at(-1)?.url);
 }
 console.log('PASS 21 independent photos over 19 unchanged lyric cues for full-length clock');
+
+const anchored=[{at:6,url:'https://a/linked.png',slideIndex:1},{at:15,url:'https://a/fixed.png'}];
+const moved=pages.map((p,i)=>i===1?{...p,syncTimeline:{...p.syncTimeline,start:7}}:p);
+const linked=T.composePhotos(moved,anchored,20);
+assert.equal(linked.find(p=>p.formBackgroundImage===anchored[0].url).syncTimeline.start,7);
+assert.equal(linked.find(p=>p.formBackgroundImage===anchored[1].url).syncTimeline.start,15);
+assert.equal(anchored[0].at,6);
+const lyricLinked=T.composePhotos(pages,[{at:10,url:'https://a/lyric.png',slideIndex:2}],20);
+assert.equal(lyricLinked.find(p=>p.formBackgroundImage).syncTimeline.start,9);
+console.log('PASS linked photo follows lyric display cue; absolute photos and original records stay unchanged');

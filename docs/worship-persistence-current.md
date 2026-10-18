@@ -351,6 +351,10 @@ instead of building and discarding an earlier copy.
 Worship-owned `audioTiming.photos` stores ordered `{at,url,name}` records in the
 existing atomic bundle. `at` is an absolute media time, with no lyric lead. The
 original lyric starts, fingerprint, text and audio identity remain unchanged.
+An optional zero-based `slideIndex` links a photo to a base lyric/blank slide.
+Its effective time follows that slide's display start (including the existing
+lyric lead); `at` is also saved as a resolved value for compatible readers.
+Old entries without `slideIndex` remain absolute and are never auto-linked.
 Photo assets use existing immutable worship media storage. Partial uploads and
 uncertain saves retain uploaded URLs for retry; unlinking does not delete blobs.
 No Praise DB or children-version attachment changes.

@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-form-label-spacing",
+  "version": "20261018-device-photo-editor",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "0abb504d1526e11248b8c9ee22ecf9a7e98d49cd58e65d2c2ec4bc868ed0abc1",
-  "runtime_sha256": "cc62d8d37dee6a61a19941fb066177b07f22da92e98ca4fcaedf07c796f2d6af",
-  "source_bytes": 1481232,
-  "runtime_bytes": 1048163,
-  "source_gzip": 330975,
-  "runtime_gzip": 259274
+  "source_sha256": "ea6f948097e1532f323da4b3c9cc45a69d09bf1adf549626883e62c6095093d3",
+  "runtime_sha256": "0c0ba5811e8db50eb672f127f939ac22c089cf97a3c92d585a36992486151efc",
+  "source_bytes": 1481364,
+  "runtime_bytes": 1048274,
+  "source_gzip": 331014,
+  "runtime_gzip": 259313
 }

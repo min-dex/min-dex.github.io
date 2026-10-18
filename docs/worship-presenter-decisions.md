@@ -3323,3 +3323,18 @@ Paired ASCII/fullwidth parentheses in praise lyric slides, including the delimit
 - 보조 내용의 크기(담당 100px, 상단 순서명 80px, 곡 설명 60px)는 이번 변경에서 유지한다.
 
 - 찬양 제목 앞 ♬는 글리프의 시각적 크기를 고려해 .55em으로 표시한다(기존 .72em보다 축소). 제목 auto-fit 시 음표도 함께 축소되며 기존 baseline 보정은 유지한다. 공통 음표 규칙이므로 fullscreen·chromakey·preview에 함께 적용한다. 실제 시각적 균형은 출력 화면에서 추가 확인이 필요하다.
+
+## 2026-10-18 · Device names and photo timeline editing
+
+Presence groups controller tabs within one browser profile using a shared reporter
+and an editable device name; IDs are not displayed. A device is output-active when
+any fresh tab is active. Other browser profiles remain separate devices. See
+`monitor-operations.md` for expiry and storage restrictions.
+
+The worship audio timing editor supports per-photo replacement/removal, absolute
+audio seconds, recording the current audio time, or linking to a lyric slide start.
+Optional `photos[].slideIndex` follows the existing display lead (lyrics 1s, blank
+0s). Absolute entries keep their old cues. Atomic worship save owns the bundle;
+photo editing never changes lyric cues by itself. Generic photo output uses the
+lower 20% caption area and instrumental sections have no caption. Existing
+Cadaros photos/cues are not migrated. See `audio-lyrics-sync-runbook.md`.

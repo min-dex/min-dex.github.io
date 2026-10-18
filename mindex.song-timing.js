@@ -38,8 +38,10 @@
     return '';
   }
   function composePhotos(slides, photos, duration) {
-    if (!photos?.length || validatePhotos(photos, duration)) return slides;
     const timed = slides.filter(s => s.syncTimeline?.serviceTiming && !s.syncTimeline.intro);
+    photos = photos?.map(photo => Number.isInteger(photo.slideIndex) ? {...photo,
+      at:timed[photo.slideIndex] ? Math.max(0,timed[photo.slideIndex].syncTimeline.start-timed[photo.slideIndex].syncTimeline.lead) : NaN} : photo);
+    if (!photos?.length || validatePhotos(photos, duration)) return slides;
     if (!timed.length) return slides;
     const first = Math.max(0, timed[0].syncTimeline.start - timed[0].syncTimeline.lead);
     if (photos[0].at < first) return slides;
@@ -579,9 +581,11 @@
       <div class="song-timing-record"><button type="button" class="btn secondary" data-timing-next>다음 장 전환 기록</button><span data-timing-next-label></span></div>
       <div class="song-timing-pages">${slides.map((slide, i) => `<div class="song-timing-row"><label>${slide.formBackgroundImage ? `<img class="song-timing-photo" src="${escapeAttr(slide.formBackgroundImage)}" alt="${i + 1}장 배경 사진">` : ''}${i + 1}장 · ${formLabels.get(slide.formKey) ? escapeHtml(formLabels.get(slide.formKey)) + ' · ' : ''}${escapeHtml(slide.text || '빈 화면')}<input aria-label="${i + 1}장 시작 초" type="number" min="0" step="0.1" data-timing-start="${i}" value="${draft.starts[i] ?? ''}" placeholder="초"></label><button type="button" class="btn secondary" data-timing-stamp="${i}">현재 시각 기록</button><button type="button" class="btn secondary" data-timing-nudge="${i}" data-delta="-0.2" aria-label="${i+1}장 0.2초 앞당기기">−0.2초</button><button type="button" class="btn secondary" data-timing-nudge="${i}" data-delta="0.2" aria-label="${i+1}장 0.2초 늦추기">+0.2초</button></div>`).join('')}</div>
       ${serviceTiming ? `<fieldset><legend>사진 별도 자동 전환</legend>
-        <p>가사 시각은 유지하고 사진만 음원 위치에 맞춰 바꿉니다. 사진 파일은 이름순으로 배치됩니다.</p>
+        <p>사진을 원하는 음원 시각 또는 가사 슬라이드에 붙이세요. 가사 구간은 하단 자막, 간주는 사진만 나옵니다.</p>
         <label>사진 선택 <input type="file" accept="image/*" multiple data-timing-photos></label>
-        <label>사진 전환 초 (한 줄에 한 장, 가사보다 1초 앞당기지 않음)<textarea data-photo-times>${draft.photos.map(p=>p.at).join('\n')}</textarea></label>
+        <div data-photo-editor></div>
+        <button type="button" class="btn secondary" data-photo-sort>시각 순으로 정렬</button>
+        <details><summary>시각 일괄 입력</summary><label>사진 전환 초 (한 줄에 한 장, 가사보다 1초 앞당기지 않음)<textarea data-photo-times>${draft.photos.map(p=>p.at).join('\n')}</textarea></label></details>
         <p data-photo-names>${draft.photos.map(p=>escapeHtml(p.name || p.url.split('/').pop())).join(' · ')}</p>
         <button type="button" class="btn secondary" data-photo-clear>사진 연결 해제</button>
       </fieldset>` : ''}
@@ -601,48 +605,116 @@
     const beatEnabled = dialog.querySelector('[data-beat-enabled]');
     const resetBeat = () => { beatAbort?.abort(); beatSerial++; dialog.querySelector('[data-beat-analyze]').disabled=false; beatBpm.value=''; beatAnchor.value='0'; beatEnabled.checked=false; beatStatus.textContent='음원이 바뀌었어요. 박자를 다시 확인해 주세요.'; };
     let busy = false;
-    let photoFiles = [];
-    const uploadedPhotos = new Map();
+    let photoRows = draft.photos.map(photo=>({...photo})), photoBulkError=false;
+    const uploadedPhotos = new Map(), photoPreviewUrls = new Set();
+    const photoCue = row => Number.isInteger(row.slideIndex)
+      ? (Number.isFinite(draft.starts[row.slideIndex]) && slides[row.slideIndex] ? Math.max(0,draft.starts[row.slideIndex]-(noLead(slides[row.slideIndex])?0:1)) : null)
+      : row.at;
+    const syncPhotoTimes = () => {
+      const field=dialog.querySelector('[data-photo-times]');
+      photoBulkError=false;
+      if(field)field.value=photoRows.map(photo=>photoCue(photo) ?? '').join('\n');
+      dialog.querySelectorAll('[data-photo-at]').forEach(field=>{
+        const row=photoRows[Number(field.dataset.photoAt)];
+        if(Number.isInteger(row.slideIndex))field.value=photoCue(row) ?? '';
+      });
+    };
+    const renderPhotos = () => {
+      const editor=dialog.querySelector('[data-photo-editor]'); if(!editor)return;
+      editor.innerHTML=photoRows.length ? photoRows.map((photo,i)=>`<article class="song-photo-row">
+        <img src="${escapeAttr(photo.preview || photo.url || '')}" alt="사진 ${i+1} 미리보기">
+        <div class="song-photo-fields"><strong>${i+1}. ${escapeHtml(photo.name || '사진')}</strong>
+        <label>붙일 위치<select data-photo-anchor="${i}" aria-label="사진 ${i+1} 붙일 위치"><option value="">음원 시각 직접 지정</option>${slides.map((slide,j)=>`<option value="${j}" ${photo.slideIndex===j?'selected':''}>${j+1}장 · ${escapeHtml((slide.text || '간주 · 사진만').replace(/\s+/g,' ').slice(0,65))}</option>`).join('')}</select></label>
+        <label>전환 시각 (초)<input type="number" min="0" step="0.001" data-photo-at="${i}" aria-label="사진 ${i+1} 전환 초" value="${photoCue(photo) ?? ''}" ${Number.isInteger(photo.slideIndex)?'readonly':''}></label>
+        <div class="song-photo-actions"><button type="button" class="btn secondary" data-photo-stamp="${i}">지금 시각 기록</button><button type="button" class="btn secondary" data-photo-preview="${i}">이 시점 듣기</button>
+        <label class="btn secondary">사진 교체<input type="file" accept="image/*" data-photo-replace="${i}" aria-label="사진 ${i+1} 교체"></label><button type="button" class="btn secondary" data-photo-remove="${i}">삭제</button></div></div></article>`).join('') : '<p>사진을 선택한 뒤 원하는 시각을 기록하거나 가사 슬라이드를 선택하세요.</p>';
+      dialog.querySelector('[data-photo-names]').textContent=photoRows.map(p=>p.name || '사진').join(' · ');
+      syncPhotoTimes();
+    };
+    const fileRow = (file, previous={}) => {
+      if(!file.type.startsWith('image/') || file.size>20*1024*1024)throw Error('사진 파일을 한 장당 20MB 이하로 선택해 주세요.');
+      const preview=URL.createObjectURL(file);photoPreviewUrls.add(preview);
+      return {...previous,file,preview,name:file.name,at:previous.at ?? null};
+    };
     dialog.querySelector('[data-timing-photos]')?.addEventListener('change', e => {
-      photoFiles = [...e.target.files].sort((a,b)=>a.name.localeCompare(b.name, 'ko', {numeric:true}));
-      dialog.querySelector('[data-photo-names]').textContent = photoFiles.map(f=>f.name).join(' · ');
+      if(busy)return;
+      try {
+        const files=[...e.target.files].sort((a,b)=>a.name.localeCompare(b.name,'ko',{numeric:true}));
+        if(photoRows.length+files.length>200)throw Error('사진은 최대 200장까지 저장할 수 있어요.');
+        photoRows.push(...files.map(file=>fileRow(file)));renderPhotos();
+      } catch(error){status.textContent=error.message;}
+      e.target.value='';
     });
     dialog.querySelector('[data-photo-clear]')?.addEventListener('click', () => {
-      if (busy) return;
-      photoFiles = []; draft.photos = [];
-      dialog.querySelector('[data-timing-photos]').value = '';
-      dialog.querySelector('[data-photo-times]').value = '';
-      dialog.querySelector('[data-photo-names]').textContent = '사진 연결을 해제한 뒤 예배에 저장해 주세요.';
+      if(busy)return;photoRows=[];renderPhotos();
+      status.textContent='사진 연결 해제는 예배에 저장할 때 반영됩니다.';
     });
+    dialog.querySelector('[data-photo-times]')?.addEventListener('input', e=>{
+      const values=e.target.value.trim().split(/\s+/);
+      if(values.length!==photoRows.length){photoBulkError=true;return;}
+      photoRows=photoRows.map((row,i)=>{const {slideIndex,...rest}=row;return {...rest,at:values[i]===''?null:Number(values[i])};});
+      renderPhotos();
+    });
+    dialog.addEventListener('change',e=>{
+      if(busy)return;
+      if(e.target.matches('[data-photo-anchor]')) {
+        const row=photoRows[Number(e.target.dataset.photoAnchor)];
+        if(e.target.value===''){row.at=photoCue(row);delete row.slideIndex;}else row.slideIndex=Number(e.target.value);
+        renderPhotos();
+      }
+      if(e.target.matches('[data-photo-replace]')) {
+        const i=Number(e.target.dataset.photoReplace),file=e.target.files[0];if(!file)return;
+        try {photoRows[i]=fileRow(file,photoRows[i]);renderPhotos();}catch(error){status.textContent=error.message;}
+      }
+    });
+    dialog.addEventListener('input', e=>{
+      if(e.target.matches('[data-photo-at]')) {photoRows[Number(e.target.dataset.photoAt)].at=e.target.value===''?null:Number(e.target.value);syncPhotoTimes();}
+      if(e.target.matches('[data-timing-start]')) {
+        draft.starts[Number(e.target.dataset.timingStart)]=e.target.value===''?null:Number(e.target.value);syncPhotoTimes();
+      }
+    });
+    dialog.addEventListener('click',e=>{
+      const button=e.target.closest('button');if(!button || busy)return;
+      if(button.hasAttribute('data-photo-sort')){photoRows.sort((a,b)=>(photoCue(a) ?? Infinity)-(photoCue(b) ?? Infinity));renderPhotos();}
+      if(button.hasAttribute('data-photo-remove')){photoRows.splice(Number(button.dataset.photoRemove),1);renderPhotos();}
+      if(button.hasAttribute('data-photo-stamp')){
+        if (!draft.duration || audio.readyState<1) { status.textContent='음원을 먼저 선택해 주세요.'; return; }
+        if (beatEnabled.checked && (!beatBpm.value || !Number.isFinite(Number(beatBpm.value)) || Number(beatBpm.value)<40 || Number(beatBpm.value)>240 || !beatAnchor.value || !Number.isFinite(Number(beatAnchor.value)) || Number(beatAnchor.value)<0 || Number(beatAnchor.value)>=draft.duration)) { beatStatus.textContent='BPM과 기준 박을 확인해 주세요.'; return; }
+        const row=photoRows[Number(button.dataset.photoStamp)];delete row.slideIndex;
+        row.at=Math.round((beatEnabled.checked?snapBeat(audio.currentTime,Number(beatBpm.value),Number(beatAnchor.value)):audio.currentTime)*1000)/1000;renderPhotos();
+      }
+      if(button.hasAttribute('data-photo-preview')){
+        const time=photoCue(photoRows[Number(button.dataset.photoPreview)]);
+        if(!Number.isFinite(time) || time>=draft.duration){status.textContent='음원과 유효한 사진 전환 시각을 먼저 지정해 주세요.';return;}
+        audio.currentTime=time;void audio.play().catch(()=>{status.textContent='음원 재생 버튼을 눌러 주세요.';});
+      }
+    });
+    renderPhotos();
     const preparePhotos = async () => {
-      const raw = dialog.querySelector('[data-photo-times]')?.value.trim() || '';
-      const times = raw ? raw.split(/\s+/).map(Number) : [];
-      const count = photoFiles.length || draft.photos.length;
-      if (times.length !== count || times.some((t,i)=>!Number.isFinite(t) || t<0 || t>=draft.duration || (i>0 && t-times[i-1]<0.2)))
-        throw Error('사진 수와 전환 시각의 수·순서를 확인해 주세요.');
-      const first = Math.max(0, draft.starts[0] - (noLead(slides[0]) ? 0 : 1));
-      if (times.length && times[0] < first) throw Error('사진은 첫 가사·간주 화면 이후부터 배치해 주세요.');
-      if (photoFiles.some(f=>f.size>20*1024*1024)) throw Error('사진은 한 장당 20MB 이하로 선택해 주세요.');
-      if (photoFiles.some(f=>!f.type.startsWith('image/'))) throw Error('사진 파일만 선택해 주세요.');
-      if (count>200) throw Error('사진은 최대 200장까지 저장할 수 있어요.');
-      if (photoFiles.length) {
-        const item = getServiceItems(serviceId).find(i=>i.id===elementId);
-        const bucket = state.client.storage.from(PRESENTER_MEDIA_STORAGE_BUCKET);
-        const uploaded = [];
-        for (const file of photoFiles) {
-          if (uploadedPhotos.has(file)) {
-            uploaded.push({...uploadedPhotos.get(file),at:times[uploaded.length]}); continue;
+      if(photoBulkError)throw Error('사진 수와 입력한 시각 수가 달라요. 한 장에 한 시각을 입력해 주세요.');
+      const times=photoRows.map(photoCue);
+      if(times.some((t,i)=>!Number.isFinite(t) || t<0 || t>=draft.duration || (i>0&&t-times[i-1]<0.2)))
+        throw Error('사진 시각을 모두 지정하고 시각 순으로 정렬해 주세요. 사진 사이는 최소 0.2초입니다.');
+      const first=Math.max(0,draft.starts[0]-(noLead(slides[0])?0:1));
+      if(times.length && times[0]<first)throw Error('사진은 첫 가사·간주 화면 이후부터 배치해 주세요.');
+      const item=getServiceItems(serviceId).find(i=>i.id===elementId);
+      const uploaded=[];
+      for(let i=0;i<photoRows.length;i++){
+        const row=photoRows[i];let url=row.url;
+        if(row.file){
+          url=uploadedPhotos.get(row.file);
+          if(!url){
+            const bucket=state.client.storage.from(PRESENTER_MEDIA_STORAGE_BUCKET);
+            const path=presenterReferenceMediaUploadPath(serviceId,item,row.file);
+            const result=await bucket.upload(path,row.file,{cacheControl:PRESENTER_MEDIA_CACHE_CONTROL,contentType:row.file.type,upsert:false});
+            if(result.error)throw result.error;
+            url=bucket.getPublicUrl(path).data?.publicUrl;if(!url)throw Error('사진 주소를 확인하지 못했습니다.');
+            uploadedPhotos.set(row.file,url);
           }
-          const path = presenterReferenceMediaUploadPath(serviceId,item,file);
-          const result = await bucket.upload(path,file,{cacheControl:PRESENTER_MEDIA_CACHE_CONTROL,contentType:file.type,upsert:false});
-          if (result.error) throw result.error;
-          const url = bucket.getPublicUrl(path).data?.publicUrl;
-          if (!url) throw Error('사진 주소를 확인하지 못했습니다.');
-          uploadedPhotos.set(file,{name:file.name,url});
-          uploaded.push({name:file.name,url,at:times[uploaded.length]});
         }
-        draft.photos = uploaded; photoFiles = [];
-      } else draft.photos = draft.photos.map((photo,i)=>({...photo,at:times[i]}));
+        uploaded.push({name:row.name,url,at:times[i],...(Number.isInteger(row.slideIndex)?{slideIndex:row.slideIndex}:{})});
+      }
+      draft.photos=uploaded;
     };
     let nextStamp = Math.max(0, draft.starts.findIndex(value => value == null));
     const updateNext = () => {
@@ -650,7 +722,7 @@
     };
     updateNext();
     dialog.addEventListener('cancel', e => { if (busy) e.preventDefault(); });
-    dialog.addEventListener('close', () => { beatAbort?.abort(); beatSerial++; audio.pause(); audio.removeAttribute('src'); if (previewUrl) URL.revokeObjectURL(previewUrl); dialog.remove(); });
+    dialog.addEventListener('close', () => { photoPreviewUrls.forEach(url=>URL.revokeObjectURL(url)); beatAbort?.abort(); beatSerial++; audio.pause(); audio.removeAttribute('src'); if (previewUrl) URL.revokeObjectURL(previewUrl); dialog.remove(); });
     dialog.addEventListener('keydown', e => e.stopPropagation());
     dialog.addEventListener('input', e => {
       if (e.target.matches('[data-beat-bpm],[data-beat-anchor]')) { beatAbort?.abort(); beatSerial++; dialog.querySelector('[data-beat-analyze]').disabled=false; }
@@ -669,7 +741,7 @@
         previewUrl = URL.createObjectURL(file);
         if (digest !== draft.audioFingerprint) {
           draft.starts = slides.map(() => null); nextStamp = 0; updateNext();
-          if (dialog.querySelector('[data-photo-times]')) dialog.querySelector('[data-photo-times]').value = '';
+          photoRows=photoRows.map(row=>({...row,at:null}));renderPhotos();
           dialog.querySelectorAll('[data-timing-start]').forEach(input => { input.value = ''; });
         }
         draft.audioUrl = ''; draft.audio = file; draft.audioName = file.name; draft.audioFingerprint = digest; draft.duration = 0;
@@ -727,7 +799,7 @@
         if(!Number.isFinite(old)){status.textContent='먼저 이 장의 시각을 기록해 주세요.';return;}
         const time=Math.round((old+Number(button.dataset.delta))*100)/100;
         if(time<0 || time>=draft.duration){status.textContent='음원 길이 안에서 조정해 주세요.';return;}
-        draft.starts[i]=time;dialog.querySelector(`[data-timing-start="${i}"]`).value=time;
+        draft.starts[i]=time;dialog.querySelector(`[data-timing-start="${i}"]`).value=time;syncPhotoTimes();
         status.textContent=`${i+1}장 · ${time}초 (미세 조정은 박에 붙이지 않음)`;return;
       }
       if (button.hasAttribute('data-timing-close')) { dialog.close(); return; }
@@ -741,7 +813,7 @@
         if (snapped >= draft.duration) { status.textContent='가까운 박이 음원 끝을 벗어납니다. 박자 맞춤을 끄거나 시각을 직접 입력하세요.'; return; }
         draft.starts[i] = Math.round(snapped * 100) / 100;
         if (beatEnabled.checked) beatStatus.textContent=`${raw.toFixed(2)}초 → ${draft.starts[i]}초 (박자 맞춤)`;
-        dialog.querySelector(`[data-timing-start="${i}"]`).value = draft.starts[i];
+        dialog.querySelector(`[data-timing-start="${i}"]`).value = draft.starts[i];syncPhotoTimes();
         status.textContent = `${i + 1}장 · ${draft.starts[i]}초 기록됨`;
         nextStamp = i + 1; updateNext();
         dialog.querySelector(`[data-timing-start="${Math.min(nextStamp, slides.length - 1)}"]`).closest('.song-timing-row').scrollIntoView({block:'nearest'});
@@ -789,7 +861,7 @@
         return;
       }
       if (button.hasAttribute('data-timing-save')) {
-        busy = true; dialog.querySelectorAll('button,input,textarea').forEach(c=>c.disabled=true);
+        busy = true; dialog.querySelectorAll('button,input,textarea,select').forEach(c=>c.disabled=true);
         try {
           const current = pagesFor(presenterSlidesForService(serviceId).filter(s => belongsTo(s, elementId)));
           if (current[0]?.songTimingKey !== key || fingerprint(current) !== draft.lyricsFingerprint) throw Error('편집 중 곡 또는 가사가 바뀌었어요. 닫고 다시 열어 주세요.');
@@ -804,7 +876,7 @@
           refreshPresenterForService(serviceId);
           status.textContent = serviceTiming ? '음원·가사·타이밍을 예배에 저장했어요. 다른 컴퓨터에서도 이 예배를 열면 사용할 수 있어요.' : '곡 버전에 음원·타이밍을 저장했어요. 음원 불러오기 방식에서만 적용됩니다.';
         } catch (error) { status.textContent = error.message; }
-        finally { busy = false; dialog.querySelectorAll('button,input,textarea').forEach(c=>c.disabled=false); }
+        finally { busy = false; dialog.querySelectorAll('button,input,textarea,select').forEach(c=>c.disabled=false); }
       }
     });
     document.body.append(dialog); dialog.showModal();

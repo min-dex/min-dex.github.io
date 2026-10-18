@@ -4,8 +4,11 @@
   const trigger = document.getElementById("monitorPanelBtn");
   if (!trigger) return;
   const REPORT_MS = 60000, STALE_MS = 180000;
-  const TOKEN_KEY = "mindex.monitor.reporter";
-  let resumeReady = false, releaseTokenLock = null;
+  const TOKEN_KEY = "mindex.monitor.deviceReporter";
+  const TAB_PREFIX = "mindex.monitor.tab.";
+  const tabId = crypto.randomUUID();
+  const withDeviceLock = task => navigator.locks?.request ? navigator.locks.request("mindex-monitor-device-report", task) : task();
+  let resumeReady = false;
   const requests = new Map();
   const renderKeys = new WeakMap();
   let remoteRows = [];
@@ -20,10 +23,10 @@
   const panel = document.createElement("dialog");
   panel.className = "monitor-panel"; panel.setAttribute("aria-labelledby", "monitorTitle");
   panel.innerHTML = `<header><h2 id="monitorTitle">접속 현황</h2><button class="icon-btn" data-close title="닫기" aria-label="닫기"><i data-lucide="x"></i></button></header>
-    <section class="monitor-section"><div data-local></div></section>
-    <section class="monitor-section" aria-labelledby="monitorRemoteTitle"><div class="monitor-section-heading"><h3 id="monitorRemoteTitle">접속 중</h3><span data-count></span><button class="icon-btn" data-refresh title="새로고침" aria-label="새로고침"><i data-lucide="refresh-cw"></i></button></div>
+
+    <section class="monitor-section" aria-labelledby="monitorRemoteTitle"><div class="monitor-section-heading"><h3 id="monitorRemoteTitle">접속 기기</h3><span data-count></span><button class="icon-btn" data-refresh title="새로고침" aria-label="새로고침"><i data-lucide="refresh-cw"></i></button></div>
     <p class="monitor-message" role="status"></p><div data-devices></div></section>
-    <details class="monitor-section"><summary>접속 이름 설정</summary><div class="monitor-toolbar"><label for="monitorName">접속 이름</label><input id="monitorName" maxlength="60" autocomplete="off"></div><p class="monitor-share-status" role="status"></p><p>민덱스를 열면 자동으로 표시됩니다.</p></details>`;
+    <section class="monitor-section"><h3>이 기기 이름</h3><div class="monitor-toolbar"><label for="monitorName">기기 이름</label><input id="monitorName" maxlength="60" autocomplete="off" placeholder="예: 본당 송출 PC"></div><p class="monitor-share-status" role="status"></p><p>같은 브라우저 프로필의 창·탭은 한 기기로 표시됩니다. 다른 브라우저는 별도 기기로 표시됩니다.</p></section>`;
   document.body.append(panel);
   const $ = (selector) => panel.querySelector(selector);
   $("#monitorName").value = name || `${os} ${browser}`;
@@ -34,10 +37,29 @@
     return Number.isFinite(time) && time <= Date.now() + 5000 ? time : 0;
   }
   function isStale(row) { const time = timestamp(row.last_seen); return !time || Date.now() - time > STALE_MS; }
-  function snapshot() {
+  function localOutput() {
     const p = state.presenter;
-    const output = Boolean(p.outputConnectedAt && Date.now() >= p.outputConnectedAt && Date.now() - p.outputConnectedAt <= PRESENTER_OUTPUT_HEARTBEAT_TTL_MS);
-    return { name: $("#monitorName").value.trim().slice(0, 60), os, browser, output };
+    return Boolean(p.outputConnectedAt && Date.now() >= p.outputConnectedAt && Date.now() - p.outputConnectedAt <= PRESENTER_OUTPUT_HEARTBEAT_TTL_MS);
+  }
+  function recordTab(remove = false) {
+    try {
+      if (remove) localStorage.removeItem(TAB_PREFIX + tabId);
+      else localStorage.setItem(TAB_PREFIX + tabId, JSON.stringify({at:Date.now(), output:localOutput()}));
+    } catch {}
+  }
+  function snapshot() {
+    let output = enabled && localOutput();
+    try {
+      for (let i=0;i<localStorage.length;i++) {
+        const key=localStorage.key(i);
+        if (!key?.startsWith(TAB_PREFIX)) continue;
+        try {
+          const tab=JSON.parse(localStorage.getItem(key));
+          if (tab && tab.at<=Date.now()+5000 && Date.now()-tab.at<STALE_MS && tab.output===true) output=true;
+        } catch {}
+      }
+    } catch {}
+    return { name: name.trim().slice(0,60) || `${os} ${browser}`, os, browser, output };
   }
   function renderDevice(root, data, lastSeen, id = "local") {
     const local = id === "local";
@@ -48,7 +70,7 @@
     const status = document.createElement("span"); status.className = "monitor-health";
     status.textContent = data.output === true ? "송출 중" : "송출 안 함"; row.append(status);
     const identity = document.createElement("p"); identity.className = "monitor-environment";
-    identity.textContent = local ? "이 기기" : `${data.os || ""} · ${data.browser || ""} · ${id.slice(0, 8)}`;
+    identity.textContent = local ? "이 기기" : `${data.os || ""} · ${data.browser || ""}`;
     row.append(identity); root.append(row);
   }
   function renderRows(root, rows) {
@@ -59,7 +81,7 @@
   }
   function renderRemote() {
     const rows = remoteVerified ? remoteRows.filter(row => !isStale(row)) : [];
-    $("[data-count]").textContent = remoteVerified ? `${rows.length}개 접속` : "";
+    $("[data-count]").textContent = remoteVerified ? `${rows.length}대` : "";
     renderRows($("[data-devices]"), rows);
     if (!rows.length) $("[data-devices]").textContent = !remoteVerified ? "접속 상태를 확인하지 못했습니다." : "현재 접속 중인 기기가 없습니다.";
   }
@@ -79,48 +101,40 @@
       throw Error(["원격 조회 서버 설정이 필요합니다.", "서버 요청에 실패했습니다."].includes(error?.message) ? error.message : "서버에 연결하지 못했습니다.");
     } finally { clearTimeout(timeout); requests.delete(controller); }
   }
+  function readToken() {
+    try { return localStorage.getItem(TOKEN_KEY) || ''; } catch { return reporter || ''; }
+  }
   function rememberToken(token) {
     reporter = token;
-    try { if (token) sessionStorage.setItem(TOKEN_KEY, token); else sessionStorage.removeItem(TOKEN_KEY); } catch {}
-  }
-  async function claimToken(token) {
-    if (!navigator.locks?.request) return true;
-    return new Promise(resolve => {
-      navigator.locks.request(`mindex-monitor:${token}`, {ifAvailable:true}, lock => {
-        if (!lock) { resolve(false); return; }
-        return new Promise(release => { releaseTokenLock = release; resolve(true); });
-      }).catch(() => resolve(false));
-    });
+    try { if (token) localStorage.setItem(TOKEN_KEY,token); else localStorage.removeItem(TOKEN_KEY); } catch {}
   }
   async function resume() {
-    let token = "";
-    try { token = sessionStorage.getItem(TOKEN_KEY) || ""; } catch {}
-    if (/^[a-f0-9]{64}$/.test(token) && await claimToken(token)) reporter = token;
-    else rememberToken(null);
-    resumeReady = true; void upload();
+    recordTab(); resumeReady=true; void upload();
   }
   async function upload() {
     if (!resumeReady || !enabled || uploading || Date.now() < retryAt || !state.client) return;
     const serial = shareSerial; uploading = true;
     try {
+      await withDeviceLock(async () => {
       let sent;
       for (let attempt = 0; attempt < 2; attempt++) {
-        let token = reporter;
-        if (!token) {
+        let token = readToken();
+        if (!/^[a-f0-9]{64}$/.test(token)) {
           token = await rpc("mindex_monitor_register", {});
           if (!token || !/^[a-f0-9]{64}$/.test(token)) throw Error("접속 등록 서버 설정 또는 접속 상한을 확인해 주세요.");
-          if (!await claimToken(token)) throw Error("접속을 다시 확인해 주세요.");
           rememberToken(token);
         }
         if (serial !== shareSerial || !enabled) return;
         sent = snapshot();
         if (await rpc("mindex_monitor_ping", {p_token:token,p_status:sent})) break;
-        releaseTokenLock?.(); releaseTokenLock = null; rememberToken(null);
+        rememberToken(null);
         if (attempt === 1) throw Error("접속 등록이 만료되었습니다.");
       }
       if (serial !== shareSerial || !enabled) return;
       failures = 0; retryAt = 0; lastReportAt = Date.now(); reportedOutput = sent.output;
-      shareMessage(`자동 등록됨 · 마지막 응답 ${new Date(lastReportAt).toLocaleTimeString()}`);
+      shareMessage(`기기 이름 공유됨 · 마지막 응답 ${new Date(lastReportAt).toLocaleTimeString()}`);
+      if (panel.open) void refresh();
+      });
     } catch (e) {
       if (serial !== shareSerial || !enabled) return;
       retryAt = Date.now() + Math.min(300000, REPORT_MS * 2 ** Math.min(++failures - 1, 3));
@@ -135,7 +149,6 @@
   }
   async function refresh() {
     if (!panel.open || document.hidden) return;
-    renderRows($("[data-local]"), [{ id: "local", status: snapshot() }]);
     if (reading) return;
     renderRemote();
     const serial = viewSerial; reading = true;
@@ -153,26 +166,37 @@
   trigger.onclick = () => { if (!panel.open) panel.showModal(); void refresh(); window.lucide?.createIcons({ root: panel }); };
   $("[data-close]").onclick = () => panel.close(); panel.addEventListener("close", clearView);
   $("[data-refresh]").onclick = () => { void refresh(); if (enabled && Date.now() - lastReportAt >= REPORT_MS) { retryAt = 0; void upload(); } };
-  $("#monitorName").onchange = () => { try { localStorage.setItem("mindex.monitor.name", $("#monitorName").value.slice(0, 60)); } catch {} };
+  $("#monitorName").onchange = () => {
+    name=$("#monitorName").value.trim().slice(0,60);
+    try { localStorage.setItem("mindex.monitor.name",name); } catch {}
+    retryAt=0; void upload();
+  };
+  window.addEventListener("storage", e => {
+    if(e.key==='mindex.monitor.name') {
+      name=e.newValue || ''; $("#monitorName").value=name || `${os} ${browser}`;
+      retryAt=0; void upload();
+    } else if(e.key?.startsWith(TAB_PREFIX) && snapshot().output!==reportedOutput) void upload();
+  });
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) { clearView(); }
     else { if (enabled) { retryAt = 0; void upload(); } void refresh(); }
   });
   window.addEventListener("offline", () => { remoteVerified = false; if (panel.open) renderRemote(); if (enabled) shareMessage("네트워크 연결 끊김 · 전송 대기"); });
   window.addEventListener("online", () => { if (enabled) { retryAt = 0; void upload(); } void refresh(); });
-  window.addEventListener("pagehide", () => { shareSerial++; enabled = false; clearView();  });
+  window.addEventListener("pagehide", () => { recordTab(true); shareSerial++; enabled = false; clearView(); });
   window.addEventListener("pageshow", (e) => {
     if (!e.persisted) return;
-    enabled = true; retryAt = 0; lastReportAt = 0; void upload();
+    enabled = true; recordTab(); retryAt = 0; lastReportAt = 0; void upload();
   });
   shareMessage("접속 등록 중…");
   void resume();
   // Output changes are sampled locally; unchanged presence uploads once per minute.
+  let lastTabOutput=localOutput(), lastTabWrite=Date.now();
   setInterval(() => {
+    if(enabled && (localOutput()!==lastTabOutput || Date.now()-lastTabWrite>30000)) { recordTab(); lastTabOutput=localOutput(); lastTabWrite=Date.now(); }
     if (enabled && (!lastReportAt || snapshot().output !== reportedOutput)) void upload();
     if (panel.open) {
-      renderRows($("[data-local]"), [{ id: "local", status: snapshot() }]);
-      renderRemote();
+        renderRemote();
     }
   }, 2000);
   // Telemetry never awaits, rebuilds, or publishes the presenter state.

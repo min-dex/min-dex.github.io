@@ -36,9 +36,8 @@ def main():
                     page.locator('#monitorPanelBtn').click()
                     assert page.locator('.monitor-panel').is_visible()
                     assert page.locator('[data-share]').count() == 0
-                    assert page.locator('[data-local] .monitor-health').inner_text() in ('송출 중', '송출 안 함')
-                    assert 'sunday-second' not in page.locator('[data-local]').inner_text()
-                    page.get_by_text('접속 이름 설정', exact=True).click()
+                    assert page.locator('[data-local]').count()==0
+                    assert page.get_by_label('기기 이름').is_visible()
                     page.wait_for_function("monitorCalls.some(c=>c.name==='mindex_monitor_ping')")
                     page.evaluate("emitMonitorSaveEvent('save_start');emitMonitorSaveEvent('save_ok');emitMonitorSaveEvent('save_failed')")
                     page.locator('[data-refresh]').click()

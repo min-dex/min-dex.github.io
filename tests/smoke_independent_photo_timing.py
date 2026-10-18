@@ -95,13 +95,31 @@ try:
    assert page.evaluate('uploads')==1
    page.evaluate("window.photoUploads=0;state.client.storage.from=()=>({upload:async()=>{photoUploads++;return {error:null}},getPublicUrl:()=>({data:{publicUrl:location.origin+'/photo-'+photoUploads+'.png'}}),remove:()=>{throw Error('must not delete uncertain photos')}})")
    d.locator('[data-timing-photos]').set_input_files([{'name':f'{i:02}.png','mimeType':'image/png','buffer':png} for i in range(1,4)])
+   d.get_by_text('시각 일괄 입력',exact=True).click()
    d.locator('[data-photo-times]').fill('6\n7.5\n11')
+   assert d.locator('.song-photo-row').count()==3
+   d.locator('[data-photo-anchor="0"]').select_option('1')
+   d.locator('[data-timing-start="1"]').fill('6.5')
+   assert d.locator('[data-photo-at="0"]').input_value()=='6.5'
+   d.locator('[data-timing-start="1"]').fill('6')
+   assert d.locator('[data-photo-at="0"]').input_value()=='6'
+   assert d.locator('[data-photo-at="1"]').input_value()=='7.5'
+   d.locator('[data-photo-replace="1"]').set_input_files({'name':'replacement-photo.png','mimeType':'image/png','buffer':png})
+   assert d.locator('[data-photo-at="1"]').input_value()=='7.5'
+   d.locator('[data-photo-editor]').screenshot(path=f'/private/tmp/mindex-photo-editor-{engine}.png')
+   page.set_viewport_size({'width':390,'height':844})
+   d.locator('[data-photo-editor]').screenshot(path=f'/private/tmp/mindex-photo-editor-{engine}-mobile.png')
+   assert d.evaluate('(el)=>el.scrollWidth<=el.clientWidth+2')
+   page.set_viewport_size({'width':1280,'height':900})
+
+
    page.evaluate('window.failSave=true');d.locator('[data-timing-save]').click();page.wait_for_function("!document.querySelector('[data-timing-save]').disabled")
    page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('injected failure')")
    page.evaluate('window.failSave=false');d.locator('[data-timing-save]').click();page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('예배에 저장했어요')")
    assert page.evaluate('photoUploads')==3
    assert d.locator('[data-timing-start]').count()==3
    saved=page.evaluate('db');assert saved['elements'][0]['config']['audioTiming']['starts']==[2,6,10]
+   assert saved['elements'][0]['config']['audioTiming']['photos'][0]['slideIndex']==1
    assert '음원 타이밍' in saved['service']['source_ref']['mindexServiceDocument']['sourceText']
    assert not saved['service']['source_ref']['mindexServiceDocument']['sourceText'].endswith('[truncated]')
    assert not saved['elements'][0].get('song_id');assert saved['elements'][0]['config']['inputMode']=='audio_praise'

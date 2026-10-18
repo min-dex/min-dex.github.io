@@ -30,6 +30,9 @@ NODE_TESTS = (
 )
 SMOKES = (
     "smoke_form_label_spacing.py",
+    "smoke_monitor_session.py",
+    "smoke_monitor.py",
+    "smoke_monitor_isolation.py",
     "smoke_version_row_alignment.py",
     "smoke_lyric_parentheses.py",
     "smoke_offering_projection.py",

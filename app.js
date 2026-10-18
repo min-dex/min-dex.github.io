@@ -10938,6 +10938,7 @@ function normalizeServiceAudioTiming(value) {
     starts:value.starts.map(t => typeof t === 'number' && Number.isFinite(t) ? t : null), enabled:value.enabled === true,
     photos:Array.isArray(value.photos) ? value.photos.slice(0,200).map(p=>({
       at:typeof p?.at === 'number' && Number.isFinite(p.at) ? p.at : null,
+      ...(Number.isInteger(p?.slideIndex) && p.slideIndex>=0 && p.slideIndex<value.starts.length ? {slideIndex:p.slideIndex} : {}),
       url:String(p?.url || ''), name:String(p?.name || '')})) : []};
 }
 

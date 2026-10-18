@@ -1,5 +1,18 @@
 # Read-only operations panel
 
+## Browser-profile devices · 2026-10-18
+
+Same-origin tabs in one browser profile share a reporter token in localStorage.
+Web Locks serialize registration and reporting; the server sees one device row.
+The editable device name is shared across tabs and the public list omits token/ID
+suffixes. Output is true while any fresh tab reports an active output connection.
+Page hide removes that tab; crashed tab records expire after 180 seconds.
+The existing 60-second reports and 180-second remote expiry remain unchanged.
+Other browsers/profiles are separate devices; this is not hardware identification.
+Storage/lock restrictions may prevent grouping. Old per-tab rows age out normally.
+No RPC/schema/permissions or worship data changes. This supersedes the tab-scoped
+reporter storage/lock description below.
+
 ## Reload continuity and 60/180 cadence · 2026-10-17
 
 Reporter tokens (reporter-only, never viewer credentials) are stored in tab-scoped
