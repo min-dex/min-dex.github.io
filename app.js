@@ -6993,6 +6993,7 @@ async function saveScripture() {
     return;
   }
 
+  const publishClient = state.client, publishProject = state.config.url;
   state.saving = true;
   updateSaveState();
 
@@ -7013,7 +7014,10 @@ async function saveScripture() {
       .single();
 
     if (error) throw error;
+    if (!data || data.id !== scripture.id) throw new Error("저장 결과를 확인하지 못했습니다.");
 
+    if (state.client !== publishClient || state.config.url !== publishProject) return;
+    window.MINDEX_CONTENT_LIVE?.publish("scripture", "all");
     Object.assign(scripture, normalizeServerScripture(data));
     state.scriptures = state.scriptures.sort(sortScriptures);
     state.dirty.scripture = false;

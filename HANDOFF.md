@@ -1033,3 +1033,10 @@ playback and scroll. No schema changes or automatic worship rewrites.
 See docs/operations-realtime.md. List summaries refresh without replacing open
 editors or full documents; archive cards use revision scans and changed-only
 reads, retaining leader drafts and rejecting mid-read saves.
+
+## Saved scripture realtime · 2026-10-18
+
+Successful scripture saves notify the existing content transport. Visible excerpt
+catalogue reconciliation preserves drafts, reader/search DOM, chapter selection,
+playback and deleted selected records. No schema/corpus changes. Contract and
+change-scoped browser coverage: docs/content-realtime.md, smoke_scripture_live.py.

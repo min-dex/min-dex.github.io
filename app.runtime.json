@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-hymn-reviewed-fixes",
+  "version": "20261018-scripture-live",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "a11df5717ad7c14f736a353b93e9568afbe32087e2d65e4c3325820954b52aaa",
-  "runtime_sha256": "e2d48d26909238e4be2fc6a610569f3399be55a70321ec13f2d03a2977e078c7",
-  "source_bytes": 1513501,
-  "runtime_bytes": 1070684,
-  "source_gzip": 338827,
-  "runtime_gzip": 265449
+  "source_sha256": "690c7d213508b262a85a69fb370c5a61d6136c67b8242ce69f429bf9ac3cc592",
+  "runtime_sha256": "1654c5baae89a960d17dd05a831e1fd59cf6159e1f985bc40194b51b0cf06682",
+  "source_bytes": 1513832,
+  "runtime_bytes": 1070913,
+  "source_gzip": 338883,
+  "runtime_gzip": 265497
 }

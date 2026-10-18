@@ -392,3 +392,9 @@ playback and scroll. No schema changes or automatic worship rewrites.
 See docs/operations-realtime.md. List summaries refresh without replacing open
 editors or full documents; archive cards use revision scans and changed-only
 reads, retaining leader drafts and rejecting mid-read saves.
+
+## Saved scripture realtime · 2026-10-18
+
+Saved excerpts now share guarded content invalidations and visible-screen
+recovery. Bible corpus/chapter caches and existing worship documents stay separate.
+See docs/content-realtime.md and tests/smoke_scripture_live.py.
