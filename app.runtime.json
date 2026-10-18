@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-photo-editor-shortcut",
+  "version": "20261018-announcement-sidebar",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "f194f498406907e485a04210bbbc874f0de5b7d932e30475457d6c649433eb3a",
-  "runtime_sha256": "0ecdef041ab557a1098c738481cc0ee426cec76f2bf9f50683c4ab7c99ad0af0",
-  "source_bytes": 1482772,
-  "runtime_bytes": 1049424,
-  "source_gzip": 331309,
-  "runtime_gzip": 259555
+  "source_sha256": "2fb06d1dc16797d9aa9f3c10642c0b58a416add5731d5c284f4330efe1928088",
+  "runtime_sha256": "7a59d8437554dc533a6382120f8f3e7d0803a99bfed00e1fb711ab07b86db394",
+  "source_bytes": 1483036,
+  "runtime_bytes": 1049637,
+  "source_gzip": 331346,
+  "runtime_gzip": 259592
 }

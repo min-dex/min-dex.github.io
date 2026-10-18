@@ -23652,6 +23652,7 @@ function serviceSidebarChildItemDisplayParts(item, service = null) {
     };
   }
   const label = serviceElementDisplayLabel(serviceItemOrdinalDisplayLabel(item, service));
+  if (serviceSidebarUsesLabelOnly(item)) return { meta: label || "항목", title: "" };
   const fallback = serviceSidebarChildItemTitle(item, service);
   if (!label) return { meta: "", title: serviceSidebarOutlineFirstLine(fallback || "항목", item) };
   const title = serviceSidebarChildItemDisplayText(item);
@@ -23749,7 +23750,9 @@ function serviceSidebarPersonSummary(item = {}, service = null) {
 
 function serviceSidebarUsesLabelOnly(item = {}) {
   const label = compactSearchValue(item.label || "");
-  return isCreedServiceItem(item)
+  return String(item._worshipSectionKey || item.section_key || "") === "announcements"
+    || ["광고", "교회소식", "청년부광고", "청소년부광고"].includes(label)
+    || isCreedServiceItem(item)
     || label === "주기도문"
     || label === "공동체고백";
 }

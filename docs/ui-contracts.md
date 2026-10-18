@@ -565,3 +565,5 @@ and bulletin editor/preview in Chromium and WebKit; no service data is saved.
 - The manual DB refresh button and module-wide refresh entry point are removed. Explicit service navigation and tab re-entry check that service only after hydration, with a bounded wait. Drafts, saves, output, navigation and input races defer application. Source song records, transport and other services are not replaced. A failed fetch retains current content.
 
 - Reselecting the currently open worship service retains the mounted editor, caret, selected item and clean fingerprint. Each navigation invalidates prior entry requests before awaiting navigation; completed responses require the same entry token. Deferred text is protected even without a modified-status badge.
+
+- Worship sidebar announcement entries show their label only, like liturgical entries. Announcement source text and output are unchanged.
