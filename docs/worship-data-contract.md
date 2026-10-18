@@ -973,8 +973,13 @@ The calendar batch compares the previous value, service set and service revision
 Transport failures retain and replay the exact session-journal request; a resolved
 retry asks the user to reload before submitting a newer draft. Database errors
 known to roll back discard that pending request. Successful writes invalidate
-clean service caches; opening the calendar refreshes its rows. Other open tabs
-must reload to see changes; stale writes fail instead of silently overwriting.
+clean service caches; opening the calendar refreshes its rows. Other tabs in the same browser profile receive identifier-only BroadcastChannel
+notifications with a storage-event fallback and read fresh DB values. Calendar
+cells update in place. Clean worship editors refresh their snapshot and atomic
+revision together. Focused inputs, drafts, saves and live output defer refresh;
+queued work retries after editing/output settles. Notifications never carry
+assignee names or authorize a write. Different browser profiles/devices are not
+covered by this local channel; stale writes still fail instead of overwriting.
 
 Legacy direct updates of these four calendar fields are rejected. Duplicate
 same-department services are supported by calendar batch edits; a direct worship

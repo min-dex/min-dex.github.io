@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-internal-labels",
+  "version": "20261018-department-live-tabs",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "6fd0121bbcb08031446f6bd6a445e0ec5ee9713125bd8f27cb8f5575e805381a",
-  "runtime_sha256": "6a2065048b76ec9e889bb85beb4b15ca42c6a82bc6f7666e0bc436f4b2585c2d",
-  "source_bytes": 1494298,
-  "runtime_bytes": 1057277,
-  "source_gzip": 333999,
-  "runtime_gzip": 261717
+  "source_sha256": "194aa9df37cabac329ffab38cb1b1b7044223da8c57988692ea13f4c6c03dcaf",
+  "runtime_sha256": "80d7c1da0a0eac365272afd4143256fe51a858e3b8ad52a569631e0591fc9c1a",
+  "source_bytes": 1500607,
+  "runtime_bytes": 1061746,
+  "source_gzip": 335661,
+  "runtime_gzip": 262997
 }

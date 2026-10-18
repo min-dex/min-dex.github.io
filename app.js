@@ -910,6 +910,7 @@ async function init() {
   bindElectronDesktopEvents();
   bindPresenterChannel();
   connectClient();
+  initializeDepartmentTabSync();
   render();
   syncBrowserHistory({ replace: true });
   void requestPresenterScreens({ silent: true });
@@ -4153,7 +4154,10 @@ async function worshipAtomicClient() {
     const promise = import(`./mindex.worship-atomic-client.mjs?v=${release}`).then(({ createWorshipAtomicClient }) =>
       createWorshipAtomicClient({ rpc: async (name, args) => {
         const result = await client.rpc(name, args);
-        if (!result.error && result.data?.calendar) adoptDepartmentCalendarReceipt(result.data.calendar);
+        if (!result.error && result.data?.calendar) {
+          adoptDepartmentCalendarReceipt(result.data.calendar);
+          publishDepartmentTabChange(result.data.calendar, [args.req.serviceId]);
+        }
         return result;
       },
         journal: sessionStorage, namespace: state.config.url })).catch((error) => {
@@ -5431,6 +5435,99 @@ async function loadCalendarDataOnce({ silent = false } = {}) {
   }
 }
 
+// Same-origin tab notifications contain identifiers only; committed values come from DB.
+let departmentTabSync = null;
+function initializeDepartmentTabSync() {
+  if (departmentTabSync || isPresenterOutputRoute()) return;
+  const sync = departmentTabSync = { channel: null, pending: new Map(), timer: null, busy: false, seen: new Set(), editRevision: 0 };
+  document.addEventListener("input", () => { sync.editRevision += 1; }, true);
+  document.addEventListener("change", () => { sync.editRevision += 1; }, true);
+  const receive = message => {
+    if (!message || message.project !== state.config.url || typeof message.id !== "string"
+      || typeof message.calendarId !== "string" || !Array.isArray(message.serviceIds) || message.serviceIds.length > 100
+      || !message.serviceIds.every(id => typeof id === "string") || sync.seen.has(message.id)) return;
+    sync.seen.add(message.id);
+    if (sync.seen.size > 256) sync.seen.delete(sync.seen.values().next().value);
+    const previous = sync.pending.get(message.calendarId);
+    sync.pending.set(message.calendarId, { ...message, serviceIds: [...new Set([...(previous?.serviceIds || []), ...message.serviceIds])] });
+    scheduleDepartmentTabRefresh();
+  };
+  try { sync.channel = new BroadcastChannel("mindex.department.assignees.v1"); sync.channel.onmessage = event => receive(event.data); } catch {}
+  window.addEventListener("storage", event => {
+    if (event.key !== "mindex.department.assignees.v1" || !event.newValue) return;
+    try { receive(JSON.parse(event.newValue)); } catch {}
+  });
+  const wake = () => {
+    try { receive(JSON.parse(localStorage.getItem("mindex.department.assignees.v1") || "null")); } catch {}
+    scheduleDepartmentTabRefresh();
+  };
+  window.addEventListener("focus", wake);
+  document.addEventListener("visibilitychange", wake);
+  document.addEventListener("focusout", () => scheduleDepartmentTabRefresh());
+  window.addEventListener("online", wake);
+}
+function publishDepartmentTabChange(calendar, serviceIds = []) {
+  if (!calendar?.id || !state.config.url) return;
+  initializeDepartmentTabSync();
+  const message = { id: createUuid(), project: state.config.url, calendarId: calendar.id, serviceIds };
+  if (departmentTabSync) departmentTabSync.editRevision += 1;
+  departmentTabSync?.seen.add(message.id);
+  try { departmentTabSync?.channel?.postMessage(message); } catch {}
+  try { localStorage.setItem("mindex.department.assignees.v1", JSON.stringify(message)); } catch {}
+}
+function scheduleDepartmentTabRefresh() {
+  const sync = departmentTabSync;
+  if (!sync || sync.timer || !sync.pending.size) return;
+  sync.timer = setTimeout(() => { sync.timer = null; void refreshDepartmentTabs(); }, 200);
+}
+async function refreshDepartmentTabs() {
+  const sync = departmentTabSync;
+  if (!sync || sync.busy || !sync.pending.size) return;
+  const retry = (delay = 2000) => {
+    if (!sync.timer && sync.pending.size) sync.timer = setTimeout(() => { sync.timer = null; void refreshDepartmentTabs(); }, delay);
+  };
+  if (!canUseClientData() || document.hidden || state.calendarLoading || state.calendarCellSaves.size || departmentCalendarWrites.size
+    || state.saving || state.loading || isPresenterOutputWindowOpen() || state.presenter.outputPendingAt
+    || document.activeElement?.matches('input,textarea,select,[contenteditable="true"]')
+    || (["service", "presenter"].includes(state.module) && sundayEditSyncHasLocalDraft(state.selectedServiceId))) { retry(); return; }
+  sync.busy = true;
+  const client = state.client, project = state.config.url;
+  let retryDelay = 2000;
+  try {
+    for (const [calendarId, message] of [...sync.pending]) {
+      if (message.project !== project) { sync.pending.delete(calendarId); continue; }
+      const revision = sync.editRevision;
+      const {data, error} = await client.from("mindex_sunday_calendar").select("*").eq("id", calendarId);
+      if (error) throw error;
+      if (state.client !== client || state.config.url !== project) break;
+      if (revision !== sync.editRevision || sync.pending.get(calendarId) !== message) continue;
+      const calendar = data?.[0];
+      if (!calendar) { if (sync.pending.get(calendarId) === message) sync.pending.delete(calendarId); continue; }
+      let deferred = false;
+      const previous = state.calendarData.find(row => row.id === calendarId);
+      if (previous) {
+        for (const field of DEPARTMENT_ASSIGNEE_FIELDS) {
+          const cells = [...document.querySelectorAll("[data-cal-id][data-cal-field]")].filter(cell => cell.dataset.calId === calendarId && cell.dataset.calField === field);
+          if (state.calendarCellSaves.has(calendarCellSaveKey(calendarId, field)) || departmentCalendarWrites.has(`${calendarId}:${field}`)
+            || cells.some(cell => cell.contains(document.activeElement) || cell.classList.contains("is-save-error"))) { deferred = true; continue; }
+          previous[field] = calendar[field];
+          for (const cell of cells) { cell.textContent = calendar[field] || ""; cell.dataset.initialValue = calendar[field] || ""; }
+        }
+      } else state.calendarLoaded = false;
+      const ids = new Set([...message.serviceIds, ...state.services.filter(service => service.date === calendar.date
+        && ["children", "youth", "young-adult"].includes(worshipAppServiceTypeId(service.type_id))).map(service => service.id)]);
+      for (const id of ids) {
+        if (id === state.selectedServiceId && ["service", "presenter"].includes(state.module)) {
+          if (!await window.MINDEX_SERVICE_ENTRY?.check(id, undefined, { background: true })) deferred = true;
+        } else if (sundayEditSyncHasLocalDraft(id)) deferred = true;
+        else { state.loadedWorshipServiceIds.delete(id); state.loadedWorshipPresenterServiceIds.delete(id); presenterSlideBuildCache.delete(id); }
+      }
+      if (!deferred && sync.pending.get(calendarId) === message) sync.pending.delete(calendarId);
+    }
+  } catch { retryDelay = 15000; /* Retain the invalidation; never use cached message values. */ }
+  finally { sync.busy = false; retry(retryDelay); }
+}
+
 const departmentCalendarWrites = new Map();
 const DEPARTMENT_ASSIGNEE_FIELDS = new Set(["children_prayer", "youth_prayer", "youth_offering_prayer", "young_adult_prayer"]);
 function departmentAssigneeField(typeId, label) {
@@ -5479,6 +5576,7 @@ async function departmentCalendarSaveOnce(row, field, value, previousValue) {
   }
   sessionStorage.removeItem(key);
   adoptDepartmentCalendarReceipt(result.data.calendar);
+  publishDepartmentTabChange(result.data.calendar, request.requests.map(item => item.serviceId));
   // Invalidate only clean cached services; never overwrite an editor's drafts.
   for (const id of new Set(request.requests.map(item => item.serviceId))) {
     if (sundayEditSyncHasLocalDraft(id) || state.dirtyServiceElementIds.has(id) || state.dirtyServiceStructureIds.has(id)) continue;

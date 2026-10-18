@@ -69,15 +69,28 @@
 
     captureCleanFingerprint("service");
   }
-  async function check(serviceId, token = entryToken) {
+  async function check(serviceId, token = entryToken, { background = false } = {}) {
+    const focusedInput = () => background && document.activeElement?.matches('input,textarea,select,[contenteditable="true"]');
     if (token !== entryToken || !serviceId || busy || !state.client || !["service", "presenter"].includes(state.module)
-      || state.selectedServiceId !== serviceId || blockedReason()) return false;
+      || state.selectedServiceId !== serviceId || blockedReason() || focusedInput()) return false;
     const context = () => JSON.stringify([state.module, state.selectedServiceId, presenterViewServiceId()]);
     const before = context(), revision = editRevision, model = dirtyModuleFingerprint("service");
     busy = true;
     try {
       const snapshot = await fetchSnapshot(serviceId);
-      if (token !== entryToken || before !== context() || revision !== editRevision || model !== dirtyModuleFingerprint("service") || blockedReason()) return false;
+      const safe = () => token === entryToken && before === context() && revision === editRevision
+        && model === dirtyModuleFingerprint("service") && !blockedReason() && !focusedInput();
+      if (!safe()) return false;
+      if (background) {
+        const atomic = await worshipAtomicClient();
+        if (!safe() || atomic.pending(serviceId)) return false;
+        const aggregate = await atomic.read(serviceId, { adopt: safe });
+        if (!safe() || !aggregate?.service) return false;
+        snapshot.fullServices = [aggregate.service];
+        snapshot.sections = aggregate.sections; snapshot.elements = aggregate.elements;
+        const people = new Map(aggregate.elements.map(row => [row.id, row.person]));
+        snapshot.slides = snapshot.slides.map(row => people.has(row.element_id) ? { ...row, element_person: people.get(row.element_id) } : row);
+      }
       if (!snapshot.fullServices.length) return false;
       const viewport = captureDetailViewportSnapshot();
       applySnapshot(snapshot);
@@ -86,7 +99,7 @@
       return true;
     } catch (error) {
       console.error("[Service entry]", error);
-      if (token === entryToken && before === context()) showToast("최신 예배를 확인하지 못했어요. 현재 내용은 유지됩니다.", "error");
+      if (!background && token === entryToken && before === context()) showToast("최신 예배를 확인하지 못했어요. 현재 내용은 유지됩니다.", "error");
       return false;
     } finally { busy = false; }
   }

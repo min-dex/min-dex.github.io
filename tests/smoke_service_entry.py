@@ -37,6 +37,18 @@ try:
     check(state.worshipElements[0].config.formHint==='V2-C-V1-C','manual form');
     check(JSON.stringify(state.presenter)===presenter&&JSON.stringify(state.songs)===songs&&state.serviceMusic===music,'transport or song modified');
     check(!document.getElementById('refreshDbBtn'),'button remains');
+    // Background tab refresh adopts the same atomic revision as the visible model.
+    let duringAtomic=null;
+    const aggregate={revision:'2',service:{...rows.mindex_worship_services[0],title:'atomic fresh'},sections:rows.mindex_worship_sections,elements:rows.mindex_worship_elements,slides:[]};
+    state.client={rpc:async()=>{if(duringAtomic)duringAtomic();return {data:structuredClone(aggregate)}}};
+    check(await MINDEX_SERVICE_ENTRY.check(sid,undefined,{background:true}),'background refresh');
+    const atomic=await worshipAtomicClient();
+    check(atomic.baseline(sid).revision==='2'&&state.services[0].title==='atomic fresh','model/revision mismatch');
+    duringAtomic=()=>document.dispatchEvent(new Event('input'));aggregate.revision='3';aggregate.service.title='must defer';
+    check(await MINDEX_SERVICE_ENTRY.check(sid,undefined,{background:true})===false,'late input accepted');
+    check(atomic.baseline(sid).revision==='2'&&state.services[0].title==='atomic fresh','late input changed baseline');
+    duringAtomic=null;
+
     // Exercise actual tab activation with an isolated route renderer, no save or network writes.
     confirmSaveBeforeLeaving=async()=>true;syncActivePageTabState=()=>{};
     state.pageTabs=[{id:'tab-a',snapshot:{selectedServiceId:sid}},{id:'tab-b',snapshot:{selectedServiceId:'other'}}];state.pageTabIndex=0;
