@@ -1920,6 +1920,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 }
 .reference-editor-main {
   display: grid;
+  align-items: end;
   grid-template-columns: minmax(0, 1fr);
   gap: 7px;
 }
