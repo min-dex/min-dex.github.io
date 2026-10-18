@@ -3400,3 +3400,10 @@ remain untouched and are linked in the manual's sources.
 sections in its contents and body. New code must keep source order, distinguish
 absolute photo timing from slide anchors, preserve the music fade preference,
 and retain the worship-owned versus children-version-owned audio boundary.
+
+### Compact offering fields · 2026-10-18
+
+Offering cards at container widths of 550px and above place mode/title on one
+row and version/form/assignee on the next. Narrow cards retain wrapping; the
+shared choice/save toolbar and file editor remain unchanged. No save or data
+behavior changes.

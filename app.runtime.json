@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-timing-file-layout",
+  "version": "20261018-offering-compact-fields",
   "options": {
     "compress": false,
     "mangle": {

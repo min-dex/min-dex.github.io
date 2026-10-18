@@ -9033,3 +9033,14 @@ body[data-module="presenter"] .topbar-actions > .icon-btn { flex: 0 0 35px; widt
   .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-praise-input-mode-control,
   .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-edit-title { grid-column: 1 / -1; grid-row: auto; }
 }
+
+/* Medium offering cards use two input rows, independent of the fixed toolbar. */
+@container (min-width: 550px) {
+  .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-edit-title { grid-column: 2 / -1; }
+  .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-song-picker--linked { grid-column: 1; grid-row: 3; }
+  .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-form-hint.compact { grid-column: 2; grid-row: 3; }
+  .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor > .svc-presenter-input-field--assignee { grid-column: 3; grid-row: 3; }
+}
