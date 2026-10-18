@@ -3345,3 +3345,12 @@ Audio-led worship items expose `사진·타이밍 편집` in their item action r
 It opens the existing timing editor and focuses the photo section. Opening the
 shortcut does not save, mutate lyric starts, or change absolute/linked photo cues.
 The existing audio synchronization entry remains available.
+
+## Music-only topbar panel · 2026-10-18
+
+The topbar launcher and panel are named `음악 관리` with a music icon. They show
+only the selected music, playback/pause/stop, fade-stop preference and audio timing
+transport. Output status/return/stop are absent from this panel; screen selection
+and always-on-top controls live beside the existing lower presenter controls.
+Output and music lifecycles remain independent. This supersedes the combined
+송출·음악 launcher description above; saved worship/audio/photo timing is unchanged.

@@ -22,7 +22,7 @@ def main():
                       const check=(v,m)=>{if(!v)throw Error(m)};
                       const host=document.getElementById('globalPlaybackControls');
                       renderGlobalPlaybackControls();check(host.hidden,'idle transport shown');
-                      state.module='presenter';renderGlobalPlaybackControls();check(!host.hidden,'display setup unavailable before output');
+                      state.module='presenter';renderGlobalPlaybackControls();check(!host.hidden&&host.textContent.includes('선택된 음악이 없습니다.'),'idle music menu unavailable');
                       state.module='service';state.selectedServiceId='other';
                       state.services=[{id:'owner',type_id:'friday',title:'금요기도회 자율기도'},{id:'other',title:'다른 예배'}];
                       const audio={paused:true,currentTime:0,src:'',pause(){this.paused=true},play(){this.paused=false;return Promise.resolve()},removeAttribute(){this.src=''}};
@@ -36,10 +36,10 @@ def main():
                       await click('toggle');check(audio.paused&&audio.currentTime===42&&host.textContent.includes('일시정지'),'global pause');
                       await click('toggle');check(!audio.paused&&state.serviceMusic.ownerServiceId==='owner'&&audio.currentTime===42,'global resume changed owner');
                       state.presenter.serviceId='owner';state.presenter.outputWindow={closed:false,close(){this.closed=true}};
-                      renderLiveServiceReturnControl();check(host.textContent.includes('예배 송출 중'),'output indicator absent');
+                      renderLiveServiceReturnControl();check(!host.querySelector('[data-global-playback-action="output-stop"]'),'output controls leaked into music panel');
                       confirmSaveBeforeLeaving=async()=>false;
-                      await click('return');check(state.module==='home'&&state.selectedServiceId==='other','return bypassed dirty guard');
-                      await click('output-stop');check(!isPresenterOutputWindowOpen()&&!audio.paused,'output stop affected music');
+                      await returnToLiveService();check(state.module==='home'&&state.selectedServiceId==='other','return bypassed dirty guard');
+                      await runPresenterAction('stop','owner');check(!isPresenterOutputWindowOpen()&&!audio.paused,'output stop affected music');
                       await click('stop');check(audio.paused&&audio.currentTime===0&&host.textContent.includes('음악 정지'),'global stop');
                       await click('toggle');check(!audio.paused,'restart missing');
                       let finish;audio.play=()=>new Promise(r=>finish=r);runServiceMusicAction('stop',binding);
@@ -50,7 +50,7 @@ def main():
                       clearServiceMusicSyncTimer();return 'PASS navigation, owner controls, pause/resume/stop, pending cancellation and independent output stop';
                     }'''),flush=True)
                     launcher=page.locator('[popovertarget="globalPlaybackPanel"]').first
-                    assert launcher.locator('span').first.inner_text()=='송출·음악', repr(launcher.inner_text())
+                    assert launcher.locator('span').first.inner_text()=='음악 관리', repr(launcher.inner_text())
                     launcher.click()
                     panel=page.locator('#globalPlaybackPanel')
                     assert panel.is_visible()
@@ -62,8 +62,8 @@ def main():
                     assert fade.is_checked()
                     fade.uncheck()
                     assert page.evaluate("!state.serviceMusic.fadeStopEnabled && localStorage.getItem('mindex.music.fadeStop')==='false'")
-                    assert panel.get_by_role('button',name='예배 송출 종료').inner_text()=='송출 종료'
-                    assert panel.locator('[data-presenter-action="detect-screens"]').is_visible()
+                    assert panel.locator('[data-presenter-action], [data-presenter-always-on-top], [data-global-playback-action="return"], [data-global-playback-action="output-stop"]').count()==0
+                    assert page.evaluate("""()=>{const html=renderPresenterControlsTop(state.services[0],[],false,0);return html.includes('data-presenter-action="detect-screens"')&&html.includes('data-presenter-always-on-top')}""")
                     before=page.locator('#globalPlaybackControls').bounding_box()
                     page.evaluate('renderGlobalPlaybackControls()')
                     assert panel.is_visible()
@@ -105,6 +105,13 @@ def main():
                     page.wait_for_function('document.activeElement===document.querySelector(".global-playback-trigger")')
                     page.set_viewport_size({'width':1440,'height':900})
                     page.screenshot(path='/tmp/mindex-global-playback-'+engine+'.png')
+                    page.evaluate("""()=>{const host=document.createElement('aside');host.id='lower-output-fixture';host.className='svc-presenter-side-panel';host.style.cssText='position:fixed;bottom:0;left:0;width:280px;z-index:9999';host.innerHTML=renderPresenterControlsTop(state.services[0],[],false,0);document.body.append(host)}""")
+                    lower=page.locator('#lower-output-fixture')
+                    assert lower.locator('[data-presenter-action="detect-screens"]').is_visible()
+                    assert lower.locator('[data-presenter-always-on-top]').count()==1
+                    assert lower.evaluate('e=>e.scrollWidth<=e.clientWidth+2')
+                    lower.screenshot(path=f'/tmp/mindex-lower-output-{engine}.png')
+                    lower.evaluate('e=>e.remove()')
                     launcher.click()
                     fade.check()
                     page.reload()
