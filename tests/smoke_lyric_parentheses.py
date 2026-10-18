@@ -1,0 +1,83 @@
+import os
+os.environ["MINDEX_SMOKE_OFFLINE"]="1"
+"""Announcement-only typography, exact source retention and highlight overlap."""
+from smoke_app import launch_chromium, start_local_app_server, sync_playwright
+
+server,url=start_local_app_server()
+try:
+ with sync_playwright() as p:
+  for engine in ('chromium','webkit'):
+   browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
+   page=browser.new_page(viewport={'width':1440,'height':900})
+   page.add_init_script("Element.prototype.requestFullscreen=async()=>{};window.open=()=>null")
+   page.route('**/*supabase*/**',lambda r:r.abort())
+   page.goto(url+'?mindexSmokeRaw=1',wait_until='load')
+   page.wait_for_function("typeof renderPresenterHighlightedText === 'function' && typeof normalizeServiceTextHighlights === 'function' && typeof buildPresenterSlidesForServiceItem === 'function'")
+   print(engine,page.evaluate('''() => {
+    const check=(v,m)=>{if(!v)throw Error(m)};
+    const host=document.createElement('div');host.style.cssText='font-size:40px;background:#111;color:white;padding:30px';document.body.prepend(host);
+    const texts=['모임 안내 (오후 2시, 교육관)','안내(가족(어린이 포함)) 및 （별도 신청）','안내 (미완성','안내 <img src=x onerror=alert(1)> (문의 & 신청)','모임 (오후 2시) 안내'];
+    for(const text of texts) {
+     const slide={announcementItems:[{lines:[text]}],textHighlights:[{text:'오후 2시) 안내',color:'#ff0000',bold:true}]};
+     const snapshot=JSON.stringify(slide);
+     host.innerHTML=renderPresenterHighlightedText(text,slide);
+     check(host.textContent===text,'text changed');
+     check(!host.querySelector('img'),'unsafe HTML');
+     check(JSON.stringify(slide)===snapshot,'slide mutated');
+     check(!host.querySelector('.presenter-announcement-paren .presenter-announcement-paren'),'nested shrinking');
+     for(const span of host.querySelectorAll('.presenter-announcement-paren')) check(Math.abs(parseFloat(getComputedStyle(span).fontSize)/parseFloat(getComputedStyle(span.parentElement).fontSize)-.8)<.001,'ratio');
+     if(text.includes('미완성'))check(!host.querySelector('.presenter-announcement-paren'),'unmatched shrunk');
+     if(text==='모임 (오후 2시) 안내')check(host.querySelector('.presenter-text-highlight').textContent==='오후 2시) 안내','highlight split changed');
+     check(!renderPresenterHighlightedText(text,{textHighlights:slide.textHighlights}).includes('presenter-announcement-paren'),'other text shrunk');
+    }
+    for(const text of texts.concat(['할렐루야 주의 나라가 (눈먼 자는 눈을 뜨며)'])) {
+     const slide={type:'lyrics',elementType:'praise',text,textHighlights:[{text:'오후 2시) 안내',bold:true}]};
+     const before=JSON.stringify(slide);
+     for(const mode of ['presenter-output-root','presenter-output-root no-chromakey']) {
+      host.className=mode;host.innerHTML=renderPresenterSlideFrame(slide);
+      check(host.textContent.includes(text),'lyric text changed');
+      check(!host.querySelector('img'),'lyric HTML unsafe');
+      const spans=host.querySelectorAll('.presenter-lyric-paren');
+      if(!text.includes('미완성'))check(spans.length,'missing lyric parentheses');
+      check(!host.querySelector('.presenter-lyric-paren .presenter-lyric-paren'),'nested lyric shrink');
+      for(const span of spans)check(Math.abs(parseFloat(getComputedStyle(span).fontSize)/parseFloat(getComputedStyle(span.parentElement).fontSize)-.8)<.001,'lyric ratio');
+     }
+     check(JSON.stringify(slide)===before,'lyric source changed');
+     check(!renderPresenterHighlightedText(text,{type:'song-title',elementType:'praise'}).includes('presenter-lyric-paren'),'song title shrunk');
+     check(!renderPresenterHighlightedText(text,{type:'scripture',elementType:'scripture_body'}).includes('presenter-lyric-paren'),'scripture shrunk');
+    }
+    for(const type of ['young-adult','sunday-main']) {
+     const service={id:'ad-parenthesis',type_id:type};
+     const text='1. **모임** 안내 (오후 2시, 교육관)';
+     const item={id:'ad',label:'광고',raw_title:text,_worshipSectionKey:'announcements',memo:serializeServiceItemMemo({elementType:'body',inputMode:'text'})};
+     const before=JSON.stringify(item);
+     const slide=buildPresenterSlidesForServiceItem(item,service,0).find(x=>x.announcementItems?.length);
+     check(slide,'announcement slide missing');
+     host.className=type==='young-adult'?'presenter-output-root no-chromakey':'presenter-output-root';
+     host.innerHTML=renderPresenterSlideFrame(slide);
+     check(getComputedStyle(host.querySelector(".presenter-announcement-copy, .presenter-slide-text")).fontWeight==='600','output body weight '+type);
+     check(getComputedStyle(host.querySelector("strong")).fontWeight==='800','output emphasis weight '+type);
+     const paren=host.querySelector('.presenter-announcement-paren');check(paren,'output parentheses missing');
+     check(Math.abs(parseFloat(getComputedStyle(paren).fontSize)/parseFloat(getComputedStyle(paren.parentElement).fontSize)-.8)<.001,'output ratio '+type);
+     check(JSON.stringify(item)===before,'stored source changed');
+    }
+    const markdown='온세대 **월삭예배 (오후 8시)** <img src=x> **강조**';
+    host.innerHTML=renderPresenterHighlightedText(markdown,{announcementItems:[{lines:[markdown]}],textHighlights:[{text:'월삭예배 (오후 8시)',bold:true}]});
+    check(host.textContent==='온세대 월삭예배 (오후 8시) <img src=x> 강조','Markdown symbols leaked');
+    check(host.querySelector('strong')?.textContent.includes('월삭예배'),'bold missing');
+    check(host.querySelector('.presenter-announcement-paren strong')?.textContent==='(오후 8시)','paren/bold overlap');
+    check(!host.querySelector('img'),'Markdown HTML unsafe');
+    check(renderPresenterHighlightedText('**가사**',{}).includes('**가사**'),'Other text unexpectedly changed');
+    for(const mode of ['presenter-output-root','presenter-output-root no-chromakey']) {
+     host.className=mode;
+     host.innerHTML='<div class="presenter-liturgical-body-lines">전례문</div><div class="presenter-announcement-items"><div class="presenter-announcement-copy">일반 광고 <strong>강조</strong></div></div>';
+     check(getComputedStyle(host.querySelector('.presenter-liturgical-body-lines')).fontWeight==='500','liturgy weight '+mode);
+     check(getComputedStyle(host.querySelector('.presenter-announcement-copy')).fontWeight==='600','announcement base weight '+mode);
+     check(getComputedStyle(host.querySelector('strong')).fontWeight==='800','announcement bold weight '+mode);
+    }
+    return 'PASS 80% output, nested/fullwidth/unmatched pairs, escaping, overlapping highlights, unchanged source and other text';
+   }'''),flush=True)
+   page.evaluate(r"""()=>{document.body.innerHTML='<div class="presenter-output-root no-chromakey" style="position:fixed;inset:0;background:#123;color:white">'+renderPresenterSlideFrame({type:'lyrics',elementType:'praise',text:'할렐루야 주의 나라가 (눈먼 자는 눈을 뜨며)\n할렐루야 임하소서 (저는 자는 걷게 되리)'})+'</div>';}""")
+   page.screenshot(path=f'/tmp/lyric-parentheses-{engine}.png')
+   browser.close()
+finally: server.shutdown()

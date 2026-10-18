@@ -3308,3 +3308,8 @@ Single-element DB shortcuts sit beside the board element heading, independent of
 ## Editor button surfaces and save feedback · 2026-10-18
 
 Photo disclosure, audio upload and save actions share a 30px bordered field-surface button with hover and visible keyboard focus. DB remains the heading link. The per-item saved text is empty because success is already toasted; modified/saving/error feedback and busy disabling remain. Song-form photo placement remains functional and unchanged: it attaches a reference image to a specific progression group, unlike timed photo playback. No stored media, timing or production records are changed.
+
+
+## Lyric parenthetical text · 2026-10-18
+
+Paired ASCII/fullwidth parentheses in praise lyric slides, including the delimiters, render at 80% of adjacent text size in the shared output/thumbnail renderer. Nested pairs shrink once; incomplete pairs remain unchanged. Highlight ranges, source text, scripture and song titles are preserved. Announcement parenthesis behavior is unchanged.

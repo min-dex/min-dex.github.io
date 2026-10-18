@@ -1504,7 +1504,8 @@
 }
 
 /* Announcement asides share the authored text and emphasis at 80% size. */
-span.presenter-announcement-paren {
+span.presenter-announcement-paren,
+:is(.svc-slide-mini-output, .presenter-output-root) .presenter-slide--lyrics .presenter-slide-text span.presenter-lyric-paren {
   font-size: .8em;
   line-height: inherit;
   vertical-align: baseline;

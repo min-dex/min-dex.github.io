@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-editor-buttons",
+  "version": "20261018-lyric-parentheses",
   "options": {
     "compress": false,
     "mangle": {
