@@ -522,6 +522,14 @@ function presenterScoreImageSourcesForFormSequence(imageSources = [], scoreForms
     if (matchIndex >= 0) cursor = matchIndex + 1;
   });
   if (!selected.length) return { imageSources, scoreForms };
+  // The reviewed 163/166 score decks have a once-only opening page before V1.
+  // Verse selection must not drop that unlabelled introduction.
+  const opening = groups[0];
+  const openingUrl = String(opening?.sources?.[0]?.url || opening?.sources?.[0]?.src || "");
+  if (!opening?.target?.key && opening?.sources?.length === 1
+      && /(?:^|\/)assets\/hymn-scores\/(163|166)\/slide-01\.webp(?:[?#]|$)/.test(openingUrl)) {
+    selected.unshift(opening);
+  }
   return {
     imageSources: selected.flatMap((group) => group.sources),
     scoreForms: selected.flatMap((group) => group.forms),
@@ -631,18 +639,40 @@ function presenterFormPlanForServiceItem(version = {}, item, song = null) {
   const forms = normalizeForms(version.forms || []).filter((form) => normalizeLyricsForCopy(form.lyrics));
   const preset = presenterServiceItemFormPreset(version, item, song);
   const effectivePreset = presenterFormPresetWithAvailableForms(preset, forms);
-  if (!effectivePreset?.forms?.length) return { forms, warnings: [] };
+  if (!effectivePreset?.forms?.length) return { forms: presenterHymnOnceOnlyIntro(forms, version), warnings: [] };
   const resolved = resolvePresenterFormPresetSequence(forms, effectivePreset);
   const warnings = presenterMissingFormWarnings(resolved.missing, forms, effectivePreset);
   const omitUnlisted = presenterFormPresetShouldOmitUnlisted(effectivePreset);
   return {
-    forms: resolved.items.length
+    forms: presenterHymnOnceOnlyIntro(resolved.items.length
       ? omitUnlisted
         ? resolved.items
         : presenterFormsWithNoSourceOmissions(resolved.items, forms)
-      : forms,
+      : forms, version),
     warnings,
   };
+}
+
+function presenterHymnOnceOnlyIntro(forms = [], version = {}) {
+  // These reviewed editions return to the segno AFTER the opening alleluias.
+  // Work on the playback plan only; never rewrite saved units or form IDs.
+  const count = ({
+    "5bf20e2d-cb7e-5c2a-86ca-0a75acfdd7c0": 4, // 새찬송가 163
+    "7ab06cc7-99cf-5e67-b236-78a6758734e8": 3, // 새찬송가 166
+  })[version?.id];
+  if (!count) return forms;
+  const prefix = `${Array(count).fill("할렐루야").join(" ")}\n`;
+  let playedIntro = false;
+  return forms.map((form) => {
+    const target = normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form));
+    // Explicit A/B segments and user-edited wording are not inferred here.
+    if (target.type !== "verse" || target.group || target.variant || !String(form.lyrics || "").startsWith(prefix)) return form;
+    if (!playedIntro) {
+      playedIntro = true;
+      return form;
+    }
+    return { ...form, lyrics: form.lyrics.slice(prefix.length) };
+  });
 }
 
 function presenterServiceItemFormPreset(version = {}, item = {}, song = null, { includePlaybackFallback = true } = {}) {

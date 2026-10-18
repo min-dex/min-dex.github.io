@@ -3438,3 +3438,12 @@ Repeated forms after another block remain separate; ungrouped title/blank/media
 slides remain outside. Ten-pixel inset/gaps and an eight-pixel radius keep active
 rings visible. Slide objects, global indexes, navigation, output HTML and saves
 are unchanged. Group labels remain accessible without adding duplicate headings.
+
+
+## Reviewed hymn playback corrections · 2026-10-18
+
+- Score manifest 4 starts at its beginning, with the preceding duplicate ending removed.
+- Score manifest 570 retains one 12-page set; page 2 continues verse 1.
+- Score 106 pages 6/9 and 466 pages 6/9/12/15 continue their verse groups; false Verse 1 boundaries are removed.
+- The reviewed new-hymnal versions 163/166 include opening alleluias only once per lyric playback plan. The print segno follows the opening. This applies after verse selection, including repeated/reordered verses, using copies only. It never saves inferred forms or rewrites unit IDs/text, worship records or medley order. Other version IDs, explicitly segmented forms and edited nonmatching wording are untouched. Their score opening page is retained once when selecting verses.
+- 69/561 have shared endings stored as Chorus. This is an existing classification choice, not a demonstrated missing-lyric error; do not silently rename their referenced form IDs. 262/346 spelling-error claims and 628 melody/other-voice claim were withdrawn after visual review.
