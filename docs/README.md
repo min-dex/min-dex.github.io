@@ -33,7 +33,7 @@ stale document in the same change.
 ## Operational Runbooks
 
 - `audio-lyrics-sync-runbook.md`: 실제 음원 박자·가사 진입 기준 싱킹, 예배 저장,
-  전체 재생 검증과 완료 후 임시 파일 정리.
+  사진·타이밍 편집 바로가기, 음악 관리·페이드아웃 기본값, 전체 재생 검증과 임시 파일 정리.
 - `manuals/operations.md`: operator-facing Worship and Presenter procedure.
 - `monitor-operations.md`: read-only operations panel and access boundaries.
 - `supabase-capacity-maintenance.md`: conservative database capacity checks and
