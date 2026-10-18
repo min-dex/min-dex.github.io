@@ -2,11 +2,11 @@
 (() => {
   if (isPresenterOutputRoute()) return;
   const key='mindex.content.committed.v1',pending=new Map(),seen=new Set(),deletedNotices=new Set();
-  let channel,timer,busy=false,probing=false,edit=0;
+  let channel,busy=false,probing=false,edit=0;
   for(const event of ['input','change','pointerdown','keydown'])document.addEventListener(event,()=>edit++,true);
   const identity=m=>`${m.kind}:${m.kind==='scripture'?'all':m.recordId}`;
   const controller=()=>refs.detailPane?.querySelector('[data-bulletin-owner]')?.bulletinController;
-  function schedule(delay=200){if(!timer&&pending.size)timer=setTimeout(()=>{timer=null;void flush();},delay);}
+  const schedule=createLiveRefreshScheduler(pending,flush);
   function remember(id){seen.add(id);if(seen.size>256)seen.delete(seen.values().next().value);}
   function receive(m){
     if(!m||m.project!==state.config.url||typeof m.id!=='string'||!['song','bulletin','bulletin-template','service-list','references','service-settings','setlist-archive','scripture'].includes(m.kind)||typeof m.recordId!=='string'||!m.recordId||seen.has(m.id))return;
@@ -166,7 +166,6 @@
   window.addEventListener('storage',e=>{if(e.key===key&&e.newValue)try{receive(JSON.parse(e.newValue));}catch{}});
   function wake(){try{receive(JSON.parse(localStorage.getItem(key)||'null'));}catch{}schedule();void reconcile();}
   window.addEventListener('focus',wake);window.addEventListener('online',wake);document.addEventListener('visibilitychange',wake);
-  document.addEventListener('focusout',()=>schedule());
   setInterval(()=>void reconcile(),60000);
   window.MINDEX_CONTENT_LIVE={publish,receive,reconcile};
 })();

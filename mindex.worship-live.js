@@ -3,10 +3,8 @@
   if (isPresenterOutputRoute()) return;
   const key = 'mindex.worship.committed.v1';
   const pending = new Map(), seen = new Set();
-  let channel, timer, busy = false, probing = false;
-  function schedule(delay = 200) {
-    if (!timer && pending.size) timer = setTimeout(() => { timer = null; void flush(); }, delay);
-  }
+  let channel, busy = false, probing = false;
+  const schedule = createLiveRefreshScheduler(pending, flush);
   function receive(message) {
     if (!message || message.project !== state.config.url || typeof message.id !== 'string'
       || typeof message.serviceId !== 'string' || !message.serviceId || seen.has(message.id)) return;
@@ -75,7 +73,6 @@
   window.addEventListener('focus', wake);
   window.addEventListener('online', wake);
   document.addEventListener('visibilitychange', wake);
-  document.addEventListener('focusout', () => schedule());
   setInterval(() => { void reconcile(); }, 60000);
   window.MINDEX_WORSHIP_LIVE = { publish, receive, reconcile };
 })();

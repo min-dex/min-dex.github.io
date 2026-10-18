@@ -5443,11 +5443,29 @@ async function loadCalendarDataOnce({ silent = false } = {}) {
   }
 }
 
+// Coalesce bursts, but let a safe-state event bring a deferred read forward.
+// A failed read retains its backoff even if notifications keep arriving.
+function createLiveRefreshScheduler(pending, flush) {
+  let timer = null, due = 0, backoff = 0;
+  const schedule = (delay = 80) => {
+    if (!pending.size) return;
+    const now = Date.now();
+    if (delay >= 15000) backoff = now + delay;
+    const next = Math.max(now + delay, backoff);
+    if (timer && due <= next && due >= backoff) return;
+    clearTimeout(timer); due = next;
+    timer = setTimeout(() => { timer = null; void flush(); }, Math.max(0, next - now));
+  };
+  for (const event of ['focusout', 'pause', 'ended', 'close']) document.addEventListener(event, () => schedule(), true);
+  return schedule;
+}
+
 // Local and remote notifications contain identifiers only; committed values come from DB.
 let departmentTabSync = null;
 function initializeDepartmentTabSync() {
   if (departmentTabSync || isPresenterOutputRoute()) return;
-  const sync = departmentTabSync = { channel: null, pending: new Map(), timer: null, busy: false, seen: new Set(), editRevision: 0 };
+  const sync = departmentTabSync = { channel: null, pending: new Map(), busy: false, seen: new Set(), editRevision: 0 };
+  sync.schedule = createLiveRefreshScheduler(sync.pending, refreshDepartmentTabs);
   document.addEventListener("input", () => { sync.editRevision += 1; }, true);
   document.addEventListener("change", () => { sync.editRevision += 1; }, true);
   const receive = message => {
@@ -5476,7 +5494,6 @@ function initializeDepartmentTabSync() {
   };
   window.addEventListener("focus", wake);
   document.addEventListener("visibilitychange", wake);
-  document.addEventListener("focusout", () => scheduleDepartmentTabRefresh());
   window.addEventListener("online", wake);
 }
 function publishDepartmentTabChange(calendar, serviceIds = [], { calendarOnly = false } = {}) {
@@ -5551,17 +5568,11 @@ async function reconcileDepartmentRealtime() {
   } catch { /* Reconnect/focus and the low-frequency safety check retry read-only. */ }
   finally { sync.reconciling = false; }
 }
-function scheduleDepartmentTabRefresh() {
-  const sync = departmentTabSync;
-  if (!sync || sync.timer || !sync.pending.size) return;
-  sync.timer = setTimeout(() => { sync.timer = null; void refreshDepartmentTabs(); }, 200);
-}
+function scheduleDepartmentTabRefresh() { departmentTabSync?.schedule(); }
 async function refreshDepartmentTabs() {
   const sync = departmentTabSync;
   if (!sync || sync.busy || !sync.pending.size) return;
-  const retry = (delay = 2000) => {
-    if (!sync.timer && sync.pending.size) sync.timer = setTimeout(() => { sync.timer = null; void refreshDepartmentTabs(); }, delay);
-  };
+  const retry = (delay = 2000) => sync.schedule(delay);
   if (departmentRefreshBlocked()) { retry(); return; }
   sync.busy = true;
   const client = state.client, project = state.config.url;

@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-controller-form-colors",
+  "version": "20261019-controller-form-colors",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "14d79e927a7fbf8c6d98f57bf77d44075884ca0d07cafe454fe92797801c508e",
-  "runtime_sha256": "365ae20101d71bd3086b680ff0fa41481ebea3c520f44d2296635b016cf01b0c",
-  "source_bytes": 1514986,
-  "runtime_bytes": 1071509,
-  "source_gzip": 339131,
-  "runtime_gzip": 265689
+  "source_sha256": "66afcde3d1165f09a25a62a37fc4e442e987eb7cab295a876c8194ae7c7154df",
+  "runtime_sha256": "5f2ad92909f2336a77d282757c19f548d0f857219ba128790acabcca1045452c",
+  "source_bytes": 1515475,
+  "runtime_bytes": 1071678,
+  "source_gzip": 339414,
+  "runtime_gzip": 265804
 }
