@@ -4900,7 +4900,11 @@ body[data-theme="dark"] .service-week-card:hover {
   outline: none;
   padding: 8px;
 }
-.svc-item-note-grid select { height: 30px; }
+.svc-item-note-grid input:not([type="hidden"]),
+.svc-item-note-grid select {
+  height: 30px;
+  padding: 0 8px;
+}
 .svc-item-note-grid textarea {
   min-height: 78px;
   resize: vertical;

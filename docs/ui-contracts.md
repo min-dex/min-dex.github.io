@@ -573,3 +573,5 @@ and bulletin editor/preview in Chromium and WebKit; no service data is saved.
 - Reference-screen titles, attached-file names and site-link titles use internal placeholders without duplicated external captions. Retain explicit accessible names, values and persistence attributes; other field labels remain unchanged.
 
 - Link groups use an internal placeholder and explicit accessible name. Reference editor columns align at the bottom without stretching caption-free inputs; URL captions and focus indicators remain.
+
+- Worship item settings use 30px single-line input/select controls with identical vertical sizing. Keep field captions, focus styling and the existing multiline textarea sizing/resizing unchanged.

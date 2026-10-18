@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-department-live-devices",
+  "version": "20261018-settings-input-height",
   "options": {
     "compress": false,
     "mangle": {
