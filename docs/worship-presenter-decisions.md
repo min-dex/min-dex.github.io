@@ -3373,3 +3373,6 @@ Hymn, special and video offering editors share an in-card toolbar: choice at
 top left, one save action at top right. Variant inputs follow below; upload,
 background and audio tools follow the inputs. No duplicate outer-header save.
 Existing element commits and feedback remain unchanged.
+
+The empty offering video editor omits the redundant file-connection helper;
+name, file/link and upload controls remain, as does connected-file information.
