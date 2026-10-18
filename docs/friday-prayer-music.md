@@ -39,3 +39,11 @@
 ## Release Status
 
 Prepared and verified in an isolated worktree. The DB task confirmed that this UI-only release can proceed; its inactive atomic-storage changes in the root worktree are excluded.
+
+## Optional fade-out stop · 2026-10-18
+
+- 송출·음악의 `페이드아웃 정지` 체크박스는 기기 localStorage에 저장하며 기본은 해제다.
+- 명시적인 음악 정지만 1.2초 동안 음량을 줄인 뒤 처음 위치로 정지한다. 한 번 더 정지하면 즉시 멈춘다.
+- 일시정지, 준비 취소, 송출 종료와 음원 교체는 즉시 처리한다. 이전 fade timer는 취소되고 설정 볼륨을 복구한다.
+- fade 중 볼륨 조정은 남은 감쇠 비율에 적용한다. 체크 해제는 진행 중인 정지를 즉시 완료한다.
+- 운영 음원과 예배 저장 데이터는 변경하지 않는다.

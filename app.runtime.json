@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-controller-actions",
+  "version": "20261018-fade-stop",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "a027504606e362ddc46e9196ef4fb32c6f6489439e8e1edda052e88879c58ba9",
-  "runtime_sha256": "16680e0395329bd13051776fdd6e5384d1f97b26c8c2861d435b0d9e24c0ada1",
-  "source_bytes": 1475546,
-  "runtime_bytes": 1044161,
-  "source_gzip": 329650,
-  "runtime_gzip": 258201
+  "source_sha256": "7b42046c044ed63f138d177d2a5bd61eee7b1c67425163190318fedf3dd58f3c",
+  "runtime_sha256": "51b857746aff000e69d86f8b257ca906c00cd1e793beb9d74bf7663251e8dbf1",
+  "source_bytes": 1477886,
+  "runtime_bytes": 1045904,
+  "source_gzip": 330238,
+  "runtime_gzip": 258697
 }

@@ -8914,3 +8914,6 @@ html.ui-theme-switching:not(.presenter-output-document) *::after {
   .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link, .svc-song-picker--linked)) .svc-form-hint.compact { grid-column: 3; }
   .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link, .svc-song-picker--linked)) > .svc-board-subgroup-flow { grid-column: 4; }
 }
+
+.global-playback-fade-stop { display:flex; align-items:center; gap:8px; margin:10px 0; color:var(--ink-2); font-size:12px; cursor:pointer; }
+.global-playback-fade-stop input { margin:0; }
