@@ -3412,3 +3412,20 @@ Offering choice/save/background/upload buttons use a shared 30px height and
 70px minimum width, with 50px choices on narrow cards. Keep the choice/save
 positions stable. Praise assignee placeholders show the field name only, without
 a repeated inferred example; accessible names and saved assignees are unchanged.
+
+
+### Source English names and neutral department headings ·2026-10-18
+
+Preserve the Notion 예배 source's English names alongside Korean names, including
+Classic Components/Fourfold Order of Worship, all31 numbered department steps,
+11 nested offering/prayer entries, and3 Fellowship entries. Keep source order,
+parent-child grouping, song counts and meaningful department identifiers TOV/RIA.
+Remove descriptive heading adjectives 귀여운/꿈꾸는 and implementation commentary
+from operator prose. Retain actionable confirmation labels: preschool order,
+Friday scheduling/location and the main-service order must not be invented.
+
+The requested retirement covers only the Notion 예배 page, not the separate
+예배 운영 매뉴얼26-Q4 source. Retain source attribution and a private full source
+snapshot. Report the page ready for user-led removal only after source coverage,
+committed generated documentation, browser readability and production publication
+are verified. This change never deletes or edits Notion pages or worship data.

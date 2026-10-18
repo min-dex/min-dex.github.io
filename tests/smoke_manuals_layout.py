@@ -30,16 +30,58 @@ try:
               check(JSON.stringify(categories)===JSON.stringify(['예배 이해·부서별 순서','준비·진행·마무리','민덱스 사용법']),'manual category order');
               const find=title=>sections.find(s=>s.querySelector('h4').textContent===title);
               const expected={
-                '꿈꾸는 어린이부 예배':['사도신경 (신앙고백)','찬양 (4곡)','예배의 부름','성경봉독','설교','기도','봉헌','나래파송 (공동체고백)','주기도문','광고'],
-                'TOV 청소년부 예배':['준비','사도신경 (신앙고백)','찬양 (3곡)','대표기도','봉헌','성경봉독','설교','결단','주기도문','광고'],
-                'RIA 청년부 예배':['준비','사도신경 (신앙고백)','대표기도','찬양 (4곡)','성경봉독','설교','결단','봉헌','광고','파송찬양','축도']
+                "어린이부 예배": [
+                  "사도신경 Apostles’ Creed (신앙고백)",
+                  "찬양 Praise (4 songs)",
+                  "예배의 부름 (Opening)",
+                  "성경봉독 Scripture Reading",
+                  "설교 Sermon",
+                  "기도 Prayer",
+                  "봉헌 Offering",
+                  "나래파송 Sending (공동체고백)",
+                  "주기도문 Lord’s Prayer",
+                  "광고 Announcements"
+                ],
+                "TOV 청소년부 예배": [
+                  "준비 Preparation",
+                  "사도신경 Apostles’ Creed (신앙고백)",
+                  "찬양 Praise (3 songs)",
+                  "대표기도 Opening Prayer",
+                  "봉헌 Offering",
+                  "성경봉독 Scripture Reading",
+                  "설교 Sermon",
+                  "결단 Commitment",
+                  "주기도문 Lord’s Prayer",
+                  "광고 Announcements"
+                ],
+                "RIA 청년부 예배": [
+                  "준비 Preparation",
+                  "사도신경 Apostles’ Creed (신앙고백)",
+                  "대표기도 Opening Prayer",
+                  "찬양 Praise (4 songs)",
+                  "성경봉독 Scripture Reading",
+                  "설교 Sermon",
+                  "결단 Commitment",
+                  "봉헌 Offering",
+                  "광고 Announcements",
+                  "파송찬양 Sending Song",
+                  "축도 Benediction"
+                ]
               };
               for(const [title,order] of Object.entries(expected)){
                 const section=find(title);
                 check(JSON.stringify([...section.querySelectorAll('.manual-order > li > strong')].map(e=>e.textContent))===JSON.stringify(order),title+' source order changed');
                 check(section.textContent.includes('봉헌찬양')&&section.textContent.includes('봉헌기도'),'offering substeps missing');
               }
-              check(find('귀여운 유치부 예배').textContent.includes('확인 필요'),'unknown preschool order invented');
+              check(!refs.detailPane.textContent.includes('귀여운')&&!refs.detailPane.textContent.includes('꿈꾸는'),'department adjectives retained');
+              check(find('예배의 구성과 네 가지 흐름').textContent.includes('Classic Components')&&find('예배의 구성과 네 가지 흐름').textContent.includes('Fourfold Order of Worship'),'worship order English headings missing');
+              const children=find('어린이부 예배'),youth=find('TOV 청소년부 예배'),youngAdult=find('RIA 청년부 예배');
+              for(const section of [children,youth,youngAdult]){
+                check(section.textContent.includes('Offertory Song')&&section.textContent.includes('Prayer of Dedication')&&section.textContent.includes('Fellowship'),'nested English names missing');
+              }
+              check(youth.textContent.includes('Corporate Prayer')&&youth.textContent.includes('Prayer of Commitment'),'youth nested names missing');
+              check(youngAdult.textContent.includes('Corporate Prayer')&&youngAdult.textContent.includes('Song of Response')&&youngAdult.textContent.includes('Prayer of Commitment'),'young adult nested names missing');
+              check(find('유치부 예배').textContent.includes('확인 필요'),'unknown preschool order invented');
               check(find('순서와 미확인 항목의 적용 기준').textContent.includes('확인 필요'),'unconfirmed scheduling missing');
               check(find('음악 관리와 페이드아웃 정지').textContent.includes('기본 체크'),'fade default missing');
               check(find('사진·타이밍 편집').textContent.includes('0.2초'),'photo validation missing');

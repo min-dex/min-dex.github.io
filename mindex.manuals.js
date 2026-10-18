@@ -4,7 +4,7 @@ window.MINDEX_MANUALS = Object.freeze([
     "title": "예배 매뉴얼",
     "eyebrow": "예배와 방송",
     "summary": "예배 이해·부서별 순서부터 현장 준비와 민덱스 사용법까지",
-    "notice": "부서별 순서는 노션 원문을 유지한다. 실제 진행은 그 주의 확정 순서지와 현장 공지를 우선하고, 미확인 내용은 확인 필요로 남긴다.",
+    "notice": "부서별 기본 순서를 참고하되, 실제 진행은 그 주의 확정 순서지와 현장 공지를 우선한다. 미확인 내용은 확인 필요로 남긴다.",
     "sections": [
       {
         "category": "예배 이해·부서별 순서",
@@ -12,7 +12,7 @@ window.MINDEX_MANUALS = Object.freeze([
         "layout": "schedule",
         "groups": [
           {
-            "title": "고전적 예배 구성 요소",
+            "title": "고전적 예배 구성 요소 · Classic Components",
             "rows": [
               [
                 "1. 경배",
@@ -33,7 +33,7 @@ window.MINDEX_MANUALS = Object.freeze([
             ]
           },
           {
-            "title": "예배의 네 가지 흐름",
+            "title": "예배의 네 가지 흐름 · Fourfold Order of Worship",
             "rows": [
               [
                 "1. 모임",
@@ -54,57 +54,57 @@ window.MINDEX_MANUALS = Object.freeze([
             ]
           }
         ],
-        "note": "두 표현은 원문 구분을 유지했다. 이 분류에 맞추려고 부서별 순서를 재배열하지 않는다. 실제 진행은 그 주의 확정 순서지를 따른다."
+        "note": "예배의 두 분류를 구분해 참고한다. 부서별 순서를 이 분류에 맞춰 재배열하지 않으며, 실제 진행은 그 주의 확정 순서지를 따른다."
       },
       {
         "category": "예배 이해·부서별 순서",
-        "title": "귀여운 유치부 예배",
+        "title": "유치부 예배",
         "items": [
-          "확인 필요: 노션 원문에 순서가 비어 있다. 담당자에게 현재 예배 순서와 찬양 곡 수를 확인한 뒤 보완한다."
+          "확인 필요: 담당자에게 현재 유치부 예배 순서와 찬양 곡 수를 확인한 뒤 보완한다."
         ]
       },
       {
         "category": "예배 이해·부서별 순서",
-        "title": "꿈꾸는 어린이부 예배",
+        "title": "어린이부 예배",
         "layout": "order",
         "steps": [
           {
-            "title": "사도신경 (신앙고백)"
+            "title": "사도신경 Apostles’ Creed (신앙고백)"
           },
           {
-            "title": "찬양 (4곡)"
+            "title": "찬양 Praise (4 songs)"
           },
           {
-            "title": "예배의 부름"
+            "title": "예배의 부름 (Opening)"
           },
           {
-            "title": "성경봉독"
+            "title": "성경봉독 Scripture Reading"
           },
           {
-            "title": "설교"
+            "title": "설교 Sermon"
           },
           {
-            "title": "기도"
+            "title": "기도 Prayer"
           },
           {
-            "title": "봉헌",
+            "title": "봉헌 Offering",
             "items": [
-              "봉헌찬양",
-              "봉헌기도"
+              "봉헌찬양 Offertory Song",
+              "봉헌기도 Prayer of Dedication"
             ]
           },
           {
-            "title": "나래파송 (공동체고백)"
+            "title": "나래파송 Sending (공동체고백)"
           },
           {
-            "title": "주기도문"
+            "title": "주기도문 Lord’s Prayer"
           },
           {
-            "title": "광고"
+            "title": "광고 Announcements"
           }
         ],
         "items": [
-          "교제: 반별 모임"
+          "교제 Fellowship (반별 모임)"
         ]
       },
       {
@@ -113,48 +113,48 @@ window.MINDEX_MANUALS = Object.freeze([
         "layout": "order",
         "steps": [
           {
-            "title": "준비"
+            "title": "준비 Preparation"
           },
           {
-            "title": "사도신경 (신앙고백)"
+            "title": "사도신경 Apostles’ Creed (신앙고백)"
           },
           {
-            "title": "찬양 (3곡)",
+            "title": "찬양 Praise (3 songs)",
             "items": [
-              "통성기도"
+              "통성기도 Corporate Prayer"
             ]
           },
           {
-            "title": "대표기도"
+            "title": "대표기도 Opening Prayer"
           },
           {
-            "title": "봉헌",
+            "title": "봉헌 Offering",
             "items": [
-              "봉헌찬양",
-              "봉헌기도"
+              "봉헌찬양 Offertory Song",
+              "봉헌기도 Prayer of Dedication"
             ]
           },
           {
-            "title": "성경봉독"
+            "title": "성경봉독 Scripture Reading"
           },
           {
-            "title": "설교"
+            "title": "설교 Sermon"
           },
           {
-            "title": "결단",
+            "title": "결단 Commitment",
             "items": [
-              "결단기도"
+              "결단기도 Prayer of Commitment"
             ]
           },
           {
-            "title": "주기도문"
+            "title": "주기도문 Lord’s Prayer"
           },
           {
-            "title": "광고"
+            "title": "광고 Announcements"
           }
         ],
         "items": [
-          "교제: 반별 모임"
+          "교제 Fellowship (반별 모임)"
         ]
       },
       {
@@ -163,62 +163,62 @@ window.MINDEX_MANUALS = Object.freeze([
         "layout": "order",
         "steps": [
           {
-            "title": "준비"
+            "title": "준비 Preparation"
           },
           {
-            "title": "사도신경 (신앙고백)"
+            "title": "사도신경 Apostles’ Creed (신앙고백)"
           },
           {
-            "title": "대표기도"
+            "title": "대표기도 Opening Prayer"
           },
           {
-            "title": "찬양 (4곡)",
+            "title": "찬양 Praise (4 songs)",
             "items": [
-              "통성기도"
+              "통성기도 Corporate Prayer"
             ]
           },
           {
-            "title": "성경봉독"
+            "title": "성경봉독 Scripture Reading"
           },
           {
-            "title": "설교"
+            "title": "설교 Sermon"
           },
           {
-            "title": "결단",
+            "title": "결단 Commitment",
             "items": [
-              "결단찬양",
-              "결단기도"
+              "결단찬양 Song of Response",
+              "결단기도 Prayer of Commitment"
             ]
           },
           {
-            "title": "봉헌",
+            "title": "봉헌 Offering",
             "items": [
-              "봉헌찬양",
-              "봉헌기도"
+              "봉헌찬양 Offertory Song",
+              "봉헌기도 Prayer of Dedication"
             ]
           },
           {
-            "title": "광고"
+            "title": "광고 Announcements"
           },
           {
-            "title": "파송찬양"
+            "title": "파송찬양 Sending Song"
           },
           {
-            "title": "축도"
+            "title": "축도 Benediction"
           }
         ],
         "items": [
-          "교제: 셀 모임"
+          "교제 Fellowship (셀 모임)"
         ]
       },
       {
         "category": "예배 이해·부서별 순서",
         "title": "순서와 미확인 항목의 적용 기준",
         "items": [
-          "부서별 순서와 찬양 곡 수는 노션 「예배」 원문의 기록이다. 매주 순서지와 대조해 사용한다.",
+          "부서별 순서와 찬양 곡 수는 기본 기록이다. 매주 순서지와 대조해 사용한다.",
           "확인 필요: 유치부 순서, 금요예배의 주차별 실제 편성 및 본당·베데스다홀 사용 장소.",
-          "주일 본예배 전체 순서는 이번 원문에 없다. 그 주 주보·순서지로 확인하며 교육부서 순서로 대신하지 않는다.",
-          "현장 변경은 해당 예배에서 조정한다. 이 매뉴얼을 읽는 것만으로 예배 순서나 템플릿이 바뀌지 않는다."
+          "주일 본예배 전체 순서는 그 주 주보·순서지로 확인한다. 교육부서 순서로 대신하지 않는다.",
+          "현장 변경은 해당 예배에서 조정한 뒤 저장한다."
         ]
       },
       {
