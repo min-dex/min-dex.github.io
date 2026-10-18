@@ -4154,12 +4154,12 @@ async function worshipAtomicClient() {
     const promise = import(`./mindex.worship-atomic-client.mjs?v=${release}`).then(({ createWorshipAtomicClient }) =>
       createWorshipAtomicClient({ rpc: async (name, args) => {
         const result = await client.rpc(name, args);
-        if (!result.error && result.data && args?.req?.serviceId
+        if (client === state.client && !result.error && result.data && args?.req?.serviceId
           && ["save_worship_service_v1", "create_worship_service_v1", "delete_worship_service_v1"].includes(name)
           && typeof result.data.committedRevision === "string") {
           window.MINDEX_WORSHIP_LIVE?.publish(args.req.serviceId);
         }
-        if (!result.error && result.data?.calendar) {
+        if (client === state.client && !result.error && result.data?.calendar) {
           adoptDepartmentCalendarReceipt(result.data.calendar);
           publishDepartmentTabChange(result.data.calendar, [args.req.serviceId]);
         }

@@ -32,7 +32,7 @@
     let retry = 2000;
     try {
       for (const [id, message] of [...pending]) {
-        if (message.project !== state.config.url) { pending.delete(id); continue; }
+        if (message.project !== state.config.url) { if (pending.get(id) === message) pending.delete(id); continue; }
         let done = false;
         if (id === state.selectedServiceId && ['service', 'presenter'].includes(state.module)) {
           done = await window.MINDEX_SERVICE_ENTRY.check(id, undefined, { background: true });
