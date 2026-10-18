@@ -36,7 +36,19 @@ try:
    for width in [320,700,1100]:
     page.set_viewport_size({'width':width,'height':900})
     for theme in ['dark','light']:
-     page.evaluate('(theme)=>applyTheme(theme)',theme)
+     page.evaluate('(theme)=>{applyTheme(theme);updatePresenterBoardBlockBackgrounds(document)}',theme)
+     page.evaluate('''()=>{
+       const grid=document.getElementById('blocks');
+       const baseline=grid.cloneNode(true); baseline.id='baseline';
+       for(const block of baseline.querySelectorAll('.svc-board-slide-block')) block.replaceWith(...block.querySelectorAll(':scope > .svc-slide-thumb-wrap'));
+       grid.after(baseline);
+       const boxes=root=>{const origin=root.getBoundingClientRect();return [...root.querySelectorAll('.svc-slide-thumb-wrap')].map(e=>{const r=e.getBoundingClientRect();return [r.x-origin.x,r.y-origin.y,r.width,r.height]})};
+       const actual=boxes(grid), original=boxes(baseline);
+       if(actual.some((box,i)=>box.some((v,j)=>Math.abs(v-original[i][j])>0.1)))throw Error('original grid geometry changed');
+       baseline.remove();
+       const backgrounds=[...grid.querySelectorAll('.svc-board-block-background')];
+       if(backgrounds.length<6 || backgrounds.some(e=>getComputedStyle(e).position!=='absolute'||getComputedStyle(e).pointerEvents!=='none'))throw Error('background enters layout or intercepts clicks');
+     }''')
      assert page.evaluate('''()=>[...document.querySelectorAll('.svc-board-grid,.svc-board-slide-block')].every(e=>e.scrollWidth<=e.clientWidth+1)'''),(engine,width,theme)
      if width==700:page.screenshot(path=f'/tmp/mindex-slide-blocks-{engine}-{theme}.png')
    browser.close()
