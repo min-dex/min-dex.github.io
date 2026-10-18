@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-scripture-live",
+  "version": "20261018-hymn223-edge",
   "options": {
     "compress": false,
     "mangle": {
