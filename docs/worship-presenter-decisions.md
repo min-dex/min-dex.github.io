@@ -3354,3 +3354,9 @@ transport. Output status/return/stop are absent from this panel; screen selectio
 and always-on-top controls live beside the existing lower presenter controls.
 Output and music lifecycles remain independent. This supersedes the combined
 송출·음악 launcher description above; saved worship/audio/photo timing is unchanged.
+
+### Fade-stop default · 2026-10-18
+
+`페이드아웃 정지` defaults to checked when no device preference exists. Explicit
+on/off choices remain in `mindex.music.fadeStop` and survive reload. The fade
+envelope, immediate stop after opt-out, and worship/lyric/photo timing are unchanged.

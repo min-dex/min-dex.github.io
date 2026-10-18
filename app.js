@@ -796,7 +796,7 @@ const state = {
     repeatAllowed: true,
     playing: false,
     volumeLevel: 3,
-    fadeStopEnabled: safeStorageGet("local", "mindex.music.fadeStop", "false") === "true",
+    fadeStopEnabled: safeStorageGet("local", "mindex.music.fadeStop", "true") === "true",
     fadeStop: null,
     intentionalPauseUntil: 0,
     resumeTimer: null,

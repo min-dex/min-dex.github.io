@@ -20,6 +20,8 @@ def main():
                     page.wait_for_function("typeof renderGlobalPlaybackControls==='function' && !document.body.classList.contains('ui-booting')")
                     print(engine,page.evaluate('''async()=>{
                       const check=(v,m)=>{if(!v)throw Error(m)};
+                      check(state.serviceMusic.fadeStopEnabled,'new profile must default to fade stop');
+                      state.serviceMusic.fadeStopEnabled=false; // Immediate-stop transport cases; fade envelope has its own unit coverage.
                       const host=document.getElementById('globalPlaybackControls');
                       renderGlobalPlaybackControls();check(host.hidden,'idle transport shown');
                       state.module='presenter';renderGlobalPlaybackControls();check(!host.hidden&&host.textContent.includes('선택된 음악이 없습니다.'),'idle music menu unavailable');
@@ -49,13 +51,15 @@ def main():
                       state.presenter.outputWindow={closed:false,close(){this.closed=true}};renderGlobalPlaybackControls();
                       clearServiceMusicSyncTimer();return 'PASS navigation, owner controls, pause/resume/stop, pending cancellation and independent output stop';
                     }'''),flush=True)
+                    page.evaluate('state.serviceMusic.fadeStopEnabled=true;renderGlobalPlaybackControls()')
                     launcher=page.locator('[popovertarget="globalPlaybackPanel"]').first
                     assert launcher.locator('span').first.inner_text()=='음악 관리', repr(launcher.inner_text())
                     launcher.click()
                     panel=page.locator('#globalPlaybackPanel')
                     assert panel.is_visible()
                     fade=panel.get_by_label('페이드아웃 정지', exact=True)
-                    assert not fade.is_checked()
+                    assert fade.is_checked()
+                    fade.uncheck()
                     fade.check()
                     assert page.evaluate("state.serviceMusic.fadeStopEnabled && localStorage.getItem('mindex.music.fadeStop')==='true'")
                     page.evaluate('renderGlobalPlaybackControls()')
@@ -117,6 +121,10 @@ def main():
                     page.reload()
                     page.wait_for_function("typeof state==='object' && !document.body.classList.contains('ui-booting')")
                     assert page.evaluate('state.serviceMusic.fadeStopEnabled'), 'device preference lost on reload'
+                    page.evaluate("localStorage.setItem('mindex.music.fadeStop','false')")
+                    page.reload()
+                    page.wait_for_function("typeof state==='object' && !document.body.classList.contains('ui-booting')")
+                    assert not page.evaluate('state.serviceMusic.fadeStopEnabled'), 'explicit opt-out lost on reload'
                 finally:browser.close()
     finally:server.shutdown();server.server_close()
 
