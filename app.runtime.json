@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-service-entry-draft-guard",
+  "version": "20261018-photo-editor-shortcut",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "836db58b311f1f83d87e66fc572f05a01656c79bab04cb2d1d3beeb8b6800de4",
-  "runtime_sha256": "6f17daddfe78fe85daebcd8303f84a67c5c62803e4e9d7bffb9df45eb1f52a4b",
-  "source_bytes": 1482323,
-  "runtime_bytes": 1049048,
-  "source_gzip": 331228,
-  "runtime_gzip": 259493
+  "source_sha256": "f194f498406907e485a04210bbbc874f0de5b7d932e30475457d6c649433eb3a",
+  "runtime_sha256": "0ecdef041ab557a1098c738481cc0ee426cec76f2bf9f50683c4ab7c99ad0af0",
+  "source_bytes": 1482772,
+  "runtime_bytes": 1049424,
+  "source_gzip": 331309,
+  "runtime_gzip": 259555
 }

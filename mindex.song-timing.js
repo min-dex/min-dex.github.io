@@ -580,7 +580,7 @@
       </fieldset>
       <div class="song-timing-record"><button type="button" class="btn secondary" data-timing-next>다음 장 전환 기록</button><span data-timing-next-label></span></div>
       <div class="song-timing-pages">${slides.map((slide, i) => `<div class="song-timing-row"><label>${slide.formBackgroundImage ? `<img class="song-timing-photo" src="${escapeAttr(slide.formBackgroundImage)}" alt="${i + 1}장 배경 사진">` : ''}${i + 1}장 · ${formLabels.get(slide.formKey) ? escapeHtml(formLabels.get(slide.formKey)) + ' · ' : ''}${escapeHtml(slide.text || '빈 화면')}<input aria-label="${i + 1}장 시작 초" type="number" min="0" step="0.1" data-timing-start="${i}" value="${draft.starts[i] ?? ''}" placeholder="초"></label><button type="button" class="btn secondary" data-timing-stamp="${i}">현재 시각 기록</button><button type="button" class="btn secondary" data-timing-nudge="${i}" data-delta="-0.2" aria-label="${i+1}장 0.2초 앞당기기">−0.2초</button><button type="button" class="btn secondary" data-timing-nudge="${i}" data-delta="0.2" aria-label="${i+1}장 0.2초 늦추기">+0.2초</button></div>`).join('')}</div>
-      ${serviceTiming ? `<fieldset><legend>사진 별도 자동 전환</legend>
+      ${serviceTiming ? `<fieldset data-photo-section tabindex="-1"><legend>사진 별도 자동 전환</legend>
         <p>사진을 원하는 음원 시각 또는 가사 슬라이드에 붙이세요. 가사 구간은 하단 자막, 간주는 사진만 나옵니다.</p>
         <label>사진 선택 <input type="file" accept="image/*" multiple data-timing-photos></label>
         <div data-photo-editor></div>
@@ -929,6 +929,13 @@
     const playButton = e.target.closest('[data-song-timing-play]');
     if (playButton) { e.preventDefault(); void play(playButton.dataset.serviceId, playButton.dataset.elementId); return; }
     const button = e.target.closest('[data-song-timing-open]');
-    if (button) { e.preventDefault(); void open(button.dataset.serviceId, button.dataset.elementId).catch(error => showToast(error.message, 'error')); }
+    if (button) {
+      e.preventDefault();
+      void open(button.dataset.serviceId, button.dataset.elementId).then(() => {
+        if (button.dataset.songTimingFocus !== 'photos') return;
+        const section=document.querySelector('[data-song-timing-dialog] [data-photo-section]');
+        section?.focus({preventScroll:true});section?.scrollIntoView({block:'start'});
+      }).catch(error => showToast(error.message, 'error'));
+    }
   });
 })(globalThis);
