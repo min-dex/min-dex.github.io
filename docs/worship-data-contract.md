@@ -978,8 +978,14 @@ notifications with a storage-event fallback and read fresh DB values. Calendar
 cells update in place. Clean worship editors refresh their snapshot and atomic
 revision together. Focused inputs, drafts, saves and live output defer refresh;
 queued work retries after editing/output settles. Notifications never carry
-assignee names or authorize a write. Different browser profiles/devices are not
-covered by this local channel; stale writes still fail instead of overwriting.
+assignee names or authorize a write. Supabase Realtime Broadcast carries the same identifier-only commit notification
+across browser profiles/devices. No publication, DB permissions or data changes
+are needed. One channel per app client is replaced on connection changes.
+Reconnect/focus and a visible, idle 60-second safety check compare only four
+assignee fields for loaded calendar dates or the selected service date, recovering
+missed notifications. Hidden/editing/saving/output sessions defer these reads.
+This scope is linked department assignees, not all app data. Both peers must load
+the new release for immediate broadcast; stale writes retain the CAS guard.
 
 Legacy direct updates of these four calendar fields are rejected. Duplicate
 same-department services are supported by calendar batch edits; a direct worship

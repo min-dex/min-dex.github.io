@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-reference-alignment",
+  "version": "20261018-department-live-devices",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "6a259395b38d6be1031d0b745c27e2694d013f90f0dc11e38e5507af473510eb",
-  "runtime_sha256": "713da4b360d4826502f5238dcd209d1868a2d6161a1876a16a64fda2c4af7a6c",
-  "source_bytes": 1501724,
-  "runtime_bytes": 1062597,
-  "source_gzip": 335881,
-  "runtime_gzip": 263181
+  "source_sha256": "31149e98c1e6dea0547ac724b47b55ba5c79536834f50b6e53c01d97105715e5",
+  "runtime_sha256": "f737d2b589600527f97a38945cc89a1c0f216a72884b5e8f735706b6bf4bd460",
+  "source_bytes": 1504787,
+  "runtime_bytes": 1064717,
+  "source_gzip": 336596,
+  "runtime_gzip": 263742
 }

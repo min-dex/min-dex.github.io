@@ -5435,7 +5435,7 @@ async function loadCalendarDataOnce({ silent = false } = {}) {
   }
 }
 
-// Same-origin tab notifications contain identifiers only; committed values come from DB.
+// Local and remote notifications contain identifiers only; committed values come from DB.
 let departmentTabSync = null;
 function initializeDepartmentTabSync() {
   if (departmentTabSync || isPresenterOutputRoute()) return;
@@ -5452,12 +5452,17 @@ function initializeDepartmentTabSync() {
     sync.pending.set(message.calendarId, { ...message, serviceIds: [...new Set([...(previous?.serviceIds || []), ...message.serviceIds])] });
     scheduleDepartmentTabRefresh();
   };
+  sync.receive = receive;
+  connectDepartmentRealtime();
+  setInterval(() => { connectDepartmentRealtime(); void reconcileDepartmentRealtime(); }, 60000);
   try { sync.channel = new BroadcastChannel("mindex.department.assignees.v1"); sync.channel.onmessage = event => receive(event.data); } catch {}
   window.addEventListener("storage", event => {
     if (event.key !== "mindex.department.assignees.v1" || !event.newValue) return;
     try { receive(JSON.parse(event.newValue)); } catch {}
   });
   const wake = () => {
+    connectDepartmentRealtime();
+    void reconcileDepartmentRealtime();
     try { receive(JSON.parse(localStorage.getItem("mindex.department.assignees.v1") || "null")); } catch {}
     scheduleDepartmentTabRefresh();
   };
@@ -5472,8 +5477,60 @@ function publishDepartmentTabChange(calendar, serviceIds = []) {
   const message = { id: createUuid(), project: state.config.url, calendarId: calendar.id, serviceIds };
   if (departmentTabSync) departmentTabSync.editRevision += 1;
   departmentTabSync?.seen.add(message.id);
+  connectDepartmentRealtime();
+  try { void departmentTabSync?.remote?.send({ type: "broadcast", event: "committed", payload: message }).catch(() => {}); } catch {}
   try { departmentTabSync?.channel?.postMessage(message); } catch {}
   try { localStorage.setItem("mindex.department.assignees.v1", JSON.stringify(message)); } catch {}
+}
+function departmentRefreshBlocked() {
+  return !canUseClientData() || document.hidden || state.calendarLoading || state.calendarCellSaves.size || departmentCalendarWrites.size
+    || state.saving || state.loading || isPresenterOutputWindowOpen() || state.presenter.outputPendingAt
+    || document.activeElement?.matches('input,textarea,select,[contenteditable="true"]')
+    || (["service", "presenter"].includes(state.module) && sundayEditSyncHasLocalDraft(state.selectedServiceId));
+}
+function connectDepartmentRealtime() {
+  const sync = departmentTabSync;
+  if (!sync) return;
+  const client = canUseClientData() ? state.client : null;
+  if (sync.remoteClient === client) return;
+  if (sync.remote) { try { void sync.remoteClient.removeChannel(sync.remote).catch(() => {}); } catch {} }
+  sync.remote = null; sync.remoteClient = client;
+  if (!client?.channel) return;
+  try {
+    const project = state.config.url;
+    const channel = client.channel("mindex.department.assignees.v1", { config: { broadcast: { ack: true, self: false } } });
+    sync.remote = channel;
+    channel.on("broadcast", { event: "committed" }, ({ payload }) => {
+      if (sync.remote === channel && state.client === client && state.config.url === project) sync.receive(payload);
+    }).subscribe(status => {
+      if (sync.remote === channel && status === "SUBSCRIBED") void reconcileDepartmentRealtime();
+    });
+  } catch { sync.remoteClient = null; }
+}
+async function reconcileDepartmentRealtime() {
+  const sync = departmentTabSync;
+  if (!sync || sync.reconciling || departmentRefreshBlocked() || !["calendar", "service", "presenter"].includes(state.module)) return;
+  // A small four-field projection catches missed events, without fetching full worship documents.
+  const dates = state.module === "calendar" ? [...new Set(state.calendarData.map(row => row.date).filter(Boolean))]
+    : [state.services.find(row => row.id === state.selectedServiceId)?.date].filter(Boolean);
+  if (!dates.length) return;
+  sync.reconciling = true;
+  const client = state.client, project = state.config.url, revision = sync.editRevision;
+  try {
+    for (let offset = 0; offset < dates.length; offset += 100) {
+      const { data, error } = await client.from("mindex_sunday_calendar")
+        .select("id,date,children_prayer,youth_prayer,youth_offering_prayer,young_adult_prayer").in("date", dates.slice(offset, offset + 100));
+      if (error) throw error;
+      if (state.client !== client || state.config.url !== project || revision !== sync.editRevision || departmentRefreshBlocked()) return;
+      for (const row of data || []) {
+        const previous = state.calendarData.find(item => item.id === row.id);
+        if (!previous || [...DEPARTMENT_ASSIGNEE_FIELDS].some(field => (previous[field] || "") !== (row[field] || ""))) {
+          sync.receive({ id: createUuid(), project, calendarId: row.id, serviceIds: [] });
+        }
+      }
+    }
+  } catch { /* Reconnect/focus and the low-frequency safety check retry read-only. */ }
+  finally { sync.reconciling = false; }
 }
 function scheduleDepartmentTabRefresh() {
   const sync = departmentTabSync;
@@ -5486,10 +5543,7 @@ async function refreshDepartmentTabs() {
   const retry = (delay = 2000) => {
     if (!sync.timer && sync.pending.size) sync.timer = setTimeout(() => { sync.timer = null; void refreshDepartmentTabs(); }, delay);
   };
-  if (!canUseClientData() || document.hidden || state.calendarLoading || state.calendarCellSaves.size || departmentCalendarWrites.size
-    || state.saving || state.loading || isPresenterOutputWindowOpen() || state.presenter.outputPendingAt
-    || document.activeElement?.matches('input,textarea,select,[contenteditable="true"]')
-    || (["service", "presenter"].includes(state.module) && sundayEditSyncHasLocalDraft(state.selectedServiceId))) { retry(); return; }
+  if (departmentRefreshBlocked()) { retry(); return; }
   sync.busy = true;
   const client = state.client, project = state.config.url;
   let retryDelay = 2000;
@@ -5500,7 +5554,7 @@ async function refreshDepartmentTabs() {
       const {data, error} = await client.from("mindex_sunday_calendar").select("*").eq("id", calendarId);
       if (error) throw error;
       if (state.client !== client || state.config.url !== project) break;
-      if (revision !== sync.editRevision || sync.pending.get(calendarId) !== message) continue;
+      if (departmentRefreshBlocked() || revision !== sync.editRevision || sync.pending.get(calendarId) !== message) continue;
       const calendar = data?.[0];
       if (!calendar) { if (sync.pending.get(calendarId) === message) sync.pending.delete(calendarId); continue; }
       let deferred = false;
