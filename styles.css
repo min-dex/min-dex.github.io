@@ -8986,3 +8986,36 @@ body[data-module="presenter"] .topbar-actions > .icon-btn { flex: 0 0 35px; widt
 .service-offering-modes .btn[aria-pressed="true"] {
   color: var(--accent); border-color: var(--accent);
 }
+
+/* Offering variants keep their selection and commit controls in one stable row. */
+.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor {
+  display: grid; grid-template-columns: minmax(0, 180px) minmax(0, 1fr); gap: 10px; align-items: start;
+}
+.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor > *,
+.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-edit-title,
+.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-song-picker--linked,
+.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-form-hint.compact,
+.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-praise-input-mode-control,
+.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor > .svc-presenter-input-field--assignee {
+  grid-column: 1 / -1; grid-row: auto; min-width: 0; max-width: 100%; width: 100%;
+}
+.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-praise-input-mode-control { grid-column: 1; grid-row: 2; }
+.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-edit-title { grid-column: 2; grid-row: 2; }
+.service-offering-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 10px; }
+.service-offering-toolbar .service-offering-modes { margin: 0; gap: 5px; flex-wrap: nowrap; }
+.service-offering-toolbar > .svc-board-subgroup-flow { display: contents; }
+.service-offering-toolbar .service-offering-modes { grid-column: 1; grid-row: 1; }
+.service-offering-toolbar .svc-board-subgroup-commit { grid-column: 2; grid-row: 1; }
+.service-offering-toolbar .svc-input-status { grid-column: 1 / -1; grid-row: 2; justify-self: end; }
+.service-offering-toolbar .svc-input-status:empty { display: none; }
+.service-offering-tools { display: flex; justify-content: flex-end; }
+.service-offering-tools:has(> .svc-board-subgroup-flow:empty) { display: none; }
+.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor > .svc-reference-media-input { width: 100%; }
+
+.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor > .service-offering-toolbar { grid-column: 1 / -1; grid-row: 1; }
+
+.svc-board-subgroup-controls .service-offering-editor .svc-reference-media-input > .svc-presenter-input-field.svc-reference-media-title { flex: 1 1 100%; width: 100%; max-width: none; }
+@container (max-width: 400px) {
+  .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-praise-input-mode-control,
+  .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-edit-title { grid-column: 1 / -1; grid-row: auto; }
+}

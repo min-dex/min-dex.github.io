@@ -74,11 +74,11 @@
     if (token !== entryToken || !serviceId || busy || !state.client || !["service", "presenter"].includes(state.module)
       || state.selectedServiceId !== serviceId || blockedReason() || focusedInput()) return false;
     const context = () => JSON.stringify([state.module, state.selectedServiceId, presenterViewServiceId()]);
-    const before = context(), revision = editRevision, model = dirtyModuleFingerprint("service");
+    const before = context(), revision = editRevision, model = dirtyModuleFingerprint("service"), client = state.client;
     busy = true;
     try {
       const snapshot = await fetchSnapshot(serviceId);
-      const safe = () => token === entryToken && before === context() && revision === editRevision
+      const safe = () => state.client === client && token === entryToken && before === context() && revision === editRevision
         && model === dirtyModuleFingerprint("service") && !blockedReason() && !focusedInput();
       if (!safe()) return false;
       if (background) {
