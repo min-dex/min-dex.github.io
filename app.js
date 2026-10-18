@@ -4158,6 +4158,7 @@ async function worshipAtomicClient() {
           && ["save_worship_service_v1", "create_worship_service_v1", "delete_worship_service_v1"].includes(name)
           && typeof result.data.committedRevision === "string") {
           window.MINDEX_WORSHIP_LIVE?.publish(args.req.serviceId);
+          if (name !== "save_worship_service_v1") window.MINDEX_CONTENT_LIVE?.publish("service-list", "all");
         }
         if (client === state.client && !result.error && result.data?.calendar) {
           adoptDepartmentCalendarReceipt(result.data.calendar);
@@ -5454,7 +5455,7 @@ function initializeDepartmentTabSync() {
     sync.seen.add(message.id);
     if (sync.seen.size > 256) sync.seen.delete(sync.seen.values().next().value);
     const previous = sync.pending.get(message.calendarId);
-    sync.pending.set(message.calendarId, { ...message, serviceIds: [...new Set([...(previous?.serviceIds || []), ...message.serviceIds])] });
+    sync.pending.set(message.calendarId, { ...message, calendarOnly: message.calendarOnly === true && (!previous || previous.calendarOnly === true), serviceIds: [...new Set([...(previous?.serviceIds || []), ...message.serviceIds])] });
     scheduleDepartmentTabRefresh();
   };
   sync.receive = receive;
@@ -5476,10 +5477,10 @@ function initializeDepartmentTabSync() {
   document.addEventListener("focusout", () => scheduleDepartmentTabRefresh());
   window.addEventListener("online", wake);
 }
-function publishDepartmentTabChange(calendar, serviceIds = []) {
+function publishDepartmentTabChange(calendar, serviceIds = [], { calendarOnly = false } = {}) {
   if (!calendar?.id || !state.config.url) return;
   initializeDepartmentTabSync();
-  const message = { id: createUuid(), project: state.config.url, calendarId: calendar.id, serviceIds };
+  const message = { id: createUuid(), project: state.config.url, calendarId: calendar.id, serviceIds, ...(calendarOnly ? { calendarOnly: true } : {}) };
   if (departmentTabSync) departmentTabSync.editRevision += 1;
   departmentTabSync?.seen.add(message.id);
   connectDepartmentRealtime();
@@ -5525,7 +5526,7 @@ function connectDepartmentRealtime() {
 async function reconcileDepartmentRealtime() {
   const sync = departmentTabSync;
   if (!sync || sync.reconciling || departmentRefreshBlocked() || !["calendar", "service", "presenter"].includes(state.module)) return;
-  // A small four-field projection catches missed events, without fetching full worship documents.
+  // Editable calendar fields only; never fetch worship documents in the recovery projection.
   const dates = state.module === "calendar" ? [...new Set(state.calendarData.map(row => row.date).filter(Boolean))]
     : [state.services.find(row => row.id === state.selectedServiceId)?.date].filter(Boolean);
   if (!dates.length) return;
@@ -5534,13 +5535,14 @@ async function reconcileDepartmentRealtime() {
   try {
     for (let offset = 0; offset < dates.length; offset += 100) {
       const { data, error } = await client.from("mindex_sunday_calendar")
-        .select("id,date,children_prayer,youth_prayer,youth_offering_prayer,young_adult_prayer").in("date", dates.slice(offset, offset + 100));
+        .select(["id", "date", ...CALENDAR_LIVE_FIELDS].join(",")).in("date", dates.slice(offset, offset + 100));
       if (error) throw error;
       if (state.client !== client || state.config.url !== project || revision !== sync.editRevision || departmentRefreshBlocked()) return;
       for (const row of data || []) {
         const previous = state.calendarData.find(item => item.id === row.id);
-        if (!previous || [...DEPARTMENT_ASSIGNEE_FIELDS].some(field => (previous[field] || "") !== (row[field] || ""))) {
-          sync.receive({ id: createUuid(), project, calendarId: row.id, serviceIds: [] });
+        if (!previous || CALENDAR_LIVE_FIELDS.some(field => (previous[field] || "") !== (row[field] || ""))) {
+          const linkedChanged = !previous || [...DEPARTMENT_ASSIGNEE_FIELDS].some(field => (previous[field] || "") !== (row[field] || ""));
+          sync.receive({ id: createUuid(), project, calendarId: row.id, serviceIds: [], calendarOnly: !linkedChanged });
         }
       }
     }
@@ -5575,7 +5577,7 @@ async function refreshDepartmentTabs() {
       let deferred = false;
       const previous = state.calendarData.find(row => row.id === calendarId);
       if (previous) {
-        for (const field of DEPARTMENT_ASSIGNEE_FIELDS) {
+        for (const field of CALENDAR_LIVE_FIELDS) {
           const cells = [...document.querySelectorAll("[data-cal-id][data-cal-field]")].filter(cell => cell.dataset.calId === calendarId && cell.dataset.calField === field);
           if (state.calendarCellSaves.has(calendarCellSaveKey(calendarId, field)) || departmentCalendarWrites.has(`${calendarId}:${field}`)
             || cells.some(cell => cell.contains(document.activeElement) || cell.classList.contains("is-save-error"))) { deferred = true; continue; }
@@ -5583,8 +5585,8 @@ async function refreshDepartmentTabs() {
           for (const cell of cells) { cell.textContent = calendar[field] || ""; cell.dataset.initialValue = calendar[field] || ""; }
         }
       } else state.calendarLoaded = false;
-      const ids = new Set([...message.serviceIds, ...state.services.filter(service => service.date === calendar.date
-        && ["children", "youth", "young-adult"].includes(worshipAppServiceTypeId(service.type_id))).map(service => service.id)]);
+      const ids = new Set([...message.serviceIds, ...(message.calendarOnly ? [] : state.services.filter(service => service.date === calendar.date
+        && ["children", "youth", "young-adult"].includes(worshipAppServiceTypeId(service.type_id))).map(service => service.id))]);
       for (const id of ids) {
         if (id === state.selectedServiceId && ["service", "presenter"].includes(state.module)) {
           if (!await window.MINDEX_SERVICE_ENTRY?.check(id, undefined, { background: true })) deferred = true;
@@ -5599,6 +5601,7 @@ async function refreshDepartmentTabs() {
 
 const departmentCalendarWrites = new Map();
 const DEPARTMENT_ASSIGNEE_FIELDS = new Set(["children_prayer", "youth_prayer", "youth_offering_prayer", "young_adult_prayer"]);
+const CALENDAR_LIVE_FIELDS = ["note", "church_schedule", ...CALENDAR_DEPARTMENT_FIELDS.map(([field]) => field), ...CALENDAR_LECTIONARY_FIELDS.map(([field]) => field)];
 function departmentAssigneeField(typeId, label) {
   const type = worshipAppServiceTypeId(typeId), name = compactSearchValue(label);
   if (type === "children" && name === "봉헌기도") return "children_prayer";
@@ -5709,6 +5712,7 @@ async function saveCalendarCell(id, field, value, options = {}) {
     return false;
   }
 
+  const publishClient = state.client;
   const key = calendarCellSaveKey(id, field);
   const token = createLocalId();
   state.calendarCellSaves.set(key, token);
@@ -5726,6 +5730,7 @@ async function saveCalendarCell(id, field, value, options = {}) {
       setCalendarCellSaveState(cell, "saved");
       if (cell) cell.dataset.initialValue = value;
     }
+    if (publishClient === state.client && !DEPARTMENT_ASSIGNEE_FIELDS.has(field)) publishDepartmentTabChange(row, [], { calendarOnly: true });
     return true;
   } catch (error) {
     if (state.calendarCellSaves.get(key) === token) {

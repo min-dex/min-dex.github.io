@@ -374,3 +374,9 @@ Saved Praise records and bulletin/template revisions now share the existing
 cross-device Broadcast transport. Detached reads protect local drafts, playback,
 output, printing and input races; the current visible record is reconciled on
 wake/reconnect and every minute. See `docs/content-realtime.md` for scope and limits.
+
+## Calendar fields and worship-list realtime · 2026-10-18
+
+All editable calendar fields now update in place. Confirmed worship create/delete
+receipts refresh list membership without replacing open editors or aggregates.
+See `docs/operations-realtime.md` for guards, retained open deletions and recovery.

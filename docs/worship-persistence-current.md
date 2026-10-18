@@ -413,3 +413,10 @@ a visible idle 60-second check read only the selected service ID/save_revision t
 recover missed signals. Equal revisions do not re-render. Both clients must load
 the new release. This does not synchronize unsaved keystrokes, Praise DB/catalog
 edits, templates or bulletin edits. No production schema/permission changes.
+
+## Worship membership realtime · 2026-10-18
+
+`operations-realtime.md` supersedes the new-list discovery limitation above.
+Successful create/delete receipts now trigger read-only list reconciliation.
+Open/deferred drafts survive remote deletion until the user leaves the editor
+and draft protection clears. Existing aggregates/baselines are not list data.
