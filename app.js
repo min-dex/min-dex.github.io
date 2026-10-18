@@ -4158,7 +4158,8 @@ async function worshipAtomicClient() {
           && ["save_worship_service_v1", "create_worship_service_v1", "delete_worship_service_v1"].includes(name)
           && typeof result.data.committedRevision === "string") {
           window.MINDEX_WORSHIP_LIVE?.publish(args.req.serviceId);
-          if (name !== "save_worship_service_v1") window.MINDEX_CONTENT_LIVE?.publish("service-list", "all");
+          window.MINDEX_CONTENT_LIVE?.publish("service-list", "all");
+          window.MINDEX_CONTENT_LIVE?.publish("setlist-archive", "all");
         }
         if (client === state.client && !result.error && result.data?.calendar) {
           adoptDepartmentCalendarReceipt(result.data.calendar);
@@ -24558,6 +24559,7 @@ async function persistWorshipSetlistLeader(id, value, expectedLeader) {
     const cacheKey = `${state.config.url}:live-services-v4:${WORSHIP_IMPORT_SOURCE_LIST_SELECT}:${WORSHIP_IMPORT_CANDIDATE_LIST_SELECT}`;
     writeStaticSupabaseCache("worship_setlist_archive", cacheKey, [{ sources: archive.sources, candidates: archive.candidates, live: archive.live }]);
   }
+  window.MINDEX_CONTENT_LIVE?.publish("setlist-archive", "all");
   return leader;
 }
 

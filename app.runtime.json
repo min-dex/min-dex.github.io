@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-operations-navigation",
+  "version": "20261018-list-archive-live",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "0e43f5e01c59ff9b92d52be1dab1181ab9cbfa9fb946f9ae8f9888e32ceae87f",
-  "runtime_sha256": "97df6423be2471e9b96c2ea4e02da66363e21168d417a6db0f36e6df0cca2462",
-  "source_bytes": 1511691,
-  "runtime_bytes": 1069485,
-  "source_gzip": 338286,
-  "runtime_gzip": 265053
+  "source_sha256": "554b8016b10dc1f66cb1de42437dc9e3941782c67c5c85df3b1127ad577f9654",
+  "runtime_sha256": "0e4a510b87f28609d102e17d2b8e704ba495dfb1ecfbed59aa9f55cc9c768734",
+  "source_bytes": 1511789,
+  "runtime_bytes": 1069574,
+  "source_gzip": 338318,
+  "runtime_gzip": 265089
 }

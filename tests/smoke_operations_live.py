@@ -64,6 +64,9 @@ try:
    b.evaluate("state.module='service';state.selectedServiceId=sid;refs.detailPane.scrollTop=200;window.originalPane=refs.detailPane.firstElementChild;serviceDB.push({id:other,service_type_id:'children',service_date:'2026-11-01',title:'Created'})")
    list_signal();b.wait_for_function('state.services.length===2')
    assert b.evaluate('refs.detailPane.firstElementChild===originalPane&&detailRenders===0&&state.selectedServiceId===sid&&refs.songList.scrollTop===100')
+   b.evaluate("state.services.find(s=>s.id===other)._worshipSourceRef={retained:'document'};serviceDB.find(s=>s.id===other).title='Remote summary';serviceDB.find(s=>s.id===other).praise_leader='Remote leader';serviceDB.find(s=>s.id===other).service_date='2026-11-08'")
+   list_signal();b.wait_for_function("state.services.find(s=>s.id===other).title==='Remote summary'")
+   assert b.evaluate("state.services.find(s=>s.id===other).praiseLeader==='Remote leader'&&state.services.find(s=>s.id===other).date==='2026-11-08'&&state.services.find(s=>s.id===other)._worshipSourceRef.retained==='document'&&refs.detailPane.firstElementChild===originalPane")
    b.evaluate('serviceDB=serviceDB.filter(s=>s.id!==other);live=true');list_signal();b.wait_for_timeout(300);assert b.evaluate('state.services.length')==2
    b.evaluate('live=false');b.wait_for_function('state.services.length===1')
    # Open deletion retains its editor. Leaving it permits safe list removal.

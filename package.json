@@ -47,7 +47,7 @@
       "mindex.worship-week.js",
       "mindex.monitor.js",
       "mindex.service-entry.js",
-      "mindex.worship-live.js", "mindex.content-live.js", "mindex.service-list-live.js",
+      "mindex.worship-live.js", "mindex.content-live.js", "mindex.service-list-live.js", "mindex.archive-live.js",
       "mindex.constants.js",
       "mindex.design-tokens.js",
       "mindex.worship-model.js",
