@@ -16586,7 +16586,7 @@
         "scoreFormKey": "score:verse-4"
       },
       {
-        "src": "assets/hymn-scores/223/slide-08-reviewed.webp",
+        "src": "assets/hymn-scores/223/slide-08-reviewed-v2.webp",
         "source": "DB_HYMN1.pptx",
         "sourceSlideId": "3739",
         "sourceSlide": 1923,
@@ -16594,8 +16594,8 @@
         "reviewedAsset": {
           "date": "2026-10-18",
           "original": "assets/hymn-scores/223/slide-08.webp",
-          "sha256": "4cee008e543d6c54c7b8cea311adfa42b925b68284d8e5e447cf98ce3458c147",
-          "note": "귀하신 분 → 귀한 신분; 신 and its original eighth note translated 40 px right, no pitch/rhythm change."
+          "sha256": "a748b54e524085d44c5042c2960ecbd64de6a6e705ce22e70128224d73a4440f",
+          "note": "귀하신 분 → 귀한 신분; 신 and its original eighth note translated 40 px right, no pitch/rhythm change. Left 신 outline and soft shadow repaired; note position unchanged; notehead center x1091, glyph center x1089 at 1920px width."
         }
       }
     ]
