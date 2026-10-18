@@ -1061,10 +1061,10 @@ function isOperationsModule(moduleName = state.module) {
 }
 
 const OPERATIONS_MODULES = [
-  ["setlists", "역대 콘티"],
   ["calendar", "교회력"],
-  ["references", "참고자료"],
   ["manuals", "예배 매뉴얼"],
+  ["setlists", "역대 찬양 콘티"],
+  ["references", "참고자료"],
 ];
 
 function renderCurrentServiceModuleDetail() {

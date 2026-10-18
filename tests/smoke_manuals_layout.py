@@ -1,4 +1,5 @@
 import os
+import sys
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
@@ -17,6 +18,7 @@ try:
             print(engine, page.evaluate('''() => {
               const check=(value,message)=>{if(!value)throw Error(message)};
               state.module='manuals';state.search='';render();syncBrowserHistory({replace:true});
+              check(JSON.stringify([...refs.songList.querySelectorAll('[data-home-module]')].map(e=>e.textContent.trim()))===JSON.stringify(['교회력','예배 매뉴얼','역대 찬양 콘티','참고자료']),'operations sidebar order: '+JSON.stringify([...refs.songList.querySelectorAll('[data-home-module]')].map(e=>e.textContent.trim())));
               const sections=[...refs.detailPane.querySelectorAll('.manual-section')];
               const links=[...refs.detailPane.querySelectorAll('.manuals-index a')];
               check(sections.length>8,'manual sections missing');
@@ -124,6 +126,38 @@ try:
             page.locator('#detailPane').screenshot(path=f'/tmp/mindex-manuals-{engine}-mobile.png')
             page.evaluate("applyTheme('dark')")
             page.locator('#detailPane').screenshot(path=f'/tmp/mindex-manuals-{engine}-dark.png')
+            # Original Notion hosts can be handed off outside macOS WebKit before a popup
+            # event. Check exact host URLs in Linux CI; on macOS WebKit retain DOM URL
+            # assertions and exercise the same anchors against isolated local responses.
+            context = page.context
+            context.route('https://www.notion.so/**', lambda r: r.fulfill(status=200, content_type='text/html', body='<title>Isolated manual source</title>'))
+            context.route('**/manual-source-fixture/*', lambda r: r.fulfill(status=200, content_type='text/html', body='<title>Isolated manual source</title>'))
+            sources = page.locator('.manual-sources a')
+            original_urls = sources.evaluate_all('es=>es.map(e=>e.href)')
+            assert original_urls == page.evaluate('MINDEX_MANUALS[0].sources.map(s=>s.url)')
+            mapped = sys.platform == 'darwin' and engine == 'webkit'
+            if mapped:
+                sources.evaluate_all("es=>es.forEach((e,i)=>e.href=new URL('/manual-source-fixture/'+i,location.href).href)")
+            route_before = page.url
+            history_before = page.evaluate('history.length')
+            for index in range(sources.count()):
+                for activation in ('click', 'Enter'):
+                    link = sources.nth(index)
+                    expected = link.get_attribute('href')
+                    with context.expect_page(timeout=10000) as opened:
+                        if activation == 'click':
+                            link.click()
+                        else:
+                            link.focus()
+                            page.keyboard.press('Enter')
+                    popup = opened.value
+                    popup.wait_for_load_state()
+                    assert popup.url == expected
+                    assert popup.evaluate('window.opener===null')
+                    assert page.url == route_before and page.evaluate('state.module') == 'manuals'
+                    assert page.evaluate('history.length') == history_before
+                    popup.close()
+            print(engine, 'PASS both source links click/Enter, noopener and app route/history preserved;', 'macOS isolated destinations' if mapped else 'original source URLs')
             browser.close()
 finally:
     server.shutdown()

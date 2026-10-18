@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-controller-slide-blocks",
+  "version": "20261018-operations-navigation",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "fbbb39b816190190823f0d185526b3857585e95fe257d291d98e628e772cc413",
-  "runtime_sha256": "9cc2f3a9f4dfc96b7fefb86d609ef18716728e66c18a9b3f84ab6000eef16e9a",
-  "source_bytes": 1511684,
-  "runtime_bytes": 1069478,
-  "source_gzip": 338281,
-  "runtime_gzip": 265048
+  "source_sha256": "0e43f5e01c59ff9b92d52be1dab1181ab9cbfa9fb946f9ae8f9888e32ceae87f",
+  "runtime_sha256": "97df6423be2471e9b96c2ea4e02da66363e21168d417a6db0f36e6df0cca2462",
+  "source_bytes": 1511691,
+  "runtime_bytes": 1069485,
+  "source_gzip": 338286,
+  "runtime_gzip": 265053
 }

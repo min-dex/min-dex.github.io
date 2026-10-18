@@ -581,3 +581,5 @@ and bulletin editor/preview in Chromium and WebKit; no service data is saved.
 - Worship sidebar section dividers stay attached to the heading and leave 15px before the list (10px heading margin plus 5px section gap). Preserve title padding and list-row spacing.
 
 - Manual table-of-contents activation (click or Enter) scrolls only the detail pane and focuses the target heading. Preserve the app hash route and browser history; never invoke fragment navigation.
+
+- Operations navigation order: 교회력, 예배 매뉴얼, 역대 찬양 콘티, 참고자료. Manual source links remain external new-tab anchors with noopener/noreferrer; TOC links alone scroll internally.
