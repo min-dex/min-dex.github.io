@@ -62,13 +62,23 @@ try:
     w.setnchannels(1);w.setsampwidth(2);w.setframerate(8000)
     w.writeframes(b''.join(struct.pack('<h',int(20000*math.exp(-((i-1600)%4000)/40))) if i>=1600 else b'\0\0' for i in range(160000)))
    d.locator('[data-timing-file]').set_input_files({'name':'pulse.wav','mimeType':'audio/wav','buffer':pulse.getvalue()})
-   page.wait_for_function("document.querySelector('[data-song-timing-dialog] audio').duration>19")
+   # Equal-length files need an identity/busy check, not the previous duration.
+   page.wait_for_function("""name => {
+    const dialog=document.querySelector('[data-song-timing-dialog]');
+    return dialog.querySelector('[data-timing-filename]').textContent===name
+      && !dialog.querySelector('[data-timing-file]').disabled && dialog.querySelector('audio').duration>19;
+   }""", arg="pulse.wav")
    d.locator('[data-beat-analyze]').click()
    page.wait_for_function("document.querySelector('[data-beat-status]').textContent.includes('박자 후보')")
    assert abs(float(d.locator('[data-beat-bpm]').input_value())-120)<1
    assert not d.locator('[data-beat-enabled]').is_checked()
    d.locator('[data-timing-file]').set_input_files({'name':'fixture.wav','mimeType':'audio/wav','buffer':buf.getvalue()})
-   page.wait_for_function("document.querySelector('[data-song-timing-dialog] audio').duration>19")
+   # Equal-length files need an identity/busy check, not the previous duration.
+   page.wait_for_function("""name => {
+    const dialog=document.querySelector('[data-song-timing-dialog]');
+    return dialog.querySelector('[data-timing-filename]').textContent===name
+      && !dialog.querySelector('[data-timing-file]').disabled && dialog.querySelector('audio').duration>19;
+   }""", arg="fixture.wav")
    assert d.locator('[data-beat-bpm]').input_value()==''
    d.locator('[data-beat-analyze]').click()
    page.wait_for_function("document.querySelector('[data-beat-status]').textContent.includes('확신할 수 없어요')")
