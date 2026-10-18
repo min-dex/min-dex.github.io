@@ -3454,3 +3454,10 @@ are unchanged. Group labels remain accessible without adding duplicate headings.
 Controller thumbnail metadata places form/scripture badges on the left and slide
 numbers on the right, including unlabeled slides. Numbers retain their size,
 weight and theme contrast and never shrink under long references. Output is unchanged.
+
+Controller form badges use occurrence order within each song: muted red, yellow,
+green, cyan, blue, magenta, repeating after six blocks. Form type no longer
+determines badge color. Neutral block backgrounds and output colors are unchanged.
+Score pages without a new form marker continue the preceding verified form within
+the same element, using controller-entry metadata only. Unmarked leading pages
+remain ungrouped; never infer verse boundaries or rewrite score manifests.

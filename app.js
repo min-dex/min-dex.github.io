@@ -31351,9 +31351,9 @@ function presenterBoardSlideBlocks(entries = []) {
     if (presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.SCRIPTURE_TEXT) {
       label = [slide.referenceBook, slide.referenceRange].filter(Boolean).join(" ") || slide.title || "본문";
       key = JSON.stringify([owner, "scripture", label, slide.translationLabel || ""]);
-    } else if (presenterSlideSupportsFormGrouping(slide) && slide.formKey) {
-      label = presenterFormGroupLabel(slide) || "송폼";
-      key = JSON.stringify([owner, "form", slide.formKey]);
+    } else if (presenterSlideSupportsFormGrouping(slide) && (entry.controllerFormKey || slide.formKey)) {
+      label = entry.controllerFormLabel || presenterFormGroupLabel(slide) || "송폼";
+      key = JSON.stringify([owner, "form", entry.controllerFormKey || slide.formKey]);
     }
     const previous = blocks[blocks.length - 1];
     if (key && previous?.key === key) previous.entries.push(entry);
@@ -31363,11 +31363,17 @@ function presenterBoardSlideBlocks(entries = []) {
 }
 
 function renderPresenterBoardSlideBlocks(entries, activeIndex, serviceId) {
+  const colorIndexes = new Map();
   return presenterBoardSlideBlocks(entries).map((block) => {
+    const owner = presenterSlideElementGroupKey(block.entries[0]?.slide) || "";
+    const isForm = block.key && presenterSlideSupportsFormGrouping(block.entries[0]?.slide);
+    const colorIndex = colorIndexes.get(owner) || 0;
+    if (isForm) colorIndexes.set(owner, colorIndex + 1);
+    const colorAttribute = isForm ? ` data-form-color="${colorIndex % 6}"` : "";
     const thumbs = block.entries.map(({ slide, slideIndex, formLabel }) =>
       renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, formLabel)).join("");
     return block.key
-      ? `<div class="svc-board-slide-block" role="group" aria-label="${escapeAttr(block.label)}">${thumbs}</div>`
+      ? `<div class="svc-board-slide-block"${colorAttribute} role="group" aria-label="${escapeAttr(block.label)}">${thumbs}</div>`
       : thumbs;
   }).join("");
 }
@@ -31406,17 +31412,29 @@ function updatePresenterBoardBlockBackgrounds(host = refs.detailPane) {
 function annotatePresenterFormStarts(entries = [], initialPreviousKey = "") {
   let previousKey = initialPreviousKey;
   let currentFormLabel = "";
+  let scoreKey = "";
+  let scoreLabel = "";
+  let previousOwner = "";
   const annotatedEntries = entries.map((entry) => {
     const { slide, slideIndex } = entry;
-    const formSlide = presenterSlideSupportsFormGrouping(slide);
-    const key = formSlide ? `form:${slide.formKey || slideIndex}` : "";
+    const owner = presenterSlideElementGroupKey(slide) || "";
+    const score = String(slide.sourceType || slide.componentType || "").toLowerCase() === "score";
+    if (!score || owner !== previousOwner) { scoreKey = ""; scoreLabel = ""; }
+    if (score && slide.formKey) { scoreKey = slide.formKey; scoreLabel = presenterFormGroupLabel(slide); }
+    previousOwner = owner;
+    const controllerFormKey = score ? scoreKey : slide.formKey;
+    const controllerFormLabel = score ? scoreLabel : presenterFormGroupLabel(slide);
+    const formSlide = presenterSlideSupportsFormGrouping(slide) && (!score || controllerFormKey);
+    const key = formSlide ? `${owner}:form:${controllerFormKey || slideIndex}` : "";
     const startsForm = Boolean(formSlide && key !== previousKey);
-    if (startsForm) currentFormLabel = presenterFormGroupLabel(slide);
+    if (startsForm) currentFormLabel = controllerFormLabel;
     if (!formSlide) currentFormLabel = "";
     previousKey = key;
     return {
       ...entry,
       formLabel: startsForm ? currentFormLabel : "",
+      controllerFormKey,
+      controllerFormLabel,
     };
   });
   return { entries: annotatedEntries, lastKey: previousKey };
@@ -31428,7 +31446,7 @@ function presenterSlideSupportsFormGrouping(slide) {
     && presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT;
   if (praiseLowerBar) return true;
   const sourceType = String(slide.sourceType || slide.componentType || "").trim().toLowerCase();
-  return Boolean(slide.formKey && sourceType === "score");
+  return sourceType === "score";
 }
 
 function presenterFormGroupLabel(slide) {

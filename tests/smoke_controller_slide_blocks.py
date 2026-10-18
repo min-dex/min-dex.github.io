@@ -19,6 +19,16 @@ try:
     const blank={elementId:'song',elementType:'blank',layout:'blank',type:'blank',title:'빈 화면'};
     const slides=[lyric('v1:0','Verse 1'),lyric('v1:0','Verse 1'),lyric('c:1','Chorus'),lyric('c:2','Chorus'),blank,verse('3:16–18'),verse('3:16–18'),verse('4:1–2'),verse('4:1–2','새번역')];
     const entries=slides.map((slide,slideIndex)=>({slide:{...slide,id:'slide-'+slideIndex},slideIndex}));
+    const score=(owner,key,label)=>({slide:{elementId:owner,elementType:'image',layout:'media',sourceType:'score',formKey:key,formLabel:label,title:'악보'},slideIndex:0});
+    const scoreEntries=[score('hymn','',''),score('hymn','v1','Verse 1'),score('hymn','',''),score('hymn','v2','Verse 2'),score('hymn','',''),score('other','','')];
+    const scoreBefore=JSON.stringify(scoreEntries);
+    const annotatedScores=annotatePresenterFormStarts(scoreEntries).entries;
+    check(presenterBoardSlideBlocks(annotatedScores).map(b=>b.entries.length).join()==='1,2,2,1','score continuation/owner boundary');
+    check(annotatedScores.map(e=>e.formLabel).join('|')==='|Verse 1||Verse 2||','score labels only on starts');
+    check(JSON.stringify(scoreEntries)===scoreBefore,'score source mutated');
+    const colors=Array.from({length:8},(_,i)=>score('hymn','v'+i,'Verse '+(i+1)));
+    const colorHtml=renderPresenterBoardSlideBlocks(annotatePresenterFormStarts(colors).entries,-1,'fixture');
+    check([...colorHtml.matchAll(/data-form-color="(\d)"/g)].map(m=>m[1]).join()==='0,1,2,3,4,5,0,1','ordered six-color cycle');
     const before=JSON.stringify(entries), blocks=presenterBoardSlideBlocks(entries);
     check(blocks.map(b=>b.entries.length).join()==='2,1,1,1,2,1,1','group boundaries');
     check(!blocks[3].key,'blank grouped');

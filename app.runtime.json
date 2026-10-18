@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-hymn223-edge",
+  "version": "20261018-controller-form-colors",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "c409664ce6ff380f7b564a005a4c6a0ff5f479a4c96791f123970598358acc62",
-  "runtime_sha256": "4e987c5d04802d7bb8943be2b85a76c5fc55a6530e04baa2f305be17d4705e64",
-  "source_bytes": 1513832,
-  "runtime_bytes": 1070913,
-  "source_gzip": 338880,
-  "runtime_gzip": 265495
+  "source_sha256": "14d79e927a7fbf8c6d98f57bf77d44075884ca0d07cafe454fe92797801c508e",
+  "runtime_sha256": "365ae20101d71bd3086b680ff0fa41481ebea3c520f44d2296635b016cf01b0c",
+  "source_bytes": 1514986,
+  "runtime_bytes": 1071509,
+  "source_gzip": 339131,
+  "runtime_gzip": 265689
 }
