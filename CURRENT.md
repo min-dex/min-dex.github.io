@@ -359,3 +359,11 @@ Browser output stop now waits for pending fullscreen entry/exit before closing;
 duplicate requests coalesce. Timing/data and desktop close remain unchanged.
 See presenter decisions and test_output_fullscreen_close.cjs. Local rapid-stop
 and session-isolation browser checks pass; deployment is verified separately.
+
+
+## Department assignee linkage · 2026-10-18
+
+Four calendar prayer fields now share atomic saves with children/youth/young-adult
+worship elements. Teacher honorific is 교사. See worship-data-contract.md for
+field scope, retry/conflict behavior and duplicate-service restrictions.
+Production verification and deployment receipts are recorded separately.

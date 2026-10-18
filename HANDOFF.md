@@ -997,3 +997,11 @@ Native-close smoke exits fullscreen explicitly; rapid app-stop smoke keeps real
 fullscreen startup and checks three immediate stop/reopen cycles per engine.
 Unit checks cover ordering, duplicate requests, denied entry and failed exit retry.
 No Cadaros lyrics, timing, photos or production records were written.
+
+
+## Department assignee linkage · 2026-10-18
+
+Four calendar prayer fields now share atomic saves with children/youth/young-adult
+worship elements. Teacher honorific is 교사. See worship-data-contract.md for
+field scope, retry/conflict behavior and duplicate-service restrictions.
+Production verification and deployment receipts are recorded separately.

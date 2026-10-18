@@ -6,6 +6,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 NODE_TESTS = (
+    "test_department_assignee_requests.cjs",
     "test_calendar_assignee_creation.cjs",
     "test_shared_offering_integrity.cjs",
     "test_music_fade_stop.cjs",
@@ -29,6 +30,7 @@ NODE_TESTS = (
     "test_worship_read_parallel.cjs",
 )
 SMOKES = (
+    "smoke_department_assignees.py",
     "smoke_service_entry.py",
     "smoke_form_label_spacing.py",
     "smoke_monitor_session.py",

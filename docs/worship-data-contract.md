@@ -951,3 +951,38 @@ Existing28 versions/forms are unchanged apart from audio_set, verified through
 production REST readback.30 automatic sets,8 disabled review drafts.
 All38 Storage files re-downloaded and SHA-256 matched (229,417,423bytes).
 Audio, lyrics, original snapshots and operational SQL stay outside public Git.
+
+
+## Linked department assignees · 2026-10-18
+
+The calendar and persisted worship element now share these four assignments by date:
+children_prayer ↔ children 봉헌기도 (the same child also collects the offering),
+youth_prayer ↔ youth 대표기도/기도, youth_offering_prayer ↔ youth 봉헌기도,
+young_adult_prayer ↔ young-adult 대표기도/기도. Use 교사, not 선생님, for
+teacher honorifics. Other roles remain independent; minister prayer slots are
+not mapped to these fields.
+
+A worship save uses the existing atomic RPC, locking the calendar before the
+service and updating both in one transaction. Calendar edits read fresh service
+aggregates, build person-only atomic requests and submit the whole batch through
+save_calendar_assignee_v1. Preserve source documents, unrelated rows, lyrics,
+versions and local drafts. Explicit empty values are saved in both places.
+Fresh service creation checks the locked roster to reject stale cached names.
+
+The calendar batch compares the previous value, service set and service revisions.
+Transport failures retain and replay the exact session-journal request; a resolved
+retry asks the user to reload before submitting a newer draft. Database errors
+known to roll back discard that pending request. Successful writes invalidate
+clean service caches; opening the calendar refreshes its rows. Other open tabs
+must reload to see changes; stale writes fail instead of silently overwriting.
+
+Legacy direct updates of these four calendar fields are rejected. Duplicate
+same-department services are supported by calendar batch edits; a direct worship
+person edit on such a date is rejected to prevent leaving siblings inconsistent.
+Changing a linked service's date/type or deleting a mapped slot requires review.
+Unrelated calendar fields keep their existing save path. No Notion dependency.
+
+Migration: migrations/2026-10-18-department-assignee-links.sql. Private receipt
+storage has RLS and internal-writer-only policies. Tests: targeted request VM,
+Chromium/WebKit journal/queue smoke, and opt-in disposable PostgreSQL 17.6 tests
+for rollback, permissions, replay, stale revisions, and two-connection races.

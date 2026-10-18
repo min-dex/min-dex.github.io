@@ -3199,8 +3199,8 @@ function runModuleEntryLoads(moduleName) {
       await loadWorshipPresenterSlides(presenterViewServiceId());
     }
 
-    if (moduleName === "calendar" && !state.calendarLoaded && !state.calendarLoading && !state.calendarError) {
-      await loadCalendarData();
+    if (moduleName === "calendar" && !state.calendarLoading && !state.calendarCellSaves.size && !departmentCalendarWrites.size) {
+      await loadCalendarData({ refresh: true });
     }
 
     if (moduleName === "references" && !state.referenceLinksLoaded && !state.referenceError) {
@@ -4149,7 +4149,11 @@ async function worshipAtomicClient() {
     const client = state.client;
     const release = encodeURIComponent(window.MINDEX_RELEASE || "atomic-production-20260922-001");
     const promise = import(`./mindex.worship-atomic-client.mjs?v=${release}`).then(({ createWorshipAtomicClient }) =>
-      createWorshipAtomicClient({ rpc: (name, args) => client.rpc(name, args),
+      createWorshipAtomicClient({ rpc: async (name, args) => {
+        const result = await client.rpc(name, args);
+        if (!result.error && result.data?.calendar) adoptDepartmentCalendarReceipt(result.data.calendar);
+        return result;
+      },
         journal: sessionStorage, namespace: state.config.url })).catch((error) => {
           // A failed speculative import must not poison the next detail/open retry.
           if (worshipAtomicRuntime?.promise === promise) worshipAtomicRuntime = null;
@@ -5386,8 +5390,8 @@ async function detectTableColumnSupport(table, column) {
   }
 }
 
-async function loadCalendarData({ silent = false } = {}) {
-  if (state.calendarLoaded) return;
+async function loadCalendarData({ silent = false, refresh = false } = {}) {
+  if (state.calendarLoaded && !refresh) return;
   if (calendarLoadPromise) return calendarLoadPromise;
   calendarLoadPromise = loadCalendarDataOnce({ silent });
   try {
@@ -5424,6 +5428,100 @@ async function loadCalendarDataOnce({ silent = false } = {}) {
   }
 }
 
+const departmentCalendarWrites = new Map();
+const DEPARTMENT_ASSIGNEE_FIELDS = new Set(["children_prayer", "youth_prayer", "youth_offering_prayer", "young_adult_prayer"]);
+function departmentAssigneeField(typeId, label) {
+  const type = worshipAppServiceTypeId(typeId), name = compactSearchValue(label);
+  if (type === "children" && name === "봉헌기도") return "children_prayer";
+  if (type === "youth" && name === "봉헌기도") return "youth_offering_prayer";
+  if (type === "youth" && ["대표기도", "기도"].includes(name)) return "youth_prayer";
+  if (type === "young-adult" && ["대표기도", "기도"].includes(name)) return "young_adult_prayer";
+  return "";
+}
+function adoptDepartmentCalendarReceipt(calendar) {
+  if (!calendar?.id) return;
+  const previous = state.calendarData.find(row => row.id === calendar.id);
+  if (previous) Object.assign(previous, calendar);
+  else state.calendarLoaded = false;
+}
+async function departmentCalendarSave(row, field, value, previousValue) {
+  const identity = `${row.id}:${field}`;
+  const earlier = departmentCalendarWrites.get(identity) || Promise.resolve();
+  const pending = earlier.then(() => departmentCalendarSaveOnce(row, field, value, previousValue));
+  departmentCalendarWrites.set(identity, pending);
+  try { return await pending; } finally {
+    if (departmentCalendarWrites.get(identity) === pending) departmentCalendarWrites.delete(identity);
+  }
+}
+async function departmentCalendarSaveOnce(row, field, value, previousValue) {
+  const key = `mindex.department.pending.v1:${JSON.stringify([state.config.url, row.id, field])}`;
+  const pending = sessionStorage.getItem(key);
+  let request = pending ? JSON.parse(pending) : null;
+  if (!request) {
+    const context = await state.client.rpc("get_department_assignee_context_v1", { calendar_id: row.id, field_name: field });
+    if (context.error) throw context.error;
+    if (String(context.data.calendar[field] || "") !== previousValue) {
+      throw new Error("담당자가 다른 곳에서 변경됐어요. 교회력을 다시 열어 확인해 주세요.");
+    }
+    const { prepareWorshipRowsCommit } = await import(`./mindex.worship-atomic-client.mjs?v=${encodeURIComponent(window.MINDEX_RELEASE || "department-links")}`);
+    request = { requestId: createUuid(), calendarId: row.id, field, expected: previousValue, value,
+      requests: context.data.services.map(aggregate => buildDepartmentCalendarServiceRequest(aggregate, field, value, prepareWorshipRowsCommit)) };
+    // Persist before the first write. Transport failures replay this exact batch.
+    sessionStorage.setItem(key, JSON.stringify(request));
+  }
+  const result = await state.client.rpc("save_calendar_assignee_v1", { req: request });
+  if (result.error) {
+    if (/^(P0001|22\w{3}|23\w{3}|42501|55P03|57014|40\w{3})$/.test(result.error.code || "")) sessionStorage.removeItem(key);
+    throw result.error;
+  }
+  sessionStorage.removeItem(key);
+  adoptDepartmentCalendarReceipt(result.data.calendar);
+  // Invalidate only clean cached services; never overwrite an editor's drafts.
+  for (const saved of result.data.services || []) {
+    const id = saved.service.id;
+    if (sundayEditSyncHasLocalDraft(id) || state.dirtyServiceElementIds.has(id) || state.dirtyServiceStructureIds.has(id)) continue;
+    state.loadedWorshipServiceIds.delete(id);
+    state.loadedWorshipPresenterServiceIds.delete(id);
+    presenterSlideBuildCache.delete(id);
+  }
+  if (pending || String(result.data.calendar[field] || "") !== value) {
+    throw new Error("이전 저장 결과를 확인했어요. 교회력을 다시 열어 현재 담당자를 확인해 주세요.");
+  }
+  return result.data.calendar;
+}
+function buildDepartmentCalendarServiceRequest(aggregate, field, value, prepareCommit) {
+  const service = normalizeWorshipService(aggregate.service);
+  const elements = structuredClone(aggregate.elements), sections = structuredClone(aggregate.sections);
+  const matches = elements.filter(row => departmentAssigneeField(service.type_id, row.source_ref?.label) === field);
+  if (matches.length > 1) throw new Error("같은 담당 순서가 둘 이상 있어 예배 순서를 먼저 확인해 주세요.");
+  const previousItems = groupWorshipElements(sections, elements)[service.id] || [];
+  let target = matches[0];
+  let insertedSection = null;
+  if (!target) {
+    const scaffold = buildWorshipServiceScaffold(service.id, service.type_id, { service });
+    const candidates = scaffold.elements.filter(row => departmentAssigneeField(service.type_id, row.source_ref?.label) === field);
+    if (candidates.length !== 1) throw new Error("담당 순서를 찾지 못했어요. 예배 순서를 확인해 주세요.");
+    target = candidates[0];
+    const newSection = scaffold.sections.find(row => row.id === target.section_id);
+    const existingSection = sections.find(row => row.section_key === newSection.section_key);
+    if (existingSection) target.section_id = existingSection.id;
+    else { sections.push(newSection); insertedSection = newSection; }
+    target.source_ref = { ...target.source_ref, placeholder: false };
+    elements.push(target);
+  }
+  target.person = value;
+  const committedItems = groupWorshipElements(sections, elements)[service.id] || [];
+  const previousItem = previousItems.find(row => row.id === target.id);
+  const committedItem = committedItems.find(row => row.id === target.id);
+  const previousDocument = serviceDocumentSnapshotFromRef(service);
+  if (previousDocument?.sourceText && !previousDocument.sourceText.endsWith("\n[truncated]") && previousItem && committedItem) {
+    service._worshipSourceTextDraft = sundayEditSyncSourceText(previousDocument, previousItem, committedItem, service);
+  }
+  const document = withServiceDocumentSnapshot(service, committedItems)[MINDEX_SERVICE_DOCUMENT_SOURCE_REF_KEY];
+  return { ...prepareCommit({ baseline: aggregate, rows: { sections: insertedSection ? [insertedSection] : [], elements: [target] }, document }),
+    protocolVersion: 1, requestId: createUuid() };
+}
+
 async function saveCalendarCell(id, field, value, options = {}) {
   const cell = options.cell || null;
   const previousValue = String(options.previousValue || "");
@@ -5447,11 +5545,12 @@ async function saveCalendarCell(id, field, value, options = {}) {
   state.calendarCellSaves.set(key, token);
   setCalendarCellSaveState(cell, "saving");
   try {
-    const { error } = await state.client
-      .from("mindex_sunday_calendar")
-      .update({ [field]: value })
-      .eq("id", id);
-    if (error) throw error;
+    if (DEPARTMENT_ASSIGNEE_FIELDS.has(field)) {
+      await departmentCalendarSave(row, field, value, previousValue);
+    } else {
+      const { error } = await state.client.from("mindex_sunday_calendar").update({ [field]: value }).eq("id", id);
+      if (error) throw error;
+    }
     row[field] = value;
     if (state.calendarCellSaves.get(key) === token) {
       state.calendarCellSaves.delete(key);
