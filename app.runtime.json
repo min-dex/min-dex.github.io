@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-sidebar-divider-spacing",
+  "version": "20261018-operations-live-devices-v2",
   "options": {
     "compress": false,
     "mangle": {
