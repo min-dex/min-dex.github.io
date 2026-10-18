@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-service-entry-rail",
+  "version": "20261018-service-entry-draft-guard",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "ca62c4419db0150980c2320748f29b0b5d22f294f929ff1ba395f0905fe55674",
-  "runtime_sha256": "584072f439aa323985b7c7f9d069a7379773ed4314bc89b4b220888ca8b1169b",
-  "source_bytes": 1481673,
-  "runtime_bytes": 1048563,
-  "source_gzip": 331096,
-  "runtime_gzip": 259407
+  "source_sha256": "836db58b311f1f83d87e66fc572f05a01656c79bab04cb2d1d3beeb8b6800de4",
+  "runtime_sha256": "6f17daddfe78fe85daebcd8303f84a67c5c62803e4e9d7bffb9df45eb1f52a4b",
+  "source_bytes": 1482323,
+  "runtime_bytes": 1049048,
+  "source_gzip": 331228,
+  "runtime_gzip": 259493
 }

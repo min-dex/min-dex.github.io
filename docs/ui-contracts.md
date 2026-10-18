@@ -563,3 +563,5 @@ and bulletin editor/preview in Chromium and WebKit; no service data is saved.
 - Presenter topbar utilities align to the fixed right rail width and continuous left boundary. Existing playback controls remain mounted; navigation never restarts transport.
 - Operations leader inputs use 30px minimum height, 5px/10px padding, standard corners and visible keyboard focus. Content width includes padding; blur-save behavior is unchanged.
 - The manual DB refresh button and module-wide refresh entry point are removed. Explicit service navigation and tab re-entry check that service only after hydration, with a bounded wait. Drafts, saves, output, navigation and input races defer application. Source song records, transport and other services are not replaced. A failed fetch retains current content.
+
+- Reselecting the currently open worship service retains the mounted editor, caret, selected item and clean fingerprint. Each navigation invalidates prior entry requests before awaiting navigation; completed responses require the same entry token. Deferred text is protected even without a modified-status badge.
