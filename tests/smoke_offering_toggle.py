@@ -79,7 +79,7 @@ def run(browser, url):
       target = getServiceItems(sid).find(x => x.label === '봉헌영상');
       check(target && serviceItemSlotKey(target) === 'offering.media', 'video lost in projection');
       check(!getServiceItems(sid).some(x => x.label === '봉헌찬송'), 'duplicate hymn');
-      check(!sundaySharedContentKey(service, target), 'video linked to shared hymn');
+      check(!sundaySharedContentKey(target, service), 'video linked to shared hymn');
       check(writes.at(-1).document.sourceText.includes('[봉헌영상]'), 'video source missing');
       target.raw_title = '봉헌 영상 제목';
       target.memo = serializeServiceItemMemo({...parseServiceItemMemo(target.memo), asset:{url:'https://example.test/offering.mp4',type:'video'}});
