@@ -29,6 +29,7 @@ NODE_TESTS = (
     "test_worship_read_parallel.cjs",
 )
 SMOKES = (
+    "smoke_form_label_spacing.py",
     "smoke_version_row_alignment.py",
     "smoke_lyric_parentheses.py",
     "smoke_offering_projection.py",

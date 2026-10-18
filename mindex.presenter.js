@@ -1283,7 +1283,7 @@ function presenterFormPresetDisplayLabel(value = "") {
   if (!raw) return "";
   const target = normalizePresenterFormPresetLabel(raw);
   const group = String(target.group || "").trim().toUpperCase();
-  const suffix = target.variant ? `${target.number ? ` ${target.number}` : ""}@${group}` : target.number ? ` ${target.number}${group ? ` ${group}` : ""}` : group ? ` ${group}` : "";
+  const suffix = target.variant ? `${target.number ? ` ${target.number}` : ""} @${group}` : target.number ? ` ${target.number}${group ? ` ${group}` : ""}` : group ? ` ${group}` : "";
   if (target.lastVerse) return "Last Verse";
   if (target.type === "verse") return `Verse${suffix}`;
   if (target.type === "chorus") return `Chorus${suffix}`;

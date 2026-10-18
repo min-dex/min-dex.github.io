@@ -17640,7 +17640,7 @@ function renderReadonlyFormBlock(form, options = {}) {
     <article class="form-block readonly">
       <div class="form-head">
         <div class="form-meta">
-          <span class="form-label-text">${escapeHtml(displayLabel(form))}</span>
+          <span class="form-label-text">${escapeHtml(songFormPresetDisplayLabel(displayLabel(form)) || displayLabel(form))}</span>
         </div>
       </div>
       <div class="form-preview-text">${escapeHtml(form.lyrics || "")}</div>
