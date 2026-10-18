@@ -39,6 +39,12 @@ try:
      page.evaluate('(theme)=>{applyTheme(theme);updatePresenterBoardBlockBackgrounds(document)}',theme)
      page.evaluate('''()=>{
        const grid=document.getElementById('blocks');
+       for(const meta of grid.querySelectorAll('.svc-slide-thumb-meta')) {
+         const number=meta.querySelector('.svc-slide-thumb-no'), badge=meta.querySelector('.svc-slide-form-badge');
+         const nr=number.getBoundingClientRect(), mr=meta.getBoundingClientRect();
+         if(Math.abs(nr.right-(mr.right-1))>0.1)throw Error('number not fixed at right edge');
+         if(badge && (badge.getBoundingClientRect().right>nr.left || Math.abs(badge.getBoundingClientRect().left-(mr.left+1))>0.1))throw Error('badge not at left edge');
+       }
        const baseline=grid.cloneNode(true); baseline.id='baseline';
        for(const block of baseline.querySelectorAll('.svc-board-slide-block')) block.replaceWith(...block.querySelectorAll(':scope > .svc-slide-thumb-wrap'));
        grid.after(baseline);

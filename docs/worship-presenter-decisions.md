@@ -3450,3 +3450,7 @@ are unchanged. Group labels remain accessible without adding duplicate headings.
 - The reviewed new-hymnal versions 163/166 include opening alleluias only once per lyric playback plan. The print segno follows the opening. This applies after verse selection, including repeated/reordered verses, using copies only. It never saves inferred forms or rewrites unit IDs/text, worship records or medley order. Other version IDs, explicitly segmented forms and edited nonmatching wording are untouched. Their score opening page is retained once when selecting verses.
 - 69/561 have shared endings stored as Chorus. This is an existing classification choice, not a demonstrated missing-lyric error; do not silently rename their referenced form IDs. 262/346 spelling-error claims and 628 melody/other-voice claim were withdrawn after visual review.
 - 223 page 8: corrected to 귀한 신분. The 신 syllable and its original eighth-note pixels move 40 px horizontally, with pitch and rhythm unchanged. Only the documented local text/note regions differ. The original WebP remains as evidence; the manifest points to a versioned lossless reviewed asset with a checksum. The renderer must preserve this reviewed override instead of regenerating the typo from the old deck.
+
+Controller thumbnail metadata places form/scripture badges on the left and slide
+numbers on the right, including unlabeled slides. Numbers retain their size,
+weight and theme contrast and never shrink under long references. Output is unchanged.

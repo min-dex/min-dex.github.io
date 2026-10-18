@@ -31494,8 +31494,8 @@ function renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, fo
   return `
     <span class="svc-slide-thumb-wrap${active ? " active" : ""}${selected ? " selected" : ""}${hidden ? " hidden" : ""}${visibleFormLabel ? " has-form-label" : ""}">
       <span class="svc-slide-thumb-meta">
-        <span class="svc-slide-thumb-no" aria-hidden="true">${slideNumber}</span>
         ${formBadge || scriptureReferenceBadge}
+        <span class="svc-slide-thumb-no" aria-hidden="true">${slideNumber}</span>
       </span>
       <button class="svc-slide-thumb${active ? " active" : ""}${selected ? " selected" : ""}" type="button"
         data-presenter-action="jump"
