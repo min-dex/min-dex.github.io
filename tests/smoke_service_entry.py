@@ -47,7 +47,10 @@ try:
     duringAtomic=()=>document.dispatchEvent(new Event('input'));aggregate.revision='3';aggregate.service.title='must defer';
     check(await MINDEX_SERVICE_ENTRY.check(sid,undefined,{background:true})===false,'late input accepted');
     check(atomic.baseline(sid).revision==='2'&&state.services[0].title==='atomic fresh','late input changed baseline');
-    duringAtomic=null;
+    duringAtomic=()=>{state.serviceMusic.playing=true};
+    check(await MINDEX_SERVICE_ENTRY.check(sid,undefined,{background:true})===false,'late playback accepted');
+    check(atomic.baseline(sid).revision==='2'&&state.services[0].title==='atomic fresh','late playback changed baseline');
+    state.serviceMusic.playing=false;duringAtomic=null;
 
     // Exercise actual tab activation with an isolated route renderer, no save or network writes.
     confirmSaveBeforeLeaving=async()=>true;syncActivePageTabState=()=>{};

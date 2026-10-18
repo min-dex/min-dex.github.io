@@ -983,7 +983,8 @@ across browser profiles/devices. No publication, DB permissions or data changes
 are needed. One channel per app client is replaced on connection changes.
 Reconnect/focus and a visible, idle 60-second safety check compare only four
 assignee fields for loaded calendar dates or the selected service date, recovering
-missed notifications. Hidden/editing/saving/output sessions defer these reads.
+missed notifications. Hidden/editing/saving/output sessions and active music or inline media defer these reads.
+The service snapshot rechecks this protection after asynchronous reads too.
 This scope is linked department assignees, not all app data. Both peers must load
 the new release for immediate broadcast; stale writes retain the CAS guard.
 

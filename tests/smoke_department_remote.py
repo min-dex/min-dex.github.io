@@ -53,6 +53,11 @@ try:
    b.evaluate('output=true;delayRead=false;releaseRead()');b.wait_for_timeout(100)
    assert b.evaluate("row.children_prayer===''&&departmentTabSync.pending.size===1")
    b.evaluate('output=false');b.wait_for_function("row.children_prayer==='E'")
+   # Native inline media is not replaced while playing, even without output.
+   b.evaluate("window.media=document.createElement('audio');window.mediaPlaying=true;Object.defineProperty(media,'paused',{get:()=>!mediaPlaying});document.body.append(media)")
+   send('F');b.wait_for_timeout(300)
+   assert b.evaluate("row.children_prayer==='E'")
+   b.evaluate('mediaPlaying=false');b.wait_for_function("row.children_prayer==='F'")
    # Old client callbacks cannot affect a replacement connection.
    b.evaluate('''()=>{window.oldReceive=remoteReceive;state.client={...state.client};connectDepartmentRealtime();connectDepartmentRealtime();
      if(created!==2||removed!==1)throw Error('channel lifecycle');}''')

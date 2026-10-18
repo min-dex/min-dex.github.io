@@ -70,7 +70,7 @@
     captureCleanFingerprint("service");
   }
   async function check(serviceId, token = entryToken, { background = false } = {}) {
-    const focusedInput = () => background && document.activeElement?.matches('input,textarea,select,[contenteditable="true"]');
+    const focusedInput = () => background && departmentRefreshBlocked();
     if (token !== entryToken || !serviceId || busy || !state.client || !["service", "presenter"].includes(state.module)
       || state.selectedServiceId !== serviceId || blockedReason() || focusedInput()) return false;
     const context = () => JSON.stringify([state.module, state.selectedServiceId, presenterViewServiceId()]);

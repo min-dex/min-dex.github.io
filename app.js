@@ -5483,7 +5483,8 @@ function publishDepartmentTabChange(calendar, serviceIds = []) {
   try { localStorage.setItem("mindex.department.assignees.v1", JSON.stringify(message)); } catch {}
 }
 function departmentRefreshBlocked() {
-  return !canUseClientData() || document.hidden || state.calendarLoading || state.calendarCellSaves.size || departmentCalendarWrites.size
+  const playingMedia = [...document.querySelectorAll("audio,video")].some(media => !media.paused && !media.ended);
+  return serviceMusicHasActivePlayback() || state.serviceMusic.pending || playingMedia || !canUseClientData() || document.hidden || state.calendarLoading || state.calendarCellSaves.size || departmentCalendarWrites.size
     || state.saving || state.loading || isPresenterOutputWindowOpen() || state.presenter.outputPendingAt
     || document.activeElement?.matches('input,textarea,select,[contenteditable="true"]')
     || (["service", "presenter"].includes(state.module) && sundayEditSyncHasLocalDraft(state.selectedServiceId));
