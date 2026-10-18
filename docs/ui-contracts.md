@@ -571,3 +571,5 @@ and bulletin editor/preview in Chromium and WebKit; no service data is saved.
 - Presenter text-item assignees use an internal 담당 placeholder instead of an external label; filled inputs show the name only and keep aria-label.
 
 - Reference-screen titles, attached-file names and site-link titles use internal placeholders without duplicated external captions. Retain explicit accessible names, values and persistence attributes; other field labels remain unchanged.
+
+- Link groups use an internal placeholder and explicit accessible name. Reference editor columns align at the bottom without stretching caption-free inputs; URL captions and focus indicators remain.

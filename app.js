@@ -16882,8 +16882,7 @@ function renderReferenceEditorRow(link, index = 0, total = 1) {
           <input data-reference-id="${escapeAttr(link.id)}" data-reference-field="url" value="${escapeAttr(link.url)}" placeholder="https://..." inputmode="url" />
         </label>
         ${state.referenceGroupSupported ? `<label>
-          <span>그룹</span>
-          <input data-reference-id="${escapeAttr(link.id)}" data-reference-field="group_name" value="${escapeAttr(link.group_name)}" placeholder="그룹" />
+          <input data-reference-id="${escapeAttr(link.id)}" data-reference-field="group_name" value="${escapeAttr(link.group_name)}" placeholder="그룹" aria-label="링크 그룹" />
         </label>` : ""}
       </div>
       <div class="reference-editor-actions">
