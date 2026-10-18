@@ -3219,7 +3219,7 @@ body[data-module="presenter"] .detail-pane {
   align-items: center;
   gap: var(--s2);
   border-bottom: 1px solid color-mix(in srgb, var(--line) 56%, transparent);
-  margin-bottom: 3px;
+  margin-bottom: var(--s2);
   padding: 0 var(--sidebar-section-label-x) 7px;
   color: var(--sidebar-label);
   font-size: var(--ui-label-size);
