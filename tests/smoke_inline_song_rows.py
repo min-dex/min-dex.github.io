@@ -75,6 +75,7 @@ try:
      return 'PASS no reserved version column';
     }'''),flush=True)
     page.evaluate('renderSingleSong()')
+    page.evaluate("""()=>{const row=document.querySelector('.svc-inline-song');for(const status of ['saving','error','modified','saved']){setServiceInputFeedback(row,status);const text=row.querySelector('[data-service-input-status]').textContent;if(status==='saved'&&text)throw Error('duplicate saved status');if(status!=='saved'&&!text)throw Error('missing pending/error status');}}""")
     for width in [1600,1200,1100,1000,800,600]:
      page.set_viewport_size({'width':width,'height':900})
      page.wait_for_timeout(100)

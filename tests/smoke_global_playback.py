@@ -12,6 +12,9 @@ def main():
                 browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
                 try:
                     page=browser.new_page(viewport={'width':1440,'height':900})
+                    page.add_init_script("""window.open=()=>null;
+                      Element.prototype.requestFullscreen=()=>Promise.resolve();
+                      Element.prototype.webkitRequestFullscreen=()=>{};""")
                     page.route('**/*',lambda r:r.continue_() if urlsplit(r.request.url).netloc==urlsplit(url).netloc and r.request.method in ('GET','HEAD') else r.abort())
                     page.goto(url)
                     page.wait_for_function("typeof renderGlobalPlaybackControls==='function' && !document.body.classList.contains('ui-booting')")
@@ -51,6 +54,14 @@ def main():
                     launcher.click()
                     panel=page.locator('#globalPlaybackPanel')
                     assert panel.is_visible()
+                    fade=panel.get_by_label('페이드아웃 정지', exact=True)
+                    assert not fade.is_checked()
+                    fade.check()
+                    assert page.evaluate("state.serviceMusic.fadeStopEnabled && localStorage.getItem('mindex.music.fadeStop')==='true'")
+                    page.evaluate('renderGlobalPlaybackControls()')
+                    assert fade.is_checked()
+                    fade.uncheck()
+                    assert page.evaluate("!state.serviceMusic.fadeStopEnabled && localStorage.getItem('mindex.music.fadeStop')==='false'")
                     assert panel.get_by_role('button',name='예배 송출 종료').inner_text()=='송출 종료'
                     assert panel.locator('[data-presenter-action="detect-screens"]').is_visible()
                     before=page.locator('#globalPlaybackControls').bounding_box()
@@ -94,6 +105,11 @@ def main():
                     page.wait_for_function('document.activeElement===document.querySelector(".global-playback-trigger")')
                     page.set_viewport_size({'width':1440,'height':900})
                     page.screenshot(path='/tmp/mindex-global-playback-'+engine+'.png')
+                    launcher.click()
+                    fade.check()
+                    page.reload()
+                    page.wait_for_function("typeof state==='object' && !document.body.classList.contains('ui-booting')")
+                    assert page.evaluate('state.serviceMusic.fadeStopEnabled'), 'device preference lost on reload'
                 finally:browser.close()
     finally:server.shutdown();server.server_close()
 
