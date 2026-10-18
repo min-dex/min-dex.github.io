@@ -3376,3 +3376,27 @@ Existing element commits and feedback remain unchanged.
 
 The empty offering video editor omits the redundant file-connection helper;
 name, file/link and upload controls remain, as does connected-file information.
+
+### Concise worship editor copy · 2026-10-18
+
+Shared reference/media editors across service types omit the empty file-link
+explanation. Upload/name/link controls already describe the action; connected
+file details and preview errors remain. The source disclosure drops its redundant
+edit/apply caption while retaining the Apply button and save/recovery feedback.
+Praise, scripture, prayer/sermon, announcements and source controls retain loading,
+validation, historical-date scope, empty-state and non-obvious keyboard guidance.
+
+## Unified worship manual · 2026-10-18
+
+Operations → 예배 매뉴얼 has three groups: worship understanding/department orders,
+preparation/live wrap-up, and current Mindex usage. Department order and nested
+offering/prayer details follow the Notion 예배 source; preschool's missing order
+and unconfirmed Friday scheduling are marked 확인 필요. Reading the manual never
+changes templates, services, playback or operational records. Notion originals
+remain untouched and are linked in the manual's sources.
+
+`mindex.manuals.js` owns normalized content; `tools/build_manual_docs.cjs` generates
+`docs/manuals/operations.md` and `--check` detects drift. App UI groups the same
+sections in its contents and body. New code must keep source order, distinguish
+absolute photo timing from slide anchors, preserve the music fade preference,
+and retain the worship-owned versus children-version-owned audio boundary.

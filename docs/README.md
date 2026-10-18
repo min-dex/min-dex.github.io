@@ -34,7 +34,7 @@ stale document in the same change.
 
 - `audio-lyrics-sync-runbook.md`: 실제 음원 박자·가사 진입 기준 싱킹, 예배 저장,
   사진·타이밍 편집 바로가기, 음악 관리·페이드아웃 기본값, 전체 재생 검증과 임시 파일 정리.
-- `manuals/operations.md`: operator-facing Worship and Presenter procedure.
+- `manuals/operations.md`: 예배 이해·부서별 원문 순서, 현장 준비·진행·마무리, 최신 민덱스 사용법. `mindex.manuals.js`에서 자동 생성.
 - `monitor-operations.md`: read-only operations panel and access boundaries.
 - `supabase-capacity-maintenance.md`: conservative database capacity checks and
   cleanup procedure.
