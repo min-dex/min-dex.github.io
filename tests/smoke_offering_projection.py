@@ -50,6 +50,36 @@ const entrance={...hymn,id:'entrance',label:'입례찬양',_worshipSlotKey:'prai
 const praiseSeven={...entrance,id:'praise-seven',label:'찬양 7',_worshipSlotKey:'praise.song.7'};
 const separated=collapseDuplicateTemplateProjectionItems(regular,[entrance,praiseSeven]);
 if(separated.length!==2)throw Error('different slots collapsed by ordinal');
+// The two labels occupy one position and survive an actual persistence row round-trip.
+for (const type of ['sunday-first','sunday-second','sunday-main']) {
+ for (const date of ['2026-10-04','2026-10-18']) {
+  const svc={...service,type_id:type,date,alias:''}; state.services=[svc];
+  let changed={...hymn,_worshipSlotKey:'offering.praise'};
+  const preserved=JSON.stringify([changed.memo,changed.raw_title,changed.song_id,changed.version_id]);
+  if(!replaceServiceOfferingSpecial(changed,true))throw Error('toggle failed');
+  if(JSON.stringify([changed.memo,changed.raw_title,changed.song_id,changed.version_id])!==preserved)throw Error('toggle changed content');
+  changed._worshipElementTemplateModified=false; // Legacy special labels also remain independent.
+  state.serviceItems[svc.id]=[changed,prayer];
+  for(let n=0;n<2;n++){
+   const projected=projectWorshipServiceItemsFromTemplate(svc,state.serviceItems[svc.id]);
+   const specials=projected.filter(i=>i.label==='봉헌특송');
+   if(specials.length!==1||projected.some(i=>i.label==='봉헌찬송'))throw Error('duplicate offering '+type+' '+date+' '+JSON.stringify(projected.filter(i=>i._worshipSectionKey==='offering').map(i=>({id:i.id,label:i.label,slot:i._worshipSlotKey,m:i._worshipElementTemplateModified}))));
+   changed=specials[0];
+   if(serviceItemSlotKey(changed)!=='offering.special'||sundayEditSyncEligible(changed,svc))throw Error('special linked to common hymn');
+   const rows=buildWorshipPersistenceRows(svc,projected,{},{});
+   state.serviceItems[svc.id]=groupWorshipElements(rows.sections,rows.elements)[svc.id];
+  }
+  changed=state.serviceItems[svc.id].find(i=>i.label==='봉헌특송');
+  if(!renderServiceOfferingSpecialToggle(changed,svc).includes('봉헌찬송으로 변경'))throw Error('reverse control missing');
+  if(!replaceServiceOfferingSpecial(changed,false))throw Error('reverse toggle failed');
+  const restored=projectWorshipServiceItemsFromTemplate(svc,state.serviceItems[svc.id]);
+  if(restored.filter(i=>i.label==='봉헌찬송').length!==1||restored.some(i=>i.label==='봉헌특송'))throw Error('reverse duplicate');
+  const h=restored.find(i=>i.label==='봉헌찬송');
+  if(h.song_id!==hymn.song_id||h.version_id!==hymn.version_id||parseServiceItemMemo(h.memo).formHint!=='V2-C-V1-C')throw Error('round-trip content lost');
+ }
+}
+if(serviceItemCanToggleOfferingSpecial(prayer))throw Error('prayer has toggle');
+state.services=[service];state.serviceItems[service.id]=[hymn,prayer];
 const contexts=[{item:hymn,index:0,service},{item:prayer,index:1,service}];document.body.innerHTML='<main style="padding:20px">'+contexts.map(context=>{presenterBoardSubgroupInputContexts=()=>[context];presenterBoardSubgroupItemContext=()=>context;presenterBoardSubgroupDisplay=()=>({label:context.item.label,title:context.item.raw_title});return renderPresenterBoardSubgroup({slides:[],name:context.item.label},-1,service.id,{showHead:true})}).join('')+'</main>';applyTheme('dark');return 'PASS hymn/prayer separate; song/version/form and source retained; slides generated';
 }'''),flush=True)
    page.screenshot(path=f'/tmp/offering-fixed-{engine}.png')

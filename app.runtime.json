@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-service-entry-rail",
+  "version": "20261018-offering-special-toggle",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "ca62c4419db0150980c2320748f29b0b5d22f294f929ff1ba395f0905fe55674",
-  "runtime_sha256": "584072f439aa323985b7c7f9d069a7379773ed4314bc89b4b220888ca8b1169b",
-  "source_bytes": 1481673,
-  "runtime_bytes": 1048563,
-  "source_gzip": 331096,
-  "runtime_gzip": 259407
+  "source_sha256": "563e7bb1622dd7c71e39b4ed18c157a6acd76d8f91b46996cdecade740725de6",
+  "runtime_sha256": "5d21abb360fc64d43801bcf2501a83ae95cb9712f4bb77c95cf4163ebdfebf71",
+  "source_bytes": 1485407,
+  "runtime_bytes": 1051389,
+  "source_gzip": 331566,
+  "runtime_gzip": 259870
 }
