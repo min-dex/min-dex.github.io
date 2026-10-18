@@ -3286,3 +3286,8 @@ linked old-edition lyric versions. No existing service links are rewritten.
 ## 전체화면 대기 안내 굵기 · 2026-10-18
 
 전체화면 예배 대기 화면의 윗문구는 font-weight 600을 직접 지정한다. 기존 공통 meta 기본값도 600이었으며, 공통 토큰 변경과 무관하게 유지하기 위한 고정이다. 문구 크기·아랫문구·로고·배경은 유지한다.
+
+
+## Compact assignee and audio preparation · 2026-10-18
+
+Assignee-only board fields omit the enclosing card padding/background. Non-children audio management uses a full row below the inputs, with a compact label, player, filename and actions; controls wrap at narrow widths. This is controller CSS only; saving, playback, output, print and operational records are unchanged. Actual app renderers were checked offline in Chromium/WebKit at 1200, 800 and 390px with external requests and native fullscreen/window opening blocked.

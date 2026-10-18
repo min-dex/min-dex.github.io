@@ -8860,3 +8860,43 @@ html.ui-theme-switching:not(.presenter-output-document) *::after {
 .song-timing-row { flex-wrap:wrap; }
 .song-timing-row label { flex-basis:240px; }
 .song-timing-dialog input[type=number] { min-height:30px; box-sizing:border-box; padding:5px; border:1px solid var(--line); border-radius:5px; color:var(--ink); background:var(--ui-surface-panel); }
+
+/* Compact assignee-only preparation fields without a second enclosing card. */
+.svc-board-subgroup-controls:has(> .svc-board-subgroup-control-item:only-child > .svc-presenter-input-field:only-child > [data-service-item-field="assignee"]) {
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+}
+.svc-board-subgroup-control-item > .svc-presenter-input-field:only-child:has(> [data-service-item-field="assignee"]) {
+  flex: 0 1 320px;
+  gap: 10px;
+}
+
+/* Audio preparation is a single flowing row, not a nested full-width heading. */
+.svc-board-subgroup-controls .svc-board-subgroup-audio.svc-audio-manager:not(.svc-children-audio) {
+  flex: 1 0 100%;
+  margin-top: 0;
+  padding: 10px 0 0;
+  align-items: center;
+  font-weight: 600;
+}
+.svc-audio-manager:not(.svc-children-audio) .svc-audio-manager-label {
+  flex: 0 0 auto;
+}
+.svc-audio-manager:not(.svc-children-audio) audio {
+  flex: 0 1 260px;
+  width: 260px;
+  height: 35px;
+}
+.svc-audio-manager:not(.svc-children-audio) strong {
+  flex: 1 1 160px;
+  max-width: none;
+  font-size: 12px;
+  font-weight: 500;
+}
+.svc-audio-manager:not(.svc-children-audio) .svc-board-subgroup-audio-actions {
+  flex: 0 1 auto;
+  min-width: 0;
+  margin-left: auto;
+  gap: 10px;
+}
