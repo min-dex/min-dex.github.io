@@ -3338,3 +3338,10 @@ Optional `photos[].slideIndex` follows the existing display lead (lyrics 1s, bla
 photo editing never changes lyric cues by itself. Generic photo output uses the
 lower 20% caption area and instrumental sections have no caption. Existing
 Cadaros photos/cues are not migrated. See `audio-lyrics-sync-runbook.md`.
+
+### Direct photo timing entry · 2026-10-18
+
+Audio-led worship items expose `사진·타이밍 편집` in their item action row.
+It opens the existing timing editor and focuses the photo section. Opening the
+shortcut does not save, mutate lyric starts, or change absolute/linked photo cues.
+The existing audio synchronization entry remains available.
