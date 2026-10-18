@@ -6,7 +6,7 @@ c.assert=assert;
  state.config.authRequired=true;state.services=[{id:'live',praiseLeader:'old',leader:'old'}];
  state.worshipSetlistArchive={loaded:true,live:{services:[{id:'live',praise_leader:'old'}]},sources:[{id:'archive',leader:'old'}]};
  const db={mindex_worship_services:{id:'live',praise_leader:'old',worship_leader:'',other:'keep'},mindex_worship_import_sources:{id:'archive',updated_at:'v1',raw_payload:{other:'keep',service:{leader:'old',songs:['keep']}}}};
- let fail=false;let writes=0;
+ let fail=false;let writes=0;const notifications=[];window.MINDEX_CONTENT_LIVE={publish:(kind,id)=>notifications.push({kind,id})};
  state.client={from(table){let patch=null;const filters=[];const q={update(p){patch=p;return q},select(){return q},eq(k,v){filters.push([k,v]);return q},single(){return Promise.resolve({data:db[table],error:null})},maybeSingle(){writes++;if(fail)return Promise.resolve({error:new Error('fixture failure')});const row=db[table];if(!filters.every(([k,v])=>row[k]===v))return Promise.resolve({data:null,error:null});Object.assign(row,patch);return Promise.resolve({data:row,error:null})}};return q}};
  worshipAtomicClient=async()=>({read:async()=>({service:{...db.mindex_worship_services,source_ref:{mindexServiceDocument:{sourceText:'Keep'}}},sections:[],elements:[]}),
    commit:async request=>{writes++;if(fail)throw Error('fixture failure');assert.equal(request.serviceId,'live');assert.deepEqual(Object.keys(request.metadata),['praise_leader']);assert.equal(request.rows.elements.length,0);Object.assign(db.mindex_worship_services,request.metadata);return {service:{...db.mindex_worship_services}};}});
@@ -23,5 +23,6 @@ c.assert=assert;
  await saveWorshipSetlistLeader('archive');assert.equal(db.mindex_worship_import_sources.raw_payload.service.leader,'서영윤 선생님');
  const beforeNoop=writes;worshipSetlistLeaderDrafts.set('archive',{original:'서영윤 선생님',value:'서영윤 선생님',saving:false});await saveWorshipSetlistLeader('archive');assert.equal(writes,beforeNoop);
  fail=true;worshipSetlistLeaderDrafts.set('archive',{original:'서영윤 선생님',value:'보존할 이름',saving:false});await saveWorshipSetlistLeader('archive');assert.equal(worshipSetlistLeaderDrafts.get('archive').value,'보존할 이름');assert.equal(worshipSetlistLeaderDrafts.get('archive').saving,false);
+ assert.equal(notifications.length,4);assert.ok(notifications.every(m=>m.kind==='setlist-archive'&&m.id==='all'));
  console.log('PASS live/archive leader save, field-only changes, conflict/failure, clear and dash placeholder');
 })()`,c);}catch(e){console.error(e);process.exitCode=1}})();

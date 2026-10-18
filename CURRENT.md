@@ -386,3 +386,9 @@ See `docs/operations-realtime.md` for guards, retained open deletions and recove
 `docs/content-realtime.md` extends the shared transport to saved service type
 settings and reference links. Detached reads preserve drafts, open documents,
 playback and scroll. No schema changes or automatic worship rewrites.
+
+## Service summaries and archive realtime · 2026-10-18
+
+See docs/operations-realtime.md. List summaries refresh without replacing open
+editors or full documents; archive cards use revision scans and changed-only
+reads, retaining leader drafts and rejecting mid-read saves.

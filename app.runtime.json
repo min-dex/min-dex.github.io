@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-operations-navigation",
+  "version": "20261018-controller-background-only",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "0e43f5e01c59ff9b92d52be1dab1181ab9cbfa9fb946f9ae8f9888e32ceae87f",
-  "runtime_sha256": "97df6423be2471e9b96c2ea4e02da66363e21168d417a6db0f36e6df0cca2462",
-  "source_bytes": 1511691,
-  "runtime_bytes": 1069485,
-  "source_gzip": 338286,
-  "runtime_gzip": 265053
+  "source_sha256": "a11df5717ad7c14f736a353b93e9568afbe32087e2d65e4c3325820954b52aaa",
+  "runtime_sha256": "e2d48d26909238e4be2fc6a610569f3399be55a70321ec13f2d03a2977e078c7",
+  "source_bytes": 1513501,
+  "runtime_bytes": 1070684,
+  "source_gzip": 338827,
+  "runtime_gzip": 265449
 }

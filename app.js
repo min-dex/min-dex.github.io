@@ -1243,6 +1243,7 @@ function schedulePresenterPreviewScaleUpdate(host = refs.detailPane) {
   // Board and sidebar updates share a frame; always measure both surfaces.
   const updateScales = () => {
     applyPresenterPreviewScales(host);
+    updatePresenterBoardBlockBackgrounds(host);
     if (refs.rightSidebar?.isConnected && !host.contains(refs.rightSidebar)) {
       applyPresenterPreviewScales(refs.rightSidebar);
     }
@@ -4158,7 +4159,8 @@ async function worshipAtomicClient() {
           && ["save_worship_service_v1", "create_worship_service_v1", "delete_worship_service_v1"].includes(name)
           && typeof result.data.committedRevision === "string") {
           window.MINDEX_WORSHIP_LIVE?.publish(args.req.serviceId);
-          if (name !== "save_worship_service_v1") window.MINDEX_CONTENT_LIVE?.publish("service-list", "all");
+          window.MINDEX_CONTENT_LIVE?.publish("service-list", "all");
+          window.MINDEX_CONTENT_LIVE?.publish("setlist-archive", "all");
         }
         if (client === state.client && !result.error && result.data?.calendar) {
           adoptDepartmentCalendarReceipt(result.data.calendar);
@@ -24558,6 +24560,7 @@ async function persistWorshipSetlistLeader(id, value, expectedLeader) {
     const cacheKey = `${state.config.url}:live-services-v4:${WORSHIP_IMPORT_SOURCE_LIST_SELECT}:${WORSHIP_IMPORT_CANDIDATE_LIST_SELECT}`;
     writeStaticSupabaseCache("worship_setlist_archive", cacheKey, [{ sources: archive.sources, candidates: archive.candidates, live: archive.live }]);
   }
+  window.MINDEX_CONTENT_LIVE?.publish("setlist-archive", "all");
   return leader;
 }
 
@@ -31363,6 +31366,37 @@ function renderPresenterBoardSlideBlocks(entries, activeIndex, serviceId) {
       ? `<div class="svc-board-slide-block" role="group" aria-label="${escapeAttr(block.label)}">${thumbs}</div>`
       : thumbs;
   }).join("");
+}
+
+function updatePresenterBoardBlockBackgrounds(host = refs.detailPane) {
+  if (!host?.querySelectorAll) return;
+  for (const grid of host.querySelectorAll(".svc-board-grid")) {
+    const origin = grid.getBoundingClientRect();
+    if (!origin.width) continue;
+    for (const block of grid.querySelectorAll(":scope > .svc-board-slide-block")) {
+      const rows = [];
+      for (const thumb of block.querySelectorAll(":scope > .svc-slide-thumb-wrap")) {
+        const rect = thumb.getBoundingClientRect();
+        if (!rect.width || !rect.height) continue;
+        let row = rows.find((candidate) => Math.abs(candidate.top - rect.top) < 1);
+        if (!row) rows.push(row = { top: rect.top, left: rect.left, right: rect.right, bottom: rect.bottom });
+        else { row.right = Math.max(row.right, rect.right); row.bottom = Math.max(row.bottom, rect.bottom); }
+      }
+      const backgrounds = [...block.querySelectorAll(":scope > .svc-board-block-background")];
+      rows.forEach((row, index) => {
+        const background = backgrounds[index] || document.createElement("span");
+        background.className = "svc-board-block-background";
+        background.setAttribute("aria-hidden", "true");
+        const css = `left:${row.left - origin.left}px;top:${row.top - origin.top}px;width:${row.right - row.left}px;height:${row.bottom - row.top}px`;
+        if (background.dataset.geometry !== css) {
+          background.style.cssText = css;
+          background.dataset.geometry = css;
+        }
+        if (!background.parentNode) block.append(background);
+      });
+      backgrounds.slice(rows.length).forEach((background) => background.remove());
+    }
+  }
 }
 
 function annotatePresenterFormStarts(entries = [], initialPreviousKey = "") {

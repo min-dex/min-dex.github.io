@@ -51,7 +51,9 @@ try:
    # Actual wrapped atomic commit publishes only after success.
    b.evaluate("db.revision='2';db.service.title='Saved';db.elements[0].config.manualLyrics='New lyrics';db.elements[0].sort_order=3;db.elements.reverse()")
    a.evaluate("atomic.commit({serviceId:sid,rows:{sections:[],elements:[]},metadata:{title:'Saved'},document:{sourceText:'Saved'}})")
-   a.wait_for_timeout(20);packet=messages.pop();b.evaluate('(payload)=>remoteReceive({payload})',packet['payload'])
+   a.wait_for_timeout(20);packet=next(m for m in messages if m['event']=='worship-committed');b.evaluate('(payload)=>remoteReceive({payload})',packet['payload'])
+   assert {m['payload']['kind'] for m in messages if m['event']=='content-committed'}=={'service-list','setlist-archive'}
+   messages.clear()
    b.wait_for_function("state.services[0].title==='Saved'")
    assert b.evaluate("atomic.baseline(sid).revision==='2'&&getServiceItems(sid)[state.selectedServiceItemIndex].id===eid&&refs.detailPane.scrollTop===320")
    assert b.evaluate("state.worshipElements.find(e=>e.id===eid).config.manualLyrics==='New lyrics'&&state.worshipElements.find(e=>e.id===eid).config.formHint==='V2-C-V1-C'&&state.worshipElements.find(e=>e.id===eid).asset.url.endsWith('clip.mp3')")

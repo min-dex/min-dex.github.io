@@ -3435,8 +3435,10 @@ are verified. This change never deletes or edits Notion pages or worship data.
 Controller thumbnails share a subtle panel background per contiguous formKey
 occurrence or scripture range (including element and translation boundaries).
 Repeated forms after another block remain separate; ungrouped title/blank/media
-slides remain outside. Ten-pixel inset/gaps and an eight-pixel radius keep active
-rings visible. Slide objects, global indexes, navigation, output HTML and saves
+slides remain outside. Background-only row fragments follow the original grid
+with an eight-pixel radius: no new rows, padding, thumbnail resizing or gap changes.
+Decorations are absolute and pointer-transparent; resize/scale updates reposition
+them without changing layout. Slide objects, global indexes, navigation, output HTML and saves
 are unchanged. Group labels remain accessible without adding duplicate headings.
 
 
