@@ -5794,7 +5794,7 @@ function renderPresenterProgressionAdd(item) {
   const plan = presenterProgressionForItem(item, serviceId);
   if (!plan.groups.length) return "";
   return `<details class="svc-progression-media">
-    <summary>송폼 배경 사진</summary>
+    <summary>배경</summary>
     <div class="svc-progression-media-controls">
       <select class="svc-presenter-input-control" data-progression-position aria-label="사진을 띄울 송폼">${presenterProgressionOptions(plan)}</select>
       <button class="btn ghost" type="button" data-progression-media-add data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(item.id)}">사진 추가</button>
