@@ -415,7 +415,7 @@
   margin: 0;
   color: #fff;
   font-size: calc(50 * var(--presenter-stage-unit));
-  font-weight: var(--presenter-weight-meta);
+  font-weight: 600;
   line-height: 1.16;
 }
 .presenter-ready-screen-message {

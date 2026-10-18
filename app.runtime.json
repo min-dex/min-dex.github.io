@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261018-bulletin-notices",
+  "version": "20261018-ready-kicker-600",
   "options": {
     "compress": false,
     "mangle": {
