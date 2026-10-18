@@ -4,12 +4,12 @@
   const key='mindex.content.committed.v1',pending=new Map(),seen=new Set(),deletedNotices=new Set();
   let channel,timer,busy=false,probing=false,edit=0;
   for(const event of ['input','change','pointerdown','keydown'])document.addEventListener(event,()=>edit++,true);
-  const identity=m=>`${m.kind}:${m.recordId}`;
+  const identity=m=>`${m.kind}:${m.kind==='scripture'?'all':m.recordId}`;
   const controller=()=>refs.detailPane?.querySelector('[data-bulletin-owner]')?.bulletinController;
   function schedule(delay=200){if(!timer&&pending.size)timer=setTimeout(()=>{timer=null;void flush();},delay);}
   function remember(id){seen.add(id);if(seen.size>256)seen.delete(seen.values().next().value);}
   function receive(m){
-    if(!m||m.project!==state.config.url||typeof m.id!=='string'||!['song','bulletin','bulletin-template','service-list','references','service-settings','setlist-archive'].includes(m.kind)||typeof m.recordId!=='string'||!m.recordId||seen.has(m.id))return;
+    if(!m||m.project!==state.config.url||typeof m.id!=='string'||!['song','bulletin','bulletin-template','service-list','references','service-settings','setlist-archive','scripture'].includes(m.kind)||typeof m.recordId!=='string'||!m.recordId||seen.has(m.id))return;
     remember(m.id);if(m.kind==='service-list')window.MINDEX_SERVICE_LIST_LIVE?.invalidate();pending.set(identity(m),m);schedule();
   }
   function publish(kind,recordId){
@@ -66,6 +66,41 @@
     if(refs.songList&&listTop!=null)refs.songList.scrollTop=listTop;
     return true;
   }
+  function scriptureBlocked(){
+    return state.module!=='scripture'||departmentRefreshBlocked()||hasDirtyChanges()||scriptureLoadPromise
+      ||(state.cleanFingerprints.scripture&&dirtyModuleFingerprint('scripture')!==state.cleanFingerprints.scripture);
+  }
+  const scriptureContext=()=>JSON.stringify([state.module,state.selectedScriptureId,state.selectedBookCode,
+    state.selectedBibleTranslationId,state.selectedBibleChapter,state.selectedBibleVerse,state.selectedBibleVerses,state.bibleTextSearchQuery,state.search,state.scriptureFilter]);
+  async function refreshScriptures(){
+    if(scriptureBlocked())return false;
+    const client=state.client,project=state.config.url,revision=edit,context=scriptureContext();
+    const previous=state.scriptures,ui=state.uiVerses;
+    const comparable=value=>JSON.stringify(dirtyComparableValue(value));
+    const before=comparable([previous,ui]);
+    // Saved excerpts have no revision column. Read this small catalogue only while
+    // visible; never read the separate Bible verse corpus or chapter caches.
+    const result=await rows(client,'mindex_scriptures',q=>q.eq('is_active',true).order('id'));
+    if(result.some(r=>!r||typeof r.id!=='string'||!r.id)||new Set(result.map(r=>r.id)).size!==result.length)throw Error('Invalid scripture catalogue');
+    if(client!==state.client||project!==state.config.url||revision!==edit||context!==scriptureContext()
+      ||scriptureBlocked()||previous!==state.scriptures||ui!==state.uiVerses||before!==comparable([state.scriptures,state.uiVerses]))return false;
+    const normalized=result.map(normalizeServerScripture),nextUi=extractUiVerses(normalized);
+    const next=normalized.filter(r=>!uiVerseSlot(r)).sort(sortScriptures);
+    const selected=getSelectedScripture(),notice=project+':scripture:'+state.selectedScriptureId;
+    if(selected&&!next.some(r=>r.id===selected.id)){
+      next.push(selected);next.sort(sortScriptures);
+      if(!deletedNotices.has(notice)){deletedNotices.add(notice);showToast('다른 곳에서 이 말씀 자료를 삭제했습니다. 현재 화면은 유지됩니다.','info');}
+    }else deletedNotices.delete(notice);
+    if(before===comparable([next,nextUi]))return true;
+    const selectedChanged=comparable(selected)!==comparable(next.find(r=>r.id===state.selectedScriptureId)||null);
+    const viewport=captureDetailViewportSnapshot();
+    state.scriptures=next;state.uiVerses=nextUi;state.scripturesLoaded=true;state.scriptureError='';
+    captureCleanFingerprint('scripture');clearSearchCaches();
+    // The sidebar is the Bible book catalogue, not the saved excerpt list.
+    // Leave reader/search DOM and chapter/translation/verse selection intact.
+    if(selectedChanged&&!isBibleTextSearchActive()){renderScriptureDetail();restoreDetailViewportSnapshot(viewport);}
+    return true;
+  }
   const sharedContext=()=>JSON.stringify([state.module,state.selectedServiceId,state.selectedServiceTypeId,state.editingReferenceId,state.editingReferenceGroupKey,state.search,state.pageTabIndex]);
   function sharedBlocked(kind){
     if(departmentRefreshBlocked()||hasDirtyChanges()||serviceDataLoadPromise||activeServiceSavePromise)return true;
@@ -107,7 +142,7 @@
     try{
       for(const [id,m] of [...pending]){
         if(m.project!==state.config.url){if(pending.get(id)===m)pending.delete(id);continue;}
-        const done=m.kind==='setlist-archive'?await window.MINDEX_ARCHIVE_LIVE?.refresh():['references','service-settings'].includes(m.kind)?await refreshShared(m.kind):m.kind==='service-list'?await window.MINDEX_SERVICE_LIST_LIVE?.refresh():m.kind==='song'?await refreshSong(m.recordId):await controller()?.refreshRemote(m.kind,m.recordId);
+        const done=m.kind==='scripture'?await refreshScriptures():m.kind==='setlist-archive'?await window.MINDEX_ARCHIVE_LIVE?.refresh():['references','service-settings'].includes(m.kind)?await refreshShared(m.kind):m.kind==='service-list'?await window.MINDEX_SERVICE_LIST_LIVE?.refresh():m.kind==='song'?await refreshSong(m.recordId):await controller()?.refreshRemote(m.kind,m.recordId);
         if(done&&pending.get(id)===m)pending.delete(id);
       }
     }catch{delay=15000;}
@@ -119,6 +154,7 @@
     try{
       window.MINDEX_SERVICE_LIST_LIVE?.reconcile();
       window.MINDEX_ARCHIVE_LIVE?.reconcile();
+      if(!scriptureBlocked())receive({id:createUuid(),project:state.config.url,kind:'scripture',recordId:'all'});
       for(const kind of ['references','service-settings'])if(!sharedBlocked(kind))receive({id:createUuid(),project:state.config.url,kind,recordId:'all'});
       // Only the visible record is fetched on recovery; no full lyrics corpus polling.
       if(state.module==='praise'&&state.selectedSongId)receive({id:createUuid(),project:state.config.url,kind:'song',recordId:state.selectedSongId});
