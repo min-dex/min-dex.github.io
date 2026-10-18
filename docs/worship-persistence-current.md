@@ -420,3 +420,7 @@ edits, templates or bulletin edits. No production schema/permission changes.
 Successful create/delete receipts now trigger read-only list reconciliation.
 Open/deferred drafts survive remote deletion until the user leaves the editor
 and draft protection clears. Existing aggregates/baselines are not list data.
+
+Common settings/reference invalidations now share content realtime; see
+`content-realtime.md`. Remote default changes are deferred while a worship,
+Presenter or bulletin document is open; atomic baselines/documents stay intact.
