@@ -9254,6 +9254,6 @@ body[data-module="presenter"] .topbar-actions > .icon-btn { flex: 0 0 35px; widt
   }
   #servicePresenterControls .svc-board-subgroup-controls :is(input, select, textarea):focus-visible {
     outline: 2px solid var(--accent);
-    outline-offset: 2px;
+    outline-offset: -2px;
   }
 }

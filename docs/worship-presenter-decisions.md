@@ -3569,6 +3569,7 @@ Explicit suppression remains authoritative. No saved rows or sequence are rewrit
 Inline controller editors have no large panel fill or outer padding. Their row
 and toolbar gaps are 5px. Text fields, selects and textareas use transparent
 backgrounds and a bottom rule, with a complete accent border on focus and the
-existing 2px keyboard focus outline. Select arrows, invalid/disabled states,
+2px keyboard focus outline drawn inside the field (offset -2px), without an
+outward ring or layout shift. Select arrows, invalid/disabled states,
 buttons, automatic textarea heights and output rendering remain intact. This
 exception applies only inside servicePresenterControls subgroup editors.
