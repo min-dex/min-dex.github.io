@@ -36,12 +36,7 @@ def main():
                   if(order().indexOf(target.id)!==before.indexOf(target.id)+1) throw Error('Move down failed');
                   clickAction('up');
                   if(JSON.stringify(order())!==JSON.stringify(before)) throw Error('Move up failed');
-                  clickAction('toggle-visibility');
-                  const hidden=servicePrepEditorItems(service.id).find(item=>item.id===target.id);
-                  if(!parseServiceItemMemo(hidden.memo).hiddenInPresentation) throw Error('Visibility lost');
-                  refs.detailPane.innerHTML=renderPresenterSectionEditorLayer(service);
-                  const visibilityButton=refs.detailPane.querySelector(`[data-presenter-section-item-action="toggle-visibility"][data-service-item-index="${hidden._origIndex}"]`);
-                  if(visibilityButton?.getAttribute('aria-pressed')!=='true') throw Error('Visibility state unclear');
+                  if(refs.detailPane.querySelector('[data-presenter-section-item-action="toggle-visibility"]')) throw Error('Retired hide control remains');
                   window.confirm=message=>{confirmations.push(message);return false};
                   clickAction('delete');
                   if(!getServiceItems(service.id).some(item=>item.id===target.id)) throw Error('Cancelled deletion removed item');
@@ -53,7 +48,7 @@ def main():
                   const suppression=state.templateElementSuppressions.get(target.id);
                   if(!suppression || !isTemplateSuppressedServiceItem(suppression)) throw Error('Missing suppression');
                   if(!confirmations.at(-1)?.includes('기본 예배 양식과 찬양·성경 DB는 바뀌지 않습니다.')) throw Error('Missing delete scope');
-                  return {moved:true,hidden:true,deleted:true,suppression:true,confirmation:true,cancelled:true};
+                  return {moved:true,hideControlRemoved:true,deleted:true,suppression:true,confirmation:true,cancelled:true};
                 }''')
                 print('PASS section editor', engine, result)
                 browser.close()
