@@ -18640,6 +18640,7 @@ function parseSongMemo(value) {
   try {
     const parsed = typeof value === "string" ? JSON.parse(value) : value;
     return {
+      versionOutputTitles: normalizeVersionOutputTitles(parsed?.versionOutputTitles),
       versions: Array.isArray(parsed?.versions) ? parsed.versions : [],
       scripture: cleanList(parsed?.scripture),
       metadata: normalizeSongMetadata(parsed?.metadata),
@@ -18683,7 +18684,9 @@ function serializeSongMemo(song, options = {}) {
   const metadata = options.omitPromotedMetadata
     ? omitPromotedSongMetadata(song, normalizeSongMetadata(song.metadata))
     : normalizeSongMetadata(song.metadata);
+  const versionOutputTitles = songVersionOutputTitles(song);
   const payload = {
+    ...(Object.keys(versionOutputTitles).length ? { versionOutputTitles } : {}),
     ...(scripture.length ? { scripture } : {}),
     ...(relatedSongIds.length ? { related_song_ids: relatedSongIds } : {}),
     ...(Object.keys(metadata).length ? { metadata } : {}),
@@ -23595,13 +23598,13 @@ function renderPresenterSidebarServiceSummary(service) {
   return `
     <section class="service-sidebar-section service-sidebar-section--presenter-context" aria-label="현재 예배">
       <div class="service-sidebar-presenter-context">
-        <strong class="service-sidebar-presenter-title">${escapeHtml(serviceName)}</strong>
+        <strong class="service-sidebar-presenter-title" title="${escapeAttr(serviceName)}">${escapeHtml(serviceName)}</strong>
         <div class="service-sidebar-presenter-meta">
           ${renderServiceDateStatus(service)}
           ${details.length ? `<span class="service-sidebar-presenter-date">${escapeHtml(details.join(" · "))}</span>` : ""}
         </div>
         ${noGathering ? '<span class="service-sidebar-presenter-date">집회 없음</span>' : `<button class="svc-present-btn svc-presenter-launch svc-presenter-launch--sidebar svc-presenter-launch--${launchTone}${anyOutputOpen ? " is-stop" : ""}" type="button" data-presenter-action="${escapeAttr(launchAction)}" data-service-id="${escapeAttr(service.id)}" aria-label="${escapeAttr(launchLabel)}" title="${escapeAttr(launchLabel)}">
-          <i data-lucide="${escapeAttr(launchIcon)}"></i>
+          <i data-lucide="${escapeAttr(launchIcon)}"></i><span>${escapeHtml(launchLabel)}</span>
         </button>`}
       </div>
     </section>`;

@@ -20,10 +20,10 @@
 | --- | --- | --- |
 | 아이패드 원격 조작 | QR/연결 번호로 붙어 현재 장·목록·좌우 터치/스와이프·음원을 제어하는 별도 원격 콘솔은 미이관. Mindex 접속 현황 패널은 상태 확인용이다. | Elem Remote/RemoteConsole*.swift, Mindex mindex.monitor.js |
 | 자동 넘김 복귀 R | 2026-10-18 이관: R/복귀 버튼으로 현재 재생 위치를 유지하며 자동 넘김 복귀. 기존 재생 버튼은 재시작 용도로 유지. | Elem SongAudioPlayer.resumeAutoAdvance, Mindex mindex.song-timing.js play |
-| 음원 서서히 끄기 | Elem S의 1.2초 fade-out 정지 동작은 미이관. 새 P는 제목에서 재생 시작만 한다. | Elem SongAudioPlayer.fadeOutAndStop, Mindex service music transport |
+| 음원 서서히 끄기 | Mindex의 `페이드아웃 정지` 체크박스로 구현. 현재 기본값은 켜짐이며 설정은 서버 상태 저장 경로를 사용한다. 명시적 음악 정지에 감쇠를 적용하며 일시정지는 즉시 처리한다. S 단축키는 이관하지 않는다. | Mindex service music transport, docs/server-state-current.md |
 | 박자 맞춤 타이밍 입력 | 2026-10-18 이관: 보수적 박자 후보 분석·BPM/기준 박 지정·새 기록에만 선택적 맞춤·±0.2초 조정. 가사 정렬 또는 기존 38곡 자동 수정은 아니다. | Elem BeatGrid.swift / SongTimingPanel.swift, Mindex mindex.song-timing.js open |
 | 어린이 성경책 쪽수 | 장별 실물 성경 쪽수표를 관리하여 봉독 표지에 p.152처럼 붙이는 기능은 미이관. 검색 결과의 페이지 번호와 별개다. | Elem Model/BiblePages.swift 및 README 성경 쪽수, Mindex scripture rendering |
-| 헌금위원 명단표 | 기존 Mindex 담당자 입력/교회력 연결은 있으나 Elem의 날짜별 헌금위원.md 읽기·명단대로 복귀·주차별 예외 편집 흐름은 미이관. | Elem OfferingCommitteeField / 명단 모델, Mindex service assignee handling |
+| 헌금위원 명단표 | 어린이부 봉헌기도자/헌금위원과 운영표 children_prayer를 양방향 atomic save로 연동. 청소년부 대표·봉헌기도, 청년부 대표기도도 동일하게 연동하며 빈칸도 공유. 별도 명단 파일·Notion은 사용하지 않는다. 배포 검증은 department-assignee-link-deployment-20261018.json 참조. | Elem OfferingCommitteeField / 명단 모델, Mindex service assignee handling |
 | Keynote 고급 처리 | Mindex macOS Electron에 Keynote 단계별 PNG 반입은 있다. Elem의 원본 CALayer 애니메이션 재생·타임라인 되감기와 첫 두 장의 안내 양식 자동 추출/제외는 동등하게 이관되지 않았다. 웹 Pages 배포에는 네이티브 .key 반입이 없다. 웹 PPTX 경로와는 별개다. | electron/keynote-importer.js keynoteExportScript, Elem KeynoteScene*.swift / KeynoteExporter.swift |
 | 전체 예배 PNG 내보내기 | Elem SlideExporter의 전체 덱 1920×1080 PNG 일괄 내보내기는 Mindex presenter에 같은 기능이 확인되지 않았다. | Elem Views/SlideExporter.swift / CLI --export-png |
 

@@ -47,6 +47,7 @@ NODE_TESTS = (
 )
 SMOKES = (
     "smoke_version_output_title.py",
+    "smoke_sidebar_control_affordance.py",
     "smoke_citation_translation_editor.py",
     "smoke_explicit_worship_order.py",
     "smoke_section_editor_actions.py",
