@@ -3549,3 +3549,10 @@ or media. Both the initial regular-slot filter and unmatched-extra filter use
 this rule. Form presets alone do not make an empty template slot populated.
 A populated hymn cannot match the closing image by section or ordinal alone.
 Explicit suppression remains authoritative. No saved rows or sequence are rewritten.
+
+Inline controller editors have no large panel fill or outer padding. Their row
+and toolbar gaps are 5px. Text fields, selects and textareas use transparent
+backgrounds and a bottom rule, with a complete accent border on focus and the
+existing 2px keyboard focus outline. Select arrows, invalid/disabled states,
+buttons, automatic textarea heights and output rendering remain intact. This
+exception applies only inside servicePresenterControls subgroup editors.
