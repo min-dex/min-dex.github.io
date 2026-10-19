@@ -18614,7 +18614,6 @@ function parseSongMemo(value) {
   try {
     const parsed = typeof value === "string" ? JSON.parse(value) : value;
     return {
-      childrenAudioSets: parsed?.childrenAudioSets && typeof parsed.childrenAudioSets === "object" && !Array.isArray(parsed.childrenAudioSets) ? parsed.childrenAudioSets : {},
       versions: Array.isArray(parsed?.versions) ? parsed.versions : [],
       scripture: cleanList(parsed?.scripture),
       metadata: normalizeSongMetadata(parsed?.metadata),
@@ -18633,9 +18632,7 @@ function serializeSongMemo(song, options = {}) {
   const metadata = options.omitPromotedMetadata
     ? omitPromotedSongMetadata(song, normalizeSongMetadata(song.metadata))
     : normalizeSongMetadata(song.metadata);
-  const childrenAudioSets = parseSongMemo(song.memo).childrenAudioSets;
   const payload = {
-    ...(childrenAudioSets && Object.keys(childrenAudioSets).length ? { childrenAudioSets } : {}),
     ...(scripture.length ? { scripture } : {}),
     ...(relatedSongIds.length ? { related_song_ids: relatedSongIds } : {}),
     ...(Object.keys(metadata).length ? { metadata } : {}),
