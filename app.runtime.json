@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-card-controls-focus",
+  "version": "20261020-scripture-sidebar-order",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "3d08e37c12340d3b3818e2b2b2ac996fc017fa4645577fe2c5cb3bc38aedcb6a",
-  "runtime_sha256": "89bd841bb220301948e8f65960b50e1615a3d29c9a28129a0fd52e471f121866",
-  "source_bytes": 1518003,
-  "runtime_bytes": 1073100,
-  "source_gzip": 339329,
-  "runtime_gzip": 265254
+  "source_sha256": "56bf52054113a2677341d91cba439d736a4acfb2116b91963a0be7adea834662",
+  "runtime_sha256": "eab8b2680db068c9b73c9445dadb7aa94ed50842de8ea1aa97047461c3fb57f8",
+  "source_bytes": 1518128,
+  "runtime_bytes": 1073181,
+  "source_gzip": 339368,
+  "runtime_gzip": 265297
 }
