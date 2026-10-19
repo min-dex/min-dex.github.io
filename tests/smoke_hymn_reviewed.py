@@ -10,7 +10,7 @@ def main():
             page = browser.new_page()
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-            page.wait_for_function("typeof presenterHymnOnceOnlyIntro === 'function'")
+            page.wait_for_function("typeof presenterHymnOnceOnlyIntro === 'function' && typeof serializeServiceItemMemo === 'function' && typeof presenterFormPlanForServiceItem === 'function'")
             result = page.evaluate('''() => {
               const assert=(ok,message)=>{if(!ok)throw Error(message)};
               const checked=[];
