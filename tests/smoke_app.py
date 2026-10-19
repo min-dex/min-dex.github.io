@@ -1540,7 +1540,7 @@ def main() -> int:
                 page.click("[data-service-list]")
                 page.wait_for_function("() => state.selectedServiceTypeId === '__list'", timeout=5000)
                 page.click('.module-switcher [data-home-module="service"]')
-                page.wait_for_function("() => state.selectedServiceTypeId === '__week'", timeout=5000)
+                page.wait_for_function("() => state.selectedServiceTypeId === null", timeout=5000)
                 service_rail_state = page.evaluate(
                     """
                     (() => ({
@@ -1555,15 +1555,15 @@ def main() -> int:
                 )
                 if (
                     service_rail_state["module"] == "service"
-                    and service_rail_state["selectedTypeId"] == "__week"
+                    and service_rail_state["selectedTypeId"] == ""
                     and service_rail_state["selectedServiceId"] == ""
-                    and service_rail_state["hasDashboard"]
-                    and service_rail_state["activeWeekRows"] == 1
+                    and not service_rail_state["hasDashboard"]
+                    and service_rail_state["activeWeekRows"] == 0
                     and service_rail_state["activeListRows"] == 0
                 ):
-                    pass_("service-rail-click-opens-week-board", json.dumps(service_rail_state, ensure_ascii=False))
+                    pass_("service-rail-click-opens-verse-landing", json.dumps(service_rail_state, ensure_ascii=False))
                 else:
-                    fail("service-rail-click-opens-week-board", json.dumps(service_rail_state, ensure_ascii=False))
+                    fail("service-rail-click-opens-verse-landing", json.dumps(service_rail_state, ensure_ascii=False))
                 calendar_alternative_service_skip_state = page.evaluate(
                     """
                     (() => {

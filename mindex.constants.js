@@ -341,7 +341,14 @@
     },
     SUPABASE_PAGE_SIZE: 2000,
     UI_SCRIPTURE_PREFIX: "Mindex UI:",
-    UI_VERSE_SLOTS: ["home", "activities", "praise", "scripture"],
+    UI_VERSE_SLOTS: ["home", "activities", "service", "bulletin", "praise", "scripture", "operations"],
+    UI_VERSE_DEFAULTS: {
+      service: { reference: "Psalm 95:6", text: "Come, let us bow down in worship, let us kneel before the Lord our Maker;" },
+      bulletin: { reference: "Psalm 133:1", text: "How good and pleasant it is when God’s people live together in unity!" },
+      praise: { reference: "Psalm 96:1", text: "Sing to the Lord a new song; sing to the Lord, all the earth." },
+      scripture: { reference: "Psalm 119:105", text: "Your word is a lamp for my feet, a light on my path." },
+      operations: { reference: "1 Corinthians 14:40", text: "But everything should be done in a fitting and orderly way." },
+    },
     LOADING_MESSAGE: "불러오는 중...",
     CONNECTION_LIST_TITLE: "연결할 수 없음",
     DB_CONNECTION_EMPTY_VERSE: {

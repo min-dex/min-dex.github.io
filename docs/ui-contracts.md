@@ -87,8 +87,10 @@ Home hierarchy:
 
 - Worship is the primary operational area.
 - Home shows the week dashboard: `이번 주 예배` plus `다가오는 예배`.
-- The Worship/Service tab opens to the weekly board (`최근 예배`) by default.
-  `전체 예배` remains a separate list action (navigation commit `91fba0fd`).
+- Module rail icons open verse landing pages titled 예배, 주보, 찬양, 말씀 and 운영.
+  Re-clicking an icon clears its selection/search after the existing unsaved-edit
+  confirmation. Page tabs, history and explicit detail links retain their target.
+  `최근 예배` and `교회력` are sidebar destinations, not default rail targets.
 - Praise and Scripture are major resources.
 - Calendar and References are home utilities.
 - Template structure is an internal management concept. Do not surface it in
@@ -587,8 +589,23 @@ and bulletin editor/preview in Chromium and WebKit; no service data is saved.
 
 - Home weekly worship cards show abbreviated scripture references and the sermon assignee separated by ` / `. Omit the separator when either value is empty; allow wrapping and expose the complete metadata on hover. This is display-only and does not rewrite worship records or output/print references.
 
-The Scripture empty-state verse starts a new line after each comma while retaining
-punctuation and text. Other module verse wrapping remains unchanged.
+All app verse screens use one 45-character (including spaces) wrapping rule.
+Sentence punctuation splits first; long segments split at commas and then word
+boundaries. Input newlines and repeated whitespace normalize to one space. There
+is no module-specific comma rule or manual line-break mode. Source text stays intact.
+
+## Module verse landings ·2026-10-20
+
+NIV defaults: service Psalm95:6; bulletin Psalm133:1; praise Psalm96:1; scripture
+Psalm119:105; operations1Corinthians14:40. Stored UI-verse records override these
+small display defaults; Bible corpora and operational records are not rewritten.
+The home weekly board is retained. Operations has its own `operations` route;
+calendar/manuals/setlists/references remain explicit sidebar routes with their
+existing titles. Root landing snapshots contain no selected detail or search.
+
+NIV source checks: [Psalm95:6](https://www.biblegateway.com/passage/?search=Psalm+95:6&version=NIV),
+[Psalm133:1](https://www.biblegateway.com/passage/?search=Psalm+133:1&version=NIV),
+[1Corinthians14:40](https://www.biblegateway.com/passage/?search=1+Corinthians+14:40&version=NIV).
 
 
 ### Static shell icons and announcement labels · 2026-10-20
