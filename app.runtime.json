@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261019-closing-hymn-preservation",
+  "version": "20261019-inset-editor-focus",
   "options": {
     "compress": false,
     "mangle": {
