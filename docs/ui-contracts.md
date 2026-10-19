@@ -589,3 +589,13 @@ and bulletin editor/preview in Chromium and WebKit; no service data is saved.
 
 The Scripture empty-state verse starts a new line after each comma while retaining
 punctuation and text. Other module verse wrapping remains unchanged.
+
+
+### Static shell icons and announcement labels · 2026-10-20
+
+Normal app startup hydrates static shell icons after caching DOM refs, without
+depending on a later detail renderer. Restored and empty tabs retain icons on
+reload. Presenter output uses its existing separate initialization.
+Announcement editor disclosure reads 상하단 문구; fields read 상단 / 하단,
+including accessible labels. Stored content and output remain unchanged.
+Coverage: tests/smoke_shell_icons.py (offline Chromium/WebKit).

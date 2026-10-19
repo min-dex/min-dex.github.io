@@ -1107,3 +1107,13 @@ Cross-edition wording and unconfirmed impression identity are not corpus errors
 or required corrections. Source/edition history and actual source-conformance
 repair evidence remain separate. No Bible body, production DB, service or record
 changes. Rebuild/version the runtime for the approved web release.
+
+
+## Static shell icons and announcement labels · 2026-10-20
+
+- Hydrate static app-shell icons once at normal init, before initial module render;
+  empty/restored modules no longer rely on an unrelated global icon refresh.
+- Announcement disclosure/field labels: 상하단 문구 / 상단 / 하단 (aria labels too).
+- Scoped Chromium/WebKit initial/reload checks pass for Scripture/Praise/Service.
+  Compiled release screenshots and isolated announcement fields verified in both.
+- No production records, music, presenter output or bulletin printing changed.

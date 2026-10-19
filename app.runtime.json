@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-bible-source-review",
+  "version": "20261020-shell-icons-labels",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "295871fa7461db8b77bfee90738e83bc4f3a62f92a7f8f59e367616fd5b5a246",
-  "runtime_sha256": "36dce2a7fdf48eda9d3a4906df420c8de7a8e44b9ce94eb9d45b025b9bd5f45c",
-  "source_bytes": 1518334,
-  "runtime_bytes": 1073388,
-  "source_gzip": 339519,
-  "runtime_gzip": 265434
+  "source_sha256": "dcdc0a8ae650707c6b4d008b5b9c9e81244b739d05d519dc3b381a3e62f65eb3",
+  "runtime_sha256": "ae06858ed0e4ff0346d8384c670f2de89a5ce4fc0e78036a5ac0bf8331166179",
+  "source_bytes": 1518396,
+  "runtime_bytes": 1073368,
+  "source_gzip": 339553,
+  "runtime_gzip": 265433
 }
