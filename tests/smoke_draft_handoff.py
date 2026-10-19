@@ -36,13 +36,17 @@ try:
       cacheRefs();state.cleanFingerprints.scripture=dirtyModuleFingerprint('scripture');
       await MINDEX_SERVER_STORAGE.initialize(state.client,'fixture');
      }''')
-     page.wait_for_selector('#draftHandoffButton');pages.append(page)
+     assert page.locator('#draftHandoffButton').count()==0;pages.append(page)
     a,b=pages
     a.evaluate("()=>{state.scriptures[0].body='Draft from A';state.dirty.scripture=true;MINDEX_EDITOR_DRAFTS.capture();}")
-    a.wait_for_function("document.querySelector('#draftHandoffButton').textContent.includes('1')")
+    a.evaluate('()=>MINDEX_DRAFT_HANDOFF.open()')
+    a.get_by_role('button',name='이 초안 이어쓰기',exact=True).wait_for()
+    a.get_by_role('button',name='닫기',exact=True).click()
+    a.locator('.draft-handoff-dialog').wait_for(state='detached')
     b.evaluate('()=>MINDEX_DRAFT_HANDOFF.refresh()')
-    assert '1' not in b.locator('#draftHandoffButton').inner_text()
-    b.click('#draftHandoffButton');b.get_by_text('다른 기기 연결',exact=True).click()
+    b.evaluate('()=>MINDEX_DRAFT_HANDOFF.open()')
+    assert b.get_by_role('button',name='이 초안 이어쓰기',exact=True).count()==0
+    b.get_by_text('다른 기기 연결',exact=True).click()
     b.get_by_label('다른 기기 연결 코드').fill(json.dumps({'mindexDraft':1,'project':'wrong','token':'a'*64}))
     b.get_by_role('button',name='이 기기 연결',exact=True).click()
     b.wait_for_function("document.querySelector('[data-handoff-status]').textContent.includes('같은 프로젝트')")
@@ -50,15 +54,16 @@ try:
     b.get_by_role('button',name='이 기기 연결',exact=True).click()
     b.wait_for_function("document.querySelector('[data-handoff-status]').textContent.includes('기기를 연결')")
     b.get_by_role('button',name='닫기',exact=True).click()
-    b.wait_for_function("document.querySelector('#draftHandoffButton').textContent.includes('1')")
+    b.locator('.draft-handoff-dialog').wait_for(state='detached')
     assert b.evaluate('state.scriptures[0].body')=='Original'
     # Remote draft is offered explicitly; current edit must remain intact.
     b.evaluate("()=>{state.scriptures[0].body='B still typing';state.dirty.scripture=true;}")
-    b.click('#draftHandoffButton');b.get_by_role('button',name='이 초안 이어쓰기',exact=True).click()
+    b.evaluate('()=>MINDEX_DRAFT_HANDOFF.open()');b.get_by_role('button',name='이 초안 이어쓰기',exact=True).click()
     assert b.evaluate('state.scriptures[0].body')=='B still typing'
     b.get_by_role('button',name='닫기',exact=True).click()
+    b.locator('.draft-handoff-dialog').wait_for(state='detached')
     b.evaluate("()=>{state.scriptures[0].body='Original';state.dirty.scripture=false;}")
-    b.on('dialog',lambda d:d.accept());b.click('#draftHandoffButton');b.get_by_role('button',name='이 초안 이어쓰기',exact=True).click()
+    b.on('dialog',lambda d:d.accept());b.evaluate('()=>MINDEX_DRAFT_HANDOFF.open()');b.get_by_role('button',name='이 초안 이어쓰기',exact=True).click()
     b.wait_for_function("state.scriptures[0].body==='Draft from A'")
     assert b.evaluate('state.dirty.scripture')
     assert a.evaluate('state.scriptures[0].body')=='Draft from A'

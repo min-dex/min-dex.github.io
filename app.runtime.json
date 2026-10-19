@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261019-audio-db-only",
+  "version": "20261019-quiet-draft-toolbar",
   "options": {
     "compress": false,
     "mangle": {
