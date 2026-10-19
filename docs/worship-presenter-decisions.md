@@ -3522,3 +3522,20 @@ classified as a liturgical body from its shared section heading/key. Saved song,
 version and form sequence remain authoritative; actual creed/prayer siblings keep
 their liturgical handling. This fixes the historical sending hymn under a
 projected 공동체고백 heading without rewriting sections, elements, forms or links.
+
+
+## Private draft handoff and legacy timing links · 2026-10-19
+
+Draft arrivals update an explicit handoff list, never a running editor or output.
+Restore requires the original document baseline, no dirty fields, and no active
+save/playback/output. Separate author keys retain concurrent drafts; pairing only
+shares the dedicated private draft namespace, not device journals or recovery.
+See `server-state-current.md` for connection and failure behavior.
+
+Legacy timing links preserve the original target identity. Worship-occurrence
+profiles use the existing atomic worship save; version profiles use version CAS.
+Different existing public timing is never silently replaced. Verify uploaded audio
+bytes and read back the saved attachment; keep legacy originals. The audited
+production MR already has public timing, but eight of nineteen cues differ from
+the retained legacy copy. Its public file passes independent SHA-256 validation;
+no operational timing replacement was made during this audit.
