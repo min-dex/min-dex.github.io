@@ -135,3 +135,14 @@ retain filename and native selection. Search/transport geometry is excluded.
 Warnings, disabled and keyboard focus stay explicit. Section template actions
 use outlined neutral buttons with a plus,35px target and10px gaps; item-add
 buttons align to their30px editor row. Screen-only; no output/print changes.
+
+
+## Recognizable sidebar controls · 2026-10-19
+
+Praise and Scripture filter buttons retain a neutral field surface, visible
+border and 5px inset at rest. Selection uses accent fill/border; hover changes
+the surface without losing selection, and keyboard focus has a separate outline.
+Do not apply the bare DB-link style to filters. Keep Praise 3-by-2 and Scripture
+4-column grouping. Presenter sidebar context uses a neutral bordered surface;
+its launch control visibly says its existing start/stop action. Stop remains
+danger-colored. This is appearance only: output lifecycle/data stay unchanged.
