@@ -1400,6 +1400,10 @@ function presenterTitleOnlySlide(item, section, index, titleText = "") {
 }
 
 function isLiturgicalBodyServiceItem(item = {}) {
+  // Section headings are shared by siblings; they cannot turn a saved praise
+  // item into a creed/prayer and bypass its selected version and form sequence.
+  if (serviceMemoElementType(parseServiceItemMemo(item.memo)) === "praise"
+    || isSongServiceLabel(item.label) || isSpecialSongServiceItem(item)) return false;
   const sectionKey = String(item?._worshipSectionKey || "").trim();
   if (sectionKey === "creed" || sectionKey === "lords_prayer" || sectionKey === "community_confession") return true;
   return isLiturgicalBodyLabel(item?.label, item?.raw_title, item?._worshipSectionTitle)

@@ -3513,3 +3513,12 @@ Schema adapters retaining praise input flavor in config/content_state remain.
 Legacy service/section identifiers keep exact-key mappings and preserve unknown
 strings. Preparation labels also ignore inherited object properties. No alias
 lookup may treat prototype names as registered values.
+
+
+## Praise within liturgical-titled sections · 2026-10-19
+
+A praise element (typed praise, praise label or special-song slot) must not be
+classified as a liturgical body from its shared section heading/key. Saved song,
+version and form sequence remain authoritative; actual creed/prayer siblings keep
+their liturgical handling. This fixes the historical sending hymn under a
+projected 공동체고백 heading without rewriting sections, elements, forms or links.
