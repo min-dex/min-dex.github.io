@@ -238,3 +238,6 @@ reserved Safari, so this empty marker cleanup is deferred. It is not audio
 or a backup; do not claim zero remaining Storage objects.
 Local37 unit+52 smoke and Linux branch gate passed before latest-main merge.
 Latest toolbar removal is preserved. Final deployment verification is separate.
+
+복구 버튼의 표시 이름은 `임시 저장본 복구`이며 확인·완료·오류 안내도 같은
+용어를 사용한다. 저장 키, 복구 조건, 확인 절차와 명시적 저장 동작은 그대로다.
