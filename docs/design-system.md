@@ -144,5 +144,7 @@ border and 5px inset at rest. Selection uses accent fill/border; hover changes
 the surface without losing selection, and keyboard focus has a separate outline.
 Do not apply the bare DB-link style to filters. Keep Praise 3-by-2 and Scripture
 4-column grouping. Presenter sidebar context uses a neutral bordered surface;
-its launch control visibly says its existing start/stop action. Stop remains
+its left text column stacks title, date, then temporal status. The icon-only
+35px launch control sits vertically centered against the whole text column,
+with its existing start/stop tooltip and accessible name. Stop remains
 danger-colored. This is appearance only: output lifecycle/data stay unchanged.

@@ -5331,11 +5331,11 @@ body[data-theme="dark"] .service-week-card:hover {
 .svc-present-btn.svc-presenter-launch--sidebar {
   grid-column: 2;
   grid-row: 1;
-  width: auto;
-  min-width: 0;
+  width: 35px;
+  min-width: 35px;
   height: 35px;
   margin: 0;
-  padding: 0 10px;
+  padding: 0;
   gap: 5px;
   justify-content: center;
   border: 1px solid var(--line-2);
@@ -8524,15 +8524,12 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .svc-media-order-row > span { flex: 1 1 100px; min-width: 0; overflow-wrap: anywhere; font-size: 12px; }
 
 .service-sidebar-presenter-meta {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  grid-column: 1;
+  display: grid;
   gap: 5px;
   min-width: 0;
 }
-.service-sidebar-presenter-meta .service-date-status { padding: 0; background: transparent; }
-.service-sidebar-presenter-meta .service-date-status::after { content: "·"; margin-left: 5px; }
+.service-sidebar-presenter-meta .service-date-status { padding: 0; background: transparent; justify-self: start; }
 .service-sidebar-presenter-meta .service-sidebar-presenter-date { font-weight: 500; }
 
 /* Publisher split/relocated labels must fit without exposing storage slots. */

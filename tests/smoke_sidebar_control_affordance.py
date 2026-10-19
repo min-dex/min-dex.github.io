@@ -47,8 +47,15 @@ try:
    page.evaluate('''()=>{
     const root=document.querySelector('.service-sidebar-presenter-context');
     const button=root.querySelector('button');
-    if(button.dataset.presenterAction!=='open'||!button.textContent.includes('송출'))throw Error('start action/label');
+    if(button.dataset.presenterAction!=='open'||!button.getAttribute('aria-label').includes('송출'))throw Error('start action/label');
     if(button.getBoundingClientRect().right>root.getBoundingClientRect().right)throw Error('card overflow');
+    if(button.textContent.trim())throw Error('visible launch text remains');
+    const copy=root.querySelector('.service-sidebar-presenter-meta');
+    const children=[...copy.children];
+    if(!children[0].matches('strong')||!children[1].matches('.service-sidebar-presenter-date')||!children[2].matches('.service-date-status'))throw Error('text order');
+    const rect=copy.getBoundingClientRect(),btn=button.getBoundingClientRect();
+    if(Math.abs((rect.top+rect.bottom)/2-(btn.top+btn.bottom)/2)>1)throw Error('button not vertically centered');
+    if(children.some((e,i)=>i&&e.getBoundingClientRect().top<children[i-1].getBoundingClientRect().bottom))throw Error('text not stacked');
     isPresenterOutputWindowOpen=()=>true;
     const html=renderPresenterSidebarServiceSummary(sidebarFixtureService);
     if(!html.includes('data-presenter-action="stop"')||!html.includes('is-stop'))throw Error('stop changed');
