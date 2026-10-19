@@ -1098,3 +1098,12 @@ Audio physical playback and independent remote audio digest comparison are not
 claimed. Completion receipt:
 docs/server-state-verification-20261019.json. Unrelated AGENTS/fullscreen edits
 remain untouched. This completion record is maintained on the task branch.
+
+
+## Bible source review classification · 2026-10-20
+
+The edition disclosure now explains that retained provider text is the reading
+baseline. Cross-edition wording and unconfirmed impression identity are not
+corpus errors or required corrections. Source/edition histories and actual source
+conformance/repair evidence remain separate. No Bible body, production DB, service
+or record changes. Runtime/version rebuilt for the approved web release.

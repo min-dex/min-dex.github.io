@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-card-controls-focus",
+  "version": "20261020-bible-source-review",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "3d08e37c12340d3b3818e2b2b2ac996fc017fa4645577fe2c5cb3bc38aedcb6a",
-  "runtime_sha256": "89bd841bb220301948e8f65960b50e1615a3d29c9a28129a0fd52e471f121866",
-  "source_bytes": 1518003,
-  "runtime_bytes": 1073100,
-  "source_gzip": 339329,
-  "runtime_gzip": 265254
+  "source_sha256": "a8d203eb5adcb4893234349f1d19b1782958f17c3bc4667007b964692b5fcb71",
+  "runtime_sha256": "046b45dd430fafd1aa5f30f253a03a10e7c6cc8e1f70c859ad13e97ee911a3b1",
+  "source_bytes": 1518209,
+  "runtime_bytes": 1073307,
+  "source_gzip": 339480,
+  "runtime_gzip": 265392
 }
