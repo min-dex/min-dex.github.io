@@ -48,6 +48,7 @@
  }
  function schedule(){if(!timer)timer=setTimeout(()=>{timer=null;void flush()},300)}
  function queue(scope,key,value){
+  if(typeof key!=='string'||!key)return false;
   if(transport(key)){
    value===null?ephemeral.delete(key):ephemeral.set(key,String(value));
    if(ready&&key!=='mindex.presenter.signal')queue('local',recoveryKey(key),value);
@@ -163,5 +164,5 @@
   setItem:(key,value)=>setItem('local',key,value),removeItem:key=>setItem('local',key,null)};
  window.addEventListener('beforeunload',event=>{if(pending()){event.preventDefault();event.returnValue=''}});
  window.addEventListener('online',()=>{if(ready)void retry()});
- window.MINDEX_SERVER_STORAGE={initialize,getItem,setItem,updateItem:(scope,key,update)=>setItem(scope,key,update),queue,flush,retry,journal,get ready(){return ready},get pending(){return pending()}};
+ window.MINDEX_SERVER_STORAGE={initialize,keys:scope=>ready?stores[namespace(scope,'')].keys():[],getItem,setItem,updateItem:(scope,key,update)=>setItem(scope,key,update),queue,flush,retry,journal,get ready(){return ready},get pending(){return pending()}};
 })();

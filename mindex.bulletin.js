@@ -1139,6 +1139,7 @@
       target.backupPending=true;
       const accepted=window.MINDEX_SERVER_STORAGE?.queue("local",target.key,JSON.stringify({version:3,...value,savedAt,...(templateSession&&target===doc?{templateDirty:target.dirty,templateRevision:target.revision}:{})}));
       if(!accepted){target.backupPending=false;target.backupUnavailable=true;}
+      if(target.dirty)window.MINDEX_DRAFT_HANDOFF?.publish(templateSession&&target===doc?'bulletin-template':'bulletin',templateSession&&target===doc?TEMPLATE_KEY:String(target.id),{schema:1,revision:target.revision,value},target.source?.title||'주보 초안');
       status();
     }
     async function retainRecovery(target,value) {
@@ -1512,7 +1513,19 @@
     }
     function remoteIdentity(){return doc?{kind:templateSession?"bulletin-template":"bulletin",recordId:templateSession?TEMPLATE_KEY:q("[data-bulletin-service]").value}:null;}
     void load(options.serviceId);
-    return {destroy, refreshRemote, remoteIdentity, reload(){return load(q("[data-bulletin-service]").value);}};
+    function handoffIdentity(){const id=remoteIdentity();return id?{kind:id.kind,id:id.recordId}:null;}
+    async function restoreHandoff(draft){
+      if(!draft||draft.schema!==1||remoteBlocked()){saveError='현재 입력·저장·인쇄를 마친 뒤 초안을 이어 써 주세요.';status();return false;}
+      if(draft.revision!==doc.revision){saveError='초안을 만든 뒤 저장본이 바뀌었습니다. 기존 초안은 보존됩니다.';status();return false;}
+      if(!window.confirm('연결된 기기의 주보 초안을 편집창에 불러올까요?'))return false;
+      const target=doc,request=serial,edit=interactionRevision,before=JSON.stringify(snapshot(target));
+      try{
+        await retainRecovery(target,snapshot(target));
+        if(remoteBlocked()||doc!==target||serial!==request||edit!==interactionRevision||JSON.stringify(snapshot(target))!==before)return false;
+        remember();Object.assign(target,normalizeSnapshot(draft.value));persist();properties();preview();status();return true;
+      }catch(e){saveError=e.message;status();return false;}
+    }
+    return {destroy, refreshRemote, remoteIdentity,handoffIdentity,restoreHandoff, reload(){return load(q("[data-bulletin-service]").value);}};
   }
   window.MindexBulletin=Object.freeze({mount,resolveSource,reusableContent,fieldValue,defaultFrames,renderPages,readyAssets,TOKENS,wrap,profileForDate,monthlyView,storedValue,applyStored,normalizeSnapshot,applySourceSnapshot,templateValue,normalizeTemplate,applyTemplate,TEMPLATE_KEY});
 })();

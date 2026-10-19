@@ -32,7 +32,7 @@ export function createServerState({rpc,token,scope,makeId=()=>crypto.randomUUID(
   if(running.has(key))return Promise.reject(Error('STATE_WRITE_IN_PROGRESS'));
   const promise=Promise.resolve().then(task).finally(()=>running.delete(key));running.set(key,promise);return promise;
  }
- function setItem(key,value){return exclusive(key,async()=>{
+ function setItem(key,value){if(typeof key!=='string'||!key)return Promise.reject(Error('INVALID_STATE_KEY'));return exclusive(key,async()=>{
   if(loadBarrier)await loadBarrier;
   if(!loaded)throw Error('STATE_NOT_READY');
   if(uncertain.has(key))throw Error('STATE_RETRY_REQUIRED');

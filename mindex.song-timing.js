@@ -561,6 +561,78 @@
     if (result.error) throw Error(`곡 버전 저장 실패: ${result.error.message || 'DB 연결을 확인해 주세요.'}`);
     if (result.data?.length !== 1) throw Error('다른 곳에서 버전 자료가 변경됐습니다. 새로고침 후 다시 확인해 주세요.');
     version.audio_set = audioSet; remoteSources.add(audioSet.audioUrl); revision++;
+    root.MINDEX_CONTENT_LIVE?.publish('song',song.id);
+  }
+  function legacyTarget(key) {
+    try {const ids=JSON.parse(key);if(!Array.isArray(ids))return null;
+      if(ids.length===4&&ids[0]==='service')return {kind:'service',serviceId:ids[1],elementId:ids[2]};
+      if(ids.length===2)return {kind:'song',songId:ids[0],versionId:ids[1]};
+    } catch {} return null;
+  }
+  function legacyBlocked(){return hasDirtyChanges()||state.saving||state.serviceMusic?.playing||state.serviceMusic?.pending||isPresenterOutputWindowOpen();}
+  async function connectLegacyProfile(key) {
+    const profile=profiles.get(key),target=legacyTarget(key);
+    if(!profile||!target)throw Error('원래 연결 대상을 확인하지 못했습니다. 기존 자료는 보존됩니다.');
+    if(legacyBlocked())throw Error('현재 편집을 저장하고 재생을 마친 뒤 연결해 주세요.');
+    const client=state.client,selectedService=state.selectedServiceId,selectedSong=state.selectedSongId,selectedVersion=state.selectedVersionId;
+    let song,version,item,slides,previous;
+    if(target.kind==='service'){
+      if(selectedService!==target.serviceId)throw Error('먼저 원래 예배를 열어 주세요.');
+      item=getServiceItems(target.serviceId).find(i=>i.id===target.elementId);
+      if(!item)throw Error('원래 예배 항목이 없습니다. 다른 항목으로 임의 연결하지 않습니다.');
+      previous=item.memo;const stored=parseServiceItemMemo(previous).audioTiming;
+      if(stored){
+        if(stored.audioFingerprint===profile.audioFingerprint&&JSON.stringify(stored.starts)===JSON.stringify(profile.starts)&&stored.duration===profile.duration&&stored.audioUrl===profile.audioUrl)return {alreadyLinked:true};
+        throw Error('공용 예배에 다른 음원·타이밍이 있습니다. 양쪽 자료를 보존하고 연결을 중단했습니다.');
+      }
+      slides=pagesFor(presenterSlidesForService(target.serviceId).filter(s=>belongsTo(s,target.elementId)));
+    }else{
+      if(selectedSong!==target.songId||selectedVersion!==target.versionId)throw Error('먼저 원래 곡과 버전을 열어 주세요.');
+      song=getSelectedSong();version=getSelectedVersion();previous=version?.audio_set;
+      if(previous){
+        if(previous.audioFingerprint===profile.audioFingerprint&&JSON.stringify(previous.starts)===JSON.stringify(profile.starts)&&previous.audioUrl===profile.audioUrl)return {alreadyLinked:true};
+        throw Error('공용 버전에 다른 음원·타이밍이 있습니다. 양쪽 자료를 보존하고 연결을 중단했습니다.');
+      }
+      if(!validSet(profile,version))throw Error('현재 버전의 가사·폼과 일치하지 않습니다. 기존 자료는 보존됩니다.');
+      slides=presenterLyricsSlidesForServiceItem({item:{id:'legacy-link'},section:{},index:0,song,version,displayText:song.title,label:'찬양',forms:profile.forms});
+    }
+    const issue=validate(profile,slides,true);if(issue)throw Error(issue);
+    // Verify the uploaded bytes independently before exposing this timing publicly.
+    const response=await fetch(profile.audioUrl);if(!response.ok)throw Error('보관된 음원을 다시 읽지 못했습니다.');
+    if(await digestBytes(await response.arrayBuffer())!==profile.audioFingerprint)throw Error('보관된 음원 지문이 달라 연결하지 않았습니다.');
+    if(client!==state.client||selectedService!==state.selectedServiceId||selectedSong!==state.selectedSongId||selectedVersion!==state.selectedVersionId||legacyBlocked())throw Error('확인 중 편집 상태가 바뀌었습니다. 다시 시도해 주세요.');
+    if(target.kind==='service'){
+      if(item.memo!==previous)throw Error('확인 중 예배 내용이 바뀌었습니다.');
+      await saveToWorship(target.serviceId,target.elementId,{...profile},slides);
+      const rows=await fetchWorshipRowsForServiceIds([target.serviceId]);
+      const saved=rows.elements.find(row=>row.id===target.elementId)?.config?.audioTiming;
+      if(!saved||saved.audioFingerprint!==profile.audioFingerprint||saved.audioUrl!==profile.audioUrl||JSON.stringify(saved.starts)!==JSON.stringify(profile.starts))throw Error('저장 응답은 받았지만 서버 재확인이 필요합니다. 원본은 보존됩니다.');
+    }else{
+      if(version.audio_set!==previous)throw Error('확인 중 버전 자료가 바뀌었습니다.');
+      await saveToVersion(song,version,{...profile},slides);
+      const {data,error}=await client.from('mindex_song_versions').select('audio_set').eq('id',version.id).single();
+      if(error||data?.audio_set?.audioFingerprint!==profile.audioFingerprint||JSON.stringify(data.audio_set.starts)!==JSON.stringify(profile.starts))throw Error('버전 저장 후 재확인이 필요합니다. 원본은 보존됩니다.');
+    }
+    return {alreadyLinked:false};
+  }
+  async function openLegacyLibrary(){
+    if(document.querySelector('[data-legacy-audio-dialog]'))return;
+    const dialog=document.createElement('dialog');dialog.dataset.legacyAudioDialog='';dialog.className='draft-handoff-dialog';dialog.setAttribute('aria-label','구형 음원 공용 연결');
+    const add=(tag,text,parent=dialog)=>{const node=document.createElement(tag);node.textContent=text;parent.append(node);return node;};
+    add('h2','구형 음원 공용 연결');add('p','원래 예배 항목 또는 곡·버전에 연결합니다. 가사·타이밍·음원 지문이 일치할 때만 저장하며, 기존 자료는 삭제하지 않습니다.');
+    const status=add('p','');status.setAttribute('role','status');
+    if(!profiles.size)add('p','이 기기에 연결할 구형 음원이 없습니다.');
+    for(const [key,profile] of profiles){
+      const target=legacyTarget(key),row=add('section','');add('h3',profile.audioName||'구형 음원',row);
+      add('p',target?.kind==='service'?'특정 예배에 직접 입력한 음원·타이밍':target?.kind==='song'?'곡·버전 음원·타이밍':'원래 연결 대상 확인 필요',row);
+      if(target?.kind==='service'){
+        const openButton=add('button','원래 예배 열기',row);openButton.type='button';openButton.className='btn secondary';
+        openButton.onclick=async()=>{if(legacyBlocked()){status.textContent='현재 편집을 저장하고 재생을 마친 뒤 열어 주세요.';return;}dialog.close();await openServiceInPresenter(target.serviceId);await openLegacyLibrary();};
+      }
+      const connectButton=add('button','공용 DB에 연결',row);connectButton.type='button';connectButton.className='btn secondary';connectButton.disabled=!target;
+      connectButton.onclick=async()=>{connectButton.disabled=true;status.textContent='원본과 연결 대상을 확인하는 중…';try{const result=await connectLegacyProfile(key);status.textContent=result.alreadyLinked?'같은 음원·타이밍이 이미 공용 DB에 연결돼 있습니다.':'공용 DB 연결과 서버 재확인을 마쳤습니다. 기존 원본도 보존했습니다.';}catch(e){status.textContent=e.message}finally{connectButton.disabled=false}};
+    }
+    const close=add('button','닫기');close.type='button';close.className='btn secondary';close.onclick=()=>dialog.close();dialog.addEventListener('close',()=>dialog.remove(),{once:true});document.body.append(dialog);dialog.showModal();
   }
   async function open(serviceId, elementId) {
     await ready;
@@ -944,7 +1016,7 @@
     }
     return result;
   }
-  root.MindexSongTiming = { initializeServerProfiles, resumeAutoSync, snapBeat, detectBeatGrid, composePhotos, validatePhotos, saveToVersion, readElemLibrary, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, save, saveToWorship, ready, pack, unpack, share, loadShared, formsFor, sourceSignature, ownsSource: source => remoteSources.has(source) || [...profiles.values()].some(p => p.url === source), get revision() { return revision; } };
+  root.MindexSongTiming = { initializeServerProfiles,legacyTarget,connectLegacyProfile,openLegacyLibrary, resumeAutoSync, snapBeat, detectBeatGrid, composePhotos, validatePhotos, saveToVersion, readElemLibrary, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, save, saveToWorship, ready, pack, unpack, share, loadShared, formsFor, sourceSignature, ownsSource: source => remoteSources.has(source) || [...profiles.values()].some(p => p.url === source), get revision() { return revision; } };
   if (typeof document !== 'undefined') document.addEventListener('input', e => {
     const input = e.target.closest('[data-song-timing-seek]');
     const audio = state.serviceMusic.audio;

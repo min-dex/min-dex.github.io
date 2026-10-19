@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261019-source-metadata-guard",
+  "version": "20261019-draft-handoff",
   "options": {
     "compress": false,
     "mangle": {

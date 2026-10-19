@@ -44,6 +44,17 @@ try:
    page.locator('[data-bulletin-reload]').click()
    page.wait_for_function("docs.get('bulletin-fixture').fields.news==='Committed'")
    assert page.evaluate("()=>{const key=docs.get('bulletin-fixture').key+':recovery';return JSON.parse(MINDEX_SERVER_STORAGE.getItem('local',key)).fields.news}")=='Typed while preserving'
-   print('PASS',engine,'failed recovery blocks replacement; in-flight edit retained; confirmed recovery precedes reload',flush=True)
+   page.on('dialog',lambda d:d.accept())
+   page.evaluate("window.delayRecovery=true;window.incoming={schema:1,revision:1,value:{fields:{news:'From paired device'},settings:{design:'simple'}}};window.resumeResult=editor.restoreHandoff(incoming);void 0")
+   page.wait_for_function('typeof releaseRecovery==="function"')
+   page.evaluate("docs.get('bulletin-fixture').fields.news='Late current edit';docs.get('bulletin-fixture').dirty=true;window.delayRecovery=false;releaseRecovery()")
+   assert page.evaluate('resumeResult') is False
+   assert page.evaluate("docs.get('bulletin-fixture').fields.news")=='Late current edit'
+   page.evaluate("docs.get('bulletin-fixture').fields.news='Committed';docs.get('bulletin-fixture').dirty=false")
+   assert page.evaluate('()=>editor.restoreHandoff({...incoming,revision:2})') is False
+   assert page.evaluate('()=>editor.restoreHandoff(incoming)') is True
+   assert page.evaluate("docs.get('bulletin-fixture').fields.news")=='From paired device'
+   assert page.evaluate("docs.get('bulletin-fixture').dirty") is True
+   print('PASS',engine,'failed recovery blocks replacement; late edit retained; paired draft revision guard and explicit resume',flush=True)
    context.close();browser.close()
 finally:server.shutdown()

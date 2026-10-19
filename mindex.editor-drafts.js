@@ -20,7 +20,7 @@
    ...(module==='service'?{sourceText:serviceSourceTextareaForService(id)?.value,elementIds:[...(state.dirtyServiceElementIds.get(id)||[])],structure:state.dirtyServiceStructureIds.has(id),typeIds:[...state.dirtyServiceTypeIds]}:{})};
   const serialized=JSON.stringify(value);
   if(last.get(key)===serialized)return;
-  if(storage.queue('local',key,serialized)){last.set(key,serialized);touched.add(key)}
+  if(storage.queue('local',key,serialized)){last.set(key,serialized);touched.add(key);window.MINDEX_DRAFT_HANDOFF?.publish(module,id,value,value.value?.song?.title||value.value?.title||value.value?.service?.title||'편집 초안')}
  }
  function schedule(){if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;capture();render()})}
  function render(){
@@ -34,7 +34,14 @@
   const module=moduleName(),id=idFor(module);if(!id||state.saving)return;
   const raw=window.MINDEX_SERVER_STORAGE.getItem('local',keyFor(module,id));if(!raw)return;
   let draft;try{draft=JSON.parse(raw)}catch{showToast('초안 형식을 확인하지 못했습니다. 원본은 서버에 보관됩니다.','error');return}
-  if(draft.schema!==1||draft.module!==module||draft.id!==id)return;
+  return restoreDraft(draft);
+ }
+ async function restoreDraft(draft){
+  const module=moduleName(),id=idFor(module);
+  if(state.saving||state.serviceMusic?.playing||state.serviceMusic?.pending||isPresenterOutputWindowOpen()){showToast('저장이나 재생을 마친 뒤 초안을 이어 써 주세요.','error');return false;}
+  if(draft?.schema!==1||draft.module!==module||draft.id!==id)return false;
+  const payload=draft.value;
+  if((module==='praise'&&(!payload?.song||payload.song.id!==id||!Array.isArray(payload.forms)))||(module==='scripture'&&payload?.id!==id)||(module==='service'&&(payload?.service?.id!==id||!Array.isArray(payload.items)||!Array.isArray(payload.serviceTypes)))||(module==='references'&&!Array.isArray(payload))){showToast('초안 내용과 연결 대상을 확인하지 못했습니다. 원본은 보존됩니다.','error');return false;}
   if(hasDirtyChanges()||pendingFields().length){showToast('현재 입력을 먼저 저장하거나 정리해 주세요.','error');return}
   if(draft.base&&dirtyModuleFingerprint(module)!==draft.base){showToast('초안을 만든 뒤 서버 내용이 바뀌었습니다. 현재 내용을 덮어쓰지 않고 초안을 보관합니다.','error');return}
   if(!window.confirm('서버에 보관된 미저장 초안을 편집창에 복구할까요?'))return;
@@ -62,10 +69,10 @@
     if(node){node.value=field.value;if(typeof field.checked==='boolean')node.checked=field.checked;node.dispatchEvent(new Event('input',{bubbles:true}))}
    }
   }finally{window.MINDEX_EDITOR_DRAFTS.restoring=false}
-  updateSaveState();showToast('초안을 복구했습니다. 확인 후 저장해 주세요.');
+  updateSaveState();showToast('초안을 복구했습니다. 확인 후 저장해 주세요.');return true;
  }
  window.addEventListener('mindex-server-state-settled',render);
  window.addEventListener('mindex-server-storage-ready',render);
  document.addEventListener('input',schedule);document.addEventListener('change',schedule);
- window.MINDEX_EDITOR_DRAFTS={capture:schedule,restoring:false};
+ window.MINDEX_EDITOR_DRAFTS={capture:schedule,restoreDraft,identity:()=>{const kind=moduleName(),id=idFor(kind);return id?{kind,id}:null},restoring:false};
 })();

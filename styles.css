@@ -9218,3 +9218,6 @@ body[data-module="presenter"] .topbar-actions > .icon-btn { flex: 0 0 35px; widt
 .svc-board-slide-block[data-form-color] > .svc-board-block-background {
   background: color-mix(in srgb, var(--form-color) 20%, var(--ui-surface-panel));
 }
+
+.draft-handoff-dialog{width:min(620px,calc(100vw - 32px));max-height:85vh;overflow:auto;border:1px solid var(--border);border-radius:12px;padding:24px;background:var(--panel);color:var(--text)}
+.draft-handoff-dialog .btn{margin:4px}.draft-handoff-dialog textarea{display:block;width:100%;min-height:72px;margin:12px 0}.draft-handoff-list>div{padding:12px 0;border-bottom:1px solid var(--border)}

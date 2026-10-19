@@ -327,6 +327,7 @@
       theme: "mindex.theme",
       presenterThumbScale: "mindex.ui.presenterThumbScale",
       module: "mindex.ui.module",
+      listScroll: "mindex.ui.listScroll",
       praiseFilter: "mindex.ui.praiseFilter",
       scriptureFilter: "mindex.ui.scriptureFilter",
       serviceFilter: "mindex.ui.serviceFilter",
