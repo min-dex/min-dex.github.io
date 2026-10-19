@@ -3494,3 +3494,20 @@ Normalization matrix (`Verse 1`, `Verse1`, `V1`, `verse 1`, `verse1`, `v1` each 
 - Existing timing fingerprint validation rejects a profile when page text or boundaries change; require new cues instead of applying old timings to different slides. Running audio/output sessions are not changed by normalization or slide preparation.
 
 - Automatic A/B fallback keeps its existing selected nonempty lines, while retaining blank-line boundaries inside each selected range. Explicit A/B blocks and form ordering remain unchanged.
+
+
+## Explicit source metadata validation · 2026-10-19
+
+Before applying a portable source edit, validate every explicit element type,
+input mode and output mode. Unknown values report the item and field and leave
+both source text and all existing items untouched; no partial application or
+fallback-to-default is allowed. Empty values and the existing generic 요소 alias
+remain compatible. Stored legacy reads are not rewritten or newly blocked by
+this edit guard. Direct source-record/creation helpers enforce the same guard.
+Worship/service element aliases have one resolver; output modes and preparation
+roles use own-property alias lookup, including spacing/case compatibility.
+Schema adapters retaining praise input flavor in config/content_state remain.
+
+Legacy service/section identifiers keep exact-key mappings and preserve unknown
+strings. Preparation labels also ignore inherited object properties. No alias
+lookup may treat prototype names as registered values.

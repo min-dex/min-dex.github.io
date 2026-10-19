@@ -4392,7 +4392,7 @@ async function ensureUpcomingPublicWorshipServices(baseDate = new Date()) {
 }
 
 function worshipAppServiceTypeId(typeId) {
-  return WORSHIP_SERVICE_TYPE_ALIASES[typeId] || typeId || "";
+  return Object.hasOwn(WORSHIP_SERVICE_TYPE_ALIASES, typeId) ? WORSHIP_SERVICE_TYPE_ALIASES[typeId] : typeId || "";
 }
 
 async function loadWorshipData() {
@@ -7199,7 +7199,8 @@ async function saveService(serviceId = state.selectedServiceId, options = {}) {
   const sourceTextHadPendingChanges = serviceSourceTextHasPendingChanges(serviceSourceTextareaForService(serviceId));
   const sourceTextApplied = applyPendingServiceSourceTextBeforeSave(serviceId);
   if (sourceTextHadPendingChanges && !sourceTextApplied) {
-    const message = "예배 원문에서 반영할 항목을 찾지 못해 저장하지 않았습니다. 원문 항목 이름을 확인해 주세요.";
+    const message = serviceSourceTextareaForService(serviceId)?.dataset.serviceSourceValidationError
+      || "예배 원문에서 반영할 항목을 찾지 못해 저장하지 않았습니다. 원문 항목 이름을 확인해 주세요.";
     if (!options.silent) showToast(message, "error");
     if (options.throwOnError) throw new Error(message);
     return false;
@@ -10779,14 +10780,7 @@ function normalizeServicePlaybackConfig(value, elementType = "") {
 }
 
 function normalizeServicePresenterRole(value) {
-  const raw = String(value || "").trim();
-  if (!raw) return "";
-  const compactKey = raw.replace(/\s+/g, "");
-  const normalizedKey = raw.toLowerCase().replace(/[-\s]+/g, "_");
-  return PRESENTER_ROLE_ALIASES[raw]
-    || PRESENTER_ROLE_ALIASES[compactKey]
-    || PRESENTER_ROLE_ALIASES[normalizedKey]
-    || "";
+  return resolveDomainAlias(value, PRESENTER_ROLE_ALIASES);
 }
 
 function hasServicePlaybackConfig(playback) {
@@ -11452,7 +11446,6 @@ function serializeServiceItemMemo(value = {}) {
 }
 
 function normalizeServiceOutputMode(value) {
-  const mode = String(value || "").trim().toLowerCase().replace(/[-\s]+/g, "_");
   const aliases = {
     score: "score",
     music_score: "score",
@@ -11462,7 +11455,7 @@ function normalizeServiceOutputMode(value) {
     lyric: "lyrics",
     "가사": "lyrics",
   };
-  return aliases[mode] || "";
+  return resolveDomainAlias(value, aliases);
 }
 
 function serviceItemUsesFlexibleOfferingSlot(item = {}) {
@@ -13905,13 +13898,7 @@ function worshipTemplateElementType(step = {}, label = "") {
 }
 
 function normalizeWorshipElementType(value) {
-  const raw = String(value || "").trim().toLowerCase();
-  const canonical = raw.replace(/-/g, "_");
-  if (SERVICE_ELEMENT_TYPES.has(canonical)) return canonical;
-  if (canonical === "activity") return "live_scripture";
-  if (canonical === "scripture") return "scripture_reading";
-  const type = normalizeServiceElementType(value);
-  return SERVICE_ELEMENT_TYPES.has(type) ? type : "";
+  return normalizeServiceElementType(value);
 }
 
 function runCopyAction(action, index, versionId = "") {
@@ -21870,7 +21857,7 @@ function serviceItemTemplateProjectionKey(item = {}, options = {}) {
 
 function templateProjectionSectionKey(item = {}) {
   const sectionKey = String(item._worshipSectionKey || item.sectionKey || item.section_key || "").trim();
-  return PUBLIC_TEMPLATE_SECTION_KEY_ALIASES[sectionKey] || sectionKey;
+  return Object.hasOwn(PUBLIC_TEMPLATE_SECTION_KEY_ALIASES, sectionKey) ? PUBLIC_TEMPLATE_SECTION_KEY_ALIASES[sectionKey] : sectionKey;
 }
 
 function mergeTemplateProjectionItem(templateItem = {}, existingItem = {}) {
@@ -22211,7 +22198,7 @@ function serviceTemplateHierarchyMetaForItem(hierarchy, item = {}) {
   const labelElement = labelKey ? hierarchy.elementByLabel.get(labelKey) : null;
   if (labelElement) return labelElement;
 
-  const aliasKey = PUBLIC_TEMPLATE_SECTION_KEY_ALIASES[sectionKey] || "";
+  const aliasKey = Object.hasOwn(PUBLIC_TEMPLATE_SECTION_KEY_ALIASES, sectionKey) ? PUBLIC_TEMPLATE_SECTION_KEY_ALIASES[sectionKey] : "";
   if (aliasKey) {
     const aliasElement = labelKey ? hierarchy.elementBySectionAndLabel.get(`${aliasKey}:${labelKey}`) : null;
     if (aliasElement) return aliasElement;
@@ -25387,10 +25374,13 @@ function applyServiceSourceText(serviceId = state.selectedServiceId, options = {
   if (!service) return false;
   const textarea = serviceSourceTextareaForService(id);
   if (!textarea) return false;
+  delete textarea.dataset.serviceSourceValidationError;
   const records = parseServiceSourceText(textarea.value);
   try {
+    validateServiceSourceRecordMetadata(records);
     validateServiceSourceRecordMultiplicity(records, getServiceItems(id));
   } catch (error) {
+    textarea.dataset.serviceSourceValidationError = error.message;
     showToast(error.message, "error");
     return false;
   }
@@ -25434,6 +25424,25 @@ function applyServiceSourceText(serviceId = state.selectedServiceId, options = {
   return true;
 }
 
+// Validate the complete edit before adding or changing any items. Legacy reads
+// remain permissive; an unknown explicit new value must never become a default.
+function validateServiceSourceRecordMetadata(records = []) {
+  const fields = [
+    ["elementType", "유형", normalizeServiceElementType],
+    ["inputMode", "입력", normalizeServiceInputMode],
+    ["outputMode", "출력", normalizeServiceOutputMode],
+  ];
+  for (const record of records) {
+    for (const [key, label, normalize] of fields) {
+      const raw = String(record[key] ?? "");
+      if (!raw.trim() || normalize(raw)) continue;
+      // The existing generic-element alias deliberately represents an empty type.
+      if (key === "elementType" && raw.normalize("NFKC").replace(/\s+/g, "") === "요소") continue;
+      throw new Error(`${record.sectionTitle || "구역 없음"} / ${record.label || "항목"}: ${label} 값 “${raw}”을 인식하지 못했습니다. 입력은 유지됩니다.`);
+    }
+  }
+}
+
 function validateServiceSourceRecordMultiplicity(records = [], items = [], previousRecords = []) {
   const checked = new Set();
   for (const record of records) {
@@ -25468,6 +25477,7 @@ function serviceSourceFindTarget(record = {}, candidates = [], usedIndexes = new
 }
 
 function ensurePortableSourceItems(service, records = []) {
+  validateServiceSourceRecordMetadata(records);
   const serviceId = String(service?.id || "").trim();
   if (!serviceId) return 0;
   const items = normalizeServiceItemsInCurrentOrder(getServiceItems(serviceId));
@@ -25539,6 +25549,7 @@ function serviceSourceVirtualField(serviceId, index, key, value) {
 }
 
 function applyServiceSourceRecord(serviceId, index, record = {}) {
+  validateServiceSourceRecordMetadata([record]);
   let item = getServiceItems(serviceId)[index];
   if (!item) return false;
   if (record.elementType) updateServiceItemField(serviceSourceVirtualField(serviceId, index, "element_type", record.elementType), { deferPresenterRefresh: true });

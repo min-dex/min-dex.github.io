@@ -929,7 +929,7 @@ function normalizePresenterPreparationInputLabel(label = "") {
     파송찬송: "파송찬송",
     폐회찬송: "폐회찬송",
   };
-  if (aliases[key]) return aliases[key];
+  if (Object.hasOwn(aliases, key)) return aliases[key];
   const numbered = key.match(/^(찬양|기도찬양|공동기도)(\d+)$/);
   if (numbered) {
     const displayBase = {
