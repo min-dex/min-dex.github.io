@@ -163,3 +163,8 @@ card-utility surface/border/hover rule. Do not dim entire lyric toolbars; only
 disabled controls are muted. Version deletion remains danger-colored at rest.
 Selectable version/linked lyric cards use the shared 2px accent focus outline,
 while preserving whole-card selection and all existing action handlers.
+
+Song timing and draft-handoff dialogs share the neutral utility button
+surface/border/hover rule for secondary actions. Timing save uses the existing
+primary style; preserve its disabled/busy handling, hover ring and focus outline.
+This is dialog chrome only; timing, playback and persistence logic are unchanged.

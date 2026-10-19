@@ -481,7 +481,7 @@
       <label><input type="checkbox" data-timing-enabled ${draft.enabled ? 'checked' : ''}> 음악 재생 중 자동 넘김</label>
       <p role="status" data-timing-status>${old && !fresh ? '가사가 바뀌었어요. 모든 장의 시각을 다시 기록해 주세요.' : '음원과 시각을 저장한 뒤, 해당 곡에서 음악 재생을 누르세요.'}</p>
 
-      <div class="song-timing-actions"><button type="button" class="btn secondary" data-timing-close>닫기</button><button type="button" class="btn" data-timing-save>${serviceTiming ? '예배에 저장' : '곡 버전에 저장'}</button></div>`;
+      <div class="song-timing-actions"><button type="button" class="btn secondary" data-timing-close>닫기</button><button type="button" class="btn primary" data-timing-save>${serviceTiming ? '예배에 저장' : '곡 버전에 저장'}</button></div>`;
     const audio = dialog.querySelector('audio');
     const status = dialog.querySelector('[data-timing-status]');
     const saveButton = dialog.querySelector('[data-timing-save]');
