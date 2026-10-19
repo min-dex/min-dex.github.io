@@ -5,6 +5,7 @@ import traceback
 from pathlib import Path
 from urllib.parse import urlsplit
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
+from smoke_app import prepare_server_state_fixture
 
 
 def main():
@@ -21,6 +22,7 @@ def main():
                                if urlsplit(route.request.url).netloc == origin else route.abort())
                     page.goto(url + '?output=presenter&mindexSmokeRaw=1', wait_until='domcontentloaded')
                     page.wait_for_function("typeof saveWorshipServiceInstance==='function'")
+                    prepare_server_state_fixture(page)
                     fixtures.append(page.evaluate('''async () => {
                       const check=(ok,msg)=>{if(!ok)throw Error(msg)};
                       const sid=crypto.randomUUID();

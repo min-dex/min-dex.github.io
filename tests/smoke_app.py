@@ -10869,3 +10869,38 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+def prepare_server_state_fixture(page):
+    """Explicit in-process state RPC fixture; never contacts Supabase."""
+    context = page.context
+    if not hasattr(context, '_mindex_state_rows'):
+        context._mindex_state_rows = {}
+    rows = context._mindex_state_rows
+
+    def rpc(name, args):
+        owner = 'shared' if args['p_scope'] == 'shared' else args['p_token']
+        scope = (owner, args['p_scope'])
+        if name == 'mindex_state_read_v1':
+            return {'data': [value for key, value in rows.items() if key[:2] == scope]}
+        if name != 'mindex_state_write_v1':
+            raise ValueError('Unexpected fixture RPC')
+        key = scope + (args['p_key'],)
+        old = rows.get(key)
+        if old and old['requestId'] == args['p_request_id']:
+            if old['value'] != args['p_value']:
+                return {'error': {'message': 'STATE_REQUEST_REUSED'}}
+            return {'data': old}
+        if str(old['revision'] if old else '0') != args['p_revision']:
+            return {'error': {'message': 'STATE_REVISION_CONFLICT'}}
+        row = {'key': args['p_key'], 'value': args['p_value'],
+               'revision': str(int(args['p_revision']) + 1), 'requestId': args['p_request_id']}
+        rows[key] = row
+        return {'data': row}
+
+    if not getattr(page, '_mindex_state_bound', False):
+        page.expose_function('__mindexStateFixtureRpc', rpc)
+        page._mindex_state_bound = True
+    page.evaluate("""async()=>{
+      await MINDEX_SERVER_STORAGE.initialize({rpc:(name,args)=>window.__mindexStateFixtureRpc(name,args)},'offline-server-state-fixture');
+    }""")

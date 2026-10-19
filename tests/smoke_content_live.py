@@ -3,6 +3,7 @@ import os
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from urllib.parse import urlsplit
 from smoke_app import start_local_app_server,sync_playwright,launch_chromium
+from smoke_app import prepare_server_state_fixture
 server,url=start_local_app_server()
 try:
  with sync_playwright() as p:
@@ -14,6 +15,7 @@ try:
     context.route('**/*',lambda r:r.continue_() if r.request.method=='GET' and urlsplit(r.request.url).netloc==urlsplit(url).netloc else r.abort())
     page=context.new_page();pages.append(page);page.expose_function('remoteSend',lambda message:messages.append(message))
     page.goto(url+'?mindexSmokeRaw=1',wait_until='load');page.wait_for_function('!!window.MINDEX_CONTENT_LIVE')
+    prepare_server_state_fixture(page)
     page.evaluate('''()=>{
       window.sid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';window.vid='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
       state.config.url='content-fixture';state.module='praise';state.loading=false;state.saving=false;

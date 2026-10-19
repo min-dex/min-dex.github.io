@@ -9211,3 +9211,6 @@ body[data-module="presenter"] .topbar-actions > .icon-btn { flex: 0 0 35px; widt
   .presenter-section-editor-item:hover,
   .presenter-section-editor-item:focus-within { background: var(--ui-surface-panel); }
 }
+
+#serverStorageStatus:not([hidden]) { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); z-index: 1000; max-width: min(90vw, 44rem); padding: .7rem 1rem; background: var(--surface, #fff); color: var(--text, #222); border: 1px solid currentColor; border-radius: .6rem; font-size: .875rem; }
+#serverStorageStatus button { margin-left: .75rem; }

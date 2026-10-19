@@ -5,10 +5,15 @@ const revision = value => {
   return BigInt(value);
 };
 
-// journal must be tab-scoped (e.g. sessionStorage), not shared localStorage.
+// journal must be session-scoped and hydrated before reads. Writes may be async.
 export function createWorshipStore({ rpc, journal, methods, namespace = '', makeId = () => crypto.randomUUID() }) {
   const baselines = new Map();
   const running = new Set();
+  const preparing = new Set();
+  const persist = async action => {
+    try { await action(); }
+    catch (cause) { throw new Error('JOURNAL_NOT_CONFIRMED', {cause}); }
+  };
   const legacyKey = id => `mindex.atomic.pending.v1:${id}`;
   const key = id => namespace ? `mindex.atomic.pending.v2:${JSON.stringify([namespace,id])}` : legacyKey(id);
   const getPending = id => {
@@ -36,7 +41,7 @@ export function createWorshipStore({ rpc, journal, methods, namespace = '', make
     }
   };
   const retry = async id => {
-    if (running.has(id)) throw new Error('SAVE_IN_PROGRESS');
+    if (running.has(id) || preparing.has(id)) throw new Error('SAVE_IN_PROGRESS');
     const entry = getPending(id);
     if (!entry) throw new Error('NO_PENDING_REQUEST');
     running.add(id);
@@ -50,7 +55,7 @@ export function createWorshipStore({ rpc, journal, methods, namespace = '', make
       remember(id, receipt);
       // Do not clear another tab's newer request, even when this response arrives late.
       const current = getPending(id);
-      if (current?.request.requestId === entry.request.requestId) journal.removeItem(key(id));
+      if (current?.request.requestId === entry.request.requestId) await persist(() => journal.removeItem(key(id)));
       return clone(receipt);
     } finally { running.delete(id); }
   };
@@ -64,7 +69,7 @@ export function createWorshipStore({ rpc, journal, methods, namespace = '', make
     async save(operation, payload) {
       if (!Object.hasOwn(methods, operation) || typeof methods[operation] !== 'string') throw new Error('INVALID_OPERATION');
       const id = payload.serviceId;
-      if (!id || getPending(id)) throw new Error('PENDING_REQUEST_REQUIRES_RESOLUTION');
+      if (!id || getPending(id) || preparing.has(id)) throw new Error('PENDING_REQUEST_REQUIRES_RESOLUTION');
       const request = clone({...payload, protocolVersion:1, requestId:makeId()});
       if (operation !== 'create') {
         revision(request.expectedRevision);
@@ -72,16 +77,18 @@ export function createWorshipStore({ rpc, journal, methods, namespace = '', make
         if (!base || base.deleted || base.revision !== request.expectedRevision) throw new Error('BASELINE_REQUIRED');
       }
       // Journal failure must stop the save before contacting the server.
-      journal.setItem(key(id), JSON.stringify({operation,request}));
+      preparing.add(id);
+      try { await persist(() => journal.setItem(key(id), JSON.stringify({operation,request}))); }
+      finally { preparing.delete(id); }
       return retry(id);
     },
     retry,
-    resolvePending(id, requestId) {
+    async resolvePending(id, requestId) {
       // UI must first resolve conflict/uncertain outcome and preserve the draft.
-      if (running.has(id)) throw new Error('SAVE_IN_PROGRESS');
+      if (running.has(id) || preparing.has(id)) throw new Error('SAVE_IN_PROGRESS');
       const entry = getPending(id);
       if (!entry || entry.request.requestId !== requestId) throw new Error('REQUEST_ID_MISMATCH');
-      journal.removeItem(key(id));
+      await persist(() => journal.removeItem(key(id)));
     },
   };
 }

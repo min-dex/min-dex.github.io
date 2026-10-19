@@ -3,6 +3,7 @@ import os,io,wave,json
 from urllib.parse import urlsplit
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from smoke_app import start_local_app_server,sync_playwright,launch_chromium
+from smoke_app import prepare_server_state_fixture
 buf=io.BytesIO()
 with wave.open(buf,'wb') as w:
  w.setnchannels(1);w.setsampwidth(2);w.setframerate(8000);w.writeframes(b'\0\0'*8000*20)
@@ -19,6 +20,7 @@ try:
      else:r.abort()
     page.route('**/*',route);page.goto(url+'?mindexSmokeRaw=1')
     page.wait_for_function("typeof buildWorshipPersistenceRows==='function' && !!globalThis.MindexSongTiming && !document.body.classList.contains('ui-booting')")
+    prepare_server_state_fixture(page)
     return page
    context=b.new_context();page=page_for(context)
    page.evaluate(r'''()=>{

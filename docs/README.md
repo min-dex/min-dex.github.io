@@ -6,6 +6,8 @@ stale document in the same change.
 
 ## Current Contracts
 
+- `server-state-current.md`: 서버 저장 통일 구현·격리 검증과 운영 적용 전 경계.
+
 - `citation-live-output.md`: dedicated live scripture input, optional immediate
   output, draft retention, and controller scroll anchoring.
 - `worship-presenter-decisions.md`: current Worship/Presenter behavior,

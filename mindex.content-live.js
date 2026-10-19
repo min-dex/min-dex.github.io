@@ -17,7 +17,6 @@
     const m={id:createUuid(),project:state.config.url,kind,recordId};remember(m.id);
     if(kind==='setlist-archive'){pending.set(identity(m),m);schedule();}
     try{channel?.postMessage(m);}catch{}
-    try{localStorage.setItem(key,JSON.stringify(m));}catch{}
     connectDepartmentRealtime();
     try{void departmentTabSync?.remote?.send({type:'broadcast',event:'content-committed',payload:m}).catch(()=>{});}catch{}
   }
@@ -164,7 +163,7 @@
   }
   try{channel=new BroadcastChannel(key);channel.onmessage=e=>receive(e.data);}catch{}
   window.addEventListener('storage',e=>{if(e.key===key&&e.newValue)try{receive(JSON.parse(e.newValue));}catch{}});
-  function wake(){try{receive(JSON.parse(localStorage.getItem(key)||'null'));}catch{}schedule();void reconcile();}
+  function wake(){schedule();void reconcile();}
   window.addEventListener('focus',wake);window.addEventListener('online',wake);document.addEventListener('visibilitychange',wake);
   setInterval(()=>void reconcile(),60000);
   window.MINDEX_CONTENT_LIVE={publish,receive,reconcile};

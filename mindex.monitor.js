@@ -5,7 +5,9 @@
   if (!trigger) return;
   const REPORT_MS = 60000, STALE_MS = 180000;
   const TOKEN_KEY = "mindex.monitor.deviceReporter";
-  const TAB_PREFIX = "mindex.monitor.tab.";
+  const tabs=new Map();
+  let tabChannel=null;
+  try { tabChannel=new BroadcastChannel("mindex.monitor.presence.v1"); } catch {}
   const tabId = crypto.randomUUID();
   const withDeviceLock = task => navigator.locks?.request ? navigator.locks.request("mindex-monitor-device-report", task) : task();
   let resumeReady = false;
@@ -16,7 +18,7 @@
   let reporter = null, uploading = false, reading = false;
   let viewSerial = 0, shareSerial = 0, retryAt = 0, failures = 0;
   let enabled = true, name = "";
-  try { name = localStorage.getItem("mindex.monitor.name") || ""; } catch {}
+  try { name = window.MINDEX_SERVER_STORAGE?.getItem("local","mindex.monitor.name") || ""; } catch {}
   const ua = navigator.userAgent;
   const os = /Windows/.test(ua) ? "Windows" : /Android/.test(ua) ? "Android" : /iPhone|iPad/.test(ua) ? "iOS" : /Mac/.test(ua) ? "macOS" : "Other";
   const browser = /Whale\//.test(ua) ? "Whale" : /Edg\//.test(ua) ? "Edge" : /Chrome\//.test(ua) ? "Chrome" : /Firefox\//.test(ua) ? "Firefox" : /Safari\//.test(ua) ? "Safari" : "Browser";
@@ -42,23 +44,25 @@
     return Boolean(p.outputConnectedAt && Date.now() >= p.outputConnectedAt && Date.now() - p.outputConnectedAt <= PRESENTER_OUTPUT_HEARTBEAT_TTL_MS);
   }
   function recordTab(remove = false) {
-    try {
-      if (remove) localStorage.removeItem(TAB_PREFIX + tabId);
-      else localStorage.setItem(TAB_PREFIX + tabId, JSON.stringify({at:Date.now(), output:localOutput()}));
-    } catch {}
+    const value=remove?null:{at:Date.now(),output:localOutput()};
+    if(value)tabs.set(tabId,value);else tabs.delete(tabId);
+    try{tabChannel?.postMessage({id:tabId,value})}catch{}
+  }
+  if(tabChannel){
+    tabChannel.onmessage=({data})=>{
+      if(data?.hello){recordTab();return}
+      if(typeof data?.id!=="string"||data.id===tabId)return;
+      if(data.value&&Number.isFinite(data.value.at))tabs.set(data.id,data.value);else tabs.delete(data.id);
+      if(snapshot().output!==reportedOutput)void upload();
+    };
+    tabChannel.postMessage({hello:true});
   }
   function snapshot() {
     let output = enabled && localOutput();
-    try {
-      for (let i=0;i<localStorage.length;i++) {
-        const key=localStorage.key(i);
-        if (!key?.startsWith(TAB_PREFIX)) continue;
-        try {
-          const tab=JSON.parse(localStorage.getItem(key));
-          if (tab && tab.at<=Date.now()+5000 && Date.now()-tab.at<STALE_MS && tab.output===true) output=true;
-        } catch {}
-      }
-    } catch {}
+    for(const [id,tab] of tabs){
+      if(tab.at>Date.now()+5000||Date.now()-tab.at>=STALE_MS){tabs.delete(id);continue}
+      if(tab.output===true)output=true;
+    }
     return { name: name.trim().slice(0,60) || `${os} ${browser}`, os, browser, output };
   }
   function renderDevice(root, data, lastSeen, id = "local") {
@@ -166,17 +170,20 @@
   trigger.onclick = () => { if (!panel.open) panel.showModal(); void refresh(); window.lucide?.createIcons({ root: panel }); };
   $("[data-close]").onclick = () => panel.close(); panel.addEventListener("close", clearView);
   $("[data-refresh]").onclick = () => { void refresh(); if (enabled && Date.now() - lastReportAt >= REPORT_MS) { retryAt = 0; void upload(); } };
-  $("#monitorName").onchange = () => {
-    name=$("#monitorName").value.trim().slice(0,60);
-    try { localStorage.setItem("mindex.monitor.name",name); } catch {}
-    retryAt=0; void upload();
+  $("#monitorName").onchange = async () => {
+    const next=$("#monitorName").value.trim().slice(0,60);
+    try{
+      if(!window.MINDEX_SERVER_STORAGE?.ready)throw Error("서버 연결을 확인해 주세요.");
+      await window.MINDEX_SERVER_STORAGE.setItem("local","mindex.monitor.name",next);
+      name=next;retryAt=0;void upload();
+    }catch{shareMessage("기기 이름을 서버에 저장하지 못했습니다. 다시 시도해 주세요.");}
   };
-  window.addEventListener("storage", e => {
-    if(e.key==='mindex.monitor.name') {
-      name=e.newValue || ''; $("#monitorName").value=name || `${os} ${browser}`;
-      retryAt=0; void upload();
-    } else if(e.key?.startsWith(TAB_PREFIX) && snapshot().output!==reportedOutput) void upload();
-  });
+  function hydrateServerName(){
+    name=window.MINDEX_SERVER_STORAGE.getItem("local","mindex.monitor.name","");
+    if(document.activeElement!==$("#monitorName"))$("#monitorName").value=name||`${os} ${browser}`;
+  }
+  window.addEventListener("mindex-server-storage-ready",hydrateServerName);
+  window.addEventListener("mindex-server-device-updated",hydrateServerName);
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) { clearView(); }
     else { if (enabled) { retryAt = 0; void upload(); } void refresh(); }

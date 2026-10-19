@@ -2,7 +2,7 @@
 import os
 os.environ["MINDEX_SMOKE_OFFLINE"] = "1"
 from urllib.parse import urlsplit
-from smoke_app import launch_chromium, start_local_app_server, sync_playwright
+from smoke_app import prepare_server_state_fixture, launch_chromium, start_local_app_server, sync_playwright
 
 def main():
     server,url=start_local_app_server()
@@ -18,6 +18,7 @@ def main():
                     page.route('**/*',lambda r:r.continue_() if urlsplit(r.request.url).netloc==urlsplit(url).netloc and r.request.method in ('GET','HEAD') else r.abort())
                     page.goto(url)
                     page.wait_for_function("typeof renderGlobalPlaybackControls==='function' && !document.body.classList.contains('ui-booting')")
+                    prepare_server_state_fixture(page)
                     print(engine,page.evaluate('''async()=>{
                       const check=(v,m)=>{if(!v)throw Error(m)};
                       check(state.serviceMusic.fadeStopEnabled,'new profile must default to fade stop');
@@ -61,11 +62,13 @@ def main():
                     assert fade.is_checked()
                     fade.uncheck()
                     fade.check()
-                    assert page.evaluate("state.serviceMusic.fadeStopEnabled && localStorage.getItem('mindex.music.fadeStop')==='true'")
+                    page.evaluate('()=>MINDEX_SERVER_STORAGE.flush()')
+                    assert page.evaluate("state.serviceMusic.fadeStopEnabled && MINDEX_SERVER_STORAGE.getItem('local','mindex.music.fadeStop')==='true'")
                     page.evaluate('renderGlobalPlaybackControls()')
                     assert fade.is_checked()
                     fade.uncheck()
-                    assert page.evaluate("!state.serviceMusic.fadeStopEnabled && localStorage.getItem('mindex.music.fadeStop')==='false'")
+                    page.evaluate('()=>MINDEX_SERVER_STORAGE.flush()')
+                    assert page.evaluate("!state.serviceMusic.fadeStopEnabled && MINDEX_SERVER_STORAGE.getItem('local','mindex.music.fadeStop')==='false'")
                     assert panel.locator('[data-presenter-action], [data-presenter-always-on-top], [data-global-playback-action="return"], [data-global-playback-action="output-stop"]').count()==0
                     assert page.evaluate("""()=>{const html=renderPresenterControlsTop(state.services[0],[],false,0);return html.includes('data-presenter-action="detect-screens"')&&html.includes('data-presenter-always-on-top')}""")
                     before=page.locator('#globalPlaybackControls').bounding_box()
@@ -118,12 +121,17 @@ def main():
                     lower.evaluate('e=>e.remove()')
                     launcher.click()
                     fade.check()
+                    page.evaluate('()=>MINDEX_SERVER_STORAGE.flush()')
                     page.reload()
                     page.wait_for_function("typeof state==='object' && !document.body.classList.contains('ui-booting')")
+                    prepare_server_state_fixture(page)
                     assert page.evaluate('state.serviceMusic.fadeStopEnabled'), 'device preference lost on reload'
-                    page.evaluate("localStorage.setItem('mindex.music.fadeStop','false')")
+                    page.evaluate("()=>MINDEX_SERVER_STORAGE.setItem('local','mindex.music.fadeStop','false')")
+                    page.evaluate('()=>MINDEX_SERVER_STORAGE.flush()')
                     page.reload()
                     page.wait_for_function("typeof state==='object' && !document.body.classList.contains('ui-booting')")
+                    prepare_server_state_fixture(page)
+                    assert page.evaluate("localStorage.getItem('mindex.music.fadeStop')") is None
                     assert not page.evaluate('state.serviceMusic.fadeStopEnabled'), 'explicit opt-out lost on reload'
                 finally:browser.close()
     finally:server.shutdown();server.server_close()

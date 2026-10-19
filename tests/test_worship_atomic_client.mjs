@@ -119,7 +119,7 @@ const lifecycle=createWorshipAtomicClient({journal,makeId:()=> 'stable-id',rpc:a
     : {aggregate:null,deleted:true,currentRevision:'2',committedRevision:'2',replayed:true}};
 }});
 const identity=['fixture','2026-10-12'];
-assert.equal(lifecycle.creationId(identity),lifecycle.creationId(identity));
+assert.equal(await lifecycle.creationId(identity),await lifecycle.creationId(identity));
 await assert.rejects(lifecycle.create(creation),/Response lost/);
 const recovered=await lifecycle.create({...creation,document:{...creation.document,updatedAt:'two'}});
 assert.equal(recovered.service.id,'service');
@@ -129,7 +129,7 @@ assert.equal(await lifecycle.remove('service'),true);
 assert.deepEqual(replayCalls[2],replayCalls[3]);
 assert.equal(await lifecycle.remove('service'),true);
 assert.equal(replayCalls.length,4);
-lifecycle.finishCreation(identity,'stable-id');
+await lifecycle.finishCreation(identity,'stable-id');
 assert.equal([...memory.keys()].length,0);
 console.log('PASS creation identity, ignored client timestamps, exact create/delete retry and tombstone receipt');
 

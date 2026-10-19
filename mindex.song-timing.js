@@ -99,7 +99,7 @@
     const profile = versionProfile(song, version);
     const children = isChildrenVersion(song, version);
     const childMode = isChildrenMode(item);
-    const valid = childMode && children && validSet(profile, version) && profile?.enabled && profile.url && !validate(profile, slides, Boolean(profile?.databaseTiming));
+    const valid = childMode && children && validSet(profile, version) && profile?.enabled && profile.url && !validate(profile, slides, Boolean(profile?.databaseTiming||profile?.serverTiming));
     if (valid && profile.databaseTiming) remoteSources.add(profile.url);
     let page = 0;
     return slides.map(slide => {
@@ -141,7 +141,7 @@
       const memo = parseServiceItemMemo(item.memo);
       const stored = memo.audioTiming;
       const profile = stored ? {...stored, url:stored.audioUrl} : profiles.get(key);
-      const valid = profile?.enabled && profile.url && (!stored || stored.audioUrl === linkedSource) && !validate(profile, group, Boolean(stored));
+      const valid = profile?.enabled && profile.url && (!stored || stored.audioUrl === linkedSource) && !validate(profile, group, Boolean(stored||profile?.serverTiming));
       if (valid && stored) remoteSources.add(profile.url);
       let page = 0;
       result = result.map(slide => {
@@ -193,26 +193,53 @@
     });
   }
   let loadError = null;
+  const legacyProfiles = new Map();
+  const PROFILE_MANIFEST = "mindex.songTiming.manifest.v1";
   const ready = dbPromise ? transaction('readonly', store => store.getAll()).then(rows => {
     for (const row of rows) {
       const audio = row.audioBytes instanceof ArrayBuffer ? new Blob([row.audioBytes], { type: row.audioType || 'audio/mpeg' }) : row.audio;
-      if (audio instanceof Blob) profiles.set(row.key, { ...row, audio, url: URL.createObjectURL(audio) });
+      if (audio instanceof Blob) legacyProfiles.set(row.key, { ...row, audio });
     }
     revision++;
   }).catch(error => { loadError = error; }) : Promise.resolve();
+  async function persistProfile(profile) {
+    if(!root.MINDEX_SERVER_STORAGE?.ready||!state.client?.storage)throw Error('서버 저장 연결이 필요합니다.');
+    const {url,audio,audioBytes,...record}=profile;
+    if(!record.audioUrl){
+      if(!(audio instanceof Blob))throw Error('음원을 확인해 주세요.');
+      if(await digestBytes(await audio.arrayBuffer())!==record.audioFingerprint)throw Error('음원 지문이 다릅니다.');
+      const bucket=state.client.storage.from('mindex-worship-media');
+      const path=`song-timing/audio/${crypto.randomUUID()}`;
+      const result=await bucket.upload(path,audio,{contentType:audio.type||'audio/mpeg',upsert:false,cacheControl:'31536000'});
+      if(result.error)throw result.error;
+      record.audioUrl=bucket.getPublicUrl(path).data?.publicUrl;
+      if(!/^https:\/\//.test(record.audioUrl||''))throw Error('음원 주소를 확인하지 못했습니다.');
+      profile.audioUrl=record.audioUrl;
+    }
+    await root.MINDEX_SERVER_STORAGE.updateItem('local',PROFILE_MANIFEST,current=>{
+      const manifest=JSON.parse(current||'{}');manifest[record.key]=record;return JSON.stringify(manifest);
+    });
+    profiles.set(record.key,{...record,audio,url:record.audioUrl,serverTiming:true});
+    remoteSources.add(record.audioUrl);revision++;
+  }
+  async function initializeServerProfiles(){
+    await ready;
+    const stored=JSON.parse(root.MINDEX_SERVER_STORAGE.getItem('local',PROFILE_MANIFEST,'{}'));
+    for(const [key,record] of Object.entries(stored)){
+      if(record?.key!==key||!/^https:\/\//.test(record.audioUrl||''))continue;
+      profiles.set(key,{...record,url:record.audioUrl,serverTiming:true});remoteSources.add(record.audioUrl);
+    }
+    for(const [key,profile] of legacyProfiles){
+      if(profiles.has(key))continue;
+      await persistProfile(profile);
+    }
+    revision++;
+  }
   async function save(profile, slides) {
     await ready;
-    if (loadError) throw loadError;
-    const error = validate(profile, slides);
-    if (error) throw Error(error);
-    const { url, audio, audioBytes: previousBytes, ...record } = profile;
-    // ArrayBuffer avoids WebKit File/Blob transaction failures while retaining exact bytes.
-    const audioBytes = await audio.arrayBuffer();
-    await transaction('readwrite', store => store.put({ ...record, audioBytes, audioType: audio.type }));
-    const old = profiles.get(record.key);
-    profiles.set(record.key, { ...record, audio, url: URL.createObjectURL(audio) });
-    if (old?.url) URL.revokeObjectURL(old.url);
-    revision++;
+    const error=validate(profile,slides,Boolean(profile.audioUrl));
+    if(error)throw Error(error);
+    await persistProfile(profile);
   }
   const PACKAGE_LIMIT = 50 * 1024 * 1024;
   const digestBytes = async bytes => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)), b => b.toString(16).padStart(2, '0')).join('');
@@ -554,11 +581,11 @@
     const stored = serviceTiming ? parseServiceItemMemo(item.memo).audioTiming : null;
     const old = stored ? {...stored, audioName:linkedAudio.name, url:stored.audioUrl} : (serviceTiming ? profiles.get(key) : versionProfile(song,version));
     const fresh = Array.isArray(old?.starts) && old?.lyricsFingerprint === fingerprint(slides);
-    let draft = { key, audioUrl: stored?.audioUrl || (!serviceTiming && old?.audioUrl) || (old?.lyricsFingerprint === fingerprint(slides) ? linkedAudio.url : ''), audio: old?.audio, audioName: old?.audioName || '', audioFingerprint: old?.audioFingerprint || '',
+    let draft = { key, audioUrl: stored?.audioUrl || old?.audioUrl || (old?.lyricsFingerprint === fingerprint(slides) ? linkedAudio.url : ''), audio: old?.audio, audioName: old?.audioName || '', audioFingerprint: old?.audioFingerprint || '',
       duration: old?.duration || 0, lyricsFingerprint: fingerprint(slides),
       sourceSignature: sourceSignature(version), forms: setForms, photos:structuredClone(old?.photos || []),
       starts: fresh ? [...old.starts] : slides.map(() => null), enabled: old?.enabled ?? true };
-    let previewUrl = old?.audio ? URL.createObjectURL(old.audio) : (stored?.audioUrl || (!serviceTiming && old?.audioUrl) || '');
+    let previewUrl = old?.audio ? URL.createObjectURL(old.audio) : (stored?.audioUrl || old?.audioUrl || '');
     const formLabels = new Map(slides.filter(slide => slide.formKey && presenterFormGroupLabel(slide)).map(slide => [slide.formKey, presenterFormGroupLabel(slide)]));
     const dialog = document.createElement('dialog');
     dialog.className = 'song-timing-dialog'; dialog.dataset.songTimingDialog = '';
@@ -847,7 +874,7 @@
             if (isChildrenMode(item) && fingerprint(slides) !== incoming.lyricsFingerprint) {
               dialog.close(); dialog.remove(); await open(serviceId, elementId); return;
             }
-            status.textContent = '공유 음원·타이밍을 이 컴퓨터에 저장했어요. 다시 열어도 사용할 수 있어요.';
+            status.textContent = '공유 음원·타이밍을 서버에 보관했어요.';
           } else {
             draft.enabled = dialog.querySelector('[data-timing-enabled]').checked;
             await save(draft, currentSlides());
@@ -856,7 +883,7 @@
             audio.pause(); refreshPresenterForService(serviceId);
             status.textContent = '공유 저장했어요. 다른 컴퓨터에서 같은 곡의 공유 불러오기를 누르세요.';
           }
-        } catch (error) { status.textContent = `공유 ${loading ? '불러오기' : '저장'} 실패: ${error.message || '연결 상태를 확인해 주세요.'} ${savedLocally ? '이 컴퓨터에는 저장됐고 기존 공유본은 유지됩니다.' : '기존 저장본은 유지됩니다.'}`; }
+        } catch (error) { status.textContent = `공유 ${loading ? '불러오기' : '저장'} 실패: ${error.message || '연결 상태를 확인해 주세요.'} ${savedLocally ? '서버 보관본과 기존 공유본은 유지됩니다.' : '기존 저장본은 유지됩니다.'}`; }
         finally { busy = false; dialog.querySelectorAll('button,input').forEach(control => { control.disabled = false; }); }
         return;
       }
@@ -915,7 +942,7 @@
     }
     return result;
   }
-  root.MindexSongTiming = { resumeAutoSync, snapBeat, detectBeatGrid, composePhotos, validatePhotos, saveToVersion, readElemLibrary, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, save, saveToWorship, ready, pack, unpack, share, loadShared, formsFor, sourceSignature, ownsSource: source => remoteSources.has(source) || [...profiles.values()].some(p => p.url === source), get revision() { return revision; } };
+  root.MindexSongTiming = { initializeServerProfiles, resumeAutoSync, snapBeat, detectBeatGrid, composePhotos, validatePhotos, saveToVersion, readElemLibrary, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, save, saveToWorship, ready, pack, unpack, share, loadShared, formsFor, sourceSignature, ownsSource: source => remoteSources.has(source) || [...profiles.values()].some(p => p.url === source), get revision() { return revision; } };
   if (typeof document !== 'undefined') document.addEventListener('input', e => {
     const input = e.target.closest('[data-song-timing-seek]');
     const audio = state.serviceMusic.audio;

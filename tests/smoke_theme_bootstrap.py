@@ -1,4 +1,4 @@
-"""First paint must preserve the chosen theme while app scripts are delayed."""
+"""First paint uses the system theme until server preferences are available."""
 from io import BytesIO
 from time import monotonic
 from PIL import Image
@@ -37,7 +37,7 @@ def main():
                     page.route('**/mindex-release.json*', lambda r: releases.append(r))
                     page.route('**/mindex.constants.js*', lambda r: r.abort() if fail_modules else modules.append(r))
                     page.goto(url+'?mindexSmokeRaw=1'+('&output=presenter' if output else ''), wait_until='domcontentloaded')
-                    expected_theme = saved if saved in ('dark','light') else system
+                    expected_theme = system
                     expected = (0,0,0) if output else (24,24,22) if expected_theme == 'dark' else (255,255,255)
                     deadline = monotonic() + 5
                     while not releases and monotonic() < deadline:

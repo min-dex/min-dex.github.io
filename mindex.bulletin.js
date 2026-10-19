@@ -1006,7 +1006,7 @@
     return {fields:values,settings,frames,months,inherited,sourceSnapshot:normalizeSourceSnapshot(value.sourceSnapshot)};
   }
   function readLocal(key) {
-    try{return JSON.parse(localStorage.getItem(key)||"null");}catch{return null;}
+    try{return JSON.parse(window.MINDEX_SERVER_STORAGE?.getItem("local",key)||"null");}catch{return null;}
   }
   function restore(scope,id) {
     const key=`mindex.bulletin.v1:${scope}:${id}`,saved=readLocal(key);
@@ -1093,7 +1093,7 @@
       <button type="button" data-bulletin-template-edit hidden>2027 공통 양식 편집</button><button type="button" data-bulletin-template-exit hidden>주보로 돌아가기</button><span class="bulletin-spacer"></span><div class="bulletin-history" role="group" aria-label="편집 기록">
       <button type="button" data-bulletin-undo aria-label="주보 실행 취소" title="실행 취소"><i data-lucide="undo-2"></i></button><button type="button" data-bulletin-redo aria-label="주보 다시 실행" title="다시 실행"><i data-lucide="redo-2"></i></button></div>
       <button type="button" data-bulletin-save><i data-lucide="save"></i><span>저장</span></button><button class="bulletin-primary" type="button" data-bulletin-print disabled><i data-lucide="printer"></i><span>인쇄 / PDF</span></button></header>
-      <div class="bulletin-meta"><div class="bulletin-status" role="status"></div><div class="bulletin-source-actions" role="group" aria-label="주보 자료"><button type="button" data-bulletin-local title="이 브라우저에 남아 있는 복구 초안을 불러옵니다">임시 초안</button><button type="button" data-bulletin-reload title="DB에 저장한 주보 내용과 양식을 다시 불러옵니다">저장본 불러오기</button><button type="button" data-bulletin-refresh title="연결된 예배·교회력에서 최신 자료를 가져옵니다"><i data-lucide="refresh-cw"></i><span>예배 자료 갱신</span></button></div></div>
+      <div class="bulletin-meta"><div class="bulletin-status" role="status"></div><div class="bulletin-source-actions" role="group" aria-label="주보 자료"><button type="button" data-bulletin-local title="서버에 보관된 복구 초안을 불러옵니다">임시 초안</button><button type="button" data-bulletin-reload title="DB에 저장한 주보 내용과 양식을 다시 불러옵니다">저장본 불러오기</button><button type="button" data-bulletin-refresh title="연결된 예배·교회력에서 최신 자료를 가져옵니다"><i data-lucide="refresh-cw"></i><span>예배 자료 갱신</span></button></div></div>
       <div class="bulletin-body"><aside class="bulletin-inspector" aria-label="주보 편집 도구">
       <div class="bulletin-modes" role="group" aria-label="편집 방식"><button type="button" data-bulletin-mode="content">내용</button><button type="button" data-bulletin-mode="layout">양식</button></div>
       <div class="bulletin-properties"></div></aside><section class="bulletin-preview" aria-label="인쇄 미리보기"><div class="bulletin-preview-head"><strong>미리보기</strong><div class="bulletin-page-nav" role="group" aria-label="주보 면 이동"><button type="button" data-bulletin-page="0">겉면</button><button type="button" data-bulletin-page="1">안쪽</button></div><span>A4 가로 · 2쪽</span></div><div class="bulletin-canvas" tabindex="0" aria-label="주보 페이지"></div></section></div></section>`;
@@ -1118,24 +1118,33 @@
     on(q(".bulletin-canvas"),"scroll",pageNavigation);
     const previewResize=new ResizeObserver(pageNavigation);previewResize.observe(q(".bulletin-canvas"));
     function loadProfile(date) {
-      let versions=[];try{versions=JSON.parse(localStorage.getItem(`mindex.bulletin.profiles:${options.scope}`)||"[]");}catch{}
+      let versions=[];try{versions=JSON.parse(window.MINDEX_SERVER_STORAGE?.getItem("local",`mindex.bulletin.profiles:${options.scope}`)||"[]");}catch{}
       const profile={};
       if(Array.isArray(versions))for(const v of versions.filter(v=>v&&typeof v.date==="string"&&v.date<=date).sort((a,b)=>a.date.localeCompare(b.date)))
         for(const k of profileKeys)if(typeof v.fields?.[k]==="string")profile[k]=v.fields[k];
       return profile;
     }
     function remember(before=snapshot(doc)){doc.history.push(before);if(doc.history.length>50)doc.history.shift();doc.future=[];}
-    function writeLocal(target,key,value) {
-      try{localStorage.setItem(key,JSON.stringify(value));target.backupUnavailable=false;return true;}
-      catch{target.backupUnavailable=true;return false;}
+    async function writeLocal(target,key,value) {
+      target.backupPending=true;status();
+      try{
+        if(!window.MINDEX_SERVER_STORAGE?.ready)throw Error("서버 보관 연결이 필요합니다.");
+        await window.MINDEX_SERVER_STORAGE.setItem("local",key,JSON.stringify(value));
+        target.backupUnavailable=false;return true;
+      }catch(error){target.backupUnavailable=true;throw error;}
+      finally{target.backupPending=false;status();}
     }
     function backup(target=doc){
       const savedAt=Date.now(),value=snapshot(target);
-      if(writeLocal(target,target.key,{version:3,...value,savedAt,...(templateSession&&target===doc?{templateDirty:target.dirty,templateRevision:target.revision}:{})}))target.savedAt=savedAt;
+      target.backupPending=true;
+      const accepted=window.MINDEX_SERVER_STORAGE?.queue("local",target.key,JSON.stringify({version:3,...value,savedAt,...(templateSession&&target===doc?{templateDirty:target.dirty,templateRevision:target.revision}:{})}));
+      if(!accepted){target.backupPending=false;target.backupUnavailable=true;}
+      status();
     }
-    function retainRecovery(target,value) {
-      target.localDraft=normalizeSnapshot(value);
-      writeLocal(target,target.key+":recovery",{version:3,...target.localDraft,savedAt:Date.now()});
+    async function retainRecovery(target,value) {
+      const preserved=normalizeSnapshot(value);
+      await writeLocal(target,target.key+":recovery",{version:3,...preserved,savedAt:Date.now()});
+      target.localDraft=preserved;
     }
     function persist(){doc.dirty=true;doc.saveError="";saveError="";printError="";backup();}
     async function editTemplate(){
@@ -1191,10 +1200,16 @@
     }
     on(window,"mindex-bulletin-save-settled",event=>{if(event.detail===doc){saveError=doc.saveError||"";status();}});
     on(root,"mindex-bulletin-save",event=>{const result=save();if(event.detail)event.detail.result=result;});
+    on(window,"mindex-server-state-settled",()=>{if(!signal.aborted)status()});
     function status(){
+      if(doc?.backupPending){
+        const confirmed=readLocal(doc.key);
+        if(confirmed?.savedAt&&JSON.stringify(normalizeSnapshot(confirmed))===JSON.stringify(snapshot(doc))){doc.savedAt=confirmed.savedAt;doc.backupPending=false;doc.backupUnavailable=false;}
+      }
+
       const text=error||saveError||printError||(loading?"저장된 예배 자료를 불러오는 중…":!assetLoaded?"글꼴과 이미지를 준비하는 중…":
         issues.size?`영역 넘침·겹침: ${[...issues].map(frameLabel).join(", ")}`:"");
-      q(".bulletin-status").textContent=[text,`${templateSession?"공통 양식 편집":"이번 주 편집"} · ${doc?.saving?"저장 중…":doc?.dirty?"수정 중":doc?.revision?"저장됨":"저장 전"}`,templateSession?"":templateError,doc?.backupUnavailable?"브라우저 임시 저장 불가":""].filter(Boolean).join(" · ");
+      q(".bulletin-status").textContent=[text,`${templateSession?"공통 양식 편집":"이번 주 편집"} · ${doc?.saving?"저장 중…":doc?.dirty?"수정 중":doc?.revision?"저장됨":"저장 전"}`,templateSession?"":templateError,doc?.backupUnavailable?"서버 초안 보관 실패":doc?.backupPending?"서버 초안 보관 중":""].filter(Boolean).join(" · ");
       q(".bulletin-status").hidden=!q(".bulletin-status").textContent;
       q(".bulletin-status").dataset.state=error||saveError||printError||doc?.backupUnavailable||issues.size?"warning":loading||!assetLoaded?"loading":"saved";
       q("[data-bulletin-print]").disabled=printing||loading||!assetLoaded||!!error||!doc?.source?.order.length||issues.size>0;
@@ -1285,10 +1300,14 @@
       try{
         if(!target.dbLoaded||force){
           if(!options.loadDraft)throw new Error("주보 DB 연결이 필요합니다.");
-          if(force&&target.dirty)retainRecovery(target,snapshot(target));
+          const beforeRead=JSON.stringify(snapshot(target));
+          if(force&&target.dirty)await retainRecovery(target,snapshot(target));
           const row=await options.loadDraft(id);if(request!==serial||signal.aborted)return;
+          if(JSON.stringify(snapshot(target))!==beforeRead)throw Error("불러오는 동안 입력이 바뀌어 현재 입력을 유지했습니다.");
           if(row){
-            if(target.localDraft&&!readLocal(target.key+":recovery"))retainRecovery(target,target.localDraft);
+            if(target.localDraft&&!readLocal(target.key+":recovery"))await retainRecovery(target,target.localDraft);
+            if(request!==serial||signal.aborted)return;
+            if(JSON.stringify(snapshot(target))!==beforeRead)throw Error("초안을 보관하는 동안 입력이 바뀌어 현재 입력을 유지했습니다.");
             applyStored(target,row);
           }else{target.dirty=true;target.revision=0;}
           target.dbLoaded=true;target.saveError="";saveError="";
@@ -1357,7 +1376,7 @@
       if(t.dataset.bulletinDimension){const n=Number(t.value);if(!t.value.trim()||!Number.isFinite(n)){t.value=String(f[t.dataset.bulletinDimension]);return;}remember();setDimension(f,t.dataset.bulletinDimension,n);persist();properties();preview();}
       if(t.matches("[data-bulletin-align]")){remember();f.align=t.value;persist();preview();}
     });
-    on(root,"click",event=>{
+    on(root,"click",async event=>{
       if(mode==="content"){
         const hit=event.target.closest("[data-frame-id]"),frame=hit&&doc?.frames.find(f=>f.id===hit.dataset.frameId);
         if(frame?.binding.startsWith("field:")){
@@ -1368,7 +1387,7 @@
       const b=event.target.closest("button");if(!b)return;
       if(b.hasAttribute("data-bulletin-template-edit")){void editTemplate();return;}
       if(b.hasAttribute("data-bulletin-template-reload")){
-        if(templateSession){retainRecovery(doc,snapshot(doc));writeLocal(doc,doc.key,{version:3,templateDirty:false});exitTemplate();templateDraft=null;void editTemplate();}return;
+        if(templateSession){try{const target=doc,before=JSON.stringify(snapshot(target));await retainRecovery(target,snapshot(target));if(doc!==target||JSON.stringify(snapshot(target))!==before)throw Error("입력이 바뀌어 현재 초안을 유지했습니다.");await writeLocal(target,target.key,{version:3,templateDirty:false});if(doc!==target||JSON.stringify(snapshot(target))!==before)throw Error("입력이 바뀌어 현재 초안을 유지했습니다.");exitTemplate();templateDraft=null;void editTemplate();}catch(e){saveError=e.message;status();}}return;
       }
       if(b.hasAttribute("data-bulletin-template-exit")){exitTemplate();return;}
       if(b.hasAttribute("data-bulletin-template-apply")){

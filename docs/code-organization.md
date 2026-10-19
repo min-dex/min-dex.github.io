@@ -272,3 +272,13 @@ real browser cache across fresh releases, original-vs-subset wrapping including
 rare/common boundaries, and compiled-vs-source selection in Chromium/WebKit.
 Rare characters can download the original full face in addition to the common
 face; the reduction is for ordinary common-character output, not all scripts.
+
+
+## Server-state modules · 2026-10-19 (pending deployment)
+
+`mindex.server-storage.js` loads before the application runtime. It owns confirmed
+memory mirrors, coalesced dispatch and server-state initialization; dynamically
+loaded `mindex.server-state.mjs` owns revision/request identity and
+`mindex.legacy-state.mjs` owns the allowlisted legacy migration. The editor draft
+adapter `mindex.editor-drafts.js` loads after app globals. None replaces the atomic
+worship RPC or independently publishes a deployment.

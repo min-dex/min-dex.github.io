@@ -3,6 +3,7 @@ import os
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from urllib.parse import urlsplit
 from smoke_app import start_local_app_server,sync_playwright,launch_chromium
+from smoke_app import prepare_server_state_fixture
 server,url=start_local_app_server()
 try:
  with sync_playwright() as p:
@@ -12,6 +13,7 @@ try:
    page.add_init_script("window.open=()=>null; Element.prototype.requestFullscreen=async()=>{}; Element.prototype.webkitRequestFullscreen=()=>{};")
    page.route('**/*',lambda r:r.continue_() if r.request.method=='GET' and urlsplit(r.request.url).netloc==urlsplit(url).netloc else r.abort())
    page.goto(url+'?output=presenter&mindexSmokeRaw=1',wait_until='domcontentloaded');page.wait_for_function("typeof departmentCalendarSave==='function'")
+   prepare_server_state_fixture(page)
    result=page.evaluate('''async()=>{
     const row={id:crypto.randomUUID(),date:'2026-10-25',children_prayer:'A'};
     const dbRow=structuredClone(row);state.calendarData=[row];state.config={url:'offline-fixture'};state.calendarLoaded=true;

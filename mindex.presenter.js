@@ -2928,9 +2928,10 @@ function restorePresenterControllerSession() {
 function bindPresenterChannel() {
   window.addEventListener("message", (event) => {
     if (event.origin !== window.location.origin || !event.source
-      || !["presenter-ready", "presenter-heartbeat"].includes(event.data?.type)
+      || !event.data?.type?.startsWith("presenter-")
       || !acceptsPresenterOutputMessage(event.data)) return;
     // Recover the real Window reference after a controller reload, without opening anything.
+    if(state.presenter.outputWindow&&state.presenter.outputWindow!==event.source) return;
     state.presenter.outputWindow = event.source;
     handlePresenterControllerMessage(event.data);
   });
@@ -3106,6 +3107,7 @@ function reconcilePresenterTransportReceipt(message = {}) {
   latest.retriedAt = Date.now();
   // Replay the same ID: a delayed acknowledgement must not render twice.
   safeStorageSet("local", PRESENTER_STORAGE_KEY, JSON.stringify(latest.payload));
+  try { state.presenter.outputWindow?.postMessage({type:"presenter-state",payload:latest.payload},window.location.origin); } catch {}
   try {
     state.presenter.channel?.postMessage({ type: "presenter-state", payload: latest.payload });
   } catch {
@@ -3141,6 +3143,7 @@ function publishPresenterPayload(payload, options = {}) {
       index, slideAnchor, pptxProgress, safetyBlank, liveScripture, livePraise, updatedAt };
     presenterTransportLatest = { payload: { ...payload, ...navigation }, sentAt: Date.now(), retriedAt: 0 };
     safeStorageSet("local", PRESENTER_NAVIGATION_STORAGE_KEY, JSON.stringify(navigation));
+    try { state.presenter.outputWindow?.postMessage({type:"presenter-navigation",payload:navigation},window.location.origin); } catch {}
     try {
       state.presenter.channel?.postMessage({ type: "presenter-navigation", payload: navigation });
     } catch {
@@ -3151,6 +3154,7 @@ function publishPresenterPayload(payload, options = {}) {
   const snapshot = { ...payload, snapshotId: messageId, messageId };
   presenterTransportLatest = { payload: snapshot, sentAt: Date.now(), retriedAt: 0 };
   const stored = safeStorageSet("local", PRESENTER_STORAGE_KEY, JSON.stringify(snapshot));
+  try { state.presenter.outputWindow?.postMessage({type:"presenter-state",payload:snapshot},window.location.origin); } catch {}
   presenterTransportSnapshot = stored ? { id: messageId, contentKey } : null;
   try {
     state.presenter.channel?.postMessage({ type: "presenter-state", payload: snapshot });
@@ -3513,14 +3517,12 @@ function initPresenterOutputCore() {
   };
   const sendControllerMessage = (message) => {
     const payload = { ...message, outputSessionId, updatedAt: Date.now() };
-    if (["presenter-ready", "presenter-heartbeat"].includes(message.type)) {
-      try { window.opener?.postMessage(payload, window.location.origin); } catch {}
-    }
-    if (channel) {
-      channel.postMessage(payload);
-      return true;
-    }
-    return safeStorageSet("local", PRESENTER_SIGNAL_KEY, JSON.stringify(payload));
+    const announce=["presenter-ready","presenter-heartbeat"].includes(message.type);
+    if(announce){try { window.opener?.postMessage(payload, window.location.origin); } catch {}}
+    // Actions use one transport only: duplicate next/previous would skip slides.
+    if(channel){try { channel.postMessage(payload);return true; } catch {}}
+    if(!announce){try { window.opener?.postMessage(payload, window.location.origin); } catch {}}
+    return Boolean(window.opener);
   };
   const postHeartbeat = () => {
     if (outputStopping) return;
@@ -3643,6 +3645,12 @@ function initPresenterOutputCore() {
       }, 40);
     }
   };
+
+  window.addEventListener("message", event => {
+    if(event.origin!==window.location.origin || event.source!==window.opener || !event.source)return;
+    if(event.data?.type==="presenter-state")applyInitialPresenterState(event.data.payload);
+    else handleOutputSignalMessage(event.data || {});
+  });
 
   if ("BroadcastChannel" in window) {
     try {
@@ -4720,7 +4728,8 @@ function requestPresenterVideoRetry(serviceId) {
     clientId: health.clientId, frameKey: health.frameKey,
     requestId: `${Date.now()}:${Math.random()}` };
   safeStorageSet("local", PRESENTER_SIGNAL_KEY, JSON.stringify(message));
-  try { state.presenter.channel?.postMessage(message); } catch { /* Storage delivers the request. */ }
+  try { state.presenter.outputWindow?.postMessage(message,window.location.origin); } catch {}
+  try { state.presenter.channel?.postMessage(message); } catch {}
 }
 
 function preparePresenterOutputVideoForPaint(video) {

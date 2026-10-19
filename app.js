@@ -900,6 +900,17 @@ async function init() {
   applyPresenterThumbScale(readPresenterThumbScale());
   const linkParams = readLinkParams();
   state.config = readConfig(linkParams);
+  const legacyProject = safeStorageGet("local", STORAGE.url, "");
+  connectClient();
+  if (state.client) {
+    await window.MINDEX_SERVER_STORAGE.initialize(state.client, state.config.url, {legacyProject, prepare: prepareLegacyServerValue});
+    await window.MindexSongTiming.initializeServerProfiles();
+    applyTheme(readTheme());
+    applyPresenterThumbScale(readPresenterThumbScale());
+    pendingSundayEditSync.clear();
+    for (const [key, value] of readPendingSundayEditSync()) pendingSundayEditSync.set(key, value);
+    state.serviceMusic.fadeStopEnabled = safeStorageGet("local", "mindex.music.fadeStop", "true") === "true";
+  }
   rememberConfig(state.config);
   readUiState();
   state.worshipBackgroundRegistry = readWorshipBackgroundRegistry();
@@ -909,8 +920,15 @@ async function init() {
   bindStaticEvents();
   bindElectronDesktopEvents();
   bindPresenterChannel();
-  connectClient();
   initializeDepartmentTabSync();
+  const hydrateServerPreferences = () => {
+    applyTheme(readTheme());
+    applyPresenterThumbScale(readPresenterThumbScale());
+    state.worshipBackgroundRegistry = readWorshipBackgroundRegistry();
+    state.serviceMusic.fadeStopEnabled = safeStorageGet("local", "mindex.music.fadeStop", "true") === "true";
+  };
+  window.addEventListener("mindex-server-shared-updated", hydrateServerPreferences);
+  window.addEventListener("mindex-server-storage-ready", hydrateServerPreferences);
   render();
   syncBrowserHistory({ replace: true });
   void requestPresenterScreens({ silent: true });
@@ -2198,30 +2216,37 @@ function safeStorageArea(scope) {
   }
 }
 
-function safeStorageGet(scope, key, fallback = "") {
-  try {
-    return safeStorageArea(scope)?.getItem(key) ?? fallback;
-  } catch {
-    return fallback;
-  }
+function isConnectionStorageKey(key) {
+  return key === STORAGE.url || key === STORAGE.key;
 }
 
+function safeStorageGet(scope, key, fallback = "") {
+  try {
+    return isConnectionStorageKey(key)
+      ? safeStorageArea(scope)?.getItem(key) ?? fallback
+      : window.MINDEX_SERVER_STORAGE?.getItem(scope, key, fallback) ?? fallback;
+  } catch { return fallback; }
+}
+
+// UI changes may queue a write; this boolean is not a server-save receipt.
 function safeStorageSet(scope, key, value) {
   try {
-    safeStorageArea(scope)?.setItem(key, value);
-    return true;
-  } catch {
-    return false;
-  }
+    if (isConnectionStorageKey(key)) { safeStorageArea(scope)?.setItem(key, value); return true; }
+    return window.MINDEX_SERVER_STORAGE?.queue(scope, key, value) === true;
+  } catch { return false; }
 }
 
 function safeStorageRemove(scope, key) {
   try {
-    safeStorageArea(scope)?.removeItem(key);
-    return true;
-  } catch {
-    return false;
-  }
+    if (isConnectionStorageKey(key)) { safeStorageArea(scope)?.removeItem(key); return true; }
+    return window.MINDEX_SERVER_STORAGE?.queue(scope, key, null) === true;
+  } catch { return false; }
+}
+
+async function persistServerValue(scope, key, value) {
+  if (!window.MINDEX_SERVER_STORAGE?.ready) throw new Error("서버 보관 연결이 준비되지 않았습니다. 입력을 유지하고 다시 시도해 주세요.");
+  await window.MINDEX_SERVER_STORAGE.setItem(scope, key, value);
+  return true;
 }
 
 function readListScrollState() {
@@ -2279,44 +2304,25 @@ function worshipRecoveryLatestSnapshotKey(serviceId = "") {
   return `${WORSHIP_RECOVERY_LATEST_STORAGE_PREFIX}${serviceId}`;
 }
 
-function writeWorshipRecoverySnapshots(snapshots = []) {
+function compactWorshipRecoverySnapshots(snapshots = []) {
   const compact = snapshots
     .filter((snapshot) => snapshot && typeof snapshot === "object" && snapshot.serviceId)
     .slice(-WORSHIP_RECOVERY_SNAPSHOT_LIMIT);
-  while (compact.length) {
-    const snapshotJson = JSON.stringify(compact);
-    if (snapshotJson.length > WORSHIP_RECOVERY_SNAPSHOT_MAX_BYTES && compact.length > 1) {
-      compact.shift();
-      continue;
-    }
-    if (safeStorageSet("local", WORSHIP_RECOVERY_SNAPSHOTS_STORAGE_KEY, snapshotJson)) return true;
-    compact.shift();
-  }
-  return safeStorageSet("local", WORSHIP_RECOVERY_SNAPSHOTS_STORAGE_KEY, "[]");
+  while (compact.length > 1 && JSON.stringify(compact).length > WORSHIP_RECOVERY_SNAPSHOT_MAX_BYTES) compact.shift();
+  return JSON.stringify(compact);
+}
+
+async function writeWorshipRecoverySnapshots(snapshots = []) {
+  return persistServerValue("local", WORSHIP_RECOVERY_SNAPSHOTS_STORAGE_KEY, compactWorshipRecoverySnapshots(snapshots));
 }
 
 function scheduleWorshipRecoverySnapshotHistoryWrite(snapshotJson = "") {
   if (!snapshotJson) return;
-  const run = () => {
-    let snapshot = null;
-    try {
-      snapshot = JSON.parse(snapshotJson);
-    } catch {
-      return;
-    }
-    const snapshots = readWorshipRecoverySnapshots();
-    snapshots.push(snapshot);
-    if (!writeWorshipRecoverySnapshots(snapshots)) {
-      console.warn("Could not write worship recovery snapshot history.");
-    }
-  };
-  if (typeof window !== "undefined" && typeof window.requestIdleCallback === "function") {
-    window.requestIdleCallback(run, { timeout: 3000 });
-  } else if (typeof window !== "undefined" && typeof window.setTimeout === "function") {
-    window.setTimeout(run, 0);
-  } else {
-    run();
-  }
+  const snapshot = JSON.parse(snapshotJson);
+  // Read after any uncertain request has been replayed, inside the per-key queue.
+  // Otherwise a later append could erase a snapshot whose response was lost.
+  void window.MINDEX_SERVER_STORAGE.updateItem("local", WORSHIP_RECOVERY_SNAPSHOTS_STORAGE_KEY, current =>
+    compactWorshipRecoverySnapshots([...JSON.parse(current || "[]"), snapshot])).catch(() => {});
 }
 
 function buildWorshipRecoverySnapshot(service = null, reason = "before-save") {
@@ -2351,7 +2357,7 @@ function buildWorshipRecoveryServiceDocument(service = null) {
   }
 }
 
-function captureWorshipRecoverySnapshot(service = null, reason = "before-save") {
+async function captureWorshipRecoverySnapshot(service = null, reason = "before-save") {
   const snapshot = buildWorshipRecoverySnapshot(service, reason);
   if (!snapshot) return false;
   let snapshotJson = "";
@@ -2360,7 +2366,7 @@ function captureWorshipRecoverySnapshot(service = null, reason = "before-save") 
   } catch {
     return false;
   }
-  const saved = safeStorageSet("local", worshipRecoveryLatestSnapshotKey(snapshot.serviceId), snapshotJson);
+  const saved = await persistServerValue("local", worshipRecoveryLatestSnapshotKey(snapshot.serviceId), snapshotJson);
   if (saved) scheduleWorshipRecoverySnapshotHistoryWrite(snapshotJson);
   else console.warn("Could not write latest worship recovery snapshot.");
   return saved;
@@ -4055,7 +4061,7 @@ function isMissingWorshipListViewError(error) {
 const WORSHIP_LIST_VIEW_MISSING_KEY = "mindex.serviceListView.missingUntil";
 function worshipListViewKnownMissing() {
   try {
-    return Number(localStorage.getItem(WORSHIP_LIST_VIEW_MISSING_KEY) || 0) > Date.now();
+    return Number(safeStorageGet("local", WORSHIP_LIST_VIEW_MISSING_KEY, "0")) > Date.now();
   } catch {
     return false;
   }
@@ -4077,7 +4083,7 @@ async function fetchWorshipServiceListViewRows(select) {
     if (!isMissingWorshipListViewError(error)) throw error;
     state.serviceListViewSupported = false;
     try {
-      localStorage.setItem(WORSHIP_LIST_VIEW_MISSING_KEY, String(Date.now() + 60 * 60 * 1000));
+      safeStorageSet("local", WORSHIP_LIST_VIEW_MISSING_KEY, String(Date.now() + 60 * 60 * 1000));
     } catch {
       // Private mode: probe again next load.
     }
@@ -4168,7 +4174,7 @@ async function worshipAtomicClient() {
         }
         return result;
       },
-        journal: sessionStorage, namespace: state.config.url })).catch((error) => {
+        journal: window.MINDEX_SERVER_STORAGE.journal, namespace: state.config.url })).catch((error) => {
           // A failed speculative import must not poison the next detail/open retry.
           if (worshipAtomicRuntime?.promise === promise) worshipAtomicRuntime = null;
           throw error;
@@ -5489,7 +5495,7 @@ function initializeDepartmentTabSync() {
   const wake = () => {
     connectDepartmentRealtime();
     void reconcileDepartmentRealtime();
-    try { receive(JSON.parse(localStorage.getItem("mindex.department.assignees.v1") || "null")); } catch {}
+
     scheduleDepartmentTabRefresh();
   };
   window.addEventListener("focus", wake);
@@ -5505,7 +5511,7 @@ function publishDepartmentTabChange(calendar, serviceIds = [], { calendarOnly = 
   connectDepartmentRealtime();
   try { void departmentTabSync?.remote?.send({ type: "broadcast", event: "committed", payload: message }).catch(() => {}); } catch {}
   try { departmentTabSync?.channel?.postMessage(message); } catch {}
-  try { localStorage.setItem("mindex.department.assignees.v1", JSON.stringify(message)); } catch {}
+
 }
 function departmentRefreshBlocked() {
   const playingMedia = [...document.querySelectorAll("audio,video")].some(media => !media.paused && !media.ended);
@@ -5641,7 +5647,7 @@ async function departmentCalendarSave(row, field, value, previousValue) {
 }
 async function departmentCalendarSaveOnce(row, field, value, previousValue) {
   const key = `mindex.department.pending.v1:${JSON.stringify([state.config.url, row.id, field])}`;
-  const pending = sessionStorage.getItem(key);
+  const pending = window.MINDEX_SERVER_STORAGE.journal.getItem(key);
   let request = pending ? JSON.parse(pending) : null;
   if (!request) {
     const context = await state.client.rpc("get_department_assignee_context_v1", { calendar_id: row.id, field_name: field });
@@ -5653,14 +5659,14 @@ async function departmentCalendarSaveOnce(row, field, value, previousValue) {
     request = { requestId: createUuid(), calendarId: row.id, field, expected: previousValue, value,
       requests: context.data.services.map(aggregate => buildDepartmentCalendarServiceRequest(aggregate, field, value, prepareWorshipRowsCommit)) };
     // Persist before the first write. Transport failures replay this exact batch.
-    sessionStorage.setItem(key, JSON.stringify(request));
+    await window.MINDEX_SERVER_STORAGE.journal.setItem(key, JSON.stringify(request));
   }
   const result = await state.client.rpc("save_calendar_assignee_v1", { req: request });
   if (result.error) {
-    if (/^(P0001|22\w{3}|23\w{3}|42501|55P03|57014|40\w{3})$/.test(result.error.code || "")) sessionStorage.removeItem(key);
+    if (/^(P0001|22\w{3}|23\w{3}|42501|55P03|57014|40\w{3})$/.test(result.error.code || "")) await window.MINDEX_SERVER_STORAGE.journal.removeItem(key);
     throw result.error;
   }
-  sessionStorage.removeItem(key);
+  await window.MINDEX_SERVER_STORAGE.journal.removeItem(key);
   adoptDepartmentCalendarReceipt(result.data.calendar);
   publishDepartmentTabChange(result.data.calendar, request.requests.map(item => item.serviceId));
   // Invalidate only clean cached services; never overwrite an editor's drafts.
@@ -7050,7 +7056,7 @@ function serviceSaveErrorMessage(error) {
     return "서버 응답을 받지 못해 저장 완료 여부를 확인하지 못했습니다. 입력은 유지됩니다. 연결을 확인한 뒤 다시 저장해 주세요.";
   }
   if (/QuotaExceededError|SecurityError/.test(code)) {
-    return "브라우저에 저장 복구 정보를 기록하지 못했습니다. 입력은 유지됩니다. 브라우저 저장 공간과 사이트 저장 권한을 확인해 주세요.";
+    return "서버에 저장 복구 정보를 기록하지 못했습니다. 입력은 유지됩니다. 연결을 확인하고 다시 시도해 주세요.";
   }
   if (/PENDING_PROJECT_UNKNOWN/.test(message)) {
     return "이전 저장 요청의 프로젝트를 확인할 수 없어 재전송하지 않았습니다. 입력과 이전 요청은 유지됩니다.";
@@ -7109,6 +7115,14 @@ async function reopenWorshipConflict(review, isOpen = () => true) {
   const id = review.serviceId;
   const signature = JSON.stringify(review.draft);
   const atomic = await worshipAtomicClient();
+    const archive = {schema:1, reason:'before-conflict-reopen', capturedAt:new Date().toISOString(),
+      serviceId:id, service:review.draft.service, draft:review.draft,
+      serviceDocument:{sourceText:review.draft.sourceText},
+      baseline:review.baseline, sections:review.baseline?.sections || [], elements:review.baseline?.elements || []};
+    const serialized = JSON.stringify(archive);
+    const archiveKey = `${worshipRecoveryLatestSnapshotKey(id)}:conflict:${crypto.randomUUID()}`;
+    await persistServerValue('local', archiveKey, serialized);
+    await persistServerValue('local', worshipRecoveryLatestSnapshotKey(id), serialized);
   await atomic.reopenReviewed(review, {beforeAdopt: latest => {
     if (!isOpen() || state.saving || JSON.stringify(worshipConflictDraft(id)) !== signature) {
       throw new Error('LOCAL_DRAFT_CHANGED');
@@ -7116,17 +7130,6 @@ async function reopenWorshipConflict(review, isOpen = () => true) {
     const service = normalizeWorshipService(latest.service);
     const items = projectWorshipServiceItemsFromTemplate(service,
       groupWorshipElements(latest.sections, latest.elements)[id] || []);
-    const archive = {schema:1, reason:'before-conflict-reopen', capturedAt:new Date().toISOString(),
-      serviceId:id, service:review.draft.service, draft:review.draft,
-      serviceDocument:{sourceText:review.draft.sourceText},
-      baseline:review.baseline, sections:review.baseline?.sections || [], elements:review.baseline?.elements || []};
-    const serialized = JSON.stringify(archive);
-    const archiveKey = `${worshipRecoveryLatestSnapshotKey(id)}:conflict:${crypto.randomUUID()}`;
-    if (!safeStorageSet('local', archiveKey, serialized)
-      || safeStorageGet('local', archiveKey, '') !== serialized
-      || !safeStorageSet('local', worshipRecoveryLatestSnapshotKey(id), serialized)) {
-      throw new Error('DRAFT_NOT_PRESERVED');
-    }
     // No DB write or presenter publish: only this service's editable baseline changes.
     const sectionIds = new Set(state.worshipSections.filter(row => row.service_id === id).map(row => row.id));
     state.worshipElements.filter(row => sectionIds.has(row.section_id))
@@ -7142,7 +7145,7 @@ async function reopenWorshipConflict(review, isOpen = () => true) {
   }});
 }
 
-function preserveWorshipConflictServerSnapshot(review = {}) {
+async function preserveWorshipConflictServerSnapshot(review = {}) {
   const latest = review?.latest;
   const id = String(review?.serviceId || latest?.service?.id || "").trim();
   if (!latest?.service || !id) throw new Error("SERVER_SNAPSHOT_UNAVAILABLE");
@@ -7160,11 +7163,8 @@ function preserveWorshipConflictServerSnapshot(review = {}) {
   };
   const serialized = JSON.stringify(archive);
   const archiveKey = `${worshipRecoveryLatestSnapshotKey(id)}:conflict-server:${crypto.randomUUID()}`;
-  if (!safeStorageSet("local", archiveKey, serialized)
-    || safeStorageGet("local", archiveKey, "") !== serialized
-    || !safeStorageSet("local", worshipRecoveryLatestSnapshotKey(id), serialized)) {
-    throw new Error("DRAFT_NOT_PRESERVED");
-  }
+  await persistServerValue("local", archiveKey, serialized);
+  await persistServerValue("local", worshipRecoveryLatestSnapshotKey(id), serialized);
   scheduleWorshipRecoverySnapshotHistoryWrite(serialized);
   return true;
 }
@@ -7224,7 +7224,7 @@ async function openWorshipConflictReview(serviceId) {
       </div>
     </section>
     <p class="worship-conflict-caution" role="status" data-conflict-status>내 입력은 이 기기에 그대로 유지됩니다. 자동 병합하거나 서버 내용을 덮어쓰지 않습니다.</p>
-    <p class="worship-conflict-choice-help">편집 계속하기는 저장하지 않고 창을 닫습니다. 최신본을 열면 내 초안은 원문의 로컬 복구본에 보관됩니다.</p>
+    <p class="worship-conflict-choice-help">편집 계속하기는 저장하지 않고 창을 닫습니다. 최신본을 열면 내 초안은 원문의 서버 복구본에 보관됩니다.</p>
     <details class="worship-conflict-details">
       <summary>원문 전체 비교</summary>
       <p>내 입력과 최신 서버 원문을 확인한 뒤 선택하세요.</p>
@@ -7256,11 +7256,11 @@ async function openWorshipConflictReview(serviceId) {
     keep.disabled = busy;
     reopen.disabled = busy;
   };
-  keep.addEventListener("click", () => {
+  keep.addEventListener("click", async () => {
     setChoiceBusy(true);
     let serverSnapshotPreserved = true;
     try {
-      if (review.latest) preserveWorshipConflictServerSnapshot(review);
+      if (review.latest) await preserveWorshipConflictServerSnapshot(review);
       else serverSnapshotPreserved = false;
     } catch (error) {
       serverSnapshotPreserved = false;
@@ -7269,7 +7269,7 @@ async function openWorshipConflictReview(serviceId) {
     showToast(toastLines(
       "편집을 계속합니다. 아직 저장하지 않았습니다.",
       serverSnapshotPreserved
-        ? "서버 최신본은 예배 원문의 로컬 복구본에 보관했습니다."
+        ? "서버 최신본은 예배 원문의 서버 복구본에 보관했습니다."
         : "서버 최신본 복구본은 보관하지 못했지만, 현재 입력은 그대로 유지됩니다.",
     ), "info");
   });
@@ -7299,7 +7299,7 @@ async function openWorshipConflictReview(serviceId) {
     updateSaveState();
     showToast(toastLines(
       "최신본을 열었습니다.",
-      "기존 입력은 예배 원문의 로컬 복구본에서 확인할 수 있습니다.",
+      "기존 입력은 예배 원문의 서버 복구본에서 확인할 수 있습니다.",
     ), "info");
   });
   worshipConflictReview = dialog;
@@ -7498,7 +7498,7 @@ async function saveWorshipServiceInstance(service) {
   await requireFullServiceSourceRef(serviceId);
   const inputSignature = JSON.stringify(getServiceItems(serviceId));
   const metadataSignature = serviceSaveMetadataSignature(service);
-  captureWorshipRecoverySnapshot(service, "before-full-save");
+  await captureWorshipRecoverySnapshot(service, "before-full-save");
   const canonicalTypeId = canonicalWorshipServiceTypeId(service.type_id);
   const worshipLeader = "";
   const praiseLeader = serviceUsesPraiseLeader(service.type_id)
@@ -7747,7 +7747,7 @@ async function saveWorshipServiceElementPatch(service, itemId) {
   if (!elementRow) return false;
   let sectionRow = existingSectionById[elementRow.section_id]
     || rows.sections.find((section) => section.id === elementRow.section_id);
-  captureWorshipRecoverySnapshot(service, "before-element-patch");
+  await captureWorshipRecoverySnapshot(service, "before-element-patch");
   const committedSections = sectionRow
     ? [...existingSections.filter(section => section.id !== sectionRow.id), sectionRow] : existingSections;
   const committedElements = [...existingElements.filter(element => element.id !== elementRow.id), elementRow];
@@ -7840,7 +7840,7 @@ async function syncSharedSundayContentAfterSave(sourceService, sourceItems = [],
       pendingSundayEditSync.set(jobKey, {
         sourceServiceId: sourceService.id, targetId: target.id, key,
         // Retry records never need arbitrary element payloads. Keeping this
-        // compact also avoids localStorage quota failures from blocking a
+        // compact also avoids oversized server recovery records blocking a
         // live first/second-service sync.
         previous: sundayEditSyncItemSnapshot(previous[0]),
         item: sundayEditSyncItemSnapshot(savedItem),
@@ -7850,7 +7850,7 @@ async function syncSharedSundayContentAfterSave(sourceService, sourceItems = [],
     }
   }
   const failures = [];
-  let retryRecordPersisted = persistPendingSundayEditSync();
+  let retryRecordPersisted = await persistPendingSundayEditSync();
   for (const [jobKey, job] of pendingSundayEditSync) {
     const jobSource = state.services.find((service) => service.id === job.sourceServiceId);
     const jobTarget = state.services.find((service) => service.id === job.targetId);
@@ -7860,7 +7860,7 @@ async function syncSharedSundayContentAfterSave(sourceService, sourceItems = [],
     // those obsolete jobs instead of surfacing a false linked-service error.
     if (!jobSource || !jobTarget || !sundayEditSyncEligible(job.item, jobSource) || !jobTypes.includes(targetTypeId)) {
       pendingSundayEditSync.delete(jobKey);
-      retryRecordPersisted = persistPendingSundayEditSync() && retryRecordPersisted;
+      retryRecordPersisted = await persistPendingSundayEditSync() && retryRecordPersisted;
       continue;
     }
     if (job.sourceServiceId !== sourceService.id) continue;
@@ -7872,20 +7872,20 @@ async function syncSharedSundayContentAfterSave(sourceService, sourceItems = [],
     if (savedSource.length !== 1 || !sundayEditSyncEligible(savedSource[0], jobSource)
       || sundayEditSyncSignature(savedSource[0]) !== sundayEditSyncSignature(job.item)) {
       pendingSundayEditSync.delete(jobKey);
-      retryRecordPersisted = persistPendingSundayEditSync() && retryRecordPersisted;
+      retryRecordPersisted = await persistPendingSundayEditSync() && retryRecordPersisted;
       failures.push(`${job.item.label}: 원본이 바뀌어 이전 동기화 요청을 취소했습니다.`);
       continue;
     }
     try {
       await persistSundayEditSync(job, options);
       pendingSundayEditSync.delete(jobKey);
-      retryRecordPersisted = persistPendingSundayEditSync() && retryRecordPersisted;
+      retryRecordPersisted = await persistPendingSundayEditSync() && retryRecordPersisted;
     } catch (error) {
       failures.push(error.message || "연결 예배 저장 실패");
     }
   }
   if (failures.length) {
-    const retryNote = retryRecordPersisted ? "" : " 이 브라우저에서는 재시도 기록을 보관하지 못하니 화면을 닫기 전에 다시 저장해 주세요.";
+    const retryNote = retryRecordPersisted ? "" : " 서버에 재시도 기록을 보관하지 못했으니 화면을 닫기 전에 다시 저장해 주세요.";
     const message = `현재 예배는 저장됐지만 연결 예배 반영은 완료되지 않았습니다. ${uniqueList(failures).join(" / ")}${retryNote}`;
     showToast(message, "error");
     throw new Error(message);
@@ -7940,14 +7940,9 @@ function sundayEditSyncItemSnapshot(item = {}) {
   };
 }
 
-function persistPendingSundayEditSync() {
-  if (!pendingSundayEditSync.size) {
-    safeStorageRemove("local", SUNDAY_EDIT_SYNC_STORAGE_KEY);
-    return true;
-  }
-  // Storage is a retry aid, not a prerequisite for the immediately following
-  // network save. Private mode or quota pressure must not stop a live sync.
-  return safeStorageSet("local", SUNDAY_EDIT_SYNC_STORAGE_KEY, JSON.stringify([...pendingSundayEditSync]));
+async function persistPendingSundayEditSync() {
+  return persistServerValue("local", SUNDAY_EDIT_SYNC_STORAGE_KEY,
+    pendingSundayEditSync.size ? JSON.stringify([...pendingSundayEditSync]) : null);
 }
 
 function sundayEditSyncEligible(item = {}, service = null) {
@@ -13777,7 +13772,7 @@ async function insertWorshipServicesWithCalendarAssignees(payloads = []) {
     for (const payload of payloads) {
       const identity = [payload.service_type_id, payload.service_date, payload.service_date_end || null,
         payload.title || "", payload.service_alias || "", payload.source_ref?.created_from || ""];
-      const row = { ...payload, id: atomic.creationId(identity) };
+      const row = { ...payload, id: await atomic.creationId(identity) };
       const service = normalizeWorshipService(row);
       const pending = atomic.pending(row.id);
       // A scaffold allocates child UUIDs. Reuse the frozen children on retry,
@@ -13795,7 +13790,7 @@ async function insertWorshipServicesWithCalendarAssignees(payloads = []) {
       state.serviceItems[row.id] = groupWorshipElements(aggregate.sections, aggregate.elements)[row.id] || [];
       state.loadedWorshipServiceIds.add(row.id);
       created.push(aggregate.service);
-      atomic.finishCreation(identity, row.id);
+      await atomic.finishCreation(identity, row.id);
     }
     return created;
   } catch (error) {
@@ -15308,7 +15303,7 @@ function sanitizeWorshipBackgroundRegistry(registry) {
   return Object.entries(registry).reduce((next, [key, entry]) => {
     const fileName = worshipBackgroundFileNameFromPath(entry?.fileName || key);
     const dataUrl = String(entry?.dataUrl || "");
-    if (!fileName || !/^data:image\//.test(dataUrl)) return next;
+    if (!fileName || !/^(?:data:image\/|https:\/\/)/.test(dataUrl)) return next;
     next[fileName] = {
       fileName,
       dataUrl,
@@ -15321,8 +15316,8 @@ function sanitizeWorshipBackgroundRegistry(registry) {
   }, {});
 }
 
-function saveWorshipBackgroundRegistry(registry) {
-  return safeStorageSet("local", WORSHIP_BACKGROUND_REGISTRY_STORAGE_KEY, JSON.stringify(registry || {}));
+async function saveWorshipBackgroundRegistry(registry) {
+  return persistServerValue("local", WORSHIP_BACKGROUND_REGISTRY_STORAGE_KEY, JSON.stringify(registry || {}));
 }
 
 function worshipBackgroundTargets() {
@@ -15360,7 +15355,7 @@ async function handleWorshipBackgroundAction(button) {
   } else if (action === "download") {
     downloadWorshipBackground(fileName);
   } else if (action === "clear") {
-    clearRegisteredWorshipBackground(fileName);
+    await clearRegisteredWorshipBackground(fileName);
   } else if (action === "manifest") {
     downloadWorshipBackgroundManifest();
   }
@@ -15380,7 +15375,7 @@ async function registerSelectedWorshipBackground(fileName) {
 
   let dataUrl = "";
   try {
-    dataUrl = await readFileAsDataUrl(file);
+    dataUrl = await uploadServerBackground(file, fileName);
   } catch (error) {
     showToast(error.message || "이미지 파일을 읽지 못했습니다.", "error");
     return;
@@ -15397,8 +15392,8 @@ async function registerSelectedWorshipBackground(fileName) {
       updatedAt: new Date().toISOString(),
     },
   };
-  if (!saveWorshipBackgroundRegistry(nextRegistry)) {
-    showToast("이미지가 너무 커서 브라우저에 저장하지 못했습니다.", "error");
+  if (!await saveWorshipBackgroundRegistry(nextRegistry).catch(() => false)) {
+    showToast("배경 정보를 서버에 저장하지 못했습니다. 연결을 확인하고 다시 시도해 주세요.", "error");
     return;
   }
   state.worshipBackgroundRegistry = nextRegistry;
@@ -15408,6 +15403,30 @@ async function registerSelectedWorshipBackground(fileName) {
   renderWorshipBackgroundsDetail();
   renderSongList();
   showToast(`${fileName} 배경을 등록했습니다.`);
+}
+
+async function uploadServerBackground(file, fileName) {
+  if (!state.client?.storage) throw new Error("SERVER_STORAGE_NOT_READY");
+  const client = state.client;
+  const path = `backgrounds/${crypto.randomUUID()}/${encodeURIComponent(fileName)}`;
+  const { error } = await client.storage.from(PRESENTER_MEDIA_STORAGE_BUCKET)
+    .upload(path, file, { cacheControl: PRESENTER_MEDIA_CACHE_CONTROL, contentType: file.type || "image/png", upsert: false });
+  if (error) throw error;
+  if (state.client !== client) throw new Error("SERVER_STORAGE_PROJECT_CHANGED");
+  const { data } = client.storage.from(PRESENTER_MEDIA_STORAGE_BUCKET).getPublicUrl(path);
+  if (!/^https:\/\//.test(data?.publicUrl || "")) throw new Error("INVALID_BACKGROUND_URL");
+  return data.publicUrl;
+}
+
+async function prepareLegacyServerValue(entry) {
+  if (entry.key !== WORSHIP_BACKGROUND_REGISTRY_STORAGE_KEY) return entry.value;
+  const registry = sanitizeWorshipBackgroundRegistry(JSON.parse(entry.value));
+  for (const background of Object.values(registry)) {
+    if (!background.dataUrl.startsWith("data:image/")) continue;
+    const response = await fetch(background.dataUrl);
+    background.dataUrl = await uploadServerBackground(await response.blob(), background.fileName);
+  }
+  return JSON.stringify(registry);
 }
 
 function readFileAsDataUrl(file) {
@@ -15424,11 +15443,11 @@ function dataUrlByteSize(dataUrl) {
   return Math.max(0, Math.floor((base64.length * 3) / 4));
 }
 
-function clearRegisteredWorshipBackground(fileName) {
+async function clearRegisteredWorshipBackground(fileName) {
   if (!state.worshipBackgroundRegistry[fileName]) return;
   const nextRegistry = { ...state.worshipBackgroundRegistry };
   delete nextRegistry[fileName];
-  if (!saveWorshipBackgroundRegistry(nextRegistry)) {
+  if (!await saveWorshipBackgroundRegistry(nextRegistry).catch(() => false)) {
     showToast("배경 정보를 업데이트하지 못했습니다.", "error");
     return;
   }
@@ -20058,6 +20077,7 @@ async function confirmSaveBeforeLeaving() {
 }
 
 function updateSaveState() {
+  if (!window.MINDEX_EDITOR_DRAFTS?.restoring) window.MINDEX_EDITOR_DRAFTS?.capture();
   syncSaveButtonChrome();
   if (state.module === "home" || state.module === "calendar" || state.module === "manuals") {
     renderConnectionStatus();
@@ -25312,9 +25332,9 @@ function renderServiceSourceRecovery(service) {
   const pending = Array.isArray(snapshot?.draft?.pendingInputs) ? snapshot.draft.pendingInputs : [];
   if (!hasSource && !pending.length) return "";
   return `
-    <div class="svc-source-history" aria-label="로컬 복구본">
+    <div class="svc-source-history" aria-label="서버 복구본">
       <div class="svc-source-history-head">
-        <span>로컬 복구본</span>
+        <span>서버 복구본</span>
         <small>${escapeHtml(formatServiceSourceHistoryTime(snapshot.capturedAt) || "최근")}</small>
       </div>
       ${hasSource ? `<button class="svc-source-history-item svc-source-recovery-item" type="button" data-service-source-recovery="${escapeAttr(service.id)}">
@@ -25408,12 +25428,12 @@ function restoreServiceSourceRecovery(serviceId = state.selectedServiceId) {
   const document = serviceDocumentFromRecoverySnapshot(latestWorshipRecoverySnapshotForService(id));
   const sourceText = String(document?.sourceText || "").trim();
   if (!service || !textarea || !sourceText) {
-    showToast("불러올 로컬 복구본을 찾지 못했습니다.", "error");
+    showToast("불러올 서버 복구본을 찾지 못했습니다.", "error");
     return false;
   }
   textarea.value = sourceText;
   textarea.dispatchEvent(new Event("input", { bubbles: true }));
-  showToast("로컬 복구본 원문을 불러왔습니다. 반영 후 저장해 주세요.", "info");
+  showToast("서버 복구본 원문을 불러왔습니다. 반영 후 저장해 주세요.", "info");
   return true;
 }
 
@@ -25599,7 +25619,7 @@ function applyServiceSourceText(serviceId = state.selectedServiceId, options = {
   }
   service._worshipSourceTextDraft = textarea.value;
   textarea.dataset.serviceSourceSignature = compactTextSignature(textarea.value);
-  captureWorshipRecoverySnapshot(service, options.recoveryReason || "after-source-text-apply");
+  void captureWorshipRecoverySnapshot(service, options.recoveryReason || "after-source-text-apply").catch(() => {});
   if (options.refreshPresenter !== false) refreshPresenterForService(id, { publish: false });
   if (options.renderAfterApply !== false) {
     renderCurrentServiceModuleDetail();
@@ -34343,7 +34363,7 @@ async function deleteService(serviceId) {
   updateSaveState();
   try {
     await ensureWorshipServiceRowsLoadedForPersistence(serviceId);
-    captureWorshipRecoverySnapshot(service, "before-service-delete");
+    await captureWorshipRecoverySnapshot(service, "before-service-delete");
     const cachedSections = state.worshipSections.filter((section) => section.service_id === serviceId);
     const sectionIds = cachedSections.map(section => section.id);
     const atomic = await worshipAtomicClient();

@@ -1,5 +1,15 @@
 # Current Worship Persistence Contract
 
+## Server-state implementation · 2026-10-19 (not deployed)
+
+The pending server-state change replaces browser journals with confirmed private
+server journals scoped by device identity and project. Writes await journal RPC
+confirmation before the existing atomic worship RPC. Recovery captures also await
+server confirmation; failure retains editor input. Unknown outcomes keep the exact
+request identity. See [server state](server-state-current.md) for migration, access
+and verification boundaries. The production description below remains historical
+until the schema and client are deployed together.
+
 ## Production Boundary (2026-10-06)
 
 - Worship aggregate reads and instance writes require the RPC client and expected

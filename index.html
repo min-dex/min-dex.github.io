@@ -103,7 +103,7 @@
     <script>
       (() => {
         let savedTheme = "";
-        try { savedTheme = localStorage.getItem("mindex.theme"); } catch (_) {}
+
         const theme = savedTheme === "dark" || savedTheme === "light"
           ? savedTheme
           : window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ? "dark" : "light";
@@ -124,7 +124,7 @@
           }
         };
         let presenterController = new URLSearchParams(location.hash.slice(1)).get("module") === "presenter";
-        try { presenterController ||= sessionStorage.getItem("mindex.ui.module") === "presenter"; } catch (_) {}
+
         if (document.documentElement.classList.contains("presenter-output-document") || presenterController) {
           window.MINDEX_PRELOAD_PRESENTER_FONTS({ controller: !document.documentElement.classList.contains("presenter-output-document") });
         }
@@ -164,7 +164,7 @@
         });
         observer.observe(document.body, { attributes: true, attributeFilter: ["class", "data-boot-failed"] });
         try {
-          const moduleName = sessionStorage.getItem("mindex.ui.module");
+          const moduleName = new URLSearchParams(location.search).get("module");
           if (moduleName) {
             document.body.dataset.module = moduleName;
             if (moduleName === "presenter") {
@@ -264,8 +264,8 @@
           "mindex.worship-persistence.js", "mindex.presenter.js",
           "mindex.pptx.js", "mindex.worship-input.js", "mindex.song-timing.js",
           "mindex.presenter-ui.js", "mindex.worship-week.js", "mindex.setlist-links.js",
-          "mindex.manuals.js", "mindex.bulletin.js", "mindex.worship-source.js", "scripture-editions.js", "app.js",
-          "mindex.service-entry.js", "mindex.worship-live.js", "mindex.content-live.js", "mindex.service-list-live.js", "mindex.archive-live.js", "mindex.monitor.js", "mindex.scripture-repair-display.js",
+          "mindex.manuals.js", "mindex.bulletin.js", "mindex.worship-source.js", "scripture-editions.js", "mindex.server-storage.js", "app.js",
+          "mindex.editor-drafts.js", "mindex.service-entry.js", "mindex.worship-live.js", "mindex.content-live.js", "mindex.service-list-live.js", "mindex.archive-live.js", "mindex.monitor.js", "mindex.scripture-repair-display.js",
         ];
         const styles = [
           "styles.css", "styles.presenter-output.css", "styles.bulletin.css",

@@ -2,6 +2,7 @@ from urllib.parse import urlsplit
 """Instance-only offering toggle, persistence, projection and restore."""
 
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
+from smoke_app import prepare_server_state_fixture
 
 
 def run(browser, url):
@@ -11,6 +12,7 @@ def run(browser, url):
     page = context.new_page()
     page.goto(url + '?output=presenter', wait_until='domcontentloaded')
     page.wait_for_function("typeof replaceServiceOfferingSpecial === 'function'")
+    prepare_server_state_fixture(page)
     results = page.evaluate("""async () => {
       const check = (ok, msg) => { if (!ok) throw Error(msg); };
       const clone = value => JSON.parse(JSON.stringify(value));

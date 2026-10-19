@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-19",
+  "branch": "codex/children-version-audio",
+  "base": "d8dbb09d",
+  "status": "code-and-isolated-tests-complete-schema-applied-client-not-deployed",
+  "baseline": {
+    "unit": 32,
+    "smoke": 45,
+    "result": "pass",
+    "log": "/private/tmp/mindex-server-state-final-gate.log"
+  },
+  "additional": {
+    "unit": [
+      "test_server_audio.cjs"
+    ],
+    "smoke": [
+      "smoke_server_bulletin.py",
+      "smoke_server_presenter_transport.py",
+      "smoke_atomic_lifecycle.py"
+    ],
+    "engines": [
+      "Chromium",
+      "WebKit"
+    ],
+    "result": "pass"
+  },
+  "post_followup_checks": [
+    "test_server_storage.cjs",
+    "test_server_audio.cjs",
+    "test_app_runtime.cjs",
+    "test_ui_icons.cjs",
+    "smoke_atomic_save_runtime.py",
+    "smoke_server_state.py"
+  ],
+  "database": {
+    "isolatedEngine": "PostgreSQL 17.6",
+    "isolatedResult": "pass",
+    "productionProject": "tdulobbnppmpiqqxbvqy",
+    "migrationSha256": "d6c4e83cfc2f1648f6128ea0cb62a11b96c8e035b647d68412d7351d2e95e1e1",
+    "productionSchemaApplied": true,
+    "rlsEnabled": true,
+    "anonSchemaAccess": false,
+    "anonTableRead": false,
+    "authenticatedTableRead": false,
+    "anonReadRpc": true,
+    "anonWriteRpc": true,
+    "stateRows": 0
+  },
+  "notPerformed": [
+    "browser legacy data inspection/migration",
+    "client deployment",
+    "Linux CI run for this change",
+    "physical PA/native fullscreen verification"
+  ],
+  "preservedUnrelatedFiles": [
+    "AGENTS.md",
+    "tests/smoke_delegated_fullscreen.py"
+  ]
+}

@@ -1,6 +1,7 @@
 import os
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from smoke_app import launch_chromium,start_local_app_server,sync_playwright
+from smoke_app import prepare_server_state_fixture
 server,url=start_local_app_server()
 try:
  with sync_playwright() as p:
@@ -11,6 +12,7 @@ try:
    page.route('**/*supabase*/**',lambda r:r.abort())
    page.goto(url+'?mindexSmokeRaw=1',wait_until='load')
    page.wait_for_function("!!window.MINDEX_SERVICE_ENTRY")
+   prepare_server_state_fixture(page)
    print(engine,page.evaluate('''async()=>{
     const check=(v,m)=>{if(!v)throw Error(m)};
     const realDirty=hasDirtyChanges, realCapture=captureCleanFingerprint;

@@ -19,7 +19,6 @@
     seen.add(message.id);
     if (seen.size > 256) seen.delete(seen.values().next().value);
     try { channel?.postMessage(message); } catch {}
-    try { localStorage.setItem(key, JSON.stringify(message)); } catch {}
     connectDepartmentRealtime();
     try { void departmentTabSync?.remote?.send({ type: 'broadcast', event: 'worship-committed', payload: message }).catch(() => {}); } catch {}
   }
@@ -67,7 +66,7 @@
     if (event.key === key && event.newValue) { try { receive(JSON.parse(event.newValue)); } catch {} }
   });
   function wake() {
-    try { receive(JSON.parse(localStorage.getItem(key) || 'null')); } catch {}
+
     schedule(); void reconcile();
   }
   window.addEventListener('focus', wake);

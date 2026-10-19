@@ -1,4 +1,4 @@
-import { createWorshipStore } from './mindex.worship-store.mjs?v=atomic-recovery-prep-20260919-001';
+import { createWorshipStore } from './mindex.worship-store.mjs?v=server-state-20261019';
 
 const clone = value => JSON.parse(JSON.stringify(value));
 const ignored = new Set(['id', 'service_id', 'section_id', 'created_at', 'updated_at']);
@@ -129,11 +129,12 @@ export function createWorshipAtomicClient({rpc, journal, namespace = '', makeId 
     save:'save_worship_service_v1', create:'create_worship_service_v1', delete:'delete_worship_service_v1',
   }});
   const reloadRequired = new Set();
-  const reject = (id, error) => {
+  const creations = new Map();
+  const reject = async (id, error) => {
     // Only an actual SQLSTATE proves that PostgREST rolled back the transaction.
     if (/^(P0001|22\w{3}|23\w{3}|42501|55P03|57014|40\w{3})$/.test(error?.code || '')) {
       const failed = store.pending(id);
-      if (failed) store.resolvePending(id, failed.request.requestId);
+      if (failed) await store.resolvePending(id, failed.request.requestId);
       if (/REVISION_CONFLICT/.test(error.message || '')) reloadRequired.add(id);
     }
     throw error;
@@ -141,13 +142,18 @@ export function createWorshipAtomicClient({rpc, journal, namespace = '', makeId 
   return {
     creationId(identity) {
       const key = `mindex.atomic.creation.v1:${namespace}:${JSON.stringify(identity)}`;
-      let id = journal.getItem(key);
-      if (!id) { id = makeId(); journal.setItem(key, id); }
-      return id;
+      if (creations.has(key)) return creations.get(key);
+      const task = Promise.resolve().then(async () => {
+        let id = journal.getItem(key);
+        if (!id) { id = makeId(); await journal.setItem(key, id); }
+        return id;
+      }).finally(() => creations.delete(key));
+      creations.set(key, task);
+      return task;
     },
-    finishCreation(identity, id) {
+    async finishCreation(identity, id) {
       const key = `mindex.atomic.creation.v1:${namespace}:${JSON.stringify(identity)}`;
-      if (journal.getItem(key) === id) journal.removeItem(key);
+      if (journal.getItem(key) === id) await journal.removeItem(key);
     },
     baseline:id => store.baseline(id)?.aggregate || null,
     pending:id => store.pending(id),
@@ -223,7 +229,7 @@ export function createWorshipAtomicClient({rpc, journal, namespace = '', makeId 
           throw new Error('ATOMIC_RETRY_COMMITTED_RELOAD_REQUIRED');
         }
         return receipt.aggregate;
-      } catch (error) { reject(id, error); }
+      } catch (error) { await reject(id, error); }
     },
     async remove(id) {
       const pending = store.pending(id);
@@ -238,7 +244,7 @@ export function createWorshipAtomicClient({rpc, journal, namespace = '', makeId 
         });
         if (receipt.deleted !== true || receipt.aggregate !== null) throw new Error('INVALID_RECEIPT');
         return true;
-      } catch (error) { reject(id, error); }
+      } catch (error) { await reject(id, error); }
     },
     async commit(input) {
       const id = input.serviceId;
@@ -247,7 +253,7 @@ export function createWorshipAtomicClient({rpc, journal, namespace = '', makeId 
       if (pending) {
         // An uncertain earlier request is resolved first. Its receipt must never
         // acknowledge the newer draft submitted by this click.
-        try { await store.retry(id); } catch (error) { reject(id, error); }
+        try { await store.retry(id); } catch (error) { await reject(id, error); }
         reloadRequired.add(id);
         throw new Error('ATOMIC_RETRY_COMMITTED_RELOAD_REQUIRED');
       }
@@ -267,7 +273,7 @@ export function createWorshipAtomicClient({rpc, journal, namespace = '', makeId 
       } catch (error) {
         // PostgreSQL errors roll back the RPC transaction. Transport errors do
         // not prove rollback and retain the durable request for exact retry.
-        reject(id, error);
+        await reject(id, error);
       }
     },
   };

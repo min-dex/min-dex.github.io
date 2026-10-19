@@ -1047,3 +1047,28 @@ change-scoped browser coverage: docs/content-realtime.md, smoke_scripture_live.p
 Shared scheduler coalesces at80ms and advances deferred reads after focus/media/
 dialog exit, retaining all guards and15s failure backoff. No faster recovery polling.
 See docs/content-realtime.md and tests/test_live_refresh_scheduler.cjs.
+
+
+## Server-authoritative application state · 2026-10-19
+
+Code and isolated tests completed on `codex/children-version-audio` (base d8dbb09d).
+Draft/recovery/preferences/background registry/journals/legacy audio now use confirmed
+server state; browser persistence remains only for connection identity. Immutable
+uploads survive metadata-save retry; per-key mutations replay before reading the
+latest manifest/history so concurrent additions are preserved. Existing worship
+atomic writes stay the only instance-save path. Explicit editor recovery checks
+baseline and current drafts; bulletin replacement awaits recovery and checks late
+input. Output actions use one transport to avoid duplicate slide advancement.
+
+Baseline 32 Node +45 browser entry points passed. Added audio persistence unit and
+bulletin recovery/output IPC smokes passed; current gate is33+47. Post-followup
+storage/audio/runtime/icon/atomic/editor checks passed. Atomic lifecycle passed
+Chromium/WebKit separately; real PostgreSQL17.6 verified ACL and retry/conflicts.
+
+User initially reserved Safari, then explicitly allowed it again. Mindex production
+schema migration applied via Safari SQL Editor and independently read back: RLS on,
+anon/authenticated direct table reads off, scoped read/write RPC execution on,
+state table0rows. No browser data migration or app deployment yet. Deployment still
+needs latest-main reconciliation and release/CI/public-byte verification. Worktree
+changes are uncommitted; unrelated AGENTS/fullscreen smoke edits were preserved.
+See server-state-current.md and server-state-verification-20261019.json.

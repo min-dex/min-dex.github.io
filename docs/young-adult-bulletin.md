@@ -364,3 +364,13 @@ Cross-device saved bulletin/template updates follow `content-realtime.md`.
 Only clean idle workbenches adopt detached snapshots; dirty drafts, active
 inputs, drags and print sessions defer updates. Template notifications never
 apply a new template to a saved weekly bulletin implicitly.
+
+
+## Server-state implementation · 2026-10-19 (not deployed)
+
+입력 중 초안과 복구본은 private server state로 보관한다. 아래가 배포되면 앞선
+브라우저 저장 실패를 허용하는 정책을 대체한다. 300ms 큐 수락은 저장 완료가
+아니며, 서버 확인 전에는 보관 중/실패 상태를 표시한다. 저장본 다시 불러오기와
+양식 초기화는 복구본 서버 저장을 기다리고, 그 사이 새 입력이 생기면 중단한다.
+기존 브라우저 원본은 이관 입력으로만 사용하며 삭제하지 않는다.
+현재 운영 DB 적용과 배포는 보류 중이다. [구현 계약](server-state-current.md).

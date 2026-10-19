@@ -1,5 +1,5 @@
 """Same-profile device presence, shared names, OR output and independent profiles."""
-from smoke_app import launch_chromium,start_local_app_server,sync_playwright
+from smoke_app import prepare_server_state_fixture,launch_chromium,start_local_app_server,sync_playwright
 HTML='''<meta charset="utf-8"><button id="monitorPanelBtn">현황</button><script>
 window.clock=2000000000000;Date.now=()=>clock;
 window.ticks={};window.setInterval=(fn,ms)=>{ticks[ms]=fn;return ms};
@@ -10,7 +10,7 @@ window.state={presenter:{outputConnectedAt:0},client:{rpc:(name,args)=>({abortSi
  if(name==='mindex_monitor_ping')data=args.p_token!=='0'.repeat(64);
  if(name==='mindex_monitor_presence')data=[{id:'12345678-abcd',last_seen:new Date(clock).toISOString(),status:{name:'본당 송출 PC',os:'Windows',browser:'Chrome',output:true}}];
  return Promise.resolve({data,error:null});
-}})}};</script><script src="/mindex.monitor.js"></script>'''
+}})}};</script><script src="/mindex.server-storage.js"></script><script src="/mindex.monitor.js"></script>'''
 def main():
  server,url=start_local_app_server()
  try:
@@ -19,7 +19,7 @@ def main():
     browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
     context=browser.new_context();context.route('**/presence-fixture',lambda r:r.fulfill(content_type='text/html',body=HTML))
     def new(ctx):
-     page=ctx.new_page();page.goto(url.rsplit('/',1)[0]+'/presence-fixture');page.wait_for_function("calls.some(c=>c.name==='mindex_monitor_ping')");return page
+     page=ctx.new_page();page.goto(url.rsplit('/',1)[0]+'/presence-fixture');page.wait_for_function("calls.some(c=>c.name==='mindex_monitor_ping')");prepare_server_state_fixture(page);return page
     page=new(context);token=page.evaluate("localStorage.getItem('mindex.monitor.deviceReporter')");assert len(token)==64
     copy=new(context);assert copy.evaluate("calls.filter(c=>c.name==='mindex_monitor_register').length")==0
     assert copy.evaluate("calls.find(c=>c.name==='mindex_monitor_ping').args.p_token")==token
