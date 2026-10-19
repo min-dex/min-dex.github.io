@@ -9187,3 +9187,8 @@ body[data-module="presenter"] .topbar-actions > .icon-btn { flex: 0 0 35px; widt
 .topbar-actions > #restoreServerEditorDraft::before {
   width: calc(100% - 10px);
 }
+
+/* Optional per-version output title; representative title remains the default. */
+.version-output-title-input { min-width: 0; width: 100%; }
+.version-title-main:has(.version-output-title-input) { flex-wrap: wrap; }
+.version-title-main > .version-output-title-input { flex-basis: 100%; }

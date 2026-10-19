@@ -3604,3 +3604,28 @@ markers. Filled rows, lyrics, forms, medley links and their relative order remai
 Deletion markers prevent template resurrection and are distinct from presentation
 hiding. Compatibility reading of legacy hidden data, imported PPTX slide flags
 and invalid-media safety exclusions remains; do not remove renderer safety flags.
+
+
+## 통일 전용 곡의 장 번호 부제 중복 표시 · 2026-10-19
+
+통일 전용 곡의 `hymn_no=통 N`과 정확히 일치하는 `subtitle=통일 N`은
+찬양 목록/상세 설명과 예배 곡 제목의 부제에서 제외한다. 서로 다른 번호,
+실제 별칭·원제·일반 곡 부제는 유지한다. 데이터는 삭제하지 않는다:
+현재 부제는 canonical variant key에도 쓰이므로 저장 식별 규칙을 분리하기
+전에는 지우지 않는다. 검색, 버전 이름, 판본 번호와 source/canonical ID,
+가사·송폼·메들리는 변경하지 않는다. 제목 슬라이드의 일반 부제 우선순위와
+찬송가 판본 번호 재배치는 별도 후속 작업이다.
+
+검증: test_union_subtitle_display.cjs, 운영 snapshot 77곡의 Chromium/WebKit
+로컬 렌더링 및 식별값 보존. 이 기록은 배포 완료를 의미하지 않는다.
+
+
+## 공통 버전 출력 제목 · 2026-10-19
+
+찬송가뿐 아니라 모든 찬양 버전에서 선택적인 출력 제목을 지정할 수 있다.
+버전 관리에 ‘버전 출력 제목’ 입력을 제공하고 비우면 곡 대표 제목을 쓴다.
+English 이름이나 원제에서 자동 추론하지 않는다. 선택한 버전의 제목을 곡
+제목 슬라이드와 예배 곡 제목에 적용하되, 목록의 대표 제목·버전 이름·ID는
+유지한다. 기존 찬송가 번호 장식과 부제/원제 우선순위는 이번 변경 범위 밖이다.
+저장/재조회 방식은 version-name-preservation.md의 versionOutputTitles 계약 참조.
+운영 schema 변경·기존 데이터 보충·배포는 이 로컬 구현 완료와 구분한다.

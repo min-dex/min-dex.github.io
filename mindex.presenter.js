@@ -2416,7 +2416,7 @@ function presenterOrderContentTitleSlide(item, section, index, orderTitle = "", 
 
 function presenterSongTitleDisplayTitle(song = null, version = null, fallbackText = "", sectionHeading = "") {
   void sectionHeading;
-  const title = presenterPraiseTitle(song, fallbackText);
+  const title = presenterPraiseTitle(song, fallbackText, version);
   const hymnNo = presenterSongTitleHymnNo(song, version, fallbackText);
   if (!hymnNo) return title;
   const titleParts = splitHymnNo(title);
@@ -2515,8 +2515,8 @@ function formatPresenterSongTitleText(title) {
     : `${PRESENTER_SONG_NOTE} ${cleanTitle}`;
 }
 
-function presenterPraiseTitle(song, fallbackText = "") {
-  const linkedTitle = String(song?.title || "").trim();
+function presenterPraiseTitle(song, fallbackText = "", version = null) {
+  const linkedTitle = songOutputTitle(song, version);
   const cleanLinkedTitle = song?.hymn_no ? stripHymnNumber(linkedTitle) : linkedTitle;
   const normalizedLinkedTitle = cleanLinkedTitle.replace(/^찬송가\s*\d+\s*장\s*/i, "").trim();
   if (normalizedLinkedTitle) return normalizedLinkedTitle;
@@ -2534,10 +2534,10 @@ function presenterPraiseFallbackTitle(fallbackText = "") {
 }
 
 function presenterPraiseElementTitle(song, version = null, fallbackText = "") {
-  const title = presenterPraiseTitle(song, fallbackText);
+  const title = presenterPraiseTitle(song, fallbackText, version);
   if (!song) return title;
   const meta = new Set();
-  [song.subtitle, song.original_title, version?.subtitle, version?.original_title]
+  [visibleSongSubtitle(song), song.original_title, visibleSongSubtitle(song, version?.subtitle), version?.original_title]
     .forEach((value) => addTitleMeta(meta, value));
   const visibleMeta = [...meta].filter((value) => normalizeTitle(value) !== normalizeTitle(title));
   return visibleMeta.length ? `${title} (${joinMetaItems(visibleMeta)})` : title;

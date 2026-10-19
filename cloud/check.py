@@ -6,6 +6,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 NODE_TESTS = (
+    "test_union_subtitle_display.cjs",
     "test_draft_handoff.mjs",
     "test_audio_db_only.cjs",
     "test_server_state.mjs",
@@ -45,6 +46,7 @@ NODE_TESTS = (
     "test_worship_read_parallel.cjs",
 )
 SMOKES = (
+    "smoke_version_output_title.py",
     "smoke_citation_translation_editor.py",
     "smoke_explicit_worship_order.py",
     "smoke_section_editor_actions.py",

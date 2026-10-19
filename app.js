@@ -8767,7 +8767,7 @@ function handleDetailClick(event) {
 
   const versionTarget = event.target.closest("[data-version-id]");
   if (versionTarget) {
-    if (event.target.closest("[data-version-name-field]")) return;
+    if (event.target.closest("[data-version-name-field], [data-version-output-title-field]")) return;
     selectVersion(versionTarget.dataset.versionId);
     return;
   }
@@ -9088,7 +9088,7 @@ function handleDetailKeydown(event) {
     return;
   }
 
-  if (event.key === "Enter" && event.target.matches("input[data-song-field], input[data-song-meta-field], input[data-version-name-field]")) {
+  if (event.key === "Enter" && event.target.matches("input[data-song-field], input[data-song-meta-field], input[data-version-name-field], input[data-version-output-title-field]")) {
     event.preventDefault();
     saveAll();
     return;
@@ -9147,7 +9147,7 @@ function handleDetailPointerDown(event) {
     return;
   }
   if (handlePresenterBoardPointerDown(event)) return;
-  if (event.target.closest("[data-form-action], [data-version-action], [data-version-name-field], [data-service-item-action], [data-presenter-action]")) {
+  if (event.target.closest("[data-form-action], [data-version-action], [data-version-name-field], [data-version-output-title-field], [data-service-item-action], [data-presenter-action]")) {
     event.stopPropagation();
     return;
   }
@@ -9327,6 +9327,12 @@ function handleDetailInput(event) {
   const songField = event.target.closest("[data-song-field]");
   if (songField) {
     updateSongField(songField);
+    return;
+  }
+
+  const outputTitleField = event.target.closest("[data-version-output-title-field]");
+  if (outputTitleField) {
+    updateVersionOutputTitleField(outputTitleField);
     return;
   }
 
@@ -9533,6 +9539,12 @@ function handleDetailChange(event) {
   const songField = event.target.closest("[data-song-field]");
   if (songField) {
     updateSongField(songField);
+    return;
+  }
+
+  const outputTitleField = event.target.closest("[data-version-output-title-field]");
+  if (outputTitleField) {
+    updateVersionOutputTitleField(outputTitleField);
     return;
   }
 
@@ -9793,6 +9805,16 @@ function updateSongField(field) {
     updateEditorTitle(song);
   }
 
+  state.dirty.song = true;
+  updateSaveState();
+}
+
+function updateVersionOutputTitleField(field) {
+  const song = getSelectedSong();
+  const version = song?.versions?.find(item => item.id === field.dataset.versionOutputTitleField);
+  if (!version) return;
+  version.output_title = field.value.trim();
+  clearSearchCaches();
   state.dirty.song = true;
   updateSaveState();
 }
@@ -17416,6 +17438,7 @@ function renderVersionTitleContent(song, version, forms, options = {}) {
   return `
     <div class="version-title-main">
       <input class="version-title-input" type="text" data-version-name-field="${escapeAttr(version?.id || "")}" value="${escapeAttr(versionName)}" aria-label="버전 이름" />
+      <input class="version-output-title-input" type="text" data-version-output-title-field="${escapeAttr(version?.id || "")}" value="${escapeAttr(version?.output_title || "")}" placeholder="${escapeAttr(`출력 제목 · 미입력 시 ${song?.title || "대표 제목"}`)}" aria-label="버전 출력 제목" title="비워 두면 대표 제목으로 출력합니다" />
       ${renderVersionAttentionStatus(song, version, forms, { active })}
     </div>
     <div class="version-title-actions">
@@ -18546,8 +18569,10 @@ function normalizeServerSong(row) {
 }
 
 function normalizeSongVersions(song, versions) {
+  const outputTitles = parseSongMemo(song.memo).versionOutputTitles || {};
   const normalized = (versions || []).map((version, index) => ({
     ...version,
+    output_title: String(version.output_title ?? outputTitles[version.id] ?? "").trim(),
     id: version.id || `${song.id}:version:${index + 1}`,
     name: normalizeGeneratedVersionName(version.name || version.curated_version_name || version.version_label || `Version ${index + 1}`),
     curated_version_name: version.curated_version_name || null,
@@ -18625,6 +18650,31 @@ function parseSongMemo(value) {
   }
 }
 
+function normalizeVersionOutputTitles(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(Object.entries(value).filter(([id, title]) => id && typeof title === "string" && title.trim()).map(([id, title]) => [id, title.trim()]));
+}
+
+function songVersionOutputTitles(song) {
+  const titles = { ...(parseSongMemo(song.memo).versionOutputTitles || {}) };
+  const versions = song.versions || [];
+  if (song._relationalVersionsLoaded || song._memoHasVersions) {
+    const ids = new Set(versions.map(version => version.id));
+    for (const id of Object.keys(titles)) if (!ids.has(id)) delete titles[id];
+  }
+  for (const version of versions) {
+    if (!Object.prototype.hasOwnProperty.call(version, "output_title")) continue;
+    const title = String(version.output_title || "").trim();
+    if (title) titles[version.id] = title;
+    else delete titles[version.id];
+  }
+  return titles;
+}
+
+function songOutputTitle(song, version = null) {
+  return String(version?.output_title || "").trim() || String(song?.title || "").trim();
+}
+
 function serializeSongMemo(song, options = {}) {
   const scripture = options.omitScripture ? [] : cleanList(song.scripture);
   const relatedSongIds = options.omitRelatedSongs
@@ -18644,6 +18694,7 @@ function serializeSongMemo(song, options = {}) {
         return {
           id: version.id,
           name: normalizeGeneratedVersionName(version.name || `Version ${index + 1}`),
+          output_title: String(version.output_title || "").trim(),
           raw_section_name: version.raw_section_name || null,
           hymn_no: version.hymn_no || null,
           is_primary: Boolean(version.is_primary) || index === 0,
@@ -18793,10 +18844,19 @@ function stripTitleDecorations(value) {
 
 let songTitlePeers = null;
 
+// Edition identifiers remain stored for canonical identity and search.
+// Only suppress a subtitle that repeats this union-only song's exact number.
+function visibleSongSubtitle(song, value = song?.subtitle) {
+  const subtitle = String(value || "").trim();
+  const number = String(song?.hymn_no || "").trim().match(/^통\s*(\d+)$/u);
+  const repeated = subtitle.match(/^통일\s*(\d+)$/u);
+  return number && repeated && Number(number[1]) === Number(repeated[1]) ? "" : subtitle;
+}
+
 function songTitleMetaLine(song) {
   const titles = new Set();
   const metadata = normalizeSongMetadata(song?.metadata);
-  for (const value of [song?.subtitle, song?.original_title]) {
+  for (const value of [visibleSongSubtitle(song), song?.original_title]) {
     addTitleMeta(titles, value);
   }
   addSongMetaFromRaw(titles, song?.title, "", { includeSubtitle: !song?.hymn_no });
@@ -19402,6 +19462,7 @@ function getSongSearchFields(song, options = {}) {
 
   for (const version of song.versions || []) {
     const versionMetadata = normalizeSongMetadata(version.metadata);
+    fields.push(searchField("title", version.output_title, 120, "버전 출력 제목"));
     fields.push(searchField("version", versionDisplayName(song, version), 118, "버전"));
     fields.push(searchField("version", version.raw_section_name, 58, "버전"));
     fields.push(searchField("version", version.version_label, 52, "버전"));
