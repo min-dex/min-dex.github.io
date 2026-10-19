@@ -3553,6 +3553,17 @@ worship saves, lyric validation, P/R and photo/beat controls remain unchanged.
 DB-only tests reject any legacy store access and exercise both current sources;
 current DB browser suites supersede the retired local-profile smoke scripts.
 
+
+
+## Preserve populated closing hymns · 2026-10-19
+
+All-generations projection may omit an empty inherited 폐회찬송 slot, but must
+retain one with saved song/version identity, a real title, manual lyric blocks
+or media. Both the initial regular-slot filter and unmatched-extra filter use
+this rule. Form presets alone do not make an empty template slot populated.
+A populated hymn cannot match the closing image by section or ordinal alone.
+Explicit suppression remains authoritative. No saved rows or sequence are rewritten.
+
 ### Inline editor appearance retained
 
 Inline controller editors have no large panel fill or outer padding. Their row

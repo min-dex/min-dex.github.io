@@ -21813,6 +21813,9 @@ function findTemplateProjectionMatchIndex(templateItem = {}, existingItems = [],
   const sectionOnlyKey = serviceItemTemplateProjectionKey(templateItem, { sectionOnly: true });
   const templateSectionCount = templateSectionCounts.get(sectionOnlyKey) || 0;
   const candidates = [...unmatched].map((index) => ({ index, item: existingItems[index] }))
+    // A populated closing hymn is not the closing image, even in a one-slot section.
+    .filter(({ item }) => !serviceClosingHymnHasContent(item)
+      || serviceItemTemplateProjectionKey(item, { includeLabel: true }) === exactKey)
     .filter(({ item }) => templateProjectionSectionKey(templateItem) !== "offering"
       || serviceItemTemplateProjectionKey(item, { includeLabel: true }) === exactKey);
 
@@ -21960,6 +21963,7 @@ function shouldDropUnmodifiedTemplateProjectionExtra(service = null, item = {}) 
   if (shouldDropFriday3355ProjectionExtra(service, item)) return true;
   if (item._worshipSectionTemplateModified || item._worshipElementTemplateModified) return false;
   if (shouldDropAllGenerationsRegularThirdProjectionExtra(service, item)) return true;
+  if (serviceClosingHymnHasContent(item)) return false;
   const parsed = parseServiceItemMemo(item.memo);
   const templateish = !String(item.raw_title || "").trim();
   return templateish && !item.song_id && !cleanServiceAssignee(item.assignee);
@@ -21968,6 +21972,16 @@ function shouldDropUnmodifiedTemplateProjectionExtra(service = null, item = {}) 
 function shouldDropFriday3355ProjectionExtra(service = null, item = {}) {
   if (!serviceIsFridayVariant(service, "3355")) return false;
   return ["entrance_praise", "prayer_meeting_praise"].includes(templateProjectionSectionKey(item));
+}
+
+function serviceClosingHymnHasContent(item = {}) {
+  if (templateProjectionSectionKey(item) !== "closing_visual"
+    || compactSearchValue(item.label || "") !== "폐회찬송") return false;
+  const memo = parseServiceItemMemo(item.memo);
+  const title = compactSearchValue(item.raw_title || "");
+  return Boolean(item.song_id || item.version_id || item.song_version_id
+    || (title && title !== "폐회찬송") || memo.slides?.length
+    || hasServiceAsset(memo.asset) || hasServiceAsset(memo.audioAsset));
 }
 
 function shouldDropAllGenerationsRegularThirdProjectionExtra(service = null, item = {}) {
@@ -21991,7 +22005,7 @@ function shouldDropAllGenerationsRegularThirdProjectionExtra(service = null, ite
     return !item.song_id && !item.version_id && !item.song_version_id
       && (!title || title === labelKey) && !memo.slides?.length;
   }
-  if (sectionKey === "closing_visual" && labelKey === "폐회찬송") return true;
+  if (sectionKey === "closing_visual" && labelKey === "폐회찬송") return !serviceClosingHymnHasContent(item);
   return false;
 }
 
