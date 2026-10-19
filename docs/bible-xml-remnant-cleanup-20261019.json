@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-19",
+  "scope": "Mindex current checkout and attached children-version-audio worktree; Downloads/tmp filename scan",
+  "removedObsoleteSourceFiles": {
+    "migrations/2026-10-08-modern-bible-headings.sql": "dcad1c2f13968967cc0d24e97c380504d4fefb3137f9bd9d8f5fbc2dff981036",
+    "tests/test_modern_bible_headings.mjs": "08ff8cf20cf65701285cbbd44b87f22b60981bdfb93b5231c125950b50b9a09b",
+    "tests/test_bible_integrity_repair.mjs": "6c5ed1c92b4370cf29f46577fa63afdd0aec6eb02febfae69a3d629f90c958e4",
+    "tests/test_bible_psalm_headings.mjs": "27025096bd5048cf7a59666786635eb46f00a0f4344a87b768919f27536a14b5"
+  },
+  "preserved": [
+    "current authoritative scripture sources and source receipts",
+    "historical repair audit documents marked retired",
+    "one-time stale browser corpus cache purge and its test",
+    "lyrics XML export",
+    "user worship documents and personal data"
+  ],
+  "priorProductionEvidence": "bible-legacy-purge-production-20261016.json",
+  "productionWrites": false,
+  "safariUsed": false,
+  "limits": [
+    "No fresh production DB audit in this cleanup",
+    "Biblia and its worktrees untouched",
+    "Git history retained; no history rewrite",
+    "Other devices and arbitrary archives not claimed scanned"
+  ]
+}
