@@ -63,11 +63,15 @@ def main():
                     fade.uncheck()
                     fade.check()
                     page.evaluate('()=>MINDEX_SERVER_STORAGE.flush()')
+                    # flush can join an older batch; wait for queued follow-up writes as well.
+                    page.wait_for_function('!MINDEX_SERVER_STORAGE.pending')
                     assert page.evaluate("state.serviceMusic.fadeStopEnabled && MINDEX_SERVER_STORAGE.getItem('local','mindex.music.fadeStop')==='true'")
                     page.evaluate('renderGlobalPlaybackControls()')
                     assert fade.is_checked()
                     fade.uncheck()
                     page.evaluate('()=>MINDEX_SERVER_STORAGE.flush()')
+                    # flush can join an older batch; wait for queued follow-up writes as well.
+                    page.wait_for_function('!MINDEX_SERVER_STORAGE.pending')
                     assert page.evaluate("!state.serviceMusic.fadeStopEnabled && MINDEX_SERVER_STORAGE.getItem('local','mindex.music.fadeStop')==='false'")
                     assert panel.locator('[data-presenter-action], [data-presenter-always-on-top], [data-global-playback-action="return"], [data-global-playback-action="output-stop"]').count()==0
                     assert page.evaluate("""()=>{const html=renderPresenterControlsTop(state.services[0],[],false,0);return html.includes('data-presenter-action="detect-screens"')&&html.includes('data-presenter-always-on-top')}""")
@@ -122,12 +126,16 @@ def main():
                     launcher.click()
                     fade.check()
                     page.evaluate('()=>MINDEX_SERVER_STORAGE.flush()')
+                    # flush can join an older batch; wait for queued follow-up writes as well.
+                    page.wait_for_function('!MINDEX_SERVER_STORAGE.pending')
                     page.reload()
                     page.wait_for_function("typeof state==='object' && !document.body.classList.contains('ui-booting')")
                     prepare_server_state_fixture(page)
                     assert page.evaluate('state.serviceMusic.fadeStopEnabled'), 'device preference lost on reload'
                     page.evaluate("()=>MINDEX_SERVER_STORAGE.setItem('local','mindex.music.fadeStop','false')")
                     page.evaluate('()=>MINDEX_SERVER_STORAGE.flush()')
+                    # flush can join an older batch; wait for queued follow-up writes as well.
+                    page.wait_for_function('!MINDEX_SERVER_STORAGE.pending')
                     page.reload()
                     page.wait_for_function("typeof state==='object' && !document.body.classList.contains('ui-booting')")
                     prepare_server_state_fixture(page)
