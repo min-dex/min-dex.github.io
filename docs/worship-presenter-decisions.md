@@ -3456,8 +3456,10 @@ numbers on the right, including unlabeled slides. Numbers retain their size,
 weight and theme contrast and never shrink under long references. Output is unchanged.
 
 Controller whole-group backgrounds use occurrence order within each song: muted
-red, yellow, green, cyan, blue, magenta, repeating after six blocks, mixed at 20%
-with the panel surface. Form type no longer determines color. Form and scripture
+red, yellow, green, cyan, blue, magenta, repeating after six blocks, mixed at 30%
+with the panel surface and a three-pixel inset top rule in the full group color.
+Green uses deep green and cyan uses sky blue to remain distinct beside chroma-key
+slide previews in both themes. The inset rule never changes grid geometry. Form type no longer determines color. Form and scripture
 labels are plain text without local fills, including hover; keyboard focus remains.
 Scripture range groups use the same six-color occurrence cycle within each scripture
 element, keeping continuation pages and wrapped row fragments the same color.
@@ -3511,3 +3513,12 @@ Schema adapters retaining praise input flavor in config/content_state remain.
 Legacy service/section identifiers keep exact-key mappings and preserve unknown
 strings. Preparation labels also ignore inherited object properties. No alias
 lookup may treat prototype names as registered values.
+
+
+## Praise within liturgical-titled sections · 2026-10-19
+
+A praise element (typed praise, praise label or special-song slot) must not be
+classified as a liturgical body from its shared section heading/key. Saved song,
+version and form sequence remain authoritative; actual creed/prayer siblings keep
+their liturgical handling. This fixes the historical sending hymn under a
+projected 공동체고백 heading without rewriting sections, elements, forms or links.

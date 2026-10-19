@@ -7496,9 +7496,9 @@ textarea.svc-presenter-input-control--multiline {
 /* Per-song occurrence order: R, Y, G, C, B, M. */
 .svc-board-slide-block[data-form-color="0"] { --form-color: #d65a62; }
 .svc-board-slide-block[data-form-color="1"] { --form-color: #c5a12d; }
-.svc-board-slide-block[data-form-color="2"] { --form-color: #4b9b60; }
-.svc-board-slide-block[data-form-color="3"] { --form-color: #329ca8; }
-.svc-board-slide-block[data-form-color="4"] { --form-color: #587ed2; }
+.svc-board-slide-block[data-form-color="2"] { --form-color: #248449; }
+.svc-board-slide-block[data-form-color="3"] { --form-color: #21a6d2; }
+.svc-board-slide-block[data-form-color="4"] { --form-color: #4f65d5; }
 .svc-board-slide-block[data-form-color="5"] { --form-color: #b864b5; }
 .svc-slide-form-badge[data-form-type] {
   background: transparent;
@@ -9216,7 +9216,8 @@ body[data-module="presenter"] .topbar-actions > .icon-btn { flex: 0 0 35px; widt
 #serverStorageStatus button { margin-left: .75rem; }
 /* Color belongs to the entire form group; labels remain plain text. */
 .svc-board-slide-block[data-form-color] > .svc-board-block-background {
-  background: color-mix(in srgb, var(--form-color) 20%, var(--ui-surface-panel));
+  background: color-mix(in srgb, var(--form-color) 30%, var(--ui-surface-panel));
+  box-shadow: inset 0 3px 0 var(--form-color);
 }
 
 .draft-handoff-dialog{width:min(620px,calc(100vw - 32px));max-height:85vh;overflow:auto;border:1px solid var(--border);border-radius:12px;padding:24px;background:var(--panel);color:var(--text)}

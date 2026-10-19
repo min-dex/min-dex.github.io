@@ -53,6 +53,7 @@ SMOKES = (
     "smoke_server_presenter_transport.py",
     "smoke_lyric_paragraph_boundaries.py",
     "smoke_hymn_reviewed.py",
+    "smoke_praise_liturgical_section.py",
     "smoke_manuals_layout.py",
     "smoke_department_tabs.py",
     "smoke_department_remote.py",
