@@ -6,9 +6,6 @@
  const current=()=>bulletin()?.handoffIdentity?.()||window.MINDEX_EDITOR_DRAFTS?.identity?.();
  const tokenKey=p=>'mindex.handoff.identity:'+p;
  function status(){
-  let button=document.getElementById('draftHandoffButton');
-  if(!button&&typeof refs!=='undefined'&&refs.saveAllBtn){button=document.createElement('button');button.id='draftHandoffButton';button.className='btn secondary';button.onclick=open;refs.saveAllBtn.before(button)}
-  if(button){const id=current();const count=id?core?.list(id.kind,id.id).length||0:0;button.textContent=core?.error?'초안 연결 확인':core?.pending?'초안 전달 중…':count?`초안 이어쓰기 · ${count}`:'초안 이어쓰기';}
   renderRows?.();
   if(dialog?.open){const target=dialog.querySelector('[data-handoff-status]');if(target)target.textContent=core?.error?'다른 기기로 전달하지 못했습니다. 기존 초안은 유지됩니다. 다시 시도해 주세요.':core?.pending?'초안 전달 중…':lastStatus||'연결된 기기의 초안은 목록에 표시됩니다. 편집창은 자동 변경되지 않습니다.';}
  }

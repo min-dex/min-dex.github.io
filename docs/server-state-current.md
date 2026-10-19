@@ -219,3 +219,22 @@ metadata/성경 연결 및 atomic 저장 경로는 유지한다.
 운영 사전 대조: private manifest1건, 해당 옛 URL의 현재 예배/버전 참조0건.
 현재 공용 MR은 별도 URL, 같은 SHA-256,19시각. 현재 버전 음원38건.
 실제 삭제는 별도 결과 확인 전까지 완료로 간주하지 않는다.
+
+상단의 `초안 이어쓰기` 버튼은 사용자 요청으로 제거했다. 기기 연결 UI를
+상시 노출하지 않으며 기존 초안 보관·자동 복구와 명시적 복구 경로는 유지한다.
+
+### Permanent deletion receipt
+
+After explicit action-time confirmation, deleted the private legacy manifest and
+its unreferenced old audio copy. Readback: manifest0, old URL NoSuchKey.
+Chrome and Safari mindex-song-timing-v1 IndexedDB deletion was confirmed.
+Current version audio_set38 and worship MR19 cues remain unchanged. Independent
+MR download:10,569,839bytes; SHA-256
+123046c4372aad18996808b724875576886916ec096a67a4f91404b6405182af matches.
+Current song memo childrenAudioSets count0. Physical audio output not tested.
+
+One0byte song-timing/.emptyFolderPlaceholder remains in Storage. The user
+reserved Safari, so this empty marker cleanup is deferred. It is not audio
+or a backup; do not claim zero remaining Storage objects.
+Local37 unit+52 smoke and Linux branch gate passed before latest-main merge.
+Latest toolbar removal is preserved. Final deployment verification is separate.
