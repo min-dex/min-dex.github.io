@@ -2,7 +2,7 @@
   "date": "2026-10-19",
   "branch": "codex/children-version-audio",
   "base": "d8dbb09d",
-  "status": "safari-data-migrated-integrated-local-checks-pass-deployment-pending",
+  "status": "deployed-accessible-browser-data-migrated-and-reloaded",
   "baseline": {
     "unit": 36,
     "smoke": 48,
@@ -47,8 +47,9 @@
     "initialStateRows": 0
   },
   "notPerformed": [
-    "client deployment",
-    "successful Linux CI for integrated release",
+    "migration of unopened browsers/other devices (automatic on next app load)",
+    "Safari post-deploy UI reload (Mac locked; pre-deploy data migration/readback completed)",
+    "independent download/hash comparison of Chrome uploaded legacy audio",
     "physical PA/native fullscreen verification"
   ],
   "preservedUnrelatedFiles": [
@@ -65,6 +66,32 @@
       "originalsIntact": true,
       "failed": 0
     },
-    "chrome": "pending deployed initialization"
+    "chrome": {
+      "entries": 38,
+      "confirmed": 38,
+      "archived": 0,
+      "legacyAudioProfiles": 1,
+      "audioReadError": false,
+      "reload": {
+        "migrated": 0,
+        "retained": 38,
+        "audioProfiles": 1,
+        "ready": true,
+        "booting": false,
+        "pending": false,
+        "unsavedEdit": false
+      },
+      "originalsRetainedByMigration": true
+    }
+  },
+  "deployment": {
+    "commit": "0d88bec84b340b51ff87d8f15a5e0990e8728e52",
+    "release": "20261019-source-metadata-guard",
+    "run": 39195317576,
+    "linux": "success",
+    "unit": 36,
+    "smoke": 49,
+    "pages": "success",
+    "publicByteMatches": 24
   }
 }
