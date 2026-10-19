@@ -92,7 +92,7 @@ def main():
                     other=browser.new_context();other.route('**/*',route_request)
                     other.add_init_script("window.open=()=>null;Element.prototype.requestFullscreen=()=>Promise.reject(Error('blocked fixture'));")
                     second=other.new_page();second.goto(url+'?mindexSmokeRaw=1',wait_until='domcontentloaded')
-                    second.wait_for_function('!!window.MINDEX_SERVER_STORAGE');assert second.evaluate(INIT)
+                    second.wait_for_function('!!window.MINDEX_SERVER_STORAGE && typeof safeStorageGet === "function" && !document.body.classList.contains("ui-booting")');assert second.evaluate(INIT)
                     assert second.evaluate("safeStorageGet('local','mindex.theme')")=='dark'
                     assert second.evaluate("safeStorageGet('local','mindex.worshipRecoverySnapshot.latest.v1.fixture')")==''
                     print('PASS',engine,'server confirmed recovery, offline preservation/retry, reload and private/shared profile boundary')

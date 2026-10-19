@@ -296,6 +296,18 @@ function serviceManualPraiseSeedSlides(item, service) {
 }
 
 function updateServiceItemField(field, options = {}) {
+  const manualFields = ["manual_scripture_translation_label", "manual_scripture_text"];
+  if (manualFields.includes(field.dataset.serviceItemField) && field.closest?.(".svc-presenter-scripture-manual")?.hidden) return;
+  if (field.dataset.serviceItemField === "scripture_reference_translation_id") {
+    const panel = field.closest?.(".svc-presenter-scripture-part")?.querySelector(".svc-presenter-scripture-manual");
+    // Enter-only text drafts must be captured before hiding or changing modes.
+    if (panel && !panel.hidden) {
+      for (const input of panel.querySelectorAll("[data-service-item-field]")) {
+        clearDeferredServiceTextPreview(input);
+        updateServiceItemField(input, { ...options, deferPresenterRefresh: true, livePreview: true });
+      }
+    }
+  }
   const serviceId = field.dataset.serviceId || state.selectedServiceId;
   const items = getServiceItems(serviceId);
   const index = Number(field.dataset.serviceItemIndex);
@@ -377,11 +389,36 @@ function updateServiceItemField(field, options = {}) {
   if (key === "scripture_reference_translation_id" || key === "manual_scripture_translation_label" || key === "manual_scripture_text") {
     const referenceIndex = Number(field.dataset.scriptureReferenceIndex);
     const parsed = parseServiceItemMemo(item.memo);
+    const references = normalizeServiceScriptureReferenceList(parsed.scriptureReferences || parsed.scripture_references);
+    const legacyManual = references.length === 1 ? normalizeServiceManualScripture(parsed.manualScripture) : null;
     updateServiceScriptureReferencePayload(parsed, Number.isFinite(referenceIndex) ? referenceIndex : 0, (payload) => {
+      // Adopt the old single-reference shape only after an explicit editor change.
+      if (legacyManual) {
+        payload.manualScripture = legacyManual;
+        payload.manualTranslationLabel = legacyManual.translationLabel;
+        delete parsed.manualScripture;
+      }
       if (key === "scripture_reference_translation_id") {
         const translationId = String(field.value || "").trim();
-        if (serviceBibleTranslationById(translationId)) payload.scriptureTranslationId = translationId;
-        else delete payload.scriptureTranslationId;
+        if (translationId === "__manual__") {
+          if (!payload.manualInput && !payload.manualScripture && !payload.manualTranslationLabel && payload.manualInputDraft) {
+            payload.manualScripture = payload.manualInputDraft.scripture;
+            payload.manualTranslationLabel = payload.manualInputDraft.translationLabel;
+          }
+          payload.manualInput = true;
+        } else {
+          if (payload.manualScripture || payload.manualTranslationLabel) {
+            payload.manualInputDraft = {
+              scripture: payload.manualScripture || null,
+              translationLabel: payload.manualTranslationLabel || payload.manualScripture?.translationLabel || "",
+            };
+          }
+          delete payload.manualInput;
+          delete payload.manualScripture;
+          delete payload.manualTranslationLabel;
+          if (serviceBibleTranslationById(translationId)) payload.scriptureTranslationId = translationId;
+          else delete payload.scriptureTranslationId;
+        }
       }
       const manual = normalizeServiceManualScripture(payload.manualScripture) || { reference: payload.reference, verses: [] };
       if (key === "manual_scripture_translation_label") {
@@ -404,6 +441,23 @@ function updateServiceItemField(field, options = {}) {
       return payload;
     });
     item.memo = serializeServiceItemMemo(parsed);
+    if (key === "scripture_reference_translation_id") {
+      const panel = field.closest?.(".svc-presenter-scripture-part")?.querySelector(".svc-presenter-scripture-manual");
+      if (panel) {
+        panel.hidden = field.value !== "__manual__";
+        const payload = normalizeServiceScriptureReferencePayloads(parsed.scriptureReferencePayloads, references)
+          .find(candidate => normalizeServiceScriptureReferenceKey(candidate.reference) === normalizeServiceScriptureReferenceKey(references[referenceIndex]));
+        const values = {
+          manual_scripture_translation_label: payload?.manualScripture?.translationLabel || payload?.manualTranslationLabel || "",
+          manual_scripture_text: formatServiceManualScriptureInput(payload?.manualScripture),
+        };
+        for (const input of panel.querySelectorAll("[data-service-item-field]")) {
+          input.value = values[input.dataset.serviceItemField] || "";
+          input.dataset.initialValue = input.value;
+          input.dataset.presenterPreviewValue = input.value;
+        }
+      }
+    }
     scheduleServiceScriptureBodyResolve(serviceId, index);
   }
   if (key === "praise_input_mode") {

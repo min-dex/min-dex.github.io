@@ -10114,7 +10114,8 @@ const deferredServiceScriptureReferenceTimers = new Map();
 const deferredServiceTextPreviewTimers = new Map();
 
 function deferredServiceTextPreviewKey(field) {
-  return `${field.dataset.serviceId || state.selectedServiceId}:${field.dataset.serviceItemIndex || ""}:${field.dataset.serviceItemField || ""}`;
+  const referenceKey = field.dataset.scriptureReferenceIndex === undefined ? "" : `:${field.dataset.scriptureReferenceIndex}`;
+  return `${field.dataset.serviceId || state.selectedServiceId}:${field.dataset.serviceItemIndex || ""}:${field.dataset.serviceItemField || ""}${referenceKey}`;
 }
 
 function deferredServiceScriptureReferenceDraftValue(serviceId, index) {
@@ -11252,11 +11253,17 @@ function normalizeServiceScriptureReferencePayloads(value, references = []) {
       const scriptureTranslationId = String(item.scriptureTranslationId || item.scripture_translation_id || item.translationId || item.translation_id || "").trim();
       const manualTranslationLabel = String(item.manualTranslationLabel || item.manual_translation_label || "").trim();
       const manualScripture = normalizeServiceManualScripture(item.manualScripture || item.manual_scripture);
-      if (!scriptureTranslationId && !manualTranslationLabel && !manualScripture) return null;
+      const manualInput = item.manualInput === true;
+      const draftScripture = normalizeServiceManualScripture(item.manualInputDraft?.scripture);
+      const draftLabel = String(item.manualInputDraft?.translationLabel || "").trim();
+      const manualInputDraft = draftScripture || draftLabel ? { scripture: draftScripture, translationLabel: draftLabel } : null;
+      if (!scriptureTranslationId && !manualTranslationLabel && !manualScripture && !manualInput && !manualInputDraft) return null;
       return {
         reference,
         ...(scriptureTranslationId ? { scriptureTranslationId } : {}),
         ...(manualTranslationLabel ? { manualTranslationLabel } : {}),
+        ...(manualInput ? { manualInput: true } : {}),
+        ...(manualInputDraft ? { manualInputDraft } : {}),
         ...(manualScripture ? { manualScripture: { ...manualScripture, reference: manualScripture.reference || reference } } : {}),
       };
     })
@@ -11317,7 +11324,7 @@ function updateServiceScriptureReferencePayload(parsed = {}, referenceIndex = 0,
   const key = normalizeServiceScriptureReferenceKey(reference);
   const current = byReference.get(key) || { reference };
   const next = updater({ ...current, reference }) || null;
-  if (next && (next.scriptureTranslationId || next.manualTranslationLabel || next.manualScripture)) {
+  if (next && (next.scriptureTranslationId || next.manualTranslationLabel || next.manualScripture || next.manualInput || next.manualInputDraft)) {
     byReference.set(key, { ...next, reference });
   } else {
     byReference.delete(key);
@@ -28415,45 +28422,36 @@ function renderPresenterServiceScriptureInput(item, index, memo, service = null)
   const selectedTranslationId = serviceItemBibleTranslation(item, memo)?.id || "";
   const perReferencePayloads = normalizeServiceScriptureReferencePayloads(memo.scriptureReferencePayloads, references);
   const payloadByReference = new Map(perReferencePayloads.map((payload) => [normalizeServiceScriptureReferenceKey(payload.reference), payload]));
-  const hasPerReferenceManual = perReferencePayloads.some((payload) => {
-    const manual = normalizeServiceManualScripture(payload.manualScripture);
-    return Boolean(manual?.verses?.length || payload.manualTranslationLabel);
-  });
+  const legacyManual = references.length === 1 ? normalizeServiceManualScripture(memo.manualScripture) : null;
   const perReferenceControls = citation && references.length ? `
-    <details class="svc-presenter-input-field svc-presenter-input-field--scripture-parts">
-      <summary>
-        <span>인용별 역본</span>
-        <small>${escapeHtml(`${references.length}개${hasPerReferenceManual ? " · 수동 입력 있음" : ""}`)}</small>
-      </summary>
+    <div class="svc-presenter-input-field svc-presenter-input-field--scripture-parts" role="group" aria-label="인용별 역본">
       <div class="svc-presenter-scripture-parts">
         ${references.map((reference, referenceIndex) => {
           const payload = payloadByReference.get(normalizeServiceScriptureReferenceKey(reference)) || {};
-          const manual = normalizeServiceManualScripture(payload.manualScripture);
+          const manual = legacyManual || normalizeServiceManualScripture(payload.manualScripture);
           const selectedId = payload.scriptureTranslationId || selectedTranslationId;
-          const hasManual = Boolean(manual?.verses?.length || payload.manualTranslationLabel);
+          const hasManual = Boolean(manual?.verses?.length || payload.manualTranslationLabel || payload.manualInput);
           return `
             <div class="svc-presenter-scripture-part">
-              <strong>${escapeHtml(reference)}</strong>
-              ${state.bibleTranslations.length ? `
+              <div class="svc-presenter-scripture-part-head">
+                <strong>${escapeHtml(reference)}</strong>
                 <select class="svc-presenter-input-control" data-service-item-field="scripture_reference_translation_id" data-service-item-index="${index}" data-scripture-reference-index="${referenceIndex}" aria-label="${escapeAttr(`${reference} 역본`)}">
+                  <option value=""${!hasManual && !selectedId ? " selected" : ""}>기본 역본</option>
                   ${state.bibleTranslations.map((translation) => `
-                    <option value="${escapeAttr(translation.id)}"${translation.id === selectedId ? " selected" : ""}>
-                      ${escapeHtml(serviceBibleTranslationDisplayLabel(translation))}
-                    </option>`).join("")}
-                </select>` : ""}
-              <details class="svc-presenter-scripture-manual"${hasManual ? " open" : ""}>
-                <summary>수동 입력</summary>
-                <div>
-                  <input class="svc-presenter-input-control" type="text" data-service-item-field="manual_scripture_translation_label" data-service-item-index="${index}" data-scripture-reference-index="${referenceIndex}"
-                    value="${escapeAttr(manual?.translationLabel || payload.manualTranslationLabel || "")}" placeholder="수동 역본명" aria-label="${escapeAttr(`${reference} 수동 역본명`)}" />
-                  <textarea class="svc-presenter-input-control" data-service-item-field="manual_scripture_text" data-service-item-index="${index}" data-scripture-reference-index="${referenceIndex}"
-                    rows="2" placeholder="7 본문&#10;8 본문" aria-label="${escapeAttr(`${reference} 수동 본문`)}">${escapeHtml(formatServiceManualScriptureInput(manual))}</textarea>
-                </div>
-              </details>
+                    <option value="${escapeAttr(translation.id)}"${!hasManual && translation.id === selectedId ? " selected" : ""}>${escapeHtml(serviceBibleTranslationDisplayLabel(translation))}</option>`).join("")}
+                  <option value="__manual__"${hasManual ? " selected" : ""}>직접 입력</option>
+                </select>
+              </div>
+              <div class="svc-presenter-scripture-manual"${hasManual ? "" : " hidden"}>
+                <input class="svc-presenter-input-control" type="text" data-service-item-field="manual_scripture_translation_label" data-service-item-index="${index}" data-scripture-reference-index="${referenceIndex}"
+                  value="${escapeAttr(manual?.translationLabel || payload.manualTranslationLabel || "")}" placeholder="역본명 (예: 새한글성경)" aria-label="${escapeAttr(`${reference} 수동 역본명`)}" />
+                <textarea class="svc-presenter-input-control" data-service-item-field="manual_scripture_text" data-service-item-index="${index}" data-scripture-reference-index="${referenceIndex}"
+                  rows="3" placeholder="7 본문&#10;8 본문" aria-label="${escapeAttr(`${reference} 수동 본문`)}">${escapeHtml(formatServiceManualScriptureInput(manual))}</textarea>
+              </div>
             </div>`;
         }).join("")}
       </div>
-    </details>` : "";
+    </div>` : "";
   return `
     <label class="svc-presenter-input-field svc-presenter-input-field--scripture">
       <div class="svc-presenter-input-control-wrap">

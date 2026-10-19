@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261019-explicit-worship-order",
+  "version": "20261019-citation-editor",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "f4774a42dc9c87be3d276a245859e7e35a24d068813403b13d4a94917218cbc5",
-  "runtime_sha256": "01095fbcf8f31e9bc70e74ea0bf0417c3e045f4b977dcf5c25d4b084bc008ceb",
-  "source_bytes": 1514054,
-  "runtime_bytes": 1070440,
-  "source_gzip": 338513,
-  "runtime_gzip": 264594
+  "source_sha256": "855a407a2ff8d9a80256c45254536361b3f1c736ad0de7ac4633a558ff8fa1cb",
+  "runtime_sha256": "a65b07ac4a493f17dd6f99348d67e4194dbb6c629ab781c13bbdfd7bec1a45af",
+  "source_bytes": 1514625,
+  "runtime_bytes": 1070747,
+  "source_gzip": 338638,
+  "runtime_gzip": 264703
 }
