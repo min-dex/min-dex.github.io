@@ -23,6 +23,9 @@ try:
     const original=JSON.stringify({song,item}),playback=JSON.stringify(state.presenter);
     const slides=buildPresenterSlidesForServiceItem(item,service,0).filter(s=>s.type==='lyrics');
     check(JSON.stringify(slides.map(s=>s.text))===JSON.stringify([...expected,'후렴 한 줄',...expected]),'DB paragraph/order '+JSON.stringify(slides.map(s=>s.text)));
+    const grouped={...item,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formHint:'V1A-V1B',formPreset:normalizeServiceFormPreset('V1A-V1B','','manual')})};
+    const groupedSlides=buildPresenterSlidesForServiceItem(grouped,service,0).filter(s=>s.type==='lyrics');
+    check(JSON.stringify(groupedSlides.map(s=>s.text))===JSON.stringify(['혼자 부르는 한 줄','세 줄의 첫째\\n둘째','셋째','마지막 한 줄']),'grouped paragraph boundary');
     const direct={id:'direct',service_id:service.id,label:'찬양',raw_title:'직접 입력',memo:serializeServiceItemMemo({elementType:'praise',inputMode:'manual_praise',slides:parseServiceManualPraiseLyricsInput(lyrics.replace(/\\r/g,''))})};
     const manual=buildPresenterSlidesForServiceItem(direct,service,1).filter(s=>s.type==='lyrics');
     check(JSON.stringify(manual.map(s=>s.text))===JSON.stringify(expected),'direct/DB mismatch');

@@ -1185,15 +1185,15 @@ function presenterFormPresetGroupItem(label = "", target = {}, form = {}) {
 function presenterGroupedLyricChunks(lyrics = "", target = {}) {
   const groupIndex = Number(target?.groupIndex) || 0;
   if (!groupIndex) return splitPresenterLyricChunks(lyrics);
-  const lines = String(lyrics || "")
-    .split(/\n+/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-  if (lines.length < 2) return lines;
-  const chunkSize = Math.max(1, Math.ceil(lines.length / Math.max(groupIndex, 2)));
+  const sourceLines = String(lyrics || "").replace(/\r\n?/g, "\n").split("\n").map((line) => line.trim());
+  const lineIndexes = sourceLines.flatMap((line, index) => line ? [index] : []);
+  if (lineIndexes.length < 2) return lineIndexes.map((index) => sourceLines[index]);
+  // Keep the established A/B line selection, including authored paragraph breaks inside it.
+  const chunkSize = Math.max(1, Math.ceil(lineIndexes.length / Math.max(groupIndex, 2)));
   const chunks = [];
-  for (let index = 0; index < lines.length; index += chunkSize) {
-    chunks.push(lines.slice(index, index + chunkSize).join("\n"));
+  for (let index = 0; index < lineIndexes.length; index += chunkSize) {
+    const selected = lineIndexes.slice(index, index + chunkSize);
+    chunks.push(sourceLines.slice(selected[0], selected.at(-1) + 1).join("\n"));
   }
   return chunks;
 }

@@ -3492,3 +3492,5 @@ Normalization matrix (`Verse 1`, `Verse1`, `V1`, `verse 1`, `verse1`, `v1` each 
 - Praise classifications are a set projected in `hymn`, `ccm`, `children` order. Song versions, worship items, forms and lyric paragraphs retain authored order. Bible short-name/alias tables have one owner in mindex.constants.js, including supplemental books.
 - DB praise slides use blank-line-separated paragraphs, just as direct lyrics do. One-, three- and longer-line paragraphs each remain one slide; no padding, merging or splitting into pairs. CRLF and whitespace-only blank lines are separators; no saved lyrics are changed. Liturgical text retains its existing separate two-line splitter.
 - Existing timing fingerprint validation rejects a profile when page text or boundaries change; require new cues instead of applying old timings to different slides. Running audio/output sessions are not changed by normalization or slide preparation.
+
+- Automatic A/B fallback keeps its existing selected nonempty lines, while retaining blank-line boundaries inside each selected range. Explicit A/B blocks and form ordering remain unchanged.
