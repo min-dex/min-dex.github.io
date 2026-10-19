@@ -171,3 +171,16 @@ false, anon read/write RPC execute true, state_rows 0. 실제 사용자 데이�
 없음을 확인했다. 현재 공용 예배 타이밍을 유지하고, 구형은 private 서버의 원본
 보관본으로 남긴다. 현재 코드는 공용 예배 audioTiming을 구형 profile보다 우선한다.
 이 대조에서 예배 내용·타이밍을 변경하지 않았다.
+
+### 배포 검증 완료 ·2026-10-19
+
+- 배포: d158d0fda0252840e9219c6e7ef4d55b5956eda0 / 20261019-draft-handoff.
+- Linux/Pages run39200023720 성공. 로컬38 unit+51 smoke 통과, 공개26파일 byte-for-byte 일치.
+- Chrome 기존 프로필1건 복원, 서버 준비 완료/저장 대기 경고 없음/미저장 수정 없음.
+- Safari 서버 준비 완료/저장 대기 없음/미저장 수정 없음. 기존 목록 스크롤의
+  잘못된 키 요청은 올바른 키의 서버 영수증을 확인한 뒤 재접속했고 오류가 사라졌다.
+- 실제 예배의 현재 공용 MR은19페이지/19시각 validation 통과, public worship
+  syncTimeline 생성 확인. 송출·청음이나 운영 예배 저장은 실행하지 않았다.
+- 서로 독립된 Chromium/WebKit 프로필로 연결·초안 복원/dirty 보호를 검증했다.
+  사용자의 실제 Chrome/Safari는 아직 서로 pairing하지 않았다. 최초1회
+  ‘초안 이어쓰기 → 다른 기기 연결’ 코드 전달이 필요하다.
