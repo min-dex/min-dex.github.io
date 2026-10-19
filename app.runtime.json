@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261019-paragraph-groups",
+  "version": "20261019-paragraph-boundaries",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "82fe227ba0648f1c8a1afb4588d9244ca17580272cd4119d63cd54715a38ee91",
-  "runtime_sha256": "7afd76a12420a10f74eea57a60e5aaa024cb1ae490dae6f4838fe57519ab7165",
-  "source_bytes": 1511405,
-  "runtime_bytes": 1068336,
-  "source_gzip": 337732,
-  "runtime_gzip": 264052
+  "source_sha256": "870d0ce40e066a9e6e22467e171657b699ef6fd4ac8ace2c54e9265d8e37ff88",
+  "runtime_sha256": "634142442be0d4d50201973bb958ec281cb3c1a4aa2d7575b9b2dd61e4661176",
+  "source_bytes": 1511437,
+  "runtime_bytes": 1068375,
+  "source_gzip": 337742,
+  "runtime_gzip": 264065
 }

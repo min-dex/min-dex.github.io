@@ -43,13 +43,6 @@ const serviceScriptureChapterLoadPromises = new Map();
 const DEFAULT_CONFIG_PRESET = "gwc";
 
 const { BIBLE_CHAPTER_COUNTS, KOREAN_BIBLE_BOOK_NAMES = {} } = MINDEX_CONSTANTS;
-
-
-
-
-
-
-
 const BIBLE_BOOKS = [];
 
 const { STORAGE } = MINDEX_CONSTANTS;
@@ -10550,7 +10543,7 @@ function serviceInputModeValue(value) {
 }
 
 function normalizeServiceElementType(value) {
-  const raw = String(value || "");
+  const raw = String(value || "").normalize("NFKC").trim().toLowerCase();
   if (SERVICE_ELEMENT_TYPES.has(raw)) return raw;
   return serviceElementTypeValue(resolveDomainAlias(raw, SERVICE_ELEMENT_TYPE_ALIASES));
 }

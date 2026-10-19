@@ -24,3 +24,11 @@ for(const key of ['TOB','JDT','WSD','SIR','BAR','1MA','2MA','GKE','DA1'])assert.
 assert.equal(c.KOREAN_BIBLE_BOOK_ABBREVIATIONS.GEN,'창');
 assert.deepEqual(Array.from(c.splitFreeShowParagraphs('\r\n혼자\r\n\r\n첫째\r\n둘째\r\n셋째\r\n\r\n끝\r\n')),['혼자','첫째\n둘째\n셋째','끝']);
 console.log('PASS boundary aliases, strict internal values, canonical classification order, immutable sources, single Bible table owner, paragraph units');
+
+for (const code of vm.runInContext('Array.from(SERVICE_ELEMENT_TYPES)',c).filter(Boolean)) {
+  for (const input of [code, code.toUpperCase(), '  '+code.toUpperCase()+'  ']) assert.equal(c.normalizeServiceElementType(input),code,input);
+}
+for (const code of vm.runInContext('Array.from(WORSHIP_DB_ELEMENT_INPUT_MODES)',c).filter(Boolean)) {
+  for (const input of [code, code.toUpperCase(), '  '+code.toUpperCase()+'  ']) assert.equal(c.normalizeServiceInputMode(input),code,input);
+}
+console.log('PASS every canonical element/input code with uppercase and surrounding spaces at import boundary');
