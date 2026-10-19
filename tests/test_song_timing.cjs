@@ -15,25 +15,6 @@ const before=JSON.stringify(item);
 T.decorate(slides,item,{id:'song-a'},{id:'v'});
 assert.equal(JSON.stringify(item),before);
 console.log('PASS timing validation, effective cue order, identity isolation and immutable inputs');
-(async () => {
-  const crypto = require('node:crypto');
-  const audio = new Blob(['audio bytes'], {type:'audio/wav'});
-  const portable = {...profile, key:T.keyFor('song-a','v'),audio,audioName:'fixture.wav',enabled:true,
-    audioFingerprint:crypto.createHash('sha256').update(Buffer.from(await audio.arrayBuffer())).digest('hex')};
-  const bundle = await T.pack(portable,slides);
-  const restored = await T.unpack(bundle,portable.key,slides);
-  assert.deepEqual(restored.starts,portable.starts);
-  assert.equal(await restored.audio.text(),'audio bytes');
-  assert.equal(restored.audioFingerprint,portable.audioFingerprint);
-  await assert.rejects(T.unpack(bundle,T.keyFor('other','v'),slides),/다른/);
-  await assert.rejects(T.unpack(bundle,portable.key,[...slides].reverse()),/바뀌/);
-  const corrupt = new Uint8Array(await bundle.arrayBuffer());corrupt[corrupt.length-1]^=1;
-  await assert.rejects(T.unpack(new Blob([corrupt]),portable.key,slides),/검증/);
-  await assert.rejects(T.unpack(new Blob(['invalid']),portable.key,slides));
-  await assert.rejects(T.pack({...portable,audioFingerprint:'wrong'},slides),/변경/);
-  console.log('PASS portable bytes/timestamps, wrong song/version, changed lyrics and corrupted audio rejection');
-})().catch(error=>{console.error(error);process.exitCode=1});
-
 // Beat detection must abstain on silence/free time and never rewrite cue arrays.
 assert.equal(T.snapBeat(1.13,120,.1),1.1);
 assert.equal(T.snapBeat(1.13,0,0),1.13);

@@ -7,9 +7,8 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 NODE_TESTS = (
     "test_draft_handoff.mjs",
-    "test_legacy_audio_link.cjs",
+    "test_audio_db_only.cjs",
     "test_server_state.mjs",
-    "test_server_audio.cjs",
     "test_server_storage.cjs",
     "test_legacy_state.mjs",
     "test_worship_store.mjs",

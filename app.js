@@ -690,7 +690,6 @@ async function init() {
   connectClient();
   if (state.client) {
     await window.MINDEX_SERVER_STORAGE.initialize(state.client, state.config.url, {legacyProject, prepare: prepareLegacyServerValue});
-    await window.MindexSongTiming.initializeServerProfiles();
     applyTheme(readTheme());
     applyPresenterThumbScale(readPresenterThumbScale());
     pendingSundayEditSync.clear();

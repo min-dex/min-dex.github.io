@@ -12,7 +12,7 @@ try:
     page.goto(url);page.wait_for_function("typeof renderPresenterBoardSubgroupInputControls==='function' && !!globalThis.MindexSongTiming && !document.body.classList.contains('ui-booting')")
     page.locator('#bootStatus').wait_for(state='hidden')
     print(engine,page.evaluate('''async()=>{
-     await MindexSongTiming.ready;const check=(v,m)=>{if(!v)throw Error(m)};
+     const check=(v,m)=>{if(!v)throw Error(m)};
      const service={id:'audio-ui-fixture',type_id:'fixture'},song={id:'audio-song',title:'관리창 테스트',_relationalVersionsLoaded:true,versions:[{id:'audio-version',name:'버전',forms:[{part_type:'Verse',lyrics:'테스트 가사'}]}]};
      const item=normalizeServiceItem({id:'audio-item',service_id:service.id,label:'찬양 1',song_id:song.id,version_id:'audio-version',memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formHint:'V-C-V'})});
      state.services=[service];state.songs=[song];state.selectedServiceId=service.id;state.serviceItems={[service.id]:[item]};
@@ -34,8 +34,8 @@ try:
      page.screenshot(path=f'/tmp/mindex-audio-manager-{engine}-{width}.png')
     print(engine,page.evaluate('''async()=>{
      const item=audioManagerItem;item.memo=serializeServiceItemMemo({...parseServiceItemMemo(item.memo),audioAsset:{},inputMode:'children_audio'});
-     const pages=[{type:'lyrics',text:'테스트 가사'}];await MindexSongTiming.save({key:'audio-key',audio:new Blob(['audio']),audioName:'기존 어린이 음원',audioFingerprint:'fixture',lyricsFingerprint:MindexSongTiming.fingerprint(pages),duration:20,starts:[2],enabled:true},pages);
-     audioManagerRender();const manager=document.querySelector('.svc-audio-manager');if(!manager?.querySelector('[data-song-timing-open]')||!manager.textContent.includes('기존 어린이 음원'))throw Error('existing profile inaccessible');
+     audioManagerSubgroup.slides.forEach(({slide})=>{slide.songTimingAudio={url:'https://example.invalid/children.wav',name:'현재 어린이 음원'};});
+     audioManagerRender();const manager=document.querySelector('.svc-audio-manager');if(!manager?.querySelector('[data-song-timing-open]')||!manager.textContent.includes('현재 어린이 음원'))throw Error('existing profile inaccessible');
      audioManagerSubgroup.slides.forEach(({slide})=>{slide.serviceTimingPage=true;slide.serviceTimingAudioSource='';});audioManagerRender();if(document.querySelector('.svc-audio-manager'))throw Error('stale service profile resurrected disconnected audio');
      return 'PASS children profile accessible; stale service profile cannot resurrect disconnected audio';
     }'''),flush=True)

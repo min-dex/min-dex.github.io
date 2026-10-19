@@ -98,7 +98,6 @@
   const join=element('button','이 기기 연결');join.type='button';join.className='btn secondary';join.onclick=async()=>{
    try{const code=JSON.parse(input.value);if(code.mindexDraft!==1||code.project!==project||!/^[a-f0-9]{64}$/.test(code.token||''))throw Error('같은 프로젝트의 연결 코드를 확인해 주세요.');await connect(code.token);input.value='';lastStatus='기기를 연결했습니다. 기존 자료는 그대로 보존됩니다.';await flush();await refresh();rows()}catch(e){lastStatus=e.message}status();
   };details.append(copy,input,join);dialog.append(details);
-  const audio=element('button','구형 음원 공용 연결');audio.type='button';audio.className='btn secondary';audio.onclick=()=>{dialog.close();void window.MindexSongTiming?.openLegacyLibrary?.()};dialog.append(audio);
   dialog.addEventListener('close',()=>{dialog?.remove();dialog=null;renderRows=null},{once:true});document.body.append(dialog);dialog.showModal();status();rows();
  }
  window.addEventListener('mindex-server-storage-ready',()=>void initialize());

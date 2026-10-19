@@ -184,3 +184,16 @@ false, anon read/write RPC execute true, state_rows 0. 실제 사용자 데이�
 - 서로 독립된 Chromium/WebKit 프로필로 연결·초안 복원/dirty 보호를 검증했다.
   사용자의 실제 Chrome/Safari는 아직 서로 pairing하지 않았다. 최초1회
   ‘초안 이어쓰기 → 다른 기기 연결’ 코드 전달이 필요하다.
+
+## 레거시 음원 실행 경로 종료 ·2026-10-19
+
+사용자 지시에 따라 음원은 공용 DB만 사용한다. 버전은 `audio_set`, 예배 항목은
+현재 `audioAsset`/`audioTiming`을 읽고 기존 version CAS/atomic 저장으로 저장한다.
+위의 IndexedDB 자동 이관·private manifest 재생·구형 음원 공용 연결 설명은 과거
+배포 기록이며 현재 동작이 아니다. 새 실행에서 해당 저장소를 열거나 업로드하지
+않는다. memo.childrenAudioSets fallback, 별도 바이너리 공유 저장/불러오기도 종료했다.
+
+기존 IndexedDB/private manifest/업로드 원본은 삭제하지 않고 앱에서 사용하지 않는다.
+확인된 공용 MR의 현재19시각과38곡 버전 자료를 레거시 시각으로 덮어쓰지 않는다.
+DB 자료가 없거나 가사가 달라지면 기존 검증/안내를 사용하며 옛 자료로 우회하지 않는다.
+초안 이어쓰기, P/R, 박자 편집, 사진 전환, 페이드아웃 및 현재 저장 경로는 유지한다.

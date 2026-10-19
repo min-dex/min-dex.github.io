@@ -1,7 +1,6 @@
 /* Version-owned children audio and worship-owned occurrence timing. */
 (function (root) {
   'use strict';
-  const profiles = new Map();
   let revision = 0;
   const remoteSources = new Set();
   const keyFor = (songId, versionId) => JSON.stringify([String(songId || ''), String(versionId || '')]);
@@ -85,8 +84,8 @@
       });
   }
   const versionProfile = (song, version) => {
-    const stored = version?.audio_set || (typeof parseSongMemo === 'function' ? parseSongMemo(song?.memo).childrenAudioSets?.[version?.id] : null);
-    return stored ? {...stored, url:stored.audioUrl, databaseTiming:true} : profiles.get(keyFor(song?.id, version?.id));
+    const stored = version?.audio_set;
+    return stored ? {...stored, url:stored.audioUrl, databaseTiming:true} : null;
   };
   function formsFor(item, song, version, fallback) {
     if (!isChildrenMode(item) || !isChildrenVersion(song, version)) return fallback;
@@ -99,7 +98,7 @@
     const profile = versionProfile(song, version);
     const children = isChildrenVersion(song, version);
     const childMode = isChildrenMode(item);
-    const valid = childMode && children && validSet(profile, version) && profile?.enabled && profile.url && !validate(profile, slides, Boolean(profile?.databaseTiming||profile?.serverTiming));
+    const valid = childMode && children && validSet(profile, version) && profile?.enabled && profile.url && !validate(profile, slides, true);
     if (valid && profile.databaseTiming) remoteSources.add(profile.url);
     let page = 0;
     return slides.map(slide => {
@@ -108,7 +107,7 @@
       const result = { ...slide, songTimingKey: key, songTimingEligible: children && childMode, songTimingAudio: childMode && children && validSet(profile, version) && profile?.url ? {url:profile.url,name:profile.audioName} : null };
       if (childMode && !valid) result.warnings = [...(slide.warnings || []), "버전 음원·타이밍이 없거나 변경됐습니다. 버전 음원·타이밍에서 자료를 확인하세요."];
       if (timed || intro) {
-        // A stale or disabled local profile must not fall back to a different timeline.
+        // Missing, stale or disabled DB timing must not inherit another timeline.
         if (children || profile || childMode) delete result.syncTimeline;
         if (valid) result.syncTimeline = {
           groupId: `${item.id}:local-song-timing`, audioSrc: profile.url,
@@ -140,8 +139,8 @@
       if (!pages.length) continue;
       const memo = parseServiceItemMemo(item.memo);
       const stored = memo.audioTiming;
-      const profile = stored ? {...stored, url:stored.audioUrl} : profiles.get(key);
-      const valid = profile?.enabled && profile.url && (!stored || stored.audioUrl === linkedSource) && !validate(profile, group, Boolean(stored||profile?.serverTiming));
+      const profile = stored ? {...stored, url:stored.audioUrl} : null;
+      const valid = profile?.enabled && profile.url && stored.audioUrl === linkedSource && !validate(profile, group, true);
       if (valid && stored) remoteSources.add(profile.url);
       let page = 0;
       result = result.map(slide => {
@@ -175,141 +174,7 @@
     }
     return result;
   }
-  const dbPromise = typeof indexedDB === 'undefined' ? null : new Promise((resolve, reject) => {
-    const request = indexedDB.open('mindex-song-timing-v1', 1);
-    request.onupgradeneeded = () => request.result.createObjectStore('profiles', { keyPath: 'key' });
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-    request.onblocked = () => reject(new Error('다른 창을 닫고 다시 열어 주세요.'));
-  });
-  async function transaction(mode, action) {
-    if (!dbPromise) throw Error('로컬 저장소를 사용할 수 없습니다.');
-    const db = await dbPromise;
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction('profiles', mode);
-      const request = action(tx.objectStore('profiles'));
-      tx.oncomplete = () => resolve(request.result);
-      tx.onerror = tx.onabort = () => reject(tx.error || request.error || Error('로컬 저장 실패'));
-    });
-  }
-  let loadError = null;
-  const legacyProfiles = new Map();
-  const PROFILE_MANIFEST = "mindex.songTiming.manifest.v1";
-  const ready = dbPromise ? transaction('readonly', store => store.getAll()).then(rows => {
-    for (const row of rows) {
-      const audio = row.audioBytes instanceof ArrayBuffer ? new Blob([row.audioBytes], { type: row.audioType || 'audio/mpeg' }) : row.audio;
-      if (audio instanceof Blob) legacyProfiles.set(row.key, { ...row, audio });
-    }
-    revision++;
-  }).catch(error => { loadError = error; }) : Promise.resolve();
-  async function persistProfile(profile) {
-    if(!root.MINDEX_SERVER_STORAGE?.ready||!state.client?.storage)throw Error('서버 저장 연결이 필요합니다.');
-    const {url,audio,audioBytes,...record}=profile;
-    if(!record.audioUrl){
-      if(!(audio instanceof Blob))throw Error('음원을 확인해 주세요.');
-      if(await digestBytes(await audio.arrayBuffer())!==record.audioFingerprint)throw Error('음원 지문이 다릅니다.');
-      const bucket=state.client.storage.from('mindex-worship-media');
-      const path=`song-timing/audio/${crypto.randomUUID()}`;
-      const result=await bucket.upload(path,audio,{contentType:audio.type||'audio/mpeg',upsert:false,cacheControl:'31536000'});
-      if(result.error)throw result.error;
-      record.audioUrl=bucket.getPublicUrl(path).data?.publicUrl;
-      if(!/^https:\/\//.test(record.audioUrl||''))throw Error('음원 주소를 확인하지 못했습니다.');
-      profile.audioUrl=record.audioUrl;
-    }
-    await root.MINDEX_SERVER_STORAGE.updateItem('local',PROFILE_MANIFEST,current=>{
-      const manifest=JSON.parse(current||'{}');manifest[record.key]=record;return JSON.stringify(manifest);
-    });
-    profiles.set(record.key,{...record,audio,url:record.audioUrl,serverTiming:true});
-    remoteSources.add(record.audioUrl);revision++;
-  }
-  async function initializeServerProfiles(){
-    await ready;
-    if(typeof document!=='undefined')document.body.dataset.serverLegacyAudioReadError=String(Boolean(loadError));
-    const stored=JSON.parse(root.MINDEX_SERVER_STORAGE.getItem('local',PROFILE_MANIFEST,'{}'));
-    for(const [key,record] of Object.entries(stored)){
-      if(record?.key!==key||!/^https:\/\//.test(record.audioUrl||''))continue;
-      profiles.set(key,{...record,url:record.audioUrl,serverTiming:true});remoteSources.add(record.audioUrl);
-    }
-    for(const [key,profile] of legacyProfiles){
-      if(profiles.has(key))continue;
-      await persistProfile(profile);
-    }
-    if(typeof document!=='undefined')document.body.dataset.serverAudioProfiles=String(profiles.size);
-    revision++;
-  }
-  async function save(profile, slides) {
-    await ready;
-    const error=validate(profile,slides,Boolean(profile.audioUrl));
-    if(error)throw Error(error);
-    await persistProfile(profile);
-  }
-  const PACKAGE_LIMIT = 50 * 1024 * 1024;
   const digestBytes = async bytes => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)), b => b.toString(16).padStart(2, '0')).join('');
-  async function pack(profile, slides) {
-    const error = validate(profile, slides);
-    if (error) throw Error(error);
-    if (profile.audio.size > PACKAGE_LIMIT) throw Error('공유할 음원은 50MB보다 작아야 합니다.');
-    const bytes = await profile.audio.arrayBuffer();
-    const audioFingerprint = await digestBytes(bytes);
-    if (audioFingerprint !== profile.audioFingerprint) throw Error('음원이 변경됐어요. 시각을 다시 확인해 주세요.');
-    const header = new TextEncoder().encode(JSON.stringify({
-      format: 'mindex-song-timing', version: 1, key: profile.key,
-      audioName: String(profile.audioName || '음원'), audioType: profile.audio.type,
-      audioFingerprint, audioSize: bytes.byteLength, lyricsFingerprint: profile.lyricsFingerprint,
-      starts: profile.starts, duration: profile.duration, enabled: Boolean(profile.enabled),
-      sourceSignature: profile.sourceSignature || null, forms: profile.forms || null,
-    }));
-    if (header.byteLength > 1024 * 1024) throw Error('타이밍 정보가 너무 큽니다.');
-    const length = new Uint8Array(4); new DataView(length.buffer).setUint32(0, header.byteLength);
-    const blob = new Blob(['MINDXST1', length, header, bytes], { type: 'application/octet-stream' });
-    if (blob.size > PACKAGE_LIMIT) throw Error('음원과 타이밍을 합쳐 50MB 이하여야 합니다.');
-    return blob;
-  }
-  async function unpack(blob, key, slides, context = null) {
-    if (!(blob instanceof Blob) || blob.size < 13 || blob.size > PACKAGE_LIMIT) throw Error('지원하지 않는 동기화 파일 크기입니다.');
-    const prefix = await blob.slice(0, 12).arrayBuffer();
-    if (new TextDecoder().decode(prefix.slice(0, 8)) !== 'MINDXST1') throw Error('민덱스 동기화 파일이 아닙니다.');
-    const length = new DataView(prefix).getUint32(8);
-    if (!length || length > 1024 * 1024 || length + 12 >= blob.size) throw Error('동기화 파일이 손상됐습니다.');
-    const header = JSON.parse(await blob.slice(12, 12 + length).text());
-    if (header.format !== 'mindex-song-timing' || header.version !== 1 || header.key !== key) throw Error('현재 곡·버전과 다른 동기화 자료입니다.');
-    const audio = blob.slice(12 + length, blob.size, typeof header.audioType === 'string' ? header.audioType : '');
-    if (audio.size !== header.audioSize || await digestBytes(await audio.arrayBuffer()) !== header.audioFingerprint) throw Error('음원 검증에 실패했습니다. 다시 불러와 주세요.');
-    const profile = { key, audio, audioName: String(header.audioName || '음원'), audioFingerprint: header.audioFingerprint,
-      lyricsFingerprint: header.lyricsFingerprint, starts: header.starts, duration: header.duration, enabled: header.enabled === true,
-      sourceSignature: header.sourceSignature, forms: header.forms };
-    if (context) {
-      if (!isChildrenVersion(context.song, context.version) || !validSet(profile, context.version)) throw Error("현재 어린이 버전과 맞는 음원 세트가 아닙니다.");
-      slides = context.buildSlides(profile.forms);
-    }
-    const error = validate(profile, slides);
-    if (error) throw Error(error);
-    return profile;
-  }
-  async function sharedPrefix(key) {
-    return 'song-timing/v1/' + await digestBytes(new TextEncoder().encode(key));
-  }
-  async function share(profile, slides, bucket) {
-    if (!bucket) throw Error('공유 저장소에 연결되지 않았습니다.');
-    const bundle = await pack(profile, slides);
-    const path = `${await sharedPrefix(profile.key)}/${Date.now()}-${crypto.randomUUID()}.mindex-timing`;
-    // Append-only: never overwrite/delete another computer's saved version.
-    const { error } = await bucket.upload(path, bundle, { contentType: 'application/octet-stream', upsert: false, cacheControl: '31536000' });
-    if (error) throw error;
-    return path;
-  }
-  async function loadShared(key, slides, bucket, context = null) {
-    if (!bucket) throw Error('공유 저장소에 연결되지 않았습니다.');
-    const prefix = await sharedPrefix(key);
-    const listing = await bucket.list(prefix, { limit: 1, sortBy: { column: 'created_at', order: 'desc' } });
-    if (listing.error) throw listing.error;
-    const entry = listing.data?.[0];
-    if (!entry) throw Error('이 곡·버전의 공유 저장본이 없습니다. 저장한 컴퓨터에서 공유 저장을 먼저 눌러 주세요.');
-    if (!/^\d+-[0-9a-f-]+\.mindex-timing$/.test(entry.name) || Number(entry.metadata?.size) > PACKAGE_LIMIT) throw Error('올바른 공유 저장본이 아닙니다.');
-    const result = await bucket.download(`${prefix}/${entry.name}`);
-    if (result.error) throw result.error;
-    return unpack(result.data, key, slides, context);
-  }
   async function decodedDuration(blob) {
     const url = URL.createObjectURL(blob);
     const audio = new Audio(); audio.preload = 'metadata';
@@ -326,15 +191,12 @@
     const slide = entries.map(entry => entry.slide || entry).find(slide =>
       slide.songTimingKey && (slide.songTimingElementId || slide.elementId) === elementId);
     if (slide && !slide.serviceTimingPage) return slide.songTimingEligible ? slide.songTimingAudio || null : null;
-    const profile = slide && profiles.get(slide.songTimingKey);
-    // A disconnected/replaced service asset must not resurrect stale cached audio.
-    if (slide?.serviceTimingPage && profile?.lyricsFingerprint !== fingerprint(entries.map(entry => entry.slide || entry))) return null;
-    return profile?.url ? { url: profile.url, name: profile.audioName || '동기화 음원' } : null;
+    return null; // Worship audio is owned by its current audioAsset, never a cached profile.
   }
   function controls(serviceId, entries, options = {}) {
     const seen = new Set();
     return entries.filter(({ slide }) => slide.songTimingKey && slide.songTimingEligible
-      && (options.audioSource || slide.serviceTimingAudioSource || !slide.serviceTimingPage || profiles.get(slide.songTimingKey)?.url)
+      && (options.audioSource || slide.serviceTimingAudioSource || !slide.serviceTimingPage)
       && !seen.has(slide.songTimingElementId || slide.elementId) && seen.add(slide.songTimingElementId || slide.elementId))
       .map(({ slide }) => `<button type="button" class="btn secondary" data-song-timing-open data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(slide.songTimingElementId || slide.elementId)}">음원 동기화</button>${presenterControllerIsLive(serviceId) && entries.some(({ slide: candidate }) => (candidate.songTimingElementId || candidate.elementId) === (slide.songTimingElementId || slide.elementId) && candidate.syncTimeline?.localTiming) ? `<button type="button" class="btn secondary" data-song-timing-play data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(slide.songTimingElementId || slide.elementId)}">자동 넘김 재생</button>` : ''}`).join('');
   }
@@ -454,7 +316,7 @@
   }
   function transport() {
     const source = state.serviceMusic.sourceKey;
-    if (state.serviceMusic.mode !== 'presenter-audio' || !(remoteSources.has(source) || [...profiles.values()].some(p => p.url === source))) return '';
+    if (state.serviceMusic.mode !== 'presenter-audio' || !remoteSources.has(source)) return '';
     return `<label class="song-timing-seek">음원 위치 <input type="range" min="0" max="${Number(state.serviceMusic.audio?.duration) || 0}" step="0.1" value="${Number(state.serviceMusic.audio?.currentTime) || 0}" data-song-timing-seek data-source="${escapeAttr(source)}" aria-label="동기화 음원 위치"><span data-song-timing-clock></span></label><button type="button" class="btn secondary" data-song-timing-resume ${!state.serviceMusic.autoSyncSuspended || !state.serviceMusic.playing ? 'hidden' : ''}>자동 넘김 복귀 · R</button>`;
   }
   function updateTransport(audio) {
@@ -563,80 +425,7 @@
     version.audio_set = audioSet; remoteSources.add(audioSet.audioUrl); revision++;
     root.MINDEX_CONTENT_LIVE?.publish('song',song.id);
   }
-  function legacyTarget(key) {
-    try {const ids=JSON.parse(key);if(!Array.isArray(ids))return null;
-      if(ids.length===4&&ids[0]==='service')return {kind:'service',serviceId:ids[1],elementId:ids[2]};
-      if(ids.length===2)return {kind:'song',songId:ids[0],versionId:ids[1]};
-    } catch {} return null;
-  }
-  function legacyBlocked(){return hasDirtyChanges()||state.saving||state.serviceMusic?.playing||state.serviceMusic?.pending||isPresenterOutputWindowOpen();}
-  async function connectLegacyProfile(key) {
-    const profile=profiles.get(key),target=legacyTarget(key);
-    if(!profile||!target)throw Error('원래 연결 대상을 확인하지 못했습니다. 기존 자료는 보존됩니다.');
-    if(legacyBlocked())throw Error('현재 편집을 저장하고 재생을 마친 뒤 연결해 주세요.');
-    const client=state.client,selectedService=state.selectedServiceId,selectedSong=state.selectedSongId,selectedVersion=state.selectedVersionId;
-    let song,version,item,slides,previous;
-    if(target.kind==='service'){
-      if(selectedService!==target.serviceId)throw Error('먼저 원래 예배를 열어 주세요.');
-      item=getServiceItems(target.serviceId).find(i=>i.id===target.elementId);
-      if(!item)throw Error('원래 예배 항목이 없습니다. 다른 항목으로 임의 연결하지 않습니다.');
-      previous=item.memo;const stored=parseServiceItemMemo(previous).audioTiming;
-      if(stored){
-        if(stored.audioFingerprint===profile.audioFingerprint&&JSON.stringify(stored.starts)===JSON.stringify(profile.starts)&&stored.duration===profile.duration&&stored.audioUrl===profile.audioUrl)return {alreadyLinked:true};
-        throw Error('공용 예배에 다른 음원·타이밍이 있습니다. 양쪽 자료를 보존하고 연결을 중단했습니다.');
-      }
-      slides=pagesFor(presenterSlidesForService(target.serviceId).filter(s=>belongsTo(s,target.elementId)));
-    }else{
-      if(selectedSong!==target.songId||selectedVersion!==target.versionId)throw Error('먼저 원래 곡과 버전을 열어 주세요.');
-      song=getSelectedSong();version=getSelectedVersion();previous=version?.audio_set;
-      if(previous){
-        if(previous.audioFingerprint===profile.audioFingerprint&&JSON.stringify(previous.starts)===JSON.stringify(profile.starts)&&previous.audioUrl===profile.audioUrl)return {alreadyLinked:true};
-        throw Error('공용 버전에 다른 음원·타이밍이 있습니다. 양쪽 자료를 보존하고 연결을 중단했습니다.');
-      }
-      if(!validSet(profile,version))throw Error('현재 버전의 가사·폼과 일치하지 않습니다. 기존 자료는 보존됩니다.');
-      slides=presenterLyricsSlidesForServiceItem({item:{id:'legacy-link'},section:{},index:0,song,version,displayText:song.title,label:'찬양',forms:profile.forms});
-    }
-    const issue=validate(profile,slides,true);if(issue)throw Error(issue);
-    // Verify the uploaded bytes independently before exposing this timing publicly.
-    const response=await fetch(profile.audioUrl);if(!response.ok)throw Error('보관된 음원을 다시 읽지 못했습니다.');
-    if(await digestBytes(await response.arrayBuffer())!==profile.audioFingerprint)throw Error('보관된 음원 지문이 달라 연결하지 않았습니다.');
-    if(client!==state.client||selectedService!==state.selectedServiceId||selectedSong!==state.selectedSongId||selectedVersion!==state.selectedVersionId||legacyBlocked())throw Error('확인 중 편집 상태가 바뀌었습니다. 다시 시도해 주세요.');
-    if(target.kind==='service'){
-      if(item.memo!==previous)throw Error('확인 중 예배 내용이 바뀌었습니다.');
-      await saveToWorship(target.serviceId,target.elementId,{...profile},slides);
-      const rows=await fetchWorshipRowsForServiceIds([target.serviceId]);
-      const saved=rows.elements.find(row=>row.id===target.elementId)?.config?.audioTiming;
-      if(!saved||saved.audioFingerprint!==profile.audioFingerprint||saved.audioUrl!==profile.audioUrl||JSON.stringify(saved.starts)!==JSON.stringify(profile.starts))throw Error('저장 응답은 받았지만 서버 재확인이 필요합니다. 원본은 보존됩니다.');
-    }else{
-      if(version.audio_set!==previous)throw Error('확인 중 버전 자료가 바뀌었습니다.');
-      await saveToVersion(song,version,{...profile},slides);
-      const {data,error}=await client.from('mindex_song_versions').select('audio_set').eq('id',version.id).single();
-      if(error||data?.audio_set?.audioFingerprint!==profile.audioFingerprint||JSON.stringify(data.audio_set.starts)!==JSON.stringify(profile.starts))throw Error('버전 저장 후 재확인이 필요합니다. 원본은 보존됩니다.');
-    }
-    return {alreadyLinked:false};
-  }
-  async function openLegacyLibrary(){
-    if(document.querySelector('[data-legacy-audio-dialog]'))return;
-    const dialog=document.createElement('dialog');dialog.dataset.legacyAudioDialog='';dialog.className='draft-handoff-dialog';dialog.setAttribute('aria-label','구형 음원 공용 연결');
-    const add=(tag,text,parent=dialog)=>{const node=document.createElement(tag);node.textContent=text;parent.append(node);return node;};
-    add('h2','구형 음원 공용 연결');add('p','원래 예배 항목 또는 곡·버전에 연결합니다. 가사·타이밍·음원 지문이 일치할 때만 저장하며, 기존 자료는 삭제하지 않습니다.');
-    const status=add('p','');status.setAttribute('role','status');
-    if(!profiles.size)add('p','이 기기에 연결할 구형 음원이 없습니다.');
-    for(const [key,profile] of profiles){
-      const target=legacyTarget(key),row=add('section','');add('h3',profile.audioName||'구형 음원',row);
-      add('p',target?.kind==='service'?'특정 예배에 직접 입력한 음원·타이밍':target?.kind==='song'?'곡·버전 음원·타이밍':'원래 연결 대상 확인 필요',row);
-      if(target?.kind==='service'){
-        const openButton=add('button','원래 예배 열기',row);openButton.type='button';openButton.className='btn secondary';
-        openButton.onclick=async()=>{if(legacyBlocked()){status.textContent='현재 편집을 저장하고 재생을 마친 뒤 열어 주세요.';return;}dialog.close();await openServiceInPresenter(target.serviceId);await openLegacyLibrary();};
-      }
-      const connectButton=add('button','공용 DB에 연결',row);connectButton.type='button';connectButton.className='btn secondary';connectButton.disabled=!target;
-      connectButton.onclick=async()=>{connectButton.disabled=true;status.textContent='원본과 연결 대상을 확인하는 중…';try{const result=await connectLegacyProfile(key);status.textContent=result.alreadyLinked?'같은 음원·타이밍이 이미 공용 DB에 연결돼 있습니다.':'공용 DB 연결과 서버 재확인을 마쳤습니다. 기존 원본도 보존했습니다.';}catch(e){status.textContent=e.message}finally{connectButton.disabled=false}};
-    }
-    const close=add('button','닫기');close.type='button';close.className='btn secondary';close.onclick=()=>dialog.close();dialog.addEventListener('close',()=>dialog.remove(),{once:true});document.body.append(dialog);dialog.showModal();
-  }
   async function open(serviceId, elementId) {
-    await ready;
-
     if (document.querySelector('[data-song-timing-dialog]')) return;
     const all = presenterSlidesForService(serviceId).filter(s => belongsTo(s, elementId));
     const slides = pagesFor(all);
@@ -650,10 +439,9 @@
     const serviceTiming = all.some(s => s.serviceTimingPage);
     if (!serviceTiming && (!isChildrenVersion(song, version) || !isChildrenMode(item))) { showToast('어린이 유형의 버전을 선택해 주세요.', 'error'); return; }
     const setForms = serviceTiming ? null : formsFor(item, song, version, presenterFormPlanForServiceItem(version, item, song).forms);
-    const buildSetSlides = forms => presenterLyricsSlidesForServiceItem({item, section: {}, index: 0, song, version, displayText: song.title, label: item.label, forms, formWarnings: []});
     const linkedAudio = normalizeServiceAudioAsset(parseServiceItemMemo(item.memo).audioAsset);
     const stored = serviceTiming ? parseServiceItemMemo(item.memo).audioTiming : null;
-    const old = stored ? {...stored, audioName:linkedAudio.name, url:stored.audioUrl} : (serviceTiming ? profiles.get(key) : versionProfile(song,version));
+    const old = stored ? {...stored, audioName:linkedAudio.name, url:stored.audioUrl} : (serviceTiming ? null : versionProfile(song,version));
     const fresh = Array.isArray(old?.starts) && old?.lyricsFingerprint === fingerprint(slides);
     let draft = { key, audioUrl: stored?.audioUrl || old?.audioUrl || (old?.lyricsFingerprint === fingerprint(slides) ? linkedAudio.url : ''), audio: old?.audio, audioName: old?.audioName || '', audioFingerprint: old?.audioFingerprint || '',
       duration: old?.duration || 0, lyricsFingerprint: fingerprint(slides),
@@ -919,48 +707,6 @@
         nextStamp = i + 1; updateNext();
         dialog.querySelector(`[data-timing-start="${Math.min(nextStamp, slides.length - 1)}"]`).closest('.song-timing-row').scrollIntoView({block:'nearest'});
       }
-      if (button.hasAttribute('data-timing-share') || button.hasAttribute('data-timing-load-shared')) {
-        const loading = button.hasAttribute('data-timing-load-shared');
-        if (loading && draft.audio && !window.confirm('공유 저장본으로 현재 음원·타이밍을 교체할까요? 기존 공유 저장본은 삭제하지 않습니다.')) return;
-        busy = true;
-        let savedLocally = false;
-        dialog.querySelectorAll('button,input').forEach(control => { control.disabled = true; });
-        status.textContent = loading ? '공유 음원·타이밍을 확인하고 있어요…' : '음원·타이밍을 공유 저장하고 있어요…';
-        try {
-          const currentSlides = () => {
-            const current = pagesFor(presenterSlidesForService(serviceId).filter(s => belongsTo(s, elementId)));
-            if (current[0]?.songTimingKey !== key || fingerprint(current) !== draft.lyricsFingerprint) throw Error('편집 중 곡 또는 가사가 바뀌었어요. 닫고 다시 열어 주세요.');
-            return current;
-          };
-          const bucket = state.client?.storage?.from('mindex-worship-media');
-          if (loading) {
-            const incoming = await loadShared(key, currentSlides(), bucket, isChildrenMode(item) ? {song, version, buildSlides: buildSetSlides} : null);
-            incoming.duration = await decodedDuration(incoming.audio);
-            currentSlides();
-            await save(incoming, isChildrenMode(item) ? buildSetSlides(incoming.forms) : currentSlides());
-            audio.pause();
-            if (previewUrl) URL.revokeObjectURL(previewUrl);
-            draft = incoming; previewUrl = URL.createObjectURL(draft.audio); audio.src = previewUrl;
-            dialog.querySelector('[data-timing-filename]').textContent = draft.audioName;
-            dialog.querySelector('[data-timing-enabled]').checked = draft.enabled;
-            dialog.querySelectorAll('[data-timing-start]').forEach(input => { input.value = draft.starts[Number(input.dataset.timingStart)]; });
-            refreshPresenterForService(serviceId);
-            if (isChildrenMode(item) && fingerprint(slides) !== incoming.lyricsFingerprint) {
-              dialog.close(); dialog.remove(); await open(serviceId, elementId); return;
-            }
-            status.textContent = '공유 음원·타이밍을 서버에 보관했어요.';
-          } else {
-            draft.enabled = dialog.querySelector('[data-timing-enabled]').checked;
-            await save(draft, currentSlides());
-            savedLocally = true;
-            await share(draft, currentSlides(), bucket);
-            audio.pause(); refreshPresenterForService(serviceId);
-            status.textContent = '공유 저장했어요. 다른 컴퓨터에서 같은 곡의 공유 불러오기를 누르세요.';
-          }
-        } catch (error) { status.textContent = `공유 ${loading ? '불러오기' : '저장'} 실패: ${error.message || '연결 상태를 확인해 주세요.'} ${savedLocally ? '서버 보관본과 기존 공유본은 유지됩니다.' : '기존 저장본은 유지됩니다.'}`; }
-        finally { busy = false; dialog.querySelectorAll('button,input').forEach(control => { control.disabled = false; }); }
-        return;
-      }
       if (button.hasAttribute('data-timing-save')) {
         busy = true; dialog.querySelectorAll('button,input,textarea,select').forEach(c=>c.disabled=true);
         try {
@@ -1016,7 +762,7 @@
     }
     return result;
   }
-  root.MindexSongTiming = { initializeServerProfiles,legacyTarget,connectLegacyProfile,openLegacyLibrary, resumeAutoSync, snapBeat, detectBeatGrid, composePhotos, validatePhotos, saveToVersion, readElemLibrary, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, save, saveToWorship, ready, pack, unpack, share, loadShared, formsFor, sourceSignature, ownsSource: source => remoteSources.has(source) || [...profiles.values()].some(p => p.url === source), get revision() { return revision; } };
+  root.MindexSongTiming = { resumeAutoSync, snapBeat, detectBeatGrid, composePhotos, validatePhotos, saveToVersion, readElemLibrary, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, saveToWorship, formsFor, sourceSignature, ownsSource: source => remoteSources.has(source), get revision() { return revision; } };
   if (typeof document !== 'undefined') document.addEventListener('input', e => {
     const input = e.target.closest('[data-song-timing-seek]');
     const audio = state.serviceMusic.audio;

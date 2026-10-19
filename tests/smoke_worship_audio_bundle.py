@@ -55,7 +55,7 @@ try:
     saveServiceItemMutation=async(id,index)=>{await saveWorshipServiceElementPatch(service,state.serviceItems[id][index].id);return true};
     renderPresenterControlState=()=>{};publishPresenterState=()=>{};
     state.presenter.serviceId=sid;state.presenter.sourceSignature='';state.presenter.slides=[];
-    await MindexSongTiming.ready;
+
     if(!renderServicePraiseInputModeControl(state.serviceItems[sid][0],0).includes('직접 추가: 음원'))throw Error('mode UI missing');
     if(serviceItemRequiresSongSelection(state.serviceItems[sid][0],service))throw Error('audio mode requires DB');
     return {serviceId:sid,elementId:state.serviceItems[sid][0].id};
@@ -87,7 +87,7 @@ try:
    page.evaluate(r'''async db=>{
     const sid=db.service.id;state.services=[{id:sid,type_id:'fixture',date:'2026-10-18'}];state.selectedServiceId=sid;state.serviceTypes=[{id:'fixture',name:'검증'}];state.songs=[];
     state.loadedWorshipServiceIds=new Set([sid]);state.templateElementSuppressions.clear();state.serviceItems=groupWorshipElements(db.sections,db.elements);
-    renderPresenterControlState=()=>{};publishPresenterState=()=>{};state.presenter.serviceId=sid;state.presenter.sourceSignature='';state.presenter.slides=[];await MindexSongTiming.ready;
+    renderPresenterControlState=()=>{};publishPresenterState=()=>{};state.presenter.serviceId=sid;state.presenter.sourceSignature='';state.presenter.slides=[];
     const slides=presenterSlidesForService(sid),p=MindexSongTiming.pagesFor(slides);
     if(JSON.stringify(p.map(s=>s.syncTimeline?.start))!=='[2,6,10]')throw Error('fresh device lost timing');
     if(JSON.stringify(p.map(s=>s.syncTimeline?.lead))!=='[1,0,1]')throw Error('lead');

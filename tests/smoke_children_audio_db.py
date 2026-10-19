@@ -15,7 +15,7 @@ fixture=r'''async()=>{
  renderPresenterControlState=()=>{};publishPresenterState=()=>{};
  window.originalItems=JSON.stringify(state.serviceItems);window.db={id:song.versions[0].id,lyric_signature:'fixture-signature',audio_set:null};window.uploads=0;window.failSave=false;
  state.client={storage:{from(){return {upload:async()=>{uploads++;return {error:null}},getPublicUrl:()=>({data:{publicUrl:location.origin+'/clock.wav'}})}}},from(table){if(table!=='mindex_song_versions')throw Error('wrong owner '+table);let patch=null,filters=[];const q={update(p){if(Object.keys(p).join()!=='audio_set')throw Error('wrong fields');patch=p;return q},eq(k,v){filters.push([k,v]);return q},is(k,v){filters.push([k,v]);return q},async select(){if(failSave)return {error:{message:'injected save failure'}};if(!filters.every(([k,v])=>(k==='audio_set'&&v!==null?JSON.stringify(db[k]):db[k])===v))return {data:[]};Object.assign(db,patch);return {data:[structuredClone(db)]}}};return q;}};
- await MindexSongTiming.ready;
+
  return {sid,song:structuredClone(song),item:structuredClone(item)};
 }'''
 class AudioFixtureHandler(MindexSmokeHandler):

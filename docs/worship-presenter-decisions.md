@@ -3539,3 +3539,16 @@ bytes and read back the saved attachment; keep legacy originals. The audited
 production MR already has public timing, but eight of nineteen cues differ from
 the retained legacy copy. Its public file passes independent SHA-256 validation;
 no operational timing replacement was made during this audit.
+
+## Retire legacy audio runtime ·2026-10-19
+
+User authorized retirement after current public attachments were verified. Public
+version audio_set and worship audioAsset/audioTiming are now the only active
+sources. Removed IndexedDB initialization/import, private profile manifest reads
+and writes, memo.childrenAudioSets fallback, portable binary sharing and the
+legacy-link dialog. Earlier local-profile descriptions above are historical.
+Retained original stores/files are recovery evidence only; no data deletion or
+operational row rewrite is part of this release. Current version CAS, atomic
+worship saves, lyric validation, P/R and photo/beat controls remain unchanged.
+DB-only tests reject any legacy store access and exercise both current sources;
+current DB browser suites supersede the retired local-profile smoke scripts.
