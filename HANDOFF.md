@@ -1091,8 +1091,10 @@ Linux36+49 and Pages run39195317576 success;24 public assets match exact source.
 Safari7 session entries migrated/read back before Mac lock. Existing Chrome
 migrated38 entries and1 legacy audio profile; next reload restores server values
 with0 new migrations/38 retained,1 audio profile, no read error/pending/dirty edit.
-Originals remain. Unopened devices migrate on their next app visit. Safari's
-post-deploy UI reload was blocked by Mac lock; audio physical playback and an
-independent remote audio digest comparison are not claimed. Completion receipt:
+Originals remain. Unopened devices migrate on their next app visit. After user
+unlock, Safari post-deploy reload also passed: ready,0 new/7 retained,0 archive,
+0 audio profiles, no audio read error or pending save; actual home UI restored.
+Audio physical playback and independent remote audio digest comparison are not
+claimed. Completion receipt:
 docs/server-state-verification-20261019.json. Unrelated AGENTS/fullscreen edits
 remain untouched. This completion record is maintained on the task branch.

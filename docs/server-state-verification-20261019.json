@@ -48,7 +48,6 @@
   },
   "notPerformed": [
     "migration of unopened browsers/other devices (automatic on next app load)",
-    "Safari post-deploy UI reload (Mac locked; pre-deploy data migration/readback completed)",
     "independent download/hash comparison of Chrome uploaded legacy audio",
     "physical PA/native fullscreen verification"
   ],
@@ -64,7 +63,18 @@
       "audioProfiles": 0,
       "readbackMatches": true,
       "originalsIntact": true,
-      "failed": 0
+      "failed": 0,
+      "postDeployReload": {
+        "release": "20261019-source-metadata-guard",
+        "ready": true,
+        "migrated": 0,
+        "retained": 7,
+        "archived": 0,
+        "audioProfiles": 0,
+        "audioReadError": false,
+        "booting": false,
+        "pending": false
+      }
     },
     "chrome": {
       "entries": 38,
