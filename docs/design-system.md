@@ -157,3 +157,9 @@ Reference view/editor and background-management card utilities use a neutral
 field surface with a visible border at rest, stronger hover and 5px action gaps.
 Keep existing target sizes, danger/disabled semantics and focus outlines.
 Scope this to those card toolbars; navigation links and output are unchanged.
+
+Reference group tools, version management and lyric block tools follow the same
+card-utility surface/border/hover rule. Do not dim entire lyric toolbars; only
+disabled controls are muted. Version deletion remains danger-colored at rest.
+Selectable version/linked lyric cards use the shared 2px accent focus outline,
+while preserving whole-card selection and all existing action handlers.
