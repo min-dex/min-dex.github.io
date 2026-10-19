@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261019-editor-fields",
+  "version": "20261019-controller-group-fill",
   "options": {
     "compress": false,
     "mangle": {

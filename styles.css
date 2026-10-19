@@ -7479,7 +7479,7 @@ textarea.svc-presenter-input-control--multiline {
   align-items: center;
   border: 0;
   border-radius: calc(var(--r) - 1px);
-  background: color-mix(in srgb, var(--panel-2) 42%, transparent);
+  background: transparent;
   color: var(--ink-2);
   cursor: pointer;
   font: inherit;
@@ -7488,7 +7488,7 @@ textarea.svc-presenter-input-control--multiline {
   letter-spacing: 0;
   line-height: 18px;
   overflow: hidden;
-  padding: 0 6px;
+  padding: 0;
   text-align: right;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -7501,18 +7501,18 @@ textarea.svc-presenter-input-control--multiline {
 .svc-board-slide-block[data-form-color="4"] { --form-color: #587ed2; }
 .svc-board-slide-block[data-form-color="5"] { --form-color: #b864b5; }
 .svc-slide-form-badge[data-form-type] {
-  background: color-mix(in srgb, var(--form-color, #6b7280) 30%, var(--panel));
+  background: transparent;
   box-shadow: none;
   color: var(--ink-2);
-  padding: 0 7px;
+  padding: 0;
 }
 .svc-slide-form-badge[data-form-type]:is(:hover, :focus-visible) {
-  background: color-mix(in srgb, var(--form-color, #6b7280) 40%, var(--panel));
+  background: transparent;
   color: var(--ink);
 }
 .svc-slide-form-badge:hover,
 .svc-slide-form-badge:focus-visible {
-  background: color-mix(in srgb, var(--accent) 20%, var(--panel-2));
+  background: transparent;
   color: var(--ink);
 }
 .svc-slide-form-badge:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -9210,4 +9210,9 @@ body[data-module="presenter"] .topbar-actions > .icon-btn { flex: 0 0 35px; widt
   .presenter-section-editor-add .reference-new-btn:hover { background: var(--ui-surface-field); }
   .presenter-section-editor-item:hover,
   .presenter-section-editor-item:focus-within { background: var(--ui-surface-panel); }
+}
+
+/* Color belongs to the entire form group; labels remain plain text. */
+.svc-board-slide-block[data-form-color] > .svc-board-block-background {
+  background: color-mix(in srgb, var(--form-color) 20%, var(--ui-surface-panel));
 }
