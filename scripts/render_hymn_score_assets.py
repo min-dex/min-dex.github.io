@@ -17,7 +17,8 @@ from PIL import Image
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_SOURCE_DIR = Path(os.environ.get("MINDEX_HYMN_SCORE_SOURCE_DIR", ROOT / "[external references]" / "hymn-scores"))
+SOURCE_DIR_SETTING = os.environ.get("MINDEX_HYMN_SCORE_SOURCE_DIR", "").strip()
+DEFAULT_SOURCE_DIR = Path(SOURCE_DIR_SETTING) if SOURCE_DIR_SETTING else None
 DEFAULT_MANIFEST = ROOT / "assets/hymn-scores/manifest.json"
 DEFAULT_CACHE_DIR = ROOT / ".cache/hymn-score-native"
 DEFAULT_OUTPUT_SIZE = (1920, 1080)
@@ -389,7 +390,9 @@ def main() -> int:
         description="Render hymn score assets from native PowerPoint exports or source PPTX decks."
     )
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
-    parser.add_argument("--source-dir", type=Path, default=DEFAULT_SOURCE_DIR)
+    parser.add_argument("--source-dir", type=Path, default=DEFAULT_SOURCE_DIR,
+                        required=DEFAULT_SOURCE_DIR is None,
+                        help="Source PPTX directory; alternatively set MINDEX_HYMN_SCORE_SOURCE_DIR.")
     parser.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE_DIR)
     parser.add_argument("--format", default="webp", choices=["png", "webp"])
     parser.add_argument("--quality", type=int, default=92)

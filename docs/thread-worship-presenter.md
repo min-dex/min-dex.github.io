@@ -233,6 +233,9 @@ decisions. Use [current decisions](worship-presenter-decisions.md),
   asset source. Prefer PowerPoint-exported `Slide*.png` folders with
   `render_hymn_score_assets.py --exported-slide-dir`; if those are unavailable,
   the script can fall back to LibreOffice PDF export plus Poppler page rendering.
+  Supply `--source-dir` or `MINDEX_HYMN_SCORE_SOURCE_DIR` explicitly; no local
+  reference-folder default is assumed. This generation tool is separate from
+  the already generated score assets used by the app.
   It no longer reconstructs PPT text boxes with PIL, which avoids broken label
   weight, transparency, and layout drift in score slides.
 - Worship authoring and Presenter control are now separate topbar modules.
