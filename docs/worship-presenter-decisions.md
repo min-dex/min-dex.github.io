@@ -3456,8 +3456,10 @@ numbers on the right, including unlabeled slides. Numbers retain their size,
 weight and theme contrast and never shrink under long references. Output is unchanged.
 
 Controller whole-group backgrounds use occurrence order within each song: muted
-red, yellow, green, cyan, blue, magenta, repeating after six blocks, mixed at 20%
-with the panel surface. Form type no longer determines color. Form and scripture
+red, yellow, green, cyan, blue, magenta, repeating after six blocks, mixed at 30%
+with the panel surface and a three-pixel inset top rule in the full group color.
+Green uses deep green and cyan uses sky blue to remain distinct beside chroma-key
+slide previews in both themes. The inset rule never changes grid geometry. Form type no longer determines color. Form and scripture
 labels are plain text without local fills, including hover; keyboard focus remains.
 Scripture range groups use the same six-color occurrence cycle within each scripture
 element, keeping continuation pages and wrapped row fragments the same color.
