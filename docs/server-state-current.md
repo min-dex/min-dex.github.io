@@ -247,3 +247,11 @@ Post-deploy21 changed root JS/JSON/HTML/CSS assets match local source exactly.
 Merged draft handoff smoke passed Chromium/WebKit and runtime hash gate passed.
 Safari was not accessed after the user's restriction. The0byte folder marker
 remains deferred; no fresh live-browser or physical audio check is claimed.
+
+### Empty marker cleanup completed
+
+The user authorized Safari for this deletion only. Deleted the empty song-timing
+folder through Supabase Storage on2026-10-19. After deletion and explicit Reload,
+the bucket root lists legacy-import-20261016, services, shared and song-audio;
+song-timing is absent. This completes the previously deferred0byte marker cleanup.
+No other folders or current operational audio were changed. No redeploy required.
