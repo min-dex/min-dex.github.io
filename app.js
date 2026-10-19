@@ -212,7 +212,7 @@ const TITLE_COLLATOR = new Intl.Collator("ko-KR", {
 });
 
 const HANGUL_INITIALS = ["ㄱ", "ㄲ", "ㄴ", "ㄷ", "ㄸ", "ㄹ", "ㅁ", "ㅂ", "ㅃ", "ㅅ", "ㅆ", "ㅇ", "ㅈ", "ㅉ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ"];
-const CONTENT_MODULES = ["service", "presenter", "bulletin", "scripture", "praise", "calendar", "references", "manuals", "setlists"];
+const CONTENT_MODULES = ["service", "presenter", "bulletin", "scripture", "praise", "operations", "calendar", "references", "manuals", "setlists"];
 const ROUTE_MODULES = ["home", ...CONTENT_MODULES];
 const SERVICE_FILTERS = ["all", "public", "ministry", "special"];
 const PRAISE_LIST_FILTERS = [
@@ -338,6 +338,7 @@ const {
   SUPABASE_PAGE_SIZE,
   UI_SCRIPTURE_PREFIX,
   UI_VERSE_SLOTS,
+  UI_VERSE_DEFAULTS,
   LOADING_MESSAGE,
   CONNECTION_LIST_TITLE,
   DB_CONNECTION_EMPTY_VERSE,
@@ -860,7 +861,7 @@ function isServiceDataModule(moduleName = state.module) {
 }
 
 function isOperationsModule(moduleName = state.module) {
-  return ["calendar", "references", "manuals", "setlists"].includes(moduleName);
+  return ["operations", "calendar", "references", "manuals", "setlists"].includes(moduleName);
 }
 
 const OPERATIONS_MODULES = [
@@ -2950,9 +2951,6 @@ async function switchModule(moduleName, options = {}) {
     state.selectedServiceTypeId = SERVICE_SETLIST_ARCHIVE_PANEL_ID;
     state.selectedServiceId = null;
     state.selectedServiceItemIndex = null;
-  }
-  if (moduleName === "service" && !state.selectedServiceId) {
-    state.selectedServiceTypeId = SERVICE_WEEK_PANEL_ID;
   }
   if (moduleName === "calendar") {
     state.calendarScrollTargetMonth = toLocalDateStr(new Date()).slice(0, 7);
@@ -14204,6 +14202,7 @@ function currentPageTabTitle() {
     return song ? songListView(song).title || song.title || "찬양" : "찬양";
   }
   if (state.module === "setlists") return SERVICE_SETLIST_ARCHIVE_PANEL_TITLE;
+  if (state.module === "operations") return "운영";
   if (state.module === "calendar") return "교회력";
   if (state.module === "references") return "참고자료";
   if (state.module === "manuals") return "예배 매뉴얼";
@@ -14288,6 +14287,7 @@ function pageTabTitleForSnapshot(snapshot = {}) {
     return song ? songListView(song).title || song.title || "찬양" : "찬양";
   }
   if (moduleName === "setlists") return SERVICE_SETLIST_ARCHIVE_PANEL_TITLE;
+  if (moduleName === "operations") return "운영";
   if (moduleName === "calendar") return "교회력";
   if (moduleName === "references") return "참고자료";
   if (moduleName === "manuals") return "예배 매뉴얼";
@@ -14541,37 +14541,24 @@ function renderNavigationSidebarState() {
 }
 
 async function handleNavigationRailClick(button) {
-  const moduleName = button.dataset.homeModule;
-  if (moduleName === "bulletin") {
-    if (state.module === "bulletin") return;
-    await applyBrowserHistorySnapshot({...currentBrowserHistorySnapshot(), module:"bulletin", search:"",
-      selectedServiceId:null, presenterBulletinServiceId:null});
-    syncBrowserHistory();
-    return;
-  }
+  const moduleName = button.hasAttribute("data-operations-nav") ? "operations" : button.dataset.homeModule;
   if (moduleName === "home") {
     await goHome();
     return;
   }
-  if (moduleName === "service") {
+  if (["service", "bulletin", "praise", "scripture", "operations"].includes(moduleName)) {
     if (!(await confirmSaveBeforeLeaving())) return;
     saveCurrentListScroll();
-    state.module = "service";
-    state.selectedServiceTypeId = SERVICE_WEEK_PANEL_ID;
-    state.selectedServiceId = null;
-    state.selectedServiceItemIndex = null;
     state.newServiceForm = null;
-    state.search = "";
-    refs.searchInput.value = "";
-    clearBibleTextSearch();
+    state.metadataPopupOpen = false;
     clearDirtyState();
-    persistUiState();
-    render();
+    await applyBrowserHistorySnapshot({
+      ...homePageTabSnapshot(),
+      module: moduleName,
+      selectedBibleTranslationId: state.selectedBibleTranslationId,
+    });
+    if (refs.detailPane) refs.detailPane.scrollTop = 0;
     syncBrowserHistory();
-    return;
-  }
-  if (button.hasAttribute("data-operations-nav")) {
-    await switchModule("calendar");
     return;
   }
   await switchModule(moduleName);
@@ -14603,7 +14590,7 @@ function renderBulletinDetail() {
   if (!state.serviceTypes.length) {refs.detailPane.innerHTML=renderLoadingDetail();return;}
   const service=state.services.find(s=>s.id===state.presenterBulletinServiceId);
   if (service && serviceSupportsBulletin(service)) {mountServiceBulletinWorkbench(service);refreshIcons();return;}
-  refs.detailPane.innerHTML='<div class="empty-state"><h2>주보</h2><p>왼쪽 목록에서 주보를 선택해 주세요.</p></div>';
+  refs.detailPane.innerHTML=renderModuleEmptyDetail("bulletin", "주보", "왼쪽 목록에서 주보를 선택해 주세요.");
 }
 
 const bulletinTabSessions = new Map();
@@ -15496,7 +15483,7 @@ function renderSearchResultsForCurrentModule() {
   }
   if (isServiceDataModule()) return;
   if (state.module === "home") renderDetail();
-  if (state.module === "calendar") renderDetail();
+  if (["operations", "calendar"].includes(state.module)) renderDetail();
   if (state.module === "scripture") renderDetail();
   if (state.module === "references") renderDetail();
   if (state.module === "manuals") renderDetail();
@@ -15526,13 +15513,13 @@ function renderSongList() {
     return;
   }
 
-  if (state.connectionError && !["calendar", "references", "manuals", "setlists"].includes(state.module)) {
+  if (state.connectionError && !isOperationsModule()) {
     refs.songCount.textContent = "";
     refs.songList.innerHTML = renderConnectionList(state.connectionError);
     return;
   }
 
-  if (["calendar", "references", "manuals", "setlists"].includes(state.module)) {
+  if (isOperationsModule()) {
     renderModuleSidebarContext();
     return;
   }
@@ -16059,8 +16046,8 @@ function renderWorshipBackgroundStatus(fileName) {
   return `<span class="background-status missing">없음</span>`;
 }
 
-function renderHomeVerseText(text, options = {}) {
-  return splitHomeVerseLines(text, options)
+function renderHomeVerseText(text) {
+  return splitHomeVerseLines(text)
     .map((line) => escapeHtml(line))
     .join("<br />");
 }
@@ -16143,7 +16130,7 @@ function renderModuleEmptyDetail(slot, title, fallback) {
   const verse = moduleUiVerse(slot);
   const verseHtml = verse?.text
     ? `
-          <p class="empty-verse">${renderHomeVerseText(verse.text, { breakAtComma: slot === "scripture" })}</p>
+          <p class="empty-verse">${renderHomeVerseText(verse.text)}</p>
           ${verse.reference ? `<span>${escapeHtml(verse.reference)}</span>` : ""}
       `
     : `
@@ -16161,7 +16148,7 @@ function renderModuleEmptyDetail(slot, title, fallback) {
 
 function moduleUiVerse(slot) {
   const verses = state.uiVerses[slot] || [];
-  return verses[0] || null;
+  return verses[0] || UI_VERSE_DEFAULTS[slot] || null;
 }
 
 function extractUiVerses(scriptures) {
@@ -16184,12 +16171,12 @@ function uiVerseSlot(scripture) {
   return UI_VERSE_SLOTS.includes(rawSlot) ? rawSlot : "";
 }
 
-function splitHomeVerseLines(text, options = {}) {
+function splitHomeVerseLines(text) {
   const normalized = String(text || "").replace(/\s+/g, " ").trim();
   if (!normalized) return [""];
-  const maxLineLength = 56;
+  const maxLineLength = 45;
   const punctuationSegments = normalized
-    .match(options.breakAtComma ? /[^,;.?!:]+[,;.?!:]?/g : /[^;.?!:]+[;.?!:]?/g)
+    .match(/[^;.?!:]+[;.?!:]?/g)
     ?.map((segment) => segment.trim())
     .filter(Boolean) || [normalized];
 
@@ -16374,6 +16361,7 @@ function getListScrollKey() {
   if (state.module === "scripture") return `scripture:${state.scriptureFilter}:${search}`;
   if (state.module === "service") return `service:${state.serviceFilter}:${search}`;
   if (state.module === "presenter") return `presenter:${search}`;
+  if (state.module === "operations") return `operations:${search}`;
   if (state.module === "calendar") return `calendar:${search}`;
   if (state.module === "references") return `references:${search}`;
   if (state.module === "manuals") return "manuals";
@@ -16452,7 +16440,7 @@ function renderDetail() {
     return;
   }
 
-  if (isGlobalSearchActive() && ["home", "calendar", "manuals"].includes(state.module)) {
+  if (isGlobalSearchActive() && ["home", "operations", "calendar", "manuals"].includes(state.module)) {
     renderHomeSearchDetail();
     return;
   }
@@ -16484,6 +16472,10 @@ function renderDetail() {
   }
   if (state.module === "presenter") {
     renderPresenterDetail();
+    return;
+  }
+  if (state.module === "operations") {
+    refs.detailPane.innerHTML = renderModuleEmptyDetail("operations", "운영", "");
     return;
   }
   if (state.module === "calendar") {
@@ -19817,7 +19809,7 @@ function hasDirtyChanges({ reconcile = false } = {}) {
 function currentSaveButtonState() {
   if (state.module === "bulletin") return {label:"주보 저장",dirty:Boolean(refs.detailPane?.querySelector("[data-bulletin-save]:not(:disabled)")),available:Boolean(refs.detailPane?.querySelector(".bulletin-workbench"))};
   if (state.saving) return { label: "저장 중", dirty: true, available: true, busy: true };
-  if (state.module === "home") return { label: "저장", dirty: false, available: false };
+  if (["home", "operations"].includes(state.module)) return { label: "저장", dirty: false, available: false };
   if (state.module === "calendar") return { label: "교회력 자동 저장", dirty: false, available: false };
   if (state.module === "manuals") return { label: "예배 매뉴얼은 자동 저장됩니다", dirty: false, available: false };
   if (state.module === "references") return { label: "참고자료 저장", dirty: state.dirty.references, available: true };
@@ -19924,7 +19916,7 @@ async function confirmSaveBeforeLeaving() {
 function updateSaveState() {
   if (!window.MINDEX_EDITOR_DRAFTS?.restoring) window.MINDEX_EDITOR_DRAFTS?.capture();
   syncSaveButtonChrome();
-  if (state.module === "home" || state.module === "calendar" || state.module === "manuals") {
+  if (["home", "operations", "calendar", "manuals"].includes(state.module)) {
     renderConnectionStatus();
     return;
   }
@@ -24897,8 +24889,7 @@ function renderServiceDetail() {
   }
 
   if (!state.selectedServiceTypeId) {
-    state.selectedServiceTypeId = SERVICE_WEEK_PANEL_ID;
-    renderServiceDashboard({ title: SERVICE_WEEK_PANEL_TITLE });
+    refs.detailPane.innerHTML = renderModuleEmptyDetail("service", "예배", "");
     return;
   }
 
