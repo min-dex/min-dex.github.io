@@ -3539,3 +3539,10 @@ bytes and read back the saved attachment; keep legacy originals. The audited
 production MR already has public timing, but eight of nineteen cues differ from
 the retained legacy copy. Its public file passes independent SHA-256 validation;
 no operational timing replacement was made during this audit.
+
+Inline controller editors have no large panel fill or outer padding. Their row
+and toolbar gaps are 5px. Text fields, selects and textareas use transparent
+backgrounds and a bottom rule, with a complete accent border on focus and the
+existing 2px keyboard focus outline. Select arrows, invalid/disabled states,
+buttons, automatic textarea heights and output rendering remain intact. This
+exception applies only inside servicePresenterControls subgroup editors.

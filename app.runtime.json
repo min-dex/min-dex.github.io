@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261019-draft-handoff",
+  "version": "20261019-unboxed-editors",
   "options": {
     "compress": false,
     "mangle": {

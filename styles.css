@@ -9222,3 +9222,38 @@ body[data-module="presenter"] .topbar-actions > .icon-btn { flex: 0 0 35px; widt
 
 .draft-handoff-dialog{width:min(620px,calc(100vw - 32px));max-height:85vh;overflow:auto;border:1px solid var(--border);border-radius:12px;padding:24px;background:var(--panel);color:var(--text)}
 .draft-handoff-dialog .btn{margin:4px}.draft-handoff-dialog textarea{display:block;width:100%;min-height:72px;margin:12px 0}.draft-handoff-list>div{padding:12px 0;border-bottom:1px solid var(--border)}
+
+/* Inline worship editors: compact, unboxed fields; preserve native controls. */
+@media screen {
+  #servicePresenterControls .svc-board-subgroup-controls {
+    background: transparent;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    gap: 5px;
+  }
+  #servicePresenterControls .svc-board-subgroup-control-item,
+  #servicePresenterControls .svc-board-subgroup-flow { gap: 5px; }
+  #servicePresenterControls .svc-board-subgroup-controls :is(
+    input:not([type]), input[type="text"], input[type="url"], input[type="number"], select, textarea
+  ):not(.is-invalid):not([aria-invalid="true"]) {
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-bottom-color: var(--line-2);
+    border-radius: 0;
+    box-shadow: none;
+    padding-inline: 5px;
+  }
+  #servicePresenterControls .svc-board-subgroup-controls select { padding-right: 25px; }
+  #servicePresenterControls .svc-board-subgroup-controls textarea { padding-block: 5px; }
+  #servicePresenterControls .svc-board-subgroup-controls :is(
+    input:not([type]), input[type="text"], input[type="url"], input[type="number"], select, textarea
+  ):not(.is-invalid):not([aria-invalid="true"]):focus {
+    border-color: var(--accent);
+    border-radius: var(--r);
+  }
+  #servicePresenterControls .svc-board-subgroup-controls :is(input, select, textarea):focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
