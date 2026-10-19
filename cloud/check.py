@@ -39,7 +39,6 @@ NODE_TESTS = (
     "test_setlist_archive_loading.cjs",
     "test_song_timing.cjs",
     "test_independent_photo_timing.cjs",
-    "test_children_library.cjs",
     "test_children_version_audio.cjs",
     "test_scripture_preload_parallel.cjs",
     "test_worship_unchanged_save.mjs",

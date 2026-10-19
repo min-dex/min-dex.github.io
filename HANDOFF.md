@@ -1098,3 +1098,11 @@ Audio physical playback and independent remote audio digest comparison are not
 claimed. Completion receipt:
 docs/server-state-verification-20261019.json. Unrelated AGENTS/fullscreen edits
 remain untouched. This completion record is maintained on the task branch.
+
+## Children audio completion and presenter ideas · 2026-10-20
+
+Current scope is `docs/children-audio-status.md`. Device-independent remote control
+and a switchable focused presenter view are ideas only in `docs/presenter-control-ideas.md`.
+Bible page numbers and whole-service PNG export are excluded. Retired the unused
+folder import adapter and its dedicated test; existing version/occurrence audio
+and source evidence remain intact. Downloads originals are outside this cleanup.

@@ -1,5 +1,13 @@
 # MINDEX Current
 
+## Children audio completion · 2026-10-20
+
+Core integration is complete. Bible page numbers and whole-service PNG export
+are excluded. Device-independent remote control, a focused presenter view,
+sequence-linked audio/lighting and integrated video/caption/broadcast remain
+future ideas only. See `docs/children-audio-status.md` and `docs/presenter-control-ideas.md`.
+
+
 - Lifecycle: `active`; HQ inventory identity verified on `2026-09-24`.
 - Product identity: independent church operations product; not governed by the EX design family.
 - Read first: `HANDOFF.md`, then the relevant contract and owner report.
