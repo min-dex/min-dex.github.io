@@ -255,3 +255,6 @@ folder through Supabase Storage on2026-10-19. After deletion and explicit Reload
 the bucket root lists legacy-import-20261016, services, shared and song-audio;
 song-timing is absent. This completes the previously deferred0byte marker cleanup.
 No other folders or current operational audio were changed. No redeploy required.
+
+복구 버튼의 표시 이름은 `임시 저장본 복구`이며 확인·완료·오류 안내도 같은
+용어를 사용한다. 저장 키, 복구 조건, 확인 절차와 명시적 저장 동작은 그대로다.

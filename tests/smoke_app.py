@@ -4258,13 +4258,13 @@ def main() -> int:
                             {"type": "scripture_body", "label": "인용 구절", "outputMode": ""},
                         ]
                         and template_terms["sundayPublicScaffold"]["afternoon"]["offeringElements"] == [
-                            {"type": "praise", "label": "봉헌찬송", "outputMode": "score", "hidden": True},
-                            {"type": "title_person", "label": "봉헌기도", "outputMode": "", "hidden": True},
+                            {"type": "praise", "label": "봉헌찬송", "outputMode": "score"},
+                            {"type": "title_person", "label": "봉헌기도", "outputMode": ""},
                         ]
                         and template_terms["sundayPublicScaffold"]["afternoon"]["hiddenContentStates"] == [
-                            {"sectionKey": "special_song", "label": "특송", "hidden": True, "state": "filled", "reason": "hidden_in_presentation", "required": False},
-                            {"sectionKey": "offering", "label": "봉헌찬송", "hidden": True, "state": "filled", "reason": "hidden_in_presentation", "required": False},
-                            {"sectionKey": "offering", "label": "봉헌기도", "hidden": True, "state": "filled", "reason": "hidden_in_presentation", "required": False},
+                            {"sectionKey": "special_song", "label": "특송", "hidden": False, "state": "missing", "reason": "song_empty", "required": True},
+                            {"sectionKey": "offering", "label": "봉헌찬송", "hidden": False, "state": "missing", "reason": "song_empty", "required": True},
+                            {"sectionKey": "offering", "label": "봉헌기도", "hidden": False, "state": "missing", "reason": "assignee_empty", "required": True},
                         ]
                         and template_terms["sundayPublicScaffold"]["afternoon"]["sendingElements"] == [
                             {"type": "praise", "label": "송영", "outputMode": "score"},

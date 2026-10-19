@@ -238,32 +238,11 @@ function updateServiceMetaField(field) {
     }
     service.leader = field.value;
     service.praiseLeader = field.value;
-  } else if (key === "dedication") {
-    const enabled = Boolean(field.checked);
-    service._worshipSourceRef = {
-      ...(service._worshipSourceRef && typeof service._worshipSourceRef === "object" ? service._worshipSourceRef : {}),
-      dedication_service: enabled,
-    };
-    syncSundayAfternoonDedicationSlots(service.id, enabled);
   }
   state.dirty.service = true;
   markServiceStructureDirty(service.id);
   refreshPresenterForService(service.id);
   updateSaveState();
-}
-
-function syncSundayAfternoonDedicationSlots(serviceId, enabled) {
-  const service = state.services.find((candidate) => candidate.id === serviceId);
-  if (worshipAppServiceTypeId(service?.type_id) !== "sunday-afternoon") return;
-  const dedicationSections = new Set(["special_song", "offering"]);
-  const items = getServiceItems(serviceId);
-  items.forEach((item) => {
-    if (!dedicationSections.has(String(item._worshipSectionKey || "").trim())) return;
-    const memo = parseServiceItemMemo(item.memo);
-    memo.hiddenInPresentation = !enabled;
-    item.memo = serializeServiceItemMemo(memo);
-  });
-  state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(items);
 }
 
 function updateNewServiceFormField(field) {

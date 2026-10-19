@@ -19,7 +19,6 @@ const extractedHandlers = [
   'handleServiceItemDetailClick',
   'handleServiceNavigationDetailClick',
   'updateServiceMetaField',
-  'syncSundayAfternoonDedicationSlots',
   'updateNewServiceFormField',
   'updateServiceItemField',
   'applyServiceItemMetadataField',
