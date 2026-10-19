@@ -609,3 +609,13 @@ NIV source checks: [Psalm95:6](https://www.biblegateway.com/passage/?search=Psal
 
 Built-in verse defaults apply to normal landing/empty views. Unavailable/read-error
 views retain their existing message or stored UI verse; defaults cannot hide a new error.
+
+
+### Static shell icons and announcement labels · 2026-10-20
+
+Normal app startup hydrates static shell icons after caching DOM refs, without
+depending on a later detail renderer. Restored and empty tabs retain icons on
+reload. Presenter output uses its existing separate initialization.
+Announcement editor disclosure reads 상하단 문구; fields read 상단 / 하단,
+including accessible labels. Stored content and output remain unchanged.
+Coverage: tests/smoke_shell_icons.py (offline Chromium/WebKit).

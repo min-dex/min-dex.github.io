@@ -1115,3 +1115,13 @@ and a switchable focused presenter view are ideas only in `docs/presenter-contro
 Bible page numbers and whole-service PNG export are excluded. Retired the unused
 folder import adapter and its dedicated test; existing version/occurrence audio
 and source evidence remain intact. Downloads originals are outside this cleanup.
+
+
+## Static shell icons and announcement labels · 2026-10-20
+
+- Hydrate static app-shell icons once at normal init, before initial module render;
+  empty/restored modules no longer rely on an unrelated global icon refresh.
+- Announcement disclosure/field labels: 상하단 문구 / 상단 / 하단 (aria labels too).
+- Scoped Chromium/WebKit initial/reload checks pass for Scripture/Praise/Service.
+  Compiled release screenshots and isolated announcement fields verified in both.
+- No production records, music, presenter output or bulletin printing changed.
