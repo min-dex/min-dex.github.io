@@ -8810,7 +8810,7 @@ body[data-module="praise"] .praise-forms-panel .form-block:not(.needs-review) { 
 .praise-forms-panel .form-head { flex-wrap: wrap; gap: 10px; }
 body[data-module="praise"] .praise-forms-panel .form-meta { gap: 5px; }
 .praise-forms-panel .form-type-select { min-width: 110px; }
-.praise-forms-panel .form-variant-input { width: 30px; min-width: 30px; }
+.praise-forms-panel .form-variant-input { width: 40px; min-width: 40px; }
 .praise-forms-panel .form-actions { margin-left: auto; opacity: 1; gap: 5px; }
 .praise-forms-panel .form-preview-text, .praise-forms-panel .form-textarea { font-size: 16px; line-height: 25px; font-weight: 500; padding: 10px; }
 .praise-forms-panel .form-preview-text { color: var(--ink-2); background: transparent; }

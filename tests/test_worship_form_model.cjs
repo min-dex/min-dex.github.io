@@ -17,7 +17,7 @@ for (const name of ['parseObjectPayload', 'firstNonBlankString']) {
 const model = fs.readFileSync(path.join(root, 'mindex.worship-model.js'), 'utf8');
 vm.runInContext(model, context);
 for (const name of ['normalizeServiceFormPreset','canonicalServiceFormToken','normalizeServiceFormPresetForms',
-  'collapseSingletonServiceFormPartNumbers','normalizeServiceFormHint','normalizeSongFormPresetLabel',
+  'normalizeServiceFormHint','normalizeSongFormPresetLabel',
   'songFormPresetDisplayLabel','normalizeSongMetadataPresenterForm','normalizeServiceFormPresetRules',
   'normalizeServiceFormPresetRulePreset']) {
   assert.equal([...model.matchAll(new RegExp(`^function ${name}\\(`, 'gm'))].length, 1);
@@ -55,10 +55,10 @@ assert.equal(context.normalizeServiceFormPreset(null), null);
 const metadata = context.normalizeSongMetadataPresenterForm({forms:['B'],sourceForms:['V1','V2','C'],sourceHint:'V1-V2-C'});
 assert.equal(metadata.forms.join('-'), 'V1-V2-C');
 assert.equal(metadata.strength, 'song-default');
-assert.equal(context.songFormPresetDisplayLabel('C@A'), 'Chorus @A');
+assert.equal(context.songFormPresetDisplayLabel('C@A'), 'Chorus @ A');
 console.log('PASS form defaults, manual preservation, singleton/variant/repeat identity, rule aliases and persistence round-trip');
 
-for (const [raw,shown] of [['C@','Chorus @'],['V1@','Verse 1 @'],['C@A','Chorus @A'],['Coda@','Coda @']]) {
+for (const [raw,shown] of [['C@','Chorus @'],['V1@','Verse 1 @'],['C@A','Chorus @ A'],['Coda@','Coda @']]) {
   assert.equal(context.songFormPresetDisplayLabel(raw),shown);
   assert.equal(context.normalizeSongFormPresetLabel(raw).key,context.normalizeSongFormPresetLabel(shown).key);
 }
@@ -66,4 +66,4 @@ for (const [raw,shown] of [['C@','Chorus @'],['V1@','Verse 1 @'],['C@A','Chorus 
 for (const hint of ['V2-C-V1-C','C-V1-C-V2','V1-C-C']) {
  assert.equal(context.normalizeServiceFormPreset(undefined,hint).forms.join('-'),context.normalizeServiceFormHint(hint));
 }
-assert.equal(context.normalizeServiceFormPreset({forms:['C','V1']},'V2-C').forms.join('-'),'C-V');
+assert.equal(context.normalizeServiceFormPreset({forms:['C','V1']},'V2-C').forms.join('-'),'C-V1');

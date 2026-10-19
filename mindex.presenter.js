@@ -1199,13 +1199,13 @@ function presenterGroupedLyricChunks(lyrics = "", target = {}) {
 }
 
 function presenterFormDisplayLabel(form = {}) {
-  if (form._presenterVirtual && form._presenterSourceFormId) return String(form.label || "").trim() || displayLabel(form);
+  if (form._presenterVirtual && form._presenterSourceFormId) return presenterFormPresetDisplayLabel(form.label) || String(form.label || "").trim() || displayLabel(form);
   if (form._presenterVirtual) return displayLabel(form);
-  return String(form.label || "").trim() || displayLabel(form);
+  return presenterFormPresetDisplayLabel(form.label) || String(form.label || "").trim() || displayLabel(form);
 }
 
 function normalizePresenterFormPresetLabel(value = "") {
-  const raw = String(value || "").trim();
+  const raw = canonicalServiceFormToken(value);
   const compact = compactSearchValue(raw);
   const lastVerse = /^(vl|마지막절|lastverse|last)$/i.test(compact);
   if (lastVerse) return { key: "last-verse", type: "verse", number: 0, lastVerse: true };
@@ -1313,7 +1313,7 @@ function presenterFormPresetDisplayLabel(value = "") {
   if (!raw) return "";
   const target = normalizePresenterFormPresetLabel(raw);
   const group = String(target.group || "").trim().toUpperCase();
-  const suffix = target.variant ? `${target.number ? ` ${target.number}` : ""} @${group}` : target.number ? ` ${target.number}${group ? ` ${group}` : ""}` : group ? ` ${group}` : "";
+  const suffix = target.variant ? `${target.number ? ` ${target.number}` : ""} @${group ? ` ${group}` : ""}` : target.number ? ` ${target.number}${group ? ` ${group}` : ""}` : group ? ` ${group}` : "";
   if (target.lastVerse) return "Last Verse";
   if (target.type === "verse") return `Verse${suffix}`;
   if (target.type === "chorus") return `Chorus${suffix}`;

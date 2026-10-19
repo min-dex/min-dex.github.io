@@ -3463,3 +3463,23 @@ Scripture group backgrounds stay neutral. Output colors are unchanged.
 Score pages without a new form marker continue the preceding verified form within
 the same element, using controller-entry metadata only. Unmarked leading pages
 remain ungrouped; never infer verse boundaries or rewrite score manifests.
+
+## Song-form spelling and identity · 2026-10-19
+
+- Full labels separate number, @ and group: `Verse 1 A`, `Verse 1 @ A`. Compact tokens remain `V1A`, `V1@A`. Case and spaces are accepted, including the trailing-@ alias `Verse1 a@` → `V1@A`.
+- Explicit numbers are preserved in input normalization, including a lone `V1`; normalization does not infer an unnumbered identity from occurrence counts. This does not migrate stored lyric blocks.
+- Hyphens delimit sequence items; whitespace never does. `v - c - c b - tags` becomes `V-C-CB-Tags`, whereas `C-B` is Chorus then Bridge. Legacy comma/arrow/plus separators remain accepted.
+- Unknown or ambiguous tokens such as `V1A@B` and whitespace-only sequences are preserved, never guessed or discarded; existing missing-form feedback reports unresolved targets. No operational records are rewritten.
+
+Normalization matrix (`Verse 1`, `Verse1`, `V1`, `verse 1`, `verse1`, `v1` each use every row; spaces may be omitted or repeated between suffix components):
+
+| Suffix input | Canonical suffix | Full suffix |
+| --- | --- | --- |
+| none | none | none |
+| `A`, `a` | `A` | ` A` |
+| `B`, `b` | `B` | ` B` |
+| `@` | `@` | ` @` |
+| `@A`, `@a`, `A@`, `a@` | `@A` | ` @ A` |
+| `@B`, `@b`, `B@`, `b@` | `@B` | ` @ B` |
+
+`tests/test_form_input_normalization.cjs` covers 396 spelling/spacing/suffix combinations plus ambiguous tokens, sequence boundaries and repeat preservation. The same aliases apply to Chorus, Pre-Chorus, Bridge and Coda.

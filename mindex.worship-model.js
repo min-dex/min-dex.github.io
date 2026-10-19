@@ -275,7 +275,11 @@ function normalizeServiceFormPreset(value, fallbackHint = "", fallbackStrength =
 }
 
 function canonicalServiceFormToken(value = "") {
-  const raw = String(value || "").trim();
+  // A trailing @ is an input alias, never a second sequence separator.
+  const raw = String(value || "").trim().replace(
+    /^(v|verse|c|chorus|pc|prechorus|pre-chorus|p-c|p\.c\.|b|bridge|coda|ending)\s*(\d*)\s*([a-z])\s*@$/i,
+    "$1$2@$3",
+  );
   const atVariant = raw.match(/^(v|verse|c|chorus|pc|prechorus|pre-chorus|p-c|p\.c\.|b|bridge|coda|ending)\s*(\d*)\s*@\s*([a-z])?$/i);
   if (atVariant) {
     const type = atVariant[1].toLowerCase();
@@ -318,30 +322,7 @@ function normalizeServiceFormPresetForms(value) {
     .split(/\s*(?:,|[-+>→])\s*/)
     .map(canonicalServiceFormToken)
     .filter(Boolean);
-  return collapseSingletonServiceFormPartNumbers(forms);
-}
-
-function collapseSingletonServiceFormPartNumbers(forms = []) {
-  const parts = forms.map((token) => {
-    const match = String(token || "").match(/^(V|C|PC|B)(\d+)([A-Z]?|@[A-Z]?)$/);
-    return match ? { token, prefix: match[1], number: Number(match[2]), suffix: match[3] || "" } : null;
-  });
-  const types = new Map();
-  parts.forEach((part) => {
-    if (!part) return;
-    const state = types.get(part.prefix) || { numbers: new Set(), hasVariant: false, count: 0 };
-    state.numbers.add(part.number);
-    state.count += 1;
-    if (part.suffix) state.hasVariant = true;
-    types.set(part.prefix, state);
-  });
-  return forms.map((token, index) => {
-    const part = parts[index];
-    const state = part && types.get(part.prefix);
-    return part && part.number === 1 && !part.suffix && !state.hasVariant && state.numbers.size === 1 && state.count === 1
-      ? part.prefix
-      : token;
-  });
+  return forms;
 }
 
 function normalizeServiceFormHint(value = "") {
@@ -349,7 +330,7 @@ function normalizeServiceFormHint(value = "") {
 }
 
 function normalizeSongFormPresetLabel(value = "") {
-  const raw = String(value || "").trim();
+  const raw = canonicalServiceFormToken(value);
   const compact = compactSearchValue(raw);
   if (/^(vl|마지막절|lastverse|last)$/i.test(compact)) return { key: "last-verse", type: "verse", number: 0, lastVerse: true };
   const atVariant = raw.match(/^(v|verse|c|chorus|후렴|pc|prechorus|pre-chorus|p-c|p\.c\.|b|bridge|coda|ending)\s*(\d*)\s*@\s*([a-z])?$/i);
@@ -420,7 +401,7 @@ function songFormPresetDisplayLabel(value = "") {
   const target = normalizeSongFormPresetLabel(raw);
   if (target.lastVerse) return "VL";
   const group = String(target.group || "").trim().toUpperCase();
-  const suffix = target.variant ? `${target.number ? ` ${target.number}` : ""} @${group}` : target.number ? ` ${target.number}${group ? ` ${group}` : ""}` : group ? ` ${group}` : "";
+  const suffix = target.variant ? `${target.number ? ` ${target.number}` : ""} @${group ? ` ${group}` : ""}` : target.number ? ` ${target.number}${group ? ` ${group}` : ""}` : group ? ` ${group}` : "";
   if (target.type === "verse") return `Verse${suffix}`;
   if (target.type === "chorus") return `Chorus${suffix}`;
   if (target.type === "bridge") return `Bridge${suffix}`;

@@ -18152,7 +18152,7 @@ function normalizeFormPartNumber(value = "") {
 }
 
 function normalizeFormPartVariant(value = "") {
-  const raw = String(value || "").trim().replace(/\s+/g, "");
+  const raw = String(value || "").trim().replace(/\s+/g, "").replace(/^([a-z])@$/i, "@$1");
   const atVariant = raw.match(/^@([a-z])?$/i);
   if (atVariant) return `@${String(atVariant[1] || "").toUpperCase()}`;
   const match = raw.match(/^[a-z]$/i);
@@ -18180,7 +18180,7 @@ function formPartLabelIdentity(value = "", partType = "") {
 function formatFormPartLabel(partType = "Lyrics", partNumber = null, partVariant = "") {
   const number = normalizeFormPartNumber(partNumber);
   const variant = normalizeFormPartVariant(partVariant);
-  if (variant.startsWith("@")) return `${partType}${number ? ` ${number}` : ""}${variant}`;
+  if (variant.startsWith("@")) return [partType, number || "", "@", variant.slice(1)].filter(Boolean).join(" ");
   return [partType, number || "", variant].filter(Boolean).join(" ");
 }
 

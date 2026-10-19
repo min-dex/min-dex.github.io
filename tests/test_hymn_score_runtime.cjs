@@ -44,6 +44,7 @@ Object.assign(context, {
   presenterScoreFormPresetLabels: item => item.labels || [],
   presenterFormDisplayLabel: form => form.label,
 });
+vm.runInContext(fs.readFileSync(path.join(__dirname, '../mindex.worship-model.js'), 'utf8'), context);
 for (const name of ['normalizePresenterFormPresetLabel', 'presenterFormTargetsMatch', 'presenterScoreImageSourcesForFormSequence']) {
   vm.runInContext(extractFunction(name), context);
 }
