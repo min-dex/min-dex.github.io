@@ -2007,6 +2007,25 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   cursor: default;
   opacity: .28;
 }
+/* Card utilities need a visible hit area even before hover. */
+:is(.reference-card-actions, .reference-editor-actions, .background-tile-actions) .icon-btn {
+  flex-shrink: 0;
+  border: 1px solid var(--line-2);
+}
+:is(.reference-card-actions, .reference-editor-actions, .background-tile-actions) .icon-btn:not(:disabled) {
+  background: var(--ui-surface-field);
+}
+:is(.reference-card-actions, .reference-editor-actions, .background-tile-actions) .icon-btn:not(:disabled):not(.danger) {
+  color: var(--ink-2);
+}
+:is(.reference-card-actions, .reference-editor-actions, .background-tile-actions) .icon-btn:not(:disabled):hover {
+  background: color-mix(in srgb, var(--ui-surface-field) 85%, var(--ink) 15%);
+}
+:is(.reference-card-actions, .reference-editor-actions, .background-tile-actions) .icon-btn.danger:not(:disabled) {
+  color: var(--danger);
+}
+.reference-card-actions, .reference-move-actions { gap: 5px; }
+
 .reference-active-toggle {
   display: inline-flex;
   align-items: center;

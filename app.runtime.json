@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261019-sidebar-summary-hierarchy",
+  "version": "20261019-card-utility-buttons",
   "options": {
     "compress": false,
     "mangle": {

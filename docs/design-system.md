@@ -152,3 +152,8 @@ danger-colored. This is appearance only: output lifecycle/data stay unchanged.
 Sidebar summary hierarchy: keep the 16/700 title, 12/500 date and 12/500 neutral
 temporal status. Today retains a 12/600 accent label in the same third row;
 status changes never move or resize the launch control.
+
+Reference view/editor and background-management card utilities use a neutral
+field surface with a visible border at rest, stronger hover and 5px action gaps.
+Keep existing target sizes, danger/disabled semantics and focus outlines.
+Scope this to those card toolbars; navigation links and output are unchanged.
