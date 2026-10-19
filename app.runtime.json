@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261019-form-spelling",
+  "version": "20261019-input-boundaries",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "794665fdf5cd6c08c30e7620981c1e6a965d99eb92f6c241e925f6244757652d",
-  "runtime_sha256": "6675bf45a617cf91ac59c35b97f0b8f57a85569826d6d8b0ddadd26bc03e2ce8",
-  "source_bytes": 1516057,
-  "runtime_bytes": 1072057,
-  "source_gzip": 339538,
-  "runtime_gzip": 265916
+  "source_sha256": "241f07785f64376d4462e9edf970db8e1a03c9278fc89ebaf7025aabeea7578a",
+  "runtime_sha256": "db32e615c19077098fa5730de549ebebeca068236e4c121deaa741e83932733a",
+  "source_bytes": 1511450,
+  "runtime_bytes": 1068384,
+  "source_gzip": 337733,
+  "runtime_gzip": 264056
 }

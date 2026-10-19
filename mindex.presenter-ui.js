@@ -75,7 +75,8 @@ function presenterLyricsSlidesForServiceItem({
       }];
     }
 
-    const chunks = splitPresenterLyricChunks(form.lyrics);
+    // Authored blank lines delimit slides; a paragraph is never padded to two lines.
+    const chunks = splitFreeShowParagraphs(form.lyrics);
     const formId = form._localId || form.id || formIndex;
     const formKey = `${formId}:${formIndex}`;
     return chunks.map((chunk, chunkIndex) => ({

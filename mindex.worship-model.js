@@ -484,3 +484,13 @@ function normalizeServiceMediaPlacement(value) {
   if (!parentItemId || !formKey || !signature) return null;
   return { parentItemId, formKey, signature };
 }
+
+// Lookup-only alias folding. Never use this key as user-visible or stored text.
+function resolveDomainAlias(value, aliases) {
+  const raw = String(value || "").normalize("NFKC").trim().toLowerCase();
+  if (Object.prototype.hasOwnProperty.call(aliases, raw)) return aliases[raw];
+  const compact = raw.replace(/[\s_-]+/g, "");
+  const key = Object.keys(aliases).find((candidate) =>
+    candidate.normalize("NFKC").toLowerCase().replace(/[\s_-]+/g, "") === compact);
+  return key === undefined ? "" : aliases[key];
+}
