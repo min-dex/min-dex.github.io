@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-module-landings",
+  "version": "20261020-module-landings-final",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "8fa759e95aff0eb1526e2739f84c22dc53885198745aa61afaf7369ca9a497b4",
-  "runtime_sha256": "44786a79be4a7d70209b521fbcd224bc7e04cb51ed33f009f2032ca160a8bebf",
-  "source_bytes": 1518070,
-  "runtime_bytes": 1073225,
-  "source_gzip": 339505,
-  "runtime_gzip": 265408
+  "source_sha256": "319d92ffe8a198a1ab67ebce4e605ab0cf5142cc704d22c0385eba6604f62211",
+  "runtime_sha256": "daf2d45401d5a178ade0efdc70f7354f71b10f88dec1da932a338bea6c9da5b2",
+  "source_bytes": 1518103,
+  "runtime_bytes": 1073252,
+  "source_gzip": 339524,
+  "runtime_gzip": 265422
 }

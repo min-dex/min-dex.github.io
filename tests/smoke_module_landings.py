@@ -68,6 +68,7 @@ try:
     for(const text of samples){const lines=splitHomeVerseLines(text);if(lines.some(l=>l.length>45))throw Error('line exceeds 45');if(lines.join(' ')!==text)throw Error('text changed')}
     if(splitHomeVerseLines('One\\nline, then another.').join(' ')!=='One line, then another.')throw Error('manual newline mode');
     if(splitHomeVerseLines('A short, complete phrase.').length!==1)throw Error('comma forced');
+    if(!renderUnavailableDetail('service','예배','Fixture read failure').includes('Fixture read failure'))throw Error('default verse hides read error');
     state.uiVerses.service=[{text:'Stored override',reference:'Fixture 1:1'}];if(moduleUiVerse('service').text!=='Stored override')throw Error('stored source ignored');
     if(JSON.stringify([state.services,state.scriptures,state.songs,state.calendarData])!==fixtureOriginalRecords)throw Error('records changed');
     if(JSON.stringify([state.presenter,state.serviceMusic])!==fixtureTransport)throw Error('transport changed');

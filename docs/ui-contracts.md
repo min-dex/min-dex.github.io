@@ -606,3 +606,6 @@ existing titles. Root landing snapshots contain no selected detail or search.
 NIV source checks: [Psalm95:6](https://www.biblegateway.com/passage/?search=Psalm+95:6&version=NIV),
 [Psalm133:1](https://www.biblegateway.com/passage/?search=Psalm+133:1&version=NIV),
 [1Corinthians14:40](https://www.biblegateway.com/passage/?search=1+Corinthians+14:40&version=NIV).
+
+Built-in verse defaults apply to normal landing/empty views. Unavailable/read-error
+views retain their existing message or stored UI verse; defaults cannot hide a new error.

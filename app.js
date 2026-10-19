@@ -16123,11 +16123,10 @@ function isConnectionUnavailableMessage(message) {
 function renderUnavailableDetail(slot, title, message) {
   const connectionMessage = state.connectionError || (isConnectionUnavailableMessage(message) ? message : "");
   if (connectionMessage) return renderConnectionEmptyDetail(connectionMessage);
-  return renderModuleEmptyDetail(slot, title, message);
+  return renderModuleEmptyDetail(slot, title, message, (state.uiVerses[slot] || [])[0] || null);
 }
 
-function renderModuleEmptyDetail(slot, title, fallback) {
-  const verse = moduleUiVerse(slot);
+function renderModuleEmptyDetail(slot, title, fallback, verse = moduleUiVerse(slot)) {
   const verseHtml = verse?.text
     ? `
           <p class="empty-verse">${renderHomeVerseText(verse.text)}</p>
