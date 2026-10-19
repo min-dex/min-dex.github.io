@@ -1,5 +1,12 @@
 # Authoritative-only scripture library
 
+> Current cleanup status (2026-10-19): the initial XML bundle, inactive legacy
+> editions and obsolete backups were permanently purged on2026-10-16. Pending
+> or reversible-retirement statements below are historical, superseded by
+> `bible-legacy-purge-production-20261016.json`. Remaining obsolete repair tools
+> were removed; current authoritative source evidence stays valid and preserved.
+
+
 User decision (2026-10-16): remove the old bundle from active loading; use
 identified publisher/electronic witnesses throughout both apps.
 

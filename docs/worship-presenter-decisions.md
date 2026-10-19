@@ -3588,3 +3588,19 @@ is not output content, and manualInput retains an empty editor across renders.
 Hidden fields cannot overwrite the selected DB mode during save. Each reference
 has an independent deferred-input key. Existing atomic save and output resolution
 remain unchanged; no production records are migrated.
+## Explicit worship order, no dedication-driven hiding · 2026-10-19
+
+Users manage the actual service order directly. The dedication checkbox and its
+automatic special-song/offering visibility mutation are retired. Existing
+dedication metadata is inert for template visibility; no new content-inference
+rule is introduced. New afternoon orders expose special song and offering so
+users may fill or delete them. The section editor uses add/move/delete, with no
+separate item hide action. Third-service templates no longer generate empty
+hidden new-family/assurance placeholders; those can be added explicitly.
+
+Previously saved empty hidden elements are converted only through an explicitly
+authorized, revision-guarded data cleanup into normal template-slot deletion
+markers. Filled rows, lyrics, forms, medley links and their relative order remain.
+Deletion markers prevent template resurrection and are distinct from presentation
+hiding. Compatibility reading of legacy hidden data, imported PPTX slide flags
+and invalid-media safety exclusions remains; do not remove renderer safety flags.

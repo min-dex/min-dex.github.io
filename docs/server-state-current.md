@@ -239,5 +239,22 @@ or a backup; do not claim zero remaining Storage objects.
 Local37 unit+52 smoke and Linux branch gate passed before latest-main merge.
 Latest toolbar removal is preserved. Final deployment verification is separate.
 
+### Purge release verified
+
+Main1fed27b5d43597280421d6e8a57e1b51ee9026c6 /20261019-audio-legacy-purge:
+GitHub run39235719155 offline-web and deploy-pages both completed successfully.
+Post-deploy21 changed root JS/JSON/HTML/CSS assets match local source exactly.
+Merged draft handoff smoke passed Chromium/WebKit and runtime hash gate passed.
+Safari was not accessed after the user's restriction. The0byte folder marker
+remains deferred; no fresh live-browser or physical audio check is claimed.
+
+### Empty marker cleanup completed
+
+The user authorized Safari for this deletion only. Deleted the empty song-timing
+folder through Supabase Storage on2026-10-19. After deletion and explicit Reload,
+the bucket root lists legacy-import-20261016, services, shared and song-audio;
+song-timing is absent. This completes the previously deferred0byte marker cleanup.
+No other folders or current operational audio were changed. No redeploy required.
+
 복구 버튼의 표시 이름은 `임시 저장본 복구`이며 확인·완료·오류 안내도 같은
 용어를 사용한다. 저장 키, 복구 조건, 확인 절차와 명시적 저장 동작은 그대로다.

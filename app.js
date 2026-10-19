@@ -12582,12 +12582,6 @@ function runPresenterSectionItemAction(action, index) {
     .map((item) => Number(item._origIndex))
     .filter((itemIndex) => Number.isInteger(itemIndex) && items[itemIndex]);
   const position = sectionIndexes.indexOf(index);
-  if (action === "toggle-visibility" && position >= 0) {
-    const item = items[index];
-    const memo = parseServiceItemMemo(item?.memo);
-    memo.hiddenInPresentation = !memo.hiddenInPresentation;
-    item.memo = serializeServiceItemMemo(memo);
-  }
   if (action === "up" && position > 0) {
     const previousIndex = sectionIndexes[position - 1];
     [items[previousIndex], items[index]] = [items[index], items[previousIndex]];
@@ -20898,7 +20892,6 @@ function publicSundayThirdAnnouncementsStep() {
     ...publicWorshipAnnouncementsStep(),
     elements: [
       { label: "교회소식", name: "교회소식", elementType: "title" },
-      { label: "새가족환영", name: "새가족환영", elementType: "title", hiddenInPresentation: true },
     ],
   };
 }
@@ -20912,7 +20905,6 @@ function publicSundayThirdConfessionStep() {
     sectionKey: "confession",
     elements: [
       { label: "참회기도", name: "참회기도", elementType: "title" },
-      { label: "사죄의 선언", name: "사죄의 선언", elementType: "title", hiddenInPresentation: true },
     ],
   };
 }
@@ -21138,7 +21130,6 @@ function serviceIsDedicationWorship(service = null) {
 
 function publicSundayAfternoonTemplate(options = {}) {
   const typeId = "sunday-afternoon";
-  const dedication = serviceIsDedicationWorship(options.service);
   return [
     publicWorshipReadyStep(),
     publicWorshipPraiseStep({ count: 4, required: true }),
@@ -21146,10 +21137,10 @@ function publicSundayAfternoonTemplate(options = {}) {
     { label: "찬송", name: "찬송", required: true, flex: false, sectionKey: "hymn_praise", elementType: "praise", ...scoreOutputMode() },
     publicWorshipPrayerStep(),
     publicWorshipScriptureReadingStep(),
-    publicWorshipSpecialSongStep({ score: false, hiddenInPresentation: !dedication }),
+    publicWorshipSpecialSongStep({ score: false }),
     publicWorshipSermonStep({ typeId }),
     publicWorshipResponseStep(),
-    publicWorshipOfferingStep({ score: true, praiseLabel: "봉헌찬송", hiddenInPresentation: !dedication }),
+    publicWorshipOfferingStep({ score: true, praiseLabel: "봉헌찬송" }),
     publicWorshipAnnouncementsStep(),
     publicWorshipSendingStep({
       score: true,
@@ -25822,7 +25813,6 @@ function renderPresenterSectionEditorItem(item, localIndex, context) {
   const origIndex = item._origIndex;
   const displayLabel = serviceItemOrdinalDisplayLabel(item, context.service);
   const model = serviceItemEditorModel(item, { service: context.service });
-  const hidden = Boolean(model.parsed?.hiddenInPresentation);
   const first = localIndex === 0;
   const last = localIndex === context.sectionItems.length - 1;
   return `
@@ -25835,7 +25825,6 @@ function renderPresenterSectionEditorItem(item, localIndex, context) {
         ${renderServiceElementTypeOptions(serviceMemoElementType(model.parsed))}
       </select></label>
       <div class="svc-edit-actions">
-        <button class="icon-btn" type="button" data-presenter-section-item-action="toggle-visibility" data-service-item-index="${origIndex}" aria-pressed="${hidden}" aria-label="${hidden ? "송출에 표시" : "송출에서 숨기기"}" title="${hidden ? "송출에 표시" : "송출에서 숨기기"}"><i data-lucide="${hidden ? "eye-off" : "eye"}"></i></button>
         ${renderServiceItemMoveButton({ actionAttr: "data-presenter-section-item-action", indexAttr: "data-service-item-index", index: origIndex, direction: "up", disabled: first, label: "엘리멘트 위로 이동" })}
         ${renderServiceItemMoveButton({ actionAttr: "data-presenter-section-item-action", indexAttr: "data-service-item-index", index: origIndex, direction: "down", disabled: last, label: "엘리멘트 아래로 이동" })}
         <button class="icon-btn danger" type="button" data-presenter-section-item-action="delete" data-service-item-index="${origIndex}" aria-label="엘리멘트 삭제" title="엘리멘트 삭제"><i data-lucide="trash-2"></i></button>
@@ -26041,11 +26030,7 @@ function renderServiceMetaEditor(service) {
           placeholder="이름/직분"
           aria-label="찬양 인도자" />
       </label>`}
-      ${worshipAppServiceTypeId(service.type_id) === "sunday-afternoon" ? `
-      <label class="svc-meta-toggle">
-        <input type="checkbox" data-service-meta-field="dedication" ${serviceIsDedicationWorship(service) ? "checked" : ""} />
-        <span>헌신예배</span>
-      </label>` : ""}
+
     </div>
   `;
 }
