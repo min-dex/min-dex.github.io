@@ -16059,8 +16059,8 @@ function renderWorshipBackgroundStatus(fileName) {
   return `<span class="background-status missing">없음</span>`;
 }
 
-function renderHomeVerseText(text) {
-  return splitHomeVerseLines(text)
+function renderHomeVerseText(text, options = {}) {
+  return splitHomeVerseLines(text, options)
     .map((line) => escapeHtml(line))
     .join("<br />");
 }
@@ -16143,7 +16143,7 @@ function renderModuleEmptyDetail(slot, title, fallback) {
   const verse = moduleUiVerse(slot);
   const verseHtml = verse?.text
     ? `
-          <p class="empty-verse">${renderHomeVerseText(verse.text)}</p>
+          <p class="empty-verse">${renderHomeVerseText(verse.text, { breakAtComma: slot === "scripture" })}</p>
           ${verse.reference ? `<span>${escapeHtml(verse.reference)}</span>` : ""}
       `
     : `
@@ -16184,12 +16184,12 @@ function uiVerseSlot(scripture) {
   return UI_VERSE_SLOTS.includes(rawSlot) ? rawSlot : "";
 }
 
-function splitHomeVerseLines(text) {
+function splitHomeVerseLines(text, options = {}) {
   const normalized = String(text || "").replace(/\s+/g, " ").trim();
   if (!normalized) return [""];
   const maxLineLength = 56;
   const punctuationSegments = normalized
-    .match(/[^;.?!:]+[;.?!:]?/g)
+    .match(options.breakAtComma ? /[^,;.?!:]+[,;.?!:]?/g : /[^;.?!:]+[;.?!:]?/g)
     ?.map((segment) => segment.trim())
     .filter(Boolean) || [normalized];
 

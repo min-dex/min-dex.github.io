@@ -420,7 +420,8 @@ and visible count before starting reader/search requests. Search-mode switches
 must not retain the previous edition catalogue; unavailable supplemental books
 reset to the existing GEN/all selection before rendering.
 
-The Scripture edition selector lives above sidebar search and controls both the
+The Scripture edition selector lives below sidebar search and above the filters,
+so global search stays first in every module. It controls both the
 book catalogue and reader/search results. Reader/search controls do not repeat
 it. Keep the sidebar select DOM stable during renders to preserve focus. Hide
 it outside Scripture, and disable it while the edition catalogue is unavailable.
@@ -585,3 +586,6 @@ and bulletin editor/preview in Chromium and WebKit; no service data is saved.
 - Operations navigation order: 교회력, 예배 매뉴얼, 역대 찬양 콘티, 참고자료. Manual source links remain external new-tab anchors with noopener/noreferrer; TOC links alone scroll internally.
 
 - Home weekly worship cards show abbreviated scripture references and the sermon assignee separated by ` / `. Omit the separator when either value is empty; allow wrapping and expose the complete metadata on hover. This is display-only and does not rewrite worship records or output/print references.
+
+The Scripture empty-state verse starts a new line after each comma while retaining
+punctuation and text. Other module verse wrapping remains unchanged.
