@@ -238,3 +238,12 @@ reserved Safari, so this empty marker cleanup is deferred. It is not audio
 or a backup; do not claim zero remaining Storage objects.
 Local37 unit+52 smoke and Linux branch gate passed before latest-main merge.
 Latest toolbar removal is preserved. Final deployment verification is separate.
+
+### Purge release verified
+
+Main1fed27b5d43597280421d6e8a57e1b51ee9026c6 /20261019-audio-legacy-purge:
+GitHub run39235719155 offline-web and deploy-pages both completed successfully.
+Post-deploy21 changed root JS/JSON/HTML/CSS assets match local source exactly.
+Merged draft handoff smoke passed Chromium/WebKit and runtime hash gate passed.
+Safari was not accessed after the user's restriction. The0byte folder marker
+remains deferred; no fresh live-browser or physical audio check is claimed.
