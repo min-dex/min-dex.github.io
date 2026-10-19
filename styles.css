@@ -9177,3 +9177,13 @@ body[data-module="presenter"] .topbar-actions > .icon-btn { flex: 0 0 35px; widt
     outline-offset: -2px;
   }
 }
+
+/* Recovery is a text action, not a fixed-width toolbar icon. */
+.topbar-actions > #restoreServerEditorDraft {
+  width: auto;
+  flex: 0 0 auto;
+  padding-inline: 10px;
+}
+.topbar-actions > #restoreServerEditorDraft::before {
+  width: calc(100% - 10px);
+}
