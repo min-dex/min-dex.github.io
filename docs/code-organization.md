@@ -27,7 +27,7 @@ The order is checked by `tests/solid_audit.py`.
   modules and their license/patch notice live in `vendor/web-ppt-0.4.5`.
 - `mindex.worship-model.js` owns pure worship slot, media-payload, and form-preset
   normalization rules, including media aliases, ordered decks, audio, timing,
-  form tokens, singleton numbering, and default-preset normalization. These
+  form tokens, explicit numbering, and default-preset normalization. These
   rules run without controller state, DOM, storage, or database dependencies.
   Applying a default to an editable item stays with the caller; normalization
   does not turn an existing manual or song-default preset into a suggested one.
@@ -282,3 +282,6 @@ loaded `mindex.server-state.mjs` owns revision/request identity and
 `mindex.legacy-state.mjs` owns the allowlisted legacy migration. The editor draft
 adapter `mindex.editor-drafts.js` loads after app globals. None replaces the atomic
 worship RPC or independently publishes a deployment.
+## Canonical values and aliases · 2026-10-19
+
+Bible short-name and alias objects have one owner in `mindex.constants.js`; app code consumes them. UI selects use strict canonical values; the portable source/read boundary resolves known aliases through lookup-only keys. Praise classification arrays are ordered sets, whereas worship/form/version/lyric arrays are ordered content and must not be sorted for cleanup.

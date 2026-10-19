@@ -282,6 +282,15 @@
     "3JN": ["3 john", "3john", "3 jn", "3jn", "third john"],
     JUD: ["jude", "jud"],
     REV: ["rev", "revelation", "re"],
+    TOB: ["Tobit", "Tobias"],
+    JDT: ["Judith"],
+    WSD: ["Wisdom", "Wisdom of Solomon"],
+    SIR: ["Sirach", "Ecclesiasticus"],
+    BAR: ["Baruch"],
+    "1MA": ["1 Maccabees", "First Maccabees", "마카베오 상", "마카베오기 상권"],
+    "2MA": ["2 Maccabees", "Second Maccabees", "마카베오 하", "마카베오기 하권"],
+    GKE: ["에스델 추가 본문", "에스더 추가 본문", "Additions to Esther", "Esther additions"],
+    DA1: ["다니엘 추가 본문", "Additions to Daniel", "Daniel additions"],
   };
 
   window.MINDEX_APP_CONSTANTS = {

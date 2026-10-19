@@ -539,7 +539,7 @@ function applyServiceItemMetadataField(item, field, service) {
   const key = field.dataset.serviceItemField;
   const parsed = parseServiceItemMemo(item.memo);
   // Portable source restores metadata without the interactive praise-mode conversion.
-  if (key === "input_mode") parsed.inputMode = normalizeServiceInputMode(field.value);
+  if (key === "input_mode") parsed.inputMode = field.tagName === "SELECT" ? serviceInputModeValue(field.value) : normalizeServiceInputMode(field.value);
   if (key === "memo_note") parsed.note = field.value;
   if (key === "slide_overrides") parsed.slides = parseServiceSlideOverrideInput(field.value);
   if (key === "manual_praise_lyrics") {
@@ -553,7 +553,7 @@ function applyServiceItemMetadataField(item, field, service) {
     parsed.formPresetDisabled = !formHint;
   }
   if (key === "element_type" || key === "component_type") {
-    parsed.elementType = normalizeServiceElementType(field.value);
+    parsed.elementType = field.tagName === "SELECT" ? serviceElementTypeValue(field.value) : normalizeServiceElementType(field.value);
     parsed.componentType = parsed.elementType;
     const assetKind = serviceAssetKindForElementType(parsed.elementType);
     if (assetKind) parsed.asset = { ...normalizeServiceAsset(parsed.asset), kind: assetKind };

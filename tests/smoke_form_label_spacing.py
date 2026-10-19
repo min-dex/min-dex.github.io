@@ -14,7 +14,7 @@ try:
    page.wait_for_function("typeof renderReadonlyFormBlock==='function'")
    print(engine,page.evaluate('''()=>{
     const check=(v,m)=>{if(!v)throw Error(m)};
-    const cases=[['V2B','Verse 2 B','Verse',2,'B'],['C1A','Chorus 1 A','Chorus',1,'A'],['C@','Chorus @','Chorus',null,'@'],['V1@A','Verse 1 @A','Verse',1,'@A'],['PC2@B','Pre-Chorus 2 @B','Pre-Chorus',2,'@B'],['Coda@','Coda @','Coda',null,'@']];
+    const cases=[['V2B','Verse 2 B','Verse',2,'B'],['C1A','Chorus 1 A','Chorus',1,'A'],['C@','Chorus @','Chorus',null,'@'],['V1@A','Verse 1 @ A','Verse',1,'@A'],['PC2@B','Pre-Chorus 2 @ B','Pre-Chorus',2,'@B'],['Coda@','Coda @','Coda',null,'@']];
     const host=document.createElement('main');document.body.replaceChildren(host);
     for(const [raw,shown,part_type,part_number,part_variant] of cases){
      const form={id:raw,part_type,part_number,part_variant,lyrics:'첫 줄\\n둘째 줄'};
@@ -28,7 +28,7 @@ try:
      check(JSON.stringify(form)===source&&displayLabel(form)===stored&&formatBlockForCopy(form)===copy,'source/copy changed');
      check(normalizePresenterFormPresetLabel(raw).key===normalizePresenterFormPresetLabel(shown).key,'playback identity');
     }
-    check(displayLabel({part_type:'Chorus',part_variant:'@'})==='Chorus@','storage label changed');
+    check(displayLabel({part_type:'Chorus',part_variant:'@'})==='Chorus @','canonical storage label');
     return 'PASS readonly, badges, timing labels, source/copy and playback identity';
    }'''),flush=True)
    page.screenshot(path='/tmp/form-label-spacing-'+engine+'.png');browser.close()

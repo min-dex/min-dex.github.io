@@ -1185,27 +1185,27 @@ function presenterFormPresetGroupItem(label = "", target = {}, form = {}) {
 function presenterGroupedLyricChunks(lyrics = "", target = {}) {
   const groupIndex = Number(target?.groupIndex) || 0;
   if (!groupIndex) return splitPresenterLyricChunks(lyrics);
-  const lines = String(lyrics || "")
-    .split(/\n+/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-  if (lines.length < 2) return lines;
-  const chunkSize = Math.max(1, Math.ceil(lines.length / Math.max(groupIndex, 2)));
+  const sourceLines = String(lyrics || "").replace(/\r\n?/g, "\n").split("\n").map((line) => line.trim());
+  const lineIndexes = sourceLines.flatMap((line, index) => line ? [index] : []);
+  if (lineIndexes.length < 2) return lineIndexes.map((index) => sourceLines[index]);
+  // Keep the established A/B line selection, including authored paragraph breaks inside it.
+  const chunkSize = Math.max(1, Math.ceil(lineIndexes.length / Math.max(groupIndex, 2)));
   const chunks = [];
-  for (let index = 0; index < lines.length; index += chunkSize) {
-    chunks.push(lines.slice(index, index + chunkSize).join("\n"));
+  for (let index = 0; index < lineIndexes.length; index += chunkSize) {
+    const selected = lineIndexes.slice(index, index + chunkSize);
+    chunks.push(sourceLines.slice(selected[0], selected.at(-1) + 1).join("\n"));
   }
   return chunks;
 }
 
 function presenterFormDisplayLabel(form = {}) {
-  if (form._presenterVirtual && form._presenterSourceFormId) return String(form.label || "").trim() || displayLabel(form);
+  if (form._presenterVirtual && form._presenterSourceFormId) return presenterFormPresetDisplayLabel(form.label) || String(form.label || "").trim() || displayLabel(form);
   if (form._presenterVirtual) return displayLabel(form);
-  return String(form.label || "").trim() || displayLabel(form);
+  return presenterFormPresetDisplayLabel(form.label) || String(form.label || "").trim() || displayLabel(form);
 }
 
 function normalizePresenterFormPresetLabel(value = "") {
-  const raw = String(value || "").trim();
+  const raw = canonicalServiceFormToken(value);
   const compact = compactSearchValue(raw);
   const lastVerse = /^(vl|마지막절|lastverse|last)$/i.test(compact);
   if (lastVerse) return { key: "last-verse", type: "verse", number: 0, lastVerse: true };
@@ -1313,7 +1313,7 @@ function presenterFormPresetDisplayLabel(value = "") {
   if (!raw) return "";
   const target = normalizePresenterFormPresetLabel(raw);
   const group = String(target.group || "").trim().toUpperCase();
-  const suffix = target.variant ? `${target.number ? ` ${target.number}` : ""} @${group}` : target.number ? ` ${target.number}${group ? ` ${group}` : ""}` : group ? ` ${group}` : "";
+  const suffix = target.variant ? `${target.number ? ` ${target.number}` : ""} @${group ? ` ${group}` : ""}` : target.number ? ` ${target.number}${group ? ` ${group}` : ""}` : group ? ` ${group}` : "";
   if (target.lastVerse) return "Last Verse";
   if (target.type === "verse") return `Verse${suffix}`;
   if (target.type === "chorus") return `Chorus${suffix}`;

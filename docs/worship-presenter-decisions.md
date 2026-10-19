@@ -3455,9 +3455,42 @@ Controller thumbnail metadata places form/scripture badges on the left and slide
 numbers on the right, including unlabeled slides. Numbers retain their size,
 weight and theme contrast and never shrink under long references. Output is unchanged.
 
-Controller form badges use occurrence order within each song: muted red, yellow,
-green, cyan, blue, magenta, repeating after six blocks. Form type no longer
-determines badge color. Neutral block backgrounds and output colors are unchanged.
+Controller whole-group backgrounds use occurrence order within each song: muted
+red, yellow, green, cyan, blue, magenta, repeating after six blocks, mixed at 20%
+with the panel surface. Form type no longer determines color. Form and scripture
+labels are plain text without local fills, including hover; keyboard focus remains.
+Scripture range groups use the same six-color occurrence cycle within each scripture
+element, keeping continuation pages and wrapped row fragments the same color.
+Output colors are unchanged.
 Score pages without a new form marker continue the preceding verified form within
 the same element, using controller-entry metadata only. Unmarked leading pages
 remain ungrouped; never infer verse boundaries or rewrite score manifests.
+
+## Song-form spelling and identity · 2026-10-19
+
+- Full labels separate number, @ and group: `Verse 1 A`, `Verse 1 @ A`. Compact tokens remain `V1A`, `V1@A`. Case and spaces are accepted, including the trailing-@ alias `Verse1 a@` → `V1@A`.
+- Explicit numbers are preserved in input normalization, including a lone `V1`; normalization does not infer an unnumbered identity from occurrence counts. This does not migrate stored lyric blocks.
+- Hyphens delimit sequence items; whitespace never does. `v - c - c b - tags` becomes `V-C-CB-Tags`, whereas `C-B` is Chorus then Bridge. Legacy comma/arrow/plus separators remain accepted.
+- Unknown or ambiguous tokens such as `V1A@B` and whitespace-only sequences are preserved, never guessed or discarded; existing missing-form feedback reports unresolved targets. No operational records are rewritten.
+
+Normalization matrix (`Verse 1`, `Verse1`, `V1`, `verse 1`, `verse1`, `v1` each use every row; spaces may be omitted or repeated between suffix components):
+
+| Suffix input | Canonical suffix | Full suffix |
+| --- | --- | --- |
+| none | none | none |
+| `A`, `a` | `A` | ` A` |
+| `B`, `b` | `B` | ` B` |
+| `@` | `@` | ` @` |
+| `@A`, `@a`, `A@`, `a@` | `@A` | ` @ A` |
+| `@B`, `@b`, `B@`, `b@` | `@B` | ` @ B` |
+
+`tests/test_form_input_normalization.cjs` covers 396 spelling/spacing/suffix combinations plus ambiguous tokens, sequence boundaries and repeat preservation. The same aliases apply to Chorus, Pre-Chorus, Bridge and Coda.
+
+## Input boundaries and authored lyric paragraphs · 2026-10-19
+
+- Alias folding is lookup-only at free-input, portable-source and persisted legacy-read boundaries. Fixed selects use strict canonical-code checks; source labels, titles, names and lyrics are not rewritten with folded keys.
+- Praise classifications are a set projected in `hymn`, `ccm`, `children` order. Song versions, worship items, forms and lyric paragraphs retain authored order. Bible short-name/alias tables have one owner in mindex.constants.js, including supplemental books.
+- DB praise slides use blank-line-separated paragraphs, just as direct lyrics do. One-, three- and longer-line paragraphs each remain one slide; no padding, merging or splitting into pairs. CRLF and whitespace-only blank lines are separators; no saved lyrics are changed. Liturgical text retains its existing separate two-line splitter.
+- Existing timing fingerprint validation rejects a profile when page text or boundaries change; require new cues instead of applying old timings to different slides. Running audio/output sessions are not changed by normalization or slide preparation.
+
+- Automatic A/B fallback keeps its existing selected nonempty lines, while retaining blank-line boundaries inside each selected range. Explicit A/B blocks and form ordering remain unchanged.

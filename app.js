@@ -2,6 +2,9 @@
 const MINDEX_CONSTANTS = window.MINDEX_APP_CONSTANTS || {};
 const MINDEX_DESIGN_TOKENS = window.MINDEX_DESIGN_TOKENS || {};
 const {
+  KOREAN_BIBLE_BOOK_ABBREVIATIONS,
+  ENGLISH_BIBLE_BOOK_ABBREVIATIONS,
+  BIBLE_BOOK_ALIASES,
   PART_TYPES,
   STRUCTURAL_PART_TYPES,
   FORM_ADD_LABELS,
@@ -41,221 +44,11 @@ const DEFAULT_CONFIG_PRESET = "gwc";
 
 const { BIBLE_CHAPTER_COUNTS, KOREAN_BIBLE_BOOK_NAMES = {} } = MINDEX_CONSTANTS;
 
-const KOREAN_BIBLE_BOOK_ABBREVIATIONS = {
-  GEN: "창",
-  EXO: "출",
-  LEV: "레",
-  NUM: "민",
-  DEU: "신",
-  JOS: "수",
-  JDG: "삿",
-  RUT: "룻",
-  "1SA": "삼상",
-  "2SA": "삼하",
-  "1KI": "왕상",
-  "2KI": "왕하",
-  "1CH": "대상",
-  "2CH": "대하",
-  EZR: "스",
-  NEH: "느",
-  EST: "에",
-  JOB: "욥",
-  PSA: "시",
-  PRO: "잠",
-  ECC: "전",
-  SNG: "아",
-  ISA: "사",
-  JER: "렘",
-  LAM: "애",
-  EZK: "겔",
-  DAN: "단",
-  HOS: "호",
-  JOL: "욜",
-  AMO: "암",
-  OBA: "옵",
-  JON: "욘",
-  MIC: "미",
-  NAM: "나",
-  HAB: "합",
-  ZEP: "습",
-  HAG: "학",
-  ZEC: "슥",
-  MAL: "말",
-  MAT: "마",
-  MRK: "막",
-  LUK: "눅",
-  JHN: "요",
-  ACT: "행",
-  ROM: "롬",
-  "1CO": "고전",
-  "2CO": "고후",
-  GAL: "갈",
-  EPH: "엡",
-  PHP: "빌",
-  COL: "골",
-  "1TH": "살전",
-  "2TH": "살후",
-  "1TI": "딤전",
-  "2TI": "딤후",
-  TIT: "딛",
-  PHM: "몬",
-  HEB: "히",
-  JAS: "약",
-  "1PE": "벧전",
-  "2PE": "벧후",
-  "1JN": "요일",
-  "2JN": "요이",
-  "3JN": "요삼",
-  JUD: "유",
-  REV: "계",
-};
 
-const ENGLISH_BIBLE_BOOK_ABBREVIATIONS = {
-  GEN: "Gen",
-  EXO: "Exod",
-  LEV: "Lev",
-  NUM: "Num",
-  DEU: "Deut",
-  JOS: "Josh",
-  JDG: "Judg",
-  RUT: "Ruth",
-  "1SA": "1 Sam",
-  "2SA": "2 Sam",
-  "1KI": "1 Kgs",
-  "2KI": "2 Kgs",
-  "1CH": "1 Chr",
-  "2CH": "2 Chr",
-  EZR: "Ezra",
-  NEH: "Neh",
-  EST: "Esth",
-  JOB: "Job",
-  PSA: "Ps",
-  PRO: "Prov",
-  ECC: "Eccl",
-  SNG: "Song",
-  ISA: "Isa",
-  JER: "Jer",
-  LAM: "Lam",
-  EZK: "Ezek",
-  DAN: "Dan",
-  HOS: "Hos",
-  JOL: "Joel",
-  AMO: "Amos",
-  OBA: "Obad",
-  JON: "Jonah",
-  MIC: "Mic",
-  NAM: "Nah",
-  HAB: "Hab",
-  ZEP: "Zeph",
-  HAG: "Hag",
-  ZEC: "Zech",
-  MAL: "Mal",
-  MAT: "Matt",
-  MRK: "Mark",
-  LUK: "Luke",
-  JHN: "John",
-  ACT: "Acts",
-  ROM: "Rom",
-  "1CO": "1 Cor",
-  "2CO": "2 Cor",
-  GAL: "Gal",
-  EPH: "Eph",
-  PHP: "Phil",
-  COL: "Col",
-  "1TH": "1 Thess",
-  "2TH": "2 Thess",
-  "1TI": "1 Tim",
-  "2TI": "2 Tim",
-  TIT: "Titus",
-  PHM: "Philem",
-  HEB: "Heb",
-  JAS: "Jas",
-  "1PE": "1 Pet",
-  "2PE": "2 Pet",
-  "1JN": "1 John",
-  "2JN": "2 John",
-  "3JN": "3 John",
-  JUD: "Jude",
-  REV: "Rev",
-};
 
-const BIBLE_BOOK_ALIASES = {
-  GEN: ["gen", "ge", "gn"],
-  EXO: ["exo", "exod", "ex"],
-  LEV: ["lev", "le"],
-  NUM: ["num", "nu", "nm"],
-  DEU: ["deut", "deu", "dt"],
-  JOS: ["josh", "jos"],
-  JDG: ["judg", "jdg", "jg"],
-  RUT: ["ruth", "rut", "ru"],
-  "1SA": ["1 sam", "1sam", "1 sa", "1sa", "first samuel"],
-  "2SA": ["2 sam", "2sam", "2 sa", "2sa", "second samuel"],
-  "1KI": ["1 kgs", "1kgs", "1 ki", "1ki", "1 kings", "first kings"],
-  "2KI": ["2 kgs", "2kgs", "2 ki", "2ki", "2 kings", "second kings"],
-  "1CH": ["1 chr", "1chr", "1 ch", "1ch", "1 chronicles", "first chronicles"],
-  "2CH": ["2 chr", "2chr", "2 ch", "2ch", "2 chronicles", "second chronicles"],
-  EZR: ["ezra", "ezr"],
-  NEH: ["neh", "ne"],
-  EST: ["esth", "est"],
-  JOB: ["job", "jb"],
-  PSA: ["ps", "psa", "psalm", "psalms"],
-  PRO: ["prov", "pro", "pr"],
-  ECC: ["eccl", "ecc", "qoheleth"],
-  SNG: ["song", "songs", "sos", "song of solomon", "song of songs"],
-  ISA: ["isa", "is"],
-  JER: ["jer", "je"],
-  LAM: ["lam", "la"],
-  EZK: ["ezek", "ezk", "eze"],
-  DAN: ["dan", "da"],
-  HOS: ["hos", "ho"],
-  JOL: ["joel", "jol"],
-  AMO: ["amos", "amo", "am"],
-  OBA: ["obad", "oba", "ob"],
-  JON: ["jonah", "jon"],
-  MIC: ["mic", "mi"],
-  NAM: ["nah", "nam"],
-  HAB: ["hab"],
-  ZEP: ["zeph", "zep"],
-  HAG: ["hag"],
-  ZEC: ["zech", "zec"],
-  MAL: ["mal"],
-  MAT: ["matt", "mat", "mt"],
-  MRK: ["mark", "mrk", "mk"],
-  LUK: ["luke", "luk", "lk"],
-  JHN: ["john", "jhn", "jn"],
-  ACT: ["acts", "act", "ac"],
-  ROM: ["rom", "ro"],
-  "1CO": ["1 cor", "1cor", "1 co", "1co", "1 corinthians", "first corinthians"],
-  "2CO": ["2 cor", "2cor", "2 co", "2co", "2 corinthians", "second corinthians"],
-  GAL: ["gal"],
-  EPH: ["eph"],
-  PHP: ["phil", "php", "philip"],
-  COL: ["col"],
-  "1TH": ["1 thess", "1thess", "1 th", "1th", "1 thessalonians", "first thessalonians"],
-  "2TH": ["2 thess", "2thess", "2 th", "2th", "2 thessalonians", "second thessalonians"],
-  "1TI": ["1 tim", "1tim", "1 ti", "1ti", "1 timothy", "first timothy"],
-  "2TI": ["2 tim", "2tim", "2 ti", "2ti", "2 timothy", "second timothy"],
-  TIT: ["titus", "tit"],
-  PHM: ["philem", "phm"],
-  HEB: ["heb"],
-  JAS: ["james", "jas", "jam"],
-  "1PE": ["1 pet", "1pet", "1 pe", "1pe", "1 peter", "first peter"],
-  "2PE": ["2 pet", "2pet", "2 pe", "2pe", "2 peter", "second peter"],
-  "1JN": ["1 john", "1john", "1 jn", "1jn", "first john"],
-  "2JN": ["2 john", "2john", "2 jn", "2jn", "second john"],
-  "3JN": ["3 john", "3john", "3 jn", "3jn", "third john"],
-  JUD: ["jude", "jud"],
-  REV: ["rev", "revelation", "re"],
-  TOB: ["Tobit", "Tobias"],
-  JDT: ["Judith"],
-  WSD: ["Wisdom", "Wisdom of Solomon"],
-  SIR: ["Sirach", "Ecclesiasticus"],
-  BAR: ["Baruch"],
-  "1MA": ["1 Maccabees", "First Maccabees", "마카베오 상", "마카베오기 상권"],
-  "2MA": ["2 Maccabees", "Second Maccabees", "마카베오 하", "마카베오기 하권"],
-  GKE: ["에스델 추가 본문", "에스더 추가 본문", "Additions to Esther", "Esther additions"],
-  DA1: ["다니엘 추가 본문", "Additions to Daniel", "Daniel additions"],
-};
+
+
+
 
 const BIBLE_BOOKS = [];
 
@@ -8330,7 +8123,7 @@ async function saveSongVersions(song) {
     subtitle: nullIfBlank(version.subtitle),
     original_title: nullIfBlank(version.original_title),
     hymn_no: nullIfBlank(version.hymn_no),
-    ...(state.songVersionPraiseTypesSupported ? { praise_types: normalizePraiseTypes(version.praise_types) } : {}),
+    ...(state.songVersionPraiseTypesSupported ? { praise_types: canonicalPraiseTypes(version.praise_types) } : {}),
     lyric_signature: versionLyricSignature(version),
     source_count: Number(version.source_count) > 0 ? Number(version.source_count) : 1,
     is_primary: Boolean(version.is_primary) || index === 0,
@@ -10116,14 +9909,15 @@ function addForm(type) {
 }
 
 function toggleVersionPraiseType(type) {
+  if (!PRAISE_TYPES.includes(type)) return;
   const song = getSelectedSong();
   const version = getSelectedVersion();
   if (!version) return;
-  const types = normalizePraiseTypes(version.praise_types);
+  const types = canonicalPraiseTypes(version.praise_types);
   const idx = types.indexOf(type);
   if (idx >= 0) types.splice(idx, 1);
   else types.push(type);
-  version.praise_types = types;
+  version.praise_types = canonicalPraiseTypes(types);
   updateSongPraiseTypesFromVersions(song);
   state.dirty.forms = true;
   state.dirty.song = true;
@@ -10741,10 +10535,19 @@ function serviceAssetKindForElementType(elementType) {
   return ["file", "video", "image", "score", "audio"].includes(type) ? type : "";
 }
 
+// Strict internal values; aliases belong to imported/read/input boundaries.
+function serviceElementTypeValue(value) {
+  return SERVICE_ELEMENT_TYPES.has(value) ? value : "";
+}
+
+function serviceInputModeValue(value) {
+  return WORSHIP_DB_ELEMENT_INPUT_MODES.has(value) ? value : "";
+}
+
 function normalizeServiceElementType(value) {
-  const type = String(value || "").trim().toLowerCase();
-  const normalized = SERVICE_ELEMENT_TYPE_ALIASES[type] || type;
-  return SERVICE_ELEMENT_TYPES.has(normalized) ? normalized : "";
+  const raw = String(value || "");
+  if (SERVICE_ELEMENT_TYPES.has(raw)) return raw;
+  return serviceElementTypeValue(resolveDomainAlias(raw, SERVICE_ELEMENT_TYPE_ALIASES));
 }
 
 function serviceElementTypeLabel(type) {
@@ -10759,7 +10562,7 @@ function serviceMemoElementType(memo = {}) {
 function servicePraiseUsesDirectLyrics(mode) { return mode === "manual_praise" || mode === "audio_praise"; }
 
 function normalizeServiceInputMode(value) {
-  const mode = String(value || "").trim().toLowerCase().replace(/[-\s]+/g, "_");
+  if (WORSHIP_DB_ELEMENT_INPUT_MODES.has(value)) return value;
   const aliases = {
     praise: "praise_db",
     praise_db: "praise_db",
@@ -10797,7 +10600,7 @@ function normalizeServiceInputMode(value) {
     config: "config",
     none: "none",
   };
-  return aliases[mode] || "";
+  return serviceInputModeValue(resolveDomainAlias(value, aliases));
 }
 
 function worshipDbInputModeForSave(value) {
@@ -12827,7 +12630,7 @@ function runPresenterSectionItemAction(action, index) {
   }
   if (action === "add") {
     const root = refs.detailPane?.querySelector("[data-presenter-section-editor]");
-    const type = normalizeServiceElementType(root?.querySelector("[data-presenter-section-new-type]")?.value || "");
+    const type = serviceElementTypeValue(root?.querySelector("[data-presenter-section-new-type]")?.value || "");
     const name = String(root?.querySelector("[data-presenter-section-new-name]")?.value || "").trim();
     if (!name || !type) {
       showToast("새 엘리멘트는 이름과 타입이 필요합니다.", "error");
@@ -18171,7 +17974,7 @@ function normalizeFormPartNumber(value = "") {
 }
 
 function normalizeFormPartVariant(value = "") {
-  const raw = String(value || "").trim().replace(/\s+/g, "");
+  const raw = String(value || "").trim().replace(/\s+/g, "").replace(/^([a-z])@$/i, "@$1");
   const atVariant = raw.match(/^@([a-z])?$/i);
   if (atVariant) return `@${String(atVariant[1] || "").toUpperCase()}`;
   const match = raw.match(/^[a-z]$/i);
@@ -18199,7 +18002,7 @@ function formPartLabelIdentity(value = "", partType = "") {
 function formatFormPartLabel(partType = "Lyrics", partNumber = null, partVariant = "") {
   const number = normalizeFormPartNumber(partNumber);
   const variant = normalizeFormPartVariant(partVariant);
-  if (variant.startsWith("@")) return `${partType}${number ? ` ${number}` : ""}${variant}`;
+  if (variant.startsWith("@")) return [partType, number || "", "@", variant.slice(1)].filter(Boolean).join(" ");
   return [partType, number || "", variant].filter(Boolean).join(" ");
 }
 
@@ -20151,6 +19954,11 @@ function normalizeSongMetadata(value) {
   return Object.fromEntries(Object.entries(metadata).filter(([, item]) => (Array.isArray(item) ? item.length : item)));
 }
 
+function canonicalPraiseTypes(value) {
+  const selected = new Set(Array.isArray(value) ? value : []);
+  return PRAISE_TYPES.filter((type) => selected.has(type));
+}
+
 function normalizePraiseTypes(value) {
   const aliases = {
     hymn: "hymn",
@@ -20167,7 +19975,7 @@ function normalizePraiseTypes(value) {
     elem: "children",
     어린이찬양: "children",
   };
-  return [...new Set(parseList(value).map((item) => aliases[normalizeTitle(item)]).filter((item) => PRAISE_TYPES.includes(item)))];
+  return canonicalPraiseTypes(parseList(value).map((item) => resolveDomainAlias(item, aliases)));
 }
 
 function nullIfBlank(value) {
@@ -31402,10 +31210,10 @@ function renderPresenterBoardSlideBlocks(entries, activeIndex, serviceId) {
   const colorIndexes = new Map();
   return presenterBoardSlideBlocks(entries).map((block) => {
     const owner = presenterSlideElementGroupKey(block.entries[0]?.slide) || "";
-    const isForm = block.key && presenterSlideSupportsFormGrouping(block.entries[0]?.slide);
+    const isColored = Boolean(block.key);
     const colorIndex = colorIndexes.get(owner) || 0;
-    if (isForm) colorIndexes.set(owner, colorIndex + 1);
-    const colorAttribute = isForm ? ` data-form-color="${colorIndex % 6}"` : "";
+    if (isColored) colorIndexes.set(owner, colorIndex + 1);
+    const colorAttribute = isColored ? ` data-form-color="${colorIndex % 6}"` : "";
     const thumbs = block.entries.map(({ slide, slideIndex, formLabel }) =>
       renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, formLabel)).join("");
     return block.key

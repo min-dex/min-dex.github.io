@@ -1,0 +1,26 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const app=fs.readFileSync('app.js','utf8'), constants=fs.readFileSync('mindex.constants.js','utf8');
+const c={window:{},cleanList:v=>v.map(String).map(x=>x.trim()).filter(Boolean)};vm.createContext(c);vm.runInContext(constants,c);
+Object.assign(c,c.window.MINDEX_APP_CONSTANTS);vm.runInContext(fs.readFileSync('mindex.worship-model.js','utf8'),c);
+for(const name of ['SERVICE_ELEMENT_TYPE_UI_OPTIONS','SERVICE_ELEMENT_TYPE_ALIASES']){
+ const a=app.indexOf('const '+name+' =');const ends=['\n};','\n];'].map(x=>app.indexOf(x,a)).filter(x=>x>=0);vm.runInContext(app.slice(a,Math.min(...ends)+3),c);
+}
+vm.runInContext('const SERVICE_ELEMENT_TYPES=new Set(["",...SERVICE_ELEMENT_TYPE_UI_OPTIONS.map(x=>x[0])]);',c);
+const a=app.indexOf('const WORSHIP_DB_ELEMENT_INPUT_MODES =');vm.runInContext(app.slice(a,app.indexOf('\n]);',a)+4),c);
+for(const name of ['serviceElementTypeValue','serviceInputModeValue','normalizeServiceElementType','normalizeServiceInputMode','canonicalPraiseTypes','normalizePraiseTypes','parseList','normalizeGeneratedVersionName','normalizeLyricsForCopy','splitFreeShowParagraphs']){
+ const a=app.indexOf('function '+name+'(');assert.ok(a>=0,name);vm.runInContext(app.slice(a,app.indexOf('\n}\n',a)+2),c);
+}
+for(const [inputs,expected] of [[['말씀','Scripture','scripture_reading','scripture-reading','scripture reading','성경 봉독',' 성경  봉독 '],'scripture_reading'],[['찬양','PRAISE','ｐｒａｉｓｅ'],'praise'],[['제목 / 내용','제목  /  내용','title-content'],'title_content']])for(const input of inputs)assert.equal(c.normalizeServiceElementType(input),expected,input);
+for(const input of ['직접 입력','직접입력','manual praise','manual-praise','manual_praise'])assert.equal(c.normalizeServiceInputMode(input),'manual_praise');
+assert.equal(c.serviceElementTypeValue('말씀'),'');assert.equal(c.serviceInputModeValue('직접 입력'),'');
+assert.equal(c.serviceElementTypeValue('scripture_reading'),'scripture_reading');assert.equal(c.serviceInputModeValue('manual_praise'),'manual_praise');
+for(const unknown of ['toString','__proto__','not-known']){assert.equal(c.normalizeServiceElementType(unknown),'');assert.equal(c.normalizeServiceInputMode(unknown),'');}
+const values=['어린이 찬양','ＣＣＭ','찬송가','children','복음 성가'];const before=JSON.stringify(values);
+assert.equal(JSON.stringify(c.normalizePraiseTypes(values)),JSON.stringify(['hymn','ccm','children']));assert.equal(JSON.stringify(values),before);
+assert.equal(JSON.stringify(c.canonicalPraiseTypes(['children','hymn','ccm','children','찬송가'])),JSON.stringify(['hymn','ccm','children']));
+assert.equal(c.normalizeGeneratedVersionName(' Default '),'Default');
+for(const name of ['KOREAN_BIBLE_BOOK_ABBREVIATIONS','ENGLISH_BIBLE_BOOK_ABBREVIATIONS','BIBLE_BOOK_ALIASES'])assert.ok(!app.includes('const '+name+' ='),name+' has one owner');
+for(const key of ['TOB','JDT','WSD','SIR','BAR','1MA','2MA','GKE','DA1'])assert.ok(c.BIBLE_BOOK_ALIASES[key]?.length,key);
+assert.equal(c.KOREAN_BIBLE_BOOK_ABBREVIATIONS.GEN,'창');
+assert.deepEqual(Array.from(c.splitFreeShowParagraphs('\r\n혼자\r\n\r\n첫째\r\n둘째\r\n셋째\r\n\r\n끝\r\n')),['혼자','첫째\n둘째\n셋째','끝']);
+console.log('PASS boundary aliases, strict internal values, canonical classification order, immutable sources, single Bible table owner, paragraph units');

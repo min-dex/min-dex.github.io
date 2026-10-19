@@ -1,14 +1,14 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const src=fs.readFileSync('app.js','utf8');const c={cleanList:x=>x.map(String).map(x=>x.trim()).filter(Boolean),parseObjectPayload:x=>x&&typeof x==='object'&&!Array.isArray(x)?x:null,firstNonBlankString:(...xs)=>xs.map(x=>String(x||'').trim()).find(Boolean)||''};vm.createContext(c);
 vm.runInContext(fs.readFileSync('mindex.worship-model.js','utf8'),c);
-for(const [raw,expected] of [[' v - pc - c - 간주 ','V-PC-C-Int'],['v1a - v2b - c2 - pc1a - b - tags - vl','V1A-V2B-C2-PC1A-B-Tags-VL'],['verse 1 → Pre-Chorus + chorus, interlude > ending','V-PC-C-Int-Coda'],['1절 - 후렴 - 마지막 절','V-C-VL'],['V-C-C-Int-C','V-C-C-Int-C'],['custom label - V','custom label-V']]){assert.equal(c.normalizeServiceFormHint(raw),expected);assert.equal(c.normalizeServiceFormHint(expected),expected);const p=c.normalizeServiceFormPreset(raw,raw,'manual');assert.equal(p.hint,expected);assert.equal(p.forms.join('-'),expected);}
+for(const [raw,expected] of [[' v - pc - c - 간주 ','V-PC-C-Int'],['v1a - v2b - c2 - pc1a - b - tags - vl','V1A-V2B-C2-PC1A-B-Tags-VL'],['verse 1 → Pre-Chorus + chorus, interlude > ending','V1-PC-C-Int-Coda'],['1절 - 후렴 - 마지막 절','V1-C-VL'],['V-C-C-Int-C','V-C-C-Int-C'],['custom label - V','custom label-V']]){assert.equal(c.normalizeServiceFormHint(raw),expected);assert.equal(c.normalizeServiceFormHint(expected),expected);const p=c.normalizeServiceFormPreset(raw,raw,'manual');assert.equal(p.hint,expected);assert.equal(p.forms.join('-'),expected);}
 assert.equal(c.normalizeServiceFormPresetForms(['v1a',' pc ','간주','C','C']).join('-'),'V1A-PC-Int-C-C');
 assert.equal(c.normalizeServiceFormHint('Verse 2 A - Chorus 1 B - Bridge A'),'V2A-C1B-BA');
 assert.equal(c.canonicalServiceFormToken('Chorus 1 A'),'C1A');
 assert.equal(c.normalizeServiceFormHint('V1@ - C@A - Bridge@B'),'V1@-C@A-B@B');
 assert.equal(c.normalizeServiceFormHint('V1-C1-V1-C1'),'V1-C1-V1-C1');
-assert.equal(c.normalizeServiceFormHint('V1-C1-C2'),'V-C1-C2');
-assert.equal(c.normalizeServiceFormHint('V1-C1A'),'V-C1A');
+assert.equal(c.normalizeServiceFormHint('V1-C1-C2'),'V1-C1-C2');
+assert.equal(c.normalizeServiceFormHint('V1-C1A'),'V1-C1A');
 assert.equal(c.canonicalServiceFormToken('Chorus @ A'),'C@A');
 assert.equal(c.canonicalServiceFormToken('Coda@'),'Coda@');
 assert.equal(c.normalizeServiceFormHint('  '),'');
@@ -63,3 +63,36 @@ for(const [raw,shown] of [['V2B','Verse 2 B'],['C1A','Chorus 1 A'],['PC2B','Pre-
  assert.equal(c.normalizePresenterFormPresetLabel(raw).key,c.normalizePresenterFormPresetLabel(shown).key);
 }
 console.log('PASS spaced A/B display labels and unchanged form identity');
+
+// Full user-input matrix: spelling/case, separator spaces, groups and @ aliases.
+let matrixCount = 0;
+for (const base of ['Verse 1','Verse1','V1','verse 1','verse1','v1']) {
+  for (const gap of ['', ' ', '  ']) {
+    for (const [suffix, canonical, display] of [
+      ['', 'V1','Verse 1'], ['A','V1A','Verse 1 A'], ['a','V1A','Verse 1 A'],
+      ['B','V1B','Verse 1 B'], ['b','V1B','Verse 1 B'], ['@','V1@','Verse 1 @'],
+      ...['A','a','B','b'].flatMap(g => ['@'+g, '@ '+g, g+'@', g+' @'].map(s =>
+        [s, 'V1@'+g.toUpperCase(), 'Verse 1 @ '+g.toUpperCase()])),
+    ]) {
+      const raw = base + gap + suffix;
+      assert.equal(c.normalizeServiceFormHint(raw), canonical, raw);
+      assert.equal(c.normalizeServiceFormHint(canonical), canonical);
+      assert.equal(c.songFormPresetDisplayLabel(raw), display, raw);
+      assert.equal(c.presenterFormPresetDisplayLabel(raw), display, raw);
+      assert.equal(c.normalizePresenterFormPresetLabel(raw).key, c.normalizeSongFormPresetLabel(canonical).key);
+      const identity = c.formPartLabelIdentity(raw, 'Verse');
+      assert.equal(c.formatFormPartLabel('Verse', identity.part_number, identity.part_variant), display);
+      matrixCount++;
+    }
+  }
+}
+for (const [raw, expected] of [
+  ['v - c - c b - tags','V-C-CB-Tags'], ['v-c-c-b-tags','V-C-C-B-Tags'],
+  ['v c cb tags','v c cb tags'], ['Verse 1 A@B','Verse 1 A@B'],
+  ['V1-C1-V1-C1','V1-C1-V1-C1'], ['c b','CB'], ['c-b','C-B'],
+  ['pre-chorus 1 b@ - bridge a@ - coda @ b','PC1@B-B@A-Coda@B'],
+]) assert.equal(c.normalizeServiceFormHint(raw), expected, raw);
+for (const raw of ['Verse 1 A@B', 'v c cb tags']) {
+  assert.equal(c.findPresenterFormForPresetLabel([{id:'plain',label:'Verse 1',lyrics:'keep'}],raw),null);
+}
+console.log(`PASS ${matrixCount} input combinations, full-name round trips, explicit numbers, ambiguous input and sequence boundaries`);

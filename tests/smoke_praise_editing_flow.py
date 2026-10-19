@@ -39,18 +39,18 @@ def check_flow(browser, url, engine, width, theme):
       {part_type:'Chorus',label:'Chorus@',lyrics:'Short chorus'},
       {part_type:'Verse',label:'Verse 1@A',lyrics:'Variant verse'},
     ]).map(displayLabel).join('|')''')
-    assert at_labels == 'Chorus|Chorus@|Verse 1@A', at_labels
+    assert at_labels == 'Chorus|Chorus @|Verse 1 @ A', at_labels
     legacy_variant_labels = page.evaluate('''() => normalizeForms([
       {part_type:'Chorus',label:'Chorus 1',lyrics:'Original chorus'},
       {part_type:'Chorus',label:'Chorus 2@',lyrics:'Variant chorus'},
     ]).map(displayLabel).join('|')''')
-    assert legacy_variant_labels == 'Chorus|Chorus@', legacy_variant_labels
+    assert legacy_variant_labels == 'Chorus|Chorus @', legacy_variant_labels
     distinct_chorus_labels = page.evaluate('''() => normalizeForms([
       {part_type:'Chorus',label:'Chorus 1',lyrics:'First original chorus'},
       {part_type:'Chorus',label:'Chorus 2',lyrics:'Second original chorus'},
       {part_type:'Chorus',label:'Chorus 2@',lyrics:'Second chorus variation'},
     ]).map(displayLabel).join('|')''')
-    assert distinct_chorus_labels == 'Chorus 1|Chorus 2|Chorus 2@', distinct_chorus_labels
+    assert distinct_chorus_labels == 'Chorus 1|Chorus 2|Chorus 2 @', distinct_chorus_labels
     at_variant_target = page.evaluate('''() => {
       const forms=normalizeForms([
         {id:'base',part_type:'Chorus',lyrics:'Original chorus'},
@@ -64,6 +64,13 @@ def check_flow(browser, url, engine, width, theme):
     page.locator('.form-variant-input').nth(1).press('Tab')
     page.wait_for_function("state.forms[1].part_variant === 'C'")
     assert page.evaluate("displayLabel(state.forms[1])") == 'Verse 2 C'
+    page.locator('.form-variant-input').nth(1).fill('b@')
+    page.locator('.form-variant-input').nth(1).press('Tab')
+    page.wait_for_function("state.forms[1].part_variant === '@B'")
+    assert page.evaluate("displayLabel(state.forms[1])") == 'Verse 2 @ B'
+    page.locator('.form-variant-input').nth(1).fill('C')
+    page.locator('.form-variant-input').nth(1).press('Tab')
+    page.wait_for_function("state.forms[1].part_variant === 'C'")
     page.locator('.form-textarea').first.fill('Edited line\nSecond line')
     page.locator('.form-textarea').first.press('Tab')
     assert page.evaluate("state.forms[0].lyrics") == 'Edited line\nSecond line'
@@ -80,8 +87,8 @@ def check_flow(browser, url, engine, width, theme):
     page.locator('.form-type-select').last.select_option('Bridge')
     assert page.evaluate('state.forms[3].part_type') == 'Bridge'
     assert page.evaluate('state.forms[3].lyrics') == 'New chorus'
-    page.locator('[data-form-action="delete"][data-index="3"]').click()
-    assert page.locator('.form-textarea').count() == 3
+    page.locator('[data-form-action="delete"][data-index="3"]').press("Enter")
+    page.wait_for_function("document.querySelectorAll('.form-textarea').length === 3")
     page.evaluate('''() => {
       writeFormsToSelectedVersion();
       state.songs[0].versions.push({id:'v2',name:'Secondary',forms:[
