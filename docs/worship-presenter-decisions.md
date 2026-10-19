@@ -3552,3 +3552,12 @@ operational row rewrite is part of this release. Current version CAS, atomic
 worship saves, lyric validation, P/R and photo/beat controls remain unchanged.
 DB-only tests reject any legacy store access and exercise both current sources;
 current DB browser suites supersede the retired local-profile smoke scripts.
+
+### Inline editor appearance retained
+
+Inline controller editors have no large panel fill or outer padding. Their row
+and toolbar gaps are 5px. Text fields, selects and textareas use transparent
+backgrounds and a bottom rule, with a complete accent border on focus and the
+existing 2px keyboard focus outline. Select arrows, invalid/disabled states,
+buttons, automatic textarea heights and output rendering remain intact. This
+exception applies only inside servicePresenterControls subgroup editors.
