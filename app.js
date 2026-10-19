@@ -31190,10 +31190,10 @@ function renderPresenterBoardSlideBlocks(entries, activeIndex, serviceId) {
   const colorIndexes = new Map();
   return presenterBoardSlideBlocks(entries).map((block) => {
     const owner = presenterSlideElementGroupKey(block.entries[0]?.slide) || "";
-    const isForm = block.key && presenterSlideSupportsFormGrouping(block.entries[0]?.slide);
+    const isColored = Boolean(block.key);
     const colorIndex = colorIndexes.get(owner) || 0;
-    if (isForm) colorIndexes.set(owner, colorIndex + 1);
-    const colorAttribute = isForm ? ` data-form-color="${colorIndex % 6}"` : "";
+    if (isColored) colorIndexes.set(owner, colorIndex + 1);
+    const colorAttribute = isColored ? ` data-form-color="${colorIndex % 6}"` : "";
     const thumbs = block.entries.map(({ slide, slideIndex, formLabel }) =>
       renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, formLabel)).join("");
     return block.key

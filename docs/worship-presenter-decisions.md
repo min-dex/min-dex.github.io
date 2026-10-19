@@ -3459,7 +3459,9 @@ Controller whole-group backgrounds use occurrence order within each song: muted
 red, yellow, green, cyan, blue, magenta, repeating after six blocks, mixed at 20%
 with the panel surface. Form type no longer determines color. Form and scripture
 labels are plain text without local fills, including hover; keyboard focus remains.
-Scripture group backgrounds stay neutral. Output colors are unchanged.
+Scripture range groups use the same six-color occurrence cycle within each scripture
+element, keeping continuation pages and wrapped row fragments the same color.
+Output colors are unchanged.
 Score pages without a new form marker continue the preceding verified form within
 the same element, using controller-entry metadata only. Unmarked leading pages
 remain ungrouped; never infer verse boundaries or rewrite score manifests.
