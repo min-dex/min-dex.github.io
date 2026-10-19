@@ -5519,106 +5519,36 @@ textarea.svc-presenter-input-control--multiline {
 }
 .svc-presenter-input-field--scripture-parts {
   grid-column: 1 / -1;
-}
-.svc-presenter-input-field--scripture-parts > summary {
-  display: grid;
+  width: 100%;
   min-width: 0;
-  grid-template-columns: max-content minmax(0, 1fr) max-content;
-  align-items: center;
-  border-radius: calc(var(--r) - 2px);
-  background: var(--ui-surface-field);
-  color: var(--ink-2);
-  cursor: pointer;
-  font-size: var(--ui-meta-size);
-  font-weight: var(--ui-label-weight);
-  gap: 10px;
-  list-style: none;
-  padding: 8px 10px;
 }
-.svc-presenter-input-field--scripture-parts > summary::-webkit-details-marker {
-  display: none;
-}
-.svc-presenter-input-field--scripture-parts > summary::after {
-  color: var(--ink-3);
-  content: "▸ 펼치기";
-  flex: 0 0 auto;
-  font-size: var(--ui-label-size);
-  font-weight: var(--ui-label-weight);
-}
-.svc-presenter-input-field--scripture-parts[open] > summary {
-  margin-bottom: 8px;
-}
-.svc-presenter-input-field--scripture-parts[open] > summary::after {
-  content: "▾ 접기";
-}
-.svc-presenter-input-field--scripture-parts > summary small {
-  min-width: 0;
-  color: var(--ink-3);
-  font-size: var(--ui-label-size);
-  font-weight: var(--ui-label-weight);
-  justify-self: start;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.svc-presenter-scripture-parts {
-  display: grid;
-  gap: 6px;
-}
-.svc-presenter-scripture-part {
+.svc-presenter-scripture-parts { display: grid; gap: 10px; min-width: 0; }
+.svc-presenter-scripture-part { display: grid; gap: 10px; min-width: 0; }
+.svc-presenter-scripture-part-head {
   display: flex;
   flex-wrap: wrap;
-  min-width: 0;
   align-items: center;
-  gap: 6px;
-}
-.svc-presenter-scripture-part > .svc-presenter-input-control { flex: 1 1 120px; min-width: 0; }
-.svc-presenter-scripture-part > strong {
-  flex: 1 1 92px;
+  gap: 10px;
   min-width: 0;
-  overflow: hidden;
+}
+.svc-presenter-scripture-part-head > strong {
+  flex: 1 1 100px;
+  min-width: 0;
+  overflow-wrap: anywhere;
   color: var(--ink-2);
   font-size: var(--ui-meta-size);
   font-weight: var(--ui-label-weight);
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
+.svc-presenter-scripture-part-head > select { flex: 1 1 150px; min-width: 0; max-width: 100%; }
 .svc-presenter-scripture-manual {
+  display: grid;
+  gap: 10px;
   min-width: 0;
 }
-.svc-presenter-scripture-manual > summary {
-  display: inline-flex;
-  height: 26px;
-  align-items: center;
-  border-radius: calc(var(--r) - 2px);
-  background: var(--ui-surface-panel);
-  color: var(--ink-3);
-  cursor: pointer;
-  font-size: var(--ui-label-size);
-  font-weight: var(--ui-label-weight);
-  list-style: none;
-  padding: 0 8px;
-  white-space: nowrap;
-}
-.svc-presenter-scripture-manual > summary::-webkit-details-marker {
-  display: none;
-}
-.svc-presenter-scripture-manual[open] {
-  flex: 0 0 100%;
-}
-.svc-presenter-scripture-manual[open] > summary {
-  margin-bottom: 6px;
-  color: var(--accent);
-}
-.svc-presenter-scripture-manual > div {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
-  gap: 6px;
-}
+.svc-presenter-scripture-manual[hidden] { display: none; }
 .svc-presenter-scripture-manual textarea.svc-presenter-input-control {
-  height: 52px;
-  min-height: 52px;
-  padding-top: 7px;
+  height: auto;
+  min-height: 75px;
   resize: vertical;
 }
 .svc-presenter-input-field--song .svc-edit-title-wrap {
@@ -7286,18 +7216,8 @@ textarea.svc-presenter-input-control--multiline {
   gap: 8px;
   width: 100%;
 }
-.svc-board-subgroup-control-item > .svc-presenter-input-field--scripture-parts,
-.svc-board-subgroup-control-item > .svc-presenter-input-field--scripture-parts::details-content {
-  display: contents;
-}
-.svc-board-subgroup-control-item > .svc-presenter-input-field--scripture-parts > summary {
-  flex: 0 0 auto;
-  margin-bottom: 0;
-}
-.svc-board-subgroup-control-item > .svc-presenter-input-field--scripture-parts:not([open]) > .svc-presenter-scripture-parts {
-  display: none;
-}
-.svc-board-subgroup-control-item > .svc-presenter-input-field--scripture-parts > .svc-presenter-scripture-parts {
+.svc-board-subgroup-control-item > .svc-presenter-input-field--scripture-parts {
+  grid-template-columns: minmax(0, 1fr);
   flex: 0 0 100%;
   width: 100%;
 }

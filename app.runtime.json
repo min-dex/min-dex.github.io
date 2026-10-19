@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261019-audio-legacy-purge",
+  "version": "20261019-citation-editor",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "f8148d7722d40e54fd31aae646776df299c15170a2bca5cf0cec166396ea5448",
-  "runtime_sha256": "2dccff8384255a01255586d260c4ab9c9270a6a7480a92dfbd7a47d3048a90be",
-  "source_bytes": 1515387,
-  "runtime_bytes": 1071544,
-  "source_gzip": 338808,
-  "runtime_gzip": 264854
+  "source_sha256": "a6ff401f91bd3015c8cffcc6ca2490da2fe7317530a35d18a3671890f5e03d5f",
+  "runtime_sha256": "23ba94e73ad1fd9b67beeffecfcdbf4afecfd25a77c5d3491ef5ba195494bd90",
+  "source_bytes": 1515958,
+  "runtime_bytes": 1071851,
+  "source_gzip": 338934,
+  "runtime_gzip": 264968
 }

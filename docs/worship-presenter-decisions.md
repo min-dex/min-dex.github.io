@@ -3573,3 +3573,18 @@ backgrounds and a bottom rule, with a complete accent border on focus and the
 outward ring or layout shift. Select arrows, invalid/disabled states,
 buttons, automatic textarea heights and output rendering remain intact. This
 exception applies only inside servicePresenterControls subgroup editors.
+
+
+## Citation translation editor · 2026-10-19
+
+Each citation shows its reference and translation selector without nested
+disclosures. Direct input is a selector option; only that mode shows the
+translation name and multiline body. Existing manual citations are visible
+immediately, including the older single-reference manualScripture shape.
+Viewing does not migrate saved data. Explicit edits adopt that old shape into
+the per-reference payload. Switching to a DB translation captures pending
+text in manualInputDraft; switching back restores it. This optional memo draft
+is not output content, and manualInput retains an empty editor across renders.
+Hidden fields cannot overwrite the selected DB mode during save. Each reference
+has an independent deferred-input key. Existing atomic save and output resolution
+remain unchanged; no production records are migrated.
