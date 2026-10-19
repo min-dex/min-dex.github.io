@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261019-draft-handoff",
+  "version": "20261019-closing-hymn-preservation",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "c495c9d3c9b67ee7d7df42c15d4b4e20b6043f8da50075e8055f62a53ecad61e",
-  "runtime_sha256": "56c8aa013e8769c857fb483eeabc3e611942310c37218a1e5d745c717f27a736",
-  "source_bytes": 1514962,
-  "runtime_bytes": 1071252,
-  "source_gzip": 338734,
-  "runtime_gzip": 264838
+  "source_sha256": "e642169ceaeec70b8ed273ed94550e0322a9d93f4e209539711ef568a624bf4b",
+  "runtime_sha256": "f4afdca00af5bd0d1f325681d4f4b31a612a8617f7f1d107b30a129027e285dd",
+  "source_bytes": 1515795,
+  "runtime_bytes": 1071840,
+  "source_gzip": 338886,
+  "runtime_gzip": 264926
 }

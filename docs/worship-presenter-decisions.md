@@ -3539,3 +3539,13 @@ bytes and read back the saved attachment; keep legacy originals. The audited
 production MR already has public timing, but eight of nineteen cues differ from
 the retained legacy copy. Its public file passes independent SHA-256 validation;
 no operational timing replacement was made during this audit.
+
+
+## Preserve populated closing hymns · 2026-10-19
+
+All-generations projection may omit an empty inherited 폐회찬송 slot, but must
+retain one with saved song/version identity, a real title, manual lyric blocks
+or media. Both the initial regular-slot filter and unmatched-extra filter use
+this rule. Form presets alone do not make an empty template slot populated.
+A populated hymn cannot match the closing image by section or ordinal alone.
+Explicit suppression remains authoritative. No saved rows or sequence are rewritten.
