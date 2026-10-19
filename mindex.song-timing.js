@@ -728,41 +728,7 @@
     });
     document.body.append(dialog); dialog.showModal();
   }
-  // Read-only adapter for audited Elem packages; persistence is version-owned.
-  const libraryKey = value => String(value || '').normalize('NFC').replace(/\s/g, '').toLowerCase();
-  async function readElemLibrary(doc, files, manifest = []) {
-    if (doc?.kind !== 'mindex-song-timing' || doc.version !== 1 || !doc.songs || !doc.lyrics) throw Error('Elem 찬양-타이밍.json을 선택해 주세요.');
-    const entries = Object.entries(doc.songs);
-    if (!entries.length || entries.length > 100) throw Error('한 번에 1~100곡을 가져올 수 있습니다.');
-    const result = [];
-    for (const [key, timing] of entries) {
-      const lyric = doc.lyrics[key];
-      if (!timing?.title || typeof lyric?.text !== 'string' || lyric.text.length > 100000) throw Error('곡 제목이나 가사 자료가 올바르지 않습니다.');
-      const pages = lyric.text.trim().split(/\n\s*\n/).map(s => s.normalize('NFC'));
-      const lyricHash = (await digestBytes(new TextEncoder().encode(pages.join('\n\n')))).slice(0, 16);
-      if (lyricHash !== timing.lyricsFingerprint || pages.length !== timing.pageStarts?.length || pages.length !== timing.origins?.length) throw Error(`${timing.title}: 가사와 타이밍 지문이 다릅니다.`);
-      const candidates = files.filter(f => /\.(mp3|m4a|wav|aac|ogg|webm|flac)$/i.test(f.name) && libraryKey(f.name.replace(/\.[^.]+$/, '')) === libraryKey(timing.title));
-      if (candidates.length !== 1) throw Error(`${timing.title}: 같은 이름의 음원 파일이 하나 있어야 합니다.`);
-      const file = candidates[0];
-      if (file.size > 100 * 1024 * 1024 || String(file.size) !== timing.audioFingerprint) throw Error(`${timing.title}: 음원 파일 크기가 원본과 다릅니다.`);
-      const audioBytes = await file.arrayBuffer(), audioFingerprint = await digestBytes(audioBytes);
-      const evidence = manifest.find(r => libraryKey(r.title) === libraryKey(timing.title));
-      if (evidence && (evidence.sha256 !== audioFingerprint || evidence.bytes !== file.size)) throw Error(`${timing.title}: 음원 SHA-256이 다릅니다.`);
-      const starts = [...timing.pageStarts];
-      if (timing.crossStart != null) { pages.push('[후주]'); starts.push(timing.crossStart); }
-      const duration = await decodedDuration(file);
-      const slides = pages.map(text => /^\[(간주|int|후주)\]$/i.test(text) ? {type:'blank',text:''} : {type:'lyrics',text});
-      const issue = validate({audio:file, audioFingerprint, duration, starts, lyricsFingerprint:fingerprint(slides)}, slides);
-      if (issue) throw Error(`${timing.title}: ${issue}`);
-      // Legacy guessed/aligned positions are never promoted by an import.
-      const enabled = Boolean(evidence) && timing.origins.every(origin => origin === 'manual');
-      const id = await digestBytes(new TextEncoder().encode(JSON.stringify([audioFingerprint,pages,starts,timing.origins])));
-      result.push({id,title:timing.title,pages,starts,duration,enabled,audioName:file.name,audioType:file.type,
-        audioBytes,audioFingerprint,origins:[...timing.origins],sourceLyricsFingerprint:timing.lyricsFingerprint});
-    }
-    return result;
-  }
-  root.MindexSongTiming = { resumeAutoSync, snapBeat, detectBeatGrid, composePhotos, validatePhotos, saveToVersion, readElemLibrary, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, saveToWorship, formsFor, sourceSignature, ownsSource: source => remoteSources.has(source), get revision() { return revision; } };
+  root.MindexSongTiming = { resumeAutoSync, snapBeat, detectBeatGrid, composePhotos, validatePhotos, saveToVersion, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, saveToWorship, formsFor, sourceSignature, ownsSource: source => remoteSources.has(source), get revision() { return revision; } };
   if (typeof document !== 'undefined') document.addEventListener('input', e => {
     const input = e.target.closest('[data-song-timing-seek]');
     const audio = state.serviceMusic.audio;

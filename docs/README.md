@@ -111,7 +111,8 @@ records above for the retained repair evidence and Git reference.
 
 - `ui-review-20261011.md`: current cross-module UI review, fixes, verification and limits.
 
-- [Elem 통합 현황과 남은 기능](elem-migration-status-20261018.md): 2026-10-18 기준 소스 비교와 웹/데스크톱 지원 차이.
+- [어린이 찬양 핵심 기능 현황](children-audio-status.md): 통합 완료 범위와 검증 한계. 쪽수·전체 예배 PNG 내보내기는 제외.
+- [예배 조작·장비 연동·방송 송출 아이디어](presenter-control-ideas.md): 원격 조작, 보기 전환, 순서별 음향·조명 자동 조작, OBS 없는 영상·자막 합성 및 방송 송출. 미구현 기획.
 - [찬양·주보 실시간 연동](content-realtime.md): 저장 알림, 초안·재생·인쇄 보호, 현재 레코드 복구 범위.
 - [운영·교회력 및 예배 목록 실시간 연동](operations-realtime.md): 셀 갱신, 생성·삭제, 열린 문서 보호와 복구.
 

@@ -1107,3 +1107,11 @@ Cross-edition wording and unconfirmed impression identity are not corpus errors
 or required corrections. Source/edition history and actual source-conformance
 repair evidence remain separate. No Bible body, production DB, service or record
 changes. Rebuild/version the runtime for the approved web release.
+
+## Children audio completion and presenter ideas · 2026-10-20
+
+Current scope is `docs/children-audio-status.md`. Device-independent remote control
+and a switchable focused presenter view are ideas only in `docs/presenter-control-ideas.md`.
+Bible page numbers and whole-service PNG export are excluded. Retired the unused
+folder import adapter and its dedicated test; existing version/occurrence audio
+and source evidence remain intact. Downloads originals are outside this cleanup.
