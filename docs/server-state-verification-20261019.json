@@ -2,12 +2,12 @@
   "date": "2026-10-19",
   "branch": "codex/children-version-audio",
   "base": "d8dbb09d",
-  "status": "code-and-isolated-tests-complete-schema-applied-client-not-deployed",
+  "status": "safari-data-migrated-integrated-local-checks-pass-deployment-pending",
   "baseline": {
-    "unit": 32,
-    "smoke": 45,
+    "unit": 36,
+    "smoke": 48,
     "result": "pass",
-    "log": "/private/tmp/mindex-server-state-final-gate.log"
+    "log": "/private/tmp/mindex-server-state-integrated-gate.log"
   },
   "additional": {
     "unit": [
@@ -44,16 +44,27 @@
     "authenticatedTableRead": false,
     "anonReadRpc": true,
     "anonWriteRpc": true,
-    "stateRows": 0
+    "initialStateRows": 0
   },
   "notPerformed": [
-    "browser legacy data inspection/migration",
     "client deployment",
-    "Linux CI run for this change",
+    "successful Linux CI for integrated release",
     "physical PA/native fullscreen verification"
   ],
   "preservedUnrelatedFiles": [
     "AGENTS.md",
     "tests/smoke_delegated_fullscreen.py"
-  ]
+  ],
+  "actualMigration": {
+    "safari": {
+      "entries": 7,
+      "bytes": 549,
+      "confirmed": 7,
+      "audioProfiles": 0,
+      "readbackMatches": true,
+      "originalsIntact": true,
+      "failed": 0
+    },
+    "chrome": "pending deployed initialization"
+  }
 }

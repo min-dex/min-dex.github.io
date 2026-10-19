@@ -1072,3 +1072,13 @@ state table0rows. No browser data migration or app deployment yet. Deployment st
 needs latest-main reconciliation and release/CI/public-byte verification. Worktree
 changes are uncommitted; unrelated AGENTS/fullscreen smoke edits were preserved.
 See server-state-current.md and server-state-verification-20261019.json.
+
+
+### Server-state actual migration follow-up ·2026-10-19
+
+Safari actual session state7entries/549bytes migrated with exact server readback;
+originals retained, legacy audio0. Differing existing server values now preserve
+the browser alternative in a private device archive without overwrite. Main
+564c5981 integrated, local36+48 gate and scoped followups pass. Release target
+20261019-server-state. Final Linux/Pages and Chrome initialization are pending;
+see docs/server-state-verification-20261019.json for the completion receipt.
