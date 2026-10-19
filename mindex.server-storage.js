@@ -122,6 +122,7 @@
    const next=Object.fromEntries(['shared','device','session'].map(name=>[name,createServerState({rpc,token,scope:name==='session'?'session:'+session:name})]));
    await Promise.all(Object.values(next).map(s=>s.load()));
    if(connection!==captured)throw Error('SERVER_STORAGE_PROJECT_CHANGED');
+   let migrationSummary={confirmed:[],retained:[],archived:[]};
    if(legacyProject){
     const {legacyStateDestination,migrateLegacyState}=await import(`./mindex.legacy-state.mjs?v=${encodeURIComponent(window.MINDEX_RELEASE||'server-state')}`);
     const entries=[];
@@ -133,9 +134,16 @@
     }
     const migration=await migrateLegacyState({entries,project,legacyProject,stores:next,prepare});
     if(migration.failed.length)throw Error('LEGACY_STATE_MIGRATION_PENDING');
+    migrationSummary=migration;
    }
    if(connection!==captured)throw Error('SERVER_STORAGE_PROJECT_CHANGED');
    stores=next;ready=true;status();
+   if(document.body.dataset){
+    document.body.dataset.serverStateReady='true';
+    document.body.dataset.serverStateMigrated=String(migrationSummary.confirmed.length);
+    document.body.dataset.serverStateRetained=String(migrationSummary.retained.length);
+    document.body.dataset.serverStateArchived=String(migrationSummary.archived.length);
+   }
    try{
     localChannel=new BroadcastChannel('mindex-server-state:'+project);
     localChannel.onmessage=event=>{

@@ -11,7 +11,7 @@ export function legacyStateDestination(scope,key,project){
  return scope==='session'?'session':'device';
 }
 export async function migrateLegacyState({entries,project,legacyProject,stores,prepare=async entry=>entry.value}){
- const result={confirmed:[],retained:[],failed:[]};
+ const result={confirmed:[],retained:[],archived:[],failed:[]};
  // An unlabelled old browser snapshot must not silently enter another project.
  if(!project||legacyProject!==project){result.retained=entries.map(entry=>({key:entry.key,reason:'PROJECT_UNKNOWN'}));return result}
  const checked=[];
@@ -22,6 +22,22 @@ export async function migrateLegacyState({entries,project,legacyProject,stores,p
   try{
    // Tombstones count as existing records: migration must not resurrect a deletion.
    if(store.keys().includes(entry.key)){
+    if(store.getItem(entry.key)!==entry.value){
+     // Different browser defaults/drafts must not overwrite the shared/current
+     // value, but retaining them only in that browser is not a server migration.
+     const sourceHash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(entry)))),b=>b.toString(16).padStart(2,'0')).join('');
+     const archiveKey='mindex.legacy.alternative.v1:'+sourceHash,backup=stores.device;
+     if(backup.pendingKeys().includes(archiveKey))await backup.retry(archiveKey);
+     if(!backup.keys().includes(archiveKey)){
+      const value=await prepare(entry);
+      if(typeof value!=='string')throw Error('MIGRATION_VALUE_REQUIRED');
+      await backup.setItem(archiveKey,JSON.stringify({scope:entry.scope,key:entry.key,value,sourceHash}));
+     }
+     await backup.load();
+     const archived=JSON.parse(backup.getItem(archiveKey)||'null');
+     if(archived?.sourceHash!==sourceHash||archived.key!==entry.key||archived.scope!==entry.scope)throw Error('MIGRATION_ARCHIVE_READBACK_FAILED');
+     result.archived.push({key:entry.key,archiveKey});
+    }
     result.retained.push({key:entry.key,reason:'SERVER_RECORD_EXISTS'});continue;
    }
    const value=await prepare(entry);

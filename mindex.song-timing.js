@@ -224,6 +224,7 @@
   }
   async function initializeServerProfiles(){
     await ready;
+    if(typeof document!=='undefined')document.body.dataset.serverLegacyAudioReadError=String(Boolean(loadError));
     const stored=JSON.parse(root.MINDEX_SERVER_STORAGE.getItem('local',PROFILE_MANIFEST,'{}'));
     for(const [key,record] of Object.entries(stored)){
       if(record?.key!==key||!/^https:\/\//.test(record.audioUrl||''))continue;
@@ -233,6 +234,7 @@
       if(profiles.has(key))continue;
       await persistProfile(profile);
     }
+    if(typeof document!=='undefined')document.body.dataset.serverAudioProfiles=String(profiles.size);
     revision++;
   }
   async function save(profile, slides) {

@@ -21,7 +21,9 @@ const entries=[{scope:'local',key:'mindex.theme',value:'dark'},
 assert.equal((await migrateLegacyState({entries,project,legacyProject:'other',stores})).retained.length,3);assert.equal(writes,0);
 await stores.shared.setItem('mindex.theme','light');await stores.session.removeItem('mindex.ui.module');
 let result=await migrateLegacyState({entries,project,legacyProject:project,stores});
-assert.equal(result.confirmed.length,1);assert.equal(result.retained.length,2);
+assert.equal(result.confirmed.length,1);assert.equal(result.retained.length,2);assert.equal(result.archived.length,2);
+for(const entry of result.archived)assert.ok(JSON.parse(stores.device.getItem(entry.archiveKey)).sourceHash);
+const archiveWrites=writes;await migrateLegacyState({entries,project,legacyProject:project,stores});assert.equal(writes,archiveWrites,'repeat migration cannot duplicate backups');
 assert.equal(stores.shared.getItem('mindex.theme'),'light');assert.equal(stores.session.getItem('mindex.ui.module'),null);
 const source=new Map(entries.map(e=>[e.key,e.value]));const access=()=>({getItem:key=>source.get(key),removeItem:key=>source.delete(key)});
 source.set(entries[1].key,'newer edit');assert.deepEqual(retireConfirmedLegacyState(result,access),[]);
