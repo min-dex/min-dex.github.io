@@ -148,3 +148,7 @@ its left text column stacks title, date, then temporal status. The icon-only
 35px launch control sits vertically centered against the whole text column,
 with its existing start/stop tooltip and accessible name. Stop remains
 danger-colored. This is appearance only: output lifecycle/data stay unchanged.
+
+Sidebar summary hierarchy: keep the 16/700 title, 12/500 date and 12/500 neutral
+temporal status. Today retains a 12/600 accent label in the same third row;
+status changes never move or resize the launch control.

@@ -8529,7 +8529,8 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
   gap: 5px;
   min-width: 0;
 }
-.service-sidebar-presenter-meta .service-date-status { padding: 0; background: transparent; justify-self: start; }
+.service-sidebar-presenter-meta .service-date-status { padding: 0; background: transparent; justify-self: start; font-size: var(--ui-label-size); font-weight: 500; line-height: 17px; color: var(--ink-3); }
+.service-sidebar-presenter-meta .service-date-status.is-today { color: var(--accent); font-weight: 600; }
 .service-sidebar-presenter-meta .service-sidebar-presenter-date { font-weight: 500; }
 
 /* Publisher split/relocated labels must fit without exposing storage slots. */
