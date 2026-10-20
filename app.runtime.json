@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-today-sidebar-insets",
+  "version": "20261020-bible-info-top",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "4fbf7de16b708d25bd21b907d19f8bf65fbd7498003cb389bbe0bc39b6532dfb",
-  "runtime_sha256": "0c0db380ffee011da6e6391323ebffc2d3d76b2178e6283134620805270f5dbc",
+  "source_sha256": "0f044673df287fb01f7246a229e35b8014f462ba203683e65947974ed16e23b2",
+  "runtime_sha256": "45f15c3ab7cb647f46e4ce509bc4b53fb3e09dff9ac6ca0b54b4d510a048a9d2",
   "source_bytes": 1521035,
   "runtime_bytes": 1075744,
-  "source_gzip": 340354,
-  "runtime_gzip": 266047
+  "source_gzip": 340353,
+  "runtime_gzip": 266046
 }

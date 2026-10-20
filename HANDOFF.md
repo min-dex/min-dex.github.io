@@ -1144,3 +1144,11 @@ Move the closed source/edition disclosure below chapter text. Opening it shows
 source, edition history, acquisition date and links; review/printing caveats stay
 in a second closed disclosure. Existing source records and classification policy
 are retained. No scripture bodies, DB, worship records or output changes.
+
+
+## Discoverable Bible source disclosure ·2026-10-20
+
+Place the closed 출처·판본 disclosure immediately below chapter/copy controls,
+before scripture. Its basic source information and nested review/printing notes
+remain closed until requested. Supersedes the prior bottom-of-chapter placement;
+no corpus, metadata, DB, worship records or output changes.
