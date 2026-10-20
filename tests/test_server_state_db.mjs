@@ -64,6 +64,36 @@ try{
  await assert.rejects(put(token,journalKey,'x','0',id,'shared'),/PRIVATE_STATE_REQUIRED/);
  await assert.rejects(db.query('select * from mindex_state_private.entries'),/permission denied/);
  assert.deepEqual(await read(other),[]);
+ const moreKeys=[
+  `mindex.department.pending.v1:${JSON.stringify([project,serviceId,'youth_prayer'])}`,
+  `mindex.bulletin.v1:${project}:${serviceId}`,
+  `mindex.bulletin.v1:${project}:${serviceId}:recovery`,
+  `mindex.bulletin.v1:${project}:${serviceId}:handoff-recovery:${serviceId}`,
+  `mindex.bulletin.template:${project}:young-adult`,
+ ];
+ for(const key of moreKeys)await assert.rejects(server.setItem(key,'preserved draft'),/INVALID_STATE_VALUE/);
+ const before=await read(token);
+ await db.exec('reset role');
+ const followup=await fs.readFile(new URL('../migrations/2026-10-21-state-department-bulletin-keys.sql',import.meta.url),'utf8');
+ await db.exec(followup);await db.exec(followup);
+ await db.exec('set role anon');
+ assert.deepEqual(await read(token),before); // schema-only repair preserves every stored row
+ for(const key of moreKeys){
+  await server.retry(key);
+  assert.equal(server.getItem(key),'preserved draft');
+  for(const suffix of [':auth.token',':credential',':supabase.anonKey',':deviceReporter'])
+   await assert.rejects(put(token,key+suffix,'secret','0'),/INVALID_STATE_VALUE/);
+  await assert.rejects(put(token,key,'fixture','0',id,'shared'),/PRIVATE_STATE_REQUIRED/);
+ }
+ for(const key of ['mindex.bulletin.other:'+project, 'mindex.department.other:'+project,
+  'mindex.bulletin.v1:https://fixtureproject.supabase.co.evil:x','mindex.bulletin.v1:https://auth.supabase.co:x']){
+  // A valid hostname can contain a secret-like substring; only the hostname is exempt.
+  if(key.includes('https://auth.supabase.co:'))assert.equal((await put(token,key,'fixture','0')).value,'fixture');
+  else await assert.rejects(put(token,key,'fixture','0'),/INVALID_STATE_VALUE/);
+ }
+ await assert.rejects(db.query('select * from mindex_state_private.entries'),/permission denied/);
+ assert.deepEqual(await read(other),[]);
+ console.log('PASS department + bulletin: five failed requests retry unchanged; existing rows, private isolation and suffix secret guards preserved');
  assert.equal((await put(null,'mindex.music.fadeStop','true','0',id,'shared')).value,'true');
  console.log('PASS PostgreSQL: original JOURNAL_NOT_CONFIRMED reproduced; same pending request recovered after migration; creation key, cleanup, isolation, CAS and secret-key guards preserved');
 }finally{await db.close()}

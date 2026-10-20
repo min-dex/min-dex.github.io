@@ -127,8 +127,17 @@ def main():
                       renderCurrentServiceModuleDetail = () => {};
                       let publishes = 0, writes = 0, failStorage = true, waitRead = null;
                       publishPresenterState = () => {publishes++};
-                      const realSet = safeStorageSet;
-                      safeStorageSet = (...args) => failStorage ? false : realSet(...args);
+                      const realStorage = window.MINDEX_SERVER_STORAGE;
+                      const recoveryStore = new Map();
+                      window.MINDEX_SERVER_STORAGE = {
+                        ready:true,
+                        getItem:(scope,key,fallback=null)=>recoveryStore.get(scope+':'+key)??fallback,
+                        setItem:async(scope,key,value)=>{
+                          if(failStorage)throw Error('RECOVERY_SERVER_UNAVAILABLE');
+                          recoveryStore.set(scope+':'+key,value);
+                        },
+                        queue:(scope,key,value)=>{recoveryStore.set(scope+':'+key,value);return true;}
+                      };
                       let db = {revision:'1',service:{id,title:'서버',service_date:'2026-09-19',source_ref:{mindexServiceDocument:{sourceText:'서버 최신 원문'}}},sections:[],elements:[]};
                       const memory = new Map();
                       const atomic = createWorshipAtomicClient({journal:{getItem:k=>memory.get(k)||null,setItem:(k,v)=>memory.set(k,v),removeItem:k=>memory.delete(k)},rpc:async name => {
@@ -141,7 +150,7 @@ def main():
                       db.revision = '2';
                       let review = await atomic.inspectConflict(id,worshipConflictDraft(id));
                       try {await reopenWorshipConflict(review);throw Error('storage failure accepted')}
-                      catch(e){check(e.message === 'DRAFT_NOT_PRESERVED',e.message)}
+                      catch(e){check(e.message === 'RECOVERY_SERVER_UNAVAILABLE',e.message)}
                       check(state.services[0] === original && atomic.baseline(id).revision === '1','storage failure altered state');
                       await openWorshipConflictReview(id);
                       let storageDialog = document.querySelector('.worship-conflict-dialog');
@@ -187,8 +196,8 @@ def main():
                       check(archived.draft.pendingInputs[0].value === '읽는 동안 추가 입력','pending input not archived');
                       check(renderServiceSourceRecovery({id}).includes('읽는 동안 추가 입력'),'archived pending input not available in recovery UI');
                       check(writes === 0 && publishes === 0,'reopen wrote DB or published output');
-                      safeStorageSet = realSet;
-                      return 'PASS recovery action archives full draft; quota and in-flight edits block; unrelated drafts and live output untouched';
+                      window.MINDEX_SERVER_STORAGE = realStorage;
+                      return 'PASS recovery action archives full draft; server failure and in-flight edits block; unrelated drafts and live output untouched';
                     }"""), flush=True)
                     page.close()
                 browser.close()

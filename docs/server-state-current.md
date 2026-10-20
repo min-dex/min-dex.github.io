@@ -311,3 +311,17 @@ JOURNAL_NOT_CONFIRMED/cause INVALID_STATE_VALUE 재현, 수정 후 동일 요청
 독립 readback: journal_guard_fixed/rpc_access_preserved/private_table_protected 모두 true.
 실제 예배 저장·초안 삭제·재생·송출·주보 인쇄는 실행하지 않았다.
 앱 정적 파일 변경은 없으므로 이 서버 수정에 Pages 교체는 필요하지 않다.
+
+### 교회력 담당자·주보 초안 동일 원인 보완 ·2026-10-21
+
+추가 승인에 따라 department.pending.v1의 JSON project URL과 bulletin.v1/
+bulletin.template의 project URL도 정상 식별자로 인식한다. 나머지 suffix는
+동일한 secret guard로 검사한다. 임의 namespace나 위장 도메인은 허용하지 않는다.
+`2026-10-21-state-department-bulletin-keys.sql`은 직전 migration의 알려진 조건만
+교체한다. 기존 rows/requests/grants, 용량·revision·scope 검사는 변경하지 않는다.
+
+격리 PostgreSQL18.4에서 담당자 journal, 주보 초안/복구/이어쓰기 보관본/양식 초안
+5개 실패 요청의 동일 요청 재시도와 기존 저장 rows 완전 일치, 반복 적용, private
+격리·shared 거부·suffix 비밀키 차단을 검증했다. 주보 인쇄/렌더링 코드는 변경하지 않았다.
+운영 적용과 별도 anon synthetic write/replay/cleanup/secret 거부 검증을 수행하며
+검증 요청은 transaction rollback한다. 운영 원본 및 임시본은 수정·삭제하지 않는다.
