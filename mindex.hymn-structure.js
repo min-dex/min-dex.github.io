@@ -2,6 +2,7 @@
 (function (root) {
   'use strict';
   let pending;
+  const formatMeasures = value => Number(value.toFixed(2)).toString();
   function load() {
     if (!pending) pending = fetch('./mindex.hymn-structure.runtime.json', {cache:'no-cache'})
       .then(response => { if (!response.ok) throw Error('Measure metadata unavailable'); return response.json(); })
@@ -23,11 +24,11 @@
       return {status:'stale',text:'마디: 가사가 바뀌어 재검토 필요'};
     }
     if (record.reviewStatus === 'recitative_exception') return {status:'recitative',text:'마디: 낭송형 · 일정한 마디 구분 없음'};
-    const patterns = [...new Set(record.parts.filter(part => part.kind === 'Verse' && part.approxMeasuresByBlock).map(part => part.approxMeasuresByBlock.join('+')))];
+    const patterns = [...new Set(record.parts.filter(part => part.kind === 'Verse' && part.approxMeasuresByBlock).map(part => part.approxMeasuresByBlock.map(formatMeasures).join('+')))];
     const chorus = [...new Set(record.parts.filter(part => part.kind === 'Chorus' && part.approxMeasures != null).map(part => part.approxMeasures))];
     const coda = [...new Set(record.parts.filter(part => part.kind === 'Coda' && part.approxMeasures != null).map(part => part.approxMeasures))];
     const unmeasured = record.parts.some(part => part.approxMeasures == null && part.blockCount > 0);
-    return {status:'measured',text:`마디: 본절 약 ${record.stanzaApproxMeasures} · 블록 ${patterns.join(' / ')}${chorus.length ? ` · 후렴 약 ${chorus.join('/')}` : ''}${coda.length ? ` · 아멘·Coda 약 ${coda.join('/')}` : ''}${unmeasured ? ' · 기타 구간 미확인' : ''}`};
+    return {status:'measured',text:`마디: 본절 약 ${formatMeasures(record.stanzaApproxMeasures)} · 블록 ${patterns.join(' / ')}${chorus.length ? ` · 후렴 약 ${chorus.map(formatMeasures).join('/')}` : ''}${coda.length ? ` · 아멘·Coda 약 ${coda.map(formatMeasures).join('/')}` : ''}${record.displayNote ? ` · ${record.displayNote}` : ''}${unmeasured ? ' · 기타 구간 미확인' : ''}`};
   }
   root.MindexHymnStructure = {describe};
 })(globalThis);
