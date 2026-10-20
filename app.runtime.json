@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-music-topbar-spacing",
+  "version": "20261020-home-preparation",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "d9299d12c851d0e41ec05f2c918706640da9a6b244ffcfbf0f49fba3eea4ed0d",
-  "runtime_sha256": "5533c43389b33bb1c5e1b9c284752873ea27f10a2bbc8415a53f20aed821972a",
-  "source_bytes": 1530242,
-  "runtime_bytes": 1082477,
-  "source_gzip": 342930,
-  "runtime_gzip": 267998
+  "source_sha256": "7e925eced09a98821026296decbdd159e75155ab6e4950b7cb33196fc426f5ab",
+  "runtime_sha256": "6bcf6b4a0e6f0184ee938c4c7b5180e5915cf00de8b56e01e358887e6b0bec06",
+  "source_bytes": 1530962,
+  "runtime_bytes": 1082807,
+  "source_gzip": 343255,
+  "runtime_gzip": 268155
 }

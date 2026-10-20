@@ -90,7 +90,7 @@ Home hierarchy:
   its day section exposes `aria-current="date"`.
 
 - Worship is the primary operational area.
-- Home opens a dedicated start page: today’s date, this week’s worship grouped by date, and small Bulletin/Praise/Scripture shortcuts. Empty dates are omitted; no-gathering records are excluded. The full two-week board remains under `최근 예배`.
+- Home is a preparation preview for the next ongoing/upcoming service selected by the existing time-window rules. Show its registered order/content and explicit 예배 열기 / 원문 편집 actions. The sidebar owns browsing; do not repeat the service catalogue or module shortcuts in the main pane. Preview loads only that service via the existing guarded read path; unknown/loading/error content is never presented as confirmed readiness. No-gathering services are excluded. The full two-week board remains under `최근 예배`.
 - Module rail icons open verse landing pages titled 예배, 주보, 찬양, 말씀 and 운영.
   Re-clicking an icon clears its selection/search after the existing unsaved-edit
   confirmation. Page tabs, history and explicit detail links retain their target.
@@ -670,7 +670,7 @@ output controls in the content sidebar do not move. Add/Save edit buttons share
 
 Popup copy: unsaved-change choices are explained by action labels. Beat setup retains existing-time preservation, with variable-beat guidance in an initially closed, keyboard-accessible disclosure. Photo filenames stay on individual photo rows; no repeated aggregate list.
 
-Home start uses a compact MINDEX wordmark/date header and a flat date-grouped worship agenda beside resource shortcuts. Separate days with rules rather than nested panel/button cards; use two worship columns when space allows and stack on narrow screens. Keep the explicit today marker, shared shell typography/surfaces and inset keyboard focus. Home error states show an actionable error instead of scripture; other module landing verses and scripture records are unchanged. Existing home navigation routes remain intact.
+Home uses a compact preparation header, next-service actions and a read-only registered-content outline. Use shared type/surfaces, 5/10px spacing and responsive columns; no large empty hero, repeated catalogue or module shortcut cards. Home error states remain actionable and never show a scripture fallback.
 
 Service-data detail refresh must dispatch home to renderHomeDetail, including delayed supplemental data and background song completion. Home must not fall through to the service empty-state renderer after initial load.
 
