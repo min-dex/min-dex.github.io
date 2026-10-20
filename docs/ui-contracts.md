@@ -737,3 +737,9 @@ lyrics or Bible bodies, change reader selection, or set full-catalogue-loaded
 flags. Coalesce reads per client with a one-minute in-memory freshness window;
 ignore old-client completions and never replace a different view on completion.
 Unknown/error states remain distinct from zero and offer an explicit retry.
+
+### Presenter input spacing ·2026-10-21
+
+Live scripture outer edges share the controller’s12px inset; inner padding stays10px.
+Preparation disclosure retains its35px click target and focus; the following gap is5px,
+removing stacked heading whitespace. Labels, input heights and output behavior remain unchanged.

@@ -6207,7 +6207,7 @@ textarea.svc-presenter-input-control--multiline {
 }
 .svc-presenter-side-panel .svc-presenter-help > summary { width: 34px; }
 .svc-presenter-side-panel .svc-presenter-input-rail {
-  gap: 15px;
+  gap: 5px;
   padding-block: 15px;
 }
 .svc-presenter-actions .icon-btn { width: var(--ui-icon-btn-inline); height: var(--ui-icon-btn-inline); }
@@ -7631,7 +7631,7 @@ body.is-chromium .svc-slide-thumb-wrap.active:has(.svc-slide-thumb:focus-visible
 }
 .svc-citation-composer {
   min-width: 0;
-  margin: 0 10px;
+  margin: 0 12px;
   padding: 10px;
   border: 1px solid transparent;
   border-radius: 8px;
