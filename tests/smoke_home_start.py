@@ -36,6 +36,10 @@ try:
    page.set_viewport_size({'width':1280,'height':800})
    page.locator('.home-start [data-service-week]').click()
    assert page.locator('.service-week-board').count()==2
+   today=page.locator('.service-week-day[aria-current="date"]')
+   assert today.locator('.service-week-today').inner_text()=='오늘'
+   assert '2px' in today.evaluate('e=>getComputedStyle(e).boxShadow')
+   assert page.locator('.service-week-today').count()==1
    page.evaluate("()=>{state.selectedServiceTypeId=null;state.search='';render()}")
    page.locator('.home-start [data-home-module="praise"]').click()
    page.wait_for_function("state.module==='praise'")

@@ -26884,7 +26884,7 @@ function renderServiceWeekDay(date, services) {
     <section class="service-week-day${dateStr < today ? " is-past" : dateStr > today ? " is-upcoming" : ""}${dateStr === today ? " is-today" : ""}${services.length ? "" : " is-empty"}"${dateStr === today ? ' aria-current="date"' : ""}>
       <header>
         <strong>${escapeHtml(weekdays[date.getDay()])}</strong>
-        <span>${escapeHtml(`${date.getMonth() + 1}/${date.getDate()}`)}</span>
+        <span class="service-week-date">${dateStr === today ? '<small class="service-week-today">오늘</small>' : ""}${escapeHtml(`${date.getMonth() + 1}/${date.getDate()}`)}</span>
       </header>
       ${services.length ? renderServiceDateStatus({date:dateStr}) : ""}
       <div class="service-week-stack">

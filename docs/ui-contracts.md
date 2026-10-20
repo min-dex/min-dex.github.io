@@ -627,3 +627,11 @@ Routine background state/draft persistence does not show a global progress
 banner. Failed persistence keeps the actionable warning and retry button; the
 pending queue and beforeunload protection remain unchanged. No success toast
 is added. This changes only the bridge status presentation, not save receipts.
+
+
+### Week today marker and sidebar filter inset ·2026-10-20
+
+The current day has a 2px accent inset border and an accent date with a small
+오늘 marker, even without services. Preserve aria-current=date and separate
+service temporal labels. Sidebar filters share the search/translation 15px
+horizontal inset; button padding, focus and grouping remain unchanged.
