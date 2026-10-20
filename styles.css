@@ -9327,3 +9327,20 @@ body:has(#servicePresenterControls[data-focus-view="true"]) .svc-presenter-live-
 .svc-focus-filmstrip-heading { border-top: 1px solid var(--line); padding-top: 15px; color: var(--ink-3); font-size: 12px; font-weight: 600; }
 #servicePresenterControls[data-focus-view="true"] .svc-slide-board { gap: 10px; padding-top: 10px; }
 #servicePresenterControls[data-focus-view="true"] .svc-slide-thumb-meta { font-variant-numeric: tabular-nums; }
+
+/* Both presenter views share a stable, wrapping toolbar. */
+.svc-presenter-toolbar { display: flex; flex-wrap: wrap; gap: 10px; overflow: visible; }
+.svc-presenter-view-switch { order: 0; display: inline-flex; flex: 0 0 auto; gap: 0; padding: 2px; border: 1px solid var(--line); border-radius: var(--r); height: 35px; box-sizing: border-box; }
+.svc-presenter-view-switch .btn { min-height: 28px; height: 28px; padding: 0 10px; font-size: var(--ui-meta-size); white-space: nowrap; }
+.svc-presenter-view-switch .btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink, #fff); }
+.svc-presenter-view-switch .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.svc-presenter-toolbar .svc-source-panel-head { order: 1; flex: 0 0 auto; box-sizing: border-box; }
+.svc-presenter-toolbar .svc-board-scale { order: 2; margin-left: auto; }
+.svc-presenter-toolbar > .svc-output-action { order: 3; }
+.svc-presenter-toolbar-utilities { order: 4; }
+.svc-presenter-toolbar .svc-source-panel-body { order: 5; flex: 0 0 100%; min-width: 0; }
+.svc-focus-transport { align-items: flex-start; }
+.svc-focus-navigation { min-height: 35px; }
+.svc-focus-audio { justify-content: flex-end; }
+.svc-focus-audio [data-focus-music-status] { text-align: right; }
+#servicePresenterControls .svc-slide-thumb-meta { font-variant-numeric: tabular-nums; }

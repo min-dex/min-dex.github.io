@@ -245,7 +245,10 @@ function renderPresenterServiceInputRail(service) {
 // View-only state: switching layouts never saves or rebuilds the worship document.
 let presenterFocusView = false;
 function renderPresenterFocusView() {
-  return `<button type="button" class="btn secondary" data-presenter-focus-toggle aria-pressed="${presenterFocusView}">${presenterFocusView ? '기본 보기' : '집중 보기'}</button>`;
+  return `<div class="svc-presenter-view-switch" role="group" aria-label="예배 보기">
+    <button type="button" class="btn secondary" data-presenter-focus-toggle="basic" aria-pressed="${!presenterFocusView}">기본 보기</button>
+    <button type="button" class="btn secondary" data-presenter-focus-toggle="focus" aria-pressed="${presenterFocusView}">집중 보기</button>
+  </div>`;
 }
 
 function syncPresenterFocusView() {
@@ -256,11 +259,9 @@ function syncPresenterFocusView() {
   if (layoutChanged) {
     mountDeferredPresenterBoardSections(root, root.dataset.serviceId, presenterSlidesForService(root.dataset.serviceId));
   }
-  const toggle = root.querySelector('[data-presenter-focus-toggle]');
-  if (toggle) {
-    toggle.textContent = presenterFocusView ? '기본 보기' : '집중 보기';
-    toggle.setAttribute('aria-pressed', String(presenterFocusView));
-  }
+  root.querySelectorAll('[data-presenter-focus-toggle]').forEach(button => {
+    button.setAttribute('aria-pressed', String((button.dataset.presenterFocusToggle === 'focus') === presenterFocusView));
+  });
   let panel = root.querySelector('[data-presenter-focus-panel]');
   if (!presenterFocusView) { if (panel) panel.hidden = true; return; }
   if (!panel) {
@@ -322,7 +323,9 @@ function syncPresenterFocusMusic() {
 document.addEventListener('click', event => {
   const toggle = event.target.closest('[data-presenter-focus-toggle]');
   if (toggle) {
-    presenterFocusView = !presenterFocusView;
+    const nextView = toggle.dataset.presenterFocusToggle === 'focus';
+    if (nextView === presenterFocusView) return;
+    presenterFocusView = nextView;
     syncPresenterFocusView();
     schedulePresenterPreviewLayoutUpdate(document);
   }

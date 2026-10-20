@@ -18,8 +18,8 @@ try:
     page.wait_for_function("typeof syncPresenterFocusView==='function' && !document.body.classList.contains('ui-booting')")
     page.evaluate('''()=>{
       const sid='focus-fixture';state.client={};state.serviceError='';
-      state.services=[{id:sid,type_id:'fixture',date:'2026-10-25',title:'집중 보기 검증'}];
-      state.serviceTypes=[{id:'fixture',name:'검증'}];
+      state.services=[{id:sid,type_id:'fixture',date:'2026-10-25',title:'주일예배'}];
+      state.serviceTypes=[{id:'fixture',name:'주일예배'}];
       state.serviceItems={[sid]:['첫 번째','두 번째','마지막'].map((title,i)=>({id:'focus-'+i,service_id:sid,label:'설교',raw_title:title,sort_order:i+1,_worshipSectionKey:'sermon',_worshipElementTemplateModified:true,memo:serializeServiceItemMemo({elementType:'title',inputMode:'manual',outputMode:'title'})}))};
       state.loadedWorshipServiceIds=new Set([sid]);state.selectedServiceId=sid;state.module='presenter';state.loading=false;
       renderPresenterDetail();
@@ -30,7 +30,7 @@ try:
       state.serviceMusic.mode='presenter-audio';state.serviceMusic.timingGroupId='group';state.serviceMusic.autoSyncSuspended=true;
       window.focusItems=JSON.stringify(state.serviceItems);
     }''')
-    toggle=page.locator('[data-presenter-focus-toggle]')
+    toggle=page.locator('[data-presenter-focus-toggle=focus]')
     toggle.click()
     assert page.locator('[data-presenter-focus-panel]').is_visible()
     assert not page.locator('.svc-source-panel').is_visible()
@@ -77,9 +77,28 @@ try:
     }''')
     Path('output/presenter-focus').mkdir(parents=True,exist_ok=True)
     page.screenshot(path=f'output/presenter-focus/{engine}.png')
-    toggle.click()
+    page.locator('[data-presenter-focus-toggle=basic]').click()
     assert page.locator('.svc-source-panel').is_visible()
     assert page.evaluate("focusBoard===document.querySelector('.svc-slide-board') && focusDraft.value==='아직 저장하지 않은 원문' && focusAudio.currentTime===42 && state.serviceMusic.playing && state.serviceMusic.autoSyncSuspended && focusItems===JSON.stringify(state.serviceItems)")
+    for theme in ('light','dark'):
+     page.evaluate('(theme)=>{document.body.dataset.theme=theme}',theme)
+     for view in ('basic','focus'):
+      page.locator(f'[data-presenter-focus-toggle={view}]').click()
+      assert page.locator(f'[data-presenter-focus-toggle={view}]').get_attribute('aria-pressed')=='true'
+      page.locator(f'[data-presenter-focus-toggle={view}]').click()
+      assert page.locator(f'[data-presenter-focus-toggle={view}]').get_attribute('aria-pressed')=='true'
+      assert page.evaluate("focusBoard===document.querySelector('.svc-slide-board') && focusDraft.value==='아직 저장하지 않은 원문' && focusAudio.currentTime===42")
+      for width in (1440,1100,800):
+       page.set_viewport_size({'width':width,'height':1000})
+       page.wait_for_timeout(100)
+       assert page.locator('.svc-presenter-toolbar').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
+       if view=='basic':
+        page.locator('.svc-source-panel-head').click()
+        assert page.locator('.svc-source-text').is_visible()
+        assert page.locator('.svc-source-panel-body').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
+        page.locator('.svc-source-panel-head').click()
+       if width==1440:
+        page.screenshot(path=f'output/presenter-focus/{engine}-{view}-{theme}.png')
     print(engine,'PASS view switch, DOM/draft/audio retention, live/blank/end states, responsive geometry',flush=True)
    finally: browser.close()
 finally:server.shutdown()

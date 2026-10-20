@@ -42,7 +42,7 @@ def main():
                 page = browser.new_page(viewport={'width': 1440, 'height': 900})
                 setup(page, url)
                 if focused_view:
-                    page.locator("[data-presenter-focus-toggle]").click()
+                    page.locator("[data-presenter-focus-toggle=focus]").click()
                     page.locator('.svc-slide-thumb[data-presenter-index="1"]').focus()
                 for key in ('ArrowRight', 'ArrowLeft', 'End', 'Home', 'Space', '3', 'Enter'):
                     page.keyboard.press(key)
