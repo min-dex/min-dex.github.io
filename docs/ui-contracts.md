@@ -655,3 +655,11 @@ Timing dialogs consolidate repeated save scope; photo-specific guidance stays
 with photo controls. Empty states describe the current state or useful next
 action. Manual source links need no redundant prose footer. Use 송폼 for forms
 and explicit keyboard instructions (same-item newline versus next item).
+
+### Presenter topbar alignment correction · 2026-10-20
+
+Presenter topbar utilities use the same 40px slots, zero gap and centered icons
+as the left module buttons. Remove the presenter-only right-rail header width,
+separator and 35px overrides. This supersedes the fixed-rail toolbar clause;
+output controls in the content sidebar do not move. Add/Save edit buttons share
+70px width, 30px height and 14px icon slots; Save uses the shell's save icon.

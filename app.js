@@ -31058,7 +31058,7 @@ function renderPresenterBoardItemActions(serviceId, context, options = {}) {
       ${options.commitOnly ? "" : audioControls}
       ${options.omitCommit ? "" : `<button class="reference-new-btn svc-board-subgroup-commit" type="button" data-service-item-commit
         data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}">
-        <i data-lucide="check"></i><span>저장</span>
+        <i data-lucide="save"></i><span>저장</span>
       </button>`}
     </div>`;
 }

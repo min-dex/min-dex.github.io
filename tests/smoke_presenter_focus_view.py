@@ -21,7 +21,7 @@ try:
       state.services=[{id:sid,type_id:'fixture',date:'2026-10-25',title:'주일예배'}];
       state.serviceTypes=[{id:'fixture',name:'주일예배'}];
       state.serviceItems={[sid]:['첫 번째','두 번째','마지막'].map((title,i)=>({id:'focus-'+i,service_id:sid,label:'설교',raw_title:title,sort_order:i+1,_worshipSectionKey:'sermon',_worshipElementTemplateModified:true,memo:serializeServiceItemMemo({elementType:'title',inputMode:'manual',outputMode:'title'})}))};
-      state.loadedWorshipServiceIds=new Set([sid]);state.selectedServiceId=sid;state.module='presenter';state.loading=false;
+      state.loadedWorshipServiceIds=new Set([sid]);state.selectedServiceId=sid;state.module='presenter';document.body.dataset.module='presenter';state.loading=false;
       renderPresenterDetail();
       window.focusDraft=document.querySelector('.svc-source-text');focusDraft.value='아직 저장하지 않은 원문';
       window.focusBoard=document.querySelector('.svc-slide-board');
@@ -92,7 +92,17 @@ try:
        page.set_viewport_size({'width':width,'height':1000})
        page.wait_for_timeout(100)
        assert page.locator('.svc-presenter-toolbar').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
+       assert page.evaluate("""()=>{
+        const left=document.querySelector('.module-switcher-tab').getBoundingClientRect();
+        const right=document.querySelector('#themeBtn').getBoundingClientRect();
+        return Math.abs(left.height-right.height)<1 && Math.abs((left.top+left.height/2)-(right.top+right.height/2))<1;
+       }""")
        if view=='basic':
+        assert page.evaluate("""()=>{
+         const add=document.querySelector('.svc-reference-media-quick-add > summary');
+         const save=document.querySelector('.svc-board-subgroup-commit');
+         return Math.abs(add.getBoundingClientRect().width-save.getBoundingClientRect().width)<1 && Math.abs(add.getBoundingClientRect().height-save.getBoundingClientRect().height)<1;
+        }""")
         page.locator('.svc-source-panel-head').click()
         assert page.locator('.svc-source-text').is_visible()
         assert page.locator('.svc-source-panel-body').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
