@@ -743,3 +743,9 @@ Unknown/error states remain distinct from zero and offer an explicit retry.
 Live scripture outer edges share the controller’s12px inset; inner padding stays10px.
 Preparation disclosure retains its35px click target and focus; the following gap is5px,
 removing stacked heading whitespace. Labels, input heights and output behavior remain unchanged.
+
+
+Home places the next calendar date/liturgical label below today's date in the
+header. It links to the existing Calendar route; operations retains only its
+navigation commands and does not repeat the calendar summary. Preserve the same
+next-date selection and error state; stack the context naturally on narrow views.

@@ -16200,7 +16200,9 @@ function renderHomeStart() {
   refs.detailPane.innerHTML = `
     <main class="home-start" aria-label="홈">
       <header class="home-start-header"><div><h1>MINDEX</h1><p>전체 현황</p></div>
-        <time datetime="${toLocalDateStr(now)}">${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 ${serviceWeekdayLabel(now)}</time>
+        <div class="home-header-context"><time datetime="${toLocalDateStr(now)}">${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 ${serviceWeekdayLabel(now)}</time>
+          ${state.calendarError || calendarNext ? `<button class="home-calendar-context" type="button" data-home-module="calendar"><i data-lucide="calendar-days"></i><span>${escapeHtml(state.calendarError ? "교회력을 불러오지 못했습니다." : `${formatServiceDate(calendarNext, {compact:true})} · ${calendarNext.liturgical || calendarNext.note || "교회력 일정"}`)}</span></button>` : ""}
+        </div>
       </header>
       ${renderHomeRecentWork()}
       <div class="home-overview">
@@ -16211,8 +16213,7 @@ function renderHomeStart() {
         </section>`).join("")}
         <section class="home-module home-module--operations" aria-labelledby="home-operations-heading">
           <h2 id="home-operations-heading"><button type="button" data-home-module="operations"><span><i data-lucide="notebook-tabs"></i>운영</span><i data-lucide="arrow-right"></i></button></h2>
-          <div class="home-operations-content"><p class="home-module-detail">${escapeHtml(state.calendarError ? "교회력을 불러오지 못했습니다." : calendarNext ? `${formatServiceDate(calendarNext, {compact:true})} · ${calendarNext.liturgical || calendarNext.note || "교회력 일정"}` : "교회력과 공용 자료를 관리합니다.")}</p>
-            <nav aria-label="운영 메뉴">${OPERATIONS_MODULES.map(([id,label]) => `<button class="btn secondary" type="button" data-home-module="${id}">${escapeHtml(label)}</button>`).join("")}</nav>
+          <div class="home-operations-content"><nav aria-label="운영 메뉴">${OPERATIONS_MODULES.map(([id,label]) => `<button class="btn secondary" type="button" data-home-module="${id}">${escapeHtml(label)}</button>`).join("")}</nav>
           </div>
         </section>
       </div>

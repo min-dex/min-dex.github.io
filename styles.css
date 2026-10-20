@@ -9550,6 +9550,17 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
 @media(max-width:900px) { .home-recent-list { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:640px) { .home-recent-list { grid-template-columns:minmax(0,1fr); } }
 
+.home-header-context { display:flex; flex-direction:column; align-items:flex-end; gap:5px; min-width:0; width:max-content; max-width:100%; }
+.home-calendar-context { display:flex; align-self:stretch; align-items:center; justify-content:flex-end; gap:5px; padding:5px; margin-right:-5px; color:var(--ink-2); font-size:var(--ui-meta-size); line-height:1.5; text-align:right; background:transparent; border:0; border-radius:5px; cursor:pointer; }
+.home-calendar-context svg { width:16px; height:16px; flex-shrink:0; }
+.home-calendar-context span { min-width:0; overflow-wrap:anywhere; }
+.home-calendar-context:hover { background:var(--ui-surface-field); }
+.home-calendar-context:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+@media(max-width:640px) {
+ .home-header-context { align-items:flex-start; }
+ .home-calendar-context { justify-content:flex-start; text-align:left; margin-right:0; margin-left:-5px; }
+}
+
 /* Narrow presenter: existing controls and drafts stay mounted in a vertical flow. */
 @media screen and (max-width: 980px) {
   body:has(#servicePresenterControls) { height:auto; overflow-y:auto; }
@@ -9587,4 +9598,5 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
 @media screen and (max-width:980px) {
   .svc-focus-navigation .svc-focus-output { display:inline-flex; }
   .svc-focus-panel > .svc-focus-transport { order:-1; }
+
 }

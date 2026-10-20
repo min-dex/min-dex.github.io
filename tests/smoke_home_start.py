@@ -48,7 +48,8 @@ try:
    assert '2개 부서' in page.locator('.home-module').nth(1).inner_text()
    assert '2곡' in page.locator('.home-module').nth(2).inner_text()
    assert '2개 역본' in page.locator('.home-module').nth(3).inner_text()
-   assert '교회력 fixture' in page.locator('.home-module--operations').inner_text()
+   assert '교회력 fixture' in page.locator('.home-start-header').inner_text()
+   assert '교회력 fixture' not in page.locator('.home-module--operations').inner_text()
    # The original sidebar routes remain functional, including stalled data.
    page.locator('#songList [data-service-week]').click()
    assert page.locator('.service-week-board').count()==2
