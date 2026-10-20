@@ -119,3 +119,5 @@ records above for the retained repair evidence and Git reference.
 - [운영·교회력 및 예배 목록 실시간 연동](operations-realtime.md): 셀 갱신, 생성·삭제, 열린 문서 보호와 복구.
 
 - [프로젝트 잔재 점검](project-cleanup-20261019.md): 삭제·보존 범위와 문서 보완, 점검 한계.
+
+- [찬송가 마디 검토·표시](hymn-musical-structure.md): 본절 측정25개/전체1203개. 읽기 전용 표시 및 미확인·가사 변경 재검토 규칙. 전곡 심층 완료가 아님.
