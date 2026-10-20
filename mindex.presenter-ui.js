@@ -181,7 +181,7 @@ function renderPresenterHelpControl() {
         </dl>
         <div class="svc-presenter-help-head">
           <strong>입력</strong>
-          <small>인용 구절은 준비 상태에서는 선택만, 송출 중에는 바로 전환합니다.</small>
+          <small>준비 중에는 구절만 선택합니다. 송출 중에는 선택한 구절로 바로 전환합니다.</small>
         </div>
         <dl>
           ${inputRows.map(([key, value]) => `

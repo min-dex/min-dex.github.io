@@ -643,3 +643,15 @@ Place 출처·판본 directly below reader controls so it is reachable without
 scrolling through a chapter. The native disclosure and its nested review record
 start closed. Source text/history/links remain available on request. This
 supersedes the earlier bottom-of-chapter placement; preserve all source evidence.
+### Concise explanatory copy ·2026-10-20
+
+Keep helper copy in the order scope, next action, then necessary caveat. Avoid
+repeating scope or save completion across adjacent paragraphs. Preserve distinct
+service-only versus shared-version effects, one-second lyric lead, manual-switch
+behavior, failure/recovery choices and source evidence. User-authored content,
+manual body, projection text and print content are outside editorial cleanup.
+
+Timing dialogs consolidate repeated save scope; photo-specific guidance stays
+with photo controls. Empty states describe the current state or useful next
+action. Manual source links need no redundant prose footer. Use 송폼 for forms
+and explicit keyboard instructions (same-item newline versus next item).

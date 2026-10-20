@@ -28,7 +28,7 @@
 
     <section class="monitor-section" aria-labelledby="monitorRemoteTitle"><div class="monitor-section-heading"><h3 id="monitorRemoteTitle">접속 기기</h3><span data-count></span><button class="icon-btn" data-refresh title="새로고침" aria-label="새로고침"><i data-lucide="refresh-cw"></i></button></div>
     <p class="monitor-message" role="status"></p><div data-devices></div></section>
-    <section class="monitor-section"><h3>이 기기 이름</h3><div class="monitor-toolbar"><label for="monitorName">기기 이름</label><input id="monitorName" maxlength="60" autocomplete="off" placeholder="예: 본당 송출 PC"></div><p class="monitor-share-status" role="status"></p><p>같은 브라우저 프로필의 창·탭은 한 기기로 표시됩니다. 다른 브라우저는 별도 기기로 표시됩니다.</p></section>`;
+    <section class="monitor-section"><h3>이 기기 이름</h3><div class="monitor-toolbar"><label for="monitorName">기기 이름</label><input id="monitorName" maxlength="60" autocomplete="off" placeholder="예: 본당 송출 PC"></div><p class="monitor-share-status" role="status"></p><p>같은 브라우저 프로필의 창·탭은 한 기기로 묶습니다. 브라우저나 프로필이 다르면 별도로 표시합니다.</p></section>`;
   document.body.append(panel);
   const $ = (selector) => panel.querySelector(selector);
   $("#monitorName").value = name || `${os} ${browser}`;
