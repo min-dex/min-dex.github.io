@@ -6235,7 +6235,7 @@ textarea.svc-presenter-input-control--multiline {
 }
 .svc-presenter-help-panel {
   position: absolute;
-  top: calc(100% + 7px);
+  top: calc(100% + 5px);
   right: 0;
   z-index: 45;
   width: min(320px, calc(100vw - 42px));
@@ -6250,12 +6250,12 @@ textarea.svc-presenter-input-control--multiline {
 }
 .svc-presenter-help-head {
   display: grid;
-  gap: 3px;
-  padding: 0 0 8px;
+  gap: 5px;
+  padding: 0 0 10px;
 }
 .svc-presenter-help-head strong {
-  font-size: 12px;
-  font-weight: 800;
+  font-size: 16px;
+  font-weight: 700;
 }
 .svc-presenter-help-head small {
   color: var(--ink-4);
@@ -6265,18 +6265,18 @@ textarea.svc-presenter-input-control--multiline {
 }
 .svc-presenter-help-panel dl {
   display: grid;
-  gap: 4px;
+  gap: 5px;
   margin: 0;
 }
 .svc-presenter-help-panel dl + .svc-presenter-help-head {
-  padding-top: 12px;
+  padding-top: 10px;
 }
 .svc-presenter-help-panel dl > div {
   display: grid;
   grid-template-columns: minmax(86px, .42fr) minmax(0, 1fr);
-  gap: 8px;
+  gap: 10px;
   align-items: center;
-  min-height: 24px;
+  min-height: 25px;
 }
 .svc-presenter-help-panel dt,
 .svc-presenter-help-panel dd {
@@ -6285,7 +6285,7 @@ textarea.svc-presenter-input-control--multiline {
 .svc-presenter-help-panel dt {
   color: var(--ink-3);
   font-size: var(--ui-label-size);
-  font-weight: 800;
+  font-weight: 600;
   white-space: nowrap;
 }
 .svc-presenter-help-panel dd {
@@ -6636,13 +6636,13 @@ textarea.svc-presenter-input-control--multiline {
 }
 .svc-reference-media-quick-add-actions {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + 5px);
   right: 0;
   z-index: 20;
   display: grid;
   min-width: 140px;
-  gap: 4px;
-  padding: 6px;
+  gap: 5px;
+  padding: 5px;
   border: 1px solid var(--line);
   border-radius: var(--r);
   background: var(--ui-surface-panel);
@@ -9404,7 +9404,7 @@ body:has(#servicePresenterControls[data-focus-view="true"]) .right-sidebar { dis
 .svc-presenter-side-panel .svc-presenter-pin-button:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .global-playback-actions { display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-top:5px; }
-.global-playback-actions > button { display:flex; align-items:center; justify-content:center; gap:5px; flex:1 0 60px; min-width:0; height:30px; padding:0 5px; }
+.global-playback-actions > button { display:flex; align-items:center; justify-content:center; gap:5px; flex:1 0 60px; min-width:0; height:30px; padding:0 10px; font-weight:600; }
 .global-playback-actions :is(svg,i[data-lucide]) { width:16px; height:16px; flex-shrink:0; }
 .global-playback-panel .global-playback-fade-stop { flex:0 0 auto; margin:0; padding:0; border:0; gap:5px; white-space:nowrap; }
 .global-playback-panel-head > .icon-btn { width:30px; height:30px; flex:0 0 30px; }
@@ -9514,3 +9514,13 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
 .server-conflict-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 
 .server-conflict-review::backdrop { background: #0008; }
+
+/* Reference menu commands use the dense command tier, including file labels. */
+#servicePresenterControls .svc-reference-media-quick-add-actions > :is(button, label) {
+  height:30px; min-height:30px; padding:0 10px; gap:5px; font-weight:600;
+}
+#servicePresenterControls .svc-reference-media-quick-add-actions :is(i[data-lucide], svg.lucide) {
+  width:var(--ui-icon-size); height:var(--ui-icon-size);
+  min-width:var(--ui-icon-size); min-height:var(--ui-icon-size);
+  flex:0 0 var(--ui-icon-size); stroke-width:var(--ui-icon-stroke);
+}

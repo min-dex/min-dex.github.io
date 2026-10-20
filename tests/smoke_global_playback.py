@@ -67,6 +67,7 @@ def main():
                     launcher.click()
                     panel=page.locator('#globalPlaybackPanel')
                     assert panel.is_visible()
+                    assert panel.locator('[data-global-playback-action="toggle"]').evaluate("e=>{const s=getComputedStyle(e);return s.height==='30px'&&s.paddingLeft==='10px'&&s.paddingRight==='10px'&&s.fontWeight==='600'}")
                     fade=panel.get_by_label('페이드아웃 정지', exact=True)
                     assert fade.is_checked()
                     fade.uncheck()

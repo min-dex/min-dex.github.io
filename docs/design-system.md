@@ -169,3 +169,12 @@ Song timing and draft-handoff dialogs share the neutral utility button
 surface/border/hover rule for secondary actions. Timing save uses the existing
 primary style; preserve its disabled/busy handling, hover ring and focus outline.
 This is dialog chrome only; timing, playback and persistence logic are unchanged.
+
+
+## Presenter popup rhythm ·2026-10-21
+
+Reference insertion menu commands use the dense30px tier,10px horizontal
+insets,600 weight and16px/1.5 icons, including native file-picker labels.
+Help popups use16/700 headings,12/600 shortcut labels and5/10px spacing.
+Music popup transport retains its30px tier with10px insets and600 weight;
+selected, pending, disabled and keyboard-focus states retain their semantics.
