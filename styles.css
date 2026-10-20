@@ -9560,3 +9560,43 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
  .home-header-context { align-items:flex-start; }
  .home-calendar-context { justify-content:flex-start; text-align:left; margin-right:0; margin-left:-5px; }
 }
+
+/* Narrow presenter: existing controls and drafts stay mounted in a vertical flow. */
+@media screen and (max-width: 980px) {
+  body:has(#servicePresenterControls) { height:auto; overflow-y:auto; }
+  body:has(#servicePresenterControls) .app-shell {
+    min-width:0; width:100%; height:auto; min-height:100dvh; overflow:visible;
+    grid-template-columns:minmax(0,1fr); grid-template-rows:auto auto auto auto auto;
+  }
+  body:has(#servicePresenterControls) .app-shell::after { display:none; }
+  body:has(#servicePresenterControls) .topbar {
+    grid-column:1; grid-row:1; height:auto; min-width:0;
+    grid-template-columns:minmax(0,1fr) auto; grid-template-rows:50px 50px;
+  }
+  body:has(#servicePresenterControls) .topbar-module-strip { grid-column:1/-1; grid-row:1; width:100%; }
+  body:has(#servicePresenterControls) .primary-switcher { grid-column:1; grid-row:2; min-width:0; }
+  body:has(#servicePresenterControls) .topbar-actions { grid-column:2; grid-row:2; }
+  body:has(#servicePresenterControls) .workspace { grid-column:1; grid-row:3; overflow:visible; }
+  body:has(#servicePresenterControls) .detail-pane { height:auto; overflow:visible; padding:15px; }
+  body:has(#servicePresenterControls) .nav-sidebar { grid-column:1; grid-row:5; height:300px; min-width:0; }
+  body:has(#servicePresenterControls[data-focus-view="false"]) .right-sidebar,
+  body:has(#servicePresenterControls[data-focus-view="false"]) .svc-presenter-side-panel { display:contents; }
+  body:has(#servicePresenterControls) .svc-presenter-side-panel > .svc-presenter-top {
+    grid-column:1; grid-row:2; padding:10px 15px; min-width:0;
+  }
+  body:has(#servicePresenterControls) .svc-presenter-input-stack { grid-column:1; grid-row:4; padding:0 15px 15px; }
+  body:has(#servicePresenterControls) .svc-presenter-input-rail { width:100%; }
+  body:has(#servicePresenterControls) .svc-presenter-side-panel .svc-presenter-main { width:100%; }
+  body:has(#servicePresenterControls) .svc-presenter-live-panel { max-width:100%; }
+  .svc-focus-audio { min-width:0; flex-wrap:wrap; }
+  .svc-focus-audio [data-focus-music-status] { overflow-wrap:anywhere; }
+}
+@media screen and (max-width: 500px) {
+  .svc-focus-screens { grid-template-columns:minmax(0,1fr); }
+}
+.svc-focus-output { display:none; }
+@media screen and (max-width:980px) {
+  .svc-focus-navigation .svc-focus-output { display:inline-flex; }
+  .svc-focus-panel > .svc-focus-transport { order:-1; }
+
+}

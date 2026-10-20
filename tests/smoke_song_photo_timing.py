@@ -45,7 +45,7 @@ try:
    page.route('**/*',route)
    page.goto(url+'?mindexSmokeRaw=1');page.wait_for_function("typeof buildPresenterSlidesForServiceItem==='function' && !!globalThis.MindexSongTiming")
    page.wait_for_function("!document.body.classList.contains('ui-booting')");page.locator('#bootStatus').wait_for(state='hidden')
-   for width in (390,1100):
+   for width in (390,600,800,1100):
     page.set_viewport_size({'width':width,'height':800})
     page.evaluate("void confirmUnsavedChangesAction().then(value=>window.popupChoice=value)")
     unsaved=page.locator('.unsaved-dialog')
@@ -58,9 +58,11 @@ try:
    ids=page.evaluate(fixture)
    page.evaluate('({serviceId,elementId})=>MindexSongTiming.open(serviceId,elementId)',ids)
    d=page.locator('[data-song-timing-dialog]');assert '예배 음원' in d.locator('h2').inner_text()
+   d.locator('[data-timing-filename]').evaluate("e=>e.textContent='아주긴파일명LongFileName'.repeat(35)+'.wav'")
+   d.locator('.song-timing-row label').first.evaluate("e=>e.prepend('공백없는긴가사LongLyrics'.repeat(35))")
    assert d.locator('.song-timing-photo').count()>=4
    assert d.locator('[data-photo-names]').count()==0
-   for width in (390,1100):
+   for width in (390,600,800,1100):
     page.set_viewport_size({'width':width,'height':800})
     help=d.locator('[data-beat-help]')
     assert not help.evaluate('el=>el.open')
@@ -82,7 +84,7 @@ try:
     assert float(d.locator(f'[data-timing-start="{i}"]').input_value())==i*3
    d.locator('[data-timing-save]').click();page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('저장했습니다.')")
    page.evaluate('photoTimingSnapshot=JSON.stringify({services:state.services,songs:state.songs,items:state.serviceItems})')
-   for width in (390,1100):
+   for width in (390,600,800,1100):
     page.set_viewport_size({'width':width,'height':800});assert d.evaluate('(el)=>el.scrollWidth<=el.clientWidth+1')
     d.screenshot(path=f'/tmp/mindex-photo-timing-{engine}-{width}.png')
    d.evaluate('(el)=>el.scrollTop=0');d.screenshot(path=f'/tmp/mindex-photo-timing-{engine}-top.png')

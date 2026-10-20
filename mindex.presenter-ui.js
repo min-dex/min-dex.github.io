@@ -290,10 +290,12 @@ function syncPresenterFocusView() {
   const label = outputOpen ? (state.presenter.safetyBlank ? '암전' : '현재 송출')
     : isPresenterOutputWindowOpen() ? '선택 화면 · 다른 예배 송출 중' : '선택 화면 · 송출 대기';
   const frame = (slide, title) => `<div class="svc-focus-preview"><strong>${escapeHtml(title)}</strong><div class="svc-slide-thumb-frame">${slide ? renderPresenterSlideMiniPreview(slide, serviceId) : '<span>다음 슬라이드 없음</span>'}</div></div>`;
+  const outputControl = document.querySelector('[data-presenter-right-sidebar] .svc-presenter-launch');
+  const narrowOutput = outputControl ? `<button type="button" class="btn secondary svc-focus-output" data-presenter-action="${escapeAttr(outputControl.dataset.presenterAction)}" data-service-id="${escapeAttr(serviceId)}" ${outputControl.disabled ? 'disabled' : ''}>${escapeHtml(outputControl.getAttribute('aria-label') || outputControl.textContent.trim())}</button>` : '';
   const markup = `<div class="svc-focus-screens">${frame(current, label)}${frame(next, '다음 화면')}</div>
     <div class="svc-focus-transport"><div class="svc-focus-navigation" role="group" aria-label="슬라이드 이동"><span class="svc-focus-count">${slides.length ? index + 1 : 0} <span>/ ${slides.length}</span></span>
       <button type="button" class="btn secondary" data-presenter-action="prev" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}>이전</button>
-      <button type="button" class="btn secondary" data-presenter-action="next" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}>다음</button></div>
+      <button type="button" class="btn secondary" data-presenter-action="next" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}>다음</button>${narrowOutput}</div>
       <div class="svc-focus-audio" role="group" aria-label="음원 조작"><span data-focus-music-status role="status"></span>
       <button type="button" class="btn secondary" data-focus-music="toggle">재생 / 일시정지 · P</button>
       <button type="button" class="btn secondary" data-focus-music="stop" aria-label="음악 정지">정지</button>
