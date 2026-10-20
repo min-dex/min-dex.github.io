@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-compact-music-controls",
+  "version": "20261020-integrated-music-layout",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "a79294df24b07d0680e229f0139cdf3025727dfa924e0c90e042e868b4959454",
-  "runtime_sha256": "5a95d7523d245a0cb8952792216ca68cfe668a33d6023c465046723d87cdbbeb",
-  "source_bytes": 1521987,
-  "runtime_bytes": 1076387,
-  "source_gzip": 340601,
-  "runtime_gzip": 266229
+  "source_sha256": "533cf676f94869144278c85cc0687b9efc7ebb39176a4d1c589b6819f771d1ba",
+  "runtime_sha256": "cb460eb04669fe603852893b6a57db62aa29e66f2d123cda4f1f576a4234aaf3",
+  "source_bytes": 1522656,
+  "runtime_bytes": 1076993,
+  "source_gzip": 340817,
+  "runtime_gzip": 266432
 }

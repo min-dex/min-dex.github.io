@@ -657,3 +657,7 @@ action. Manual source links need no redundant prose footer. Use 송폼 for forms
 and explicit keyboard instructions (same-item newline versus next item).
 
 Popup copy: unsaved-change choices are explained by action labels. Beat setup retains existing-time preservation, with variable-beat guidance in an initially closed, keyboard-accessible disclosure. Photo filenames stay on individual photo rows; no repeated aggregate list.
+
+Home start uses neutral date-grouped worship cards, explicit today marker, visible module shortcut buttons, and responsive stacking. Home error states show an actionable error instead of scripture; other module landing verses and scripture records are unchanged. Existing home navigation routes remain intact.
+
+Service-data detail refresh must dispatch home to renderHomeDetail, including delayed supplemental data and background song completion. Home must not fall through to the service empty-state renderer after initial load.

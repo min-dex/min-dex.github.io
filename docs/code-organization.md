@@ -285,3 +285,9 @@ worship RPC or independently publishes a deployment.
 ## Canonical values and aliases · 2026-10-19
 
 Bible short-name and alias objects have one owner in `mindex.constants.js`; app code consumes them. UI selects use strict canonical values; the portable source/read boundary resolves known aliases through lookup-only keys. Praise classification arrays are ordered sets, whereas worship/form/version/lyric arrays are ordered content and must not be sorted for cleanup.
+
+`mindex.presenter-freshness.js` owns read-only output-start DB revalidation,
+blank-window reservation, live song snapshots and change notifications. It is
+loaded before app.js; hooks execute after bootstrap. Output orchestration stays
+in app.js, song selection stays in mindex.presenter.js and existing live modules
+forward change notifications without rewriting service records.

@@ -9178,22 +9178,30 @@ body[data-module="presenter"] .topbar-actions > .icon-btn { flex: 0 0 35px; widt
 .version-title-main > .version-output-title-input { flex-basis: 100%; }
 
 /* Home: a compact starting point; the full week board stays a separate destination. */
-.home-start { width:min(100%, 760px); margin:0 auto; padding:40px 30px; display:grid; gap:30px; }
+/* Home shares the app's neutral panels and visible control surfaces. */
+.home-start { width:min(100%, 1000px); margin:0 auto; padding:30px; display:grid; gap:30px; }
+.home-start-header { display:grid; gap:5px; }
+.home-start-header h1 { margin:0; font-size:var(--page-title-size); font-weight:700; }
 .home-start-header p { margin:0; color:var(--ink-3); font-size:var(--ui-meta-size); }
-.home-start h2 { margin:0; color:var(--ink-3); font-size:var(--ui-label-size); font-weight:700; }
+.home-start h2 { margin:0; font-size:var(--ui-row-size); font-weight:700; }
 .home-start svg { width:16px; height:16px; flex-shrink:0; }
-.home-schedule > header { display:flex; justify-content:space-between; align-items:center; gap:15px; margin-bottom:10px; }
-.home-start-text-button, .home-start-shortcuts button { display:flex; align-items:center; justify-content:space-between; gap:10px; border:0; background:transparent; color:var(--ink-3); cursor:pointer; font-size:var(--ui-meta-size); padding:10px 0; }
-.home-schedule-day { display:grid; grid-template-columns:110px minmax(0,1fr); align-items:start; padding:10px 0; border-bottom:1px solid var(--line); }
-.home-schedule-day h3 { margin:10px 0; color:var(--ink-3); font-size:var(--ui-meta-size); font-weight:500; }
-.home-schedule-day > div { display:grid; gap:5px; }
-.home-schedule-day button { display:flex; justify-content:space-between; align-items:center; gap:15px; padding:10px; border:0; background:transparent; color:var(--ink); text-align:left; cursor:pointer; font-size:var(--ui-meta-size); }
-.home-start-shortcuts { display:flex; gap:20px; }
-.home-start-shortcuts button { padding:10px 0; color:var(--ink-3); }
-.home-start button:hover { color:var(--accent); }
-.home-start button:focus-visible { outline:2px solid var(--accent); outline-offset:4px; border-radius:4px; }
-.home-start-empty { margin:15px 0 0; color:var(--ink-3); font-size:var(--ui-meta-size); }
-@media(max-width:640px) { .home-start { padding:20px 15px; gap:20px; } .home-schedule-day { grid-template-columns:85px minmax(0,1fr); } .home-start-shortcuts { gap:20px; flex-wrap:wrap; } }
+.home-schedule { display:grid; gap:15px; min-width:0; }
+.home-schedule > header { display:flex; justify-content:space-between; align-items:center; gap:15px; }
+.home-start-text-button, .home-start-shortcuts button, .home-schedule-day button { display:flex; align-items:center; justify-content:space-between; gap:10px; min-width:0; border:1px solid var(--line-2); border-radius:6px; background:var(--control-surface); color:var(--ink); cursor:pointer; text-align:left; font-size:var(--ui-row-size); font-weight:600; padding:10px 15px; }
+.home-start-text-button { font-size:var(--ui-meta-size); padding:5px 10px; flex-shrink:0; }
+.home-schedule-day { display:grid; grid-template-columns:110px minmax(0,1fr); gap:20px; align-items:start; padding:20px; border:1px solid var(--line); border-radius:8px; background:var(--panel); }
+.home-schedule-day.is-today { box-shadow:inset 3px 0 var(--accent); }
+.home-schedule-day h3 { margin:10px 0 0; display:grid; justify-items:start; gap:10px; color:var(--ink-2); font-size:var(--ui-meta-size); font-weight:600; }
+.home-schedule-day h3 small { color:var(--accent); font:inherit; }
+.home-schedule-day > div { display:grid; gap:10px; min-width:0; }
+.home-schedule-day button span { overflow-wrap:anywhere; }
+.home-start-shortcuts { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:15px; }
+.home-start-shortcuts button { min-height:55px; }
+.home-start-shortcuts button span { display:flex; align-items:center; gap:10px; }
+.home-start button:hover { background:var(--panel); border-color:var(--ink-3); }
+.home-start button:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.home-start-empty { margin:0; padding:25px 20px; border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--ink-3); font-size:var(--ui-meta-size); }
+@media(max-width:640px) { .home-start { padding:20px 15px; gap:25px; } .home-schedule-day { grid-template-columns:minmax(0,1fr); gap:15px; padding:15px; } .home-schedule-day h3 { margin:0; display:flex; align-items:center; } .home-start-shortcuts { grid-template-columns:minmax(0,1fr); gap:10px; } }
 
 /* Controller layout only; the same board and editor DOM survive both views. */
 .svc-focus-panel[hidden] { display: none; }
