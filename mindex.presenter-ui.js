@@ -290,8 +290,8 @@ function syncPresenterFocusView() {
       <button type="button" class="btn secondary" data-presenter-action="prev" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}>이전</button>
       <button type="button" class="btn secondary" data-presenter-action="next" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}>다음</button>
       <span data-focus-music-status role="status"></span>
-      <button type="button" class="btn secondary" data-focus-music="toggle">재생 / 일시정지 · P</button>
-      <button type="button" class="btn secondary" data-focus-music="stop">음악 정지</button>
+      <button type="button" class="btn secondary" data-focus-music="toggle">재생 · P</button>
+      <button type="button" class="btn secondary" data-focus-music="stop" aria-label="음악 정지">정지</button>
       <button type="button" class="btn secondary" data-song-timing-resume>자동 넘김 복귀 · R</button>
     </div>`;
   if (panel._markup !== markup) { panel.innerHTML = markup; panel._markup = markup; }
@@ -312,6 +312,13 @@ function syncPresenterFocusMusic() {
   const label = `${music.pending ? '음원 준비 중' : music.playing ? '음원 재생 중' : '음원 정지 / 일시정지'}${sync ? music.autoSyncSuspended ? ' · 자동 넘김 해제' : ' · 자동 넘김' : ''}${music.sourceKey && !own ? ' · 다른 예배 음원' : ''}`;
   panel.querySelector('[data-focus-music-status]').textContent = label;
   panel.querySelectorAll('[data-focus-music]').forEach(button => { button.disabled = !own || !music.sourceKey; });
+  const toggle = panel.querySelector('[data-focus-music="toggle"]');
+  if (toggle) {
+    const text = `${music.pending ? '준비 취소' : music.playing ? '일시정지' : '재생'} · P`;
+    if (toggle.textContent !== text) toggle.textContent = text;
+    toggle.setAttribute('aria-label', music.pending ? '음악 준비 취소' : music.playing ? '음악 일시정지' : '음악 재생');
+    toggle.setAttribute('aria-pressed', String(Boolean(own && music.playing)));
+  }
   const resume = panel.querySelector('[data-song-timing-resume]');
   resume.hidden = !(canResume && music.playing && !music.pending && music.autoSyncSuspended);
 }
