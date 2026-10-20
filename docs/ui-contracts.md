@@ -693,3 +693,5 @@ DOM/focus; late responses cannot overwrite a newer draft. New version IDs do not
 inherit reviewed measurements. See `hymn-musical-structure.md` for evidence scope.
 
 Music management uses a 40px icon-only topbar button. Keep the music icon, active indicator, tooltip and accessible name; the opened panel retains its title.
+
+The nested music launcher participates in the same topbar button selectors as its siblings: 40px fixed slot, zero padding, shared hover face and pressed transform. Its active indicator stays absolutely positioned.
