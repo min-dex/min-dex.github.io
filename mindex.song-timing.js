@@ -328,8 +328,10 @@
     return `${Math.floor(safe / 60)}:${String(Math.floor(safe % 60)).padStart(2, '0')}`;
   }
   function updateTransport(audio) {
+    if (typeof syncPresenterFocusMusic === "function") syncPresenterFocusMusic();
     const source = state.serviceMusic.sourceKey;
     for (const button of document.querySelectorAll('[data-song-timing-resume]')) {
+      if (button.closest('[data-presenter-focus-panel]')) continue;
       button.hidden = !state.serviceMusic.autoSyncSuspended || !state.serviceMusic.playing || !state.presenter.slides[state.presenter.index]?.songTimingEligible || state.serviceMusic.timingGroupId !== state.presenter.slides[state.presenter.index]?.syncTimeline?.groupId;
     }
     for (const input of document.querySelectorAll('[data-song-timing-seek]')) {
