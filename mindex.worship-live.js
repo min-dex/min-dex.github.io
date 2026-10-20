@@ -45,6 +45,7 @@
     finally { busy = false; schedule(retry); }
   }
   async function reconcile() {
+    await globalThis.MindexPresenterFreshness?.checkLiveRevision();
     if (probing || departmentRefreshBlocked() || !['service', 'presenter'].includes(state.module)) return;
     const id = state.selectedServiceId, client = state.client, project = state.config.url;
     if (!id || state.services.find(row => row.id === id)?._isExpected) return;

@@ -32226,6 +32226,8 @@ function setPresenterPendingSlide(serviceId, index, options = {}) {
 async function openPresenterOutput(serviceId = state.selectedServiceId) {
   if (!serviceId) return;
   if (serviceNavigationBlocked(serviceId)) return;
+  if (!globalThis.MindexPresenterFreshness) { showToast("송출 준비 기능을 불러오는 중입니다. 잠시 후 다시 시도해 주세요.", "info"); return; }
+  if (!await globalThis.MindexPresenterFreshness.beforeOpen(serviceId)) return;
   preparePresenterService(serviceId);
   if (!isPresenterOutputWindowOpen()) {
     state.presenter.outputSessionId = crypto.randomUUID();

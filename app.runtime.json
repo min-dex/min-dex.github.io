@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-presenter-filmstrip",
+  "version": "20261020-presenter-fresh-lyrics",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "95161347a386eb38b4b9e6c4561bcd00ec93c837edcfdd0b9943e6bedbd6a2d9",
-  "runtime_sha256": "ac5976b829227a7ca38fe93c249938cbd1f310be85efaa3a4198e0f9e6ed1303",
-  "source_bytes": 1521738,
-  "runtime_bytes": 1076180,
-  "source_gzip": 340576,
-  "runtime_gzip": 266203
+  "source_sha256": "407ab66f7d2f4c766fe04ff751c5b84e88d8bc8c2988e5af518974ffc91167ed",
+  "runtime_sha256": "72be915e7c3831647a252f2b4f0155297b8aa0254a87790faab6f8bcf65c0d63",
+  "source_bytes": 1521986,
+  "runtime_bytes": 1076405,
+  "source_gzip": 340698,
+  "runtime_gzip": 266305
 }
