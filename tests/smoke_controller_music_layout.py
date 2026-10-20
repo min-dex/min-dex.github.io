@@ -37,6 +37,20 @@ try:
    assert page.locator('.svc-children-audio audio').evaluate('(e)=>!e.error&&e.paused&&e.duration>=9')
    for theme in ('light','dark'):
     page.evaluate('(t)=>applyTheme(t)',theme)
+    page.evaluate("""()=>{
+      const button=document.querySelector('.svc-music-toggle'),style=()=>getComputedStyle(button);
+      button.style.transition='none';
+      button.disabled=false;button.setAttribute('aria-pressed','false');const normal=style().color;
+      button.setAttribute('aria-pressed','true');if(style().color===normal)throw Error('pressed state missing');
+      button.disabled=true;const background=style().backgroundColor;
+      if(background!=='rgba(0, 0, 0, 0)'&&background!=='transparent')throw Error('disabled surface overridden');
+      if(style().color===normal)throw Error('disabled ink overridden');
+      button.disabled=false;button.setAttribute('aria-pressed','false');
+    }""")
+    page.keyboard.press('Tab')
+    page.locator('.svc-music-toggle').focus()
+    assert page.locator('.svc-music-toggle').evaluate('(e)=>getComputedStyle(e).outlineOffset')=='-2px'
+
     for width in (1000,600,390,254):
      page.locator('#music-layout').evaluate('(e,w)=>e.style.width=w+"px"',width)
      assert page.locator('#music-layout').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')

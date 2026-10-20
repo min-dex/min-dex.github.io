@@ -9429,3 +9429,23 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
   stroke-width: var(--ui-icon-stroke);
   vertical-align: middle;
 }
+
+/* Music command states follow the shared button grammar without moving controls. */
+.svc-music-player--inline .icon-btn[aria-pressed="true"]:not(:disabled),
+.global-playback-actions > button[aria-pressed="true"]:not(:disabled) {
+  color:var(--accent); background:var(--accent-soft); border-color:var(--accent);
+}
+.svc-music-player--inline .icon-btn:disabled,
+.svc-board-subgroup-audio-actions > .btn:disabled,
+.global-playback-actions > button:disabled {
+  color:var(--ink-4); background:transparent; border-color:var(--line);
+  box-shadow:none; transform:none; opacity:.55;
+}
+.svc-music-player--inline .icon-btn:not(:disabled):active,
+.svc-board-subgroup-audio-actions > .btn:not(:disabled):active,
+.global-playback-actions > button:not(:disabled):active { transform:none; }
+.global-playback-actions > button:focus-visible,
+.svc-board-subgroup-audio-actions > button:focus-visible,
+.svc-board-subgroup-audio-actions > label:focus-within {
+  outline:2px solid var(--accent); outline-offset:-2px;
+}
