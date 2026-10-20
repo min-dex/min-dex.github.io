@@ -13,9 +13,9 @@
   },
   "summary": {
     "versions": 1203,
-    "stanzaMeasuredVersions": 49,
+    "stanzaMeasuredVersions": 54,
     "recitativeExceptions": 2,
-    "unmeasuredVersions": 1154,
+    "unmeasuredVersions": 1149,
     "complete": false,
     "productionMetadataWritten": false,
     "appDisplayImplemented": true,
@@ -1098,45 +1098,56 @@
       "versionId": "6b7f4f68-7765-5a7c-b3cc-c471a2064c43",
       "edition": "new",
       "number": 19,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 16.0,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "a29b6b03-57e5-4714-b294-1182acf51eb1",
           "kind": "Verse",
           "textSha256": "9ae92158a3be181b603c719e4235158f28c754c7a457b60c50fb246e50f1c8fb",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8.333333333333334,
+            7.666666666666667
+          ],
+          "approxMeasures": 16.0,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "cef05cc8-8d67-4cbe-a0e0-0404c8007054",
           "kind": "Verse",
           "textSha256": "6153e36f7ea6533b77e079b9abd13b4cf847f14952cd09e49e3b1fc006787369",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8.333333333333334,
+            7.666666666666667
+          ],
+          "approxMeasures": 16.0,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "a83a410b-d40c-4c08-b9f0-bc78902362f0",
           "kind": "Verse",
           "textSha256": "6e12408b7e2441e1987c2cd5fbc5df755dc7e1674e358f0306974bed3e23129b",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8.333333333333334,
+            7.666666666666667
+          ],
+          "approxMeasures": 16.0,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "dd3d3d2f-2319-4696-995b-21235a3d9e02",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
       "scoreEvidence": [
@@ -1145,7 +1156,8 @@
           "sha256": "e80cca4148c16a36fa5c5216b29047f4d393658f1715064e68503523c4cb4a09"
         }
       ],
-      "reviewNotes": "Deferred: 3/4 pickup plus written rest creates a fractional stored-block boundary; no rounded block values published pending an independent recount."
+      "reviewNotes": "Resolved by quarter-beat recount: printed systems contain 12+13+11+12 beats before the separate Amen. Stored blocks therefore contain 25+23 beats in 3/4, total 16 measure equivalents. Written rests included. The Amen sung inside each verse is distinct from the additional two-bar closing Amen.",
+      "meter": "3/4"
     },
     {
       "versionId": "482d2fb8-627d-4d95-8424-ae22cec66ccc",
@@ -1796,45 +1808,56 @@
       "versionId": "3cf1f936-5377-5e7b-9863-21e2424c9d91",
       "edition": "new",
       "number": 29,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "107cf88b-0488-454b-b51c-7ea1137de0d1",
           "kind": "Verse",
           "textSha256": "2827782f1f85cd45f009691aac90c018e4c6c66e36bcf2e4af84840e120323f8",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "ea2296f8-a976-4e55-97ba-95adb6f629e1",
           "kind": "Verse",
           "textSha256": "2b0c59edc7cbe427a361ad004025c20990a8c0889a3ba70bdd4c77763a9e53bf",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "a0efaeaa-6cf6-4261-99d3-04d7be1800ad",
           "kind": "Verse",
           "textSha256": "b66c2dfe00e21beb0b7a83dcc72fa056b8a6ee90e00fb0c0602e5a7e52eecc35",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            7
+          ],
+          "approxMeasures": 15,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "fd444159-d269-4abe-8131-0ab1ee533c61",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
       "scoreEvidence": [
@@ -1843,7 +1866,9 @@
           "sha256": "9214eeb536ffed9a774fc4ad948f967d6bb2207463450c92a265d8a561a9b5d1"
         }
       ],
-      "reviewNotes": "Deferred: verses 1 and 2 include final Amen, verse 3 ends at Hallelujah and shares the stored Coda Amen. Do not count Coda as an additional printed ending for every verse. Per-part mapping and preserved output require separate review; no lyric or form changes."
+      "reviewNotes": "Resolved by per-unit mapping: four systems of four bars, 16 per complete printed stanza. Stored verses 1/2 contain 8+8; verse 3 contains 8+7 and the last printed one-bar Amen is the Coda. Coda is shared ending material, not an additional 17th bar. No text, form or output changes.",
+      "meter": "4/4",
+      "displayNote": "1·2절은 아멘 포함 · 3절은 15마디+Coda 1마디"
     },
     {
       "versionId": "a95259ae-7f17-4e31-81c9-0ac965bec268",
@@ -2227,54 +2252,68 @@
       "versionId": "89aac97e-6524-5903-9924-a844373da66b",
       "edition": "new",
       "number": 35,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 15.0,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "48fb438c-881d-4a81-ac25-9dce9f4c7305",
           "kind": "Verse",
           "textSha256": "6afe59605f128fa930b8d60708d1c882e50c0008ac2c3b56ac4d88e799535c64",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8.25,
+            6.75
+          ],
+          "approxMeasures": 15.0,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "cab7d0ba-0b77-4def-bcf0-75d61d15bcb4",
           "kind": "Verse",
           "textSha256": "26cd5ae9621204bc98f693e53d82de6a011fe35de548ae76d5bc3a43b0b3a5e8",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8.25,
+            6.75
+          ],
+          "approxMeasures": 15.0,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "2cb1b8d1-b091-4de5-955c-e95ec0cd419f",
           "kind": "Verse",
           "textSha256": "03806f3235243e62d8808b468bd5f27dfea850025d4842b6bb52be6833aaa2b6",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8.25,
+            6.75
+          ],
+          "approxMeasures": 15.0,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "1df8fd08-fc77-425e-8f71-7f8ccd412b9f",
           "kind": "Verse",
           "textSha256": "4715986c5c62bf2810ed93868fb5a8bdca54ecd898e2938b01c66ae0acaffaa2",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8.25,
+            6.75
+          ],
+          "approxMeasures": 15.0,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "54168a3d-4085-4666-b233-bdbb6430aa7d",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
       "scoreEvidence": [
@@ -2283,7 +2322,8 @@
           "sha256": "001680cb38ce766ec5830248bf12faeede563b7e73fd2057c3df3340d3ae4c78"
         }
       ],
-      "reviewNotes": "Deferred: half-note opening pickup changes to quarter-note pickup at the repeated closing phrase. Stored break lies inside a measure; independent beat-level recount required. No numeric approximation published."
+      "reviewNotes": "Resolved by quarter-beat recount: systems 16+17+16+11 beats before Amen. Stored blocks 33+27 beats in 4/4 = 8.25+6.75, total 15. Initial half-note pickup and later quarter-note pickups retained; separate Amen one bar.",
+      "meter": "4/4"
     },
     {
       "versionId": "b0c30f09-f6e3-50f7-8597-6318461ff119",
@@ -2366,63 +2406,75 @@
       "versionId": "2612b1e8-e160-47e9-9d70-90da8b417178",
       "edition": "new",
       "number": 37,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 13,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "5b70a5f9-5d93-4676-bcf2-ba189e099ec4",
           "kind": "Verse",
           "textSha256": "7e605199cc7d13ad85a404b4eed056c855fe1681a5d5b312acf97b6aa22a98cb",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            13
+          ],
+          "approxMeasures": 13,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "c85f2834-b4b8-4b5a-95c5-122ec68ed5b6",
           "kind": "Verse",
           "textSha256": "7b3ecb769705effb38265c605348a7b0a3f0b040a2f6fb98548fbad9b6c04961",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            13
+          ],
+          "approxMeasures": 13,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "1fccc723-221d-4c95-b678-8b0e8514f5aa",
           "kind": "Verse",
           "textSha256": "308b7cef4b6e62319d45ffc1501f0ce39e24f5a3a30ff2ebad5ca033af44f179",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            13
+          ],
+          "approxMeasures": 13,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e22d1b31-74b7-4f8a-a548-a252b063a6bf",
           "kind": "Verse",
           "textSha256": "d25e04b14e2a4d454bcd9bd3fd6bcef39fdac08a2e300960e3375e024f66d6c6",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            13
+          ],
+          "approxMeasures": 13,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "331b7c89-db64-40cb-b9c4-69dfacd1c02e",
           "kind": "Chorus",
           "textSha256": "e07a4e591d3a79390074a0388ea1e7afc9ad3435a7fd82a2c425a49fc18a311e",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            10
+          ],
+          "approxMeasures": 10,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "da1ed525-51fb-4faf-943b-2727f9b099a1",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
       "scoreEvidence": [
@@ -2431,7 +2483,8 @@
           "sha256": "762c04af4b64f5ac2970fbab90f6e03a8eeced750fb0ec38adc92650d7234285"
         }
       ],
-      "reviewNotes": "Deferred: 3/4 pickups cross the verse/refrain boundary and the refrain contains overlapping voice entries. Independent primary-melody boundary mapping required; do not sum simultaneous voice responses."
+      "reviewNotes": "Resolved using primary melody and written rests only: verse systems 18+21 quarter beats = 13 bars in 3/4. Refrain systems 16+14 quarter beats = 10 bars. Simultaneous lower-voice responses do not extend elapsed bars. Separate closing Amen two bars.",
+      "meter": "3/4"
     },
     {
       "versionId": "d3d73b62-24d9-4746-a580-dab4795012a1",
@@ -2548,54 +2601,70 @@
       "versionId": "dc9d0cb5-aba6-4760-923a-248847923595",
       "edition": "new",
       "number": 40,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "f5e219d5-fc8f-4030-9959-8f0adc65de18",
           "kind": "Verse",
           "textSha256": "16dd783783826415bbb5a708e512cffe3a3df65ac375f8e07a80a90b6381d03e",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "544af452-2e8b-40dd-a7c4-bd9cda94d76f",
           "kind": "Verse",
           "textSha256": "83c2946ee1ce449695501f83db0b9b5e774cb1187d13c4de06a602695bede07b",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "7706bc3d-1582-4190-b6fe-ecc8284fa866",
           "kind": "Verse",
           "textSha256": "8587e8301d324d356fd723a0d84d5ee5b5a740a24bc7409450c0a2430371bbda",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "6ef1ed8c-bc06-40da-a7f5-1d23a08ae7ff",
           "kind": "Verse",
           "textSha256": "1829a597eb8fa957ad5d317e2fa805b5bd94c58cb5d6db9c60de6ec0d53df306",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "c313c5d0-a722-40e6-8aac-ca6a7bbaaec1",
           "kind": "Chorus",
           "textSha256": "f2a522ca36fb8c71dbf2ad665d79f48ca78a7fac69e124d350cf593b623c1246",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2,
+            4.25,
+            1.75
+          ],
+          "approxMeasures": 8.0,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
       "scoreEvidence": [
@@ -2604,7 +2673,8 @@
           "sha256": "64e57b78e543ccc1c77079bc2f85837778862c9a82e9adf53de945f1c997dcd8"
         }
       ],
-      "reviewNotes": "Deferred: three stored refrain blocks do not align with the printed systems and pickup syllables cross phrase boundaries. Independent beat-level mapping needed before publishing block counts."
+      "reviewNotes": "Resolved by quarter-beat recount: each verse block 16 beats, total 8 bars in 4/4. Refrain stored blocks contain 8+17+7 beats = 2+4.25+1.75 bars, total 8. Block 2 starts on the last beat of its printed bar; final block starts on a barline. No separate Amen.",
+      "meter": "4/4"
     },
     {
       "versionId": "427dbdf9-1fa0-5260-918a-323b0c2b71de",

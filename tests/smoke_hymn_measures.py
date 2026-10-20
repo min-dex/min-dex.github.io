@@ -17,12 +17,16 @@ def main():
      const records={v:record},describe=MindexHymnStructure.describe;
      const measured=await describe('v',forms,records);
      check(measured.status==='measured'&&measured.text.includes('12+4')&&measured.text.includes('Coda 약 2'),'measured metadata');
+     const fractional=await describe('v',forms,{v:{...record,displayNote:'shared ending',parts:[{...record.parts[0],approxMeasuresByBlock:[25/3,23/3]},record.parts[1]]}});
+     check(fractional.text.includes('8.33+7.67')&&!fractional.text.includes('33333')&&fractional.text.includes('shared ending'),'fractional boundary and shared ending explanation');
      check((await describe('copy',forms,records)).status==='unreviewed','copy identity');
      for(const changed of [forms.slice(1),[...forms,{id:'extra',lyrics:'extra'}],[{...forms[0],lyrics:'edit'},forms[1]],[{...forms[0],part_type:'Chorus'},forms[1]]])check((await describe('v',changed,records)).status==='stale','changed unit guard');
      check((await describe('v',forms,{v:{...record,reviewStatus:'recitative_exception'}})).status==='recitative','recitative');
      check((await describe('v',forms,{v:{...record,parts:[record.parts[0],{...record.parts[1],approxMeasures:null}]}})).text.includes('기타 구간 미확인'),'partial coverage');
      const data=await(await fetch('./mindex.hymn-structure.runtime.json')).json();
      check(Object.keys(data.records).length>=25,'published catalog');
+     const hymn29=Object.values(data.records).find(r=>r.edition==='new'&&r.number===29);
+     check(hymn29.parts.filter(p=>p.kind==='Verse').map(p=>p.approxMeasures).join(',')==='16,16,15'&&hymn29.parts.find(p=>p.kind==='Coda').approxMeasures===1&&hymn29.displayNote.includes('15마디+Coda 1마디'),'shared Amen is mapped per unit, not counted twice');
      for(const r of Object.values(data.records))for(const part of r.parts){check(!('lyrics'in part)&&!('text'in part),'no published lyrics');if(part.approxMeasuresByBlock)check(part.approxMeasuresByBlock.length===part.blockCount&&part.approxMeasuresByBlock.reduce((a,b)=>a+b,0)===part.approxMeasures,'block consistency');}
      MindexHymnStructure.describe=(id,fs)=>describe(id,fs,records);
      const version={id:'v',name:'새찬송가',hymn_no:'10',forms},song={id:'song',title:'fixture',versions:[version],metadata:{}};
