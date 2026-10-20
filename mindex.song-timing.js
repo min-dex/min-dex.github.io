@@ -315,9 +315,17 @@
     });
   }
   function transport() {
-    const source = state.serviceMusic.sourceKey;
-    if (state.serviceMusic.mode !== 'presenter-audio' || !remoteSources.has(source)) return '';
-    return `<label class="song-timing-seek">음원 위치 <input type="range" min="0" max="${Number(state.serviceMusic.audio?.duration) || 0}" step="0.1" value="${Number(state.serviceMusic.audio?.currentTime) || 0}" data-song-timing-seek data-source="${escapeAttr(source)}" aria-label="동기화 음원 위치"><span data-song-timing-clock></span></label><button type="button" class="btn secondary" data-song-timing-resume ${!state.serviceMusic.autoSyncSuspended || !state.serviceMusic.playing ? 'hidden' : ''}>자동 넘김 복귀 · R</button>`;
+    const music = state.serviceMusic;
+    const source = music.sourceKey;
+    if (!source || !music.audio) return '';
+    const duration = Number.isFinite(music.audio.duration) && music.audio.duration > 0 ? music.audio.duration : 0;
+    const position = Math.max(0, Math.min(Number(music.audio.currentTime) || 0, duration));
+    const synced = music.mode === 'presenter-audio' && remoteSources.has(source);
+    return `<label class="song-timing-seek">음원 위치 <input type="range" min="0" max="${duration}" step="0.1" value="${position}" ${duration ? '' : 'disabled'} data-song-timing-seek data-source="${escapeAttr(source)}" aria-label="음원 재생 위치"><span data-song-timing-clock>${transportClock(position)} / ${transportClock(duration)}</span></label>${synced ? `<button type="button" class="btn secondary" data-song-timing-resume ${!music.autoSyncSuspended || !music.playing ? 'hidden' : ''}>자동 넘김 복귀 · R</button>` : ''}`;
+  }
+  function transportClock(seconds) {
+    const safe = Number.isFinite(seconds) ? Math.max(0, seconds) : 0;
+    return `${Math.floor(safe / 60)}:${String(Math.floor(safe % 60)).padStart(2, '0')}`;
   }
   function updateTransport(audio) {
     const source = state.serviceMusic.sourceKey;
@@ -326,10 +334,10 @@
     }
     for (const input of document.querySelectorAll('[data-song-timing-seek]')) {
       if (input.dataset.source !== source) continue;
-      input.max = Number.isFinite(audio.duration) ? audio.duration : 0;
+      input.max = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 0;
+      input.disabled = Number(input.max) <= 0;
       if (document.activeElement !== input) input.value = audio.currentTime || 0;
-      const clock = seconds => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
-      input.parentElement.querySelector('[data-song-timing-clock]').textContent = `${clock(audio.currentTime || 0)} / ${clock(Number(input.max))}`;
+      input.parentElement.querySelector('[data-song-timing-clock]').textContent = `${transportClock(audio.currentTime || 0)} / ${transportClock(Number(input.max))}`;
     }
   }
   function play(serviceId, elementId) {
@@ -732,7 +740,7 @@
   if (typeof document !== 'undefined') document.addEventListener('input', e => {
     const input = e.target.closest('[data-song-timing-seek]');
     const audio = state.serviceMusic.audio;
-    if (!input || !audio || state.serviceMusic.mode !== 'presenter-audio' || input.dataset.source !== state.serviceMusic.sourceKey) return;
+    if (!input || !audio || input.disabled || input.dataset.source !== state.serviceMusic.sourceKey) return;
     const time = Number(input.value);
     if (Number.isFinite(time) && Number.isFinite(audio.duration)) audio.currentTime = Math.max(0, Math.min(time, audio.duration));
     updateTransport(audio);

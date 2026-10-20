@@ -52,7 +52,7 @@ shell, navigation, buttons, labels, and shared UI copy.
 
 - The root page tab label is `홈`; it names the location while the wordmark names
   the product. The internal route remains `home`.
-- Home tab default: show `이번 주 예배` and `다가오는 예배`.
+- Home tab default: compact date and this-week worship start page; full week board remains an explicit `최근 예배` destination.
 - Module rail defaults: show each module’s centered verse landing and its module name.
   Worship’s weekly board (`최근 예배`) opens explicitly from the sidebar.
 - The weekly board groups this week and next week; `전체 예배` remains a separate list action.

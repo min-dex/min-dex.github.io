@@ -8563,6 +8563,16 @@ function handleDetailClick(event) {
     return;
   }
 
+  if (event.target.closest(".home-start [data-service-week]")) {
+    if (!confirmDiscardServiceChanges()) return;
+    state.selectedServiceTypeId = SERVICE_WEEK_PANEL_ID;
+    state.selectedServiceId = null;
+    renderServiceList();
+    renderHomeDetail();
+    syncBrowserHistory();
+    return;
+  }
+
   const homeModule = event.target.closest("[data-home-module]");
   if (homeModule) {
     void switchModule(homeModule.dataset.homeModule);
@@ -15924,7 +15934,44 @@ function renderHomeDetail() {
     renderServiceSetlistArchiveDetail();
     return;
   }
-  renderServiceDashboard();
+  if (state.selectedServiceTypeId === SERVICE_WEEK_PANEL_ID) {
+    renderServiceDashboard();
+    return;
+  }
+  renderHomeStart();
+}
+
+function renderHomeStart() {
+  if (!state.serviceTypes.length) {
+    refs.detailPane.innerHTML = state.serviceError
+      ? renderUnavailableDetail("home", "홈", state.serviceError)
+      : renderLoadingDetail();
+    return;
+  }
+  const now = new Date();
+  const week = recentServiceWeeks(now)[0];
+  const upcoming = getServiceDashboardServices(now)
+    .filter(service => service.date >= toLocalDateStr(week.start) && service.date <= toLocalDateStr(week.end) && !serviceIsNoGathering(service));
+  const dates = [...new Set(upcoming.map(service => service.date))];
+  refs.detailPane.innerHTML = `
+    <main class="home-start" aria-label="홈">
+      <header class="home-start-header">
+        <p>${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일 ${serviceWeekdayLabel(now)}</p>
+      </header>
+      <section class="home-schedule" aria-labelledby="home-schedule-heading">
+        <header><h2 id="home-schedule-heading">이번 주 예배</h2><button type="button" class="home-start-text-button" data-service-week>최근 예배 <i data-lucide="arrow-right"></i></button></header>
+        ${dates.length ? dates.map(date => `<div class="home-schedule-day">
+          <h3>${escapeHtml(formatServiceDate({date}, {compact:true}))}</h3>
+          <div>${upcoming.filter(service => service.date === date).map(service => `<button type="button" data-service-id="${escapeAttr(service.id)}"><span>${escapeHtml(serviceDisplayTypeName(service))}</span><i data-lucide="arrow-right"></i></button>`).join("")}</div>
+        </div>`).join("") : '<p class="home-start-empty">이번 주에 등록된 예배가 없습니다.</p>'}
+      </section>
+      <nav class="home-start-shortcuts" aria-label="바로가기">
+        <button type="button" data-home-module="bulletin">주보 <i data-lucide="arrow-right"></i></button>
+        <button type="button" data-home-module="praise">찬양 <i data-lucide="arrow-right"></i></button>
+        <button type="button" data-home-module="scripture">말씀 <i data-lucide="arrow-right"></i></button>
+      </nav>
+    </main>`;
+  refreshIcons();
 }
 
 function renderHomeSearchDetail() {
@@ -29337,8 +29384,12 @@ function getServiceMusicAudio() {
       }
       renderPresenterControlState();
     });
+    for (const event of ["loadedmetadata", "durationchange", "emptied"]) {
+      audio.addEventListener(event, () => globalThis.MindexSongTiming?.updateTransport(audio));
+    }
     audio.addEventListener("seeked", () => {
       if (state.serviceMusic.pending) state.serviceMusic.pendingStartTime = audio.currentTime;
+      globalThis.MindexSongTiming?.updateTransport(audio);
     });
     audio.addEventListener("timeupdate", () => {
       // Some native decoders advance after resume without settling play().

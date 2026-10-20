@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-module-landings-final",
+  "version": "20261020-home-music-seek",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "05870109839e3fc504f92605597e88ccc9c6960668075cdb90700ec08227e4d0",
-  "runtime_sha256": "15bd3bfa1f745b0fa34f615a0d717d8ae93c8137110a918501b41707d3a4fa60",
-  "source_bytes": 1518165,
-  "runtime_bytes": 1073232,
-  "source_gzip": 339566,
-  "runtime_gzip": 265421
+  "source_sha256": "10bf84f9ee6a67fa755081c69b7a7ab59f3c577046c4e04c093f2828659eeaf0",
+  "runtime_sha256": "47a2764fd463a34c31d9c9747ef564f349de6f4636c7d621ec43c93270cf825e",
+  "source_bytes": 1520887,
+  "runtime_bytes": 1075610,
+  "source_gzip": 340316,
+  "runtime_gzip": 266011
 }

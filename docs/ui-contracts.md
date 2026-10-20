@@ -86,7 +86,7 @@ Home hierarchy:
   its day section exposes `aria-current="date"`.
 
 - Worship is the primary operational area.
-- Home shows the week dashboard: `이번 주 예배` plus `다가오는 예배`.
+- Home opens a dedicated start page: today’s date, this week’s worship grouped by date, and small Bulletin/Praise/Scripture shortcuts. Empty dates are omitted; no-gathering records are excluded. The full two-week board remains under `최근 예배`.
 - Module rail icons open verse landing pages titled 예배, 주보, 찬양, 말씀 and 운영.
   Re-clicking an icon clears its selection/search after the existing unsaved-edit
   confirmation. Page tabs, history and explicit detail links retain their target.
