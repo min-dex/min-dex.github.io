@@ -19,10 +19,12 @@ def main():
         with sync_playwright() as p:
             for engine in ('chromium','webkit'):
                 browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
-                db={};control={'offline':False}
+                db={};control={'offline':False,'hold':False};held=[]
                 def route_request(route):
                     request=route.request
                     if '/state-fixture/' in request.url:
+                        if control['hold'] and request.url.endswith('mindex_state_write_v1'):
+                            held.append(route);return
                         args=json.loads(request.post_data)
                         owner='shared' if args['p_scope']=='shared' else args['p_token']
                         scope=(owner,args['p_scope'])
@@ -42,13 +44,25 @@ def main():
                     if urlsplit(request.url).netloc==origin:route.continue_()
                     else:route.abort()
                 try:
-                    context=browser.new_context()
+                    context=browser.new_context(reduced_motion="reduce")
                     context.add_init_script("window.open=()=>null;Element.prototype.requestFullscreen=()=>Promise.reject(Error('blocked fixture'));")
                     context.route('**/*',route_request)
                     page=context.new_page()
                     page.goto(url+'?mindexSmokeRaw=1',wait_until='domcontentloaded')
                     page.wait_for_function('!!window.MINDEX_SERVER_STORAGE && typeof persistServerValue === "function" && !document.body.classList.contains("ui-booting")')
+                    page.locator(".mindex-boot").wait_for(state="hidden")
+                    page.evaluate("document.fonts.ready")
                     assert page.evaluate(INIT)
+                    control['hold']=True
+                    page.evaluate("()=>{window.quietSave=MINDEX_SERVER_STORAGE.setItem('session','mindex.quiet.fixture','pending')}")
+                    page.wait_for_function('MINDEX_SERVER_STORAGE.pending')
+                    page.wait_for_timeout(100)
+                    assert page.locator('#serverStorageStatus').is_visible() is False
+                    page.screenshot(path='/tmp/mindex-quiet-pending-'+engine+'.png')
+                    control['hold']=False
+                    for held_route in held: route_request(held_route)
+                    held.clear()
+                    page.evaluate('()=>window.quietSave')
                     page.wait_for_function('!!window.MINDEX_EDITOR_DRAFTS')
                     draft_result=page.evaluate("""async()=>{
                       cacheRefs();state.module='scripture';state.selectedScriptureId='fixture';
@@ -68,8 +82,11 @@ def main():
                     assert error=='offline'
                     assert page.evaluate("safeStorageGet('local','mindex.worshipRecoverySnapshot.latest.v1.fixture')")=='recovery'
                     assert page.locator('#serverStorageStatus').is_visible()
+                    assert page.get_by_role('button',name='다시 보관',exact=True).count()==1
+                    page.screenshot(path='/tmp/mindex-quiet-failure-'+engine+'.png')
                     control['offline']=False
                     assert page.evaluate('()=>window.MINDEX_SERVER_STORAGE.retry()')
+                    assert page.locator('#serverStorageStatus').is_visible() is False
                     assert page.evaluate("safeStorageGet('local','mindex.worshipRecoverySnapshot.latest.v1.fixture')")=='newer'
                     page.reload(wait_until='domcontentloaded')
                     page.wait_for_function('!!window.MINDEX_SERVER_STORAGE && !document.body.classList.contains("ui-booting")')

@@ -15,6 +15,10 @@ Use the existing atomic worship save path; preserve user lyrics, forms and versi
 Read docs/cloud-development.md. Setup: `bash cloud/setup.sh`.
 Baseline: `.cache/cloud-venv/bin/python cloud/check.py`.
 Run additional change-scoped tests; this baseline is not the complete suite.
+For bounded UI changes, run relevant local unit/browser checks and rely on the
+complete required GitHub gate before publication instead of repeating the full
+local baseline. For CI-runner changes, test partition coverage/failure propagation
+locally and verify every shard in GitHub. Never omit or bypass required CI checks.
 Do not glob-run live/import/migration scripts: some can mutate production data.
 Never equate a successful local check with cloud execution or Pages deployment.
 Before push/integration fetch and reconcile the latest remote without discarding work.

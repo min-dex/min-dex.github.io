@@ -12,10 +12,12 @@
  const pending=()=>queued.size>0||failures.size>0||writers.size>0||Object.values(stores||{}).some(s=>s.pending);
  function status(){
   let node=document.getElementById('serverStorageStatus');
+  // Routine background persistence is silent; failures still require action.
+  if(!failures.size){if(node){node.hidden=true;node.textContent=''}return}
   if(!node){node=document.createElement('div');node.id='serverStorageStatus';node.setAttribute('role','status');document.body.append(node);}
-  node.hidden=!pending();
-  node.textContent=failures.size?'서버에 보관하지 못한 내용이 있습니다. 연결을 확인하고 이 화면을 유지해 주세요.':pending()?'변경 내용 서버 보관 중…':'';
-  if(failures.size){const button=document.createElement('button');button.type='button';button.textContent='다시 보관';button.onclick=()=>void retry();node.append(button)}
+  node.hidden=false;
+  node.textContent='서버에 보관하지 못한 내용이 있습니다. 연결을 확인하고 이 화면을 유지해 주세요.';
+  if(failures.size){const button=document.createElement('button');button.type='button';button.className='btn secondary';button.textContent='다시 보관';button.onclick=()=>void retry();node.append(button)}
  }
  function getItem(scope,key,fallback=null){
   if(transport(key))return ephemeral.get(key)??(ready&&key!=='mindex.presenter.signal'?stores.device.getItem(recoveryKey(key)):null)??fallback;

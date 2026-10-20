@@ -619,3 +619,11 @@ reload. Presenter output uses its existing separate initialization.
 Announcement editor disclosure reads 상하단 문구; fields read 상단 / 하단,
 including accessible labels. Stored content and output remain unchanged.
 Coverage: tests/smoke_shell_icons.py (offline Chromium/WebKit).
+
+
+### Quiet server persistence ·2026-10-20
+
+Routine background state/draft persistence does not show a global progress
+banner. Failed persistence keeps the actionable warning and retry button; the
+pending queue and beforeunload protection remain unchanged. No success toast
+is added. This changes only the bridge status presentation, not save receipts.
