@@ -719,3 +719,14 @@ Reuse the existing session/server page-tab payload and guarded history restore.
 Store navigation IDs and a short label only, never document/draft bodies. Reopening
 does not save or start output. Known-deleted/no-gathering destinations are hidden;
 unknown catalogues retain captured labels until the normal module read resolves.
+
+
+### Home catalogue totals ·2026-10-21
+
+Home independently reads the exact visible song count with a HEAD-only query,
+and the active edition catalogue (id/name/source marker only). Apply the same
+canonical-source eligibility as the Scripture reader. Never load song versions,
+lyrics or Bible bodies, change reader selection, or set full-catalogue-loaded
+flags. Coalesce reads per client with a one-minute in-memory freshness window;
+ignore old-client completions and never replace a different view on completion.
+Unknown/error states remain distinct from zero and offer an explicit retry.

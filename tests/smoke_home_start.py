@@ -112,6 +112,45 @@ try:
    assert '불러오지 못했습니다' in page.locator('.home-module').nth(0).inner_text()
    assert '0곡' not in page.locator('.home-module').nth(2).inner_text()
    assert '0개 역본' not in page.locator('.home-module').nth(3).inner_text()
+   # Home totals are independent of reader selection and full catalogue loads.
+   result=page.evaluate("""async()=>{
+    const check=(ok,message)=>{if(!ok)throw Error(message)};
+    const originalClient=state.client, originalCanRead=canUseClientData;
+    const before=JSON.stringify([state.songs,state.bibleTranslations,state.selectedBibleTranslationId,state.selectedBookCode,songCatalogLoaded]);
+    const calls=[];let resolveSongs,resolveEditions;
+    const responses={mindex_songs:new Promise(r=>resolveSongs=r),mindex_bible_translations:new Promise(r=>resolveEditions=r)};
+    const client={from:table=>({select:(fields,options)=>{
+     calls.push({table,fields,options});
+     return {eq(){return this},abortSignal(){return responses[table]}};
+    }})};
+    try {
+     state.client=client;canUseClientData=()=>true;homeOverviewStats=null;
+     state.module='home';renderHomeStart();
+     const pending=loadHomeOverviewStats();
+     check(calls.length===2,'duplicate summary requests');
+     state.module='praise';render();
+     resolveSongs({count:1133,error:null});
+     resolveEditions({data:[{id:'one',name:'개역개정',canonical_source:{}},{id:'two',name:'ASV',canonical_source:'source'},{id:'legacy',name:'legacy',canonical_source:null}],error:null});
+     await pending;
+     check(state.module==='praise'&&!document.querySelector('.home-start'),'late totals replaced navigation');
+     check(homeOverviewStats.songs===1133&&homeOverviewStats.editions===2,'source-qualified totals');
+     check(JSON.stringify([state.songs,state.bibleTranslations,state.selectedBibleTranslationId,state.selectedBookCode,songCatalogLoaded])===before,'summary changed reader/catalogue state');
+     check(calls[0].fields==='id'&&calls[0].options.head&&calls[0].options.count==='exact','song count downloaded catalogue');
+     check(!calls[1].fields.includes('*')&&!calls[1].fields.includes('text'),'edition query fetched bodies');
+     state.module='home';renderHomeStart();
+     check(calls.length===2,'summary ignored freshness window');
+     responses.mindex_songs=Promise.resolve({error:{message:'offline'}});
+     responses.mindex_bible_translations=Promise.resolve({error:{message:'offline'}});
+     await loadHomeOverviewStats({force:true});
+     check(document.querySelectorAll('[data-home-overview-retry]').length===2,'summary error has no retry');
+     responses.mindex_songs=Promise.resolve({count:0,error:null});
+     responses.mindex_bible_translations=Promise.resolve({data:[],error:null});
+     await loadHomeOverviewStats({force:true});
+     check(homeOverviewStats.songs===0&&homeOverviewStats.editions===0,'zero treated as unknown');
+     return 'PASS lightweight independent catalogue totals, coalescing, read errors and zero';
+    } finally {state.client=originalClient;canUseClientData=originalCanRead;homeOverviewStats=null;}
+   }""")
+   print(engine,result,flush=True)
    print('PASS home overview, five routes, unknown/error states, sidebar navigation',engine,flush=True)
    browser.close()
 finally:server.shutdown()

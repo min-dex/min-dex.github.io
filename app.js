@@ -37,6 +37,7 @@ const presenterSlideBuildCache = new Map();
 const explicitlyRequestedWorshipServiceIds = new Set();
 let hymnScoreManifestLoadPromise = null;
 let songCatalogLoaded = false;
+let homeOverviewStats = null;
 let songCatalogSummaryLoaded = false;
 let backgroundSongLoadScheduled = false;
 const serviceScriptureChapterLoadPromises = new Map();
@@ -8665,6 +8666,11 @@ function handleDetailClick(event) {
     return;
   }
 
+  if (event.target.closest("[data-home-overview-retry]")) {
+    void loadHomeOverviewStats({ force:true });
+    return;
+  }
+
   const recentWorkButton = event.target.closest("[data-home-recent]");
   if (recentWorkButton) {
     void openHomeRecentWork(recentWorkButton.dataset.homeRecent);
@@ -16130,8 +16136,49 @@ function renderHomeDetail() {
   renderHomeStart();
 }
 
+async function loadHomeOverviewStats({ force = false } = {}) {
+  if (!canUseClientData() || typeof state.client?.from !== "function") return;
+  const client = state.client;
+  if (homeOverviewStats?.client !== client) homeOverviewStats = { client, songs:null, editions:null, names:[], errors:{}, readAt:0, promise:null };
+  const stats = homeOverviewStats;
+  if (stats.promise) return stats.promise;
+  if (!force && stats.readAt && Date.now() - stats.readAt < 60000) return;
+  const abort = new AbortController();
+  const timer = setTimeout(() => abort.abort(), 15000);
+  const refresh = () => {
+    if (state.client === client && state.module === "home" && refs.detailPane.querySelector(".home-overview") && !isGlobalSearchActive()) renderHomeStart();
+  };
+  stats.promise = (async () => {
+    const results = await Promise.allSettled([
+      client.from("mindex_songs").select("id", { count:"exact", head:true }).abortSignal(abort.signal),
+      client.from("mindex_bible_translations").select("id,name,canonical_source:metadata->canonical_source").eq("is_active", true).abortSignal(abort.signal),
+    ]);
+    if (state.client !== client || homeOverviewStats !== stats) return;
+    const songs = results[0];
+    stats.errors.songs = songs.status !== "fulfilled" || Boolean(songs.value.error) || !Number.isInteger(songs.value.count) || songs.value.count < 0;
+    if (!stats.errors.songs) stats.songs = songs.value.count;
+    const editions = results[1];
+    stats.errors.editions = editions.status !== "fulfilled" || Boolean(editions.value.error) || !Array.isArray(editions.value.data);
+    if (!stats.errors.editions) {
+      const rows = editions.value.data.filter(row => row.canonical_source);
+      stats.editions = rows.length;
+      stats.names = rows.map(row => row.name).filter(Boolean);
+    }
+  })().catch(() => { stats.errors = { songs:true, editions:true }; }).finally(() => {
+    clearTimeout(timer);
+    stats.readAt = Date.now();
+    stats.promise = null;
+    refresh();
+  });
+  return stats.promise;
+}
+
 function renderHomeStart() {
   const now = new Date();
+  const stats = homeOverviewStats?.client === state.client ? homeOverviewStats : null;
+  const songCount = stats?.songs ?? (songCatalogLoaded ? state.songs.length : null);
+  const editionCount = stats?.editions ?? (state.bibleTranslations.length ? state.bibleTranslations.length : null);
+  const editionNames = stats?.editions != null ? stats.names : state.bibleTranslations.map(row => row.name || row.label || row.id);
   const week = recentServiceWeeks(now)[0];
   const servicesReady = state.serviceTypes.length > 0 && !state.serviceError;
   const services = state.services.filter(service => !service._expected && !serviceIsNoGathering(service));
@@ -16139,17 +16186,16 @@ function renderHomeStart() {
   const next = getHomeNextService(now);
   const bulletins = services.filter(serviceSupportsBulletin);
   const departments = [...new Set(bulletins.map(service => serviceDisplayTypeName(service)))];
-  const translations = state.bibleTranslations || [];
   const calendarNext = state.calendarLoaded ? [...state.calendarData].filter(row => row.date >= toLocalDateStr(now)).sort((a,b) => a.date.localeCompare(b.date))[0] : null;
   const modules = [
     {id:"service", label:"예배", icon:"church", value:servicesReady ? `${thisWeek.length}회` : "—", unit:"이번 주 등록 예배",
       detail:state.serviceError ? "예배 목록을 불러오지 못했습니다." : next ? `${formatServiceDate(next, {compact:true})} · ${serviceDisplayTypeName(next)}` : servicesReady ? "다가오는 예배가 없습니다." : "예배 목록 불러오는 중…"},
     {id:"bulletin", label:"주보", icon:"newspaper", value:servicesReady ? `${departments.length}개 부서` : "—", unit:"예배와 연결된 주보",
       detail:state.serviceError ? "주보 목록을 불러오지 못했습니다." : departments.join(" · ") || (servicesReady ? "연결된 주보가 없습니다." : "주보 목록 불러오는 중…")},
-    {id:"praise", label:"찬양", icon:"music", value:songCatalogLoaded ? `${formatCount(state.songs.length)}곡` : "찬양 자료", unit:songCatalogLoaded ? "등록된 곡" : "찬송가 · CCM · 어린이 찬양",
-      detail:songCatalogLoaded ? "가사 · 버전 · 악보 · 음원" : "찬양 탭에서 곡 목록을 확인할 수 있습니다."},
-    {id:"scripture", label:"말씀", icon:"book-open", value:translations.length ? `${translations.length}개 역본` : "성경 자료", unit:"설치된 역본과 본문",
-      detail:translations.map(translation => translation.name || translation.label || translation.id).filter(Boolean).join(" · ") || "말씀 탭에서 역본과 본문을 확인할 수 있습니다."},
+    {id:"praise", label:"찬양", icon:"music", value:songCount != null ? `${formatCount(songCount)}곡` : "—", unit:"등록된 곡",
+      detail:stats?.errors.songs ? "곡 수를 불러오지 못했습니다." : songCount != null ? "가사 · 버전 · 악보 · 음원" : "곡 수 조회 중…", retry:stats?.errors.songs},
+    {id:"scripture", label:"말씀", icon:"book-open", value:editionCount != null ? `${editionCount}개 역본` : "—", unit:"설치된 역본과 본문",
+      detail:stats?.errors.editions ? "역본 수를 불러오지 못했습니다." : editionCount != null ? editionNames.join(" · ") || "설치된 역본이 없습니다." : "역본 수 조회 중…", retry:stats?.errors.editions},
   ];
   refs.detailPane.innerHTML = `
     <main class="home-start" aria-label="홈">
@@ -16161,7 +16207,7 @@ function renderHomeStart() {
         ${modules.map(module => `<section class="home-module" aria-labelledby="home-${module.id}-heading">
           <h2 id="home-${module.id}-heading"><button type="button" data-home-module="${module.id}"><span><i data-lucide="${module.icon}"></i>${module.label}</span><i data-lucide="arrow-right"></i></button></h2>
           <div class="home-module-value">${escapeHtml(module.value)}<span>${escapeHtml(module.unit)}</span></div>
-          <p class="home-module-detail">${escapeHtml(module.detail)}</p>
+          <p class="home-module-detail">${escapeHtml(module.detail)}</p>${module.retry ? '<button class="btn secondary" type="button" data-home-overview-retry>다시 조회</button>' : ""}
         </section>`).join("")}
         <section class="home-module home-module--operations" aria-labelledby="home-operations-heading">
           <h2 id="home-operations-heading"><button type="button" data-home-module="operations"><span><i data-lucide="notebook-tabs"></i>운영</span><i data-lucide="arrow-right"></i></button></h2>
@@ -16172,6 +16218,7 @@ function renderHomeStart() {
       </div>
     </main>`;
   refreshIcons();
+  void loadHomeOverviewStats();
 }
 
 function renderHomeSearchDetail() {

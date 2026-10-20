@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261021-controller-navigation",
+  "version": "20261021-home-live-totals",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "512e37d7e8a16e99328b1908bc7dfed2fe7e587270e239864eb89b14a1302356",
-  "runtime_sha256": "e34d1f11532cba5b3702cbe935b5766427534bf417bdd0b2e50675205ef1fef3",
-  "source_bytes": 1541963,
-  "runtime_bytes": 1090892,
-  "source_gzip": 346114,
-  "runtime_gzip": 270645
+  "source_sha256": "f9a641aaa070112ed4090f6edff676ef2b8aca4eeb637f6063701eeeca18efd0",
+  "runtime_sha256": "624d621f0c021eb5c9ff4661b9b21d5f075f7de821d2b2b0a4b99005f6934632",
+  "source_bytes": 1544643,
+  "runtime_bytes": 1092891,
+  "source_gzip": 346962,
+  "runtime_gzip": 271385
 }
