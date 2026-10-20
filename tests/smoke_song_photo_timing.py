@@ -45,10 +45,33 @@ try:
    page.route('**/*',route)
    page.goto(url+'?mindexSmokeRaw=1');page.wait_for_function("typeof buildPresenterSlidesForServiceItem==='function' && !!globalThis.MindexSongTiming")
    page.wait_for_function("!document.body.classList.contains('ui-booting')");page.locator('#bootStatus').wait_for(state='hidden')
+   for width in (390,1100):
+    page.set_viewport_size({'width':width,'height':800})
+    page.evaluate("void confirmUnsavedChangesAction().then(value=>window.popupChoice=value)")
+    unsaved=page.locator('.unsaved-dialog')
+    assert unsaved.locator('[data-unsaved-action]').count()==3
+    assert unsaved.locator('.unsaved-dialog-copy p').count()==0
+    assert unsaved.evaluate('(el)=>el.scrollWidth<=el.clientWidth+1')
+    unsaved.screenshot(path=f'/tmp/mindex-popup-unsaved-{engine}-{width}.png')
+    unsaved.locator('[data-unsaved-action="cancel"]').click()
+    page.wait_for_function('window.popupChoice === "cancel"')
    ids=page.evaluate(fixture)
    page.evaluate('({serviceId,elementId})=>MindexSongTiming.open(serviceId,elementId)',ids)
    d=page.locator('[data-song-timing-dialog]');assert '예배 음원' in d.locator('h2').inner_text()
    assert d.locator('.song-timing-photo').count()>=4
+   assert d.locator('[data-photo-names]').count()==0
+   for width in (390,1100):
+    page.set_viewport_size({'width':width,'height':800})
+    help=d.locator('[data-beat-help]')
+    assert not help.evaluate('el=>el.open')
+    help.locator('summary').focus();page.keyboard.press('Enter')
+    assert help.evaluate('el=>el.open')
+    assert '구간별로 기준 박' in help.inner_text()
+    assert '기존 시각은 유지' in d.locator('[data-beat-status]').inner_text()
+    assert d.evaluate('(el)=>el.scrollWidth<=el.clientWidth+1')
+    d.locator('.song-timing-beats').screenshot(path=f'/tmp/mindex-popup-beat-{engine}-{width}.png')
+    help.locator('summary').click()
+
    d.locator('[data-timing-linked]').click()
    page.wait_for_function("document.querySelector('[data-song-timing-dialog] audio').duration>90")
    count=d.locator('[data-timing-start]').count();assert count>10

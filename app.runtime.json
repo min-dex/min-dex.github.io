@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "407ab66f7d2f4c766fe04ff751c5b84e88d8bc8c2988e5af518974ffc91167ed",
-  "runtime_sha256": "72be915e7c3831647a252f2b4f0155297b8aa0254a87790faab6f8bcf65c0d63",
-  "source_bytes": 1521986,
-  "runtime_bytes": 1076405,
-  "source_gzip": 340698,
-  "runtime_gzip": 266305
+  "source_sha256": "2a975a82d46e410f774c1bf500451b69b875946fcf4c96d5887fa825d621d629",
+  "runtime_sha256": "4fa2293bf8e56f779edc7dc28fb6175a83564ff4010cbee9564d98f5feafbd3c",
+  "source_bytes": 1522109,
+  "runtime_bytes": 1076513,
+  "source_gzip": 340699,
+  "runtime_gzip": 266310
 }
