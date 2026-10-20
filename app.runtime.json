@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-save-draft-recovery",
+  "version": "20261020-presenter-peer-controls",
   "options": {
     "compress": false,
     "mangle": {
