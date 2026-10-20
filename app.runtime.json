@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261021-controller-input-spacing",
+  "version": "20261021-home-calendar-header",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "f9a641aaa070112ed4090f6edff676ef2b8aca4eeb637f6063701eeeca18efd0",
-  "runtime_sha256": "624d621f0c021eb5c9ff4661b9b21d5f075f7de821d2b2b0a4b99005f6934632",
-  "source_bytes": 1544643,
-  "runtime_bytes": 1092891,
-  "source_gzip": 346962,
-  "runtime_gzip": 271385
+  "source_sha256": "4abb757c7ac082192e30cd79252bba0b5f697f8e1ca813058dc0165d6ac30e7c",
+  "runtime_sha256": "97c3073b078e1f3bbbbf42cf6f194dc4b68ea20ac7f0b10d88354384e6d764c0",
+  "source_bytes": 1544774,
+  "runtime_bytes": 1093021,
+  "source_gzip": 346982,
+  "runtime_gzip": 271401
 }
