@@ -46,7 +46,7 @@ def main():
                     page.locator('.svc-slide-thumb[data-presenter-index="1"]').focus()
                 for key in ('ArrowRight', 'ArrowLeft', 'End', 'Home', 'Space', '3', 'Enter'):
                     page.keyboard.press(key)
-                    page.wait_for_timeout(100)
+                    page.wait_for_function("state.presenter.index === Number(document.activeElement?.dataset.presenterIndex ?? -1) && document.activeElement?.dataset.serviceId === 'focus-fixture'", timeout=5000)
                     result = focus_state(page)
                     assert result['live'] == result['focused'], (key, result)
                     assert result['service'] == 'focus-fixture', result
@@ -62,7 +62,7 @@ def main():
                     }''', delay)
                     page.keyboard.press('ArrowRight')
                     page.wait_for_function('window.focusRefreshDone === true')
-                    page.wait_for_timeout(100)
+                    page.wait_for_function("state.presenter.index === Number(document.activeElement?.dataset.presenterIndex ?? -1) && document.activeElement?.dataset.serviceId === 'focus-fixture'", timeout=5000)
                     result = focus_state(page)
                     assert result['live'] == result['focused'], (delay, result)
                 print('PASS focus survives delayed full board replacement', engine)
