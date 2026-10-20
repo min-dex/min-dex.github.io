@@ -701,3 +701,15 @@ Music management uses a 40px icon-only topbar button. Keep the music icon, activ
 The nested music launcher participates in the same topbar button selectors as its siblings: 40px fixed slot, zero padding, shared hover face and pressed transform. Its active indicator stays absolutely positioned.
 
 Presenter toolbar music uses 35px height and 10px horizontal padding; sidebar previous/next use 35px square targets. Preparation Apply uses 10px horizontal padding and 600 label weight, matching peer commands.
+
+
+### Home continuation ·2026-10-21
+
+Home keeps the whole-app overview and adds up to six deduplicated recent item
+links above it. Deduplicate a song across versions while retaining the latest
+selected version. Record concrete worship/bulletin/song-version/Bible-chapter or
+saved-scripture destinations, plus operations pages; omit root landings/searches.
+Reuse the existing session/server page-tab payload and guarded history restore.
+Store navigation IDs and a short label only, never document/draft bodies. Reopening
+does not save or start output. Known-deleted/no-gathering destinations are hidden;
+unknown catalogues retain captured labels until the normal module read resolves.

@@ -9529,3 +9529,17 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
 .svc-presenter-toolbar { position:relative; }
 .svc-presenter-toolbar .svc-presenter-help { position:static; }
 .svc-presenter-toolbar .svc-presenter-help-panel { left:0; right:auto; width:min(320px, 100%); box-sizing:border-box; }
+
+/* Bounded navigation history: item destinations, never draft contents. */
+.home-recent { min-width:0; }
+.home-recent h2 { margin:0 0 10px; font-size:var(--ui-row-size); font-weight:700; }
+.home-recent-list { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.home-recent-list button { display:flex; align-items:center; justify-content:space-between; min-width:0; gap:10px; padding:10px 15px; background:transparent; color:var(--ink); border:1px solid var(--line); border-radius:5px; cursor:pointer; text-align:left; }
+.home-recent-list button > span { display:grid; gap:5px; min-width:0; }
+.home-recent-list small { font-size:var(--ui-meta-size); font-weight:500; color:var(--ink-3); }
+.home-recent-list strong { font-size:var(--ui-row-size); font-weight:600; overflow-wrap:anywhere; }
+.home-recent-list svg { width:16px; height:16px; flex-shrink:0; color:var(--ink-3); }
+.home-recent-list button:hover { background:var(--ui-surface-field); border-color:var(--line-2); }
+.home-recent-list button:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+@media(max-width:900px) { .home-recent-list { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:640px) { .home-recent-list { grid-template-columns:minmax(0,1fr); } }

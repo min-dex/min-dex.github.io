@@ -445,6 +445,7 @@ const state = {
   bibleTextSearchTotal: null,
   bibleTextSearchPage: 0,
   applyingBrowserHistory: false,
+  recentWork: [],
   pageTabs: [],
   pageTabIndex: 0,
   applyingPageTab: false,
@@ -2482,6 +2483,7 @@ function syncBrowserHistory({ replace = false } = {}) {
   // in this shared path so service transitions cannot update one without the other.
   renderPageTabTitle();
   const snapshot = currentBrowserHistorySnapshot();
+  rememberRecentWork(snapshot);
   const current = history.state?.mindex;
   const targetUrl = buildMindexLink(snapshot);
   const sameSnapshot = current && JSON.stringify(current) === JSON.stringify(snapshot);
@@ -8663,6 +8665,12 @@ function handleDetailClick(event) {
     return;
   }
 
+  const recentWorkButton = event.target.closest("[data-home-recent]");
+  if (recentWorkButton) {
+    void openHomeRecentWork(recentWorkButton.dataset.homeRecent);
+    return;
+  }
+
   const homeModule = event.target.closest("[data-home-module]");
   if (homeModule) {
     void switchModule(homeModule.dataset.homeModule);
@@ -14405,6 +14413,86 @@ function pageTabTitleForSnapshot(snapshot = {}) {
   return HOME_PAGE_TAB_LABEL;
 }
 
+function recentWorkEntry(snapshot = {}, label = "") {
+  if (!snapshot || typeof snapshot !== "object") return null;
+  const module = snapshot.module;
+  const fields = { module };
+  let key = "";
+  let kind = "";
+  if (["service", "presenter", "bulletin"].includes(module)) {
+    const bulletin = module === "bulletin" || Boolean(snapshot.presenterBulletinServiceId);
+    const id = bulletin ? snapshot.presenterBulletinServiceId || snapshot.selectedServiceId : snapshot.selectedServiceId;
+    if (!id || String(id).startsWith("__")) return null;
+    fields.module = bulletin ? "bulletin" : "presenter";
+    fields.selectedServiceId = String(id);
+    fields.selectedServiceTypeId = snapshot.selectedServiceTypeId || null;
+    fields.presenterBulletinServiceId = bulletin ? String(id) : null;
+    key = `${fields.module}:${id}`;
+    kind = bulletin ? "주보" : "예배";
+  } else if (module === "praise" && snapshot.selectedSongId) {
+    fields.selectedSongId = String(snapshot.selectedSongId);
+    fields.selectedVersionId = snapshot.selectedVersionId || null;
+    key = `praise:${fields.selectedSongId}`;
+    kind = "찬양";
+  } else if (module === "scripture" && (snapshot.selectedBookCode || snapshot.selectedScriptureId)) {
+    for (const field of ["selectedBookCode", "selectedScriptureId", "selectedBibleTranslationId", "selectedBibleChapter", "selectedBibleVerse", "selectedBibleVerseEnd"]) fields[field] = snapshot[field] ?? null;
+    key = snapshot.selectedBookCode ? `bible:${fields.selectedBibleTranslationId}:${fields.selectedBookCode}:${fields.selectedBibleChapter}` : `scripture:${fields.selectedScriptureId}`;
+    kind = "말씀";
+  } else if (["calendar", "references", "manuals", "setlists"].includes(module)) {
+    key = module;
+    kind = "운영";
+  } else return null;
+  return { key, kind, snapshot: fields, label: String(label || pageTabTitleForSnapshot(fields)).slice(0, 160) };
+}
+
+function rememberRecentWork(snapshot) {
+  const entry = recentWorkEntry(snapshot);
+  if (!entry) return;
+  state.recentWork = [entry, ...state.recentWork.filter(item => item.key !== entry.key)].slice(0, 6);
+  persistPageTabsState();
+}
+
+function homeRecentWorkEntries() {
+  return state.recentWork.filter(entry => {
+    const snapshot = entry.snapshot;
+    if (["presenter", "bulletin"].includes(snapshot.module) && state.serviceTypes.length) {
+      const service = state.services.find(item => item.id === snapshot.selectedServiceId);
+      return Boolean(service && !serviceIsNoGathering(service) && (snapshot.module !== "bulletin" || serviceSupportsBulletin(service)));
+    }
+    if (snapshot.module === "praise" && songCatalogLoaded) return Boolean(songById(snapshot.selectedSongId));
+    if (snapshot.module === "scripture" && snapshot.selectedScriptureId && state.scripturesLoaded) return state.scriptures.some(item => item.id === snapshot.selectedScriptureId);
+    return true;
+  });
+}
+
+async function openHomeRecentWork(key) {
+  const entry = homeRecentWorkEntries().find(item => item.key === key);
+  if (!entry || !(await confirmSaveBeforeLeaving())) return;
+  clearDirtyState();
+  await applyBrowserHistorySnapshot(entry.snapshot);
+  syncBrowserHistory();
+}
+
+function renderHomeRecentWork() {
+  const entries = homeRecentWorkEntries();
+  return `<section class="home-recent" aria-labelledby="home-recent-heading"><h2 id="home-recent-heading">최근 작업</h2>
+    ${entries.length ? `<div class="home-recent-list">${entries.map(entry => {
+      const snapshot = entry.snapshot;
+      const service = state.services.find(item => item.id === snapshot.selectedServiceId);
+      let title = pageTabTitleForSnapshot(snapshot);
+      if (["찬양", "말씀", "예배", "주보"].includes(title)) title = entry.label || title;
+      if (snapshot.module === "scripture" && snapshot.selectedScriptureId) title = state.scriptures.find(item => item.id === snapshot.selectedScriptureId)?.title || entry.label || title;
+      if (snapshot.module === "scripture" && snapshot.selectedBookCode) {
+        const verse = Number(snapshot.selectedBibleVerse) || 0;
+        const end = Number(snapshot.selectedBibleVerseEnd) || verse;
+        title += ` ${Number(snapshot.selectedBibleChapter) || 1}${verse ? `:${verse}${end > verse ? `–${end}` : ""}` : "장"}`;
+      }
+      const meta = service ? `${entry.kind} · ${formatServiceDate(service, {compact:true})}` : entry.kind;
+      return `<button type="button" data-home-recent="${escapeAttr(entry.key)}"><span><small>${escapeHtml(meta)}</small><strong>${escapeHtml(title)}</strong></span><i data-lucide="arrow-up-right"></i></button>`;
+    }).join("")}</div>` : '<p class="home-module-detail">열어 본 항목이 여기에 표시됩니다.</p>'}
+    </section>`;
+}
+
 function readPageTabsState() {
   const raw = safeStorageGet("session", MINDEX_TAB_STATE_STORAGE_KEY);
   let parsed = null;
@@ -14415,6 +14503,7 @@ function readPageTabsState() {
   }
   const tabs = Array.isArray(parsed?.tabs) ? parsed.tabs : [];
   normalizePageTabsState(tabs, Number(parsed?.index) || 0);
+  state.recentWork = (Array.isArray(parsed?.recentWork) ? parsed.recentWork : []).map(entry => recentWorkEntry(entry?.snapshot, entry?.label)).filter(Boolean).filter((entry,index,entries) => entries.findIndex(item => item.key === entry.key) === index).slice(0,6);
 }
 
 function persistPageTabsState() {
@@ -14426,6 +14515,7 @@ function persistPageTabsState() {
       snapshot: tab.snapshot,
     })),
     index: state.pageTabIndex,
+    recentWork: state.recentWork,
   };
   safeStorageSet("session", MINDEX_TAB_STATE_STORAGE_KEY, JSON.stringify(payload));
 }
@@ -16066,6 +16156,7 @@ function renderHomeStart() {
       <header class="home-start-header"><div><h1>MINDEX</h1><p>전체 현황</p></div>
         <time datetime="${toLocalDateStr(now)}">${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 ${serviceWeekdayLabel(now)}</time>
       </header>
+      ${renderHomeRecentWork()}
       <div class="home-overview">
         ${modules.map(module => `<section class="home-module" aria-labelledby="home-${module.id}-heading">
           <h2 id="home-${module.id}-heading"><button type="button" data-home-module="${module.id}"><span><i data-lucide="${module.icon}"></i>${module.label}</span><i data-lucide="arrow-right"></i></button></h2>
