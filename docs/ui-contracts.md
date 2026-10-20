@@ -678,3 +678,5 @@ Presenter toolbar, sidebar, shell navigation and inline editing commands use
 16px fixed Lucide slots and 1.5 strokes, including Add/Save and media actions.
 Placeholders and SVGs share dimensions to avoid load-time shifts. Small helper
 indicators remain 14px; artwork and slide previews are outside this rule.
+
+Lyrics block/first-lyrics creation, service list creation, preparation header item creation and unlinked-song creation share the existing neutral utility button surface/border/hover rules. Existing dimensions, focus, disabled states and creation handlers remain unchanged.
