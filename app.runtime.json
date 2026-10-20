@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-presenter-filmstrip",
+  "version": "20261020-presenter-controls-loading",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "ae81b91e32274f28cfdb813e675134b8fca51394a34bca33ff9c90bbcb91e0b5",
-  "runtime_sha256": "9392fa1139321c0c1787d2d42b18ce49057f8233ac19c0132072648da93fa2d9",
-  "source_bytes": 1522231,
-  "runtime_bytes": 1076400,
-  "source_gzip": 340749,
-  "runtime_gzip": 266265
+  "source_sha256": "4673d3d43038d75e9b331cba3073d03a51422a706c490caf5451423db574bf26",
+  "runtime_sha256": "7f46192e78a94262e0c7a62bb75e75f157b3525e26e31f8a3d17961642fb2093",
+  "source_bytes": 1522965,
+  "runtime_bytes": 1077063,
+  "source_gzip": 340957,
+  "runtime_gzip": 266461
 }

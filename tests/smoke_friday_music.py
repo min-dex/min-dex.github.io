@@ -16,6 +16,7 @@ try:
  const service={id:'fixture',type_id:'friday'},item={_worshipSlotKey:'prayer.meeting.free'};
  const a={paused:true,currentTime:0,src:'',load(){this.loads=(this.loads||0)+1},pause(){this.paused=true},play(){this.paused=false;return Promise.resolve()}};
  state.serviceMusic.audio=a;
+ state.serviceMusic.fadeStopEnabled=false; // Immediate-stop cases; fade envelope is verified separately.
  const m=document.createElement('div');m.id='music-test';m.style.width='254px';m.innerHTML=renderServiceSlotMusic({service,item});document.body.append(m);refreshIcons(m);
  check(!('prayerMusic' in state),'dedicated state left');
  check(!a.loads&&a.paused&&!state.serviceMusic.sourceKey,'render mutated player');

@@ -14,11 +14,14 @@ try:
     if not channels:context.add_init_script("delete window.BroadcastChannel")
     context.route('**/*',lambda r:r.continue_() if urlsplit(r.request.url).netloc==urlsplit(url).netloc else r.abort())
     page=context.new_page();page.goto(url+'?mindexSmokeRaw=1')
-    page.wait_for_function("typeof runPresenterAction==='function'&&!document.body.classList.contains('ui-booting')")
+    page.wait_for_function("typeof runPresenterAction==='function'&&!!window.MindexPresenterFreshness&&!document.body.classList.contains('ui-booting')")
     page.evaluate('''()=>{
      window.svc={id:'transport-fixture',type_id:'sunday-second',title:'전달 검증'};
      state.services=[svc];state.serviceItems={[svc.id]:[]};state.selectedServiceId=svc.id;
      canUseClientData=()=>false;songCatalogLoaded=true;
+     // The transport fixture has no DB-linked songs; still satisfy the real preflight revision read.
+     state.client={from:()=>({select:()=>({eq:()=>({single:async()=>({data:{id:svc.id,save_revision:1},error:null})})})})};
+     hydratePresenterServiceData=async()=>{};
      window.fixtureSlides=[presenterReadySlide(svc),...[1,2,3].map(n=>({id:'slide'+n,type:'lyrics',layout:'lower_bar_text',title:'Slide '+n,text:'Fixture text '+n}))];
      buildServicePresenterSlides=()=>fixtureSlides;presenterSlideBuildSourceSignature=()=> 'transport-fixture';
      hydratePresenterOutputInBackground=()=>{};renderPresenterControlState=()=>{};

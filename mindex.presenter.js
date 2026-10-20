@@ -2757,6 +2757,8 @@ function getServiceItemVersion(song, item, service) {
 }
 
 function presenterSongForServiceItem(item = {}, displayText = serviceItemDisplayText(item), label = item?.label || "", service = null) {
+  const frozenSong = globalThis.MindexPresenterFreshness?.song(item.song_id, service?.id);
+  if (frozenSong) return frozenSong;
   const linkedSong = item.song_id
     ? (typeof songById === "function" ? songById(item.song_id) : state.songs.find((candidate) => candidate.id === item.song_id) || null)
     : null;

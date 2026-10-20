@@ -15956,7 +15956,7 @@ function renderHomeDetail() {
 function renderHomeStart() {
   if (!state.serviceTypes.length) {
     refs.detailPane.innerHTML = state.serviceError
-      ? renderUnavailableDetail("home", "홈", state.serviceError)
+      ? renderModuleEmptyDetail("home", "예배를 불러오지 못했습니다", state.serviceError, null)
       : renderLoadingDetail();
     return;
   }
@@ -15968,19 +15968,20 @@ function renderHomeStart() {
   refs.detailPane.innerHTML = `
     <main class="home-start" aria-label="홈">
       <header class="home-start-header">
+        <h1>홈</h1>
         <p>${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일 ${serviceWeekdayLabel(now)}</p>
       </header>
       <section class="home-schedule" aria-labelledby="home-schedule-heading">
         <header><h2 id="home-schedule-heading">이번 주 예배</h2><button type="button" class="home-start-text-button" data-service-week>최근 예배 <i data-lucide="arrow-right"></i></button></header>
-        ${dates.length ? dates.map(date => `<div class="home-schedule-day">
-          <h3>${escapeHtml(formatServiceDate({date}, {compact:true}))}</h3>
+        ${dates.length ? dates.map(date => `<div class="home-schedule-day${date === toLocalDateStr(now) ? " is-today" : ""}"${date === toLocalDateStr(now) ? ' aria-current="date"' : ""}>
+          <h3>${escapeHtml(formatServiceDate({date}, {compact:true}))}${date === toLocalDateStr(now) ? '<small>오늘</small>' : ""}</h3>
           <div>${upcoming.filter(service => service.date === date).map(service => `<button type="button" data-open-presenter-service="${escapeAttr(service.id)}"><span>${escapeHtml(serviceDisplayTypeName(service))}</span><i data-lucide="arrow-right"></i></button>`).join("")}</div>
         </div>`).join("") : '<p class="home-start-empty">이번 주에 등록된 예배가 없습니다.</p>'}
       </section>
       <nav class="home-start-shortcuts" aria-label="바로가기">
-        <button type="button" data-home-module="bulletin">주보 <i data-lucide="arrow-right"></i></button>
-        <button type="button" data-home-module="praise">찬양 <i data-lucide="arrow-right"></i></button>
-        <button type="button" data-home-module="scripture">말씀 <i data-lucide="arrow-right"></i></button>
+        <button type="button" data-home-module="bulletin"><span><i data-lucide="newspaper"></i>주보</span> <i data-lucide="arrow-right"></i></button>
+        <button type="button" data-home-module="praise"><span><i data-lucide="music"></i>찬양</span> <i data-lucide="arrow-right"></i></button>
+        <button type="button" data-home-module="scripture"><span><i data-lucide="book-open"></i>말씀</span> <i data-lucide="arrow-right"></i></button>
       </nav>
     </main>`;
   refreshIcons();
@@ -19915,7 +19916,6 @@ function confirmUnsavedChangesAction() {
       <div class="unsaved-dialog" role="dialog" aria-modal="true" aria-labelledby="unsavedDialogTitle">
         <div class="unsaved-dialog-copy">
           <h2 id="unsavedDialogTitle">저장하지 않은 변경이 있어요</h2>
-          <p>나가기 전에 저장하거나, 저장하지 않고 이동할 수 있어요.</p>
         </div>
         <div class="unsaved-dialog-actions">
           <button class="btn subtle" type="button" data-unsaved-action="cancel">계속 편집</button>
@@ -29316,12 +29316,14 @@ function renderGlobalPlaybackControls() {
       <header class="global-playback-panel-head"><strong>음악 관리</strong><button class="icon-btn" type="button" popovertarget="globalPlaybackPanel" popovertargetaction="hide" aria-label="음악 관리 닫기"><i data-lucide="x"></i></button></header>
       <p class="global-playback-empty" ${hasMusic ? "hidden" : ""}>선택된 음악이 없습니다.</p>
       <div class="global-playback-group" role="group" aria-label="현재 음악" ${hasMusic ? "" : "hidden"}>
-        <span class="global-playback-label"><span class="global-playback-state" role="status">${musicState}</span><span class="global-playback-name">${escapeHtml(music.sourceLabel || music.fileName || "음악")}</span></span>
-        <button type="button" class="icon-btn" data-global-playback-action="toggle" title="${toggleLabel}" aria-label="${toggleLabel}" aria-pressed="${Boolean(music.playing)}"><i data-lucide="${icon}"></i></button>
-        <button type="button" class="btn secondary global-playback-stop" data-global-playback-action="stop" aria-label="음악 정지" ${music.pending || music.playing || music.audio?.currentTime ? "" : "disabled"}>음악 정지</button>
+        <span class="global-playback-label"><span class="global-playback-name">${escapeHtml(music.sourceLabel || music.fileName || "음악")}</span><span class="global-playback-state" role="status">${musicState}</span></span>
       </div>
-      <label class="global-playback-fade-stop"><input type="checkbox" data-service-music-fade-stop${music.fadeStopEnabled ? " checked" : ""}>페이드아웃 정지</label>
       ${globalThis.MindexSongTiming?.transport() || ""}
+      <div class="global-playback-actions" role="group" aria-label="음악 재생 제어" ${hasMusic ? "" : "hidden"}>
+        <button type="button" class="btn secondary" data-global-playback-action="toggle" title="${toggleLabel}" aria-label="${toggleLabel}" aria-pressed="${Boolean(music.playing)}"><i data-lucide="${icon}"></i><span>${music.pending ? "준비 취소" : music.playing ? "일시정지" : "재생"}</span></button>
+        <button type="button" class="btn secondary global-playback-stop" data-global-playback-action="stop" aria-label="음악 정지" ${music.pending || music.playing || music.audio?.currentTime ? "" : "disabled"}><i data-lucide="square"></i><span>정지</span></button>
+        <label class="global-playback-fade-stop"><input type="checkbox" data-service-music-fade-stop${music.fadeStopEnabled ? " checked" : ""}>페이드아웃 정지</label>
+      </div>
     </section>`;
   if (!available) root.querySelector(':popover-open')?.hidePopover();
   root.hidden = !available;
@@ -31204,9 +31206,8 @@ function renderPresenterBoardItemAudioControls(serviceId, context = {}, options 
   return `
     <div class="svc-board-subgroup-audio${source ? " has-audio svc-audio-manager" : ""}${childrenAudio ? " svc-children-audio" : ""}" aria-label="${escapeAttr(`${context.item.label || "찬양"} 음원 관리`)}">
       ${source ? `
-        ${childrenAudio ? "" : '<span class="svc-audio-manager-label">음원 관리</span>'}
-        <audio controls preload="metadata" src="${escapeAttr(source)}"></audio>
-        <strong title="${escapeAttr(label)}">${escapeHtml(label)}</strong>` : ""}
+        <strong title="${escapeAttr(label)}">${escapeHtml(label)}</strong>
+        <audio controls preload="metadata" aria-label="${escapeAttr(label)} 미리 듣기" src="${escapeAttr(source)}"></audio>` : ""}
       ${childrenAudio && source ? '<span class="svc-children-audio-hint">송출 중 제목에서 <kbd>P</kbd> 재생</span>' : ""}
       <div class="svc-board-subgroup-audio-actions">
         ${!source && servicePraiseInputMode(context.item) === "children_audio" ? `<button class="btn secondary" type="button" data-song-timing-open data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(context.item.id)}">버전 음원·타이밍</button>` : ""}
@@ -32239,6 +32240,8 @@ function setPresenterPendingSlide(serviceId, index, options = {}) {
 async function openPresenterOutput(serviceId = state.selectedServiceId) {
   if (!serviceId) return;
   if (serviceNavigationBlocked(serviceId)) return;
+  if (!globalThis.MindexPresenterFreshness) { showToast("송출 준비 기능을 불러오는 중입니다. 잠시 후 다시 시도해 주세요.", "info"); return; }
+  if (!await globalThis.MindexPresenterFreshness.beforeOpen(serviceId)) return;
   preparePresenterService(serviceId);
   if (!isPresenterOutputWindowOpen()) {
     state.presenter.outputSessionId = crypto.randomUUID();
