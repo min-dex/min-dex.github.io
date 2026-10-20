@@ -655,3 +655,5 @@ Timing dialogs consolidate repeated save scope; photo-specific guidance stays
 with photo controls. Empty states describe the current state or useful next
 action. Manual source links need no redundant prose footer. Use 송폼 for forms
 and explicit keyboard instructions (same-item newline versus next item).
+
+Popup copy: unsaved-change choices are explained by action labels. Beat setup retains existing-time preservation, with variable-beat guidance in an initially closed, keyboard-accessible disclosure. Photo filenames stay on individual photo rows; no repeated aggregate list.

@@ -19903,7 +19903,6 @@ function confirmUnsavedChangesAction() {
       <div class="unsaved-dialog" role="dialog" aria-modal="true" aria-labelledby="unsavedDialogTitle">
         <div class="unsaved-dialog-copy">
           <h2 id="unsavedDialogTitle">저장하지 않은 변경이 있어요</h2>
-          <p>나가기 전에 저장하거나, 저장하지 않고 이동할 수 있어요.</p>
         </div>
         <div class="unsaved-dialog-actions">
           <button class="btn subtle" type="button" data-unsaved-action="cancel">계속 편집</button>
