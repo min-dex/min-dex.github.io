@@ -41,6 +41,12 @@ try:
     a.evaluate("()=>{state.scriptures[0].body='Draft from A';state.dirty.scripture=true;MINDEX_EDITOR_DRAFTS.capture();}")
     a.evaluate('()=>MINDEX_DRAFT_HANDOFF.open()')
     a.get_by_role('button',name='이 초안 이어쓰기',exact=True).wait_for()
+    for theme in ('light','dark'):
+     a.evaluate('(t)=>document.body.dataset.theme=t',theme)
+     for width in (390,800,1440):
+      a.set_viewport_size({'width':width,'height':900})
+      assert a.locator('.draft-handoff-dialog').evaluate("""e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect();return s.borderRadius==='5px'&&s.borderTopWidth==='1px'&&s.color===getComputedStyle(document.body).color&&r.left>=0&&r.right<=innerWidth&&e.scrollWidth<=e.clientWidth+1;}""")
+    a.set_viewport_size({'width':1440,'height':900})
     a.get_by_role('button',name='닫기',exact=True).click()
     a.locator('.draft-handoff-dialog').wait_for(state='detached')
     b.evaluate('()=>MINDEX_DRAFT_HANDOFF.refresh()')

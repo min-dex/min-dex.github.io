@@ -1188,3 +1188,21 @@ PostgreSQL18.4 실제 store 연동 재현·동일 요청 복구, server-state/br
 creation/secret-guard 검증은 전체 rollback; readback3항목 true.
 운영 원본/초안 삭제 없음, 실제 사용자 예배 저장·재생/송출/인쇄 실행 없음.
 증거 /tmp/mindex-server-journal-verified.png. 정적 앱 변경/새로고침 필요 없음.
+
+## 교회력·주보 정상 private 저장 요청 보완 ·2026-10-21
+
+작업 /tmp/mindex-server-journal-key. department.pending.v1, bulletin.v1/template의
+project hostname만 secret guard에서 식별자로 인식; 나머지 키 검사는 유지.
+PostgreSQL18.4 실제 실패 요청5개 재시도/기존 row 보존/권한/secret 차단 PASS.
+사용자 승인 후 운영 migration 적용 성공. 별도 anon synthetic 저장·재시도·정리·
+secret 거부 전체 rollback, 독립 readback3개 true. 운영 데이터/임시본 변경 없음.
+재생/송출/주보 인쇄 실행 또는 코드 변경 없음. 정적 앱 재배포 불필요.
+증거 /tmp/mindex-department-bulletin-server-verified.png.
+
+## 안전 마무리·제어판 시각 정리 ·2026-10-21
+
+사용자 제어판 정리 요청에 따라 예배 오른쪽 패널의 이전/다음 버튼 기본 테두리와
+표면을 표시하고 부모 줄 높이를 기존35px token으로 정렬. 동작 코드 변경 없음.
+Chromium/WebKit254/320/390px6조합 PASS; runtime hash PASS.
+실제 사용자 창·운영 데이터·재생·송출·인쇄 조작 없음.
+release20261021-controller-navigation, 별도 CI/배포 결과 확인 필요.
