@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-peer-command-icons",
+  "version": "20261020-order-disclosure-music-icon",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "ebad558c7b21193b7da85f82a88fb51070db2b22d1505853b898287aed82cf81",
-  "runtime_sha256": "942c3082d2fa1ea20d0701a25757e18fe4325220c8e34e02291cea0585081721",
-  "source_bytes": 1528311,
-  "runtime_bytes": 1080911,
-  "source_gzip": 342406,
-  "runtime_gzip": 267564
+  "source_sha256": "fa7bada123e03dea443a287dbf2654ce9f4f4562da162de7867009dbcaf35118",
+  "runtime_sha256": "e3695a44b61e534a94711616b2ae980a865a2e4b3c901ffb7733cd4fbd2c0f47",
+  "source_bytes": 1529890,
+  "runtime_bytes": 1082144,
+  "source_gzip": 342864,
+  "runtime_gzip": 267935
 }

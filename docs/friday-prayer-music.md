@@ -77,3 +77,8 @@ Prepared and verified in an isolated worktree. The DB task confirmed that this U
 - 재생 위치는 항상 음원명/조작 다음 줄에 두고 전체 가용 폭을 쓴다. 숫자는 tabular-nums와 최소11ch를 사용해 시간 갱신에 따른 흔들림을 줄인다.
 
 - 음악 UI는 민덱스의 field/panel/line/ink 토큰을 재사용한다. 위치 트랙은 중립 색상, 키보드 포커스는 안쪽 accent 테두리로 표시한다. 기본 audio의 내부 스타일을 지원하는 브라우저에서는 둥근 미디어 캡슐을 기존 필드 반경·표면에 맞추며, native controls와 키보드 기능은 유지한다.
+
+### Button state final review
+
+- 음악 조작은 중립 버튼, 재생/반복 활성 상태만 accent-soft를 사용한다. 비활성 버튼은 공통 보조 글자색·투명 배경이며 클릭해도 배치가 움직이지 않는다.
+- 음악 관리·컨트롤러·연결 음원 작업 버튼의 키보드 포커스는 안쪽2px outline을 사용한다. 저장·삭제 등 다른 명령과 송출 화면에는 적용하지 않는다.
