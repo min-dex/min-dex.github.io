@@ -662,7 +662,7 @@ Presenter topbar utilities use the same 40px slots, zero gap and centered icons
 as the left module buttons. Remove the presenter-only right-rail header width,
 separator and 35px overrides. This supersedes the fixed-rail toolbar clause;
 output controls in the content sidebar do not move. Add/Save edit buttons share
-70px width, 30px height and 14px icon slots; Save uses the shell's save icon.
+70px width, 30px height and 16px icon slots; Save uses the shell's save icon.
 
 Popup copy: unsaved-change choices are explained by action labels. Beat setup retains existing-time preservation, with variable-beat guidance in an initially closed, keyboard-accessible disclosure. Photo filenames stay on individual photo rows; no repeated aggregate list.
 
@@ -671,3 +671,10 @@ Home start uses neutral date-grouped worship cards, explicit today marker, visib
 Service-data detail refresh must dispatch home to renderHomeDetail, including delayed supplemental data and background song completion. Home must not fall through to the service empty-state renderer after initial load.
 
 Praise creation controls and reference header add buttons use the shared neutral utility button surface/border/hover rules. Retain existing30px size, icon labels, disabled state and global accent focus outline; do not restyle other reference-new-btn consumers.
+
+### Peer command icon sizing · 2026-10-20
+
+Presenter toolbar, sidebar, shell navigation and inline editing commands use
+16px fixed Lucide slots and 1.5 strokes, including Add/Save and media actions.
+Placeholders and SVGs share dimensions to avoid load-time shifts. Small helper
+indicators remain 14px; artwork and slide previews are outside this rule.
