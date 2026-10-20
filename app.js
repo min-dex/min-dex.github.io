@@ -33553,7 +33553,7 @@ function presenterReadySlide(service) {
     label: "준비",
     title,
     marker: "",
-    text: `잠시 후\n${serviceName}\n가 시작됩니다`,
+    text: `잠시 후\n${serviceName}\n${presenterReadySubjectParticle(serviceName)} 시작됩니다`,
     videoSrc: chromakey ? PRESENTER_CHROMAKEY_READY_LOOP_VIDEO : "",
     readyServiceName: serviceName,
     outputContext: presenterServiceUsesChromakey(service) ? "chromakey" : "clean",
