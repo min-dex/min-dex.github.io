@@ -1,4 +1,6 @@
 """Offline rendered input + real parser/cache path; synthetic verse bodies only."""
+import os
+os.environ["MINDEX_SMOKE_OFFLINE"]="1"
 import json
 from pathlib import Path
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
@@ -15,7 +17,7 @@ def main():
                 page.on('pageerror', lambda e: print('PAGE ERROR', e, flush=True))
                 page.set_default_timeout(7000)
                 page.route('**/*', lambda r: r.continue_() if r.request.url.startswith(url.rsplit('/', 1)[0] + '/') else r.abort())
-                page.goto(url, wait_until='domcontentloaded')
+                page.goto(url, wait_until='load')
                 page.wait_for_function("typeof parseLiveScriptureQuery==='function' && !document.body.classList.contains('ui-booting')")
                 page.wait_for_function("getComputedStyle(document.querySelector('.mindex-boot')).visibility==='hidden'")
                 page.evaluate('''supplements => {
@@ -33,6 +35,7 @@ def main():
                   for(const [id,book,ch,verse] of [['cog','TOB',1,1],['kjv','GEN',1,1],['cognew','DAN',14,1]]){
                     state.bibleVerseCache.set(bibleVerseCacheKey(id,book,ch),[{book_code:book,chapter:ch,verse,text:'검증용 본문 — 운영 성경 데이터가 아닙니다.'}]);
                   }
+                  refs.detailPane.hidden=false;
                   refs.detailPane.innerHTML='<h2>성구 입력 검증 · 오프라인 fixture</h2>'+renderLiveScriptureControl('');
                 }''', supplements)
                 result = page.evaluate('''async () => {
@@ -58,14 +61,14 @@ def main():
                 }''')
                 print(engine, result)
                 field = page.locator('[data-live-scripture-input]')
-                for query, expected in [('Tobit 1:1 공동번역','토비'),('Genesis 1:1 King James Version','Gen 1:1'),('다니엘 14:1 공동번역 개정','14:1')]:
+                for query, expected in [('Tobit 1:1 공동번역','토비'),('Genesis 1:1 King James Version','창세기 1:1'),('다니엘 14:1 공동번역 개정','14:1')]:
                     field.fill(query)
                     field.press('Enter')
                     page.wait_for_function('(expected)=>state.presenter.liveScripture.active && state.presenter.liveScripture.slide.title.includes(expected)', arg=expected)
                     assert page.evaluate('aliasReads') == 0
                 before = page.evaluate('JSON.stringify(state.presenter.liveScripture.slide)')
                 field.fill('Tobit 99:1 공동번역');field.press('Enter')
-                page.wait_for_function("document.body.innerText.includes('성구 형식을 확인')")
+                page.wait_for_function("document.body.innerText.includes('성구를 확인')")
                 assert page.evaluate('JSON.stringify(state.presenter.liveScripture.slide)') == before
                 page.screenshot(path=f'/tmp/mindex-scripture-aliases-{engine}.png')
                 print(engine, 'PASS rendered input/Enter, invalid address preserves current output')

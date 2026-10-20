@@ -7214,6 +7214,9 @@ async function saveService(serviceId = state.selectedServiceId, options = {}) {
   }
 
   return Boolean(await runServiceSave({ ...options, feedbackServiceId: serviceId }, async () => {
+    const scriptureSaveSnapshot = JSON.stringify(getServiceItems(serviceId));
+    for (const item of getServiceItems(serviceId)) await validateServiceItemScriptureInput(item);
+    if (scriptureSaveSnapshot !== JSON.stringify(getServiceItems(serviceId))) throw new Error("예배 입력이 변경되었습니다. 다시 저장해 주세요.");
     let saved = { unchanged: true };
     if (service && !service._isExpected) {
       saved = await saveWorshipServiceInstance(service);
@@ -7475,6 +7478,9 @@ async function saveServiceItemPatch(serviceId = state.selectedServiceId, index =
 
   let needsFullSave = false;
   const result = await runServiceSave({ ...options, feedbackServiceId: serviceId, feedbackItemId: itemId }, async () => {
+    const scriptureSaveSnapshot = JSON.stringify(item);
+    await validateServiceItemScriptureInput(item);
+    if (scriptureSaveSnapshot !== JSON.stringify(getServiceItems(serviceId).find(candidate => candidate.id === itemId))) throw new Error("예배 입력이 변경되었습니다. 다시 저장해 주세요.");
     const saved = await saveWorshipServiceElementPatch(service, item.id);
     if (!saved) {
       needsFullSave = true;
@@ -8005,6 +8011,9 @@ async function ensureWorshipServiceRowsLoadedForPersistence(serviceId = "") {
 }
 
 async function saveSongMeta(song) {
+  const scriptureSnapshot = JSON.stringify(song.scripture || []);
+  if (cleanList(song.scripture).length) await validateScriptureReferences(song.scripture);
+  if (scriptureSnapshot !== JSON.stringify(song.scripture || [])) throw new Error("성구 입력이 변경되었습니다. 다시 저장해 주세요.");
   const metadata = normalizeSongMetadata(song.metadata);
   const hasPromotedColumns = hasPromotedSongMetadataColumns(song);
   const hasScriptureRefsColumn = hasSongColumn(song, "scripture_refs");
@@ -8042,7 +8051,7 @@ async function saveSongMeta(song) {
   }
 
   if (hasScriptureRefsColumn) {
-    payload.scripture_refs = cleanList(song.scripture);
+    payload.scripture_refs = normalizeSongScriptureRefs(song.scripture);
   }
 
   let songUpdate = state.client.from("mindex_songs").update(payload).eq("id", song.id);
@@ -9806,7 +9815,13 @@ function updateSongField(field) {
 
   const key = field.dataset.songField;
   if (key === "scripture") {
-    song.scripture = parseList(field.value);
+    song.scripture = String(field.value).split(/[\n;；]/).map(text => text.trim()).filter(Boolean);
+    const problem = scriptureReferenceProblem(inspectScriptureReferences(song.scripture));
+    field.setCustomValidity(problem);
+    field.setAttribute("aria-invalid", String(Boolean(problem)));
+    field.title = problem;
+    const hint = field.closest("label")?.querySelector("[data-scripture-validation-hint]");
+    if (hint) { hint.textContent = problem; hint.hidden = !problem; }
   } else {
     song[key] = field.value;
   }
@@ -11842,16 +11857,22 @@ function serviceItemEditorScriptureTitleValue(item = {}, parsed = parseServiceIt
   return scripturePayload?.reference || normalizeServiceItemReferenceSpacing(parsed.scriptureReference || item.raw_title || "");
 }
 
+function serviceItemUsesScriptureReferenceInput(item = {}) {
+  return serviceItemSupportsScriptureResolution(item)
+    || normalizeWorshipElementType(serviceMemoElementType(parseServiceItemMemo(item.memo))) === "scripture_reading";
+}
+
 function serviceItemScriptureInputInvalid(item = {}) {
-  if (!isScriptureBodyServiceItem(item)) return false;
+  if (!serviceItemUsesScriptureReferenceInput(item)) return false;
   const memo = parseServiceItemMemo(item.memo);
+  if (memo.manualScripture) return false;
   if (serviceItemSupportsScriptureReferenceList(item)) {
     const raw = String(item.raw_title || "").trim();
     return Boolean(raw) && !normalizeServiceScriptureReferenceList(raw).length;
   }
   const raw = String(memo.scriptureReference || item.raw_title || "").trim();
   if (!raw) return false;
-  return !parseBibleReference(raw);
+  return !inspectScriptureReferences(raw).valid;
 }
 
 function clearGeneratedServiceScriptureSlides(item = {}, parsed = parseServiceItemMemo(item.memo)) {
@@ -11929,10 +11950,8 @@ async function resolveServiceScriptureBodyReference(serviceId, index, options = 
   const referenceSignature = references.join(";");
   try {
     const resolved = await Promise.all(references.map(async (referenceText) => {
-      const reference = parseBibleReference(referenceText);
-      if (!reference) return null;
-      const verses = await fetchServiceScriptureVerses(reference, serviceItemBibleTranslationForReference(item, memo, referenceText));
-      return verses.length ? formatLiveScriptureReference(reference) : null;
+      const validation = await validateScriptureReferences(referenceText, serviceItemBibleTranslationForReference(item, memo, referenceText));
+      return validation.references[0];
     }));
     if (!resolved.some(Boolean)) return;
     const currentItems = state.serviceItems[serviceId] || [];
@@ -17549,10 +17568,12 @@ function renderFormToolbar(song) {
 }
 
 function renderInput(label, field, value, className = "") {
+  const problem = field === "scripture" ? scriptureReferenceProblem(inspectScriptureReferences(value)) : "";
   return `
     <label class="field ${className}">
       <span>${label}</span>
-      <input type="text" data-song-field="${field}" value="${escapeAttr(value)}" />
+      <input type="text" data-song-field="${field}" value="${escapeAttr(value)}" ${field === "scripture" ? `aria-invalid="${Boolean(problem)}" title="${escapeAttr(problem)}"` : ""} />
+      ${field === "scripture" ? `<small data-scripture-validation-hint role="status" ${problem ? "" : "hidden"}>${escapeHtml(problem)}</small>` : ""}
     </label>
   `;
 }
@@ -18587,6 +18608,76 @@ function cleanScriptureBookShortName(value) {
   return text;
 }
 
+function inspectScriptureReferences(value, translation = null) {
+  const source = Array.isArray(value) ? value : [String(value || "")];
+  const entries = [];
+  let lastBook = "", lastChapter = null;
+  for (const raw of source.flatMap(text => String(text).split(/[\n;；,，]/)).map(text => text.trim()).filter(Boolean)) {
+    const candidates = [raw];
+    if (lastBook) {
+      if (lastChapter && /^\d{1,3}(?:\s*[-–—~]\s*\d{1,3})?$/.test(raw)) candidates.push(`${lastBook} ${lastChapter}:${raw}`);
+      candidates.push(`${lastBook} ${raw}`);
+    }
+    const reference = candidates.map(text => parseBibleReference(text, translation)).find(Boolean) || null;
+    const normalized = reference ? formatServiceBibleReference(reference) : raw;
+    entries.push({ raw, reference, normalized });
+    if (reference) {
+      lastBook = reference.book.koreanName || reference.book.code;
+      lastChapter = reference.chapter;
+    } else {
+      // An invalid fragment must not lend a guessed context to the next fragment.
+      lastBook = ""; lastChapter = null;
+    }
+  }
+  const invalid = entries.filter(entry => !entry.reference).map(entry => entry.raw);
+  return { entries, invalid, valid: invalid.length === 0,
+    references: uniqueList(entries.map(entry => entry.normalized)) };
+}
+
+function scriptureReferenceProblem(result) {
+  return result.invalid.length ? `성구를 확인해 주세요: ${result.invalid.join("; ")}` : "";
+}
+
+async function validateScriptureReferences(value, translation = null) {
+  await ensureBibleBookLookups();
+  if (!state.bibleTranslations.length && !state.bibleReaderError) await loadBibleTranslations({ silent: true });
+  translation = translation || selectedPresenterBibleTranslation();
+  const result = inspectScriptureReferences(value, translation);
+  if (!result.valid) throw new Error(scriptureReferenceProblem(result));
+  if (!result.entries.length) return result;
+  if (!translation?.id) throw new Error("성구를 확인할 역본을 불러오지 못했습니다. 다시 시도해 주세요.");
+  const resolved = [];
+  for (const entry of result.entries) {
+    const verses = await fetchServiceScriptureVerses(entry.reference, translation);
+    const covers = number => verses.some(row => Number(row.verse) <= number && Number(row.verse_end || row.verse) >= number);
+    if (!verses.length || (entry.reference.verse && (!covers(entry.reference.verse) || !covers(entry.reference.verseEnd || entry.reference.verse)))) {
+      throw new Error(`성구를 확인해 주세요: ${entry.raw}`);
+    }
+    resolved.push({ ...entry, verses });
+  }
+  return { ...result, resolved, translation };
+}
+
+function normalizeSongScriptureRefs(value) {
+  return inspectScriptureReferences(value).references;
+}
+
+async function validateServiceItemScriptureInput(item) {
+  if (!serviceItemUsesScriptureReferenceInput(item)) return;
+  const memo = parseServiceItemMemo(item.memo);
+  if (memo.manualScripture) return;
+  const raw = String(item.raw_title || memo.scriptureReference || "").trim();
+  if (!raw) return;
+  const result = inspectScriptureReferences(raw);
+  if (!result.valid) throw new Error(scriptureReferenceProblem(result));
+  for (const reference of result.references) {
+    await validateScriptureReferences(reference, serviceItemBibleTranslationForReference(item, memo, reference));
+  }
+  if (raw !== String(item.raw_title || parseServiceItemMemo(item.memo).scriptureReference || "").trim()) {
+    throw new Error("말씀 입력이 변경되었습니다. 다시 저장해 주세요.");
+  }
+}
+
 function normalizeServerSong(row) {
   const memo = parseSongMemo(row.memo);
   const scriptureRefs = cleanList(row.scripture_refs).length ? cleanList(row.scripture_refs) : cleanList(memo.scripture);
@@ -18721,7 +18812,7 @@ function songOutputTitle(song, version = null) {
 }
 
 function serializeSongMemo(song, options = {}) {
-  const scripture = options.omitScripture ? [] : cleanList(song.scripture);
+  const scripture = options.omitScripture ? [] : normalizeSongScriptureRefs(song.scripture);
   const relatedSongIds = options.omitRelatedSongs
     ? []
     : cleanList(song.related_song_ids).filter((id) => id !== song.id);
@@ -27063,6 +27154,8 @@ function normalizeServiceItemReferenceSpacing(value) {
   const text = String(value || "").trim();
   if (!text) return "";
 
+  const inspection = inspectScriptureReferences(text);
+  if (!inspection.valid) return text;
   const references = normalizeServiceScriptureReferenceList(text);
   if (references.length > 1) return formatServiceScriptureReferenceList(references);
 
@@ -27076,10 +27169,8 @@ function normalizeServiceItemReferenceSpacing(value) {
 }
 
 function normalizeServiceScriptureReferenceList(value) {
-  const source = Array.isArray(value) ? value : String(value || "").split(/[\n;；]/);
-  const context = { lastBookName: "", lastChapter: null };
-  return uniqueList(mergeConsecutiveServiceScriptureReferences(source.flatMap((text) =>
-    expandServiceScriptureReferenceText(text, context))));
+  const result = inspectScriptureReferences(value);
+  return result.valid ? uniqueList(mergeConsecutiveServiceScriptureReferences(result.references)) : [];
 }
 
 function formatServiceScriptureReferenceList(value, options = {}) {
@@ -29859,6 +29950,7 @@ async function appendPresenterCitationReference(input) {
 
   pendingPresenterCitationRequests.add(requestKey);
   try {
+    await validateScriptureReferences(rawValue);
     await resolveServiceScriptureBeforeSave(serviceId, index);
     const targetReference = parseBibleReference(addedReferences[0]);
     const targetElementId = String(item.id || elementId).trim();
@@ -29982,24 +30074,11 @@ async function buildLiveScriptureSlide(query) {
   if (!state.bibleTranslations.length && !state.bibleReaderError) await loadBibleTranslations({ silent: true });
 
   const parsedQuery = parseLiveScriptureQuery(query);
-  const reference = parsedQuery.reference;
-  if (!reference) {
-    showToast("성구 형식을 확인해 주세요.", "error");
-    return null;
-  }
-  const translation = parsedQuery.translation || selectedPresenterBibleTranslation();
-  if (!translation?.id) {
-    showToast("사용 가능한 역본이 없습니다.", "error");
-    return null;
-  }
-
-  const verses = await fetchServiceScriptureVerses(reference, translation);
-  if (!verses.length) {
-    showToast("해당 성구를 찾지 못했습니다.", "error");
-    return null;
-  }
-
-  const title = formatLiveScriptureReference(reference, translation);
+  const validation = await validateScriptureReferences(parsedQuery.referenceText, parsedQuery.translation);
+  if (!validation.entries.length) { showToast("성구를 입력해 주세요.", "error"); return null; }
+  const translation = validation.translation;
+  const title = validation.references.join("; ");
+  const text = validation.resolved.map(entry => formatLiveScriptureSlideText(entry.normalized, entry.verses)).join("\n");
   return {
     id: `live-scripture:${Date.now()}`,
     elementType: PRESENTER_ELEMENT_TYPES.SCRIPTURE_TEXT,
@@ -30009,7 +30088,7 @@ async function buildLiveScriptureSlide(query) {
     label: "성구",
     title,
     marker: title,
-    text: formatLiveScriptureSlideText(title, verses),
+    text,
     translationLabel: serviceBibleTranslationDisplayLabel(translation),
     live: true,
   };
