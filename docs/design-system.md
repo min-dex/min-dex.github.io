@@ -178,3 +178,11 @@ insets,600 weight and16px/1.5 icons, including native file-picker labels.
 Help popups use16/700 headings,12/600 shortcut labels and5/10px spacing.
 Music popup transport retains its30px tier with10px insets and600 weight;
 selected, pending, disabled and keyboard-focus states retain their semantics.
+
+
+## Recovery and timing dialogs ·2026-10-21
+
+Draft handoff uses the shared panel/ink/line tokens,5px radius,20px
+padding and10px wrapped action gaps. Do not use undefined border/text aliases.
+Timing and server conflict dialogs share the same radius and border-box sizing.
+Draft restore, conflict decisions and playback semantics are unchanged.

@@ -8550,7 +8550,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .svc-board-subgroup-controls:has(.svc-announcement-editor){padding:5px 0;background:transparent;border-radius:0}
 
 /* Local song timing editor; keeps the presenter board and worship input intact. */
-.song-timing-dialog { width: min(750px, 90vw); max-height: 85vh; overflow: auto; padding: 20px; background: var(--ui-surface-panel); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; }
+.song-timing-dialog { box-sizing: border-box; width: min(750px, 90vw); max-height: 85vh; overflow: auto; padding: 20px; background: var(--ui-surface-panel); color: var(--ink); border: 1px solid var(--line); border-radius: var(--r); }
 .song-timing-dialog::backdrop { background: #0008; }
 .song-timing-dialog h2 { font-size: 22px; }
 .song-timing-dialog p { font-size: 12px; margin: 10px 0; }
@@ -9154,8 +9154,13 @@ body[data-module="praise"] .praise-forms-panel .version-compare-column {
   box-shadow: inset 0 3px 0 var(--form-color);
 }
 
-.draft-handoff-dialog{width:min(620px,calc(100vw - 32px));max-height:85vh;overflow:auto;border:1px solid var(--border);border-radius:12px;padding:24px;background:var(--panel);color:var(--text)}
-.draft-handoff-dialog .btn{margin:4px}.draft-handoff-dialog textarea{display:block;width:100%;min-height:72px;margin:12px 0}.draft-handoff-list>div{padding:12px 0;border-bottom:1px solid var(--border)}
+.draft-handoff-dialog{box-sizing:border-box;width:min(620px,calc(100vw - 30px));max-height:85dvh;overflow:auto;border:1px solid var(--line);border-radius:var(--r);padding:20px;background:var(--ui-surface-panel);color:var(--ink)}
+.draft-handoff-dialog::backdrop { background:#0008; }
+.draft-handoff-dialog h2 { margin:0 0 10px; font-size:22px; font-weight:700; }
+.draft-handoff-dialog .draft-handoff-tools { display:flex; flex-wrap:wrap; gap:10px; }
+.draft-handoff-dialog textarea{display:block;box-sizing:border-box;width:100%;min-height:75px;margin:10px 0}
+.draft-handoff-list>div{padding:10px 0;border-bottom:1px solid var(--line)}
+.draft-handoff-dialog :is(p, [role="status"]) { overflow-wrap:anywhere; }
 
 /* Inline worship editors: compact, unboxed fields; preserve native controls. */
 @media screen {
@@ -9509,7 +9514,7 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
 .svc-presenter-side-panel .svc-presenter-action-group--nav .icon-btn { width:35px; height:35px; flex:0 0 35px; }
 .svc-presenter-side-panel button.svc-presenter-preparation-apply { padding:0 10px; font-weight:600; }
 
-.server-conflict-review { width: min(90vw, 760px); max-height: 85vh; overflow: auto; padding: 25px; background: var(--ui-surface-panel); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; }
+.server-conflict-review { box-sizing: border-box; width: min(90vw, 760px); max-height: 85vh; overflow: auto; padding: 25px; background: var(--ui-surface-panel); color: var(--ink); border: 1px solid var(--line); border-radius: var(--r); }
 .server-conflict-review label { display: block; margin-top: 15px; }
 .server-conflict-review textarea { display: block; width: 100%; min-height: 120px; margin-top: 10px; }
 .server-conflict-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 20px; }
@@ -9530,3 +9535,17 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
 .svc-presenter-toolbar { position:relative; }
 .svc-presenter-toolbar .svc-presenter-help { position:static; }
 .svc-presenter-toolbar .svc-presenter-help-panel { left:0; right:auto; width:min(320px, 100%); box-sizing:border-box; }
+
+/* Bounded navigation history: item destinations, never draft contents. */
+.home-recent { min-width:0; }
+.home-recent h2 { margin:0 0 10px; font-size:var(--ui-row-size); font-weight:700; }
+.home-recent-list { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.home-recent-list button { display:flex; align-items:center; justify-content:space-between; min-width:0; gap:10px; padding:10px 15px; background:transparent; color:var(--ink); border:1px solid var(--line); border-radius:5px; cursor:pointer; text-align:left; }
+.home-recent-list button > span { display:grid; gap:5px; min-width:0; }
+.home-recent-list small { font-size:var(--ui-meta-size); font-weight:500; color:var(--ink-3); }
+.home-recent-list strong { font-size:var(--ui-row-size); font-weight:600; overflow-wrap:anywhere; }
+.home-recent-list svg { width:16px; height:16px; flex-shrink:0; color:var(--ink-3); }
+.home-recent-list button:hover { background:var(--ui-surface-field); border-color:var(--line-2); }
+.home-recent-list button:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+@media(max-width:900px) { .home-recent-list { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:640px) { .home-recent-list { grid-template-columns:minmax(0,1fr); } }

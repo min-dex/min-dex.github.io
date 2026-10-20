@@ -60,6 +60,40 @@ try:
    assert page.locator('[data-service-view-loading="next"]').count()==1
    assert page.evaluate('!isPresenterOutputWindowOpen()')
    page.evaluate("()=>{loadServiceItems=window.homeOriginalLoadItems;state.module='home';state.selectedServiceId=null;state.selectedServiceTypeId=null;clearDirtyState();render()}")
+   # Continuation is a bounded navigation record, not a draft/body copy.
+   page.evaluate("""()=>{
+    state.recentWork=[];
+    rememberRecentWork({module:'home'});
+    rememberRecentWork({module:'praise'});
+    rememberRecentWork({module:'praise',selectedSongId:'one',selectedVersionId:'v1',draft:'DO NOT STORE',search:'private query'});
+    rememberRecentWork({module:'praise',selectedSongId:'one',selectedVersionId:'v1'});
+    rememberRecentWork({module:'bulletin',selectedServiceId:'next',presenterBulletinServiceId:'next'});
+    rememberRecentWork({module:'scripture',selectedBookCode:'GEN',selectedBibleTranslationId:'GAE',selectedBibleChapter:3,selectedBibleVerse:16});
+    rememberRecentWork({module:'presenter',selectedServiceId:'next',selectedServiceTypeId:'young-adult'});
+    render();
+   }""")
+   assert page.locator('[data-home-recent]').count()==4
+   assert page.evaluate("!JSON.stringify(state.recentWork).includes('DO NOT STORE')&&!JSON.stringify(state.recentWork).includes('private query')")
+   assert '3:16' in page.locator('.home-recent').inner_text()
+   page.evaluate("""()=>{
+    const get=safeStorageGet,set=safeStorageSet;
+    try {
+     safeStorageSet=(scope,key,value)=>{if(key===MINDEX_TAB_STATE_STORAGE_KEY)window.recentTabsPayload=value;return true};
+     persistPageTabsState();state.recentWork=[];
+     safeStorageGet=(scope,key)=>key===MINDEX_TAB_STATE_STORAGE_KEY?window.recentTabsPayload:null;
+     readPageTabsState();
+    } finally {safeStorageGet=get;safeStorageSet=set;}
+    render();
+   }""")
+   assert page.locator('[data-home-recent]').count()==4
+   page.evaluate("()=>{window.homeConfirm=confirmSaveBeforeLeaving;confirmSaveBeforeLeaving=async()=>false}")
+   page.locator('[data-home-recent="praise:one"]').click()
+   assert page.evaluate("state.module==='home'")
+   page.evaluate("()=>{confirmSaveBeforeLeaving=window.homeConfirm;window.homeForms=loadForms;loadForms=async()=>{}}")
+   page.locator('[data-home-recent="praise:one"]').click()
+   page.wait_for_function("state.module==='praise'&&state.selectedSongId==='one'&&state.selectedVersionId==='v1'")
+   assert page.evaluate('!isPresenterOutputWindowOpen()')
+   page.evaluate("()=>{loadForms=window.homeForms;state.module='home';state.selectedSongId=null;state.selectedVersionId=null;render()}")
    for theme in ('light','dark'):
     page.evaluate('(t)=>applyTheme(t)',theme)
     for width in (1280,800,390):
@@ -67,6 +101,7 @@ try:
      assert page.locator('.home-start').evaluate('(e)=>e.scrollWidth<=e.clientWidth')
      page.locator('.home-module h2 button').first.focus()
      page.locator('#detailPane').screenshot(path=f'/tmp/mindex-overview-{engine}-{theme}-{width}.png')
+   page.set_viewport_size({'width':1280,'height':800})
    for module in ('service','bulletin','praise','scripture','operations'):
     page.evaluate("()=>{state.module='home';state.selectedServiceId=null;state.selectedServiceTypeId=null;state.search='';clearDirtyState();render()}")
     page.locator(f'.home-module h2 [data-home-module="{module}"]').click()
