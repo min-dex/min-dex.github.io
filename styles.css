@@ -9511,4 +9511,4 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
 /* Read-only measured phrase metadata; never changes the lyric editor. */
 .version-musical-structure { flex-basis: 100%; min-width: 0; color: var(--ink-3); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
 
-.topbar-actions .global-playback-trigger > .global-playback-indicator { position:absolute; top:6px; right:6px; }
+.topbar-actions #globalPlaybackControls > .global-playback-trigger > .global-playback-indicator { position:absolute; top:6px; right:6px; }
