@@ -33,7 +33,16 @@ def main():
                     check(withPresenterElementTrailingBlanks(slides,service).length===4,'duplicate blanks');
                     check(withPresenterElementTrailingBlanks([ready],service).length===2,'ready-only service');
                   }
-                  return 'PASS ready video/screen, closing, empty media, output modes, no duplicates';
+                  for (const [name, particle] of [['어린이부 예배','가'],['집중 보기 검증','이'],['모임','이'],['찬양제','가'],['특별 모임) ','이'],['검증'.normalize('NFD'),'이'],['모임 1','이'],['모임 2','가']]) {
+                    serviceDisplayTypeName=()=>name;
+                    const ready=presenterReadySlide({id:'particle-fixture'});
+                    check(ready.text.endsWith(particle+' 시작됩니다'),'ready text particle: '+name);
+                    for (const render of [renderPresenterFullscreenReadySlide,renderPresenterGeneratedWaitingLoopSlide]) {
+                      const host=document.createElement('div');host.innerHTML=render(ready);
+                      check(host.textContent.includes(name.trim()+particle+' 시작됩니다'),'rendered particle: '+name);
+                    }
+                  }
+                  return 'PASS ready screen/video particles, trailing blanks, output modes and input preservation';
                 }'''))
                 browser.close()
     finally:

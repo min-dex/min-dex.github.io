@@ -47,7 +47,7 @@ try:
     check(!serviceItemScriptureInputInvalid(special),'edition chapter rejected');await validateServiceItemScriptureInput(special);
     special.memo=JSON.stringify({elementType:'scripture_reading',scriptureTranslationId:translation.id});
     check(serviceItemScriptureInputInvalid(special),'default edition admitted foreign chapter');
-    
+
     const live=await buildLiveScriptureSlide(mixed);check(live.text.includes('fixture 16')&&live.text.includes('fixture 21'),'live multi');
     await fails(()=>buildLiveScriptureSlide('요3:16; 오류'),'오류');
     await fails(()=>buildLiveScriptureSlide('요3:16-99'),'성구를 확인');

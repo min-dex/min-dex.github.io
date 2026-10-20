@@ -3653,6 +3653,51 @@ English 이름이나 원제에서 자동 추론하지 않는다. 선택한 버�
 선택·음원·미저장 입력을 유지하고 기본 보기의 세로 편집 배열은 변경하지 않는다.
 많은 장수의 지연 로딩도 가로 뷰포트를 기준으로 유지한다.
 
+### 집중 보기 조작 계층 · 2026-10-20
+
+슬라이드 순번·이전/다음과 음원 상태·재생/정지/자동 넘김 복귀를 별도 그룹으로
+배치한다. 재생 버튼은 현재 가능한 동작을 표시한다. 전체 슬라이드 제목과
+구분선으로 미리보기/조작/가로 목록을 구분한다. 동작·저장·송출 경로는 유지한다.
+
+### 준비 안내 문구의 조사 · 2026-10-20
+
+자동 준비 안내는 제목 끝 한글의 받침에 따라 이/가를 선택한다(검증이, 예배가).
+조합형 한글과 뒤쪽 공백/닫는 기호를 처리하며 숫자는 한국어 숫자 발음을 따른다.
+발음을 추론할 수 없는 기타 문자는 기존 가를 유지한다. 전체화면 준비, 자동 대기
+화면, 슬라이드 텍스트에 동일 규칙을 적용하고 저장된 제목/사용자 문구는 바꾸지 않는다.
+
+### 두 보기의 공통 도구막대 · 2026-10-20
+
+기본 보기/집중 보기를 고정된 두 버튼으로 표시하고 현재 보기만 선택 상태로 표시한다.
+같은 보기를 다시 누르면 상태를 바꾸지 않는다. 원문·배율·주보·도움말은 공통
+도구막대에 정렬하고 폭이 좁으면 줄바꿈한다. 원문 펼침은 그 아래 전체 폭을 사용한다.
+두 보기의 초안·음원·썸네일 DOM 보존 계약은 유지한다.
+
+### 보조 버튼 디자인 통일 · 2026-10-20
+
+사용자 정정: 추가·저장·도움말·화면 감지는 위치가 아닌 외형 통일이 목적이다.
+제목 옆으로 옮긴 추가/저장과 보기 전환 옆 도움말을 원래 위치로 돌리고, 송출
+설정의 새 그룹 박스/제목도 제거한다. 기존 배치를 유지한 채 중립 테두리·색·
+모서리·글자 굵기·hover를 통일한다. 편집행은 30px, 도구막대/송출 조작은 35px
+크기 체계를 따른다. 활성 보기/송출 시작의 강조와 비활성 표시는 보존한다.
+
+### 집중 보기 전체 폭 및 찬양 초기 로딩 · 2026-10-20
+
+집중 보기에서는 우측 패널을 숨기고 그리드 열을 0으로 만들어 본문 전체 폭을 쓴다.
+기본 보기로 돌아오면 기존 패널 DOM과 입력을 복원한다. 송출 장비 설정은 기본 보기에서 한다.
+찬양 메타데이터 전체 로딩은 이미 완성된 연결 곡의 버전/가사를 지우지 않는다.
+일시적인 연결 곡/버전/가사 조회 실패는 예배 로딩 오류·재시도 경로로 전파하며
+테이블 미지원이나 성공으로 취급하지 않는다. 동시 metadata/version 조회는 모두
+완료된 뒤 공개하여 먼저 실패한 Promise가 방치되지 않게 한다.
+
+### Output sidebar button grid · 2026-10-20
+
+Basic view output controls use a two-column grid: display detection/selection and
+start/stop on the first row, fullscreen and always-on-top on the second. All four
+share dimensions, icon size, padding and neutral borders. Always-on-top retains
+its checkbox semantics, selected state and unsupported-browser restriction.
+Focused view continues to hide the entire sidebar.
+
 ## DB lyric freshness at output start ·2026-10-20
 
 - Starting output re-reads linked DB songs, versions and units regardless of the

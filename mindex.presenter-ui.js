@@ -120,12 +120,12 @@ function renderPresenterScreenControl() {
     </button>`;
 }
 
-function renderPresenterAlwaysOnTopControl() {
+function renderPresenterAlwaysOnTopControl({ buttonStyle = false } = {}) {
   const supported = Boolean(window.mindexElectron?.setPresenterAlwaysOnTop);
   return `
-    <label class="svc-presenter-pin-toggle${supported ? "" : " is-unavailable"}" title="${supported ? "출력 창을 항상 위에 표시" : "웹 버전에서는 항상 위 표시를 지원하지 않습니다"}">
+    <label class="svc-presenter-pin-toggle${buttonStyle ? " svc-presenter-pin-button" : ""}${supported ? "" : " is-unavailable"}" title="${supported ? "출력 창을 항상 위에 표시" : "웹 버전에서는 항상 위 표시를 지원하지 않습니다"}">
       <input type="checkbox" data-presenter-always-on-top ${supported && state.presenter.alwaysOnTop ? "checked" : ""} ${supported ? "" : "disabled"} />
-      <span class="svc-presenter-pin-track" aria-hidden="true"></span>
+      ${buttonStyle ? `<i data-lucide="pin" aria-hidden="true"></i>` : `<span class="svc-presenter-pin-track" aria-hidden="true"></span>`}
       <span>항상 위</span>
     </label>`;
 }
@@ -245,7 +245,10 @@ function renderPresenterServiceInputRail(service) {
 // View-only state: switching layouts never saves or rebuilds the worship document.
 let presenterFocusView = false;
 function renderPresenterFocusView() {
-  return `<button type="button" class="btn secondary" data-presenter-focus-toggle aria-pressed="${presenterFocusView}">${presenterFocusView ? '기본 보기' : '집중 보기'}</button>`;
+  return `<div class="svc-presenter-view-switch" role="group" aria-label="예배 보기">
+    <button type="button" class="btn secondary" data-presenter-focus-toggle="basic" aria-pressed="${!presenterFocusView}">기본 보기</button>
+    <button type="button" class="btn secondary" data-presenter-focus-toggle="focus" aria-pressed="${presenterFocusView}">집중 보기</button>
+  </div>`;
 }
 
 function syncPresenterFocusView() {
@@ -256,11 +259,9 @@ function syncPresenterFocusView() {
   if (layoutChanged) {
     mountDeferredPresenterBoardSections(root, root.dataset.serviceId, presenterSlidesForService(root.dataset.serviceId));
   }
-  const toggle = root.querySelector('[data-presenter-focus-toggle]');
-  if (toggle) {
-    toggle.textContent = presenterFocusView ? '기본 보기' : '집중 보기';
-    toggle.setAttribute('aria-pressed', String(presenterFocusView));
-  }
+  root.querySelectorAll('[data-presenter-focus-toggle]').forEach(button => {
+    button.setAttribute('aria-pressed', String((button.dataset.presenterFocusToggle === 'focus') === presenterFocusView));
+  });
   let panel = root.querySelector('[data-presenter-focus-panel]');
   if (!presenterFocusView) { if (panel) panel.hidden = true; return; }
   if (!panel) {
@@ -286,14 +287,14 @@ function syncPresenterFocusView() {
     : isPresenterOutputWindowOpen() ? '선택 화면 · 다른 예배 송출 중' : '선택 화면 · 송출 대기';
   const frame = (slide, title) => `<div class="svc-focus-preview"><strong>${escapeHtml(title)}</strong><div class="svc-slide-thumb-frame">${slide ? renderPresenterSlideMiniPreview(slide, serviceId) : '<span>다음 슬라이드 없음</span>'}</div></div>`;
   const markup = `<div class="svc-focus-screens">${frame(current, label)}${frame(next, '다음 화면')}</div>
-    <div class="svc-focus-transport"><span>${slides.length ? index + 1 : 0} / ${slides.length}</span>
+    <div class="svc-focus-transport"><div class="svc-focus-navigation" role="group" aria-label="슬라이드 이동"><span class="svc-focus-count">${slides.length ? index + 1 : 0} <span>/ ${slides.length}</span></span>
       <button type="button" class="btn secondary" data-presenter-action="prev" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}>이전</button>
-      <button type="button" class="btn secondary" data-presenter-action="next" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}>다음</button>
-      <span data-focus-music-status role="status"></span>
-      <button type="button" class="btn secondary" data-focus-music="toggle">재생 · P</button>
+      <button type="button" class="btn secondary" data-presenter-action="next" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}>다음</button></div>
+      <div class="svc-focus-audio" role="group" aria-label="음원 조작"><span data-focus-music-status role="status"></span>
+      <button type="button" class="btn secondary" data-focus-music="toggle">재생 / 일시정지 · P</button>
       <button type="button" class="btn secondary" data-focus-music="stop" aria-label="음악 정지">정지</button>
-      <button type="button" class="btn secondary" data-song-timing-resume>자동 넘김 복귀 · R</button>
-    </div>`;
+      <button type="button" class="btn secondary" data-song-timing-resume>자동 넘김 복귀 · R</button></div>
+    </div><div class="svc-focus-filmstrip-heading">전체 슬라이드</div>`;
   if (panel._markup !== markup) { panel.innerHTML = markup; panel._markup = markup; }
   syncPresenterFocusMusic();
   schedulePresenterPreviewLayoutUpdate(panel);
@@ -309,7 +310,7 @@ function syncPresenterFocusMusic() {
   const canResume = sync && presenterControllerIsLive(state.selectedServiceId)
     && !state.presenter.safetyBlank && !state.presenter.liveScripture?.active
     && slide?.songTimingEligible && slide.syncTimeline?.groupId === music.timingGroupId;
-  const label = `${music.pending ? '음원 준비 중' : music.playing ? '음원 재생 중' : '음원 정지 / 일시정지'}${sync ? music.autoSyncSuspended ? ' · 자동 넘김 해제' : ' · 자동 넘김' : ''}${music.sourceKey && !own ? ' · 다른 예배 음원' : ''}`;
+  const label = !music.sourceKey ? '연결된 음원 없음' : `${music.pending ? '음원 준비 중' : music.playing ? '음원 재생 중' : '음원 정지 / 일시정지'}${sync ? music.autoSyncSuspended ? ' · 자동 넘김 해제' : ' · 자동 넘김' : ''}${music.sourceKey && !own ? ' · 다른 예배 음원' : ''}`;
   panel.querySelector('[data-focus-music-status]').textContent = label;
   panel.querySelectorAll('[data-focus-music]').forEach(button => { button.disabled = !own || !music.sourceKey; });
   const toggle = panel.querySelector('[data-focus-music="toggle"]');
@@ -326,7 +327,9 @@ function syncPresenterFocusMusic() {
 document.addEventListener('click', event => {
   const toggle = event.target.closest('[data-presenter-focus-toggle]');
   if (toggle) {
-    presenterFocusView = !presenterFocusView;
+    const nextView = toggle.dataset.presenterFocusToggle === 'focus';
+    if (nextView === presenterFocusView) return;
+    presenterFocusView = nextView;
     syncPresenterFocusView();
     schedulePresenterPreviewLayoutUpdate(document);
   }

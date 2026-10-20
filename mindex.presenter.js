@@ -5242,6 +5242,15 @@ function presenterSlideUsesGeneratedWaitingLoop(slide, options = {}) {
   return presenterSlideOutputContext(slide, true) === "chromakey";
 }
 
+function presenterReadySubjectParticle(serviceName) {
+  const ending = String(serviceName || "").normalize("NFC").replace(/[\s)\]}'"”’」』】〉》.!?…]+$/u, "").slice(-1);
+  const code = ending.charCodeAt(0);
+  if (code >= 0xAC00 && code <= 0xD7A3) return (code - 0xAC00) % 28 ? "이" : "가";
+  if (/^[0-9]$/.test(ending)) return "013678".includes(ending) ? "이" : "가";
+  // Keep the existing fallback for names whose pronunciation cannot be inferred.
+  return "가";
+}
+
 function renderPresenterGeneratedWaitingLoopSlide(slide) {
   const serviceName = presenterReadySlideServiceName(slide);
   return `
@@ -5250,7 +5259,7 @@ function renderPresenterGeneratedWaitingLoopSlide(slide) {
       <div class="presenter-waiting-loop-cross" aria-hidden="true"></div>
       <div class="presenter-waiting-loop-copy">
         <p class="presenter-waiting-loop-script">지금은 기도로 예배를 준비하는 시간입니다</p>
-        <p class="presenter-waiting-loop-title">잠시 후 <strong>${escapeHtml(serviceName)}</strong>가 시작됩니다</p>
+        <p class="presenter-waiting-loop-title">잠시 후 <strong>${escapeHtml(serviceName)}</strong>${presenterReadySubjectParticle(serviceName)} 시작됩니다</p>
       </div>
       <img class="presenter-waiting-loop-logo" src="${escapeAttr(PRESENTER_CHURCH_LOGO)}" alt="기형 검단우리교회" decoding="sync" loading="eager" fetchpriority="high" draggable="false" />
     </div>
@@ -5271,7 +5280,7 @@ function renderPresenterFullscreenReadySlide(slide) {
       <div class="presenter-ready-screen-field" aria-hidden="true"></div>
       <div class="presenter-ready-screen-copy">
         <p class="presenter-ready-screen-kicker">지금은 기도로 예배를 준비하는 시간입니다</p>
-        <p class="presenter-ready-screen-message">잠시 후 <strong>${escapeHtml(serviceName)}</strong>가 시작됩니다</p>
+        <p class="presenter-ready-screen-message">잠시 후 <strong>${escapeHtml(serviceName)}</strong>${presenterReadySubjectParticle(serviceName)} 시작됩니다</p>
       </div>
       <img class="presenter-ready-screen-logo" src="${escapeAttr(PRESENTER_CHURCH_LOGO)}" alt="기형 검단우리교회" decoding="sync" loading="eager" fetchpriority="high" draggable="false" />
     </div>

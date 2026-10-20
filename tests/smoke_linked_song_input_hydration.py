@@ -54,7 +54,8 @@ def main():
                       check(requests === 1, 'duplicate loads must share one request');
                       fail = true;
                       release();
-                      await Promise.all([first, duplicate]);
+                      const failures = await Promise.allSettled([first, duplicate]);
+                      check(failures.every(result => result.status === 'rejected' && result.reason.message === 'simulated outage'), 'both callers must receive the load failure');
                       for (let i = 0; i < 20; i++) renderPicker();
                       check(requests === 1, 'failed request must not create render loop');
                       check(renderPicker().includes('data-service-song-retry'), 'failure retry');

@@ -45,6 +45,8 @@ stale document in the same change.
 
 ## Planning Or Deferred Work
 
+- `presenter-remote-design.md`: 다른 기기 원격 조작의 화면·승인·명령/연결 실패 설계안(미구현).
+
 - `electron-packaging-plan.md`: packaging and auto-update plan.
 - `admin-access-security.md`: admin and access-control planning.
 - `solid-refactor-notes.md`: refactor notes only. Do not treat as a required
