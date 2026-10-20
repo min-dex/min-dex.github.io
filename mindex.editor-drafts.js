@@ -43,9 +43,29 @@
   const payload=draft.value;
   if((module==='praise'&&(!payload?.song||payload.song.id!==id||!Array.isArray(payload.forms)))||(module==='scripture'&&payload?.id!==id)||(module==='service'&&(payload?.service?.id!==id||!Array.isArray(payload.items)||!Array.isArray(payload.serviceTypes)))||(module==='references'&&!Array.isArray(payload))){showToast('임시 저장본 내용과 연결 대상을 확인하지 못했습니다. 원본은 보존됩니다.','error');return false;}
   if(hasDirtyChanges()||pendingFields().length){showToast('현재 입력을 먼저 저장하거나 정리해 주세요.','error');return}
-  if(draft.base&&dirtyModuleFingerprint(module)!==draft.base){showToast('임시 저장 이후 원본 내용이 바뀌었습니다. 현재 내용을 덮어쓰지 않고 임시 저장본을 보관합니다.','error');return}
-  if(!window.confirm('임시 저장본을 편집창에 복구할까요? 확인 후 저장하면 반영됩니다.'))return;
-  const value=structuredClone(draft.value);
+  const fingerprint=dirtyModuleFingerprint(module),client=state.client;
+  let value=structuredClone(draft.value),changed=Boolean(draft.base&&fingerprint!==draft.base),conflicts=[];
+  if(changed){
+   try{
+    const {mergeEditorDraft}=await import(`./mindex.draft-merge.mjs?v=${encodeURIComponent(window.MINDEX_RELEASE||'draft-merge')}`);
+    const merged=mergeEditorDraft(JSON.parse(draft.base),draft.value,dirtyModuleValue(module));
+    value=merged.value;conflicts=merged.conflicts;
+   }catch{showToast('복구 기준을 읽지 못했습니다. 임시 저장본은 그대로 보관됩니다.','error');return false;}
+  }
+  const notice=changed
+   ? (conflicts.length||draft.fields?.length
+      ? '원본도 변경되었습니다. 현재 내용과 임시 저장본을 각각 보관한 뒤, 겹치는 수정은 임시 저장본으로 편집창에 복구할까요? 저장 전 내용을 확인해 주세요.'
+      : '원본의 새 변경은 유지하고 임시 저장본의 수정만 편집창에 복구할까요? 확인 후 저장하면 반영됩니다.')
+   : '임시 저장본을 편집창에 복구할까요? 확인 후 저장하면 반영됩니다.';
+  if(!window.confirm(notice))return;
+  try{
+   // Never lose the draft or the latest editor snapshot, even after a later save.
+   await window.MINDEX_SERVER_STORAGE.setItem('local',`mindex.editor.recovery.v1:${module}:${id}:${crypto.randomUUID()}`,
+    JSON.stringify({schema:1,module,id,draft,current:dirtyModuleValue(module),createdAt:new Date().toISOString()}));
+  }catch{showToast('복구 전 보관을 완료하지 못했습니다. 원본과 임시 저장본을 유지합니다. 연결을 확인하고 다시 시도해 주세요.','error');return false;}
+  if(moduleName()!==module||idFor(module)!==id||state.client!==client||dirtyModuleFingerprint(module)!==fingerprint||hasDirtyChanges()||pendingFields().length||state.saving||state.serviceMusic?.playing||state.serviceMusic?.pending||isPresenterOutputWindowOpen()){
+   showToast('복구 준비 중 화면이나 입력이 바뀌어 적용을 멈췄습니다. 보관된 내용은 유지됩니다.','error');return false;
+  }
   if(module==='praise'){
    const index=state.songs.findIndex(song=>song.id===id);if(index<0)return;
    state.songs=state.songs.map((song,i)=>i===index?value.song:song);state.forms=value.forms;state.selectedVersionId=value.versionId;
@@ -65,7 +85,15 @@
   try{
    window.render();
    for(const field of draft.fields||[]){
-    const node=[...(refs.detailPane?.querySelectorAll('input,textarea,select')||[])].find(node=>field.id?node.id===field.id:JSON.stringify({...node.dataset})===JSON.stringify(field.data));
+    const data={...field.data};
+    if(module==='service'&&data.serviceItemIndex!==undefined){
+     const itemId=draft.value.items[Number(data.serviceItemIndex)]?.id;
+     const index=value.items.findIndex(item=>item.id===itemId);
+     if(index<0)continue;
+     data.serviceItemIndex=String(index);
+    }
+    const identity=data=>JSON.stringify(Object.keys(data).filter(key=>key!=='initialValue').sort().map(key=>[key,data[key]]));
+    const node=[...(refs.detailPane?.querySelectorAll('input,textarea,select')||[])].find(node=>field.id?node.id===field.id:identity(node.dataset)===identity(data));
     if(node){node.value=field.value;if(typeof field.checked==='boolean')node.checked=field.checked;node.dispatchEvent(new Event('input',{bubbles:true}))}
    }
   }finally{window.MINDEX_EDITOR_DRAFTS.restoring=false}

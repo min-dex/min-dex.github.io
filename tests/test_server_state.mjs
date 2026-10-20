@@ -42,3 +42,17 @@ const reading=delayed.load(),writing=delayed.setItem('mindex.draft','after refre
 await new Promise(setImmediate);finishRead();await Promise.all([reading,writing]);
 assert.equal(db.get('mindex.draft').value,'after refresh');
 console.log('PASS refresh/write overlap uses the newly confirmed revision');
+
+// Stale tombstone revisions are not conflicting content. Rebase only after
+// the server explicitly rejects the CAS and confirms the original value.
+const j1=create(),j2=create();await j1.load();await j2.load();
+await j1.setItem('journal','old');await j1.removeItem('journal');
+await j2.setItem('journal','new');assert.equal(db.get('journal').value,'new');
+const j3=create();await j3.load();await j2.removeItem('journal');
+await j3.removeItem('journal');assert.equal(j3.getItem('journal'),null);assert.equal(j3.pending,false);
+const j4=create();await j4.load();await j3.setItem('journal','other request');
+await assert.rejects(j4.setItem('journal','my request'),/CONFLICT/);
+assert.equal(j4.pending,true);assert.equal(db.get('journal').value,'other request');
+await assert.rejects(j4.retry('journal'),/CONFLICT/);
+assert.equal(db.get('journal').value,'other request');
+console.log('PASS stale tombstone recovery, identical cleanup, real journal conflict retention');

@@ -87,7 +87,7 @@ assert.equal(serverCalls,0);
 await assert.rejects(asyncStore.save('save',{serviceId:'service',expectedRevision:'1'}),/PENDING_REQUEST/);
 await assert.rejects(asyncStore.retry('service'),/SAVE_IN_PROGRESS/);
 assert.equal(journalAttempts,1);releaseJournal();
-await assert.rejects(delayed,e=>e.message==='JOURNAL_NOT_CONFIRMED'&&!e.code&&e.cause.code==='P0001');
+await assert.rejects(delayed,e=>e.message==='JOURNAL_NOT_CONFIRMED'&&e.journalPhase==='cleanup'&&!e.code&&e.cause.code==='P0001');
 assert.equal(serverCalls,1);assert.ok(asyncStore.pending('service'));
 assert.equal(asyncStore.baseline('service').revision,'2');
 console.log('PASS confirmed async journal before RPC, concurrent save exclusion, cleanup failure retains replay without masquerading as worship rollback');
