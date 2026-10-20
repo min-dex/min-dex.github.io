@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-home-sidebar-entry",
+  "version": "20261020-home-agenda",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "a97d535bbc3969b5f07abd318432e62a8103df7e4613b0d3d3d79c2166c16ab5",
-  "runtime_sha256": "c9717451cd21b47e1e3b28956832eda64a0dc10a820bb4d79bd030bf9c5d39b2",
-  "source_bytes": 1529976,
-  "runtime_bytes": 1082208,
-  "source_gzip": 342873,
-  "runtime_gzip": 267945
+  "source_sha256": "d9299d12c851d0e41ec05f2c918706640da9a6b244ffcfbf0f49fba3eea4ed0d",
+  "runtime_sha256": "5533c43389b33bb1c5e1b9c284752873ea27f10a2bbc8415a53f20aed821972a",
+  "source_bytes": 1530242,
+  "runtime_bytes": 1082477,
+  "source_gzip": 342930,
+  "runtime_gzip": 267998
 }

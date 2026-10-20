@@ -670,7 +670,7 @@ output controls in the content sidebar do not move. Add/Save edit buttons share
 
 Popup copy: unsaved-change choices are explained by action labels. Beat setup retains existing-time preservation, with variable-beat guidance in an initially closed, keyboard-accessible disclosure. Photo filenames stay on individual photo rows; no repeated aggregate list.
 
-Home start uses neutral date-grouped worship cards, explicit today marker, visible module shortcut buttons, and responsive stacking. Home error states show an actionable error instead of scripture; other module landing verses and scripture records are unchanged. Existing home navigation routes remain intact.
+Home start uses a compact MINDEX wordmark/date header and a flat date-grouped worship agenda beside resource shortcuts. Separate days with rules rather than nested panel/button cards; use two worship columns when space allows and stack on narrow screens. Keep the explicit today marker, shared shell typography/surfaces and inset keyboard focus. Home error states show an actionable error instead of scripture; other module landing verses and scripture records are unchanged. Existing home navigation routes remain intact.
 
 Service-data detail refresh must dispatch home to renderHomeDetail, including delayed supplemental data and background song completion. Home must not fall through to the service empty-state renderer after initial load.
 
