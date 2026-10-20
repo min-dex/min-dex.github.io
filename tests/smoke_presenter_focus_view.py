@@ -100,6 +100,11 @@ try:
         return Math.abs(left.height-right.height)<1 && Math.abs((left.top+left.height/2)-(right.top+right.height/2))<1;
        }""")
        if view=='basic':
+        assert page.evaluate('''()=>{
+         const selectors=['.module-switcher button svg.lucide','.topbar-actions button svg.lucide','.svc-presenter-toolbar button svg.lucide','.svc-presenter-toolbar summary svg.lucide','.svc-presenter-output-group svg.lucide','#servicePresenterControls .svc-board-subgroup-flow button svg.lucide','#servicePresenterControls .svc-board-subgroup-flow summary svg.lucide'];
+         const icons=[...document.querySelectorAll(selectors.join(','))].filter(icon=>icon.getBoundingClientRect().width>0);
+         return icons.length>=10 && icons.every(icon=>{const box=icon.getBoundingClientRect();return Math.abs(box.width-16)<.1 && Math.abs(box.height-16)<.1 && getComputedStyle(icon).strokeWidth==='1.5px';});
+        }''')
         assert page.evaluate("""()=>{
          const add=document.querySelector('.svc-reference-media-quick-add > summary');
          const save=document.querySelector('.svc-board-subgroup-commit');
