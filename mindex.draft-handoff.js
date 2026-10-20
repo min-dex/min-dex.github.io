@@ -70,6 +70,7 @@
   dialog.append(element('h2','초안 이어쓰기'));
   const message=element('p','');message.dataset.handoffStatus='';message.setAttribute('role','status');dialog.append(message);
   const tools=element('div',''),refreshButton=element('button','목록 새로고침'),retry=element('button','전달 다시 시도'),close=element('button','닫기');
+  tools.className='draft-handoff-tools';
   for(const b of [refreshButton,retry,close]){b.type='button';b.className='btn secondary';tools.append(b)}dialog.append(tools);
   const list=element('div','');list.className='draft-handoff-list';dialog.append(list);
   let listSignature='';
