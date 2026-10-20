@@ -5,7 +5,7 @@ from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 def setup(page, url):
     page.route('**/*supabase*/**', lambda route: route.abort())
     page.goto(url + '?mindexSmokeRaw=1', wait_until='load')
-    page.wait_for_function("typeof renderPresenterControlState === 'function'")
+    page.wait_for_function("typeof renderPresenterControlState === 'function' && !document.body.classList.contains('ui-booting')")
     page.evaluate('''() => {
       const service={id:'focus-fixture',type_id:'young-adult',date:'2026-10-11',title:'테스트 예배'};
       const items=Array.from({length:8},(_,i)=>({id:'item-'+i,service_id:service.id,
@@ -37,10 +37,13 @@ def main():
     server, url = start_local_app_server()
     try:
         with sync_playwright() as p:
-            for engine in ('chromium', 'webkit'):
+            for engine, focused_view in ((e, mode) for e in ('chromium', 'webkit') for mode in (False, True)):
                 browser = launch_chromium(p) if engine == 'chromium' else p.webkit.launch()
                 page = browser.new_page(viewport={'width': 1440, 'height': 900})
                 setup(page, url)
+                if focused_view:
+                    page.locator("[data-presenter-focus-toggle]").click()
+                    page.locator('.svc-slide-thumb[data-presenter-index="1"]').focus()
                 for key in ('ArrowRight', 'ArrowLeft', 'End', 'Home', 'Space', '3', 'Enter'):
                     page.keyboard.press(key)
                     page.wait_for_timeout(100)
