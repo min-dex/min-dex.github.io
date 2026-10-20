@@ -26,6 +26,17 @@ try:
    assert not page.locator('.service-week-board').count()
    assert not page.locator('.home-start .empty-verse').count()
    assert page.locator('.home-start-shortcuts button').count()==3
+   page.evaluate("""async()=>{
+    const saved=[fetchCachedSupabasePaged,loadCalendarData,ensureUpcomingPublicWorshipServices];
+    fetchCachedSupabasePaged=async()=>[];loadCalendarData=async()=>{};ensureUpcomingPublicWorshipServices=async()=>[];
+    try {
+     await new Promise(resolve=>setTimeout(resolve,25));
+     await hydrateSupplementalWorshipDataAfterInitialRender();
+    } finally {[fetchCachedSupabasePaged,loadCalendarData,ensureUpcomingPublicWorshipServices]=saved;}
+   }""")
+   assert page.locator('.home-start').count()==1, 'late supplemental load replaced home'
+   assert page.locator('.empty-verse').count()==0
+
    page.evaluate("""()=>{const d=toLocalDateStr(new Date());state.services=[{id:'next',type_id:'sunday-main',date:d,sort_order:0},{id:'other',type_id:'sunday-main',date:d,sort_order:1}];render()}""")
    assert page.locator('.home-schedule-day button').count()==2
    assert page.locator('.home-schedule-day[aria-current="date"] h3 small').inner_text()=='오늘'
