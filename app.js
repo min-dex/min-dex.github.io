@@ -11867,13 +11867,8 @@ function serviceItemScriptureInputInvalid(item = {}) {
   if (!serviceItemUsesScriptureReferenceInput(item)) return false;
   const memo = parseServiceItemMemo(item.memo);
   if (memo.manualScripture) return false;
-  if (serviceItemSupportsScriptureReferenceList(item)) {
-    const raw = String(item.raw_title || "").trim();
-    return Boolean(raw) && !normalizeServiceScriptureReferenceList(raw).length;
-  }
-  const raw = String(memo.scriptureReference || item.raw_title || "").trim();
-  if (!raw) return false;
-  return !inspectScriptureReferences(raw).valid;
+  const raw = String(item.raw_title || memo.scriptureReference || "").trim();
+  return Boolean(raw) && !inspectScriptureReferences(raw, serviceItemBibleTranslation(item, memo)).valid;
 }
 
 function clearGeneratedServiceScriptureSlides(item = {}, parsed = parseServiceItemMemo(item.memo)) {
@@ -18669,7 +18664,7 @@ async function validateServiceItemScriptureInput(item) {
   if (memo.manualScripture) return;
   const raw = String(item.raw_title || memo.scriptureReference || "").trim();
   if (!raw) return;
-  const result = inspectScriptureReferences(raw);
+  const result = inspectScriptureReferences(raw, serviceItemBibleTranslation(item, memo));
   if (!result.valid) throw new Error(scriptureReferenceProblem(result));
   for (const reference of result.references) {
     await validateScriptureReferences(reference, serviceItemBibleTranslationForReference(item, memo, reference));

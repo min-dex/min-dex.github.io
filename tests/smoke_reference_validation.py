@@ -39,6 +39,15 @@ try:
     }
     await fails(()=>validateScriptureReferences('요 3:16-99'),'성구를 확인');
     await validateScriptureReferences('시 100');
+    // Edition-specific chapter bounds must not inherit the default edition's bounds.
+    state.scriptureBooks.push({code:'DAN',koreanName:'다니엘',chapterCount:12});
+    const edition={id:'test-cog',name:'공동번역 개정판',metadata:{edition_books:[{id:'DAN',name:'다니엘',chapterOptions:Array.from({length:14},(_,i)=>({key:i+1,label:String(i+1)}))}]}};
+    state.bibleTranslations.push(edition);fixtures.DAN={14:42};
+    const special={label:'성경봉독',raw_title:'다니엘 14:1',memo:JSON.stringify({elementType:'scripture_reading',scriptureTranslationId:edition.id})};
+    check(!serviceItemScriptureInputInvalid(special),'edition chapter rejected');await validateServiceItemScriptureInput(special);
+    special.memo=JSON.stringify({elementType:'scripture_reading',scriptureTranslationId:translation.id});
+    check(serviceItemScriptureInputInvalid(special),'default edition admitted foreign chapter');
+    
     const live=await buildLiveScriptureSlide(mixed);check(live.text.includes('fixture 16')&&live.text.includes('fixture 21'),'live multi');
     await fails(()=>buildLiveScriptureSlide('요3:16; 오류'),'오류');
     await fails(()=>buildLiveScriptureSlide('요3:16-99'),'성구를 확인');
