@@ -34,7 +34,6 @@ try:
     page.set_viewport_size({'width':width,'height':800})
     assert page.locator('.home-start').evaluate('(e)=>e.scrollWidth<=e.clientWidth')
    page.set_viewport_size({'width':1280,'height':800})
-   page.screenshot(path=f'/Users/parkjihun/Code/Apps/Mindex/output/home-start-{engine}.png')
    page.locator('.home-start [data-service-week]').click()
    assert page.locator('.service-week-board').count()==2
    page.evaluate("()=>{state.selectedServiceTypeId=null;state.search='';render()}")

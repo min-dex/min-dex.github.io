@@ -19,6 +19,10 @@ class PagesGate(unittest.TestCase):
         deploy = workflow['jobs']['deploy-pages']
         self.assertEqual(deploy['needs'], 'offline-web')
         self.assertEqual(deploy['if'], "github.ref == 'refs/heads/main' && github.event_name != 'pull_request'")
+        self.assertEqual(check['strategy']['matrix']['shard'], [0, 1, 2, 3])
+        self.assertFalse(check['strategy']['fail-fast'])
+        command = next(step['run'] for step in check['steps'] if 'cloud/check.py' in step.get('run', ''))
+        self.assertIn('--shard-index ${{ matrix.shard }} --shard-count 4', command)
         self.assertNotIn('continue-on-error', check)
         for step in check['steps']:
             self.assertNotIn('continue-on-error', step)

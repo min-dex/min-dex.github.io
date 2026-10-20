@@ -10,6 +10,10 @@ jobs:
   offline-web:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -19,7 +23,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: bash cloud/setup.sh
-      - run: .cache/cloud-venv/bin/python cloud/check.py
+      - run: .cache/cloud-venv/bin/python cloud/check.py --shard-index ${{ matrix.shard }} --shard-count 4
   deploy-pages:
     # A failed/cancelled check skips this entire job. No always() or bypass.
     needs: offline-web

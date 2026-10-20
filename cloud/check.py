@@ -1,8 +1,10 @@
 """Bounded offline Cloud gate, not a full corpus or hardware certification."""
+import argparse
 import os
 from pathlib import Path
 import subprocess
 import sys
+import time
 
 ROOT = Path(__file__).resolve().parents[1]
 NODE_TESTS = (
@@ -108,19 +110,39 @@ SMOKES = (
     "smoke_boot_loading_indicator.py",
 )
 
+def selected_tests(shard_index=0, shard_count=1):
+    if shard_count < 1 or not 0 <= shard_index < shard_count:
+        raise ValueError("shard index must be within a positive shard count")
+    unit = ("test_pages_gate.py", "test_cloud_check.py") + NODE_TESTS if shard_index == 0 else ()
+    return unit + SMOKES[shard_index::shard_count]
+
+
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--shard-index", type=int, default=0)
+    parser.add_argument("--shard-count", type=int, default=1)
+    args = parser.parse_args()
+    try:
+        selected = selected_tests(args.shard_index, args.shard_count)
+    except ValueError as error:
+        parser.error(str(error))
     env = dict(os.environ, MINDEX_SMOKE_OFFLINE="1")
     # Do not forward production credentials inherited from a developer shell.
     for key in list(env):
         if "SUPABASE" in key.upper():
             del env[key]
-    print("RUN manual content/document consistency", flush=True)
-    subprocess.run(["node", "tools/build_manual_docs.cjs", "--check"], cwd=ROOT, env=env, check=True, timeout=30)
-    for name in ("test_pages_gate.py",) + NODE_TESTS + SMOKES:
+    started = time.monotonic()
+    if args.shard_index == 0:
+        print("RUN manual content/document consistency", flush=True)
+        subprocess.run(["node", "tools/build_manual_docs.cjs", "--check"], cwd=ROOT, env=env, check=True, timeout=30)
+    for name in selected:
         command = ["node" if name in NODE_TESTS else sys.executable, "tests/" + name]
         print("RUN", name, flush=True)
+        test_started = time.monotonic()
         subprocess.run(command, cwd=ROOT, env=env, check=True, timeout=180)
-    print(f"PASS Cloud baseline: {len(NODE_TESTS)} unit + {len(SMOKES)} smoke entry points")
+        print(f"DONE {name}: {time.monotonic() - test_started:.1f}s", flush=True)
+    label = "Cloud baseline" if args.shard_count == 1 else f"Cloud shard {args.shard_index + 1}/{args.shard_count} (not the whole gate)"
+    print(f"PASS {label}: {len(selected)} entry points in {time.monotonic() - started:.1f}s")
     print("Not covered: full regression suite, production DB, original corpus, physical output, signed desktop packages.")
 
 if __name__ == "__main__":

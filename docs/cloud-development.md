@@ -139,3 +139,22 @@ This gate covers the explicitly listed offline baseline, not every possible
 bug, production data integrity, physical output or signed desktop releases.
 GitHub source-setting activation and the first gated Linux run must be verified
 separately from local configuration tests.
+
+
+## Bounded local checks and isolated CI shards ·2026-10-20
+
+For bounded UI edits, run relevant local unit/browser checks; the complete GitHub
+gate remains mandatory before Pages publication. Do not repeat the full local
+baseline merely to duplicate that gate. Broader data/runtime risk still requires
+corresponding scoped regression checks. CI-runner changes require local partition
+and failure-propagation tests plus successful execution of all CI shards.
+
+The offline-web matrix runs four isolated Ubuntu jobs, using zero-based
+--shard-index and --shard-count 4. Unit/manual checks run once on shard 0; every
+reviewed smoke appears exactly once across the four jobs. Each job retains its
+own checkout, browser profiles and fixture outputs. No same-directory concurrent
+smokes are introduced. fail-fast:false retains complete failure evidence; Pages
+needs the whole matrix to succeed and retains the stale-commit guard.
+
+The no-argument cloud/check.py command still executes the entire baseline.
+Shard PASS is explicitly partial; per-entry timings support future balancing.

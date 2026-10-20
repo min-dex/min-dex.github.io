@@ -1125,3 +1125,22 @@ and source evidence remain intact. Downloads originals are outside this cleanup.
 - Scoped Chromium/WebKit initial/reload checks pass for Scripture/Praise/Service.
   Compiled release screenshots and isolated announcement fields verified in both.
 - No production records, music, presenter output or bulletin printing changed.
+
+
+## Quiet persistence and shorter checks ·2026-10-20
+
+- Background storage no longer shows routine pending banners. Error/retry and
+  pending beforeunload protections remain; RPC/queues/data semantics unchanged.
+- offline-web now has four isolated runner shards; unit/manual checks once on
+  shard0, every smoke once, all matrix jobs must pass before Pages. No bypass.
+- Local bounded UI validation is change-scoped; full CI is required. Runner
+  partition/failure tests plus Chromium/WebKit storage/retry checks pass locally.
+- No operating data, active playback, presenter output or printing changed.
+
+
+## Quiet Bible provenance ·2026-10-20
+
+Move the closed source/edition disclosure below chapter text. Opening it shows
+source, edition history, acquisition date and links; review/printing caveats stay
+in a second closed disclosure. Existing source records and classification policy
+are retained. No scripture bodies, DB, worship records or output changes.
