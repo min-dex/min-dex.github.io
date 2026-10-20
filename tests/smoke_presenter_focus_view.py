@@ -92,7 +92,28 @@ try:
        page.set_viewport_size({'width':width,'height':1000})
        page.wait_for_timeout(100)
        assert page.locator('.svc-presenter-toolbar').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
+       page.locator('[data-presenter-help] > summary').click()
+       assert page.locator('.svc-presenter-help-panel').is_visible()
+       assert page.locator('.svc-presenter-help-panel').evaluate('(e)=>{const r=e.getBoundingClientRect();return r.left>=0 && r.right<=innerWidth}')
+       page.locator('[data-presenter-help] > summary').click()
+       assert page.evaluate("""()=>{
+        const help=document.querySelector('[data-presenter-help]').getBoundingClientRect();
+        const views=document.querySelector('.svc-presenter-view-switch').getBoundingClientRect();
+        const output=document.querySelector('.svc-presenter-output-group');
+        const detect=output.querySelector('[data-presenter-action=detect-screens]').getBoundingClientRect();
+        const pin=output.querySelector('.svc-presenter-pin-toggle').getBoundingClientRect();
+        return Math.abs(help.top-views.top)<2 && help.left-views.right<=10 && Math.abs(detect.top-pin.top)<2;
+       }""")
        if view=='basic':
+        for menu in page.locator('.svc-reference-media-quick-add').all():
+         assert menu.evaluate('(e)=>e.getBoundingClientRect().left-e.previousElementSibling.getBoundingClientRect().right<=15')
+        for flow in page.locator('.svc-board-subgroup-head-row > .svc-board-subgroup-flow').all():
+         assert flow.evaluate('(e)=>e.getBoundingClientRect().left-e.previousElementSibling.getBoundingClientRect().right<=15')
+        add=page.locator('.svc-reference-media-quick-add > summary').first
+        add.click()
+        assert page.locator('.svc-reference-media-quick-add-actions').first.is_visible()
+        assert page.locator('.svc-reference-media-quick-add-actions').first.evaluate('(e)=>{const r=e.getBoundingClientRect();return r.left>=0 && r.right<=innerWidth}')
+        add.click()
         page.locator('.svc-source-panel-head').click()
         assert page.locator('.svc-source-text').is_visible()
         assert page.locator('.svc-source-panel-body').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')

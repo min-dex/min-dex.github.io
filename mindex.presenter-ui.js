@@ -245,10 +245,10 @@ function renderPresenterServiceInputRail(service) {
 // View-only state: switching layouts never saves or rebuilds the worship document.
 let presenterFocusView = false;
 function renderPresenterFocusView() {
-  return `<div class="svc-presenter-view-switch" role="group" aria-label="예배 보기">
+  return `<div class="svc-presenter-view-tools"><div class="svc-presenter-view-switch" role="group" aria-label="예배 보기">
     <button type="button" class="btn secondary" data-presenter-focus-toggle="basic" aria-pressed="${!presenterFocusView}">기본 보기</button>
     <button type="button" class="btn secondary" data-presenter-focus-toggle="focus" aria-pressed="${presenterFocusView}">집중 보기</button>
-  </div>`;
+  </div>${renderPresenterHelpControl()}</div>`;
 }
 
 function syncPresenterFocusView() {

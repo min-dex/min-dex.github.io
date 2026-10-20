@@ -25162,7 +25162,6 @@ function renderServicePresenterControlsUnscoped(service, slides = [], active = f
         ${serviceSupportsBulletin(service) ? `<button class="svc-output-action" type="button" data-service-bulletin-action="open" data-service-id="${escapeAttr(service.id)}"><i data-lucide="newspaper"></i><span>주보</span></button>` : ""}
         <span class="svc-presenter-toolbar-utilities" aria-label="송출 보조 도구">
           ${renderServiceMusicPlayer()}
-          ${renderPresenterHelpControl()}
         </span>
       </div>
       <div class="svc-presenter-workspace">
@@ -28952,7 +28951,8 @@ function renderPresenterControlsTop(service, slides, active, index) {
   const fullscreenControl = `<button class="icon-btn svc-presenter-fullscreen" type="button" data-presenter-action="fullscreen" aria-label="${escapeAttr(fullscreenLabel)}" title="${escapeAttr(fullscreenLabel)}" ${anyOutputOpen ? "" : "disabled"}><i data-lucide="maximize"></i><span>전체 화면</span></button>`;
   return `
       <div class="svc-presenter-top">
-        <div class="svc-presenter-output-group">
+        <div class="svc-presenter-output-group" role="group" aria-label="송출 화면">
+          <span class="svc-presenter-output-heading">송출 화면</span>
           <button class="svc-present-btn svc-presenter-launch svc-presenter-launch--${launchTone}${anyOutputOpen ? " is-stop" : ""}" type="button" data-presenter-action="${escapeAttr(launchAction)}" data-service-id="${escapeAttr(service.id)}" aria-label="${escapeAttr(launchLabel)}">
             <i data-lucide="${escapeAttr(launchIcon)}"></i>
             <span>${escapeHtml(launchLabel)}</span>
