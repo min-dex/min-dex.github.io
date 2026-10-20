@@ -670,6 +670,8 @@ Home start uses neutral date-grouped worship cards, explicit today marker, visib
 
 Service-data detail refresh must dispatch home to renderHomeDetail, including delayed supplemental data and background song completion. Home must not fall through to the service empty-state renderer after initial load.
 
+Praise creation controls and reference header add buttons use the shared neutral utility button surface/border/hover rules. Retain existing30px size, icon labels, disabled state and global accent focus outline; do not restyle other reference-new-btn consumers.
+
 ### Peer command icon sizing · 2026-10-20
 
 Presenter toolbar, sidebar, shell navigation and inline editing commands use
