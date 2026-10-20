@@ -9345,20 +9345,43 @@ body:has(#servicePresenterControls[data-focus-view="true"]) .svc-presenter-live-
 .svc-focus-audio [data-focus-music-status] { text-align: right; }
 #servicePresenterControls .svc-slide-thumb-meta { font-variant-numeric: tabular-nums; }
 
-/* Keep contextual actions beside their subject, not across an empty row. */
-#servicePresenterControls .svc-reference-media-quick-add { margin-left: 0; }
-#servicePresenterControls .svc-board-section-head-row { gap: 10px; flex-wrap: wrap; }
-#servicePresenterControls .svc-reference-media-quick-add-actions { left: 0; right: auto; }
-#servicePresenterControls .svc-board-subgroup-head-row > .svc-board-subgroup-head { flex: 0 1 auto; }
-#servicePresenterControls .svc-board-subgroup-head-row > .svc-item-link { margin-right: 0; }
-.svc-presenter-view-tools { position: relative; order: 0; display: inline-flex; align-items: center; flex: 0 0 auto; gap: 5px; }
-.svc-presenter-view-tools .svc-presenter-help { position: static; height: 35px; }
-.svc-presenter-view-tools .svc-presenter-help > summary { width: 35px; height: 35px; }
-.svc-presenter-view-tools .svc-presenter-help-panel { left: 0; right: auto; width: min(320px, calc(100vw - 310px)); box-sizing: border-box; }
-.svc-presenter-side-panel .svc-presenter-output-group { gap: 5px; padding: 10px; border: 1px solid var(--line); border-radius: var(--r); box-sizing: border-box; }
-.svc-presenter-output-heading { grid-column: 1 / -1; font-size: 12px; font-weight: 600; color: var(--ink-3); margin-bottom: 5px; }
-.svc-presenter-side-panel .svc-presenter-display-settings { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 5px; padding-top: 5px; margin-top: 5px; border-top: 1px solid var(--line); }
-.svc-presenter-side-panel .svc-presenter-display-settings > :is(.icon-btn, .svc-presenter-pin-toggle, .svc-presenter-screen-select) { width: 100%; min-width: 0; padding: 0 5px; justify-content: center; box-sizing: border-box; }
-.svc-presenter-side-panel .svc-presenter-display-settings .svc-presenter-screen-select select { width: 100%; min-width: 0; }
-
-#servicePresenterControls .svc-board-subgroup-head-row > .svc-board-subgroup-flow { margin-left: 0; justify-content: flex-start; }
+/* Presenter secondary actions share one quiet surface; positions stay unchanged. */
+#servicePresenterControls .svc-reference-media-quick-add > summary,
+#servicePresenterControls .svc-board-subgroup-commit,
+.svc-presenter-toolbar .svc-presenter-help > summary,
+.svc-presenter-side-panel .svc-presenter-fullscreen,
+.svc-presenter-side-panel [data-presenter-action="detect-screens"],
+.svc-focus-transport .btn {
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: transparent;
+  color: var(--ink-3);
+  font-size: var(--ui-meta-size);
+  font-weight: 600;
+  line-height: 1.4;
+  gap: 5px;
+}
+#servicePresenterControls .svc-reference-media-quick-add > summary,
+#servicePresenterControls .svc-board-subgroup-commit {
+  height: 30px;
+  min-height: 30px;
+  padding: 0 10px;
+}
+.svc-presenter-side-panel [data-presenter-action="detect-screens"] { height: 35px; padding: 0 10px; }
+#servicePresenterControls .svc-reference-media-quick-add > summary:is(:hover, :focus-visible),
+#servicePresenterControls .svc-board-subgroup-commit:is(:hover, :focus-visible),
+.svc-presenter-toolbar .svc-presenter-help > summary:is(:hover, :focus-visible),
+.svc-presenter-side-panel .svc-presenter-fullscreen:not(:disabled):hover,
+.svc-presenter-side-panel [data-presenter-action="detect-screens"]:hover,
+.svc-focus-transport .btn:not(:disabled):hover {
+  background: var(--ui-surface-field);
+  border-color: var(--line);
+  color: var(--ink-2);
+}
+#servicePresenterControls .svc-reference-media-quick-add > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+#servicePresenterControls :is(.svc-reference-media-quick-add > summary, .svc-board-subgroup-commit) :is(i[data-lucide], svg.lucide) { width: 14px; height: 14px; stroke-width: var(--ui-icon-stroke); }
+.svc-presenter-side-panel .svc-presenter-fullscreen:disabled { color: var(--ink-4); }
