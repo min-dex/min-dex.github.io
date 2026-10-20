@@ -464,8 +464,8 @@
     dialog.setAttribute('aria-labelledby', 'song-timing-title');
     dialog.innerHTML = `<h2 id="song-timing-title">${serviceTiming ? '예배 음원·가사·타이밍' : '어린이 버전 음원·타이밍'}</h2>
       <p>${escapeHtml(all[0]?.elementTitle || all[0]?.title || '')}</p>
-      <p>${serviceTiming ? '이 예배의 가사 전환 시각을 저장합니다. 아래 사진 별도 자동 전환은 가사 시각을 바꾸지 않고 추가할 수 있습니다. 다른 예배에는 적용되지 않습니다.' : '현재 가사·폼과 음원·자동 넘김 시각을 한 세트로 저장합니다. 곡·버전에 연결해 보관하며 ‘어린이: 음원 불러오기’에서만 사용합니다.'}</p>
-      <p>${serviceTiming ? '음원·가사·타이밍을 이 예배에 함께 저장합니다. 다른 컴퓨터에서도 예배를 열면 그대로 사용할 수 있습니다.' : '이 버전의 자료를 함께 사용하는 예배에 적용됩니다. 가사·악보 불러오기에는 적용하지 않습니다.'} 음원을 들으며 각 장의 시작을 기록하세요. ${serviceTiming ? '가사는 부르기 시작하는 시각을 기록하면 1초 먼저 넘깁니다. 가사 없는 사진·간주는 기록한 시각에 넘깁니다.' : '가사는 1초 먼저, 빈 화면·음표는 기록한 시각에 넘깁니다.'} 수동으로 넘기면 음악은 계속 재생하고 자동 넘김만 해제됩니다.</p>
+      <p>${serviceTiming ? '음원·가사·전환 시각을 이 예배에만 저장합니다. 다른 기기에서도 이 예배를 열면 사용할 수 있습니다.' : '가사·송폼·음원·전환 시각을 이 곡의 버전에 저장합니다. ‘어린이: 음원 불러오기’로 이 버전을 사용하는 예배에 적용됩니다.'}</p>
+      <p>${serviceTiming ? '' : '가사·악보 불러오기에는 적용되지 않습니다.'} 음원을 들으며 각 장의 시작 시각을 기록하세요. ${serviceTiming ? '가사는 부르기 시작하는 시각보다 1초 먼저, 가사 없는 사진·간주는 기록한 시각에 넘깁니다.' : '가사는 1초 먼저, 빈 화면·음표는 기록한 시각에 넘깁니다.'} 수동 전환 시 자동 넘김만 꺼지고 음악은 계속 재생됩니다.</p>
       ${linkedAudio.url ? `<button type="button" class="btn secondary" data-timing-linked>연결된 음원 사용 · ${escapeHtml(linkedAudio.name || '음원')}</button>` : ''}
       <label>음원 선택 <input type="file" accept="audio/*" data-timing-file></label>
       <p data-timing-filename></p><audio controls preload="metadata"></audio>
@@ -480,7 +480,7 @@
       <div class="song-timing-record"><button type="button" class="btn secondary" data-timing-next>다음 장 전환 기록</button><span data-timing-next-label></span></div>
       <div class="song-timing-pages">${slides.map((slide, i) => `<div class="song-timing-row"><label>${slide.formBackgroundImage ? `<img class="song-timing-photo" src="${escapeAttr(slide.formBackgroundImage)}" alt="${i + 1}장 배경 사진">` : ''}${i + 1}장 · ${formLabels.get(slide.formKey) ? escapeHtml(formLabels.get(slide.formKey)) + ' · ' : ''}${escapeHtml(slide.text || '빈 화면')}<input aria-label="${i + 1}장 시작 초" type="number" min="0" step="0.1" data-timing-start="${i}" value="${draft.starts[i] ?? ''}" placeholder="초"></label><button type="button" class="btn secondary" data-timing-stamp="${i}">현재 시각 기록</button><button type="button" class="btn secondary" data-timing-nudge="${i}" data-delta="-0.2" aria-label="${i+1}장 0.2초 앞당기기">−0.2초</button><button type="button" class="btn secondary" data-timing-nudge="${i}" data-delta="0.2" aria-label="${i+1}장 0.2초 늦추기">+0.2초</button></div>`).join('')}</div>
       ${serviceTiming ? `<fieldset data-photo-section tabindex="-1"><legend>사진 별도 자동 전환</legend>
-        <p>사진을 원하는 음원 시각 또는 가사 슬라이드에 붙이세요. 가사 구간은 하단 자막, 간주는 사진만 나옵니다.</p>
+        <p>사진을 전환 시각이나 가사 슬라이드에 연결하세요. 가사 시각은 바뀌지 않습니다. 가사 구간에는 하단 자막을, 간주에는 사진만 표시합니다.</p>
         <label>사진 선택 <input type="file" accept="image/*" multiple data-timing-photos></label>
         <div data-photo-editor></div>
         <button type="button" class="btn secondary" data-photo-sort>시각 순으로 정렬</button>
@@ -489,7 +489,7 @@
         <button type="button" class="btn secondary" data-photo-clear>사진 연결 해제</button>
       </fieldset>` : ''}
       <label><input type="checkbox" data-timing-enabled ${draft.enabled ? 'checked' : ''}> 음악 재생 중 자동 넘김</label>
-      <p role="status" data-timing-status>${old && !fresh ? '가사가 바뀌었어요. 모든 장의 시각을 다시 기록해 주세요.' : '음원과 시각을 저장한 뒤, 해당 곡에서 음악 재생을 누르세요.'}</p>
+      <p role="status" data-timing-status>${old && !fresh ? '가사가 바뀌었어요. 모든 장의 시각을 다시 기록해 주세요.' : '저장한 뒤 해당 곡의 음악 재생 버튼을 누르세요.'}</p>
 
       <div class="song-timing-actions"><button type="button" class="btn secondary" data-timing-close>닫기</button><button type="button" class="btn primary" data-timing-save>${serviceTiming ? '예배에 저장' : '곡 버전에 저장'}</button></div>`;
     const audio = dialog.querySelector('audio');
@@ -526,7 +526,7 @@
         <label>붙일 위치<select data-photo-anchor="${i}" aria-label="사진 ${i+1} 붙일 위치"><option value="">음원 시각 직접 지정</option>${slides.map((slide,j)=>`<option value="${j}" ${photo.slideIndex===j?'selected':''}>${j+1}장 · ${escapeHtml((slide.text || '간주 · 사진만').replace(/\s+/g,' ').slice(0,65))}</option>`).join('')}</select></label>
         <label>전환 시각 (초)<input type="number" min="0" step="0.001" data-photo-at="${i}" aria-label="사진 ${i+1} 전환 초" value="${photoCue(photo) ?? ''}" ${Number.isInteger(photo.slideIndex)?'readonly':''}></label>
         <div class="song-photo-actions"><button type="button" class="btn secondary" data-photo-stamp="${i}">지금 시각 기록</button><button type="button" class="btn secondary" data-photo-preview="${i}">이 시점 듣기</button>
-        <label class="btn secondary">사진 교체<input type="file" accept="image/*" data-photo-replace="${i}" aria-label="사진 ${i+1} 교체"></label><button type="button" class="btn secondary" data-photo-remove="${i}">삭제</button></div></div></article>`).join('') : '<p>사진을 선택한 뒤 원하는 시각을 기록하거나 가사 슬라이드를 선택하세요.</p>';
+        <label class="btn secondary">사진 교체<input type="file" accept="image/*" data-photo-replace="${i}" aria-label="사진 ${i+1} 교체"></label><button type="button" class="btn secondary" data-photo-remove="${i}">삭제</button></div></div></article>`).join('') : '<p>추가한 사진이 없습니다.</p>';
       dialog.querySelector('[data-photo-names]').textContent=photoRows.map(p=>p.name || '사진').join(' · ');
       syncPhotoTimes();
     };
@@ -731,7 +731,7 @@
           else await saveToVersion(song, version, draft, current);
           audio.pause();
           refreshPresenterForService(serviceId);
-          status.textContent = serviceTiming ? '음원·가사·타이밍을 예배에 저장했어요. 다른 컴퓨터에서도 이 예배를 열면 사용할 수 있어요.' : '곡 버전에 음원·타이밍을 저장했어요. 음원 불러오기 방식에서만 적용됩니다.';
+          status.textContent = serviceTiming ? '이 예배의 음원·가사·전환 시각을 저장했습니다.' : '이 버전의 음원·전환 시각을 저장했습니다. 음원 불러오기 방식에 적용됩니다.';
         } catch (error) { status.textContent = error.message; }
         finally { busy = false; dialog.querySelectorAll('button,input,textarea,select').forEach(c=>c.disabled=false); }
       }

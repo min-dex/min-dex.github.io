@@ -57,7 +57,7 @@ try:
     page.evaluate('(t)=>{document.querySelector("[data-song-timing-dialog] audio").currentTime=t}',i*3)
     d.locator('[data-timing-next]').click()
     assert float(d.locator(f'[data-timing-start="{i}"]').input_value())==i*3
-   d.locator('[data-timing-save]').click();page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('저장했어요')")
+   d.locator('[data-timing-save]').click();page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('저장했습니다.')")
    page.evaluate('photoTimingSnapshot=JSON.stringify({services:state.services,songs:state.songs,items:state.serviceItems})')
    for width in (390,1100):
     page.set_viewport_size({'width':width,'height':800});assert d.evaluate('(el)=>el.scrollWidth<=el.clientWidth+1')
@@ -118,7 +118,7 @@ try:
    assert page.evaluate('(id)=>presenterSlidesForService(id).some(s=>s.syncTimeline?.serviceTiming)',ids['serviceId'])
    page.evaluate('({serviceId,elementId})=>MindexSongTiming.open(serviceId,elementId)',ids)
    page.locator('[data-timing-enabled]').uncheck();page.locator('[data-timing-save]').click()
-   page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('저장했어요')")
+   page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('저장했습니다.')")
    assert not page.evaluate('(id)=>presenterSlidesForService(id).some(s=>s.syncTimeline?.serviceTiming)',ids['serviceId'])
    assert not writes,writes
    print(engine,'PASS saved profile reload; zero external writes')

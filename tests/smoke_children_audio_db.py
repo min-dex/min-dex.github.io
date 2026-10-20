@@ -100,7 +100,7 @@ try:
    page.evaluate('failSave=true');d.locator('[data-timing-save]').click();page.wait_for_function("!document.querySelector('[data-timing-save]').disabled")
    assert 'injected' in d.locator('[data-timing-status]').inner_text()
    assert page.evaluate('uploads')==1
-   page.evaluate('failSave=false');d.locator('[data-timing-save]').click();page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('곡 버전에 음원·타이밍을 저장했어요')")
+   page.evaluate('failSave=false');d.locator('[data-timing-save]').click();page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('이 버전의 음원·전환 시각을 저장했습니다.')")
    print(engine,'DB save/retry passed',flush=True)
    saved=page.evaluate('db');assert page.evaluate('uploads')==1
    assert saved['audio_set']['starts']==[2,8]

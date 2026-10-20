@@ -11138,7 +11138,7 @@ function renderServiceAnnouncementEditor(item,index,serviceId,memo) {
   const regions=serviceAnnouncementRegions(item,memo);
   regions.news=window.MindexInlineText.numbered(regions.news).value;
   const field=(key,label)=>`<label class="svc-presenter-input-field"><span>${label}</span><textarea data-inline-bold ${key==="news"?'data-announcement-numbered':''} class="svc-presenter-input-control svc-presenter-input-control--multiline" data-service-id="${escapeAttr(serviceId||"")}" data-service-item-index="${index}" data-service-item-field="announcement_${key}" data-initial-value="${escapeAttr(regions[key])}" rows="1" aria-label="${label}" onkeydown="handleDetailKeydown(event)">${escapeHtml(regions[key])}</textarea></label>`;
-  return `<div class="svc-announcement-editor">${field("news","주간 소식")}<small class="svc-presenter-input-hint">Enter 다음 번호 · Shift+Enter 이어 쓰기</small><details><summary>상하단 문구</summary>${field("welcome","상단")}${field("footer","하단")}</details></div>`;
+  return `<div class="svc-announcement-editor">${field("news","주간 소식")}<small class="svc-presenter-input-hint">Enter: 다음 번호 · Shift+Enter: 같은 항목에서 줄바꿈</small><details><summary>상하단 문구</summary>${field("welcome","상단")}${field("footer","하단")}</details></div>`;
 }
 
 function normalizeServiceAudioTiming(value) {
@@ -15625,7 +15625,7 @@ function renderGlobalSearchList() {
   refs.songCount.textContent = `${formatCount(total)}개 표시`;
 
   if (!total && !results.scripture.some((result) => result.kind === "text") && !globalPraiseSearchLoad && !globalPraiseSearchError) {
-    refs.songList.innerHTML = renderListEmptyState("검색 결과 없음", "찬양, 말씀, 예배를 검색해 보세요.");
+    refs.songList.innerHTML = renderListEmptyState("검색 결과 없음", "다른 검색어로 찾아보세요.");
     return;
   }
 
@@ -15992,7 +15992,7 @@ function renderHomeSearchDetail() {
         <div class="empty-detail">
           <div class="empty-detail-inner">
             <h2>검색 결과 없음</h2>
-            <p>찬양, 말씀, 예배를 검색해 보세요.</p>
+            <p>다른 검색어로 찾아보세요.</p>
           </div>
         </div>
       `}
@@ -16757,7 +16757,7 @@ function renderManualsDetail() {
           }).join("")}
         </div>
       </article>
-      ${active.sources?.length ? `<footer class="manual-sources"><strong>원본·출처</strong><span>정리 기준: ${escapeHtml(active.reviewedAt || "확인 필요")}</span>${active.sources.filter(source => /^https:\/\//.test(source.url)).map(source => `<a href="${escapeAttr(source.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(source.title)}</a>`).join("")}<p>노션 원본은 보존하며, 이 매뉴얼에서는 현재 앱 사용법과 함께 안내합니다.</p></footer>` : ""}
+      ${active.sources?.length ? `<footer class="manual-sources"><strong>원본·출처</strong><span>정리 기준: ${escapeHtml(active.reviewedAt || "확인 필요")}</span>${active.sources.filter(source => /^https:\/\//.test(source.url)).map(source => `<a href="${escapeAttr(source.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(source.title)}</a>`).join("")}</footer>` : ""}
     </div>
   `;
   refs.detailPane.querySelectorAll('.manuals-index a').forEach((link) => {
@@ -24576,7 +24576,7 @@ function renderWorshipSetlistArchiveEntry(entry) {
         <ul class="svc-setlist-song-list">
           ${entry.candidates.map(renderWorshipSetlistCandidate).join("")}
         </ul>
-      ` : `<p class="svc-setlist-empty">가사 입력용 찬양/특송 후보가 없습니다.</p>`}
+      ` : `<p class="svc-setlist-empty">가사를 입력할 찬양·특송이 없습니다.</p>`}
     </article>`;
 }
 
@@ -26310,7 +26310,7 @@ function renderServiceEditorLabelCell(item, origIndex, attrs = {}, model = servi
 }
 
 function renderServiceEditorFormControls(item, origIndex, model = serviceItemEditorModel(item), options = {}) {
-  if (servicePraiseInputMode(item, model.parsed, model.service) === "children_audio") return `<span class="svc-song-picker-hint">음원 세트 지정 폼</span>`;
+  if (servicePraiseInputMode(item, model.parsed, model.service) === "children_audio") return `<span class="svc-song-picker-hint">음원 세트에 저장된 송폼</span>`;
   const parsed = model.parsed || parseServiceItemMemo(item?.memo);
   const hasFormData = Boolean(parsed.formHint || parsed.formPreset || parsed.formPresetRules?.length);
   if (!model.song && !hasFormData) return "";
@@ -26457,7 +26457,7 @@ function renderServiceManualPraiseLyricsEditor(item, index, options = {}) {
         data-service-item-field="manual_praise_lyrics"
         data-service-item-index="${index}"
         rows="${rows}"
-        placeholder="가사를 붙여넣기&#10;&#10;빈 줄은 다음 슬라이드로 나뉩니다."
+        placeholder="가사를 붙여 넣으세요.&#10;빈 줄마다 슬라이드가 나뉩니다."
       >${escapeHtml(lyrics)}</textarea>
     </label>`;
 }
@@ -26950,7 +26950,7 @@ function renderDeferredPastServiceDetail(service) {
       <section class="empty-detail-inner service-deferred-empty">
         <h2>${escapeHtml(serviceDisplayTypeName(service))}</h2>
         <p>${escapeHtml(`${formatServiceDate(service)} · 지난 예배`)}</p>
-        <p>아직 이 예배의 자료를 불러오지 않았습니다.</p>
+        <p>예배 자료를 불러오면 내용을 확인할 수 있습니다.</p>
         <button class="btn secondary" type="button" data-open-presenter-service="${escapeAttr(service.id)}">예배 불러오기</button>
       </section>
     </div>`;
@@ -28852,7 +28852,7 @@ function renderPresenterManualLyricsField(item, index, serviceId = "") {
   return `<div class="svc-presenter-input-field svc-presenter-input-field--lyrics${expanded ? "" : " is-collapsed"}">
     <span class="svc-presenter-lyrics-heading">가사<button class="icon-btn" type="button" data-presenter-lyrics-toggle="${escapeAttr(key)}" aria-expanded="${expanded}" aria-label="${title}" title="${title}"><i data-lucide="${expanded ? "chevron-up" : "chevron-down"}"></i></button></span>
     <textarea class="svc-presenter-input-control svc-presenter-input-control--multiline" data-service-item-field="manual_praise_lyrics" data-service-item-index="${index}"
-      rows="${expanded ? Math.max(2, Math.min(12, lyrics.split("\n").length)) : 3}" placeholder="가사를 붙여넣기&#10;&#10;빈 줄은 다음 슬라이드로 나뉩니다." onkeydown="handleDetailKeydown(event)" aria-label="${escapeAttr(`${item.label || "특송"} 가사`)}">${escapeHtml(lyrics)}</textarea>
+      rows="${expanded ? Math.max(2, Math.min(12, lyrics.split("\n").length)) : 3}" placeholder="가사를 붙여 넣으세요.&#10;빈 줄마다 슬라이드가 나뉩니다." onkeydown="handleDetailKeydown(event)" aria-label="${escapeAttr(`${item.label || "특송"} 가사`)}">${escapeHtml(lyrics)}</textarea>
   </div>`;
 }
 

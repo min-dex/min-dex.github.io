@@ -91,7 +91,7 @@ try:
    for i,t in enumerate([2,6,10]):d.locator(f'[data-timing-start="{i}"]').fill(str(t))
    page.evaluate('window.failSave=true');d.locator('[data-timing-save]').click();page.wait_for_function("!document.querySelector('[data-timing-save]').disabled");assert 'injected failure' in d.locator('[data-timing-status]').inner_text(),d.locator('[data-timing-status]').inner_text()
    assert not page.evaluate('db.elements[0].config.audioTiming')
-   page.evaluate('window.failSave=false');d.locator('[data-timing-save]').click();page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('예배에 저장했어요')")
+   page.evaluate('window.failSave=false');d.locator('[data-timing-save]').click();page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('이 예배의 음원·가사·전환 시각을 저장했습니다.')")
    page.evaluate("""()=>{const service=state.services[0],doc=service._worshipSourceRef.mindexServiceDocument;if(doc.sourceText.length<=8000)throw Error('long source fixture too short');doc.sourceText=doc.sourceText.slice(0,8000)+'\\n[truncated]';}""")
    # Replacing the audio uploads once; a failed commit retains the upload for retry.
    page.evaluate("window.uploads=0;state.client.storage.from=()=>({upload:async()=>{uploads++;return {error:null}},getPublicUrl:()=>({data:{publicUrl:location.origin+'/replacement.wav'}}),remove:()=>{throw Error('must not delete uncertain audio')}})")
@@ -100,7 +100,7 @@ try:
    for i,t in enumerate([2,6,10]):d.locator(f'[data-timing-start="{i}"]').fill(str(t))
    page.evaluate('window.failSave=true');d.locator('[data-timing-save]').click();page.wait_for_function("!document.querySelector('[data-timing-save]').disabled");assert 'injected failure' in d.locator('[data-timing-status]').inner_text(),d.locator('[data-timing-status]').inner_text()
    assert page.evaluate('db.elements[0].config.audioAsset.url').endswith('/clock.wav')
-   page.evaluate('window.failSave=false');d.locator('[data-timing-save]').click();page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('예배에 저장했어요')")
+   page.evaluate('window.failSave=false');d.locator('[data-timing-save]').click();page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('이 예배의 음원·가사·전환 시각을 저장했습니다.')")
    assert page.evaluate('uploads')==1
    page.evaluate("window.photoUploads=0;state.client.storage.from=()=>({upload:async()=>{photoUploads++;return {error:null}},getPublicUrl:()=>({data:{publicUrl:location.origin+'/photo-'+photoUploads+'.png'}}),remove:()=>{throw Error('must not delete uncertain photos')}})")
    d.locator('[data-timing-photos]').set_input_files([{'name':f'{i:02}.png','mimeType':'image/png','buffer':png} for i in range(1,4)])
@@ -124,7 +124,7 @@ try:
 
    page.evaluate('window.failSave=true');d.locator('[data-timing-save]').click();page.wait_for_function("!document.querySelector('[data-timing-save]').disabled")
    page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('injected failure')")
-   page.evaluate('window.failSave=false');d.locator('[data-timing-save]').click();page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('예배에 저장했어요')")
+   page.evaluate('window.failSave=false');d.locator('[data-timing-save]').click();page.wait_for_function("document.querySelector('[data-timing-status]').textContent.includes('이 예배의 음원·가사·전환 시각을 저장했습니다.')")
    assert page.evaluate('photoUploads')==3
    assert d.locator('[data-timing-start]').count()==3
    saved=page.evaluate('db');assert saved['elements'][0]['config']['audioTiming']['starts']==[2,6,10]
