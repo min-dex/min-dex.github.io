@@ -11,7 +11,7 @@ try:
             page = browser.new_page()
             page.route("**/*supabase*/**", lambda route: route.abort())
             page.goto(url, wait_until="domcontentloaded")
-            page.wait_for_function("typeof openPresenterOutput === 'function'")
+            page.wait_for_function("typeof openPresenterOutput === 'function' && !!window.MindexPresenterFreshness")
             print(engine, page.evaluate("""async () => {
               const check = (value, label) => { if (!value) throw Error(label); };
               const previous = {

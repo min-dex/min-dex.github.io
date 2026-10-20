@@ -10,11 +10,13 @@
   function remember(id){seen.add(id);if(seen.size>256)seen.delete(seen.values().next().value);}
   function receive(m){
     if(!m||m.project!==state.config.url||typeof m.id!=='string'||!['song','bulletin','bulletin-template','service-list','references','service-settings','setlist-archive','scripture'].includes(m.kind)||typeof m.recordId!=='string'||!m.recordId||seen.has(m.id))return;
+    if(m.kind==='song')globalThis.MindexPresenterFreshness?.notify(m.recordId);
     remember(m.id);if(m.kind==='service-list')window.MINDEX_SERVICE_LIST_LIVE?.invalidate();pending.set(identity(m),m);schedule();
   }
   function publish(kind,recordId){
     if(!state.config.url||!recordId)return;
     const m={id:createUuid(),project:state.config.url,kind,recordId};remember(m.id);
+    if(kind==='song')globalThis.MindexPresenterFreshness?.notify(recordId);
     if(kind==='setlist-archive'){pending.set(identity(m),m);schedule();}
     try{channel?.postMessage(m);}catch{}
     connectDepartmentRealtime();

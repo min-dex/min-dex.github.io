@@ -10,10 +10,13 @@ try:
    b=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
    try:
     ctx=b.new_context();ctx.route('**/*',lambda r:r.continue_() if urlsplit(r.request.url).netloc==urlsplit(u).netloc else r.abort())
-    page=ctx.new_page();page.goto(u);page.wait_for_function("typeof runPresenterAction==='function'&&!document.body.classList.contains('ui-booting')")
+    page=ctx.new_page();page.goto(u);page.wait_for_function("typeof runPresenterAction==='function'&&!!window.MindexPresenterFreshness&&!document.body.classList.contains('ui-booting')")
     page.evaluate('''()=>{
      window.svc={id:'restart-fixture',type_id:'sunday-second',title:'재시작 검증'};state.services=[svc];state.serviceItems={[svc.id]:[]};state.selectedServiceId=svc.id;
      canUseClientData=()=>false;songCatalogLoaded=true;
+     // No DB-linked songs in this fixture; use the real preflight with a stable revision.
+     state.client={from:()=>({select:()=>({eq:()=>({single:async()=>({data:{id:svc.id,save_revision:1},error:null})})})})};
+     hydratePresenterServiceData=async()=>{};
      window.fixtureSlides=[presenterReadySlide(svc),{id:'old',type:'lyrics',layout:'lower_bar_text',title:'이전 화면',text:'이전 송출 내용'}, {id:'new',type:'lyrics',layout:'lower_bar_text',title:'새 선택',text:'새로 선택한 내용'}];
      buildServicePresenterSlides=()=>fixtureSlides;presenterSlideBuildSourceSignature=()=> 'fixture';
      hydratePresenterOutputInBackground=()=>{};renderPresenterControlState=()=>{};

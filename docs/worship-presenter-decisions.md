@@ -3652,3 +3652,24 @@ English 이름이나 원제에서 자동 추론하지 않는다. 선택한 버�
 가로로 따라가며 상단 현재/다음 화면은 밀어내지 않는다. 기존 썸네일 DOM과
 선택·음원·미저장 입력을 유지하고 기본 보기의 세로 편집 배열은 변경하지 않는다.
 많은 장수의 지연 로딩도 가로 뷰포트를 기준으로 유지한다.
+
+## DB lyric freshness at output start ·2026-10-20
+
+- Starting output re-reads linked DB songs, versions and units regardless of the
+  editor cache, after service hydration. Service revision is checked around the
+  read; missing rows, empty selected lyrics, errors, navigation/edit races and a
+  20-second deadline block output. No service records or timing cues are saved.
+- Reserve a blank popup inside the click gesture. Publish/navigate only after
+  verification; close the reservation on failure. Duplicate starts are ignored.
+- A lyric-only document fallback without usable service items cannot authorize
+  output. Saved snapshots remain available for recovery, not freshness proof.
+- The verified song/version data is pinned for the live session. Local or remote
+  catalog changes only notify; they never replace running lyrics/audio sets.
+  Content broadcasts notify immediately; the existing 60-second/wake service
+  revision check covers missed broadcasts. Notification does not claim an exact
+  song change when only the aggregate revision is known.
+- Stop/start rechecks and adopts current DB data. Switching to another service
+  requires ending the current verified output. Manual lyrics/audio and their
+  timing are not treated as DB lyrics and are not rewritten.
+- Coverage: smoke_presenter_freshness.py (Chromium/WebKit, mocked popup only).
+  Physical output and native fullscreen remain separate tests.
