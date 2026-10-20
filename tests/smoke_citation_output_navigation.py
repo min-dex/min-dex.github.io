@@ -71,6 +71,8 @@ def main():
               renderPresenterControlState=()=>{};
               updateSaveState=()=>{};
               scrollPresenterBoardToIndex=()=>{scrolls++};
+              // Navigation is isolated from DB validation; shared validator has its own fixture suite.
+              validateScriptureReferences=async()=>({valid:true});
               saveServiceItemPatch=async()=>{saves++;return true};
               showToast=()=>{};
               presenterSlidesForService=()=>[{...slide,elementId:'different'}, {...slide,elementId}, {...slide,elementId,title:'마태복음 5:46'}];
