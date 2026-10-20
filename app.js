@@ -34439,6 +34439,10 @@ async function deleteService(serviceId) {
 
 function selectService(id) {
   if (serviceNavigationBlocked(id)) return;
+  if (state.module === "home") {
+    void openServiceInPresenter(id);
+    return;
+  }
   window.MINDEX_SERVICE_ENTRY?.invalidate();
   // Reselecting is not navigation: retain the live editor, selection and clean baseline.
   if (id && id === state.selectedServiceId && ["service", "presenter"].includes(state.module)) {
