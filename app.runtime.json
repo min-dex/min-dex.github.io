@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-compact-music-controls",
+  "version": "20261020-home-refresh",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "861ae407fed695a792b0aaa10cd8ca63d3d8210f740722ba068ef25580e0b843",
-  "runtime_sha256": "2981840460a4a803ab71cefd2ee0631bf45c35664127dbfd1f110ca7a0fc5ff0",
-  "source_bytes": 1521861,
-  "runtime_bytes": 1076288,
-  "source_gzip": 340577,
-  "runtime_gzip": 266208
+  "source_sha256": "4522c07aaac8d746924ee132198f106cb033117f2cc9481f74caf8dda1c68b97",
+  "runtime_sha256": "07746f81312599095c69a3f109f22a6edac6b7ad095dcd06224975b14986529f",
+  "source_bytes": 1522224,
+  "runtime_bytes": 1076618,
+  "source_gzip": 340668,
+  "runtime_gzip": 266298
 }

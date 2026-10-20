@@ -15944,7 +15944,7 @@ function renderHomeDetail() {
 function renderHomeStart() {
   if (!state.serviceTypes.length) {
     refs.detailPane.innerHTML = state.serviceError
-      ? renderUnavailableDetail("home", "홈", state.serviceError)
+      ? renderModuleEmptyDetail("home", "예배를 불러오지 못했습니다", state.serviceError, null)
       : renderLoadingDetail();
     return;
   }
@@ -15956,19 +15956,20 @@ function renderHomeStart() {
   refs.detailPane.innerHTML = `
     <main class="home-start" aria-label="홈">
       <header class="home-start-header">
+        <h1>홈</h1>
         <p>${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일 ${serviceWeekdayLabel(now)}</p>
       </header>
       <section class="home-schedule" aria-labelledby="home-schedule-heading">
         <header><h2 id="home-schedule-heading">이번 주 예배</h2><button type="button" class="home-start-text-button" data-service-week>최근 예배 <i data-lucide="arrow-right"></i></button></header>
-        ${dates.length ? dates.map(date => `<div class="home-schedule-day">
-          <h3>${escapeHtml(formatServiceDate({date}, {compact:true}))}</h3>
+        ${dates.length ? dates.map(date => `<div class="home-schedule-day${date === toLocalDateStr(now) ? " is-today" : ""}"${date === toLocalDateStr(now) ? ' aria-current="date"' : ""}>
+          <h3>${escapeHtml(formatServiceDate({date}, {compact:true}))}${date === toLocalDateStr(now) ? '<small>오늘</small>' : ""}</h3>
           <div>${upcoming.filter(service => service.date === date).map(service => `<button type="button" data-open-presenter-service="${escapeAttr(service.id)}"><span>${escapeHtml(serviceDisplayTypeName(service))}</span><i data-lucide="arrow-right"></i></button>`).join("")}</div>
         </div>`).join("") : '<p class="home-start-empty">이번 주에 등록된 예배가 없습니다.</p>'}
       </section>
       <nav class="home-start-shortcuts" aria-label="바로가기">
-        <button type="button" data-home-module="bulletin">주보 <i data-lucide="arrow-right"></i></button>
-        <button type="button" data-home-module="praise">찬양 <i data-lucide="arrow-right"></i></button>
-        <button type="button" data-home-module="scripture">말씀 <i data-lucide="arrow-right"></i></button>
+        <button type="button" data-home-module="bulletin"><span><i data-lucide="newspaper"></i>주보</span> <i data-lucide="arrow-right"></i></button>
+        <button type="button" data-home-module="praise"><span><i data-lucide="music"></i>찬양</span> <i data-lucide="arrow-right"></i></button>
+        <button type="button" data-home-module="scripture"><span><i data-lucide="book-open"></i>말씀</span> <i data-lucide="arrow-right"></i></button>
       </nav>
     </main>`;
   refreshIcons();

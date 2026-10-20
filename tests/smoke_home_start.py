@@ -24,18 +24,21 @@ try:
    page.evaluate("()=>{state.module='home';state.selectedServiceTypeId=null;state.search='';render()}")
    assert page.locator('.home-start').count()==1
    assert not page.locator('.service-week-board').count()
+   assert not page.locator('.home-start .empty-verse').count()
    assert page.locator('.home-start-shortcuts button').count()==3
    page.evaluate("""()=>{const d=toLocalDateStr(new Date());state.services=[{id:'next',type_id:'sunday-main',date:d,sort_order:0},{id:'other',type_id:'sunday-main',date:d,sort_order:1}];render()}""")
    assert page.locator('.home-schedule-day button').count()==2
+   assert page.locator('.home-schedule-day[aria-current="date"] h3 small').inner_text()=='오늘'
    page.evaluate("()=>{openServiceInPresenter=async id=>{window.homeOpenedService=id}}")
    page.locator('.home-schedule-day button').first.click()
    assert page.evaluate('window.homeOpenedService')=='next'
    for theme in ('light','dark'):
     page.evaluate('(t)=>applyTheme(t)',theme)
-    assert page.locator('.home-start').evaluate('(e)=>e.scrollWidth<=e.clientWidth')
-   for width in (1280,800,390):
-    page.set_viewport_size({'width':width,'height':800})
-    assert page.locator('.home-start').evaluate('(e)=>e.scrollWidth<=e.clientWidth')
+    for width in (1280,800,390):
+     page.set_viewport_size({'width':width,'height':800})
+     assert page.locator('.home-start').evaluate('(e)=>e.scrollWidth<=e.clientWidth')
+     page.locator('.home-schedule-day button').first.focus()
+     page.locator('#detailPane').screenshot(path=f'/tmp/mindex-home-{engine}-{theme}-{width}.png')
    page.set_viewport_size({'width':1280,'height':800})
    page.locator('.home-start [data-service-week]').click()
    assert page.locator('.service-week-board').count()==2
@@ -47,6 +50,10 @@ try:
    page.locator('.home-start [data-home-module="praise"]').click()
    page.wait_for_function("state.module==='praise'")
    assert page.locator('.empty-verse').count()==1
+   page.evaluate("()=>{state.module='home';state.serviceTypes=[];state.serviceError='Failed to fetch';state.uiVerses.home=[{text:'HOME VERSE MUST NOT APPEAR'}];state.selectedServiceTypeId=null;render()}")
+   assert page.locator('.empty-verse').count()==0
+   assert 'HOME VERSE MUST NOT APPEAR' not in page.locator('#detailPane').inner_text()
+   assert '예배를 불러오지 못했습니다' in page.locator('#detailPane').inner_text()
    print('PASS home start',engine,flush=True)
    browser.close()
 finally:server.shutdown()
