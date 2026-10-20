@@ -26,7 +26,7 @@
  function render(){
   if(!refs.saveAllBtn||!window.MINDEX_SERVER_STORAGE?.ready)return;
   let button=document.getElementById('restoreServerEditorDraft');
-  if(!button){button=document.createElement('button');button.id='restoreServerEditorDraft';button.className='btn secondary';button.textContent='임시 저장본 복구';button.onclick=restore;refs.saveAllBtn.before(button)}
+  if(!button){button=document.createElement('button');button.id='restoreServerEditorDraft';button.className='btn secondary';const label=document.createElement('span');label.textContent='임시 저장본 복구';button.append(label);button.onclick=restore;refs.saveAllBtn.before(button)}
   const module=moduleName(),id=idFor(module);
   button.hidden=!id||!window.MINDEX_SERVER_STORAGE.getItem('local',keyFor(module,id));
  }

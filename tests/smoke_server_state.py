@@ -118,6 +118,8 @@ def main():
                     page.locator('#restoreServerEditorDraft').click()
                     page.wait_for_function("state.scriptures[0].body==='Unsaved draft' && state.scriptures[0].title==='New title'")
                     assert any('mindex.editor.recovery.v1:' in key[2] for key in db)
+                    page.locator('#restoreServerEditorDraft').hover()
+                    assert page.locator('#restoreServerEditorDraft > span').is_visible()
                     # Focus is one rounded container ring, not clipped inner edges.
                     page.locator('#searchInput').focus()
                     focus=page.locator('#searchInput').evaluate("e=>({inner:getComputedStyle(e).outlineStyle,ring:getComputedStyle(e.closest('.search-wrap')).outlineStyle})")
