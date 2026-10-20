@@ -29187,6 +29187,7 @@ function renderServiceMusicPlayer(options = {}) {
           </select>
         </span>` : ""}
       </span>
+      ${inline ? globalThis.MindexSongTiming?.transport({ source: options.source, serviceId: options.serviceId }) || "" : ""}
     </span>`;
 }
 

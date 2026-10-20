@@ -53,6 +53,7 @@ SMOKES = (
     "smoke_module_landings.py",
     "smoke_home_start.py",
     "smoke_music_seek.py",
+    "smoke_controller_music_layout.py",
     "smoke_citation_translation_editor.py",
     "smoke_explicit_worship_order.py",
     "smoke_section_editor_actions.py",

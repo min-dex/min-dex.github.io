@@ -315,14 +315,16 @@
     });
   }
   let activeSeekInput = null;
-  function transport() {
+  function transport(options = {}) {
     const music = state.serviceMusic;
-    const source = music.sourceKey;
-    if (!source || !music.audio) return '';
-    const duration = Number.isFinite(music.audio.duration) && music.audio.duration > 0 ? music.audio.duration : 0;
-    const position = Math.max(0, Math.min(Number(music.audio.currentTime) || 0, duration));
-    const synced = music.mode === 'presenter-audio' && remoteSources.has(source);
-    return `<label class="song-timing-seek"><span class="song-timing-seek-label">음원 위치</span><input type="range" min="0" max="${duration}" step="0.1" value="${position}" ${duration ? '' : 'disabled'} data-song-timing-seek data-source="${escapeAttr(source)}" aria-label="음원 재생 위치"><span data-song-timing-clock>${transportClock(position)} / ${transportClock(duration)}</span></label>${synced ? `<button type="button" class="btn secondary" data-song-timing-resume ${!music.autoSyncSuspended || !music.playing ? 'hidden' : ''}>자동 넘김 복귀 · R</button>` : ''}`;
+    const source = options.source || music.sourceKey;
+    if (!source || (!options.source && !music.audio)) return '';
+    const owner = options.serviceId || '';
+    const active = source === music.sourceKey && (!owner || owner === music.ownerServiceId);
+    const duration = active && Number.isFinite(music.audio?.duration) && music.audio.duration > 0 ? music.audio.duration : 0;
+    const position = active ? Math.max(0, Math.min(Number(music.audio?.currentTime) || 0, duration)) : 0;
+    const synced = !options.source && music.mode === 'presenter-audio' && remoteSources.has(source);
+    return `<label class="song-timing-seek"><span class="song-timing-seek-label">음원 위치</span><input type="range" min="0" max="${duration}" step="0.1" value="${position}" ${duration ? '' : 'disabled'} data-song-timing-seek data-source="${escapeAttr(source)}" data-seek-owner="${escapeAttr(owner)}" aria-label="음원 재생 위치"><span data-song-timing-clock>${transportClock(position)} / ${transportClock(duration)}</span></label>${synced ? `<button type="button" class="btn secondary" data-song-timing-resume ${!music.autoSyncSuspended || !music.playing ? 'hidden' : ''}>자동 넘김 복귀 · R</button>` : ''}`;
   }
   function transportClock(seconds) {
     const safe = Number.isFinite(seconds) ? Math.max(0, seconds) : 0;
@@ -336,7 +338,11 @@
       button.hidden = !state.serviceMusic.autoSyncSuspended || !state.serviceMusic.playing || !state.presenter.slides[state.presenter.index]?.songTimingEligible || state.serviceMusic.timingGroupId !== state.presenter.slides[state.presenter.index]?.syncTimeline?.groupId;
     }
     for (const input of document.querySelectorAll('[data-song-timing-seek]')) {
-      if (input.dataset.source !== source) continue;
+      if (input.dataset.source !== source || (input.dataset.seekOwner && input.dataset.seekOwner !== state.serviceMusic.ownerServiceId)) {
+        input.disabled = true; input.max = 0; input.value = 0;
+        input.parentElement.querySelector('[data-song-timing-clock]').textContent = '0:00 / 0:00';
+        continue;
+      }
       input.max = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 0;
       input.disabled = Number(input.max) <= 0;
       if (activeSeekInput !== input) input.value = audio.currentTime || 0;
@@ -757,7 +763,7 @@
   if (typeof document !== 'undefined') document.addEventListener('input', e => {
     const input = e.target.closest('[data-song-timing-seek]');
     const audio = state.serviceMusic.audio;
-    if (!input || !audio || input.disabled || input.dataset.source !== state.serviceMusic.sourceKey) return;
+    if (!input || !audio || input.disabled || input.dataset.source !== state.serviceMusic.sourceKey || (input.dataset.seekOwner && input.dataset.seekOwner !== state.serviceMusic.ownerServiceId)) return;
     const time = Number(input.value);
     if (Number.isFinite(time) && Number.isFinite(audio.duration)) audio.currentTime = Math.max(0, Math.min(time, audio.duration));
     updateTransport(audio);
