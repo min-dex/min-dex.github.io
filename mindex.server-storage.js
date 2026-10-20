@@ -16,8 +16,53 @@
   if(!failures.size){if(node){node.hidden=true;node.textContent=''}return}
   if(!node){node=document.createElement('div');node.id='serverStorageStatus';node.setAttribute('role','status');document.body.append(node);}
   node.hidden=false;
-  node.textContent='서버에 보관하지 못한 내용이 있습니다. 연결을 확인하고 이 화면을 유지해 주세요.';
+  const conflict=Object.entries(stores||{}).flatMap(([name,store])=>store.conflictKeys().map(key=>({name,key})))[0];
+  node.textContent=conflict?'다른 창의 저장본과 내용이 다릅니다. 양쪽 내용을 확인해 주세요.':'서버에 보관하지 못한 내용이 있습니다. 연결을 확인하고 이 화면을 유지해 주세요.';
+  if(conflict){const button=document.createElement('button');button.type='button';button.className='btn secondary';button.textContent='충돌 확인';button.onclick=()=>void reviewConflict(conflict.name,conflict.key);node.append(button);return}
   if(failures.size){const button=document.createElement('button');button.type='button';button.className='btn secondary';button.textContent='다시 보관';button.onclick=()=>void retry();node.append(button)}
+ }
+ let reviewing=false;
+ async function reviewConflict(name,key){
+  if(reviewing)return;reviewing=true;
+  const captured=connection,store=stores[name],id=name+':'+key,queuedBefore=queued.get(id);
+  let dialog;
+  try{
+   await Promise.allSettled([...writers.values()]);
+   const review=await store.reviewConflict(key);
+   const localValue=queuedBefore?queuedBefore.value:review.local;
+   const archiveKey='mindex.state.recovery.v1:'+crypto.randomUUID();
+   const archiveValue=JSON.stringify({schema:1,key,...review,queued:localValue,savedAt:Date.now()});
+   if(connection!==captured)return;
+   dialog=document.createElement('dialog');dialog.className='server-conflict-review';
+   const title=document.createElement('h2');title.textContent='보관 중인 내용 확인';dialog.append(title);
+   const note=document.createElement('p');
+   const atomic=/^mindex\.atomic\./.test(key);
+   note.textContent=atomic?'양쪽 요청을 보관한 뒤 서버 요청을 확인합니다. 편집 입력은 유지됩니다. 이후 예배 저장에서 이전 요청의 결과를 확인해 주세요.':'양쪽 내용을 별도로 보관한 뒤 사용할 저장본을 선택합니다. 편집창의 입력은 바뀌지 않습니다.';dialog.append(note);
+   for(const [label,value] of [['이 창의 보관 요청',localValue],['서버 보관본',review.current]]){
+    const field=document.createElement('label');field.textContent=label;
+    const input=document.createElement('textarea');input.readOnly=true;input.value=value??'(비어 있음)';field.append(input);dialog.append(field);
+   }
+   const errorText=document.createElement('p');errorText.setAttribute('role','alert');dialog.append(errorText);
+   const actions=document.createElement('div');actions.className='server-conflict-actions';dialog.append(actions);
+   const add=(label,choice)=>{const button=document.createElement('button');button.className='btn secondary';button.type='button';button.textContent=label;actions.append(button);
+    button.onclick=async()=>{
+     if(choice===null){dialog.close();return}
+     for(const b of actions.children)b.disabled=true;
+     try{
+      if(connection!==captured||writers.has(id)||queued.get(id)!==queuedBefore)throw Error('새 입력이 있어 다시 확인해 주세요.');
+      await setItem('local',archiveKey,archiveValue);
+      if(connection!==captured||writers.has(id)||queued.get(id)!==queuedBefore)throw Error('새 입력이 있어 현재 내용을 유지했습니다.');
+      await store.resolveConflict(review,choice,localValue);
+      if(queued.get(id)===queuedBefore)queued.delete(id);
+      failures.delete(id);announce(name);status();dialog.close();
+      window.dispatchEvent?.(new Event('mindex-server-state-settled'));
+     }catch(error){errorText.textContent=error.message==='STATE_CONFLICT_CHANGED'?'다른 창에서 내용이 다시 바뀌었습니다. 취소 후 충돌 내용을 다시 확인해 주세요.':'보관을 완료하지 못했습니다. 현재 내용은 유지됩니다. 연결을 확인한 뒤 다시 시도해 주세요.';for(const b of actions.children)b.disabled=false}
+    };
+   };
+   add('취소',null);add(atomic?'서버 요청 확인':'서버 보관본 유지','current');if(!atomic)add('이 창의 보관 요청 사용','local');
+   dialog.addEventListener('close',()=>{dialog.remove();reviewing=false},{once:true});document.body.append(dialog);dialog.showModal();
+  }catch(error){if(dialog)dialog.remove();reviewing=false;failures.set(id,error);status()}
+  finally{if(!dialog)reviewing=false}
  }
  function getItem(scope,key,fallback=null){
   if(transport(key))return ephemeral.get(key)??(ready&&key!=='mindex.presenter.signal'?stores.device.getItem(recoveryKey(key)):null)??fallback;

@@ -6,7 +6,7 @@ from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 INIT = """async () => {
  const client={rpc:async(name,args)=>{
   const response=await fetch('/state-fixture/'+name,{method:'POST',body:JSON.stringify(args)});
-  const result=await response.json();if(result.error)throw Error(result.error);return result;
+  const result=await response.json();if(result.error)return {error:Error(result.error)};return result;
  }};
  await window.MINDEX_SERVER_STORAGE.initialize(client,'fixture');
  return window.MINDEX_SERVER_STORAGE.ready;
@@ -88,6 +88,28 @@ def main():
                     assert page.evaluate('()=>window.MINDEX_SERVER_STORAGE.retry()')
                     assert page.locator('#serverStorageStatus').is_visible() is False
                     assert page.evaluate("safeStorageGet('local','mindex.worshipRecoverySnapshot.latest.v1.fixture')")=='newer'
+                    # A competing tab's confirmed value requires explicit choice, not blind retry.
+                    conflict_key=next(key for key in db if key[2]=='mindex.worshipRecoverySnapshot.latest.v1.fixture')
+                    db[conflict_key]={**db[conflict_key],'value':'other window','revision':str(int(db[conflict_key]['revision'])+1),'requestId':'other-window'}
+                    error=page.evaluate("async()=>{try{await persistServerValue('local','mindex.worshipRecoverySnapshot.latest.v1.fixture','this window');return ''}catch(e){return e.message}}")
+                    assert error=='STATE_REVISION_CONFLICT'
+                    page.get_by_role('button',name='충돌 확인',exact=True).click()
+                    page.get_by_role('dialog').wait_for()
+                    assert page.get_by_label('이 창의 보관 요청',exact=True).input_value()=='this window'
+                    assert page.get_by_label('서버 보관본',exact=True).input_value()=='other window'
+                    page.screenshot(path='/tmp/mindex-state-conflict-'+engine+'.png')
+                    control['offline']=True
+                    page.get_by_role('button',name='이 창의 보관 요청 사용',exact=True).click()
+                    page.wait_for_function("document.querySelector('.server-conflict-review [role=alert]').textContent.length>0")
+                    assert db[conflict_key]['value']=='other window'
+                    control['offline']=False
+                    page.get_by_role('button',name='이 창의 보관 요청 사용',exact=True).click()
+                    page.get_by_role('dialog').wait_for(state='detached')
+                    assert db[conflict_key]['value']=='this window'
+                    archives=[json.loads(value['value']) for key,value in db.items() if key[2].startswith('mindex.state.recovery.v1:')]
+                    assert any(a['local']=='this window' and a['current']=='other window' for a in archives)
+                    await_value=page.evaluate("async()=>{await persistServerValue('local','mindex.worshipRecoverySnapshot.latest.v1.fixture','newer');return true}")
+                    assert await_value
                     page.reload(wait_until='domcontentloaded')
                     page.wait_for_function('!!window.MINDEX_SERVER_STORAGE && !document.body.classList.contains("ui-booting")')
                     assert page.evaluate(INIT)

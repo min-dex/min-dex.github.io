@@ -1516,10 +1516,11 @@
     function handoffIdentity(){const id=remoteIdentity();return id?{kind:id.kind,id:id.recordId}:null;}
     async function restoreHandoff(draft){
       if(!draft||draft.schema!==1||remoteBlocked()){saveError='현재 입력·저장·인쇄를 마친 뒤 초안을 이어 써 주세요.';status();return false;}
-      if(draft.revision!==doc.revision){saveError='초안을 만든 뒤 저장본이 바뀌었습니다. 기존 초안은 보존됩니다.';status();return false;}
-      if(!window.confirm('연결된 기기의 주보 초안을 편집창에 불러올까요?'))return false;
+      const changed=draft.revision!==doc.revision;
+      if(!window.confirm(changed?'초안을 만든 뒤 저장본이 바뀌었습니다. 현재 내용과 가져올 초안을 각각 보관하고, 가져온 초안으로 편집창을 바꿀까요? 저장본은 바뀌지 않습니다.':'연결된 기기의 주보 초안을 편집창에 불러올까요?'))return false;
       const target=doc,request=serial,edit=interactionRevision,before=JSON.stringify(snapshot(target));
       try{
+        await writeLocal(target,target.key+":handoff-recovery:"+crypto.randomUUID(),{schema:1,current:snapshot(target),incoming:structuredClone(draft),savedAt:Date.now()});
         await retainRecovery(target,snapshot(target));
         if(remoteBlocked()||doc!==target||serial!==request||edit!==interactionRevision||JSON.stringify(snapshot(target))!==before)return false;
         remember();Object.assign(target,normalizeSnapshot(draft.value));persist();properties();preview();status();return true;

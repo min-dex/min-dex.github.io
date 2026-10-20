@@ -6548,14 +6548,21 @@ async function saveAll() {
 
   try {
     writeFormsToSelectedVersion();
-    await saveSongMeta(song);
+    const savedWithoutNewInput = await saveSongMeta(song);
+    if (publishClient !== state.client || getSelectedSong() !== song) return;
+    if (publishClient === state.client) window.MINDEX_CONTENT_LIVE?.publish("song", song.id);
+    if (!savedWithoutNewInput) {
+      showToast("저장했습니다. 저장 중 추가한 입력은 남아 있으니 다시 저장해 주세요.");
+      return;
+    }
+    const selectedVersion = getSelectedVersion();
+    if (selectedVersion) state.forms = normalizeForms((selectedVersion.forms || []).map(form => withLocalId({ ...form, song_id: selectedVersion.id })));
     state.songs = state.songs.sort(sortSongs);
     clearSearchCaches();
     state.dirty.song = false;
     state.dirty.forms = false;
     delete song._pendingVersionDeletes;
     captureCleanFingerprint("praise");
-    if (publishClient === state.client) window.MINDEX_CONTENT_LIVE?.publish("song", song.id);
     showToast("저장했습니다.");
     render();
   } catch (error) {
@@ -6569,6 +6576,8 @@ async function saveAll() {
 async function saveReferenceLinks() {
   if (!requireClient() || state.saving) return;
 
+  const publishClient = state.client, publishProject = state.config.url;
+  const before = dirtyModuleFingerprint("references");
   const links = state.referenceLinks.map(normalizeReferenceLink).sort(sortReferenceLinks);
   const invalid = links.find((link) => !link.title.trim() || !referenceUrlIsValid(link.url));
   if (invalid) {
@@ -6598,6 +6607,14 @@ async function saveReferenceLinks() {
       .order("title", { ascending: true });
     if (error) throw error;
 
+    if (state.client !== publishClient || state.config.url !== publishProject) return;
+    if (dirtyModuleFingerprint("references") !== before) {
+      state.cleanFingerprints.references = JSON.stringify(dirtyComparableValue((data || []).map(normalizeReferenceLink).sort(sortReferenceLinks)));
+      state.dirty.references = true;
+      window.MINDEX_CONTENT_LIVE?.publish("references", "all");
+      showToast("저장했습니다. 저장 중 추가한 입력은 유지했습니다.");
+      return;
+    }
     state.referenceLinks = (data || []).map(normalizeReferenceLink).sort(sortReferenceLinks);
     state.referenceError = "";
     state.referenceLinksLoaded = true;
@@ -6809,6 +6826,7 @@ async function saveScripture() {
   }
 
   const publishClient = state.client, publishProject = state.config.url;
+  const before = JSON.stringify(dirtyComparableValue(scripture));
   state.saving = true;
   updateSaveState();
 
@@ -6833,6 +6851,13 @@ async function saveScripture() {
 
     if (state.client !== publishClient || state.config.url !== publishProject) return;
     window.MINDEX_CONTENT_LIVE?.publish("scripture", "all");
+    if (getSelectedScripture() !== scripture) return;
+    if (JSON.stringify(dirtyComparableValue(scripture)) !== before) {
+      state.cleanFingerprints.scripture = JSON.stringify(dirtyComparableValue(normalizeServerScripture(data)));
+      state.dirty.scripture = true;
+      showToast("저장했습니다. 저장 중 추가한 입력은 유지했습니다.");
+      return;
+    }
     Object.assign(scripture, normalizeServerScripture(data));
     state.scriptures = state.scriptures.sort(sortScriptures);
     state.dirty.scripture = false;
@@ -6853,7 +6878,7 @@ function serviceSaveErrorMessage(error) {
   if (message === "JOURNAL_NOT_CONFIRMED") {
     if (error.journalPhase === "cleanup") return "예배 저장 응답은 받았지만 복구 기록 정리를 확인하지 못했습니다. 입력과 요청은 유지됩니다. 다시 저장하면 기존 요청의 결과부터 확인합니다.";
     const cause = String(error?.cause?.message || "");
-    if (cause === "STATE_REVISION_CONFLICT") return "저장 복구 정보가 다른 창의 내용과 충돌했습니다. 입력과 임시 저장본은 유지됩니다. 다른 창의 저장을 마친 뒤 다시 시도해 주세요.";
+    if (cause === "STATE_REVISION_CONFLICT") return "저장 복구 정보가 다른 창의 내용과 충돌했습니다. 입력과 임시 저장본은 유지됩니다. 하단의 ‘충돌 확인’에서 기존 요청을 확인한 뒤 다시 저장해 주세요.";
     return "서버에 저장 복구 정보를 확인하지 못했습니다. 입력과 임시 저장본은 유지됩니다. 연결을 확인한 뒤 다시 저장해 주세요.";
   }
   if (/Failed to fetch|Failed to send a request|NetworkError|Load failed|Network request failed/i.test(message)) {
@@ -8029,7 +8054,32 @@ async function ensureWorshipServiceRowsLoadedForPersistence(serviceId = "") {
   }
 }
 
-async function saveSongMeta(song) {
+async function saveSongMeta(liveSong) {
+  const client = state.client, project = state.config.url;
+  // Assign IDs before taking the immutable request snapshot, so late edits keep
+  // referring to the same versions/units even when these are newly created.
+  if (state.songVersionTablesSupported && state.dirty.forms) {
+    for (const version of liveSong.versions || []) {
+      const oldId = version.id;
+      if (!isUuid(version.id)) version.id = createUuid();
+      if (state.selectedVersionId === oldId) {
+        state.selectedVersionId = version.id;
+        for (const form of state.forms) form.song_id = version.id;
+      }
+      for (const form of version.forms || []) {
+        const oldFormId = form.id;
+        if (!isUuid(form.id)) form.id = createUuid();
+        if (state.selectedVersionId === version.id) {
+          const visible = state.forms.find(item => item.id === oldFormId);
+          if (visible) visible.id = form.id;
+        }
+      }
+    }
+  }
+  const before = structuredClone(liveSong), formsBefore = JSON.stringify(state.forms);
+  const selectedVersionId = state.selectedVersionId;
+  const song = structuredClone(liveSong);
+  const { mergeEditorDraft } = await import(`./mindex.draft-merge.mjs?v=${encodeURIComponent(window.MINDEX_RELEASE || "draft-merge")}`);
   const scriptureSnapshot = JSON.stringify(song.scripture || []);
   if (cleanList(song.scripture).length) await validateScriptureReferences(song.scripture);
   if (scriptureSnapshot !== JSON.stringify(song.scripture || [])) throw new Error("성구 입력이 변경되었습니다. 다시 저장해 주세요.");
@@ -8041,7 +8091,7 @@ async function saveSongMeta(song) {
 
   if (useVersionTables && state.dirty.forms) {
     try {
-      await saveSongVersions(song);
+      await saveSongVersions(song, { detached: true });
     } catch (error) {
       if (!isUnavailableRelationError(error)) throw error;
       console.warn("Fell back to memo-backed song versions.", error);
@@ -8086,9 +8136,21 @@ async function saveSongMeta(song) {
     song.versions = normalizeSongVersions(song, versions);
     song._memoHasVersions = false;
   }
+  if (client !== state.client || project !== state.config.url) return false;
+  const unchanged = JSON.stringify(liveSong) === JSON.stringify(before) && JSON.stringify(state.forms) === formsBefore;
+  const merged = mergeEditorDraft(before, liveSong, song).value;
+  // memo is the confirmed CAS baseline, not an editable field.
+  merged.memo = song.memo;
+  Object.assign(liveSong, merged);
+  if (getSelectedSong() === liveSong) {
+    const savedVersion = song.versions?.find(version => version.id === selectedVersionId);
+    if (savedVersion) state.cleanFingerprints.praise = JSON.stringify(dirtyComparableValue({song, versionId: selectedVersionId || "", forms: savedVersion.forms || []}));
+  }
+  if (!unchanged && getSelectedSong() === liveSong) { state.dirty.song = true; state.dirty.forms = true; }
+  return unchanged;
 }
 
-async function saveSongVersions(song) {
+async function saveSongVersions(song, { detached = false } = {}) {
   if (!song?.id || !state.client) return;
 
   const canonicalSongId = await ensureCanonicalSongRow(song);
@@ -8109,10 +8171,10 @@ async function saveSongVersions(song) {
     const oldId = version.id;
     if (!isUuid(version.id)) version.id = createUuid();
     if (oldId && oldId !== version.id) versionIdMap.set(oldId, version.id);
-    if (previousSelectedVersionId === oldId) state.selectedVersionId = version.id;
+    if (!detached && previousSelectedVersionId === oldId) state.selectedVersionId = version.id;
   }
 
-  if (versionIdMap.size) {
+  if (!detached && versionIdMap.size) {
     for (const form of state.forms) {
       if (versionIdMap.has(form.song_id)) form.song_id = versionIdMap.get(form.song_id);
     }
@@ -8219,7 +8281,7 @@ async function saveSongVersions(song) {
   }
 
   const selectedVersion = getSelectedVersion();
-  if (selectedVersion) {
+  if (!detached && selectedVersion) {
     state.forms = normalizeForms((selectedVersion.forms || []).map((form) => withLocalId({ ...form, song_id: selectedVersion.id })));
   }
 }
@@ -25458,36 +25520,37 @@ function serviceSourceHistoryMeta(entry = {}) {
   ]).join(" · ") || "원문";
 }
 
-function restoreServiceSourceHistory(serviceId = state.selectedServiceId, historyIndex = -1) {
-  const id = String(serviceId || "").trim();
-  const service = state.services.find((candidate) => candidate.id === id);
+async function restoreServiceSourceText(id, sourceText) {
   const textarea = serviceSourceTextareaForService(id);
-  const entry = serviceDocumentHistoryFromRef(service)[Number(historyIndex)];
-  const sourceText = String(entry?.sourceText || "").trim();
-  if (!service || !textarea || !sourceText) {
-    showToast("불러올 이전 저장본을 찾지 못했습니다.", "error");
-    return false;
-  }
-  textarea.value = sourceText;
-  textarea.dispatchEvent(new Event("input", { bubbles: true }));
-  showToast("이전 저장본 원문을 불러왔습니다. 반영 후 저장해 주세요.", "info");
-  return true;
+  const service = state.services.find(candidate => candidate.id === id);
+  if (!service || !textarea || !sourceText.trim() || state.saving) return false;
+  if (!window.confirm("현재 원문과 복구할 원문을 각각 보관하고 편집창에 불러올까요? 예배 저장본은 바뀌지 않습니다.")) return false;
+  const before = textarea.value, client = state.client, project = state.config.url;
+  try {
+    await persistServerValue("local", `mindex.source.recovery.v1:${id}:${createUuid()}`, JSON.stringify({
+      schema: 1, serviceId: id, current: before, incoming: sourceText, savedAt: Date.now(),
+    }));
+    if (state.client !== client || state.config.url !== project || state.saving ||
+        serviceSourceTextareaForService(id) !== textarea || textarea.value !== before || !textarea.isConnected) {
+      showToast("복구 중 입력이나 화면이 바뀌어 현재 내용을 유지했습니다.", "info");return false;
+    }
+    textarea.value = sourceText;
+    textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    showToast("원문을 불러왔습니다. 확인 후 반영·저장해 주세요.", "info");return true;
+  } catch (error) { showToast(error.message || "원문 보관을 확인하지 못해 현재 입력을 유지했습니다.", "error");return false; }
 }
 
-function restoreServiceSourceRecovery(serviceId = state.selectedServiceId) {
+async function restoreServiceSourceHistory(serviceId = state.selectedServiceId, historyIndex = -1) {
   const id = String(serviceId || "").trim();
-  const service = state.services.find((candidate) => candidate.id === id);
-  const textarea = serviceSourceTextareaForService(id);
+  const service = state.services.find(candidate => candidate.id === id);
+  const entry = serviceDocumentHistoryFromRef(service)[Number(historyIndex)];
+  return restoreServiceSourceText(id, String(entry?.sourceText || ""));
+}
+
+async function restoreServiceSourceRecovery(serviceId = state.selectedServiceId) {
+  const id = String(serviceId || "").trim();
   const document = serviceDocumentFromRecoverySnapshot(latestWorshipRecoverySnapshotForService(id));
-  const sourceText = String(document?.sourceText || "").trim();
-  if (!service || !textarea || !sourceText) {
-    showToast("불러올 서버 복구본을 찾지 못했습니다.", "error");
-    return false;
-  }
-  textarea.value = sourceText;
-  textarea.dispatchEvent(new Event("input", { bubbles: true }));
-  showToast("서버 복구본 원문을 불러왔습니다. 반영 후 저장해 주세요.", "info");
-  return true;
+  return restoreServiceSourceText(id, String(document?.sourceText || ""));
 }
 
 function buildServiceSourceText(service, options = {}) {

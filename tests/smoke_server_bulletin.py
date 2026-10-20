@@ -51,8 +51,9 @@ try:
    assert page.evaluate('resumeResult') is False
    assert page.evaluate("docs.get('bulletin-fixture').fields.news")=='Late current edit'
    page.evaluate("docs.get('bulletin-fixture').fields.news='Committed';docs.get('bulletin-fixture').dirty=false")
-   assert page.evaluate('()=>editor.restoreHandoff({...incoming,revision:2})') is False
-   assert page.evaluate('()=>editor.restoreHandoff(incoming)') is True
+   assert page.evaluate('()=>editor.restoreHandoff({...incoming,revision:2})') is True
+   assert page.evaluate("docs.get('bulletin-fixture').revision")==1
+   assert page.evaluate("()=>MINDEX_SERVER_STORAGE.keys('local').some(k=>k.includes(':handoff-recovery:'))")
    assert page.evaluate("docs.get('bulletin-fixture').fields.news")=='From paired device'
    assert page.evaluate("docs.get('bulletin-fixture').dirty") is True
    print('PASS',engine,'failed recovery blocks replacement; late edit retained; paired draft revision guard and explicit resume',flush=True)

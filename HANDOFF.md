@@ -1162,3 +1162,18 @@ New gate entry: tests/smoke_presenter_focus_view.py. Not deployed; no physical o
 Release verification also covers keyboard focus in both layouts and deferred board scrolling.
 The old keyboard fixture now waits for ui-booting to finish; the same premature-start
 failure was reproduced against unmodified bb5a1673. Existing assertions were retained.
+
+## 저장·복구 후속 수정 ·2026-10-20
+
+말씀/참고자료/찬양 저장 응답 중 새 입력 보존, 찬양 고정 snapshot 및 memo CAS
+기준 갱신, 원문 이력/복구 전 양쪽 private archive, 실제 state 충돌 비교·선택,
+revision이 바뀐 주보 이어쓰기의 명시적 복구를 구현했다. atomic journal은 서버
+요청 확인만 허용하고 기존 예배 receipt/충돌 경로를 유지한다. 네트워크 응답
+유실의 동일 요청 재시도와 운영 저장 경로는 유지한다.
+
+로컬 Cloud 4묶음111entrypoints PASS(103/160/172/188초). Chromium/WebKit
+충돌 비교·양쪽 보관·보관 실패 후 재시도, 주보 late input/보관 실패/새 revision
+복구 PASS. 추가 찬양 편집 light/dark·1440/390 8조합 PASS. 실제 저장 함수
+지연 응답 및 원문 취소/보관 실패/추가입력 검증 PASS. native macOS fullscreen은
+기본 보호·SKIP 범위이며 실제 장비/재생/송출/운영 DB 쓰기는 실행하지 않았다.
+release20261020-save-retry-preserve. GitHub/Pages 결과는 이후 별도 확인한다.

@@ -1,14 +1,14 @@
 # Current Worship Persistence Contract
 
-## Server-state implementation · 2026-10-19 (not deployed)
+## Server-state implementation · 2026-10-19
 
-The pending server-state change replaces browser journals with confirmed private
+The deployed server-state path replaces browser journals with confirmed private
 server journals scoped by device identity and project. Writes await journal RPC
 confirmation before the existing atomic worship RPC. Recovery captures also await
 server confirmation; failure retains editor input. Unknown outcomes keep the exact
 request identity. See [server state](server-state-current.md) for migration, access
-and verification boundaries. The production description below remains historical
-until the schema and client are deployed together.
+and verification boundaries. The older storage-scope description below is historical; the server-state
+contract and its deployment receipts are authoritative.
 
 ## Production Boundary (2026-10-06)
 

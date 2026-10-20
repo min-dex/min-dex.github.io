@@ -15,6 +15,7 @@ NODE_TESTS = (
     "test_server_state.mjs",
     "test_editor_draft_merge.mjs",
     "test_editor_draft_recovery.cjs",
+    "test_save_input_retention.cjs",
     "test_server_storage.cjs",
     "test_legacy_state.mjs",
     "test_worship_store.mjs",

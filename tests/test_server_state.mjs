@@ -56,3 +56,20 @@ assert.equal(j4.pending,true);assert.equal(db.get('journal').value,'other reques
 await assert.rejects(j4.retry('journal'),/CONFLICT/);
 assert.equal(db.get('journal').value,'other request');
 console.log('PASS stale tombstone recovery, identical cleanup, real journal conflict retention');
+
+// Explicit conflicts expose only application values, never capability tokens.
+const review=await j4.reviewConflict('journal');
+assert.equal(review.local,'my request');assert.equal(review.current,'other request');assert.equal(review.p_token,undefined);
+await j4.resolveConflict(review,'local');assert.equal(db.get('journal').value,'my request');assert.equal(j4.pending,false);
+const c1=create(),c2=create();await c1.load();await c2.load();
+await c1.setItem('mindex.atomic.pending.v2:x','other');
+await assert.rejects(c2.setItem('mindex.atomic.pending.v2:x','mine'),/CONFLICT/);
+const atomicReview=await c2.reviewConflict('mindex.atomic.pending.v2:x');
+await assert.rejects(c2.resolveConflict(atomicReview,'local'),/ATOMIC_REQUEST/);
+await c1.setItem('mindex.atomic.pending.v2:x','newer');
+await assert.rejects(c2.resolveConflict(atomicReview,'current'),/CONFLICT_CHANGED/);
+await c2.resolveConflict(await c2.reviewConflict('mindex.atomic.pending.v2:x'),'current');
+assert.equal(c2.getItem('mindex.atomic.pending.v2:x'),'newer');assert.equal(c2.pending,false);
+lose=true;await assert.rejects(c2.setItem('network','unknown'),/Response lost/);
+await assert.rejects(c2.reviewConflict('network'),/NOT_CONFIRMED/);await c2.retry('network');
+console.log('PASS explicit conflict choices, stale review guard, atomic request protection and unknown network identity');

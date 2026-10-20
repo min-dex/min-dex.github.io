@@ -2022,7 +2022,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .svc-prep-editor-head-actions .reference-new-btn[data-service-item-action="add"],
 .svc-song-create[data-service-song-create],
 .service-list-type-block .service-list-new-btn,
-:is(.song-timing-dialog, .draft-handoff-dialog) .btn.secondary {
+:is(.song-timing-dialog, .draft-handoff-dialog, .server-conflict-review) .btn.secondary {
   flex-shrink: 0;
   border: 1px solid var(--line-2);
 }
@@ -2034,7 +2034,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .svc-prep-editor-head-actions .reference-new-btn[data-service-item-action="add"]:not(:disabled),
 .svc-song-create[data-service-song-create]:not(:disabled),
 .service-list-type-block .service-list-new-btn:not(:disabled),
-:is(.song-timing-dialog, .draft-handoff-dialog) .btn.secondary:not(:disabled) {
+:is(.song-timing-dialog, .draft-handoff-dialog, .server-conflict-review) .btn.secondary:not(:disabled) {
   background: var(--ui-surface-field);
 }
 :is(.reference-card-actions, .reference-editor-actions, .background-tile-actions, .reference-group-tools, .version-edit-actions, .form-actions) :is(.icon-btn, .version-copy-btn, .version-add-btn, .version-delete-btn):not(:disabled):not(.danger):not(.version-delete-btn):not(.review-action),
@@ -2045,7 +2045,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .svc-prep-editor-head-actions .reference-new-btn[data-service-item-action="add"]:not(:disabled):not(.danger),
 .svc-song-create[data-service-song-create]:not(:disabled):not(.danger),
 .service-list-type-block .service-list-new-btn:not(:disabled):not(.danger),
-:is(.song-timing-dialog, .draft-handoff-dialog) .btn.secondary:not(:disabled):not(.danger) {
+:is(.song-timing-dialog, .draft-handoff-dialog, .server-conflict-review) .btn.secondary:not(:disabled):not(.danger) {
   color: var(--ink-2);
 }
 :is(.reference-card-actions, .reference-editor-actions, .background-tile-actions, .reference-group-tools, .version-edit-actions, .form-actions) :is(.icon-btn, .version-copy-btn, .version-add-btn, .version-delete-btn):not(:disabled):hover,
@@ -2056,11 +2056,11 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .svc-prep-editor-head-actions .reference-new-btn[data-service-item-action="add"]:not(:disabled):hover,
 .svc-song-create[data-service-song-create]:not(:disabled):hover,
 .service-list-type-block .service-list-new-btn:not(:disabled):hover,
-:is(.song-timing-dialog, .draft-handoff-dialog) .btn.secondary:not(:disabled):hover {
+:is(.song-timing-dialog, .draft-handoff-dialog, .server-conflict-review) .btn.secondary:not(:disabled):hover {
   background: color-mix(in srgb, var(--ui-surface-field) 85%, var(--ink) 15%);
 }
 :is(.reference-card-actions, .reference-editor-actions, .background-tile-actions, .reference-group-tools, .version-edit-actions, .form-actions) :is(.icon-btn, .version-copy-btn, .version-add-btn, .version-delete-btn):is(.danger, .version-delete-btn):not(:disabled),
-:is(.song-timing-dialog, .draft-handoff-dialog) .btn.secondary.danger:not(:disabled) {
+:is(.song-timing-dialog, .draft-handoff-dialog, .server-conflict-review) .btn.secondary.danger:not(:disabled) {
   color: var(--danger);
 }
 .reference-card-actions, .reference-move-actions, .reference-group-actions { gap: 5px; }
@@ -9503,3 +9503,10 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
 .svc-presenter-side-panel .svc-presenter-action-group--nav { height:35px; }
 .svc-presenter-side-panel .svc-presenter-action-group--nav .icon-btn { width:35px; height:35px; flex:0 0 35px; }
 .svc-presenter-side-panel button.svc-presenter-preparation-apply { padding:0 10px; font-weight:600; }
+
+.server-conflict-review { width: min(90vw, 760px); max-height: 85vh; overflow: auto; padding: 25px; background: var(--ui-surface-panel); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; }
+.server-conflict-review label { display: block; margin-top: 15px; }
+.server-conflict-review textarea { display: block; width: 100%; min-height: 120px; margin-top: 10px; }
+.server-conflict-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+.server-conflict-review::backdrop { background: #0008; }
