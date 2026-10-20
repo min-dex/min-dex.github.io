@@ -312,9 +312,6 @@ function syncPresenterFocusMusic() {
     && slide?.songTimingEligible && slide.syncTimeline?.groupId === music.timingGroupId;
   const label = !music.sourceKey ? '연결된 음원 없음' : `${music.pending ? '음원 준비 중' : music.playing ? '음원 재생 중' : '음원 정지 / 일시정지'}${sync ? music.autoSyncSuspended ? ' · 자동 넘김 해제' : ' · 자동 넘김' : ''}${music.sourceKey && !own ? ' · 다른 예배 음원' : ''}`;
   panel.querySelector('[data-focus-music-status]').textContent = label;
-  const toggle = panel.querySelector('[data-focus-music="toggle"]');
-  const toggleLabel = music.playing ? '일시정지 · P' : '재생 · P';
-  if (toggle.textContent !== toggleLabel) toggle.textContent = toggleLabel;
   panel.querySelectorAll('[data-focus-music]').forEach(button => { button.disabled = !own || !music.sourceKey; });
   const toggle = panel.querySelector('[data-focus-music="toggle"]');
   if (toggle) {
