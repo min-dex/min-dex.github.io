@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-presenter-focus",
+  "version": "20261020-home-music-seek-final",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "71a69b5aceb25c82f9f8258477d9fec87b76968c348dc4d21fccc9ba69a2e380",
-  "runtime_sha256": "497d86bf2255c958c26600969ec826a0a2247dc7451a3f7cd19d171704a3ae50",
-  "source_bytes": 1521491,
-  "runtime_bytes": 1076042,
-  "source_gzip": 340499,
-  "runtime_gzip": 266178
+  "source_sha256": "e332c27697c71503db46cfb2c1d5ca6632d83d8cedea5dead1ccc1dd334e5989",
+  "runtime_sha256": "1a38eb87b5570dfd84e5cefdf91fbb537dede638a2a6aba0e7215d170e2588fb",
+  "source_bytes": 1521503,
+  "runtime_bytes": 1076054,
+  "source_gzip": 340508,
+  "runtime_gzip": 266188
 }
