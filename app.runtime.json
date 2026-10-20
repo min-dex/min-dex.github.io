@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261021-controller-input-spacing",
+  "version": "20261021-narrow-presenter",
   "options": {
     "compress": false,
     "mangle": {
