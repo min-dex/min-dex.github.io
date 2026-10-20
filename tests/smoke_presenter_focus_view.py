@@ -117,6 +117,14 @@ try:
         return Math.abs(left.height-right.height)<1 && Math.abs((left.top+left.height/2)-(right.top+right.height/2))<1;
        }""")
        if view=='basic':
+        assert page.evaluate("""()=>{
+         const music=document.querySelector('.svc-presenter-toolbar .svc-music-name');
+         const apply=document.querySelector('.svc-presenter-preparation-apply');
+         const nav=[...document.querySelectorAll('.svc-presenter-side-panel .svc-presenter-action-group--nav .icon-btn')];
+         return music.getBoundingClientRect().height===35 && getComputedStyle(music).padding==='0px 10px'
+          && getComputedStyle(apply).padding==='0px 10px' && getComputedStyle(apply).fontWeight==='600'
+          && nav.length===2 && nav.every(e=>e.getBoundingClientRect().width===35 && e.getBoundingClientRect().height===35);
+        }""")
         assert page.evaluate('''()=>{
          const selectors=['.module-switcher button svg.lucide','.topbar-actions button svg.lucide','.svc-presenter-toolbar button svg.lucide','.svc-presenter-toolbar summary svg.lucide','.svc-presenter-output-group svg.lucide','#servicePresenterControls .svc-board-subgroup-flow button svg.lucide','#servicePresenterControls .svc-board-subgroup-flow summary svg.lucide'];
          const icons=[...document.querySelectorAll(selectors.join(','))].filter(icon=>icon.getBoundingClientRect().width>0);

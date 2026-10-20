@@ -5,14 +5,14 @@ const revision = value => {
   return BigInt(value);
 };
 
-// journal must be session-scoped and hydrated before reads. Writes may be async.
+// Journal is project/device-scoped and hydrated before reads. Writes may be async.
 export function createWorshipStore({ rpc, journal, methods, namespace = '', makeId = () => crypto.randomUUID() }) {
   const baselines = new Map();
   const running = new Set();
   const preparing = new Set();
-  const persist = async action => {
+  const persist = async (action, phase = 'prepare') => {
     try { await action(); }
-    catch (cause) { throw new Error('JOURNAL_NOT_CONFIRMED', {cause}); }
+    catch (cause) { const error = new Error('JOURNAL_NOT_CONFIRMED', {cause}); error.journalPhase = phase; throw error; }
   };
   const legacyKey = id => `mindex.atomic.pending.v1:${id}`;
   const key = id => namespace ? `mindex.atomic.pending.v2:${JSON.stringify([namespace,id])}` : legacyKey(id);
@@ -55,7 +55,7 @@ export function createWorshipStore({ rpc, journal, methods, namespace = '', make
       remember(id, receipt);
       // Do not clear another tab's newer request, even when this response arrives late.
       const current = getPending(id);
-      if (current?.request.requestId === entry.request.requestId) await persist(() => journal.removeItem(key(id)));
+      if (current?.request.requestId === entry.request.requestId) await persist(() => journal.removeItem(key(id)), 'cleanup');
       return clone(receipt);
     } finally { running.delete(id); }
   };

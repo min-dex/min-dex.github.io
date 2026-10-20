@@ -20,10 +20,27 @@ export function createServerState({rpc,token,scope,makeId=()=>crypto.randomUUID(
   }finally{loading=false;release();loadBarrier=null}
  }
  function getItem(key){if(!loaded)throw Error('STATE_NOT_READY');return rows.get(key)?.value??null;}
- async function transmit(key){
+ async function transmit(key, reconcile=true){
   const request=uncertain.get(key);if(!request)throw Error('NO_STATE_REQUEST');
   const {data,error}=await rpc('mindex_state_write_v1',request);
-  if(error)throw error;
+  if(error){
+   // A newer revision can contain the very same value (e.g. a cleared journal).
+   // Reconcile only an explicitly rejected CAS, never an uncertain network write.
+   if(reconcile&&error.message==='STATE_REVISION_CONFLICT'){
+    const latest=await rpc('mindex_state_read_v1',{p_token:token,p_scope:scope});
+    if(latest.error)throw latest.error;
+    if(!Array.isArray(latest.data)||latest.data.some(r=>!validate(r))||new Set(latest.data.map(r=>r.key)).size!==latest.data.length)throw Error('INVALID_STATE_RESPONSE');
+    const row=latest.data.find(r=>r.key===key),previous=rows.get(key);
+    if(!row||(previous&&BigInt(row.revision)<BigInt(previous.revision)))throw error;
+    if(row.value===request.p_value){rows.set(key,{...row});uncertain.delete(key);return true;}
+    if(row.value===(previous?.value??null)){
+     rows.set(key,{...row});
+     uncertain.set(key,{...request,p_revision:row.revision,p_request_id:makeId()});
+     return transmit(key,false);
+    }
+   }
+   throw error;
+  }
   if(!validate(data)||data.key!==key||data.value!==request.p_value||data.requestId!==request.p_request_id
    ||BigInt(data.revision)!==BigInt(request.p_revision)+1n)throw Error('INVALID_STATE_RECEIPT');
   rows.set(key,{...data});uncertain.delete(key);return true;

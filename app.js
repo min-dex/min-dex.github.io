@@ -6850,6 +6850,12 @@ async function saveScripture() {
 function serviceSaveErrorMessage(error) {
   const message = String(error?.message || (typeof error === "string" ? error : "") || "").trim();
   const code = String(error?.code || error?.name || "").trim();
+  if (message === "JOURNAL_NOT_CONFIRMED") {
+    if (error.journalPhase === "cleanup") return "예배 저장 응답은 받았지만 복구 기록 정리를 확인하지 못했습니다. 입력과 요청은 유지됩니다. 다시 저장하면 기존 요청의 결과부터 확인합니다.";
+    const cause = String(error?.cause?.message || "");
+    if (cause === "STATE_REVISION_CONFLICT") return "저장 복구 정보가 다른 창의 내용과 충돌했습니다. 입력과 임시 저장본은 유지됩니다. 다른 창의 저장을 마친 뒤 다시 시도해 주세요.";
+    return "서버에 저장 복구 정보를 확인하지 못했습니다. 입력과 임시 저장본은 유지됩니다. 연결을 확인한 뒤 다시 저장해 주세요.";
+  }
   if (/Failed to fetch|Failed to send a request|NetworkError|Load failed|Network request failed/i.test(message)) {
     return "서버 응답을 받지 못해 저장 완료 여부를 확인하지 못했습니다. 입력은 유지됩니다. 연결을 확인한 뒤 다시 저장해 주세요.";
   }

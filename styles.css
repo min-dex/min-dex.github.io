@@ -1008,9 +1008,15 @@ body[data-module="backgrounds"] .sidebar-count,
 .search-wrap input::-webkit-search-results-button,
 .search-wrap input::-webkit-search-results-decoration { appearance: none; display: none; }
 .search-wrap input::placeholder { color: var(--placeholder-ink); }
+body:not(.presenter-output-body) .search-wrap input:focus-visible {
+  outline: none;
+}
+
 .search-wrap:focus-within {
   background: var(--ui-surface-field);
   box-shadow: none;
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
   color: var(--ink-3);
 }
 .field input:focus, .field textarea:focus, .field select:focus, .form-type-select:focus, .form-variant-input:focus, .form-textarea:focus, .scripture-textarea:focus { background: var(--ui-surface-field); }
@@ -9191,6 +9197,7 @@ body[data-module="praise"] .praise-forms-panel .version-compare-column {
   flex: 0 0 auto;
   padding-inline: 10px;
 }
+.topbar-actions > #restoreServerEditorDraft > span { display: inline; }
 .topbar-actions > #restoreServerEditorDraft::before {
   width: calc(100% - 10px);
 }
@@ -9489,3 +9496,10 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
 .version-musical-structure { flex-basis: 100%; min-width: 0; color: var(--ink-3); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
 
 .topbar-actions #globalPlaybackControls > .global-playback-trigger > .global-playback-indicator { position:absolute; top:6px; right:6px; }
+
+/* Peer presenter controls share the standard command rhythm. */
+.svc-presenter-toolbar .svc-music-player { height:35px; padding:0; }
+.svc-presenter-toolbar .svc-music-name { height:35px; min-height:35px; padding:0 10px; font-weight:600; }
+.svc-presenter-side-panel .svc-presenter-action-group--nav { height:35px; }
+.svc-presenter-side-panel .svc-presenter-action-group--nav .icon-btn { width:35px; height:35px; flex:0 0 35px; }
+.svc-presenter-side-panel button.svc-presenter-preparation-apply { padding:0 10px; font-weight:600; }

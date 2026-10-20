@@ -13,6 +13,8 @@ NODE_TESTS = (
     "test_draft_handoff.mjs",
     "test_audio_db_only.cjs",
     "test_server_state.mjs",
+    "test_editor_draft_merge.mjs",
+    "test_editor_draft_recovery.cjs",
     "test_server_storage.cjs",
     "test_legacy_state.mjs",
     "test_worship_store.mjs",

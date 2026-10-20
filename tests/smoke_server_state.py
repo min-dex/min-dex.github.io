@@ -105,6 +105,26 @@ def main():
                     page.locator('#restoreServerEditorDraft').click()
                     page.wait_for_function("state.scriptures[0].body==='Unsaved draft' && state.dirty.scripture")
                     assert page.evaluate("localStorage.getItem('mindex.editor.draft.v1:scripture:fixture')") is None
+                    # Changed originals no longer make recovery a dead end.
+                    page.evaluate("""async()=>{
+                      const originalDraft=JSON.parse(MINDEX_SERVER_STORAGE.getItem('local','mindex.editor.draft.v1:scripture:fixture'));
+                      clearDirtyState();state.scriptures=[{id:'fixture',title:'New title',body:'Original text'}];
+                      state.cleanFingerprints.scripture=dirtyModuleFingerprint('scripture');
+                      render();MINDEX_EDITOR_DRAFTS.capture();await new Promise(queueMicrotask);
+                      await MINDEX_SERVER_STORAGE.flush();
+                      await MINDEX_SERVER_STORAGE.setItem('local','mindex.editor.draft.v1:scripture:fixture',JSON.stringify(originalDraft));
+                    }""")
+                    page.once('dialog',lambda dialog:dialog.accept())
+                    page.locator('#restoreServerEditorDraft').click()
+                    page.wait_for_function("state.scriptures[0].body==='Unsaved draft' && state.scriptures[0].title==='New title'")
+                    assert any('mindex.editor.recovery.v1:' in key[2] for key in db)
+                    page.locator('#restoreServerEditorDraft').hover()
+                    assert page.locator('#restoreServerEditorDraft > span').is_visible()
+                    # Focus is one rounded container ring, not clipped inner edges.
+                    page.locator('#searchInput').focus()
+                    focus=page.locator('#searchInput').evaluate("e=>({inner:getComputedStyle(e).outlineStyle,ring:getComputedStyle(e.closest('.search-wrap')).outlineStyle})")
+                    assert focus['inner']=='none' and focus['ring']=='solid',focus
+                    page.screenshot(path='/tmp/mindex-recovery-search-'+engine+'.png')
                     # Another profile can see shared preferences, never the private recovery namespace.
                     other=browser.new_context();other.route('**/*',route_request)
                     other.add_init_script("window.open=()=>null;Element.prototype.requestFullscreen=()=>Promise.reject(Error('blocked fixture'));")

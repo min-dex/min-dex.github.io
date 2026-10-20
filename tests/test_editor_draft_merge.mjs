@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {mergeEditorDraft} from '../mindex.draft-merge.mjs';
+const base={service:{id:'s',title:'old',date:'today'},items:[{id:'a',text:'old'},{id:'b',text:'keep'}],serviceTypes:[{id:'t',label:'type'}]};
+const draft=structuredClone(base);draft.items[0].text='my lyric';
+const current=structuredClone(base);current.service.title='new title';current.serviceTypes[0].label='new type';current.service._cache='keep';
+const result=mergeEditorDraft(base,draft,current);
+assert.deepEqual(result.conflicts,[]);assert.equal(result.value.items[0].text,'my lyric');assert.equal(result.value.service.title,'new title');assert.equal(result.value.serviceTypes[0].label,'new type');assert.equal(result.value.service._cache,'keep');
+current.items[0].text='remote lyric';const conflict=mergeEditorDraft(base,draft,current);
+assert.equal(conflict.conflicts.length,1);assert.equal(conflict.conflicts[0].current,'remote lyric');assert.equal(conflict.value.items[0].text,'my lyric');
+const order=structuredClone(draft);order.items.reverse();
+assert.equal(mergeEditorDraft(base,order,current).conflicts[0].path,'items');
+const deleted=mergeEditorDraft({a:'old',b:'old'},{b:'old'},{a:'old',b:'new'});
+assert.deepEqual(deleted.value,{b:'new'});assert.equal(deleted.conflicts.length,0);
+assert.equal(base.items[0].text,'old');assert.equal(current.items[0].text,'remote lyric');
+console.log('PASS disjoint edits, same-field conflict, order conflict, deletion and input immutability');

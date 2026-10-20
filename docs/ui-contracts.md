@@ -699,3 +699,5 @@ inherit reviewed measurements. See `hymn-musical-structure.md` for evidence scop
 Music management uses a 40px icon-only topbar button. Keep the music icon, active indicator, tooltip and accessible name; the opened panel retains its title.
 
 The nested music launcher participates in the same topbar button selectors as its siblings: 40px fixed slot, zero padding, shared hover face and pressed transform. Its active indicator stays absolutely positioned.
+
+Presenter toolbar music uses 35px height and 10px horizontal padding; sidebar previous/next use 35px square targets. Preparation Apply uses 10px horizontal padding and 600 label weight, matching peer commands.
