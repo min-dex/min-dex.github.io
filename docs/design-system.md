@@ -102,7 +102,7 @@ and square icon targets retain their distinct roles. Neutral utility buttons
 use transparent rest/field hover rather than an invisible panel-on-panel box.
 Primary buttons retain accent colors and gain an inset hover ring; warnings,
 keyboard focus and disabled feedback remain explicit.
-Live scripture uses10px outer inset/padding, a20px heading/checkbox line,10px
+Live scripture uses12px outer inset (aligned with controller controls),10px inner padding, a20px heading/checkbox line,10px
 heading-to-input gap and35px input. The previous28px checkbox row added invisible
 vertical centering space above the heading. Controller toolbar/panel controls
 also use35px. Output artwork and bulletin print rules are outside this cleanup.
