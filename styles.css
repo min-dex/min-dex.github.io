@@ -8594,8 +8594,8 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .global-playback-indicator { position:absolute; top:5px; right:5px; width:5px; height:5px; border-radius:50%; background:var(--accent); display:block; visibility:hidden; flex-shrink:0; }
 .global-playback-trigger[data-active="true"] { color:var(--accent); }
 .global-playback-trigger[data-active="true"] .global-playback-indicator { visibility:visible; }
-.global-playback-panel { position:fixed; inset:auto; margin:0; width:min(320px, calc(100vw - 16px)); max-height:calc(100dvh - 16px); overflow:auto; box-sizing:border-box; padding:16px; border:1px solid var(--line); border-radius:var(--r); background: var(--ui-surface-panel); color:var(--ink); box-shadow:0 10px 30px #0003; }
-.global-playback-panel-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:12px; }
+.global-playback-panel { position:fixed; inset:auto; margin:0; width:min(320px, calc(100vw - 16px)); max-height:calc(100dvh - 16px); overflow:auto; box-sizing:border-box; padding:15px; border:1px solid var(--line); border-radius:var(--r); background: var(--ui-surface-panel); color:var(--ink); box-shadow:0 10px 30px #0003; }
+.global-playback-panel-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
 .global-playback-panel-head strong { font-size:16px; font-weight:700; }
 .global-playback-group { display:flex; align-items:center; gap:10px; padding:15px 0; border-top:1px solid var(--line); }
 .global-playback-label { display:flex; flex-direction:column; gap:5px; flex:1; min-width:0; text-align:left; }
@@ -9273,3 +9273,11 @@ body:has(#servicePresenterControls[data-focus-view="true"]) .svc-presenter-input
   overscroll-behavior: contain;
 }
 body:has(#servicePresenterControls[data-focus-view="true"]) .svc-presenter-live-panel { display: none; }
+
+/* Shared music transport: readable clock above a full-width seek track. */
+.global-playback-panel .song-timing-seek { grid-template-columns:minmax(0,1fr) auto; gap:5px 10px; margin-top:15px; color:var(--ink-3); }
+.global-playback-panel .song-timing-seek-label { grid-column:1; grid-row:1; }
+.global-playback-panel [data-song-timing-clock] { grid-column:2; grid-row:1; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.global-playback-panel [data-song-timing-seek] { grid-column:1 / -1; grid-row:2; height:30px; margin:0; padding:0; cursor:pointer; }
+.global-playback-panel [data-song-timing-seek]:disabled { cursor:default; }
+.global-playback-panel .global-playback-fade-stop { margin:5px 0 0; gap:5px; }

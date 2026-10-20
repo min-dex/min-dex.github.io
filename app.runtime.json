@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-bible-info-top",
+  "version": "20261020-music-transport-progress",
   "options": {
     "compress": false,
     "mangle": {
