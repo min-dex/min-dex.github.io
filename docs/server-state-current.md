@@ -286,3 +286,28 @@ private 서버 복구 기록으로 확정하며 실패하면 편집창을 바꾸
 - 주보 이어쓰기의 revision 차이는 명시적 확인 후 양쪽 snapshot을 보관하고 편집창에만
   적용한다. 현재 revision을 유지해 다음 저장의 CAS를 보존한다. 인쇄 경로 변경 없음.
 - 운영 데이터·schema 변경 없음. 격리 검증 및 배포 결과는 HANDOFF에 별도 기록한다.
+
+## 서버 journal 이름 오인 차단 수정 ·2026-10-21
+
+운영 `mindex_state_write_v1`의 secret-key 검사가 키 전체의 `supabase`를
+거절하여, 실제 클라이언트의 project URL을 포함한 atomic pending/creation
+키까지 `INVALID_STATE_VALUE`로 차단했다. 예배 RPC 전 journal 확인에서
+`JOURNAL_NOT_CONFIRMED`가 발생한다. 기존 mock RPC/단순 draft 키 검사는
+이 실제 namespace 조합을 검증하지 못했다.
+
+`2026-10-21-state-journal-project-key.sql`은 알려진 atomic 키 시작 부분의
+HTTPS Supabase project hostname만 검사 대상에서 제외한다. 나머지 키의
+secret guard, quota, revision, request identity, scope와 grants는 유지한다.
+설치된 함수의 알려진 조건만 교체하며 예상하지 못한 정의에서는 중단한다.
+기존 요청/초안 삭제나 키 변경, 앱 새로고침 없이 같은 요청을 재시도할 수 있다.
+
+PostgreSQL18.4 격리 검증: 실제 server-state→worship-store 연결로 수정 전
+JOURNAL_NOT_CONFIRMED/cause INVALID_STATE_VALUE 재현, 수정 후 동일 요청
+재시도·cleanup, creation 키와 비밀키 차단/권한/충돌 회귀 통과.
+운영 적용은 사용자의 명시적 서버 수정 승인 후 Safari SQL Editor로 실행했다.
+사전 broad_guard=true, 최대 owner 저장량2,098,302bytes로 quota 초과 아님.
+운영에서는 anon 역할로 synthetic private namespace의 journal 쓰기·동일 요청
+재시도·cleanup·creation·secret 거절을 transaction 안에서 실행 후 rollback했다.
+독립 readback: journal_guard_fixed/rpc_access_preserved/private_table_protected 모두 true.
+실제 예배 저장·초안 삭제·재생·송출·주보 인쇄는 실행하지 않았다.
+앱 정적 파일 변경은 없으므로 이 서버 수정에 Pages 교체는 필요하지 않다.

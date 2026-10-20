@@ -1177,3 +1177,14 @@ revision이 바뀐 주보 이어쓰기의 명시적 복구를 구현했다. atom
 지연 응답 및 원문 취소/보관 실패/추가입력 검증 PASS. native macOS fullscreen은
 기본 보호·SKIP 범위이며 실제 장비/재생/송출/운영 DB 쓰기는 실행하지 않았다.
 release20261020-save-retry-preserve. GitHub/Pages 결과는 이후 별도 확인한다.
+
+## 운영 저장 journal 차단 원인 수정 ·2026-10-21
+
+작업공간 /tmp/mindex-server-journal-key. 기존 실제 SQL의 `supabase` 단어 차단이
+project URL을 포함한 atomic journal/creation 키도 거절하는 오류 재현 및 수정.
+새 migration은 설치된 함수의 해당 조건만 교체하며 권한/내용/요청 ID 유지.
+PostgreSQL18.4 실제 store 연동 재현·동일 요청 복구, server-state/bridge unit PASS.
+사용자 명시 승인 후 운영 함수에 적용 완료. anon synthetic write/replay/cleanup/
+creation/secret-guard 검증은 전체 rollback; readback3항목 true.
+운영 원본/초안 삭제 없음, 실제 사용자 예배 저장·재생/송출/인쇄 실행 없음.
+증거 /tmp/mindex-server-journal-verified.png. 정적 앱 변경/새로고침 필요 없음.
