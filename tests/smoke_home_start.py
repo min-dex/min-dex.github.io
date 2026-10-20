@@ -27,6 +27,9 @@ try:
    assert page.locator('.home-start-shortcuts button').count()==3
    page.evaluate("""()=>{const d=toLocalDateStr(new Date());state.services=[{id:'next',type_id:'sunday-main',date:d,sort_order:0},{id:'other',type_id:'sunday-main',date:d,sort_order:1}];render()}""")
    assert page.locator('.home-schedule-day button').count()==2
+   page.evaluate("()=>{openServiceInPresenter=async id=>{window.homeOpenedService=id}}")
+   page.locator('.home-schedule-day button').first.click()
+   assert page.evaluate('window.homeOpenedService')=='next'
    for theme in ('light','dark'):
     page.evaluate('(t)=>applyTheme(t)',theme)
     assert page.locator('.home-start').evaluate('(e)=>e.scrollWidth<=e.clientWidth')

@@ -241,3 +241,90 @@ function renderPresenterServiceInputRail(service) {
       </section>
     </aside>`;
 }
+
+// View-only state: switching layouts never saves or rebuilds the worship document.
+let presenterFocusView = false;
+function renderPresenterFocusView() {
+  return `<button type="button" class="btn secondary" data-presenter-focus-toggle aria-pressed="${presenterFocusView}">${presenterFocusView ? '기본 보기' : '집중 보기'}</button>`;
+}
+
+function syncPresenterFocusView() {
+  const root = document.getElementById('servicePresenterControls');
+  if (!root) return;
+  root.dataset.focusView = String(presenterFocusView);
+  const toggle = root.querySelector('[data-presenter-focus-toggle]');
+  if (toggle) {
+    toggle.textContent = presenterFocusView ? '기본 보기' : '집중 보기';
+    toggle.setAttribute('aria-pressed', String(presenterFocusView));
+  }
+  let panel = root.querySelector('[data-presenter-focus-panel]');
+  if (!presenterFocusView) { if (panel) panel.hidden = true; return; }
+  if (!panel) {
+    panel = document.createElement('section');
+    panel.className = 'svc-focus-panel';
+    panel.dataset.presenterFocusPanel = '';
+    panel.setAttribute('aria-label', '발표자 집중 보기');
+    root.querySelector('.svc-presenter-workspace').before(panel);
+  }
+  panel.hidden = false;
+  const serviceId = root.dataset.serviceId;
+  const slides = presenterSlidesForService(serviceId);
+  const active = state.presenter.serviceId === serviceId;
+  const outputOpen = active && isPresenterOutputWindowOpen();
+  const selected = state.presenterBoardSelection.serviceId === serviceId
+    ? state.presenterBoardSelection.indexes?.at(-1) : null;
+  const index = clampPresenterIndex(outputOpen ? state.presenter.index : selected ?? (active ? state.presenter.index : 0), slides.length);
+  const current = outputOpen
+    ? presenterLiveStatusPreviewSlide(slides, index, {active, outputOpen}) : slides[index];
+  const nextIndex = presenterNextNavigableIndex(slides, index);
+  const next = nextIndex !== index ? slides[nextIndex] : null;
+  const label = outputOpen ? (state.presenter.safetyBlank ? '암전' : '현재 송출')
+    : isPresenterOutputWindowOpen() ? '선택 화면 · 다른 예배 송출 중' : '선택 화면 · 송출 대기';
+  const frame = (slide, title) => `<div class="svc-focus-preview"><strong>${escapeHtml(title)}</strong><div class="svc-slide-thumb-frame">${slide ? renderPresenterSlideMiniPreview(slide, serviceId) : '<span>다음 슬라이드 없음</span>'}</div></div>`;
+  const markup = `<div class="svc-focus-screens">${frame(current, label)}${frame(next, '다음 화면')}</div>
+    <div class="svc-focus-transport"><span>${slides.length ? index + 1 : 0} / ${slides.length}</span>
+      <button type="button" class="btn secondary" data-presenter-action="prev" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}>이전</button>
+      <button type="button" class="btn secondary" data-presenter-action="next" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}>다음</button>
+      <span data-focus-music-status role="status"></span>
+      <button type="button" class="btn secondary" data-focus-music="toggle">재생 / 일시정지 · P</button>
+      <button type="button" class="btn secondary" data-focus-music="stop">음악 정지</button>
+      <button type="button" class="btn secondary" data-song-timing-resume>자동 넘김 복귀 · R</button>
+    </div>`;
+  if (panel._markup !== markup) { panel.innerHTML = markup; panel._markup = markup; }
+  syncPresenterFocusMusic();
+  schedulePresenterPreviewLayoutUpdate(panel);
+}
+
+function syncPresenterFocusMusic() {
+  const panel = document.querySelector('[data-presenter-focus-panel]:not([hidden])');
+  if (!panel) return;
+  const music = state.serviceMusic;
+  const own = music.ownerServiceId === state.selectedServiceId;
+  const slide = state.presenter.slides[state.presenter.index];
+  const sync = own && music.mode === 'presenter-audio' && Boolean(music.timingGroupId);
+  const canResume = sync && presenterControllerIsLive(state.selectedServiceId)
+    && !state.presenter.safetyBlank && !state.presenter.liveScripture?.active
+    && slide?.songTimingEligible && slide.syncTimeline?.groupId === music.timingGroupId;
+  const label = `${music.pending ? '음원 준비 중' : music.playing ? '음원 재생 중' : '음원 정지 / 일시정지'}${sync ? music.autoSyncSuspended ? ' · 자동 넘김 해제' : ' · 자동 넘김' : ''}${music.sourceKey && !own ? ' · 다른 예배 음원' : ''}`;
+  panel.querySelector('[data-focus-music-status]').textContent = label;
+  panel.querySelectorAll('[data-focus-music]').forEach(button => { button.disabled = !own || !music.sourceKey; });
+  const resume = panel.querySelector('[data-song-timing-resume]');
+  resume.hidden = !(canResume && music.playing && !music.pending && music.autoSyncSuspended);
+}
+
+document.addEventListener('click', event => {
+  const toggle = event.target.closest('[data-presenter-focus-toggle]');
+  if (toggle) {
+    presenterFocusView = !presenterFocusView;
+    syncPresenterFocusView();
+    schedulePresenterPreviewLayoutUpdate(document);
+  }
+  const music = event.target.closest('[data-focus-music]');
+  if (music && !music.disabled) {
+    const binding = {serviceMusicSource: state.serviceMusic.sourceKey,
+      serviceMusicServiceId: state.serviceMusic.ownerServiceId,
+      serviceMusicLabel: state.serviceMusic.sourceLabel,
+      serviceMusicRepeatAllowed: String(state.serviceMusic.repeatAllowed !== false)};
+    void runServiceMusicAction(music.dataset.focusMusic, binding);
+  }
+});

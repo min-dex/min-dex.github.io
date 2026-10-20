@@ -15962,7 +15962,7 @@ function renderHomeStart() {
         <header><h2 id="home-schedule-heading">이번 주 예배</h2><button type="button" class="home-start-text-button" data-service-week>최근 예배 <i data-lucide="arrow-right"></i></button></header>
         ${dates.length ? dates.map(date => `<div class="home-schedule-day">
           <h3>${escapeHtml(formatServiceDate({date}, {compact:true}))}</h3>
-          <div>${upcoming.filter(service => service.date === date).map(service => `<button type="button" data-service-id="${escapeAttr(service.id)}"><span>${escapeHtml(serviceDisplayTypeName(service))}</span><i data-lucide="arrow-right"></i></button>`).join("")}</div>
+          <div>${upcoming.filter(service => service.date === date).map(service => `<button type="button" data-open-presenter-service="${escapeAttr(service.id)}"><span>${escapeHtml(serviceDisplayTypeName(service))}</span><i data-lucide="arrow-right"></i></button>`).join("")}</div>
         </div>`).join("") : '<p class="home-start-empty">이번 주에 등록된 예배가 없습니다.</p>'}
       </section>
       <nav class="home-start-shortcuts" aria-label="바로가기">
@@ -25133,6 +25133,7 @@ function renderPresenterDetailUnscoped() {
   mountDeferredPresenterBoardSections(document.getElementById("servicePresenterControls"), serviceId, presenterSlides);
   restorePresenterFocusedThumb(document.getElementById("servicePresenterControls"), focusedThumb);
   restorePresenterViewportSnapshot(viewportSnapshot);
+  syncPresenterFocusView();
   updateSaveState();
   observePresenterPreviewScaleFrames(document);
   schedulePresenterPreviewLayoutUpdate(document);
@@ -25157,6 +25158,7 @@ function renderServicePresenterControlsUnscoped(service, slides = [], active = f
       <div class="svc-presenter-toolbar">
         ${renderServiceSourcePanel(service)}
         ${renderPresenterThumbScaleControl()}
+        ${renderPresenterFocusView()}
         ${serviceSupportsBulletin(service) ? `<button class="svc-output-action" type="button" data-service-bulletin-action="open" data-service-id="${escapeAttr(service.id)}"><i data-lucide="newspaper"></i><span>주보</span></button>` : ""}
         <span class="svc-presenter-toolbar-utilities" aria-label="송출 보조 도구">
           ${renderServiceMusicPlayer()}
@@ -29218,6 +29220,7 @@ function renderServiceSlotMusic(context) {
 
 function updateServiceMusicTransportControls() {
   renderGlobalPlaybackControls();
+  syncPresenterFocusMusic();
   const music = state.serviceMusic;
   document.querySelectorAll("[data-service-music-player]").forEach(root => {
     const source = root.dataset.serviceMusicSource;
@@ -30313,6 +30316,7 @@ function clearPresenterBoardSelection(options = {}) {
 
 function syncPresenterBoardSelectionClasses(root = document.getElementById("servicePresenterControls")) {
   if (!root) return;
+  syncPresenterFocusView();
   const selected = selectedPresenterBoardIndexes(state.selectedServiceId);
   root.querySelectorAll(".svc-slide-thumb[data-presenter-index][data-service-id]").forEach((thumb) => {
     const serviceId = thumb.dataset.serviceId;
@@ -31904,7 +31908,8 @@ function scrollPresenterBoardToIndex(serviceId, index, options = {}) {
   const run = () => {
     const root = document.getElementById("servicePresenterControls");
     if (!root?.isConnected) return false;
-    const viewport = refs.detailPane?.isConnected ? refs.detailPane : root;
+    const focusBoard = root.dataset.focusView === "true" ? root.querySelector(".svc-slide-board") : null;
+    const viewport = focusBoard || (refs.detailPane?.isConnected ? refs.detailPane : root);
     const scrollTopBeforeHydration = viewport.scrollTop;
     let thumb = findPresenterBoardThumbByIndex(root, serviceId, targetIndex);
     if (!thumb) {
@@ -31934,6 +31939,10 @@ function scrollPresenterBoardToIndex(serviceId, index, options = {}) {
       && thumbRect.left >= viewportRect.left
       && thumbRect.right <= viewportRect.right;
     if (fullyVisible && !options.force) return true;
+    if (focusBoard) {
+      focusBoard.scrollTop += thumbRect.top - viewportRect.top - (viewportRect.height - thumbRect.height) / 2;
+      return true;
+    }
     scrollWithinPresenterViewport(scrollTarget, {
       block: options.block || "center",
       behavior: options.behavior || "auto",
@@ -32418,7 +32427,9 @@ function stopPresenterOutputWindowMonitor() {
 }
 
 function renderPresenterControlState(serviceId = state.selectedServiceId) {
-  return withServiceItemsScope(() => renderPresenterControlStateUnscoped(serviceId));
+  const result = withServiceItemsScope(() => renderPresenterControlStateUnscoped(serviceId));
+  syncPresenterFocusView();
+  return result;
 }
 
 function renderPresenterControlStateUnscoped(serviceId) {

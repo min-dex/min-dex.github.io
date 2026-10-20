@@ -9253,3 +9253,23 @@ body[data-module="presenter"] .topbar-actions > .icon-btn { flex: 0 0 35px; widt
 .home-start button:focus-visible { outline:2px solid var(--accent); outline-offset:4px; border-radius:4px; }
 .home-start-empty { margin:15px 0 0; color:var(--ink-3); font-size:var(--ui-meta-size); }
 @media(max-width:640px) { .home-start { padding:20px 15px; gap:20px; } .home-schedule-day { grid-template-columns:85px minmax(0,1fr); } .home-start-shortcuts { gap:20px; flex-wrap:wrap; } }
+
+/* Controller layout only; the same board and editor DOM survive both views. */
+.svc-focus-panel[hidden] { display: none; }
+.svc-focus-panel { display: grid; gap: 10px; margin-bottom: 15px; }
+.svc-focus-screens { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 10px; align-items: start; }
+.svc-focus-preview { min-width: 0; display: grid; gap: 5px; }
+.svc-focus-preview > strong { font-size: 12px; font-weight: 600; }
+.svc-focus-transport { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 12px; }
+#servicePresenterControls[data-focus-view="true"] .svc-source-panel,
+#servicePresenterControls[data-focus-view="true"] .svc-board-subgroup-controls,
+#servicePresenterControls[data-focus-view="true"] .svc-board-subgroup-commit,
+#servicePresenterControls[data-focus-view="true"] .svc-reference-media-quick-add,
+#servicePresenterControls[data-focus-view="true"] .svc-board-subgroup-head-row > :not(.svc-board-subgroup-head),
+body:has(#servicePresenterControls[data-focus-view="true"]) .svc-presenter-input-stack { display: none; }
+#servicePresenterControls[data-focus-view="true"] .svc-slide-board {
+  max-height: 300px;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+body:has(#servicePresenterControls[data-focus-view="true"]) .svc-presenter-live-panel { display: none; }

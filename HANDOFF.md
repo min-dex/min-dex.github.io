@@ -1152,3 +1152,13 @@ Place the closed 출처·판본 disclosure immediately below chapter/copy contro
 before scripture. Its basic source information and nested review/printing notes
 remain closed until requested. Supersedes the prior bottom-of-chapter placement;
 no corpus, metadata, DB, worship records or output changes.
+## Focused presenter layout · 2026-10-20 local
+
+Added optional 집중 보기 / 기본 보기 with shared previews, existing board and music actions.
+Editor DOM survives layout toggles; view choice is transient, no new persistence.
+Offline Chromium/WebKit checks preserve drafts, audio identity/time, and cover live/blank/end states.
+New gate entry: tests/smoke_presenter_focus_view.py. Not deployed; no physical output verification.
+
+Release verification also covers keyboard focus in both layouts and deferred board scrolling.
+The old keyboard fixture now waits for ui-booting to finish; the same premature-start
+failure was reproduced against unmodified bb5a1673. Existing assertions were retained.
