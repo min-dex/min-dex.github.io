@@ -63,9 +63,13 @@ try:
     page.set_viewport_size({'width':1440,'height':1000})
     page.evaluate('''()=>{
       const before=refs.detailPane.scrollTop;
+      const thumbs=[...document.querySelectorAll('.svc-slide-thumb-wrap')];
+      const top=thumbs[0].getBoundingClientRect().top;
+      if(!thumbs.every(t=>Math.abs(t.getBoundingClientRect().top-top)<1))throw Error('slides wrap instead of one row');
+      if(focusBoard.scrollHeight>focusBoard.clientHeight+1)throw Error('vertical filmstrip overflow');
       scrollPresenterBoardToIndex(state.selectedServiceId,state.presenter.slides.length-1,{force:true});
       if(refs.detailPane.scrollTop!==before)throw Error('focus screen scrolled away');
-      if(document.querySelector('.svc-slide-board').scrollTop<=0)throw Error('board did not follow target');
+      if(document.querySelector('.svc-slide-board').scrollLeft<=0)throw Error('filmstrip did not follow target');
       state.presenter.index=0;syncPresenterFocusView();
       scrollPresenterBoardToIndex(state.selectedServiceId,0,{force:true});
     }''')

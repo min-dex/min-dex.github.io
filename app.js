@@ -30110,7 +30110,7 @@ function renderDeferredPresenterBoardSection(group, serviceId, groupIndex) {
       data-service-id="${escapeAttr(serviceId)}"
       data-presenter-board-group-index="${groupIndex}"
       aria-label="${escapeAttr(group.name)}"
-      style="--svc-deferred-board-height:${estimatedHeight}px">
+      style="--svc-deferred-board-height:${estimatedHeight}px;--svc-deferred-slide-count:${group.slides.length}">
       <div class="svc-board-section-head-row">
         <button class="svc-board-section-head" type="button"
           data-presenter-action="jump"
@@ -30133,7 +30133,8 @@ function mountDeferredPresenterBoardSections(root, serviceId, slides) {
   if (!root?.isConnected || !serviceId || typeof IntersectionObserver === "undefined") return;
   const deferredSections = [...root.querySelectorAll("[data-presenter-deferred-board-section]")];
   if (!deferredSections.length) return;
-  const viewport = refs.detailPane?.isConnected ? refs.detailPane : null;
+  const viewport = root.dataset.focusView === "true" ? root.querySelector(".svc-slide-board")
+    : refs.detailPane?.isConnected ? refs.detailPane : null;
   const hydrateVisible = () => hydrateVisibleDeferredPresenterBoardSections(root, serviceId, slides, viewport);
   if (root._presenterBoardDeferredScrollHandler && root._presenterBoardDeferredScrollViewport) {
     root._presenterBoardDeferredScrollViewport.removeEventListener("scroll", root._presenterBoardDeferredScrollHandler);
@@ -30157,7 +30158,7 @@ function mountDeferredPresenterBoardSections(root, serviceId, slides) {
       observer.unobserve(entry.target);
       hydrateDeferredPresenterBoardSection(root, serviceId, slides, Number(entry.target.dataset.presenterBoardGroupIndex));
     });
-  }, { root: viewport, rootMargin: "720px 0px" });
+  }, { root: viewport, rootMargin: root.dataset.focusView === "true" ? "0px 720px" : "720px 0px" });
   root._presenterBoardObserver = observer;
   deferredSections.forEach((section) => observer.observe(section));
   // Initial groups are already mounted. Let the observer measure the new board
@@ -30172,7 +30173,8 @@ function hydrateVisibleDeferredPresenterBoardSections(root, serviceId, slides, v
   const candidates = [...root.querySelectorAll("[data-presenter-deferred-board-section]")]
     .filter((section) => {
       const rect = section.getBoundingClientRect();
-      return rect.bottom > viewportRect.top - padding && rect.top < viewportRect.bottom + padding;
+      return rect.bottom > viewportRect.top - padding && rect.top < viewportRect.bottom + padding
+        && (root.dataset.focusView !== "true" || (rect.right > viewportRect.left - padding && rect.left < viewportRect.right + padding));
     })
     .slice(0, 3);
   candidates.forEach((section) => {
@@ -31929,7 +31931,7 @@ function scrollPresenterBoardToIndex(serviceId, index, options = {}) {
       });
       return true;
     }
-    const scrollTarget = options.target === "subgroup"
+    const scrollTarget = !focusBoard && options.target === "subgroup"
       ? thumb.closest(".svc-board-subgroup") || thumb.closest(".svc-slide-thumb-wrap") || thumb
       : thumb.closest(".svc-slide-thumb-wrap") || thumb;
     const viewportRect = viewport.getBoundingClientRect();
@@ -31940,7 +31942,7 @@ function scrollPresenterBoardToIndex(serviceId, index, options = {}) {
       && thumbRect.right <= viewportRect.right;
     if (fullyVisible && !options.force) return true;
     if (focusBoard) {
-      focusBoard.scrollTop += thumbRect.top - viewportRect.top - (viewportRect.height - thumbRect.height) / 2;
+      focusBoard.scrollLeft += thumbRect.left - viewportRect.left - (viewportRect.width - thumbRect.width) / 2;
       return true;
     }
     scrollWithinPresenterViewport(scrollTarget, {

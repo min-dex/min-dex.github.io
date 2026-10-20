@@ -251,7 +251,11 @@ function renderPresenterFocusView() {
 function syncPresenterFocusView() {
   const root = document.getElementById('servicePresenterControls');
   if (!root) return;
+  const layoutChanged = root.dataset.focusView !== String(presenterFocusView);
   root.dataset.focusView = String(presenterFocusView);
+  if (layoutChanged) {
+    mountDeferredPresenterBoardSections(root, root.dataset.serviceId, presenterSlidesForService(root.dataset.serviceId));
+  }
   const toggle = root.querySelector('[data-presenter-focus-toggle]');
   if (toggle) {
     toggle.textContent = presenterFocusView ? '기본 보기' : '집중 보기';
