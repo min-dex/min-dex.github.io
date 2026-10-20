@@ -637,6 +637,12 @@ service temporal labels. Sidebar filters share the search/translation 15px
 horizontal inset; button padding, focus and grouping remain unchanged.
 
 
+### Bible source disclosure placement ·2026-10-20
+
+Place 출처·판본 directly below reader controls so it is reachable without
+scrolling through a chapter. The native disclosure and its nested review record
+start closed. Source text/history/links remain available on request. This
+supersedes the earlier bottom-of-chapter placement; preserve all source evidence.
 ### Concise explanatory copy ·2026-10-20
 
 Keep helper copy in the order scope, next action, then necessary caveat. Avoid

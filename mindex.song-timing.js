@@ -314,6 +314,7 @@
       } catch(error){finish(error);}
     });
   }
+  let activeSeekInput = null;
   function transport() {
     const music = state.serviceMusic;
     const source = music.sourceKey;
@@ -321,7 +322,7 @@
     const duration = Number.isFinite(music.audio.duration) && music.audio.duration > 0 ? music.audio.duration : 0;
     const position = Math.max(0, Math.min(Number(music.audio.currentTime) || 0, duration));
     const synced = music.mode === 'presenter-audio' && remoteSources.has(source);
-    return `<label class="song-timing-seek">음원 위치 <input type="range" min="0" max="${duration}" step="0.1" value="${position}" ${duration ? '' : 'disabled'} data-song-timing-seek data-source="${escapeAttr(source)}" aria-label="음원 재생 위치"><span data-song-timing-clock>${transportClock(position)} / ${transportClock(duration)}</span></label>${synced ? `<button type="button" class="btn secondary" data-song-timing-resume ${!music.autoSyncSuspended || !music.playing ? 'hidden' : ''}>자동 넘김 복귀 · R</button>` : ''}`;
+    return `<label class="song-timing-seek"><span class="song-timing-seek-label">음원 위치</span><input type="range" min="0" max="${duration}" step="0.1" value="${position}" ${duration ? '' : 'disabled'} data-song-timing-seek data-source="${escapeAttr(source)}" aria-label="음원 재생 위치"><span data-song-timing-clock>${transportClock(position)} / ${transportClock(duration)}</span></label>${synced ? `<button type="button" class="btn secondary" data-song-timing-resume ${!music.autoSyncSuspended || !music.playing ? 'hidden' : ''}>자동 넘김 복귀 · R</button>` : ''}`;
   }
   function transportClock(seconds) {
     const safe = Number.isFinite(seconds) ? Math.max(0, seconds) : 0;
@@ -338,7 +339,7 @@
       if (input.dataset.source !== source) continue;
       input.max = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 0;
       input.disabled = Number(input.max) <= 0;
-      if (document.activeElement !== input) input.value = audio.currentTime || 0;
+      if (activeSeekInput !== input) input.value = audio.currentTime || 0;
       input.parentElement.querySelector('[data-song-timing-clock]').textContent = `${transportClock(audio.currentTime || 0)} / ${transportClock(Number(input.max))}`;
     }
   }
@@ -739,6 +740,21 @@
     document.body.append(dialog); dialog.showModal();
   }
   root.MindexSongTiming = { resumeAutoSync, snapBeat, detectBeatGrid, composePhotos, validatePhotos, saveToVersion, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, saveToWorship, formsFor, sourceSignature, ownsSource: source => remoteSources.has(source), get revision() { return revision; } };
+  if (typeof document !== 'undefined') {
+    document.addEventListener('pointerdown', e => {
+      activeSeekInput = e.target.closest('[data-song-timing-seek]:not(:disabled)');
+    });
+    const finishSeek = () => {
+      activeSeekInput = null;
+      if (state.serviceMusic.audio) updateTransport(state.serviceMusic.audio);
+    };
+    document.addEventListener('pointerup', finishSeek);
+    document.addEventListener('pointercancel', finishSeek);
+    document.addEventListener('focusout', e => {
+      if (e.target === activeSeekInput) finishSeek();
+    });
+    window.addEventListener('blur', finishSeek);
+  }
   if (typeof document !== 'undefined') document.addEventListener('input', e => {
     const input = e.target.closest('[data-song-timing-seek]');
     const audio = state.serviceMusic.audio;

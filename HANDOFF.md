@@ -1145,6 +1145,13 @@ source, edition history, acquisition date and links; review/printing caveats sta
 in a second closed disclosure. Existing source records and classification policy
 are retained. No scripture bodies, DB, worship records or output changes.
 
+
+## Discoverable Bible source disclosure ·2026-10-20
+
+Place the closed 출처·판본 disclosure immediately below chapter/copy controls,
+before scripture. Its basic source information and nested review/printing notes
+remain closed until requested. Supersedes the prior bottom-of-chapter placement;
+no corpus, metadata, DB, worship records or output changes.
 ## Focused presenter layout · 2026-10-20 local
 
 Added optional 집중 보기 / 기본 보기 with shared previews, existing board and music actions.

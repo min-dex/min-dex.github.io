@@ -17745,13 +17745,13 @@ function renderBibleReader(book) {
       ${renderBibleReaderControls({
         chapterControl: renderBibleChapterControl(chapters, hasPreviousChapter, hasNextChapter),
       })}
+      ${renderBibleEditionInfo()}
       ${getBibleBooks().some(b=>b.code===({EST:"GKE",DAN:"DA1"}[book.code])) ? `<button class="btn secondary" type="button" data-global-book-code="${{EST:"GKE",DAN:"DA1"}[book.code]}">${escapeHtml(book.koreanName)} 추가 본문 →</button>` : ""}
       ${
         state.bibleReaderLoading
           ? renderBibleVerseSkeleton()
           : renderBibleVerseList(verses)
       }
-      ${renderBibleEditionInfo()}
     </section>
   `;
 }
