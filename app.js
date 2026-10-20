@@ -878,6 +878,7 @@ function renderCurrentServiceModuleDetail() {
 }
 
 function renderCurrentServiceModuleDetailUnscoped() {
+  if (state.module === "home") return renderHomeDetail();
   if (isSetlistArchiveView()) return renderServiceSetlistArchiveDetail();
   if (state.module === "bulletin") renderBulletinDetail();
   else if (state.module === "presenter") renderPresenterDetail();
@@ -29201,6 +29202,7 @@ function renderServiceMusicPlayer(options = {}) {
           </select>
         </span>` : ""}
       </span>
+      ${inline ? globalThis.MindexSongTiming?.transport({ source: options.source, serviceId: options.serviceId }) || "" : ""}
     </span>`;
 }
 
