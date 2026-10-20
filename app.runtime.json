@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-shared-scripture-validation",
+  "version": "20261020-start-add-buttons",
   "options": {
     "compress": false,
     "mangle": {

@@ -669,3 +669,5 @@ Popup copy: unsaved-change choices are explained by action labels. Beat setup re
 Home start uses neutral date-grouped worship cards, explicit today marker, visible module shortcut buttons, and responsive stacking. Home error states show an actionable error instead of scripture; other module landing verses and scripture records are unchanged. Existing home navigation routes remain intact.
 
 Service-data detail refresh must dispatch home to renderHomeDetail, including delayed supplemental data and background song completion. Home must not fall through to the service empty-state renderer after initial load.
+
+Praise creation controls and reference header add buttons use the shared neutral utility button surface/border/hover rules. Retain existing30px size, icon labels, disabled state and global accent focus outline; do not restyle other reference-new-btn consumers.

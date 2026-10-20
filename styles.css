@@ -2009,19 +2009,27 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 }
 /* Card and dialog utilities need a visible hit area even before hover. */
 :is(.reference-card-actions, .reference-editor-actions, .background-tile-actions, .reference-group-tools, .version-edit-actions, .form-actions) :is(.icon-btn, .version-copy-btn, .version-add-btn, .version-delete-btn),
+:is(.praise-create-btn, .praise-empty-create-btn).reference-new-btn,
+.references-shell .head-actions > .reference-new-btn,
 :is(.song-timing-dialog, .draft-handoff-dialog) .btn.secondary {
   flex-shrink: 0;
   border: 1px solid var(--line-2);
 }
 :is(.reference-card-actions, .reference-editor-actions, .background-tile-actions, .reference-group-tools, .version-edit-actions, .form-actions) :is(.icon-btn, .version-copy-btn, .version-add-btn, .version-delete-btn):not(:disabled),
+:is(.praise-create-btn, .praise-empty-create-btn).reference-new-btn:not(:disabled),
+.references-shell .head-actions > .reference-new-btn:not(:disabled),
 :is(.song-timing-dialog, .draft-handoff-dialog) .btn.secondary:not(:disabled) {
   background: var(--ui-surface-field);
 }
 :is(.reference-card-actions, .reference-editor-actions, .background-tile-actions, .reference-group-tools, .version-edit-actions, .form-actions) :is(.icon-btn, .version-copy-btn, .version-add-btn, .version-delete-btn):not(:disabled):not(.danger):not(.version-delete-btn):not(.review-action),
+:is(.praise-create-btn, .praise-empty-create-btn).reference-new-btn:not(:disabled):not(.danger),
+.references-shell .head-actions > .reference-new-btn:not(:disabled):not(.danger),
 :is(.song-timing-dialog, .draft-handoff-dialog) .btn.secondary:not(:disabled):not(.danger) {
   color: var(--ink-2);
 }
 :is(.reference-card-actions, .reference-editor-actions, .background-tile-actions, .reference-group-tools, .version-edit-actions, .form-actions) :is(.icon-btn, .version-copy-btn, .version-add-btn, .version-delete-btn):not(:disabled):hover,
+:is(.praise-create-btn, .praise-empty-create-btn).reference-new-btn:not(:disabled):hover,
+.references-shell .head-actions > .reference-new-btn:not(:disabled):hover,
 :is(.song-timing-dialog, .draft-handoff-dialog) .btn.secondary:not(:disabled):hover {
   background: color-mix(in srgb, var(--ui-surface-field) 85%, var(--ink) 15%);
 }
