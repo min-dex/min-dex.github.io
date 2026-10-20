@@ -9459,4 +9459,4 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
 }
 
 /* Read-only measured phrase metadata; never changes the lyric editor. */
-.version-musical-structure { flex-basis: 100%; min-width: 0; color: var(--muted); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.version-musical-structure { flex-basis: 100%; min-width: 0; color: var(--ink-3); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
