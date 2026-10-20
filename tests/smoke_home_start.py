@@ -55,7 +55,7 @@ try:
    assert not page.locator('.home-start').count()
    assert page.evaluate('!isPresenterOutputWindowOpen()')
    page.evaluate("()=>{loadServiceItems=window.homeOriginalLoadItems;state.module='home';state.selectedServiceId=null;state.selectedServiceTypeId=null;clearDirtyState();render()}")
-   page.evaluate("()=>{openServiceInPresenter=async id=>{window.homeOpenedService=id}}")
+   page.evaluate("()=>{window.homeOriginalOpenPresenter=openServiceInPresenter;openServiceInPresenter=async id=>{window.homeOpenedService=id}}")
    page.locator('.home-next [data-home-next-service-action="presenter"]').click()
    page.wait_for_function("window.homeOpenedService==='next'")
    # Preview actual registered content, excluding a nearer no-gathering record.
@@ -82,6 +82,13 @@ try:
      assert page.locator('.home-start').evaluate('(e)=>e.scrollWidth<=e.clientWidth')
      page.locator('.home-next-actions button').first.focus()
      page.locator('#detailPane').screenshot(path=f'/tmp/mindex-home-{engine}-{theme}-{width}.png')
+   page.evaluate('()=>{openServiceInPresenter=window.homeOriginalOpenPresenter;window.homeOriginalServiceEntry=MINDEX_SERVICE_ENTRY.enter;MINDEX_SERVICE_ENTRY.enter=async()=>false}')
+   page.locator('.home-next [data-home-next-service-action="editor"]').click()
+   page.wait_for_function("document.querySelector('.svc-source-panel')?.open===true",timeout=5000)
+   assert page.locator('[data-service-source-text="preview"]').is_visible()
+   assert page.locator('[data-service-source-text="preview"]').evaluate('(e)=>e===document.activeElement')
+   assert page.evaluate('!isPresenterOutputWindowOpen()')
+   page.evaluate("()=>{state.module='home';state.selectedServiceId=null;state.selectedServiceTypeId=null;clearDirtyState();render()}")
    # A delayed read must not steal navigation or mark unknown content ready.
    page.evaluate("""()=>{
     state.loadedWorshipServiceIds.delete('preview');

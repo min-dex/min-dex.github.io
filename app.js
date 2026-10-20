@@ -34593,16 +34593,14 @@ async function openHomeNextService(action = "presenter", serviceId = "") {
     await openServiceInPresenter(id);
     return;
   }
-  if (id !== state.selectedServiceId && !confirmDiscardServiceChanges()) return;
-  state.selectedServiceId = id;
-  state.selectedServiceItemIndex = 0;
-  const service = state.services.find((entry) => entry.id === id);
-  if (service) state.selectedServiceTypeId = service.type_id;
-  // Move to the working surface first so a slow item load cannot leave the
-  // selected service in the sidebar while the home dashboard remains visible.
-  await switchModule("service", { clearSearch: false });
-  await loadServiceItems(id);
-  await window.MINDEX_SERVICE_ENTRY?.enter(id);
+  await openServiceInPresenter(id);
+  if (state.selectedServiceId !== id || !["service", "presenter"].includes(state.module)) return;
+  const sourcePanel = refs.detailPane.querySelector(".svc-source-panel");
+  const sourceInput = sourcePanel?.querySelector("[data-service-source-text]");
+  if (sourceInput?.dataset.serviceSourceText !== id) return;
+  sourcePanel.open = true;
+  sourcePanel.scrollIntoView({ block: "start" });
+  sourceInput.focus({ preventScroll: true });
 }
 
 async function openServiceInPresenter(id) {
