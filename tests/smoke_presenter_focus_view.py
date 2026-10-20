@@ -30,6 +30,23 @@ try:
       state.serviceMusic.mode='presenter-audio';state.serviceMusic.timingGroupId='group';state.serviceMusic.autoSyncSuspended=true;
       window.focusItems=JSON.stringify(state.serviceItems);
     }''')
+    page.evaluate("""()=>{
+      const original=window.MINDEX_SERVER_STORAGE;
+      const writes=[];window.MINDEX_SERVER_STORAGE={queue:(...args)=>{writes.push(args);return true;}};
+      try {
+        const toggle=document.querySelector('[data-presenter-order-toggle]');
+        const body=document.getElementById('presenterOrderInputBody');
+        const field=body.querySelector('input,textarea');
+        const before=field.value;field.value='접어도 유지되는 입력';
+        toggle.click();
+        if(!body.hidden || toggle.getAttribute('aria-expanded')!=='false')throw Error('collapse failed');
+        if(!renderPresenterServiceInputRail(state.services[0]).includes('aria-expanded="false"'))throw Error('rerender lost collapse state');
+        toggle.click();
+        if(body.hidden || body.querySelector('input,textarea')!==field || field.value!=='접어도 유지되는 입력')throw Error('disclosure lost draft');
+        if(writes.length!==2 || writes[0][1]!=='mindex.ui.presenterOrderInputOpen' || writes[0][2]!=='false' || writes[1][2]!=='true')throw Error('server UI preference missing');
+        field.value=before;
+      } finally {window.MINDEX_SERVER_STORAGE=original;}
+    }""")
     toggle=page.locator('[data-presenter-focus-toggle=focus]')
     toggle.click()
     assert page.locator('[data-presenter-focus-panel]').is_visible()
