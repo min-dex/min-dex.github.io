@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-start-add-buttons",
+  "version": "20261020-music-button-states",
   "options": {
     "compress": false,
     "mangle": {
