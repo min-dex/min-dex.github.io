@@ -35,6 +35,13 @@ Read `HANDOFF.md` first. This file is the short UI contract for Codex threads so
   width of `max(700px, left sidebar + 320px content + right panel)`; below it,
   horizontal page scrolling keeps all controls reachable. This minimum is
   screen-only and must never constrain printed bulletins.
+- Exception: an open presenter at980px or below uses one vertical flow without
+  page-level horizontal scrolling. Existing output/navigation controls precede
+  the board; input and the existing service list follow it. Focus view retains
+  its hidden right panel but mirrors the existing output action in its transport and
+  places transport before previews. Below500px previews stack. Controls and
+  input DOM are retained during resizing; no new panel toggles or save actions.
+  Above980px the existing three-column layout remains unchanged.
 
 ## Color And Surfaces
 

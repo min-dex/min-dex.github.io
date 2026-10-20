@@ -75,7 +75,7 @@ try:
     assert '첫 번째' in page.locator('.svc-focus-preview').first.inner_text()
     assert '송출 대기' in page.locator('.svc-focus-preview').first.inner_text()
     page.evaluate('state.presenter.outputWindow.closed=false;syncPresenterFocusView()')
-    for width in (1440,1100,800):
+    for width in (1440,1100,800,390):
      page.set_viewport_size({'width':width,'height':1000})
      page.wait_for_timeout(100)
      assert page.locator('.svc-focus-panel').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
@@ -102,21 +102,27 @@ try:
      for view in ('basic','focus'):
       page.locator(f'[data-presenter-focus-toggle={view}]').click()
       assert page.locator(f'[data-presenter-focus-toggle={view}]').get_attribute('aria-pressed')=='true'
-      page.locator('.right-sidebar').wait_for(state='visible' if view=='basic' else 'hidden')
+      page.locator('.svc-presenter-side-panel .svc-presenter-top').wait_for(state='visible' if view=='basic' else 'hidden')
       page.locator(f'[data-presenter-focus-toggle={view}]').click()
       assert page.locator(f'[data-presenter-focus-toggle={view}]').get_attribute('aria-pressed')=='true'
-      page.locator('.right-sidebar').wait_for(state='visible' if view=='basic' else 'hidden')
+      page.locator('.svc-presenter-side-panel .svc-presenter-top').wait_for(state='visible' if view=='basic' else 'hidden')
       assert page.evaluate("focusBoard===document.querySelector('.svc-slide-board') && focusDraft.value==='아직 저장하지 않은 원문' && focusAudio.currentTime===42")
-      for width in (1440,1100,800):
+      for width in (1440,1100,800,390):
        page.set_viewport_size({'width':width,'height':1000})
        page.wait_for_timeout(100)
        assert page.locator('.svc-presenter-toolbar').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
        assert page.evaluate("""()=>{
         const left=document.querySelector('.module-switcher-tab').getBoundingClientRect();
         const right=document.querySelector('#themeBtn').getBoundingClientRect();
-        return Math.abs(left.height-right.height)<1 && Math.abs((left.top+left.height/2)-(right.top+right.height/2))<1;
+        return Math.abs(left.height-right.height)<1 && (innerWidth<=980 || Math.abs((left.top+left.height/2)-(right.top+right.height/2))<1);
        }""")
        assert page.evaluate("""()=>{const help=document.querySelector('[data-presenter-help]');if(!help||!help.getBoundingClientRect().width)return true;help.open=true;const p=help.querySelector('.svc-presenter-help-panel').getBoundingClientRect(),t=document.querySelector('.svc-presenter-toolbar').getBoundingClientRect();help.open=false;return p.left>=t.left-1&&p.right<=t.right+1;}""")
+       if width<=980:
+        assert page.evaluate("document.querySelector('.app-shell').scrollWidth<=innerWidth+1")
+        if view=='focus':
+         assert page.locator('.svc-focus-output').is_visible()
+        selector='.svc-presenter-side-panel [data-presenter-action]' if view=='basic' else '.svc-focus-navigation button,.svc-presenter-toolbar > .svc-output-action'
+        assert page.locator(selector).evaluate_all("es=>es.filter(e=>e.getBoundingClientRect().width>0).every(e=>{const r=e.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth+1})")
        if view=='basic':
         assert page.evaluate("""()=>{
          const music=document.querySelector('.svc-presenter-toolbar .svc-music-name');
