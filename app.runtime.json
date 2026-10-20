@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-hymn-measures",
+  "version": "20261020-order-disclosure-music-icon",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "ed7ae91bcbed0bb84f34d196ab0f641fe935a64202b2362dc7108d68473c1061",
-  "runtime_sha256": "6e1f0cf8f424de950ee50af6f351bbad34e5887c270709893e3409b76c6f6463",
-  "source_bytes": 1529916,
-  "runtime_bytes": 1082170,
-  "source_gzip": 342867,
-  "runtime_gzip": 267940
+  "source_sha256": "fa7bada123e03dea443a287dbf2654ce9f4f4562da162de7867009dbcaf35118",
+  "runtime_sha256": "e3695a44b61e534a94711616b2ae980a865a2e4b3c901ffb7733cd4fbd2c0f47",
+  "source_bytes": 1529890,
+  "runtime_bytes": 1082144,
+  "source_gzip": 342864,
+  "runtime_gzip": 267935
 }

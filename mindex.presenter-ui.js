@@ -220,16 +220,20 @@ function renderPresenterRightSidebar(service, slides, active, index) {
     </div>`;
 }
 
+const PRESENTER_ORDER_INPUT_OPEN_KEY = 'mindex.ui.presenterOrderInputOpen';
+let presenterOrderInputOpen = null;
+
 function renderPresenterServiceInputRail(service) {
+  const expanded = presenterOrderInputOpen ?? safeStorageGet('local', PRESENTER_ORDER_INPUT_OPEN_KEY, 'true') !== 'false';
   const draft = presenterPreparationDisplayTextForService(service);
   const applying = state.presenterPreparationApplyingServiceIds.has(service.id);
   const hasValues = presenterPreparationDraftHasValues(service, draft);
   return `
     <aside class="svc-presenter-input-rail" aria-label="예배 입력">
-      <header class="svc-presenter-input-rail-head">
-        <span>예배 순서 입력</span>
-      </header>
-      <section class="svc-presenter-preparation-input">
+      <button type="button" class="svc-presenter-input-rail-head svc-presenter-input-disclosure" data-presenter-order-toggle aria-expanded="${expanded}" aria-controls="presenterOrderInputBody">
+        <span>예배 순서 입력</span><i data-lucide="chevron-down" aria-hidden="true"></i>
+      </button>
+      <section id="presenterOrderInputBody" class="svc-presenter-preparation-input" ${expanded ? '' : 'hidden'}>
         ${renderPresenterPreparationFieldRows(service, draft)}
         <div class="svc-presenter-preparation-actions">
           <button class="svc-presenter-preparation-apply" type="button" data-presenter-preparation-apply data-service-id="${escapeAttr(service.id)}"
@@ -325,6 +329,18 @@ function syncPresenterFocusMusic() {
 }
 
 document.addEventListener('click', event => {
+  const orderToggle = event.target.closest('[data-presenter-order-toggle]');
+  if (orderToggle) {
+    const body = orderToggle.closest('.svc-presenter-input-rail')?.querySelector('.svc-presenter-preparation-input');
+    if (!body) return;
+    presenterOrderInputOpen = orderToggle.getAttribute('aria-expanded') !== 'true';
+    orderToggle.setAttribute('aria-expanded', String(presenterOrderInputOpen));
+    body.hidden = !presenterOrderInputOpen;
+    if (!safeStorageSet('local', PRESENTER_ORDER_INPUT_OPEN_KEY, String(presenterOrderInputOpen))) {
+      showToast('펼침 상태를 서버에 보관하지 못했습니다. 연결 후 다시 변경해 주세요.', 'error');
+    }
+    return;
+  }
   const toggle = event.target.closest('[data-presenter-focus-toggle]');
   if (toggle) {
     const nextView = toggle.dataset.presenterFocusToggle === 'focus';

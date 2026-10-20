@@ -29426,7 +29426,7 @@ function renderGlobalPlaybackControls() {
   const toggleLabel = music.pending ? "음악 준비 취소" : music.playing ? "음악 일시정지" : "음악 재생";
   const icon = music.pending ? "loader-circle" : music.playing ? "pause" : "play";
   const available = hasMusic || state.module === "presenter";
-  const html = `<button class="icon-btn global-playback-trigger" type="button" popovertarget="globalPlaybackPanel" title="음악 관리" aria-label="음악 관리" data-active="${Boolean(music.playing || music.pending)}"><i data-lucide="music"></i><span>음악 관리</span><span class="global-playback-indicator" aria-hidden="true"></span></button>
+  const html = `<button class="icon-btn global-playback-trigger" type="button" popovertarget="globalPlaybackPanel" title="음악 관리" aria-label="음악 관리" data-active="${Boolean(music.playing || music.pending)}"><i data-lucide="music"></i><span class="global-playback-indicator" aria-hidden="true"></span></button>
     <section id="globalPlaybackPanel" class="global-playback-panel" popover aria-label="음악 관리">
       <header class="global-playback-panel-head"><strong>음악 관리</strong><button class="icon-btn" type="button" popovertarget="globalPlaybackPanel" popovertargetaction="hide" aria-label="음악 관리 닫기"><i data-lucide="x"></i></button></header>
       <p class="global-playback-empty" ${hasMusic ? "hidden" : ""}>선택된 음악이 없습니다.</p>

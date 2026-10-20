@@ -54,7 +54,10 @@ def main():
                     }'''),flush=True)
                     page.evaluate('state.serviceMusic.fadeStopEnabled=true;renderGlobalPlaybackControls()')
                     launcher=page.locator('[popovertarget="globalPlaybackPanel"]').first
-                    assert launcher.locator('span').first.inner_text()=='음악 관리', repr(launcher.inner_text())
+                    assert launcher.inner_text()==''
+                    assert launcher.get_attribute('aria-label')=='음악 관리'
+                    assert launcher.get_attribute('title')=='음악 관리'
+                    assert launcher.locator('svg.lucide').count()==1
                     launcher.click()
                     panel=page.locator('#globalPlaybackPanel')
                     assert panel.is_visible()
