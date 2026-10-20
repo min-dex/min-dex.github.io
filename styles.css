@@ -9391,3 +9391,7 @@ body:has(#servicePresenterControls[data-focus-view="true"]) .svc-presenter-live-
   justify-content: center;
 }
 #servicePresenterControls :is(.svc-reference-media-quick-add > summary, .svc-board-subgroup-commit) :is(i[data-lucide], svg.lucide) { flex: 0 0 14px; }
+
+/* Focused presenter uses the full content width; basic view restores its rail. */
+body:has(#servicePresenterControls[data-focus-view="true"]) { --shell-right-w: 0px; }
+body:has(#servicePresenterControls[data-focus-view="true"]) .right-sidebar { display: none; }

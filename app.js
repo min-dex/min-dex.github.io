@@ -3074,7 +3074,16 @@ async function loadSongsOnce(context = {}) {
   }
 
   if (!context.searchOnly) state.connectionError = "";
-  state.songs = (data || []).map(normalizeServerSong).sort(sortSongs);
+  const hydratedSongs = new Map(state.songs.filter(song => song._relationalVersionsLoaded).map(song => [song.id, song]));
+  state.songs = (data || []).map(row => {
+    const song = normalizeServerSong(row);
+    const hydrated = hydratedSongs.get(song.id);
+    if (hydrated) {
+      song.versions = hydrated.versions;
+      song._relationalVersionsLoaded = true;
+    }
+    return song;
+  }).sort(sortSongs);
   // Title, hymn number, and promoted metadata can answer the first search
   // immediately. Version units continue loading below for lyric-only matches.
   songCatalogSummaryLoaded = true;
@@ -3082,7 +3091,16 @@ async function loadSongsOnce(context = {}) {
   if (context.searchOnly && isGlobalSearchActive()) renderGlobalSearchList();
   if (!context.searchOnly && state.module === "praise") renderSongList();
   await yieldToBrowser();
-  await attachRelationalSongVersions();
+  try {
+    await attachRelationalSongVersions();
+  } catch (error) {
+    // Keep complete linked lyrics available and leave the catalog retryable.
+    if (context.searchOnly) throw error;
+    finishDataLoading("praise");
+    state.connectionError = error.message || "찬양 가사를 불러오지 못했습니다.";
+    showToast(state.connectionError, "error");
+    return;
+  }
   clearSearchCaches();
   if (context.searchOnly && isGlobalSearchActive()) renderGlobalSearchList();
   await yieldToBrowser();
@@ -3150,29 +3168,23 @@ function songNeedsRelationalHydration(songId = "") {
 async function loadMissingSongsForIds(targetIds = []) {
   const existingSongs = songLookupMap();
   const missingIds = targetIds.filter((id) => !existingSongs.has(id));
-  // Song metadata and version lookup are independent; publish only when both finish.
-  const versionDataPromise = loadRelationalSongVersionData(targetIds);
-  let songRows = [];
-  if (missingIds.length) {
-    try {
-      songRows = await fetchSupabaseBatches(missingIds, (batch) =>
-        fetchSupabasePaged("mindex_songs", "*", (query) => query.in("id", batch)
-          .order("title", { ascending: true }).order("id", { ascending: true })));
-
-    } catch (error) {
-      if (!isUnavailableRelationError(error)) console.warn("Could not load linked praise songs.", error);
-    }
-  }
-
+  // Observe both promises immediately; failures must reach the service retry UI.
+  const [songRows, versionData] = await Promise.all([
+    missingIds.length ? fetchSupabaseBatches(missingIds, (batch) =>
+      fetchSupabasePaged("mindex_songs", "*", (query) => query.in("id", batch)
+        .order("title", { ascending: true }).order("id", { ascending: true }))) : [],
+    loadRelationalSongVersionData(targetIds),
+  ]);
   if (songRows.length) {
     const songMap = new Map(songLookupMap());
-    const linkedSongs = songRows.map(normalizeServerSong);
-    for (const song of linkedSongs) songMap.set(song.id, song);
+    for (const row of songRows) {
+      // A concurrent targeted read may already have published complete versions.
+      if (!songMap.get(row.id)?._relationalVersionsLoaded) songMap.set(row.id, normalizeServerSong(row));
+    }
     state.songs = [...songMap.values()].sort(sortSongs);
     clearSearchCaches();
   }
   const hydratableIds = targetIds.filter((id) => songById(id));
-  const versionData = await versionDataPromise;
   if (!hydratableIds.length || !versionData) return;
   await publishRelationalSongVersionData(versionData, hydratableIds);
 }
@@ -3215,7 +3227,7 @@ async function loadRelationalSongVersionData(songIds = []) {
     }, { concurrency: 2 });
 
   } catch (error) {
-    if (!isUnavailableRelationError(error)) console.warn("Could not load linked song versions.", error);
+    if (!isUnavailableRelationError(error)) throw error;
     state.songVersionTablesSupported = false;
     state.songVersionPraiseTypesSupported = false;
     return;
@@ -3234,7 +3246,7 @@ async function loadRelationalSongVersionData(songIds = []) {
         .order("unit_order", { ascending: true }).order("id", { ascending: true })));
 
   } catch (error) {
-    if (!isUnavailableRelationError(error)) console.warn("Could not load linked song units.", error);
+    if (!isUnavailableRelationError(error)) throw error;
     state.songVersionTablesSupported = false;
     state.songVersionPraiseTypesSupported = false;
     return;
@@ -3268,7 +3280,7 @@ async function attachRelationalSongVersions() {
   const failure = responses.find((result) => result.status === "rejected" || result.value?.error);
   if (failure) {
     const error = failure.status === "rejected" ? failure.reason : failure.value.error;
-    if (!isUnavailableRelationError(error)) console.warn("Could not load song versions and units.", error);
+    if (!isUnavailableRelationError(error)) throw error;
     state.songVersionTablesSupported = false;
     state.songVersionPraiseTypesSupported = false;
     return;

@@ -85,8 +85,10 @@ try:
      for view in ('basic','focus'):
       page.locator(f'[data-presenter-focus-toggle={view}]').click()
       assert page.locator(f'[data-presenter-focus-toggle={view}]').get_attribute('aria-pressed')=='true'
+      page.locator('.right-sidebar').wait_for(state='visible' if view=='basic' else 'hidden')
       page.locator(f'[data-presenter-focus-toggle={view}]').click()
       assert page.locator(f'[data-presenter-focus-toggle={view}]').get_attribute('aria-pressed')=='true'
+      page.locator('.right-sidebar').wait_for(state='visible' if view=='basic' else 'hidden')
       assert page.evaluate("focusBoard===document.querySelector('.svc-slide-board') && focusDraft.value==='아직 저장하지 않은 원문' && focusAudio.currentTime===42")
       for width in (1440,1100,800):
        page.set_viewport_size({'width':width,'height':1000})

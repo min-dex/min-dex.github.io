@@ -15,7 +15,9 @@ const c = {
   selectedServiceForEditor: () => null,
   linkServiceItemToPraiseSong: (item, song) => { item.song_id = song.id; },
 };
-vm.createContext(c); vm.runInContext(code, c);
+vm.createContext(c);
+vm.runInContext(source.match(/function servicePraiseUsesDirectLyrics\(mode\) \{[^\n]+/)[0], c);
+vm.runInContext(code, c);
 const item = {label: '찬양 5', raw_title: '', song_id: 'saved-song', version_id: 'saved-version', song_version_id: 'saved-version'};
 const before = JSON.stringify(item);
 c.applyServiceSongSelectionWithService(item);
