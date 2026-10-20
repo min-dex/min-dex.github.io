@@ -9429,3 +9429,11 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
   stroke-width: var(--ui-icon-stroke);
   vertical-align: middle;
 }
+
+.svc-presenter-input-disclosure {
+  width: 100%; padding: 0; border: 0; background: transparent;
+  color: inherit; text-align: left; cursor: pointer;
+}
+.svc-presenter-input-disclosure > svg { margin-left: auto; transition: transform .14s ease; }
+.svc-presenter-input-disclosure[aria-expanded="false"] > svg { transform: rotate(-90deg); }
+.svc-presenter-input-rail > .svc-presenter-preparation-input[hidden] { display: none; }

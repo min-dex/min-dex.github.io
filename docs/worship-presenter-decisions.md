@@ -3718,3 +3718,10 @@ Focused view continues to hide the entire sidebar.
   timing are not treated as DB lyrics and are not rewritten.
 - Coverage: smoke_presenter_freshness.py (Chromium/WebKit, mocked popup only).
   Physical output and native fullscreen remain separate tests.
+
+### 예배 순서 입력 접기 · 2026-10-20
+
+우측 예배 순서 입력은 제목 버튼으로 펼치고 접는다. 기본값은 펼침이며 마지막
+선택은 기존 서버 UI 저장 경로의 기기별 설정으로 보관한다. 접기는 DOM을 숨기기만
+하여 미반영 입력을 보존한다. 송출·슬라이드 변경으로 자동 전환하지 않으며
+제목 버튼은 키보드와 aria-expanded를 지원한다.
