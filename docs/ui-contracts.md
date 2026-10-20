@@ -90,7 +90,7 @@ Home hierarchy:
   its day section exposes `aria-current="date"`.
 
 - Worship is the primary operational area.
-- Home is a preparation preview for the next ongoing/upcoming service selected by the existing time-window rules. Show its registered order/content and explicit 예배 열기 / 원문 편집 actions. The sidebar owns browsing; do not repeat the service catalogue or module shortcuts in the main pane. Preview loads only that service via the existing guarded read path; unknown/loading/error content is never presented as confirmed readiness. No-gathering services are excluded. The full two-week board remains under `최근 예배`.
+- Home summarizes all five modules equally: this-week registered worship count, bulletin-linked departments, known Praise catalogue size, installed Bible editions, and operations/calendar context. It never renders a service order/editor or duplicates the sidebar catalogue. Counts use loaded data only, exclude expected/no-gathering services, and distinguish unknown/read errors from zero. Bulletin department counts describe eligible linked services, not saved/published issue counts. Home triggers no service-detail fetch. Module headers and operations links use existing guarded navigation.
 - Module rail icons open verse landing pages titled 예배, 주보, 찬양, 말씀 and 운영.
   Re-clicking an icon clears its selection/search after the existing unsaved-edit
   confirmation. Page tabs, history and explicit detail links retain their target.
@@ -670,7 +670,7 @@ output controls in the content sidebar do not move. Add/Save edit buttons share
 
 Popup copy: unsaved-change choices are explained by action labels. Beat setup retains existing-time preservation, with variable-beat guidance in an initially closed, keyboard-accessible disclosure. Photo filenames stay on individual photo rows; no repeated aggregate list.
 
-Home uses a compact preparation header, next-service actions and a read-only registered-content outline. Use shared type/surfaces, 5/10px spacing and responsive columns; no large empty hero, repeated catalogue or module shortcut cards. Home error states remain actionable and never show a scripture fallback.
+Home uses a compact wordmark/date header and a five-module overview with shared neutral surfaces, type and 5/10px spacing. Responsive columns keep summaries visible without a large hero. Errors are local to the affected module and never fall back to scripture.
 
 Service-data detail refresh must dispatch home to renderHomeDetail, including delayed supplemental data and background song completion. Home must not fall through to the service empty-state renderer after initial load.
 

@@ -9207,30 +9207,34 @@ body[data-module="praise"] .praise-forms-panel .version-compare-column {
 .version-title-main:has(.version-output-title-input) { flex-wrap: wrap; }
 .version-title-main > .version-output-title-input { flex-basis: 100%; }
 
-/* Home is a preparation preview; the sidebar owns the service catalogue. */
+/* Home summarizes all modules; detailed catalogues stay in their own tabs. */
 .home-start { width:100%; padding:25px 30px; display:grid; gap:20px; }
-.home-start-header { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:10px 20px; }
-.home-start-header h1 { margin:0; font-size:var(--page-title-size); font-weight:700; }
-.home-start-header time, .home-next-date { color:var(--ink-3); font-size:var(--ui-meta-size); font-weight:500; }
-.home-next { min-width:0; border-top:1px solid var(--line); }
-.home-next-heading { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:20px 0; }
-.home-next-date { margin:0 0 5px; }
-.home-next h2 { margin:0; font-size:var(--page-title-size); font-weight:700; }
-.home-next-actions { display:flex; flex-wrap:wrap; gap:10px; flex-shrink:0; }
-.home-next-actions .btn { min-height:35px; padding:5px 10px; gap:10px; }
-.home-next-actions svg { width:16px; height:16px; }
-.home-prep-content { border-top:1px solid var(--line); padding-top:20px; }
-.home-prep-content > h3 { margin:0 0 15px; font-size:var(--ui-row-size); font-weight:700; }
-.home-prep-outline { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 30px; }
-.home-prep-group { display:grid; grid-template-columns:80px minmax(0,1fr); gap:10px; padding:15px 0; border-top:1px solid var(--line); min-width:0; align-content:start; }
-.home-prep-group h4 { margin:0; color:var(--ink-3); font-size:var(--ui-meta-size); line-height:1.5; font-weight:600; overflow-wrap:anywhere; }
-.home-prep-group ul { list-style:none; margin:0; padding:0; display:grid; gap:5px; }
-.home-prep-group li { font-size:var(--ui-row-size); font-weight:600; line-height:1.5; overflow-wrap:anywhere; }
-.home-start-empty { margin:0; padding:20px 0; color:var(--ink-3); font-size:var(--ui-meta-size); }
-@media(max-width:800px) {
-  .home-start { padding:20px 15px; }
-  .home-next-heading { align-items:flex-start; flex-direction:column; gap:15px; }
-  .home-prep-outline { grid-template-columns:minmax(0,1fr); }
+.home-start-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px 20px; }
+.home-start-header h1 { margin:0; font-size:var(--page-title-size); font-weight:700; letter-spacing:0.1em; }
+.home-start-header p { margin:5px 0 0; color:var(--ink-2); font-size:var(--ui-meta-size); }
+.home-start-header time { color:var(--ink-3); font-size:var(--ui-meta-size); }
+.home-overview { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:15px; }
+.home-module { min-width:0; padding:15px 20px; border:1px solid var(--line); border-radius:5px; background:var(--ui-surface-panel); }
+.home-module h2 { margin:0 0 15px; font-size:var(--ui-row-size); }
+.home-module h2 button { width:100%; min-height:30px; display:flex; justify-content:space-between; align-items:center; gap:10px; color:var(--ink); background:transparent; border:0; padding:5px 0; cursor:pointer; font:inherit; font-weight:700; border-radius:5px; }
+.home-module h2 button > span { display:flex; align-items:center; gap:10px; }
+.home-module svg { width:16px; height:16px; flex-shrink:0; }
+.home-module h2 button > svg { color:var(--ink-3); }
+.home-module h2 button:hover { background:var(--ui-surface-field); }
+.home-module h2 button:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+.home-module-value { display:flex; align-items:baseline; flex-wrap:wrap; gap:5px 10px; font-size:var(--page-title-size); font-weight:700; }
+.home-module-value span { font-size:var(--ui-meta-size); font-weight:500; color:var(--ink-3); }
+.home-module-detail { margin:10px 0 0; color:var(--ink-2); font-size:var(--ui-meta-size); line-height:1.6; overflow-wrap:anywhere; }
+.home-module--operations { grid-column:1 / -1; }
+.home-module--operations h2 { margin-bottom:5px; }
+.home-operations-content { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px 20px; }
+.home-operations-content .home-module-detail { margin:0; }
+.home-operations-content nav { display:flex; flex-wrap:wrap; gap:5px; }
+.home-operations-content .btn { min-height:30px; padding:5px 10px; font-size:var(--ui-meta-size); }
+@media(max-width:640px) {
+ .home-start { padding:20px 15px; }
+ .home-overview { grid-template-columns:minmax(0,1fr); gap:10px; }
+ .home-module { padding:15px; }
 }
 
 /* Controller layout only; the same board and editor DOM survive both views. */

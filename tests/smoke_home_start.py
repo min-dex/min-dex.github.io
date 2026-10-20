@@ -22,90 +22,61 @@ try:
     clearDirtyState();render();
    }''')
    page.evaluate("()=>{state.module='home';state.selectedServiceTypeId=null;state.search='';render()}")
-   assert page.locator('.home-start').count()==1
-   assert not page.locator('.service-week-board').count()
-   assert not page.locator('.home-start .empty-verse').count()
-   assert page.locator('.home-start-shortcuts').count()==0
-   assert '등록된 다음 예배가 없습니다.' in page.locator('.home-start').inner_text()
+   assert page.locator('.home-module').count()==5
+   assert page.locator('.home-next,.home-prep-outline,.service-week-board,.empty-verse').count()==0
+   assert '전체 현황' in page.locator('.home-start').inner_text()
+   # Deferred worship hydration cannot replace the whole-app overview.
    page.evaluate("""async()=>{
     const saved=[fetchCachedSupabasePaged,loadCalendarData,ensureUpcomingPublicWorshipServices];
     fetchCachedSupabasePaged=async()=>[];loadCalendarData=async()=>{};ensureUpcomingPublicWorshipServices=async()=>[];
-    try {
-     await new Promise(resolve=>setTimeout(resolve,25));
-     await hydrateSupplementalWorshipDataAfterInitialRender();
-    } finally {[fetchCachedSupabasePaged,loadCalendarData,ensureUpcomingPublicWorshipServices]=saved;}
+    try {await hydrateSupplementalWorshipDataAfterInitialRender();}
+    finally {[fetchCachedSupabasePaged,loadCalendarData,ensureUpcomingPublicWorshipServices]=saved;}
    }""")
-   assert page.locator('.home-start').count()==1, 'late supplemental load replaced home'
-   assert page.locator('.empty-verse').count()==0
-
-   page.evaluate("""()=>{const tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);const d=toLocalDateStr(tomorrow);state.services=[{id:'next',type_id:'sunday-main',date:d,sort_order:0},{id:'other',type_id:'sunday-main',date:d,sort_order:1}];render()}""")
-   assert page.locator('.home-next').count()==1
-   assert page.locator('.home-schedule').count()==0
-   assert page.locator('.home-next-actions button').count()==2
-   assert '불러오는 중' in page.locator('.home-prep-content').inner_text()
-   # Actual sidebar navigation remains independent of the preparation preview.
+   assert page.locator('.home-module').count()==5
+   page.evaluate("""()=>{
+    const d=toLocalDateStr(new Date());
+    state.serviceTypes=[{id:'young-adult',name:'청년부 예배'},{id:'children',name:'어린이부 예배'}];
+    state.services=[{id:'next',type_id:'young-adult',date:d},{id:'other',type_id:'children',date:d},
+      {id:'none',type_id:'young-adult',date:d,_worshipSourceRef:{no_gathering:true}},
+      {id:'expected',type_id:'young-adult',date:d,_expected:true}];
+    state.songs=[{id:'one',title:'Test Song'},{id:'two',title:'Second Song'}];songCatalogLoaded=true;
+    state.bibleTranslations=[{id:'GAE',name:'개역개정'},{id:'KRV',name:'개역한글'}];
+    state.calendarData=[{date:d,liturgical:'교회력 fixture'}];state.calendarLoaded=true;
+    render();
+   }""")
+   assert '2회' in page.locator('.home-module').nth(0).inner_text()
+   assert '2개 부서' in page.locator('.home-module').nth(1).inner_text()
+   assert '2곡' in page.locator('.home-module').nth(2).inner_text()
+   assert '2개 역본' in page.locator('.home-module').nth(3).inner_text()
+   assert '교회력 fixture' in page.locator('.home-module--operations').inner_text()
+   # The original sidebar routes remain functional, including stalled data.
    page.locator('#songList [data-service-week]').click()
    assert page.locator('.service-week-board').count()==2
    page.locator('#songList [data-service-list]').click()
    assert page.evaluate('state.selectedServiceTypeId')=='__list'
    page.evaluate("()=>{window.homeOriginalLoadItems=loadServiceItems;loadServiceItems=()=>new Promise(()=>{});state.presenter.outputWindow=null}")
    page.locator('#songList [data-service-id="next"]').click()
-   page.wait_for_function("state.module==='presenter' && state.selectedServiceId==='next'",timeout=3000)
+   page.wait_for_function("state.module==='presenter'&&state.selectedServiceId==='next'",timeout=3000)
    assert page.locator('[data-service-view-loading="next"]').count()==1
-   assert not page.locator('.home-start').count()
    assert page.evaluate('!isPresenterOutputWindowOpen()')
    page.evaluate("()=>{loadServiceItems=window.homeOriginalLoadItems;state.module='home';state.selectedServiceId=null;state.selectedServiceTypeId=null;clearDirtyState();render()}")
-   page.evaluate("()=>{window.homeOriginalOpenPresenter=openServiceInPresenter;openServiceInPresenter=async id=>{window.homeOpenedService=id}}")
-   page.locator('.home-next [data-home-next-service-action="presenter"]').click()
-   page.wait_for_function("window.homeOpenedService==='next'")
-   # Preview actual registered content, excluding a nearer no-gathering record.
-   page.evaluate("""()=>{
-    const tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);const date=toLocalDateStr(tomorrow);
-    state.serviceTypes=[{id:'fixture',name:'청년부 예배'}];
-    state.services=[{id:'none',type_id:'fixture',date:toLocalDateStr(new Date()),_worshipSourceRef:{no_gathering:true}},{id:'preview',type_id:'fixture',date}];
-    state.loadedWorshipServiceIds.add('preview');
-    state.serviceItems.preview=[
-     {id:'song',service_id:'preview',label:'찬양',raw_title:'하나님은 너를 만드신 분',sort_order:0},
-     {id:'prayer',service_id:'preview',label:'대표기도',raw_title:'대표기도',assignee:'이예율 학생',sort_order:1},
-     {id:'reading',service_id:'preview',label:'성경봉독',raw_title:'빌립보서 4:6–7',sort_order:2},
-     {id:'sermon',service_id:'preview',label:'설교',raw_title:'염려 대신 기도',assignee:'김남영 목사',sort_order:3},
-     {id:'notice',service_id:'preview',label:'광고',raw_title:'이번 주 소식과 기도 모임 안내',sort_order:4}
-    ];render();
-   }""")
-   assert page.locator('.home-next [data-home-service-id="preview"]').count()==2
-   assert '염려 대신 기도' in page.locator('.home-prep-content').inner_text()
-   assert '이예율 학생' in page.locator('.home-prep-content').inner_text()
    for theme in ('light','dark'):
     page.evaluate('(t)=>applyTheme(t)',theme)
     for width in (1280,800,390):
      page.set_viewport_size({'width':width,'height':800})
      assert page.locator('.home-start').evaluate('(e)=>e.scrollWidth<=e.clientWidth')
-     page.locator('.home-next-actions button').first.focus()
-     page.locator('#detailPane').screenshot(path=f'/tmp/mindex-home-{engine}-{theme}-{width}.png')
-   page.evaluate('()=>{openServiceInPresenter=window.homeOriginalOpenPresenter;window.homeOriginalServiceEntry=MINDEX_SERVICE_ENTRY.enter;MINDEX_SERVICE_ENTRY.enter=async()=>false}')
-   page.locator('.home-next [data-home-next-service-action="editor"]').click()
-   page.wait_for_function("document.querySelector('.svc-source-panel')?.open===true",timeout=5000)
-   assert page.locator('[data-service-source-text="preview"]').is_visible()
-   assert page.locator('[data-service-source-text="preview"]').evaluate('(e)=>e===document.activeElement')
-   assert page.evaluate('!isPresenterOutputWindowOpen()')
-   page.evaluate("()=>{state.module='home';state.selectedServiceId=null;state.selectedServiceTypeId=null;clearDirtyState();render()}")
-   # A delayed read must not steal navigation or mark unknown content ready.
-   page.evaluate("""()=>{
-    state.loadedWorshipServiceIds.delete('preview');
-    state.client={from:()=>{throw Error('unexpected external read')}};
-    loadServiceItems=()=>new Promise(resolve=>{window.finishHomePreview=resolve});
-    renderHomeStart();
-   }""")
-   assert page.locator('.home-prep-content[aria-busy="true"]').count()==1
-   page.evaluate("()=>{state.module='praise';render();window.finishHomePreview()}")
-   page.wait_for_function("state.module==='praise'&&!document.querySelector('.home-start')")
-   assert page.locator('.empty-verse').count()==1
-   page.evaluate("()=>{loadServiceItems=window.homeOriginalLoadItems;state.client={};state.module='home';serviceViewLoadErrors.set('preview',true);render()}")
-   assert '불러오지 못했습니다' in page.locator('.home-prep-content').inner_text()
-   page.evaluate("()=>{state.module='home';state.serviceTypes=[];state.serviceError='Failed to fetch';state.uiVerses.home=[{text:'HOME VERSE MUST NOT APPEAR'}];state.selectedServiceTypeId=null;render()}")
-   assert page.locator('.empty-verse').count()==0
-   assert 'HOME VERSE MUST NOT APPEAR' not in page.locator('#detailPane').inner_text()
-   assert '예배를 불러오지 못했습니다' in page.locator('#detailPane').inner_text()
-   print('PASS home start',engine,flush=True)
+     page.locator('.home-module h2 button').first.focus()
+     page.locator('#detailPane').screenshot(path=f'/tmp/mindex-overview-{engine}-{theme}-{width}.png')
+   for module in ('service','bulletin','praise','scripture','operations'):
+    page.evaluate("()=>{state.module='home';state.selectedServiceId=null;state.selectedServiceTypeId=null;state.search='';clearDirtyState();render()}")
+    page.locator(f'.home-module h2 [data-home-module="{module}"]').click()
+    page.wait_for_function('(m)=>state.module===m',arg=module)
+   page.evaluate("()=>{state.module='home';state.serviceTypes=[];state.serviceError='Failed to fetch';songCatalogLoaded=false;state.bibleTranslations=[];state.selectedServiceTypeId=null;render()}")
+   assert page.locator('.home-module').count()==5
+   assert page.locator('.empty-verse,.home-next').count()==0
+   assert '불러오지 못했습니다' in page.locator('.home-module').nth(0).inner_text()
+   assert '0곡' not in page.locator('.home-module').nth(2).inner_text()
+   assert '0개 역본' not in page.locator('.home-module').nth(3).inner_text()
+   print('PASS home overview, five routes, unknown/error states, sidebar navigation',engine,flush=True)
    browser.close()
 finally:server.shutdown()
