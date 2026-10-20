@@ -17,7 +17,7 @@
    return;
   }
   const value={schema:1,module,id,base:state.cleanFingerprints[module],value:dirtyModuleValue(module),fields,
-   ...(module==='service'?{sourceText:serviceSourceTextareaForService(id)?.value,elementIds:[...(state.dirtyServiceElementIds.get(id)||[])],structure:state.dirtyServiceStructureIds.has(id),typeIds:[...state.dirtyServiceTypeIds]}:{})};
+   ...(module==='service'?{sourceText:serviceSourceTextareaForService(id)?.value??state.services.find(row=>row.id===id)?._worshipSourceTextDraft,elementIds:[...(state.dirtyServiceElementIds.get(id)||[])],structure:state.dirtyServiceStructureIds.has(id),typeIds:[...state.dirtyServiceTypeIds]}:{})};
   const serialized=JSON.stringify(value);
   if(last.get(key)===serialized)return;
   if(storage.queue('local',key,serialized)){last.set(key,serialized);touched.add(key);window.MINDEX_DRAFT_HANDOFF?.publish(module,id,value,value.value?.song?.title||value.value?.title||value.value?.service?.title||'편집 초안')}
@@ -76,7 +76,8 @@
   }else if(module==='service'){
    const index=state.services.findIndex(row=>row.id===id);if(index<0)return;
    state.services[index]=value.service;state.serviceItems[id]=value.items;state.serviceTypes=value.serviceTypes;
-   if(draft.sourceText!==undefined)state.services[index]._worshipSourceTextDraft=draft.sourceText;
+   const sourceText=draft.sourceText??draft.value.service._worshipSourceTextDraft;
+   if(sourceText!==undefined)state.services[index]._worshipSourceTextDraft=sourceText;
    state.dirtyServiceElementIds.set(id,new Set(draft.elementIds||[]));
    for(const typeId of draft.typeIds||[])state.dirtyServiceTypeIds.add(typeId);
    if(draft.structure)state.dirtyServiceStructureIds.add(id);state.dirty.service=true;
