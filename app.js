@@ -17698,13 +17698,13 @@ function renderBibleReader(book) {
       ${renderBibleReaderControls({
         chapterControl: renderBibleChapterControl(chapters, hasPreviousChapter, hasNextChapter),
       })}
-      ${renderBibleEditionInfo()}
       ${getBibleBooks().some(b=>b.code===({EST:"GKE",DAN:"DA1"}[book.code])) ? `<button class="btn secondary" type="button" data-global-book-code="${{EST:"GKE",DAN:"DA1"}[book.code]}">${escapeHtml(book.koreanName)} 추가 본문 →</button>` : ""}
       ${
         state.bibleReaderLoading
           ? renderBibleVerseSkeleton()
           : renderBibleVerseList(verses)
       }
+      ${renderBibleEditionInfo()}
     </section>
   `;
 }
@@ -17724,12 +17724,14 @@ function renderBibleEditionInfo() {
   const edition = window.BibleEditionInfo?.get(getSelectedBibleTranslation());
   if (!edition) return "";
   return `<details class="bible-reader-note bible-edition-info">
-    <summary>판본·연도</summary>
-    <p>${escapeHtml(edition.history)}</p>
-    <p>사용 본문: ${escapeHtml(edition.textEdition)} · 확보일 ${escapeHtml(edition.retrievedAt)}</p>
-    <p>${escapeHtml(edition.note)}</p>
-    <p>기록된 제공처의 확보 본문을 기준으로 사용합니다. 다른 역본·판차의 표현 차이나 인쇄 쇄차 미확정은 본문 오류·교정 대기를 뜻하지 않습니다.</p>
-    <p><a href="${escapeAttr(edition.source)}" target="_blank" rel="noopener noreferrer">본문 출처</a> · <a href="${escapeAttr(edition.historySource)}" target="_blank" rel="noopener noreferrer">발행 연혁 근거</a>${edition.revisionSource ? ` · <a href="${escapeAttr(edition.revisionSource)}" target="_blank" rel="noopener noreferrer">제4판 발행 근거</a>` : ""}</p>
+    <summary>출처·판본</summary>
+    <p>${escapeHtml(edition.textEdition)}</p>
+    <p>${escapeHtml(edition.history)} · 확보일 ${escapeHtml(edition.retrievedAt)}</p>
+    <p><a href="${escapeAttr(edition.source)}" target="_blank" rel="noopener noreferrer">본문 출처</a> · <a href="${escapeAttr(edition.historySource)}" target="_blank" rel="noopener noreferrer">발행 연혁</a>${edition.revisionSource ? ` · <a href="${escapeAttr(edition.revisionSource)}" target="_blank" rel="noopener noreferrer">제4판 자료</a>` : ""}</p>
+    <details><summary>검증·판본 기록</summary>
+      <p>${escapeHtml(edition.note)}</p>
+      <p>기록된 제공처의 확보 본문을 기준으로 사용합니다. 다른 역본·판차의 표현 차이나 인쇄 쇄차 미확정은 본문 오류·교정 대기를 뜻하지 않습니다.</p>
+    </details>
   </details>`;
 }
 

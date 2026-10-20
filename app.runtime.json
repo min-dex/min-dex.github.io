@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-quiet-storage-parallel-checks",
+  "version": "20261020-quiet-bible-info",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "05870109839e3fc504f92605597e88ccc9c6960668075cdb90700ec08227e4d0",
-  "runtime_sha256": "15bd3bfa1f745b0fa34f615a0d717d8ae93c8137110a918501b41707d3a4fa60",
-  "source_bytes": 1518165,
-  "runtime_bytes": 1073232,
-  "source_gzip": 339566,
-  "runtime_gzip": 265421
+  "source_sha256": "baa557e699354232e33d382b09913854866911c74901b466b0a39054b2ba0ea0",
+  "runtime_sha256": "b2720591b2f6f685a96a5bc1e6f5b7d5d13de3349866318e4cd5f40fb5aebf78",
+  "source_bytes": 1518209,
+  "runtime_bytes": 1073278,
+  "source_gzip": 339562,
+  "runtime_gzip": 265425
 }

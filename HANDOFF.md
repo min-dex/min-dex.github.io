@@ -1136,3 +1136,11 @@ and source evidence remain intact. Downloads originals are outside this cleanup.
 - Local bounded UI validation is change-scoped; full CI is required. Runner
   partition/failure tests plus Chromium/WebKit storage/retry checks pass locally.
 - No operating data, active playback, presenter output or printing changed.
+
+
+## Quiet Bible provenance ·2026-10-20
+
+Move the closed source/edition disclosure below chapter text. Opening it shows
+source, edition history, acquisition date and links; review/printing caveats stay
+in a second closed disclosure. Existing source records and classification policy
+are retained. No scripture bodies, DB, worship records or output changes.
