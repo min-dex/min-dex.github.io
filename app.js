@@ -15962,7 +15962,7 @@ function renderHomeStart() {
         <header><h2 id="home-schedule-heading">이번 주 예배</h2><button type="button" class="home-start-text-button" data-service-week>최근 예배 <i data-lucide="arrow-right"></i></button></header>
         ${dates.length ? dates.map(date => `<div class="home-schedule-day">
           <h3>${escapeHtml(formatServiceDate({date}, {compact:true}))}</h3>
-          <div>${upcoming.filter(service => service.date === date).map(service => `<button type="button" data-service-id="${escapeAttr(service.id)}"><span>${escapeHtml(serviceDisplayTypeName(service))}</span><i data-lucide="arrow-right"></i></button>`).join("")}</div>
+          <div>${upcoming.filter(service => service.date === date).map(service => `<button type="button" data-open-presenter-service="${escapeAttr(service.id)}"><span>${escapeHtml(serviceDisplayTypeName(service))}</span><i data-lucide="arrow-right"></i></button>`).join("")}</div>
         </div>`).join("") : '<p class="home-start-empty">이번 주에 등록된 예배가 없습니다.</p>'}
       </section>
       <nav class="home-start-shortcuts" aria-label="바로가기">
