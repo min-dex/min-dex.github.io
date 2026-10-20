@@ -28965,6 +28965,7 @@ function renderPresenterControlsTop(service, slides, active, index) {
   return `
       <div class="svc-presenter-top">
         <div class="svc-presenter-output-group">
+          <div class="svc-presenter-display-slot">${renderPresenterScreenControl()}</div>
           <button class="svc-present-btn svc-presenter-launch svc-presenter-launch--${launchTone}${anyOutputOpen ? " is-stop" : ""}" type="button" data-presenter-action="${escapeAttr(launchAction)}" data-service-id="${escapeAttr(service.id)}" aria-label="${escapeAttr(launchLabel)}">
             <i data-lucide="${escapeAttr(launchIcon)}"></i>
             <span>${escapeHtml(launchLabel)}</span>
@@ -28972,7 +28973,7 @@ function renderPresenterControlsTop(service, slides, active, index) {
           <div class="svc-presenter-window-controls">
           ${anyOutputOpen ? fullscreenControl : `<span class="svc-presenter-disabled-control" title="${escapeAttr(fullscreenLabel)}">${fullscreenControl}</span>`}
           </div>
-          <div class="svc-presenter-display-settings">${renderPresenterScreenControl()}${renderPresenterAlwaysOnTopControl()}</div>
+          ${renderPresenterAlwaysOnTopControl({ buttonStyle: true })}
         </div>
         <div class="svc-presenter-main" aria-live="polite">
           <span class="svc-slide-counter" aria-label="${escapeAttr(uiText("presenter.aria.slideCount", { current, count }))}">

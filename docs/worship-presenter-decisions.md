@@ -3689,3 +3689,11 @@ English 이름이나 원제에서 자동 추론하지 않는다. 선택한 버�
 일시적인 연결 곡/버전/가사 조회 실패는 예배 로딩 오류·재시도 경로로 전파하며
 테이블 미지원이나 성공으로 취급하지 않는다. 동시 metadata/version 조회는 모두
 완료된 뒤 공개하여 먼저 실패한 Promise가 방치되지 않게 한다.
+
+### Output sidebar button grid · 2026-10-20
+
+Basic view output controls use a two-column grid: display detection/selection and
+start/stop on the first row, fullscreen and always-on-top on the second. All four
+share dimensions, icon size, padding and neutral borders. Always-on-top retains
+its checkbox semantics, selected state and unsupported-browser restriction.
+Focused view continues to hide the entire sidebar.
