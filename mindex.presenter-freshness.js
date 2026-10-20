@@ -28,7 +28,7 @@
     return normalized;
   }
   async function verify(serviceId, token = null) {
-    const client = state.client, project = state.config.url, selected = state.selectedServiceId;
+    const client = state.client, project = state.config.url, selected = state.selectedServiceId, generation = state.presenter.outputGeneration;
     if (!client) throw Error('DB에 연결한 뒤 송출을 시작해 주세요.');
     if (state.dirty.song || state.dirty.forms) throw Error('편집 중인 찬양을 저장한 뒤 송출을 시작해 주세요.');
     await hydratePresenterServiceData(serviceId);
@@ -43,7 +43,7 @@
     const ids = [...new Set(items.filter(i => !['manual_praise', 'audio_praise'].includes(servicePraiseInputMode(i))).map(i => i.song_id).filter(Boolean))];
     const songs = await freshSongs(ids);
     const after = await revision(client, serviceId);
-    if ((token && pending !== token) || selected !== state.selectedServiceId || before !== after || client !== state.client || project !== state.config.url || signature !== JSON.stringify(getServiceItems(serviceId))
+    if (generation !== state.presenter.outputGeneration || (token && pending !== token) || selected !== state.selectedServiceId || before !== after || client !== state.client || project !== state.config.url || signature !== JSON.stringify(getServiceItems(serviceId))
       || state.dirty.song || state.dirty.forms || live()) throw Error('확인 중 자료가 변경되었습니다. 다시 송출을 시작해 주세요.');
     for (const item of items) {
       if (!item.song_id || ['manual_praise', 'audio_praise'].includes(servicePraiseInputMode(item))) continue;
@@ -79,6 +79,9 @@
       })]);
       if (reserved?.closed) throw Error('송출 준비가 취소되었습니다.');
       if (reserved) {
+        // This newly reserved popup must not inherit a stopped output session.
+        state.presenter.outputSessionId = crypto.randomUUID();
+        state.presenter.outputClientId = '';
         const url = new URL(presenterOutputUrl());url.searchParams.set('fullscreen', 'start');
         reserved.location.replace(url.toString());state.presenter.outputWindow = reserved;
       }

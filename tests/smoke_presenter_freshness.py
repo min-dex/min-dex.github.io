@@ -35,6 +35,7 @@ try:
     state.serviceItems[sid]=[];check(!await MindexPresenterFreshness.beforeOpen(sid)&&reserved.closed,'snapshot admitted');state.serviceItems[sid]=[item];
     const savedVersions=db.mindex_song_versions;db.mindex_song_versions=[];check(!await MindexPresenterFreshness.beforeOpen(sid),'missing version admitted');db.mindex_song_versions=savedVersions;
     hydratePresenterServiceData=()=>new Promise(r=>{release=r});const waiting=MindexPresenterFreshness.beforeOpen(sid);check(!await MindexPresenterFreshness.beforeOpen(sid),'duplicate prepare');state.selectedServiceId='other';const finish=release;release=null;finish();check(!await waiting,'navigation race');
+    state.selectedServiceId=sid;const cancelled=MindexPresenterFreshness.beforeOpen(sid);state.presenter.outputGeneration++;const cancelFinish=release;release=null;cancelFinish();check(!await cancelled,'stop during preparation ignored');
     check(JSON.stringify(item)===original,'persistent item changed');return {failureBlocks:true,freshRead:true,liveFrozen:true,notice:true,restartFresh:true,legacyBlocked:true,duplicateAndNavigationGuard:true};
    }'''.replace('()=>url','()=>location.href'))
    print(engine,'PASS',result,flush=True);b.close()
