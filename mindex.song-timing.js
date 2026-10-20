@@ -476,7 +476,8 @@
         <label>기준 박 (초) <input type="number" min="0" step="0.001" value="0" data-beat-anchor aria-label="기준 박 초"></label>
         <button type="button" class="btn secondary" data-beat-anchor-now>현재 위치를 기준 박으로</button>
         <label><input type="checkbox" data-beat-enabled> 새 기록을 가까운 박에 맞춤</label>
-        <p data-beat-status role="status">분석 또는 직접 입력 후 켜세요. 기존 시각은 바뀌지 않습니다. 박자가 달라지는 곡은 구간별로 기준을 다시 잡으세요.</p>
+        <p data-beat-status role="status">박자를 분석하거나 BPM·기준 박을 입력한 뒤 켜세요. 기존 시각은 유지됩니다.</p>
+        <details data-beat-help><summary>박자가 달라지는 곡</summary><p>구간별로 기준 박을 다시 지정하세요.</p></details>
       </fieldset>
       <div class="song-timing-record"><button type="button" class="btn secondary" data-timing-next>다음 장 전환 기록</button><span data-timing-next-label></span></div>
       <div class="song-timing-pages">${slides.map((slide, i) => `<div class="song-timing-row"><label>${slide.formBackgroundImage ? `<img class="song-timing-photo" src="${escapeAttr(slide.formBackgroundImage)}" alt="${i + 1}장 배경 사진">` : ''}${i + 1}장 · ${formLabels.get(slide.formKey) ? escapeHtml(formLabels.get(slide.formKey)) + ' · ' : ''}${escapeHtml(slide.text || '빈 화면')}<input aria-label="${i + 1}장 시작 초" type="number" min="0" step="0.1" data-timing-start="${i}" value="${draft.starts[i] ?? ''}" placeholder="초"></label><button type="button" class="btn secondary" data-timing-stamp="${i}">현재 시각 기록</button><button type="button" class="btn secondary" data-timing-nudge="${i}" data-delta="-0.2" aria-label="${i+1}장 0.2초 앞당기기">−0.2초</button><button type="button" class="btn secondary" data-timing-nudge="${i}" data-delta="0.2" aria-label="${i+1}장 0.2초 늦추기">+0.2초</button></div>`).join('')}</div>
@@ -486,7 +487,6 @@
         <div data-photo-editor></div>
         <button type="button" class="btn secondary" data-photo-sort>시각 순으로 정렬</button>
         <details><summary>시각 일괄 입력</summary><label>사진 전환 초 (한 줄에 한 장, 가사보다 1초 앞당기지 않음)<textarea data-photo-times>${draft.photos.map(p=>p.at).join('\n')}</textarea></label></details>
-        <p data-photo-names>${draft.photos.map(p=>escapeHtml(p.name || p.url.split('/').pop())).join(' · ')}</p>
         <button type="button" class="btn secondary" data-photo-clear>사진 연결 해제</button>
       </fieldset>` : ''}
       <label><input type="checkbox" data-timing-enabled ${draft.enabled ? 'checked' : ''}> 음악 재생 중 자동 넘김</label>
@@ -528,7 +528,6 @@
         <label>전환 시각 (초)<input type="number" min="0" step="0.001" data-photo-at="${i}" aria-label="사진 ${i+1} 전환 초" value="${photoCue(photo) ?? ''}" ${Number.isInteger(photo.slideIndex)?'readonly':''}></label>
         <div class="song-photo-actions"><button type="button" class="btn secondary" data-photo-stamp="${i}">지금 시각 기록</button><button type="button" class="btn secondary" data-photo-preview="${i}">이 시점 듣기</button>
         <label class="btn secondary">사진 교체<input type="file" accept="image/*" data-photo-replace="${i}" aria-label="사진 ${i+1} 교체"></label><button type="button" class="btn secondary" data-photo-remove="${i}">삭제</button></div></div></article>`).join('') : '<p>추가한 사진이 없습니다.</p>';
-      dialog.querySelector('[data-photo-names]').textContent=photoRows.map(p=>p.name || '사진').join(' · ');
       syncPhotoTimes();
     };
     const fileRow = (file, previous={}) => {
