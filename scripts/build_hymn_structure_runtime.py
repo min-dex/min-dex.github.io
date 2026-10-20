@@ -8,8 +8,6 @@ for row in source['versions']:
     if row['stanzaApproxMeasures'] is None and row['reviewStatus'] != 'recitative_exception':
         continue
     records[row['versionId']] = {key: row[key] for key in ('edition', 'number', 'classification', 'stanzaApproxMeasures', 'reviewStatus', 'parts')}
-    if row.get('scoreApproxMeasuresByBlock'):
-        records[row['versionId']]['scoreApproxMeasuresByBlock'] = row['scoreApproxMeasuresByBlock']
     if row.get('displayNote'):
         records[row['versionId']]['displayNote'] = row['displayNote']
 (ROOT / 'mindex.hymn-structure.runtime.json').write_text(json.dumps({'schemaVersion':1,'records':records},ensure_ascii=False,separators=(',', ':'))+'\n')

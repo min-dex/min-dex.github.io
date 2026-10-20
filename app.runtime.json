@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261021-hymn29-measure-correction",
+  "version": "20261021-hymn29-pair-complete",
   "options": {
     "compress": false,
     "mangle": {
