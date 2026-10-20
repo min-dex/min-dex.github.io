@@ -9932,6 +9932,10 @@ function updateFormField(field) {
     resizeFormTextarea(field);
   }
 
+  const version = getSelectedVersion();
+  if (version) document.querySelectorAll("[data-hymn-structure-version]").forEach(node => {
+    if (node.dataset.hymnStructureVersion === version.id) updateVersionMusicalStructure(node, version, state.forms);
+  });
   state.dirty.forms = true;
   updateSaveState();
 }
@@ -17517,7 +17521,30 @@ function renderVersionTitleContent(song, version, forms, options = {}) {
       <button class="version-delete-btn" type="button" data-delete-version="${escapeAttr(version?.id || "")}" aria-label="${escapeAttr(versionEditableName(song, version))} 버전 삭제" title="${song.versions.length <= 1 ? "마지막 버전은 삭제할 수 없습니다" : "버전 삭제"}" ${song.versions.length <= 1 ? "disabled" : ""}><i data-lucide="trash-2"></i></button>
       </div>
     </div>
+    ${renderVersionMusicalStructure(version, forms)}
   `;
+}
+
+let hymnStructureRenderTicket = 0;
+function updateVersionMusicalStructure(node, version, forms) {
+  if (!node || !globalThis.MindexHymnStructure) return;
+  const ticket = String(++hymnStructureRenderTicket);
+  node.dataset.hymnStructureRequest = ticket;
+  node.textContent = "마디 정보 확인 중…";
+  const snapshot = (forms || []).map(form => ({id:form.id, part_type:form.part_type, lyrics:form.lyrics || ""}));
+  MindexHymnStructure.describe(version.id, snapshot)
+    .catch(() => ({text:"마디 정보를 불러오지 못했어요",status:"error"}))
+    .then(result => {
+      if (!node.isConnected || node.dataset.hymnStructureRequest !== ticket) return;
+      node.textContent = result.text;
+      node.dataset.reviewStatus = result.status;
+    });
+}
+function renderVersionMusicalStructure(version, forms) {
+  if (!version?.hymn_no || !globalThis.MindexHymnStructure) return "";
+  const ticket = ++hymnStructureRenderTicket;
+  queueMicrotask(() => updateVersionMusicalStructure(document.querySelector(`[data-hymn-structure-ticket="${ticket}"]`), version, forms));
+  return `<div class="version-musical-structure" data-hymn-structure-ticket="${ticket}" data-hymn-structure-version="${escapeAttr(version.id)}" aria-label="버전별 마디 정보">마디 정보 확인 중…</div>`;
 }
 
 function renderVersionAttentionStatus(song, version, forms, options = {}) {

@@ -47,7 +47,10 @@
       "mindex.worship-week.js",
       "mindex.monitor.js",
       "mindex.service-entry.js",
-      "mindex.worship-live.js", "mindex.content-live.js", "mindex.service-list-live.js", "mindex.archive-live.js",
+      "mindex.worship-live.js",
+      "mindex.content-live.js",
+      "mindex.service-list-live.js",
+      "mindex.archive-live.js",
       "mindex.constants.js",
       "mindex.design-tokens.js",
       "mindex.worship-model.js",
@@ -85,7 +88,11 @@
       "!scripts/**/*",
       "!data/**/*",
       "!node_modules/electron/**/*",
-      "!node_modules/electron-builder/**/*"
+      "!node_modules/electron-builder/**/*",
+      "mindex.draft-handoff.js",
+      "mindex.presenter-freshness.js",
+      "mindex.hymn-structure.js",
+      "mindex.hymn-structure.runtime.json"
     ],
     "mac": {
       "target": [

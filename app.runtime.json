@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-music-button-states-final",
+  "version": "20261020-hymn-measures",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "ebad558c7b21193b7da85f82a88fb51070db2b22d1505853b898287aed82cf81",
-  "runtime_sha256": "942c3082d2fa1ea20d0701a25757e18fe4325220c8e34e02291cea0585081721",
-  "source_bytes": 1528311,
-  "runtime_bytes": 1080911,
-  "source_gzip": 342406,
-  "runtime_gzip": 267564
+  "source_sha256": "ed7ae91bcbed0bb84f34d196ab0f641fe935a64202b2362dc7108d68473c1061",
+  "runtime_sha256": "6e1f0cf8f424de950ee50af6f351bbad34e5887c270709893e3409b76c6f6463",
+  "source_bytes": 1529916,
+  "runtime_bytes": 1082170,
+  "source_gzip": 342867,
+  "runtime_gzip": 267940
 }

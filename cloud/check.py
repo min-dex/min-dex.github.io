@@ -53,6 +53,7 @@ SMOKES = (
     "smoke_shell_icons.py",
     "smoke_praise_progressive_loading.py",
     "smoke_version_output_title.py",
+    "smoke_hymn_measures.py",
     "smoke_sidebar_control_affordance.py",
     "smoke_module_landings.py",
     "smoke_home_start.py",
