@@ -47,6 +47,10 @@ try:
       if(style().color===normal)throw Error('disabled ink overridden');
       button.disabled=false;button.setAttribute('aria-pressed','false');
     }""")
+    page.locator('.svc-music-toggle').evaluate("e=>e.setAttribute('aria-pressed','true')")
+    page.locator('.svc-music-toggle').hover()
+    assert page.locator('.svc-music-toggle').evaluate("e=>getComputedStyle(e).borderColor===getComputedStyle(e).color")
+    page.locator('.svc-music-toggle').evaluate("e=>e.setAttribute('aria-pressed','false')")
     page.keyboard.press('Tab')
     page.locator('.svc-music-toggle').focus()
     assert page.locator('.svc-music-toggle').evaluate('(e)=>getComputedStyle(e).outlineOffset')=='-2px'

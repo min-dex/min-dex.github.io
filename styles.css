@@ -9439,7 +9439,7 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
 }
 
 /* Music command states follow the shared button grammar without moving controls. */
-.svc-music-player--inline .icon-btn[aria-pressed="true"]:not(:disabled),
+#servicePresenterControls .svc-music-player--inline .icon-btn[aria-pressed="true"]:not(:disabled),
 .global-playback-actions > button[aria-pressed="true"]:not(:disabled) {
   color:var(--accent); background:var(--accent-soft); border-color:var(--accent);
 }

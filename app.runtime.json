@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-music-button-states",
+  "version": "20261020-music-button-states-final",
   "options": {
     "compress": false,
     "mangle": {
