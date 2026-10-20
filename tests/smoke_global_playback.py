@@ -57,6 +57,12 @@ def main():
                     assert launcher.inner_text()==''
                     assert launcher.get_attribute('aria-label')=='음악 관리'
                     assert launcher.get_attribute('title')=='음악 관리'
+                    assert launcher.evaluate("""button=>{
+                      const peer=document.getElementById('themeBtn');
+                      const a=getComputedStyle(button), b=getComputedStyle(peer);
+                      return ['width','height','paddingTop','paddingRight','paddingBottom','paddingLeft','flexBasis','borderRadius'].every(key=>a[key]===b[key])
+                        && getComputedStyle(button,'::before').width===getComputedStyle(peer,'::before').width;
+                    }""")
                     assert launcher.locator('svg.lucide').count()==1
                     launcher.click()
                     panel=page.locator('#globalPlaybackPanel')

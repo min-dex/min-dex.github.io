@@ -40,9 +40,30 @@ try:
    page.evaluate("""()=>{const d=toLocalDateStr(new Date());state.services=[{id:'next',type_id:'sunday-main',date:d,sort_order:0},{id:'other',type_id:'sunday-main',date:d,sort_order:1}];render()}""")
    assert page.locator('.home-schedule-day button').count()==2
    assert page.locator('.home-schedule-day[aria-current="date"] h3 small').inner_text()=='오늘'
+   # Exercise the actual sidebar delegates, including a stalled detail load.
+   page.locator('#songList [data-service-week]').click()
+   assert page.locator('.service-week-board').count()==2
+   page.locator('#songList [data-service-list]').click()
+   assert page.evaluate('state.selectedServiceTypeId')=='__list'
+   assert not page.locator('.home-start').count()
+   page.evaluate("()=>{window.homeOriginalLoadItems=loadServiceItems;loadServiceItems=()=>new Promise(()=>{});state.presenter.outputWindow=null}")
+   page.locator('#songList [data-service-id="next"]').click()
+   page.wait_for_function("state.module==='presenter' && state.selectedServiceId==='next'",timeout=3000)
+   assert page.locator('[data-service-view-loading="next"]').count()==1
+   assert not page.locator('.home-start').count()
+   assert page.evaluate('!isPresenterOutputWindowOpen()')
+   page.evaluate("()=>{loadServiceItems=window.homeOriginalLoadItems;state.module='home';state.selectedServiceId=null;state.selectedServiceTypeId=null;clearDirtyState();render()}")
    page.evaluate("()=>{openServiceInPresenter=async id=>{window.homeOpenedService=id}}")
    page.locator('.home-schedule-day button').first.click()
    assert page.evaluate('window.homeOpenedService')=='next'
+   # Review a full week, not only the two-item navigation fixture.
+   page.evaluate("""()=>{
+    const week=recentServiceWeeks(new Date())[0];
+    state.serviceTypes=[{id:'main',name:'주일예배 [1부]'},{id:'union',name:'온세대 찬양예배'},{id:'young',name:'청년부 예배'},{id:'wed',name:'수요예배'},{id:'fri',name:'금요기도회'}];
+    const day=offset=>{const d=new Date(week.start);d.setDate(d.getDate()+offset);return toLocalDateStr(d)};
+    state.services=[['main',0],['union',0],['young',0],['wed',3],['fri',5]].map(([type,offset],i)=>({id:'visual-'+i,type_id:type,date:day(offset),sort_order:i}));
+    render();
+   }""")
    for theme in ('light','dark'):
     page.evaluate('(t)=>applyTheme(t)',theme)
     for width in (1280,800,390):

@@ -15987,21 +15987,26 @@ function renderHomeStart() {
   refs.detailPane.innerHTML = `
     <main class="home-start" aria-label="홈">
       <header class="home-start-header">
-        <h1>홈</h1>
-        <p>${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일 ${serviceWeekdayLabel(now)}</p>
+        <h1>MINDEX</h1>
+        <time datetime="${toLocalDateStr(now)}">${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일 ${serviceWeekdayLabel(now)}</time>
       </header>
-      <section class="home-schedule" aria-labelledby="home-schedule-heading">
-        <header><h2 id="home-schedule-heading">이번 주 예배</h2><button type="button" class="home-start-text-button" data-service-week>최근 예배 <i data-lucide="arrow-right"></i></button></header>
-        ${dates.length ? dates.map(date => `<div class="home-schedule-day${date === toLocalDateStr(now) ? " is-today" : ""}"${date === toLocalDateStr(now) ? ' aria-current="date"' : ""}>
-          <h3>${escapeHtml(formatServiceDate({date}, {compact:true}))}${date === toLocalDateStr(now) ? '<small>오늘</small>' : ""}</h3>
-          <div>${upcoming.filter(service => service.date === date).map(service => `<button type="button" data-open-presenter-service="${escapeAttr(service.id)}"><span>${escapeHtml(serviceDisplayTypeName(service))}</span><i data-lucide="arrow-right"></i></button>`).join("")}</div>
-        </div>`).join("") : '<p class="home-start-empty">이번 주에 등록된 예배가 없습니다.</p>'}
-      </section>
-      <nav class="home-start-shortcuts" aria-label="바로가기">
-        <button type="button" data-home-module="bulletin"><span><i data-lucide="newspaper"></i>주보</span> <i data-lucide="arrow-right"></i></button>
-        <button type="button" data-home-module="praise"><span><i data-lucide="music"></i>찬양</span> <i data-lucide="arrow-right"></i></button>
-        <button type="button" data-home-module="scripture"><span><i data-lucide="book-open"></i>말씀</span> <i data-lucide="arrow-right"></i></button>
-      </nav>
+      <div class="home-start-body">
+        <section class="home-schedule" aria-labelledby="home-schedule-heading">
+          <header><h2 id="home-schedule-heading">이번 주 예배</h2><button type="button" class="home-start-text-button" data-service-week>최근 예배 <i data-lucide="arrow-right"></i></button></header>
+          <div class="home-schedule-list">
+            ${dates.length ? dates.map(date => `<div class="home-schedule-day${date === toLocalDateStr(now) ? " is-today" : ""}"${date === toLocalDateStr(now) ? ' aria-current="date"' : ""}>
+              <h3><span>${escapeHtml(formatServiceDate({date}, {compact:true}))}</span>${date === toLocalDateStr(now) ? '<small>오늘</small>' : ""}</h3>
+              <div>${upcoming.filter(service => service.date === date).map(service => `<button type="button" data-open-presenter-service="${escapeAttr(service.id)}"><span>${escapeHtml(serviceDisplayTypeName(service))}</span><i data-lucide="arrow-up-right"></i></button>`).join("")}</div>
+            </div>`).join("") : '<p class="home-start-empty">이번 주에 등록된 예배가 없습니다.</p>'}
+          </div>
+        </section>
+        <nav class="home-start-shortcuts" aria-labelledby="home-resources-heading">
+          <h2 id="home-resources-heading">자료</h2>
+          <button type="button" data-home-module="bulletin"><span><i data-lucide="newspaper"></i>주보</span><i data-lucide="arrow-right"></i></button>
+          <button type="button" data-home-module="praise"><span><i data-lucide="music"></i>찬양</span><i data-lucide="arrow-right"></i></button>
+          <button type="button" data-home-module="scripture"><span><i data-lucide="book-open"></i>말씀</span><i data-lucide="arrow-right"></i></button>
+        </nav>
+      </div>
     </main>`;
   refreshIcons();
 }
@@ -34466,6 +34471,10 @@ async function deleteService(serviceId) {
 
 function selectService(id) {
   if (serviceNavigationBlocked(id)) return;
+  if (state.module === "home") {
+    void openServiceInPresenter(id);
+    return;
+  }
   window.MINDEX_SERVICE_ENTRY?.invalidate();
   // Reselecting is not navigation: retain the live editor, selection and clean baseline.
   if (id && id === state.selectedServiceId && ["service", "presenter"].includes(state.module)) {
