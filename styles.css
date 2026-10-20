@@ -9524,3 +9524,8 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
   min-width:var(--ui-icon-size); min-height:var(--ui-icon-size);
   flex:0 0 var(--ui-icon-size); stroke-width:var(--ui-icon-stroke);
 }
+
+/* Anchor help to the toolbar so narrow editor columns cannot clip its left edge. */
+.svc-presenter-toolbar { position:relative; }
+.svc-presenter-toolbar .svc-presenter-help { position:static; }
+.svc-presenter-toolbar .svc-presenter-help-panel { left:0; right:auto; width:min(320px, 100%); box-sizing:border-box; }

@@ -116,6 +116,7 @@ try:
         const right=document.querySelector('#themeBtn').getBoundingClientRect();
         return Math.abs(left.height-right.height)<1 && Math.abs((left.top+left.height/2)-(right.top+right.height/2))<1;
        }""")
+       assert page.evaluate("""()=>{const help=document.querySelector('[data-presenter-help]');if(!help||!help.getBoundingClientRect().width)return true;help.open=true;const p=help.querySelector('.svc-presenter-help-panel').getBoundingClientRect(),t=document.querySelector('.svc-presenter-toolbar').getBoundingClientRect();help.open=false;return p.left>=t.left-1&&p.right<=t.right+1;}""")
        if view=='basic':
         assert page.evaluate("""()=>{
          const music=document.querySelector('.svc-presenter-toolbar .svc-music-name');
