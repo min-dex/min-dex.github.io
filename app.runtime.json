@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261021-hymn-five-review",
+  "version": "20261021-controller-navigation",
   "options": {
     "compress": false,
     "mangle": {

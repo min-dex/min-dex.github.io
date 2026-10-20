@@ -1198,3 +1198,11 @@ PostgreSQL18.4 실제 실패 요청5개 재시도/기존 row 보존/권한/secre
 secret 거부 전체 rollback, 독립 readback3개 true. 운영 데이터/임시본 변경 없음.
 재생/송출/주보 인쇄 실행 또는 코드 변경 없음. 정적 앱 재배포 불필요.
 증거 /tmp/mindex-department-bulletin-server-verified.png.
+
+## 안전 마무리·제어판 시각 정리 ·2026-10-21
+
+사용자 제어판 정리 요청에 따라 예배 오른쪽 패널의 이전/다음 버튼 기본 테두리와
+표면을 표시하고 부모 줄 높이를 기존35px token으로 정렬. 동작 코드 변경 없음.
+Chromium/WebKit254/320/390px6조합 PASS; runtime hash PASS.
+실제 사용자 창·운영 데이터·재생·송출·인쇄 조작 없음.
+release20261021-controller-navigation, 별도 CI/배포 결과 확인 필요.

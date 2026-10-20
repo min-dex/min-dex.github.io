@@ -6062,7 +6062,7 @@ textarea.svc-presenter-input-control--multiline {
 .svc-presenter-side-panel .svc-slide-counter {
   display: grid;
   width: max-content;
-  height: 34px;
+  height: var(--svc-panel-control-height);
   grid-template-columns: 48px max-content;
   align-items: center;
   gap: 5px;
@@ -6087,16 +6087,17 @@ textarea.svc-presenter-input-control--multiline {
   line-height: normal;
 }
 .svc-presenter-side-panel .svc-presenter-action-group--nav {
-  height: 34px;
+  height: var(--svc-panel-control-height);
   gap: 5px;
   background: transparent;
   padding: 0;
 }
 .svc-presenter-side-panel .svc-presenter-action-group--nav .icon-btn {
-  width: 34px;
-  height: 34px;
-  background: transparent;
-  color: var(--ink-3);
+  width: var(--svc-panel-control-height);
+  height: var(--svc-panel-control-height);
+  border: 1px solid var(--line);
+  background: var(--ui-surface-panel);
+  color: var(--ink-2);
 }
 .svc-presenter-side-panel .svc-presenter-action-group--nav .icon-btn:hover,
 .svc-presenter-side-panel .svc-presenter-action-group--nav .icon-btn:focus-visible {
