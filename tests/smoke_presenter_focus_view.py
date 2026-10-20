@@ -36,9 +36,11 @@ try:
     assert not page.locator('.svc-source-panel').is_visible()
     assert page.evaluate("focusDraft===document.querySelector('.svc-source-text') && focusDraft.value==='아직 저장하지 않은 원문' && focusAudio===state.serviceMusic.audio && focusAudio.currentTime===42 && focusItems===JSON.stringify(state.serviceItems)")
     assert '자동 넘김 해제' in page.locator('[data-focus-music-status]').inner_text()
+    assert page.locator('[data-focus-music="toggle"]').inner_text() == '일시정지 · P'
+    assert page.evaluate('''()=>{const b=document.querySelector('[data-focus-music="toggle"]');const text=b.firstChild;syncPresenterFocusMusic();return text===b.firstChild}''')
     page.evaluate('window.focusOriginalMusicAction=runServiceMusicAction;runServiceMusicAction=(action,binding)=>{window.focusMusicCall={action,binding}}')
     page.locator('[data-focus-music="toggle"]').click()
-    assert page.evaluate("focusMusicCall.action==='toggle' && focusMusicCall.binding.serviceMusicServiceId==='focus-fixture'")
+    assert page.evaluate("focusMusicCall.action==='toggle' && focusMusicCall.binding.serviceMusicServiceId==='focus-fixture'"), page.evaluate("JSON.stringify(focusMusicCall)")
     page.locator('[data-focus-music="stop"]').click()
     assert page.evaluate("focusMusicCall.action==='stop'")
     page.evaluate('runServiceMusicAction=focusOriginalMusicAction')

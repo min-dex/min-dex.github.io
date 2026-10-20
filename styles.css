@@ -9312,3 +9312,18 @@ body:has(#servicePresenterControls[data-focus-view="true"]) .svc-presenter-live-
 .global-playback-panel [data-song-timing-seek] { grid-column:1 / -1; grid-row:2; height:30px; margin:0; padding:0; cursor:pointer; }
 .global-playback-panel [data-song-timing-seek]:disabled { cursor:default; }
 .global-playback-panel .global-playback-fade-stop { margin:5px 0 0; gap:5px; }
+
+/* Focused control hierarchy: separate navigation from audio without new panels. */
+.svc-focus-panel { gap: 15px; margin-bottom: 0; }
+.svc-focus-preview > strong { color: var(--ink-3); }
+.svc-focus-preview:first-child > strong { color: var(--ink); }
+.svc-focus-transport { justify-content: space-between; gap: 10px 20px; padding-block: 5px; }
+.svc-focus-navigation, .svc-focus-audio { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.svc-focus-count { min-width: 60px; font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.svc-focus-count > span { color: var(--ink-3); font-size: 12px; font-weight: 500; }
+.svc-focus-transport .btn { min-height: 35px; padding-inline: 10px; border: 1px solid var(--line-2); border-radius: var(--r); }
+.svc-focus-transport .btn:disabled { opacity: .45; }
+.svc-focus-transport [data-focus-music-status] { flex-basis: 100%; color: var(--ink-3); font-size: 12px; margin-bottom: 5px; }
+.svc-focus-filmstrip-heading { border-top: 1px solid var(--line); padding-top: 15px; color: var(--ink-3); font-size: 12px; font-weight: 600; }
+#servicePresenterControls[data-focus-view="true"] .svc-slide-board { gap: 10px; padding-top: 10px; }
+#servicePresenterControls[data-focus-view="true"] .svc-slide-thumb-meta { font-variant-numeric: tabular-nums; }

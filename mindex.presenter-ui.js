@@ -286,14 +286,14 @@ function syncPresenterFocusView() {
     : isPresenterOutputWindowOpen() ? '선택 화면 · 다른 예배 송출 중' : '선택 화면 · 송출 대기';
   const frame = (slide, title) => `<div class="svc-focus-preview"><strong>${escapeHtml(title)}</strong><div class="svc-slide-thumb-frame">${slide ? renderPresenterSlideMiniPreview(slide, serviceId) : '<span>다음 슬라이드 없음</span>'}</div></div>`;
   const markup = `<div class="svc-focus-screens">${frame(current, label)}${frame(next, '다음 화면')}</div>
-    <div class="svc-focus-transport"><span>${slides.length ? index + 1 : 0} / ${slides.length}</span>
+    <div class="svc-focus-transport"><div class="svc-focus-navigation" role="group" aria-label="슬라이드 이동"><span class="svc-focus-count">${slides.length ? index + 1 : 0} <span>/ ${slides.length}</span></span>
       <button type="button" class="btn secondary" data-presenter-action="prev" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}>이전</button>
-      <button type="button" class="btn secondary" data-presenter-action="next" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}>다음</button>
-      <span data-focus-music-status role="status"></span>
+      <button type="button" class="btn secondary" data-presenter-action="next" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}>다음</button></div>
+      <div class="svc-focus-audio" role="group" aria-label="음원 조작"><span data-focus-music-status role="status"></span>
       <button type="button" class="btn secondary" data-focus-music="toggle">재생 / 일시정지 · P</button>
       <button type="button" class="btn secondary" data-focus-music="stop">음악 정지</button>
-      <button type="button" class="btn secondary" data-song-timing-resume>자동 넘김 복귀 · R</button>
-    </div>`;
+      <button type="button" class="btn secondary" data-song-timing-resume>자동 넘김 복귀 · R</button></div>
+    </div><div class="svc-focus-filmstrip-heading">전체 슬라이드</div>`;
   if (panel._markup !== markup) { panel.innerHTML = markup; panel._markup = markup; }
   syncPresenterFocusMusic();
   schedulePresenterPreviewLayoutUpdate(panel);
@@ -309,8 +309,11 @@ function syncPresenterFocusMusic() {
   const canResume = sync && presenterControllerIsLive(state.selectedServiceId)
     && !state.presenter.safetyBlank && !state.presenter.liveScripture?.active
     && slide?.songTimingEligible && slide.syncTimeline?.groupId === music.timingGroupId;
-  const label = `${music.pending ? '음원 준비 중' : music.playing ? '음원 재생 중' : '음원 정지 / 일시정지'}${sync ? music.autoSyncSuspended ? ' · 자동 넘김 해제' : ' · 자동 넘김' : ''}${music.sourceKey && !own ? ' · 다른 예배 음원' : ''}`;
+  const label = !music.sourceKey ? '연결된 음원 없음' : `${music.pending ? '음원 준비 중' : music.playing ? '음원 재생 중' : '음원 정지 / 일시정지'}${sync ? music.autoSyncSuspended ? ' · 자동 넘김 해제' : ' · 자동 넘김' : ''}${music.sourceKey && !own ? ' · 다른 예배 음원' : ''}`;
   panel.querySelector('[data-focus-music-status]').textContent = label;
+  const toggle = panel.querySelector('[data-focus-music="toggle"]');
+  const toggleLabel = music.playing ? '일시정지 · P' : '재생 · P';
+  if (toggle.textContent !== toggleLabel) toggle.textContent = toggleLabel;
   panel.querySelectorAll('[data-focus-music]').forEach(button => { button.disabled = !own || !music.sourceKey; });
   const resume = panel.querySelector('[data-song-timing-resume]');
   resume.hidden = !(canResume && music.playing && !music.pending && music.autoSyncSuspended);
