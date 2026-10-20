@@ -16022,6 +16022,7 @@ function renderHomeStart() {
   if (next && !loaded && !failed && !serviceItemLoadPromises.has(next.id) && typeof state.client?.from === "function") {
     const id = next.id;
     const refresh = () => {
+      if (!state.loadedWorshipServiceIds.has(id) && !serviceViewLoadErrors.has(id)) return;
       if (state.module === "home" && refs.detailPane.querySelector(".home-next") && !isGlobalSearchActive() && getHomeNextService()?.id === id) renderHomeStart();
     };
     void loadServiceItems(id).then(refresh).catch(refresh);
