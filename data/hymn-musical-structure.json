@@ -1808,56 +1808,45 @@
       "versionId": "3cf1f936-5377-5e7b-9863-21e2424c9d91",
       "edition": "new",
       "number": 29,
-      "classification": "mixed_blocks",
+      "classification": "score_verified_mapping_pending",
       "stanzaApproxMeasures": 16,
-      "reviewStatus": "score_supported_approximation",
+      "reviewStatus": "stored_structure_mismatch",
       "parts": [
         {
           "unitId": "107cf88b-0488-454b-b51c-7ea1137de0d1",
           "kind": "Verse",
           "textSha256": "2827782f1f85cd45f009691aac90c018e4c6c66e36bcf2e4af84840e120323f8",
           "blockCount": 2,
-          "approxMeasuresByBlock": [
-            8,
-            8
-          ],
-          "approxMeasures": 16,
-          "reviewStatus": "score_supported_approximation"
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "mapping_pending"
         },
         {
           "unitId": "ea2296f8-a976-4e55-97ba-95adb6f629e1",
           "kind": "Verse",
           "textSha256": "2b0c59edc7cbe427a361ad004025c20990a8c0889a3ba70bdd4c77763a9e53bf",
           "blockCount": 2,
-          "approxMeasuresByBlock": [
-            8,
-            8
-          ],
-          "approxMeasures": 16,
-          "reviewStatus": "score_supported_approximation"
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "mapping_pending"
         },
         {
           "unitId": "a0efaeaa-6cf6-4261-99d3-04d7be1800ad",
           "kind": "Verse",
           "textSha256": "b66c2dfe00e21beb0b7a83dcc72fa056b8a6ee90e00fb0c0602e5a7e52eecc35",
           "blockCount": 2,
-          "approxMeasuresByBlock": [
-            8,
-            7
-          ],
-          "approxMeasures": 15,
-          "reviewStatus": "score_supported_approximation"
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "mapping_pending"
         },
         {
           "unitId": "fd444159-d269-4abe-8131-0ab1ee533c61",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": [
-            1
-          ],
-          "approxMeasures": 1,
-          "reviewStatus": "score_supported_approximation"
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "mapping_pending"
         }
       ],
       "scoreEvidence": [
@@ -1866,9 +1855,12 @@
           "sha256": "9214eeb536ffed9a774fc4ad948f967d6bb2207463450c92a265d8a561a9b5d1"
         }
       ],
-      "reviewNotes": "Resolved by per-unit mapping: four systems of four bars, 16 per complete printed stanza. Stored verses 1/2 contain 8+8; verse 3 contains 8+7 and the last printed one-bar Amen is the Coda. Coda is shared ending material, not an additional 17th bar. No text, form or output changes.",
+      "reviewNotes": "Correction: all three printed verses contain their own final Amen within 16 bars (8+8); no separate printed Coda. Existing DB separation/order is not a verified score structure. Retain IDs/text; unit mapping pending safe song-form compatibility review.",
       "meter": "4/4",
-      "displayNote": "1·2절은 아멘 포함 · 3절은 15마디+Coda 1마디"
+      "scoreApproxMeasuresByBlock": [
+        8,
+        8
+      ]
     },
     {
       "versionId": "a95259ae-7f17-4e31-81c9-0ac965bec268",

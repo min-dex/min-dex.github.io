@@ -26,7 +26,8 @@ def main():
      const data=await(await fetch('./mindex.hymn-structure.runtime.json')).json();
      check(Object.keys(data.records).length>=25,'published catalog');
      const hymn29=Object.values(data.records).find(r=>r.edition==='new'&&r.number===29);
-     check(hymn29.parts.filter(p=>p.kind==='Verse').map(p=>p.approxMeasures).join(',')==='16,16,15'&&hymn29.parts.find(p=>p.kind==='Coda').approxMeasures===1&&hymn29.displayNote.includes('15마디+Coda 1마디'),'shared Amen is mapped per unit, not counted twice');
+     check(hymn29.reviewStatus==='stored_structure_mismatch'&&hymn29.stanzaApproxMeasures===16&&hymn29.scoreApproxMeasuresByBlock.join('+')==='8+8'&&!hymn29.displayNote&&hymn29.parts.every(p=>p.approxMeasures==null),'printed verses are16 bars; DB split is not endorsed');
+     const mismatch=await describe('v',forms,{v:{...record,reviewStatus:'stored_structure_mismatch',scoreApproxMeasuresByBlock:[8,8]}});check(mismatch.status==='structure-review'&&mismatch.text.includes('각 절 16')&&!mismatch.text.includes('Coda'),'mismatch never displays inferred Coda');
      for(const r of Object.values(data.records))for(const part of r.parts){check(!('lyrics'in part)&&!('text'in part),'no published lyrics');if(part.approxMeasuresByBlock)check(part.approxMeasuresByBlock.length===part.blockCount&&part.approxMeasuresByBlock.reduce((a,b)=>a+b,0)===part.approxMeasures,'block consistency');}
      MindexHymnStructure.describe=(id,fs)=>describe(id,fs,records);
      const version={id:'v',name:'새찬송가',hymn_no:'10',forms},song={id:'song',title:'fixture',versions:[version],metadata:{}};
