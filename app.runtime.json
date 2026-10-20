@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261020-save-draft-recovery",
+  "version": "20261020-home-preparation",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "f9ef1d1cb16c8c8db21b07860c7e012024e4766a248bda0cc43e3d19e2d6e864",
-  "runtime_sha256": "3b41ab55c922ca791e2db3319d9928d72bfbe2dcd4dfe24c8fc9088fab354938",
-  "source_bytes": 1531003,
-  "runtime_bytes": 1083170,
-  "source_gzip": 343103,
-  "runtime_gzip": 268136
+  "source_sha256": "ed495f32c1fb20e335d0f80f1c2ce4276ebf625a53e28a1c50711ba8b76ab7c5",
+  "runtime_sha256": "8d3957ecfb1179f43ef2ea1f21c98c2026a3949bc699edb06c70f86610def52b",
+  "source_bytes": 1531815,
+  "runtime_bytes": 1083579,
+  "source_gzip": 343449,
+  "runtime_gzip": 268305
 }

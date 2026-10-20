@@ -25,7 +25,8 @@ try:
    assert page.locator('.home-start').count()==1
    assert not page.locator('.service-week-board').count()
    assert not page.locator('.home-start .empty-verse').count()
-   assert page.locator('.home-start-shortcuts button').count()==3
+   assert page.locator('.home-start-shortcuts').count()==0
+   assert '등록된 다음 예배가 없습니다.' in page.locator('.home-start').inner_text()
    page.evaluate("""async()=>{
     const saved=[fetchCachedSupabasePaged,loadCalendarData,ensureUpcomingPublicWorshipServices];
     fetchCachedSupabasePaged=async()=>[];loadCalendarData=async()=>{};ensureUpcomingPublicWorshipServices=async()=>[];
@@ -37,15 +38,16 @@ try:
    assert page.locator('.home-start').count()==1, 'late supplemental load replaced home'
    assert page.locator('.empty-verse').count()==0
 
-   page.evaluate("""()=>{const d=toLocalDateStr(new Date());state.services=[{id:'next',type_id:'sunday-main',date:d,sort_order:0},{id:'other',type_id:'sunday-main',date:d,sort_order:1}];render()}""")
-   assert page.locator('.home-schedule-day button').count()==2
-   assert page.locator('.home-schedule-day[aria-current="date"] h3 small').inner_text()=='오늘'
-   # Exercise the actual sidebar delegates, including a stalled detail load.
+   page.evaluate("""()=>{const tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);const d=toLocalDateStr(tomorrow);state.services=[{id:'next',type_id:'sunday-main',date:d,sort_order:0},{id:'other',type_id:'sunday-main',date:d,sort_order:1}];render()}""")
+   assert page.locator('.home-next').count()==1
+   assert page.locator('.home-schedule').count()==0
+   assert page.locator('.home-next-actions button').count()==2
+   assert '불러오는 중' in page.locator('.home-prep-content').inner_text()
+   # Actual sidebar navigation remains independent of the preparation preview.
    page.locator('#songList [data-service-week]').click()
    assert page.locator('.service-week-board').count()==2
    page.locator('#songList [data-service-list]').click()
    assert page.evaluate('state.selectedServiceTypeId')=='__list'
-   assert not page.locator('.home-start').count()
    page.evaluate("()=>{window.homeOriginalLoadItems=loadServiceItems;loadServiceItems=()=>new Promise(()=>{});state.presenter.outputWindow=null}")
    page.locator('#songList [data-service-id="next"]').click()
    page.wait_for_function("state.module==='presenter' && state.selectedServiceId==='next'",timeout=3000)
@@ -54,34 +56,45 @@ try:
    assert page.evaluate('!isPresenterOutputWindowOpen()')
    page.evaluate("()=>{loadServiceItems=window.homeOriginalLoadItems;state.module='home';state.selectedServiceId=null;state.selectedServiceTypeId=null;clearDirtyState();render()}")
    page.evaluate("()=>{openServiceInPresenter=async id=>{window.homeOpenedService=id}}")
-   page.locator('.home-schedule-day button').first.click()
-   assert page.evaluate('window.homeOpenedService')=='next'
-   # Review a full week, not only the two-item navigation fixture.
+   page.locator('.home-next [data-home-next-service-action="presenter"]').click()
+   page.wait_for_function("window.homeOpenedService==='next'")
+   # Preview actual registered content, excluding a nearer no-gathering record.
    page.evaluate("""()=>{
-    const week=recentServiceWeeks(new Date())[0];
-    state.serviceTypes=[{id:'main',name:'주일예배 [1부]'},{id:'union',name:'온세대 찬양예배'},{id:'young',name:'청년부 예배'},{id:'wed',name:'수요예배'},{id:'fri',name:'금요기도회'}];
-    const day=offset=>{const d=new Date(week.start);d.setDate(d.getDate()+offset);return toLocalDateStr(d)};
-    state.services=[['main',0],['union',0],['young',0],['wed',3],['fri',5]].map(([type,offset],i)=>({id:'visual-'+i,type_id:type,date:day(offset),sort_order:i}));
-    render();
+    const tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);const date=toLocalDateStr(tomorrow);
+    state.serviceTypes=[{id:'fixture',name:'청년부 예배'}];
+    state.services=[{id:'none',type_id:'fixture',date:toLocalDateStr(new Date()),_worshipSourceRef:{no_gathering:true}},{id:'preview',type_id:'fixture',date}];
+    state.loadedWorshipServiceIds.add('preview');
+    state.serviceItems.preview=[
+     {id:'song',service_id:'preview',label:'찬양',raw_title:'하나님은 너를 만드신 분',sort_order:0},
+     {id:'prayer',service_id:'preview',label:'대표기도',raw_title:'대표기도',assignee:'이예율 학생',sort_order:1},
+     {id:'reading',service_id:'preview',label:'성경봉독',raw_title:'빌립보서 4:6–7',sort_order:2},
+     {id:'sermon',service_id:'preview',label:'설교',raw_title:'염려 대신 기도',assignee:'김남영 목사',sort_order:3},
+     {id:'notice',service_id:'preview',label:'광고',raw_title:'이번 주 소식과 기도 모임 안내',sort_order:4}
+    ];render();
    }""")
+   assert page.locator('.home-next [data-home-service-id="preview"]').count()==2
+   assert '염려 대신 기도' in page.locator('.home-prep-content').inner_text()
+   assert '이예율 학생' in page.locator('.home-prep-content').inner_text()
    for theme in ('light','dark'):
     page.evaluate('(t)=>applyTheme(t)',theme)
     for width in (1280,800,390):
      page.set_viewport_size({'width':width,'height':800})
      assert page.locator('.home-start').evaluate('(e)=>e.scrollWidth<=e.clientWidth')
-     page.locator('.home-schedule-day button').first.focus()
+     page.locator('.home-next-actions button').first.focus()
      page.locator('#detailPane').screenshot(path=f'/tmp/mindex-home-{engine}-{theme}-{width}.png')
-   page.set_viewport_size({'width':1280,'height':800})
-   page.locator('.home-start [data-service-week]').click()
-   assert page.locator('.service-week-board').count()==2
-   today=page.locator('.service-week-day[aria-current="date"]')
-   assert today.locator('.service-week-today').inner_text()=='오늘'
-   assert '2px' in today.evaluate('e=>getComputedStyle(e).boxShadow')
-   assert page.locator('.service-week-today').count()==1
-   page.evaluate("()=>{state.selectedServiceTypeId=null;state.search='';render()}")
-   page.locator('.home-start [data-home-module="praise"]').click()
-   page.wait_for_function("state.module==='praise'")
+   # A delayed read must not steal navigation or mark unknown content ready.
+   page.evaluate("""()=>{
+    state.loadedWorshipServiceIds.delete('preview');
+    state.client={from:()=>{throw Error('unexpected external read')}};
+    loadServiceItems=()=>new Promise(resolve=>{window.finishHomePreview=resolve});
+    renderHomeStart();
+   }""")
+   assert page.locator('.home-prep-content[aria-busy="true"]').count()==1
+   page.evaluate("()=>{state.module='praise';render();window.finishHomePreview()}")
+   page.wait_for_function("state.module==='praise'&&!document.querySelector('.home-start')")
    assert page.locator('.empty-verse').count()==1
+   page.evaluate("()=>{loadServiceItems=window.homeOriginalLoadItems;state.client={};state.module='home';serviceViewLoadErrors.set('preview',true);render()}")
+   assert '불러오지 못했습니다' in page.locator('.home-prep-content').inner_text()
    page.evaluate("()=>{state.module='home';state.serviceTypes=[];state.serviceError='Failed to fetch';state.uiVerses.home=[{text:'HOME VERSE MUST NOT APPEAR'}];state.selectedServiceTypeId=null;render()}")
    assert page.locator('.empty-verse').count()==0
    assert 'HOME VERSE MUST NOT APPEAR' not in page.locator('#detailPane').inner_text()

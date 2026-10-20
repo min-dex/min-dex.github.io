@@ -15986,35 +15986,47 @@ function renderHomeStart() {
     return;
   }
   const now = new Date();
-  const week = recentServiceWeeks(now)[0];
-  const upcoming = getServiceDashboardServices(now)
-    .filter(service => service.date >= toLocalDateStr(week.start) && service.date <= toLocalDateStr(week.end) && !serviceIsNoGathering(service));
-  const dates = [...new Set(upcoming.map(service => service.date))];
+  const next = getHomeNextService(now);
+  const loaded = next && state.loadedWorshipServiceIds.has(next.id);
+  const failed = next && serviceViewLoadErrors.has(next.id);
+  const groups = loaded ? groupServiceSidebarOutlineItems(getServiceOutlineItems(next)) : [];
   refs.detailPane.innerHTML = `
     <main class="home-start" aria-label="홈">
       <header class="home-start-header">
-        <h1>MINDEX</h1>
+        <h1>예배 준비</h1>
         <time datetime="${toLocalDateStr(now)}">${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일 ${serviceWeekdayLabel(now)}</time>
       </header>
-      <div class="home-start-body">
-        <section class="home-schedule" aria-labelledby="home-schedule-heading">
-          <header><h2 id="home-schedule-heading">이번 주 예배</h2><button type="button" class="home-start-text-button" data-service-week>최근 예배 <i data-lucide="arrow-right"></i></button></header>
-          <div class="home-schedule-list">
-            ${dates.length ? dates.map(date => `<div class="home-schedule-day${date === toLocalDateStr(now) ? " is-today" : ""}"${date === toLocalDateStr(now) ? ' aria-current="date"' : ""}>
-              <h3><span>${escapeHtml(formatServiceDate({date}, {compact:true}))}</span>${date === toLocalDateStr(now) ? '<small>오늘</small>' : ""}</h3>
-              <div>${upcoming.filter(service => service.date === date).map(service => `<button type="button" data-open-presenter-service="${escapeAttr(service.id)}"><span>${escapeHtml(serviceDisplayTypeName(service))}</span><i data-lucide="arrow-up-right"></i></button>`).join("")}</div>
-            </div>`).join("") : '<p class="home-start-empty">이번 주에 등록된 예배가 없습니다.</p>'}
+      ${next ? `<section class="home-next" aria-labelledby="home-next-title">
+        <div class="home-next-heading">
+          <div><p class="home-next-date">${next.date === toLocalDateStr(now) ? "오늘 예배" : "다음 예배"} · ${escapeHtml(formatServiceDate(next))}</p>
+          <h2 id="home-next-title">${escapeHtml(serviceDisplayTypeName(next))}</h2></div>
+          <div class="home-next-actions">
+            <button class="btn secondary" type="button" data-home-next-service-action="editor" data-home-service-id="${escapeAttr(next.id)}">원문 편집</button>
+            <button class="btn primary" type="button" data-home-next-service-action="presenter" data-home-service-id="${escapeAttr(next.id)}">예배 열기<i data-lucide="arrow-right"></i></button>
           </div>
-        </section>
-        <nav class="home-start-shortcuts" aria-labelledby="home-resources-heading">
-          <h2 id="home-resources-heading">자료</h2>
-          <button type="button" data-home-module="bulletin"><span><i data-lucide="newspaper"></i>주보</span><i data-lucide="arrow-right"></i></button>
-          <button type="button" data-home-module="praise"><span><i data-lucide="music"></i>찬양</span><i data-lucide="arrow-right"></i></button>
-          <button type="button" data-home-module="scripture"><span><i data-lucide="book-open"></i>말씀</span><i data-lucide="arrow-right"></i></button>
-        </nav>
-      </div>
+        </div>
+        <div class="home-prep-content"${!loaded && !failed ? ' aria-busy="true"' : ""}>
+          ${loaded ? `<h3>준비 내용</h3><div class="home-prep-outline">${groups.map(group => `<section class="home-prep-group"><h4>${escapeHtml(group.sectionTitle)}</h4><ul>${group.items.map(({item}) => {
+            const content = serviceItemDisplayText(item);
+            const person = serviceTitlePersonEffectiveParts(item, parseServiceItemMemo(item.memo), next).assignee;
+            const text = content === item.label && person ? person : cleanList([content, person && !content.includes(person) ? person : ""]).join(" · ");
+            return `<li>${escapeHtml(text || item.label || "—")}</li>`;
+          }).join("")}</ul></section>`).join("")}</div>${groups.length ? "" : '<p class="home-start-empty">등록된 순서가 없습니다.</p>'}`
+          : `<p class="home-start-empty" role="status">${failed ? "준비 내용을 불러오지 못했습니다. 예배를 열어 다시 확인해 주세요." : "준비 내용을 불러오는 중…"}</p>`}
+        </div>
+      </section>` : '<p class="home-start-empty">등록된 다음 예배가 없습니다.</p>'}
     </main>`;
   refreshIcons();
+  // Preview only the next service through the existing guarded read path.
+  // Late completion must never replace a detail opened while the request ran.
+  if (next && !loaded && !failed && !serviceItemLoadPromises.has(next.id) && typeof state.client?.from === "function") {
+    const id = next.id;
+    const refresh = () => {
+      if (!state.loadedWorshipServiceIds.has(id) && !serviceViewLoadErrors.has(id)) return;
+      if (state.module === "home" && refs.detailPane.querySelector(".home-next") && !isGlobalSearchActive() && getHomeNextService()?.id === id) renderHomeStart();
+    };
+    void loadServiceItems(id).then(refresh).catch(refresh);
+  }
 }
 
 function renderHomeSearchDetail() {
