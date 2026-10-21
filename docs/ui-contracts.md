@@ -749,3 +749,8 @@ Home places the next calendar date/liturgical label below today's date in the
 header. It links to the existing Calendar route; operations retains only its
 navigation commands and does not repeat the calendar summary. Preserve the same
 next-date selection and error state; stack the context naturally on narrow views.
+
+
+Home header calendar context uses the compact-title 16px/700 scale and primary
+ink for its date and liturgical name. Today's date remains secondary metadata.
+Keep 10px icon/text spacing, responsive wrapping and the existing calendar action.
