@@ -41,7 +41,9 @@
 - Original-source evidence remains `#594841` in `Elem_2026-01-04.pptx`,
   slides 6–7, and `Elem_2026-08-09.pptx`, slides 6–7. The available 2026 archive
   has no October 11 deck.
-- Apply the foreground consistently to all frames using the C5 artwork, including
+- The children output theme owns the foreground on frames with a service background,
+  independent of PNG/WebP URLs. Both thumbnail and output use the same CSS tokens.
+- Apply the foreground consistently to these frames, including
   lyrics, titles, announcements, liturgy, ready/waiting copy, and the transition
   cross (both strokes, including thumbnails), and monochrome church logos.
   Logos use an SVG color filter to preserve the original image and alpha edges.

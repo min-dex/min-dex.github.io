@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261022-remote-numeric-pin",
+  "version": "20261022-children-shared-ink",
   "options": {
     "compress": false,
     "mangle": {
