@@ -2661,6 +2661,7 @@ body[data-module="scripture"] .scripture-editor .meta-attribute-label {
   background: transparent;
 }
 .metadata-popover {
+  container: metadata-editor / inline-size;
   position: absolute;
   top: var(--s4);
   right: var(--s5);
@@ -2693,11 +2694,15 @@ body[data-module="scripture"] .scripture-editor .meta-attribute-label {
 }
 .metadata-popover-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--s2);
 }
-.scripture-metadata-popover-grid {
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, .9fr);
+@container metadata-editor (min-width: 400px) {
+  .metadata-popover-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .scripture-metadata-popover-grid { grid-template-columns: minmax(0, 1.2fr) minmax(0, .9fr); }
+}
+@container metadata-editor (min-width: 570px) {
+  .metadata-popover-grid:not(.scripture-metadata-popover-grid) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 .metadata-popover-grid .field {
   min-width: 0;
@@ -3246,7 +3251,6 @@ body[data-module="praise"] .song-count-badge {
     width: calc(100% - (var(--sidebar-search-inset) * 2));
   }
   .head-actions, .form-actions { justify-content: flex-start; }
-  .metadata-popover-grid { grid-template-columns: 1fr; }
   .nav-sidebar, .sidebar { max-height: none; border-bottom: 0; }
   .detail-pane { overflow: auto; padding: var(--content-pad-tight); padding-bottom: var(--content-pad-bottom-tight); }
 }

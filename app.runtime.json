@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261022-home-recent-height",
+  "version": "20261022-metadata-responsive",
   "options": {
     "compress": false,
     "mangle": {
