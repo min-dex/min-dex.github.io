@@ -8046,6 +8046,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
   line-height: 20px;
 }
 .presenter-section-editor-body {
+  container: section-editor / inline-size;
   display: grid;
   gap: 10px;
   min-height: 0;
@@ -8133,9 +8134,11 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
     bottom: 10px;
     width: calc(100vw - 20px);
   }
+}
+@container section-editor (max-width: 549px) {
   .presenter-section-editor-item,
   .presenter-section-editor-add {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .presenter-section-editor-item > .presenter-section-item-content,
   .presenter-section-editor-item > .presenter-section-item-type {
