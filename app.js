@@ -3312,6 +3312,13 @@ function attachRelationalSongVersionRows(versionRows = [], unitRows = [], target
     unitsByVersion.set(row.version_id, units);
   }
 
+  // Detached realtime reads use ID order for pagination, not musical order.
+  // Restore persisted order here so every read path and later save agrees.
+  for (const units of unitsByVersion.values()) {
+    units.sort((a, b) => a.sort_order - b.sort_order
+      || String(a.id || "").localeCompare(String(b.id || "")));
+  }
+
   const sourceVersionsBySong = new Map();
   const fallbackVersionsBySong = new Map();
   for (const row of versionRows || []) {

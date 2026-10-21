@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261022-home-work-center",
+  "version": "20261022-praise-form-order",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "0094c81dd74715643046db18cd482932822bfb2e5bbdc256a1df5310977b211b",
-  "runtime_sha256": "1273ff8323f54645776b0d05ac5774024b3acac73b98a495687f54fcb738598b",
-  "source_bytes": 1550342,
-  "runtime_bytes": 1097449,
-  "source_gzip": 348594,
-  "runtime_gzip": 272686
+  "source_sha256": "fa00f9cfaf3aa4843b385a01965e56d5ed555a1d4897188fe9b5aaa25a5c9b33",
+  "runtime_sha256": "0d7dd6c5154048ff7f814bd3c18d768afef39079b1e5d863b04d8ad2773c692b",
+  "source_bytes": 1550666,
+  "runtime_bytes": 1097567,
+  "source_gzip": 348735,
+  "runtime_gzip": 272726
 }

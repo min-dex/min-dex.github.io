@@ -43,6 +43,14 @@ try:
    signal();b.wait_for_function("state.songs[0].title==='Saved'")
    assert b.evaluate("state.selectedVersionId===vid&&refs.detailPane.scrollTop===320&&JSON.stringify(state.forms).includes('New lyrics')")
    count=b.evaluate('renders');signal();b.wait_for_timeout(300);assert b.evaluate('renders')==count
+   # Realtime fetches by ID for stable pagination; IDs are not musical order.
+   b.evaluate("db.units=[{id:'a',version_id:vid,curated_unit_type:'Verse',curated_unit_label:'Verse 3',curated_order:3,unit_order:1,text:'Third'},{id:'b',version_id:vid,curated_unit_type:'Verse',curated_unit_label:'Verse 1',curated_order:1,unit_order:2,text:'First'},{id:'c',version_id:vid,curated_unit_type:'Verse',curated_unit_label:'Verse 2',curated_order:2,unit_order:3,text:'Second'}]")
+   signal();b.wait_for_function("state.forms.length===3")
+   assert b.evaluate("state.forms.map(f=>f.lyrics).join('|')")=='First|Second|Third'
+   assert b.evaluate("state.forms.map(f=>f.id).join('|')")=='b|c|a'
+   # Save payload preparation and a second refresh keep the same identity/order.
+   assert b.evaluate("normalizeForms(state.forms).map(f=>f.id).join('|')")=='b|c|a'
+   count=b.evaluate('renders');signal();b.wait_for_timeout(300);assert b.evaluate('renders')==count
    b.evaluate("db.song.title='Deferred';document.getElementById('draft').focus();document.getElementById('draft').value='typing'")
    signal();b.wait_for_timeout(300);assert b.evaluate("state.songs[0].title==='Saved'")
    b.evaluate("document.activeElement.blur();state.dirty.song=true")
