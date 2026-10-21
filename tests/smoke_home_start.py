@@ -50,6 +50,30 @@ try:
    assert '2개 역본' in page.locator('.home-module').nth(3).inner_text()
    assert '교회력 fixture' in page.locator('.home-start-header').inner_text()
    assert '교회력 fixture' not in page.locator('.home-module--operations').inner_text()
+   # Saved receipts and browsing history are independent; latest save wins.
+   page.evaluate("""()=>{
+    rememberRecentEdit({module:'praise',selectedSongId:'one',selectedVersionId:'v1'},'Test Song','2026-10-20T01:00:00Z');
+    rememberRecentEdit({module:'praise',selectedSongId:'one',selectedVersionId:'v2'},'Test Song','2026-10-21T01:00:00Z');
+    rememberRecentEdit({module:'scripture',selectedScriptureId:'fixture'},'Fixture','2026-10-20T02:00:00Z');
+    rememberRecentEdit({module:'praise',selectedSongId:'two'},'Invalid','invalid');
+   }""")
+   page.locator('[data-home-recent-view="edits"]').click()
+   assert page.locator('.home-recent-list button').count()==2
+   assert page.locator('.home-recent-list time').count()==2
+   assert page.evaluate("homeRecentEditEntries()[0].snapshot.selectedVersionId")=='v2'
+   page.evaluate("""()=>{
+    const get=safeStorageGet,set=safeStorageSet;
+    try {
+     let payload;
+     safeStorageSet=(scope,key,value)=>{payload=value;return true};persistPageTabsState();
+     state.homeRecentView='work';state.recentEdits=[];
+     safeStorageGet=()=>payload;readPageTabsState();
+    } finally {safeStorageGet=get;safeStorageSet=set;}
+   }""")
+   assert page.evaluate('state.homeRecentView')=='edits'
+   assert page.evaluate('state.recentEdits.length')==2
+   page.locator('[data-home-recent-view="work"]').click()
+   assert page.locator('.home-recent-list time').count()==0
    # The original sidebar routes remain functional, including stalled data.
    page.locator('#songList [data-service-week]').click()
    assert page.locator('.service-week-board').count()==2
@@ -150,6 +174,30 @@ try:
      check(homeOverviewStats.songs===0&&homeOverviewStats.editions===0,'zero treated as unknown');
      return 'PASS lightweight independent catalogue totals, coalescing, read errors and zero';
     } finally {state.client=originalClient;canUseClientData=originalCanRead;homeOverviewStats=null;}
+   }""")
+   print(engine,result,flush=True)
+   result=page.evaluate("""async()=>{
+    const original=state.client,canRead=canUseClientData;
+    const calls=[];
+    let resolve;
+    const pending=new Promise(r=>resolve=r);
+    try {
+     canUseClientData=()=>false;
+     state.client={from(table){const call={table};calls.push(call);return {
+      select(fields){call.fields=fields;return this},order(){return this},limit(n){call.limit=n;return this},abortSignal(){return pending}
+     }}};
+     state.homeRecentView='edits';state.module='home';
+     const first=loadHomeRecentEdits();void loadHomeRecentEdits();
+     state.module='praise';refs.detailPane.innerHTML='<div id="recent-navigation-sentinel"></div>';
+     resolve({data:[{id:'next',service_id:'next',updated_at:'2026-10-21T02:00:00Z'}],error:null});await first;
+     if(!document.querySelector('#recent-navigation-sentinel'))throw Error('late recent response replaced destination');
+     if(calls.length!==2||calls.some(c=>c.limit!==12||/content|layout|text|\*/.test(c.fields)))throw Error('recent query unbounded or fetched bodies');
+     if(!homeRecentEditEntries().some(e=>e.key==='presenter:next'))throw Error('server saves missing');
+     state.client={from(){return {select(){return this},order(){return this},limit(){return this},abortSignal(){return Promise.resolve({error:{message:'offline'}})}}}};
+     state.module='home';await loadHomeRecentEdits();
+     if(!homeRecentEditsCache.error||!document.querySelector('[data-home-recent-retry]'))throw Error('read failure hidden');
+     return 'PASS bounded recent save queries, coalescing, navigation guard and read failure';
+    } finally {state.client=original;canUseClientData=canRead;homeRecentEditsCache=null;state.homeRecentView='work';}
    }""")
    print(engine,result,flush=True)
    print('PASS home overview, five routes, unknown/error states, sidebar navigation',engine,flush=True)

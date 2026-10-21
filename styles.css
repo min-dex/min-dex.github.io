@@ -9612,3 +9612,11 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
 :is(.song-timing-dialog, .draft-handoff-dialog) details > summary:hover { background: var(--ui-surface-field); }
 :is(.song-timing-dialog, .draft-handoff-dialog) details > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .draft-handoff-dialog details > p { margin: 0 0 10px; }
+
+.home-recent-switch { display:flex; gap:5px; margin-bottom:10px; }
+.home-recent-switch button { min-height:30px; padding:5px 10px; border:1px solid transparent; border-radius:5px; background:transparent; color:var(--ink-3); font:inherit; font-size:var(--ui-row-size); cursor:pointer; }
+.home-recent-switch button[aria-pressed="true"] { color:var(--ink); background:var(--ui-surface-field); border-color:var(--line); font-weight:700; }
+.home-recent-switch button:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+.home-recent-list time,.home-recent-note { color:var(--ink-3); font-size:var(--ui-meta-size); }
+.home-recent-note { margin:10px 0 0; }
+.home-recent-note button { color:var(--ink); background:transparent; border:0; text-decoration:underline; cursor:pointer; }

@@ -762,3 +762,13 @@ output title grows twice as much). Review status retains its own row. Input valu
 and save behavior stay unchanged. Timing/help and draft pairing disclosures use
 30px minimum targets,10px expanded spacing, hover and2px inset focus. Keep all
 labels, pairing warnings and multiline fields; never trigger playback/save during UI QA.
+
+## Home recent destinations
+
+Home offers `최근 작업` (opened destinations) and `최근 수정` (confirmed saves),
+with the selected view retained in private page-tab state. Each list is bounded
+to six destinations and uses the existing unsaved-change navigation guard.
+Recent saves bootstrap worship/bulletin timestamps through two body-free reads
+(limit12 per table,60-second cache,15-second abort); Praise and saved Scripture
+start tracking successful receipts when this feature is installed. Never infer
+modifications from visits, draft input, failed saves or deletion notifications.
