@@ -109,6 +109,7 @@ try:
     render();
    }""")
    assert page.locator('[data-home-recent]').count()==4
+   assert page.locator('.home-recent-list button').first.evaluate("e=>{const a=e.getBoundingClientRect(),b=e.querySelector('span').getBoundingClientRect();return Math.abs((a.top+a.bottom)-(b.top+b.bottom))<1&&a.height===80&&b.height===38}")
    assert page.evaluate("!JSON.stringify(state.recentWork).includes('DO NOT STORE')&&!JSON.stringify(state.recentWork).includes('private query')")
    assert '3:16' in page.locator('.home-recent').inner_text()
    page.evaluate("""()=>{

@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261022-remote-design-code",
+  "version": "20261022-home-work-center",
   "options": {
     "compress": false,
     "mangle": {
