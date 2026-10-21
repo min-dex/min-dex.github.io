@@ -9211,7 +9211,9 @@ body[data-module="praise"] .praise-forms-panel .version-compare-column {
 /* Optional per-version output title; representative title remains the default. */
 .version-output-title-input { min-width: 0; width: 100%; }
 .version-title-main:has(.version-output-title-input) { flex-wrap: wrap; }
-.version-title-main > .version-output-title-input { flex-basis: 100%; }
+.version-title-main:has(.version-output-title-input) > .version-title-input { flex: 1 1 150px; width: auto; }
+.version-title-main > .version-output-title-input { flex: 2 1 250px; width: auto; }
+.version-title-main:has(.version-output-title-input) > .version-attention-status { flex-basis: 100%; }
 
 /* Home summarizes all modules; detailed catalogues stay in their own tabs. */
 .home-start { width:100%; padding:25px 30px; display:grid; gap:20px; }
@@ -9600,3 +9602,13 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
   .svc-focus-panel > .svc-focus-transport { order:-1; }
 
 }
+
+/* Popup disclosures keep a real target and space before expanded content. */
+:is(.song-timing-dialog, .draft-handoff-dialog) details > summary {
+  box-sizing: border-box; min-height: 30px; padding: 5px 0;
+  line-height: 20px; cursor: pointer; border-radius: var(--r);
+}
+:is(.song-timing-dialog, .draft-handoff-dialog) details[open] > summary { margin-bottom: 10px; }
+:is(.song-timing-dialog, .draft-handoff-dialog) details > summary:hover { background: var(--ui-surface-field); }
+:is(.song-timing-dialog, .draft-handoff-dialog) details > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.draft-handoff-dialog details > p { margin: 0 0 10px; }

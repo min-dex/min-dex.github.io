@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261021-home-calendar-type",
+  "version": "20261021-title-popup-spacing",
   "options": {
     "compress": false,
     "mangle": {
