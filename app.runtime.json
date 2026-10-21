@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261022-praise-order-pin",
+  "version": "20261022-praise-order-final",
   "options": {
     "compress": false,
     "mangle": {
