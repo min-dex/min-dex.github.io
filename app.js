@@ -447,6 +447,8 @@ const state = {
   bibleTextSearchPage: 0,
   applyingBrowserHistory: false,
   recentWork: [],
+  recentEdits: [],
+  homeRecentView: "work",
   pageTabs: [],
   pageTabIndex: 0,
   applyingPageTab: false,
@@ -3965,6 +3967,7 @@ async function worshipAtomicClient() {
         if (client === state.client && !result.error && result.data && args?.req?.serviceId
           && ["save_worship_service_v1", "create_worship_service_v1", "delete_worship_service_v1"].includes(name)
           && typeof result.data.committedRevision === "string") {
+          if(name !== "delete_worship_service_v1") rememberRecentEdit({module:"presenter",selectedServiceId:args.req.serviceId});
           window.MINDEX_WORSHIP_LIVE?.publish(args.req.serviceId);
           window.MINDEX_CONTENT_LIVE?.publish("service-list", "all");
           window.MINDEX_CONTENT_LIVE?.publish("setlist-archive", "all");
@@ -6853,6 +6856,7 @@ async function saveScripture() {
     if (!data || data.id !== scripture.id) throw new Error("저장 결과를 확인하지 못했습니다.");
 
     if (state.client !== publishClient || state.config.url !== publishProject) return;
+    if(typeof rememberRecentEdit === "function") rememberRecentEdit({module:"scripture",selectedScriptureId:data.id},data.title);
     window.MINDEX_CONTENT_LIVE?.publish("scripture", "all");
     if (getSelectedScripture() !== scripture) return;
     if (JSON.stringify(dirtyComparableValue(scripture)) !== before) {
@@ -8140,6 +8144,7 @@ async function saveSongMeta(liveSong) {
     song._memoHasVersions = false;
   }
   if (client !== state.client || project !== state.config.url) return false;
+  if(typeof rememberRecentEdit === "function") rememberRecentEdit({module:"praise",selectedSongId:data.id,selectedVersionId},data.title);
   const unchanged = JSON.stringify(liveSong) === JSON.stringify(before) && JSON.stringify(state.forms) === formsBefore;
   const merged = mergeEditorDraft(before, liveSong, song).value;
   // memo is the confirmed CAS baseline, not an editable field.
@@ -8671,6 +8676,12 @@ function handleDetailClick(event) {
     return;
   }
 
+  const recentViewButton = event.target.closest("[data-home-recent-view]");
+  if (recentViewButton) {
+    state.homeRecentView = recentViewButton.dataset.homeRecentView === "edits" ? "edits" : "work";
+    persistPageTabsState();renderHomeStart();return;
+  }
+  if(event.target.closest("[data-home-recent-retry]")) { void loadHomeRecentEdits({force:true});return; }
   const recentWorkButton = event.target.closest("[data-home-recent]");
   if (recentWorkButton) {
     void openHomeRecentWork(recentWorkButton.dataset.homeRecent);
@@ -14451,6 +14462,62 @@ function recentWorkEntry(snapshot = {}, label = "") {
   return { key, kind, snapshot: fields, label: String(label || pageTabTitleForSnapshot(fields)).slice(0, 160) };
 }
 
+// Confirmed save metadata only; never persist editor contents here.
+let homeRecentEditsCache = null;
+function recentEditEntry(value) {
+  const entry = recentWorkEntry(value?.snapshot, value?.label);
+  const time = Date.parse(value?.savedAt);
+  return entry && Number.isFinite(time) ? {...entry, savedAt:new Date(time).toISOString()} : null;
+}
+function rememberRecentEdit(snapshot, label, savedAt = new Date().toISOString()) {
+  try {
+    const entry = recentEditEntry({snapshot,label,savedAt});
+    if (!entry) return;
+    state.recentEdits = [entry,...(state.recentEdits || []).filter(item => item.key !== entry.key)].slice(0,6);
+    if (homeRecentEditsCache) homeRecentEditsCache.readAt = 0;
+    persistPageTabsState();
+  } catch (error) { console.warn("Recent save metadata unavailable", error?.message); }
+}
+function homeRecentEditEntries() {
+  const cached = homeRecentEditsCache?.client === state.client ? homeRecentEditsCache.entries : [];
+  const seen = new Set();
+  return [...(state.recentEdits || []),...(cached || [])]
+    .sort((a,b) => Date.parse(b.savedAt)-Date.parse(a.savedAt))
+    .filter(entry => !seen.has(entry.key) && seen.add(entry.key))
+    .filter(entry => {
+      const id=entry.snapshot.selectedServiceId;
+      const service=state.services.find(item => item.id === id);
+      if(id) return Boolean(service && !serviceIsNoGathering(service) && (entry.kind !== "주보" || serviceSupportsBulletin(service)));
+      if(entry.kind === "찬양" && songCatalogLoaded) return Boolean(songById(entry.snapshot.selectedSongId));
+      if(entry.kind === "말씀" && state.scripturesLoaded) return state.scriptures.some(item => item.id === entry.snapshot.selectedScriptureId);
+      return true;
+    }).slice(0,6);
+}
+async function loadHomeRecentEdits({force=false} = {}) {
+  if(typeof state.client?.from !== "function") return;
+  const client=state.client;
+  if(homeRecentEditsCache?.client !== client) homeRecentEditsCache={client,entries:[],readAt:0,promise:null,error:false};
+  const cache=homeRecentEditsCache;
+  if(cache.promise || (!force && cache.readAt && Date.now()-cache.readAt<60000)) return cache.promise;
+  const abort=new AbortController(), timer=setTimeout(()=>abort.abort(),15000);
+  cache.promise=(async()=>{
+    try {
+      const results=await Promise.allSettled([
+        client.from("mindex_worship_services").select("id,updated_at").order("updated_at",{ascending:false}).limit(12).abortSignal(abort.signal),
+        client.from("mindex_bulletins").select("service_id,updated_at").order("updated_at",{ascending:false}).limit(12).abortSignal(abort.signal)
+      ]);
+      if(client !== state.client) return;
+      cache.error=results.some(result=>result.status !== "fulfilled" || result.value.error);
+      cache.entries=results.flatMap((result,index)=>result.status === "fulfilled" && !result.value.error ? (result.value.data || []).map(row=>recentEditEntry({snapshot:{module:index ? "bulletin":"presenter",selectedServiceId:row.service_id || row.id},savedAt:row.updated_at})).filter(Boolean) : []);
+      cache.readAt=Date.now();
+    } catch { cache.error=true;cache.readAt=Date.now(); } finally {
+      clearTimeout(timer);cache.promise=null;
+      if(client === state.client && state.module === "home" && state.homeRecentView === "edits" && !isGlobalSearchActive()) renderHomeStart();
+    }
+  })();
+  return cache.promise;
+}
+
 function rememberRecentWork(snapshot) {
   const entry = recentWorkEntry(snapshot);
   if (!entry) return;
@@ -14472,7 +14539,7 @@ function homeRecentWorkEntries() {
 }
 
 async function openHomeRecentWork(key) {
-  const entry = homeRecentWorkEntries().find(item => item.key === key);
+  const entry = (state.homeRecentView === "edits" ? homeRecentEditEntries() : homeRecentWorkEntries()).find(item => item.key === key);
   if (!entry || !(await confirmSaveBeforeLeaving())) return;
   clearDirtyState();
   await applyBrowserHistorySnapshot(entry.snapshot);
@@ -14480,8 +14547,10 @@ async function openHomeRecentWork(key) {
 }
 
 function renderHomeRecentWork() {
-  const entries = homeRecentWorkEntries();
-  return `<section class="home-recent" aria-labelledby="home-recent-heading"><h2 id="home-recent-heading">최근 작업</h2>
+  const edits = state.homeRecentView === "edits";
+  const entries = edits ? homeRecentEditEntries() : homeRecentWorkEntries();
+  if(edits) void loadHomeRecentEdits();
+  return `<section class="home-recent" aria-label="최근 항목"><div class="home-recent-switch" aria-label="최근 항목 보기">${[["work","최근 작업"],["edits","최근 수정"]].map(([key,label])=>`<button type="button" data-home-recent-view="${key}" aria-pressed="${state.homeRecentView === key}">${label}</button>`).join("")}</div>
     ${entries.length ? `<div class="home-recent-list">${entries.map(entry => {
       const snapshot = entry.snapshot;
       const service = state.services.find(item => item.id === snapshot.selectedServiceId);
@@ -14494,8 +14563,9 @@ function renderHomeRecentWork() {
         title += ` ${Number(snapshot.selectedBibleChapter) || 1}${verse ? `:${verse}${end > verse ? `–${end}` : ""}` : "장"}`;
       }
       const meta = service ? `${entry.kind} · ${formatServiceDate(service, {compact:true})}` : entry.kind;
-      return `<button type="button" data-home-recent="${escapeAttr(entry.key)}"><span><small>${escapeHtml(meta)}</small><strong>${escapeHtml(title)}</strong></span><i data-lucide="arrow-up-right"></i></button>`;
-    }).join("")}</div>` : '<p class="home-module-detail">열어 본 항목이 여기에 표시됩니다.</p>'}
+      return `<button type="button" data-home-recent="${escapeAttr(entry.key)}"><span><small>${escapeHtml(meta)}</small><strong>${escapeHtml(title)}</strong>${edits ? `<time datetime="${escapeAttr(entry.savedAt)}">${escapeHtml(new Intl.DateTimeFormat("ko-KR",{timeZone:"Asia/Seoul",month:"numeric",day:"numeric",hour:"numeric",minute:"2-digit"}).format(new Date(entry.savedAt)))}</time>` : ""}</span><i data-lucide="arrow-up-right"></i></button>`;
+    }).join("")}</div>` : `<p class="home-module-detail">${edits ? (homeRecentEditsCache?.promise ? '최근 수정 불러오는 중…' : '저장한 항목이 여기에 표시됩니다.') : '열어 본 항목이 여기에 표시됩니다.'}</p>`}
+    ${edits ? `<p class="home-recent-note">찬양·말씀은 이 기능 적용 후 저장부터 표시됩니다.${homeRecentEditsCache?.error ? ' 일부 기록을 불러오지 못했습니다. <button type="button" data-home-recent-retry>다시 시도</button>' : ""}</p>` : ""}
     </section>`;
 }
 
@@ -14507,6 +14577,8 @@ function readPageTabsState() {
   } catch {
     parsed = null;
   }
+  state.homeRecentView = parsed?.homeRecentView === "edits" ? "edits" : "work";
+  state.recentEdits = (Array.isArray(parsed?.recentEdits) ? parsed.recentEdits : []).map(recentEditEntry).filter(Boolean).slice(0,6);
   const tabs = Array.isArray(parsed?.tabs) ? parsed.tabs : [];
   normalizePageTabsState(tabs, Number(parsed?.index) || 0);
   state.recentWork = (Array.isArray(parsed?.recentWork) ? parsed.recentWork : []).map(entry => recentWorkEntry(entry?.snapshot, entry?.label)).filter(Boolean).filter((entry,index,entries) => entries.findIndex(item => item.key === entry.key) === index).slice(0,6);
@@ -14522,6 +14594,8 @@ function persistPageTabsState() {
     })),
     index: state.pageTabIndex,
     recentWork: state.recentWork,
+    recentEdits: state.recentEdits,
+    homeRecentView: state.homeRecentView,
   };
   safeStorageSet("session", MINDEX_TAB_STATE_STORAGE_KEY, JSON.stringify(payload));
 }
@@ -14882,10 +14956,13 @@ async function saveBulletinDraft(serviceId, value, revision) {
   const query=revision
     ? table.update(value).eq("service_id",serviceId).eq("revision",revision)
     : table.insert({service_id:serviceId,...value});
-  const {data,error}=await query.select("service_id,content,layout,revision").maybeSingle();
+  const {data,error}=await query.select("service_id,content,layout,revision,updated_at").maybeSingle();
   if(error?.code==="23505"||(!error&&!data))throw new Error("다른 곳에서 주보가 변경되었습니다. DB 다시 불러오기로 확인해 주세요. 현재 수정 내용은 이 화면에 남아 있습니다.");
   if(error)throw new Error(`주보 DB 저장 실패: ${error.message}`);
-  if(publishClient===state.client)window.MINDEX_CONTENT_LIVE?.publish("bulletin",serviceId);
+  if(publishClient===state.client) {
+    rememberRecentEdit({module:"bulletin",selectedServiceId:serviceId},"",data.updated_at);
+    window.MINDEX_CONTENT_LIVE?.publish("bulletin",serviceId);
+  }
   return data;
 }
 

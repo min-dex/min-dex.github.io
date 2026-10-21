@@ -754,3 +754,21 @@ next-date selection and error state; stack the context naturally on narrow views
 Home header calendar context uses the compact-title 16px/700 scale and primary
 ink for its date and liturgical name. Today's date remains secondary metadata.
 Keep 10px icon/text spacing, responsive wrapping and the existing calendar action.
+
+### Version title row and popup disclosures ·2026-10-21
+
+Version name and optional output title share a wrapping row (150/250px bases;
+output title grows twice as much). Review status retains its own row. Input values
+and save behavior stay unchanged. Timing/help and draft pairing disclosures use
+30px minimum targets,10px expanded spacing, hover and2px inset focus. Keep all
+labels, pairing warnings and multiline fields; never trigger playback/save during UI QA.
+
+## Home recent destinations
+
+Home offers `최근 작업` (opened destinations) and `최근 수정` (confirmed saves),
+with the selected view retained in private page-tab state. Each list is bounded
+to six destinations and uses the existing unsaved-change navigation guard.
+Recent saves bootstrap worship/bulletin timestamps through two body-free reads
+(limit12 per table,60-second cache,15-second abort); Praise and saved Scripture
+start tracking successful receipts when this feature is installed. Never infer
+modifications from visits, draft input, failed saves or deletion notifications.
