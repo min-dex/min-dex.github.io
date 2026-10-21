@@ -35,8 +35,8 @@ try:
     runServiceMusicAction=async action=>{remoteCalls.push(action);state.serviceMusic.playing=action==='toggle'?!state.serviceMusic.playing:false;};
     MindexSongTiming.resumeAutoSync=()=>{remoteCalls.push('resume');state.serviceMusic.autoSyncSuspended=false;return true;};
    }''')
-   host.click('#remotePanelBtn');host.click('[data-start]');host.wait_for_function("document.querySelector('[data-code]').textContent.length>0")
-   code=host.locator('[data-code]').inner_text()
+   host.click('#remotePanelBtn');host.click('[data-remote-start]');host.wait_for_function("document.querySelector('[data-remote-code]').textContent.length>0")
+   code=host.locator('[data-remote-code]').inner_text()
    phone.goto(url.replace('index.html','remote.html'));phone.fill('#code',code.lower());phone.click('#connect')
    history=[]
    def pump(seconds=.3,drop=False):
@@ -80,7 +80,7 @@ try:
    pump(1.5);ready('prev')
    # Host service change revokes the code; output never gets restarted remotely.
    host.evaluate("state.selectedServiceId='other-service'");pump(1.5)
-   assert host.locator('[data-status]').inner_text().find('종료')>=0
+   assert host.locator('[data-remote-status]').inner_text().find('종료')>=0
    pump(3.2);assert phone.locator('[data-action=next]').is_disabled()
    phone.click('#disconnect');assert phone.locator('#pairForm').is_visible()
    phone.fill('#code','123456');phone.click('#connect');pump();assert '확인' in phone.locator('#status').inner_text()

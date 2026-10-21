@@ -1,33 +1,33 @@
-.monitor-panel { box-sizing: border-box; width: min(560px, calc(100% - 24px)); max-height: 85vh; padding: 20px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); overflow-y: auto; }
-.monitor-panel::backdrop { background: #0008; }
-.monitor-panel header, .monitor-panel form, .monitor-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
-.monitor-panel h2 { margin: 0; flex: 1; font-size: var(--ui-page-title-size); }
-.monitor-panel h3 { font-size: var(--ui-card-title-size); margin: 16px 0 8px; }
-.monitor-panel input:not([type=checkbox]) { min-width: 0; flex: 1; padding: 10px; background: var(--panel-2); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; }
-.monitor-panel label { display: flex; align-items: center; gap: 8px; }
-.monitor-panel select { padding: 6px; min-width: 0; border: 1px solid var(--line); border-radius: 4px; background: var(--panel-2); color: var(--ink); font: inherit; }
-.monitor-panel .monitor-device[data-health=stale] { border-left: 3px solid #888; padding-left: 12px; }
-.monitor-panel .monitor-device[data-health=error] { border-left: 3px solid #df7373; padding-left: 12px; }
-.monitor-panel .monitor-device { padding: 14px 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
-.monitor-panel p { margin: 6px 0; font-size: 14px; overflow-wrap: anywhere; }
-.monitor-panel ul { margin: 8px 0; padding-left: 20px; font-size: 14px; }
-.monitor-panel summary { cursor: pointer; font-size: 14px; margin-top: 8px; }
-.monitor-panel .monitor-message { min-height: 22px; }
-.monitor-panel .monitor-message:empty { display: none; }
+:is(.monitor-panel, .remote-panel) { box-sizing: border-box; width: min(560px, calc(100% - 24px)); max-height: 85vh; padding: 20px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); overflow-y: auto; }
+:is(.monitor-panel, .remote-panel)::backdrop { background: #0008; }
+:is(.monitor-panel, .remote-panel) header, :is(.monitor-panel, .remote-panel) form, .monitor-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+:is(.monitor-panel, .remote-panel) h2 { margin: 0; flex: 1; font-size: var(--ui-page-title-size); }
+:is(.monitor-panel, .remote-panel) h3 { font-size: var(--ui-card-title-size); margin: 16px 0 8px; }
+:is(.monitor-panel, .remote-panel) input:not([type=checkbox]) { min-width: 0; flex: 1; padding: 10px; background: var(--panel-2); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; }
+:is(.monitor-panel, .remote-panel) label { display: flex; align-items: center; gap: 8px; }
+:is(.monitor-panel, .remote-panel) select { padding: 6px; min-width: 0; border: 1px solid var(--line); border-radius: 4px; background: var(--panel-2); color: var(--ink); font: inherit; }
+:is(.monitor-panel, .remote-panel) .monitor-device[data-health=stale] { border-left: 3px solid #888; padding-left: 12px; }
+:is(.monitor-panel, .remote-panel) .monitor-device[data-health=error] { border-left: 3px solid #df7373; padding-left: 12px; }
+:is(.monitor-panel, .remote-panel) .monitor-device { padding: 14px 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
+:is(.monitor-panel, .remote-panel) p { margin: 6px 0; font-size: 14px; overflow-wrap: anywhere; }
+:is(.monitor-panel, .remote-panel) ul { margin: 8px 0; padding-left: 20px; font-size: 14px; }
+:is(.monitor-panel, .remote-panel) summary { cursor: pointer; font-size: 14px; margin-top: 8px; }
+:is(.monitor-panel, .remote-panel) .monitor-message { min-height: 22px; }
+:is(.monitor-panel, .remote-panel) .monitor-message:empty { display: none; }
 .monitor-section { padding: 15px 0; border-top: 1px solid var(--line); }
 .monitor-section-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .monitor-section-heading h3 { flex: 1; margin: 0; }
 .monitor-section > h3 { margin: 0 0 15px; }
-.monitor-panel .monitor-toolbar { gap: 10px; margin-bottom: 10px; }
-.monitor-panel #monitorName { flex: 1 1 160px; }
-.monitor-panel .monitor-device { border-top: 0; padding: 15px 0; }
-.monitor-panel .monitor-device + .monitor-device { border-top: 1px solid var(--line); }
+:is(.monitor-panel, .remote-panel) .monitor-toolbar { gap: 10px; margin-bottom: 10px; }
+:is(.monitor-panel, .remote-panel) #monitorName { flex: 1 1 160px; }
+:is(.monitor-panel, .remote-panel) .monitor-device { border-top: 0; padding: 15px 0; }
+:is(.monitor-panel, .remote-panel) .monitor-device + .monitor-device { border-top: 1px solid var(--line); }
 .monitor-health { display: inline-block; margin-left: 10px; font-size: 12px; color: var(--muted); }
-.monitor-panel .monitor-environment { color: var(--muted); font-size: 12px; }
+:is(.monitor-panel, .remote-panel) .monitor-environment { color: var(--muted); font-size: 12px; }
 .monitor-facts { display: grid; grid-template-columns: 85px minmax(0, 1fr); gap: 8px 15px; margin: 15px 0; font-size: 14px; }
 .monitor-facts dt { color: var(--muted); }
 .monitor-facts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
-.monitor-panel [data-count] { margin-left: auto; font-size: 12px; color: var(--muted); }
-.monitor-panel summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-.monitor-panel [hidden] { display: none !important; }
-@media (max-width: 480px) { .monitor-panel { padding: 16px; } .monitor-panel form label { flex-basis: 100%; } }
+:is(.monitor-panel, .remote-panel) [data-count] { margin-left: auto; font-size: 12px; color: var(--muted); }
+:is(.monitor-panel, .remote-panel) summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+:is(.monitor-panel, .remote-panel) [hidden] { display: none !important; }
+@media (max-width: 480px) { :is(.monitor-panel, .remote-panel) { padding: 16px; } :is(.monitor-panel, .remote-panel) form label { flex-basis: 100%; } }
