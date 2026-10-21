@@ -14,7 +14,7 @@
 <header><p class="brand">MINDEX</p><h1>Remote Controller</h1><p id="status" role="status">송출 PC의 연결 코드를 입력해 주세요.</p></header>
 <form id="pairForm">
 <label for="code">연결 코드</label>
-<input id="code" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABCD-EFGH" maxlength="24" required aria-describedby="codeHelp">
+<input id="code" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="123456" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" required aria-describedby="codeHelp">
 <p id="codeHelp">PC에서 ‘원격 → 연결 시작’ · 2분 안에 입력</p>
 <button id="connect" class="primary">연결</button>
 </form>
@@ -32,5 +32,5 @@
 </main>
 <script src="vendor/supabase-js.min.js"></script>
 <script src="mindex.public-config.js"></script>
-<script type="module" src="remote.mjs?v=2"></script>
+<script type="module" src="remote.mjs?v=3"></script>
 </body></html>

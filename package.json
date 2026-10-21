@@ -49,6 +49,7 @@
       "mindex.remote.js",
       "mindex.remote-core.mjs",
       "mindex.remote-session.mjs",
+      "mindex.remote-pairing.mjs",
       "mindex.public-config.js",
       "remote.html",
       "remote.mjs",

@@ -415,3 +415,6 @@ See docs/content-realtime.md and tests/smoke_scripture_live.py.
 Shared scheduler coalesces at80ms and advances deferred reads after focus/media/
 dialog exit, retaining all guards and15s failure backoff. No faster recovery polling.
 See docs/content-realtime.md and tests/test_live_refresh_scheduler.cjs.
+
+
+2026-10-22 작업 중: 원격 코드 v3는 숫자 6자리 서버 claim 방식으로 구현. `migrations/2026-10-22-remote-pin.sql` 운영 DB 적용 성공. v3 클라이언트 배포 검증 진행 중. PostgreSQL 18.4 격리 검증(권한/동시 claim/만료/횟수 제한), Chromium/WebKit UI·실제 adapter 검증 통과. 서버 적용 후 전체 GitHub gate 및 배포 검증 필요.

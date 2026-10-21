@@ -1,14 +1,11 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
-import {newCode,validCode,displayCode,pairing,seal,unseal,identity,sessionKey,createGate,id} from '../mindex.remote-core.mjs';
-const codes=new Set(Array.from({length:100},newCode));assert.equal(codes.size,100);
-for(const code of codes){assert.equal(code.length,8);assert(validCode(code));assert(validCode(displayCode(code).toLowerCase()));}
-assert(!validCode('123456'));assert(!validCode('I'.repeat(16)));
-const code=newCode(),pair=await pairing(code),wrong=await pairing(newCode());
-assert(pair.topic.startsWith('mindex-remote-v2:'));
-await assert.rejects(pairing('ABCDEFGHJKLMNPQR'),/새로고침/);
-assert.equal((await pairing(displayCode(code).toLowerCase())).topic,pair.topic);
+import {pairing,seal,unseal,identity,sessionKey,createGate,id} from '../mindex.remote-core.mjs';
+const code='11'.repeat(32),pair=await pairing(code),wrong=await pairing('22'.repeat(32));
+assert(pair.topic.startsWith('mindex-remote-v3:'));
+await assert.rejects(pairing('123456'));
+assert.equal((await pairing(code)).topic,pair.topic);
 const box=await seal(pair.key,{action:'next'},pair.topic);assert.deepEqual(await unseal(pair.key,box,pair.topic),{action:'next'});
 await assert.rejects(unseal(wrong.key,box,pair.topic));await assert.rejects(unseal(pair.key,box,'wrong'));
 await assert.rejects(unseal(pair.key,{...box,data:box.data.slice(0,-4)+'AAAA'},pair.topic));
