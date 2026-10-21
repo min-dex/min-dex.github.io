@@ -775,6 +775,6 @@ modifications from visits, draft input, failed saves or deletion notifications.
 
 Reference editing cards use the available group width; read-only cards retain their compact grid. Title/URL fields stack below 600px of card content, use 1:2 columns from 600px, and include the group field in a third column from 900px. Labels, focus and save behavior remain unchanged.
 
-Home recent views reserve six80px card slots (10px gaps) in the shared responsive grid, including loading/empty states. Titles occupy one20px line (ellipsis with full title available on hover) and save time its own18px row in both views; switching must not move the module cards below. No routine footer explanation; read failures retain an inline retry in the selector row.
+Home recent views reserve six80px card slots (10px gaps) in the shared responsive grid, including loading/empty states. Titles occupy one20px line (ellipsis with full title available on hover) and save time its own18px row only in recent edits; recent work centers its two-line text block vertically; switching must not move the module cards below. No routine footer explanation; read failures retain an inline retry in the selector row.
 
 Praise/Scripture metadata popovers use their own content width, not viewport breakpoints: below400px one column; from400px two columns; Praise alone uses three columns from570px. Preserve labels, input order, focus and existing popup width.
