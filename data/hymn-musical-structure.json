@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOf": "2026-10-21",
+  "asOf": "2026-10-22",
   "purpose": "Version-specific hymn musical structure metadata; independent of output form order. Initial measured subset, NOT full-catalog completion.",
   "countingPolicy": {
     "basis": "one printed stanza, before performance repeats",
@@ -13,9 +13,9 @@
   },
   "summary": {
     "versions": 1203,
-    "stanzaMeasuredVersions": 113,
+    "stanzaMeasuredVersions": 147,
     "recitativeExceptions": 2,
-    "unmeasuredVersions": 1090,
+    "unmeasuredVersions": 1056,
     "complete": false,
     "productionMetadataWritten": false,
     "appDisplayImplemented": true,
@@ -5824,66 +5824,91 @@
       "versionId": "8623922b-453e-469f-aa83-1061d472698d",
       "edition": "new",
       "number": 86,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 8.125,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "64000c3c-112e-463c-82bd-cff01ba4fb2e",
           "kind": "Verse",
           "textSha256": "51c365190d3f06d9f7038290c6090ab58a99faf04f44ea35403254cff7804df3",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4.125
+          ],
+          "approxMeasures": 8.125,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "145cc7fe-49cd-407c-a4c2-66a702636fc2",
           "kind": "Verse",
           "textSha256": "397156301a5d3a2752d034a40f9d33005fcfc586e05ff44ed8f76cd048718e51",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4.125
+          ],
+          "approxMeasures": 8.125,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "33de056f-0928-4812-af03-5f9a978a7d38",
           "kind": "Verse",
           "textSha256": "d64ec115126b3abc4b8cf029787083a01f6fcda673175e75e47b5be064d8375c",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4.125
+          ],
+          "approxMeasures": 8.125,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "f1aa4849-49a7-4bfe-8f39-82d3a67656ad",
           "kind": "Verse",
           "textSha256": "40b965cc4eafee1211fa187061fa1fe4a17d68fb41c8d1ba6ea7f99ca1ad7db4",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4.125
+          ],
+          "approxMeasures": 8.125,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "7718e93b-141a-436f-b68d-b3068ec5cc8d",
           "kind": "Chorus",
           "textSha256": "65b5028c426202aafe668510c4409c3eea2123f0ae4d6d33b9270d05b324c1bd",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            3.875,
+            4
+          ],
+          "approxMeasures": 7.875,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "8ac70e7d-4094-4a64-a2eb-93fa19f5575a",
           "kind": "Chorus",
           "textSha256": "92f0c5ff96fb1fd0b1dbeb36a1c2e18998e847226ee23d9ba5c1b4a8c1e70c22",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            3.875,
+            4
+          ],
+          "approxMeasures": 7.875,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/086/score",
+          "sha256": "81a4573c5bef43267feaaf9a23504c87cd2696c25093433e4907d88bd7a7c182"
+        }
+      ],
+      "meter": "4/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Resolved previous hold: verse quarter-beat totals 16+16.5; chorus totals 15.5+16. The chorus starts with an eighth-note pickup (shared stem/flag), not a quarter note. The preceding eighth rest belongs to the verse. Simultaneous response voices are not additional time. Union split before the last phrase gives verse 4+2+2.125 and chorus 3.875+2+2. The second stored new-edition chorus differs only by a prolongation dash; same printed bars, no fixed extra bar or timing inferred."
     },
     {
       "versionId": "816af56b-c2fd-5fe3-a139-cafbf497f114",
@@ -6160,1004 +6185,1364 @@
       "versionId": "760aec77-d501-527d-b27c-00d3ac79fe2e",
       "edition": "new",
       "number": 91,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 7.75,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "6316fb8b-cfa1-4750-98aa-c0a12b213cb9",
           "kind": "Verse",
           "textSha256": "022e52ab1cf75150700f765dcdb687b06d3bd0ec1f11f9d61698d9276f9ee159",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            7.75
+          ],
+          "approxMeasures": 7.75,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "5a2b08be-e1a1-47f4-ad29-00f072b147a6",
           "kind": "Verse",
           "textSha256": "f94825bceec201c07a035230d357801767169cc3aa06bc90e4397468950b9ec5",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            7.75
+          ],
+          "approxMeasures": 7.75,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "7b8c3752-d07f-45b2-b292-336021c77ef2",
           "kind": "Verse",
           "textSha256": "07ad2421644bf8b1892e97458f0952997dcfcd35f78731541408ed9a1fbdc74c",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            7.75
+          ],
+          "approxMeasures": 7.75,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "572329a9-45fd-46fd-85e0-19e07d2a6a68",
           "kind": "Verse",
           "textSha256": "c64c236462bee9e3a7214505716b313b2e835e1616038ac5a1382d69c098147b",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            7.75
+          ],
+          "approxMeasures": 7.75,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "27620a94-7c14-4d71-9d04-42cfa6558e57",
           "kind": "Chorus",
           "textSha256": "f0c9b06e0ad068add69b6af3a6894eed4c7457e309e04f1c3db96c065eb3384a",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8.25
+          ],
+          "approxMeasures": 8.25,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/091/score",
+          "sha256": "b0e0d79965f4b8c05b72cf9734b63f3c99a2ae08b7a8d82b7f27950bd97ab2db"
+        }
+      ],
+      "meter": "4/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Verse 31 quarter beats (4+3.75 bars); chorus33 (4+4.25 bars), total16. Chorus pickup retained; simultaneous lower response not counted twice."
     },
     {
       "versionId": "73ff63aa-da15-5e4b-9b4d-ed28c71eda4f",
       "edition": "new",
       "number": 92,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "0434ccad-d396-40e7-bae1-6a5edacdb298",
           "kind": "Verse",
           "textSha256": "ffedfd57e333c11ee51f1c4c91add07db718e291a96c1abdbf421026ad9f2de7",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "ed54b2f5-d6b5-43a7-bd14-33abc5830059",
           "kind": "Verse",
           "textSha256": "9ccb0c10e6aa484b3ea639beecae7b0e21c6345f73da46dc2827d9a0be44bca5",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "682c996e-d043-4498-a009-7a0e9cce29c5",
           "kind": "Verse",
           "textSha256": "d6b2f6779dc4f2375489ec49f93a7039100c4c549370a3625c20da25ba24b7d8",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "b5db1e30-8b1a-4183-90c3-5b9cf2d26f3b",
           "kind": "Verse",
           "textSha256": "4571424bf275dd3c0d6c4c2fe79d911d5f09ee26ea60b725f334666b83effbdc",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "eb12d4a7-d4cb-46af-9d07-aabc6c8565b5",
           "kind": "Chorus",
           "textSha256": "81d8c3a0b00fb2ed718341f413a0157af6597882a300611aa0689b492d8f27d5",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/092/score",
+          "sha256": "60f43ed64d00873352ae0a43decc5752d6b7665d1fe598e8d45372ed0c9064bf"
+        }
+      ],
+      "meter": "Verse 3/4; Chorus 4/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Verse 3/4 and chorus 4/4 counted in their respective printed meters, each8 bars. Union split4+4 for both; new edition each one stored block."
     },
     {
       "versionId": "f755f3d6-6567-5744-8e4f-90149c84d77c",
       "edition": "new",
       "number": 93,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "9a1587a2-e753-4655-88c7-5d32860648f1",
           "kind": "Verse",
           "textSha256": "63e91d325ac187d7b3886b7b5d838ad17a918bcf05cd350751baad9ff3067ab8",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "1d429296-9bb7-4fca-86b1-015b92553d1d",
           "kind": "Verse",
           "textSha256": "d111b42fe63360e59d40652245b1a6e2e6bbfbde60968ba8ddb5c0bedf44d9a3",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "34fa21f4-3b66-4358-85cf-69a17c0525ca",
           "kind": "Verse",
           "textSha256": "618fdd2a40ca33645a1105eea6b5ca4680494f1a1491091a2f65d5e9468d768a",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "a92f15e2-075a-48b1-92cd-da44a54a2b31",
           "kind": "Verse",
           "textSha256": "f205c19c06160f2ab9635bc949391538935cc9bfe09e6d843c14a26c9419295d",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/093/score",
+          "sha256": "881fc7abb0d67b62af51c256ba681a08bea9fb8bf0e9a42615d5ac9e1b2b7c4d"
+        }
+      ],
+      "meter": "6/8",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Verse16. First two printed systems have23+25 eighth-note beats in6/8, so union split23/6+25/6; remaining systems4+4. New split8+8."
     },
     {
       "versionId": "152b55dc-dd3a-4ed9-aca7-896141a7ecb1",
       "edition": "new",
       "number": 94,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "f61254e2-877f-4834-be30-f31db7712285",
           "kind": "Verse",
           "textSha256": "60ac0d4d28c08e8c9fa4d4d66c1b43be7a310a6d3d638164e2e68d07c6fbb871",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "6fa82e57-04d4-4040-a99a-e05c986b113b",
           "kind": "Verse",
           "textSha256": "bde548d66265dd10ff128ffe6b7a9f94b7dbf4f47598fba67077b34dd9dc96ad",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "78aafd75-c686-46e7-a01c-dc389c9860ea",
           "kind": "Verse",
           "textSha256": "3e5b69f4402a43819468e6c6fae23e659d8eb1e7a3bb2edb8c60e73668827290",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "a6b19866-b206-4e64-840d-3b82f412a9b5",
           "kind": "Chorus",
           "textSha256": "f8ba80e54b1c671a7f13e96f7c9d16961ff2860c3f9267e2680c3eda4b054ec3",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/094/score",
+          "sha256": "369aaa7fb7284ed91ac412221907077a3f6a6263f178843baa245b2d4a07203f"
+        }
+      ],
+      "meter": "3/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Verse16 and chorus16; quarter-note pickups and complementary final halves combine. Each stored part8+8."
     },
     {
       "versionId": "c5e735c0-9011-4248-aa45-74cf7647091a",
       "edition": "new",
       "number": 95,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 14,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "85b860c7-6930-4f63-8c40-9f1326f8582b",
           "kind": "Verse",
           "textSha256": "e1a8aba9786d85876df02f5b34562963cb2bb39e2205b9138e61b0408fc62250",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            14
+          ],
+          "approxMeasures": 14,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "593c57e4-6acc-41a1-9933-172f6e011d90",
           "kind": "Verse",
           "textSha256": "8f21c28f5039dddac291f1c204652bb1e13e24b424cd907cf792cf58b871dce0",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            14
+          ],
+          "approxMeasures": 14,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "00e8f36b-40ad-45ab-8c0a-4c431c3b61ca",
           "kind": "Verse",
           "textSha256": "23556dd05808ca10e1ec5191f84d1a7fe1152b7b116acfd187b44884b863d5df",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            14
+          ],
+          "approxMeasures": 14,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "66ef94d1-1474-449c-bd6c-b8bca945f8a4",
           "kind": "Verse",
           "textSha256": "2b7f1d8b24516fedbd11673590703cef81500a5333c8fa133d270e79324ab482",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            14
+          ],
+          "approxMeasures": 14,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "0249799f-8264-453b-b1da-aa20713a8d37",
           "kind": "Verse",
           "textSha256": "44d9bef1d888dd9c4e3429069ca6f9038fe2a80a6c3074bb23d9041d986182df",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            14
+          ],
+          "approxMeasures": 14,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "6551214c-25b1-4724-89d9-6798c0baeec4",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/095/score",
+          "sha256": "87a691bbfe8d942d0da5c7a129ed7bd367ff4f54cac0482ecd9adaf32e099937"
+        }
+      ],
+      "meter": "4/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Two seven-bar phrases, verse14. Separate Amen1."
     },
     {
       "versionId": "5f00788d-9db5-4925-9625-1d9590daea16",
       "edition": "new",
       "number": 96,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 12,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "625b4d9c-5d91-4474-8b3e-5a94db977d49",
           "kind": "Verse",
           "textSha256": "a259cca46393c1d34b80ac78bccc87495a458f3ee1da75942be3c8bc21909693",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "b95eabc1-fc2f-4a60-81ac-4e39a2d3e3d5",
           "kind": "Verse",
           "textSha256": "7cbc1da0993760698bd9aca5b1d40120c49995d3bd00487660090d0b826b8595",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "9e512903-ae5b-4f88-a418-39242cb1c775",
           "kind": "Verse",
           "textSha256": "5e27aac75482959d06de7867f97bced163ec496a6b52febd4e5698192f80914a",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "a9a92c8a-7e30-4c31-b164-3507405976eb",
           "kind": "Verse",
           "textSha256": "5e84c40c8615d06b0215cb2fd01a1ec4f8235e7591cb7d47f765f9cc9732ced9",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/096/score",
+          "sha256": "fb0fa6c591f704ea4ce472f9ba6c7775c49c625dde19edd6fc611edbb4bf22d3"
+        }
+      ],
+      "meter": "4/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Three four-bar systems, verse12. New8+4; union4+4+4."
     },
     {
       "versionId": "a214db06-a6dc-478d-aa2c-f1770cc3d61f",
       "edition": "new",
       "number": 97,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 12,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "5a316004-d40e-4e25-8cb7-546cca031b3d",
           "kind": "Verse",
           "textSha256": "5fb67dc68a41913d4f76c65f4ca50c94315abab46db429d1dd6390dd3fe3f7c8",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "0f854782-00be-4fc7-9f4c-63fc6220b1c8",
           "kind": "Verse",
           "textSha256": "939bdd80c50e919c81d952d8cad6e2ee8d5d3b16f15651f358d4a2fed570cfb7",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "ada2a822-c0d3-457c-865a-ab39dd07b5b5",
           "kind": "Verse",
           "textSha256": "bc9f02f7a5dd7446d96b9d18a2774cbd918c712f2ab6bcbefc30a3f1f6d095b8",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "f41dbf92-db1e-451c-8f82-186b05ca1e17",
           "kind": "Verse",
           "textSha256": "3862e5f02a902e21b8eb0aa10bbb780e1bfbdef91b13d9377e517b2b56fe9460",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "cd500d3f-e286-4e93-8809-d9d6333fa541",
           "kind": "Verse",
           "textSha256": "5f4140940e8351c986d9f9f6df10c69edec44c351776dc0cd674e5a05d921c31",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "442446d6-ee32-4134-bbf9-e9072b539fe1",
           "kind": "Verse",
           "textSha256": "14f00336fd71afeb3f40e1c4cb3fe4965e65d2a31fa6ee082f6c0d90ded4a3bd",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/097/score",
+          "sha256": "0030bbc8e59a62ed347f55cc96d249926523871505c04c519534b78635d06cd8"
+        }
+      ],
+      "meter": "4/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Three four-bar phrases including complementary pickups/endings, verse12, stored8+4. No linked union version in current canonical record."
     },
     {
       "versionId": "27f353b3-39d9-4885-9967-0c9021b7d1ca",
       "edition": "new",
       "number": 98,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "881234ff-4249-431f-9394-3ce8ac4369e4",
           "kind": "Verse",
           "textSha256": "3c9e7a3b6395b7c678a3a0426ccc91fee370e41b41494ed6385868e2c46da311",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "a9768096-9d0d-4d9d-ad95-d12c75d8be47",
           "kind": "Verse",
           "textSha256": "f176ee468b0c8950d76c4fd259fb2d2e9469e5283a02054e16edf9ffa24a8560",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e678cbcc-797e-48be-adab-bd6f91f6b947",
           "kind": "Verse",
           "textSha256": "a78de0bd670923eb745b3c29e5467794b0be2b1832b05e157744850f77fa5304",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "6331b02f-6e59-4179-aee8-fcc1515ab82b",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/098/score",
+          "sha256": "f9799f5fd39182de72972322b91491c6d922f3e70e138c6a1fee8ceecf3c63d6"
+        }
+      ],
+      "meter": "3/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Four four-bar systems, verse16, stored8+8. Separate Amen2."
     },
     {
       "versionId": "c9174714-ea1e-4bfd-9add-446f7951164f",
       "edition": "new",
       "number": 99,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 19,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "dc26d054-4010-44e7-98ab-ff08c38c9218",
           "kind": "Verse",
           "textSha256": "457e9f26f911f751b5d629ecc7c002f41da551ac2b85be7bfeb37d92842249f5",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            12,
+            7
+          ],
+          "approxMeasures": 19,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "0edcf29a-964d-4f1c-9e69-c042ec01a1ac",
           "kind": "Verse",
           "textSha256": "4349a359da289c7a07fd12b116d6761a399ea70e891406c16bfb3c3bb5f1f952",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            12,
+            7
+          ],
+          "approxMeasures": 19,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "1f9a0085-d977-4f44-b3bd-7bfea6e5fc0c",
           "kind": "Verse",
           "textSha256": "972395e552a41924b49ef66ebf7883571a78fa7437a6e1744f9e87be1d608b32",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            12,
+            7
+          ],
+          "approxMeasures": 19,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "2114a66c-5d18-456a-a4f8-fcba424c3834",
           "kind": "Verse",
           "textSha256": "769e620016eb7e6ce77afb714240cec10ddc10d431cb051d596aa035006abbbc",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            12,
+            7
+          ],
+          "approxMeasures": 19,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/099/score",
+          "sha256": "3f96a303bf5a6b9755c46854275e5bab4eb9c3e632a861b88e67d9d1d1c58c2e"
+        }
+      ],
+      "meter": "2/2",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Printed2/2 systems6+6+7, verse19, stored12+7. Not forced to4/8-bar phrases."
     },
     {
       "versionId": "545a96a8-9609-4f31-a44b-ad0e9da49919",
       "edition": "new",
       "number": 100,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "f0878673-3556-409a-9867-42b203a9977b",
           "kind": "Verse",
           "textSha256": "c68af31d17738d2b83a37bfb857f74106fc14c1fbc2679397812a9e2c34957b2",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "5be249f0-c3dc-4921-940e-ce22362a2d3b",
           "kind": "Verse",
           "textSha256": "79327800c806673f2230a54a718405b19c07b6ac20437f6a0a8ef96598a6a94b",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "0e828b18-4fab-4ae7-8125-329df6c04ada",
           "kind": "Verse",
           "textSha256": "c3a7e65866f93391008a7687096d4d95be4f4718e73b7719be1fd9612ab2087b",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "305e2d84-14ac-45d2-8f06-3e81d43cfe0d",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/100/score",
+          "sha256": "149e7886a4c20a52d88b3edc521bfd521ad3bd7d68ffa140a32bb826b76d18a3"
+        }
+      ],
+      "meter": "3/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Printed3/4 systems4+4+4+4, verse16. Triplets are subdivisions, not added beats. Separate Amen2."
     },
     {
       "versionId": "2deb1b5b-4b72-5cf3-86a0-9b93300b6bb4",
       "edition": "new",
       "number": 101,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 17,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "7beae96d-1e5d-48f2-b1e3-8f836e98b6ef",
           "kind": "Verse",
           "textSha256": "854002b820fb66f24e9d2b5978bca3b433f7f76b6d8df3608783a02c41b266e2",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            10,
+            7
+          ],
+          "approxMeasures": 17,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e6c50025-26c8-491b-aa65-9747ea3f20eb",
           "kind": "Verse",
           "textSha256": "f5a8eea1493c4325599fc052006d05074719e799aa9926d28c5f08467d1a6271",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            10,
+            7
+          ],
+          "approxMeasures": 17,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "880e2e98-29b1-4ced-9db6-fbc6ef83067b",
           "kind": "Verse",
           "textSha256": "da4042771d53773eee98dc9121461e8a02c62b2c1c318931a869e30263552d1c",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            10,
+            7
+          ],
+          "approxMeasures": 17,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e3097e1d-633a-4ccd-ada6-81c9d908b0c5",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/101/score",
+          "sha256": "825270242e236c3c4624559d26817006dd664071383088ed3e20d26324d04c24"
+        }
+      ],
+      "meter": "2/2",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Printed2/2 first two phrases5+5; remaining7. Union third stored block includes4.5 bars and final block2.5. Complementary half-measure pickups/endings combined. Separate Amen1."
     },
     {
       "versionId": "3a12be3d-8f2a-52ac-9de3-6a9da4a04709",
       "edition": "new",
       "number": 102,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "f8d3cc76-f6eb-4259-a7d6-6e9829e70047",
           "kind": "Verse",
           "textSha256": "492bae0a4fda4a543b9653ddda9ea69932bbac82ca3b34215de18d7858cf008f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "30b1d89d-74d6-40e2-99ed-f0cfb7af5f57",
           "kind": "Verse",
           "textSha256": "97e1e3e926ce7bbc0d2db78ced3b10bb0041be59973c7b2c461ae5ada6173e96",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "9414550c-7c9e-47c6-a992-01c9ef3664ce",
           "kind": "Verse",
           "textSha256": "e8886051cb25388c514cb1e059f9f74204959833b54ccad5501f82f77c12d048",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e8bca5c2-2364-4f93-88ad-4ba829825654",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/102/score",
+          "sha256": "46d1e514c6ccc8b5427f2f49b4cec6195289b36514c601a8a7d6f7bce098fa4e"
+        }
+      ],
+      "meter": "2/2",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Printed2/2 verse16. Union first stored block31 quarter beats=7.75 bars, second33=8.25. Separate Amen1."
     },
     {
       "versionId": "5556f4c7-9b8f-51c3-9e79-4cf38fffa885",
       "edition": "new",
       "number": 103,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "141c6631-2372-4a1c-9eb0-7a17f74c0201",
           "kind": "Verse",
           "textSha256": "cd3005eab426adbcb39c305d34e522d6a0ee8de97c1c0970997506d3e3c0479a",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e590a7c6-6364-4112-aa0b-8a37b94deb0f",
           "kind": "Verse",
           "textSha256": "360779a7b47ca3f4f935af7e9bea5c4dd125322d8d66a64f6cd25ed6db8622a3",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "3e0e858f-428d-432e-ac3a-f0248da4a8d9",
           "kind": "Verse",
           "textSha256": "e7ed4cbf1b55820a94fe1b48c7d03b0f0518308cc035e7d146e26c82fdefe749",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "07cf76d6-bc4a-44ac-8829-bfc267daf156",
           "kind": "Verse",
           "textSha256": "4c9b857ae87f0ead833bab6d8ef4157b09a2672d45963314ab4c546c870cbb01",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "72498111-2798-4ef9-b141-39dcfa5ff537",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/103/score",
+          "sha256": "98974c992d90dcef326c081d3513ed5b20d900eb0a825c4027030778e64353a6"
+        }
+      ],
+      "meter": "4/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Two four-bar systems, verse8. Separate Amen1."
     },
     {
       "versionId": "7056c987-a1bd-53fb-9f7e-7390b1dcfd99",
       "edition": "new",
       "number": 104,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 12,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "d6046c0e-0485-4281-bc5c-681824d99936",
           "kind": "Verse",
           "textSha256": "1a6cd351dfa528341ba21d915b690afad0db22b7532dcf61645130639a49b55e",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            12
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "c8b79e1c-3a6e-4eae-a980-d6a3dafae133",
           "kind": "Verse",
           "textSha256": "47368344a8223472d3782a4ef47d1620382fa57bc517e1e39a6803c69d89068f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            12
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "3aed15e4-1c4e-49dd-b98d-f60759cea017",
           "kind": "Verse",
           "textSha256": "ca59ee9f48bf82bffdaf029694c597ea1f841829b156ccbab88bc2271a7ee6a4",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            12
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "c694c524-a518-437c-9f6c-87416b7de0cc",
           "kind": "Chorus",
           "textSha256": "3ca78388f6a1a20d9faeed15e30bc7e3660de51a59dc5d62af20b2f5514ce56c",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            7
+          ],
+          "approxMeasures": 7,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "0c15a111-e32c-42ac-9cbf-440217a5dce1",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/104/score",
+          "sha256": "3e06d2168807cf1028fb7e032ad3de91a717c01b10d38da359b989d3633002b7"
+        }
+      ],
+      "meter": "4/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Verse12, union6+6; printed refrain7, separate Amen1. No additional repetitions generated."
     },
     {
       "versionId": "9a1879d3-f1f5-5371-a591-1497ebbb0831",
       "edition": "new",
       "number": 105,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 32,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "fd16aac4-551b-4d4f-8dd2-1c33f5c8909b",
           "kind": "Verse",
           "textSha256": "739dc5aecb276656a6a080ec8ab1ecc3d02bdf0be1e408e2402333a1837a5ebc",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            16,
+            16
+          ],
+          "approxMeasures": 32,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e9aceac6-f70f-446d-b2e4-be9035b6f190",
           "kind": "Verse",
           "textSha256": "73d3578f5a357b11c65b2feaece14bb8d3a2aaa4db20573fa5784c7cd242e6e1",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            16,
+            16
+          ],
+          "approxMeasures": 32,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "66dcce56-dc31-4f50-931f-d0157712a18b",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/105/score",
+          "sha256": "883a7541b6e056e2a8fe861a089a7c2fe5be0ba9a811613f6c567d840a6dcba9"
+        }
+      ],
+      "meter": "3/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Four eight-bar systems, verse32. New16+16; union8+8+8+8. Separate Amen2."
     },
     {
       "versionId": "700ed631-454e-4c52-8303-52969c9970d1",
       "edition": "new",
       "number": 106,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "e668162f-7850-4af4-a6f0-2a21c56518ec",
           "kind": "Verse",
           "textSha256": "c7a0ed41d2796d5cf1b7dc960cedeb8ad5c91b7427a2cdad2e5904089e586611",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "90bb7997-bee0-413a-b5fe-d8f2e83740f2",
           "kind": "Verse",
           "textSha256": "01469631b3d8877c0219f120c7faf717ce51cfb5a4a1c3238f85aaee1bab33e0",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "0b4c1f30-0543-436a-bf96-bcf8cbaa607b",
           "kind": "Verse",
           "textSha256": "bdb7837773682bd9f94b52d47cad1ba8b220b64c5a9ed07005cdd448cf611915",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "a9c4b19b-8e11-4c72-b970-e11aa5ff8495",
           "kind": "Chorus",
           "textSha256": "84958cf36040747c50f7299ba3751e4606c9d4a9e4ec83aeda357dfbe491bbbf",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/106/score",
+          "sha256": "b07413bf94d16e856372d04cc7520060ac77a7908e40f817fa6f494cd0dab53d"
+        }
+      ],
+      "meter": "2/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Printed2/4 refrain16 and verse16. D.C./Fine directs return to existing refrain; no repeated bars appended to stanza and no song form written."
     },
     {
       "versionId": "129bbc44-b9c3-5191-af8e-8a15472238fd",
       "edition": "new",
       "number": 107,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "a80b9730-9279-4dbe-97bd-c9b056df77d9",
           "kind": "Verse",
           "textSha256": "6aadb6b94eebdfba56e70afc400064992fe63c9d350412bf0ee1702e5aee0e61",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "dc5573a4-b562-4737-bc7b-c70a02b2b265",
           "kind": "Verse",
           "textSha256": "26cbe757018499a2bb2c8313cd3da3be735d9c9f86ebd711e21840b2f45155b8",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "b10fcc9d-e043-498b-ac27-a574191eb040",
           "kind": "Verse",
           "textSha256": "032a1a4020189a6fa18d5f6f185c3d9f19e94329066d0334f184b5a539bf13e7",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/107/score",
+          "sha256": "8422f6b58f2574eaeff423655e3e5e1c85dff4410f0d7676cfbc9f2305c03d26"
+        }
+      ],
+      "meter": "4/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Four four-bar systems, verse16, stored8+8."
     },
     {
       "versionId": "6734eda6-3f9c-48e3-8b9a-bcd78226f916",
       "edition": "new",
       "number": 108,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "7783439a-3d2d-416a-967d-1c102342f283",
           "kind": "Verse",
           "textSha256": "73391d2deb91b603f0343142e32fd9c7d31723a94ad6424e03d4fa501941067d",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "78c0b241-f4a4-4798-96ef-4c58c43564e0",
           "kind": "Verse",
           "textSha256": "7b9d56e1b918c43185f0aa4f6797f336a64310a387ccfa8a1a49e8158d0f39d2",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "9acc68d1-3f71-4ebf-b18b-7f8b146aff54",
           "kind": "Verse",
           "textSha256": "21d854db7a02c9da96f2d97153171c7b36a3299ffdca154dadfc2afef824ba5c",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "6f78ba81-e742-4bc0-b117-088cdf267844",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/108/score",
+          "sha256": "bc21f0bbbc9fb6344ac66de3f118858b62b32ab74345b1667850817ce6970529"
+        }
+      ],
+      "meter": "3/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Printed3/4 four four-bar phrases, verse16, stored8+8. Separate Amen2."
     },
     {
       "versionId": "49ffd8c3-76b1-40ac-b081-51f21f6f6a76",
       "edition": "new",
       "number": 109,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 14,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "5159d89a-7908-4a81-beb5-de5f91e7e6fd",
           "kind": "Verse",
           "textSha256": "a06c54302fdb283a5503ac143d416926044e05c0d6c28c2935db5b9cb4527ff8",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            6
+          ],
+          "approxMeasures": 14,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "3a17e0be-b836-4f2a-996c-9a7c87dcd264",
           "kind": "Verse",
           "textSha256": "c43781a96effd9f68e59067ceb188110b21eb4cd8de6ba0daf5e82eb21a04dc9",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            6
+          ],
+          "approxMeasures": 14,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "972c037f-0016-4d42-970c-dec2c129f4f3",
           "kind": "Verse",
           "textSha256": "81d7e9235fb02cb7da81ba9775910d04748bc327f41cbd6ce751a20ed46420aa",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            6
+          ],
+          "approxMeasures": 14,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e415c7a2-1fc2-4c60-9f92-86262dfb207a",
           "kind": "Verse",
           "textSha256": "b132e32eabf4d224635b3b1a6aa7c2ef468fe127b15817c931ad8408c8a86b72",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            6
+          ],
+          "approxMeasures": 14,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "0b0d3411-abed-45a0-9aca-c3a96272b622",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/109/score",
+          "sha256": "15fb5307c4a1a2fb4cf5af3bfa9b351d8236a99886fe1f8de79dd7402035172f"
+        }
+      ],
+      "meter": "6/8",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Printed6/8 systems4+4+6, verse14. New8+6; union4+4+6. Separate Amen2."
     },
     {
       "versionId": "0e609e37-cad6-51b4-86b9-5ac29bf79b47",
       "edition": "new",
       "number": 110,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "37262ad6-0ef5-4883-9040-8ec4ddf59999",
           "kind": "Verse",
           "textSha256": "c12547f208e61d72f4de4ee2bfb37152261daafbab1e50155291207c931aacee",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "3e1b7ab7-fe93-4ef3-ae2f-673d00c4a6dd",
           "kind": "Verse",
           "textSha256": "8b7805c0fdc39263205b8718102a0315d30e979b59c867a900bb082e9be7902c",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "6a72fb58-6ec7-47ea-a21d-a2666bcb7bed",
           "kind": "Verse",
           "textSha256": "a97e62fcfe6b33bb30478e5e67054615f905bdc329f6869f39ce5fc9c4134e38",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "c22e2879-dc41-40e2-ba47-cd0dae2bd0e7",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/110/score",
+          "sha256": "eb35d3cfe7e99059d932dfaaa15999b40a41bb967613ef22aa20050380ee8485"
+        }
+      ],
+      "meter": "4/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Four four-bar systems, verse16, stored8+8. Separate Amen1."
     },
     {
       "versionId": "e2ffeb2f-882b-4494-a289-c03c3f5e8225",
@@ -38641,66 +39026,90 @@
       "versionId": "c2b663ba-b200-4ec9-a1d7-0faf0ecc03b3",
       "edition": "union",
       "number": 82,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 14,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "7546d58f-ad60-5561-a94a-a442a41ac088",
           "kind": "Verse",
           "textSha256": "a90336c47985875f35bb000d5df64094625939a58172b44e6400bd7e4c713141",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            7,
+            7
+          ],
+          "approxMeasures": 14,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "6e6fc06a-4832-5966-800a-8599ab0c67ee",
           "kind": "Verse",
           "textSha256": "188193613ba178b80b3d7d54beb1e50927b0bc5a861a3d5886da2072d96a2f33",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            7,
+            7
+          ],
+          "approxMeasures": 14,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "96c1e6c5-e17e-5a28-bcab-f2d53e288423",
           "kind": "Verse",
           "textSha256": "6a13b89c3d191831ab49e0badd83a90fc7f01476cedc7abd5ae6eec5faf5c5a1",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            7,
+            7
+          ],
+          "approxMeasures": 14,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e50bcde4-89c2-5f60-a25e-0b0986e0f75e",
           "kind": "Verse",
           "textSha256": "e0e85f3a93a4611ec230ac8d8018619e4426f00706c872b1fc4ae038553bd79d",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            7,
+            7
+          ],
+          "approxMeasures": 14,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "3d3ccc6f-ade7-599a-a4be-caea7bd26523",
           "kind": "Verse",
           "textSha256": "00e832188eeb00ebd4449794b408bfc5b518ca084945014bcefc94c1424a4782",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            7,
+            7
+          ],
+          "approxMeasures": 14,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "93c3ec8c-a8a1-5910-9703-71f36e80875f",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review10-02/score-082.jpg",
+          "sha256": "a4f8b7de144a86382d3e0b7dab912d074371ae930dd8eb4125f20ab6a5d858f1"
+        }
+      ],
+      "meter": "4/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Two seven-bar phrases, verse14. Separate Amen1."
     },
     {
       "versionId": "6c9d1ae3-a0d1-4be5-b4a3-b6f7a7fdac35",
@@ -38956,57 +39365,84 @@
       "versionId": "bfc709eb-baae-41b9-9a0b-9eebbb71adbb",
       "edition": "union",
       "number": 86,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 8.125,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "d32501a2-03ab-5440-9463-a035cb42e403",
           "kind": "Verse",
           "textSha256": "98796bdd3213a994cc46a1db452d3d7c76b65f1bff1bff0fd67b157fa6e994d4",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            2,
+            2.125
+          ],
+          "approxMeasures": 8.125,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e32858b3-6e00-53ce-89cf-2ceb1ec22080",
           "kind": "Verse",
           "textSha256": "eeaacae10543e70028ab68e327cb2694dbef20f018d42d340506f1784ae77e75",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            2,
+            2.125
+          ],
+          "approxMeasures": 8.125,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "1a4a0668-050e-5bd6-856d-197f22c92afa",
           "kind": "Verse",
           "textSha256": "e3d2f192d738772263fe957f1f7668992d6975522f5f45613d181a6916ddb220",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            2,
+            2.125
+          ],
+          "approxMeasures": 8.125,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "4a1221ae-db56-52e5-9541-3ad97d1e816f",
           "kind": "Verse",
           "textSha256": "f0f266e5af30b7669a0021f68926af1e8a8ae042e37877de5f15ad2792adf1cb",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            2,
+            2.125
+          ],
+          "approxMeasures": 8.125,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "f93fcb5c-7214-5c0e-b42a-9ec7c4f18cd7",
           "kind": "Chorus",
           "textSha256": "694c2ecd28e894f74108be2ac43de93d8477a8f52eb23f1d1fc9d636dadf485d",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            3.875,
+            2,
+            2
+          ],
+          "approxMeasures": 7.875,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review10-02/score-086.jpg",
+          "sha256": "351b151650db41a6837e3af13f3a6ba6894e339603f690485551e7c345a4df55"
+        }
+      ],
+      "meter": "4/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Resolved previous hold: verse quarter-beat totals 16+16.5; chorus totals 15.5+16. The chorus starts with an eighth-note pickup (shared stem/flag), not a quarter note. The preceding eighth rest belongs to the verse. Simultaneous response voices are not additional time. Union split before the last phrase gives verse 4+2+2.125 and chorus 3.875+2+2. The second stored new-edition chorus differs only by a prolongation dash; same printed bars, no fixed extra bar or timing inferred."
     },
     {
       "versionId": "d90f999e-2061-52b3-a622-919b647a100b",
@@ -39312,57 +39748,74 @@
       "versionId": "1cacb52f-74c1-5ad5-a93a-db3f82f512d7",
       "edition": "union",
       "number": 91,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 7.75,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "9a4a8b64-2615-4a5a-8b4e-80038f904444",
           "kind": "Verse",
           "textSha256": "022e52ab1cf75150700f765dcdb687b06d3bd0ec1f11f9d61698d9276f9ee159",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            7.75
+          ],
+          "approxMeasures": 7.75,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "159f92a4-ce5f-4d06-81ac-b954677085db",
           "kind": "Verse",
           "textSha256": "85a5228781eb9271e2b49e0f21cc7d8549e97013b05ab69e50e2967dacfeda71",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            7.75
+          ],
+          "approxMeasures": 7.75,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "c55cb3c0-0f05-4534-b85b-28026daa365d",
           "kind": "Verse",
           "textSha256": "07ad2421644bf8b1892e97458f0952997dcfcd35f78731541408ed9a1fbdc74c",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            7.75
+          ],
+          "approxMeasures": 7.75,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "491673b4-4a5d-4a60-814d-14656d64928d",
           "kind": "Verse",
           "textSha256": "c64c236462bee9e3a7214505716b313b2e835e1616038ac5a1382d69c098147b",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            7.75
+          ],
+          "approxMeasures": 7.75,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "8f018114-bfd9-49ea-aa51-c96253723f05",
           "kind": "Chorus",
           "textSha256": "f0c9b06e0ad068add69b6af3a6894eed4c7457e309e04f1c3db96c065eb3384a",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8.25
+          ],
+          "approxMeasures": 8.25,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-final77/score-091.jpg",
+          "sha256": "fd1ae3075de456d7cda6358256c587dcc39d0969464fe2eedbe87db467e7ca0e"
+        }
+      ],
+      "meter": "4/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Verse 31 quarter beats (4+3.75 bars); chorus33 (4+4.25 bars), total16. Chorus pickup retained; simultaneous lower response not counted twice."
     },
     {
       "versionId": "fd7d35b9-4b2b-5ec3-9a6f-3c77a3bcd16c",
@@ -39415,95 +39868,145 @@
       "versionId": "120eb643-5168-52cb-8f03-20abf24200c1",
       "edition": "union",
       "number": 93,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 16.0,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "ddeee903-fd20-5658-b9f0-616e6f4b7016",
           "kind": "Verse",
           "textSha256": "44cbce60dc5b77cc3692f01cdc69eb5fa4aeb54515c38b02376794e37fbcdd5f",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            3.8333333333333335,
+            4.166666666666667,
+            4,
+            4
+          ],
+          "approxMeasures": 16.0,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "c81d44c5-49a0-5f52-95f8-03dac6a2ade8",
           "kind": "Verse",
           "textSha256": "f7dd27ba4220e8c7f61adeb01889df3ce1e3d480bce5cb2b05af74156579da2c",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            3.8333333333333335,
+            4.166666666666667,
+            4,
+            4
+          ],
+          "approxMeasures": 16.0,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "aa807f97-ba74-5ec8-8b3e-0fa6931e1dec",
           "kind": "Verse",
           "textSha256": "3f54833675444c7537b6391cbc59ef9f6c8a3aa630f0f639e798fb84ca848d8d",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            3.8333333333333335,
+            4.166666666666667,
+            4,
+            4
+          ],
+          "approxMeasures": 16.0,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "6727caac-8bd8-52cc-b013-f89c01d7066c",
           "kind": "Verse",
           "textSha256": "3e92f3b010855ee78c6fe54a033160696a71a50db770b3d9100a9492a80e9aeb",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            3.8333333333333335,
+            4.166666666666667,
+            4,
+            4
+          ],
+          "approxMeasures": 16.0,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review10-02/score-093.jpg",
+          "sha256": "10b34beea2ea536376f78dadfac72f7d317d1e2b43f5e4490805858325848484"
+        }
+      ],
+      "meter": "6/8",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Verse16. First two printed systems have23+25 eighth-note beats in6/8, so union split23/6+25/6; remaining systems4+4. New split8+8."
     },
     {
       "versionId": "212d82ce-0471-4919-a017-50c2811c8d44",
       "edition": "union",
       "number": 94,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 12,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "30dd9858-e4dc-5c55-ba52-20b25675e412",
           "kind": "Verse",
           "textSha256": "5403c5eec4f81c5eeb3f61475e0ec28540379f329796cc588c7cd383b27c0881",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "61f1b7bb-f4d5-5cd1-8d05-d22a909c2398",
           "kind": "Verse",
           "textSha256": "fe69414d33fb6b155697323e71d83542d0d7b00afb5c5e610f23fc6a510a0367",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "fd6fddf6-cb29-5be6-9e3c-6ab221bf45b5",
           "kind": "Verse",
           "textSha256": "ae33f2ede9251f2766e34b27c062ed13c6dcc909a718b37ccbc95476daed85d7",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "26b0b36c-48e4-52c3-ad34-bd40927d537d",
           "kind": "Verse",
           "textSha256": "fb6d7035ab32eb4aa8f5717a6e1fdcc1144c22aa0d25eaa0810c65c5446eed91",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review10-02/score-094.jpg",
+          "sha256": "fa9b6feb3b27402cdc8d77ec57cc3c2ce71ab5296fa9f65a64add85679f3df4c"
+        }
+      ],
+      "meter": "4/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Three four-bar systems, verse12. New8+4; union4+4+4."
     },
     {
       "versionId": "2df1c73d-98a9-5bf2-893a-2b1e395d2dad",
@@ -39631,57 +40134,79 @@
       "versionId": "74e88e6a-345c-53c1-95c4-b3d445ff9923",
       "edition": "union",
       "number": 97,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "d85413d9-4e0e-5f54-838f-4a25a873c98b",
           "kind": "Verse",
           "textSha256": "c8ad2d551e4c73557235404f3cad9ea20fc67003315cc7603e49d66a659f5ad2",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "ad17bb8e-9ffb-570f-9fd4-9ba2e37de3c1",
           "kind": "Verse",
           "textSha256": "997761ab19eb74006533fc8e0e98439c68d969b37c6e3c76f3ae44e689339f81",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "fe5bccc9-253b-5d68-b42d-a71f183a7926",
           "kind": "Verse",
           "textSha256": "b31bbf9b02bfe739d34f5a808fa3ccb2b3765c11c9e5aa9e5bda534899694566",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "6e33accb-f394-5287-9359-4e9af7fe79ff",
           "kind": "Verse",
           "textSha256": "0395710cde0a473beb2e18fb946670b897627dfcaf4ec33eb1e720d5576517e3",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e2408bc4-2898-53cf-ba90-1797c5cabb96",
           "kind": "Chorus",
           "textSha256": "12bd4ee49bcb8d8fb4395bdbde9fb0ebd51a83b0c3f42c07c6166fa65b7b04b2",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review11-03/score-097.jpg",
+          "sha256": "924de7216a95145562ca3f22fecfd2849876bdb659e763de3530a87348a61e92"
+        }
+      ],
+      "meter": "Verse 3/4; Chorus 4/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Verse 3/4 and chorus 4/4 counted in their respective printed meters, each8 bars. Union split4+4 for both; new edition each one stored block."
     },
     {
       "versionId": "dfc6ec6c-9629-4edf-9466-fc049be7e93c",
@@ -39915,48 +40440,67 @@
       "versionId": "5c824519-d7d8-4a79-84b0-2b0c0053d4da",
       "edition": "union",
       "number": 102,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "96a0441f-48ee-5c87-bc62-76e81c842fa9",
           "kind": "Verse",
           "textSha256": "0aed95a676ae98d51a36c807c301b55c20cca0c815f6768de17aa4440321a38d",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "7fd09dba-f0c5-5607-bfc4-525b79c8bdf8",
           "kind": "Verse",
           "textSha256": "698ca54692a478517eada99e3344d1408d9321c0d4cbce3c1dcf8f34de422ba3",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "f70c61d9-d330-5227-971a-77b7cb42c488",
           "kind": "Verse",
           "textSha256": "92d2050b06a811f5d1c7ceb9feb06c14f65b2852953e1c6fa12fedb2fde324f0",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "b909c304-2ae4-5d0e-a75a-732fca5243bf",
           "kind": "Chorus",
           "textSha256": "f8ba80e54b1c671a7f13e96f7c9d16961ff2860c3f9267e2680c3eda4b054ec3",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review11-03/score-102.jpg",
+          "sha256": "224606073c390e617ee76f7b2650cc6cc31e885af039a449c663db5310aef08f"
+        }
+      ],
+      "meter": "3/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Verse16 and chorus16; quarter-note pickups and complementary final halves combine. Each stored part8+8."
     },
     {
       "versionId": "42b0e7f0-364f-53ce-820c-9b0942154670",
@@ -40018,189 +40562,270 @@
       "versionId": "dbffdcd5-5402-5cb9-a43c-f82e3cb7c340",
       "edition": "union",
       "number": 104,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "6_bar_blocks",
+      "stanzaApproxMeasures": 12,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "68f1a8d6-d437-55c0-8ef6-67363d991f30",
           "kind": "Verse",
           "textSha256": "22d933076e8cd52dbdeb462e9252e5a05f5de693c8e634986d64832ae9fe97eb",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            6,
+            6
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "5c27d219-cab0-5e33-b240-354c02f733a9",
           "kind": "Verse",
           "textSha256": "4a47ab999b3564228f36dd39aac6510f769b8a90b0f65f02079ad063e90ef9c2",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            6,
+            6
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "a373d4d2-dd9f-5c40-b145-7e4e2fda71b2",
           "kind": "Verse",
           "textSha256": "8e66ce2cf0193990de340a28e311e2e0be08ea4e59b116832e09a54fef978bdf",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            6,
+            6
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "08cbf8d9-a295-5c96-beda-cb9d2c12adc7",
           "kind": "Chorus",
           "textSha256": "01b89c6434819105f8ec916f15ff674f8184ea018d89f855e75ea74ba2d9a836",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            7
+          ],
+          "approxMeasures": 7,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "1eb37825-2f25-514c-9b56-6124656581f6",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review11-03/score-104.jpg",
+          "sha256": "370ad99c279f21cb2fd9a047eabf3fd608eb6df63602ce6901bc87797993e1cc"
+        }
+      ],
+      "meter": "4/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Verse12, union6+6; printed refrain7, separate Amen1. No additional repetitions generated."
     },
     {
       "versionId": "1179134e-7ee4-5931-8276-ec66adbd8961",
       "edition": "union",
       "number": 105,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 32,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "464fa577-8b14-5fc1-b3ea-942bf4363250",
           "kind": "Verse",
           "textSha256": "4706c9388452708717a27cf9b23b130acea0c8b61e5976112f41ef6f62274803",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8,
+            8,
+            8
+          ],
+          "approxMeasures": 32,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "24356dc1-7e56-5d3f-b70d-e2943c4ad2e0",
           "kind": "Verse",
           "textSha256": "f7f95b5c31a706889ff138c7ba3908523987aed8bfcd8622879f3ff874692b9b",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8,
+            8,
+            8
+          ],
+          "approxMeasures": 32,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "20af963b-16eb-5cf3-af2a-7d1359cd2e68",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review11-03/score-105.jpg",
+          "sha256": "01a90ec1f2176c727ce265c0e898d459b3ed90be1af39518b134dcf12f00e97e"
+        }
+      ],
+      "meter": "3/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Four eight-bar systems, verse32. New16+16; union8+8+8+8. Separate Amen2."
     },
     {
       "versionId": "86a65ada-fbd6-5ae5-977d-bac013c9fb89",
       "edition": "union",
       "number": 106,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 17.0,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "dd88992a-ee7f-5fc5-891b-922bb6f01bf3",
           "kind": "Verse",
           "textSha256": "d1391926e20b2dd7f225882c63a2771cfb173bf12be083ebf4e7e908eed87091",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            5,
+            5,
+            4.5,
+            2.5
+          ],
+          "approxMeasures": 17.0,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "481cabb2-c8cf-594b-907d-e391facc3552",
           "kind": "Verse",
           "textSha256": "43738ff1319014e219b7c373a294fbbcd72d642f24fd8406ddba47710a61e8de",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            5,
+            5,
+            4.5,
+            2.5
+          ],
+          "approxMeasures": 17.0,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "373373a0-a7c7-5d2d-a8cb-9da216992203",
           "kind": "Verse",
           "textSha256": "eff815dc572ef95a4f30bbfb5b401e1513406e8891efb5b34acc64d9ea9e37f4",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            5,
+            5,
+            4.5,
+            2.5
+          ],
+          "approxMeasures": 17.0,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "19c8e0eb-5fda-5188-aab9-649ba544c431",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review11-03/score-106.jpg",
+          "sha256": "0141998b0243d77d01f9ea0ef7f2289a334572641c7aab9b65c99ac2e89378b8"
+        }
+      ],
+      "meter": "2/2",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Printed2/2 first two phrases5+5; remaining7. Union third stored block includes4.5 bars and final block2.5. Complementary half-measure pickups/endings combined. Separate Amen1."
     },
     {
       "versionId": "14040f5c-c7ea-5a62-ad79-bd294f789433",
       "edition": "union",
       "number": 107,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 16.0,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "0068a2cc-22eb-5290-849b-6ead16c28ea7",
           "kind": "Verse",
           "textSha256": "22c0417f671b91dab6c6bc7e62253345ac64a0a083f63422265ae870412cd8b4",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            7.75,
+            8.25
+          ],
+          "approxMeasures": 16.0,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "19b28ab2-a82f-574e-a0e5-ab5c78061f67",
           "kind": "Verse",
           "textSha256": "23d4680a8b009cacb2a63f7e7c06e704d9232a54fae2f0533d9955a6115ca703",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            7.75,
+            8.25
+          ],
+          "approxMeasures": 16.0,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "6513f748-ed92-5054-8d52-a6ff4dd8b0fd",
           "kind": "Verse",
           "textSha256": "c5bf5fe61aa1866ffc098cc9597ab219a14268cdef2aa1a72f0926a5f5d88620",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            7.75,
+            8.25
+          ],
+          "approxMeasures": 16.0,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "821e0a84-1a89-5d6b-9b24-fdd555e61ff5",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review11-03/score-107.jpg",
+          "sha256": "9ce105b633d4615d1cafb1e6ed4fa0315995b2b233f2b42d567fa5f722c19700"
+        }
+      ],
+      "meter": "2/2",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Printed2/2 verse16. Union first stored block31 quarter beats=7.75 bars, second33=8.25. Separate Amen1."
     },
     {
       "versionId": "afb26675-92c4-5794-bc46-b2b384e8c3b3",
@@ -40262,57 +40887,82 @@
       "versionId": "4554058a-57ee-4770-b5ae-3c8bc19c1da5",
       "edition": "union",
       "number": 109,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 14,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "2f05dc4d-521b-55c2-a909-7854c5be8694",
           "kind": "Verse",
           "textSha256": "4a81881742d66d03cd713e1683c039350495edef89edac2996e0c922ec13d3c1",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            6
+          ],
+          "approxMeasures": 14,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "4133efdc-d300-52a6-addc-7c66fdad55da",
           "kind": "Verse",
           "textSha256": "d93501d320953aade568040a8a7edef3548e26bc91464fe2204845c329987a5d",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            6
+          ],
+          "approxMeasures": 14,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "291c9a4d-fb86-51dc-9f22-2f1c8578efeb",
           "kind": "Verse",
           "textSha256": "927b6831978eb95bf85db7eca6c316dd5b106ef76dc2798be96c53a62bf9b312",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            6
+          ],
+          "approxMeasures": 14,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "be39d2b2-99ff-54b9-8918-4d4da8d2b94b",
           "kind": "Verse",
           "textSha256": "682668a33f03303db0aaad28eba1139d223f52f2df6c7e2a961e04048338473e",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            6
+          ],
+          "approxMeasures": 14,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "7d6bc0be-8866-52e5-be87-64c5e355b6f6",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review11-03/score-109.jpg",
+          "sha256": "bf966a233ace423cf52cfdd602fff871ab57cd90c00340445d6fcf0521350a0b"
+        }
+      ],
+      "meter": "6/8",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Printed6/8 systems4+4+6, verse14. New8+6; union4+4+6. Separate Amen2."
     },
     {
       "versionId": "46db5e62-c0dc-599d-a3d5-435797112413",
@@ -40459,48 +41109,66 @@
       "versionId": "9a41c66b-ab31-4acb-93dc-bb985227d925",
       "edition": "union",
       "number": 113,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "7cd2e995-448f-5d25-bea4-c8d52b3e347c",
           "kind": "Verse",
           "textSha256": "ec90cf6762e069dd1ae951c95fef63aea9ae7db721451c7489524637d233ae36",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "5a3ea02a-0b6a-52aa-95f4-ef48daa9bbbb",
           "kind": "Verse",
           "textSha256": "4e670a62aff147ae84064cf3cbfe473048c6322fdde1ba0b2aed725cd925fefe",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "fff40775-8a2f-5af4-bb72-97eeba3a65e5",
           "kind": "Verse",
           "textSha256": "21d854db7a02c9da96f2d97153171c7b36a3299ffdca154dadfc2afef824ba5c",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "4b9de1e0-8977-5456-9c18-bbdf51083d58",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-113.jpg",
+          "sha256": "e0b6cc17cafa00b52b5de4875f3398e356db1819c417cfe1d7a4c4f6b6958fa0"
+        }
+      ],
+      "meter": "3/4",
+      "reviewNotes": "Visual printed-score and stored-block mapping. Printed3/4 four four-bar phrases, verse16, stored8+8. Separate Amen2."
     },
     {
       "versionId": "aed33d76-5881-5d2b-a004-daebea4036d0",
