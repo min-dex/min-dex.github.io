@@ -7,7 +7,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 from smoke_app import start_local_app_server,sync_playwright,launch_chromium
 MOCK='''window.remoteOut=[];window.remoteChannels=[];
-window.remoteClient={channel(topic){const c={topic,handler:null,on(t,f,h){this.handler=h;return this;},subscribe(cb){this.status=cb;setTimeout(()=>cb('SUBSCRIBED'),0);return this;},async send(m){window.remoteOut.push({topic,payload:m.payload});return 'ok';}};remoteChannels.push(c);return c;},async removeChannel(c){remoteChannels=remoteChannels.filter(x=>x!==c);}};
+window.remoteClient={async rpc(name,args={}){if(name==='mindex_remote_create_code')return {data:{ok:true,code:'012345',secret:'11'.repeat(32),owner_token:'22'.repeat(32)}};if(name==='mindex_remote_claim_code')return {data:args.p_code==='012345'?{ok:true,secret:'11'.repeat(32)}:{ok:false,error:'invalid_code'}};return {data:true};},channel(topic){const c={topic,handler:null,on(t,f,h){this.handler=h;return this;},subscribe(cb){this.status=cb;setTimeout(()=>cb('SUBSCRIBED'),0);return this;},async send(m){window.remoteOut.push({topic,payload:m.payload});return 'ok';}};remoteChannels.push(c);return c;},async removeChannel(c){remoteChannels=remoteChannels.filter(x=>x!==c);}};
 window.supabase={createClient:()=>window.remoteClient};
 window.deliver=p=>{for(const c of remoteChannels)if(c.topic===p.topic)c.handler({payload:p.payload});};'''
 server,url=start_local_app_server()
@@ -38,7 +38,7 @@ try:
    host.click('#remotePanelBtn');host.click('[data-remote-start]');host.wait_for_function("document.querySelector('[data-remote-code]').textContent.length>0")
    code=host.locator('[data-remote-code]').inner_text()
    phone.goto(url.replace('index.html','remote.html'))
-   assert len(code.replace('-',''))==8
+   assert len(code.replace('-',''))==6
    for theme in ('light','dark'):
     phone.emulate_media(color_scheme=theme)
     host.evaluate('theme=>document.body.dataset.theme=theme',theme)

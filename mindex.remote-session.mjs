@@ -1,8 +1,11 @@
-import {pairing,identity,sessionKey,seal,unseal,id,createGate} from './mindex.remote-core.mjs?v=2';
+import {pairing,identity,sessionKey,seal,unseal,id,createGate} from './mindex.remote-core.mjs?v=3';
+import {obtainPairing} from './mindex.remote-pairing.mjs?v=3';
 
 // The relay carries ciphertext only. A code grants one ephemeral controller.
 export async function openRemote({client,code,host=false,read,execute,onState=()=>{},onStatus=()=>{},onResult=()=>{},onClose=()=>{}}){
- const pair=await pairing(code),keys=await identity(),peer=id(),nonce=id();
+ const registration=await obtainPairing(client,host,code);
+ let pair,keys;try{pair=await pairing(registration.secret);keys=await identity();}catch(e){await registration.revoke();throw e;}
+ const peer=id(),nonce=id();
  const gate=host?createGate({read,execute}):null;
  let channel,key,other,closed=false,ready=false,subscribed=false,reserved=false;
  let outgoing=0,incoming=0,sequence=0,lastSeen=performance.now(),snapshot=null,pending=null;
@@ -19,8 +22,8 @@ export async function openRemote({client,code,host=false,read,execute,onState=()
  }
  function close(reason='연결이 종료됐습니다.'){
   if(closed)return;closed=true;ready=false;fresh=false;snapshot=null;
-  clearInterval(timer);clearTimeout(expiry);clearTimeout(ackTimer);gate?.close();
-  Promise.resolve(client.removeChannel(channel)).catch(()=>{});onStatus(reason);onState(null);onClose();
+  clearInterval(timer);clearTimeout(expiry);clearTimeout(ackTimer);gate?.close();void registration.revoke();
+  if(channel)Promise.resolve().then(()=>client.removeChannel(channel)).catch(()=>{});onStatus(reason);onState(null);onClose();
  }
  async function end(){try{if(ready)await send({type:'end'});}catch{}finally{close();}}
  async function publish(request=''){
@@ -62,7 +65,7 @@ export async function openRemote({client,code,host=false,read,execute,onState=()
    pending=null;clearTimeout(ackTimer);onResult(m.result);
   }
  }
- channel=client.channel(pair.topic,{config:{broadcast:{self:false,ack:true}}})
+ try{channel=client.channel(pair.topic,{config:{broadcast:{self:false,ack:true}}})
   .on('broadcast',{event:'packet'},({payload})=>{
    const t=performance.now();if(t-rateAt>1000){rateAt=t;rate=0;}
    if(++rate>40||queued>=20)return;
@@ -75,6 +78,7 @@ export async function openRemote({client,code,host=false,read,execute,onState=()
    if(!host)send({type:'hello',nonce,publicKey:keys.publicKey},true).catch(e=>close(e.message));
   }else if(['CHANNEL_ERROR','TIMED_OUT','CLOSED'].includes(s))close('연결이 끊겼습니다. 새 코드로 다시 연결해 주세요.');
  });
+ }catch(e){close('연결 준비에 실패했습니다. 새 코드를 만들어 주세요.');throw e;}
  expiry=setTimeout(()=>close('연결 코드가 만료됐습니다. 새 코드를 만들어 주세요.'),host?120000:15000);
  timer=setInterval(()=>{
   if(closed)return;
@@ -90,7 +94,8 @@ export async function openRemote({client,code,host=false,read,execute,onState=()
   }
  },1000);
  return {
-  close,end,
+  close,end,code:registration.code,
+  get listening(){return subscribed&&!closed;},
   get connected(){return ready&&!closed;},
   get usable(){return ready&&fresh&&!closed&&!pending&&performance.now()-lastSeen<=2500;},
   refresh(){fresh=false;freshRequest=id();if(ready)send({type:'ping',request:freshRequest}).catch(e=>close(e.message));},

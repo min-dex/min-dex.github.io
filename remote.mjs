@@ -1,4 +1,4 @@
-import {openRemote} from './mindex.remote-session.mjs?v=2';
+import {openRemote} from './mindex.remote-session.mjs?v=3';
 const $=id=>document.getElementById(id);
 let session,view=null,opening=false;
 let client;

@@ -1206,3 +1206,6 @@ secret 거부 전체 rollback, 독립 readback3개 true. 운영 데이터/임시
 Chromium/WebKit254/320/390px6조합 PASS; runtime hash PASS.
 실제 사용자 창·운영 데이터·재생·송출·인쇄 조작 없음.
 release20261021-controller-navigation, 별도 CI/배포 결과 확인 필요.
+
+
+2026-10-22 numeric remote pairing: Production SQL applied successfully through Safari with one-time user authorization. Client release pending. Migration is isolated ephemeral schema/RPC, no worship mutations. Local PostgreSQL 18.4 test passes. Default pairing test added; SQL opt-in harness uses temporary embedded-postgres only. Existing deployed v2 stays usable.

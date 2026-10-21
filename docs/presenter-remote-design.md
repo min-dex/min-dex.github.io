@@ -12,14 +12,16 @@
 4. 어느 쪽에서든 연결 종료 가능. 송출 종료·예배 변경·출력 세션 교체·탭 종료 시 연결을 폐기한다.
    새 연결에는 PC에서 새 코드를 만든다. 같은 코드로 두 번째 기기는 연결할 수 없다.
 
-사용자 결정에 따라 기존 로그인·운영자 목록·QR 승인·DB grant/claim 제안은 대체했다.
-**코드 자체가 조작 권한**이다. 8자리 Base32(40-bit random)를 4자리씩 표시하며,
-혼동되는 I/O/0/1은 쓰지 않는다. 짧아진 코드의 키와 채널 이름은 모두 PBKDF2-HMAC-SHA256 600,000회에서 파생한다.
-단순 해시로 채널 이름을 노출해 저비용 대입이 가능해지는 경로를 만들지 않는다.
-이는 80-bit 코드와 같은 엔트로피를 의미하지 않는다. 2분짜리 임시 연결에만 쓰며,
-장기 비밀번호나 6자리 숫자 PIN으로 재사용하지 않는다. 서버의 시도 횟수 제한을 대신하는
-기술도 아니다. protocol v2는 기존 16자리 클라이언트와 섞이지 않으며 구형 코드는 새로고침을 안내한다.
-키 파생 work factor 참고: [OWASP PBKDF2](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2). 코드는 2분/한 번만 유효하며 연결 최대 시간은 8시간이다.
+**숫자 6자리 서버 연결(v3)**: `migrations/2026-10-22-remote-pin.sql`의 적용이 선행되어야 한다.
+v3 운영 서버 적용 완료. 클라이언트 배포 검증 진행 중.
+계정·이메일·승인 팝업 없이 PC에서 생성한 6자리 숫자를 폰에 입력한다. 앞자리 0도 유지한다.
+코드는 2분/한 번만 유효하다. 서버의 atomic DELETE RETURNING으로 한 기기만 claim할 수 있다.
+서버는 코드 원문 대신 비공개 pepper를 이용한 HMAC을 저장하고, 256-bit 임의 relay secret을 교환한다.
+6자리 숫자는 암호화 키나 Broadcast topic으로 사용하지 않는다. 대기 코드는 최대 3개다.
+생성·입력 각각 프로젝트 전체 분당 5회 제한이다. 잘못된 입력도 반환 오류로 처리하여 횟수 증가가 commit된다.
+브라우저 초기화나 위조 헤더로 우회할 수 없지만 다른 사용자의 반복 시도도 새 연결을 잠시 막을 수 있다.
+이미 연결된 세션은 이 제한과 무관하다. 연결 최대 시간은 8시간이다.
+비공개 테이블에 직접 접근할 수 없으며 공개 RPC 세 개만 허용한다. 예배·찬양 자료는 변경하지 않는다.
 
 ## 폰 전용 화면
 
@@ -39,15 +41,15 @@
 
 ## 연결·명령 계약
 
-- `mindex.remote-core.mjs`: 코드 생성, AES-GCM 인증 암호화, P-256 ECDH/HKDF, 명령 gate.
+- `mindex.remote-core.mjs`: 256-bit secret 파생, AES-GCM 인증 암호화, P-256 ECDH/HKDF, 명령 gate.
 - `mindex.remote-session.mjs`: Supabase Broadcast 연결, handshake, heartbeat, 만료·종료·실행 응답.
 - `mindex.remote.js`: 송출 PC UI 및 기존 조작 함수 adapter.
-- 기존 공용 데이터 변경 채널과 분리된 무작위 topic을 사용한다. DB/schema/권한 변경은 없다.
+- 기존 공용 데이터 변경 채널과 분리된 무작위 topic을 사용한다. 원격 연결 전용 private schema와 제한된 RPC만 추가한다.
   공개 채널은 암호문 relay일 뿐이고 코드 보유 증명/세션 키/epoch가 조작 권한이다.
-- 최초 hello/welcome은 코드에서 파생한 키로 암호화한다. 연결 후 ECDH 세션 키로 전환한다.
+- 최초 hello/welcome은 서버가 교환한 relay secret에서 파생한 키로 암호화한다. 연결 후 ECDH 세션 키로 전환한다.
   나중에 코드만 알게 된 기기가 기존 세션 암호문을 해독할 수 없다. 코드 유출 중 동시 연결은
   먼저 연결한 기기가 권한을 얻으므로 코드를 외부 공유하지 않는다.
-- 세션/코드/키는 메모리에만 존재한다. 저장해야 하는 사용자 데이터가 아니며 재접속 복구하지 않는다.
+- 브라우저의 세션/코드/키는 메모리에만 존재하며, 서버에는 만료 전 임시 연결 정보만 남는다. 저장해야 하는 사용자 데이터가 아니며 재접속 복구하지 않는다.
 - host가 snapshot에 2초짜리 일회성 ticket과 revision을 발급한다. 명령은 epoch, peer,
   command ID, 증가 sequence, ticket, revision, 허용 action을 검증한 뒤 실행한다.
   시간은 host의 monotonic clock으로 판단한다. PC 직접 조작이 상태를 바꾸면 오래된 명령은 거절한다.
@@ -81,3 +83,7 @@
 전체 GitHub gate와 배포 확인도 별도다. 위 로컬 검증을 배포 완료로 표현하지 않는다.
 
 2026-10-22 수정: 디자인 통일·8자리 코드. 기존 첫 배포는 GitHub run39633523909에서 완료됐으며, 이번 수정 배포는 별도 검증한다.
+
+숫자 코드 추가 검증: `test_remote_pairing.mjs`(기본 CI), `test_remote_pin_sql.mjs`(별도 로컬 PostgreSQL).
+SQL 테스트는 PGLITE_ROOT의 embedded-postgres/pg와 WORSHIP_TEST_ENGINE=postgres를 사용하며,
+실제 운영 URL이나 인증 정보는 받지 않는다. 권한, 재적용, 동시 claim, 만료, 폐기, 실패 횟수 지속을 확인한다.

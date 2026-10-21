@@ -14,11 +14,11 @@ try:
    page.goto(url.replace('index.html','remote.html'))
    page.evaluate('''async()=>{
     window.client=supabase.createClient(MINDEX_SUPABASE.url,MINDEX_SUPABASE.anonKey,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
-    window.core=await import('./mindex.remote-core.mjs');window.mod=await import('./mindex.remote-session.mjs');
+    client.rpc=({async rpc(name,args={}){if(name==='mindex_remote_create_code')return {data:{ok:true,code:'012345',secret:'11'.repeat(32),owner_token:'22'.repeat(32)}};if(name==='mindex_remote_claim_code')return {data:args.p_code==='012345'?{ok:true,secret:'11'.repeat(32)}:{ok:false,error:'invalid_code'}};return {data:true};},}).rpc;window.core=await import('./mindex.remote-core.mjs');window.mod=await import('./mindex.remote-session.mjs');
     window.status='';window.received=null;window.result=null;
    }''')
   host,remote=pages
-  code=host.evaluate('core.newCode()')
+  code='012345'
   host.evaluate('''async code=>{window.fixture={live:true,index:0};window.session=await mod.openRemote({client,code,host:true,read:()=>fixture,execute:()=>fixture.index++,onStatus:s=>window.status=s});}''',code)
   host.wait_for_function("status.includes('코드를 입력')",timeout=20000)
   remote.evaluate('''async code=>{window.session=await mod.openRemote({client,code,onState:s=>window.received=s,onStatus:s=>window.status=s,onResult:r=>window.result=r});}''',code)

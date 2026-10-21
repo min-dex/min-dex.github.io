@@ -1,22 +1,15 @@
 // Ephemeral pairing only: no persistent credentials or offline command queue.
-const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const enc=new TextEncoder(),dec=new TextDecoder();
 export const actions=new Set(['prev','next','blank','unblank','play','pause','stop','resume']);
-export const normalizeCode=value=>String(value||'').toUpperCase().replace(/[\s-]/g,'');
-export function newCode(){return [...crypto.getRandomValues(new Uint8Array(8))].map(x=>alphabet[x%32]).join('');}
-export function displayCode(code){return normalizeCode(code).match(/.{1,4}/g)?.join('-')||'';}
-export function validCode(code){return new RegExp('^['+alphabet+']{8}$').test(normalizeCode(code));}
 export const id=()=>crypto.randomUUID();
 const hex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
-export async function pairing(code){
- code=normalizeCode(code);if(code.length===16)throw Error('PC와 폰을 새로고침하고 새 8자리 코드를 만들어 주세요.');if(!validCode(code))throw Error('연결 코드를 확인해 주세요.');
- // The relay topic must also require the slow KDF: a fast code hash would
- // allow cheap offline guessing even if the encryption key used a slow KDF.
- const material=await crypto.subtle.importKey('raw',enc.encode(code),'PBKDF2',false,['deriveBits']);
- const bytes=await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:enc.encode('mindex-remote-pair-v2'),iterations:600000},material,256);
+export async function pairing(secret){
+ if(!/^[0-9a-f]{64}$/.test(secret||''))throw Error('REMOTE_INVALID_RELAY_SECRET');
+ const bytes=await crypto.subtle.digest('SHA-256',enc.encode('mindex-remote-key-v3:'+secret));
  return {key:await crypto.subtle.importKey('raw',bytes,'AES-GCM',false,['encrypt','decrypt']),
- topic:'mindex-remote-v2:'+hex(await crypto.subtle.digest('SHA-256',enc.encode('mindex-remote-topic-v2:'+hex(bytes))))};
+ topic:'mindex-remote-v3:'+hex(await crypto.subtle.digest('SHA-256',enc.encode('mindex-remote-topic-v3:'+secret)))};
 }
+
 const b64=bytes=>btoa(String.fromCharCode(...new Uint8Array(bytes)));
 const unb64=s=>Uint8Array.from(atob(s),x=>x.charCodeAt(0));
 export async function seal(key,message,topic){
