@@ -774,3 +774,5 @@ start tracking successful receipts when this feature is installed. Never infer
 modifications from visits, draft input, failed saves or deletion notifications.
 
 Reference editing cards use the available group width; read-only cards retain their compact grid. Title/URL fields stack below 600px of card content, use 1:2 columns from 600px, and include the group field in a third column from 900px. Labels, focus and save behavior remain unchanged.
+
+Home recent views reserve six100px card slots (10px gaps) in the shared responsive grid, including loading/empty states. Titles occupy two20px lines and save time its own18px row in both views; switching must not move the module cards below. No routine footer explanation; read failures retain an inline retry in the selector row.

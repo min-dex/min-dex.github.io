@@ -74,6 +74,16 @@ try:
    assert page.evaluate('state.recentEdits.length')==2
    page.locator('[data-home-recent-view="work"]').click()
    assert page.locator('.home-recent-list time').count()==0
+   # Every viewport reserves the same recent area in both views, even empty.
+   for width in (1280,800,390):
+    page.set_viewport_size({'width':width,'height':800})
+    page.locator('[data-home-recent-view="work"]').click()
+    top=page.locator('.home-module').first.bounding_box()['y']
+    page.locator('[data-home-recent-view="edits"]').click()
+    assert abs(page.locator('.home-module').first.bounding_box()['y']-top)<1
+    assert page.locator('.home-recent-note').count()==0
+   page.set_viewport_size({'width':1280,'height':800})
+   page.locator('[data-home-recent-view="work"]').click()
    # The original sidebar routes remain functional, including stalled data.
    page.locator('#songList [data-service-week]').click()
    assert page.locator('.service-week-board').count()==2
