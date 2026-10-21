@@ -749,3 +749,16 @@ Home places the next calendar date/liturgical label below today's date in the
 header. It links to the existing Calendar route; operations retains only its
 navigation commands and does not repeat the calendar summary. Preserve the same
 next-date selection and error state; stack the context naturally on narrow views.
+
+
+Home header calendar context uses the compact-title 16px/700 scale and primary
+ink for its date and liturgical name. Today's date remains secondary metadata.
+Keep 10px icon/text spacing, responsive wrapping and the existing calendar action.
+
+### Version title row and popup disclosures ·2026-10-21
+
+Version name and optional output title share a wrapping row (150/250px bases;
+output title grows twice as much). Review status retains its own row. Input values
+and save behavior stay unchanged. Timing/help and draft pairing disclosures use
+30px minimum targets,10px expanded spacing, hover and2px inset focus. Keep all
+labels, pairing warnings and multiline fields; never trigger playback/save during UI QA.
