@@ -1860,6 +1860,9 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   gap: var(--s2);
   justify-content: start;
 }
+.reference-link-grid:has(.reference-card--editing) {
+  grid-template-columns: minmax(0, 1fr);
+}
 .reference-card {
   display: grid;
   min-height: 68px;
@@ -1939,6 +1942,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   opacity: .28;
 }
 .reference-card--editing {
+  container-type: inline-size;
   display: grid;
   min-height: 0;
   grid-template-columns: minmax(0, 1fr);
@@ -1955,7 +1959,17 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   display: grid;
   align-items: end;
   grid-template-columns: minmax(0, 1fr);
-  gap: 7px;
+  gap: 10px;
+}
+@container (min-width: 600px) {
+  .reference-editor-main {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  }
+}
+@container (min-width: 900px) {
+  .reference-editor-main:has(> label:nth-child(3)) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+  }
 }
 .reference-editor-main label,
 .reference-active-toggle {
@@ -2125,9 +2139,6 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   .reference-editor-actions {
     justify-content: flex-end;
   }
-  .reference-editor-main {
-    grid-template-columns: 1fr 1fr;
-  }
 }
 @media (max-width: 700px) {
   .reference-card {
@@ -2138,9 +2149,6 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   }
   .references-shell .head-actions {
     flex-wrap: wrap;
-  }
-  .reference-editor-main {
-    grid-template-columns: 1fr;
   }
 }
 

@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261022-remote-controller",
+  "version": "20261022-reference-editor-layout",
   "options": {
     "compress": false,
     "mangle": {

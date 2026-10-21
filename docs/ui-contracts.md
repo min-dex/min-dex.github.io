@@ -772,3 +772,5 @@ Recent saves bootstrap worship/bulletin timestamps through two body-free reads
 (limit12 per table,60-second cache,15-second abort); Praise and saved Scripture
 start tracking successful receipts when this feature is installed. Never infer
 modifications from visits, draft input, failed saves or deletion notifications.
+
+Reference editing cards use the available group width; read-only cards retain their compact grid. Title/URL fields stack below 600px of card content, use 1:2 columns from 600px, and include the group field in a third column from 900px. Labels, focus and save behavior remain unchanged.
