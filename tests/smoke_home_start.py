@@ -82,6 +82,7 @@ try:
     page.locator('[data-home-recent-view="edits"]').click()
     assert abs(page.locator('.home-module').first.bounding_box()['y']-top)<1
     assert page.locator('.home-recent-note').count()==0
+    assert page.locator('.home-recent-list button').first.bounding_box()['height']==80
    page.set_viewport_size({'width':1280,'height':800})
    page.locator('[data-home-recent-view="work"]').click()
    # The original sidebar routes remain functional, including stalled data.
