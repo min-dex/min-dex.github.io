@@ -14550,8 +14550,8 @@ function renderHomeRecentWork() {
   const edits = state.homeRecentView === "edits";
   const entries = edits ? homeRecentEditEntries() : homeRecentWorkEntries();
   if(edits) void loadHomeRecentEdits();
-  return `<section class="home-recent" aria-label="최근 항목"><div class="home-recent-switch" aria-label="최근 항목 보기">${[["work","최근 작업"],["edits","최근 수정"]].map(([key,label])=>`<button type="button" data-home-recent-view="${key}" aria-pressed="${state.homeRecentView === key}">${label}</button>`).join("")}</div>
-    ${entries.length ? `<div class="home-recent-list">${entries.map(entry => {
+  return `<section class="home-recent" aria-label="최근 항목"><div class="home-recent-switch" aria-label="최근 항목 보기">${[["work","최근 작업"],["edits","최근 수정"]].map(([key,label])=>`<button type="button" data-home-recent-view="${key}" aria-pressed="${state.homeRecentView === key}">${label}</button>`).join("")}${edits && homeRecentEditsCache?.error ? `<button type="button" data-home-recent-retry title="일부 수정 기록을 불러오지 못했습니다">다시 시도</button>` : ""}</div>
+    <div class="home-recent-list">${entries.length ? `${entries.map(entry => {
       const snapshot = entry.snapshot;
       const service = state.services.find(item => item.id === snapshot.selectedServiceId);
       let title = pageTabTitleForSnapshot(snapshot);
@@ -14563,9 +14563,9 @@ function renderHomeRecentWork() {
         title += ` ${Number(snapshot.selectedBibleChapter) || 1}${verse ? `:${verse}${end > verse ? `–${end}` : ""}` : "장"}`;
       }
       const meta = service ? `${entry.kind} · ${formatServiceDate(service, {compact:true})}` : entry.kind;
-      return `<button type="button" data-home-recent="${escapeAttr(entry.key)}"><span><small>${escapeHtml(meta)}</small><strong>${escapeHtml(title)}</strong>${edits ? `<time datetime="${escapeAttr(entry.savedAt)}">${escapeHtml(new Intl.DateTimeFormat("ko-KR",{timeZone:"Asia/Seoul",month:"numeric",day:"numeric",hour:"numeric",minute:"2-digit"}).format(new Date(entry.savedAt)))}</time>` : ""}</span><i data-lucide="arrow-up-right"></i></button>`;
-    }).join("")}</div>` : `<p class="home-module-detail">${edits ? (homeRecentEditsCache?.promise ? '최근 수정 불러오는 중…' : '저장한 항목이 여기에 표시됩니다.') : '열어 본 항목이 여기에 표시됩니다.'}</p>`}
-    ${edits ? `<p class="home-recent-note">찬양·말씀은 이 기능 적용 후 저장부터 표시됩니다.${homeRecentEditsCache?.error ? ' 일부 기록을 불러오지 못했습니다. <button type="button" data-home-recent-retry>다시 시도</button>' : ""}</p>` : ""}
+      return `<button type="button" data-home-recent="${escapeAttr(entry.key)}"><span><small>${escapeHtml(meta)}</small><strong title="${escapeAttr(title)}">${escapeHtml(title)}</strong>${edits ? `<time datetime="${escapeAttr(entry.savedAt)}">${escapeHtml(new Intl.DateTimeFormat("ko-KR",{timeZone:"Asia/Seoul",month:"numeric",day:"numeric",hour:"numeric",minute:"2-digit"}).format(new Date(entry.savedAt)))}</time>` : ""}</span><i data-lucide="arrow-up-right"></i></button>`;
+    }).join("")}` : `<p class="home-module-detail">${edits ? (homeRecentEditsCache?.promise ? '최근 수정 불러오는 중…' : '저장한 항목이 여기에 표시됩니다.') : '열어 본 항목이 여기에 표시됩니다.'}</p>`}
+    </div>
     </section>`;
 }
 

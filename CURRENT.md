@@ -4,8 +4,10 @@
 
 Core integration is complete. Bible page numbers and whole-service PNG export
 are excluded. Focused presenter view is implemented with isolated Chromium/WebKit
-verification; publication status is recorded in deployment receipts. Remote control,
-sequence-linked audio/lighting and integrated video/caption/broadcast remain ideas. See `docs/children-audio-status.md` and `docs/presenter-control-ideas.md`.
+verification; publication status is recorded in deployment receipts. Phone-first remote control
+is implemented and locally/relay verified, pending deployment and physical-device checks
+(see `docs/presenter-remote-design.md`). Sequence-linked audio/lighting and integrated
+video/caption/broadcast remain ideas. See `docs/children-audio-status.md` and `docs/presenter-control-ideas.md`.
 
 
 - Lifecycle: `active`; HQ inventory identity verified on `2026-09-24`.

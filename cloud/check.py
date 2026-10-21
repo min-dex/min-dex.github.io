@@ -8,6 +8,8 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 NODE_TESTS = (
+    "test_remote_core.mjs",
+    "test_remote_session.mjs",
     "test_union_subtitle_display.cjs",
     "test_linked_song_parallel_load.cjs",
     "test_draft_handoff.mjs",
@@ -51,6 +53,8 @@ NODE_TESTS = (
     "test_worship_read_parallel.cjs",
 )
 SMOKES = (
+    "smoke_presenter_remote.py",
+    "smoke_remote_adapter.py",
     "smoke_reference_validation.py",
     "smoke_presenter_freshness.py",
     "smoke_shell_icons.py",
