@@ -10,7 +10,7 @@ try:
   contexts=[browser.new_context(),browser.new_context()]
   pages=[c.new_page() for c in contexts]
   for page in pages:
-   page.route('**/remote.mjs',lambda r:r.fulfill(body='',content_type='text/javascript'))
+   page.route('**/remote.mjs*',lambda r:r.fulfill(body='',content_type='text/javascript'))
    page.goto(url.replace('index.html','remote.html'))
    page.evaluate('''async()=>{
     window.client=supabase.createClient(MINDEX_SUPABASE.url,MINDEX_SUPABASE.anonKey,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});

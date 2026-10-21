@@ -53,6 +53,7 @@
       "remote.html",
       "remote.mjs",
       "remote.css",
+      "remote.shared.css",
       "remote.webmanifest",
       "mindex.service-entry.js",
       "mindex.worship-live.js",

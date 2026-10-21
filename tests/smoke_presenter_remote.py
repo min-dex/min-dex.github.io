@@ -37,7 +37,20 @@ try:
    }''')
    host.click('#remotePanelBtn');host.click('[data-remote-start]');host.wait_for_function("document.querySelector('[data-remote-code]').textContent.length>0")
    code=host.locator('[data-remote-code]').inner_text()
-   phone.goto(url.replace('index.html','remote.html'));phone.fill('#code',code.lower());phone.click('#connect')
+   phone.goto(url.replace('index.html','remote.html'))
+   assert len(code.replace('-',''))==8
+   for theme in ('light','dark'):
+    phone.emulate_media(color_scheme=theme)
+    host.evaluate('theme=>document.body.dataset.theme=theme',theme)
+    phone.wait_for_function('theme=>document.documentElement.dataset.theme===theme',arg=theme)
+    keys=['--bg','--panel','--panel-2','--ink','--ink-3','--accent','--accent-ink','--r','--font-sans']
+    actual=phone.evaluate('keys=>keys.map(k=>getComputedStyle(document.body).getPropertyValue(k).trim())',keys)
+    expected=host.evaluate('keys=>keys.map(k=>getComputedStyle(document.body).getPropertyValue(k).trim())',keys)
+    assert actual==expected,theme+' Mindex token mismatch'
+    assert phone.locator('#connect').evaluate('e=>getComputedStyle(e).borderRadius')=='5px'
+    if engine=='chromium':phone.screenshot(path='/tmp/mindex-remote-unified-'+theme+'.png',full_page=True)
+   phone.emulate_media(color_scheme='light')
+   phone.fill('#code',code.lower());phone.click('#connect')
    history=[]
    def pump(seconds=.3,drop=False):
     until=time.monotonic()+seconds

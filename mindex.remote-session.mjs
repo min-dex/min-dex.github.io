@@ -1,4 +1,4 @@
-import {pairing,identity,sessionKey,seal,unseal,id,createGate} from './mindex.remote-core.mjs';
+import {pairing,identity,sessionKey,seal,unseal,id,createGate} from './mindex.remote-core.mjs?v=2';
 
 // The relay carries ciphertext only. A code grants one ephemeral controller.
 export async function openRemote({client,code,host=false,read,execute,onState=()=>{},onStatus=()=>{},onResult=()=>{},onClose=()=>{}}){
