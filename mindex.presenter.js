@@ -363,6 +363,7 @@ function presenterScoreImageSlidesFromAsset(
   const scoreForms = presenterScoreFormsFromImageSources(imageSources);
   const sequenced = presenterScoreImageSourcesForFormSequence(imageSources, scoreForms, forms, item, song, version);
   return sequenced.imageSources.map((slide, slideIndex) => {
+    if (slide._presenterTitle) return presenterSequenceTitleSlide(item, section, song, version, displayText, index, slideIndex);
     return {
       id: `${item.id || index}:score-image:${slideIndex}`,
       ...section,
@@ -381,6 +382,7 @@ function presenterScoreImageSlidesFromAsset(
       imageSrc: slide.url,
       asset: { ...asset, kind: asset.kind || "score", url: slide.url, name: slide.name || asset.name || "" },
       ...presenterScoreFormMetadata(sequenced.scoreForms, slideIndex, formWarnings),
+      ...(slide.titleSequenceWarning ? { warnings: [...formWarnings, slide.titleSequenceWarning] } : {}),
       scoreBackground: true,
       sourceType: "score",
       componentType: "score",
@@ -487,8 +489,22 @@ function presenterScoreImageSourcesForFormSequence(imageSources = [], scoreForms
   const scoreTargets = (scoreForms || []).map((form) =>
     form ? normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form)) : null,
   );
-  if (!planTargets.length || !scoreTargets.some((target) => target?.key)) {
-    return { imageSources, scoreForms };
+  if (!planTargets.length) return { imageSources, scoreForms };
+  if (!scoreTargets.some((target) => target?.key)) {
+    if (!planTargets.some(target => target.type === "title")) return { imageSources, scoreForms };
+    // A deck without form labels has no reliable verse boundaries. Keep every
+    // page; titles at the ends are unambiguous, internal positions need labels.
+    const first = planTargets.findIndex(target => target.type !== "title");
+    if (first < 0) return { imageSources: planTargets.map(() => ({ _presenterTitle: true })), scoreForms: [] };
+    const last = planTargets.findLastIndex(target => target.type !== "title");
+    const ambiguous = planTargets.slice(first, last + 1).some(target => target.type === "title");
+    return {
+      imageSources: [
+        ...planTargets.slice(0, first).map(() => ({ _presenterTitle: true })),
+        ...imageSources.map(source => ambiguous ? { ...source, titleSequenceWarning: "악보 송폼 표시가 없어 중간 Title 위치를 확인할 수 없습니다." } : source),
+        ...planTargets.slice(last + 1).map(() => ({ _presenterTitle: true })),
+      ], scoreForms: [],
+    };
   }
 
   const groups = [];
@@ -507,6 +523,10 @@ function presenterScoreImageSourcesForFormSequence(imageSources = [], scoreForms
   const lastMatchedByKey = new Map();
   let cursor = 0;
   planTargets.forEach((target) => {
+    if (target.type === "title") {
+      selected.push({ sources: [{ _presenterTitle: true }], forms: [null] });
+      return;
+    }
     const matchIndex = groups.findIndex((group, index) =>
       index >= cursor && group.target && presenterFormTargetsMatch(target, group.target),
     );
@@ -786,7 +806,7 @@ function presenterFormsWithNoSourceOmissions(plannedForms = [], sourceForms = []
 }
 
 function presenterExplicitNonHymnFormPreset(preset = null) {
-  if (!preset?.forms?.length) return null;
+  if (!preset?.forms?.length && !preset?.titleSequence) return null;
   return String(preset.strength || "").trim().toLowerCase() === "suggested" ? null : preset;
 }
 
@@ -1005,12 +1025,15 @@ function presenterFormsAreUnsplitLyrics(forms = []) {
   return Boolean(normalizedForms.length) && normalizedForms.every((form) => normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form)).type === "lyrics");
 }
 
-function resolvePresenterLyricsFormPresetSequence(forms = [], presetForms = [], sourceForms = []) {
-  const blocks = presenterLyricsBlocksFromForms(forms);
+function resolvePresenterLyricsFormPresetSequence(forms = [], presetForms = [], sourceForms = [], providedBlocks = null) {
+  const blocks = providedBlocks || presenterLyricsBlocksFromForms(forms);
   const blockBySourceKey = new Map();
   const sourceBlockIndexes = new Set();
-  cleanList(sourceForms).forEach((label, index) => {
+  let sourceIndex = 0;
+  cleanList(sourceForms).forEach((label) => {
     const target = normalizePresenterFormPresetLabel(label);
+    if (target.type === "title") return;
+    const index = sourceIndex++;
     if (!target.key || target.blank || blockBySourceKey.has(target.key)) return;
     const block = blocks[index];
     if (block) {
@@ -1025,6 +1048,10 @@ function resolvePresenterLyricsFormPresetSequence(forms = [], presetForms = [], 
   cleanList(presetForms).forEach((label, index) => {
     const target = normalizePresenterFormPresetLabel(label);
     if (!target.key) return;
+    if (target.type === "title") {
+      items.push(findPresenterFormForPresetLabel([], "Title"));
+      return;
+    }
     if (target.blank) {
       items.push(presenterBlankFormPresetItem(label, target));
       return;
@@ -1088,6 +1115,7 @@ function presenterFormPartTypeForPresetTarget(target = {}) {
 function findPresenterFormForPresetLabel(forms = [], label = "") {
   const target = normalizePresenterFormPresetLabel(label);
   if (!target.key) return null;
+  if (target.type === "title") return { _presenterTitle: true, id: "preset-title", label: "Title", lyrics: "" };
   if (target.blank) return presenterBlankFormPresetItem(label, target);
   if (target.type === "tag") {
     const chorus = findPresenterFormForPresetTarget(forms, { key: "chorus", type: "chorus" });
@@ -1207,6 +1235,7 @@ function presenterFormDisplayLabel(form = {}) {
 function normalizePresenterFormPresetLabel(value = "") {
   const raw = canonicalServiceFormToken(value);
   const compact = compactSearchValue(raw);
+  if (raw === "Title") return { key: "title", type: "title", number: 0 };
   const lastVerse = /^(vl|마지막절|lastverse|last)$/i.test(compact);
   if (lastVerse) return { key: "last-verse", type: "verse", number: 0, lastVerse: true };
   const hymnVerse = raw.match(/^(\d+)\s*절$/u);
@@ -1314,6 +1343,7 @@ function presenterFormPresetDisplayLabel(value = "") {
   const target = normalizePresenterFormPresetLabel(raw);
   const group = String(target.group || "").trim().toUpperCase();
   const suffix = target.variant ? `${target.number ? ` ${target.number}` : ""} @${group ? ` ${group}` : ""}` : target.number ? ` ${target.number}${group ? ` ${group}` : ""}` : group ? ` ${group}` : "";
+  if (target.type === "title") return "Title";
   if (target.lastVerse) return "Last Verse";
   if (target.type === "verse") return `Verse${suffix}`;
   if (target.type === "chorus") return `Chorus${suffix}`;
@@ -2109,6 +2139,17 @@ function buildPresenterCustomSlides(item, section, index) {
       sort: index + blockIndex / 100,
     };
   }).filter((slide) => slide.type === "blank" || String(slide.text || "").trim());
+  const preset = serviceItemFormPreset(item);
+  if (songLikeItem && preset?.titleSequence && preset.forms?.length) {
+    const plan = resolvePresenterLyricsFormPresetSequence([], preset.forms, [], lyricSlides.map(slide => slide.text));
+    return plan.items.map((form, position) => form._presenterTitle
+      ? presenterSequenceTitleSlide(item, section, null, null, serviceItemDisplayText(item), index, position)
+      : { ...lyricSlides[0], id: `${item.id || index}:custom-sequence:${position}`,
+        type: form._presenterBlank ? "blank" : "lyrics", text: form.lyrics || "",
+        elementType: form._presenterBlank ? PRESENTER_ELEMENT_TYPES.BLANK : PRESENTER_ELEMENT_TYPES.PRAISE,
+        layout: form._presenterBlank ? PRESENTER_SLIDE_LAYOUTS.BLANK : PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT,
+        marker: form.label, formKey: `custom:${position}`, sort: index + position / 100 });
+  }
   if (!songLikeItem || !shouldIncludeSongTitleSlide(item, label)) return lyricSlides;
   return [
     presenterSongTitleSlide(item, section, null, null, serviceItemConnectedPraiseTitle(item, "title") || serviceItemDisplayText(item), index),
@@ -2312,7 +2353,9 @@ function isScriptureBodyServiceItem(item) {
     || (sectionKey === "scripture_reading" && elementType === "scripture_body");
 }
 
-function shouldIncludeSongTitleSlide(item, label) {
+function shouldIncludeSongTitleSlide(item, label, song = null, version = null) {
+  if (parseServiceItemMemo(item?.memo).formPreset?.titleSequence
+      || presenterServiceItemFormPreset(version || {}, item, song)?.titleSequence) return false;
   if (isServiceConnectedPraiseSecondaryItem(item)) return false;
   const displayText = serviceItemDisplayText(item);
   if (serviceItemConnectedPraiseTitle(item, "title")) return true;
@@ -5772,7 +5815,12 @@ function renderPresenterHighlightedText(line, slide) {
 function presenterTextHighlightStyle(highlight = {}) {
   const styles = [];
   const color = normalizeServiceTextHighlightColor(highlight.color || highlight.fg || highlight.foreground || highlight.hex);
-  if (color) styles.push(`--presenter-text-highlight-color: ${escapeAttr(color)}`);
+  if (color) {
+    // Theme overrides preserve the authored color as the fallback everywhere else.
+    const palette = ["#FFC832", "#C8FF32", "#FF96C8", "#FF6432", "#32C8FF", "#9696FF"];
+    const token = palette.includes(color.toUpperCase()) ? `--presenter-highlight-${color.slice(1).toLowerCase()}` : "";
+    styles.push(`--presenter-text-highlight-color: ${token ? `var(${token}, ${escapeAttr(color)})` : escapeAttr(color)}`);
+  }
   if (highlight.bold === false) styles.push("--presenter-text-highlight-weight: inherit");
   return styles.join("; ");
 }
@@ -6026,6 +6074,15 @@ function updatePresenterMediaOrder(button) {
   refreshPresenterForService(serviceId, { publish: false });
   renderCurrentServiceModuleDetail();
   updateSaveState();
+}
+
+function presenterSequenceTitleSlide(item, section, song, version, displayText, index, sequenceIndex) {
+  return {
+    ...presenterSongTitleSlide(item, section, song, version, displayText, index),
+    id: `${item.id || index}:sequence-title:${sequenceIndex}`,
+    formKey: `title:${sequenceIndex}`, formLabel: "Title", marker: "Title",
+    sort: index + sequenceIndex / 100,
+  };
 }
 
 // Per-element presentation settings share the worship memo/atomic persistence path.
