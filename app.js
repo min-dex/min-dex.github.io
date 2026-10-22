@@ -7646,6 +7646,8 @@ async function saveWorshipServiceElementPatch(service, itemId) {
     unchanged && savedItem && item.id === targetItemId
       ? {
         ...savedItem,
+        // Non-template services sort directly by this editor ordinal.
+        sort_order: item.sort_order,
         // A single receipt uses compact persisted ordinals, while sibling drafts
         // can still use spaced editor ordinals. Keep one ordering scale until
         // the whole collection is reloaded; otherwise projection moves this row.

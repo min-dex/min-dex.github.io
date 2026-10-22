@@ -3854,3 +3854,10 @@ the cream artwork without changing emphasis wording or font weight.
   Order labels, original titles and subtitles are absent from this display. Their
   authored metadata and version output-title selection remain unchanged.
 - Chapel scripture uses normal Bible reading rather than a poster scripture image.
+
+## Special-service partial save ordering · 2026-10-22
+
+A content-only save receipt preserves the editor `sort_order` as well as section
+and element ordinals. Special services sort their outline directly by this field;
+mixing a database section-weighted ordinal into compact editor ordinals moved
+the saved song behind its siblings. Stored records and labels are not renumbered.
