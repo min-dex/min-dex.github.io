@@ -30,6 +30,20 @@ def main():
                             assert button.locator('i[data-lucide]').count() == 0
                             box = button.locator('svg').bounding_box()
                             assert box and box['width'] > 0 and box['height'] > 0
+                        remote = page.locator('#remotePanelBtn')
+                        assert remote.get_attribute('aria-label') == '원격 조작'
+                        assert remote.get_attribute('title') == '원격 조작'
+                        assert remote.locator('svg.lucide-smartphone').count() == 1
+                        assert remote.inner_text() == ''
+                        metrics = page.evaluate("""() => ['remotePanelBtn', 'monitorPanelBtn'].map(id => {
+                            const button = document.getElementById(id), icon = button.querySelector('svg');
+                            const b = getComputedStyle(button), i = getComputedStyle(icon);
+                            return [b.width, b.height, b.padding, i.width, i.height, i.strokeWidth];
+                        })""")
+                        assert metrics[0] == metrics[1], metrics
+                        remote.click()
+                        assert page.locator('.remote-panel').evaluate('(el) => el.open')
+                        page.locator('[data-remote-close]').click()
                         print('PASS', engine, module, phase, flush=True)
                     context.close()
                 browser.close()
