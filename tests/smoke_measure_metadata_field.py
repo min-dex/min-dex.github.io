@@ -28,5 +28,21 @@ try:
    page.evaluate("state.songs[0].versions.push({id:'ccm',name:'English',forms:[]});state.selectedVersionId='ccm';state.forms=[];paintMeasure()")
    page.wait_for_function("document.querySelector('input[data-hymn-structure-label]')?.value==='미확인'")
    assert page.evaluate('!state.dirty.song && !state.dirty.forms')
+   page.evaluate("document.body.dataset.theme='dark'")
+   for width in (1000,620,390):
+    page.set_viewport_size({'width':width,'height':900})
+    page.evaluate("state.songs[0].scripture=[];paintMeasure()")
+    before=page.locator('.metadata-popover-grid').evaluate("e=>[...e.querySelectorAll('.field')].slice(-3).map(f=>({top:f.querySelector('input').getBoundingClientRect().top,gap:f.querySelector('input').getBoundingClientRect().top-f.querySelector('span').getBoundingClientRect().bottom}))")
+    page.evaluate("state.songs[0].scripture=['시편'];paintMeasure()")
+    hint=page.locator('[data-scripture-validation-hint]');assert hint.is_visible()
+    assert '시편' in hint.inner_text()
+    after=page.locator('.metadata-popover-grid').evaluate("e=>[...e.querySelectorAll('.field')].slice(-3).map(f=>({top:f.querySelector('input').getBoundingClientRect().top,gap:f.querySelector('input').getBoundingClientRect().top-f.querySelector('span').getBoundingClientRect().bottom}))")
+    assert all(abs(a['gap']-b['gap'])<1 for a,b in zip(before,after)),(engine,width,before,after)
+    if width==1000:assert max(x['top'] for x in after)-min(x['top'] for x in after)<1,(engine,after)
+    scripture=page.locator('input[data-song-field="scripture"]');scripture.focus()
+    assert scripture.evaluate('e=>getComputedStyle(e).outlineWidth')=='2px'
+    assert scripture.input_value()=='시편'
+    assert page.locator('.metadata-popover-grid').evaluate('e=>e.scrollWidth<=e.clientWidth+1')
+    page.screenshot(path=f'/tmp/metadata-hint-alignment-{engine}-{width}.png')
    print(engine,'PASS 12 slots; version selection; readonly; stale/unknown; no dirty writes',flush=True);b.close()
 finally:server.shutdown();server.server_close()

@@ -2694,6 +2694,7 @@ body[data-module="scripture"] .scripture-editor .meta-attribute-label {
 }
 .metadata-popover-grid {
   display: grid;
+  align-items: start;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--s2);
 }
@@ -2706,6 +2707,7 @@ body[data-module="scripture"] .scripture-editor .meta-attribute-label {
 }
 .metadata-popover-grid .field {
   min-width: 0;
+  align-content: start;
 }
 .metadata-popover-grid .field span {
   color: var(--ink-4);

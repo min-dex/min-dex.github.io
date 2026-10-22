@@ -782,3 +782,10 @@ Praise/Scripture metadata popovers use their own content width, not viewport bre
 Section editor item name/assignee and new type/name/add rows use the editor body content width: retain side-by-side controls from550px, stack below550px. Long item content stays on its separate row; labels, focus and input order remain unchanged. Viewport rules only position/size the floating panel.
 
 Lyric block headers wrap the form/variation and action groups according to their actual available width, without the860px viewport column override. Keep lyrics on their separate row, DOM/tab order, labels, focus and disabled actions unchanged.
+
+### Metadata validation alignment ·2026-10-22
+
+Metadata grid items and their internal label/input tracks align to the start.
+Validation hints grow below the relevant input without distributing spare height
+into neighboring label/input gaps. Keep hints, focus outlines and container-width
+3/2/1-column rules intact.
