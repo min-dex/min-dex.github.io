@@ -129,3 +129,5 @@ records above for the retained repair evidence and Git reference.
 - [새191–230·연결 통일31판본 마디 검증](hymn-measures-191-230-review-20261022.json): 71판본, 신규 수치66·기존2·자유박자1·보류2. 후보353, 검증 완료·미배포.
 
 - [새231–250·연결 통일14판본 마디 검토](hymn-measures-231-250-review-20261022.json): 확정18·보류16. 후보371 표시 검증, 미배포.
+
+- [새231–250 보류16 해소](hymn-measures-231-250-deferrals-20261022.json): 직전 보류 판정 대체, 후보387 검증, 미배포.
