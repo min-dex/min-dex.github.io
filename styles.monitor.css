@@ -31,3 +31,8 @@
 :is(.monitor-panel, .remote-panel) summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 :is(.monitor-panel, .remote-panel) [hidden] { display: none !important; }
 @media (max-width: 480px) { :is(.monitor-panel, .remote-panel) { padding: 16px; } :is(.monitor-panel, .remote-panel) form label { flex-basis: 100%; } }
+
+/* Remote dialog follows shared dialog rhythm without changing device-status UI. */
+.remote-panel { border-radius: var(--r); padding: 20px; }
+.remote-panel header { gap: 10px; margin-bottom: 15px; }
+.remote-panel p { margin: 5px 0; }

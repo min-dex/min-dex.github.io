@@ -10,7 +10,7 @@ p { overflow-wrap: anywhere; }
 .brand { font-size: var(--ui-meta-size); font-weight: var(--ui-title-weight); color: var(--ink-2); margin: 0; }
 #status { font-size: var(--ui-meta-size); font-weight: var(--ui-meta-weight); min-height: 20px; color: var(--ink-3); margin: 0; }
 button, input { font: inherit; border-radius: var(--r); min-height: 50px; width: 100%; }
-button { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 10px 15px; border: 0; background: var(--panel); color: var(--ink-2); font-size: var(--ui-body-size); font-weight: var(--ui-row-weight); touch-action: manipulation; cursor: pointer; }
+button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 10px; border: 0; background: var(--panel); color: var(--ink-2); font-size: var(--ui-body-size); font-weight: var(--ui-row-weight); touch-action: manipulation; cursor: pointer; }
 button:not(:disabled):hover { background: var(--panel-2); }
 button:disabled { color: var(--ink-4); background: var(--panel); cursor: default; opacity: .6; }
 button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -29,7 +29,10 @@ input::placeholder { color: var(--placeholder-ink); opacity: 1; }
 .navigation { grid-template-columns: 1fr 1fr; }
 .navigation button { min-height: 70px; font-size: var(--ui-page-title-size); font-weight: var(--ui-title-weight); }
 .audio { grid-template-columns: repeat(3, 1fr); }
-.audio button { padding: 10px 5px; }
+.audio button { min-width: 0; }
+@media (max-width: 360px) { .audio button { padding-inline: 5px; } }
+button :is([data-lucide], svg.lucide) { width: var(--ui-icon-size); height: var(--ui-icon-size); flex: 0 0 var(--ui-icon-size); stroke-width: var(--ui-icon-stroke); }
+.navigation :is([data-lucide], svg.lucide) { width: var(--ui-icon-lg); height: var(--ui-icon-lg); flex-basis: var(--ui-icon-lg); }
 #music, #result { font-size: var(--ui-meta-size); color: var(--ink-3); }
 #disconnect { background: transparent; border: 1px solid var(--line); }
 @media (min-width: 600px) { main { padding: 25px; } .previews { grid-template-columns: 1fr 1fr; } .previews article { min-height: 180px; } }

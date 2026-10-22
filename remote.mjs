@@ -1,5 +1,6 @@
 import {openRemote} from './mindex.remote-session.mjs?v=5';
 import {setupPhoneExperience} from './remote.screen.mjs?v=1';
+window.lucide?.createIcons();
 const screenAwake=setupPhoneExperience();
 const $=id=>document.getElementById(id);
 let session,view=null,opening=false,ending=false;
@@ -18,7 +19,13 @@ function state(value){
  $('pairForm').hidden=true;$('position').textContent=`${value.index+1} / ${value.total}`;
  $('current').textContent=value.blank?'암전 중':value.current||'내용 없음';$('next').textContent=value.next||'마지막 슬라이드';
  $('music').textContent=value.music;
- $('blank').dataset.action=value.blank?'unblank':'blank';$('blank').textContent=value.blank?'암전 해제':'암전';paint();
+ $('blank').dataset.action=value.blank?'unblank':'blank';$('blank').querySelector('span').textContent=value.blank?'암전 해제':'암전';
+ const icon=value.blank?'eye':'eye-off';
+ if($('blank').querySelector('[data-lucide]')?.getAttribute('data-lucide')!==icon){
+  $('blank').querySelector('[data-lucide]')?.remove();
+  const glyph=document.createElement('i');glyph.dataset.lucide=icon;$('blank').prepend(glyph);window.lucide?.createIcons({root:$('blank')});
+ }
+ paint();
 }
 $('pairForm').addEventListener('submit',async e=>{
  e.preventDefault();if(opening||ending||session)return;opening=true;paint();$('result').textContent='';

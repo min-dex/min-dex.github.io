@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261022-metadata-hint-alignment",
+  "version": "20261022-remote-control-icons",
   "options": {
     "compress": false,
     "mangle": {
