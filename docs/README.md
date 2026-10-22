@@ -127,3 +127,5 @@ records above for the retained repair evidence and Git reference.
 - [찬송가 새171–190·연결 통일16판본 검증](hymn-measures-171-190-review-20261022.json): 신규 본절36, 전체 구간34/부분2. 누적 본절283, 후보 표시286. 검증 완료·배포 대기.
 
 - [새191–230·연결 통일31판본 마디 검증](hymn-measures-191-230-review-20261022.json): 71판본, 신규 수치66·기존2·자유박자1·보류2. 후보353, 검증 완료·미배포.
+
+- [새231–250·연결 통일14판본 마디 검토](hymn-measures-231-250-review-20261022.json): 확정18·보류16. 후보371 표시 검증, 미배포.
