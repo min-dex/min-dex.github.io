@@ -12,6 +12,13 @@ INIT = """async () => {
  return window.MINDEX_SERVER_STORAGE.ready;
 }"""
 
+def choose_draft(page, text):
+    select=page.get_by_label('복구할 임시 저장본',exact=True)
+    for option in select.locator('option').all():
+        select.select_option(option.get_attribute('value'))
+        if text in page.get_by_label('복구할 내용',exact=True).input_value(): return
+    raise AssertionError('Missing draft preview: '+text)
+
 def main():
     server,url=start_local_app_server()
     origin=urlsplit(url).netloc
@@ -71,10 +78,18 @@ def main():
                       state.scriptures[0].body='Unsaved draft';state.dirty.scripture=true;
                       window.MINDEX_EDITOR_DRAFTS.capture();await new Promise(queueMicrotask);
                       await window.MINDEX_SERVER_STORAGE.flush();
-                      const saved=JSON.parse(window.MINDEX_SERVER_STORAGE.getItem('local','mindex.editor.draft.v1:scripture:fixture'));
+                      const key=MINDEX_SERVER_STORAGE.keys('local').find(k=>k.startsWith('mindex.editor.draft.v2:scripture:fixture:'));
+                      const saved=JSON.parse(window.MINDEX_SERVER_STORAGE.getItem('local',key));
                       return {body:saved.value.body,local:localStorage.getItem('mindex.editor.draft.v1:scripture:fixture')};
                     }""")
                     assert draft_result=={'body':'Unsaved draft','local':None}
+                    assert page.locator('#restoreServerEditorDraft').is_hidden()
+                    # A legacy recovery record is never rewritten by new-session typing.
+                    page.evaluate("""async()=>{
+                      const key=MINDEX_SERVER_STORAGE.keys('local').find(k=>k.startsWith('mindex.editor.draft.v2:scripture:fixture:'));
+                      const draft=JSON.parse(MINDEX_SERVER_STORAGE.getItem('local',key));draft.value.body='Legacy draft';
+                      await MINDEX_SERVER_STORAGE.setItem('local','mindex.editor.draft.v1:scripture:fixture',JSON.stringify(draft));
+                    }""")
                     page.evaluate("async()=>{await persistServerValue('local','mindex.worshipRecoverySnapshot.latest.v1.fixture','recovery');await persistServerValue('local','mindex.theme','dark')}")
                     assert page.evaluate("localStorage.getItem('mindex.worshipRecoverySnapshot.latest.v1.fixture')") is None
                     control['offline']=True
@@ -123,25 +138,46 @@ def main():
                       render();MINDEX_EDITOR_DRAFTS.capture();
                     }""")
                     page.wait_for_function("document.getElementById('restoreServerEditorDraft')?.hidden===false")
-                    page.once('dialog',lambda dialog:dialog.accept())
+                    preserved=page.evaluate("""async()=>{
+                      const storage=MINDEX_SERVER_STORAGE,old=storage.getItem('local','mindex.editor.draft.v1:scripture:fixture');
+                      state.scriptures[0].body='New edit before recovery';state.dirty.scripture=true;
+                      MINDEX_EDITOR_DRAFTS.capture();await new Promise(queueMicrotask);await storage.flush();
+                      return {legacy:old===storage.getItem('local','mindex.editor.draft.v1:scripture:fixture'),old:storage.keys('local').some(k=>k.startsWith('mindex.editor.draft.v2:')&&JSON.parse(storage.getItem('local',k)||'null')?.value?.body==='Unsaved draft')};
+                    }""")
+                    assert preserved=={'legacy':True,'old':True}
+
                     page.locator('#restoreServerEditorDraft').click()
+                    choose_draft(page,'Unsaved draft')
+                    page.once('dialog',lambda dialog:dialog.accept())
+                    page.get_by_role('button',name='편집창에 복구',exact=True).click()
                     page.wait_for_function("state.scriptures[0].body==='Unsaved draft' && state.dirty.scripture")
                     assert page.evaluate("localStorage.getItem('mindex.editor.draft.v1:scripture:fixture')") is None
+                    assert any(json.loads(value['value'] or '{}').get('value',{}).get('body')=='New edit before recovery' for key,value in db.items() if key[2].startswith('mindex.editor.draft.v2:'))
+                    page.locator('#restoreServerEditorDraft').click()
+                    choose_draft(page,'New edit before recovery')
+                    for width in (1000,390):
+                        page.set_viewport_size({'width':width,'height':900})
+                        assert page.locator('.editor-draft-review').evaluate('(e)=>e.scrollWidth<=e.clientWidth')
+                        page.screenshot(path=f'/tmp/editor-draft-review-{engine}-{width}.png')
+                    page.get_by_role('button',name='닫기',exact=True).click()
+                    assert page.evaluate("state.scriptures[0].body==='Unsaved draft'")
                     # Changed originals no longer make recovery a dead end.
                     page.evaluate("""async()=>{
-                      const originalDraft=JSON.parse(MINDEX_SERVER_STORAGE.getItem('local','mindex.editor.draft.v1:scripture:fixture'));
+                      const key=MINDEX_SERVER_STORAGE.keys('local').find(k=>k.startsWith('mindex.editor.draft.v2:scripture:fixture:'));
+                      const originalDraft=JSON.parse(MINDEX_SERVER_STORAGE.getItem('local',key));
                       clearDirtyState();state.scriptures=[{id:'fixture',title:'New title',body:'Original text'}];
                       state.cleanFingerprints.scripture=dirtyModuleFingerprint('scripture');
                       render();MINDEX_EDITOR_DRAFTS.capture();await new Promise(queueMicrotask);
                       await MINDEX_SERVER_STORAGE.flush();
                       await MINDEX_SERVER_STORAGE.setItem('local','mindex.editor.draft.v1:scripture:fixture',JSON.stringify(originalDraft));
                     }""")
-                    page.once('dialog',lambda dialog:dialog.accept())
                     page.locator('#restoreServerEditorDraft').click()
+                    choose_draft(page,'Unsaved draft')
+                    page.once('dialog',lambda dialog:dialog.accept())
+                    page.get_by_role('button',name='편집창에 복구',exact=True).click()
                     page.wait_for_function("state.scriptures[0].body==='Unsaved draft' && state.scriptures[0].title==='New title'")
                     assert any('mindex.editor.recovery.v1:' in key[2] for key in db)
-                    page.locator('#restoreServerEditorDraft').hover()
-                    assert page.locator('#restoreServerEditorDraft > span').is_visible()
+                    assert page.locator('.editor-draft-review').count()==0
                     # Focus is one rounded container ring, not clipped inner edges.
                     page.locator('#searchInput').focus()
                     focus=page.locator('#searchInput').evaluate("e=>({inner:getComputedStyle(e).outlineStyle,ring:getComputedStyle(e.closest('.search-wrap')).outlineStyle})")

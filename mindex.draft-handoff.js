@@ -56,9 +56,16 @@
    if(!/^[a-f0-9]{64}$/.test(saved||''))saved=Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join('');
    await connect(saved);
    // Existing editor drafts are copied, never moved or deleted.
+   const existing=[];
    for(const key of window.MINDEX_SERVER_STORAGE.keys?.('local')||[]){
-    if(!key.startsWith('mindex.editor.draft.v1:'))continue;
-    try{const draft=JSON.parse(window.MINDEX_SERVER_STORAGE.getItem('local',key));if(draft?.schema===1)publish(draft.module,draft.id,draft,draft.value?.song?.title||draft.value?.title||draft.value?.service?.title||'보관된 초안');}catch{}
+    if(!/^mindex\.editor\.draft\.v[12]:/.test(key))continue;
+    try{const draft=JSON.parse(window.MINDEX_SERVER_STORAGE.getItem('local',key));if(draft?.schema===1)existing.push(draft);}catch{}
+   }
+   const latest=new Map();
+   for(const draft of existing.sort((a,b)=>String(a.savedAt||'').localeCompare(String(b.savedAt||''))))latest.set(draft.module+':'+draft.id,draft);
+   for(const [identity,draft] of latest){
+    if(pending.has(identity))continue; // Never replace input published during connection setup.
+    publish(draft.module,draft.id,draft,draft.value?.song?.title||draft.value?.title||draft.value?.service?.title||'보관된 초안');
    }
    if(poll)clearInterval(poll);poll=setInterval(refresh,60000);
   })().catch(()=>{lastStatus='초안 연결을 준비하지 못했습니다. 다시 시도해 주세요.';status()}).finally(()=>{starting=null});return starting;
