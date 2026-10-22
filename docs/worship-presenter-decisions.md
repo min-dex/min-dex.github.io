@@ -3805,3 +3805,14 @@ Liturgical body sizes and chromakey caption text are unchanged.
   overflow flag before measuring; shortening content restores its base type.
 - This replaces former1px/2px loops, unconstrained binary shrink, title clamp and
   the separate28px preview/32px output scripture floors.
+
+
+## Children community-confession emphasis ·2026-10-22
+
+Children fullscreen frames with service artwork use deeper variants of the six
+original confession colors: #A66B00, #527A00, #B53B76, #B94720, #006C91, #6554B8.
+The shared theme overrides the original palette through CSS tokens in both
+thumbnails and output. Authored colors remain stored unchanged; other service
+formats, chromakey and reading frames retain their original colors. Unrelated
+custom highlight colors are not mapped. The darker palette improves contrast on
+the cream artwork without changing emphasis wording or font weight.

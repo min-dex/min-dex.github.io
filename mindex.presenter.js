@@ -5768,7 +5768,12 @@ function renderPresenterHighlightedText(line, slide) {
 function presenterTextHighlightStyle(highlight = {}) {
   const styles = [];
   const color = normalizeServiceTextHighlightColor(highlight.color || highlight.fg || highlight.foreground || highlight.hex);
-  if (color) styles.push(`--presenter-text-highlight-color: ${escapeAttr(color)}`);
+  if (color) {
+    // Theme overrides preserve the authored color as the fallback everywhere else.
+    const palette = ["#FFC832", "#C8FF32", "#FF96C8", "#FF6432", "#32C8FF", "#9696FF"];
+    const token = palette.includes(color.toUpperCase()) ? `--presenter-highlight-${color.slice(1).toLowerCase()}` : "";
+    styles.push(`--presenter-text-highlight-color: ${token ? `var(${token}, ${escapeAttr(color)})` : escapeAttr(color)}`);
+  }
   if (highlight.bold === false) styles.push("--presenter-text-highlight-weight: inherit");
   return styles.join("; ");
 }
