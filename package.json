@@ -53,6 +53,7 @@
       "mindex.public-config.js",
       "remote.html",
       "remote.mjs",
+      "remote.screen.mjs",
       "remote.css",
       "remote.shared.css",
       "remote.webmanifest",

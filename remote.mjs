@@ -1,9 +1,12 @@
-import {openRemote} from './mindex.remote-session.mjs?v=3';
+import {openRemote} from './mindex.remote-session.mjs?v=4';
+import {setupPhoneExperience} from './remote.screen.mjs?v=1';
+const screenAwake=setupPhoneExperience();
 const $=id=>document.getElementById(id);
 let session,view=null,opening=false;
 let client;
 function reset(){session=null;state(null);$('pairForm').hidden=false;$('disconnect').hidden=true;$('code').value='';paint();}
 function paint(){
+ screenAwake.update({active:!!session?.connected,visible:!document.hidden});
  const usable=session?.usable&&!document.hidden;
  for(const button of document.querySelectorAll('[data-action]'))button.disabled=!usable||!view?.allowed?.includes(button.dataset.action);
  $('connect').disabled=opening||!!session;

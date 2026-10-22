@@ -34,3 +34,29 @@ const before=registrations.size;
 await assert.rejects(openRemote({client:{...client,channel(){throw Error("setup failed");}},host:true}),/setup failed/);
 await until(()=>registrations.size===before);
 console.log('PASS encrypted session handshake, one controller, in-flight lock, revocation, consumed code, expiry and channel cleanup');
+// Immediate subscription failure must reject, not return a dead session or leave timers.
+let intervals=0;const interval=globalThis.setInterval;
+globalThis.setInterval=(...args)=>{intervals++;return interval(...args);};
+try{
+ await assert.rejects(openRemote({client:{...client,channel(topic){const c=client.channel(topic);c.subscribe=cb=>{cb('CHANNEL_ERROR');return c;};return c;}},host:true}),/연결/);
+ assert.equal(intervals,0);
+}finally{globalThis.setInterval=interval;}
+// A lost transport send acknowledgement must not keep the Disconnect UI waiting.
+let hanging=false;const unreliable={...client,channel(topic){const c=client.channel(topic),send=c.send;c.send=function(m){return hanging?new Promise(()=>{}):send.call(this,m);};return c;}};
+const h=await openRemote({client:unreliable,host:true,read:()=>({live:true}),execute:()=>{}});
+const c=await openRemote({client:unreliable,code:h.code});await until(()=>c.usable);
+try{hanging=true;await Promise.race([c.end(),wait(1500).then(()=>{throw Error('disconnect stuck');})]);assert(!c.connected);}finally{h.close();c.close();}
+console.log('PASS immediate subscribe failure and bounded disconnect with silent transport');
+for(const failure of ['CHANNEL_ERROR','TIMED_OUT','CLOSED']){
+ let closeCount=0;const channelsForTest=[];
+ const failing={...client,channel(topic){const channel=client.channel(topic),subscribe=channel.subscribe;channel.subscribe=function(cb){this.fail=()=>cb(failure);return subscribe.call(this,cb);};channelsForTest.push(channel);return channel;}};
+ const a=await openRemote({client:failing,host:true,read:()=>({live:true}),execute:()=>{throw Error('audio blocked');}});
+ let outcome;const b=await openRemote({client:failing,code:a.code,onClose:()=>closeCount++,onResult:r=>outcome=r});
+ try{
+  await until(()=>b.usable);await b.command('play');await until(()=>outcome);assert(!outcome.ok);assert.match(outcome.message,/audio blocked/);
+  channelsForTest[1].fail();channelsForTest[1].fail();assert(!b.usable);assert.equal(closeCount,1);
+  await assert.rejects(b.command('next'));
+ }finally{a.close();b.close();}
+}
+await until(()=>channels.size===0);
+console.log('PASS transport error/timeout/close, idempotent cleanup and failed execution feedback');
