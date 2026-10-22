@@ -3753,3 +3753,11 @@ in presenter-remote-design.md. Immediate subscription failure rejects before a
 closed session can be assigned to the UI. Explicit disconnect waits at most one
 second for transport acknowledgement and then releases the local session, without
 stopping presentation or replaying commands.
+
+## 2026-10-22 · Remote home-screen and screen-awake behavior
+
+Remote Controller offers a collapsed home-screen installation guide and an install
+button only when the browser provides its native prompt. When launched standalone,
+installation guidance is hidden. Screen wake lock defaults on only for a connected,
+visible controller and is optional via a checkbox. Denial/release is communicated
+without retry loops, reconnecting, or interfering with PC presentation.

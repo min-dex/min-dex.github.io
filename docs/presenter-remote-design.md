@@ -119,3 +119,25 @@ and Chromium/WebKit adapter/lifecycle/presenter regressions accompany these chec
 Service quota failure is simulated through error/timeout paths without exhausting
 production quota. Physical OS sleep, mobile power management and real network
 handover remain outside this verification. These fixes are local, not yet deployed.
+
+## Home-screen launch and screen wake lock · 2026-10-22
+
+The standalone manifest retains remote.html as its start URL and now has an
+explicit matching identity. Apple web-app title and safe-area top spacing are
+provided. A collapsed home-screen guide explains Safari Share > Add to Home
+Screen > Open as Web App and Android's browser menu. A native install button is
+shown only after beforeinstallprompt; standalone/appinstalled hides the guide.
+No service worker, offline commands, stored pairing key or automatic reconnection.
+
+While a connected controller is visible, Screen Wake Lock is requested by default.
+The checkbox opts out for the current page lifetime only. Disconnect, pagehide
+and hidden state release it; returning visible requests again if still connected.
+Unsupported/denied/system-released states are explicit, with a manual retry for
+release/denial; painting and heartbeats never create an automatic retry loop.
+Late async requests after disconnect release their sentinel instead of retaining it.
+Wake Lock is convenience only and never establishes command authorization.
+
+Sources: https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API
+and https://support.apple.com/guide/iphone/iphea86e5236/ios . Physical home-screen
+installation and actual mobile battery/screen behavior require a real device.
+Local tests mock platform APIs; protocol/lifecycle tests remain separate.

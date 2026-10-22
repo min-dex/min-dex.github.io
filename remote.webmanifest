@@ -17,5 +17,7 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "id": "./remote.html",
+  "description": "민덱스 송출 PC 원격 조작"
 }

@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 NODE_TESTS = (
     "test_remote_core.mjs",
     "test_remote_pairing.mjs",
+    "test_remote_screen.mjs",
     "test_remote_theme.cjs",
     "test_remote_session.mjs",
     "test_union_subtitle_display.cjs",
@@ -57,6 +58,8 @@ NODE_TESTS = (
 SMOKES = (
     "smoke_children_theme.py",
     "smoke_presenter_remote.py",
+    "smoke_remote_phone.py",
+    "smoke_remote_lifecycle.py",
     "smoke_remote_adapter.py",
     "smoke_reference_validation.py",
     "smoke_presenter_freshness.py",
