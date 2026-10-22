@@ -3889,3 +3889,14 @@ for retry and concurrent input retains the existing signature guard.
 Validation: ten service types, Chromium/WebKit, up/down/add/delete, shuffled
 reload, last-slot deletion, failure/retry, concurrent full-save input and omitted
 content protection in isolated RPC fixtures.
+
+## Children common marker emphasis ·2026-10-23
+
+Supersedes Children community-confession emphasis and Children artwork emphasis
+palettes above. All colored highlights on children fullscreen service artwork now
+use the authored color as an opaque marker behind the lower65% of the text line
+(30–95%), with the common #34271f foreground. Bold-only emphasis stays plain.
+Remove artwork identity selection, per-background color substitutions, palette
+attributes and text outlines. Every artwork, preview and output uses one CSS rule;
+no stored highlight values, text, font sizes or weights change. Non-children,
+chromakey and reading frames retain their existing colored text behavior.
