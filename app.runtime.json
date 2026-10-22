@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261022-special-save-order",
+  "version": "20261023-remote-concise",
   "options": {
     "compress": false,
     "mangle": {
