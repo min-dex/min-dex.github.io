@@ -4779,7 +4779,7 @@ function serviceItemSlotKey(item = {}, memo = null) {
 
 function groupWorshipElements(sections = [], elements = []) {
   const sectionById = Object.fromEntries(sections.map((section) => [section.id, section]));
-  return elements.reduce((grouped, element) => {
+  const grouped = elements.reduce((grouped, element) => {
     const section = sectionById[element.section_id];
     const serviceId = section?.service_id;
     if (!serviceId) return grouped;
@@ -4916,6 +4916,10 @@ function groupWorshipElements(sections = [], elements = []) {
     }));
     return grouped;
   }, {});
+  // RPC arrays have no ordering guarantee. Every editor/hydration consumer must
+  // start from persisted section/element order before compacting editor ordinals.
+  Object.values(grouped).forEach(items => items.sort((a, b) => a.sort_order - b.sort_order));
+  return grouped;
 }
 
 function serviceElementManualSlides(element = {}, config = {}, context = {}) {

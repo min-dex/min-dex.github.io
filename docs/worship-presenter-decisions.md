@@ -3854,3 +3854,7 @@ the cream artwork without changing emphasis wording or font weight.
   Order labels, original titles and subtitles are absent from this display. Their
   authored metadata and version output-title selection remain unchanged.
 - Chapel scripture uses normal Bible reading rather than a poster scripture image.
+
+- Canonical grouping sorts RPC rows by persisted section/element order before any
+  editor or scripture hydration compacts visible ordinals. Unordered aggregate
+  arrays must never silently reorder a service when a Bible body finishes loading.

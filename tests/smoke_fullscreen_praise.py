@@ -14,6 +14,13 @@ def main():
                 page.wait_for_function("typeof WORSHIP_BACKGROUND_BASE === 'string' && typeof renderPresenterPresentationControls === 'function'")
                 result = page.evaluate('''async () => {
                   const check=(v,m)=>{if(!v)throw Error(m)};
+                  const sections=[{id:'reading-section',service_id:'order-fixture',sort_order:20,section_key:'scripture_reading',title:'성경봉독'},{id:'praise-section',service_id:'order-fixture',sort_order:10,section_key:'praise',title:'찬양'}];
+                  const elements=[{id:'reading',section_id:'reading-section',sort_order:1,element_type:'scripture_body',title:'',source_ref:{label:'성경봉독'},config:{inputMode:'scripture',elementType:'scripture_body'}},{id:'second-song',section_id:'praise-section',sort_order:20,element_type:'title_person',title:'둘째 곡',source_ref:{label:'찬양 2'},config:{inputMode:'text',elementType:'title_person'}},{id:'first-song',section_id:'praise-section',sort_order:10,element_type:'title_person',title:'첫째 곡',source_ref:{label:'찬양 1'},config:{inputMode:'text',elementType:'title_person'}}];
+                  const before=JSON.stringify([sections,elements]);
+                  const grouped=groupWorshipElements(sections,elements)['order-fixture'];
+                  check(grouped.map(e=>e.id).join(',')==='first-song,second-song,reading','unordered RPC rows changed service order');
+                  check(normalizeServiceItemsInCurrentOrder(grouped).map(e=>e.id).join(',')==='first-song,second-song,reading','hydration compaction changed persisted order');
+                  check(JSON.stringify([sections,elements])===before,'grouping mutated server rows');
                   const presentation={backgroundVideo:'tests/fixtures/praise-background.webm'};
                   const memo=serializeServiceItemMemo({elementType:'title_person',presentation,note:'보존'});
                   check(parseServiceItemMemo(memo).presentation.backgroundVideo===presentation.backgroundVideo,'memo lost video');
