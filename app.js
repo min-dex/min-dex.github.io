@@ -22011,7 +22011,10 @@ function recoverAllGenerationsOfferingItems(service, items = []) {
 function projectWorshipServiceItemsFromTemplate(service, items = []) {
   const appTypeId = worshipAppServiceTypeId(service?.type_id);
   if (!TEMPLATE_PROJECTED_SERVICE_TYPES.has(appTypeId)) {
-    return normalizeServiceItemsForTemplateHierarchy(service, items.filter(item => !isTemplateSuppressedServiceItem(item)));
+    // Preserve the live collection/item identities when there is no deletion.
+    // Audio/timing editors can retain references while applying a draft.
+    return items.some(isTemplateSuppressedServiceItem)
+      ? items.filter(item => !isTemplateSuppressedServiceItem(item)) : items;
   }
   const sourceItems = mergeMonthlyCorporatePrayerItems(mergeRememberedTemplateSuppressionItems(service?.id, recoverAllGenerationsOfferingItems(service, items)));
 
