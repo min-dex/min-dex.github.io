@@ -1597,12 +1597,13 @@ span.presenter-announcement-paren,
   margin-left: calc(var(--transition-logo-left) * var(--presenter-stage-unit));
   margin-top: calc(var(--transition-logo-top) * var(--presenter-stage-unit));
   max-width: none; object-fit: fill; pointer-events: none;
-  clip-path: inset(var(--transition-logo-y) calc(100% - var(--transition-logo-x)) calc(100% - var(--transition-logo-y)) var(--transition-logo-x));
+  transform-origin: var(--transition-logo-x) var(--transition-logo-y);
+  transform: scale(0);
   animation: presenter-transition-logo-reveal 850ms ease-out forwards;
 }
-@keyframes presenter-transition-logo-reveal { to { clip-path: inset(0); } }
+@keyframes presenter-transition-logo-reveal { to { transform: scale(1); } }
 .presenter-output-root > .presenter-output-layer:not(.is-active) .presenter-transition-logo { visibility: hidden; animation: none; }
-.svc-slide-mini-canvas .presenter-transition-logo { animation: none; clip-path: inset(0); }
+.svc-slide-mini-canvas .presenter-transition-logo { animation: none; transform: scale(1); }
 @media (prefers-reduced-motion: reduce) {
-  .presenter-transition-logo { animation: none; clip-path: inset(0); }
+  .presenter-transition-logo { animation: none; transform: scale(1); }
 }

@@ -33,8 +33,17 @@ def main():
                   const logo=root.querySelector('img');await logo.decode();
                   const animation=logo.getAnimations()[0];check(animation,'animation missing');animation.pause();
                   const samples=[];
-                  for(const t of [0,425,850]){animation.currentTime=t;await new Promise(requestAnimationFrame);const box=logo.getBoundingClientRect();samples.push(getComputedStyle(logo).clipPath);check(Math.abs(box.left+box.width*.5-960)<1,'x intersection moved '+JSON.stringify({x:box.left,w:box.width,root:root.getBoundingClientRect().toJSON(),section:logo.parentElement.getBoundingClientRect().toJSON()}));check(Math.abs(box.top+box.height*.5-540)<1,'artwork vertical center moved');}
-                  check(samples[0].includes('29.5%'),'reveal does not start at intersection');check(samples[0]!==samples[1] && samples[1]!==samples[2],'reveal did not progress');check(samples[2]==='inset(0%)' || samples[2]==='inset(0px)','reveal not complete: '+samples[2]);
+                  for(const t of [0,425,850]){
+                    animation.currentTime=t;await new Promise(requestAnimationFrame);
+                    const box=logo.getBoundingClientRect(),css=getComputedStyle(logo),matrix=new DOMMatrixReadOnly(css.transform);
+                    samples.push(matrix.a);
+                    check(css.clipPath==='none','rectangle mask still clips pointed tips');
+                    check(Math.abs(matrix.a-matrix.d)<.001,'silhouette proportions distorted');
+                    check(Math.abs(box.left+box.width*.5-960)<1,'x intersection moved');
+                    check(Math.abs(box.top+box.height*.295-447.75)<1,'reveal intersection moved');
+                    if(t===850)check(Math.abs(box.top+box.height*.5-540)<1,'complete artwork not centered');
+                  }
+                  check(samples[0]===0 && samples[1]>0 && samples[1]<1 && samples[2]===1,'pointed silhouette did not grow from intersection');
                   check(getComputedStyle(root.querySelector('section'),'::before').display==='none','default cross overlays custom logo');
                   root.classList.add('svc-slide-mini-canvas');await new Promise(requestAnimationFrame);check(getComputedStyle(logo).animationName==='none','thumbnail animation');
                   return 'PASS payload, origin, reveal progress, cache, chromakey, safety, default and thumbnails';
