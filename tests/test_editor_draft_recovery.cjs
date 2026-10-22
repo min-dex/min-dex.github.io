@@ -25,6 +25,14 @@ function fixture(){
   assert.equal(await f.restore(),true);assert.ok(f.archives.some(a=>a.value?.text==='original'));
  }
  f=fixture();f.state.dirty.scripture=true;assert.equal(await f.restore(),true);assert.ok(f.archives.some(a=>a.value?.text==='original'));
+ for(const closeAt of [1,2,3]){
+  f=fixture();let active=true,writes=0;
+  f.context.window.MINDEX_SERVER_STORAGE.setItem=async(scope,key,value)=>{f.archives.push(JSON.parse(value));if(++writes===closeAt)active=false};
+  assert.equal(await f.context.window.MINDEX_EDITOR_DRAFTS.restoreDraft(f.draft,()=>active),false);
+  assert.equal(f.state.scriptures[0].text,'original');assert.equal(f.archives.length,closeAt);
+  f.context.window.MINDEX_SERVER_STORAGE.setItem=async(scope,key,value)=>f.archives.push(JSON.parse(value));
+  assert.equal(await f.restore(),true);
+ }
  f=fixture();f.context.window.confirm=()=>false;assert.equal(await f.restore(),undefined);assert.equal(f.archives.length,0);assert.equal(f.state.scriptures[0].text,'original');
  f=fixture();
  const service={id:'w',title:'Youth',_worshipSourceTextDraft:'current source'};
