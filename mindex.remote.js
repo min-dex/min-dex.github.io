@@ -1,8 +1,9 @@
 (() => {
  'use strict';
  if(isPresenterOutputRoute())return;
- const trigger=document.createElement('button');trigger.type='button';trigger.className='icon-btn';trigger.id='remotePanelBtn';trigger.textContent='원격';trigger.title='원격 조작';trigger.setAttribute('aria-label','원격 조작');
+ const trigger=document.createElement('button');trigger.type='button';trigger.className='icon-btn';trigger.id='remotePanelBtn';trigger.innerHTML='<i data-lucide="smartphone"></i>';trigger.title='원격 조작';trigger.setAttribute('aria-label','원격 조작');
  document.getElementById('monitorPanelBtn')?.before(trigger);
+ window.lucide?.createIcons({root:trigger});
  let session=null,opening=false,ending=false;
  const panel=document.createElement('dialog');panel.className='remote-panel';panel.setAttribute('aria-labelledby','remoteTitle');
  panel.innerHTML='<header><h2 id="remoteTitle">원격 조작</h2><button class="icon-btn" data-remote-close aria-label="닫기">×</button></header><section class="monitor-section"><p>폰에서 Mindex Remote Controller를 열고 아래 코드를 입력해 주세요.</p><p><a data-remote-link target="_blank" rel="noopener">리모컨 페이지 열기</a></p><p data-remote-status role="status">예배 송출을 시작한 뒤 연결할 수 있어요.</p><p><strong data-remote-code style="font-size:20px;letter-spacing:.06em;overflow-wrap:anywhere"></strong></p><p data-remote-help></p><div class="monitor-toolbar"><button class="btn primary" data-remote-start>연결 시작</button><button class="btn secondary" data-remote-end disabled>연결 종료</button></div></section>';
