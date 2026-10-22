@@ -89,6 +89,7 @@
   const module=moduleName(),id=idFor(module);
   if(state.saving||state.serviceMusic?.playing||state.serviceMusic?.pending||isPresenterOutputWindowOpen()){showToast('저장이나 재생을 마친 뒤 임시 저장본을 복구해 주세요.','error');return false;}
   if(draft?.schema!==1||draft.module!==module||draft.id!==id)return false;
+  if(content(draft)===content(snapshot(module,id)))return false;
   const payload=draft.value;
   if((module==='praise'&&(!payload?.song||payload.song.id!==id||!Array.isArray(payload.forms)))||(module==='scripture'&&payload?.id!==id)||(module==='service'&&(payload?.service?.id!==id||!Array.isArray(payload.items)||!Array.isArray(payload.serviceTypes)))||(module==='references'&&!Array.isArray(payload))){showToast('임시 저장본 내용과 연결 대상을 확인하지 못했습니다. 원본은 보존됩니다.','error');return false;}
   const fingerprint=dirtyModuleFingerprint(module),client=state.client,current=snapshot(module,id),signature=content(current);
@@ -159,5 +160,5 @@
  window.addEventListener('mindex-server-state-settled',render);
  window.addEventListener('mindex-server-storage-ready',render);
  document.addEventListener('input',schedule);document.addEventListener('change',schedule);
- window.MINDEX_EDITOR_DRAFTS={capture:schedule,restoreDraft,identity:()=>{const kind=moduleName(),id=idFor(kind);return id?{kind,id}:null},restoring:false};
+ window.MINDEX_EDITOR_DRAFTS={matchesDraft:draft=>!!draft&&draft.module===moduleName()&&draft.id===idFor(moduleName())&&content(draft)===content(snapshot(moduleName(),draft.id)),capture:schedule,restoreDraft,identity:()=>{const kind=moduleName(),id=idFor(kind);return id?{kind,id}:null},restoring:false};
 })();
