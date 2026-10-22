@@ -23,7 +23,7 @@ def main():
     page=new(context);token=page.evaluate("localStorage.getItem('mindex.monitor.deviceReporter')");assert len(token)==64
     copy=new(context);assert copy.evaluate("calls.filter(c=>c.name==='mindex_monitor_register').length")==0
     assert copy.evaluate("calls.find(c=>c.name==='mindex_monitor_ping').args.p_token")==token
-    page.locator('#monitorPanelBtn').click();page.get_by_label('기기 이름').fill('본당 송출 PC');page.get_by_label('기기 이름').press('Tab')
+    page.locator('#monitorPanelBtn').click();page.get_by_label('접속명').fill('본당 송출 PC');page.get_by_label('접속명').press('Tab')
     copy.wait_for_function("document.querySelector('#monitorName').value==='본당 송출 PC'")
     assert '12345678' not in page.locator('[data-devices]').inner_text()
     assert page.locator('[data-devices] .monitor-device').count()==1

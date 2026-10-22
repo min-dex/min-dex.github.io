@@ -1,5 +1,14 @@
 # Read-only operations panel
 
+## Browser presence wording · 2026-10-22
+
+The panel is 접속 현황, showing 접속명, OS/browser and output status. Names are
+user-editable labels, not hardware identity. Same-profile tabs count as one
+connection; counts use 개 접속, not physical-device units. IDs/tokens stay internal.
+Clearing browser storage requires assigning the name again. No device enrollment
+is introduced; six-digit remote-control pairing remains a separate permission.
+Existing server name storage, reporter identity, cadence and RPCs are unchanged.
+
 ## Browser-profile devices · 2026-10-18
 
 Same-origin tabs in one browser profile share a reporter token in localStorage.

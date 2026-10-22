@@ -37,7 +37,7 @@ def main():
                     assert page.locator('.monitor-panel').is_visible()
                     assert page.locator('[data-share]').count() == 0
                     assert page.locator('[data-local]').count()==0
-                    assert page.get_by_label('기기 이름').is_visible()
+                    assert page.get_by_label('접속명').is_visible()
                     page.wait_for_function("monitorCalls.some(c=>c.name==='mindex_monitor_ping')")
                     page.evaluate("emitMonitorSaveEvent('save_start');emitMonitorSaveEvent('save_ok');emitMonitorSaveEvent('save_failed')")
                     page.locator('[data-refresh]').click()
@@ -49,7 +49,7 @@ def main():
                     assert '송출 중' in page.locator('[data-devices]').inner_text()
                     page.evaluate("monitorMode='stale'")
                     page.locator('[data-refresh]').click()
-                    page.wait_for_function("document.querySelector('[data-devices]').textContent.includes('현재 접속 중인 기기가 없습니다')")
+                    page.wait_for_function("document.querySelector('[data-devices]').textContent.includes('현재 접속 중인 브라우저가 없습니다')")
                     page.evaluate("monitorMode='missing'")
                     page.locator('[data-refresh]').click()
                     page.wait_for_function("document.querySelector('.monitor-message').textContent.includes('서버 설정')")
