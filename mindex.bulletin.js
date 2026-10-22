@@ -1008,8 +1008,14 @@
   function readLocal(key) {
     try{return JSON.parse(window.MINDEX_SERVER_STORAGE?.getItem("local",key)||"null");}catch{return null;}
   }
+  function bulletinDrafts(key){
+    return [key,key+":recovery",...(window.MINDEX_SERVER_STORAGE?.keys?.("local")||[]).filter(k=>k.startsWith(key+":draft:")||k.startsWith(key+":recovery:"))]
+      .map(readLocal).filter(v=>isRecord(v)&&[1,2,3].includes(v.version)&&isRecord(v.fields)&&Array.isArray(v.frames))
+      .sort((a,b)=>(Number(b.savedAt)||0)-(Number(a.savedAt)||0));
+  }
+  const draftSignature=value=>JSON.stringify(normalizeSnapshot(value));
   function restore(scope,id) {
-    const key=`mindex.bulletin.v1:${scope}:${id}`,saved=readLocal(key);
+    const key=`mindex.bulletin.v1:${scope}:${id}`,saved=bulletinDrafts(key)[0];
     const hasLocal=isRecord(saved)&&[1,2,3].includes(saved.version);
     const value=normalizeSnapshot(hasLocal?saved:{});
     if(saved?.version===1&&!Object.hasOwn(value.settings,"theme"))value.settings.theme="26-A5.png";
@@ -1137,15 +1143,56 @@
     function backup(target=doc){
       const savedAt=Date.now(),value=snapshot(target);
       target.backupPending=true;
-      const accepted=window.MINDEX_SERVER_STORAGE?.queue("local",target.key,JSON.stringify({version:3,...value,savedAt,...(templateSession&&target===doc?{templateDirty:target.dirty,templateRevision:target.revision}:{})}));
+      const accepted=window.MINDEX_SERVER_STORAGE?.queue("local",target.sessionDraftKey||(target.sessionDraftKey=target.key+":draft:"+crypto.randomUUID()),JSON.stringify({version:3,...value,savedAt,...(templateSession&&target===doc?{templateDirty:target.dirty,templateRevision:target.revision}:{})}));
       if(!accepted){target.backupPending=false;target.backupUnavailable=true;}
       if(target.dirty)window.MINDEX_DRAFT_HANDOFF?.publish(templateSession&&target===doc?'bulletin-template':'bulletin',templateSession&&target===doc?TEMPLATE_KEY:String(target.id),{schema:1,revision:target.revision,value},target.source?.title||'주보 초안');
       status();
     }
     async function retainRecovery(target,value) {
       const preserved=normalizeSnapshot(value);
+      const previous=readLocal(target.key+":recovery");
+      if(previous)await writeLocal(target,target.key+":recovery:"+crypto.randomUUID(),previous);
+      await writeLocal(target,target.key+":recovery:"+crypto.randomUUID(),{version:3,...preserved,savedAt:Date.now()});
       await writeLocal(target,target.key+":recovery",{version:3,...preserved,savedAt:Date.now()});
       target.localDraft=preserved;
+    }
+    function recoveryChoices(){
+      if(!doc)return [];
+      const seen=new Set([draftSignature(doc)]);
+      return [...bulletinDrafts(doc.key),...(doc.localDraft?[doc.localDraft]:[])].filter(value=>{
+        const signature=draftSignature(value);if(seen.has(signature))return false;seen.add(signature);return true;
+      });
+    }
+    function reviewLocalDraft(){
+      const choices=recoveryChoices();if(!choices.length||loading||doc.saving)return;
+      const target=doc,request=serial,before=draftSignature(doc);
+      const dialog=document.createElement('dialog');dialog.className='editor-draft-review';dialog.setAttribute('aria-label','주보 임시 초안 확인');
+      const title=document.createElement('h2');title.textContent='주보 임시 초안 확인';dialog.append(title);
+      const note=document.createElement('p');note.textContent='현재 입력과 선택한 초안을 보관한 뒤 편집창에 복구합니다. 저장본은 바뀌지 않습니다.';dialog.append(note);
+      const select=document.createElement('select');select.setAttribute('aria-label','복구할 주보 초안');
+      choices.forEach((value,i)=>{const option=document.createElement('option');option.value=String(i);option.textContent=value.savedAt?new Date(value.savedAt).toLocaleString('ko-KR'):'기존 초안 · 보관 시각 정보 없음';select.append(option)});dialog.append(select);
+      const columns=document.createElement('div');columns.className='editor-draft-preview';dialog.append(columns);
+      const previewText=value=>Object.entries(value.fields||{}).map(([key,text])=>`${fields[key]||key}\n${text}`).join('\n\n')+`\n\n배치 ${value.frames?.length||0}개 · 배경 ${value.settings?.theme||'기본'}`;
+      const field=(label,value)=>{const l=document.createElement('label');l.textContent=label;const t=document.createElement('textarea');t.readOnly=true;t.setAttribute('aria-label',label);t.value=previewText(value);l.append(t);columns.append(l);return t};
+      field('현재 입력',target);const incoming=field('복구할 내용',choices[0]);select.onchange=()=>incoming.value=previewText(choices[Number(select.value)]);
+      const message=document.createElement('p');message.setAttribute('role','status');dialog.append(message);
+      const actions=document.createElement('div');actions.className='editor-draft-actions';dialog.append(actions);
+      const close=document.createElement('button');close.className='btn secondary';close.textContent='닫기';close.onclick=()=>dialog.close();actions.append(close);
+      const apply=document.createElement('button');apply.className='btn primary';apply.textContent='편집창에 복구';actions.append(apply);
+      const unchanged=()=>dialog.open&&doc===target&&request===serial&&!signal.aborted&&!loading&&!target.saving&&!printing&&!printSession&&!options.remoteBlocked?.()&&draftSignature(target)===before;
+      apply.onclick=async()=>{
+        if(!unchanged()){message.textContent='현재 입력이나 화면이 바뀌었습니다. 닫고 다시 확인해 주세요.';return}
+        apply.disabled=true;select.disabled=true;
+        try{
+          const selected=normalizeSnapshot(choices[Number(select.value)]);
+          await retainRecovery(target,selected);
+          if(!unchanged())throw Error('입력이 바뀌어 현재 내용을 유지했습니다.');
+          await retainRecovery(target,snapshot(target));
+          if(!unchanged())throw Error('입력이 바뀌어 현재 내용을 유지했습니다.');
+          remember();Object.assign(target,selected);persist();properties();preview();status();dialog.close();
+        }catch(e){message.textContent=e.message;}finally{apply.disabled=false;select.disabled=false;}
+      };
+      dialog.addEventListener('close',()=>dialog.remove(),{once:true});document.body.append(dialog);dialog.showModal();
     }
     function persist(){doc.dirty=true;doc.saveError="";saveError="";printError="";backup();}
     async function editTemplate(){
@@ -1158,10 +1205,10 @@
         if(templateDraft&&!templateDraft.dirty)templateDraft=null;
         templateSession={weekly,mode};
         const value=templateRow||{template_key:TEMPLATE_KEY,revision:1,...templateValue({...weekly,settings:{...weekly.settings,design:"simple"},frames:defaultFrames("simple")})};
-        doc=templateDraft||{...weekly,...normalizeSnapshot(snapshot(weekly)),key:`mindex.bulletin.template:${options.scope}:${TEMPLATE_KEY}`,history:[],future:[],dirty:!templateRow,revision:templateRow?.revision||0,saveError:"",saving:false,localDraft:null};
+        doc=templateDraft||{...weekly,...normalizeSnapshot(snapshot(weekly)),key:`mindex.bulletin.template:${options.scope}:${TEMPLATE_KEY}`,sessionDraftKey:null,history:[],future:[],dirty:!templateRow,revision:templateRow?.revision||0,saveError:"",saving:false,localDraft:null};
         if(!templateDraft){applyTemplate(doc,value);doc.fields={...value.common};doc.profile={};doc.sourceSnapshot=null;}
         if(!templateDraft){
-          const saved=readLocal(doc.key);
+          const saved=bulletinDrafts(doc.key).find(v=>v.templateDirty!==undefined);
           if(saved?.templateDirty&&saved?.templateRevision===(templateRow?.revision||0)){Object.assign(doc,normalizeSnapshot(saved));doc.dirty=true;}
         }
         doc.source=weekly.source;doc.backgrounds=weekly.backgrounds;
@@ -1204,7 +1251,7 @@
     on(window,"mindex-server-state-settled",()=>{if(!signal.aborted)status()});
     function status(){
       if(doc?.backupPending){
-        const confirmed=readLocal(doc.key);
+        const confirmed=readLocal(doc.sessionDraftKey||doc.key);
         if(confirmed?.savedAt&&JSON.stringify(normalizeSnapshot(confirmed))===JSON.stringify(snapshot(doc))){doc.savedAt=confirmed.savedAt;doc.backupPending=false;doc.backupUnavailable=false;}
       }
 
@@ -1228,7 +1275,7 @@
       q("[data-bulletin-template-exit]").hidden=!templateSession;
       q("[data-bulletin-template-exit]").disabled=!!doc?.saving;
       pageNavigation();
-      q("[data-bulletin-local]").hidden=!!templateSession||!doc?.localDraft;
+      q("[data-bulletin-local]").hidden=!!templateSession||!recoveryChoices().length;
       q("[data-bulletin-local]").disabled=loading||!!doc?.saving;
       root.querySelectorAll(".bulletin-properties input,.bulletin-properties select,.bulletin-properties textarea,.bulletin-properties button").forEach(el=>el.disabled=loading||(!doc?.dbLoaded&&!!error));
       options.onStateChange?.();
@@ -1388,7 +1435,7 @@
       const b=event.target.closest("button");if(!b)return;
       if(b.hasAttribute("data-bulletin-template-edit")){void editTemplate();return;}
       if(b.hasAttribute("data-bulletin-template-reload")){
-        if(templateSession){try{const target=doc,before=JSON.stringify(snapshot(target));await retainRecovery(target,snapshot(target));if(doc!==target||JSON.stringify(snapshot(target))!==before)throw Error("입력이 바뀌어 현재 초안을 유지했습니다.");await writeLocal(target,target.key,{version:3,templateDirty:false});if(doc!==target||JSON.stringify(snapshot(target))!==before)throw Error("입력이 바뀌어 현재 초안을 유지했습니다.");exitTemplate();templateDraft=null;void editTemplate();}catch(e){saveError=e.message;status();}}return;
+        if(templateSession){try{const target=doc,before=JSON.stringify(snapshot(target));await retainRecovery(target,snapshot(target));if(doc!==target||JSON.stringify(snapshot(target))!==before)throw Error("입력이 바뀌어 현재 초안을 유지했습니다.");await writeLocal(target,target.key,{version:3,...snapshot(target),templateDirty:false,templateRevision:target.revision,savedAt:Date.now()});if(doc!==target||JSON.stringify(snapshot(target))!==before)throw Error("입력이 바뀌어 현재 초안을 유지했습니다.");exitTemplate();templateDraft=null;void editTemplate();}catch(e){saveError=e.message;status();}}return;
       }
       if(b.hasAttribute("data-bulletin-template-exit")){exitTemplate();return;}
       if(b.hasAttribute("data-bulletin-template-apply")){
@@ -1412,7 +1459,7 @@
       if(b.hasAttribute("data-bulletin-save")){void save();return;}
       if(b.hasAttribute("data-bulletin-reload")){void load(doc.id,true);return;}
       if(b.hasAttribute("data-bulletin-local")){
-        if(!doc.localDraft)return;remember();Object.assign(doc,normalizeSnapshot(doc.localDraft));persist();void load(doc.id);return;
+        reviewLocalDraft();return;
       }
       if(b.dataset.bulletinMode){mode=b.dataset.bulletinMode;properties();preview();}
       if(b.hasAttribute("data-bulletin-refresh")){remember();doc.inherited={common:doc.settings.templateKey?doc.inherited.common:{},months:{}};doc.sourceSnapshot=null;doc.settings.archiveReference=false;persist();void load(q("[data-bulletin-service]").value);}
@@ -1515,6 +1562,7 @@
     void load(options.serviceId);
     function handoffIdentity(){const id=remoteIdentity();return id?{kind:id.kind,id:id.recordId}:null;}
     async function restoreHandoff(draft){
+      if(draft?.schema===1&&draftSignature(draft.value)===draftSignature(doc))return false;
       if(!draft||draft.schema!==1||remoteBlocked()){saveError='현재 입력·저장·인쇄를 마친 뒤 초안을 이어 써 주세요.';status();return false;}
       const changed=draft.revision!==doc.revision;
       if(!window.confirm(changed?'초안을 만든 뒤 저장본이 바뀌었습니다. 현재 내용과 가져올 초안을 각각 보관하고, 가져온 초안으로 편집창을 바꿀까요? 저장본은 바뀌지 않습니다.':'연결된 기기의 주보 초안을 편집창에 불러올까요?'))return false;
@@ -1526,7 +1574,7 @@
         remember();Object.assign(target,normalizeSnapshot(draft.value));persist();properties();preview();status();return true;
       }catch(e){saveError=e.message;status();return false;}
     }
-    return {destroy, refreshRemote, remoteIdentity,handoffIdentity,restoreHandoff, reload(){return load(q("[data-bulletin-service]").value);}};
+    return {matchesDraft:draft=>!!doc&&draft?.schema===1&&draftSignature(draft.value)===draftSignature(doc),destroy, refreshRemote, remoteIdentity,handoffIdentity,restoreHandoff, reload(){return load(q("[data-bulletin-service]").value);}};
   }
   window.MindexBulletin=Object.freeze({mount,resolveSource,reusableContent,fieldValue,defaultFrames,renderPages,readyAssets,TOKENS,wrap,profileForDate,monthlyView,storedValue,applyStored,normalizeSnapshot,applySourceSnapshot,templateValue,normalizeTemplate,applyTemplate,TEMPLATE_KEY});
 })();
