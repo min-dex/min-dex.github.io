@@ -31,9 +31,9 @@ export function createScreenAwake({request,onChange}){
 
 export function setupPhoneExperience(){
  const $=id=>document.getElementById(id);
- const labels={idle:'연결하면 화면을 켜 둡니다.',off:'화면 꺼짐 방지 꺼짐',hidden:'화면으로 돌아오면 다시 시도합니다.',requesting:'화면 유지 요청 중…',held:'화면 켜짐 유지 중',unsupported:'이 브라우저에서는 화면 유지가 지원되지 않습니다.',blocked:'절전 설정 또는 브라우저가 화면 유지를 허용하지 않았습니다.',released:'화면 유지가 해제됐습니다.'};
+ const labels={unsupported:'화면 꺼짐 방지 미지원',blocked:'화면 꺼짐 방지를 허용하지 않았어요.',released:'화면 꺼짐 방지 해제됨'};
  const awake=createScreenAwake({request:navigator.wakeLock?.request?()=>navigator.wakeLock.request('screen'):null,onChange:state=>{
-  $('screenStatus').textContent=labels[state];$('screenRetry').hidden=!['blocked','released'].includes(state);
+  $('screenStatus').textContent=labels[state]||'';$('screenRetry').hidden=!['blocked','released'].includes(state);
  }});
  $('keepAwake').addEventListener('change',()=>awake.update({enabled:$('keepAwake').checked}));
  $('screenRetry').onclick=()=>awake.retry();
