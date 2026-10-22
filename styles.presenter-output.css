@@ -283,6 +283,24 @@
   --presenter-highlight-32c8ff: #006c91;
   --presenter-highlight-9696ff: #6554b8;
 }
+/* Busy artwork needs an edge separator as well as deeper hues. */
+.presenter-output-root.no-chromakey.has-background[data-output-theme="children"][data-emphasis-palette="textured"] {
+  --presenter-highlight-ffc832: #603900;
+  --presenter-highlight-c8ff32: #294600;
+  --presenter-highlight-ff96c8: #761747;
+  --presenter-highlight-ff6432: #7a280b;
+  --presenter-highlight-32c8ff: #00384e;
+  --presenter-highlight-9696ff: #3c286b;
+  --presenter-palette-stroke: calc(2 * var(--presenter-stage-unit));
+}
+.presenter-output-root.no-chromakey.has-background[data-output-theme="children"][data-emphasis-palette="sky"] {
+  --presenter-highlight-ffc832: #805000;
+  --presenter-highlight-c8ff32: #3b6000;
+  --presenter-highlight-ff96c8: #98275e;
+  --presenter-highlight-ff6432: #963414;
+  --presenter-highlight-32c8ff: #00566f;
+  --presenter-highlight-9696ff: #524095;
+}
 .presenter-output-root.no-chromakey.has-background[data-output-theme="children"] :is(.presenter-slide-text, .presenter-output-empty, .presenter-ready-screen, .presenter-ready-screen-kicker, .presenter-ready-screen-message, .presenter-waiting-loop, .presenter-waiting-loop-script, .presenter-waiting-loop-title) {
   color: var(--presenter-output-fg);
 }
@@ -344,6 +362,8 @@
   font-size: inherit;
   font-weight: var(--presenter-text-highlight-weight, var(--presenter-weight-display));
   white-space: inherit;
+  -webkit-text-stroke: var(--presenter-text-highlight-stroke, 0px) #fff9eb;
+  paint-order: stroke fill;
 }
 .presenter-output-root.no-chromakey .presenter-slide--lyrics[data-element-type="praise"] .presenter-slide-text {
   font-size: var(--presenter-size-lyrics);

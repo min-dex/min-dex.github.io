@@ -7650,6 +7650,8 @@ async function saveWorshipServiceElementPatch(service, itemId) {
     unchanged && savedItem && item.id === targetItemId
       ? {
         ...savedItem,
+        // Non-template services sort directly by this editor ordinal.
+        sort_order: item.sort_order,
         // A single receipt uses compact persisted ordinals, while sibling drafts
         // can still use spaced editor ordinals. Keep one ordering scale until
         // the whole collection is reloaded; otherwise projection moves this row.
@@ -32033,11 +32035,11 @@ function renderPresenterSlideMiniPreview(slide, serviceId = state.presenter.serv
     frameClasses,
   ].filter(Boolean).join(" ");
   if (!slide) {
-    return `<span class="${escapeAttr(outputClasses)}"><span class="${escapeAttr(canvasClasses)}" data-output-theme="${escapeAttr(theme)}"${backgroundStyle}></span></span>`;
+    return `<span class="${escapeAttr(outputClasses)}"><span class="${escapeAttr(canvasClasses)}" data-output-theme="${escapeAttr(theme)}" data-emphasis-palette="${escapeAttr(presenterEmphasisPalette(frameState))}"${backgroundStyle}></span></span>`;
   }
   return `
     <span class="${escapeAttr(outputClasses)}">
-      <span class="${escapeAttr(canvasClasses)}" data-output-theme="${escapeAttr(theme)}"${backgroundStyle}>
+      <span class="${escapeAttr(canvasClasses)}" data-output-theme="${escapeAttr(theme)}" data-emphasis-palette="${escapeAttr(presenterEmphasisPalette(frameState))}"${backgroundStyle}>
         ${renderPresenterSlideFrame(previewSlide, { noChromakey: frameState.noChromakey, previewStage: true, transitionLogo: serviceRawSourceRef(service).transitionLogo })}
       </span>
     </span>`;
