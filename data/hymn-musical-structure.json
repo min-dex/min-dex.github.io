@@ -14,7 +14,7 @@
   "summary": {
     "versions": 1203,
     "stanzaMeasuredVersions": 218,
-    "recitativeExceptions": 2,
+    "recitativeExceptions": 3,
     "unmeasuredVersions": 985,
     "complete": false,
     "productionMetadataWritten": false,
@@ -28,7 +28,7 @@
       "number": 1,
       "classification": "4_bar_blocks",
       "stanzaApproxMeasures": 8,
-      "reviewStatus": "verse_measured_other_parts_pending",
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "2520a212-c62e-4aa5-b764-5d8a107e01d2",
@@ -47,9 +47,11 @@
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
       "scoreEvidence": [
@@ -10319,7 +10321,7 @@
       "number": 151,
       "classification": "4_bar_blocks",
       "stanzaApproxMeasures": 8,
-      "reviewStatus": "verse_measured_other_parts_pending",
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "f5b0049e-1afa-4e47-9627-1cfab0cc87cb",
@@ -13566,7 +13568,7 @@
       "number": 211,
       "classification": "8_bar_blocks",
       "stanzaApproxMeasures": 16,
-      "reviewStatus": "verse_measured_other_parts_pending",
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "47a8f588-bf59-4163-b039-deeba9956860",
@@ -13621,9 +13623,11 @@
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
       "scoreEvidence": [
@@ -19040,7 +19044,7 @@
       "number": 312,
       "classification": "8_bar_blocks",
       "stanzaApproxMeasures": 24,
-      "reviewStatus": "verse_measured_other_parts_pending",
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "83d3961b-650d-488e-857c-82257822968a",
@@ -19086,9 +19090,11 @@
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
       "scoreEvidence": [
@@ -20230,7 +20236,7 @@
       "number": 336,
       "classification": "8_bar_blocks",
       "stanzaApproxMeasures": 24,
-      "reviewStatus": "verse_measured_other_parts_pending",
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "85444197-59fb-40f2-b728-3d7551e79315",
@@ -20276,9 +20282,11 @@
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
       "scoreEvidence": [
@@ -20350,7 +20358,7 @@
       "number": 338,
       "classification": "8_bar_blocks",
       "stanzaApproxMeasures": 16,
-      "reviewStatus": "verse_measured_other_parts_pending",
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "73649f1b-ddc0-49fd-a5c8-a0f38cce9cdd",
@@ -20405,9 +20413,11 @@
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
       "scoreEvidence": [
@@ -26722,7 +26732,7 @@
       "number": 459,
       "classification": "8_bar_blocks",
       "stanzaApproxMeasures": 24,
-      "reviewStatus": "verse_measured_other_parts_pending",
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "98ebb910-a2b9-4eab-936d-800dae74e6f0",
@@ -33150,7 +33160,7 @@
       "number": 585,
       "classification": "mixed_blocks",
       "stanzaApproxMeasures": 18,
-      "reviewStatus": "verse_measured_other_parts_pending",
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "62ebe291-629c-4687-8172-0550b47e7e25",
@@ -33202,9 +33212,11 @@
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
       "scoreEvidence": [
@@ -36648,7 +36660,7 @@
       "number": 23,
       "classification": "4_bar_blocks",
       "stanzaApproxMeasures": 8,
-      "reviewStatus": "verse_measured_other_parts_pending",
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "8fc49ebe-95af-57c8-96dc-48f8aa7c8bff",
@@ -36703,9 +36715,11 @@
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
       "scoreEvidence": [
@@ -43852,7 +43866,7 @@
       "number": 138,
       "classification": "4_bar_blocks",
       "stanzaApproxMeasures": 8,
-      "reviewStatus": "verse_measured_other_parts_pending",
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "cc642218-fb45-521c-9c23-f099da18cea9",
@@ -55105,7 +55119,7 @@
       "number": 341,
       "classification": "8_bar_blocks",
       "stanzaApproxMeasures": 24,
-      "reviewStatus": "verse_measured_other_parts_pending",
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "93e467fe-b951-5256-8f50-109eba2ef63b",
@@ -55151,9 +55165,11 @@
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
       "scoreEvidence": [
@@ -55375,7 +55391,7 @@
       "number": 346,
       "classification": "8_bar_blocks",
       "stanzaApproxMeasures": 16,
-      "reviewStatus": "verse_measured_other_parts_pending",
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "f3d4cc69-5778-5e2d-844e-578ddbe3f4ff",
@@ -55430,9 +55446,11 @@
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
       "scoreEvidence": [
@@ -56396,7 +56414,7 @@
       "number": 364,
       "classification": "8_bar_blocks",
       "stanzaApproxMeasures": 16,
-      "reviewStatus": "verse_measured_other_parts_pending",
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "05d7b287-4d38-5ced-88f2-5fdc221888de",
@@ -56451,9 +56469,11 @@
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
       "scoreEvidence": [
@@ -57410,7 +57430,7 @@
       "number": 383,
       "classification": "8_bar_blocks",
       "stanzaApproxMeasures": 24,
-      "reviewStatus": "verse_measured_other_parts_pending",
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "fd0445f9-505b-5e8f-913a-4a3005ded2f7",
@@ -57456,9 +57476,11 @@
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
       "scoreEvidence": [
@@ -57474,7 +57496,7 @@
       "number": 384,
       "classification": "mixed_blocks",
       "stanzaApproxMeasures": 18,
-      "reviewStatus": "verse_measured_other_parts_pending",
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "a768b8d1-e131-526b-b58e-bd192188bbf2",
@@ -57526,9 +57548,11 @@
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
       "scoreEvidence": [
@@ -64379,7 +64403,7 @@
       "number": 514,
       "classification": "8_bar_blocks",
       "stanzaApproxMeasures": 24,
-      "reviewStatus": "verse_measured_other_parts_pending",
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "030d7a33-86a8-59d5-bb8c-dc274990f6a5",
