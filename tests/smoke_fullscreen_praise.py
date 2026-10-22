@@ -39,9 +39,10 @@ def main():
                   check(!presenterOutputFrameStateForSlide({...videoSlide,formBackgroundImage:'photo.png'},payload).backgroundVideo,'video covers photo');
                   check(!presenterOutputFrameStateForSlide({...videoSlide,type:'blank',layout:PRESENTER_SLIDE_LAYOUTS.BLANK},payload).backgroundVideo,'video leaked into blank');
                   check(presenterOutputFrameKey(payload,videoSlide,vf)!==presenterOutputFrameKey(payload,song,presenterOutputFrameStateForSlide(song,payload)),'cache ignores video');
-                  const root=document.createElement('div');document.body.append(root);
+                  const root=document.createElement('div');root.className='presenter-output-root';const still=document.createElement('div');still.className='presenter-output-background';root.append(still);document.body.append(root);
                   applyPresenterBackgroundVideo(root,vf.backgroundVideo);const video=root.querySelector('video');
                   check(video.muted&&video.loop&&video.playsInline,'background audio/loop contract');
+                  check(Number(getComputedStyle(video).zIndex)>Number(getComputedStyle(still).zIndex),'existing still covers moving background');
                   await video.play();await new Promise(resolve=>setTimeout(resolve,180));
                   check(!video.paused&&video.currentTime>0,'background did not play');
                   applyPresenterBackgroundVideo(root,vf.backgroundVideo);check(video===root.querySelector('video'),'lyric change restarts video');
