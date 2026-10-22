@@ -141,3 +141,12 @@ Sources: https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API
 and https://support.apple.com/guide/iphone/iphea86e5236/ios . Physical home-screen
 installation and actual mobile battery/screen behavior require a real device.
 Local tests mock platform APIs; protocol/lifecycle tests remain separate.
+
+## Actionable connection errors · 2026-10-22
+
+Invalid/used/expired code messages direct users to PC connection end/start. Rate
+limits instruct waiting one minute and generating a new code; pending-code cap
+explains closing unused connections or waiting two minutes. Server transport
+errors instruct checking both devices' internet; legacy/malformed responses
+instruct refreshing both pages. Rejected transport promises are normalized so
+native technical messages are not exposed. Existing timeout/attempt rules remain.

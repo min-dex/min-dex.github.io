@@ -1,5 +1,14 @@
 # Read-only operations panel
 
+## Last response display · 2026-10-22
+
+Each visible connection shows the server last_seen time as local month/day and
+hour/minute/second. A timestamp-only heartbeat updates the rendered row too.
+The panel explains normal 60-second refresh, earlier output-change reporting,
+180-second stale exclusion and possible network/sleep delays. Timestamp is last
+server response evidence, not an instantaneous online guarantee. No cadence or
+server data contract changes.
+
 ## Browser presence wording · 2026-10-22
 
 The panel is 접속 현황, showing 접속명, OS/browser and output status. Names are

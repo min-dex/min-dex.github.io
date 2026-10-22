@@ -18,3 +18,9 @@ try{
  assert(aborted);
 }finally{globalThis.setTimeout=originalTimeout;}
 console.log('PASS legacy version rejection and stalled server timeout/abort');
+
+await assert.rejects(obtainPairing({rpc:()=>Promise.reject(Error('internal network detail'))},true),e=>e.message.includes('인터넷')&&!e.message.includes('internal'));
+for(const [error,advice] of [['rate_limited','1분 뒤 PC'],['busy','2분 뒤'],['invalid_code','연결 종료 → 연결 시작']]){
+ await assert.rejects(obtainPairing({rpc:async()=>({data:{ok:false,error}})},true),e=>e.message.includes(advice));
+}
+console.log('PASS actionable rate limit, pending capacity and used/expired code guidance');

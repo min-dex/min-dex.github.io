@@ -56,7 +56,7 @@
   if(!state.client||!presenterControllerIsLive(state.selectedServiceId)||!isPresenterOutputWindowOpen()){$('[data-remote-status]').textContent='이 PC에서 예배 송출을 먼저 시작해 주세요.';return;}
   opening=true;$('[data-remote-start]').disabled=true;
   try{
-   const {openRemote}=await import('./mindex.remote-session.mjs?v=4');
+   const {openRemote}=await import('./mindex.remote-session.mjs?v=5');
    const a=adapter(state.presenter.serviceId,state.presenter.outputSessionId,state.presenter.outputWindow);
    session=await openRemote({client:state.client,host:true,...a,onClose:()=>{session=null;$('[data-remote-code]').textContent='';$('[data-remote-help]').textContent='';$('[data-remote-start]').disabled=false;$('[data-remote-end]').disabled=true;},onStatus:s=>{$('[data-remote-status]').textContent=s;if(s==='코드를 입력하면 바로 연결됩니다.'&&session)$('[data-remote-code]').textContent=session.code;if(s==='리모컨 연결됨'){$('[data-remote-code]').textContent='';$('[data-remote-help]').textContent='한 대가 연결됐습니다. 언제든 연결을 종료할 수 있어요.';}}});
    $('[data-remote-code]').textContent=session.listening?session.code:'';$('[data-remote-help]').textContent='2분 안에 입력 · 한 번만 사용 · 코드를 아는 기기가 조작할 수 있어요.';$('[data-remote-end]').disabled=false;

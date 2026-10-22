@@ -27,6 +27,11 @@ def main():
     copy.wait_for_function("document.querySelector('#monitorName').value==='본당 송출 PC'")
     assert '12345678' not in page.locator('[data-devices]').inner_text()
     assert page.locator('[data-devices] .monitor-device').count()==1
+    assert '최근 응답' in page.locator('[data-devices]').inner_text()
+    assert '60초' in page.locator('[data-cadence]').inner_text() and '3분' in page.locator('[data-cadence]').inner_text()
+    before=page.locator('[data-devices]').inner_text()
+    page.evaluate('clock+=60000');copy.evaluate('clock+=60000');page.locator('[data-refresh]').click()
+    page.wait_for_function('before=>document.querySelector("[data-devices]").innerText!==before',arg=before)
     page.evaluate('state.presenter.outputConnectedAt=clock;ticks[2000]()')
     copy.wait_for_function("calls.filter(c=>c.name==='mindex_monitor_ping').at(-1).args.p_status.output===true")
     copy.evaluate('ticks[60000]()')
