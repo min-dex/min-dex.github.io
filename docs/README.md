@@ -123,3 +123,5 @@ records above for the retained repair evidence and Git reference.
 - [찬송가 마디 검토·표시](hymn-musical-structure.md): 본절 측정25개/전체1203개. 읽기 전용 표시 및 미확인·가사 변경 재검토 규칙. 전곡 심층 완료가 아님.
 
 - [폰 전용 원격 조작](presenter-remote-design.md): 코드 연결·암호화 중계·기존 조작 API, 로컬/relay 검증과 실기기 검증 한계.
+
+- [찬송가 새171–190·연결 통일16판본 검증](hymn-measures-171-190-review-20261022.json): 신규 본절36, 전체 구간34/부분2. 누적 본절283, 후보 표시286. 검증 완료·배포 대기.

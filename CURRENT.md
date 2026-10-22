@@ -418,3 +418,8 @@ See docs/content-realtime.md and tests/test_live_refresh_scheduler.cjs.
 
 
 2026-10-22 작업 중: 원격 코드 v3는 숫자 6자리 서버 claim 방식으로 구현. `migrations/2026-10-22-remote-pin.sql` 운영 DB 적용 성공. v3 클라이언트 배포 검증 진행 중. PostgreSQL 18.4 격리 검증(권한/동시 claim/만료/횟수 제한), Chromium/WebKit UI·실제 adapter 검증 통과. 서버 적용 후 전체 GitHub gate 및 배포 검증 필요.
+
+
+## 2026-10-22 찬송가 새171–190·연결 통일16판본 검증 대기분
+
+36판본 신규 본절 기록, 전체 구간34판본 확인. 새184·통173 후렴 박 경계는 보류(본절8/아멘2 확인). 새175·통162 본절8.25, 새185·통179 본절·후렴15로 인쇄 악보의 길이를 보존. 누적 본절283/전체1203, 전체 구간279·부분4·자유박자3·수치 미확인917·교차 보류6. 후보 표시286. 가사5419단위 해시·블록·근거 검사 및 Chromium/WebKit36카드·재열기·286 metadata PASS. 운영 쓰기0, 후보 주입 검사이며 미배포. 이전151–170 배치와 함께 배포 대기; 다음191–210. 곡 연결·가사·송폼·메들리·타이밍·예배 불변. 상세 docs/hymn-musical-structure.md 및 docs/hymn-measures-171-190-review-20261022.json.

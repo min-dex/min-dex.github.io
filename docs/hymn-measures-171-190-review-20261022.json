@@ -1,0 +1,925 @@
+{
+  "date": "2026-10-22",
+  "status": "verified_pending_deployment",
+  "deploymentRequested": false,
+  "pushed": false,
+  "productionDatabaseWrites": 0,
+  "invariants": {
+    "versionsReviewed": 36,
+    "newlyMeasured": 36,
+    "fullyReviewedInBatch": 34,
+    "partialInBatch": 2,
+    "fullyDeferredInBatch": 0,
+    "preservedUnitIdentityKindTextHashBlockCounts": true,
+    "outsideBatchUnchanged": true,
+    "checkedLyricUnits": 5419,
+    "databaseWrites": 0,
+    "deployed": false
+  },
+  "summary": {
+    "versions": 1203,
+    "stanzaMeasuredVersions": 283,
+    "recitativeExceptions": 3,
+    "unmeasuredVersions": 920,
+    "complete": false,
+    "productionMetadataWritten": false,
+    "appDisplayImplemented": true,
+    "appDisplayDeployed": true,
+    "fullyMeasuredVersions": 279,
+    "partiallyMeasuredVersions": 4,
+    "notMeasuredVersions": 917,
+    "deferredVersions": 6
+  },
+  "browserValidation": {
+    "mode": "local candidate data injected into read-only production browser; not a deployed-data certification",
+    "results": {
+      "chromium": {
+        "versions": 36,
+        "metadata": 286,
+        "renderedCards": 36,
+        "freshReopen": true,
+        "writes": 0
+      },
+      "webkit": {
+        "versions": 36,
+        "metadata": 286,
+        "renderedCards": 36,
+        "freshReopen": true,
+        "writes": 0
+      }
+    }
+  },
+  "scoreReview": [
+    {
+      "versionId": "355e9c84-7af0-4e21-b3f1-d7381cfc6645",
+      "edition": "new",
+      "number": 171,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            8,
+            8
+          ]
+        },
+        {
+          "kind": "Chorus",
+          "blocks": [
+            8,
+            8
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "0a5c781b-6af1-4cb3-93cf-afe249f9cce4",
+      "edition": "new",
+      "number": 172,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            4,
+            4
+          ]
+        },
+        {
+          "kind": "Coda",
+          "blocks": [
+            2
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "e80abda4-1b59-4fa5-bf2e-c8f9b0f166c2",
+      "edition": "union",
+      "number": 152,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            4,
+            4
+          ]
+        },
+        {
+          "kind": "Coda",
+          "blocks": [
+            2
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "b84fd034-9862-4738-ada4-72e553defd8b",
+      "edition": "new",
+      "number": 173,
+      "stanzaApproxMeasures": 14,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            14
+          ]
+        },
+        {
+          "kind": "Coda",
+          "blocks": [
+            1
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "8369f0fa-1e50-5178-ac99-c0fb9e8366cd",
+      "edition": "new",
+      "number": 174,
+      "stanzaApproxMeasures": 12,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            8,
+            4
+          ]
+        },
+        {
+          "kind": "Coda",
+          "blocks": [
+            2
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "2d17b018-5349-5bb4-8803-641c08f94662",
+      "edition": "union",
+      "number": 161,
+      "stanzaApproxMeasures": 12,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            4,
+            4,
+            4
+          ]
+        },
+        {
+          "kind": "Coda",
+          "blocks": [
+            2
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "b9930b27-c4ef-5e10-b4b8-2dd30b4ba32f",
+      "edition": "new",
+      "number": 175,
+      "stanzaApproxMeasures": 8.25,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            4,
+            4.25
+          ]
+        },
+        {
+          "kind": "Chorus",
+          "blocks": [
+            8
+          ]
+        }
+      ],
+      "note": "4/4 본절 첫 블록은 못갖춘1박+3완전마디+끝3박=4. 둘째 블록 그날의 못갖춘1박 뒤 네 완전마디(끝 됐느냐는 4분+4분+2분)=4.25. 후렴은 못갖춘마디 없이8. 인쇄 줄이나 통상 악구 수로 반올림하지 않음."
+    },
+    {
+      "versionId": "3149ffea-d8e4-5e9e-ac54-9de80eb15df3",
+      "edition": "union",
+      "number": 162,
+      "stanzaApproxMeasures": 8.25,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            4,
+            4.25
+          ]
+        },
+        {
+          "kind": "Chorus",
+          "blocks": [
+            4,
+            4
+          ]
+        }
+      ],
+      "note": "4/4 본절 첫 블록은 못갖춘1박+3완전마디+끝3박=4. 둘째 블록 그날의 못갖춘1박 뒤 네 완전마디(끝 됐느냐는 4분+4분+2분)=4.25. 후렴은 못갖춘마디 없이8. 인쇄 줄이나 통상 악구 수로 반올림하지 않음."
+    },
+    {
+      "versionId": "0ca39b2f-f208-536d-90cf-7f71df2b2a3f",
+      "edition": "new",
+      "number": 176,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            8
+          ]
+        },
+        {
+          "kind": "Chorus",
+          "blocks": [
+            8
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "14730b5e-2523-5141-8787-b70a5a5cc056",
+      "edition": "union",
+      "number": 163,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            4,
+            4
+          ]
+        },
+        {
+          "kind": "Chorus",
+          "blocks": [
+            4,
+            4
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "eab0721f-2048-536c-846b-1994e59cc6cb",
+      "edition": "new",
+      "number": 177,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            4,
+            4
+          ]
+        },
+        {
+          "kind": "Chorus",
+          "blocks": [
+            2,
+            4,
+            2
+          ]
+        },
+        {
+          "kind": "Coda",
+          "blocks": [
+            1
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "31ad2d86-5bb5-52c3-9b9b-1eb322ada13c",
+      "edition": "union",
+      "number": 164,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "kind": "Chorus",
+          "blocks": [
+            4,
+            2,
+            2
+          ]
+        },
+        {
+          "kind": "Coda",
+          "blocks": [
+            1
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "4180ecc0-21c5-4aee-9340-3d964a4fd843",
+      "edition": "new",
+      "number": 178,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            8,
+            8
+          ]
+        },
+        {
+          "kind": "Coda",
+          "blocks": [
+            1
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "73f91310-8d49-55cc-91e1-e766da21e503",
+      "edition": "new",
+      "number": 179,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            8,
+            8
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "ba277817-9ae0-589f-9f9e-4e546e318520",
+      "edition": "union",
+      "number": 167,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            8,
+            8
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "755a63e1-c094-5f43-bfa1-61e93e659bc2",
+      "edition": "new",
+      "number": 180,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            4,
+            4
+          ]
+        },
+        {
+          "kind": "Chorus",
+          "blocks": [
+            8
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "3ac9ccf5-255e-5213-a6f3-b73dc4f59b76",
+      "edition": "union",
+      "number": 168,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            2,
+            3,
+            3
+          ]
+        },
+        {
+          "kind": "Chorus",
+          "blocks": [
+            4,
+            4
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "4d350711-825e-4767-8e45-43606a6a9851",
+      "edition": "new",
+      "number": 181,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            8
+          ]
+        },
+        {
+          "kind": "Chorus",
+          "blocks": [
+            8
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "ac8e9094-4412-5997-8ff2-83b53f53a0e8",
+      "edition": "new",
+      "number": 182,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            8
+          ]
+        },
+        {
+          "kind": "Chorus",
+          "blocks": [
+            8
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "1c3b97ce-8baa-54a7-a006-13e4c1ae5dfc",
+      "edition": "union",
+      "number": 169,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            4,
+            4
+          ]
+        },
+        {
+          "kind": "Chorus",
+          "blocks": [
+            4,
+            4
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "9ac7b0ad-08a4-5c29-8be0-276d3141335d",
+      "edition": "new",
+      "number": 183,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            4,
+            4
+          ]
+        },
+        {
+          "kind": "Chorus",
+          "blocks": [
+            4,
+            4
+          ]
+        },
+        {
+          "kind": "Coda",
+          "blocks": [
+            1
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "a5110308-8e04-50d6-b703-d72ed9b7ec85",
+      "edition": "union",
+      "number": 172,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            4,
+            4
+          ]
+        },
+        {
+          "kind": "Chorus",
+          "blocks": [
+            4,
+            4
+          ]
+        },
+        {
+          "kind": "Coda",
+          "blocks": [
+            1
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "19a83ade-106e-4c44-a79f-ab58899b515c",
+      "edition": "new",
+      "number": 184,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "verse_measured_other_parts_pending",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            8
+          ]
+        },
+        {
+          "kind": "Chorus",
+          "blocks": null
+        },
+        {
+          "kind": "Coda",
+          "blocks": [
+            2
+          ]
+        }
+      ],
+      "note": "본절8과 아멘2는 확인. 후렴 만족하게의 만은 앞 행 끝 1박에서 시작해 다음 마디로 붙임줄이 이어지며, 불로 앞 블록 끝은 완전마디이고 마지막은 불완전마디다. 저장 블록의 마디 상당량을 정수 4/8로 단정하지 않고 박 귀속 추가 대조까지 후렴 수치 null 유지."
+    },
+    {
+      "versionId": "75378ecf-ad29-429d-b080-7619b2bb3b24",
+      "edition": "union",
+      "number": 173,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "verse_measured_other_parts_pending",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            4,
+            4
+          ]
+        },
+        {
+          "kind": "Chorus",
+          "blocks": null
+        },
+        {
+          "kind": "Coda",
+          "blocks": [
+            2
+          ]
+        }
+      ],
+      "note": "본절8과 아멘2는 확인. 후렴 만족하게의 만은 앞 행 끝 1박에서 시작해 다음 마디로 붙임줄이 이어지며, 불로 앞 블록 끝은 완전마디이고 마지막은 불완전마디다. 저장 블록의 마디 상당량을 정수 4/8로 단정하지 않고 박 귀속 추가 대조까지 후렴 수치 null 유지."
+    },
+    {
+      "versionId": "57ea83fa-0fbd-5e75-ba5a-279586b2787c",
+      "edition": "new",
+      "number": 185,
+      "stanzaApproxMeasures": 15,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            8,
+            7
+          ]
+        },
+        {
+          "kind": "Chorus",
+          "blocks": [
+            8,
+            7
+          ]
+        }
+      ],
+      "note": "3/4 본절8+7, 후렴8+7. 마지막 성령이 오셨네는 못갖춘1박+두 완전마디+끝2박=3마디이므로 전체15. 16마디로 강제하지 않음."
+    },
+    {
+      "versionId": "0b884699-c51e-5440-a2f4-11957efb3608",
+      "edition": "union",
+      "number": 179,
+      "stanzaApproxMeasures": 15,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            8,
+            7
+          ]
+        },
+        {
+          "kind": "Chorus",
+          "blocks": [
+            8,
+            7
+          ]
+        }
+      ],
+      "note": "3/4 본절8+7, 후렴8+7. 마지막 성령이 오셨네는 못갖춘1박+두 완전마디+끝2박=3마디이므로 전체15. 16마디로 강제하지 않음."
+    },
+    {
+      "versionId": "338cffb7-2745-5b89-bc73-2a6c50e2eaca",
+      "edition": "new",
+      "number": 186,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            16
+          ]
+        },
+        {
+          "kind": "Coda",
+          "blocks": [
+            2
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "679f7c9c-8b39-5186-b941-392aec71a128",
+      "edition": "union",
+      "number": 176,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            8,
+            8
+          ]
+        },
+        {
+          "kind": "Coda",
+          "blocks": [
+            2
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "2cc9fc0e-98a0-4707-b8e5-eded0a931018",
+      "edition": "new",
+      "number": 187,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            16
+          ]
+        },
+        {
+          "kind": "Coda",
+          "blocks": [
+            1
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "aaf8d7ea-682b-436b-b93b-03d8dd790e3b",
+      "edition": "union",
+      "number": 171,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            8,
+            8
+          ]
+        },
+        {
+          "kind": "Coda",
+          "blocks": [
+            1
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "785fd865-4e2c-44ab-bb1b-f7a9924432ad",
+      "edition": "new",
+      "number": 188,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            8
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "7620d789-1891-4e75-9702-cfe75d29d039",
+      "edition": "union",
+      "number": 180,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            4,
+            4
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "856469a0-4617-5d26-9196-dced3ed02f0d",
+      "edition": "new",
+      "number": 189,
+      "stanzaApproxMeasures": 32,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            16,
+            8,
+            8
+          ]
+        },
+        {
+          "kind": "Coda",
+          "blocks": [
+            2
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "409d0a39-d28a-5bbe-aed8-e76ba9956389",
+      "edition": "union",
+      "number": 181,
+      "stanzaApproxMeasures": 32,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            8,
+            8,
+            8,
+            8
+          ]
+        },
+        {
+          "kind": "Coda",
+          "blocks": [
+            2
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "11422d7c-309d-4364-ae2f-fc1e3b0e231e",
+      "edition": "new",
+      "number": 190,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            8
+          ]
+        },
+        {
+          "kind": "Chorus",
+          "blocks": [
+            8
+          ]
+        },
+        {
+          "kind": "Coda",
+          "blocks": [
+            1
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "versionId": "48df5016-2ff3-4b17-bbbd-b12cfcd61561",
+      "edition": "union",
+      "number": 177,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blocks": [
+            4,
+            4
+          ]
+        },
+        {
+          "kind": "Chorus",
+          "blocks": [
+            4,
+            4
+          ]
+        },
+        {
+          "kind": "Coda",
+          "blocks": [
+            1
+          ]
+        }
+      ],
+      "note": null
+    }
+  ],
+  "next": "new191-210 and canonically linked union editions; six deferred editions tracked independently",
+  "scoreEvidenceDirectory": "/Users/parkjihun/Code/Apps/Mindex/backups/20261022-hymn171-190-paired",
+  "preserved": [
+    "lyrics",
+    "unit identity/order/type/blocks",
+    "song/version links",
+    "forms",
+    "medleys",
+    "audio timing",
+    "operational worship data"
+  ]
+}

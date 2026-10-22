@@ -1209,3 +1209,8 @@ release20261021-controller-navigation, 별도 CI/배포 결과 확인 필요.
 
 
 2026-10-22 numeric remote pairing: Production SQL applied successfully through Safari with one-time user authorization. Client release pending. Migration is isolated ephemeral schema/RPC, no worship mutations. Local PostgreSQL 18.4 test passes. Default pairing test added; SQL opt-in harness uses temporary embedded-postgres only. Existing deployed v2 stays usable.
+
+
+## 2026-10-22 찬송가 새171–190·연결 통일16판본 검증 대기분
+
+36판본 신규 본절 기록, 전체 구간34판본 확인. 새184·통173 후렴 박 경계는 보류(본절8/아멘2 확인). 새175·통162 본절8.25, 새185·통179 본절·후렴15로 인쇄 악보의 길이를 보존. 누적 본절283/전체1203, 전체 구간279·부분4·자유박자3·수치 미확인917·교차 보류6. 후보 표시286. 가사5419단위 해시·블록·근거 검사 및 Chromium/WebKit36카드·재열기·286 metadata PASS. 운영 쓰기0, 후보 주입 검사이며 미배포. 이전151–170 배치와 함께 배포 대기; 다음191–210. 곡 연결·가사·송폼·메들리·타이밍·예배 불변. 상세 docs/hymn-musical-structure.md 및 docs/hymn-measures-171-190-review-20261022.json.
