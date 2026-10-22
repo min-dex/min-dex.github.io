@@ -26,9 +26,9 @@
   panel.className = "monitor-panel"; panel.setAttribute("aria-labelledby", "monitorTitle");
   panel.innerHTML = `<header><h2 id="monitorTitle">접속 현황</h2><button class="icon-btn" data-close title="닫기" aria-label="닫기"><i data-lucide="x"></i></button></header>
 
-    <section class="monitor-section" aria-labelledby="monitorRemoteTitle"><div class="monitor-section-heading"><h3 id="monitorRemoteTitle">접속 기기</h3><span data-count></span><button class="icon-btn" data-refresh title="새로고침" aria-label="새로고침"><i data-lucide="refresh-cw"></i></button></div>
-    <p class="monitor-message" role="status"></p><div data-devices></div></section>
-    <section class="monitor-section"><h3>이 기기 이름</h3><div class="monitor-toolbar"><label for="monitorName">기기 이름</label><input id="monitorName" maxlength="60" autocomplete="off" placeholder="예: 본당 송출 PC"></div><p class="monitor-share-status" role="status"></p><p>같은 브라우저 프로필의 창·탭은 한 기기로 묶습니다. 브라우저나 프로필이 다르면 별도로 표시합니다.</p></section>`;
+    <section class="monitor-section" aria-labelledby="monitorRemoteTitle"><div class="monitor-section-heading"><h3 id="monitorRemoteTitle">현재 접속</h3><span data-count></span><button class="icon-btn" data-refresh title="새로고침" aria-label="새로고침"><i data-lucide="refresh-cw"></i></button></div>
+    <p class="monitor-message" role="status"></p><div data-devices></div><p class="monitor-environment" data-cadence>보통 60초마다 갱신합니다. 송출 상태 변경은 더 빨리 반영하며, 최근 응답이 3분을 넘은 접속은 목록에서 제외합니다. 네트워크·절전 상태에 따라 늦어질 수 있습니다.</p></section>
+    <section class="monitor-section"><h3>이 브라우저의 접속명</h3><div class="monitor-toolbar"><label for="monitorName">접속명</label><input id="monitorName" maxlength="60" autocomplete="off" placeholder="예: 본당 송출 PC"></div><p class="monitor-share-status" role="status"></p><p>같은 브라우저 프로필의 창·탭은 하나의 접속으로 묶습니다. 브라우저나 프로필이 다르면 별도로 표시하며, 브라우저 데이터를 지우면 접속명을 다시 지정해야 합니다.</p></section>`;
   document.body.append(panel);
   const $ = (selector) => panel.querySelector(selector);
   $("#monitorName").value = name || `${os} ${browser}`;
@@ -74,20 +74,24 @@
     const status = document.createElement("span"); status.className = "monitor-health";
     status.textContent = data.output === true ? "송출 중" : "송출 안 함"; row.append(status);
     const identity = document.createElement("p"); identity.className = "monitor-environment";
-    identity.textContent = local ? "이 기기" : `${data.os || ""} · ${data.browser || ""}`;
-    row.append(identity); root.append(row);
+    identity.textContent = local ? "이 브라우저" : `${data.os || ""} · ${data.browser || ""}`;
+    row.append(identity);
+    const seen = document.createElement("p"); seen.className = "monitor-environment";
+    const at = timestamp(lastSeen);
+    seen.textContent = at ? `최근 응답 · ${new Date(at).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false})}` : "최근 응답 · 확인되지 않음";
+    row.append(seen); root.append(row);
   }
   function renderRows(root, rows) {
-    const key = JSON.stringify(rows.map(row=>[row.id,row.status.name,row.status.os,row.status.browser,row.status.output]));
+    const key = JSON.stringify(rows.map(row=>[row.id,row.status.name,row.status.os,row.status.browser,row.status.output,row.last_seen]));
     if (renderKeys.get(root) === key) return;
     renderKeys.set(root, key); root.replaceChildren();
     for (const row of rows) renderDevice(root, row.status, row.last_seen, row.id);
   }
   function renderRemote() {
     const rows = remoteVerified ? remoteRows.filter(row => !isStale(row)) : [];
-    $("[data-count]").textContent = remoteVerified ? `${rows.length}대` : "";
+    $("[data-count]").textContent = remoteVerified ? `${rows.length}개 접속` : "";
     renderRows($("[data-devices]"), rows);
-    if (!rows.length) $("[data-devices]").textContent = !remoteVerified ? "접속 상태를 확인하지 못했습니다." : "현재 접속 중인 기기가 없습니다.";
+    if (!rows.length) $("[data-devices]").textContent = !remoteVerified ? "접속 상태를 확인하지 못했습니다." : "현재 접속 중인 브라우저가 없습니다.";
   }
   async function rpc(name, args) {
     if (!state.client?.rpc) throw Error("원격 조회에 필요한 DB 클라이언트가 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.");
@@ -136,7 +140,7 @@
       }
       if (serial !== shareSerial || !enabled) return;
       failures = 0; retryAt = 0; lastReportAt = Date.now(); reportedOutput = sent.output;
-      shareMessage(`기기 이름 공유됨 · 마지막 응답 ${new Date(lastReportAt).toLocaleTimeString()}`);
+      shareMessage(`접속명 공유됨 · 마지막 응답 ${new Date(lastReportAt).toLocaleTimeString()}`);
       if (panel.open) void refresh();
       });
     } catch (e) {
@@ -176,7 +180,7 @@
       if(!window.MINDEX_SERVER_STORAGE?.ready)throw Error("서버 연결을 확인해 주세요.");
       await window.MINDEX_SERVER_STORAGE.setItem("local","mindex.monitor.name",next);
       name=next;retryAt=0;void upload();
-    }catch{shareMessage("기기 이름을 서버에 저장하지 못했습니다. 다시 시도해 주세요.");}
+    }catch{shareMessage("접속명을 서버에 저장하지 못했습니다. 다시 시도해 주세요.");}
   };
   function hydrateServerName(){
     name=window.MINDEX_SERVER_STORAGE.getItem("local","mindex.monitor.name","");

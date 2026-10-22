@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261022-hymn32-blocks",
+  "version": "20261022-connection-guidance",
   "options": {
     "compress": false,
     "mangle": {
