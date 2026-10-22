@@ -26,6 +26,7 @@ def main():
                   check(!renderPresenterSlideFrame(blank,{noChromakey:false,transitionLogo:config}).includes('presenter-transition-logo'),'chromakey changed');
                   check(!renderPresenterSlideFrame({...blank,id:'presenter:safety-blank'},{noChromakey:true,transitionLogo:config}).includes('presenter-transition-logo'),'safety blackout changed');
                   check(!renderPresenterSlideFrame(blank,{noChromakey:true}).includes('presenter-transition-logo'),'default changed');
+                  check(!renderPresenterSlideFrame({...blank,formBackgroundImage:'photo.png'},{noChromakey:true,transitionLogo:config}).includes('presenter-transition-logo'),'photo-only blank changed');
                   check(presenterOutputFrameKey({serviceId:'fixture',transitionLogo:config},blank,{blankOutput:true})!==presenterOutputFrameKey({serviceId:'fixture'},blank,{blankOutput:true}),'frame cache ignores artwork');
                   const root=document.createElement('div');root.id='transition-test';root.className='presenter-output-root no-chromakey is-blank';root.style.cssText='position:fixed;inset:0;width:1920px;height:1080px;transform:none;--presenter-stage-unit:1px;z-index:99999';
                   root.innerHTML=renderPresenterSlideFrame(blank,{noChromakey:true,transitionLogo:config});document.body.append(root);

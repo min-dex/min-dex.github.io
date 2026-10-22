@@ -5158,7 +5158,7 @@ function normalizePresenterTransitionLogo(value) {
 }
 
 function renderPresenterTransitionLogo(slide, options = {}) {
-  if (!options.noChromakey || slide?.id === "presenter:safety-blank"
+  if (!options.noChromakey || slide?.id === "presenter:safety-blank" || slide?.formBackgroundImage
     || presenterSlideLayout(slide) !== PRESENTER_SLIDE_LAYOUTS.BLANK) return "";
   const logo = normalizePresenterTransitionLogo(options.transitionLogo);
   if (!logo) return "";
