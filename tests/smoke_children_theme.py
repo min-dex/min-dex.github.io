@@ -53,6 +53,28 @@ try:
        for(const logo of root.querySelectorAll('.presenter-ready-screen-logo,.presenter-waiting-loop-logo'))check(getComputedStyle(logo).filter.includes('children-autumn-ink.svg'),'logo filter missing');
       }
      }
+     const palettes={textured:['rgb(96, 57, 0)','rgb(41, 70, 0)','rgb(118, 23, 71)','rgb(122, 40, 11)','rgb(0, 56, 78)','rgb(60, 40, 107)'],sky:['rgb(128, 80, 0)','rgb(59, 96, 0)','rgb(152, 39, 94)','rgb(150, 52, 20)','rgb(0, 86, 111)','rgb(82, 64, 149)'],light:inkColors};
+     for(const code of ['C1','C2','C3','C5','S4','S5','S6']) {
+      const source='assets/worship-backgrounds/26-'+code+'.png?fixture=1';
+      presenterBackgroundSourcesForService=()=>[source];
+      host.innerHTML=renderPresenterSlideMiniPreview(emphasis,service.id);
+      const mini=host.querySelector('.svc-slide-mini-canvas');
+      const frame=presenterOutputFrameStateForSlide(emphasis,{chromakey:false,serviceType:'children',backgroundImages:[source]});
+      const out=document.createElement('main');out.className='presenter-output-root';host.append(out);applyPresenterOutputFrameState(out,frame);out.innerHTML=renderPresenterSlideFrame(emphasis,{noChromakey:true});
+      const palette=['C1','C2'].includes(code)?'textured':code==='C3'?'sky':'light';
+      for(const root of [mini,out]) {
+       check(root.dataset.emphasisPalette===palette,code+' palette selection mismatch');
+       const marks=[...root.querySelectorAll('.presenter-text-highlight')];
+       check(JSON.stringify(marks.slice(0,6).map(el=>getComputedStyle(el).color))===JSON.stringify(palettes[palette]),code+' emphasis mismatch');
+       const stroke=+getComputedStyle(marks[0]).webkitTextStrokeWidth.replace('px','')*1920/root.clientWidth;
+       check(Math.abs(stroke-(palette==='textured'?2:0))<.01,code+' outline scale mismatch '+stroke);
+       check(getComputedStyle(marks[6]).color==='rgb(18, 52, 86)'&&getComputedStyle(marks[6]).webkitTextStrokeWidth==='0px','custom color/outline changed');
+      }
+      check(presenterEmphasisPalette({...frame,backgroundImages:['assets/worship-backgrounds/previews/26-'+code+'.webp?v=1']})===palette,'WebP palette mismatch');
+      check(presenterEmphasisPalette({...frame,backgroundImages:['data:image/png;base64,fixture',source]})===palette,'data URL fallback identity mismatch');
+      applyPresenterOutputFrameState(out,{...frame,showBackground:false});
+      check(out.dataset.emphasisPalette===''&&getComputedStyle(out.querySelector('.presenter-text-highlight')).webkitTextStrokeWidth==='0px','palette/outline leaked after frame switch');
+     }
      // A different URL must not change the theme; reading/blackout must not inherit it.
      for(const source of ['assets/worship-backgrounds/previews/26-C5.webp','https://example.invalid/custom-art.webp']) {
       const frame=presenterOutputFrameStateForSlide(slides[2],{chromakey:false,serviceType:'children',backgroundImages:[source]});
