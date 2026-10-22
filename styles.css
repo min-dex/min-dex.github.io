@@ -3029,7 +3029,7 @@ body[data-module="scripture"] .scripture-editor .meta-attribute-label {
   padding: 8px 10px;
   white-space: pre-wrap;
 }
-.form-head { justify-content: space-between; margin-bottom: 0; }
+.form-head { justify-content: space-between; flex-wrap: wrap; margin-bottom: 0; }
 .form-meta { display: flex; min-width: 0; flex-wrap: wrap; align-items: center; gap: var(--s2); color: var(--ink); font-weight: 500; }
 .form-label-text {
   display: inline-flex;
@@ -3239,7 +3239,6 @@ body[data-module="praise"] .song-count-badge {
 
 @media (max-width: 860px) {
   .editor-head { grid-template-columns: 1fr; align-items: stretch; }
-  .form-head { align-items: stretch; flex-direction: column; }
   .editor-head-right {
     justify-self: stretch;
     min-width: 0;
@@ -3250,7 +3249,7 @@ body[data-module="praise"] .song-count-badge {
   .sidebar-search-wrap {
     width: calc(100% - (var(--sidebar-search-inset) * 2));
   }
-  .head-actions, .form-actions { justify-content: flex-start; }
+  .head-actions { justify-content: flex-start; }
   .nav-sidebar, .sidebar { max-height: none; border-bottom: 0; }
   .detail-pane { overflow: auto; padding: var(--content-pad-tight); padding-bottom: var(--content-pad-bottom-tight); }
 }
