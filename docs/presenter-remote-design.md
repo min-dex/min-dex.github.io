@@ -87,3 +87,20 @@ v3 운영 서버 적용 완료. 클라이언트 배포 검증 진행 중.
 숫자 코드 추가 검증: `test_remote_pairing.mjs`(기본 CI), `test_remote_pin_sql.mjs`(별도 로컬 PostgreSQL).
 SQL 테스트는 PGLITE_ROOT의 embedded-postgres/pg와 WORSHIP_TEST_ENGINE=postgres를 사용하며,
 실제 운영 URL이나 인증 정보는 받지 않는다. 권한, 재적용, 동시 claim, 만료, 폐기, 실패 횟수 지속을 확인한다.
+
+## 잠금·백그라운드·복귀 회귀 검증 · 2026-10-22
+
+`tests/smoke_remote_lifecycle.py`를 로컬 Chromium/WebKit에서 통과했다.
+운영 DB/현장 송출에는 접근하지 않고 독립된 브라우저 context와 암호문 중계 fixture를 쓴다.
+- hidden/visible 전환은 visibility API 값을 바꾸고 이벤트를 발생시키는 시뮬레이션이다.
+  숨김 상태에서 버튼 잠금, 복귀 직후 새 요청에 대응하는 상태를 받기 전 조작 금지,
+  PC에서 바뀐 슬라이드의 최신 위치 반영을 검증했다.
+- 명령 실행 직후 응답만 유실시켜 실행 불확실 안내와 명령 재실행 방지를 확인했다.
+- 11.5초 중계 단절 후 기존 연결 종료, 새 연결의 정상 조작과 과거 명령 미실행을 확인했다.
+- persisted pagehide/pageshow 이벤트를 재현해 기존 권한을 되살리지 않는 것을 확인했다.
+  실제 OS 메모리 회수나 실제 BFCache navigation을 검증했다는 뜻은 아니다.
+- Chromium은 CDP로 renderer를 실제 frozen 상태에 11.5초 두었다가 active로 복귀시켜
+  host timeout과 복귀 후 조작 잠금을 확인했다. WebKit에는 이 freeze 검증을 적용하지 않았다.
+
+이번 검증에서 앱 수정이 필요한 결함은 재현되지 않았다. 실제 iPhone/Android의 화면 잠금,
+절전·앱 강제 종료·Wi-Fi/셀룰러 전환은 여전히 실기기 확인 대상이다.
