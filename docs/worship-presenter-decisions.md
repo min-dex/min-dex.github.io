@@ -3745,3 +3745,13 @@ Focused view continues to hide the entire sidebar.
 연결 코드는 16자리에서 8자리로 줄이고 PBKDF2 600,000회로 키와 topic 모두 파생한다.
 2분/1회/한 기기 제한과 ECDH 세션 키는 유지한다. 구형 16자리 코드는 새로고침을 안내한다.
 protocol v2의 모듈 URL을 고정해 이전 캐시와 섞이지 않게 한다.
+
+## Announcement type scale · 2026-10-22
+
+User keeps100px/800 titles. Fullscreen announcement welcome/footer use50px/600
+and weekly news60px/600 at1920×1080; emphasis stays800. These values use the
+shared stage unit, including thumbnail scaling, rather than height percentages.
+Plain unzoned announcement copy also uses60px. Existing overflow fitting still
+shrinks a region only when needed; its font size is a base, not a clipping rule.
+This supersedes the earlier4cqh welcome/news and3.6cqh footer sizes.
+Liturgical body sizes and chromakey caption text are unchanged.

@@ -55,6 +55,7 @@ NODE_TESTS = (
     "test_worship_read_parallel.cjs",
 )
 SMOKES = (
+    "smoke_announcement_type.py",
     "smoke_children_theme.py",
     "smoke_presenter_remote.py",
     "smoke_remote_adapter.py",

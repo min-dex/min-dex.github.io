@@ -780,3 +780,5 @@ Home recent views reserve six80px card slots (10px gaps) in the shared responsiv
 Praise/Scripture metadata popovers use their own content width, not viewport breakpoints: below400px one column; from400px two columns; Praise alone uses three columns from570px. Preserve labels, input order, focus and existing popup width.
 
 Section editor item name/assignee and new type/name/add rows use the editor body content width: retain side-by-side controls from550px, stack below550px. Long item content stays on its separate row; labels, focus and input order remain unchanged. Viewport rules only position/size the floating panel.
+
+Lyric block headers wrap the form/variation and action groups according to their actual available width, without the860px viewport column override. Keep lyrics on their separate row, DOM/tab order, labels, focus and disabled actions unchanged.
