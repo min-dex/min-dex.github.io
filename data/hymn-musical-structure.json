@@ -13,9 +13,9 @@
   },
   "summary": {
     "versions": 1203,
-    "stanzaMeasuredVersions": 167,
+    "stanzaMeasuredVersions": 199,
     "recitativeExceptions": 2,
-    "unmeasuredVersions": 1036,
+    "unmeasuredVersions": 1004,
     "complete": false,
     "productionMetadataWritten": false,
     "appDisplayImplemented": true,
@@ -8253,589 +8253,783 @@
       "versionId": "55542891-c945-4496-bbbf-864e8882efbe",
       "edition": "new",
       "number": 121,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "0f21748f-8599-4ad4-8491-ff27b11fa8ab",
           "kind": "Verse",
           "textSha256": "cba742aa63981226e1dae54811c981ac3af678b5df858ebeccab8e4e28f5d250",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "89b90c59-6385-4a32-a210-492f47f18989",
           "kind": "Verse",
           "textSha256": "a286e5747f8d39bf749cd436ddee90726304ea95c39d0ef7678197be3ec57740",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "fcd59855-897b-4caf-b45f-918f37ce0876",
           "kind": "Verse",
           "textSha256": "498b710470e39f50fe75ce7b5c41a43d80b99caa3fa0479146e52730b5ea9156",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "33b119e8-b9fa-4fa6-8456-5ec721819023",
           "kind": "Chorus",
           "textSha256": "80d03b6056421af7c596bc078e8928276d59252ceac4995de8e9b61e29084485",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/121/score",
+          "sha256": "9febb3e7e201b83e4c55a007eb7e4adced4b131cc5de67ad06c5d4edb20a29c2"
+        }
+      ]
     },
     {
       "versionId": "cfafd1b8-7857-4880-b078-86adf66fb1ad",
       "edition": "new",
       "number": 122,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 12,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "dedd71c4-cd82-4b80-b076-d2936db9bdf7",
           "kind": "Verse",
           "textSha256": "f6f18dc56f19db7a362de2ff2d7a725b2de06107ece0a20b6fd946b10a0c5ec9",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "29655400-1dc6-43d0-ad66-469bcc7dee89",
           "kind": "Verse",
           "textSha256": "b957774b838ec996dc6a8490dbf023f4385767ce64c6434c9dfe015c42091a01",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "86e5cd8b-f831-47b6-8371-bb9544491a72",
           "kind": "Verse",
           "textSha256": "b2a07d7f0d17e19c664dc97d6c1404aa23574620f56fe6146d67ccc7d17fe641",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e37eee59-3ac0-4dfc-9a35-0560f745649d",
           "kind": "Verse",
           "textSha256": "14aeb189cca9c3a163dccb0e5a7bf758159130379f04db13ec5e80bead722af3",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "920479a1-09a0-4c78-bd40-0b124aed4ca0",
           "kind": "Chorus",
           "textSha256": "80892afc203af2f48eec34b1879dd49e39f9fe40a447c22160294adc1b5deea7",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "c17633cb-7574-4a33-a5d1-a9e8317ed44c",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/122/score",
+          "sha256": "9195a12ed723367759f9e5139a2c1fb42dc2475701a42d168a1d32ce5878ebe9"
+        }
+      ]
     },
     {
       "versionId": "c5f07300-9cc7-4480-bd0c-faca09eeca7c",
       "edition": "new",
       "number": 123,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "d9a78cdc-085e-48fb-b7af-fcebead46705",
           "kind": "Verse",
           "textSha256": "0aa912e631907645089a487f0e5e73c18e1f2293e19bbcb05b3f8c4ca91f572b",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "f144a6d3-2f5c-4f21-a270-55655bd0e489",
           "kind": "Verse",
           "textSha256": "0f135c64fc4bebbed58fde2616614929fc6a53dd58233074c64bb5d7b123d525",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "0d25224e-d576-4b15-bb15-27b8d8447538",
           "kind": "Verse",
           "textSha256": "c358eac4e15fe3fcf669f8c61364314bfd092b7faf05b1a099be07f787c71095",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "5c1f77ab-a94d-4602-b443-9bfc6df59d4e",
           "kind": "Verse",
           "textSha256": "e201227d251ec62ddeb68a9196226f30c6001b2a4eb7150bfe39bb3885807d3a",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e4cfa954-299d-4dfb-89ea-9c6107f5ae27",
           "kind": "Chorus",
           "textSha256": "cdb73e85dcba56dd4069e80a89cbfb7312af04bdec376043dda21dc2882fca76",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4.333333333333333,
+            3.6666666666666665
+          ],
+          "approxMeasures": 8.0,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "04c3cd30-d4df-433d-81d6-58b6118d41b7",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/123/score",
+          "sha256": "7a1b610a09fde4c55bd6f06566b9ac77700ffd919cd599c3098ae434d43c7dbb"
+        }
+      ]
     },
     {
       "versionId": "0e56863d-3059-41ca-94c7-d1d484f2fdb9",
       "edition": "new",
       "number": 124,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "55b62de2-8dfd-4a96-9cd4-ba38be6b3f7a",
           "kind": "Verse",
           "textSha256": "f76bacd288e58284ab3bd306936d8594d7586dc53eb7643b7d650c667d7b5524",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "f608f91c-6b5e-44fa-9767-fb87117c5913",
           "kind": "Verse",
           "textSha256": "d9fde071256a5760c62656a0eacfff906f8702869cd424b929622b71d5490d1a",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "65934f52-5873-47f5-a699-de74b344debc",
           "kind": "Verse",
           "textSha256": "4e453275d9d8b46840bb8a1855c0c45a8ec848a11dbdcb659d611f3b1ba2358d",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/124/score",
+          "sha256": "6bd2d0132283aa0d5c010f74f627450fbad07faec34c1cb3f8e4516c4638e09a"
+        }
+      ]
     },
     {
       "versionId": "9ca5e5ae-4460-505e-bd93-83db1ba9d39c",
       "edition": "new",
       "number": 125,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "627d9ba9-052c-45b9-8fba-7d28f37045a7",
           "kind": "Verse",
           "textSha256": "f35fc191fb786221cd176e70be2c41e819b9b1c148b77d2f894362d1414ff91b",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "530f60a5-6c91-4068-b8f3-8273f9046a92",
           "kind": "Verse",
           "textSha256": "c892657213d20e922d143da32f5a96da54049caf60882016f8ee27c3a6f38ce2",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "4c250bc6-3fc6-4d50-9960-316df44b1155",
           "kind": "Verse",
           "textSha256": "a94b9ab77477e923174b67b6f54f63c97c3804503b9612acef00c5f4e6ec7fa9",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "9423a3c9-0c68-4969-ba04-10c3c0f5e082",
           "kind": "Verse",
           "textSha256": "ec9308f529ca06ca4628179068a8330e4f378503e96f5de61fc847a633bc7d3d",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "c5d0625f-c959-4f68-b050-95d21c99cde2",
           "kind": "Chorus",
           "textSha256": "bac40a2ddaa7643e5d81bcb87cd2165a0d8c9e54c9edee3334e4a984eea85b60",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            13
+          ],
+          "approxMeasures": 13,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "74790e3f-3686-4e52-8028-e138d067c3c0",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/125/score",
+          "sha256": "41d2ab91ba95890a4298b0574881840530a2f936de7ae604842adbdbdeb4f64b"
+        }
+      ]
     },
     {
       "versionId": "c15d963e-3fe8-47ac-96ad-c14928b0a681",
       "edition": "new",
       "number": 126,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 20,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "843bf91e-9eaa-466e-8565-de93a15cb3f5",
           "kind": "Verse",
           "textSha256": "e18c861619bedda01aaf1416fa676a7f249fe50f46ea300e7491baa1d06a1f9b",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8,
+            4
+          ],
+          "approxMeasures": 20,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "3ce5b7fb-bb1c-47e6-b224-459f60462d80",
           "kind": "Verse",
           "textSha256": "3aba59e6d58bd283f0e35bf2ad3f681d070c46b1897c64d410b40d9054f3d726",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8,
+            4
+          ],
+          "approxMeasures": 20,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "a1821e06-2fa3-434b-bc9e-e81845250856",
           "kind": "Verse",
           "textSha256": "c8f871cf12aba9bba22057c94855b5743db04f0db4ea3226fa49aeea84189f0b",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8,
+            4
+          ],
+          "approxMeasures": 20,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "80a3733a-486b-4bb4-8fb4-ba319220ed0c",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/126/score",
+          "sha256": "898d2345af90950837b42fada4b5f1280bdc31a258482400fbcdf75bc0a1ab46"
+        }
+      ]
     },
     {
       "versionId": "418421d3-751f-5c32-80c9-d83fd1610316",
       "edition": "new",
       "number": 127,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 12.25,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "aa1ea76f-f616-484b-b09f-236c5f55e52c",
           "kind": "Verse",
           "textSha256": "d422e328625ca886f5c0c2b77c4673f4e4bcbce46e4cee772951ada20f71e933",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            4.25
+          ],
+          "approxMeasures": 12.25,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "72626503-c4fe-49d3-92aa-d1c5e7a536ef",
           "kind": "Verse",
           "textSha256": "2b51a17d468c6daf9d304e8a5eede305e0e72787a26665bf3355eaabfe997e1f",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            4.25
+          ],
+          "approxMeasures": 12.25,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "5f3f3a9a-e0ea-4aca-848c-8fe2a83dc145",
           "kind": "Verse",
           "textSha256": "8c2c195feaf6435de38b02a08c252cc4302e7f35a034fba163336b347ab3ddc8",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            4.25
+          ],
+          "approxMeasures": 12.25,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "9e160dd5-4e46-42f5-9a03-d5171577ebc2",
           "kind": "Chorus",
           "textSha256": "2162e18403b449a6dbbad2900b0564f1dbc5b5a0ce8a3c09f650a3f1d70e348f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            5.75
+          ],
+          "approxMeasures": 5.75,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/127/score",
+          "sha256": "b0d0bf35cc541ef010d9785dbd5beb2db4865f8d4021038d7c5d789e16230503"
+        }
+      ]
     },
     {
       "versionId": "8853f05e-af86-548c-bc63-7477757d53f1",
       "edition": "new",
       "number": 128,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 14,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "9bb268ca-d362-4329-8f09-72261b652e19",
           "kind": "Verse",
           "textSha256": "835fc33ee8a63d28e00f441ccd899560c759b6c5f1a0a49f886319ee77e948d2",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            4,
+            2
+          ],
+          "approxMeasures": 14,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "ae7b5ee5-f331-451e-ae56-a3fbb678f8c4",
           "kind": "Verse",
           "textSha256": "2ac6abbaa0f1d55a8d7528f7c87491ccfc3f6fe7402928d9b7c0ff39e14c45e7",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            4,
+            2
+          ],
+          "approxMeasures": 14,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/128/score",
+          "sha256": "1aa00d8f228ff0f4b4a321508559cc61bd4bd455bd75f53763d21062c6d3d29d"
+        }
+      ]
     },
     {
       "versionId": "d6830651-511a-4952-bead-4cea2fe9427c",
       "edition": "new",
       "number": 129,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 17,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "fb0b469e-8ce2-4d10-8b97-56b820ae7119",
           "kind": "Verse",
           "textSha256": "75ebf2b094fef1617d184174e16804e74d014e825ed0d9dbd42457721a735b90",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            9
+          ],
+          "approxMeasures": 17,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "5bf017ab-b916-43ed-82a7-00c101a0b3b2",
           "kind": "Verse",
           "textSha256": "53c308d1cd5adcdf47a2ab2cb1f29419f9e68457844ae79a021271fad8b3d308",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            9
+          ],
+          "approxMeasures": 17,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "26465b96-84fe-4aff-b7cf-1089a11a6f51",
           "kind": "Verse",
           "textSha256": "f1a49305b8b80c887c37799e425e3f0e8034450be46d82660d906cb770feb8d3",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            9
+          ],
+          "approxMeasures": 17,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/129/score",
+          "sha256": "a338a650b11494fb2df826ab1a11c1d6a72f986748599390c1c2b40b0a4baaa0"
+        }
+      ]
     },
     {
       "versionId": "9a23f192-0238-5366-bc58-b3e29ef376d9",
       "edition": "new",
       "number": 130,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "8f68a1dd-a2ae-4015-9987-76d1cfba0511",
           "kind": "Verse",
           "textSha256": "a7698ea076bf589c36b2a51a160c7c9a3a84351061848059cd8633cd77fb87b2",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "3261f001-dc5e-4013-a29f-39ddaeddf937",
           "kind": "Verse",
           "textSha256": "7ea85b680d12a10825f3dd6de096ed0eb9b056980295c86437eec640ec23ddaa",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "210a254f-7757-439b-8c78-6ab5e7cb3e2e",
           "kind": "Verse",
           "textSha256": "9d0d307ede1b3e29544be3653badd99b0199eb183c265ad999d3451dff7b71cf",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e68ddeae-7456-46bd-8826-f9ad058272b6",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/130/score",
+          "sha256": "d3441272a497a19c6b4134cd9222ed69fe7fb1e68a105a0bf9d1ca6b7f9375f9"
+        }
+      ]
     },
     {
       "versionId": "d5544f04-4b69-5c65-a389-38cdca34dca5",
       "edition": "new",
       "number": 131,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "6015ca97-1d15-4915-bcc6-b5f403214af7",
           "kind": "Verse",
           "textSha256": "a11d93fd477b3b3e3e0d4f898a922f1d72a166777fe309c580f6c301d500b279",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "191dd973-9f70-4fb9-b8c9-fe719564a86d",
           "kind": "Verse",
           "textSha256": "e60bb0068d1af04892e42b4cc652ff547f2fd5444efca1b1715330734bd19a02",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "b9b798cd-0930-4e8f-a362-c30ebcf515f1",
           "kind": "Verse",
           "textSha256": "52baf7fa7511b7646cd8d05c8cfb4d5f48bd4826acba1c561fde73512165a6b6",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "c735f016-dab8-42ca-8966-a71c8857bff8",
           "kind": "Verse",
           "textSha256": "8ff4c5568d9ee649fac908d63f1f1f613e78517d0abb82d636943d62a6b947a2",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "1f698ea6-38eb-4c4b-a010-e115c4318315",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/131/score",
+          "sha256": "d89359726f01d57a49fd269db444f16d04a8b9e8de71f4634929c8c3944977c5"
+        }
+      ]
     },
     {
       "versionId": "f5d7ff1d-1d2a-519d-b927-a890585e2bea",
       "edition": "new",
       "number": 132,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "331bd71a-cf4c-493d-ab35-abf407b316ba",
           "kind": "Verse",
           "textSha256": "a97799ac7881a90df672c666cab68fc829bd504d440c3f0e904c774abe629c5d",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e0cd1e60-7338-43c1-b473-c404efbde11d",
           "kind": "Verse",
           "textSha256": "cb62aa001d98fd9a7a479112a0deea4a19e3189745cb1a5747a9795b5e54f198",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "74d78555-99a8-409d-8b11-33f159f96193",
           "kind": "Verse",
           "textSha256": "d36ff8d0f615f1ca1f6c77ebf5a626b2e9586b01706849a040665470a1cc5013",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "ff4840bb-c130-4fe5-a65d-7aff5fc9cdfa",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
       "scoreEvidence": [
@@ -8849,9 +9043,9 @@
       "versionId": "711745c2-a244-5871-8121-13e25d5ccfc3",
       "edition": "new",
       "number": 133,
-      "classification": "unclassified",
+      "classification": "recitative",
       "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "reviewStatus": "recitative_exception",
       "parts": [
         {
           "unitId": "4970c043-526c-44a6-9cee-8c67f844ca82",
@@ -8890,390 +9084,517 @@
           "reviewStatus": "not_measured"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/133/score",
+          "sha256": "d9ceb67c7c334aba88965b1b614ad56833288a671ffdefa2e32100c4ea02ef45"
+        }
+      ]
     },
     {
       "versionId": "9568cea3-7461-434e-82dc-2db15a1dbdff",
       "edition": "new",
       "number": 134,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "254a652c-69b5-491f-ba5a-4c759fa1624e",
           "kind": "Verse",
           "textSha256": "268d9f486290dd15a644df4130a956ace4e9283e1ce46d24534b1c86c5b31e99",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "021c04e8-71d4-469a-8817-07fb6b49b018",
           "kind": "Verse",
           "textSha256": "83633118aae665019dfa40ac4a525204e8aeb6464332629f2651756ca56bab7a",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "92d31f6b-db2e-4852-bfc0-17fce156fea7",
           "kind": "Verse",
           "textSha256": "ba694fe4ccb0451dce7fc54b5208015016f6de3141eecfec1ed9a2fdbf39b574",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "af86c49e-ae0a-4528-8f4c-df0eb410e5a3",
           "kind": "Verse",
           "textSha256": "b0d94b886ac165cef5c5fdb3b3a7e0478e2c52786481f173da91f32fcb0bc4ce",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "7f26ec77-20bf-4c8a-bfdd-0d065470ca38",
           "kind": "Chorus",
           "textSha256": "d2ad2f6e295db79253735d0b89a9156d085bae62f61437a909beaa8894d8eee1",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/134/score",
+          "sha256": "47aa2e4fd46a279a7dcf98860390bce1b6b623bccf94ad1038054c506b70c3b7"
+        }
+      ]
     },
     {
       "versionId": "5334fbe3-1aec-59f7-8bf6-b5fec53c3696",
       "edition": "new",
       "number": 135,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "dc340f56-4c2f-43ca-a04d-1fe402a23c42",
           "kind": "Verse",
           "textSha256": "e36657bd517ea9d06967784184528b5977cdf1f2c730b43a5b6cc1fcf8ebf1fb",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e220465d-d1b9-4208-8be8-2290abcc087d",
           "kind": "Verse",
           "textSha256": "63e13d284243145e98b7ef7972c937bbe0a6c70450dcf75cf2b1ca2f54e9c52b",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "3118a6f1-b403-404b-a209-73915b7df65b",
           "kind": "Verse",
           "textSha256": "329d785cce2be482a0cf1008b8e83d75734c55cbc07c138b4f761cc906412f7c",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "9bd62d6f-3a9d-4c07-b12e-73cd59cf4ac9",
           "kind": "Verse",
           "textSha256": "4777b26b65c04a680bf36c73cf83aae1a14e0ce11f300d21b1e524773e9393bd",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "d7d3fb79-1bce-4298-b9f2-f219cb329751",
           "kind": "Chorus",
           "textSha256": "05ed5f771669bc4dbec23f698d536f0a215230738aa9a54fc4e93dcad9077d3d",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/135/score",
+          "sha256": "606bbb4eb1335ad7468868d11b9af025b35506d104dea1fd9b13569d1cf82b9a"
+        }
+      ]
     },
     {
       "versionId": "595cd977-bcf1-5237-aabe-8aa9bcdaf75a",
       "edition": "new",
       "number": 136,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "400fb47a-1d4f-4a9e-b264-50bdfee2333e",
           "kind": "Verse",
           "textSha256": "7f719d382786244fed7a280730f78c786ff4492ba60e118ca8892dac33e5331d",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "309679fb-e8c6-4f32-819e-93600e029b28",
           "kind": "Verse",
           "textSha256": "b692b336353278b1b5389277585241bd52036650209b3764c73491c0bf9e2b0e",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "8357abc3-911e-4190-b38e-e2c1d2539f95",
           "kind": "Verse",
           "textSha256": "68202ba43504f76e0e7a69d492aa0bb99b4b6edad99ce202d0b8a4fd0d7adc0b",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "0788df1c-ced4-4bcb-a122-d236f86babe5",
           "kind": "Verse",
           "textSha256": "5854cf74f47ca16c536b0bf14491baa1c76145d56707005da3f3796d6394bde6",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "faba7976-7fcd-4093-9827-c6a8e06ed859",
           "kind": "Chorus",
           "textSha256": "3f96280f97847f4b4cd3f78f658d3a9aefb33aab2c4be582f8b131e791e0af91",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/136/score",
+          "sha256": "9b70708a5e3aa5549b1e3d19f29e71e1bbcdb0cbf40cb3e7d1b1af7e14cc0ca0"
+        }
+      ]
     },
     {
       "versionId": "fb880ac1-aa47-522b-8c30-e9da1e037bf7",
       "edition": "new",
       "number": 137,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "b8832b2c-26e2-4b1b-838c-008a26b0c8e1",
           "kind": "Verse",
           "textSha256": "0853b542818b9b58e271ba484bfdd063be697b0cacb0ebff9593c1c47b634937",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "7685fdde-f9fd-495a-9c9e-cb429c0e7563",
           "kind": "Verse",
           "textSha256": "0cb061d7217fcb5b7c0cf4b1a62f6b1a07409265b114f85337d496ecc3a6f509",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "cb2774f4-03ae-4e6f-8462-06dcf504c9cc",
           "kind": "Verse",
           "textSha256": "4aa9cd3d57102a6867cc83dab85d99bf4e790e985c7eb5b7cb3eceb1a7edae96",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "487be8bd-19af-41f0-bee4-eeb65cd6aeef",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/137/score",
+          "sha256": "9a05f6865042f3a17d8161d77cc7662a214b17773f9f9183122019ac454d718a"
+        }
+      ]
     },
     {
       "versionId": "47fe4ee0-2bbd-4238-9e63-803e22298b79",
       "edition": "new",
       "number": 138,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "d10834c9-ec3c-4627-b6a3-1cfb05436eb3",
           "kind": "Verse",
           "textSha256": "96b9075585f20badd54f7b9f59f22f9cb3cbdfa36c9380b1b56c954b29130572",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "2c5aaf69-e197-4166-a3e0-4ce3e056ecd9",
           "kind": "Verse",
           "textSha256": "2967d16d8d9be6bba9cfd7f3eeac577f056adbee35204093b4c0dbed75c90593",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "37c0352c-d953-4065-8e85-9f14650e35bf",
           "kind": "Verse",
           "textSha256": "9f23589b10a44a8670bf746a61ec188dd873dc6b2b0e06ecf49a6c0c42682750",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "b69ed75f-d635-4f84-be17-545cc358dcb9",
           "kind": "Verse",
           "textSha256": "f5428386d8cea290e6f2b612bc9959ba554ea6aac4552daf86a624a0b580130d",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "2f5f692b-a55d-46c5-a1b1-f3884b366e3f",
           "kind": "Verse",
           "textSha256": "210aa25ab743804ac16a9a6074bb567b20d78b8a779a4dfc71ffa3bea0f2b182",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "2d510a8e-e3e0-4fe6-8b46-705b1ce790fc",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/138/score",
+          "sha256": "4b07b64e16fc9967e617c1aec2b4b1db4ac747a1c728268078400c02b6fd46b1"
+        }
+      ]
     },
     {
       "versionId": "92c0a523-cc05-5018-bdf8-b420d3dad925",
       "edition": "new",
       "number": 139,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "81359ada-426f-49fc-8674-6f43585b76d5",
           "kind": "Verse",
           "textSha256": "e2bae4015524a10b4c3f0c52f9b3d005d8a2351105d2b34c84cb78e2d2a9403e",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "83956967-deb9-42e3-afe4-fa8fbce4d51d",
           "kind": "Verse",
           "textSha256": "ddf3c7db27375e890d536cc6690e67f1091b49f291dbc8fcf9dee5f7a4d65eb3",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "9847fada-50e8-4802-bd4c-88ab3d2707cd",
           "kind": "Verse",
           "textSha256": "141fbc48064914799ad89425dcf0975cce7e0e2d4368eeb964e33fc14a950de5",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "5dd1b8a5-8227-4204-88ca-5118ff1a5b0c",
           "kind": "Verse",
           "textSha256": "aa5fcbf1391b3a8e2d716e1c6546e2f79cac2a0d33bfb1f6e37fdbdcfd8e066a",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "195f63ab-2e0b-411a-b74b-bfc7d5c4d39e",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/139/score",
+          "sha256": "8b1707f62ab9c69187b213456593b54eccd606e1d8c4a9de94437ebed7597e19"
+        }
+      ]
     },
     {
       "versionId": "81ec299a-78fe-572f-94c6-f14d3f525cf8",
       "edition": "new",
       "number": 140,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "4eb36143-6818-4015-94b4-e147a508c5a4",
           "kind": "Verse",
           "textSha256": "711a31e50c65076210252f8d6649648a6da2653ab7b10f23d9aa87e5b4939c34",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "4d32b442-3bee-4abf-8903-a56d575f5806",
           "kind": "Verse",
           "textSha256": "0159f7bf5f80a39950b24f9ac406e005c43e73e07d1bda663192bcf737d314a3",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "4d351c69-b368-434f-ab8a-3777b7aa9149",
           "kind": "Verse",
           "textSha256": "30916050f9b15bd4eece4459ed1645786fa7ed089614993cfc4c4fd28e1c76b7",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "b4423d2c-f83a-49a1-bad5-a995eeab9ecf",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/140/score",
+          "sha256": "c5f9d75171af5844877424a21f56835629df3725097e49f32efb4e290cf17ed3"
+        }
+      ]
     },
     {
       "versionId": "24e3cda8-dd8a-58e9-8258-a3fdb4abb0d9",
@@ -36228,57 +36549,76 @@
       "versionId": "1e2986dd-2d89-5b51-8dc3-9f3de27930d8",
       "edition": "union",
       "number": 24,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "3944d578-a8fd-56a1-af52-f5916f5b40ab",
           "kind": "Verse",
           "textSha256": "c8b873e5193c75201fc0907ab7545ff54c93a4e0ebe334b45af24ea891d83c0c",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "76639702-b043-5445-9708-2fa95f279916",
           "kind": "Verse",
           "textSha256": "a690bdf8e88061cabab386f142cdcec9e2e202caa7883a3e5c19a7cc6ce2d4bc",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "d4fbedb5-7eb4-523f-8f25-3586bee4c4f7",
           "kind": "Verse",
           "textSha256": "36b3184dd5bcf1426ef720fd74f5178d89a725dcd5bb8fb80688f040918fd037",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "87d9939d-7b53-5300-b9cd-ee60ea9ba6da",
           "kind": "Verse",
           "textSha256": "390157d162cf23a58ef1c93da764ec0992fa373521e1478e10cf6c925f879f8a",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "8b89ece8-3fd2-5c69-9bee-6589468d3b8a",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review50/score-024.jpg",
+          "sha256": "799d53045462bc8a004eb8ef9911beedbacafa6ee9c9967ff2d65bf9564052c7"
+        }
+      ]
     },
     {
       "versionId": "61a33e52-6033-5fd3-befe-2d90a65d2d61",
@@ -37042,45 +37382,62 @@
       "versionId": "6b62e880-05f6-521f-accc-cb51cc9ccfea",
       "edition": "union",
       "number": 38,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "93959d9c-b54f-5940-adc6-58bdd8e4f22b",
           "kind": "Verse",
           "textSha256": "a97799ac7881a90df672c666cab68fc829bd504d440c3f0e904c774abe629c5d",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "0078888a-c1ab-5860-9a66-16b29310bcdc",
           "kind": "Verse",
           "textSha256": "cb62aa001d98fd9a7a479112a0deea4a19e3189745cb1a5747a9795b5e54f198",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "4d1f0abd-fc32-507b-8236-510296cbb8d9",
           "kind": "Verse",
           "textSha256": "d36ff8d0f615f1ca1f6c77ebf5a626b2e9586b01706849a040665470a1cc5013",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "0881b60f-c6a2-56ec-8ebc-4d369e4727cb",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
       "scoreEvidence": [
@@ -37253,57 +37610,76 @@
       "versionId": "b9afd3f8-cff2-5e92-95c4-ed4480342aaf",
       "edition": "union",
       "number": 42,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "28ba051a-b29b-5069-85da-e2b12d88791f",
           "kind": "Verse",
           "textSha256": "790a1dc1cae2b53ce7f1bbe70cfa6a8e3fc504f419224589e22985e06d47fcb1",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "f75e2eb3-4696-5259-a125-39dc077ec401",
           "kind": "Verse",
           "textSha256": "a8ca0f95cbdfac8b994e5552d8e98e4c46401d535a6825b2bde13eceb1f2e01f",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "ab53a92a-862d-5c1a-8aa2-d77dd44cc445",
           "kind": "Verse",
           "textSha256": "40c269210b354c05c4391a25f8ffd792f3d8b0d1a00cbbb746cfb49eff954176",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "f9851a0b-471e-57dc-95bd-82af8844e25f",
           "kind": "Verse",
           "textSha256": "76194712f6c8cd34a5978fa2db8784a3a2cdeb0fd49f757f343ca60251fcce69",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "5962c715-3b35-56fc-a300-11d3ed417ff3",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review50/score-042.jpg",
+          "sha256": "d4b8b58f97c17485f876bd1e491aa72bb01cedb686993ae47b6a66a909684746"
+        }
+      ]
     },
     {
       "versionId": "792fefad-0d60-4de9-a390-5dbf7649ba52",
@@ -37768,66 +38144,88 @@
       "versionId": "6d566768-a60f-4eb5-a24e-3e77408d4a94",
       "edition": "union",
       "number": 52,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "2c708735-8673-5edc-bc6c-e4b12f6f3e67",
           "kind": "Verse",
           "textSha256": "1f26594eca3dde5725984411d43ddc11bebb080efad0d31d5986751f6828fb51",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "cd8d581b-747c-5a42-a013-a67c30223469",
           "kind": "Verse",
           "textSha256": "11bbb52a01fb6b0f5b7cc849f765f88a0d54a568f4544efbe942413cc6228a5b",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "33b291c5-c97b-522a-b1be-df7204ceb049",
           "kind": "Verse",
           "textSha256": "e76d4fbd2e8722c31a464675c1d642b986275697a49bca544af711f5e0b2dcdb",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "350ac9ef-2990-58c7-8202-e98a1d0dd2e8",
           "kind": "Verse",
           "textSha256": "aa0a6ec39105845a638768c5146d467e29e678fbffbae7e84451f46a765617c3",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "d974cfca-73bc-5263-b3f3-dc03ad9ccb6b",
           "kind": "Verse",
           "textSha256": "2fec55b4ba0697cb706c63b779156aadadf7e8a1997a2fa38fc05ea9b83add74",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "55bfdb7c-8ae0-57bb-ba4a-494d742ac4ec",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review50/score-052.jpg",
+          "sha256": "779f1acaecedca9b6656a13dddc241ec38a3f285c66f43fd4a3d4cae0b96677f"
+        }
+      ]
     },
     {
       "versionId": "d9f89e3b-04f5-49ee-8647-b57225c56c56",
@@ -39498,84 +39896,121 @@
       "versionId": "4263921e-89e1-4069-882d-213e603b864a",
       "edition": "union",
       "number": 84,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "ad2dcd32-9ba2-55cc-82f9-d2123724996f",
           "kind": "Verse",
           "textSha256": "f337805ee9a87f704bedba286a5d9eb34dcb5ef6c56e145e5ad287350f40d7ef",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e688f6c2-05b6-57ce-9b45-c00b38ea6dfc",
           "kind": "Verse",
           "textSha256": "85e39c20803ebded73f2466893494260d473b6225fc56c1ec080eceec4a4b915",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e57805e1-0fff-532d-a482-43e055b1d4b7",
           "kind": "Verse",
           "textSha256": "d03544c8d1405e13b0c3736ba9f6403c360750736deef2068bb6f14c572409e1",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "bca7efcf-0a4b-5c31-a6fe-5e8e71a81673",
           "kind": "Verse",
           "textSha256": "65f71315b03f8e02394e47c324106665242730625909f667dd852e3144ec4e45",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "3b2a3897-5ad2-5a92-8f83-8c62b2645860",
           "kind": "Chorus",
           "textSha256": "7a2511524db277b025acc7096258e4be98c34089cc8118eb99bb84a1ed9f3670",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "edbe10ed-f6e2-5a25-bd77-a8c7ac76950d",
           "kind": "Chorus",
           "textSha256": "7a2511524db277b025acc7096258e4be98c34089cc8118eb99bb84a1ed9f3670",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "87a5603b-d764-5e03-b071-ff97268ec3c3",
           "kind": "Chorus",
           "textSha256": "7a2511524db277b025acc7096258e4be98c34089cc8118eb99bb84a1ed9f3670",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "c7234912-26df-5699-abb7-9641a60fe352",
           "kind": "Chorus",
           "textSha256": "15581d59b5753161179cf6394cbb07aa5d8b8988fd5e9be5d91ba08181f756da",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review11-03/score-084.jpg",
+          "sha256": "4c2f3516d0fe698274875b0abc86dc8cff856acc879cc59ad62036ae9294c4ed"
+        }
+      ]
     },
     {
       "versionId": "66c3c292-a662-404e-9ec0-9452961653b3",
@@ -42070,178 +42505,242 @@
       "versionId": "24678bd4-42ce-4610-8ef4-aa606738d7be",
       "edition": "union",
       "number": 121,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "af5085da-8da3-578b-843b-fc5fb31d5115",
           "kind": "Verse",
           "textSha256": "3d8f6cae4d761b87d7c32530ea3f96d4a12eef0b9cb8c446cf64a123a560f69d",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "aed27864-db69-53b0-bb91-dc4937149e00",
           "kind": "Verse",
           "textSha256": "e35650c3fa69e83f8999015da3551cd9352160491b138a29ab8ab6e921b04dbc",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "5c3018c6-4a25-543d-940b-48d152ef3d7f",
           "kind": "Verse",
           "textSha256": "c831ca70a9a73621d6fbfdcad37a53f5042c93beb484a34ba3a1ecea2fb895f3",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "6426ca4e-4270-54a4-8eaa-dac888306f70",
           "kind": "Chorus",
           "textSha256": "76772b887e92906f65f5c6b971b738fb094b7ecb61d96f7b6b372d157f95d4f3",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-121.jpg",
+          "sha256": "274d2ec29c51af2fbb24e61e2d2c156906fd5f5bdb1a56061850c844761ea1df"
+        }
+      ]
     },
     {
       "versionId": "c78c0d32-cd9d-4bd1-91be-f70b44a7eae4",
       "edition": "union",
       "number": 122,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 12,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "a02fdcb4-aaf2-5aeb-9812-2a5356c0b8dc",
           "kind": "Verse",
           "textSha256": "838920a026e6163b8abf164ca21d725a92352ebf84e78fdd15b88c7c4cc31e6b",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "8cb8431d-81b0-5644-8ed9-261ffc4748c3",
           "kind": "Verse",
           "textSha256": "8eb8ec4aa66480066b01fc08f8e1e7438af97d5abe3eda30be500b8a790ca352",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e3c31363-f5ac-5833-9347-7f818b5336c4",
           "kind": "Verse",
           "textSha256": "a3f4afbf689b82d35ea05135af09a3b64372ca5d83cdb4ac914deec56f0e8503",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "4e42ff95-6d55-581c-88c5-fdea488d564b",
           "kind": "Verse",
           "textSha256": "8022f7dad7040404ecc80798ebe530d63a45b2e7ca0feb7371952d5d92f261a8",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "160cae86-6efa-55b1-9a3e-e0a15ede04b7",
           "kind": "Chorus",
           "textSha256": "964ffd33ffc153249aabe927ac66c4e2fa9bc0749a4e582f711c35f58eba2e6b",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "bb9b21c8-14eb-52dc-8def-9baf1604ea66",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-122.jpg",
+          "sha256": "696e700b7d527f27297839d882816c5a1abbb6dbf5e73153261b54e31c40c6ba"
+        }
+      ]
     },
     {
       "versionId": "e725590d-d4b8-401b-8485-8b48b732436a",
       "edition": "union",
       "number": 123,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "21c07b01-81d0-5a71-84c8-37f4f382b6b8",
           "kind": "Verse",
           "textSha256": "0aa912e631907645089a487f0e5e73c18e1f2293e19bbcb05b3f8c4ca91f572b",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "cb02c0d6-9a8d-5654-a93d-cbb2a35529e1",
           "kind": "Verse",
           "textSha256": "0f135c64fc4bebbed58fde2616614929fc6a53dd58233074c64bb5d7b123d525",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "da00e2ec-229c-5688-9ec2-2f333157bc49",
           "kind": "Verse",
           "textSha256": "54784c4184901c580f4b530afc899002eab6c6105e0e2a520be29bec5b563ac1",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "9721a446-ce68-5dff-b51b-47c2d2e4521e",
           "kind": "Verse",
           "textSha256": "7b13446d4d5874b14104bc3a90e276ac301961e53824ecc619df18de2f588668",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "55fbff3b-00d5-5ad2-8eca-5135f49542c3",
           "kind": "Chorus",
           "textSha256": "89109d2eadb7c30b5a4b752ec0b826e8fce0999b4ae07dc7d67f0b302af3349b",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "3a714b26-fed3-5ef5-98bc-267b862e9730",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-123.jpg",
+          "sha256": "205d98d24fd92b169f051eb16c821ed7feaa114d48d59a64738ba84470a72d69"
+        }
+      ]
     },
     {
       "versionId": "a81212ae-43d4-5395-a768-bb42ebdefc97",
@@ -42321,104 +42820,149 @@
       "versionId": "b2158e1d-16df-52a2-816f-747293159ec7",
       "edition": "union",
       "number": 125,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "7ba5e591-f6cb-52dc-80d8-d561747f31b2",
           "kind": "Verse",
           "textSha256": "27baa4c6800ad3bff16b0ad09a370c9ff8b0a67de6531e8d9de3d531742d5649",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "85c7efbe-d643-56ca-9b38-a54c928626c0",
           "kind": "Verse",
           "textSha256": "0175d42ab66674b4a91353832c6439be63b566033cb0a55747fd7f0093cf9ffc",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "12cee117-166f-59a5-95e3-f8f7a99ef94e",
           "kind": "Verse",
           "textSha256": "74d209bbc6ba30d7c7b90aef0c71f1a7e6da87c47af61cbe7c41a1b3fc474653",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "42ba0db8-c9e4-518a-b70d-cad80822b41c",
           "kind": "Verse",
           "textSha256": "31ccfa3afb7e33b0082ccf27c4c1a80775556f746c7ac25679f7245d37c3ac2d",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "931d1201-e745-56e4-9c0a-2c5c0b7d0fb2",
           "kind": "Chorus",
           "textSha256": "4f7afa5293776ce552aa96e6aa6f97549bc7b16c79cc0fe81a8e724babf5fb2a",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            13,
+            1
+          ],
+          "approxMeasures": 14,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-125.jpg",
+          "sha256": "921dc2a6dceb502a1eca05db43cfef611e9eff10cede74d96f1cab49af269b8f"
+        }
+      ]
     },
     {
       "versionId": "bec16771-0b8c-4362-a320-743251df56ff",
       "edition": "union",
       "number": 126,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 20,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "1a1fb054-c138-51fe-9231-ae3428fbba19",
           "kind": "Verse",
           "textSha256": "79f1a66526495db0e3a49e2c9276b3fe47f889fb70380eae894ea7e0d5c04c8c",
           "blockCount": 5,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 20,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "9ab30d97-f4bb-5bc8-ab8e-c9b781c7ff5f",
           "kind": "Verse",
           "textSha256": "c547b6ae02afe554ad4dd5fc76f658aad14f1d3c644d2a2e46d957036d7f2b30",
           "blockCount": 5,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 20,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "831586db-a467-5eb1-82fe-84fa444472e8",
           "kind": "Verse",
           "textSha256": "c02c113cb63fb8e7055c9da6158aab8e8bdf0d41d79d98e48942721e0a319311",
           "blockCount": 5,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 20,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "a8ef32a0-d4c0-551c-b74d-ac26c074bcd6",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-126.jpg",
+          "sha256": "a6f6020755bacad317d679e9b46ab27515e7cf828b6470231a1bb5b6a5847df5"
+        }
+      ]
     },
     {
       "versionId": "1d66ad1b-7058-503e-a334-457f8fbab002",
@@ -42462,57 +43006,84 @@
       "versionId": "d5fee4b6-62e4-5c93-b1cb-ccf89f59ba7e",
       "edition": "union",
       "number": 128,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "2ca3c6eb-47d7-5793-aba6-b92d7678ca8a",
           "kind": "Verse",
           "textSha256": "9ad766a6d551a931eb5dd520efe31fed0304beabb11c57b4068e521ca17a38bf",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "4d56a26d-dd08-5c55-8314-6f4ea804f343",
           "kind": "Verse",
           "textSha256": "1e62aaad1d95b78cb7fae578232bab37ad8352bc2273a220074f24ac77136792",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "c559fb10-9506-5ccc-9ce1-056106685c7b",
           "kind": "Verse",
           "textSha256": "74e4535ede74c60a2d5b92f74926cbeb27981489e8cd5ec12b20c51b891f96ea",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "a302b728-a65c-5130-89b1-b8154fe0b847",
           "kind": "Verse",
           "textSha256": "ab476a182679c9bc4048a39930ea3fe5b25fea2f805f720782ac85acc79dab6d",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "60b1aa38-aece-55cb-a0b5-acd51e41c76e",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-128.jpg",
+          "sha256": "376330b9c9fc1a9234c192bd3c30724f6f8becd6da8949181dafbe27668b2560"
+        }
+      ]
     },
     {
       "versionId": "25b17715-24af-51f4-a5c6-61211bed747a",
@@ -42574,48 +43145,70 @@
       "versionId": "16c3341c-d37b-53dd-8af5-9cdf3fe5eb68",
       "edition": "union",
       "number": 130,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "b1663d1c-d7a7-5387-a1b8-0afaf9795ad4",
           "kind": "Verse",
           "textSha256": "1e930972c046473f93b00c7d337815d287dd1ad913f425ac7b2f9637ade668fe",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "ecd3620a-3f75-59ca-b02d-4c9c03afe14f",
           "kind": "Verse",
           "textSha256": "5c047982d43b0bb6e6b6d2a50ac2689bbab3cd24c67d929bcae814a245e5f7ab",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "0ee9ed8c-d2c2-5a95-8a98-5b9af715a968",
           "kind": "Verse",
           "textSha256": "1c88ea7fc6c1dae908e23d81f223e4b8bdce8743d81025d6ab6605b8dccb2cf0",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "ca80d451-851d-58e0-bdab-d6956e719ccb",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-130.jpg",
+          "sha256": "8305c33efb4ed1e5c57be323ea9da06c42ebb07b56c2f264c147e078ecba0681"
+        }
+      ]
     },
     {
       "versionId": "b6367279-f061-5482-85b1-6d920736e269",
@@ -42715,57 +43308,87 @@
       "versionId": "92eaa746-f441-5ccf-8b38-ac97910e7f14",
       "edition": "union",
       "number": 133,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "f85872ce-a4af-55f4-b41e-f1b611580118",
           "kind": "Verse",
           "textSha256": "5396f8beb47a2b49bf1f1261bdcdf3b852d904b89ba15c42ba57f94504c99273",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "15da3080-039a-53cc-89aa-f4d7aeaa28c0",
           "kind": "Verse",
           "textSha256": "a3f5d28fbd1c9d234e509ce9fe91fedf7c4ebe685dbdad52eeda054d2a6748ec",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "d21afc0d-5779-5635-a658-a3fc54317d9c",
           "kind": "Verse",
           "textSha256": "76a4de8de2367eae232f508349e098ba2b242f86833f1776868ad8949e720f3b",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "6f7098d7-c3e6-5a49-8b2c-7b6852628c06",
           "kind": "Verse",
           "textSha256": "aba072fac8b98626772e537dd2b658f163e1e1cfed53a78e91a857c875a96da4",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "11f96c89-04ed-568f-835a-021d09cc27b5",
           "kind": "Chorus",
           "textSha256": "52195b51205c6d9fdf5001e18c179d4c0469a98a2bfe37cb8199000f4febf70d",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-133.jpg",
+          "sha256": "2ac21ce526eb833d49b541b27f561b14fafa6de7cc26579716e95a99648bda73"
+        }
+      ]
     },
     {
       "versionId": "8b1308f2-1977-510b-bc8d-4d25652156b6",
