@@ -33,6 +33,13 @@ try:
     await adapter.execute('pause');check(audio.paused&&!state.serviceMusic.playing,'real pause');
     await adapter.execute('play');await adapter.execute('stop');check(audio.paused&&audio.currentTime===0,'real stop');
     audio.play=()=>Promise.reject(Error('blocked'));let blocked=false;try{await adapter.execute('play')}catch{blocked=true}check(blocked,'autoplay failure not acknowledged as success');
+    for(const patch of [{pending:true},{fadeStop:{active:true}}]){
+     Object.assign(state.serviceMusic,{pending:false,fadeStop:null},patch);
+     check(!adapter.read().allowed.includes('play'),'busy audio must be locked');
+     let rejected=false;try{await adapter.execute('play')}catch{rejected=true}check(rejected,'busy audio must reject execution');
+    }
+    Object.assign(state.serviceMusic,{pending:false,fadeStop:null});
+    output.closed=true;check(!adapter.read().live,'closed output revoked');output.closed=false;
     state.serviceMusic.ownerServiceId='another-service';check(!adapter.read().allowed.includes('play'),'foreign audio protected');
     state.presenter.outputSessionId='new-session';check(!adapter.read().live,'replacement output revoked');clearServiceMusicSyncTimer();
     return 'PASS real navigation/blackout/music/auto-sync adapter, source ownership, autoplay failure and output identity';

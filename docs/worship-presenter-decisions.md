@@ -3745,3 +3745,11 @@ Focused view continues to hide the entire sidebar.
 연결 코드는 16자리에서 8자리로 줄이고 PBKDF2 600,000회로 키와 topic 모두 파생한다.
 2분/1회/한 기기 제한과 ECDH 세션 키는 유지한다. 구형 16자리 코드는 새로고침을 안내한다.
 protocol v2의 모듈 URL을 고정해 이전 캐시와 섞이지 않게 한다.
+
+## 2026-10-22 · Remote failure and disconnect contract
+
+The current pairing protocol uses server-claimed six-digit codes (v3), as documented
+in presenter-remote-design.md. Immediate subscription failure rejects before a
+closed session can be assigned to the UI. Explicit disconnect waits at most one
+second for transport acknowledgement and then releases the local session, without
+stopping presentation or replaying commands.

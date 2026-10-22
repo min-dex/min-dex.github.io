@@ -104,3 +104,18 @@ SQL 테스트는 PGLITE_ROOT의 embedded-postgres/pg와 WORSHIP_TEST_ENGINE=post
 
 이번 검증에서 앱 수정이 필요한 결함은 재현되지 않았다. 실제 iPhone/Android의 화면 잠금,
 절전·앱 강제 종료·Wi-Fi/셀룰러 전환은 여전히 실기기 확인 대상이다.
+
+## Remote failure matrix verification · 2026-10-22
+
+Immediate subscribe failure now rejects instead of returning a closed session and
+starting timers after cleanup. Disconnect waits at most one second for its send
+acknowledgement before closing locally; the peer closes on end or heartbeat timeout.
+No failed command or disconnect notice is automatically replayed.
+
+Expanded checks cover CHANNEL_ERROR/TIMED_OUT/CLOSED, duplicate close callbacks,
+execution failure, RPC timeout/abort, legacy code rejection, audio pending/fade
+locks and output-window closure. Crypto/gate, isolated real PostgreSQL code limits,
+and Chromium/WebKit adapter/lifecycle/presenter regressions accompany these checks.
+Service quota failure is simulated through error/timeout paths without exhausting
+production quota. Physical OS sleep, mobile power management and real network
+handover remain outside this verification. These fixes are local, not yet deployed.

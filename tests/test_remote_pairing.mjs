@@ -9,3 +9,12 @@ for(const error of ['rate_limited','busy','invalid_code'])await assert.rejects(o
 await assert.rejects(obtainPairing({rpc:async()=>({error:{message:'private details'}})},true),e=>!e.message.includes('private details'));
 await assert.rejects(obtainPairing({rpc:async()=>({data:{ok:true,secret:'123456'}})},false,'012345'));
 console.log('PASS six-digit leading zeros, server-only pairing, one-time revoke, fail-closed errors and response validation');
+for(const legacy of ['ABCDEFGH','ABCDEFGHJKLMNPQR'])await assert.rejects(obtainPairing(client,false,legacy),/새로고침/);
+// Server never answers: abort the request and return a recoverable message.
+const originalTimeout=globalThis.setTimeout;let aborted=false;
+globalThis.setTimeout=(fn,ms,...args)=>originalTimeout(fn,ms===8000?5:ms,...args);
+try{
+ await assert.rejects(obtainPairing({rpc(){return {abortSignal(signal){signal.addEventListener('abort',()=>aborted=true);return new Promise(()=>{});}};}},true),/지연/);
+ assert(aborted);
+}finally{globalThis.setTimeout=originalTimeout;}
+console.log('PASS legacy version rejection and stalled server timeout/abort');

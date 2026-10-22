@@ -25,7 +25,7 @@ export async function openRemote({client,code,host=false,read,execute,onState=()
   clearInterval(timer);clearTimeout(expiry);clearTimeout(ackTimer);gate?.close();void registration.revoke();
   if(channel)Promise.resolve().then(()=>client.removeChannel(channel)).catch(()=>{});onStatus(reason);onState(null);onClose();
  }
- async function end(){try{if(ready)await send({type:'end'});}catch{}finally{close();}}
+ async function end(){let deadline;try{if(ready)await Promise.race([send({type:'end'}),new Promise(resolve=>{deadline=setTimeout(resolve,1000);})]);}catch{}finally{clearTimeout(deadline);close();}}
  async function publish(request=''){
   if(!host||!ready)return;
   try{await send({type:'state',request,snapshot:gate.snapshot()});}catch(e){close(e.message);}
@@ -79,6 +79,7 @@ export async function openRemote({client,code,host=false,read,execute,onState=()
   }else if(['CHANNEL_ERROR','TIMED_OUT','CLOSED'].includes(s))close('연결이 끊겼습니다. 새 코드로 다시 연결해 주세요.');
  });
  }catch(e){close('연결 준비에 실패했습니다. 새 코드를 만들어 주세요.');throw e;}
+ if(closed)throw Error('연결 준비에 실패했습니다. 새 코드를 만들어 주세요.');
  expiry=setTimeout(()=>close('연결 코드가 만료됐습니다. 새 코드를 만들어 주세요.'),host?120000:15000);
  timer=setInterval(()=>{
   if(closed)return;
