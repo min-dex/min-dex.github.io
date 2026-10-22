@@ -363,6 +363,7 @@ function presenterScoreImageSlidesFromAsset(
   const scoreForms = presenterScoreFormsFromImageSources(imageSources);
   const sequenced = presenterScoreImageSourcesForFormSequence(imageSources, scoreForms, forms, item, song, version);
   return sequenced.imageSources.map((slide, slideIndex) => {
+    if (slide._presenterTitle) return presenterSequenceTitleSlide(item, section, song, version, displayText, index, slideIndex);
     return {
       id: `${item.id || index}:score-image:${slideIndex}`,
       ...section,
@@ -381,6 +382,7 @@ function presenterScoreImageSlidesFromAsset(
       imageSrc: slide.url,
       asset: { ...asset, kind: asset.kind || "score", url: slide.url, name: slide.name || asset.name || "" },
       ...presenterScoreFormMetadata(sequenced.scoreForms, slideIndex, formWarnings),
+      ...(slide.titleSequenceWarning ? { warnings: [...formWarnings, slide.titleSequenceWarning] } : {}),
       scoreBackground: true,
       sourceType: "score",
       componentType: "score",
@@ -487,8 +489,22 @@ function presenterScoreImageSourcesForFormSequence(imageSources = [], scoreForms
   const scoreTargets = (scoreForms || []).map((form) =>
     form ? normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form)) : null,
   );
-  if (!planTargets.length || !scoreTargets.some((target) => target?.key)) {
-    return { imageSources, scoreForms };
+  if (!planTargets.length) return { imageSources, scoreForms };
+  if (!scoreTargets.some((target) => target?.key)) {
+    if (!planTargets.some(target => target.type === "title")) return { imageSources, scoreForms };
+    // A deck without form labels has no reliable verse boundaries. Keep every
+    // page; titles at the ends are unambiguous, internal positions need labels.
+    const first = planTargets.findIndex(target => target.type !== "title");
+    if (first < 0) return { imageSources: planTargets.map(() => ({ _presenterTitle: true })), scoreForms: [] };
+    const last = planTargets.findLastIndex(target => target.type !== "title");
+    const ambiguous = planTargets.slice(first, last + 1).some(target => target.type === "title");
+    return {
+      imageSources: [
+        ...planTargets.slice(0, first).map(() => ({ _presenterTitle: true })),
+        ...imageSources.map(source => ambiguous ? { ...source, titleSequenceWarning: "악보 송폼 표시가 없어 중간 Title 위치를 확인할 수 없습니다." } : source),
+        ...planTargets.slice(last + 1).map(() => ({ _presenterTitle: true })),
+      ], scoreForms: [],
+    };
   }
 
   const groups = [];
@@ -507,6 +523,10 @@ function presenterScoreImageSourcesForFormSequence(imageSources = [], scoreForms
   const lastMatchedByKey = new Map();
   let cursor = 0;
   planTargets.forEach((target) => {
+    if (target.type === "title") {
+      selected.push({ sources: [{ _presenterTitle: true }], forms: [null] });
+      return;
+    }
     const matchIndex = groups.findIndex((group, index) =>
       index >= cursor && group.target && presenterFormTargetsMatch(target, group.target),
     );
@@ -786,7 +806,7 @@ function presenterFormsWithNoSourceOmissions(plannedForms = [], sourceForms = []
 }
 
 function presenterExplicitNonHymnFormPreset(preset = null) {
-  if (!preset?.forms?.length) return null;
+  if (!preset?.forms?.length && !preset?.titleSequence) return null;
   return String(preset.strength || "").trim().toLowerCase() === "suggested" ? null : preset;
 }
 
@@ -1005,12 +1025,15 @@ function presenterFormsAreUnsplitLyrics(forms = []) {
   return Boolean(normalizedForms.length) && normalizedForms.every((form) => normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form)).type === "lyrics");
 }
 
-function resolvePresenterLyricsFormPresetSequence(forms = [], presetForms = [], sourceForms = []) {
-  const blocks = presenterLyricsBlocksFromForms(forms);
+function resolvePresenterLyricsFormPresetSequence(forms = [], presetForms = [], sourceForms = [], providedBlocks = null) {
+  const blocks = providedBlocks || presenterLyricsBlocksFromForms(forms);
   const blockBySourceKey = new Map();
   const sourceBlockIndexes = new Set();
-  cleanList(sourceForms).forEach((label, index) => {
+  let sourceIndex = 0;
+  cleanList(sourceForms).forEach((label) => {
     const target = normalizePresenterFormPresetLabel(label);
+    if (target.type === "title") return;
+    const index = sourceIndex++;
     if (!target.key || target.blank || blockBySourceKey.has(target.key)) return;
     const block = blocks[index];
     if (block) {
@@ -1025,6 +1048,10 @@ function resolvePresenterLyricsFormPresetSequence(forms = [], presetForms = [], 
   cleanList(presetForms).forEach((label, index) => {
     const target = normalizePresenterFormPresetLabel(label);
     if (!target.key) return;
+    if (target.type === "title") {
+      items.push(findPresenterFormForPresetLabel([], "Title"));
+      return;
+    }
     if (target.blank) {
       items.push(presenterBlankFormPresetItem(label, target));
       return;
@@ -1088,6 +1115,7 @@ function presenterFormPartTypeForPresetTarget(target = {}) {
 function findPresenterFormForPresetLabel(forms = [], label = "") {
   const target = normalizePresenterFormPresetLabel(label);
   if (!target.key) return null;
+  if (target.type === "title") return { _presenterTitle: true, id: "preset-title", label: "Title", lyrics: "" };
   if (target.blank) return presenterBlankFormPresetItem(label, target);
   if (target.type === "tag") {
     const chorus = findPresenterFormForPresetTarget(forms, { key: "chorus", type: "chorus" });
@@ -1207,6 +1235,7 @@ function presenterFormDisplayLabel(form = {}) {
 function normalizePresenterFormPresetLabel(value = "") {
   const raw = canonicalServiceFormToken(value);
   const compact = compactSearchValue(raw);
+  if (raw === "Title") return { key: "title", type: "title", number: 0 };
   const lastVerse = /^(vl|마지막절|lastverse|last)$/i.test(compact);
   if (lastVerse) return { key: "last-verse", type: "verse", number: 0, lastVerse: true };
   const hymnVerse = raw.match(/^(\d+)\s*절$/u);
@@ -1314,6 +1343,7 @@ function presenterFormPresetDisplayLabel(value = "") {
   const target = normalizePresenterFormPresetLabel(raw);
   const group = String(target.group || "").trim().toUpperCase();
   const suffix = target.variant ? `${target.number ? ` ${target.number}` : ""} @${group ? ` ${group}` : ""}` : target.number ? ` ${target.number}${group ? ` ${group}` : ""}` : group ? ` ${group}` : "";
+  if (target.type === "title") return "Title";
   if (target.lastVerse) return "Last Verse";
   if (target.type === "verse") return `Verse${suffix}`;
   if (target.type === "chorus") return `Chorus${suffix}`;
@@ -2109,6 +2139,17 @@ function buildPresenterCustomSlides(item, section, index) {
       sort: index + blockIndex / 100,
     };
   }).filter((slide) => slide.type === "blank" || String(slide.text || "").trim());
+  const preset = serviceItemFormPreset(item);
+  if (songLikeItem && preset?.titleSequence && preset.forms?.length) {
+    const plan = resolvePresenterLyricsFormPresetSequence([], preset.forms, [], lyricSlides.map(slide => slide.text));
+    return plan.items.map((form, position) => form._presenterTitle
+      ? presenterSequenceTitleSlide(item, section, null, null, serviceItemDisplayText(item), index, position)
+      : { ...lyricSlides[0], id: `${item.id || index}:custom-sequence:${position}`,
+        type: form._presenterBlank ? "blank" : "lyrics", text: form.lyrics || "",
+        elementType: form._presenterBlank ? PRESENTER_ELEMENT_TYPES.BLANK : PRESENTER_ELEMENT_TYPES.PRAISE,
+        layout: form._presenterBlank ? PRESENTER_SLIDE_LAYOUTS.BLANK : PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT,
+        marker: form.label, formKey: `custom:${position}`, sort: index + position / 100 });
+  }
   if (!songLikeItem || !shouldIncludeSongTitleSlide(item, label)) return lyricSlides;
   return [
     presenterSongTitleSlide(item, section, null, null, serviceItemConnectedPraiseTitle(item, "title") || serviceItemDisplayText(item), index),
@@ -2312,7 +2353,9 @@ function isScriptureBodyServiceItem(item) {
     || (sectionKey === "scripture_reading" && elementType === "scripture_body");
 }
 
-function shouldIncludeSongTitleSlide(item, label) {
+function shouldIncludeSongTitleSlide(item, label, song = null, version = null) {
+  if (parseServiceItemMemo(item?.memo).formPreset?.titleSequence
+      || presenterServiceItemFormPreset(version || {}, item, song)?.titleSequence) return false;
   if (isServiceConnectedPraiseSecondaryItem(item)) return false;
   const displayText = serviceItemDisplayText(item);
   if (serviceItemConnectedPraiseTitle(item, "title")) return true;
@@ -4012,6 +4055,7 @@ function presenterOutputFrameStateForSlide(slide, payload = {}) {
     scoreOutput,
     videoOutput,
     scriptureReadingOutput,
+    backgroundVideo: blackoutOutput ? "" : presenterSlideBackgroundVideoSource(slide, cleanOutput),
     backgroundImage: backgroundImages[0] || "",
     backgroundImages,
     serviceType: payload?.serviceType || "",
@@ -4234,6 +4278,7 @@ function presenterOutputFrameKey(payload = {}, slide = null, frameState = {}) {
     frameState.noChromakey ? "clean" : "chromakey",
     frameState.blankOutput ? "blank" : "",
     frameState.backgroundImage || "",
+    frameState.backgroundVideo || "",
     frameState.blankOutput ? JSON.stringify(normalizePresenterTransitionLogo(payload.transitionLogo)) : "",
     slide.title || "",
     slide.text || "",
@@ -4616,6 +4661,7 @@ function applyPresenterOutputFrameState(root, frameState = {}) {
   root.classList.toggle("is-blank", Boolean(frameState.blankOutput));
   document.body.classList.toggle("is-blackout", Boolean(frameState.blackoutOutput));
   root.classList.toggle("is-blackout", Boolean(frameState.blackoutOutput));
+  applyPresenterBackgroundVideo(root, frameState.backgroundVideo);
   root.dataset.serviceType = frameState.serviceType || "";
   root.dataset.outputTheme = frameState.outputTheme || presenterOutputTheme(frameState.serviceType);
   // Reuse decoded image nodes for output backgrounds. Assigning the URL to CSS
@@ -5168,7 +5214,7 @@ function renderPresenterSlideFrame(slide, options = {}) {
     && presenterSlideLayout(slide) !== PRESENTER_SLIDE_LAYOUTS.BLANK
     && (slide?.songTitle || (slide?.type === "song-title" && presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE))) {
     const content = presenterSongTitleContent(slide);
-    const title = formatPresenterSongTitleText(content.title);
+    const title = String(content.title || "").replace(PRESENTER_SONG_NOTE_PATTERN, "").trim();
     // Keep the order heading when adapting song titles for fullscreen output.
     slide = { ...slide, elementType: PRESENTER_ELEMENT_TYPES.TITLE_CONTENT,
       layout: PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT, type: "title-content",
@@ -5186,6 +5232,7 @@ function renderPresenterSlideFrame(slide, options = {}) {
   return `
     <section class="presenter-slide presenter-slide--${escapeAttr(slideClass)}${extraClasses ? ` ${escapeAttr(extraClasses)}` : ""}" data-element-type="${escapeAttr(presenterSlideElementType(slide))}" data-slide-layout="${escapeAttr(presenterSlideLayout(slide))}"${sectionKey ? ` data-section-key="${escapeAttr(sectionKey)}"` : ""}${presenterRole ? ` data-presenter-role="${escapeAttr(presenterRole)}"` : ""}${backgroundStyle}>
       ${renderPresenterSlideMeta(slide)}
+      ${options.previewStage && presenterSlideBackgroundVideoSource(slide, options.noChromakey) ? `<video class="presenter-output-background-video" src="${escapeAttr(presenterSlideBackgroundVideoSource(slide, options.noChromakey))}" muted playsinline preload="metadata" aria-hidden="true"></video>` : ""}
       ${body}
     </section>
   `;
@@ -5523,9 +5570,9 @@ function renderPresenterTitleContentSlide(slide, options = {}) {
   return `
     <div class="presenter-title-content">
       ${orderHeading ? `<span class="presenter-fullscreen-order-heading">${escapeHtml(presenterOrderDisplayLabel(orderHeading))}</span>` : ""}
-      ${slide.fullscreenSongTitle && slide.songTitleContent?.orderTitle ? `<span class="presenter-fullscreen-song-heading">${escapeHtml(presenterOrderDisplayLabel(slide.songTitleContent.orderTitle))}</span>` : ""}
-      <span class="presenter-title-content-title" style="--line-chars: ${escapeAttr(titleChars)}">${slide.fullscreenSongTitle ? renderPresenterSongText(title, slide) : escapeHtml(title)}</span>
-      ${slide.fullscreenSongTitle && slide.songTitleContent?.detail ? `<span class="presenter-fullscreen-song-detail">${slide.songTitleContent.detailKind === "subtitle" ? `(${escapeHtml(slide.songTitleContent.detail)})` : escapeHtml(slide.songTitleContent.detail)}</span>` : ""}
+      ${slide.fullscreenSongTitle ? `<span class="presenter-fullscreen-song-heading" aria-label="찬양">${PRESENTER_SONG_NOTE}</span>` : ""}
+      <span class="presenter-title-content-title" style="--line-chars: ${escapeAttr(titleChars)}">${escapeHtml(title)}</span>
+
       ${slide.fullscreenSongTitle ? "" : `<div class="presenter-title-content-body">
         ${bodyLines.map((line) => `<span style="--line-chars: ${presenterLineCharEstimate(line)}">${escapePresenterSlideLine(line, slide)}</span>`).join("")}
       </div>`}
@@ -6027,4 +6074,76 @@ function updatePresenterMediaOrder(button) {
   refreshPresenterForService(serviceId, { publish: false });
   renderCurrentServiceModuleDetail();
   updateSaveState();
+}
+
+function presenterSequenceTitleSlide(item, section, song, version, displayText, index, sequenceIndex) {
+  return {
+    ...presenterSongTitleSlide(item, section, song, version, displayText, index),
+    id: `${item.id || index}:sequence-title:${sequenceIndex}`,
+    formKey: `title:${sequenceIndex}`, formLabel: "Title", marker: "Title",
+    sort: index + sequenceIndex / 100,
+  };
+}
+
+// Per-element presentation settings share the worship memo/atomic persistence path.
+function normalizeServicePresentation(value) {
+  if (!value || typeof value !== "object") return null;
+  const source = normalizePresenterMediaSource(value.backgroundVideo);
+  const backgroundVideo = /\.(mp4|webm|mov|m4v)(?:[?#].*)?$/i.test(source) ? source : "";
+  return backgroundVideo ? { backgroundVideo } : null;
+}
+
+function renderPresenterPresentationControls(item, index, serviceId) {
+  const memo = parseServiceItemMemo(item.memo), type = serviceMemoElementType(memo);
+  if (type !== "praise") return "";
+  const presentation = normalizeServicePresentation(memo.presentation) || {};
+  const attrs = `data-service-item-index="${index}" data-service-id="${escapeAttr(serviceId)}"`;
+  return `<details class="svc-presentation-controls"><summary>배경 영상</summary>
+    <label>영상 주소 <input class="svc-presenter-input-control" type="text" data-service-item-field="background_video" ${attrs} value="${escapeAttr(presentation.backgroundVideo || '')}" placeholder="MP4 · WebM 영상 주소" aria-label="찬양 배경 영상 주소"></label>
+    <label class="btn ghost">영상 파일 선택<input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,.mp4,.webm,.mov,.m4v" data-praise-background-file data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(item.id)}" hidden></label>
+    <span class="muted">전체 화면에서 음소거·반복 재생</span>
+  </details>`;
+}
+
+async function uploadPresenterPraiseBackground(input) {
+  const file = input.files?.[0], serviceId = input.dataset.serviceId;
+  const itemId = input.dataset.serviceItemId;
+  const item = getServiceItems(serviceId).find(row => row.id === itemId);
+  if (!file || !item) return;
+  if (!/\.(mp4|webm|mov|m4v)$/i.test(file.name) || file.size > presenterMediaMaxBytesForKind("video")) {
+    showToast(`MP4·WebM·MOV 영상은 ${presenterMediaMaxSizeLabel("video")} 이하로 선택해 주세요.`, "error"); input.value = ""; return;
+  }
+  input.disabled = true;
+  try {
+    const path = presenterReferenceMediaUploadPath(serviceId, item, file);
+    const bucket = state.client.storage.from(PRESENTER_MEDIA_STORAGE_BUCKET);
+    const upload = await bucket.upload(path, file, { contentType: file.type || "video/mp4", cacheControl: PRESENTER_MEDIA_CACHE_CONTROL, upsert: false });
+    if (upload.error) throw upload.error;
+    const url = bucket.getPublicUrl(path).data.publicUrl;
+    const currentIndex = getServiceItems(serviceId).findIndex(row => row.id === itemId);
+    if (currentIndex < 0) throw new Error("배경을 연결할 찬양을 찾지 못했습니다.");
+    updateServiceItemField({ dataset: { serviceId, serviceItemIndex: String(currentIndex), serviceItemField: "background_video" }, value: url }, { deferPresenterRefresh: true });
+    if (!await saveServiceItemPatch(serviceId, currentIndex, { throwOnError: true })) throw new Error("배경 영상 저장을 확인해 주세요.");
+    renderCurrentServiceModuleDetail(); showToast("찬양 배경 영상을 저장했습니다.", "success");
+  } catch (error) { showToast(error.message || "배경 영상을 저장하지 못했습니다. 다시 시도해 주세요.", "error"); }
+  finally { input.disabled = false; input.value = ""; }
+}
+
+function presenterSlideBackgroundVideoSource(slide, noChromakey) {
+  if (!noChromakey || slide?.formBackgroundImage || presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.BLANK) return "";
+  if (![PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT, PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT].includes(presenterSlideLayout(slide))) return "";
+  return normalizeServicePresentation({ backgroundVideo: slide?.backgroundVideo })?.backgroundVideo || "";
+}
+
+function applyPresenterBackgroundVideo(root, source = "") {
+  let video = root.querySelector(":scope > .presenter-output-background-video");
+  if (!source) { if (video) { video.pause(); video.removeAttribute("src"); video.load(); video.remove(); } delete root.dataset.backgroundVideoError; return; }
+  if (video?.getAttribute("src") === source) return;
+  if (video) { video.pause(); video.remove(); }
+  video = document.createElement("video"); video.className = "presenter-output-background-video";
+  video.muted = true; video.defaultMuted = true; video.loop = true; video.autoplay = true; video.playsInline = true; video.preload = "auto";
+  video.setAttribute("aria-hidden", "true"); video.setAttribute("src", source);
+  video.addEventListener("error", () => { root.dataset.backgroundVideoError = "true"; });
+  video.addEventListener("playing", () => { delete root.dataset.backgroundVideoError; });
+  root.prepend(video); video.play()?.catch(() => { root.dataset.backgroundVideoError = "true"; });
 }

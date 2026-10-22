@@ -3816,3 +3816,41 @@ thumbnails and output. Authored colors remain stored unchanged; other service
 formats, chromakey and reading frames retain their original colors. Unrelated
 custom highlight colors are not mapped. The darker palette improves contrast on
 the cream artwork without changing emphasis wording or font weight.
+
+## Explicit Title in song forms · 2026-10-22
+
+- `Title` is a sequence token for the existing song title renderer, not a lyric
+  unit type. Input case/outer whitespace normalizes to `Title`; Tag/Tags and
+  their existing meanings are unchanged (no reassignment of T).
+- Legacy presets retain automatic title behavior without data migration. The
+  first explicit Title enables `titleSequence` on that preset; removing it or
+  clearing the sequence retains that intent instead of restoring an auto title.
+- Explicit title positions/repetitions get unique slide IDs and do not consume
+  a lyric paragraph. Manual slide blocks retain their authored boundaries.
+  Labelled score pages follow the same title positions. Unlabelled score decks
+  retain every page and support leading/trailing Title; an ambiguous middle
+  Title displays a warning rather than guessing a verse boundary or dropping pages.
+  No corpus units change.
+- Memo/config and portable source (`제목 순서: 송폼`) preserve explicit policy.
+  Playback projection alone changes; publishing does not write service records.
+- Regression: smoke_title_songform.py uses synthetic Chromium/WebKit records,
+  rendering, edit/reopen, empty/repeated/middle Title, direct paragraphs, score
+  ordering and portable policy. No native output or operational audio is opened.
+
+
+## Fullscreen praise titles and video backgrounds ·2026-10-22
+
+- Chapel uses its ordinary fullscreen service output. No camera caption mode or
+  event-specific scripture/sermon renderer is added.
+- Praise element config.presentation.backgroundVideo stores a direct MP4/WebM/
+  MOV/M4V URL. Presenter exposes 배경 영상 with URL and file inputs. Upload uses
+  the existing media Storage bucket and single-element atomic save. Settings
+  survive grouping, memo, canonical config, portable source and document fallback.
+- Praise backgrounds are muted, looping and inline. One output video node stays
+  alive across lyric changes with the same source. Keyed frames, score/media
+  frames, photo cues, blackout and blank frames never inherit the video. Controller
+  thumbnails load metadata without autoplay. Audio playback/timing stays separate.
+- Fullscreen praise title slides show the note alone above one main output title.
+  Order labels, original titles and subtitles are absent from this display. Their
+  authored metadata and version output-title selection remain unchanged.
+- Chapel scripture uses normal Bible reading rather than a poster scripture image.

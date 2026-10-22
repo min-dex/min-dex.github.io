@@ -57,6 +57,7 @@ function presenterLyricsSlidesForServiceItem({
   item, section, index, song, version, displayText, label, forms, formWarnings,
 }) {
   return forms.flatMap((form, formIndex) => {
+    if (form._presenterTitle) return [presenterSequenceTitleSlide(item, section, song, version, displayText, index, formIndex)];
     if (form._presenterBlank) {
       return [{
         id: `${item.id || index}:blank:${form._presenterToken || formIndex}:${formIndex}`,

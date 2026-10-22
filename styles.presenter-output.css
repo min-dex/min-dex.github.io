@@ -1613,3 +1613,12 @@ span.presenter-announcement-paren,
 @media (prefers-reduced-motion: reduce) {
   .presenter-transition-logo { animation: none; transform: scale(1); }
 }
+
+/* Fullscreen titles and silent praise video backgrounds. */
+.presenter-slide--fullscreen-song-title .presenter-title-content { gap: 3cqh; }
+.presenter-output-root.no-chromakey .presenter-fullscreen-song-heading { font-size: calc(85 * var(--presenter-stage-unit)); line-height: 1; color: #cba56a; }
+.presenter-output-background-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; z-index: 0; }
+.presenter-slide:has(> .presenter-output-background-video) > :not(video) { position: relative; z-index: 1; }
+
+.presenter-output-root.no-chromakey .presenter-fullscreen-order-heading { color: #cba56a; }
+.presenter-output-root.no-chromakey .presenter-fullscreen-order-heading::after { content: ""; display: block; width: calc(80 * var(--presenter-stage-unit)); height: calc(3 * var(--presenter-stage-unit)); margin: 2cqh auto 0; background: currentColor; }
