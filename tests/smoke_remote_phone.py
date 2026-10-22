@@ -14,7 +14,7 @@ try:
    page.add_init_script("""window.locks=[];window.denied=false;Object.defineProperty(navigator,'wakeLock',{configurable:true,value:{request:async()=>{if(denied)throw Error('denied');const s=new EventTarget();s.released=false;s.release=async()=>{s.released=true;s.dispatchEvent(new Event('release'));};locks.push(s);return s;}}});""")
    page.goto(url);page.evaluate("async()=>{window.awake=(await import('./remote.screen.mjs')).setupPhoneExperience();}")
    assert page.locator('#installHelp').is_visible();assert page.locator('#installApp').is_hidden()
-   page.evaluate('awake.update({active:true})');page.wait_for_function("document.querySelector('#screenStatus').textContent.includes('유지 중')")
+   page.evaluate('awake.update({active:true})');page.wait_for_function('locks.length===1');assert page.locator('#screenStatus').is_hidden()
    page.uncheck('#keepAwake');page.wait_for_function('locks[0].released');page.check('#keepAwake');page.wait_for_function('locks.length===2')
    page.evaluate('locks[1].release()');assert page.locator('#screenRetry').is_visible();page.click('#screenRetry');page.wait_for_function('locks.length===3')
    page.evaluate('awake.close();denied=true;awake.update({active:true})');page.wait_for_function("document.querySelector('#screenStatus').textContent.includes('허용하지')")
