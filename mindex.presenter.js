@@ -2852,6 +2852,7 @@ function presenterStatePayload(serviceId = state.presenter.serviceId) {
     serviceType: service?.type_id || "",
     serviceTitle: [serviceDisplayTypeName(service), service ? formatServiceDate(service) : ""].filter(Boolean).join(" · "),
     serviceDate: service?.date || "",
+    transitionLogo: normalizePresenterTransitionLogo(serviceRawSourceRef(service).transitionLogo),
     chromakey: serviceChromakey,
     outputTheme: presenterOutputTheme(service?.type_id),
     backgroundImage: backgroundImages[0] || "",
@@ -3823,6 +3824,7 @@ function normalizePresenterPayload(payload) {
     serviceTitle: payload?.serviceTitle || "",
     serviceDate: payload?.serviceDate || payload?.service_date || "",
     chromakey: Boolean(payload?.chromakey),
+    transitionLogo: normalizePresenterTransitionLogo(payload?.transitionLogo),
     outputTheme: payload?.outputTheme || presenterOutputTheme(payload?.serviceType),
     backgroundImage: payload?.backgroundImage || "",
     backgroundImages: Array.isArray(payload?.backgroundImages)
@@ -3919,7 +3921,8 @@ function renderPresenterOutput(payload, options = {}) {
   }
   releasePresenterPptxOutput(root);
   warmPresenterPptx(payload);
-  const activeImageSource = presenterSlideImageSource(slide);
+  const activeImageSource = presenterSlideImageSource(slide)
+    || (frameState.blankOutput ? normalizePresenterTransitionLogo(payload.transitionLogo)?.url : "");
   preloadPresenterOutputImages(payload, slide);
   warmPresenterOutputNextVideo(payload);
   const backgroundSources = frameState.showBackground
@@ -4073,7 +4076,7 @@ function presenterOutputFrameBackgroundStyle(frameState = {}) {
 }
 
 function commitPresenterOutputFrame(root, payload, slide, frameState, token, options = {}) {
-  const html = slide ? renderPresenterSlideFrame(slide, { noChromakey: frameState.noChromakey }) : "";
+  const html = slide ? renderPresenterSlideFrame(slide, { noChromakey: frameState.noChromakey, transitionLogo: payload.transitionLogo }) : "";
   const activeImageSource = presenterSlideImageSource(slide);
   const frameKey = presenterOutputFrameKey(payload, slide, frameState);
   const commit = () => {
@@ -4231,6 +4234,7 @@ function presenterOutputFrameKey(payload = {}, slide = null, frameState = {}) {
     frameState.noChromakey ? "clean" : "chromakey",
     frameState.blankOutput ? "blank" : "",
     frameState.backgroundImage || "",
+    frameState.blankOutput ? JSON.stringify(normalizePresenterTransitionLogo(payload.transitionLogo)) : "",
     slide.title || "",
     slide.text || "",
   ].map((value) => String(value ?? "")).join("|");
@@ -5143,6 +5147,27 @@ function trimPresenterOutputImagePreloadCache() {
     .forEach(([source]) => presenterOutputImagePreloadCache.delete(source));
 }
 
+function normalizePresenterTransitionLogo(value) {
+  if (!value || typeof value !== "object") return null;
+  const url = normalizePresenterMediaSource(value.url);
+  if (!url || !presenterMediaSourceIsImage(url)) return null;
+  const bounded = (key, fallback, min, max) => typeof value[key] === "number" && Number.isFinite(value[key])
+    ? Math.min(max, Math.max(min, value[key])) : fallback;
+  return { url, originX: bounded("originX", 50, 0, 100), originY: bounded("originY", 50, 0, 100),
+    width: bounded("width", 255, 32, 960), height: bounded("height", 450, 32, 960) };
+}
+
+function renderPresenterTransitionLogo(slide, options = {}) {
+  if (!options.noChromakey || slide?.id === "presenter:safety-blank"
+    || presenterSlideLayout(slide) !== PRESENTER_SLIDE_LAYOUTS.BLANK) return "";
+  const logo = normalizePresenterTransitionLogo(options.transitionLogo);
+  if (!logo) return "";
+  const style = `--transition-logo-width:${logo.width};--transition-logo-height:${logo.height};`
+    + `--transition-logo-x:${logo.originX}%;--transition-logo-y:${logo.originY}%;`
+    + `--transition-logo-left:${-logo.width * logo.originX / 100};--transition-logo-top:${-logo.height * logo.originY / 100};`;
+  return `<img class="presenter-transition-logo" src="${escapeAttr(logo.url)}" alt="" aria-hidden="true" style="${style}" />`;
+}
+
 function renderPresenterSlideFrame(slide, options = {}) {
   if (options.noChromakey && !slide?.autoTrailingBlank
     && presenterSlideLayout(slide) !== PRESENTER_SLIDE_LAYOUTS.BLANK
@@ -5155,8 +5180,9 @@ function renderPresenterSlideFrame(slide, options = {}) {
       title, text: title, songTitleContent: content, bodyText: "", assignee: "", fullscreenSongTitle: true };
   }
   const slideClass = presenterSlideRenderClass(slide);
-  const extraClasses = presenterSlideExtraClasses(slide);
-  const body = renderPresenterSlideBody(slide, options);
+  const transitionLogo = renderPresenterTransitionLogo(slide, options);
+  const extraClasses = [presenterSlideExtraClasses(slide), transitionLogo ? "has-transition-logo" : ""].filter(Boolean).join(" ");
+  const body = transitionLogo || renderPresenterSlideBody(slide, options);
   const sectionKey = String(slide?.sectionKey || slide?.section_key || "").trim();
   const presenterRole = normalizeServicePresenterRole(slide?.presenterRole);
   const backgroundStyle = slide?.scriptureContext === "reading" && !slide?.suppressBackgroundImage && !slide?.noBackgroundImage

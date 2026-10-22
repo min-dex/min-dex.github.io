@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261022-hymn121-140",
+  "version": "20261022-transition-logo",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "fa00f9cfaf3aa4843b385a01965e56d5ed555a1d4897188fe9b5aaa25a5c9b33",
-  "runtime_sha256": "0d7dd6c5154048ff7f814bd3c18d768afef39079b1e5d863b04d8ad2773c692b",
-  "source_bytes": 1550666,
-  "runtime_bytes": 1097567,
-  "source_gzip": 348735,
-  "runtime_gzip": 272726
+  "source_sha256": "00c6b4781cf78a96d481a0c05823adb77158117a5b9930b6581e5bb94803b716",
+  "runtime_sha256": "2653c0fabde07db7970ff99312a69756913aef96e036303573806927659535b0",
+  "source_bytes": 1550727,
+  "runtime_bytes": 1097620,
+  "source_gzip": 348758,
+  "runtime_gzip": 272750
 }

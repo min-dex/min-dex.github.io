@@ -32001,7 +32001,7 @@ function renderPresenterSlideMiniPreview(slide, serviceId = state.presenter.serv
   return `
     <span class="${escapeAttr(outputClasses)}">
       <span class="${escapeAttr(canvasClasses)}" data-output-theme="${escapeAttr(theme)}"${backgroundStyle}>
-        ${renderPresenterSlideFrame(previewSlide, { noChromakey: frameState.noChromakey, previewStage: true })}
+        ${renderPresenterSlideFrame(previewSlide, { noChromakey: frameState.noChromakey, previewStage: true, transitionLogo: serviceRawSourceRef(service).transitionLogo })}
       </span>
     </span>`;
 }

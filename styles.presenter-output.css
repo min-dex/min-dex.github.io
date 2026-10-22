@@ -1588,3 +1588,25 @@ span.presenter-announcement-paren,
 .presenter-liturgical-body > .presenter-announcement-items > .presenter-announcement-item {
   flex-shrink: 0;
 }
+
+/* Optional per-service artwork uses the existing blank transition and transport.
+   The artwork intersection stays at stage center throughout the reveal. */
+.presenter-output-root.no-chromakey.is-blank .presenter-slide--blank.has-transition-logo::before,
+.presenter-output-root.no-chromakey.is-blank .presenter-slide--blank.has-transition-logo::after { display: none; }
+.presenter-transition-logo {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: calc(var(--transition-logo-width) * var(--presenter-stage-unit));
+  height: calc(var(--transition-logo-height) * var(--presenter-stage-unit));
+  margin-left: calc(var(--transition-logo-left) * var(--presenter-stage-unit));
+  margin-top: calc(var(--transition-logo-top) * var(--presenter-stage-unit));
+  max-width: none; object-fit: fill; pointer-events: none;
+  clip-path: inset(var(--transition-logo-y) calc(100% - var(--transition-logo-x)) calc(100% - var(--transition-logo-y)) var(--transition-logo-x));
+  animation: presenter-transition-logo-reveal 850ms ease-out forwards;
+}
+@keyframes presenter-transition-logo-reveal { to { clip-path: inset(0); } }
+.presenter-output-root > .presenter-output-layer:not(.is-active) .presenter-transition-logo { visibility: hidden; animation: none; }
+.svc-slide-mini-canvas .presenter-transition-logo { animation: none; clip-path: inset(0); }
+@media (prefers-reduced-motion: reduce) {
+  .presenter-transition-logo { animation: none; clip-path: inset(0); }
+}
