@@ -1590,7 +1590,7 @@ span.presenter-announcement-paren,
 }
 
 /* Optional per-service artwork uses the existing blank transition and transport.
-   The artwork intersection stays at stage center throughout the reveal. */
+   The artwork stays centered; its reveal origin is independent of alignment. */
 .presenter-output-root.no-chromakey.is-blank .presenter-slide--blank.has-transition-logo::before,
 .presenter-output-root.no-chromakey.is-blank .presenter-slide--blank.has-transition-logo::after { display: none; }
 .presenter-transition-logo {

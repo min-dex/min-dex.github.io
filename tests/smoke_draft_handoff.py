@@ -40,7 +40,8 @@ try:
     a,b=pages
     a.evaluate("()=>{state.scriptures[0].body='Draft from A';state.dirty.scripture=true;MINDEX_EDITOR_DRAFTS.capture();}")
     a.evaluate('()=>MINDEX_DRAFT_HANDOFF.open()')
-    a.get_by_role('button',name='이 초안 이어쓰기',exact=True).wait_for()
+    a.evaluate('()=>MINDEX_DRAFT_HANDOFF.flush()')
+    assert a.get_by_role('button',name='이 초안 이어쓰기',exact=True).count()==0
     for theme in ('light','dark'):
      a.evaluate('(t)=>document.body.dataset.theme=t',theme)
      for width in (390,800,1440):
@@ -73,6 +74,9 @@ try:
     b.wait_for_function("state.scriptures[0].body==='Draft from A'")
     assert b.evaluate('state.dirty.scripture')
     assert a.evaluate('state.scriptures[0].body')=='Draft from A'
+    b.locator('.draft-handoff-dialog').wait_for(state='detached')
+    b.evaluate('()=>MINDEX_DRAFT_HANDOFF.open()')
+    assert b.get_by_role('button',name='이 초안 이어쓰기',exact=True).count()==0
     # Restoring only changes an editor; no committed document API is available.
     assert all(k[2].startswith(('mindex.handoff.','mindex.editor.')) for k in db)
     print('PASS',engine,'separate profiles, explicit recovery, dirty-edit preservation and no committed-row writes',flush=True)

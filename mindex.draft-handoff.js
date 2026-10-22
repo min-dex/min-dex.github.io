@@ -82,7 +82,7 @@
   const list=element('div','');list.className='draft-handoff-list';dialog.append(list);
   let listSignature='';
   function rows(force=false){
-   const id=current(),entries=id?core?.list(id.kind,id.id)||[]:[];
+   const id=current(),entries=(id?core?.list(id.kind,id.id)||[]:[]).filter(entry=>!(entry.kind.startsWith('bulletin')?bulletin()?.matchesDraft?.(entry.draft):window.MINDEX_EDITOR_DRAFTS?.matchesDraft?.(entry.draft)));
    const signature=JSON.stringify([id,entries.map(e=>[e.key,e.updatedAt])]);
    if(!force&&(signature===listSignature||list.contains(document.activeElement)))return;
    listSignature=signature;list.replaceChildren();

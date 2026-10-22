@@ -25619,7 +25619,7 @@ function renderServiceSourcePanel(service) {
       <div class="svc-source-panel-body">
         <textarea class="svc-source-text" data-service-source-text="${escapeAttr(service.id)}" data-service-source-signature="${escapeAttr(compactTextSignature(source))}" spellcheck="false" aria-label="예배 원문">${escapeHtml(source)}</textarea>
         <div class="svc-source-side">
-          ${renderServiceSourceRecovery(service)}
+          <div data-service-recovery-root${renderServiceSourceRecovery(service) ? "" : " hidden"}>${renderServiceSourceRecovery(service)}</div>
           ${renderServiceSourceHistory(service)}
           <div class="svc-source-actions">
             <button class="reference-new-btn svc-source-apply" type="button" data-service-source-apply="${escapeAttr(service.id)}">
@@ -25667,7 +25667,7 @@ function serviceDocumentFromRecoverySnapshot(snapshot = null) {
 function renderServiceSourceRecovery(service) {
   const snapshot = latestWorshipRecoverySnapshotForService(service?.id);
   const document = serviceDocumentFromRecoverySnapshot(snapshot);
-  const hasSource = Boolean(String(document?.sourceText || "").trim());
+  const hasSource = Boolean(String(document?.sourceText || "").trim()) && document.sourceText !== (serviceSourceTextareaForService(service?.id)?.value ?? serviceSourceTextForEditor(service));
   const pending = Array.isArray(snapshot?.draft?.pendingInputs) ? snapshot.draft.pendingInputs : [];
   if (!hasSource && !pending.length) return "";
   return `
@@ -25747,7 +25747,7 @@ function serviceSourceHistoryMeta(entry = {}) {
 async function restoreServiceSourceText(id, sourceText) {
   const textarea = serviceSourceTextareaForService(id);
   const service = state.services.find(candidate => candidate.id === id);
-  if (!service || !textarea || !sourceText.trim() || state.saving) return false;
+  if (!service || !textarea || !sourceText.trim() || sourceText === textarea.value || state.saving) return false;
   if (!window.confirm("현재 원문과 복구할 원문을 각각 보관하고 편집창에 불러올까요? 예배 저장본은 바뀌지 않습니다.")) return false;
   const before = textarea.value, client = state.client, project = state.config.url;
   try {
@@ -25876,6 +25876,8 @@ function updateServiceSourceTextDraft(textarea = null) {
   const service = state.services.find((candidate) => candidate.id === id);
   if (!service || !textarea) return false;
   service._worshipSourceTextDraft = textarea.value;
+  const recovery = textarea.closest(".svc-source-panel")?.querySelector("[data-service-recovery-root]");
+  if (recovery) { recovery.innerHTML = renderServiceSourceRecovery(service); recovery.hidden = !recovery.innerHTML; }
   if (serviceSourceTextHasPendingChanges(textarea)) state.dirty.service = true;
   updateSaveState();
   return true;
