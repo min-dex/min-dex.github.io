@@ -1,0 +1,1279 @@
+{
+  "date": "2026-10-22",
+  "scope": "32 exact-text paired hymn verses with different block boundaries",
+  "policy": "Match corresponding musical phrases across editions; preserve each edition wording and internal spaces. Keep Verse/Chorus/Coda identities and ordering. Do not force recitative or irregular endings into four-bar blocks.",
+  "pairs": [
+    {
+      "new": 263,
+      "union": 197,
+      "changedEdition": "new",
+      "changedUnits": 4,
+      "blocks": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/263/score",
+          "sha256": "986b8926002c43191e2617235ed3cc26fcc479a15319d21b7763da7aaa189d43"
+        },
+        {
+          "path": "backups/20261018-union-review-remaining/score-197.jpg",
+          "sha256": "d5defa59de799525a1d624487aaf67e9c5249dec7196d29cf9fa2cf03493a704"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 539,
+      "union": 483,
+      "changedEdition": "new",
+      "changedUnits": 4,
+      "blocks": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/539/score",
+          "sha256": "32ccdb4f7a13e8e5ca93f41b4e8a630e096b83d0e0679dd563acf4117824981a"
+        },
+        {
+          "path": "backups/20261018-union-final77/score-483.jpg",
+          "sha256": "3e14bda99c3ae51a0abd7268ef6db8945bf2fc5692d58d1525b0aceae6419ee5"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 266,
+      "union": 200,
+      "changedEdition": "new",
+      "changedUnits": 3,
+      "blocks": [
+        2,
+        2,
+        2
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/266/score",
+          "sha256": "7f0c6a6d2be0859dd7d5e862210e42f567e0e4744ea8dbe7c972d259ba9241de"
+        },
+        {
+          "path": "backups/20261018-union-final77/score-200.jpg",
+          "sha256": "47fd1a631fd709aeb5017c408e0894d0002221beac721e9203d66336059c4a0d"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 172,
+      "union": 152,
+      "changedEdition": "new",
+      "changedUnits": 4,
+      "blocks": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/172/score",
+          "sha256": "f8067a1244bba2e9d60de3921372f080414c48f79be795e700cec1bc848705b9"
+        },
+        {
+          "path": "backups/20261018-union-final77/score-152.jpg",
+          "sha256": "5d06f34a451610cbfd371982f57a05e3cf17f806d76b01011989fb918c28487c"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 336,
+      "union": 383,
+      "changedEdition": "new",
+      "changedUnits": 3,
+      "blocks": [
+        3,
+        3,
+        3
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/336/score",
+          "sha256": "4e3b286df25d550173c4b2c9d11cfd9c86aeffa92debe118a7cea0b5a9711167"
+        },
+        {
+          "path": "backups/20261018-union-review-remaining/score-383.jpg",
+          "sha256": "6d92a6f914d45a4540616c9d073d009fa997255f4af326e266574b42f67522d0"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 211,
+      "union": 346,
+      "changedEdition": "new",
+      "changedUnits": 4,
+      "blocks": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/211/score",
+          "sha256": "6923a11e53515d1dcd57b7cfbc11a7d1f60293e6abfc6d0ef9bc3442c33c387a"
+        },
+        {
+          "path": "backups/20261018-union-review-remaining/score-346.jpg",
+          "sha256": "128ac348aae796915364c4a9bcef1a7a6a93836863f98f49b34dbad082984762"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 301,
+      "union": 460,
+      "changedEdition": "new",
+      "changedUnits": 3,
+      "blocks": [
+        4,
+        4,
+        4
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/301/score",
+          "sha256": "6b3905d407f0fcd0d26eefeaba447ae1cbc34bd2771960b5c73a88ab4e5c222b"
+        },
+        {
+          "path": "backups/20261018-union-review-remaining/score-460.jpg",
+          "sha256": "b2802967c950ab674a24ff9559e56f719ea543276381dc41c7e494626af5c2de"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 145,
+      "union": 145,
+      "changedEdition": "new",
+      "changedUnits": 3,
+      "blocks": [
+        4,
+        4,
+        4
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/145/score",
+          "sha256": "d32384bf72e62a5c14c125d459f559dd11b309af278b7e938be3c787c6bf1d85"
+        },
+        {
+          "path": "backups/20261018-union-review-remaining/score-145.jpg",
+          "sha256": "a979362e202a51308f125a50769db189fde89f71d6b97637122992afa9753510"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 261,
+      "union": 195,
+      "changedEdition": "new",
+      "changedUnits": 3,
+      "blocks": [
+        4,
+        4,
+        4
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/261/score",
+          "sha256": "93743da2ac31c7982199f788377d4491ed242b0123db7f039cd765e4f842a5dd"
+        },
+        {
+          "path": "backups/20261018-union-review-remaining/score-195.jpg",
+          "sha256": "6d667775ce34961892ef8dc2577dd3b886281ae8599454efdc18385cfe6230d3"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 408,
+      "union": 466,
+      "changedEdition": "new",
+      "changedUnits": 4,
+      "blocks": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/408/score",
+          "sha256": "1ea9a061281c2bdd3d4ede7dbab53b554eeb938338f96c5ba346b167c019de67"
+        },
+        {
+          "path": "backups/20261018-union-final77/score-466.jpg",
+          "sha256": "dffaefc574751abefc07b4125d489e1d4045b5f4253acfbebca09b4cd7fed375"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 602,
+      "union": 286,
+      "changedEdition": "new",
+      "changedUnits": 4,
+      "blocks": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/602/score",
+          "sha256": "fa929dfa36276599d68249eb1aefd9e2a2d929cfd684f1bf6c6d3f2ee17a5bee"
+        },
+        {
+          "path": "backups/20261018-union-final77/score-286.jpg",
+          "sha256": "cb89694b790c7e186f506e3b799b32cb1cd05eb3d1d590ffd116f4c1acf230f9"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 366,
+      "union": 485,
+      "changedEdition": "new",
+      "changedUnits": 3,
+      "blocks": [
+        4,
+        4,
+        4
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/366/score",
+          "sha256": "a92763b6bdb26f950182c606414e9701f41444a6a41f70ae0e554cd6d11b2080"
+        },
+        {
+          "path": "backups/20261018-union-final77/score-485.jpg",
+          "sha256": "3d611545aa740454a4844b5ff0fab929b5aa388e8eb156b267f0d608df53ba55"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 528,
+      "union": 318,
+      "changedEdition": "new",
+      "changedUnits": 4,
+      "blocks": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/528/score",
+          "sha256": "682c3b780abf11a7938d8e7c22f3b1810676f21a6a1c7a41825d4aaa8de5f4d8"
+        },
+        {
+          "path": "backups/20261018-union-final77/score-318.jpg",
+          "sha256": "cd9ac542f780464741f9a8f5ef393c649a2bf833052b5051faea22b9c63f8fc2"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 23,
+      "union": 23,
+      "changedEdition": "new",
+      "changedUnits": 4,
+      "blocks": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/023/score",
+          "sha256": "265bdb184d934c133bea9f35196a798a25033f246f5a55a856a764c7efd4a5d2"
+        },
+        {
+          "path": "backups/20261018-union-final77/score-023.jpg",
+          "sha256": "07943478c1506e797e60551ab2741c1c317698e8b64a3dcc126711a9a83daf71"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 630,
+      "union": 547,
+      "changedEdition": "new",
+      "changedUnits": 1,
+      "blocks": [
+        2
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/630/score",
+          "sha256": "8c80ec1958bdab29e50ccab9155a82807d747e14000f4a3b8776157e42ab379b"
+        },
+        {
+          "path": "backups/20261018-union-final77/score-547.jpg",
+          "sha256": "8e8f73a2f69714cdae4c0a1343106aeb9718bcb63d7b0cda0d5bcf9a6176dfdf"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 222,
+      "union": 524,
+      "changedEdition": "new",
+      "changedUnits": 4,
+      "blocks": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/222/score",
+          "sha256": "54adc24f6aff1e0a3e33aef41e07be6625b746f6465b9d2f44765d4edfb41ab9"
+        },
+        {
+          "path": "backups/20261018-union-final77/score-524.jpg",
+          "sha256": "4270b1c7c7b8e1c9fa24fb6c7bcda6bec6a55a85aba34d0bf80073dbf5f1c84e"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 212,
+      "union": 347,
+      "changedEdition": "new",
+      "changedUnits": 4,
+      "blocks": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/212/score",
+          "sha256": "f03759f50056a38c1aee5bc57a0bdc20ca23c7b4171ed5385ce362b5002b0012"
+        },
+        {
+          "path": "backups/20261018-union-final77/score-347.jpg",
+          "sha256": "58269a2389faef3f7cc6a328b77755e87dd22bbf58bbe5d2cf7baf2680df7247"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 538,
+      "union": 327,
+      "changedEdition": "new",
+      "changedUnits": 4,
+      "blocks": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/538/score",
+          "sha256": "1385833ad1ef51857afd4179df0e33a6a2409351c27143b8b017f44e7ca85097"
+        },
+        {
+          "path": "backups/20261018-union-final77/score-327.jpg",
+          "sha256": "0b608eaed4354d001a1bfb67740720e72d0d8ef8aea02a1aa66fd0b17e2d67c6"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 459,
+      "union": 514,
+      "changedEdition": "new",
+      "changedUnits": 3,
+      "blocks": [
+        3,
+        3,
+        3
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/459/score",
+          "sha256": "6cb6c61ef644791f9604489a2ba5979602157836f2615a4af6ce5c63f1545f42"
+        },
+        {
+          "path": "backups/20261018-union-review-remaining/score-514.jpg",
+          "sha256": "c28a9ded026280ac0db9f8bf24acc38ba73052c9de7cd98d75f16d16683788c6"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 450,
+      "union": 376,
+      "changedEdition": "new",
+      "changedUnits": 5,
+      "blocks": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/450/score",
+          "sha256": "7c4f0d4f6b4343ee14dd90d87fed9270f5e9e923d16b15a17a1319830aeace92"
+        },
+        {
+          "path": "backups/20261018-union-final77/score-376.jpg",
+          "sha256": "f883d7d73bc70d99879d9936782b6a011a48516e3501173967468ec1988a6059"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 89,
+      "union": 89,
+      "changedEdition": "new",
+      "changedUnits": 4,
+      "blocks": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/089/score",
+          "sha256": "4ea1926e92cfbb5251b75e6ae808cb3fe55704d2061c4299515044d0b8342709"
+        },
+        {
+          "path": "backups/20261018-union-final77/score-089.jpg",
+          "sha256": "a0d9c42bf6b143c8506c693b5d9816e0bc5ad9a50b47dc554421259fcca0a3fe"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 530,
+      "union": 320,
+      "changedEdition": "new",
+      "changedUnits": 4,
+      "blocks": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/530/score",
+          "sha256": "9df34cfcee5dda5216ad798337b3c475a12e8e74f3f077bd8e53c7398802777b"
+        },
+        {
+          "path": "backups/20261018-union-final77/score-320.jpg",
+          "sha256": "c1081fc04583cff4ef129f81728fcd4f31186473543522afaed06011eb71a25a"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 132,
+      "union": 38,
+      "changedEdition": "new",
+      "changedUnits": 3,
+      "blocks": [
+        4,
+        4,
+        4
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/132/score",
+          "sha256": "7e8b4f6cbbf59cf4851eea2b1a636f976a9f4e7cb4d696349c947dabac52f7bc"
+        },
+        {
+          "path": "backups/20261018-union-review50/score-038.jpg",
+          "sha256": "76459d5e2d447ef91d62611cdb678fcdd5f232e9344608898e843bbc83ebdd46"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 636,
+      "union": 548,
+      "changedEdition": "union",
+      "changedUnits": 1,
+      "blocks": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/636/score",
+          "sha256": "f59607d8a7ecac5a13e4cf93ef48b13e4d74b681fc369af5c5fa044d05d51353"
+        },
+        {
+          "path": "backups/20261018-union-review-remaining/score-548.jpg",
+          "sha256": "16cf8a3d4abb01e1d0f622657e13305361c5c6f6543d361e2e72279e4c297a9f"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 312,
+      "union": 341,
+      "changedEdition": "new",
+      "changedUnits": 3,
+      "blocks": [
+        3,
+        3,
+        3
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/312/score",
+          "sha256": "65c0b2c18edf191374add0622e2548dace61fbf1e715d02f04de92be2f671ab4"
+        },
+        {
+          "path": "backups/20261018-union-final77/score-341.jpg",
+          "sha256": "d0836cb8400a82e2c3f8e91f0399856c9ba0feca16980ab294d33dcf879949f2"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 564,
+      "union": 299,
+      "changedEdition": "new",
+      "changedUnits": 3,
+      "blocks": [
+        2,
+        2,
+        2
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/564/score",
+          "sha256": "dc96adcd3f7c5b841137c684f995ff4ef7ab8a193d80756f2b3307cebf7e4f78"
+        },
+        {
+          "path": "backups/20261018-union-final77/score-299.jpg",
+          "sha256": "d9b4a3984242fcf73ff80099f8624c14a76bcef6a94cbf3c98e6ed5bbf49a738"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 497,
+      "union": 274,
+      "changedEdition": "new",
+      "changedUnits": 3,
+      "blocks": [
+        4,
+        4,
+        4
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/497/score",
+          "sha256": "df6057aab498ea3a269a8c30ec1ccd042707c3cd675bb25ec24ae66c6e18765b"
+        },
+        {
+          "path": "backups/20261018-union-review-remaining/score-274.jpg",
+          "sha256": "55733d348f0ae23fad13279149a1c0639bbeef9845a2b30d7e6d89b5af48d8d5"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 338,
+      "union": 364,
+      "changedEdition": "new",
+      "changedUnits": 4,
+      "blocks": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/338/score",
+          "sha256": "b63db36d2bd5fd34c9cfbfb542bee2a0ccf81a5b5826265e1546ce85edcd095b"
+        },
+        {
+          "path": "backups/20261018-union-review-remaining/score-364.jpg",
+          "sha256": "e9de653259e129857089198ca089f279b099017208ba6129f70e77236949ab11"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 585,
+      "union": 384,
+      "changedEdition": "new",
+      "changedUnits": 3,
+      "blocks": [
+        5,
+        5,
+        5
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/585/score",
+          "sha256": "dc90dbe8e38861d7871e0657a2932391d76ec7adbfadf07e970120466b6b2342"
+        },
+        {
+          "path": "backups/20261018-union-final77/score-384.jpg",
+          "sha256": "7920689c7321e8172f28d7a5f3791d587094419e48a22104ecb3868283ed8453"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 298,
+      "union": 35,
+      "changedEdition": "new",
+      "changedUnits": 4,
+      "blocks": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/298/score",
+          "sha256": "53e97f77be3d39806fdc11d048932ee93a63c658a7214b10179ad5e0cb419419"
+        },
+        {
+          "path": "backups/20261018-union-review50/score-035.jpg",
+          "sha256": "f0ea168cf77d38dee1dda3539c00aa1c3cb442d5168e31ca4a0f2d7cdaa1f7ac"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 382,
+      "union": 432,
+      "changedEdition": "new",
+      "changedUnits": 4,
+      "blocks": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/382/score",
+          "sha256": "2cf2316f66a426c30b489b349f300245a2ff2dfe3010b4786b628e81491161bd"
+        },
+        {
+          "path": "backups/20261018-union-final77/score-432.jpg",
+          "sha256": "6dc2f7b9704802b7f3f37ad51e4b51c71c4b470124cc30968e51fa12ee553e73"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    },
+    {
+      "new": 90,
+      "union": 98,
+      "changedEdition": "new",
+      "changedUnits": 3,
+      "blocks": [
+        4,
+        4,
+        4
+      ],
+      "evidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/090/score",
+          "sha256": "3db630146b1f113a33fc734bee96d4d1437bcc8171ac0dd3bf1058d014e126e1"
+        },
+        {
+          "path": "backups/20261018-union-review11-03/score-098.jpg",
+          "sha256": "bb96d76ad95f864e5b02c29f7c6caf1b5e711d8425fa582e00459798145f6338"
+        }
+      ],
+      "criterion": "Printed musical phrases; preserve text, verse/chorus identity and short closing phrase. Two readable lines per block where supported; recitative keeps paired phrases."
+    }
+  ],
+  "changedUnits": 110,
+  "changedVersionSignatures": 32,
+  "preserved": [
+    "song and version IDs",
+    "unit IDs, kinds and order",
+    "lyrics characters and internal word spacing",
+    "all stored worship elements and sections",
+    "forms and medleys",
+    "audio timing"
+  ],
+  "preflight": {
+    "chromium": {
+      "versions": 64,
+      "existingItems": 5,
+      "allTextAndUnitOrderPreserved": true,
+      "pages": {
+        "0c75ca53-db32-4e2a-89d8-253e8274f5cd": [
+          5,
+          9
+        ],
+        "04644554-5e85-4f7e-92e9-45aa52d75f93": [
+          11,
+          11
+        ],
+        "0753e3b8-2e87-516b-841c-0bb71d671170": [
+          5,
+          9
+        ],
+        "294a473a-6806-5d0c-a47b-75030f73861b": [
+          10,
+          10
+        ],
+        "749eb778-22ec-4edc-a4d6-df883dba1413": [
+          4,
+          7
+        ],
+        "09133633-87a3-46af-a568-e7a3e329d876": [
+          8,
+          8
+        ],
+        "0a5c781b-6af1-4cb3-93cf-afe249f9cce4": [
+          4,
+          8
+        ],
+        "e80abda4-1b59-4fa5-bf2e-c8f9b0f166c2": [
+          8,
+          8
+        ],
+        "8c9d116c-780b-5c03-9938-127442d45056": [
+          6,
+          9
+        ],
+        "0f2d1c58-4bc8-52f4-8326-0223bb61762a": [
+          9,
+          9
+        ],
+        "23d9847b-101f-538b-84d3-fa961b6f332d": [
+          12,
+          8
+        ],
+        "1d6667c0-39d2-54a0-9d93-4b57c44400a0": [
+          8,
+          8
+        ],
+        "4e457f33-add4-5929-b32e-4b079183b625": [
+          6,
+          12
+        ],
+        "28aebd39-90c4-55c3-bd65-5505efa4bb8b": [
+          12,
+          12
+        ],
+        "295c7447-9653-49eb-bd26-f48fcc79725d": [
+          6,
+          12
+        ],
+        "5e7492be-51a6-4541-a61c-902dfec5370b": [
+          12,
+          12
+        ],
+        "2bef7583-5c7b-4092-8bfa-77c0ca7f2375": [
+          7,
+          13
+        ],
+        "a469cc15-3a01-4e3a-a315-1098fa18faae": [
+          15,
+          15
+        ],
+        "ceafe810-72bf-5dcb-83dd-926771a92b91": [
+          6,
+          10
+        ],
+        "2ed580bc-8cc7-582d-bd37-272b534f0dd0": [
+          10,
+          10
+        ],
+        "340d445a-bab2-5ebb-bb02-36133e18df89": [
+          4,
+          8
+        ],
+        "608a20da-aad7-5b62-aedf-c7d697f700d3": [
+          8,
+          8
+        ],
+        "67076b37-669e-5c07-8056-5dcef953fbfb": [
+          6,
+          12
+        ],
+        "3644d073-832e-5e7b-a883-009f7f05a7d1": [
+          12,
+          12
+        ],
+        "371c5cd7-a2f8-4cf5-9e22-048d4c11f9e9": [
+          5,
+          9
+        ],
+        "a427e5b5-01ec-4a06-8ad6-c6218fb37c44": [
+          10,
+          10
+        ],
+        "3cd2f3cc-b923-5c8f-921d-1c501a3f0083": [
+          4,
+          8
+        ],
+        "7baeafc7-8501-596b-94e8-ee7240b54115": [
+          8,
+          8
+        ],
+        "3dcb25cf-08a0-52e3-a90b-0edbcc671849": [
+          1,
+          2
+        ],
+        "c194dc53-c4d1-5d0c-ae34-ed2799dfba5f": [
+          2,
+          2
+        ],
+        "b77116a2-f0a7-4ea2-bf09-34f2ad60b0bb": [
+          5,
+          9
+        ],
+        "42358e13-b8b8-4d23-92e7-c4e6313724b4": [
+          10,
+          10
+        ],
+        "497cc3ac-cc58-496b-9222-78b1592914d0": [
+          4,
+          8
+        ],
+        "5a47c012-6c0c-4d6a-8b5d-235e654f10d3": [
+          8,
+          8
+        ],
+        "f3129076-e148-51a2-8652-e22d1f0c7ffc": [
+          5,
+          9
+        ],
+        "4d37bd7b-4d2b-586c-80ca-503d5706a0bc": [
+          10,
+          10
+        ],
+        "79b21149-e555-441a-bd4a-85952e275dc3": [
+          12,
+          9
+        ],
+        "599628f0-89cd-45a7-a8cd-ded9373a117e": [
+          9,
+          9
+        ],
+        "5eb2e6de-b1e3-5fc4-9dca-ee01597177ae": [
+          5,
+          10
+        ],
+        "e4e422d3-377f-53bd-b8cf-d847e4f1c9fe": [
+          10,
+          10
+        ],
+        "99b0844d-c5ad-5d88-8143-3dedc58b5abf": [
+          5,
+          9
+        ],
+        "608b25a7-51cc-5d4a-9b97-0e13e620d6fa": [
+          9,
+          9
+        ],
+        "76a927fe-f9b7-4334-888c-edeb8cb41c38": [
+          4,
+          8
+        ],
+        "68a853a2-ce86-4229-a790-7b457fce8f36": [
+          8,
+          8
+        ],
+        "f5d7ff1d-1d2a-519d-b927-a890585e2bea": [
+          6,
+          12
+        ],
+        "6b62e880-05f6-521f-accc-cb51cc9ccfea": [
+          12,
+          12
+        ],
+        "c8fac05c-79cc-5e4c-8e47-07d678858c71": [
+          6,
+          6
+        ],
+        "6d45dc72-1f8a-538b-822b-e7a65569117e": [
+          7,
+          6
+        ],
+        "6d97011f-d43c-405b-8f5d-28ab2ae31907": [
+          6,
+          9
+        ],
+        "98469777-c3d6-4779-b19a-048f228941cd": [
+          9,
+          9
+        ],
+        "aaf488da-6c8f-5e09-9a24-54e486d4726c": [
+          4,
+          7
+        ],
+        "6dbddc89-2f6b-5f06-a466-6a851bf152af": [
+          8,
+          8
+        ],
+        "eb4a9920-1c0c-4e31-8035-fd6ebabc73a8": [
+          7,
+          13
+        ],
+        "7167f5bf-d305-40c2-a946-86171aa95883": [
+          14,
+          14
+        ],
+        "f3ef39c8-780b-522a-9740-0b1419201f1a": [
+          12,
+          8
+        ],
+        "720aacdd-bd2d-5aec-af56-42da482a6630": [
+          8,
+          8
+        ],
+        "783b5739-0449-4156-a3d5-aba15506b754": [
+          6,
+          15
+        ],
+        "e1f576be-0609-4d94-92fa-07a93e09b003": [
+          15,
+          15
+        ],
+        "b96ec121-5342-5707-af7e-10bf6788f421": [
+          5,
+          9
+        ],
+        "83cf955d-0949-5d15-8b7d-b3af8a733222": [
+          10,
+          10
+        ],
+        "a07c3e9b-bc66-4c2e-9e11-a3a589070ee1": [
+          5,
+          9
+        ],
+        "88d812f2-a587-4004-87cc-cee6be7d28ea": [
+          11,
+          11
+        ],
+        "e4336d8d-f1a8-47c4-ba2b-cb3ac2d625c9": [
+          6,
+          12
+        ],
+        "dfc6ec6c-9629-4edf-9466-fc049be7e93c": [
+          12,
+          12
+        ]
+      }
+    },
+    "webkit": {
+      "versions": 64,
+      "existingItems": 5,
+      "allTextAndUnitOrderPreserved": true,
+      "pages": {
+        "0c75ca53-db32-4e2a-89d8-253e8274f5cd": [
+          5,
+          9
+        ],
+        "04644554-5e85-4f7e-92e9-45aa52d75f93": [
+          11,
+          11
+        ],
+        "0753e3b8-2e87-516b-841c-0bb71d671170": [
+          5,
+          9
+        ],
+        "294a473a-6806-5d0c-a47b-75030f73861b": [
+          10,
+          10
+        ],
+        "749eb778-22ec-4edc-a4d6-df883dba1413": [
+          4,
+          7
+        ],
+        "09133633-87a3-46af-a568-e7a3e329d876": [
+          8,
+          8
+        ],
+        "0a5c781b-6af1-4cb3-93cf-afe249f9cce4": [
+          4,
+          8
+        ],
+        "e80abda4-1b59-4fa5-bf2e-c8f9b0f166c2": [
+          8,
+          8
+        ],
+        "8c9d116c-780b-5c03-9938-127442d45056": [
+          6,
+          9
+        ],
+        "0f2d1c58-4bc8-52f4-8326-0223bb61762a": [
+          9,
+          9
+        ],
+        "23d9847b-101f-538b-84d3-fa961b6f332d": [
+          12,
+          8
+        ],
+        "1d6667c0-39d2-54a0-9d93-4b57c44400a0": [
+          8,
+          8
+        ],
+        "4e457f33-add4-5929-b32e-4b079183b625": [
+          6,
+          12
+        ],
+        "28aebd39-90c4-55c3-bd65-5505efa4bb8b": [
+          12,
+          12
+        ],
+        "295c7447-9653-49eb-bd26-f48fcc79725d": [
+          6,
+          12
+        ],
+        "5e7492be-51a6-4541-a61c-902dfec5370b": [
+          12,
+          12
+        ],
+        "2bef7583-5c7b-4092-8bfa-77c0ca7f2375": [
+          7,
+          13
+        ],
+        "a469cc15-3a01-4e3a-a315-1098fa18faae": [
+          15,
+          15
+        ],
+        "ceafe810-72bf-5dcb-83dd-926771a92b91": [
+          6,
+          10
+        ],
+        "2ed580bc-8cc7-582d-bd37-272b534f0dd0": [
+          10,
+          10
+        ],
+        "340d445a-bab2-5ebb-bb02-36133e18df89": [
+          4,
+          8
+        ],
+        "608a20da-aad7-5b62-aedf-c7d697f700d3": [
+          8,
+          8
+        ],
+        "67076b37-669e-5c07-8056-5dcef953fbfb": [
+          6,
+          12
+        ],
+        "3644d073-832e-5e7b-a883-009f7f05a7d1": [
+          12,
+          12
+        ],
+        "371c5cd7-a2f8-4cf5-9e22-048d4c11f9e9": [
+          5,
+          9
+        ],
+        "a427e5b5-01ec-4a06-8ad6-c6218fb37c44": [
+          10,
+          10
+        ],
+        "3cd2f3cc-b923-5c8f-921d-1c501a3f0083": [
+          4,
+          8
+        ],
+        "7baeafc7-8501-596b-94e8-ee7240b54115": [
+          8,
+          8
+        ],
+        "3dcb25cf-08a0-52e3-a90b-0edbcc671849": [
+          1,
+          2
+        ],
+        "c194dc53-c4d1-5d0c-ae34-ed2799dfba5f": [
+          2,
+          2
+        ],
+        "b77116a2-f0a7-4ea2-bf09-34f2ad60b0bb": [
+          5,
+          9
+        ],
+        "42358e13-b8b8-4d23-92e7-c4e6313724b4": [
+          10,
+          10
+        ],
+        "497cc3ac-cc58-496b-9222-78b1592914d0": [
+          4,
+          8
+        ],
+        "5a47c012-6c0c-4d6a-8b5d-235e654f10d3": [
+          8,
+          8
+        ],
+        "f3129076-e148-51a2-8652-e22d1f0c7ffc": [
+          5,
+          9
+        ],
+        "4d37bd7b-4d2b-586c-80ca-503d5706a0bc": [
+          10,
+          10
+        ],
+        "79b21149-e555-441a-bd4a-85952e275dc3": [
+          12,
+          9
+        ],
+        "599628f0-89cd-45a7-a8cd-ded9373a117e": [
+          9,
+          9
+        ],
+        "5eb2e6de-b1e3-5fc4-9dca-ee01597177ae": [
+          5,
+          10
+        ],
+        "e4e422d3-377f-53bd-b8cf-d847e4f1c9fe": [
+          10,
+          10
+        ],
+        "99b0844d-c5ad-5d88-8143-3dedc58b5abf": [
+          5,
+          9
+        ],
+        "608b25a7-51cc-5d4a-9b97-0e13e620d6fa": [
+          9,
+          9
+        ],
+        "76a927fe-f9b7-4334-888c-edeb8cb41c38": [
+          4,
+          8
+        ],
+        "68a853a2-ce86-4229-a790-7b457fce8f36": [
+          8,
+          8
+        ],
+        "f5d7ff1d-1d2a-519d-b927-a890585e2bea": [
+          6,
+          12
+        ],
+        "6b62e880-05f6-521f-accc-cb51cc9ccfea": [
+          12,
+          12
+        ],
+        "c8fac05c-79cc-5e4c-8e47-07d678858c71": [
+          6,
+          6
+        ],
+        "6d45dc72-1f8a-538b-822b-e7a65569117e": [
+          7,
+          6
+        ],
+        "6d97011f-d43c-405b-8f5d-28ab2ae31907": [
+          6,
+          9
+        ],
+        "98469777-c3d6-4779-b19a-048f228941cd": [
+          9,
+          9
+        ],
+        "aaf488da-6c8f-5e09-9a24-54e486d4726c": [
+          4,
+          7
+        ],
+        "6dbddc89-2f6b-5f06-a466-6a851bf152af": [
+          8,
+          8
+        ],
+        "eb4a9920-1c0c-4e31-8035-fd6ebabc73a8": [
+          7,
+          13
+        ],
+        "7167f5bf-d305-40c2-a946-86171aa95883": [
+          14,
+          14
+        ],
+        "f3ef39c8-780b-522a-9740-0b1419201f1a": [
+          12,
+          8
+        ],
+        "720aacdd-bd2d-5aec-af56-42da482a6630": [
+          8,
+          8
+        ],
+        "783b5739-0449-4156-a3d5-aba15506b754": [
+          6,
+          15
+        ],
+        "e1f576be-0609-4d94-92fa-07a93e09b003": [
+          15,
+          15
+        ],
+        "b96ec121-5342-5707-af7e-10bf6788f421": [
+          5,
+          9
+        ],
+        "83cf955d-0949-5d15-8b7d-b3af8a733222": [
+          10,
+          10
+        ],
+        "a07c3e9b-bc66-4c2e-9e11-a3a589070ee1": [
+          5,
+          9
+        ],
+        "88d812f2-a587-4004-87cc-cee6be7d28ea": [
+          11,
+          11
+        ],
+        "e4336d8d-f1a8-47c4-ba2b-cb3ac2d625c9": [
+          6,
+          12
+        ],
+        "dfc6ec6c-9629-4edf-9466-fc049be7e93c": [
+          12,
+          12
+        ]
+      }
+    }
+  },
+  "productionReadback": {
+    "expectedRowsMatch": true,
+    "operationalContentChanged": false,
+    "triggerOnlyServiceRevisionUpdates": 5
+  },
+  "metadata": {
+    "measuredVersions": 148,
+    "recitativeVersions": 2,
+    "allHymnsComplete": false
+  },
+  "deployment": "pending"
+}
