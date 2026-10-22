@@ -382,6 +382,7 @@ function presenterScoreImageSlidesFromAsset(
       imageSrc: slide.url,
       asset: { ...asset, kind: asset.kind || "score", url: slide.url, name: slide.name || asset.name || "" },
       ...presenterScoreFormMetadata(sequenced.scoreForms, slideIndex, formWarnings),
+      ...(slide.titleSequenceWarning ? { warnings: [...formWarnings, slide.titleSequenceWarning] } : {}),
       scoreBackground: true,
       sourceType: "score",
       componentType: "score",
@@ -491,11 +492,18 @@ function presenterScoreImageSourcesForFormSequence(imageSources = [], scoreForms
   if (!planTargets.length) return { imageSources, scoreForms };
   if (!scoreTargets.some((target) => target?.key)) {
     if (!planTargets.some(target => target.type === "title")) return { imageSources, scoreForms };
-    // Unlabelled pages, like unsplit lyrics, occupy consecutive authored blocks.
-    const plan = resolvePresenterLyricsFormPresetSequence([], presetLabels, [], imageSources.map((_, index) => String(index)));
+    // A deck without form labels has no reliable verse boundaries. Keep every
+    // page; titles at the ends are unambiguous, internal positions need labels.
+    const first = planTargets.findIndex(target => target.type !== "title");
+    if (first < 0) return { imageSources: planTargets.map(() => ({ _presenterTitle: true })), scoreForms: [] };
+    const last = planTargets.findLastIndex(target => target.type !== "title");
+    const ambiguous = planTargets.slice(first, last + 1).some(target => target.type === "title");
     return {
-      imageSources: plan.items.filter(form => !form._presenterBlank).map(form => form._presenterTitle ? { _presenterTitle: true } : imageSources[Number(form.lyrics)]).filter(Boolean),
-      scoreForms: [],
+      imageSources: [
+        ...planTargets.slice(0, first).map(() => ({ _presenterTitle: true })),
+        ...imageSources.map(source => ambiguous ? { ...source, titleSequenceWarning: "악보 송폼 표시가 없어 중간 Title 위치를 확인할 수 없습니다." } : source),
+        ...planTargets.slice(last + 1).map(() => ({ _presenterTitle: true })),
+      ], scoreForms: [],
     };
   }
 

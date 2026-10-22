@@ -49,7 +49,11 @@ try:
     const score=presenterScoreImageSourcesForFormSequence(sources,presenterScoreFormsFromImageSources(sources),[],item,song,version);
     check(score.imageSources.map(s=>s._presenterTitle?'Title':s.url).join(',')==='v1.png,Title,c.png,Title','score title order');
     const unlabelled=presenterScoreImageSourcesForFormSequence(sources.map(({url})=>({url})),[],[],item,song,version);
-    check(unlabelled.imageSources.map(s=>s._presenterTitle?'Title':s.url).join(',')==='v1.png,Title,c.png,Title','unlabelled score Title does not consume page');
+    check(unlabelled.imageSources.map(s=>s._presenterTitle?'Title':s.url).join(',')==='v1.png,c.png,Title' && unlabelled.imageSources[0].titleSequenceWarning,'unlabelled score retains every page and warns on ambiguous middle Title');
+    edit('Title-V1-C-Title');
+    const manyPages=[...sources,{url:'extra.png'}].map(({url})=>({url}));
+    const unchangedDeck=presenterScoreImageSourcesForFormSequence(manyPages,[],[],item,song,version);
+    check(unchangedDeck.imageSources.map(s=>s._presenterTitle?'Title':s.url).join(',')==='Title,v1.png,c.png,extra.png,Title','unlabelled deck pages retained between titles');
     const portable=serializePortableServiceSourceItem({label:'찬양',value:song.title,formHint:'V1-C',titleSequence:true,asset:{},audio:{}});
     check(parsePortableServiceSourceText(portable.join('\\n'))[0].titleSequence,'portable source preserves explicit title mode');
     edit('Title-V1-C');slides=render();

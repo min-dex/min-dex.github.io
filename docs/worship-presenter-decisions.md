@@ -3816,7 +3816,10 @@ Liturgical body sizes and chromakey caption text are unchanged.
   clearing the sequence retains that intent instead of restoring an auto title.
 - Explicit title positions/repetitions get unique slide IDs and do not consume
   a lyric paragraph. Manual slide blocks retain their authored boundaries.
-  Labelled score pages follow the same title positions. No corpus units change.
+  Labelled score pages follow the same title positions. Unlabelled score decks
+  retain every page and support leading/trailing Title; an ambiguous middle
+  Title displays a warning rather than guessing a verse boundary or dropping pages.
+  No corpus units change.
 - Memo/config and portable source (`제목 순서: 송폼`) preserve explicit policy.
   Playback projection alone changes; publishing does not write service records.
 - Regression: smoke_title_songform.py uses synthetic Chromium/WebKit records,
