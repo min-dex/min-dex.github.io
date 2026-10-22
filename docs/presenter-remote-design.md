@@ -150,3 +150,12 @@ explains closing unused connections or waiting two minutes. Server transport
 errors instruct checking both devices' internet; legacy/malformed responses
 instruct refreshing both pages. Rejected transport promises are normalized so
 native technical messages are not exposed. Existing timeout/attempt rules remain.
+
+## Panel audit · 2026-10-22
+
+Slow explicit disconnect now locks both repeated disconnect and reconnect attempts
+until cleanup finishes, on both PC and phone. This prevents a second click from
+re-enabling connection while the first session's close callback is still pending.
+`smoke_remote_panel.py` uses a delayed end promise and checks both engines; full
+presenter remote smoke separately covers the real encrypted session path.
+Panel screenshots were inspected. This audit fix is not yet deployed.
