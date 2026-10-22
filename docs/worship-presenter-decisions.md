@@ -3825,3 +3825,21 @@ Liturgical body sizes and chromakey caption text are unchanged.
 - Regression: smoke_title_songform.py uses synthetic Chromium/WebKit records,
   rendering, edit/reopen, empty/repeated/middle Title, direct paragraphs, score
   ordering and portable policy. No native output or operational audio is opened.
+
+
+## Fullscreen praise titles and video backgrounds ·2026-10-22
+
+- Chapel uses its ordinary fullscreen service output. No camera caption mode or
+  event-specific scripture/sermon renderer is added.
+- Praise element config.presentation.backgroundVideo stores a direct MP4/WebM/
+  MOV/M4V URL. Presenter exposes 배경 영상 with URL and file inputs. Upload uses
+  the existing media Storage bucket and single-element atomic save. Settings
+  survive grouping, memo, canonical config, portable source and document fallback.
+- Praise backgrounds are muted, looping and inline. One output video node stays
+  alive across lyric changes with the same source. Keyed frames, score/media
+  frames, photo cues, blackout and blank frames never inherit the video. Controller
+  thumbnails load metadata without autoplay. Audio playback/timing stays separate.
+- Fullscreen praise title slides show the note alone above one main output title.
+  Order labels, original titles and subtitles are absent from this display. Their
+  authored metadata and version output-title selection remain unchanged.
+- Chapel scripture uses normal Bible reading rather than a poster scripture image.

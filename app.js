@@ -4892,6 +4892,7 @@ function groupWorshipElements(sections = [], elements = []) {
         asset,
         audioAsset,
         audioTiming: normalizeServiceAudioTiming(config.audioTiming),
+        presentation: normalizeServicePresentation(config.presentation),
         playback,
         presenterRole,
         connectedPraise,
@@ -9503,6 +9504,8 @@ function handleDetailSubmit(event) {
 }
 
 function handleDetailChange(event) {
+  const backgroundVideoFile = event.target.closest("[data-praise-background-file]");
+  if (backgroundVideoFile) { void uploadPresenterPraiseBackground(backgroundVideoFile); return; }
   const fadeStop = event.target.closest("[data-service-music-fade-stop]");
   if (fadeStop) {
     state.serviceMusic.fadeStopEnabled = fadeStop.checked;
@@ -11022,6 +11025,7 @@ function emptyServiceItemMemo(rawNote = "") {
     asset: { kind: "", name: "", url: "" },
     audioAsset: { kind: "", name: "", url: "" },
     playback: null,
+    presentation: null,
     presenterRole: "",
     connectedPraise: null,
     mediaPlacement: null,
@@ -11324,6 +11328,7 @@ function parseServiceItemMemo(value) {
         asset,
         audioAsset,
         audioTiming: normalizeServiceAudioTiming(parsed.audioTiming),
+        presentation: normalizeServicePresentation(parsed.presentation),
         playback: normalizeServicePlaybackConfig(parsed.playback, elementType),
         presenterRole,
         connectedPraise,
@@ -11571,6 +11576,7 @@ function serializeServiceItemMemo(value = {}) {
   const asset = normalizeServiceAsset(value.asset);
   const audioAsset = normalizeServiceAudioAsset(value.audioAsset || value.audio_asset || value.audio || value.mr);
   const audioTiming = normalizeServiceAudioTiming(value.audioTiming);
+  const presentation = normalizeServicePresentation(value.presentation);
   const playback = normalizeServicePlaybackConfig(value.playback, elementType);
   const presenterRole = normalizeServicePresenterRole(value.presenterRole || value.presenter_role || value.role);
   const connectedPraise = normalizeServiceConnectedPraise(value.connectedPraise || value.connected_praise);
@@ -11581,7 +11587,7 @@ function serializeServiceItemMemo(value = {}) {
   const templateSuppressed = Boolean(value.templateSuppressed || value.template_suppressed);
   const defaultAssetKind = serviceAssetKindForElementType(elementType);
   if (!asset.kind && defaultAssetKind && hasServiceAsset(asset)) asset.kind = defaultAssetKind;
-  if (!normalizeAnnouncementRegions(value.announcementRegions) && !slides.length && !scriptureReference && !scriptureReferences.length && !scriptureTranslationId && !scriptureReferencePayloads.length && !manualScripture && !hasServiceIntroSlide(introSlide) && !formHint && !formPreset && !formPresetDisabled && !formPresetRules.length && !templateKey && !templateVariant && !elementType && !outputMode && !inputMode && !textHighlights.length && !hasServiceAsset(asset) && !hasServiceAsset(audioAsset) && !hasServicePlaybackConfig(playback) && !presenterRole && !connectedPraise && !mediaPlacement && !benedictionReplacement && !offeringVariants && !hiddenInPresentation && !templateSuppressed) return note;
+  if (!normalizeAnnouncementRegions(value.announcementRegions) && !slides.length && !scriptureReference && !scriptureReferences.length && !scriptureTranslationId && !scriptureReferencePayloads.length && !manualScripture && !hasServiceIntroSlide(introSlide) && !formHint && !formPreset && !formPresetDisabled && !formPresetRules.length && !templateKey && !templateVariant && !elementType && !outputMode && !inputMode && !textHighlights.length && !hasServiceAsset(asset) && !hasServiceAsset(audioAsset) && !hasServicePlaybackConfig(playback) && !presenterRole && !connectedPraise && !presentation && !mediaPlacement && !benedictionReplacement && !offeringVariants && !hiddenInPresentation && !templateSuppressed) return note;
   const payload = { note };
   if(normalizeAnnouncementRegions(value.announcementRegions))payload.announcementRegions=normalizeAnnouncementRegions(value.announcementRegions);
   if (scriptureReference) payload.scriptureReference = scriptureReference;
@@ -11611,6 +11617,7 @@ function serializeServiceItemMemo(value = {}) {
   if (hasServiceAsset(asset)) payload.asset = asset;
   if (hasServiceAsset(audioAsset)) payload.audioAsset = audioAsset;
   if (audioTiming) payload.audioTiming = audioTiming;
+  if (presentation) payload.presentation = presentation;
   if (hasServicePlaybackConfig(playback)) payload.playback = playback;
   if (slides.length) payload.slides = slides;
   return JSON.stringify(payload);
@@ -25845,7 +25852,7 @@ function serviceSourceItemLines(item = {}, service = null, memo = parseServiceIt
     label, value, elementType, inputMode, outputMode, formHint: memo.formHint, titleSequence: memo.formPreset?.titleSequence,
     songTitle: song?.title, songId: item.song_id, versionId: item.version_id || item.song_version_id,
     assignee, hasTranslation: Boolean(translation), translationLabel, translationId, sermonReference,
-    lyrics, slides: memo.slides, manualScripture, manualTranslation, asset, audio, audioTiming:memo.audioTiming,
+    lyrics, slides: memo.slides, manualScripture, manualTranslation, asset, audio, audioTiming:memo.audioTiming, presentation:memo.presentation,
     announcementRegions: isAnnouncementTextInputItem(item) || memo.announcementRegions ? serviceAnnouncementRegions(item, memo) : null,
   });
 }
@@ -26182,6 +26189,11 @@ function applyServiceSourceRecord(serviceId, index, record = {}) {
       item.raw_title || record.value || "",
       record.manualTranslationLabel || record.translationLabel || "",
     );
+    item.memo = serializeServiceItemMemo(nextMemo);
+  }
+  if (record.hasPresentation) {
+    const nextMemo = parseServiceItemMemo(item.memo);
+    nextMemo.presentation = normalizeServicePresentation(record.presentation);
     item.memo = serializeServiceItemMemo(nextMemo);
   }
   if (record.hasAudioTiming) {
@@ -31534,6 +31546,7 @@ function renderPresenterBoardSubgroupInputControls(serviceId, subgroup = {}, opt
         ${label ? `<div class="svc-board-subgroup-control-head"><span class="svc-board-subgroup-control-label">${escapeHtml(label)}</span>${dbLink}${renderPresenterBoardItemActions(serviceId, context)}</div>` : ""}
         ${audioLed ? audioManager : ""}
         ${controls}
+        ${renderPresenterPresentationControls(context.item, context.index, serviceId)}
         ${options.headerActions || label ? "" : renderPresenterBoardItemActions(serviceId, context)}
         ${audioLed ? "" : audioManager}
       </div>`;
@@ -33729,6 +33742,7 @@ function serviceDocumentSlideToPresenterSlide(slide = {}, index = 0, service = n
     marker: slide.title || slide.elementLabel || "",
     text: slide.text || "",
     outputContext: normalizePresenterOutputContext(slide.outputContext) || "",
+    backgroundVideo: normalizeServicePresentation({ backgroundVideo: slide.backgroundVideo })?.backgroundVideo || "",
     hiddenInPresentation: Boolean(slide.hidden),
     autoTrailingBlank: Boolean(slide.autoTrailingBlank),
     serviceDocumentFallback: true,
@@ -33948,6 +33962,7 @@ function presenterElementTrailingBlankSlide(slide, index, service = null) {
     // This keeps fullscreen services clean even when the preceding item has an explicit
     // chromakey context (for example a special-song element).
     outputContext: serviceChromakey ? "chromakey" : "clean",
+    backgroundVideo: "",
     // Hiding an element hides its content, not its required transition blank.
     hiddenInPresentation: false,
     hidden_in_presentation: false,
@@ -34443,6 +34458,9 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   }
   const confessionPrayer = isConfessionPrayerServiceItem(item);
   const section = presenterSectionForServiceItem(item, index, displayText, song, version);
+  const presentation = normalizeServicePresentation(memo.presentation);
+
+  if (memoElementType === "praise" && presentation?.backgroundVideo) section.backgroundVideo = presentation.backgroundVideo;
   const withIntro = (slides) => presenterSlidesWithIntroSlide(item, section, index, memo, slides);
   const withSpecialTitle = (slides) => presenterSlidesWithSpecialSongTitle(item, section, slides, index, service);
   const withIntroAndSpecialTitle = (slides) => withIntro(withSpecialTitle(slides));
