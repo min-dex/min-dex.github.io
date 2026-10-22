@@ -11,7 +11,7 @@ def main():
     browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
     page=browser.new_page(viewport={'width':1920,'height':1080})
     page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(url.rsplit('/',1)[0]+'/') else r.abort())
-    page.goto(url+'?output=presenter');page.wait_for_function("typeof renderPresenterOutput==='function'")
+    page.goto(url+'?output=presenter');page.wait_for_function("typeof WORSHIP_BACKGROUND_BASE==='string' && typeof renderPresenterOutput==='function'")
     result=page.evaluate('''async()=>{
      const check=(v,m)=>{if(!v)throw Error(m)};
      const design={sectionKeys:['reading','sermon'],background:'#ffffff',foreground:'#292522',accent:'#ad371d',logo:'assets/transition-logos/on-fire.svg',showReadingEnd:false};

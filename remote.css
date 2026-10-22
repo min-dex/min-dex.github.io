@@ -18,7 +18,8 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .primary:not(:disabled):hover { background: var(--accent); box-shadow: inset 0 0 0 2px var(--accent-ink); }
 input { margin-top: 10px; padding: 10px 15px; background: var(--panel-2); color: var(--ink); border: 1px solid var(--line); font-size: 20px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
 input::placeholder { color: var(--placeholder-ink); opacity: 1; }
-#codeHelp, .foot { font-size: var(--ui-meta-size); font-weight: var(--ui-meta-weight); color: var(--ink-3); }
+#connect { margin-top: 15px; }
+#status:empty, #screenStatus:empty, #result:empty { display: none; }
 #controller, #disconnect { margin-top: 20px; }
 .previews { display: grid; gap: 10px; }
 .previews article { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 15px; min-width: 0; }

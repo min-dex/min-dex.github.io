@@ -202,3 +202,10 @@ Lucide arrows; audio and blackout controls use16px/1.5 icons alongside labels.
 Preserve50px phone buttons and70px navigation targets. Insets are10px with5px
 icon gaps; the three audio controls use5px horizontal insets at360px and below
 to retain readable labels. Blackout updates both its icon and text.
+
+## Remote concise copy ·2026-10-23
+
+The personal remote page omits repeated code instructions, target-PC footer and
+normal wake-lock narration. Keep actionable connection/error feedback and
+wake-lock failure/retry visible. Installation help stays collapsed and brief.
+Empty status regions occupy no space; phone touch target sizes are unchanged.

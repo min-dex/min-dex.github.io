@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-service-design",
+  "version": "20261023-chapel-design",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "ad771ee67335cc342504be9abebd8842df714d60633abfd43d308cb36cb3f1ba",
-  "runtime_sha256": "de1b85eb914dce8d7802d705bee8aab62a0dd5c182098b190cce565c660d3f6f",
-  "source_bytes": 1554856,
-  "runtime_bytes": 1100498,
-  "source_gzip": 349770,
-  "runtime_gzip": 273528
+  "source_sha256": "2b75ec6929c79b39e2c7fce839f7fd75cd77eb8b186b6e1afb2b64d701bbe889",
+  "runtime_sha256": "0b8187441416fea40be685cea6a077767ce63808438556638a0ee396994169cd",
+  "source_bytes": 1554704,
+  "runtime_bytes": 1100364,
+  "source_gzip": 349740,
+  "runtime_gzip": 273496
 }
