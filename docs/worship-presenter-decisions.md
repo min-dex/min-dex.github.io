@@ -3858,3 +3858,15 @@ the cream artwork without changing emphasis wording or font weight.
 - Canonical grouping sorts RPC rows by persisted section/element order before any
   editor or scripture hydration compacts visible ordinals. Unordered aggregate
   arrays must never silently reorder a service when a Bible body finishes loading.
+
+
+## Children artwork emphasis palettes ·2026-10-22
+
+The shared frame helper resolves the artwork identity for both thumbnail and
+output, independent of PNG/WebP, query strings and CSS scale. C1/C2 textured
+artwork uses deep hues with a2-stage-pixel ivory outline on the six palette
+highlights; C3 sky uses medium-deep hues without an outline. C5 and S4/S5/S6
+retain the cream-background palette. Unknown/custom artwork retains that default;
+no automatic contrast guarantee is made for arbitrary user images. Reading,
+blackout, chromakey and non-children frames reset palette selection. Authored
+highlight values and unrelated custom colors remain unchanged.

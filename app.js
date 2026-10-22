@@ -32033,11 +32033,11 @@ function renderPresenterSlideMiniPreview(slide, serviceId = state.presenter.serv
     frameClasses,
   ].filter(Boolean).join(" ");
   if (!slide) {
-    return `<span class="${escapeAttr(outputClasses)}"><span class="${escapeAttr(canvasClasses)}" data-output-theme="${escapeAttr(theme)}"${backgroundStyle}></span></span>`;
+    return `<span class="${escapeAttr(outputClasses)}"><span class="${escapeAttr(canvasClasses)}" data-output-theme="${escapeAttr(theme)}" data-emphasis-palette="${escapeAttr(presenterEmphasisPalette(frameState))}"${backgroundStyle}></span></span>`;
   }
   return `
     <span class="${escapeAttr(outputClasses)}">
-      <span class="${escapeAttr(canvasClasses)}" data-output-theme="${escapeAttr(theme)}"${backgroundStyle}>
+      <span class="${escapeAttr(canvasClasses)}" data-output-theme="${escapeAttr(theme)}" data-emphasis-palette="${escapeAttr(presenterEmphasisPalette(frameState))}"${backgroundStyle}>
         ${renderPresenterSlideFrame(previewSlide, { noChromakey: frameState.noChromakey, previewStage: true, transitionLogo: serviceRawSourceRef(service).transitionLogo })}
       </span>
     </span>`;

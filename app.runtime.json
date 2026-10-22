@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261022-fullscreen-order-video",
+  "version": "20261022-children-art-palettes",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "599ed573bf774f78485f5678d4b2c5baed22f3758314bbc99c93b96026203e5b",
-  "runtime_sha256": "6baebfdf092142eb1f18c859a96c734453dbe34564a9b25337aa441994d1c40c",
-  "source_bytes": 1554433,
-  "runtime_bytes": 1100205,
-  "source_gzip": 349681,
-  "runtime_gzip": 273467
+  "source_sha256": "c31f45f892339f68bc1612ae0d1722666d38a34bf35a0b8467d85313dbd5f99c",
+  "runtime_sha256": "82ee0e83962b1e5c1182ce1e7b7f4327bbd9db81d15d2bbb3caaa6c8ad6f937f",
+  "source_bytes": 1554585,
+  "runtime_bytes": 1100339,
+  "source_gzip": 349710,
+  "runtime_gzip": 273499
 }
