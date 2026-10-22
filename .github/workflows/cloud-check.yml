@@ -28,7 +28,7 @@ jobs:
         run: |
           sudo python3 - <<'PYMIRROR'
           from pathlib import Path
-          for path in (Path('/etc/apt/sources.list'), Path('/etc/apt/sources.list.d/ubuntu.sources')):
+          for path in (Path('/etc/apt/sources.list'), Path('/etc/apt/sources.list.d/ubuntu.sources'), Path('/etc/apt/apt-mirrors.txt')):
               if path.exists():
                   source = path.read_text()
                   updated = source.replace('http://azure.archive.ubuntu.com/ubuntu', 'https://archive.ubuntu.com/ubuntu')
