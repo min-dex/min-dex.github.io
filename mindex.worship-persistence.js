@@ -140,7 +140,6 @@ function normalizeServiceDocumentSlides(slides = []) {
       title: String(slide.title || "").trim(),
       text: limitServiceDocumentText(slide.text || slide.bodyText || slide.body || ""),
       outputContext: String(slide.outputContext || slide.output_context || "").trim(),
-      presentationMode: slide.presentationMode || "",
       backgroundVideo: slide.backgroundVideo || "",
       hidden: Boolean(slide.hidden),
       autoTrailingBlank: Boolean(slide.autoTrailingBlank || slide.auto_trailing_blank),

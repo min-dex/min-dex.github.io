@@ -4236,7 +4236,6 @@ function presenterOutputFrameKey(payload = {}, slide = null, frameState = {}) {
     frameState.blankOutput ? "blank" : "",
     frameState.backgroundImage || "",
     frameState.backgroundVideo || "",
-    slide.presentationMode || "",
     frameState.blankOutput ? JSON.stringify(normalizePresenterTransitionLogo(payload.transitionLogo)) : "",
     slide.title || "",
     slide.text || "",
@@ -5198,7 +5197,6 @@ function renderPresenterSlideFrame(slide, options = {}) {
 
 function presenterSlideExtraClasses(slide) {
   const classes = [];
-  if (slide?.presentationMode === "camera") classes.push("presenter-slide--camera-caption");
   if (slide?.fullscreenSongTitle) classes.push("presenter-slide--fullscreen-song-title");
   const layout = presenterSlideLayout(slide);
   // A blank (including the auto trailing blank, which copies the previous slide) has no caption to theme.
@@ -5252,7 +5250,6 @@ function renderPresenterSlideBody(slide, options = {}) {
   if (layout !== PRESENTER_SLIDE_LAYOUTS.BLANK && elementType === PRESENTER_ELEMENT_TYPES.SCRIPTURE_TEXT && presenterScriptureContextUsesAddressTab(slide?.scriptureContext)) return renderPresenterCitationTabSlide(slide);
   if (elementType === PRESENTER_ELEMENT_TYPES.SCRIPTURE_TEXT && presenterScriptureContextUsesReadingForm(slide?.scriptureContext)) return renderPresenterScriptureReadingSlide(slide);
   if (layout === PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT && elementType === PRESENTER_ELEMENT_TYPES.TITLE_ASSIGNEE) {
-    if (slide.presentationMode === "camera") return renderPresenterCameraTitleSlide(slide);
     return renderPresenterReadingAssigneeTab(slide) + renderPresenterTitleAssigneeSlide(slide);
   }
   if (layout === PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT && slide?.type === "song-title" && slide.sectionHeading) return renderPresenterSectionSongTitleSlide(slide);
@@ -6034,25 +6031,21 @@ function updatePresenterMediaOrder(button) {
 // Per-element presentation settings share the worship memo/atomic persistence path.
 function normalizeServicePresentation(value) {
   if (!value || typeof value !== "object") return null;
-  const mode = ["fullscreen", "camera"].includes(value.mode) ? value.mode : "";
   const source = normalizePresenterMediaSource(value.backgroundVideo);
   const backgroundVideo = /\.(mp4|webm|mov|m4v)(?:[?#].*)?$/i.test(source) ? source : "";
-  return mode || backgroundVideo ? { ...(mode ? { mode } : {}), ...(backgroundVideo ? { backgroundVideo } : {}) } : null;
+  return backgroundVideo ? { backgroundVideo } : null;
 }
 
 function renderPresenterPresentationControls(item, index, serviceId) {
   const memo = parseServiceItemMemo(item.memo), type = serviceMemoElementType(memo);
-  if (!["title_person", "title_content", "title", "praise"].includes(type)) return "";
+  if (type !== "praise") return "";
   const presentation = normalizeServicePresentation(memo.presentation) || {};
   const attrs = `data-service-item-index="${index}" data-service-id="${escapeAttr(serviceId)}"`;
-  return `<details class="svc-presentation-controls"><summary>화면</summary>
-    <label>화면 방식 <select class="svc-presenter-input-control" data-service-item-field="presentation_mode" ${attrs} aria-label="${escapeAttr(item.label || '항목')} 화면 방식">
-      ${[["", "예배 기본"], ["fullscreen", "전체 화면"], ["camera", "카메라 자막"]].map(([v,label]) => `<option value="${v}"${presentation.mode === v || !presentation.mode && !v ? ' selected' : ''}>${label}</option>`).join('')}
-    </select></label>
-    ${type === "praise" ? `<label>배경 영상 <input class="svc-presenter-input-control" type="text" data-service-item-field="background_video" ${attrs} value="${escapeAttr(presentation.backgroundVideo || '')}" placeholder="MP4 · WebM 영상 주소" aria-label="찬양 배경 영상 주소"></label>
-      <label class="btn ghost">영상 파일 선택<input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,.mp4,.webm,.mov,.m4v" data-praise-background-file data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(item.id)}" hidden></label>
-      <span class="muted">전체 화면에서 음소거·반복 재생</span>` : ''}
-    </details>`;
+  return `<details class="svc-presentation-controls"><summary>배경 영상</summary>
+    <label>영상 주소 <input class="svc-presenter-input-control" type="text" data-service-item-field="background_video" ${attrs} value="${escapeAttr(presentation.backgroundVideo || '')}" placeholder="MP4 · WebM 영상 주소" aria-label="찬양 배경 영상 주소"></label>
+    <label class="btn ghost">영상 파일 선택<input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,.mp4,.webm,.mov,.m4v" data-praise-background-file data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(item.id)}" hidden></label>
+    <span class="muted">전체 화면에서 음소거·반복 재생</span>
+  </details>`;
 }
 
 async function uploadPresenterPraiseBackground(input) {
@@ -6096,16 +6089,4 @@ function applyPresenterBackgroundVideo(root, source = "") {
   video.addEventListener("error", () => { root.dataset.backgroundVideoError = "true"; });
   video.addEventListener("playing", () => { delete root.dataset.backgroundVideoError; });
   root.prepend(video); video.play()?.catch(() => { root.dataset.backgroundVideoError = "true"; });
-}
-
-function renderPresenterCameraTitleSlide(slide) {
-  const order = String(slide.orderTitle || slide.sectionTitle || slide.label || "").trim();
-  const title = String(slide.contentTitle || slide.title || "").trim();
-  const main = title || order;
-  const person = String(slide.assignee || slide.sectionAssignee || slide.subtitle || "").trim();
-  return `<div class="presenter-camera-title">
-    ${order && order !== main ? `<span class="presenter-camera-title-order">${escapeHtml(order)}</span>` : ""}
-    <span class="presenter-camera-title-main">${escapeHtml(main)}</span>
-    ${person ? `<span class="presenter-camera-title-person">${escapeHtml(person)}</span>` : ""}
-  </div>`;
 }

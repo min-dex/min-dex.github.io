@@ -33733,7 +33733,6 @@ function serviceDocumentSlideToPresenterSlide(slide = {}, index = 0, service = n
     marker: slide.title || slide.elementLabel || "",
     text: slide.text || "",
     outputContext: normalizePresenterOutputContext(slide.outputContext) || "",
-    presentationMode: normalizeServicePresentation({ mode: slide.presentationMode })?.mode || "",
     backgroundVideo: normalizeServicePresentation({ backgroundVideo: slide.backgroundVideo })?.backgroundVideo || "",
     hiddenInPresentation: Boolean(slide.hidden),
     autoTrailingBlank: Boolean(slide.autoTrailingBlank),
@@ -33953,7 +33952,7 @@ function presenterElementTrailingBlankSlide(slide, index, service = null) {
     // A transition blank belongs to the service output, never to the preceding element.
     // This keeps fullscreen services clean even when the preceding item has an explicit
     // chromakey context (for example a special-song element).
-    outputContext: slide.presentationMode === "camera" ? "chromakey" : slide.presentationMode === "fullscreen" ? "clean" : serviceChromakey ? "chromakey" : "clean",
+    outputContext: serviceChromakey ? "chromakey" : "clean",
     backgroundVideo: "",
     // Hiding an element hides its content, not its required transition blank.
     hiddenInPresentation: false,
@@ -34450,10 +34449,7 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   const confessionPrayer = isConfessionPrayerServiceItem(item);
   const section = presenterSectionForServiceItem(item, index, displayText, song, version);
   const presentation = normalizeServicePresentation(memo.presentation);
-  if (presentation?.mode) {
-    section.presentationMode = presentation.mode;
-    section.outputContext = presentation.mode === "camera" ? "chromakey" : "clean";
-  }
+
   if (memoElementType === "praise" && presentation?.backgroundVideo) section.backgroundVideo = presentation.backgroundVideo;
   const withIntro = (slides) => presenterSlidesWithIntroSlide(item, section, index, memo, slides);
   const withSpecialTitle = (slides) => presenterSlidesWithSpecialSongTitle(item, section, slides, index, service);

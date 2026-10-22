@@ -1,4 +1,4 @@
-"""Offline per-element presentation: one content model, camera/clean, video lifecycle."""
+"""Offline fullscreen praise title, video settings and background lifecycle."""
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 
@@ -14,30 +14,18 @@ def main():
                 page.wait_for_function("typeof WORSHIP_BACKGROUND_BASE === 'string' && typeof renderPresenterPresentationControls === 'function'")
                 result = page.evaluate('''async () => {
                   const check=(v,m)=>{if(!v)throw Error(m)};
-                  const presentation={mode:'camera',backgroundVideo:'tests/fixtures/praise-background.webm'};
+                  const presentation={backgroundVideo:'tests/fixtures/praise-background.webm'};
                   const memo=serializeServiceItemMemo({elementType:'title_person',presentation,note:'보존'});
-                  check(parseServiceItemMemo(memo).presentation.mode==='camera','memo lost mode');
+                  check(parseServiceItemMemo(memo).presentation.backgroundVideo===presentation.backgroundVideo,'memo lost video');
                   check(parseServiceItemMemo(memo).note==='보존','memo lost text');
                   const config=serviceElementConfigForSave({custom:'keep'},parseServiceItemMemo(memo),{item:{label:'설교',raw_title:'소망',assignee:'이름 목사'}});
-                  check(config.presentation.mode==='camera'&&config.custom==='keep','atomic config lost presentation or unrelated setting');
+                  check(config.presentation.backgroundVideo===presentation.backgroundVideo&&config.custom==='keep','atomic config lost video or unrelated setting');
                   check(!normalizeServicePresentation({backgroundVideo:'javascript:bad.mp4'}),'unsafe source');
                   check(!normalizeServicePresentation({backgroundVideo:'https://example.com/image.png'}),'not video');
                   const lines=serializePortableServiceSourceItem({label:'설교',value:'소망',elementType:'title_person',inputMode:'text',asset:{},audio:{},presentation});
                   const records=parseServiceSourceText('[[설교]]\\n'+lines.join('\\n'));
-                  check(records[0].presentation.mode==='camera','source roundtrip');
-                  const base={id:'sermon',type:'title-assignee',elementType:'title_assignee',layout:'lower-bar-text',sectionKey:'sermon',sectionTitle:'설교',orderTitle:'설교',contentTitle:'소망',title:'소망',assignee:'이름 목사',presentationMode:'camera',outputContext:'chromakey'};
-                  // Use canonical enum values, same as the projected service slides.
-                  base.elementType=PRESENTER_ELEMENT_TYPES.TITLE_ASSIGNEE;base.layout=PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT;
+                  check(records[0].presentation.backgroundVideo===presentation.backgroundVideo,'source roundtrip');
                   const payload={chromakey:false,serviceType:'special'};
-                  const frame=presenterOutputFrameStateForSlide(base,payload);
-                  check(!frame.noChromakey,'camera did not override fullscreen service');
-                  const blank=presenterElementTrailingBlankSlide(base,0,{type_id:'special'});
-                  check(!presenterOutputFrameStateForSlide(blank,payload).noChromakey,'camera blank hides camera');
-                  const html=renderPresenterSlideFrame(base,{noChromakey:false});
-                  check(html.includes('presenter-camera-title')&&html.includes('소망')&&html.includes('이름 목사'),'camera content');
-                  const full=normalizeCleanPresenterSlideLayout({...base,outputContext:'clean',presentationMode:'fullscreen'});
-                  const fullHtml=renderPresenterSlideFrame(full,{noChromakey:true});
-                  check(fullHtml.includes('소망')&&fullHtml.includes('이름 목사')&&!fullHtml.includes('presenter-camera-title'),'fullscreen content parity');
                   const song={id:'song',type:'song-title',elementType:PRESENTER_ELEMENT_TYPES.PRAISE,layout:PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT,songTitle:'제목',songTitleContent:{orderTitle:'찬양 1',title:'제목',detail:'부제',detailKind:'subtitle'}};
                   const songHtml=renderPresenterSlideFrame(song,{noChromakey:true});
                   const holder=document.createElement('div');holder.innerHTML=songHtml;
@@ -60,8 +48,23 @@ def main():
                   applyPresenterBackgroundVideo(root,'');check(!root.querySelector('video'),'video not removed');
                   const item={id:'fixture',label:'찬양',memo:serializeServiceItemMemo({elementType:'praise'})};
                   const controls=renderPresenterPresentationControls(item,0,'fixture');
-                  check(controls.includes('카메라 자막')&&controls.includes('data-praise-background-file'),'editable controls');
-                  return 'PASS mode/source roundtrip, shared content, title layout, video isolation/reuse and controls';
+                  check(!controls.includes('카메라 자막')&&controls.includes('data-praise-background-file'),'editable controls');
+                  const fixtureId='11111111-1111-4111-8111-111111111111';
+                  const target={id:'22222222-2222-4222-8222-222222222222',service_id:fixtureId,label:'찬양',raw_title:'곡',song_id:'linked-song',song_version_id:'linked-version',memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',slides:['보존할 가사']})};
+                  state.services=[{id:fixtureId,type_id:'special',date:'2026-11-03'}];state.serviceItems[fixtureId]=[target];state.selectedServiceId=fixtureId;
+                  const originals={saveServiceItemPatch,renderCurrentServiceModuleDetail,schedulePresenterRefreshForService,showToast,updateSaveState};
+                  let saved,notice;
+                  try {
+                    state.client={storage:{from:()=>({upload:async()=>({error:null}),getPublicUrl:()=>({data:{publicUrl:'https://example.com/loop.webm'}})})}};
+                    saveServiceItemPatch=async(id,index)=>{saved=structuredClone(getServiceItems(id)[index]);return true};
+                    renderCurrentServiceModuleDetail=()=>{};schedulePresenterRefreshForService=()=>{};showToast=message=>{notice=message};updateSaveState=()=>{};
+                    const input={files:[new File(['fixture'],'loop.webm',{type:'video/webm'})],dataset:{serviceId:fixtureId,serviceItemId:target.id},value:'fixture'};
+                    await uploadPresenterPraiseBackground(input);
+                    check(saved?.song_id==='linked-song'&&saved.version_id==='linked-version','upload changed song link '+JSON.stringify({saved,notice}));
+                    const savedMemo=parseServiceItemMemo(saved.memo);
+                    check(savedMemo.slides[0]==='보존할 가사'&&savedMemo.presentation.backgroundVideo==='https://example.com/loop.webm','upload changed lyrics or failed to attach background');
+                  } finally {saveServiceItemPatch=originals.saveServiceItemPatch;renderCurrentServiceModuleDetail=originals.renderCurrentServiceModuleDetail;schedulePresenterRefreshForService=originals.schedulePresenterRefreshForService;showToast=originals.showToast;updateSaveState=originals.updateSaveState;}
+                  return 'PASS fullscreen title, video config/source roundtrip, playback/isolation/reuse and upload preservation';
                 }''')
                 print(engine, result)
                 browser.close()
