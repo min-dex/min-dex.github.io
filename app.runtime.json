@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-remote-concise",
+  "version": "20261023-common-deletion",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "2ab55c4bcb76eba9243450922e9d43b53bd7b8bd4684ab86bc3d71cc3e16f42c",
-  "runtime_sha256": "c07af1e40726c1ddffce767549aabba123b7deabb81d47480d25a6e08c53b354",
-  "source_bytes": 1554693,
-  "runtime_bytes": 1100363,
-  "source_gzip": 349741,
-  "runtime_gzip": 273502
+  "source_sha256": "9b5132762c45cef6b58134ef51602974b8d5a7733e4c6df3effb313b26e64f80",
+  "runtime_sha256": "dcc0dbaff3f2a6563ead14e14fe09386d812db3f1d0ee4aea06f69cb2cbbfaf7",
+  "source_bytes": 1554141,
+  "runtime_bytes": 1099938,
+  "source_gzip": 349694,
+  "runtime_gzip": 273459
 }

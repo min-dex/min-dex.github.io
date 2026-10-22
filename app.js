@@ -12673,6 +12673,18 @@ function updateServiceDefaultItemField(field) {
   refreshPresenterForServiceType(typeId);
 }
 
+// One deletion intent for every editor and service type. The persisted marker
+// also suppresses template regeneration; keep its existing storage field.
+function markServiceItemDeleted(item, serviceId) {
+  if (!item?.id || !serviceId) return;
+  state.templateElementSuppressions.set(item.id, {
+    ...item,
+    service_id: serviceId,
+    memo: serializeServiceItemMemo({ ...parseServiceItemMemo(item.memo), templateSuppressed: true }),
+    _worshipElementTemplateModified: true,
+  });
+}
+
 function runServiceItemAction(action, index, label = "", title = "") {
   return withServiceItemsScope(() => runServiceItemActionUnscoped(action, index, label, title));
 }
@@ -12720,16 +12732,7 @@ function runServiceItemActionUnscoped(action, index, label = "", title = "") {
     nextSelectedIndex = index + 1;
   }
   if (action === "delete" && item) {
-    // Match section-editor deletion: record intent before removing the draft,
-    // otherwise content-preservation restores the deleted row on full save.
-    if (item.id && TEMPLATE_PROJECTED_SERVICE_TYPES.has(worshipAppServiceTypeId(typeId))) {
-      state.templateElementSuppressions.set(item.id, {
-        ...item,
-        service_id: serviceId,
-        memo: serializeServiceItemMemo({ ...parseServiceItemMemo(item.memo), templateSuppressed: true }),
-        _worshipElementTemplateModified: true,
-      });
-    }
+    markServiceItemDeleted(item, serviceId);
     markServiceItemSharedContentDirty(item, state.services.find((service) => service.id === serviceId));
     items.splice(index, 1);
     nextSelectedIndex = Math.min(index, items.length - 1);
@@ -12780,14 +12783,7 @@ function runPresenterSectionItemAction(action, index) {
   if (action === "delete" && position >= 0) {
     const item = items[index];
     if (!confirmPresenterSectionItemDeletion(item, service)) return;
-    if (item?.id && TEMPLATE_PROJECTED_SERVICE_TYPES.has(worshipAppServiceTypeId(service.type_id))) {
-      state.templateElementSuppressions.set(item.id, {
-        ...item,
-        service_id: serviceId,
-        memo: serializeServiceItemMemo({ ...parseServiceItemMemo(item.memo), templateSuppressed: true }),
-        _worshipElementTemplateModified: true,
-      });
-    }
+    markServiceItemDeleted(item, serviceId);
     markServiceItemSharedContentDirty(item, service);
     items.splice(index, 1);
   }
@@ -22015,7 +22011,7 @@ function recoverAllGenerationsOfferingItems(service, items = []) {
 function projectWorshipServiceItemsFromTemplate(service, items = []) {
   const appTypeId = worshipAppServiceTypeId(service?.type_id);
   if (!TEMPLATE_PROJECTED_SERVICE_TYPES.has(appTypeId)) {
-    return normalizeServiceItemsForTemplateHierarchy(service, items);
+    return normalizeServiceItemsForTemplateHierarchy(service, items.filter(item => !isTemplateSuppressedServiceItem(item)));
   }
   const sourceItems = mergeMonthlyCorporatePrayerItems(mergeRememberedTemplateSuppressionItems(service?.id, recoverAllGenerationsOfferingItems(service, items)));
 
@@ -23600,7 +23596,7 @@ function withServiceItemsScope(callback) {
 function getServiceItems(serviceId) {
   if (!serviceId) return [];
   const service = state.services.find((svc) => svc.id === serviceId);
-  if (!service || !TEMPLATE_PROJECTED_SERVICE_TYPES.has(worshipAppServiceTypeId(service.type_id))) {
+  if (!service) {
     return state.serviceItems[serviceId] || [];
   }
   if (serviceItemsScopeDepth) {
@@ -25921,12 +25917,7 @@ function suppressOmittedEmptySourcePraiseItems(service, candidates, usedIndexes)
   const removedIds = new Set();
   omitted.forEach(({ item }) => {
     if (!item.id) return;
-    state.templateElementSuppressions.set(item.id, {
-      ...item,
-      service_id: service.id,
-      memo: serializeServiceItemMemo({ ...parseServiceItemMemo(item.memo), templateSuppressed: true }),
-      _worshipElementTemplateModified: true,
-    });
+    markServiceItemDeleted(item, service.id);
     removedIds.add(item.id);
   });
   if (removedIds.size) {
