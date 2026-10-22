@@ -11,7 +11,7 @@ def main():
                 page = browser.new_page(viewport={"width": 1920, "height": 1080})
                 page.route("**/*supabase*/**", lambda route: route.abort())
                 page.goto(url + "?output=presenter", wait_until="domcontentloaded")
-                page.wait_for_function("typeof normalizePresenterTransitionLogo === 'function'")
+                page.wait_for_function("typeof normalizePresenterTransitionLogo === 'function' && typeof WORSHIP_BACKGROUND_BASE === 'string'")
                 result = page.evaluate("""async () => {
                   const check=(v,m)=>{if(!v)throw Error(m)};
                   const config={url:'assets/transition-logos/on-fire.svg',originX:50,originY:29.5,width:255,height:450};
