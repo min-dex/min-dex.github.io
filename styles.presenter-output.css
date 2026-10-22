@@ -1622,3 +1622,5 @@ span.presenter-announcement-paren,
 
 .presenter-output-root.no-chromakey .presenter-fullscreen-order-heading { color: #cba56a; }
 .presenter-output-root.no-chromakey .presenter-fullscreen-order-heading::after { content: ""; display: block; width: calc(80 * var(--presenter-stage-unit)); height: calc(3 * var(--presenter-stage-unit)); margin: 2cqh auto 0; background: currentColor; }
+/* Keep moving praise footage above an already-mounted still background. */
+.presenter-output-root > .presenter-output-background-video { z-index: 1; }
