@@ -4779,7 +4779,7 @@ function serviceItemSlotKey(item = {}, memo = null) {
 
 function groupWorshipElements(sections = [], elements = []) {
   const sectionById = Object.fromEntries(sections.map((section) => [section.id, section]));
-  return elements.reduce((grouped, element) => {
+  const grouped = elements.reduce((grouped, element) => {
     const section = sectionById[element.section_id];
     const serviceId = section?.service_id;
     if (!serviceId) return grouped;
@@ -4830,7 +4830,8 @@ function groupWorshipElements(sections = [], elements = []) {
       || config.disable_form_preset,
     );
     const formHint = formPresetDisabled ? "" : serviceFormHintFromConfig(config);
-    const formPreset = formPresetDisabled ? null : normalizeServiceFormPreset(config.formPreset || config.form_preset, formHint);
+    const storedFormPreset = normalizeServiceFormPreset(config.formPreset || config.form_preset, formHint);
+    const formPreset = formPresetDisabled && !storedFormPreset?.titleSequence ? null : storedFormPreset;
     const formPresetRules = formPresetDisabled ? [] : normalizeServiceFormPresetRules(config.formPresetRules || config.form_preset_rules);
     const scriptureReference = serviceElementScriptureReference(element, section, sourceRef, config);
     const scriptureReferences = serviceElementScriptureReferences(element, section, sourceRef, config);
@@ -4891,6 +4892,7 @@ function groupWorshipElements(sections = [], elements = []) {
         asset,
         audioAsset,
         audioTiming: normalizeServiceAudioTiming(config.audioTiming),
+        presentation: normalizeServicePresentation(config.presentation),
         playback,
         presenterRole,
         connectedPraise,
@@ -4914,6 +4916,10 @@ function groupWorshipElements(sections = [], elements = []) {
     }));
     return grouped;
   }, {});
+  // RPC arrays have no ordering guarantee. Every editor/hydration consumer must
+  // start from persisted section/element order before compacting editor ordinals.
+  Object.values(grouped).forEach(items => items.sort((a, b) => a.sort_order - b.sort_order));
+  return grouped;
 }
 
 function serviceElementManualSlides(element = {}, config = {}, context = {}) {
@@ -7644,6 +7650,8 @@ async function saveWorshipServiceElementPatch(service, itemId) {
     unchanged && savedItem && item.id === targetItemId
       ? {
         ...savedItem,
+        // Non-template services sort directly by this editor ordinal.
+        sort_order: item.sort_order,
         // A single receipt uses compact persisted ordinals, while sibling drafts
         // can still use spaced editor ordinals. Keep one ordering scale until
         // the whole collection is reloaded; otherwise projection moves this row.
@@ -9502,6 +9510,8 @@ function handleDetailSubmit(event) {
 }
 
 function handleDetailChange(event) {
+  const backgroundVideoFile = event.target.closest("[data-praise-background-file]");
+  if (backgroundVideoFile) { void uploadPresenterPraiseBackground(backgroundVideoFile); return; }
   const fadeStop = event.target.closest("[data-service-music-fade-stop]");
   if (fadeStop) {
     state.serviceMusic.fadeStopEnabled = fadeStop.checked;
@@ -9981,7 +9991,7 @@ function updateSongMetadataField(field) {
   const key = field.dataset.songMetaField;
   const metadata = normalizeSongMetadata(song.metadata);
   if (key === "presenter_form") {
-    metadata[key] = normalizeServiceFormPreset(field.value, field.value, "song-default");
+    metadata[key] = normalizeServiceFormPreset({ forms: normalizeServiceFormPresetForms(field.value), hint: field.value, titleSequence: metadata[key]?.titleSequence }, field.value, "song-default");
   } else {
     metadata[key] = field.value;
   }
@@ -11021,6 +11031,7 @@ function emptyServiceItemMemo(rawNote = "") {
     asset: { kind: "", name: "", url: "" },
     audioAsset: { kind: "", name: "", url: "" },
     playback: null,
+    presentation: null,
     presenterRole: "",
     connectedPraise: null,
     mediaPlacement: null,
@@ -11323,6 +11334,7 @@ function parseServiceItemMemo(value) {
         asset,
         audioAsset,
         audioTiming: normalizeServiceAudioTiming(parsed.audioTiming),
+        presentation: normalizeServicePresentation(parsed.presentation),
         playback: normalizeServicePlaybackConfig(parsed.playback, elementType),
         presenterRole,
         connectedPraise,
@@ -11570,6 +11582,7 @@ function serializeServiceItemMemo(value = {}) {
   const asset = normalizeServiceAsset(value.asset);
   const audioAsset = normalizeServiceAudioAsset(value.audioAsset || value.audio_asset || value.audio || value.mr);
   const audioTiming = normalizeServiceAudioTiming(value.audioTiming);
+  const presentation = normalizeServicePresentation(value.presentation);
   const playback = normalizeServicePlaybackConfig(value.playback, elementType);
   const presenterRole = normalizeServicePresenterRole(value.presenterRole || value.presenter_role || value.role);
   const connectedPraise = normalizeServiceConnectedPraise(value.connectedPraise || value.connected_praise);
@@ -11580,7 +11593,7 @@ function serializeServiceItemMemo(value = {}) {
   const templateSuppressed = Boolean(value.templateSuppressed || value.template_suppressed);
   const defaultAssetKind = serviceAssetKindForElementType(elementType);
   if (!asset.kind && defaultAssetKind && hasServiceAsset(asset)) asset.kind = defaultAssetKind;
-  if (!normalizeAnnouncementRegions(value.announcementRegions) && !slides.length && !scriptureReference && !scriptureReferences.length && !scriptureTranslationId && !scriptureReferencePayloads.length && !manualScripture && !hasServiceIntroSlide(introSlide) && !formHint && !formPreset && !formPresetDisabled && !formPresetRules.length && !templateKey && !templateVariant && !elementType && !outputMode && !inputMode && !textHighlights.length && !hasServiceAsset(asset) && !hasServiceAsset(audioAsset) && !hasServicePlaybackConfig(playback) && !presenterRole && !connectedPraise && !mediaPlacement && !benedictionReplacement && !offeringVariants && !hiddenInPresentation && !templateSuppressed) return note;
+  if (!normalizeAnnouncementRegions(value.announcementRegions) && !slides.length && !scriptureReference && !scriptureReferences.length && !scriptureTranslationId && !scriptureReferencePayloads.length && !manualScripture && !hasServiceIntroSlide(introSlide) && !formHint && !formPreset && !formPresetDisabled && !formPresetRules.length && !templateKey && !templateVariant && !elementType && !outputMode && !inputMode && !textHighlights.length && !hasServiceAsset(asset) && !hasServiceAsset(audioAsset) && !hasServicePlaybackConfig(playback) && !presenterRole && !connectedPraise && !presentation && !mediaPlacement && !benedictionReplacement && !offeringVariants && !hiddenInPresentation && !templateSuppressed) return note;
   const payload = { note };
   if(normalizeAnnouncementRegions(value.announcementRegions))payload.announcementRegions=normalizeAnnouncementRegions(value.announcementRegions);
   if (scriptureReference) payload.scriptureReference = scriptureReference;
@@ -11610,6 +11623,7 @@ function serializeServiceItemMemo(value = {}) {
   if (hasServiceAsset(asset)) payload.asset = asset;
   if (hasServiceAsset(audioAsset)) payload.audioAsset = audioAsset;
   if (audioTiming) payload.audioTiming = audioTiming;
+  if (presentation) payload.presentation = presentation;
   if (hasServicePlaybackConfig(playback)) payload.playback = playback;
   if (slides.length) payload.slides = slides;
   return JSON.stringify(payload);
@@ -22482,7 +22496,7 @@ function mergeTemplateProjectionMemo(templateMemo = "", existingMemo = "") {
     componentType: template.componentType || template.elementType || existing.componentType,
     outputMode: template.outputMode || existing.outputMode,
     formHint: formPresetDisabled ? "" : template.formHint || existing.formHint,
-    formPreset: formPresetDisabled ? null : template.formPreset || existing.formPreset,
+    formPreset: formPresetDisabled ? (existing.formPreset?.titleSequence ? existing.formPreset : null) : template.formPreset || existing.formPreset,
     formPresetDisabled,
     formPresetRules: formPresetDisabled ? [] : template.formPresetRules.length ? template.formPresetRules : existing.formPresetRules,
     textHighlights: template.textHighlights.length ? template.textHighlights : existing.textHighlights,
@@ -23562,7 +23576,7 @@ function renderServiceFormHintInput(item, index, options = {}) {
       data-service-id="${escapeAttr(item.service_id || options.serviceId || state.selectedServiceId || "")}"
       data-service-item-index="${index}"
       value="${escapeAttr(serviceItemEffectiveFormHint(item))}"
-      placeholder="${escapeAttr(options.placeholder || "송폼/범위")}"
+      placeholder="${escapeAttr(options.placeholder || "송폼 · Title-V1-C")}"
       aria-label="섹션 송폼/범위"
     />`;
 }
@@ -25841,10 +25855,10 @@ function serviceSourceItemLines(item = {}, service = null, memo = parseServiceIt
   const asset = normalizeServiceAsset(memo.asset);
   const audio = normalizeServiceAudioAsset(memo.audioAsset || memo.audio_asset);
   return serializePortableServiceSourceItem({
-    label, value, elementType, inputMode, outputMode, formHint: memo.formHint,
+    label, value, elementType, inputMode, outputMode, formHint: memo.formHint, titleSequence: memo.formPreset?.titleSequence,
     songTitle: song?.title, songId: item.song_id, versionId: item.version_id || item.song_version_id,
     assignee, hasTranslation: Boolean(translation), translationLabel, translationId, sermonReference,
-    lyrics, slides: memo.slides, manualScripture, manualTranslation, asset, audio, audioTiming:memo.audioTiming,
+    lyrics, slides: memo.slides, manualScripture, manualTranslation, asset, audio, audioTiming:memo.audioTiming, presentation:memo.presentation,
     announcementRegions: isAnnouncementTextInputItem(item) || memo.announcementRegions ? serviceAnnouncementRegions(item, memo) : null,
   });
 }
@@ -26049,6 +26063,7 @@ function ensurePortableSourceItems(service, records = []) {
       inputMode: normalizeServiceInputMode(record.inputMode || ""),
     };
     if (record.formHint) memo.formHint = normalizeServiceFormHint(record.formHint);
+    if (record.titleSequence) memo.formPreset = normalizeServiceFormPreset({ forms: normalizeServiceFormPresetForms(record.formHint), titleSequence: true });
     const sectionKey = `source-${compactSearchValue(record.sectionTitle || "section").replace(/[^a-z0-9가-힣]+/g, "-") || "section"}`;
     const sectionPeer = items.find(item => compactSearchValue(serviceSourceSectionTitle(item)) === compactSearchValue(record.sectionTitle));
     // Place new source records beside their source neighbours, retaining section identity.
@@ -26108,6 +26123,12 @@ function applyServiceSourceRecord(serviceId, index, record = {}) {
   if (!item) return false;
   if (record.elementType) updateServiceItemField(serviceSourceVirtualField(serviceId, index, "element_type", record.elementType), { deferPresenterRefresh: true });
   if (record.inputMode) updateServiceItemField(serviceSourceVirtualField(serviceId, index, "input_mode", record.inputMode), { deferPresenterRefresh: true });
+  if (record.titleSequence) {
+    item = getServiceItems(serviceId)[index];
+    const memo = parseServiceItemMemo(item.memo);
+    memo.formPreset = { ...memo.formPreset, titleSequence: true };
+    item.memo = serializeServiceItemMemo(memo);
+  }
   if (Object.hasOwn(record, "formHint")) updateServiceItemField(serviceSourceVirtualField(serviceId, index, "form_hint", record.formHint), { deferPresenterRefresh: true });
   // Updates can replace normalized items; classify using the restored type/mode.
   item = getServiceItems(serviceId)[index];
@@ -26174,6 +26195,11 @@ function applyServiceSourceRecord(serviceId, index, record = {}) {
       item.raw_title || record.value || "",
       record.manualTranslationLabel || record.translationLabel || "",
     );
+    item.memo = serializeServiceItemMemo(nextMemo);
+  }
+  if (record.hasPresentation) {
+    const nextMemo = parseServiceItemMemo(item.memo);
+    nextMemo.presentation = normalizeServicePresentation(record.presentation);
     item.memo = serializeServiceItemMemo(nextMemo);
   }
   if (record.hasAudioTiming) {
@@ -31526,6 +31552,7 @@ function renderPresenterBoardSubgroupInputControls(serviceId, subgroup = {}, opt
         ${label ? `<div class="svc-board-subgroup-control-head"><span class="svc-board-subgroup-control-label">${escapeHtml(label)}</span>${dbLink}${renderPresenterBoardItemActions(serviceId, context)}</div>` : ""}
         ${audioLed ? audioManager : ""}
         ${controls}
+        ${renderPresenterPresentationControls(context.item, context.index, serviceId)}
         ${options.headerActions || label ? "" : renderPresenterBoardItemActions(serviceId, context)}
         ${audioLed ? "" : audioManager}
       </div>`;
@@ -31828,6 +31855,7 @@ function annotatePresenterFormStarts(entries = [], initialPreviousKey = "") {
 
 function presenterSlideSupportsFormGrouping(slide) {
   if (!slide) return false;
+  if (slide.formLabel === "Title" && String(slide.formKey || "").startsWith("title:")) return true;
   const praiseLowerBar = presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE
     && presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT;
   if (praiseLowerBar) return true;
@@ -32007,11 +32035,11 @@ function renderPresenterSlideMiniPreview(slide, serviceId = state.presenter.serv
     frameClasses,
   ].filter(Boolean).join(" ");
   if (!slide) {
-    return `<span class="${escapeAttr(outputClasses)}"><span class="${escapeAttr(canvasClasses)}" data-output-theme="${escapeAttr(theme)}"${backgroundStyle}></span></span>`;
+    return `<span class="${escapeAttr(outputClasses)}"><span class="${escapeAttr(canvasClasses)}" data-output-theme="${escapeAttr(theme)}" data-emphasis-palette="${escapeAttr(presenterEmphasisPalette(frameState))}"${backgroundStyle}></span></span>`;
   }
   return `
     <span class="${escapeAttr(outputClasses)}">
-      <span class="${escapeAttr(canvasClasses)}" data-output-theme="${escapeAttr(theme)}"${backgroundStyle}>
+      <span class="${escapeAttr(canvasClasses)}" data-output-theme="${escapeAttr(theme)}" data-emphasis-palette="${escapeAttr(presenterEmphasisPalette(frameState))}"${backgroundStyle}>
         ${renderPresenterSlideFrame(previewSlide, { noChromakey: frameState.noChromakey, previewStage: true, transitionLogo: serviceRawSourceRef(service).transitionLogo })}
       </span>
     </span>`;
@@ -33720,6 +33748,7 @@ function serviceDocumentSlideToPresenterSlide(slide = {}, index = 0, service = n
     marker: slide.title || slide.elementLabel || "",
     text: slide.text || "",
     outputContext: normalizePresenterOutputContext(slide.outputContext) || "",
+    backgroundVideo: normalizeServicePresentation({ backgroundVideo: slide.backgroundVideo })?.backgroundVideo || "",
     hiddenInPresentation: Boolean(slide.hidden),
     autoTrailingBlank: Boolean(slide.autoTrailingBlank),
     serviceDocumentFallback: true,
@@ -33939,6 +33968,7 @@ function presenterElementTrailingBlankSlide(slide, index, service = null) {
     // This keeps fullscreen services clean even when the preceding item has an explicit
     // chromakey context (for example a special-song element).
     outputContext: serviceChromakey ? "chromakey" : "clean",
+    backgroundVideo: "",
     // Hiding an element hides its content, not its required transition blank.
     hiddenInPresentation: false,
     hidden_in_presentation: false,
@@ -34410,7 +34440,8 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   const song = presenterSongForServiceItem(item, displayText, label, service);
   const version = song ? getPresenterServiceItemVersion(song, item, service) : null;
   const formPlan = version ? presenterFormPlanForServiceItem(version, item, song) : { forms: [], warnings: [] };
-  const forms = globalThis.MindexSongTiming?.formsFor(item, song, version, formPlan.forms) || formPlan.forms;
+  const forms = serviceItemFormPreset(item)?.titleSequence ? formPlan.forms
+    : globalThis.MindexSongTiming?.formsFor(item, song, version, formPlan.forms) || formPlan.forms;
   const formWarnings = formPlan.warnings;
   const memo = initialMemo;
   const linkedSongId = String(item.song_id || item.songId || "").trim();
@@ -34433,6 +34464,9 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   }
   const confessionPrayer = isConfessionPrayerServiceItem(item);
   const section = presenterSectionForServiceItem(item, index, displayText, song, version);
+  const presentation = normalizeServicePresentation(memo.presentation);
+
+  if (memoElementType === "praise" && presentation?.backgroundVideo) section.backgroundVideo = presentation.backgroundVideo;
   const withIntro = (slides) => presenterSlidesWithIntroSlide(item, section, index, memo, slides);
   const withSpecialTitle = (slides) => presenterSlidesWithSpecialSongTitle(item, section, slides, index, service);
   const withIntroAndSpecialTitle = (slides) => withIntro(withSpecialTitle(slides));
@@ -34555,7 +34589,7 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
     const slides = shouldSuppressMainPraiseScoreSongTitle(item, service)
       ? scoreSlides
       : [
-	        ...(song && shouldIncludeSongTitleSlide(item, label) ? [presenterSongTitleSlide(item, section, song, version, displayText, index)] : []),
+	        ...(song && shouldIncludeSongTitleSlide(item, label, song, version) ? [presenterSongTitleSlide(item, section, song, version, displayText, index)] : []),
         ...scoreSlides,
       ];
     return withIntro(presenterSlidesWithSpecialSongTitle(item, section, slides, index, service));
@@ -34566,7 +34600,7 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
       item, section, index, song, version, displayText, label, forms, formWarnings,
     });
     const syncConfig = presenterSyncedLyricsConfigFromAsset(configuredAsset);
-    const slides = shouldIncludeSongTitleSlide(item, label)
+    const slides = shouldIncludeSongTitleSlide(item, label, song, version)
       ? presenterSlidesWithSpecialSongTitle(item, section, [
           presenterSongTitleSlide(item, section, song, version, displayText, index),
           ...lyricsSlides,
@@ -34579,7 +34613,7 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   if (!specialSongItem && song && presenterHymnScoreAssetSlides(song, version, displayText).length) {
     const scoreSlides = presenterScoreSlidesForServiceItem(item, section, index, song, version, displayText, memo, forms, formWarnings);
     const slides = [
-	      ...(song && shouldIncludeSongTitleSlide(item, label) ? [presenterSongTitleSlide(item, section, song, version, displayText, index)] : []),
+	      ...(song && shouldIncludeSongTitleSlide(item, label, song, version) ? [presenterSongTitleSlide(item, section, song, version, displayText, index)] : []),
       ...scoreSlides,
     ];
     return withIntro(presenterSlidesWithSpecialSongTitle(item, section, slides, index, service));

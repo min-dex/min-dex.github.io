@@ -276,6 +276,30 @@
   --presenter-blank-cross-color: var(--presenter-output-fg);
   --presenter-output-muted: rgba(52, 39, 31, .68);
   --presenter-output-bar: transparent;
+  --presenter-highlight-ffc832: #a66b00;
+  --presenter-highlight-c8ff32: #527a00;
+  --presenter-highlight-ff96c8: #b53b76;
+  --presenter-highlight-ff6432: #b94720;
+  --presenter-highlight-32c8ff: #006c91;
+  --presenter-highlight-9696ff: #6554b8;
+}
+/* Busy artwork needs an edge separator as well as deeper hues. */
+.presenter-output-root.no-chromakey.has-background[data-output-theme="children"][data-emphasis-palette="textured"] {
+  --presenter-highlight-ffc832: #603900;
+  --presenter-highlight-c8ff32: #294600;
+  --presenter-highlight-ff96c8: #761747;
+  --presenter-highlight-ff6432: #7a280b;
+  --presenter-highlight-32c8ff: #00384e;
+  --presenter-highlight-9696ff: #3c286b;
+  --presenter-palette-stroke: calc(2 * var(--presenter-stage-unit));
+}
+.presenter-output-root.no-chromakey.has-background[data-output-theme="children"][data-emphasis-palette="sky"] {
+  --presenter-highlight-ffc832: #805000;
+  --presenter-highlight-c8ff32: #3b6000;
+  --presenter-highlight-ff96c8: #98275e;
+  --presenter-highlight-ff6432: #963414;
+  --presenter-highlight-32c8ff: #00566f;
+  --presenter-highlight-9696ff: #524095;
 }
 .presenter-output-root.no-chromakey.has-background[data-output-theme="children"] :is(.presenter-slide-text, .presenter-output-empty, .presenter-ready-screen, .presenter-ready-screen-kicker, .presenter-ready-screen-message, .presenter-waiting-loop, .presenter-waiting-loop-script, .presenter-waiting-loop-title) {
   color: var(--presenter-output-fg);
@@ -338,6 +362,8 @@
   font-size: inherit;
   font-weight: var(--presenter-text-highlight-weight, var(--presenter-weight-display));
   white-space: inherit;
+  -webkit-text-stroke: var(--presenter-text-highlight-stroke, 0px) #fff9eb;
+  paint-order: stroke fill;
 }
 .presenter-output-root.no-chromakey .presenter-slide--lyrics[data-element-type="praise"] .presenter-slide-text {
   font-size: var(--presenter-size-lyrics);
@@ -1607,3 +1633,14 @@ span.presenter-announcement-paren,
 @media (prefers-reduced-motion: reduce) {
   .presenter-transition-logo { animation: none; transform: scale(1); }
 }
+
+/* Fullscreen titles and silent praise video backgrounds. */
+.presenter-slide--fullscreen-song-title .presenter-title-content { gap: 3cqh; }
+.presenter-output-root.no-chromakey .presenter-fullscreen-song-heading { font-size: calc(85 * var(--presenter-stage-unit)); line-height: 1; color: #cba56a; }
+.presenter-output-background-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; z-index: 0; }
+.presenter-slide:has(> .presenter-output-background-video) > :not(video) { position: relative; z-index: 1; }
+
+.presenter-output-root.no-chromakey .presenter-fullscreen-order-heading { color: #cba56a; }
+.presenter-output-root.no-chromakey .presenter-fullscreen-order-heading::after { content: ""; display: block; width: calc(80 * var(--presenter-stage-unit)); height: calc(3 * var(--presenter-stage-unit)); margin: 2cqh auto 0; background: currentColor; }
+/* Keep moving praise footage above an already-mounted still background. */
+.presenter-output-root > .presenter-output-background-video { z-index: 1; }
