@@ -3761,3 +3761,12 @@ button only when the browser provides its native prompt. When launched standalon
 installation guidance is hidden. Screen wake lock defaults on only for a connected,
 visible controller and is optional via a checkbox. Denial/release is communicated
 without retry loops, reconnecting, or interfering with PC presentation.
+## Announcement type scale · 2026-10-22
+
+User keeps100px/800 titles. Fullscreen announcement welcome/footer use50px/600
+and weekly news60px/600 at1920×1080; emphasis stays800. These values use the
+shared stage unit, including thumbnail scaling, rather than height percentages.
+Plain unzoned announcement copy also uses60px. Existing overflow fitting still
+shrinks a region only when needed; its font size is a base, not a clipping rule.
+This supersedes the earlier4cqh welcome/news and3.6cqh footer sizes.
+Liturgical body sizes and chromakey caption text are unchanged.
