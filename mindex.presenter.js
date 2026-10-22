@@ -4254,6 +4254,51 @@ function presenterOutputShouldAnimateFrameTransition(root, frameState = {}) {
   return true;
 }
 
+// All fitting sizes are measured on the same 1920px design stage.
+const PRESENTER_TEXT_FIT = Object.freeze({ step:5, body:40, title:70 });
+function presenterTextFitScale(box) {
+  return (box.closest?.(".presenter-output-root")?.clientWidth || 1920) / 1920;
+}
+function presenterTextFitStatus(box, overflow) {
+  if (overflow) {
+    box.dataset.presenterFitOverflow = "true";
+    box.setAttribute("aria-description", "최소 글자 크기에서도 내용이 넘칩니다. 내용을 나누어 주세요.");
+  } else {
+    if (box.dataset.presenterFitOverflow) box.removeAttribute("aria-description");
+    delete box.dataset.presenterFitOverflow;
+  }
+}
+function presenterTextFits(box, role = "body") {
+  const tolerance = presenterTextFitScale(box);
+  if (box.scrollWidth > box.clientWidth + tolerance) return false;
+  if (role !== "title") return box.scrollHeight <= box.clientHeight + tolerance;
+  // Title line-height is intentionally tight; check its allocated frame instead
+  // of mistaking font ink below the line box for a text overflow.
+  const frame = box.closest(".presenter-slide");
+  if (!frame) return true;
+  const bounds = frame.getBoundingClientRect(), text = box.getBoundingClientRect();
+  const root = box.closest(".presenter-output-root");
+  const renderedTolerance = (root?.getBoundingClientRect().width || 1920) / 1920;
+  return text.top >= bounds.top - renderedTolerance && text.bottom <= bounds.bottom + renderedTolerance;
+}
+function fitPresenterTextBox(box, { role="body", fits=()=>presenterTextFits(box, role), property="font-size" } = {}) {
+  box.style.removeProperty(property);
+  const scale = presenterTextFitScale(box);
+  const base = Number.parseFloat(getComputedStyle(box).fontSize);
+  if (!box.clientWidth || !box.clientHeight || !Number.isFinite(base) || base <= 0) return;
+  presenterTextFitStatus(box, false);
+  if (fits()) return;
+  const normalizedBase = Math.round(base / scale * 1000) / 1000;
+  const floor = Math.min(PRESENTER_TEXT_FIT[role], normalizedBase);
+  let candidate = Math.floor(normalizedBase / PRESENTER_TEXT_FIT.step) * PRESENTER_TEXT_FIT.step;
+  for (; candidate > floor; candidate -= PRESENTER_TEXT_FIT.step) {
+    box.style.setProperty(property, `${candidate * scale}px`);
+    if (fits()) return;
+  }
+  box.style.setProperty(property, `${floor * scale}px`);
+  presenterTextFitStatus(box, !fits());
+}
+
 function fitPresenterChromakeyScriptureText(host, frameState = {}) {
   if (!host || frameState.noChromakey) return;
   const textBox = host.querySelector(
@@ -4261,19 +4306,7 @@ function fitPresenterChromakeyScriptureText(host, frameState = {}) {
   );
   if (!textBox) return;
 
-  textBox.style.removeProperty("--presenter-scripture-fitted-size");
-  const baseSize = Number.parseFloat(window.getComputedStyle(textBox).fontSize);
-  if (!Number.isFinite(baseSize) || baseSize <= 0) return;
-
-  const preview = host.classList?.contains("svc-slide-mini-canvas");
-  const minimumSize = Math.min(preview ? 28 : 32, baseSize);
-  for (let size = Math.round(baseSize); size >= minimumSize; size -= 1) {
-    textBox.style.setProperty("--presenter-scripture-fitted-size", `${size}px`);
-    if (
-      textBox.scrollHeight <= textBox.clientHeight + 1
-      && textBox.scrollWidth <= textBox.clientWidth + 1
-    ) return;
-  }
+  fitPresenterTextBox(textBox, { property:"--presenter-scripture-fitted-size" });
 }
 
 function presenterTextNaturalWidth(node) {
@@ -4312,22 +4345,8 @@ function fitPresenterChromakeyScripturePreviews(host) {
 function fitPresenterSongTitleText(host) {
   if (!host) return;
   fitPresenterLyricText(host);
-  const outputRoot = host.closest?.(".presenter-output-root") || host;
-  const fullscreen = outputRoot.classList?.contains("no-chromakey");
-  const minimumSize = fullscreen ? 72 : 56;
-  host
-    .querySelectorAll(".presenter-slide--song-title > .presenter-slide-text, .presenter-slide--song-title .presenter-section-song-title-name")
-    .forEach((textBox) => {
-      textBox.style.removeProperty("font-size");
-      const baseSize = Number.parseFloat(window.getComputedStyle(textBox).fontSize);
-      if (!Number.isFinite(baseSize) || baseSize <= 0) return;
-
-      const floor = Math.min(minimumSize, baseSize);
-      for (let size = baseSize; size >= floor; size -= 2) {
-        textBox.style.fontSize = `${size}px`;
-        if (textBox.scrollWidth <= textBox.clientWidth + 1) return;
-      }
-    });
+  host.querySelectorAll(".presenter-slide--song-title > .presenter-slide-text, .presenter-slide--song-title .presenter-section-song-title-name")
+    .forEach(box => fitPresenterTextBox(box, {role:"title"}));
 }
 
 const presenterLyricFitCache = new Map();
@@ -4351,11 +4370,11 @@ function presenterLyricFitKey(textBox) {
   ]);
 }
 
-function rememberPresenterLyricFit(key, fontSize) {
+function rememberPresenterLyricFit(key, fontSize, overflow = false) {
   if (presenterLyricFitCache.size >= PRESENTER_LYRIC_FIT_CACHE_LIMIT) {
     presenterLyricFitCache.delete(presenterLyricFitCache.keys().next().value);
   }
-  presenterLyricFitCache.set(key, fontSize);
+  presenterLyricFitCache.set(key, {fontSize, overflow});
 }
 
 // Font changes invalidate every fit, but must not synchronously refit an
@@ -4374,39 +4393,30 @@ document.fonts?.addEventListener("loadingdone", invalidatePresenterFontFits);
 document.fonts?.addEventListener("loadingerror", invalidatePresenterFontFits);
 
 function fitPresenterLyricText(host) {
-  if(host)fitPresenterAnnouncementRegions(host);
+  if (!host) return;
+  fitPresenterAnnouncementRegions(host);
+  host.querySelectorAll(".presenter-liturgical-body-lines, .presenter-slide--liturgical-body .presenter-title-content-body")
+    .forEach(box => fitPresenterTextBox(box));
   host.querySelectorAll('.presenter-slide--lyrics:is([data-element-type="praise"], [data-section-key="announcements"]) > .presenter-slide-text').forEach((textBox) => {
     textBox.style.removeProperty("font-size");
     const baseSize = Number.parseFloat(getComputedStyle(textBox).fontSize);
     if (!Number.isFinite(baseSize) || baseSize <= 0 || !textBox.clientWidth) return;
-    // Read the unfitted CSS size first so theme, viewport and typography changes invalidate the key.
-    const key = document.fonts?.status === "loading" ? null : presenterLyricFitKey(textBox);
+    const key = document.fonts?.status === "loading" ? null : JSON.stringify([presenterTextFitScale(textBox),presenterLyricFitKey(textBox)]);
     if (key !== null && presenterLyricFitCache.has(key)) {
-      const size = presenterLyricFitCache.get(key);
-      if (size) textBox.style.fontSize = size;
+      const record = presenterLyricFitCache.get(key);
+      if (record.fontSize) textBox.style.fontSize = record.fontSize;
+      presenterTextFitStatus(textBox, record.overflow);
       return;
     }
     const fits = () => {
       const style = getComputedStyle(textBox);
       const width = textBox.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
-      return [...textBox.children].every((line) => presenterTextNaturalWidth(line) <= width - 2)
-        && textBox.scrollHeight <= textBox.clientHeight + 1;
+      const tolerance = presenterTextFitScale(textBox);
+      return [...textBox.children].every(line => presenterTextNaturalWidth(line) <= width - 2 * tolerance)
+        && textBox.scrollHeight <= textBox.clientHeight + tolerance;
     };
-    if (fits()) {
-      if (key !== null) rememberPresenterLyricFit(key, "");
-      return;
-    }
-    // Measure complete lines, including generated verse numbers, before revealing the frame.
-    let low = 0;
-    let high = baseSize;
-    for (let step = 0; step < 14; step += 1) {
-      const size = (low + high) / 2;
-      textBox.style.fontSize = `${size}px`;
-      if (fits()) low = size;
-      else high = size;
-    }
-    textBox.style.fontSize = `${low}px`;
-    if (key !== null) rememberPresenterLyricFit(key, textBox.style.fontSize);
+    fitPresenterTextBox(textBox, {fits});
+    if (key !== null) rememberPresenterLyricFit(key, textBox.style.fontSize, textBox.dataset.presenterFitOverflow === "true");
   });
 }
 
@@ -4419,23 +4429,8 @@ function fitPresenterSongTitlePreviews(host) {
 
 function fitPresenterSermonTitleText(host) {
   if (!host) return;
-  const outputRoot = host.closest?.(".presenter-output-root") || host;
-  const fullscreen = outputRoot.classList?.contains("no-chromakey");
-  const minimumSize = fullscreen ? 72 : 56;
-  host
-    .querySelectorAll(".presenter-title-assignee--sermon .presenter-title-assignee-content, .presenter-title-content-title")
-    .forEach((textBox) => {
-      textBox.style.removeProperty("font-size");
-      const baseSize = Number.parseFloat(window.getComputedStyle(textBox).fontSize);
-      if (!Number.isFinite(baseSize) || baseSize <= 0) return;
-
-      const songTitle = textBox.closest('.presenter-slide--fullscreen-song-title');
-      const floor = Math.min(songTitle ? 48 * (outputRoot.clientWidth || 1920) / 1920 : minimumSize, baseSize);
-      for (let size = baseSize; size >= floor; size -= 2) {
-        textBox.style.fontSize = `${size}px`;
-        if (textBox.scrollWidth <= textBox.clientWidth + 1) return;
-      }
-    });
+  host.querySelectorAll(".presenter-title-assignee--sermon .presenter-title-assignee-content, .presenter-title-content-title, .presenter-liturgical-body-heading > span")
+    .forEach(box => fitPresenterTextBox(box, {role:"title"}));
 }
 
 function fitPresenterSermonTitlePreviews(host) {
@@ -5586,19 +5581,15 @@ function fitPresenterAnnouncementRegions(host) {
         ? box.parentElement.querySelector(".presenter-liturgical-body-heading")?.getBoundingClientRect()
         : null;
       const top=heading?Math.max(bounds.top,heading.bottom):bounds.top;
-      return box.scrollWidth<=box.clientWidth+1&&box.scrollHeight<=box.clientHeight+1
+      const root=box.closest(".presenter-output-root");
+      const tolerance=(root?.getBoundingClientRect().width || 1920)/1920;
+      return presenterTextFits(box)
         && [...box.children].every(item=>{
           const rect=item.getBoundingClientRect();
-          return rect.top>=top-1&&rect.bottom<=bounds.bottom+1;
+          return rect.top>=top-tolerance&&rect.bottom<=bounds.bottom+tolerance;
         });
     };
-    if(fits())return;
-    let low=0,high=base;
-    for(let i=0;i<12;i++){
-      const size=(low+high)/2;box.style.fontSize=`${size}px`;
-      if(fits())low=size;else high=size;
-    }
-    box.style.fontSize=`${low}px`;
+    fitPresenterTextBox(box, {fits});
   });
 }
 

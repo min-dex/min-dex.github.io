@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261022-remote-icon",
+  "version": "20261022-presenter-common-fit",
   "options": {
     "compress": false,
     "mangle": {
