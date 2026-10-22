@@ -7811,8 +7811,8 @@
           "textSha256": "c752b698277e5a2e5729cd173f213413f8aba655fcb5dec4610f6617f9645ef2",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            11.25,
-            7.75
+            10.75,
+            8.25
           ],
           "approxMeasures": 19.0,
           "reviewStatus": "score_supported_approximation"
@@ -7823,8 +7823,8 @@
           "textSha256": "367568cfef3ae251e5acb6140050f47d1b9fc10b9d01fed850e2f49a69dee62a",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            11.25,
-            7.75
+            10.75,
+            8.25
           ],
           "approxMeasures": 19.0,
           "reviewStatus": "score_supported_approximation"
@@ -7835,8 +7835,8 @@
           "textSha256": "1c51f65f1eba587825134b5174a57a17cde43ba2f9022827ad8d129faa815ef6",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            11.25,
-            7.75
+            10.75,
+            8.25
           ],
           "approxMeasures": 19.0,
           "reviewStatus": "score_supported_approximation"
@@ -7847,8 +7847,8 @@
           "textSha256": "df1542a9c3b749613252a9f76db0d42e1c66cea209691542fdfac4c424bf0570",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            11.25,
-            7.75
+            10.75,
+            8.25
           ],
           "approxMeasures": 19.0,
           "reviewStatus": "score_supported_approximation"
@@ -41597,9 +41597,9 @@
           "textSha256": "62585554a7e38f30bbdaf1a17b7d5891e889168120ccaee14fa0916de0d8547e",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            7.25,
+            6.75,
             6,
-            5.75
+            6.25
           ],
           "approxMeasures": 19.0,
           "reviewStatus": "score_supported_approximation"
@@ -41610,9 +41610,9 @@
           "textSha256": "ce3d3f91142eb750c6993dcd4b1b7f0c715d2e04e03c7fa29e5f483266f25b4b",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            7.25,
+            6.75,
             6,
-            5.75
+            6.25
           ],
           "approxMeasures": 19.0,
           "reviewStatus": "score_supported_approximation"
@@ -41623,9 +41623,9 @@
           "textSha256": "452dc492c00ac620e46915df8b3c2bfc33e6f674ecb68000309ba9e062e9ef58",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            7.25,
+            6.75,
             6,
-            5.75
+            6.25
           ],
           "approxMeasures": 19.0,
           "reviewStatus": "score_supported_approximation"
@@ -41636,9 +41636,9 @@
           "textSha256": "57c71d2f96d3747cbe2238f6d1d0140eccbb3969f297164f180fc2b00d13839f",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            7.25,
+            6.75,
             6,
-            5.75
+            6.25
           ],
           "approxMeasures": 19.0,
           "reviewStatus": "score_supported_approximation"
