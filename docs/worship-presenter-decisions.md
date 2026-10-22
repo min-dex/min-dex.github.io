@@ -3778,7 +3778,9 @@ Liturgical body sizes and chromakey caption text are unchanged.
   as {url, originX, originY, width, height}. Origin is a percentage of the artwork;
   width/height use the existing 1920×1080 stage units. Invalid input uses the
   existing cross. The complete artwork is centered on the stage and revealed from its origin
-  outward simultaneously; no chapel identity is hardcoded in runtime logic.
+  outward simultaneously by scaling the complete silhouette around that origin.
+  No rectangular reveal mask clips the tips during growth; no chapel identity is
+  hardcoded in runtime logic.
 - The existing blank-slide renderer, thumbnails, output payload and remote
   normalization share the same setting. Thumbnails/reduced motion show the final
   frame. Inactive layers, chromakey and safety blackout never reveal artwork.
