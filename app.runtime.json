@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261022-remote-control-icons",
+  "version": "20261022-title-songform",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "b9b38d57dab079c3fa17ca02a4b287afbb7b4a0d1c4658996cd0807bc5370ac5",
-  "runtime_sha256": "ff33e6839db01887ac6f428ed6c39504471048fbfe82a9417d622af56ebbc06a",
-  "source_bytes": 1552047,
-  "runtime_bytes": 1098661,
-  "source_gzip": 349097,
-  "runtime_gzip": 273032
+  "source_sha256": "5ab2e6440db2e6c8dbc2a7b02791374250e7a5583a5f7c3b2d072810cbbf5377",
+  "runtime_sha256": "e3a917b858e94b7d4fccdbb3525954ddb708f670ec20b79cc495fdbbd6f7a70c",
+  "source_bytes": 1552967,
+  "runtime_bytes": 1099306,
+  "source_gzip": 349306,
+  "runtime_gzip": 273242
 }

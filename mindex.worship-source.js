@@ -3,7 +3,7 @@
 // Values are resolved by the caller; this formatter does not look up app state.
 function serializePortableServiceSourceItem(fields) {
   const { label, value, elementType, inputMode, outputMode, formHint, songTitle,
-    songId, versionId, assignee, hasTranslation, translationLabel, translationId, sermonReference,
+    titleSequence, songId, versionId, assignee, hasTranslation, translationLabel, translationId, sermonReference,
     lyrics, slides, manualScripture, manualTranslation, asset, audio, audioTiming, announcementRegions } = fields;
   const lines = [`[${label}]`];
   const textField = (key, text = "") => {
@@ -21,7 +21,8 @@ function serializePortableServiceSourceItem(fields) {
   if (elementType) lines.push(`- 유형: ${elementType}`);
   if (inputMode) lines.push(`- 입력: ${inputMode}`);
   if (outputMode) lines.push(`- 출력: ${outputMode}`);
-  if (formHint) lines.push(`- 송폼: ${formHint}`);
+  if (formHint || titleSequence) lines.push(`- 송폼: ${formHint || ""}`);
+  if (titleSequence) lines.push("- 제목 순서: 송폼");
   if (songTitle) lines.push(`- 곡: ${songTitle}`);
   if (songId) lines.push(`- 곡 ID: ${songId}`);
   if (versionId) lines.push(`- 버전 ID: ${versionId}`);
@@ -210,6 +211,7 @@ function parsePortableServiceSourceText(value = "", options = {}) {
       else if (key === "입력") current.inputMode = fieldValue;
       else if (key === "출력") current.outputMode = fieldValue;
       else if (key === "송폼") current.formHint = fieldValue;
+      else if (key === "제목순서") current.titleSequence = fieldValue === "송폼";
       else if (key === "곡") current.songTitle = fieldValue;
       else if (key === "곡id") current.songId = fieldValue;
       else if (key === "버전id") current.versionId = fieldValue;

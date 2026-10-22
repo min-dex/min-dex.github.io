@@ -3805,3 +3805,20 @@ Liturgical body sizes and chromakey caption text are unchanged.
   overflow flag before measuring; shortening content restores its base type.
 - This replaces former1px/2px loops, unconstrained binary shrink, title clamp and
   the separate28px preview/32px output scripture floors.
+
+## Explicit Title in song forms · 2026-10-22
+
+- `Title` is a sequence token for the existing song title renderer, not a lyric
+  unit type. Input case/outer whitespace normalizes to `Title`; Tag/Tags and
+  their existing meanings are unchanged (no reassignment of T).
+- Legacy presets retain automatic title behavior without data migration. The
+  first explicit Title enables `titleSequence` on that preset; removing it or
+  clearing the sequence retains that intent instead of restoring an auto title.
+- Explicit title positions/repetitions get unique slide IDs and do not consume
+  a lyric paragraph. Manual slide blocks retain their authored boundaries.
+  Labelled score pages follow the same title positions. No corpus units change.
+- Memo/config and portable source (`제목 순서: 송폼`) preserve explicit policy.
+  Playback projection alone changes; publishing does not write service records.
+- Regression: smoke_title_songform.py uses synthetic Chromium/WebKit records,
+  rendering, edit/reopen, empty/repeated/middle Title, direct paragraphs, score
+  ordering and portable policy. No native output or operational audio is opened.

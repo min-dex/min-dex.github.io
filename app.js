@@ -4830,7 +4830,8 @@ function groupWorshipElements(sections = [], elements = []) {
       || config.disable_form_preset,
     );
     const formHint = formPresetDisabled ? "" : serviceFormHintFromConfig(config);
-    const formPreset = formPresetDisabled ? null : normalizeServiceFormPreset(config.formPreset || config.form_preset, formHint);
+    const storedFormPreset = normalizeServiceFormPreset(config.formPreset || config.form_preset, formHint);
+    const formPreset = formPresetDisabled && !storedFormPreset?.titleSequence ? null : storedFormPreset;
     const formPresetRules = formPresetDisabled ? [] : normalizeServiceFormPresetRules(config.formPresetRules || config.form_preset_rules);
     const scriptureReference = serviceElementScriptureReference(element, section, sourceRef, config);
     const scriptureReferences = serviceElementScriptureReferences(element, section, sourceRef, config);
@@ -9981,7 +9982,7 @@ function updateSongMetadataField(field) {
   const key = field.dataset.songMetaField;
   const metadata = normalizeSongMetadata(song.metadata);
   if (key === "presenter_form") {
-    metadata[key] = normalizeServiceFormPreset(field.value, field.value, "song-default");
+    metadata[key] = normalizeServiceFormPreset({ forms: normalizeServiceFormPresetForms(field.value), hint: field.value, titleSequence: metadata[key]?.titleSequence }, field.value, "song-default");
   } else {
     metadata[key] = field.value;
   }
@@ -22482,7 +22483,7 @@ function mergeTemplateProjectionMemo(templateMemo = "", existingMemo = "") {
     componentType: template.componentType || template.elementType || existing.componentType,
     outputMode: template.outputMode || existing.outputMode,
     formHint: formPresetDisabled ? "" : template.formHint || existing.formHint,
-    formPreset: formPresetDisabled ? null : template.formPreset || existing.formPreset,
+    formPreset: formPresetDisabled ? (existing.formPreset?.titleSequence ? existing.formPreset : null) : template.formPreset || existing.formPreset,
     formPresetDisabled,
     formPresetRules: formPresetDisabled ? [] : template.formPresetRules.length ? template.formPresetRules : existing.formPresetRules,
     textHighlights: template.textHighlights.length ? template.textHighlights : existing.textHighlights,
@@ -23562,7 +23563,7 @@ function renderServiceFormHintInput(item, index, options = {}) {
       data-service-id="${escapeAttr(item.service_id || options.serviceId || state.selectedServiceId || "")}"
       data-service-item-index="${index}"
       value="${escapeAttr(serviceItemEffectiveFormHint(item))}"
-      placeholder="${escapeAttr(options.placeholder || "송폼/범위")}"
+      placeholder="${escapeAttr(options.placeholder || "송폼 · Title-V1-C")}"
       aria-label="섹션 송폼/범위"
     />`;
 }
@@ -25841,7 +25842,7 @@ function serviceSourceItemLines(item = {}, service = null, memo = parseServiceIt
   const asset = normalizeServiceAsset(memo.asset);
   const audio = normalizeServiceAudioAsset(memo.audioAsset || memo.audio_asset);
   return serializePortableServiceSourceItem({
-    label, value, elementType, inputMode, outputMode, formHint: memo.formHint,
+    label, value, elementType, inputMode, outputMode, formHint: memo.formHint, titleSequence: memo.formPreset?.titleSequence,
     songTitle: song?.title, songId: item.song_id, versionId: item.version_id || item.song_version_id,
     assignee, hasTranslation: Boolean(translation), translationLabel, translationId, sermonReference,
     lyrics, slides: memo.slides, manualScripture, manualTranslation, asset, audio, audioTiming:memo.audioTiming,
@@ -26049,6 +26050,7 @@ function ensurePortableSourceItems(service, records = []) {
       inputMode: normalizeServiceInputMode(record.inputMode || ""),
     };
     if (record.formHint) memo.formHint = normalizeServiceFormHint(record.formHint);
+    if (record.titleSequence) memo.formPreset = normalizeServiceFormPreset({ forms: normalizeServiceFormPresetForms(record.formHint), titleSequence: true });
     const sectionKey = `source-${compactSearchValue(record.sectionTitle || "section").replace(/[^a-z0-9가-힣]+/g, "-") || "section"}`;
     const sectionPeer = items.find(item => compactSearchValue(serviceSourceSectionTitle(item)) === compactSearchValue(record.sectionTitle));
     // Place new source records beside their source neighbours, retaining section identity.
@@ -26108,6 +26110,12 @@ function applyServiceSourceRecord(serviceId, index, record = {}) {
   if (!item) return false;
   if (record.elementType) updateServiceItemField(serviceSourceVirtualField(serviceId, index, "element_type", record.elementType), { deferPresenterRefresh: true });
   if (record.inputMode) updateServiceItemField(serviceSourceVirtualField(serviceId, index, "input_mode", record.inputMode), { deferPresenterRefresh: true });
+  if (record.titleSequence) {
+    item = getServiceItems(serviceId)[index];
+    const memo = parseServiceItemMemo(item.memo);
+    memo.formPreset = { ...memo.formPreset, titleSequence: true };
+    item.memo = serializeServiceItemMemo(memo);
+  }
   if (Object.hasOwn(record, "formHint")) updateServiceItemField(serviceSourceVirtualField(serviceId, index, "form_hint", record.formHint), { deferPresenterRefresh: true });
   // Updates can replace normalized items; classify using the restored type/mode.
   item = getServiceItems(serviceId)[index];
@@ -31828,6 +31836,7 @@ function annotatePresenterFormStarts(entries = [], initialPreviousKey = "") {
 
 function presenterSlideSupportsFormGrouping(slide) {
   if (!slide) return false;
+  if (slide.formLabel === "Title" && String(slide.formKey || "").startsWith("title:")) return true;
   const praiseLowerBar = presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE
     && presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT;
   if (praiseLowerBar) return true;
@@ -34410,7 +34419,8 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   const song = presenterSongForServiceItem(item, displayText, label, service);
   const version = song ? getPresenterServiceItemVersion(song, item, service) : null;
   const formPlan = version ? presenterFormPlanForServiceItem(version, item, song) : { forms: [], warnings: [] };
-  const forms = globalThis.MindexSongTiming?.formsFor(item, song, version, formPlan.forms) || formPlan.forms;
+  const forms = serviceItemFormPreset(item)?.titleSequence ? formPlan.forms
+    : globalThis.MindexSongTiming?.formsFor(item, song, version, formPlan.forms) || formPlan.forms;
   const formWarnings = formPlan.warnings;
   const memo = initialMemo;
   const linkedSongId = String(item.song_id || item.songId || "").trim();
@@ -34555,7 +34565,7 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
     const slides = shouldSuppressMainPraiseScoreSongTitle(item, service)
       ? scoreSlides
       : [
-	        ...(song && shouldIncludeSongTitleSlide(item, label) ? [presenterSongTitleSlide(item, section, song, version, displayText, index)] : []),
+	        ...(song && shouldIncludeSongTitleSlide(item, label, song, version) ? [presenterSongTitleSlide(item, section, song, version, displayText, index)] : []),
         ...scoreSlides,
       ];
     return withIntro(presenterSlidesWithSpecialSongTitle(item, section, slides, index, service));
@@ -34566,7 +34576,7 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
       item, section, index, song, version, displayText, label, forms, formWarnings,
     });
     const syncConfig = presenterSyncedLyricsConfigFromAsset(configuredAsset);
-    const slides = shouldIncludeSongTitleSlide(item, label)
+    const slides = shouldIncludeSongTitleSlide(item, label, song, version)
       ? presenterSlidesWithSpecialSongTitle(item, section, [
           presenterSongTitleSlide(item, section, song, version, displayText, index),
           ...lyricsSlides,
@@ -34579,7 +34589,7 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   if (!specialSongItem && song && presenterHymnScoreAssetSlides(song, version, displayText).length) {
     const scoreSlides = presenterScoreSlidesForServiceItem(item, section, index, song, version, displayText, memo, forms, formWarnings);
     const slides = [
-	      ...(song && shouldIncludeSongTitleSlide(item, label) ? [presenterSongTitleSlide(item, section, song, version, displayText, index)] : []),
+	      ...(song && shouldIncludeSongTitleSlide(item, label, song, version) ? [presenterSongTitleSlide(item, section, song, version, displayText, index)] : []),
       ...scoreSlides,
     ];
     return withIntro(presenterSlidesWithSpecialSongTitle(item, section, slides, index, service));
