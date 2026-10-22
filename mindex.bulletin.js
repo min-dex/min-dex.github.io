@@ -1435,7 +1435,7 @@
       const b=event.target.closest("button");if(!b)return;
       if(b.hasAttribute("data-bulletin-template-edit")){void editTemplate();return;}
       if(b.hasAttribute("data-bulletin-template-reload")){
-        if(templateSession){try{const target=doc,before=JSON.stringify(snapshot(target));await retainRecovery(target,snapshot(target));if(doc!==target||JSON.stringify(snapshot(target))!==before)throw Error("입력이 바뀌어 현재 초안을 유지했습니다.");await writeLocal(target,target.key,{version:3,templateDirty:false});if(doc!==target||JSON.stringify(snapshot(target))!==before)throw Error("입력이 바뀌어 현재 초안을 유지했습니다.");exitTemplate();templateDraft=null;void editTemplate();}catch(e){saveError=e.message;status();}}return;
+        if(templateSession){try{const target=doc,before=JSON.stringify(snapshot(target));await retainRecovery(target,snapshot(target));if(doc!==target||JSON.stringify(snapshot(target))!==before)throw Error("입력이 바뀌어 현재 초안을 유지했습니다.");await writeLocal(target,target.key,{version:3,...snapshot(target),templateDirty:false,templateRevision:target.revision,savedAt:Date.now()});if(doc!==target||JSON.stringify(snapshot(target))!==before)throw Error("입력이 바뀌어 현재 초안을 유지했습니다.");exitTemplate();templateDraft=null;void editTemplate();}catch(e){saveError=e.message;status();}}return;
       }
       if(b.hasAttribute("data-bulletin-template-exit")){exitTemplate();return;}
       if(b.hasAttribute("data-bulletin-template-apply")){
