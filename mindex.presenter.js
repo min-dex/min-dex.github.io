@@ -4651,18 +4651,6 @@ function presenterOutputLayers(root) {
   return { active, next };
 }
 
-function presenterEmphasisPalette(frameState = {}) {
-  if (!frameState.showBackground || !frameState.noChromakey
-      || (frameState.outputTheme || presenterOutputTheme(frameState.serviceType)) !== "children") return "";
-  const sources = frameState.backgroundImages?.length ? frameState.backgroundImages : [frameState.backgroundImage];
-  // Retain artwork identity when a decoded/data URL precedes its file fallback.
-  const code = sources.map(source => String(source || "").split(/[?#]/)[0]
-    .match(/(?:^|\/)26-(C[1235]|S[456])\.(?:png|jpe?g|webp)$/i)?.[1]?.toUpperCase()).find(Boolean);
-  if (code === "C1" || code === "C2") return "textured";
-  if (code === "C3") return "sky";
-  return "light";
-}
-
 function applyPresenterOutputFrameState(root, frameState = {}) {
   document.body.classList.toggle("presenter-output-body--clean", Boolean(frameState.cleanOutput));
   document.body.classList.toggle("has-background", Boolean(frameState.showBackground));
@@ -4676,7 +4664,6 @@ function applyPresenterOutputFrameState(root, frameState = {}) {
   applyPresenterBackgroundVideo(root, frameState.backgroundVideo);
   root.dataset.serviceType = frameState.serviceType || "";
   root.dataset.outputTheme = frameState.outputTheme || presenterOutputTheme(frameState.serviceType);
-  root.dataset.emphasisPalette = presenterEmphasisPalette(frameState);
   // Reuse decoded image nodes for output backgrounds. Assigning the URL to CSS
   // can start another fetch/decode after the readiness gate (notably cold caches).
   const sources = frameState.showBackground ? (frameState.backgroundImages?.length
@@ -5818,7 +5805,8 @@ function renderPresenterHighlightedText(line, slide) {
     if (range.start > cursor) parts.push(renderRange(cursor, range.start));
     const content = renderRange(range.start, range.end);
     const style = presenterTextHighlightStyle(range.highlight);
-    parts.push(`<span class="presenter-text-highlight"${style ? ` style="${style}"` : ""}>${content}</span>`);
+    const colorClass = style.includes("--presenter-text-highlight-color:") ? " presenter-text-highlight--color" : "";
+    parts.push(`<span class="presenter-text-highlight${colorClass}"${style ? ` style="${style}"` : ""}>${content}</span>`);
     cursor = range.end;
   });
   if (cursor < text.length) parts.push(renderRange(cursor, text.length));
@@ -5828,13 +5816,7 @@ function renderPresenterHighlightedText(line, slide) {
 function presenterTextHighlightStyle(highlight = {}) {
   const styles = [];
   const color = normalizeServiceTextHighlightColor(highlight.color || highlight.fg || highlight.foreground || highlight.hex);
-  if (color) {
-    // Theme overrides preserve the authored color as the fallback everywhere else.
-    const palette = ["#FFC832", "#C8FF32", "#FF96C8", "#FF6432", "#32C8FF", "#9696FF"];
-    const token = palette.includes(color.toUpperCase()) ? `--presenter-highlight-${color.slice(1).toLowerCase()}` : "";
-    styles.push(`--presenter-text-highlight-color: ${token ? `var(${token}, ${escapeAttr(color)})` : escapeAttr(color)}`);
-    if (token) styles.push("--presenter-text-highlight-stroke: var(--presenter-palette-stroke, 0px)");
-  }
+  if (color) styles.push(`--presenter-text-highlight-color: ${escapeAttr(color)}`);
   if (highlight.bold === false) styles.push("--presenter-text-highlight-weight: inherit");
   return styles.join("; ");
 }

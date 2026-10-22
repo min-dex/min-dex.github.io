@@ -3876,3 +3876,15 @@ retain the cream-background palette. Unknown/custom artwork retains that default
 no automatic contrast guarantee is made for arbitrary user images. Reading,
 blackout, chromakey and non-children frames reset palette selection. Authored
 highlight values and unrelated custom colors remain unchanged.
+
+
+## Children common marker emphasis ·2026-10-23
+
+Supersedes Children community-confession emphasis and Children artwork emphasis
+palettes above. All colored highlights on children fullscreen service artwork now
+use the authored color as an opaque marker behind the lower65% of the text line
+(30–95%), with the common #34271f foreground. Bold-only emphasis stays plain.
+Remove artwork identity selection, per-background color substitutions, palette
+attributes and text outlines. Every artwork, preview and output uses one CSS rule;
+no stored highlight values, text, font sizes or weights change. Non-children,
+chromakey and reading frames retain their existing colored text behavior.
