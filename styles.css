@@ -9648,3 +9648,10 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
 .editor-draft-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:10px; }
 .editor-draft-actions .secondary { border:1px solid var(--line); background:var(--ui-surface-field); }
 .editor-draft-actions .secondary:hover { border-color:var(--ink-3); }
+
+/* Controller-only warning: the output never shrinks below its readable floor. */
+.svc-slide-thumb-frame:has([data-presenter-fit-overflow="true"])::before {
+ content:"내용 넘침";position:absolute;right:5px;bottom:5px;z-index:3;
+ padding:5px 10px;border-radius:5px;background:var(--ui-surface-panel);color:var(--warn);
+ font-size:var(--ui-meta-size);font-weight:600;line-height:1.5;
+}

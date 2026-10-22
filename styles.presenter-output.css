@@ -1128,11 +1128,7 @@
 /* Song titles stay centered as their length grows. The character estimate is
    rendered with each title, so ordinary titles retain the display scale. */
 :is(.svc-slide-mini-output, .presenter-output-root).no-chromakey .presenter-slide--song-title .presenter-section-song-title-name {
-  font-size: clamp(
-    calc(70 * var(--presenter-stage-unit)),
-    calc(90cqw / var(--line-chars, 1)),
-    var(--presenter-size-song-title)
-  );
+  font-size: var(--presenter-size-song-title);
   text-align: center;
   transform: translateZ(0);
 }

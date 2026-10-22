@@ -3787,3 +3787,21 @@ Liturgical body sizes and chromakey caption text are unchanged.
 - Defaults remain unchanged. ON FIRE uses the supplied poster's tapered cross,
   red #af3b20, intersection (50%,29.5%) and a 255×450 stage-unit size. The vector
   is a reconstruction of the supplied raster silhouette, not an original vector.
+
+## Shared presenter text fitting · 2026-10-22
+
+- All shrinking uses the1920×1080 design stage:5px candidate steps, body floor40px,
+  title floor70px. Existing base copy smaller than a floor is never enlarged.
+- Lyrics, announcement zones, liturgical text, chromakey scripture and titles use
+  the same fitting helper. Preview status never changes the minimum or step.
+  Output uses its logical stage width; miniature CSS transforms affect display only.
+- Preserve each frame's layout constraints: title ink may extend below its tight
+  line box, so test its allocated slide bounds; body/regions must fit their area.
+- At the floor, unfit content is marked with a controller-only `내용 넘침` badge
+  and accessible description. Do not silently shrink below the floor or mutate
+  stored content. Splitting an overfull author-written slide remains explicit.
+- Dedicated scripture reading keeps its existing paginated layout and type scale.
+- Retain lyric fit caching and font-load invalidation. A retry resets the size and
+  overflow flag before measuring; shortening content restores its base type.
+- This replaces former1px/2px loops, unconstrained binary shrink, title clamp and
+  the separate28px preview/32px output scripture floors.
