@@ -17355,6 +17355,7 @@ function renderSongMetadataDialog(song) {
           ${renderMetadataInput("트랙", "track", metadata.track || "", "compact meta-track")}
           ${renderMetadataInput("송폼", "presenter_form", serviceFormPresetSummary(metadata.presenter_form) || "", "compact")}
           ${renderInput("성구", "scripture", cleanList(song.scripture).join(LIST_INPUT_SEPARATOR), "compact meta-ref")}
+          ${renderVersionMusicalStructure(getSelectedVersion(), state.forms, { metadataField: true })}
         </div>
       </section>
     </div>
@@ -17830,20 +17831,28 @@ function updateVersionMusicalStructure(node, version, forms) {
   if (!node || !globalThis.MindexHymnStructure) return;
   const ticket = String(++hymnStructureRenderTicket);
   node.dataset.hymnStructureRequest = ticket;
-  node.textContent = "마디 정보 확인 중…";
+  if (node.matches("input")) node.value = "확인 중…";
+  else node.textContent = "마디 정보 확인 중…";
   const snapshot = (forms || []).map(form => ({id:form.id, part_type:form.part_type, lyrics:form.lyrics || ""}));
   MindexHymnStructure.describe(version.id, snapshot)
     .catch(() => ({text:"마디 정보를 불러오지 못했어요",status:"error"}))
     .then(result => {
       if (!node.isConnected || node.dataset.hymnStructureRequest !== ticket) return;
-      node.textContent = result.text;
+      if (node.matches("input")) {
+        node.value = result.text.replace(/^마디:\s*/, "").split(" · 블록 ")[0];
+        node.title = `${node.dataset.hymnStructureLabel} · ${result.text}`;
+      } else node.textContent = result.text;
       node.dataset.reviewStatus = result.status;
     });
 }
-function renderVersionMusicalStructure(version, forms) {
-  if (!version?.hymn_no || !globalThis.MindexHymnStructure) return "";
+function renderVersionMusicalStructure(version, forms, options = {}) {
+  if (!version || !globalThis.MindexHymnStructure || (!options.metadataField && !version.hymn_no)) return "";
   const ticket = ++hymnStructureRenderTicket;
   queueMicrotask(() => updateVersionMusicalStructure(document.querySelector(`[data-hymn-structure-ticket="${ticket}"]`), version, forms));
+  if (options.metadataField) {
+    const label = `마디 수 · ${versionEditableName(getSelectedSong(), version)}`;
+    return `<label class="field compact"><span>마디 수</span><input type="text" readonly aria-label="${escapeAttr(label)}" value="확인 중…" data-hymn-structure-label="${escapeAttr(label)}" data-hymn-structure-ticket="${ticket}" data-hymn-structure-version="${escapeAttr(version.id)}" /></label>`;
+  }
   return `<div class="version-musical-structure" data-hymn-structure-ticket="${ticket}" data-hymn-structure-version="${escapeAttr(version.id)}" aria-label="버전별 마디 정보">마디 정보 확인 중…</div>`;
 }
 
@@ -32001,7 +32010,7 @@ function renderPresenterSlideMiniPreview(slide, serviceId = state.presenter.serv
   return `
     <span class="${escapeAttr(outputClasses)}">
       <span class="${escapeAttr(canvasClasses)}" data-output-theme="${escapeAttr(theme)}"${backgroundStyle}>
-        ${renderPresenterSlideFrame(previewSlide, { noChromakey: frameState.noChromakey, previewStage: true })}
+        ${renderPresenterSlideFrame(previewSlide, { noChromakey: frameState.noChromakey, previewStage: true, transitionLogo: serviceRawSourceRef(service).transitionLogo })}
       </span>
     </span>`;
 }

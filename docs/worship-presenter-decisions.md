@@ -3770,3 +3770,18 @@ Plain unzoned announcement copy also uses60px. Existing overflow fitting still
 shrinks a region only when needed; its font size is a base, not a clipping rule.
 This supersedes the earlier4cqh welcome/news and3.6cqh footer sizes.
 Liturgical body sizes and chromakey caption text are unchanged.
+
+
+## Per-service blank-transition artwork ·2026-10-22
+
+- Explicitly requested artwork can be configured in service source_ref.transitionLogo
+  as {url, originX, originY, width, height}. Origin is a percentage of the artwork;
+  width/height use the existing 1920×1080 stage units. Invalid input uses the
+  existing cross. The intersection is anchored at stage center and revealed
+  outward simultaneously; no chapel identity is hardcoded in runtime logic.
+- The existing blank-slide renderer, thumbnails, output payload and remote
+  normalization share the same setting. Thumbnails/reduced motion show the final
+  frame. Inactive layers, chromakey and safety blackout never reveal artwork.
+- Defaults remain unchanged. ON FIRE uses the supplied poster's tapered cross,
+  red #af3b20, intersection (50%,29.5%) and a 255×450 stage-unit size. The vector
+  is a reconstruction of the supplied raster silhouette, not an original vector.
