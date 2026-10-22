@@ -4012,6 +4012,7 @@ function presenterOutputFrameStateForSlide(slide, payload = {}) {
     scoreOutput,
     videoOutput,
     scriptureReadingOutput,
+    backgroundVideo: blackoutOutput ? "" : presenterSlideBackgroundVideoSource(slide, cleanOutput),
     backgroundImage: backgroundImages[0] || "",
     backgroundImages,
     serviceType: payload?.serviceType || "",
@@ -4234,6 +4235,8 @@ function presenterOutputFrameKey(payload = {}, slide = null, frameState = {}) {
     frameState.noChromakey ? "clean" : "chromakey",
     frameState.blankOutput ? "blank" : "",
     frameState.backgroundImage || "",
+    frameState.backgroundVideo || "",
+    slide.presentationMode || "",
     frameState.blankOutput ? JSON.stringify(normalizePresenterTransitionLogo(payload.transitionLogo)) : "",
     slide.title || "",
     slide.text || "",
@@ -4616,6 +4619,7 @@ function applyPresenterOutputFrameState(root, frameState = {}) {
   root.classList.toggle("is-blank", Boolean(frameState.blankOutput));
   document.body.classList.toggle("is-blackout", Boolean(frameState.blackoutOutput));
   root.classList.toggle("is-blackout", Boolean(frameState.blackoutOutput));
+  applyPresenterBackgroundVideo(root, frameState.backgroundVideo);
   root.dataset.serviceType = frameState.serviceType || "";
   root.dataset.outputTheme = frameState.outputTheme || presenterOutputTheme(frameState.serviceType);
   // Reuse decoded image nodes for output backgrounds. Assigning the URL to CSS
@@ -5168,7 +5172,7 @@ function renderPresenterSlideFrame(slide, options = {}) {
     && presenterSlideLayout(slide) !== PRESENTER_SLIDE_LAYOUTS.BLANK
     && (slide?.songTitle || (slide?.type === "song-title" && presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE))) {
     const content = presenterSongTitleContent(slide);
-    const title = formatPresenterSongTitleText(content.title);
+    const title = String(content.title || "").replace(PRESENTER_SONG_NOTE_PATTERN, "").trim();
     // Keep the order heading when adapting song titles for fullscreen output.
     slide = { ...slide, elementType: PRESENTER_ELEMENT_TYPES.TITLE_CONTENT,
       layout: PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT, type: "title-content",
@@ -5186,6 +5190,7 @@ function renderPresenterSlideFrame(slide, options = {}) {
   return `
     <section class="presenter-slide presenter-slide--${escapeAttr(slideClass)}${extraClasses ? ` ${escapeAttr(extraClasses)}` : ""}" data-element-type="${escapeAttr(presenterSlideElementType(slide))}" data-slide-layout="${escapeAttr(presenterSlideLayout(slide))}"${sectionKey ? ` data-section-key="${escapeAttr(sectionKey)}"` : ""}${presenterRole ? ` data-presenter-role="${escapeAttr(presenterRole)}"` : ""}${backgroundStyle}>
       ${renderPresenterSlideMeta(slide)}
+      ${options.previewStage && presenterSlideBackgroundVideoSource(slide, options.noChromakey) ? `<video class="presenter-output-background-video" src="${escapeAttr(presenterSlideBackgroundVideoSource(slide, options.noChromakey))}" muted playsinline preload="metadata" aria-hidden="true"></video>` : ""}
       ${body}
     </section>
   `;
@@ -5193,6 +5198,7 @@ function renderPresenterSlideFrame(slide, options = {}) {
 
 function presenterSlideExtraClasses(slide) {
   const classes = [];
+  if (slide?.presentationMode === "camera") classes.push("presenter-slide--camera-caption");
   if (slide?.fullscreenSongTitle) classes.push("presenter-slide--fullscreen-song-title");
   const layout = presenterSlideLayout(slide);
   // A blank (including the auto trailing blank, which copies the previous slide) has no caption to theme.
@@ -5246,6 +5252,7 @@ function renderPresenterSlideBody(slide, options = {}) {
   if (layout !== PRESENTER_SLIDE_LAYOUTS.BLANK && elementType === PRESENTER_ELEMENT_TYPES.SCRIPTURE_TEXT && presenterScriptureContextUsesAddressTab(slide?.scriptureContext)) return renderPresenterCitationTabSlide(slide);
   if (elementType === PRESENTER_ELEMENT_TYPES.SCRIPTURE_TEXT && presenterScriptureContextUsesReadingForm(slide?.scriptureContext)) return renderPresenterScriptureReadingSlide(slide);
   if (layout === PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT && elementType === PRESENTER_ELEMENT_TYPES.TITLE_ASSIGNEE) {
+    if (slide.presentationMode === "camera") return renderPresenterCameraTitleSlide(slide);
     return renderPresenterReadingAssigneeTab(slide) + renderPresenterTitleAssigneeSlide(slide);
   }
   if (layout === PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT && slide?.type === "song-title" && slide.sectionHeading) return renderPresenterSectionSongTitleSlide(slide);
@@ -5523,9 +5530,9 @@ function renderPresenterTitleContentSlide(slide, options = {}) {
   return `
     <div class="presenter-title-content">
       ${orderHeading ? `<span class="presenter-fullscreen-order-heading">${escapeHtml(presenterOrderDisplayLabel(orderHeading))}</span>` : ""}
-      ${slide.fullscreenSongTitle && slide.songTitleContent?.orderTitle ? `<span class="presenter-fullscreen-song-heading">${escapeHtml(presenterOrderDisplayLabel(slide.songTitleContent.orderTitle))}</span>` : ""}
-      <span class="presenter-title-content-title" style="--line-chars: ${escapeAttr(titleChars)}">${slide.fullscreenSongTitle ? renderPresenterSongText(title, slide) : escapeHtml(title)}</span>
-      ${slide.fullscreenSongTitle && slide.songTitleContent?.detail ? `<span class="presenter-fullscreen-song-detail">${slide.songTitleContent.detailKind === "subtitle" ? `(${escapeHtml(slide.songTitleContent.detail)})` : escapeHtml(slide.songTitleContent.detail)}</span>` : ""}
+      ${slide.fullscreenSongTitle ? `<span class="presenter-fullscreen-song-heading" aria-label="찬양">${PRESENTER_SONG_NOTE}</span>` : ""}
+      <span class="presenter-title-content-title" style="--line-chars: ${escapeAttr(titleChars)}">${escapeHtml(title)}</span>
+
       ${slide.fullscreenSongTitle ? "" : `<div class="presenter-title-content-body">
         ${bodyLines.map((line) => `<span style="--line-chars: ${presenterLineCharEstimate(line)}">${escapePresenterSlideLine(line, slide)}</span>`).join("")}
       </div>`}
@@ -6022,4 +6029,83 @@ function updatePresenterMediaOrder(button) {
   refreshPresenterForService(serviceId, { publish: false });
   renderCurrentServiceModuleDetail();
   updateSaveState();
+}
+
+// Per-element presentation settings share the worship memo/atomic persistence path.
+function normalizeServicePresentation(value) {
+  if (!value || typeof value !== "object") return null;
+  const mode = ["fullscreen", "camera"].includes(value.mode) ? value.mode : "";
+  const source = normalizePresenterMediaSource(value.backgroundVideo);
+  const backgroundVideo = /\.(mp4|webm|mov|m4v)(?:[?#].*)?$/i.test(source) ? source : "";
+  return mode || backgroundVideo ? { ...(mode ? { mode } : {}), ...(backgroundVideo ? { backgroundVideo } : {}) } : null;
+}
+
+function renderPresenterPresentationControls(item, index, serviceId) {
+  const memo = parseServiceItemMemo(item.memo), type = serviceMemoElementType(memo);
+  if (!["title_person", "title_content", "title", "praise"].includes(type)) return "";
+  const presentation = normalizeServicePresentation(memo.presentation) || {};
+  const attrs = `data-service-item-index="${index}" data-service-id="${escapeAttr(serviceId)}"`;
+  return `<details class="svc-presentation-controls"><summary>화면</summary>
+    <label>화면 방식 <select class="svc-presenter-input-control" data-service-item-field="presentation_mode" ${attrs} aria-label="${escapeAttr(item.label || '항목')} 화면 방식">
+      ${[["", "예배 기본"], ["fullscreen", "전체 화면"], ["camera", "카메라 자막"]].map(([v,label]) => `<option value="${v}"${presentation.mode === v || !presentation.mode && !v ? ' selected' : ''}>${label}</option>`).join('')}
+    </select></label>
+    ${type === "praise" ? `<label>배경 영상 <input class="svc-presenter-input-control" type="text" data-service-item-field="background_video" ${attrs} value="${escapeAttr(presentation.backgroundVideo || '')}" placeholder="MP4 · WebM 영상 주소" aria-label="찬양 배경 영상 주소"></label>
+      <label class="btn ghost">영상 파일 선택<input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,.mp4,.webm,.mov,.m4v" data-praise-background-file data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(item.id)}" hidden></label>
+      <span class="muted">전체 화면에서 음소거·반복 재생</span>` : ''}
+    </details>`;
+}
+
+async function uploadPresenterPraiseBackground(input) {
+  const file = input.files?.[0], serviceId = input.dataset.serviceId;
+  const itemId = input.dataset.serviceItemId;
+  const item = getServiceItems(serviceId).find(row => row.id === itemId);
+  if (!file || !item) return;
+  if (!/\.(mp4|webm|mov|m4v)$/i.test(file.name) || file.size > presenterMediaMaxBytesForKind("video")) {
+    showToast(`MP4·WebM·MOV 영상은 ${presenterMediaMaxSizeLabel("video")} 이하로 선택해 주세요.`, "error"); input.value = ""; return;
+  }
+  input.disabled = true;
+  try {
+    const path = presenterReferenceMediaUploadPath(serviceId, item, file);
+    const bucket = state.client.storage.from(PRESENTER_MEDIA_STORAGE_BUCKET);
+    const upload = await bucket.upload(path, file, { contentType: file.type || "video/mp4", cacheControl: PRESENTER_MEDIA_CACHE_CONTROL, upsert: false });
+    if (upload.error) throw upload.error;
+    const url = bucket.getPublicUrl(path).data.publicUrl;
+    const currentIndex = getServiceItems(serviceId).findIndex(row => row.id === itemId);
+    if (currentIndex < 0) throw new Error("배경을 연결할 찬양을 찾지 못했습니다.");
+    updateServiceItemField({ dataset: { serviceId, serviceItemIndex: String(currentIndex), serviceItemField: "background_video" }, value: url }, { deferPresenterRefresh: true });
+    if (!await saveServiceItemPatch(serviceId, currentIndex, { throwOnError: true })) throw new Error("배경 영상 저장을 확인해 주세요.");
+    renderCurrentServiceModuleDetail(); showToast("찬양 배경 영상을 저장했습니다.", "success");
+  } catch (error) { showToast(error.message || "배경 영상을 저장하지 못했습니다. 다시 시도해 주세요.", "error"); }
+  finally { input.disabled = false; input.value = ""; }
+}
+
+function presenterSlideBackgroundVideoSource(slide, noChromakey) {
+  if (!noChromakey || slide?.formBackgroundImage || presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.BLANK) return "";
+  if (![PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT, PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT].includes(presenterSlideLayout(slide))) return "";
+  return normalizeServicePresentation({ backgroundVideo: slide?.backgroundVideo })?.backgroundVideo || "";
+}
+
+function applyPresenterBackgroundVideo(root, source = "") {
+  let video = root.querySelector(":scope > .presenter-output-background-video");
+  if (!source) { if (video) { video.pause(); video.removeAttribute("src"); video.load(); video.remove(); } delete root.dataset.backgroundVideoError; return; }
+  if (video?.getAttribute("src") === source) return;
+  if (video) { video.pause(); video.remove(); }
+  video = document.createElement("video"); video.className = "presenter-output-background-video";
+  video.muted = true; video.defaultMuted = true; video.loop = true; video.autoplay = true; video.playsInline = true; video.preload = "auto";
+  video.setAttribute("aria-hidden", "true"); video.setAttribute("src", source);
+  video.addEventListener("error", () => { root.dataset.backgroundVideoError = "true"; });
+  video.addEventListener("playing", () => { delete root.dataset.backgroundVideoError; });
+  root.prepend(video); video.play()?.catch(() => { root.dataset.backgroundVideoError = "true"; });
+}
+
+function renderPresenterCameraTitleSlide(slide) {
+  const order = String(slide.orderTitle || slide.sectionTitle || slide.label || "").trim();
+  const title = String(slide.contentTitle || slide.title || "").trim();
+  const main = title || order;
+  const person = String(slide.assignee || slide.sectionAssignee || slide.subtitle || "").trim();
+  return `<div class="presenter-camera-title">
+    ${order && order !== main ? `<span class="presenter-camera-title-order">${escapeHtml(order)}</span>` : ""}
+    <span class="presenter-camera-title-main">${escapeHtml(main)}</span>
+    ${person ? `<span class="presenter-camera-title-person">${escapeHtml(person)}</span>` : ""}
+  </div>`;
 }

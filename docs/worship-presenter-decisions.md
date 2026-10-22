@@ -3805,3 +3805,28 @@ Liturgical body sizes and chromakey caption text are unchanged.
   overflow flag before measuring; shortening content restores its base type.
 - This replaces former1px/2px loops, unconstrained binary shrink, title clamp and
   the separate28px preview/32px output scripture floors.
+
+
+## Per-element camera captions and praise video backgrounds ·2026-10-22
+
+- Element config.presentation uses {mode: "fullscreen" | "camera", backgroundVideo?: URL}.
+  Omitted mode follows the service default. Camera mode uses the existing chromakey
+  transport and a dedicated lower-third title/assignee composition; fullscreen
+  renders the same title and assignee centrally. Both use the same canonical rows,
+  lyric/scripture resolution, navigation and atomic persistence path. No event ID
+  or event-name branch selects the mode. A configured camera element's following
+  blank clears its caption while retaining the camera/keying context.
+- The Presenter board exposes 화면 → 화면 방식 on title/person, title/content,
+  title and praise elements. Praise also accepts a direct MP4/WebM/MOV/M4V URL or
+  a video file through the existing media Storage bucket and single-element save.
+  Presentation settings survive grouping, memo, canonical config, portable source
+  and document fallback. Invalid/unsafe media schemes are rejected.
+- Praise backgrounds are muted, looping and inline. One output video node stays
+  alive across lyric changes with the same source. Camera/keyed frames, score/media
+  frames, photo cues, blackout and blank frames never inherit the video. Controller
+  thumbnails load metadata without autoplay. Audio playback/timing remains separate.
+- Fullscreen praise title slides show the note alone above one main output title.
+  The order label, original title and subtitle are absent from this display; their
+  authored metadata and version output-title selection remain unchanged.
+- Chapel content uses normal scripture reading rather than a poster scripture
+  image. No special scripture text or sermon renderer is introduced for the event.

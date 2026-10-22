@@ -58,6 +58,7 @@ NODE_TESTS = (
 SMOKES = (
     "smoke_presenter_common_fit.py",
     "smoke_transition_logo.py",
+    "smoke_presentation_modes.py",
     "smoke_announcement_type.py",
     "smoke_children_theme.py",
     "smoke_presenter_remote.py",

@@ -140,6 +140,8 @@ function normalizeServiceDocumentSlides(slides = []) {
       title: String(slide.title || "").trim(),
       text: limitServiceDocumentText(slide.text || slide.bodyText || slide.body || ""),
       outputContext: String(slide.outputContext || slide.output_context || "").trim(),
+      presentationMode: slide.presentationMode || "",
+      backgroundVideo: slide.backgroundVideo || "",
       hidden: Boolean(slide.hidden),
       autoTrailingBlank: Boolean(slide.autoTrailingBlank || slide.auto_trailing_blank),
       linkedSource,
@@ -910,6 +912,8 @@ function serviceElementConfigForSave(existingConfig = {}, parsed = emptyServiceI
   } else {
     delete config.asset;
   }
+  if (parsed.presentation) config.presentation = parsed.presentation;
+  else delete config.presentation;
   if (parsed.audioTiming) config.audioTiming = parsed.audioTiming;
   else delete config.audioTiming;
   if (hasServiceAsset(parsed.audioAsset)) config.audioAsset = parsed.audioAsset;

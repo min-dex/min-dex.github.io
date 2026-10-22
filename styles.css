@@ -9657,3 +9657,7 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
  padding:5px 10px;border-radius:5px;background:var(--ui-surface-panel);color:var(--warn);
  font-size:var(--ui-meta-size);font-weight:600;line-height:1.5;
 }
+.svc-presentation-controls { margin-block: .5rem; }
+.svc-presentation-controls[open] { display: grid; gap: .6rem; }
+.svc-presentation-controls > label { display: grid; gap: .3rem; }
+.svc-presentation-controls > .btn { width: fit-content; }
