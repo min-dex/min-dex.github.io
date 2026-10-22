@@ -3777,7 +3777,7 @@ Liturgical body sizes and chromakey caption text are unchanged.
 - Explicitly requested artwork can be configured in service source_ref.transitionLogo
   as {url, originX, originY, width, height}. Origin is a percentage of the artwork;
   width/height use the existing 1920×1080 stage units. Invalid input uses the
-  existing cross. The intersection is anchored at stage center and revealed
+  existing cross. The complete artwork is centered on the stage and revealed from its origin
   outward simultaneously; no chapel identity is hardcoded in runtime logic.
 - The existing blank-slide renderer, thumbnails, output payload and remote
   normalization share the same setting. Thumbnails/reduced motion show the final

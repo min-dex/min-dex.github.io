@@ -5164,7 +5164,7 @@ function renderPresenterTransitionLogo(slide, options = {}) {
   if (!logo) return "";
   const style = `--transition-logo-width:${logo.width};--transition-logo-height:${logo.height};`
     + `--transition-logo-x:${logo.originX}%;--transition-logo-y:${logo.originY}%;`
-    + `--transition-logo-left:${-logo.width * logo.originX / 100};--transition-logo-top:${-logo.height * logo.originY / 100};`;
+    + `--transition-logo-left:${-logo.width / 2};--transition-logo-top:${-logo.height / 2};`;
   return `<img class="presenter-transition-logo" src="${escapeAttr(logo.url)}" alt="" aria-hidden="true" style="${style}" />`;
 }
 
