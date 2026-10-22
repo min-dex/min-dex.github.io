@@ -80,12 +80,12 @@
   apply.onclick=async()=>{
    if(moduleName()!==module||idFor(module)!==id||state.client!==client||content(snapshot(module,id))!==signature){status.textContent='현재 입력이나 화면이 바뀌었습니다. 닫고 다시 확인해 주세요.';return}
    apply.disabled=true;select.disabled=true;
-   try{if(await restoreDraft(entries[Number(select.value)].draft))dialog.close();else status.textContent='복구하지 않았습니다. 현재 입력과 보관본은 유지됩니다.'}
+   try{if(await restoreDraft(entries[Number(select.value)].draft,()=>dialog.open&&dialog.isConnected))dialog.close();else status.textContent='복구하지 않았습니다. 현재 입력과 보관본은 유지됩니다.'}
    finally{apply.disabled=false;select.disabled=false}
   };
   dialog.addEventListener('close',()=>dialog.remove(),{once:true});document.body.append(dialog);dialog.showModal();
  }
- async function restoreDraft(draft){
+ async function restoreDraft(draft,isActive=()=>true){
   const module=moduleName(),id=idFor(module);
   if(state.saving||state.serviceMusic?.playing||state.serviceMusic?.pending||isPresenterOutputWindowOpen()){showToast('저장이나 재생을 마친 뒤 임시 저장본을 복구해 주세요.','error');return false;}
   if(draft?.schema!==1||draft.module!==module||draft.id!==id)return false;
@@ -106,8 +106,9 @@
       ? '원본도 변경되었습니다. 현재 내용과 임시 저장본을 각각 보관한 뒤, 겹치는 수정은 임시 저장본으로 편집창에 복구할까요? 저장 전 내용을 확인해 주세요.'
       : '원본의 새 변경은 유지하고 임시 저장본의 수정만 편집창에 복구할까요? 확인 후 저장하면 반영됩니다.')
    : '임시 저장본을 편집창에 복구할까요? 확인 후 저장하면 반영됩니다.';
+  if(!isActive())return false;
   if(!window.confirm(notice))return;
-  const unchanged=()=>moduleName()===module&&idFor(module)===id&&state.client===client&&dirtyModuleFingerprint(module)===fingerprint&&content(snapshot(module,id))===signature&&!state.saving&&!state.serviceMusic?.playing&&!state.serviceMusic?.pending&&!isPresenterOutputWindowOpen();
+  const unchanged=()=>isActive()&&moduleName()===module&&idFor(module)===id&&state.client===client&&dirtyModuleFingerprint(module)===fingerprint&&content(snapshot(module,id))===signature&&!state.saving&&!state.serviceMusic?.playing&&!state.serviceMusic?.pending&&!isPresenterOutputWindowOpen();
   try{
    const storage=window.MINDEX_SERVER_STORAGE,now=new Date().toISOString();
    const records=[

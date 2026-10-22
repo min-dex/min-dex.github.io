@@ -149,6 +149,22 @@ def main():
                     page.locator('#restoreServerEditorDraft').click()
                     choose_draft(page,'Unsaved draft')
                     page.once('dialog',lambda dialog:dialog.accept())
+                    page.evaluate("""()=>{
+                      window.originalArchiveWrite=MINDEX_SERVER_STORAGE.setItem;window.archiveFinished=false;let first=true;
+                      MINDEX_SERVER_STORAGE.setItem=async(...args)=>{if(first){first=false;await new Promise(r=>window.releaseArchive=r)}const result=await originalArchiveWrite(...args);archiveFinished=true;return result};
+                    }""")
+                    page.get_by_role('button',name='편집창에 복구',exact=True).click()
+                    page.wait_for_function('typeof releaseArchive==="function"')
+                    page.get_by_role('button',name='닫기',exact=True).click()
+                    page.locator('.editor-draft-review').wait_for(state='detached')
+                    page.evaluate('releaseArchive()')
+                    page.wait_for_function('archiveFinished')
+                    assert page.evaluate("state.scriptures[0].body==='New edit before recovery'")
+                    assert any(json.loads(v['value'] or '{}').get('value',{}).get('body')=='Unsaved draft' for k,v in db.items() if k[2].startswith('mindex.editor.draft.v2:'))
+                    page.evaluate('()=>{MINDEX_SERVER_STORAGE.setItem=originalArchiveWrite}')
+                    page.locator('#restoreServerEditorDraft').click()
+                    choose_draft(page,'Unsaved draft')
+                    page.once('dialog',lambda dialog:dialog.accept())
                     page.get_by_role('button',name='편집창에 복구',exact=True).click()
                     page.wait_for_function("state.scriptures[0].body==='Unsaved draft' && state.dirty.scripture")
                     assert page.evaluate("localStorage.getItem('mindex.editor.draft.v1:scripture:fixture')") is None
