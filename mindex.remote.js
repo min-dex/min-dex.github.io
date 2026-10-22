@@ -3,7 +3,7 @@
  if(isPresenterOutputRoute())return;
  const trigger=document.createElement('button');trigger.type='button';trigger.className='icon-btn';trigger.id='remotePanelBtn';trigger.textContent='원격';trigger.title='원격 조작';trigger.setAttribute('aria-label','원격 조작');
  document.getElementById('monitorPanelBtn')?.before(trigger);
- let session=null,opening=false;
+ let session=null,opening=false,ending=false;
  const panel=document.createElement('dialog');panel.className='remote-panel';panel.setAttribute('aria-labelledby','remoteTitle');
  panel.innerHTML='<header><h2 id="remoteTitle">원격 조작</h2><button class="icon-btn" data-remote-close aria-label="닫기">×</button></header><section class="monitor-section"><p>폰에서 Mindex Remote Controller를 열고 아래 코드를 입력해 주세요.</p><p><a data-remote-link target="_blank" rel="noopener">리모컨 페이지 열기</a></p><p data-remote-status role="status">예배 송출을 시작한 뒤 연결할 수 있어요.</p><p><strong data-remote-code style="font-size:20px;letter-spacing:.06em;overflow-wrap:anywhere"></strong></p><p data-remote-help></p><div class="monitor-toolbar"><button class="btn primary" data-remote-start>연결 시작</button><button class="btn secondary" data-remote-end disabled>연결 종료</button></div></section>';
  document.body.append(panel);const $=s=>panel.querySelector(s);
@@ -52,7 +52,7 @@
   return {read,execute};
  }
  $('[data-remote-start]').onclick=async()=>{
-  if(opening||session)return;
+  if(opening||ending||session)return;
   if(!state.client||!presenterControllerIsLive(state.selectedServiceId)||!isPresenterOutputWindowOpen()){$('[data-remote-status]').textContent='이 PC에서 예배 송출을 먼저 시작해 주세요.';return;}
   opening=true;$('[data-remote-start]').disabled=true;
   try{
@@ -62,7 +62,7 @@
    $('[data-remote-code]').textContent=session.listening?session.code:'';$('[data-remote-help]').textContent='2분 안에 입력 · 한 번만 사용 · 코드를 아는 기기가 조작할 수 있어요.';$('[data-remote-end]').disabled=false;
   }catch(e){$('[data-remote-status]').textContent=e.message;$('[data-remote-start]').disabled=false;}finally{opening=false;}
  };
- $('[data-remote-end]').onclick=async()=>{const old=session;session=null;await old?.end();$('[data-remote-code]').textContent='';$('[data-remote-help]').textContent='';$('[data-remote-start]').disabled=false;$('[data-remote-end]').disabled=true;};
+ $('[data-remote-end]').onclick=async()=>{if(ending)return;ending=true;$('[data-remote-end]').disabled=true;const old=session;session=null;try{await old?.end();}finally{ending=false;}$('[data-remote-code]').textContent='';$('[data-remote-help]').textContent='';$('[data-remote-start]').disabled=false;$('[data-remote-end]').disabled=true;};
  window.addEventListener('pagehide',()=>session?.close());
  // Read-only adapter entry is also used by isolated regression tests.
  window.MindexRemote={adapter,open:()=>panel.showModal()};
