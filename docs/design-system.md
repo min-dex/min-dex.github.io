@@ -186,3 +186,10 @@ Draft handoff uses the shared panel/ink/line tokens,5px radius,20px
 padding and10px wrapped action gaps. Do not use undefined border/text aliases.
 Timing and server conflict dialogs share the same radius and border-box sizing.
 Draft restore, conflict decisions and playback semantics are unchanged.
+
+## Remote utility icon ·2026-10-22
+
+The topbar remote control uses the pinned Lucide smartphone icon and shared
+icon-btn sizing, padding and stroke, at its existing position before device
+status. Preserve the 원격 조작 tooltip and accessible label; hydrate the dynamic
+button immediately so initial load does not depend on a later view render.
