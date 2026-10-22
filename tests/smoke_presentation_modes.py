@@ -14,7 +14,7 @@ def main():
                 page.wait_for_function("typeof WORSHIP_BACKGROUND_BASE === 'string' && typeof renderPresenterPresentationControls === 'function'")
                 result = page.evaluate('''async () => {
                   const check=(v,m)=>{if(!v)throw Error(m)};
-                  const presentation={mode:'camera',backgroundVideo:'assets/presenter/chromakey-ready-loop-pingpong.mp4'};
+                  const presentation={mode:'camera',backgroundVideo:'tests/fixtures/praise-background.webm'};
                   const memo=serializeServiceItemMemo({elementType:'title_person',presentation,note:'보존'});
                   check(parseServiceItemMemo(memo).presentation.mode==='camera','memo lost mode');
                   check(parseServiceItemMemo(memo).note==='보존','memo lost text');
