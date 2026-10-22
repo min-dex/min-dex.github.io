@@ -193,3 +193,12 @@ The topbar remote control uses the pinned Lucide smartphone icon and shared
 icon-btn sizing, padding and stroke, at its existing position before device
 status. Preserve the 원격 조작 tooltip and accessible label; hydrate the dynamic
 button immediately so initial load does not depend on a later view render.
+
+## Remote controls ·2026-10-22
+
+Remote dialog close uses Lucide X with shared icon-btn dimensions; dialog radius
+is5px, padding20px and gaps follow5/10px rhythm. Phone navigation uses20px
+Lucide arrows; audio and blackout controls use16px/1.5 icons alongside labels.
+Preserve50px phone buttons and70px navigation targets. Insets are10px with5px
+icon gaps; the three audio controls use5px horizontal insets at360px and below
+to retain readable labels. Blackout updates both its icon and text.

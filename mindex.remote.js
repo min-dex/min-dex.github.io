@@ -6,8 +6,8 @@
  window.lucide?.createIcons({root:trigger});
  let session=null,opening=false,ending=false;
  const panel=document.createElement('dialog');panel.className='remote-panel';panel.setAttribute('aria-labelledby','remoteTitle');
- panel.innerHTML='<header><h2 id="remoteTitle">원격 조작</h2><button class="icon-btn" data-remote-close aria-label="닫기">×</button></header><section class="monitor-section"><p>폰에서 Mindex Remote Controller를 열고 아래 코드를 입력해 주세요.</p><p><a data-remote-link target="_blank" rel="noopener">리모컨 페이지 열기</a></p><p data-remote-status role="status">예배 송출을 시작한 뒤 연결할 수 있어요.</p><p><strong data-remote-code style="font-size:20px;letter-spacing:.06em;overflow-wrap:anywhere"></strong></p><p data-remote-help></p><div class="monitor-toolbar"><button class="btn primary" data-remote-start>연결 시작</button><button class="btn secondary" data-remote-end disabled>연결 종료</button></div></section>';
- document.body.append(panel);const $=s=>panel.querySelector(s);
+ panel.innerHTML='<header><h2 id="remoteTitle">원격 조작</h2><button class="icon-btn" data-remote-close aria-label="닫기" title="닫기"><i data-lucide="x"></i></button></header><section class="monitor-section"><p>폰에서 Mindex Remote Controller를 열고 아래 코드를 입력해 주세요.</p><p><a data-remote-link target="_blank" rel="noopener">리모컨 페이지 열기</a></p><p data-remote-status role="status">예배 송출을 시작한 뒤 연결할 수 있어요.</p><p><strong data-remote-code style="font-size:20px;letter-spacing:.06em;overflow-wrap:anywhere"></strong></p><p data-remote-help></p><div class="monitor-toolbar"><button class="btn primary" data-remote-start>연결 시작</button><button class="btn secondary" data-remote-end disabled>연결 종료</button></div></section>';
+ document.body.append(panel);window.lucide?.createIcons({root:panel});const $=s=>panel.querySelector(s);
  $('[data-remote-link]').href=location.protocol==='file:'?'https://min-dex.github.io/remote.html':new URL('remote.html',location.href).href;
  $('[data-remote-close]').onclick=()=>panel.close();trigger.onclick=()=>panel.showModal();
  const text=s=>[s?.title,s?.body||s?.text||s?.bodyText||s?.content].filter(v=>typeof v==='string').join('\n').slice(0,1800);
