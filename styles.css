@@ -9744,3 +9744,7 @@ body[data-module="praise"] .praise-forms-panel .version-compare-head > .version-
 .praise-forms-panel .version-compare-head .version-title-actions { align-self: stretch; align-content: end; align-items: end; }
 /* Empty/loading recent lists do not reserve invisible destination cards. */
 .home-recent-list:has(> .home-module-detail:only-child) { grid-template-rows: auto; }
+
+/* Version-owned saved audio summary wraps without competing with title inputs. */
+.version-audio-summary { flex: 0 0 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; line-height: 1.5; color: var(--ink-3); }
+.version-audio-summary > span { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }

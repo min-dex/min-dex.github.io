@@ -17942,7 +17942,21 @@ function renderVersionTitleContent(song, version, forms, options = {}) {
       <button class="version-delete-btn" type="button" data-delete-version="${escapeAttr(version?.id || "")}" aria-label="${escapeAttr(versionEditableName(song, version))} 버전 삭제" title="${song.versions.length <= 1 ? "마지막 버전은 삭제할 수 없습니다" : "버전 삭제"}" ${song.versions.length <= 1 ? "disabled" : ""}><i data-lucide="trash-2"></i></button>
       </div>
     </div>
+    ${renderVersionAudioSummary(version, forms)}
   `;
+}
+
+// Read-only summary of the selected version's persisted audio; never borrow song memo data.
+function renderVersionAudioSummary(version, forms) {
+  const audio = version?.audio_set;
+  if (!audio || !String(audio.audioUrl || "").trim()) return "";
+  const count = Array.isArray(audio.starts) ? audio.starts.filter(value => Number.isFinite(value) && value >= 0).length : 0;
+  const changed = globalThis.MindexSongTiming && audio.sourceSignature !== MindexSongTiming.sourceSignature({ ...version, forms });
+  const status = changed ? "가사 변경 · 타이밍 확인 필요" : `저장된 자동 넘김 ${audio.enabled ? "켜짐" : "꺼짐"}`;
+  return `<div class="version-audio-summary" aria-label="버전에 저장된 음원·타이밍">
+    <span class="version-audio-summary-name">음원 · ${escapeHtml(audio.audioName || "등록된 음원")}</span>
+    <span>${count ? `저장 타이밍 ${count}개` : "저장 타이밍 없음"} · ${status}</span>
+  </div>`;
 }
 
 let hymnStructureRenderTicket = 0;

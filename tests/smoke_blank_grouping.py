@@ -37,11 +37,11 @@ def main():
                     sectionKey:'announcements',sectionLabel:'광고',label:'광고',elementLabel:'광고',
                     type:'title',layout:'center_text',text:'안내',hiddenInPresentation:true,hidden:true};
                   const hiddenPair=withPresenterElementTrailingBlanks([hiddenSource],service);
-                  check(hiddenPair.length===2,'hidden element blank count');
+                  // Hidden elements (including orphaned progression photos) must not
+                  // introduce a visible transition into the output sequence.
+                  check(hiddenPair.length===1,'hidden element introduced transition blank');
                   check(presenterSlideIsHidden(hiddenPair[0]),'hidden content became visible');
-                  check(!presenterSlideIsHidden(hiddenPair[1]),'hidden element transition blank was hidden');
-                  check(hiddenPair[1].autoTrailingBlank,'hidden element blank marker missing');
-                  check(firstPresenterNavigableIndex(hiddenPair)===1,'hidden element transition blank is not reachable');
+                  check(!hiddenPair.some(s=>s.autoTrailingBlank),'hidden element gained visible blank');
                   const keys=['ready','praise','entrance_praise','special_song','scripture_reading',
                     'sermon','offering','announcements','closing_hymn','closing_visual'];
                   const fixtures=keys.map(key=>({id:key,elementId:key,sectionId:'section-'+key,

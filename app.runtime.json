@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-whole-score-block",
+  "version": "20261023-version-audio-summary",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "7e423d6caccbcb526663dc7cabb3e9975320d351f6cdb3fbf154cd6be17f58b1",
-  "runtime_sha256": "3d2861b0be7f8b75e0f826d2b4576a067925288eafcab9343164ad4ce0bcd288",
-  "source_bytes": 1566805,
-  "runtime_bytes": 1109121,
-  "source_gzip": 353309,
-  "runtime_gzip": 276103
+  "source_sha256": "0fee9c449c98cf6e6f689bff4ea87c97150d1c22e89df95312e9ef82a2da1ceb",
+  "runtime_sha256": "27a745ceae71bd9b3e61ef528892166b1053b6800542820c34d449a5c76a84ac",
+  "source_bytes": 1567822,
+  "runtime_bytes": 1109869,
+  "source_gzip": 353645,
+  "runtime_gzip": 276346
 }
