@@ -3978,6 +3978,16 @@ read the same saved choice. Its spacing/accent selectors are scoped to the
 selected composition; no event IDs or names are used. Chapel data alone selects
 this choice; other service records are not rewritten.
 
+## Song title/form proportions and redundant unlink removal · 2026-10-23
+
+Remove the standalone DB song-disconnect X, its delegated handler, unused
+clear function and styles. Song selection/mode switching and medley unlink stay
+unchanged. Wide song rows share spare width between title and form at1.3:1,
+with a220px form minimum instead of a fixed160px column. Below1121px actual
+container width, the form takes its own full-width row. No input values, focus,
+versions, form sequence, persistence or output behavior change. Chromium/WebKit
+actual-renderer checks cover DB shortcut variants,360–1500px, both themes,
+long forms, medley action retention and unsaved text/focus through resizing.
 
 ## Shared fullscreen foreground contrast ·2026-10-23
 

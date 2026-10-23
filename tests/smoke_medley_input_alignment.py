@@ -23,7 +23,6 @@ def main():
                                   <option selected>${selected}</option>
                                   <option>${longest}</option>
                                 </select>
-                                <button class="svc-song-clear" type="button">×</button>
                               </div>
                               <input class="svc-form-hint compact" value="V1-V2">
                             </div>
