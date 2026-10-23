@@ -798,3 +798,12 @@ rows retain the separate full-width form field. Medley unlink remains available.
 Home edition summaries use the reader language/name sorting rule and compact
 KJV/ASV names, both before and after summary loading. Canonical edition names,
 source metadata and stored records remain unchanged.
+
+
+### Recovery notices during editing ·2026-10-23
+
+Current-session automatic draft keys are excluded from recovery candidates,
+including while writes or retirement deletions await acknowledgement. Previous
+sessions and explicit safety archives remain recoverable; identical content
+is still suppressed. Reload makes the prior session's preserved draft eligible
+again. This changes notice selection only, not stored content or restore guards.

@@ -8,6 +8,7 @@ INIT = """async () => {
   const response=await fetch('/state-fixture/'+name,{method:'POST',body:JSON.stringify(args)});
   const result=await response.json();if(result.error)return {error:Error(result.error)};return result;
  }};
+ state.client=client;state.auth.session={user:{id:'offline-fixture'}};state.connectionError='';
  await window.MINDEX_SERVER_STORAGE.initialize(client,'fixture');
  return window.MINDEX_SERVER_STORAGE.ready;
 }"""
@@ -55,7 +56,7 @@ def main():
                     context.add_init_script("window.open=()=>null;Element.prototype.requestFullscreen=()=>Promise.reject(Error('blocked fixture'));")
                     context.route('**/*',route_request)
                     page=context.new_page()
-                    page.goto(url+'?mindexSmokeRaw=1',wait_until='domcontentloaded')
+                    page.goto(url+'?mindexSmokeRaw=1&supabaseUrl=project_url&supabaseAnonKey=anon_key',wait_until='domcontentloaded')
                     page.wait_for_function('!!window.MINDEX_SERVER_STORAGE && typeof persistServerValue === "function" && !document.body.classList.contains("ui-booting")')
                     page.locator(".mindex-boot").wait_for(state="hidden")
                     page.evaluate("document.fonts.ready")
@@ -84,6 +85,26 @@ def main():
                     }""")
                     assert draft_result=={'body':'Unsaved draft','local':None}
                     assert page.locator('#restoreServerEditorDraft').is_hidden()
+                    # Slow acknowledgement must not advertise this session's older keystroke.
+                    page.evaluate("""()=>{
+                      const input=document.createElement('input');input.id='typingDraftFixture';
+                      input.setAttribute('aria-label','임시본 입력 검사');input.style.cssText='position:fixed;top:150px;left:350px;width:240px;height:40px;z-index:999999;display:block';
+                      input.value=state.scriptures[0].body;
+                      input.oninput=()=>{state.scriptures[0].body=input.value;state.dirty.scripture=true;MINDEX_EDITOR_DRAFTS.capture()};
+                      document.body.append(input);
+                    }""")
+                    control['hold']=True
+                    for text in ('Typing A','Typing AB','Typing ABC'):
+                        page.get_by_label('임시본 입력 검사',exact=True).fill(text)
+                        assert page.locator('#restoreServerEditorDraft').evaluate('(e)=>e.hidden'), 'active draft flashed as recovery'
+                    control['hold']=False
+                    for held_route in held: route_request(held_route)
+                    held.clear()
+                    page.evaluate('()=>MINDEX_SERVER_STORAGE.flush()')
+                    assert page.locator('#restoreServerEditorDraft').is_hidden()
+                    page.get_by_label('임시본 입력 검사',exact=True).fill('Unsaved draft')
+                    page.evaluate('()=>MINDEX_SERVER_STORAGE.flush()')
+                    page.locator('#typingDraftFixture').evaluate('(e)=>e.remove()')
                     # A legacy recovery record is never rewritten by new-session typing.
                     page.evaluate("""async()=>{
                       const key=MINDEX_SERVER_STORAGE.keys('local').find(k=>k.startsWith('mindex.editor.draft.v2:scripture:fixture:'));
@@ -125,7 +146,7 @@ def main():
                     assert any(a['local']=='this window' and a['current']=='other window' for a in archives)
                     await_value=page.evaluate("async()=>{await persistServerValue('local','mindex.worshipRecoverySnapshot.latest.v1.fixture','newer');return true}")
                     assert await_value
-                    page.reload(wait_until='domcontentloaded')
+                    page.goto(url+'?mindexSmokeRaw=1&supabaseUrl=project_url&supabaseAnonKey=anon_key',wait_until='domcontentloaded')
                     page.wait_for_function('!!window.MINDEX_SERVER_STORAGE && !document.body.classList.contains("ui-booting")')
                     assert page.evaluate(INIT)
                     assert page.evaluate("safeStorageGet('local','mindex.worshipRecoverySnapshot.latest.v1.fixture')")=='newer'
@@ -204,7 +225,7 @@ def main():
                     # Another profile can see shared preferences, never the private recovery namespace.
                     other=browser.new_context();other.route('**/*',route_request)
                     other.add_init_script("window.open=()=>null;Element.prototype.requestFullscreen=()=>Promise.reject(Error('blocked fixture'));")
-                    second=other.new_page();second.goto(url+'?mindexSmokeRaw=1',wait_until='domcontentloaded')
+                    second=other.new_page();second.goto(url+'?mindexSmokeRaw=1&supabaseUrl=project_url&supabaseAnonKey=anon_key',wait_until='domcontentloaded')
                     second.wait_for_function('!!window.MINDEX_SERVER_STORAGE && typeof safeStorageGet === "function" && !document.body.classList.contains("ui-booting")');assert second.evaluate(INIT)
                     assert second.evaluate("safeStorageGet('local','mindex.theme')")=='dark'
                     assert second.evaluate("safeStorageGet('local','mindex.worshipRecoverySnapshot.latest.v1.fixture')")==''

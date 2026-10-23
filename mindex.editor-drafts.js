@@ -1,6 +1,6 @@
 // Drafts are private server records. Restoring changes only the editor, never DB rows.
 (() => {
- const touched=new Set(),last=new Map(),sessionKeys=new Map();let scheduled=false,activeClient=null;
+ const touched=new Set(),last=new Map(),sessionKeys=new Map(),ownedKeys=new Set();let scheduled=false,activeClient=null;
  const moduleName=()=>['service','presenter'].includes(state.module)?'service':state.module;
  const idFor=module=>module==='praise'?state.selectedSongId:module==='scripture'?state.selectedScriptureId:module==='service'?state.selectedServiceId:module==='references'?'all':null;
  const keyFor=(module,id)=>`mindex.editor.draft.v1:${module}:${id}`;
@@ -19,14 +19,14 @@
  function candidates(module,id){
   const storage=window.MINDEX_SERVER_STORAGE,current=content(snapshot(module,id)),seen=new Set();
   const keys=[keyFor(module,id),...(storage.keys?.('local')||[]).filter(key=>key.startsWith(historyPrefix(module,id)))];
-  return keys.map(key=>({key,draft:parse(storage.getItem('local',key))}))
+  return keys.filter(key=>!ownedKeys.has(key)).map(key=>({key,draft:parse(storage.getItem('local',key))}))
    .filter(({draft})=>draft?.schema===1&&draft.module===module&&draft.id===id&&draft.value)
    .sort((a,b)=>String(b.draft.savedAt||'').localeCompare(String(a.draft.savedAt||'')))
    .filter(({draft})=>{const value=content(draft);if(value===current||seen.has(value))return false;seen.add(value);return true});
  }
  function capture(){
   const storage=window.MINDEX_SERVER_STORAGE;if(!storage?.ready)return;
-  if(activeClient!==state.client){sessionKeys.clear();last.clear();touched.clear();activeClient=state.client}
+  if(activeClient!==state.client){sessionKeys.clear();ownedKeys.clear();last.clear();touched.clear();activeClient=state.client}
   const module=moduleName(),id=idFor(module);if(!id)return;
   const identity=keyFor(module,id),fields=pendingFields();
   const dirty=module==='praise'?state.dirty.song||state.dirty.forms:state.dirty[module];
@@ -39,6 +39,9 @@
   const value=snapshot(module,id),signature=content(value);
   if(!sessionKeys.has(identity))sessionKeys.set(identity,historyPrefix(module,id)+crypto.randomUUID());
   const key=sessionKeys.get(identity);
+  // Current-session autosaves may lag behind typing; they are not recovery candidates.
+  // Keep ownership after retirement until reload, including while deletion is pending.
+  ownedKeys.add(key);
   if(last.get(key)===signature)return;
   value.savedAt=new Date().toISOString();
   if(storage.queue('local',key,JSON.stringify(value))){last.set(key,signature);touched.add(key);window.MINDEX_DRAFT_HANDOFF?.publish(module,id,value,value.value?.song?.title||value.value?.title||value.value?.service?.title||'편집 초안')}
