@@ -31897,6 +31897,10 @@ function presenterVisibleTitle(label, title) {
 
 // Controller-only grouping: preserve slide objects, indexes and output order.
 function presenterBoardSlideBlocks(entries = []) {
+  const scoreSlide = slide => String(slide?.sourceType || slide?.componentType || "").toLowerCase() === "score";
+  const namedScoreOwners = new Set(entries.filter(entry => scoreSlide(entry.slide)
+    && (entry.controllerFormLabel || presenterFormGroupLabel(entry.slide)))
+    .map(entry => presenterSlideElementGroupKey(entry.slide) || ""));
   const blocks = [];
   for (const entry of entries) {
     const slide = entry.slide;
@@ -31907,7 +31911,10 @@ function presenterBoardSlideBlocks(entries = []) {
     if (presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.SCRIPTURE_TEXT) {
       label = [slide.referenceBook, slide.referenceRange].filter(Boolean).join(" ") || slide.title || "본문";
       key = JSON.stringify([owner, "scripture", label, slide.translationLabel || ""]);
-    } else if (presenterSlideSupportsFormGrouping(slide) && (entry.controllerFormKey || slide.formKey)
+    } else if (scoreSlide(slide) && owner && !namedScoreOwners.has(owner)) {
+      label = "악보";
+      key = JSON.stringify([owner, "score-whole"]);
+    } else if (presenterSlideSupportsFormGrouping(slide, entry.controllerFormLabel || presenterFormGroupLabel(slide)) && (entry.controllerFormKey || slide.formKey)
         && (entry.controllerFormLabel || presenterFormGroupLabel(slide))) {
       label = entry.controllerFormLabel || presenterFormGroupLabel(slide) || "송폼";
       key = JSON.stringify([owner, "form", entry.controllerFormKey || slide.formKey]);
@@ -31986,8 +31993,9 @@ function annotatePresenterFormStarts(entries = [], initialPreviousKey = "") {
     if (score && slide.formKey) { scoreKey = slide.formKey; scoreLabel = presenterFormGroupLabel(slide); }
     previousOwner = owner;
     const controllerFormKey = score ? scoreKey : slide.formKey;
-    const controllerFormLabel = score ? scoreLabel : presenterFormGroupLabel(slide);
-    const formSlide = presenterSlideSupportsFormGrouping(slide) && (!score || (controllerFormKey && controllerFormLabel));
+    const controllerFormLabel = score ? scoreLabel : presenterFormGroupLabel(slide)
+      || (controllerFormKey && previousKey === `${owner}:form:${controllerFormKey}` ? currentFormLabel : "");
+    const formSlide = presenterSlideSupportsFormGrouping(slide, controllerFormLabel) && (!score || (controllerFormKey && controllerFormLabel));
     const key = formSlide ? `${owner}:form:${controllerFormKey || slideIndex}` : "";
     const startsForm = Boolean(formSlide && key !== previousKey);
     if (startsForm) currentFormLabel = controllerFormLabel;
@@ -32003,12 +32011,12 @@ function annotatePresenterFormStarts(entries = [], initialPreviousKey = "") {
   return { entries: annotatedEntries, lastKey: previousKey };
 }
 
-function presenterSlideSupportsFormGrouping(slide) {
+function presenterSlideSupportsFormGrouping(slide, formLabel = presenterFormGroupLabel(slide)) {
   if (!slide) return false;
   if (normalizePresenterFormPresetLabel(slide.formLabel).type === "title" && String(slide.formKey || "").startsWith("title:")) return true;
   const praiseLowerBar = presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE
     && presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT;
-  if (praiseLowerBar && presenterFormGroupLabel(slide)) return true;
+  if (praiseLowerBar && formLabel) return true;
   const sourceType = String(slide.sourceType || slide.componentType || "").trim().toLowerCase();
   return sourceType === "score";
 }
@@ -32017,6 +32025,7 @@ function presenterFormGroupLabel(slide) {
   const label = String(slide?.formLabel || slide?.marker || "").trim();
   if (isGenericPresenterFormLabel(label)) return "";
   const form = normalizePresenterFormPresetLabel(label);
+  if (form.type === "title") return "Title";
   const singleType = Array.isArray(slide?.controllerSingleFormTypes)
     && slide.controllerSingleFormTypes.includes(form.type);
   if ((singleType || (slide?.controllerSingleVerse && form.type === "verse"))
@@ -32051,7 +32060,9 @@ function renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, fo
   const selected = state.presenterBoardSelection.serviceId === serviceId
     && state.presenterBoardSelection.elementKey === elementKey
     && (state.presenterBoardSelection.indexes || []).map(Number).includes(slideIndex);
-  const normalizedFormLabel = songFormPresetDisplayLabel(formLabel) || String(formLabel || "").trim();
+  const normalizedFormLabel = normalizePresenterFormPresetLabel(formLabel).type === "title"
+    ? "Title"
+    : songFormPresetDisplayLabel(formLabel) || String(formLabel || "").trim();
   const visibleFormLabel = presenterLabelDuplicatesSlideText(normalizedFormLabel, slide) ? "" : normalizedFormLabel;
   const ariaPrefix = presenterSlideInteractionHint(serviceId, `${slideIndex + 1}번 슬라이드${hidden ? " · 숨김" : ""}`);
   const slideNumber = slideIndex + 1;

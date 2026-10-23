@@ -4267,3 +4267,30 @@ service-ID exception. Canonical offering/response/sending keys retain their scop
 Old saved forms without explicit Title ownership regain their leading T; a user
 sequence explicitly saved without T still owns that omission. No stored sequence
 or section metadata is rewritten by this classification correction.
+
+## Controller Title labels ·2026-10-23
+
+Controller thumbnail form captions display `Title` for both `T` and `Title`
+aliases. Keep the canonical `T` token in form inputs, parsing and saved sequences;
+this only expands the human-readable controller label. Group boundaries, colors,
+slide ordering and output content are unchanged.
+
+
+## Lyric form block continuation ·2026-10-23
+
+A named lyric form's continuation pages share the same controller block even
+when only its first page carries the visible label. Inherit the effective label
+only across adjacent pages with the same owner and form key. Blank pages, another
+form or another worship element break inheritance. Unnamed direct Lyrics pages
+still have no form box; source slides, output, order and timing are untouched.
+
+
+## Whole-score block without form labels ·2026-10-23
+
+Supersedes the unlabelled-score no-box rule in “Direct praise titles and meaningful
+form groups”. If an entire score element has no meaningful form labels, group
+its pages into one neutral controller block. Use score source identity and the
+worship element owner, never a hymn number/title allowlist. No synthetic V/C
+form, saved sequence or metadata is added. Labelled scores retain their existing
+form boundaries and leading unlabelled pages; other elements break the run.
+Unlabelled direct lyrics remain unboxed. Output pages/order/IDs/timing are unchanged.

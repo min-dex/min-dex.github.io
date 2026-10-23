@@ -19,6 +19,12 @@ try:
     const blank={elementId:'song',elementType:'blank',layout:'blank',type:'blank',title:'빈 화면'};
     const slides=[lyric('v1:0','Verse 1'),lyric('v1:0','Verse 1'),lyric('c:1','Chorus'),lyric('c:2','Chorus'),blank,verse('3:16–18'),verse('3:16–18'),verse('4:1–2'),verse('4:1–2','새번역')];
     const entries=slides.map((slide,slideIndex)=>({slide:{...slide,id:'slide-'+slideIndex},slideIndex}));
+    const continuation=[lyric('v1:0','Verse 1'),lyric('v1:0',''),lyric('c:1','Chorus'),lyric('c:1',''),lyric('c:2',''),blank,lyric('c:1',''),{...lyric('v1:0',''),elementId:'other'}].map((slide,slideIndex)=>({slide,slideIndex}));
+    const continuationBefore=JSON.stringify(continuation);
+    const grouped=annotatePresenterFormStarts(continuation).entries;
+    check(presenterBoardSlideBlocks(grouped).map(b=>b.entries.length).join()==='2,2,1,1,1,1','lyric continuation must share block; no inheritance across form/blank/owner');
+    check(grouped.map(e=>e.formLabel).join('|')==='Verse 1||Chorus|||||','lyric labels remain only on starts');
+    check(JSON.stringify(continuation)===continuationBefore,'lyric continuation changes source data');
     const score=(owner,key,label)=>({slide:{elementId:owner,elementType:'image',layout:'media',sourceType:'score',formKey:key,formLabel:label,title:'악보'},slideIndex:0});
     const scoreEntries=[score('hymn','',''),score('hymn','v1','Verse 1'),score('hymn','',''),score('hymn','v2','Verse 2'),score('hymn','',''),score('other','','')];
     const scoreBefore=JSON.stringify(scoreEntries);
@@ -26,6 +32,15 @@ try:
     check(presenterBoardSlideBlocks(annotatedScores).map(b=>b.entries.length).join()==='1,2,2,1','score continuation/owner boundary');
     check(annotatedScores.map(e=>e.formLabel).join('|')==='|Verse 1||Verse 2||','score labels only on starts');
     check(JSON.stringify(scoreEntries)===scoreBefore,'score source mutated');
+    const wholeScores=[score('whole','',''),score('whole','raw-page-key',''),score('whole','',''),score('next','',''),score('next','','')];
+    const wholeBefore=JSON.stringify(wholeScores);
+    const wholeBlocks=presenterBoardSlideBlocks(annotatePresenterFormStarts(wholeScores).entries);
+    check(wholeBlocks.map(b=>b.entries.length).join()==='3,2' && wholeBlocks.every(b=>b.key && b.label==='악보'),'unlabelled score whole blocks and owner boundaries');
+    check(JSON.stringify(wholeScores)===wholeBefore,'whole score grouping mutated source');
+    const wholeHtml=renderPresenterBoardSlideBlocks(annotatePresenterFormStarts(wholeScores).entries,-1,'fixture');
+    check((wholeHtml.match(/data-form-color="neutral"/g)||[]).length===2 && !wholeHtml.includes('svc-slide-form-badge'),'whole score gets neutral block without invented form label');
+    const noForms=[{slide:{elementId:'direct',elementType:'praise',layout:'lower_bar_text',type:'lyrics',text:'직접 가사'},slideIndex:0}];
+    check(!presenterBoardSlideBlocks(noForms)[0].key,'unlabelled direct lyrics must remain unboxed');
     const labels=['Verse 1','Verse 2','Verse 2 A','Verse 2 B','Verse 2 @ A','Pre-Chorus','Chorus','Bridge','Coda','Tag','Tags','Custom'];
     const colors=labels.map((label,i)=>score('hymn','form-'+i,label));
     const colorHtml=renderPresenterBoardSlideBlocks(annotatePresenterFormStarts(colors).entries,-1,'fixture');
@@ -54,6 +69,9 @@ try:
     document.body.append(plain);
     const groups=[...plain.querySelectorAll('.svc-board-slide-block')];
     check(groups.length===4 && groups[0].dataset.formPlain==='true' && groups[2].dataset.formPlain==='true','Title/Int plain grouping');
+    check(groups[0].querySelector('.svc-slide-form-badge').textContent.trim()==='Title','controller Title caption abbreviated');
+    check(presenterFormGroupLabel({formLabel:'T'})==='Title' && presenterFormGroupLabel({formLabel:'Title'})==='Title','controller title aliases');
+    check(presenterFormPresetDisplayLabel('Title')==='T','canonical input title token changed');
     check(groups[1].dataset.formColor==='verse' && groups[3].dataset.formColor==='chorus','Title/Int consumed lyric colors');
     check(plain.querySelectorAll('.svc-slide-form-badge').length===4,'plain group labels lost');
     check([...plain.querySelectorAll('.svc-slide-thumb')].map(e=>e.dataset.presenterIndex).join()==='20,21,22,23','plain group click targets changed');

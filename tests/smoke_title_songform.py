@@ -27,7 +27,7 @@ try:
     check(canonicalServiceFormToken('T')==='T' && canonicalServiceFormToken('Tag')==='Tag','Tag unchanged');
     const legacyTitle={id:'saved-title',type:'song-title',formKey:'title:0',formLabel:'Title',marker:'Title'};
     const oldTitleBefore=JSON.stringify(legacyTitle);
-    check(presenterFormGroupLabel(legacyTitle)==='T','legacy Title thumbnail label');
+    check(presenterFormGroupLabel(legacyTitle)==='Title','legacy Title thumbnail label');
     check(presenterProgressionPlan(item,[legacyTitle]).groups[0].label==='T','legacy Title photo placement label');
     check(JSON.stringify(legacyTitle)===oldTitleBefore,'legacy Title display rewrote slide');
     const edit=value=>applyServiceItemMetadataField(item,{dataset:{serviceItemField:'form_hint'},value},{});
@@ -98,7 +98,7 @@ try:
         check(output.filter(s=>s.type==='song-title').length===wanted,'direct title restored '+inputMode+'/'+label);
         check(output.filter(s=>s.type==='lyrics').map(s=>s.text).join('|')==='첫 화면|둘째 화면','direct page boundaries preserved');
         const entries=annotatePresenterFormStarts(output.map((slide,slideIndex)=>({slide,slideIndex}))).entries;
-        const blocks=presenterBoardSlideBlocks(entries);check(blocks.filter(b=>b.key).every(b=>b.label==='T'),'unlabelled direct pages received form boxes');
+        const blocks=presenterBoardSlideBlocks(entries);check(blocks.filter(b=>b.key).every(b=>b.label==='Title'),'unlabelled direct pages received form boxes');
         const html=renderPresenterBoardSlideBlocks(entries,0,service.id);check(!html.includes('data-form-color'),'unlabelled direct pages received colored backgrounds');
         check(JSON.stringify(directItem)===original,'direct data rewritten');
       }
@@ -111,7 +111,7 @@ try:
     check(presenterSlideSupportsFormGrouping(scorePage),'score grouping eligibility lost');
     const scoreDeck=[{...scorePage,id:'score-a',elementId:'score-owner',formKey:'raw-score-key'},{...scorePage,id:'score-b',elementId:'score-owner',formKey:''}];
     const scoreEntries=annotatePresenterFormStarts(scoreDeck.map((slide,slideIndex)=>({slide,slideIndex}))).entries;
-    check(presenterBoardSlideBlocks(scoreEntries).every(b=>!b.key),'unlabelled score received a form box');
+    check(presenterBoardSlideBlocks(scoreEntries).length===1 && presenterBoardSlideBlocks(scoreEntries)[0].entries.length===2,'unlabelled score must be one whole-score block');
     scoreDeck[0].formLabel='Verse';
     const namedScore=annotatePresenterFormStarts(scoreDeck.map((slide,slideIndex)=>({slide,slideIndex}))).entries;
     check(presenterBoardSlideBlocks(namedScore).length===1 && presenterBoardSlideBlocks(namedScore)[0].entries.length===2,'inherited score group lost');
