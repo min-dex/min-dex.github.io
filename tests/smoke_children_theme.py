@@ -1,111 +1,112 @@
-"""Shared children foreground parity; offline frames, no output window/fullscreen."""
+"""Common fullscreen artwork contrast and confession markers; no native output."""
 import os
+import io
+from PIL import Image
+import subprocess
+import sys
+from pathlib import Path
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from smoke_app import launch_chromium,start_local_app_server,sync_playwright
+subprocess.run([sys.executable,str(Path(__file__).resolve().parents[1]/'tools/build_background_luminance.py'),'--check'],check=True)
 server,url=start_local_app_server()
 try:
  with sync_playwright() as p:
   for engine in ('chromium','webkit'):
    browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
    page=browser.new_page(viewport={'width':1280,'height':900})
-   page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(url.rsplit('/',1)[0]+'/') else r.abort())
+   white_image=io.BytesIO();Image.new('RGB',(64,36),'white').save(white_image,format='PNG')
+   black_image=io.BytesIO();Image.new('RGB',(64,36),'black').save(black_image,format='PNG')
+   def route(request):
+    if request.request.url.endswith('contrast-white.png'):
+     request.fulfill(body=white_image.getvalue(),content_type='image/png')
+    elif request.request.url.endswith('contrast-black.png'):
+     request.fulfill(body=black_image.getvalue(),content_type='image/png')
+    elif request.request.url.startswith(url.rsplit('/',1)[0]+'/'):
+     request.continue_()
+    else:
+     request.abort()
+   page.route('**/*',route)
    page.goto(url+'?mindexSmokeRaw=1')
    page.wait_for_function("typeof renderPresenterSlideMiniPreview==='function'&&!document.body.classList.contains('ui-booting')")
-   result=page.evaluate('''()=>{
+   result=page.evaluate('''async()=>{
     const check=(ok,msg)=>{if(!ok)throw Error(msg)};
-    const service={id:'theme-fixture',type_id:'children',date:'2026-10-25'};
-    state.services=[service];state.serviceTypes=[{id:'children',name:'어린이부 예배'}];
+    const brown='rgb(51, 34, 17)',white='rgb(255, 255, 255)';
     const original=presenterBackgroundSourcesForService;
-    const brown='rgb(52, 39, 31)';
-    const originalColors=['#FFC832','#C8FF32','#FF96C8','#FF6432','#32C8FF','#9696FF'];
-    const markerColors=['rgb(255, 200, 50)','rgb(200, 255, 50)','rgb(255, 150, 200)','rgb(255, 100, 50)','rgb(50, 200, 255)','rgb(150, 150, 255)','rgb(18, 52, 86)'];
-    const emphasis={id:'emphasis',type:'liturgical-body',title:'공동체고백',text:'예배자 훈련자 전도자 치유자 화해자 소명자 임의색',layout:'center_text',textHighlights:['예배자','훈련자','전도자','치유자','화해자','소명자','임의색'].map((text,i)=>({text,color:originalColors[i]||'#123456',bold:true}))};
-    const slides=[
-     emphasis,
-     {id:'ready',type:'ready',title:'어린이부 예배',text:'예배 준비',layout:'center_text'},
-     {id:'creed',type:'liturgical-body',title:'사도신경',text:'나는 전능하신 하나님을 믿습니다',layout:'center_text'},
-     {id:'lyric',type:'lyrics',elementType:'praise',text:'주 은혜임을',layout:'center_text'},
-     {id:'notice',type:'title-content',title:'광고',text:'광고',bodyText:'주간 소식',layout:'center_text'},
-     {id:'title',type:'title-content',title:'찬양',text:'찬양',bodyText:'다같이',layout:'center_text'},
-     {id:'blank',type:'blank',elementType:'blank',layout:'blank',text:''}
-    ];
+    const service={id:'contrast-fixture',type_id:'children',date:'2026-10-25'};
+    state.services=[service];state.serviceTypes=[{id:'children',name:'어린이부 예배'}];
+    const colors=['#FFC832','#C8FF32','#FF96C8','#FF6432','#32C8FF','#9696FF'];
+    const emphasis={id:'emphasis',type:'liturgical-body',title:'공동체고백',text:'예배자 훈련자 전도자 치유자 화해자 소명자',layout:'center_text',outputContext:'clean',textHighlights:['예배자','훈련자','전도자','치유자','화해자','소명자'].map((text,i)=>({text,color:colors[i],bold:true}))};
+    const slides=[emphasis,
+     {id:'ready',type:'ready',title:'예배',text:'예배 준비',layout:'center_text',outputContext:'clean'},
+     {id:'creed',type:'liturgical-body',title:'사도신경',text:'나는 전능하신 하나님을 믿습니다',layout:'center_text',outputContext:'clean'},
+     {id:'lyric',type:'lyrics',elementType:'praise',text:'주 은혜임을',layout:'center_text',outputContext:'clean'},
+     {id:'blank',type:'blank',elementType:'blank',layout:'blank',text:'',outputContext:'clean'}];
+    refs.detailPane.innerHTML='<div id="contrast-fixture"></div>';
+    const host=document.querySelector('#contrast-fixture');
+    const markerState=root=>[...root.querySelectorAll('.presenter-text-highlight--color')].map((el,i)=>{
+      const style=getComputedStyle(el);const probe=document.createElement('span');
+      probe.style.backgroundImage='linear-gradient(to bottom, transparent 45%, '+colors[i]+' 45%, '+colors[i]+' 95%, transparent 95%)';host.append(probe);
+      check(style.backgroundImage===getComputedStyle(probe).backgroundImage,'original marker color/50% coverage mismatch');probe.remove();
+      check(style.color===brown&&style.webkitTextStrokeWidth==='0px','marker ink/outline mismatch');
+      const padding=+style.paddingLeft.replace('px','')*1920/root.clientWidth;
+      check(Math.abs(padding-4)<.01,'marker padding mismatch');
+      return [style.color,style.backgroundImage,style.fontWeight];
+    });
     try {
-     presenterBackgroundSourcesForService=()=>['assets/worship-backgrounds/26-C5.png'];
-     refs.detailPane.innerHTML='<div id="parity"></div>';
-     const host=document.querySelector('#parity');
-     for(const slide of slides){
-      host.innerHTML=renderPresenterSlideMiniPreview(slide,service.id);
-      const mini=host.querySelector('.svc-slide-mini-canvas');
-      check((mini.getAttribute('style') || '').includes('.webp'),slide.id+' mini did not use derived WebP');
-      const frame=presenterOutputFrameStateForSlide(slide,{chromakey:false,serviceType:'children',backgroundImages:['assets/worship-backgrounds/26-C5.png']});
-      const out=document.createElement('main');out.className='presenter-output-root';host.append(out);
-      applyPresenterOutputFrameState(out,frame);out.innerHTML=renderPresenterSlideFrame(slide,{noChromakey:true});
-      for(const root of [mini,out]) {
-       check(getComputedStyle(root).getPropertyValue('--presenter-output-fg').trim()==='#34271f',slide.id+' theme ink mismatch');
-       const text=root.querySelector('.presenter-slide-text,.presenter-ready-screen-message');
-       if(text)check(getComputedStyle(text).color===brown,slide.id+' text remains white');
-       if(slide.id==='emphasis') {
-        const colors=[...root.querySelectorAll('.presenter-text-highlight')].map(el=>getComputedStyle(el).color);
-        check(colors.every(color=>color===brown),'marker foreground mismatch '+colors);
-       }
-       const cross=root.querySelector('.presenter-slide--blank');
-       if(cross)for(const pseudo of ['::before','::after'])check(getComputedStyle(cross,pseudo).backgroundColor===brown,'cross stroke remains white');
-       for(const logo of root.querySelectorAll('.presenter-ready-screen-logo,.presenter-waiting-loop-logo'))check(getComputedStyle(logo).filter.includes('children-autumn-ink.svg'),'logo filter missing');
-      }
-     }
-     const compareMarker=(root,code)=>{
-      const marks=[...root.querySelectorAll('.presenter-text-highlight')];
-      check(marks.length===7,code+' lost authored highlights');
-      return marks.map((el,i)=>{
-       const style=getComputedStyle(el);
-       check(style.color===brown,code+' marker foreground mismatch');
-       const probe=document.createElement('span');
-       const source=originalColors[i]||'#123456';
-       const marker=source;
-       probe.style.backgroundImage='linear-gradient(to bottom, transparent 45%, '+marker+' 45%, '+marker+' 95%, transparent 95%)';host.append(probe);
-       check(style.backgroundImage===getComputedStyle(probe).backgroundImage,code+' marker color/50% coverage mismatch');probe.remove();
-       const padding=+style.paddingLeft.replace('px','')*1920/root.clientWidth;
-       check(Math.abs(padding-4)<.01&&style.paddingLeft===style.paddingRight,code+' marker side spacing mismatch '+padding);
-       check(style.webkitTextStrokeWidth==='0px',code+' retained outline');
-       return [style.color,style.backgroundImage,style.fontWeight];
-      });
-     };
-     for(const code of ['C1','C2','C3','C5','S4','S5','S6','custom']) {
-      const source=code==='custom'?'https://example.invalid/custom.webp':'assets/worship-backgrounds/26-'+code+'.png?fixture=1';
+     check(presenterInkForLuminance(.3)==='white'&&presenterInkForLuminance(.30001)==='brown','contrast boundary mismatch');
+     check(presenterInkForLuminance(null)==='white'&&presenterInkForLuminance(NaN)==='white','unreadable background fallback mismatch');
+     const count=presenterOutputImagePreloadCache.size;
+     for(const name of Object.keys(PRESENTER_BACKGROUND_LUMINANCE)) for(const type of ['children','youth','young-adult','sunday-first']) {
+      service.type_id=type;
+      const source='assets/worship-backgrounds/'+name+'.png?fixture=1';
       presenterBackgroundSourcesForService=()=>[source];
-      host.innerHTML=renderPresenterSlideMiniPreview(emphasis,service.id);
-      const mini=host.querySelector('.svc-slide-mini-canvas');
-      const frame=presenterOutputFrameStateForSlide(emphasis,{chromakey:false,serviceType:'children',backgroundImages:[source]});
-      const out=document.createElement('main');out.className='presenter-output-root';host.append(out);applyPresenterOutputFrameState(out,frame);out.innerHTML=renderPresenterSlideFrame(emphasis,{noChromakey:true});
-      check(JSON.stringify(compareMarker(mini,code))===JSON.stringify(compareMarker(out,code)),code+' preview/output marker mismatch');
-      applyPresenterOutputFrameState(out,{...frame,showBackground:false});
-      const mark=out.querySelector('.presenter-text-highlight');
-      check(getComputedStyle(mark).backgroundImage==='none'&&getComputedStyle(mark).color===markerColors[0],'marker leaked after background removal');
+      const ink=presenterInkForLuminance(PRESENTER_BACKGROUND_LUMINANCE[name]);
+      const foreground=ink==='brown'?brown:white;
+      for(const slide of slides) {
+       host.innerHTML=renderPresenterSlideMiniPreview(slide,service.id);
+       const mini=host.querySelector('.svc-slide-mini-canvas');
+       const frame=presenterOutputFrameStateForSlide(slide,{chromakey:false,serviceType:type,backgroundImages:[source]});
+       const out=document.createElement('main');out.className='presenter-output-root';host.append(out);applyPresenterOutputFrameState(out,frame);out.innerHTML=renderPresenterSlideFrame(slide,{noChromakey:true});
+       for(const root of [mini,out]) {
+        check(root.dataset.outputInk===ink,name+'/'+type+' ink selection mismatch');
+        const text=root.querySelector('.presenter-slide-text,.presenter-liturgical-body-lines,.presenter-ready-screen-message');
+        if(text)check(getComputedStyle(text).color===foreground,name+'/'+type+' foreground mismatch');
+        const cross=root.querySelector('.presenter-slide--blank');
+        if(cross)for(const pseudo of ['::before','::after'])check(getComputedStyle(cross,pseudo).backgroundColor===foreground,'cross ink mismatch');
+        for(const logo of root.querySelectorAll('.presenter-ready-screen-logo,.presenter-waiting-loop-logo'))check(getComputedStyle(logo).filter.includes('fullscreen-ink.svg')===(ink==='brown'),'logo ink mismatch');
+       }
+       if(slide.id==='emphasis')check(JSON.stringify(markerState(mini))===JSON.stringify(markerState(out)),'marker preview/output mismatch');
+      }
+      const preview='assets/worship-backgrounds/previews/'+name+'.webp?v=1';
+      check(presenterBackgroundInk(preview)===ink,'preview file identity mismatch');
      }
-     // A different URL must not change the theme; reading/blackout must not inherit it.
-     for(const source of ['assets/worship-backgrounds/previews/26-C5.webp','https://example.invalid/custom-art.webp']) {
-      const frame=presenterOutputFrameStateForSlide(slides[2],{chromakey:false,serviceType:'children',backgroundImages:[source]});
-      const root=document.createElement('main');root.className='presenter-output-root';host.replaceChildren(root);applyPresenterOutputFrameState(root,frame);
-      check(getComputedStyle(root).getPropertyValue('--presenter-output-fg').trim()==='#34271f','theme depends on asset name');
+     check(presenterOutputImagePreloadCache.size===count,'known backgrounds added original-image downloads for ink analysis');
+     check(presenterBackgroundInk('assets/worship-backgrounds/26-C2.png')==='white','grass did not retain default white');
+     check(presenterBackgroundInk('assets/worship-backgrounds/26-C5.png')==='brown','cream artwork did not select brown');
+     // Unknown uploaded artwork follows the same rule once its image decodes.
+     const dark=new URL('contrast-black.png',window.location.href).href,light=new URL('contrast-white.png',window.location.href).href;
+     presenterBackgroundSourcesForService=()=>[light];service.type_id='children';
+     host.innerHTML=renderPresenterSlideMiniPreview(slides[2],service.id);
+     await preloadPresenterOutputImage(light);await Promise.resolve();
+     check(host.querySelector('.presenter-output-root').dataset.outputInk==='brown','custom preview did not update after decode');
+     const root=document.createElement('main');root.className='presenter-output-root';host.replaceChildren(root);
+     const frame=presenterOutputFrameStateForSlide(slides[2],{chromakey:false,serviceType:'young-adult',backgroundImages:[light]});
+     applyPresenterOutputFrameState(root,frame);root.innerHTML=renderPresenterSlideFrame(slides[2],{noChromakey:true});
+     check(root.dataset.outputInk==='brown','custom light output mismatch');
+     applyPresenterOutputFrameState(root,{...frame,backgroundImages:[dark]});
+     await preloadPresenterOutputImage(dark);await Promise.resolve();
+     check(root.dataset.outputInk==='white'&&getComputedStyle(root.querySelector('.presenter-liturgical-body-lines')).color===white,'custom dark output/stale source mismatch');
+     for(const slide of [{...slides[3],scriptureContext:'reading',elementType:'scripture_text'},{id:'presenter:safety-blank',layout:'blank',type:'blank'}]) {
+      applyPresenterOutputFrameState(root,presenterOutputFrameStateForSlide(slide,{chromakey:false,serviceType:'children',backgroundImages:[light]}));
+      check(root.dataset.outputInk==='white'&&!root.classList.contains('has-background'),'reading/blackout retained image ink');
      }
-     for(const slide of [{...slides[2],scriptureContext:'reading',elementType:'scripture_text'},{id:'presenter:safety-blank',layout:'blank',type:'blank'}]) {
-      const frame=presenterOutputFrameStateForSlide(slide,{chromakey:false,serviceType:'children',backgroundImages:['assets/worship-backgrounds/26-C5.png']});
-      const root=document.createElement('main');root.className='presenter-output-root';host.replaceChildren(root);applyPresenterOutputFrameState(root,frame);
-      check(!frame.showBackground,'reading/blackout acquired service artwork');
-      check(getComputedStyle(root).getPropertyValue('--presenter-output-fg').trim()!=='#34271f','reading/blackout acquired brown');
-     }
-     for(const payload of [{chromakey:true,serviceType:'children'},{chromakey:false,serviceType:'youth'}]) {
-      const frame=presenterOutputFrameStateForSlide(slides[2],{...payload,backgroundImages:['assets/worship-backgrounds/26-C5.png']});
-      const root=document.createElement('main');root.className='presenter-output-root';host.replaceChildren(root);applyPresenterOutputFrameState(root,frame);
-      check(getComputedStyle(root).getPropertyValue('--presenter-output-fg').trim()!=='#34271f','unrelated output inherited children ink');
-     }
-     for(const payload of [{chromakey:true,serviceType:'children'},{chromakey:false,serviceType:'young-adult'}]) {
-      const frame=presenterOutputFrameStateForSlide(emphasis,{...payload,backgroundImages:['assets/worship-backgrounds/26-C5.png']});
-      const root=document.createElement('main');root.className='presenter-output-root';host.replaceChildren(root);applyPresenterOutputFrameState(root,frame);root.innerHTML=renderPresenterSlideFrame(emphasis,{noChromakey:!payload.chromakey});
-      const mark=root.querySelector('.presenter-text-highlight');
-      check(getComputedStyle(mark).color==='rgb(255, 200, 50)'&&getComputedStyle(mark).backgroundImage==='none','marker leaked outside children artwork');
-     }
-     return 'PASS seven backgrounds/custom: common marker RGB/coverage/weight parity, no outlines, text/cross/logo and reading/chroma isolation';
+     // Only fullscreen community confession receives markers, never chromakey/other copy.
+     const caption={...emphasis,outputContext:'chromakey'};
+     applyPresenterOutputFrameState(root,presenterOutputFrameStateForSlide(caption,{chromakey:true,serviceType:'sunday-main',backgroundImages:[light]}));root.innerHTML=renderPresenterSlideFrame(caption,{noChromakey:false});
+     check([...root.querySelectorAll('.presenter-text-highlight--color')].every(e=>getComputedStyle(e).backgroundImage==='none'),'chromakey acquired markers');
+     applyPresenterOutputFrameState(root,frame);root.innerHTML=renderPresenterSlideFrame({...emphasis,title:'다른 문구'},{noChromakey:true});
+     check([...root.querySelectorAll('.presenter-text-highlight--color')].every(e=>getComputedStyle(e).backgroundImage==='none'),'other copy acquired confession markers');
+     return 'PASS all registered backgrounds x four service types: white/brown text/cross/logo and PNG/WebP parity; custom decode/reset; confession-only markers; chromakey/reading isolation';
     } finally {presenterBackgroundSourcesForService=original;}
    }''')
    print(engine,result,flush=True)
