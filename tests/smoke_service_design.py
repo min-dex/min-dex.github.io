@@ -38,7 +38,7 @@ def main():
      check(getComputedStyle(text).fontFamily.includes('Mindex Service Serif'),'reading retained old font');
      const bounds=text.getBoundingClientRect();check(bounds.right<=1920&&bounds.bottom<1046,'serif reading clips');
      const citation=document.createElement('div');citation.className='presenter-output-root no-chromakey';citation.style.cssText='position:fixed;inset:0;width:1920px;height:1080px';citation.innerHTML=renderPresenterSlideFrame({...slide,sectionKey:'sermon',scriptureContext:'sermon'},{noChromakey:true,presentationDesign:design});document.body.append(citation);
-     const citationText=citation.querySelector('.presenter-slide-text');check(citationText&&getComputedStyle(citationText).color==='rgb(41, 37, 34)','sermon citation became white on white');citation.remove();
+     const citationText=citation.querySelector('.presenter-scripture-reading-text');check(citationText&&getComputedStyle(citationText).color==='rgb(41, 37, 34)','sermon citation became white on white');citation.remove();
      const mini=document.createElement('div');mini.innerHTML=renderPresenterSlideFrame(slide,{noChromakey:true,previewStage:true,presentationDesign:design});check(mini.textContent.includes('부족함이 없으리로다')&&!mini.textContent.includes('Fin.'),'preview differs from output');
      const service={id:'fixture',type_id:'special'},item={id:'speaker',label:'설교',raw_title:'',assignee:'이름 목사',memo:serializeServiceItemMemo({elementType:'title_person',inputMode:'text'})};
      const missing=presenterMissingContentSlide(item,{sectionKey:'sermon',sectionTitle:'설교',orderTitle:'설교'},0,{state:'missing'},service);
