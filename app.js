@@ -18286,10 +18286,6 @@ function renderBibleEditionInfo() {
     <p>${escapeHtml(edition.textEdition)}</p>
     <p>${escapeHtml(edition.history)} · 확보일 ${escapeHtml(edition.retrievedAt)}</p>
     <p><a href="${escapeAttr(edition.source)}" target="_blank" rel="noopener noreferrer">본문 출처</a> · <a href="${escapeAttr(edition.historySource)}" target="_blank" rel="noopener noreferrer">발행 연혁</a>${edition.revisionSource ? ` · <a href="${escapeAttr(edition.revisionSource)}" target="_blank" rel="noopener noreferrer">제4판 자료</a>` : ""}</p>
-    <details><summary>검증·판본 기록</summary>
-      <p>${escapeHtml(edition.note)}</p>
-      <p>기록된 제공처의 확보 본문을 기준으로 사용합니다. 다른 역본·판차의 표현 차이나 인쇄 쇄차 미확정은 본문 오류·교정 대기를 뜻하지 않습니다.</p>
-    </details>
   </details>`;
 }
 
