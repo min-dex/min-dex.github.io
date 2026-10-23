@@ -31967,6 +31967,7 @@ function presenterFormGroupLabel(slide) {
   const label = String(slide?.formLabel || slide?.marker || "").trim();
   if (isGenericPresenterFormLabel(label)) return "";
   const form = normalizePresenterFormPresetLabel(label);
+  if (form.type === "title") return "Title";
   const singleType = Array.isArray(slide?.controllerSingleFormTypes)
     && slide.controllerSingleFormTypes.includes(form.type);
   if ((singleType || (slide?.controllerSingleVerse && form.type === "verse"))
@@ -32001,7 +32002,9 @@ function renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, fo
   const selected = state.presenterBoardSelection.serviceId === serviceId
     && state.presenterBoardSelection.elementKey === elementKey
     && (state.presenterBoardSelection.indexes || []).map(Number).includes(slideIndex);
-  const normalizedFormLabel = songFormPresetDisplayLabel(formLabel) || String(formLabel || "").trim();
+  const normalizedFormLabel = normalizePresenterFormPresetLabel(formLabel).type === "title"
+    ? "Title"
+    : songFormPresetDisplayLabel(formLabel) || String(formLabel || "").trim();
   const visibleFormLabel = presenterLabelDuplicatesSlideText(normalizedFormLabel, slide) ? "" : normalizedFormLabel;
   const ariaPrefix = presenterSlideInteractionHint(serviceId, `${slideIndex + 1}번 슬라이드${hidden ? " · 숨김" : ""}`);
   const slideNumber = slideIndex + 1;

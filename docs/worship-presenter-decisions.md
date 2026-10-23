@@ -4267,3 +4267,10 @@ service-ID exception. Canonical offering/response/sending keys retain their scop
 Old saved forms without explicit Title ownership regain their leading T; a user
 sequence explicitly saved without T still owns that omission. No stored sequence
 or section metadata is rewritten by this classification correction.
+
+## Controller Title labels ·2026-10-23
+
+Controller thumbnail form captions display `Title` for both `T` and `Title`
+aliases. Keep the canonical `T` token in form inputs, parsing and saved sequences;
+this only expands the human-readable controller label. Group boundaries, colors,
+slide ordering and output content are unchanged.

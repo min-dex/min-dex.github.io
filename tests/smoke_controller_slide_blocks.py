@@ -54,6 +54,9 @@ try:
     document.body.append(plain);
     const groups=[...plain.querySelectorAll('.svc-board-slide-block')];
     check(groups.length===4 && groups[0].dataset.formPlain==='true' && groups[2].dataset.formPlain==='true','Title/Int plain grouping');
+    check(groups[0].querySelector('.svc-slide-form-badge').textContent.trim()==='Title','controller Title caption abbreviated');
+    check(presenterFormGroupLabel({formLabel:'T'})==='Title' && presenterFormGroupLabel({formLabel:'Title'})==='Title','controller title aliases');
+    check(presenterFormPresetDisplayLabel('Title')==='T','canonical input title token changed');
     check(groups[1].dataset.formColor==='verse' && groups[3].dataset.formColor==='chorus','Title/Int consumed lyric colors');
     check(plain.querySelectorAll('.svc-slide-form-badge').length===4,'plain group labels lost');
     check([...plain.querySelectorAll('.svc-slide-thumb')].map(e=>e.dataset.presenterIndex).join()==='20,21,22,23','plain group click targets changed');
