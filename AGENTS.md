@@ -19,6 +19,9 @@ For bounded UI changes, run relevant local unit/browser checks and rely on the
 complete required GitHub gate before publication instead of repeating the full
 local baseline. For CI-runner changes, test partition coverage/failure propagation
 locally and verify every shard in GitHub. Never omit or bypass required CI checks.
+CSS-only publication uses the conservative affected-screen plan in
+`cloud/check_scope.py`; mixed behavior/data/config/test changes retain the full
+gate. Unknown scope or unverified baseline must fall back to the full gate.
 Do not glob-run live/import/migration scripts: some can mutate production data.
 Never equate a successful local check with cloud execution or Pages deployment.
 Before push/integration fetch and reconcile the latest remote without discarding work.

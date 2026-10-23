@@ -17,6 +17,13 @@ class PagesGate(unittest.TestCase):
         workflow = yaml.safe_load((ROOT / '.github/workflows/cloud-check.yml').read_text())
         check = workflow['jobs']['offline-web']
         deploy = workflow['jobs']['deploy-pages']
+        scope = workflow['jobs']['scope']
+        self.assertEqual(check['needs'], 'scope')
+        self.assertEqual(scope['steps'][1]['run'], 'python3 cloud/check_scope.py')
+        self.assertEqual(scope['steps'][2]['name'], 'Scope proof: ${{ steps.plan.outputs.signature }}')
+        self.assertEqual(check['env']['MINDEX_CHECK_PROFILE'], '${{ needs.scope.outputs.profile }}')
+        self.assertEqual(check['env']['MINDEX_CHECK_SMOKES'], '${{ needs.scope.outputs.smokes }}')
+        self.assertEqual(check['env']['MINDEX_CHECK_SIGNATURE'], '${{ needs.scope.outputs.signature }}')
         self.assertEqual(deploy['needs'], 'offline-web')
         self.assertEqual(deploy['if'], "github.ref == 'refs/heads/main' && github.event_name != 'pull_request'")
         self.assertEqual(check['strategy']['matrix']['shard'], [0, 1, 2, 3])
