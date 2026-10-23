@@ -17877,7 +17877,7 @@ function renderVersionTitleContent(song, version, forms, options = {}) {
   return `
     <div class="version-title-main">
       <input class="version-title-input" type="text" data-version-name-field="${escapeAttr(version?.id || "")}" value="${escapeAttr(versionName)}" aria-label="버전 이름" />
-      <input class="version-output-title-input" type="text" data-version-output-title-field="${escapeAttr(version?.id || "")}" value="${escapeAttr(version?.output_title || "")}" placeholder="${escapeAttr(`출력 제목 · 미입력 시 ${song?.title || "대표 제목"}`)}" aria-label="버전 출력 제목" title="비워 두면 대표 제목으로 출력합니다" />
+      <input class="version-output-title-input" type="text" data-version-output-title-field="${escapeAttr(version?.id || "")}" value="${escapeAttr(version?.output_title || "")}" placeholder="${escapeAttr(`버전 전용 제목 · 미입력 시 ${song?.title || "대표 제목"}`)}" aria-label="버전 전용 제목" title="비워 두면 대표 제목으로 출력합니다" />
       ${renderVersionAttentionStatus(song, version, forms, { active })}
     </div>
     <div class="version-title-actions">
@@ -20003,7 +20003,7 @@ function getSongSearchFields(song, options = {}) {
 
   for (const version of song.versions || []) {
     const versionMetadata = normalizeSongMetadata(version.metadata);
-    fields.push(searchField("title", version.output_title, 120, "버전 출력 제목"));
+    fields.push(searchField("title", version.output_title, 120, "버전 전용 제목"));
     fields.push(searchField("version", versionDisplayName(song, version), 118, "버전"));
     fields.push(searchField("version", version.raw_section_name, 58, "버전"));
     fields.push(searchField("version", version.version_label, 52, "버전"));
@@ -23334,7 +23334,8 @@ function linkServiceItemToPraiseSong(item, song, service = selectedServiceForEdi
   item.version_id = defaultVersion?.id || null;
   item.song_version_id = item.version_id;
   if (!parsed.formPresetDisabled && !parsed.formPreset?.forms?.length && !parsed.formHint) {
-    const preset = presenterServiceItemFormPreset(defaultVersion || {}, item, song, { includePlaybackFallback: false });
+    const registered = presenterSongDefaultFormPreset(song, defaultVersion);
+    const preset = registered && presenterFormPresetWithDefaultTitle(registered, item, song, defaultVersion);
     if (preset?.forms?.length) {
       parsed.formPreset = normalizeServiceFormPreset({ ...preset, strength: "manual" });
       parsed.formHint = serviceFormPresetSummary(parsed.formPreset);
@@ -23604,9 +23605,18 @@ function serviceItemEffectiveFormHint(item = {}) {
   if (parsed.formPresetDisabled) return "";
   const song = serviceItemLinkedSong(item);
   const version = serviceItemLinkedVersion(item, song);
-  return serviceFormPresetSummary(presenterServiceItemFormPreset(version || {}, item, song))
-    || parsed.formHint
-    || "Title";
+  const preset = parsed.formPreset || (parsed.formHint ? normalizeServiceFormPreset(parsed.formHint) : null)
+    || presenterSongDefaultFormPreset(song, version);
+  return preset ? serviceFormPresetSummary(presenterFormPresetWithDefaultTitle(preset, item, song, version)) : "";
+}
+
+function serviceItemDefaultFormHint(item = {}) {
+  const song = serviceItemLinkedSong(item);
+  const version = serviceItemLinkedVersion(item, song);
+  const score = serviceItemOutputMode(item) === "score";
+  const preset = score ? presenterScoreFormSequence(item, song, version)
+    : presenterServiceItemFormPreset(version || {}, item, song);
+  return serviceFormPresetSummary(preset);
 }
 
 function serviceFormPresetSummary(preset) {
@@ -23625,7 +23635,7 @@ function renderServiceFormHintInput(item, index, options = {}) {
       data-service-id="${escapeAttr(item.service_id || options.serviceId || state.selectedServiceId || "")}"
       data-service-item-index="${index}"
       value="${escapeAttr(serviceItemEffectiveFormHint(item))}"
-      placeholder="${escapeAttr(options.placeholder || "송폼 · Title-V1-C")}"
+      placeholder="${escapeAttr(serviceItemDefaultFormHint(item) || options.placeholder || "송폼")}"
       aria-label="섹션 송폼/범위"
     />`;
 }
@@ -34532,7 +34542,10 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   const presentation = normalizeServicePresentation(memo.presentation);
 
   if (memoElementType === "praise" && presentation?.backgroundVideo) section.backgroundVideo = presentation.backgroundVideo;
-  const withIntro = (slides) => presenterSlidesWithIntroSlide(item, section, index, memo, slides);
+  const withIntro = (slides) => presenterSlidesWithIntroSlide(item, section, index, memo,
+    memoElementType === "praise"
+      ? presenterSlidesWithSongContentHeading(item, section, song, version, displayText, index, slides)
+      : slides);
   const withSpecialTitle = (slides) => presenterSlidesWithSpecialSongTitle(item, section, slides, index, service);
   const withIntroAndSpecialTitle = (slides) => withIntro(withSpecialTitle(slides));
   const specialSongItem = isSpecialSongServiceItem(item);
@@ -34660,12 +34673,7 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
       item, section, index, song, version, displayText, label, forms, formWarnings,
     });
     const syncConfig = presenterSyncedLyricsConfigFromAsset(configuredAsset);
-    const slides = shouldIncludeSongTitleSlide(item, label, song, version)
-      ? presenterSlidesWithSpecialSongTitle(item, section, [
-          presenterSongTitleSlide(item, section, song, version, displayText, index),
-          ...lyricsSlides,
-        ], index, service)
-      : presenterSlidesWithSpecialSongTitle(item, section, lyricsSlides, index, service);
+    const slides = presenterSlidesWithSpecialSongTitle(item, section, lyricsSlides, index, service);
     const syncedSlides = presenterApplySyncedLyricsConfig(slides, syncConfig, item, index);
     return withIntro(globalThis.MindexSongTiming?.decorate(syncedSlides, item, song, version) || syncedSlides);
   }

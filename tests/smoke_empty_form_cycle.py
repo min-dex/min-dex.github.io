@@ -20,14 +20,14 @@ try:
      await updateServiceItemField({value:'',dataset:{serviceId:sid,serviceItemIndex:'0',serviceItemField:'form_hint'}});
      const cleared=getServiceItems(sid)[0],before=JSON.stringify(cleared);
      const plan=presenterFormPlanForServiceItem(version,cleared,song);
-     check(plan.forms.map(f=>f.id).join()==='v1,c,v2,c',label+' cleared order');
+     check(plan.forms.filter(f=>!f._presenterTitle).map(f=>f.id).join()==='v1,c,v2,c',label+' cleared order');
      const slides=buildPresenterSlidesForServiceItem(cleared,service,0).filter(s=>s.type==='lyrics');
      check(slides.map(s=>s.text).join('|')==='첫 절|후렴|둘째 절|후렴',label+' actual slides '+slides.map(s=>s.text));
      check(serviceItemEffectiveFormHint(cleared)==='' && !presenterServiceItemFormPreset(version,cleared,song,{includePlaybackFallback:false}),'inference leaked into form field');
      check(JSON.stringify(cleared)===before,'render mutated item');
      const reopened={...cleared,memo:serializeServiceItemMemo(parseServiceItemMemo(cleared.memo))};
-     check(presenterFormPlanForServiceItem(version,reopened,song).forms.map(f=>f.id).join()==='v1,c,v2,c','reopen');
-     check(presenterFormPlanForServiceItem({forms:forms.slice(0,2)},cleared,song).forms.length===2,'missing chorus');
+     check(presenterFormPlanForServiceItem(version,reopened,song).forms.filter(f=>!f._presenterTitle).map(f=>f.id).join()==='v1,c,v2,c','reopen');
+     check(presenterFormPlanForServiceItem({forms:forms.slice(0,2)},cleared,song).forms.filter(f=>!f._presenterTitle).length===2,'missing chorus');
     }
     const disabled={memo:serializeServiceItemMemo({formPresetDisabled:true})};
     check(presenterFormPlanForServiceItem({...version,praise_types:['children']},disabled,song).forms.filter(f=>!f._presenterTitle).map(f=>f.id).join()==='v1,v2,c','children changed');
