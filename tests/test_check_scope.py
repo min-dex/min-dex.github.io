@@ -28,13 +28,13 @@ class CheckScope(unittest.TestCase):
                 self.assertEqual(plan['profile'], 'css')
                 self.assertTrue(plan['smokes'])
                 self.assertTrue(set(plan['smokes']) <= set(gate.SMOKES))
-                expected = gate.selected_tests(smokes=plan['smokes'], node_tests=scope.CSS_NODE_TESTS)
+                expected = gate.selected_tests(smokes=plan['smokes'], node_tests=gate.CSS_NODE_TESTS)
                 for count in (1, 2, 4, 20):
-                    actual = [name for i in range(count) for name in gate.selected_tests(i, count, smokes=plan['smokes'], node_tests=scope.CSS_NODE_TESTS)]
+                    actual = [name for i in range(count) for name in gate.selected_tests(i, count, smokes=plan['smokes'], node_tests=gate.CSS_NODE_TESTS)]
                     self.assertEqual(Counter(actual), Counter(expected))
                     self.assertEqual(len(actual), len(set(actual)))
         self.assertEqual(set(self.plan([('M', 'styles.css')])['smokes']), set(gate.SMOKES))
-        self.assertTrue(set(scope.CSS_NODE_TESTS) <= set(gate.NODE_TESTS))
+        self.assertTrue(set(gate.CSS_NODE_TESTS) <= set(gate.NODE_TESTS))
 
     def test_multiple_stylesheets_union_and_signature_bind_baseline(self):
         paths = ['styles.monitor.css', 'styles.calendar.css']
@@ -99,6 +99,14 @@ class CheckScope(unittest.TestCase):
                     scope.main()
                 self.assertIn('profile=full\n', output.read_text())
                 self.assertIn('signature=full\n', output.read_text())
+
+    def test_css_runner_works_without_cloud_import_path(self):
+        cloud_path = str(Path(__file__).resolve().parents[1] / 'cloud')
+        with patch.dict(os.environ, MINDEX_CHECK_PROFILE='css', MINDEX_CHECK_SMOKES='["smoke_children_theme.py"]'), patch.object(sys, 'path', [p for p in sys.path if p != cloud_path]), patch.dict(sys.modules, {'check_scope':None}):
+            profile, smokes, nodes = gate.scope_parameters()
+            self.assertEqual(profile, 'css')
+            self.assertEqual(smokes, ('smoke_children_theme.py',))
+            self.assertEqual(nodes, gate.CSS_NODE_TESTS)
 
     def test_invalid_runner_selection_fails_before_subprocess(self):
         for value in ('[]', '["unknown.py"]', '["smoke_children_theme.py","smoke_children_theme.py"]', '{}', 'invalid'):

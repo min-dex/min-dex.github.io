@@ -31,8 +31,6 @@ CSS_SCREENS = {
     'remote.shared.css': ('smoke_presenter_remote.py', 'smoke_remote_phone.py',
                           'smoke_remote_preview.py', 'smoke_remote_lifecycle.py', 'smoke_remote_video.py'),
 }
-CSS_NODE_TESTS = ('test_app_runtime.cjs', 'test_ui_icons.cjs',
-                  'test_remote_theme.cjs', 'test_bulletin.cjs')
 PROOF_PREFIX = 'Scope proof: '
 
 
