@@ -3,11 +3,13 @@
 body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-sans); line-height: 1.4; text-rendering: geometricPrecision; }
 main { max-width: 760px; margin: auto; padding: 25px 15px max(25px, env(safe-area-inset-bottom)); }
 header { padding-bottom: 15px; border-bottom: 1px solid var(--line); margin-bottom: 20px; }
-h1 { font-size: var(--ui-page-title-size); font-weight: var(--ui-title-weight); margin: 5px 0 10px; }
+h1 { font-size: var(--ui-page-title-size); font-weight: var(--ui-title-weight); margin: 0; }
 h2, label { font-size: var(--ui-label-size); font-weight: var(--ui-label-weight); }
 h2 { margin: 20px 0 10px; }
 p { overflow-wrap: anywhere; }
-.brand { font-size: var(--ui-meta-size); font-weight: var(--ui-title-weight); color: var(--ink-2); margin: 0; }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark { width: 20px; height: 25px; flex: 0 0 20px; background: var(--accent); -webkit-mask: url("./assets/mindex-cross.svg") center / contain no-repeat; mask: url("./assets/mindex-cross.svg") center / contain no-repeat; }
+#status:not(:empty) { margin-top: 10px; }
 #status { font-size: var(--ui-meta-size); font-weight: var(--ui-meta-weight); min-height: 20px; color: var(--ink-3); margin: 0; }
 button, input { font: inherit; border-radius: var(--r); min-height: 50px; width: 100%; }
 button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 10px; border: 0; background: var(--panel); color: var(--ink-2); font-size: var(--ui-body-size); font-weight: var(--ui-row-weight); touch-action: manipulation; cursor: pointer; }

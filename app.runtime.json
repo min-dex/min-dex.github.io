@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-common-deletion",
+  "version": "20261023-service-window-controls",
   "options": {
     "compress": false,
     "mangle": {

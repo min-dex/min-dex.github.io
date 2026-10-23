@@ -3930,3 +3930,11 @@ focus and unavailable styling. Fullscreen remains an entry command; only the
 native always-on-top checkbox displays checked state. Browser pin support and
 output-window availability remain separate capability checks. No output behavior
 or stored preference changes.
+
+## Refined common marker geometry ·2026-10-23
+
+Supersedes the initial30–95% marker coverage: all children artwork now uses the
+same45–95% band (50% height),4-stage-pixel padding on each side and a65% authored
+color /35% white mix. Foreground, font sizes and weights are unchanged. Padding
+uses the shared1920px stage unit in thumbnails/output; no background exceptions,
+text outlines or stored highlight color edits are introduced.
