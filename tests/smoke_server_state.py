@@ -5,6 +5,7 @@ from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 INIT = """async () => {
  const client={rpc:async(name,args)=>{
+  if(!['mindex_state_read_v1','mindex_state_write_v1'].includes(name))return {data:[],error:null};
   const response=await fetch('/state-fixture/'+name,{method:'POST',body:JSON.stringify(args)});
   const result=await response.json();if(result.error)return {error:Error(result.error)};return result;
  }};
