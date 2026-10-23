@@ -828,3 +828,11 @@ read-only navigation. No automatic save or source data migration is introduced.
 Unselected same-song versions also retain all three praise-type toggles
 (찬송가/CCM/어린이). Each toggle carries its target version ID and updates only
 that version without changing the active editor or its unsaved lyrics.
+
+
+### Praise compact control alignment · 2026-10-23
+
+Version classification pills use the 28px compact minimum height and 10px
+horizontal padding. Review-complete actions use a 30×30px target with the
+existing 16px icon; their status row accommodates that target. Form-add buttons
+keep their 30px height and use the shared 5px icon/text gap.
