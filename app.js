@@ -19404,7 +19404,7 @@ function songTitleMetaLine(song) {
   for (const version of song?.versions || []) {
     const displayName = versionDisplayName(song, version);
     addSongMetaFromRaw(titles, version.name || version.curated_version_name || "", displayName);
-    addSongMetaFromRaw(titles, version.raw_section_name || version.version_label || "", displayName);
+    addSongMetaFromRaw(titles, version.raw_section_name || version.version_label || "", displayName, { includeSubtitle: false });
   }
   return joinMetaItems([...titles]);
 }
