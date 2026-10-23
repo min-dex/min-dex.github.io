@@ -34600,10 +34600,7 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   if (scoreOutput) {
     if (!song) return [];
     const scoreSlides = presenterScoreSlidesForServiceItem(item, section, index, song, version, displayText, memo, forms, formWarnings);
-    const slides = [
-	        ...(song && shouldIncludeSongTitleSlide(item, label, song, version, scoreSlides) ? [presenterSongTitleSlide(item, section, song, version, displayText, index)] : []),
-        ...scoreSlides,
-      ];
+    const slides = scoreSlides;
     return withIntro(presenterSlidesWithSpecialSongTitle(item, section, slides, index, service));
   }
 
@@ -34624,10 +34621,7 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
 
   if (!specialSongItem && song && presenterHymnScoreAssetSlides(song, version, displayText).length) {
     const scoreSlides = presenterScoreSlidesForServiceItem(item, section, index, song, version, displayText, memo, forms, formWarnings);
-    const slides = [
-	      ...(song && shouldIncludeSongTitleSlide(item, label, song, version, scoreSlides) ? [presenterSongTitleSlide(item, section, song, version, displayText, index)] : []),
-      ...scoreSlides,
-    ];
+    const slides = scoreSlides;
     return withIntro(presenterSlidesWithSpecialSongTitle(item, section, slides, index, service));
   }
 

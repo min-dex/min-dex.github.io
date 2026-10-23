@@ -23,12 +23,15 @@ try:
               state.client={};state.auth.session={user:{id:'offline'}};
               const images=[{url:'/assets/icon-192.png',formLabel:'V1'},{url:'/assets/icon-512.png',formLabel:'C'}];
               let count=0;
+              const legacyAuto=shouldIncludeSongTitleSlide;
+              shouldIncludeSongTitleSlide=()=>{throw Error('legacy automatic title path used');};
               for(const [label,key] of [['찬양 1','praise'],['파송찬양','sending'],['결단찬양','response_song'],['폐회찬송','closing_song']]) {
                 for(const [name,preset,disabled,wanted] of [
                   ['legacy', {forms:['V1','C'],strength:'manual'},false,1],
                   ['no-preset',null,false,1],
                   ['legacy-cleared',null,true,1],
                   ['explicit', {forms:['Title','V1','C'],titleSequence:true,strength:'manual'},false,1],
+                  ['title-only', {forms:['Title'],titleSequence:true,strength:'manual'},false,1],
                   ['explicit-repeated', {forms:['Title','V1','Title','C'],titleSequence:true,strength:'manual'},false,2],
                   ['omitted', {forms:['V1','C'],titleSequence:true,strength:'manual'},false,0],
                   ['explicit-cleared', {titleSequence:true},true,0],
@@ -40,7 +43,7 @@ try:
                   const slides=buildPresenterSlidesForServiceItem(item,service,0,{allowHydration:false});
                   const titles=slides.filter(s=>s.type==='song-title'||s.songTitle);
                   check(titles.length===wanted,label+' '+name+' title count '+JSON.stringify(slides.map(s=>({type:s.type,title:s.title,form:s.formLabel,songTitle:s.songTitle}))));
-                  check(slides.filter(s=>s.type==='image').length===2,label+' '+name+' score pages lost '+JSON.stringify(slides.map(s=>({type:s.type,src:s.imageSrc,title:s.title}))));
+                  check(slides.filter(s=>s.type==='image').length===(name==='title-only'?0:2),label+' '+name+' score pages lost '+JSON.stringify(slides.map(s=>({type:s.type,src:s.imageSrc,title:s.title}))));
                   check(new Set(slides.map(s=>s.id)).size===slides.length,'duplicate IDs');
                   check(JSON.stringify({item,song})===before,'source changed');
                   if(wanted===1) {
@@ -58,6 +61,7 @@ try:
                 check(slides.filter(s=>s.type!=='song-title').length===(asset.url?1:2),'file/unlabelled content lost');
                 count++;
               }
+              shouldIncludeSongTitleSlide=legacyAuto;
               return 'PASS '+count+' legacy/explicit score, PDF, unlabelled, fullscreen/keyed and immutable-source cases';
             }'''), flush=True)
             browser.close()

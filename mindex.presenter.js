@@ -304,10 +304,14 @@ function presenterScoreSlidesForServiceItem(
   const imageSlides = presenterScoreImageSlidesFromAsset(asset, item, section, index, title, label, song, version, displayText, forms, formWarnings);
   if (imageSlides.length) return imageSlides;
   const scoreAsset = { ...asset, kind: asset.kind || "score" };
-  if (!String(scoreAsset.url || "").trim()) return [];
+  if (!String(scoreAsset.url || "").trim()) {
+    return presenterScoreFormPresetLabels(item, song, version).flatMap((label, position) =>
+      normalizePresenterFormPresetLabel(label).type === "title"
+        ? [presenterSequenceTitleSlide(item, section, song, version, displayText, index, position)] : []);
+  }
   const fileTitle = presenterFileDisplayTitle({ title, asset: scoreAsset }, "악보");
   const scoreForms = presenterScoreFormsFromImageSources([{ formLabel: asset.formLabel || asset.form_label || asset.scoreFormLabel || asset.score_form_label }]);
-  return [{
+  const fileSlide = {
     id: `${item.id || index}:score`,
     ...section,
     sectionLabel: section.sectionLabel || label || "악보",
@@ -327,7 +331,11 @@ function presenterScoreSlidesForServiceItem(
     sourceType: "score",
     componentType: "score",
     sort: index,
-  }];
+  };
+  const sequence = presenterScoreImageSourcesForFormSequence([{ url: scoreAsset.url }], scoreForms, forms, item, song, version);
+  return sequence.imageSources.map((source, position) => source._presenterTitle
+    ? presenterSequenceTitleSlide(item, section, song, version, displayText, index, position)
+    : { ...fileSlide, sort: index + position / 100 });
 }
 
 function presenterScoreImageSlidesFromAsset(
@@ -360,6 +368,7 @@ function presenterScoreImageSlidesFromAsset(
     }))
     .filter((slide) => slide.url && presenterMediaSourceIsImage(slide.url));
   const count = imageSources.length;
+  if (!count) return [];
   const scoreForms = presenterScoreFormsFromImageSources(imageSources);
   const sequenced = presenterScoreImageSourcesForFormSequence(imageSources, scoreForms, forms, item, song, version);
   return sequenced.imageSources.map((slide, slideIndex) => {
@@ -482,7 +491,8 @@ function presenterApplySyncedLyricsConfig(slides = [], syncConfig = null, item =
 }
 
 function presenterScoreImageSourcesForFormSequence(imageSources = [], scoreForms = [], forms = [], item = {}, song = null, version = null) {
-  const presetLabels = presenterScoreFormPresetLabels(item, song, version);
+  const policy = presenterScoreFormSequence(item, song, version);
+  const presetLabels = policy.forms;
   const planTargets = presetLabels
     .map((label) => normalizePresenterFormPresetLabel(label))
     .filter((target) => target.key && target.type !== "lyrics");
@@ -490,6 +500,9 @@ function presenterScoreImageSourcesForFormSequence(imageSources = [], scoreForms
     form ? normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form)) : null,
   );
   if (!planTargets.length) return { imageSources, scoreForms };
+  if (policy.defaultTitle && planTargets.every(target => target.type === "title")) {
+    return { imageSources: [{ _presenterTitle: true }, ...imageSources], scoreForms: [null, ...scoreForms] };
+  }
   if (!scoreTargets.some((target) => target?.key)) {
     if (!planTargets.some(target => target.type === "title")) return { imageSources, scoreForms };
     // A deck without form labels has no reliable verse boundaries. Keep every
@@ -556,19 +569,23 @@ function presenterScoreImageSourcesForFormSequence(imageSources = [], scoreForms
   };
 }
 
+function presenterScoreFormSequence(item = {}, song = null, version = null) {
+  const memo = parseServiceItemMemo(item?.memo);
+  if (serviceItemFormPresetDisabled(item)) {
+    return memo.formPreset?.titleSequence ? { forms: [], titleSequence: true }
+      : { forms: ["Title"], titleSequence: true, defaultTitle: true };
+  }
+  const preset = serviceItemFormPreset(item)
+    || matchedServiceItemFormPresetRule(item, song, version)?.formPreset
+    || presenterSongDefaultFormPreset(song, version);
+  const forms = normalizeServiceFormPresetForms(preset?.forms || []);
+  if (preset?.titleSequence) return { ...preset, forms };
+  // Translate the old implicit title into the same virtual token used by lyrics.
+  return { ...preset, forms: ["Title", ...forms], titleSequence: true, defaultTitle: true };
+}
+
 function presenterScoreFormPresetLabels(item = {}, song = null, version = null) {
-  if (typeof serviceItemFormPresetDisabled === "function" && serviceItemFormPresetDisabled(item)) return [];
-  const itemPreset = typeof serviceItemFormPreset === "function" ? serviceItemFormPreset(item) : null;
-  const matchedRule = typeof matchedServiceItemFormPresetRule === "function"
-    ? matchedServiceItemFormPresetRule(item, song, version)
-    : null;
-  const songDefaultPreset = presenterSongDefaultFormPreset(song, version);
-  return cleanList(
-    itemPreset?.forms
-    || matchedRule?.formPreset?.forms
-    || songDefaultPreset?.forms
-    || [],
-  );
+  return presenterScoreFormSequence(item, song, version).forms;
 }
 
 function presenterScoreFormMetadata(forms = [], slideIndex = 0, formWarnings = []) {
@@ -2372,18 +2389,9 @@ function isScriptureBodyServiceItem(item) {
     || (sectionKey === "scripture_reading" && elementType === "scripture_body");
 }
 
-function shouldIncludeSongTitleSlide(item, label, song = null, version = null, renderedSlides = null) {
-  const authored = parseServiceItemMemo(item?.memo).formPreset;
-  const preset = presenterServiceItemFormPreset(version || {}, item, song);
-  if (Array.isArray(renderedSlides)) {
-    // A legacy score plan may not yet contain the virtual default Title.
-    // Inspect actual output before suppressing the former automatic title.
-    if (renderedSlides.some(slide => slide?.formLabel === "Title" || slide?.type === "song-title"
-      || (slide?.songTitle && ["title-content", "title-assignee"].includes(slide.type)))) return false;
-    const explicit = authored?.titleSequence ? authored
-      : presenterServiceItemBaseFormPreset(version || {}, item, song);
-    if (explicit?.titleSequence) return normalizeServiceFormPresetForms(explicit.forms || []).includes("Title");
-  } else if (authored?.titleSequence || preset?.titleSequence) return false;
+function shouldIncludeSongTitleSlide(item, label, song = null, version = null) {
+  if (parseServiceItemMemo(item?.memo).formPreset?.titleSequence
+      || presenterServiceItemFormPreset(version || {}, item, song)?.titleSequence) return false;
   if (isServiceConnectedPraiseSecondaryItem(item)) return false;
   const displayText = serviceItemDisplayText(item);
   if (serviceItemConnectedPraiseTitle(item, "title")) return true;
