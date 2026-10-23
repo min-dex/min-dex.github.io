@@ -88,7 +88,7 @@ try:
    # The original sidebar routes remain functional, including stalled data.
    page.locator('#songList [data-service-week]').click()
    assert page.locator('.service-week-board').count()==2
-   page.locator('#songList [data-service-list]').click()
+   page.locator('#songList [data-service-list="public"]').click()
    assert page.evaluate('state.selectedServiceTypeId')=='__list'
    page.evaluate("()=>{window.homeOriginalLoadItems=loadServiceItems;loadServiceItems=()=>new Promise(()=>{});state.presenter.outputWindow=null}")
    page.locator('#songList [data-service-id="next"]').click()
