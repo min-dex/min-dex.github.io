@@ -1,0 +1,2548 @@
+{
+  "date": "2026-10-22",
+  "status": "verified_pending_deployment",
+  "deploymentRequested": false,
+  "pushed": false,
+  "productionDatabaseWrites": 0,
+  "invariants": {
+    "versionsReviewed": 71,
+    "newlyMeasured": 66,
+    "reusedMeasured": 2,
+    "fullyMeasuredInBatch": 68,
+    "recitativeInBatch": 1,
+    "fullyDeferredInBatch": 2,
+    "preservedUnitIdentityKindTextHashBlockCounts": true,
+    "outsideBatchUnchanged": true,
+    "checkedLyricUnits": 5419,
+    "deployed": false
+  },
+  "summary": {
+    "versions": 1203,
+    "stanzaMeasuredVersions": 349,
+    "recitativeExceptions": 4,
+    "unmeasuredVersions": 854,
+    "complete": false,
+    "productionMetadataWritten": false,
+    "appDisplayImplemented": true,
+    "appDisplayDeployed": true,
+    "fullyMeasuredVersions": 345,
+    "partiallyMeasuredVersions": 4,
+    "notMeasuredVersions": 850,
+    "deferredVersions": 8
+  },
+  "browserValidation": {
+    "mode": "local candidate injection with live reads; writes blocked; not deployment or save certification",
+    "results": {
+      "chromium": {
+        "versions": 71,
+        "metadata": 353,
+        "renderedCards": 71,
+        "freshReopen": true,
+        "writes": 0
+      },
+      "webkit": {
+        "versions": 71,
+        "metadata": 353,
+        "renderedCards": 71,
+        "freshReopen": true,
+        "writes": 0
+      }
+    }
+  },
+  "scoreReview": [
+    {
+      "versionId": "b00aca6f-e5d6-51d8-804b-eaa9c0be0d00",
+      "edition": "new",
+      "number": 191,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/191/score",
+          "sha256": "5aef145a67599bca4c8696df5857f89e2edc342d876ac47124ad2f829de65a8b"
+        }
+      ]
+    },
+    {
+      "versionId": "58671f54-c7ab-5939-a7ac-9c343d17b75d",
+      "edition": "union",
+      "number": 427,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "본절8. 저장 두 번째 블록이 첫 인쇄 행 후반2마디와 다음 행 첫 악구1마디에 걸치므로2+3+3으로 기록. 인쇄 행 단위로 강제 재분할하지 않음.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 3,
+          "approxMeasuresByBlock": [
+            2,
+            3,
+            3
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-427.jpg",
+          "sha256": "20968ac484dbbce3fd40b140c93956ee6d880531f4e156cd004fd2f1f3d57910"
+        }
+      ]
+    },
+    {
+      "versionId": "919d7d30-fff2-5c74-a3f3-7986ca2c26cb",
+      "edition": "new",
+      "number": 192,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/192/score",
+          "sha256": "dab3927f223e4ea583295eec7589b69221c21069e06d2181be64c03e32e555eb"
+        }
+      ]
+    },
+    {
+      "versionId": "e95e6b81-4256-5ba8-b1d5-7c7cf9eb90a3",
+      "edition": "new",
+      "number": 193,
+      "stanzaApproxMeasures": 12,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/193/score",
+          "sha256": "29eedb97f393573594f43e0b8b50faac527aab6b50b7de29601272d6d916bbe4"
+        }
+      ]
+    },
+    {
+      "versionId": "58a2e005-3c5a-49fb-a7c6-8afeb278071b",
+      "edition": "new",
+      "number": 194,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/194/score",
+          "sha256": "9ccad66fc4c8396bacc9d7203a2019712831dd55aca463ab22e7763a48211b94"
+        }
+      ]
+    },
+    {
+      "versionId": "179c619f-9f8a-4fc4-9c42-dc515711da42",
+      "edition": "new",
+      "number": 195,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/195/score",
+          "sha256": "b0e02f48c5fab5b1ddd7f96f26ef703d3b7862ab7d68ee3b3fad4d0d9d145318"
+        }
+      ]
+    },
+    {
+      "versionId": "88b62fdf-29ad-4bff-ba29-4ce7bc723da7",
+      "edition": "union",
+      "number": 175,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-175.jpg",
+          "sha256": "f112e310a44afafa482eb3d308d37c0728b5d580f954c29ee7d4e4da671d1664"
+        }
+      ]
+    },
+    {
+      "versionId": "5320effe-0058-4985-8fd7-4af818d32216",
+      "edition": "new",
+      "number": 196,
+      "stanzaApproxMeasures": 13,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "3/4 본절은 성령의 은사를3+나에게 채우사3+주님의 사랑 본받아 및 나 살게 하소서7=13. 인쇄 첫 행7마디/둘째 행 본절6마디, 아멘2 별도. 통174와 총수 동일.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            13
+          ],
+          "approxMeasures": 13,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/196/score",
+          "sha256": "a67f5d4c40d072a83b0c1986e1fda16935999464553c15e305597b899cbb7f57"
+        }
+      ]
+    },
+    {
+      "versionId": "9a1fd9ac-37a4-438e-b259-f737fab39680",
+      "edition": "union",
+      "number": 174,
+      "stanzaApproxMeasures": 13,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "3/4 첫 저장 블록은 두 악구3+3=6, 둘째 블록7. 본절13·아멘2. 새196과 총수 동일, 저장 블록만 다름.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            6,
+            7
+          ],
+          "approxMeasures": 13,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-174.jpg",
+          "sha256": "dca7aa7c3ccf9f24e644def4bca67bf6968bb42553c254abe95c942a9d16d744"
+        }
+      ]
+    },
+    {
+      "versionId": "78b4a381-b3d4-409e-8a4d-ae0d42fe7948",
+      "edition": "new",
+      "number": 197,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/197/score",
+          "sha256": "2e1a03c00d6e03d388d48fc03e3e5e74b75478f1c3eeba4fc3e7b4b950b40ec6"
+        }
+      ]
+    },
+    {
+      "versionId": "813dcae4-86b1-4bf2-ae97-4251adca0e89",
+      "edition": "union",
+      "number": 178,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-178.jpg",
+          "sha256": "92030f459e19460024b2859b2072ba017c6149d86bb76cc8913ab49d1951b8c0"
+        }
+      ]
+    },
+    {
+      "versionId": "4df4c0be-d280-4709-ba3c-37beb13f62bf",
+      "edition": "new",
+      "number": 198,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/198/score",
+          "sha256": "ad8188afbd1d672427aa8c79841be06c0b920b0707af606412f8ab467de1491d"
+        }
+      ]
+    },
+    {
+      "versionId": "c7fea160-ab0f-4b08-a2ea-515e05b86064",
+      "edition": "union",
+      "number": 284,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-284.jpg",
+          "sha256": "1fb9489d169cca60ae49736ddc90c21bb2188d8fa9159743212c5b4d5c329e53"
+        }
+      ]
+    },
+    {
+      "versionId": "cba2a37e-d8ce-4ddf-b38e-fe3f0bfffd2d",
+      "edition": "new",
+      "number": 199,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/199/score",
+          "sha256": "3a47e0bb28f1d514d9ea6bd27703819ebfd1eb45bcf5c96a203bdabaa9df5c5a"
+        }
+      ]
+    },
+    {
+      "versionId": "f57454ec-b2e7-4d6f-8f91-e2d5d9bc5f39",
+      "edition": "union",
+      "number": 234,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "본절8은 기존 세 블록2+3+3에 대응. 후렴은 기존 세 블록4+2+2. 새199와 총수는 같고 블록 경계만 다름.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 3,
+          "approxMeasuresByBlock": [
+            2,
+            3,
+            3
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 3,
+          "approxMeasuresByBlock": [
+            4,
+            2,
+            2
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-234.jpg",
+          "sha256": "5597c13b06dfeec6dd073f9673fe7fa3469f0af4a214e3ad6d17146c7abafd53"
+        }
+      ]
+    },
+    {
+      "versionId": "31bf48dd-217c-478e-be39-6dd5370239f6",
+      "edition": "new",
+      "number": 200,
+      "stanzaApproxMeasures": 12,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/200/score",
+          "sha256": "2b3592239075e0e53f253ccad4b36f3fdd7769e241dedebb91f03932992831e4"
+        }
+      ]
+    },
+    {
+      "versionId": "45bf3907-cbb5-49e2-bf76-8dc05efd0452",
+      "edition": "union",
+      "number": 235,
+      "stanzaApproxMeasures": 12,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 3,
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-235.jpg",
+          "sha256": "8a929fb647fb8fcd970254821317ce83c00b1281723429489527ba9f3cb5168e"
+        }
+      ]
+    },
+    {
+      "versionId": "924abf68-e64a-5c78-91a7-9204f9e40a64",
+      "edition": "new",
+      "number": 201,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/201/score",
+          "sha256": "2aad16ffcba3c0d9bddb12e2e802d69a88064f8bbd5107793d31110c564f8b21"
+        }
+      ]
+    },
+    {
+      "versionId": "86c6c44f-20d3-5cec-bced-02a7c552f3d9",
+      "edition": "union",
+      "number": 240,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 4,
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-240.jpg",
+          "sha256": "73ce73e27deee6b2761c3c4fcbbe20c9bdb6d9781f8be5f5a3ca2e6527289c30"
+        }
+      ]
+    },
+    {
+      "versionId": "9f861306-6694-42a3-ae09-3613e73909b1",
+      "edition": "new",
+      "number": 202,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/202/score",
+          "sha256": "bf96e58762ebcff9c733c6839a007fbe10b97bf88a0aca90827cbbb6a2cb8692"
+        }
+      ]
+    },
+    {
+      "versionId": "10c02862-b80c-4074-aae8-c2438abd8395",
+      "edition": "union",
+      "number": 241,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-241.jpg",
+          "sha256": "39d1756ec0ce56e62b3a75970d00a1b4ae904b428d9fc3ab56973132d72800b2"
+        }
+      ]
+    },
+    {
+      "versionId": "7563d3b6-0b52-5406-8302-6221acd95cb0",
+      "edition": "new",
+      "number": 203,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/203/score",
+          "sha256": "a7c0b1fd0d6b62786951bcd994c7745b37ce45396c6ee606c40a1917ce5fbb1a"
+        }
+      ]
+    },
+    {
+      "versionId": "c8034de5-5d10-4c9c-bd4d-7afd1dbe9aa2",
+      "edition": "new",
+      "number": 204,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/204/score",
+          "sha256": "c798be74d0f1f2232c5c3c40ffed1fa810d7abd4c6c959871e8b6c99301957e4"
+        }
+      ]
+    },
+    {
+      "versionId": "bf4ce471-221c-4a96-93a6-6c4b3d07e1b3",
+      "edition": "union",
+      "number": 379,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 4,
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-379.jpg",
+          "sha256": "5fad91210f6fa8330f3a1e388db006ce7ee115a07999375e3ca6c329e3ff278b"
+        }
+      ]
+    },
+    {
+      "versionId": "966da409-d905-4ce6-a904-6d429116bb90",
+      "edition": "new",
+      "number": 205,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/205/score",
+          "sha256": "1932295605f93c5e841b303d0712015ea0ef7ac09083e3d319efa539f4c1c2af"
+        }
+      ]
+    },
+    {
+      "versionId": "7fc83053-1778-4661-b318-8343016a93aa",
+      "edition": "union",
+      "number": 236,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 4,
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-236.jpg",
+          "sha256": "9a4cc1197001318df2ce85677ba1f83c6f2235e7e1a8fd770680d7e55e749017"
+        }
+      ]
+    },
+    {
+      "versionId": "163f6247-86c9-46b6-bd58-21297ffc1b24",
+      "edition": "new",
+      "number": 206,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/206/score",
+          "sha256": "c7c10f0234329a3a9df031139718186849ea1ad3707860d45c5f5e7487d2786b"
+        }
+      ]
+    },
+    {
+      "versionId": "cd455939-f3f7-4439-a898-dca051f5292c",
+      "edition": "new",
+      "number": 207,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "2/2 각 인쇄 행4마디, 본절16. 아멘 온음표 두 개는2마디.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/207/score",
+          "sha256": "7065f34acd72aaa16b647193f89cdc9500658a20d95d3d944226e29fcf4e329c"
+        }
+      ]
+    },
+    {
+      "versionId": "25d0d5f3-4fa1-4401-a1f8-bde2b5538d11",
+      "edition": "union",
+      "number": 243,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "2/2 본절16, 저장 블록8+8. 아멘 온음표 두 개는2마디.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-243.jpg",
+          "sha256": "82c5ec738ce22a7c25f068e035ddd726beaddbbad4eedaec2561df44f7ed5500"
+        }
+      ]
+    },
+    {
+      "versionId": "fdcc7986-a155-5c7d-aed5-efe28bc89c9b",
+      "edition": "new",
+      "number": 208,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/208/score",
+          "sha256": "aa77ddadd46dabcd869e91035226785dcd2716dca4340feac27dc52ac3cdfed9"
+        }
+      ]
+    },
+    {
+      "versionId": "9fca98a5-2e0c-5569-80fb-cdb9d3afec0f",
+      "edition": "union",
+      "number": 246,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-246.jpg",
+          "sha256": "5ed5d3863c11a4c0edfd19b368fcce764e467c6b40dd02a52a2939e05932473f"
+        }
+      ]
+    },
+    {
+      "versionId": "d5ac65ef-6b97-41e4-8b1a-fd0e75ff8759",
+      "edition": "new",
+      "number": 209,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "6/4 본절은 못갖춘1박과 끝5박을 합산해8, 아멘 두 점2분음표는 합쳐1마디.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/209/score",
+          "sha256": "248e11f922044191b7e6e15e5d91cac0f8ad0fa08af6359d9a684efee921f3ab"
+        }
+      ]
+    },
+    {
+      "versionId": "b1d540c6-1b2a-4480-bacd-4c9a2d87f8d5",
+      "edition": "union",
+      "number": 247,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "6/4 본절4+4, 못갖춘1박과 끝5박 합산. 아멘 두 점2분음표는 합쳐1마디.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-247.jpg",
+          "sha256": "741d7b2409a2a5d0c396e1e8872080430ff651c7ddf2281884db8ba75d316125"
+        }
+      ]
+    },
+    {
+      "versionId": "d8883753-f4e2-5aeb-a85d-4786df22f4bf",
+      "edition": "new",
+      "number": 210,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/210/score",
+          "sha256": "9c2bc668486de7457fedf552062ce3e21e6f3998fbbe352224c419cdab82fabb"
+        }
+      ]
+    },
+    {
+      "versionId": "02b26e78-85c6-56d8-9c3a-2bd16f9fe1cc",
+      "edition": "union",
+      "number": 245,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 4,
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-245.jpg",
+          "sha256": "78549f9c923fd3cfabef5ba265f6b8527ef88feb283f915f1190e651beca2809"
+        }
+      ]
+    },
+    {
+      "versionId": "23d9847b-101f-538b-84d3-fa961b6f332d",
+      "edition": "new",
+      "number": 211,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/211/score",
+          "sha256": "6923a11e53515d1dcd57b7cfbc11a7d1f60293e6abfc6d0ef9bc3442c33c387a"
+        }
+      ]
+    },
+    {
+      "versionId": "1d6667c0-39d2-54a0-9d93-4b57c44400a0",
+      "edition": "union",
+      "number": 346,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-346.jpg",
+          "sha256": "128ac348aae796915364c4a9bcef1a7a6a93836863f98f49b34dbad082984762"
+        }
+      ]
+    },
+    {
+      "versionId": "497cc3ac-cc58-496b-9222-78b1592914d0",
+      "edition": "new",
+      "number": 212,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/212/score",
+          "sha256": "f03759f50056a38c1aee5bc57a0bdc20ca23c7b4171ed5385ce362b5002b0012"
+        }
+      ]
+    },
+    {
+      "versionId": "5a47c012-6c0c-4d6a-8b5d-235e654f10d3",
+      "edition": "union",
+      "number": 347,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-final77/score-347.jpg",
+          "sha256": "58269a2389faef3f7cc6a328b77755e87dd22bbf58bbe5d2cf7baf2680df7247"
+        }
+      ]
+    },
+    {
+      "versionId": "8030903b-d306-4643-bfb2-af58ca783495",
+      "edition": "new",
+      "number": 213,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/213/score",
+          "sha256": "43167280b80cd7b90bdcbb5d7c38e748a1c69f4b0c81b9e7a89ba7948bff75d8"
+        }
+      ]
+    },
+    {
+      "versionId": "5af1c323-1401-4027-bc6c-00d5876eed91",
+      "edition": "union",
+      "number": 348,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-348.jpg",
+          "sha256": "45daff7a07526def29e37a27e849a9412f350a85be5ea5f83343e810ca0ed0d5"
+        }
+      ]
+    },
+    {
+      "versionId": "d98142ba-641b-50cf-b798-67ea3386e391",
+      "edition": "new",
+      "number": 214,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/214/score",
+          "sha256": "3572e987d7c0bb3d2a9b1a1f9a3c498c1355ec6d92c86c94065f6343e9da0d77"
+        }
+      ]
+    },
+    {
+      "versionId": "7d234250-c751-5459-a309-b58494c088b0",
+      "edition": "union",
+      "number": 349,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-349.jpg",
+          "sha256": "55619b80a3e224d9a4da43b31545d5fdeb33a1e81d00f8335a99a52df8a1cf4d"
+        }
+      ]
+    },
+    {
+      "versionId": "06404809-5601-55c7-856a-f2e2a3170469",
+      "edition": "new",
+      "number": 215,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/215/score",
+          "sha256": "a917dc519a33b92fb7c23fd452896c237b611ec1c5e2e00955433f2413961e49"
+        }
+      ]
+    },
+    {
+      "versionId": "872ebc88-c70c-54e2-ba49-fb4531545a35",
+      "edition": "union",
+      "number": 354,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 4,
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-354.jpg",
+          "sha256": "e8a683de7580b4ac39bebeff24680f28bd5a2b165db764eb6e338ca48c197c79"
+        }
+      ]
+    },
+    {
+      "versionId": "85c4f268-ca1a-4de8-8d4d-8fda6d54356b",
+      "edition": "new",
+      "number": 216,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/216/score",
+          "sha256": "c2dc8f0cf325ed5da9338f7e842a051a8922522994587e3d38b8da263a94a8a9"
+        }
+      ]
+    },
+    {
+      "versionId": "ecad3316-ca53-4bc0-84a6-a77601852c0a",
+      "edition": "union",
+      "number": 356,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-356.jpg",
+          "sha256": "452991bd3cb0934176236a780a60f5fb6cdc534796152ac5c3e929e5d3a32287"
+        }
+      ]
+    },
+    {
+      "versionId": "60716dfc-ebc0-5541-bc34-d8c72f0afee2",
+      "edition": "new",
+      "number": 217,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "3/8 인쇄 행마다8마디. 본절16·후렴16·아멘2. 6/8로 환산하지 않음.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/217/score",
+          "sha256": "05957e703e827b076f1596b5f2b6c47effd6d073a39ac480041ee2d5de91188f"
+        }
+      ]
+    },
+    {
+      "versionId": "dcd381d7-edc7-5dd1-bcee-653bfe6e341a",
+      "edition": "union",
+      "number": 362,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "3/8 인쇄 행마다8마디. 본절16·후렴16·아멘2. 6/8로 환산하지 않음.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-362.jpg",
+          "sha256": "21182366fe655eae35b2c2d3320374bb7ea4b0de611fcf1efb78a93991746195"
+        }
+      ]
+    },
+    {
+      "versionId": "c56abccc-8b87-5ea6-a250-b47eb4dfd154",
+      "edition": "new",
+      "number": 218,
+      "stanzaApproxMeasures": 24,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "3/4 본절24, 저장 블록8+8+8. 인쇄 행6마디와 저장 블록 경계가 달라 블록은 유지. 아멘2.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 3,
+          "approxMeasuresByBlock": [
+            8,
+            8,
+            8
+          ],
+          "approxMeasures": 24,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/218/score",
+          "sha256": "8aa4cb4c1207da15350da3208a4084444264c9c380389f8768aa07b1e1c8c527"
+        }
+      ]
+    },
+    {
+      "versionId": "829965a5-5bf3-5224-aada-7ea28f227fde",
+      "edition": "union",
+      "number": 369,
+      "stanzaApproxMeasures": 24,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "3/4 본절24, 저장 블록8+8+8. 인쇄 행6마디와 저장 블록 경계가 달라 블록은 유지. 아멘2.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 3,
+          "approxMeasuresByBlock": [
+            8,
+            8,
+            8
+          ],
+          "approxMeasures": 24,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-369.jpg",
+          "sha256": "50bfa7cca5aa27c0158cca1039d7ebba665796337bbe314756c73d2b40742e6c"
+        }
+      ]
+    },
+    {
+      "versionId": "06813541-64ec-408d-ae22-0ec853c837f8",
+      "edition": "new",
+      "number": 219,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/219/score",
+          "sha256": "173f9c9a932528ca85551610c54a38e82d7d96403483b5351fa098aa9363b7d7"
+        }
+      ]
+    },
+    {
+      "versionId": "431c7f5d-48e2-4fa7-812b-8c0caaae1889",
+      "edition": "union",
+      "number": 279,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 4,
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-279.jpg",
+          "sha256": "2101160428f805efc8fde5e7aeaf3a4288d52aba11fae39b1e5e18831d2dd784"
+        }
+      ]
+    },
+    {
+      "versionId": "952ec53e-f1ae-5697-9bf4-752741bdb147",
+      "edition": "new",
+      "number": 220,
+      "stanzaApproxMeasures": null,
+      "reviewStatus": "not_measured",
+      "reviewDisposition": "deferred",
+      "reviewNote": "3/2 중창에서4/2 합창으로 바뀌며 성부 응답이 겹친다. 전반8마디는 확인했으나 후반 주선율·응답 및 저장 블록 경계의 박 합산을 추가 대조해야 하므로 총수 미확정. 기존 가사와 Verse 구분을 유지.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/220/score",
+          "sha256": "00f159158ad4989eb1fc42e96d73c4b44615f1ca7d2c03fc3871200ab56d0556"
+        }
+      ]
+    },
+    {
+      "versionId": "bd966684-d0f3-5e3d-9918-a92e61adefa6",
+      "edition": "union",
+      "number": 278,
+      "stanzaApproxMeasures": null,
+      "reviewStatus": "not_measured",
+      "reviewDisposition": "deferred",
+      "reviewNote": "3/2 중창에서4/2 합창으로 바뀌며 성부 응답이 겹친다. 전반8마디는 확인했으나 후반 주선율·응답 및 저장 블록 경계의 박 합산을 추가 대조해야 하므로 총수 미확정. 기존 가사와 Verse 구분을 유지.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 4,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-278.jpg",
+          "sha256": "4bdd727ea6f3b4f90fd92df5f601fd79b72e7f0ed1d12a18c4cb386416604a5b"
+        }
+      ]
+    },
+    {
+      "versionId": "770938fe-1c3e-43e0-ba42-ab1375d0fc4e",
+      "edition": "new",
+      "number": 221,
+      "stanzaApproxMeasures": 13,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "3/4 본절13. 첫 못갖춘1박과 마지막2박을 합산. 새판 한 블록13, 통525 두 블록6+7.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            13
+          ],
+          "approxMeasures": 13,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/221/score",
+          "sha256": "0cee8d280cba8ef7ac6496313ace4ad60207bf9844098d8c28eea05f296b6c97"
+        }
+      ]
+    },
+    {
+      "versionId": "6bccd402-60d1-4453-99ae-7ef844104919",
+      "edition": "union",
+      "number": 525,
+      "stanzaApproxMeasures": 13,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "3/4 본절13. 첫 못갖춘1박과 마지막2박을 합산. 새판 한 블록13, 통525 두 블록6+7.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            6,
+            7
+          ],
+          "approxMeasures": 13,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-525.jpg",
+          "sha256": "0b55b3a4f9792e47b1041ebb33bc7e2a1cde4d4ace93efcd68ad020de65f38ca"
+        }
+      ]
+    },
+    {
+      "versionId": "b77116a2-f0a7-4ea2-bf09-34f2ad60b0bb",
+      "edition": "new",
+      "number": 222,
+      "stanzaApproxMeasures": 7.75,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "4/4 본절 마지막 마디는3박, 후렴 못갖춘1박과 연결됨. 본절4+3.75=7.75, 후렴8.25(통524는4+4.25). 합계16이며 독립적인8+8로 반올림하지 않음.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            3.75
+          ],
+          "approxMeasures": 7.75,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8.25
+          ],
+          "approxMeasures": 8.25,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/222/score",
+          "sha256": "54adc24f6aff1e0a3e33aef41e07be6625b746f6465b9d2f44765d4edfb41ab9"
+        }
+      ]
+    },
+    {
+      "versionId": "42358e13-b8b8-4d23-92e7-c4e6313724b4",
+      "edition": "union",
+      "number": 524,
+      "stanzaApproxMeasures": 7.75,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "4/4 본절 마지막 마디는3박, 후렴 못갖춘1박과 연결됨. 본절4+3.75=7.75, 후렴8.25(통524는4+4.25). 합계16이며 독립적인8+8로 반올림하지 않음.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            3.75
+          ],
+          "approxMeasures": 7.75,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4.25
+          ],
+          "approxMeasures": 8.25,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-final77/score-524.jpg",
+          "sha256": "4270b1c7c7b8e1c9fa24fb6c7bcda6bec6a55a85aba34d0bf80073dbf5f1c84e"
+        }
+      ]
+    },
+    {
+      "versionId": "8039e295-54bb-4de9-886d-6d6351d5f88a",
+      "edition": "new",
+      "number": 223,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "9/8 인쇄 네 행 각4마디. 본절16, 저장 블록8+8. 성부 응답을 새 블록으로 만들지 않음.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/223/score",
+          "sha256": "4c2634c7f137640315e1dbb0dce738afdadb03d2781f41ec65ca16350fac163a"
+        }
+      ]
+    },
+    {
+      "versionId": "be9afec5-d2d7-461b-a681-7c10201f18ee",
+      "edition": "new",
+      "number": 224,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "3/2 못갖춘2박과 종지4박을 합산. 본절16, 기존 블록8+8.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/224/score",
+          "sha256": "752af7c4a0c3a8264e6f3e16b0044e1969434cdf168fbac2ce998bc858e05ba3"
+        }
+      ]
+    },
+    {
+      "versionId": "e66dc31f-6fb7-4f4c-a063-be1e747c09cc",
+      "edition": "new",
+      "number": 225,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "3/4 본절16, 아멘 두 점2분음표2마디.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/225/score",
+          "sha256": "e3c291812af86639657f6a60eb4aeef2a9593c33e81d523046263d120a23fcb2"
+        }
+      ]
+    },
+    {
+      "versionId": "3c0f511b-6fee-4e96-b4f8-cab7cf1eff98",
+      "edition": "union",
+      "number": 298,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "3/4 본절16, 아멘 두 점2분음표2마디.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-298.jpg",
+          "sha256": "874bcd8c0a093111b84c8dabc381d58ecfbd4f99912e4f97f598bf205bc0fdbe"
+        }
+      ]
+    },
+    {
+      "versionId": "fdeffe26-4900-40e9-917a-f5176eed9903",
+      "edition": "new",
+      "number": 226,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/226/score",
+          "sha256": "09d8eb26e83108e4bf5871ace7cf8d0fc74e4e04219f6e6093da6ea999c47738"
+        }
+      ]
+    },
+    {
+      "versionId": "20dfd4b2-b32e-4bfa-97ba-e80e1dce9975",
+      "edition": "new",
+      "number": 227,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/227/score",
+          "sha256": "c1655eab26c321b80a412bfb8c5f824a83d87fea362d6d55b24a035623d5e75d"
+        }
+      ]
+    },
+    {
+      "versionId": "0d834ee7-2e8b-4d60-b962-ab25922f4490",
+      "edition": "union",
+      "number": 283,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            2
+          ],
+          "approxMeasures": 2,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-final77/score-283.jpg",
+          "sha256": "c39780abd2513426084be2e2a94caa6a6104aece74e155f1a9f5f8cb71f7e5b8"
+        }
+      ]
+    },
+    {
+      "versionId": "e8e44053-4304-4e6c-ad5d-f74fc3932a45",
+      "edition": "new",
+      "number": 228,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/228/score",
+          "sha256": "3e4b7c13ec99727e9211433a6f08fde5829097e29f8ac086d3ea8ae561ef6c43"
+        }
+      ]
+    },
+    {
+      "versionId": "f3ee09a6-57ed-4094-811a-bdd1b9740641",
+      "edition": "union",
+      "number": 285,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": null,
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-285.jpg",
+          "sha256": "c863d46349482f6fa72fd799655ea2b67cad41503b76930a05f330d4a1eb85c2"
+        }
+      ]
+    },
+    {
+      "versionId": "d57548ef-18c3-5570-98dc-3864aa4d2017",
+      "edition": "new",
+      "number": 229,
+      "stanzaApproxMeasures": 12,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "3/4 본절12. 각 인쇄 행은 못갖춘1박+완전5마디+종지2박으로6마디. 새판 한 블록12, 통281 두 블록6+6.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            12
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/229/score",
+          "sha256": "8277181a9ad31d96204173766c92bcc4d96fa68033d53571eb42d2999b26ba1e"
+        }
+      ]
+    },
+    {
+      "versionId": "379f0c43-9224-54c4-902e-be5417c17eff",
+      "edition": "union",
+      "number": 281,
+      "stanzaApproxMeasures": 12,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "3/4 본절12. 각 인쇄 행은 못갖춘1박+완전5마디+종지2박으로6마디. 새판 한 블록12, 통281 두 블록6+6.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            6,
+            6
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-281.jpg",
+          "sha256": "bfea2480a790970f3340dcb5e5cc64b59a5b960cd39f0506ba4d6f9e8358a626"
+        }
+      ]
+    },
+    {
+      "versionId": "8151c118-e56a-4351-bd87-f8a610bd3a2e",
+      "edition": "new",
+      "number": 230,
+      "stanzaApproxMeasures": null,
+      "reviewStatus": "recitative_exception",
+      "reviewDisposition": null,
+      "reviewNote": "박자표와 정규 세로줄 없이 악구 끝 빗금으로 구분하는 ADORO TE DEVOTE 성가. 악구4개를4마디로 간주하지 않고 마디 수는 비워 둠. 기존 recitative 분류 사용.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/230/score",
+          "sha256": "f50561466ef739fe5c4534b3c93d0d0c83049636bf5480e92af00550f90cf183"
+        }
+      ]
+    }
+  ],
+  "next": "새231–250 및 연결 통일판; 기존 보류8 별도 추적",
+  "scoreEvidenceDirectory": "/Users/parkjihun/Code/Apps/Mindex/backups/20261022-hymn191-230-paired",
+  "preserved": [
+    "lyrics",
+    "unit IDs/types/order/blocks",
+    "song links",
+    "saved song forms",
+    "medleys",
+    "audio timing",
+    "worship data"
+  ]
+}

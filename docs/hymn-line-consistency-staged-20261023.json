@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-23",
+  "status": "staged_not_applied_or_deployed",
+  "supersedes": "independent-amen-types-staged-20261023.json",
+  "reason": "Prior midpoint/flattened wrapping made Silent Night verses and corresponding editions inconsistent. Restore phrase-based internal line breaks, not just slide boundaries.",
+  "scope": {
+    "editions": 1203,
+    "pairedSongFamilies": 481
+  },
+  "changes": {
+    "changedUnitsFromPriorCandidate": 1184,
+    "changedVersionsFromPriorCandidate": 333,
+    "bundleVersions": 445,
+    "bundleUnits": 1643,
+    "phraseBoundaryRepairs": [
+      "68700431-3182-5840-aaaa-eb5d2389cf6c"
+    ]
+  },
+  "explicitPhraseBoundaryRepairs": [
+    "68700431-3182-5840-aaaa-eb5d2389cf6c",
+    "ed163137-4913-5d56-bb21-cd507882cfd2",
+    "f58d96af-634b-5f73-9be1-e8b4fb3a00fd",
+    "f850c312-39f9-5a30-96d6-3133beb2ecb0"
+  ],
+  "method": [
+    "Restore source phrase line boundaries within candidate slides.",
+    "Match exact phrases across linked editions while keeping each edition wording and word spacing.",
+    "Compare corresponding verse page positions with equal syllable count; use existing line patterns only at word boundaries.",
+    "Review remaining 35 unsupported phrase-pattern groups; repair incomplete phrases and detached parenthetical responses."
+  ],
+  "checks": {
+    "samePhraseLineBoundaryDifferences": 0,
+    "sameVersionCorrespondingVerseLineCountDifferences": 0,
+    "identicalTextCrossEditionSlideBoundaryDifferences": 0,
+    "protectedFieldsAndTablesUnchanged": true,
+    "browser": {
+      "chromium": {
+        "editions": 1203,
+        "existingWorshipReferences": 350,
+        "uniqueSlides": 7930,
+        "rendered": 23790,
+        "overflow": 0,
+        "textAndFormOrderPreserved": true
+      },
+      "webkit": {
+        "editions": 1203,
+        "existingWorshipReferences": 350,
+        "uniqueSlides": 7930,
+        "rendered": 23790,
+        "overflow": 0,
+        "textAndFormOrderPreserved": true
+      }
+    }
+  },
+  "productionWrites": 0,
+  "deployed": false,
+  "candidatePlanSha256": "d56aa5778770f520851e0a737a9b5f389c5811c82fbdcfa3858aae993ca66601",
+  "privateCandidateDirectory": "/Users/parkjihun/Code/Apps/Mindex/backups/20261023-hymn-line-review",
+  "limitations": [
+    "Phrase/line consistency and rendering review, not a fresh musicological verification of every printed score.",
+    "Exact rhythmic interpretation is not inferred from syllable counts; approximate measure labels remain presentation estimates.",
+    "Local-only timing on another device still requires checking before DB application."
+  ],
+  "release": "Use this plan/expected/candidate-ledger as the latest whole bundle. Refresh baseline, guarded application, exact readback and runtime regeneration, then required full gate and bundled publication. Deployment coordination pause was lifted; no publication requested in this turn."
+}

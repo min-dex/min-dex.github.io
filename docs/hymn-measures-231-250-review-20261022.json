@@ -1,0 +1,1189 @@
+{
+  "date": "2026-10-22",
+  "status": "reviewed_with_deferrals_pending_deployment",
+  "deploymentRequested": false,
+  "pushed": false,
+  "productionDatabaseWrites": 0,
+  "invariants": {
+    "versionsExamined": 34,
+    "newlyMeasured": 18,
+    "fullyMeasuredInBatch": 18,
+    "fullyDeferredInBatch": 16,
+    "preservedUnitIdentityKindTextHashBlockCounts": true,
+    "outsideBatchUnchanged": true,
+    "checkedLyricUnits": 5419,
+    "deployed": false
+  },
+  "summary": {
+    "versions": 1203,
+    "stanzaMeasuredVersions": 367,
+    "recitativeExceptions": 4,
+    "unmeasuredVersions": 836,
+    "complete": false,
+    "productionMetadataWritten": false,
+    "appDisplayImplemented": true,
+    "appDisplayDeployed": true,
+    "fullyMeasuredVersions": 363,
+    "partiallyMeasuredVersions": 4,
+    "notMeasuredVersions": 832,
+    "deferredVersions": 24
+  },
+  "browserValidation": {
+    "mode": "local candidate injection with live reads; writes blocked; not deployment or save certification",
+    "results": {
+      "chromium": {
+        "versions": 34,
+        "metadata": 371,
+        "renderedCards": 34,
+        "freshReopen": true,
+        "writes": 0
+      },
+      "webkit": {
+        "versions": 34,
+        "metadata": 371,
+        "renderedCards": 34,
+        "freshReopen": true,
+        "writes": 0
+      }
+    }
+  },
+  "scoreReview": [
+    {
+      "versionId": "99e9c6c9-b4d9-528c-ace0-5caef82acb26",
+      "edition": "new",
+      "number": 231,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "4/4 본절 각 인쇄 악구4마디씩8. 후렴8. 못갖춘2박과 끝2박을 합산하며 성부의 괄호 응답은 별도 마디로 가산하지 않음.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/231/score",
+          "sha256": "5a9649cc63c5fd85bdbbb30d5f299cef1668432b823d1ce269996a195dc1ae11"
+        }
+      ]
+    },
+    {
+      "versionId": "5207fb8e-c323-4adf-a9a6-214d1e749ab7",
+      "edition": "new",
+      "number": 232,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "2/2 본절16, 아멘 두2분음표 합쳐1마디. 새판 한 블록16/통282 두 블록8+8.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/232/score",
+          "sha256": "c2276779fed2d4627a27c7f3c708bfebbb104f33cbea5c0fcb6b059067996579"
+        }
+      ]
+    },
+    {
+      "versionId": "0fb4da8a-bea2-4e27-b028-9b7ef465f151",
+      "edition": "union",
+      "number": 282,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "2/2 본절16, 아멘 두2분음표 합쳐1마디. 새판 한 블록16/통282 두 블록8+8.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-282.jpg",
+          "sha256": "f66127d9b4142e812686cc75f20aac7cec60050af3f269a579da2017fb58bbe2"
+        }
+      ]
+    },
+    {
+      "versionId": "428343cb-89c2-4f95-9280-05ce2115b8bf",
+      "edition": "new",
+      "number": 233,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "3/4 각 인쇄 행8마디, 본절16. 후렴·아멘 없음.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            16
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/233/score",
+          "sha256": "0047044274a77aa1e48c79e16a22e60f40da436abc37757ce5a300e6082a759d"
+        }
+      ]
+    },
+    {
+      "versionId": "83192442-97b7-4114-86c0-713c845ef664",
+      "edition": "new",
+      "number": 234,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "6/8 본절8·후렴8. 못갖춘8분음표와 끝5개8분음표 길이 합산. 통220은 본절·후렴 각각4+4.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/234/score",
+          "sha256": "41c2c9d4c43a1b01ab11ed2ada7e08572810300f62201258a544c8265b3675bc"
+        }
+      ]
+    },
+    {
+      "versionId": "54a8b007-b3bd-4f1d-b64b-0714532f83c7",
+      "edition": "union",
+      "number": 220,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "6/8 본절8·후렴8. 못갖춘8분음표와 끝5개8분음표 길이 합산. 통220은 본절·후렴 각각4+4.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-220.jpg",
+          "sha256": "f9533bc8b42a0011c2de9ec716e7a5cb74cb042efaae1f903fa179ec271af6a2"
+        }
+      ]
+    },
+    {
+      "versionId": "ac4c96e8-fdd8-4e77-bc1f-1d1a5fbcbeef",
+      "edition": "new",
+      "number": 235,
+      "stanzaApproxMeasures": null,
+      "reviewStatus": "not_measured",
+      "reviewDisposition": "deferred",
+      "reviewNote": "본절 앞부분은 못갖춘1박과 종지3박을 합산할 수 있으나 마지막 네의2분음표와 반복 거기서 구간의 성부 응답 귀속을 재확인해야 함. 새판2블록/통222의4블록을16으로 강제하지 않고 총수 보류.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/235/score",
+          "sha256": "173e64b0db1017e3a27e529e22d6fe6ea012ed6ddc09f74e1d8508e9d81238d1"
+        }
+      ]
+    },
+    {
+      "versionId": "13d38b7e-21fa-4032-8608-be639dc36715",
+      "edition": "union",
+      "number": 222,
+      "stanzaApproxMeasures": null,
+      "reviewStatus": "not_measured",
+      "reviewDisposition": "deferred",
+      "reviewNote": "본절 앞부분은 못갖춘1박과 종지3박을 합산할 수 있으나 마지막 네의2분음표와 반복 거기서 구간의 성부 응답 귀속을 재확인해야 함. 새판2블록/통222의4블록을16으로 강제하지 않고 총수 보류.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 4,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-222.jpg",
+          "sha256": "1e2a25ccf9d053553f9adc517418f53e08bfc949ed583e469bc3fbd05af0c1d0"
+        }
+      ]
+    },
+    {
+      "versionId": "332fae3c-59a4-4752-821f-016eb4df0d20",
+      "edition": "new",
+      "number": 236,
+      "stanzaApproxMeasures": null,
+      "reviewStatus": "not_measured",
+      "reviewDisposition": "deferred",
+      "reviewNote": "본절 행 끝 에와 다음 행 주를의 못갖춘 박, 후렴 새 예루살렘의 겹친 응답을 구별해야 함. 새판 후렴3블록과 통223의3블록 경계도 달라 전체 주선율 박 합산을 재확인하기 전 수치 미확정.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 3,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/236/score",
+          "sha256": "a6ac41d427efba8211b99846a5852bc47912992150c2f2e09d2186e9069f61cc"
+        }
+      ]
+    },
+    {
+      "versionId": "8880ef3e-a905-4765-baee-d1631a121306",
+      "edition": "union",
+      "number": 223,
+      "stanzaApproxMeasures": null,
+      "reviewStatus": "not_measured",
+      "reviewDisposition": "deferred",
+      "reviewNote": "본절 행 끝 에와 다음 행 주를의 못갖춘 박, 후렴 새 예루살렘의 겹친 응답을 구별해야 함. 새판 후렴3블록과 통223의3블록 경계도 달라 전체 주선율 박 합산을 재확인하기 전 수치 미확정.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 3,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 3,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-223.jpg",
+          "sha256": "5c93bbe44ff4337c279248e0881805631634ba249e331a01e0b8418a95f8d78e"
+        }
+      ]
+    },
+    {
+      "versionId": "4e84758b-af55-4c27-a2a3-f31a3edb645e",
+      "edition": "new",
+      "number": 237,
+      "stanzaApproxMeasures": null,
+      "reviewStatus": "not_measured",
+      "reviewDisposition": "deferred",
+      "reviewNote": "인쇄 행이 가사 악구 중간에서 끊기며 황금문 및 너와 날 위해 시작이 앞 행 끝과 이어진다. 새판 본절2/후렴3블록, 통226 본절3/후렴3블록의 못갖춘마디 귀속과 끝 울린다 성부 응답 길이 추가 확인 필요.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 3,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/237/score",
+          "sha256": "6381c1ef61a039397a70ecd009e31bed9bf9bfc22dfdb065714550d380b6d47a"
+        }
+      ]
+    },
+    {
+      "versionId": "21e74158-23d3-4733-a392-9bfba2fab500",
+      "edition": "union",
+      "number": 226,
+      "stanzaApproxMeasures": null,
+      "reviewStatus": "not_measured",
+      "reviewDisposition": "deferred",
+      "reviewNote": "인쇄 행이 가사 악구 중간에서 끊기며 황금문 및 너와 날 위해 시작이 앞 행 끝과 이어진다. 새판 본절2/후렴3블록, 통226 본절3/후렴3블록의 못갖춘마디 귀속과 끝 울린다 성부 응답 길이 추가 확인 필요.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 3,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 3,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-226.jpg",
+          "sha256": "ca83d72107eed175c9b937d0509a0d5ce902f316ee6a940ae8b250294347dc9e"
+        }
+      ]
+    },
+    {
+      "versionId": "1e102b2d-acaf-5d6b-a458-b17bb7b50c00",
+      "edition": "new",
+      "number": 238,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "4/4 각 악구 못갖춘3개8분음표와 끝5개8분음표 길이 합산하여4마디씩, 본절8. 아멘1.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/238/score",
+          "sha256": "8b5aeacf54300b0d10138faac58150fc97bafc50a78ac7e839c4ff69dbe027ed"
+        }
+      ]
+    },
+    {
+      "versionId": "9322edf4-d127-4814-ad0c-185866f9abc6",
+      "edition": "new",
+      "number": 239,
+      "stanzaApproxMeasures": null,
+      "reviewStatus": "not_measured",
+      "reviewDisposition": "deferred",
+      "reviewNote": "6/8 본절 첫 악구의 끝5개8분음표와 둘째 악구 마지막 점2분음표의 길이가 달라 처음 못갖춘8분음표를 포함한 총수를 재확인해야 함. 통230 후렴 경계 가까운의 까도 앞 마디 마지막8분음표에서 시작. 정수8로 반올림하지 않고 수치 보류.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 1,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/239/score",
+          "sha256": "1b4e339833550ea7458a33c2b389b5153fec57223d78d2c1ac1ccefd953575f8"
+        }
+      ]
+    },
+    {
+      "versionId": "5e47bf26-a8c3-4f25-92ba-ccd7a434ad66",
+      "edition": "union",
+      "number": 230,
+      "stanzaApproxMeasures": null,
+      "reviewStatus": "not_measured",
+      "reviewDisposition": "deferred",
+      "reviewNote": "6/8 본절 첫 악구의 끝5개8분음표와 둘째 악구 마지막 점2분음표의 길이가 달라 처음 못갖춘8분음표를 포함한 총수를 재확인해야 함. 통230 후렴 경계 가까운의 까도 앞 마디 마지막8분음표에서 시작. 정수8로 반올림하지 않고 수치 보류.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 2,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-230.jpg",
+          "sha256": "bee40295e452d7a762430ff73cb227065ffc8f145f449bf13e5701bb77abf19c"
+        }
+      ]
+    },
+    {
+      "versionId": "f1954aef-6192-5653-897f-371c48182d30",
+      "edition": "new",
+      "number": 240,
+      "stanzaApproxMeasures": null,
+      "reviewStatus": "not_measured",
+      "reviewDisposition": "deferred",
+      "reviewNote": "본절 때·리 종지와 요단강·후렴 나의 주를의 못갖춘 박을 재확인해야 함. 통231 본절3블록은 새판2블록과 다른 경계이며 응답 성부를 주선율 길이에 더하지 않도록 수치 미확정.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 1,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/240/score",
+          "sha256": "8756bc8e293ba81a9bd73bf572bc590c35d30f2d3475f8818be4b9a97cdbedb2"
+        }
+      ]
+    },
+    {
+      "versionId": "fe8bec2f-d63a-5850-a870-759ab333c989",
+      "edition": "union",
+      "number": 231,
+      "stanzaApproxMeasures": null,
+      "reviewStatus": "not_measured",
+      "reviewDisposition": "deferred",
+      "reviewNote": "본절 때·리 종지와 요단강·후렴 나의 주를의 못갖춘 박을 재확인해야 함. 통231 본절3블록은 새판2블록과 다른 경계이며 응답 성부를 주선율 길이에 더하지 않도록 수치 미확정.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 3,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 2,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-231.jpg",
+          "sha256": "08df9ad7aaabf4ff38bad7e301e0517a932f3a5ebb69fe7710b40052ee9abdd7"
+        }
+      ]
+    },
+    {
+      "versionId": "d4da02f3-7130-55aa-aab1-6ad20ffb600b",
+      "edition": "new",
+      "number": 241,
+      "stanzaApproxMeasures": null,
+      "reviewStatus": "not_measured",
+      "reviewDisposition": "deferred",
+      "reviewNote": "3/4 본절 중 반복 고난 풍파가 일지 않네가 마디 중간에 시작/종지한다. 새판3블록과 통232의4블록에 동일한 경계 규칙으로 박을 귀속하는 추가 검토 필요. 총수와 블록 수치 미확정.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 3,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/241/score",
+          "sha256": "ec0d76c29876d91a81cc2b4e388935e8f77a4feb580c93a9bdbc441f4349ef66"
+        }
+      ]
+    },
+    {
+      "versionId": "b8bbeada-1065-5687-ab76-d5cd4e68c797",
+      "edition": "union",
+      "number": 232,
+      "stanzaApproxMeasures": null,
+      "reviewStatus": "not_measured",
+      "reviewDisposition": "deferred",
+      "reviewNote": "3/4 본절 중 반복 고난 풍파가 일지 않네가 마디 중간에 시작/종지한다. 새판3블록과 통232의4블록에 동일한 경계 규칙으로 박을 귀속하는 추가 검토 필요. 총수와 블록 수치 미확정.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 4,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-232.jpg",
+          "sha256": "588fb82d4ebb9c58aa9a886aab71f9f3802dfc4e0bca412219dea1a70b908ed5"
+        }
+      ]
+    },
+    {
+      "versionId": "6fac5a55-d5ba-427e-9670-1750d820a9f2",
+      "edition": "new",
+      "number": 242,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "4/4 본절8·후렴8. 성부 응답과 반주 쉼표를 중복 구간으로 세지 않음. 통233 각각4+4.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/242/score",
+          "sha256": "cb58d4039d3bfb39a4423af4072e2299aeaf4eceabc33ab472e532104458853a"
+        }
+      ]
+    },
+    {
+      "versionId": "dca2e3c2-7248-4a7b-b7b6-d349f2378ae7",
+      "edition": "union",
+      "number": 233,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "4/4 본절8·후렴8. 성부 응답과 반주 쉼표를 중복 구간으로 세지 않음. 통233 각각4+4.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-233.jpg",
+          "sha256": "b46c370498cac5e12394efdbd81c00db5ed273917ad7d2e002f5be6d89fb4d6b"
+        }
+      ]
+    },
+    {
+      "versionId": "80b609c9-055f-446f-8bd8-98293e7fb83d",
+      "edition": "new",
+      "number": 243,
+      "stanzaApproxMeasures": null,
+      "reviewStatus": "not_measured",
+      "reviewDisposition": "deferred",
+      "reviewNote": "후렴 주의 얼굴 뵈오리의 주선율 장음과 하성 응답이 겹친다. 본절 강가에는·후렴 구속하신 시작도 기존 블록 경계와 인쇄 행이 달라, 못갖춘 박 및 괄호 나 뵈오리의 귀속을 재확인하기 전 수치 미확정.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 2,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/243/score",
+          "sha256": "5822679a6b2408391cc58b2335870d8a0956c67a5e6c3d2798dda99c55506e4e"
+        }
+      ]
+    },
+    {
+      "versionId": "165357f1-1458-4a01-b641-de9fa0874387",
+      "edition": "union",
+      "number": 224,
+      "stanzaApproxMeasures": null,
+      "reviewStatus": "not_measured",
+      "reviewDisposition": "deferred",
+      "reviewNote": "후렴 주의 얼굴 뵈오리의 주선율 장음과 하성 응답이 겹친다. 본절 강가에는·후렴 구속하신 시작도 기존 블록 경계와 인쇄 행이 달라, 못갖춘 박 및 괄호 나 뵈오리의 귀속을 재확인하기 전 수치 미확정.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 3,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 3,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-224.jpg",
+          "sha256": "9ac4a9b665d769c9b4f12c86dc0f761cb8f862aec27c270c015096618ea34084"
+        }
+      ]
+    },
+    {
+      "versionId": "94df12d8-3195-4889-9c68-18e5dacccdd0",
+      "edition": "new",
+      "number": 244,
+      "stanzaApproxMeasures": 11.5,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "4/4 시작4분쉼표 포함 본절 앞8마디, 뒤3.5마디. 네의2분음표 뒤 후렴 알의2분음표가 같은 마디를 채움. 본절11.5·후렴4.5=16. 저장 블록8+3.5 보존.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            3.5
+          ],
+          "approxMeasures": 11.5,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            4.5
+          ],
+          "approxMeasures": 4.5,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/244/score",
+          "sha256": "9a9547e66f2960423c9e05324ff597d1a96a8d378ad74072865a21203161ca5f"
+        }
+      ]
+    },
+    {
+      "versionId": "7f8e2303-c71f-41d6-961e-7e996b5f2ae3",
+      "edition": "new",
+      "number": 245,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "3/4 본절8·후렴12. 후렴은 영의 못갖춘1박과 마지막2박을 합산. 새8+4/통228은4+4+4. 반올림이나 구조 변경 없음.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/245/score",
+          "sha256": "1208ad65116f1a4c582efc4e704f9d20d07399fb5bcd3e48adac2c47adce65c9"
+        }
+      ]
+    },
+    {
+      "versionId": "86b71b9f-14f1-4c3e-9de8-f1fe276ae7f0",
+      "edition": "union",
+      "number": 228,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "3/4 본절8·후렴12. 후렴은 영의 못갖춘1박과 마지막2박을 합산. 새8+4/통228은4+4+4. 반올림이나 구조 변경 없음.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 3,
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-228.jpg",
+          "sha256": "c72d26bc50c28e1a853a73dc45ba58701b6347faa8e13fe14cf9120e59226428"
+        }
+      ]
+    },
+    {
+      "versionId": "0516cede-f8c5-4813-ba7f-8a01710bc7ee",
+      "edition": "new",
+      "number": 246,
+      "stanzaApproxMeasures": null,
+      "reviewStatus": "not_measured",
+      "reviewDisposition": "deferred",
+      "reviewNote": "첫 나의4분음표, 첫 행 네 뒤8분쉼표, 다음 죄의8분음표 및 후렴 진입의 쉼표를 포함한 박 상당량 추가 확인 필요. 새 후렴3블록/통221 후렴2블록과 종지 살겠네 응답을 정수4/8로 추정하지 않고 보류.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 3,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/246/score",
+          "sha256": "4f5f9070f8a4c9849b8cb7d571b41b5e049c21600d3970d2dba35875b25a2808"
+        }
+      ]
+    },
+    {
+      "versionId": "fda6562f-6ae2-4326-a2e9-989bd48c7662",
+      "edition": "union",
+      "number": 221,
+      "stanzaApproxMeasures": null,
+      "reviewStatus": "not_measured",
+      "reviewDisposition": "deferred",
+      "reviewNote": "첫 나의4분음표, 첫 행 네 뒤8분쉼표, 다음 죄의8분음표 및 후렴 진입의 쉼표를 포함한 박 상당량 추가 확인 필요. 새 후렴3블록/통221 후렴2블록과 종지 살겠네 응답을 정수4/8로 추정하지 않고 보류.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 2,
+          "approxMeasuresByBlock": null,
+          "approxMeasures": null,
+          "reviewStatus": "not_measured"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-221.jpg",
+          "sha256": "ba58882a6ec21b19c750cd1e25df894e2bedab629d2b4093bce01d1862bd3c07"
+        }
+      ]
+    },
+    {
+      "versionId": "82ee8ff0-5009-4d31-80a9-fe1fc974431d",
+      "edition": "new",
+      "number": 247,
+      "stanzaApproxMeasures": 17,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "4/4 인쇄 앞 세 행 각4마디, 마지막 본절 행5마디. 본절17(8+9), 아멘1. 16마디로 강제하지 않음.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            9
+          ],
+          "approxMeasures": 17,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Coda",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/247/score",
+          "sha256": "f8eb18f105e7e4ee1ba6f8f859dfce074408d26721f90242d7901d6284559739"
+        }
+      ]
+    },
+    {
+      "versionId": "2b73ad8a-e98b-4855-b51d-e03f40c9fbaa",
+      "edition": "new",
+      "number": 248,
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "4/4 인쇄 네 행 각4마디, 본절16(8+8), 끝 쉼표 포함. 아멘 없음.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/248/score",
+          "sha256": "7f4671ff7435848aba4a81f45476b0d8e46fb9daa7cecc615fefe514b9520ec7"
+        }
+      ]
+    },
+    {
+      "versionId": "a1d76bb8-ea5e-4eb0-ae63-db2f69b8265a",
+      "edition": "new",
+      "number": 249,
+      "stanzaApproxMeasures": 12,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "6/8 본절12. 새8+4/통249는4+4+4. 후렴8, 통일판4+4. 반복된 그 보좌 앞에 및 큰 영광 구절은 인쇄대로 포함.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            8,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/249/score",
+          "sha256": "8eb2a91c61570ca6a48fd85cab7c3487159528bdd9a153c126603a5333047aeb"
+        }
+      ]
+    },
+    {
+      "versionId": "058a01de-a1c0-450f-b04e-64130a31ea6b",
+      "edition": "union",
+      "number": 249,
+      "stanzaApproxMeasures": 12,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "6/8 본절12. 새8+4/통249는4+4+4. 후렴8, 통일판4+4. 반복된 그 보좌 앞에 및 큰 영광 구절은 인쇄대로 포함.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 3,
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-249.jpg",
+          "sha256": "e05e74a23ec813f0b08df2baee8d38577dc71f3e21c0dfb481a4b7dd5e5ea0b1"
+        }
+      ]
+    },
+    {
+      "versionId": "6d1d849e-82be-4b6d-b470-5637265915ec",
+      "edition": "new",
+      "number": 250,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "4/4 본절8·후렴8, 종지4분쉼표 포함. 통182 각4+4, 아멘 없음.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 1,
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/250/score",
+          "sha256": "b96b4f9993d5b933fc90e8a5a379fd6b82672ba80848709f907ea38fd4da94bf"
+        }
+      ]
+    },
+    {
+      "versionId": "1c86613b-a873-47a0-a39b-5bb9c3e5e1c4",
+      "edition": "union",
+      "number": 182,
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
+      "reviewDisposition": null,
+      "reviewNote": "4/4 본절8·후렴8, 종지4분쉼표 포함. 통182 각4+4, 아멘 없음.",
+      "parts": [
+        {
+          "kind": "Verse",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        },
+        {
+          "kind": "Chorus",
+          "blockCount": 2,
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
+        }
+      ],
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-final77/score-182.jpg",
+          "sha256": "26fc5a095e4dd4d0d3e354134ddce146b50663281ceb2acd6e606d41ce6d4692"
+        }
+      ]
+    }
+  ],
+  "next": "Resolve retained boundary deferrals; sequential range new251–270 with linked union editions",
+  "scoreEvidenceDirectory": "/Users/parkjihun/Code/Apps/Mindex/backups/20261022-hymn231-250-paired",
+  "preserved": [
+    "lyrics",
+    "unit IDs/types/order/blocks",
+    "song links",
+    "saved song forms",
+    "medleys",
+    "audio timing",
+    "worship data"
+  ]
+}

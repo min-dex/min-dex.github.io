@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-unified-background",
+  "version": "20261023-praise-controls",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "2c3f4db0e2690425b939e18c4c2eb4ae60c1f4da3c289e5a2ed174f866a34a25",
-  "runtime_sha256": "70ede0ce864f2f0a566432135b18368dc4502ba87f385125553d7c2c9a5e5d09",
-  "source_bytes": 1560110,
-  "runtime_bytes": 1104230,
-  "source_gzip": 351407,
-  "runtime_gzip": 274820
+  "source_sha256": "0603d804d256fc4b384257dfaca1452ece64a993b619f7458f830d32fad1b66a",
+  "runtime_sha256": "c5a7e38eedb7a8642883889e98fdfc669867b8aa33043520cd352246f0e3c672",
+  "source_bytes": 1559187,
+  "runtime_bytes": 1103744,
+  "source_gzip": 351237,
+  "runtime_gzip": 274688
 }

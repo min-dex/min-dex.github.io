@@ -1,0 +1,53 @@
+{
+  "dbReadbackExactWithExpectedTriggerRevisions": true,
+  "unitUpdates": 1643,
+  "signatureUpdates": 442,
+  "versionsWithUnitUpdates": 445,
+  "verifiedMetadataVersions": 1203,
+  "verifiedMetadataUnits": 5419,
+  "worshipContentUnchanged": true,
+  "automaticServiceRevisionRows": 71,
+  "directWorshipWrites": 0,
+  "deployment": "pending",
+  "status": "DB applied and verified; app deployment pending",
+  "measurePolicy": "Approximate measures per output slide; not exact stanza totals",
+  "numericEditions": 1197,
+  "recitativeEditions": 6,
+  "pendingEditions": 0,
+  "finalThree": {
+    "new620": [
+      4
+    ],
+    "new638": [
+      10,
+      14
+    ],
+    "union550": [
+      5,
+      2,
+      5,
+      3,
+      10
+    ]
+  },
+  "preserved": [
+    "lyric words",
+    "saved forms",
+    "song and version IDs",
+    "medley order",
+    "Amen repetitions",
+    "audio timing",
+    "worship content"
+  ],
+  "localBrowserAudit": {
+    "engines": [
+      "Chromium",
+      "WebKit"
+    ],
+    "editions": 1203,
+    "savedReferences": 350,
+    "uniqueSlides": 7930,
+    "resolutions": 3,
+    "overflow": 0
+  }
+}
