@@ -695,7 +695,18 @@ function presenterHymnOnceOnlyIntro(forms = [], version = {}) {
   });
 }
 
-function presenterServiceItemFormPreset(version = {}, item = {}, song = null, { includePlaybackFallback = true } = {}) {
+function presenterServiceItemFormPreset(version = {}, item = {}, song = null, options = {}) {
+  const preset = presenterServiceItemBaseFormPreset(version, item, song, options);
+  // Legacy automatic titles become an explicit virtual sequence entry on read.
+  // An authored titleSequence (including an empty one) owns title visibility.
+  if (!preset?.forms?.length || preset.titleSequence || parseServiceItemMemo(item?.memo).formPreset?.titleSequence) return preset;
+  const available = normalizeForms(version?.forms || []).filter(form => normalizeLyricsForCopy(form.lyrics));
+  const resolved = presenterFormPresetWithAvailableForms(preset, available);
+  const forms = ["Title", ...resolved.forms];
+  return { ...resolved, forms, hint: forms.join("-"), titleSequence: true };
+}
+
+function presenterServiceItemBaseFormPreset(version = {}, item = {}, song = null, { includePlaybackFallback = true } = {}) {
   // Clearing the editable form suppresses stored defaults, not the ordinary
   // verse/chorus playback cycle. Keep the input empty and never persist inference.
   if (serviceItemFormPresetDisabled(item)) {
@@ -2144,7 +2155,7 @@ function buildPresenterCustomSlides(item, section, index) {
       sort: index + blockIndex / 100,
     };
   }).filter((slide) => slide.type === "blank" || String(slide.text || "").trim());
-  const preset = serviceItemFormPreset(item);
+  const preset = presenterServiceItemFormPreset({}, item);
   if (songLikeItem && preset?.titleSequence && preset.forms?.length) {
     const plan = resolvePresenterLyricsFormPresetSequence([], preset.forms, [], lyricSlides.map(slide => slide.text));
     return plan.items.map((form, position) => form._presenterTitle
@@ -2388,15 +2399,13 @@ function presenterSongTitleSlide(item, section, song, version, displayText, inde
     detail: songDetail,
     detailKind: connectedTitle ? "" : presenterSongTitleDetailKind(song, version),
   };
-  if (sectionHeading) {
-    return { ...presenterOrderContentTitleSlide(item, section, index, sectionHeading, titleText), songTitle: displayTitle, songTitleContent };
-  }
   return {
     id: `${item.id || index}:song-title`,
     ...section,
     elementType: PRESENTER_ELEMENT_TYPES.PRAISE,
     layout: PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT,
     type: "song-title",
+    formKey: "title:0", formLabel: "Title",
     label: item.label || "",
     title: displayTitle,
     subtitle: connectedTitle ? "" : versionDisplayName(song, version),

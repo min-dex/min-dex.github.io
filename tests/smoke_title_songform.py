@@ -23,10 +23,18 @@ try:
     const before=JSON.stringify({item,version});
     const legacy=render();check(legacy[0].type==='song-title','legacy title retained');check(legacy.length===5,'authored paragraphs preserved');
     check(before===JSON.stringify({item,version}),'read did not migrate data');
-    for(const raw of ['title','TITLE',' Title ']) check(normalizeServiceFormHint(raw+' - Verse 1 - Tags')==='Title-V1-Tags','normalization');
-    check(canonicalServiceFormToken('T')==='T' && canonicalServiceFormToken('Tag')==='Tag','Tag unchanged');
+    for(const raw of ['t','T','title','TITLE',' Title ']) check(normalizeServiceFormHint(raw+' - Verse 1 - Tags')==='Title-V1-Tags','normalization');
+    check(canonicalServiceFormToken('T')==='Title' && canonicalServiceFormToken('Tag')==='Tag','Tag unchanged');
     const edit=value=>applyServiceItemMetadataField(item,{dataset:{serviceItemField:'form_hint'},value},{});
-    edit('v1 - title - c - TITLE');
+    check(serviceItemEffectiveFormHint(item)==='Title-V1-C','legacy sequence exposes title');
+    for(const label of ['파송찬양','마침찬양','결단찬양']) {
+      const title=presenterSongTitleSlide({...item,label},{sectionKey:'response_song'},song,version,song.title,0);
+      check(title.type==='song-title' && title.formLabel==='Title','uniform title for '+label);
+    }
+    const fresh={...item};
+    applyServiceItemMetadataField(fresh,{dataset:{serviceItemField:'form_hint'},value:'V1-C'},{});
+    check(!shouldIncludeSongTitleSlide(fresh,fresh.label,song,version) && presenterFormPlanForServiceItem(version,fresh,song).forms.every(f=>!f._presenterTitle),'first edit can omit Title');
+    edit('v1 - t - c - T');
     let slides=render();check(slides.map(s=>s.type).join(',')==='lyrics,lyrics,lyrics,song-title,lyrics,song-title','middle/repeated title order');
     check(new Set(slides.map(s=>s.id)).size===slides.length,'unique slide IDs');
     check(parseServiceItemMemo(item.memo).formHint==='V1-Title-C-Title','stored canonical input');

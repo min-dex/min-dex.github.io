@@ -23563,8 +23563,9 @@ function serviceItemEffectiveFormHint(item = {}) {
   if (parsed.formPresetDisabled) return "";
   const song = serviceItemLinkedSong(item);
   const version = serviceItemLinkedVersion(item, song);
-  return serviceFormPresetSummary(presenterServiceItemFormPreset(version || {}, item, song, { includePlaybackFallback: false }))
-    || parsed.formHint;
+  return serviceFormPresetSummary(presenterServiceItemFormPreset(version || {}, item, song))
+    || parsed.formHint
+    || "Title";
 }
 
 function serviceFormPresetSummary(preset) {
@@ -34450,7 +34451,7 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   const song = presenterSongForServiceItem(item, displayText, label, service);
   const version = song ? getPresenterServiceItemVersion(song, item, service) : null;
   const formPlan = version ? presenterFormPlanForServiceItem(version, item, song) : { forms: [], warnings: [] };
-  const forms = serviceItemFormPreset(item)?.titleSequence ? formPlan.forms
+  const forms = serviceItemFormPreset(item)?.titleSequence || formPlan.forms.some(form => form._presenterTitle) ? formPlan.forms
     : globalThis.MindexSongTiming?.formsFor(item, song, version, formPlan.forms) || formPlan.forms;
   const formWarnings = formPlan.warnings;
   const memo = initialMemo;
@@ -34596,9 +34597,7 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   if (scoreOutput) {
     if (!song) return [];
     const scoreSlides = presenterScoreSlidesForServiceItem(item, section, index, song, version, displayText, memo, forms, formWarnings);
-    const slides = shouldSuppressMainPraiseScoreSongTitle(item, service)
-      ? scoreSlides
-      : [
+    const slides = [
 	        ...(song && shouldIncludeSongTitleSlide(item, label, song, version) ? [presenterSongTitleSlide(item, section, song, version, displayText, index)] : []),
         ...scoreSlides,
       ];
@@ -34615,7 +34614,7 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
           presenterSongTitleSlide(item, section, song, version, displayText, index),
           ...lyricsSlides,
         ], index, service)
-      : lyricsSlides;
+      : presenterSlidesWithSpecialSongTitle(item, section, lyricsSlides, index, service);
     const syncedSlides = presenterApplySyncedLyricsConfig(slides, syncConfig, item, index);
     return withIntro(globalThis.MindexSongTiming?.decorate(syncedSlides, item, song, version) || syncedSlides);
   }
@@ -34685,11 +34684,6 @@ function presenterCorporatePrayerTopicTitle(value = "") {
   return /^['"“”‘’].*['"“”‘’]$/u.test(topic) ? topic : `'${topic}'`;
 }
 
-function shouldSuppressMainPraiseScoreSongTitle(item = {}, service = {}) {
-  const appTypeId = worshipAppServiceTypeId(service?.type_id);
-  if (appTypeId !== "sunday-first" && appTypeId !== "sunday-second") return false;
-  return isMainPraiseServiceItem(item);
-}
 
 function presenterElementSlideFromMemo(item, section, index, memo, displayText, service = null) {
   return presenterElementSlideFromMemoCore(item, section, index, memo, displayText, service);

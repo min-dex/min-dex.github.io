@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-children-confession",
+  "version": "20261023-title-sequence",
   "options": {
     "compress": false,
     "mangle": {
