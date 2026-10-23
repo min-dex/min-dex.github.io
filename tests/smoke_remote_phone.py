@@ -15,7 +15,9 @@ try:
    page.goto(url);page.evaluate("async()=>{window.awake=(await import('./remote.screen.mjs')).setupPhoneExperience();}")
    assert page.locator('#installHelp').is_visible();assert page.locator('#installApp').is_hidden()
    page.evaluate('awake.update({active:true})');page.wait_for_function('locks.length===1');assert page.locator('#screenStatus').is_hidden()
-   page.uncheck('#keepAwake');page.wait_for_function('locks[0].released');page.check('#keepAwake');page.wait_for_function('locks.length===2')
+   assert page.locator('#keepAwake').count()==0
+   page.evaluate('awake.close()');page.wait_for_function('locks[0].released')
+   page.evaluate('awake.update({active:true})');page.wait_for_function('locks.length===2')
    page.evaluate('locks[1].release()');assert page.locator('#screenRetry').is_visible();page.click('#screenRetry');page.wait_for_function('locks.length===3')
    page.evaluate('awake.close();denied=true;awake.update({active:true})');page.wait_for_function("document.querySelector('#screenStatus').textContent.includes('허용하지')")
    page.evaluate("window.prompts=0;const e=new Event('beforeinstallprompt',{cancelable:true});e.prompt=async()=>{prompts++;};e.userChoice=Promise.resolve({outcome:'dismissed'});dispatchEvent(e);")
@@ -24,5 +26,5 @@ try:
    for width in (320,390,768):
     page.set_viewport_size({'width':width,'height':844});assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
    page.screenshot(path='/tmp/mindex-remote-phone-options-'+engine+'.png',full_page=True)
-   page.evaluate('awake.close()');browser.close();print('PASS',engine,'wake state/opt-out/retry/denial, install fallback/prompt/installed state and narrow layout',flush=True)
+   page.evaluate('awake.close()');browser.close();print('PASS',engine,'automatic wake/reconnect/retry/denial, install fallback/prompt/installed state and narrow layout',flush=True)
 finally:server.shutdown()

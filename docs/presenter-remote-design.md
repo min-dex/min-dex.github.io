@@ -130,7 +130,8 @@ shown only after beforeinstallprompt; standalone/appinstalled hides the guide.
 No service worker, offline commands, stored pairing key or automatic reconnection.
 
 While a connected controller is visible, Screen Wake Lock is requested by default.
-The checkbox opts out for the current page lifetime only. Disconnect, pagehide
+Wake Lock is automatic while connected and visible; there is no checkbox or
+per-device preference (2026-10-23). Disconnect, pagehide
 and hidden state release it; returning visible requests again if still connected.
 Unsupported/denied/system-released states are explicit, with a manual retry for
 release/denial; painting and heartbeats never create an automatic retry loop.

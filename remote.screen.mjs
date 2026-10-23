@@ -1,10 +1,10 @@
 // Wake Lock is a foreground convenience, never a connection or command permission.
 export function createScreenAwake({request,onChange}){
- let active=false,visible=true,enabled=true,lock=null,pending=false,epoch=0;
- const wanted=()=>active&&visible&&enabled;
+ let active=false,visible=true,lock=null,pending=false,epoch=0;
+ const wanted=()=>active&&visible;
  const announce=state=>onChange(state);
  const release=sentinel=>Promise.resolve().then(()=>sentinel.release()).catch(()=>{});
- function idle(){announce(!enabled?'off':!active?'idle':!visible?'hidden':request?'released':'unsupported');}
+ function idle(){announce(!active?'idle':!visible?'hidden':request?'released':'unsupported');}
  async function acquire(){
   if(!wanted()){idle();return;}
   if(!request){announce('unsupported');return;}
@@ -20,9 +20,9 @@ export function createScreenAwake({request,onChange}){
   finally{pending=false;if(generation!==epoch&&wanted())void acquire();}
  }
  function update(values){
-  const nextActive=values.active??active,nextVisible=values.visible??visible,nextEnabled=values.enabled??enabled;
-  if(active===nextActive&&visible===nextVisible&&enabled===nextEnabled)return;
-  active=nextActive;visible=nextVisible;enabled=nextEnabled;epoch++;
+  const nextActive=values.active??active,nextVisible=values.visible??visible;
+  if(active===nextActive&&visible===nextVisible)return;
+  active=nextActive;visible=nextVisible;epoch++;
   if(!wanted()){const old=lock;lock=null;if(old)void release(old);idle();}
   else void acquire();
  }
@@ -35,7 +35,6 @@ export function setupPhoneExperience(){
  const awake=createScreenAwake({request:navigator.wakeLock?.request?()=>navigator.wakeLock.request('screen'):null,onChange:state=>{
   $('screenStatus').textContent=labels[state]||'';$('screenRetry').hidden=!['blocked','released'].includes(state);
  }});
- $('keepAwake').addEventListener('change',()=>awake.update({enabled:$('keepAwake').checked}));
  $('screenRetry').onclick=()=>awake.retry();
  document.addEventListener('visibilitychange',()=>awake.update({visible:!document.hidden}));
  window.addEventListener('pagehide',()=>awake.close());
