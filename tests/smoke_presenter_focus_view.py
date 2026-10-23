@@ -58,8 +58,8 @@ try:
       assert not page.locator('.global-playback-trigger').is_visible()
       assert remote.bounding_box()['height']==music.bounding_box()['height']==35
       assert abs(remote.bounding_box()['width']-music.bounding_box()['width'])<1
-      remote.click();assert page.locator('.remote-panel').is_visible()
-      page.locator('[data-remote-close]').click()
+      remote.click();assert not page.locator('.remote-panel').is_visible()
+      assert '예배 송출을 먼저' in page.locator('[data-remote-status]').text_content()
       music.click();assert page.locator('#globalPlaybackPanel').is_visible()
       page.keyboard.press('Escape')
       assert music.evaluate('e=>e===document.activeElement')

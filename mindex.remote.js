@@ -4,12 +4,26 @@
  const trigger=document.createElement('button');trigger.type='button';trigger.className='icon-btn';trigger.id='remotePanelBtn';trigger.innerHTML='<i data-lucide="smartphone"></i>';trigger.title='원격 조작';trigger.setAttribute('aria-label','원격 조작');
  document.getElementById('monitorPanelBtn')?.before(trigger);
  window.lucide?.createIcons({root:trigger});
- let session=null,opening=false,ending=false;
+ let session=null,opening=false,ending=false,announcedCode='';
+ const notify=(message,type='info')=>{if(typeof showToast==='function')showToast(message,type);};
+ const buttonLabel=()=>ending?'종료 중':opening?'연결 준비':session?.connected?'원격 연결됨':session?.listening?session.code:'원격 조작';
  const panel=document.createElement('dialog');panel.className='remote-panel';panel.setAttribute('aria-labelledby','remoteTitle');
  panel.innerHTML='<header><span class="remote-brand-mark" aria-hidden="true"></span><h2 id="remoteTitle">Mindex Remote</h2><button class="icon-btn" data-remote-close aria-label="닫기" title="닫기"><i data-lucide="x"></i></button></header><section class="remote-connection"><p data-remote-status role="status">연결 코드를 만들어 주세요.</p><strong data-remote-code></strong><p data-remote-help></p></section><footer class="remote-actions"><a class="btn secondary" data-remote-link target="_blank" rel="noopener"><i data-lucide="external-link"></i><span>Remote 열기</span></a><button class="btn primary" data-remote-start>연결 시작</button><button class="btn secondary" data-remote-end disabled hidden>연결 종료</button></footer>';
  document.body.append(panel);window.lucide?.createIcons({root:panel});const $=s=>panel.querySelector(s);
  function paintPanel(){
   const active=!!session||ending;
+  const label=buttonLabel();
+  const code=!!session?.listening&&!session.connected;
+  for(const button of [trigger,...document.querySelectorAll('[data-presenter-remote]')]){
+   let text=button.querySelector('[data-remote-button-label]');
+   if(!text){text=document.createElement('span');text.dataset.remoteButtonLabel='';button.append(text);}
+   if(text.textContent!==label)text.textContent=label;
+   button.disabled=opening||ending;
+   button.dataset.remotePairing=String(code);
+   button.setAttribute('aria-label',code?'원격 연결 코드 '+session.code:label);
+   button.title=code?'2분 안에 리모트 화면에서 입력':label;
+  }
+  if(code&&announcedCode!==session.code){announcedCode=session.code;notify('2분 안에 리모트 화면에서 코드를 입력하세요.');}
   $('[data-remote-start]').hidden=active;
   $('[data-remote-start]').disabled=opening||ending||active;
   $('[data-remote-end]').hidden=!active;
@@ -17,8 +31,8 @@
   $('[data-remote-link]').hidden=!!session?.connected||ending;
  }
  $('[data-remote-link]').href=location.protocol==='file:'?'https://min-dex.github.io/remote.html':new URL('remote.html',location.href).href;
- $('[data-remote-close]').onclick=()=>panel.close();trigger.onclick=()=>panel.showModal();
- document.addEventListener('click',event=>{if(event.target.closest('[data-presenter-remote]'))panel.showModal();});
+ $('[data-remote-close]').onclick=()=>panel.close();trigger.onclick=()=>activate();
+ document.addEventListener('click',event=>{if(event.target.closest('[data-presenter-remote]'))void activate();});
  const text=s=>[s?.title,s?.body||s?.text||s?.bodyText||s?.content].filter(v=>typeof v==='string').join('\n').slice(0,1800);
  function adapter(serviceId,outputSession,outputWindow){
   let previewRevision,previews=new WeakMap();
@@ -87,19 +101,26 @@
   }
   return {read,execute};
  }
- $('[data-remote-start]').onclick=async()=>{
+ async function activate(){
+  if(opening||ending)return;
+  if(session){panel.showModal();return;}
+  await start();
+ }
+ async function start(){
   if(opening||ending||session)return;
-  if(!state.client||!presenterControllerIsLive(state.selectedServiceId)||!isPresenterOutputWindowOpen()){$('[data-remote-status]').textContent='이 PC에서 예배 송출을 먼저 시작해 주세요.';return;}
+  if(!state.client||!presenterControllerIsLive(state.selectedServiceId)||!isPresenterOutputWindowOpen()){const message='이 PC에서 예배 송출을 먼저 시작해 주세요.';$('[data-remote-status]').textContent=message;notify(message);return;}
   opening=true;paintPanel();
   try{
    const {openRemote}=await import('./mindex.remote-session.mjs?v=5');
    const a=adapter(state.presenter.serviceId,state.presenter.outputSessionId,state.presenter.outputWindow);
-   session=await openRemote({client:state.client,host:true,...a,onClose:()=>{session=null;$('[data-remote-code]').textContent='';$('[data-remote-help]').textContent='';$('[data-remote-start]').disabled=false;$('[data-remote-end]').disabled=true;paintPanel();},onStatus:s=>{$('[data-remote-status]').textContent=s;if(s==='코드를 입력하면 바로 연결됩니다.'&&session)$('[data-remote-code]').textContent=session.code;if(s==='리모컨 연결됨'){$('[data-remote-code]').textContent='';$('[data-remote-help]').textContent='';$('[data-remote-link]').hidden=true;}}});
+   session=await openRemote({client:state.client,host:true,...a,onClose:()=>{session=null;announcedCode='';$('[data-remote-code]').textContent='';$('[data-remote-help]').textContent='';$('[data-remote-start]').disabled=false;$('[data-remote-end]').disabled=true;paintPanel();},onStatus:s=>{$('[data-remote-status]').textContent=s;if(s==='코드를 입력하면 바로 연결됩니다.'&&session)$('[data-remote-code]').textContent=session.code;if(s==='리모컨 연결됨'){$('[data-remote-code]').textContent='';$('[data-remote-help]').textContent='';$('[data-remote-link]').hidden=true;}paintPanel();}});
    $('[data-remote-code]').textContent=session.listening?session.code:'';$('[data-remote-help]').textContent='폰에서 코드 입력 · 2분간 유효';$('[data-remote-end]').disabled=false;
-  }catch(e){$('[data-remote-status]').textContent=e.message;$('[data-remote-start]').disabled=false;}finally{opening=false;paintPanel();}
- };
+  }catch(e){$('[data-remote-status]').textContent=e.message;notify(e.message,'error');$('[data-remote-start]').disabled=false;}finally{opening=false;paintPanel();}
+ }
+ $('[data-remote-start]').onclick=start;
  $('[data-remote-end]').onclick=async()=>{if(ending)return;ending=true;paintPanel();const old=session;session=null;try{await old?.end();}finally{ending=false;}$('[data-remote-code]').textContent='';$('[data-remote-help]').textContent='';$('[data-remote-start]').disabled=false;$('[data-remote-end]').disabled=true;paintPanel();};
  window.addEventListener('pagehide',()=>session?.close());
  // Read-only adapter entry is also used by isolated regression tests.
- window.MindexRemote={adapter,open:()=>panel.showModal()};
+ window.MindexRemote={adapter,buttonLabel,open:()=>panel.showModal()};
+ paintPanel();
 })();

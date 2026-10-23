@@ -29405,6 +29405,7 @@ function renderPresenterControlsTop(service, slides, active, index) {
   const launchLabel = uiText(anyOutputOpen ? "presenter.action.stop" : "presenter.action.present");
   const launchIcon = anyOutputOpen ? "screen-share-off" : "screen-share";
   const launchTone = anyOutputOpen ? "stop" : "start";
+  const remoteLabel = window.MindexRemote?.buttonLabel() || "원격 조작";
   const fullscreenLabel = anyOutputOpen ? "송출 화면 전체 화면" : "송출을 시작하면 전체 화면을 사용할 수 있습니다";
   const fullscreenControl = `<button class="icon-btn svc-presenter-fullscreen svc-presenter-window-button" type="button" data-presenter-action="fullscreen" aria-label="${escapeAttr(fullscreenLabel)}" title="${escapeAttr(fullscreenLabel)}" ${anyOutputOpen ? "" : "disabled"}><i data-lucide="maximize"></i><span>전체 화면</span></button>`;
   return `
@@ -29419,7 +29420,7 @@ function renderPresenterControlsTop(service, slides, active, index) {
           ${anyOutputOpen ? fullscreenControl : `<span class="svc-presenter-disabled-control" title="${escapeAttr(fullscreenLabel)}">${fullscreenControl}</span>`}
           </div>
           ${renderPresenterAlwaysOnTopControl({ buttonStyle: true })}
-          <button class="icon-btn" type="button" data-presenter-remote aria-label="원격 조작" title="원격 조작"><i data-lucide="smartphone"></i><span>원격 조작</span></button>
+          <button class="icon-btn" type="button" data-presenter-remote aria-label="${escapeAttr(/^\d{6}$/.test(remoteLabel) ? "원격 연결 코드 " + remoteLabel : remoteLabel)}" title="${escapeAttr(remoteLabel)}" ${["연결 준비", "종료 중"].includes(remoteLabel) ? "disabled" : ""}><i data-lucide="smartphone"></i><span data-remote-button-label>${escapeHtml(remoteLabel)}</span></button>
           <button class="icon-btn" type="button" data-presenter-music-manager popovertarget="globalPlaybackPanel" aria-label="음악 관리" title="음악 관리"><i data-lucide="music"></i><span>음악 관리</span></button>
         </div>
         <div class="svc-presenter-main" aria-live="polite">

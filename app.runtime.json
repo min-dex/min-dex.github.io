@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-focus-controls-merged",
+  "version": "20261023-direct-remote",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "9df4b6a303f235c933ace4eb44a6f6b3f2f70762fda88853b5f5ced49257d087",
-  "runtime_sha256": "0c12bccc92eb6aa958e5b9e0bb25ddc492a3c036644ad18061b1d69e80f181a3",
-  "source_bytes": 1555661,
-  "runtime_bytes": 1101110,
-  "source_gzip": 350256,
-  "runtime_gzip": 273903
+  "source_sha256": "70447703ce2cc1927353f50577426f316a6ca963182e3b5b39cced33649bd08b",
+  "runtime_sha256": "275f885cf95e4c82fc419d18cdb3366fc97a4665ad63b32c8db5b148d98d5c9e",
+  "source_bytes": 1555947,
+  "runtime_bytes": 1101308,
+  "source_gzip": 350351,
+  "runtime_gzip": 273992
 }

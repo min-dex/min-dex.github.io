@@ -42,8 +42,8 @@ def main():
                         })""")
                         assert metrics[0] == metrics[1], metrics
                         remote.click()
-                        assert page.locator('.remote-panel').evaluate('(el) => el.open')
-                        page.locator('[data-remote-close]').click()
+                        assert not page.locator('.remote-panel').evaluate('(el) => el.open')
+                        assert '예배 송출을 먼저' in page.locator('[data-remote-status]').text_content()
                         print('PASS', engine, module, phase, flush=True)
                     context.close()
                 browser.close()

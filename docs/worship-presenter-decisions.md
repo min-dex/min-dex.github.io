@@ -4041,3 +4041,14 @@ copy. Chapel colors, serif faces, cross, reading/sermon styling remain opt-in.
 Chromakey title layout is unchanged. No service/song records are rewritten.
 T remains unassigned as documented in the Title sequence contract; Title is the
 accepted explicit title token and Tag/Tags retain their meaning.
+
+
+## Direct remote code entry ·2026-10-23
+
+Pressing 원격 조작 starts one pairing session directly while this PC is presenting.
+The launcher shows its six-digit code and announces the two-minute entry window
+once. No setup modal is required. Repeated pending/connected entry opens the
+existing connection/end dialog, never creates a second session. Busy buttons
+lock during creation/ending; expired/closed sessions restore the normal label.
+Basic right-panel rerenders retain the current code; focus topbar temporarily
+widens to show the code. No pairing TTL, permission or relay protocol changes.
