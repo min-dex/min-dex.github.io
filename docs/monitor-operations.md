@@ -1,5 +1,13 @@
 # Read-only operations panel
 
+## Concise presence copy · 2026-10-23
+
+The toolbar and dialog both say 접속 현황. The local section says 이 브라우저
+with the explicit 접속명 input label. Shorter guidance retains 60-second updates,
+3-minute exclusion, possible delays, per-profile grouping and name reset on
+storage clearing. Successful reporting says 최근 전송 rather than implying a
+name-save acknowledgement. Reporting, retries, RPCs and stored data are unchanged.
+
 ## Last response display · 2026-10-22
 
 Each visible connection shows the server last_seen time as local month/day and

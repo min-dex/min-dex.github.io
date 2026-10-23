@@ -74,5 +74,24 @@ try:
       assert lyrics.input_value()=='첫 줄\n둘째 줄\n\n다음 슬라이드' and lyrics.evaluate('e=>document.activeElement===e')
       assert lyrics.evaluate("e=>{const a=e.getBoundingClientRect(),r=e.closest('.svc-board-subgroup-control-item').getBoundingClientRect();return a.left>=r.left-1&&a.right<=r.right+1&&a.width>r.width-10}")
    print('PASS',engine,'direct lyric/audio and special-song natural wrapping, containment, drafts/focus')
+   page.evaluate("""()=>{
+    const service=state.services[0],item=normalizeServiceItem({id:'empty-search',service_id:service.id,label:'특송',raw_title:'',memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db'})});
+    state.serviceItems[service.id]=[item];state.client=null;songCatalogLoaded=true;
+    window.searchItemBefore=JSON.stringify(item);
+    const model=serviceItemEditorModel(item,{service});
+    document.querySelector('#width-host').innerHTML='<div class="svc-board-subgroup-controls"><div class="svc-board-subgroup-control-item">'+renderPresenterServicePraiseInput(item,0,model,{headerActions:true})+'</div></div>';
+   }""")
+   field=page.locator('#width-host [data-service-item-field=raw_title]')
+   assert page.locator('[data-service-song-create]').count()==0
+   for query,creation in [('zzzz등록확인용찬양',1),('나의 주 크고 놀라운 하나님',0),('',0)]:
+    field.fill(query);field.evaluate('e=>scheduleServiceSongPickerPreview(e)');page.wait_for_timeout(250)
+    assert page.locator('[data-service-song-create]').count()==creation,(engine,query)
+    if creation:
+     assert page.locator('[data-service-song-create]').inner_text()=='새 곡 등록'
+     page.locator('#width-host').evaluate('e=>e.style.width="360px"')
+     assert page.locator('[data-service-song-create]').evaluate("e=>{const a=e.getBoundingClientRect(),r=e.closest('.svc-board-subgroup-controls').getBoundingClientRect();return a.left>=r.left-1&&a.right<=r.right+1}")
+     page.locator('#width-host').evaluate('e=>e.style.width="960px"')
+   assert page.evaluate("searchItemBefore===JSON.stringify(state.serviceItems[state.selectedServiceId][0])")
+   print('PASS',engine,'live search creation appears/disappears without committing draft')
    browser.close();print('PASS',engine,'actual song editor, wide/narrow form sizing, DB variants, medley control, drafts/focus retained')
 finally:server.shutdown()

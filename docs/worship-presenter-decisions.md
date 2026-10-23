@@ -1853,7 +1853,7 @@ The user explicitly approved publication of this display/cache update.
 
 ### 2026-10-14 Unlinked praise creation action
 
-- Unlinked praise/special-song inputs show `새 곡 추가`, including empty strict DB-selection slots. Linked songs retain the existing DB-open button; scripture and non-song rows are unchanged.
+- Superseded by the 2026-10-23 search-only creation rule below: creation is available only beside empty DB search results. Linked songs retain the existing DB-open button; scripture and non-song rows are unchanged.
 - Empty slots ask for a title before creation; cancel/blank input writes nothing. Reuse existing exact-match song resolution and medley-title rejection. A newly created song receives the entered title; no sibling slots or medley links are normalized or rewritten by this UI change.
 
 
@@ -4156,6 +4156,17 @@ layout wrapper is flattened; lyrics, audio management, result lists and expanded
 photo tools retain full content areas. Offering selection/save geometry retains
 its existing separate toolbar contract. Inputs, IDs, lyrics, modes and save paths
 are unchanged; resize must preserve unsaved values and focus.
+
+### Song registration only for empty DB search results · 2026-10-23
+
+Remove the always-visible unlinked praise registration shortcut. Direct lyric
+and audio modes never show it, and an empty search shows no registration action.
+DB search results show `새 곡 등록` only when the nonempty query has no matches;
+the button lives inside the live picker replacement region so further typing
+updates/removes it without a rerender. Registration reads the current uncommitted
+search text, and its action also rejects direct lyric/audio modes. Linked DB
+shortcuts remain unchanged.
+Existing registration duplicate checks and atomic worship save behavior remain.
 
 ## Empty form input and scoped default Title ·2026-10-23
 

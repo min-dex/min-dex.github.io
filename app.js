@@ -12588,7 +12588,8 @@ async function createPraiseSongFromServiceItem(index) {
   const items = getServiceItems(serviceId);
   const item = items[index];
   if (!service || !item || item.song_id) return;
-  const inputTitle = String(item.raw_title || "").trim()
+  if (!["praise_db", "lyrics_db", "score_db", "children_audio"].includes(servicePraiseInputMode(item, parseServiceItemMemo(item.memo), service))) return;
+  const inputTitle = String(findDeferredServiceTextInput(serviceId, index, "raw_title")?.value ?? item.raw_title ?? "").trim()
     || String(window.prompt("새 곡 제목을 입력해 주세요.", "") || "").trim();
   if (!inputTitle) return;
   if (presenterPreparationSongContentHasConnection(inputTitle)) {
@@ -26933,7 +26934,7 @@ function renderServiceSongPicker(item, index, model = serviceItemEditorModel(ite
   if (!query) return `<div class="svc-song-picker" hidden></div>`;
   const results = serviceSongPickerResults(query, item, model.service);
   if (!results.length) {
-    return `<div class="svc-song-picker"><span class="svc-song-picker-warning">검색 결과 없음</span></div>`;
+    return `<div class="svc-song-picker"><span class="svc-song-picker-warning">검색 결과 없음</span><button class="svc-song-create" type="button" data-service-song-create="${index}">새 곡 등록</button></div>`;
   }
   return `
     <div class="svc-song-picker" role="listbox" aria-label="찬양 검색 결과">
@@ -27285,11 +27286,7 @@ function renderServicePraiseLinkControl(item, index) {
   if (item?.song_id) {
     return `<button class="svc-item-link svc-item-link--linked" type="button" data-service-db-song="${escapeAttr(item.song_id)}" aria-label="찬양 DB 새 탭에서 열기" title="찬양 DB 새 탭에서 열기">DB</button>`;
   }
-  // An unlinked praise slot must offer creation even before a title is entered.
-  return `
-    <button class="svc-song-create" type="button" data-service-song-create="${index}">
-      <span>새 곡 추가</span>
-    </button>`;
+  return "";
 }
 
 function renderServiceItemLinkControl(item, index) {

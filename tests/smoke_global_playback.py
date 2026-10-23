@@ -95,7 +95,7 @@ def main():
                         page.set_viewport_size({'width':width,'height':900})
                         assert page.evaluate('''()=>{const r=document.getElementById('globalPlaybackControls');return r.scrollWidth<=r.clientWidth+1}'''),f'overflow {width}'
                         assert page.locator('#monitorPanelBtn').inner_text()==''
-                        assert page.locator('#monitorPanelBtn').get_attribute('aria-label')=='기기 상태'
+                        assert page.locator('#monitorPanelBtn').get_attribute('aria-label')=='접속 현황'
                         assert page.locator('#monitorPanelBtn').evaluate('e=>e.scrollWidth<=e.clientWidth+1')
                         # Before icon hydration and after SVG replacement, the utility
                         # control must keep the same topbar hit target and centered icon.
