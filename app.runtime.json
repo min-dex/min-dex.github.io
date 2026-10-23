@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-praise-atomic-save",
+  "version": "20261023-form-block-continuation",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "660c4f519eee070cdd5e135ffb64412a10447eaa237246934f9221691d20d923",
-  "runtime_sha256": "4610bf325e511ddf8ed96b37acd7b3e3f4688242b96a8f37a93e45e2ac608491",
-  "source_bytes": 1565969,
-  "runtime_bytes": 1108607,
-  "source_gzip": 353138,
-  "runtime_gzip": 275990
+  "source_sha256": "0e38f1386ffc374d7428a42fc2634eb02f58cd1e67e19c535d0841df1954ad04",
+  "runtime_sha256": "a3a9c58453ceccbfc7f17f9a0de2cd1005ecfe2804d71478542d4bfe2f7984a4",
+  "source_bytes": 1566183,
+  "runtime_bytes": 1108695,
+  "source_gzip": 353175,
+  "runtime_gzip": 276006
 }

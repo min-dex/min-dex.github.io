@@ -31909,7 +31909,7 @@ function presenterBoardSlideBlocks(entries = []) {
     if (presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.SCRIPTURE_TEXT) {
       label = [slide.referenceBook, slide.referenceRange].filter(Boolean).join(" ") || slide.title || "본문";
       key = JSON.stringify([owner, "scripture", label, slide.translationLabel || ""]);
-    } else if (presenterSlideSupportsFormGrouping(slide) && (entry.controllerFormKey || slide.formKey)
+    } else if (presenterSlideSupportsFormGrouping(slide, entry.controllerFormLabel || presenterFormGroupLabel(slide)) && (entry.controllerFormKey || slide.formKey)
         && (entry.controllerFormLabel || presenterFormGroupLabel(slide))) {
       label = entry.controllerFormLabel || presenterFormGroupLabel(slide) || "송폼";
       key = JSON.stringify([owner, "form", entry.controllerFormKey || slide.formKey]);
@@ -31988,8 +31988,9 @@ function annotatePresenterFormStarts(entries = [], initialPreviousKey = "") {
     if (score && slide.formKey) { scoreKey = slide.formKey; scoreLabel = presenterFormGroupLabel(slide); }
     previousOwner = owner;
     const controllerFormKey = score ? scoreKey : slide.formKey;
-    const controllerFormLabel = score ? scoreLabel : presenterFormGroupLabel(slide);
-    const formSlide = presenterSlideSupportsFormGrouping(slide) && (!score || (controllerFormKey && controllerFormLabel));
+    const controllerFormLabel = score ? scoreLabel : presenterFormGroupLabel(slide)
+      || (controllerFormKey && previousKey === `${owner}:form:${controllerFormKey}` ? currentFormLabel : "");
+    const formSlide = presenterSlideSupportsFormGrouping(slide, controllerFormLabel) && (!score || (controllerFormKey && controllerFormLabel));
     const key = formSlide ? `${owner}:form:${controllerFormKey || slideIndex}` : "";
     const startsForm = Boolean(formSlide && key !== previousKey);
     if (startsForm) currentFormLabel = controllerFormLabel;
@@ -32005,12 +32006,12 @@ function annotatePresenterFormStarts(entries = [], initialPreviousKey = "") {
   return { entries: annotatedEntries, lastKey: previousKey };
 }
 
-function presenterSlideSupportsFormGrouping(slide) {
+function presenterSlideSupportsFormGrouping(slide, formLabel = presenterFormGroupLabel(slide)) {
   if (!slide) return false;
   if (normalizePresenterFormPresetLabel(slide.formLabel).type === "title" && String(slide.formKey || "").startsWith("title:")) return true;
   const praiseLowerBar = presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE
     && presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT;
-  if (praiseLowerBar && presenterFormGroupLabel(slide)) return true;
+  if (praiseLowerBar && formLabel) return true;
   const sourceType = String(slide.sourceType || slide.componentType || "").trim().toLowerCase();
   return sourceType === "score";
 }
