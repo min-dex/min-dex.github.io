@@ -6234,6 +6234,7 @@ def main() -> int:
                         readingRefFontWeight: readingRefStyle?.fontWeight || '',
                         readingVersionFontFamily: readingVersionStyle?.fontFamily || '',
                         readingVersionFontSize: readingVersionStyle?.fontSize || '',
+                        readingRefFontSize: readingRefStyle?.fontSize || '',
                         readingVersionFontWeight: readingVersionStyle?.fontWeight || '',
                         readingVersionOpacity: readingVersionStyle?.opacity || '',
                         readingNumberFontFamily: readingNoStyle?.fontFamily || '',
@@ -6327,8 +6328,9 @@ def main() -> int:
                     and scripture_context_state["readingFontWeight"] == "700"
                     and scripture_context_state["readingFontSynthesis"] in ["weight", "auto"]
                     and scripture_context_state["readingRefFontWeight"] == "700"
-                    and scripture_context_state["readingVersionFontWeight"] == "600"
+                    and scripture_context_state["readingVersionFontWeight"] == "400"
                     and scripture_context_state["readingVersionOpacity"] == "1"
+                    and scripture_context_state["readingVersionFontSize"] == scripture_context_state["readingRefFontSize"]
                     and float(scripture_context_state["readingVersionFontSize"].replace("px", "")) >= 35
                     and scripture_context_state["readingFinFontWeight"] == "600"
                     and -6 <= float(scripture_context_state["readingLetterSpacing"].replace("px", "") or "0") <= -5
