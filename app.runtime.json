@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-song-register-search-only",
+  "version": "20261023-praise-narrow-content",
   "options": {
     "compress": false,
     "mangle": {
