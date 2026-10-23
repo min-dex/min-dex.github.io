@@ -2037,6 +2037,8 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .svc-song-create[data-service-song-create],
 .service-list-type-block .service-list-new-btn,
 .bible-reader-controls :is(.bible-copy-chapter, .bible-chapter-control .icon-btn),
+.monitor-panel [data-refresh],
+.unsaved-dialog-actions .btn.subtle,
 :is(.song-timing-dialog, .draft-handoff-dialog, .server-conflict-review) .btn.secondary {
   flex-shrink: 0;
   border: 1px solid var(--line-2);
@@ -2050,6 +2052,8 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .svc-song-create[data-service-song-create]:not(:disabled),
 .service-list-type-block .service-list-new-btn:not(:disabled),
 .bible-reader-controls :is(.bible-copy-chapter, .bible-chapter-control .icon-btn):not(:disabled),
+.monitor-panel [data-refresh]:not(:disabled),
+.unsaved-dialog-actions .btn.subtle:not(:disabled),
 :is(.song-timing-dialog, .draft-handoff-dialog, .server-conflict-review) .btn.secondary:not(:disabled) {
   background: var(--ui-surface-field);
 }
@@ -2062,6 +2066,8 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .svc-song-create[data-service-song-create]:not(:disabled):not(.danger),
 .service-list-type-block .service-list-new-btn:not(:disabled):not(.danger),
 .bible-reader-controls :is(.bible-copy-chapter, .bible-chapter-control .icon-btn):not(:disabled):not(.danger),
+.monitor-panel [data-refresh]:not(:disabled):not(.danger),
+.unsaved-dialog-actions .btn.subtle:not(:disabled):not(.danger),
 :is(.song-timing-dialog, .draft-handoff-dialog, .server-conflict-review) .btn.secondary:not(:disabled):not(.danger) {
   color: var(--ink-2);
 }
@@ -2074,6 +2080,8 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .svc-song-create[data-service-song-create]:not(:disabled):hover,
 .service-list-type-block .service-list-new-btn:not(:disabled):hover,
 .bible-reader-controls :is(.bible-copy-chapter, .bible-chapter-control .icon-btn):not(:disabled):hover,
+.monitor-panel [data-refresh]:not(:disabled):hover,
+.unsaved-dialog-actions .btn.subtle:not(:disabled):hover,
 :is(.song-timing-dialog, .draft-handoff-dialog, .server-conflict-review) .btn.secondary:not(:disabled):hover {
   background: color-mix(in srgb, var(--ui-surface-field) 85%, var(--ink) 15%);
 }
@@ -9565,10 +9573,10 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
   flex:0 0 var(--ui-icon-size); stroke-width:var(--ui-icon-stroke);
 }
 
-/* Anchor help to the toolbar so narrow editor columns cannot clip its left edge. */
+/* Align help with the trailing utility button; constrain it to the editor toolbar. */
 .svc-presenter-toolbar { position:relative; }
 .svc-presenter-toolbar .svc-presenter-help { position:static; }
-.svc-presenter-toolbar .svc-presenter-help-panel { left:0; right:auto; width:min(320px, 100%); box-sizing:border-box; }
+.svc-presenter-toolbar .svc-presenter-help-panel { left:auto; right:0; width:min(320px, 100%); box-sizing:border-box; }
 
 /* Bounded navigation history: item destinations, never draft contents. */
 .home-recent { min-width:0; }
