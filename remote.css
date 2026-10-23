@@ -38,7 +38,7 @@ input::placeholder { color: var(--placeholder-ink); opacity: .55; font-weight: 4
 @media (max-width: 360px) { .audio button { padding-inline: 5px; } }
 button :is([data-lucide], svg.lucide) { width: var(--ui-icon-size); height: var(--ui-icon-size); flex: 0 0 var(--ui-icon-size); stroke-width: var(--ui-icon-stroke); }
 .navigation :is([data-lucide], svg.lucide) { width: var(--ui-icon-lg); height: var(--ui-icon-lg); flex-basis: var(--ui-icon-lg); }
-#music, #result { font-size: var(--ui-meta-size); color: var(--ink-3); }
+#music, #videoStatus, #result { font-size: var(--ui-meta-size); color: var(--ink-3); }
 #disconnect { background: transparent; border: 1px solid var(--line); }
 @media (min-width: 600px) { main { padding: 25px; } .previews { grid-template-columns: 1fr 1fr; } .previews article { min-height: 180px; } }
 

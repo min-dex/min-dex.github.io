@@ -19,6 +19,7 @@ try:
     state.loadedWorshipServiceIds=new Set([sid]);state.selectedServiceId=sid;state.module='presenter';state.loading=false;
     preparePresenterService(sid);state.presenter.index=0;state.presenter.outputSessionId='fixture';
     const output={closed:false,postMessage(){}};state.presenter.outputWindow=output;
+    const {createGate,id}=await import('./mindex.remote-core.mjs');
     const adapter=MindexRemote.adapter(sid,'fixture',output);
     check(adapter.read().live,'host live');await adapter.execute('next');check(state.presenter.index===1,'real next');
     await adapter.execute('prev');check(state.presenter.index===0,'real previous');
@@ -39,6 +40,19 @@ try:
      let rejected=false;try{await adapter.execute('play')}catch{rejected=true}check(rejected,'busy audio must reject execution');
     }
     Object.assign(state.serviceMusic,{pending:false,fadeStop:null});
+    const gate=createGate(adapter);let snapshot=gate.connect('phone'),sequence=0;
+    const command=action=>({...snapshot,id:id(),sequence:++sequence,action});
+    const staleNavigation=command('next'),originalIndex=state.presenter.index;
+    runPresenterAction('next',sid,{scroll:false});runPresenterAction('prev',sid,{scroll:false});
+    check(state.presenter.index===originalIndex,'local next/prev returns to same slide');
+    let stale=false;try{await gate.command('phone',staleNavigation)}catch{stale=true}check(stale,'ABA navigation rejected');
+    snapshot=gate.snapshot();const staleAudio=command('play');
+    stopServiceMusicPlayback({render:false});
+    stale=false;try{await gate.command('phone',staleAudio)}catch{stale=true}check(stale,'same-state local stop invalidates audio command');
+    snapshot=gate.snapshot();const fresh=command('next');
+    check((await gate.command('phone',fresh)).ok,'fresh remote command');
+    const after=state.presenter.index;await gate.command('phone',fresh);check(state.presenter.index===after,'duplicate command cannot move twice');
+    gate.close();
     output.closed=true;check(!adapter.read().live,'closed output revoked');output.closed=false;
     state.serviceMusic.ownerServiceId='another-service';check(!adapter.read().allowed.includes('play'),'foreign audio protected');
     state.presenter.outputSessionId='new-session';check(!adapter.read().live,'replacement output revoked');clearServiceMusicSyncTimer();

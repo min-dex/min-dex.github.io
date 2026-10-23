@@ -4062,3 +4062,15 @@ including the closing bold phrase. Other services retain the standard public
 confession and third-service chromakey chunks exactly. Preview and output consume
 the same generated slide; do not rewrite operational records or custom authored
 confession text. Marker foreground/coverage and original six colors are unchanged.
+
+
+## Remote video transport and PC races ·2026-10-23
+
+Remote commands include presenter transport and music execution sequence in the
+state signature, preventing an old command after a local out-and-back action.
+Native slide video transport exposes play/pause/restart on the controller page;
+PC output acknowledges actual media completion. Commands bind to output client,
+session, message/frame and media revision, deduplicate across transports and
+expire after1.8 seconds. Restart seeks to zero and plays; pause preserves position.
+No media stream is sent to the phone. Browser autoplay rejection is explicit.
+PPTX embedded media/background loops retain their existing playback behavior.

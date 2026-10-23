@@ -76,18 +76,21 @@
     if(own)allowed.push('stop');
     if(own&&m.playing&&m.autoSyncSuspended&&m.mode==='presenter-audio'&&sync?.localTiming&&slide.songTimingEligible&&m.timingGroupId===sync.groupId&&!p.safetyBlank&&!p.liveScripture?.active)allowed.push('resume');
    }
+   const video=presenterRemoteVideoState(serviceId);
+   if(video?.ready)allowed.push(...(video.status==='playing'?['video-pause']:['video-play']), 'video-restart');
    const next=p.slides.slice(p.index+1).find(s=>!presenterSlideIsHidden(s));
-   return {live,index:p.index,total:p.slides.length,blank:!!p.safetyBlank,current:text(p.liveScripture?.active?p.liveScripture.slide:slide),next:text(next),allowed,
+   return {live,video,index:p.index,total:p.slides.length,blank:!!p.safetyBlank,current:text(p.liveScripture?.active?p.liveScripture.slide:slide),next:text(next),allowed,
     previewCurrent:p.safetyBlank?'<div style="width:100%;height:100%;background:#000"></div>':preview(p.liveScripture?.active?p.liveScripture.slide:slide),previewNext:preview(next),
     music:!own&&!intro?'연결된 음원 없음':m.pending?'음원 준비 중':m.fadeStop?'페이드아웃 중':`${m.playing?'재생 중':'정지 / 일시정지'}${sync?.localTiming?m.autoSyncSuspended?' · 자동 넘김 해제':' · 자동 넘김':''}`,
     // Compare identities without disclosing media URLs or the full worship source.
-    version:compactTextSignature(JSON.stringify([p.sourceSignature,m.sourceKey,m.timingGroupId,m.mode,p.livePraise,p.liveScripture?.active]))};
+    version:compactTextSignature(JSON.stringify([p.sourceSignature,presenterTransportSequence,m.playSerial,m.sourceKey,m.timingGroupId,m.mode,p.livePraise,p.liveScripture?.active]))};
   }
   async function execute(action){
    if(!read().live||!read().allowed.includes(action))throw Error('현재 상태에서는 이 조작을 할 수 없습니다.');
    const {p,m,slide,intro}=context();
    if(action==='prev'||action==='next')return runPresenterAction(action,serviceId,{scroll:false});
    if(action==='blank'||action==='unblank')return runPresenterAction('jump',serviceId,{index:action==='blank'?-1:p.index,scroll:false});
+   if(action.startsWith('video-'))return requestPresenterVideoCommand(serviceId,action.slice(6));
    if(action==='resume'){
     if(!window.MindexSongTiming?.resumeAutoSync(serviceId))throw Error('현재 음원의 자동 넘김을 복귀할 수 없습니다.');return;
    }
@@ -111,7 +114,7 @@
   if(!state.client||!presenterControllerIsLive(state.selectedServiceId)||!isPresenterOutputWindowOpen()){const message='이 PC에서 예배 송출을 먼저 시작해 주세요.';$('[data-remote-status]').textContent=message;notify(message);return;}
   opening=true;paintPanel();
   try{
-   const {openRemote}=await import('./mindex.remote-session.mjs?v=5');
+   const {openRemote}=await import('./mindex.remote-session.mjs?v=6');
    const a=adapter(state.presenter.serviceId,state.presenter.outputSessionId,state.presenter.outputWindow);
    session=await openRemote({client:state.client,host:true,...a,onClose:()=>{session=null;announcedCode='';$('[data-remote-code]').textContent='';$('[data-remote-help]').textContent='';$('[data-remote-start]').disabled=false;$('[data-remote-end]').disabled=true;paintPanel();},onStatus:s=>{$('[data-remote-status]').textContent=s;if(s==='코드를 입력하면 바로 연결됩니다.'&&session)$('[data-remote-code]').textContent=session.code;if(s==='리모컨 연결됨'){$('[data-remote-code]').textContent='';$('[data-remote-help]').textContent='';$('[data-remote-link]').hidden=true;}paintPanel();}});
    $('[data-remote-code]').textContent=session.listening?session.code:'';$('[data-remote-help]').textContent='폰에서 코드 입력 · 2분간 유효';$('[data-remote-end]').disabled=false;
