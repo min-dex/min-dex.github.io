@@ -19,6 +19,12 @@ try:
     const blank={elementId:'song',elementType:'blank',layout:'blank',type:'blank',title:'빈 화면'};
     const slides=[lyric('v1:0','Verse 1'),lyric('v1:0','Verse 1'),lyric('c:1','Chorus'),lyric('c:2','Chorus'),blank,verse('3:16–18'),verse('3:16–18'),verse('4:1–2'),verse('4:1–2','새번역')];
     const entries=slides.map((slide,slideIndex)=>({slide:{...slide,id:'slide-'+slideIndex},slideIndex}));
+    const continuation=[lyric('v1:0','Verse 1'),lyric('v1:0',''),lyric('c:1','Chorus'),lyric('c:1',''),lyric('c:2',''),blank,lyric('c:1',''),{...lyric('v1:0',''),elementId:'other'}].map((slide,slideIndex)=>({slide,slideIndex}));
+    const continuationBefore=JSON.stringify(continuation);
+    const grouped=annotatePresenterFormStarts(continuation).entries;
+    check(presenterBoardSlideBlocks(grouped).map(b=>b.entries.length).join()==='2,2,1,1,1,1','lyric continuation must share block; no inheritance across form/blank/owner');
+    check(grouped.map(e=>e.formLabel).join('|')==='Verse 1||Chorus|||||','lyric labels remain only on starts');
+    check(JSON.stringify(continuation)===continuationBefore,'lyric continuation changes source data');
     const score=(owner,key,label)=>({slide:{elementId:owner,elementType:'image',layout:'media',sourceType:'score',formKey:key,formLabel:label,title:'악보'},slideIndex:0});
     const scoreEntries=[score('hymn','',''),score('hymn','v1','Verse 1'),score('hymn','',''),score('hymn','v2','Verse 2'),score('hymn','',''),score('other','','')];
     const scoreBefore=JSON.stringify(scoreEntries);

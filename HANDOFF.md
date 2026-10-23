@@ -1341,6 +1341,14 @@ Chromium/WebKit 각각 전체1203판본과 기존 예배 참조350개의 출력 
 
 최신 적용 후보는 backups/20261023-hymn-line-review/{plan,expected,candidate-ledger}.json. 이전 independent-amen 폴더 후보는 이 기록으로 대체한다. 공개 대장/runtime은 운영 적용/readback 전까지 그대로 유지한다. 배포 조율의 main push 대기는 해제됐지만 이번 턴에는 push/배포하지 않았다. 증빙: docs/hymn-line-consistency-staged-20261023.json.
 
+## 2026-10-23 찬양 동시 편집·저장 중단 보완 후보 (미배포)
+
+`docs/content-realtime.md`의 찬양 편집 원자 저장 후보 참조.
+기존 곡 저장의 부분 반영/동시 덮어쓰기 위험을 재현하고 앱+additive SQL 후보 작성.
+임시 PostgreSQL18.4 동시 연결/취소/RLS rollback 및 Chromium/WebKit 검증.
+운영 DB 쓰기0. **서버 함수 적용/운영 호환성 확인 전 앱 배포 금지.**
+신규 곡 생성/빈 곡 삭제 경로는 별도 범위이며 구버전 앱의 직접 쓰기는 그대로다.
+작업 폴더: `/Users/parkjihun/.codex/worktrees/presenter-focus-release/Mindex`.
 ## 2026-10-23 미래 예배 목록·컨트롤러 표시 일치
 
 `codex/future-outline-consistency`: 빈 설교 제목에 담당자를 제목 괄호로 표시하던 controller fallback 제거. 단일 편집 항목의 목록·컨트롤러는 공통 read-only summary를 사용하고, 제목/담당자 일부가 있어도 필요한 입력이 비었으면 같은 안내를 유지한다. 기존 제목 칸에 담당자가 있는 경우 편집 모델의 title override를 존중한다.14개 예배 유형138개 기본 편집 항목과 부분 입력, 좁은/넓은 화면·포커스, 항목/출력 불변 확인. 운영 쓰기 없음. 배포 완료 여부는 GitHub exact-SHA gate/Pages와 공개 버전 확인으로 판정한다.
@@ -1348,3 +1356,13 @@ Chromium/WebKit 각각 전체1203판본과 기존 예배 참조350개의 출력 
 ## 2026-10-23 송폼별 컨트롤러 묶음 색
 
 `codex/form-group-colors`: 순서별 색 순환을 Verse 적색/Pre-Chorus 녹색/Chorus 청색/Bridge 청록/Coda 자홍/Tag·Tags 황색으로 교체. 성경은 요소·섹션을 넘어 밝은/어두운 회색 교대. Title·간주는 박스 없음 유지, 미분류 가사는 중립 회색. 반복·절·A/B 박스 경계와 기존 클릭·송출 순서 보존. Chromium/WebKit 양 테마·3폭 실제 렌더와 미래 예배14유형138항목 표시 회귀 확인. 운영 쓰기 없음.
+
+
+## 2026-10-23 찬양 원자 저장 서버 적용
+
+사용자 승인으로 get_praise_snapshot_v1/save_praise_v1 및 공유 잠금 트리거 적용.
+기존 RLS/테이블 권한 유지, SECURITY INVOKER. 6개 테이블 적용 전후 행 해시 동일:
+곡1142, 버전1731, 가사6751, 관계6, canonical1163, 예배요소2495.
+실제 anon/authenticated 저장·동일 요청 replay·CAS 거절·음원 보존 검사 통과,
+검증 변경 전체 rollback 후 동일성 확인. 서버 적용 전 금지 조건은 해소됐다.
+앱 출시는 별도 GitHub 전체 gate/Pages/public readback으로 확인한다.

@@ -8088,107 +8088,144 @@ async function ensureWorshipServiceRowsLoadedForPersistence(serviceId = "") {
   }
 }
 
+const praisePendingSaves = new WeakMap();
+
+function praiseSnapshotSong(snapshot) {
+  if (!snapshot?.song || !Array.isArray(snapshot.versions) || !Array.isArray(snapshot.units) || !Array.isArray(snapshot.relations)) throw new Error("찬양 최신본을 확인하지 못했습니다. 입력은 유지됩니다.");
+  const song = normalizeServerSong(snapshot.song);
+  attachRelationalSongVersionRows(snapshot.versions, snapshot.units, [song.id], [song]);
+  song.related_song_ids = [...new Set(snapshot.relations.map(row => row.source_song_id === song.id ? row.related_song_id : row.source_song_id))].sort();
+  return song;
+}
+
+function praiseSaveComparable(song) {
+  const fields = ['title','subtitle','original_title','hymn_no','praise_types','metadata','scripture','related_song_ids'];
+  const value = Object.fromEntries(fields.map(key => [key, song?.[key] ?? null]));
+  value.versions = (song?.versions || []).map(version => ({
+    id: version.id, name: version.name, output_title: version.output_title || '',
+    is_primary: !!version.is_primary, praise_types: version.praise_types || [],
+    subtitle: version.subtitle || null, original_title: version.original_title || null,
+    hymn_no: version.hymn_no || null, audio_set: version.audio_set || null,
+    version_label:version.version_label||null,raw_section_name:version.raw_section_name||null,
+    deck_key:version.deck_key||null,source_count:Number(version.source_count)||1,
+    forms: normalizeForms(version.forms || []).map(form => ({id:form.id,part_type:form.part_type,
+      part_number:form.part_number,part_variant:form.part_variant||'',label:form.label||'',lyrics:form.lyrics||'',
+      review_status:form.review_status||'reviewed'}))
+  }));
+  return JSON.stringify(dirtyComparableValue(value));
+}
+
 async function saveSongMeta(liveSong) {
   const client = state.client, project = state.config.url;
-  // Assign IDs before taking the immutable request snapshot, so late edits keep
-  // referring to the same versions/units even when these are newly created.
-  if (state.songVersionTablesSupported && state.dirty.forms) {
-    for (const version of liveSong.versions || []) {
-      const oldId = version.id;
-      if (!isUuid(version.id)) version.id = createUuid();
-      if (state.selectedVersionId === oldId) {
-        state.selectedVersionId = version.id;
-        for (const form of state.forms) form.song_id = version.id;
-      }
-      for (const form of version.forms || []) {
-        const oldFormId = form.id;
-        if (!isUuid(form.id)) form.id = createUuid();
-        if (state.selectedVersionId === version.id) {
-          const visible = state.forms.find(item => item.id === oldFormId);
-          if (visible) visible.id = form.id;
+  const pending = praisePendingSaves.get(liveSong);
+  if (pending && (pending.client !== client || pending.project !== project)) throw new Error("연결이 변경되었습니다. 이전 저장 결과 확인 전에는 덮어쓸 수 없습니다.");
+  if (!pending) {
+    // Assign IDs before taking the immutable request snapshot, so late edits keep
+    // referring to the same versions/units even when these are newly created.
+    if (state.songVersionTablesSupported && state.dirty.forms) {
+      for (const version of liveSong.versions || []) {
+        const oldId = version.id;
+        if (!isUuid(version.id)) version.id = createUuid();
+        if (state.selectedVersionId === oldId) {
+          state.selectedVersionId = version.id;
+          for (const form of state.forms) form.song_id = version.id;
+        }
+        for (const form of version.forms || []) {
+          const oldFormId = form.id;
+          if (!isUuid(form.id)) form.id = createUuid();
+          if (state.selectedVersionId === version.id) {
+            const visible = state.forms.find(item => item.id === oldFormId);
+            if (visible) visible.id = form.id;
+          }
         }
       }
     }
   }
-  const before = structuredClone(liveSong), formsBefore = JSON.stringify(state.forms);
-  const selectedVersionId = state.selectedVersionId;
-  const song = structuredClone(liveSong);
+  const before = pending?.before || structuredClone(liveSong);
+  const formsBefore = pending?.formsBefore || JSON.stringify(state.forms);
+  const selectedVersionId = pending?.selectedVersionId || state.selectedVersionId;
+  const song = pending?.draft || structuredClone(liveSong);
   const { mergeEditorDraft } = await import(`./mindex.draft-merge.mjs?v=${encodeURIComponent(window.MINDEX_RELEASE || "draft-merge")}`);
-  const scriptureSnapshot = JSON.stringify(song.scripture || []);
-  if (cleanList(song.scripture).length) await validateScriptureReferences(song.scripture);
-  if (scriptureSnapshot !== JSON.stringify(song.scripture || [])) throw new Error("성구 입력이 변경되었습니다. 다시 저장해 주세요.");
-  const metadata = normalizeSongMetadata(song.metadata);
-  const hasPromotedColumns = hasPromotedSongMetadataColumns(song);
-  const hasScriptureRefsColumn = hasSongColumn(song, "scripture_refs");
-  const aggregatePraiseTypes = aggregateSongPraiseTypes(song);
-  let useVersionTables = state.songVersionTablesSupported === true;
+  let req = pending?.req;
+  if (!req) {
+    if (cleanList(song.scripture).length) await validateScriptureReferences(song.scripture);
+    const baseline = JSON.parse(state.cleanFingerprints.praise || 'null')?.song;
+    if (!baseline || baseline.id !== song.id) throw new Error("저장 기준을 확인하지 못했습니다. 입력을 보존한 채 최신본을 다시 확인해 주세요.");
+    const result = await client.rpc('get_praise_snapshot_v1', {sid:song.id});
+    if (result.error) throw new Error("안전한 찬양 저장 연결을 확인하지 못했습니다. 입력은 유지됩니다.", {cause:result.error});
+    const fresh = praiseSnapshotSong(result.data);
+    if (praiseSaveComparable(baseline) !== praiseSaveComparable(fresh)) throw new Error("다른 곳에서 이 곡이 변경되었습니다. 내 입력은 유지하고 최신본 덮어쓰기는 막았습니다.");
+    const metadata = normalizeSongMetadata(song.metadata);
+    const hasPromotedColumns = hasPromotedSongMetadataColumns(song);
+    const hasScriptureRefsColumn = hasSongColumn(song, "scripture_refs");
+    const aggregatePraiseTypes = aggregateSongPraiseTypes(song);
+    const useVersionTables = state.songVersionTablesSupported === true;
+    const useRelationTable = state.songRelationsSupported === true;
+    const plan = useVersionTables && state.dirty.forms ? await saveSongVersions(song, {detached:true, planOnly:true}) : {};
+    const payload = {
+      title: cleanSongTitleForSave(song),
+      subtitle: nullIfBlank(song.subtitle),
+      original_title: nullIfBlank(song.original_title),
+      hymn_no: nullIfBlank(song.hymn_no),
+      ...(hasSongColumn(song, "praise_types") ? { praise_types: aggregatePraiseTypes } : {}),
+      memo: serializeSongMemo(song, {
+        omitPromotedMetadata: hasPromotedColumns,
+        omitScripture: hasScriptureRefsColumn,
+        omitVersions: useVersionTables,
+        omitRelatedSongs: useRelationTable,
+      }),
+    };
 
-  if (useVersionTables && state.dirty.forms) {
-    try {
-      await saveSongVersions(song, { detached: true });
-    } catch (error) {
-      if (!isUnavailableRelationError(error)) throw error;
-      console.warn("Fell back to memo-backed song versions.", error);
-      state.songVersionTablesSupported = false;
-      useVersionTables = false;
+    if (hasPromotedColumns) {
+      Object.assign(payload, promotedSongMetadataPayload(song, metadata));
     }
+
+    if (hasScriptureRefsColumn) {
+      payload.scripture_refs = normalizeSongScriptureRefs(song.scripture);
+    }
+
+
+    // Editing lyrics must not erase import provenance or media source metadata.
+    for (const row of plan.units || []) {
+      const original = result.data.units.find(unit => unit.id === row.id);
+      if (original) for (const key of ['source_unit_id','trigger','slide_numbers','review_note']) {
+        if (Object.prototype.hasOwnProperty.call(original,key)) row[key]=original[key];
+      }
+    }
+    req = {protocolVersion:1,requestId:createUuid(),songId:song.id,expected:result.data,songPatch:payload,...plan,
+      ...(useRelationTable ? {relatedIds:cleanList(song.related_song_ids).filter(id=>id!==song.id)} : {})};
+    if (client !== state.client || project !== state.config.url) throw new Error("연결이 변경되어 저장하지 않았습니다. 입력은 유지됩니다.");
+    praisePendingSaves.set(liveSong,{client,project,req,before,formsBefore,selectedVersionId,draft:song});
   }
-  const useRelationTable = await saveSongRelationsIfAvailable(song);
-
-  const payload = {
-    title: cleanSongTitleForSave(song),
-    subtitle: nullIfBlank(song.subtitle),
-    original_title: nullIfBlank(song.original_title),
-    hymn_no: nullIfBlank(song.hymn_no),
-    ...(hasSongColumn(song, "praise_types") ? { praise_types: aggregatePraiseTypes } : {}),
-    memo: serializeSongMemo(song, {
-      omitPromotedMetadata: hasPromotedColumns,
-      omitScripture: hasScriptureRefsColumn,
-      omitVersions: useVersionTables,
-      omitRelatedSongs: useRelationTable,
-    }),
-  };
-
-  if (hasPromotedColumns) {
-    Object.assign(payload, promotedSongMetadataPayload(song, metadata));
+  // Keep exactly the same request after an unknown outcome (e.g. lost response).
+  // No fallback to non-transactional table writes if the RPC is unavailable.
+  const result = await client.rpc('save_praise_v1', {req});
+  if (result.error) {
+    if (result.error.code === 'P0001' || result.error.code === '23505' || result.error.code === '23503') praisePendingSaves.delete(liveSong);
+    throw new Error(result.error.message?.includes('PRAISE_CONFLICT')
+      ? "다른 곳에서 이 곡이 변경되어 저장을 중단했습니다. 내 입력은 유지됩니다."
+      : "저장을 확인하지 못했습니다. 입력은 유지됩니다. 연결 후 다시 저장하면 결과를 확인합니다.", {cause:result.error});
   }
-
-  if (hasScriptureRefsColumn) {
-    payload.scripture_refs = normalizeSongScriptureRefs(song.scripture);
-  }
-
-  let songUpdate = state.client.from("mindex_songs").update(payload).eq("id", song.id);
-  songUpdate = song.memo == null ? songUpdate.is("memo", null) : songUpdate.eq("memo", song.memo);
-  const { data, error } = await songUpdate.select("*").single();
-
-  if (error) throw error;
-
-  const versions = song.versions || [];
-  Object.assign(song, normalizeServerSong(data));
-  clearSearchCaches();
-  if (useVersionTables) {
-    song.versions = normalizeSongVersions(song, versions);
-    song._memoHasVersions = false;
-  }
+  const saved = praiseSnapshotSong(result.data?.snapshot);
+  praisePendingSaves.delete(liveSong);
   if (client !== state.client || project !== state.config.url) return false;
-  if(typeof rememberRecentEdit === "function") rememberRecentEdit({module:"praise",selectedSongId:data.id,selectedVersionId},data.title);
   const unchanged = JSON.stringify(liveSong) === JSON.stringify(before) && JSON.stringify(state.forms) === formsBefore;
-  const merged = mergeEditorDraft(before, liveSong, song).value;
-  // memo is the confirmed CAS baseline, not an editable field.
-  merged.memo = song.memo;
+  const merged = mergeEditorDraft(before, liveSong, saved).value;
+  merged.memo = saved.memo;
   Object.assign(liveSong, merged);
   if (getSelectedSong() === liveSong) {
-    const savedVersion = song.versions?.find(version => version.id === selectedVersionId);
-    if (savedVersion) state.cleanFingerprints.praise = JSON.stringify(dirtyComparableValue({song, versionId: selectedVersionId || "", forms: savedVersion.forms || []}));
+    const savedVersion = saved.versions?.find(version => version.id === selectedVersionId);
+    if (savedVersion) state.cleanFingerprints.praise = JSON.stringify(dirtyComparableValue({song:saved,versionId:selectedVersionId||"",forms:savedVersion.forms||[]}));
   }
-  if (!unchanged && getSelectedSong() === liveSong) { state.dirty.song = true; state.dirty.forms = true; }
+  if (!unchanged && getSelectedSong() === liveSong) {state.dirty.song=true;state.dirty.forms=true;}
+  clearSearchCaches();
   return unchanged;
 }
 
-async function saveSongVersions(song, { detached = false } = {}) {
+async function saveSongVersions(song, { detached = false, planOnly = false } = {}) {
   if (!song?.id || !state.client) return;
 
-  const canonicalSongId = await ensureCanonicalSongRow(song);
+  const canonicalSongId = await ensureCanonicalSongRow(song, {planOnly});
   if (!state.songVersionPraiseTypesSupported) {
     state.songVersionPraiseTypesSupported = await detectSongVersionPraiseTypesSupport();
   }
@@ -8250,6 +8287,7 @@ async function saveSongVersions(song, { detached = false } = {}) {
   const existingVersionIds = existingVersions.map((version) => version.id);
   assignUniqueVersionLyricSignatures(versionRows, existingCanonicalVersions);
 
+  if (!planOnly) {
   const { error: versionError } = await state.client
     .from("mindex_song_versions")
     .upsert(versionRows, { onConflict: "id" });
@@ -8265,6 +8303,8 @@ async function saveSongVersions(song, { detached = false } = {}) {
       .in("id", deletedVersionIds)
       .eq("source_song_id", song.id);
     if (deleteError) throw deleteError;
+  }
+
   }
 
   const unitRows = [];
@@ -8297,6 +8337,12 @@ async function saveSongVersions(song, { detached = false } = {}) {
   }
 
   const existingUnits = await fetchExistingVersionUnits(versionIds);
+  if (planOnly) {
+    const retained = new Set(unitRows.map(row=>row.id));
+    return {versions:versionRows,units:unitRows,deleteVersionIds:deletedVersionIds,
+      deleteUnitIds:existingUnits.filter(row=>!retained.has(row.id)).map(row=>row.id),
+      canonicalRows:song._pendingCanonicalRow ? [song._pendingCanonicalRow] : []};
+  }
   await reserveExistingVersionUnitOrders(existingUnits);
   if (unitRows.length) {
     const { error: unitError } = await state.client
@@ -8321,7 +8367,7 @@ async function saveSongVersions(song, { detached = false } = {}) {
   }
 }
 
-async function ensureCanonicalSongRow(song) {
+async function ensureCanonicalSongRow(song, {planOnly = false} = {}) {
   const title = cleanSongTitleForSave(song) || "제목 없는 찬양";
   const normalizedTitle = await resolveCanonicalNormalizedTitle(song, title);
   const payload = {
@@ -8339,6 +8385,8 @@ async function ensureCanonicalSongRow(song) {
     song._canonicalSongId = existing.id;
     return existing.id;
   }
+
+  if (planOnly) { song._pendingCanonicalRow=payload; return song.id; }
 
   const { data, error } = await state.client
     .from("mindex_canonical_songs")
@@ -19155,6 +19203,10 @@ function normalizeRelationalVersion(row, index) {
     version_label: row.version_label || null,
     raw_section_name: row.raw_section_name || null,
     hymn_no: row.hymn_no || null,
+    subtitle: row.subtitle || null,
+    original_title: row.original_title || null,
+    deck_key: row.deck_key || null,
+    source_count: Number(row.source_count) || 1,
     is_primary: Boolean(row.is_primary),
     praise_types: normalizePraiseTypes(row.praise_types),
     source_song_id: row.source_song_id || null,
@@ -31857,7 +31909,7 @@ function presenterBoardSlideBlocks(entries = []) {
     if (presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.SCRIPTURE_TEXT) {
       label = [slide.referenceBook, slide.referenceRange].filter(Boolean).join(" ") || slide.title || "본문";
       key = JSON.stringify([owner, "scripture", label, slide.translationLabel || ""]);
-    } else if (presenterSlideSupportsFormGrouping(slide) && (entry.controllerFormKey || slide.formKey)
+    } else if (presenterSlideSupportsFormGrouping(slide, entry.controllerFormLabel || presenterFormGroupLabel(slide)) && (entry.controllerFormKey || slide.formKey)
         && (entry.controllerFormLabel || presenterFormGroupLabel(slide))) {
       label = entry.controllerFormLabel || presenterFormGroupLabel(slide) || "송폼";
       key = JSON.stringify([owner, "form", entry.controllerFormKey || slide.formKey]);
@@ -31936,8 +31988,9 @@ function annotatePresenterFormStarts(entries = [], initialPreviousKey = "") {
     if (score && slide.formKey) { scoreKey = slide.formKey; scoreLabel = presenterFormGroupLabel(slide); }
     previousOwner = owner;
     const controllerFormKey = score ? scoreKey : slide.formKey;
-    const controllerFormLabel = score ? scoreLabel : presenterFormGroupLabel(slide);
-    const formSlide = presenterSlideSupportsFormGrouping(slide) && (!score || (controllerFormKey && controllerFormLabel));
+    const controllerFormLabel = score ? scoreLabel : presenterFormGroupLabel(slide)
+      || (controllerFormKey && previousKey === `${owner}:form:${controllerFormKey}` ? currentFormLabel : "");
+    const formSlide = presenterSlideSupportsFormGrouping(slide, controllerFormLabel) && (!score || (controllerFormKey && controllerFormLabel));
     const key = formSlide ? `${owner}:form:${controllerFormKey || slideIndex}` : "";
     const startsForm = Boolean(formSlide && key !== previousKey);
     if (startsForm) currentFormLabel = controllerFormLabel;
@@ -31953,12 +32006,12 @@ function annotatePresenterFormStarts(entries = [], initialPreviousKey = "") {
   return { entries: annotatedEntries, lastKey: previousKey };
 }
 
-function presenterSlideSupportsFormGrouping(slide) {
+function presenterSlideSupportsFormGrouping(slide, formLabel = presenterFormGroupLabel(slide)) {
   if (!slide) return false;
   if (normalizePresenterFormPresetLabel(slide.formLabel).type === "title" && String(slide.formKey || "").startsWith("title:")) return true;
   const praiseLowerBar = presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE
     && presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT;
-  if (praiseLowerBar && presenterFormGroupLabel(slide)) return true;
+  if (praiseLowerBar && formLabel) return true;
   const sourceType = String(slide.sourceType || slide.componentType || "").trim().toLowerCase();
   return sourceType === "score";
 }
