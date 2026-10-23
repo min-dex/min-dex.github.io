@@ -82,6 +82,7 @@ SMOKES = (
     "smoke_remote_adapter.py",
     "smoke_remote_video.py",
     "smoke_reference_validation.py",
+    "smoke_praise_atomic_save.py",
     "smoke_presenter_freshness.py",
     "smoke_shell_icons.py",
     "smoke_praise_progressive_loading.py",

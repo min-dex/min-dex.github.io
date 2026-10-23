@@ -1340,3 +1340,12 @@ Chromium/WebKit 각각 전체1203판본과 기존 예배 참조350개의 출력 
 최종 같은 구절 줄바꿈 불일치0, 절별 대응 페이지 한/두 줄 불일치0, 같은 가사의 새/통일 슬라이드 경계 불일치0. Chromium/WebKit 전체1203판본 및 기존 예배 참조350개의 출력 문구/순서 보존과3해상도 넘침0 확인. 고요한 밤·하나님의 크신 사랑·하나님의 나팔 소리의 실제 비교 UI도 로컬 후보로 캡처했다. 운영 쓰기0, 배포 없음.
 
 최신 적용 후보는 backups/20261023-hymn-line-review/{plan,expected,candidate-ledger}.json. 이전 independent-amen 폴더 후보는 이 기록으로 대체한다. 공개 대장/runtime은 운영 적용/readback 전까지 그대로 유지한다. 배포 조율의 main push 대기는 해제됐지만 이번 턴에는 push/배포하지 않았다. 증빙: docs/hymn-line-consistency-staged-20261023.json.
+
+## 2026-10-23 찬양 동시 편집·저장 중단 보완 후보 (미배포)
+
+`docs/content-realtime.md`의 찬양 편집 원자 저장 후보 참조.
+기존 곡 저장의 부분 반영/동시 덮어쓰기 위험을 재현하고 앱+additive SQL 후보 작성.
+임시 PostgreSQL18.4 동시 연결/취소/RLS rollback 및 Chromium/WebKit 검증.
+운영 DB 쓰기0. **서버 함수 적용/운영 호환성 확인 전 앱 배포 금지.**
+신규 곡 생성/빈 곡 삭제 경로는 별도 범위이며 구버전 앱의 직접 쓰기는 그대로다.
+작업 폴더: `/Users/parkjihun/.codex/worktrees/presenter-focus-release/Mindex`.

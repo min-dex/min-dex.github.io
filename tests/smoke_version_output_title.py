@@ -51,7 +51,10 @@ def main():
       const song=state.songs[0];state.songVersionTablesSupported=true;state.dirty.forms=false;
       saveSongRelationsIfAvailable=async()=>false;
       const writes=[];
-      state.client={from(table){if(table!=='mindex_songs')throw Error('unexpected table '+table);let payload;const q={update(p){payload=p;return q},eq(){return q},is(){return q},select(){return q},async single(){writes.push(payload);return {data:{id:song.id,...payload},error:null}}};return q}};
+      state.cleanFingerprints.praise=JSON.stringify({song});
+      const baseSong=structuredClone(song);praiseSnapshotSong=s=>s.song;praiseSaveComparable=s=>JSON.stringify(s);
+      state.client={async rpc(name,{req}){if(name==='get_praise_snapshot_v1')return {data:{song:baseSong}};
+        writes.push(req.songPatch);return {data:{snapshot:{song:{...song,...req.songPatch}}}}}};
       const versions=JSON.stringify(song.versions);
       await saveSongMeta(song);
       if(writes.length!==1 || JSON.parse(writes[0].memo).versionOutputTitles.en!=='Updated title')throw Error('save path');

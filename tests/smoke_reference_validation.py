@@ -55,7 +55,12 @@ try:
     const song={id:'fixture',title:'fixture',memo:null,scripture:['요 3:16; 오류'],scripture_refs:[],versions:[],metadata:{}};
     state.songVersionTablesSupported=true;state.dirty.forms=false;saveSongRelationsIfAvailable=async()=>false;
     await fails(()=>saveSongMeta(song),'오류');check(song.scripture[0]==='요 3:16; 오류','song draft lost');
-    let payload;state.client={from(table){if(table==='mindex_bible_verses')return beforeClient.from(table);check(table==='mindex_songs','unexpected write');const q={update(v){writes++;payload=v;return q},eq(){return q},is(){return q},select(){return q},async single(){return {data:{id:song.id,...payload}}}};return q}};
+    let payload;state.cleanFingerprints.praise=JSON.stringify({song});
+    const baseSong=structuredClone(song);praiseSnapshotSong=s=>s.song;praiseSaveComparable=s=>JSON.stringify(s);
+    state.client={from:table=>beforeClient.from(table),async rpc(name,{req}){
+      if(name==='get_praise_snapshot_v1')return {data:{song:baseSong}};
+      writes++;payload=req.songPatch;return {data:{snapshot:{song:{...song,...payload,scripture:payload.scripture_refs}}}};
+    }};
     song.scripture=[mixed];await saveSongMeta(song);check(writes===1&&song.scripture.length===3,'save/reopen');
     check(song.scripture[1]==='요한복음 3:18–20','normalized reopen');
     document.body.innerHTML=renderInput('성구','scripture','요3:16; 오류');
