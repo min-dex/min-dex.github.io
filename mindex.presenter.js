@@ -338,6 +338,25 @@ function presenterScoreSlidesForServiceItem(
     : { ...fileSlide, sort: index + position / 100 });
 }
 
+function presenterScoreImageSourcesFromAsset(asset, song = null, version = null, displayText = "") {
+  const explicitSources = [
+    ...normalizeServiceAssetSlides(asset?.slides),
+    ...normalizeServiceAssetSlides(asset?.images),
+    ...normalizeServiceAssetSlides(asset?.urls),
+    ...presenterImageSourcesFromAssetUrl(asset?.url),
+  ];
+  const sources = explicitSources.length ? explicitSources : presenterHymnScoreAssetSlides(song, version, displayText);
+  return sources
+    .map((slide, slideIndex) => ({
+      url: normalizePresenterMediaSource(slide.url),
+      name: String(slide.name || "").trim(),
+      formLabel: presenterScoreFormLabelFromAssetSlide(slide),
+      formKey: String(slide.formKey || slide.form_key || slide.scoreFormKey || slide.score_form_key || "").trim(),
+      order: Number(slide.order) || slideIndex + 1,
+    }))
+    .filter((slide) => slide.url && presenterMediaSourceIsImage(slide.url));
+}
+
 function presenterScoreImageSlidesFromAsset(
   asset,
   item,
@@ -351,22 +370,7 @@ function presenterScoreImageSlidesFromAsset(
   forms = [],
   formWarnings = [],
 ) {
-  const explicitSources = [
-    ...normalizeServiceAssetSlides(asset?.slides),
-    ...normalizeServiceAssetSlides(asset?.images),
-    ...normalizeServiceAssetSlides(asset?.urls),
-    ...presenterImageSourcesFromAssetUrl(asset?.url),
-  ];
-  const sources = explicitSources.length ? explicitSources : presenterHymnScoreAssetSlides(song, version, displayText);
-  const imageSources = sources
-    .map((slide, slideIndex) => ({
-      url: normalizePresenterMediaSource(slide.url),
-      name: String(slide.name || "").trim(),
-      formLabel: presenterScoreFormLabelFromAssetSlide(slide),
-      formKey: String(slide.formKey || slide.form_key || slide.scoreFormKey || slide.score_form_key || "").trim(),
-      order: Number(slide.order) || slideIndex + 1,
-    }))
-    .filter((slide) => slide.url && presenterMediaSourceIsImage(slide.url));
+  const imageSources = presenterScoreImageSourcesFromAsset(asset, song, version, displayText);
   const count = imageSources.length;
   if (!count) return [];
   const scoreForms = presenterScoreFormsFromImageSources(imageSources);
@@ -514,7 +518,7 @@ function presenterScoreImageSourcesForFormSequence(imageSources = [], scoreForms
     return {
       imageSources: [
         ...planTargets.slice(0, first).map(() => ({ _presenterTitle: true })),
-        ...imageSources.map(source => ambiguous ? { ...source, titleSequenceWarning: "악보 송폼 표시가 없어 중간 Title 위치를 확인할 수 없습니다." } : source),
+        ...imageSources.map(source => ambiguous ? { ...source, titleSequenceWarning: "악보 송폼 표시가 없어 중간 T 위치를 확인할 수 없습니다." } : source),
         ...planTargets.slice(last + 1).map(() => ({ _presenterTitle: true })),
       ], scoreForms: [],
     };
@@ -579,9 +583,9 @@ function presenterDefaultTitleForServiceItem(item = {}, song = null, version = n
 
 function presenterFormPresetWithDefaultTitle(preset, item, song, version, options = {}) {
   const forms = normalizeServiceFormPresetForms(preset?.forms || []);
-  if (preset?.titleSequence || forms.includes("Title")) return { ...preset, forms, titleSequence: true };
+  if (preset?.titleSequence || forms.includes("T")) return { ...preset, forms, titleSequence: true };
   if (!presenterDefaultTitleForServiceItem(item, song, version, options)) return preset;
-  return { ...preset, forms: ["Title", ...forms], hint: ["Title", ...forms].join("-"), titleSequence: true, defaultTitle: true };
+  return { ...preset, forms: ["T", ...forms], hint: ["T", ...forms].join("-"), titleSequence: true, defaultTitle: true };
 }
 
 function presenterScoreFormSequence(item = {}, song = null, version = null) {
@@ -685,8 +689,8 @@ function presenterFormPlanForServiceItem(version = {}, item, song = null) {
   const preset = presenterServiceItemFormPreset(version, item, song);
   const effectivePreset = presenterFormPresetWithAvailableForms(preset, forms);
   if (!effectivePreset?.forms?.length) return { forms: presenterHymnOnceOnlyIntro(forms, version), warnings: [] };
-  if (effectivePreset.defaultTitle && effectivePreset.forms.every(label => label === "Title")) {
-    return { forms: [findPresenterFormForPresetLabel([], "Title"), ...presenterHymnOnceOnlyIntro(forms, version)], warnings: [] };
+  if (effectivePreset.defaultTitle && effectivePreset.forms.every(label => label === "T")) {
+    return { forms: [findPresenterFormForPresetLabel([], "T"), ...presenterHymnOnceOnlyIntro(forms, version)], warnings: [] };
   }
   const resolved = resolvePresenterFormPresetSequence(forms, effectivePreset);
   const warnings = presenterMissingFormWarnings(resolved.missing, forms, effectivePreset);
@@ -1090,7 +1094,7 @@ function resolvePresenterLyricsFormPresetSequence(forms = [], presetForms = [], 
     const target = normalizePresenterFormPresetLabel(label);
     if (!target.key) return;
     if (target.type === "title") {
-      items.push(findPresenterFormForPresetLabel([], "Title"));
+      items.push(findPresenterFormForPresetLabel([], "T"));
       return;
     }
     if (target.blank) {
@@ -1156,7 +1160,7 @@ function presenterFormPartTypeForPresetTarget(target = {}) {
 function findPresenterFormForPresetLabel(forms = [], label = "") {
   const target = normalizePresenterFormPresetLabel(label);
   if (!target.key) return null;
-  if (target.type === "title") return { _presenterTitle: true, id: "preset-title", label: "Title", lyrics: "" };
+  if (target.type === "title") return { _presenterTitle: true, id: "preset-title", label: "T", lyrics: "" };
   if (target.blank) return presenterBlankFormPresetItem(label, target);
   if (target.type === "tag") {
     const chorus = findPresenterFormForPresetTarget(forms, { key: "chorus", type: "chorus" });
@@ -1276,7 +1280,7 @@ function presenterFormDisplayLabel(form = {}) {
 function normalizePresenterFormPresetLabel(value = "") {
   const raw = canonicalServiceFormToken(value);
   const compact = compactSearchValue(raw);
-  if (raw === "Title") return { key: "title", type: "title", number: 0 };
+  if (raw === "T") return { key: "title", type: "title", number: 0 };
   const lastVerse = /^(vl|마지막절|lastverse|last)$/i.test(compact);
   if (lastVerse) return { key: "last-verse", type: "verse", number: 0, lastVerse: true };
   const hymnVerse = raw.match(/^(\d+)\s*절$/u);
@@ -1384,7 +1388,7 @@ function presenterFormPresetDisplayLabel(value = "") {
   const target = normalizePresenterFormPresetLabel(raw);
   const group = String(target.group || "").trim().toUpperCase();
   const suffix = target.variant ? `${target.number ? ` ${target.number}` : ""} @${group ? ` ${group}` : ""}` : target.number ? ` ${target.number}${group ? ` ${group}` : ""}` : group ? ` ${group}` : "";
-  if (target.type === "title") return "Title";
+  if (target.type === "title") return "T";
   if (target.lastVerse) return "Last Verse";
   if (target.type === "verse") return `Verse${suffix}`;
   if (target.type === "chorus") return `Chorus${suffix}`;
@@ -2186,7 +2190,7 @@ function buildPresenterCustomSlides(item, section, index) {
     };
   }).filter((slide) => slide.type === "blank" || String(slide.text || "").trim());
   const preset = presenterServiceItemFormPreset({}, item);
-  if (songLikeItem && preset?.defaultTitle && preset.forms.every(label => label === "Title")) {
+  if (songLikeItem && preset?.defaultTitle && preset.forms.every(label => label === "T")) {
     return [presenterSequenceTitleSlide(item, section, null, null, serviceItemDisplayText(item), index, 0), ...lyricSlides];
   }
   if (songLikeItem && preset?.titleSequence && preset.forms?.length) {
@@ -2411,7 +2415,7 @@ function isScriptureBodyServiceItem(item) {
 
 function presenterSlidesWithSongContentHeading(item, section, song, version, displayText, index, slides = []) {
   const heading = presenterSongTitleSectionHeading(item, section);
-  if (!heading || !slides.length || isServiceConnectedPraiseSecondaryItem(item) || slides.some(slide => slide.formLabel === "Title" || (slide.orderTitle === heading && slide.contentTitle))) return slides;
+  if (!heading || !slides.length || isServiceConnectedPraiseSecondaryItem(item) || slides.some(slide => normalizePresenterFormPresetLabel(slide.formLabel).type === "title" || (slide.orderTitle === heading && slide.contentTitle))) return slides;
   const content = presenterSongTitleDisplayTitle(song, version, displayText);
   if (!content) return slides;
   return [presenterOrderContentTitleSlide(item, section, index, heading, content), ...slides];
@@ -2438,7 +2442,7 @@ function presenterSongTitleSlide(item, section, song, version, displayText, inde
     elementType: PRESENTER_ELEMENT_TYPES.PRAISE,
     layout: PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT,
     type: "song-title",
-    formKey: "title:0", formLabel: "Title",
+    formKey: "title:0", formLabel: "T",
     label: item.label || "",
     title: displayTitle,
     subtitle: connectedTitle ? "" : versionDisplayName(song, version),
@@ -6187,7 +6191,8 @@ function presenterProgressionPlan(item, slides = []) {
     if (!slide.formKey) continue;
     let group = groups.at(-1);
     if (group?.key !== slide.formKey) {
-      group = { key: slide.formKey, label: slide.formLabel || slide.marker || slide.title || "구간", lastSlideId: slide.id };
+      const label = slide.formLabel || slide.marker || slide.title || "구간";
+      group = { key: slide.formKey, label: normalizePresenterFormPresetLabel(label).type === "title" ? "T" : label, lastSlideId: slide.id };
       groups.push(group);
     }
     group.lastSlideId = slide.id;
@@ -6383,7 +6388,7 @@ function presenterSequenceTitleSlide(item, section, song, version, displayText, 
   return {
     ...presenterSongTitleSlide(item, section, song, version, displayText, index),
     id: `${item.id || index}:sequence-title:${sequenceIndex}`,
-    formKey: `title:${sequenceIndex}`, formLabel: "Title", marker: "Title",
+    formKey: `title:${sequenceIndex}`, formLabel: "T", marker: "T",
     sort: index + sequenceIndex / 100,
   };
 }

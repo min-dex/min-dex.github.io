@@ -1356,3 +1356,13 @@ Chromium/WebKit 각각 전체1203판본과 기존 예배 참조350개의 출력 
 ## 2026-10-23 송폼별 컨트롤러 묶음 색
 
 `codex/form-group-colors`: 순서별 색 순환을 Verse 적색/Pre-Chorus 녹색/Chorus 청색/Bridge 청록/Coda 자홍/Tag·Tags 황색으로 교체. 성경은 요소·섹션을 넘어 밝은/어두운 회색 교대. Title·간주는 박스 없음 유지, 미분류 가사는 중립 회색. 반복·절·A/B 박스 경계와 기존 클릭·송출 순서 보존. Chromium/WebKit 양 테마·3폭 실제 렌더와 미래 예배14유형138항목 표시 회귀 확인. 운영 쓰기 없음.
+
+
+## 2026-10-23 찬양 원자 저장 서버 적용
+
+사용자 승인으로 get_praise_snapshot_v1/save_praise_v1 및 공유 잠금 트리거 적용.
+기존 RLS/테이블 권한 유지, SECURITY INVOKER. 6개 테이블 적용 전후 행 해시 동일:
+곡1142, 버전1731, 가사6751, 관계6, canonical1163, 예배요소2495.
+실제 anon/authenticated 저장·동일 요청 replay·CAS 거절·음원 보존 검사 통과,
+검증 변경 전체 rollback 후 동일성 확인. 서버 적용 전 금지 조건은 해소됐다.
+앱 출시는 별도 GitHub 전체 gate/Pages/public readback으로 확인한다.

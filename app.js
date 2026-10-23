@@ -23664,12 +23664,20 @@ function serviceItemEffectiveFormHint(item = {}) {
 }
 
 function serviceItemDefaultFormHint(item = {}) {
+  const memo = parseServiceItemMemo(item.memo);
   const song = serviceItemLinkedSong(item);
   const version = serviceItemLinkedVersion(item, song);
-  const score = serviceItemOutputMode(item) === "score";
+  const score = presenterServiceItemUsesScoreInputMode(item, memo) || serviceItemOutputMode(item, memo) === "score";
   const preset = score ? presenterScoreFormSequence(item, song, version)
     : presenterServiceItemFormPreset(version || {}, item, song);
-  return serviceFormPresetSummary(preset);
+  if (!score || preset.forms?.some(label => normalizePresenterFormPresetLabel(label).type !== "title")) {
+    return serviceFormPresetSummary(preset);
+  }
+  const asset = normalizeServiceAsset(memo.asset || item.asset);
+  const sources = presenterScoreImageSourcesFromAsset(asset, song, version, serviceItemDisplayText(item));
+  const labels = sources.map(presenterScoreFormLabelFromAssetSlide).filter(Boolean)
+    .map(canonicalServiceFormToken).filter((label, index, all) => index === 0 || label !== all[index - 1]);
+  return labels.length ? normalizeServiceFormHint([...(preset.forms || []), ...labels]) : serviceFormPresetSummary(preset);
 }
 
 function serviceFormPresetSummary(preset) {
@@ -28102,6 +28110,9 @@ function stripHymnNo(raw) {
 
 function isMainPraiseServiceItem(item, options = {}) {
   const sectionKey = String(item?._worshipSectionKey || "").trim();
+  if (sectionKey.startsWith("source-")) {
+    return isMainPraiseLabel(item?._worshipSectionTitle || sectionKey.slice("source-".length));
+  }
   if (sectionKey) return sectionKey === "praise";
   const label = String(item?.label || "").trim();
   if (isMainPraiseLabel(label)) return true;
@@ -31996,7 +32007,7 @@ function annotatePresenterFormStarts(entries = [], initialPreviousKey = "") {
 
 function presenterSlideSupportsFormGrouping(slide) {
   if (!slide) return false;
-  if (slide.formLabel === "Title" && String(slide.formKey || "").startsWith("title:")) return true;
+  if (normalizePresenterFormPresetLabel(slide.formLabel).type === "title" && String(slide.formKey || "").startsWith("title:")) return true;
   const praiseLowerBar = presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE
     && presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT;
   if (praiseLowerBar && presenterFormGroupLabel(slide)) return true;
