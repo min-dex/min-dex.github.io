@@ -1700,6 +1700,8 @@ span.presenter-announcement-paren,
 
 /* Typography belongs to the reusable service artwork, not the church preset. */
 .presenter-slide--service-design {
+  --presenter-output-fg: var(--service-design-foreground);
+  --presenter-output-bg: var(--service-design-background);
   --presenter-font-family: "Mindex Service Display", "Mindex Service Serif", serif;
   --presenter-reading-font-family: "Mindex Service Serif", serif;
   --presenter-scripture-font: var(--presenter-font-family);
