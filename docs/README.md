@@ -151,3 +151,5 @@ records above for the retained repair evidence and Git reference.
 - 2026-10-23 [전곡 찬송가 슬라이드 후보 검증](hymn-slide-balance-completion-staged-20261023.json): 전체1203판본, 연결481곡군; 수정 후보440판본·1623단위. 운영 DB 미적용·묶음 배포 대기. 이전293판본 후보를 대체.
 
 - [독립 아멘 유형 통일 후보](independent-amen-types-staged-20261023.json): 통551·553·556만 Lyrics로 통일, 기존 Coda 송폼 호환 검증. 최신 묶음443판본·1626단위, 미적용·미배포.
+
+- [찬송가 악구 줄바꿈 전곡 재검토](hymn-line-consistency-staged-20261023.json): 고요한 밤부터 새·통일/절 사이 대응 줄바꿈 교정. 최신 묶음445판본·1643단위, 미적용·미배포.
