@@ -3989,6 +3989,29 @@ versions, form sequence, persistence or output behavior change. Chromium/WebKit
 actual-renderer checks cover DB shortcut variants,360–1500px, both themes,
 long forms, medley action retention and unsaved text/focus through resizing.
 
+## Shared fullscreen foreground contrast ·2026-10-23
+
+Supersedes the department-wide children brown foreground. Fullscreen still
+artwork uses white by default; switch to #332211 only when white's median
+contrast over the central artwork region is below3:1. The rule depends on image
+luminance, never service type, month or a hand-selected filename palette. Text,
+blank cross and monochrome ready/waiting logos share the foreground. Explicit
+service-design foreground choices remain authored overrides.
+
+Bundled original PNGs have generated median-luminance metadata (64×36 sampling,
+central x5–58/y4–31), shared with their WebP previews. This avoids downloading
+full PNGs merely to color controller thumbnails. Rebuild/check with
+`tools/build_background_luminance.py [--check]`. Other decoded images use the
+same cached sampling rule; unreadable cross-origin images retain white. Cache
+uses the existing bounded image-preload records; stale image completions never
+recolor a root now showing another source. Dynamic video retains white.
+
+Reading frames without service artwork, blackout and chromakey do not acquire
+a brown foreground. Community-confession markers alone keep original colors,
+50% coverage,4-stage-pixel side padding and #332211 text on the marker. This
+semantic rule is fullscreen-only, independent of department; third-service
+chromakey retains its original colored words. Other colored copy is not marked.
+
 ## Remote and music entry placement · 2026-10-23
 
 Basic presenter puts 원격 조작 and 음악 관리 in the third equal-width row of
