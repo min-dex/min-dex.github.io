@@ -24,13 +24,13 @@ for (const name of ['normalizeServiceFormPreset','canonicalServiceFormToken','no
   assert.doesNotMatch(app, new RegExp(`^function ${name}\\(`, 'm'));
 }
 const plain = value => JSON.parse(JSON.stringify(value));
-const canonical = 'V1-C-V2-C-Int-VL-C-Coda';
+const canonical = 'T-V1-C-V2-C-Int-VL-C-Coda';
 assert.equal(context.normalizeServiceFormHint(canonical), canonical);
 assert.equal(context.normalizeServiceFormHint('V1-C1-V1-C1'), 'V1-C1-V1-C1');
 assert.equal(context.normalizeServiceFormHint('V1-V2-C1-C2'), 'V1-V2-C1-C2');
 assert.equal(context.normalizeServiceFormHint('V1@A-V1@-C1A'), 'V1@A-V1@-C1A');
 assert.equal(context.normalizeServiceFormHint('Custom-C-C'), 'Custom-C-C');
-for (const forms of [['1절','2절','간주','마지막 절'],['1절','후렴','2절','후렴','간주','마지막 절','후렴']]) {
+for (const forms of [['1절','2절','간주','마지막 절'],['1절','후렴','2절','후렴','간주','마지막 절','후렴'],['V1','C','V2','C','Int','VL','C','Coda']]) {
   const preset = {forms, hint:forms.join('-')};
   const before = JSON.stringify(preset);
   const upgraded = context.normalizeServiceFormPresetRulePreset(preset, {songType:'hymn'});

@@ -3197,6 +3197,7 @@ def main() -> int:
                             });
                             state.songs = [song, hymnSong];
                             const metadataValue = serviceItemEffectiveFormHint(item);
+                            const metadataPlaceholder = serviceItemDefaultFormHint(item);
                             const inputHtml = renderServiceFormHintInput(item, 0, { compact: true, placeholder: '송폼' });
                             const hymnInputHtml = renderServiceFormHintInput(hymnItem, 0, { compact: true, placeholder: '송폼' });
                             const disabledMemo = serializeServiceItemMemo({ ...parseServiceItemMemo(item.memo), formHint: '', formPreset: null, formPresetDisabled: true });
@@ -3260,6 +3261,7 @@ def main() -> int:
                               forms: parsed.formPreset?.forms || [],
                               strength: parsed.formPreset?.strength || '',
                               metadataValue,
+                              metadataPlaceholder,
                               explicitSequenceValue: serviceFormPresetSummary(explicitSequence),
                               explicitSequenceForms: explicitSequence.forms || [],
                               legacyAugmentedSequenceValue: serviceFormPresetSummary(legacyAugmentedSequence),
@@ -4140,8 +4142,8 @@ def main() -> int:
                             "sectionTitle": "특송",
                             "elementLabel": "특송",
                             "when": {"songType": "hymn"},
-                            "forms": ["V1", "C", "V2", "C", "Int", "VL", "C", "Coda"],
-                            "hint": "V1-C-V2-C-Int-VL-C-Coda",
+                            "forms": ["T", "V1", "C", "V2", "C", "Int", "VL", "C", "Coda"],
+                            "hint": "T-V1-C-V2-C-Int-VL-C-Coda",
                             "strength": "default",
                         }
                         and template_terms["sundayPublicScaffold"]["first"]["titles"][:4] == ["준비", "신앙고백", "찬양", "참회기도"]
@@ -4421,13 +4423,14 @@ def main() -> int:
                             "formHint": "V2-C",
                             "forms": ["V2", "C"],
                             "strength": "manual",
-                            "metadataValue": "V1-V2-C-B-Coda",
+                            "metadataValue": "",
                             "explicitSequenceValue": "V-C-V-C-B-C-Coda",
                             "explicitSequenceForms": ["V", "C", "V", "C", "B", "C", "Coda"],
                             "legacyAugmentedSequenceValue": "V-C-V-C-B-C-Coda",
                             "legacyAugmentedSequenceForms": ["V", "C", "V", "C", "B", "C", "Coda"],
-                            "inputValue": "V1-V2-C-B-Coda",
-                            "hymnInputValue": "V1-C-V2-C-Int-VL-C-Coda",
+                            "inputValue": "",
+                            "metadataPlaceholder": "V1-V2-C-B-Coda",
+                            "hymnInputValue": "T-V1-C-V2-C-Int-VL-C-Coda",
                             "disabledMemoKeepsOverride": True,
                             "disabledValue": "",
                             "savedOverride": True,
