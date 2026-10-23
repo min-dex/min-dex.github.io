@@ -33,8 +33,8 @@
     const coda = record.parts.filter(part => part.kind === 'Coda').flatMap(part => part.approxMeasuresByBlock || []);
     const unmeasured = record.parts.some(part => !part.approxMeasuresByBlock && part.blockCount > 0);
     const labels = [];
-    if (body.length) labels.push(`슬라이드당 약 ${range(body)}마디`);
-    if (coda.length) labels.push(`아멘·Coda 별도 · 약 ${range(coda)}마디`);
+    const displayed = body.length ? body : coda;
+    if (displayed.length) labels.push(`approx. ${range(displayed)} bars`);
     if (unmeasured) labels.push('일부 구간 미확인');
     return {status:'measured',text:labels.join(' / ') || '마디: 미확인'};
   }

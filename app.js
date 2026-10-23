@@ -17964,7 +17964,6 @@ function getFormsForVersionId(versionId) {
 function renderFormToolbar(song) {
   return `
     <div class="section-bar form-toolbar" aria-label="찬양 입력 양식">
-      <h3 class="form-toolbar-title">가사 블록</h3>
       <div class="form-buttons">
         ${STRUCTURAL_PART_TYPES
           .map(
