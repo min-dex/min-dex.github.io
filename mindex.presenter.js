@@ -696,11 +696,14 @@ function presenterHymnOnceOnlyIntro(forms = [], version = {}) {
 }
 
 function presenterServiceItemFormPreset(version = {}, item = {}, song = null, options = {}) {
-  const preset = presenterServiceItemBaseFormPreset(version, item, song, options);
+  const available = normalizeForms(version?.forms || []).filter(form => normalizeLyricsForCopy(form.lyrics));
+  const sourceSequence = available.length && available.every(form => normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form)).type !== "lyrics")
+    ? { forms: available.map(presenterFormDisplayLabel), strength: "auto" } : null;
+  const preset = presenterServiceItemBaseFormPreset(version, item, song, options)
+    || (options.includePlaybackFallback !== false && !serviceItemFormPresetDisabled(item) ? sourceSequence : null);
   // Legacy automatic titles become an explicit virtual sequence entry on read.
   // An authored titleSequence (including an empty one) owns title visibility.
   if (!preset?.forms?.length || preset.titleSequence || parseServiceItemMemo(item?.memo).formPreset?.titleSequence) return preset;
-  const available = normalizeForms(version?.forms || []).filter(form => normalizeLyricsForCopy(form.lyrics));
   const resolved = presenterFormPresetWithAvailableForms(preset, available);
   const forms = ["Title", ...resolved.forms];
   return { ...resolved, forms, hint: forms.join("-"), titleSequence: true };
