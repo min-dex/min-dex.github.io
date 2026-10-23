@@ -16229,6 +16229,15 @@ function renderHomeDetail() {
   renderHomeStart();
 }
 
+function homeBibleEditionNames(rows) {
+  return [...rows].sort(sortBibleTranslations).map(row => {
+    const name = String(row.name || row.label || row.id || "");
+    if (/^(King James Version(?: \(CrossWire 1769\))?|KJV)$/i.test(name)) return "KJV";
+    if (/^(American Standard Version|ASV)$/i.test(name)) return "ASV";
+    return name;
+  }).filter(Boolean);
+}
+
 async function loadHomeOverviewStats({ force = false } = {}) {
   if (!canUseClientData() || typeof state.client?.from !== "function") return;
   const client = state.client;
@@ -16244,7 +16253,7 @@ async function loadHomeOverviewStats({ force = false } = {}) {
   stats.promise = (async () => {
     const results = await Promise.allSettled([
       client.from("mindex_songs").select("id", { count:"exact", head:true }).abortSignal(abort.signal),
-      client.from("mindex_bible_translations").select("id,name,canonical_source:metadata->canonical_source").eq("is_active", true).abortSignal(abort.signal),
+      client.from("mindex_bible_translations").select("id,name,language,canonical_source:metadata->canonical_source").eq("is_active", true).abortSignal(abort.signal),
     ]);
     if (state.client !== client || homeOverviewStats !== stats) return;
     const songs = results[0];
@@ -16255,7 +16264,7 @@ async function loadHomeOverviewStats({ force = false } = {}) {
     if (!stats.errors.editions) {
       const rows = editions.value.data.filter(row => row.canonical_source);
       stats.editions = rows.length;
-      stats.names = rows.map(row => row.name).filter(Boolean);
+      stats.names = homeBibleEditionNames(rows);
     }
   })().catch(() => { stats.errors = { songs:true, editions:true }; }).finally(() => {
     clearTimeout(timer);
@@ -16271,7 +16280,7 @@ function renderHomeStart() {
   const stats = homeOverviewStats?.client === state.client ? homeOverviewStats : null;
   const songCount = stats?.songs ?? (songCatalogLoaded ? state.songs.length : null);
   const editionCount = stats?.editions ?? (state.bibleTranslations.length ? state.bibleTranslations.length : null);
-  const editionNames = stats?.editions != null ? stats.names : state.bibleTranslations.map(row => row.name || row.label || row.id);
+  const editionNames = stats?.editions != null ? stats.names : homeBibleEditionNames(state.bibleTranslations);
   const week = recentServiceWeeks(now)[0];
   const servicesReady = state.serviceTypes.length > 0 && !state.serviceError;
   const services = state.services.filter(service => !service._expected && !serviceIsNoGathering(service));

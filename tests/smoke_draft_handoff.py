@@ -78,7 +78,7 @@ try:
     b.evaluate('()=>MINDEX_DRAFT_HANDOFF.open()')
     assert b.get_by_role('button',name='이 초안 이어쓰기',exact=True).count()==0
     # Restoring only changes an editor; no committed document API is available.
-    assert all(k[2].startswith(('mindex.handoff.','mindex.editor.')) for k in db)
+    assert all(k[2].startswith(('mindex.handoff.','mindex.editor.')) for k in db), sorted(k[2] for k in db)
     print('PASS',engine,'separate profiles, explicit recovery, dirty-edit preservation and no committed-row writes',flush=True)
    finally:browser.close()
 finally:server.shutdown();server.server_close()

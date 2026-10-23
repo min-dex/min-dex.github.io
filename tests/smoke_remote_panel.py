@@ -24,6 +24,7 @@ try:
    assert page.evaluate('ends')==1;assert page.locator('[data-remote-start]').is_disabled();assert page.locator('[data-remote-end]').is_disabled()
    page.evaluate('finishEnd()');page.wait_for_function("!document.querySelector('[data-remote-start]').disabled");assert page.locator('[data-remote-code]').inner_text()==''
    assert page.locator('#remotePanelBtn').get_attribute('aria-label')=='원격 조작'
+   page.click('[data-remote-close]')
    page.click('[data-presenter-remote]');page.wait_for_function("starts===2")
    page.evaluate("remoteOptions.onClose()")
    assert page.locator('[data-presenter-remote] [data-remote-button-label]').inner_text()=='원격 조작'

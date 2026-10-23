@@ -155,6 +155,10 @@ try:
     const originalClient=state.client, originalCanRead=canUseClientData;
     const before=JSON.stringify([state.songs,state.bibleTranslations,state.selectedBibleTranslationId,state.selectedBookCode,songCatalogLoaded]);
     const calls=[];let resolveSongs,resolveEditions;
+    const editionsFixture=[{name:'King James Version (CrossWire 1769)',language:'en'},{name:'표준새번역',language:'ko'},{name:'개역개정',language:'ko'},{name:'ASV',language:'en'}];
+    const editionsBefore=JSON.stringify(editionsFixture);
+    check(homeBibleEditionNames(editionsFixture).join(' · ')==='개역개정 · 표준새번역 · ASV · KJV','home edition labels/order');
+    check(JSON.stringify(editionsFixture)===editionsBefore,'home reordered source rows');
     const responses={mindex_songs:new Promise(r=>resolveSongs=r),mindex_bible_translations:new Promise(r=>resolveEditions=r)};
     const client={from:table=>({select:(fields,options)=>{
      calls.push({table,fields,options});

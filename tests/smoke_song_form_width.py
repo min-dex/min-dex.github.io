@@ -30,7 +30,7 @@ try:
       page.locator('#width-host').evaluate('(e,w)=>e.style.width=w+"px"',width)
       result=page.evaluate('''()=>{const host=document.querySelector('#width-host'),title=host.querySelector('.svc-edit-title'),form=host.querySelector('.svc-form-hint'),row=host.querySelector('.svc-inline-song');const t=title.getBoundingClientRect(),f=form.getBoundingClientRect(),r=row.getBoundingClientRect();return {title:t.width,form:f.width,sameRow:Math.abs(t.y-f.y)<1,overflow:row.scrollWidth>row.clientWidth+1,formFull:Math.abs(f.width-r.width)<1}}''')
       assert not result['overflow'],(engine,theme,db_link,width,result)
-      if width>1120:assert result['sameRow'] and result['form']>=219,(engine,width,result)
+      if width>1120:assert result['sameRow'] and result['form']>=219 and abs(result['form']-result['title'])<1,(engine,width,result)
       else:assert not result['sameRow'] and result['formFull'],(engine,width,result)
       if width in [1500,520] and not db_link:page.screenshot(path=f'/tmp/mindex-song-width-{engine}-{theme}-{width}.png')
      title=page.locator('#width-host .svc-edit-title');form=page.locator('#width-host .svc-form-hint')

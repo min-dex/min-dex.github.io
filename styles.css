@@ -8651,7 +8651,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .svc-praise-input-mode-control { width:160px; flex:0 0 160px; max-width:160px; }
 .svc-board-subgroup-controls .svc-praise-input-mode-control > select { flex:1 1 auto; max-width:none; }
 .svc-board-subgroup-controls { container-type:inline-size; }
-.svc-board-subgroup-control-item:has(> .svc-presenter-input-field--song .svc-praise-input-mode-control) { display:grid; grid-template-columns:150px minmax(180px,1.3fr) minmax(130px,.7fr) minmax(220px,1fr) auto minmax(150px,.8fr); gap:10px; align-items:center; }
+.svc-board-subgroup-control-item:has(> .svc-presenter-input-field--song .svc-praise-input-mode-control) { display:grid; grid-template-columns:150px minmax(220px,1fr) minmax(130px,.7fr) minmax(220px,1fr) auto minmax(150px,.8fr); gap:10px; align-items:center; }
 .svc-board-subgroup-control-item:has(> .svc-presenter-input-field--song .svc-praise-input-mode-control) > .svc-presenter-input-field--song > span { display:none; }
 .svc-board-subgroup-control-item .svc-praise-input-mode-control { grid-column:1; grid-row:var(--praise-first-row,1); width:100%; }
 .svc-board-subgroup-control-item:has(> .svc-presenter-input-field--song .svc-praise-input-mode-control) .svc-edit-title { grid-column:2; grid-row:var(--praise-first-row,1); width:100%; min-width:0; }
@@ -8667,7 +8667,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .svc-board-subgroup-control-item > .svc-presenter-input-field--assignee,
 .svc-board-subgroup-control-item > .svc-presenter-input-field--scripture { grid-template-columns:minmax(0,1fr); }
 @container (min-width:1121px) {
-  .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control):not(:has(.svc-song-picker--linked)) { grid-template-columns:150px minmax(180px,1.3fr) minmax(220px,1fr) auto minmax(150px,.8fr); }
+  .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control):not(:has(.svc-song-picker--linked)) { grid-template-columns:150px minmax(220px,1fr) minmax(220px,1fr) auto minmax(150px,.8fr); }
   .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control):not(:has(.svc-song-picker--linked)) .svc-form-hint.compact { grid-column:3; }
   .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control):not(:has(.svc-song-picker--linked)) .svc-edit-title-wrap > .svc-item-link { grid-column:4; }
   .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control):not(:has(.svc-song-picker--linked)) > .svc-presenter-input-field--assignee { grid-column:5; }
@@ -8780,7 +8780,7 @@ body[data-module="praise"] .praise-forms-panel .form-meta { gap: 5px; }
 /* Song rows reserve space only for present controls. Expanded media stays below. */
 @container (min-width: 1121px) {
   .svc-board-subgroup-controls .svc-board-subgroup-control-item.svc-inline-song {
-    grid-template-columns: 130px minmax(180px, 1.3fr) auto 160px minmax(220px, 1fr) max-content;
+    grid-template-columns: 130px minmax(220px, 1fr) auto 160px minmax(220px, 1fr) max-content;
   }
   .svc-board-subgroup-controls .svc-board-subgroup-control-item.svc-inline-song .svc-edit-title-wrap > .svc-item-link { grid-column: 3; }
   .svc-board-subgroup-controls .svc-board-subgroup-control-item.svc-inline-song .svc-song-picker--linked { grid-column: 4; }
@@ -8792,7 +8792,7 @@ body[data-module="praise"] .praise-forms-panel .form-meta { gap: 5px; }
     grid-column: 2 / -1; grid-row: 2;
   }
   .svc-board-subgroup-controls .svc-board-subgroup-control-item.svc-inline-song:not(:has(.svc-song-picker--linked)) {
-    grid-template-columns: 130px minmax(180px, 1.3fr) auto minmax(220px, 1fr) max-content;
+    grid-template-columns: 130px minmax(220px, 1fr) auto minmax(220px, 1fr) max-content;
     column-gap: 10px;
   }
   .svc-board-subgroup-controls .svc-board-subgroup-control-item.svc-inline-song:not(:has(.svc-song-picker--linked)) .svc-form-hint.compact { grid-column: 4; }
@@ -8844,11 +8844,11 @@ html.ui-theme-switching:not(.presenter-output-document) *::after {
 .svc-presenter-side-panel .svc-presenter-fullscreen { height: 35px; padding: 0 10px; gap: 5px; white-space: nowrap; }
 /* A single element's DB shortcut belongs to its heading, not an input column. */
 @container (min-width: 1121px) {
-  .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link)) { grid-template-columns: 130px minmax(180px, 1.3fr) 160px minmax(220px, 1fr) max-content; }
+  .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link)) { grid-template-columns: 130px minmax(220px, 1fr) 160px minmax(220px, 1fr) max-content; }
   .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link)) .svc-song-picker--linked { grid-column: 3; }
   .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link)) .svc-form-hint.compact { grid-column: 4; }
   .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link)) > .svc-board-subgroup-flow { grid-column: 5; }
-  .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link, .svc-song-picker--linked)) { grid-template-columns: 130px minmax(180px, 1.3fr) minmax(220px, 1fr) max-content; }
+  .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link, .svc-song-picker--linked)) { grid-template-columns: 130px minmax(220px, 1fr) minmax(220px, 1fr) max-content; }
   .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link, .svc-song-picker--linked)) .svc-form-hint.compact { grid-column: 3; }
   .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link, .svc-song-picker--linked)) > .svc-board-subgroup-flow { grid-column: 4; }
 }
