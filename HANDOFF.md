@@ -1405,3 +1405,9 @@ trailing blanks/output/content remain unchanged. Chromium/WebKit Title+interlude
 real-builder/manual-input regression and controller block smoke PASS. Reconciled
 published 5a4eb848. Release ticket f4b63645b4bd4f0b9214e0d2e1f0f4e3 waiting behind
 presenter-focus-release. Not yet deployed; no operational data writes.
+
+
+Controller interlude release batch: original discard components eca60365 +
+0616a0dc (prepared combined candidate 807a9b48) are included with the interlude
+caption fix. Both had user approval in Mindex; combined gate/publication pending.
+Ticket f4b63645b4bd4f0b9214e0d2e1f0f4e3 is claimed. No operational writes.
