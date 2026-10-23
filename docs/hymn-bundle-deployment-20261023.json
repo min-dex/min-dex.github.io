@@ -1,0 +1,189 @@
+{
+  "dbReadbackExactWithExpectedTriggerRevisions": true,
+  "unitUpdates": 1643,
+  "signatureUpdates": 442,
+  "versionsWithUnitUpdates": 445,
+  "verifiedMetadataVersions": 1203,
+  "verifiedMetadataUnits": 5419,
+  "worshipContentUnchanged": true,
+  "automaticServiceRevisionRows": 71,
+  "directWorshipWrites": 0,
+  "deployment": "verified",
+  "commit": "5cbf86ce5689390800df4e767cffb04ad9dafb2b",
+  "release": "20261023-hymn-slide-bundle-2",
+  "ciBranchRun": 39908262110,
+  "pagesRun": 39909222948,
+  "requiredShards": "4/4 success",
+  "pagesConclusion": "success",
+  "productionFiles": {
+    "mindex-release.json": {
+      "match": true,
+      "sha256": "e5abb495b9d93ad170fe921e460b2251f639edc271d9b9bb368005fa00f34cc0"
+    },
+    "index.html": {
+      "match": true,
+      "sha256": "c5abba4275bc3df338a26749e88723127dbcfc859c727f6ce652f28bf0500ea0"
+    },
+    "app.js": {
+      "match": true,
+      "sha256": "e38f2067117132425c8230360811c433bdfb337863101f2b3c82d29ae1a9a50e"
+    },
+    "app.runtime.js": {
+      "match": true,
+      "sha256": "22fdcb226e9cf4096b619ee8f52c23ed5030edee5b5f048424b0f25d691d38fe"
+    },
+    "mindex.hymn-structure.js": {
+      "match": true,
+      "sha256": "08ba96a2aa56d34439ca00407c27492421aef3b227f489ec153b66355802c3ef"
+    },
+    "mindex.hymn-structure.runtime.json": {
+      "match": true,
+      "sha256": "87adfc4b594ebe5ef412ca578e08efb158bb7d5cf9f1cd0dd910a4ee8d5e422e"
+    }
+  },
+  "productionUI": {
+    "chromium": {
+      "release": "20261023-hymn-slide-bundle-2",
+      "measured": 1197,
+      "recitative": 6,
+      "samples": [
+        {
+          "edition": "new",
+          "number": 109,
+          "text": "슬라이드당 약 3–4마디 / 아멘·Coda 별도 · 약 2마디"
+        },
+        {
+          "edition": "new",
+          "number": 620,
+          "text": "슬라이드당 약 4마디"
+        },
+        {
+          "edition": "new",
+          "number": 638,
+          "text": "슬라이드당 약 10–14마디 / 아멘·Coda 별도 · 약 1마디"
+        },
+        {
+          "edition": "new",
+          "number": 645,
+          "text": "슬라이드당 약 12마디"
+        },
+        {
+          "edition": "union",
+          "number": 109,
+          "text": "슬라이드당 약 3–4마디 / 아멘·Coda 별도 · 약 2마디"
+        },
+        {
+          "edition": "union",
+          "number": 550,
+          "text": "슬라이드당 약 2–10마디"
+        },
+        {
+          "edition": "union",
+          "number": 551,
+          "text": "슬라이드당 약 2마디"
+        },
+        {
+          "edition": "union",
+          "number": 553,
+          "text": "슬라이드당 약 3마디"
+        },
+        {
+          "edition": "union",
+          "number": 556,
+          "text": "슬라이드당 약 5마디"
+        },
+        {
+          "edition": "union",
+          "number": 558,
+          "text": "슬라이드당 약 12마디"
+        }
+      ],
+      "metadataField": "슬라이드당 약 3–4마디 / 아멘·Coda 별도 · 약 2마디",
+      "cardMeasureLineRemoved": true
+    },
+    "webkit": {
+      "release": "20261023-hymn-slide-bundle-2",
+      "measured": 1197,
+      "recitative": 6,
+      "samples": [
+        {
+          "edition": "new",
+          "number": 109,
+          "text": "슬라이드당 약 3–4마디 / 아멘·Coda 별도 · 약 2마디"
+        },
+        {
+          "edition": "new",
+          "number": 620,
+          "text": "슬라이드당 약 4마디"
+        },
+        {
+          "edition": "new",
+          "number": 638,
+          "text": "슬라이드당 약 10–14마디 / 아멘·Coda 별도 · 약 1마디"
+        },
+        {
+          "edition": "new",
+          "number": 645,
+          "text": "슬라이드당 약 12마디"
+        },
+        {
+          "edition": "union",
+          "number": 109,
+          "text": "슬라이드당 약 3–4마디 / 아멘·Coda 별도 · 약 2마디"
+        },
+        {
+          "edition": "union",
+          "number": 550,
+          "text": "슬라이드당 약 2–10마디"
+        },
+        {
+          "edition": "union",
+          "number": 551,
+          "text": "슬라이드당 약 2마디"
+        },
+        {
+          "edition": "union",
+          "number": 553,
+          "text": "슬라이드당 약 3마디"
+        },
+        {
+          "edition": "union",
+          "number": 556,
+          "text": "슬라이드당 약 5마디"
+        },
+        {
+          "edition": "union",
+          "number": 558,
+          "text": "슬라이드당 약 12마디"
+        }
+      ],
+      "metadataField": "슬라이드당 약 3–4마디 / 아멘·Coda 별도 · 약 2마디",
+      "cardMeasureLineRemoved": true
+    }
+  },
+  "outputAudit": {
+    "chromium": {
+      "versions": 1203,
+      "savedReferences": 350,
+      "uniqueSlides": 7930,
+      "rendered": 23790,
+      "overflow": 0
+    },
+    "webkit": {
+      "versions": 1203,
+      "savedReferences": 350,
+      "uniqueSlides": 7930,
+      "rendered": 23790,
+      "overflow": 0
+    }
+  },
+  "independentAmenLegacyPresetCasesPerEngine": 12,
+  "finalThreeApproximateNotExact": true,
+  "pendingEditions": 0,
+  "normalizationDisplayHashes": {
+    "editions": 11,
+    "units": 17,
+    "additionalDBWrites": 0
+  },
+  "scope": "Approximate measures per output slide; no exact-performance-total certification; no native fullscreen testing."
+}

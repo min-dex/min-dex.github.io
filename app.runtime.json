@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-version-name-fallback",
+  "version": "20261023-hymn-labels",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "5a9c6392502f520e5cab8e6baf32c88816cddcdafd37ad9c5bc4c44a5b043242",
-  "runtime_sha256": "28ce386872938471393444c9c8e41814028ec2e1ccaa8ee9329ff0e53a9bfd1b",
-  "source_bytes": 1557821,
-  "runtime_bytes": 1102809,
-  "source_gzip": 350992,
-  "runtime_gzip": 274468
+  "source_sha256": "488cc2c03827ddd1c0699bd7ccc667500af5683d16035dd6dc061a2abe8eb928",
+  "runtime_sha256": "833fb0e100d4fd6741932bff632d53dbe1707743b9285ddf9251d9415297a893",
+  "source_bytes": 1557765,
+  "runtime_bytes": 1102752,
+  "source_gzip": 350978,
+  "runtime_gzip": 274451
 }
