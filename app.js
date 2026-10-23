@@ -19344,22 +19344,7 @@ function versionDisplayName(song, version = {}) {
   if (isRedundantSingleVersionName(song, version, version.name || version.curated_version_name)) return "기본";
   if (version.name) return displayVersionName(version.name);
   if (version.curated_version_name) return displayVersionName(version.curated_version_name);
-  const raw = version.raw_section_name || version.version_label || "";
-  const canonicalTitle = song?.title || "";
-  const canonicalHymnNo = song?.hymn_no ? `${song.hymn_no} ${canonicalTitle}` : canonicalTitle;
-  const trailingLegacyMatch = raw.match(/^(.*?)\s*\((통\s*\d+)\)\s*$/);
-  if (trailingLegacyMatch) {
-    const hymnTitle = trailingLegacyMatch[1].trim();
-    const hymnNumber = trailingLegacyMatch[2].replace(/\s+/g, " ").trim();
-    if (normalizeTitle(hymnTitle) !== normalizeTitle(canonicalTitle)) return `${hymnNumber} ${hymnTitle}`;
-    return hymnNumber;
-  }
-  const hymnNumberMatch = raw.match(/통\s*\d+(?:\s+.*)?$/);
-  if (hymnNumberMatch) return hymnNumberMatch[0].replace(/\s+/g, " ").trim();
-  const subtitleMatch = raw.match(/\(([^)]*?)\)\s*$/);
-  if (subtitleMatch) return subtitleMatch[1].trim();
-  if (raw === canonicalTitle || raw === canonicalHymnNo) return "기본";
-  return raw || "기본";
+  return displayVersionName(version.version_label);
 }
 
 function isRedundantSingleVersionName(song, version, name) {

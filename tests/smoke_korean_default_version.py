@@ -23,13 +23,19 @@ def main():
               const previousUpdateSaveState=updateSaveState;
               updateSaveState=()=>{};
               getSelectedSong=()=>song;
-              for (const name of ['Default','default','버전 1','Default Remix','']) {
+              for (const name of ['Default','default','버전 1','Default Remix','라이브 (어쿠스틱)','']) {
                 updateVersionNameField({dataset:{versionNameField:'version'},value:name});
                 const expected=name || '기본';
                 const loaded=normalizeServerSong({...old,memo:serializeSongMemo(song)});
                 if (song.versions[0].name!==expected || loaded.versions[0].name!==expected)
                   throw new Error('Version name changed: '+name);
               }
+              const parenthesized={id:'named',name:'라이브 (어쿠스틱)'};
+              if(versionDisplayName({title:'곡',versions:[parenthesized,{}]},parenthesized)!=='라이브 (어쿠스틱)')throw Error('Explicit parentheses changed');
+              for(const raw of ['곡 (어쿠스틱)','곡 (통 23)','옛 제목','곡 [Original] (라이브)']){
+                if(versionDisplayName({title:'곡'}, {raw_section_name:raw})!=='기본')throw Error('Legacy raw name inferred: '+raw);
+              }
+              if(versionDisplayName({title:'곡'}, {version_label:'라이브 (어쿠스틱)'})!=='라이브 (어쿠스틱)')throw Error('Stored label changed');
               getSelectedSong=previousSelected;
               updateSaveState=previousUpdateSaveState;
               return {draft:draft.versions[0].name, raw:draft.versions[0].raw_section_name,

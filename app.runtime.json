@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-hymn-slide-bundle-2",
+  "version": "20261023-version-name-fallback",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "e38f2067117132425c8230360811c433bdfb337863101f2b3c82d29ae1a9a50e",
-  "runtime_sha256": "22fdcb226e9cf4096b619ee8f52c23ed5030edee5b5f048424b0f25d691d38fe",
-  "source_bytes": 1558691,
-  "runtime_bytes": 1103252,
-  "source_gzip": 351152,
-  "runtime_gzip": 274596
+  "source_sha256": "5a9c6392502f520e5cab8e6baf32c88816cddcdafd37ad9c5bc4c44a5b043242",
+  "runtime_sha256": "28ce386872938471393444c9c8e41814028ec2e1ccaa8ee9329ff0e53a9bfd1b",
+  "source_bytes": 1557821,
+  "runtime_bytes": 1102809,
+  "source_gzip": 350992,
+  "runtime_gzip": 274468
 }
