@@ -216,6 +216,18 @@ const HANGUL_INITIALS = ["ㄱ", "ㄲ", "ㄴ", "ㄷ", "ㄸ", "ㄹ", "ㅁ", "ㅂ",
 const CONTENT_MODULES = ["service", "presenter", "bulletin", "scripture", "praise", "operations", "calendar", "references", "manuals", "setlists"];
 const ROUTE_MODULES = ["home", ...CONTENT_MODULES];
 const SERVICE_FILTERS = ["all", "public", "ministry", "special"];
+const SERVICE_BROWSE_CATEGORIES = [
+  { key: "public", label: "공예배" },
+  { key: "ministry", label: "부서 예배" },
+  { key: "special", label: "기타 예배" },
+];
+function serviceBrowseCategory(filter = state.serviceFilter) {
+  return SERVICE_BROWSE_CATEGORIES.find(category => category.key === filter) || SERVICE_BROWSE_CATEGORIES[0];
+}
+function serviceBrowseGroup(typeId) {
+  const group = serviceTypeGroupKey(worshipAppServiceTypeId(typeId));
+  return group === "other" ? "special" : group;
+}
 const PRAISE_LIST_FILTERS = [
   ["all", "전체"],
   ["empty", "빈 곡"],
@@ -1435,7 +1447,7 @@ function bindStaticEvents() {
     }
 
     if (event.target.closest("[data-service-list]")) {
-      openServiceListPanel();
+      openServiceListPanel(event.target.closest("[data-service-list]").dataset.serviceList);
       return;
     }
 
@@ -14341,7 +14353,7 @@ function currentPageTabTitle() {
     const service = state.services.find((svc) => svc.id === state.selectedServiceId);
     if (service) return serviceDisplayTypeName(service);
     if (state.selectedServiceTypeId === SERVICE_WEEK_PANEL_ID) return SERVICE_WEEK_PANEL_TITLE;
-    if (state.selectedServiceTypeId === SERVICE_LIST_PANEL_ID) return SERVICE_LIST_PANEL_TITLE;
+    if (state.selectedServiceTypeId === SERVICE_LIST_PANEL_ID) return serviceBrowseCategory().label;
     if (state.selectedServiceTypeId === SERVICE_TEMPLATES_PANEL_ID) return SERVICE_TEMPLATES_PANEL_TITLE;
     if (state.selectedServiceTypeId === SERVICE_SETLIST_ARCHIVE_PANEL_ID) return SERVICE_SETLIST_ARCHIVE_PANEL_TITLE;
     return "예배";
@@ -14426,7 +14438,7 @@ function pageTabTitleForSnapshot(snapshot = {}) {
     const service = state.services.find((svc) => svc.id === snapshot.selectedServiceId);
     if (service) return serviceDisplayTypeName(service);
     if (snapshot.selectedServiceTypeId === SERVICE_WEEK_PANEL_ID) return SERVICE_WEEK_PANEL_TITLE;
-    if (snapshot.selectedServiceTypeId === SERVICE_LIST_PANEL_ID) return SERVICE_LIST_PANEL_TITLE;
+    if (snapshot.selectedServiceTypeId === SERVICE_LIST_PANEL_ID) return serviceBrowseCategory(snapshot.serviceFilter).label;
     if (snapshot.selectedServiceTypeId === SERVICE_TEMPLATES_PANEL_ID) return SERVICE_TEMPLATES_PANEL_TITLE;
     if (snapshot.selectedServiceTypeId === SERVICE_SETLIST_ARCHIVE_PANEL_ID) return SERVICE_SETLIST_ARCHIVE_PANEL_TITLE;
     return "예배";
@@ -24023,10 +24035,13 @@ function renderServiceList() {
       <span>${escapeHtml(SERVICE_WEEK_PANEL_TITLE)}</span>
       <small>${getServiceDashboardServices().length}</small>
     </button>
-    <button class="service-type-row${state.selectedServiceTypeId === SERVICE_LIST_PANEL_ID && !state.selectedServiceId ? " active" : ""}" type="button" data-service-list>
-      <span>${escapeHtml(SERVICE_LIST_PANEL_TITLE)}</span>
-      <small>${state.services.length}</small>
-    </button>
+    ${SERVICE_BROWSE_CATEGORIES.map(category => `
+      <button class="service-type-row${state.selectedServiceTypeId === SERVICE_LIST_PANEL_ID && !state.selectedServiceId && serviceBrowseCategory().key === category.key ? " active" : ""}" type="button" data-service-list="${category.key}">
+        <span>${category.label}</span>
+        <small>${state.services.filter(service => serviceBrowseGroup(service.type_id) === category.key).length}</small>
+      </button>
+    `).join("")}
+
   `;
 
   refs.songList.innerHTML = `
@@ -25279,16 +25294,13 @@ function worshipElementTypeLabel(type) {
 }
 
 function renderServiceListDetail() {
-  const types = getFilteredServiceTypes();
+  const category = serviceBrowseCategory();
+  const types = getFilteredServiceTypes().filter(type => serviceBrowseGroup(type.id) === category.key);
   const q = normalizeSearchValue(state.search);
-  const groups = ["public", "ministry", "special", "other"]
-    .map((key) => ({
-      key,
-      types: serviceListTypeEntriesForGroup(types.filter((type) => serviceTypeGroupKey(type.id) === key), q),
-    }))
-    .filter((group) => group.types.length);
+  const groups = [{ key: category.key, types: serviceListTypeEntriesForGroup(types, q) }]
+    .filter(group => group.types.length);
   const count = groups.reduce((total, group) => total + group.types.reduce((sum, entry) => sum + entry.services.length, 0), 0);
-  const title = q ? "예배 검색 결과" : SERVICE_LIST_PANEL_TITLE;
+  const title = q ? "예배 검색 결과" : category.label;
   refs.detailPane.innerHTML = `
     <div class="service-date-list service-date-list--all">
       <div class="service-section-head">
@@ -25303,7 +25315,7 @@ function renderServiceListDetail() {
       <div class="service-list-groups">
         ${groups.map((group) => `
           <section class="service-list-group">
-            <h3>${escapeHtml(serviceTypeGroupLabel(group.key))}</h3>
+            <h3>${escapeHtml(category.label)}</h3>
             <div class="service-list-type-stack">
               ${group.types.map((entry) => renderServiceListTypeBlock(entry.type, entry.services, q, entry)).join("")}
             </div>
@@ -27252,8 +27264,9 @@ function renderServiceScriptureLinkControl(item) {
   return `<button class="svc-item-link svc-item-link--linked" type="button" data-service-db-reference="${escapeAttr(reference)}" aria-label="말씀 DB 새 탭에서 열기" title="말씀 DB 새 탭에서 열기">DB</button>`;
 }
 
-function openServiceListPanel() {
+function openServiceListPanel(filter = "public") {
   if (!confirmDiscardServiceChanges()) return;
+  state.serviceFilter = serviceBrowseCategory(filter).key;
   state.selectedServiceTypeId = SERVICE_LIST_PANEL_ID;
   state.selectedServiceId = null;
   state.selectedServiceItemIndex = null;
@@ -27288,7 +27301,7 @@ function renderServiceDashboard(options = {}) {
           <div>
             <h2 class="service-date-list-title">검색 결과</h2>
           </div>
-          <button class="reference-new-btn secondary" type="button" data-service-list>전체 예배</button>
+          <button class="reference-new-btn secondary" type="button" data-service-list>예배 보기</button>
         </div>
         ${q ? (services.length ? `<div class="service-date-grid service-date-grid--dashboard">
           ${services.map((service) => renderServiceDateCard(service, { showType: true })).join("")}
@@ -27301,7 +27314,7 @@ function renderServiceDashboard(options = {}) {
               <h3 class="service-date-list-title">${week.label}</h3>
               <p class="service-week-range">${escapeHtml(formatServiceWeekRange(week.start, week.end))}</p>
             </div>
-            ${index === 0 ? '<button class="reference-new-btn secondary" type="button" data-service-list>전체 예배</button>' : ""}
+            ${index === 0 ? '<button class="reference-new-btn secondary" type="button" data-service-list>예배 보기</button>' : ""}
           </div>
           <div class="service-week-board">
             ${week.days.map(date => renderServiceWeekDay(date, servicesByDate.get(toLocalDateStr(date)) || [])).join("")}
@@ -29407,7 +29420,7 @@ function renderPresenterControlsTop(service, slides, active, index) {
   const launchIcon = anyOutputOpen ? "screen-share-off" : "screen-share";
   const launchTone = anyOutputOpen ? "stop" : "start";
   const fullscreenLabel = anyOutputOpen ? "송출 화면 전체 화면" : "송출을 시작하면 전체 화면을 사용할 수 있습니다";
-  const fullscreenControl = `<button class="icon-btn svc-presenter-fullscreen" type="button" data-presenter-action="fullscreen" aria-label="${escapeAttr(fullscreenLabel)}" title="${escapeAttr(fullscreenLabel)}" ${anyOutputOpen ? "" : "disabled"}><i data-lucide="maximize"></i><span>전체 화면</span></button>`;
+  const fullscreenControl = `<button class="icon-btn svc-presenter-fullscreen svc-presenter-window-button" type="button" data-presenter-action="fullscreen" aria-label="${escapeAttr(fullscreenLabel)}" title="${escapeAttr(fullscreenLabel)}" ${anyOutputOpen ? "" : "disabled"}><i data-lucide="maximize"></i><span>전체 화면</span></button>`;
   return `
       <div class="svc-presenter-top">
         <div class="svc-presenter-output-group">

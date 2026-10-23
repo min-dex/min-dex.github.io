@@ -61,8 +61,8 @@ try:
        check(style.color===brown,code+' marker foreground mismatch');
        const probe=document.createElement('span');
        const source=originalColors[i]||'#123456';
-       const softened='color-mix(in srgb, '+source+' 65%, white)';
-       probe.style.backgroundImage='linear-gradient(to bottom, transparent 45%, '+softened+' 45%, '+softened+' 95%, transparent 95%)';host.append(probe);
+       const marker=source;
+       probe.style.backgroundImage='linear-gradient(to bottom, transparent 45%, '+marker+' 45%, '+marker+' 95%, transparent 95%)';host.append(probe);
        check(style.backgroundImage===getComputedStyle(probe).backgroundImage,code+' marker color/50% coverage mismatch');probe.remove();
        const padding=+style.paddingLeft.replace('px','')*1920/root.clientWidth;
        check(Math.abs(padding-4)<.01&&style.paddingLeft===style.paddingRight,code+' marker side spacing mismatch '+padding);

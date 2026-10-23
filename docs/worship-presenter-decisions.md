@@ -3914,6 +3914,22 @@ attributes and text outlines. Every artwork, preview and output uses one CSS rul
 no stored highlight values, text, font sizes or weights change. Non-children,
 chromakey and reading frames retain their existing colored text behavior.
 
+## Service sidebar browse categories · 2026-10-23
+
+The service sidebar replaces the all-service entry with 공예배, 부서 예배 and
+기타 예배, using existing canonical service classifications. Special and unknown
+service types belong to 기타 예배; no service records are reclassified. Existing
+serviceFilter state carries the category through tabs/history; legacy all values
+open 공예배. Counts, active state, detail list and tab title reflect the category.
+Navigation retains the existing unsaved-input confirmation boundary.
+
+## Presenter window control states · 2026-10-23
+
+Fullscreen and always-on-top share geometry, field background, hover, keyboard
+focus and unavailable styling. Fullscreen remains an entry command; only the
+native always-on-top checkbox displays checked state. Browser pin support and
+output-window availability remain separate capability checks. No output behavior
+or stored preference changes.
 ### Service artwork typography · 2026-10-23
 
 The authored service design uses bundled Nanum Myeongjo Regular/Bold for Korean
@@ -3931,3 +3947,22 @@ same45–95% band (50% height),4-stage-pixel padding on each side and a65% autho
 color /35% white mix. Foreground, font sizes and weights are unchanged. Padding
 uses the shared1920px stage unit in thumbnails/output; no background exceptions,
 text outlines or stored highlight color edits are introduced.
+
+
+## Original marker colors ·2026-10-23
+
+Remove the35% white mix from Refined common marker geometry. Children markers
+use the authored color unchanged, with the same45–95% coverage and4-stage-pixel
+side padding. Preview/output share the rule; no artwork palettes, outlines or
+stored color changes are introduced.
+
+### Praise title scope correction · 2026-10-23
+
+Standard fullscreen praise retains its sequence heading, inline note/main title
+and authored original/subtitle. Only an explicit
+`source_ref.presentationDesign.songTitleStyle: "note-title"` selects a separate
+note above one main title and hides detail. An unrelated service design, special
+service type or theme does not select this composition. Both output and previews
+read the same saved choice. Its spacing/accent selectors are scoped to the
+selected composition; no event IDs or names are used. Chapel data alone selects
+this choice; other service records are not rewritten.
