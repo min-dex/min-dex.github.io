@@ -49,7 +49,7 @@ const runtimeReferences = [
   'deleteService', 'runServiceDefaultItemAction', 'setServiceBenedictionReplacement', 'copyText', 'serviceSourceTextForEditor',
   'applyServiceSourceText', 'restoreServiceSourceHistory', 'restoreServiceSourceRecovery', 'commitServiceItemInputs',
   'runServiceItemAction', 'runServiceMusicAction', 'runLiveScriptureAction', 'jumpPresenterToSlideInput',
-  'createPraiseSongFromServiceItem', 'selectServiceSongForItem', 'clearServiceSongForItem', 'canUseClientData',
+  'createPraiseSongFromServiceItem', 'selectServiceSongForItem', 'canUseClientData',
   'loadSongsForIdsInBackground', 'runServiceBulletinAction', 'openHomeNextService', 'worshipAppServiceTypeId',
   'markServiceStructureDirty', 'refreshPresenterForService', 'updateSaveState', 'serviceUsesPraiseLeader',
   'defaultServicePraiseLeader', 'getServiceItems', 'serviceItemPersistenceSignature', 'markServiceItemSharedContentDirty',

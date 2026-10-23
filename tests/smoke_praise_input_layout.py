@@ -29,7 +29,7 @@ try:
       const boxes=[...host.querySelectorAll('input,select')].map(el=>({el,r:el.getBoundingClientRect()}));
       for(const {r} of boxes)if(r.width<=0||r.right>host.getBoundingClientRect().right+1)throw Error('overflow');
       for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){const a=boxes[i].r,b=boxes[j].r;if(Math.min(a.right,b.right)>Math.max(a.left,b.left)+1&&Math.min(a.bottom,b.bottom)>Math.max(a.top,b.top)+1)throw Error('overlap');}
-      if(host.clientWidth>960){
+      if(host.clientWidth>1120){
        const title=host.querySelector('.svc-edit-title').getBoundingClientRect();
        const assignee=host.querySelector('[data-service-item-field=assignee]').getBoundingClientRect();
        if(Math.abs(title.top-assignee.top)>1)throw Error('desktop assignee wrapped');

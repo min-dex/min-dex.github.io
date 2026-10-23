@@ -12652,21 +12652,6 @@ function selectServiceSongForItem(index, songId) {
   saveCommittedServiceItem(index, serviceId);
 }
 
-function clearServiceSongForItem(index) {
-  const serviceId = state.selectedServiceId;
-  const items = getServiceItems(serviceId);
-  const item = items[index];
-  if (!serviceId || !item) return;
-  item.song_id = null;
-  item.version_id = null;
-  item.song_version_id = null;
-  state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(items);
-  state.dirty.service = true;
-  refreshPresenterForService(serviceId);
-  renderCurrentServiceModuleDetail();
-  updateSaveState();
-}
-
 function getActiveServiceTypeId() {
   return state.services.find((service) => service.id === state.selectedServiceId)?.type_id
     || state.selectedServiceTypeId
@@ -26881,7 +26866,6 @@ function renderServiceSongPicker(item, index, model = serviceItemEditorModel(ite
       <div class="svc-song-picker svc-song-picker--linked">
         ${versionPicker}
         ${typeWarning}
-        <button class="svc-song-clear icon-btn" type="button" data-service-song-clear="${index}" aria-label="곡 연결 해제" title="곡 연결 해제"><i data-lucide="x"></i></button>
       </div>`;
   }
   // Keep the preview replacement target without floating text or layout space.

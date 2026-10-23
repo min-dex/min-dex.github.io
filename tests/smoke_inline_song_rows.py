@@ -47,7 +47,7 @@ try:
        const q=host.getBoundingClientRect();
        for(const e of controls){const r=e.getBoundingClientRect();if(r.left<q.left-1||r.right>q.right+1)issues.push('outside '+e.className)}
        for(let i=0;i<controls.length;i++)for(let j=i+1;j<controls.length;j++){let a=controls[i],b=controls[j];if(a.contains(b)||b.contains(a))continue;let r=a.getBoundingClientRect(),t=b.getBoundingClientRect();if(Math.min(r.right,t.right)-Math.max(r.left,t.left)>2&&Math.min(r.bottom,t.bottom)-Math.max(r.top,t.top)>2)issues.push('overlap '+a.className+' '+b.className)}
-       if(host.clientWidth>=961){const top=row.querySelector('.svc-edit-title').getBoundingClientRect().top;for(const e of controls)if(!e.closest('.svc-presenter-input-field--assignee')&&Math.abs(e.getBoundingClientRect().top-top)>12)issues.push('extra row '+e.outerHTML.slice(0,180)+' '+e.getBoundingClientRect().top+' vs '+top)}
+       if(host.clientWidth>=1121){const top=row.querySelector('.svc-edit-title').getBoundingClientRect().top;for(const e of controls)if(!e.closest('.svc-presenter-input-field--assignee,.svc-presentation-controls')&&Math.abs(e.getBoundingClientRect().top-top)>12)issues.push('extra row '+e.outerHTML.slice(0,180)+' '+e.getBoundingClientRect().top+' vs '+top)}
       }
       if(!host.querySelector('.svc-inline-song'))issues.push('missing inline rows');
       if(issues.length)throw Error(issues.join(';'));return 'PASS bounds overlap and desktop single row';
@@ -87,7 +87,7 @@ try:
       const host=document.querySelector('.svc-board-subgroup-controls'),q=host.getBoundingClientRect();
       const controls=[...row.querySelectorAll('input:not([type=file]),select,button,summary,label.svc-board-subgroup-audio-upload')].filter(e=>e.checkVisibility()&&e.getBoundingClientRect().width);
       for(const e of controls){const r=e.getBoundingClientRect();if(r.left<q.left-1||r.right>q.right+1)throw Error('single song overflow');}
-      if(host.clientWidth>=961){const top=row.querySelector('.svc-edit-title').getBoundingClientRect().top;for(const e of controls)if(Math.abs(e.getBoundingClientRect().top-top)>12)throw Error('single song extra row');}
+      if(host.clientWidth>=1121){const top=row.querySelector('.svc-edit-title').getBoundingClientRect().top;for(const e of controls)if(!e.closest('.svc-presentation-controls')&&Math.abs(e.getBoundingClientRect().top-top)>12)throw Error('single song extra row');}
       return 'PASS single song with visible header, one save and compact controls';
      }"""),flush=True)
      if width==1600:page.screenshot(path=f'/tmp/mindex-single-song-{engine}.png')

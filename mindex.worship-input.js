@@ -172,11 +172,7 @@ function handleServiceItemDetailClick(event) {
     selectServiceSongForItem(Number(serviceSongSelect.dataset.serviceSongIndex), serviceSongSelect.dataset.serviceSongSelect);
     return true;
   }
-  const serviceSongClear = event.target.closest("[data-service-song-clear]");
-  if (serviceSongClear) {
-    clearServiceSongForItem(Number(serviceSongClear.dataset.serviceSongClear));
-    return true;
-  }
+
   const serviceSongRetry = event.target.closest("[data-service-song-retry]");
   if (serviceSongRetry) {
     const songId = serviceSongRetry.dataset.serviceSongRetry;
