@@ -4339,4 +4339,4 @@ explicit stop. Switching the selected output must not stop either worship. The
 administrator remains attached to the actual output when the PC browses another
 service. Guest six-digit pairing remains separate; concurrent controllers share
 revision/serialization protection. See `presenter-remote-design.md` for security,
-expiry and the pending production provisioning/publication boundary.
+expiry and production verification/publication status.

@@ -198,8 +198,9 @@ PC에서 허용하도록 안내한다. PPTX 내장 영상·배경 영상은 이 
 
 ## PIN administrator / all active outputs · 2026-10-24
 
-Implementation prepared; production migration, PIN provisioning and publication
-are NOT completed. This supersedes email identification for remote administration
+Production migration and PIN provisioning were completed by the operator on
+2026-10-24. Live RPC verification confirmed PIN login, authorized listing, invalid
+administrator/host rejection and logout. Publication is tracked separately in the release receipt. This supersedes email identification for remote administration
 only; it does not change general app login/RLS or require prior PC registration.
 
 The administrator enters a PIN on Remote, sees active outputs, and selects one.
@@ -250,4 +251,5 @@ isolation, readiness, wrong-owner refusal and stale leases. Chromium/WebKit smok
 covers PIN UI, encrypted two-output control, switching without stopping, selected
 output stop and logout; real host-adapter coverage includes administrator/guest
 stale-command rejection and editing another service. Physical phones, OS sleep and
-production installation remain separate checks.
+public deployment remain separate checks. Host registration restarts after a
+page restored from the browser back/forward cache, using a fresh output identity.

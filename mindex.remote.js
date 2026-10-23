@@ -130,12 +130,13 @@
  $('[data-remote-end]').onclick=async()=>{if(ending)return;ending=true;paintPanel();const old=session;session=null;try{await old?.end();}finally{ending=false;}$('[data-remote-code]').textContent='';$('[data-remote-help]').textContent='';$('[data-remote-start]').disabled=false;$('[data-remote-end]').disabled=true;paintPanel();};
  window.addEventListener('pagehide',()=>session?.close());
  // Each actual output gets its own ephemeral registry identity; no PC registration.
- let registry=null,registryLoading=false;
- const registryTimer=setInterval(async()=>{
-  if(registry||registryLoading||!state.client||!isPresenterOutputWindowOpen())return;
-  registryLoading=true;
+ let registry=null,registryLoading=false,registryActive=true,registryEpoch=0;
+ async function ensureRegistry(){
+  if(!registryActive||registry||registryLoading||!state.client||!isPresenterOutputWindowOpen())return;
+  registryLoading=true;const epoch=registryEpoch;
   try{
    const {createOutputRegistry}=await import('./mindex.remote-admin.mjs?v=1');
+   if(!registryActive||epoch!==registryEpoch)return;
    registry=createOutputRegistry(()=>{
     const p=state.presenter;
     if(!state.client||!presenterControllerIsLive(p.serviceId)||!isPresenterOutputWindowOpen())return null;
@@ -144,8 +145,10 @@
      info:{title:service?.title||service?.name||'예배',device:document.getElementById('monitorName')?.value||'송출 PC',position:`${p.index+1} / ${p.slides.length}`}};
    });
   }catch{}finally{registryLoading=false;}
- },2000);
- window.addEventListener('pagehide',()=>{clearInterval(registryTimer);registry?.close();});
+ }
+ let registryTimer=setInterval(ensureRegistry,2000);
+ window.addEventListener('pagehide',()=>{registryActive=false;registryEpoch++;clearInterval(registryTimer);registry?.close();registry=null;});
+ window.addEventListener('pageshow',()=>{if(registryActive)return;registryActive=true;registryTimer=setInterval(ensureRegistry,2000);void ensureRegistry();});
  // Read-only adapter entry is also used by isolated regression tests.
  window.MindexRemote={adapter,buttonLabel,open:()=>panel.showModal()};
  paintPanel();
