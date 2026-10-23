@@ -1324,3 +1324,8 @@ Chromium/WebKit 각각 전체1203판본과 기존 예배 참조350개의 출력 
 최신 묶음 후보443판본·1626단위는 backups/20261023-independent-amen/{bundle-plan,bundle-expected,bundle-candidate-ledger}.json. 최신 읽기 결과에 이전 후보를 CAS 대조하여 반영했으며 별도 예배 변경은 보존했다. 이전 slide-final 후보만 단독 적용하지 말 것. 공개 대장/runtime은 실제 DB 적용·readback 때 함께 갱신한다. Main push/Pages 게시 대기 조율도 준수한다.
 
 증빙: docs/independent-amen-types-staged-20261023.json.
+
+
+## 2026-10-23 찬송가 비교 카드의 마디 문구 제거 / 미배포
+
+사용자 요청으로 버전 비교 카드 아래의 renderVersionMusicalStructure 호출을 제거했다. 마디: 미확인뿐 아니라 같은 위치의 마디 상태 줄 전체를 제거하며, 메타데이터 편집창의 전용 마디 수 항목과 검토 자료는 유지한다. 새574/통303, 새109/통109, 새241/통232를 최신 묶음 후보로 메모리에서 열어 실제 가사 비교 UI를 캡처했다. Chromium/WebKit 모두 카드 아래 마디 문구 없음과 메타데이터 전용 필드 유지 확인. 가사/운영 DB/실제 예배 쓰기 없음. runtime 재생성, 배포 대기 유지. 개인 캡처: backups/20261023-hymn-comparison-examples/.

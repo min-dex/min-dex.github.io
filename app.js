@@ -17822,7 +17822,6 @@ function renderVersionTitleContent(song, version, forms, options = {}) {
       <button class="version-delete-btn" type="button" data-delete-version="${escapeAttr(version?.id || "")}" aria-label="${escapeAttr(versionEditableName(song, version))} 버전 삭제" title="${song.versions.length <= 1 ? "마지막 버전은 삭제할 수 없습니다" : "버전 삭제"}" ${song.versions.length <= 1 ? "disabled" : ""}><i data-lucide="trash-2"></i></button>
       </div>
     </div>
-    ${renderVersionMusicalStructure(version, forms)}
   `;
 }
 
