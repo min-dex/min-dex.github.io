@@ -27,9 +27,9 @@ CSS_SCREENS = {
     'styles.monitor.css': ('smoke_monitor.py', 'smoke_monitor_session.py',
                            'smoke_monitor_isolation.py', 'smoke_theme_switch.py'),
     'remote.css': ('smoke_presenter_remote.py', 'smoke_remote_phone.py',
-                   'smoke_remote_preview.py', 'smoke_remote_lifecycle.py'),
+                   'smoke_remote_preview.py', 'smoke_remote_lifecycle.py', 'smoke_remote_video.py'),
     'remote.shared.css': ('smoke_presenter_remote.py', 'smoke_remote_phone.py',
-                          'smoke_remote_preview.py', 'smoke_remote_lifecycle.py'),
+                          'smoke_remote_preview.py', 'smoke_remote_lifecycle.py', 'smoke_remote_video.py'),
 }
 CSS_NODE_TESTS = ('test_app_runtime.cjs', 'test_ui_icons.cjs',
                   'test_remote_theme.cjs', 'test_bulletin.cjs')
