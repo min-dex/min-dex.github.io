@@ -55,8 +55,8 @@ def main():
                     page.evaluate('state.serviceMusic.fadeStopEnabled=true;renderGlobalPlaybackControls()')
                     launcher=page.locator('[popovertarget="globalPlaybackPanel"]').first
                     assert launcher.inner_text()==''
-                    assert launcher.get_attribute('aria-label')=='음악 관리'
-                    assert launcher.get_attribute('title')=='음악 관리'
+                    assert launcher.get_attribute('aria-label')=='미디어 관리'
+                    assert launcher.get_attribute('title')=='미디어 관리'
                     assert launcher.evaluate("""button=>{
                       const peer=document.getElementById('themeBtn');
                       const a=getComputedStyle(button), b=getComputedStyle(peer);

@@ -9661,4 +9661,12 @@ body:has(#servicePresenterControls[data-focus-view="false"]):has([data-presenter
 #remotePanelBtn[data-remote-pairing="true"] [data-remote-button-label] { display:inline; }
 [data-remote-button-label] { font-variant-numeric:tabular-nums; }
 
+/* One media popover shared by both presenter views. */
+.global-media-section + .global-media-section { border-top:1px solid var(--line); margin-top:15px; padding-top:15px; }
+.global-media-section h3 { margin:15px 0 10px; font-size:var(--ui-label-size); font-weight:var(--ui-label-weight); }
+.global-media-section + .global-media-section h3 { margin-top:0; }
+.global-media-section .global-playback-group { padding-top:0; min-width:0; }
+.global-media-section .global-playback-empty { padding-top:0; }
+.global-media-section > .global-playback-state { margin:5px 0 10px; }
+
 .praise-forms-panel .version-move-btn { width: 30px; height: 30px; }
