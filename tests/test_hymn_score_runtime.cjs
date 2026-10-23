@@ -41,7 +41,7 @@ function extractFunction(name) {
 }
 Object.assign(context, {
   compactSearchValue: value => String(value).replace(/\s+/g, '').toLowerCase(),
-  presenterScoreFormPresetLabels: item => item.labels || [],
+  presenterScoreFormSequence: item => ({forms: item.labels || [], titleSequence: true}),
   presenterFormDisplayLabel: form => form.label,
 });
 vm.runInContext(fs.readFileSync(path.join(__dirname, '../mindex.worship-model.js'), 'utf8'), context);
