@@ -139,3 +139,5 @@ records above for the retained repair evidence and Git reference.
 - [새331–350·연결 통일판 검토](hymn-measures-331-350-review-20261023.json): 36판본 중 확정34·보류2. 누적560·자유박자4·미확인639. 후보564 검증·미배포, 다음 새351.
 
 - [새351–370·연결 통일판 검토](hymn-measures-351-370-review-20261023.json): 39판본 중 확정35·보류4. 누적595·자유박자4·미확인604. 후보599 검증·미배포, 다음 새371.
+
+- [남은 찬송가 전체 범위 대조](hymn-measures-remaining-review-20261023.json): 610판본 검토. 누적 수치1150·낭송형6·보류47, 후보1156 검증. 전곡 수치 확정 아님; 미배포.
