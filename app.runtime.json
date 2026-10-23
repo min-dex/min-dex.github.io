@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261024-prayer-volume-bible-cleanup",
+  "version": "20261024-empty-form-default",
   "options": {
     "compress": false,
     "mangle": {

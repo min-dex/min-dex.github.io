@@ -109,6 +109,20 @@ try:
     }
     check(backgroundCases>=20,'background matrix did not exercise templates');
     state.services=[service];
+    const emptyDefaultItem={id:'empty-default',label:'찬양 2',_worshipSectionKey:'praise',song_id:song.id,version_id:version.id,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db'})};
+    version.forms.splice(1,0,{id:'prechorus',part_type:'Pre-Chorus',lyrics:'프리코러스'});
+    song.metadata={presenter_form:{strength:'song-default'}};
+    const emptyBefore=JSON.stringify({song,item:emptyDefaultItem});
+    check(input(emptyDefaultItem).value==='' && input(emptyDefaultItem).placeholder==='T-V-PC-C','empty registered preset must not become title-only');
+    const emptyPlan=presenterFormPlanForServiceItem(version,emptyDefaultItem,song);
+    check(emptyPlan.forms.map(f=>f._presenterTitle?'T':f.id).join(',')==='T,verse,prechorus,chorus','empty metadata keeps complete playback');
+    check(JSON.stringify({song,item:emptyDefaultItem})===emptyBefore,'empty preset read mutated data');
+    const emptyLinked={...emptyDefaultItem,song_id:null,version_id:null};
+    linkServiceItemToPraiseSong(emptyLinked,song,service);
+    check(!parseServiceItemMemo(emptyLinked.memo).formPreset,'empty default copied phantom Title on linking');
+    applyServiceItemMetadataField(emptyDefaultItem,{dataset:{serviceItemField:'form_hint'},value:'T'},service);
+    check(input(emptyDefaultItem).value==='T' && presenterFormPlanForServiceItem(version,emptyDefaultItem,song).forms.length===1,'intentional title-only must remain');
+    version.forms.splice(1,1);
     song.metadata={presenter_form:{forms:['C','V1'],strength:'song-default'}};
     const registered={id:'registered',label:'찬양 1',_worshipSectionKey:'praise',song_id:song.id,version_id:version.id,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db'})};
     check(input(registered).value==='T-C-V1','registered main default filled');

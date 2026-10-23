@@ -4394,3 +4394,14 @@ follows that output even when the PC selects another service. Administrator PIN
 access and its independent session remain unchanged. This supersedes the prior
 six-digit/two-minute guest pairing UI; see the remote contract for recovery and
 rollout limits.
+
+## Empty song-default form metadata · 2026-10-24
+
+A metadata object containing only `strength: song-default` (or an empty forms/hint)
+is not an authored sequence. Normalize it to no preset, so the input stays empty
+and shows the actual inferred sequence as its placeholder instead of a phantom
+`T`. Preserve explicit Title-only sequences and explicit empty title policy.
+Reproduced with the 10/25 third-service second-song metadata, using read-only
+production inspection; no worship/song records changed. Local model checks and
+Chromium/WebKit placeholder/output/link/clear/save and Title regression coverage
+verify the fix. Web publication remains pending.

@@ -79,3 +79,10 @@ assert.equal(titlePreset.titleSequence,true);
 assert.equal(context.normalizeServiceFormPreset({...titlePreset,forms:['V1'],hint:'V1'}).titleSequence,true);
 assert.equal(context.normalizeServiceFormPreset('V1-C').titleSequence,undefined);
 console.log('PASS Title normalization, explicit policy persistence and legacy Tag preservation');
+
+for (const empty of [null, '', {}, {strength:'song-default'}, {forms:[],hint:'',strength:'song-default'}]) {
+  assert.equal(context.normalizeSongMetadataPresenterForm(empty),null);
+}
+assert.equal(context.normalizeSongMetadataPresenterForm('T').forms.join('-'),'T');
+assert.equal(context.normalizeSongMetadataPresenterForm({forms:[],titleSequence:true}).titleSequence,true);
+console.log('PASS empty song-default metadata is not a sequence; explicit title policy retained');

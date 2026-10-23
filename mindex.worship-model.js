@@ -433,7 +433,10 @@ function normalizeSongMetadataPresenterForm(value) {
       );
     }
   }
-  return normalizeServiceFormPreset(value, "", "song-default");
+  const preset = normalizeServiceFormPreset(value, "", "song-default");
+  // Flags left after clearing metadata are not an authored playback sequence.
+  // Preserve an explicit empty title policy, which intentionally suppresses Title.
+  return preset?.forms?.length || preset?.titleSequence ? preset : null;
 }
 
 function normalizeServiceFormPresetRules(value) {
