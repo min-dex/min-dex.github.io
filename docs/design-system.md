@@ -209,3 +209,9 @@ The personal remote page omits repeated code instructions, target-PC footer and
 normal wake-lock narration. Keep actionable connection/error feedback and
 wake-lock failure/retry visible. Installation help stays collapsed and brief.
 Empty status regions occupy no space; phone touch target sizes are unchanged.
+
+## Remote identity ·2026-10-23
+
+Use one compact Mindex Remote heading with the existing mindex-cross.svg mark
+(20×25px) in the shared accent color. Avoid repeated wordmarks or explanatory
+subtitles; status text only appears when present.
