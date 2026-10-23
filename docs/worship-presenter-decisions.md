@@ -4077,6 +4077,18 @@ The atomic save path persists edited sequences normally; no bulk DB migration ru
 Title entries do not consume lyric occurrence keys or photo-placement signatures;
 version audio page boundaries remain intact when a default title is prepended.
 
+
+## Remote video transport and PC races ·2026-10-23
+
+Remote commands include presenter transport and music execution sequence in the
+state signature, preventing an old command after a local out-and-back action.
+Native slide video transport exposes play/pause/restart on the controller page;
+PC output acknowledges actual media completion. Commands bind to output client,
+session, message/frame and media revision, deduplicate across transports and
+expire after1.8 seconds. Restart seeks to zero and plays; pause preserves position.
+No media stream is sent to the phone. Browser autoplay rejection is explicit.
+PPTX embedded media/background loops retain their existing playback behavior.
+
 ## Full-height confession marker ·2026-10-23
 
 Fullscreen community-confession markers now fill the full inline text box,

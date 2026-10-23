@@ -37,7 +37,7 @@ class CloudShards(unittest.TestCase):
 
     def test_measured_load_is_balanced_and_unknown_tests_are_retained(self):
         timings = json.loads((ROOT / 'cloud/smoke_timings.json').read_text())
-        loads = [sum(timings.get(name, 0) for name in gate.selected_tests(i, 4)) + (7 if i == 0 else 0) for i in range(4)]
+        loads = [sum(timings.get(name, 10) for name in gate.selected_tests(i, 4) if name in gate.SMOKES) + (7 if i == 0 else 0) for i in range(4)]
         self.assertLess(max(loads) - min(loads), 10)
         with patch.object(gate, 'SMOKES', gate.SMOKES + ('new_offline_fixture.py',)):
             combined = [name for i in range(4) for name in gate.selected_tests(i, 4)]

@@ -83,7 +83,7 @@ try:
     phone.set_viewport_size({'width':width,'height':844});pump(.1)
     assert phone.evaluate('document.documentElement.scrollWidth<=innerWidth'),f'overflow {width}'
     assert phone.locator('[data-action=next]').bounding_box()['height']==70
-    for button in phone.locator('[data-action]').all():
+    for button in phone.locator('[data-action]:visible').all():
      assert button.locator('svg').count()==1
      assert button.evaluate('e=>e.scrollWidth<=e.clientWidth')
      icon=button.locator('svg')
@@ -105,6 +105,19 @@ try:
    # A local change between displayed state and command rejects the stale request.
    ready('next');host.evaluate('state.presenter.index=2');phone.click('[data-action=next]');pump()
    assert '바뀌었습니다' in phone.locator('#result').inner_text()
+   # Encrypted video transport and phone touch targets; actual media is tested separately.
+   host.evaluate("window.remoteVideo={status:'paused',ready:true,revision:0,identity:'fixture'};presenterRemoteVideoState=()=>remoteVideo;requestPresenterVideoCommand=async(sid,action)=>{remoteCalls.push('video-'+action);remoteVideo.status=action==='pause'?'paused':'playing';remoteVideo.revision++;};void 0")
+   for action in ('video-play','video-pause','video-restart'):
+    ready(action);phone.click(f'[data-action="{action}"]');pump();assert phone.locator('#result').inner_text()=='처리 완료',action
+    assert host.evaluate('remoteCalls.at(-1)')==action
+   for width in (320,390,768):
+    phone.set_viewport_size({'width':width,'height':844});pump(.1)
+    assert phone.evaluate('document.documentElement.scrollWidth<=innerWidth')
+    for button in phone.locator('#videoControls button').all():
+     assert button.bounding_box()['height']==50
+     assert button.evaluate('e=>e.scrollWidth<=e.clientWidth')
+     assert button.locator('svg').bounding_box()['width']==16
+   host.evaluate('remoteVideo=null');pump(1.2);assert phone.locator('#videoControls').is_hidden()
    # No audio/media objects on the remote page.
    assert phone.locator('audio,video').count()==0
    assert phone.locator('.slide-preview iframe').count()==2

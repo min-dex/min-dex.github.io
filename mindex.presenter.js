@@ -3058,6 +3058,12 @@ function handlePresenterControllerMessage(message = {}) {
   if (["presenter-ready", "presenter-heartbeat"].includes(message.type)) {
     state.presenter.outputTransportVersion = Number(message.transportVersion) || 0;
   }
+  if (message.type === "presenter-video-result") {
+    const pending = presenterVideoRequests.get(message.requestId);
+    if (!pending || pending.clientId !== message.clientId || pending.outputSessionId !== message.outputSessionId) return;
+    pending.finish(message);
+    return;
+  }
   if (message.type === "presenter-ready") {
     markPresenterOutputConnected(message.clientId);
     const restoreState = restorePresenterControllerSession();
@@ -3697,8 +3703,21 @@ function initPresenterOutputCore() {
       return false;
     }
   };
+  const videoCommandReceipts = new Map();
   let lastVideoRetryId = "";
   const handleOutputSignalMessage = (message = {}) => {
+    if (message.type === "presenter-video-command") {
+      if (message.clientId !== outputClientId || message.outputSessionId !== outputSessionId
+        || typeof message.requestId !== "string" || message.requestId.length > 80) return;
+      let receipt = videoCommandReceipts.get(message.requestId);
+      if (!receipt) {
+        receipt = executePresenterVideoCommand(message, () => currentPayload);
+        videoCommandReceipts.set(message.requestId, receipt);
+        if (videoCommandReceipts.size > 64) videoCommandReceipts.delete(videoCommandReceipts.keys().next().value);
+      }
+      receipt.then(result => { sendControllerMessage({type:"presenter-video-result",clientId:outputClientId,requestId:message.requestId,...result});postHeartbeat(); });
+      return;
+    }
     if (message.type === "presenter-video-retry") {
       if (message.clientId !== outputClientId || !message.requestId || message.requestId === lastVideoRetryId) return;
       lastVideoRetryId = message.requestId;
@@ -3747,7 +3766,7 @@ function initPresenterOutputCore() {
   if (channel) {
     renderFreshStoredState();
     channel.onmessage = (event) => {
-      if (event.data?.type === "presenter-video-retry") {
+      if (["presenter-video-retry", "presenter-video-command"].includes(event.data?.type)) {
         handleOutputSignalMessage(event.data);
         return;
       }
@@ -4853,16 +4872,89 @@ function preparePresenterOutputFrameForPaint(host) {
   return Promise.all([...imageReady, ...videoReady]);
 }
 
+const presenterVideoRevisions = new WeakMap();
+const presenterVideoRequests = new Map();
+
+function presenterRemoteVideoState(serviceId) {
+  const p = state.presenter, health = p.videoHealth;
+  if (!health || health.serviceId !== serviceId || p.serviceId !== serviceId || health.index !== p.index
+    || p.safetyBlank || p.liveScripture?.active) return null;
+  const ready = Date.now() - health.receivedAt <= 2500 && ["playing","paused","ended","blocked"].includes(health.status)
+    && Number.isSafeInteger(health.revision) && Boolean(health.messageId)
+    && health.messageId === presenterTransportLatest?.payload?.messageId;
+  return {status:health.status,ready,revision:health.revision,identity:compactTextSignature(health.frameKey)};
+}
+
+function requestPresenterVideoCommand(serviceId, action) {
+  const health = state.presenter.videoHealth;
+  if (!["play","pause","restart"].includes(action) || !presenterRemoteVideoState(serviceId)?.ready)
+    return Promise.reject(Error("영상의 최신 상태를 확인한 뒤 다시 눌러 주세요."));
+  const outputSessionId = state.presenter.outputSessionId, requestId = crypto.randomUUID();
+  const message = {type:"presenter-video-command",action,requestId,outputSessionId,clientId:health.clientId,expiresAt:Date.now()+1800,
+    serviceId,index:health.index,frameKey:health.frameKey,messageId:health.messageId,revision:health.revision,status:health.status};
+  return new Promise((resolve,reject) => {
+    const finish = result => {
+      clearTimeout(timer);presenterVideoRequests.delete(requestId);
+      if (state.presenter.outputSessionId !== outputSessionId || state.presenter.serviceId !== serviceId
+        || state.selectedServiceId !== serviceId || state.presenter.index !== message.index
+        || presenterTransportLatest?.payload?.messageId !== message.messageId)
+        return reject(Error("송출 상태가 바뀌었습니다. 현재 화면을 확인해 주세요."));
+      if (result.health) state.presenter.videoHealth={...result.health,clientId:health.clientId,receivedAt:Date.now()};
+      if (result.ok) resolve();else reject(Error(result.message || "영상 조작을 확인하지 못했습니다."));
+    };
+    const timer=setTimeout(()=>finish({ok:false,message:"영상 응답을 확인하지 못했습니다. 현재 화면을 확인해 주세요."}),1800);
+    presenterVideoRequests.set(requestId,{clientId:health.clientId,outputSessionId,finish});
+    try { state.presenter.outputWindow?.postMessage(message,window.location.origin); } catch {}
+    try { state.presenter.channel?.postMessage(message); } catch {}
+  });
+}
+
+async function executePresenterVideoCommand(request, getPayload) {
+  const health=presenterOutputVideoHealth(getPayload());
+  const matches=health && ["serviceId","index","frameKey","messageId","revision","status"].every(key=>health[key]===request[key]);
+  if (!matches || getPayload()?.safetyBlank || !Number.isFinite(request.expiresAt) || Date.now()>request.expiresAt
+    || !["play","pause","restart"].includes(request.action))
+    return {ok:false,message:"영상 상태가 바뀌었습니다. 최신 상태에서 다시 눌러 주세요."};
+  const video=document.querySelector("#presenterOutputRoot .presenter-output-layer.is-active video.presenter-video");
+  try {
+    const settle = event => new Promise((resolve,reject) => {
+      const done=()=>{clearTimeout(timer);video.removeEventListener(event,done);resolve();};
+      const timer=setTimeout(()=>{video.removeEventListener(event,done);reject(Error('영상 상태 변경을 확인하지 못했습니다.'));},900);
+      video.addEventListener(event,done,{once:true});
+    });
+    if(request.action==='pause') {
+      if(!video.paused){const paused=settle('pause');video.pause();await paused;}
+    } else {
+      if(request.action==='restart'){const seeked=settle('seeked');video.currentTime=0;await seeked;}
+      const target=presenterOutputVideoHealth(getPayload());
+      if(!video.isConnected || Date.now()>request.expiresAt || getPayload()?.safetyBlank
+        || target?.messageId!==request.messageId || target?.frameKey!==request.frameKey
+        || target.revision!==request.revision+(request.action==='restart'?1:0))
+        throw Error("송출 화면이 바뀌었습니다. 현재 영상을 확인해 주세요.");
+      await video.play();
+    }
+    const current=presenterOutputVideoHealth(getPayload());
+    if (!video.isConnected || !current || current.messageId!==request.messageId || current.frameKey!==request.frameKey)
+      throw Error("송출 화면이 바뀌었습니다. 현재 영상을 확인해 주세요.");
+    if(request.action!=='pause'&&video.paused)throw Error("송출 PC에서 영상 재생을 허용해 주세요.");
+    return {ok:true,health:current};
+  } catch(error) {return {ok:false,message:error?.name==='NotAllowedError'?"송출 PC에서 영상 재생을 허용해 주세요.":String(error.message||error)};}
+}
+
 function presenterOutputVideoHealth(payload) {
   const layer = document.querySelector("#presenterOutputRoot .presenter-output-layer.is-active");
   const video = layer?.querySelector("video.presenter-video");
   if (!video || !payload?.serviceId) return null;
+  if (!presenterVideoRevisions.has(video)) {
+    const record={value:0};presenterVideoRevisions.set(video,record);
+    for(const event of ['play','pause','seeking','ended','emptied'])video.addEventListener(event,()=>record.value++);
+  }
   const status = video.error ? "error" : video.ended ? "ended"
     : video.paused && video.dataset.autoplayBlocked === "true" ? "blocked"
     : video.readyState < HTMLMediaElement.HAVE_FUTURE_DATA ? "loading"
       : video.paused ? "paused" : "playing";
   return { serviceId: payload.serviceId, index: payload.index,
-    frameKey: layer.dataset.presenterFrameKey || "", status };
+    frameKey: layer.dataset.presenterFrameKey || "", messageId:payload.messageId || "", revision:presenterVideoRevisions.get(video).value, status };
 }
 
 async function retryPresenterOutputVideo(request, payload) {
