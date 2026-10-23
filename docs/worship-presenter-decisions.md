@@ -4128,3 +4128,11 @@ lyrics and versions are untouched; this is an effective-sequence migration at lo
 Controller Title and instrumental groups retain their labels, thumbnails, grouping
 and navigation, with no group background box. They do not consume the lyric
 group color cycle. Verse/chorus/other form backgrounds and output remain unchanged.
+
+### Main praise input flow · 2026-10-23
+
+Main praise controller inputs use one wrapping flex row instead of the old
+1120px container rule that forced version, form and assignee onto separate rows.
+Mode/version use compact 130px bases; title and form share remaining width.
+Only controls that no longer fit wrap; expanded photo tools keep a full row.
+The single-song DB shortcut remains in the heading. Saving/data behavior is unchanged.
