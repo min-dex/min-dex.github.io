@@ -3967,3 +3967,13 @@ Input feedback is announced outside layout; the fixed Save button retains its
 label/width and exposes busy/retry status through accessibility/title and disabled
 state. Existing save-failure notification remains. Source editing/history is
 retained: it supports partial text editing/recovery, not full worship backup.
+### Praise title scope correction · 2026-10-23
+
+Standard fullscreen praise retains its sequence heading, inline note/main title
+and authored original/subtitle. Only an explicit
+`source_ref.presentationDesign.songTitleStyle: "note-title"` selects a separate
+note above one main title and hides detail. An unrelated service design, special
+service type or theme does not select this composition. Both output and previews
+read the same saved choice. Its spacing/accent selectors are scoped to the
+selected composition; no event IDs or names are used. Chapel data alone selects
+this choice; other service records are not rewritten.

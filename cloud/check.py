@@ -70,6 +70,7 @@ SMOKES = (
     "smoke_announcement_type.py",
     "smoke_children_theme.py",
     "smoke_presenter_remote.py",
+    "smoke_remote_preview.py",
     "smoke_remote_phone.py",
     "smoke_remote_panel.py",
     "smoke_remote_lifecycle.py",

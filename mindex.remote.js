@@ -20,6 +20,31 @@
  $('[data-remote-close]').onclick=()=>panel.close();trigger.onclick=()=>panel.showModal();
  const text=s=>[s?.title,s?.body||s?.text||s?.bodyText||s?.content].filter(v=>typeof v==='string').join('\n').slice(0,1800);
  function adapter(serviceId,outputSession,outputWindow){
+  let previewRevision,previews=new WeakMap();
+  function preview(slide){
+   if(!slide?.type)return '';
+   if(previewRevision!==state.presenter.sourceSignature){previewRevision=state.presenter.sourceSignature;previews=new WeakMap();}
+   if(previews.has(slide))return previews.get(slide);
+   let html='';
+   try{
+    const template=document.createElement('template');template.innerHTML=renderPresenterSlideMiniPreview(slide,serviceId);
+    template.content.querySelectorAll('script,style,link,meta,base,iframe,object,embed,audio,video,form,input,button').forEach(el=>el.remove());
+    for(const el of template.content.querySelectorAll('*')){
+     for(const attr of [...el.attributes])if(/^on/i.test(attr.name)||['href','srcdoc','srcset'].includes(attr.name))el.removeAttribute(attr.name);
+     if(el.tagName==='IMG')el.setAttribute('loading','eager');
+     if(el.hasAttribute('src')){
+      const url=new URL(el.getAttribute('src'),location.href);
+      if(['https:','http:'].includes(url.protocol))el.setAttribute('src',url.href);else el.removeAttribute('src');
+     }
+     if(/(?:blob:|data:|file:|javascript:)/i.test(el.getAttribute('style')||''))el.removeAttribute('style');
+    }
+    const stage=document.createElement('div');stage.style.cssText='position:fixed;left:-10000px;top:0;width:1920px;height:1080px;visibility:hidden;pointer-events:none';
+    stage.append(template.content);document.body.append(stage);
+    try{if(typeof fitPresenterPreviewText==='function')fitPresenterPreviewText(stage);html=stage.innerHTML;}finally{stage.remove();}
+    if(new TextEncoder().encode(JSON.stringify(html)).length>4500)html='';
+   }catch{}
+   previews.set(slide,html);return html;
+  }
   function context(){
    const p=state.presenter,m=state.serviceMusic,slide=p.slides[p.index],sync=slide?.syncTimeline;
    const own=!!m.sourceKey&&(m.ownerServiceId===serviceId||(!m.ownerServiceId&&m.mode==='presenter-audio'&&sync?.audioSrc&&normalizePresenterMediaSource(sync.audioSrc)===normalizePresenterMediaSource(m.sourceKey)));
@@ -38,6 +63,7 @@
    }
    const next=p.slides.slice(p.index+1).find(s=>!presenterSlideIsHidden(s));
    return {live,index:p.index,total:p.slides.length,blank:!!p.safetyBlank,current:text(p.liveScripture?.active?p.liveScripture.slide:slide),next:text(next),allowed,
+    previewCurrent:p.safetyBlank?'<div style="width:100%;height:100%;background:#000"></div>':preview(p.liveScripture?.active?p.liveScripture.slide:slide),previewNext:preview(next),
     music:!own&&!intro?'연결된 음원 없음':m.pending?'음원 준비 중':m.fadeStop?'페이드아웃 중':`${m.playing?'재생 중':'정지 / 일시정지'}${sync?.localTiming?m.autoSyncSuspended?' · 자동 넘김 해제':' · 자동 넘김':''}`,
     // Compare identities without disclosing media URLs or the full worship source.
     version:compactTextSignature(JSON.stringify([p.sourceSignature,m.sourceKey,m.timingGroupId,m.mode,p.livePraise,p.liveScripture?.active]))};
