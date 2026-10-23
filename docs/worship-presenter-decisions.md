@@ -4365,3 +4365,22 @@ service palette. Gold #cba56a belongs only to authored presentationDesign
 songTitleStyle note-title. Other fullscreen titles inherit the shared output
 foreground (white or brown), identically in thumbnails and output. Chromakey
 and all saved service/song content are unchanged.
+
+
+## Liturgical praise content-title restoration ·2026-10-24
+
+Entrance, offering, response, prayer, sending/doxology and closing praise use the
+ordinary order/content title layout in both chromakey and fullscreen output.
+An entrance element inside a main praise section keeps its actual liturgical
+role; a section container alone must not grant it a default T. Explicit stored
+T positions still own sequence order, but render the same order/content layout
+for these roles. Content headings are not relabelled as implicit T forms.
+
+Inline musical title notes normalize to the single eighth note ♪ in chromakey
+song titles and order/content titles. The separate note above main/special
+fullscreen song titles keeps ♬. Older order/content snapshots remain two-level
+when rendered fullscreen. No operational data or saved song forms are rewritten.
+
+Read-only retained-snapshot audit found64 special-song elements:48 lyrics DB,
+15 manual lyrics and1 manual audio; no score DB special-song instances. Earlier
+score support described capability coverage, not a claim of existing usage.

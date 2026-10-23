@@ -39,7 +39,7 @@ try:
                     memo:serializeServiceItemMemo({elementType:'praise',inputMode:'score_db',outputMode:'score',asset:{kind:'score',slides:images},formPreset:preset,formPresetDisabled:disabled})};
                   const before=JSON.stringify({item,song});
                   const slides=buildPresenterSlidesForServiceItem(item,service,0,{allowHydration:false});
-                  const titles=slides.filter(s=>s.type==='song-title'||s.songTitle);
+                  const titles=slides.filter(s=>normalizePresenterFormPresetLabel(s.formLabel).type==='title');
                   check(titles.length===wanted,label+' '+name+' title count '+JSON.stringify(slides.map(s=>({type:s.type,title:s.title,form:s.formLabel,songTitle:s.songTitle}))));
                   check(slides.filter(s=>s.type==='image').length===(name==='title-only'?0:2),label+' '+name+' score pages lost '+JSON.stringify(slides.map(s=>({type:s.type,src:s.imageSrc,title:s.title}))));
                   check(new Set(slides.map(s=>s.id)).size===slides.length,'duplicate IDs');

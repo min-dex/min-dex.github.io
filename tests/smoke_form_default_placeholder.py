@@ -11,7 +11,7 @@ try:
    page.goto(url+'?mindexSmokeRaw=1');page.wait_for_function("typeof serviceItemDefaultFormHint==='function' && !document.body.classList.contains('ui-booting')")
    print(engine,page.evaluate('''() => {
     const check=(ok,m)=>{if(!ok)throw Error(m)};
-    const version={id:'v',name:'기본',praise_types:['ccm'],forms:[{id:'verse',part_type:'Verse',part_number:1,lyrics:'첫 절'},{id:'chorus',part_type:'Chorus',lyrics:'후렴'}]};
+    const version={id:'v',name:'기본',_worshipVersionPersisted:true,praise_types:['ccm'],forms:[{id:'verse',part_type:'Verse',part_number:1,lyrics:'첫 절'},{id:'chorus',part_type:'Chorus',lyrics:'후렴'}]};
     const song={id:'s',title:'기본 송폼 검증',praise_types:['ccm'],versions:[version],_relationalVersionsLoaded:true};
     state.songs=[song];
     const service={id:'svc',type_id:'fixture',date:'2000-01-01'};state.services=[service];
@@ -30,6 +30,40 @@ try:
      applyServiceItemMetadataField(item,{dataset:{serviceItemField:'form_hint'},value:''},service);
      check(input(item).value==='' && !serviceElementConfigForSave({},parseServiceItemMemo(item.memo)).formPreset,'clearing restores empty input');
     }
+    for(const [label,key] of [['입례찬양','praise'],['입례 찬양','praise'],['입례찬양','entrance_praise'],['성경봉독 전 찬양','pre_scripture_praise'],['봉헌찬송','offering'],['봉헌찬양','offering'],['결단찬양','response_song'],['기도찬양','prayer_meeting_praise'],['송영','sending'],['파송찬양','sending'],['폐회찬송','closing_visual']]) {
+     for(const mode of ['lyrics_db','score_db','manual_praise','audio_praise']) {
+      for(const sequence of [null,['T','V1','C'],['V1','T','C']]) {
+       const direct=['manual_praise','audio_praise'].includes(mode);
+       state.songs=[mode==='score_db'?{...song,hymn_no:'9',praise_types:['hymn'],versions:[{...version,name:'새찬송가',hymn_no:'9',praise_types:['hymn']}]}:song];
+       const expectedTitle=(mode==='score_db'?'9 ':'')+song.title;
+       const item={id:'content-'+label+'-'+mode,service_id:service.id,label,_worshipSectionKey:key,raw_title:song.title,
+        song_id:direct?null:song.id,version_id:direct?null:version.id,_worshipElementTemplateModified:true,
+        memo:serializeServiceItemMemo({elementType:'praise',inputMode:mode,outputMode:mode==='score_db'?'score':'lyrics',
+         ...(direct?{slides:['첫 절','후렴']}:{}),
+         ...(mode==='score_db'?{asset:{kind:'score',slides:[{url:'/assets/icon-192.png',formLabel:'V1'},{url:'/assets/icon-512.png',formLabel:'C'}]}}:{}),
+         ...(sequence?{formPreset:{forms:sequence,titleSequence:true,strength:'manual'}}:{})})};
+       const original=JSON.stringify(item),slides=buildPresenterSlidesForServiceItem(item,service,0,{allowHydration:false});
+       const headings=slides.filter(slide=>slide.orderTitle && slide.contentTitle);
+       check(headings.length===1 && headings[0].contentTitle==='♪ '+expectedTitle,'content heading missing/duplicate '+label+'/'+mode+'/'+sequence);
+       check(!slides.some(slide=>slide.type==='song-title'),'non-main got main Title '+label+'/'+mode+'/'+sequence+' '+JSON.stringify(slides.map(s=>({type:s.type,label:s.label,sectionKey:s.sectionKey,sectionRole:s.sectionRole,order:s.orderTitle,content:s.contentTitle,form:s.formLabel,reason:s.missingReason}))));
+       check(!sequence || headings[0].formLabel==='T','authored T identity lost');
+       if(!sequence)check(!headings[0].formLabel && !input(item).placeholder.startsWith('T-'),'implicit T added to liturgical praise '+label);
+       for(const noChromakey of [false,true]) {
+        const html=renderPresenterSlideFrame(headings[0],{noChromakey});
+        check(html.includes('presenter-title-assignee--order-content') && html.includes('♪ '+expectedTitle) && !html.includes('presenter-fullscreen-song-heading'),'order/content output lost '+label+'/'+mode+'/'+noChromakey);
+       }
+       check(JSON.stringify(item)===original,'content heading rewrote data');
+      }
+     }
+    }
+    state.songs=[song];
+    const mainTitle=presenterSongTitleSlide({id:'main-title',label:'찬양 1'},{sectionKey:'praise'},song,version,song.title,0);
+    const keyed=renderPresenterSlideFrame(mainTitle,{noChromakey:false}),full=renderPresenterSlideFrame(mainTitle,{noChromakey:true});
+    check(keyed.includes('>♪</span>') && !keyed.includes('♬'),'chromakey inline note must be eighth note');
+    check(full.includes('aria-label="찬양">♬</span>') && !full.includes('♪'),'separate fullscreen note changed');
+    const oldContent={...presenterOrderContentTitleSlide({label:'결단찬양'},{sectionKey:'response_song'},0,'결단찬양','♬ '+song.title),songTitle:song.title};
+    const oldFull=renderPresenterSlideFrame(oldContent,{noChromakey:true});
+    check(oldFull.includes('♪ '+song.title) && !oldFull.includes('presenter-fullscreen-song-heading'),'old order/content snapshot changed to main Title');
     const imported={id:'source-praise',label:'찬양 4',_worshipSectionKey:'source-찬양',_worshipSectionTitle:'찬양',song_id:song.id,version_id:version.id,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formHint:'V1-C',formPreset:{forms:['V1','C'],strength:'manual'}})};
     const importedBefore=JSON.stringify(imported);
     check(isMainPraiseServiceItem(imported) && input(imported).value==='T-V1-C','source praise with saved form restores leading T');

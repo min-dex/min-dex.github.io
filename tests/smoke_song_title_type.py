@@ -20,9 +20,7 @@ def main():
             page.wait_for_function("typeof state !== 'undefined' && !document.body.classList.contains('ui-booting')")
             page.evaluate('document.fonts.ready')
             for chromakey in [True, False]:
-                for key in ['praise', 'pre_scripture_praise', 'entrance_praise',
-                            'response_song', 'prayer_meeting_praise', 'special_song', 'offering',
-                            'hymn_praise', 'doxology', 'sending', 'closing_song', 'closing_hymn', 'closing_visual']:
+                for key in ['praise', 'special_song']:
                     for title in ['임재', '한라에서 백두까지 백두에서 땅끝까지',
                                   '한라에서 백두까지 백두에서 땅끝까지 주님의 사랑을 전하리',
                                   '주의 자녀로 산다는 것은']:

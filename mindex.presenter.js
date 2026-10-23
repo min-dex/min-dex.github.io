@@ -3,6 +3,7 @@
 // owned by app.js and must not be redeclared here; tests/solid_audit.py enforces it.
 
 const PRESENTER_SONG_NOTE = "♬";
+const PRESENTER_INLINE_SONG_NOTE = "♪";
 const PRESENTER_SONG_NOTE_PATTERN = /^[\u2669\u266A\u266B\u266C]\s*/u;
 const PRESENTER_DEFAULT_CHROMAKEY_READY_LOOP_VIDEO = "assets/presenter/chromakey-ready-loop-pingpong.mp4?v=pingpong-20260925-001";
 
@@ -577,6 +578,7 @@ function presenterScoreImageSourcesForFormSequence(imageSources = [], scoreForms
 function presenterDefaultTitleForServiceItem(item = {}, song = null, version = null, { score = false } = {}) {
   if (isServiceConnectedPraiseSecondaryItem(item)) return false;
   if (isPresenterSpecialSongItem(item)) return true;
+  if (presenterSongTitleUsesSectionHeading(item)) return false;
   if (!isMainPraiseServiceItem(item, { allowUnlabeled: true })) return false;
   const memo = parseServiceItemMemo(item.memo);
   const scoreOutput = score || serviceItemOutputMode(item, memo) === "score";
@@ -2417,7 +2419,7 @@ function presenterSlidesWithSongContentHeading(item, section, song, version, dis
   if (!heading || !slides.length || isServiceConnectedPraiseSecondaryItem(item) || slides.some(slide => normalizePresenterFormPresetLabel(slide.formLabel).type === "title" || (slide.orderTitle === heading && slide.contentTitle))) return slides;
   const content = presenterSongTitleDisplayTitle(song, version, displayText);
   if (!content) return slides;
-  return [presenterOrderContentTitleSlide(item, section, index, heading, content), ...slides];
+  return [presenterOrderContentTitleSlide(item, section, index, heading, formatPresenterSongTitleText(content)), ...slides];
 }
 
 function presenterSongTitleSlide(item, section, song, version, displayText, index) {
@@ -2435,6 +2437,10 @@ function presenterSongTitleSlide(item, section, song, version, displayText, inde
     detail: songDetail,
     detailKind: connectedTitle ? "" : presenterSongTitleDetailKind(song, version),
   };
+  if (sectionHeading) {
+    return { ...presenterOrderContentTitleSlide(item, section, index, sectionHeading, titleText),
+      formKey: "title:0", formLabel: "T" };
+  }
   return {
     id: `${item.id || index}:song-title`,
     ...section,
@@ -2582,9 +2588,13 @@ function presenterSongTitleNormalizedHeading(heading = "", sectionKey = "") {
 
 function presenterSongTitleUsesSectionHeading(item = {}, section = {}) {
   if (isPresenterSpecialSongItem(item, section)) return false;
+  const compact = compactSearchValue(item?.label || section.elementLabel || section.sectionLabel || "");
+  if (/^(입례찬양|성경봉독전찬양|송영|파송|봉헌|봉헌찬송|봉헌찬양|파송찬양|파송찬송|결단|결단찬송|결단찬양|기도찬양|기도회찬양|폐회|폐회찬송)$/.test(compact)) return true;
   if (section.sectionRole === "main-praise") return false;
   const sectionKey = String(section.sectionKey || item?._worshipSectionKey || "").trim();
   if ([
+    "entrance_praise",
+    "pre_scripture_praise",
     "hymn_praise",
     "offering",
     "doxology",
@@ -2595,17 +2605,15 @@ function presenterSongTitleUsesSectionHeading(item = {}, section = {}) {
     "closing_hymn",
     "closing_visual",
   ].includes(sectionKey)) return true;
-  const compact = compactSearchValue(item?.label || section.elementLabel || section.sectionLabel || "");
-  if (!compact) return false;
-  return /^(송영|파송|봉헌|봉헌찬송|봉헌찬양|파송찬송|결단|결단찬송|결단찬양|기도찬양|기도회찬양|폐회|폐회찬송)$/.test(compact);
+  return false;
 }
 
 function formatPresenterSongTitleText(title) {
   const cleanTitle = String(title || "").trim();
   if (!cleanTitle) return "";
   return PRESENTER_SONG_NOTE_PATTERN.test(cleanTitle)
-    ? cleanTitle.replace(PRESENTER_SONG_NOTE_PATTERN, `${PRESENTER_SONG_NOTE} `)
-    : `${PRESENTER_SONG_NOTE} ${cleanTitle}`;
+    ? cleanTitle.replace(PRESENTER_SONG_NOTE_PATTERN, `${PRESENTER_INLINE_SONG_NOTE} `)
+    : `${PRESENTER_INLINE_SONG_NOTE} ${cleanTitle}`;
 }
 
 function presenterPraiseTitle(song, fallbackText = "", version = null) {
@@ -5509,6 +5517,7 @@ function presenterServiceDesignForSlide(slide, options = {}) {
 function renderPresenterSlideFrame(slide, options = {}) {
   if (options.noChromakey && !slide?.autoTrailingBlank
     && presenterSlideLayout(slide) !== PRESENTER_SLIDE_LAYOUTS.BLANK
+    && !(slide?.type === "title-assignee" && slide.orderTitle && slide.contentTitle)
     && (slide?.songTitle || (slide?.type === "song-title" && presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE))) {
     const content = presenterSongTitleContent(slide);
     const hideDetail = normalizePresenterServiceDesign(options.presentationDesign)?.songTitleStyle === "note-title";
@@ -5797,7 +5806,8 @@ function renderPresenterTitleAssigneeSlide(slide) {
   const title = String(slide.title || slide.text || slide.label || "").trim();
   const assignee = String(slide.assignee || slide.subtitle || "").trim();
   const orderTitle = String(slide.orderTitle || "").trim();
-  const contentTitle = String(slide.contentTitle || "").trim();
+  const rawContentTitle = String(slide.contentTitle || "").trim();
+  const contentTitle = PRESENTER_SONG_NOTE_PATTERN.test(rawContentTitle) ? formatPresenterSongTitleText(rawContentTitle) : rawContentTitle;
   const titleChars = presenterLineCharEstimate(title);
   const assigneeChars = presenterLineCharEstimate(assignee);
   const orderChars = presenterLineCharEstimate(orderTitle);
@@ -6006,7 +6016,7 @@ function renderPresenterSongText(text, slide) {
   const match = raw.match(/^(\s*)([\u2669\u266A\u266B\u266C])(\s*)(.*)$/u);
   if (!match) return renderPresenterHighlightedText(raw, slide);
   const [, leading, , spacing, rest] = match;
-  return `${escapeHtml(leading)}<span class="presenter-song-note" aria-hidden="true">${escapeHtml(PRESENTER_SONG_NOTE)}</span>${escapeHtml(spacing || " ")}${renderPresenterHighlightedText(rest || " ", slide)}`;
+  return `${escapeHtml(leading)}<span class="presenter-song-note" aria-hidden="true">${escapeHtml(PRESENTER_INLINE_SONG_NOTE)}</span>${escapeHtml(spacing || " ")}${renderPresenterHighlightedText(rest || " ", slide)}`;
 }
 
 function presenterLyricVerseNumber(slide, lines = presenterDisplayLines(slide)) {

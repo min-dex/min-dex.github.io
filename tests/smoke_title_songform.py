@@ -34,7 +34,7 @@ try:
     check(serviceItemEffectiveFormHint(item)==='T-V1-C','legacy sequence exposes title');
     for(const label of ['파송찬양','마침찬양','결단찬양']) {
       const title=presenterSongTitleSlide({...item,label},{sectionKey:'response_song'},song,version,song.title,0);
-      check(title.type==='song-title' && title.formLabel==='T','uniform title for '+label);
+      check(title.type==='title-assignee' && title.formLabel==='T' && title.contentTitle==='♪ '+song.title,'order/content title for '+label);
     }
     const fresh={...item};
     applyServiceItemMetadataField(fresh,{dataset:{serviceItemField:'form_hint'},value:'V1-C'},{});
