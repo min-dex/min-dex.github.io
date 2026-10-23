@@ -74,13 +74,17 @@ try:
    assert page.evaluate('state.recentEdits.length')==2
    page.locator('[data-home-recent-view="work"]').click()
    assert page.locator('.home-recent-list time').count()==0
-   # Every viewport reserves the same recent area in both views, even empty.
+   # Populated views reserve card slots; an empty view collapses to its notice.
    for width in (1280,800,390):
     page.set_viewport_size({'width':width,'height':800})
     page.locator('[data-home-recent-view="work"]').click()
     top=page.locator('.home-module').first.bounding_box()['y']
+    has_work=page.locator('.home-recent-list button').count()>0
+    if not has_work:
+     assert page.locator('.home-recent-list').bounding_box()['height']<50
     page.locator('[data-home-recent-view="edits"]').click()
-    assert abs(page.locator('.home-module').first.bounding_box()['y']-top)<1
+    edits_top=page.locator('.home-module').first.bounding_box()['y']
+    assert abs(edits_top-top)<1 if has_work else edits_top>top
     assert page.locator('.home-recent-note').count()==0
     assert page.locator('.home-recent-list button').first.bounding_box()['height']==80
    page.set_viewport_size({'width':1280,'height':800})
