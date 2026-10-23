@@ -10534,6 +10534,8 @@ function setServiceInputFeedback(editor, status) {
   const button = actions.querySelector("[data-service-item-commit]");
   if (button) {
     const busy = status === "saving";
+    button.title = labels[status] || "저장";
+    button.setAttribute("aria-label", busy ? "저장 중" : status === "error" ? "저장 재시도" : "저장");
     if (button.disabled !== busy) button.disabled = busy;
     if (button.getAttribute("aria-busy") !== String(busy)) button.setAttribute("aria-busy", String(busy));
   }
@@ -31513,7 +31515,8 @@ function renderPresenterBoardItemActions(serviceId, context, options = {}) {
     ? renderPresenterAssetUpload(context.item, context.index, inputContext.memo, serviceId) : "";
   return `
     <div class="svc-board-subgroup-flow" data-service-item-actions data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}">
-      ${options.omitCommit ? "" : `<span class="svc-input-status" data-service-input-status role="status" aria-live="polite"></span>`}
+      ${options.omitCommit ? "" : `<span class="svc-input-status sr-only" data-service-input-status role="status" aria-live="polite"></span>`}
+      ${!options.commitOnly && serviceItemConnectedPraise(context.item)?.groupId ? `<button class="reference-new-btn secondary svc-medley-unlink" type="button" data-service-medley-unlink="${escapeAttr(context.item.id)}" data-service-id="${escapeAttr(serviceId)}" title="곡과 순서를 유지하고 메들리 묶음 해제">메들리 해제</button>` : ""}
       ${options.commitOnly ? "" : fileControls}
       ${!options.commitOnly && photoTiming ? `<button class="btn secondary" type="button" data-song-timing-open data-song-timing-focus="photos"
         data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(context.item.id)}">사진·타이밍 편집</button>` : ""}

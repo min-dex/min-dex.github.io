@@ -3955,3 +3955,15 @@ Remove the35% white mix from Refined common marker geometry. Children markers
 use the authored color unchanged, with the same45–95% coverage and4-stage-pixel
 side padding. Preview/output share the rule; no artwork palettes, outlines or
 stored color changes are introduced.
+
+## Medley unlink and stable save feedback · 2026-10-23
+
+Each connected-song row offers 메들리 해제. It removes grouping from all members,
+preserving IDs, songs, versions, forms, content and order. Deferred field input
+is retained before editor rebuild. This is an unsaved structural edit committed
+through the existing atomic save; no implicit save or output/music update.
+Pending source edits and an in-flight save retain their existing protection.
+Input feedback is announced outside layout; the fixed Save button retains its
+label/width and exposes busy/retry status through accessibility/title and disabled
+state. Existing save-failure notification remains. Source editing/history is
+retained: it supports partial text editing/recovery, not full worship backup.

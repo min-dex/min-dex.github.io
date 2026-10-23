@@ -112,6 +112,11 @@ function handleServiceManagementDetailClick(event) {
 }
 
 function handleDetailServiceWorkspaceClick(event) {
+  const unlink = event.target.closest("[data-service-medley-unlink]");
+  if (unlink) {
+    unlinkServiceMedley(unlink.dataset.serviceId || state.selectedServiceId, unlink.dataset.serviceMedleyUnlink);
+    return true;
+  }
   const serviceSourceCopyBtn = event.target.closest("[data-service-source-copy]");
   if (serviceSourceCopyBtn) {
     const service = state.services.find((candidate) => candidate.id === serviceSourceCopyBtn.dataset.serviceSourceCopy);
@@ -1624,4 +1629,48 @@ function finalizePresenterPreparationApply({
     `예배 입력 ${entries.length}개 항목을 반영했습니다.`, skippedNote, createdNote,
     versionNote, "상단 저장을 눌러 확정해 주세요.",
   ), "info");
+}
+
+// Only remove grouping metadata. Content, identities and ordering stay untouched.
+function unlinkServiceMedley(serviceId, itemId) {
+  if (state.saving) {
+    showToast("저장이 끝난 뒤 메들리를 해제해 주세요.", "info");
+    return false;
+  }
+  const service = state.services.find(candidate => candidate.id === serviceId);
+  if (!service || serviceSourceTextHasPendingChanges(serviceSourceTextareaForService(serviceId))) {
+    if (service) showToast("편집 중인 원문을 먼저 반영해 주세요.", "info");
+    return false;
+  }
+  let items = getServiceItems(serviceId);
+  const groupId = serviceItemConnectedPraise(items.find(item => item.id === itemId) || {})?.groupId;
+  if (!groupId) return false;
+  // Retain deferred text before rebuilding the editor; never save it implicitly.
+  for (const field of refs.detailPane?.querySelectorAll("input[data-service-item-field], textarea[data-service-item-field]") || []) {
+    if ((field.dataset.serviceId || state.selectedServiceId) !== serviceId || !isDeferredServiceTextInput(field)
+      || field.dataset.initialValue === undefined || field.value === field.dataset.initialValue) continue;
+    clearDeferredServiceTextPreview(field);
+    updateServiceItemField(field, { deferPresenterRefresh: true });
+    field.dataset.initialValue = field.value;
+    field.dataset.presenterPreviewValue = field.value;
+  }
+  items = getServiceItems(serviceId);
+  for (const item of items) {
+    if (serviceItemConnectedPraise(item)?.groupId !== groupId) continue;
+    const memo = parseServiceItemMemo(item.memo);
+    delete memo.connectedPraise;
+    delete memo.connected_praise;
+    item.memo = serializeServiceItemMemo(memo);
+    delete item.connectedPraise;
+    delete item.connected_praise;
+    item._worshipElementTemplateModified = true;
+    markServiceElementDirty(serviceId, item);
+  }
+  markServiceStructureDirty(serviceId);
+  state.dirty.service = true;
+  delete service._worshipSourceTextDraft;
+  renderCurrentServiceModuleDetail();
+  updateSaveState();
+  showToast("메들리를 해제했습니다. 곡과 순서는 유지됩니다. 저장해 주세요.");
+  return true;
 }
