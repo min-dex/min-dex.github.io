@@ -3983,8 +3983,8 @@ this choice; other service records are not rewritten.
 Remove the standalone DB song-disconnect X, its delegated handler, unused
 clear function and styles. Song selection/mode switching and medley unlink stay
 unchanged. Wide song rows share spare width between title and form at1.3:1,
-with a220px form minimum instead of a fixed160px column. Below1121px actual
-container width, the form takes its own full-width row. No input values, focus,
+with a220px form minimum instead of a fixed160px column. The original below1121px
+full-width form row is superseded by the main praise input flow rule below. No input values, focus,
 versions, form sequence, persistence or output behavior change. Chromium/WebKit
 actual-renderer checks cover DB shortcut variants,360–1500px, both themes,
 long forms, medley action retention and unsaved text/focus through resizing.
@@ -4138,3 +4138,11 @@ group color cycle. Verse/chorus/other form backgrounds and output remain unchang
   uploads and atomic saves unchanged. Photo-backed forms take precedence over
   the muted looping video; no asset conversion or stored-data migration.
 - Without photo-capable forms, retain video controls for praise items.
+
+### Main praise input flow · 2026-10-23
+
+Main praise controller inputs use one wrapping flex row instead of the old
+1120px container rule that forced version, form and assignee onto separate rows.
+Mode/version use compact 130px bases; title and form share remaining width.
+Only controls that no longer fit wrap; expanded photo tools keep a full row.
+The single-song DB shortcut remains in the heading. Saving/data behavior is unchanged.

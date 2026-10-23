@@ -8781,29 +8781,44 @@ body[data-module="praise"] .praise-forms-panel .form-meta { gap: 5px; }
 .praise-forms-panel .version-empty-state .btn { min-height: 30px; }
 .praise-forms-panel .linked-version-title { box-shadow: none; }
 
-/* Song rows reserve space only for present controls. Expanded media stays below. */
-@container (min-width: 1121px) {
-  .svc-board-subgroup-controls .svc-board-subgroup-control-item.svc-inline-song {
-    grid-template-columns: 130px minmax(220px, 1fr) auto 160px minmax(220px, 1fr) max-content;
-  }
-  .svc-board-subgroup-controls .svc-board-subgroup-control-item.svc-inline-song .svc-edit-title-wrap > .svc-item-link { grid-column: 3; }
-  .svc-board-subgroup-controls .svc-board-subgroup-control-item.svc-inline-song .svc-song-picker--linked { grid-column: 4; }
-  .svc-board-subgroup-controls .svc-board-subgroup-control-item.svc-inline-song .svc-form-hint.compact { grid-column: 5; }
-  .svc-board-subgroup-controls .svc-board-subgroup-control-item.svc-inline-song > .svc-board-subgroup-flow {
-    grid-column: 6; grid-row: 1; margin-left: 0; flex-wrap: nowrap; gap: 5px;
-  }
-  .svc-board-subgroup-controls .svc-board-subgroup-control-item.svc-inline-song > .svc-presenter-input-field--assignee {
-    grid-column: 2 / -1; grid-row: 2;
-  }
-  .svc-board-subgroup-controls .svc-board-subgroup-control-item.svc-inline-song:not(:has(.svc-song-picker--linked)) {
-    grid-template-columns: 130px minmax(220px, 1fr) auto minmax(220px, 1fr) max-content;
-    column-gap: 10px;
-  }
-  .svc-board-subgroup-controls .svc-board-subgroup-control-item.svc-inline-song:not(:has(.svc-song-picker--linked)) .svc-form-hint.compact { grid-column: 4; }
-  .svc-board-subgroup-controls .svc-board-subgroup-control-item.svc-inline-song:not(:has(.svc-song-picker--linked)) > .svc-board-subgroup-flow { grid-column: 5; }
-  .svc-board-subgroup-controls .svc-board-subgroup-control-item.svc-inline-song:has(.svc-progression-media[open]) > .svc-board-subgroup-flow {
-    grid-column: 1 / -1; grid-row: auto; flex-wrap: wrap; width: 100%;
-  }
+/* Main praise controls flow together; available space determines wrapping. */
+.svc-board-subgroup-controls .svc-board-subgroup-control-item.svc-inline-song {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.svc-board-subgroup-controls .svc-inline-song .svc-praise-input-mode-control {
+  flex: 0 1 130px;
+  width: 130px;
+  max-width: 100%;
+}
+.svc-board-subgroup-controls .svc-inline-song .svc-edit-title {
+  flex: 1 1 160px;
+  width: auto;
+  min-width: min(100%, 140px);
+}
+.svc-board-subgroup-controls .svc-inline-song .svc-song-picker--linked {
+  flex: 0 1 130px;
+  width: 130px;
+}
+.svc-board-subgroup-controls .svc-inline-song .svc-form-hint.compact {
+  flex: 1 1 120px;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+}
+.svc-board-subgroup-controls .svc-inline-song > .svc-board-subgroup-flow {
+  flex: 0 1 auto;
+  margin-left: auto;
+  gap: 5px;
+}
+.svc-board-subgroup-controls .svc-inline-song > .svc-presenter-input-field--assignee {
+  flex: 0 1 160px;
+}
+.svc-board-subgroup-controls .svc-inline-song:has(.svc-progression-media[open]) > .svc-board-subgroup-flow {
+  flex: 1 1 100%;
+  width: 100%;
 }
 
 /* Explicit feedback for the compact live-scripture label without a nested box. */
@@ -8846,17 +8861,6 @@ html.ui-theme-switching:not(.presenter-output-document) *::after {
 .svc-presenter-side-panel .svc-presenter-launch { grid-column: 1; height: 35px; min-width: 0; padding: 0 10px; }
 .svc-presenter-side-panel .svc-presenter-window-controls { grid-column: 2; grid-template-columns: minmax(0, 1fr); gap: 0; }
 .svc-presenter-side-panel .svc-presenter-fullscreen { height: 35px; padding: 0 10px; gap: 5px; white-space: nowrap; }
-/* A single element's DB shortcut belongs to its heading, not an input column. */
-@container (min-width: 1121px) {
-  .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link)) { grid-template-columns: 130px minmax(220px, 1fr) 160px minmax(220px, 1fr) max-content; }
-  .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link)) .svc-song-picker--linked { grid-column: 3; }
-  .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link)) .svc-form-hint.compact { grid-column: 4; }
-  .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link)) > .svc-board-subgroup-flow { grid-column: 5; }
-  .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link, .svc-song-picker--linked)) { grid-template-columns: 130px minmax(220px, 1fr) minmax(220px, 1fr) max-content; }
-  .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link, .svc-song-picker--linked)) .svc-form-hint.compact { grid-column: 3; }
-  .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link, .svc-song-picker--linked)) > .svc-board-subgroup-flow { grid-column: 4; }
-}
-
 /* Repeated editing actions share a visible, compact button surface. */
 .svc-board-subgroup-flow :is(.svc-board-subgroup-commit, .svc-reference-media-upload, .svc-board-subgroup-audio-upload, .svc-progression-media > summary) {
   box-sizing: border-box;

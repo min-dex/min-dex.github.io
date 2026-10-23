@@ -47,6 +47,7 @@ try:
        const q=host.getBoundingClientRect();
        for(const e of controls){const r=e.getBoundingClientRect();if(r.left<q.left-1||r.right>q.right+1)issues.push('outside '+e.className)}
        for(let i=0;i<controls.length;i++)for(let j=i+1;j<controls.length;j++){let a=controls[i],b=controls[j];if(a.contains(b)||b.contains(a))continue;let r=a.getBoundingClientRect(),t=b.getBoundingClientRect();if(Math.min(r.right,t.right)-Math.max(r.left,t.left)>2&&Math.min(r.bottom,t.bottom)-Math.max(r.top,t.top)>2)issues.push('overlap '+a.className+' '+b.className)}
+       if(host.clientWidth>=560){const tops=controls.filter(e=>!e.closest('.svc-presentation-controls')).map(e=>Math.round(e.getBoundingClientRect().top));const lines=[];for(const top of tops.sort((a,b)=>a-b))if(!lines.length||top-lines[lines.length-1]>16)lines.push(top);if(lines.length>2)issues.push('main praise unnecessarily split into '+lines.length+' rows');}
        if(host.clientWidth>=1121){const top=row.querySelector('.svc-edit-title').getBoundingClientRect().top;for(const e of controls)if(!e.closest('.svc-presenter-input-field--assignee,.svc-presentation-controls')&&Math.abs(e.getBoundingClientRect().top-top)>12)issues.push('extra row '+e.outerHTML.slice(0,180)+' '+e.getBoundingClientRect().top+' vs '+top)}
       }
       if(!host.querySelector('.svc-inline-song'))issues.push('missing inline rows');
