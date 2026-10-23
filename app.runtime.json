@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-chapel-design",
+  "version": "20261023-remote-auto-awake",
   "options": {
     "compress": false,
     "mangle": {
