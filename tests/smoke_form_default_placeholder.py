@@ -76,6 +76,36 @@ try:
     check(headingBounds.bottom<=titleBounds.top+1 && Math.abs((titleBounds.top+titleBounds.bottom-stageBounds.top-stageBounds.bottom)/2)<108,'fullscreen order heading above centered title');
     check(parseFloat(getComputedStyle(fullTitle).fontSize)===150,'short fullscreen content title must retain original scale');
     fullTitleHost.remove();
+    const proxyCache=new WeakMap();
+    const readOnly=value=>{
+     if(!value||typeof value!=='object')return value;
+     if(proxyCache.has(value))return proxyCache.get(value);
+     const proxy=new Proxy(value,{
+      get:(target,key)=>readOnly(Reflect.get(target,key)),
+      set:()=>{throw Error('render attempted to edit source worship data')},
+      deleteProperty:()=>{throw Error('render attempted to delete source worship data')},
+     });proxyCache.set(value,proxy);return proxy;
+    };
+    const protectedData={formPreset:{forms:['T','L','Int','L'],titleSequence:true},audioTiming:{startTimes:[0,12,24]},song_id:'keep-song',version_id:'keep-version',sort_order:30,lyrics:'보존할 가사'};
+    const protectedSlides=[oldContent,mainTitle,{...oldContent,songTitle:'기본 송폼 검증'},
+     {...oldContent,assignee:'이름 집사'},
+     {...mainTitle,layout:PRESENTER_SLIDE_LAYOUTS.BLANK,type:'blank',autoTrailingBlank:true},
+     {type:'lyrics',elementType:PRESENTER_ELEMENT_TYPES.PRAISE,layout:PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT,text:'보존할 가사'}];
+    for(const raw of protectedSlides){
+     const source={...raw,preservedConfig:structuredClone(protectedData)},before=JSON.stringify(source),locked=readOnly(source);
+     for(const noChromakey of [false,true]){
+      const options=readOnly({noChromakey,presentationDesign:{sectionKeys:[],songTitleStyle:'note-title'}});
+      const view=presenterFullscreenSongTitleView(locked,options);
+      check(presenterFullscreenSongTitleView(view,options)===view,'display conversion must be idempotent');
+      const rendered=renderPresenterSlideFrame(locked,options);
+      check(rendered===renderPresenterSlideFrame(locked,options),'repeat rendering must be stable');
+      check(JSON.stringify(source)===before,'render changed saved links/forms/lyrics/timing/order');
+      if(view!==locked&&locked.songTitleContent){
+       check(view.songTitleContent!==locked.songTitleContent,'view must not share editable title metadata');
+       view.songTitleContent.title='view only';check(JSON.stringify(source)===before,'editing derived title changed source');
+      }
+     }
+    }
     const imported={id:'source-praise',label:'찬양 4',_worshipSectionKey:'source-찬양',_worshipSectionTitle:'찬양',song_id:song.id,version_id:version.id,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formHint:'V1-C',formPreset:{forms:['V1','C'],strength:'manual'}})};
     const importedBefore=JSON.stringify(imported);
     check(isMainPraiseServiceItem(imported) && input(imported).value==='V1-C','stored source praise form stays exact');

@@ -5563,24 +5563,46 @@ function presenterServiceDesignForSlide(slide, options = {}) {
   return design;
 }
 
+// Derived display data only; source worship items keep their stored shape.
+function presenterFullscreenSongTitleView(slide, options = {}) {
+  if (!options.noChromakey || !slide || slide.autoTrailingBlank
+      || presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.BLANK
+      || (slide.fullscreenSongTitle && presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT)) return slide;
+
+  const hasOrderContent = Boolean(slide.type === "title-assignee" && slide.orderTitle && slide.contentTitle);
+  const isSectionSong = Boolean(hasOrderContent && !slide.assignee
+    && (slide.songTitle || PRESENTER_SONG_NOTE_PATTERN.test(slide.contentTitle)));
+  if (hasOrderContent && !isSectionSong) return slide;
+  const isStandaloneSong = Boolean(slide.songTitle
+    || (slide.type === "song-title" && presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE));
+  if (!isSectionSong && !isStandaloneSong) return slide;
+
+  const content = isSectionSong
+    ? { orderTitle: slide.orderTitle, title: slide.contentTitle, detail: "" }
+    : { ...presenterSongTitleContent(slide) };
+  const title = isSectionSong
+    ? formatPresenterSongTitleText(content.title)
+    : String(content.title || "").replace(PRESENTER_SONG_NOTE_PATTERN, "").trim();
+  const hideDetail = normalizePresenterServiceDesign(options.presentationDesign)?.songTitleStyle === "note-title";
+
+  return {
+    ...slide,
+    elementType: PRESENTER_ELEMENT_TYPES.TITLE_CONTENT,
+    layout: PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT,
+    type: "title-content",
+    title,
+    text: title,
+    songTitleContent: content,
+    bodyText: "",
+    assignee: "",
+    fullscreenSongTitle: true,
+    fullscreenSongTitleStyle: isSectionSong ? "standard" : "note-title",
+    fullscreenSongTitleHideDetail: hideDetail,
+  };
+}
+
 function renderPresenterSlideFrame(slide, options = {}) {
-  const sectionSongTitle = slide?.type === "title-assignee" && slide.orderTitle && slide.contentTitle
-    && !slide.assignee && (slide.songTitle || PRESENTER_SONG_NOTE_PATTERN.test(slide.contentTitle));
-  if (options.noChromakey && !slide?.autoTrailingBlank
-    && presenterSlideLayout(slide) !== PRESENTER_SLIDE_LAYOUTS.BLANK
-    && (sectionSongTitle || !(slide?.type === "title-assignee" && slide.orderTitle && slide.contentTitle))
-    && (sectionSongTitle || slide?.songTitle || (slide?.type === "song-title" && presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE))) {
-    const content = sectionSongTitle
-      ? { orderTitle: slide.orderTitle, title: slide.contentTitle, detail: "" }
-      : presenterSongTitleContent(slide);
-    const hideDetail = normalizePresenterServiceDesign(options.presentationDesign)?.songTitleStyle === "note-title";
-    const title = sectionSongTitle ? formatPresenterSongTitleText(content.title)
-      : String(content.title || "").replace(PRESENTER_SONG_NOTE_PATTERN, "").trim();
-    // Section songs retain the original order heading and inline-note fullscreen title.
-    slide = { ...slide, elementType: PRESENTER_ELEMENT_TYPES.TITLE_CONTENT,
-      layout: PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT, type: "title-content",
-      title, text: title, songTitleContent: content, bodyText: "", assignee: "", fullscreenSongTitle: true, fullscreenSongTitleStyle: sectionSongTitle ? "standard" : "note-title", fullscreenSongTitleHideDetail: hideDetail };
-  }
+  slide = presenterFullscreenSongTitleView(slide, options);
   const design = presenterServiceDesignForSlide(slide, options);
   if (design) {
     slide = { ...slide, suppressBackgroundImage: true, scriptureReadingFinal: design.showReadingEnd && slide.scriptureReadingFinal };

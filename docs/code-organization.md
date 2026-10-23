@@ -291,3 +291,25 @@ blank-window reservation, live song snapshots and change notifications. It is
 loaded before app.js; hooks execute after bootstrap. Output orchestration stays
 in app.js, song selection stays in mindex.presenter.js and existing live modules
 forward change notifications without rewriting service records.
+
+
+## Presenter display projection ·2026-10-24
+
+Keep the output pipeline in this order: stored slide/builders, derived fullscreen
+title view, service artwork, frame/body rendering. `presenterFullscreenSongTitleView`
+returns display-only data and never feeds a worship save or source serializer.
+Unrelated and blank slides pass through unchanged; converted title views can be
+applied repeatedly without changing their style. Copy title-content metadata
+when constructing a view so view changes cannot edit its source. Keep stored
+song forms, lyrics, links, order and audio timing in their existing owners.
+The existing browser regression traps writes/deletes to source objects and checks
+repeated rendering plus actual fullscreen title geometry.
+
+
+The legacy SOLID size ratchets already fail on the published 819a0776 baseline
+(app/presenter/style line counts, function counts, coupling-marker count and
+saveSongVersions size). This change leaves those thresholds intact and records
+the existing failure separately from passing load-order/collision, source-write
+protection, atomic-save and browser geometry checks. It adds one pure projection
+helper to shorten the renderer's inline decision block; it does not claim a
+repository-wide size/coupling cleanup.
