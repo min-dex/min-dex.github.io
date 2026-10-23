@@ -4340,3 +4340,11 @@ administrator remains attached to the actual output when the PC browses another
 service. Guest six-digit pairing remains separate; concurrent controllers share
 revision/serialization protection. See `presenter-remote-design.md` for security,
 expiry and production verification/publication status.
+
+## Controller interlude captions ·2026-10-24
+
+Explicit interlude blank slides retain their form label for controller captions.
+Display Int/Interlude/Instrumental/간주 as `Interlude`, without a colored group box.
+The output remains blank and canonical input remains `Int`; ordinary trailing
+blanks receive no caption. Do not suppress the caption because the model title
+also names the interlude.

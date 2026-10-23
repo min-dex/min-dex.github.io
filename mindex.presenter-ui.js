@@ -69,6 +69,7 @@ function presenterLyricsSlidesForServiceItem({
         type: "blank",
         label,
         title: form.label || "빈 화면",
+        formLabel: form.label || "",
         marker: "",
         formKey: `blank:${form._presenterToken || formIndex}:${formIndex}`,
         segment: "",

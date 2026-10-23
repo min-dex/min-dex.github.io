@@ -32058,6 +32058,7 @@ function annotatePresenterFormStarts(entries = [], initialPreviousKey = "") {
 
 function presenterSlideSupportsFormGrouping(slide, formLabel = presenterFormGroupLabel(slide)) {
   if (!slide) return false;
+  if (normalizePresenterFormPresetLabel(formLabel).type === "instrumental") return true;
   if (normalizePresenterFormPresetLabel(slide.formLabel).type === "title" && String(slide.formKey || "").startsWith("title:")) return true;
   const praiseLowerBar = presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE
     && presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT;
@@ -32071,6 +32072,7 @@ function presenterFormGroupLabel(slide) {
   if (isGenericPresenterFormLabel(label)) return "";
   const form = normalizePresenterFormPresetLabel(label);
   if (form.type === "title") return "Title";
+  if (form.type === "instrumental") return "Interlude";
   const singleType = Array.isArray(slide?.controllerSingleFormTypes)
     && slide.controllerSingleFormTypes.includes(form.type);
   if ((singleType || (slide?.controllerSingleVerse && form.type === "verse"))
@@ -32105,10 +32107,11 @@ function renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, fo
   const selected = state.presenterBoardSelection.serviceId === serviceId
     && state.presenterBoardSelection.elementKey === elementKey
     && (state.presenterBoardSelection.indexes || []).map(Number).includes(slideIndex);
-  const normalizedFormLabel = normalizePresenterFormPresetLabel(formLabel).type === "title"
-    ? "Title"
+  const formType = normalizePresenterFormPresetLabel(formLabel).type;
+  const normalizedFormLabel = formType === "title" ? "Title"
+    : formType === "instrumental" ? "Interlude"
     : songFormPresetDisplayLabel(formLabel) || String(formLabel || "").trim();
-  const visibleFormLabel = presenterLabelDuplicatesSlideText(normalizedFormLabel, slide) ? "" : normalizedFormLabel;
+  const visibleFormLabel = formType !== "instrumental" && presenterLabelDuplicatesSlideText(normalizedFormLabel, slide) ? "" : normalizedFormLabel;
   const ariaPrefix = presenterSlideInteractionHint(serviceId, `${slideIndex + 1}번 슬라이드${hidden ? " · 숨김" : ""}`);
   const slideNumber = slideIndex + 1;
   const formBadge = visibleFormLabel ? `
