@@ -86,5 +86,6 @@
   "smoke_atomic_save_runtime.py": 2.4,
   "smoke_children_audio_db.py": 12.6,
   "smoke_scripture_aliases.py": 3.4,
-  "smoke_startup_overlap_recovery.py": 11.3
+  "smoke_startup_overlap_recovery.py": 11.3,
+  "smoke_legacy_title_restore.py": 2.9
 }

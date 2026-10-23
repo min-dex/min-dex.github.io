@@ -4109,3 +4109,15 @@ the same acknowledged transport as Remote. No background/PPTX media transport
 is added. No active video shows an empty state. Shared pending requests prevent
 PC/Remote overlap; current output ownership and freshness are rechecked on action.
 Heartbeat updates preserve the open popover and use the existing markup patcher.
+
+## Migrate legacy score titles to Title tokens ·2026-10-23
+
+The previous automatic title behavior identifies legacy intent; it is not revived
+as a score-output fallback. Legacy score sequences are normalized to a leading
+virtual Title and rendered by the same sequence interpreter as explicit titles.
+Score output no longer prepends titles through shouldIncludeSongTitleSlide.
+An absent legacy score sequence preserves every source page after the migrated
+Title; an explicit Title-only sequence intentionally emits only its title. PDF
+and pending-score output use the same Title token renderer. Explicit omission
+and repeated/middle titles retain their authored order. Stored operational rows,
+lyrics and versions are untouched; this is an effective-sequence migration at load.
