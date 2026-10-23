@@ -6553,7 +6553,7 @@ textarea.svc-presenter-input-control--multiline {
 .svc-presenter-pin-toggle input:checked + .svc-presenter-pin-track::after {
   transform: translateX(12px);
 }
-.svc-presenter-pin-toggle:focus-within {
+.svc-presenter-pin-toggle:not(.svc-presenter-pin-button):focus-within {
   outline: 2px solid color-mix(in srgb, var(--accent) 64%, transparent);
   outline-offset: 2px;
 }
@@ -9424,8 +9424,24 @@ body:has(#servicePresenterControls[data-focus-view="true"]) .right-sidebar { dis
 .svc-presenter-side-panel .svc-presenter-output-group :is(i, svg) { width: 16px; height: 16px; flex: 0 0 16px; stroke-width: var(--ui-icon-stroke); }
 .svc-presenter-side-panel .svc-presenter-output-group .svc-presenter-disabled-control { padding: 0; }
 .svc-presenter-side-panel .svc-presenter-output-group :is(button:not(:disabled), .svc-presenter-pin-button:not(.is-unavailable)):hover { background: var(--ui-surface-field); color: var(--ink-2); }
-.svc-presenter-side-panel .svc-presenter-pin-button:has(input:checked) { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
-.svc-presenter-side-panel .svc-presenter-pin-button:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* Shared window command states; checkbox state remains truthful to the pin toggle. */
+.svc-presenter-side-panel .svc-presenter-output-group .svc-presenter-window-button {
+  background: var(--ui-surface-field); color: var(--ink-2); cursor: pointer;
+}
+.svc-presenter-side-panel .svc-presenter-output-group .svc-presenter-window-button:not(:disabled):not(.is-unavailable):not(:has(input:checked)):hover {
+  background: var(--ui-surface-panel); border-color: var(--ink-3); color: var(--ink);
+}
+.svc-presenter-side-panel .svc-presenter-output-group .svc-presenter-window-button:has(input:checked),
+.svc-presenter-side-panel .svc-presenter-output-group .svc-presenter-window-button:has(input:checked):hover {
+  color: var(--accent); border-color: var(--accent); background: var(--accent-soft);
+}
+.svc-presenter-side-panel .svc-presenter-output-group .svc-presenter-window-button:is(:focus-visible, :has(input:focus-visible)) {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+.svc-presenter-side-panel .svc-presenter-output-group .svc-presenter-window-button:is(:disabled, .is-unavailable) {
+  color: var(--ink-4); background: transparent; border-color: var(--line);
+  opacity: .5; cursor: not-allowed;
+}
 
 .global-playback-actions { display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-top:5px; }
 .global-playback-actions > button { display:flex; align-items:center; justify-content:center; gap:5px; flex:1 0 60px; min-width:0; height:30px; padding:0 10px; font-weight:600; }

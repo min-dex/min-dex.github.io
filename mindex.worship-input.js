@@ -197,7 +197,7 @@ function handleServiceItemDetailClick(event) {
 
 function handleServiceNavigationDetailClick(event) {
   if (event.target.closest("[data-service-list]")) {
-    openServiceListPanel();
+    openServiceListPanel(event.target.closest("[data-service-list]").dataset.serviceList);
     return true;
   }
   const serviceTypeCard = event.target.closest("[data-select-service-type]");

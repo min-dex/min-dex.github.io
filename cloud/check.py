@@ -56,6 +56,8 @@ NODE_TESTS = (
     "test_worship_read_parallel.cjs",
 )
 SMOKES = (
+    "smoke_service_browse_categories.py",
+    "smoke_presenter_window_buttons.py",
     "smoke_service_structural_order.py",
     "smoke_special_service_order.py",
     "smoke_title_songform.py",

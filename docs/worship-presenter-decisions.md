@@ -3913,3 +3913,20 @@ Remove artwork identity selection, per-background color substitutions, palette
 attributes and text outlines. Every artwork, preview and output uses one CSS rule;
 no stored highlight values, text, font sizes or weights change. Non-children,
 chromakey and reading frames retain their existing colored text behavior.
+
+## Service sidebar browse categories · 2026-10-23
+
+The service sidebar replaces the all-service entry with 공예배, 부서 예배 and
+기타 예배, using existing canonical service classifications. Special and unknown
+service types belong to 기타 예배; no service records are reclassified. Existing
+serviceFilter state carries the category through tabs/history; legacy all values
+open 공예배. Counts, active state, detail list and tab title reflect the category.
+Navigation retains the existing unsaved-input confirmation boundary.
+
+## Presenter window control states · 2026-10-23
+
+Fullscreen and always-on-top share geometry, field background, hover, keyboard
+focus and unavailable styling. Fullscreen remains an entry command; only the
+native always-on-top checkbox displays checked state. Browser pin support and
+output-window availability remain separate capability checks. No output behavior
+or stored preference changes.
