@@ -4236,3 +4236,9 @@ generic Lyrics/가사 pages retain thumbnails, indexes and form/photo identities
 receive no form block or background. Named forms, unboxed Title/interludes, scripture
 references and inherited score-page grouping keep their existing behavior. No stored
 worship, song, lyric, version or timing rows are rewritten.
+### Inline unmatched-search registration · 2026-10-23
+
+The unmatched DB search registration action shares the title input line when
+space permits. Its picker does not reserve a full results row, and the redundant
+visible no-results caption is hidden. Actual matching result lists retain their
+full area; the existing query-driven show/hide and registration action remain.

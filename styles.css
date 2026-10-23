@@ -8822,6 +8822,21 @@ body[data-module="praise"] .praise-forms-panel .form-meta { gap: 5px; }
   flex: 1 1 100%;
 }
 
+/* An unmatched-search action belongs beside the song title, not a results row. */
+.svc-board-subgroup-controls .svc-edit-title-wrap .svc-song-picker:has(> [data-service-song-create]) {
+  flex: 0 0 auto;
+  width: auto;
+  max-width: 100%;
+}
+.svc-board-subgroup-controls .svc-edit-title-wrap .svc-song-picker:has(> [data-service-song-create]) > .svc-song-picker-warning {
+  display: none;
+}
+
+.svc-board-subgroup-controls .svc-song-picker > [data-service-song-create] {
+  height: 30px;
+  min-height: 30px;
+}
+
 /* Explicit feedback for the compact live-scripture label without a nested box. */
 .svc-slide-citation-auto-output:hover { color: var(--ink); }
 .svc-slide-citation-auto-output:hover > span { text-decoration: underline; text-underline-offset: 3px; }
