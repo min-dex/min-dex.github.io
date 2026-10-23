@@ -56,6 +56,7 @@ NODE_TESTS = (
     "test_worship_read_parallel.cjs",
 )
 SMOKES = (
+    "smoke_legacy_title_restore.py",
     "smoke_song_form_width.py",
     "smoke_medley_unlink.py",
     "smoke_editor_save_status.py",

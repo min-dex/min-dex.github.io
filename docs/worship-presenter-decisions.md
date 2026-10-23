@@ -4085,3 +4085,15 @@ superseding the45–95% half-height band. Keep original six source colors,
 CSS rule. Third-service chromakey and other copy remain unmarked. Children
 retain their dedicated closing. User requested skipping optional local checks;
 the complete required publication gate remains mandatory.
+
+
+## Restore legacy score titles ·2026-10-23
+
+Legacy lyrics expose a virtual default Title through their effective preset,
+but score selection still uses the authored score labels. Do not infer that a
+score title was emitted from the effective lyric preset. The shared title check
+now accepts the actual score slides: restore the former leading title when none
+was emitted, retain explicit title omission, and never duplicate explicit/repeated
+titles. PDF/file and hymn-score fallback paths use the same check. No operational
+rows, lyrics, versions or score pages are rewritten. Regression covers thirty
+legacy/explicit/cleared/repeated/PDF/unlabelled cases in both browser engines.

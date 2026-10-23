@@ -2372,9 +2372,18 @@ function isScriptureBodyServiceItem(item) {
     || (sectionKey === "scripture_reading" && elementType === "scripture_body");
 }
 
-function shouldIncludeSongTitleSlide(item, label, song = null, version = null) {
-  if (parseServiceItemMemo(item?.memo).formPreset?.titleSequence
-      || presenterServiceItemFormPreset(version || {}, item, song)?.titleSequence) return false;
+function shouldIncludeSongTitleSlide(item, label, song = null, version = null, renderedSlides = null) {
+  const authored = parseServiceItemMemo(item?.memo).formPreset;
+  const preset = presenterServiceItemFormPreset(version || {}, item, song);
+  if (Array.isArray(renderedSlides)) {
+    // A legacy score plan may not yet contain the virtual default Title.
+    // Inspect actual output before suppressing the former automatic title.
+    if (renderedSlides.some(slide => slide?.formLabel === "Title" || slide?.type === "song-title"
+      || (slide?.songTitle && ["title-content", "title-assignee"].includes(slide.type)))) return false;
+    const explicit = authored?.titleSequence ? authored
+      : presenterServiceItemBaseFormPreset(version || {}, item, song);
+    if (explicit?.titleSequence) return normalizeServiceFormPresetForms(explicit.forms || []).includes("Title");
+  } else if (authored?.titleSequence || preset?.titleSequence) return false;
   if (isServiceConnectedPraiseSecondaryItem(item)) return false;
   const displayText = serviceItemDisplayText(item);
   if (serviceItemConnectedPraiseTitle(item, "title")) return true;
