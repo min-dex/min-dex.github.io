@@ -150,7 +150,18 @@ def selected_tests(shard_index=0, shard_count=1):
     if shard_count < 1 or not 0 <= shard_index < shard_count:
         raise ValueError("shard index must be within a positive shard count")
     unit = ("test_pages_gate.py", "test_cloud_check.py", "test_reuse_checks.py") + NODE_TESTS if shard_index == 0 else ()
-    return unit + SMOKES[shard_index::shard_count]
+    if shard_count == 1:
+        return unit + SMOKES
+    # Durations affect scheduling only; the explicit allowlist owns coverage.
+    import json
+    timings = json.loads((ROOT / 'cloud/smoke_timings.json').read_text())
+    groups = [[] for _ in range(shard_count)]
+    loads = [7.0] + [0.0] * (shard_count - 1)  # unit/manual checks on shard 0
+    for name in sorted(SMOKES, key=lambda name: -timings.get(name, 10.0)):
+        target = min(range(shard_count), key=lambda index: loads[index])
+        groups[target].append(name)
+        loads[target] += timings.get(name, 10.0)
+    return unit + tuple(groups[shard_index])
 
 
 def main():

@@ -159,6 +159,21 @@ needs the whole matrix to succeed and retains the stale-commit guard.
 The no-argument cloud/check.py command still executes the entire baseline.
 Shard PASS is explicitly partial; per-entry timings support future balancing.
 
+### Measured balancing and superseded checks ·2026-10-23
+
+The four shards now assign longer smokes first to the least-loaded shard using
+`cloud/smoke_timings.json`, measured in run39888011911. This file schedules tests;
+it never selects coverage. New allowlisted tests receive a10-second estimate and
+still run exactly once. Unit/manual checks remain on shard0; no-argument order
+and all timeouts/failure propagation remain unchanged. The measured smoke loads
+previously ranged from173 to295 seconds including unit work.
+
+Check-job concurrency cancels superseded runs only for the same event/ref/shard.
+Pages keeps its separate non-cancelling publication group and complete gate.
+Fetch/reconcile main before the branch gate; when main has not advanced, integrate
+the verified SHA without a new merge commit so exact-commit reuse avoids running
+the same suite twice. If main advances, reconcile and verify the resulting SHA.
+
 
 ## Exact-commit gate reuse ·2026-10-23
 

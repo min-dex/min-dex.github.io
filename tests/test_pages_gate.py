@@ -21,6 +21,10 @@ class PagesGate(unittest.TestCase):
         self.assertEqual(deploy['if'], "github.ref == 'refs/heads/main' && github.event_name != 'pull_request'")
         self.assertEqual(check['strategy']['matrix']['shard'], [0, 1, 2, 3])
         self.assertFalse(check['strategy']['fail-fast'])
+        self.assertEqual(check['concurrency'], {
+            'group': 'cloud-check-${{ github.event_name }}-${{ github.ref }}-${{ matrix.shard }}',
+            'cancel-in-progress': True,
+        })
         command = next(step['run'] for step in check['steps'] if 'cloud/check.py' in step.get('run', ''))
         self.assertIn('--shard-index ${{ matrix.shard }} --shard-count 4', command)
         self.assertNotIn('continue-on-error', check)

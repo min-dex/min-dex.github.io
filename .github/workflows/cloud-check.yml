@@ -9,6 +9,10 @@ permissions:
 jobs:
   offline-web:
     runs-on: ubuntu-24.04
+    # Superseded checks stop; publication has its own non-cancelling group.
+    concurrency:
+      group: cloud-check-${{ github.event_name }}-${{ github.ref }}-${{ matrix.shard }}
+      cancel-in-progress: true
     permissions:
       contents: read
       actions: read
