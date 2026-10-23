@@ -4348,3 +4348,13 @@ Display Int/Interlude/Instrumental/간주 as `Interlude`, without a colored grou
 The output remains blank and canonical input remains `Int`; ordinary trailing
 blanks receive no caption. Do not suppress the caption because the model title
 also names the interlude.
+
+
+## Special-song default Title ·2026-10-24
+
+Special-song elements, including offering special songs and hymn score output,
+receive a leading default T through the same sequence resolver as main praise.
+Existing authored titleSequence presets still own omitted, repeated and middle
+T positions; secondary connected-praise items do not add duplicate titles.
+This extends default scope only: stored forms, lyrics, score pages, audio cues
+and ordinary offering/response/sending headings are unchanged.
