@@ -1,0 +1,175 @@
+{
+  "date": "2026-10-23",
+  "status": "staged_not_applied_or_deployed",
+  "supersedes": "hymn-slide-balance-staged-20261023.json",
+  "scope": "Whole-catalog output-slide balance and readability, using existing score-backed estimates; not a new page-by-page printed-score audit.",
+  "auditedEditions": 1203,
+  "newEditions": 645,
+  "unionEditions": 558,
+  "songFamilies": 722,
+  "pairedFamilies": 481,
+  "changedVersions": 440,
+  "changedLyricUnits": 1623,
+  "invariants": {
+    "allNonLyricTablesUnchanged": true,
+    "allUnitIdsOrderFieldsUnchanged": true,
+    "wordBoundariesAndWordsPreserved": true,
+    "independentCodaUnitsUnchanged": 592,
+    "protectedSongAllVersionsUnchanged": true,
+    "exactTextPairedBoundaryMismatches": [],
+    "changedVersions": 440,
+    "changedUnits": 1623
+  },
+  "semanticIntroBoundariesPreserved": [
+    163,
+    166
+  ],
+  "amenOnlyUnitsPreserved": 602,
+  "intentionalEditionDifferences": [
+    {
+      "new": 125,
+      "union": 125,
+      "kind": "Chorus",
+      "index": 0,
+      "reason": "통일판에 추가 아멘 구절이 있어 해당 독립 슬라이드 유지",
+      "resolution": "intentional edition difference preserved"
+    },
+    {
+      "new": 163,
+      "union": 160,
+      "kind": "Verse",
+      "index": 0,
+      "reason": "새판에 추가 할렐루야 도입 구절이 있어 별도 슬라이드 유지",
+      "resolution": "intentional edition difference preserved"
+    },
+    {
+      "new": 163,
+      "union": 160,
+      "kind": "Verse",
+      "index": 1,
+      "reason": "새판에 추가 할렐루야 도입 구절이 있어 별도 슬라이드 유지",
+      "resolution": "intentional edition difference preserved"
+    },
+    {
+      "new": 163,
+      "union": 160,
+      "kind": "Verse",
+      "index": 2,
+      "reason": "새판에 추가 할렐루야 도입 구절이 있어 별도 슬라이드 유지",
+      "resolution": "intentional edition difference preserved"
+    },
+    {
+      "new": 163,
+      "union": 160,
+      "kind": "Verse",
+      "index": 3,
+      "reason": "새판에 추가 할렐루야 도입 구절이 있어 별도 슬라이드 유지",
+      "resolution": "intentional edition difference preserved"
+    },
+    {
+      "new": 163,
+      "union": 160,
+      "kind": "Verse",
+      "index": 4,
+      "reason": "새판에 추가 할렐루야 도입 구절이 있어 별도 슬라이드 유지",
+      "resolution": "intentional edition difference preserved"
+    },
+    {
+      "new": 361,
+      "union": 480,
+      "kind": "Verse",
+      "index": 0,
+      "reason": "판본별 본절/후렴 경계가 달라 송폼 경계를 우선 유지",
+      "resolution": "intentional edition difference preserved"
+    },
+    {
+      "new": 361,
+      "union": 480,
+      "kind": "Verse",
+      "index": 1,
+      "reason": "판본별 본절/후렴 경계가 달라 송폼 경계를 우선 유지",
+      "resolution": "intentional edition difference preserved"
+    },
+    {
+      "new": 361,
+      "union": 480,
+      "kind": "Chorus",
+      "index": 0,
+      "reason": "판본별 본절/후렴 경계가 달라 송폼 경계를 우선 유지",
+      "resolution": "intentional edition difference preserved"
+    },
+    {
+      "new": 385,
+      "union": 435,
+      "kind": "Verse",
+      "index": 2,
+      "reason": "판본별 가사 어순이 달라 대응 위치를 강제하지 않음; 현재 약 4–5마디로 균형 유지",
+      "resolution": "intentional edition difference preserved"
+    }
+  ],
+  "checks": {
+    "chromium": {
+      "versions": 1203,
+      "existingWorshipReferences": 350,
+      "outputWordsAndFormOrderPreserved": true,
+      "savedReferenceContentPreserved": true,
+      "uniqueRenderedSlides": 9738,
+      "layoutRenders": 29214,
+      "viewports": [
+        [
+          1920,
+          1080
+        ],
+        [
+          1280,
+          720
+        ],
+        [
+          960,
+          540
+        ]
+      ],
+      "overflowCount": 0
+    },
+    "webkit": {
+      "versions": 1203,
+      "existingWorshipReferences": 350,
+      "outputWordsAndFormOrderPreserved": true,
+      "savedReferenceContentPreserved": true,
+      "uniqueRenderedSlides": 9738,
+      "layoutRenders": 29214,
+      "viewports": [
+        [
+          1920,
+          1080
+        ],
+        [
+          1280,
+          720
+        ],
+        [
+          960,
+          540
+        ]
+      ],
+      "overflowCount": 0
+    }
+  },
+  "productionWrites": 0,
+  "deployed": false,
+  "protectedSong": "이 세상은 내 집 아니네 — all versions/units unchanged, including deliberate -의 and paragraph boundary",
+  "limitations": [
+    "Headless layout bounds and output content checks are not physical broadcast/fullscreen testing.",
+    "Different edition wording, repetitions and form boundaries are preserved, rather than forced to identical page counts.",
+    "Six recitative editions and three unresolved exact-measure editions keep their existing number availability; no new precision claim.",
+    "Local-only audio timing on other computers cannot be inspected in this read-only snapshot; pre-application timing checks remain required."
+  ],
+  "candidatePlanSha256": "dd683003dae7ca1a77998ab19d48e8a8f011073401f8f2b6900615599f3222b2",
+  "privateCandidateDirectory": "/Users/parkjihun/Code/Apps/Mindex/backups/20261023-hymn-slide-final",
+  "releaseOrder": [
+    "Refresh live snapshot and reject concurrent target changes; recheck audio/timing dependencies before any write.",
+    "Apply reviewed unit text only with guarded version signatures; never alter worship rows.",
+    "Exact readback before promoting candidate ledger and regenerating metadata summary/runtime.",
+    "Fetch/reconcile current remote, pass all required deployment checks, then bundled publication and live verification."
+  ]
+}

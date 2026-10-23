@@ -147,3 +147,5 @@ records above for the retained repair evidence and Git reference.
 - [최종20판본 재대조](hymn-measures-final20-review-20261023.json): 추가17, 수치1194·낭송형6·보류3(새620·새638·통550). 후보1200 표시/재열기 검증, 미배포.
 
 - [출력 슬라이드 분량·새/통일 대응 정리](hymn-slide-balance-staged-20261023.json): 293판본·1123단위 후보, 대응524개 일치, 두 브라우저/세 해상도 넘침0. **운영 미적용·미배포.**
+
+- 2026-10-23 [전곡 찬송가 슬라이드 후보 검증](hymn-slide-balance-completion-staged-20261023.json): 전체1203판본, 연결481곡군; 수정 후보440판본·1623단위. 운영 DB 미적용·묶음 배포 대기. 이전293판본 후보를 대체.
