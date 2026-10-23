@@ -92,6 +92,7 @@ SMOKES = (
     "smoke_version_output_title.py",
     "smoke_version_order.py",
     "smoke_version_audio_summary.py",
+    "smoke_version_audio_input.py",
     "smoke_hymn_measures.py",
     "smoke_sidebar_control_affordance.py",
     "smoke_module_landings.py",
