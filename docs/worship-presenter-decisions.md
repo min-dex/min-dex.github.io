@@ -3931,3 +3931,11 @@ same45–95% band (50% height),4-stage-pixel padding on each side and a65% autho
 color /35% white mix. Foreground, font sizes and weights are unchanged. Padding
 uses the shared1920px stage unit in thumbnails/output; no background exceptions,
 text outlines or stored highlight color edits are introduced.
+
+
+## Original marker colors ·2026-10-23
+
+Remove the35% white mix from Refined common marker geometry. Children markers
+use the authored color unchanged, with the same45–95% coverage and4-stage-pixel
+side padding. Preview/output share the rule; no artwork palettes, outlines or
+stored color changes are introduced.
