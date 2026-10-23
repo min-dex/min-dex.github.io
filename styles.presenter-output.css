@@ -1625,3 +1625,59 @@ span.presenter-announcement-paren,
 .presenter-output-root.no-chromakey .presenter-fullscreen-order-heading::after { content: ""; display: block; width: calc(80 * var(--presenter-stage-unit)); height: calc(3 * var(--presenter-stage-unit)); margin: 2cqh auto 0; background: currentColor; }
 /* Keep moving praise footage above an already-mounted still background. */
 .presenter-output-root > .presenter-output-background-video { z-index: 1; }
+
+/* Authored service design: colors/artwork shared by previews and clean output. */
+.presenter-output-root.no-chromakey .presenter-slide--service-design {
+  background: var(--service-design-background);
+  color: var(--service-design-foreground);
+  text-shadow: none;
+  --presenter-slide-bg-image: none;
+}
+.presenter-output-root.no-chromakey .presenter-slide--service-design::before {
+  display: block; width: auto; height: auto; transform: none;
+  content: ""; position: absolute;
+  inset: calc(34 * var(--presenter-stage-unit)) calc(72 * var(--presenter-stage-unit));
+  border-block: calc(2 * var(--presenter-stage-unit)) solid var(--service-design-accent);
+  pointer-events: none;
+  background: none;
+}
+.presenter-service-design-mark {
+  position: absolute; left: 50%; top: calc(68 * var(--presenter-stage-unit));
+  transform: translateX(-50%); width: calc(68 * var(--presenter-stage-unit));
+  height: calc(120 * var(--presenter-stage-unit)); object-fit: contain;
+}
+.presenter-slide--service-design .presenter-title-content-title,
+.presenter-slide--service-design .presenter-fullscreen-order-heading,
+.presenter-slide--service-design .presenter-title-content-body,
+.presenter-slide--service-design .presenter-scripture-reading-head,
+.presenter-slide--service-design .presenter-scripture-reading-text {
+  color: var(--service-design-foreground); text-shadow: none;
+}
+.presenter-slide--service-design .presenter-title-content-title,
+.presenter-slide--service-design .presenter-fullscreen-order-heading,
+.presenter-slide--service-design .presenter-scripture-reading-ref {
+  color: var(--service-design-accent);
+}
+.presenter-slide--service-design .presenter-fullscreen-order-heading {
+  border-color: var(--service-design-accent);
+}
+.presenter-slide--service-design .presenter-title-content { gap: calc(35 * var(--presenter-stage-unit)); }
+.presenter-output-root.no-chromakey .presenter-slide--service-design.presenter-slide--scripture-reading {
+  padding: calc(112 * var(--presenter-stage-unit)) calc(145 * var(--presenter-stage-unit)) calc(135 * var(--presenter-stage-unit));
+}
+.presenter-slide--service-design .presenter-scripture-reading {
+  --presenter-scripture-reading-text-size: calc(68 * var(--presenter-stage-unit));
+  background: none;
+  padding: 0;
+}
+.presenter-slide--service-design .presenter-scripture-reading-head {
+  border-bottom: calc(1 * var(--presenter-stage-unit)) solid var(--service-design-accent);
+  padding-bottom: calc(26 * var(--presenter-stage-unit));
+}
+.presenter-slide--service-design .presenter-scripture-reading-text {
+  word-break: keep-all; overflow-wrap: break-word; line-break: strict;
+  text-align: left; text-align-last: left; line-height: 1.5;
+  font-weight: 500; -webkit-text-stroke: 0; letter-spacing: -.025em;
+}
+
+.presenter-slide--service-design .presenter-scripture-reading-line { margin-top: calc(70 * var(--presenter-stage-unit)); }

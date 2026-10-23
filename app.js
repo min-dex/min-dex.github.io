@@ -32040,7 +32040,7 @@ function renderPresenterSlideMiniPreview(slide, serviceId = state.presenter.serv
   return `
     <span class="${escapeAttr(outputClasses)}">
       <span class="${escapeAttr(canvasClasses)}" data-output-theme="${escapeAttr(theme)}"${backgroundStyle}>
-        ${renderPresenterSlideFrame(previewSlide, { noChromakey: frameState.noChromakey, previewStage: true, transitionLogo: serviceRawSourceRef(service).transitionLogo })}
+        ${renderPresenterSlideFrame(previewSlide, { noChromakey: frameState.noChromakey, previewStage: true, transitionLogo: serviceRawSourceRef(service).transitionLogo, presentationDesign: serviceRawSourceRef(service).presentationDesign })}
       </span>
     </span>`;
 }
@@ -34369,9 +34369,9 @@ function presenterMissingContentSlide(item = {}, section = {}, index = 0, conten
     type: "title-assignee",
     label,
     title,
-    assignee: loading ? warning : "",
+    assignee: loading ? warning : String(item.assignee || item.person || "").trim(),
     marker: "",
-    text: cleanList([title, loading ? warning : ""]).join("\n"),
+    text: cleanList([title, loading ? warning : String(item.assignee || item.person || "").trim()]).join("\n"),
     warnings: [warning],
     missingContent: !loading,
     loadingContent: loading,
