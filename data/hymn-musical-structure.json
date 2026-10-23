@@ -13,17 +13,17 @@
   },
   "summary": {
     "versions": 1203,
-    "stanzaMeasuredVersions": 530,
+    "stanzaMeasuredVersions": 560,
     "recitativeExceptions": 4,
-    "unmeasuredVersions": 673,
+    "unmeasuredVersions": 643,
     "complete": false,
     "productionMetadataWritten": false,
     "appDisplayImplemented": true,
     "appDisplayDeployed": true,
-    "fullyMeasuredVersions": 530,
+    "fullyMeasuredVersions": 560,
     "partiallyMeasuredVersions": 0,
-    "notMeasuredVersions": 669,
-    "deferredVersions": 4
+    "notMeasuredVersions": 639,
+    "deferredVersions": 6
   },
   "versions": [
     {
@@ -23434,227 +23434,324 @@
       "versionId": "9437aa84-d645-4d48-bd5a-b8cc49554825",
       "edition": "new",
       "number": 331,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "454743f2-400c-45c2-8068-42e1cd4aa610",
           "kind": "Verse",
           "textSha256": "77ae928aeb9d1d0202c4dbb09c7e41a182f8afe6df830da8f22ef65a40dbb4ac",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "df95f4f0-540d-4e9f-a119-1b845c56378d",
           "kind": "Verse",
           "textSha256": "2e327089928e21e3f90d5475ff8a8aaa1fe554c978b4af72828e82daf227c439",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "c491b20e-2d6c-4c0e-b3b2-979b5185c8bb",
           "kind": "Verse",
           "textSha256": "a71821e5f4a18077ea48b237674ead94f7fa4da46958dd19e0babd3938dbf1bc",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "dcc9ede4-1cb2-446a-ad85-d25a5c8fb2a7",
           "kind": "Chorus",
           "textSha256": "9c678e5b3f6b25c13fb03ea0559e1b70d6c1f845f436f950a631832e4350e3c6",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/331/score",
+          "sha256": "508255e6fe687e3eb1a388ff20259a2d74f2a1b150c4e2e0acf6777aac421ab3"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "6/8 본절16·후렴16. 각 인쇄 악구4마디, 두 판본 각8+8. 후렴 하성의 늦은 시작과 동시 응답은 추가 마디로 세지 않음. 종지의 성부 음가와 쉼표를 마디 안에 포함."
     },
     {
       "versionId": "2e5bf440-7b50-40a6-abb0-5ae39ae64688",
       "edition": "new",
       "number": 332,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "8f002d7b-2bf5-4aa1-8e92-968a7d871684",
           "kind": "Verse",
           "textSha256": "eafc2848e00bf41ade0eb63dd165300e6fb997bec5ab0062f99dce62b958641d",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "d7c35488-183c-48b7-b013-21c9c4639f55",
           "kind": "Verse",
           "textSha256": "fade340f7d8be495b25c13ef8c658ac8ebc23ab223f18018e26050fbabc92e74",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "3028a0d4-a41f-4b32-8f7c-5a1709da76bf",
           "kind": "Verse",
           "textSha256": "7d2e69766f81dcbaed484d738c40b4ce85f3955eb5ef61625e84bf98979190f1",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/332/score",
+          "sha256": "3959490708ac6d0347eb8bf23e266d5a01404a0f891ceba591697f199e4f9389"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "6/8 본절16. 인쇄 네 행 각4마디, 기존 두 블록8+8. 붙임줄·점음표 포함."
     },
     {
       "versionId": "36df60ea-61d3-4935-b6ca-3362e8e258b6",
       "edition": "new",
       "number": 333,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 12,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "796cb795-e39e-4c4e-842a-aad2ee8eda11",
           "kind": "Verse",
           "textSha256": "6f058ac9734bdebc7fc49c6933a75760589a8dd7a6289948c01239cc7a111364",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "81a52147-b6c8-48e8-bd70-b9e99666c373",
           "kind": "Verse",
           "textSha256": "9d160c27bb05fe05760289eab19c91ec3d9179eedac2ac26eef3e30813b0fe05",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "6bcb814a-ca4f-41d7-89f0-7276dba2a4a4",
           "kind": "Verse",
           "textSha256": "88dbe58934d5241cccf058064a71f937ce8f5de808e390065b2ee6dd4063ac16",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "ce81b0fa-072c-4bbd-99c0-d7cc89637bd1",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/333/score",
+          "sha256": "b2dc811674cefed5b0249f1c78a112847f420f65dac4e1e93d185ac9939bbe9d"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "4/4 본절12. 세 인쇄행 각4마디. 새8+4/통4+4+4. 아멘2분음표 두 개1마디."
     },
     {
       "versionId": "45325f7a-9f25-49f3-8a09-361c163abb52",
       "edition": "new",
       "number": 334,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 16.0,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "cb29acf6-0d09-47ea-8538-0d0f8edaa216",
           "kind": "Verse",
           "textSha256": "e5137d3a896896fae91f6b0f1312e199d406b93fb3235f4375d3c0255c4a2fed",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            7.75,
+            8.25
+          ],
+          "approxMeasures": 16.0,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e71dba97-cf06-4ac2-9c7b-be534e527c17",
           "kind": "Verse",
           "textSha256": "67720e48ababfe01383377fb2a610c8b94ff5be75d286b5235732574757399c4",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            7.75,
+            8.25
+          ],
+          "approxMeasures": 16.0,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "ba8acdd4-e35b-4aeb-a2c4-895b834c6098",
           "kind": "Verse",
           "textSha256": "16d587070420c586f8326a5bce57bbd71117928bf6bb99806ed32b7aa186e14c",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            7.75,
+            8.25
+          ],
+          "approxMeasures": 16.0,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/334/score",
+          "sha256": "9b02e2b87a67650435c1e88745ee4adcca7f1b8cd6f9e06bb2de82dc8c7bf34c"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "4/4 본절16. 둘째 인쇄행 끝 저(다음 블록 첫 음절)가 마지막1박을 차지하므로 기존 첫 블록7.75, 둘째8.25. 셋째행 끝 그도 다음 악구 못갖춘이지만 동일 블록 내부. 가사 블록 변경 없음."
     },
     {
       "versionId": "deab679a-bf9e-4874-a836-95de8c9f0ddd",
       "edition": "new",
       "number": 335,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "3fbf4166-7095-461f-a165-e5ef1ebcd8bc",
           "kind": "Verse",
           "textSha256": "86849808cbc1f855f39601d6431789af05be4fedd21ceba4ac736598eaf4143e",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "8954aa86-af60-4bd7-927a-69433483d5c4",
           "kind": "Verse",
           "textSha256": "78d8ec18a5cebf242019cb7fe39eb519506abf83079c08bd02529c874dbbe4e5",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e8cb52ac-4944-49a6-87ff-2f03d200ebc2",
           "kind": "Verse",
           "textSha256": "36486ff1f395de9d8204099c6e6fe7c303b3500815d29ecce57036f0c1f4904b",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "44be286e-1a09-4691-8963-2b86b9051e58",
           "kind": "Verse",
           "textSha256": "deebbad83906c4139a2035622cf6ebd2b444f2633ac7d530e91ad83c39f22a47",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "9dbb6505-1c1d-4cc9-abcc-66f75d9a4376",
           "kind": "Chorus",
           "textSha256": "6ae932379a34b58d8158f9d9ef9e5cd45b1c8d88de39cf75d541327175cbb615",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            2,
+            4,
+            2
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/335/score",
+          "sha256": "8682985c6a2965965a898bd341f10d26939647049042a5f0ea2fa7b42bd86737"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "6/8 본절8(4+4), 후렴8(2+4+2). 확대 원본에서 본절 못갖춘 두16분음표+8분음표=2개의8분음표 상당, 종지점4분음표+8분음표 붙임줄=4개를 확인. 후렴 못갖춘8분음표1개와 종지점4분음표+4분음표 붙임줄5개가 합해1마디. 오놀라운주 두 번까지2, 저천군부터나엎드려서주경배하리까지4, 마지막오놀라운구주예수2. 기존3블록 유지."
     },
     {
       "versionId": "8c9d116c-780b-5c03-9938-127442d45056",
@@ -23720,63 +23817,89 @@
           "path": "backups/20261018-new-hymn-full-review/336/score",
           "sha256": "4e3b286df25d550173c4b2c9d11cfd9c86aeffa92debe118a7cea0b5a9711167"
         }
-      ]
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "3/4 본절24. 환난과~지켰네8, 이신앙~충만하도다8, 성도의~충성하겠네8. 인쇄행 나눔과 가사 블록 경계가 다름. 아멘점2분음표 두 개2마디."
     },
     {
       "versionId": "b2d10db0-ce6b-5361-b329-41f2de8fca6a",
       "edition": "new",
       "number": 337,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "f6be1fe5-6db2-4347-b96c-a53cb43a3028",
           "kind": "Verse",
           "textSha256": "976a7b8d1fa85e2e40099a5a1862111dcacb21380306a4aa08bd7224b9e9fe09",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "c0e3743c-2516-48d0-97e6-342d8bc40613",
           "kind": "Verse",
           "textSha256": "f1766172b8eaea662214191730128070876d6958316292c53362cea681a25bf2",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "40d91228-9cfe-446e-9553-e226987df033",
           "kind": "Verse",
           "textSha256": "9ffb52b763805c283a81627a08974995ee39e1fe8bb2f69a6cd0adb1a7a448f3",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e76c3f8e-a800-4128-a472-708bd2b9493b",
           "kind": "Verse",
           "textSha256": "cd617c8fd26e8f6c4355a2596398cf30e34d6de212c82054e688a68185f3de35",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e15ff51d-b941-4408-89d1-529ebc2cf9f3",
           "kind": "Chorus",
           "textSha256": "6b3c178344975e6fa0ecf78e423c8a9e89ba78a6f87e8f18f9056b79ac56358e",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/337/score",
+          "sha256": "a09bd61ec5d764e53e679680488ccd4202f42a5bc081589572f97800ac70960d"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "9/8 본절8·후렴8. 각 악구 못갖춘3개의8분음표+3온마디+끝점2분음표=4. 두 판본 본절·후렴 각각4+4."
     },
     {
       "versionId": "f3ef39c8-780b-522a-9740-0b1419201f1a",
@@ -23851,522 +23974,717 @@
           "path": "backups/20261018-new-hymn-full-review/338/score",
           "sha256": "b63db36d2bd5fd34c9cfbfb542bee2a0ccf81a5b5826265e1546ce85edcd095b"
         }
-      ]
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "6/8 본절16. 네 인쇄행 각4온마디, 두 판본8+8. 아멘점4분음표 두 개1마디."
     },
     {
       "versionId": "82cf7fa9-3ff7-5b81-b3f9-6b3f16d56c7b",
       "edition": "new",
       "number": 339,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "b329d4ab-0947-4ced-bfe3-5e34f5d13f60",
           "kind": "Verse",
           "textSha256": "0abdd302e98d086896c6acb0763fa1a54aadda382c7b3a06ffc2ddfda6d8448b",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "6f42b4f7-d3ab-456e-99cb-b06db4df4827",
           "kind": "Verse",
           "textSha256": "1c1a1e0740cb7c3664cbf5b87dec7ec16493004164005ee7d54ecba6c4acec68",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "41181238-17e7-41d9-8164-b55ab6e5a0c2",
           "kind": "Verse",
           "textSha256": "415c9df055d3d18344496e8a755d90464670b5e9d6bea7b85dbc572a2aa33438",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "07809a2f-9cea-4c24-9931-f62d94a57dc0",
           "kind": "Verse",
           "textSha256": "f586632145dcc555793363428d6afaea20868177821ce2483821bb2f5a03f0af",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "08b59fd2-5928-4318-aec2-d85a9cb00fdd",
           "kind": "Verse",
           "textSha256": "cddab80e23b767197fc972b4611459ce8c58035021dda9608db337edd9e06221",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "eba8ad29-8fac-46e4-bb97-1f22cab33591",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/339/score",
+          "sha256": "42bbc379e4aef78cea095498e4802a56787e6443eb50747b094a907e04086883"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "6/4 본절8. 악구마다 못갖춘1박+3온마디+끝붙임줄5박=4. 새8/통4+4. 아멘점2분음표 두 개1마디."
     },
     {
       "versionId": "ad2d000f-dc92-5862-b3c0-ef253d6a8979",
       "edition": "new",
       "number": 340,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "800eafc5-f904-4ceb-ab50-deb12503f641",
           "kind": "Verse",
           "textSha256": "136f97e75db94dfb34253cade710ab44b85dce9722716247c7a166c0967b058d",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "80818b2b-7652-408f-96ce-a27e7b64ea81",
           "kind": "Verse",
           "textSha256": "b054b356a4c0930752b59d851926bc810adabb93c60ef014c14670818762637d",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "bc9404da-bdd9-4227-bfe2-14256b3db6b4",
           "kind": "Verse",
           "textSha256": "8924d8ea8cda8f39eab621bf97f3e44c04b47a4d8f052e5d787ef7c6cd777d78",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "823e78c2-871d-4743-9021-9eaf47163753",
           "kind": "Verse",
           "textSha256": "e898f27d98d0a9e82d6d4f5fa814a2571b23b0c5d3f68df622622777c7b34ec8",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/340/score",
+          "sha256": "6383522af8e3ea29716014cac23f81e1bce1621631b4d60926f17e64c7d0015a"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "6/4 본절8. 두 인쇄행 각각4온마디, 새8/통4+4. 마지막 점2분음표는 해당 마디 나머지3박."
     },
     {
       "versionId": "d4789c42-044b-4c9c-81e7-d7aefd91c4c0",
       "edition": "new",
       "number": 341,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "71c61ffd-ea81-4f1a-8664-8f8537b7d706",
           "kind": "Verse",
           "textSha256": "7a955a6a111ada6079d501dbcb9ff5772303bdfffbc9f66ae5776f64de10000f",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "ec35d840-8aa6-4787-a614-bd8c041d111d",
           "kind": "Verse",
           "textSha256": "a744737ff84e90b0d6dee539b9b97db07a85cc61e92b9fe93a85733929dab4da",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "4a677411-b02f-4f83-aab7-034a3bb3df4d",
           "kind": "Verse",
           "textSha256": "8742ebf154c346d800b37ad3988c4499b83c3135e8933b3e76af0f0b95bf1393",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "d0949396-ed02-4f03-b26f-d864cc9f57bb",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/341/score",
+          "sha256": "4fd80cd963dac359fbed9ec187564b989f8fe3a3a13ce5124bef26abe6563a5f"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "4/4 본절16. 네 인쇄행 각4온마디, 새8+8/통4+4+4+4. 아멘2분음표 두 개1마디."
     },
     {
       "versionId": "ec31c5af-58f6-4243-8987-7382f2030a50",
       "edition": "new",
       "number": 342,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "c6a88743-1186-4531-b1bf-b738983aa035",
           "kind": "Verse",
           "textSha256": "d76987454a72a80f61e612f9a3bfbeaf5d232d6f06c4277f41b4e530aa6bf7a4",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "91b0c40d-34be-44d1-9cea-4542030b5ece",
           "kind": "Verse",
           "textSha256": "8d9a3a238223df566b04e8f139553c846e6cd712ab1f83de41e06017f8523a2a",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "29382a56-00bf-4a1d-b9a7-43b2779b71c8",
           "kind": "Verse",
           "textSha256": "55cf0c9ab4173f9286eed89b8cb17fb3d8714100429358e4d96aa5c28aa69e1a",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "c9975718-b1fb-4d5d-b7b4-6b67c213de20",
           "kind": "Chorus",
           "textSha256": "b09dfe9c8d9d6c2c7134f5cf745c9fd03fcee6e49283251c9c5b6f3aa97990e5",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/342/score",
+          "sha256": "ea20ab27c23a37bb8293cde19b1939273f0a858b2153cc40b4be58a659935c1b"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "6/8 본절16·후렴8. 본절 네 악구 각4마디, 새8+8/통4+4+4+4. 후렴 새8/통4+4. 인쇄행 중간 후렴 경계를 가사 단위와 대조."
     },
     {
       "versionId": "91ea92ff-733e-46a9-8f26-f70229e91d0a",
       "edition": "new",
       "number": 343,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "e147a07a-62bd-40f0-8965-6337e1498692",
           "kind": "Verse",
           "textSha256": "2630c9f9f1ac5cc783edffef69b3138ab8b706c33b26400775d3f3c354160cf0",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "951820ec-b585-4921-84ba-253e621a8d91",
           "kind": "Verse",
           "textSha256": "3e6f5d5bd7be9236cb7de8b599260c7a0b2cd79237fa13a1ca09f9789eda0f37",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "8d3b37b8-cd62-49ed-b843-7b029e09a01e",
           "kind": "Verse",
           "textSha256": "f578f994d2e1dee20e19f4940650168b11628af0916e9c838691f2ff0bf663b1",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "6753c208-984c-4032-a039-ebeec6af3b57",
           "kind": "Verse",
           "textSha256": "5dbba4a24afe0777a86512897b8ecfc360f808892807de501d3578992ddf3710",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "3d00697f-f94d-4dc4-83c2-c98f79844458",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/343/score",
+          "sha256": "02617a5b25eda55388d5fa56e80e9aafba69e868011627f7a16a8307e198e434"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "4/4 본절16. 네 인쇄행 각4온마디, 두 판본8+8. 아멘2분음표 두 개1마디."
     },
     {
       "versionId": "4c2beca7-cb87-4bf0-918b-ec6d67c64bee",
       "edition": "new",
       "number": 344,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "711027d4-37c0-4e56-a851-9c6ec5c2d8f1",
           "kind": "Verse",
           "textSha256": "545a462bffe4087cf11b81c432cc9a38cbda4f516973587249d26fad78bbd00c",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "729de0f2-4d8f-4542-9066-95e7d7bcfd81",
           "kind": "Verse",
           "textSha256": "421d47f0ab4c6d3c538b6dbd5fac7b2e5fd5772662bea2a76a1852d81d48d4b1",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "b8ea1d9f-e9bf-43df-ad09-5f738c9cf151",
           "kind": "Verse",
           "textSha256": "f9f0dfa1778e9af88bd6c4a062b6c2d9975f397e7fe662f4615f79d1b1f87fc2",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "f0fe1cb7-3fcb-4254-863e-36b80bad3563",
           "kind": "Chorus",
           "textSha256": "f81da22b7d05f6d056ce43b1c01a62d4ec9980e95e95edea22a312f25f62c4ec",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/344/score",
+          "sha256": "4166702929b5792609516ee8f24b64b19e898a1eaf71d66d9a8530cd69773b25"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "4/4 본절8·후렴8. 각 두 인쇄행4+4, 기존 단일 블록각8. 후렴 마지막 점2분음표와4분쉼표 포함."
     },
     {
       "versionId": "1fb5e2cc-28a2-44f8-a990-4d93c0062191",
       "edition": "new",
       "number": 345,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "11bba6e9-a253-47ed-ae78-b127ba989129",
           "kind": "Verse",
           "textSha256": "d68810e5d70f0d5bc37c04c177cdd7de8ce58d5bfe7811608ca7320e2b41dd31",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "88866b83-4621-4b41-960d-a519b7ad2172",
           "kind": "Verse",
           "textSha256": "0d7026f118e61908df850427b107a8d401b839f36e697523597f674a8fa2135a",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "cbfc7a13-dd92-4570-9b80-fab5464fce16",
           "kind": "Verse",
           "textSha256": "a2ad5163b8f86a4a24ed70a35cc29b32f19c00cb218bea70c498dbc8248cf134",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "a3ab7912-20a1-46e3-9b79-58c87c57104c",
           "kind": "Verse",
           "textSha256": "684e01f66b99b39e9e48e5f4d36873dbba4d446d92823c2fde77882f9f84a6bb",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "a0d4668a-8a54-4a97-bbad-9633f7d8546c",
           "kind": "Verse",
           "textSha256": "94c6f4c5b57abe7e60fcac0d8111864b94d162835caac83dec3c701c1ca4737a",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/345/score",
+          "sha256": "7942d7b78a7458f8333a0f58ded12f79c4fe6afde41f650144d78363ac1988d3"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "6/8 본절16. 네 인쇄행 각4온마디, 두 판본8+8. 아 위태하구나 반복까지 본절에 포함. 붙임줄은 마디 내 음가."
     },
     {
       "versionId": "3c1a16f8-0b05-4435-a6aa-17c5adb770f1",
       "edition": "new",
       "number": 346,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "a9510aa6-b856-4ea8-b368-ce6f3aa5a58e",
           "kind": "Verse",
           "textSha256": "3d0fb0d9594b4d9801c6fd9cf7a67d48855d5f79f292514917c94bc3955e7c6f",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "3d98dcd1-095f-46d1-a67a-4dd2b40309a6",
           "kind": "Verse",
           "textSha256": "444cde81c4faa6145f4d1a067715e4c2fab524e1c5b726d0f79ead57247393ff",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "95a7f9cd-9351-4b15-9ff9-763a740fbcaf",
           "kind": "Verse",
           "textSha256": "8b98e810d5b5a2172c3f5865dd8b5f0627b32501c6f67f4ed2a668a4a6878228",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "db24c708-e254-4a70-a11c-0cc746344cc8",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/346/score",
+          "sha256": "7454ebee7b96469fad412acd3b451bd29ba3908f784ce931867db6ccff823f18"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "4/4 본절16. 각 악구 못갖춘1박+3온마디+종지3박=4. 새8+8/통4+4+4+4. 아멘2분음표 두 개1마디."
     },
     {
       "versionId": "c4303791-4988-5bbd-8521-b42737ad1f6f",
       "edition": "new",
       "number": 347,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "aa512c69-b32f-4ec3-a35f-4dc68db7102e",
           "kind": "Verse",
           "textSha256": "ae380aea9a410ea423bc897ae094cc5a895fb80468e21324e5eca8197e8698fb",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "26ba1886-f2cf-4938-9a4e-c709eb7ddc0a",
           "kind": "Verse",
           "textSha256": "3908d92c64f17b1ac9ead6ff07d93a7f5dbd3b40bc4f1d2f226451b4a72eadf3",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "d9e3ccb4-ccc8-4191-86ba-25041d93588e",
           "kind": "Verse",
           "textSha256": "60a68c1ee2619b539b69eb5908272a39f7cdbf4876a3c901af3e7eb1ce7f1782",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "71d99e7c-307e-4a3b-be72-955e570492a3",
           "kind": "Verse",
           "textSha256": "134bb3ecfd65749f3cda19805e8580c4ee7896898d422f1e5502b1e0be39d7e3",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "1c1af761-00c4-4d9c-9b75-7101808e454d",
           "kind": "Chorus",
           "textSha256": "b68e0a82a1157aa074fb6cae220356e234dce93e8a5f3a768aed5fda09d1e9f9",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/347/score",
+          "sha256": "5554c37874120cfc8036f49dea954d97856bf9cf77c873ee36fe7fe86a974817"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "4/4 본절8·후렴8. 각 악구4온마디, 점2분음표 뒤4분쉼표까지 포함. 새각8/통각4+4."
     },
     {
       "versionId": "c501a07d-2e74-514b-9cb6-c2bdbe20f763",
       "edition": "new",
       "number": 348,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 8.25,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "b4377826-e33e-41f0-ba1a-a38c8c828d51",
           "kind": "Verse",
           "textSha256": "a07bfbc5d349f9c4f4293e9fa9799062dde9b152e77d42f5e3fbc8ac154928d2",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4.25
+          ],
+          "approxMeasures": 8.25,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "427fb72e-8cae-4129-a0f4-d7d978b78d62",
           "kind": "Verse",
           "textSha256": "d532401363035634c123b8097acf6d5d60813077ce473a898bfb149e4eff2f30",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4.25
+          ],
+          "approxMeasures": 8.25,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "48441f75-f7bd-4e85-be05-3f02b9a56e52",
           "kind": "Verse",
           "textSha256": "74a8397e88efef06b6d81553502c568cb71e0c146fd86709588761025ef393f3",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4.25
+          ],
+          "approxMeasures": 8.25,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "31ce15ec-76cb-440c-aa5a-15fa2f4800b7",
           "kind": "Chorus",
           "textSha256": "f13611072bf9c5a75255685e8f008bdd556f98d7e78b8c0c8c8f36034e482f88",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            3.75
+          ],
+          "approxMeasures": 7.75,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/348/score",
+          "sha256": "1a87379f94998d68503e0962c523ba32627b0103aeb2b7cccb9d4a12d5d69ea9"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "4/4 본절8.25·후렴7.75. 첫 악구 못갖춘1박+3온마디+끝3박=4. 둘째 못갖춘1박+3온마디+종지3박과4분쉼표=4.25. 후렴 첫4온마디, 마지막3온마디+점2분음표=3.75. 두 판본 같은 배분."
     },
     {
       "versionId": "3924018e-aa1a-5e5a-92ef-fa6ad0aebfe1",
@@ -24413,63 +24731,95 @@
           "reviewStatus": "not_measured"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/349/score",
+          "sha256": "be48dbde521cf6b408f20359b09e07b5c7e89ecfd210112e23a879cf6c0c63fa"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "6/4 후렴 확장부의 점음표·붙임줄 및 동시 하성 응답, 본절 종지에서 후렴으로 넘어가는 경계의 정확한 음가를 추가 대조해야 함. 새2블록/통4블록 배분을 추측하지 않고 보류.",
+      "reviewDisposition": "deferred"
     },
     {
       "versionId": "8b7a91c0-213c-4741-a8dc-4b3234721861",
       "edition": "new",
       "number": 350,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 15.75,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "435f8193-b62f-48a9-90fd-54af9b9f8d2d",
           "kind": "Verse",
           "textSha256": "f83fee2c9871e700696659425fe16c95fe36413ef39826e97bb6dd53249875e2",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            7.75
+          ],
+          "approxMeasures": 15.75,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "3e03dad2-b773-4064-8c2d-141f0cb48e56",
           "kind": "Verse",
           "textSha256": "1ab0551cb19459abf6f07418870d81972f1c2195082ad09292ba83277536ff25",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            7.75
+          ],
+          "approxMeasures": 15.75,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "63edaf67-3984-4c22-9651-c8621433ded6",
           "kind": "Verse",
           "textSha256": "200d9c52fe5cc123cdc2ef008e331a9f4069b699a9425fb9b62417635dc134f5",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            7.75
+          ],
+          "approxMeasures": 15.75,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "653bb2af-9e7e-4cec-b8f0-d2b0d19adb2b",
           "kind": "Verse",
           "textSha256": "22c29c5134ced8e211c819fc395fd10a0cf7e05c9f4104a34b28fb0b9e3bbe91",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            7.75
+          ],
+          "approxMeasures": 15.75,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "d73dda24-e0ca-4fe1-b5a7-f973b5fda72e",
           "kind": "Chorus",
           "textSha256": "043ea40459ce1851179ff568348391d526e301d2dc097f45ce13349e41ce8598",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8.25,
+            8
+          ],
+          "approxMeasures": 16.25,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-new-hymn-full-review/350/score",
+          "sha256": "56d443b178360981ee7395ba349ef3a1548812ce2ac3572eeab098b5edc949fc"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "2/4 본절15.75·후렴16.25. 첫 인쇄행8온마디. 본절 둘째행7온마디+마지막4분음표와8분쉼표=7.75. 후렴8분음표 못갖춘0.25+첫행8온마디=8.25, 마지막행8온마디(4분쉼표 포함). 두 판본 같은 경계, 총32마디."
     },
     {
       "versionId": "020669ff-3faa-57bb-a14f-02af9d255570",
@@ -62504,57 +62854,80 @@
       "versionId": "e1003706-9e1e-5c9c-a6a2-11ff6c3b2c76",
       "edition": "union",
       "number": 363,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "7b092474-ad53-55e5-987c-2181b2af4d9d",
           "kind": "Verse",
           "textSha256": "976a7b8d1fa85e2e40099a5a1862111dcacb21380306a4aa08bd7224b9e9fe09",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "21cb99b9-d3f6-5f77-8e1d-5cd020e45117",
           "kind": "Verse",
           "textSha256": "f1766172b8eaea662214191730128070876d6958316292c53362cea681a25bf2",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "5201cc3a-5c1b-5902-8904-c54fece72a54",
           "kind": "Verse",
           "textSha256": "9ffb52b763805c283a81627a08974995ee39e1fe8bb2f69a6cd0adb1a7a448f3",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "a77b0253-d619-53fe-aa18-689eecfc5324",
           "kind": "Verse",
           "textSha256": "cd617c8fd26e8f6c4355a2596398cf30e34d6de212c82054e688a68185f3de35",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "adddb70a-c7e8-55f9-af89-f0dc1d875ae1",
           "kind": "Chorus",
           "textSha256": "6b3c178344975e6fa0ecf78e423c8a9e89ba78a6f87e8f18f9056b79ac56358e",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-final77/score-363.jpg",
+          "sha256": "eba1b9151a04940853a505aa59972209b8e103d8927807d8cf6a9897ec0129ac"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "9/8 본절8·후렴8. 각 악구 못갖춘3개의8분음표+3온마디+끝점2분음표=4. 두 판본 본절·후렴 각각4+4."
     },
     {
       "versionId": "720aacdd-bd2d-5aec-af56-42da482a6630",
@@ -62629,166 +63002,239 @@
           "path": "backups/20261018-union-review-remaining/score-364.jpg",
           "sha256": "e9de653259e129857089198ca089f279b099017208ba6129f70e77236949ab11"
         }
-      ]
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "6/8 본절16. 네 인쇄행 각4온마디, 두 판본8+8. 아멘점4분음표 두 개1마디."
     },
     {
       "versionId": "f58c5c10-a466-556e-8e1f-4a3d28d50da2",
       "edition": "union",
       "number": 365,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "8c4c3aac-aee7-5d6b-ac8d-1afce79f353a",
           "kind": "Verse",
           "textSha256": "86eb2d45fe55d99364555673a1cdee734518ef9409ab3cafc51b2bc4bb6d5f33",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e7266041-5948-506d-9d1b-872e04257fb2",
           "kind": "Verse",
           "textSha256": "45da862d44587128adf9b981e529c9d069e032c215fa29fdc64f6a38cbb394b3",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "552e1323-c940-59df-aba9-ca54472baed6",
           "kind": "Verse",
           "textSha256": "f8ca7ee603aea16bd7e10a1f25f2f5fe0ef3335c9bbdf14bc4ff7d9a9c159320",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "d14bdf03-9cda-5de9-aea2-99c67ddcce5d",
           "kind": "Verse",
           "textSha256": "862772ff518afe8413650d7e700d3147a57ff604610393d02269a7de711c13af",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "38daba84-c5a8-5692-8e0d-051d7638a31d",
           "kind": "Verse",
           "textSha256": "dd5a99c56c9be25e0e3959e6959fd9b3d1bc61058c3ea30e7883573c2736c7d3",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "106ef9dd-affc-52a0-97af-018a91c3aebe",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-365.jpg",
+          "sha256": "9574ffd2c570dda3b4aa8c789a7f7cb4410a4c794433a6f3165c0f0a76f789a6"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "6/4 본절8. 악구마다 못갖춘1박+3온마디+끝붙임줄5박=4. 새8/통4+4. 아멘점2분음표 두 개1마디."
     },
     {
       "versionId": "47c82c9a-8ff8-53eb-b503-bfdb492211c0",
       "edition": "union",
       "number": 366,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "afa35b0f-05dc-56c5-8866-353d630100e1",
           "kind": "Verse",
           "textSha256": "224e4612091440b9a135a8b05bdf329fe7b4c1cdf702f3f56a58141a6940ef42",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "2b5bb4f0-c369-5aa6-8bcb-2ae657ede80c",
           "kind": "Verse",
           "textSha256": "a5790b069efb85a120f6bec9bbe8edab3519a1939dcd26bba5557db7205fb656",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e39325ca-3987-529b-97d6-85cf09f3db05",
           "kind": "Verse",
           "textSha256": "a424241ddecb866c9055dda19c31bfbfed3f1a78654aca3ac60288d133494d92",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "fddc4f3c-062a-51f3-bf95-63820abd2849",
           "kind": "Verse",
           "textSha256": "a0987c23038b7d40d9b59af4eea8a6011e79d278a75dbce4043108bc1689629d",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-366.jpg",
+          "sha256": "f2f7cf9e6c4649983933285113d870ea9998b7fe3b6ea43a183734c3179db2c9"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "6/4 본절8. 두 인쇄행 각각4온마디, 새8/통4+4. 마지막 점2분음표는 해당 마디 나머지3박."
     },
     {
       "versionId": "f45af99e-c6f0-4bc7-9197-8c7e7f07b806",
       "edition": "union",
       "number": 367,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "0e0f9afd-115e-586c-a3b2-c1dffc273ad1",
           "kind": "Verse",
           "textSha256": "24349cc5df6d9c3ddf3672554e8998f31f5816adc073a2bbf86f92d3bcbdafc4",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "1794c942-d3ec-5163-9033-34e11ee25a91",
           "kind": "Verse",
           "textSha256": "2a88432c16aafc839566d4d860ec67985671bc39dec25cf82b7dea88f7ce5b37",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "ed3bf520-ea11-56de-a9ef-ee5acd93e656",
           "kind": "Verse",
           "textSha256": "230ab707c4e0527fdb99b3b133304d9b67a14406f059cb70ddb4298c5b5f2f30",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "bd07d591-306b-562b-acb0-dbbb96bfced5",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-367.jpg",
+          "sha256": "eb8a85adeea979a33c467eb36c7a1fe177f584439ca50663f01695ebc228c6b8"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "4/4 본절16. 네 인쇄행 각4온마디, 새8+8/통4+4+4+4. 아멘2분음표 두 개1마디."
     },
     {
       "versionId": "38573dc1-e26f-57cb-bcc8-cdac1b8b1859",
@@ -63232,48 +63678,68 @@
       "versionId": "297d0489-ee06-4667-99f3-8a52f226840d",
       "edition": "union",
       "number": 375,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "fbee1c7c-c0cb-55d3-ba5e-772f3ee46bae",
           "kind": "Verse",
           "textSha256": "afcfcb75f7bc8c53a4c1ef5e90b353eda6eda7742b61b3d87f3605c97851360a",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "2063dba6-e7a1-5c5c-9985-6710935a6333",
           "kind": "Verse",
           "textSha256": "2e327089928e21e3f90d5475ff8a8aaa1fe554c978b4af72828e82daf227c439",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "45441246-d259-550f-81fe-d131666838bd",
           "kind": "Verse",
           "textSha256": "efabacbe8eb7291a21833dcf246a403dfe8644c8cd6c8a1f52e3c274baae80e3",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "8f8a0ac0-e67e-5c32-a16f-af307381734e",
           "kind": "Chorus",
           "textSha256": "9c678e5b3f6b25c13fb03ea0559e1b70d6c1f845f436f950a631832e4350e3c6",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-375.jpg",
+          "sha256": "46f8da22da9b41e7634e87ad6de70036183db70febbf54c33f736fc3d1a71540"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "6/8 본절16·후렴16. 각 인쇄 악구4마디, 두 판본 각8+8. 후렴 하성의 늦은 시작과 동시 응답은 추가 마디로 세지 않음. 종지의 성부 음가와 쉼표를 마디 안에 포함."
     },
     {
       "versionId": "e4e422d3-377f-53bd-b8cf-d847e4f1c9fe",
@@ -63589,104 +64055,149 @@
       "versionId": "4e6e786e-cf31-424a-b426-0f7607139ee8",
       "edition": "union",
       "number": 381,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 12,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "6760f13e-14ba-5da5-893e-1e6b238d2d9f",
           "kind": "Verse",
           "textSha256": "7cd4f6b71e98e9f2dafa7686614b46a80155a70c04b8b8146b0197619f376443",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "491d7e52-564c-58c9-9152-7459a765958f",
           "kind": "Verse",
           "textSha256": "43fac4077a2595b4e08e045cf9d252d90649e250fa4f123c7af6161afe970524",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "5add88aa-cc66-5653-8f14-3f57833a95b9",
           "kind": "Verse",
           "textSha256": "06d698b7a0e8e5956a39cb1efa6ba0490f11c50b0d7f4ab9a9b05a7922564277",
           "blockCount": 3,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 12,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "f110453b-314f-5484-a7c9-8e6089345da6",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-381.jpg",
+          "sha256": "8b2088da420896e6e6eb2949062076412b83b7db808d869b4c2c6d61dd35fe48"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "4/4 본절12. 세 인쇄행 각4마디. 새8+4/통4+4+4. 아멘2분음표 두 개1마디."
     },
     {
       "versionId": "b5ef0d77-1ac4-585d-9125-4015a05d6c9a",
       "edition": "union",
       "number": 382,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 8,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "feb16e4f-0883-57da-84d4-6ee3036e1280",
           "kind": "Verse",
           "textSha256": "4a7ed0866d3d5b9a46378185f197ea2e342f0f46ca2c8590517739106d6fa3dd",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "243826ef-f22b-594b-9432-0a65a38a80c8",
           "kind": "Verse",
           "textSha256": "9042477cbc1c7180a80ece790aef005fb583d514ded904d1dcf56bcc5d799fac",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "eeaac9b3-818d-5a6d-b69b-28315586aeaa",
           "kind": "Verse",
           "textSha256": "b499da66acefe319625ffacf081fc7ee637b7b7accb652c638b34d4f66f70f3b",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "87fcee63-a1b7-520c-abbe-03fff8f00537",
           "kind": "Verse",
           "textSha256": "d41d9829050e30ee29dcf139654a5dee5c285ef51e97e95caaacd894d56f9a85",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "b09bb72c-3f0f-5e0f-a4fc-169404833e90",
           "kind": "Chorus",
           "textSha256": "acd03f5b737ba28aab7a4a6a61615238037e98d390abe53ac9a3027c62df1342",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-382.jpg",
+          "sha256": "ae5e2409c199a6d14f4a4fc586800102f7f027f8f36d242f6ddf4ddcc38e4053"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "4/4 본절8·후렴8. 각 악구4온마디, 점2분음표 뒤4분쉼표까지 포함. 새각8/통각4+4."
     },
     {
       "versionId": "0f2d1c58-4bc8-52f4-8326-0223bb61762a",
@@ -63752,7 +64263,10 @@
           "path": "backups/20261018-union-review-remaining/score-383.jpg",
           "sha256": "6d92a6f914d45a4540616c9d073d009fa997255f4af326e266574b42f67522d0"
         }
-      ]
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "3/4 본절24. 환난과~지켰네8, 이신앙~충만하도다8, 성도의~충성하겠네8. 인쇄행 나눔과 가사 블록 경계가 다름. 아멘점2분음표 두 개2마디."
     },
     {
       "versionId": "e1f576be-0609-4d94-92fa-07a93e09b003",
@@ -63974,54 +64488,83 @@
           "reviewStatus": "not_measured"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-387.jpg",
+          "sha256": "63251a8625853c3d8988502647ac3b5047b6025296491c9a1dea8ba2ab404722"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "6/4 후렴 확장부의 점음표·붙임줄 및 동시 하성 응답, 본절 종지에서 후렴으로 넘어가는 경계의 정확한 음가를 추가 대조해야 함. 새2블록/통4블록 배분을 추측하지 않고 보류.",
+      "reviewDisposition": "deferred"
     },
     {
       "versionId": "f10f1389-f9d9-5eff-b9b1-407db2fc5061",
       "edition": "union",
       "number": 388,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 8.25,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "a8097bf3-f49c-58eb-b649-6c0afd72909e",
           "kind": "Verse",
           "textSha256": "7607eb56c0602474729f4a048f1af9dedf295abd5cc15c3e58a53c2ff1939a15",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4.25
+          ],
+          "approxMeasures": 8.25,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "e5cf1d59-a24f-5f1c-b012-da19fe06186a",
           "kind": "Verse",
           "textSha256": "115b5201b00bff208fb1bd884fed68fb18f1aff9dc2fb992b789a08b2cc3b855",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4.25
+          ],
+          "approxMeasures": 8.25,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "c27babae-88df-5b10-853a-1190dd9101f5",
           "kind": "Verse",
           "textSha256": "74a8397e88efef06b6d81553502c568cb71e0c146fd86709588761025ef393f3",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4.25
+          ],
+          "approxMeasures": 8.25,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "ae2f7ac5-53a4-55fc-8d3c-82c0ef330a92",
           "kind": "Chorus",
           "textSha256": "f13611072bf9c5a75255685e8f008bdd556f98d7e78b8c0c8c8f36034e482f88",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            3.75
+          ],
+          "approxMeasures": 7.75,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-388.jpg",
+          "sha256": "6fc21072de7e996c2fe6f83b56b24bf7562ebc8be656c1b4592370d1de8467f5"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "4/4 본절8.25·후렴7.75. 첫 악구 못갖춘1박+3온마디+끝3박=4. 둘째 못갖춘1박+3온마디+종지3박과4분쉼표=4.25. 후렴 첫4온마디, 마지막3온마디+점2분음표=3.75. 두 판본 같은 배분."
     },
     {
       "versionId": "6d2254ac-e393-5603-9548-c3d49b3a87f4",
@@ -64269,57 +64812,80 @@
       "versionId": "9d7f4abd-3a97-4cf5-a61b-f762bff5b1be",
       "edition": "union",
       "number": 393,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "mixed_blocks",
+      "stanzaApproxMeasures": 15.75,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "c7049d1e-0169-5deb-b6b8-0629bf340c93",
           "kind": "Verse",
           "textSha256": "8f3b98b32c11f2c015fa8092dba5d93acc04b8dccfeb5b13a6fbf421a4e2b80d",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            7.75
+          ],
+          "approxMeasures": 15.75,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "90c3b20d-8d43-509f-91fd-a270b5ac8fed",
           "kind": "Verse",
           "textSha256": "e9da41700db81b2dc6691952866575fb49f03e092bcb647e522d05af795522a9",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            7.75
+          ],
+          "approxMeasures": 15.75,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "8dca4110-2dd6-549f-ba6b-161bb12e969d",
           "kind": "Verse",
           "textSha256": "00876da107ad76537f6821b80fd13801f3836eb9453683a98a8252729e90743c",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            7.75
+          ],
+          "approxMeasures": 15.75,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "6bd2f315-6142-5bda-ba8b-49adc3180c23",
           "kind": "Verse",
           "textSha256": "22c29c5134ced8e211c819fc395fd10a0cf7e05c9f4104a34b28fb0b9e3bbe91",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            7.75
+          ],
+          "approxMeasures": 15.75,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "8019c6a6-ed1c-5fdb-9279-df31f19ad67b",
           "kind": "Chorus",
           "textSha256": "9397ee16fcc840ca17aaf0ec21a032b5a5bb020b20b71cfec6ff8f481610c184",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8.25,
+            8
+          ],
+          "approxMeasures": 16.25,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-393.jpg",
+          "sha256": "54bc6b6ea6da08cc7a9d497a506111d763b9708369dd8b6081c89125f7b0b05c"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "2/4 본절15.75·후렴16.25. 첫 인쇄행8온마디. 본절 둘째행7온마디+마지막4분음표와8분쉼표=7.75. 후렴8분음표 못갖춘0.25+첫행8온마디=8.25, 마지막행8온마디(4분쉼표 포함). 두 판본 같은 경계, 총32마디."
     },
     {
       "versionId": "f7c546b0-20d5-54ac-95b1-3ba3c4007979",
@@ -64381,48 +64947,74 @@
       "versionId": "8b571be9-c7b8-465e-a252-ffede095c53c",
       "edition": "union",
       "number": 395,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "b3d0e3d7-1593-5226-b277-a25929c85b3f",
           "kind": "Verse",
           "textSha256": "ee2361a65c2825f616fb82fbd87e287505b02072ceef30c4f9d983da6e65ff09",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "14d08cea-9a6e-59ce-af1b-dd13bd070c8b",
           "kind": "Verse",
           "textSha256": "bbf50f09a15f4b897e6950b2e9b9e27053f137e2ab14ab9cfe657ca0c7cf5287",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "4cdda6b7-133a-5ce9-97f4-a47f581b00d5",
           "kind": "Verse",
           "textSha256": "cba13532ba89a3588d6925b1d7b29704a0f5a043a8819c58ef65c0804d1487cb",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "be02a0fb-1d47-5572-81b5-146979d94e09",
           "kind": "Chorus",
           "textSha256": "12a1db2697ee17601e6995c1b4d9536df4184012086c61d3719c655f80ef95ad",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4
+          ],
+          "approxMeasures": 8,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-395.jpg",
+          "sha256": "4407339fb42f086e75c299a7462ddb8bdd74233de9e149a43b152e6fbc79cff3"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "6/8 본절16·후렴8. 본절 네 악구 각4마디, 새8+8/통4+4+4+4. 후렴 새8/통4+4. 인쇄행 중간 후렴 경계를 가사 단위와 대조."
     },
     {
       "versionId": "c05a5b3a-c7ee-5a5a-8de7-efdd946b7784",
@@ -64540,48 +65132,73 @@
       "versionId": "4b2d41b8-2947-4ca6-ba0e-bc19223ea34c",
       "edition": "union",
       "number": 398,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "06d197b6-b7c8-50d3-b6cb-22f4e8db8887",
           "kind": "Verse",
           "textSha256": "e2ac9236fa3d7733f7051b353ac4e106a345055484ed0eb02e3bc71dc132a5b8",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "ed941262-f3f2-5906-9368-b84a23d1fbfe",
           "kind": "Verse",
           "textSha256": "9a49061f70d226ad19f1d9f5e2a4dabdd0fc5bd4c048dc65c51c224b565bd455",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "2d8c923d-6c98-5e28-b797-a8f48672f27b",
           "kind": "Verse",
           "textSha256": "5f69b466df7071914d6dccb50c369cc779df0693bae222377ebbf3e808f01000",
           "blockCount": 4,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "1ad826e9-9a52-5c1f-9f18-d62315718ea3",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-398.jpg",
+          "sha256": "9a45068fde27c55a0ff7bb08e5e77af37d158373afcf4759691ab50bdb56e504"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "4/4 본절16. 각 악구 못갖춘1박+3온마디+종지3박=4. 새8+8/통4+4+4+4. 아멘2분음표 두 개1마디."
     },
     {
       "versionId": "fe0d3952-b646-4dad-953a-e27f6da992b7",
@@ -67240,57 +67857,79 @@
       "versionId": "f5bb8333-14cb-5385-8af6-ab9f9b1bcf9c",
       "edition": "union",
       "number": 443,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "46667ad3-3bcd-52ca-b708-ac34e2af36fd",
           "kind": "Verse",
           "textSha256": "b7d3fc183cebb3ba1ecfe341126d1df62173a1392233d6d8fb6365a759414fd5",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "d9af2233-c621-5d90-a5a3-fa9b94942e8e",
           "kind": "Verse",
           "textSha256": "bde2a37078edff9d49550155fa34472b81cef4e1f717204bf8e2f81bae11607c",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "4a34615c-f4f4-5423-ad00-6ccb0ba9d0ec",
           "kind": "Verse",
           "textSha256": "7b2b7e71a95f881e318fa86b7fa77a101d6c18ce06b894fe292ec28fa2df1baf",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "338cbd15-1cc1-5d36-8e00-2f93a4276af7",
           "kind": "Verse",
           "textSha256": "4c2bae7b74c67d0ac2f66ea26177e19b492fba41434429adcc9a0176d2fb4d48",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "49267934-725f-5250-a337-ea1472bdac7a",
           "kind": "Coda",
           "textSha256": "c23e09c9fd7736e06a9d96512f2cee124973450cd5bb6dba39639b610b658b3f",
           "blockCount": 1,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            1
+          ],
+          "approxMeasures": 1,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-final77/score-443.jpg",
+          "sha256": "752a88e382bb1909a498c96cbe378e8dd2788c33e518be196597ac2ce926e8af"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "4/4 본절16. 네 인쇄행 각4온마디, 두 판본8+8. 아멘2분음표 두 개1마디."
     },
     {
       "versionId": "92c5c67c-ff8d-43c3-904e-d94953d3114d",
@@ -68226,57 +68865,80 @@
       "versionId": "6ab36178-6e6e-4d46-9d7c-58eb2c653097",
       "edition": "union",
       "number": 461,
-      "classification": "unclassified",
-      "stanzaApproxMeasures": null,
-      "reviewStatus": "not_measured",
+      "classification": "8_bar_blocks",
+      "stanzaApproxMeasures": 16,
+      "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "85a60748-43b1-52a9-872e-e9804ed6bc5a",
           "kind": "Verse",
           "textSha256": "d68810e5d70f0d5bc37c04c177cdd7de8ce58d5bfe7811608ca7320e2b41dd31",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "a518c897-3146-5fe0-a160-670649e4476c",
           "kind": "Verse",
           "textSha256": "3887cc09702524cb6ab2063b93c85dc121e20bf0aad478864eb1825e28020026",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "3c37a0ac-f11b-5c63-821b-b7ee007d2b42",
           "kind": "Verse",
           "textSha256": "7b1e41e99d83828c0e362f7721d69e2fb986e02d91c8f639b878facf0fa29378",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "8dd8ef83-c35b-5bba-85be-65a7090352d2",
           "kind": "Verse",
           "textSha256": "684e01f66b99b39e9e48e5f4d36873dbba4d446d92823c2fde77882f9f84a6bb",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "85b7cd75-9cde-577c-8038-5eb29fc7ed62",
           "kind": "Verse",
           "textSha256": "704bc162ee2b6ca747bbc85a5a8eb0fe1566422fbc1cee1832f3d1b257fff0f3",
           "blockCount": 2,
-          "approxMeasuresByBlock": null,
-          "approxMeasures": null,
-          "reviewStatus": "not_measured"
+          "approxMeasuresByBlock": [
+            8,
+            8
+          ],
+          "approxMeasures": 16,
+          "reviewStatus": "score_supported_approximation"
         }
       ],
-      "scoreEvidence": []
+      "scoreEvidence": [
+        {
+          "path": "backups/20261018-union-review-remaining/score-461.jpg",
+          "sha256": "eb8777e71b80997e0765a2df1a781153354853c84b6d9d4a636b366744b44066"
+        }
+      ],
+      "reviewedAt": "2026-10-23",
+      "reviewBatch": "hymn331-350-paired",
+      "reviewNote": "6/8 본절16. 네 인쇄행 각4온마디, 두 판본8+8. 아 위태하구나 반복까지 본절에 포함. 붙임줄은 마디 내 음가."
     },
     {
       "versionId": "4f94196a-18f2-58e8-9e3f-920bee63234c",
