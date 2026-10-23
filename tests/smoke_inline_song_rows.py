@@ -94,7 +94,7 @@ try:
     page.evaluate("""()=>{document.body.innerHTML='<aside class="svc-presenter-side-panel" style="width:260px"></aside>';window.renderOutputFixture=open=>{isPresenterOutputWindowOpen=()=>open;document.querySelector('aside').innerHTML=renderPresenterControlsTop(state.services[0],[],false,0);};}""")
     for opened in [False,True]:
      page.evaluate('(open)=>renderOutputFixture(open)',opened)
-     print(engine,'output',opened,page.evaluate("""()=>{const a=document.querySelector('.svc-presenter-launch'),b=document.querySelector('.svc-presenter-fullscreen');const x=a.getBoundingClientRect(),y=b.getBoundingClientRect();if(Math.abs(x.top-y.top)>1||y.left<x.right||y.right>260)throw Error('command alignment');if(b.textContent.trim()!=='전체 화면')throw Error('spacing');return 'PASS paired commands';}"""),flush=True)
+     print(engine,'output',opened,page.evaluate("""()=>{const a=document.querySelector('.svc-presenter-fullscreen'),b=document.querySelector('.svc-presenter-pin-button');const x=a.getBoundingClientRect(),y=b.getBoundingClientRect();if(Math.abs(x.top-y.top)>1||y.left<x.right||y.right>260)throw Error('command alignment');if(a.textContent.trim()!=='전체 화면')throw Error('spacing');return 'PASS paired commands';}"""),flush=True)
     page.screenshot(path=f'/tmp/output-paired-{engine}.png')
    finally:browser.close()
 finally:server.shutdown();server.server_close()
