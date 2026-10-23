@@ -3877,6 +3877,19 @@ no automatic contrast guarantee is made for arbitrary user images. Reading,
 blackout, chromakey and non-children frames reset palette selection. Authored
 highlight values and unrelated custom colors remain unchanged.
 
+## Shared explicit deletion intent · 2026-10-23
+
+All service types and both order/section editors record explicit deletion through
+markServiceItemDeleted. Source omission of empty slots uses the same helper.
+Existing suppression storage stays compatible; no schema or operational rewrite
+is required. Non-template services also remove deletion markers from editable
+and visible projections. Full-save preservation still retains accidentally omitted
+content, while explicit deleted slots cannot resurrect. Failed saves keep intent
+for retry and concurrent input retains the existing signature guard.
+Validation: ten service types, Chromium/WebKit, up/down/add/delete, shuffled
+reload, last-slot deletion, failure/retry, concurrent full-save input and omitted
+content protection in isolated RPC fixtures.
+
 ### Authored service design · 2026-10-23
 
 `source_ref.presentationDesign` selects reusable artwork by `sectionKeys`, with
