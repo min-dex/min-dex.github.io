@@ -66,3 +66,15 @@ Display position never promotes a version to primary. Legacy records with no
 primary still receive the existing normalization fallback. No worship references,
 forms, playback or projection are changed by a move. Boundary buttons are disabled;
 keyboard focus follows the moved card. Memo-only versions retain array order.
+
+
+## Legacy raw-name fallback removal ·2026-10-23
+
+Unnamed versions no longer derive a display name from raw_section_name, trailing
+parentheses, or a raw title match. The stored version_label remains an explicit
+label fallback; a missing label displays 기본. Normal relational hydration still
+uses curated_version_name or version_label. Hymnal edition display and raw source
+evidence remain intact. Parenthetical metadata display is separate and unchanged.
+Read-only production inventory: 1,732 versions all have a nonempty stored name;
+no current effective name ends in parentheses. 48 raw source names do, and none
+depend on the removed unnamed-version path. No production records are rewritten.

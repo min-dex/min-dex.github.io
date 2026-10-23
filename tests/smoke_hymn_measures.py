@@ -33,7 +33,7 @@ def main():
      const version={id:'v',name:'새찬송가',hymn_no:'10',forms},song={id:'song',title:'fixture',versions:[version],metadata:{}};
      state.songs=[song];state.selectedSongId='song';state.selectedVersionId='v';state.forms=forms.map(x=>({...x}));updateSaveState=()=>{};
      document.body.innerHTML='<div id="fixture">'+renderVersionTitleContent(song,version,state.forms,{active:true})+renderVersionMusicalStructure(version,state.forms,{metadataField:true})+'</div><textarea data-form-field="lyrics" data-index="0"></textarea>';
-     const before=JSON.stringify(song);
+     const toolbar=document.createElement('div');toolbar.innerHTML=renderFormToolbar(song);check(!toolbar.querySelector('.form-toolbar-title')&&toolbar.querySelectorAll('[data-add-form]').length===5,'toolbar buttons without redundant heading');const before=JSON.stringify(song);
      await new Promise(r=>setTimeout(r,30));
      check(!document.querySelector('.version-musical-structure'),'no measure line on version card');const node=document.querySelector('[data-hymn-structure-version]');check(node.tagName==='INPUT'&&node.readOnly,'dedicated read-only metadata field');check(node.dataset.reviewStatus==='measured','rendered measured');
      const field=document.querySelector('textarea');field.value='Edited lyrics';field.focus();field.setSelectionRange(3,3);updateFormField(field);
