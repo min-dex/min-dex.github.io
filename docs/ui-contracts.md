@@ -836,3 +836,12 @@ Version classification pills use the 28px compact minimum height and 10px
 horizontal padding. Review-complete actions use a 30×30px target with the
 existing 16px icon; their status row accommodates that target. Form-add buttons
 keep their 30px height and use the shared 5px icon/text gap.
+
+
+### Praise empty-state actions · 2026-10-23
+
+Empty active/inactive version actions use the same 30px editor button height,
+10px horizontal padding and 5px icon gap as the populated form toolbar. Keep
+metadata close controls at the shared 35px dialog size. Version-name prompts
+and deletion confirmations remain native browser dialogs; cancellation must
+retain drafts and perform no persistence writes.

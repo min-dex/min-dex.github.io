@@ -8780,7 +8780,7 @@ body[data-module="praise"] .praise-forms-panel .form-meta { gap: 5px; }
 .praise-forms-panel :is(.version-compare-head, .version-compare-columns, .version-compare-row) { gap: 15px; }
 .praise-forms-panel .version-compare-grid { gap: 15px; }
 .praise-forms-panel .version-empty-state { display: grid; justify-items: center; align-content: center; gap: 15px; min-height: 150px; padding: 20px; border: 0; background: var(--ui-surface-panel); border-radius: var(--r); color: var(--ink-3); font-size: 14px; }
-.praise-forms-panel .version-empty-state .btn { min-height: 30px; }
+.praise-forms-panel .version-empty-state .btn { height: 30px; min-height: 30px; padding: 0 10px; gap: 5px; font-size: var(--ui-label-size); }
 .praise-forms-panel .linked-version-title { box-shadow: none; }
 
 /* Main praise controls flow together; available space determines wrapping. */
