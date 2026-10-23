@@ -1,0 +1,267 @@
+{
+  "versions": 47,
+  "units": 56,
+  "freshBrowserReadback": true,
+  "nineTableComparisonPassed": true,
+  "noServiceContentChanges": true,
+  "expectedAutomaticServiceRevisionIncrements": {
+    "d202cd48-f5b4-434e-8256-87b40f25d399": 4,
+    "e8a6d7f8-b78a-4e4e-9f4d-28e7ae2bd9a6": 4,
+    "b9b6447b-d377-4998-b5ca-5df663caa3fa": 4,
+    "61dde39c-f8fd-48b8-9bc2-24125445bd30": 2,
+    "9f30e3d4-b129-4893-b63f-3718e7452550": 2,
+    "02cf027c-a37c-44e1-8f82-5e5f96788026": 2,
+    "89c833c5-460c-4596-88d5-6ab65803cb78": 2,
+    "d1027f58-546b-4b4f-bae6-9b9771703132": 2,
+    "f7d47435-ae42-4460-895b-8ce776c955ab": 2,
+    "10cca388-2dc9-48eb-8f7c-9a5f82f15498": 2,
+    "9fb3fe5f-c213-4327-ba8f-a6f473737657": 2
+  },
+  "runtime": [
+    {
+      "number": 246,
+      "edition": "new",
+      "forms": 4
+    },
+    {
+      "number": 88,
+      "edition": "new",
+      "forms": 4
+    },
+    {
+      "number": 219,
+      "edition": "new",
+      "forms": 4
+    },
+    {
+      "number": 315,
+      "edition": "new",
+      "forms": 4
+    },
+    {
+      "number": 124,
+      "edition": "new",
+      "forms": 3
+    },
+    {
+      "number": 94,
+      "edition": "new",
+      "forms": 4
+    },
+    {
+      "number": 613,
+      "edition": "new",
+      "forms": 6
+    },
+    {
+      "number": 116,
+      "edition": "new",
+      "forms": 6
+    },
+    {
+      "number": 581,
+      "edition": "new",
+      "forms": 3
+    },
+    {
+      "number": 328,
+      "edition": "new",
+      "forms": 4
+    },
+    {
+      "number": 364,
+      "edition": "new",
+      "forms": 5
+    },
+    {
+      "number": 277,
+      "edition": "new",
+      "forms": 5
+    },
+    {
+      "number": 594,
+      "edition": "new",
+      "forms": 4
+    },
+    {
+      "number": 346,
+      "edition": "new",
+      "forms": 4
+    },
+    {
+      "number": 46,
+      "edition": "new",
+      "forms": 6
+    },
+    {
+      "number": 12,
+      "edition": "new",
+      "forms": 5
+    },
+    {
+      "number": 115,
+      "edition": "new",
+      "forms": 5
+    },
+    {
+      "number": 73,
+      "edition": "new",
+      "forms": 5
+    },
+    {
+      "number": 135,
+      "edition": "new",
+      "forms": 5
+    },
+    {
+      "number": 442,
+      "edition": "new",
+      "forms": 4
+    },
+    {
+      "number": 399,
+      "edition": "new",
+      "forms": 4
+    },
+    {
+      "number": 92,
+      "edition": "new",
+      "forms": 5
+    },
+    {
+      "number": 221,
+      "edition": "new",
+      "forms": 4
+    },
+    {
+      "number": 354,
+      "edition": "new",
+      "forms": 5
+    },
+    {
+      "number": 297,
+      "edition": "new",
+      "forms": 5
+    },
+    {
+      "number": 216,
+      "edition": "new",
+      "forms": 5
+    },
+    {
+      "number": 128,
+      "edition": "new",
+      "forms": 2
+    },
+    {
+      "number": 139,
+      "edition": "new",
+      "forms": 5
+    },
+    {
+      "number": 220,
+      "edition": "new",
+      "forms": 3
+    },
+    {
+      "number": 255,
+      "edition": "new",
+      "forms": 3
+    },
+    {
+      "number": 125,
+      "edition": "new",
+      "forms": 6
+    },
+    {
+      "number": 7,
+      "edition": "new",
+      "forms": 2
+    },
+    {
+      "number": 298,
+      "edition": "new",
+      "forms": 5
+    },
+    {
+      "number": 175,
+      "edition": "new",
+      "forms": 5
+    },
+    {
+      "number": 273,
+      "edition": "new",
+      "forms": 6
+    },
+    {
+      "number": 64,
+      "edition": "new",
+      "forms": 5
+    },
+    {
+      "number": 126,
+      "edition": "new",
+      "forms": 4
+    },
+    {
+      "number": 329,
+      "edition": "new",
+      "forms": 5
+    },
+    {
+      "number": 628,
+      "edition": "new",
+      "forms": 2
+    },
+    {
+      "number": 285,
+      "edition": "new",
+      "forms": 5
+    },
+    {
+      "number": 229,
+      "edition": "new",
+      "forms": 6
+    },
+    {
+      "number": 480,
+      "edition": "new",
+      "forms": 4
+    },
+    {
+      "number": 118,
+      "edition": "new",
+      "forms": 7
+    },
+    {
+      "number": 112,
+      "edition": "new",
+      "forms": 4
+    },
+    {
+      "number": 448,
+      "edition": "new",
+      "forms": 3
+    },
+    {
+      "number": 147,
+      "edition": "new",
+      "forms": 5
+    },
+    {
+      "number": 54,
+      "edition": "new",
+      "forms": 3
+    }
+  ],
+  "scope": "Reviewed spacing patterns across 645 New hymnal editions, not exhaustive orthographic certification.",
+  "legacyWordingPreserved": true,
+  "lineAndSlideBoundariesPreserved": true,
+  "metadataStatus": "local hash updates staged for next publication",
+  "concurrentUnrelatedServiceEditPreserved": true,
+  "combinedOutputRegression": {
+    "versions": 1203,
+    "savedItems": 350,
+    "whitespaceOnlyOutputDifference": true
+  }
+}

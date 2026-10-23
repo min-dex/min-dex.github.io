@@ -26,16 +26,23 @@ try:
     check(presenterBoardSlideBlocks(annotatedScores).map(b=>b.entries.length).join()==='1,2,2,1','score continuation/owner boundary');
     check(annotatedScores.map(e=>e.formLabel).join('|')==='|Verse 1||Verse 2||','score labels only on starts');
     check(JSON.stringify(scoreEntries)===scoreBefore,'score source mutated');
-    const colors=Array.from({length:8},(_,i)=>score('hymn','v'+i,'Verse '+(i+1)));
+    const labels=['Verse 1','Verse 2','Verse 2 A','Verse 2 B','Verse 2 @ A','Pre-Chorus','Chorus','Bridge','Coda','Tag','Tags','Custom'];
+    const colors=labels.map((label,i)=>score('hymn','form-'+i,label));
     const colorHtml=renderPresenterBoardSlideBlocks(annotatePresenterFormStarts(colors).entries,-1,'fixture');
-    check([...colorHtml.matchAll(/data-form-color="(\d)"/g)].map(m=>m[1]).join()==='0,1,2,3,4,5,0,1','ordered six-color cycle');
+    check([...colorHtml.matchAll(/data-form-color="([a-z-]+)"/g)].map(m=>m[1]).join()==='verse,verse,verse,verse,verse,pre-chorus,chorus,bridge,coda,tag,tag,neutral','fixed form colors and variants');
+    const crossSections=[verse('3:16'),{...verse('4:1'),elementId:'bible-2',sectionKey:'sermon'}, {...verse('5:1'),elementId:'bible-3',sectionKey:'citation'}];
+    const crossBefore=JSON.stringify(crossSections);
+    const sections=groupPresenterSlidesBySection(crossSections,'fixture');
+    const crossColors=sections.flatMap(g=>g.subgroups).flatMap(g=>[...renderPresenterBoardSlideBlocks(g.slides,-1,'fixture',g.scriptureColorStart).matchAll(/data-form-color="([a-z-]+)"/g)].map(m=>m[1]));
+    check(crossColors.join()==='bible-light,bible-dark,bible-light','Bible alternation reset at section/element boundary');
+    check(JSON.stringify(crossSections)===crossBefore,'Bible output changed');
     const before=JSON.stringify(entries), blocks=presenterBoardSlideBlocks(entries);
     check(blocks.map(b=>b.entries.length).join()==='2,1,1,1,2,1,1','group boundaries');
     check(!blocks[3].key,'blank grouped');
     check(JSON.stringify(entries)===before,'output data mutated');
     check(blocks.flatMap(b=>b.entries).every((e,i)=>e===entries[i]),'entry identity/order');
     document.body.innerHTML='<div style="padding:20px;width:100%;box-sizing:border-box"><div class="svc-board-grid" id="blocks"></div></div>';
-    document.body.classList.remove('ui-booting');document.body.style.cssText='display:block;margin:0;background:var(--bg)';
+    document.documentElement.className='';document.body.className='';document.body.style.cssText='display:block;margin:0;background:var(--bg)';
     document.getElementById('blocks').innerHTML=renderPresenterBoardSlideBlocks(annotatePresenterFormStarts(entries).entries,1,'fixture');
     const buttons=[...document.querySelectorAll('.svc-slide-thumb')];
     check(buttons.map(b=>b.dataset.presenterIndex).join()==='0,1,2,3,4,5,6,7,8','navigation indexes');
@@ -47,9 +54,13 @@ try:
     document.body.append(plain);
     const groups=[...plain.querySelectorAll('.svc-board-slide-block')];
     check(groups.length===4 && groups[0].dataset.formPlain==='true' && groups[2].dataset.formPlain==='true','Title/Int plain grouping');
-    check(groups[1].dataset.formColor==='0' && groups[3].dataset.formColor==='1','Title/Int consumed lyric colors');
+    check(groups[1].dataset.formColor==='verse' && groups[3].dataset.formColor==='chorus','Title/Int consumed lyric colors');
     check(plain.querySelectorAll('.svc-slide-form-badge').length===4,'plain group labels lost');
     check([...plain.querySelectorAll('.svc-slide-thumb')].map(e=>e.dataset.presenterIndex).join()==='20,21,22,23','plain group click targets changed');
+    const palette=document.createElement('div');palette.id='palette';palette.className='svc-board-grid';
+    palette.innerHTML=colorHtml+renderPresenterBoardSlideBlocks(entries.slice(5),-1,'fixture');
+    document.body.prepend(palette);
+    check([...palette.querySelectorAll('.svc-board-slide-block')].slice(-3).map(e=>e.dataset.formColor).join()==='bible-light,bible-dark,bible-light','Bible reference/translation alternation');
     return 'PASS form boundaries, source/order, grid geometry, plain Title/Int and click targets';
    }'''),flush=True)
    for width in [320,700,1100]:
@@ -64,6 +75,18 @@ try:
          if(!label || getComputedStyle(label).backgroundColor!=='rgba(0, 0, 0, 0)')throw Error('Title/Int label is boxed');
        }
        if(plain.querySelectorAll('.svc-board-block-background').length<2)throw Error('lyric group backgrounds lost');
+       const palette=document.getElementById('palette');
+       const formBlocks=[...palette.querySelectorAll('.svc-board-slide-block')];
+       const color=block=>getComputedStyle(block).getPropertyValue('--form-color').trim();
+       const expected=['#d65a62','#248449','#4f65d5','#21a6d2','#b864b5','#c5a12d'];
+       if([0,5,6,7,8,9].some((i,j)=>color(formBlocks[i])!==expected[j]))throw Error('form palette');
+       if(new Set(formBlocks.slice(0,5).map(color)).size!==1)throw Error('Verse variants differ in color');
+       if(color(formBlocks[9])!==color(formBlocks[10]))throw Error('Tag/Tags differ');
+       for(let i=1;i<5;i++) {
+         const a=formBlocks[i-1].querySelector('.svc-board-block-background').getBoundingClientRect();
+         const b=formBlocks[i].querySelector('.svc-board-block-background').getBoundingClientRect();
+         if(!(b.left>a.right || b.top>a.bottom))throw Error('same-color blocks joined');
+       }
        const grid=document.getElementById('blocks');
        for(const meta of grid.querySelectorAll('.svc-slide-thumb-meta')) {
          const number=meta.querySelector('.svc-slide-thumb-no'), badge=meta.querySelector('.svc-slide-form-badge');
@@ -82,6 +105,6 @@ try:
        if(backgrounds.length<6 || backgrounds.some(e=>getComputedStyle(e).position!=='absolute'||getComputedStyle(e).pointerEvents!=='none'))throw Error('background enters layout or intercepts clicks');
      }''')
      assert page.evaluate('''()=>[...document.querySelectorAll('.svc-board-grid,.svc-board-slide-block')].every(e=>e.scrollWidth<=e.clientWidth+1)'''),(engine,width,theme)
-     if width==700:page.screenshot(path=f'/tmp/mindex-slide-blocks-{engine}-{theme}.png')
+     if width==1100:page.locator('#palette').screenshot(path=f'/tmp/mindex-slide-blocks-{engine}-{theme}.png')
    browser.close()
 finally:server.shutdown()

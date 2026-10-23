@@ -803,3 +803,22 @@ Chromium/WebKit 각각 전체1203판본과 기존 예배 참조350개의 출력 
 혼합 분량 후보143판본과 추가 연결2판본의 악보를 재검토했다. 28판본55가사 단위의 줄/화면 경계를 정리하고28가사 서명을 갱신했다. 통480장3절은 다른 절/새361장과 같은4화면으로, 새/통115장1·3절은2·4절과 같은3화면으로 맞췄다. 자연스러운 짧은 악구와 성부 응답은 유지한다.
 
 운영 재조회는 예정한 변경과 일치. 실제 예배 내용/송폼/연결/메들리/타이밍 불변; 기존 canonical 갱신 트리거로4예배의 save_revision/updated_at만 증가했다. 운영 재조회 데이터로1203판본·저장참조350개, Chromium/WebKit의3해상도 출력 검사 통과. 메타데이터 배포는 별도 증빙으로 완료 상태를 갱신한다.
+
+
+## 2026-10-23 readable slide batch
+
+New128 and Union480 approved adjustments, Unified152/New47 edition spacing
+repairs and short-line grouping114 editions are reflected in the new source ledger.
+The last38 editions preserve natural short final phrases; New632 retains three
+invocations with a line break inside each. No grouping deferrals remain in this
+114-edition candidate set. This is not an assertion of universal orthographic
+infallibility. Version badges were cleared only for the verified editions
+(28+19 previously flagged versions); original review notes remain intact.
+All1203 editions and350 saved items preserve performed text/order, with no overflow
+in Chromium/WebKit at three sizes. Operational service content and audio timing
+were untouched; DB automatic revision increments are recorded separately.
+The metadata UI displays the most common ordinary slide measure estimate,
+excluding Coda; equal-frequency values use the longer regular span rather than
+a range widened by a short closing phrase. Source metadata retains actual per-page
+estimates for auditing. Detailed data and publication status:
+[hymn-final38-release-20261023.json](hymn-final38-release-20261023.json).

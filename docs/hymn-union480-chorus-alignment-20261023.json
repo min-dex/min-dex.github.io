@@ -1,0 +1,51 @@
+{
+  "versionId": "8299ff24-623a-44e7-bf4e-43a879990486",
+  "rowsChanged": 6,
+  "freshBrowserReadback": true,
+  "nineTablesExactExpected": true,
+  "worshipUnchanged": true,
+  "unitIdsKindsOrderUnchanged": true,
+  "runtime": {
+    "checks": [
+      {
+        "sequence": null,
+        "wordsAndRepetitionsPreserved": true
+      },
+      {
+        "sequence": [
+          "V1",
+          "C",
+          "V2",
+          "C",
+          "V3",
+          "C",
+          "V4",
+          "C"
+        ],
+        "wordsAndRepetitionsPreserved": true
+      },
+      {
+        "sequence": [
+          "V4",
+          "C",
+          "V1",
+          "C",
+          "V4",
+          "C"
+        ],
+        "wordsAndRepetitionsPreserved": true
+      },
+      {
+        "sequence": [
+          "V2",
+          "C"
+        ],
+        "wordsAndRepetitionsPreserved": true
+      }
+    ]
+  },
+  "note": "User-requested Unified480 section boundary alignment to New361; original Unified wording retained. Production data applied; measurement metadata staged locally.",
+  "newHymn": 361,
+  "unionHymn": 480,
+  "printedScoreBoundaryIntentionallyDifferent": true
+}

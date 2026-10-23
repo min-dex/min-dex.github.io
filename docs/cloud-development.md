@@ -254,3 +254,23 @@ those explicitly. If main changes externally, reconcile/reverify as before.
 Do not use workflow-wide concurrency as a replacement: it does not reconcile
 queued candidates and can supersede pending runs. Required checks, Pages gate,
 freshness guard, exact-SHA evidence and all test coverage are unchanged.
+
+## Ready-change batches ·2026-10-23
+
+Prefer a single batch of ready, user-approved changes to separate chat releases.
+The coordinator records each exact component commit and its scoped checks. With
+user authorization to coordinate those chats, participating owners stop their
+individual final pushes/gates and release their own waiting tickets. One ticket
+then covers the combined candidate. Keep an already-running release intact and
+reconcile its published main before the combined gate. Unfinished/new requests
+remain for a later batch; freeze scope before the gate to avoid endless restarts.
+
+Cherry-pick reviewed changes without replacing whole dirty source files, retain
+all components when resolving conflicts, and rebuild generated runtime/version
+files once for the combined candidate. Run interaction-relevant local checks,
+then every required GitHub shard on that exact combined SHA. Individual component
+checks cannot substitute for the combined gate. Fast-forward that verified SHA,
+reuse it on main, verify Pages/public files and return the coordinator's ticket.
+Record original component commits plus the deployed SHA so each owner can finish
+without launching another release. Never steal another ticket or cancel an
+unrelated running check. This changes batching, not required test coverage.
