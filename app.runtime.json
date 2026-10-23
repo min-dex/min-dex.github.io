@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-plain-title-interlude",
+  "version": "20261023-shared-editor-controls",
   "options": {
     "compress": false,
     "mangle": {

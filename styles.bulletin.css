@@ -10,7 +10,8 @@ body:has(.bulletin-workbench) .right-sidebar{display:none}
 .bulletin-spacer{flex:1}
 .bulletin-toolbar select{max-width:320px;min-width:0;padding:5px 10px;height:35px;font-size:var(--ui-body-size);font-weight:var(--ui-row-weight);border:0;background:var(--control-surface)}
 .bulletin-history{display:flex;gap:0;padding-right:10px;border-right:1px solid var(--line-soft)}
-.bulletin-toolbar [data-bulletin-save]{border:0;background:transparent;font-size:var(--ui-label-size);font-weight:700}
+.bulletin-toolbar [data-bulletin-save]{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);font-size:var(--ui-label-size);font-weight:700}
+.bulletin-toolbar [data-bulletin-save]:hover:not(:disabled){background:color-mix(in srgb,var(--accent) 85%,var(--ink) 15%)}
 .bulletin-history button{width:35px;min-height:35px;padding:0;border:0;background:transparent;font-size:var(--ui-body-size)}
 .bulletin-toolbar .bulletin-primary{background:var(--accent-soft);border-color:transparent;color:var(--accent);font-size:var(--ui-label-size);font-weight:700;white-space:nowrap}
 .bulletin-toolbar .bulletin-primary:hover:not(:disabled){background:color-mix(in srgb,var(--accent) 20%,var(--panel))}
@@ -21,7 +22,8 @@ body:has(.bulletin-workbench) .right-sidebar{display:none}
 .bulletin-status::before{content:"";display:inline-block;width:5px;height:5px;margin:0 5px 2px 0;border-radius:50%;background:var(--ink-4,#90958d)}
 .bulletin-status[data-state=warning]{color:var(--accent,#a64937)}
 .bulletin-status[data-state=warning]::before{background:currentColor}
-.bulletin-meta button{border:0;background:transparent;padding:0;min-height:25px;color:var(--ink-3);font-size:var(--ui-meta-size);white-space:nowrap}
+.bulletin-meta button{border:1px solid var(--line-2);background:var(--ui-surface-field);padding:5px 10px;min-height:35px;color:var(--ink-2);font-size:var(--ui-label-size);white-space:nowrap}
+.bulletin-meta button:hover:not(:disabled){background:color-mix(in srgb,var(--ui-surface-field) 85%,var(--ink) 15%)}
 .bulletin-body{display:grid;grid-template-columns:300px minmax(0,1fr);gap:15px;min-height:0;flex:1}
 .bulletin-inspector{min-height:0;overflow:auto;padding:0 15px 15px 0;background:transparent;border:0;border-right:1px solid var(--line-soft);border-radius:0;scrollbar-width:thin}
 .bulletin-modes{display:flex;align-items:center;gap:5px;position:sticky;top:0;background:var(--bg);height:45px;box-sizing:border-box;padding:0 0 10px;z-index:1}
