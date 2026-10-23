@@ -3988,3 +3988,12 @@ container width, the form takes its own full-width row. No input values, focus,
 versions, form sequence, persistence or output behavior change. Chromium/WebKit
 actual-renderer checks cover DB shortcut variants,360–1500px, both themes,
 long forms, medley action retention and unsaved text/focus through resizing.
+
+## Remote and music entry placement · 2026-10-23
+
+Basic presenter puts 원격 조작 and 음악 관리 in the third equal-width row of
+right-panel output controls, using the existing35px/16px button/icon rules.
+The matching topbar launchers are hidden only while that basic control rail
+exists. Focus view and other modules retain global access. Both entries open
+the existing dialog/popover; no extra audio instance or remote session is created.
+Music popover placement and keyboard return use the visible launcher.

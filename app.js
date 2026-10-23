@@ -1256,7 +1256,7 @@ function bindStaticEvents() {
   document.getElementById("globalPlaybackControls")?.addEventListener("toggle", (event) => {
     if (event.target.id !== "globalPlaybackPanel" || event.newState !== "closed") return;
     if (document.activeElement === document.body || event.target.contains(document.activeElement)) {
-      document.querySelector(".global-playback-trigger")?.focus({ preventScroll: true });
+      visibleGlobalPlaybackTrigger()?.focus({ preventScroll: true });
     }
   }, true);
   document.getElementById("globalPlaybackControls")?.addEventListener("keydown", (event) => {
@@ -1265,7 +1265,7 @@ function bindStaticEvents() {
     event.preventDefault();
     event.stopPropagation();
     panel.hidePopover();
-    document.querySelector(".global-playback-trigger")?.focus({ preventScroll: true });
+    visibleGlobalPlaybackTrigger()?.focus({ preventScroll: true });
   });
   refs.themeBtn.addEventListener("click", toggleTheme);
   document.getElementById("returnLiveServiceBtn")?.addEventListener("click", returnToLiveService);
@@ -29419,6 +29419,8 @@ function renderPresenterControlsTop(service, slides, active, index) {
           ${anyOutputOpen ? fullscreenControl : `<span class="svc-presenter-disabled-control" title="${escapeAttr(fullscreenLabel)}">${fullscreenControl}</span>`}
           </div>
           ${renderPresenterAlwaysOnTopControl({ buttonStyle: true })}
+          <button class="icon-btn" type="button" data-presenter-remote aria-label="원격 조작" title="원격 조작"><i data-lucide="smartphone"></i><span>원격 조작</span></button>
+          <button class="icon-btn" type="button" data-presenter-music-manager popovertarget="globalPlaybackPanel" aria-label="음악 관리" title="음악 관리"><i data-lucide="music"></i><span>음악 관리</span></button>
         </div>
         <div class="svc-presenter-main" aria-live="polite">
           <span class="svc-slide-counter" aria-label="${escapeAttr(uiText("presenter.aria.slideCount", { current, count }))}">
@@ -29736,9 +29738,13 @@ function handleGlobalPlaybackAction(event) {
   void runServiceMusicAction(action, binding);
 }
 
+function visibleGlobalPlaybackTrigger() {
+  return [...document.querySelectorAll(".global-playback-trigger, [data-presenter-music-manager]")].find(button => button.getClientRects().length);
+}
+
 function positionGlobalPlaybackPanel() {
   const panel = document.getElementById("globalPlaybackPanel");
-  const trigger = document.querySelector(".global-playback-trigger");
+  const trigger = visibleGlobalPlaybackTrigger();
   if (!panel || !trigger) return;
   const rect = trigger.getBoundingClientRect();
   const top = Math.min(rect.bottom + 8, window.innerHeight - 40);

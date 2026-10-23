@@ -9646,3 +9646,11 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
 .svc-presentation-controls[open] { display: grid; gap: .6rem; }
 .svc-presentation-controls > label { display: grid; gap: .3rem; }
 .svc-presentation-controls > .btn { width: fit-content; }
+
+/* Basic presenter keeps music and remote entry alongside output controls.
+   Focus view retains the global launchers because its right rail is hidden. */
+body:has(#servicePresenterControls[data-focus-view="false"]):has([data-presenter-right-sidebar]) .topbar-actions #remotePanelBtn,
+body:has(#servicePresenterControls[data-focus-view="false"]):has([data-presenter-right-sidebar]) .topbar-actions #globalPlaybackControls > .global-playback-trigger { display:none; }
+body:has(#servicePresenterControls[data-focus-view="false"]):has([data-presenter-right-sidebar]) .topbar-actions #globalPlaybackControls { margin:0; }
+.svc-presenter-output-group [data-presenter-remote] { grid-column:1; grid-row:3; }
+.svc-presenter-output-group [data-presenter-music-manager] { grid-column:2; grid-row:3; }
