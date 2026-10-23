@@ -29,6 +29,16 @@ Keep deployment and credential access out of setup scripts and default tests.
 
 ## Shared release queue
 
+Prefer one coordinated batch of ready, approved changes over a release per chat.
+With user-authorized thread coordination, freeze exact commits and local checks,
+have participating owners stop individual final gates and release their waiting
+tickets, then let one coordinator own the batch ticket through publication.
+Preserve work still in progress for a later batch; do not keep adding changes once
+the final gate starts. Keep an already-running unrelated release intact. Record
+included commits and report the shared result to the participating owners when
+authorized. The combined SHA must pass every required check; component checks
+alone do not authorize publication. Never take another owner's ticket yourself.
+
 Before the final branch gate, follow docs/cloud-development.md's Local release
 queue. All worktrees of this checkout share a FIFO slot in Git's common directory:
 `python3 cloud/release_queue.py join --owner <task-branch>`, retain its ticket,

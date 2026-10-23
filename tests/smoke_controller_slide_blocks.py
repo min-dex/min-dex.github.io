@@ -26,7 +26,7 @@ try:
     check(presenterBoardSlideBlocks(annotatedScores).map(b=>b.entries.length).join()==='1,2,2,1','score continuation/owner boundary');
     check(annotatedScores.map(e=>e.formLabel).join('|')==='|Verse 1||Verse 2||','score labels only on starts');
     check(JSON.stringify(scoreEntries)===scoreBefore,'score source mutated');
-    const labels=['Verse 1','Verse 2','Verse 2 A','Verse 2 B','Verse 2 @ A','Pre-Chorus','Chorus','Bridge','Coda','Tag','Tags','Lyrics'];
+    const labels=['Verse 1','Verse 2','Verse 2 A','Verse 2 B','Verse 2 @ A','Pre-Chorus','Chorus','Bridge','Coda','Tag','Tags','Custom'];
     const colors=labels.map((label,i)=>score('hymn','form-'+i,label));
     const colorHtml=renderPresenterBoardSlideBlocks(annotatePresenterFormStarts(colors).entries,-1,'fixture');
     check([...colorHtml.matchAll(/data-form-color="([a-z-]+)"/g)].map(m=>m[1]).join()==='verse,verse,verse,verse,verse,pre-chorus,chorus,bridge,coda,tag,tag,neutral','fixed form colors and variants');
