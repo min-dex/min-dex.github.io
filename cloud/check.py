@@ -55,6 +55,8 @@ NODE_TESTS = (
     "test_worship_unchanged_save.mjs",
     "test_worship_read_parallel.cjs",
 )
+CSS_NODE_TESTS = ('test_app_runtime.cjs', 'test_ui_icons.cjs',
+                  'test_remote_theme.cjs', 'test_bulletin.cjs')
 SMOKES = (
     "smoke_legacy_title_restore.py",
     "smoke_song_form_width.py",
@@ -179,7 +181,6 @@ def scope_parameters():
     if profile != 'css':
         raise ValueError('Unknown check profile')
     import json
-    from check_scope import CSS_NODE_TESTS
     try:
         smokes = json.loads(os.environ['MINDEX_CHECK_SMOKES'])
         if (not isinstance(smokes, list) or not smokes
