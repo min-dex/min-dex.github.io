@@ -4073,3 +4073,6 @@ All song titles use the ordinary song-title renderer, including sending/response
 songs; there is no order-content title substitution or main-praise score suppression.
 A special-song section's genuine assignee heading remains separate from song titles.
 The atomic save path persists edited sequences normally; no bulk DB migration runs.
+
+Title entries do not consume lyric occurrence keys or photo-placement signatures;
+version audio page boundaries remain intact when a default title is prepended.

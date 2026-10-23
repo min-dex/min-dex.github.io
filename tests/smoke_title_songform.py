@@ -34,6 +34,9 @@ try:
     const fresh={...item};
     applyServiceItemMetadataField(fresh,{dataset:{serviceItemField:'form_hint'},value:'V1-C'},{});
     check(!shouldIncludeSongTitleSlide(fresh,fresh.label,song,version) && presenterFormPlanForServiceItem(version,fresh,song).forms.every(f=>!f._presenterTitle),'first edit can omit Title');
+    const withoutTitle=presenterLyricsSlidesForServiceItem({item:fresh,section,index:0,song,version,displayText:song.title,label:fresh.label,forms:presenterFormPlanForServiceItem(version,fresh,song).forms,formWarnings:[]});
+    check(legacy.filter(s=>s.type!=='song-title').map(s=>s.formKey).join('|')===withoutTitle.map(s=>s.formKey).join('|'),'Title shifts existing content keys');
+    check(presenterProgressionPlan(item,legacy).signature===presenterProgressionPlan(item,withoutTitle).signature,'Title invalidates existing photo placement');
     edit('v1 - t - c - T');
     let slides=render();check(slides.map(s=>s.type).join(',')==='lyrics,lyrics,lyrics,song-title,lyrics,song-title','middle/repeated title order');
     check(new Set(slides.map(s=>s.id)).size===slides.length,'unique slide IDs');

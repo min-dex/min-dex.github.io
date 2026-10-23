@@ -56,8 +56,10 @@ function bindPresenterInputGuardEvents() {
 function presenterLyricsSlidesForServiceItem({
   item, section, index, song, version, displayText, label, forms, formWarnings,
 }) {
-  return forms.flatMap((form, formIndex) => {
-    if (form._presenterTitle) return [presenterSequenceTitleSlide(item, section, song, version, displayText, index, formIndex)];
+  let contentIndex = 0;
+  return forms.flatMap((form, sequenceIndex) => {
+    if (form._presenterTitle) return [presenterSequenceTitleSlide(item, section, song, version, displayText, index, sequenceIndex)];
+    const formIndex = contentIndex++;
     if (form._presenterBlank) {
       return [{
         id: `${item.id || index}:blank:${form._presenterToken || formIndex}:${formIndex}`,
@@ -72,7 +74,7 @@ function presenterLyricsSlidesForServiceItem({
         segment: "",
         text: "",
         warnings: formWarnings,
-        sort: index + formIndex / 100,
+        sort: index + sequenceIndex / 100,
       }];
     }
 
@@ -94,7 +96,7 @@ function presenterLyricsSlidesForServiceItem({
       segment: "",
       text: chunk,
       warnings: formWarnings,
-      sort: index + formIndex / 100 + chunkIndex / 10000,
+      sort: index + sequenceIndex / 100 + chunkIndex / 10000,
     }));
   });
 }

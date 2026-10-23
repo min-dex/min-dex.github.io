@@ -34451,8 +34451,11 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   const song = presenterSongForServiceItem(item, displayText, label, service);
   const version = song ? getPresenterServiceItemVersion(song, item, service) : null;
   const formPlan = version ? presenterFormPlanForServiceItem(version, item, song) : { forms: [], warnings: [] };
-  const forms = serviceItemFormPreset(item)?.titleSequence || formPlan.forms.some(form => form._presenterTitle) ? formPlan.forms
-    : globalThis.MindexSongTiming?.formsFor(item, song, version, formPlan.forms) || formPlan.forms;
+  const explicitTitleSequence = serviceItemFormPreset(item)?.titleSequence;
+  const titleForms = formPlan.forms.filter(form => form._presenterTitle);
+  const contentForms = formPlan.forms.filter(form => !form._presenterTitle);
+  const forms = explicitTitleSequence ? formPlan.forms
+    : [...titleForms, ...(globalThis.MindexSongTiming?.formsFor(item, song, version, contentForms) || contentForms)];
   const formWarnings = formPlan.warnings;
   const memo = initialMemo;
   const linkedSongId = String(item.song_id || item.songId || "").trim();

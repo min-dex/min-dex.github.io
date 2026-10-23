@@ -16,7 +16,7 @@ SCRIPT=r'''async()=>{
  state.songs=[song];clearSearchCaches();
  const parent=normalizeServiceItem({id:crypto.randomUUID(),service_id:service.id,label:'찬양 1',raw_title:song.title,song_id:song.id,version_id:version.id,
  _worshipSectionKey:'praise',_worshipSectionTitle:'찬양',_worshipElementTemplateModified:true,
- memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',outputMode:'lyrics',formHint:'V-C-Int-Coda-C-Int-C-C-Tag'})},0);
+ memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',outputMode:'lyrics',formHint:'V-C-Int-Coda-C-Int-C-C-Tag',formPreset:{forms:['V','C','Int','Coda','C','Int','C','C','Tag'],titleSequence:true,strength:'manual'}})},0);
  state.serviceItems[service.id]=[parent];
  const canonical=JSON.stringify(song);
  const plan=presenterProgressionForItem(parent,service.id);

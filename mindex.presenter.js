@@ -6040,7 +6040,7 @@ function presenterProgressionPlan(item, slides = []) {
   const memo = parseServiceItemMemo(item?.memo);
   const signature = JSON.stringify([
     item?.song_id || "", item?.version_id || item?.song_version_id || "",
-    serviceItemOutputMode(item, memo), groups.map(group => group.key),
+    serviceItemOutputMode(item, memo), groups.filter(group => !group.key.startsWith("title:")).map(group => group.key),
     // Manual slides have positional IDs: changed text requires reselection.
     memo.slides,
   ]);
