@@ -328,3 +328,27 @@ Actual encrypted two-admin/one-guest relay tests cover stale concurrent commands
 independent disconnect and continued control. Chromium/WebKit admin UI and actual
 presenter adapter checks pass. Production SQL installation and deployment are
 pending, tracked separately from these isolated checks.
+
+## Unified entry and administrator output picker ·2026-10-24
+
+The first four-digit entry field sends its value to mindex_remote_entry. The
+server checks the configured PIN hash; a match returns an administrator session,
+otherwise the existing guest output-code flow continues. No PIN literal or hash
+is included in browser code. There is no separate administrator tab. The entry
+field masks input, clears a successful PIN, and retains tokens only in memory.
+A private project-wide five-attempt/minute entry budget protects the automatic
+PIN check without counting ordinary output codes as failed administrator logins.
+Existing direct PIN lockout remains enforced.
+
+The administrator picker lists active worship titles and explicit output codes,
+with PC name and current position below. The selected title/code remains visible
+above controls. '예배 선택' disconnects only this controller and returns to the
+picker without stopping output or logging out; '송출 종료' remains a distinct
+confirmed command. This is output control, not remote editing of saved worship
+documents. Logout returns to the shared entry screen.
+
+The entry migration reserves the current configured administrator PIN against
+new output code allocation. If a previously assigned code equals that PIN, only
+that code is renewed; the output identity, links and actual worship stay intact.
+Heartbeat reports do not perform extra PIN hash verification. Installation and
+publication remain pending; isolated PostgreSQL and Chromium/WebKit checks pass.

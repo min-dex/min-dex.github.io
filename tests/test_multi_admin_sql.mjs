@@ -7,7 +7,7 @@ try {
  await db.exec('create role anon;create role authenticated;');
  for(const f of ['2026-10-22-remote-pin.sql','2026-10-24-remote-admin.sql','2026-10-24-output-codes.sql'])await db.exec(fs.readFileSync(new URL('../migrations/'+f,import.meta.url),'utf8'));
  const c=await db.connect();await c.query('set role anon');
- const token=()=>randomBytes(32).toString('hex'),pin=token().slice(0,16);
+ const token=()=>randomBytes(32).toString('hex'),pin='7777';
  await db.query("insert into mindex_remote_private.admin_pin(hash) values(extensions.crypt($1,extensions.gen_salt('bf',4)))",[pin]);
  const login=async()=>(await c.query('select public.mindex_remote_admin_login($1) r',[pin])).rows[0].r;
  const host=async(action,h={},info={},ready=null)=>(await c.query('select public.mindex_remote_output($1,$2,$3,$4,$5) r',[action,h.id||null,h.token||null,info,ready])).rows[0].r;
@@ -41,6 +41,25 @@ try {
  assert((await admin('connect',b.token,h2.id,randomUUID())).ok);
  await host('remove',h);assert.equal((await admin('connect',b.token,h.id,rb)).error,'offline');
  assert.equal((await host('tick',h2,{multiAdmin:true})).links.length,1);
+
+ // Unified entry never embeds the PIN; an accidental old matching code is retired.
+ await db.query("update mindex_remote_private.outputs set code=$1 where id=$2",[pin,h2.id]);
+ const entrySql=fs.readFileSync(new URL('../migrations/2026-10-24-remote-entry.sql',import.meta.url),'utf8');
+ const storedPin=(await db.query('select hash from mindex_remote_private.admin_pin')).rows[0].hash;
+ await db.exec(entrySql);await db.exec(entrySql);
+ assert.equal((await db.query('select hash from mindex_remote_private.admin_pin')).rows[0].hash,storedPin);
+ const updated=await host('tick',h2,{multiAdmin:true});assert.notEqual(updated.code,pin);assert.equal(updated.links.length,1);
+ const entry=async code=>(await c.query('select public.mindex_remote_entry($1) r',[code])).rows[0].r;
+ const authEntry=await entry(pin);assert(authEntry.ok&&authEntry.kind==='admin'&&authEntry.token);
+ assert((await admin('list',authEntry.token)).ok);
+ assert.equal((await entry(updated.code)).kind,'guest');
+ await db.exec("update mindex_remote_private.admin_pin set locked_until=clock_timestamp()+interval '15 minutes'");
+ assert.equal((await entry(pin)).error,'locked');
+ assert.equal((await entry(updated.code)).kind,'guest','admin lockout does not block a valid guest entry');
+ assert.equal((await entry('oops')).error,'invalid_code');
+ assert.equal((await entry(pin)).error,'rate_limited');
+ await assert.rejects(c.query('select * from mindex_remote_private.entry_budget'),/permission denied/);
+ console.log('PASS unified server entry, PIN secrecy/preservation, reserved PIN collision repair, admin lockout, guest routing and shared guess budget');
  await assert.rejects(c.query('select * from mindex_remote_private.admin_links'),/permission denied/);
  console.log('PASS migration replay/preservation, concurrent admins, independent secrets/readiness/logout, single guest, old-host guard, login cap removal, output isolation and ACL');
 }finally{await db.close();}

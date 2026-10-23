@@ -7,22 +7,21 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Mindex Remote">
 <link rel="stylesheet" href="remote.shared.css?v=2">
-<link rel="stylesheet" href="remote.css?v=12">
+<link rel="stylesheet" href="remote.css?v=13">
 <script>const theme=matchMedia("(prefers-color-scheme: dark)");function applyTheme(){document.documentElement.dataset.theme=theme.matches?"dark":"light";document.querySelector('meta[name="theme-color"]').content=theme.matches?"#181816":"#ffffff";}applyTheme();theme.addEventListener("change",applyTheme);</script>
 </head>
 <body>
 <main>
 <header><div class="brand"><span class="brand-mark" aria-hidden="true"></span><h1>Mindex Remote</h1></div><p id="status" role="status"></p></header>
-<nav class="connection-modes" aria-label="연결 방식"><button type="button" id="guestMode" aria-pressed="true">코드 연결</button><button type="button" id="adminMode" aria-pressed="false">관리자</button></nav>
-<form id="adminForm" hidden><label for="adminPin">관리자 PIN</label><input id="adminPin" type="password" inputmode="numeric" autocomplete="off" maxlength="32" required><button class="primary" id="adminLogin">접속</button></form>
-<section id="adminOutputs" hidden aria-label="송출 중인 예배"><h2>송출 중</h2><div id="outputList"></div></section>
+<section id="adminOutputs" hidden aria-label="송출 중인 예배"><h2>예배 선택</h2><div id="outputList"></div></section>
 <button id="adminLogout" hidden>관리자 접속 종료</button>
 <form id="pairForm">
-<label for="code">송출 코드</label>
-<input id="code" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="1234" maxlength="4" inputmode="numeric" pattern="[0-9]{4}" required>
+<label for="code">송출 코드 · 관리자 PIN</label>
+<input id="code" type="password" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="1234" maxlength="4" inputmode="numeric" pattern="[0-9]{4}" required>
 <button id="connect" class="primary">연결</button>
 </form>
 <section id="controller" hidden aria-label="송출 조작">
+<div id="adminContext" hidden><button id="backOutputs" type="button"><i data-lucide="arrow-left"></i><span>예배 선택</span></button><div class="selected-output"><strong id="selectedOutputTitle"></strong><span id="selectedOutputCode" class="output-code"></span></div></div>
 <div class="previews"><article><h2>현재 <span id="position"></span></h2><div id="current" class="slide-preview"></div></article><article><h2>다음</h2><div id="next" class="slide-preview"></div></article></div>
 <div class="navigation"><button data-action="prev"><i data-lucide="arrow-left"></i><span>이전</span></button><button data-action="next" class="primary"><span>다음</span><i data-lucide="arrow-right"></i></button></div>
 <button data-action="blank" id="blank"><i data-lucide="eye-off"></i><span>암전</span></button>
@@ -43,5 +42,5 @@
 <script src="mindex.icons.js?v=remote-controls1"></script>
 <script src="vendor/supabase-js.min.js"></script>
 <script src="mindex.public-config.js"></script>
-<script type="module" src="remote.mjs?v=15"></script>
+<script type="module" src="remote.mjs?v=16"></script>
 </body></html>
