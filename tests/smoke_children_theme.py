@@ -59,7 +59,13 @@ try:
       return marks.map((el,i)=>{
        const style=getComputedStyle(el);
        check(style.color===brown,code+' marker foreground mismatch');
-       check(style.backgroundImage.includes(markerColors[i])&&style.backgroundImage.includes('30%')&&style.backgroundImage.includes('95%'),code+' marker color/coverage mismatch');
+       const probe=document.createElement('span');
+       const source=originalColors[i]||'#123456';
+       const softened='color-mix(in srgb, '+source+' 65%, white)';
+       probe.style.backgroundImage='linear-gradient(to bottom, transparent 45%, '+softened+' 45%, '+softened+' 95%, transparent 95%)';host.append(probe);
+       check(style.backgroundImage===getComputedStyle(probe).backgroundImage,code+' marker color/50% coverage mismatch');probe.remove();
+       const padding=+style.paddingLeft.replace('px','')*1920/root.clientWidth;
+       check(Math.abs(padding-4)<.01&&style.paddingLeft===style.paddingRight,code+' marker side spacing mismatch '+padding);
        check(style.webkitTextStrokeWidth==='0px',code+' retained outline');
        return [style.color,style.backgroundImage,style.fontWeight];
       });

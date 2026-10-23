@@ -3913,3 +3913,12 @@ Remove artwork identity selection, per-background color substitutions, palette
 attributes and text outlines. Every artwork, preview and output uses one CSS rule;
 no stored highlight values, text, font sizes or weights change. Non-children,
 chromakey and reading frames retain their existing colored text behavior.
+
+
+## Refined common marker geometry ·2026-10-23
+
+Supersedes the initial30–95% marker coverage: all children artwork now uses the
+same45–95% band (50% height),4-stage-pixel padding on each side and a65% authored
+color /35% white mix. Foreground, font sizes and weights are unchanged. Padding
+uses the shared1920px stage unit in thumbnails/output; no background exceptions,
+text outlines or stored highlight color edits are introduced.
