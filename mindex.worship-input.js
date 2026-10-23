@@ -1638,7 +1638,9 @@ function unlinkServiceMedley(serviceId, itemId) {
     return false;
   }
   const service = state.services.find(candidate => candidate.id === serviceId);
-  if (!service || serviceSourceTextHasPendingChanges(serviceSourceTextareaForService(serviceId))) {
+  const pendingSource = service && typeof service._worshipSourceTextDraft === "string"
+    && service._worshipSourceTextDraft !== buildServiceSourceText(service);
+  if (!service || pendingSource || serviceSourceTextHasPendingChanges(serviceSourceTextareaForService(serviceId))) {
     if (service) showToast("편집 중인 원문을 먼저 반영해 주세요.", "info");
     return false;
   }
