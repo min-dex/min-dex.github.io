@@ -9650,9 +9650,12 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
  padding:5px 10px;border-radius:5px;background:var(--ui-surface-panel);color:var(--warn);
  font-size:var(--ui-meta-size);font-weight:600;line-height:1.5;
 }
-.svc-presentation-controls { margin-block: .5rem; }
-.svc-presentation-controls[open] { display: grid; gap: .6rem; }
-.svc-presentation-controls > label { display: grid; gap: .3rem; }
+.svc-progression-media[open] { flex: 1 1 100%; max-width: 100%; }
+.svc-progression-media[open] > summary { width: fit-content; }
+.svc-presentation-controls { display: grid; gap: 10px; min-width: 0; padding: 10px 5px 5px; }
+.svc-progression-media-controls + .svc-presentation-controls { border-top: 1px solid var(--line); }
+.svc-presentation-controls > label { display: grid; gap: 5px; min-width: 0; }
+.svc-presentation-controls input[type="text"] { width: 100%; min-width: 0; }
 .svc-presentation-controls > .btn { width: fit-content; }
 
 /* Basic presenter keeps music and remote entry alongside output controls.

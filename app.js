@@ -26821,7 +26821,7 @@ function renderServiceEditorFormControls(item, origIndex, model = serviceItemEdi
   if (!model.song && !hasFormData) return "";
   return `
     ${renderServiceFormHintInput(item, origIndex, options)}
-    ${options.hideProgression ? "" : renderPresenterProgressionAdd(item)}`;
+    ${options.hideProgression ? "" : renderPresenterProgressionAdd(item, origIndex, model.service?.id)}`;
 }
 
 function renderServiceEditorAssigneeControl(item, origIndex, attrs = {}, model = serviceItemEditorModel(item, attrs)) {
@@ -31565,7 +31565,7 @@ function renderPresenterBoardItemActions(serviceId, context, options = {}) {
       ${options.commitOnly ? "" : fileControls}
       ${!options.commitOnly && photoTiming ? `<button class="btn secondary" type="button" data-song-timing-open data-song-timing-focus="photos"
         data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(context.item.id)}">사진·타이밍 편집</button>` : ""}
-      ${options.commitOnly ? "" : renderPresenterProgressionAdd(context.item)}
+      ${options.commitOnly ? "" : renderPresenterProgressionAdd(context.item, context.index, serviceId)}
       ${options.commitOnly ? "" : audioControls}
       ${options.omitCommit ? "" : `<button class="reference-new-btn svc-board-subgroup-commit" type="button" data-service-item-commit
         data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}">
@@ -31607,7 +31607,6 @@ function renderPresenterBoardSubgroupInputControls(serviceId, subgroup = {}, opt
         ${label ? `<div class="svc-board-subgroup-control-head"><span class="svc-board-subgroup-control-label">${escapeHtml(label)}</span>${dbLink}${renderPresenterBoardItemActions(serviceId, context)}</div>` : ""}
         ${audioLed ? audioManager : ""}
         ${controls}
-        ${renderPresenterPresentationControls(context.item, context.index, serviceId)}
         ${options.headerActions || label ? "" : renderPresenterBoardItemActions(serviceId, context)}
         ${audioLed ? "" : audioManager}
       </div>`;

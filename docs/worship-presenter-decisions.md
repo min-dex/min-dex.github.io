@@ -4129,6 +4129,16 @@ Controller Title and instrumental groups retain their labels, thumbnails, groupi
 and navigation, with no group background box. They do not consume the lyric
 group color cycle. Verse/chorus/other form backgrounds and output remain unchanged.
 
+
+## Unified praise background controls (2026-10-23)
+
+- Worship/presenter song editing uses one `배경` disclosure for form-photo placement
+  and background-video URL/file selection. Remove the separate video disclosure.
+- Keep existing photo placement/signatures and video presentation metadata,
+  uploads and atomic saves unchanged. Photo-backed forms take precedence over
+  the muted looping video; no asset conversion or stored-data migration.
+- Without photo-capable forms, retain video controls for praise items.
+
 ### Main praise input flow · 2026-10-23
 
 Main praise controller inputs use one wrapping flex row instead of the old

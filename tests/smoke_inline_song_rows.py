@@ -59,6 +59,9 @@ try:
     print(engine,page.evaluate('''()=>{
      const row=document.querySelector('.svc-inline-song'),details=row.querySelector('.svc-progression-media');
      if(!details.open)throw Error('photos did not open');
+     if(row.querySelectorAll('.svc-progression-media').length!==1||details.querySelector('summary').textContent!=='배경')throw Error('duplicate background disclosures');
+     if(!details.querySelector('[data-progression-position]')||!details.querySelector('[data-praise-background-file]')||!details.querySelector('[data-service-item-field="background_video"]'))throw Error('unified photo/video controls missing');
+     if(details.querySelectorAll('details').length)throw Error('nested video disclosure');
      const title=row.querySelector('.svc-edit-title').getBoundingClientRect(),flow=row.querySelector('.svc-board-subgroup-flow').getBoundingClientRect();
      if(flow.top<title.bottom)throw Error('expanded photos overlap song');
      const host=document.querySelector('.svc-board-subgroup-controls').getBoundingClientRect();
@@ -75,6 +78,11 @@ try:
      if(Math.abs(title.top-form.top)>2||Math.abs(title.top-actions.top)>12||form.right>actions.left)throw Error('unlinked desktop layout');
      return 'PASS no reserved version column';
     }'''),flush=True)
+    page.locator('.svc-progression-media > summary').first.click()
+    for width in [600,1200]:
+     page.set_viewport_size({'width':width,'height':900})
+     page.evaluate("""()=>{const panel=document.querySelector('.svc-progression-media[open]');for(const e of panel.querySelectorAll('select,input:not([type=file]),button,label.btn')){const r=e.getBoundingClientRect();if(r.width&& (r.left<0||r.right>innerWidth))throw Error('background control overflow');}}""")
+     page.screenshot(path=f'/tmp/mindex-unified-background-{engine}-{width}.png')
     page.evaluate('renderSingleSong()')
     page.evaluate("""()=>{const row=document.querySelector('.svc-inline-song');for(const status of ['saving','error','modified','saved']){setServiceInputFeedback(row,status);const text=row.querySelector('[data-service-input-status]').textContent;if(status==='saved'&&text)throw Error('duplicate saved status');if(status!=='saved'&&!text)throw Error('missing pending/error status');}}""")
     for width in [1600,1200,1100,1000,800,600]:
