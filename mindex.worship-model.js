@@ -300,7 +300,7 @@ function canonicalServiceFormToken(value = "") {
   }
   const instrumental = raw.match(/^(int|간주|interlude|instrumental)\s*([a-z]?)$/i);
   if (instrumental) return "Int" + instrumental[2].toUpperCase();
-  if (/^title$/i.test(raw)) return "Title";
+  if (/^(?:t|title)$/i.test(raw)) return "Title";
   if (/^vl$/i.test(raw)) return "VL";
   if (/^tags$/i.test(raw)) return "Tags";
   const ending = raw.match(/^(coda|ending)\s*(\d*)\s*([a-z]?)$/i);

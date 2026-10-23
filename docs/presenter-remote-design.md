@@ -174,3 +174,24 @@ Remove in-page installation guidance and its custom install prompt. The existing
 manifest and platform browser installation remain available. Show the wake-lock
 status section only for actionable failures; idle/normal states occupy no space.
 The example code uses lighter400-weight placeholder text, distinct from entered digits.
+
+
+## PC 동시 조작과 영상 제어 ·2026-10-23
+
+PC에서 슬라이드를 넘겼다 돌아오거나 음원을 시작했다 멈춰서 최종 표시가 같아도,
+송출 순번과 음원 실행 순번을 비교해 그 사이 발급된 오래된 원격 명령을 거절한다.
+새 상태를 받은 다음 명령은 정상 실행하며 같은 명령 ID는 재실행하지 않는다.
+
+현재 송출 슬라이드의 일반 영상에는 재생·일시정지·처음부터 버튼을 표시한다.
+폰은 영상을 재생하거나 전달받지 않는다. 송출 창의 영상 요소를 조작하고 실제 처리
+응답을 받은 뒤 완료로 표시한다. 일시정지는 위치를 유지하고, 처음부터는 0초에서 재생한다.
+출력 세션·슬라이드 메시지·영상 상태 변경 이력을 검사하고 중복 전달은 한 번만 처리한다.
+영상 상태가 오래됐거나 준비 중이면 잠그며, 암전·실시간 말씀 중에는 영상 버튼을 숨긴다.
+응답 제한은 1.8초이며 불확실한 명령은 재시도하지 않는다. 브라우저의 자동 재생 차단은
+PC에서 허용하도록 안내한다. PPTX 내장 영상·배경 영상은 이 조작 대상에 포함하지 않는다.
+
+`smoke_remote_video.py`는 별도 controller/output 페이지와 실제 HTTP MP4로 양 브라우저의
+재생·일시정지·재시작, 중복 전달, PC 경합, 화면 교체와 재생 차단을 검증한다.
+`smoke_remote_adapter.py`는 실제 슬라이드/음원 함수의 왕복 조작 경합을 검증한다.
+암호화 relay 및 320/390/768px 영상 버튼 검사는 `smoke_presenter_remote.py`에 포함한다.
+현장 휴대폰·실물 출력 장비 확인은 별도이며, 배포 완료는 Pages 기록으로 확인한다.

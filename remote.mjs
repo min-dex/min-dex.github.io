@@ -1,5 +1,5 @@
 import {createPreview} from './remote.preview.mjs?v=1';
-import {openRemote} from './mindex.remote-session.mjs?v=5';
+import {openRemote} from './mindex.remote-session.mjs?v=6';
 import {setupPhoneExperience} from './remote.screen.mjs?v=4';
 window.lucide?.createIcons();
 const screenAwake=setupPhoneExperience();
@@ -21,6 +21,8 @@ function state(value){
  $('pairForm').hidden=true;$('position').textContent=`${value.index+1} / ${value.total}`;
  currentPreview(value.previewCurrent,value.blank?'암전 중':value.current||'내용 없음');nextPreview(value.previewNext,value.next||'마지막 슬라이드');
  $('music').textContent=value.music;
+ $('videoControls').hidden=!value.video;
+ $('videoStatus').textContent=value.video ? ({playing:'재생 중',paused:'일시정지',ended:'재생 완료',blocked:'PC에서 재생 허용 필요',loading:'영상 준비 중',error:'영상 재생 실패'}[value.video.status]||'영상 상태 확인 중') : '';
  $('blank').dataset.action=value.blank?'unblank':'blank';$('blank').querySelector('span').textContent=value.blank?'암전 해제':'암전';
  const icon=value.blank?'eye':'eye-off';
  if($('blank').querySelector('[data-lucide]')?.getAttribute('data-lucide')!==icon){

@@ -30,8 +30,10 @@ def main():
                   const before=JSON.stringify({version,item,song});
                   const plan=presenterFormPlanForServiceItem(version,item,song);
                   assert(plan.forms.filter(f=>f.lyrics.startsWith(intro)).length===1,'intro count '+number);
-                  assert(plan.forms.length===(sequence?.length||2),'selected form count');
-                  assert(plan.forms[0].id===(sequence ? 'review-v2' : 'review-v1'),'first selected verse');
+                  assert(plan.forms[0]._presenterTitle,'default Title missing');
+                  const content=plan.forms.filter(f=>!f._presenterTitle);
+                  assert(content.length===(sequence?.length||2),'selected form count');
+                  assert(content[0].id===(sequence ? 'review-v2' : 'review-v1'),'first selected verse');
                   assert(!plan.warnings.length,'unexpected warning');
                   assert(JSON.stringify({version,item,song})===before,'saved object mutated');
                   const reopened=JSON.parse(JSON.stringify(item));
