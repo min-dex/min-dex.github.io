@@ -326,8 +326,10 @@ independent secrets/readiness/logout, denied request takeover, one-guest limit,
 old-host guard, more than twenty valid admin logins, output isolation and ACL.
 Actual encrypted two-admin/one-guest relay tests cover stale concurrent commands,
 independent disconnect and continued control. Chromium/WebKit admin UI and actual
-presenter adapter checks pass. Production SQL installation and deployment are
-pending, tracked separately from these isolated checks.
+presenter adapter checks pass. Operator SQL installation and production RPC verification are complete. Two
+administrators and one guest shared a temporary output; disconnect preserved the
+other links, code and second output. Temporary records were removed. Publication
+is tracked separately in the deployment receipt.
 
 ## Unified entry and administrator output picker ·2026-10-24
 
@@ -350,5 +352,6 @@ documents. Logout returns to the shared entry screen.
 The entry migration reserves the current configured administrator PIN against
 new output code allocation. If a previously assigned code equals that PIN, only
 that code is renewed; the output identity, links and actual worship stay intact.
-Heartbeat reports do not perform extra PIN hash verification. Installation and
-publication remain pending; isolated PostgreSQL and Chromium/WebKit checks pass.
+Heartbeat reports do not perform extra PIN hash verification. Operator installation and production entry/list readback are complete; isolated
+PostgreSQL and Chromium/WebKit checks pass. Publication remains a separate
+deployment receipt.
