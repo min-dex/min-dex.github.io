@@ -748,3 +748,14 @@ Chromium/WebKit 각각 전체1203판본과 기존 예배 참조350개의 출력 
 **운영 DB 쓰기0, push/배포 없음.** 공개 대장/runtime은 현재 운영 가사와 맞도록 그대로 둔다. 최신 후보는 `backups/20261023-hymn-slide-final/{plan,expected,candidate-ledger,full-layout,invariants}.json`. 이전 slide-balance 폴더의 적용 스크립트를 그대로 실행하지 말 것. 적용 전에 현재 DB 및 다른 기기의 로컬 타이밍 의존성을 재확인하고, 동시 수정 CAS→signature/readback→대장/runtime 갱신→필수 배포 gate→운영 확인 순서를 따른다. 다른 기기 로컬 타이밍은 이번 snapshot만으로 확인 불가하다. 정밀 마디 수 미확정3판본과 낭송형6판본은 숫자를 억지로 만들지 않았으며 전곡 화면 검사에는 포함했다.
 
 공개 증빙: [전곡 슬라이드 후보 검증](hymn-slide-balance-completion-staged-20261023.json). 전곡 출력 비교와 줄바꿈 후보 준비는 완료; 운영 적용·묶음 배포는 대기다.
+
+
+## 2026-10-23 독립 아멘 유형 통일 / 묶음 적용 대기
+
+독립 아멘14판본(새640–645, 통551–558)은 Lyrics로 통일한다. 이미 Lyrics인11판본은 그대로, 통551·553·556의 curated_unit_type/curated_unit_label 두 필드만 Coda→Lyrics 후보로 준비했다. 가사·줄바꿈·아멘 횟수·원본 source 필드·ID·순서 변경 없음. 일반 찬송가 끝의 Coda589단위는 그대로다.
+
+유형 변경 단독 및 앞선 슬라이드 분량 후보와 합친 경우 모두 Chromium/WebKit 전체1203판본·기존 예배 참조350개 출력 보존 PASS. 세 변경판본의 기본/Coda/Coda-Coda/Coda-Coda-Coda12경우에서 아멘 횟수·슬라이드·경고 동일. 후보5419단위 metadata 종류/해시 일치. 운영 쓰기0, 실제 예배 변경0, 배포 없음.
+
+최신 묶음 후보443판본·1626단위는 backups/20261023-independent-amen/{bundle-plan,bundle-expected,bundle-candidate-ledger}.json. 최신 읽기 결과에 이전 후보를 CAS 대조하여 반영했으며 별도 예배 변경은 보존했다. 이전 slide-final 후보만 단독 적용하지 말 것. 공개 대장/runtime은 실제 DB 적용·readback 때 함께 갱신한다. Main push/Pages 게시 대기 조율도 준수한다.
+
+증빙: docs/independent-amen-types-staged-20261023.json.

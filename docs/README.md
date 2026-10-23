@@ -149,3 +149,5 @@ records above for the retained repair evidence and Git reference.
 - [출력 슬라이드 분량·새/통일 대응 정리](hymn-slide-balance-staged-20261023.json): 293판본·1123단위 후보, 대응524개 일치, 두 브라우저/세 해상도 넘침0. **운영 미적용·미배포.**
 
 - 2026-10-23 [전곡 찬송가 슬라이드 후보 검증](hymn-slide-balance-completion-staged-20261023.json): 전체1203판본, 연결481곡군; 수정 후보440판본·1623단위. 운영 DB 미적용·묶음 배포 대기. 이전293판본 후보를 대체.
+
+- [독립 아멘 유형 통일 후보](independent-amen-types-staged-20261023.json): 통551·553·556만 Lyrics로 통일, 기존 Coda 송폼 호환 검증. 최신 묶음443판본·1626단위, 미적용·미배포.

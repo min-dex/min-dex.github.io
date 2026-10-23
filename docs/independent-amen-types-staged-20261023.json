@@ -1,0 +1,150 @@
+{
+  "date": "2026-10-23",
+  "status": "staged_not_applied_or_deployed",
+  "policy": "Independent Amen-only songs use Lyrics; trailing Amen within ordinary hymns remains Coda. Preserve saved preset resolution, text, repetitions, IDs and ordering.",
+  "independentEditions": [
+    {
+      "edition": "new",
+      "number": 640,
+      "versionId": "7343aabc-a9d4-5622-9f05-ce8d18bc87a1"
+    },
+    {
+      "edition": "new",
+      "number": 641,
+      "versionId": "681061c2-e356-507c-b96f-680acec5ed7d"
+    },
+    {
+      "edition": "new",
+      "number": 642,
+      "versionId": "7beb5d46-eb62-5019-bddf-49c707a7597d"
+    },
+    {
+      "edition": "new",
+      "number": 643,
+      "versionId": "76850f83-c898-5f07-89a7-c86ec357c369"
+    },
+    {
+      "edition": "new",
+      "number": 644,
+      "versionId": "25840464-d97e-55f2-b521-c5493f0ef463"
+    },
+    {
+      "edition": "new",
+      "number": 645,
+      "versionId": "86773128-ae86-5b82-bc70-8e373dae2716"
+    },
+    {
+      "edition": "union",
+      "number": 551,
+      "versionId": "446c74e8-c659-58f3-92ac-1215e1fb9118"
+    },
+    {
+      "edition": "union",
+      "number": 552,
+      "versionId": "25b02196-d57e-5633-a397-0a6fbf5c7609"
+    },
+    {
+      "edition": "union",
+      "number": 553,
+      "versionId": "defc45b0-a1b3-552a-a76d-88ed8643c0d1"
+    },
+    {
+      "edition": "union",
+      "number": 554,
+      "versionId": "80b07e2c-aa40-5856-8507-30cb3269477e"
+    },
+    {
+      "edition": "union",
+      "number": 555,
+      "versionId": "5a32dff2-8ab8-5ac8-b058-af5abb77246f"
+    },
+    {
+      "edition": "union",
+      "number": 556,
+      "versionId": "dde3f9f3-4627-5efe-9419-963dbb37cc73"
+    },
+    {
+      "edition": "union",
+      "number": 557,
+      "versionId": "7d724b1c-8ff9-5bd5-a820-7f8990994917"
+    },
+    {
+      "edition": "union",
+      "number": 558,
+      "versionId": "8c51a845-f19b-501b-a14c-7b6e9f5b82f5"
+    }
+  ],
+  "changedEditions": [
+    {
+      "edition": "union",
+      "number": 551,
+      "unitId": "0345432d-870f-53ed-91f9-f4e00cd1c6d0",
+      "from": "Coda",
+      "to": "Lyrics"
+    },
+    {
+      "edition": "union",
+      "number": 553,
+      "unitId": "ba576571-6399-56cb-b852-c75762d56bbd",
+      "from": "Coda",
+      "to": "Lyrics"
+    },
+    {
+      "edition": "union",
+      "number": 556,
+      "unitId": "593218ef-4750-551c-8f8a-7e6ed1403dee",
+      "from": "Coda",
+      "to": "Lyrics"
+    }
+  ],
+  "changedFields": [
+    "curated_unit_type",
+    "curated_unit_label"
+  ],
+  "independentEditionCount": 14,
+  "alreadyLyrics": 11,
+  "trailingCodaUnitsUnchanged": 589,
+  "checks": {
+    "verification.json": {
+      "chromium": {
+        "hymnVersions": 1203,
+        "existingReferences": 350,
+        "legacyCodaPresetCases": 12,
+        "outputPreserved": true
+      },
+      "webkit": {
+        "hymnVersions": 1203,
+        "existingReferences": 350,
+        "legacyCodaPresetCases": 12,
+        "outputPreserved": true
+      }
+    },
+    "bundle-verification.json": {
+      "chromium": {
+        "hymnVersions": 1203,
+        "existingReferences": 350,
+        "legacyCodaPresetCases": 12,
+        "outputPreserved": true
+      },
+      "webkit": {
+        "hymnVersions": 1203,
+        "existingReferences": 350,
+        "legacyCodaPresetCases": 12,
+        "outputPreserved": true
+      }
+    }
+  },
+  "metadataUnitKindsAndHashesChecked": 5419,
+  "changedVersionsHaveNoAudioSet": true,
+  "bundle": {
+    "changedVersions": 443,
+    "changedUnits": 1626,
+    "planSha256": "5afd070abfcd158260f9b52f3fed6895b8d16eefafbd1ffe147731114356c912",
+    "replacesPrivateCandidateDirectory": "backups/20261023-hymn-slide-final",
+    "privateCandidateDirectory": "/Users/parkjihun/Code/Apps/Mindex/backups/20261023-independent-amen"
+  },
+  "productionWrites": 0,
+  "worshipWrites": 0,
+  "deployed": false,
+  "releaseNote": "Use bundle-plan/expected/candidate-ledger together, refresh baseline and guard concurrent edits before applying. Existing public ledger/runtime remain matched to current DB until exact readback. Main push/Pages publication currently paused by deployment coordination; local work only."
+}
