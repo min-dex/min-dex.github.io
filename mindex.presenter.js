@@ -5547,6 +5547,7 @@ function presenterSlideExtraClasses(slide) {
   const classes = [];
   if (slide?.fullscreenSongTitle) classes.push("presenter-slide--fullscreen-song-title");
   if (slide?.fullscreenSongTitleStyle === "note-title") classes.push("presenter-slide--song-note-title");
+  if (slide?.fullscreenSongTitleStyle === "note-title" && slide?.fullscreenSongTitleHideDetail) classes.push("presenter-slide--song-note-accent");
   const layout = presenterSlideLayout(slide);
   // A blank (including the auto trailing blank, which copies the previous slide) has no caption to theme.
   if (slide?.captionTheme === "cadaros" && layout !== PRESENTER_SLIDE_LAYOUTS.BLANK) classes.push("presenter-slide--caption-cadaros");

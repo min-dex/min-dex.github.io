@@ -1635,7 +1635,8 @@ span.presenter-announcement-paren,
 
 /* Fullscreen titles and silent praise video backgrounds. */
 .presenter-slide--song-note-title .presenter-title-content { gap: 3cqh; }
-.presenter-output-root.no-chromakey .presenter-slide--song-note-title .presenter-fullscreen-song-heading { font-size: calc(85 * var(--presenter-stage-unit)); line-height: 1; color: #cba56a; }
+.presenter-output-root.no-chromakey .presenter-slide--song-note-title .presenter-fullscreen-song-heading { font-size: calc(85 * var(--presenter-stage-unit)); line-height: 1; }
+.presenter-output-root.no-chromakey .presenter-slide--song-note-accent .presenter-fullscreen-song-heading { color: #cba56a; }
 .presenter-output-background-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; z-index: 0; }
 .presenter-slide:has(> .presenter-output-background-video) > :not(video) { position: relative; z-index: 1; }
 
