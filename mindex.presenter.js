@@ -4886,9 +4886,37 @@ function presenterRemoteVideoState(serviceId) {
   return {status:health.status,ready,revision:health.revision,identity:compactTextSignature(health.frameKey)};
 }
 
+function presenterManagedVideoState() {
+  const serviceId = state.presenter.serviceId;
+  if (!serviceId || !presenterControllerIsLive(serviceId) || !isPresenterOutputWindowOpen()) return null;
+  return presenterRemoteVideoState(serviceId);
+}
+
+function renderPresenterVideoManagement(video) {
+  const busy = presenterVideoRequests.size > 0;
+  const enabled = video?.ready && !busy && state.selectedServiceId === state.presenter.serviceId;
+  const labels = { playing: "재생 중", paused: "일시정지", ended: "재생 완료", blocked: "PC에서 재생 허용 필요", loading: "영상 준비 중", error: "영상 재생 실패" };
+  const status = busy ? "처리 중…" : video ? labels[video.status] || "상태 확인 중" : "송출 중인 영상이 없습니다.";
+  const title = state.presenter.slides[state.presenter.index]?.title || "현재 영상";
+  return `<section class="global-media-section" aria-label="영상"><h3>영상</h3>
+    ${video ? `<div class="global-playback-group"><span class="global-playback-name">${escapeHtml(title)}</span></div>` : ""}
+    <p class="global-playback-state" role="status">${escapeHtml(status)}</p>
+    <div class="global-playback-actions" role="group" aria-label="영상 재생 제어" ${video ? "" : "hidden"}>
+      ${[["play","play","재생"],["pause","pause","일시정지"],["restart","rotate-ccw","처음부터"]].map(([action,icon,label]) => `<button type="button" class="btn secondary" data-global-playback-action="video-${action}" aria-label="영상 ${label}" ${!enabled || (action === "pause" ? video?.status !== "playing" : action === "play" && video?.status === "playing") ? "disabled" : ""}><i data-lucide="${icon}"></i><span>${label}</span></button>`).join("")}
+    </div></section>`;
+}
+
+async function runPresenterManagedVideoAction(action) {
+  const serviceId = state.presenter.serviceId;
+  if (!presenterManagedVideoState()?.ready || presenterVideoRequests.size) return;
+  try { await requestPresenterVideoCommand(serviceId, action); }
+  catch (error) { showToast(error.message, "error"); }
+  finally { renderGlobalPlaybackControls(); }
+}
+
 function requestPresenterVideoCommand(serviceId, action) {
   const health = state.presenter.videoHealth;
-  if (!["play","pause","restart"].includes(action) || !presenterRemoteVideoState(serviceId)?.ready)
+  if (state.selectedServiceId !== serviceId || presenterVideoRequests.size || !["play","pause","restart"].includes(action) || !presenterRemoteVideoState(serviceId)?.ready)
     return Promise.reject(Error("영상의 최신 상태를 확인한 뒤 다시 눌러 주세요."));
   const outputSessionId = state.presenter.outputSessionId, requestId = crypto.randomUUID();
   const message = {type:"presenter-video-command",action,requestId,outputSessionId,clientId:health.clientId,expiresAt:Date.now()+1800,
@@ -4896,6 +4924,7 @@ function requestPresenterVideoCommand(serviceId, action) {
   return new Promise((resolve,reject) => {
     const finish = result => {
       clearTimeout(timer);presenterVideoRequests.delete(requestId);
+      queueMicrotask(renderGlobalPlaybackControls);
       if (state.presenter.outputSessionId !== outputSessionId || state.presenter.serviceId !== serviceId
         || state.selectedServiceId !== serviceId || state.presenter.index !== message.index
         || presenterTransportLatest?.payload?.messageId !== message.messageId)
@@ -4905,6 +4934,7 @@ function requestPresenterVideoCommand(serviceId, action) {
     };
     const timer=setTimeout(()=>finish({ok:false,message:"영상 응답을 확인하지 못했습니다. 현재 화면을 확인해 주세요."}),1800);
     presenterVideoRequests.set(requestId,{clientId:health.clientId,outputSessionId,finish});
+    renderGlobalPlaybackControls();
     try { state.presenter.outputWindow?.postMessage(message,window.location.origin); } catch {}
     try { state.presenter.channel?.postMessage(message); } catch {}
   });

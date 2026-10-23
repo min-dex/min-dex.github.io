@@ -4099,6 +4099,17 @@ retain their dedicated closing. User requested skipping optional local checks;
 the complete required publication gate remains mandatory.
 
 
+## Unified media management ·2026-10-23
+
+The existing music popover is now Media management (미디어 관리), shared by basic
+and focused presenter views. One video-icon launcher retains its existing view
+placement and button geometry. Audio keeps timing, auto-sync and fade-stop;
+a separate video section controls native output-slide play/pause/restart through
+the same acknowledged transport as Remote. No background/PPTX media transport
+is added. No active video shows an empty state. Shared pending requests prevent
+PC/Remote overlap; current output ownership and freshness are rechecked on action.
+Heartbeat updates preserve the open popover and use the existing markup patcher.
+
 ## Migrate legacy score titles to Title tokens ·2026-10-23
 
 The previous automatic title behavior identifies legacy intent; it is not revived
