@@ -58,8 +58,10 @@ try:
       assert not page.locator('.global-playback-trigger').is_visible()
       assert remote.bounding_box()['height']==music.bounding_box()['height']==35
       assert abs(remote.bounding_box()['width']-music.bounding_box()['width'])<1
-      remote.click();assert not page.locator('.remote-panel').is_visible()
-      assert '예배 송출을 먼저' in page.locator('[data-remote-status]').text_content()
+      remote.click();assert page.locator('.remote-panel').is_visible()
+      assert '예배 송출을 시작하면 코드가 표시됩니다.' in page.locator('[data-remote-status]').text_content()
+      page.keyboard.press('Escape')
+      assert not page.locator('.remote-panel').is_visible()
       music.click();assert page.locator('#globalPlaybackPanel').is_visible()
       page.keyboard.press('Escape')
       assert music.evaluate('e=>e===document.activeElement')
