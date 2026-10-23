@@ -4242,3 +4242,17 @@ The unmatched DB search registration action shares the title input line when
 space permits. Its picker does not reserve a full results row, and the redundant
 visible no-results caption is hidden. Actual matching result lists retain their
 full area; the existing query-driven show/hide and registration action remain.
+
+
+## Score form placeholders and canonical T ·2026-10-23
+
+Empty score form inputs show the actual score asset/manifest sequence as a light
+placeholder. Consecutive pages of one named form share one token; later repeats
+remain visible. Reuse the same image-source resolver as score playback. Explicit
+item/song forms take precedence. Unlabelled scores do not invent verse boundaries.
+Rendering never materializes the placeholder into stored worship data.
+
+Title input aliases (`Title`, `title`, `T`, `t`) normalize to `T` for form hints,
+newly saved tokens and visible form markers. Existing title tokens retain their
+meaning and position without a bulk data rewrite. Hymn scores still receive no
+default T, and order/content headings remain separate from Title forms.

@@ -28,9 +28,9 @@ try:
                   ['legacy', {forms:['V1','C'],strength:'manual'},false,0],
                   ['no-preset',null,false,0],
                   ['legacy-cleared',null,true,0],
-                  ['explicit', {forms:['Title','V1','C'],titleSequence:true,strength:'manual'},false,1],
-                  ['title-only', {forms:['Title'],titleSequence:true,strength:'manual'},false,1],
-                  ['explicit-repeated', {forms:['Title','V1','Title','C'],titleSequence:true,strength:'manual'},false,2],
+                  ['explicit', {forms:['T','V1','C'],titleSequence:true,strength:'manual'},false,1],
+                  ['title-only', {forms:['T'],titleSequence:true,strength:'manual'},false,1],
+                  ['explicit-repeated', {forms:['T','V1','T','C'],titleSequence:true,strength:'manual'},false,2],
                   ['omitted', {forms:['V1','C'],titleSequence:true,strength:'manual'},false,0],
                   ['explicit-cleared', {titleSequence:true},true,0],
                 ]) {
@@ -56,7 +56,7 @@ try:
               for(const asset of [{kind:'score',url:'https://example.invalid/score.pdf'}, {kind:'score',slides:images.map(({url})=>({url}))}]) {
                 const item={...base,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'score_db',outputMode:'score',formPreset:{forms:['V1','C'],strength:'manual'},asset})};
                 const slides=buildPresenterSlidesForServiceItem(item,service,0,{allowHydration:false});
-                check(slides.filter(s=>s.formLabel==='Title').length===0,'hymn file/unlabelled default must omit Title');
+                check(slides.filter(s=>s.formLabel==='T').length===0,'hymn file/unlabelled default must omit Title');
                 check(slides.filter(s=>s.type!=='song-title').length===(asset.url?1:2),'file/unlabelled content lost');
                 count++;
               }

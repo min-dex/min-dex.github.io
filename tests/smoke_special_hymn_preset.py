@@ -68,12 +68,12 @@ def main():
               const linkedSong={...song,id:'preset-test-song',versions:[{id:'preset-test-version',praise_types:['hymn'],forms:all}]};
               const fresh={id:'preset-test-item',label:'특송',_worshipSectionKey:'special_song'};
               linkServiceItemToPraiseSong(fresh,linkedSong,{type_id:'monthly'});
-              assert(serviceItemFormPreset(fresh)?.hint==='Title-V1-C-V2-C-Int-VL-C-Coda','default not materialized');
+              assert(serviceItemFormPreset(fresh)?.hint==='T-V1-C-V2-C-Int-VL-C-Coda','default not materialized');
               const frozen=fresh.memo;
               const offering={id:'offering-test',label:'봉헌찬송',_worshipSectionKey:'offering'};
               linkServiceItemToPraiseSong(offering,linkedSong,{type_id:'sunday-first'});
               assert(!serviceItemFormPreset(offering),'playback fallback persisted as offering form');
-              assert(serviceItemEffectiveFormHint(offering)==='Title','playback fallback shown as editable form');
+              assert(serviceItemEffectiveFormHint(offering)==='T','playback fallback shown as editable form');
               assert(presenterFormPlanForServiceItem({forms:all},offering,linkedSong).forms.length>0,'offering playback lost');
               linkServiceItemToPraiseSong(fresh,linkedSong,{type_id:'monthly'});
               assert(fresh.memo===frozen,'relink changed saved default');

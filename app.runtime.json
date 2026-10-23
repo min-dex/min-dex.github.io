@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-controller-batch",
+  "version": "20261023-score-forms-t",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "ed6af59ac73471bceea579da6e1a9be002b31c7b61633211af4b769bc09f611e",
-  "runtime_sha256": "7caeb3e8c3710c5036ee1823e155f9fe6ea51ceb2b5871d94b30f55d9d9e2df8",
-  "source_bytes": 1560836,
-  "runtime_bytes": 1104831,
-  "source_gzip": 351642,
-  "runtime_gzip": 274930
+  "source_sha256": "b5218f9f64948d84a36ce4fc9d54c662539cb9ab25241de53923bd0942cd295f",
+  "runtime_sha256": "11e371354850d3805365ad1fa922e63a26e5c8fa7fc3c70a294a480cbdf35e52",
+  "source_bytes": 1561584,
+  "runtime_bytes": 1105385,
+  "source_gzip": 351833,
+  "runtime_gzip": 275094
 }

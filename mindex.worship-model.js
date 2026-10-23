@@ -271,7 +271,7 @@ function normalizeServiceFormPreset(value, fallbackHint = "", fallbackStrength =
   if (hint) preset.hint = normalizeServiceFormHint(hint);
   if (strength) preset.strength = strength;
   if (source?.omitUnlisted || source?.omit_unlisted) preset.omitUnlisted = true;
-  if (source?.titleSequence || forms.includes("Title")) preset.titleSequence = true;
+  if (source?.titleSequence || forms.includes("T")) preset.titleSequence = true;
   return Object.keys(preset).length ? preset : null;
 }
 
@@ -300,7 +300,7 @@ function canonicalServiceFormToken(value = "") {
   }
   const instrumental = raw.match(/^(int|간주|interlude|instrumental)\s*([a-z]?)$/i);
   if (instrumental) return "Int" + instrumental[2].toUpperCase();
-  if (/^(?:t|title)$/i.test(raw)) return "Title";
+  if (/^(?:t|title)$/i.test(raw)) return "T";
   if (/^vl$/i.test(raw)) return "VL";
   if (/^tags$/i.test(raw)) return "Tags";
   const ending = raw.match(/^(coda|ending)\s*(\d*)\s*([a-z]?)$/i);
@@ -334,6 +334,7 @@ function normalizeServiceFormHint(value = "") {
 function normalizeSongFormPresetLabel(value = "") {
   const raw = canonicalServiceFormToken(value);
   const compact = compactSearchValue(raw);
+  if (raw === "T") return { key: "title", type: "title", number: 0 };
   if (/^(vl|마지막절|lastverse|last)$/i.test(compact)) return { key: "last-verse", type: "verse", number: 0, lastVerse: true };
   const atVariant = raw.match(/^(v|verse|c|chorus|후렴|pc|prechorus|pre-chorus|p-c|p\.c\.|b|bridge|coda|ending)\s*(\d*)\s*@\s*([a-z])?$/i);
   if (atVariant) {
@@ -401,7 +402,7 @@ function songFormPresetDisplayLabel(value = "") {
   const raw = String(value || "").trim();
   if (!raw) return "";
   const target = normalizeSongFormPresetLabel(raw);
-  if (target.type === "title") return "Title";
+  if (target.type === "title") return "T";
   if (target.lastVerse) return "VL";
   const group = String(target.group || "").trim().toUpperCase();
   const suffix = target.variant ? `${target.number ? ` ${target.number}` : ""} @${group ? ` ${group}` : ""}` : target.number ? ` ${target.number}${group ? ` ${group}` : ""}` : group ? ` ${group}` : "";
