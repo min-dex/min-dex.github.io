@@ -78,3 +78,18 @@ evidence remain intact. Parenthetical metadata display is separate and unchanged
 Read-only production inventory: 1,732 versions all have a nonempty stored name;
 no current effective name ends in parentheses. 48 raw source names do, and none
 depend on the removed unnamed-version path. No production records are rewritten.
+
+
+## Raw parenthetical subtitle display ·2026-10-23
+
+List metadata no longer infers a subtitle from parentheses in a version
+raw_section_name/version_label. Existing song subtitle/original_title and explicit
+version names remain authoritative. Raw source names, bracketed original-title
+evidence, search indexing, textual version aliases and stable worship-version ID
+links remain unchanged. No song/version/worship data is rewritten.
+
+The read-only 48-version/42-song audit found 33 parenthetical values already stored
+as subtitle/original-title data, 13 as explicit version names, and two representative
+titles redundantly added to list metadata. Only those two redundant list strings
+change. A whole-catalog comparison protects unrelated bracketed original titles.
+The user-edited 주님의 임재 앞에서 is outside this display cleanup.

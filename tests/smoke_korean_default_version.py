@@ -36,6 +36,14 @@ def main():
                 if(versionDisplayName({title:'곡'}, {raw_section_name:raw})!=='기본')throw Error('Legacy raw name inferred: '+raw);
               }
               if(versionDisplayName({title:'곡'}, {version_label:'라이브 (어쿠스틱)'})!=='라이브 (어쿠스틱)')throw Error('Stored label changed');
+              const aliases=normalizeServerSong({id:'aliases',title:'정식 제목',subtitle:'정식 부제',original_title:'Official Original'});
+              aliases.versions=[normalizeRelationalVersion({id:'alias-version',curated_version_name:'편곡 A',version_label:'옛 제목 [其他原题] (옛 부제)',raw_section_name:'옛 제목 [其他原题] (옛 부제)'},0)];
+              const aliasMeta=songTitleMetaLine(aliases);
+              if(aliasMeta!=='정식 부제 · Official Original · 其他原题')throw Error('Raw parenthetical subtitle leaked or original title lost: '+aliasMeta);
+              if(!getSongSearchFields(aliases,{includeLyrics:false}).some(f=>f.text==='옛 제목 [其他原题] (옛 부제)'))throw Error('Old search alias removed');
+              if(!serviceVersionLookupNames(aliases,aliases.versions[0]).includes(normalizeTitle('옛 제목 [其他原题] (옛 부제)')))throw Error('Version lookup alias removed');
+              const selected=getPresenterServiceItemVersion(aliases,{version_id:'alias-version',song_id:aliases.id,raw_title:'정식 제목',memo:''},{type_id:'sunday3'});
+              if(selected?.id!=='alias-version')throw Error('Saved version ID link changed');
               getSelectedSong=previousSelected;
               updateSaveState=previousUpdateSaveState;
               return {draft:draft.versions[0].name, raw:draft.versions[0].raw_section_name,
