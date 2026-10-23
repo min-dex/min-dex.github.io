@@ -20509,11 +20509,40 @@ function confirmUnsavedChangesAction() {
 
 async function discardUnsavedChanges() {
   const dirtyModules = getDirtyModules();
+  if (dirtyModules.praise && state.module === "praise") {
+    const song = getSelectedSong(), client = state.client;
+    const versionId = getSelectedVersionId();
+    const before = JSON.stringify({song, forms:state.forms});
+    try {
+      if (!song || !client || state.saving) return false;
+      const result = await client.rpc("get_praise_snapshot_v1", {sid:song.id});
+      if (result.error) throw result.error;
+      const fresh = praiseSnapshotSong(result.data);
+      if (client !== state.client || getSelectedSong() !== song || versionId !== getSelectedVersionId()
+          || before !== JSON.stringify({song, forms:state.forms})) {
+        showToast("확인 중 입력이 바뀌어 이동하지 않았습니다. 입력은 유지됩니다.", "error");
+        return false;
+      }
+      state.songs = state.songs.map(item => item === song ? fresh : item);
+      praisePendingSaves.delete(song);
+      state.selectedVersionId = fresh.versions.some(item => item.id === versionId) ? versionId : getDefaultVersionId(fresh);
+      state.forms = normalizeForms((getSelectedVersion()?.forms || []).map(form => withLocalId({...form, song_id:state.selectedVersionId})));
+      state.dirty.song = state.dirty.forms = false;
+      clearSearchCaches();
+      captureCleanFingerprint("praise");
+      updateSaveState();
+      return true;
+    } catch {
+      showToast("최신 내용을 확인하지 못해 이동하지 않았습니다. 입력은 유지됩니다. 다시 시도해 주세요.", "error");
+      return false;
+    }
+  }
   clearDirtyState();
   updateSaveState();
   await reloadDiscardedChanges(dirtyModules);
   clearDirtyState();
   updateSaveState();
+  return true;
 }
 
 async function confirmSaveBeforeLeaving() {
@@ -20521,8 +20550,7 @@ async function confirmSaveBeforeLeaving() {
   const action = await confirmUnsavedChangesAction();
   if (action === "cancel") return false;
   if (action === "discard") {
-    await discardUnsavedChanges();
-    return true;
+    return await discardUnsavedChanges();
   }
   await saveAll();
   if (!hasDirtyChanges({ reconcile: true })) return true;

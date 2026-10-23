@@ -864,3 +864,10 @@ the desktop shell retains its existing minimum width on phone-size windows.
 Metadata dialogs remain viewport-bounded with container-driven field columns.
 Offline coverage: `tests/smoke_praise_narrow_content.py`, Chromium/WebKit,
 390/600/768/1024/1440px and both themes; no operational data writes.
+
+### Praise discard after failed save ·2026-10-24
+“저장 안 함” reads the complete atomic praise snapshot before replacing the
+selected song. A failed read or input/selection change during the read blocks
+navigation and retains dirty input and the outstanding save request. Only a
+successful unchanged read replaces the selected song, clears its pending retry,
+and captures the clean baseline. Other songs and playback are untouched.
