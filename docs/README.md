@@ -145,3 +145,5 @@ records above for the retained repair evidence and Git reference.
 - [보류47판본 재대조](hymn-measures-deferrals-recheck-20261023.json): 신규27확정·20보류 유지. 누적1177·낭송형6·후보1183. 검증·미배포; 전체 수치 완료 아님.
 
 - [최종20판본 재대조](hymn-measures-final20-review-20261023.json): 추가17, 수치1194·낭송형6·보류3(새620·새638·통550). 후보1200 표시/재열기 검증, 미배포.
+
+- [출력 슬라이드 분량·새/통일 대응 정리](hymn-slide-balance-staged-20261023.json): 293판본·1123단위 후보, 대응524개 일치, 두 브라우저/세 해상도 넘침0. **운영 미적용·미배포.**
