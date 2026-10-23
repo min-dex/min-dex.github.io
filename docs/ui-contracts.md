@@ -789,3 +789,12 @@ Metadata grid items and their internal label/input tracks align to the start.
 Validation hints grow below the relevant input without distributing spare height
 into neighboring label/input gaps. Keep hints, focus outlines and container-width
 3/2/1-column rules intact.
+
+
+### Editor and home summary ·2026-10-23
+
+Wide worship song rows allocate equal tracks to the title and form fields; narrow
+rows retain the separate full-width form field. Medley unlink remains available.
+Home edition summaries use the reader language/name sorting rule and compact
+KJV/ASV names, both before and after summary loading. Canonical edition names,
+source metadata and stored records remain unchanged.
