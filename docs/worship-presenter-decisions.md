@@ -4121,3 +4121,10 @@ Title; an explicit Title-only sequence intentionally emits only its title. PDF
 and pending-score output use the same Title token renderer. Explicit omission
 and repeated/middle titles retain their authored order. Stored operational rows,
 lyrics and versions are untouched; this is an effective-sequence migration at load.
+
+
+## Plain Title and interlude group labels ·2026-10-23
+
+Controller Title and instrumental groups retain their labels, thumbnails, grouping
+and navigation, with no group background box. They do not consume the lyric
+group color cycle. Verse/chorus/other form backgrounds and output remain unchanged.
