@@ -9,7 +9,7 @@ def main():
             page = browser.new_page()
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-            page.wait_for_function("typeof buildPresenterCustomSlides === 'function'")
+            page.wait_for_function("typeof buildPresenterCustomSlides === 'function' && typeof parseServiceItemMemo === 'function' && !document.body.classList.contains('ui-booting')")
             result = page.evaluate(r'''() => {
               const results=[];
               for (const label of ['특송','봉헌특송','봉헌찬송']) {
@@ -19,7 +19,7 @@ def main():
                   memo:JSON.stringify({inputMode:'manual_praise',elementType:'praise',
                     slides:['[Verse 1]\n첫 줄\n둘째 줄','[간주]','[Bridge]\n마지막 줄']})};
                 const section={sectionKey:item._worshipSectionKey,sectionLabel:label,sectionTitle:'테스트 곡'};
-                const raw=buildPresenterCustomSlides(item,section,0);
+                const raw=presenterSlidesWithSongContentHeading(item,section,null,null,item.raw_title,0,buildPresenterCustomSlides(item,section,0));
                 const slides=presenterSlidesWithSpecialSongTitle(item,section,raw,0,{type_id:'sunday-main'});
                 const repeated=presenterSlidesWithSpecialSongTitle(item,section,slides,0,{type_id:'sunday-main'});
                 const expected=special?['title-assignee','song-title','lyrics','blank','lyrics']:['title-assignee','lyrics','blank','lyrics'];

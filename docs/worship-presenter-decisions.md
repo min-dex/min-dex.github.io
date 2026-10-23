@@ -4213,7 +4213,7 @@ Supersedes the occurrence-based six-color cycle. Controller lyric/score groups
 use stable form colors: Verse red, Pre-Chorus green, Chorus blue, Bridge cyan,
 Coda magenta, Tag/Tags yellow. Numbers, A/B and @ variants share their base-form
 color but retain independent occurrence keys, boxes, spacing and click indexes.
-Title/interlude remain unboxed; unclassified lyric forms use neutral gray.
+Title/interlude remain unboxed; other named forms use neutral gray. Generic Lyrics/가사 remain unboxed.
 Scripture range/translation groups alternate light/dark gray across the board,
 including separate elements/sections and deferred rendering. Offsets live only
 on controller group metadata; slides and operational records are unchanged.
@@ -4222,3 +4222,17 @@ Verified with Chromium/WebKit, both themes and 320/700/1100px widths. Rechecked
 future-service title/person/missing-state summaries: no further instance of the
 person-as-sermon-title fallback found in the related controller/outline paths.
 Output, printing, playback, draft contents and persisted ordering are unchanged.
+
+## Direct praise titles and meaningful form groups ·2026-10-23
+
+Direct lyrics/audio keep a title slide for main praise and special songs when the
+content title is present, including legacy cleared-form metadata. Reuse the common
+song-title renderer; retain any existing Title entries without duplication. Ordinary
+order/content headings still own offering/response/sending introductions. Secondary
+medley items do not add another title. Authored lyric screens and timing remain intact.
+
+Controller form grouping requires a visible form label. Unlabelled direct pages and
+generic Lyrics/가사 pages retain thumbnails, indexes and form/photo identities but
+receive no form block or background. Named forms, unboxed Title/interludes, scripture
+references and inherited score-page grouping keep their existing behavior. No stored
+worship, song, lyric, version or timing rows are rewritten.

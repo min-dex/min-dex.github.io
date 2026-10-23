@@ -2191,15 +2191,26 @@ function buildPresenterCustomSlides(item, section, index) {
   }
   if (songLikeItem && preset?.titleSequence && preset.forms?.length) {
     const plan = resolvePresenterLyricsFormPresetSequence([], preset.forms, [], lyricSlides.map(slide => slide.text));
-    return plan.items.map((form, position) => form._presenterTitle
+    const ordered = plan.items.map((form, position) => form._presenterTitle
       ? presenterSequenceTitleSlide(item, section, null, null, serviceItemDisplayText(item), index, position)
       : { ...lyricSlides[0], id: `${item.id || index}:custom-sequence:${position}`,
         type: form._presenterBlank ? "blank" : "lyrics", text: form.lyrics || "",
         elementType: form._presenterBlank ? PRESENTER_ELEMENT_TYPES.BLANK : PRESENTER_ELEMENT_TYPES.PRAISE,
         layout: form._presenterBlank ? PRESENTER_SLIDE_LAYOUTS.BLANK : PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT,
         marker: form.label, formKey: `custom:${position}`, sort: index + position / 100 });
+    return presenterDirectPraiseSlidesWithTitle(item, section, index, ordered);
   }
-  return lyricSlides;
+  return presenterDirectPraiseSlidesWithTitle(item, section, index, lyricSlides);
+}
+
+function presenterDirectPraiseSlidesWithTitle(item, section, index, slides = []) {
+  if (!servicePraiseUsesDirectLyrics(servicePraiseInputMode(item))
+      || isServiceConnectedPraiseSecondaryItem(item)
+      || presenterSongTitleUsesSectionHeading(item, section)
+      || slides.some(slide => slide.type === "song-title")) return slides;
+  const title = serviceItemDisplayText(item);
+  if (!title || !slides.length) return slides;
+  return [presenterSongTitleSlide(item, section, null, null, title, index), ...slides];
 }
 
 function parsePresenterCustomSlideBlock(block) {

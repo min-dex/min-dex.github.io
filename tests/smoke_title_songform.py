@@ -85,6 +85,32 @@ try:
     const direct={...item,song_id:null,version_id:null,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'manual_praise',slides:['직접 한 줄','직접 두 줄\\n둘째 줄'],formPreset:{forms:['V1','Title','C'],titleSequence:true,strength:'manual'}})};
     const directSlides=buildPresenterCustomSlides(direct,section,0);
     check(directSlides.length===3 && directSlides[1].formLabel==='Title' && directSlides[2].text==='직접 두 줄\\n둘째 줄','direct slide boundaries');
+    for(const inputMode of ['manual_praise','audio_praise']) {
+      for(const [label,key,wanted] of [['찬양 1','praise',1],['특송','special_song',1],['봉헌찬송','offering',0],['결단찬양','response_song',0]]) {
+        const directItem={id:`direct-${inputMode}-${key}`,label,raw_title:'직접 입력 제목',_worshipSectionKey:key,memo:serializeServiceItemMemo({elementType:'praise',inputMode,slides:['첫 화면','둘째 화면'],formPresetDisabled:true,formPreset:{titleSequence:true}})};
+        const original=JSON.stringify(directItem);const directSection={sectionKey:key,sectionTitle:label};
+        const output=buildPresenterCustomSlides(directItem,directSection,0);
+        check(output.filter(s=>s.type==='song-title').length===wanted,'direct title restored '+inputMode+'/'+label);
+        check(output.filter(s=>s.type==='lyrics').map(s=>s.text).join('|')==='첫 화면|둘째 화면','direct page boundaries preserved');
+        const entries=annotatePresenterFormStarts(output.map((slide,slideIndex)=>({slide,slideIndex}))).entries;
+        const blocks=presenterBoardSlideBlocks(entries);check(blocks.filter(b=>b.key).every(b=>b.label==='Title'),'unlabelled direct pages received form boxes');
+        const html=renderPresenterBoardSlideBlocks(entries,0,service.id);check(!html.includes('data-form-color'),'unlabelled direct pages received colored backgrounds');
+        check(JSON.stringify(directItem)===original,'direct data rewritten');
+      }
+    }
+    const generic={id:'generic',elementType:PRESENTER_ELEMENT_TYPES.PRAISE,layout:PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT,type:'lyrics',formKey:'lyrics:1',formLabel:'Lyrics',text:'가사'};
+    check(!presenterSlideSupportsFormGrouping(generic),'generic Lyrics is not a form distinction');
+    const named={...generic,formLabel:'Verse',formKey:'verse:1'};
+    check(presenterSlideSupportsFormGrouping(named),'real form grouping lost');
+    const scorePage={...generic,formLabel:'',sourceType:'score'};
+    check(presenterSlideSupportsFormGrouping(scorePage),'score grouping eligibility lost');
+    const scoreDeck=[{...scorePage,id:'score-a',elementId:'score-owner',formKey:'raw-score-key'},{...scorePage,id:'score-b',elementId:'score-owner',formKey:''}];
+    const scoreEntries=annotatePresenterFormStarts(scoreDeck.map((slide,slideIndex)=>({slide,slideIndex}))).entries;
+    check(presenterBoardSlideBlocks(scoreEntries).every(b=>!b.key),'unlabelled score received a form box');
+    scoreDeck[0].formLabel='Verse';
+    const namedScore=annotatePresenterFormStarts(scoreDeck.map((slide,slideIndex)=>({slide,slideIndex}))).entries;
+    check(presenterBoardSlideBlocks(namedScore).length===1 && presenterBoardSlideBlocks(namedScore)[0].entries.length===2,'inherited score group lost');
+
     check(JSON.stringify(version)===JSON.stringify(JSON.parse(before).version),'source forms unchanged');
     return {types:slides.map(s=>s.type),sourceUntouched:true};
    }''')
