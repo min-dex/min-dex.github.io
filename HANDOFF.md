@@ -1433,3 +1433,9 @@ Common fit (largest grid size, reset, stage/thumbnail parity, long order/person)
 announcement region, sermon and song-heading Chromium/WebKit checks PASS.
 Ticket bd3d0e5b655a43ce8cb073baa0713fad waits behind existing releases.
 Not deployed yet. No operational data writes.
+
+
+One-unit release candidate reconciles published0c405fd7. Common fit rerun passes
+in Chromium/WebKit, including standalone, pair, sermon, order/content and
+three-part headings; related heading/announcement and runtime checks pass.
+Ticket bd3d0e5b655a43ce8cb073baa0713fad is claimed; final branch gate pending.
