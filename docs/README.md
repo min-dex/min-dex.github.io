@@ -143,3 +143,5 @@ records above for the retained repair evidence and Git reference.
 - [남은 찬송가 전체 범위 대조](hymn-measures-remaining-review-20261023.json): 610판본 검토. 누적 수치1150·낭송형6·보류47, 후보1156 검증. 전곡 수치 확정 아님; 미배포.
 
 - [보류47판본 재대조](hymn-measures-deferrals-recheck-20261023.json): 신규27확정·20보류 유지. 누적1177·낭송형6·후보1183. 검증·미배포; 전체 수치 완료 아님.
+
+- [최종20판본 재대조](hymn-measures-final20-review-20261023.json): 추가17, 수치1194·낭송형6·보류3(새620·새638·통550). 후보1200 표시/재열기 검증, 미배포.
