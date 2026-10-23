@@ -1,6 +1,7 @@
-import {adminRpc,relayRegistration} from './mindex.remote-admin.mjs?v=1';
+import {obtainOutputPairing} from './mindex.output-pairing.mjs?v=1';
+import {adminRpc,relayRegistration} from './mindex.remote-admin.mjs?v=2';
 import {createPreview} from './remote.preview.mjs?v=1';
-import {openRemote} from './mindex.remote-session.mjs?v=7';
+import {openRemote} from './mindex.remote-session.mjs?v=8';
 import {setupPhoneExperience} from './remote.screen.mjs?v=4';
 window.lucide?.createIcons();
 const screenAwake=setupPhoneExperience();
@@ -39,7 +40,7 @@ async function listOutputs(){
   if(!data.outputs.length){const p=document.createElement('p');p.textContent='송출 중인 예배가 없어요.';list.append(p);}
   for(const output of data.outputs){
    const button=document.createElement('button'),title=document.createElement('span'),detail=document.createElement('small');
-   title.textContent=output.title;detail.textContent=`${output.device} · ${output.position} · ${output.id.slice(0,6)}`;
+   title.textContent=output.title;detail.textContent=`${output.device} · ${output.position} · ${output.code||output.id.slice(0,6)}`;
    button.append(title,detail);button.onclick=()=>connectAdmin(output.id);list.append(button);
   }
  }catch(e){$('status').textContent=e.message;if(e.code==='expired'){adminToken=null;connectionForms();}}
@@ -108,7 +109,8 @@ $('pairForm').addEventListener('submit',async e=>{
   if(!window.supabase||!window.MINDEX_SUPABASE)throw Error('연결 준비에 실패했습니다. 페이지를 새로고침해 주세요.');
   client=getClient();
   $('disconnect').textContent='연결 종료';
-  session=await openRemote({client,onClose:reset,code:$('code').value,onState:state,onStatus:s=>{$('status').textContent=s;paint();},onResult:r=>{$('result').textContent=r.message;paint();}});
+  const registration=await obtainOutputPairing(client,$('code').value);
+  session=await openRemote({client,registration,onClose:reset,onState:state,onStatus:s=>{$('status').textContent=s;paint();},onResult:r=>{$('result').textContent=r.message;paint();}});
   $('disconnect').hidden=false;
  }catch(e){$('status').textContent=e.message;}finally{opening=false;paint();}
 });

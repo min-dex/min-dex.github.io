@@ -1,0 +1,44 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {randomBytes} from 'node:crypto';
+import {openWorshipTestDb} from './helpers/worship-test-db.mjs';
+const db=await openWorshipTestDb({requirePostgres:true});
+try{
+ await db.exec('create role anon;create role authenticated;');
+ for(const file of ['2026-10-22-remote-pin.sql','2026-10-24-remote-admin.sql','2026-10-24-output-codes.sql','2026-10-24-output-codes.sql'])await db.exec(fs.readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));
+ const a=await db.connect(),b=await db.connect();await a.query('set role anon');await b.query('set role authenticated');
+ const host=async(action,h={},info={},ready=null)=>(await a.query('select public.mindex_remote_output($1,$2,$3,$4,$5) r',[action,h.id||null,h.token||null,info,ready])).rows[0].r;
+ const guest=async(action,token,code=null,output=null,client=b)=>(await client.query('select public.mindex_remote_guest($1,$2,$3,$4) r',[action,token,code,output])).rows[0].r;
+ const token=()=>randomBytes(32).toString('hex');
+ const h1=await host('register'),h2=await host('register');assert.match(h1.code,/^\d{4}$/);assert.notEqual(h1.code,h2.code);
+ await db.query("update mindex_remote_private.outputs set seen_at=clock_timestamp()-interval '2 minutes' where id=$1",[h1.id]);
+ assert.equal((await guest('connect',token(),h1.code)).error,'invalid_code');
+ assert.equal((await host('tick',h1)).code,h1.code);
+ const t1=token(),t2=token();const g1=await guest('connect',t1,h1.code);assert(g1.ok&&!g1.ready&&!g1.secret);
+ assert.equal((await guest('connect',token(),h1.code)).error,'busy');
+ const g2=await guest('connect',t2,h2.code);assert(g2.ok);
+ const r1=await host('tick',h1),r2=await host('tick',h2);assert.notEqual(r1.guest.secret,r2.guest.secret);
+ const pin=token().slice(0,16);await db.query("insert into mindex_remote_private.admin_pin(hash) values(extensions.crypt($1,extensions.gen_salt('bf',4)))",[pin]);
+ const auth=(await b.query('select public.mindex_remote_admin_login($1) r',[pin])).rows[0].r;
+ const listed=(await b.query("select public.mindex_remote_admin('list',$1) r",[auth.token])).rows[0].r.outputs;assert.equal(listed.find(x=>x.id===h2.id).code,h2.code);
+ const request='00000000-0000-0000-0000-000000000024';
+ assert((await b.query("select public.mindex_remote_admin('connect',$1,$2,$3) r",[auth.token,h2.id,request])).rows[0].r.ok);
+ const both=await host('tick',h2);assert(both.link&&both.guest);assert.notEqual(both.link.secret,both.guest.secret);
+ await b.query("select public.mindex_remote_admin('logout',$1)",[auth.token]);assert((await host('tick',h2)).guest);
+ await host('tick',h1,{guestReady:r1.guest.id});assert.equal((await guest('connect',t1,h1.code)).secret,r1.guest.secret);
+ // Idempotent readiness polling is free, while new guesses consume the shared budget.
+ for(let i=0;i<9;i++)assert((await guest('connect',t1,h1.code)).ready);
+ await guest('disconnect',t1,null,h2.id);assert((await host('tick',h1)).guest);
+ await guest('disconnect',t1);assert.equal((await host('tick',h1)).guest,null);assert((await host('tick',h2)).guest);
+ assert.equal((await host('tick',h1)).code,h1.code);
+ await db.exec("update mindex_remote_private.buckets set started_at=clock_timestamp()-interval '2 minutes'");
+ const again=await guest('connect',token(),h1.code);assert(again.ok);assert.equal(again.output,h1.id);
+ await host('remove',h1);const h3=await host('register');assert.notEqual(h3.code,h1.code);
+ assert.equal((await guest('connect',token(),h1.code)).error,'invalid_code');
+ await db.exec("update mindex_remote_private.buckets set started_at=clock_timestamp()-interval '2 minutes'");
+ for(let i=0;i<5;i++)assert.equal((await guest('connect',token(),'wrong')).error,'invalid_code');
+ assert.equal((await guest('connect',token(),h3.code)).error,'rate_limited');
+ await assert.rejects(a.query('select * from mindex_remote_private.output_codes'),/permission denied/);
+ await assert.rejects(a.query('select * from mindex_remote_private.guest_links'),/permission denied/);
+ console.log('PASS four-digit uniqueness, stable code after outage/reconnect, independent guest slots, readiness, owner isolation, repeat connections, stop/restart retirement and attempt budget');
+}finally{await db.close();}

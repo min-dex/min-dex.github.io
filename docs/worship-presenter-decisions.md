@@ -4384,3 +4384,13 @@ when rendered fullscreen. No operational data or saved song forms are rewritten.
 Read-only retained-snapshot audit found64 special-song elements:48 lyrics DB,
 15 manual lyrics and1 manual audio; no score DB special-song instances. Earlier
 score support described capability coverage, not a claim of existing usage.
+## Output-scoped guest codes ·2026-10-24
+
+Use one automatically assigned four-digit code per running output, retained
+through guest disconnection and short network/page suspension. Show it on the
+remote button in both presenter views. Stop/replacement retires it, with a server
+reuse hold to avoid late connections reaching another worship. Guest control
+follows that output even when the PC selects another service. Administrator PIN
+access and its independent session remain unchanged. This supersedes the prior
+six-digit/two-minute guest pairing UI; see the remote contract for recovery and
+rollout limits.

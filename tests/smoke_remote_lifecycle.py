@@ -32,7 +32,7 @@ try:
     raise AssertionError(phone.locator('#status').inner_text())
    def connect():
     host.evaluate("async()=>{window.s=await mod.openRemote({client:remoteClient,host:true,read:()=>fixture,execute:()=>{calls++;fixture.index++;}});}")
-    phone.fill('#code','012345');phone.click('#connect');ready()
+    phone.fill('#code','0123');phone.click('#connect');ready()
    def visibility(hidden):
     phone.evaluate("hidden=>{Object.defineProperty(document,'hidden',{configurable:true,value:hidden});Object.defineProperty(document,'visibilityState',{configurable:true,value:hidden?'hidden':'visible'});document.dispatchEvent(new Event('visibilitychange'));}",hidden)
    connect()

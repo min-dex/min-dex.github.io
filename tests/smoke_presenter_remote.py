@@ -7,7 +7,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 from smoke_app import start_local_app_server,sync_playwright,launch_chromium
 MOCK='''window.remoteOut=[];window.remoteChannels=[];
-window.remoteClient={async rpc(name,args={}){if(name==='mindex_remote_create_code')return {data:{ok:true,code:'012345',secret:'11'.repeat(32),owner_token:'22'.repeat(32)}};if(name==='mindex_remote_claim_code')return {data:args.p_code==='012345'?{ok:true,secret:'11'.repeat(32)}:{ok:false,error:'invalid_code'}};return {data:true};},channel(topic){const c={topic,handler:null,on(t,f,h){this.handler=h;return this;},subscribe(cb){this.status=cb;setTimeout(()=>cb('SUBSCRIBED'),0);return this;},async send(m){window.remoteOut.push({topic,payload:m.payload});return 'ok';}};remoteChannels.push(c);return c;},async removeChannel(c){remoteChannels=remoteChannels.filter(x=>x!==c);}};
+window.remoteClient={async rpc(name,args={}){if(name==='mindex_remote_output'){if(args.p_action==='register')return {data:{ok:true,id:'fixture-output',token:'22'.repeat(32),code:'0123'}};if(args.p_action==='unlink_guest')window.remoteGuestEnded=true;return {data:{ok:true,code:'0123',link:null,guest:window.remoteGuestEnded?null:{id:'fixture-guest',secret:'11'.repeat(32)}}};}if(name==='mindex_remote_guest')return {data:args.p_action==='disconnect'?{ok:true}:args.p_code==='0123'?{ok:true,ready:true,output:'fixture-output',secret:'11'.repeat(32)}:{ok:false,error:'invalid_code'}};if(name==='mindex_remote_create_code')return {data:{ok:true,code:'012345',secret:'11'.repeat(32),owner_token:'22'.repeat(32)}};if(name==='mindex_remote_claim_code')return {data:args.p_code==='012345'?{ok:true,secret:'11'.repeat(32)}:{ok:false,error:'invalid_code'}};return {data:true};},channel(topic){const c={topic,handler:null,on(t,f,h){this.handler=h;return this;},subscribe(cb){this.status=cb;setTimeout(()=>cb('SUBSCRIBED'),0);return this;},async send(m){window.remoteOut.push({topic,payload:m.payload});return 'ok';}};remoteChannels.push(c);return c;},async removeChannel(c){remoteChannels=remoteChannels.filter(x=>x!==c);}};
 window.supabase={createClient:()=>window.remoteClient};
 window.deliver=p=>{for(const c of remoteChannels)if(c.topic===p.topic)c.handler({payload:p.payload});};'''
 server,url=start_local_app_server()
@@ -36,16 +36,15 @@ try:
     MindexSongTiming.resumeAutoSync=()=>{remoteCalls.push('resume');state.serviceMusic.autoSyncSuspended=false;return true;};
    }''')
    host.click('#remotePanelBtn');host.wait_for_function("document.querySelector('[data-remote-code]').textContent.length>0")
-   assert not host.locator('.remote-panel').is_visible()
+   assert host.locator('.remote-panel').is_visible()
    assert host.locator('#remotePanelBtn [data-remote-button-label]').inner_text()==host.locator('[data-remote-code]').text_content()
-   host.click('#remotePanelBtn')
    assert host.locator('[data-remote-close] svg.lucide-x').count()==1
    assert host.locator('.remote-panel').evaluate('e=>getComputedStyle(e).borderRadius')=='5px'
-   assert host.locator('[data-remote-start]').is_hidden()
+   assert host.locator('[data-remote-start]').count()==0
    assert host.locator('[data-remote-end]').is_visible()
    code=host.locator('[data-remote-code]').inner_text()
    phone.goto(url.replace('index.html','remote.html'))
-   assert len(code.replace('-',''))==6
+   assert len(code)==4
    for theme in ('light','dark'):
     phone.emulate_media(color_scheme=theme)
     host.evaluate('theme=>document.body.dataset.theme=theme',theme)
@@ -75,8 +74,8 @@ try:
      if phone.locator(f'[data-action="{action}"]').is_enabled():return
     raise AssertionError('not ready: '+action+' '+phone.locator('#status').inner_text())
    ready('next')
-   assert host.locator('[data-remote-link]').is_hidden()
-   assert host.locator('[data-remote-help]').inner_text()==''
+   assert host.locator('[data-remote-link]').is_visible()
+   assert '송출 중 유지' in host.locator('[data-remote-help]').inner_text()
    if engine=='chromium':host.screenshot(path='/tmp/mindex-remote-panel-compact.png')
    assert phone.frame_locator('#current iframe').locator('body').inner_text().startswith('첫 번째')
    for width in (320,390,768):
@@ -126,12 +125,13 @@ try:
    pump(4.2,drop=True);assert phone.locator('[data-action=next]').is_disabled()
    assert '잠김' in phone.locator('#status').inner_text()
    pump(1.5);ready('prev')
-   # Host service change revokes the code; output never gets restarted remotely.
-   host.evaluate("state.selectedServiceId='other-service'");pump(1.5)
-   assert host.locator('[data-remote-status]').inner_text().find('종료')>=0
+   # Browsing another service keeps this output's controller; ending the output revokes it.
+   host.evaluate("state.selectedServiceId='other-service'");pump(1.5);ready('prev')
+   host.evaluate("isPresenterOutputWindowOpen=()=>false;presenterControllerIsLive=()=>false");pump(2.2)
+   assert host.locator('[data-remote-code]').inner_text()==''
    pump(3.2);assert phone.locator('[data-action=next]').is_disabled()
    phone.click('#disconnect');assert phone.locator('#pairForm').is_visible()
-   phone.fill('#code','123456');phone.click('#connect');pump();assert '확인' in phone.locator('#status').inner_text()
+   phone.fill('#code','9999');phone.click('#connect');pump();assert '확인' in phone.locator('#status').inner_text()
    print('PASS',engine,'separate contexts: phone/tablet layout, pairing, actions, replay, stale revision, outage, service switch, invalid code')
    host_context.close();phone_context.close();browser.close()
 finally:server.shutdown()

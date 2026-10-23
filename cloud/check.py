@@ -10,6 +10,8 @@ ROOT = Path(__file__).resolve().parents[1]
 NODE_TESTS = (
     "test_remote_core.mjs",
     "test_remote_pairing.mjs",
+    "test_output_pairing.mjs",
+    "test_output_registry.mjs",
     "test_remote_screen.mjs",
     "test_remote_theme.cjs",
     "test_remote_session.mjs",

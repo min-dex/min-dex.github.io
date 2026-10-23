@@ -38,7 +38,7 @@ try:
    page.route('**/vendor/supabase-js.min.js',lambda r:r.fulfill(body=MOCK,content_type='text/javascript'))
    page.goto(url)
    page.evaluate('''async()=>{
-    const {createOutputRegistry}=await import('./mindex.remote-admin.mjs?v=1');
+    const {createOutputRegistry}=await import('./mindex.remote-admin.mjs?v=2');
     window.hosts=['첫째 예배','둘째 예배'].map((title,i)=>{
      const h={live:true,index:0,version:0,title};
      h.registry=createOutputRegistry(()=>h.live?{key:title,client:remoteClient,info:{title,device:'송출 PC',position:String(h.index+1)},adapter:{read:()=>({live:h.live,index:h.index,total:5,current:title,next:'다음',music:'음원 없음',version:h.version,allowed:['next','prev','output-stop']}),execute:async action=>{calls.push([i,action]);h.version++;if(action==='next')h.index++;if(action==='prev')h.index--;if(action==='output-stop')h.live=false;}}}:null,{interval:100});return h;

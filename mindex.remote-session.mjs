@@ -18,7 +18,7 @@ export async function openRemote({client,code,host=false,registration:providedRe
   const box=await seal(pairMode?pair.key:key,{...message,peer,seq:++outgoing},pair.topic);
   if(closed)return;
   const result=await channel.send({type:'broadcast',event:'packet',payload:{mode:pairMode?'pair':'session',box}});
-  if(result!=='ok')throw Error('연결이 끊겼습니다. PC와 폰의 인터넷을 확인하고 PC에서 연결 종료 → 연결 시작으로 새 코드를 만들어 주세요.');
+  if(result!=='ok')throw Error('연결이 끊겼습니다. PC와 폰의 인터넷을 확인하고 같은 송출 코드로 다시 연결해 주세요.');
  }
  function close(reason='연결이 종료됐습니다.'){
   if(closed)return;closed=true;ready=false;fresh=false;snapshot=null;
@@ -39,8 +39,8 @@ export async function openRemote({client,code,host=false,registration:providedRe
     reserved=true;other=m.peer;
     try{key=await sessionKey(keys.privateKey,m.publicKey,pair.topic+':'+m.nonce);
      await send({type:'welcome',to:other,nonce:m.nonce,publicKey:keys.publicKey},true);
-     clearTimeout(expiry);expiry=setTimeout(()=>close('연결 확인 시간이 지났습니다. PC에서 연결 종료 → 연결 시작으로 새 코드를 만들어 주세요.'),10000);
-    }catch{close('연결 코드 확인에 실패했습니다. PC에서 연결 종료 → 연결 시작으로 새 코드를 만들어 주세요.');}
+     clearTimeout(expiry);expiry=setTimeout(()=>close('연결 확인 시간이 지났습니다. 같은 송출 코드로 다시 연결해 주세요.'),10000);
+    }catch{close('연결 코드 확인에 실패했습니다. 같은 송출 코드로 다시 연결해 주세요.');}
    }else if(!host&&!key&&m.type==='welcome'&&m.to===peer&&m.nonce===nonce){
     other=m.peer;key=await sessionKey(keys.privateKey,m.publicKey,pair.topic+':'+nonce);
     await send({type:'ready',request:freshRequest});
@@ -76,21 +76,21 @@ export async function openRemote({client,code,host=false,registration:providedRe
   if(s==='SUBSCRIBED'){
    subscribed=true;status(host?'코드를 입력하면 바로 연결됩니다.':'송출 PC를 찾는 중');
    if(!host)send({type:'hello',nonce,publicKey:keys.publicKey},true).catch(e=>close(e.message));
-  }else if(['CHANNEL_ERROR','TIMED_OUT','CLOSED'].includes(s))close('연결이 끊겼습니다. PC와 폰의 인터넷을 확인하고 PC에서 연결 종료 → 연결 시작으로 새 코드를 만들어 주세요.');
+  }else if(['CHANNEL_ERROR','TIMED_OUT','CLOSED'].includes(s))close('연결이 끊겼습니다. PC와 폰의 인터넷을 확인하고 같은 송출 코드로 다시 연결해 주세요.');
  });
- }catch(e){close('연결 준비에 실패했습니다. PC에서 연결 종료 → 연결 시작으로 새 코드를 만들어 주세요.');throw e;}
- if(closed)throw Error('연결 준비에 실패했습니다. PC에서 연결 종료 → 연결 시작으로 새 코드를 만들어 주세요.');
- expiry=setTimeout(()=>close('연결 코드가 만료됐습니다. PC에서 연결 종료 → 연결 시작으로 새 코드를 만들어 주세요.'),host?120000:15000);
+ }catch(e){close('연결 준비에 실패했습니다. 같은 송출 코드로 다시 연결해 주세요.');throw e;}
+ if(closed)throw Error('연결 준비에 실패했습니다. 같은 송출 코드로 다시 연결해 주세요.');
+ expiry=setTimeout(()=>close('연결 대기 시간이 지났습니다. 같은 송출 코드로 다시 연결해 주세요.'),host?120000:15000);
  timer=setInterval(()=>{
   if(closed)return;
-  if(performance.now()-born>8*3600000)return close('연결 시간이 만료됐습니다. PC에서 새 코드를 만들어 다시 연결해 주세요.');
+  if(performance.now()-born>8*3600000)return close('연결 시간이 만료됐습니다. 같은 송출 코드로 다시 연결해 주세요.');
   if(host){
    try{if(!read()?.live)return close('송출 종료 또는 예배 변경으로 연결이 종료됐습니다.');}catch{return close();}
    if(ready&&performance.now()-lastSeen>10000)return close('리모컨 응답이 없어 연결을 종료했습니다.');
    void publish();
   }else if(ready){
    if(performance.now()-lastSeen>3000){fresh=false;freshRequest=id();status('연결 확인 중 · 조작 잠김');}
-   if(performance.now()-lastSeen>10000)return close('송출 PC 응답이 없습니다. PC의 예배 송출과 인터넷을 확인하고 새 코드로 연결해 주세요.');
+   if(performance.now()-lastSeen>10000)return close('송출 PC 응답이 없습니다. PC의 예배 송출과 인터넷을 확인하고 같은 송출 코드로 다시 연결해 주세요.');
    send({type:'ping',request:freshRequest}).catch(e=>close(e.message));
   }
  },1000);

@@ -253,3 +253,47 @@ output stop and logout; real host-adapter coverage includes administrator/guest
 stale-command rejection and editing another service. Physical phones, OS sleep and
 public deployment remain separate checks. Host registration restarts after a
 page restored from the browser back/forward cache, using a fresh output identity.
+
+## Stable four-digit output codes ·2026-10-24
+
+Operator installed `2026-10-24-output-codes.sql`; production RPC verification
+passed unique codes, host readiness, isolated guest secrets, owner rejection,
+disconnect persistence and retired-code reservation. Temporary verification
+outputs were removed. Publication is recorded separately in the release receipt.
+The migration preserves the configured admin PIN.
+This supersedes the six-digit/two-minute guest UI described earlier.
+
+Every active output automatically gets a server-assigned four-digit code,
+including leading zeros. Both presenter views show it on the remote button;
+the panel keeps displaying it after guest connection or disconnection. An active
+output may have one guest controller and one administrator independently. Guest
+control follows the output while the PC browses another service; only the admin
+adapter can end the output. Both use the shared mutation/revision safeguards.
+
+Remote accepts the output code and waits for host subscription before receiving
+an ephemeral random relay secret. The four digits never become an encryption key.
+Requests use a random 256-bit controller token; readiness polls and lost-response
+retries reuse that token. New code attempts share the existing server budget of
+five per minute across the project. Disconnect cancels only the token's guest
+slot. Established sessions retain the existing eight-hour ceiling and fresh-state
+requirements; the output code itself does not have the old two-minute deadline.
+
+A temporary network outage closes control sessions but preserves the host owner
+identity and code. Code lookup requires a report within ten seconds; control
+requires a report within six seconds. Recovery retries the same output identity.
+BFCache suspension also retains it; returning renews the report and requires a
+new controller handshake. Used/closed link IDs are not revived if a revocation
+request was lost. Explicit output replacement/stop removes its registry row.
+
+Inactive identities are retained for up to 24 hours solely for recovery; after
+that, the host must register again. They are not connectable while offline. Code
+reservations survive stop for 24 hours since the last report so a recently closed
+code cannot immediately select another worship. Assignment is serialized with a
+unique reservation; twenty fresh hosts and two hundred retained identities are
+the limits. A multi-day outage is outside same-code recovery, and forgotten
+server entries expire conservatively rather than claiming instant crash detection.
+
+Legacy six-digit RPCs remain for already-open older clients during rollout; the
+new UI does not create or accept those codes. This is compatibility for deployed
+clients, not a fallback for missing new server functions. No worship, Praise,
+lyrics, timing, media, or administrator PIN records are migrated by this change.

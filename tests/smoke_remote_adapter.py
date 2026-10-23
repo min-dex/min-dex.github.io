@@ -62,10 +62,10 @@ try:
     output.closed=true;check(!adapter.read().live,'closed output revoked');output.closed=false;
     state.serviceMusic.ownerServiceId='another-service';check(!adapter.read().allowed.includes('play'),'foreign audio protected');
     state.presenter.outputSessionId='new-session';check(!adapter.read().live,'replacement output revoked');clearServiceMusicSyncTimer();
-    state.presenter.outputSessionId='fixture';let registrations=0;
-    state.client={async rpc(name,args){if(name!=='mindex_remote_output')return {data:{ok:true}};if(args.p_action==='register'){registrations++;return {data:{ok:true,id:crypto.randomUUID(),token:'fixture'}};}return {data:{ok:true,link:null}};}};
+    state.presenter.outputSessionId='fixture';let registrations=0,reports=0;
+    state.client={async rpc(name,args){if(name!=='mindex_remote_output')return {data:{ok:true}};if(args.p_action==='register'){registrations++;return {data:{ok:true,id:crypto.randomUUID(),token:'fixture'}};}reports++;return {data:{ok:true,link:null}};}};
     const until=async f=>{for(let i=0;i<60;i++){if(f())return;await new Promise(r=>setTimeout(r,100));}throw Error('registry timeout');};
-    await until(()=>registrations===1);window.dispatchEvent(new PageTransitionEvent('pagehide',{persisted:true}));window.dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true}));await until(()=>registrations===2);
+    await until(()=>registrations===1&&reports>0);const beforeReports=reports;window.dispatchEvent(new PageTransitionEvent('pagehide',{persisted:true}));window.dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true}));await until(()=>reports>beforeReports);check(registrations===1,'page restore keeps output identity');
     window.dispatchEvent(new PageTransitionEvent('pagehide'));state.client=null;
     return 'PASS page restore registration; real navigation/blackout/music/auto-sync adapter, source ownership, autoplay failure and output identity';
    }'''),flush=True)
