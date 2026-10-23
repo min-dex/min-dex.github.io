@@ -1006,3 +1006,15 @@ scope above: all currently editable calendar fields are now read and reflected
 in place. The four assignee fields remain the only fields linked atomically to
 worship elements. Other fields keep their direct save path and calendar-only
 invalidation; no automatic worship-document rewrite is introduced.
+
+
+### Worship form input versus effective default ·2026-10-23
+
+An absent form is not materialized from generic playback or template rules.
+Display that effective sequence in the input placeholder only. A registered
+song/version presenter form may be copied on linking; explicit item forms win.
+A nonempty edit persists its exact sequence with titleSequence ownership; clearing
+removes the form payload and uses playback fallback without storing that fallback.
+Default Title is scoped to main praise and excludes hymn score output. Ordinary
+order/content headings are separate from Title tokens. No operational row migration
+is needed to remove formerly displayed virtual defaults.

@@ -570,19 +570,26 @@ function presenterScoreImageSourcesForFormSequence(imageSources = [], scoreForms
   };
 }
 
+function presenterDefaultTitleForServiceItem(item = {}, song = null, version = null, { score = false } = {}) {
+  if (!isMainPraiseServiceItem(item, { allowUnlabeled: true }) || isServiceConnectedPraiseSecondaryItem(item)) return false;
+  const memo = parseServiceItemMemo(item.memo);
+  const scoreOutput = score || serviceItemOutputMode(item, memo) === "score";
+  return !(scoreOutput && versionEffectivePraiseTypes(song, version).includes("hymn"));
+}
+
+function presenterFormPresetWithDefaultTitle(preset, item, song, version, options = {}) {
+  const forms = normalizeServiceFormPresetForms(preset?.forms || []);
+  if (preset?.titleSequence || forms.includes("Title")) return { ...preset, forms, titleSequence: true };
+  if (!presenterDefaultTitleForServiceItem(item, song, version, options)) return preset;
+  return { ...preset, forms: ["Title", ...forms], hint: ["Title", ...forms].join("-"), titleSequence: true, defaultTitle: true };
+}
+
 function presenterScoreFormSequence(item = {}, song = null, version = null) {
-  const memo = parseServiceItemMemo(item?.memo);
-  if (serviceItemFormPresetDisabled(item)) {
-    return memo.formPreset?.titleSequence ? { forms: [], titleSequence: true }
-      : { forms: ["Title"], titleSequence: true, defaultTitle: true };
-  }
-  const preset = serviceItemFormPreset(item)
+  if (serviceItemFormPresetDisabled(item) && parseServiceItemMemo(item.memo).formPreset?.titleSequence) return { forms: [], titleSequence: true };
+  const preset = serviceItemFormPresetDisabled(item) ? null : serviceItemFormPreset(item)
     || matchedServiceItemFormPresetRule(item, song, version)?.formPreset
     || presenterSongDefaultFormPreset(song, version);
-  const forms = normalizeServiceFormPresetForms(preset?.forms || []);
-  if (preset?.titleSequence) return { ...preset, forms };
-  // Translate the old implicit title into the same virtual token used by lyrics.
-  return { ...preset, forms: ["Title", ...forms], titleSequence: true, defaultTitle: true };
+  return presenterFormPresetWithDefaultTitle(preset, item, song, version, { score: true }) || { forms: [] };
 }
 
 function presenterScoreFormPresetLabels(item = {}, song = null, version = null) {
@@ -678,6 +685,9 @@ function presenterFormPlanForServiceItem(version = {}, item, song = null) {
   const preset = presenterServiceItemFormPreset(version, item, song);
   const effectivePreset = presenterFormPresetWithAvailableForms(preset, forms);
   if (!effectivePreset?.forms?.length) return { forms: presenterHymnOnceOnlyIntro(forms, version), warnings: [] };
+  if (effectivePreset.defaultTitle && effectivePreset.forms.every(label => label === "Title")) {
+    return { forms: [findPresenterFormForPresetLabel([], "Title"), ...presenterHymnOnceOnlyIntro(forms, version)], warnings: [] };
+  }
   const resolved = resolvePresenterFormPresetSequence(forms, effectivePreset);
   const warnings = presenterMissingFormWarnings(resolved.missing, forms, effectivePreset);
   const omitUnlisted = presenterFormPresetShouldOmitUnlisted(effectivePreset);
@@ -719,12 +729,11 @@ function presenterServiceItemFormPreset(version = {}, item = {}, song = null, op
     ? { forms: available.map(presenterFormDisplayLabel), strength: "auto" } : null;
   const preset = presenterServiceItemBaseFormPreset(version, item, song, options)
     || (options.includePlaybackFallback !== false && !serviceItemFormPresetDisabled(item) ? sourceSequence : null);
-  // Legacy automatic titles become an explicit virtual sequence entry on read.
-  // An authored titleSequence (including an empty one) owns title visibility.
-  if (!preset?.forms?.length || preset.titleSequence || parseServiceItemMemo(item?.memo).formPreset?.titleSequence) return preset;
+  // Typed sequences own Title. Only the ordinary main-praise default adds it.
+  if (preset?.titleSequence || parseServiceItemMemo(item?.memo).formPreset?.titleSequence) return preset;
+  if (!preset?.forms?.length && options.includePlaybackFallback === false) return preset;
   const resolved = presenterFormPresetWithAvailableForms(preset, available);
-  const forms = ["Title", ...resolved.forms];
-  return { ...resolved, forms, hint: forms.join("-"), titleSequence: true };
+  return presenterFormPresetWithDefaultTitle(resolved, item, song, version);
 }
 
 function presenterServiceItemBaseFormPreset(version = {}, item = {}, song = null, { includePlaybackFallback = true } = {}) {
@@ -2177,6 +2186,9 @@ function buildPresenterCustomSlides(item, section, index) {
     };
   }).filter((slide) => slide.type === "blank" || String(slide.text || "").trim());
   const preset = presenterServiceItemFormPreset({}, item);
+  if (songLikeItem && preset?.defaultTitle && preset.forms.every(label => label === "Title")) {
+    return [presenterSequenceTitleSlide(item, section, null, null, serviceItemDisplayText(item), index, 0), ...lyricSlides];
+  }
   if (songLikeItem && preset?.titleSequence && preset.forms?.length) {
     const plan = resolvePresenterLyricsFormPresetSequence([], preset.forms, [], lyricSlides.map(slide => slide.text));
     return plan.items.map((form, position) => form._presenterTitle
@@ -2187,11 +2199,7 @@ function buildPresenterCustomSlides(item, section, index) {
         layout: form._presenterBlank ? PRESENTER_SLIDE_LAYOUTS.BLANK : PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT,
         marker: form.label, formKey: `custom:${position}`, sort: index + position / 100 });
   }
-  if (!songLikeItem || !shouldIncludeSongTitleSlide(item, label)) return lyricSlides;
-  return [
-    presenterSongTitleSlide(item, section, null, null, serviceItemConnectedPraiseTitle(item, "title") || serviceItemDisplayText(item), index),
-    ...lyricSlides,
-  ];
+  return lyricSlides;
 }
 
 function parsePresenterCustomSlideBlock(block) {
@@ -2390,19 +2398,12 @@ function isScriptureBodyServiceItem(item) {
     || (sectionKey === "scripture_reading" && elementType === "scripture_body");
 }
 
-function shouldIncludeSongTitleSlide(item, label, song = null, version = null) {
-  if (parseServiceItemMemo(item?.memo).formPreset?.titleSequence
-      || presenterServiceItemFormPreset(version || {}, item, song)?.titleSequence) return false;
-  if (isServiceConnectedPraiseSecondaryItem(item)) return false;
-  const displayText = serviceItemDisplayText(item);
-  if (serviceItemConnectedPraiseTitle(item, "title")) return true;
-  if (!displayText) return false;
-  return Boolean(
-    item?.song_id
-    || isSongServiceLabel(label)
-    || isPresenterSpecialSongItem(item)
-    || isMainPraiseServiceItem(item, { allowUnlabeled: true }),
-  );
+function presenterSlidesWithSongContentHeading(item, section, song, version, displayText, index, slides = []) {
+  const heading = presenterSongTitleSectionHeading(item, section);
+  if (!heading || !slides.length || isServiceConnectedPraiseSecondaryItem(item) || slides.some(slide => slide.formLabel === "Title" || (slide.orderTitle === heading && slide.contentTitle))) return slides;
+  const content = presenterSongTitleDisplayTitle(song, version, displayText);
+  if (!content) return slides;
+  return [presenterOrderContentTitleSlide(item, section, index, heading, content), ...slides];
 }
 
 function presenterSongTitleSlide(item, section, song, version, displayText, index) {

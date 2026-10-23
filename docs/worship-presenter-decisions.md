@@ -4156,3 +4156,27 @@ layout wrapper is flattened; lyrics, audio management, result lists and expanded
 photo tools retain full content areas. Offering selection/save geometry retains
 its existing separate toolbar contract. Inputs, IDs, lyrics, modes and save paths
 are unchanged; resize must preserve unsaved values and focus.
+
+## Empty form input and scoped default Title ·2026-10-23
+
+Supersedes the universal-title scope in “Uniform Title sequence ownership” and
+“Migrate legacy score titles to Title tokens” above. A blank worship form stays
+blank. Its effective rule/playback sequence appears only as a light placeholder
+and is never copied into the item by rendering, linking or saving. A registered
+song/version presenter form can fill the input and is copied on song linking;
+an authored item sequence takes precedence and is followed exactly, including
+omitted, repeated and middle Title tokens.
+
+Only main praise receives a leading default Title when adapting an old sequence
+or constructing a playback default. Hymn score output receives no default Title.
+Sending/response/offering/closing songs retain the ordinary order/content heading;
+that heading is not a Title form and has no Title group label. Explicit Title
+entries still use the common song-title renderer. Secondary connected-praise items
+do not create another default title/heading. The separate old automatic-title
+prepend path is removed; title tokens remain the sequence interpreter's concern.
+
+Clearing a form removes its stored sequence and restores the light playback
+fallback. Existing saved sequences/lyrics/versions, audio cues and IDs are retained;
+there is no bulk data rewrite. The read-only audit found891 praise elements:
+720 without a stored form and171 with one. Five main-praise items contain saved
+Title tokens; those authored positions remain intact.
