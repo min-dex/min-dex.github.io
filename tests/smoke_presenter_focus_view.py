@@ -47,14 +47,38 @@ try:
         field.value=before;
       } finally {window.MINDEX_SERVER_STORAGE=original;}
     }""")
+    page.evaluate('renderGlobalPlaybackControls()')
+    page.wait_for_selector('#remotePanelBtn',state='attached')
+    for width in (1440,390):
+      page.set_viewport_size({'width':width,'height':1000})
+      remote=page.locator('[data-presenter-remote]')
+      music=page.locator('[data-presenter-music-manager]')
+      assert remote.is_visible() and music.is_visible()
+      assert not page.locator('#remotePanelBtn').is_visible()
+      assert not page.locator('.global-playback-trigger').is_visible()
+      assert remote.bounding_box()['height']==music.bounding_box()['height']==35
+      assert abs(remote.bounding_box()['width']-music.bounding_box()['width'])<1
+      remote.click();assert not page.locator('.remote-panel').is_visible()
+      assert '예배 송출을 먼저' in page.locator('[data-remote-status]').text_content()
+      music.click();assert page.locator('#globalPlaybackPanel').is_visible()
+      page.keyboard.press('Escape')
+      assert music.evaluate('e=>e===document.activeElement')
+    page.set_viewport_size({'width':1440,'height':1000})
     toggle=page.locator('[data-presenter-focus-toggle=focus]')
     toggle.click()
     assert page.locator('[data-presenter-focus-panel]').is_visible()
+    assert page.locator('#remotePanelBtn').is_visible()
+    assert page.locator('.global-playback-trigger').is_visible()
     assert not page.locator('.svc-source-panel').is_visible()
     assert page.evaluate("focusDraft===document.querySelector('.svc-source-text') && focusDraft.value==='아직 저장하지 않은 원문' && focusAudio===state.serviceMusic.audio && focusAudio.currentTime===42 && focusItems===JSON.stringify(state.serviceItems)")
     assert '자동 넘김 해제' in page.locator('[data-focus-music-status]').inner_text()
-    assert page.locator('[data-focus-music="toggle"]').inner_text() == '일시정지 · P'
+    assert page.locator('[data-focus-music-label]').inner_text() == '일시정지 · P'
     assert page.evaluate('''()=>{const b=document.querySelector('[data-focus-music="toggle"]');const text=b.firstChild;syncPresenterFocusMusic();return text===b.firstChild}''')
+    for playing,pending,icon in ((False,False,'play'),(True,False,'pause'),(False,True,'loader-circle')):
+      page.evaluate('([playing,pending])=>{state.serviceMusic.playing=playing;state.serviceMusic.pending=pending;syncPresenterFocusMusic()}',[playing,pending])
+      assert page.locator(f'[data-focus-music="toggle"] svg.lucide-{icon}').count()==1
+      assert page.evaluate("""()=>{const b=document.querySelector('[data-focus-music="toggle"]'),i=b.firstChild,l=b.lastChild;syncPresenterFocusMusic();return i===b.firstChild&&l===b.lastChild}""")
+    page.evaluate('state.serviceMusic.playing=true;state.serviceMusic.pending=false;syncPresenterFocusMusic()')
     page.evaluate('window.focusOriginalMusicAction=runServiceMusicAction;runServiceMusicAction=(action,binding)=>{window.focusMusicCall={action,binding}}')
     page.locator('[data-focus-music="toggle"]').click()
     assert page.evaluate("focusMusicCall.action==='toggle' && focusMusicCall.binding.serviceMusicServiceId==='focus-fixture'"), page.evaluate("JSON.stringify(focusMusicCall)")
@@ -97,6 +121,7 @@ try:
     page.locator('[data-presenter-focus-toggle=basic]').click()
     assert page.locator('.svc-source-panel').is_visible()
     assert page.evaluate("focusBoard===document.querySelector('.svc-slide-board') && focusDraft.value==='아직 저장하지 않은 원문' && focusAudio.currentTime===42 && state.serviceMusic.playing && state.serviceMusic.autoSyncSuspended && focusItems===JSON.stringify(state.serviceItems)")
+    page.evaluate("window.originalManagedVideo=presenterManagedVideoState;presenterManagedVideoState=()=>({status:'paused',ready:true});renderGlobalPlaybackControls()")
     for theme in ('light','dark'):
      page.evaluate('(theme)=>{document.body.dataset.theme=theme}',theme)
      for view in ('basic','focus'):
@@ -110,6 +135,16 @@ try:
       for width in (1440,1100,800,390):
        page.set_viewport_size({'width':width,'height':1000})
        page.wait_for_timeout(100)
+       media=page.locator('[data-presenter-music-manager]') if view=='basic' else page.locator('.global-playback-trigger')
+       assert media.get_attribute('aria-label')=='미디어 관리'
+       assert media.locator('svg.lucide-video').count()==1
+       media.click()
+       panel=page.locator('#globalPlaybackPanel');assert panel.is_visible()
+       assert panel.locator('h3').all_text_contents()==['음원','영상']
+       assert panel.locator('[data-global-playback-action^="video-"]').evaluate_all("es=>es.every(e=>{const s=getComputedStyle(e),i=e.querySelector('svg');return s.height==='30px'&&s.paddingLeft==='10px'&&getComputedStyle(i).width==='16px'&&e.scrollWidth<=e.clientWidth+1})")
+       assert panel.evaluate('e=>{const r=e.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth+1&&r.bottom<=innerHeight+1}')
+       panel.locator('[popovertargetaction="hide"]').click()
+
        assert page.locator('.svc-presenter-toolbar').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
        assert page.evaluate("""()=>{
         const left=document.querySelector('.module-switcher-tab').getBoundingClientRect();
@@ -123,6 +158,12 @@ try:
          assert page.locator('.svc-focus-output').is_visible()
         selector='.svc-presenter-side-panel [data-presenter-action]' if view=='basic' else '.svc-focus-navigation button,.svc-presenter-toolbar > .svc-output-action'
         assert page.locator(selector).evaluate_all("es=>es.filter(e=>e.getBoundingClientRect().width>0).every(e=>{const r=e.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth+1})")
+       if view=='focus':
+        assert page.locator('.svc-focus-transport button').evaluate_all("""es=>es.every(e=>{
+          const s=getComputedStyle(e),i=e.querySelector('svg.lucide'),is=i&&getComputedStyle(i);
+          return s.height==='35px'&&s.padding==='0px 8px'&&s.gap==='6px'&&is?.width==='16px'&&is.height==='16px'&&is.strokeWidth==='1.5px'
+            &&(!e.getClientRects().length||e.scrollWidth<=e.clientWidth+1);
+        })""")
        if view=='basic':
         assert page.evaluate("""()=>{
          const music=document.querySelector('.svc-presenter-toolbar .svc-music-name');

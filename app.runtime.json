@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261022-recovery-cancel",
+  "version": "20261023-shared-editor-controls",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "ae4c3f4774233040ac3c78b8f95be2fe66e0ad6271b052bfe653ad6a1f780b33",
-  "runtime_sha256": "f9f815d454f4f5ea02e2387bfb697000a949003ec0814515dfae9db1fc443f93",
-  "source_bytes": 1551994,
-  "runtime_bytes": 1098618,
-  "source_gzip": 349088,
-  "runtime_gzip": 273029
+  "source_sha256": "b0d24da541184515c8ff30973f4f60b567302d43a8cb6346ba963a4a04e9f027",
+  "runtime_sha256": "66a76f69cd3cc2c5ad86107be61c50bf37aa770df0cc77e31960960aaf144f1e",
+  "source_bytes": 1558722,
+  "runtime_bytes": 1103292,
+  "source_gzip": 351159,
+  "runtime_gzip": 274615
 }

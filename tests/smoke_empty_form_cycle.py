@@ -16,7 +16,7 @@ try:
     for(const label of ['특송','봉헌특송','찬양 1','입례찬양','봉헌찬송']){
      const item=normalizeServiceItem({id:crypto.randomUUID(),service_id:sid,label,raw_title:song.title,song_id:song.id,version_id:version.id,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formHint:'V1-V2-C',formPreset:{forms:['V1','V2','C'],strength:'manual'}})},0);
      state.serviceItems[sid]=[item];
-     check(presenterFormPlanForServiceItem(version,item,song).forms.map(f=>f.id).join()==='v1,v2,c','explicit order changed');
+     check(presenterFormPlanForServiceItem(version,item,song).forms.filter(f=>!f._presenterTitle).map(f=>f.id).join()==='v1,v2,c','explicit order changed');
      await updateServiceItemField({value:'',dataset:{serviceId:sid,serviceItemIndex:'0',serviceItemField:'form_hint'}});
      const cleared=getServiceItems(sid)[0],before=JSON.stringify(cleared);
      const plan=presenterFormPlanForServiceItem(version,cleared,song);
@@ -30,7 +30,7 @@ try:
      check(presenterFormPlanForServiceItem({forms:forms.slice(0,2)},cleared,song).forms.length===2,'missing chorus');
     }
     const disabled={memo:serializeServiceItemMemo({formPresetDisabled:true})};
-    check(presenterFormPlanForServiceItem({...version,praise_types:['children']},disabled,song).forms.map(f=>f.id).join()==='v1,v2,c','children changed');
+    check(presenterFormPlanForServiceItem({...version,praise_types:['children']},disabled,song).forms.filter(f=>!f._presenterTitle).map(f=>f.id).join()==='v1,v2,c','children changed');
     return 'PASS clear field, actual lyric slides, 5 labels, explicit order, reopen, no mutation, empty editor and children preservation';
    }'''))
    b.close()

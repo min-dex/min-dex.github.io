@@ -193,6 +193,8 @@ def main():
                     page.get_by_role('button',name='편집창에 복구',exact=True).click()
                     page.wait_for_function("state.scriptures[0].body==='Unsaved draft' && state.scriptures[0].title==='New title'")
                     assert any('mindex.editor.recovery.v1:' in key[2] for key in db)
+                    # State is restored before the async caller closes/removes the dialog.
+                    page.locator('.editor-draft-review').wait_for(state='detached')
                     assert page.locator('.editor-draft-review').count()==0
                     # Focus is one rounded container ring, not clipped inner edges.
                     page.locator('#searchInput').focus()

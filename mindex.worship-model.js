@@ -271,6 +271,7 @@ function normalizeServiceFormPreset(value, fallbackHint = "", fallbackStrength =
   if (hint) preset.hint = normalizeServiceFormHint(hint);
   if (strength) preset.strength = strength;
   if (source?.omitUnlisted || source?.omit_unlisted) preset.omitUnlisted = true;
+  if (source?.titleSequence || forms.includes("Title")) preset.titleSequence = true;
   return Object.keys(preset).length ? preset : null;
 }
 
@@ -299,6 +300,7 @@ function canonicalServiceFormToken(value = "") {
   }
   const instrumental = raw.match(/^(int|간주|interlude|instrumental)\s*([a-z]?)$/i);
   if (instrumental) return "Int" + instrumental[2].toUpperCase();
+  if (/^(?:t|title)$/i.test(raw)) return "Title";
   if (/^vl$/i.test(raw)) return "VL";
   if (/^tags$/i.test(raw)) return "Tags";
   const ending = raw.match(/^(coda|ending)\s*(\d*)\s*([a-z]?)$/i);
@@ -399,6 +401,7 @@ function songFormPresetDisplayLabel(value = "") {
   const raw = String(value || "").trim();
   if (!raw) return "";
   const target = normalizeSongFormPresetLabel(raw);
+  if (target.type === "title") return "Title";
   if (target.lastVerse) return "VL";
   const group = String(target.group || "").trim().toUpperCase();
   const suffix = target.variant ? `${target.number ? ` ${target.number}` : ""} @${group ? ` ${group}` : ""}` : target.number ? ` ${target.number}${group ? ` ${group}` : ""}` : group ? ` ${group}` : "";

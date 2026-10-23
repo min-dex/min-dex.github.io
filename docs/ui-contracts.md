@@ -775,10 +775,35 @@ modifications from visits, draft input, failed saves or deletion notifications.
 
 Reference editing cards use the available group width; read-only cards retain their compact grid. Title/URL fields stack below 600px of card content, use 1:2 columns from 600px, and include the group field in a third column from 900px. Labels, focus and save behavior remain unchanged.
 
-Home recent views reserve six80px card slots (10px gaps) in the shared responsive grid, including loading/empty states. Titles occupy one20px line (ellipsis with full title available on hover) and save time its own18px row only in recent edits; recent work centers its two-line text block vertically; switching must not move the module cards below. No routine footer explanation; read failures retain an inline retry in the selector row.
+Home recent views reserve six80px card slots (10px gaps) in the shared responsive grid, while destinations are present. Loading/empty states collapse to the notice height. Titles occupy one20px line (ellipsis with full title available on hover) and save time its own18px row only in recent edits; recent work centers its two-line text block vertically; switching between populated views must not move the module cards below. No routine footer explanation; read failures retain an inline retry in the selector row.
 
 Praise/Scripture metadata popovers use their own content width, not viewport breakpoints: below400px one column; from400px two columns; Praise alone uses three columns from570px. Preserve labels, input order, focus and existing popup width.
 
 Section editor item name/assignee and new type/name/add rows use the editor body content width: retain side-by-side controls from550px, stack below550px. Long item content stays on its separate row; labels, focus and input order remain unchanged. Viewport rules only position/size the floating panel.
 
 Lyric block headers wrap the form/variation and action groups according to their actual available width, without the860px viewport column override. Keep lyrics on their separate row, DOM/tab order, labels, focus and disabled actions unchanged.
+
+### Metadata validation alignment ·2026-10-22
+
+Metadata grid items and their internal label/input tracks align to the start.
+Validation hints grow below the relevant input without distributing spare height
+into neighboring label/input gaps. Keep hints, focus outlines and container-width
+3/2/1-column rules intact.
+
+
+### Editor and home summary ·2026-10-23
+
+Wide worship song rows allocate equal tracks to the title and form fields; narrow
+rows retain the separate full-width form field. Medley unlink remains available.
+Home edition summaries use the reader language/name sorting rule and compact
+KJV/ASV names, both before and after summary loading. Canonical edition names,
+source metadata and stored records remain unchanged.
+
+### Cross-screen controls ·2026-10-23
+
+Praise version headers share their title/review, management and measure tracks.
+Reference edit cards keep the panel surface on hover so fields remain distinct.
+Scripture chapter/copy controls share 35px height and visible neutral action
+borders. Bulletin save uses the primary action surface; reload/refresh use
+35px neutral actions. Preserve labels, keyboard focus and disabled states.
+These rules do not affect output slides, printing or stored content.

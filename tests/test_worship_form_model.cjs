@@ -67,3 +67,15 @@ for (const hint of ['V2-C-V1-C','C-V1-C-V2','V1-C-C']) {
  assert.equal(context.normalizeServiceFormPreset(undefined,hint).forms.join('-'),context.normalizeServiceFormHint(hint));
 }
 assert.equal(context.normalizeServiceFormPreset({forms:['C','V1']},'V2-C').forms.join('-'),'C-V1');
+
+for (const raw of ['t', 'T', 'title', 'TITLE', ' Title ']) {
+  assert.equal(context.normalizeServiceFormHint(`${raw} - Verse 1 - Tags`), 'Title-V1-Tags');
+  assert.equal(context.songFormPresetDisplayLabel(raw), 'Title');
+}
+assert.equal(context.canonicalServiceFormToken('T'),'Title');
+assert.equal(context.canonicalServiceFormToken('Tag'),'Tag');
+const titlePreset=context.normalizeServiceFormPreset('title-v1');
+assert.equal(titlePreset.titleSequence,true);
+assert.equal(context.normalizeServiceFormPreset({...titlePreset,forms:['V1'],hint:'V1'}).titleSequence,true);
+assert.equal(context.normalizeServiceFormPreset('V1-C').titleSequence,undefined);
+console.log('PASS Title normalization, explicit policy persistence and legacy Tag preservation');

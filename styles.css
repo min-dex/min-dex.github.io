@@ -1876,7 +1876,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   text-decoration: none;
   transition: background .12s ease;
 }
-.reference-card:hover {
+.reference-card:not(.reference-card--editing):hover {
   background: var(--ui-surface-field);
   color: var(--ink);
 }
@@ -2036,6 +2036,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .svc-prep-editor-head-actions .reference-new-btn[data-service-item-action="add"],
 .svc-song-create[data-service-song-create],
 .service-list-type-block .service-list-new-btn,
+.bible-reader-controls :is(.bible-copy-chapter, .bible-chapter-control .icon-btn),
 :is(.song-timing-dialog, .draft-handoff-dialog, .server-conflict-review) .btn.secondary {
   flex-shrink: 0;
   border: 1px solid var(--line-2);
@@ -2048,6 +2049,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .svc-prep-editor-head-actions .reference-new-btn[data-service-item-action="add"]:not(:disabled),
 .svc-song-create[data-service-song-create]:not(:disabled),
 .service-list-type-block .service-list-new-btn:not(:disabled),
+.bible-reader-controls :is(.bible-copy-chapter, .bible-chapter-control .icon-btn):not(:disabled),
 :is(.song-timing-dialog, .draft-handoff-dialog, .server-conflict-review) .btn.secondary:not(:disabled) {
   background: var(--ui-surface-field);
 }
@@ -2059,6 +2061,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .svc-prep-editor-head-actions .reference-new-btn[data-service-item-action="add"]:not(:disabled):not(.danger),
 .svc-song-create[data-service-song-create]:not(:disabled):not(.danger),
 .service-list-type-block .service-list-new-btn:not(:disabled):not(.danger),
+.bible-reader-controls :is(.bible-copy-chapter, .bible-chapter-control .icon-btn):not(:disabled):not(.danger),
 :is(.song-timing-dialog, .draft-handoff-dialog, .server-conflict-review) .btn.secondary:not(:disabled):not(.danger) {
   color: var(--ink-2);
 }
@@ -2070,6 +2073,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .svc-prep-editor-head-actions .reference-new-btn[data-service-item-action="add"]:not(:disabled):hover,
 .svc-song-create[data-service-song-create]:not(:disabled):hover,
 .service-list-type-block .service-list-new-btn:not(:disabled):hover,
+.bible-reader-controls :is(.bible-copy-chapter, .bible-chapter-control .icon-btn):not(:disabled):hover,
 :is(.song-timing-dialog, .draft-handoff-dialog, .server-conflict-review) .btn.secondary:not(:disabled):hover {
   background: color-mix(in srgb, var(--ui-surface-field) 85%, var(--ink) 15%);
 }
@@ -2492,17 +2496,17 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 }
 .bible-chapter-control {
   display: grid;
-  grid-template-columns: 30px minmax(62px, 1fr) 30px;
+  grid-template-columns: 35px minmax(62px, 1fr) 35px;
   gap: var(--s1);
 }
 .bible-chapter-control .icon-btn {
-  width: 30px;
-  height: 30px;
+  width: 35px;
+  height: 35px;
   border-radius: var(--r);
   background: var(--ui-surface-panel);
 }
 .bible-reader-controls select {
-  height: 30px;
+  height: 35px;
   border: 0;
   border-radius: var(--r);
   background: var(--ui-surface-field);
@@ -2619,7 +2623,7 @@ body[data-module="scripture"] .scripture-editor .meta-attribute-label {
   height: 16px;
 }
 .bible-copy-chapter {
-  height: 30px;
+  height: 35px;
   align-self: end;
   gap: 6px;
   padding: 0 11px;
@@ -2694,6 +2698,7 @@ body[data-module="scripture"] .scripture-editor .meta-attribute-label {
 }
 .metadata-popover-grid {
   display: grid;
+  align-items: start;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--s2);
 }
@@ -2706,6 +2711,7 @@ body[data-module="scripture"] .scripture-editor .meta-attribute-label {
 }
 .metadata-popover-grid .field {
   min-width: 0;
+  align-content: start;
 }
 .metadata-popover-grid .field span {
   color: var(--ink-4);
@@ -4811,25 +4817,6 @@ body[data-theme="dark"] .service-week-card:hover {
   color: var(--warn);
   background: var(--warn-bg);
 }
-.svc-song-clear {
-  width: 24px;
-  height: 24px;
-  border: 0;
-  border-radius: calc(var(--r) - 2px);
-  background: transparent;
-  color: var(--ink-4);
-  cursor: pointer;
-  padding: 0;
-}
-.svc-song-clear:hover {
-  background: var(--ui-surface-field);
-  color: var(--ink);
-}
-.svc-song-clear svg {
-  width: var(--ui-icon-sm);
-  height: var(--ui-icon-sm);
-  stroke-width: var(--ui-icon-stroke);
-}
 .svc-edit-actions { display: flex; align-items: center; justify-content: flex-end; gap: 4px; opacity: .58; }
 .svc-edit-item:hover .svc-edit-actions, .svc-edit-item:focus-within .svc-edit-actions { opacity: 1; }
 .svc-edit-actions .icon-btn { width: 32px; height: 32px; touch-action: manipulation; }
@@ -6551,7 +6538,7 @@ textarea.svc-presenter-input-control--multiline {
 .svc-presenter-pin-toggle input:checked + .svc-presenter-pin-track::after {
   transform: translateX(12px);
 }
-.svc-presenter-pin-toggle:focus-within {
+.svc-presenter-pin-toggle:not(.svc-presenter-pin-button):focus-within {
   outline: 2px solid color-mix(in srgb, var(--accent) 64%, transparent);
   outline-offset: 2px;
 }
@@ -7168,21 +7155,10 @@ textarea.svc-presenter-input-control--multiline {
   white-space: nowrap;
 }
 
-.svc-input-status:empty { display: none; }
-
-.svc-input-status {
-  min-width: 5.5em;
-  font-size: 12px;
-  line-height: 1.4;
-  text-align: right;
-  color: var(--ink-3);
-}
-
-[data-input-status="error"] > .svc-board-subgroup-flow .svc-input-status,
-.svc-board-subgroup-flow[data-input-status="error"] .svc-input-status {
-  color: var(--danger);
-  font-weight: 700;
-}
+/* Status remains announced without consuming editor width. */
+.svc-input-status { min-width: 0; margin: 0; padding: 0; border: 0; }
+.svc-board-subgroup-commit[aria-busy="true"] { cursor: progress; }
+#servicePresenterControls .svc-board-subgroup-flow[data-input-status="error"] .svc-board-subgroup-commit { border-color: var(--danger); color: var(--danger); }
 .svc-board-subgroup-control-label {
   flex: 1 0 100%;
   grid-column: 1 / -1;
@@ -7331,10 +7307,6 @@ textarea.svc-presenter-input-control--multiline {
 .svc-board-subgroup-controls .svc-song-picker-hint,
 .svc-board-subgroup-controls .svc-song-picker-warning {
   font-size: var(--ui-label-size);
-}
-.svc-board-subgroup-controls .svc-song-clear {
-  flex: 0 0 24px;
-  height: 24px;
 }
 .svc-board-subgroup-controls .svc-presenter-input-field--song .svc-song-picker--linked {
   flex: 0 1 auto;
@@ -8683,7 +8655,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .svc-praise-input-mode-control { width:160px; flex:0 0 160px; max-width:160px; }
 .svc-board-subgroup-controls .svc-praise-input-mode-control > select { flex:1 1 auto; max-width:none; }
 .svc-board-subgroup-controls { container-type:inline-size; }
-.svc-board-subgroup-control-item:has(> .svc-presenter-input-field--song .svc-praise-input-mode-control) { display:grid; grid-template-columns:150px minmax(150px,1fr) minmax(130px,.7fr) minmax(120px,.7fr) auto minmax(150px,.8fr); gap:10px; align-items:center; }
+.svc-board-subgroup-control-item:has(> .svc-presenter-input-field--song .svc-praise-input-mode-control) { display:grid; grid-template-columns:150px minmax(220px,1fr) minmax(130px,.7fr) minmax(220px,1fr) auto minmax(150px,.8fr); gap:10px; align-items:center; }
 .svc-board-subgroup-control-item:has(> .svc-presenter-input-field--song .svc-praise-input-mode-control) > .svc-presenter-input-field--song > span { display:none; }
 .svc-board-subgroup-control-item .svc-praise-input-mode-control { grid-column:1; grid-row:var(--praise-first-row,1); width:100%; }
 .svc-board-subgroup-control-item:has(> .svc-presenter-input-field--song .svc-praise-input-mode-control) .svc-edit-title { grid-column:2; grid-row:var(--praise-first-row,1); width:100%; min-width:0; }
@@ -8698,13 +8670,13 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .svc-board-subgroup-controls select:not(.svc-song-version-select) { appearance:none; -webkit-appearance:none; padding-right:32px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23999' stroke-width='1.5'/%3E%3C/svg%3E") !important; background-repeat:no-repeat !important; background-position:right 12px center !important; }
 .svc-board-subgroup-control-item > .svc-presenter-input-field--assignee,
 .svc-board-subgroup-control-item > .svc-presenter-input-field--scripture { grid-template-columns:minmax(0,1fr); }
-@container (min-width:961px) {
-  .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control):not(:has(.svc-song-picker--linked)) { grid-template-columns:150px minmax(150px,1fr) minmax(120px,.7fr) auto minmax(150px,.8fr); }
+@container (min-width:1121px) {
+  .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control):not(:has(.svc-song-picker--linked)) { grid-template-columns:150px minmax(220px,1fr) minmax(220px,1fr) auto minmax(150px,.8fr); }
   .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control):not(:has(.svc-song-picker--linked)) .svc-form-hint.compact { grid-column:3; }
   .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control):not(:has(.svc-song-picker--linked)) .svc-edit-title-wrap > .svc-item-link { grid-column:4; }
   .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control):not(:has(.svc-song-picker--linked)) > .svc-presenter-input-field--assignee { grid-column:5; }
 }
-@container (max-width:960px) {
+@container (max-width:1120px) {
   .svc-board-subgroup-control-item:has(> .svc-presenter-input-field--song .svc-praise-input-mode-control) { grid-template-columns:160px minmax(0,1fr); }
   .svc-board-subgroup-control-item:has(> .svc-presenter-input-field--song .svc-praise-input-mode-control) .svc-song-picker--linked { grid-column:1; grid-row:var(--praise-second-row,2); }
   .svc-board-subgroup-control-item:has(> .svc-presenter-input-field--song .svc-praise-input-mode-control) .svc-edit-title-wrap > .svc-item-link { grid-column:2; grid-row:var(--praise-second-row,2); justify-self:start; }
@@ -8810,9 +8782,9 @@ body[data-module="praise"] .praise-forms-panel .form-meta { gap: 5px; }
 .praise-forms-panel .linked-version-title { box-shadow: none; }
 
 /* Song rows reserve space only for present controls. Expanded media stays below. */
-@container (min-width: 961px) {
+@container (min-width: 1121px) {
   .svc-board-subgroup-controls .svc-board-subgroup-control-item.svc-inline-song {
-    grid-template-columns: 130px minmax(180px, 1fr) auto 160px 160px max-content;
+    grid-template-columns: 130px minmax(220px, 1fr) auto 160px minmax(220px, 1fr) max-content;
   }
   .svc-board-subgroup-controls .svc-board-subgroup-control-item.svc-inline-song .svc-edit-title-wrap > .svc-item-link { grid-column: 3; }
   .svc-board-subgroup-controls .svc-board-subgroup-control-item.svc-inline-song .svc-song-picker--linked { grid-column: 4; }
@@ -8824,7 +8796,7 @@ body[data-module="praise"] .praise-forms-panel .form-meta { gap: 5px; }
     grid-column: 2 / -1; grid-row: 2;
   }
   .svc-board-subgroup-controls .svc-board-subgroup-control-item.svc-inline-song:not(:has(.svc-song-picker--linked)) {
-    grid-template-columns: 130px minmax(180px, 1fr) auto 160px max-content;
+    grid-template-columns: 130px minmax(220px, 1fr) auto minmax(220px, 1fr) max-content;
     column-gap: 10px;
   }
   .svc-board-subgroup-controls .svc-board-subgroup-control-item.svc-inline-song:not(:has(.svc-song-picker--linked)) .svc-form-hint.compact { grid-column: 4; }
@@ -8875,12 +8847,12 @@ html.ui-theme-switching:not(.presenter-output-document) *::after {
 .svc-presenter-side-panel .svc-presenter-window-controls { grid-column: 2; grid-template-columns: minmax(0, 1fr); gap: 0; }
 .svc-presenter-side-panel .svc-presenter-fullscreen { height: 35px; padding: 0 10px; gap: 5px; white-space: nowrap; }
 /* A single element's DB shortcut belongs to its heading, not an input column. */
-@container (min-width: 961px) {
-  .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link)) { grid-template-columns: 130px minmax(180px, 1fr) 160px 160px max-content; }
+@container (min-width: 1121px) {
+  .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link)) { grid-template-columns: 130px minmax(220px, 1fr) 160px minmax(220px, 1fr) max-content; }
   .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link)) .svc-song-picker--linked { grid-column: 3; }
   .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link)) .svc-form-hint.compact { grid-column: 4; }
   .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link)) > .svc-board-subgroup-flow { grid-column: 5; }
-  .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link, .svc-song-picker--linked)) { grid-template-columns: 130px minmax(180px, 1fr) 160px max-content; }
+  .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link, .svc-song-picker--linked)) { grid-template-columns: 130px minmax(220px, 1fr) minmax(220px, 1fr) max-content; }
   .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link, .svc-song-picker--linked)) .svc-form-hint.compact { grid-column: 3; }
   .svc-board-subgroup-controls .svc-inline-song:not(:has(.svc-item-link, .svc-song-picker--linked)) > .svc-board-subgroup-flow { grid-column: 4; }
 }
@@ -9328,7 +9300,7 @@ body:has(#servicePresenterControls[data-focus-view="true"]) .svc-presenter-live-
 .svc-focus-navigation, .svc-focus-audio { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
 .svc-focus-count { min-width: 60px; font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .svc-focus-count > span { color: var(--ink-3); font-size: 12px; font-weight: 500; }
-.svc-focus-transport .btn { min-height: 35px; padding-inline: 10px; border: 1px solid var(--line-2); border-radius: var(--r); }
+.svc-focus-transport .btn { height:35px; min-height:35px; padding:0 8px; border: 1px solid var(--line-2); border-radius: var(--r); }
 .svc-focus-transport .btn:disabled { opacity: .45; }
 .svc-focus-transport [data-focus-music-status] { flex-basis: 100%; color: var(--ink-3); font-size: 12px; margin-bottom: 5px; }
 .svc-focus-filmstrip-heading { border-top: 1px solid var(--line); padding-top: 15px; color: var(--ink-3); font-size: 12px; font-weight: 600; }
@@ -9355,6 +9327,7 @@ body:has(#servicePresenterControls[data-focus-view="true"]) .svc-presenter-live-
 /* Presenter secondary actions share one quiet surface; positions stay unchanged. */
 #servicePresenterControls .svc-reference-media-quick-add > summary,
 #servicePresenterControls .svc-board-subgroup-commit,
+#servicePresenterControls .svc-medley-unlink,
 .svc-presenter-toolbar .svc-presenter-help > summary,
 .svc-presenter-side-panel .svc-presenter-fullscreen,
 .svc-presenter-side-panel [data-presenter-action="detect-screens"],
@@ -9370,7 +9343,8 @@ body:has(#servicePresenterControls[data-focus-view="true"]) .svc-presenter-live-
   gap: 5px;
 }
 #servicePresenterControls .svc-reference-media-quick-add > summary,
-#servicePresenterControls .svc-board-subgroup-commit {
+#servicePresenterControls .svc-board-subgroup-commit,
+#servicePresenterControls .svc-medley-unlink {
   height: 30px;
   min-height: 30px;
   padding: 0 10px;
@@ -9378,6 +9352,7 @@ body:has(#servicePresenterControls[data-focus-view="true"]) .svc-presenter-live-
 .svc-presenter-side-panel [data-presenter-action="detect-screens"] { height: 35px; padding: 0 10px; }
 #servicePresenterControls .svc-reference-media-quick-add > summary:is(:hover, :focus-visible),
 #servicePresenterControls .svc-board-subgroup-commit:is(:hover, :focus-visible),
+#servicePresenterControls .svc-medley-unlink:is(:hover, :focus-visible),
 .svc-presenter-toolbar .svc-presenter-help > summary:is(:hover, :focus-visible),
 .svc-presenter-side-panel .svc-presenter-fullscreen:not(:disabled):hover,
 .svc-presenter-side-panel [data-presenter-action="detect-screens"]:hover,
@@ -9422,8 +9397,24 @@ body:has(#servicePresenterControls[data-focus-view="true"]) .right-sidebar { dis
 .svc-presenter-side-panel .svc-presenter-output-group :is(i, svg) { width: 16px; height: 16px; flex: 0 0 16px; stroke-width: var(--ui-icon-stroke); }
 .svc-presenter-side-panel .svc-presenter-output-group .svc-presenter-disabled-control { padding: 0; }
 .svc-presenter-side-panel .svc-presenter-output-group :is(button:not(:disabled), .svc-presenter-pin-button:not(.is-unavailable)):hover { background: var(--ui-surface-field); color: var(--ink-2); }
-.svc-presenter-side-panel .svc-presenter-pin-button:has(input:checked) { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
-.svc-presenter-side-panel .svc-presenter-pin-button:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* Shared window command states; checkbox state remains truthful to the pin toggle. */
+.svc-presenter-side-panel .svc-presenter-output-group .svc-presenter-window-button {
+  background: var(--ui-surface-field); color: var(--ink-2); cursor: pointer;
+}
+.svc-presenter-side-panel .svc-presenter-output-group .svc-presenter-window-button:not(:disabled):not(.is-unavailable):not(:has(input:checked)):hover {
+  background: var(--ui-surface-panel); border-color: var(--ink-3); color: var(--ink);
+}
+.svc-presenter-side-panel .svc-presenter-output-group .svc-presenter-window-button:has(input:checked),
+.svc-presenter-side-panel .svc-presenter-output-group .svc-presenter-window-button:has(input:checked):hover {
+  color: var(--accent); border-color: var(--accent); background: var(--accent-soft);
+}
+.svc-presenter-side-panel .svc-presenter-output-group .svc-presenter-window-button:is(:focus-visible, :has(input:focus-visible)) {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+.svc-presenter-side-panel .svc-presenter-output-group .svc-presenter-window-button:is(:disabled, .is-unavailable) {
+  color: var(--ink-4); background: transparent; border-color: var(--line);
+  opacity: .5; cursor: not-allowed;
+}
 
 .global-playback-actions { display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-top:5px; }
 .global-playback-actions > button { display:flex; align-items:center; justify-content:center; gap:5px; flex:1 0 60px; min-width:0; height:30px; padding:0 10px; font-weight:600; }
@@ -9454,7 +9445,7 @@ body:has(#servicePresenterControls[data-focus-view="true"]) .right-sidebar { dis
 .svc-board-subgroup-audio.has-audio > audio { order:2; flex:1 1 100%; width:100%; min-width:0; max-width:100%; height:40px; }
 .svc-board-subgroup-audio.has-audio > .svc-children-audio-hint { order:3; flex:1 0 100%; }
 .svc-board-subgroup-audio-actions > :is(button,label) { min-height:30px; white-space:nowrap; }
-.svc-focus-transport [data-focus-music] { height:30px; padding:0 10px; white-space:nowrap; }
+.svc-focus-transport .btn { gap:6px; white-space:nowrap; }
 .svc-focus-transport [data-focus-music="toggle"] { width:110px; flex-shrink:0; }
 
 /* Music adopts the same neutral fields and inset focus as controller editors. */
@@ -9479,7 +9470,7 @@ body[data-theme="dark"] .svc-board-subgroup-audio audio { color-scheme:dark; }
 body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
 
 /* Peer commands share a fixed icon slot; helper/preview artwork stays independent. */
-:is(.module-switcher, .topbar-actions, .svc-presenter-toolbar, .svc-presenter-side-panel) :is(button, summary, .svc-presenter-pin-toggle, .svc-presenter-screen-select) :is(i[data-lucide], svg.lucide),
+:is(.module-switcher, .topbar-actions, .svc-presenter-toolbar, .svc-presenter-side-panel, .svc-focus-transport) :is(button, summary, .svc-presenter-pin-toggle, .svc-presenter-screen-select) :is(i[data-lucide], svg.lucide),
 #servicePresenterControls .svc-board-subgroup-flow :is(button, summary, .svc-reference-media-upload, .svc-board-subgroup-audio-upload) :is(i[data-lucide], svg.lucide) {
   display: inline-block;
   box-sizing: border-box;
@@ -9648,3 +9639,52 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
 .editor-draft-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:10px; }
 .editor-draft-actions .secondary { border:1px solid var(--line); background:var(--ui-surface-field); }
 .editor-draft-actions .secondary:hover { border-color:var(--ink-3); }
+
+/* Controller-only warning: the output never shrinks below its readable floor. */
+.svc-slide-thumb-frame:has([data-presenter-fit-overflow="true"])::before {
+ content:"내용 넘침";position:absolute;right:5px;bottom:5px;z-index:3;
+ padding:5px 10px;border-radius:5px;background:var(--ui-surface-panel);color:var(--warn);
+ font-size:var(--ui-meta-size);font-weight:600;line-height:1.5;
+}
+.svc-presentation-controls { margin-block: .5rem; }
+.svc-presentation-controls[open] { display: grid; gap: .6rem; }
+.svc-presentation-controls > label { display: grid; gap: .3rem; }
+.svc-presentation-controls > .btn { width: fit-content; }
+
+/* Basic presenter keeps music and remote entry alongside output controls.
+   Focus view retains the global launchers because its right rail is hidden. */
+body:has(#servicePresenterControls[data-focus-view="false"]):has([data-presenter-right-sidebar]) .topbar-actions #remotePanelBtn,
+body:has(#servicePresenterControls[data-focus-view="false"]):has([data-presenter-right-sidebar]) .topbar-actions #globalPlaybackControls > .global-playback-trigger { display:none; }
+body:has(#servicePresenterControls[data-focus-view="false"]):has([data-presenter-right-sidebar]) .topbar-actions #globalPlaybackControls { margin:0; }
+.svc-presenter-output-group [data-presenter-remote] { grid-column:1; grid-row:3; }
+.svc-presenter-output-group [data-presenter-music-manager] { grid-column:2; grid-row:3; }
+
+/* Pairing code is available directly on either remote launcher. */
+#remotePanelBtn [data-remote-button-label] { display:none; }
+#remotePanelBtn[data-remote-pairing="true"] { width:auto; min-width:100px; padding:0 8px; gap:6px; }
+#remotePanelBtn[data-remote-pairing="true"] [data-remote-button-label] { display:inline; }
+[data-remote-button-label] { font-variant-numeric:tabular-nums; }
+
+/* One media popover shared by both presenter views. */
+.global-media-section + .global-media-section { border-top:1px solid var(--line); margin-top:15px; padding-top:15px; }
+.global-media-section h3 { margin:15px 0 10px; font-size:var(--ui-label-size); font-weight:var(--ui-label-weight); }
+.global-media-section + .global-media-section h3 { margin-top:0; }
+.global-media-section .global-playback-group { padding-top:0; min-width:0; }
+.global-media-section .global-playback-empty { padding-top:0; }
+.global-media-section > .global-playback-state { margin:5px 0 10px; }
+
+.praise-forms-panel .version-move-btn { width: 30px; height: 30px; }
+
+/* Version header tracks are shared, including optional review and type metadata. */
+.praise-forms-panel .version-compare-head { grid-template-rows: repeat(3, auto); }
+body[data-module="praise"] .praise-forms-panel .version-compare-head > .version-compare-title {
+  display: grid;
+  grid-row: span 3;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: subgrid;
+  align-items: start;
+}
+.praise-forms-panel .version-compare-head .version-title-main { align-content: start; }
+.praise-forms-panel .version-compare-head .version-title-actions { align-self: stretch; align-content: end; align-items: end; }
+/* Empty/loading recent lists do not reserve invisible destination cards. */
+.home-recent-list:has(> .home-module-detail:only-child) { grid-template-rows: auto; }

@@ -216,6 +216,18 @@ const HANGUL_INITIALS = ["ㄱ", "ㄲ", "ㄴ", "ㄷ", "ㄸ", "ㄹ", "ㅁ", "ㅂ",
 const CONTENT_MODULES = ["service", "presenter", "bulletin", "scripture", "praise", "operations", "calendar", "references", "manuals", "setlists"];
 const ROUTE_MODULES = ["home", ...CONTENT_MODULES];
 const SERVICE_FILTERS = ["all", "public", "ministry", "special"];
+const SERVICE_BROWSE_CATEGORIES = [
+  { key: "public", label: "공예배" },
+  { key: "ministry", label: "부서 예배" },
+  { key: "special", label: "기타 예배" },
+];
+function serviceBrowseCategory(filter = state.serviceFilter) {
+  return SERVICE_BROWSE_CATEGORIES.find(category => category.key === filter) || SERVICE_BROWSE_CATEGORIES[0];
+}
+function serviceBrowseGroup(typeId) {
+  const group = serviceTypeGroupKey(worshipAppServiceTypeId(typeId));
+  return group === "other" ? "special" : group;
+}
 const PRAISE_LIST_FILTERS = [
   ["all", "전체"],
   ["empty", "빈 곡"],
@@ -1244,7 +1256,7 @@ function bindStaticEvents() {
   document.getElementById("globalPlaybackControls")?.addEventListener("toggle", (event) => {
     if (event.target.id !== "globalPlaybackPanel" || event.newState !== "closed") return;
     if (document.activeElement === document.body || event.target.contains(document.activeElement)) {
-      document.querySelector(".global-playback-trigger")?.focus({ preventScroll: true });
+      visibleGlobalPlaybackTrigger()?.focus({ preventScroll: true });
     }
   }, true);
   document.getElementById("globalPlaybackControls")?.addEventListener("keydown", (event) => {
@@ -1253,7 +1265,7 @@ function bindStaticEvents() {
     event.preventDefault();
     event.stopPropagation();
     panel.hidePopover();
-    document.querySelector(".global-playback-trigger")?.focus({ preventScroll: true });
+    visibleGlobalPlaybackTrigger()?.focus({ preventScroll: true });
   });
   refs.themeBtn.addEventListener("click", toggleTheme);
   document.getElementById("returnLiveServiceBtn")?.addEventListener("click", returnToLiveService);
@@ -1435,7 +1447,7 @@ function bindStaticEvents() {
     }
 
     if (event.target.closest("[data-service-list]")) {
-      openServiceListPanel();
+      openServiceListPanel(event.target.closest("[data-service-list]").dataset.serviceList);
       return;
     }
 
@@ -4779,7 +4791,7 @@ function serviceItemSlotKey(item = {}, memo = null) {
 
 function groupWorshipElements(sections = [], elements = []) {
   const sectionById = Object.fromEntries(sections.map((section) => [section.id, section]));
-  return elements.reduce((grouped, element) => {
+  const grouped = elements.reduce((grouped, element) => {
     const section = sectionById[element.section_id];
     const serviceId = section?.service_id;
     if (!serviceId) return grouped;
@@ -4830,7 +4842,8 @@ function groupWorshipElements(sections = [], elements = []) {
       || config.disable_form_preset,
     );
     const formHint = formPresetDisabled ? "" : serviceFormHintFromConfig(config);
-    const formPreset = formPresetDisabled ? null : normalizeServiceFormPreset(config.formPreset || config.form_preset, formHint);
+    const storedFormPreset = normalizeServiceFormPreset(config.formPreset || config.form_preset, formHint);
+    const formPreset = formPresetDisabled && !storedFormPreset?.titleSequence ? null : storedFormPreset;
     const formPresetRules = formPresetDisabled ? [] : normalizeServiceFormPresetRules(config.formPresetRules || config.form_preset_rules);
     const scriptureReference = serviceElementScriptureReference(element, section, sourceRef, config);
     const scriptureReferences = serviceElementScriptureReferences(element, section, sourceRef, config);
@@ -4891,6 +4904,7 @@ function groupWorshipElements(sections = [], elements = []) {
         asset,
         audioAsset,
         audioTiming: normalizeServiceAudioTiming(config.audioTiming),
+        presentation: normalizeServicePresentation(config.presentation),
         playback,
         presenterRole,
         connectedPraise,
@@ -4914,6 +4928,10 @@ function groupWorshipElements(sections = [], elements = []) {
     }));
     return grouped;
   }, {});
+  // RPC arrays have no ordering guarantee. Every editor/hydration consumer must
+  // start from persisted section/element order before compacting editor ordinals.
+  Object.values(grouped).forEach(items => items.sort((a, b) => a.sort_order - b.sort_order));
+  return grouped;
 }
 
 function serviceElementManualSlides(element = {}, config = {}, context = {}) {
@@ -7644,6 +7662,8 @@ async function saveWorshipServiceElementPatch(service, itemId) {
     unchanged && savedItem && item.id === targetItemId
       ? {
         ...savedItem,
+        // Non-template services sort directly by this editor ordinal.
+        sort_order: item.sort_order,
         // A single receipt uses compact persisted ordinals, while sibling drafts
         // can still use spaced editor ordinals. Keep one ordering scale until
         // the whole collection is reloaded; otherwise projection moves this row.
@@ -8224,7 +8244,7 @@ async function saveSongVersions(song, { detached = false } = {}) {
     ...(state.songVersionPraiseTypesSupported ? { praise_types: canonicalPraiseTypes(version.praise_types) } : {}),
     lyric_signature: versionLyricSignature(version),
     source_count: Number(version.source_count) > 0 ? Number(version.source_count) : 1,
-    is_primary: Boolean(version.is_primary) || index === 0,
+    is_primary: Boolean(version.is_primary),
   }));
 
   const existingVersionIds = existingVersions.map((version) => version.id);
@@ -8854,6 +8874,14 @@ function handleDetailClick(event) {
   const createSongButton = event.target.closest("[data-create-song]");
   if (createSongButton) {
     createPraiseSong();
+    return;
+  }
+
+  const moveVersionButton = event.target.closest("[data-move-version]");
+  if (moveVersionButton) {
+    event.preventDefault();
+    event.stopPropagation();
+    movePraiseVersion(moveVersionButton.dataset.moveVersion, Number(moveVersionButton.dataset.direction));
     return;
   }
 
@@ -9502,6 +9530,8 @@ function handleDetailSubmit(event) {
 }
 
 function handleDetailChange(event) {
+  const backgroundVideoFile = event.target.closest("[data-praise-background-file]");
+  if (backgroundVideoFile) { void uploadPresenterPraiseBackground(backgroundVideoFile); return; }
   const fadeStop = event.target.closest("[data-service-music-fade-stop]");
   if (fadeStop) {
     state.serviceMusic.fadeStopEnabled = fadeStop.checked;
@@ -9981,7 +10011,7 @@ function updateSongMetadataField(field) {
   const key = field.dataset.songMetaField;
   const metadata = normalizeSongMetadata(song.metadata);
   if (key === "presenter_form") {
-    metadata[key] = normalizeServiceFormPreset(field.value, field.value, "song-default");
+    metadata[key] = normalizeServiceFormPreset({ forms: normalizeServiceFormPresetForms(field.value), hint: field.value, titleSequence: metadata[key]?.titleSequence }, field.value, "song-default");
   } else {
     metadata[key] = field.value;
   }
@@ -10103,6 +10133,32 @@ async function assertPraiseVersionsUnused(versionIds) {
     .select("id").in("song_version_id", ids).limit(1);
   if (error) throw new Error("버전 사용 여부를 확인하지 못했습니다. 다시 시도해 주세요.");
   if (data?.length) throw new Error("예배에 연결된 버전은 삭제할 수 없습니다. 예배의 버전 연결을 먼저 변경해 주세요.");
+}
+
+function movePraiseVersion(versionId, direction) {
+  const song = getSelectedSong();
+  if (!song || state.saving || praiseVersionDeletePending || ![-1, 1].includes(direction)) return;
+  const index = song.versions.findIndex(version => version.id === versionId);
+  const target = index + direction;
+  if (index < 0 || target < 0 || target >= song.versions.length) return;
+  writeFormsToSelectedVersion();
+  // Reuse this song's order slots; never renumber another linked source song.
+  const slots = song.versions.map(version => Number(version.version_order) || 0);
+  let next = Math.max(0, ...slots);
+  const used = new Set();
+  for (let i = 0; i < slots.length; i++) {
+    if (slots[i] <= 0 || used.has(slots[i])) slots[i] = ++next;
+    used.add(slots[i]);
+  }
+  slots.sort((a, b) => a - b);
+  [song.versions[index], song.versions[target]] = [song.versions[target], song.versions[index]];
+  song.versions.forEach((version, i) => { version.version_order = slots[i]; });
+  state.dirty.song = state.dirty.forms = true;
+  renderDetail();
+  updateSaveState();
+  const button = refs.detailPane.querySelector(`[data-move-version="${CSS.escape(versionId)}"][data-direction="${direction}"]:not(:disabled)`)
+    || refs.detailPane.querySelector(`[data-move-version="${CSS.escape(versionId)}"]:not(:disabled)`);
+  button?.focus({ preventScroll: true });
 }
 
 let praiseVersionDeletePending = false;
@@ -10512,6 +10568,8 @@ function setServiceInputFeedback(editor, status) {
   const button = actions.querySelector("[data-service-item-commit]");
   if (button) {
     const busy = status === "saving";
+    button.title = labels[status] || "저장";
+    button.setAttribute("aria-label", busy ? "저장 중" : status === "error" ? "저장 재시도" : "저장");
     if (button.disabled !== busy) button.disabled = busy;
     if (button.getAttribute("aria-busy") !== String(busy)) button.setAttribute("aria-busy", String(busy));
   }
@@ -11021,6 +11079,7 @@ function emptyServiceItemMemo(rawNote = "") {
     asset: { kind: "", name: "", url: "" },
     audioAsset: { kind: "", name: "", url: "" },
     playback: null,
+    presentation: null,
     presenterRole: "",
     connectedPraise: null,
     mediaPlacement: null,
@@ -11323,6 +11382,7 @@ function parseServiceItemMemo(value) {
         asset,
         audioAsset,
         audioTiming: normalizeServiceAudioTiming(parsed.audioTiming),
+        presentation: normalizeServicePresentation(parsed.presentation),
         playback: normalizeServicePlaybackConfig(parsed.playback, elementType),
         presenterRole,
         connectedPraise,
@@ -11570,6 +11630,7 @@ function serializeServiceItemMemo(value = {}) {
   const asset = normalizeServiceAsset(value.asset);
   const audioAsset = normalizeServiceAudioAsset(value.audioAsset || value.audio_asset || value.audio || value.mr);
   const audioTiming = normalizeServiceAudioTiming(value.audioTiming);
+  const presentation = normalizeServicePresentation(value.presentation);
   const playback = normalizeServicePlaybackConfig(value.playback, elementType);
   const presenterRole = normalizeServicePresenterRole(value.presenterRole || value.presenter_role || value.role);
   const connectedPraise = normalizeServiceConnectedPraise(value.connectedPraise || value.connected_praise);
@@ -11580,7 +11641,7 @@ function serializeServiceItemMemo(value = {}) {
   const templateSuppressed = Boolean(value.templateSuppressed || value.template_suppressed);
   const defaultAssetKind = serviceAssetKindForElementType(elementType);
   if (!asset.kind && defaultAssetKind && hasServiceAsset(asset)) asset.kind = defaultAssetKind;
-  if (!normalizeAnnouncementRegions(value.announcementRegions) && !slides.length && !scriptureReference && !scriptureReferences.length && !scriptureTranslationId && !scriptureReferencePayloads.length && !manualScripture && !hasServiceIntroSlide(introSlide) && !formHint && !formPreset && !formPresetDisabled && !formPresetRules.length && !templateKey && !templateVariant && !elementType && !outputMode && !inputMode && !textHighlights.length && !hasServiceAsset(asset) && !hasServiceAsset(audioAsset) && !hasServicePlaybackConfig(playback) && !presenterRole && !connectedPraise && !mediaPlacement && !benedictionReplacement && !offeringVariants && !hiddenInPresentation && !templateSuppressed) return note;
+  if (!normalizeAnnouncementRegions(value.announcementRegions) && !slides.length && !scriptureReference && !scriptureReferences.length && !scriptureTranslationId && !scriptureReferencePayloads.length && !manualScripture && !hasServiceIntroSlide(introSlide) && !formHint && !formPreset && !formPresetDisabled && !formPresetRules.length && !templateKey && !templateVariant && !elementType && !outputMode && !inputMode && !textHighlights.length && !hasServiceAsset(asset) && !hasServiceAsset(audioAsset) && !hasServicePlaybackConfig(playback) && !presenterRole && !connectedPraise && !presentation && !mediaPlacement && !benedictionReplacement && !offeringVariants && !hiddenInPresentation && !templateSuppressed) return note;
   const payload = { note };
   if(normalizeAnnouncementRegions(value.announcementRegions))payload.announcementRegions=normalizeAnnouncementRegions(value.announcementRegions);
   if (scriptureReference) payload.scriptureReference = scriptureReference;
@@ -11610,6 +11671,7 @@ function serializeServiceItemMemo(value = {}) {
   if (hasServiceAsset(asset)) payload.asset = asset;
   if (hasServiceAsset(audioAsset)) payload.audioAsset = audioAsset;
   if (audioTiming) payload.audioTiming = audioTiming;
+  if (presentation) payload.presentation = presentation;
   if (hasServicePlaybackConfig(playback)) payload.playback = playback;
   if (slides.length) payload.slides = slides;
   return JSON.stringify(payload);
@@ -12624,21 +12686,6 @@ function selectServiceSongForItem(index, songId) {
   saveCommittedServiceItem(index, serviceId);
 }
 
-function clearServiceSongForItem(index) {
-  const serviceId = state.selectedServiceId;
-  const items = getServiceItems(serviceId);
-  const item = items[index];
-  if (!serviceId || !item) return;
-  item.song_id = null;
-  item.version_id = null;
-  item.song_version_id = null;
-  state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(items);
-  state.dirty.service = true;
-  refreshPresenterForService(serviceId);
-  renderCurrentServiceModuleDetail();
-  updateSaveState();
-}
-
 function getActiveServiceTypeId() {
   return state.services.find((service) => service.id === state.selectedServiceId)?.type_id
     || state.selectedServiceTypeId
@@ -12657,6 +12704,18 @@ function updateServiceDefaultItemField(field) {
   if (key === "label") items[index].raw_title = normalizeServiceItemRawTitle(items[index].label, items[index].raw_title);
   setServiceDefaultItems(typeId, normalizeServiceDefaultItemsInCurrentOrder(items));
   refreshPresenterForServiceType(typeId);
+}
+
+// One deletion intent for every editor and service type. The persisted marker
+// also suppresses template regeneration; keep its existing storage field.
+function markServiceItemDeleted(item, serviceId) {
+  if (!item?.id || !serviceId) return;
+  state.templateElementSuppressions.set(item.id, {
+    ...item,
+    service_id: serviceId,
+    memo: serializeServiceItemMemo({ ...parseServiceItemMemo(item.memo), templateSuppressed: true }),
+    _worshipElementTemplateModified: true,
+  });
 }
 
 function runServiceItemAction(action, index, label = "", title = "") {
@@ -12706,16 +12765,7 @@ function runServiceItemActionUnscoped(action, index, label = "", title = "") {
     nextSelectedIndex = index + 1;
   }
   if (action === "delete" && item) {
-    // Match section-editor deletion: record intent before removing the draft,
-    // otherwise content-preservation restores the deleted row on full save.
-    if (item.id && TEMPLATE_PROJECTED_SERVICE_TYPES.has(worshipAppServiceTypeId(typeId))) {
-      state.templateElementSuppressions.set(item.id, {
-        ...item,
-        service_id: serviceId,
-        memo: serializeServiceItemMemo({ ...parseServiceItemMemo(item.memo), templateSuppressed: true }),
-        _worshipElementTemplateModified: true,
-      });
-    }
+    markServiceItemDeleted(item, serviceId);
     markServiceItemSharedContentDirty(item, state.services.find((service) => service.id === serviceId));
     items.splice(index, 1);
     nextSelectedIndex = Math.min(index, items.length - 1);
@@ -12766,14 +12816,7 @@ function runPresenterSectionItemAction(action, index) {
   if (action === "delete" && position >= 0) {
     const item = items[index];
     if (!confirmPresenterSectionItemDeletion(item, service)) return;
-    if (item?.id && TEMPLATE_PROJECTED_SERVICE_TYPES.has(worshipAppServiceTypeId(service.type_id))) {
-      state.templateElementSuppressions.set(item.id, {
-        ...item,
-        service_id: serviceId,
-        memo: serializeServiceItemMemo({ ...parseServiceItemMemo(item.memo), templateSuppressed: true }),
-        _worshipElementTemplateModified: true,
-      });
-    }
+    markServiceItemDeleted(item, serviceId);
     markServiceItemSharedContentDirty(item, service);
     items.splice(index, 1);
   }
@@ -14331,7 +14374,7 @@ function currentPageTabTitle() {
     const service = state.services.find((svc) => svc.id === state.selectedServiceId);
     if (service) return serviceDisplayTypeName(service);
     if (state.selectedServiceTypeId === SERVICE_WEEK_PANEL_ID) return SERVICE_WEEK_PANEL_TITLE;
-    if (state.selectedServiceTypeId === SERVICE_LIST_PANEL_ID) return SERVICE_LIST_PANEL_TITLE;
+    if (state.selectedServiceTypeId === SERVICE_LIST_PANEL_ID) return serviceBrowseCategory().label;
     if (state.selectedServiceTypeId === SERVICE_TEMPLATES_PANEL_ID) return SERVICE_TEMPLATES_PANEL_TITLE;
     if (state.selectedServiceTypeId === SERVICE_SETLIST_ARCHIVE_PANEL_ID) return SERVICE_SETLIST_ARCHIVE_PANEL_TITLE;
     return "예배";
@@ -14416,7 +14459,7 @@ function pageTabTitleForSnapshot(snapshot = {}) {
     const service = state.services.find((svc) => svc.id === snapshot.selectedServiceId);
     if (service) return serviceDisplayTypeName(service);
     if (snapshot.selectedServiceTypeId === SERVICE_WEEK_PANEL_ID) return SERVICE_WEEK_PANEL_TITLE;
-    if (snapshot.selectedServiceTypeId === SERVICE_LIST_PANEL_ID) return SERVICE_LIST_PANEL_TITLE;
+    if (snapshot.selectedServiceTypeId === SERVICE_LIST_PANEL_ID) return serviceBrowseCategory(snapshot.serviceFilter).label;
     if (snapshot.selectedServiceTypeId === SERVICE_TEMPLATES_PANEL_ID) return SERVICE_TEMPLATES_PANEL_TITLE;
     if (snapshot.selectedServiceTypeId === SERVICE_SETLIST_ARCHIVE_PANEL_ID) return SERVICE_SETLIST_ARCHIVE_PANEL_TITLE;
     return "예배";
@@ -16220,6 +16263,15 @@ function renderHomeDetail() {
   renderHomeStart();
 }
 
+function homeBibleEditionNames(rows) {
+  return [...rows].sort(sortBibleTranslations).map(row => {
+    const name = String(row.name || row.label || row.id || "");
+    if (/^(King James Version(?: \(CrossWire 1769\))?|KJV)$/i.test(name)) return "KJV";
+    if (/^(American Standard Version|ASV)$/i.test(name)) return "ASV";
+    return name;
+  }).filter(Boolean);
+}
+
 async function loadHomeOverviewStats({ force = false } = {}) {
   if (!canUseClientData() || typeof state.client?.from !== "function") return;
   const client = state.client;
@@ -16235,7 +16287,7 @@ async function loadHomeOverviewStats({ force = false } = {}) {
   stats.promise = (async () => {
     const results = await Promise.allSettled([
       client.from("mindex_songs").select("id", { count:"exact", head:true }).abortSignal(abort.signal),
-      client.from("mindex_bible_translations").select("id,name,canonical_source:metadata->canonical_source").eq("is_active", true).abortSignal(abort.signal),
+      client.from("mindex_bible_translations").select("id,name,language,canonical_source:metadata->canonical_source").eq("is_active", true).abortSignal(abort.signal),
     ]);
     if (state.client !== client || homeOverviewStats !== stats) return;
     const songs = results[0];
@@ -16246,7 +16298,7 @@ async function loadHomeOverviewStats({ force = false } = {}) {
     if (!stats.errors.editions) {
       const rows = editions.value.data.filter(row => row.canonical_source);
       stats.editions = rows.length;
-      stats.names = rows.map(row => row.name).filter(Boolean);
+      stats.names = homeBibleEditionNames(rows);
     }
   })().catch(() => { stats.errors = { songs:true, editions:true }; }).finally(() => {
     clearTimeout(timer);
@@ -16262,7 +16314,7 @@ function renderHomeStart() {
   const stats = homeOverviewStats?.client === state.client ? homeOverviewStats : null;
   const songCount = stats?.songs ?? (songCatalogLoaded ? state.songs.length : null);
   const editionCount = stats?.editions ?? (state.bibleTranslations.length ? state.bibleTranslations.length : null);
-  const editionNames = stats?.editions != null ? stats.names : state.bibleTranslations.map(row => row.name || row.label || row.id);
+  const editionNames = stats?.editions != null ? stats.names : homeBibleEditionNames(state.bibleTranslations);
   const week = recentServiceWeeks(now)[0];
   const servicesReady = state.serviceTypes.length > 0 && !state.serviceError;
   const services = state.services.filter(service => !service._expected && !serviceIsNoGathering(service));
@@ -17817,6 +17869,11 @@ function renderVersionTitleContent(song, version, forms, options = {}) {
     <div class="version-title-actions">
       ${active ? renderVersionPraiseTypeTags(version) : ""}
       <div class="version-edit-actions" role="group" aria-label="버전 관리">
+      ${[-1, 1].map(direction => {
+        const index = song.versions.findIndex(item => item.id === version.id);
+        const label = `${versionName} 버전 ${direction < 0 ? "앞으로" : "뒤로"} 이동`;
+        return `<button class="icon-btn version-move-btn" type="button" data-move-version="${escapeAttr(version.id)}" data-direction="${direction}" aria-label="${escapeAttr(label)}" title="${escapeAttr(label)}" ${state.saving || index + direction < 0 || index + direction >= song.versions.length ? "disabled" : ""}><i data-lucide="${direction < 0 ? "arrow-left" : "arrow-right"}"></i></button>`;
+      }).join("")}
       ${renderCopyVersionButton(version, forms)}
       ${renderAddVersionButton(version?.id)}
       <button class="version-delete-btn" type="button" data-delete-version="${escapeAttr(version?.id || "")}" aria-label="${escapeAttr(versionEditableName(song, version))} 버전 삭제" title="${song.versions.length <= 1 ? "마지막 버전은 삭제할 수 없습니다" : "버전 삭제"}" ${song.versions.length <= 1 ? "disabled" : ""}><i data-lucide="trash-2"></i></button>
@@ -19057,7 +19114,7 @@ function normalizeSongVersions(song, versions) {
     version_label: version.version_label || null,
     raw_section_name: version.raw_section_name || null,
     hymn_no: version.hymn_no || null,
-    is_primary: Boolean(version.is_primary) || index === 0,
+    is_primary: Boolean(version.is_primary),
     metadata: normalizeSongMetadata(version.metadata),
     forms: normalizeForms(Array.isArray(version.forms) ? version.forms : []),
     praise_types: normalizePraiseTypes(version.praise_types),
@@ -19079,7 +19136,7 @@ function normalizeRelationalVersion(row, index) {
     version_label: row.version_label || null,
     raw_section_name: row.raw_section_name || null,
     hymn_no: row.hymn_no || null,
-    is_primary: Boolean(row.is_primary) || index === 0,
+    is_primary: Boolean(row.is_primary),
     praise_types: normalizePraiseTypes(row.praise_types),
     source_song_id: row.source_song_id || null,
     canonical_song_id: row.canonical_song_id || null,
@@ -19178,7 +19235,7 @@ function serializeSongMemo(song, options = {}) {
           output_title: String(version.output_title || "").trim(),
           raw_section_name: version.raw_section_name || null,
           hymn_no: version.hymn_no || null,
-          is_primary: Boolean(version.is_primary) || index === 0,
+          is_primary: Boolean(version.is_primary),
           ...(version.praise_types?.length ? { praise_types: version.praise_types } : {}),
           ...(Object.keys(versionMetadata).length ? { metadata: versionMetadata } : {}),
           forms: (version.forms || []).map((form, formIndex) => ({
@@ -22000,7 +22057,10 @@ function recoverAllGenerationsOfferingItems(service, items = []) {
 function projectWorshipServiceItemsFromTemplate(service, items = []) {
   const appTypeId = worshipAppServiceTypeId(service?.type_id);
   if (!TEMPLATE_PROJECTED_SERVICE_TYPES.has(appTypeId)) {
-    return normalizeServiceItemsForTemplateHierarchy(service, items);
+    // Preserve the live collection/item identities when there is no deletion.
+    // Audio/timing editors can retain references while applying a draft.
+    return items.some(isTemplateSuppressedServiceItem)
+      ? items.filter(item => !isTemplateSuppressedServiceItem(item)) : items;
   }
   const sourceItems = mergeMonthlyCorporatePrayerItems(mergeRememberedTemplateSuppressionItems(service?.id, recoverAllGenerationsOfferingItems(service, items)));
 
@@ -22481,7 +22541,7 @@ function mergeTemplateProjectionMemo(templateMemo = "", existingMemo = "") {
     componentType: template.componentType || template.elementType || existing.componentType,
     outputMode: template.outputMode || existing.outputMode,
     formHint: formPresetDisabled ? "" : template.formHint || existing.formHint,
-    formPreset: formPresetDisabled ? null : template.formPreset || existing.formPreset,
+    formPreset: formPresetDisabled ? (existing.formPreset?.titleSequence ? existing.formPreset : null) : template.formPreset || existing.formPreset,
     formPresetDisabled,
     formPresetRules: formPresetDisabled ? [] : template.formPresetRules.length ? template.formPresetRules : existing.formPresetRules,
     textHighlights: template.textHighlights.length ? template.textHighlights : existing.textHighlights,
@@ -23541,8 +23601,9 @@ function serviceItemEffectiveFormHint(item = {}) {
   if (parsed.formPresetDisabled) return "";
   const song = serviceItemLinkedSong(item);
   const version = serviceItemLinkedVersion(item, song);
-  return serviceFormPresetSummary(presenterServiceItemFormPreset(version || {}, item, song, { includePlaybackFallback: false }))
-    || parsed.formHint;
+  return serviceFormPresetSummary(presenterServiceItemFormPreset(version || {}, item, song))
+    || parsed.formHint
+    || "Title";
 }
 
 function serviceFormPresetSummary(preset) {
@@ -23561,7 +23622,7 @@ function renderServiceFormHintInput(item, index, options = {}) {
       data-service-id="${escapeAttr(item.service_id || options.serviceId || state.selectedServiceId || "")}"
       data-service-item-index="${index}"
       value="${escapeAttr(serviceItemEffectiveFormHint(item))}"
-      placeholder="${escapeAttr(options.placeholder || "송폼/범위")}"
+      placeholder="${escapeAttr(options.placeholder || "송폼 · Title-V1-C")}"
       aria-label="섹션 송폼/범위"
     />`;
 }
@@ -23585,7 +23646,7 @@ function withServiceItemsScope(callback) {
 function getServiceItems(serviceId) {
   if (!serviceId) return [];
   const service = state.services.find((svc) => svc.id === serviceId);
-  if (!service || !TEMPLATE_PROJECTED_SERVICE_TYPES.has(worshipAppServiceTypeId(service.type_id))) {
+  if (!service) {
     return state.serviceItems[serviceId] || [];
   }
   if (serviceItemsScopeDepth) {
@@ -24009,10 +24070,13 @@ function renderServiceList() {
       <span>${escapeHtml(SERVICE_WEEK_PANEL_TITLE)}</span>
       <small>${getServiceDashboardServices().length}</small>
     </button>
-    <button class="service-type-row${state.selectedServiceTypeId === SERVICE_LIST_PANEL_ID && !state.selectedServiceId ? " active" : ""}" type="button" data-service-list>
-      <span>${escapeHtml(SERVICE_LIST_PANEL_TITLE)}</span>
-      <small>${state.services.length}</small>
-    </button>
+    ${SERVICE_BROWSE_CATEGORIES.map(category => `
+      <button class="service-type-row${state.selectedServiceTypeId === SERVICE_LIST_PANEL_ID && !state.selectedServiceId && serviceBrowseCategory().key === category.key ? " active" : ""}" type="button" data-service-list="${category.key}">
+        <span>${category.label}</span>
+        <small>${state.services.filter(service => serviceBrowseGroup(service.type_id) === category.key).length}</small>
+      </button>
+    `).join("")}
+
   `;
 
   refs.songList.innerHTML = `
@@ -25265,16 +25329,13 @@ function worshipElementTypeLabel(type) {
 }
 
 function renderServiceListDetail() {
-  const types = getFilteredServiceTypes();
+  const category = serviceBrowseCategory();
+  const types = getFilteredServiceTypes().filter(type => serviceBrowseGroup(type.id) === category.key);
   const q = normalizeSearchValue(state.search);
-  const groups = ["public", "ministry", "special", "other"]
-    .map((key) => ({
-      key,
-      types: serviceListTypeEntriesForGroup(types.filter((type) => serviceTypeGroupKey(type.id) === key), q),
-    }))
-    .filter((group) => group.types.length);
+  const groups = [{ key: category.key, types: serviceListTypeEntriesForGroup(types, q) }]
+    .filter(group => group.types.length);
   const count = groups.reduce((total, group) => total + group.types.reduce((sum, entry) => sum + entry.services.length, 0), 0);
-  const title = q ? "예배 검색 결과" : SERVICE_LIST_PANEL_TITLE;
+  const title = q ? "예배 검색 결과" : category.label;
   refs.detailPane.innerHTML = `
     <div class="service-date-list service-date-list--all">
       <div class="service-section-head">
@@ -25289,7 +25350,7 @@ function renderServiceListDetail() {
       <div class="service-list-groups">
         ${groups.map((group) => `
           <section class="service-list-group">
-            <h3>${escapeHtml(serviceTypeGroupLabel(group.key))}</h3>
+            <h3>${escapeHtml(category.label)}</h3>
             <div class="service-list-type-stack">
               ${group.types.map((entry) => renderServiceListTypeBlock(entry.type, entry.services, q, entry)).join("")}
             </div>
@@ -25840,10 +25901,10 @@ function serviceSourceItemLines(item = {}, service = null, memo = parseServiceIt
   const asset = normalizeServiceAsset(memo.asset);
   const audio = normalizeServiceAudioAsset(memo.audioAsset || memo.audio_asset);
   return serializePortableServiceSourceItem({
-    label, value, elementType, inputMode, outputMode, formHint: memo.formHint,
+    label, value, elementType, inputMode, outputMode, formHint: memo.formHint, titleSequence: memo.formPreset?.titleSequence,
     songTitle: song?.title, songId: item.song_id, versionId: item.version_id || item.song_version_id,
     assignee, hasTranslation: Boolean(translation), translationLabel, translationId, sermonReference,
-    lyrics, slides: memo.slides, manualScripture, manualTranslation, asset, audio, audioTiming:memo.audioTiming,
+    lyrics, slides: memo.slides, manualScripture, manualTranslation, asset, audio, audioTiming:memo.audioTiming, presentation:memo.presentation,
     announcementRegions: isAnnouncementTextInputItem(item) || memo.announcementRegions ? serviceAnnouncementRegions(item, memo) : null,
   });
 }
@@ -25906,12 +25967,7 @@ function suppressOmittedEmptySourcePraiseItems(service, candidates, usedIndexes)
   const removedIds = new Set();
   omitted.forEach(({ item }) => {
     if (!item.id) return;
-    state.templateElementSuppressions.set(item.id, {
-      ...item,
-      service_id: service.id,
-      memo: serializeServiceItemMemo({ ...parseServiceItemMemo(item.memo), templateSuppressed: true }),
-      _worshipElementTemplateModified: true,
-    });
+    markServiceItemDeleted(item, service.id);
     removedIds.add(item.id);
   });
   if (removedIds.size) {
@@ -26048,6 +26104,7 @@ function ensurePortableSourceItems(service, records = []) {
       inputMode: normalizeServiceInputMode(record.inputMode || ""),
     };
     if (record.formHint) memo.formHint = normalizeServiceFormHint(record.formHint);
+    if (record.titleSequence) memo.formPreset = normalizeServiceFormPreset({ forms: normalizeServiceFormPresetForms(record.formHint), titleSequence: true });
     const sectionKey = `source-${compactSearchValue(record.sectionTitle || "section").replace(/[^a-z0-9가-힣]+/g, "-") || "section"}`;
     const sectionPeer = items.find(item => compactSearchValue(serviceSourceSectionTitle(item)) === compactSearchValue(record.sectionTitle));
     // Place new source records beside their source neighbours, retaining section identity.
@@ -26107,6 +26164,12 @@ function applyServiceSourceRecord(serviceId, index, record = {}) {
   if (!item) return false;
   if (record.elementType) updateServiceItemField(serviceSourceVirtualField(serviceId, index, "element_type", record.elementType), { deferPresenterRefresh: true });
   if (record.inputMode) updateServiceItemField(serviceSourceVirtualField(serviceId, index, "input_mode", record.inputMode), { deferPresenterRefresh: true });
+  if (record.titleSequence) {
+    item = getServiceItems(serviceId)[index];
+    const memo = parseServiceItemMemo(item.memo);
+    memo.formPreset = { ...memo.formPreset, titleSequence: true };
+    item.memo = serializeServiceItemMemo(memo);
+  }
   if (Object.hasOwn(record, "formHint")) updateServiceItemField(serviceSourceVirtualField(serviceId, index, "form_hint", record.formHint), { deferPresenterRefresh: true });
   // Updates can replace normalized items; classify using the restored type/mode.
   item = getServiceItems(serviceId)[index];
@@ -26173,6 +26236,11 @@ function applyServiceSourceRecord(serviceId, index, record = {}) {
       item.raw_title || record.value || "",
       record.manualTranslationLabel || record.translationLabel || "",
     );
+    item.memo = serializeServiceItemMemo(nextMemo);
+  }
+  if (record.hasPresentation) {
+    const nextMemo = parseServiceItemMemo(item.memo);
+    nextMemo.presentation = normalizeServicePresentation(record.presentation);
     item.memo = serializeServiceItemMemo(nextMemo);
   }
   if (record.hasAudioTiming) {
@@ -26846,7 +26914,6 @@ function renderServiceSongPicker(item, index, model = serviceItemEditorModel(ite
       <div class="svc-song-picker svc-song-picker--linked">
         ${versionPicker}
         ${typeWarning}
-        <button class="svc-song-clear icon-btn" type="button" data-service-song-clear="${index}" aria-label="곡 연결 해제" title="곡 연결 해제"><i data-lucide="x"></i></button>
       </div>`;
   }
   // Keep the preview replacement target without floating text or layout space.
@@ -27231,8 +27298,9 @@ function renderServiceScriptureLinkControl(item) {
   return `<button class="svc-item-link svc-item-link--linked" type="button" data-service-db-reference="${escapeAttr(reference)}" aria-label="말씀 DB 새 탭에서 열기" title="말씀 DB 새 탭에서 열기">DB</button>`;
 }
 
-function openServiceListPanel() {
+function openServiceListPanel(filter = "public") {
   if (!confirmDiscardServiceChanges()) return;
+  state.serviceFilter = serviceBrowseCategory(filter).key;
   state.selectedServiceTypeId = SERVICE_LIST_PANEL_ID;
   state.selectedServiceId = null;
   state.selectedServiceItemIndex = null;
@@ -27267,7 +27335,7 @@ function renderServiceDashboard(options = {}) {
           <div>
             <h2 class="service-date-list-title">검색 결과</h2>
           </div>
-          <button class="reference-new-btn secondary" type="button" data-service-list>전체 예배</button>
+          <button class="reference-new-btn secondary" type="button" data-service-list>예배 보기</button>
         </div>
         ${q ? (services.length ? `<div class="service-date-grid service-date-grid--dashboard">
           ${services.map((service) => renderServiceDateCard(service, { showType: true })).join("")}
@@ -27280,7 +27348,7 @@ function renderServiceDashboard(options = {}) {
               <h3 class="service-date-list-title">${week.label}</h3>
               <p class="service-week-range">${escapeHtml(formatServiceWeekRange(week.start, week.end))}</p>
             </div>
-            ${index === 0 ? '<button class="reference-new-btn secondary" type="button" data-service-list>전체 예배</button>' : ""}
+            ${index === 0 ? '<button class="reference-new-btn secondary" type="button" data-service-list>예배 보기</button>' : ""}
           </div>
           <div class="service-week-board">
             ${week.days.map(date => renderServiceWeekDay(date, servicesByDate.get(toLocalDateStr(date)) || [])).join("")}
@@ -29385,8 +29453,9 @@ function renderPresenterControlsTop(service, slides, active, index) {
   const launchLabel = uiText(anyOutputOpen ? "presenter.action.stop" : "presenter.action.present");
   const launchIcon = anyOutputOpen ? "screen-share-off" : "screen-share";
   const launchTone = anyOutputOpen ? "stop" : "start";
+  const remoteLabel = window.MindexRemote?.buttonLabel() || "원격 조작";
   const fullscreenLabel = anyOutputOpen ? "송출 화면 전체 화면" : "송출을 시작하면 전체 화면을 사용할 수 있습니다";
-  const fullscreenControl = `<button class="icon-btn svc-presenter-fullscreen" type="button" data-presenter-action="fullscreen" aria-label="${escapeAttr(fullscreenLabel)}" title="${escapeAttr(fullscreenLabel)}" ${anyOutputOpen ? "" : "disabled"}><i data-lucide="maximize"></i><span>전체 화면</span></button>`;
+  const fullscreenControl = `<button class="icon-btn svc-presenter-fullscreen svc-presenter-window-button" type="button" data-presenter-action="fullscreen" aria-label="${escapeAttr(fullscreenLabel)}" title="${escapeAttr(fullscreenLabel)}" ${anyOutputOpen ? "" : "disabled"}><i data-lucide="maximize"></i><span>전체 화면</span></button>`;
   return `
       <div class="svc-presenter-top">
         <div class="svc-presenter-output-group">
@@ -29399,6 +29468,8 @@ function renderPresenterControlsTop(service, slides, active, index) {
           ${anyOutputOpen ? fullscreenControl : `<span class="svc-presenter-disabled-control" title="${escapeAttr(fullscreenLabel)}">${fullscreenControl}</span>`}
           </div>
           ${renderPresenterAlwaysOnTopControl({ buttonStyle: true })}
+          <button class="icon-btn" type="button" data-presenter-remote aria-label="${escapeAttr(/^\d{6}$/.test(remoteLabel) ? "원격 연결 코드 " + remoteLabel : remoteLabel)}" title="${escapeAttr(remoteLabel)}" ${["연결 준비", "종료 중"].includes(remoteLabel) ? "disabled" : ""}><i data-lucide="smartphone"></i><span data-remote-button-label>${escapeHtml(remoteLabel)}</span></button>
+          <button class="icon-btn" type="button" data-presenter-music-manager popovertarget="globalPlaybackPanel" aria-label="미디어 관리" title="미디어 관리"><i data-lucide="video"></i><span>미디어 관리</span></button>
         </div>
         <div class="svc-presenter-main" aria-live="polite">
           <span class="svc-slide-counter" aria-label="${escapeAttr(uiText("presenter.aria.slideCount", { current, count }))}">
@@ -29474,6 +29545,7 @@ function renderPresenterVideoHealthControl(serviceId) {
 }
 
 function syncPresenterVideoHealthControl() {
+  renderGlobalPlaybackControls();
   document.querySelectorAll("[data-presenter-video-health]").forEach((host) => {
     const html = renderPresenterVideoHealthControl(host.dataset.serviceId);
     if (host.dataset.healthMarkup === html) return;
@@ -29700,6 +29772,7 @@ function handleGlobalPlaybackAction(event) {
   const button = event.target.closest("[data-global-playback-action]");
   if (!button) return;
   const action = button.dataset.globalPlaybackAction;
+  if (action.startsWith("video-")) { void runPresenterManagedVideoAction(action.slice(6)); return; }
   if (action === "return") { void returnToLiveService(); return; }
   if (action === "output-stop") {
     if (isPresenterOutputWindowOpen()) runPresenterAction("stop", state.presenter.serviceId);
@@ -29716,9 +29789,13 @@ function handleGlobalPlaybackAction(event) {
   void runServiceMusicAction(action, binding);
 }
 
+function visibleGlobalPlaybackTrigger() {
+  return [...document.querySelectorAll(".global-playback-trigger, [data-presenter-music-manager]")].find(button => button.getClientRects().length);
+}
+
 function positionGlobalPlaybackPanel() {
   const panel = document.getElementById("globalPlaybackPanel");
-  const trigger = document.querySelector(".global-playback-trigger");
+  const trigger = visibleGlobalPlaybackTrigger();
   if (!panel || !trigger) return;
   const rect = trigger.getBoundingClientRect();
   const top = Math.min(rect.bottom + 8, window.innerHeight - 40);
@@ -29736,10 +29813,12 @@ function renderGlobalPlaybackControls() {
     : music.audio?.currentTime ? "음악 일시정지" : "음악 정지";
   const toggleLabel = music.pending ? "음악 준비 취소" : music.playing ? "음악 일시정지" : "음악 재생";
   const icon = music.pending ? "loader-circle" : music.playing ? "pause" : "play";
-  const available = hasMusic || state.module === "presenter";
-  const html = `<button class="icon-btn global-playback-trigger" type="button" popovertarget="globalPlaybackPanel" title="음악 관리" aria-label="음악 관리" data-active="${Boolean(music.playing || music.pending)}"><i data-lucide="music"></i><span class="global-playback-indicator" aria-hidden="true"></span></button>
-    <section id="globalPlaybackPanel" class="global-playback-panel" popover aria-label="음악 관리">
-      <header class="global-playback-panel-head"><strong>음악 관리</strong><button class="icon-btn" type="button" popovertarget="globalPlaybackPanel" popovertargetaction="hide" aria-label="음악 관리 닫기"><i data-lucide="x"></i></button></header>
+  const video = presenterManagedVideoState();
+  const available = hasMusic || !!video || state.module === "presenter";
+  const html = `<button class="icon-btn global-playback-trigger" type="button" popovertarget="globalPlaybackPanel" title="미디어 관리" aria-label="미디어 관리" data-active="${Boolean(music.playing || music.pending || video?.status === "playing")}"><i data-lucide="video"></i><span class="global-playback-indicator" aria-hidden="true"></span></button>
+    <section id="globalPlaybackPanel" class="global-playback-panel" popover aria-label="미디어 관리">
+      <header class="global-playback-panel-head"><strong>미디어 관리</strong><button class="icon-btn" type="button" popovertarget="globalPlaybackPanel" popovertargetaction="hide" aria-label="미디어 관리 닫기"><i data-lucide="x"></i></button></header>
+      <section class="global-media-section" aria-label="음원"><h3>음원</h3>
       <p class="global-playback-empty" ${hasMusic ? "hidden" : ""}>선택된 음악이 없습니다.</p>
       <div class="global-playback-group" role="group" aria-label="현재 음악" ${hasMusic ? "" : "hidden"}>
         <span class="global-playback-label"><span class="global-playback-name">${escapeHtml(music.sourceLabel || music.fileName || "음악")}</span><span class="global-playback-state" role="status">${musicState}</span></span>
@@ -29750,6 +29829,8 @@ function renderGlobalPlaybackControls() {
         <button type="button" class="btn secondary global-playback-stop" data-global-playback-action="stop" aria-label="음악 정지" ${music.pending || music.playing || music.audio?.currentTime ? "" : "disabled"}><i data-lucide="square"></i><span>정지</span></button>
         <label class="global-playback-fade-stop"><input type="checkbox" data-service-music-fade-stop${music.fadeStopEnabled ? " checked" : ""}>페이드아웃 정지</label>
       </div>
+      </section>
+      ${renderPresenterVideoManagement(video)}
     </section>`;
   if (!available) root.querySelector(':popover-open')?.hidePopover();
   root.hidden = !available;
@@ -31479,7 +31560,8 @@ function renderPresenterBoardItemActions(serviceId, context, options = {}) {
     ? renderPresenterAssetUpload(context.item, context.index, inputContext.memo, serviceId) : "";
   return `
     <div class="svc-board-subgroup-flow" data-service-item-actions data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}">
-      ${options.omitCommit ? "" : `<span class="svc-input-status" data-service-input-status role="status" aria-live="polite"></span>`}
+      ${options.omitCommit ? "" : `<span class="svc-input-status sr-only" data-service-input-status role="status" aria-live="polite"></span>`}
+      ${!options.commitOnly && serviceItemConnectedPraise(context.item)?.groupId ? `<button class="reference-new-btn secondary svc-medley-unlink" type="button" data-service-medley-unlink="${escapeAttr(context.item.id)}" data-service-id="${escapeAttr(serviceId)}" title="곡과 순서를 유지하고 메들리 묶음 해제">메들리 해제</button>` : ""}
       ${options.commitOnly ? "" : fileControls}
       ${!options.commitOnly && photoTiming ? `<button class="btn secondary" type="button" data-song-timing-open data-song-timing-focus="photos"
         data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(context.item.id)}">사진·타이밍 편집</button>` : ""}
@@ -31525,6 +31607,7 @@ function renderPresenterBoardSubgroupInputControls(serviceId, subgroup = {}, opt
         ${label ? `<div class="svc-board-subgroup-control-head"><span class="svc-board-subgroup-control-label">${escapeHtml(label)}</span>${dbLink}${renderPresenterBoardItemActions(serviceId, context)}</div>` : ""}
         ${audioLed ? audioManager : ""}
         ${controls}
+        ${renderPresenterPresentationControls(context.item, context.index, serviceId)}
         ${options.headerActions || label ? "" : renderPresenterBoardItemActions(serviceId, context)}
         ${audioLed ? "" : audioManager}
       </div>`;
@@ -31751,14 +31834,15 @@ function renderPresenterBoardSlideBlocks(entries, activeIndex, serviceId) {
   const colorIndexes = new Map();
   return presenterBoardSlideBlocks(entries).map((block) => {
     const owner = presenterSlideElementGroupKey(block.entries[0]?.slide) || "";
-    const isColored = Boolean(block.key);
+    const plain = ["title", "instrumental"].includes(normalizePresenterFormPresetLabel(block.label).type);
+    const isColored = Boolean(block.key) && !plain;
     const colorIndex = colorIndexes.get(owner) || 0;
     if (isColored) colorIndexes.set(owner, colorIndex + 1);
     const colorAttribute = isColored ? ` data-form-color="${colorIndex % 6}"` : "";
     const thumbs = block.entries.map(({ slide, slideIndex, formLabel }) =>
       renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, formLabel)).join("");
     return block.key
-      ? `<div class="svc-board-slide-block"${colorAttribute} role="group" aria-label="${escapeAttr(block.label)}">${thumbs}</div>`
+      ? `<div class="svc-board-slide-block"${plain ? ' data-form-plain="true"' : colorAttribute} role="group" aria-label="${escapeAttr(block.label)}">${thumbs}</div>`
       : thumbs;
   }).join("");
 }
@@ -31769,6 +31853,10 @@ function updatePresenterBoardBlockBackgrounds(host = refs.detailPane) {
     const origin = grid.getBoundingClientRect();
     if (!origin.width) continue;
     for (const block of grid.querySelectorAll(":scope > .svc-board-slide-block")) {
+      if (block.dataset.formPlain === "true") {
+        block.querySelectorAll(":scope > .svc-board-block-background").forEach(background => background.remove());
+        continue;
+      }
       const rows = [];
       for (const thumb of block.querySelectorAll(":scope > .svc-slide-thumb-wrap")) {
         const rect = thumb.getBoundingClientRect();
@@ -31827,6 +31915,7 @@ function annotatePresenterFormStarts(entries = [], initialPreviousKey = "") {
 
 function presenterSlideSupportsFormGrouping(slide) {
   if (!slide) return false;
+  if (slide.formLabel === "Title" && String(slide.formKey || "").startsWith("title:")) return true;
   const praiseLowerBar = presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE
     && presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT;
   if (praiseLowerBar) return true;
@@ -32006,12 +32095,12 @@ function renderPresenterSlideMiniPreview(slide, serviceId = state.presenter.serv
     frameClasses,
   ].filter(Boolean).join(" ");
   if (!slide) {
-    return `<span class="${escapeAttr(outputClasses)}"><span class="${escapeAttr(canvasClasses)}" data-output-theme="${escapeAttr(theme)}"${backgroundStyle}></span></span>`;
+    return `<span class="${escapeAttr(outputClasses)}"><span class="${escapeAttr(canvasClasses)}" data-output-theme="${escapeAttr(theme)}" ${presenterBackgroundInkAttributes(frameState)}${backgroundStyle}></span></span>`;
   }
   return `
     <span class="${escapeAttr(outputClasses)}">
-      <span class="${escapeAttr(canvasClasses)}" data-output-theme="${escapeAttr(theme)}"${backgroundStyle}>
-        ${renderPresenterSlideFrame(previewSlide, { noChromakey: frameState.noChromakey, previewStage: true, transitionLogo: serviceRawSourceRef(service).transitionLogo })}
+      <span class="${escapeAttr(canvasClasses)}" data-output-theme="${escapeAttr(theme)}" ${presenterBackgroundInkAttributes(frameState)}${backgroundStyle}>
+        ${renderPresenterSlideFrame(previewSlide, { noChromakey: frameState.noChromakey, previewStage: true, transitionLogo: serviceRawSourceRef(service).transitionLogo, presentationDesign: serviceRawSourceRef(service).presentationDesign })}
       </span>
     </span>`;
 }
@@ -33719,6 +33808,7 @@ function serviceDocumentSlideToPresenterSlide(slide = {}, index = 0, service = n
     marker: slide.title || slide.elementLabel || "",
     text: slide.text || "",
     outputContext: normalizePresenterOutputContext(slide.outputContext) || "",
+    backgroundVideo: normalizeServicePresentation({ backgroundVideo: slide.backgroundVideo })?.backgroundVideo || "",
     hiddenInPresentation: Boolean(slide.hidden),
     autoTrailingBlank: Boolean(slide.autoTrailingBlank),
     serviceDocumentFallback: true,
@@ -33938,6 +34028,7 @@ function presenterElementTrailingBlankSlide(slide, index, service = null) {
     // This keeps fullscreen services clean even when the preceding item has an explicit
     // chromakey context (for example a special-song element).
     outputContext: serviceChromakey ? "chromakey" : "clean",
+    backgroundVideo: "",
     // Hiding an element hides its content, not its required transition blank.
     hiddenInPresentation: false,
     hidden_in_presentation: false,
@@ -34338,9 +34429,9 @@ function presenterMissingContentSlide(item = {}, section = {}, index = 0, conten
     type: "title-assignee",
     label,
     title,
-    assignee: loading ? warning : "",
+    assignee: loading ? warning : String(item.assignee || item.person || "").trim(),
     marker: "",
-    text: cleanList([title, loading ? warning : ""]).join("\n"),
+    text: cleanList([title, loading ? warning : String(item.assignee || item.person || "").trim()]).join("\n"),
     warnings: [warning],
     missingContent: !loading,
     loadingContent: loading,
@@ -34409,7 +34500,11 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   const song = presenterSongForServiceItem(item, displayText, label, service);
   const version = song ? getPresenterServiceItemVersion(song, item, service) : null;
   const formPlan = version ? presenterFormPlanForServiceItem(version, item, song) : { forms: [], warnings: [] };
-  const forms = globalThis.MindexSongTiming?.formsFor(item, song, version, formPlan.forms) || formPlan.forms;
+  const explicitTitleSequence = serviceItemFormPreset(item)?.titleSequence;
+  const titleForms = formPlan.forms.filter(form => form._presenterTitle);
+  const contentForms = formPlan.forms.filter(form => !form._presenterTitle);
+  const forms = explicitTitleSequence ? formPlan.forms
+    : [...titleForms, ...(globalThis.MindexSongTiming?.formsFor(item, song, version, contentForms) || contentForms)];
   const formWarnings = formPlan.warnings;
   const memo = initialMemo;
   const linkedSongId = String(item.song_id || item.songId || "").trim();
@@ -34432,6 +34527,9 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   }
   const confessionPrayer = isConfessionPrayerServiceItem(item);
   const section = presenterSectionForServiceItem(item, index, displayText, song, version);
+  const presentation = normalizeServicePresentation(memo.presentation);
+
+  if (memoElementType === "praise" && presentation?.backgroundVideo) section.backgroundVideo = presentation.backgroundVideo;
   const withIntro = (slides) => presenterSlidesWithIntroSlide(item, section, index, memo, slides);
   const withSpecialTitle = (slides) => presenterSlidesWithSpecialSongTitle(item, section, slides, index, service);
   const withIntroAndSpecialTitle = (slides) => withIntro(withSpecialTitle(slides));
@@ -34551,12 +34649,7 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   if (scoreOutput) {
     if (!song) return [];
     const scoreSlides = presenterScoreSlidesForServiceItem(item, section, index, song, version, displayText, memo, forms, formWarnings);
-    const slides = shouldSuppressMainPraiseScoreSongTitle(item, service)
-      ? scoreSlides
-      : [
-	        ...(song && shouldIncludeSongTitleSlide(item, label) ? [presenterSongTitleSlide(item, section, song, version, displayText, index)] : []),
-        ...scoreSlides,
-      ];
+    const slides = scoreSlides;
     return withIntro(presenterSlidesWithSpecialSongTitle(item, section, slides, index, service));
   }
 
@@ -34565,22 +34658,19 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
       item, section, index, song, version, displayText, label, forms, formWarnings,
     });
     const syncConfig = presenterSyncedLyricsConfigFromAsset(configuredAsset);
-    const slides = shouldIncludeSongTitleSlide(item, label)
+    const slides = shouldIncludeSongTitleSlide(item, label, song, version)
       ? presenterSlidesWithSpecialSongTitle(item, section, [
           presenterSongTitleSlide(item, section, song, version, displayText, index),
           ...lyricsSlides,
         ], index, service)
-      : lyricsSlides;
+      : presenterSlidesWithSpecialSongTitle(item, section, lyricsSlides, index, service);
     const syncedSlides = presenterApplySyncedLyricsConfig(slides, syncConfig, item, index);
     return withIntro(globalThis.MindexSongTiming?.decorate(syncedSlides, item, song, version) || syncedSlides);
   }
 
   if (!specialSongItem && song && presenterHymnScoreAssetSlides(song, version, displayText).length) {
     const scoreSlides = presenterScoreSlidesForServiceItem(item, section, index, song, version, displayText, memo, forms, formWarnings);
-    const slides = [
-	      ...(song && shouldIncludeSongTitleSlide(item, label) ? [presenterSongTitleSlide(item, section, song, version, displayText, index)] : []),
-      ...scoreSlides,
-    ];
+    const slides = scoreSlides;
     return withIntro(presenterSlidesWithSpecialSongTitle(item, section, slides, index, service));
   }
 
@@ -34640,11 +34730,6 @@ function presenterCorporatePrayerTopicTitle(value = "") {
   return /^['"“”‘’].*['"“”‘’]$/u.test(topic) ? topic : `'${topic}'`;
 }
 
-function shouldSuppressMainPraiseScoreSongTitle(item = {}, service = {}) {
-  const appTypeId = worshipAppServiceTypeId(service?.type_id);
-  if (appTypeId !== "sunday-first" && appTypeId !== "sunday-second") return false;
-  return isMainPraiseServiceItem(item);
-}
 
 function presenterElementSlideFromMemo(item, section, index, memo, displayText, service = null) {
   return presenterElementSlideFromMemoCore(item, section, index, memo, displayText, service);

@@ -7,8 +7,41 @@ on:
 permissions:
   contents: read
 jobs:
-  offline-web:
+  scope:
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      profile: ${{ steps.plan.outputs.profile }}
+      smokes: ${{ steps.plan.outputs.smokes }}
+      signature: ${{ steps.plan.outputs.signature }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: cloud
+      - name: Plan affected screens
+        id: plan
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 cloud/check_scope.py
+      - name: "Scope proof: ${{ steps.plan.outputs.signature }}"
+        run: echo "Check scope recorded in the run summary."
+  offline-web:
+    needs: scope
+    env:
+      MINDEX_CHECK_PROFILE: ${{ needs.scope.outputs.profile }}
+      MINDEX_CHECK_SMOKES: ${{ needs.scope.outputs.smokes }}
+      MINDEX_CHECK_SIGNATURE: ${{ needs.scope.outputs.signature }}
+    runs-on: ubuntu-24.04
+    # Superseded checks stop; publication has its own non-cancelling group.
+    concurrency:
+      group: cloud-check-${{ github.event_name }}-${{ github.ref }}-${{ matrix.shard }}
+      cancel-in-progress: true
+    permissions:
+      contents: read
+      actions: read
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -16,14 +49,38 @@ jobs:
         shard: [0, 1, 2, 3]
     steps:
       - uses: actions/checkout@v4
+      - name: Reuse verified exact commit
+        id: verified
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 cloud/reuse_checks.py
       - uses: actions/setup-node@v4
+        if: steps.verified.outputs.reuse != 'true'
         with:
           node-version: '22'
       - uses: actions/setup-python@v5
+        if: steps.verified.outputs.reuse != 'true'
         with:
           python-version: '3.12'
-      - run: bash cloud/setup.sh
-      - run: .cache/cloud-venv/bin/python cloud/check.py --shard-index ${{ matrix.shard }} --shard-count 4
+      - name: Use the official Ubuntu package mirror
+        if: steps.verified.outputs.reuse != 'true'
+        # The hosted Azure mirror can stall dependency downloads until timeout.
+        # Keep Ubuntu's signed package metadata and all required browser checks.
+        run: |
+          sudo python3 - <<'PYMIRROR'
+          from pathlib import Path
+          for path in (Path('/etc/apt/sources.list'), Path('/etc/apt/sources.list.d/ubuntu.sources'), *Path('/etc/apt').glob('apt-mirrors*.txt')):
+              if path.exists():
+                  source = path.read_text()
+                  updated = source.replace('http://azure.archive.ubuntu.com/ubuntu', 'https://archive.ubuntu.com/ubuntu')
+                  updated = updated.replace('https://azure.archive.ubuntu.com/ubuntu', 'https://archive.ubuntu.com/ubuntu')
+                  if updated != source:
+                      path.write_text(updated)
+          PYMIRROR
+      - if: steps.verified.outputs.reuse != 'true'
+        run: bash cloud/setup.sh
+      - if: steps.verified.outputs.reuse != 'true'
+        run: .cache/cloud-venv/bin/python cloud/check.py --shard-index ${{ matrix.shard }} --shard-count 4
   deploy-pages:
     # A failed/cancelled check skips this entire job. No always() or bypass.
     needs: offline-web

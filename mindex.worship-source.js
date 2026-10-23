@@ -3,8 +3,8 @@
 // Values are resolved by the caller; this formatter does not look up app state.
 function serializePortableServiceSourceItem(fields) {
   const { label, value, elementType, inputMode, outputMode, formHint, songTitle,
-    songId, versionId, assignee, hasTranslation, translationLabel, translationId, sermonReference,
-    lyrics, slides, manualScripture, manualTranslation, asset, audio, audioTiming, announcementRegions } = fields;
+    titleSequence, songId, versionId, assignee, hasTranslation, translationLabel, translationId, sermonReference,
+    lyrics, slides, manualScripture, manualTranslation, asset, audio, audioTiming, presentation, announcementRegions } = fields;
   const lines = [`[${label}]`];
   const textField = (key, text = "") => {
     text = String(text).replace(/\r\n?/g, "\n");
@@ -21,7 +21,8 @@ function serializePortableServiceSourceItem(fields) {
   if (elementType) lines.push(`- 유형: ${elementType}`);
   if (inputMode) lines.push(`- 입력: ${inputMode}`);
   if (outputMode) lines.push(`- 출력: ${outputMode}`);
-  if (formHint) lines.push(`- 송폼: ${formHint}`);
+  if (formHint || titleSequence) lines.push(`- 송폼: ${formHint || ""}`);
+  if (titleSequence) lines.push("- 제목 순서: 송폼");
   if (songTitle) lines.push(`- 곡: ${songTitle}`);
   if (songId) lines.push(`- 곡 ID: ${songId}`);
   if (versionId) lines.push(`- 버전 ID: ${versionId}`);
@@ -56,6 +57,7 @@ function serializePortableServiceSourceItem(fields) {
     lines.push(`- 음원 파일: ${audio.name || ""}`);
     if (audio.url) lines.push(`- 음원 링크: ${audio.url}`);
   }
+  if (presentation) lines.push(`- 화면 설정: ${JSON.stringify(presentation)}`);
   if (audioTiming) lines.push(`- 음원 타이밍: ${JSON.stringify(audioTiming)}`);
   return lines;
 }
@@ -210,6 +212,7 @@ function parsePortableServiceSourceText(value = "", options = {}) {
       else if (key === "입력") current.inputMode = fieldValue;
       else if (key === "출력") current.outputMode = fieldValue;
       else if (key === "송폼") current.formHint = fieldValue;
+      else if (key === "제목순서") current.titleSequence = fieldValue === "송폼";
       else if (key === "곡") current.songTitle = fieldValue;
       else if (key === "곡id") current.songId = fieldValue;
       else if (key === "버전id") current.versionId = fieldValue;
@@ -221,6 +224,10 @@ function parsePortableServiceSourceText(value = "", options = {}) {
       else if (key === "슬라이드") { current.hasSlides = true; if (fieldValue !== "|") current.slides = fieldValue; else blockKey = "slides"; }
       else if (key === "수동본문") { current.hasManualScripture = true; if (fieldValue !== "|") current.manualScripture = fieldValue; else blockKey = "manualScripture"; }
       else if (key === "수동역본") current.manualTranslationLabel = fieldValue;
+      else if (key === "화면설정") {
+        try { current.presentation = normalizeServicePresentation(JSON.parse(fieldValue)); current.hasPresentation = true; }
+        catch { throw new Error("화면 설정 형식을 확인해 주세요."); }
+      }
       else if (key === "음원타이밍") {
         try { current.audioTiming = normalizeServiceAudioTiming(JSON.parse(fieldValue)); current.hasAudioTiming = true; }
         catch {

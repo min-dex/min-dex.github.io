@@ -31,7 +31,7 @@ def main():
                   ['one-verse',[all[0]],['v1','Int','v1']],
                 ]) {
                   const plan=presenterFormPlanForServiceItem({forms},item,song);
-                  const actual=plan.forms.map(f=>f._presenterBlank?'Int':f.id);
+                  const actual=plan.forms.filter(f=>!f._presenterTitle).map(f=>f._presenterBlank?'Int':f.id);
                   assert(JSON.stringify(actual)===JSON.stringify(expected),label+' '+name+': '+JSON.stringify(actual));
                   assert(!plan.warnings.length,'optional forms warned');
                   cases.push(label+' '+name);
@@ -59,26 +59,26 @@ def main():
                 const item={label:'특송',_worshipSectionKey:'special_song',memo:serializeServiceItemMemo({
                   formHint:savedHint,formPreset:{forms:savedHint.split('-'),hint:savedHint,strength}
                 })};
-                assert(presenterServiceItemFormPreset({forms:all},item,song).forms.join('-')===savedHint,
+                assert(presenterServiceItemFormPreset({forms:all},item,song).forms.join('-')==='Title-'+savedHint,
                   'saved preset replaced before slide planning: '+strength);
                 const plan=presenterFormPlanForServiceItem({forms:all},item,song);
-                assert(JSON.stringify(plan.forms.map(f=>f.id))===JSON.stringify(['v1','c','v2','c','v4','c']), 'saved sequence overwritten: '+strength);
-                assert(serviceItemEffectiveFormHint(item)===savedHint,'shown sequence differs: '+strength);
+                assert(JSON.stringify(plan.forms.filter(f=>!f._presenterTitle).map(f=>f.id))===JSON.stringify(['v1','c','v2','c','v4','c']), 'saved sequence overwritten: '+strength);
+                assert(serviceItemEffectiveFormHint(item)==='Title-'+savedHint,'shown sequence differs: '+strength);
               }
               const linkedSong={...song,id:'preset-test-song',versions:[{id:'preset-test-version',praise_types:['hymn'],forms:all}]};
               const fresh={id:'preset-test-item',label:'특송',_worshipSectionKey:'special_song'};
               linkServiceItemToPraiseSong(fresh,linkedSong,{type_id:'monthly'});
-              assert(serviceItemFormPreset(fresh)?.hint==='V1-C-V2-C-Int-VL-C-Coda','default not materialized');
+              assert(serviceItemFormPreset(fresh)?.hint==='Title-V1-C-V2-C-Int-VL-C-Coda','default not materialized');
               const frozen=fresh.memo;
               const offering={id:'offering-test',label:'봉헌찬송',_worshipSectionKey:'offering'};
               linkServiceItemToPraiseSong(offering,linkedSong,{type_id:'sunday-first'});
               assert(!serviceItemFormPreset(offering),'playback fallback persisted as offering form');
-              assert(serviceItemEffectiveFormHint(offering)==='','playback fallback shown as editable form');
+              assert(serviceItemEffectiveFormHint(offering)==='Title','playback fallback shown as editable form');
               assert(presenterFormPlanForServiceItem({forms:all},offering,linkedSong).forms.length>0,'offering playback lost');
               linkServiceItemToPraiseSong(fresh,linkedSong,{type_id:'monthly'});
               assert(fresh.memo===frozen,'relink changed saved default');
               const reopened={...fresh,memo:serializeServiceItemMemo(parseServiceItemMemo(fresh.memo))};
-              assert(JSON.stringify(presenterFormPlanForServiceItem({forms:all},reopened,linkedSong).forms.map(f=>f._presenterBlank?'Int':f.id))===JSON.stringify(['v1','c','v2','c','Int','v4','c','coda']),'round trip changed playback');
+              assert(JSON.stringify(presenterFormPlanForServiceItem({forms:all},reopened,linkedSong).forms.filter(f=>!f._presenterTitle).map(f=>f._presenterBlank?'Int':f.id))===JSON.stringify(['v1','c','v2','c','Int','v4','c','coda']),'round trip changed playback');
               assert(!presenterFormPlanForServiceItem({forms:all.filter(f=>f.id!=='coda')},reopened,linkedSong).warnings.length,'saved default warns about optional coda');
               const disabled={label:'특송',memo:serializeServiceItemMemo({formPresetDisabled:true})};
               linkServiceItemToPraiseSong(disabled,linkedSong,{type_id:'monthly'});

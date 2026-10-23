@@ -3778,10 +3778,353 @@ Liturgical body sizes and chromakey caption text are unchanged.
   as {url, originX, originY, width, height}. Origin is a percentage of the artwork;
   width/height use the existing 1920×1080 stage units. Invalid input uses the
   existing cross. The complete artwork is centered on the stage and revealed from its origin
-  outward simultaneously; no chapel identity is hardcoded in runtime logic.
+  outward simultaneously by scaling the complete silhouette around that origin.
+  No rectangular reveal mask clips the tips during growth; no chapel identity is
+  hardcoded in runtime logic.
 - The existing blank-slide renderer, thumbnails, output payload and remote
   normalization share the same setting. Thumbnails/reduced motion show the final
   frame. Inactive layers, chromakey and safety blackout never reveal artwork.
 - Defaults remain unchanged. ON FIRE uses the supplied poster's tapered cross,
   red #af3b20, intersection (50%,29.5%) and a 255×450 stage-unit size. The vector
   is a reconstruction of the supplied raster silhouette, not an original vector.
+
+## Shared presenter text fitting · 2026-10-22
+
+- All shrinking uses the1920×1080 design stage:5px candidate steps, body floor40px,
+  title floor70px. Existing base copy smaller than a floor is never enlarged.
+- Lyrics, announcement zones, liturgical text, chromakey scripture and titles use
+  the same fitting helper. Preview status never changes the minimum or step.
+  Output uses its logical stage width; miniature CSS transforms affect display only.
+- Preserve each frame's layout constraints: title ink may extend below its tight
+  line box, so test its allocated slide bounds; body/regions must fit their area.
+- At the floor, unfit content is marked with a controller-only `내용 넘침` badge
+  and accessible description. Do not silently shrink below the floor or mutate
+  stored content. Splitting an overfull author-written slide remains explicit.
+- Dedicated scripture reading keeps its existing paginated layout and type scale.
+- Retain lyric fit caching and font-load invalidation. A retry resets the size and
+  overflow flag before measuring; shortening content restores its base type.
+- This replaces former1px/2px loops, unconstrained binary shrink, title clamp and
+  the separate28px preview/32px output scripture floors.
+
+
+## Children community-confession emphasis ·2026-10-22
+
+Children fullscreen frames with service artwork use deeper variants of the six
+original confession colors: #A66B00, #527A00, #B53B76, #B94720, #006C91, #6554B8.
+The shared theme overrides the original palette through CSS tokens in both
+thumbnails and output. Authored colors remain stored unchanged; other service
+formats, chromakey and reading frames retain their original colors. Unrelated
+custom highlight colors are not mapped. The darker palette improves contrast on
+the cream artwork without changing emphasis wording or font weight.
+
+## Explicit Title in song forms · 2026-10-22
+
+- `Title` is a sequence token for the existing song title renderer, not a lyric
+  unit type. Input case/outer whitespace normalizes to `Title`; Tag/Tags and
+  their existing meanings are unchanged (no reassignment of T).
+- Legacy presets retain automatic title behavior without data migration. The
+  first explicit Title enables `titleSequence` on that preset; removing it or
+  clearing the sequence retains that intent instead of restoring an auto title.
+- Explicit title positions/repetitions get unique slide IDs and do not consume
+  a lyric paragraph. Manual slide blocks retain their authored boundaries.
+  Labelled score pages follow the same title positions. Unlabelled score decks
+  retain every page and support leading/trailing Title; an ambiguous middle
+  Title displays a warning rather than guessing a verse boundary or dropping pages.
+  No corpus units change.
+- Memo/config and portable source (`제목 순서: 송폼`) preserve explicit policy.
+  Playback projection alone changes; publishing does not write service records.
+- Regression: smoke_title_songform.py uses synthetic Chromium/WebKit records,
+  rendering, edit/reopen, empty/repeated/middle Title, direct paragraphs, score
+  ordering and portable policy. No native output or operational audio is opened.
+
+
+## Fullscreen praise titles and video backgrounds ·2026-10-22
+
+- Chapel uses its ordinary fullscreen service output. No camera caption mode or
+  event-specific scripture/sermon renderer is added.
+- Praise element config.presentation.backgroundVideo stores a direct MP4/WebM/
+  MOV/M4V URL. Presenter exposes 배경 영상 with URL and file inputs. Upload uses
+  the existing media Storage bucket and single-element atomic save. Settings
+  survive grouping, memo, canonical config, portable source and document fallback.
+- Praise backgrounds are muted, looping and inline. One output video node stays
+  alive across lyric changes with the same source. Keyed frames, score/media
+  frames, photo cues, blackout and blank frames never inherit the video. Controller
+  thumbnails load metadata without autoplay. Audio playback/timing stays separate.
+- Fullscreen praise title slides show the note alone above one main output title.
+  Order labels, original titles and subtitles are absent from this display. Their
+  authored metadata and version output-title selection remain unchanged.
+- Chapel scripture uses normal Bible reading rather than a poster scripture image.
+
+- Canonical grouping sorts RPC rows by persisted section/element order before any
+  editor or scripture hydration compacts visible ordinals. Unordered aggregate
+  arrays must never silently reorder a service when a Bible body finishes loading.
+
+## Special-service partial save ordering · 2026-10-22
+
+A content-only save receipt preserves the editor `sort_order` as well as section
+and element ordinals. Special services sort their outline directly by this field;
+mixing a database section-weighted ordinal into compact editor ordinals moved
+the saved song behind its siblings. Stored records and labels are not renumbered.
+
+## Children artwork emphasis palettes ·2026-10-22
+
+The shared frame helper resolves the artwork identity for both thumbnail and
+output, independent of PNG/WebP, query strings and CSS scale. C1/C2 textured
+artwork uses deep hues with a2-stage-pixel ivory outline on the six palette
+highlights; C3 sky uses medium-deep hues without an outline. C5 and S4/S5/S6
+retain the cream-background palette. Unknown/custom artwork retains that default;
+no automatic contrast guarantee is made for arbitrary user images. Reading,
+blackout, chromakey and non-children frames reset palette selection. Authored
+highlight values and unrelated custom colors remain unchanged.
+
+## Shared explicit deletion intent · 2026-10-23
+
+All service types and both order/section editors record explicit deletion through
+markServiceItemDeleted. Source omission of empty slots uses the same helper.
+Existing suppression storage stays compatible; no schema or operational rewrite
+is required. Non-template services also remove deletion markers from editable
+and visible projections. Full-save preservation still retains accidentally omitted
+content, while explicit deleted slots cannot resurrect. Failed saves keep intent
+for retry and concurrent input retains the existing signature guard.
+Validation: ten service types, Chromium/WebKit, up/down/add/delete, shuffled
+reload, last-slot deletion, failure/retry, concurrent full-save input and omitted
+content protection in isolated RPC fixtures.
+
+### Authored service design · 2026-10-23
+
+`source_ref.presentationDesign` selects reusable artwork by `sectionKeys`, with
+validated background/foreground/accent colors, an optional image logo and
+`showReadingEnd`. Fullscreen output, portable payloads and thumbnails share the
+same renderer and cache identity. It changes presentation only: normal scripture
+loading, verse navigation, title/person input and source records remain intact.
+No event ID or church preset enables this design implicitly. Blank, keyed,
+score, photo and self-contained media frames retain their normal output policy.
+An empty title retains an authored speaker on the normal missing-title slide;
+the designed fullscreen view suppresses a duplicate order heading.
+
+
+## Children common marker emphasis ·2026-10-23
+
+Supersedes Children community-confession emphasis and Children artwork emphasis
+palettes above. All colored highlights on children fullscreen service artwork now
+use the authored color as an opaque marker behind the lower65% of the text line
+(30–95%), with the common #34271f foreground. Bold-only emphasis stays plain.
+Remove artwork identity selection, per-background color substitutions, palette
+attributes and text outlines. Every artwork, preview and output uses one CSS rule;
+no stored highlight values, text, font sizes or weights change. Non-children,
+chromakey and reading frames retain their existing colored text behavior.
+
+## Service sidebar browse categories · 2026-10-23
+
+The service sidebar replaces the all-service entry with 공예배, 부서 예배 and
+기타 예배, using existing canonical service classifications. Special and unknown
+service types belong to 기타 예배; no service records are reclassified. Existing
+serviceFilter state carries the category through tabs/history; legacy all values
+open 공예배. Counts, active state, detail list and tab title reflect the category.
+Navigation retains the existing unsaved-input confirmation boundary.
+
+## Presenter window control states · 2026-10-23
+
+Fullscreen and always-on-top share geometry, field background, hover, keyboard
+focus and unavailable styling. Fullscreen remains an entry command; only the
+native always-on-top checkbox displays checked state. Browser pin support and
+output-window availability remain separate capability checks. No output behavior
+or stored preference changes.
+### Service artwork typography · 2026-10-23
+
+The authored service design uses bundled Nanum Myeongjo Regular/Bold for Korean
+and Cormorant Garamond variable for Latin headings and numerals. Names are CSS
+aliases; licensed files, pinned upstream sources and lossless WOFF2 hashes live in
+`vendor/fonts/service-serif/`. Other output designs retain their existing fonts.
+Reading text remains regular weight with Korean word boundaries intact; title
+and speaker hierarchy is shared by thumbnails and fullscreen output.
+
+
+## Refined common marker geometry ·2026-10-23
+
+Supersedes the initial30–95% marker coverage: all children artwork now uses the
+same45–95% band (50% height),4-stage-pixel padding on each side and a65% authored
+color /35% white mix. Foreground, font sizes and weights are unchanged. Padding
+uses the shared1920px stage unit in thumbnails/output; no background exceptions,
+text outlines or stored highlight color edits are introduced.
+
+
+## Original marker colors ·2026-10-23
+
+Remove the35% white mix from Refined common marker geometry. Children markers
+use the authored color unchanged, with the same45–95% coverage and4-stage-pixel
+side padding. Preview/output share the rule; no artwork palettes, outlines or
+stored color changes are introduced.
+
+## Medley unlink and stable save feedback · 2026-10-23
+
+Each connected-song row offers 메들리 해제. It removes grouping from all members,
+preserving IDs, songs, versions, forms, content and order. Deferred field input
+is retained before editor rebuild. This is an unsaved structural edit committed
+through the existing atomic save; no implicit save or output/music update.
+Pending source edits and an in-flight save retain their existing protection.
+Input feedback is announced outside layout; the fixed Save button retains its
+label/width and exposes busy/retry status through accessibility/title and disabled
+state. Existing save-failure notification remains. Source editing/history is
+retained: it supports partial text editing/recovery, not full worship backup.
+### Praise title scope correction · 2026-10-23
+
+Standard fullscreen praise retains its sequence heading, inline note/main title
+and authored original/subtitle. Only an explicit
+`source_ref.presentationDesign.songTitleStyle: "note-title"` selects a separate
+note above one main title and hides detail. An unrelated service design, special
+service type or theme does not select this composition. Both output and previews
+read the same saved choice. Its spacing/accent selectors are scoped to the
+selected composition; no event IDs or names are used. Chapel data alone selects
+this choice; other service records are not rewritten.
+
+## Song title/form proportions and redundant unlink removal · 2026-10-23
+
+Remove the standalone DB song-disconnect X, its delegated handler, unused
+clear function and styles. Song selection/mode switching and medley unlink stay
+unchanged. Wide song rows share spare width between title and form at1.3:1,
+with a220px form minimum instead of a fixed160px column. Below1121px actual
+container width, the form takes its own full-width row. No input values, focus,
+versions, form sequence, persistence or output behavior change. Chromium/WebKit
+actual-renderer checks cover DB shortcut variants,360–1500px, both themes,
+long forms, medley action retention and unsaved text/focus through resizing.
+
+## Shared fullscreen foreground contrast ·2026-10-23
+
+Supersedes the department-wide children brown foreground. Fullscreen still
+artwork uses white by default; switch to #332211 only when white's median
+contrast over the central artwork region is below3:1. The rule depends on image
+luminance, never service type, month or a hand-selected filename palette. Text,
+blank cross and monochrome ready/waiting logos share the foreground. Explicit
+service-design foreground choices remain authored overrides.
+
+Bundled original PNGs have generated median-luminance metadata (64×36 sampling,
+central x5–58/y4–31), shared with their WebP previews. This avoids downloading
+full PNGs merely to color controller thumbnails. Rebuild/check with
+`tools/build_background_luminance.py [--check]`. Other decoded images use the
+same cached sampling rule; unreadable cross-origin images retain white. Cache
+uses the existing bounded image-preload records; stale image completions never
+recolor a root now showing another source. Dynamic video retains white.
+
+Reading frames without service artwork, blackout and chromakey do not acquire
+a brown foreground. Community-confession markers alone keep original colors,
+50% coverage,4-stage-pixel side padding and #332211 text on the marker. This
+semantic rule is fullscreen-only, independent of department; third-service
+chromakey retains its original colored words. Other colored copy is not marked.
+
+## Remote and music entry placement · 2026-10-23
+
+Basic presenter puts 원격 조작 and 음악 관리 in the third equal-width row of
+right-panel output controls, using the existing35px/16px button/icon rules.
+The matching topbar launchers are hidden only while that basic control rail
+exists. Focus view and other modules retain global access. Both entries open
+the existing dialog/popover; no extra audio instance or remote session is created.
+Music popover placement and keyboard return use the visible launcher.
+
+
+## Focused presenter command geometry ·2026-10-23
+
+Focused previous/next, music play/pause/cancel/stop, auto-sync return and narrow
+output controls share35px height,8px horizontal padding,6px icon gap and16px
+Lucide icons with1.5 stroke, matching basic-view output controls. Toggle label
+and icon update only when changed; unchanged playback updates retain the nodes.
+App topbar40px and segmented view/scale28px targets retain their distinct roles.
+
+## Shared note-above-song-title layout ·2026-10-23
+
+User explicitly selected the small note above the main song title for ordinary
+fullscreen praise too. Both output and previews use the same existing song title
+renderer, including explicit Title positions. The inline note and textual order
+heading are replaced by one small note; ordinary subtitles remain visible.
+The existing per-service note-title setting retains chapel's compact no-subtitle
+copy. Chapel colors, serif faces, cross, reading/sermon styling remain opt-in.
+Chromakey title layout is unchanged. No service/song records are rewritten.
+T remains unassigned as documented in the Title sequence contract; Title is the
+accepted explicit title token and Tag/Tags retain their meaning.
+
+
+## Direct remote code entry ·2026-10-23
+
+Pressing 원격 조작 starts one pairing session directly while this PC is presenting.
+The launcher shows its six-digit code and announces the two-minute entry window
+once. No setup modal is required. Repeated pending/connected entry opens the
+existing connection/end dialog, never creates a second session. Busy buttons
+lock during creation/ending; expired/closed sessions restore the normal label.
+Basic right-panel rerenders retain the current code; focus topbar temporarily
+widens to show the code. No pairing TTL, permission or relay protocol changes.
+
+## Children community-confession closing ·2026-10-23
+
+The standard children confession ends with
+`검단우리교회 꿈꾸는 어린이부 공동체가 되겠습니다.`
+Select this copy from the normalized service type during liturgical slide build,
+including the closing bold phrase. Other services retain the standard public
+confession and third-service chromakey chunks exactly. Preview and output consume
+the same generated slide; do not rewrite operational records or custom authored
+confession text. Marker foreground/coverage and original six colors are unchanged.
+## Uniform Title sequence ownership ·2026-10-23
+
+T/t now canonicalizes to Title; Tag/Tags remain unchanged. Legacy presets expose
+a leading virtual Title without rewriting stored lyrics, forms, versions or service
+rows. Resolve existing playback defaults before adding Title to preserve verse/chorus
+expansion. Explicit titleSequence presets, including empty/removed titles, are kept.
+Every edit of the sequence now owns title visibility: no Title means no song title.
+All song titles use the ordinary song-title renderer, including sending/response/closing
+songs; there is no order-content title substitution or main-praise score suppression.
+A special-song section's genuine assignee heading remains separate from song titles.
+The atomic save path persists edited sequences normally; no bulk DB migration runs.
+
+Title entries do not consume lyric occurrence keys or photo-placement signatures;
+version audio page boundaries remain intact when a default title is prepended.
+
+
+## Remote video transport and PC races ·2026-10-23
+
+Remote commands include presenter transport and music execution sequence in the
+state signature, preventing an old command after a local out-and-back action.
+Native slide video transport exposes play/pause/restart on the controller page;
+PC output acknowledges actual media completion. Commands bind to output client,
+session, message/frame and media revision, deduplicate across transports and
+expire after1.8 seconds. Restart seeks to zero and plays; pause preserves position.
+No media stream is sent to the phone. Browser autoplay rejection is explicit.
+PPTX embedded media/background loops retain their existing playback behavior.
+
+## Full-height confession marker ·2026-10-23
+
+Fullscreen community-confession markers now fill the full inline text box,
+superseding the45–95% half-height band. Keep original six source colors,
+#332211 marker text and4-stage-pixel side padding. Preview/output share this
+CSS rule. Third-service chromakey and other copy remain unmarked. Children
+retain their dedicated closing. User requested skipping optional local checks;
+the complete required publication gate remains mandatory.
+
+
+## Unified media management ·2026-10-23
+
+The existing music popover is now Media management (미디어 관리), shared by basic
+and focused presenter views. One video-icon launcher retains its existing view
+placement and button geometry. Audio keeps timing, auto-sync and fade-stop;
+a separate video section controls native output-slide play/pause/restart through
+the same acknowledged transport as Remote. No background/PPTX media transport
+is added. No active video shows an empty state. Shared pending requests prevent
+PC/Remote overlap; current output ownership and freshness are rechecked on action.
+Heartbeat updates preserve the open popover and use the existing markup patcher.
+
+## Migrate legacy score titles to Title tokens ·2026-10-23
+
+The previous automatic title behavior identifies legacy intent; it is not revived
+as a score-output fallback. Legacy score sequences are normalized to a leading
+virtual Title and rendered by the same sequence interpreter as explicit titles.
+Score output no longer prepends titles through shouldIncludeSongTitleSlide.
+An absent legacy score sequence preserves every source page after the migrated
+Title; an explicit Title-only sequence intentionally emits only its title. PDF
+and pending-score output use the same Title token renderer. Explicit omission
+and repeated/middle titles retain their authored order. Stored operational rows,
+lyrics and versions are untouched; this is an effective-sequence migration at load.
+
+
+## Plain Title and interlude group labels ·2026-10-23
+
+Controller Title and instrumental groups retain their labels, thumbnails, grouping
+and navigation, with no group background box. They do not consume the lyric
+group color cycle. Verse/chorus/other form backgrounds and output remain unchanged.

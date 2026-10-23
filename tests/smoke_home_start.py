@@ -74,13 +74,17 @@ try:
    assert page.evaluate('state.recentEdits.length')==2
    page.locator('[data-home-recent-view="work"]').click()
    assert page.locator('.home-recent-list time').count()==0
-   # Every viewport reserves the same recent area in both views, even empty.
+   # Populated views reserve card slots; an empty view collapses to its notice.
    for width in (1280,800,390):
     page.set_viewport_size({'width':width,'height':800})
     page.locator('[data-home-recent-view="work"]').click()
     top=page.locator('.home-module').first.bounding_box()['y']
+    has_work=page.locator('.home-recent-list button').count()>0
+    if not has_work:
+     assert page.locator('.home-recent-list').bounding_box()['height']<50
     page.locator('[data-home-recent-view="edits"]').click()
-    assert abs(page.locator('.home-module').first.bounding_box()['y']-top)<1
+    edits_top=page.locator('.home-module').first.bounding_box()['y']
+    assert abs(edits_top-top)<1 if has_work else edits_top>top
     assert page.locator('.home-recent-note').count()==0
     assert page.locator('.home-recent-list button').first.bounding_box()['height']==80
    page.set_viewport_size({'width':1280,'height':800})
@@ -88,7 +92,7 @@ try:
    # The original sidebar routes remain functional, including stalled data.
    page.locator('#songList [data-service-week]').click()
    assert page.locator('.service-week-board').count()==2
-   page.locator('#songList [data-service-list]').click()
+   page.locator('#songList [data-service-list="public"]').click()
    assert page.evaluate('state.selectedServiceTypeId')=='__list'
    page.evaluate("()=>{window.homeOriginalLoadItems=loadServiceItems;loadServiceItems=()=>new Promise(()=>{});state.presenter.outputWindow=null}")
    page.locator('#songList [data-service-id="next"]').click()
@@ -155,6 +159,10 @@ try:
     const originalClient=state.client, originalCanRead=canUseClientData;
     const before=JSON.stringify([state.songs,state.bibleTranslations,state.selectedBibleTranslationId,state.selectedBookCode,songCatalogLoaded]);
     const calls=[];let resolveSongs,resolveEditions;
+    const editionsFixture=[{name:'King James Version (CrossWire 1769)',language:'en'},{name:'표준새번역',language:'ko'},{name:'개역개정',language:'ko'},{name:'ASV',language:'en'}];
+    const editionsBefore=JSON.stringify(editionsFixture);
+    check(homeBibleEditionNames(editionsFixture).join(' · ')==='개역개정 · 표준새번역 · ASV · KJV','home edition labels/order');
+    check(JSON.stringify(editionsFixture)===editionsBefore,'home reordered source rows');
     const responses={mindex_songs:new Promise(r=>resolveSongs=r),mindex_bible_translations:new Promise(r=>resolveEditions=r)};
     const client={from:table=>({select:(fields,options)=>{
      calls.push({table,fields,options});

@@ -1,3 +1,19 @@
+/* Poster-inspired service typography; local files keep projection consistent. */
+@font-face {
+  font-family: "Mindex Service Serif";
+  src: url("./vendor/fonts/service-serif/NanumMyeongjo-Regular.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: block;
+}
+@font-face {
+  font-family: "Mindex Service Serif";
+  src: url("./vendor/fonts/service-serif/NanumMyeongjo-Bold.woff2") format("woff2");
+  font-weight: 700; font-style: normal; font-display: block;
+}
+@font-face {
+  font-family: "Mindex Service Display";
+  src: url("./vendor/fonts/service-serif/CormorantGaramond-Variable.woff2") format("woff2");
+  font-weight: 300 700; font-style: normal; font-display: block;
+}
 /* ── Presenter output ───────────────────────────────────────────────────── */
 @font-face {
   font-family: "Mindex Presenter";
@@ -267,24 +283,27 @@
 }
 .presenter-output-root.no-chromakey[data-output-theme="formal"] {
   --presenter-output-bg: #10120f;
-  --presenter-output-fg: #f8f8f3;
   --presenter-output-muted: rgba(248, 248, 243, .66);
 }
-/* Shared children background theme: identical ink for original and preview assets. */
-.presenter-output-root.no-chromakey.has-background[data-output-theme="children"] {
-  --presenter-output-fg: #34271f;
+/* Fullscreen foreground follows artwork luminance, never the department. */
+.presenter-output-root.no-chromakey {
   --presenter-blank-cross-color: var(--presenter-output-fg);
-  --presenter-output-muted: rgba(52, 39, 31, .68);
+}
+.presenter-output-root.no-chromakey.has-background {
+  --presenter-output-fg: #fff;
+  --presenter-output-muted: rgba(255, 255, 255, .64);
   --presenter-output-bar: transparent;
 }
-.presenter-output-root.no-chromakey.has-background[data-output-theme="children"] :is(.presenter-slide-text, .presenter-output-empty, .presenter-ready-screen, .presenter-ready-screen-kicker, .presenter-ready-screen-message, .presenter-waiting-loop, .presenter-waiting-loop-script, .presenter-waiting-loop-title) {
+.presenter-output-root.no-chromakey.has-background[data-output-ink="brown"] {
+  --presenter-output-fg: #332211;
+  --presenter-output-muted: rgba(51, 34, 17, .68);
+}
+.presenter-output-root.no-chromakey :is(.presenter-slide-text, .presenter-output-empty, .presenter-ready-screen, .presenter-ready-screen-kicker, .presenter-ready-screen-message, .presenter-waiting-loop, .presenter-waiting-loop-script, .presenter-waiting-loop-title) {
   color: var(--presenter-output-fg);
 }
-/* Tint only the monochrome church mark; preserve its original alpha edges. */
-.presenter-output-root.no-chromakey.has-background[data-output-theme="children"] :is(.presenter-ready-screen-logo, .presenter-waiting-loop-logo) {
-  filter: url("assets/presenter/children-autumn-ink.svg#ink");
+.presenter-output-root.no-chromakey.has-background[data-output-ink="brown"] :is(.presenter-ready-screen-logo, .presenter-waiting-loop-logo) {
+  filter: url("assets/presenter/fullscreen-ink.svg#brown");
 }
-/* Reading frames omit the service artwork, so the base white foreground applies. */
 
 .presenter-output-root[data-output-theme="youth"],
 .presenter-output-root[data-output-theme="young-adult"] {
@@ -292,12 +311,10 @@
 }
 .presenter-output-root[data-output-theme="youth"] {
   --presenter-output-bg: #07384d;
-  --presenter-output-fg: #f7fbff;
   --presenter-output-muted: rgba(247, 251, 255, .68);
 }
 .presenter-output-root[data-output-theme="young-adult"] {
   --presenter-output-bg: #0b0d12;
-  --presenter-output-fg: #f8f8f3;
   --presenter-output-muted: rgba(248, 248, 243, .62);
 }
 .presenter-output-root.no-chromakey.has-background {
@@ -338,6 +355,14 @@
   font-size: inherit;
   font-weight: var(--presenter-text-highlight-weight, var(--presenter-weight-display));
   white-space: inherit;
+}
+/* Full-height confession markers share original colors in previews and output. */
+.presenter-output-root.no-chromakey .presenter-liturgical-body--community-confession .presenter-text-highlight--color {
+  color: #332211;
+  background-image: linear-gradient(var(--presenter-text-highlight-color), var(--presenter-text-highlight-color));
+  padding-inline: calc(4 * var(--presenter-stage-unit));
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 .presenter-output-root.no-chromakey .presenter-slide--lyrics[data-element-type="praise"] .presenter-slide-text {
   font-size: var(--presenter-size-lyrics);
@@ -475,7 +500,7 @@
   left: 50%;
   top: 50%;
   content: "";
-  background: rgba(255, 255, 255, .9);
+  background: var(--presenter-blank-cross-color, #fff);
   border-radius: 999px;
 }
 .presenter-waiting-loop-cross::before {
@@ -1128,11 +1153,7 @@
 /* Song titles stay centered as their length grows. The character estimate is
    rendered with each title, so ordinary titles retain the display scale. */
 :is(.svc-slide-mini-output, .presenter-output-root).no-chromakey .presenter-slide--song-title .presenter-section-song-title-name {
-  font-size: clamp(
-    calc(70 * var(--presenter-stage-unit)),
-    calc(90cqw / var(--line-chars, 1)),
-    var(--presenter-size-song-title)
-  );
+  font-size: var(--presenter-size-song-title);
   text-align: center;
   transform: translateZ(0);
 }
@@ -1601,12 +1622,117 @@ span.presenter-announcement-paren,
   margin-left: calc(var(--transition-logo-left) * var(--presenter-stage-unit));
   margin-top: calc(var(--transition-logo-top) * var(--presenter-stage-unit));
   max-width: none; object-fit: fill; pointer-events: none;
-  clip-path: inset(var(--transition-logo-y) calc(100% - var(--transition-logo-x)) calc(100% - var(--transition-logo-y)) var(--transition-logo-x));
+  transform-origin: var(--transition-logo-x) var(--transition-logo-y);
+  transform: scale(0);
   animation: presenter-transition-logo-reveal 850ms ease-out forwards;
 }
-@keyframes presenter-transition-logo-reveal { to { clip-path: inset(0); } }
+@keyframes presenter-transition-logo-reveal { to { transform: scale(1); } }
 .presenter-output-root > .presenter-output-layer:not(.is-active) .presenter-transition-logo { visibility: hidden; animation: none; }
-.svc-slide-mini-canvas .presenter-transition-logo { animation: none; clip-path: inset(0); }
+.svc-slide-mini-canvas .presenter-transition-logo { animation: none; transform: scale(1); }
 @media (prefers-reduced-motion: reduce) {
-  .presenter-transition-logo { animation: none; clip-path: inset(0); }
+  .presenter-transition-logo { animation: none; transform: scale(1); }
+}
+
+/* Fullscreen titles and silent praise video backgrounds. */
+.presenter-slide--song-note-title .presenter-title-content { gap: 3cqh; }
+.presenter-output-root.no-chromakey .presenter-slide--song-note-title .presenter-fullscreen-song-heading { font-size: calc(85 * var(--presenter-stage-unit)); line-height: 1; color: #cba56a; }
+.presenter-output-background-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; z-index: 0; }
+.presenter-slide:has(> .presenter-output-background-video) > :not(video) { position: relative; z-index: 1; }
+
+.presenter-output-root.no-chromakey .presenter-slide--service-design .presenter-fullscreen-order-heading { color: #cba56a; }
+.presenter-output-root.no-chromakey .presenter-slide--service-design .presenter-fullscreen-order-heading::after { content: ""; display: block; width: calc(80 * var(--presenter-stage-unit)); height: calc(3 * var(--presenter-stage-unit)); margin: 2cqh auto 0; background: currentColor; }
+/* Keep moving praise footage above an already-mounted still background. */
+.presenter-output-root > .presenter-output-background-video { z-index: 1; }
+
+/* Authored service design: colors/artwork shared by previews and clean output. */
+.presenter-output-root.no-chromakey .presenter-slide--service-design {
+  background: var(--service-design-background);
+  color: var(--service-design-foreground);
+  text-shadow: none;
+  --presenter-slide-bg-image: none;
+}
+.presenter-output-root.no-chromakey .presenter-slide--service-design::before {
+  display: block; width: auto; height: auto; transform: none;
+  content: ""; position: absolute;
+  inset: calc(34 * var(--presenter-stage-unit)) calc(72 * var(--presenter-stage-unit));
+  border-block: calc(2 * var(--presenter-stage-unit)) solid var(--service-design-accent);
+  pointer-events: none;
+  background: none;
+}
+.presenter-service-design-mark {
+  position: absolute; left: 50%; top: calc(68 * var(--presenter-stage-unit));
+  transform: translateX(-50%); width: calc(68 * var(--presenter-stage-unit));
+  height: calc(120 * var(--presenter-stage-unit)); object-fit: contain;
+}
+.presenter-slide--service-design .presenter-title-content-title,
+.presenter-slide--service-design .presenter-fullscreen-order-heading,
+.presenter-slide--service-design .presenter-title-content-body,
+.presenter-slide--service-design .presenter-scripture-reading-head,
+.presenter-slide--service-design .presenter-scripture-reading-text {
+  color: var(--service-design-foreground); text-shadow: none;
+}
+.presenter-slide--service-design .presenter-title-content-title,
+.presenter-slide--service-design .presenter-fullscreen-order-heading,
+.presenter-slide--service-design .presenter-scripture-reading-ref {
+  color: var(--service-design-accent);
+}
+.presenter-slide--service-design .presenter-fullscreen-order-heading {
+  border-color: var(--service-design-accent);
+}
+.presenter-slide--service-design .presenter-title-content { gap: calc(35 * var(--presenter-stage-unit)); }
+.presenter-output-root.no-chromakey .presenter-slide--service-design.presenter-slide--scripture-reading {
+  padding: calc(112 * var(--presenter-stage-unit)) calc(145 * var(--presenter-stage-unit)) calc(135 * var(--presenter-stage-unit));
+}
+.presenter-slide--service-design .presenter-scripture-reading {
+  --presenter-scripture-reading-text-size: calc(68 * var(--presenter-stage-unit));
+  background: none;
+  padding: 0;
+}
+.presenter-slide--service-design .presenter-scripture-reading-head {
+  border-bottom: calc(1 * var(--presenter-stage-unit)) solid var(--service-design-accent);
+  padding-bottom: calc(26 * var(--presenter-stage-unit));
+}
+.presenter-slide--service-design .presenter-scripture-reading-text {
+  word-break: keep-all; overflow-wrap: break-word; line-break: strict;
+  text-align: left; text-align-last: left; line-height: 1.5;
+  font-weight: 500; -webkit-text-stroke: 0; letter-spacing: -.025em;
+}
+
+.presenter-slide--service-design .presenter-scripture-reading-line { margin-top: calc(70 * var(--presenter-stage-unit)); }
+
+/* Typography belongs to the reusable service artwork, not the church preset. */
+.presenter-slide--service-design {
+  --presenter-output-fg: var(--service-design-foreground);
+  --presenter-output-bg: var(--service-design-background);
+  --presenter-font-family: "Mindex Service Display", "Mindex Service Serif", serif;
+  --presenter-reading-font-family: "Mindex Service Serif", serif;
+  --presenter-scripture-font: var(--presenter-font-family);
+  font-family: var(--presenter-font-family);
+  font-synthesis: none;
+}
+.presenter-slide--service-design .presenter-title-content-title,
+.presenter-slide--service-design .presenter-fullscreen-order-heading,
+.presenter-slide--service-design .presenter-scripture-reading-head {
+  font-family: var(--presenter-font-family);
+  font-weight: 500;
+  letter-spacing: -.02em;
+}
+.presenter-slide--service-design .presenter-title-content-title {
+  font-size: calc(132 * var(--presenter-stage-unit));
+}
+.presenter-slide--service-design .presenter-title-content-body {
+  font-family: var(--presenter-font-family);
+  font-size: calc(60 * var(--presenter-stage-unit));
+  font-weight: 400;
+  letter-spacing: .01em;
+}
+.presenter-slide--service-design .presenter-title-content-body span {
+  font-size: inherit; font-weight: inherit;
+}
+.presenter-slide--service-design .presenter-scripture-reading-version {
+  font-weight: 400;
+}
+.presenter-slide--service-design .presenter-scripture-reading-text {
+  font-weight: 400;
+  letter-spacing: -.015em;
 }

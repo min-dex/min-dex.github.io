@@ -17,10 +17,21 @@ class PagesGate(unittest.TestCase):
         workflow = yaml.safe_load((ROOT / '.github/workflows/cloud-check.yml').read_text())
         check = workflow['jobs']['offline-web']
         deploy = workflow['jobs']['deploy-pages']
+        scope = workflow['jobs']['scope']
+        self.assertEqual(check['needs'], 'scope')
+        self.assertEqual(scope['steps'][1]['run'], 'python3 cloud/check_scope.py')
+        self.assertEqual(scope['steps'][2]['name'], 'Scope proof: ${{ steps.plan.outputs.signature }}')
+        self.assertEqual(check['env']['MINDEX_CHECK_PROFILE'], '${{ needs.scope.outputs.profile }}')
+        self.assertEqual(check['env']['MINDEX_CHECK_SMOKES'], '${{ needs.scope.outputs.smokes }}')
+        self.assertEqual(check['env']['MINDEX_CHECK_SIGNATURE'], '${{ needs.scope.outputs.signature }}')
         self.assertEqual(deploy['needs'], 'offline-web')
         self.assertEqual(deploy['if'], "github.ref == 'refs/heads/main' && github.event_name != 'pull_request'")
         self.assertEqual(check['strategy']['matrix']['shard'], [0, 1, 2, 3])
         self.assertFalse(check['strategy']['fail-fast'])
+        self.assertEqual(check['concurrency'], {
+            'group': 'cloud-check-${{ github.event_name }}-${{ github.ref }}-${{ matrix.shard }}',
+            'cancel-in-progress': True,
+        })
         command = next(step['run'] for step in check['steps'] if 'cloud/check.py' in step.get('run', ''))
         self.assertIn('--shard-index ${{ matrix.shard }} --shard-count 4', command)
         self.assertNotIn('continue-on-error', check)
@@ -28,6 +39,11 @@ class PagesGate(unittest.TestCase):
             self.assertNotIn('continue-on-error', step)
         self.assertTrue(any('cloud/check.py' in step.get('run', '') for step in check['steps']))
         self.assertEqual(workflow['permissions'], {'contents': 'read'})
+        self.assertEqual(check['permissions'], {'contents': 'read', 'actions': 'read'})
+        reuse_step = next(step for step in check['steps'] if step.get('id') == 'verified')
+        self.assertEqual(reuse_step['run'], 'python3 cloud/reuse_checks.py')
+        for step in check['steps'][2:]:
+            self.assertEqual(step['if'], "steps.verified.outputs.reuse != 'true'")
         self.assertEqual(deploy['permissions'], {'contents': 'read', 'pages': 'write', 'id-token': 'write'})
         self.assertEqual(deploy['steps'][0]['with']['ref'], '${{ github.sha }}')
         self.assertIn('origin/main', deploy['steps'][1]['run'])

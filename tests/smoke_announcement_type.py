@@ -38,8 +38,8 @@ try:
     const anchor=footer.getBoundingClientRect().bottom;
     news.innerHTML=renderPresenterAnnouncementItems(presenterAnnouncementItems('① '+('긴 광고 내용 '.repeat(100))),slide);
     fitPresenterSongTitleText(stage);
-    check(news.scrollHeight<=news.clientHeight+1&&news.scrollWidth<=news.clientWidth+1,'long news clipped');
-    check(parseFloat(getComputedStyle(news).fontSize)<60,'long news did not fit');
+    check(parseFloat(getComputedStyle(news).fontSize)===40,'long news passed readable minimum');
+    check(news.dataset.presenterFitOverflow==='true','unfit copy is not flagged');
     check(Math.abs(footer.getBoundingClientRect().bottom-anchor)<1,'footer anchor moved');
     check(Math.abs(parseFloat(getComputedStyle(footer).fontSize)-50)<.1,'news resized footer');
     return 'PASS50/60/50px,600/800 weights,100px title, stage scaling and independent long-copy fit';

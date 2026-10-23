@@ -54,11 +54,11 @@ def main():
                             const textBounds = range.getBoundingClientRect();
                             return {size:parseFloat(style.fontSize), weight:style.fontWeight,
                               clean:chromakey || (!root.querySelector('.presenter-title-content-body')
-                                && !root.textContent.includes('찬양 1') && box.textContent.includes('♬')
+                                && !root.textContent.includes('찬양 1') && !box.textContent.includes('♬')
+                                && root.querySelector('.presenter-fullscreen-song-heading')?.textContent === '♬'
                                 && box.scrollWidth <= box.clientWidth + 1
                                 && Math.abs((textBounds.left + textBounds.right - stageBounds.left - stageBounds.right) / 2) < 2
-                                // Order headings are restored above the title (dc5cf02b), so the title box
-                                // sits below the heading rather than at the stage's vertical center.
+                                // The separate note sits above the centered main title.
                                 && bounds.top >= stageBounds.top && bounds.bottom <= stageBounds.bottom),
                               inside:[...range.getClientRects()].every(r => r.left >= clip.left - 1
                                 && r.right <= clip.right + 1 && r.top >= clip.top - 1

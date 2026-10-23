@@ -55,20 +55,37 @@ NODE_TESTS = (
     "test_worship_unchanged_save.mjs",
     "test_worship_read_parallel.cjs",
 )
+CSS_NODE_TESTS = ('test_app_runtime.cjs', 'test_ui_icons.cjs',
+                  'test_remote_theme.cjs', 'test_bulletin.cjs')
 SMOKES = (
+    "smoke_legacy_title_restore.py",
+    "smoke_song_form_width.py",
+    "smoke_medley_unlink.py",
+    "smoke_editor_save_status.py",
+    "smoke_service_browse_categories.py",
+    "smoke_presenter_window_buttons.py",
+    "smoke_service_structural_order.py",
+    "smoke_special_service_order.py",
+    "smoke_title_songform.py",
+    "smoke_presenter_common_fit.py",
     "smoke_transition_logo.py",
+    "smoke_fullscreen_praise.py",
+    "smoke_service_design.py",
     "smoke_announcement_type.py",
     "smoke_children_theme.py",
     "smoke_presenter_remote.py",
+    "smoke_remote_preview.py",
     "smoke_remote_phone.py",
     "smoke_remote_panel.py",
     "smoke_remote_lifecycle.py",
     "smoke_remote_adapter.py",
+    "smoke_remote_video.py",
     "smoke_reference_validation.py",
     "smoke_presenter_freshness.py",
     "smoke_shell_icons.py",
     "smoke_praise_progressive_loading.py",
     "smoke_version_output_title.py",
+    "smoke_version_order.py",
     "smoke_hymn_measures.py",
     "smoke_sidebar_control_affordance.py",
     "smoke_module_landings.py",
@@ -134,11 +151,45 @@ SMOKES = (
     "smoke_boot_loading_indicator.py",
 )
 
-def selected_tests(shard_index=0, shard_count=1):
+GOVERNANCE_TESTS = ("test_pages_gate.py", "test_cloud_check.py", "test_reuse_checks.py", "test_check_scope.py")
+
+
+def selected_tests(shard_index=0, shard_count=1, *, smokes=None, node_tests=None):
+    smokes = SMOKES if smokes is None else tuple(smokes)
+    node_tests = NODE_TESTS if node_tests is None else tuple(node_tests)
     if shard_count < 1 or not 0 <= shard_index < shard_count:
         raise ValueError("shard index must be within a positive shard count")
-    unit = ("test_pages_gate.py", "test_cloud_check.py") + NODE_TESTS if shard_index == 0 else ()
-    return unit + SMOKES[shard_index::shard_count]
+    unit = GOVERNANCE_TESTS + node_tests if shard_index == 0 else ()
+    if shard_count == 1:
+        return unit + smokes
+    # Durations affect scheduling only; the explicit allowlist owns coverage.
+    import json
+    timings = json.loads((ROOT / 'cloud/smoke_timings.json').read_text())
+    groups = [[] for _ in range(shard_count)]
+    loads = [7.0] + [0.0] * (shard_count - 1)  # unit/manual checks on shard 0
+    for name in sorted(smokes, key=lambda name: -timings.get(name, 10.0)):
+        target = min(range(shard_count), key=lambda index: loads[index])
+        groups[target].append(name)
+        loads[target] += timings.get(name, 10.0)
+    return unit + tuple(groups[shard_index])
+
+
+def scope_parameters():
+    profile = os.environ.get('MINDEX_CHECK_PROFILE', 'full')
+    if profile == 'full':
+        return profile, SMOKES, NODE_TESTS
+    if profile != 'css':
+        raise ValueError('Unknown check profile')
+    import json
+    try:
+        smokes = json.loads(os.environ['MINDEX_CHECK_SMOKES'])
+        if (not isinstance(smokes, list) or not smokes
+            or not all(isinstance(name, str) for name in smokes)
+            or len(smokes) != len(set(smokes)) or not set(smokes) <= set(SMOKES)):
+            raise ValueError('Invalid CSS screen selection')
+    except (KeyError, TypeError, json.JSONDecodeError) as error:
+        raise ValueError('Invalid CSS screen selection') from error
+    return profile, tuple(smokes), CSS_NODE_TESTS
 
 
 def main():
@@ -147,7 +198,8 @@ def main():
     parser.add_argument("--shard-count", type=int, default=1)
     args = parser.parse_args()
     try:
-        selected = selected_tests(args.shard_index, args.shard_count)
+        profile, smokes, node_tests = scope_parameters()
+        selected = selected_tests(args.shard_index, args.shard_count, smokes=smokes, node_tests=node_tests)
     except ValueError as error:
         parser.error(str(error))
     env = dict(os.environ, MINDEX_SMOKE_OFFLINE="1")
@@ -166,7 +218,7 @@ def main():
         subprocess.run(command, cwd=ROOT, env=env, check=True, timeout=180)
         print(f"DONE {name}: {time.monotonic() - test_started:.1f}s", flush=True)
     label = "Cloud baseline" if args.shard_count == 1 else f"Cloud shard {args.shard_index + 1}/{args.shard_count} (not the whole gate)"
-    print(f"PASS {label}: {len(selected)} entry points in {time.monotonic() - started:.1f}s")
+    print(f"PASS {profile} {label}: {len(selected)} entry points in {time.monotonic() - started:.1f}s")
     print("Not covered: full regression suite, production DB, original corpus, physical output, signed desktop packages.")
 
 if __name__ == "__main__":

@@ -304,10 +304,14 @@ function presenterScoreSlidesForServiceItem(
   const imageSlides = presenterScoreImageSlidesFromAsset(asset, item, section, index, title, label, song, version, displayText, forms, formWarnings);
   if (imageSlides.length) return imageSlides;
   const scoreAsset = { ...asset, kind: asset.kind || "score" };
-  if (!String(scoreAsset.url || "").trim()) return [];
+  if (!String(scoreAsset.url || "").trim()) {
+    return presenterScoreFormPresetLabels(item, song, version).flatMap((label, position) =>
+      normalizePresenterFormPresetLabel(label).type === "title"
+        ? [presenterSequenceTitleSlide(item, section, song, version, displayText, index, position)] : []);
+  }
   const fileTitle = presenterFileDisplayTitle({ title, asset: scoreAsset }, "악보");
   const scoreForms = presenterScoreFormsFromImageSources([{ formLabel: asset.formLabel || asset.form_label || asset.scoreFormLabel || asset.score_form_label }]);
-  return [{
+  const fileSlide = {
     id: `${item.id || index}:score`,
     ...section,
     sectionLabel: section.sectionLabel || label || "악보",
@@ -327,7 +331,11 @@ function presenterScoreSlidesForServiceItem(
     sourceType: "score",
     componentType: "score",
     sort: index,
-  }];
+  };
+  const sequence = presenterScoreImageSourcesForFormSequence([{ url: scoreAsset.url }], scoreForms, forms, item, song, version);
+  return sequence.imageSources.map((source, position) => source._presenterTitle
+    ? presenterSequenceTitleSlide(item, section, song, version, displayText, index, position)
+    : { ...fileSlide, sort: index + position / 100 });
 }
 
 function presenterScoreImageSlidesFromAsset(
@@ -360,9 +368,11 @@ function presenterScoreImageSlidesFromAsset(
     }))
     .filter((slide) => slide.url && presenterMediaSourceIsImage(slide.url));
   const count = imageSources.length;
+  if (!count) return [];
   const scoreForms = presenterScoreFormsFromImageSources(imageSources);
   const sequenced = presenterScoreImageSourcesForFormSequence(imageSources, scoreForms, forms, item, song, version);
   return sequenced.imageSources.map((slide, slideIndex) => {
+    if (slide._presenterTitle) return presenterSequenceTitleSlide(item, section, song, version, displayText, index, slideIndex);
     return {
       id: `${item.id || index}:score-image:${slideIndex}`,
       ...section,
@@ -381,6 +391,7 @@ function presenterScoreImageSlidesFromAsset(
       imageSrc: slide.url,
       asset: { ...asset, kind: asset.kind || "score", url: slide.url, name: slide.name || asset.name || "" },
       ...presenterScoreFormMetadata(sequenced.scoreForms, slideIndex, formWarnings),
+      ...(slide.titleSequenceWarning ? { warnings: [...formWarnings, slide.titleSequenceWarning] } : {}),
       scoreBackground: true,
       sourceType: "score",
       componentType: "score",
@@ -480,15 +491,33 @@ function presenterApplySyncedLyricsConfig(slides = [], syncConfig = null, item =
 }
 
 function presenterScoreImageSourcesForFormSequence(imageSources = [], scoreForms = [], forms = [], item = {}, song = null, version = null) {
-  const presetLabels = presenterScoreFormPresetLabels(item, song, version);
+  const policy = presenterScoreFormSequence(item, song, version);
+  const presetLabels = policy.forms;
   const planTargets = presetLabels
     .map((label) => normalizePresenterFormPresetLabel(label))
     .filter((target) => target.key && target.type !== "lyrics");
   const scoreTargets = (scoreForms || []).map((form) =>
     form ? normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form)) : null,
   );
-  if (!planTargets.length || !scoreTargets.some((target) => target?.key)) {
-    return { imageSources, scoreForms };
+  if (!planTargets.length) return { imageSources, scoreForms };
+  if (policy.defaultTitle && planTargets.every(target => target.type === "title")) {
+    return { imageSources: [{ _presenterTitle: true }, ...imageSources], scoreForms: [null, ...scoreForms] };
+  }
+  if (!scoreTargets.some((target) => target?.key)) {
+    if (!planTargets.some(target => target.type === "title")) return { imageSources, scoreForms };
+    // A deck without form labels has no reliable verse boundaries. Keep every
+    // page; titles at the ends are unambiguous, internal positions need labels.
+    const first = planTargets.findIndex(target => target.type !== "title");
+    if (first < 0) return { imageSources: planTargets.map(() => ({ _presenterTitle: true })), scoreForms: [] };
+    const last = planTargets.findLastIndex(target => target.type !== "title");
+    const ambiguous = planTargets.slice(first, last + 1).some(target => target.type === "title");
+    return {
+      imageSources: [
+        ...planTargets.slice(0, first).map(() => ({ _presenterTitle: true })),
+        ...imageSources.map(source => ambiguous ? { ...source, titleSequenceWarning: "악보 송폼 표시가 없어 중간 Title 위치를 확인할 수 없습니다." } : source),
+        ...planTargets.slice(last + 1).map(() => ({ _presenterTitle: true })),
+      ], scoreForms: [],
+    };
   }
 
   const groups = [];
@@ -507,6 +536,10 @@ function presenterScoreImageSourcesForFormSequence(imageSources = [], scoreForms
   const lastMatchedByKey = new Map();
   let cursor = 0;
   planTargets.forEach((target) => {
+    if (target.type === "title") {
+      selected.push({ sources: [{ _presenterTitle: true }], forms: [null] });
+      return;
+    }
     const matchIndex = groups.findIndex((group, index) =>
       index >= cursor && group.target && presenterFormTargetsMatch(target, group.target),
     );
@@ -528,7 +561,8 @@ function presenterScoreImageSourcesForFormSequence(imageSources = [], scoreForms
   const openingUrl = String(opening?.sources?.[0]?.url || opening?.sources?.[0]?.src || "");
   if (!opening?.target?.key && opening?.sources?.length === 1
       && /(?:^|\/)assets\/hymn-scores\/(163|166)\/slide-01\.webp(?:[?#]|$)/.test(openingUrl)) {
-    selected.unshift(opening);
+    const firstContent = selected.findIndex(group => group.sources.some(source => !source._presenterTitle));
+    if (firstContent >= 0) selected.splice(firstContent, 0, opening);
   }
   return {
     imageSources: selected.flatMap((group) => group.sources),
@@ -536,19 +570,23 @@ function presenterScoreImageSourcesForFormSequence(imageSources = [], scoreForms
   };
 }
 
+function presenterScoreFormSequence(item = {}, song = null, version = null) {
+  const memo = parseServiceItemMemo(item?.memo);
+  if (serviceItemFormPresetDisabled(item)) {
+    return memo.formPreset?.titleSequence ? { forms: [], titleSequence: true }
+      : { forms: ["Title"], titleSequence: true, defaultTitle: true };
+  }
+  const preset = serviceItemFormPreset(item)
+    || matchedServiceItemFormPresetRule(item, song, version)?.formPreset
+    || presenterSongDefaultFormPreset(song, version);
+  const forms = normalizeServiceFormPresetForms(preset?.forms || []);
+  if (preset?.titleSequence) return { ...preset, forms };
+  // Translate the old implicit title into the same virtual token used by lyrics.
+  return { ...preset, forms: ["Title", ...forms], titleSequence: true, defaultTitle: true };
+}
+
 function presenterScoreFormPresetLabels(item = {}, song = null, version = null) {
-  if (typeof serviceItemFormPresetDisabled === "function" && serviceItemFormPresetDisabled(item)) return [];
-  const itemPreset = typeof serviceItemFormPreset === "function" ? serviceItemFormPreset(item) : null;
-  const matchedRule = typeof matchedServiceItemFormPresetRule === "function"
-    ? matchedServiceItemFormPresetRule(item, song, version)
-    : null;
-  const songDefaultPreset = presenterSongDefaultFormPreset(song, version);
-  return cleanList(
-    itemPreset?.forms
-    || matchedRule?.formPreset?.forms
-    || songDefaultPreset?.forms
-    || [],
-  );
+  return presenterScoreFormSequence(item, song, version).forms;
 }
 
 function presenterScoreFormMetadata(forms = [], slideIndex = 0, formWarnings = []) {
@@ -675,7 +713,21 @@ function presenterHymnOnceOnlyIntro(forms = [], version = {}) {
   });
 }
 
-function presenterServiceItemFormPreset(version = {}, item = {}, song = null, { includePlaybackFallback = true } = {}) {
+function presenterServiceItemFormPreset(version = {}, item = {}, song = null, options = {}) {
+  const available = normalizeForms(version?.forms || []).filter(form => normalizeLyricsForCopy(form.lyrics));
+  const sourceSequence = available.length && available.every(form => normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form)).type !== "lyrics")
+    ? { forms: available.map(presenterFormDisplayLabel), strength: "auto" } : null;
+  const preset = presenterServiceItemBaseFormPreset(version, item, song, options)
+    || (options.includePlaybackFallback !== false && !serviceItemFormPresetDisabled(item) ? sourceSequence : null);
+  // Legacy automatic titles become an explicit virtual sequence entry on read.
+  // An authored titleSequence (including an empty one) owns title visibility.
+  if (!preset?.forms?.length || preset.titleSequence || parseServiceItemMemo(item?.memo).formPreset?.titleSequence) return preset;
+  const resolved = presenterFormPresetWithAvailableForms(preset, available);
+  const forms = ["Title", ...resolved.forms];
+  return { ...resolved, forms, hint: forms.join("-"), titleSequence: true };
+}
+
+function presenterServiceItemBaseFormPreset(version = {}, item = {}, song = null, { includePlaybackFallback = true } = {}) {
   // Clearing the editable form suppresses stored defaults, not the ordinary
   // verse/chorus playback cycle. Keep the input empty and never persist inference.
   if (serviceItemFormPresetDisabled(item)) {
@@ -786,7 +838,7 @@ function presenterFormsWithNoSourceOmissions(plannedForms = [], sourceForms = []
 }
 
 function presenterExplicitNonHymnFormPreset(preset = null) {
-  if (!preset?.forms?.length) return null;
+  if (!preset?.forms?.length && !preset?.titleSequence) return null;
   return String(preset.strength || "").trim().toLowerCase() === "suggested" ? null : preset;
 }
 
@@ -1005,12 +1057,15 @@ function presenterFormsAreUnsplitLyrics(forms = []) {
   return Boolean(normalizedForms.length) && normalizedForms.every((form) => normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form)).type === "lyrics");
 }
 
-function resolvePresenterLyricsFormPresetSequence(forms = [], presetForms = [], sourceForms = []) {
-  const blocks = presenterLyricsBlocksFromForms(forms);
+function resolvePresenterLyricsFormPresetSequence(forms = [], presetForms = [], sourceForms = [], providedBlocks = null) {
+  const blocks = providedBlocks || presenterLyricsBlocksFromForms(forms);
   const blockBySourceKey = new Map();
   const sourceBlockIndexes = new Set();
-  cleanList(sourceForms).forEach((label, index) => {
+  let sourceIndex = 0;
+  cleanList(sourceForms).forEach((label) => {
     const target = normalizePresenterFormPresetLabel(label);
+    if (target.type === "title") return;
+    const index = sourceIndex++;
     if (!target.key || target.blank || blockBySourceKey.has(target.key)) return;
     const block = blocks[index];
     if (block) {
@@ -1025,6 +1080,10 @@ function resolvePresenterLyricsFormPresetSequence(forms = [], presetForms = [], 
   cleanList(presetForms).forEach((label, index) => {
     const target = normalizePresenterFormPresetLabel(label);
     if (!target.key) return;
+    if (target.type === "title") {
+      items.push(findPresenterFormForPresetLabel([], "Title"));
+      return;
+    }
     if (target.blank) {
       items.push(presenterBlankFormPresetItem(label, target));
       return;
@@ -1088,6 +1147,7 @@ function presenterFormPartTypeForPresetTarget(target = {}) {
 function findPresenterFormForPresetLabel(forms = [], label = "") {
   const target = normalizePresenterFormPresetLabel(label);
   if (!target.key) return null;
+  if (target.type === "title") return { _presenterTitle: true, id: "preset-title", label: "Title", lyrics: "" };
   if (target.blank) return presenterBlankFormPresetItem(label, target);
   if (target.type === "tag") {
     const chorus = findPresenterFormForPresetTarget(forms, { key: "chorus", type: "chorus" });
@@ -1207,6 +1267,7 @@ function presenterFormDisplayLabel(form = {}) {
 function normalizePresenterFormPresetLabel(value = "") {
   const raw = canonicalServiceFormToken(value);
   const compact = compactSearchValue(raw);
+  if (raw === "Title") return { key: "title", type: "title", number: 0 };
   const lastVerse = /^(vl|마지막절|lastverse|last)$/i.test(compact);
   if (lastVerse) return { key: "last-verse", type: "verse", number: 0, lastVerse: true };
   const hymnVerse = raw.match(/^(\d+)\s*절$/u);
@@ -1314,6 +1375,7 @@ function presenterFormPresetDisplayLabel(value = "") {
   const target = normalizePresenterFormPresetLabel(raw);
   const group = String(target.group || "").trim().toUpperCase();
   const suffix = target.variant ? `${target.number ? ` ${target.number}` : ""} @${group ? ` ${group}` : ""}` : target.number ? ` ${target.number}${group ? ` ${group}` : ""}` : group ? ` ${group}` : "";
+  if (target.type === "title") return "Title";
   if (target.lastVerse) return "Last Verse";
   if (target.type === "verse") return `Verse${suffix}`;
   if (target.type === "chorus") return `Chorus${suffix}`;
@@ -1466,9 +1528,9 @@ function presenterAnnouncementBodyText(text = "") {
     .join("\n");
 }
 
-function liturgicalBodyText(item = {}, memo = parseServiceItemMemo(item?.memo), displayText = "") {
+function liturgicalBodyText(item = {}, memo = parseServiceItemMemo(item?.memo), displayText = "", service = {}) {
   const title = liturgicalBodyTitle(item);
-  const canonical = presenterCanonicalLiturgicalBodyText(title);
+  const canonical = presenterCanonicalLiturgicalBodyText(title, service);
   if (canonical && !item?.template_modified && !item?.templateModified) return canonical;
   const announcement = isAnnouncementTextInputItem(item);
   if (memo.slides?.length) {
@@ -1480,15 +1542,20 @@ function liturgicalBodyText(item = {}, memo = parseServiceItemMemo(item?.memo), 
   return announcement ? presenterAnnouncementBodyText(text) : canonical || text.trim();
 }
 
-function presenterCanonicalLiturgicalBodyText(title = "") {
+function presenterCommunityConfessionCommunityName(service = {}) {
+  const type = worshipAppServiceTypeId(service?.type_id || service?.service_type_id || service?.typeId || "");
+  return type === "children" ? "검단우리교회 꿈꾸는 어린이부 공동체" : "검단우리교회 공동체";
+}
+
+function presenterCanonicalLiturgicalBodyText(title = "", service = {}) {
   const key = compactSearchValue(title);
   if (key === "주기도문") return PRESENTER_PUBLIC_LORDS_PRAYER_TEXT;
-  if (key === "공동체고백") return PRESENTER_PUBLIC_COMMUNITY_CONFESSION_TEXT;
+  if (key === "공동체고백") return PRESENTER_PUBLIC_COMMUNITY_CONFESSION_TEXT.replace("검단우리교회 공동체", presenterCommunityConfessionCommunityName(service));
   if (key === "사도신경" || key === "신앙고백") return PRESENTER_PUBLIC_APOSTLES_CREED_TEXT;
   return "";
 }
 
-function liturgicalBodyTextHighlights(item = {}, memo = parseServiceItemMemo(item?.memo)) {
+function liturgicalBodyTextHighlights(item = {}, memo = parseServiceItemMemo(item?.memo), service = {}) {
   const explicit = normalizeServiceTextHighlights(memo?.textHighlights || memo?.text_highlights || memo?.highlights);
   if (explicit.length) return explicit;
   if (liturgicalBodyTitle(item) !== "공동체고백") return [];
@@ -1503,19 +1570,19 @@ function liturgicalBodyTextHighlights(item = {}, memo = parseServiceItemMemo(ite
     { text: "치유자", color: "#FF6432", bold: true },
     { text: "화해자", color: "#32C8FF", bold: true },
     { text: "소명자", color: "#9696FF", bold: true },
-    { text: "검단우리교회 공동체", bold: true },
+    { text: presenterCommunityConfessionCommunityName(service), bold: true },
   ];
 }
 
 function buildPresenterLiturgicalBodySlides(item, section, index, service, memo, displayText) {
   if (!isLiturgicalBodyServiceItem(item)) return [];
-  const text = liturgicalBodyText(item, memo, displayText);
+  const text = liturgicalBodyText(item, memo, displayText, service);
   if (!text) return [];
   const title = liturgicalBodyTitle(item);
   const announcementItems = isAnnouncementTextInputItem(item)
     ? presenterAnnouncementItems(text)
     : [];
-  const textHighlights = liturgicalBodyTextHighlights(item, memo);
+  const textHighlights = liturgicalBodyTextHighlights(item, memo, service);
   const base = {
     ...section,
     sectionLabel: item?.label || title,
@@ -2109,6 +2176,17 @@ function buildPresenterCustomSlides(item, section, index) {
       sort: index + blockIndex / 100,
     };
   }).filter((slide) => slide.type === "blank" || String(slide.text || "").trim());
+  const preset = presenterServiceItemFormPreset({}, item);
+  if (songLikeItem && preset?.titleSequence && preset.forms?.length) {
+    const plan = resolvePresenterLyricsFormPresetSequence([], preset.forms, [], lyricSlides.map(slide => slide.text));
+    return plan.items.map((form, position) => form._presenterTitle
+      ? presenterSequenceTitleSlide(item, section, null, null, serviceItemDisplayText(item), index, position)
+      : { ...lyricSlides[0], id: `${item.id || index}:custom-sequence:${position}`,
+        type: form._presenterBlank ? "blank" : "lyrics", text: form.lyrics || "",
+        elementType: form._presenterBlank ? PRESENTER_ELEMENT_TYPES.BLANK : PRESENTER_ELEMENT_TYPES.PRAISE,
+        layout: form._presenterBlank ? PRESENTER_SLIDE_LAYOUTS.BLANK : PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT,
+        marker: form.label, formKey: `custom:${position}`, sort: index + position / 100 });
+  }
   if (!songLikeItem || !shouldIncludeSongTitleSlide(item, label)) return lyricSlides;
   return [
     presenterSongTitleSlide(item, section, null, null, serviceItemConnectedPraiseTitle(item, "title") || serviceItemDisplayText(item), index),
@@ -2312,7 +2390,9 @@ function isScriptureBodyServiceItem(item) {
     || (sectionKey === "scripture_reading" && elementType === "scripture_body");
 }
 
-function shouldIncludeSongTitleSlide(item, label) {
+function shouldIncludeSongTitleSlide(item, label, song = null, version = null) {
+  if (parseServiceItemMemo(item?.memo).formPreset?.titleSequence
+      || presenterServiceItemFormPreset(version || {}, item, song)?.titleSequence) return false;
   if (isServiceConnectedPraiseSecondaryItem(item)) return false;
   const displayText = serviceItemDisplayText(item);
   if (serviceItemConnectedPraiseTitle(item, "title")) return true;
@@ -2340,15 +2420,13 @@ function presenterSongTitleSlide(item, section, song, version, displayText, inde
     detail: songDetail,
     detailKind: connectedTitle ? "" : presenterSongTitleDetailKind(song, version),
   };
-  if (sectionHeading) {
-    return { ...presenterOrderContentTitleSlide(item, section, index, sectionHeading, titleText), songTitle: displayTitle, songTitleContent };
-  }
   return {
     id: `${item.id || index}:song-title`,
     ...section,
     elementType: PRESENTER_ELEMENT_TYPES.PRAISE,
     layout: PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT,
     type: "song-title",
+    formKey: "title:0", formLabel: "Title",
     label: item.label || "",
     title: displayTitle,
     subtitle: connectedTitle ? "" : versionDisplayName(song, version),
@@ -2853,6 +2931,7 @@ function presenterStatePayload(serviceId = state.presenter.serviceId) {
     serviceTitle: [serviceDisplayTypeName(service), service ? formatServiceDate(service) : ""].filter(Boolean).join(" · "),
     serviceDate: service?.date || "",
     transitionLogo: normalizePresenterTransitionLogo(serviceRawSourceRef(service).transitionLogo),
+    presentationDesign: normalizePresenterServiceDesign(serviceRawSourceRef(service).presentationDesign),
     chromakey: serviceChromakey,
     outputTheme: presenterOutputTheme(service?.type_id),
     backgroundImage: backgroundImages[0] || "",
@@ -2979,6 +3058,12 @@ function handlePresenterControllerMessage(message = {}) {
   if (!acceptsPresenterOutputMessage(message)) return;
   if (["presenter-ready", "presenter-heartbeat"].includes(message.type)) {
     state.presenter.outputTransportVersion = Number(message.transportVersion) || 0;
+  }
+  if (message.type === "presenter-video-result") {
+    const pending = presenterVideoRequests.get(message.requestId);
+    if (!pending || pending.clientId !== message.clientId || pending.outputSessionId !== message.outputSessionId) return;
+    pending.finish(message);
+    return;
   }
   if (message.type === "presenter-ready") {
     markPresenterOutputConnected(message.clientId);
@@ -3619,8 +3704,21 @@ function initPresenterOutputCore() {
       return false;
     }
   };
+  const videoCommandReceipts = new Map();
   let lastVideoRetryId = "";
   const handleOutputSignalMessage = (message = {}) => {
+    if (message.type === "presenter-video-command") {
+      if (message.clientId !== outputClientId || message.outputSessionId !== outputSessionId
+        || typeof message.requestId !== "string" || message.requestId.length > 80) return;
+      let receipt = videoCommandReceipts.get(message.requestId);
+      if (!receipt) {
+        receipt = executePresenterVideoCommand(message, () => currentPayload);
+        videoCommandReceipts.set(message.requestId, receipt);
+        if (videoCommandReceipts.size > 64) videoCommandReceipts.delete(videoCommandReceipts.keys().next().value);
+      }
+      receipt.then(result => { sendControllerMessage({type:"presenter-video-result",clientId:outputClientId,requestId:message.requestId,...result});postHeartbeat(); });
+      return;
+    }
     if (message.type === "presenter-video-retry") {
       if (message.clientId !== outputClientId || !message.requestId || message.requestId === lastVideoRetryId) return;
       lastVideoRetryId = message.requestId;
@@ -3669,7 +3767,7 @@ function initPresenterOutputCore() {
   if (channel) {
     renderFreshStoredState();
     channel.onmessage = (event) => {
-      if (event.data?.type === "presenter-video-retry") {
+      if (["presenter-video-retry", "presenter-video-command"].includes(event.data?.type)) {
         handleOutputSignalMessage(event.data);
         return;
       }
@@ -3825,6 +3923,7 @@ function normalizePresenterPayload(payload) {
     serviceDate: payload?.serviceDate || payload?.service_date || "",
     chromakey: Boolean(payload?.chromakey),
     transitionLogo: normalizePresenterTransitionLogo(payload?.transitionLogo),
+    presentationDesign: normalizePresenterServiceDesign(payload?.presentationDesign),
     outputTheme: payload?.outputTheme || presenterOutputTheme(payload?.serviceType),
     backgroundImage: payload?.backgroundImage || "",
     backgroundImages: Array.isArray(payload?.backgroundImages)
@@ -4012,6 +4111,7 @@ function presenterOutputFrameStateForSlide(slide, payload = {}) {
     scoreOutput,
     videoOutput,
     scriptureReadingOutput,
+    backgroundVideo: blackoutOutput ? "" : presenterSlideBackgroundVideoSource(slide, cleanOutput),
     backgroundImage: backgroundImages[0] || "",
     backgroundImages,
     serviceType: payload?.serviceType || "",
@@ -4076,7 +4176,7 @@ function presenterOutputFrameBackgroundStyle(frameState = {}) {
 }
 
 function commitPresenterOutputFrame(root, payload, slide, frameState, token, options = {}) {
-  const html = slide ? renderPresenterSlideFrame(slide, { noChromakey: frameState.noChromakey, transitionLogo: payload.transitionLogo }) : "";
+  const html = slide ? renderPresenterSlideFrame(slide, { noChromakey: frameState.noChromakey, transitionLogo: payload.transitionLogo, presentationDesign: payload.presentationDesign }) : "";
   const activeImageSource = presenterSlideImageSource(slide);
   const frameKey = presenterOutputFrameKey(payload, slide, frameState);
   const commit = () => {
@@ -4234,7 +4334,9 @@ function presenterOutputFrameKey(payload = {}, slide = null, frameState = {}) {
     frameState.noChromakey ? "clean" : "chromakey",
     frameState.blankOutput ? "blank" : "",
     frameState.backgroundImage || "",
+    frameState.backgroundVideo || "",
     frameState.blankOutput ? JSON.stringify(normalizePresenterTransitionLogo(payload.transitionLogo)) : "",
+    JSON.stringify(normalizePresenterServiceDesign(payload.presentationDesign)),
     slide.title || "",
     slide.text || "",
   ].map((value) => String(value ?? "")).join("|");
@@ -4254,6 +4356,51 @@ function presenterOutputShouldAnimateFrameTransition(root, frameState = {}) {
   return true;
 }
 
+// All fitting sizes are measured on the same 1920px design stage.
+const PRESENTER_TEXT_FIT = Object.freeze({ step:5, body:40, title:70 });
+function presenterTextFitScale(box) {
+  return (box.closest?.(".presenter-output-root")?.clientWidth || 1920) / 1920;
+}
+function presenterTextFitStatus(box, overflow) {
+  if (overflow) {
+    box.dataset.presenterFitOverflow = "true";
+    box.setAttribute("aria-description", "최소 글자 크기에서도 내용이 넘칩니다. 내용을 나누어 주세요.");
+  } else {
+    if (box.dataset.presenterFitOverflow) box.removeAttribute("aria-description");
+    delete box.dataset.presenterFitOverflow;
+  }
+}
+function presenterTextFits(box, role = "body") {
+  const tolerance = presenterTextFitScale(box);
+  if (box.scrollWidth > box.clientWidth + tolerance) return false;
+  if (role !== "title") return box.scrollHeight <= box.clientHeight + tolerance;
+  // Title line-height is intentionally tight; check its allocated frame instead
+  // of mistaking font ink below the line box for a text overflow.
+  const frame = box.closest(".presenter-slide");
+  if (!frame) return true;
+  const bounds = frame.getBoundingClientRect(), text = box.getBoundingClientRect();
+  const root = box.closest(".presenter-output-root");
+  const renderedTolerance = (root?.getBoundingClientRect().width || 1920) / 1920;
+  return text.top >= bounds.top - renderedTolerance && text.bottom <= bounds.bottom + renderedTolerance;
+}
+function fitPresenterTextBox(box, { role="body", fits=()=>presenterTextFits(box, role), property="font-size" } = {}) {
+  box.style.removeProperty(property);
+  const scale = presenterTextFitScale(box);
+  const base = Number.parseFloat(getComputedStyle(box).fontSize);
+  if (!box.clientWidth || !box.clientHeight || !Number.isFinite(base) || base <= 0) return;
+  presenterTextFitStatus(box, false);
+  if (fits()) return;
+  const normalizedBase = Math.round(base / scale * 1000) / 1000;
+  const floor = Math.min(PRESENTER_TEXT_FIT[role], normalizedBase);
+  let candidate = Math.floor(normalizedBase / PRESENTER_TEXT_FIT.step) * PRESENTER_TEXT_FIT.step;
+  for (; candidate > floor; candidate -= PRESENTER_TEXT_FIT.step) {
+    box.style.setProperty(property, `${candidate * scale}px`);
+    if (fits()) return;
+  }
+  box.style.setProperty(property, `${floor * scale}px`);
+  presenterTextFitStatus(box, !fits());
+}
+
 function fitPresenterChromakeyScriptureText(host, frameState = {}) {
   if (!host || frameState.noChromakey) return;
   const textBox = host.querySelector(
@@ -4261,19 +4408,7 @@ function fitPresenterChromakeyScriptureText(host, frameState = {}) {
   );
   if (!textBox) return;
 
-  textBox.style.removeProperty("--presenter-scripture-fitted-size");
-  const baseSize = Number.parseFloat(window.getComputedStyle(textBox).fontSize);
-  if (!Number.isFinite(baseSize) || baseSize <= 0) return;
-
-  const preview = host.classList?.contains("svc-slide-mini-canvas");
-  const minimumSize = Math.min(preview ? 28 : 32, baseSize);
-  for (let size = Math.round(baseSize); size >= minimumSize; size -= 1) {
-    textBox.style.setProperty("--presenter-scripture-fitted-size", `${size}px`);
-    if (
-      textBox.scrollHeight <= textBox.clientHeight + 1
-      && textBox.scrollWidth <= textBox.clientWidth + 1
-    ) return;
-  }
+  fitPresenterTextBox(textBox, { property:"--presenter-scripture-fitted-size" });
 }
 
 function presenterTextNaturalWidth(node) {
@@ -4312,22 +4447,8 @@ function fitPresenterChromakeyScripturePreviews(host) {
 function fitPresenterSongTitleText(host) {
   if (!host) return;
   fitPresenterLyricText(host);
-  const outputRoot = host.closest?.(".presenter-output-root") || host;
-  const fullscreen = outputRoot.classList?.contains("no-chromakey");
-  const minimumSize = fullscreen ? 72 : 56;
-  host
-    .querySelectorAll(".presenter-slide--song-title > .presenter-slide-text, .presenter-slide--song-title .presenter-section-song-title-name")
-    .forEach((textBox) => {
-      textBox.style.removeProperty("font-size");
-      const baseSize = Number.parseFloat(window.getComputedStyle(textBox).fontSize);
-      if (!Number.isFinite(baseSize) || baseSize <= 0) return;
-
-      const floor = Math.min(minimumSize, baseSize);
-      for (let size = baseSize; size >= floor; size -= 2) {
-        textBox.style.fontSize = `${size}px`;
-        if (textBox.scrollWidth <= textBox.clientWidth + 1) return;
-      }
-    });
+  host.querySelectorAll(".presenter-slide--song-title > .presenter-slide-text, .presenter-slide--song-title .presenter-section-song-title-name")
+    .forEach(box => fitPresenterTextBox(box, {role:"title"}));
 }
 
 const presenterLyricFitCache = new Map();
@@ -4351,11 +4472,11 @@ function presenterLyricFitKey(textBox) {
   ]);
 }
 
-function rememberPresenterLyricFit(key, fontSize) {
+function rememberPresenterLyricFit(key, fontSize, overflow = false) {
   if (presenterLyricFitCache.size >= PRESENTER_LYRIC_FIT_CACHE_LIMIT) {
     presenterLyricFitCache.delete(presenterLyricFitCache.keys().next().value);
   }
-  presenterLyricFitCache.set(key, fontSize);
+  presenterLyricFitCache.set(key, {fontSize, overflow});
 }
 
 // Font changes invalidate every fit, but must not synchronously refit an
@@ -4374,39 +4495,30 @@ document.fonts?.addEventListener("loadingdone", invalidatePresenterFontFits);
 document.fonts?.addEventListener("loadingerror", invalidatePresenterFontFits);
 
 function fitPresenterLyricText(host) {
-  if(host)fitPresenterAnnouncementRegions(host);
+  if (!host) return;
+  fitPresenterAnnouncementRegions(host);
+  host.querySelectorAll(".presenter-liturgical-body-lines, .presenter-slide--liturgical-body .presenter-title-content-body")
+    .forEach(box => fitPresenterTextBox(box));
   host.querySelectorAll('.presenter-slide--lyrics:is([data-element-type="praise"], [data-section-key="announcements"]) > .presenter-slide-text').forEach((textBox) => {
     textBox.style.removeProperty("font-size");
     const baseSize = Number.parseFloat(getComputedStyle(textBox).fontSize);
     if (!Number.isFinite(baseSize) || baseSize <= 0 || !textBox.clientWidth) return;
-    // Read the unfitted CSS size first so theme, viewport and typography changes invalidate the key.
-    const key = document.fonts?.status === "loading" ? null : presenterLyricFitKey(textBox);
+    const key = document.fonts?.status === "loading" ? null : JSON.stringify([presenterTextFitScale(textBox),presenterLyricFitKey(textBox)]);
     if (key !== null && presenterLyricFitCache.has(key)) {
-      const size = presenterLyricFitCache.get(key);
-      if (size) textBox.style.fontSize = size;
+      const record = presenterLyricFitCache.get(key);
+      if (record.fontSize) textBox.style.fontSize = record.fontSize;
+      presenterTextFitStatus(textBox, record.overflow);
       return;
     }
     const fits = () => {
       const style = getComputedStyle(textBox);
       const width = textBox.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
-      return [...textBox.children].every((line) => presenterTextNaturalWidth(line) <= width - 2)
-        && textBox.scrollHeight <= textBox.clientHeight + 1;
+      const tolerance = presenterTextFitScale(textBox);
+      return [...textBox.children].every(line => presenterTextNaturalWidth(line) <= width - 2 * tolerance)
+        && textBox.scrollHeight <= textBox.clientHeight + tolerance;
     };
-    if (fits()) {
-      if (key !== null) rememberPresenterLyricFit(key, "");
-      return;
-    }
-    // Measure complete lines, including generated verse numbers, before revealing the frame.
-    let low = 0;
-    let high = baseSize;
-    for (let step = 0; step < 14; step += 1) {
-      const size = (low + high) / 2;
-      textBox.style.fontSize = `${size}px`;
-      if (fits()) low = size;
-      else high = size;
-    }
-    textBox.style.fontSize = `${low}px`;
-    if (key !== null) rememberPresenterLyricFit(key, textBox.style.fontSize);
+    fitPresenterTextBox(textBox, {fits});
+    if (key !== null) rememberPresenterLyricFit(key, textBox.style.fontSize, textBox.dataset.presenterFitOverflow === "true");
   });
 }
 
@@ -4419,23 +4531,8 @@ function fitPresenterSongTitlePreviews(host) {
 
 function fitPresenterSermonTitleText(host) {
   if (!host) return;
-  const outputRoot = host.closest?.(".presenter-output-root") || host;
-  const fullscreen = outputRoot.classList?.contains("no-chromakey");
-  const minimumSize = fullscreen ? 72 : 56;
-  host
-    .querySelectorAll(".presenter-title-assignee--sermon .presenter-title-assignee-content, .presenter-title-content-title")
-    .forEach((textBox) => {
-      textBox.style.removeProperty("font-size");
-      const baseSize = Number.parseFloat(window.getComputedStyle(textBox).fontSize);
-      if (!Number.isFinite(baseSize) || baseSize <= 0) return;
-
-      const songTitle = textBox.closest('.presenter-slide--fullscreen-song-title');
-      const floor = Math.min(songTitle ? 48 * (outputRoot.clientWidth || 1920) / 1920 : minimumSize, baseSize);
-      for (let size = baseSize; size >= floor; size -= 2) {
-        textBox.style.fontSize = `${size}px`;
-        if (textBox.scrollWidth <= textBox.clientWidth + 1) return;
-      }
-    });
+  host.querySelectorAll(".presenter-title-assignee--sermon .presenter-title-assignee-content, .presenter-title-content-title, .presenter-liturgical-body-heading > span")
+    .forEach(box => fitPresenterTextBox(box, {role:"title"}));
 }
 
 function fitPresenterSermonTitlePreviews(host) {
@@ -4611,6 +4708,99 @@ function presenterOutputLayers(root) {
   return { active, next };
 }
 
+// BEGIN GENERATED BACKGROUND LUMINANCE
+const PRESENTER_BACKGROUND_LUMINANCE = Object.freeze({
+  "26-A1": 0.021915,
+  "26-A2": 0.015800,
+  "26-A3": 0.004375,
+  "26-A4": 0.187702,
+  "26-A5": 0.116077,
+  "26-B1": 0.431074,
+  "26-B2": 0.417014,
+  "26-B3": 0.307186,
+  "26-B4": 0.005927,
+  "26-B5": 0.052116,
+  "26-C1": 0.273571,
+  "26-C2": 0.290693,
+  "26-C3": 0.710122,
+  "26-C5": 0.833448,
+  "26-S4": 0.836764,
+  "26-S5": 0.727394,
+  "26-S6": 0.606454,
+  "scripture-reading-cross": 0.009832,
+});
+// END GENERATED BACKGROUND LUMINANCE
+
+// White stays the default until its median contrast falls below 3:1.
+function presenterInkForLuminance(value) {
+  return typeof value === "number" && Number.isFinite(value) && 1.05 / (value + .05) < 3 ? "brown" : "white";
+}
+
+function presenterKnownBackgroundLuminance(source) {
+  try {
+    const url = new URL(source, window.location.href);
+    if (url.origin !== window.location.origin) return null;
+    const name = url.pathname.match(/\/assets\/worship-backgrounds\/(?:previews\/)?([^/]+)\.(?:png|webp)$/i)?.[1];
+    return Object.hasOwn(PRESENTER_BACKGROUND_LUMINANCE, name) ? PRESENTER_BACKGROUND_LUMINANCE[name] : null;
+  } catch { return null; }
+}
+
+function presenterDecodedBackgroundLuminance(image) {
+  try {
+    const canvas = document.createElement("canvas");canvas.width = 64;canvas.height = 36;
+    const context = canvas.getContext("2d", {willReadFrequently: true});
+    context.fillStyle = "#000";context.fillRect(0, 0, 64, 36);
+    // Same centered width-fill geometry as fullscreen still artwork.
+    const height = image.naturalHeight * 64 / image.naturalWidth;
+    context.drawImage(image, 0, (36 - height) / 2, 64, height);
+    const pixels = context.getImageData(0, 0, 64, 36).data;
+    const samples = [];
+    for (let y = 4; y < 32; y++) for (let x = 5; x < 59; x++) {
+      const index = (y * 64 + x) * 4;
+      const channel = offset => {const v = pixels[index + offset] / 255;return v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4;};
+      samples.push(.2126 * channel(0) + .7152 * channel(1) + .0722 * channel(2));
+    }
+    samples.sort((a, b) => a - b);
+    return (samples[samples.length / 2 - 1] + samples[samples.length / 2]) / 2;
+  } catch { return null; } // Unreadable cross-origin artwork retains white.
+}
+
+function presenterBackgroundInkSource(frameState = {}) {
+  if (!frameState.noChromakey || !frameState.showBackground || frameState.backgroundVideo) return "";
+  return normalizePresenterMediaSource(frameState.backgroundImages?.[0] || frameState.backgroundImage || "");
+}
+
+function presenterBackgroundInk(source) {
+  if (!source) return "white";
+  const known = presenterKnownBackgroundLuminance(source);
+  if (known !== null) return presenterInkForLuminance(known);
+  const record = presenterOutputImagePreloadCache.get(source);
+  if (!record?.ready) return "white";
+  if (!Object.hasOwn(record, "ink")) record.ink = presenterInkForLuminance(presenterDecodedBackgroundLuminance(record.image));
+  return record.ink;
+}
+
+function schedulePresenterBackgroundInk(source) {
+  if (!source || presenterKnownBackgroundLuminance(source) !== null) return;
+  const pending = preloadPresenterOutputImage(source);
+  const record = presenterOutputImagePreloadCache.get(source);
+  if (!pending || !record || record.inkNotificationScheduled) return;
+  record.inkNotificationScheduled = true;
+  pending.then(() => {
+    if (presenterOutputImagePreloadCache.get(source) !== record) return;
+    const ink = presenterBackgroundInk(source);
+    document.querySelectorAll(".presenter-output-root[data-output-ink-source]").forEach(root => {
+      if (root.dataset.outputInkSource === source) root.dataset.outputInk = ink;
+    });
+  });
+}
+
+function presenterBackgroundInkAttributes(frameState = {}) {
+  const source = presenterBackgroundInkSource(frameState);
+  schedulePresenterBackgroundInk(source);
+  return `data-output-ink="${presenterBackgroundInk(source)}" data-output-ink-source="${escapeAttr(source)}"`;
+}
+
 function applyPresenterOutputFrameState(root, frameState = {}) {
   document.body.classList.toggle("presenter-output-body--clean", Boolean(frameState.cleanOutput));
   document.body.classList.toggle("has-background", Boolean(frameState.showBackground));
@@ -4621,8 +4811,13 @@ function applyPresenterOutputFrameState(root, frameState = {}) {
   root.classList.toggle("is-blank", Boolean(frameState.blankOutput));
   document.body.classList.toggle("is-blackout", Boolean(frameState.blackoutOutput));
   root.classList.toggle("is-blackout", Boolean(frameState.blackoutOutput));
+  applyPresenterBackgroundVideo(root, frameState.backgroundVideo);
   root.dataset.serviceType = frameState.serviceType || "";
   root.dataset.outputTheme = frameState.outputTheme || presenterOutputTheme(frameState.serviceType);
+  const inkSource = presenterBackgroundInkSource(frameState);
+  root.dataset.outputInkSource = inkSource;
+  root.dataset.outputInk = presenterBackgroundInk(inkSource);
+  schedulePresenterBackgroundInk(inkSource);
   // Reuse decoded image nodes for output backgrounds. Assigning the URL to CSS
   // can start another fetch/decode after the readiness gate (notably cold caches).
   const sources = frameState.showBackground ? (frameState.backgroundImages?.length
@@ -4678,16 +4873,119 @@ function preparePresenterOutputFrameForPaint(host) {
   return Promise.all([...imageReady, ...videoReady]);
 }
 
+const presenterVideoRevisions = new WeakMap();
+const presenterVideoRequests = new Map();
+
+function presenterRemoteVideoState(serviceId) {
+  const p = state.presenter, health = p.videoHealth;
+  if (!health || health.serviceId !== serviceId || p.serviceId !== serviceId || health.index !== p.index
+    || p.safetyBlank || p.liveScripture?.active) return null;
+  const ready = Date.now() - health.receivedAt <= 2500 && ["playing","paused","ended","blocked"].includes(health.status)
+    && Number.isSafeInteger(health.revision) && Boolean(health.messageId)
+    && health.messageId === presenterTransportLatest?.payload?.messageId;
+  return {status:health.status,ready,revision:health.revision,identity:compactTextSignature(health.frameKey)};
+}
+
+function presenterManagedVideoState() {
+  const serviceId = state.presenter.serviceId;
+  if (!serviceId || !presenterControllerIsLive(serviceId) || !isPresenterOutputWindowOpen()) return null;
+  return presenterRemoteVideoState(serviceId);
+}
+
+function renderPresenterVideoManagement(video) {
+  const busy = presenterVideoRequests.size > 0;
+  const enabled = video?.ready && !busy && state.selectedServiceId === state.presenter.serviceId;
+  const labels = { playing: "재생 중", paused: "일시정지", ended: "재생 완료", blocked: "PC에서 재생 허용 필요", loading: "영상 준비 중", error: "영상 재생 실패" };
+  const status = busy ? "처리 중…" : video ? labels[video.status] || "상태 확인 중" : "송출 중인 영상이 없습니다.";
+  const title = state.presenter.slides[state.presenter.index]?.title || "현재 영상";
+  return `<section class="global-media-section" aria-label="영상"><h3>영상</h3>
+    ${video ? `<div class="global-playback-group"><span class="global-playback-name">${escapeHtml(title)}</span></div>` : ""}
+    <p class="global-playback-state" role="status">${escapeHtml(status)}</p>
+    <div class="global-playback-actions" role="group" aria-label="영상 재생 제어" ${video ? "" : "hidden"}>
+      ${[["play","play","재생"],["pause","pause","일시정지"],["restart","rotate-ccw","처음부터"]].map(([action,icon,label]) => `<button type="button" class="btn secondary" data-global-playback-action="video-${action}" aria-label="영상 ${label}" ${!enabled || (action === "pause" ? video?.status !== "playing" : action === "play" && video?.status === "playing") ? "disabled" : ""}><i data-lucide="${icon}"></i><span>${label}</span></button>`).join("")}
+    </div></section>`;
+}
+
+async function runPresenterManagedVideoAction(action) {
+  const serviceId = state.presenter.serviceId;
+  if (!presenterManagedVideoState()?.ready || presenterVideoRequests.size) return;
+  try { await requestPresenterVideoCommand(serviceId, action); }
+  catch (error) { showToast(error.message, "error"); }
+  finally { renderGlobalPlaybackControls(); }
+}
+
+function requestPresenterVideoCommand(serviceId, action) {
+  const health = state.presenter.videoHealth;
+  if (state.selectedServiceId !== serviceId || presenterVideoRequests.size || !["play","pause","restart"].includes(action) || !presenterRemoteVideoState(serviceId)?.ready)
+    return Promise.reject(Error("영상의 최신 상태를 확인한 뒤 다시 눌러 주세요."));
+  const outputSessionId = state.presenter.outputSessionId, requestId = crypto.randomUUID();
+  const message = {type:"presenter-video-command",action,requestId,outputSessionId,clientId:health.clientId,expiresAt:Date.now()+1800,
+    serviceId,index:health.index,frameKey:health.frameKey,messageId:health.messageId,revision:health.revision,status:health.status};
+  return new Promise((resolve,reject) => {
+    const finish = result => {
+      clearTimeout(timer);presenterVideoRequests.delete(requestId);
+      queueMicrotask(renderGlobalPlaybackControls);
+      if (state.presenter.outputSessionId !== outputSessionId || state.presenter.serviceId !== serviceId
+        || state.selectedServiceId !== serviceId || state.presenter.index !== message.index
+        || presenterTransportLatest?.payload?.messageId !== message.messageId)
+        return reject(Error("송출 상태가 바뀌었습니다. 현재 화면을 확인해 주세요."));
+      if (result.health) state.presenter.videoHealth={...result.health,clientId:health.clientId,receivedAt:Date.now()};
+      if (result.ok) resolve();else reject(Error(result.message || "영상 조작을 확인하지 못했습니다."));
+    };
+    const timer=setTimeout(()=>finish({ok:false,message:"영상 응답을 확인하지 못했습니다. 현재 화면을 확인해 주세요."}),1800);
+    presenterVideoRequests.set(requestId,{clientId:health.clientId,outputSessionId,finish});
+    renderGlobalPlaybackControls();
+    try { state.presenter.outputWindow?.postMessage(message,window.location.origin); } catch {}
+    try { state.presenter.channel?.postMessage(message); } catch {}
+  });
+}
+
+async function executePresenterVideoCommand(request, getPayload) {
+  const health=presenterOutputVideoHealth(getPayload());
+  const matches=health && ["serviceId","index","frameKey","messageId","revision","status"].every(key=>health[key]===request[key]);
+  if (!matches || getPayload()?.safetyBlank || !Number.isFinite(request.expiresAt) || Date.now()>request.expiresAt
+    || !["play","pause","restart"].includes(request.action))
+    return {ok:false,message:"영상 상태가 바뀌었습니다. 최신 상태에서 다시 눌러 주세요."};
+  const video=document.querySelector("#presenterOutputRoot .presenter-output-layer.is-active video.presenter-video");
+  try {
+    const settle = event => new Promise((resolve,reject) => {
+      const done=()=>{clearTimeout(timer);video.removeEventListener(event,done);resolve();};
+      const timer=setTimeout(()=>{video.removeEventListener(event,done);reject(Error('영상 상태 변경을 확인하지 못했습니다.'));},900);
+      video.addEventListener(event,done,{once:true});
+    });
+    if(request.action==='pause') {
+      if(!video.paused){const paused=settle('pause');video.pause();await paused;}
+    } else {
+      if(request.action==='restart'){const seeked=settle('seeked');video.currentTime=0;await seeked;}
+      const target=presenterOutputVideoHealth(getPayload());
+      if(!video.isConnected || Date.now()>request.expiresAt || getPayload()?.safetyBlank
+        || target?.messageId!==request.messageId || target?.frameKey!==request.frameKey
+        || target.revision!==request.revision+(request.action==='restart'?1:0))
+        throw Error("송출 화면이 바뀌었습니다. 현재 영상을 확인해 주세요.");
+      await video.play();
+    }
+    const current=presenterOutputVideoHealth(getPayload());
+    if (!video.isConnected || !current || current.messageId!==request.messageId || current.frameKey!==request.frameKey)
+      throw Error("송출 화면이 바뀌었습니다. 현재 영상을 확인해 주세요.");
+    if(request.action!=='pause'&&video.paused)throw Error("송출 PC에서 영상 재생을 허용해 주세요.");
+    return {ok:true,health:current};
+  } catch(error) {return {ok:false,message:error?.name==='NotAllowedError'?"송출 PC에서 영상 재생을 허용해 주세요.":String(error.message||error)};}
+}
+
 function presenterOutputVideoHealth(payload) {
   const layer = document.querySelector("#presenterOutputRoot .presenter-output-layer.is-active");
   const video = layer?.querySelector("video.presenter-video");
   if (!video || !payload?.serviceId) return null;
+  if (!presenterVideoRevisions.has(video)) {
+    const record={value:0};presenterVideoRevisions.set(video,record);
+    for(const event of ['play','pause','seeking','ended','emptied'])video.addEventListener(event,()=>record.value++);
+  }
   const status = video.error ? "error" : video.ended ? "ended"
     : video.paused && video.dataset.autoplayBlocked === "true" ? "blocked"
     : video.readyState < HTMLMediaElement.HAVE_FUTURE_DATA ? "loading"
       : video.paused ? "paused" : "playing";
   return { serviceId: payload.serviceId, index: payload.index,
-    frameKey: layer.dataset.presenterFrameKey || "", status };
+    frameKey: layer.dataset.presenterFrameKey || "", messageId:payload.messageId || "", revision:presenterVideoRevisions.get(video).value, status };
 }
 
 async function retryPresenterOutputVideo(request, payload) {
@@ -5168,29 +5466,63 @@ function renderPresenterTransitionLogo(slide, options = {}) {
   return `<img class="presenter-transition-logo" src="${escapeAttr(logo.url)}" alt="" aria-hidden="true" style="${style}" />`;
 }
 
+// Reusable service artwork settings. Selection belongs to the authored service,
+// never to an event ID, church preset or a runtime title match.
+function normalizePresenterServiceDesign(value) {
+  if (!value || typeof value !== "object") return null;
+  const color = (input, fallback) => /^#[0-9a-f]{6}$/i.test(String(input || "")) ? input : fallback;
+  const sectionKeys = Array.isArray(value.sectionKeys) ? value.sectionKeys.filter(key => typeof key === "string" && /^[a-z0-9_-]+$/.test(key)).slice(0, 24) : [];
+  const songTitleStyle = value.songTitleStyle === "note-title" ? "note-title" : "";
+  if (!sectionKeys.length && !songTitleStyle) return null;
+  const logo = normalizePresenterMediaSource(value.logo);
+  return { sectionKeys, background: color(value.background, "#ffffff"), foreground: color(value.foreground, "#24211e"),
+    accent: color(value.accent, "#ad371d"), logo: logo && presenterMediaSourceIsImage(logo) ? logo : "",
+    showReadingEnd: value.showReadingEnd !== false, songTitleStyle };
+}
+
+function presenterServiceDesignForSlide(slide, options = {}) {
+  const design = normalizePresenterServiceDesign(options.presentationDesign);
+  const key = String(slide?.sectionKey || slide?.section_key || "");
+  const layout = presenterSlideLayout(slide);
+  if (!options.noChromakey || !design || !design.sectionKeys.includes(key)
+    || [PRESENTER_SLIDE_LAYOUTS.BLANK, PRESENTER_SLIDE_LAYOUTS.MEDIA].includes(layout)
+    || presenterSlideIsScoreLike(slide) || slide?.formBackgroundImage
+    || ["image", "video", "file", "audio"].includes(presenterSlideElementType(slide))) return null;
+  return design;
+}
+
 function renderPresenterSlideFrame(slide, options = {}) {
   if (options.noChromakey && !slide?.autoTrailingBlank
     && presenterSlideLayout(slide) !== PRESENTER_SLIDE_LAYOUTS.BLANK
     && (slide?.songTitle || (slide?.type === "song-title" && presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE))) {
     const content = presenterSongTitleContent(slide);
-    const title = formatPresenterSongTitleText(content.title);
-    // Keep the order heading when adapting song titles for fullscreen output.
+    const hideDetail = normalizePresenterServiceDesign(options.presentationDesign)?.songTitleStyle === "note-title";
+    const title = String(content.title || "").replace(PRESENTER_SONG_NOTE_PATTERN, "").trim();
+    // Share the note-above-title layout; compact event copy stays opt-in.
     slide = { ...slide, elementType: PRESENTER_ELEMENT_TYPES.TITLE_CONTENT,
       layout: PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT, type: "title-content",
-      title, text: title, songTitleContent: content, bodyText: "", assignee: "", fullscreenSongTitle: true };
+      title, text: title, songTitleContent: content, bodyText: "", assignee: "", fullscreenSongTitle: true, fullscreenSongTitleStyle: "note-title", fullscreenSongTitleHideDetail: hideDetail };
+  }
+  const design = presenterServiceDesignForSlide(slide, options);
+  if (design) {
+    slide = { ...slide, suppressBackgroundImage: true, scriptureReadingFinal: design.showReadingEnd && slide.scriptureReadingFinal };
+    options = { ...options, serviceDesignActive: true };
   }
   const slideClass = presenterSlideRenderClass(slide);
   const transitionLogo = renderPresenterTransitionLogo(slide, options);
-  const extraClasses = [presenterSlideExtraClasses(slide), transitionLogo ? "has-transition-logo" : ""].filter(Boolean).join(" ");
+  const extraClasses = [presenterSlideExtraClasses(slide), transitionLogo ? "has-transition-logo" : "", design ? "presenter-slide--service-design" : ""].filter(Boolean).join(" ");
   const body = transitionLogo || renderPresenterSlideBody(slide, options);
   const sectionKey = String(slide?.sectionKey || slide?.section_key || "").trim();
   const presenterRole = normalizeServicePresenterRole(slide?.presenterRole);
-  const backgroundStyle = slide?.scriptureContext === "reading" && !slide?.suppressBackgroundImage && !slide?.noBackgroundImage
+  const designStyle = design ? `--service-design-background:${design.background};--service-design-foreground:${design.foreground};--service-design-accent:${design.accent};` : "";
+  const backgroundStyle = design ? ` style="${escapeAttr(designStyle)}"` : slide?.scriptureContext === "reading" && !slide?.suppressBackgroundImage && !slide?.noBackgroundImage
     ? ` style="--presenter-slide-bg-image: url('${escapeAttr(PRESENTER_SCRIPTURE_READING_BACKGROUND)}')"`
     : "";
   return `
     <section class="presenter-slide presenter-slide--${escapeAttr(slideClass)}${extraClasses ? ` ${escapeAttr(extraClasses)}` : ""}" data-element-type="${escapeAttr(presenterSlideElementType(slide))}" data-slide-layout="${escapeAttr(presenterSlideLayout(slide))}"${sectionKey ? ` data-section-key="${escapeAttr(sectionKey)}"` : ""}${presenterRole ? ` data-presenter-role="${escapeAttr(presenterRole)}"` : ""}${backgroundStyle}>
+      ${design?.logo ? `<img class="presenter-service-design-mark" src="${escapeAttr(design.logo)}" alt="" aria-hidden="true" />` : ""}
       ${renderPresenterSlideMeta(slide)}
+      ${options.previewStage && presenterSlideBackgroundVideoSource(slide, options.noChromakey) ? `<video class="presenter-output-background-video" src="${escapeAttr(presenterSlideBackgroundVideoSource(slide, options.noChromakey))}" muted playsinline preload="metadata" aria-hidden="true"></video>` : ""}
       ${body}
     </section>
   `;
@@ -5199,6 +5531,7 @@ function renderPresenterSlideFrame(slide, options = {}) {
 function presenterSlideExtraClasses(slide) {
   const classes = [];
   if (slide?.fullscreenSongTitle) classes.push("presenter-slide--fullscreen-song-title");
+  if (slide?.fullscreenSongTitleStyle === "note-title") classes.push("presenter-slide--song-note-title");
   const layout = presenterSlideLayout(slide);
   // A blank (including the auto trailing blank, which copies the previous slide) has no caption to theme.
   if (slide?.captionTheme === "cadaros" && layout !== PRESENTER_SLIDE_LAYOUTS.BLANK) classes.push("presenter-slide--caption-cadaros");
@@ -5523,14 +5856,16 @@ function renderPresenterTitleContentSlide(slide, options = {}) {
   const orderHeading = options.noChromakey && presenterTitleAssigneeIsSermon(slide)
     ? String(slide.orderTitle || slide.sectionTitle || "설교").trim()
     : "";
+  const noteTitle = slide.fullscreenSongTitle && slide.fullscreenSongTitleStyle === "note-title";
   const bodyLines = presenterTitleContentLines(slide);
   const titleChars = presenterLineCharEstimate(title);
   return `
     <div class="presenter-title-content">
-      ${orderHeading ? `<span class="presenter-fullscreen-order-heading">${escapeHtml(presenterOrderDisplayLabel(orderHeading))}</span>` : ""}
-      ${slide.fullscreenSongTitle && slide.songTitleContent?.orderTitle ? `<span class="presenter-fullscreen-song-heading">${escapeHtml(presenterOrderDisplayLabel(slide.songTitleContent.orderTitle))}</span>` : ""}
+      ${orderHeading && !(options.serviceDesignActive && compactSearchValue(orderHeading) === compactSearchValue(title)) ? `<span class="presenter-fullscreen-order-heading">${escapeHtml(presenterOrderDisplayLabel(orderHeading))}</span>` : ""}
+      ${noteTitle ? `<span class="presenter-fullscreen-song-heading" aria-label="찬양">${PRESENTER_SONG_NOTE}</span>`
+        : slide.fullscreenSongTitle && slide.songTitleContent?.orderTitle ? `<span class="presenter-fullscreen-song-heading">${escapeHtml(presenterOrderDisplayLabel(slide.songTitleContent.orderTitle))}</span>` : ""}
       <span class="presenter-title-content-title" style="--line-chars: ${escapeAttr(titleChars)}">${slide.fullscreenSongTitle ? renderPresenterSongText(title, slide) : escapeHtml(title)}</span>
-      ${slide.fullscreenSongTitle && slide.songTitleContent?.detail ? `<span class="presenter-fullscreen-song-detail">${slide.songTitleContent.detailKind === "subtitle" ? `(${escapeHtml(slide.songTitleContent.detail)})` : escapeHtml(slide.songTitleContent.detail)}</span>` : ""}
+      ${slide.fullscreenSongTitle && !slide.fullscreenSongTitleHideDetail && slide.songTitleContent?.detail ? `<span class="presenter-fullscreen-song-detail">${slide.songTitleContent.detailKind === "subtitle" ? `(${escapeHtml(slide.songTitleContent.detail)})` : escapeHtml(slide.songTitleContent.detail)}</span>` : ""}
       ${slide.fullscreenSongTitle ? "" : `<div class="presenter-title-content-body">
         ${bodyLines.map((line) => `<span style="--line-chars: ${presenterLineCharEstimate(line)}">${escapePresenterSlideLine(line, slide)}</span>`).join("")}
       </div>`}
@@ -5586,19 +5921,15 @@ function fitPresenterAnnouncementRegions(host) {
         ? box.parentElement.querySelector(".presenter-liturgical-body-heading")?.getBoundingClientRect()
         : null;
       const top=heading?Math.max(bounds.top,heading.bottom):bounds.top;
-      return box.scrollWidth<=box.clientWidth+1&&box.scrollHeight<=box.clientHeight+1
+      const root=box.closest(".presenter-output-root");
+      const tolerance=(root?.getBoundingClientRect().width || 1920)/1920;
+      return presenterTextFits(box)
         && [...box.children].every(item=>{
           const rect=item.getBoundingClientRect();
-          return rect.top>=top-1&&rect.bottom<=bounds.bottom+1;
+          return rect.top>=top-tolerance&&rect.bottom<=bounds.bottom+tolerance;
         });
     };
-    if(fits())return;
-    let low=0,high=base;
-    for(let i=0;i<12;i++){
-      const size=(low+high)/2;box.style.fontSize=`${size}px`;
-      if(fits())low=size;else high=size;
-    }
-    box.style.fontSize=`${low}px`;
+    fitPresenterTextBox(box, {fits});
   });
 }
 
@@ -5618,7 +5949,7 @@ function renderPresenterLiturgicalBodySlide(slide) {
         ${lines.map((line) => `<span style="--line-chars: ${presenterLineCharEstimate(line)}">${escapePresenterSlideLine(line, slide)}</span>`).join("")}
       </div>`;
   return `
-    <div class="presenter-liturgical-body">
+    <div class="presenter-liturgical-body${title === "공동체고백" ? " presenter-liturgical-body--community-confession" : ""}">
       ${body}
       <div class="presenter-liturgical-body-heading">
         <span style="--line-chars: ${escapeAttr(titleChars)}">${escapeHtml(title)}</span>
@@ -5767,7 +6098,8 @@ function renderPresenterHighlightedText(line, slide) {
     if (range.start > cursor) parts.push(renderRange(cursor, range.start));
     const content = renderRange(range.start, range.end);
     const style = presenterTextHighlightStyle(range.highlight);
-    parts.push(`<span class="presenter-text-highlight"${style ? ` style="${style}"` : ""}>${content}</span>`);
+    const colorClass = style.includes("--presenter-text-highlight-color:") ? " presenter-text-highlight--color" : "";
+    parts.push(`<span class="presenter-text-highlight${colorClass}"${style ? ` style="${style}"` : ""}>${content}</span>`);
     cursor = range.end;
   });
   if (cursor < text.length) parts.push(renderRange(cursor, text.length));
@@ -5851,7 +6183,7 @@ function presenterProgressionPlan(item, slides = []) {
   const memo = parseServiceItemMemo(item?.memo);
   const signature = JSON.stringify([
     item?.song_id || "", item?.version_id || item?.song_version_id || "",
-    serviceItemOutputMode(item, memo), groups.map(group => group.key),
+    serviceItemOutputMode(item, memo), groups.filter(group => !group.key.startsWith("title:")).map(group => group.key),
     // Manual slides have positional IDs: changed text requires reselection.
     memo.slides,
   ]);
@@ -6031,4 +6363,76 @@ function updatePresenterMediaOrder(button) {
   refreshPresenterForService(serviceId, { publish: false });
   renderCurrentServiceModuleDetail();
   updateSaveState();
+}
+
+function presenterSequenceTitleSlide(item, section, song, version, displayText, index, sequenceIndex) {
+  return {
+    ...presenterSongTitleSlide(item, section, song, version, displayText, index),
+    id: `${item.id || index}:sequence-title:${sequenceIndex}`,
+    formKey: `title:${sequenceIndex}`, formLabel: "Title", marker: "Title",
+    sort: index + sequenceIndex / 100,
+  };
+}
+
+// Per-element presentation settings share the worship memo/atomic persistence path.
+function normalizeServicePresentation(value) {
+  if (!value || typeof value !== "object") return null;
+  const source = normalizePresenterMediaSource(value.backgroundVideo);
+  const backgroundVideo = /\.(mp4|webm|mov|m4v)(?:[?#].*)?$/i.test(source) ? source : "";
+  return backgroundVideo ? { backgroundVideo } : null;
+}
+
+function renderPresenterPresentationControls(item, index, serviceId) {
+  const memo = parseServiceItemMemo(item.memo), type = serviceMemoElementType(memo);
+  if (type !== "praise") return "";
+  const presentation = normalizeServicePresentation(memo.presentation) || {};
+  const attrs = `data-service-item-index="${index}" data-service-id="${escapeAttr(serviceId)}"`;
+  return `<details class="svc-presentation-controls"><summary>배경 영상</summary>
+    <label>영상 주소 <input class="svc-presenter-input-control" type="text" data-service-item-field="background_video" ${attrs} value="${escapeAttr(presentation.backgroundVideo || '')}" placeholder="MP4 · WebM 영상 주소" aria-label="찬양 배경 영상 주소"></label>
+    <label class="btn ghost">영상 파일 선택<input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,.mp4,.webm,.mov,.m4v" data-praise-background-file data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(item.id)}" hidden></label>
+    <span class="muted">전체 화면에서 음소거·반복 재생</span>
+  </details>`;
+}
+
+async function uploadPresenterPraiseBackground(input) {
+  const file = input.files?.[0], serviceId = input.dataset.serviceId;
+  const itemId = input.dataset.serviceItemId;
+  const item = getServiceItems(serviceId).find(row => row.id === itemId);
+  if (!file || !item) return;
+  if (!/\.(mp4|webm|mov|m4v)$/i.test(file.name) || file.size > presenterMediaMaxBytesForKind("video")) {
+    showToast(`MP4·WebM·MOV 영상은 ${presenterMediaMaxSizeLabel("video")} 이하로 선택해 주세요.`, "error"); input.value = ""; return;
+  }
+  input.disabled = true;
+  try {
+    const path = presenterReferenceMediaUploadPath(serviceId, item, file);
+    const bucket = state.client.storage.from(PRESENTER_MEDIA_STORAGE_BUCKET);
+    const upload = await bucket.upload(path, file, { contentType: file.type || "video/mp4", cacheControl: PRESENTER_MEDIA_CACHE_CONTROL, upsert: false });
+    if (upload.error) throw upload.error;
+    const url = bucket.getPublicUrl(path).data.publicUrl;
+    const currentIndex = getServiceItems(serviceId).findIndex(row => row.id === itemId);
+    if (currentIndex < 0) throw new Error("배경을 연결할 찬양을 찾지 못했습니다.");
+    updateServiceItemField({ dataset: { serviceId, serviceItemIndex: String(currentIndex), serviceItemField: "background_video" }, value: url }, { deferPresenterRefresh: true });
+    if (!await saveServiceItemPatch(serviceId, currentIndex, { throwOnError: true })) throw new Error("배경 영상 저장을 확인해 주세요.");
+    renderCurrentServiceModuleDetail(); showToast("찬양 배경 영상을 저장했습니다.", "success");
+  } catch (error) { showToast(error.message || "배경 영상을 저장하지 못했습니다. 다시 시도해 주세요.", "error"); }
+  finally { input.disabled = false; input.value = ""; }
+}
+
+function presenterSlideBackgroundVideoSource(slide, noChromakey) {
+  if (!noChromakey || slide?.formBackgroundImage || presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.BLANK) return "";
+  if (![PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT, PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT].includes(presenterSlideLayout(slide))) return "";
+  return normalizeServicePresentation({ backgroundVideo: slide?.backgroundVideo })?.backgroundVideo || "";
+}
+
+function applyPresenterBackgroundVideo(root, source = "") {
+  let video = root.querySelector(":scope > .presenter-output-background-video");
+  if (!source) { if (video) { video.pause(); video.removeAttribute("src"); video.load(); video.remove(); } delete root.dataset.backgroundVideoError; return; }
+  if (video?.getAttribute("src") === source) return;
+  if (video) { video.pause(); video.remove(); }
+  video = document.createElement("video"); video.className = "presenter-output-background-video";
+  video.muted = true; video.defaultMuted = true; video.loop = true; video.autoplay = true; video.playsInline = true; video.preload = "auto";
+  video.setAttribute("aria-hidden", "true"); video.setAttribute("src", source);
+  video.addEventListener("error", () => { root.dataset.backgroundVideoError = "true"; });
+  video.addEventListener("playing", () => { delete root.dataset.backgroundVideoError; });
+  root.prepend(video); video.play()?.catch(() => { root.dataset.backgroundVideoError = "true"; });
 }

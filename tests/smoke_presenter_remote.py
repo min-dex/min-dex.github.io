@@ -35,7 +35,14 @@ try:
     runServiceMusicAction=async action=>{remoteCalls.push(action);state.serviceMusic.playing=action==='toggle'?!state.serviceMusic.playing:false;};
     MindexSongTiming.resumeAutoSync=()=>{remoteCalls.push('resume');state.serviceMusic.autoSyncSuspended=false;return true;};
    }''')
-   host.click('#remotePanelBtn');host.click('[data-remote-start]');host.wait_for_function("document.querySelector('[data-remote-code]').textContent.length>0")
+   host.click('#remotePanelBtn');host.wait_for_function("document.querySelector('[data-remote-code]').textContent.length>0")
+   assert not host.locator('.remote-panel').is_visible()
+   assert host.locator('#remotePanelBtn [data-remote-button-label]').inner_text()==host.locator('[data-remote-code]').text_content()
+   host.click('#remotePanelBtn')
+   assert host.locator('[data-remote-close] svg.lucide-x').count()==1
+   assert host.locator('.remote-panel').evaluate('e=>getComputedStyle(e).borderRadius')=='5px'
+   assert host.locator('[data-remote-start]').is_hidden()
+   assert host.locator('[data-remote-end]').is_visible()
    code=host.locator('[data-remote-code]').inner_text()
    phone.goto(url.replace('index.html','remote.html'))
    assert len(code.replace('-',''))==6
@@ -67,11 +74,23 @@ try:
      pump(.1)
      if phone.locator(f'[data-action="{action}"]').is_enabled():return
     raise AssertionError('not ready: '+action+' '+phone.locator('#status').inner_text())
-   ready('next');assert phone.locator('#current').inner_text().startswith('첫 번째')
+   ready('next')
+   assert host.locator('[data-remote-link]').is_hidden()
+   assert host.locator('[data-remote-help]').inner_text()==''
+   if engine=='chromium':host.screenshot(path='/tmp/mindex-remote-panel-compact.png')
+   assert phone.frame_locator('#current iframe').locator('body').inner_text().startswith('첫 번째')
    for width in (320,390,768):
     phone.set_viewport_size({'width':width,'height':844});pump(.1)
     assert phone.evaluate('document.documentElement.scrollWidth<=innerWidth'),f'overflow {width}'
-    assert phone.locator('[data-action=next]').bounding_box()['height']>=44
+    assert phone.locator('[data-action=next]').bounding_box()['height']==70
+    for button in phone.locator('[data-action]:visible').all():
+     assert button.locator('svg').count()==1
+     assert button.evaluate('e=>e.scrollWidth<=e.clientWidth')
+     icon=button.locator('svg')
+     expected=20 if button.get_attribute('data-action') in ('prev','next') else 16
+     assert icon.bounding_box()['width']==expected
+     assert icon.evaluate('e=>getComputedStyle(e).strokeWidth')=='1.5px'
+    assert phone.locator('[data-action=play]').bounding_box()['height']==50
    phone.set_viewport_size({'width':390,'height':844})
    if engine=='chromium':phone.screenshot(path='/tmp/mindex-remote-phone.png',full_page=True)
    phone.click('[data-action=next]');pump();assert host.evaluate('state.presenter.index')==1
@@ -81,12 +100,28 @@ try:
    count=host.evaluate('remoteCalls.length');host.evaluate('p=>deliver(p)',command_packet);pump();assert host.evaluate('remoteCalls.length')==count
    for action in ('prev','blank','unblank','play','resume','pause','play','stop'):
     ready(action);phone.click(f'[data-action="{action}"]');pump();assert phone.locator('#result').inner_text()=='처리 완료',action
+   assert phone.locator('#blank svg.lucide-eye-off').count()==1
    assert not host.evaluate('state.serviceMusic.playing')
    # A local change between displayed state and command rejects the stale request.
    ready('next');host.evaluate('state.presenter.index=2');phone.click('[data-action=next]');pump()
    assert '바뀌었습니다' in phone.locator('#result').inner_text()
+   # Encrypted video transport and phone touch targets; actual media is tested separately.
+   host.evaluate("window.remoteVideo={status:'paused',ready:true,revision:0,identity:'fixture'};presenterRemoteVideoState=()=>remoteVideo;requestPresenterVideoCommand=async(sid,action)=>{remoteCalls.push('video-'+action);remoteVideo.status=action==='pause'?'paused':'playing';remoteVideo.revision++;};void 0")
+   for action in ('video-play','video-pause','video-restart'):
+    ready(action);phone.click(f'[data-action="{action}"]');pump();assert phone.locator('#result').inner_text()=='처리 완료',action
+    assert host.evaluate('remoteCalls.at(-1)')==action
+   for width in (320,390,768):
+    phone.set_viewport_size({'width':width,'height':844});pump(.1)
+    assert phone.evaluate('document.documentElement.scrollWidth<=innerWidth')
+    for button in phone.locator('#videoControls button').all():
+     assert button.bounding_box()['height']==50
+     assert button.evaluate('e=>e.scrollWidth<=e.clientWidth')
+     assert button.locator('svg').bounding_box()['width']==16
+   host.evaluate('remoteVideo=null');pump(1.2);assert phone.locator('#videoControls').is_hidden()
    # No audio/media objects on the remote page.
-   assert phone.locator('audio,video,iframe').count()==0
+   assert phone.locator('audio,video').count()==0
+   assert phone.locator('.slide-preview iframe').count()==2
+   for frame in phone.locator('.slide-preview iframe').all():assert frame.get_attribute('sandbox')==''
    # Disconnects disable immediately once freshness expires. No commands queued.
    pump(4.2,drop=True);assert phone.locator('[data-action=next]').is_disabled()
    assert '잠김' in phone.locator('#status').inner_text()

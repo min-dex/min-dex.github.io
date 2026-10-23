@@ -158,3 +158,60 @@ needs the whole matrix to succeed and retains the stale-commit guard.
 
 The no-argument cloud/check.py command still executes the entire baseline.
 Shard PASS is explicitly partial; per-entry timings support future balancing.
+
+### Measured balancing and superseded checks ·2026-10-23
+
+The four shards now assign longer smokes first to the least-loaded shard using
+`cloud/smoke_timings.json`, measured in run39888011911. This file schedules tests;
+it never selects coverage. New allowlisted tests receive a10-second estimate and
+still run exactly once. Unit/manual checks remain on shard0; no-argument order
+and all timeouts/failure propagation remain unchanged. The measured smoke loads
+previously ranged from173 to295 seconds including unit work.
+
+Check-job concurrency cancels superseded runs only for the same event/ref/shard.
+Pages keeps its separate non-cancelling publication group and complete gate.
+Fetch/reconcile main before the branch gate; when main has not advanced, integrate
+the verified SHA without a new merge commit so exact-commit reuse avoids running
+the same suite twice. If main advances, reconcile and verify the resulting SHA.
+
+
+## Exact-commit gate reuse ·2026-10-23
+
+A main push can reuse a completed successful codex/** push of the exact same
+SHA, same repository and cloud-check.yml workflow. All four offline-web jobs
+must be completed/success in the successful run attempt, exactly once each.
+Each main matrix job independently verifies that evidence and links the source
+run in its summary before skipping repeated setup/tests. No code-diff heuristic
+or partial-shard result is accepted. Missing/API/malformed evidence falls back
+to full checks; PRs, branch pushes and manual dispatch always execute checks.
+Read-only Actions permission is limited to the check job. Pages still depends
+on all four successful jobs, checks main freshness, and stages the exact SHA.
+The source branch gate remains mandatory before integration; a merge producing
+a different SHA must run the full gate. Local partition/failure and evidence
+validation tests are distinct from Linux/Pages verification.
+
+## CSS-only affected-screen gate ·2026-10-23
+
+`scope` computes one immutable plan for the four required offline-web jobs.
+Modified known stylesheets use the union of their screen smokes, plus release,
+icon, remote-theme, bulletin and gate-policy consistency checks. Shared
+`styles.css` still selects every UI smoke; dedicated output/bulletin/calendar/
+monitor/remote CSS selects the corresponding screens. The allowlist is in
+`cloud/check_scope.py`. No-argument local checks still run the complete baseline.
+
+A CSS candidate may include docs/*.md and version-only index.html,
+mindex-release.json/app.runtime.json edits. Index markup/scripts, runtime hashes,
+JS, SQL, assets, tests, config, unknown/new/deleted/renamed CSS or unavailable
+comparison/evidence select the full gate. The comparison base must be a completed
+successful main run with all four checks AND successful Pages publication.
+Branch plans snapshot current main once; main uses the push's before SHA;
+PRs use the base SHA; manual/unknown events use full coverage. Missing API/history
+always means full coverage. Shards receive the same validated allowlist; failures
+and skipped/cancelled prerequisites continue to block Pages.
+
+Exact-SHA reuse also checks the source run's scope proof. A full successful gate
+can satisfy any plan; a CSS gate can satisfy only the identical published base
+and selected-screen signature. No partial/wrong-scope success is accepted.
+CI policy changes themselves select the full gate. Verify mapping/partitions,
+failure propagation and reuse locally, then every GitHub shard. A subsequent
+CSS-only source-comment change verifies the real scoped path without changing UI.

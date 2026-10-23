@@ -34,8 +34,7 @@ v3 운영 서버 적용 완료. 클라이언트 배포 검증 진행 중.
 600px 이상에서는 현재/다음을 두 열로 표시한다. 버튼 최소 높이50px, 이전·다음70px.
 긴 텍스트는 미리보기 안에서 스크롤하며 가로 페이지 넘침을 방지한다.
 
-미리보기는 텍스트 요약이다. 영상·이미지·음원 파일 또는 전체 예배 데이터를 폰에 전송하지 않는다.
-미디어 자체의 화면 미리보기와 특정 장 선택은 이번 범위에 없다. 폰에서는 음원을 재생하지 않는다.
+미리보기는 현재·다음 두 장의 기존 PC thumbnail 렌더러 결과다. 각 직렬화된 UTF-8 기준4500바이트 이내로 제한하고 초과 시 텍스트 대체 화면을 표시한다. 정적 이미지·배경은 원본 URL로 표시하며 로컬 blob/file 자료는 제외한다. 전체 예배 자료나 음원은 보내지 않는다. 폰의 미리보기는 script 없는 sandbox iframe이며 영상·음원을 재생하지 않는다.
 홈 화면 추가용 manifest가 있으며 service worker/offline 명령 저장은 없다.
 공통 설정은 공개 브라우저 설정만 별도 파일로 공유하고 기존 inline bootstrap과 자동 대조한다.
 
@@ -130,7 +129,8 @@ shown only after beforeinstallprompt; standalone/appinstalled hides the guide.
 No service worker, offline commands, stored pairing key or automatic reconnection.
 
 While a connected controller is visible, Screen Wake Lock is requested by default.
-The checkbox opts out for the current page lifetime only. Disconnect, pagehide
+Wake Lock is automatic while connected and visible; there is no checkbox or
+per-device preference (2026-10-23). Disconnect, pagehide
 and hidden state release it; returning visible requests again if still connected.
 Unsupported/denied/system-released states are explicit, with a manual retry for
 release/denial; painting and heartbeats never create an automatic retry loop.
@@ -159,3 +159,39 @@ re-enabling connection while the first session's close callback is still pending
 `smoke_remote_panel.py` uses a delayed end promise and checks both engines; full
 presenter remote smoke separately covers the real encrypted session path.
 Panel screenshots were inspected. This audit fix is not yet deployed.
+
+## Compact connection dialog ·2026-10-23
+
+Use Mindex Remote with the existing small cross mark. Show a short status,
+code only while pairing, and one applicable start/end action. Once connected,
+hide the page link and pairing guidance; retain disconnect and failure status.
+Close only dismisses the dialog; it must not disconnect. Keep the existing
+opening/ending guards and six-digit pairing protocol.
+
+## Minimal phone chrome ·2026-10-23
+
+Remove in-page installation guidance and its custom install prompt. The existing
+manifest and platform browser installation remain available. Show the wake-lock
+status section only for actionable failures; idle/normal states occupy no space.
+The example code uses lighter400-weight placeholder text, distinct from entered digits.
+
+
+## PC 동시 조작과 영상 제어 ·2026-10-23
+
+PC에서 슬라이드를 넘겼다 돌아오거나 음원을 시작했다 멈춰서 최종 표시가 같아도,
+송출 순번과 음원 실행 순번을 비교해 그 사이 발급된 오래된 원격 명령을 거절한다.
+새 상태를 받은 다음 명령은 정상 실행하며 같은 명령 ID는 재실행하지 않는다.
+
+현재 송출 슬라이드의 일반 영상에는 재생·일시정지·처음부터 버튼을 표시한다.
+폰은 영상을 재생하거나 전달받지 않는다. 송출 창의 영상 요소를 조작하고 실제 처리
+응답을 받은 뒤 완료로 표시한다. 일시정지는 위치를 유지하고, 처음부터는 0초에서 재생한다.
+출력 세션·슬라이드 메시지·영상 상태 변경 이력을 검사하고 중복 전달은 한 번만 처리한다.
+영상 상태가 오래됐거나 준비 중이면 잠그며, 암전·실시간 말씀 중에는 영상 버튼을 숨긴다.
+응답 제한은 1.8초이며 불확실한 명령은 재시도하지 않는다. 브라우저의 자동 재생 차단은
+PC에서 허용하도록 안내한다. PPTX 내장 영상·배경 영상은 이 조작 대상에 포함하지 않는다.
+
+`smoke_remote_video.py`는 별도 controller/output 페이지와 실제 HTTP MP4로 양 브라우저의
+재생·일시정지·재시작, 중복 전달, PC 경합, 화면 교체와 재생 차단을 검증한다.
+`smoke_remote_adapter.py`는 실제 슬라이드/음원 함수의 왕복 조작 경합을 검증한다.
+암호화 relay 및 320/390/768px 영상 버튼 검사는 `smoke_presenter_remote.py`에 포함한다.
+현장 휴대폰·실물 출력 장비 확인은 별도이며, 배포 완료는 Pages 기록으로 확인한다.
