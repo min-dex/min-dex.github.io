@@ -6200,17 +6200,19 @@ function presenterProgressionOptions(plan, selected = "") {
   return plan.groups.map((group, index) => `<option value="${escapeAttr(group.key)}"${group.key === selected ? " selected" : ""}>${escapeHtml(`${index + 1}. ${group.label}`)}</option>`).join("");
 }
 
-function renderPresenterProgressionAdd(item) {
-  const serviceId = item?.service_id || state.selectedServiceId;
+function renderPresenterProgressionAdd(item, index, serviceId = item?.service_id || state.selectedServiceId) {
   if (!item || item._isDefault) return "";
   const plan = presenterProgressionForItem(item, serviceId);
-  if (!plan.groups.length) return "";
+  const itemIndex = index ?? getServiceItems(serviceId).findIndex(row => row.id === item.id);
+  const videoControls = itemIndex >= 0 ? renderPresenterPresentationControls(item, itemIndex, serviceId) : "";
+  if (!plan.groups.length && !videoControls) return "";
   return `<details class="svc-progression-media">
     <summary>배경</summary>
-    <div class="svc-progression-media-controls">
+    ${plan.groups.length ? `<div class="svc-progression-media-controls">
       <select class="svc-presenter-input-control" data-progression-position aria-label="사진을 띄울 송폼">${presenterProgressionOptions(plan)}</select>
       <button class="btn ghost" type="button" data-progression-media-add data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(item.id)}">사진 추가</button>
-    </div>
+    </div>` : ""}
+    ${videoControls}
   </details>`;
 }
 
@@ -6387,11 +6389,11 @@ function renderPresenterPresentationControls(item, index, serviceId) {
   if (type !== "praise") return "";
   const presentation = normalizeServicePresentation(memo.presentation) || {};
   const attrs = `data-service-item-index="${index}" data-service-id="${escapeAttr(serviceId)}"`;
-  return `<details class="svc-presentation-controls"><summary>배경 영상</summary>
+  return `<div class="svc-presentation-controls">
     <label>영상 주소 <input class="svc-presenter-input-control" type="text" data-service-item-field="background_video" ${attrs} value="${escapeAttr(presentation.backgroundVideo || '')}" placeholder="MP4 · WebM 영상 주소" aria-label="찬양 배경 영상 주소"></label>
     <label class="btn ghost">영상 파일 선택<input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,.mp4,.webm,.mov,.m4v" data-praise-background-file data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(item.id)}" hidden></label>
     <span class="muted">전체 화면에서 음소거·반복 재생</span>
-  </details>`;
+  </div>`;
 }
 
 async function uploadPresenterPraiseBackground(input) {
