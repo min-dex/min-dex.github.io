@@ -1226,7 +1226,7 @@
   font-weight: var(--presenter-weight-display);
 }
 :is(.svc-slide-mini-output, .presenter-output-root).no-chromakey .presenter-title-assignee--sermon {
-  grid-template-columns: minmax(0, 1fr) minmax(0, max-content);
+  grid-template-columns: minmax(0, 1fr) fit-content(44cqw);
   grid-auto-rows: auto;
   gap: 0;
   justify-items: stretch;
@@ -1249,6 +1249,10 @@
 :is(.svc-slide-mini-output, .presenter-output-root).no-chromakey .presenter-title-assignee--solo .presenter-title-assignee-title {
   justify-self: start;
   text-align: left;
+}
+/* Bound the assignee's intrinsic grid contribution before fitting long names. */
+:is(.svc-slide-mini-output, .presenter-output-root).no-chromakey .presenter-title-assignee-person {
+  max-width: min(100%, 44cqw);
 }
 /* Fullscreen order headings and assignees share the same visual weight. */
 :is(.svc-slide-mini-output, .presenter-output-root).no-chromakey :is(.presenter-title-assignee-title, .presenter-title-assignee-order, .presenter-title-assignee-person),

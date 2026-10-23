@@ -3790,21 +3790,22 @@ Liturgical body sizes and chromakey caption text are unchanged.
 
 ## Shared presenter text fitting · 2026-10-22
 
-- All shrinking uses the1920×1080 design stage:5px candidate steps, body floor40px,
-  title floor70px. Existing base copy smaller than a floor is never enlarged.
+- Updated2026-10-24: shrinking uses the1920×1080 design stage and1px candidates,
+  without40/70px readability floors. Existing base sizes are never enlarged.
 - Lyrics, announcement zones, liturgical text, chromakey scripture and titles use
-  the same fitting helper. Preview status never changes the minimum or step.
+  the same fitting helper. Preview status never changes the fitting rule or step.
   Output uses its logical stage width; miniature CSS transforms affect display only.
 - Preserve each frame's layout constraints: title ink may extend below its tight
   line box, so test its allocated slide bounds; body/regions must fit their area.
-- At the floor, unfit content is marked with a controller-only `내용 넘침` badge
-  and accessible description. Do not silently shrink below the floor or mutate
-  stored content. Splitting an overfull author-written slide remains explicit.
+- If content cannot fit even at the smallest positive grid unit, retain the
+  controller-only `내용 넘침` badge and accessible description. Never mutate stored
+  content; splitting an author-written slide remains explicit.
 - Dedicated scripture reading keeps its existing paginated layout and type scale.
 - Retain lyric fit caching and font-load invalidation. A retry resets the size and
   overflow flag before measuring; shortening content restores its base type.
-- This replaces former1px/2px loops, unconstrained binary shrink, title clamp and
-  the separate28px preview/32px output scripture floors.
+- The common1px search replaces separate loops, title clamps and former per-role
+  minimum sizes. Native viewport font rounding may vary by one grid unit; the
+  1920px output and transformed thumbnail stages match exactly.
 
 
 ## Children community-confession emphasis ·2026-10-22
@@ -4405,3 +4406,10 @@ Reproduced with the 10/25 third-service second-song metadata, using read-only
 production inspection; no worship/song records changed. Local model checks and
 Chromium/WebKit placeholder/output/link/clear/save and Title regression coverage
 verify the fix. Web publication remains pending.
+## One-unit common text fitting ·2026-10-24
+
+Overflowing text fits on a 1px grid measured at 1920px stage width. Remove the
+40px body/70px title readability floors; never enlarge the authored base size.
+Use bounded binary search for the largest fitting grid size. Fullscreen order
+headings and assignees join the same fit path; output and thumbnails use the
+same stage measurements. Preserve chromakey order/person sizing.

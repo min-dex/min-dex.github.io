@@ -4380,14 +4380,14 @@ function presenterOutputShouldAnimateFrameTransition(root, frameState = {}) {
 }
 
 // All fitting sizes are measured on the same 1920px design stage.
-const PRESENTER_TEXT_FIT = Object.freeze({ step:5, body:40, title:70 });
+const PRESENTER_TEXT_FIT = Object.freeze({ step:1 });
 function presenterTextFitScale(box) {
   return (box.closest?.(".presenter-output-root")?.clientWidth || 1920) / 1920;
 }
 function presenterTextFitStatus(box, overflow) {
   if (overflow) {
     box.dataset.presenterFitOverflow = "true";
-    box.setAttribute("aria-description", "최소 글자 크기에서도 내용이 넘칩니다. 내용을 나누어 주세요.");
+    box.setAttribute("aria-description", "내용이 영역을 넘칩니다. 내용을 나누어 주세요.");
   } else {
     if (box.dataset.presenterFitOverflow) box.removeAttribute("aria-description");
     delete box.dataset.presenterFitOverflow;
@@ -4414,13 +4414,18 @@ function fitPresenterTextBox(box, { role="body", fits=()=>presenterTextFits(box,
   presenterTextFitStatus(box, false);
   if (fits()) return;
   const normalizedBase = Math.round(base / scale * 1000) / 1000;
-  const floor = Math.min(PRESENTER_TEXT_FIT[role], normalizedBase);
-  let candidate = Math.floor(normalizedBase / PRESENTER_TEXT_FIT.step) * PRESENTER_TEXT_FIT.step;
-  for (; candidate > floor; candidate -= PRESENTER_TEXT_FIT.step) {
-    box.style.setProperty(property, `${candidate * scale}px`);
-    if (fits()) return;
+  // Search the one-stage-unit grid, without a readability floor. Binary search
+  // keeps many controller thumbnails from paying for every intermediate size.
+  let low = 1;
+  let high = Math.ceil(normalizedBase / PRESENTER_TEXT_FIT.step) - 1;
+  let best = Math.min(normalizedBase, PRESENTER_TEXT_FIT.step);
+  while (low <= high) {
+    const middle = Math.floor((low + high) / 2);
+    box.style.setProperty(property, `${middle * PRESENTER_TEXT_FIT.step * scale}px`);
+    if (fits()) { best = middle * PRESENTER_TEXT_FIT.step; low = middle + 1; }
+    else high = middle - 1;
   }
-  box.style.setProperty(property, `${floor * scale}px`);
+  box.style.setProperty(property, `${best * scale}px`);
   presenterTextFitStatus(box, !fits());
 }
 
@@ -4554,8 +4559,14 @@ function fitPresenterSongTitlePreviews(host) {
 
 function fitPresenterSermonTitleText(host) {
   if (!host) return;
+  const orderBoxes = [...host.querySelectorAll(".presenter-title-assignee-title, .presenter-title-assignee-order, .presenter-title-assignee-person")]
+    .filter(box => box.closest(".presenter-output-root")?.classList.contains("no-chromakey"));
+  // Restore related grid items together so refitting does not inherit a sibling's
+  // previously shrunken intrinsic width.
+  orderBoxes.forEach(box => box.style.removeProperty("font-size"));
   host.querySelectorAll(".presenter-title-assignee--sermon .presenter-title-assignee-content, .presenter-title-content-title, .presenter-liturgical-body-heading > span")
     .forEach(box => fitPresenterTextBox(box, {role:"title"}));
+  orderBoxes.forEach(box => fitPresenterTextBox(box, {role:"title"}));
 }
 
 function fitPresenterSermonTitlePreviews(host) {
