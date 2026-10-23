@@ -4396,10 +4396,15 @@ function presenterTextFits(box, role = "body") {
   // of mistaking font ink below the line box for a text overflow.
   const frame = box.closest(".presenter-slide");
   if (!frame) return true;
-  const bounds = frame.getBoundingClientRect(), text = box.getBoundingClientRect();
+  const bounds = frame.getBoundingClientRect();
+  // Caption containers include the entire padded bar and may be nudged for
+  // ornament clearance. Only the rendered title ink must stay inside the stage.
+  const range = document.createRange();
+  range.selectNodeContents(box);
+  const rects = [...range.getClientRects()].filter(rect => rect.width > 0 && rect.height > 0);
   const root = box.closest(".presenter-output-root");
   const renderedTolerance = (root?.getBoundingClientRect().width || 1920) / 1920;
-  return text.top >= bounds.top - renderedTolerance && text.bottom <= bounds.bottom + renderedTolerance;
+  return rects.every(text => text.top >= bounds.top - renderedTolerance && text.bottom <= bounds.bottom + renderedTolerance);
 }
 function fitPresenterTextBox(box, { role="body", fits=()=>presenterTextFits(box, role), property="font-size" } = {}) {
   box.style.removeProperty(property);

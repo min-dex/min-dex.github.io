@@ -52,6 +52,18 @@ try:
      check(JSON.stringify(sizes[0])===JSON.stringify(sizes[2])&&Math.abs(sizes[0].size-sizes[1].size)<=1.02,'preview/output mismatch '+JSON.stringify({row,sizes}));
      results.push(sizes[0]);
     }
+    // Past all-generations Cadaros special-song title: padded bar is nudged,
+    // but the visible title remains safely inside the stage.
+    for (const width of [1920,640,240]) {
+      const root=document.createElement('main');root.className='presenter-output-root';
+      root.style.cssText=`position:relative;width:${width}px;height:${width*1080/1920}px;transform:none`;
+      root.innerHTML=renderPresenterSlideFrame({type:'song-title',elementType:'praise',layout:'lower_bar_text',captionTheme:'cadaros',title:'교회',text:'교회',sectionKey:'special_song'});
+      host.replaceChildren(root);fitPresenterSongTitleText(root);
+      const title=root.querySelector('.presenter-slide-text');
+      check(!title.dataset.presenterFitOverflow,'Cadaros title false overflow '+width);
+      title.innerHTML='<span>'+('교회'.repeat(200))+'</span>';
+      check(!presenterTextFits(title,'title'),'real title overflow missing '+width);
+    }
     // Long text can shrink below the former floor; shortening restores the base.
     const root=document.createElement('div');root.className='presenter-output-root';root.style.cssText='position:relative;width:1920px;height:1080px;transform:none';
     const box=document.createElement('div');box.className='common-fit-box';box.style.cssText='--test-base:60px;width:200px;height:50px;white-space:nowrap';box.textContent='정말 긴 내용'.repeat(20);root.append(box);host.replaceChildren(root);

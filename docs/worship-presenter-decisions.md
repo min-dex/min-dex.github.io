@@ -4447,3 +4447,10 @@ clears still inherit dated service arrangements. Browser coverage verifies the
 four priorities, light/actual input, clear/link/save behavior, score hints, direct
 praise title ownership and both output modes. Operational readback/publication
 are recorded separately from those local checks.
+
+## Cadaros title fit correction · 2026-10-24
+
+Title vertical fitting checks rendered text ranges within the stage, not the padded
+caption container. The existing Cadaros ornament-clearance translation can move
+the container edge below the stage while the title remains fully inside. Preserve
+the caption design, current fit scale and real overflow detection; no saved content changes.
