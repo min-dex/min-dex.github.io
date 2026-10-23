@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Mindex Remote">
 <link rel="stylesheet" href="remote.shared.css?v=2">
-<link rel="stylesheet" href="remote.css?v=7">
+<link rel="stylesheet" href="remote.css?v=8">
 <script>const theme=matchMedia("(prefers-color-scheme: dark)");function applyTheme(){document.documentElement.dataset.theme=theme.matches?"dark":"light";document.querySelector('meta[name="theme-color"]').content=theme.matches?"#181816":"#ffffff";}applyTheme();theme.addEventListener("change",applyTheme);</script>
 </head>
 <body>
@@ -19,7 +19,7 @@
 <button id="connect" class="primary">연결</button>
 </form>
 <section id="controller" hidden aria-label="송출 조작">
-<div class="previews"><article><h2>현재 <span id="position"></span></h2><p id="current"></p></article><article><h2>다음</h2><p id="next"></p></article></div>
+<div class="previews"><article><h2>현재 <span id="position"></span></h2><div id="current" class="slide-preview"></div></article><article><h2>다음</h2><div id="next" class="slide-preview"></div></article></div>
 <div class="navigation"><button data-action="prev"><i data-lucide="arrow-left"></i><span>이전</span></button><button data-action="next" class="primary"><span>다음</span><i data-lucide="arrow-right"></i></button></div>
 <button data-action="blank" id="blank"><i data-lucide="eye-off"></i><span>암전</span></button>
 <h2>음원</h2><p id="music"></p>
@@ -39,5 +39,5 @@
 <script src="mindex.icons.js?v=remote-controls1"></script>
 <script src="vendor/supabase-js.min.js"></script>
 <script src="mindex.public-config.js"></script>
-<script type="module" src="remote.mjs?v=9"></script>
+<script type="module" src="remote.mjs?v=10"></script>
 </body></html>

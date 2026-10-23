@@ -26,7 +26,8 @@ input::placeholder { color: var(--placeholder-ink); opacity: 1; }
 .previews { display: grid; gap: 10px; }
 .previews article { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 15px; min-width: 0; }
 .previews h2 { margin: 0; color: var(--ink-3); }
-.previews p { white-space: pre-wrap; max-height: 140px; overflow: auto; margin: 10px 0 0; font-size: var(--ui-card-title-size); font-weight: var(--ui-row-weight); }
+.slide-preview { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; margin-top: 10px; background: #000; border-radius: var(--r); }
+.slide-preview iframe { position: absolute; inset: 0; width: 1920px; height: 1080px; border: 0; transform-origin: top left; pointer-events: none; }
 #position { float: right; }
 .navigation, .audio { display: grid; gap: 10px; margin: 15px 0; }
 .navigation { grid-template-columns: 1fr 1fr; }

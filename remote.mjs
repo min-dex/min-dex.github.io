@@ -1,8 +1,10 @@
+import {createPreview} from './remote.preview.mjs?v=1';
 import {openRemote} from './mindex.remote-session.mjs?v=5';
 import {setupPhoneExperience} from './remote.screen.mjs?v=3';
 window.lucide?.createIcons();
 const screenAwake=setupPhoneExperience();
 const $=id=>document.getElementById(id);
+const currentPreview=createPreview($('current'),'현재 슬라이드'),nextPreview=createPreview($('next'),'다음 슬라이드');
 let session,view=null,opening=false,ending=false;
 let client;
 function reset(){session=null;state(null);$('pairForm').hidden=false;$('disconnect').hidden=true;$('code').value='';paint();}
@@ -15,9 +17,9 @@ function paint(){
 }
 function state(value){
  view=value;$('controller').hidden=!value;
- if(!value)return paint();
+ if(!value){currentPreview('','');nextPreview('','');return paint();}
  $('pairForm').hidden=true;$('position').textContent=`${value.index+1} / ${value.total}`;
- $('current').textContent=value.blank?'암전 중':value.current||'내용 없음';$('next').textContent=value.next||'마지막 슬라이드';
+ currentPreview(value.previewCurrent,value.blank?'암전 중':value.current||'내용 없음');nextPreview(value.previewNext,value.next||'마지막 슬라이드');
  $('music').textContent=value.music;
  $('blank').dataset.action=value.blank?'unblank':'blank';$('blank').querySelector('span').textContent=value.blank?'암전 해제':'암전';
  const icon=value.blank?'eye':'eye-off';

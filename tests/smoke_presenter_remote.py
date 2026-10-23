@@ -75,7 +75,7 @@ try:
    assert host.locator('[data-remote-link]').is_hidden()
    assert host.locator('[data-remote-help]').inner_text()==''
    if engine=='chromium':host.screenshot(path='/tmp/mindex-remote-panel-compact.png')
-   assert phone.locator('#current').inner_text().startswith('첫 번째')
+   assert phone.frame_locator('#current iframe').locator('body').inner_text().startswith('첫 번째')
    for width in (320,390,768):
     phone.set_viewport_size({'width':width,'height':844});pump(.1)
     assert phone.evaluate('document.documentElement.scrollWidth<=innerWidth'),f'overflow {width}'
@@ -103,7 +103,9 @@ try:
    ready('next');host.evaluate('state.presenter.index=2');phone.click('[data-action=next]');pump()
    assert '바뀌었습니다' in phone.locator('#result').inner_text()
    # No audio/media objects on the remote page.
-   assert phone.locator('audio,video,iframe').count()==0
+   assert phone.locator('audio,video').count()==0
+   assert phone.locator('.slide-preview iframe').count()==2
+   for frame in phone.locator('.slide-preview iframe').all():assert frame.get_attribute('sandbox')==''
    # Disconnects disable immediately once freshness expires. No commands queued.
    pump(4.2,drop=True);assert phone.locator('[data-action=next]').is_disabled()
    assert '잠김' in phone.locator('#status').inner_text()
