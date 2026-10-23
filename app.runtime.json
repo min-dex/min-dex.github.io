@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261024-scripture-version-badges",
+  "version": "20261024-form-origin-hymn-cadaros",
   "options": {
     "compress": false,
     "mangle": {

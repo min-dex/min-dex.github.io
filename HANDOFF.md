@@ -1461,3 +1461,14 @@ special-hymn declarations, metadata-only atomic-save regression and runtime hash
 PASS. Full required combined GitHub gate/publication still pending. No release
 queue ticket or branch push held by this component; coordinate next batch after
 the already-running release, preserving the primary checkout's unrelated work.
+
+
+## Form-origin / Cadaros / paired hymns batch ·2026-10-24
+
+Coordinator:codex/form-origin-ownership, ticket d44c47e7a8ca44e5ac58b5a693da8c5c.
+Scope frozen to source components2b4a991d (reconciled8c4f81cf), a0e64655
+(reconcileda8011afe) and ebd296d2 (reconciled8658f6bb), based on published7116a806.
+All owners handed off ready changes and released their individual tickets.
+Hymn owner already applied/read back18 unit line-boundary changes and12 signatures;
+never rerun its DB patch. This also explains four service revision-only changes
+safely rebased by the form restoration. Combined gate/publication pending.
