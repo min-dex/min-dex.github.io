@@ -4074,3 +4074,12 @@ session, message/frame and media revision, deduplicate across transports and
 expire after1.8 seconds. Restart seeks to zero and plays; pause preserves position.
 No media stream is sent to the phone. Browser autoplay rejection is explicit.
 PPTX embedded media/background loops retain their existing playback behavior.
+
+## Full-height confession marker ·2026-10-23
+
+Fullscreen community-confession markers now fill the full inline text box,
+superseding the45–95% half-height band. Keep original six source colors,
+#332211 marker text and4-stage-pixel side padding. Preview/output share this
+CSS rule. Third-service chromakey and other copy remain unmarked. Children
+retain their dedicated closing. User requested skipping optional local checks;
+the complete required publication gate remains mandatory.
