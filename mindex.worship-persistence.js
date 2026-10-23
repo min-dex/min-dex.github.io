@@ -818,8 +818,6 @@ function serviceElementConfigForSave(existingConfig = {}, parsed = emptyServiceI
     delete config.form_hint;
     if (!parsed.formPreset?.titleSequence) delete config.formPreset;
     delete config.form_preset;
-    delete config.formPresetRules;
-    delete config.form_preset_rules;
     delete config.form_preset_disabled;
     delete config.disableFormPreset;
     delete config.disable_form_preset;

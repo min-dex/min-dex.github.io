@@ -242,7 +242,8 @@ function hasServiceAssetContent(asset) {
 // Form preset normalization; applying defaults and editing state stay with the caller.
 const LEGACY_PUBLIC_SPECIAL_HYMN_FORM_PRESET_FORMS = ["1절", "2절", "간주", "마지막 절"];
 const PREVIOUS_PUBLIC_SPECIAL_HYMN_FORM_PRESET_FORMS = ["1절", "후렴", "2절", "후렴", "간주", "마지막 절", "후렴"];
-const PUBLIC_SPECIAL_HYMN_FORM_PRESET_FORMS = ["V1", "C", "V2", "C", "Int", "VL", "C", "Coda"];
+const PRE_TITLE_PUBLIC_SPECIAL_HYMN_FORM_PRESET_FORMS = ["V1", "C", "V2", "C", "Int", "VL", "C", "Coda"];
+const PUBLIC_SPECIAL_HYMN_FORM_PRESET_FORMS = ["T", ...PRE_TITLE_PUBLIC_SPECIAL_HYMN_FORM_PRESET_FORMS];
 const PUBLIC_SPECIAL_HYMN_FORM_PRESET_HINT = PUBLIC_SPECIAL_HYMN_FORM_PRESET_FORMS.join("-");
 
 function normalizeServiceFormPreset(value, fallbackHint = "", fallbackStrength = "") {
@@ -468,7 +469,7 @@ function normalizeServiceFormPresetRulePreset(preset, when = {}) {
   if (!isHymnRule) return preset;
   const formsKey = normalizeServiceFormPresetForms(preset.forms).map((item) => compactSearchValue(item)).join("|");
   if (["manual", "forced", "song-default"].includes(String(preset.strength || "").toLowerCase())) return preset;
-  const legacy = [LEGACY_PUBLIC_SPECIAL_HYMN_FORM_PRESET_FORMS, PREVIOUS_PUBLIC_SPECIAL_HYMN_FORM_PRESET_FORMS]
+  const legacy = [LEGACY_PUBLIC_SPECIAL_HYMN_FORM_PRESET_FORMS, PREVIOUS_PUBLIC_SPECIAL_HYMN_FORM_PRESET_FORMS, PRE_TITLE_PUBLIC_SPECIAL_HYMN_FORM_PRESET_FORMS]
     .find((forms) => normalizeServiceFormPresetForms(forms).map((item) => compactSearchValue(item)).join("|") === formsKey);
   if (!legacy) return preset;
   const legacyHint = legacy.join("-");

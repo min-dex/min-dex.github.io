@@ -860,7 +860,7 @@ strings are authored sequences too. Do not rewrite stored metadata into a cycle.
 Public special-song hymns keep their separate public preset:
 
 ```text
-1절-후렴-2절-후렴-간주-마지막 절-후렴
+T-V1-C-V2-C-Int-VL-C-Coda
 ```
 
 ## Naming Decision
@@ -1010,11 +1010,19 @@ invalidation; no automatic worship-document rewrite is introduced.
 
 ### Worship form input versus effective default ·2026-10-23
 
-An absent form is not materialized from generic playback or template rules.
-Display that effective sequence in the input placeholder only. A registered
-song/version presenter form may be copied on linking; explicit item forms win.
-A nonempty edit persists its exact sequence with titleSequence ownership; clearing
-removes the form payload and uses playback fallback without storing that fallback.
-Default Title is scoped to main praise and excludes hymn score output. Ordinary
-order/content headings are separate from Title tokens. No operational row migration
-is needed to remove formerly displayed virtual defaults.
+Resolve song-form sources in this order: (4) saved item override, (2) explicit
+service/template/rule declaration, (1) registered song/version presenter metadata,
+then (3) inferred available lyric/score structure. Sources 1 and 3 are light input
+placeholders; sources 2 and 4 are actual editable values. Linking, rendering and
+saving must not copy inherited metadata/defaults into an item override. Clearing
+4 restores inheritance and must retain the service's declared rules.
+
+Only inferred source 3 automatically starts with T for main praise and special
+songs; ordinary hymn score defaults remain without T. Declared sequences own
+all omissions/repetitions/T positions. The special-hymn public declaration includes
+its own explicit T. Title means the existing title screen and is displayed as T.
+On the user's explicit 2026-10-24 instruction, existing nonempty metadata sequences
+receive leading T, and legacy title-bearing item sequences receive actual T only
+where no explicit titleSequence policy exists. Do not reinterpret an explicit T
+omission or touch protected manual song corrections. Lyrics/audio timing are not
+part of this change.

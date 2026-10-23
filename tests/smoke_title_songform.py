@@ -17,11 +17,11 @@ try:
       {id:'verse',part_type:'Verse',part_number:1,lyrics:'첫째 줄\\n\\n홀로 있는 줄\\n\\n세 줄\\n둘째\\n셋째'},
       {id:'chorus',part_type:'Chorus',lyrics:'후렴 가사'}]};
     const song={id:'title-song',_relationalVersionsLoaded:true,title:'제목 순서 검증',praise_types:['ccm'],versions:[version]};
-    const item={id:'title-item',label:'찬양',raw_title:song.title,song_id:song.id,version_id:version.id,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formHint:'V1-C',formPreset:{forms:['V1','C'],strength:'manual'}})};
+    const item={id:'title-item',label:'찬양',raw_title:song.title,song_id:song.id,version_id:version.id,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formHint:'T-V1-C',formPreset:{forms:['T','V1','C'],strength:'manual',titleSequence:true}})};
     const section={sectionKey:'praise',sectionLabel:'찬양'};
     const render=()=>{const plan=presenterFormPlanForServiceItem(version,item,song);check(!plan.warnings.length,JSON.stringify(plan.warnings));let slides=presenterLyricsSlidesForServiceItem({item,section,index:0,song,version,displayText:song.title,label:item.label,forms:plan.forms,formWarnings:plan.warnings});return slides;};
     const before=JSON.stringify({item,version});
-    const legacy=render();check(legacy[0].type==='song-title','legacy title retained');check(legacy.length===5,'authored paragraphs preserved');
+    const legacy=render();check(legacy[0].type==='song-title','authored leading title retained');check(legacy.length===5,'authored paragraphs preserved');
     check(before===JSON.stringify({item,version}),'read did not migrate data');
     for(const raw of ['t','T','title','TITLE',' Title ']) check(normalizeServiceFormHint(raw+' - Verse 1 - Tags')==='T-V1-Tags','normalization');
     check(canonicalServiceFormToken('T')==='T' && canonicalServiceFormToken('Tag')==='Tag','Tag unchanged');

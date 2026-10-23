@@ -544,3 +544,26 @@ Chromium/WebKit 각각 전체1203판본과 기존 예배 참조350개의 출력 
 최종 같은 구절 줄바꿈 불일치0, 절별 대응 페이지 한/두 줄 불일치0, 같은 가사의 새/통일 슬라이드 경계 불일치0. Chromium/WebKit 전체1203판본 및 기존 예배 참조350개의 출력 문구/순서 보존과3해상도 넘침0 확인. 고요한 밤·하나님의 크신 사랑·하나님의 나팔 소리의 실제 비교 UI도 로컬 후보로 캡처했다. 운영 쓰기0, 배포 없음.
 
 최신 적용 후보는 backups/20261023-hymn-line-review/{plan,expected,candidate-ledger}.json. 이전 independent-amen 폴더 후보는 이 기록으로 대체한다. 공개 대장/runtime은 운영 적용/readback 전까지 그대로 유지한다. 배포 조율의 main push 대기는 해제됐지만 이번 턴에는 push/배포하지 않았다. 증빙: docs/hymn-line-consistency-staged-20261023.json.
+
+
+## Song-form source ownership ·2026-10-24
+
+Prepared on codex/form-origin-ownership. Resolve saved item > explicit service
+arrangement > metadata > inference (4 > 2 > 1 > 3). Metadata/inference are light
+placeholders; service/item values are editable. Linking no longer copies metadata
+as manual input, and clearing no longer removes declared rules. Inferred T scope
+stays main praise/special songs; public special hymns declare T explicitly.
+
+User-approved operational restoration:34 metadata song sequences and55 legacy
+title-bearing item sequences across26 services now contain actual leading T.
+Atomic save and independent readback verified every target, unchanged target
+versions/units, and protected manual “주님의 임재 앞에서”. Concurrent unrelated
+lyric edits were retained. Private full snapshots/requests/receipts are outside
+this repository. Historical source comparisons found no additional proven lost
+nonempty stored form; ambiguous old values remain rather than guessed cleanup.
+
+Scoped Chromium/WebKit priority/default/title/children-audio save-retry checks,
+special-hymn declarations, metadata-only atomic-save regression and runtime hashes
+PASS. Full required combined GitHub gate/publication still pending. No release
+queue ticket or branch push held by this component; coordinate next batch after
+the already-running release, preserving the primary checkout's unrelated work.

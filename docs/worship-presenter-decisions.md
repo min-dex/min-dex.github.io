@@ -4420,3 +4420,30 @@ retaining one ordinary Remote guest. Administrators never occupy or evict the
 guest slot. Preserve shared command revision/serialization; one controller's
 disconnect must not terminate other controllers. See the remote contract for
 migration, old-host compatibility and verification/publication status.
+
+## Song-form source priority and input ownership ·2026-10-24
+
+Supersedes conflicting source/display rules in “Empty form input and scoped
+default Title” and “Background sequence ownership restored”. Priority is saved
+item override (4), explicit service/template declaration (2), metadata (1), inferred
+structure (3). Metadata and inference appear as light placeholders; service
+arrangements and saved overrides appear as actual values. Inheritance is resolved
+at read/playback time; linking never relabels metadata as manually entered data.
+Clearing an override retains the service rule and returns to inheritance.
+
+Inference alone supplies automatic T for main praise/special songs, excluding
+ordinary hymn scores. All declared sources keep exact T order/omission. Public
+special-hymn declarations explicitly include T. User-authorized data restoration
+adds T to 34 nonempty metadata sequences and 55 legacy title-bearing overrides
+across 26 services, without changing their sequence tails. Explicit titleSequence
+omissions and the protected user correction remain unchanged. Source records and
+native documents are retained; writes use Praise/Worship atomic saves and exact
+baseline checks. Private receipts stay outside the repository.
+
+Read-only historical comparisons found no further proven lost nonempty override
+outside prior approved automatic clears. Ambiguous old stored values remain;
+strength labels alone do not establish human authorship. Existing 77 confirmed
+clears still inherit dated service arrangements. Browser coverage verifies the
+four priorities, light/actual input, clear/link/save behavior, score hints, direct
+praise title ownership and both output modes. Operational readback/publication
+are recorded separately from those local checks.

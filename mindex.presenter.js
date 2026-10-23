@@ -588,16 +588,36 @@ function presenterDefaultTitleForServiceItem(item = {}, song = null, version = n
 function presenterFormPresetWithDefaultTitle(preset, item, song, version, options = {}) {
   const forms = normalizeServiceFormPresetForms(preset?.forms || []);
   if (preset?.titleSequence || forms.includes("T")) return { ...preset, forms, titleSequence: true };
-  if (!presenterDefaultTitleForServiceItem(item, song, version, options)) return preset;
+  if (!options.inferred || !presenterDefaultTitleForServiceItem(item, song, version, options)) return preset;
   return { ...preset, forms: ["T", ...forms], hint: ["T", ...forms].join("-"), titleSequence: true, defaultTitle: true };
 }
 
+function presenterServiceItemDeclaredFormSource(item = {}, song = null, version = null) {
+  const stored = serviceItemFormPreset(item);
+  if (stored?.forms?.length) {
+    const saved = { ...stored, strength: "manual" };
+    return { kind: "manual", preset: isPresenterSpecialSongItem(item)
+      && versionEffectivePraiseTypes(song, version).includes("hymn")
+      ? presenterSpecialSongHymnDisplayPreset(saved) : saved };
+  }
+  const template = serviceItemTemplateFormDefaults(item).formPreset;
+  const rule = matchedServiceItemFormPresetRule(item, song, version);
+  let servicePreset = template?.forms?.length ? template : rule?.formPreset;
+  if (servicePreset?.forms?.length && isPresenterSpecialSongItem(item)
+      && versionEffectivePraiseTypes(song, version).includes("hymn")) {
+    servicePreset = presenterSpecialSongHymnDisplayPreset(servicePreset);
+  }
+  if (servicePreset?.forms?.length) return { kind: "service", preset: { ...servicePreset, strength: "default" } };
+  const metadata = presenterSongDefaultFormPreset(song, version);
+  if (metadata?.forms?.length) return { kind: "metadata", preset: { ...metadata, strength: "song-default" } };
+  return null;
+}
+
 function presenterScoreFormSequence(item = {}, song = null, version = null) {
-  const preset = serviceItemFormPreset(item)
-    || presenterSongDefaultFormPreset(song, version)
-    || serviceItemTemplateFormDefaults(item).formPreset
-    || matchedServiceItemFormPresetRule(item, song, version)?.formPreset;
-  return presenterFormPresetWithDefaultTitle(preset, item, song, version, { score: true }) || { forms: [] };
+  const declared = presenterServiceItemDeclaredFormSource(item, song, version);
+  if (declared) return declared.preset;
+  // Score assets already own their page sequence; inference must not reorder it.
+  return presenterFormPresetWithDefaultTitle(null, item, song, version, { score: true, inferred: true }) || { forms: [] };
 }
 
 function presenterScoreFormPresetLabels(item = {}, song = null, version = null) {
@@ -732,48 +752,22 @@ function presenterHymnOnceOnlyIntro(forms = [], version = {}) {
 }
 
 function presenterServiceItemFormPreset(version = {}, item = {}, song = null, options = {}) {
+  const declared = presenterServiceItemDeclaredFormSource(item, song, version);
+  if (declared) return declared.preset;
+  if (options.includePlaybackFallback === false) return null;
   const available = normalizeForms(version?.forms || []).filter(form => normalizeLyricsForCopy(form.lyrics));
   const sourceSequence = available.length && available.every(form => normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form)).type !== "lyrics")
     ? { forms: available.map(presenterFormDisplayLabel), strength: "auto" } : null;
-  const preset = presenterServiceItemBaseFormPreset(version, item, song, options)
-    || (options.includePlaybackFallback !== false ? sourceSequence : null);
-  // Typed sequences own Title. Only the ordinary main-praise default adds it.
-  if (preset?.titleSequence || parseServiceItemMemo(item?.memo).formPreset?.titleSequence) return preset;
-  if (!preset?.forms?.length && options.includePlaybackFallback === false) return preset;
+  const preset = presenterDefaultVerseChorusFormPreset(available, song, version) || sourceSequence;
   const resolved = presenterFormPresetWithAvailableForms(preset, available);
-  return presenterFormPresetWithDefaultTitle(resolved, item, song, version);
+  return presenterFormPresetWithDefaultTitle(resolved, item, song, version, { inferred: true });
 }
 
 function presenterServiceItemBaseFormPreset(version = {}, item = {}, song = null, { includePlaybackFallback = true } = {}) {
-  const itemPreset = serviceItemFormPreset(item);
-  // Defaults only fill an empty item; a stored sequence keeps its playback order.
-  if (itemPreset?.forms?.length) {
-    const saved = { ...itemPreset, strength: "manual" };
-    return isPresenterSpecialSongItem(item)
-      && versionEffectivePraiseTypes(song, version).includes("hymn")
-      ? presenterSpecialSongHymnDisplayPreset(saved)
-      : saved;
-  }
-  const forms = normalizeForms(version?.forms || []).filter((form) => normalizeLyricsForCopy(form.lyrics));
-  const isHymn = versionEffectivePraiseTypes(song, version).includes("hymn");
-  const matchedRule = matchedServiceItemFormPresetRule(item, song, version);
-  const songDefaultPreset = presenterSongDefaultFormPreset(song, version);
-  if (songDefaultPreset) return songDefaultPreset;
-  const templatePreset = includePlaybackFallback && serviceItemTemplateFormDefaults(item).formPreset;
-  if (templatePreset) return templatePreset;
-  const specialHymnRulePreset = presenterSpecialSongHymnFormPreset(item, song, version, matchedRule);
-  return isHymn
-    ? specialHymnRulePreset
-      || matchedRule?.formPreset
-      || songDefaultPreset
-      || itemPreset
-      || (includePlaybackFallback && presenterDefaultVerseChorusFormPreset(forms, song, version))
-      || null
-    : matchedRule?.formPreset
-      || presenterExplicitNonHymnFormPreset(songDefaultPreset)
-      || itemPreset
-      || (includePlaybackFallback && presenterDefaultVerseChorusFormPreset(forms, song, version))
-      || null;
+  const declared = presenterServiceItemDeclaredFormSource(item, song, version);
+  if (declared) return declared.preset;
+  const forms = normalizeForms(version?.forms || []).filter(form => normalizeLyricsForCopy(form.lyrics));
+  return includePlaybackFallback ? presenterDefaultVerseChorusFormPreset(forms, song, version) : null;
 }
 
 function presenterMissingFormWarnings(missing = [], forms = [], preset = null) {
@@ -2211,6 +2205,7 @@ function buildPresenterCustomSlides(item, section, index) {
 function presenterDirectPraiseSlidesWithTitle(item, section, index, slides = []) {
   if (!servicePraiseUsesDirectLyrics(servicePraiseInputMode(item))
       || isServiceConnectedPraiseSecondaryItem(item)
+      || presenterServiceItemDeclaredFormSource(item, serviceItemLinkedSong(item), serviceItemLinkedVersion(item))
       || presenterSongTitleUsesSectionHeading(item, section)
       || slides.some(slide => slide.type === "song-title")) return slides;
   const title = serviceItemDisplayText(item);

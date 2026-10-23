@@ -22651,7 +22651,7 @@ function mergeTemplateProjectionMemo(templateMemo = "", existingMemo = "") {
     formHint: formPresetDisabled ? "" : existing.formHint,
     formPreset: formPresetDisabled ? (existing.formPreset?.titleSequence ? existing.formPreset : null) : existing.formPreset,
     formPresetDisabled,
-    formPresetRules: formPresetDisabled ? [] : template.formPresetRules.length ? template.formPresetRules : existing.formPresetRules,
+    formPresetRules: existing.formPresetRules.length ? existing.formPresetRules : template.formPresetRules,
     textHighlights: template.textHighlights.length ? template.textHighlights : existing.textHighlights,
     introSlide: template.introSlide || existing.introSlide,
     asset: template.asset?.url ? template.asset : existing.asset,
@@ -23438,15 +23438,6 @@ function linkServiceItemToPraiseSong(item, song, service = selectedServiceForEdi
   const defaultVersion = defaultServiceSongVersion(song, item, service);
   item.version_id = defaultVersion?.id || null;
   item.song_version_id = item.version_id;
-  if (!parsed.formPresetDisabled && !parsed.formPreset?.forms?.length && !parsed.formHint) {
-    const registered = presenterSongDefaultFormPreset(song, defaultVersion);
-    const preset = registered && presenterFormPresetWithDefaultTitle(registered, item, song, defaultVersion);
-    if (preset?.forms?.length) {
-      parsed.formPreset = normalizeServiceFormPreset({ ...preset, strength: "manual" });
-      parsed.formHint = serviceFormPresetSummary(parsed.formPreset);
-      item.memo = serializeServiceItemMemo(parsed);
-    }
-  }
   return true;
 }
 
@@ -23730,14 +23721,16 @@ function serviceItemTemplateFormDefaults(item = {}) {
 function serviceItemEffectiveFormHint(item = {}) {
   const song = serviceItemLinkedSong(item);
   const version = serviceItemLinkedVersion(item, song);
-  const preset = serviceItemFormPreset(item) || presenterSongDefaultFormPreset(song, version);
-  return preset ? serviceFormPresetSummary(presenterFormPresetWithDefaultTitle(preset, item, song, version)) : "";
+  const declared = presenterServiceItemDeclaredFormSource(item, song, version);
+  return declared && declared.kind !== "metadata" ? serviceFormPresetSummary(declared.preset) : "";
 }
 
 function serviceItemDefaultFormHint(item = {}) {
   const memo = parseServiceItemMemo(item.memo);
   const song = serviceItemLinkedSong(item);
   const version = serviceItemLinkedVersion(item, song);
+  const declared = presenterServiceItemDeclaredFormSource(item, song, version);
+  if (declared) return declared.kind === "metadata" ? serviceFormPresetSummary(declared.preset) : "";
   const score = presenterServiceItemUsesScoreInputMode(item, memo) || serviceItemOutputMode(item, memo) === "score";
   const preset = score ? presenterScoreFormSequence(item, song, version)
     : presenterServiceItemFormPreset(version || {}, item, song);

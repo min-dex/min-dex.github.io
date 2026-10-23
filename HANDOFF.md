@@ -1439,3 +1439,25 @@ One-unit release candidate reconciles published0c405fd7. Common fit rerun passes
 in Chromium/WebKit, including standalone, pair, sermon, order/content and
 three-part headings; related heading/announcement and runtime checks pass.
 Ticket bd3d0e5b655a43ce8cb073baa0713fad is claimed; final branch gate pending.
+
+## Song-form source ownership ·2026-10-24
+
+Prepared on codex/form-origin-ownership. Resolve saved item > explicit service
+arrangement > metadata > inference (4 > 2 > 1 > 3). Metadata/inference are light
+placeholders; service/item values are editable. Linking no longer copies metadata
+as manual input, and clearing no longer removes declared rules. Inferred T scope
+stays main praise/special songs; public special hymns declare T explicitly.
+
+User-approved operational restoration:34 metadata song sequences and55 legacy
+title-bearing item sequences across26 services now contain actual leading T.
+Atomic save and independent readback verified every target, unchanged target
+versions/units, and protected manual “주님의 임재 앞에서”. Concurrent unrelated
+lyric edits were retained. Private full snapshots/requests/receipts are outside
+this repository. Historical source comparisons found no additional proven lost
+nonempty stored form; ambiguous old values remain rather than guessed cleanup.
+
+Scoped Chromium/WebKit priority/default/title/children-audio save-retry checks,
+special-hymn declarations, metadata-only atomic-save regression and runtime hashes
+PASS. Full required combined GitHub gate/publication still pending. No release
+queue ticket or branch push held by this component; coordinate next batch after
+the already-running release, preserving the primary checkout's unrelated work.

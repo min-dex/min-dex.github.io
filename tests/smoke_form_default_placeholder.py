@@ -1,4 +1,4 @@
-"""Blank forms show effective defaults without owning/saving them; main praise and special songs default Title."""
+"""Metadata and inference are placeholders; service declarations and item input stay exact."""
 import os
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from smoke_app import launch_chromium,start_local_app_server,sync_playwright
@@ -68,8 +68,8 @@ try:
     check(oldFull.includes('♪ '+song.title) && !oldFull.includes('presenter-fullscreen-song-heading'),'old order/content snapshot changed to main Title');
     const imported={id:'source-praise',label:'찬양 4',_worshipSectionKey:'source-찬양',_worshipSectionTitle:'찬양',song_id:song.id,version_id:version.id,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formHint:'V1-C',formPreset:{forms:['V1','C'],strength:'manual'}})};
     const importedBefore=JSON.stringify(imported);
-    check(isMainPraiseServiceItem(imported) && input(imported).value==='T-V1-C','source praise with saved form restores leading T');
-    check(presenterFormPlanForServiceItem(version,imported,song).forms[0]._presenterTitle,'source praise renders restored title');
+    check(isMainPraiseServiceItem(imported) && input(imported).value==='V1-C','stored source praise form stays exact');
+    check(!presenterFormPlanForServiceItem(version,imported,song).forms.some(f=>f._presenterTitle),'stored form receives no inferred T');
     check(JSON.stringify(imported)===importedBefore,'source praise title rewrote authored form');
     check(isMainPraiseServiceItem({...imported,_worshipSectionTitle:''}),'source praise key without display title');
     for(const title of ['봉헌','파송찬양','결단찬양','입례찬양'])check(!isMainPraiseServiceItem({...imported,_worshipSectionKey:'source-'+title,_worshipSectionTitle:title}),'source non-main scope '+title);
@@ -87,10 +87,10 @@ try:
       const row={id:'default-'+backgroundCases,service_id:svc.id,label,_worshipSectionKey:worshipTemplateSectionKey(step.label||step.name,sectionIndex,step),memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formPresetDisabled:true})};
       const original=JSON.stringify(row);
       const hint=input(row);const wanted=normalizeServiceFormHint(expected.forms);
-      check(hint.value==='' && (hint.placeholder===wanted || hint.placeholder==='T-'+wanted),'background default missing '+type+'/'+label+' '+hint.outerHTML);
+      check(hint.value===wanted && hint.placeholder==='송폼','background default missing '+type+'/'+label+' '+hint.outerHTML);
       check(JSON.stringify(row)===original,'background default changed stored row');
       const plan=presenterServiceItemFormPreset({},row,null);
-      check(normalizeServiceFormHint(plan.forms)===hint.placeholder,'background placeholder/playback mismatch '+type+'/'+label);
+      check(normalizeServiceFormHint(plan.forms)===hint.value,'background placeholder/playback mismatch '+type+'/'+label);
       check(!serviceElementConfigForSave({},parseServiceItemMemo(row.memo)).formPreset,'background persisted on save');
       const authored={...row};applyServiceItemMetadataField(authored,{dataset:{serviceItemField:'form_hint'},value:'C-V1'},svc);
       const authoredBefore=JSON.stringify(authored);
@@ -125,16 +125,16 @@ try:
     version.forms.splice(1,1);
     song.metadata={presenter_form:{forms:['C','V1'],strength:'song-default'}};
     const registered={id:'registered',label:'찬양 1',_worshipSectionKey:'praise',song_id:song.id,version_id:version.id,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db'})};
-    check(input(registered).value==='T-C-V1','registered main default filled');
-    const linked={...registered,song_id:null,version_id:null};linkServiceItemToPraiseSong(linked,song,service);check(serviceItemFormHint(linked)==='T-C-V1','registered form copied on link');
-    const sending={...registered,label:'파송찬양',_worshipSectionKey:'sending'};check(input(sending).value==='C-V1','registered sending form has no added Title');
+    check(input(registered).value==='' && input(registered).placeholder==='C-V1','registered main default filled');
+    const linked={...registered,song_id:null,version_id:null};linkServiceItemToPraiseSong(linked,song,service);check(serviceItemFormHint(linked)==='' && input(linked).value==='' && input(linked).placeholder==='C-V1','registered source must not become a manual copy on link');
+    const sending={...registered,label:'파송찬양',_worshipSectionKey:'sending'};check(input(sending).value==='' && input(sending).placeholder==='C-V1','registered sending form has no added Title');
     const hymn={...song,praise_types:['hymn'],metadata:{}};const hymnVersion={...version,praise_types:['hymn']};
     const score={...registered,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'score_db',outputMode:'score'})};
     check(!presenterScoreFormSequence(score,hymn,hymnVersion).forms.includes('T'),'hymn score default Title');
     for(const [label,key] of [['특송','special_song'],['봉헌특송','offering']]) {
      const special={...score,label,_worshipSectionKey:key};
      const original=JSON.stringify(special);
-     check(presenterScoreFormSequence(special,hymn,hymnVersion).forms[0]==='T','special hymn score default Title '+label);
+     check(presenterScoreFormSequence(special,hymn,hymnVersion).forms[0]==='T','declared special hymn rule must explicitly include T '+label);
      for(const mode of ['lyrics_db','score_db','manual_praise','audio_praise']) {
       special.memo=serializeServiceItemMemo({elementType:'praise',inputMode:mode,formPreset:{forms:['C','V1'],titleSequence:true,strength:'manual'}});
       check(presenterFormPresetWithDefaultTitle(parseServiceItemMemo(special.memo).formPreset,special,hymn,hymnVersion).forms.join('-')==='C-V1','authored omission overwritten '+mode);
@@ -147,6 +147,34 @@ try:
 
     score.memo=serializeServiceItemMemo({elementType:'praise',inputMode:'score_db',outputMode:'score',formPreset:{forms:['T','V1'],titleSequence:true}});
     check(presenterScoreFormSequence(score,hymn,hymnVersion).forms.join('-')==='T-V1','explicit score Title preserved');
+    // Both declared sources exist: the service-specific arrangement wins.
+    const declaredService={id:'declared-service',type_id:'young-adult',date:'2026-10-25'};state.services=[declaredService];
+    const declaredItem={id:'declared-item',service_id:declaredService.id,label:'파송찬양',_worshipSectionKey:'sending',song_id:song.id,version_id:version.id,
+      memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formPresetDisabled:true})};
+    song.metadata={presenter_form:{forms:['C','V1'],strength:'song-default'}};
+    check(presenterServiceItemDeclaredFormSource(declaredItem,song,version).kind==='service' && input(declaredItem).value==='V-C1-C2','service arrangement must outrank metadata');
+    applyServiceItemMetadataField(declaredItem,{dataset:{serviceItemField:'form_hint'},value:'C-T-V1'},declaredService);
+    check(input(declaredItem).value==='C-T-V1' && presenterServiceItemFormPreset(version,declaredItem,song).forms.join('-')==='C-T-V1','manual wins and keeps middle T');
+    applyServiceItemMetadataField(declaredItem,{dataset:{serviceItemField:'form_hint'},value:''},declaredService);
+    check(input(declaredItem).value==='V-C1-C2','clearing manual returns to declared service value');
+    const rule={when:{songType:'ccm'},formPreset:{forms:['V1','C'],strength:'default'}};
+    const custom={...registered,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formPresetDisabled:true,formPresetRules:[rule]})};
+    check(input(custom).value==='V1-C','declared item rule must be a real value');
+    const savedRule=serviceElementConfigForSave({},parseServiceItemMemo(custom.memo));
+    check(savedRule.formPresetRules.length===1 && !savedRule.formPreset,'clear override must preserve declared rule on save');
+    const projectedRule=mergeTemplateProjectionMemo('',custom.memo);
+    check(parseServiceItemMemo(projectedRule).formPresetRules.length===1,'template projection must preserve cleared item rules');
+    const sourceOnly={...registered,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db'})};
+    song.metadata={presenter_form:{forms:['C','T','V1'],strength:'song-default'}};
+    check(input(sourceOnly).value==='' && input(sourceOnly).placeholder==='C-T-V1' && presenterServiceItemFormPreset(version,sourceOnly,song).forms.join('-')==='C-T-V1','metadata T position must remain exact');
+    for(const inputMode of ['manual_praise','audio_praise'])for(const label of ['찬양 1','특송']) {
+     const direct={id:'direct-owner',label,raw_title:'직접 제목',_worshipSectionKey:label==='특송'?'special_song':'praise',
+       memo:serializeServiceItemMemo({elementType:'praise',inputMode,slides:['첫 화면','후렴'],formPreset:{forms:['V1','C'],strength:'manual'}})};
+     const before=JSON.stringify(direct),slides=buildPresenterCustomSlides(direct,{sectionKey:direct._worshipSectionKey},0);
+     check(!slides.some(s=>s.type==='song-title') && slides.length===2,'direct stored form gained inferred T '+label+'/'+inputMode);
+     check(JSON.stringify(direct)===before,'direct stored sequence rewritten');
+    }
+    song.metadata={};state.services=[service];
     const scoreSong={...hymn,id:'score-song',hymn_no:9,versions:[{...hymnVersion,id:'score-version'}]};
     state.songs=[...state.songs,scoreSong];
     state.hymnScoreManifest={9:{title:'하늘에 가득 찬 영광의 하나님',slides:[
@@ -183,7 +211,7 @@ try:
       check(input(row).value==='' && input(row).placeholder===wanted,'actual single-score structure '+wanted+' '+input(row).outerHTML);
       check(JSON.stringify({row,ss})===original,'score source changed');
       ss.metadata={presenter_form:{forms:['C','V'],titleSequence:true}};
-      check(input(row).value==='C-V' && presenterScoreFormSequence(row,ss,vv).forms.join('-')==='C-V','registered form must remain editable and authoritative after clear');
+      check(input(row).value==='' && input(row).placeholder==='C-V' && presenterScoreFormSequence(row,ss,vv).forms.join('-')==='C-V','registered form must remain editable and authoritative after clear');
     }
     return 'PASS empty placeholder, default scope, content headings, linking, authored input, clear/save and registered forms';
    }'''),flush=True);browser.close()

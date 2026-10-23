@@ -23,7 +23,7 @@ def main():
               for(const label of ['특송','봉헌특송']) {
                 const item={id:'test',label,_worshipSectionKey:label==='특송'?'special_song':'offering'};
                 const preset=presenterSpecialSongHymnFormPreset(item,song,{});
-                assert(preset.hint==='V1-C-V2-C-Int-VL-C-Coda','default hint');
+                assert(preset.hint==='T-V1-C-V2-C-Int-VL-C-Coda','default hint');
                 for(const [name,forms,expected] of [
                   ['all',all,['v1','c','v2','c','Int','v4','c','coda']],
                   ['no-coda',all.filter(f=>f.id!=='coda'),['v1','c','v2','c','Int','v4','c']],
@@ -43,10 +43,10 @@ def main():
                 assert(parse('V1L').group==='L' || parse('V1L').group==='l','numbered group preserved');
               }
               const when={songType:'hymn'};
-              for(const forms of [LEGACY_PUBLIC_SPECIAL_HYMN_FORM_PRESET_FORMS,PREVIOUS_PUBLIC_SPECIAL_HYMN_FORM_PRESET_FORMS]) {
+              for(const forms of [LEGACY_PUBLIC_SPECIAL_HYMN_FORM_PRESET_FORMS,PREVIOUS_PUBLIC_SPECIAL_HYMN_FORM_PRESET_FORMS,PRE_TITLE_PUBLIC_SPECIAL_HYMN_FORM_PRESET_FORMS]) {
                 const preset={forms,hint:forms.join('-'),strength:'default'};
                 const upgraded=normalizeServiceFormPresetRulePreset(preset,when);
-                assert(upgraded.hint==='V1-C-V2-C-Int-VL-C-Coda','saved default migration');
+                assert(upgraded.hint==='T-V1-C-V2-C-Int-VL-C-Coda','saved default migration');
                 const manual={...preset,strength:'manual'};
                 assert(normalizeServiceFormPresetRulePreset(manual,when)===manual,'manual rule changed');
               }
@@ -59,21 +59,23 @@ def main():
                 const item={label:'특송',_worshipSectionKey:'special_song',memo:serializeServiceItemMemo({
                   formHint:savedHint,formPreset:{forms:savedHint.split('-'),hint:savedHint,strength}
                 })};
-                assert(presenterServiceItemFormPreset({forms:all},item,song).forms.join('-')==='Title-'+savedHint,
+                assert(presenterServiceItemFormPreset({forms:all},item,song).forms.join('-')===savedHint,
                   'saved preset replaced before slide planning: '+strength);
                 const plan=presenterFormPlanForServiceItem({forms:all},item,song);
                 assert(JSON.stringify(plan.forms.filter(f=>!f._presenterTitle).map(f=>f.id))===JSON.stringify(['v1','c','v2','c','v4','c']), 'saved sequence overwritten: '+strength);
-                assert(serviceItemEffectiveFormHint(item)==='Title-'+savedHint,'shown sequence differs: '+strength);
+                assert(serviceItemEffectiveFormHint(item)===savedHint,'shown sequence differs: '+strength);
               }
               const linkedSong={...song,id:'preset-test-song',versions:[{id:'preset-test-version',praise_types:['hymn'],forms:all}]};
+              state.songs.push(linkedSong);
               const fresh={id:'preset-test-item',label:'특송',_worshipSectionKey:'special_song'};
               linkServiceItemToPraiseSong(fresh,linkedSong,{type_id:'monthly'});
-              assert(serviceItemFormPreset(fresh)?.hint==='T-V1-C-V2-C-Int-VL-C-Coda','default not materialized');
+              assert(!serviceItemFormPreset(fresh),'service declaration materialized into item override');
+              assert(serviceItemEffectiveFormHint(fresh)==='T-V1-C-V2-C-Int-VL-C-Coda','service declaration missing from editable value');
               const frozen=fresh.memo;
               const offering={id:'offering-test',label:'봉헌찬송',_worshipSectionKey:'offering'};
               linkServiceItemToPraiseSong(offering,linkedSong,{type_id:'sunday-first'});
               assert(!serviceItemFormPreset(offering),'playback fallback persisted as offering form');
-              assert(serviceItemEffectiveFormHint(offering)==='T','playback fallback shown as editable form');
+              assert(serviceItemEffectiveFormHint(offering)==='','playback fallback shown as editable form');
               assert(presenterFormPlanForServiceItem({forms:all},offering,linkedSong).forms.length>0,'offering playback lost');
               linkServiceItemToPraiseSong(fresh,linkedSong,{type_id:'monthly'});
               assert(fresh.memo===frozen,'relink changed saved default');

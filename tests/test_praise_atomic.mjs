@@ -16,6 +16,18 @@ try {
  await db.query("insert into mindex_version_units(id,version_id,canonical_song_id,unit_order,unit_label,unit_kind,trigger,text) values($1,$2,$3,1,'v','verse','','original lyrics')",[u,v,sid]);
  const read=()=>scalar('select get_praise_snapshot_v1($1)',[sid]);
  const save=req=>scalar('select save_praise_v1($1)',[req]);
+ // Metadata-only song-form changes must leave lyrics, versions and relations intact.
+ const beforeMetadata=await read();
+ const metadataMemo={...JSON.parse(beforeMetadata.song.memo),metadata:{presenter_form:{forms:['T','V1','C'],hint:'T-V1-C',titleSequence:true}}};
+ const metadataRequest={protocolVersion:1,requestId:uuid(),songId:sid,expected:beforeMetadata,songPatch:{...beforeMetadata.song,memo:JSON.stringify(metadataMemo)}};
+ const metadataReceipt=await save(metadataRequest),afterMetadata=await read();
+ assert.deepEqual(afterMetadata,metadataReceipt.snapshot);
+ for(const key of ['units','versions','canonical','relations'])assert.deepEqual(afterMetadata[key],beforeMetadata[key]);
+ assert.deepEqual({...afterMetadata.song,memo:beforeMetadata.song.memo},beforeMetadata.song);
+ const persistedMemo=JSON.parse(afterMetadata.song.memo);delete persistedMemo._praiseCommit;
+ assert.deepEqual(persistedMemo,metadataMemo);
+ assert.equal((await save(metadataRequest)).replayed,true);
+ await assert.rejects(save({...metadataRequest,requestId:uuid()}),/PRAISE_CONFLICT/);
  const base=await read();
  const request=(snapshot,text)=>({protocolVersion:1,requestId:uuid(),songId:sid,expected:snapshot,
   songPatch:{title:text,memo:'{}'},versions:snapshot.versions.map(x=>({...x,version_order:1})),
