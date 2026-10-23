@@ -104,6 +104,10 @@ try:
                       renderCurrentServiceModuleDetail=()=>{};updateSaveState=()=>{};showToast=()=>{};
                       publishPresenterState=()=>{throw Error('Unexpected output publish')};
                       syncServiceMusicWithPresenterContext=()=>{throw Error('Unexpected music change')};
+                      service._worshipSourceTextDraft='Unapplied source draft';
+                      check(!unlinkServiceMedley(sid,ids[1]),'hidden source draft bypassed');
+                      check(service._worshipSourceTextDraft==='Unapplied source draft','source draft lost');
+                      delete service._worshipSourceTextDraft;
                       check(unlinkServiceMedley(sid,ids[1]),'unlink failed');
                       const after=getServiceItems(sid).map(item=>({id:item.id,song:item.song_id,version:item.version_id,title:item.raw_title,form:parseServiceItemMemo(item.memo).formHint,order:item.sort_order}));
                       check(JSON.stringify(before)===JSON.stringify(after),'unlink changed content or order');
