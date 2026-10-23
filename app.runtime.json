@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-hymn-slide-bundle",
+  "version": "20261023-hymn-slide-bundle-2",
   "options": {
     "compress": false,
     "mangle": {

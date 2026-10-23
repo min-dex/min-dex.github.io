@@ -19,7 +19,7 @@
     const current = forms || [];
     const hashes = await Promise.all(current.map(async form => [form.id, await textHash(form.lyrics ?? form.text)]));
     const byId = new Map(hashes);
-    if (current.length !== record.parts.length || byId.size !== record.parts.length || record.parts.some(part => byId.get(part.unitId) !== part.textSha256 || (current.find(form => form.id === part.unitId)?.part_type && current.find(form => form.id === part.unitId).part_type !== part.kind))) {
+    if (current.length !== record.parts.length || byId.size !== record.parts.length || record.parts.some(part => (byId.get(part.unitId) !== part.textSha256 && (!part.displayTextSha256 || byId.get(part.unitId) !== part.displayTextSha256)) || (current.find(form => form.id === part.unitId)?.part_type && current.find(form => form.id === part.unitId).part_type !== part.kind))) {
       return {status:'stale',text:'마디: 가사가 바뀌어 재검토 필요'};
     }
     if (record.reviewStatus === 'recitative_exception') return {status:'recitative',text:'마디: 낭송형 · 일정한 마디 구분 없음'};

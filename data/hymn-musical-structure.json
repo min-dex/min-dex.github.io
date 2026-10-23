@@ -18033,7 +18033,8 @@
             4
           ],
           "approxMeasures": 8,
-          "reviewStatus": "score_supported_approximation"
+          "reviewStatus": "score_supported_approximation",
+          "displayTextSha256": "2f0c6766b628432fc381edab861332db99a7bcba1f56dd2d507273108f851e4a"
         }
       ],
       "scoreEvidence": [
@@ -49907,7 +49908,8 @@
             8
           ],
           "approxMeasures": 16,
-          "reviewStatus": "score_supported_approximation"
+          "reviewStatus": "score_supported_approximation",
+          "displayTextSha256": "e7308e8291210677945687e60950f73e91c89184fca58271aadaed3361a284ff"
         },
         {
           "unitId": "dcd7b921-1530-5972-a49e-b91bf7c92849",
@@ -53166,7 +53168,8 @@
             4
           ],
           "approxMeasures": 8,
-          "reviewStatus": "score_supported_approximation"
+          "reviewStatus": "score_supported_approximation",
+          "displayTextSha256": "9a7a27f28c5d268ff62dd2db80b8e6717b68e78ea952144e5d06210e8ae754ca"
         },
         {
           "unitId": "e32858b3-6e00-53ce-89cf-2ceb1ec22080",
@@ -53202,7 +53205,8 @@
             4
           ],
           "approxMeasures": 8,
-          "reviewStatus": "score_supported_approximation"
+          "reviewStatus": "score_supported_approximation",
+          "displayTextSha256": "5f15b6ee57bc1ef2aa1ebf6405ea72f00a06c1ee6c12d1f3c3aa24b95d9b2043"
         },
         {
           "unitId": "f93fcb5c-7214-5c0e-b42a-9ec7c4f18cd7",
@@ -59091,7 +59095,8 @@
             4
           ],
           "approxMeasures": 8,
-          "reviewStatus": "score_supported_approximation"
+          "reviewStatus": "score_supported_approximation",
+          "displayTextSha256": "5e245511ae86166d892773e1bc673647d7dbb4db4111c60c98e4b88d0bd6429a"
         },
         {
           "unitId": "09ccd857-2167-521b-aa63-ead2eda86d45",
@@ -63794,7 +63799,8 @@
             4
           ],
           "approxMeasures": 8,
-          "reviewStatus": "score_supported_approximation"
+          "reviewStatus": "score_supported_approximation",
+          "displayTextSha256": "f9e154dcecdd55b55bd22ddbabe0c73a618f1d401b9b2e51e56b7d3f7f5ba94a"
         },
         {
           "unitId": "d89d177b-980b-554e-ae83-54c56a2339e7",
@@ -63818,7 +63824,8 @@
             4
           ],
           "approxMeasures": 8,
-          "reviewStatus": "score_supported_approximation"
+          "reviewStatus": "score_supported_approximation",
+          "displayTextSha256": "bc78ac1344cf08fd6d76caa5768a26df8515ee8d5cf420d114789af20c7d2490"
         },
         {
           "unitId": "bab663b9-ba47-5a65-8c51-4f52592af34d",
@@ -64411,7 +64418,8 @@
             4
           ],
           "approxMeasures": 8,
-          "reviewStatus": "score_supported_approximation"
+          "reviewStatus": "score_supported_approximation",
+          "displayTextSha256": "9111b24e15b72474daf5caf18c8eb31ba931a2cbc807ce50283b0acc990e944a"
         },
         {
           "unitId": "92df4715-963f-5d65-90f8-c24ff9960612",
@@ -64423,7 +64431,8 @@
             4
           ],
           "approxMeasures": 8,
-          "reviewStatus": "score_supported_approximation"
+          "reviewStatus": "score_supported_approximation",
+          "displayTextSha256": "6e9d6218a05f38e7c70720c1d9efd537371c214ed9c03b41dfb3659426610077"
         },
         {
           "unitId": "fab609a6-947c-54c9-a7ee-8cc885e9cc2e",
@@ -64667,7 +64676,8 @@
             4
           ],
           "approxMeasures": 8,
-          "reviewStatus": "score_supported_approximation"
+          "reviewStatus": "score_supported_approximation",
+          "displayTextSha256": "de6c13bd889447b61b679f677dec52f2cfd355ee4198f4b45dba99c0e5e36c43"
         },
         {
           "unitId": "515ae054-a18e-59bc-8066-00ca14c1e875",
@@ -64679,7 +64689,8 @@
             4
           ],
           "approxMeasures": 8,
-          "reviewStatus": "score_supported_approximation"
+          "reviewStatus": "score_supported_approximation",
+          "displayTextSha256": "572319b6b01a52a801c4c726c823fbe255cb12e3a19a5e616bc8307ef1f134fd"
         },
         {
           "unitId": "fd06f6f5-7845-54a2-9dbd-3ccd521218e3",
@@ -66892,7 +66903,8 @@
             4
           ],
           "approxMeasures": 8,
-          "reviewStatus": "score_supported_approximation"
+          "reviewStatus": "score_supported_approximation",
+          "displayTextSha256": "d4323473be2cd63f8a7e9919d1773c71b3be103892145f38a5538b930eb8466d"
         },
         {
           "unitId": "4baa0804-8da0-52c7-810f-47867389ae7d",
@@ -70498,7 +70510,8 @@
             4
           ],
           "approxMeasures": 8,
-          "reviewStatus": "score_supported_approximation"
+          "reviewStatus": "score_supported_approximation",
+          "displayTextSha256": "1529fd2cbb86de53b13170f14aa5793ce6558b1530c9136dacb2f4eb94640406"
         },
         {
           "unitId": "ca07e405-829a-5913-891a-f1a9b160a10c",
@@ -70510,7 +70523,8 @@
             4
           ],
           "approxMeasures": 8,
-          "reviewStatus": "score_supported_approximation"
+          "reviewStatus": "score_supported_approximation",
+          "displayTextSha256": "cfaded6326f044f35b2c6564d7b9423d0ef68ccf7618007ec982d7465526cc75"
         },
         {
           "unitId": "fb1958e2-e325-565e-a8ea-32206f671c62",
@@ -79489,7 +79503,8 @@
             4
           ],
           "approxMeasures": 8,
-          "reviewStatus": "score_supported_approximation"
+          "reviewStatus": "score_supported_approximation",
+          "displayTextSha256": "791061b7115844e1170e70e073a4a75aeffccf3fb4dffbee16873f6cea8a1871"
         },
         {
           "unitId": "ecd81192-f63c-5e89-9a31-5a1ef28d412e",
@@ -83501,7 +83516,8 @@
             5
           ],
           "approxMeasures": 16,
-          "reviewStatus": "score_supported_approximation"
+          "reviewStatus": "score_supported_approximation",
+          "displayTextSha256": "f4784905099ea3a46b628efa4e414e65aeadb058bada64afcbcc7f35b0cdfd26"
         },
         {
           "unitId": "79843cc3-a54d-500d-8c88-289a73d2e971",
@@ -83514,7 +83530,8 @@
             5
           ],
           "approxMeasures": 16,
-          "reviewStatus": "score_supported_approximation"
+          "reviewStatus": "score_supported_approximation",
+          "displayTextSha256": "6d0b06edd602e0e00e042d0db785c1036c4ff7423307f0e21633338ffa5ba6ee"
         },
         {
           "unitId": "e7a3229c-b15d-517a-bca5-a5b2f979efa8",
