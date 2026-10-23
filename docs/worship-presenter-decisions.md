@@ -4454,3 +4454,15 @@ Title vertical fitting checks rendered text ranges within the stage, not the pad
 caption container. The existing Cadaros ornament-clearance translation can move
 the container edge below the stage while the title remains fully inside. Preserve
 the caption design, current fit scale and real overflow detection; no saved content changes.
+
+
+## Liturgical praise fullscreen composition restored ·2026-10-24
+
+Supersedes the display-mode ambiguity in “Liturgical praise content-title
+restoration”. Reuse the existing standard fullscreen song-title renderer for
+order/content song headings: small order title above a centered large inline
+♪ song title. Chromakey keeps its original lower-bar order/content positions.
+Main/special praise keeps the separate-note title style. Render-boundary adaptation
+covers both legacy snapshots and newly built slides without rewriting stored
+forms, titles or service data. Preview and output share the same path. Browser
+regression checks actual glyph placement and title scale, not just HTML classes.

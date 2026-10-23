@@ -50,7 +50,7 @@ try:
        if(!sequence)check(!headings[0].formLabel && !input(item).placeholder.startsWith('T-'),'implicit T added to liturgical praise '+label);
        for(const noChromakey of [false,true]) {
         const html=renderPresenterSlideFrame(headings[0],{noChromakey});
-        check(html.includes('presenter-title-assignee--order-content') && html.includes('♪ '+expectedTitle) && !html.includes('presenter-fullscreen-song-heading'),'order/content output lost '+label+'/'+mode+'/'+noChromakey);
+        check(noChromakey ? html.includes('presenter-fullscreen-song-heading')&&html.includes('presenter-slide--fullscreen-song-title')&&!html.includes('presenter-slide--song-note-title')&&html.includes(expectedTitle) : html.includes('presenter-title-assignee--order-content')&&html.includes('♪ '+expectedTitle),'order/content output lost '+label+'/'+mode+'/'+noChromakey);
         const preview=normalizePresenterMiniPreviewSlide({...headings[0],outputContext:noChromakey?'clean':'chromakey'},!noChromakey);
         check(preview.type===headings[0].type && renderPresenterTitleAssigneeSlide(preview)===renderPresenterTitleAssigneeSlide(headings[0]),'preview/output title mismatch '+label+'/'+mode+'/'+noChromakey+' '+JSON.stringify({preview,original:headings[0]}));
        }
@@ -65,7 +65,17 @@ try:
     check(full.includes('aria-label="찬양">♬</span>') && !full.includes('♪'),'separate fullscreen note changed');
     const oldContent={...presenterOrderContentTitleSlide({label:'결단찬양'},{sectionKey:'response_song'},0,'결단찬양','♬ '+song.title),songTitle:song.title};
     const oldFull=renderPresenterSlideFrame(oldContent,{noChromakey:true});
-    check(oldFull.includes('♪ '+song.title) && !oldFull.includes('presenter-fullscreen-song-heading'),'old order/content snapshot changed to main Title');
+    check(oldFull.includes('presenter-fullscreen-song-heading')&&oldFull.includes(song.title)&&oldFull.includes('♪ '+song.title)&&!oldFull.includes('presenter-slide--song-note-title'),'old order/content snapshot must restore standard fullscreen composition');
+    const fullTitleHost=document.createElement('main');fullTitleHost.className='presenter-output-root no-chromakey';
+    fullTitleHost.style.cssText='position:fixed;left:0;top:0;margin:0;width:1920px;height:1080px;transform:none';
+    fullTitleHost.innerHTML=oldFull;document.body.append(fullTitleHost);fitPresenterSongTitleText(fullTitleHost);
+    const fullTitle=fullTitleHost.querySelector('.presenter-title-content-title'),fullHeading=fullTitleHost.querySelector('.presenter-fullscreen-song-heading');
+    const stageBounds=fullTitleHost.getBoundingClientRect(),titleBounds=fullTitle.getBoundingClientRect(),headingBounds=fullHeading.getBoundingClientRect();
+    const glyphRange=document.createRange();glyphRange.selectNodeContents(fullTitle);const glyphBounds=glyphRange.getBoundingClientRect();
+    check(Math.abs((glyphBounds.left+glyphBounds.right-stageBounds.left-stageBounds.right)/2)<2,'fullscreen content glyphs must center');
+    check(headingBounds.bottom<=titleBounds.top+1 && Math.abs((titleBounds.top+titleBounds.bottom-stageBounds.top-stageBounds.bottom)/2)<108,'fullscreen order heading above centered title');
+    check(parseFloat(getComputedStyle(fullTitle).fontSize)===150,'short fullscreen content title must retain original scale');
+    fullTitleHost.remove();
     const imported={id:'source-praise',label:'찬양 4',_worshipSectionKey:'source-찬양',_worshipSectionTitle:'찬양',song_id:song.id,version_id:version.id,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formHint:'V1-C',formPreset:{forms:['V1','C'],strength:'manual'}})};
     const importedBefore=JSON.stringify(imported);
     check(isMainPraiseServiceItem(imported) && input(imported).value==='V1-C','stored source praise form stays exact');

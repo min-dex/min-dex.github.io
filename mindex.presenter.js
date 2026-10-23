@@ -5564,17 +5564,22 @@ function presenterServiceDesignForSlide(slide, options = {}) {
 }
 
 function renderPresenterSlideFrame(slide, options = {}) {
+  const sectionSongTitle = slide?.type === "title-assignee" && slide.orderTitle && slide.contentTitle
+    && !slide.assignee && (slide.songTitle || PRESENTER_SONG_NOTE_PATTERN.test(slide.contentTitle));
   if (options.noChromakey && !slide?.autoTrailingBlank
     && presenterSlideLayout(slide) !== PRESENTER_SLIDE_LAYOUTS.BLANK
-    && !(slide?.type === "title-assignee" && slide.orderTitle && slide.contentTitle)
-    && (slide?.songTitle || (slide?.type === "song-title" && presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE))) {
-    const content = presenterSongTitleContent(slide);
+    && (sectionSongTitle || !(slide?.type === "title-assignee" && slide.orderTitle && slide.contentTitle))
+    && (sectionSongTitle || slide?.songTitle || (slide?.type === "song-title" && presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE))) {
+    const content = sectionSongTitle
+      ? { orderTitle: slide.orderTitle, title: slide.contentTitle, detail: "" }
+      : presenterSongTitleContent(slide);
     const hideDetail = normalizePresenterServiceDesign(options.presentationDesign)?.songTitleStyle === "note-title";
-    const title = String(content.title || "").replace(PRESENTER_SONG_NOTE_PATTERN, "").trim();
-    // Share the note-above-title layout; compact event copy stays opt-in.
+    const title = sectionSongTitle ? formatPresenterSongTitleText(content.title)
+      : String(content.title || "").replace(PRESENTER_SONG_NOTE_PATTERN, "").trim();
+    // Section songs retain the original order heading and inline-note fullscreen title.
     slide = { ...slide, elementType: PRESENTER_ELEMENT_TYPES.TITLE_CONTENT,
       layout: PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT, type: "title-content",
-      title, text: title, songTitleContent: content, bodyText: "", assignee: "", fullscreenSongTitle: true, fullscreenSongTitleStyle: "note-title", fullscreenSongTitleHideDetail: hideDetail };
+      title, text: title, songTitleContent: content, bodyText: "", assignee: "", fullscreenSongTitle: true, fullscreenSongTitleStyle: sectionSongTitle ? "standard" : "note-title", fullscreenSongTitleHideDetail: hideDetail };
   }
   const design = presenterServiceDesignForSlide(slide, options);
   if (design) {
