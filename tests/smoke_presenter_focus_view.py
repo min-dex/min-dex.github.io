@@ -72,8 +72,13 @@ try:
     assert not page.locator('.svc-source-panel').is_visible()
     assert page.evaluate("focusDraft===document.querySelector('.svc-source-text') && focusDraft.value==='아직 저장하지 않은 원문' && focusAudio===state.serviceMusic.audio && focusAudio.currentTime===42 && focusItems===JSON.stringify(state.serviceItems)")
     assert '자동 넘김 해제' in page.locator('[data-focus-music-status]').inner_text()
-    assert page.locator('[data-focus-music="toggle"]').inner_text() == '일시정지 · P'
+    assert page.locator('[data-focus-music-label]').inner_text() == '일시정지 · P'
     assert page.evaluate('''()=>{const b=document.querySelector('[data-focus-music="toggle"]');const text=b.firstChild;syncPresenterFocusMusic();return text===b.firstChild}''')
+    for playing,pending,icon in ((False,False,'play'),(True,False,'pause'),(False,True,'loader-circle')):
+      page.evaluate('([playing,pending])=>{state.serviceMusic.playing=playing;state.serviceMusic.pending=pending;syncPresenterFocusMusic()}',[playing,pending])
+      assert page.locator(f'[data-focus-music="toggle"] svg.lucide-{icon}').count()==1
+      assert page.evaluate("""()=>{const b=document.querySelector('[data-focus-music="toggle"]'),i=b.firstChild,l=b.lastChild;syncPresenterFocusMusic();return i===b.firstChild&&l===b.lastChild}""")
+    page.evaluate('state.serviceMusic.playing=true;state.serviceMusic.pending=false;syncPresenterFocusMusic()')
     page.evaluate('window.focusOriginalMusicAction=runServiceMusicAction;runServiceMusicAction=(action,binding)=>{window.focusMusicCall={action,binding}}')
     page.locator('[data-focus-music="toggle"]').click()
     assert page.evaluate("focusMusicCall.action==='toggle' && focusMusicCall.binding.serviceMusicServiceId==='focus-fixture'"), page.evaluate("JSON.stringify(focusMusicCall)")
@@ -142,6 +147,12 @@ try:
          assert page.locator('.svc-focus-output').is_visible()
         selector='.svc-presenter-side-panel [data-presenter-action]' if view=='basic' else '.svc-focus-navigation button,.svc-presenter-toolbar > .svc-output-action'
         assert page.locator(selector).evaluate_all("es=>es.filter(e=>e.getBoundingClientRect().width>0).every(e=>{const r=e.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth+1})")
+       if view=='focus':
+        assert page.locator('.svc-focus-transport button').evaluate_all("""es=>es.every(e=>{
+          const s=getComputedStyle(e),i=e.querySelector('svg.lucide'),is=i&&getComputedStyle(i);
+          return s.height==='35px'&&s.padding==='0px 8px'&&s.gap==='6px'&&is?.width==='16px'&&is.height==='16px'&&is.strokeWidth==='1.5px'
+            &&(!e.getClientRects().length||e.scrollWidth<=e.clientWidth+1);
+        })""")
        if view=='basic':
         assert page.evaluate("""()=>{
          const music=document.querySelector('.svc-presenter-toolbar .svc-music-name');

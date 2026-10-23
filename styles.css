@@ -9296,7 +9296,7 @@ body:has(#servicePresenterControls[data-focus-view="true"]) .svc-presenter-live-
 .svc-focus-navigation, .svc-focus-audio { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
 .svc-focus-count { min-width: 60px; font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .svc-focus-count > span { color: var(--ink-3); font-size: 12px; font-weight: 500; }
-.svc-focus-transport .btn { min-height: 35px; padding-inline: 10px; border: 1px solid var(--line-2); border-radius: var(--r); }
+.svc-focus-transport .btn { height:35px; min-height:35px; padding:0 8px; border: 1px solid var(--line-2); border-radius: var(--r); }
 .svc-focus-transport .btn:disabled { opacity: .45; }
 .svc-focus-transport [data-focus-music-status] { flex-basis: 100%; color: var(--ink-3); font-size: 12px; margin-bottom: 5px; }
 .svc-focus-filmstrip-heading { border-top: 1px solid var(--line); padding-top: 15px; color: var(--ink-3); font-size: 12px; font-weight: 600; }
@@ -9441,7 +9441,7 @@ body:has(#servicePresenterControls[data-focus-view="true"]) .right-sidebar { dis
 .svc-board-subgroup-audio.has-audio > audio { order:2; flex:1 1 100%; width:100%; min-width:0; max-width:100%; height:40px; }
 .svc-board-subgroup-audio.has-audio > .svc-children-audio-hint { order:3; flex:1 0 100%; }
 .svc-board-subgroup-audio-actions > :is(button,label) { min-height:30px; white-space:nowrap; }
-.svc-focus-transport [data-focus-music] { height:30px; padding:0 10px; white-space:nowrap; }
+.svc-focus-transport .btn { gap:6px; white-space:nowrap; }
 .svc-focus-transport [data-focus-music="toggle"] { width:110px; flex-shrink:0; }
 
 /* Music adopts the same neutral fields and inset focus as controller editors. */
@@ -9466,7 +9466,7 @@ body[data-theme="dark"] .svc-board-subgroup-audio audio { color-scheme:dark; }
 body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
 
 /* Peer commands share a fixed icon slot; helper/preview artwork stays independent. */
-:is(.module-switcher, .topbar-actions, .svc-presenter-toolbar, .svc-presenter-side-panel) :is(button, summary, .svc-presenter-pin-toggle, .svc-presenter-screen-select) :is(i[data-lucide], svg.lucide),
+:is(.module-switcher, .topbar-actions, .svc-presenter-toolbar, .svc-presenter-side-panel, .svc-focus-transport) :is(button, summary, .svc-presenter-pin-toggle, .svc-presenter-screen-select) :is(i[data-lucide], svg.lucide),
 #servicePresenterControls .svc-board-subgroup-flow :is(button, summary, .svc-reference-media-upload, .svc-board-subgroup-audio-upload) :is(i[data-lucide], svg.lucide) {
   display: inline-block;
   box-sizing: border-box;

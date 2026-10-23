@@ -3997,3 +3997,12 @@ The matching topbar launchers are hidden only while that basic control rail
 exists. Focus view and other modules retain global access. Both entries open
 the existing dialog/popover; no extra audio instance or remote session is created.
 Music popover placement and keyboard return use the visible launcher.
+
+
+## Focused presenter command geometry ·2026-10-23
+
+Focused previous/next, music play/pause/cancel/stop, auto-sync return and narrow
+output controls share35px height,8px horizontal padding,6px icon gap and16px
+Lucide icons with1.5 stroke, matching basic-view output controls. Toggle label
+and icon update only when changed; unchanged playback updates retain the nodes.
+App topbar40px and segmented view/scale28px targets retain their distinct roles.

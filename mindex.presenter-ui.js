@@ -292,17 +292,17 @@ function syncPresenterFocusView() {
     : isPresenterOutputWindowOpen() ? '선택 화면 · 다른 예배 송출 중' : '선택 화면 · 송출 대기';
   const frame = (slide, title) => `<div class="svc-focus-preview"><strong>${escapeHtml(title)}</strong><div class="svc-slide-thumb-frame">${slide ? renderPresenterSlideMiniPreview(slide, serviceId) : '<span>다음 슬라이드 없음</span>'}</div></div>`;
   const outputControl = document.querySelector('[data-presenter-right-sidebar] .svc-presenter-launch');
-  const narrowOutput = outputControl ? `<button type="button" class="btn secondary svc-focus-output" data-presenter-action="${escapeAttr(outputControl.dataset.presenterAction)}" data-service-id="${escapeAttr(serviceId)}" ${outputControl.disabled ? 'disabled' : ''}>${escapeHtml(outputControl.getAttribute('aria-label') || outputControl.textContent.trim())}</button>` : '';
+  const narrowOutput = outputControl ? `<button type="button" class="btn secondary svc-focus-output" data-presenter-action="${escapeAttr(outputControl.dataset.presenterAction)}" data-service-id="${escapeAttr(serviceId)}" ${outputControl.disabled ? 'disabled' : ''}><i data-lucide="${outputControl.dataset.presenterAction === 'stop' ? 'screen-share-off' : 'screen-share'}"></i><span>${escapeHtml(outputControl.getAttribute('aria-label') || outputControl.textContent.trim())}</span></button>` : '';
   const markup = `<div class="svc-focus-screens">${frame(current, label)}${frame(next, '다음 화면')}</div>
     <div class="svc-focus-transport"><div class="svc-focus-navigation" role="group" aria-label="슬라이드 이동"><span class="svc-focus-count">${slides.length ? index + 1 : 0} <span>/ ${slides.length}</span></span>
-      <button type="button" class="btn secondary" data-presenter-action="prev" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}>이전</button>
-      <button type="button" class="btn secondary" data-presenter-action="next" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}>다음</button>${narrowOutput}</div>
+      <button type="button" class="btn secondary" data-presenter-action="prev" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}><i data-lucide="chevron-left"></i><span>이전</span></button>
+      <button type="button" class="btn secondary" data-presenter-action="next" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}><i data-lucide="chevron-right"></i><span>다음</span></button>${narrowOutput}</div>
       <div class="svc-focus-audio" role="group" aria-label="음원 조작"><span data-focus-music-status role="status"></span>
-      <button type="button" class="btn secondary" data-focus-music="toggle">재생 / 일시정지 · P</button>
-      <button type="button" class="btn secondary" data-focus-music="stop" aria-label="음악 정지">정지</button>
-      <button type="button" class="btn secondary" data-song-timing-resume>자동 넘김 복귀 · R</button></div>
+      <button type="button" class="btn secondary" data-focus-music="toggle"><i data-lucide="play"></i><span data-focus-music-label>재생 · P</span></button>
+      <button type="button" class="btn secondary" data-focus-music="stop" aria-label="음악 정지"><i data-lucide="square"></i><span>정지</span></button>
+      <button type="button" class="btn secondary" data-song-timing-resume><i data-lucide="rotate-ccw"></i><span>자동 넘김 복귀 · R</span></button></div>
     </div><div class="svc-focus-filmstrip-heading">전체 슬라이드</div>`;
-  if (panel._markup !== markup) { panel.innerHTML = markup; panel._markup = markup; }
+  if (panel._markup !== markup) { panel.innerHTML = markup; panel._markup = markup; refreshIcons(panel); }
   syncPresenterFocusMusic();
   schedulePresenterPreviewLayoutUpdate(panel);
 }
@@ -323,7 +323,16 @@ function syncPresenterFocusMusic() {
   const toggle = panel.querySelector('[data-focus-music="toggle"]');
   if (toggle) {
     const text = `${music.pending ? '준비 취소' : music.playing ? '일시정지' : '재생'} · P`;
-    if (toggle.textContent !== text) toggle.textContent = text;
+    const label = toggle.querySelector('[data-focus-music-label]');
+    if (label.textContent !== text) label.textContent = text;
+    const icon = music.pending ? 'loader-circle' : music.playing ? 'pause' : 'play';
+    const currentIcon = toggle.querySelector('[data-lucide]');
+    if (currentIcon?.getAttribute('data-lucide') !== icon) {
+      const replacement = document.createElement('i');
+      replacement.dataset.lucide = icon;
+      currentIcon?.replaceWith(replacement);
+      refreshIcons(toggle);
+    }
     toggle.setAttribute('aria-label', music.pending ? '음악 준비 취소' : music.playing ? '음악 일시정지' : '음악 재생');
     toggle.setAttribute('aria-pressed', String(Boolean(own && music.playing)));
   }

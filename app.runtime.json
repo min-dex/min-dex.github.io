@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-song-form-width",
+  "version": "20261023-focus-controls",
   "options": {
     "compress": false,
     "mangle": {
