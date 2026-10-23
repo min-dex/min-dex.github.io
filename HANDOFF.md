@@ -1421,3 +1421,15 @@ service note-title artwork; ordinary shared note layout inherits white/brown
 output ink. Chromium/WebKit computed-color coverage passes. Ticket
 0978abd456a54b098fa40439debed57f belongs to codex/song-note-accent-scope;
 new release verification/publication pending. No operational data writes.
+
+## One-unit text fitting ·2026-10-24
+
+Song-note scope675b2567 completed gate39991084296, Pages39992059525 and
+Chromium/WebKit public-color verification. Current candidate7affc93e on
+codex/presenter-one-unit-fit removes40/70px readability floors and uses a1px
+1920-stage search. Fullscreen order/person labels share fitting; long assignee
+intrinsic width is bounded without changing normal short-name alignment.
+Common fit (largest grid size, reset, stage/thumbnail parity, long order/person),
+announcement region, sermon and song-heading Chromium/WebKit checks PASS.
+Ticket bd3d0e5b655a43ce8cb073baa0713fad waits behind existing releases.
+Not deployed yet. No operational data writes.
