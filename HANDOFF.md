@@ -1344,3 +1344,7 @@ Chromium/WebKit 각각 전체1203판본과 기존 예배 참조350개의 출력 
 ## 2026-10-23 미래 예배 목록·컨트롤러 표시 일치
 
 `codex/future-outline-consistency`: 빈 설교 제목에 담당자를 제목 괄호로 표시하던 controller fallback 제거. 단일 편집 항목의 목록·컨트롤러는 공통 read-only summary를 사용하고, 제목/담당자 일부가 있어도 필요한 입력이 비었으면 같은 안내를 유지한다. 기존 제목 칸에 담당자가 있는 경우 편집 모델의 title override를 존중한다.14개 예배 유형138개 기본 편집 항목과 부분 입력, 좁은/넓은 화면·포커스, 항목/출력 불변 확인. 운영 쓰기 없음. 배포 완료 여부는 GitHub exact-SHA gate/Pages와 공개 버전 확인으로 판정한다.
+
+## 2026-10-23 송폼별 컨트롤러 묶음 색
+
+`codex/form-group-colors`: 순서별 색 순환을 Verse 적색/Pre-Chorus 녹색/Chorus 청색/Bridge 청록/Coda 자홍/Tag·Tags 황색으로 교체. 성경은 요소·섹션을 넘어 밝은/어두운 회색 교대. Title·간주는 박스 없음 유지, 미분류 가사는 중립 회색. 반복·절·A/B 박스 경계와 기존 클릭·송출 순서 보존. Chromium/WebKit 양 테마·3폭 실제 렌더와 미래 예배14유형138항목 표시 회귀 확인. 운영 쓰기 없음.

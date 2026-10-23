@@ -4206,3 +4206,19 @@ contents, slide payloads/order, playback and printing are unchanged.
 `tests/smoke_future_outline_consistency.py` exercises all14 service types with
 isolated future templates, partial/complete/legacy inputs, matching UI summaries,
 unchanged items/output and narrow/wide rendered controls.
+
+## Controller group colors by form · 2026-10-23
+
+Supersedes the occurrence-based six-color cycle. Controller lyric/score groups
+use stable form colors: Verse red, Pre-Chorus green, Chorus blue, Bridge cyan,
+Coda magenta, Tag/Tags yellow. Numbers, A/B and @ variants share their base-form
+color but retain independent occurrence keys, boxes, spacing and click indexes.
+Title/interlude remain unboxed; unclassified lyric forms use neutral gray.
+Scripture range/translation groups alternate light/dark gray across the board,
+including separate elements/sections and deferred rendering. Offsets live only
+on controller group metadata; slides and operational records are unchanged.
+
+Verified with Chromium/WebKit, both themes and 320/700/1100px widths. Rechecked
+future-service title/person/missing-state summaries: no further instance of the
+person-as-sermon-title fallback found in the related controller/outline paths.
+Output, printing, playback, draft contents and persisted ordering are unchanged.

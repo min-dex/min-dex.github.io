@@ -31109,6 +31109,16 @@ function groupPresenterSlidesBySection(slides, serviceId = state.selectedService
     group.slides.push(entry);
     addPresenterSlideToSubgroup(group, entry);
   });
+  // UI-only offsets stay stable when sections are rendered lazily or refreshed.
+  let scriptureColorStart = 0;
+  for (const group of groups) {
+    for (const subgroup of group.subgroups) {
+      subgroup.scriptureColorStart = scriptureColorStart;
+      scriptureColorStart += presenterBoardSlideBlocks(subgroup.slides).filter(block =>
+        presenterSlideElementType(block.entries[0]?.slide) === PRESENTER_ELEMENT_TYPES.SCRIPTURE_TEXT).length;
+    }
+  }
+
   return groups;
 }
 
@@ -31536,7 +31546,7 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
       ${inputControls}
       ${renderServiceSlotMusic(context)}
       <div class="svc-board-grid">
-        ${renderPresenterBoardSlideBlocks(slides, activeIndex, serviceId)}
+        ${renderPresenterBoardSlideBlocks(slides, activeIndex, serviceId, subgroup.scriptureColorStart)}
       </div>
       ${subgroup.slides.some(({ slide }) => slide?.liveScriptureControl) ? `
         <button class="svc-output-action" type="button" data-presenter-citation-focus="${escapeAttr(subgroup.slides.find(({ slide }) => slide?.liveScriptureControl).slide.elementId)}" data-service-id="${escapeAttr(serviceId)}">
@@ -31847,15 +31857,16 @@ function presenterBoardSlideBlocks(entries = []) {
   return blocks;
 }
 
-function renderPresenterBoardSlideBlocks(entries, activeIndex, serviceId) {
-  const colorIndexes = new Map();
+function renderPresenterBoardSlideBlocks(entries, activeIndex, serviceId, scriptureColorStart = 0) {
+  let scriptureIndex = scriptureColorStart;
   return presenterBoardSlideBlocks(entries).map((block) => {
-    const owner = presenterSlideElementGroupKey(block.entries[0]?.slide) || "";
-    const plain = ["title", "instrumental"].includes(normalizePresenterFormPresetLabel(block.label).type);
-    const isColored = Boolean(block.key) && !plain;
-    const colorIndex = colorIndexes.get(owner) || 0;
-    if (isColored) colorIndexes.set(owner, colorIndex + 1);
-    const colorAttribute = isColored ? ` data-form-color="${colorIndex % 6}"` : "";
+    const scripture = presenterSlideElementType(block.entries[0]?.slide) === PRESENTER_ELEMENT_TYPES.SCRIPTURE_TEXT;
+    const formType = normalizePresenterFormPresetLabel(block.label).type;
+    const plain = !scripture && ["title", "instrumental"].includes(formType);
+    const color = scripture
+      ? (scriptureIndex++ % 2 === 0 ? "bible-light" : "bible-dark")
+      : ["verse", "pre-chorus", "chorus", "bridge", "coda", "tag"].includes(formType) ? formType : "neutral";
+    const colorAttribute = block.key && !plain ? ` data-form-color="${color}"` : "";
     const thumbs = block.entries.map(({ slide, slideIndex, formLabel }) =>
       renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, formLabel)).join("");
     return block.key

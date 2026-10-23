@@ -58,6 +58,7 @@ NODE_TESTS = (
 CSS_NODE_TESTS = ('test_app_runtime.cjs', 'test_ui_icons.cjs',
                   'test_remote_theme.cjs', 'test_bulletin.cjs')
 SMOKES = (
+    "smoke_controller_slide_blocks.py",
     "smoke_future_outline_consistency.py",
     "smoke_legacy_title_restore.py",
     "smoke_song_form_width.py",
