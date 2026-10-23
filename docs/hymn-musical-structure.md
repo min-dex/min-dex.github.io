@@ -822,3 +822,23 @@ excluding Coda; equal-frequency values use the longer regular span rather than
 a range widened by a short closing phrase. Source metadata retains actual per-page
 estimates for auditing. Detailed data and publication status:
 [hymn-final38-release-20261023.json](hymn-final38-release-20261023.json).
+
+## 2026-10-24 판본 간 대응 악구 재검토
+
+같은 곡·같은 구간의 문구가 조금 다른 경우도 포함하여 새/통일12곡쌍,
+24판본21대응 구간의 양쪽 인쇄 악보를 다시 확인했다.18가사 단위의
+줄/슬라이드 경계를 정리했다. 본절과 후렴의 일반 분량은 약4마디를
+기준으로 맞추되, 새488의2마디 끝맺음과 새/통125의 긴 멜리스마 악구는
+문장/음절 중간에서 자르지 않는다. 통265의 본절 뒷부분은 실제6마디여서
+기존4마디 기록을 고치고 새516과 같은4·3·3 분량으로 맞췄다.
+
+새163/166과 통160/156은 악보의 도입부 자체가 다른 것이 아니라 저장
+단위가 다르다(새판은 절에 포함하여 첫 회만 출력, 통일판은 별도 Lyrics).
+이를 페이지 수 오류로 취급해 가사나 송폼 구조를 변경하지 않는다.
+통125의 기존 아멘 페이지도 유지한다. 정확한 총마디 강제가 아니라
+자연스러운 악구·가독성을 우선하는 슬라이드 분량 검토다.
+
+24판본과 저장 참조7개는 Chromium/WebKit·3해상도에서 출력 문구/순서
+보존과 넘침0을 확인했다. 가사 어절/표기,ID,송폼,독립 아멘,실제 예배
+내용은 변경 대상이 아니다. 적용/배포 상태는
+[hymn-pair-phrase-recheck-20261024.json](hymn-pair-phrase-recheck-20261024.json)에 별도 기록한다.

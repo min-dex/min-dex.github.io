@@ -1,0 +1,529 @@
+{
+  "date": "2026-10-24",
+  "status": "data-applied-readback-verified-metadata-publication-pending",
+  "scope": {
+    "songPairs": 12,
+    "editions": 24,
+    "correspondingUnitPairs": 21,
+    "changedUnits": 18,
+    "changedVersions": 12
+  },
+  "decisions": [
+    {
+      "unitId": "a0a9202b-ac06-47de-9354-7317714ceb00",
+      "edition": "new",
+      "number": 351,
+      "beforePages": 1,
+      "afterPages": 2,
+      "bars": [
+        4,
+        4
+      ],
+      "reason": "Both scores: two four-bar refrain phrases. Match verse slide duration and two-line phrasing, retaining edition words."
+    },
+    {
+      "unitId": "56038e6e-f58b-41a5-b35a-95696b591ed5",
+      "edition": "new",
+      "number": 202,
+      "beforePages": 1,
+      "afterPages": 2,
+      "bars": [
+        4,
+        4
+      ],
+      "reason": "Both scores: two four-bar refrain phrases. Match verse slide duration and two-line phrasing, retaining edition words."
+    },
+    {
+      "unitId": "ee952eab-239a-4eec-b3b1-f09b70ca433e",
+      "edition": "new",
+      "number": 184,
+      "beforePages": 2,
+      "afterPages": 3,
+      "bars": [
+        4,
+        4,
+        4
+      ],
+      "reason": "Both scores: three four-bar refrain phrases; preserve the final fire invocation as one complete phrase."
+    },
+    {
+      "unitId": "071c4e2b-f225-4d76-bc5d-18cf05648c8f",
+      "edition": "new",
+      "number": 320,
+      "beforePages": 1,
+      "afterPages": 2,
+      "bars": [
+        4,
+        4
+      ],
+      "reason": "Both scores: two four-bar refrain phrases. Match verse slide duration and two-line phrasing, retaining edition words."
+    },
+    {
+      "unitId": "119ccaaa-09cd-40de-b8d0-5e7e3356e078",
+      "edition": "new",
+      "number": 166,
+      "beforePages": 3,
+      "afterPages": 3,
+      "bars": [
+        7,
+        8,
+        7
+      ],
+      "reason": "Both scores contain the introduction; new edition stores it within verses and renderer emits it once, old edition has a separate Lyrics unit. Preserve structure; align corresponding body line breaks."
+    },
+    {
+      "unitId": "404106ab-c19d-4940-81bb-57df3807d49b",
+      "edition": "new",
+      "number": 166,
+      "beforePages": 3,
+      "afterPages": 3,
+      "bars": [
+        7,
+        8,
+        7
+      ],
+      "reason": "Both scores contain the introduction; new edition stores it within verses and renderer emits it once, old edition has a separate Lyrics unit. Preserve structure; align corresponding body line breaks."
+    },
+    {
+      "unitId": "41fe5d61-0ff0-4af2-8203-5b87beb2575b",
+      "edition": "new",
+      "number": 166,
+      "beforePages": 3,
+      "afterPages": 3,
+      "bars": [
+        7,
+        8,
+        7
+      ],
+      "reason": "Both scores contain the introduction; new edition stores it within verses and renderer emits it once, old edition has a separate Lyrics unit. Preserve structure; align corresponding body line breaks."
+    },
+    {
+      "unitId": "ad715f2d-9b67-43d4-8ac8-98c7667dea37",
+      "edition": "new",
+      "number": 166,
+      "beforePages": 3,
+      "afterPages": 3,
+      "bars": [
+        7,
+        8,
+        7
+      ],
+      "reason": "Both scores contain the introduction; new edition stores it within verses and renderer emits it once, old edition has a separate Lyrics unit. Preserve structure; align corresponding body line breaks."
+    },
+    {
+      "unitId": "1c35c63f-5aec-4886-94a9-757899fa5851",
+      "edition": "new",
+      "number": 214,
+      "beforePages": 1,
+      "afterPages": 2,
+      "bars": [
+        4,
+        4
+      ],
+      "reason": "Both scores: two four-bar refrain phrases. Match verse slide duration and two-line phrasing, retaining edition words."
+    },
+    {
+      "unitId": "151e98de-4940-433a-98a2-ba5337befc15",
+      "edition": "new",
+      "number": 488,
+      "beforePages": 1,
+      "afterPages": 2,
+      "bars": [
+        4,
+        2
+      ],
+      "reason": "Both scores: four-bar phrase plus short two-bar repeated cadence. Preserve repetition on its own short final slide."
+    },
+    {
+      "unitId": "0d6a11e7-3cab-44e2-adb9-acb6d0781c93",
+      "edition": "new",
+      "number": 87,
+      "beforePages": 1,
+      "afterPages": 2,
+      "bars": [
+        4,
+        4
+      ],
+      "reason": "Both scores: two four-bar refrain phrases. Match verse slide duration and two-line phrasing, retaining edition words."
+    },
+    {
+      "unitId": "4ad826bc-3dbd-4272-b5c2-4371acd991f4",
+      "edition": "new",
+      "number": 485,
+      "beforePages": 1,
+      "afterPages": 2,
+      "bars": [
+        4,
+        4
+      ],
+      "reason": "Both scores: two four-bar refrain phrases. Match verse slide duration and two-line phrasing, retaining edition words."
+    },
+    {
+      "unitId": "191c4ec9-402b-5323-b487-e7f51e79f96b",
+      "edition": "union",
+      "number": 265,
+      "beforePages": 2,
+      "afterPages": 3,
+      "bars": [
+        4,
+        3,
+        3
+      ],
+      "reason": "Both scores: four-bar opening and two three-bar closing phrases; old metadata undercounted the six-bar second system. Match new edition boundaries without changing words."
+    },
+    {
+      "unitId": "41678fec-1c20-58a5-aa4e-69c90166e620",
+      "edition": "union",
+      "number": 265,
+      "beforePages": 2,
+      "afterPages": 3,
+      "bars": [
+        4,
+        3,
+        3
+      ],
+      "reason": "Both scores: four-bar opening and two three-bar closing phrases; old metadata undercounted the six-bar second system. Match new edition boundaries without changing words."
+    },
+    {
+      "unitId": "970b42e6-4deb-532c-af3e-34e8fd3f9aa3",
+      "edition": "union",
+      "number": 265,
+      "beforePages": 2,
+      "afterPages": 3,
+      "bars": [
+        4,
+        3,
+        3
+      ],
+      "reason": "Both scores: four-bar opening and two three-bar closing phrases; old metadata undercounted the six-bar second system. Match new edition boundaries without changing words."
+    },
+    {
+      "unitId": "ab2c0ad7-db27-52fe-aae7-1ab10c37876c",
+      "edition": "union",
+      "number": 265,
+      "beforePages": 2,
+      "afterPages": 3,
+      "bars": [
+        4,
+        3,
+        3
+      ],
+      "reason": "Both scores: four-bar opening and two three-bar closing phrases; old metadata undercounted the six-bar second system. Match new edition boundaries without changing words."
+    },
+    {
+      "unitId": "c5d0625f-c959-4f68-b050-95d21c99cde2",
+      "edition": "new",
+      "number": 125,
+      "beforePages": 1,
+      "afterPages": 2,
+      "bars": [
+        7,
+        6
+      ],
+      "reason": "Both scores: two complete Gloria melismatic phrases (~7/~6 bars). Do not split inside a held syllable. Retain existing independent Amen page/unit and form identity."
+    },
+    {
+      "unitId": "931d1201-e745-56e4-9c0a-2c5c0b7d0fb2",
+      "edition": "union",
+      "number": 125,
+      "beforePages": 2,
+      "afterPages": 3,
+      "bars": [
+        7,
+        6,
+        1
+      ],
+      "reason": "Both scores: two complete Gloria melismatic phrases (~7/~6 bars). Do not split inside a held syllable. Retain existing independent Amen page/unit and form identity."
+    }
+  ],
+  "retainedStructure": [
+    "New163/Union160 and New166/Union156 store the same printed introduction differently. No migration of intro or form identities.",
+    "Union125 Amen remains its existing independent page inside Chorus; New125 Coda remains separate. No repetition changes."
+  ],
+  "checks": {
+    "chromium": {
+      "textFailures": [],
+      "existingTextPreserved": true,
+      "versions": 24,
+      "existingItems": 7,
+      "allTextAndUnitOrderPreserved": true,
+      "pages": {
+        "020669ff-3faa-57bb-a14f-02af9d255570": [
+          18,
+          19
+        ],
+        "10c02862-b80c-4074-aae8-c2438abd8395": [
+          12,
+          12
+        ],
+        "19a83ade-106e-4c44-a79f-ab58899b515c": [
+          11,
+          12
+        ],
+        "59529ed2-78ed-4a72-aa57-dd0cac880e99": [
+          10,
+          11
+        ],
+        "5bf20e2d-cb7e-5c2a-86ca-0a75acfdd7c0": [
+          12,
+          12
+        ],
+        "6d2254ac-e393-5603-9548-c3d49b3a87f4": [
+          19,
+          19
+        ],
+        "75378ecf-ad29-429d-b080-7619b2bb3b24": [
+          12,
+          12
+        ],
+        "7ab06cc7-99cf-5e67-b236-78a6758734e8": [
+          10,
+          10
+        ],
+        "7d234250-c751-5459-a309-b58494c088b0": [
+          11,
+          11
+        ],
+        "7da73860-6295-4af6-8fc9-a782e5cf626f": [
+          10,
+          10
+        ],
+        "816af56b-c2fd-5fe3-a139-cafbf497f114": [
+          9,
+          10
+        ],
+        "81abd273-8cbb-5c30-a9ca-ba1fd7714149": [
+          9,
+          10
+        ],
+        "97933c11-e687-4323-9d0a-be477ce9989b": [
+          10,
+          14
+        ],
+        "9ca5e5ae-4460-505e-bd93-83db1ba9d39c": [
+          10,
+          11
+        ],
+        "9f861306-6694-42a3-ae09-3613e73909b1": [
+          11,
+          12
+        ],
+        "a248da25-ad49-5453-82e0-e8b7a5eb1422": [
+          11,
+          11
+        ],
+        "a5680578-f4fa-40bb-8167-3e4122f7ba74": [
+          9,
+          10
+        ],
+        "afb2c82b-cca0-554b-a399-f440bd926c82": [
+          10,
+          10
+        ],
+        "b2158e1d-16df-52a2-816f-747293159ec7": [
+          10,
+          11
+        ],
+        "cdc7ae5f-7590-4824-aa32-cad85d91c416": [
+          11,
+          11
+        ],
+        "d90f999e-2061-52b3-a622-919b647a100b": [
+          10,
+          10
+        ],
+        "d98142ba-641b-50cf-b798-67ea3386e391": [
+          10,
+          11
+        ],
+        "f0b77053-5120-5880-999d-a3dd1a12f7b8": [
+          9,
+          9
+        ],
+        "fd2bcd10-c8ea-46f3-9720-0389a1bff014": [
+          14,
+          14
+        ]
+      },
+      "layout": {
+        "uniqueSlides": 196,
+        "rendered": 588,
+        "overflow": []
+      },
+      "candidatePlanSha256": "072f205a58c39a65661b6f50fee44b69340c79a94df1e1131b743283db60cfca"
+    },
+    "webkit": {
+      "textFailures": [],
+      "existingTextPreserved": true,
+      "versions": 24,
+      "existingItems": 7,
+      "allTextAndUnitOrderPreserved": true,
+      "pages": {
+        "020669ff-3faa-57bb-a14f-02af9d255570": [
+          18,
+          19
+        ],
+        "10c02862-b80c-4074-aae8-c2438abd8395": [
+          12,
+          12
+        ],
+        "19a83ade-106e-4c44-a79f-ab58899b515c": [
+          11,
+          12
+        ],
+        "59529ed2-78ed-4a72-aa57-dd0cac880e99": [
+          10,
+          11
+        ],
+        "5bf20e2d-cb7e-5c2a-86ca-0a75acfdd7c0": [
+          12,
+          12
+        ],
+        "6d2254ac-e393-5603-9548-c3d49b3a87f4": [
+          19,
+          19
+        ],
+        "75378ecf-ad29-429d-b080-7619b2bb3b24": [
+          12,
+          12
+        ],
+        "7ab06cc7-99cf-5e67-b236-78a6758734e8": [
+          10,
+          10
+        ],
+        "7d234250-c751-5459-a309-b58494c088b0": [
+          11,
+          11
+        ],
+        "7da73860-6295-4af6-8fc9-a782e5cf626f": [
+          10,
+          10
+        ],
+        "816af56b-c2fd-5fe3-a139-cafbf497f114": [
+          9,
+          10
+        ],
+        "81abd273-8cbb-5c30-a9ca-ba1fd7714149": [
+          9,
+          10
+        ],
+        "97933c11-e687-4323-9d0a-be477ce9989b": [
+          10,
+          14
+        ],
+        "9ca5e5ae-4460-505e-bd93-83db1ba9d39c": [
+          10,
+          11
+        ],
+        "9f861306-6694-42a3-ae09-3613e73909b1": [
+          11,
+          12
+        ],
+        "a248da25-ad49-5453-82e0-e8b7a5eb1422": [
+          11,
+          11
+        ],
+        "a5680578-f4fa-40bb-8167-3e4122f7ba74": [
+          9,
+          10
+        ],
+        "afb2c82b-cca0-554b-a399-f440bd926c82": [
+          10,
+          10
+        ],
+        "b2158e1d-16df-52a2-816f-747293159ec7": [
+          10,
+          11
+        ],
+        "cdc7ae5f-7590-4824-aa32-cad85d91c416": [
+          11,
+          11
+        ],
+        "d90f999e-2061-52b3-a622-919b647a100b": [
+          10,
+          10
+        ],
+        "d98142ba-641b-50cf-b798-67ea3386e391": [
+          10,
+          11
+        ],
+        "f0b77053-5120-5880-999d-a3dd1a12f7b8": [
+          9,
+          9
+        ],
+        "fd2bcd10-c8ea-46f3-9720-0389a1bff014": [
+          14,
+          14
+        ]
+      },
+      "layout": {
+        "uniqueSlides": 196,
+        "rendered": 588,
+        "overflow": []
+      },
+      "candidatePlanSha256": "072f205a58c39a65661b6f50fee44b69340c79a94df1e1131b743283db60cfca"
+    }
+  },
+  "metadata": {
+    "versions": 24,
+    "parts": 135,
+    "display": {
+      "020669ff-3faa-57bb-a14f-02af9d255570": "approx. 4 bars",
+      "10c02862-b80c-4074-aae8-c2438abd8395": "approx. 4 bars",
+      "19a83ade-106e-4c44-a79f-ab58899b515c": "approx. 4 bars",
+      "59529ed2-78ed-4a72-aa57-dd0cac880e99": "approx. 4 bars",
+      "5bf20e2d-cb7e-5c2a-86ca-0a75acfdd7c0": "approx. 4 bars",
+      "6d2254ac-e393-5603-9548-c3d49b3a87f4": "approx. 4 bars",
+      "75378ecf-ad29-429d-b080-7619b2bb3b24": "approx. 4 bars",
+      "7ab06cc7-99cf-5e67-b236-78a6758734e8": "approx. 7 bars",
+      "7d234250-c751-5459-a309-b58494c088b0": "approx. 4 bars",
+      "7da73860-6295-4af6-8fc9-a782e5cf626f": "approx. 4 bars",
+      "816af56b-c2fd-5fe3-a139-cafbf497f114": "approx. 4 bars",
+      "81abd273-8cbb-5c30-a9ca-ba1fd7714149": "approx. 4 bars",
+      "97933c11-e687-4323-9d0a-be477ce9989b": "approx. 3 bars",
+      "9ca5e5ae-4460-505e-bd93-83db1ba9d39c": "approx. 4 bars",
+      "9f861306-6694-42a3-ae09-3613e73909b1": "approx. 4 bars",
+      "a248da25-ad49-5453-82e0-e8b7a5eb1422": "approx. 4 bars",
+      "a5680578-f4fa-40bb-8167-3e4122f7ba74": "approx. 4 bars",
+      "afb2c82b-cca0-554b-a399-f440bd926c82": "approx. 4 bars",
+      "b2158e1d-16df-52a2-816f-747293159ec7": "approx. 4 bars",
+      "cdc7ae5f-7590-4824-aa32-cad85d91c416": "approx. 4 bars",
+      "d90f999e-2061-52b3-a622-919b647a100b": "approx. 4 bars",
+      "d98142ba-641b-50cf-b798-67ea3386e391": "approx. 4 bars",
+      "f0b77053-5120-5880-999d-a3dd1a12f7b8": "approx. 7 bars",
+      "fd2bcd10-c8ea-46f3-9720-0389a1bff014": "approx. 3 bars"
+    }
+  },
+  "sourceEvidence": "24 printed score images retained privately; version ledger holds source hashes.",
+  "preserved": "Edition wording/word spacing, IDs, types, unit ordering, song forms, medleys, audio timing and actual worship content.",
+  "deployment": "pending",
+  "readback": {
+    "changedUnits": 18,
+    "changedSignatures": 12,
+    "changedRowsByTable": {
+      "mindex_worship_slides": 0,
+      "mindex_song_relations": 0,
+      "mindex_songs": 0,
+      "mindex_canonical_songs": 0,
+      "mindex_song_versions": 12,
+      "mindex_version_units": 18,
+      "mindex_worship_services": 4,
+      "mindex_worship_sections": 0,
+      "mindex_worship_elements": 0,
+      "mindex_worship_import_candidates": 0,
+      "mindex_worship_import_sources": 0
+    },
+    "worshipContentUnchanged": {
+      "mindex_worship_services": true,
+      "mindex_worship_sections": true,
+      "mindex_worship_elements": true,
+      "mindex_worship_slides": true
+    },
+    "targetRowsExactlyMatch": true
+  },
+  "correspondingBoundaryCheck": {
+    "checked": 21,
+    "matched": 21,
+    "introAndAmenKeptSeparate": true
+  }
+}

@@ -6204,10 +6204,11 @@
         {
           "unitId": "0d6a11e7-3cab-44e2-adb9-acb6d0781c93",
           "kind": "Chorus",
-          "textSha256": "1aec7ace1f66385cb8d732a52142c720cb0eabee62b4c9fecabc32e92136bfc5",
-          "blockCount": 1,
+          "textSha256": "4cf19218f8af047299f0a49a9742efa25691075ee2ed8410445731b7536d1d1a",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
-            8
+            4,
+            4
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -6221,8 +6222,9 @@
       ],
       "meter": "6/4",
       "reviewNotes": "Paired printed-edition review; all existing stored verse blocks mapped without changing lyrics, forms or IDs. 6/4 verse 24+25 quarter-note beats; chorus 24+23. Verse final rest retained and final chorus partial bar combined, overall 16 measures.",
-      "reviewBatch": "short-phrases-two-lines-20261023",
-      "reviewNote": "Reviewed complete adjacent short phrases paired into two-line slides, with form identities and independent Amen/Coda preserved. Whole-catalog text/order and Chromium/WebKit layout checks passed. See hymn-short-pages-review-20261023.json."
+      "reviewBatch": "paired-phrase-recheck-20261024",
+      "reviewNote": "Both scores: two four-bar refrain phrases. Match verse slide duration and two-line phrasing, retaining edition words.",
+      "reviewedAt": "2026-10-24"
     },
     {
       "versionId": "052a0c1c-c0d7-5869-a935-9eb31d85991a",
@@ -8944,10 +8946,11 @@
         {
           "unitId": "c5d0625f-c959-4f68-b050-95d21c99cde2",
           "kind": "Chorus",
-          "textSha256": "bac40a2ddaa7643e5d81bcb87cd2165a0d8c9e54c9edee3334e4a984eea85b60",
-          "blockCount": 1,
+          "textSha256": "0fcf7251772bc907de046726ba1172f06aa59a95c2944f51f2090075c9da48e5",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
-            13
+            7,
+            6
           ],
           "approxMeasures": 13,
           "reviewStatus": "score_supported_approximation"
@@ -8970,8 +8973,9 @@
           "sha256": "41d2ab91ba95890a4298b0574881840530a2f936de7ae604842adbdbdeb4f64b"
         }
       ],
-      "reviewNote": "Reviewed complete adjacent short phrases paired into two-line slides, with form identities and independent Amen/Coda preserved. Whole-catalog text/order and Chromium/WebKit layout checks passed. See hymn-short-pages-review-20261023.json.",
-      "reviewBatch": "short-phrases-two-lines-20261023"
+      "reviewNote": "Both scores: two complete Gloria melismatic phrases (~7/~6 bars). Do not split inside a held syllable. Retain existing independent Amen page/unit and form identity.",
+      "reviewBatch": "paired-phrase-recheck-20261024",
+      "reviewedAt": "2026-10-24"
     },
     {
       "versionId": "c15d963e-3fe8-47ac-96ad-c14928b0a681",
@@ -11827,7 +11831,7 @@
         {
           "unitId": "ad715f2d-9b67-43d4-8ac8-98c7667dea37",
           "kind": "Verse",
-          "textSha256": "5c9198563a4d2ff5be2ac396b6e5e019fea3523d90811634d353ce156576dc8a",
+          "textSha256": "8424c53f5283a769c91598b3ee2086dad399743ef10dcb5a0ecdad47694e30d5",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             7,
@@ -11840,7 +11844,7 @@
         {
           "unitId": "404106ab-c19d-4940-81bb-57df3807d49b",
           "kind": "Verse",
-          "textSha256": "3b48eb042737bb67897e33d249e03ef6658a1da82ce650784bccdbdbcf4f36d5",
+          "textSha256": "59c9859b3c37faf8dc627e81dadbf39919c2602582a555c474c88a709d3fcd10",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             7,
@@ -11853,7 +11857,7 @@
         {
           "unitId": "41fe5d61-0ff0-4af2-8203-5b87beb2575b",
           "kind": "Verse",
-          "textSha256": "b65dd7a645475e81be7f883d251bd128e7e103c81af2c4afc3995225a94795cc",
+          "textSha256": "8519c3d4a51afb3f432c46d76cd14dd8c6130a0343d1fe8ab7e52c5fe3a927f5",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             7,
@@ -11866,7 +11870,7 @@
         {
           "unitId": "119ccaaa-09cd-40de-b8d0-5e7e3356e078",
           "kind": "Verse",
-          "textSha256": "bf0d168342946c4af7909c0e3a75e4cac2443f222214addb5ce64d70b64f3911",
+          "textSha256": "756a361564ef08f5b8c3a398a5b9846538c693ea636a4c05d103247b665eddcb",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             7,
@@ -11894,9 +11898,9 @@
           "sha256": "a0195d903775a511e20128dcbf09a0791bdf46c9df6998de8c3cbdcb1ae0e6a5"
         }
       ],
-      "reviewedAt": "2026-10-22",
-      "reviewBatch": "hymn151-170-paired",
-      "reviewNote": "2026-10-23 natural phrase review: Printed score paired with Unified156: introductory Hallelujah shown on its own screen without changing unit/form or repetitions; body 8+7."
+      "reviewedAt": "2026-10-24",
+      "reviewBatch": "paired-phrase-recheck-20261024",
+      "reviewNote": "Both scores contain the introduction; new edition stores it within verses and renderer emits it once, old edition has a separate Lyrics unit. Preserve structure; align corresponding body line breaks."
     },
     {
       "versionId": "d9faf8e6-9f94-4814-a954-38db7c978073",
@@ -13239,10 +13243,11 @@
         {
           "unitId": "ee952eab-239a-4eec-b3b1-f09b70ca433e",
           "kind": "Chorus",
-          "textSha256": "1d88a40fcad3752b765e84fe023ee7258c0f0e81529d469fb29eef57d5f8a1d1",
-          "blockCount": 2,
+          "textSha256": "1fea6e6fb874e56cd8d269585d225656c26b0da9b1dd16fa71ae34aba3077629",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
-            8,
+            4,
+            4,
             4
           ],
           "approxMeasures": 12,
@@ -13266,9 +13271,9 @@
           "sha256": "dec7c2c4f9ff34070899429f0793183a1ffccd32564576457300085e1d7e4196"
         }
       ],
-      "reviewedAt": "2026-10-22",
-      "reviewBatch": "final38-natural-endings-20261023",
-      "reviewNote": "Natural adjacent phrases paired into two-line slides; short final cadences and Amen remain separate. New632 retains its three printed invocations with two-line internal layout. Text, form IDs, repeats and audio configuration preserved."
+      "reviewedAt": "2026-10-24",
+      "reviewBatch": "paired-phrase-recheck-20261024",
+      "reviewNote": "Both scores: three four-bar refrain phrases; preserve the final fire invocation as one complete phrase."
     },
     {
       "versionId": "57ea83fa-0fbd-5e75-ba5a-279586b2787c",
@@ -14650,10 +14655,11 @@
         {
           "unitId": "56038e6e-f58b-41a5-b35a-95696b591ed5",
           "kind": "Chorus",
-          "textSha256": "fc9e7f60139091bec619bbfe6c24f94b6f1f7a957e9b8affef96d2fde1d9a722",
-          "blockCount": 1,
+          "textSha256": "f2c5d4b0561147076b13d718033f6bba79c9cd3222b95f819d00b2abd1f32ec0",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
-            8
+            4,
+            4
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -14665,9 +14671,9 @@
           "sha256": "bf96e58762ebcff9c733c6839a007fbe10b97bf88a0aca90827cbbb6a2cb8692"
         }
       ],
-      "reviewedAt": "2026-10-22",
-      "reviewBatch": "short-phrases-two-lines-20261023",
-      "reviewNote": "Reviewed complete adjacent short phrases paired into two-line slides, with form identities and independent Amen/Coda preserved. Whole-catalog text/order and Chromium/WebKit layout checks passed. See hymn-short-pages-review-20261023.json."
+      "reviewedAt": "2026-10-24",
+      "reviewBatch": "paired-phrase-recheck-20261024",
+      "reviewNote": "Both scores: two four-bar refrain phrases. Match verse slide duration and two-line phrasing, retaining edition words."
     },
     {
       "versionId": "7563d3b6-0b52-5406-8302-6221acd95cb0",
@@ -15584,10 +15590,11 @@
         {
           "unitId": "1c35c63f-5aec-4886-94a9-757899fa5851",
           "kind": "Chorus",
-          "textSha256": "a21de370e3a3423ea87252bd3a9eddb831d0a60fdaccc5d3342cbc97e1f08350",
-          "blockCount": 1,
+          "textSha256": "0725502eee990e98818e390c271a9eb60ca43e52589fbd3754d147cd19d6a62e",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
-            8
+            4,
+            4
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -15610,9 +15617,9 @@
           "sha256": "3572e987d7c0bb3d2a9b1a1f9a3c498c1355ec6d92c86c94065f6343e9da0d77"
         }
       ],
-      "reviewedAt": "2026-10-22",
-      "reviewBatch": "short-phrases-two-lines-20261023",
-      "reviewNote": "Reviewed complete adjacent short phrases paired into two-line slides, with form identities and independent Amen/Coda preserved. Whole-catalog text/order and Chromium/WebKit layout checks passed. See hymn-short-pages-review-20261023.json."
+      "reviewedAt": "2026-10-24",
+      "reviewBatch": "paired-phrase-recheck-20261024",
+      "reviewNote": "Both scores: two four-bar refrain phrases. Match verse slide duration and two-line phrasing, retaining edition words."
     },
     {
       "versionId": "06404809-5601-55c7-856a-f2e2a3170469",
@@ -23610,10 +23617,11 @@
         {
           "unitId": "071c4e2b-f225-4d76-bc5d-18cf05648c8f",
           "kind": "Chorus",
-          "textSha256": "6341d73574c5bbc39ce4bfa4d0d196b85a1a9b8775cbd10fcdc52269e8abc9ab",
-          "blockCount": 1,
+          "textSha256": "e3b90b042ecb464a0f58942c03935ab79cb47a301d3ce015f36d19e202676f43",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
-            8
+            4,
+            4
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -23636,9 +23644,9 @@
           "sha256": "54a324223c5c6eedd3453d3d4cd318f0840536cfdc19525787ee78209fc9f623"
         }
       ],
-      "reviewedAt": "2026-10-23",
-      "reviewBatch": "short-phrases-two-lines-20261023",
-      "reviewNote": "Reviewed complete adjacent short phrases paired into two-line slides, with form identities and independent Amen/Coda preserved. Whole-catalog text/order and Chromium/WebKit layout checks passed. See hymn-short-pages-review-20261023.json."
+      "reviewedAt": "2026-10-24",
+      "reviewBatch": "paired-phrase-recheck-20261024",
+      "reviewNote": "Both scores: two four-bar refrain phrases. Match verse slide duration and two-line phrasing, retaining edition words."
     },
     {
       "versionId": "f1c4652b-220f-4eb5-af43-4573c8f1237a",
@@ -25884,10 +25892,11 @@
         {
           "unitId": "a0a9202b-ac06-47de-9354-7317714ceb00",
           "kind": "Chorus",
-          "textSha256": "a8adc32f02266d2c6590a36ff96ad2b269d27bc60b6fbccc7bde2f1b41f438e4",
-          "blockCount": 1,
+          "textSha256": "300806cc415d041625159d3a5665567fd4bc433a7c1bed30da4235d6e1ecd13d",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
-            8
+            4,
+            4
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -25910,9 +25919,9 @@
           "sha256": "ed564a7290b2828a5a0cff2c09b541b027f3f7ac5667b96a34f6b3c81f6f8ba9"
         }
       ],
-      "reviewedAt": "2026-10-23",
-      "reviewBatch": "short-phrases-two-lines-20261023",
-      "reviewNote": "Reviewed complete adjacent short phrases paired into two-line slides, with form identities and independent Amen/Coda preserved. Whole-catalog text/order and Chromium/WebKit layout checks passed. See hymn-short-pages-review-20261023.json."
+      "reviewedAt": "2026-10-24",
+      "reviewBatch": "paired-phrase-recheck-20261024",
+      "reviewNote": "Both scores: two four-bar refrain phrases. Match verse slide duration and two-line phrasing, retaining edition words."
     },
     {
       "versionId": "64cdcfc1-17e3-44a4-8a8e-47fc2c017cad",
@@ -35873,10 +35882,11 @@
         {
           "unitId": "4ad826bc-3dbd-4272-b5c2-4371acd991f4",
           "kind": "Chorus",
-          "textSha256": "f1b2d05b7408e313d584fe4d0f539f2d76a262cdaca38ef371c283ed70026d3d",
-          "blockCount": 1,
+          "textSha256": "4bf963c5160dda640336f073e990d8375a27147e2136ff37a1cc2bfc73d9d2e8",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
-            8
+            4,
+            4
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -35888,9 +35898,9 @@
           "sha256": "a32ce17fecb87eb57ca17aed7aa902f01cc942b85ea7f42e15270b8c815af7d4"
         }
       ],
-      "reviewedAt": "2026-10-23",
-      "reviewBatch": "short-phrases-two-lines-20261023",
-      "reviewNote": "Reviewed complete adjacent short phrases paired into two-line slides, with form identities and independent Amen/Coda preserved. Whole-catalog text/order and Chromium/WebKit layout checks passed. See hymn-short-pages-review-20261023.json."
+      "reviewedAt": "2026-10-24",
+      "reviewBatch": "paired-phrase-recheck-20261024",
+      "reviewNote": "Both scores: two four-bar refrain phrases. Match verse slide duration and two-line phrasing, retaining edition words."
     },
     {
       "versionId": "ff72b151-4485-5bf1-8349-dda7c793aa15",
@@ -36085,10 +36095,11 @@
         {
           "unitId": "151e98de-4940-433a-98a2-ba5337befc15",
           "kind": "Chorus",
-          "textSha256": "f4be74055045b4ea490d46395753e14ae20a4169e9d10f1899be2f5b1ee2c8b3",
-          "blockCount": 1,
+          "textSha256": "bf239993427f227569249d77bfdcbfa37b61f37646f0e8b3dec12d750d77b533",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
-            6
+            4,
+            2
           ],
           "approxMeasures": 6,
           "reviewStatus": "score_supported_approximation"
@@ -36100,9 +36111,9 @@
           "sha256": "5434e2d68a28a6105df0b8f45ef059c7f6f00bf4ddaeef2ead647a9b4a820209"
         }
       ],
-      "reviewedAt": "2026-10-23",
-      "reviewBatch": "short-phrases-two-lines-20261023",
-      "reviewNote": "Reviewed complete adjacent short phrases paired into two-line slides, with form identities and independent Amen/Coda preserved. Whole-catalog text/order and Chromium/WebKit layout checks passed. See hymn-short-pages-review-20261023.json."
+      "reviewedAt": "2026-10-24",
+      "reviewBatch": "paired-phrase-recheck-20261024",
+      "reviewNote": "Both scores: four-bar phrase plus short two-bar repeated cadence. Preserve repetition on its own short final slide."
     },
     {
       "versionId": "b66f0664-078a-5123-8dbf-88508a8c1da8",
@@ -55880,10 +55891,11 @@
         {
           "unitId": "931d1201-e745-56e4-9c0a-2c5c0b7d0fb2",
           "kind": "Chorus",
-          "textSha256": "4f7afa5293776ce552aa96e6aa6f97549bc7b16c79cc0fe81a8e724babf5fb2a",
-          "blockCount": 2,
+          "textSha256": "f066e0bb8159c0d83c6a5a28687826e7fc216e0ed02c9f6a27d7f8464b181b80",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
-            13,
+            7,
+            6,
             1
           ],
           "approxMeasures": 14,
@@ -55896,8 +55908,9 @@
           "sha256": "921dc2a6dceb502a1eca05db43cfef611e9eff10cede74d96f1cab49af269b8f"
         }
       ],
-      "reviewNote": "Natural adjacent phrases paired into two-line slides; short final cadences and Amen remain separate. New632 retains its three printed invocations with two-line internal layout. Text, form IDs, repeats and audio configuration preserved.",
-      "reviewBatch": "final38-natural-endings-20261023"
+      "reviewNote": "Both scores: two complete Gloria melismatic phrases (~7/~6 bars). Do not split inside a held syllable. Retain existing independent Amen page/unit and form identity.",
+      "reviewBatch": "paired-phrase-recheck-20261024",
+      "reviewedAt": "2026-10-24"
     },
     {
       "versionId": "bec16771-0b8c-4362-a320-743251df56ff",
@@ -66742,55 +66755,59 @@
       "edition": "union",
       "number": 265,
       "classification": "4_bar_blocks",
-      "stanzaApproxMeasures": 8,
+      "stanzaApproxMeasures": 10,
       "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "41678fec-1c20-58a5-aa4e-69c90166e620",
           "kind": "Verse",
-          "textSha256": "39767a18b7a547a40a20525a5fdea3aa90adc735844bc004b747c6f163a8a845",
-          "blockCount": 2,
+          "textSha256": "d0420d0a9bf1fd1e412d62e8b5f1f488c293ddeb650238a2960fc7491805642d",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
             4,
-            4
+            3,
+            3
           ],
-          "approxMeasures": 8,
+          "approxMeasures": 10,
           "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "ab2c0ad7-db27-52fe-aae7-1ab10c37876c",
           "kind": "Verse",
-          "textSha256": "aa197fc36cf5759d4fdfcc1f469cff2a1cfb930956eb13de1aa55310ea99865f",
-          "blockCount": 2,
+          "textSha256": "2522eb189f8f0289a72bf3693ae9fe210493cf81ca023ef32659d3653df29b19",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
             4,
-            4
+            3,
+            3
           ],
-          "approxMeasures": 8,
+          "approxMeasures": 10,
           "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "191c4ec9-402b-5323-b487-e7f51e79f96b",
           "kind": "Verse",
-          "textSha256": "c51e2a2d49e3520d3a8c5a6ea6ed7b5ab443cad3c1112af8c6d75bfe0f10fc53",
-          "blockCount": 2,
+          "textSha256": "e1e38c7590f69f5d2ad41c595b5b07cae65d8d2a67a33bc5aaed8752aac184d4",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
             4,
-            4
+            3,
+            3
           ],
-          "approxMeasures": 8,
+          "approxMeasures": 10,
           "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "970b42e6-4deb-532c-af3e-34e8fd3f9aa3",
           "kind": "Verse",
-          "textSha256": "33ccd0bb7dd3df97fad04b9c3d8c1fce4f9fd99f8485df45809f3f0c936ed771",
-          "blockCount": 2,
+          "textSha256": "498f6abb882c556588ef196d80bd0024e96816bfefa97645e439d7d715bdfca9",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
             4,
-            4
+            3,
+            3
           ],
-          "approxMeasures": 8,
+          "approxMeasures": 10,
           "reviewStatus": "score_supported_approximation"
         },
         {
@@ -66812,9 +66829,9 @@
           "sha256": "67a9756712f0330f669e27c00042ed1dfdaee77f14ffb8a96f7fa6cc72221ab2"
         }
       ],
-      "reviewedAt": "2026-10-23",
-      "reviewBatch": "hymn-remaining",
-      "reviewNote": "2026-10-23 natural phrase review: Paired with New516 score: stanza 8 bars; same natural 4+4 phrases. Previous 10-bar metadata incorrect."
+      "reviewedAt": "2026-10-24",
+      "reviewBatch": "paired-phrase-recheck-20261024",
+      "reviewNote": "Both scores: four-bar opening and two three-bar closing phrases; old metadata undercounted the six-bar second system. Match new edition boundaries without changing words."
     },
     {
       "versionId": "6d9673fd-ee71-479e-858e-1508bf9c17c2",
