@@ -39,8 +39,6 @@ button :is([data-lucide], svg.lucide) { width: var(--ui-icon-size); height: var(
 @media (min-width: 600px) { main { padding: 25px; } .previews { grid-template-columns: 1fr 1fr; } .previews article { min-height: 180px; } }
 
 .phone-options { border-top: 1px solid var(--line); margin-top: 20px; padding-top: 15px; }
-.check-row { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; }
-.check-row input { width: 20px; height: 20px; min-height: 20px; margin: 0; padding: 0; accent-color: var(--accent); flex: 0 0 auto; }
 #screenStatus, #installHelp p { font-size: var(--ui-meta-size); color: var(--ink-3); }
 #installHelp { margin-top: 15px; }
 #installHelp summary { cursor: pointer; padding: 10px 0; font-size: var(--ui-body-size); }
