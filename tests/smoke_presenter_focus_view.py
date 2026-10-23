@@ -47,9 +47,28 @@ try:
         field.value=before;
       } finally {window.MINDEX_SERVER_STORAGE=original;}
     }""")
+    page.evaluate('renderGlobalPlaybackControls()')
+    page.wait_for_selector('#remotePanelBtn',state='attached')
+    for width in (1440,390):
+      page.set_viewport_size({'width':width,'height':1000})
+      remote=page.locator('[data-presenter-remote]')
+      music=page.locator('[data-presenter-music-manager]')
+      assert remote.is_visible() and music.is_visible()
+      assert not page.locator('#remotePanelBtn').is_visible()
+      assert not page.locator('.global-playback-trigger').is_visible()
+      assert remote.bounding_box()['height']==music.bounding_box()['height']==35
+      assert abs(remote.bounding_box()['width']-music.bounding_box()['width'])<1
+      remote.click();assert page.locator('.remote-panel').is_visible()
+      page.locator('[data-remote-close]').click()
+      music.click();assert page.locator('#globalPlaybackPanel').is_visible()
+      page.keyboard.press('Escape')
+      assert music.evaluate('e=>e===document.activeElement')
+    page.set_viewport_size({'width':1440,'height':1000})
     toggle=page.locator('[data-presenter-focus-toggle=focus]')
     toggle.click()
     assert page.locator('[data-presenter-focus-panel]').is_visible()
+    assert page.locator('#remotePanelBtn').is_visible()
+    assert page.locator('.global-playback-trigger').is_visible()
     assert not page.locator('.svc-source-panel').is_visible()
     assert page.evaluate("focusDraft===document.querySelector('.svc-source-text') && focusDraft.value==='아직 저장하지 않은 원문' && focusAudio===state.serviceMusic.audio && focusAudio.currentTime===42 && focusItems===JSON.stringify(state.serviceItems)")
     assert '자동 넘김 해제' in page.locator('[data-focus-music-status]').inner_text()

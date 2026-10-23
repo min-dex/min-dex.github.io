@@ -3977,3 +3977,13 @@ service type or theme does not select this composition. Both output and previews
 read the same saved choice. Its spacing/accent selectors are scoped to the
 selected composition; no event IDs or names are used. Chapel data alone selects
 this choice; other service records are not rewritten.
+
+
+## Remote and music entry placement · 2026-10-23
+
+Basic presenter puts 원격 조작 and 음악 관리 in the third equal-width row of
+right-panel output controls, using the existing35px/16px button/icon rules.
+The matching topbar launchers are hidden only while that basic control rail
+exists. Focus view and other modules retain global access. Both entries open
+the existing dialog/popover; no extra audio instance or remote session is created.
+Music popover placement and keyboard return use the visible launcher.
