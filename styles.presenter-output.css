@@ -1250,6 +1250,10 @@
   justify-self: start;
   text-align: left;
 }
+/* Keep standalone/short-aligned labels inside their allocated fitting area. */
+:is(.svc-slide-mini-output, .presenter-output-root).no-chromakey :is(.presenter-title-assignee-title, .presenter-title-assignee-order, .presenter-title-assignee-content) {
+  max-width: 100%;
+}
 /* Bound the assignee's intrinsic grid contribution before fitting long names. */
 :is(.svc-slide-mini-output, .presenter-output-root).no-chromakey .presenter-title-assignee-person {
   max-width: min(100%, 44cqw);
