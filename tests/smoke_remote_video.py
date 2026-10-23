@@ -30,7 +30,11 @@ try:
    output=context.new_page();output.goto(url+'?output=presenter&outputSession=video-session')
    host.wait_for_function("adapter.read().allowed.includes('video-pause')")
    output.wait_for_function("document.querySelector('.is-active video')?.currentTime>.3")
-   host.evaluate("adapter.execute('video-pause')")
+   host.evaluate("state.module='presenter';renderGlobalPlaybackControls()")
+   host.click('.global-playback-trigger')
+   host.click('[data-global-playback-action="video-pause"]')
+   host.wait_for_function("!presenterVideoRequests.size && state.presenter.videoHealth.status==='paused'")
+   assert host.locator('#globalPlaybackPanel').is_visible()
    assert output.evaluate("document.querySelector('.is-active video').paused")
    position=output.evaluate("document.querySelector('.is-active video').currentTime")
    host.wait_for_function("adapter.read().allowed.includes('video-play')")
@@ -40,7 +44,9 @@ try:
    host.wait_for_function("state.presenter.videoHealth.revision>=3")
    # Real restart, delivered twice via two controller transports, must execute once.
    output.evaluate("window.playCalls=0;window.video=document.querySelector('.is-active video');window.originalPlay=video.play.bind(video);video.play=()=>{playCalls++;return originalPlay()};void 0")
-   host.evaluate("adapter.execute('video-restart')")
+   host.evaluate("document.querySelector('[data-global-playback-action=video-restart]').click();window.secondCommand=requestPresenterVideoCommand('remote-video','restart').then(()=>true,()=>false)")
+   assert not host.evaluate('secondCommand'), 'PC/remote in-flight command must not overlap'
+   host.wait_for_function('!presenterVideoRequests.size')
    assert output.evaluate('playCalls')==1, output.evaluate('({playCalls,time:video.currentTime,connected:video.isConnected})')
    assert output.evaluate('video.currentTime')<2
    # Freeze heartbeat state, then PC/output pause wins over an outdated remote play state.

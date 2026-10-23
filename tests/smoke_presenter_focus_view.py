@@ -121,6 +121,7 @@ try:
     page.locator('[data-presenter-focus-toggle=basic]').click()
     assert page.locator('.svc-source-panel').is_visible()
     assert page.evaluate("focusBoard===document.querySelector('.svc-slide-board') && focusDraft.value==='아직 저장하지 않은 원문' && focusAudio.currentTime===42 && state.serviceMusic.playing && state.serviceMusic.autoSyncSuspended && focusItems===JSON.stringify(state.serviceItems)")
+    page.evaluate("window.originalManagedVideo=presenterManagedVideoState;presenterManagedVideoState=()=>({status:'paused',ready:true});renderGlobalPlaybackControls()")
     for theme in ('light','dark'):
      page.evaluate('(theme)=>{document.body.dataset.theme=theme}',theme)
      for view in ('basic','focus'):
@@ -134,6 +135,16 @@ try:
       for width in (1440,1100,800,390):
        page.set_viewport_size({'width':width,'height':1000})
        page.wait_for_timeout(100)
+       media=page.locator('[data-presenter-music-manager]') if view=='basic' else page.locator('.global-playback-trigger')
+       assert media.get_attribute('aria-label')=='미디어 관리'
+       assert media.locator('svg.lucide-video').count()==1
+       media.click()
+       panel=page.locator('#globalPlaybackPanel');assert panel.is_visible()
+       assert panel.locator('h3').all_text_contents()==['음원','영상']
+       assert panel.locator('[data-global-playback-action^="video-"]').evaluate_all("es=>es.every(e=>{const s=getComputedStyle(e),i=e.querySelector('svg');return s.height==='30px'&&s.paddingLeft==='10px'&&getComputedStyle(i).width==='16px'&&e.scrollWidth<=e.clientWidth+1})")
+       assert panel.evaluate('e=>{const r=e.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth+1&&r.bottom<=innerHeight+1}')
+       panel.locator('[popovertargetaction="hide"]').click()
+
        assert page.locator('.svc-presenter-toolbar').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
        assert page.evaluate("""()=>{
         const left=document.querySelector('.module-switcher-tab').getBoundingClientRect();

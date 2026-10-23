@@ -29431,7 +29431,7 @@ function renderPresenterControlsTop(service, slides, active, index) {
           </div>
           ${renderPresenterAlwaysOnTopControl({ buttonStyle: true })}
           <button class="icon-btn" type="button" data-presenter-remote aria-label="${escapeAttr(/^\d{6}$/.test(remoteLabel) ? "원격 연결 코드 " + remoteLabel : remoteLabel)}" title="${escapeAttr(remoteLabel)}" ${["연결 준비", "종료 중"].includes(remoteLabel) ? "disabled" : ""}><i data-lucide="smartphone"></i><span data-remote-button-label>${escapeHtml(remoteLabel)}</span></button>
-          <button class="icon-btn" type="button" data-presenter-music-manager popovertarget="globalPlaybackPanel" aria-label="음악 관리" title="음악 관리"><i data-lucide="music"></i><span>음악 관리</span></button>
+          <button class="icon-btn" type="button" data-presenter-music-manager popovertarget="globalPlaybackPanel" aria-label="미디어 관리" title="미디어 관리"><i data-lucide="video"></i><span>미디어 관리</span></button>
         </div>
         <div class="svc-presenter-main" aria-live="polite">
           <span class="svc-slide-counter" aria-label="${escapeAttr(uiText("presenter.aria.slideCount", { current, count }))}">
@@ -29507,6 +29507,7 @@ function renderPresenterVideoHealthControl(serviceId) {
 }
 
 function syncPresenterVideoHealthControl() {
+  renderGlobalPlaybackControls();
   document.querySelectorAll("[data-presenter-video-health]").forEach((host) => {
     const html = renderPresenterVideoHealthControl(host.dataset.serviceId);
     if (host.dataset.healthMarkup === html) return;
@@ -29733,6 +29734,7 @@ function handleGlobalPlaybackAction(event) {
   const button = event.target.closest("[data-global-playback-action]");
   if (!button) return;
   const action = button.dataset.globalPlaybackAction;
+  if (action.startsWith("video-")) { void runPresenterManagedVideoAction(action.slice(6)); return; }
   if (action === "return") { void returnToLiveService(); return; }
   if (action === "output-stop") {
     if (isPresenterOutputWindowOpen()) runPresenterAction("stop", state.presenter.serviceId);
@@ -29773,10 +29775,12 @@ function renderGlobalPlaybackControls() {
     : music.audio?.currentTime ? "음악 일시정지" : "음악 정지";
   const toggleLabel = music.pending ? "음악 준비 취소" : music.playing ? "음악 일시정지" : "음악 재생";
   const icon = music.pending ? "loader-circle" : music.playing ? "pause" : "play";
-  const available = hasMusic || state.module === "presenter";
-  const html = `<button class="icon-btn global-playback-trigger" type="button" popovertarget="globalPlaybackPanel" title="음악 관리" aria-label="음악 관리" data-active="${Boolean(music.playing || music.pending)}"><i data-lucide="music"></i><span class="global-playback-indicator" aria-hidden="true"></span></button>
-    <section id="globalPlaybackPanel" class="global-playback-panel" popover aria-label="음악 관리">
-      <header class="global-playback-panel-head"><strong>음악 관리</strong><button class="icon-btn" type="button" popovertarget="globalPlaybackPanel" popovertargetaction="hide" aria-label="음악 관리 닫기"><i data-lucide="x"></i></button></header>
+  const video = presenterManagedVideoState();
+  const available = hasMusic || !!video || state.module === "presenter";
+  const html = `<button class="icon-btn global-playback-trigger" type="button" popovertarget="globalPlaybackPanel" title="미디어 관리" aria-label="미디어 관리" data-active="${Boolean(music.playing || music.pending || video?.status === "playing")}"><i data-lucide="video"></i><span class="global-playback-indicator" aria-hidden="true"></span></button>
+    <section id="globalPlaybackPanel" class="global-playback-panel" popover aria-label="미디어 관리">
+      <header class="global-playback-panel-head"><strong>미디어 관리</strong><button class="icon-btn" type="button" popovertarget="globalPlaybackPanel" popovertargetaction="hide" aria-label="미디어 관리 닫기"><i data-lucide="x"></i></button></header>
+      <section class="global-media-section" aria-label="음원"><h3>음원</h3>
       <p class="global-playback-empty" ${hasMusic ? "hidden" : ""}>선택된 음악이 없습니다.</p>
       <div class="global-playback-group" role="group" aria-label="현재 음악" ${hasMusic ? "" : "hidden"}>
         <span class="global-playback-label"><span class="global-playback-name">${escapeHtml(music.sourceLabel || music.fileName || "음악")}</span><span class="global-playback-state" role="status">${musicState}</span></span>
@@ -29787,6 +29791,8 @@ function renderGlobalPlaybackControls() {
         <button type="button" class="btn secondary global-playback-stop" data-global-playback-action="stop" aria-label="음악 정지" ${music.pending || music.playing || music.audio?.currentTime ? "" : "disabled"}><i data-lucide="square"></i><span>정지</span></button>
         <label class="global-playback-fade-stop"><input type="checkbox" data-service-music-fade-stop${music.fadeStopEnabled ? " checked" : ""}>페이드아웃 정지</label>
       </div>
+      </section>
+      ${renderPresenterVideoManagement(video)}
     </section>`;
   if (!available) root.querySelector(':popover-open')?.hidePopover();
   root.hidden = !available;
