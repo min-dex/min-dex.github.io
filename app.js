@@ -20510,7 +20510,7 @@ function confirmUnsavedChangesAction() {
 async function discardUnsavedChanges() {
   const dirtyModules = getDirtyModules();
   if (dirtyModules.praise && state.module === "praise") {
-    const song = getSelectedSong(), client = state.client;
+    const song = getSelectedSong(), client = state.client, project = state.config.url;
     const versionId = getSelectedVersionId();
     const before = JSON.stringify({song, forms:state.forms});
     try {
@@ -20518,7 +20518,8 @@ async function discardUnsavedChanges() {
       const result = await client.rpc("get_praise_snapshot_v1", {sid:song.id});
       if (result.error) throw result.error;
       const fresh = praiseSnapshotSong(result.data);
-      if (client !== state.client || getSelectedSong() !== song || versionId !== getSelectedVersionId()
+      if (fresh.id !== song.id) throw new Error("PRAISE_SNAPSHOT_MISMATCH");
+      if (project !== state.config.url || client !== state.client || getSelectedSong() !== song || versionId !== getSelectedVersionId()
           || before !== JSON.stringify({song, forms:state.forms})) {
         showToast("확인 중 입력이 바뀌어 이동하지 않았습니다. 입력은 유지됩니다.", "error");
         return false;

@@ -10,6 +10,7 @@ try:
    page=browser.new_page();page.route('**/*supabase*/**',lambda r:r.abort())
    page.goto(url+'?output=presenter&mindexSmokeRaw=1');page.wait_for_function("typeof praiseSnapshotSong==='function'")
    result=page.evaluate('''async()=>{
+    const nativeConfirm=confirmUnsavedChangesAction;
     const check=(x,m)=>{if(!x)throw Error(m)},id=crypto.randomUUID(),vid=crypto.randomUUID(),uid=crypto.randomUUID();
     const original={song:{id,title:'원본',memo:'{}',praise_types:['ccm'],scripture_refs:[]},
      versions:[{id:vid,source_song_id:id,canonical_song_id:id,version_order:1,version_label:'기본',curated_version_name:'기본',praise_types:['ccm'],is_primary:true,lyric_signature:'original',subtitle:'원본 부제',original_title:'source title',deck_key:'source deck',source_count:7,audio_set:{timings:[1,2]}}],
@@ -75,7 +76,12 @@ try:
     // Input arriving during the read must cancel discard without touching pending state.
     let song=reset();edit(song,'보존 입력');const rpc=client.rpc;client.rpc=async(...args)=>{const response=await rpc(...args);edit(song,'조회 중 추가 입력');return response};
     check(await discardUnsavedChanges()===false&&state.forms[0].lyrics==='조회 중 추가 입력'&&state.dirty.forms,'late input during discard lost');client.rpc=rpc;
+    confirmUnsavedChangesAction=nativeConfirm;
     return 'failed read blocks navigation and retains dirty draft/retry; successful discard clears retry; return/new save and late input safe';
    }''')
-   print(engine,'PASS',result,flush=True);browser.close()
+   page.evaluate("()=>{state.client.rpc=async()=>({error:{message:'offline'}});window.discardUiResult=null;confirmSaveBeforeLeaving().then(value=>window.discardUiResult=value)}")
+   page.get_by_role('button',name='저장 안 함',exact=True).click()
+   page.wait_for_function("window.discardUiResult===false")
+   assert page.evaluate("state.dirty.forms && state.forms[0].lyrics==='조회 중 추가 입력'")
+   print(engine,'PASS',result,'actual discard dialog click',flush=True);browser.close()
 finally:server.shutdown();server.server_close()
