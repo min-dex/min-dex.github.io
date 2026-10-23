@@ -356,7 +356,7 @@
   font-weight: var(--presenter-text-highlight-weight, var(--presenter-weight-display));
   white-space: inherit;
 }
-/* Community confession alone uses marker emphasis in fullscreen output. */
+/* Community confession alone uses full-height source-color markers in fullscreen. */
 .presenter-output-root.no-chromakey .presenter-liturgical-body--community-confession .presenter-text-highlight--color {
   color: #332211;
   background-image: linear-gradient(var(--presenter-text-highlight-color), var(--presenter-text-highlight-color));
