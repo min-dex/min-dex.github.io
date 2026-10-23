@@ -1,9 +1,9 @@
-import {pairing,identity,sessionKey,seal,unseal,id,createGate} from './mindex.remote-core.mjs?v=4';
+import {pairing,identity,sessionKey,seal,unseal,id,createGate} from './mindex.remote-core.mjs?v=5';
 import {obtainPairing} from './mindex.remote-pairing.mjs?v=4';
 
 // The relay carries ciphertext only. A code grants one ephemeral controller.
-export async function openRemote({client,code,host=false,read,execute,onState=()=>{},onStatus=()=>{},onResult=()=>{},onClose=()=>{}}){
- const registration=await obtainPairing(client,host,code);
+export async function openRemote({client,code,host=false,registration:providedRegistration,read,execute,onState=()=>{},onStatus=()=>{},onResult=()=>{},onClose=()=>{}}){
+ const registration=providedRegistration||await obtainPairing(client,host,code);
  let pair,keys;try{pair=await pairing(registration.secret);keys=await identity();}catch(e){await registration.revoke();throw e;}
  const peer=id(),nonce=id();
  const gate=host?createGate({read,execute}):null;

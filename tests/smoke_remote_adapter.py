@@ -52,7 +52,13 @@ try:
     snapshot=gate.snapshot();const fresh=command('next');
     check((await gate.command('phone',fresh)).ok,'fresh remote command');
     const after=state.presenter.index;await gate.command('phone',fresh);check(state.presenter.index===after,'duplicate command cannot move twice');
-    gate.close();
+    const adminAdapter=MindexRemote.adapter(sid,'fixture',output,true),adminGate=createGate(adminAdapter);
+    const adminSnapshot=adminGate.connect('admin');snapshot=gate.snapshot();const guestCommand=command('next');
+    check((await adminGate.command('admin',{...adminSnapshot,id:id(),sequence:1,action:'next'})).ok,'admin command');
+    let crossStale=false;try{await gate.command('phone',guestCommand)}catch{crossStale=true}check(crossStale,'guest stale command after admin refused');
+    check(!adapter.read().allowed.includes('output-stop')&&adminAdapter.read().allowed.includes('output-stop'),'admin-only stop');
+    state.selectedServiceId='another-editor';check(adminAdapter.read().live&&!adapter.read().live,'admin retains actual output while PC browses another service');state.selectedServiceId=sid;
+    adminGate.close();gate.close();
     output.closed=true;check(!adapter.read().live,'closed output revoked');output.closed=false;
     state.serviceMusic.ownerServiceId='another-service';check(!adapter.read().allowed.includes('play'),'foreign audio protected');
     state.presenter.outputSessionId='new-session';check(!adapter.read().live,'replacement output revoked');clearServiceMusicSyncTimer();

@@ -4,7 +4,7 @@
  const trigger=document.createElement('button');trigger.type='button';trigger.className='icon-btn';trigger.id='remotePanelBtn';trigger.innerHTML='<i data-lucide="smartphone"></i>';trigger.title='원격 조작';trigger.setAttribute('aria-label','원격 조작');
  document.getElementById('monitorPanelBtn')?.before(trigger);
  window.lucide?.createIcons({root:trigger});
- let session=null,opening=false,ending=false,announcedCode='';
+ let session=null,opening=false,ending=false,announcedCode='',remoteRevision=0,remoteBusy=false;
  const notify=(message,type='info')=>{if(typeof showToast==='function')showToast(message,type);};
  const buttonLabel=()=>ending?'종료 중':opening?'연결 준비':session?.connected?'원격 연결됨':session?.listening?session.code:'원격 조작';
  const panel=document.createElement('dialog');panel.className='remote-panel';panel.setAttribute('aria-labelledby','remoteTitle');
@@ -34,7 +34,7 @@
  $('[data-remote-close]').onclick=()=>panel.close();trigger.onclick=()=>activate();
  document.addEventListener('click',event=>{if(event.target.closest('[data-presenter-remote]'))void activate();});
  const text=s=>[s?.title,s?.body||s?.text||s?.bodyText||s?.content].filter(v=>typeof v==='string').join('\n').slice(0,1800);
- function adapter(serviceId,outputSession,outputWindow){
+ function adapter(serviceId,outputSession,outputWindow,admin=false){
   let previewRevision,previews=new WeakMap();
   function preview(slide){
    if(!slide?.type)return '';
@@ -68,8 +68,9 @@
   }
   function read(){
    const {p,m,slide,sync,own,intro}=context();
-   const live=p.serviceId===serviceId&&state.selectedServiceId===serviceId&&p.outputSessionId===outputSession&&p.outputWindow===outputWindow&&presenterControllerIsLive(serviceId)&&isPresenterOutputWindowOpen();
+   const live=p.serviceId===serviceId&&(admin||state.selectedServiceId===serviceId)&&p.outputSessionId===outputSession&&p.outputWindow===outputWindow&&presenterControllerIsLive(serviceId)&&isPresenterOutputWindowOpen();
    const allowed=['prev','next',p.safetyBlank?'unblank':'blank'];
+   if(admin)allowed.push('output-stop');
    if(!m.pending&&!m.fadeStop){
     if((own||intro)&&!m.playing)allowed.push('play');
     if(own&&m.playing)allowed.push('pause');
@@ -83,11 +84,12 @@
     previewCurrent:p.safetyBlank?'<div style="width:100%;height:100%;background:#000"></div>':preview(p.liveScripture?.active?p.liveScripture.slide:slide),previewNext:preview(next),
     music:!own&&!intro?'연결된 음원 없음':m.pending?'음원 준비 중':m.fadeStop?'페이드아웃 중':`${m.playing?'재생 중':'정지 / 일시정지'}${sync?.localTiming?m.autoSyncSuspended?' · 자동 넘김 해제':' · 자동 넘김':''}`,
     // Compare identities without disclosing media URLs or the full worship source.
-    version:compactTextSignature(JSON.stringify([p.sourceSignature,presenterTransportSequence,m.playSerial,m.sourceKey,m.timingGroupId,m.mode,p.livePraise,p.liveScripture?.active]))};
+    version:compactTextSignature(JSON.stringify([remoteRevision,p.sourceSignature,presenterTransportSequence,m.playSerial,m.sourceKey,m.timingGroupId,m.mode,p.livePraise,p.liveScripture?.active]))};
   }
-  async function execute(action){
+  async function perform(action){
    if(!read().live||!read().allowed.includes(action))throw Error('현재 상태에서는 이 조작을 할 수 없습니다.');
    const {p,m,slide,intro}=context();
+   if(action==='output-stop'&&admin)return stopPresenterOutput(serviceId);
    if(action==='prev'||action==='next')return runPresenterAction(action,serviceId,{scroll:false});
    if(action==='blank'||action==='unblank')return runPresenterAction('jump',serviceId,{index:action==='blank'?-1:p.index,scroll:false});
    if(action.startsWith('video-'))return requestPresenterVideoCommand(serviceId,action.slice(6));
@@ -102,7 +104,11 @@
    }
    if(action==='play'&&!state.serviceMusic.playing)throw Error('송출 PC에서 음원 재생이 차단됐습니다. PC에서 한 번 재생해 주세요.');
   }
-  return {read,execute};
+  return {read,async execute(action){
+   if(remoteBusy)throw Error('다른 조작을 처리 중입니다.');
+   remoteBusy=true;remoteRevision++;
+   try{return await perform(action);}finally{remoteBusy=false;remoteRevision++;}
+  }};
  }
  async function activate(){
   if(opening||ending)return;
@@ -114,7 +120,7 @@
   if(!state.client||!presenterControllerIsLive(state.selectedServiceId)||!isPresenterOutputWindowOpen()){const message='이 PC에서 예배 송출을 먼저 시작해 주세요.';$('[data-remote-status]').textContent=message;notify(message);return;}
   opening=true;paintPanel();
   try{
-   const {openRemote}=await import('./mindex.remote-session.mjs?v=6');
+   const {openRemote}=await import('./mindex.remote-session.mjs?v=7');
    const a=adapter(state.presenter.serviceId,state.presenter.outputSessionId,state.presenter.outputWindow);
    session=await openRemote({client:state.client,host:true,...a,onClose:()=>{session=null;announcedCode='';$('[data-remote-code]').textContent='';$('[data-remote-help]').textContent='';$('[data-remote-start]').disabled=false;$('[data-remote-end]').disabled=true;paintPanel();},onStatus:s=>{$('[data-remote-status]').textContent=s;if(s==='코드를 입력하면 바로 연결됩니다.'&&session)$('[data-remote-code]').textContent=session.code;if(s==='리모컨 연결됨'){$('[data-remote-code]').textContent='';$('[data-remote-help]').textContent='';$('[data-remote-link]').hidden=true;}paintPanel();}});
    $('[data-remote-code]').textContent=session.listening?session.code:'';$('[data-remote-help]').textContent='폰에서 코드 입력 · 2분간 유효';$('[data-remote-end]').disabled=false;
@@ -123,6 +129,23 @@
  $('[data-remote-start]').onclick=start;
  $('[data-remote-end]').onclick=async()=>{if(ending)return;ending=true;paintPanel();const old=session;session=null;try{await old?.end();}finally{ending=false;}$('[data-remote-code]').textContent='';$('[data-remote-help]').textContent='';$('[data-remote-start]').disabled=false;$('[data-remote-end]').disabled=true;paintPanel();};
  window.addEventListener('pagehide',()=>session?.close());
+ // Each actual output gets its own ephemeral registry identity; no PC registration.
+ let registry=null,registryLoading=false;
+ const registryTimer=setInterval(async()=>{
+  if(registry||registryLoading||!state.client||!isPresenterOutputWindowOpen())return;
+  registryLoading=true;
+  try{
+   const {createOutputRegistry}=await import('./mindex.remote-admin.mjs?v=1');
+   registry=createOutputRegistry(()=>{
+    const p=state.presenter;
+    if(!state.client||!presenterControllerIsLive(p.serviceId)||!isPresenterOutputWindowOpen())return null;
+    const service=state.services.find(s=>s.id===p.serviceId);
+    return {key:p.outputSessionId,client:state.client,adapter:adapter(p.serviceId,p.outputSessionId,p.outputWindow,true),
+     info:{title:service?.title||service?.name||'예배',device:document.getElementById('monitorName')?.value||'송출 PC',position:`${p.index+1} / ${p.slides.length}`}};
+   });
+  }catch{}finally{registryLoading=false;}
+ },2000);
+ window.addEventListener('pagehide',()=>{clearInterval(registryTimer);registry?.close();});
  // Read-only adapter entry is also used by isolated regression tests.
  window.MindexRemote={adapter,buttonLabel,open:()=>panel.showModal()};
  paintPanel();

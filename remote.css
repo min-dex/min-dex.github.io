@@ -45,3 +45,10 @@ button :is([data-lucide], svg.lucide) { width: var(--ui-icon-size); height: var(
 .phone-options { border-top: 1px solid var(--line); margin-top: 20px; padding-top: 15px; }
 #screenStatus { font-size: var(--ui-meta-size); color: var(--ink-3); }
 @media (display-mode: standalone) { main { padding-top: max(25px, env(safe-area-inset-top)); } }
+
+.connection-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.connection-modes [aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+#adminLogin, #adminLogout, #stopOutput { margin-top: 15px; }
+#outputList { display: grid; gap: 10px; }
+#outputList button { flex-direction: column; align-items: flex-start; text-align: left; overflow-wrap: anywhere; }
+#outputList small { color: var(--ink-3); font-weight: var(--ui-meta-weight); }

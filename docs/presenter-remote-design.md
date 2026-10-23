@@ -195,3 +195,59 @@ PC에서 허용하도록 안내한다. PPTX 내장 영상·배경 영상은 이 
 `smoke_remote_adapter.py`는 실제 슬라이드/음원 함수의 왕복 조작 경합을 검증한다.
 암호화 relay 및 320/390/768px 영상 버튼 검사는 `smoke_presenter_remote.py`에 포함한다.
 현장 휴대폰·실물 출력 장비 확인은 별도이며, 배포 완료는 Pages 기록으로 확인한다.
+
+## PIN administrator / all active outputs · 2026-10-24
+
+Implementation prepared; production migration, PIN provisioning and publication
+are NOT completed. This supersedes email identification for remote administration
+only; it does not change general app login/RLS or require prior PC registration.
+
+The administrator enters a PIN on Remote, sees active outputs, and selects one.
+Each entry shows worship title, the existing monitor display name, slide position
+and a short per-output discriminator. Changing targets ends only that control
+connection, never the worship output. Explicit output stop requires confirmation.
+Administrator control survives browsing another worship on the host PC, while
+remaining bound to the original output window/session. Six-digit guest pairing
+and its existing restrictions remain available separately.
+
+`2026-10-24-remote-admin.sql` adds private PIN/session/output/link records and
+three narrow RPCs. It contains no PIN or configured hash. Provision a bcrypt
+hash separately in the private singleton; never place PIN material in source,
+URL, static configuration, screenshots or release evidence. Changing the PIN
+must also delete administrator sessions to revoke existing access. This migration
+does not modify worship/Praise data or grant direct private-table access.
+Five consecutive failures lock PIN verification globally for 15 minutes (the
+lock is serialized and committed even on rejection). Random administrator tokens
+are hashed server-side, expire after eight hours and stay only in client memory.
+Logout revokes linked sessions; closing a page also attempts logout but cannot
+guarantee network delivery. Expiry remains the server-enforced boundary.
+
+Hosts use independent random owner tokens and 30-second registration leases;
+list entries require a report within ten seconds. Host reports run every two
+seconds while output exists; an established control session requires a lease
+response within six seconds. Failures close that session and back off ten seconds.
+The list refreshes every three seconds while choosing a target. No control command
+waits for list polling: commands still use the existing encrypted realtime relay,
+fresh state tickets and acknowledgement. There is no offline command queue.
+
+A requested link is not released to Remote until the host subscribes. Requests
+expire after 30 seconds; a ready connection lasts at most the administrator token's
+expiry. A host supports one administrator alongside its existing guest controller.
+Another administrator receives busy rather than taking over. Both controllers
+share the host mutation revision and execution lock: a command based on the old
+state is rejected after another controller acts. Selecting another output creates
+an unrelated encrypted channel. Only the administrator adapter permits output stop.
+
+The application's existing trusted-link model still applies to host registration:
+reported names identify app sessions, not authenticated physical machines. The
+private registry does not establish hardware identity or silently enable the
+unimplemented general Auth migration. No more than twenty fresh output entries or
+administrator tokens can accumulate; stale output cleanup cascades its links.
+
+Verification: real temporary PostgreSQL tests cover denied direct table access,
+missing provisioning, committed global PIN lockout, expiry/logout, two-output
+isolation, readiness, wrong-owner refusal and stale leases. Chromium/WebKit smoke
+covers PIN UI, encrypted two-output control, switching without stopping, selected
+output stop and logout; real host-adapter coverage includes administrator/guest
+stale-command rejection and editing another service. Physical phones, OS sleep and
+production installation remain separate checks.

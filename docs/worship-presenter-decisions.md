@@ -4329,3 +4329,14 @@ For unlabelled scores, the light hint follows actual available lyric forms
 (including Coda or Lyrics), superseding the blanket V hint above. No source forms
 means no guessed V. Whole-score controller blocks remain whole; no artificial
 score-page boundaries, source IDs, lyrics, timing or protected manual edits change.
+
+## PIN administrator remote scope ·2026-10-24
+
+Remote administration uses a server-verified PIN instead of email. Register each
+active output automatically; no advance PC registration. The administrator picks
+one output from a live list and controls that output's slides, blackout, media and
+explicit stop. Switching the selected output must not stop either worship. The
+administrator remains attached to the actual output when the PC browses another
+service. Guest six-digit pairing remains separate; concurrent controllers share
+revision/serialization protection. See `presenter-remote-design.md` for security,
+expiry and the pending production provisioning/publication boundary.
