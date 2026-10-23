@@ -104,7 +104,7 @@
           "sha256": "d7a847c6530db32101dd15e4954f2acaf8b204f05c104044374789aadb56001b"
         }
       ],
-      "reviewNote": "2026-10-20: full retained score text and phrase boundaries checked; no lyric correction. Approximate phrase-equivalent measures; pickup crossing a lyric block boundary allocated to its phrase. New5 has half-measure block boundaries (6.5+6.5), not forced to 4/8."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "64a976b0-39a6-5e86-97a0-8d19dfed39ae",
@@ -144,7 +144,7 @@
           "sha256": "43cd48c1de8674b962f693e66b54c820032272a22eba92e9b99d1d11eea1abe4"
         }
       ],
-      "reviewNote": "2026-10-20: full retained score text and phrase boundaries checked; no lyric correction. Approximate phrase-equivalent measures; pickup crossing a lyric block boundary allocated to its phrase. New5 has half-measure block boundaries (6.5+6.5), not forced to 4/8."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "0970887d-dfa3-5c48-ba0c-1d25dd7f37ec",
@@ -264,7 +264,8 @@
           "sha256": "0dae76ef81d32e95a11c4f6b83d655e55c6f79f75e982ab486ce7e9e761e5cc5"
         }
       ],
-      "reviewNotes": "4/4 pickup + final 3-beat bar combined. First lyric block 8 bars; remaining block 5. Amen 1 bar separate."
+      "reviewNotes": "4/4 pickup + final 3-beat bar combined. First lyric block 8 bars; remaining block 5. Amen 1 bar separate.",
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "a3ca1f85-d13f-467c-9975-e1efef665f5a",
@@ -304,7 +305,8 @@
           "sha256": "a58ed8a77b16216b2cff6de84baeb14575eab8fe5afae919c2cf31c8daafb9b0"
         }
       ],
-      "reviewNotes": "Printed 4/2: exclude one instrumental opening bar. Sung verse 7 bars. Stored break before tae-cho falls 6 quarter beats into bar 4, hence 3.75+3.25. Amen: tied two whole notes (one 4/2 bar), then breve (one bar). No forced text split."
+      "reviewNotes": "Printed 4/2: exclude one instrumental opening bar. Sung verse 7 bars. Stored break before tae-cho falls 6 quarter beats into bar 4, hence 3.75+3.25. Amen: tied two whole notes (one 4/2 bar), then breve (one bar). No forced text split.",
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "161eda6d-d45f-4c41-888a-a13c6915cd3d",
@@ -393,7 +395,7 @@
         {
           "unitId": "8d5723e3-0a66-4b1d-9b52-cf57971f71cc",
           "kind": "Verse",
-          "textSha256": "8726077b5307275d40fa75c3853a480e06ad43f770f1dd1752e3acc61b310bd6",
+          "textSha256": "bda2ede335b7c7287e1f7d3df05c812e0cd61d8ae55a52f70b0c4aee5d4159e8",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             8,
@@ -464,7 +466,8 @@
           "sha256": "b296187df8dfb7978799d10f9144e234759b87b999d3db472bda7a3eb0f98a25"
         }
       ],
-      "reviewNotes": "Printed 3/4. Systems: 8+9+7+5 verse bars, then Amen 2 bars. Stored lyric blocks map 8+9+(7+5). Four printed verses compared; no reflow or form change."
+      "reviewNotes": "Printed 3/4. Systems: 8+9+7+5 verse bars, then Amen 2 bars. Stored lyric blocks map 8+9+(7+5). Four printed verses compared; no reflow or form change.",
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: move 온 with 땅에 on same line; natural screen boundaries retained."
     },
     {
       "versionId": "e3ade64a-c436-419c-bf2d-6734cdb2108b",
@@ -1343,13 +1346,14 @@
         }
       ],
       "reviewNotes": "Three printed verses compared. Systems contain 6+6+5+4 bars: stored blocks 12+9, not forced to 8+8. Amen two bars separate.",
-      "meter": "3/4"
+      "meter": "3/4",
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "1abf7abf-8f3e-5d99-a3d4-8209340c833e",
       "edition": "new",
       "number": 22,
-      "classification": "4_bar_blocks",
+      "classification": "mixed_blocks",
       "stanzaApproxMeasures": 8,
       "reviewStatus": "score_supported_approximation",
       "parts": [
@@ -1432,7 +1436,8 @@
         }
       ],
       "reviewNotes": "Four verses and explicitly printed refrain compared. Verse eight bars; refrain six bars; one-quarter pickups and final three quarters combined for each part. Amen one bar separate.",
-      "meter": "4/4"
+      "meter": "4/4",
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "3cd2f3cc-b923-5c8f-921d-1c501a3f0083",
@@ -1805,7 +1810,8 @@
         }
       ],
       "reviewNotes": "Five printed verses compared in 6/4. Stored break before the final phrase occurs after six measure equivalents; repeated ending adds four, total ten. Repeated words are printed and retained. Amen one 6/4 bar separate.",
-      "meter": "6/4"
+      "meter": "6/4",
+      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep complete repeated closing phrase."
     },
     {
       "versionId": "af4f96ad-724b-541f-96ca-2b40dd990749",
@@ -1936,7 +1942,7 @@
       "versionId": "a95259ae-7f17-4e31-81c9-0ac965bec268",
       "edition": "new",
       "number": 30,
-      "classification": "8_bar_blocks",
+      "classification": "mixed_blocks",
       "stanzaApproxMeasures": 8,
       "reviewStatus": "score_supported_approximation",
       "parts": [
@@ -2015,7 +2021,8 @@
         }
       ],
       "reviewNotes": "Four printed verses and main-melody refrain compared. Verse eight bars; refrain fourteen bars (4+3+4+3), kept as the existing single block. Parenthesized lower-voice responses are simultaneous and are not added as sequential bars. Amen one bar separate; no lyric/part changes.",
-      "meter": "4/4"
+      "meter": "4/4",
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "205d4901-18f6-4e2b-b127-0e206e77e10b",
@@ -2158,7 +2165,8 @@
         }
       ],
       "reviewNotes": "Three verses compared. First system eight bars, second seven verse bars plus one Amen bar. Stored blocks 8+7, total fifteen; do not force a sixteen-bar shape.",
-      "meter": "4/4"
+      "meter": "4/4",
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "d1ec9553-6004-5ad0-861e-9388e01e0750",
@@ -2409,7 +2417,8 @@
         }
       ],
       "reviewNotes": "Resolved by quarter-beat recount: systems 16+17+16+11 beats before Amen. Stored blocks 33+27 beats in 4/4 = 8.25+6.75, total 15. Initial half-note pickup and later quarter-note pickups retained; separate Amen one bar.",
-      "meter": "4/4"
+      "meter": "4/4",
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "b0c30f09-f6e3-50f7-8597-6318461ff119",
@@ -2490,7 +2499,8 @@
         }
       ],
       "reviewNotes": "Four verses compared. Systems contribute 4+5+5 measure equivalents with quarter pickups combined with final three-quarter notes. Stored blocks 9+5, total fourteen; repeated final phrase is printed, not an invented refrain. Amen one bar separate.",
-      "meter": "4/4"
+      "meter": "4/4",
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "2612b1e8-e160-47e9-9d70-90da8b417178",
@@ -2579,7 +2589,8 @@
         }
       ],
       "reviewNotes": "Resolved using primary melody and written rests only: verse systems 18+21 quarter beats = 13 bars in 3/4. Refrain systems 16+14 quarter beats = 10 bars. Simultaneous lower-voice responses do not extend elapsed bars. Separate closing Amen two bars.",
-      "meter": "3/4"
+      "meter": "3/4",
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: repeated opening and chorus response boundaries retained; no arithmetic-only split."
     },
     {
       "versionId": "d3d73b62-24d9-4746-a580-dab4795012a1",
@@ -2751,13 +2762,11 @@
         {
           "unitId": "c313c5d0-a722-40e6-8aac-ca6a7bbaaec1",
           "kind": "Chorus",
-          "textSha256": "b81eea6ba41f20aa50c21a1dfd433c178a5b8aaa85e35e5e20c02f0f6d80097f",
-          "blockCount": 4,
+          "textSha256": "7905ba0c720cc246f0b4a9ce76ed991facefcc7cf0e718e82b4615a2958d2b09",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
-            2,
-            2,
-            2,
-            2
+            4,
+            4
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -2770,7 +2779,8 @@
         }
       ],
       "reviewNotes": "Resolved by quarter-beat recount: each verse block 16 beats, total 8 bars in 4/4. Refrain stored blocks contain 8+17+7 beats = 2+4.25+1.75 bars, total 8. Block 2 starts on the last beat of its printed bar; final block starts on a barline. No separate Amen.",
-      "meter": "4/4"
+      "meter": "4/4",
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: chorus paired into two natural 4-bar slides; Unified stanza count corrected to 4+4."
     },
     {
       "versionId": "427dbdf9-1fa0-5260-918a-323b0c2b71de",
@@ -4076,7 +4086,8 @@
         }
       ],
       "meter": "4/4",
-      "reviewNotes": "Visual printed-score measure and stored-block mapping; lyrics and song forms unchanged. First system eight bars; second seven before separate one-bar Amen, total fifteen."
+      "reviewNotes": "Visual printed-score measure and stored-block mapping; lyrics and song forms unchanged. First system eight bars; second seven before separate one-bar Amen, total fifteen.",
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "063f61f0-6a17-544d-8d37-4b0429ffbb08",
@@ -4499,7 +4510,8 @@
         }
       ],
       "meter": "2/4",
-      "reviewNotes": "Visual printed-score measure and stored-block mapping; lyrics and song forms unchanged. Printed 2/4. Systems 7+6+6+6. Block boundary after first four bars of system three: 17+8. Do not force 24 bars."
+      "reviewNotes": "Visual printed-score measure and stored-block mapping; lyrics and song forms unchanged. Printed 2/4. Systems 7+6+6+6. Block boundary after first four bars of system three: 17+8. Do not force 24 bars.",
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "d8a33722-8671-46e9-b1a5-36eac44ad9f9",
@@ -4825,7 +4837,8 @@
         }
       ],
       "meter": "3/2",
-      "reviewNotes": "Visual printed-score measure and stored-block mapping; lyrics and song forms unchanged. Printed 3/2. Pickups and complementary endings combined; four systems of four bars. Stored verse blocks 8+4+4, no printed chorus. Separate two-bar Amen."
+      "reviewNotes": "Visual printed-score measure and stored-block mapping; lyrics and song forms unchanged. Printed 3/2. Pickups and complementary endings combined; four systems of four bars. Stored verse blocks 8+4+4, no printed chorus. Separate two-bar Amen.",
+      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep alternating Hallelujah response and body."
     },
     {
       "versionId": "ad2a7ae8-7bbf-501d-a35d-6c43a047e2f3",
@@ -4899,7 +4912,8 @@
         }
       ],
       "meter": "3/4",
-      "reviewNotes": "Visual printed-score measure and stored-block mapping; lyrics and song forms unchanged. Two seven-bar systems; stored break occurs after third bar of second system: 10+4."
+      "reviewNotes": "Visual printed-score measure and stored-block mapping; lyrics and song forms unchanged. Two seven-bar systems; stored break occurs after third bar of second system: 10+4.",
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "00246c5c-1b71-5a59-b9cc-f8389f863ef1",
@@ -5164,7 +5178,8 @@
         }
       ],
       "meter": "2/2",
-      "reviewNotes": "Visual printed-score measure and stored-block mapping; lyrics and song forms unchanged. Printed 2/2: first two systems six bars each, final two systems 3.75+4.25; stored blocks 12+8."
+      "reviewNotes": "Visual printed-score measure and stored-block mapping; lyrics and song forms unchanged. Printed 2/2: first two systems six bars each, final two systems 3.75+4.25; stored blocks 12+8.",
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "fdb94d0f-4679-42c4-bb23-118d8744d187",
@@ -5688,52 +5703,49 @@
       "edition": "new",
       "number": 81,
       "classification": "mixed_blocks",
-      "stanzaApproxMeasures": 21,
+      "stanzaApproxMeasures": 19,
       "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "2594113b-876b-41ee-983d-8d446d5bec75",
           "kind": "Verse",
-          "textSha256": "d2ab28d981a5a1557418ca3d5056b9c21533be6531db8a25f782b055a8718988",
-          "blockCount": 5,
+          "textSha256": "d11d6bf878cff4d8211d67affbbb14ac896c9408747a2c629bcf400e05d331cd",
+          "blockCount": 4,
           "approxMeasuresByBlock": [
+            6,
+            6,
             4,
-            4,
-            4,
-            5,
-            4
+            3
           ],
-          "approxMeasures": 21,
+          "approxMeasures": 19,
           "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "be66403f-3a72-4353-ac3c-c7beb091f20b",
           "kind": "Verse",
-          "textSha256": "58404d1a21d5312a87d6afd74173d7a60dc8713f1e41409f8c1a6f4550636ef9",
-          "blockCount": 5,
+          "textSha256": "ce2334d571c2562d7ae0fc48bb285018f2ab1c02a73a424f50ebb32dda2a2df2",
+          "blockCount": 4,
           "approxMeasuresByBlock": [
+            6,
+            6,
             4,
-            4,
-            4,
-            5,
-            4
+            3
           ],
-          "approxMeasures": 21,
+          "approxMeasures": 19,
           "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "0bae807f-3764-432d-8dde-74d35727cc5b",
           "kind": "Verse",
-          "textSha256": "e54e60965b9e073eb8e806811bdb9aa38ad284e0068d3437fe0e5a0868f6730e",
-          "blockCount": 5,
+          "textSha256": "fea79789d4f96bdeda55293597a35b93b50fbe891b2853dff397af47ea88226a",
+          "blockCount": 4,
           "approxMeasuresByBlock": [
+            6,
+            6,
             4,
-            4,
-            4,
-            4,
-            4
+            3
           ],
-          "approxMeasures": 20,
+          "approxMeasures": 19,
           "reviewStatus": "score_supported_approximation"
         },
         {
@@ -5755,7 +5767,8 @@
         }
       ],
       "meter": "4/4",
-      "reviewNotes": "Paired printed-edition review; all existing stored verse blocks mapped without changing lyrics, forms or IDs. 4/4 score systems 4+5+5+6. Union final two stored blocks meet halfway through a bar, 4.5+3.5."
+      "reviewNotes": "Paired printed-edition review; all existing stored verse blocks mapped without changing lyrics, forms or IDs. 4/4 score systems 4+5+5+6. Union final two stored blocks meet halfway through a bar, 4.5+3.5.",
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: six-bar opening sentences kept complete; following four-bar phrase and short final cadence. Align all verses and editions."
     },
     {
       "versionId": "2b2d946b-16e3-528b-ad2d-c305d23f758a",
@@ -7121,7 +7134,8 @@
         }
       ],
       "meter": "2/2",
-      "reviewNotes": "Visual printed-score and stored-block mapping. Printed2/2 systems6+6+7, verse19, stored12+7. Not forced to4/8-bar phrases."
+      "reviewNotes": "Visual printed-score and stored-block mapping. Printed2/2 systems6+6+7, verse19, stored12+7. Not forced to4/8-bar phrases.",
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "545a96a8-9609-4f31-a44b-ad0e9da49919",
@@ -7257,7 +7271,8 @@
         }
       ],
       "meter": "2/2",
-      "reviewNotes": "Visual printed-score and stored-block mapping. Printed2/2 first two phrases5+5; remaining7. Union third stored block includes4.5 bars and final block2.5. Complementary half-measure pickups/endings combined. Separate Amen1."
+      "reviewNotes": "Visual printed-score and stored-block mapping. Printed2/2 first two phrases5+5; remaining7. Union third stored block includes4.5 bars and final block2.5. Complementary half-measure pickups/endings combined. Separate Amen1.",
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "3a12be3d-8f2a-52ac-9de3-6a9da4a04709",
@@ -7471,7 +7486,8 @@
         }
       ],
       "meter": "4/4",
-      "reviewNotes": "Visual printed-score and stored-block mapping. Verse12, union6+6; printed refrain7, separate Amen1. No additional repetitions generated."
+      "reviewNotes": "Visual printed-score and stored-block mapping. Verse12, union6+6; printed refrain7, separate Amen1. No additional repetitions generated.",
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "9a1879d3-f1f5-5371-a591-1497ebbb0831",
@@ -7798,7 +7814,8 @@
         }
       ],
       "meter": "6/8",
-      "reviewNotes": "Visual printed-score and stored-block mapping. Printed6/8 systems4+4+6, verse14. New8+6; union4+4+6. Separate Amen2."
+      "reviewNotes": "Visual printed-score and stored-block mapping. Printed6/8 systems4+4+6, verse14. New8+6; union4+4+6. Separate Amen2.",
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "0e609e37-cad6-51b4-86b9-5ac29bf79b47",
@@ -8129,11 +8146,12 @@
         {
           "unitId": "9d8aa7d3-353c-4242-8cbf-84ac63b13e1c",
           "kind": "Verse",
-          "textSha256": "c752b698277e5a2e5729cd173f213413f8aba655fcb5dec4610f6617f9645ef2",
-          "blockCount": 2,
+          "textSha256": "6f57ddf8daffbb60a0055ef33fdc652fd8bdbf9340f992b8060dced58e00dfd4",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
-            11,
-            8
+            7,
+            6,
+            6
           ],
           "approxMeasures": 19,
           "reviewStatus": "score_supported_approximation"
@@ -8154,11 +8172,12 @@
         {
           "unitId": "117ae36d-eaf0-4caa-bceb-dd35c38d9345",
           "kind": "Verse",
-          "textSha256": "1c51f65f1eba587825134b5174a57a17cde43ba2f9022827ad8d129faa815ef6",
-          "blockCount": 2,
+          "textSha256": "e549fbbe10cb59f166b69114079f1a2e0d834f9078686b565ba55f56920ebbd1",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
-            11,
-            8
+            7,
+            6,
+            6
           ],
           "approxMeasures": 19,
           "reviewStatus": "score_supported_approximation"
@@ -8193,13 +8212,14 @@
           "path": "backups/20261018-new-hymn-full-review/115/score",
           "sha256": "2e05fb081d46ff4a22ef67e4393857838744b1c95193b31029270d07d4962455"
         }
-      ]
+      ],
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: verses 1/3 use same three natural screen boundaries as verses 2/4; repeats preserved."
     },
     {
       "versionId": "236dc4a9-7be3-58fe-9afc-589fb529ab47",
       "edition": "new",
       "number": 116,
-      "classification": "8_bar_blocks",
+      "classification": "mixed_blocks",
       "stanzaApproxMeasures": 16,
       "reviewStatus": "score_supported_approximation",
       "parts": [
@@ -8281,13 +8301,14 @@
           "path": "backups/20261018-new-hymn-full-review/116/score",
           "sha256": "d4eb8b9f223e7410b342ea6e682be5ced1ebc9c56fb976ce32ca13898425cf91"
         }
-      ]
+      ],
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "4627fe78-a397-5447-9976-833425114e9e",
       "edition": "new",
       "number": 117,
-      "classification": "4_bar_blocks",
+      "classification": "mixed_blocks",
       "stanzaApproxMeasures": 12,
       "reviewStatus": "score_supported_approximation",
       "parts": [
@@ -8348,7 +8369,8 @@
           "path": "backups/20261018-new-hymn-full-review/117/score",
           "sha256": "376c00d17f698009789df7970a32cfeb208fe1c06fbd34e0759e197368aac656"
         }
-      ]
+      ],
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "e087beec-5c9a-566e-8c70-f8519c33839e",
@@ -8905,7 +8927,7 @@
       "versionId": "9ca5e5ae-4460-505e-bd93-83db1ba9d39c",
       "edition": "new",
       "number": 125,
-      "classification": "4_bar_blocks",
+      "classification": "mixed_blocks",
       "stanzaApproxMeasures": 8,
       "reviewStatus": "score_supported_approximation",
       "parts": [
@@ -8986,7 +9008,8 @@
           "path": "backups/20261018-new-hymn-full-review/125/score",
           "sha256": "41d2ab91ba95890a4298b0574881840530a2f936de7ae604842adbdbdeb4f64b"
         }
-      ]
+      ],
+      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep extended Gloria melisma must remain whole."
     },
     {
       "versionId": "c15d963e-3fe8-47ac-96ad-c14928b0a681",
@@ -9064,7 +9087,7 @@
       "versionId": "418421d3-751f-5c32-80c9-d83fd1610316",
       "edition": "new",
       "number": 127,
-      "classification": "4_bar_blocks",
+      "classification": "mixed_blocks",
       "stanzaApproxMeasures": 12,
       "reviewStatus": "score_supported_approximation",
       "parts": [
@@ -9124,7 +9147,8 @@
           "path": "backups/20261018-new-hymn-full-review/127/score",
           "sha256": "b0d0bf35cc541ef010d9785dbd5beb2db4865f8d4021038d7c5d789e16230503"
         }
-      ]
+      ],
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "8853f05e-af86-548c-bc63-7477757d53f1",
@@ -9168,7 +9192,8 @@
           "path": "backups/20261018-new-hymn-full-review/128/score",
           "sha256": "1aa00d8f228ff0f4b4a321508559cc61bd4bd455bd75f53763d21062c6d3d29d"
         }
-      ]
+      ],
+      "reviewNote": "2026-10-23 natural phrase review: Keep natural 4+4+4+2 ending, explicitly approved by user."
     },
     {
       "versionId": "d6830651-511a-4952-bead-4cea2fe9427c",
@@ -9220,7 +9245,8 @@
           "path": "backups/20261018-new-hymn-full-review/129/score",
           "sha256": "a338a650b11494fb2df826ab1a11c1d6a72f986748599390c1c2b40b0a4baaa0"
         }
-      ]
+      ],
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "9a23f192-0238-5366-bc58-b3e29ef376d9",
@@ -10537,7 +10563,8 @@
           "path": "backups/20261018-new-hymn-full-review/147/score",
           "sha256": "eb7b1cdeeb81c5fb30bb0e976e64b546f11ef08908d953488cd511b9f3f7f664"
         }
-      ]
+      ],
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "10d82315-67da-44a9-b11a-1ec1936cffff",
@@ -10907,7 +10934,8 @@
         }
       ],
       "reviewedAt": "2026-10-22",
-      "reviewBatch": "hymn151-170-paired"
+      "reviewBatch": "hymn151-170-paired",
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "888350db-c9cb-53a7-9d63-b0915381e3b5",
@@ -11850,11 +11878,12 @@
         {
           "unitId": "ad715f2d-9b67-43d4-8ac8-98c7667dea37",
           "kind": "Verse",
-          "textSha256": "954f76ded3f1ca390d9fae121fbc85185387efc98cdae2fd4a5a9a1e5bff4945",
-          "blockCount": 2,
+          "textSha256": "5c9198563a4d2ff5be2ac396b6e5e019fea3523d90811634d353ce156576dc8a",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
-            12,
-            10
+            7,
+            8,
+            7
           ],
           "approxMeasures": 22,
           "reviewStatus": "score_supported_approximation"
@@ -11862,11 +11891,12 @@
         {
           "unitId": "404106ab-c19d-4940-81bb-57df3807d49b",
           "kind": "Verse",
-          "textSha256": "7e22924ca7dfe7fc8f499a6d127dc2a1564e327ae152bf844fc5c6a115593b6e",
-          "blockCount": 2,
+          "textSha256": "3b48eb042737bb67897e33d249e03ef6658a1da82ce650784bccdbdbcf4f36d5",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
-            12,
-            10
+            7,
+            8,
+            7
           ],
           "approxMeasures": 22,
           "reviewStatus": "score_supported_approximation"
@@ -11874,11 +11904,12 @@
         {
           "unitId": "41fe5d61-0ff0-4af2-8203-5b87beb2575b",
           "kind": "Verse",
-          "textSha256": "5a97a2dd0277126d85f0d53e2ac3ad0c92f3f6f0b5c431cf0374a615cb036170",
-          "blockCount": 2,
+          "textSha256": "b65dd7a645475e81be7f883d251bd128e7e103c81af2c4afc3995225a94795cc",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
-            12,
-            10
+            7,
+            8,
+            7
           ],
           "approxMeasures": 22,
           "reviewStatus": "score_supported_approximation"
@@ -11886,11 +11917,12 @@
         {
           "unitId": "119ccaaa-09cd-40de-b8d0-5e7e3356e078",
           "kind": "Verse",
-          "textSha256": "7f54fc7b068a097e6759d2438abe06a4b079c77b971732062236ba0f5197e6ad",
-          "blockCount": 2,
+          "textSha256": "bf0d168342946c4af7909c0e3a75e4cac2443f222214addb5ce64d70b64f3911",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
-            12,
-            10
+            7,
+            8,
+            7
           ],
           "approxMeasures": 22,
           "reviewStatus": "score_supported_approximation"
@@ -11914,7 +11946,8 @@
         }
       ],
       "reviewedAt": "2026-10-22",
-      "reviewBatch": "hymn151-170-paired"
+      "reviewBatch": "hymn151-170-paired",
+      "reviewNote": "2026-10-23 natural phrase review: Printed score paired with Unified156: introductory Hallelujah shown on its own screen without changing unit/form or repetitions; body 8+7."
     },
     {
       "versionId": "d9faf8e6-9f94-4814-a954-38db7c978073",
@@ -12157,7 +12190,8 @@
         }
       ],
       "reviewedAt": "2026-10-22",
-      "reviewBatch": "hymn151-170-paired"
+      "reviewBatch": "hymn151-170-paired",
+      "reviewNote": "2026-10-23 natural phrase review: Keep 4+2+4: short central proclamation is a distinct musical phrase; no forced 2-bar pages."
     },
     {
       "versionId": "481c839e-a99b-5836-b5c5-7d3dd86c2954",
@@ -12717,12 +12751,11 @@
         {
           "unitId": "b618e41b-cbcd-4673-9f6d-08782571d0ca",
           "kind": "Chorus",
-          "textSha256": "3c3c1dc43a260ccbbc1f9ca7fe4fd125d2b08d574585e10e80b11007bb1946f6",
-          "blockCount": 3,
+          "textSha256": "9cbe6b83c6152473995d974f173a423fe4ec86cb65722ab9a816b872d78c5377",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
-            2,
             4,
-            2
+            4
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -12746,7 +12779,8 @@
         }
       ],
       "reviewedAt": "2026-10-22",
-      "reviewBatch": "hymn171-190-paired"
+      "reviewBatch": "hymn171-190-paired",
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: preserve complete melodic phrases in 4+4 chorus slides, words/repeats unchanged."
     },
     {
       "versionId": "4180ecc0-21c5-4aee-9340-3d964a4fd843",
@@ -13353,7 +13387,7 @@
       ],
       "reviewedAt": "2026-10-22",
       "reviewBatch": "hymn171-190-paired",
-      "reviewNote": "3/4 본절8+7, 후렴8+7. 마지막 성령이 오셨네는 못갖춘1박+두 완전마디+끝2박=3마디이므로 전체15. 16마디로 강제하지 않음."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "338cffb7-2745-5b89-bc73-2a6c50e2eaca",
@@ -14186,7 +14220,7 @@
       ],
       "reviewedAt": "2026-10-22",
       "reviewBatch": "hymn191-210-paired",
-      "reviewNote": "3/4 본절은 성령의 은사를3+나에게 채우사3+주님의 사랑 본받아 및 나 살게 하소서7=13. 인쇄 첫 행7마디/둘째 행 본절6마디, 아멘2 별도. 통174와 총수 동일."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "78b4a381-b3d4-409e-8a4d-ae0d42fe7948",
@@ -16141,7 +16175,7 @@
       ],
       "reviewedAt": "2026-10-22",
       "reviewBatch": "hymn211-230-paired",
-      "reviewNote": "3/4 본절13. 첫 못갖춘1박과 마지막2박을 합산. 새판 한 블록13, 통525 두 블록6+7."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "b77116a2-f0a7-4ea2-bf09-34f2ad60b0bb",
@@ -17229,12 +17263,11 @@
         {
           "unitId": "1c103ad0-04a2-4162-8101-b811af224ba8",
           "kind": "Chorus",
-          "textSha256": "7cea2ee431617f29b30c296717a02d8a88894b6bc52a739098ddb0b5424e64f1",
-          "blockCount": 3,
+          "textSha256": "4b066e212010fd05467b2a90309a1d2d63faf499c0b0628bce867e4f63f19cb8",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
-            2,
             4,
-            2
+            4
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -17248,7 +17281,7 @@
       ],
       "reviewedAt": "2026-10-22",
       "reviewBatch": "hymn231-250-deferrals",
-      "reviewNote": "4/4 본절8·후렴8. 본절 끝 에는 점2분음표. 새 본절4+4/통2+3+3, 후렴 새2+4+2/통2+3+3. 왕의 및 새 예루살렘의 앞 마디 마지막 박에서 시작하는 블록 경계를 반영."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: preserve complete melodic phrases in 4+4 chorus slides, words/repeats unchanged."
     },
     {
       "versionId": "4e84758b-af55-4c27-a2a3-f31a3edb645e",
@@ -17297,12 +17330,11 @@
         {
           "unitId": "241f1879-8e47-4296-9179-24a373bc6d59",
           "kind": "Chorus",
-          "textSha256": "dd2fdbac9f3d87525624d8c5755a84f55acf3dc4021a5fb605d4c31128b6c226",
-          "blockCount": 3,
+          "textSha256": "933a8c5c7ac984213fb24bd630b37f97119b1d8f968f42b2a70344805b61c335",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
-            2,
             4,
-            2
+            4
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -17316,7 +17348,7 @@
       ],
       "reviewedAt": "2026-10-22",
       "reviewBatch": "hymn231-250-deferrals",
-      "reviewNote": "4/4 본절8·후렴8. 인쇄 행 경계 대신 실제 마디선을 따라 합산. 본절 새4+4/통2+3+3, 후렴 새2+4+2/통2+3+3. 종지 다는 점2분음표이며 하성 응답을 중복 가산하지 않음."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: preserve complete melodic phrases in 4+4 chorus slides, words/repeats unchanged."
     },
     {
       "versionId": "1e102b2d-acaf-5d6b-a458-b17bb7b50c00",
@@ -17396,7 +17428,7 @@
       "versionId": "9322edf4-d127-4814-ad0c-185866f9abc6",
       "edition": "new",
       "number": 239,
-      "classification": "4_bar_blocks",
+      "classification": "mixed_blocks",
       "stanzaApproxMeasures": 8,
       "reviewStatus": "score_supported_approximation",
       "parts": [
@@ -17480,7 +17512,7 @@
       ],
       "reviewedAt": "2026-10-22",
       "reviewBatch": "hymn231-250-deferrals",
-      "reviewNote": "6/8 본절 첫 악구4, 둘째25/6(못갖춘1/6+온마디3+종지 점2분음표1)=49/6. 8로 반올림하지 않음. 후렴6, 통일 블록은 가까운의 까가 네 번째 마디 마지막8분음표에서 시작하여23/6+13/6. 아멘2. 새·통 원본의 동일 종지 음가 확인."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep short closing phrase."
     },
     {
       "versionId": "f1954aef-6192-5653-897f-371c48182d30",
@@ -17657,7 +17689,7 @@
       ],
       "reviewedAt": "2026-10-22",
       "reviewBatch": "hymn231-250-deferrals",
-      "reviewNote": "3/4 본절24. 못갖춘1박+인쇄 행의 온마디5+7+6+5개+종지2박=72박. 새 블록7+10+7/통7+7+7+3. 반복 고난 풍파와 무궁한 경계의 마지막 박을 다음 블록에 귀속. 아멘2."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "6fac5a55-d5ba-427e-9670-1750d820a9f2",
@@ -17809,12 +17841,11 @@
         {
           "unitId": "25d91995-6540-44ca-9456-7af298f789e0",
           "kind": "Chorus",
-          "textSha256": "18dd37e36009bbcd50df2afd3a0d2912a070a0bd2ffdb86246f081a25f51f495",
-          "blockCount": 3,
+          "textSha256": "89cc4852320c61e5490a2400eb4273e979164d07ff46cee3e68b8a4456e6b1f6",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
-            3,
-            3,
-            2
+            4,
+            4
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -17828,13 +17859,13 @@
       ],
       "reviewedAt": "2026-10-22",
       "reviewBatch": "hymn231-250-deferrals",
-      "reviewNote": "4/4 본절8·후렴8. 본절 새4+4/통2+3+3. 후렴 구속 시작은 여섯 번째 마디 마지막 박: 새6+2/통4+2+2. 끝 점2분음표와 못갖춘1박 합산, 괄호 하성 응답 중복 가산 없음."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: preserve complete melodic phrases in 4+4 chorus slides, words/repeats unchanged."
     },
     {
       "versionId": "94df12d8-3195-4889-9c68-18e5dacccdd0",
       "edition": "new",
       "number": 244,
-      "classification": "4_bar_blocks",
+      "classification": "mixed_blocks",
       "stanzaApproxMeasures": 12,
       "reviewStatus": "score_supported_approximation",
       "parts": [
@@ -17897,7 +17928,7 @@
       ],
       "reviewedAt": "2026-10-22",
       "reviewBatch": "hymn231-250-paired",
-      "reviewNote": "4/4 시작4분쉼표 포함 본절 앞8마디, 뒤3.5마디. 네의2분음표 뒤 후렴 알의2분음표가 같은 마디를 채움. 본절11.5·후렴4.5=16. 저장 블록8+3.5 보존."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "7f8e2303-c71f-41d6-961e-7e996b5f2ae3",
@@ -18111,7 +18142,7 @@
       ],
       "reviewedAt": "2026-10-22",
       "reviewBatch": "hymn231-250-paired",
-      "reviewNote": "4/4 인쇄 앞 세 행 각4마디, 마지막 본절 행5마디. 본절17(8+9), 아멘1. 16마디로 강제하지 않음."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "2b73ad8a-e98b-4855-b51d-e03f40c9fbaa",
@@ -22062,7 +22093,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn291-310-paired",
-      "reviewNote": "6/8 본절14. 첫 양의8분음표1개부터 울안에있으나까지4, 다음 한마리부터헤매네까지4. 산높고길은험한데 목자를멀리떠났네까지4, 마지막 목자를멀리떠났네2. 새8+6/통4+4+4+2. 마지막 반복을 생략하거나 별도 후렴으로 분리하지 않음."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep short final repetition."
     },
     {
       "versionId": "b96ec121-5342-5707-af7e-10bf6788f421",
@@ -22219,7 +22250,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn291-310-paired",
-      "reviewNote": "3/4 본절13. 하나님사랑은온전한참사랑의 첫 인쇄행6온마디, 내맘에부터하소서까지7온마디. 새13/통6+7. 아멘점2분음표 두 개2마디. 4/8/16마디에 맞춰 강제하지 않음."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "5180b229-5693-5ed1-82f3-a054da542b12",
@@ -23409,7 +23440,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn311-330-paired",
-      "reviewNote": "4/4 본절19. 인쇄행은3+4+4+4+4마디. 기존 가사 첫 블록은 첫행3+둘째행앞2=5, 둘째 블록은둘째행뒤2+셋째행앞2=4, 셋째 블록은셋째행뒤2+넷째행4=6, 마지막4. 아(성령으로)의 하성 응답은 같은 마디에서 진행하므로 추가 가산하지 않음. 넷째행 붙임줄과8분쉼표 포함. 기존 Verse 4블록5+4+6+4를 유지."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "f78035ac-0d21-4e9d-9e62-d088f3840b27",
@@ -24743,12 +24774,11 @@
         {
           "unitId": "9dbb6505-1c1d-4cc9-abcc-66f75d9a4376",
           "kind": "Chorus",
-          "textSha256": "6ae932379a34b58d8158f9d9ef9e5cd45b1c8d88de39cf75d541327175cbb615",
-          "blockCount": 3,
+          "textSha256": "bf5a0b41063109d185d32d704a6453c45519672225714fa95398c6610be215d0",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
-            2,
             4,
-            2
+            4
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -24762,7 +24792,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn331-350-paired",
-      "reviewNote": "6/8 본절8(4+4), 후렴8(2+4+2). 확대 원본에서 본절 못갖춘 두16분음표+8분음표=2개의8분음표 상당, 종지점4분음표+8분음표 붙임줄=4개를 확인. 후렴 못갖춘8분음표1개와 종지점4분음표+4분음표 붙임줄5개가 합해1마디. 오놀라운주 두 번까지2, 저천군부터나엎드려서주경배하리까지4, 마지막오놀라운구주예수2. 기존3블록 유지."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: preserve complete melodic phrases in 4+4 chorus slides, words/repeats unchanged."
     },
     {
       "versionId": "8c9d116c-780b-5c03-9938-127442d45056",
@@ -26240,7 +26270,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn351-370-paired",
-      "reviewNote": "4/4 본절11·후렴8. 못갖춘1박과 본절 최종3박을 합산. 본절 주를~독수리같이5, 모든싸움~벗은후2, 마지막올라가~독수리같이4. 새7+4/통5+6으로 기존 블록에 대응. 후렴4+4, 주의 못갖춘1박과 자/라 종지3박 포함. 괄호 응답은 같은 시간축이며 추가 가산하지 않음."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "cd6dc541-d60e-5f5b-ba94-96238af874e8",
@@ -26326,7 +26356,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn351-370-paired",
-      "reviewNote": "4/4 본절14. 앞 두 악구 각각4, 마지막 그어떤고난~드러내리라6(못갖춘1박+5온마디+종지3박). 새8+6/통4+4+6. 아멘1."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "10e34ff8-94c0-5b33-b460-dddcba98fb46",
@@ -26788,7 +26818,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn351-370-paired",
-      "reviewNote": "3/4 총24. 각 악구는 못갖춘1박+3온마디+종지2박=4. 새 악보 후렴 표시는 크신은혜를 앞에 있어 본절12(8+4)·후렴12(8+4). 통일판 후렴은 기도시간에 앞에 있어 본절16(4+4+4+4)·후렴8(4+4). 판본의 표시와 기존 단위 경계를 그대로 보존."
+      "reviewNote": "2026-10-23 natural phrase review: Paired score inspected: existing four-phrase screens retained."
     },
     {
       "versionId": "102cd0c0-b28e-4feb-a6d8-64fa8a283553",
@@ -27192,7 +27222,7 @@
       "versionId": "59a9c95e-c2de-5160-b56d-173f55639343",
       "edition": "new",
       "number": 367,
-      "classification": "4_bar_blocks",
+      "classification": "mixed_blocks",
       "stanzaApproxMeasures": 4,
       "reviewStatus": "score_supported_approximation",
       "parts": [
@@ -27283,7 +27313,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn351-370-paired",
-      "reviewNote": "5/4 본절4·6/8 후렴10. 본절 두 인쇄행 각2마디, 셋잇단음표 묶음을1박으로 계산. 후렴 첫행5마디·둘째행5마디, 마지막 붙임줄은 마지막2마디에 걸쳐 지속. 변박 구간을 분리해 기록하며 페르마타 추가 가산 없음."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "4243913f-56e2-50be-8393-85a9c9457cee",
@@ -27746,7 +27776,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "3/4 첫 인쇄행6(못갖춘1박+5온마디+끝2박), 둘째행7(못갖춘1박+6온마디+끝2박). 아멘2."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "b7ecc8c6-923d-5154-92f7-0747188daac7",
@@ -27831,7 +27861,7 @@
       "versionId": "d38986b2-8527-5e0a-9061-1064e87b0904",
       "edition": "new",
       "number": 375,
-      "classification": "4_bar_blocks",
+      "classification": "mixed_blocks",
       "stanzaApproxMeasures": 12,
       "reviewStatus": "score_supported_approximation",
       "parts": [
@@ -27896,7 +27926,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "3/4 세 인쇄행 각4. 새판 마지막 절에는 아멘2마디가 본절 끝에 포함돼 마지막 절의 둘째 블록만6. 통일판은 별도 Coda2. 가사·구조 변경 없이 현행 경계에 대응."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "c66268c4-be55-54c1-b4c9-34bc7549c357",
@@ -28034,7 +28064,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 첫 두행 각4, 셋째행4, 마지막 먹여주시옵소서 반복행2. 본절14, 새8+6/통4+4+4+2. 아멘1. 마지막 행을4마디로 추정하지 않음."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep short final repetition."
     },
     {
       "versionId": "13a433e3-73c0-4e05-9afa-c3c904f5cb2a",
@@ -28172,7 +28202,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-deferrals-recheck",
-      "reviewNote": "3/4. 첫 두 악구4+4.5, 뒤 두 악구4+3.5. 첫/마지막 1.5박 불완전 구간과 붙임줄을 포함해 본절16. 아멘 온마디2."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "92c782bd-1b11-4cbd-9a6f-5d1662675694",
@@ -28572,13 +28602,12 @@
         {
           "unitId": "2d8d7747-f905-4fd8-9cae-3533e808364a",
           "kind": "Verse",
-          "textSha256": "83d1beb171a9b3b5b5b2e30f1b50ef00b492d779de9dc579ff0d1250534c49f2",
-          "blockCount": 4,
+          "textSha256": "d62dc1baeb309dbab88b8640de945db59b19de938272169f289bfe983664e7f1",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
+            6,
             4,
-            4,
-            4,
-            2
+            4
           ],
           "approxMeasures": 14,
           "reviewStatus": "score_supported_approximation"
@@ -28586,13 +28615,12 @@
         {
           "unitId": "ef1ba659-4604-4231-8590-4453f83af095",
           "kind": "Verse",
-          "textSha256": "e8658c8009eccacf83a4f6cb2936e0b5844d19a01e8efdde394fb9f4b8dde82e",
-          "blockCount": 4,
+          "textSha256": "f391b88ab6e814178f3d75fbb834e0576d929aed19a2a14913d8d5aafcb28566",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
+            6,
             4,
-            4,
-            4,
-            2
+            4
           ],
           "approxMeasures": 14,
           "reviewStatus": "score_supported_approximation"
@@ -28600,11 +28628,11 @@
         {
           "unitId": "7242d56f-d19f-477c-85fa-6fab4b1f2fa4",
           "kind": "Verse",
-          "textSha256": "a103e6a38556fda4e97722eda66cfb08d335a66c39c6b8bc2bad8693ed5b622c",
+          "textSha256": "a885a649dd9a40365474c5b3c072967f8f6b882d492c7b81ada0aeb0a7cdf577",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            5,
-            5,
+            6,
+            4,
             4
           ],
           "approxMeasures": 14,
@@ -28613,13 +28641,12 @@
         {
           "unitId": "96c7dcc5-acaf-41e6-8757-c0de51389ddc",
           "kind": "Verse",
-          "textSha256": "f7556ae1b3fe4868d3c80e1a74bb84b286fde13fa2bbd27ef13a739394c7281d",
-          "blockCount": 4,
+          "textSha256": "4a80a9c0158861939530a63e01ece13782ab1370d7a2ba0e4d4041c201beb9dd",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
+            6,
             4,
-            4,
-            4,
-            2
+            4
           ],
           "approxMeasures": 14,
           "reviewStatus": "score_supported_approximation"
@@ -28644,7 +28671,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 첫행4·둘째행6·셋째행4, 본절14. 새블록10+4, 통일블록4+4+4+2. 아멘1."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: first three short phrases form 6-bar sentence; following 4+4 retained. Align all verses; do not isolate final predicate."
     },
     {
       "versionId": "5c0003b6-2a18-48b9-a805-269965566029",
@@ -29050,7 +29077,7 @@
       "versionId": "cb9d9bda-d202-456b-a3d1-9789468c2f1a",
       "edition": "new",
       "number": 391,
-      "classification": "4_bar_blocks",
+      "classification": "mixed_blocks",
       "stanzaApproxMeasures": 8,
       "reviewStatus": "score_supported_approximation",
       "parts": [
@@ -29124,7 +29151,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-deferrals-recheck",
-      "reviewNote": "6/8. 본절4+4, 후렴10. 메마른~아니하며4, 저위험한곳~덮으시네6. 인쇄 줄 끝 위험한곳의5개8분음표 상당량과 다음 줄 내가의16분음표2개가 같은 온마디. 동시 성부 중복 없음."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "b6b61a74-b970-5e45-8823-11a99a9e276d",
@@ -30713,7 +30740,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-deferrals-recheck",
-      "reviewNote": "4/4. 본절 첫7, 뒤6.75. 본절 끝 다의2박 뒤 내 영2박으로 후렴이 같은 마디에서 시작. 후렴 앞4·뒤4.25, 본절13.75+후렴8.25=22. 겹친 응답 성부는 중복 합산하지 않음."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "a81a8252-9eba-4899-8c5e-9ec4a5bd333e",
@@ -32875,13 +32902,13 @@
         {
           "unitId": "5dc8baa9-3de3-4b2a-8bf8-28034e4340a2",
           "kind": "Verse",
-          "textSha256": "78fd3848bdba2381d5d4083b65f0991eff86b69c6835e341895f07eb13f38070",
+          "textSha256": "9080a687f15902ceb85f29228c7c69fd2c221967fe5086a55bd855fd4af4d636",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
+            2,
             4,
-            3,
-            3
+            4
           ],
           "approxMeasures": 14,
           "reviewStatus": "score_supported_approximation"
@@ -32889,13 +32916,13 @@
         {
           "unitId": "08febb94-820d-4f8c-8d54-7fccd785490b",
           "kind": "Verse",
-          "textSha256": "4cc736033c640a26ca854d40ca3369918c5580036d77f79b6a19a864a919e56e",
+          "textSha256": "b942fb9512f84fe6999dc7524b0e79fce2e5467023b389cc8ccd2ac54ae60d95",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
+            2,
             4,
-            3,
-            3
+            4
           ],
           "approxMeasures": 14,
           "reviewStatus": "score_supported_approximation"
@@ -32903,13 +32930,13 @@
         {
           "unitId": "211d1e7f-0ec7-44c1-9d86-ba530c977243",
           "kind": "Verse",
-          "textSha256": "0b8cb79447689e366d978e55ca7b324c04b8ab9db6a371f781dd32c3f4440730",
+          "textSha256": "3a8d3f170a009dd238dfa0f648b0d1ab186599ef006d5398a4992caa3950c525",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
+            2,
             4,
-            3,
-            3
+            4
           ],
           "approxMeasures": 14,
           "reviewStatus": "score_supported_approximation"
@@ -32923,7 +32950,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-deferrals-recheck",
-      "reviewNote": "4/4 온마디14. 기존 블록 끝 마음즐겁다4, 문앞에서머무시는까지4, 주님영접해부터6. 괄호 응답은 동시 성부여서 추가하지 않음."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: keep 문 앞에서 머무시는 with 주님 영접해; corresponding verses aligned, response remains attached."
     },
     {
       "versionId": "ce2a6b90-efe0-59a3-8449-5421922c3295",
@@ -34456,7 +34483,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "Printed 4/4 score checked: two-quarter pickup; verse phrase lengths 5+4+4+3 bars; tied notes and polyphonic responses counted once. Amen one full bar."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "599c9cbb-6914-50b4-933e-e75cc7840e61",
@@ -34759,7 +34786,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-deferrals-recheck",
-      "reviewNote": "6/8. 본절의 높으신~낮은자를높여주심이요7, 부요한~하심이라7. 후렴8, 옥합을 한 온마디. 아멘 온마디2."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "b2e1cf79-6a1b-50c9-8d87-beb7cbaadbe2",
@@ -36193,7 +36220,7 @@
       "versionId": "a5680578-f4fa-40bb-8167-3e4122f7ba74",
       "edition": "new",
       "number": 488,
-      "classification": "4_bar_blocks",
+      "classification": "mixed_blocks",
       "stanzaApproxMeasures": 8,
       "reviewStatus": "score_supported_approximation",
       "parts": [
@@ -36266,7 +36293,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "3/4 verse two4-bar phrases, chorus three2-bar phrases including repeated final phrase; verse8 chorus6."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep short final repetition."
     },
     {
       "versionId": "b66f0664-078a-5123-8dbf-88508a8c1da8",
@@ -36769,11 +36796,11 @@
         {
           "unitId": "06bddecf-d625-4e8d-8cc9-37db02cf2129",
           "kind": "Chorus",
-          "textSha256": "3c55173d66a928e349f442e4917f53c9708bd12f648ba657a0a255dc338b820a",
+          "textSha256": "98fbea8046713c952012cb74f2d6fa07ce50eb9785c0d3214aea97ec49dbe189",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            5,
-            3
+            4,
+            4
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -36787,7 +36814,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-deferrals-recheck",
-      "reviewNote": "4/4 본절은1박 못갖춘과3박 종지가 합쳐 각4. 후렴 첫4마디 뒤 제단(1박)+숯불~대니(4박)+어찌~할까(3박)까지2마디; 주여 마지막1박부터 종지까지2마디. 총16."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: complete four-bar 보내 주소서 phrase then four-bar concluding sentence, preserving all response words."
     },
     {
       "versionId": "133e82c6-184e-4e42-8c8a-5087632f8d5f",
@@ -38322,7 +38349,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 pickup; verse four plus four plus two bars, chorus8."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep existing natural 4+4 stanza."
     },
     {
       "versionId": "8be23d40-52b3-58bd-b5bc-4e50576801cd",
@@ -40384,8 +40411,8 @@
           "textSha256": "75f1da09a21832520d9773aa4a6df8fd3f02c8522a7af21035eca53a822a6cd0",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            3,
-            3,
+            2,
+            4,
             4
           ],
           "approxMeasures": 10,
@@ -40397,8 +40424,8 @@
           "textSha256": "e8231f763843d6bf855879145172cc10e23dcc50f5721cbc3c1d10d2a3e44714",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            3,
-            3,
+            2,
+            4,
             4
           ],
           "approxMeasures": 10,
@@ -40410,8 +40437,8 @@
           "textSha256": "cfbacb94e5dbe7ad59a5ed2502e135855d3aa27f27281e6f6f21e375b243aa52",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            3,
-            3,
+            2,
+            4,
             4
           ],
           "approxMeasures": 10,
@@ -40423,8 +40450,8 @@
           "textSha256": "dd1c2450fd698238dc2dda1e95cda1cfb240197869f0588fabc809a7e2921f74",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            3,
-            3,
+            2,
+            4,
             4
           ],
           "approxMeasures": 10,
@@ -40451,7 +40478,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 full bars; verse10 (five 2-bar phrases), chorus8; existing block boundaries preserved."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: opening 2-bar call is independent; retain 2+4+4 phrases, align count across verses."
     },
     {
       "versionId": "694ef0c6-0cfa-5459-8b07-9c2e85f1fca5",
@@ -42151,7 +42178,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "Common-time full bars; four-bar first block and six-bar second block, verse10."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "0ca1d837-3385-464d-92d4-8d077186dab4",
@@ -43355,7 +43382,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 pickup and complementary closing bars; Verse eighteen, Amen one."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep short closing phrase."
     },
     {
       "versionId": "e1650fcd-da20-5572-8d86-4511f7d4a1d5",
@@ -43828,7 +43855,7 @@
       "versionId": "52367010-2871-4c31-9188-dd66eda3369d",
       "edition": "new",
       "number": 592,
-      "classification": "4_bar_blocks",
+      "classification": "mixed_blocks",
       "stanzaApproxMeasures": 8,
       "reviewStatus": "score_supported_approximation",
       "parts": [
@@ -43913,7 +43940,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "Printed 6/4 score inspected: two six-quarter bars per verse system (8 total); refrain 10 bars. Two dotted-half Amen notes form one 6/4 bar. Not counted in quarter-note 3/4 units."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep distinct two-bar declaration between longer phrases."
     },
     {
       "versionId": "7aa2ef72-de4a-4b9e-a68e-c1e8910555d7",
@@ -45940,7 +45967,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-final20-recheck",
-      "reviewNote": "4/4. 전주1.5마디 제외. 거룩한 시작부터 온땅 진입 직전9.375; 온8분음표부터 다음 오8분음표 직전8; 오부터 이4분음표 직전3.875; 마지막 이부터 종지4. 끝 쉼표 포함, 전체25.25."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "460ced10-aba1-50f8-9173-ea3d642120ee",
@@ -46125,7 +46152,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "Common-time score inspected: 17 bars including quarter pickup, internal rests, tied whole notes and final rests; existing single lyric block retained."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "c7dbee75-4d27-5c68-b020-031fc7291970",
@@ -46448,7 +46475,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-final20-recheck",
-      "reviewNote": "4/4 첫1박 진입+온마디14; 3/4 구간8마디 중 마지막 또1박은 다음 블록. 다음 블록은 또1/3+9/8 온마디7+12/8의2.25마디. 아멘은 마지막12/8 구간1.75마디. 총33.25; 박자별 한 마디를 기준으로 합산하며 재생 시간으로 환산하지 않음."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "c8fac05c-79cc-5e4c-8e47-07d678858c71",
@@ -46611,7 +46638,7 @@
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-slide-approx-final",
       "reviewDisposition": "reviewed",
-      "reviewNote": "현재 저장 슬라이드별 악구 구간의 정수 근사치. 정밀 음가·성부별 총합 또는 절별 종지 길이를 확정한 수치가 아님. 가사·송폼·반복·독립 아멘은 그대로 유지."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep user-curated choral/Amen boundaries retained."
     },
     {
       "versionId": "99b61048-aad9-5d8a-a616-f9e79523ba99",
@@ -46654,7 +46681,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "Printed common-time score inspected: sixteen total bars. Existing second verse block includes the first two Amen phrases; final Coda starts on beat two of penultimate bar. Block allocation 9.25 + 5 + 1.75 preserves current lyrics."
+      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
     },
     {
       "versionId": "7343aabc-a9d4-5622-9f05-ce8d18bc87a1",
@@ -46918,7 +46945,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 full measures; Verse six plus eight, Amen one."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "0ddedfd9-ad3f-4f1e-a720-83cc5c0aac23",
@@ -47085,7 +47112,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "Common-time pickup; Verse four plus six; final word repetition remains Verse."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "a6c07377-8935-58b7-a720-82f4a879f6bd",
@@ -47179,7 +47206,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "3/4 pickup; expanded final phrase; thirteen Verse."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "385d5df2-6d09-42c0-ad31-67188658ec0f",
@@ -48178,7 +48205,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "3/4 full measures; first two systems six measures each, remaining systems five and four; two Amen measures."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "35459546-9dbe-4980-81c6-5e8cdd5409d1",
@@ -48488,7 +48515,7 @@
       "versionId": "db221776-1a04-5692-b65d-249e00accace",
       "edition": "union",
       "number": 26,
-      "classification": "4_bar_blocks",
+      "classification": "mixed_blocks",
       "stanzaApproxMeasures": 8,
       "reviewStatus": "score_supported_approximation",
       "parts": [
@@ -48572,7 +48599,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 quarter pickups with complementary endings; Verse eight, Chorus six, Amen one."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "7219a3ec-b67e-5dee-a93c-6dea85fbeaf9",
@@ -48667,7 +48694,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 full measures; repeated final phrase adds two measures."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep complete repeated closing phrase."
     },
     {
       "versionId": "4a2feb70-7fe3-5823-b8b9-7f55429e7943",
@@ -49148,7 +49175,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-deferrals-recheck",
-      "reviewNote": "3/2. 첫 온2분음표2/6마디, 문구 종지 온음표4/6과 합산. 기존 본절 블록4+2(두 할렐루야)+4+2(하나님을찬양하라), 후렴4. 아멘 점온음표 온마디2. 동시 성부를 가산하지 않음."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep alternating Hallelujah response and body."
     },
     {
       "versionId": "9499487e-29c5-4bb3-874d-da376c3c946b",
@@ -49395,7 +49422,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 quarter pickups; Verse phrases four, five, five measures including repeated final phrase."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "a8a7d17f-ee72-4fa0-b0b8-de21973fb01d",
@@ -49485,7 +49512,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-final20-recheck",
-      "reviewNote": "3/4. 첫 주1박+온마디5+라2박=6. 다음 다1박+온마디6+서2박=7. 후렴 만1박부터 찬양 반복 끝까지7, 마지막 만유의주찬양3. 아멘2. 동시 하성부 응답은 더하지 않음."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: repeated opening and chorus response boundaries retained; no arithmetic-only split."
     },
     {
       "versionId": "6b62e880-05f6-521f-accc-cb51cc9ccfea",
@@ -49858,8 +49885,8 @@
       "versionId": "792fefad-0d60-4de9-a390-5dbf7649ba52",
       "edition": "union",
       "number": 43,
-      "classification": "8_bar_blocks",
-      "stanzaApproxMeasures": 16,
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 8,
       "reviewStatus": "score_supported_approximation",
       "parts": [
         {
@@ -49868,10 +49895,10 @@
           "textSha256": "6a82d0d967b3f7ee06a7e806b4ae0f5d4e8825644f6777e0265e8449f97f21a3",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            8,
-            8
+            4,
+            4
           ],
-          "approxMeasures": 16,
+          "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
         },
         {
@@ -49880,10 +49907,10 @@
           "textSha256": "0ddc913f887010d8f285500ba297a2b288bcf36ebebfca6bb5c0ebc684603d73",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            8,
-            8
+            4,
+            4
           ],
-          "approxMeasures": 16,
+          "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
         },
         {
@@ -49892,10 +49919,10 @@
           "textSha256": "b6904eea0e4c5db11d140f2e050e8343ba7e0e34f251caf655515fc0737d755a",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            8,
-            8
+            4,
+            4
           ],
-          "approxMeasures": 16,
+          "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
         },
         {
@@ -49904,25 +49931,23 @@
           "textSha256": "490c006de64db8d7e3465ec33d0bba325f4d857b97f8039a341eabb40a01e47f",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            8,
-            8
+            4,
+            4
           ],
-          "approxMeasures": 16,
+          "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation",
           "displayTextSha256": "e7308e8291210677945687e60950f73e91c89184fca58271aadaed3361a284ff"
         },
         {
           "unitId": "dcd7b921-1530-5972-a49e-b91bf7c92849",
           "kind": "Chorus",
-          "textSha256": "bc88234f7d8a27531e93111b440e04ef5a97b8eefb512f8a4e1e570219d2cfee",
-          "blockCount": 4,
+          "textSha256": "5a14cde8ac0918cab3002475320a137add00b4675035124418554f99da89e9cd",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
-            4,
-            4,
             4,
             4
           ],
-          "approxMeasures": 16,
+          "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
         }
       ],
@@ -49934,7 +49959,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 eighth pickups and complementary endings; Verse sixteen, Chorus sixteen."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: chorus paired into two natural 4-bar slides; Unified stanza count corrected to 4+4."
     },
     {
       "versionId": "e4ac2ce5-2d95-56c3-85e5-3672c6ddc4a6",
@@ -50319,7 +50344,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 full measures; first system eight, second system seven before Amen."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "ac971e8c-14b7-5bdc-be6d-08bc24a1738a",
@@ -50480,7 +50505,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "Enlarged Union score inspected: 4/4; half-note opening pickup. Second block ends with dotted half, third starts with quarter pickup, final phrase ends with half. Verse total 15."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "4f770f2a-1f69-5b55-b471-4eb9dc532999",
@@ -50534,7 +50559,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "Enlarged Union score inspected: 2/2; nine bars in first system, seven before two full-bar Amen notes in second system."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "6d566768-a60f-4eb5-a24e-3e77408d4a94",
@@ -50634,7 +50659,7 @@
         {
           "unitId": "5aacc657-a81f-5661-9ec5-05117cbb3329",
           "kind": "Verse",
-          "textSha256": "9cdc9703c0ef861637bbc61a98bfd63ecab24a1980f0601aeb56d75fa9636489",
+          "textSha256": "a2e6f585ceea243ab70457b3c630df172eb12ac7066549235c254b6211d9ff61",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             8,
@@ -50707,7 +50732,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "3/4 full measures; systems eight, eight, seven and five; Amen two."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: move 온 with 땅에 on same line; natural screen boundaries retained."
     },
     {
       "versionId": "5189e86f-603d-5489-bb1d-f0eb891e36ec",
@@ -50776,7 +50801,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 full measures; Verse phrases seven, seven and six."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "5abd7252-2596-4341-9aee-b9729a685f83",
@@ -51365,10 +51390,11 @@
         {
           "unitId": "f329c173-a35a-567e-b4a2-52f27c15c4dc",
           "kind": "Verse",
-          "textSha256": "e579dc01431e0e71425954c33896e37c7da8cc66a463c8c220c378c7309c5a3e",
-          "blockCount": 2,
+          "textSha256": "a2646eaa09a64acaf8cb8564a88f4e15c71a0453e92892baee1cd2fef18d5f41",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
-            8,
+            4,
+            4,
             2
           ],
           "approxMeasures": 10,
@@ -51377,10 +51403,11 @@
         {
           "unitId": "1967350c-e366-5811-8918-d45fa0b9bc28",
           "kind": "Verse",
-          "textSha256": "f48cf5eafccd12a3b2efc0eeb0859d42ace7edfa6fabfdb82a903c31a9f9abf6",
-          "blockCount": 2,
+          "textSha256": "9f658357fd98d0b62053be2b4e1847732b0db2c02436e2d701a4a70b1f6e4bc6",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
-            8,
+            4,
+            4,
             2
           ],
           "approxMeasures": 10,
@@ -51389,10 +51416,11 @@
         {
           "unitId": "379cd218-6306-51e9-a60e-e4677672f4ec",
           "kind": "Verse",
-          "textSha256": "4ddb932d4213a4f4bd1431ff266c23f1b285cab34fe78807645e9d76d79dd689",
-          "blockCount": 2,
+          "textSha256": "6f1af359d3e4d88117aac95a08e6d22fc1c5956288332d69b5f5d40381c1ce18",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
-            8,
+            4,
+            4,
             2
           ],
           "approxMeasures": 10,
@@ -51401,10 +51429,11 @@
         {
           "unitId": "bd719c0e-08b7-5de2-9f71-118800334016",
           "kind": "Verse",
-          "textSha256": "727d5b4543808c3d713e910662470416d24764c17a90eb8fdc407de97752871d",
-          "blockCount": 2,
+          "textSha256": "c9a81a7cd223359463e3552028537003b2e2221f02fc407f0bc1dd77f06bb9fe",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
-            8,
+            4,
+            4,
             2
           ],
           "approxMeasures": 10,
@@ -51413,10 +51442,11 @@
         {
           "unitId": "4cc9a3d0-411d-52ad-bca1-4b9dfeba8dd4",
           "kind": "Chorus",
-          "textSha256": "e2937245f31ac3d503989a9b04ac6099bc22672b6e0e34b5e440065c75b18e8e",
-          "blockCount": 2,
+          "textSha256": "f6bb3461842c8fbf65b86f8d3056acfcbc64c692bea494c090f7075fd770cdd4",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
-            8,
+            4,
+            4,
             2
           ],
           "approxMeasures": 10,
@@ -51442,7 +51472,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-final20-recheck",
-      "reviewNote": "6/4 온마디 본절10·후렴10·아멘1. 경배하라의 경은 앞 마디 마지막1박이므로 본절47/6+13/6. 후렴 만유의주 앞8마디와 뒤2마디를 분리; 끝 쉼표 포함."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: long opening split at complete phrases; 4+4+2 retains short cadence instead of five 2-bar pages."
     },
     {
       "versionId": "9909f418-4cca-5816-bc5b-d3bb401c4fa8",
@@ -51808,7 +51838,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 full measures; eight plus seven Verse measures."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "7d4dffe7-0a04-5752-bd54-5ad451095ee5",
@@ -52090,7 +52120,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-final20-recheck",
-      "reviewNote": "4/4. 본절 첫1박 진입과3박 종지로4+2. 후렴 십일조/우리/쌓을 진입을 해당 블록에 포함하여4+4+4+2. 동시 응답 중복 없음; 마지막 종지는3박."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep verse short cadence; chorus distinct lead/response phrases."
     },
     {
       "versionId": "2a55d556-69fd-4b0a-b84d-be28cedbb72b",
@@ -52172,7 +52202,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 full measures; first two systems six each, final pair eight."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "facc0bd3-482d-4d22-a957-8e8856a60fbb",
@@ -52631,7 +52661,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "3/4 full measures; first phrase six, second phrase eight."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "8ba02098-4b7d-53ea-a7ea-115bcca2dddf",
@@ -54468,7 +54498,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 full measures; Verse six plus eight measures, fourteen total."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "dbffdcd5-5402-5cb9-a43c-f82e3cb7c340",
@@ -54544,7 +54574,8 @@
         }
       ],
       "meter": "4/4",
-      "reviewNotes": "Visual printed-score and stored-block mapping. Verse12, union6+6; printed refrain7, separate Amen1. No additional repetitions generated."
+      "reviewNotes": "Visual printed-score and stored-block mapping. Verse12, union6+6; printed refrain7, separate Amen1. No additional repetitions generated.",
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "1179134e-7ee4-5931-8276-ec66adbd8961",
@@ -54672,7 +54703,8 @@
         }
       ],
       "meter": "2/2",
-      "reviewNotes": "Visual printed-score and stored-block mapping. Printed2/2 first two phrases5+5; remaining7. Union third stored block includes4.5 bars and final block2.5. Complementary half-measure pickups/endings combined. Separate Amen1."
+      "reviewNotes": "Visual printed-score and stored-block mapping. Printed2/2 first two phrases5+5; remaining7. Union third stored block includes4.5 bars and final block2.5. Complementary half-measure pickups/endings combined. Separate Amen1.",
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "14040f5c-c7ea-5a62-ad79-bd294f789433",
@@ -54821,7 +54853,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 full measures; three opening phrases total six, final pair four."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "4554058a-57ee-4770-b5ae-3c8bc19c1da5",
@@ -54906,7 +54938,8 @@
         }
       ],
       "meter": "6/8",
-      "reviewNotes": "Visual printed-score and stored-block mapping. Printed6/8 systems4+4+6, verse14. New8+6; union4+4+6. Separate Amen2."
+      "reviewNotes": "Visual printed-score and stored-block mapping. Printed6/8 systems4+4+6, verse14. New8+6; union4+4+6. Separate Amen2.",
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "46db5e62-c0dc-599d-a3d5-435797112413",
@@ -55251,11 +55284,12 @@
         {
           "unitId": "dff0b194-5ef3-55fc-b42f-6be6ef946a2a",
           "kind": "Verse",
-          "textSha256": "e13cdefbb61d8dc5b184cf1b05bab7e6a28247ab9904ae175ef79bb0246012cc",
-          "blockCount": 2,
+          "textSha256": "62585554a7e38f30bbdaf1a17b7d5891e889168120ccaee14fa0916de0d8547e",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
-            11,
-            8
+            7,
+            6,
+            6
           ],
           "approxMeasures": 19,
           "reviewStatus": "score_supported_approximation"
@@ -55276,11 +55310,12 @@
         {
           "unitId": "cb2031a2-0cd3-5fa9-8480-60783dc2a07d",
           "kind": "Verse",
-          "textSha256": "6c1d8421dca55398f203726925717a468cae9a70010e34926856716a815a8c1e",
-          "blockCount": 2,
+          "textSha256": "9d6699d393cef008a4d3c9c67d4d63ceefe1d18d2575906400d92f73bee9a2e2",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
-            11,
-            8
+            7,
+            6,
+            6
           ],
           "approxMeasures": 19,
           "reviewStatus": "score_supported_approximation"
@@ -55315,13 +55350,14 @@
           "path": "backups/20261018-union-review-remaining/score-115.jpg",
           "sha256": "f2386635aedd11a71a4f301d23cd5715d085b8dbcb0d603f6509e8df578ab0a1"
         }
-      ]
+      ],
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: verses 1/3 use same three natural screen boundaries as verses 2/4; repeats preserved."
     },
     {
       "versionId": "e7cfc4d7-8837-583e-b8bc-91a9e197a7a4",
       "edition": "union",
       "number": 116,
-      "classification": "8_bar_blocks",
+      "classification": "mixed_blocks",
       "stanzaApproxMeasures": 16,
       "reviewStatus": "score_supported_approximation",
       "parts": [
@@ -55403,13 +55439,14 @@
           "path": "backups/20261018-union-review-remaining/score-116.jpg",
           "sha256": "c0f26aa97c4d1e666f14135bfb9cc577de5345586f6b897681e345ba8ae3bdcd"
         }
-      ]
+      ],
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "d207bae4-4c07-5614-8393-160768964f66",
       "edition": "union",
       "number": 117,
-      "classification": "4_bar_blocks",
+      "classification": "mixed_blocks",
       "stanzaApproxMeasures": 12,
       "reviewStatus": "score_supported_approximation",
       "parts": [
@@ -55470,7 +55507,8 @@
           "path": "backups/20261018-union-review-remaining/score-117.jpg",
           "sha256": "6009b4f07ba6c4650b4fa59f319379a679118f745ee292fc70a03d86d6dafcd8"
         }
-      ]
+      ],
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "e75fc06f-5f1a-5f0a-b099-336185326b06",
@@ -56077,13 +56115,13 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 quarter pickup; block boundary before final repeated phrase pickup; Verse ten total."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "b2158e1d-16df-52a2-816f-747293159ec7",
       "edition": "union",
       "number": 125,
-      "classification": "4_bar_blocks",
+      "classification": "mixed_blocks",
       "stanzaApproxMeasures": 8,
       "reviewStatus": "score_supported_approximation",
       "parts": [
@@ -56154,7 +56192,8 @@
           "path": "backups/20261018-union-review-remaining/score-125.jpg",
           "sha256": "921dc2a6dceb502a1eca05db43cfef611e9eff10cede74d96f1cab49af269b8f"
         }
-      ]
+      ],
+      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep extended Gloria melisma and independent final Amen must remain whole."
     },
     {
       "versionId": "bec16771-0b8c-4362-a320-743251df56ff",
@@ -56962,7 +57001,8 @@
           "path": "backups/20261018-union-review-remaining/score-136.jpg",
           "sha256": "ea10f8b127575bd0c3ba428aa867dc7a3d7a9a32d849ed244dc613966c2a1ae5"
         }
-      ]
+      ],
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "01096f56-912c-56bb-bc17-d545566fd167",
@@ -58268,7 +58308,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 full measures; opening six, closing five measures."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "070d5cfb-7461-52ee-b463-fed1340c1f84",
@@ -58417,7 +58457,7 @@
       "edition": "union",
       "number": 156,
       "classification": "mixed_blocks",
-      "stanzaApproxMeasures": 7,
+      "stanzaApproxMeasures": 15,
       "reviewStatus": "score_supported_approximation",
       "parts": [
         {
@@ -58498,7 +58538,8 @@
         }
       ],
       "reviewedAt": "2026-10-22",
-      "reviewBatch": "hymn151-170-paired"
+      "reviewBatch": "hymn151-170-paired",
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: existing separate intro and body screens retained; no form changes."
     },
     {
       "versionId": "4b50ca56-5506-4551-9d31-2575b6c0dbbc",
@@ -59125,12 +59166,11 @@
         {
           "unitId": "f3419a98-b28c-5829-a843-9ef01687a9b9",
           "kind": "Chorus",
-          "textSha256": "3c3c1dc43a260ccbbc1f9ca7fe4fd125d2b08d574585e10e80b11007bb1946f6",
-          "blockCount": 3,
+          "textSha256": "9cbe6b83c6152473995d974f173a423fe4ec86cb65722ab9a816b872d78c5377",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
-            2,
             4,
-            2
+            4
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -59154,7 +59194,8 @@
         }
       ],
       "reviewedAt": "2026-10-22",
-      "reviewBatch": "hymn171-190-paired"
+      "reviewBatch": "hymn171-190-paired",
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: preserve complete melodic phrases in 4+4 chorus slides, words/repeats unchanged."
     },
     {
       "versionId": "7a4c2417-72dc-5a35-ad2f-e413bb559b07",
@@ -59920,7 +59961,7 @@
       ],
       "reviewedAt": "2026-10-22",
       "reviewBatch": "hymn191-210-paired",
-      "reviewNote": "3/4 첫 저장 블록은 두 악구3+3=6, 둘째 블록7. 본절13·아멘2. 새196과 총수 동일, 저장 블록만 다름."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "88b62fdf-29ad-4bff-ba29-4ce7bc723da7",
@@ -60326,7 +60367,7 @@
       ],
       "reviewedAt": "2026-10-22",
       "reviewBatch": "hymn171-190-paired",
-      "reviewNote": "3/4 본절8+7, 후렴8+7. 마지막 성령이 오셨네는 못갖춘1박+두 완전마디+끝2박=3마디이므로 전체15. 16마디로 강제하지 않음."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "7620d789-1891-4e75-9702-cfe75d29d039",
@@ -61327,7 +61368,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn291-310-paired",
-      "reviewNote": "6/8 본절14. 첫 양의8분음표1개부터 울안에있으나까지4, 다음 한마리부터헤매네까지4. 산높고길은험한데 목자를멀리떠났네까지4, 마지막 목자를멀리떠났네2. 새8+6/통4+4+4+2. 마지막 반복을 생략하거나 별도 후렴으로 분리하지 않음."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep short final repetition."
     },
     {
       "versionId": "84e88455-1e98-5a03-974e-4fc2728adb2e",
@@ -62510,18 +62551,20 @@
       "versionId": "ff6308aa-fcb2-5ab4-9a30-ea3cbb103ab2",
       "edition": "union",
       "number": 207,
-      "classification": "8_bar_blocks",
+      "classification": "4_bar_blocks",
       "stanzaApproxMeasures": 16,
       "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "e31afd58-f695-562d-81e2-2090f55e9c2b",
           "kind": "Verse",
-          "textSha256": "ebacdbcdb04e913e03e5f907c111730186811df621f1b9d0215324e52f6a69db",
-          "blockCount": 2,
+          "textSha256": "66d9c4a4f3d08d2400b1c784865c3e654cdc07b0dd6ada7f9c3a3c91a3ad343d",
+          "blockCount": 4,
           "approxMeasuresByBlock": [
-            8,
-            8
+            4,
+            4,
+            4,
+            4
           ],
           "approxMeasures": 16,
           "reviewStatus": "score_supported_approximation"
@@ -62529,11 +62572,13 @@
         {
           "unitId": "b9a8670f-2efa-5acb-8ce1-f8e8fc9ea315",
           "kind": "Verse",
-          "textSha256": "51aba4c4d2ec0e6003b1cad695499b95b6248cb9104e2b1e10c18acd0702fb99",
-          "blockCount": 2,
+          "textSha256": "9b9c4aa64db29afcb3215c74079cffc247d5ece6a25b7a27d4f3fcdb718fa890",
+          "blockCount": 4,
           "approxMeasuresByBlock": [
-            8,
-            8
+            4,
+            4,
+            4,
+            4
           ],
           "approxMeasures": 16,
           "reviewStatus": "score_supported_approximation"
@@ -62541,11 +62586,13 @@
         {
           "unitId": "663feca7-7ec9-52dd-9ece-db86906cd9cb",
           "kind": "Verse",
-          "textSha256": "25b221b5e96f151f7ad554ebb037b21251d573b0ea007f5759865d9463696ce1",
-          "blockCount": 2,
+          "textSha256": "af5229c457acae847e05af059acb03dcf84430c6ced1d35554ecf50e20ee1e23",
+          "blockCount": 4,
           "approxMeasuresByBlock": [
-            8,
-            8
+            4,
+            4,
+            4,
+            4
           ],
           "approxMeasures": 16,
           "reviewStatus": "score_supported_approximation"
@@ -62553,11 +62600,11 @@
         {
           "unitId": "84a89f53-9b3b-56ea-a2bd-9b9c097e943c",
           "kind": "Chorus",
-          "textSha256": "43fb963ea8dbdfe26adf8f0716d27e36ae263b91fc7d3e6c87044c59b43c8975",
+          "textSha256": "25c070b37882327711f1d5fb7d34b75de41235d53e92a55e135980dd7222c610",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            6,
-            2
+            4,
+            4
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -62571,7 +62618,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "Enlarged Union score inspected: 3/4; quarter verse pickup, full last verse bar including rest (49/3). Refrain full start and half-note ending (23/3); existing last block contains only final phrase."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: stanza long 8-bar pages split into 4-bar phrases; chorus complete 4+4, no stranded ending."
     },
     {
       "versionId": "b26f5f33-ee0e-43e7-877d-600c147e0d30",
@@ -63830,12 +63877,11 @@
         {
           "unitId": "bab663b9-ba47-5a65-8c51-4f52592af34d",
           "kind": "Chorus",
-          "textSha256": "7cea2ee431617f29b30c296717a02d8a88894b6bc52a739098ddb0b5424e64f1",
-          "blockCount": 3,
+          "textSha256": "4b066e212010fd05467b2a90309a1d2d63faf499c0b0628bce867e4f63f19cb8",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
-            2,
             4,
-            2
+            4
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -63849,7 +63895,7 @@
       ],
       "reviewedAt": "2026-10-22",
       "reviewBatch": "hymn231-250-deferrals",
-      "reviewNote": "4/4 본절8·후렴8. 본절 끝 에는 점2분음표. 새 본절4+4/통2+3+3, 후렴 새2+4+2/통2+3+3. 왕의 및 새 예루살렘의 앞 마디 마지막 박에서 시작하는 블록 경계를 반영."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: preserve complete melodic phrases in 4+4 chorus slides, words/repeats unchanged."
     },
     {
       "versionId": "165357f1-1458-4a01-b641-de9fa0874387",
@@ -63910,12 +63956,11 @@
         {
           "unitId": "a3e2169a-b8a5-5dc5-98f2-92d98903af07",
           "kind": "Chorus",
-          "textSha256": "18dd37e36009bbcd50df2afd3a0d2912a070a0bd2ffdb86246f081a25f51f495",
-          "blockCount": 3,
+          "textSha256": "89cc4852320c61e5490a2400eb4273e979164d07ff46cee3e68b8a4456e6b1f6",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
-            2,
-            2
+            4
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -63929,7 +63974,7 @@
       ],
       "reviewedAt": "2026-10-22",
       "reviewBatch": "hymn231-250-deferrals",
-      "reviewNote": "4/4 본절8·후렴8. 본절 새4+4/통2+3+3. 후렴 구속 시작은 여섯 번째 마디 마지막 박: 새6+2/통4+2+2. 끝 점2분음표와 못갖춘1박 합산, 괄호 하성 응답 중복 가산 없음."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: preserve complete melodic phrases in 4+4 chorus slides, words/repeats unchanged."
     },
     {
       "versionId": "f2a0e6b3-0841-53ca-93ee-800d348385d1",
@@ -64000,7 +64045,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 quarter pickup; block boundary at new full measure after 언제 그치고; ten Verse measures."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "21e74158-23d3-4733-a392-9bfba2fab500",
@@ -64049,12 +64094,11 @@
         {
           "unitId": "a15170b6-42be-5b2e-a13e-fcd74b33cf6c",
           "kind": "Chorus",
-          "textSha256": "737ba4ce46f397d76122ad4eed8a88786283dc1db8d9c059ea91fbb0e83c0509",
-          "blockCount": 3,
+          "textSha256": "b7d33d0f41c522059c33f07adcd8efa16fc70f9c3b3a4e0eb3c8a802b49390a3",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
-            2,
-            3,
-            3
+            4,
+            4
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -64068,7 +64112,7 @@
       ],
       "reviewedAt": "2026-10-22",
       "reviewBatch": "hymn231-250-deferrals",
-      "reviewNote": "4/4 본절8·후렴8. 인쇄 행 경계 대신 실제 마디선을 따라 합산. 본절 새4+4/통2+3+3, 후렴 새2+4+2/통2+3+3. 종지 다는 점2분음표이며 하성 응답을 중복 가산하지 않음."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: preserve complete melodic phrases in 4+4 chorus slides, words/repeats unchanged."
     },
     {
       "versionId": "77736c5b-8070-5c07-850f-b8d9a4f10bdc",
@@ -64134,7 +64178,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 quarter pickup and complementary ending; Verse fourteen measures."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "86b71b9f-14f1-4c3e-9de8-f1fe276ae7f0",
@@ -64302,7 +64346,7 @@
       "versionId": "5e47bf26-a8c3-4f25-92ba-ccd7a434ad66",
       "edition": "union",
       "number": 230,
-      "classification": "4_bar_blocks",
+      "classification": "mixed_blocks",
       "stanzaApproxMeasures": 8,
       "reviewStatus": "score_supported_approximation",
       "parts": [
@@ -64386,7 +64430,7 @@
       ],
       "reviewedAt": "2026-10-22",
       "reviewBatch": "hymn231-250-deferrals",
-      "reviewNote": "6/8 본절 첫 악구4, 둘째25/6(못갖춘1/6+온마디3+종지 점2분음표1)=49/6. 8로 반올림하지 않음. 후렴6, 통일 블록은 가까운의 까가 네 번째 마디 마지막8분음표에서 시작하여23/6+13/6. 아멘2. 새·통 원본의 동일 종지 음가 확인."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep short closing phrase."
     },
     {
       "versionId": "fe8bec2f-d63a-5850-a870-759ab333c989",
@@ -64565,7 +64609,7 @@
       ],
       "reviewedAt": "2026-10-22",
       "reviewBatch": "hymn231-250-deferrals",
-      "reviewNote": "3/4 본절24. 못갖춘1박+인쇄 행의 온마디5+7+6+5개+종지2박=72박. 새 블록7+10+7/통7+7+7+3. 반복 고난 풍파와 무궁한 경계의 마지막 박을 다음 블록에 귀속. 아멘2."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "dca2e3c2-7248-4a7b-b7b6-d349f2378ae7",
@@ -67085,60 +67129,56 @@
       "versionId": "97933c11-e687-4323-9d0a-be477ce9989b",
       "edition": "union",
       "number": 265,
-      "classification": "mixed_blocks",
-      "stanzaApproxMeasures": 10,
+      "classification": "4_bar_blocks",
+      "stanzaApproxMeasures": 8,
       "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "41678fec-1c20-58a5-aa4e-69c90166e620",
           "kind": "Verse",
-          "textSha256": "d0420d0a9bf1fd1e412d62e8b5f1f488c293ddeb650238a2960fc7491805642d",
-          "blockCount": 3,
+          "textSha256": "39767a18b7a547a40a20525a5fdea3aa90adc735844bc004b747c6f163a8a845",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
-            4,
-            2
+            4
           ],
-          "approxMeasures": 10,
+          "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "ab2c0ad7-db27-52fe-aae7-1ab10c37876c",
           "kind": "Verse",
-          "textSha256": "2522eb189f8f0289a72bf3693ae9fe210493cf81ca023ef32659d3653df29b19",
-          "blockCount": 3,
+          "textSha256": "aa197fc36cf5759d4fdfcc1f469cff2a1cfb930956eb13de1aa55310ea99865f",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
-            4,
-            2
+            4
           ],
-          "approxMeasures": 10,
+          "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "191c4ec9-402b-5323-b487-e7f51e79f96b",
           "kind": "Verse",
-          "textSha256": "c3d54a15cbcea6a419be5eff8e928de0cf46bddb4941ff3d95c7cf5f1849cc9a",
-          "blockCount": 3,
+          "textSha256": "517f17e5db90fd7bf1a5f4176742d29f47e5975672b798739c27ce98a2ccfc25",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
-            4,
-            2
+            4
           ],
-          "approxMeasures": 10,
+          "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "970b42e6-4deb-532c-af3e-34e8fd3f9aa3",
           "kind": "Verse",
-          "textSha256": "498f6abb882c556588ef196d80bd0024e96816bfefa97645e439d7d715bdfca9",
-          "blockCount": 3,
+          "textSha256": "33ccd0bb7dd3df97fad04b9c3d8c1fce4f9fd99f8485df45809f3f0c936ed771",
+          "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
-            4,
-            2
+            4
           ],
-          "approxMeasures": 10,
+          "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
         },
         {
@@ -67162,7 +67202,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 pickup; verse four plus four plus two bars, chorus8. Linked Union score separately inspected; block allocation follows this edition."
+      "reviewNote": "2026-10-23 natural phrase review: Paired with New516 score: stanza 8 bars; same natural 4+4 phrases. Previous 10-bar metadata incorrect."
     },
     {
       "versionId": "6d9673fd-ee71-479e-858e-1508bf9c17c2",
@@ -67574,11 +67614,11 @@
         {
           "unitId": "5e4aa7ef-8d0b-5579-aead-ab50be53252b",
           "kind": "Chorus",
-          "textSha256": "3c55173d66a928e349f442e4917f53c9708bd12f648ba657a0a255dc338b820a",
+          "textSha256": "98fbea8046713c952012cb74f2d6fa07ce50eb9785c0d3214aea97ec49dbe189",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            5,
-            3
+            4,
+            4
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -67592,7 +67632,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-deferrals-recheck",
-      "reviewNote": "4/4 본절은1박 못갖춘과3박 종지가 합쳐 각4. 후렴 첫4마디 뒤 제단(1박)+숯불~대니(4박)+어찌~할까(3박)까지2마디; 주여 마지막1박부터 종지까지2마디. 총16. 통일판은 대니 뒤 블록 경계라 후렴5.25+2.75."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: complete four-bar 보내 주소서 phrase then four-bar concluding sentence, preserving all response words."
     },
     {
       "versionId": "9d4d168c-6060-5851-a775-503bd83e6d61",
@@ -68229,7 +68269,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "3/4 quarter pickup and half-note endings; first system six, second seven."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "379f0c43-9224-54c4-902e-be5417c17eff",
@@ -70484,7 +70524,7 @@
       "versionId": "5d9f02f9-98c2-47bd-8a2a-8f3ad2cae815",
       "edition": "union",
       "number": 311,
-      "classification": "4_bar_blocks",
+      "classification": "mixed_blocks",
       "stanzaApproxMeasures": 8,
       "reviewStatus": "score_supported_approximation",
       "parts": [
@@ -70571,7 +70611,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "Printed 6/4 score inspected: two six-quarter bars per verse system (8 total); refrain 10 bars. Two dotted-half Amen notes form one 6/4 bar. Not counted in quarter-note 3/4 units."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep distinct two-bar declaration between longer phrases."
     },
     {
       "versionId": "96014a79-9826-45ef-a1ef-c7e31431fdff",
@@ -72786,7 +72826,7 @@
       ],
       "reviewedAt": "2026-10-22",
       "reviewBatch": "hymn271-290-paired",
-      "reviewNote": "3/4 본절18. 못갖춘1박+17온마디51박+끝붙임줄2분음표2박=54박. 마지막 갑·니·다의 점2분음표와 붙임줄 종지를 모두 포함. 새1블록18/통 첫 주시고까지8·나머지10. 아멘2. 두 판본 모두 종지 확장 확인."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "800496d2-2e53-53bc-9371-d6e49479a9d2",
@@ -73040,8 +73080,8 @@
           "textSha256": "103c99eea4be84a1fbbef288d93da1c4b3b4f0f0c8e4a399c7a1f2e9a5fe5153",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            3,
-            3,
+            2,
+            4,
             4
           ],
           "approxMeasures": 10,
@@ -73053,8 +73093,8 @@
           "textSha256": "e8231f763843d6bf855879145172cc10e23dcc50f5721cbc3c1d10d2a3e44714",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            3,
-            3,
+            2,
+            4,
             4
           ],
           "approxMeasures": 10,
@@ -73066,8 +73106,8 @@
           "textSha256": "cfbacb94e5dbe7ad59a5ed2502e135855d3aa27f27281e6f6f21e375b243aa52",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            3,
-            3,
+            2,
+            4,
             4
           ],
           "approxMeasures": 10,
@@ -73107,7 +73147,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 full bars; verse10 (five 2-bar phrases), chorus8; existing block boundaries preserved. Linked Union score separately inspected; block allocation follows this edition."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: opening 2-bar call is independent; retain 2+4+4 phrases, align count across verses."
     },
     {
       "versionId": "53121a43-f779-5286-81b0-f06b8a8707be",
@@ -76242,7 +76282,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 pickup and complementary closing bars; Verse eighteen, Amen one. Linked Union score separately inspected; block allocation follows this edition."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep short closing phrase."
     },
     {
       "versionId": "cdcb9c6f-cba2-5959-b154-e78fc7e2f300",
@@ -76394,7 +76434,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn351-370-paired",
-      "reviewNote": "4/4 본절14. 앞 두 악구 각각4, 마지막 그어떤고난~드러내리라6(못갖춘1박+5온마디+종지3박). 새8+6/통4+4+6. 아멘1."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "38791318-b325-54aa-9045-f00b5795e786",
@@ -77047,7 +77087,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn351-370-paired",
-      "reviewNote": "4/4 본절11·후렴8. 못갖춘1박과 본절 최종3박을 합산. 본절 주를~독수리같이5, 모든싸움~벗은후2, 마지막올라가~독수리같이4. 새7+4/통5+6으로 기존 블록에 대응. 후렴4+4, 주의 못갖춘1박과 자/라 종지3박 포함. 괄호 응답은 같은 시간축이며 추가 가산하지 않음."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "8b571be9-c7b8-465e-a252-ffede095c53c",
@@ -78859,7 +78899,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn291-310-paired",
-      "reviewNote": "3/4 본절13. 하나님사랑은온전한참사랑의 첫 인쇄행6온마디, 내맘에부터하소서까지7온마디. 새13/통6+7. 아멘점2분음표 두 개2마디. 4/8/16마디에 맞춰 강제하지 않음."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "c8baaafa-cd3c-549d-aea4-6cb2eec96da5",
@@ -79665,7 +79705,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-deferrals-recheck",
-      "reviewNote": "3/4. 첫 두 악구4+4.5, 뒤 두 악구4+3.5. 첫/마지막 1.5박 불완전 구간과 붙임줄을 포함해 본절16. 아멘 온마디2. 통일판 악보 별도 대조."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "a9de0b43-cbad-4186-a627-c922898a8a9b",
@@ -80033,13 +80073,12 @@
         {
           "unitId": "7826e287-2449-574b-9e42-764396611c3d",
           "kind": "Verse",
-          "textSha256": "2accd313d0b8b3ba35890ecc918f53c0e8508f087684d7e0a1ebc16e63ddf218",
-          "blockCount": 4,
+          "textSha256": "725fedd47bf8122f87ee0f79d3bdeaf44d325432f22b9c986c2b325aee517bd1",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
+            6,
             4,
-            4,
-            4,
-            2
+            4
           ],
           "approxMeasures": 14,
           "reviewStatus": "score_supported_approximation"
@@ -80047,13 +80086,12 @@
         {
           "unitId": "83791e0f-7c48-51ac-b43e-ec59ea269910",
           "kind": "Verse",
-          "textSha256": "e8658c8009eccacf83a4f6cb2936e0b5844d19a01e8efdde394fb9f4b8dde82e",
-          "blockCount": 4,
+          "textSha256": "f391b88ab6e814178f3d75fbb834e0576d929aed19a2a14913d8d5aafcb28566",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
+            6,
             4,
-            4,
-            4,
-            2
+            4
           ],
           "approxMeasures": 14,
           "reviewStatus": "score_supported_approximation"
@@ -80061,13 +80099,12 @@
         {
           "unitId": "838cdbc9-93ee-5fa2-8502-329c8c024843",
           "kind": "Verse",
-          "textSha256": "17f5a25982a8ce226ac098111ee5b6e6616b63c249a25511483ece282ba8f9f2",
-          "blockCount": 4,
+          "textSha256": "70a9a51aee0f91f591ee7af5ef4a915bcfd30365c71e75587e9b369c3cfda47f",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
+            6,
             4,
-            4,
-            4,
-            2
+            4
           ],
           "approxMeasures": 14,
           "reviewStatus": "score_supported_approximation"
@@ -80075,13 +80112,12 @@
         {
           "unitId": "39181a8c-3f53-5d37-992e-3026d5bf016d",
           "kind": "Verse",
-          "textSha256": "f7556ae1b3fe4868d3c80e1a74bb84b286fde13fa2bbd27ef13a739394c7281d",
-          "blockCount": 4,
+          "textSha256": "4a80a9c0158861939530a63e01ece13782ab1370d7a2ba0e4d4041c201beb9dd",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
+            6,
             4,
-            4,
-            4,
-            2
+            4
           ],
           "approxMeasures": 14,
           "reviewStatus": "score_supported_approximation"
@@ -80106,7 +80142,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 첫행4·둘째행6·셋째행4, 본절14. 새블록10+4, 통일블록4+4+4+2. 아멘1. Linked Union score separately inspected; block allocation follows this edition."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: first three short phrases form 6-bar sentence; following 4+4 retained. Align all verses; do not isolate final predicate."
     },
     {
       "versionId": "7f5f19b8-565d-57df-84d0-dc8ce3279d9b",
@@ -80963,7 +80999,7 @@
       "versionId": "e44528b3-c3d1-427b-8a71-f5c5925e43fd",
       "edition": "union",
       "number": 446,
-      "classification": "4_bar_blocks",
+      "classification": "mixed_blocks",
       "stanzaApproxMeasures": 8,
       "reviewStatus": "score_supported_approximation",
       "parts": [
@@ -81037,7 +81073,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-deferrals-recheck",
-      "reviewNote": "6/8. 본절4+4, 후렴10. 메마른~아니하며4, 저위험한곳~덮으시네6. 인쇄 줄 끝 위험한곳의5개8분음표 상당량과 다음 줄 내가의16분음표2개가 같은 온마디. 동시 성부 중복 없음. 통일판은 주손으로덮으시네를 별도2마디 블록으로 두어4+4+2."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "92a6c33a-de90-4e52-912a-5146491e475f",
@@ -81415,59 +81451,56 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "4/4 첫 두행 각4, 셋째행4, 마지막 먹여주시옵소서 반복행2. 본절14, 새8+6/통4+4+4+2. 아멘1. 마지막 행을4마디로 추정하지 않음. Linked Union score separately inspected; block allocation follows this edition."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep short final repetition."
     },
     {
       "versionId": "14c60609-928d-50e4-9089-08372474399a",
       "edition": "union",
       "number": 452,
       "classification": "mixed_blocks",
-      "stanzaApproxMeasures": 21,
+      "stanzaApproxMeasures": 19,
       "reviewStatus": "score_supported_approximation",
       "parts": [
         {
           "unitId": "874d9134-e60f-5780-aeaa-70f5543ac783",
           "kind": "Verse",
-          "textSha256": "d2ab28d981a5a1557418ca3d5056b9c21533be6531db8a25f782b055a8718988",
-          "blockCount": 5,
+          "textSha256": "d11d6bf878cff4d8211d67affbbb14ac896c9408747a2c629bcf400e05d331cd",
+          "blockCount": 4,
           "approxMeasuresByBlock": [
+            6,
+            6,
             4,
-            4,
-            4,
-            5,
-            4
+            3
           ],
-          "approxMeasures": 21,
+          "approxMeasures": 19,
           "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "78563dab-6d1a-5a3a-a133-19cdde3f05ba",
           "kind": "Verse",
-          "textSha256": "58404d1a21d5312a87d6afd74173d7a60dc8713f1e41409f8c1a6f4550636ef9",
-          "blockCount": 5,
+          "textSha256": "ce2334d571c2562d7ae0fc48bb285018f2ab1c02a73a424f50ebb32dda2a2df2",
+          "blockCount": 4,
           "approxMeasuresByBlock": [
+            6,
+            6,
             4,
-            4,
-            4,
-            5,
-            4
+            3
           ],
-          "approxMeasures": 21,
+          "approxMeasures": 19,
           "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "a2a62d40-f389-52dd-87c7-c5ce061d319c",
           "kind": "Verse",
-          "textSha256": "d5f52b1074b56536e274c066a57939da5147ede0ddeb1141ecff99277f66b750",
-          "blockCount": 5,
+          "textSha256": "62a5d4feb6735ea1e7ab58db8d588fd94223d84d3c39a17ccf1c6a9a52a5ce01",
+          "blockCount": 4,
           "approxMeasuresByBlock": [
+            6,
+            6,
             4,
-            4,
-            4,
-            5,
-            4
+            3
           ],
-          "approxMeasures": 21,
+          "approxMeasures": 19,
           "reviewStatus": "score_supported_approximation"
         },
         {
@@ -81489,7 +81522,8 @@
         }
       ],
       "meter": "4/4",
-      "reviewNotes": "Paired printed-edition review; all existing stored verse blocks mapped without changing lyrics, forms or IDs. 4/4 score systems 4+5+5+6. Union final two stored blocks meet halfway through a bar, 4.5+3.5."
+      "reviewNotes": "Paired printed-edition review; all existing stored verse blocks mapped without changing lyrics, forms or IDs. 4/4 score systems 4+5+5+6. Union final two stored blocks meet halfway through a bar, 4.5+3.5.",
+      "reviewNote": "2026-10-23 natural phrase review: Printed score: six-bar opening sentences kept complete; following four-bar phrase and short final cadence. Align all verses and editions."
     },
     {
       "versionId": "c3a5d60d-b48e-4240-9dd5-b76d311603a2",
@@ -82830,7 +82864,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-deferrals-recheck",
-      "reviewNote": "4/4. 본절 첫7, 뒤6.75. 본절 끝 다의2박 뒤 내 영2박으로 후렴이 같은 마디에서 시작. 후렴 앞4·뒤4.25, 본절13.75+후렴8.25=22. 겹친 응답 성부는 중복 합산하지 않음. 통일판 악보 별도 대조."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "89e8b975-f315-561b-a7bb-a0f1cb8fae6f",
@@ -83473,7 +83507,7 @@
       "versionId": "8299ff24-623a-44e7-bf4e-43a879990486",
       "edition": "union",
       "number": 480,
-      "classification": "4_bar_blocks",
+      "classification": "mixed_blocks",
       "stanzaApproxMeasures": 16,
       "reviewStatus": "score_supported_approximation",
       "parts": [
@@ -83508,16 +83542,16 @@
         {
           "unitId": "ebfdd386-a7ac-5a9d-8d58-2addc6c6e7e1",
           "kind": "Verse",
-          "textSha256": "1564ef9586ef15303696fa902bd5c5fbe7044e9650a5986c7de1633e75ac3ac9",
-          "blockCount": 3,
+          "textSha256": "a61ab7385b104b450dfe7e08b098db4a32891617bc4b7a0dbc873249c5a3007e",
+          "blockCount": 4,
           "approxMeasuresByBlock": [
-            6,
-            5,
-            5
+            4,
+            4,
+            4,
+            4
           ],
           "approxMeasures": 16,
-          "reviewStatus": "score_supported_approximation",
-          "displayTextSha256": "f4784905099ea3a46b628efa4e414e65aeadb058bada64afcbcc7f35b0cdfd26"
+          "reviewStatus": "score_supported_approximation"
         },
         {
           "unitId": "79843cc3-a54d-500d-8c88-289a73d2e971",
@@ -83554,7 +83588,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn351-370-paired",
-      "reviewNote": "3/4 총24. 각 악구는 못갖춘1박+3온마디+종지2박=4. 새 악보 후렴 표시는 크신은혜를 앞에 있어 본절12(8+4)·후렴12(8+4). 통일판 후렴은 기도시간에 앞에 있어 본절16(4+4+4+4)·후렴8(4+4). 판본의 표시와 기존 단위 경계를 그대로 보존."
+      "reviewNote": "2026-10-23 natural phrase review: Score paired with New361: align third verse with four complete phrases used by the other verses; words unchanged."
     },
     {
       "versionId": "763fe134-dc57-4c54-a2a4-4320b28570e8",
@@ -85206,7 +85240,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "Union printed score visually inspected: 6/8; full bars, four systems contain 4+4+4+6 bars. Existing lyric blocks preserved."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "5a738d21-f2fe-5a57-8a7d-fd08f16ff679",
@@ -85351,7 +85385,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "3/4 첫 인쇄행6(못갖춘1박+5온마디+끝2박), 둘째행7(못갖춘1박+6온마디+끝2박). 아멘2. Linked Union score separately inspected; block allocation follows this edition."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "6209e904-b2f3-5055-8de8-19c7e88765aa",
@@ -86447,7 +86481,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "Printed 4/4 score checked: two-quarter pickup; verse phrase lengths 5+4+4+3 bars; tied notes and polyphonic responses counted once. Amen one full bar."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "2742d951-5139-5a0b-bad5-b77abb932922",
@@ -86977,7 +87011,7 @@
       ],
       "reviewedAt": "2026-10-22",
       "reviewBatch": "hymn211-230-paired",
-      "reviewNote": "3/4 본절13. 첫 못갖춘1박과 마지막2박을 합산. 새판 한 블록13, 통525 두 블록6+7."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
     },
     {
       "versionId": "898cee1e-b0f0-5fcc-8b7b-a440266d27ab",
@@ -87928,7 +87962,7 @@
       "versionId": "7da73860-6295-4af6-8fc9-a782e5cf626f",
       "edition": "union",
       "number": 539,
-      "classification": "4_bar_blocks",
+      "classification": "mixed_blocks",
       "stanzaApproxMeasures": 8,
       "reviewStatus": "score_supported_approximation",
       "parts": [
@@ -88001,7 +88035,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-remaining",
-      "reviewNote": "3/4 verse two4-bar phrases, chorus three2-bar phrases including repeated final phrase; verse8 chorus6. Linked Union score separately inspected; block allocation follows this edition."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep short final repetition."
     },
     {
       "versionId": "dcda8199-a296-5b0d-bb79-94f0fdb7fa97",
@@ -88464,7 +88498,7 @@
         {
           "unitId": "c5ee1936-bd27-504a-a2a5-0cb58a28d111",
           "kind": "Verse",
-          "textSha256": "d1ffaec59cf5fe75629306c066c51f7ccf054a5e4e48c220b83c7be8fd517e65",
+          "textSha256": "d483756dff03e72940a388e717188eb48e1982958c3952161a8a32e0e45b4228",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             2,
@@ -88482,7 +88516,7 @@
       ],
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-deferrals-recheck",
-      "reviewNote": "4/4. 첫 주4분음표는1박 못갖춘. 첫 블록 온땅은까지2.25. 둘째 온마디3+끝 어4분음표·다2분음표3박=3.75, 총6."
+      "reviewNote": "2026-10-23 natural phrase review: Keep short opening sentence; move 온 땅은 to the sentence it introduces; approximate 2+4, no forced equal split."
     },
     {
       "versionId": "c194dc53-c4d1-5d0c-ae34-ed2799dfba5f",
@@ -88679,7 +88713,7 @@
       "reviewedAt": "2026-10-23",
       "reviewBatch": "hymn-slide-approx-final",
       "reviewDisposition": "reviewed",
-      "reviewNote": "현재 저장 슬라이드별 악구 구간의 정수 근사치. 정밀 음가·성부별 총합 또는 절별 종지 길이를 확정한 수치가 아님. 가사·송폼·반복·독립 아멘은 그대로 유지."
+      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep irregular choral responses; all seven Amen and their screen retained."
     },
     {
       "versionId": "446c74e8-c659-58f3-92ac-1215e1fb9118",
