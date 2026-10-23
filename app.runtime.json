@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-media-management",
+  "version": "20261023-media-management-order",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "51856ddac6b91083b3d9c8363e511535b1dd7c4da6f1f0f85791857f0a69b356",
-  "runtime_sha256": "f01374e149af82a567b9f772eb06a430b6a76ada25e2204017f6cfd9554db157",
-  "source_bytes": 1556240,
-  "runtime_bytes": 1101638,
-  "source_gzip": 350569,
-  "runtime_gzip": 274198
+  "source_sha256": "9492e76df62b18c9dbe92037a91390192194d08a927cda213e08d58fadc0b4cd",
+  "runtime_sha256": "4ede2cb7454bf8197f4b4c5c95bb161cae68bc424de79d3825aeaae905736dba",
+  "source_bytes": 1558433,
+  "runtime_bytes": 1103088,
+  "source_gzip": 351070,
+  "runtime_gzip": 274547
 }

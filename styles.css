@@ -9668,3 +9668,5 @@ body:has(#servicePresenterControls[data-focus-view="false"]):has([data-presenter
 .global-media-section .global-playback-group { padding-top:0; min-width:0; }
 .global-media-section .global-playback-empty { padding-top:0; }
 .global-media-section > .global-playback-state { margin:5px 0 10px; }
+
+.praise-forms-panel .version-move-btn { width: 30px; height: 30px; }
