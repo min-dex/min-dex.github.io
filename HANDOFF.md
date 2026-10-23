@@ -1340,3 +1340,7 @@ Chromium/WebKit 각각 전체1203판본과 기존 예배 참조350개의 출력 
 최종 같은 구절 줄바꿈 불일치0, 절별 대응 페이지 한/두 줄 불일치0, 같은 가사의 새/통일 슬라이드 경계 불일치0. Chromium/WebKit 전체1203판본 및 기존 예배 참조350개의 출력 문구/순서 보존과3해상도 넘침0 확인. 고요한 밤·하나님의 크신 사랑·하나님의 나팔 소리의 실제 비교 UI도 로컬 후보로 캡처했다. 운영 쓰기0, 배포 없음.
 
 최신 적용 후보는 backups/20261023-hymn-line-review/{plan,expected,candidate-ledger}.json. 이전 independent-amen 폴더 후보는 이 기록으로 대체한다. 공개 대장/runtime은 운영 적용/readback 전까지 그대로 유지한다. 배포 조율의 main push 대기는 해제됐지만 이번 턴에는 push/배포하지 않았다. 증빙: docs/hymn-line-consistency-staged-20261023.json.
+
+## 2026-10-23 미래 예배 목록·컨트롤러 표시 일치
+
+`codex/future-outline-consistency`: 빈 설교 제목에 담당자를 제목 괄호로 표시하던 controller fallback 제거. 단일 편집 항목의 목록·컨트롤러는 공통 read-only summary를 사용하고, 제목/담당자 일부가 있어도 필요한 입력이 비었으면 같은 안내를 유지한다. 기존 제목 칸에 담당자가 있는 경우 편집 모델의 title override를 존중한다.14개 예배 유형138개 기본 편집 항목과 부분 입력, 좁은/넓은 화면·포커스, 항목/출력 불변 확인. 운영 쓰기 없음. 배포 완료 여부는 GitHub exact-SHA gate/Pages와 공개 버전 확인으로 판정한다.

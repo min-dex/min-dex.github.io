@@ -8732,7 +8732,7 @@ body[data-theme="dark"].presenter-output-body, body[data-theme="dark"] .presente
 body[data-module="praise"] .praise-forms-panel { gap: 20px; }
 .praise-forms-panel .form-toolbar { align-items: center; justify-content: flex-start; gap: 15px; padding: 0 0 15px; border-bottom: 1px solid var(--line); }
 .form-toolbar-title { margin: 0; flex: 0 0 auto; font-size: 14px; line-height: 20px; font-weight: 600; color: var(--ink-2); }
-.praise-forms-panel .form-buttons { gap: 5px; flex-wrap: wrap; }
+.praise-forms-panel .form-buttons { min-width: 0; max-width: 100%; gap: 5px; flex-wrap: wrap; }
 .praise-forms-panel .form-buttons .btn { height: 30px; padding: 0 10px; gap: 5px; font-size: 12px; color: var(--ink-2); }
 body[data-module="praise"] .praise-forms-panel .version-compare-title { padding: 10px 15px; gap: 10px; border: 1px solid var(--line); background: var(--ui-surface-panel); align-content: flex-start; }
 body[data-module="praise"] .praise-forms-panel .version-compare-title.active { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); box-shadow: inset 3px 0 var(--accent); }

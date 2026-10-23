@@ -853,3 +853,14 @@ neutral action border/surface/hover rules; primary save, focus and disabled
 states retain their semantics. Presenter help aligns to the toolbar trailing
 edge beside its utility trigger, bounded by the actual toolbar width so narrow
 editors do not clip the panel. No save, recovery, playback or output changes.
+
+### Praise narrow and long content ·2026-10-23
+
+Bound the form-add button group to its toolbar width, wrapping whole 30px
+buttons instead of shrinking targets or overflowing the editor. Long lyrics
+keep source line breaks and wrap within their editable/read-only cards. Version
+comparison retains its existing horizontal scroll and 320px column minimum;
+the desktop shell retains its existing minimum width on phone-size windows.
+Metadata dialogs remain viewport-bounded with container-driven field columns.
+Offline coverage: `tests/smoke_praise_narrow_content.py`, Chromium/WebKit,
+390/600/768/1024/1440px and both themes; no operational data writes.
