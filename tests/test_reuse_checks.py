@@ -16,7 +16,7 @@ spec.loader.exec_module(reuse)
 class ReuseChecks(unittest.TestCase):
     def setUp(self):
         self.run = dict(id=123, head_sha='exact', head_repository={'full_name': 'owner/repo'}, path='.github/workflows/cloud-check.yml', event='push', head_branch='codex/fix', status='completed', conclusion='success', run_attempt=2)
-        self.jobs = [dict(name=f'offline-web ({i})', status='completed', conclusion='success') for i in range(4)]
+        self.jobs = [dict(name=f'offline-web ({i})', status='completed', conclusion='success') for i in range(4)] + [dict(name='scope', status='completed', conclusion='success', steps=[dict(name='Scope proof: full', status='completed', conclusion='success')])]
 
     def verify(self, run=None, jobs=None):
         return reuse.verified_run(self.run if run is None else run, self.jobs if jobs is None else jobs, 'owner/repo', 'exact', 456)
@@ -37,6 +37,18 @@ class ReuseChecks(unittest.TestCase):
         jobs = copy.deepcopy(self.jobs)
         jobs[0]['status'] = 'in_progress'
         self.assertFalse(self.verify(jobs=jobs))
+
+    def test_scoped_proof_requires_matching_baseline_and_selection(self):
+        signature = 'css-' + 'a' * 20
+        jobs = copy.deepcopy(self.jobs)
+        jobs[-1]['steps'][0]['name'] = 'Scope proof: ' + signature
+        self.assertTrue(reuse.verified_run(self.run, jobs, 'owner/repo', 'exact', 456, signature))
+        self.assertFalse(self.verify(jobs=jobs))
+        self.assertFalse(reuse.verified_run(self.run, jobs, 'owner/repo', 'exact', 456, 'css-' + 'b' * 20))
+        self.assertTrue(reuse.verified_run(self.run, self.jobs, 'owner/repo', 'exact', 456, signature))
+        self.assertFalse(self.verify(jobs=self.jobs[:-1]))
+        jobs[-1]['conclusion'] = 'failure'
+        self.assertFalse(reuse.verified_run(self.run, jobs, 'owner/repo', 'exact', 456, signature))
 
     def test_pagination_and_successful_attempt(self):
         seen = []
