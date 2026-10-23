@@ -25,6 +25,11 @@ try:
     check(before===JSON.stringify({item,version}),'read did not migrate data');
     for(const raw of ['t','T','title','TITLE',' Title ']) check(normalizeServiceFormHint(raw+' - Verse 1 - Tags')==='T-V1-Tags','normalization');
     check(canonicalServiceFormToken('T')==='T' && canonicalServiceFormToken('Tag')==='Tag','Tag unchanged');
+    const legacyTitle={id:'saved-title',type:'song-title',formKey:'title:0',formLabel:'Title',marker:'Title'};
+    const oldTitleBefore=JSON.stringify(legacyTitle);
+    check(presenterFormGroupLabel(legacyTitle)==='T','legacy Title thumbnail label');
+    check(presenterProgressionPlan(item,[legacyTitle]).groups[0].label==='T','legacy Title photo placement label');
+    check(JSON.stringify(legacyTitle)===oldTitleBefore,'legacy Title display rewrote slide');
     const edit=value=>applyServiceItemMetadataField(item,{dataset:{serviceItemField:'form_hint'},value},{});
     check(serviceItemEffectiveFormHint(item)==='T-V1-C','legacy sequence exposes title');
     for(const label of ['파송찬양','마침찬양','결단찬양']) {

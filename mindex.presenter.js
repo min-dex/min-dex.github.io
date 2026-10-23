@@ -6191,7 +6191,8 @@ function presenterProgressionPlan(item, slides = []) {
     if (!slide.formKey) continue;
     let group = groups.at(-1);
     if (group?.key !== slide.formKey) {
-      group = { key: slide.formKey, label: slide.formLabel || slide.marker || slide.title || "구간", lastSlideId: slide.id };
+      const label = slide.formLabel || slide.marker || slide.title || "구간";
+      group = { key: slide.formKey, label: normalizePresenterFormPresetLabel(label).type === "title" ? "T" : label, lastSlideId: slide.id };
       groups.push(group);
     }
     group.lastSlideId = slide.id;
