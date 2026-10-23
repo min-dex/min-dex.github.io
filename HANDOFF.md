@@ -1366,3 +1366,23 @@ Chromium/WebKit 각각 전체1203판본과 기존 예배 참조350개의 출력 
 실제 anon/authenticated 저장·동일 요청 replay·CAS 거절·음원 보존 검사 통과,
 검증 변경 전체 rollback 후 동일성 확인. 서버 적용 전 금지 조건은 해소됐다.
 앱 출시는 별도 GitHub 전체 gate/Pages/public readback으로 확인한다.
+
+## 2026-10-23 Praise lifecycle candidate (not installed/published)
+
+Existing-song atomic save d2487d0f was deployed and verified (branch gate
+39942492912, Pages39943239476, five exact public files). New request extends
+protection to sidebar creation, service-item/source-input creation and empty-song
+deletion. See docs/content-realtime.md and migrations/2026-10-23-praise-lifecycle.sql.
+
+Prepared two SECURITY INVOKER RPCs and a body-free immutable request receipt table.
+Actual PostgreSQL18.4: concurrent duplicate title reuse, failed create/delete full
+rollback, no resurrection after deletion, stale/lyrics/audio/metadata/FK protection,
+shared-role execution and receipt DELETE rejection PASS. Actual Chromium/WebKit:
+double click, lost create/delete replies, late service title changes, sibling edits/
+reordering, unsaved form protection and linked deletion refusal PASS. Existing
+Praise save browser suite, unlinked creation and input-module contracts, runtime
+hashes and four cloud runner partition tests PASS.
+
+Production installation pending user's answer allowing Safari for this new scope.
+Do not publish this candidate before both RPCs are installed/verified. No production
+song/worship writes performed for this candidate. No release queue ticket held.

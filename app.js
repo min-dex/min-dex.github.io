@@ -6383,47 +6383,62 @@ async function createReferenceLink(options = {}) {
   }
 }
 
+// Requests remain immutable after an unknown network outcome. The server keeps
+// content-free receipts so retries cannot resurrect a subsequently removed song.
+const praiseCreateRequests = new WeakMap();
+const praiseDeleteRequests = new WeakMap();
+const praiseServiceCreates = new Set();
+
+async function createEmptyPraiseAtomic(options = {}, scope = "sidebar") {
+  const client = state.client, project = state.config.url;
+  if (!client) throw new Error("서버 연결을 확인해 주세요.");
+  let pending = praiseCreateRequests.get(client);
+  if (!pending) { pending = new Map(); praiseCreateRequests.set(client, pending); }
+  const key = `${project}:${scope}`;
+  let entry = pending.get(key);
+  if (!entry) {
+    entry = {req:{protocolVersion:1,requestId:createUuid(),songId:createUuid(),versionId:createUuid(),
+      title:options.title,praiseTypes:options.praiseTypes,reuseExisting:!!options.reuseExisting,autoTitle:!!options.autoTitle}};
+    pending.set(key,entry);
+  }
+  if (!entry.promise) entry.promise = (async () => {
+    const result = await client.rpc('create_praise_v1',{req:entry.req});
+    if (result.error) {
+      if (['P0001','23505','23503','42501'].includes(result.error.code)) pending.delete(key);
+      throw new Error(result.error.message?.includes('PRAISE_CREATED_THEN_REMOVED')
+        ? "만들었던 곡이 이미 삭제되어 다시 만들지 않았습니다."
+        : "곡 등록 결과를 확인하지 못했습니다. 다시 누르면 같은 요청을 확인합니다.");
+    }
+    const song = praiseSnapshotSong(result.data?.snapshot);
+    pending.delete(key);
+    if (client !== state.client || project !== state.config.url) throw new Error("연결이 변경되었습니다. 원래 프로젝트의 등록 결과를 확인해 주세요.");
+    state.songs = [song,...state.songs.filter(row=>row.id!==song.id)].sort(sortSongs);
+    clearSearchCaches();
+    window.MINDEX_CONTENT_LIVE?.publish("song",song.id);
+    return song;
+  })().finally(()=>{entry.promise=null;});
+  return entry.promise;
+}
+
 async function createPraiseSong(options = {}) {
   if (!requireClient() || state.saving) return;
   if (state.loading || songLoadPromise) return;
   if (state.module !== "praise") await switchModule("praise", { clearSearch: false });
   if (state.module !== "praise") return;
+  if (state.dirty.song || state.dirty.forms) { showToast("편집 중인 곡을 먼저 저장해 주세요. 입력은 유지됩니다.","info"); return; }
 
+  const selectedBefore = state.selectedSongId, dirtyBefore = JSON.stringify(state.dirty);
   const draft = buildNewPraiseSongDraft(options);
   const publishClient = state.client;
   state.saving = true;
   updateSaveState();
   try {
-    const useVersionTables = state.songVersionTablesSupported === true;
-    const payload = {
-      title: draft.title,
-      praise_types: draft.praise_types,
-      memo: useVersionTables ? null : serializeSongMemo(draft),
-    };
-    const { data, error } = await state.client
-      .from("mindex_songs")
-      .insert(payload)
-      .select("*")
-      .single();
-    if (error) throw error;
-
-    const song = normalizeServerSong(data);
-    song.versions = normalizeSongVersions(song, draft.versions);
-    song._memoHasVersions = !useVersionTables;
-    if (useVersionTables) {
-      try {
-        await saveSongVersions(song);
-      } catch (saveError) {
-        if (!isUnavailableRelationError(saveError)) throw saveError;
-        state.songVersionTablesSupported = false;
-        song._memoHasVersions = true;
-        await state.client
-          .from("mindex_songs")
-          .update({ memo: serializeSongMemo(song) })
-          .eq("id", song.id);
-      }
+    const song = await createEmptyPraiseAtomic({title:draft.title,praiseTypes:draft.praise_types,
+      autoTitle:!options.title}, "sidebar");
+    if (state.module !== "praise" || state.selectedSongId !== selectedBefore || JSON.stringify(state.dirty) !== dirtyBefore) {
+      showToast("곡을 추가했습니다. 현재 편집 화면은 유지합니다.");
+      return;
     }
-
     state.songs = [song, ...state.songs.filter((item) => item.id !== song.id)].sort(sortSongs);
     clearSearchCaches();
     state.selectedSongId = song.id;
@@ -6484,6 +6499,7 @@ function songHasDeleteProtectedContent(song = {}) {
   if (cleanList(song.scripture).length || cleanList(song.related_song_ids).length) return true;
   if (Object.keys(normalizeSongMetadata(song.metadata)).length) return true;
   return (song.versions || []).some((version) => {
+    if (version.audio_set || version.subtitle || version.original_title || version.hymn_no || version.deck_key) return true;
     if (Object.keys(normalizeSongMetadata(version.metadata)).length) return true;
     return normalizeForms(version.forms || []).some((form) => normalizeLyricsForCopy(form.lyrics));
   });
@@ -6496,34 +6512,56 @@ function canDeletePraiseSong(song = getSelectedSong()) {
 async function deleteSelectedSong() {
   const song = getSelectedSong();
   if (!song || !requireClient() || state.saving) return;
+  if (state.dirty.song || state.dirty.forms) { showToast("편집 중인 입력이 있어 삭제하지 않았습니다. 먼저 저장하거나 변경을 취소해 주세요.","info"); return; }
   if (!canDeletePraiseSong(song)) {
     showToast("내용이 비어 있는 곡만 바로 삭제할 수 있어요.", "error");
     return;
   }
   if (!confirm(`"${song.title}"을 삭제할까요?`)) return;
+  const editorBefore = JSON.stringify({song,forms:state.forms});
 
   const publishClient = state.client;
   state.saving = true;
   updateSaveState();
   try {
-    const { error } = await state.client.from("mindex_songs").delete().eq("id", song.id);
-    if (error) {
-      showToast(error.message, "error");
-      return;
+    let pending = praiseDeleteRequests.get(song);
+    if (pending && (pending.client !== publishClient || pending.project !== state.config.url)) throw new Error("연결이 변경되어 삭제하지 않았습니다.");
+    if (!pending) {
+      const fresh = await publishClient.rpc('get_praise_snapshot_v1',{sid:song.id});
+      if (fresh.error) throw new Error("최신 자료를 확인하지 못해 삭제하지 않았습니다.");
+      if (praiseSaveComparable(song) !== praiseSaveComparable(praiseSnapshotSong(fresh.data))) throw new Error("다른 곳에서 곡이 변경되어 삭제하지 않았습니다.");
+      pending = {client:publishClient,project:state.config.url,req:{protocolVersion:1,requestId:createUuid(),songId:song.id,expected:fresh.data}};
+      praiseDeleteRequests.set(song,pending);
     }
-
+    if (state.selectedSongId === song.id && editorBefore !== JSON.stringify({song,forms:state.forms})) throw new Error("확인 중 입력이 변경되어 삭제하지 않았습니다.");
+    const before = JSON.stringify({song,forms:state.forms});
+    const result = await publishClient.rpc('delete_empty_praise_v1',{req:pending.req});
+    if (result.error) {
+      if (['P0001','23503','42501'].includes(result.error.code)) praiseDeleteRequests.delete(song);
+      throw new Error(result.error.message?.includes('PRAISE_IN_USE') ? "예배나 다른 자료에 연결된 곡은 삭제할 수 없습니다."
+        : result.error.message?.includes('PRAISE_NOT_EMPTY') || result.error.message?.includes('PRAISE_CONFLICT') ? "내용이 있거나 다른 곳에서 변경되어 삭제하지 않았습니다."
+        : "삭제 결과를 확인하지 못했습니다. 다시 누르면 같은 요청을 확인합니다.");
+    }
+    if (!result.data?.deleted) throw new Error("삭제 결과를 확인하지 못했습니다.");
+    praiseDeleteRequests.delete(song);
+    if (publishClient !== state.client || pending.project !== state.config.url) return;
+    if (state.selectedSongId === song.id && before !== JSON.stringify({song,forms:state.forms})) { showToast("서버의 빈 곡은 삭제됐지만, 대기 중 입력한 내용은 화면에 유지했습니다.","info"); return; }
     state.songs = state.songs.filter((item) => item.id !== song.id);
     clearSearchCaches();
-    state.selectedSongId = null;
-    state.selectedVersionId = null;
-    state.forms = [];
-    state.dirty.song = false;
-    state.dirty.forms = false;
-    captureCleanFingerprint("praise");
+    if (state.selectedSongId === song.id) {
+      state.selectedSongId = null;
+      state.selectedVersionId = null;
+      state.forms = [];
+      state.dirty.song = false;
+      state.dirty.forms = false;
+      captureCleanFingerprint("praise");
+    }
     persistUiState();
     render();
     if (publishClient === state.client) window.MINDEX_CONTENT_LIVE?.publish("song", song.id);
     showToast("빈 곡을 삭제했습니다.");
+  } catch (error) {
+    showToast(error.message || "삭제하지 못했습니다. 기존 자료는 유지됩니다.","error");
   } finally {
     state.saving = false;
     updateSaveState();
@@ -12630,91 +12668,51 @@ function bibleVerseNumberLabel(verse) {
 }
 
 async function createPraiseSongFromServiceItem(index) {
-  if (!Number.isFinite(index)) return;
+  if (!Number.isFinite(index) || state.saving) return;
   const serviceId = state.selectedServiceId;
-  const service = state.services.find((svc) => svc.id === serviceId);
-  const items = getServiceItems(serviceId);
-  const item = items[index];
-  if (!service || !item || item.song_id) return;
-  if (!["praise_db", "lyrics_db", "score_db", "children_audio"].includes(servicePraiseInputMode(item, parseServiceItemMemo(item.memo), service))) return;
-  const inputTitle = String(findDeferredServiceTextInput(serviceId, index, "raw_title")?.value ?? item.raw_title ?? "").trim()
-    || String(window.prompt("새 곡 제목을 입력해 주세요.", "") || "").trim();
+  const service = state.services.find(svc=>svc.id===serviceId);
+  const item = getServiceItems(serviceId)[index];
+  const operationKey = `${state.config.url}:${serviceId}:${item?.id || index}`;
+  if (!service || !item || item.song_id || praiseServiceCreates.has(operationKey)) return;
+  if (!["praise_db","lyrics_db","score_db","children_audio"].includes(servicePraiseInputMode(item,parseServiceItemMemo(item.memo),service))) return;
+  const field = () => findDeferredServiceTextInput(serviceId,index,"raw_title");
+  const inputTitle = String(field()?.value ?? item.raw_title ?? "").trim()
+    || String(window.prompt("새 곡 제목을 입력해 주세요.","") || "").trim();
   if (!inputTitle) return;
-  if (presenterPreparationSongContentHasConnection(inputTitle)) {
-    showToast("연결곡은 찬양 DB에 새 곡으로 만들지 않고 예배 항목에만 둡니다.", "info");
-    return;
-  }
-  const existing = await resolveExistingPraiseSongForServiceInputAfterCatalogLoad(inputTitle, item, service);
-  if (existing) {
-    linkServiceItemToPraiseSong(item, existing, service, {
-      forceLyricsMode: isSpecialSongServiceItem(item)
-        && servicePraiseUsesDirectLyrics(servicePraiseInputMode(item, parseServiceItemMemo(item.memo), service)),
-    });
-    state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(items);
-    state.dirty.service = true;
-    renderCurrentServiceModuleDetail();
-    updateSaveState();
-    showToast("기존 찬양 DB 곡에 연결했습니다.");
-    return;
-  }
-
-  if (!requireClient()) return;
-  const title = stripHymnNo(presenterPreparationSongContent(inputTitle)).title.trim();
-  if (!title) return;
-
-  const praiseType = servicePraiseInputMode(item, parseServiceItemMemo(item.memo), service) === "children_audio"
-    || ["children", "nursery"].includes(service?.type_id) ? "children" : "ccm";
-  const defaultVersion = {
-    id: createUuid(),
-    name: "기본",
-    is_primary: true,
-    praise_types: [praiseType],
-    forms: [],
-  };
-  const useVersionTables = state.songVersionTablesSupported === true;
-  const payload = {
-    title,
-    praise_types: [praiseType],
-    memo: useVersionTables ? null : serializeSongMemo({ versions: [defaultVersion] }),
-  };
-
-  const publishClient = state.client;
+  if (presenterPreparationSongContentHasConnection(inputTitle)) { showToast("연결곡은 찬양 DB에 새 곡으로 만들지 않고 예배 항목에만 둡니다.","info"); return; }
+  const client = state.client, project = state.config.url;
+  const before = JSON.stringify(item), fieldBefore = field()?.value;
+  const currentItem = () => (state.serviceItems[serviceId] || []).find(row=>row.id===item.id);
+  const current = () => client===state.client && project===state.config.url
+    && currentItem() && JSON.stringify(currentItem())===before
+    && (state.selectedServiceId!==serviceId || field()?.value===fieldBefore);
+  praiseServiceCreates.add(operationKey);
   try {
-    const { data, error } = await state.client
-      .from("mindex_songs")
-      .insert(payload)
-      .select("*")
-      .single();
-    if (error) throw error;
-    const song = normalizeServerSong(data);
-    if (useVersionTables) {
-      song.versions = normalizeSongVersions(song, [defaultVersion]);
-      try {
-        await saveSongVersions(song);
-      } catch (saveError) {
-        state.songVersionTablesSupported = false;
-        await state.client
-          .from("mindex_songs")
-          .update({ memo: serializeSongMemo(song) })
-          .eq("id", song.id);
-        console.warn("Fell back to memo-backed song versions.", saveError);
-      }
+    let song = await resolveExistingPraiseSongForServiceInputAfterCatalogLoad(inputTitle,item,service);
+    if (!current()) return;
+    const existed = !!song;
+    if (!song) {
+      if (!requireClient()) return;
+      const title = stripHymnNo(presenterPreparationSongContent(inputTitle)).title.trim();
+      if (!title) return;
+      const type = servicePraiseInputMode(item,parseServiceItemMemo(item.memo),service)==="children_audio"
+        || ["children","nursery"].includes(service.type_id) ? "children" : "ccm";
+      song = await createEmptyPraiseAtomic({title,praiseTypes:[type],reuseExisting:true},`service:${serviceId}:${item.id || index}`);
     }
-    state.songs = [song, ...state.songs].sort(sortSongs);
-    clearSearchCaches();
-    item.raw_title = title;
-    item.song_id = song.id;
-    item.version_id = getDefaultVersionId(song);
-    item.song_version_id = item.version_id;
-    state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(items);
+    if (!current()) { showToast("곡 등록은 확인했습니다. 변경 중인 예배 항목은 덮어쓰지 않았습니다.","info"); return; }
+    const target = currentItem();
+    linkServiceItemToPraiseSong(target,song,service,{clearRawTitle:existed,forceLyricsMode:isSpecialSongServiceItem(item)
+      && servicePraiseUsesDirectLyrics(servicePraiseInputMode(item,parseServiceItemMemo(item.memo),service))});
+    if (!existed) target.raw_title = song.title;
+    // Use the current array: edits/reordering of siblings during the request survive.
+    state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(state.serviceItems[serviceId]);
     state.dirty.service = true;
-    renderCurrentServiceModuleDetail();
+    if (state.selectedServiceId===serviceId) renderCurrentServiceModuleDetail();
     updateSaveState();
-    if (publishClient === state.client) window.MINDEX_CONTENT_LIVE?.publish("song", song.id);
-    showToast("찬양 DB에 빈 곡을 만들었습니다. 가사를 추가해 주세요.", "info");
+    showToast(existed ? "기존 찬양 DB 곡에 연결했습니다." : "찬양 DB에 곡을 등록했습니다. 예배 저장 시 연결도 함께 저장됩니다.","info");
   } catch (error) {
-    showToast(error.message || "찬양 DB 곡 추가 실패.", "error");
-  }
+    showToast(error.message || "찬양 DB 곡 추가 실패. 예배 입력은 유지됩니다.","error");
+  } finally { praiseServiceCreates.delete(operationKey); }
 }
 
 function selectServiceSongForItem(index, songId) {
@@ -12853,7 +12851,7 @@ function runPresenterSectionItemAction(action, index) {
   const service = state.services.find((svc) => svc.id === serviceId);
   const context = presenterSectionEditorContext(service);
   if (!context) return;
-  const items = normalizeServiceItemsInCurrentOrder(getServiceItems(serviceId));
+  const items = normalizeServiceItemsInCurrentOrder(state.serviceItems[serviceId]);
   const sectionIndexes = context.sectionItems
     .map((item) => Number(item._origIndex))
     .filter((itemIndex) => Number.isInteger(itemIndex) && items[itemIndex]);
@@ -13452,7 +13450,7 @@ async function clearServiceItemAudioAsset(serviceId = state.selectedServiceId, i
 
 function addPresenterReferenceMedia(serviceId = state.selectedServiceId, requestedSectionKey = "", options = {}) {
   if (!serviceId) return;
-  const items = normalizeServiceItemsInCurrentOrder(getServiceItems(serviceId));
+  const items = normalizeServiceItemsInCurrentOrder(state.serviceItems[serviceId]);
   const placementParent = options.mediaPlacement && items.find(item => item.id === options.mediaPlacement.parentItemId);
   const sectionKey = placementParent ? presenterReferenceMediaItemSectionKey(placementParent)
     : PRESENTER_REFERENCE_MEDIA_SECTION_KEYS.has(String(requestedSectionKey || "").trim())
@@ -26170,7 +26168,7 @@ function ensurePortableSourceItems(service, records = []) {
   validateServiceSourceRecordMetadata(records);
   const serviceId = String(service?.id || "").trim();
   if (!serviceId) return 0;
-  const items = normalizeServiceItemsInCurrentOrder(getServiceItems(serviceId));
+  const items = normalizeServiceItemsInCurrentOrder(state.serviceItems[serviceId]);
   let added = 0;
   const changedSections = new Set();
   for (const [recordIndex, record] of records.entries()) {

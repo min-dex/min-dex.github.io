@@ -2,7 +2,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('nod
 const src=fs.readFileSync(require('node:path').join(__dirname,'../app.js'),'utf8');
 const take=(start,end)=>src.slice(src.indexOf(start),src.indexOf(end,src.indexOf(start)));
 let answer=null,inserts=0;
-const c={String,Number,window:{prompt:()=>answer},state:{selectedServiceId:'svc',services:[{id:'svc',type_id:'wednesday'}],songs:[],serviceItems:{},dirty:{}},
+const c={String,Number,window:{prompt:()=>answer},praiseServiceCreates:new Set(),state:{config:{url:'fixture'},selectedServiceId:'svc',services:[{id:'svc',type_id:'wednesday'}],songs:[],serviceItems:{},dirty:{}},
  servicePraiseInputMode:()=>"lyrics_db",parseServiceItemMemo:()=>({}),
  isSongServiceLabel:x=>/^찬양/.test(x),isSpecialSongServiceItem:x=>x.label==='특송',escapeAttr:String,escapeHtml:String,findDeferredServiceTextInput:()=>null,linkedSongLoadPromises:new Map(),renderServiceSongVersionPicker:()=>"",
  serviceSongPickerResults:()=>c.searchResults,renderServiceSongPickerResult:s=>s.title,searchResults:[],
@@ -11,6 +11,8 @@ const c={String,Number,window:{prompt:()=>answer},state:{selectedServiceId:'svc'
  stripHymnNo:x=>({title:x}),presenterPreparationSongContent:x=>x,createUuid:()=> 'version',serializeSongMemo:JSON.stringify,
  normalizeServerSong:x=>x,sortSongs:()=>0,clearSearchCaches:()=>{},getDefaultVersionId:()=> 'version',normalizeServiceItemsInCurrentOrder:x=>x,
  renderCurrentServiceModuleDetail:()=>{},updateSaveState:()=>{}};
+c.createEmptyPraiseAtomic=async options=>{inserts++;return {id:'new-song',title:options.title}};
+c.linkServiceItemToPraiseSong=(item,song)=>{item.song_id=song.id;item.version_id='version';item.song_version_id='version';};
 c.state.client={from:()=>({insert:payload=>{inserts++;return {select:()=>({single:async()=>({data:{id:'new-song',...payload}})})}}})};
 vm.createContext(c);
 vm.runInContext(take('function renderServiceSongPicker(', '\nfunction renderServiceSongVersionPicker'),c);

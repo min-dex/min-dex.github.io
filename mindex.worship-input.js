@@ -1500,46 +1500,9 @@ async function createBlankPraiseSongForServiceInput(value, service = selectedSer
   if (!title) return null;
 
   const praiseType = ["children", "nursery"].includes(service?.type_id) ? "children" : "ccm";
-  const defaultVersion = {
-    id: createUuid(),
-    name: "기본",
-    is_primary: true,
-    praise_types: [praiseType],
-    forms: [],
-  };
-  const useVersionTables = state.songVersionTablesSupported === true;
-  const payload = {
-    title,
-    praise_types: [praiseType],
-    memo: useVersionTables ? null : serializeSongMemo({ versions: [defaultVersion] }),
-  };
-  const { data, error } = await state.client
-    .from("mindex_songs")
-    .insert(payload)
-    .select("*")
-    .single();
-  if (error) throw error;
-
-  const song = normalizeServerSong(data);
-  song.versions = normalizeSongVersions(song, song.versions?.length ? song.versions : [defaultVersion]);
-  song._memoHasVersions = !useVersionTables;
-  if (useVersionTables) {
-    try {
-      await saveSongVersions(song);
-    } catch (saveError) {
-      if (!isUnavailableRelationError(saveError)) throw saveError;
-      state.songVersionTablesSupported = false;
-      song._memoHasVersions = true;
-      await state.client
-        .from("mindex_songs")
-        .update({ memo: serializeSongMemo(song) })
-        .eq("id", song.id);
-    }
-  }
-  state.songs = [song, ...state.songs.filter((candidate) => candidate.id !== song.id)].sort(sortSongs);
-  clearSearchCaches();
-  return song;
+  return await createEmptyPraiseAtomic({title,praiseTypes:[praiseType],reuseExisting:true},`input:${service?.id || ""}:${title}`);
 }
+
 function finalizePresenterPreparationApply({
   service, serviceId, items, entries, skipped, scriptureItemIds, textFieldUpdates,
   createdSongTitles, versionWarnings,

@@ -151,3 +151,33 @@ UUID 정렬을 화면/저장 순서로 사용하지 않는다. 찬송가·CCM·�
 조회 실패·송신 전 실패·CAS 경합·응답 유실·추가 입력·재저장을 확인한다.
 성구 검증/출력 제목/버전 삭제/미저장 입력 보호 회귀도 별도 확인했다.
 이 결과는 운영 서버 적용이나 실제 네트워크 단절 검증을 의미하지 않는다.
+
+
+## Atomic Praise lifecycle - 2026-10-23 (server/deployment pending)
+
+Sidebar creation, service-item registration and source-input blank-song creation
+share create_praise_v1. Song, canonical identity, base version and receipt commit
+in one transaction. Service title/type duplicates reuse the existing song under
+the same advisory lock. Distinct editions are not automatically merged.
+
+mindex_praise_operations records only request ID/hash, operation, song ID and time.
+No lyrics/media bodies are copied. Existing shared clients receive SELECT/INSERT,
+not UPDATE/DELETE. A lost creation reply retried after removal cannot resurrect
+the song. Unknown outcomes reuse the original immutable request.
+
+delete_empty_praise_v1 checks the complete snapshot, unknown metadata, audio,
+all lyric units and incoming song/version foreign keys (including SET NULL).
+Unreadable references fail closed. Canonical source evidence is retained.
+Only the explicitly confirmed empty song and its owned empty versions are removed.
+Old clients' direct writes are not disabled by this change.
+
+Unsaved Praise input blocks creation/deletion. Late service-registration results
+check project, item ID/content and the title input before linking. Sibling edits,
+insertions and reordering use the current array. The worship connection remains a
+draft until the existing atomic worship save succeeds; failures do not erase it.
+
+Temporary PostgreSQL validates two-connection duplicate registration, creation/
+deletion rollback, replay/no resurrection and stale/reference/media/lyrics/metadata
+removal guards. Chromium/WebKit actual handlers cover repeated clicks, lost replies,
+late title edits, sibling insertion/reordering, unsaved input and linked deletion.
+Production installation and publication remain separate checkpoints.
