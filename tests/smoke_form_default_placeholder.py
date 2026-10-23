@@ -51,6 +51,8 @@ try:
        for(const noChromakey of [false,true]) {
         const html=renderPresenterSlideFrame(headings[0],{noChromakey});
         check(html.includes('presenter-title-assignee--order-content') && html.includes('♪ '+expectedTitle) && !html.includes('presenter-fullscreen-song-heading'),'order/content output lost '+label+'/'+mode+'/'+noChromakey);
+        const preview=normalizePresenterMiniPreviewSlide({...headings[0],outputContext:noChromakey?'clean':'chromakey'},!noChromakey);
+        check(preview.type===headings[0].type && renderPresenterTitleAssigneeSlide(preview)===renderPresenterTitleAssigneeSlide(headings[0]),'preview/output title mismatch '+label+'/'+mode+'/'+noChromakey+' '+JSON.stringify({preview,original:headings[0]}));
        }
        check(JSON.stringify(item)===original,'content heading rewrote data');
       }

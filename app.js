@@ -32320,30 +32320,7 @@ function normalizePresenterMiniPreviewSlide(slide = null, serviceChromakey = tru
   const normalizedSlide = outputContext === "clean"
     ? normalizeCleanPresenterSlideLayout(slide)
     : normalizeChromakeyPresenterSlideLayout(slide);
-  if (outputContext !== "clean") return normalizedSlide;
-  if (presenterSlideLayout(normalizedSlide) !== PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT) return normalizedSlide;
-  if (
-    presenterSlideElementType(normalizedSlide) === PRESENTER_ELEMENT_TYPES.TITLE_ASSIGNEE
-    && !isPresenterMainPraiseSlide(normalizedSlide)
-    && String(normalizedSlide.orderTitle || "").trim()
-    && String(normalizedSlide.contentTitle || "").trim()
-  ) {
-    const title = String(normalizedSlide.contentTitle || normalizedSlide.text || "")
-      .replace(PRESENTER_SONG_NOTE_PATTERN, "")
-      .trim();
-    const bodyText = String(normalizedSlide.orderTitle || normalizedSlide.title || "").trim();
-    return {
-      ...normalizedSlide,
-      elementType: PRESENTER_ELEMENT_TYPES.TITLE_CONTENT,
-      layout: PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT,
-      type: "title-content",
-      title: title || bodyText || "찬양",
-      assignee: "",
-      bodyText,
-      text: cleanList([title || bodyText || "찬양", bodyText && compactSearchValue(bodyText) !== compactSearchValue(title) ? bodyText : ""]).join("\n"),
-      outputContext: "clean",
-    };
-  }
+
   return normalizedSlide;
 }
 
