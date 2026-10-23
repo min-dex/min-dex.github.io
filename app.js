@@ -269,7 +269,7 @@ const SERVICE_ELEMENT_LABELS = Object.fromEntries(SERVICE_ELEMENT_TYPE_UI_OPTION
 const SERVICE_PRAISE_INPUT_MODES = [
   ["lyrics_db", "DB: 가사"],
   ["children_audio", "DB: 음원 (어린이)"],
-  ["score_db", "DB: 악보 (새찬송가)"],
+  ["score_db", "DB: 악보 (찬송가)"],
   ["manual_praise", "직접 추가: 가사"],
   ["audio_praise", "직접 추가: 음원"],
 ];
@@ -8901,7 +8901,7 @@ function handleDetailClick(event) {
 
   const versionTypeToggle = event.target.closest("[data-version-type-toggle]");
   if (versionTypeToggle) {
-    toggleVersionPraiseType(versionTypeToggle.dataset.versionTypeToggle);
+    toggleVersionPraiseType(versionTypeToggle.dataset.versionTypeToggle, versionTypeToggle.dataset.typeVersionId);
     return;
   }
 
@@ -8909,7 +8909,7 @@ function handleDetailClick(event) {
   if (formAction) {
     event.preventDefault();
     event.stopPropagation();
-    void runFormAction(formAction.dataset.formAction, Number(formAction.dataset.index));
+    void runVersionFormAction(formAction.dataset.formAction, Number(formAction.dataset.index), formAction.dataset.formVersionId);
     return;
   }
 
@@ -10095,10 +10095,10 @@ function addForm(type) {
   });
 }
 
-function toggleVersionPraiseType(type) {
-  if (!PRAISE_TYPES.includes(type)) return;
+function toggleVersionPraiseType(type, versionId = getSelectedVersionId()) {
+  if (!PRAISE_TYPES.includes(type) || state.saving) return;
   const song = getSelectedSong();
-  const version = getSelectedVersion();
+  const version = song?.versions?.find(candidate => candidate.id === versionId);
   if (!version) return;
   const types = canonicalPraiseTypes(version.praise_types);
   const idx = types.indexOf(type);
@@ -10119,7 +10119,7 @@ function renderVersionPraiseTypeTags(version) {
   return `<div class="version-type-tags">${
     PRAISE_TYPES.map(type => `
       <button class="version-type-tag${active.includes(type) ? " on" : ""}" type="button"
-              data-version-type-toggle="${escapeAttr(type)}">
+              data-version-type-toggle="${escapeAttr(type)}" data-type-version-id="${escapeAttr(version.id)}" aria-pressed="${active.includes(type)}" ${state.saving ? "disabled" : ""}>
         ${escapeHtml(labels[type])}
       </button>`).join("")
   }</div>`;
@@ -10253,6 +10253,20 @@ function addVersion(sourceVersionId = getSelectedVersionId()) {
   persistUiState();
   renderDetail();
   updateSaveState();
+}
+
+async function runVersionFormAction(action, index, versionId) {
+  if (state.saving) return;
+  if (versionId && versionId !== getSelectedVersionId()) {
+    const song = getSelectedSong();
+    const version = song?.versions?.find(candidate => candidate.id === versionId);
+    const form = version && getFormsForVersion(version)[index];
+    if (!form) return;
+    if (action === "copy") { copyText(form.lyrics || ""); return; }
+    await selectVersion(versionId);
+    if (getSelectedSong()?.id !== song.id || getSelectedVersionId() !== versionId || state.forms[index]?.id !== form.id) return;
+  }
+  await runFormAction(action, index);
 }
 
 async function runFormAction(action, index) {
@@ -17769,7 +17783,7 @@ function renderVersionCompareColumn(version, forms) {
         if (active) return renderFormBlock(form, index, { song, version });
         return `
           <div class="version-picker" data-version-id="${escapeAttr(version.id)}" role="button" tabindex="0">
-            ${renderReadonlyFormBlock(form, { song, version })}
+            ${renderReadonlyFormBlock(form, { song, version, index, formCount: displayForms.length, showActions: true })}
           </div>
         `;
       }).join("")
@@ -17867,7 +17881,7 @@ function renderVersionTitleContent(song, version, forms, options = {}) {
       ${renderVersionAttentionStatus(song, version, forms, { active })}
     </div>
     <div class="version-title-actions">
-      ${active ? renderVersionPraiseTypeTags(version) : ""}
+      ${renderVersionPraiseTypeTags(version)}
       <div class="version-edit-actions" role="group" aria-label="버전 관리">
       ${[-1, 1].map(direction => {
         const index = song.versions.findIndex(item => item.id === version.id);
@@ -18318,6 +18332,23 @@ function renderScriptureTextarea(label, field, value, className = "") {
   `;
 }
 
+function renderFormBlockActions(index, count, versionId) {
+  return `        <div class="form-actions">
+          <button class="icon-btn" type="button" data-form-version-id="${escapeAttr(versionId || "")}" data-form-action="up" data-index="${index}" aria-label="블록 위로 이동" ${index === 0 ? "disabled" : ""}>
+            <i data-lucide="arrow-up"></i>
+          </button>
+          <button class="icon-btn" type="button" data-form-version-id="${escapeAttr(versionId || "")}" data-form-action="down" data-index="${index}" aria-label="블록 아래로 이동" ${index === count - 1 ? "disabled" : ""}>
+            <i data-lucide="arrow-down"></i>
+          </button>
+          <button class="icon-btn" type="button" data-form-version-id="${escapeAttr(versionId || "")}" data-form-action="copy" data-index="${index}" aria-label="블록 복사">
+            <i data-lucide="copy"></i>
+          </button>
+          <button class="icon-btn danger" type="button" data-form-version-id="${escapeAttr(versionId || "")}" data-form-action="delete" data-index="${index}" aria-label="블록 삭제">
+            <i data-lucide="trash-2"></i>
+          </button>
+        </div>`;
+}
+
 function renderFormBlock(form, index, options = {}) {
   const label = displayLabel(form);
   const supportsVariant = ["Verse", "Chorus", "Pre-Chorus", "Bridge", "Coda"].includes(form.part_type);
@@ -18333,20 +18364,7 @@ function renderFormBlock(form, index, options = {}) {
           </select>
           ${supportsVariant ? `<input class="form-variant-input" type="text" inputmode="text" maxlength="2" data-form-field="part_variant" data-index="${index}" value="${escapeAttr(form.part_variant || "")}" placeholder="@" aria-label="${escapeAttr(label)} 변주" />` : ""}
         </div>
-        <div class="form-actions">
-          <button class="icon-btn" type="button" data-form-action="up" data-index="${index}" aria-label="블록 위로 이동" ${index === 0 ? "disabled" : ""}>
-            <i data-lucide="arrow-up"></i>
-          </button>
-          <button class="icon-btn" type="button" data-form-action="down" data-index="${index}" aria-label="블록 아래로 이동" ${index === state.forms.length - 1 ? "disabled" : ""}>
-            <i data-lucide="arrow-down"></i>
-          </button>
-          <button class="icon-btn" type="button" data-form-action="copy" data-index="${index}" aria-label="블록 복사">
-            <i data-lucide="copy"></i>
-          </button>
-          <button class="icon-btn danger" type="button" data-form-action="delete" data-index="${index}" aria-label="블록 삭제">
-            <i data-lucide="trash-2"></i>
-          </button>
-        </div>
+        ${renderFormBlockActions(index, state.forms.length, options.version?.id)}
       </div>
       <textarea class="form-textarea" data-form-field="lyrics" data-index="${index}" rows="1" aria-label="${escapeAttr(label)} lyrics">${escapeHtml(form.lyrics || "")}</textarea>
     </article>
@@ -18360,6 +18378,7 @@ function renderReadonlyFormBlock(form, options = {}) {
         <div class="form-meta">
           <span class="form-label-text">${escapeHtml(songFormPresetDisplayLabel(displayLabel(form)) || displayLabel(form))}</span>
         </div>
+        ${options.showActions ? renderFormBlockActions(options.index, options.formCount, options.version?.id) : ""}
       </div>
       <div class="form-preview-text">${escapeHtml(form.lyrics || "")}</div>
     </article>
@@ -31553,7 +31572,7 @@ function renderPresenterBoardItemActions(serviceId, context, options = {}) {
       ${options.commitOnly ? "" : audioControls}
       ${options.omitCommit ? "" : `<button class="reference-new-btn svc-board-subgroup-commit" type="button" data-service-item-commit
         data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}">
-        <i data-lucide="save"></i><span>저장</span>
+        <span>저장</span>
       </button>`}
     </div>`;
 }
@@ -31698,7 +31717,7 @@ function renderPresenterBoardItemAudioControls(serviceId, context = {}, options 
         ${childrenAudio ? "" : `<label class="svc-board-subgroup-audio-upload" title="${source ? "음원 교체" : "음원 추가"}">
           <input type="file" accept="${SERVICE_ITEM_AUDIO_ACCEPT}" data-service-item-audio-file
             data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${context.index}" />
-          <i data-lucide="${source ? "refresh-cw" : "upload"}"></i><span>${source ? "교체" : "음원"}</span>
+          <span>${source ? "교체" : "음원"}</span>
         </label>`}
       </div>
     </div>`;

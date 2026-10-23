@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-hymn-labels",
+  "version": "20261023-praise-controls",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "488cc2c03827ddd1c0699bd7ccc667500af5683d16035dd6dc061a2abe8eb928",
-  "runtime_sha256": "833fb0e100d4fd6741932bff632d53dbe1707743b9285ddf9251d9415297a893",
-  "source_bytes": 1557765,
-  "runtime_bytes": 1102752,
-  "source_gzip": 350978,
-  "runtime_gzip": 274451
+  "source_sha256": "0132cac3ca4d66afe2be1314459b0cc29f7c37d353c7988b211092abb2be0415",
+  "runtime_sha256": "cae4dda0ec18a4fbc124dab2c8a683548222832a89afaf439852bec5b5ee4a47",
+  "source_bytes": 1559131,
+  "runtime_bytes": 1103687,
+  "source_gzip": 351220,
+  "runtime_gzip": 274669
 }

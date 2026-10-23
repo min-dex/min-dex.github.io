@@ -9359,13 +9359,46 @@ body:has(#servicePresenterControls[data-focus-view="true"]) .svc-presenter-live-
 }
 .svc-presenter-side-panel .svc-presenter-fullscreen:disabled { color: var(--ink-4); }
 
-/* Two-character edit actions share the same button width. */
-#servicePresenterControls .svc-reference-media-quick-add > summary,
-#servicePresenterControls .svc-board-subgroup-commit {
+/* Reference creation keeps its icon-and-label width. */
+#servicePresenterControls .svc-reference-media-quick-add > summary {
   width: 70px;
   min-width: 70px;
   flex: 0 0 70px;
   justify-content: center;
+}
+
+/* Text-only background/audio/save actions share one compact button grammar. */
+.svc-board-subgroup-flow :is(.svc-progression-media > summary, .svc-board-subgroup-audio-upload, .svc-board-subgroup-commit),
+#servicePresenterControls :is(.svc-progression-media > summary, .svc-board-subgroup-audio-upload, .svc-board-subgroup-commit) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 60px;
+  min-width: 60px;
+  flex: 0 0 60px;
+  height: 30px;
+  min-height: 30px;
+  margin: 0;
+  padding: 0 10px;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: transparent;
+  color: var(--ink-3);
+  font-size: var(--ui-label-size);
+  font-weight: 600;
+  line-height: 1.4;
+}
+.svc-board-subgroup-flow .svc-progression-media > summary { list-style: none; }
+.svc-board-subgroup-flow .svc-progression-media > summary::-webkit-details-marker { display: none; }
+.svc-board-subgroup-flow .svc-progression-media > summary::before { content: "▸"; font-size: 10px; }
+.svc-board-subgroup-flow .svc-progression-media[open] > summary::before { content: "▾"; }
+.svc-board-subgroup-flow :is(.svc-progression-media > summary, .svc-board-subgroup-audio-upload, .svc-board-subgroup-commit):is(:hover, :focus-visible, :focus-within),
+#servicePresenterControls :is(.svc-progression-media > summary, .svc-board-subgroup-audio-upload, .svc-board-subgroup-commit):is(:hover, :focus-visible, :focus-within) {
+  background: var(--ui-surface-field);
+  color: var(--ink-2);
+  border-color: var(--line);
 }
 
 /* Focused presenter uses the full content width; basic view restores its rail. */

@@ -547,7 +547,7 @@ No input values, song/version links, medley order or persistence behavior change
 
 
 찬양 출력 유형의 표시 순서는 DB: 가사, DB: 음원 (어린이),
-DB: 악보 (새찬송가), 직접 추가: 가사, 직접 추가: 음원이다.
+DB: 악보 (찬송가), 직접 추가: 가사, 직접 추가: 음원이다.
 기존 내부 mode 값과 기본값 lyrics_db는 유지한다. 어린이 음원에는
 가사·송폼·음원·자동 넘김을 함께 불러온다는 안내를 표시한다.
 
@@ -807,3 +807,24 @@ Scripture chapter/copy controls share 35px height and visible neutral action
 borders. Bulletin save uses the primary action surface; reload/refresh use
 35px neutral actions. Preserve labels, keyboard focus and disabled states.
 These rules do not affect output slides, printing or stored content.
+
+
+### Praise input actions · 2026-10-23
+
+Background, audio upload and save use equal 60×30px quiet outlined controls,
+10px horizontal padding and the label type token. Audio/save omit redundant
+icons; background retains only its small open/closed disclosure indicator.
+File selection, save feedback and keyboard focus semantics remain unchanged.
+
+
+### Inactive version block actions · 2026-10-23
+
+Unselected versions of the current song retain their block move/copy/delete
+buttons. Copy reads that version directly; mutations select the target version
+through the existing draft-preserving path before acting, with identity checks.
+Move boundaries use that version's form count. Linked other-song previews remain
+read-only navigation. No automatic save or source data migration is introduced.
+
+Unselected same-song versions also retain all three praise-type toggles
+(찬송가/CCM/어린이). Each toggle carries its target version ID and updates only
+that version without changing the active editor or its unsaved lyrics.

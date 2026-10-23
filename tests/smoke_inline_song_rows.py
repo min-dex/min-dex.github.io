@@ -23,7 +23,7 @@ try:
      const item=normalizeServiceItem({id:crypto.randomUUID(),service_id:sid,label:'특송',raw_title:'교회',song_id:songId,version_id:vid,assignee:'카다로스 중창단',memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formHint:'V1-V2-C-Int-V3-C-Int-C'})});state.serviceItems={[sid]:[item]};
      const model=serviceItemEditorModel(item,{service});model.showAssignee=true;model.assigneeValue='카다로스 중창단';
      presenterBoardSubgroupInputContexts=()=>[0,1,2].map(index=>({item:{...item,id:'row'+index,connectedPraise:{groupId:'medley',role:index?'secondary':'primary'},label:'찬양 '+(index+1),assignee:''},index,service}));
-     const expected=['DB: 가사','DB: 음원 (어린이)','DB: 악보 (새찬송가)','직접 추가: 가사','직접 추가: 음원'];
+     const expected=['DB: 가사','DB: 음원 (어린이)','DB: 악보 (찬송가)','직접 추가: 가사','직접 추가: 음원'];
      const picker=document.createElement('div');picker.innerHTML=renderServicePraiseInputModeControl(item,0);
      if(JSON.stringify([...picker.querySelectorAll('option')].map(o=>o.textContent))!==JSON.stringify(expected))throw Error('output names/order');
      if(picker.querySelector('select').getAttribute('aria-label')!=='찬양 출력 유형')throw Error('output type label');
@@ -100,6 +100,14 @@ try:
       return 'PASS single song with visible header, one save and compact controls';
      }"""),flush=True)
      if width==1600:page.screenshot(path=f'/tmp/mindex-single-song-{engine}.png')
+    page.evaluate("""()=>{
+     const fixture=document.querySelector('#fixture'),wrapper=document.createElement('div');wrapper.id='servicePresenterControls';fixture.replaceWith(wrapper);wrapper.append(fixture);
+     const row=fixture.querySelector('.svc-inline-song');
+     const actions=['.svc-progression-media > summary','.svc-board-subgroup-audio-upload','.svc-board-subgroup-commit'].map(selector=>row.querySelector(selector));
+     for(const e of actions){const r=e.getBoundingClientRect(),s=getComputedStyle(e);if(Math.abs(r.width-60)>1||Math.abs(r.height-30)>1||s.paddingLeft!=='10px'||s.paddingRight!=='10px')throw Error('action geometry mismatch');if(e.querySelector('[data-lucide],svg'))throw Error('redundant action icon');}
+     const styles=actions.map(e=>{const s=getComputedStyle(e);return [s.backgroundColor,s.borderColor,s.borderRadius,s.fontSize,s.fontWeight].join('|')});if(new Set(styles).size!==1)throw Error('action style mismatch '+styles);
+    }""")
+    page.screenshot(path=f'/tmp/mindex-text-actions-{engine}.png')
     page.evaluate("""()=>{document.body.innerHTML='<aside class="svc-presenter-side-panel" style="width:260px"></aside>';window.renderOutputFixture=open=>{isPresenterOutputWindowOpen=()=>open;document.querySelector('aside').innerHTML=renderPresenterControlsTop(state.services[0],[],false,0);};}""")
     for opened in [False,True]:
      page.evaluate('(open)=>renderOutputFixture(open)',opened)
