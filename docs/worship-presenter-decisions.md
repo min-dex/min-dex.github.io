@@ -4413,3 +4413,10 @@ Overflowing text fits on a 1px grid measured at 1920px stage width. Remove the
 Use bounded binary search for the largest fitting grid size. Fullscreen order
 headings and assignees join the same fit path; output and thumbnails use the
 same stage measurements. Preserve chromakey order/person sizing.
+## Multiple administrators ·2026-10-24
+
+Allow multiple administrator devices to control one output independently, while
+retaining one ordinary Remote guest. Administrators never occupy or evict the
+guest slot. Preserve shared command revision/serialization; one controller's
+disconnect must not terminate other controllers. See the remote contract for
+migration, old-host compatibility and verification/publication status.

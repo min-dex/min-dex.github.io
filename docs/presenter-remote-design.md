@@ -297,3 +297,34 @@ Legacy six-digit RPCs remain for already-open older clients during rollout; the
 new UI does not create or accept those codes. This is compatibility for deployed
 clients, not a fallback for missing new server functions. No worship, Praise,
 lyrics, timing, media, or administrator PIN records are migrated by this change.
+
+## Multiple administrators, one guest ·2026-10-24
+
+User chose multiple concurrent administrators while retaining one ordinary Remote
+per output. The new migration `2026-10-24-multi-admin.sql` changes only the private
+admin-link primary key to (output_id, request_id), preserving existing records.
+The configured PIN and all operational worship/Praise data are unchanged. The
+global twenty-admin login cap is removed; PIN guess lockout, session expiry,
+fresh-state checks and output registry limits remain. This is removal of the
+one-controller product limit, not a claim of infinite hardware/network capacity.
+
+The host maintains one encrypted relay per administrator and one for the guest.
+Each has its own request ID, secret and readiness acknowledgement. Disconnect or
+logout removes only that administrator's owned links; stopping the output removes
+all its links. Every controller shares the actual host adapter's mutation revision
+and execution lock, so stale simultaneous commands cannot replay across sessions.
+Failed revocations remain remembered until a fresh server report confirms removal.
+
+New hosts announce multiAdmin capability and consume a links array. Older hosts
+continue receiving their single link, and a second administrator gets a host
+refresh message until that PC updates. A new host with the previous server still
+works with one administrator; it cannot silently pretend multi-admin is active.
+The guest slot and its four-digit code behavior remain unchanged.
+
+Local verification: real PostgreSQL migration replay and existing-link preservation,
+independent secrets/readiness/logout, denied request takeover, one-guest limit,
+old-host guard, more than twenty valid admin logins, output isolation and ACL.
+Actual encrypted two-admin/one-guest relay tests cover stale concurrent commands,
+independent disconnect and continued control. Chromium/WebKit admin UI and actual
+presenter adapter checks pass. Production SQL installation and deployment are
+pending, tracked separately from these isolated checks.

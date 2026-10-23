@@ -1,0 +1,46 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {randomBytes,randomUUID} from 'node:crypto';
+import {openWorshipTestDb} from './helpers/worship-test-db.mjs';
+const db=await openWorshipTestDb({requirePostgres:true});
+try {
+ await db.exec('create role anon;create role authenticated;');
+ for(const f of ['2026-10-22-remote-pin.sql','2026-10-24-remote-admin.sql','2026-10-24-output-codes.sql'])await db.exec(fs.readFileSync(new URL('../migrations/'+f,import.meta.url),'utf8'));
+ const c=await db.connect();await c.query('set role anon');
+ const token=()=>randomBytes(32).toString('hex'),pin=token().slice(0,16);
+ await db.query("insert into mindex_remote_private.admin_pin(hash) values(extensions.crypt($1,extensions.gen_salt('bf',4)))",[pin]);
+ const login=async()=>(await c.query('select public.mindex_remote_admin_login($1) r',[pin])).rows[0].r;
+ const host=async(action,h={},info={},ready=null)=>(await c.query('select public.mindex_remote_output($1,$2,$3,$4,$5) r',[action,h.id||null,h.token||null,info,ready])).rows[0].r;
+ const admin=async(action,t,h=null,request=null)=>(await c.query('select public.mindex_remote_admin($1,$2,$3,$4) r',[action,t,h,request])).rows[0].r;
+ const guest=async(action,t,code=null)=>(await c.query('select public.mindex_remote_guest($1,$2,$3) r',[action,t,code])).rows[0].r;
+ const h=await host('register'),a=await login(),b=await login(),ra=randomUUID(),rb=randomUUID();
+ assert((await admin('connect',a.token,h.id,ra)).ok);
+ const before=await host('tick',h,{},ra);assert(before.link.secret);
+ const migration=fs.readFileSync(new URL('../migrations/2026-10-24-multi-admin.sql',import.meta.url),'utf8');
+ await db.exec(migration);await db.exec(migration);
+ assert.equal((await admin('connect',a.token,h.id,ra)).secret,before.link.secret,'existing connection survives migration');
+ assert.equal((await admin('connect',b.token,h.id,rb)).error,'host_upgrade','old host cannot accept extra relay');
+ await host('tick',h,{multiAdmin:true});
+ assert((await admin('connect',b.token,h.id,rb)).ok);
+ assert.equal((await admin('connect',b.token,h.id,ra)).error,'busy','request cannot be stolen');
+ const pending=await host('tick',h,{multiAdmin:true});assert.equal(pending.links.length,2);
+ assert.equal(new Set(pending.links.map(x=>x.secret)).size,2);
+ assert.equal((await admin('connect',b.token,h.id,rb)).ready,false);
+ await host('tick',h,{multiAdmin:true,adminReady:[rb]});
+ assert.equal((await admin('connect',b.token,h.id,rb)).secret,pending.links.find(x=>x.id===rb).secret);
+ const gt=token();assert((await guest('connect',gt,h.code)).ok);
+ assert.equal((await guest('connect',token(),h.code)).error,'busy','guest still limited to one');
+ let state=await host('tick',h,{multiAdmin:true});assert.equal(state.links.length,2);assert(state.guest);
+ await admin('disconnect',b.token,h.id,ra);assert.equal((await host('tick',h,{multiAdmin:true})).links.length,2);
+ await admin('logout',a.token);state=await host('tick',h,{multiAdmin:true});
+ assert.equal(state.links.length,1);assert.equal(state.links[0].id,rb);assert(state.guest);
+ // The old global 20-admin login cap no longer rejects a valid administrator.
+ for(let i=0;i<21;i++)assert((await login()).ok);
+ await guest('disconnect',gt);state=await host('tick',h,{multiAdmin:true});assert.equal(state.links.length,1);assert.equal(state.guest,null);
+ const h2=await host('register');await host('tick',h2,{multiAdmin:true});
+ assert((await admin('connect',b.token,h2.id,randomUUID())).ok);
+ await host('remove',h);assert.equal((await admin('connect',b.token,h.id,rb)).error,'offline');
+ assert.equal((await host('tick',h2,{multiAdmin:true})).links.length,1);
+ await assert.rejects(c.query('select * from mindex_remote_private.admin_links'),/permission denied/);
+ console.log('PASS migration replay/preservation, concurrent admins, independent secrets/readiness/logout, single guest, old-host guard, login cap removal, output isolation and ACL');
+}finally{await db.close();}
