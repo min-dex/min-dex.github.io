@@ -215,3 +215,42 @@ and selected-screen signature. No partial/wrong-scope success is accepted.
 CI policy changes themselves select the full gate. Verify mapping/partitions,
 failure propagation and reuse locally, then every GitHub shard. A subsequent
 CSS-only source-comment change verifies the real scoped path without changing UI.
+
+## Local release queue ·2026-10-23
+
+Concurrent final branch gates waste work when another task advances main before
+integration. The final release interval is now cooperative FIFO, while editing
+and scoped local checks remain parallel. The queue lives under
+`git rev-parse --git-common-dir` (not the worktree), so all local worktrees share
+it. It has no network access and does not push, run CI, terminate processes, or
+grant permission to publish. A claimed ticket is NOT verification evidence.
+
+1. Finish approved edits and scoped checks. Run
+   `python3 cloud/release_queue.py join --owner codex/task-name` once and retain
+   its returned ticket in the task's handoff. `status` shows owner and wait order.
+2. Run `python3 cloud/release_queue.py claim --ticket TICKET`. Exit 2 means wait;
+   do not push a final candidate while waiting. Check at sensible intervals or
+   continue independent work. Only the oldest waiting ticket can claim a free slot.
+3. After claim succeeds, fetch and reconcile latest main; finish candidate checks,
+   then push the final branch candidate once. Every required shard must succeed.
+4. Fetch again and fast-forward that exact tested SHA to main only if current
+   main is still its ancestor. Existing exact-SHA/scope-proof rules remain intact.
+5. Retain the slot until main's Pages run and public file readback finish. This
+   also avoids another release invalidating the published-base scope proof.
+   Then run `python3 cloud/release_queue.py leave --ticket TICKET`.
+
+On a fixable gate failure keep the slot while fixing/rechecking that candidate.
+If abandoning/pausing the release, first stop your own release activity, then
+leave; any retry must join again and fetch/reconcile. Cancel an unused waiting
+ticket with leave. Slots never time out or auto-steal: a crashed owner's ticket
+must be explicitly reconciled with its task before release. Unknown tickets and
+malformed state fail closed without replacing state. Atomic locked transactions
+prevent simultaneous joins/claims from overwriting each other. Requires Python
+stdlib and Git on macOS/Linux, with no packages, credentials or operational data.
+
+This coordinates cooperating threads sharing one Git common directory. It does
+not retroactively cover existing runs or independent clones/hosts; coordinate
+those explicitly. If main changes externally, reconcile/reverify as before.
+Do not use workflow-wide concurrency as a replacement: it does not reconcile
+queued candidates and can supersede pending runs. Required checks, Pages gate,
+freshness guard, exact-SHA evidence and all test coverage are unchanged.

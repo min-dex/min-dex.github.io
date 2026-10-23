@@ -26,3 +26,20 @@ Do not glob-run live/import/migration scripts: some can mutate production data.
 Never equate a successful local check with cloud execution or Pages deployment.
 Before push/integration fetch and reconcile the latest remote without discarding work.
 Keep deployment and credential access out of setup scripts and default tests.
+
+## Shared release queue
+
+Before the final branch gate, follow docs/cloud-development.md's Local release
+queue. All worktrees of this checkout share a FIFO slot in Git's common directory:
+`python3 cloud/release_queue.py join --owner <task-branch>`, retain its ticket,
+then `claim --ticket <ticket>`. Exit 2 means wait; do not start the final branch
+gate or push main while waiting. Development and scoped local checks stay parallel.
+Once claimed, fetch/reconcile latest main, batch the approved candidate, run its
+required branch gate, fetch again, and fast-forward the exact verified SHA only
+when main is still its ancestor. Keep the slot through Pages and public readback,
+then `leave --ticket <ticket>`. Release on explicit abandonment after your work
+has stopped; cancel your waiting ticket if no longer needed. Never expire/steal
+another owner's slot or cancel its run. Existing runs are not retroactively locked.
+If main changes outside this cooperative queue, reconcile and verify again;
+never reuse another SHA or weaken required checks. Separate clones/hosts need
+explicit coordination: this local queue cannot serialize them.
