@@ -1,0 +1,41 @@
+{
+  "versionId": "8853f05e-af86-548c-bc63-7477757d53f1",
+  "rowsChanged": 3,
+  "freshBrowserReadback": true,
+  "nineTablesExactExpected": true,
+  "worshipUnchanged": true,
+  "unitIdsKindsOrderUnchanged": true,
+  "runtime": {
+    "checks": [
+      {
+        "sequence": null,
+        "wordsAndRepetitionsPreserved": true
+      },
+      {
+        "sequence": [
+          "V1",
+          "V2"
+        ],
+        "wordsAndRepetitionsPreserved": true
+      },
+      {
+        "sequence": [
+          "V2",
+          "V1",
+          "V2"
+        ],
+        "wordsAndRepetitionsPreserved": true
+      },
+      {
+        "sequence": [
+          "V2"
+        ],
+        "wordsAndRepetitionsPreserved": true
+      }
+    ]
+  },
+  "newHymn": 128,
+  "slidesPerVerseBefore": 4,
+  "slidesPerVerseAfter": 2,
+  "measurementMetadataStatus": "staged for next batch publication"
+}
