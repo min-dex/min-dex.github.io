@@ -23,16 +23,16 @@ def main():
                   part_type:'Verse',part_number:n,sort_order:n,lyrics:intro+'본절 '+n+'\\n\\n끝말 할렐루야'}));
                 const version={id,hymn_no:number,praise_types:['hymn'],forms};
                 const song={id:'isolated-'+number,hymn_no:number,praise_types:['hymn'],versions:[version]};
-                for(const sequence of [null,['V2'],['V2','V1','V2']]) {
+                for(const sequence of [null,['V2'],['T','V2'],['V2','V1','V2'],['T','V2','V1','V2']]) {
                   const item={id:'isolated-item',label:'찬양',memo:serializeServiceItemMemo(sequence ? {
                     formHint:sequence.join('-'),formPreset:{forms:sequence,hint:sequence.join('-'),strength:'manual'}
                   } : {})};
                   const before=JSON.stringify({version,item,song});
                   const plan=presenterFormPlanForServiceItem(version,item,song);
                   assert(plan.forms.filter(f=>f.lyrics.startsWith(intro)).length===1,'intro count '+number);
-                  assert(plan.forms[0]._presenterTitle,'default Title missing');
+                  assert(Boolean(plan.forms[0]._presenterTitle)===(!sequence||sequence.includes('T')),'inferred or explicit Title ownership');
                   const content=plan.forms.filter(f=>!f._presenterTitle);
-                  assert(content.length===(sequence?.length||2),'selected form count');
+                  assert(content.length===(sequence?sequence.filter(x=>x!=='T').length:2),'selected form count');
                   assert(content[0].id===(sequence ? 'review-v2' : 'review-v1'),'first selected verse');
                   assert(!plan.warnings.length,'unexpected warning');
                   assert(JSON.stringify({version,item,song})===before,'saved object mutated');
