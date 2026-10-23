@@ -3900,3 +3900,12 @@ Remove artwork identity selection, per-background color substitutions, palette
 attributes and text outlines. Every artwork, preview and output uses one CSS rule;
 no stored highlight values, text, font sizes or weights change. Non-children,
 chromakey and reading frames retain their existing colored text behavior.
+
+### Service artwork typography · 2026-10-23
+
+The authored service design uses bundled Nanum Myeongjo Regular/Bold for Korean
+and Cormorant Garamond variable for Latin headings and numerals. Names are CSS
+aliases; licensed files, pinned upstream sources and lossless WOFF2 hashes live in
+`vendor/fonts/service-serif/`. Other output designs retain their existing fonts.
+Reading text remains regular weight with Korean word boundaries intact; title
+and speaker hierarchy is shared by thumbnails and fullscreen output.
