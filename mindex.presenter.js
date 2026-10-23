@@ -4559,13 +4559,13 @@ function fitPresenterSongTitlePreviews(host) {
 
 function fitPresenterSermonTitleText(host) {
   if (!host) return;
-  const orderBoxes = [...host.querySelectorAll(".presenter-title-assignee-title, .presenter-title-assignee-order, .presenter-title-assignee-person")]
+  const orderBoxes = [...host.querySelectorAll(".presenter-title-assignee-title, .presenter-title-assignee-order, .presenter-title-assignee-content, .presenter-title-assignee-person")]
     .filter(box => box.closest(".presenter-output-root")?.classList.contains("no-chromakey"));
   // Restore related grid items together so refitting does not inherit a sibling's
   // previously shrunken intrinsic width.
   orderBoxes.forEach(box => box.style.removeProperty("font-size"));
   host.querySelectorAll(".presenter-title-assignee--sermon .presenter-title-assignee-content, .presenter-title-content-title, .presenter-liturgical-body-heading > span")
-    .forEach(box => fitPresenterTextBox(box, {role:"title"}));
+    .forEach(box => { if (!orderBoxes.includes(box)) fitPresenterTextBox(box, {role:"title"}); });
   orderBoxes.forEach(box => fitPresenterTextBox(box, {role:"title"}));
 }
 
