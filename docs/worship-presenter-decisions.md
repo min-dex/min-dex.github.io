@@ -3930,6 +3930,15 @@ focus and unavailable styling. Fullscreen remains an entry command; only the
 native always-on-top checkbox displays checked state. Browser pin support and
 output-window availability remain separate capability checks. No output behavior
 or stored preference changes.
+### Service artwork typography · 2026-10-23
+
+The authored service design uses bundled Nanum Myeongjo Regular/Bold for Korean
+and Cormorant Garamond variable for Latin headings and numerals. Names are CSS
+aliases; licensed files, pinned upstream sources and lossless WOFF2 hashes live in
+`vendor/fonts/service-serif/`. Other output designs retain their existing fonts.
+Reading text remains regular weight with Korean word boundaries intact; title
+and speaker hierarchy is shared by thumbnails and fullscreen output.
+
 
 ## Refined common marker geometry ·2026-10-23
 
