@@ -1386,3 +1386,13 @@ hashes and four cloud runner partition tests PASS.
 Production installation pending user's answer allowing Safari for this new scope.
 Do not publish this candidate before both RPCs are installed/verified. No production
 song/worship writes performed for this candidate. No release queue ticket held.
+
+
+## Praise lifecycle production verification completed
+
+Approved Safari installation completed. Existing six table hashes remain unchanged.
+Real anon/authenticated lifecycle rollback probe passed; no fixture songs/receipts
+remain. Missing production source_count defaults were found by rollback QA and
+fixed explicitly in both inserts, with local PostgreSQL regression coverage.
+Release ticket: 988d1f050a884765b3374fba75004785; waiting behind current release.
+Do not claim web publication until gate, Pages and public readback complete.

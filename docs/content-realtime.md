@@ -153,7 +153,7 @@ UUID 정렬을 화면/저장 순서로 사용하지 않는다. 찬송가·CCM·�
 이 결과는 운영 서버 적용이나 실제 네트워크 단절 검증을 의미하지 않는다.
 
 
-## Atomic Praise lifecycle - 2026-10-23 (server/deployment pending)
+## Atomic Praise lifecycle - 2026-10-23 (server installed; publication separate)
 
 Sidebar creation, service-item registration and source-input blank-song creation
 share create_praise_v1. Song, canonical identity, base version and receipt commit
@@ -181,3 +181,9 @@ deletion rollback, replay/no resurrection and stale/reference/media/lyrics/metad
 removal guards. Chromium/WebKit actual handlers cover repeated clicks, lost replies,
 late title edits, sibling insertion/reordering, unsaved input and linked deletion.
 Production installation and publication remain separate checkpoints.
+
+Production: installed after explicit approval; six pre-existing table hashes match.
+Real anon/authenticated creation, title reuse, replay, stale/audio deletion guards,
+empty deletion/replay and no resurrection PASS with all fixtures/receipts rolled back.
+Production source_count lacks the baseline default; both inserts now supply it
+explicitly and the PostgreSQL fixture removes those defaults as a regression.

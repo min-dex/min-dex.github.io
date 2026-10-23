@@ -44,9 +44,9 @@ begin
  -- New empty drafts get their own canonical identity: no merge or mutation of
  -- an existing edition just because a display title happens to match.
  insert into public.mindex_songs(id,title,praise_types,memo) values(sid,title_value,types,'{}');
- insert into public.mindex_canonical_songs(id,title,normalized_title) values(sid,title_value,'draft:'||sid::text);
- insert into public.mindex_song_versions(id,canonical_song_id,source_song_id,version_order,version_label,curated_version_name,raw_section_name,praise_types,lyric_signature,is_primary)
- values(vid,sid,sid,1,'기본','기본','기본',types,'empty:'||vid::text,true);
+ insert into public.mindex_canonical_songs(id,title,normalized_title,source_count,created_at) values(sid,title_value,'draft:'||sid::text,1,now());
+ insert into public.mindex_song_versions(id,canonical_song_id,source_song_id,version_order,version_label,curated_version_name,raw_section_name,praise_types,lyric_signature,is_primary,source_count,version_review_status,created_at)
+ values(vid,sid,sid,1,'기본','기본','기본',types,'empty:'||vid::text,true,1,'pending',now());
  insert into public.mindex_praise_operations values(rid,h,'create',sid,now());
  return jsonb_build_object('snapshot',public.get_praise_snapshot_v1(sid),'replayed',false);
 end $$;

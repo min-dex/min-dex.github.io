@@ -8,7 +8,7 @@ try{
  await db.exec('create role anon; create role authenticated;');
  const schema=await fs.readFile(new URL('../supabase-schema.sql',import.meta.url),'utf8');
  await db.exec(schema.slice(schema.indexOf('create table if not exists public.mindex_songs'),schema.indexOf('-- Promote song-level')));
- await db.exec('alter table mindex_song_versions add column audio_set jsonb; create table mindex_worship_elements(id uuid primary key,song_id uuid references mindex_songs on delete set null,song_version_id uuid references mindex_song_versions on delete set null)');
+ await db.exec('alter table mindex_canonical_songs alter column source_count drop default; alter table mindex_song_versions alter column source_count drop default; alter table mindex_song_versions add column audio_set jsonb; create table mindex_worship_elements(id uuid primary key,song_id uuid references mindex_songs on delete set null,song_version_id uuid references mindex_song_versions on delete set null)');
  for(const path of ['2026-10-23-praise-atomic-save.sql','2026-10-23-praise-lifecycle.sql'])await db.exec(await fs.readFile(new URL('../migrations/'+path,import.meta.url),'utf8'));
  const req=(title='새 찬양')=>({protocolVersion:1,requestId:uuid(),songId:uuid(),versionId:uuid(),title,praiseTypes:['ccm'],autoTitle:false,reuseExisting:false});
  const create=r=>scalar('select create_praise_v1($1)',[r]);
