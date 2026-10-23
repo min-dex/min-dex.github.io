@@ -455,7 +455,7 @@
     const version = getPresenterServiceItemVersion(song, item, service);
     const serviceTiming = all.some(s => s.serviceTimingPage);
     if (!serviceTiming && (!isChildrenVersion(song, version) || !isChildrenMode(item))) { showToast('어린이 유형의 버전을 선택해 주세요.', 'error'); return; }
-    const setForms = serviceTiming ? null : formsFor(item, song, version, presenterFormPlanForServiceItem(version, item, song).forms);
+    const setForms = serviceTiming ? null : formsFor(item, song, version, presenterFormPlanForServiceItem(version, item, song).forms.filter(form => !form._presenterTitle));
     const linkedAudio = normalizeServiceAudioAsset(parseServiceItemMemo(item.memo).audioAsset);
     const stored = serviceTiming ? parseServiceItemMemo(item.memo).audioTiming : null;
     const old = stored ? {...stored, audioName:linkedAudio.name, url:stored.audioUrl} : (serviceTiming ? null : versionProfile(song,version));
