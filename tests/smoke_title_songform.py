@@ -82,6 +82,7 @@ try:
     check(normalizeServiceFormHint('Interlude')==='Int','canonical interlude input changed');
     const ordinaryBlank={...interlude,formLabel:'',title:'빈 화면',marker:''};
     check(!presenterSlideSupportsFormGrouping(ordinaryBlank),'ordinary blank gained form caption');
+    check(presenterFormGroupLabel(presenterElementTrailingBlankSlide(interlude,0))==='','trailing blank inherited interlude caption');
     const manualInterlude={...item,song_id:null,version_id:null,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'manual_praise',slides:['첫 화면','후렴'],formPreset:{forms:['V1','Int','C'],titleSequence:true,strength:'manual'}})};
     const manualBlank=buildPresenterCustomSlides(manualInterlude,section,0).find(s=>s.type==='blank');
     check(manualBlank && presenterFormGroupLabel(manualBlank)==='Interlude' && manualBlank.text==='','direct interlude caption/output');

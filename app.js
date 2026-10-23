@@ -32068,6 +32068,7 @@ function presenterSlideSupportsFormGrouping(slide, formLabel = presenterFormGrou
 }
 
 function presenterFormGroupLabel(slide) {
+  if (slide?.autoTrailingBlank) return "";
   const label = String(slide?.formLabel || slide?.marker || "").trim();
   if (isGenericPresenterFormLabel(label)) return "";
   const form = normalizePresenterFormPresetLabel(label);
