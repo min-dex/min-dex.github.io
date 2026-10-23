@@ -4358,3 +4358,10 @@ Existing authored titleSequence presets still own omitted, repeated and middle
 T positions; secondary connected-praise items do not add duplicate titles.
 This extends default scope only: stored forms, lyrics, score pages, audio cues
 and ordinary offering/response/sending headings are unchanged.
+## Song-note accent scope ·2026-10-24
+
+Shared note-above-title geometry does not opt ordinary services into the special
+service palette. Gold #cba56a belongs only to authored presentationDesign
+songTitleStyle note-title. Other fullscreen titles inherit the shared output
+foreground (white or brown), identically in thumbnails and output. Chromakey
+and all saved service/song content are unchanged.

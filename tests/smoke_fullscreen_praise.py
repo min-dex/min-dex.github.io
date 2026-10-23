@@ -46,6 +46,17 @@ def main():
                   check(standard.querySelector('.presenter-slide--song-note-title'),'shared note title layout missing');
                   const otherDesign=document.createElement('div');otherDesign.innerHTML=renderPresenterSlideFrame(song,{noChromakey:true,presentationDesign:{sectionKeys:['sermon'],accent:'#112233'}});
                   check(otherDesign.textContent.includes('부제')&&otherDesign.querySelector('.presenter-slide--song-note-title'),'another service design lost subtitle or shared layout');
+                  for(const [ink,wanted] of [['white','rgb(255, 255, 255)'],['brown','rgb(51, 34, 17)']]) {
+                    const root=document.createElement('div');root.className='presenter-output-root no-chromakey has-background';root.dataset.outputInk=ink;
+                    document.body.append(root);
+                    for(const html of [standard.innerHTML,otherDesign.innerHTML]) {
+                      root.innerHTML=html;
+                      check(getComputedStyle(root.querySelector('.presenter-fullscreen-song-heading')).color===wanted,'ordinary note does not follow '+ink);
+                    }
+                    root.innerHTML=songHtml;
+                    check(getComputedStyle(root.querySelector('.presenter-fullscreen-song-heading')).color==='rgb(203, 165, 106)','authored note accent lost');
+                    root.remove();
+                  }
                   const keyed=renderPresenterSlideFrame(song,{noChromakey:false,presentationDesign:{songTitleStyle:'note-title'}});
                   check(!keyed.includes('presenter-slide--song-note-title'),'fullscreen choice leaked into keyed output');
                   const videoSlide={...song,backgroundVideo:presentation.backgroundVideo};
