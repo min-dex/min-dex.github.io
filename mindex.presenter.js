@@ -589,10 +589,10 @@ function presenterFormPresetWithDefaultTitle(preset, item, song, version, option
 }
 
 function presenterScoreFormSequence(item = {}, song = null, version = null) {
-  if (serviceItemFormPresetDisabled(item) && parseServiceItemMemo(item.memo).formPreset?.titleSequence) return { forms: [], titleSequence: true };
-  const preset = serviceItemFormPresetDisabled(item) ? null : serviceItemFormPreset(item)
-    || matchedServiceItemFormPresetRule(item, song, version)?.formPreset
-    || presenterSongDefaultFormPreset(song, version);
+  const preset = serviceItemFormPreset(item)
+    || presenterSongDefaultFormPreset(song, version)
+    || serviceItemTemplateFormDefaults(item).formPreset
+    || matchedServiceItemFormPresetRule(item, song, version)?.formPreset;
   return presenterFormPresetWithDefaultTitle(preset, item, song, version, { score: true }) || { forms: [] };
 }
 
@@ -732,7 +732,7 @@ function presenterServiceItemFormPreset(version = {}, item = {}, song = null, op
   const sourceSequence = available.length && available.every(form => normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form)).type !== "lyrics")
     ? { forms: available.map(presenterFormDisplayLabel), strength: "auto" } : null;
   const preset = presenterServiceItemBaseFormPreset(version, item, song, options)
-    || (options.includePlaybackFallback !== false && !serviceItemFormPresetDisabled(item) ? sourceSequence : null);
+    || (options.includePlaybackFallback !== false ? sourceSequence : null);
   // Typed sequences own Title. Only the ordinary main-praise default adds it.
   if (preset?.titleSequence || parseServiceItemMemo(item?.memo).formPreset?.titleSequence) return preset;
   if (!preset?.forms?.length && options.includePlaybackFallback === false) return preset;
@@ -741,12 +741,6 @@ function presenterServiceItemFormPreset(version = {}, item = {}, song = null, op
 }
 
 function presenterServiceItemBaseFormPreset(version = {}, item = {}, song = null, { includePlaybackFallback = true } = {}) {
-  // Clearing the editable form suppresses stored defaults, not the ordinary
-  // verse/chorus playback cycle. Keep the input empty and never persist inference.
-  if (serviceItemFormPresetDisabled(item)) {
-    const forms = normalizeForms(version?.forms || []).filter((form) => normalizeLyricsForCopy(form.lyrics));
-    return includePlaybackFallback ? presenterDefaultVerseChorusFormPreset(forms, song, version) : null;
-  }
   const itemPreset = serviceItemFormPreset(item);
   // Defaults only fill an empty item; a stored sequence keeps its playback order.
   if (itemPreset?.forms?.length) {
@@ -760,6 +754,9 @@ function presenterServiceItemBaseFormPreset(version = {}, item = {}, song = null
   const isHymn = versionEffectivePraiseTypes(song, version).includes("hymn");
   const matchedRule = matchedServiceItemFormPresetRule(item, song, version);
   const songDefaultPreset = presenterSongDefaultFormPreset(song, version);
+  if (songDefaultPreset) return songDefaultPreset;
+  const templatePreset = includePlaybackFallback && serviceItemTemplateFormDefaults(item).formPreset;
+  if (templatePreset) return templatePreset;
   const specialHymnRulePreset = presenterSpecialSongHymnFormPreset(item, song, version, matchedRule);
   return isHymn
     ? specialHymnRulePreset

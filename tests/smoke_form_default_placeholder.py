@@ -41,6 +41,38 @@ try:
     const intentional={...imported};
     applyServiceItemMetadataField(intentional,{dataset:{serviceItemField:'form_hint'},value:'V1-C'},service);
     check(input(intentional).value==='V1-C' && !presenterFormPlanForServiceItem(version,intentional,song).forms.some(f=>f._presenterTitle),'source praise intentional omission preserved');
+    let backgroundCases=0;
+    for(const date of ['2026-07-19','2026-10-25','2027-01-03'])for(const type of Object.keys(SERVICE_ORDER_TEMPLATE_FALLBACKS)) {
+     const svc={id:'defaults-'+date+'-'+type,type_id:type,date};state.services=[svc];
+     for(const [sectionIndex,step] of serviceOrderTemplate(type,{service:svc}).entries())for(const element of worshipTemplateElementSteps(step,step.label||step.name||'')) {
+      const expected=normalizeServiceFormPreset(element.formPreset||element.form_preset,element.formHint||element.form_hint,element.defaultStrength);
+      if(!expected?.forms?.length)continue;
+      const label=element.label||element.name||step.label;
+      const row={id:'default-'+backgroundCases,service_id:svc.id,label,_worshipSectionKey:worshipTemplateSectionKey(step.label||step.name,sectionIndex,step),memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formPresetDisabled:true})};
+      const original=JSON.stringify(row);
+      const hint=input(row);const wanted=normalizeServiceFormHint(expected.forms);
+      check(hint.value==='' && (hint.placeholder===wanted || hint.placeholder==='T-'+wanted),'background default missing '+type+'/'+label+' '+hint.outerHTML);
+      check(JSON.stringify(row)===original,'background default changed stored row');
+      const plan=presenterServiceItemFormPreset({},row,null);
+      check(normalizeServiceFormHint(plan.forms)===hint.placeholder,'background placeholder/playback mismatch '+type+'/'+label);
+      check(!serviceElementConfigForSave({},parseServiceItemMemo(row.memo)).formPreset,'background persisted on save');
+      const authored={...row};applyServiceItemMetadataField(authored,{dataset:{serviceItemField:'form_hint'},value:'C-V1'},svc);
+      const authoredBefore=JSON.stringify(authored);
+      check(input(authored).value==='C-V1' && presenterServiceItemFormPreset({},authored,null).forms.join('-')==='C-V1','authored sequence overwritten '+type+'/'+label);
+      const projected=mergeTemplateProjectionMemo(serializeServiceItemMemo({formPreset:expected,formHint:wanted}),authored.memo);
+      check(parseServiceItemMemo(projected).formHint==='C-V1','template projection overwrote manual form');
+      check(JSON.stringify(authored)===authoredBefore,'authored source changed');
+      const legacyAuto={...row,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formPreset:expected,formHint:wanted})};
+      check(input(legacyAuto).value.endsWith(wanted),'existing stored sequence must be preserved even with legacy default strength');
+      const uncertain={...row,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formPreset:{forms:['C','V1','C'],strength:'default'}})};
+      check(input(uncertain).value.endsWith('C-V1-C'),'unmatched stored legacy form changed');
+      backgroundCases++;
+     }
+     const scaffold=buildWorshipServiceScaffold(svc.id,type,{service:svc});
+     check(scaffold.elements.every(e=>!e.config.formHint && !e.config.formPreset),'new scaffold materialized background defaults '+type);
+    }
+    check(backgroundCases>=20,'background matrix did not exercise templates');
+    state.services=[service];
     song.metadata={presenter_form:{forms:['C','V1'],strength:'song-default'}};
     const registered={id:'registered',label:'찬양 1',_worshipSectionKey:'praise',song_id:song.id,version_id:version.id,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db'})};
     check(input(registered).value==='T-C-V1','registered main default filled');
@@ -68,17 +100,27 @@ try:
     check(input(scoreItem).placeholder==='V2-C','explicit score assets own placeholder');
     scoreItem.memo=serializeServiceItemMemo({elementType:'praise',inputMode:'score_db',outputMode:'score',asset:{slides:[{url:'custom1.png'}]}});
     const wholeBefore=JSON.stringify(scoreItem);
-    check(input(scoreItem).value==='' && input(scoreItem).placeholder==='V','unlabelled score shows whole-score light default');
+    check(input(scoreItem).value==='' && input(scoreItem).placeholder==='V-C','unlabelled score shows actual source form default');
     check(JSON.stringify(scoreItem)===wholeBefore && !serviceElementConfigForSave({},parseServiceItemMemo(scoreItem.memo)).formPreset,'whole-score default never persists');
     applyServiceItemMetadataField(scoreItem,{dataset:{serviceItemField:'form_hint'},value:'V-V'},service);
     check(input(scoreItem).value==='V-V','authored score sequence overrides whole-score placeholder');
     applyServiceItemMetadataField(scoreItem,{dataset:{serviceItemField:'form_hint'},value:''},service);
-    check(input(scoreItem).value==='' && input(scoreItem).placeholder==='V','clearing score restores light V');
+    check(input(scoreItem).value==='' && input(scoreItem).placeholder==='V-C','clearing score restores actual light forms');
     scoreItem.memo=serializeServiceItemMemo({elementType:'praise',inputMode:'score_db',outputMode:'score',asset:{kind:'score',url:'https://example.invalid/score.pdf'}});
     const fileScore={...scoreItem,song_id:null,version_id:null,_worshipSectionKey:'offering'};
-    check(input(fileScore).value==='' && input(fileScore).placeholder==='V','single score file shares whole-score default');
+    check(input(fileScore).value==='' && input(fileScore).placeholder==='송폼','unlinked score file must not invent V');
     const noScore={...scoreItem,song_id:null,version_id:null,raw_title:'',memo:serializeServiceItemMemo({elementType:'praise',inputMode:'score_db',outputMode:'score'})};
     check(!input(noScore).placeholder.split('-').includes('V'),'missing score never invents content default');
+    for(const [kinds,wanted] of [[['Verse','Coda'],'V-Coda'],[['Verse'],'V'],[['Lyrics'],'Lyrics']]) {
+      const vv={id:'real-score-version',name:'새찬송가',praise_types:['hymn'],forms:kinds.map((part_type,i)=>({id:'part-'+i,part_type,lyrics:'검증 가사'}))};
+      const ss={id:'real-score',title:'단일 구성 악보',praise_types:['hymn'],versions:[vv],_relationalVersionsLoaded:true};state.songs=[ss];
+      const row={id:'real-score-row',song_id:ss.id,version_id:vv.id,label:'찬양 1',_worshipSectionKey:'praise',memo:serializeServiceItemMemo({elementType:'praise',inputMode:'score_db',outputMode:'score',formPresetDisabled:true,asset:{slides:[{url:'one.png'},{url:'two.png'}]}})};
+      const original=JSON.stringify({row,ss});
+      check(input(row).value==='' && input(row).placeholder===wanted,'actual single-score structure '+wanted+' '+input(row).outerHTML);
+      check(JSON.stringify({row,ss})===original,'score source changed');
+      ss.metadata={presenter_form:{forms:['C','V'],titleSequence:true}};
+      check(input(row).value==='C-V' && presenterScoreFormSequence(row,ss,vv).forms.join('-')==='C-V','registered form must remain editable and authoritative after clear');
+    }
     return 'PASS empty placeholder, default scope, content headings, linking, authored input, clear/save and registered forms';
    }'''),flush=True);browser.close()
 finally:server.shutdown();server.server_close()

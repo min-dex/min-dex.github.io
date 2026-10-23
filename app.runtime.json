@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261024-audio-summary-input",
+  "version": "20261024-background-form-defaults",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "8fcdf98e60609c5cec0617d178ac57eac3f2cbdd36ba3a9547455b522ce30a9c",
-  "runtime_sha256": "11574049a2c3765d3898f4e09eb22e3770e40a413aa68ae9b509e063ec6f8306",
-  "source_bytes": 1572626,
-  "runtime_bytes": 1113816,
-  "source_gzip": 355074,
-  "runtime_gzip": 277323
+  "source_sha256": "936843ae0e70df7dac629d4055d81b031080c02c938adb10fca8b21ea597e903",
+  "runtime_sha256": "99ad222772632a9ae294fb338e8548cec0e7ca62ebead528f56d5097c6d5d2c5",
+  "source_bytes": 1573477,
+  "runtime_bytes": 1114513,
+  "source_gzip": 355289,
+  "runtime_gzip": 277514
 }

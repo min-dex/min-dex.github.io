@@ -4305,3 +4305,27 @@ score file. Existing default Title scope still applies; hymn scores add no T.
 No score content means no inferred V. User-entered forms remain authoritative;
 clearing restores the light default without saving it as an authored sequence.
 No form metadata, worship content, page ordering or audio timing is rewritten.
+
+
+## Background sequence ownership restored ·2026-10-24
+
+Background defaults are not authored input values. Resolve each service's dated
+native template at read/playback time, regardless of the legacy cleared-input
+flag. User-authored stored forms win, then registered song/version presenter
+metadata, then template/rule defaults, then available lyric structure. Empty
+fields show the resulting background sequence only as a light placeholder.
+All existing nonempty stored sequences, including ambiguous legacy default-strength
+records, are preserved conservatively. Only newly inferred template defaults are
+background values; confirmed automatic records cleared earlier stay empty.
+Template projection never overwrites existing authored forms, and new service
+scaffolds do not materialize background form hints/presets into operational rows.
+
+Past and future services use the same dated template resolver; no department,
+service-ID or hymn-number repair list and no production row rewrite is involved.
+Clearing a field removes the override, not the background arrangement. Registered
+metadata remains an editable value even after clearing an item override.
+
+For unlabelled scores, the light hint follows actual available lyric forms
+(including Coda or Lyrics), superseding the blanket V hint above. No source forms
+means no guessed V. Whole-score controller blocks remain whole; no artificial
+score-page boundaries, source IDs, lyrics, timing or protected manual edits change.

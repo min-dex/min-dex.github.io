@@ -13963,13 +13963,7 @@ function buildWorshipServiceScaffold(serviceId, typeId, options = {}) {
         : String(elementStep.label || elementStep.name || label).trim() || label;
       const elementType = ready ? servicePreparationElementTypeForRoleAndService(elementReadyRole, service, typeId) : worshipTemplateElementType(elementStep, elementLabel);
       const defaultStrength = String(elementStep.defaultStrength || elementStep.default_strength || "").trim();
-      const formPreset = normalizeServiceFormPreset(
-        elementStep.formPreset || elementStep.form_preset,
-        elementStep.formHint || elementStep.form_hint,
-        defaultStrength,
-      );
       const formPresetRules = normalizeServiceFormPresetRules(elementStep.formPresetRules || elementStep.form_preset_rules);
-      const formHint = String(elementStep.formHint || elementStep.form_hint || formPreset?.hint || "").trim();
       const outputMode = normalizeServiceOutputMode(elementStep.outputMode || elementStep.output_mode || elementStep.renderMode || elementStep.render_mode);
       const introSlide = normalizeServiceIntroSlide(elementStep.introSlide || elementStep.intro_slide || elementStep.titleSlide || elementStep.title_slide);
       const textHighlights = normalizeServiceTextHighlights(elementStep.textHighlights || elementStep.text_highlights || elementStep.highlights);
@@ -14006,8 +14000,6 @@ function buildWorshipServiceScaffold(serviceId, typeId, options = {}) {
         source_kind: "mindex",
         source_ref: { label: elementLabel, ...(slotKey ? { slotKey } : {}), template: true, placeholder: !ready, ...(templateVersion ? { template_version: templateVersion } : {}) },
         config: {
-          ...(formHint ? { formHint } : {}),
-          ...(formPreset ? { formPreset } : {}),
           ...(formPresetRules.length ? { formPresetRules } : {}),
           ...(defaultStrength ? { defaultStrength } : {}),
           ...(outputMode ? { outputMode } : {}),
@@ -22624,8 +22616,8 @@ function mergeTemplateProjectionMemo(templateMemo = "", existingMemo = "") {
     elementType: template.elementType || existing.elementType,
     componentType: template.componentType || template.elementType || existing.componentType,
     outputMode: template.outputMode || existing.outputMode,
-    formHint: formPresetDisabled ? "" : template.formHint || existing.formHint,
-    formPreset: formPresetDisabled ? (existing.formPreset?.titleSequence ? existing.formPreset : null) : template.formPreset || existing.formPreset,
+    formHint: formPresetDisabled ? "" : existing.formHint,
+    formPreset: formPresetDisabled ? (existing.formPreset?.titleSequence ? existing.formPreset : null) : existing.formPreset,
     formPresetDisabled,
     formPresetRules: formPresetDisabled ? [] : template.formPresetRules.length ? template.formPresetRules : existing.formPresetRules,
     textHighlights: template.textHighlights.length ? template.textHighlights : existing.textHighlights,
@@ -23673,21 +23665,40 @@ function serviceItemFormPresetDisabled(item) {
 
 function serviceItemFormPresetRules(item) {
   const parsed = parseServiceItemMemo(item?.memo);
-  if (parsed.formPresetDisabled) return [];
-  const rules = [...(parsed.formPresetRules || [])];
+  const rules = [...(parsed.formPresetRules?.length ? parsed.formPresetRules
+    : serviceItemTemplateFormDefaults(item).formPresetRules || [])];
   if (isSpecialSongServiceItem(item) && !serviceFormPresetRulesHaveHymnRule(rules)) {
     rules.push(PUBLIC_SPECIAL_HYMN_FORM_PRESET_RULE);
   }
   return rules;
 }
 
+function serviceItemTemplateFormDefaults(item = {}) {
+  const serviceId = item.service_id || state.selectedServiceId;
+  const service = state.services.find(entry => entry.id === serviceId);
+  if (!service) return {};
+  const matches = [];
+  for (const [index, step] of serviceOrderTemplate(service.type_id, { service }).entries()) {
+    const sectionKey = worshipTemplateSectionKey(step.label || step.name || "", index, step);
+    for (const element of worshipTemplateElementSteps(step, step.label || step.name || "")) {
+      if (compactSearchValue(element.label || element.name || "") !== compactSearchValue(item.label || "")) continue;
+      matches.push({ sectionKey, element });
+    }
+  }
+  const exact = matches.filter(match => match.sectionKey === templateProjectionSectionKey(item));
+  const match = exact.length === 1 ? exact[0] : matches.length === 1 ? matches[0] : null;
+  if (!match) return {};
+  const element = match.element;
+  return {
+    formPreset: normalizeServiceFormPreset(element.formPreset || element.form_preset, element.formHint || element.form_hint, element.defaultStrength || element.default_strength),
+    formPresetRules: normalizeServiceFormPresetRules(element.formPresetRules || element.form_preset_rules),
+  };
+}
+
 function serviceItemEffectiveFormHint(item = {}) {
-  const parsed = parseServiceItemMemo(item?.memo);
-  if (parsed.formPresetDisabled) return "";
   const song = serviceItemLinkedSong(item);
   const version = serviceItemLinkedVersion(item, song);
-  const preset = parsed.formPreset || (parsed.formHint ? normalizeServiceFormPreset(parsed.formHint) : null)
-    || presenterSongDefaultFormPreset(song, version);
+  const preset = serviceItemFormPreset(item) || presenterSongDefaultFormPreset(song, version);
   return preset ? serviceFormPresetSummary(presenterFormPresetWithDefaultTitle(preset, item, song, version)) : "";
 }
 
@@ -23705,7 +23716,10 @@ function serviceItemDefaultFormHint(item = {}) {
   const sources = presenterScoreImageSourcesFromAsset(asset, song, version, serviceItemDisplayText(item));
   const labels = sources.map(presenterScoreFormLabelFromAssetSlide).filter(Boolean)
     .map(canonicalServiceFormToken).filter((label, index, all) => index === 0 || label !== all[index - 1]);
-  if (!labels.length && (sources.length || asset.url)) labels.push("V");
+  if (!labels.length && (sources.length || asset.url)) {
+    labels.push(...normalizeServiceFormPresetForms(normalizeForms(version?.forms || [])
+      .filter(form => normalizeLyricsForCopy(form.lyrics)).map(presenterFormDisplayLabel)));
+  }
   return labels.length ? normalizeServiceFormHint([...(preset.forms || []), ...labels]) : serviceFormPresetSummary(preset);
 }
 
