@@ -4191,3 +4191,18 @@ fallback. Existing saved sequences/lyrics/versions, audio cues and IDs are retai
 there is no bulk data rewrite. The read-only audit found891 praise elements:
 720 without a stored form and171 with one. Five main-praise items contain saved
 Title tokens; those authored positions remain intact.
+
+### 2026-10-23 · Empty future-service summaries
+
+The controller heading and left outline use one read-only item summary for
+editable single elements. The element label, actual content title and effective
+assignee remain separate; a sermon assignee is never substituted for its title.
+The text editor respects the existing person-in-title override instead of showing
+the same person as both title and assignee. Missing content stays marked even if
+another field already contains text. Connected praise and multi-part corporate
+prayer keep their group summaries. This is display-only: stored items, draft
+contents, slide payloads/order, playback and printing are unchanged.
+
+`tests/smoke_future_outline_consistency.py` exercises all14 service types with
+isolated future templates, partial/complete/legacy inputs, matching UI summaries,
+unchanged items/output and narrow/wide rendered controls.

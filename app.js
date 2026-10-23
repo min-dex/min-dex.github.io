@@ -24393,19 +24393,11 @@ function renderServiceOutlineChildRow(service, item, index, selectedIndex, slide
   const slideIndex = firstPresenterSlideIndexForServiceItem(item, slides, slideIndexByItemId);
   const activeSlide = presenterControllerIsLive(service.id) && slideIndex >= 0 && presenterSlideBelongsToItem(state.presenter.slides[state.presenter.index], item);
   const selected = index === selectedIndex;
-  const titleParts = serviceSidebarChildItemDisplayParts(item, service);
-  const assignee = serviceSidebarOutlineFirstLine(serviceItemEditableAssigneeValue(item, service));
-  // Prayer summaries already include their assignee; keep person-only rows singular.
-  if (assignee && !serviceSidebarPersonSummary(item, service)) {
-    const titleNames = String(titleParts.title || "").split(/\s*[·/]\s*/u).map(compactSearchValue);
-    if (!titleNames.includes(compactSearchValue(assignee))) {
-      titleParts.title = [titleParts.title, assignee].filter(Boolean).join(" / ");
-    }
-  }
+  const titleParts = serviceItemSummaryDisplayParts(item, service);
   const title = [titleParts.meta, titleParts.title].filter(Boolean).join(" · ") || serviceSidebarChildItemTitle(item, service);
   const interactionHint = presenterSlideInteractionHint(service.id, title);
   const missing = serviceOutlineMissingState(item, slides);
-  const showMissingBadge = missing?.missingContent && !titleParts.title;
+  const showMissingBadge = missing?.missingContent;
   return `
     <button class="service-outline-row service-outline-row--child${selected ? " selected" : ""}${activeSlide ? " active" : ""}" type="button"${activeSlide ? ' aria-current="step"' : ""}
       data-service-outline-slide="${escapeAttr(slideIndex >= 0 ? slideIndex : "")}"
@@ -24507,6 +24499,20 @@ function serviceItemOrdinalDisplayLabel(item, service = null, automaticOnly = fa
   return peers.length === 1 ? base : `${base} ${index + 1}`;
 }
 
+// Controller and outline share the same read-only title/person summary.
+function serviceItemSummaryDisplayParts(item, service = null) {
+  const titleParts = serviceSidebarChildItemDisplayParts(item, service);
+  const assignee = serviceSidebarOutlineFirstLine(serviceItemEditableAssigneeValue(item, service));
+  // Prayer summaries already include their assignee; keep person-only rows singular.
+  if (assignee && !serviceSidebarPersonSummary(item, service)) {
+    const titleNames = String(titleParts.title || "").split(/\s*[·/]\s*/u).map(compactSearchValue);
+    if (!titleNames.includes(compactSearchValue(assignee))) {
+      titleParts.title = [titleParts.title, assignee].filter(Boolean).join(" / ");
+    }
+  }
+  return titleParts;
+}
+
 function serviceSidebarChildItemDisplayParts(item, service = null) {
   const connectedOrderTitle = serviceItemConnectedPraiseTitle(item, "order");
   const connectedSongTitle = serviceItemConnectedPraiseTitle(item, "title");
@@ -24540,6 +24546,7 @@ function serviceSidebarChildItemDisplayText(item = {}) {
     const version = getPresenterServiceItemVersion(song, effectiveItem, service);
     return presenterSongTitleDisplayTitle(song, version, serviceItemDisplayText(effectiveItem));
   }
+  if (serviceTitlePersonRawTitleAssignee(item)) return "";
   const rawTitle = String(item?.raw_title || "").trim();
   if (rawTitle) {
     const contentTitle = serviceItemContentTitleWithoutElementName(item, rawTitle);
@@ -29388,7 +29395,7 @@ function renderPresenterServiceTextInputs(item, index, model, memo) {
         ${presenterServiceTitleFieldShowsLabel(titleLabel) ? `<span>${escapeHtml(titleLabel)}</span>` : ""}
         ${manualPraise ? renderServiceEditorTitleControl(item, index, { service: model?.service, hideFormControls: true }, model) : `
           <input class="svc-presenter-input-control" type="text" data-service-item-field="raw_title" data-service-item-index="${index}"
-            value="${escapeAttr(item.raw_title || "")}" placeholder="${escapeAttr(titlePlaceholder)}" onkeydown="handleDetailKeydown(event)" ${specialSong ? `autocomplete="off" spellcheck="false"` : ""} aria-label="${escapeAttr(`${item.label || "항목"} ${titleLabel}`)}" />`}
+            value="${escapeAttr(model.titleValueOverride ?? item.raw_title ?? "")}" placeholder="${escapeAttr(titlePlaceholder)}" onkeydown="handleDetailKeydown(event)" ${specialSong ? `autocomplete="off" spellcheck="false"` : ""} aria-label="${escapeAttr(`${item.label || "항목"} ${titleLabel}`)}" />`}
       </label>` : ""}
     ${manualPraise ? renderPresenterManualLyricsField(item, index, model?.service?.id || state.presenter.serviceId) : ""}
     ${needsAssignee ? `
@@ -31300,7 +31307,7 @@ function presenterBoardSubgroupContentTitle(slide = {}, label = "") {
   if (linkedTitle) return linkedTitle;
   const sectionKey = String(slide.sectionKey || "").trim();
   if (sectionKey === "sermon" || ["설교", "설교제목"].includes(compactSearchValue(label))) {
-    return slide.contentTitle || presenterSermonContentTitle(String(slide.assignee || "").split("\n")[0]);
+    return slide.contentTitle || "";
   }
   const title = slide.elementTitle || slide.title || presenterSlideMainText(slide);
   return title;
@@ -31636,9 +31643,10 @@ function presenterBoardSubgroupDisplay(serviceId, subgroup = {}) {
   };
   const contexts = presenterBoardSubgroupInputContexts(serviceId, subgroup);
   const item = contexts.length === 1 ? contexts[0]?.item : null;
-  if (item && !serviceItemConnectedPraise(item)) {
-    const displayLabel = serviceItemOrdinalDisplayLabel(item, contexts[0].service, true);
-    if (displayLabel !== null) return { ...fallback, label: displayLabel };
+  if (item && !serviceItemConnectedPraise(item)
+      && !isMonthlyCorporatePrayerGroupItem(item, parseServiceItemMemo(item.memo))) {
+    const parts = serviceItemSummaryDisplayParts(item, contexts[0].service);
+    return { label: parts.meta, title: parts.title };
   }
   if (item && isAnnouncementTextInputItem(item)) fallback.title = "";
   if (serviceElementDisplayLabel(fallback.label) !== fallback.label) {

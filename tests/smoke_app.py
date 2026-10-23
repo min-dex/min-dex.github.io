@@ -5436,8 +5436,8 @@ def main() -> int:
                         and presenter_terms["outlineHierarchyAlignment"]["childMinusGuide"] >= 6
                         and presenter_terms["outlineHierarchyAlignment"]["guideBorderLeftWidth"] == "0px"
                         and presenter_terms["outlineMissingBadgeContract"] == {
-                            "titledText": "찬양 1 10 전능왕 오셔서",
-                            "titledBadges": 0,
+                            "titledText": "찬양 1 10 전능왕 오셔서 입력 필요",
+                            "titledBadges": 1,
                             "emptyText": "찬양 2 입력 필요",
                             "emptyBadges": 1,
                         }
