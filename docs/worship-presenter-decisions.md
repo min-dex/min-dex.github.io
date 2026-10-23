@@ -3890,6 +3890,19 @@ Validation: ten service types, Chromium/WebKit, up/down/add/delete, shuffled
 reload, last-slot deletion, failure/retry, concurrent full-save input and omitted
 content protection in isolated RPC fixtures.
 
+### Authored service design · 2026-10-23
+
+`source_ref.presentationDesign` selects reusable artwork by `sectionKeys`, with
+validated background/foreground/accent colors, an optional image logo and
+`showReadingEnd`. Fullscreen output, portable payloads and thumbnails share the
+same renderer and cache identity. It changes presentation only: normal scripture
+loading, verse navigation, title/person input and source records remain intact.
+No event ID or church preset enables this design implicitly. Blank, keyed,
+score, photo and self-contained media frames retain their normal output policy.
+An empty title retains an authored speaker on the normal missing-title slide;
+the designed fullscreen view suppresses a duplicate order heading.
+
+
 ## Children common marker emphasis ·2026-10-23
 
 Supersedes Children community-confession emphasis and Children artwork emphasis
