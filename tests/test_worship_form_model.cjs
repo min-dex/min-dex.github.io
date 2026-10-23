@@ -68,11 +68,11 @@ for (const hint of ['V2-C-V1-C','C-V1-C-V2','V1-C-C']) {
 }
 assert.equal(context.normalizeServiceFormPreset({forms:['C','V1']},'V2-C').forms.join('-'),'C-V1');
 
-for (const raw of ['title', 'TITLE', ' Title ']) {
+for (const raw of ['t', 'T', 'title', 'TITLE', ' Title ']) {
   assert.equal(context.normalizeServiceFormHint(`${raw} - Verse 1 - Tags`), 'Title-V1-Tags');
   assert.equal(context.songFormPresetDisplayLabel(raw), 'Title');
 }
-assert.equal(context.canonicalServiceFormToken('T'),'T');
+assert.equal(context.canonicalServiceFormToken('T'),'Title');
 assert.equal(context.canonicalServiceFormToken('Tag'),'Tag');
 const titlePreset=context.normalizeServiceFormPreset('title-v1');
 assert.equal(titlePreset.titleSequence,true);

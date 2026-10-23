@@ -104,6 +104,7 @@ try:
    print(engine,'DB save/retry passed',flush=True)
    saved=page.evaluate('db');assert page.evaluate('uploads')==1
    assert saved['audio_set']['starts']==[2,8]
+   assert not any(form.get('_presenterTitle') for form in saved['audio_set']['forms'])
    assert page.evaluate('JSON.stringify(state.serviceItems)===originalItems')
    assert page.evaluate("JSON.parse(state.songs[0].memo).unknown==='preserve'")
    page.evaluate(r'''async()=>{
