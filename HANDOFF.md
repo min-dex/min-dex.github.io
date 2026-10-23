@@ -1396,3 +1396,12 @@ remain. Missing production source_count defaults were found by rollback QA and
 fixed explicitly in both inserts, with local PostgreSQL regression coverage.
 Release ticket: 988d1f050a884765b3374fba75004785; waiting behind current release.
 Do not claim web publication until gate, Pages and public readback complete.
+
+## Controller interlude caption ·2026-10-24
+
+Fix prepared on codex/controller-interlude (5cd4212d). Explicit blank interlude
+slides now retain formLabel and controller-only Interlude captions; normal
+trailing blanks/output/content remain unchanged. Chromium/WebKit Title+interlude
+real-builder/manual-input regression and controller block smoke PASS. Reconciled
+published 5a4eb848. Release ticket f4b63645b4bd4f0b9214e0d2e1f0f4e3 waiting behind
+presenter-focus-release. Not yet deployed; no operational data writes.
