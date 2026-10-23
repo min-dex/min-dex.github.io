@@ -31790,14 +31790,15 @@ function renderPresenterBoardSlideBlocks(entries, activeIndex, serviceId) {
   const colorIndexes = new Map();
   return presenterBoardSlideBlocks(entries).map((block) => {
     const owner = presenterSlideElementGroupKey(block.entries[0]?.slide) || "";
-    const isColored = Boolean(block.key);
+    const plain = ["title", "instrumental"].includes(normalizePresenterFormPresetLabel(block.label).type);
+    const isColored = Boolean(block.key) && !plain;
     const colorIndex = colorIndexes.get(owner) || 0;
     if (isColored) colorIndexes.set(owner, colorIndex + 1);
     const colorAttribute = isColored ? ` data-form-color="${colorIndex % 6}"` : "";
     const thumbs = block.entries.map(({ slide, slideIndex, formLabel }) =>
       renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, formLabel)).join("");
     return block.key
-      ? `<div class="svc-board-slide-block"${colorAttribute} role="group" aria-label="${escapeAttr(block.label)}">${thumbs}</div>`
+      ? `<div class="svc-board-slide-block"${plain ? ' data-form-plain="true"' : colorAttribute} role="group" aria-label="${escapeAttr(block.label)}">${thumbs}</div>`
       : thumbs;
   }).join("");
 }
@@ -31808,6 +31809,10 @@ function updatePresenterBoardBlockBackgrounds(host = refs.detailPane) {
     const origin = grid.getBoundingClientRect();
     if (!origin.width) continue;
     for (const block of grid.querySelectorAll(":scope > .svc-board-slide-block")) {
+      if (block.dataset.formPlain === "true") {
+        block.querySelectorAll(":scope > .svc-board-block-background").forEach(background => background.remove());
+        continue;
+      }
       const rows = [];
       for (const thumb of block.querySelectorAll(":scope > .svc-slide-thumb-wrap")) {
         const rect = thumb.getBoundingClientRect();

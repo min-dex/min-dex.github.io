@@ -41,13 +41,29 @@ try:
     check(buttons.map(b=>b.dataset.presenterIndex).join()==='0,1,2,3,4,5,6,7,8','navigation indexes');
     check(buttons[1].getAttribute('aria-current')==='step','active slide');
     check(document.querySelectorAll('.svc-board-slide-block').length===6,'rendered blocks');
-    return 'PASS form occurrence/range/translation boundaries, blank, unchanged source, indexes and active selection';
+    const plain=document.createElement('div');plain.id='plain-blocks';plain.className='svc-board-grid';
+    const mixed=['Title','Verse 1','Int','Chorus'].map((label,i)=>({slide:{...lyric(label+':'+i,label),id:'plain-'+i},slideIndex:20+i}));
+    plain.innerHTML=renderPresenterBoardSlideBlocks(annotatePresenterFormStarts(mixed).entries,-1,'fixture');
+    document.body.append(plain);
+    const groups=[...plain.querySelectorAll('.svc-board-slide-block')];
+    check(groups.length===4 && groups[0].dataset.formPlain==='true' && groups[2].dataset.formPlain==='true','Title/Int plain grouping');
+    check(groups[1].dataset.formColor==='0' && groups[3].dataset.formColor==='1','Title/Int consumed lyric colors');
+    check(plain.querySelectorAll('.svc-slide-form-badge').length===4,'plain group labels lost');
+    check([...plain.querySelectorAll('.svc-slide-thumb')].map(e=>e.dataset.presenterIndex).join()==='20,21,22,23','plain group click targets changed');
+    return 'PASS form boundaries, source/order, grid geometry, plain Title/Int and click targets';
    }'''),flush=True)
    for width in [320,700,1100]:
     page.set_viewport_size({'width':width,'height':900})
     for theme in ['dark','light']:
      page.evaluate('(theme)=>{applyTheme(theme);updatePresenterBoardBlockBackgrounds(document)}',theme)
      page.evaluate('''()=>{
+       const plain=document.getElementById('plain-blocks');
+       for(const block of plain.querySelectorAll('[data-form-plain]')) {
+         if(block.querySelector('.svc-board-block-background'))throw Error('Title/Int background box remains');
+         const label=block.querySelector('.svc-slide-form-badge');
+         if(!label || getComputedStyle(label).backgroundColor!=='rgba(0, 0, 0, 0)')throw Error('Title/Int label is boxed');
+       }
+       if(plain.querySelectorAll('.svc-board-block-background').length<2)throw Error('lyric group backgrounds lost');
        const grid=document.getElementById('blocks');
        for(const meta of grid.querySelectorAll('.svc-slide-thumb-meta')) {
          const number=meta.querySelector('.svc-slide-thumb-no'), badge=meta.querySelector('.svc-slide-form-badge');
