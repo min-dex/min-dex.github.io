@@ -1411,3 +1411,13 @@ Controller interlude release batch: original discard components eca60365 +
 0616a0dc (prepared combined candidate 807a9b48) are included with the interlude
 caption fix. Both had user approval in Mindex; combined gate/publication pending.
 Ticket f4b63645b4bd4f0b9214e0d2e1f0f4e3 is claimed. No operational writes.
+
+
+## Song-note accent scope ·2026-10-24
+
+Interlude/discard batch 28fdbfb6 completed branch gate39987495769,
+Pages39988613865 and public readback. New request limits gold notes to explicit
+service note-title artwork; ordinary shared note layout inherits white/brown
+output ink. Chromium/WebKit computed-color coverage passes. Ticket
+0978abd456a54b098fa40439debed57f belongs to codex/song-note-accent-scope;
+new release verification/publication pending. No operational data writes.
