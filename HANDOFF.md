@@ -1472,3 +1472,13 @@ All owners handed off ready changes and released their individual tickets.
 Hymn owner already applied/read back18 unit line-boundary changes and12 signatures;
 never rerun its DB patch. This also explains four service revision-only changes
 safely rebased by the form restoration. Combined gate/publication pending.
+
+
+## Lyrics/L functional form ·2026-10-24
+
+`codex/lyrics-form-token`: Lyrics and L normalize to L in song-form sequences,
+placeholders and controller markers. Complete Lyrics paragraphs are selectable and
+repeatable as one form; native unit IDs and content remain intact. Direct-input
+paragraphs and score pages preserve their boundaries. Legacy explicit V/C mapping
+for unstructured lyrics remains. No operational data writes. Scoped browser and
+normalization checks pass; required branch/main/Pages verification pending.

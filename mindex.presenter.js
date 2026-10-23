@@ -500,7 +500,7 @@ function presenterScoreImageSourcesForFormSequence(imageSources = [], scoreForms
   const presetLabels = policy.forms;
   const planTargets = presetLabels
     .map((label) => normalizePresenterFormPresetLabel(label))
-    .filter((target) => target.key && target.type !== "lyrics");
+    .filter((target) => target.key);
   const scoreTargets = (scoreForms || []).map((form) =>
     form ? normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form)) : null,
   );
@@ -509,6 +509,15 @@ function presenterScoreImageSourcesForFormSequence(imageSources = [], scoreForms
     return { imageSources: [{ _presenterTitle: true }, ...imageSources], scoreForms: [null, ...scoreForms] };
   }
   if (!scoreTargets.some((target) => target?.key)) {
+    if (planTargets.every(target => ["title", "lyrics"].includes(target.type))) {
+      const selected = planTargets.map((target, index) => target.type === "title"
+        ? { sources: [{ _presenterTitle: true }], forms: [null] }
+        : { sources: imageSources, forms: imageSources.map(() => ({
+          ...presenterVirtualFormPresetItem("L", target, "L", index),
+          _presenterScoreFormKey: `score:lyrics:${index}`,
+        })) });
+      return { imageSources: selected.flatMap(group => group.sources), scoreForms: selected.flatMap(group => group.forms) };
+    }
     if (!planTargets.some(target => target.type === "title")) return { imageSources, scoreForms };
     // A deck without form labels has no reliable verse boundaries. Keep every
     // page; titles at the ends are unambiguous, internal positions need labels.
@@ -528,7 +537,10 @@ function presenterScoreImageSourcesForFormSequence(imageSources = [], scoreForms
   const groups = [];
   imageSources.forEach((source, index) => {
     const target = scoreTargets[index];
-    const startsGroup = Boolean(target?.key);
+    const previous = groups.at(-1);
+    const key = scoreForms[index]?._presenterScoreFormKey;
+    const sameForm = key && key === previous?.forms.at(-1)?._presenterScoreFormKey && target?.key === previous?.target?.key;
+    const startsGroup = Boolean(target?.key) && !sameForm;
     if (startsGroup || !groups.length) {
       groups.push({ target: target || null, sources: [], forms: [] });
     }
@@ -640,10 +652,10 @@ function presenterScoreFormsFromImageSources(imageSources = []) {
     const label = presenterScoreFormLabelFromAssetSlide(source);
     if (!label) return null;
     const target = normalizePresenterFormPresetLabel(label);
-    if (!target.key || target.type === "lyrics") return null;
+    if (!target.key) return null;
     const partType = presenterFormPartTypeForPresetTarget(target);
     const formKey = String(source.formKey || source.form_key || source.scoreFormKey || source.score_form_key || "").trim()
-      || `score:${target.key}:${index}`;
+      || `score:${target.key}:${target.type === "lyrics" ? "whole" : index}`;
     return {
       _presenterVirtual: true,
       _presenterScoreFormKey: formKey,
@@ -756,8 +768,8 @@ function presenterServiceItemFormPreset(version = {}, item = {}, song = null, op
   if (declared) return declared.preset;
   if (options.includePlaybackFallback === false) return null;
   const available = normalizeForms(version?.forms || []).filter(form => normalizeLyricsForCopy(form.lyrics));
-  const sourceSequence = available.length && available.every(form => normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form)).type !== "lyrics")
-    ? { forms: available.map(presenterFormDisplayLabel), strength: "auto" } : null;
+  const sourceSequence = available.length && available.every(form => normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form)).key)
+    ? { forms: available.map(presenterFormDisplayLabel).filter((label, index, list) => label !== "L" || list[index - 1] !== "L"), strength: "auto" } : null;
   const preset = presenterDefaultVerseChorusFormPreset(available, song, version) || sourceSequence;
   const resolved = presenterFormPresetWithAvailableForms(preset, available);
   return presenterFormPresetWithDefaultTitle(resolved, item, song, version, { inferred: true });
@@ -855,7 +867,7 @@ function presenterFormPresetWithAvailableForms(preset = null, forms = []) {
   const source = normalizeForms(forms || [])
     .filter((form) => normalizeLyricsForCopy(form.lyrics))
     .map((form) => ({ form, target: normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form)) }))
-    .filter(({ target }) => target.key && target.type !== "lyrics");
+    .filter(({ target }) => target.key);
   if (!source.length) return preset;
 
   const originalTargets = cleanList(preset.forms).map((label) => normalizePresenterFormPresetLabel(label));
@@ -979,7 +991,7 @@ function presenterFormTargetsMatch(target = {}, candidate = {}) {
 }
 
 function presenterSupplementalFormType(target = {}) {
-  return !["", "verse", "chorus", "lyrics"].includes(String(target.type || ""));
+  return !["", "verse", "chorus"].includes(String(target.type || ""));
 }
 
 function presenterInsertPreChorusBeforeChoruses(forms = []) {
@@ -1040,13 +1052,23 @@ function serviceItemFormPresetRuleMatches(rule = {}, item = {}, song = null, ver
 function resolvePresenterFormPresetSequence(forms = [], preset = []) {
   const presetForms = Array.isArray(preset) ? preset : cleanList(preset?.forms);
   const sourceForms = Array.isArray(preset) ? [] : cleanList(preset?.sourceForms);
-  if (presenterFormsAreUnsplitLyrics(forms)) {
+  if (presenterFormsAreUnsplitLyrics(forms) && presetForms.some(label => {
+    const target = normalizePresenterFormPresetLabel(label);
+    return !target.blank && !["title", "lyrics"].includes(target.type);
+  })) {
     const lyricsResolved = resolvePresenterLyricsFormPresetSequence(forms, presetForms, sourceForms);
     if (lyricsResolved.items.length) return lyricsResolved;
   }
   const items = [];
   const missing = [];
   cleanList(presetForms).forEach((label, index) => {
+    const target = normalizePresenterFormPresetLabel(label);
+    if (target.type === "lyrics" && !target.number && !target.group && !target.variant) {
+      const matching = forms.filter(form => normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form)).type === "lyrics");
+      if (matching.length) items.push(...matching.map(form => ({ ...form, _presenterPresetLabel: "L" })));
+      else missing.push("L");
+      return;
+    }
     const resolved = findPresenterFormForPresetLabel(forms, sourceForms[index] || label);
     if (resolved) items.push({ ...resolved, _presenterPresetLabel: presenterResolvedPresetLabel(label) });
     else missing.push(normalizePresenterMissingFormLabel(label));
@@ -1099,6 +1121,17 @@ function resolvePresenterLyricsFormPresetSequence(forms = [], presetForms = [], 
     const assignedForm = assigned.get(target.key);
     if (assignedForm) {
       items.push({ ...assignedForm, id: `${assignedForm.id}:repeat:${index}` });
+      return;
+    }
+    // L owns the complete unstructured lyric unit, including every paragraph.
+    if (target.type === "lyrics" && !target.number && !target.group && !target.variant) {
+      const text = blocks.join("\n\n");
+      if (!text) missing.push("L");
+      else {
+        const form = presenterVirtualFormPresetItem("L", target, text, index);
+        assigned.set(target.key, form);
+        items.push(form);
+      }
       return;
     }
     const sourceBlock = blockBySourceKey.get(target.key);
@@ -1276,6 +1309,7 @@ function normalizePresenterFormPresetLabel(value = "") {
   const raw = canonicalServiceFormToken(value);
   const compact = compactSearchValue(raw);
   if (raw === "T") return { key: "title", type: "title", number: 0 };
+  if (raw === "L") return { key: "lyrics", type: "lyrics", number: 0 };
   const lastVerse = /^(vl|마지막절|lastverse|last)$/i.test(compact);
   if (lastVerse) return { key: "last-verse", type: "verse", number: 0, lastVerse: true };
   const hymnVerse = raw.match(/^(\d+)\s*절$/u);
@@ -1372,7 +1406,7 @@ function normalizePresenterFormType(value = "") {
   if (/^prechorus$/i.test(compact)) return "pre-chorus";
   if (/^(coda|ending)$/i.test(compact)) return "coda";
   if (/^tag$/i.test(compact)) return "tag";
-  if (/^lyrics$/i.test(compact)) return "lyrics";
+  if (/^(l|lyrics)$/i.test(compact)) return "lyrics";
   if (/^(int|interlude|instrumental|간주)$/i.test(compact)) return "instrumental";
   return compact;
 }
@@ -1392,7 +1426,7 @@ function presenterFormPresetDisplayLabel(value = "") {
   if (target.type === "coda") return `Coda${suffix}`;
   if (target.type === "tag") return target.repeat > 1 ? "Tags" : "Tag";
   if (target.type === "instrumental") return "Instrumental";
-  if (target.type === "lyrics") return "";
+  if (target.type === "lyrics") return "L";
   return raw;
 }
 
@@ -1404,7 +1438,7 @@ function normalizePresenterMissingFormLabel(value = "") {
   if (target.key === "chorus") return "C";
   if (target.key === "bridge") return "Bridge";
   if (target.key === "pre-chorus") return "Pre-Chorus";
-  if (target.type === "coda") return presenterFormPresetDisplayLabel(raw);
+  if (target.type === "coda" || target.type === "lyrics") return presenterFormPresetDisplayLabel(raw);
   if (target.key === "tag") return "Tag";
   return raw || "송폼";
 }
@@ -2190,13 +2224,16 @@ function buildPresenterCustomSlides(item, section, index) {
   }
   if (songLikeItem && preset?.titleSequence && preset.forms?.length) {
     const plan = resolvePresenterLyricsFormPresetSequence([], preset.forms, [], lyricSlides.map(slide => slide.text));
-    const ordered = plan.items.map((form, position) => form._presenterTitle
-      ? presenterSequenceTitleSlide(item, section, null, null, serviceItemDisplayText(item), index, position)
-      : { ...lyricSlides[0], id: `${item.id || index}:custom-sequence:${position}`,
-        type: form._presenterBlank ? "blank" : "lyrics", text: form.lyrics || "",
+    const ordered = plan.items.flatMap((form, position) => {
+      if (form._presenterTitle) return [presenterSequenceTitleSlide(item, section, null, null, serviceItemDisplayText(item), index, position)];
+      const blocks = !form._presenterBlank && normalizePresenterFormPresetLabel(form.label).type === "lyrics"
+        ? presenterLyricsBlocksFromForms([form]) : [form.lyrics || ""];
+      return blocks.map((text, page) => ({ ...lyricSlides[0], id: `${item.id || index}:custom-sequence:${position}:${page}`,
+        type: form._presenterBlank ? "blank" : "lyrics", text,
         elementType: form._presenterBlank ? PRESENTER_ELEMENT_TYPES.BLANK : PRESENTER_ELEMENT_TYPES.PRAISE,
         layout: form._presenterBlank ? PRESENTER_SLIDE_LAYOUTS.BLANK : PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT,
-        marker: form.label, formKey: `custom:${position}`, sort: index + position / 100 });
+        marker: form.label, formKey: `custom:${position}`, sort: index + position / 100 + page / 10000 }));
+    });
     return presenterDirectPraiseSlidesWithTitle(item, section, index, ordered);
   }
   return presenterDirectPraiseSlidesWithTitle(item, section, index, lyricSlides);
@@ -2222,13 +2259,14 @@ function parsePresenterCustomSlideBlock(block) {
     return { marker: bracketed === "후주" ? "후주" : "간주", text: "", blank: true };
   }
   const markerCandidate = bracketed || first;
-  if (/^(Verse|Chorus|Pre[-\s]?Chorus|PC|Bridge|Coda|Tag|Lyrics)(?:\s+\d+)?(?:@[A-Z]?)?$/i.test(markerCandidate)) {
+  if (/^(Verse|Chorus|Pre[-\s]?Chorus|PC|Bridge|Coda|Tag|Lyrics|L)(?:\s+\d+)?(?:@[A-Z]?)?$/i.test(markerCandidate)) {
     return { marker: normalizePresenterCustomMarker(markerCandidate), text: lines.slice(1).join("\n") };
   }
   return { marker: "", text: lines.join("\n") };
 }
 
 function normalizePresenterCustomMarker(value) {
+  if (/^(l|lyrics)$/i.test(String(value || "").trim())) return "L";
   return String(value || "")
     .replace(/^pc$/i, "Pre-Chorus")
     .replace(/^pre[\s-]?chorus/i, "Pre-Chorus")
@@ -2663,7 +2701,7 @@ function isPresenterKoreanHymnPresetLabel(value = "") {
 }
 
 function isGenericPresenterFormLabel(value) {
-  return /^(lyrics|가사)$/i.test(String(value || "").trim());
+  return /^가사$/i.test(String(value || "").trim());
 }
 
 function presenterSectionForServiceItem(item, index, displayText, song = null, version = null) {

@@ -96,3 +96,13 @@ for (const raw of ['Verse 1 A@B', 'v c cb tags']) {
   assert.equal(c.findPresenterFormForPresetLabel([{id:'plain',label:'Verse 1',lyrics:'keep'}],raw),null);
 }
 console.log(`PASS ${matrixCount} input combinations, full-name round trips, explicit numbers, ambiguous input and sequence boundaries`);
+
+for(const raw of ['L','l','Lyrics','LYRICS',' lyrics ']) {
+ assert.equal(c.normalizeServiceFormHint(raw),'L');
+ assert.equal(c.normalizeSongFormPresetLabel(raw).key,'lyrics');
+ assert.equal(c.normalizePresenterFormPresetLabel(raw).key,'lyrics');
+ assert.equal(c.songFormPresetDisplayLabel(raw),'L');
+ assert.equal(c.presenterFormPresetDisplayLabel(raw),'L');
+}
+assert.equal(c.normalizeServiceFormHint('title-lyrics-Int-l'),'T-L-Int-L');
+console.log('PASS Lyrics/L normalization and shared playback identity');

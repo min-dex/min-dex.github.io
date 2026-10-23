@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261024-form-origin-hymn-cadaros",
+  "version": "20261024-lyrics-form-l",
   "options": {
     "compress": false,
     "mangle": {

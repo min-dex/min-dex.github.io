@@ -72,6 +72,7 @@ SMOKES = (
     "smoke_special_service_order.py",
     "smoke_title_songform.py",
     "smoke_form_default_placeholder.py",
+    "smoke_lyrics_form.py",
     "smoke_presenter_common_fit.py",
     "smoke_transition_logo.py",
     "smoke_fullscreen_praise.py",

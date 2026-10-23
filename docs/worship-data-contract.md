@@ -1026,3 +1026,15 @@ receive leading T, and legacy title-bearing item sequences receive actual T only
 where no explicit titleSequence policy exists. Do not reinterpret an explicit T
 omission or touch protected manual song corrections. Lyrics/audio timing are not
 part of this change.
+
+
+### Lyrics is a functional song form ·2026-10-24
+
+`Lyrics` and case variants normalize to `L` in form sequence input, persistence
+hints and form markers. Keep stored lyric unit type/IDs/text and timing ownership;
+this is a sequence alias, not a database unit migration. L selects the complete
+unstructured Lyrics unit(s), preserving paragraph pages. Repeated L entries repeat
+the whole unit and form separate controller occurrences. Source-only Lyrics
+structures infer one L sequence token, rather than hiding their form identity.
+Legacy V/C mapping of unstructured lyrics is retained when those forms are
+explicitly requested. Direct-input and score pages follow the same L identity.

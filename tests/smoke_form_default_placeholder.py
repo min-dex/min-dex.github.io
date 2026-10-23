@@ -203,7 +203,7 @@ try:
     check(input(fileScore).value==='' && input(fileScore).placeholder==='송폼','unlinked score file must not invent V');
     const noScore={...scoreItem,song_id:null,version_id:null,raw_title:'',memo:serializeServiceItemMemo({elementType:'praise',inputMode:'score_db',outputMode:'score'})};
     check(!input(noScore).placeholder.split('-').includes('V'),'missing score never invents content default');
-    for(const [kinds,wanted] of [[['Verse','Coda'],'V-Coda'],[['Verse'],'V'],[['Lyrics'],'Lyrics']]) {
+    for(const [kinds,wanted] of [[['Verse','Coda'],'V-Coda'],[['Verse'],'V'],[['Lyrics'],'L']]) {
       const vv={id:'real-score-version',name:'새찬송가',praise_types:['hymn'],forms:kinds.map((part_type,i)=>({id:'part-'+i,part_type,lyrics:'검증 가사'}))};
       const ss={id:'real-score',title:'단일 구성 악보',praise_types:['hymn'],versions:[vv],_relationalVersionsLoaded:true};state.songs=[ss];
       const row={id:'real-score-row',song_id:ss.id,version_id:vv.id,label:'찬양 1',_worshipSectionKey:'praise',memo:serializeServiceItemMemo({elementType:'praise',inputMode:'score_db',outputMode:'score',formPresetDisabled:true,asset:{slides:[{url:'one.png'},{url:'two.png'}]}})};

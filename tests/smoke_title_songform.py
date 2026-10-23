@@ -118,7 +118,7 @@ try:
       }
     }
     const generic={id:'generic',elementType:PRESENTER_ELEMENT_TYPES.PRAISE,layout:PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT,type:'lyrics',formKey:'lyrics:1',formLabel:'Lyrics',text:'가사'};
-    check(!presenterSlideSupportsFormGrouping(generic),'generic Lyrics is not a form distinction');
+    check(presenterSlideSupportsFormGrouping(generic)&&presenterFormGroupLabel(generic)==='L','legacy Lyrics must group as L');
     const named={...generic,formLabel:'Verse',formKey:'verse:1'};
     check(presenterSlideSupportsFormGrouping(named),'real form grouping lost');
     const scorePage={...generic,formLabel:'',sourceType:'score'};
