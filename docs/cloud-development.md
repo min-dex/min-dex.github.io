@@ -158,3 +158,19 @@ needs the whole matrix to succeed and retains the stale-commit guard.
 
 The no-argument cloud/check.py command still executes the entire baseline.
 Shard PASS is explicitly partial; per-entry timings support future balancing.
+
+
+## Exact-commit gate reuse ·2026-10-23
+
+A main push can reuse a completed successful codex/** push of the exact same
+SHA, same repository and cloud-check.yml workflow. All four offline-web jobs
+must be completed/success in the successful run attempt, exactly once each.
+Each main matrix job independently verifies that evidence and links the source
+run in its summary before skipping repeated setup/tests. No code-diff heuristic
+or partial-shard result is accepted. Missing/API/malformed evidence falls back
+to full checks; PRs, branch pushes and manual dispatch always execute checks.
+Read-only Actions permission is limited to the check job. Pages still depends
+on all four successful jobs, checks main freshness, and stages the exact SHA.
+The source branch gate remains mandatory before integration; a merge producing
+a different SHA must run the full gate. Local partition/failure and evidence
+validation tests are distinct from Linux/Pages verification.

@@ -28,6 +28,11 @@ class PagesGate(unittest.TestCase):
             self.assertNotIn('continue-on-error', step)
         self.assertTrue(any('cloud/check.py' in step.get('run', '') for step in check['steps']))
         self.assertEqual(workflow['permissions'], {'contents': 'read'})
+        self.assertEqual(check['permissions'], {'contents': 'read', 'actions': 'read'})
+        reuse_step = next(step for step in check['steps'] if step.get('id') == 'verified')
+        self.assertEqual(reuse_step['run'], 'python3 cloud/reuse_checks.py')
+        for step in check['steps'][2:]:
+            self.assertEqual(step['if'], "steps.verified.outputs.reuse != 'true'")
         self.assertEqual(deploy['permissions'], {'contents': 'read', 'pages': 'write', 'id-token': 'write'})
         self.assertEqual(deploy['steps'][0]['with']['ref'], '${{ github.sha }}')
         self.assertIn('origin/main', deploy['steps'][1]['run'])

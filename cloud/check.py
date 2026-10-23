@@ -149,7 +149,7 @@ SMOKES = (
 def selected_tests(shard_index=0, shard_count=1):
     if shard_count < 1 or not 0 <= shard_index < shard_count:
         raise ValueError("shard index must be within a positive shard count")
-    unit = ("test_pages_gate.py", "test_cloud_check.py") + NODE_TESTS if shard_index == 0 else ()
+    unit = ("test_pages_gate.py", "test_cloud_check.py", "test_reuse_checks.py") + NODE_TESTS if shard_index == 0 else ()
     return unit + SMOKES[shard_index::shard_count]
 
 
