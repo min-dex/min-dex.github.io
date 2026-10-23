@@ -16,9 +16,9 @@ def main():
      const record={stanzaApproxMeasures:16,reviewStatus:'score_supported_approximation',parts:[{unitId:'verse',kind:'Verse',textSha256:await hash(forms[0].lyrics),blockCount:2,approxMeasuresByBlock:[12,4],approxMeasures:16},{unitId:'amen',kind:'Coda',textSha256:await hash('Amen'),blockCount:1,approxMeasuresByBlock:[2],approxMeasures:2}]};
      const records={v:record},describe=MindexHymnStructure.describe;
      const measured=await describe('v',forms,records);
-     check(measured.status==='measured'&&measured.text.includes('슬라이드당 약 4–12마디')&&measured.text.includes('아멘·Coda 별도 · 약 2마디'),'measured metadata');
+     check(measured.status==='measured'&&measured.text==='approx. 4–12 bars','measured metadata');
      const fractional=await describe('v',forms,{v:{...record,displayNote:'shared ending',parts:[{...record.parts[0],approxMeasuresByBlock:[25/3,23/3]},record.parts[1]]}});
-     check(fractional.text.includes('슬라이드당 약 8마디')&&!fractional.text.includes('33333')&&!fractional.text.includes('shared ending'),'fractional boundary and shared ending explanation');
+     check(fractional.text==='approx. 8 bars'&&!fractional.text.includes('33333')&&!fractional.text.includes('shared ending'),'fractional boundary and shared ending explanation');
      check((await describe('copy',forms,records)).status==='unreviewed','copy identity');
      for(const changed of [forms.slice(1),[...forms,{id:'extra',lyrics:'extra'}],[{...forms[0],lyrics:'edit'},forms[1]],[{...forms[0],part_type:'Chorus'},forms[1]]])check((await describe('v',changed,records)).status==='stale','changed unit guard');
      check((await describe('v',forms,{v:{...record,reviewStatus:'recitative_exception'}})).status==='recitative','recitative');
