@@ -3955,3 +3955,14 @@ Remove the35% white mix from Refined common marker geometry. Children markers
 use the authored color unchanged, with the same45–95% coverage and4-stage-pixel
 side padding. Preview/output share the rule; no artwork palettes, outlines or
 stored color changes are introduced.
+
+### Praise title scope correction · 2026-10-23
+
+Standard fullscreen praise retains its sequence heading, inline note/main title
+and authored original/subtitle. Only an explicit
+`source_ref.presentationDesign.songTitleStyle: "note-title"` selects a separate
+note above one main title and hides detail. An unrelated service design, special
+service type or theme does not select this composition. Both output and previews
+read the same saved choice. Its spacing/accent selectors are scoped to the
+selected composition; no event IDs or names are used. Chapel data alone selects
+this choice; other service records are not rewritten.

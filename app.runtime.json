@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-service-window-controls",
+  "version": "20261023-song-title-scope",
   "options": {
     "compress": false,
     "mangle": {

@@ -5218,11 +5218,12 @@ function normalizePresenterServiceDesign(value) {
   if (!value || typeof value !== "object") return null;
   const color = (input, fallback) => /^#[0-9a-f]{6}$/i.test(String(input || "")) ? input : fallback;
   const sectionKeys = Array.isArray(value.sectionKeys) ? value.sectionKeys.filter(key => typeof key === "string" && /^[a-z0-9_-]+$/.test(key)).slice(0, 24) : [];
-  if (!sectionKeys.length) return null;
+  const songTitleStyle = value.songTitleStyle === "note-title" ? "note-title" : "";
+  if (!sectionKeys.length && !songTitleStyle) return null;
   const logo = normalizePresenterMediaSource(value.logo);
   return { sectionKeys, background: color(value.background, "#ffffff"), foreground: color(value.foreground, "#24211e"),
     accent: color(value.accent, "#ad371d"), logo: logo && presenterMediaSourceIsImage(logo) ? logo : "",
-    showReadingEnd: value.showReadingEnd !== false };
+    showReadingEnd: value.showReadingEnd !== false, songTitleStyle };
 }
 
 function presenterServiceDesignForSlide(slide, options = {}) {
@@ -5241,11 +5242,13 @@ function renderPresenterSlideFrame(slide, options = {}) {
     && presenterSlideLayout(slide) !== PRESENTER_SLIDE_LAYOUTS.BLANK
     && (slide?.songTitle || (slide?.type === "song-title" && presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE))) {
     const content = presenterSongTitleContent(slide);
-    const title = String(content.title || "").replace(PRESENTER_SONG_NOTE_PATTERN, "").trim();
-    // Keep the order heading when adapting song titles for fullscreen output.
+    const noteTitle = normalizePresenterServiceDesign(options.presentationDesign)?.songTitleStyle === "note-title";
+    const title = noteTitle ? String(content.title || "").replace(PRESENTER_SONG_NOTE_PATTERN, "").trim()
+      : formatPresenterSongTitleText(content.title);
+    // Preserve the standard composition unless this service explicitly selects another.
     slide = { ...slide, elementType: PRESENTER_ELEMENT_TYPES.TITLE_CONTENT,
       layout: PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT, type: "title-content",
-      title, text: title, songTitleContent: content, bodyText: "", assignee: "", fullscreenSongTitle: true };
+      title, text: title, songTitleContent: content, bodyText: "", assignee: "", fullscreenSongTitle: true, fullscreenSongTitleStyle: noteTitle ? "note-title" : "standard" };
   }
   const design = presenterServiceDesignForSlide(slide, options);
   if (design) {
@@ -5275,6 +5278,7 @@ function renderPresenterSlideFrame(slide, options = {}) {
 function presenterSlideExtraClasses(slide) {
   const classes = [];
   if (slide?.fullscreenSongTitle) classes.push("presenter-slide--fullscreen-song-title");
+  if (slide?.fullscreenSongTitleStyle === "note-title") classes.push("presenter-slide--song-note-title");
   const layout = presenterSlideLayout(slide);
   // A blank (including the auto trailing blank, which copies the previous slide) has no caption to theme.
   if (slide?.captionTheme === "cadaros" && layout !== PRESENTER_SLIDE_LAYOUTS.BLANK) classes.push("presenter-slide--caption-cadaros");
@@ -5599,14 +5603,16 @@ function renderPresenterTitleContentSlide(slide, options = {}) {
   const orderHeading = options.noChromakey && presenterTitleAssigneeIsSermon(slide)
     ? String(slide.orderTitle || slide.sectionTitle || "설교").trim()
     : "";
+  const noteTitle = slide.fullscreenSongTitle && slide.fullscreenSongTitleStyle === "note-title";
   const bodyLines = presenterTitleContentLines(slide);
   const titleChars = presenterLineCharEstimate(title);
   return `
     <div class="presenter-title-content">
       ${orderHeading && !(options.serviceDesignActive && compactSearchValue(orderHeading) === compactSearchValue(title)) ? `<span class="presenter-fullscreen-order-heading">${escapeHtml(presenterOrderDisplayLabel(orderHeading))}</span>` : ""}
-      ${slide.fullscreenSongTitle ? `<span class="presenter-fullscreen-song-heading" aria-label="찬양">${PRESENTER_SONG_NOTE}</span>` : ""}
-      <span class="presenter-title-content-title" style="--line-chars: ${escapeAttr(titleChars)}">${escapeHtml(title)}</span>
-
+      ${noteTitle ? `<span class="presenter-fullscreen-song-heading" aria-label="찬양">${PRESENTER_SONG_NOTE}</span>`
+        : slide.fullscreenSongTitle && slide.songTitleContent?.orderTitle ? `<span class="presenter-fullscreen-song-heading">${escapeHtml(presenterOrderDisplayLabel(slide.songTitleContent.orderTitle))}</span>` : ""}
+      <span class="presenter-title-content-title" style="--line-chars: ${escapeAttr(titleChars)}">${slide.fullscreenSongTitle ? renderPresenterSongText(title, slide) : escapeHtml(title)}</span>
+      ${slide.fullscreenSongTitle && !noteTitle && slide.songTitleContent?.detail ? `<span class="presenter-fullscreen-song-detail">${slide.songTitleContent.detailKind === "subtitle" ? `(${escapeHtml(slide.songTitleContent.detail)})` : escapeHtml(slide.songTitleContent.detail)}</span>` : ""}
       ${slide.fullscreenSongTitle ? "" : `<div class="presenter-title-content-body">
         ${bodyLines.map((line) => `<span style="--line-chars: ${presenterLineCharEstimate(line)}">${escapePresenterSlideLine(line, slide)}</span>`).join("")}
       </div>`}
