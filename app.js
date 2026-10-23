@@ -23689,6 +23689,7 @@ function serviceItemDefaultFormHint(item = {}) {
   const sources = presenterScoreImageSourcesFromAsset(asset, song, version, serviceItemDisplayText(item));
   const labels = sources.map(presenterScoreFormLabelFromAssetSlide).filter(Boolean)
     .map(canonicalServiceFormToken).filter((label, index, all) => index === 0 || label !== all[index - 1]);
+  if (!labels.length && (sources.length || asset.url)) labels.push("V");
   return labels.length ? normalizeServiceFormHint([...(preset.forms || []), ...labels]) : serviceFormPresetSummary(preset);
 }
 

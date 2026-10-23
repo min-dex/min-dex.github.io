@@ -67,7 +67,18 @@ try:
     scoreItem.memo=serializeServiceItemMemo({elementType:'praise',inputMode:'score_db',outputMode:'score',asset:{slides:[{url:'custom1.png',formLabel:'Verse 2'},{url:'custom2.png',formLabel:'Chorus'}]}});
     check(input(scoreItem).placeholder==='V2-C','explicit score assets own placeholder');
     scoreItem.memo=serializeServiceItemMemo({elementType:'praise',inputMode:'score_db',outputMode:'score',asset:{slides:[{url:'custom1.png'}]}});
-    check(input(scoreItem).placeholder==='송폼','unlabelled score never invents forms');
+    const wholeBefore=JSON.stringify(scoreItem);
+    check(input(scoreItem).value==='' && input(scoreItem).placeholder==='V','unlabelled score shows whole-score light default');
+    check(JSON.stringify(scoreItem)===wholeBefore && !serviceElementConfigForSave({},parseServiceItemMemo(scoreItem.memo)).formPreset,'whole-score default never persists');
+    applyServiceItemMetadataField(scoreItem,{dataset:{serviceItemField:'form_hint'},value:'V-V'},service);
+    check(input(scoreItem).value==='V-V','authored score sequence overrides whole-score placeholder');
+    applyServiceItemMetadataField(scoreItem,{dataset:{serviceItemField:'form_hint'},value:''},service);
+    check(input(scoreItem).value==='' && input(scoreItem).placeholder==='V','clearing score restores light V');
+    scoreItem.memo=serializeServiceItemMemo({elementType:'praise',inputMode:'score_db',outputMode:'score',asset:{kind:'score',url:'https://example.invalid/score.pdf'}});
+    const fileScore={...scoreItem,song_id:null,version_id:null,_worshipSectionKey:'offering'};
+    check(input(fileScore).value==='' && input(fileScore).placeholder==='V','single score file shares whole-score default');
+    const noScore={...scoreItem,song_id:null,version_id:null,raw_title:'',memo:serializeServiceItemMemo({elementType:'praise',inputMode:'score_db',outputMode:'score'})};
+    check(!input(noScore).placeholder.split('-').includes('V'),'missing score never invents content default');
     return 'PASS empty placeholder, default scope, content headings, linking, authored input, clear/save and registered forms';
    }'''),flush=True);browser.close()
 finally:server.shutdown();server.server_close()

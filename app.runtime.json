@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-praise-lifecycle",
+  "version": "20261024-whole-score-placeholder",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "c64082813ef0ec4663a661a0587dd142f477167d46cf62ee78df5b80f30a7d73",
-  "runtime_sha256": "f199a8d3cb4921b67cbfd2fd43267a6c0f8094e47140f8761ae109a0e4e72d1e",
-  "source_bytes": 1571805,
-  "runtime_bytes": 1113220,
-  "source_gzip": 354911,
-  "runtime_gzip": 277204
+  "source_sha256": "c1516cbbfb7fa2d7dd62d0b28fb6d1de66002a6d4e3b22b2b5fe06790c6d1d04",
+  "runtime_sha256": "b18e1bcdaf06e9b994d0e551d7816ccb294c111de5db13503d0b10c7bc532df2",
+  "source_bytes": 1571878,
+  "runtime_bytes": 1113264,
+  "source_gzip": 354936,
+  "runtime_gzip": 277227
 }

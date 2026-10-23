@@ -4294,3 +4294,14 @@ worship element owner, never a hymn number/title allowlist. No synthetic V/C
 form, saved sequence or metadata is added. Labelled scores retain their existing
 form boundaries and leading unlabelled pages; other elements break the run.
 Unlabelled direct lyrics remain unboxed. Output pages/order/IDs/timing are unchanged.
+
+
+## Whole-score light default ·2026-10-24
+
+A present score without labelled form boundaries shows `V` as its light form-input
+placeholder, meaning the whole score once. This follows the whole-score block
+rule without hymn IDs/title exceptions, and applies to image decks or a single
+score file. Existing default Title scope still applies; hymn scores add no T.
+No score content means no inferred V. User-entered forms remain authoritative;
+clearing restores the light default without saving it as an authored sequence.
+No form metadata, worship content, page ordering or audio timing is rewritten.
