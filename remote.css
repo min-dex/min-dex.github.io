@@ -1,7 +1,7 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-sans); line-height: 1.4; text-rendering: geometricPrecision; }
-main { max-width: 760px; margin: auto; padding: 25px 15px max(25px, env(safe-area-inset-bottom)); }
+body { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-sans); line-height: 1.4; text-rendering: geometricPrecision; }
+main { flex: 0 0 auto; width: 100%; max-width: 760px; margin: auto; padding: 25px 15px max(25px, env(safe-area-inset-bottom)); }
 header { padding-bottom: 15px; border-bottom: 1px solid var(--line); margin-bottom: 20px; }
 h1 { font-size: var(--ui-page-title-size); font-weight: var(--ui-title-weight); margin: 0; }
 h2, label { font-size: var(--ui-label-size); font-weight: var(--ui-label-weight); }
