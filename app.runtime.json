@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-version-specific-title-label",
+  "version": "20261023-song-register-search-only",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "6c1e1aa149c6678bca3fa583b6a1327d893cff6228215aaac157acfa1a80d3df",
-  "runtime_sha256": "8d0e7e502ccb7eaa574c89c23f5ff52cc08339fcf92f0c8e3ac77e859a013bfb",
-  "source_bytes": 1559166,
-  "runtime_bytes": 1103718,
-  "source_gzip": 351232,
-  "runtime_gzip": 274682
+  "source_sha256": "6861be33185da7b7d44c5546aa17d4a7a285acdf76a747ce6602d204d4c40344",
+  "runtime_sha256": "f64c76e64d8a67c9e13ac9bfd81133c043d8ed053447763a54a551bec45466f8",
+  "source_bytes": 1559279,
+  "runtime_bytes": 1103871,
+  "source_gzip": 351238,
+  "runtime_gzip": 274712
 }
