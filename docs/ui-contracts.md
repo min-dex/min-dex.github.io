@@ -836,3 +836,10 @@ Version classification pills use the 28px compact minimum height and 10px
 horizontal padding. Review-complete actions use a 30×30px target with the
 existing 16px icon; their status row accommodates that target. Form-add buttons
 keep their 30px height and use the shared 5px icon/text gap.
+### Popup actions and help alignment ·2026-10-23
+
+Device-status refresh and unsaved-dialog secondary decisions use the shared
+neutral action border/surface/hover rules; primary save, focus and disabled
+states retain their semantics. Presenter help aligns to the toolbar trailing
+edge beside its utility trigger, bounded by the actual toolbar width so narrow
+editors do not clip the panel. No save, recovery, playback or output changes.
