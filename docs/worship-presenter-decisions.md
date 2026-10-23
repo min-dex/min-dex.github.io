@@ -4062,3 +4062,12 @@ including the closing bold phrase. Other services retain the standard public
 confession and third-service chromakey chunks exactly. Preview and output consume
 the same generated slide; do not rewrite operational records or custom authored
 confession text. Marker foreground/coverage and original six colors are unchanged.
+
+## Full-height confession marker ·2026-10-23
+
+Fullscreen community-confession markers now fill the full inline text box,
+superseding the45–95% half-height band. Keep original six source colors,
+#332211 marker text and4-stage-pixel side padding. Preview/output share this
+CSS rule. Third-service chromakey and other copy remain unmarked. Children
+retain their dedicated closing. User requested skipping optional local checks;
+the complete required publication gate remains mandatory.
