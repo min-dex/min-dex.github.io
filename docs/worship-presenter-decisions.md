@@ -4163,5 +4163,7 @@ Remove the always-visible unlinked praise registration shortcut. Direct lyric
 and audio modes never show it, and an empty search shows no registration action.
 DB search results show `새 곡 등록` only when the nonempty query has no matches;
 the button lives inside the live picker replacement region so further typing
-updates/removes it without a rerender. Linked DB shortcuts remain unchanged.
+updates/removes it without a rerender. Registration reads the current uncommitted
+search text, and its action also rejects direct lyric/audio modes. Linked DB
+shortcuts remain unchanged.
 Existing registration duplicate checks and atomic worship save behavior remain.
