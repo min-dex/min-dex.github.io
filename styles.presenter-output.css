@@ -358,7 +358,8 @@
 /* One marker rule for every children artwork; no asset palettes or outlines. */
 .presenter-output-root.no-chromakey.has-background[data-output-theme="children"] .presenter-text-highlight--color {
   color: var(--presenter-output-fg);
-  background-image: linear-gradient(to bottom, transparent 30%, var(--presenter-text-highlight-color) 30%, var(--presenter-text-highlight-color) 95%, transparent 95%);
+  background-image: linear-gradient(to bottom, transparent 45%, color-mix(in srgb, var(--presenter-text-highlight-color) 65%, white) 45%, color-mix(in srgb, var(--presenter-text-highlight-color) 65%, white) 95%, transparent 95%);
+  padding-inline: calc(4 * var(--presenter-stage-unit));
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
 }

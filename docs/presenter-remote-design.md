@@ -160,3 +160,11 @@ re-enabling connection while the first session's close callback is still pending
 `smoke_remote_panel.py` uses a delayed end promise and checks both engines; full
 presenter remote smoke separately covers the real encrypted session path.
 Panel screenshots were inspected. This audit fix is not yet deployed.
+
+## Compact connection dialog ·2026-10-23
+
+Use Mindex Remote with the existing small cross mark. Show a short status,
+code only while pairing, and one applicable start/end action. Once connected,
+hide the page link and pairing guidance; retain disconnect and failure status.
+Close only dismisses the dialog; it must not disconnect. Keep the existing
+opening/ending guards and six-digit pairing protocol.

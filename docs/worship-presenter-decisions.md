@@ -3922,3 +3922,12 @@ aliases; licensed files, pinned upstream sources and lossless WOFF2 hashes live 
 `vendor/fonts/service-serif/`. Other output designs retain their existing fonts.
 Reading text remains regular weight with Korean word boundaries intact; title
 and speaker hierarchy is shared by thumbnails and fullscreen output.
+
+
+## Refined common marker geometry ·2026-10-23
+
+Supersedes the initial30–95% marker coverage: all children artwork now uses the
+same45–95% band (50% height),4-stage-pixel padding on each side and a65% authored
+color /35% white mix. Foreground, font sizes and weights are unchanged. Padding
+uses the shared1920px stage unit in thumbnails/output; no background exceptions,
+text outlines or stored highlight color edits are introduced.

@@ -38,6 +38,8 @@ try:
    host.click('#remotePanelBtn');host.click('[data-remote-start]');host.wait_for_function("document.querySelector('[data-remote-code]').textContent.length>0")
    assert host.locator('[data-remote-close] svg.lucide-x').count()==1
    assert host.locator('.remote-panel').evaluate('e=>getComputedStyle(e).borderRadius')=='5px'
+   assert host.locator('[data-remote-start]').is_hidden()
+   assert host.locator('[data-remote-end]').is_visible()
    code=host.locator('[data-remote-code]').inner_text()
    phone.goto(url.replace('index.html','remote.html'))
    assert len(code.replace('-',''))==6
@@ -69,7 +71,11 @@ try:
      pump(.1)
      if phone.locator(f'[data-action="{action}"]').is_enabled():return
     raise AssertionError('not ready: '+action+' '+phone.locator('#status').inner_text())
-   ready('next');assert phone.locator('#current').inner_text().startswith('첫 번째')
+   ready('next')
+   assert host.locator('[data-remote-link]').is_hidden()
+   assert host.locator('[data-remote-help]').inner_text()==''
+   if engine=='chromium':host.screenshot(path='/tmp/mindex-remote-panel-compact.png')
+   assert phone.locator('#current').inner_text().startswith('첫 번째')
    for width in (320,390,768):
     phone.set_viewport_size({'width':width,'height':844});pump(.1)
     assert phone.evaluate('document.documentElement.scrollWidth<=innerWidth'),f'overflow {width}'
