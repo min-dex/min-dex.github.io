@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261024-presenter-one-unit-fit",
+  "version": "20261024-scripture-version-badges",
   "options": {
     "compress": false,
     "mangle": {

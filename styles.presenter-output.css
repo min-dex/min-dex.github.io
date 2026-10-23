@@ -1323,8 +1323,8 @@
 }
 .presenter-scripture-reading-version {
   justify-self: end;
-  font-size: var(--presenter-scripture-reading-version-size);
-  font-weight: var(--presenter-weight-meta);
+  font-size: var(--presenter-scripture-reading-ref-size);
+  font-weight: calc(var(--presenter-weight-meta) - 200);
   opacity: 1;
   text-align: right;
 }
@@ -1739,7 +1739,7 @@ span.presenter-announcement-paren,
   font-size: inherit; font-weight: inherit;
 }
 .presenter-slide--service-design .presenter-scripture-reading-version {
-  font-weight: 400;
+  font-weight: 200;
 }
 .presenter-slide--service-design .presenter-scripture-reading-text {
   font-weight: 400;
