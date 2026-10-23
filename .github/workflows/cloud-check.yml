@@ -9,6 +9,9 @@ permissions:
 jobs:
   offline-web:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -16,13 +19,21 @@ jobs:
         shard: [0, 1, 2, 3]
     steps:
       - uses: actions/checkout@v4
+      - name: Reuse verified exact commit
+        id: verified
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 cloud/reuse_checks.py
       - uses: actions/setup-node@v4
+        if: steps.verified.outputs.reuse != 'true'
         with:
           node-version: '22'
       - uses: actions/setup-python@v5
+        if: steps.verified.outputs.reuse != 'true'
         with:
           python-version: '3.12'
       - name: Use the official Ubuntu package mirror
+        if: steps.verified.outputs.reuse != 'true'
         # The hosted Azure mirror can stall dependency downloads until timeout.
         # Keep Ubuntu's signed package metadata and all required browser checks.
         run: |
@@ -36,8 +47,10 @@ jobs:
                   if updated != source:
                       path.write_text(updated)
           PYMIRROR
-      - run: bash cloud/setup.sh
-      - run: .cache/cloud-venv/bin/python cloud/check.py --shard-index ${{ matrix.shard }} --shard-count 4
+      - if: steps.verified.outputs.reuse != 'true'
+        run: bash cloud/setup.sh
+      - if: steps.verified.outputs.reuse != 'true'
+        run: .cache/cloud-venv/bin/python cloud/check.py --shard-index ${{ matrix.shard }} --shard-count 4
   deploy-pages:
     # A failed/cancelled check skips this entire job. No always() or bypass.
     needs: offline-web
