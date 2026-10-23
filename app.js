@@ -8901,7 +8901,7 @@ function handleDetailClick(event) {
 
   const versionTypeToggle = event.target.closest("[data-version-type-toggle]");
   if (versionTypeToggle) {
-    toggleVersionPraiseType(versionTypeToggle.dataset.versionTypeToggle);
+    toggleVersionPraiseType(versionTypeToggle.dataset.versionTypeToggle, versionTypeToggle.dataset.typeVersionId);
     return;
   }
 
@@ -10095,10 +10095,10 @@ function addForm(type) {
   });
 }
 
-function toggleVersionPraiseType(type) {
-  if (!PRAISE_TYPES.includes(type)) return;
+function toggleVersionPraiseType(type, versionId = getSelectedVersionId()) {
+  if (!PRAISE_TYPES.includes(type) || state.saving) return;
   const song = getSelectedSong();
-  const version = getSelectedVersion();
+  const version = song?.versions?.find(candidate => candidate.id === versionId);
   if (!version) return;
   const types = canonicalPraiseTypes(version.praise_types);
   const idx = types.indexOf(type);
@@ -10119,7 +10119,7 @@ function renderVersionPraiseTypeTags(version) {
   return `<div class="version-type-tags">${
     PRAISE_TYPES.map(type => `
       <button class="version-type-tag${active.includes(type) ? " on" : ""}" type="button"
-              data-version-type-toggle="${escapeAttr(type)}">
+              data-version-type-toggle="${escapeAttr(type)}" data-type-version-id="${escapeAttr(version.id)}" aria-pressed="${active.includes(type)}" ${state.saving ? "disabled" : ""}>
         ${escapeHtml(labels[type])}
       </button>`).join("")
   }</div>`;
@@ -17881,7 +17881,7 @@ function renderVersionTitleContent(song, version, forms, options = {}) {
       ${renderVersionAttentionStatus(song, version, forms, { active })}
     </div>
     <div class="version-title-actions">
-      ${active ? renderVersionPraiseTypeTags(version) : ""}
+      ${renderVersionPraiseTypeTags(version)}
       <div class="version-edit-actions" role="group" aria-label="버전 관리">
       ${[-1, 1].map(direction => {
         const index = song.versions.findIndex(item => item.id === version.id);

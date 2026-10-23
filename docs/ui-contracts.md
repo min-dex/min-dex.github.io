@@ -824,3 +824,7 @@ buttons. Copy reads that version directly; mutations select the target version
 through the existing draft-preserving path before acting, with identity checks.
 Move boundaries use that version's form count. Linked other-song previews remain
 read-only navigation. No automatic save or source data migration is introduced.
+
+Unselected same-song versions also retain all three praise-type toggles
+(찬송가/CCM/어린이). Each toggle carries its target version ID and updates only
+that version without changing the active editor or its unsaved lyrics.
