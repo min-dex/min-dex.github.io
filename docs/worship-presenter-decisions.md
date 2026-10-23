@@ -4052,3 +4052,13 @@ existing connection/end dialog, never creates a second session. Busy buttons
 lock during creation/ending; expired/closed sessions restore the normal label.
 Basic right-panel rerenders retain the current code; focus topbar temporarily
 widens to show the code. No pairing TTL, permission or relay protocol changes.
+
+## Children community-confession closing ·2026-10-23
+
+The standard children confession ends with
+`검단우리교회 꿈꾸는 어린이부 공동체가 되겠습니다.`
+Select this copy from the normalized service type during liturgical slide build,
+including the closing bold phrase. Other services retain the standard public
+confession and third-service chromakey chunks exactly. Preview and output consume
+the same generated slide; do not rewrite operational records or custom authored
+confession text. Marker foreground/coverage and original six colors are unchanged.

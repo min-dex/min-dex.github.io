@@ -1496,9 +1496,9 @@ function presenterAnnouncementBodyText(text = "") {
     .join("\n");
 }
 
-function liturgicalBodyText(item = {}, memo = parseServiceItemMemo(item?.memo), displayText = "") {
+function liturgicalBodyText(item = {}, memo = parseServiceItemMemo(item?.memo), displayText = "", service = {}) {
   const title = liturgicalBodyTitle(item);
-  const canonical = presenterCanonicalLiturgicalBodyText(title);
+  const canonical = presenterCanonicalLiturgicalBodyText(title, service);
   if (canonical && !item?.template_modified && !item?.templateModified) return canonical;
   const announcement = isAnnouncementTextInputItem(item);
   if (memo.slides?.length) {
@@ -1510,15 +1510,20 @@ function liturgicalBodyText(item = {}, memo = parseServiceItemMemo(item?.memo), 
   return announcement ? presenterAnnouncementBodyText(text) : canonical || text.trim();
 }
 
-function presenterCanonicalLiturgicalBodyText(title = "") {
+function presenterCommunityConfessionCommunityName(service = {}) {
+  const type = worshipAppServiceTypeId(service?.type_id || service?.service_type_id || service?.typeId || "");
+  return type === "children" ? "검단우리교회 꿈꾸는 어린이부 공동체" : "검단우리교회 공동체";
+}
+
+function presenterCanonicalLiturgicalBodyText(title = "", service = {}) {
   const key = compactSearchValue(title);
   if (key === "주기도문") return PRESENTER_PUBLIC_LORDS_PRAYER_TEXT;
-  if (key === "공동체고백") return PRESENTER_PUBLIC_COMMUNITY_CONFESSION_TEXT;
+  if (key === "공동체고백") return PRESENTER_PUBLIC_COMMUNITY_CONFESSION_TEXT.replace("검단우리교회 공동체", presenterCommunityConfessionCommunityName(service));
   if (key === "사도신경" || key === "신앙고백") return PRESENTER_PUBLIC_APOSTLES_CREED_TEXT;
   return "";
 }
 
-function liturgicalBodyTextHighlights(item = {}, memo = parseServiceItemMemo(item?.memo)) {
+function liturgicalBodyTextHighlights(item = {}, memo = parseServiceItemMemo(item?.memo), service = {}) {
   const explicit = normalizeServiceTextHighlights(memo?.textHighlights || memo?.text_highlights || memo?.highlights);
   if (explicit.length) return explicit;
   if (liturgicalBodyTitle(item) !== "공동체고백") return [];
@@ -1533,19 +1538,19 @@ function liturgicalBodyTextHighlights(item = {}, memo = parseServiceItemMemo(ite
     { text: "치유자", color: "#FF6432", bold: true },
     { text: "화해자", color: "#32C8FF", bold: true },
     { text: "소명자", color: "#9696FF", bold: true },
-    { text: "검단우리교회 공동체", bold: true },
+    { text: presenterCommunityConfessionCommunityName(service), bold: true },
   ];
 }
 
 function buildPresenterLiturgicalBodySlides(item, section, index, service, memo, displayText) {
   if (!isLiturgicalBodyServiceItem(item)) return [];
-  const text = liturgicalBodyText(item, memo, displayText);
+  const text = liturgicalBodyText(item, memo, displayText, service);
   if (!text) return [];
   const title = liturgicalBodyTitle(item);
   const announcementItems = isAnnouncementTextInputItem(item)
     ? presenterAnnouncementItems(text)
     : [];
-  const textHighlights = liturgicalBodyTextHighlights(item, memo);
+  const textHighlights = liturgicalBodyTextHighlights(item, memo, service);
   const base = {
     ...section,
     sectionLabel: item?.label || title,

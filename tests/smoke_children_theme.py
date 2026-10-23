@@ -53,6 +53,28 @@ try:
       return [style.color,style.backgroundImage,style.fontWeight];
     });
     try {
+     const confessionItem={id:'children-confession',label:'공동체고백',_worshipSectionKey:'community_confession'};
+     const originalItem=JSON.stringify(confessionItem);
+     const childrenSlides=buildPresenterLiturgicalBodySlides(confessionItem,{},0,service,{},'');
+     check(childrenSlides.length===1&&childrenSlides[0].text.endsWith('꿈꾸는 어린이부 공동체가 되겠습니다.'),'children closing missing');
+     check(childrenSlides[0].textHighlights.some(h=>h.text.endsWith('꿈꾸는 어린이부 공동체')&&h.bold),'children closing bold missing');
+     const mainSlides=buildPresenterLiturgicalBodySlides(confessionItem,{},0,{type_id:'sunday-main'},{},'');
+     check(JSON.stringify(mainSlides.map(s=>s.text))===JSON.stringify(PRESENTER_PUBLIC_COMMUNITY_CONFESSION_CHROMAKEY_SLIDES),'third-service confession changed');
+     check(JSON.stringify(confessionItem)===originalItem,'confession source mutated');
+     const edited={...confessionItem,template_modified:true};
+     check(liturgicalBodyText(edited,{slides:['직접 작성한 공동체고백']},'',service)==='직접 작성한 공동체고백','authored confession replaced');
+     presenterBackgroundSourcesForService=()=>['assets/worship-backgrounds/26-C2.png'];
+     host.innerHTML=renderPresenterSlideMiniPreview(childrenSlides[0],service.id);
+     const childMini=host.querySelector('.svc-slide-mini-canvas');
+     const childOutput=document.createElement('main');childOutput.className='presenter-output-root';host.append(childOutput);
+     applyPresenterOutputFrameState(childOutput,presenterOutputFrameStateForSlide(childrenSlides[0],{chromakey:false,serviceType:'children',backgroundImages:['assets/worship-backgrounds/26-C2.png']}));
+     childOutput.innerHTML=renderPresenterSlideFrame(childrenSlides[0],{noChromakey:true});
+     await document.fonts.ready;fitPresenterLyricText(host);
+     for(const root of [childMini,childOutput]) {
+      check(root.textContent.includes('꿈꾸는 어린이부 공동체가 되겠습니다.'),'children preview/output closing mismatch');
+      const box=root.querySelector('.presenter-liturgical-body-lines');
+      check(box.scrollWidth<=box.clientWidth+1&&box.scrollHeight<=box.clientHeight+1,'children confession overflow');
+     }
      check(presenterInkForLuminance(.3)==='white'&&presenterInkForLuminance(.30001)==='brown','contrast boundary mismatch');
      check(presenterInkForLuminance(null)==='white'&&presenterInkForLuminance(NaN)==='white','unreadable background fallback mismatch');
      const count=presenterOutputImagePreloadCache.size;

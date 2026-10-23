@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-direct-remote-final",
+  "version": "20261023-children-confession",
   "options": {
     "compress": false,
     "mangle": {
