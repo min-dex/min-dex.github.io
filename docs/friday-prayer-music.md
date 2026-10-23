@@ -82,3 +82,16 @@ Prepared and verified in an isolated worktree. The DB task confirmed that this U
 
 - 음악 조작은 중립 버튼, 재생/반복 활성 상태만 accent-soft를 사용한다. 비활성 버튼은 공통 보조 글자색·투명 배경이며 클릭해도 배치가 움직이지 않는다.
 - 음악 관리·컨트롤러·연결 음원 작업 버튼의 키보드 포커스는 안쪽2px outline을 사용한다. 저장·삭제 등 다른 명령과 송출 화면에는 적용하지 않는다.
+
+### Volume control ·2026-10-24
+Volume uses a compact speaker/slider/percentage field (0–100%, 1% keyboard steps).
+The internal 0–5 scale and audio owner/fade handling remain unchanged. Input
+updates transport text in place rather than rebuilding the controller, preserving
+slider focus and drag. Narrow controls wrap without overflow.
+
+The free-prayer play button warms metadata on pointer hover or keyboard focus
+using a separate muted, metadata-only Audio. It never calls play, changes the
+shared audio/source/owner, or runs from rendering. Warmup stops after metadata
+or ten seconds; failure permits a later retry. The original media is unchanged.
+This reduces first-click waiting when there is preparation time; it cannot
+guarantee instant playback on a cold or slow network.

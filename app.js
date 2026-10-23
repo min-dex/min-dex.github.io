@@ -1575,6 +1575,7 @@ function bindDetailInteractionRoot(root, options = {}) {
   root.addEventListener("keydown", handleDetailKeydown, { capture: true });
   root.addEventListener("input", handleDetailInput);
   root.addEventListener("focusin", (event) => {
+    warmServiceSlotMusic(event.target);
     if (event.target?.matches?.("[data-presenter-preparation-field]")) {
       syncPresenterPreparationControls(event.target);
     }
@@ -9419,6 +9420,7 @@ function handleDetailPointerDown(event) {
 }
 
 function handleDetailPointerOver(event) {
+  warmServiceSlotMusic(event.target);
   if (handlePresenterBoardPointerOver(event)) return;
   const drag = state.bibleDragSelection;
   if (!drag) return;
@@ -9448,6 +9450,11 @@ function handleWindowPointerUp() {
 }
 
 function handleDetailInput(event) {
+  const volume = event.target.closest("[data-service-music-volume]");
+  if (volume) {
+    setServiceMusicVolume(volume.value, volume.closest("[data-service-music-player]")?.dataset);
+    return;
+  }
   const leaderInput = event.target.closest("[data-setlist-leader-input]");
   if (leaderInput) {
     const id = leaderInput.dataset.setlistLeaderInput;
@@ -29825,8 +29832,7 @@ function renderServiceMusicPlayer(options = {}) {
   const pending = active && music.pending;
   const playing = active && !pending && music.playing;
   const key = pending ? "loading" : playing ? "playing" : "idle";
-  const volumeOptions = Array.from({ length: 6 }, (_, level) =>
-    `<option value="${level}"${level === music.volumeLevel ? " selected" : ""}>${level}</option>`).join("");
+  const volumePercent = Math.round(music.volumeLevel * 20);
   return `
     <span class="svc-music-player${inline ? " svc-music-player--inline" : ""}" data-service-music-player data-service-music-service-id="${escapeAttr(options.serviceId || "")}" data-service-music-source="${escapeAttr(options.source || "")}" data-service-music-label="${escapeAttr(options.label || "")}" data-service-music-repeat-allowed="${options.repeatAllowed !== false}">
       ${inline ? `<span class="svc-music-label">${escapeHtml(options.label)}</span>` : `
@@ -29844,10 +29850,9 @@ function renderServiceMusicPlayer(options = {}) {
         ${inline ? `<button type="button" class="icon-btn" data-service-music-action="stop" aria-label="음악 정지" ${active && (music.pending || music.playing || music.audio?.currentTime) ? "" : "disabled"}><i data-lucide="square"></i></button>` : ""}
         ${options.repeatAllowed !== false && music.repeatAllowed !== false ? `<button class="icon-btn svc-music-repeat" type="button" data-service-music-action="repeat" aria-label="음악 반복 재생" aria-pressed="${Boolean(music.repeat ?? context.playback?.loop)}"><i data-lucide="repeat"></i></button>` : ""}
         <span class="svc-volume-control">
-          <span class="svc-presenter-mini-label">${escapeHtml(uiText("presenter.label.volume"))}</span>
-          <select class="svc-music-volume" data-service-music-volume aria-label="${escapeAttr(uiText("presenter.music.volume"))}">
-            ${volumeOptions}
-          </select>
+          <i data-lucide="volume-2" aria-hidden="true"></i>
+          <input class="svc-music-volume" type="range" min="0" max="5" step="0.05" value="${music.volumeLevel}" data-service-music-volume aria-label="${escapeAttr(uiText("presenter.music.volume"))}" aria-valuetext="${volumePercent}%">
+          <output data-service-music-volume-value aria-hidden="true">${volumePercent}%</output>
         </span>` : ""}
       </span>
       ${inline ? globalThis.MindexSongTiming?.transport({ source: options.source, serviceId: options.serviceId }) || "" : ""}
@@ -29874,6 +29879,30 @@ function renderLiveScriptureControl(serviceId) {
 const SERVICE_SLOT_MUSIC = Object.freeze({
   "prayer.meeting.free": { source: "./assets/presenter/friday-free-prayer.m4a?v=faststart-20260919", label: "자율기도 음악", repeatAllowed: false },
 });
+
+let serviceMusicWarmup = null;
+function warmServiceSlotMusic(target) {
+  const button = target?.closest?.('[data-service-music-action="toggle"]');
+  const source = button?.closest('[data-service-music-player]')?.dataset.serviceMusicSource;
+  if (!source || !Object.values(SERVICE_SLOT_MUSIC).some(item => item.source === source)
+      || source === state.serviceMusic.sourceKey || serviceMusicWarmup?.source === source) return;
+  // Separate metadata-only request: never select, replace, or play the shared audio.
+  const audio = new Audio();
+  const warmup = {source, audio};
+  serviceMusicWarmup = warmup;
+  audio.preload = "metadata";
+  audio.muted = true;
+  const finish = (retry = false) => {
+    clearTimeout(warmup.timer);
+    audio.removeAttribute("src");
+    audio.load();
+    if (retry && serviceMusicWarmup === warmup) serviceMusicWarmup = null;
+  };
+  audio.addEventListener("loadedmetadata", () => finish(), {once:true});
+  audio.addEventListener("error", () => finish(true), {once:true});
+  warmup.timer = setTimeout(() => finish(true), 10000);
+  audio.src = source;
+}
 
 function renderServiceSlotMusic(context) {
   const config = SERVICE_SLOT_MUSIC[context?.item?._worshipSlotKey];
@@ -29913,7 +29942,12 @@ function updateServiceMusicTransportControls() {
       repeat.setAttribute("aria-pressed", String(Boolean(music.repeat)));
     }
     const volume = root.querySelector('[data-service-music-volume]');
-    if (volume) volume.value = String(music.volumeLevel);
+    if (volume) {
+      volume.value = String(music.volumeLevel);
+      volume.setAttribute("aria-valuetext", `${Math.round(music.volumeLevel * 20)}%`);
+    }
+    const volumeValue = root.querySelector("[data-service-music-volume-value]");
+    if (volumeValue) volumeValue.textContent = `${Math.round(music.volumeLevel * 20)}%`;
   });
 }
 
@@ -30355,7 +30389,7 @@ function setServiceMusicVolume(value, binding = null) {
   const audio = getServiceMusicAudio();
   const fade = state.serviceMusic.fadeStop;
   audio.volume = (level / 5) * (fade ? Math.max(0, 1 - (Date.now() - fade.started) / 1200) : 1);
-  renderPresenterControlState();
+  updateServiceMusicTransportControls();
 }
 
 function presenterSyncTimelineForSlide(slide = null) {

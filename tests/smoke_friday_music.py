@@ -31,7 +31,7 @@ try:
  const first=runServiceMusicAction('toggle',binding);
  check(toggle.textContent.includes('준비 중'),'pending label');check(toggle.getAttribute('aria-pressed')==='false','pending playing');check(pos()===positions,'pending shift');
  finish();await first;check(toggle.textContent.includes('일시정지'),'playing label');check(pos()===positions,'playing shift');check(!a.loop,'loop');
- setServiceMusicVolume(2);check(a.volume===0.4&&m.querySelector('select').value==='2','shared volume');
+ setServiceMusicVolume(2);check(a.volume===0.4&&m.querySelector('[data-service-music-volume]').value==='2','shared volume');
  await runServiceMusicAction('toggle',binding);check(a.paused&&!state.serviceMusic.playing,'pause');
  a.currentTime=12;runServiceMusicAction('stop',binding);check(a.currentTime===0,'stop reset');
  const pending=runServiceMusicAction('toggle',binding);runServiceMusicAction('toggle',binding);check(!state.serviceMusic.pending,'cancel pending');finish();a.paused=true;await pending;check(!state.serviceMusic.playing,'stale play revived');
@@ -55,8 +55,26 @@ try:
  await runServiceMusicAction('toggle',otherBinding);check(state.serviceMusic.ownerServiceId==='other-friday'&&state.serviceMusic.playing,'idle ownership transfer failed');
  runServiceMusicAction('stop',otherBinding);
  for(const theme of ['light','dark']){document.body.dataset.theme=theme;for(const width of [254,390,1000]){m.style.width=width+'px';check(m.scrollWidth<=width,'overflow '+width);}}
+ const NativeAudio=window.Audio;let warmer;
+ window.Audio=class {constructor(){warmer=this;this.events={}}addEventListener(name,fn){this.events[name]=fn}removeAttribute(){this.src=''}load(){this.released=true}play(){throw Error('warmup autoplay')}};
+ const oldSource=state.serviceMusic.sourceKey;state.serviceMusic.sourceKey='fixture-other.mp3';
+ const originalAudio=state.serviceMusic.audio,owner=state.serviceMusic.ownerServiceId,clock=originalAudio.currentTime;
+ warmServiceSlotMusic(toggle);check(warmer.preload==='metadata'&&warmer.muted,'warmup settings');
+ const firstWarmer=warmer;warmServiceSlotMusic(toggle);check(warmer===firstWarmer,'duplicate warmup');
+ warmer.events.loadedmetadata();check(warmer.released,'warmup not bounded');
+ check(state.serviceMusic.audio===originalAudio&&state.serviceMusic.sourceKey==='fixture-other.mp3'&&state.serviceMusic.ownerServiceId===owner&&originalAudio.currentTime===clock,'warmup touched active player');
+ state.serviceMusic.sourceKey=oldSource;window.Audio=NativeAudio;
  clearServiceMusicSyncTimer();return 'PASS shared engine, side-effect-free rendering, state, cancellation, source isolation, repeat disabled, volume, widths';
 }'''), flush=True)
+            page.evaluate("""()=>{
+ const m=document.getElementById('music-test');m.innerHTML=renderServiceSlotMusic({service:{id:'other-friday'},item:{_worshipSlotKey:'prayer.meeting.free'}});m.style.cssText='position:fixed;top:20px;left:20px;width:320px;padding:15px;background:var(--ui-surface-panel);z-index:999999';
+ document.body.classList.remove('ui-booting');refreshIcons(m);m.addEventListener('input',handleDetailInput);
+ window.auditRange=m.querySelector('[data-service-music-volume]');
+}""")
+            slider=page.locator('#music-test [data-service-music-volume]')
+            slider.focus();slider.press('Home');slider.press('ArrowRight')
+            assert slider.evaluate("e=>e===document.activeElement && e===window.auditRange && e.value==='0.05' && e.getAttribute('aria-valuetext')==='1%'")
+            assert page.evaluate("Math.abs(state.serviceMusic.audio.volume-0.01)<0.00001")
             page.locator('#music-test').screenshot(path='/tmp/mindex-prayer-controls-'+engine+'.png')
             browser.close()
 finally:
