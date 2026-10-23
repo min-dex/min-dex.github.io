@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261024-special-song-title",
+  "version": "20261024-prayer-volume-bible-cleanup",
   "options": {
     "compress": false,
     "mangle": {
