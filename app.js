@@ -28058,6 +28058,9 @@ function stripHymnNo(raw) {
 
 function isMainPraiseServiceItem(item, options = {}) {
   const sectionKey = String(item?._worshipSectionKey || "").trim();
+  if (sectionKey.startsWith("source-")) {
+    return isMainPraiseLabel(item?._worshipSectionTitle || sectionKey.slice("source-".length));
+  }
   if (sectionKey) return sectionKey === "praise";
   const label = String(item?.label || "").trim();
   if (isMainPraiseLabel(label)) return true;

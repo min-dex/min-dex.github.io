@@ -4256,3 +4256,14 @@ Title input aliases (`Title`, `title`, `T`, `t`) normalize to `T` for form hints
 newly saved tokens and visible form markers. Existing title tokens retain their
 meaning and position without a bulk data rewrite. Hymn scores still receive no
 default T, and order/content headings remain separate from Title forms.
+
+
+## Source-imported main praise section identity ·2026-10-23
+
+Portable/source sections named 찬양 (including numbered 찬양 sections) are main
+praise for the same existing default-title rules as canonical `praise` sections.
+Resolve `source-` section identity from its actual title/key, without a chapel- or
+service-ID exception. Canonical offering/response/sending keys retain their scope.
+Old saved forms without explicit Title ownership regain their leading T; a user
+sequence explicitly saved without T still owns that omission. No stored sequence
+or section metadata is rewritten by this classification correction.

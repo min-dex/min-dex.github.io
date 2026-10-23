@@ -30,6 +30,17 @@ try:
      applyServiceItemMetadataField(item,{dataset:{serviceItemField:'form_hint'},value:''},service);
      check(input(item).value==='' && !serviceElementConfigForSave({},parseServiceItemMemo(item.memo)).formPreset,'clearing restores empty input');
     }
+    const imported={id:'source-praise',label:'찬양 4',_worshipSectionKey:'source-찬양',_worshipSectionTitle:'찬양',song_id:song.id,version_id:version.id,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formHint:'V1-C',formPreset:{forms:['V1','C'],strength:'manual'}})};
+    const importedBefore=JSON.stringify(imported);
+    check(isMainPraiseServiceItem(imported) && input(imported).value==='T-V1-C','source praise with saved form restores leading T');
+    check(presenterFormPlanForServiceItem(version,imported,song).forms[0]._presenterTitle,'source praise renders restored title');
+    check(JSON.stringify(imported)===importedBefore,'source praise title rewrote authored form');
+    check(isMainPraiseServiceItem({...imported,_worshipSectionTitle:''}),'source praise key without display title');
+    for(const title of ['봉헌','파송찬양','결단찬양','입례찬양'])check(!isMainPraiseServiceItem({...imported,_worshipSectionKey:'source-'+title,_worshipSectionTitle:title}),'source non-main scope '+title);
+    check(!isMainPraiseServiceItem({...imported,_worshipSectionKey:'offering'}),'canonical section owns scope');
+    const intentional={...imported};
+    applyServiceItemMetadataField(intentional,{dataset:{serviceItemField:'form_hint'},value:'V1-C'},service);
+    check(input(intentional).value==='V1-C' && !presenterFormPlanForServiceItem(version,intentional,song).forms.some(f=>f._presenterTitle),'source praise intentional omission preserved');
     song.metadata={presenter_form:{forms:['C','V1'],strength:'song-default'}};
     const registered={id:'registered',label:'찬양 1',_worshipSectionKey:'praise',song_id:song.id,version_id:version.id,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db'})};
     check(input(registered).value==='T-C-V1','registered main default filled');
