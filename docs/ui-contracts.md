@@ -815,3 +815,12 @@ Background, audio upload and save use equal 60×30px quiet outlined controls,
 10px horizontal padding and the label type token. Audio/save omit redundant
 icons; background retains only its small open/closed disclosure indicator.
 File selection, save feedback and keyboard focus semantics remain unchanged.
+
+
+### Inactive version block actions · 2026-10-23
+
+Unselected versions of the current song retain their block move/copy/delete
+buttons. Copy reads that version directly; mutations select the target version
+through the existing draft-preserving path before acting, with identity checks.
+Move boundaries use that version's form count. Linked other-song previews remain
+read-only navigation. No automatic save or source data migration is introduced.

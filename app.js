@@ -8909,7 +8909,7 @@ function handleDetailClick(event) {
   if (formAction) {
     event.preventDefault();
     event.stopPropagation();
-    void runFormAction(formAction.dataset.formAction, Number(formAction.dataset.index));
+    void runVersionFormAction(formAction.dataset.formAction, Number(formAction.dataset.index), formAction.dataset.formVersionId);
     return;
   }
 
@@ -10253,6 +10253,20 @@ function addVersion(sourceVersionId = getSelectedVersionId()) {
   persistUiState();
   renderDetail();
   updateSaveState();
+}
+
+async function runVersionFormAction(action, index, versionId) {
+  if (state.saving) return;
+  if (versionId && versionId !== getSelectedVersionId()) {
+    const song = getSelectedSong();
+    const version = song?.versions?.find(candidate => candidate.id === versionId);
+    const form = version && getFormsForVersion(version)[index];
+    if (!form) return;
+    if (action === "copy") { copyText(form.lyrics || ""); return; }
+    await selectVersion(versionId);
+    if (getSelectedSong()?.id !== song.id || getSelectedVersionId() !== versionId || state.forms[index]?.id !== form.id) return;
+  }
+  await runFormAction(action, index);
 }
 
 async function runFormAction(action, index) {
@@ -17769,7 +17783,7 @@ function renderVersionCompareColumn(version, forms) {
         if (active) return renderFormBlock(form, index, { song, version });
         return `
           <div class="version-picker" data-version-id="${escapeAttr(version.id)}" role="button" tabindex="0">
-            ${renderReadonlyFormBlock(form, { song, version })}
+            ${renderReadonlyFormBlock(form, { song, version, index, formCount: displayForms.length, showActions: true })}
           </div>
         `;
       }).join("")
@@ -18320,6 +18334,23 @@ function renderScriptureTextarea(label, field, value, className = "") {
   `;
 }
 
+function renderFormBlockActions(index, count, versionId) {
+  return `        <div class="form-actions">
+          <button class="icon-btn" type="button" data-form-version-id="${escapeAttr(versionId || "")}" data-form-action="up" data-index="${index}" aria-label="블록 위로 이동" ${index === 0 ? "disabled" : ""}>
+            <i data-lucide="arrow-up"></i>
+          </button>
+          <button class="icon-btn" type="button" data-form-version-id="${escapeAttr(versionId || "")}" data-form-action="down" data-index="${index}" aria-label="블록 아래로 이동" ${index === count - 1 ? "disabled" : ""}>
+            <i data-lucide="arrow-down"></i>
+          </button>
+          <button class="icon-btn" type="button" data-form-version-id="${escapeAttr(versionId || "")}" data-form-action="copy" data-index="${index}" aria-label="블록 복사">
+            <i data-lucide="copy"></i>
+          </button>
+          <button class="icon-btn danger" type="button" data-form-version-id="${escapeAttr(versionId || "")}" data-form-action="delete" data-index="${index}" aria-label="블록 삭제">
+            <i data-lucide="trash-2"></i>
+          </button>
+        </div>`;
+}
+
 function renderFormBlock(form, index, options = {}) {
   const label = displayLabel(form);
   const supportsVariant = ["Verse", "Chorus", "Pre-Chorus", "Bridge", "Coda"].includes(form.part_type);
@@ -18335,20 +18366,7 @@ function renderFormBlock(form, index, options = {}) {
           </select>
           ${supportsVariant ? `<input class="form-variant-input" type="text" inputmode="text" maxlength="2" data-form-field="part_variant" data-index="${index}" value="${escapeAttr(form.part_variant || "")}" placeholder="@" aria-label="${escapeAttr(label)} 변주" />` : ""}
         </div>
-        <div class="form-actions">
-          <button class="icon-btn" type="button" data-form-action="up" data-index="${index}" aria-label="블록 위로 이동" ${index === 0 ? "disabled" : ""}>
-            <i data-lucide="arrow-up"></i>
-          </button>
-          <button class="icon-btn" type="button" data-form-action="down" data-index="${index}" aria-label="블록 아래로 이동" ${index === state.forms.length - 1 ? "disabled" : ""}>
-            <i data-lucide="arrow-down"></i>
-          </button>
-          <button class="icon-btn" type="button" data-form-action="copy" data-index="${index}" aria-label="블록 복사">
-            <i data-lucide="copy"></i>
-          </button>
-          <button class="icon-btn danger" type="button" data-form-action="delete" data-index="${index}" aria-label="블록 삭제">
-            <i data-lucide="trash-2"></i>
-          </button>
-        </div>
+        ${renderFormBlockActions(index, state.forms.length, options.version?.id)}
       </div>
       <textarea class="form-textarea" data-form-field="lyrics" data-index="${index}" rows="1" aria-label="${escapeAttr(label)} lyrics">${escapeHtml(form.lyrics || "")}</textarea>
     </article>
@@ -18362,6 +18380,7 @@ function renderReadonlyFormBlock(form, options = {}) {
         <div class="form-meta">
           <span class="form-label-text">${escapeHtml(songFormPresetDisplayLabel(displayLabel(form)) || displayLabel(form))}</span>
         </div>
+        ${options.showActions ? renderFormBlockActions(options.index, options.formCount, options.version?.id) : ""}
       </div>
       <div class="form-preview-text">${escapeHtml(form.lyrics || "")}</div>
     </article>
