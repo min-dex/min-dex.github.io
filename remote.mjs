@@ -1,6 +1,6 @@
 import {createPreview} from './remote.preview.mjs?v=1';
 import {openRemote} from './mindex.remote-session.mjs?v=5';
-import {setupPhoneExperience} from './remote.screen.mjs?v=3';
+import {setupPhoneExperience} from './remote.screen.mjs?v=4';
 window.lucide?.createIcons();
 const screenAwake=setupPhoneExperience();
 const $=id=>document.getElementById(id);

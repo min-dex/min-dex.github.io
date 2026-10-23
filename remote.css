@@ -19,7 +19,8 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .primary { background: var(--accent); color: var(--accent-ink); }
 .primary:not(:disabled):hover { background: var(--accent); box-shadow: inset 0 0 0 2px var(--accent-ink); }
 input { margin-top: 10px; padding: 10px 15px; background: var(--panel-2); color: var(--ink); border: 1px solid var(--line); font-size: 20px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
-input::placeholder { color: var(--placeholder-ink); opacity: 1; }
+#code:placeholder-shown { font-weight: 400; }
+input::placeholder { color: var(--placeholder-ink); opacity: .55; font-weight: 400; }
 #connect { margin-top: 15px; }
 #status:empty, #screenStatus:empty, #result:empty { display: none; }
 #controller, #disconnect { margin-top: 20px; }
@@ -42,8 +43,5 @@ button :is([data-lucide], svg.lucide) { width: var(--ui-icon-size); height: var(
 @media (min-width: 600px) { main { padding: 25px; } .previews { grid-template-columns: 1fr 1fr; } .previews article { min-height: 180px; } }
 
 .phone-options { border-top: 1px solid var(--line); margin-top: 20px; padding-top: 15px; }
-#screenStatus, #installHelp p { font-size: var(--ui-meta-size); color: var(--ink-3); }
-#installHelp { margin-top: 15px; }
-#installHelp summary { cursor: pointer; padding: 10px 0; font-size: var(--ui-body-size); }
-#installHelp summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#screenStatus { font-size: var(--ui-meta-size); color: var(--ink-3); }
 @media (display-mode: standalone) { main { padding-top: max(25px, env(safe-area-inset-top)); } }

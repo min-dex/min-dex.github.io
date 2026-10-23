@@ -41,7 +41,7 @@
     const stage=document.createElement('div');stage.style.cssText='position:fixed;left:-10000px;top:0;width:1920px;height:1080px;visibility:hidden;pointer-events:none';
     stage.append(template.content);document.body.append(stage);
     try{if(typeof fitPresenterPreviewText==='function')fitPresenterPreviewText(stage);html=stage.innerHTML;}finally{stage.remove();}
-    if(JSON.stringify(html).length>5500)html='';
+    if(new TextEncoder().encode(JSON.stringify(html)).length>4500)html='';
    }catch{}
    previews.set(slide,html);return html;
   }

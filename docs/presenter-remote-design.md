@@ -34,7 +34,7 @@ v3 운영 서버 적용 완료. 클라이언트 배포 검증 진행 중.
 600px 이상에서는 현재/다음을 두 열로 표시한다. 버튼 최소 높이50px, 이전·다음70px.
 긴 텍스트는 미리보기 안에서 스크롤하며 가로 페이지 넘침을 방지한다.
 
-미리보기는 현재·다음 두 장의 기존 PC thumbnail 렌더러 결과다. 각5500자 이내로 제한하고 초과 시 텍스트 대체 화면을 표시한다. 정적 이미지·배경은 원본 URL로 표시하며 로컬 blob/file 자료는 제외한다. 전체 예배 자료나 음원은 보내지 않는다. 폰의 미리보기는 script 없는 sandbox iframe이며 영상·음원을 재생하지 않는다.
+미리보기는 현재·다음 두 장의 기존 PC thumbnail 렌더러 결과다. 각 직렬화된 UTF-8 기준4500바이트 이내로 제한하고 초과 시 텍스트 대체 화면을 표시한다. 정적 이미지·배경은 원본 URL로 표시하며 로컬 blob/file 자료는 제외한다. 전체 예배 자료나 음원은 보내지 않는다. 폰의 미리보기는 script 없는 sandbox iframe이며 영상·음원을 재생하지 않는다.
 홈 화면 추가용 manifest가 있으며 service worker/offline 명령 저장은 없다.
 공통 설정은 공개 브라우저 설정만 별도 파일로 공유하고 기존 inline bootstrap과 자동 대조한다.
 
@@ -167,3 +167,10 @@ code only while pairing, and one applicable start/end action. Once connected,
 hide the page link and pairing guidance; retain disconnect and failure status.
 Close only dismisses the dialog; it must not disconnect. Keep the existing
 opening/ending guards and six-digit pairing protocol.
+
+## Minimal phone chrome ·2026-10-23
+
+Remove in-page installation guidance and its custom install prompt. The existing
+manifest and platform browser installation remain available. Show the wake-lock
+status section only for actionable failures; idle/normal states occupy no space.
+The example code uses lighter400-weight placeholder text, distinct from entered digits.
