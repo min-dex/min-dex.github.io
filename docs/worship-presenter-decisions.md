@@ -4076,3 +4076,12 @@ The atomic save path persists edited sequences normally; no bulk DB migration ru
 
 Title entries do not consume lyric occurrence keys or photo-placement signatures;
 version audio page boundaries remain intact when a default title is prepended.
+
+## Full-height confession marker ·2026-10-23
+
+Fullscreen community-confession markers now fill the full inline text box,
+superseding the45–95% half-height band. Keep original six source colors,
+#332211 marker text and4-stage-pixel side padding. Preview/output share this
+CSS rule. Third-service chromakey and other copy remain unmarked. Children
+retain their dedicated closing. User requested skipping optional local checks;
+the complete required publication gate remains mandatory.

@@ -45,8 +45,8 @@ try:
     const host=document.querySelector('#contrast-fixture');
     const markerState=root=>[...root.querySelectorAll('.presenter-text-highlight--color')].map((el,i)=>{
       const style=getComputedStyle(el);const probe=document.createElement('span');
-      probe.style.backgroundImage='linear-gradient(to bottom, transparent 45%, '+colors[i]+' 45%, '+colors[i]+' 95%, transparent 95%)';host.append(probe);
-      check(style.backgroundImage===getComputedStyle(probe).backgroundImage,'original marker color/50% coverage mismatch');probe.remove();
+      probe.style.backgroundImage='linear-gradient('+colors[i]+', '+colors[i]+')';host.append(probe);
+      check(style.backgroundImage===getComputedStyle(probe).backgroundImage,'original marker color/full-height coverage mismatch');probe.remove();
       check(style.color===brown&&style.webkitTextStrokeWidth==='0px','marker ink/outline mismatch');
       const padding=+style.paddingLeft.replace('px','')*1920/root.clientWidth;
       check(Math.abs(padding-4)<.01,'marker padding mismatch');

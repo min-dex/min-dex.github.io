@@ -359,7 +359,7 @@
 /* Community confession alone uses marker emphasis in fullscreen output. */
 .presenter-output-root.no-chromakey .presenter-liturgical-body--community-confession .presenter-text-highlight--color {
   color: #332211;
-  background-image: linear-gradient(to bottom, transparent 45%, var(--presenter-text-highlight-color) 45%, var(--presenter-text-highlight-color) 95%, transparent 95%);
+  background-image: linear-gradient(var(--presenter-text-highlight-color), var(--presenter-text-highlight-color));
   padding-inline: calc(4 * var(--presenter-stage-unit));
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
