@@ -27,8 +27,8 @@
   panel.innerHTML = `<header><h2 id="monitorTitle">접속 현황</h2><button class="icon-btn" data-close title="닫기" aria-label="닫기"><i data-lucide="x"></i></button></header>
 
     <section class="monitor-section" aria-labelledby="monitorRemoteTitle"><div class="monitor-section-heading"><h3 id="monitorRemoteTitle">현재 접속</h3><span data-count></span><button class="icon-btn" data-refresh title="새로고침" aria-label="새로고침"><i data-lucide="refresh-cw"></i></button></div>
-    <p class="monitor-message" role="status"></p><div data-devices></div><p class="monitor-environment" data-cadence>보통 60초마다 갱신합니다. 송출 상태 변경은 더 빨리 반영하며, 최근 응답이 3분을 넘은 접속은 목록에서 제외합니다. 네트워크·절전 상태에 따라 늦어질 수 있습니다.</p></section>
-    <section class="monitor-section"><h3>이 브라우저의 접속명</h3><div class="monitor-toolbar"><label for="monitorName">접속명</label><input id="monitorName" maxlength="60" autocomplete="off" placeholder="예: 본당 송출 PC"></div><p class="monitor-share-status" role="status"></p><p>같은 브라우저 프로필의 창·탭은 하나의 접속으로 묶습니다. 브라우저나 프로필이 다르면 별도로 표시하며, 브라우저 데이터를 지우면 접속명을 다시 지정해야 합니다.</p></section>`;
+    <p class="monitor-message" role="status"></p><div data-devices></div><p class="monitor-environment" data-cadence>60초마다 갱신하며, 3분간 응답이 없으면 목록에서 제외합니다. 송출 변경은 먼저 반영되지만 네트워크·절전 상태에 따라 늦어질 수 있습니다.</p></section>
+    <section class="monitor-section"><h3>이 브라우저</h3><div class="monitor-toolbar"><label for="monitorName">접속명</label><input id="monitorName" maxlength="60" autocomplete="off" placeholder="예: 본당 송출 PC"></div><p class="monitor-share-status" role="status"></p><p>같은 브라우저 프로필의 창·탭은 하나로 표시합니다. 다른 브라우저·프로필은 별도로 표시하며, 브라우저 데이터 삭제 시 이름이 초기화됩니다.</p></section>`;
   document.body.append(panel);
   const $ = (selector) => panel.querySelector(selector);
   $("#monitorName").value = name || `${os} ${browser}`;
@@ -140,13 +140,13 @@
       }
       if (serial !== shareSerial || !enabled) return;
       failures = 0; retryAt = 0; lastReportAt = Date.now(); reportedOutput = sent.output;
-      shareMessage(`접속명 공유됨 · 마지막 응답 ${new Date(lastReportAt).toLocaleTimeString()}`);
+      shareMessage(`최근 전송 · ${new Date(lastReportAt).toLocaleTimeString()}`);
       if (panel.open) void refresh();
       });
     } catch (e) {
       if (serial !== shareSerial || !enabled) return;
       retryAt = Date.now() + Math.min(300000, REPORT_MS * 2 ** Math.min(++failures - 1, 3));
-      shareMessage(`${e.message} 자동 재시도 예정 · 마지막 전송 ${lastReportAt ? new Date(lastReportAt).toLocaleTimeString() : "없음"}`);
+      shareMessage(`${e.message} 자동 재시도 예정 · 최근 전송 ${lastReportAt ? new Date(lastReportAt).toLocaleTimeString() : "없음"}`);
     } finally { uploading = false; }
   }
   function clearView() {
