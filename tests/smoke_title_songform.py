@@ -19,7 +19,7 @@ try:
     const song={id:'title-song',_relationalVersionsLoaded:true,title:'제목 순서 검증',praise_types:['ccm'],versions:[version]};
     const item={id:'title-item',label:'찬양',raw_title:song.title,song_id:song.id,version_id:version.id,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formHint:'V1-C',formPreset:{forms:['V1','C'],strength:'manual'}})};
     const section={sectionKey:'praise',sectionLabel:'찬양'};
-    const render=()=>{const plan=presenterFormPlanForServiceItem(version,item,song);check(!plan.warnings.length,JSON.stringify(plan.warnings));let slides=presenterLyricsSlidesForServiceItem({item,section,index:0,song,version,displayText:song.title,label:item.label,forms:plan.forms,formWarnings:plan.warnings});if(shouldIncludeSongTitleSlide(item,item.label,song,version))slides.unshift(presenterSongTitleSlide(item,section,song,version,song.title,0));return slides;};
+    const render=()=>{const plan=presenterFormPlanForServiceItem(version,item,song);check(!plan.warnings.length,JSON.stringify(plan.warnings));let slides=presenterLyricsSlidesForServiceItem({item,section,index:0,song,version,displayText:song.title,label:item.label,forms:plan.forms,formWarnings:plan.warnings});return slides;};
     const before=JSON.stringify({item,version});
     const legacy=render();check(legacy[0].type==='song-title','legacy title retained');check(legacy.length===5,'authored paragraphs preserved');
     check(before===JSON.stringify({item,version}),'read did not migrate data');
@@ -33,7 +33,7 @@ try:
     }
     const fresh={...item};
     applyServiceItemMetadataField(fresh,{dataset:{serviceItemField:'form_hint'},value:'V1-C'},{});
-    check(!shouldIncludeSongTitleSlide(fresh,fresh.label,song,version) && presenterFormPlanForServiceItem(version,fresh,song).forms.every(f=>!f._presenterTitle),'first edit can omit Title');
+    check(presenterFormPlanForServiceItem(version,fresh,song).forms.every(f=>!f._presenterTitle),'first edit can omit Title');
     const withoutTitle=presenterLyricsSlidesForServiceItem({item:fresh,section,index:0,song,version,displayText:song.title,label:fresh.label,forms:presenterFormPlanForServiceItem(version,fresh,song).forms,formWarnings:[]});
     check(legacy.filter(s=>s.type!=='song-title').map(s=>s.formKey).join('|')===withoutTitle.map(s=>s.formKey).join('|'),'Title shifts existing content keys');
     check(presenterProgressionPlan(item,legacy).signature===presenterProgressionPlan(item,withoutTitle).signature,'Title invalidates existing photo placement');
@@ -46,12 +46,12 @@ try:
     check(parseServiceItemMemo(item.memo).formPreset.titleSequence,'explicit mode survives deletion');
     item.memo=serializeServiceItemMemo(parseServiceItemMemo(item.memo));check(render().length===4,'reopen after removal');
     edit('Title');check(render().length===1 && render()[0].type==='song-title','title only');
-    edit('');check(!shouldIncludeSongTitleSlide(item,item.label,song,version),'clear retains no auto title');
+    edit('');check(serviceItemEffectiveFormHint(item)==='', 'clear restores default placeholder');
     const config=serviceElementConfigForSave({},parseServiceItemMemo(item.memo));
-    check(config.formPreset?.titleSequence && config.formPresetDisabled,'empty policy saved');
+    check(!config.formPreset && config.formPresetDisabled,'empty input stores no inferred sequence');
     const reopened=groupWorshipElements([{id:'sec',service_id:'svc',title:'찬양',section_key:'praise'}],[{id:'el',section_id:'sec',title:song.title,element_type:'praise',config}]).svc[0];
-    check(parseServiceItemMemo(reopened.memo).formPreset?.titleSequence,'empty policy DB readback');
-    check(parseServiceItemMemo(mergeTemplateProjectionMemo('',reopened.memo)).formPreset?.titleSequence,'empty policy template projection');
+    check(!parseServiceItemMemo(reopened.memo).formPreset,'empty input DB readback');
+    check(!parseServiceItemMemo(mergeTemplateProjectionMemo('',reopened.memo)).formPreset,'empty template projection');
     const unsplit=[{id:'raw',part_type:'Lyrics',lyrics:'한 줄\\n\\n세 줄\\n둘째\\n셋째'}];
     const resolved=resolvePresenterFormPresetSequence(unsplit,['Title','V1','Title','C']);
     check(resolved.items.length===4 && resolved.items[1].lyrics==='한 줄' && resolved.items[3].lyrics==='세 줄\\n둘째\\n셋째','Title never consumes unsplit lyrics');

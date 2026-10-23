@@ -588,9 +588,9 @@ function applyServiceItemMetadataField(item, field, service) {
   if (key === "form_hint") {
     const formHint = normalizeServiceFormHint(field.value);
     parsed.formHint = formHint;
-    const titleSequence = true;
-    parsed.formPreset = normalizeServiceFormPreset({ forms: normalizeServiceFormPresetForms(formHint), hint: formHint, strength: "manual", titleSequence });
-    if (!formHint && !titleSequence) parsed.formPreset = null;
+    parsed.formPreset = formHint
+      ? normalizeServiceFormPreset({ forms: normalizeServiceFormPresetForms(formHint), hint: formHint, strength: "manual", titleSequence: true })
+      : null;
     parsed.formPresetDisabled = !formHint;
   }
   if (key === "element_type" || key === "component_type") {

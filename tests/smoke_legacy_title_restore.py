@@ -1,4 +1,4 @@
-"""Legacy score titles survive the virtual Title rollout without DB mutations."""
+"""Hymn score defaults omit Title; authored tokens and order/content headings remain."""
 import os
 os.environ['MINDEX_SMOKE_OFFLINE'] = '1'
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
@@ -23,13 +23,11 @@ try:
               state.client={};state.auth.session={user:{id:'offline'}};
               const images=[{url:'/assets/icon-192.png',formLabel:'V1'},{url:'/assets/icon-512.png',formLabel:'C'}];
               let count=0;
-              const legacyAuto=shouldIncludeSongTitleSlide;
-              shouldIncludeSongTitleSlide=()=>{throw Error('legacy automatic title path used');};
               for(const [label,key] of [['찬양 1','praise'],['파송찬양','sending'],['결단찬양','response_song'],['폐회찬송','closing_song']]) {
                 for(const [name,preset,disabled,wanted] of [
-                  ['legacy', {forms:['V1','C'],strength:'manual'},false,1],
-                  ['no-preset',null,false,1],
-                  ['legacy-cleared',null,true,1],
+                  ['legacy', {forms:['V1','C'],strength:'manual'},false,0],
+                  ['no-preset',null,false,0],
+                  ['legacy-cleared',null,true,0],
                   ['explicit', {forms:['Title','V1','C'],titleSequence:true,strength:'manual'},false,1],
                   ['title-only', {forms:['Title'],titleSequence:true,strength:'manual'},false,1],
                   ['explicit-repeated', {forms:['Title','V1','Title','C'],titleSequence:true,strength:'manual'},false,2],
@@ -45,6 +43,7 @@ try:
                   check(titles.length===wanted,label+' '+name+' title count '+JSON.stringify(slides.map(s=>({type:s.type,title:s.title,form:s.formLabel,songTitle:s.songTitle}))));
                   check(slides.filter(s=>s.type==='image').length===(name==='title-only'?0:2),label+' '+name+' score pages lost '+JSON.stringify(slides.map(s=>({type:s.type,src:s.imageSrc,title:s.title}))));
                   check(new Set(slides.map(s=>s.id)).size===slides.length,'duplicate IDs');
+                  if(wanted===0 && key!=='praise') check(slides[0].type==='title-assignee' && slides[0].contentTitle.includes('복구 찬양') && !slides[0].formLabel,'ordinary order/content heading is not Title');
                   check(JSON.stringify({item,song})===before,'source changed');
                   if(wanted===1) {
                     check(renderPresenterSlideFrame(titles[0],{noChromakey:true}).includes('복구 찬양'),'fullscreen title lost');
@@ -57,11 +56,10 @@ try:
               for(const asset of [{kind:'score',url:'https://example.invalid/score.pdf'}, {kind:'score',slides:images.map(({url})=>({url}))}]) {
                 const item={...base,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'score_db',outputMode:'score',formPreset:{forms:['V1','C'],strength:'manual'},asset})};
                 const slides=buildPresenterSlidesForServiceItem(item,service,0,{allowHydration:false});
-                check(slides.filter(s=>s.formLabel==='Title').length===1,'file/unlabelled title lost');
+                check(slides.filter(s=>s.formLabel==='Title').length===0,'hymn file/unlabelled default must omit Title');
                 check(slides.filter(s=>s.type!=='song-title').length===(asset.url?1:2),'file/unlabelled content lost');
                 count++;
               }
-              shouldIncludeSongTitleSlide=legacyAuto;
               return 'PASS '+count+' legacy/explicit score, PDF, unlabelled, fullscreen/keyed and immutable-source cases';
             }'''), flush=True)
             browser.close()
