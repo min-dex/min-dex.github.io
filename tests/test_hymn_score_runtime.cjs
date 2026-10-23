@@ -76,4 +76,17 @@ for (const number of ['163', '166']) {
     assert.equal(selected.scoreForms[0], null);
   }
 }
-console.log('PASS 163/166 score opening retained once with selected/repeated verses');
+for (const number of ['163', '166']) {
+  const images = runtime[number].slides;
+  const forms = images.map(slide => slide.scoreFormLabel ? {label: slide.scoreFormLabel} : null);
+  const verse = images.slice(3,5);
+  for (const [labels, expected] of [
+    [['Title','V2'], [{_presenterTitle:true}, images[0], ...verse]],
+    [['V2','Title'], [images[0], ...verse, {_presenterTitle:true}]],
+    [['Title'], [{_presenterTitle:true}]],
+  ]) {
+    const selected = context.presenterScoreImageSourcesForFormSequence(images, forms, [], {labels});
+    assert.equal(JSON.stringify(selected.imageSources), JSON.stringify(expected), number+': '+labels);
+  }
+}
+console.log('PASS 163/166 score opening retained once after leading Title; Title-only omits score');

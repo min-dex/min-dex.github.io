@@ -561,7 +561,8 @@ function presenterScoreImageSourcesForFormSequence(imageSources = [], scoreForms
   const openingUrl = String(opening?.sources?.[0]?.url || opening?.sources?.[0]?.src || "");
   if (!opening?.target?.key && opening?.sources?.length === 1
       && /(?:^|\/)assets\/hymn-scores\/(163|166)\/slide-01\.webp(?:[?#]|$)/.test(openingUrl)) {
-    selected.unshift(opening);
+    const firstContent = selected.findIndex(group => group.sources.some(source => !source._presenterTitle));
+    if (firstContent >= 0) selected.splice(firstContent, 0, opening);
   }
   return {
     imageSources: selected.flatMap((group) => group.sources),
