@@ -100,6 +100,14 @@ try:
       return 'PASS single song with visible header, one save and compact controls';
      }"""),flush=True)
      if width==1600:page.screenshot(path=f'/tmp/mindex-single-song-{engine}.png')
+    page.evaluate("""()=>{
+     const fixture=document.querySelector('#fixture'),wrapper=document.createElement('div');wrapper.id='servicePresenterControls';fixture.replaceWith(wrapper);wrapper.append(fixture);
+     const row=fixture.querySelector('.svc-inline-song');
+     const actions=['.svc-progression-media > summary','.svc-board-subgroup-audio-upload','.svc-board-subgroup-commit'].map(selector=>row.querySelector(selector));
+     for(const e of actions){const r=e.getBoundingClientRect(),s=getComputedStyle(e);if(Math.abs(r.width-60)>1||Math.abs(r.height-30)>1||s.paddingLeft!=='10px'||s.paddingRight!=='10px')throw Error('action geometry mismatch');if(e.querySelector('[data-lucide],svg'))throw Error('redundant action icon');}
+     const styles=actions.map(e=>{const s=getComputedStyle(e);return [s.backgroundColor,s.borderColor,s.borderRadius,s.fontSize,s.fontWeight].join('|')});if(new Set(styles).size!==1)throw Error('action style mismatch '+styles);
+    }""")
+    page.screenshot(path=f'/tmp/mindex-text-actions-{engine}.png')
     page.evaluate("""()=>{document.body.innerHTML='<aside class="svc-presenter-side-panel" style="width:260px"></aside>';window.renderOutputFixture=open=>{isPresenterOutputWindowOpen=()=>open;document.querySelector('aside').innerHTML=renderPresenterControlsTop(state.services[0],[],false,0);};}""")
     for opened in [False,True]:
      page.evaluate('(open)=>renderOutputFixture(open)',opened)

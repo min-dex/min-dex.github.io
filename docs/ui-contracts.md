@@ -807,3 +807,11 @@ Scripture chapter/copy controls share 35px height and visible neutral action
 borders. Bulletin save uses the primary action surface; reload/refresh use
 35px neutral actions. Preserve labels, keyboard focus and disabled states.
 These rules do not affect output slides, printing or stored content.
+
+
+### Praise input actions · 2026-10-23
+
+Background, audio upload and save use equal 60×30px quiet outlined controls,
+10px horizontal padding and the label type token. Audio/save omit redundant
+icons; background retains only its small open/closed disclosure indicator.
+File selection, save feedback and keyboard focus semantics remain unchanged.

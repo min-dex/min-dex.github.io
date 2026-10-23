@@ -31570,7 +31570,7 @@ function renderPresenterBoardItemActions(serviceId, context, options = {}) {
       ${options.commitOnly ? "" : audioControls}
       ${options.omitCommit ? "" : `<button class="reference-new-btn svc-board-subgroup-commit" type="button" data-service-item-commit
         data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}">
-        <i data-lucide="save"></i><span>저장</span>
+        <span>저장</span>
       </button>`}
     </div>`;
 }
@@ -31715,7 +31715,7 @@ function renderPresenterBoardItemAudioControls(serviceId, context = {}, options 
         ${childrenAudio ? "" : `<label class="svc-board-subgroup-audio-upload" title="${source ? "음원 교체" : "음원 추가"}">
           <input type="file" accept="${SERVICE_ITEM_AUDIO_ACCEPT}" data-service-item-audio-file
             data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${context.index}" />
-          <i data-lucide="${source ? "refresh-cw" : "upload"}"></i><span>${source ? "교체" : "음원"}</span>
+          <span>${source ? "교체" : "음원"}</span>
         </label>`}
       </div>
     </div>`;
