@@ -8244,7 +8244,7 @@ async function saveSongVersions(song, { detached = false } = {}) {
     ...(state.songVersionPraiseTypesSupported ? { praise_types: canonicalPraiseTypes(version.praise_types) } : {}),
     lyric_signature: versionLyricSignature(version),
     source_count: Number(version.source_count) > 0 ? Number(version.source_count) : 1,
-    is_primary: Boolean(version.is_primary) || index === 0,
+    is_primary: Boolean(version.is_primary),
   }));
 
   const existingVersionIds = existingVersions.map((version) => version.id);
@@ -8874,6 +8874,14 @@ function handleDetailClick(event) {
   const createSongButton = event.target.closest("[data-create-song]");
   if (createSongButton) {
     createPraiseSong();
+    return;
+  }
+
+  const moveVersionButton = event.target.closest("[data-move-version]");
+  if (moveVersionButton) {
+    event.preventDefault();
+    event.stopPropagation();
+    movePraiseVersion(moveVersionButton.dataset.moveVersion, Number(moveVersionButton.dataset.direction));
     return;
   }
 
@@ -10125,6 +10133,32 @@ async function assertPraiseVersionsUnused(versionIds) {
     .select("id").in("song_version_id", ids).limit(1);
   if (error) throw new Error("버전 사용 여부를 확인하지 못했습니다. 다시 시도해 주세요.");
   if (data?.length) throw new Error("예배에 연결된 버전은 삭제할 수 없습니다. 예배의 버전 연결을 먼저 변경해 주세요.");
+}
+
+function movePraiseVersion(versionId, direction) {
+  const song = getSelectedSong();
+  if (!song || state.saving || praiseVersionDeletePending || ![-1, 1].includes(direction)) return;
+  const index = song.versions.findIndex(version => version.id === versionId);
+  const target = index + direction;
+  if (index < 0 || target < 0 || target >= song.versions.length) return;
+  writeFormsToSelectedVersion();
+  // Reuse this song's order slots; never renumber another linked source song.
+  const slots = song.versions.map(version => Number(version.version_order) || 0);
+  let next = Math.max(0, ...slots);
+  const used = new Set();
+  for (let i = 0; i < slots.length; i++) {
+    if (slots[i] <= 0 || used.has(slots[i])) slots[i] = ++next;
+    used.add(slots[i]);
+  }
+  slots.sort((a, b) => a - b);
+  [song.versions[index], song.versions[target]] = [song.versions[target], song.versions[index]];
+  song.versions.forEach((version, i) => { version.version_order = slots[i]; });
+  state.dirty.song = state.dirty.forms = true;
+  renderDetail();
+  updateSaveState();
+  const button = refs.detailPane.querySelector(`[data-move-version="${CSS.escape(versionId)}"][data-direction="${direction}"]:not(:disabled)`)
+    || refs.detailPane.querySelector(`[data-move-version="${CSS.escape(versionId)}"]:not(:disabled)`);
+  button?.focus({ preventScroll: true });
 }
 
 let praiseVersionDeletePending = false;
@@ -17835,6 +17869,11 @@ function renderVersionTitleContent(song, version, forms, options = {}) {
     <div class="version-title-actions">
       ${active ? renderVersionPraiseTypeTags(version) : ""}
       <div class="version-edit-actions" role="group" aria-label="버전 관리">
+      ${[-1, 1].map(direction => {
+        const index = song.versions.findIndex(item => item.id === version.id);
+        const label = `${versionName} 버전 ${direction < 0 ? "앞으로" : "뒤로"} 이동`;
+        return `<button class="icon-btn version-move-btn" type="button" data-move-version="${escapeAttr(version.id)}" data-direction="${direction}" aria-label="${escapeAttr(label)}" title="${escapeAttr(label)}" ${state.saving || index + direction < 0 || index + direction >= song.versions.length ? "disabled" : ""}><i data-lucide="${direction < 0 ? "arrow-left" : "arrow-right"}"></i></button>`;
+      }).join("")}
       ${renderCopyVersionButton(version, forms)}
       ${renderAddVersionButton(version?.id)}
       <button class="version-delete-btn" type="button" data-delete-version="${escapeAttr(version?.id || "")}" aria-label="${escapeAttr(versionEditableName(song, version))} 버전 삭제" title="${song.versions.length <= 1 ? "마지막 버전은 삭제할 수 없습니다" : "버전 삭제"}" ${song.versions.length <= 1 ? "disabled" : ""}><i data-lucide="trash-2"></i></button>
@@ -19076,7 +19115,7 @@ function normalizeSongVersions(song, versions) {
     version_label: version.version_label || null,
     raw_section_name: version.raw_section_name || null,
     hymn_no: version.hymn_no || null,
-    is_primary: Boolean(version.is_primary) || index === 0,
+    is_primary: Boolean(version.is_primary),
     metadata: normalizeSongMetadata(version.metadata),
     forms: normalizeForms(Array.isArray(version.forms) ? version.forms : []),
     praise_types: normalizePraiseTypes(version.praise_types),
@@ -19098,7 +19137,7 @@ function normalizeRelationalVersion(row, index) {
     version_label: row.version_label || null,
     raw_section_name: row.raw_section_name || null,
     hymn_no: row.hymn_no || null,
-    is_primary: Boolean(row.is_primary) || index === 0,
+    is_primary: Boolean(row.is_primary),
     praise_types: normalizePraiseTypes(row.praise_types),
     source_song_id: row.source_song_id || null,
     canonical_song_id: row.canonical_song_id || null,
@@ -19197,7 +19236,7 @@ function serializeSongMemo(song, options = {}) {
           output_title: String(version.output_title || "").trim(),
           raw_section_name: version.raw_section_name || null,
           hymn_no: version.hymn_no || null,
-          is_primary: Boolean(version.is_primary) || index === 0,
+          is_primary: Boolean(version.is_primary),
           ...(version.praise_types?.length ? { praise_types: version.praise_types } : {}),
           ...(Object.keys(versionMetadata).length ? { metadata: versionMetadata } : {}),
           forms: (version.forms || []).map((form, formIndex) => ({
