@@ -15,7 +15,7 @@ CSS_SCREENS = {
         'smoke_fullscreen_praise.py', 'smoke_service_design.py',
         'smoke_announcement_type.py', 'smoke_children_theme.py',
         'smoke_remote_preview.py', 'smoke_version_output_title.py',
-        'smoke_hymn_measures.py', 'smoke_praise_liturgical_section.py',
+        'smoke_hymn_measures.py', 'smoke_legacy_title_restore.py', 'smoke_praise_liturgical_section.py',
         'smoke_closing_hymn_projection.py', 'smoke_offering_projection.py',
         'smoke_presenter_focus.py', 'smoke_presenter_font_cache.py',
         'smoke_theme_switch.py', 'smoke_startup_projection.py',
