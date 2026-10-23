@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-medley-unlink",
+  "version": "20261023-presenter-tools",
   "options": {
     "compress": false,
     "mangle": {
