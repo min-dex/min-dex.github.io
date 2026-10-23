@@ -31899,6 +31899,10 @@ function presenterVisibleTitle(label, title) {
 
 // Controller-only grouping: preserve slide objects, indexes and output order.
 function presenterBoardSlideBlocks(entries = []) {
+  const scoreSlide = slide => String(slide?.sourceType || slide?.componentType || "").toLowerCase() === "score";
+  const namedScoreOwners = new Set(entries.filter(entry => scoreSlide(entry.slide)
+    && (entry.controllerFormLabel || presenterFormGroupLabel(entry.slide)))
+    .map(entry => presenterSlideElementGroupKey(entry.slide) || ""));
   const blocks = [];
   for (const entry of entries) {
     const slide = entry.slide;
@@ -31909,6 +31913,9 @@ function presenterBoardSlideBlocks(entries = []) {
     if (presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.SCRIPTURE_TEXT) {
       label = [slide.referenceBook, slide.referenceRange].filter(Boolean).join(" ") || slide.title || "본문";
       key = JSON.stringify([owner, "scripture", label, slide.translationLabel || ""]);
+    } else if (scoreSlide(slide) && owner && !namedScoreOwners.has(owner)) {
+      label = "악보";
+      key = JSON.stringify([owner, "score-whole"]);
     } else if (presenterSlideSupportsFormGrouping(slide, entry.controllerFormLabel || presenterFormGroupLabel(slide)) && (entry.controllerFormKey || slide.formKey)
         && (entry.controllerFormLabel || presenterFormGroupLabel(slide))) {
       label = entry.controllerFormLabel || presenterFormGroupLabel(slide) || "송폼";

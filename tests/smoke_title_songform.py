@@ -111,7 +111,7 @@ try:
     check(presenterSlideSupportsFormGrouping(scorePage),'score grouping eligibility lost');
     const scoreDeck=[{...scorePage,id:'score-a',elementId:'score-owner',formKey:'raw-score-key'},{...scorePage,id:'score-b',elementId:'score-owner',formKey:''}];
     const scoreEntries=annotatePresenterFormStarts(scoreDeck.map((slide,slideIndex)=>({slide,slideIndex}))).entries;
-    check(presenterBoardSlideBlocks(scoreEntries).every(b=>!b.key),'unlabelled score received a form box');
+    check(presenterBoardSlideBlocks(scoreEntries).length===1 && presenterBoardSlideBlocks(scoreEntries)[0].entries.length===2,'unlabelled score must be one whole-score block');
     scoreDeck[0].formLabel='Verse';
     const namedScore=annotatePresenterFormStarts(scoreDeck.map((slide,slideIndex)=>({slide,slideIndex}))).entries;
     check(presenterBoardSlideBlocks(namedScore).length===1 && presenterBoardSlideBlocks(namedScore)[0].entries.length===2,'inherited score group lost');

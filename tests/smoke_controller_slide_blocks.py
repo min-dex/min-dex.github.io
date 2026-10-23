@@ -32,6 +32,15 @@ try:
     check(presenterBoardSlideBlocks(annotatedScores).map(b=>b.entries.length).join()==='1,2,2,1','score continuation/owner boundary');
     check(annotatedScores.map(e=>e.formLabel).join('|')==='|Verse 1||Verse 2||','score labels only on starts');
     check(JSON.stringify(scoreEntries)===scoreBefore,'score source mutated');
+    const wholeScores=[score('whole','',''),score('whole','raw-page-key',''),score('whole','',''),score('next','',''),score('next','','')];
+    const wholeBefore=JSON.stringify(wholeScores);
+    const wholeBlocks=presenterBoardSlideBlocks(annotatePresenterFormStarts(wholeScores).entries);
+    check(wholeBlocks.map(b=>b.entries.length).join()==='3,2' && wholeBlocks.every(b=>b.key && b.label==='악보'),'unlabelled score whole blocks and owner boundaries');
+    check(JSON.stringify(wholeScores)===wholeBefore,'whole score grouping mutated source');
+    const wholeHtml=renderPresenterBoardSlideBlocks(annotatePresenterFormStarts(wholeScores).entries,-1,'fixture');
+    check((wholeHtml.match(/data-form-color="neutral"/g)||[]).length===2 && !wholeHtml.includes('svc-slide-form-badge'),'whole score gets neutral block without invented form label');
+    const noForms=[{slide:{elementId:'direct',elementType:'praise',layout:'lower_bar_text',type:'lyrics',text:'직접 가사'},slideIndex:0}];
+    check(!presenterBoardSlideBlocks(noForms)[0].key,'unlabelled direct lyrics must remain unboxed');
     const labels=['Verse 1','Verse 2','Verse 2 A','Verse 2 B','Verse 2 @ A','Pre-Chorus','Chorus','Bridge','Coda','Tag','Tags','Custom'];
     const colors=labels.map((label,i)=>score('hymn','form-'+i,label));
     const colorHtml=renderPresenterBoardSlideBlocks(annotatePresenterFormStarts(colors).entries,-1,'fixture');
