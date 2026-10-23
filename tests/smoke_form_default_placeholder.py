@@ -1,4 +1,4 @@
-"""Blank forms show effective defaults without owning/saving them; only main praise defaults Title."""
+"""Blank forms show effective defaults without owning/saving them; main praise and special songs default Title."""
 import os
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from smoke_app import launch_chromium,start_local_app_server,sync_playwright
@@ -16,7 +16,7 @@ try:
     state.songs=[song];
     const service={id:'svc',type_id:'fixture',date:'2000-01-01'};state.services=[service];
     const input=item=>{const host=document.createElement('div');host.innerHTML=renderServiceFormHintInput(item,0);return host.firstElementChild};
-    for(const [label,key,hasTitle] of [['찬양 1','praise',true],['파송찬양','sending',false],['결단찬양','response_song',false]]) {
+    for(const [label,key,hasTitle] of [['찬양 1','praise',true],['특송','special_song',true],['봉헌특송','offering',true],['파송찬양','sending',false],['결단찬양','response_song',false]]) {
      const item={id:key,service_id:service.id,song_id:song.id,version_id:version.id,label,_worshipSectionKey:key,raw_title:song.title,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db'})};
      const before=JSON.stringify({item,song});
      const field=input(item);check(field.value==='' && field.placeholder===(hasTitle?'T-V-C':'V-C'),'default must be placeholder '+label+' '+field.outerHTML);
@@ -81,6 +81,20 @@ try:
     const hymn={...song,praise_types:['hymn'],metadata:{}};const hymnVersion={...version,praise_types:['hymn']};
     const score={...registered,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'score_db',outputMode:'score'})};
     check(!presenterScoreFormSequence(score,hymn,hymnVersion).forms.includes('T'),'hymn score default Title');
+    for(const [label,key] of [['특송','special_song'],['봉헌특송','offering']]) {
+     const special={...score,label,_worshipSectionKey:key};
+     const original=JSON.stringify(special);
+     check(presenterScoreFormSequence(special,hymn,hymnVersion).forms[0]==='T','special hymn score default Title '+label);
+     for(const mode of ['lyrics_db','score_db','manual_praise','audio_praise']) {
+      special.memo=serializeServiceItemMemo({elementType:'praise',inputMode:mode,formPreset:{forms:['C','V1'],titleSequence:true,strength:'manual'}});
+      check(presenterFormPresetWithDefaultTitle(parseServiceItemMemo(special.memo).formPreset,special,hymn,hymnVersion).forms.join('-')==='C-V1','authored omission overwritten '+mode);
+     }
+     special.memo=score.memo;
+     check(JSON.stringify(special)===original,'special default mutated source');
+     const secondary={...special,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'score_db',connectedPraise:{role:'secondary',groupId:'fixture'}})};
+     check(!presenterDefaultTitleForServiceItem(secondary,hymn,hymnVersion,{score:true}),'connected secondary duplicate Title');
+    }
+
     score.memo=serializeServiceItemMemo({elementType:'praise',inputMode:'score_db',outputMode:'score',formPreset:{forms:['T','V1'],titleSequence:true}});
     check(presenterScoreFormSequence(score,hymn,hymnVersion).forms.join('-')==='T-V1','explicit score Title preserved');
     const scoreSong={...hymn,id:'score-song',hymn_no:9,versions:[{...hymnVersion,id:'score-version'}]};
