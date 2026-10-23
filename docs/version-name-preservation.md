@@ -93,3 +93,9 @@ as subtitle/original-title data, 13 as explicit version names, and two represent
 titles redundantly added to list metadata. Only those two redundant list strings
 change. A whole-catalog comparison protects unrelated bracketed original titles.
 The user-edited 주님의 임재 앞에서 is outside this display cleanup.
+
+## Version-specific title label · 2026-10-23
+
+The optional output-title input is labeled `버전 전용 제목` in its placeholder,
+accessible name and search metadata. Empty values still use the song title; no
+stored title/version fields or fallback behavior change.

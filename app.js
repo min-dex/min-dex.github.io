@@ -17877,7 +17877,7 @@ function renderVersionTitleContent(song, version, forms, options = {}) {
   return `
     <div class="version-title-main">
       <input class="version-title-input" type="text" data-version-name-field="${escapeAttr(version?.id || "")}" value="${escapeAttr(versionName)}" aria-label="버전 이름" />
-      <input class="version-output-title-input" type="text" data-version-output-title-field="${escapeAttr(version?.id || "")}" value="${escapeAttr(version?.output_title || "")}" placeholder="${escapeAttr(`출력 제목 · 미입력 시 ${song?.title || "대표 제목"}`)}" aria-label="버전 출력 제목" title="비워 두면 대표 제목으로 출력합니다" />
+      <input class="version-output-title-input" type="text" data-version-output-title-field="${escapeAttr(version?.id || "")}" value="${escapeAttr(version?.output_title || "")}" placeholder="${escapeAttr(`버전 전용 제목 · 미입력 시 ${song?.title || "대표 제목"}`)}" aria-label="버전 전용 제목" title="비워 두면 대표 제목으로 출력합니다" />
       ${renderVersionAttentionStatus(song, version, forms, { active })}
     </div>
     <div class="version-title-actions">
@@ -20003,7 +20003,7 @@ function getSongSearchFields(song, options = {}) {
 
   for (const version of song.versions || []) {
     const versionMetadata = normalizeSongMetadata(version.metadata);
-    fields.push(searchField("title", version.output_title, 120, "버전 출력 제목"));
+    fields.push(searchField("title", version.output_title, 120, "버전 전용 제목"));
     fields.push(searchField("version", versionDisplayName(song, version), 118, "버전"));
     fields.push(searchField("version", version.raw_section_name, 58, "버전"));
     fields.push(searchField("version", version.version_label, 52, "버전"));
