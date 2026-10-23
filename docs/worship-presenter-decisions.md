@@ -4146,3 +4146,13 @@ Main praise controller inputs use one wrapping flex row instead of the old
 Mode/version use compact 130px bases; title and form share remaining width.
 Only controls that no longer fit wrap; expanded photo tools keep a full row.
 The single-song DB shortcut remains in the heading. Saving/data behavior is unchanged.
+
+### All praise input modes share natural wrapping · 2026-10-23
+
+The controller's natural praise flow now also covers direct lyrics/audio and
+non-offering special-song rows. Remove the old 1120px forced version/form/person
+rows rather than adding another breakpoint exception. Only the title field's
+layout wrapper is flattened; lyrics, audio management, result lists and expanded
+photo tools retain full content areas. Offering selection/save geometry retains
+its existing separate toolbar contract. Inputs, IDs, lyrics, modes and save paths
+are unchanged; resize must preserve unsaved values and focus.

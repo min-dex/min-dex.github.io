@@ -39,5 +39,40 @@ try:
      assert title.input_value()=='미저장 제목' and form.input_value()=='V1-C-C-Tag'
      assert form.evaluate('e=>document.activeElement===e')
      assert page.evaluate("widthBefore===JSON.stringify({service:state.services[0],song:state.songs[0],item:state.serviceItems['width-fixture'][0]})")
+   for mode in ['lyrics_db','manual_praise','audio_praise']:
+    for label in ['찬양 1','특송']:
+     page.evaluate("""({mode,label})=>{
+      const service=state.services[0];
+      const item=normalizeServiceItem({id:'natural-item',service_id:service.id,label,raw_title:'나의 주 크고 놀라운 하나님',assignee:'찬양팀',song_id:mode==='lyrics_db'?'width-song':null,version_id:mode==='lyrics_db'?'width-version':null,memo:serializeServiceItemMemo({elementType:'praise',inputMode:mode,formHint:'V1-C-V2-C',slides:['첫 줄\\n둘째 줄']})});
+      state.serviceItems[service.id]=[item];
+      presenterBoardSubgroupInputContexts=()=>[{service,item,index:0}];
+      const before=JSON.stringify(item);
+      document.querySelector('#width-host').innerHTML=renderPresenterBoardSubgroupInputControls(service.id,{slides:[]},{headerActions:true});
+      refreshIcons();if(before!==JSON.stringify(item))throw Error('render changed data');
+     }""",{'mode':mode,'label':label})
+     for width in [1200,960,800,600,360]:
+      page.locator('#width-host').evaluate('(e,w)=>e.style.width=w+"px"',width)
+      page.evaluate("""()=>{
+       const row=document.querySelector('.svc-board-subgroup-control-item'),host=document.querySelector('#width-host');
+       const nodes=[...row.querySelectorAll('input:not([type=hidden]):not([type=file]),select,button,summary,textarea')].filter(e=>e.checkVisibility()&&e.getBoundingClientRect().width);
+       const box=row.getBoundingClientRect();
+       for(const e of nodes){const r=e.getBoundingClientRect();if(r.left<box.left-1||r.right>box.right+1)throw Error('overflow '+e.outerHTML.slice(0,120));}
+       for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){const a=nodes[i],b=nodes[j];if(a.contains(b)||b.contains(a))continue;const x=a.getBoundingClientRect(),y=b.getBoundingClientRect();if(Math.min(x.right,y.right)-Math.max(x.left,y.left)>2&&Math.min(x.bottom,y.bottom)-Math.max(x.top,y.top)>2)throw Error('overlap');}
+       const title=row.querySelector('[data-service-item-field=raw_title]'),mode=row.querySelector('[data-service-item-field=praise_input_mode]');
+       if(!title||!mode)throw Error('missing title/mode');
+       if(host.clientWidth>=600&&Math.abs(title.getBoundingClientRect().top-mode.getBoundingClientRect().top)>1)throw Error('forced title row');
+       if(host.clientWidth>=800){const fields=[title,mode,...row.querySelectorAll('.svc-song-version-control select,.svc-form-hint,[data-service-item-field=assignee]')].filter(e=>e.checkVisibility());if(fields.some(e=>Math.abs(e.getBoundingClientRect().top-title.getBoundingClientRect().top)>1))throw Error('forced field row');}
+      }""")
+      if width==800:page.locator('#width-host').screenshot(path=f'/tmp/mindex-natural-{engine}-{mode}-{label}.png')
+     title=page.locator('#width-host [data-service-item-field=raw_title]');title.fill('미저장 특송 제목');title.focus()
+     page.locator('#width-host').evaluate('e=>e.style.width="960px"')
+     assert title.input_value()=='미저장 특송 제목' and title.evaluate('e=>document.activeElement===e')
+     if mode!='lyrics_db':
+      page.locator('.svc-presenter-input-field--lyrics').evaluate("e=>e.classList.remove('is-collapsed')")
+      lyrics=page.locator('[data-service-item-field=manual_praise_lyrics]');lyrics.fill('첫 줄\n둘째 줄\n\n다음 슬라이드');lyrics.focus()
+      page.locator('#width-host').evaluate('e=>e.style.width="600px"')
+      assert lyrics.input_value()=='첫 줄\n둘째 줄\n\n다음 슬라이드' and lyrics.evaluate('e=>document.activeElement===e')
+      assert lyrics.evaluate("e=>{const a=e.getBoundingClientRect(),r=e.closest('.svc-board-subgroup-control-item').getBoundingClientRect();return a.left>=r.left-1&&a.right<=r.right+1&&a.width>r.width-10}")
+   print('PASS',engine,'direct lyric/audio and special-song natural wrapping, containment, drafts/focus')
    browser.close();print('PASS',engine,'actual song editor, wide/narrow form sizing, DB variants, medley control, drafts/focus retained')
 finally:server.shutdown()
