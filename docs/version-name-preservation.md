@@ -99,3 +99,9 @@ The user-edited 주님의 임재 앞에서 is outside this display cleanup.
 The optional output-title input is labeled `버전 전용 제목` in its placeholder,
 accessible name and search metadata. Empty values still use the song title; no
 stored title/version fields or fallback behavior change.
+
+## Version-owned audio summary ·2026-10-23
+
+Version headers show the saved audio name, recorded timing count and saved auto-advance setting from that version's `audio_set`. A changed lyric source signature shows a timing-review notice. This is read-only saved metadata, not confirmation of current playback readiness. No song-memo fallback, service timing inheritance, data repair or writes occur. Empty audio sets show no row; long names wrap at the available card width.
+
+Isolated Chromium/WebKit checks cover 320/800px, escaped names, empty/disabled timing, draft mismatch and no mutation. Special-service taxonomy was checked through a read-only ID query: the operational `special` row exists, so no client-side taxonomy upsert was restored. The local fullscreen-skip and hidden-element blank assertions are included separately; Linux native integration remains distinct from the macOS SKIP.

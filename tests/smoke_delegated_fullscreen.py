@@ -1,4 +1,12 @@
 from pathlib import Path
+import os
+import sys
+
+# macOS can create native Spaces even when this browser is headless.
+if sys.platform == 'darwin' and os.environ.get('MINDEX_ALLOW_NATIVE_FULLSCREEN_TESTS') != '1':
+    print('SKIP native fullscreen integration on macOS; run on Linux or explicitly opt in on a dedicated desktop session')
+    raise SystemExit(0)
+
 from smoke_app import launch_chromium, sync_playwright
 
 root = Path(__file__).resolve().parents[1]
