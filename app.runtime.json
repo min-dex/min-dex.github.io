@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-whole-score-block",
+  "version": "20261023-praise-lifecycle",
   "options": {
     "compress": false,
     "mangle": {
