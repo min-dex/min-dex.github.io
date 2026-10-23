@@ -56,3 +56,13 @@ Local verification completed: 28 unit + 41 smoke entry points passed, including
 both-engine version output title checks. UI icon subset regenerated from current
 sources with prior asset retained privately. Production writes and deployment
 were not performed in this task.
+
+## Display order ·2026-10-23
+
+Version headers provide forward/back controls. A move updates the local draft
+and reuses the song's existing order slots; the normal Praise save persists it.
+Selection and unsaved lyrics remain attached to their stable version IDs.
+Display position never promotes a version to primary. Legacy records with no
+primary still receive the existing normalization fallback. No worship references,
+forms, playback or projection are changed by a move. Boundary buttons are disabled;
+keyboard focus follows the moved card. Memo-only versions retain array order.
