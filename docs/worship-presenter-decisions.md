@@ -3997,3 +3997,16 @@ The matching topbar launchers are hidden only while that basic control rail
 exists. Focus view and other modules retain global access. Both entries open
 the existing dialog/popover; no extra audio instance or remote session is created.
 Music popover placement and keyboard return use the visible launcher.
+
+
+## Shared note-above-song-title layout ·2026-10-23
+
+User explicitly selected the small note above the main song title for ordinary
+fullscreen praise too. Both output and previews use the same existing song title
+renderer, including explicit Title positions. The inline note and textual order
+heading are replaced by one small note; ordinary subtitles remain visible.
+The existing per-service note-title setting retains chapel's compact no-subtitle
+copy. Chapel colors, serif faces, cross, reading/sermon styling remain opt-in.
+Chromakey title layout is unchanged. No service/song records are rewritten.
+T remains unassigned as documented in the Title sequence contract; Title is the
+accepted explicit title token and Tag/Tags retain their meaning.

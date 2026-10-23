@@ -5242,13 +5242,12 @@ function renderPresenterSlideFrame(slide, options = {}) {
     && presenterSlideLayout(slide) !== PRESENTER_SLIDE_LAYOUTS.BLANK
     && (slide?.songTitle || (slide?.type === "song-title" && presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE))) {
     const content = presenterSongTitleContent(slide);
-    const noteTitle = normalizePresenterServiceDesign(options.presentationDesign)?.songTitleStyle === "note-title";
-    const title = noteTitle ? String(content.title || "").replace(PRESENTER_SONG_NOTE_PATTERN, "").trim()
-      : formatPresenterSongTitleText(content.title);
-    // Preserve the standard composition unless this service explicitly selects another.
+    const hideDetail = normalizePresenterServiceDesign(options.presentationDesign)?.songTitleStyle === "note-title";
+    const title = String(content.title || "").replace(PRESENTER_SONG_NOTE_PATTERN, "").trim();
+    // Share the note-above-title layout; compact event copy stays opt-in.
     slide = { ...slide, elementType: PRESENTER_ELEMENT_TYPES.TITLE_CONTENT,
       layout: PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT, type: "title-content",
-      title, text: title, songTitleContent: content, bodyText: "", assignee: "", fullscreenSongTitle: true, fullscreenSongTitleStyle: noteTitle ? "note-title" : "standard" };
+      title, text: title, songTitleContent: content, bodyText: "", assignee: "", fullscreenSongTitle: true, fullscreenSongTitleStyle: "note-title", fullscreenSongTitleHideDetail: hideDetail };
   }
   const design = presenterServiceDesignForSlide(slide, options);
   if (design) {
@@ -5612,7 +5611,7 @@ function renderPresenterTitleContentSlide(slide, options = {}) {
       ${noteTitle ? `<span class="presenter-fullscreen-song-heading" aria-label="찬양">${PRESENTER_SONG_NOTE}</span>`
         : slide.fullscreenSongTitle && slide.songTitleContent?.orderTitle ? `<span class="presenter-fullscreen-song-heading">${escapeHtml(presenterOrderDisplayLabel(slide.songTitleContent.orderTitle))}</span>` : ""}
       <span class="presenter-title-content-title" style="--line-chars: ${escapeAttr(titleChars)}">${slide.fullscreenSongTitle ? renderPresenterSongText(title, slide) : escapeHtml(title)}</span>
-      ${slide.fullscreenSongTitle && !noteTitle && slide.songTitleContent?.detail ? `<span class="presenter-fullscreen-song-detail">${slide.songTitleContent.detailKind === "subtitle" ? `(${escapeHtml(slide.songTitleContent.detail)})` : escapeHtml(slide.songTitleContent.detail)}</span>` : ""}
+      ${slide.fullscreenSongTitle && !slide.fullscreenSongTitleHideDetail && slide.songTitleContent?.detail ? `<span class="presenter-fullscreen-song-detail">${slide.songTitleContent.detailKind === "subtitle" ? `(${escapeHtml(slide.songTitleContent.detail)})` : escapeHtml(slide.songTitleContent.detail)}</span>` : ""}
       ${slide.fullscreenSongTitle ? "" : `<div class="presenter-title-content-body">
         ${bodyLines.map((line) => `<span style="--line-chars: ${presenterLineCharEstimate(line)}">${escapePresenterSlideLine(line, slide)}</span>`).join("")}
       </div>`}
