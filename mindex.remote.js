@@ -18,6 +18,7 @@
  }
  $('[data-remote-link]').href=location.protocol==='file:'?'https://min-dex.github.io/remote.html':new URL('remote.html',location.href).href;
  $('[data-remote-close]').onclick=()=>panel.close();trigger.onclick=()=>panel.showModal();
+ document.addEventListener('click',event=>{if(event.target.closest('[data-presenter-remote]'))panel.showModal();});
  const text=s=>[s?.title,s?.body||s?.text||s?.bodyText||s?.content].filter(v=>typeof v==='string').join('\n').slice(0,1800);
  function adapter(serviceId,outputSession,outputWindow){
   let previewRevision,previews=new WeakMap();

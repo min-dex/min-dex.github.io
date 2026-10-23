@@ -4001,3 +4001,12 @@ a brown foreground. Community-confession markers alone keep original colors,
 50% coverage,4-stage-pixel side padding and #332211 text on the marker. This
 semantic rule is fullscreen-only, independent of department; third-service
 chromakey retains its original colored words. Other colored copy is not marked.
+
+## Remote and music entry placement · 2026-10-23
+
+Basic presenter puts 원격 조작 and 음악 관리 in the third equal-width row of
+right-panel output controls, using the existing35px/16px button/icon rules.
+The matching topbar launchers are hidden only while that basic control rail
+exists. Focus view and other modules retain global access. Both entries open
+the existing dialog/popover; no extra audio instance or remote session is created.
+Music popover placement and keyboard return use the visible launcher.
