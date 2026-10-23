@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261023-form-group-colors",
+  "version": "20261023-controller-batch",
   "options": {
     "compress": false,
     "mangle": {

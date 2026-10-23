@@ -25,16 +25,18 @@
     if (record.reviewStatus === 'recitative_exception') return {status:'recitative',text:'마디: 낭송형 · 일정한 마디 구분 없음'};
     // Compare actual lyric slides, never stanza totals or playback form repeats.
     const approx = value => Math.max(1, Math.round(value));
-    const range = values => {
-      const numbers = [...new Set(values.map(approx))].sort((a,b) => a-b);
-      return numbers.length === 1 ? String(numbers[0]) : `${numbers[0]}–${numbers.at(-1)}`;
+    const typical = values => {
+      const counts = new Map();
+      for (const value of values.map(approx)) counts.set(value, (counts.get(value) || 0) + 1);
+      // A shorter closing phrase does not turn the ordinary slide size into a range.
+      return [...counts].sort((a,b) => b[1]-a[1] || b[0]-a[0])[0][0];
     };
     const body = record.parts.filter(part => part.kind !== 'Coda').flatMap(part => part.approxMeasuresByBlock || []);
     const coda = record.parts.filter(part => part.kind === 'Coda').flatMap(part => part.approxMeasuresByBlock || []);
     const unmeasured = record.parts.some(part => !part.approxMeasuresByBlock && part.blockCount > 0);
     const labels = [];
     const displayed = body.length ? body : coda;
-    if (displayed.length) labels.push(`approx. ${range(displayed)} bars`);
+    if (displayed.length) labels.push(`approx. ${typical(displayed)} bars`);
     if (unmeasured) labels.push('일부 구간 미확인');
     return {status:'measured',text:labels.join(' / ') || '마디: 미확인'};
   }

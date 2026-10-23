@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-23",
+  "release": "20261023-hymn-readable-pages",
+  "remainingReviewedVersions": 38,
+  "changedTextUnits": 133,
+  "reviewedUnitFlags": 82,
+  "clearedVersionBadges": 19,
+  "previousBatchClearedVersionBadges": 28,
+  "remainingGroupingDeferrals": 0,
+  "policy": "Natural complete phrases and readability first. Short final cadence allowed. Independent Amen/Coda and form IDs/order unchanged. New632 keeps three invocations, two lines each.",
+  "productionDataApplied": true,
+  "preservation": {
+    "nineTableComparison": true,
+    "automaticServiceRevisions": {
+      "4a3f4fdf-9040-43ca-947d-49b4f3ac2316": 5,
+      "2a275c3d-c266-4419-880e-2c472c7b2c17": 5,
+      "4da71eac-4698-4f8a-9a29-19d10c4dbdc3": 5,
+      "eeb73f98-6cbd-46ae-9aac-ec35dcf18caf": 5
+    },
+    "worshipContentUnchanged": true,
+    "audioAndLinksUnchanged": true
+  },
+  "outputVerification": {
+    "versions": 1203,
+    "savedItems": 350,
+    "engines": [
+      "chromium",
+      "webkit"
+    ],
+    "viewports": [
+      "1920x1080",
+      "1280x720",
+      "960x540"
+    ],
+    "overflow": 0
+  },
+  "localMetadataVerification": {
+    "measured": 1197,
+    "recitative": 6,
+    "stale": 0
+  },
+  "publication": {
+    "status": "waiting_release_queue",
+    "ticket": "9c758cec9abf401bb626e819e5a5da6f"
+  }
+}

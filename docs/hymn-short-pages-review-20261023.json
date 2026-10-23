@@ -1,0 +1,315 @@
+{
+  "date": "2026-10-23",
+  "scope": "All 1203 hymn editions scanned; 114 candidate editions with consecutive one-line pages. Short-line grouping and existing-score evidence review, not a fresh full orthography certification.",
+  "reviewedVersions": 76,
+  "changedTextUnits": 228,
+  "reviewFlagsUpdated": 133,
+  "versionBadgesCleared": 28,
+  "retainedCandidateVersions": 38,
+  "retainedDecisions": [
+    {
+      "edition": "new",
+      "number": 573,
+      "versionId": "2cb2723b-da5a-4db5-9610-4a0bcafd153e",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "union",
+      "number": 124,
+      "versionId": "a81212ae-43d4-5395-a768-bb42ebdefc97",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "union",
+      "number": 250,
+      "versionId": "9b3fe9b6-ec1c-577f-b1c7-f6b0d44ff63a",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "union",
+      "number": 165,
+      "versionId": "7a4c2417-72dc-5a35-ad2f-e413bb559b07",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "new",
+      "number": 584,
+      "versionId": "3641900c-bc02-5f4b-8ba4-19bf0b801bb5",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "new",
+      "number": 99,
+      "versionId": "c9174714-ea1e-4bfd-9add-446f7951164f",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "new",
+      "number": 97,
+      "versionId": "a214db06-a6dc-478d-aa2c-f1770cc3d61f",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "union",
+      "number": 353,
+      "versionId": "0940d0b4-7f4d-49fa-8a1d-299c068db079",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "new",
+      "number": 632,
+      "versionId": "1d77bd23-c996-5800-b3ec-cad85bbf55d9",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "new",
+      "number": 577,
+      "versionId": "4df7aeb6-a111-5a47-a3d6-8dd3d8d946ec",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "new",
+      "number": 244,
+      "versionId": "94df12d8-3195-4889-9c68-18e5dacccdd0",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "new",
+      "number": 62,
+      "versionId": "de74433a-0847-4969-8742-105d3369bee6",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "union",
+      "number": 108,
+      "versionId": "afb26675-92c4-5794-bc46-b2b384e8c3b3",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "new",
+      "number": 433,
+      "versionId": "2f96847c-7d6a-52dc-9a95-74ae8df70ac4",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "new",
+      "number": 241,
+      "versionId": "d4da02f3-7130-55aa-aab1-6ad20ffb600b",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "new",
+      "number": 594,
+      "versionId": "3ad64890-258e-49e2-b60c-e49b1b730b96",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "union",
+      "number": 187,
+      "versionId": "9fcc9764-7ae4-55a3-8d32-01bf737509c7",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "union",
+      "number": 434,
+      "versionId": "e3a608a2-7b42-542b-997f-f0ca26a50a78",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "new",
+      "number": 384,
+      "versionId": "80d1f9b0-39c4-571d-8c25-26736d187e9b",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "union",
+      "number": 143,
+      "versionId": "0acb505b-415a-563e-9858-071b57aef0a2",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "new",
+      "number": 625,
+      "versionId": "acd19fab-d9dc-5f9a-904f-1d315f899e7d",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "new",
+      "number": 465,
+      "versionId": "81c9c0e3-12b4-413c-8d7e-6527f6ea4de8",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "union",
+      "number": 490,
+      "versionId": "83f47c0d-593e-5618-aed0-4ca543a5e299",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "new",
+      "number": 255,
+      "versionId": "97075836-d104-55ad-8bc7-7d34a0b10982",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "union",
+      "number": 225,
+      "versionId": "f2a0e6b3-0841-53ca-93ee-800d348385d1",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "new",
+      "number": 127,
+      "versionId": "418421d3-751f-5c32-80c9-d83fd1610316",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "union",
+      "number": 501,
+      "versionId": "d7a3e9b9-e4e0-58aa-978d-cd992ff3fd17",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "union",
+      "number": 523,
+      "versionId": "a3a27ddf-0826-4e4c-bf8e-5c5b609cdaac",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "new",
+      "number": 317,
+      "versionId": "f78035ac-0d21-4e9d-9e62-d088f3840b27",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "union",
+      "number": 15,
+      "versionId": "d93ff6b5-e96e-5468-a166-06e20a21441b",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "union",
+      "number": 232,
+      "versionId": "b8bbeada-1065-5687-ab76-d5cd4e68c797",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "new",
+      "number": 617,
+      "versionId": "5e1accf0-2f0f-542b-9072-b0cb79028fb8",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "union",
+      "number": 229,
+      "versionId": "58d32c23-830c-5683-86bd-18f20e3ccb0f",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "new",
+      "number": 639,
+      "versionId": "99b61048-aad9-5d8a-a616-f9e79523ba99",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "union",
+      "number": 125,
+      "versionId": "b2158e1d-16df-52a2-816f-747293159ec7",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "new",
+      "number": 52,
+      "versionId": "b810ec16-67fc-5e79-90c7-b309e301673b",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "union",
+      "number": 100,
+      "versionId": "49b0e11b-0e09-5450-9afe-3ad665ef2173",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    },
+    {
+      "edition": "new",
+      "number": 184,
+      "versionId": "19a83ade-106e-4c44-a79f-ab58899b515c",
+      "action": "retain",
+      "reason": "Odd phrase group: retain musical ending pending individual grouping review"
+    }
+  ],
+  "wholeCatalogOutputVersions": 1203,
+  "savedItemOutputChecks": 350,
+  "layout": {
+    "chromium": {
+      "uniqueSlides": 7548,
+      "rendered": 22644,
+      "overflow": 0
+    },
+    "webkit": {
+      "uniqueSlides": 7548,
+      "rendered": 22644,
+      "overflow": 0
+    }
+  },
+  "productionReadbackPassed": true,
+  "preservation": {
+    "nineTableComparison": true,
+    "automaticServiceRevisions": {
+      "698fd84b-3f8a-443a-b9a2-214ba70c0ba9": 7,
+      "0abe9c39-4be8-4fd9-a61d-8cf32b0c0300": 7,
+      "bf69f813-ac6d-4f90-90fa-6f4024f37831": 7,
+      "1f3cafa0-a39c-4137-b2fe-24dcb92a72cf": 7,
+      "8cf3768d-21aa-45e1-b700-f76819231d0f": 5,
+      "9340e434-c0e6-4034-9a25-a1eb0558f330": 5,
+      "31113f21-21ff-4a68-be7f-81a394b174f9": 5,
+      "41f34f51-4688-47fa-adbc-11b470c103e5": 5,
+      "89c833c5-460c-4596-88d5-6ab65803cb78": 5,
+      "212a229f-ff69-4ab2-ad23-855a60e4f213": 5,
+      "fcb6ca41-a19e-47e5-910c-3ad8b4f2c07b": 5,
+      "f5f5cc65-31a9-4d70-b06c-784a1bb7985c": 5,
+      "0e55ae22-1564-44f1-9ca0-0786984a797a": 5,
+      "296c4ac6-9fa3-4449-a674-0c48c1e2c38b": 5
+    },
+    "worshipContentUnchanged": true,
+    "audioAndLinksUnchanged": true
+  },
+  "metadataPublication": "Updated source ledger locally; public measurement hashes pending next batch publication.",
+  "codeDeployment": false
+}

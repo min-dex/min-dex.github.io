@@ -1,0 +1,779 @@
+{
+  "versions": 152,
+  "units": 200,
+  "freshBrowserReadback": true,
+  "nineTableComparisonPassed": true,
+  "noServiceContentChanges": true,
+  "expectedAutomaticServiceRevisionIncrements": {},
+  "runtime": [
+    {
+      "number": 245,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 335,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 259,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 533,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 476,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 377,
+      "edition": "union",
+      "forms": 6
+    },
+    {
+      "number": 510,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 287,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 296,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 542,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 222,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 452,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 513,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 203,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 169,
+      "edition": "union",
+      "forms": 6
+    },
+    {
+      "number": 277,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 468,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 438,
+      "edition": "union",
+      "forms": 6
+    },
+    {
+      "number": 414,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 543,
+      "edition": "union",
+      "forms": 6
+    },
+    {
+      "number": 517,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 73,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 67,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 324,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 161,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 151,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 162,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 164,
+      "edition": "union",
+      "forms": 6
+    },
+    {
+      "number": 22,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 262,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 544,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 368,
+      "edition": "union",
+      "forms": 6
+    },
+    {
+      "number": 387,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 253,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 166,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 450,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 181,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 188,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 279,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 415,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 109,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 334,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 366,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 100,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 398,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 153,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 403,
+      "edition": "union",
+      "forms": 3
+    },
+    {
+      "number": 115,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 464,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 427,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 514,
+      "edition": "union",
+      "forms": 3
+    },
+    {
+      "number": 311,
+      "edition": "union",
+      "forms": 6
+    },
+    {
+      "number": 373,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 120,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 230,
+      "edition": "union",
+      "forms": 6
+    },
+    {
+      "number": 145,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 448,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 504,
+      "edition": "union",
+      "forms": 6
+    },
+    {
+      "number": 309,
+      "edition": "union",
+      "forms": 3
+    },
+    {
+      "number": 210,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 508,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 5,
+      "edition": "union",
+      "forms": 2
+    },
+    {
+      "number": 461,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 548,
+      "edition": "union",
+      "forms": 7
+    },
+    {
+      "number": 52,
+      "edition": "union",
+      "forms": 6
+    },
+    {
+      "number": 27,
+      "edition": "union",
+      "forms": 6
+    },
+    {
+      "number": 457,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 97,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 535,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 288,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 268,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 463,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 43,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 236,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 340,
+      "edition": "union",
+      "forms": 6
+    },
+    {
+      "number": 420,
+      "edition": "union",
+      "forms": 3
+    },
+    {
+      "number": 35,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 289,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 512,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 228,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 223,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 175,
+      "edition": "union",
+      "forms": 6
+    },
+    {
+      "number": 526,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 397,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 244,
+      "edition": "union",
+      "forms": 6
+    },
+    {
+      "number": 134,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 372,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 531,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 19,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 133,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 14,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 312,
+      "edition": "union",
+      "forms": 8
+    },
+    {
+      "number": 10,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 265,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 113,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 90,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 454,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 187,
+      "edition": "union",
+      "forms": 3
+    },
+    {
+      "number": 470,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 111,
+      "edition": "union",
+      "forms": 3
+    },
+    {
+      "number": 160,
+      "edition": "union",
+      "forms": 7
+    },
+    {
+      "number": 318,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 213,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 482,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 205,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 430,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 522,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 155,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 13,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 433,
+      "edition": "union",
+      "forms": 3
+    },
+    {
+      "number": 534,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 247,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 125,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 382,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 183,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 278,
+      "edition": "union",
+      "forms": 3
+    },
+    {
+      "number": 304,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 126,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 86,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 20,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 62,
+      "edition": "union",
+      "forms": 2
+    },
+    {
+      "number": 396,
+      "edition": "union",
+      "forms": 6
+    },
+    {
+      "number": 390,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 82,
+      "edition": "union",
+      "forms": 6
+    },
+    {
+      "number": 122,
+      "edition": "union",
+      "forms": 6
+    },
+    {
+      "number": 487,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 211,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 50,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 186,
+      "edition": "union",
+      "forms": 7
+    },
+    {
+      "number": 117,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 45,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 445,
+      "edition": "union",
+      "forms": 6
+    },
+    {
+      "number": 198,
+      "edition": "union",
+      "forms": 6
+    },
+    {
+      "number": 128,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 532,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 503,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 98,
+      "edition": "union",
+      "forms": 3
+    },
+    {
+      "number": 440,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 446,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 376,
+      "edition": "union",
+      "forms": 6
+    },
+    {
+      "number": 185,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 118,
+      "edition": "union",
+      "forms": 7
+    },
+    {
+      "number": 116,
+      "edition": "union",
+      "forms": 6
+    },
+    {
+      "number": 488,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 367,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 521,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 234,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 365,
+      "edition": "union",
+      "forms": 6
+    },
+    {
+      "number": 394,
+      "edition": "union",
+      "forms": 5
+    },
+    {
+      "number": 75,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 74,
+      "edition": "union",
+      "forms": 4
+    },
+    {
+      "number": 231,
+      "edition": "union",
+      "forms": 5
+    }
+  ],
+  "scope": "558 Unified editions scanned for reviewed spacing patterns and same-line discrepancies; not a claim of exhaustive linguistic correctness.",
+  "metadataStatus": "local hash updates staged for next publication",
+  "legacyWordingPreserved": true,
+  "lineAndSlideBoundariesPreserved": true,
+  "combinedOutputRegression": {
+    "versions": 1203,
+    "savedItems": 350,
+    "whitespaceOnlyOutputDifference": true
+  }
+}
