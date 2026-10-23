@@ -4654,6 +4654,99 @@ function presenterOutputLayers(root) {
   return { active, next };
 }
 
+// BEGIN GENERATED BACKGROUND LUMINANCE
+const PRESENTER_BACKGROUND_LUMINANCE = Object.freeze({
+  "26-A1": 0.021915,
+  "26-A2": 0.015800,
+  "26-A3": 0.004375,
+  "26-A4": 0.187702,
+  "26-A5": 0.116077,
+  "26-B1": 0.431074,
+  "26-B2": 0.417014,
+  "26-B3": 0.307186,
+  "26-B4": 0.005927,
+  "26-B5": 0.052116,
+  "26-C1": 0.273571,
+  "26-C2": 0.290693,
+  "26-C3": 0.710122,
+  "26-C5": 0.833448,
+  "26-S4": 0.836764,
+  "26-S5": 0.727394,
+  "26-S6": 0.606454,
+  "scripture-reading-cross": 0.009832,
+});
+// END GENERATED BACKGROUND LUMINANCE
+
+// White stays the default until its median contrast falls below 3:1.
+function presenterInkForLuminance(value) {
+  return typeof value === "number" && Number.isFinite(value) && 1.05 / (value + .05) < 3 ? "brown" : "white";
+}
+
+function presenterKnownBackgroundLuminance(source) {
+  try {
+    const url = new URL(source, window.location.href);
+    if (url.origin !== window.location.origin) return null;
+    const name = url.pathname.match(/\/assets\/worship-backgrounds\/(?:previews\/)?([^/]+)\.(?:png|webp)$/i)?.[1];
+    return Object.hasOwn(PRESENTER_BACKGROUND_LUMINANCE, name) ? PRESENTER_BACKGROUND_LUMINANCE[name] : null;
+  } catch { return null; }
+}
+
+function presenterDecodedBackgroundLuminance(image) {
+  try {
+    const canvas = document.createElement("canvas");canvas.width = 64;canvas.height = 36;
+    const context = canvas.getContext("2d", {willReadFrequently: true});
+    context.fillStyle = "#000";context.fillRect(0, 0, 64, 36);
+    // Same centered width-fill geometry as fullscreen still artwork.
+    const height = image.naturalHeight * 64 / image.naturalWidth;
+    context.drawImage(image, 0, (36 - height) / 2, 64, height);
+    const pixels = context.getImageData(0, 0, 64, 36).data;
+    const samples = [];
+    for (let y = 4; y < 32; y++) for (let x = 5; x < 59; x++) {
+      const index = (y * 64 + x) * 4;
+      const channel = offset => {const v = pixels[index + offset] / 255;return v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4;};
+      samples.push(.2126 * channel(0) + .7152 * channel(1) + .0722 * channel(2));
+    }
+    samples.sort((a, b) => a - b);
+    return (samples[samples.length / 2 - 1] + samples[samples.length / 2]) / 2;
+  } catch { return null; } // Unreadable cross-origin artwork retains white.
+}
+
+function presenterBackgroundInkSource(frameState = {}) {
+  if (!frameState.noChromakey || !frameState.showBackground || frameState.backgroundVideo) return "";
+  return normalizePresenterMediaSource(frameState.backgroundImages?.[0] || frameState.backgroundImage || "");
+}
+
+function presenterBackgroundInk(source) {
+  if (!source) return "white";
+  const known = presenterKnownBackgroundLuminance(source);
+  if (known !== null) return presenterInkForLuminance(known);
+  const record = presenterOutputImagePreloadCache.get(source);
+  if (!record?.ready) return "white";
+  if (!Object.hasOwn(record, "ink")) record.ink = presenterInkForLuminance(presenterDecodedBackgroundLuminance(record.image));
+  return record.ink;
+}
+
+function schedulePresenterBackgroundInk(source) {
+  if (!source || presenterKnownBackgroundLuminance(source) !== null) return;
+  const pending = preloadPresenterOutputImage(source);
+  const record = presenterOutputImagePreloadCache.get(source);
+  if (!pending || !record || record.inkNotificationScheduled) return;
+  record.inkNotificationScheduled = true;
+  pending.then(() => {
+    if (presenterOutputImagePreloadCache.get(source) !== record) return;
+    const ink = presenterBackgroundInk(source);
+    document.querySelectorAll(".presenter-output-root[data-output-ink-source]").forEach(root => {
+      if (root.dataset.outputInkSource === source) root.dataset.outputInk = ink;
+    });
+  });
+}
+
+function presenterBackgroundInkAttributes(frameState = {}) {
+  const source = presenterBackgroundInkSource(frameState);
+  schedulePresenterBackgroundInk(source);
+  return `data-output-ink="${presenterBackgroundInk(source)}" data-output-ink-source="${escapeAttr(source)}"`;
+}
+
 function applyPresenterOutputFrameState(root, frameState = {}) {
   document.body.classList.toggle("presenter-output-body--clean", Boolean(frameState.cleanOutput));
   document.body.classList.toggle("has-background", Boolean(frameState.showBackground));
@@ -4667,6 +4760,10 @@ function applyPresenterOutputFrameState(root, frameState = {}) {
   applyPresenterBackgroundVideo(root, frameState.backgroundVideo);
   root.dataset.serviceType = frameState.serviceType || "";
   root.dataset.outputTheme = frameState.outputTheme || presenterOutputTheme(frameState.serviceType);
+  const inkSource = presenterBackgroundInkSource(frameState);
+  root.dataset.outputInkSource = inkSource;
+  root.dataset.outputInk = presenterBackgroundInk(inkSource);
+  schedulePresenterBackgroundInk(inkSource);
   // Reuse decoded image nodes for output backgrounds. Assigning the URL to CSS
   // can start another fetch/decode after the readiness gate (notably cold caches).
   const sources = frameState.showBackground ? (frameState.backgroundImages?.length
@@ -5242,13 +5339,12 @@ function renderPresenterSlideFrame(slide, options = {}) {
     && presenterSlideLayout(slide) !== PRESENTER_SLIDE_LAYOUTS.BLANK
     && (slide?.songTitle || (slide?.type === "song-title" && presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE))) {
     const content = presenterSongTitleContent(slide);
-    const noteTitle = normalizePresenterServiceDesign(options.presentationDesign)?.songTitleStyle === "note-title";
-    const title = noteTitle ? String(content.title || "").replace(PRESENTER_SONG_NOTE_PATTERN, "").trim()
-      : formatPresenterSongTitleText(content.title);
-    // Preserve the standard composition unless this service explicitly selects another.
+    const hideDetail = normalizePresenterServiceDesign(options.presentationDesign)?.songTitleStyle === "note-title";
+    const title = String(content.title || "").replace(PRESENTER_SONG_NOTE_PATTERN, "").trim();
+    // Share the note-above-title layout; compact event copy stays opt-in.
     slide = { ...slide, elementType: PRESENTER_ELEMENT_TYPES.TITLE_CONTENT,
       layout: PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT, type: "title-content",
-      title, text: title, songTitleContent: content, bodyText: "", assignee: "", fullscreenSongTitle: true, fullscreenSongTitleStyle: noteTitle ? "note-title" : "standard" };
+      title, text: title, songTitleContent: content, bodyText: "", assignee: "", fullscreenSongTitle: true, fullscreenSongTitleStyle: "note-title", fullscreenSongTitleHideDetail: hideDetail };
   }
   const design = presenterServiceDesignForSlide(slide, options);
   if (design) {
@@ -5612,7 +5708,7 @@ function renderPresenterTitleContentSlide(slide, options = {}) {
       ${noteTitle ? `<span class="presenter-fullscreen-song-heading" aria-label="찬양">${PRESENTER_SONG_NOTE}</span>`
         : slide.fullscreenSongTitle && slide.songTitleContent?.orderTitle ? `<span class="presenter-fullscreen-song-heading">${escapeHtml(presenterOrderDisplayLabel(slide.songTitleContent.orderTitle))}</span>` : ""}
       <span class="presenter-title-content-title" style="--line-chars: ${escapeAttr(titleChars)}">${slide.fullscreenSongTitle ? renderPresenterSongText(title, slide) : escapeHtml(title)}</span>
-      ${slide.fullscreenSongTitle && !noteTitle && slide.songTitleContent?.detail ? `<span class="presenter-fullscreen-song-detail">${slide.songTitleContent.detailKind === "subtitle" ? `(${escapeHtml(slide.songTitleContent.detail)})` : escapeHtml(slide.songTitleContent.detail)}</span>` : ""}
+      ${slide.fullscreenSongTitle && !slide.fullscreenSongTitleHideDetail && slide.songTitleContent?.detail ? `<span class="presenter-fullscreen-song-detail">${slide.songTitleContent.detailKind === "subtitle" ? `(${escapeHtml(slide.songTitleContent.detail)})` : escapeHtml(slide.songTitleContent.detail)}</span>` : ""}
       ${slide.fullscreenSongTitle ? "" : `<div class="presenter-title-content-body">
         ${bodyLines.map((line) => `<span style="--line-chars: ${presenterLineCharEstimate(line)}">${escapePresenterSlideLine(line, slide)}</span>`).join("")}
       </div>`}
@@ -5696,7 +5792,7 @@ function renderPresenterLiturgicalBodySlide(slide) {
         ${lines.map((line) => `<span style="--line-chars: ${presenterLineCharEstimate(line)}">${escapePresenterSlideLine(line, slide)}</span>`).join("")}
       </div>`;
   return `
-    <div class="presenter-liturgical-body">
+    <div class="presenter-liturgical-body${title === "공동체고백" ? " presenter-liturgical-body--community-confession" : ""}">
       ${body}
       <div class="presenter-liturgical-body-heading">
         <span style="--line-chars: ${escapeAttr(titleChars)}">${escapeHtml(title)}</span>

@@ -3989,6 +3989,29 @@ versions, form sequence, persistence or output behavior change. Chromium/WebKit
 actual-renderer checks cover DB shortcut variants,360–1500px, both themes,
 long forms, medley action retention and unsaved text/focus through resizing.
 
+## Shared fullscreen foreground contrast ·2026-10-23
+
+Supersedes the department-wide children brown foreground. Fullscreen still
+artwork uses white by default; switch to #332211 only when white's median
+contrast over the central artwork region is below3:1. The rule depends on image
+luminance, never service type, month or a hand-selected filename palette. Text,
+blank cross and monochrome ready/waiting logos share the foreground. Explicit
+service-design foreground choices remain authored overrides.
+
+Bundled original PNGs have generated median-luminance metadata (64×36 sampling,
+central x5–58/y4–31), shared with their WebP previews. This avoids downloading
+full PNGs merely to color controller thumbnails. Rebuild/check with
+`tools/build_background_luminance.py [--check]`. Other decoded images use the
+same cached sampling rule; unreadable cross-origin images retain white. Cache
+uses the existing bounded image-preload records; stale image completions never
+recolor a root now showing another source. Dynamic video retains white.
+
+Reading frames without service artwork, blackout and chromakey do not acquire
+a brown foreground. Community-confession markers alone keep original colors,
+50% coverage,4-stage-pixel side padding and #332211 text on the marker. This
+semantic rule is fullscreen-only, independent of department; third-service
+chromakey retains its original colored words. Other colored copy is not marked.
+
 ## Remote and music entry placement · 2026-10-23
 
 Basic presenter puts 원격 조작 and 음악 관리 in the third equal-width row of
@@ -3997,3 +4020,16 @@ The matching topbar launchers are hidden only while that basic control rail
 exists. Focus view and other modules retain global access. Both entries open
 the existing dialog/popover; no extra audio instance or remote session is created.
 Music popover placement and keyboard return use the visible launcher.
+
+
+## Shared note-above-song-title layout ·2026-10-23
+
+User explicitly selected the small note above the main song title for ordinary
+fullscreen praise too. Both output and previews use the same existing song title
+renderer, including explicit Title positions. The inline note and textual order
+heading are replaced by one small note; ordinary subtitles remain visible.
+The existing per-service note-title setting retains chapel's compact no-subtitle
+copy. Chapel colors, serif faces, cross, reading/sermon styling remain opt-in.
+Chromakey title layout is unchanged. No service/song records are rewritten.
+T remains unassigned as documented in the Title sequence contract; Title is the
+accepted explicit title token and Tag/Tags retain their meaning.

@@ -30,8 +30,8 @@ def main():
                       if(detail?.textContent!=='Original title') throw Error('Missing song detail');
                       const detailSize=parseFloat(getComputedStyle(detail).fontSize),headingSize=parseFloat(getComputedStyle(heading).fontSize);
                       if(Math.abs(detailSize-60*width/1920)>.1 || getComputedStyle(detail).fontWeight!=='700' || getComputedStyle(title).fontWeight!=='800') throw Error('Incorrect type hierarchy');
-                      // Output headings omit order numbers (b088437a): '찬양 1' renders as '찬양'.
-                      if(heading?.textContent!==label.replace(/\s*\d+$/,'') || !title?.textContent.includes('하늘 보좌')) throw Error('Missing title');
+                      // The shared fullscreen heading is one note above the title.
+                      if(heading?.textContent!=='♬' || title?.textContent!=='하늘 보좌') throw Error('Missing title or repeated note');
                       const h=heading.getBoundingClientRect(),t=title.getBoundingClientRect(),r=root.getBoundingClientRect();
                       if(h.height<=0 || h.bottom>t.top+1 || h.left<r.left-1 || h.right>r.right+1 || t.bottom>r.bottom+1) throw Error('Clipped or overlapping: '+label+' '+width);
                       const d=detail.getBoundingClientRect();
@@ -63,7 +63,7 @@ def main():
                     const first=renderPresenterSlideFrame(slides[0],{noChromakey:true});
                     if(!first.includes(label)||!first.includes('이연약구역 일동')) throw Error('Missing special heading');
                     root.innerHTML=renderPresenterSlideFrame(slides[1],{noChromakey:true});
-                    if(root.querySelector('.presenter-fullscreen-song-heading')) throw Error('Repeated special heading');
+                    if(root.querySelector('.presenter-fullscreen-song-heading')?.textContent!=='♬') throw Error('Missing shared note');
                     if(root.querySelector('.presenter-title-content-title').textContent.includes('436')) throw Error('Repeated hymn number');
                     if(root.querySelector('.presenter-fullscreen-song-detail').textContent!=='새찬송가 436장') throw Error('Missing hymn detail');
                     if(!renderPresenterSlideFrame(slides[1],{}).includes('436')) throw Error('Chromakey number removed');

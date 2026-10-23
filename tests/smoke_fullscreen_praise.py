@@ -40,12 +40,12 @@ def main():
                   check(holder.querySelector('.presenter-title-content-title').textContent==='제목','main title duplicated note');
                   check(!holder.textContent.includes('부제')&&!holder.textContent.includes('찬양 1'),'extra title text');
                   const standard=document.createElement('div');standard.innerHTML=renderPresenterSlideFrame(song,{noChromakey:true});
-                  check(standard.querySelector('.presenter-fullscreen-song-heading').textContent==='찬양','ordinary service order heading changed');
-                  check(standard.querySelector('.presenter-title-content-title').textContent.includes('♬'),'ordinary service lost inline note');
+                  check(standard.querySelector('.presenter-fullscreen-song-heading').textContent==='♬','ordinary service note heading missing');
+                  check(standard.querySelector('.presenter-title-content-title').textContent==='제목','ordinary service title repeats note');
                   check(standard.querySelector('.presenter-fullscreen-song-detail').textContent==='(부제)','ordinary service subtitle hidden');
-                  check(!standard.querySelector('.presenter-slide--song-note-title'),'event style leaked into unconfigured service');
+                  check(standard.querySelector('.presenter-slide--song-note-title'),'shared note title layout missing');
                   const otherDesign=document.createElement('div');otherDesign.innerHTML=renderPresenterSlideFrame(song,{noChromakey:true,presentationDesign:{sectionKeys:['sermon'],accent:'#112233'}});
-                  check(otherDesign.textContent.includes('부제')&&!otherDesign.querySelector('.presenter-slide--song-note-title'),'another service design enabled note-only title');
+                  check(otherDesign.textContent.includes('부제')&&otherDesign.querySelector('.presenter-slide--song-note-title'),'another service design lost subtitle or shared layout');
                   const keyed=renderPresenterSlideFrame(song,{noChromakey:false,presentationDesign:{songTitleStyle:'note-title'}});
                   check(!keyed.includes('presenter-slide--song-note-title'),'fullscreen choice leaked into keyed output');
                   const videoSlide={...song,backgroundVideo:presentation.backgroundVideo};
