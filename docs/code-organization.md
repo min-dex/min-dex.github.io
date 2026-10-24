@@ -424,3 +424,11 @@ I/O, loads before app bootstrap, and uses the existing editor state boundary.
 Late-input retention and offline activation tests cover the extracted owner;
 the runtime-boundary test checks packaging and initialization. Existing main
 file size/coupling ratchets are unchanged.
+
+`mindex.praise-media.js` owns read-only catalog score/audio disclosures and native
+preview lifecycle; `styles.praise-media.css` owns their scoped presentation. The
+module performs no startup DOM/state work and receives its mount after the Praise
+view renders. It reuses catalog records, score normalization/manifest loading and
+audio_set data; it does not own persistence or Worship transport.
+The existing versionAudioSummaryStatus/renderVersionAudioSummary/updateVersionAudioSummary
+helpers move unchanged to that owner, retaining their shared APIs and status updates.

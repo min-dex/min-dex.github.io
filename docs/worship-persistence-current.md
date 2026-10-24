@@ -456,3 +456,11 @@ baseline; the next explicit save uses the current input and checks again for
 further remote changes. Proven SQL rollback also clears the obsolete attempt.
 Unknown transport/journal outcomes retain exact-request replay before any newer
 input is saved. Neither path reloads the editor or discards unsaved input.
+
+## Legacy department announcement creation ·2026-10-25
+
+Copied department announcements preserve valid input_mode values. Legacy empty
+modes fall back to source config then the copied element type using existing DB
+compatibility rules, avoiding explicit null in the required column. Previous
+services, announcement text/media, forms and versions remain unchanged. Creation
+still uses the existing atomic aggregate path.

@@ -1878,9 +1878,9 @@ The user explicitly approved publication of this display/cache update.
 - Sharing restores the package's form sequence even if the receiving worship
   item has a different form. Source lyrics/version mismatch rejects the package.
   Audio, timing and forms remain separate from song/worship/medley records.
-- Persist exact modes in existing JSON config/content state; legacy typed DB
-  columns continue using `praise_db`. When reading that compatibility value,
-  restore the precise saved praise mode rather than losing it to `praise_db`.
+- Original storage policy (superseded 2026-10-25): exact modes lived in JSON
+  while the typed column used `praise_db`. The canonical input-mode decision
+  below replaces new writes; old records remain readable.
 - Local verification: Chromium/WebKit timing and independent-profile sharing
   suites cover mode switches, designated-form ownership, serialization/reopen,
   changed-form shared loads, decoded audio playback and stale-data guards.
@@ -4714,3 +4714,17 @@ Scripture reference groups use no background boxes. Only their controller labels
 alternate default ink / current theme accent / default ink across reference
 and translation boundaries. Remove the bible-light/bible-dark gray palette. Song
 form backgrounds, slide numbering/geometry, preview and output remain unchanged.
+
+## Canonical worship input modes · 2026-10-25
+
+The typed `input_mode` column is the write/read authority for concrete modes.
+Save `lyrics_db`, `score_db`, `children_audio`, `manual_praise` and `audio_praise`
+as themselves, and align config/content-state copies. Adapt legacy `praise_db`
+or empty values only when reading older rows; preserve the existing effective
+mode, including score output aliases and manual/audio intent. Copied department
+announcements use the same resolver. No bulk backfill of existing services.
+
+The production CHECK was expanded and read back as validated on 2026-10-25,
+without worship-row, revision, draft or permission updates. The web writer is a
+separate queued release. Tests cover all five modes, both browsers, the existing
+908 Praise-row snapshot, and an isolated PostgreSQL constraint migration.

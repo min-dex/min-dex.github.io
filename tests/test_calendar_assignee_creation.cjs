@@ -11,6 +11,7 @@ c.assert=assert;
    creationId:()=>crypto.randomUUID(),pending:()=>null,finishCreation(){},
    async create({service,rows}) {
      writes++;
+     for(const element of rows.elements)assert.notEqual(element.input_mode,null,'Required DB column rejects explicit null');
      if(fail)throw new Error('fixture write failure');
      const aggregate=JSON.parse(JSON.stringify({service,sections:rows.sections,elements:rows.elements}));
      stored.mindex_worship_services.push(aggregate.service);
@@ -40,6 +41,29 @@ c.assert=assert;
  assert.equal(serviceItemEditableAssigneeValue({...offering,assignee:'직접 수정'},child),'직접 수정');
  assert.equal(serviceItemEditableAssigneeValue({...offering,assignee:''},child),'');
  const before=stored.mindex_worship_services.length;fail=true;await assert.rejects(insertWorshipServicesWithCalendarAssignees([autoWorshipServicePayload({typeId:'young-adult',date:'2026-09-13'})]),/fixture write failure/);assert.equal(stored.mindex_worship_services.length,before,'Partial creation rollback');assert.equal(state.services.length,4);
+ const oldEnsure=ensureWorshipServiceRowsLoadedForPersistence;
+ ensureWorshipServiceRowsLoadedForPersistence=async()=>{};
+ const savedServices=state.services;
+ state.services=[{id:'legacy-child',type_id:'children',date:'2026-09-06'}];
+ state.worshipSections=[{id:'legacy-ad',service_id:'legacy-child',section_key:'announcements'}];
+ state.worshipElements=[
+  {id:'old-text',section_id:'legacy-ad',sort_order:1,element_type:'title_content',body:'보존할 광고',input_mode:null,config:{},source_ref:{label:'광고'}},
+  {id:'old-video',section_id:'legacy-ad',sort_order:2,element_type:'video',input_mode:null,asset:{url:'https://example.com/ad.mp4',kind:'video'},config:{},source_ref:{label:'참고 화면'}},
+  {id:'old-config',section_id:'legacy-ad',sort_order:3,element_type:'plain_text',input_mode:null,config:{inputMode:'text'},source_ref:{label:'안내'}},
+  {id:'explicit',section_id:'legacy-ad',sort_order:4,element_type:'plain_text',input_mode:'config',config:{},source_ref:{label:'설정'}},
+ ];
+ const oldRows=JSON.stringify(state.worshipElements);
+ const scaffold={sections:[{id:'new-ad',service_id:'new-child',section_key:'announcements'}],elements:[]};
+ assert.equal((await copyPreviousDepartmentAnnouncements({id:'new-child',type_id:'children',date:'2026-09-13'},scaffold)).size,4);
+ assert.deepEqual(Array.from(scaffold.elements,e=>e.input_mode),['text','asset','text','config']);
+ assert.equal(scaffold.elements[0].body,'보존할 광고');assert.equal(scaffold.elements[1].asset.url,'https://example.com/ad.mp4');
+ assert.equal(JSON.stringify(state.worshipElements),oldRows,'Previous announcements are immutable');
+ fail=false;
+ const oldSnapshot=buildServiceDocumentSnapshot;buildServiceDocumentSnapshot=()=>({sourceText:'fixture'});
+ const [withCopiedAds]=await insertWorshipServicesWithCalendarAssignees([autoWorshipServicePayload({typeId:'children',date:'2026-09-13'})]);
+ buildServiceDocumentSnapshot=oldSnapshot;
+ assert.equal(stored.mindex_worship_elements.filter(e=>stored.mindex_worship_sections.some(s=>s.id===e.section_id&&s.service_id===withCopiedAds.id)&&e.body==='보존할 광고').length,1,'Atomic creation includes the preserved legacy announcement');
+ ensureWorshipServiceRowsLoadedForPersistence=oldEnsure;state.services=savedServices;
  const oldLoad=loadCalendarData;loadCalendarData=async()=>{};state.calendarLoaded=false;const beforeWrites=writes;await assert.rejects(insertWorshipServicesWithCalendarAssignees([autoWorshipServicePayload({typeId:'youth',date:'2026-09-13'})]),/교회력/);assert.equal(writes,beforeWrites,'Calendar failure must precede writes');loadCalendarData=oldLoad;
  fail=false;state.calendarLoaded=true;
  const wed=await insertWorshipServicesWithCalendarAssignees([{id:'wed-leader',service_type_id:'wed',service_date:'2026-08-12',worship_leader:'unused',praise_leader:''}]);
