@@ -4627,3 +4627,29 @@ A hymn awaiting the shared score manifest shows the existing loading frame
 instead of an empty deck. Authored assets remain usable
 without waiting for that manifest. The established loader refreshes the same
 service when the manifest arrives. No production data migration is required.
+
+
+## 2026-10-24 — Auto-sync follows the active playback owner
+
+The common auto-sync tick requires confirmed, unpaused, non-ended playback.
+Pending playback must not move slides. An explicit service owner must match the
+active presenter service, and a local timing slide must belong to the exact
+`serviceMusic.timingGroupId` started by the timing player. A shared audio URL is
+not sufficient identity: the same bytes may belong to another occurrence or
+version. These checks apply to the timer/timeupdate path as well as the existing
+explicit R resume guard. Untagged external/legacy timelines retain their existing
+source-based behavior; local groups require explicit playback ownership.
+
+Manual navigation still suspends auto-sync without pausing, loading or seeking
+the audio. R resumes at the existing media clock. Explicit restart keeps the
+existing media reload, group assignment and serial invalidation; stale play
+completions cannot revive stopped or replaced audio. Pause, fade-stop and global
+transport retain their existing contracts. No song/version/lyrics/cue data or
+operational service is rewritten by this change.
+
+Verification: common ownership/paused/ended/pending/manual-navigation and deferred
+play-completion unit cases; independent version profiles and immutable A-B-A
+selection; Chromium/WebKit native HTTP WAV playback with title P, manual browse,
+R return, seek/pause/output disconnection/restart, stale occurrence/service ticks,
+actual version selection and unchanged authored inputs. Global playback and save
+continuity also pass both engines with production network writes blocked.

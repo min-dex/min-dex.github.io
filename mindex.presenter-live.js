@@ -387,14 +387,19 @@ function suspendServiceMusicAutoSync() {
 
 function syncServiceMusicSyncedLyricsWithCurrentTime(options = {}) {
   if (state.serviceMusic.mode !== "presenter-audio" || !state.serviceMusic.playing
-    || state.serviceMusic.autoSyncSuspended) return false;
+    || state.serviceMusic.pending || state.serviceMusic.autoSyncSuspended
+    || (state.serviceMusic.ownerServiceId && state.serviceMusic.ownerServiceId !== state.presenter.serviceId)) return false;
   if (state.presenter.safetyBlank || state.presenter.liveScripture?.active) return false;
   const audio = state.serviceMusic.audio;
-  if (!audio) return false;
+  if (!audio || audio.paused || audio.ended) return false;
   const slides = state.presenter.slides || [];
   const activeIndex = clampPresenterIndex(state.presenter.index, slides.length);
   const activeSync = presenterSyncTimelineForSlide(slides[activeIndex]);
   if (!activeSync) return false;
+  // A URL may be reused by another occurrence. Only its explicitly started
+  // local timing group may drive output; manual navigation keeps audio alive.
+  if (slides[activeIndex]?.syncTimeline?.localTiming
+    && state.serviceMusic.timingGroupId !== activeSync.groupId) return false;
   const source = normalizePresenterMediaSource(state.serviceMusic.sourceKey || audio.currentSrc || audio.src || "");
   if (!source || source !== activeSync.audioSrc) return false;
   const target = presenterSyncedLyricsTargetForTime(slides, activeIndex, Number(audio.currentTime) || 0);

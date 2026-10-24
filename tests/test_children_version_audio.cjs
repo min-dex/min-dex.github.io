@@ -31,5 +31,21 @@ require('../mindex.song-timing.js');const T=global.MindexSongTiming;
  version.audio_set.enabled=false;assert.ok(!T.decorate(slides,item,song,version)[0].syncTimeline);
  version.audio_set.enabled=true;version.forms=[{id:'form',lyrics:'변경 가사'}];assert.ok(!T.decorate(slides,item,song,version)[0].syncTimeline);
  await assert.rejects(T.saveToVersion(song,version,draft,slides),/바뀌/);
+ const profileFor=(id,text,start,url)=>{
+  const forms=[{id,lyrics:text}],v={id,types:['children'],forms};
+  const pages=[{type:'lyrics',text,elementId:'separate-item'}];
+  v.audio_set={enabled:true,audioUrl:url,audioName:id,audioFingerprint:id,duration:20,starts:[start],forms,sourceSignature:T.sourceSignature(v),lyricsFingerprint:T.fingerprint(pages)};
+  return {v,pages};
+ };
+ const a=profileFor('a','판본 A 가사',3,'https://example.invalid/a.wav');
+ const b=profileFor('b','판본 B 가사',8,'https://example.invalid/b.wav');
+ const variantsBefore=JSON.stringify([a,b]);
+ for(const selected of [a,b,a]){
+  const rendered=T.decorate(selected.pages,{id:'separate-item',mode:'children_audio',version_id:selected.v.id},song,selected.v);
+  assert.equal(rendered[0].syncTimeline.audioSrc,selected.v.audio_set.audioUrl);
+  assert.equal(rendered[0].syncTimeline.start,selected.v.audio_set.starts[0]);
+  assert.equal(T.audioFor(rendered,'separate-item').url,selected.v.audio_set.audioUrl);
+ }
+ assert.equal(JSON.stringify([a,b]),variantsBefore,'Version switching must not mutate lyrics, profiles or cue starts');
  console.log('PASS version-owned CAS save/retry, audio-only mode gate, DB reload metadata, disabled/stale sets, unchanged fallback forms');
 })().catch(e=>{console.error(e);process.exitCode=1});

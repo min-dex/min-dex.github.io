@@ -40,6 +40,7 @@ NODE_TESTS = (
     "test_worship_template_preservation.cjs",
     "test_shared_offering_integrity.cjs",
     "test_music_fade_stop.cjs",
+    "test_playback_transition_ownership.cjs",
     "test_union_hymn_score_guard.cjs",
     "test_scripture_lookup_render.cjs",
     "test_app_runtime.cjs",

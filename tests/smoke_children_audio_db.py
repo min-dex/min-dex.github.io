@@ -192,6 +192,19 @@ try:
     const group=state.serviceMusic.timingGroupId;state.serviceMusic.timingGroupId='other-occurrence';
     if(T.resumeAutoSync(sid))throw Error('same audio from another occurrence resumed');state.serviceMusic.timingGroupId=group;
     if(T.resumeAutoSync(sid,{serviceId:sid,index:state.presenter.index,groupId:'stale'}))throw Error('stale R accepted');
+    // A stale timer must obey the same owner checks as explicit R, even when
+    // both occurrences reuse identical audio bytes and suspension is off.
+    const index=state.presenter.index,owner=state.serviceMusic.ownerServiceId;
+    state.serviceMusic.autoSyncSuspended=false;
+    for(const invalid of ['group','owner','pending']){
+      state.serviceMusic.timingGroupId=invalid==='group'?'other-occurrence':group;
+      state.serviceMusic.ownerServiceId=invalid==='owner'?'other-service':owner;
+      state.serviceMusic.pending=invalid==='pending';
+      if(syncServiceMusicSyncedLyricsWithCurrentTime() || state.presenter.index!==index)throw Error('stale '+invalid+' drove output');
+    }
+    state.serviceMusic.timingGroupId=group;state.serviceMusic.ownerServiceId=owner;
+    state.serviceMusic.pending=false;state.serviceMusic.autoSyncSuspended=true;
+
     const input=document.createElement('input');refs.detailPane.append(input);input.focus();
     input.dispatchEvent(new KeyboardEvent('keydown',{key:'r',code:'KeyR',bubbles:true}));
     if(!state.serviceMusic.autoSyncSuspended)throw Error('typing R resumed');input.remove();
@@ -230,7 +243,24 @@ try:
     state.serviceMusic.audio.dispatchEvent(new Event('ended'));
     confirmServiceMusicPlayback({paused:false,ended:false},serial);
     if(state.serviceMusic.pending || state.serviceMusic.playing)throw Error('late play completion revived ended audio');
-    const song=state.songs[0];song.versions[0].forms[0].lyrics='changed';
+    const song=state.songs[0],sid=state.selectedServiceId,item=getServiceItems(sid)[0];
+    const originalSong=JSON.stringify(song),originalItem=JSON.stringify(item);
+    const version=song.versions[0];
+    const alternate={...structuredClone(version),id:'alternate-audio-version',name:'다른 음원 판본',is_primary:false,
+      forms:version.forms.map((form,index)=>({...form,id:'alternate-form-'+index,lyrics:'다른 가사 '+index})),audio_set:null};
+    song.versions.push(alternate);item.version_id=alternate.id;
+    const alternateSlides=presenterSlidesForService(sid);
+    alternate.audio_set={...structuredClone(version.audio_set),forms:structuredClone(alternate.forms),
+      sourceSignature:MindexSongTiming.sourceSignature(alternate),lyricsFingerprint:MindexSongTiming.fingerprint(alternateSlides),
+      starts:[4,12],audioFingerprint:'alternate-audio-hash'};
+    const selected=presenterSlidesForService(sid).filter(s=>s.syncTimeline&&!s.syncTimeline.intro);
+    if(selected.length!==2||selected[0].syncTimeline.start!==4||!selected[0].text.includes('다른 가사'))throw Error('wrong version lyrics/timing selected');
+    item.version_id=version.id;
+    const restored=presenterSlidesForService(sid).filter(s=>s.syncTimeline&&!s.syncTimeline.intro);
+    if(restored.length!==2||restored[0].syncTimeline.start!==version.audio_set.starts[0]||restored[0].text.includes('다른 가사'))throw Error('version switch retained other profile');
+    song.versions.pop();
+    if(JSON.stringify(song)!==originalSong||JSON.stringify(item)!==originalItem)throw Error('version switching mutated authored content');
+    song.versions[0].forms[0].lyrics='changed';
     if(presenterSlidesForService(state.selectedServiceId).some(s=>s.syncTimeline))throw Error('stale DB lyrics');
    }''')
    print(engine,'PASS children DB save/retry/fresh-context playback, owner isolation, live gating and stale lyrics')
