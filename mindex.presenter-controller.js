@@ -2239,13 +2239,6 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
     memo.asset = { ...PUBLIC_WORSHIP_CLOSING_IMAGE_ASSET };
   }
   const memoElementType = serviceMemoElementType(memo);
-  const requestedOutputMode = normalizeServiceOutputMode(
-    memo.outputMode
-    || item.outputMode
-    || item.output_mode
-    || item.renderMode
-    || item.render_mode,
-  );
   const outputMode = serviceItemOutputMode(item, memo);
   const configuredAsset = normalizeServiceAsset(memo.asset || item.asset);
   if (isServicePreparationItemForEditor(item, memo)) {
@@ -2371,12 +2364,17 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   const customSlides = buildPresenterCustomSlides(item, section, index);
   if (customSlides.length) return withIntroAndSpecialTitle(customSlides);
 
-  const scoreOutput = !specialSongItem && (outputMode === "score" || requestedOutputMode === "score");
+  const scoreOutput = !specialSongItem && outputMode === "score";
   if (scoreOutput && !linkedSongId && !song && !templateOwnedScoreSong) {
     return [];
   }
   if (scoreOutput) {
     if (!song) return [];
+    if (presenterServiceItemScoreManifestPending(item, song, memo)) {
+      return withIntro([presenterMissingContentSlide(item, section, index, {
+        ...contentState, state: "loading", hasOutputContent: false, reason: "hymn_score_loading",
+      }, service)]);
+    }
     const scoreSlides = presenterScoreSlidesForServiceItem(item, section, index, song, version, displayText, memo, forms, formWarnings);
     const slides = scoreSlides;
     return withIntro(presenterSlidesWithSpecialSongTitle(item, section, slides, index, service));

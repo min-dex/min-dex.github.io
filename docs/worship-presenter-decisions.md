@@ -4611,3 +4611,19 @@ Chromium and WebKit for ten service types plus the old children's string-templat
 shape. Cases include authored section order, custom items, add/move/delete,
 cold-memory deletion, failed save/retry and input typed during save. These use
 isolated RPC doubles; no production service is edited by this verification.
+
+
+## Shared praise presentation mode and score loading ·2026-10-24
+
+Database-backed praise resolves its saved outputMode before an inconsistent legacy
+inputMode; missing outputMode derives from the explicit input mode. Direct lyrics,
+children audio and audio-praise retain their explicit source. Editor selection,
+score form inference, version filtering and rendering share this effective mode.
+A user mode-selection event sets both values from the new selection, retaining
+compatible versions and manually authored form sequences. Read/render never
+rewrites saved config, lyrics, versions, timing or worship rows.
+
+A hymn awaiting the shared score manifest shows the existing loading frame
+instead of an empty deck. Authored assets remain usable
+without waiting for that manifest. The established loader refreshes the same
+service when the manifest arrives. No production data migration is required.

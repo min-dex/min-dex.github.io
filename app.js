@@ -10983,21 +10983,15 @@ function serviceMemoInputMode(memo = {}, item = {}) {
 }
 
 function serviceItemUsesScoreInputMode(item = {}, memo = parseServiceItemMemo(item?.memo)) {
-  if (serviceMemoInputMode(memo, item) === "score_db") return true;
-  return normalizeServiceOutputMode(
-    memo.outputMode
-    || item.outputMode
-    || item.output_mode
-    || item.renderMode
-    || item.render_mode,
-  ) === "score";
+  return servicePraiseInputMode(item, memo) === "score_db";
 }
 
 function servicePraiseInputMode(item = {}, memo = parseServiceItemMemo(item?.memo), service = selectedServiceForEditor()) {
   const mode = serviceMemoInputMode(memo, item);
-  if (["score_db", "lyrics_db", "children_audio", "audio_praise", "manual_praise"].includes(mode)) return mode;
+  if (["children_audio", "audio_praise", "manual_praise"].includes(mode)) return mode;
   const outputMode = serviceItemOutputMode(item, memo);
   if (outputMode === "score") return "score_db";
+  if (outputMode === "lyrics") return "lyrics_db";
   if (specialSongUsesManualPraiseFallback(item, memo, service)) {
     return "manual_praise";
   }

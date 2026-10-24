@@ -262,21 +262,22 @@ function serviceItemOutputMode(item = {}, memo = parseServiceItemMemo(item?.memo
     || item.renderMode
     || item.render_mode,
   );
-  const flexibleOffering = typeof serviceItemUsesFlexibleOfferingSlot === "function"
-    && serviceItemUsesFlexibleOfferingSlot(item);
-  return flexibleOffering && mode === "score" && !presenterServiceItemUsesScoreInputMode(item, memo) ? "" : mode;
+  const inputMode = serviceMemoInputMode(memo, item);
+  if (servicePraiseUsesDirectLyrics(inputMode) || inputMode === "children_audio") return "lyrics";
+  return mode || (inputMode === "score_db" ? "score" : inputMode === "lyrics_db" ? "lyrics" : "");
 }
 
-function presenterServiceItemUsesScoreInputMode(item = {}, memo = {}) {
-  const raw = String(memo.inputMode || memo.input_mode || item.inputMode || item.input_mode || "").trim().toLowerCase();
-  if (["score_db", "score", "music_score", "sheet_music", "악보"].includes(raw)) return true;
-  return normalizeServiceOutputMode(
-    memo.outputMode
-    || item.outputMode
-    || item.output_mode
-    || item.renderMode
-    || item.render_mode,
-  ) === "score";
+function presenterServiceItemUsesScoreInputMode(item = {}, memo = parseServiceItemMemo(item?.memo)) {
+  return serviceItemUsesScoreInputMode(item, memo);
+}
+
+function presenterServiceItemScoreManifestPending(item, song, memo = parseServiceItemMemo(item?.memo)) {
+  if (!song || state.hymnScoreManifestLoaded || isSpecialSongServiceItem(item)
+    || !presenterServiceItemUsesScoreInputMode(item, memo)) return false;
+  const version = serviceItemLinkedVersion(item, song);
+  const asset = normalizeServiceAsset(memo.asset || item.asset);
+  return Boolean(normalizedHymnScoreNumber(song.hymn_no || version?.hymn_no || serviceItemDisplayText(item)))
+    && !asset.url && !presenterScoreImageSourcesFromAsset(asset, song, version, serviceItemDisplayText(item)).length;
 }
 
 function presenterScoreSlidesForServiceItem(

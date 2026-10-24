@@ -1,3 +1,5 @@
+import os
+os.environ["MINDEX_SMOKE_OFFLINE"]="1"
 """Actual mode-select events and editor layout; all DB access blocked."""
 import argparse
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
@@ -49,7 +51,7 @@ def main():
                             page.locator(selector).scroll_into_view_if_needed()
                             result=page.locator(selector).evaluate('''el=>{
                               const root=el.closest('.svc-edit-title-wrap');const box=root.getBoundingClientRect();
-                              const controls=[...root.querySelectorAll('input:not([type=hidden]),select,button')].filter(n=>n.getBoundingClientRect().width&&getComputedStyle(n).visibility!=='hidden');
+                              const controls=[...root.querySelectorAll('input:not([type=hidden]),select,button')].filter(n=>{const closed=n.closest('details:not([open])');return (!closed||closed.querySelector('summary')?.contains(n))&&n.getBoundingClientRect().width&&getComputedStyle(n).visibility!=='hidden'});
                               const errors=[];
                               for(const n of controls){const r=n.getBoundingClientRect();if(r.left<box.left-1||r.right>box.right+1)errors.push('overflow '+n.tagName);}
                               for(let i=0;i<controls.length;i++)for(let j=i+1;j<controls.length;j++){

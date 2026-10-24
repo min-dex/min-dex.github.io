@@ -464,7 +464,9 @@ function updateServiceItemField(field, options = {}) {
   if (key === "praise_input_mode") {
     const parsed = parseServiceItemMemo(item.memo);
     const service = state.services.find((candidate) => candidate.id === serviceId) || selectedServiceForEditor();
-    const inputMode = servicePraiseInputMode(item, { ...parsed, inputMode: field.value }, service);
+    const selectedMode = normalizeServiceInputMode(field.value);
+    const inputMode = SERVICE_PRAISE_INPUT_MODES.some(([mode]) => mode === selectedMode)
+      ? selectedMode : servicePraiseInputMode(item, parsed, service);
     if (servicePraiseUsesDirectLyrics(inputMode) && !parsed.slides.length) {
       // Capture the selected version and effective form sequence before unlinking.
       parsed.slides = serviceManualPraiseSeedSlides(item, service);

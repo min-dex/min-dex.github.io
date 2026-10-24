@@ -1,5 +1,6 @@
 """Slow hymn assets must not duplicate title frames or freeze a hovered board."""
 import os
+os.environ["MINDEX_SMOKE_OFFLINE"]="1"
 from smoke_app import launch_chromium,start_local_app_server,sync_playwright
 remote=os.environ.get('MINDEX_PENDING_HYMN_URL','').rstrip('/')
 server,url=(None,remote+'/') if remote else start_local_app_server()
@@ -27,13 +28,9 @@ try:
       publishPresenterState=()=>{};getServiceItems=()=>[item];getServiceOutputItems=()=>[item];
       window.pendingFixtureBefore=JSON.stringify({song,item});
       const slides=presenterSlidesForService(service.id).filter(s=>s.elementId===item.id);
-      const blank=slides.find(s=>s.autoTrailingBlank);
-      if(!blank)throw Error('missing trailing blank');
-      const duplicate=renderPresenterSlideFrame(blank,{noChromakey:true}).includes('presenter-slide--fullscreen-song-title');
-      const restored={...blank,songTitle:'old title',songTitleContent:{title:'old title'},fullscreenSongTitle:true};
-      if(renderPresenterSlideFrame(restored,{noChromakey:true}).includes('old title'))throw Error('restored blank title');
+      if(!slides.some(s=>s.loadingContent))throw Error('missing loading frame');
       render();
-      return {duplicate,types:slides.map(s=>s.type)};
+      return {types:slides.map(s=>s.type)};
     }''')
     print(engine,'pending asset',result,flush=True)
     thumb=page.locator('#servicePresenterControls .svc-slide-thumb').first
@@ -48,7 +45,13 @@ try:
     }''')
     page.wait_for_function("document.querySelector('#servicePresenterControls [data-element-type=\"image\"]') || document.querySelector('#servicePresenterControls .presenter-slide--score')",timeout=4000)
     page.screenshot(path='/tmp/mindex-pending-hymn-'+engine+'.png')
-    assert not result['duplicate'],'trailing blank rendered as duplicate song title'
+    assert page.evaluate("""()=>{
+      const blank=presenterSlidesForService('pending-hymn-fixture').find(s=>s.autoTrailingBlank);
+      if(!blank)throw Error('missing loaded trailing blank');
+      const html=renderPresenterSlideFrame(blank,{noChromakey:true});
+      const restored={...blank,songTitle:'old title',songTitleContent:{title:'old title'},fullscreenSongTitle:true};
+      return !html.includes('presenter-slide--fullscreen-song-title')&&!renderPresenterSlideFrame(restored,{noChromakey:true}).includes('old title');
+    }"""),'loaded trailing blank rendered as duplicate song title'
     assert page.evaluate("JSON.stringify({song:state.songs[0],item:state.serviceItems['pending-hymn-fixture'][0]})===window.pendingFixtureBefore")
     print(engine,'PASS blank stays blank and delayed score replaces stale board while pointer stays over thumbnail; records unchanged',flush=True)
    finally:browser.close()
