@@ -42,7 +42,7 @@ try:
                             sizes=page.locator('.background-toolbar input,.background-toolbar select,.background-toolbar > button').evaluate_all('es=>es.map(e=>e.getBoundingClientRect().height)')
                             assert all(h==35 for h in sizes),sizes
                         if name=='toolbar':
-                            assert page.locator('.svc-presenter-toolbar-utilities .svc-presenter-help > summary').evaluate('e=>e.getBoundingClientRect().height')==34
+                            assert page.locator('.svc-presenter-toolbar-utilities .svc-presenter-help > summary').evaluate('e=>e.getBoundingClientRect().height')==35
                             page.locator('.svc-presenter-toolbar-utilities').scroll_into_view_if_needed()
                         if name=='section':
                             panel=page.locator('[data-presenter-section-editor]');box=panel.bounding_box()

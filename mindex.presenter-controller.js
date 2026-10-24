@@ -1,23 +1,6 @@
 function runPresenterAction(action, serviceId = state.selectedServiceId, options = {}) {
   const p = state.presenter;
-  if (action === "return") {
-    const entry = presenterReturnTarget(serviceId);
-    if (!entry) return;
-    suspendServiceMusicAutoSync();
-    liveScriptureRequestSerial += 1;
-    p.pptxProgress = null;
-    p.jumpDraft = "";
-    p.safetyBlank = false;
-    p.liveScripture = { ...p.liveScripture, active: Boolean(entry.live), slide: entry.live ? structuredClone(entry.live) : null };
-    if (!entry.live) p.index = p.slides.findIndex(slide => slide.id === entry.id);
-    clearPresenterBoardSelection({ render: false });
-    syncSelectedServiceItemToPresenterSlide(serviceId);
-    syncServiceMusicWithPresenterContext(serviceId, { render: false });
-    publishPresenterState();
-    renderPresenterControlState(serviceId);
-    scrollPresenterOutlineToActive(serviceId);
-    return;
-  }
+  if (action === "return") { restorePresenterPreviousOutput(serviceId); return; }
   if (action === "fullscreen") {
     requestPresenterOutputFullscreenFromController();
     return;
@@ -381,7 +364,6 @@ function scrollPresenterOutlineToActive(serviceId = state.presenter.serviceId) {
 }
 
 function stopPresenterOutput(serviceId = state.presenter.serviceId) {
-  MindexPresenterHistory.reset();
   liveScriptureRequestSerial += 1;
   presenterLaunchRequestSerial += 1;
   state.presenter.outputGeneration += 1;
@@ -2687,8 +2669,3 @@ async function openServiceInPresenter(id) {
   await window.MINDEX_SERVICE_ENTRY?.enter(id);
 }
 
-
-function presenterReturnTarget(serviceId) {
-  const p = state.presenter;
-  return isPresenterOutputWindowOpen() && serviceId === p.serviceId ? MindexPresenterHistory.target(p) : null;
-}

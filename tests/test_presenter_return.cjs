@@ -7,7 +7,7 @@ const ctx=vm.createContext({state,structuredClone,isPresenterOutputWindowOpen:()
  suspendServiceMusicAutoSync(){},syncServiceMusicWithPresenterContext(){},clearPresenterBoardSelection(){},syncSelectedServiceItemToPresenterSlide(){},renderPresenterControlState(){},scrollPresenterOutlineToActive(){}});
 const source=fs.readFileSync('mindex.presenter-controller.js','utf8');
 vm.runInContext(fs.readFileSync('mindex.presenter-history.js','utf8'),ctx);
-vm.runInContext('let liveScriptureRequestSerial=0;'+source.slice(0,source.indexOf('let prepareNextServiceRequestSerial'))+source.slice(source.indexOf('function presenterReturnTarget')),ctx);
+vm.runInContext('let liveScriptureRequestSerial=0;'+source.slice(0,source.indexOf('let prepareNextServiceRequestSerial')),ctx);
 const h=ctx.MindexPresenterHistory;
 const publish=()=>h.record({...state.presenter,liveScripture:state.presenter.liveScripture});ctx.publishPresenterState=publish;
 assert.equal(ctx.presenterReturnTarget('s'),null);publish();assert.equal(ctx.presenterReturnTarget('s'),null);

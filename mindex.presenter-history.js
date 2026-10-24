@@ -24,3 +24,30 @@
     },
   };
 })(globalThis);
+
+// Controller adapters keep the history store independent of application state.
+
+function presenterReturnTarget(serviceId) {
+  const p = state.presenter;
+  return isPresenterOutputWindowOpen() && serviceId === p.serviceId ? MindexPresenterHistory.target(p) : null;
+}
+
+function restorePresenterPreviousOutput(serviceId) {
+    const p = state.presenter;
+    const entry = presenterReturnTarget(serviceId);
+    if (!entry) return;
+    suspendServiceMusicAutoSync();
+    liveScriptureRequestSerial += 1;
+    p.pptxProgress = null;
+    p.jumpDraft = "";
+    p.safetyBlank = false;
+    p.liveScripture = { ...p.liveScripture, active: Boolean(entry.live), slide: entry.live ? structuredClone(entry.live) : null };
+    if (!entry.live) p.index = p.slides.findIndex(slide => slide.id === entry.id);
+    clearPresenterBoardSelection({ render: false });
+    syncSelectedServiceItemToPresenterSlide(serviceId);
+    syncServiceMusicWithPresenterContext(serviceId, { render: false });
+    publishPresenterState();
+    renderPresenterControlState(serviceId);
+    scrollPresenterOutlineToActive(serviceId);
+    return;
+  }

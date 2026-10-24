@@ -346,3 +346,10 @@ The upgrade marker is removed after readiness. Normal HTML does not reload.
 all five asset error/retry cases, and failed refresh before connection/save.
 
 Shared output-window/heartbeat status queries stay in app.js because later peer modules read them at load time. They remain available even while a retained HTML shell is being refreshed; their behavior is unchanged.
+
+
+Shared input/presenter integration ·2026-10-24: supplemental authored-text fitting
+is owned once by presenter-board alongside mini-preview composition and invoked
+by the shared output fit path. Reallocate30 unused controller lines to the board
+owner (2670/1730); keep the combined extracted-owner ceiling6550 and add an
+explicit aggregate ceiling check. Core/function/coupling limits are unchanged.
