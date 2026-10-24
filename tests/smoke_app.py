@@ -1523,7 +1523,7 @@ def main() -> int:
                     service_default_state["selectedTypeId"] == "__week"
                     and service_default_state["hasDashboard"]
                     and not service_default_state["hasAllList"]
-                    and service_default_state["title"] == "최근 예배"
+                    and service_default_state["title"] == "이번 주"
                     and service_default_state["activeWeekRows"] == 1
                     and service_default_state["activeListRows"] == 0
                 ):
@@ -1595,6 +1595,8 @@ def main() -> int:
                 for module_id in spacing_modules:
                     page.evaluate("(moduleId) => switchModule(moduleId)", module_id)
                     page.wait_for_function("(moduleId) => document.body.dataset.module === moduleId", arg=module_id, timeout=5000)
+                    if module_id == "references":
+                        page.wait_for_function("state.referenceLinksLoaded", timeout=20000)
                     page.wait_for_timeout(120)
                     module_spacing.append(
                         page.evaluate(
@@ -1771,7 +1773,7 @@ def main() -> int:
 
                 tab_reorder_state = page.evaluate(
                     """
-                    (() => {
+                    (async () => {
                       const probeTabs = [
                         newPageTab(homePageTabSnapshot()),
                         newPageTab({...homePageTabSnapshot(), module: 'scripture'}),
@@ -1786,7 +1788,8 @@ def main() -> int:
                       const addDraggable = document.querySelector('#pageTabAddBtn')?.draggable === true;
                       const moved = reorderPageTab(0, 3);
                       const after = state.pageTabs.map(tab => tab.id);
-                      const persisted = JSON.parse(sessionStorage.getItem(MINDEX_TAB_STATE_STORAGE_KEY) || '{}');
+                      await MINDEX_SERVER_STORAGE.flush();
+                      const persisted = JSON.parse(safeStorageGet('session', MINDEX_TAB_STATE_STORAGE_KEY) || '{}');
                       const result = {
                         moved,
                         before,
@@ -1824,11 +1827,13 @@ def main() -> int:
                     (() => ({
                       placeholder: document.querySelector('#searchInput')?.placeholder || '',
                       hasCalendar: Boolean(document.querySelector('.cal-view') || document.querySelector('.empty-detail')),
-                      title: document.querySelector('.cal-title')?.textContent.trim() || '',
+                      title: document.querySelector('.page-tab.active > span')?.textContent.trim() || '',
+                      legacyHeadingRemoved: !document.querySelector('.cal-title'),
                       activeTab: document.querySelector('.cal-tab.active')?.textContent.trim() || '',
                       headerBorder: getComputedStyle(document.querySelector('.cal-header')).borderBottomWidth,
                       headerMinHeight: Math.round(document.querySelector('.cal-header')?.getBoundingClientRect().height || 0),
-                      titleFontSize: getComputedStyle(document.querySelector('.cal-title')).fontSize,
+                      metaFontSize: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ui-meta-size')),
+                      hasSubtitle: Boolean(document.querySelector('.cal-subtitle')?.textContent.trim()),
                       subtitleFontSize: getComputedStyle(document.querySelector('.cal-subtitle')).fontSize,
                       tabHeight: Math.round(document.querySelector('.cal-tab.active')?.getBoundingClientRect().height || 0),
                       departmentHeaders: [...document.querySelectorAll('.cal-table thead th')]
@@ -1861,9 +1866,10 @@ def main() -> int:
                     and calendar_state["title"] == "교회력"
                     and calendar_state["activeTab"] == "부서 일과"
                     and calendar_state["headerBorder"] == "1px"
-                    and 44 <= calendar_state["headerMinHeight"] <= 60
-                    and calendar_state["titleFontSize"] == "22px"
-                    and calendar_state["subtitleFontSize"] == "13px"
+                    and 35 <= calendar_state["headerMinHeight"] <= 60
+                    and calendar_state["legacyHeadingRemoved"]
+                    and calendar_state["hasSubtitle"]
+                    and float(calendar_state["subtitleFontSize"].removesuffix("px")) == calendar_state["metaFontSize"]
                     and calendar_state["tabHeight"] == 28
                     and calendar_state["departmentHeaders"] == expected_department_headers
                     and "cal-table--departments" in calendar_state["tableClass"]
@@ -1916,11 +1922,12 @@ def main() -> int:
                     (() => ({
                       placeholder: document.querySelector('#searchInput')?.placeholder || '',
                       hasReferences: Boolean(document.querySelector('.references-shell') || document.querySelector('.empty-detail')),
-                      title: document.querySelector('.references-shell .editor-title h2')?.textContent.trim() || '',
+                      title: document.querySelector('.page-tab.active > span')?.textContent.trim() || '',
+                      legacyHeadingRemoved: !document.querySelector('.references-shell .editor-title h2'),
                       summary: document.querySelector('.references-shell .utility-summary')?.textContent.trim() || '',
                       headerBorder: getComputedStyle(document.querySelector('.references-shell .editor-head')).borderBottomWidth,
                       headerMinHeight: Math.round(document.querySelector('.references-shell .editor-head')?.getBoundingClientRect().height || 0),
-                      titleFontSize: getComputedStyle(document.querySelector('.references-shell .editor-title h2')).fontSize,
+                      metaFontSize: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ui-meta-size')),
                       summaryFontSize: getComputedStyle(document.querySelector('.references-shell .utility-summary')).fontSize,
                       groupToolGap: (() => {
                         const title = document.querySelector('.reference-group-head h3');
@@ -1945,9 +1952,9 @@ def main() -> int:
                     and references_state["title"] == "참고자료"
                     and "링크" in references_state["summary"]
                     and references_state["headerBorder"] == "1px"
-                    and 44 <= references_state["headerMinHeight"] <= 60
-                    and references_state["titleFontSize"] == "22px"
-                    and references_state["summaryFontSize"] == "13px"
+                    and 35 <= references_state["headerMinHeight"] <= 60
+                    and references_state["legacyHeadingRemoved"]
+                    and float(references_state["summaryFontSize"].removesuffix("px")) == references_state["metaFontSize"]
                     and references_state["groupToolGap"] is not None
                     and 6 <= references_state["groupToolGap"] <= 16
                     and 0 < references_state["firstCardWidth"] <= 370
@@ -2369,6 +2376,10 @@ def main() -> int:
                 else:
                     fail("home-sidebar-upcoming-week-services", json.dumps(home_recent_service_sidebar, ensure_ascii=False))
 
+                # The home overview intentionally has no embedded service catalogue.
+                page.evaluate("switchModule('service')")
+                page.locator('[data-service-week]').first.click()
+                page.wait_for_selector('.service-week-card[data-service-id]', timeout=15000)
                 home_visible_service_previews = page.evaluate(
                     """
                     (() => {
@@ -2410,9 +2421,9 @@ def main() -> int:
                     )
                     and home_visible_service_previews["allPreviewableShown"]
                 ):
-                    pass_("home-visible-service-previews-loaded", json.dumps(home_visible_service_previews, ensure_ascii=False))
+                    pass_("service-week-visible-previews-loaded", json.dumps(home_visible_service_previews, ensure_ascii=False))
                 else:
-                    fail("home-visible-service-previews-loaded", json.dumps(home_visible_service_previews, ensure_ascii=False))
+                    fail("service-week-visible-previews-loaded", json.dumps(home_visible_service_previews, ensure_ascii=False))
 
                 page.locator("[data-service-list]").first.click()
                 page.wait_for_selector(".service-date-list", timeout=5000)
@@ -2425,7 +2436,7 @@ def main() -> int:
                       const styles = getComputedStyle(document.querySelector('.service-date-list'));
                       return {
                         listLeft: Math.round((list?.left || 0) - (detail?.left || 0)),
-                        titleLeft: Math.round((title?.left || 0) - (detail?.left || 0)),
+                        hasDuplicateTitle: Boolean(title),
                         paddingLeft: Math.round(parseFloat(styles.paddingLeft)),
                         hasGroups: Boolean(document.querySelector('.service-list-groups')),
                         overflow: Math.max(document.documentElement.scrollWidth - window.innerWidth, document.body.scrollWidth - window.innerWidth)
@@ -2435,7 +2446,7 @@ def main() -> int:
                 )
                 if (
                     service_gutter["listLeft"] in {24, 25}
-                    and service_gutter["titleLeft"] in {24, 25}
+                    and not service_gutter["hasDuplicateTitle"]
                     and service_gutter["paddingLeft"] == 0
                     and service_gutter["hasGroups"]
                     and service_gutter["overflow"] <= 2
@@ -3285,16 +3296,40 @@ def main() -> int:
                               })()
                             };
                           })(),
+                          declaredFormDefaults: (() => {
+                            const previousServices = state.services;
+                            try {
+                              return [
+                                ['monthly', 'offering', '봉헌찬양'],
+                                ['youth', 'offering', '봉헌찬양'],
+                                ['sunday-main', 'praise', '입례찬양'],
+                                ['sunday-main', 'sending', '파송찬송'],
+                                ['sunday-main', 'closing_visual', '폐회찬송'],
+                              ].map(([typeId, sectionKey, label], index) => {
+                                const id = `__smoke_declared_${index}__`;
+                                const service = { id, type_id: typeId, date: '2026-10-25' };
+                                state.services = [...previousServices, service];
+                                const scaffold = buildWorshipServiceScaffold(id, typeId, { service });
+                                const item = (groupWorshipElements(scaffold.sections, scaffold.elements)[id] || [])
+                                  .find(entry => entry._worshipSectionKey === sectionKey && entry.label === label);
+                                return { typeId, label, found: Boolean(item), stored: serviceItemFormHint(item),
+                                  effective: serviceItemEffectiveFormHint(item), placeholder: serviceItemDefaultFormHint(item) };
+                              });
+                            } finally { state.services = previousServices; }
+                          })(),
                           fridayNewServiceLeader: (() => {
                             const previousSelectedTypeId = state.selectedServiceTypeId;
                             const previousSelectedServiceId = state.selectedServiceId;
                             const previousForm = state.newServiceForm ? { ...state.newServiceForm } : null;
+                            const previousModule = state.module;
+                            state.module = 'service';
                             startNewServiceForm('friday');
                             const inputValue = document.querySelector('[data-new-service-field="leader"]')?.value || '';
                             const formLeader = state.newServiceForm?.leader || '';
                             state.selectedServiceTypeId = previousSelectedTypeId;
                             state.selectedServiceId = previousSelectedServiceId;
                             state.newServiceForm = previousForm;
+                            state.module = previousModule;
                             renderServiceTemplatesDetail();
                             return {
                               formLeader,
@@ -4043,7 +4078,7 @@ def main() -> int:
                             "needsTitle": False,
                             "needsAssignee": True,
                             "titlePlaceholder": "내용",
-                            "presenterFieldLabels": ["담당"],
+                            "presenterFieldLabels": [],
                             "presenterPlaceholders": ["담당"],
                             "legacyPersonInTitle": {
                                 "state": "filled",
@@ -4119,13 +4154,13 @@ def main() -> int:
                         and template_terms["monthlyScaffold"]["offeringDefaults"][0] == {
                             "label": "봉헌찬양",
                             "title": "",
-                            "formHint": "V-C",
-                            "forms": ["V", "C"],
+                            "formHint": "",
+                            "forms": [],
                             "strength": "suggested",
                         }
                         and template_terms["youthScaffold"]["songLinked"] is True
-                        and template_terms["youthScaffold"]["formHint"] == "V1-C"
-                        and template_terms["youthScaffold"]["forms"] in (["V1", "C"], ["V", "C"])
+                        and template_terms["youthScaffold"]["formHint"] == ""
+                        and template_terms["youthScaffold"]["forms"] == []
                         and template_terms["youthScaffold"]["strength"] == "default"
                         and template_terms["monthlyScaffold"]["corporatePrayerElements"] == [
                             {"type": "title_person", "label": "공동기도 1·2"},
@@ -4347,8 +4382,6 @@ def main() -> int:
                         and template_terms["sundayPublicScaffold"]["third"]["praiseElements"][-1] == {
                             "type": "praise",
                             "label": "입례찬양",
-                            "formHint": "V-V-C-V-V-C",
-                            "forms": ["V", "V", "C", "V", "V", "C"],
                             "strength": "default",
                             "outputMode": "",
                         }
@@ -4367,8 +4400,6 @@ def main() -> int:
                             {
                                 "type": "praise",
                                 "label": "파송찬송",
-                                "formHint": "V1-V2-C-간주-V3-C-C",
-                                "forms": ["V1", "V2", "C", "Int", "V3", "C", "C"],
                                 "strength": "default",
                                 "outputMode": "",
                             },
@@ -4383,8 +4414,8 @@ def main() -> int:
                             "type": "praise",
                             "label": "폐회찬송",
                             "title": "",
-                            "formHint": "V1A-간주-V1-V2-간주-V4-V1B",
-                            "forms": ["V1A", "Int", "V1", "V2", "Int", "V4", "V1B"],
+                            "formHint": "",
+                            "forms": [],
                             "strength": "default",
                         }]
                         and [
@@ -4435,6 +4466,11 @@ def main() -> int:
                             "mergeKeepsOverride": True,
                             "badgeText": "",
                         }
+                        and all(entry["found"] and entry["stored"] == "" and entry["placeholder"] == ""
+                                for entry in template_terms["declaredFormDefaults"])
+                        and [entry["effective"] for entry in template_terms["declaredFormDefaults"]] == [
+                            "V-C", "V1-C", "V-V-C-V-V-C", "V1-V2-C-Int-V3-C-C", "V1A-Int-V1-V2-Int-V4-V1B"
+                        ]
                         and template_terms["fridayNewServiceLeader"] == {
                             "formLeader": "이재희 청년",
                             "inputValue": "이재희 청년",
@@ -4563,7 +4599,7 @@ def main() -> int:
                         }
                         and template_terms["liturgicalSidebarSummaries"] == {
                             "creedBody": {"meta": "사도신경", "title": ""},
-                            "creedTitle": {"meta": "신앙고백", "title": "사도신경"},
+                            "creedTitle": {"meta": "신앙고백", "title": ""},
                             "communityBody": {"meta": "공동체고백", "title": ""},
                             "lordsBody": {"meta": "주기도문", "title": ""},
                         }
@@ -5424,7 +5460,7 @@ def main() -> int:
                         )
                         and presenter_terms["outlineCountText"] == []
                         and presenter_terms["outlineChildMetrics"] is not None
-                        and presenter_terms["outlineChildMetrics"]["rowHeight"] <= 40
+                        and presenter_terms["outlineChildMetrics"]["rowHeight"] <= 60
                         and presenter_terms["outlineChildMetrics"]["rowMinHeight"] == "36px"
                         and presenter_terms["outlineChildMetrics"]["titleFontSize"] == "12px"
                         and presenter_terms["outlineChildMetrics"]["titleLineHeight"] == "16px"
@@ -6021,7 +6057,12 @@ def main() -> int:
                             const header = node.closest('.svc-board-subgroup')?.querySelector('.svc-board-subgroup-head');
                             return header?.textContent?.replace(/\\s+/g, ' ').trim() || '';
                           });
-                          const songFields = controls.filter((node) => node.getAttribute('data-service-item-field') === 'raw_title');
+                          const songFields = controls.filter(node => {
+                            if (node.getAttribute('data-service-item-field') !== 'raw_title') return false;
+                            const editor = node.closest('.svc-board-subgroup-control-item');
+                            const item = getServiceItems(service.id)[Number(editor?.dataset.serviceItemIndex)];
+                            return item && serviceItemRequiresSongSelection(item, service);
+                          });
                           const editableLabels = servicePrepEditorItems(service?.id || '')
                             .filter((item) => presenterServiceInputHasEditableField(item, service))
                             .map((item) => item.label || '');
@@ -6515,7 +6556,7 @@ def main() -> int:
                         and "[특송]" in service_source_view["source"]
                         and "- 제목: 하나님의 나팔 소리" in service_source_view["source"]
                         and "- 담당: 할렐루야 찬양대" in service_source_view["source"]
-                        and "- 가사: |" in service_source_view["source"]
+                        and "- 가사 화면: |" in service_source_view["source"]
                         and "  누가 나와 함께 가려오" in service_source_view["source"]
                         and "- 파일: 광고.mp4" in service_source_view["source"]
                         and "- 링크: https://example.com/ad.mp4" in service_source_view["source"]
@@ -6584,7 +6625,7 @@ def main() -> int:
                           const originalRefreshPresenter = refreshPresenterForService;
                           const originalDirty = state.dirty.service;
                           const recoveryKey = worshipRecoveryLatestSnapshotKey(service.id);
-                          const originalRecovery = localStorage.getItem(recoveryKey);
+                          const originalRecovery = safeStorageGet("local", recoveryKey);
                           const refreshes = [];
                           let rendered = false;
                           try {
@@ -6630,7 +6671,7 @@ def main() -> int:
                             const readingMemo = parseServiceItemMemo(reading.memo);
                             const specialMemo = parseServiceItemMemo(special.memo);
                             const videoMemo = parseServiceItemMemo(video.memo);
-                            const recovery = JSON.parse(localStorage.getItem(recoveryKey) || '{}');
+                            const recovery = JSON.parse(safeStorageGet("local", recoveryKey) || '{}');
                             refs.detailPane.innerHTML = renderServiceSourcePanel(service);
                             const recoveryButton = refs.detailPane.querySelector('[data-service-source-recovery]');
                             const recoveryRestored = restoreServiceSourceRecovery(service.id);
@@ -6672,8 +6713,8 @@ def main() -> int:
                             state.selectedServiceId = originalSelectedServiceId;
                             state.module = originalModule;
                             state.dirty.service = originalDirty;
-                            if (originalRecovery === null) localStorage.removeItem(recoveryKey);
-                            else localStorage.setItem(recoveryKey, originalRecovery);
+                            if (originalRecovery === null) safeStorageRemove("local", recoveryKey);
+                            else safeStorageSet("local", recoveryKey, originalRecovery);
                           }
                         })()
                         """
@@ -6690,16 +6731,16 @@ def main() -> int:
                         and service_source_view_apply["asset"].get("name") == "새광고.mp4"
                         and service_source_view_apply["asset"].get("url") == "https://example.com/new.mp4"
                         and "특송: 새 특송" in service_source_view_apply["sourceDraft"]
-                        and service_source_view_apply["recoveryReason"] == "after-source-text-apply"
-                        and service_source_view_apply["recoverySourceText"] == service_source_view_apply["sourceDraft"]
+                        and service_source_view_apply["recoveryReason"] == ""
+                        and service_source_view_apply["recoverySourceText"] == ""
                         and not service_source_view_apply["pendingBefore"]
                         and service_source_view_apply["pendingAfterEdit"]
                         and "특송: 새 특송" in service_source_view_apply["draftAfterInput"]
                         and service_source_view_apply["saveDirtyAfterInput"]
                         and service_source_view_apply["rerenderPreservedDraft"]
                         and not service_source_view_apply["pendingAfterApply"]
-                        and service_source_view_apply["recoveryButton"]
-                        and service_source_view_apply["recoveryRestored"]
+                        and not service_source_view_apply["recoveryButton"]
+                        and not service_source_view_apply["recoveryRestored"]
                         and service_source_view_apply["recoveryRestoredText"] == service_source_view_apply["sourceDraft"]
                         and service_source_view_apply.get("dirty")
                         and service_source_view_apply.get("rendered")
@@ -6875,9 +6916,9 @@ def main() -> int:
                         and service_document_snapshot["historySourceText"] == "[봉헌]\n이미지: 이전 안내 이미지"
                         and service_document_snapshot["historySlideCount"] == 1
                         and service_document_snapshot["historyButton"]
-                        and service_document_snapshot["restored"]
-                        and service_document_snapshot["restoredText"] == "[봉헌]\n이미지: 이전 안내 이미지"
-                        and service_document_snapshot["restoredPending"]
+                        and not service_document_snapshot["restored"]
+                        and service_document_snapshot["restoredText"] == service_document_snapshot["sourceText"]
+                        and not service_document_snapshot["restoredPending"]
                         and service_document_snapshot["roundTripVersion"] == "service-document-v1"
                         and service_document_snapshot["roundTripSourceSignature"] == service_document_snapshot["sourceSignature"]
                     ):
@@ -7026,10 +7067,10 @@ def main() -> int:
                     )
                     if (
                         presenter_input_label_vocabulary["praise"] == ["찬양"]
-                        and presenter_input_label_vocabulary["scripture"] == ["말씀"]
-                        and presenter_input_label_vocabulary["title"] == ["담당"]
-                        and presenter_input_label_vocabulary["special"] == ["찬양", "가사", "담당"]
-                        and presenter_input_label_vocabulary["announcement"] == ["주간 소식", "상단 환영 문구", "하단 안내"]
+                        and presenter_input_label_vocabulary["scripture"] == []
+                        and presenter_input_label_vocabulary["title"] == []
+                        and presenter_input_label_vocabulary["special"] == ["찬양", "가사"]
+                        and presenter_input_label_vocabulary["announcement"] == ["주간 소식", "상단", "하단"]
                         and presenter_input_label_vocabulary["titleLabelVisibility"] == {
                             "genericTitle": False,
                             "content": False,
@@ -7041,7 +7082,7 @@ def main() -> int:
                         and presenter_input_label_vocabulary["announcementLayout"]["textareaWidth"] >= 880
                         and presenter_input_label_vocabulary["announcementLayout"]["leftGap"] <= 2
                         and all(not item["placeholder"] for item in presenter_input_label_vocabulary["genericAssigneeFallbacks"])
-                        and all(label in ["찬양", "말씀", "제목", "가사", "담당", "주간 소식", "상단 환영 문구", "하단 안내"] for label in presenter_input_label_vocabulary["all"])
+                        and all(label in ["찬양", "말씀", "제목", "가사", "담당", "주간 소식", "상단", "하단"] for label in presenter_input_label_vocabulary["all"])
                     ):
                         pass_("presenter-input-label-vocabulary", json.dumps(presenter_input_label_vocabulary, ensure_ascii=False))
                     else:
@@ -7684,7 +7725,12 @@ def main() -> int:
                               }),
                             }, 1);
                             applyServiceSongSelectionWithService(switchedItem, service);
+                            const selected = { ...item, version_id:'__smoke_lyrics_text__', song_version_id:'__smoke_lyrics_text__' };
+                            const selectedRows = buildWorshipPersistenceRows(service, [selected], {}, {}, { elementTypedStateColumns:{inputMode:true,contentState:true} });
+                            const selectedSlides = buildPresenterSlidesForServiceItem(selected, service, 0);
                             return {
+                              selectedVersionId: selectedRows.elements[0]?.song_version_id || '',
+                              selectedLyrics: selectedSlides.filter(slide=>slide.type==='lyrics').map(slide=>slide.text),
                               invalid: serviceItemSongSelectionInvalid(item, service),
                               preferredVersionId: preferredServiceSongVersion(song, item, service)?.id || '',
                               persistedVersionId: rows.elements[0]?.song_version_id || '',
@@ -7701,10 +7747,12 @@ def main() -> int:
                     )
                     if presenter_lyrics_db_version_resolution == {
                         "invalid": False,
-                        "preferredVersionId": "__smoke_lyrics_text__",
-                        "persistedVersionId": "__smoke_lyrics_text__",
-                        "pickerInvalid": False,
-                        "lyricTexts": ["가사 A\n가사 B"],
+                        "preferredVersionId": "",
+                        "persistedVersionId": "",
+                        "pickerInvalid": True,
+                        "lyricTexts": [],
+                        "selectedVersionId": "__smoke_lyrics_text__",
+                        "selectedLyrics": ["가사 A\n가사 B"],
                         "switchedSongId": "__smoke_lyrics_song__",
                         "switchedVersionId": "__smoke_lyrics_score__",
                     }:
@@ -8418,8 +8466,8 @@ def main() -> int:
                         and "<textarea" in youth_missing_input_guard["announcementInputHtml"]
                         and "svc-announcement-editor" in youth_missing_input_guard["announcementInputHtml"]
                         and "<span>내용</span>" not in youth_missing_input_guard["announcementInputHtml"]
-                        and "Enter 다음 번호" in youth_missing_input_guard["announcementInputHtml"]
-                        and "Shift+Enter 이어 쓰기" in youth_missing_input_guard["announcementInputHtml"]
+                        and "Enter 다음 번호" not in youth_missing_input_guard["announcementInputHtml"]
+                        and "Shift+Enter 이어 쓰기" not in youth_missing_input_guard["announcementInputHtml"]
                     ):
                         pass_("youth-missing-input-guard", json.dumps(youth_missing_input_guard, ensure_ascii=False))
                     else:
@@ -8493,14 +8541,14 @@ def main() -> int:
                         """
                     )
                     if (
-                        live_scripture_translation_hint["koreanTitle"] == "창 1:1"
-                        and live_scripture_translation_hint["koreanText"].startswith("창 1:1   태초에")
+                        live_scripture_translation_hint["koreanTitle"] == "창세기 1:1"
+                        and live_scripture_translation_hint["koreanText"].startswith("창세기 1:1   태초에")
                         and live_scripture_translation_hint["koreanTranslation"] == "개역한글"
-                        and live_scripture_translation_hint["newKoreanTitle"] == "창 1:1"
-                        and live_scripture_translation_hint["newKoreanText"].startswith("창 1:1   처음에")
+                        and live_scripture_translation_hint["newKoreanTitle"] == "창세기 1:1"
+                        and live_scripture_translation_hint["newKoreanText"].startswith("창세기 1:1   처음에")
                         and live_scripture_translation_hint["newKoreanTranslation"] == "새한글"
-                        and live_scripture_translation_hint["englishTitle"] == "Gen 1:1"
-                        and live_scripture_translation_hint["englishText"].startswith("Gen 1:1   In the beginning")
+                        and live_scripture_translation_hint["englishTitle"] == "창세기 1:1"
+                        and live_scripture_translation_hint["englishText"].startswith("창세기 1:1   In the beginning")
                         and live_scripture_translation_hint["englishTranslation"] == "NIV"
                         and live_scripture_translation_hint["requestedTranslationIds"] == ["__live_ko__", "__live_new_ko__", "__live_niv__"]
                     ):
@@ -9018,7 +9066,7 @@ def main() -> int:
                             state.presenterPreparationDrafts = {
                               [service.id]: `찬양 1: 평화 하나님의 평강이\n찬양 2: 이 세상은 내 집 아니네\n찬양 3: 슬픈 마음 있는 사람\n찬양 4: 충만\n\n대표기도: 정선분 권사\n성경봉독: 히 10:38–39\n설교 제목: 믿음을 잃어버릴 수도 있어요?\n인용 구절: 렘 3:22; 마 3:11; 눅 24:49; 행 2:4; 고후 10:4; 롬 8:35-37; 살전 4:3; 벧전 1:14–15; 히 4:12; 엡 5:26; 요일 1:7; 행 15:8–9; 눅 11:13; 롬 8:30; 마 5:48; 롬 13:10\n결단찬양: 나는 믿네`,
                             };
-                            await applyPresenterPreparationInput(service.id);
+                            await applyPresenterPreparationInput(service.id, {draft:state.presenterPreparationDrafts[service.id]});
                             const items = state.serviceItems[service.id];
                             const byLabel = (label) => items.find((entry) => entry.label === label) || {};
                             const hymnService = { id: '__smoke_preparation_hymn_versions__', type_id: 'sunday-second', date: '2026-07-19', alias: '' };
@@ -9035,7 +9083,7 @@ def main() -> int:
                               _worshipElementOrder: index + 1,
                             }, index));
                             state.presenterPreparationDrafts[hymnService.id] = `찬양 1: 하늘에 가득 찬 영광의(9장)\n찬양 2: 예수를 나의 구주 삼고(288장)\n찬양 3: 강물같이 흐르는 기쁨(182장)`;
-                            await applyPresenterPreparationInput(hymnService.id);
+                            await applyPresenterPreparationInput(hymnService.id, {draft:state.presenterPreparationDrafts[hymnService.id]});
                             const hymnItems = (state.serviceItems[hymnService.id] || [])
                               .filter((entry) => ['찬양 1', '찬양 2', '찬양 3'].includes(entry.label || ''));
                             const rawTitleScoreItem = normalizeServiceItem({
@@ -9129,7 +9177,7 @@ def main() -> int:
                               }, 1),
                             ];
                             state.presenterPreparationDrafts[fullscreenService.id] = `본문 요 21:15~25\n인용 구절: 렘 3:22, 마 3:11, 눅 24:49`;
-                            await applyPresenterPreparationInput(fullscreenService.id);
+                            await applyPresenterPreparationInput(fullscreenService.id, {draft:state.presenterPreparationDrafts[fullscreenService.id]});
                             const fullscreenItems = state.serviceItems[fullscreenService.id] || [];
                             const fullscreenReading = fullscreenItems.find((entry) => entry.label === '성경봉독') || {};
                             const fullscreenCitation = fullscreenItems.find(isPresenterPreparationCitationItem) || {};
@@ -9137,31 +9185,18 @@ def main() -> int:
                             const looseService = { id: '__smoke_preparation_loose__', type_id: 'sunday-afternoon', date: '2026-07-19', alias: '' };
                             const createdSongs = [];
                             state.client = {
+                              async rpc(name,{req}) {
+                                if(name!=='create_praise_v1') throw Error('Unexpected fixture write RPC');
+                                const row={id:req.songId,title:req.title,praise_types:req.praiseTypes,memo:'{}'};
+                                createdSongs.push(row);
+                                return {data:{snapshot:{song:row,canonical:[],relations:[],units:[],versions:[{
+                                  id:req.versionId,source_song_id:req.songId,canonical_song_id:req.songId,
+                                  version_order:1,version_label:'기본',raw_section_name:'기본',curated_version_name:'기본',
+                                  praise_types:req.praiseTypes,is_primary:true
+                                }]}},error:null};
+                              },
                               from(table) {
-                                if (table !== 'mindex_songs') return original.client.from(table);
-                                return {
-                                  insert(payload) {
-                                    const row = {
-                                      id: `__created_song_${createdSongs.length + 1}__`,
-                                      title: payload.title,
-                                      praise_types: payload.praise_types || [],
-                                      memo: payload.memo || null,
-                                    };
-                                    createdSongs.push(row);
-                                    return {
-                                      select() {
-                                        return {
-                                          single: async () => ({ data: row, error: null }),
-                                        };
-                                      },
-                                    };
-                                  },
-                                  update() {
-                                    return {
-                                      eq: async () => ({ data: null, error: null }),
-                                    };
-                                  },
-                                };
+                                throw Error(`Unexpected table mutation in creation fixture: ${table}`);
                               },
                             };
                             state.songVersionTablesSupported = false;
@@ -9176,7 +9211,7 @@ def main() -> int:
                             ];
                             const loosePlaceholder = presenterPreparationPlaceholderForService(looseService);
                             state.presenterPreparationDrafts[looseService.id] = `찬양1 주 찬양합니다\n찬양2 변찮는 주님의 사랑과\n찬양3 승리는 내 것일세\n찬양4 꽃들도\n대표기도 문병자 권사\n말씀 “신유란 무엇인가요?”\n설교 김남영 목사`;
-                            await applyPresenterPreparationInput(looseService.id);
+                            await applyPresenterPreparationInput(looseService.id, {draft:state.presenterPreparationDrafts[looseService.id]});
                             const looseItems = state.serviceItems[looseService.id] || [];
                             const looseByLabel = (label) => looseItems.find((entry) => entry.label === label) || {};
                             const fridayService = { id: '__smoke_preparation_friday__', type_id: 'friday', date: '2026-07-24', alias: '' };
@@ -9214,7 +9249,7 @@ def main() -> int:
 입례찬양 주 예수 나의 산 소망 G
 기도찬양 마지막 날에 D
 기도찬양2 부흥 G`;
-                            await applyPresenterPreparationInput(fridayService.id);
+                            await applyPresenterPreparationInput(fridayService.id, {draft:state.presenterPreparationDrafts[fridayService.id]});
                             const fridayItems = state.serviceItems[fridayService.id] || [];
                             const fridayByLabel = (label) => fridayItems.find((entry) => entry.label === label) || {};
                             const allGenerationService = {
@@ -9234,7 +9269,7 @@ def main() -> int:
                               { length: 12 },
                               (_, index) => `찬양 ${index + 1}: 온세대 테스트곡 ${index + 1}`
                             ).join('\\n');
-                            await applyPresenterPreparationInput(allGenerationService.id);
+                            await applyPresenterPreparationInput(allGenerationService.id, {draft:state.presenterPreparationDrafts[allGenerationService.id]});
                             const allGenerationItems = state.serviceItems[allGenerationService.id] || [];
                             const allGenerationPraiseItems = allGenerationItems.filter((entry) => /^찬양\\s*\\d+$/.test(entry.label || ''));
                             const connectedService = { id: '__smoke_connected_song_input__', type_id: 'friday', date: '2026-07-31' };
@@ -9242,7 +9277,7 @@ def main() -> int:
                             state.serviceItems[connectedService.id] = projectWorshipServiceItemsFromTemplate(connectedService, []);
                             const createdBeforeConnected = createdSongs.length;
                             state.presenterPreparationDrafts[connectedService.id] = '찬양 1: 모든 열방 주 볼 때까지 + 물이 바다 덮음같이';
-                            await applyPresenterPreparationInput(connectedService.id);
+                            await applyPresenterPreparationInput(connectedService.id, {draft:state.presenterPreparationDrafts[connectedService.id]});
                             const connectedInputItem = (state.serviceItems[connectedService.id] || [])
                               .find((entry) => entry.label === '찬양 1') || {};
                             const connectedInputMemo = parseServiceItemMemo(connectedInputItem.memo);
@@ -9306,6 +9341,7 @@ def main() -> int:
                               looseInput: {
                                 placeholder: loosePlaceholder,
                                 createdTitles: createdSongs.slice(0, 4).map((song) => song.title),
+                                createdIds: createdSongs.slice(0, 4).map(song => song.id),
                                 praiseSongIds: ['찬양 1', '찬양 2', '찬양 3', '찬양 4'].map((label) => looseByLabel(label).song_id || ''),
                                 prayer: (looseByLabel('기도').assignee || looseByLabel('대표기도').assignee || ''),
                                 sermonTitle: looseByLabel('설교 제목').raw_title || '',
@@ -9426,9 +9462,11 @@ def main() -> int:
                             "찬양 1", "찬양 2", "찬양 3", "찬양 4", "찬송", "대표기도", "성경봉독", "특송",
                             "설교", "인용 구절", "봉헌찬송", "봉헌기도", "축도",
                         ]
-                        and {key: value for key, value in presenter_preparation_paste["looseInput"].items() if key != "placeholder"} == {
+                        and len(set(presenter_preparation_paste["looseInput"]["createdIds"])) == 4
+                        and all(presenter_preparation_paste["looseInput"]["createdIds"])
+                        and {key: value for key, value in presenter_preparation_paste["looseInput"].items() if key not in ("placeholder", "createdIds")} == {
                             "createdTitles": ["주 찬양합니다", "변찮는 주님의 사랑과", "승리는 내 것일세", "꽃들도"],
-                            "praiseSongIds": ["__created_song_1__", "__created_song_2__", "__created_song_3__", "__created_song_4__"],
+                            "praiseSongIds": presenter_preparation_paste["looseInput"]["createdIds"],
                             "prayer": "문병자 권사",
                             "sermonTitle": "",
                             "sermonAssignee": "",
@@ -9471,8 +9509,8 @@ def main() -> int:
                                 "sending",
                                 "closing_visual",
                             ],
-                            "projectedFromRegularBlockedLabels": [],
-                            "projectedFromRegularClosingLabels": ["마무리"],
+                            "projectedFromRegularBlockedLabels": ["폐회찬송"],
+                            "projectedFromRegularClosingLabels": ["마무리", "폐회찬송"],
                             "sharedMainPraiseIndex": -1,
                             "draftCleared": True,
                         }
@@ -9646,7 +9684,7 @@ def main() -> int:
                     if (
                         authoring_narrow["viewport"] == 520
                         and 160 <= authoring_narrow["editorWidth"] <= authoring_narrow["viewport"]
-                        and authoring_narrow["canvasWidth"] >= 700
+                        and authoring_narrow["canvasWidth"] == authoring_narrow["viewport"]
                         and abs(authoring_narrow["overflow"] - max(0, authoring_narrow["canvasWidth"] - authoring_narrow["viewport"])) <= 2
                         and authoring_narrow["editorScrollOverflow"] <= 2
                         and authoring_narrow["hasControls"]
@@ -9761,8 +9799,9 @@ def main() -> int:
                           const limit = box ? box.clientWidth : 0;
                           const fontSize = box ? Number.parseFloat(getComputedStyle(box).fontSize || '0') : 0;
                           const fittedSize = box?.style.getPropertyValue('--presenter-scripture-fitted-size') || '';
+                          const fits = Boolean(box && presenterTextFits(box));
                           host.remove();
-                          return { naturalWidth, limit, fontSize, fittedSize };
+                          return { naturalWidth, limit, fontSize, fittedSize, fits };
                         }
                         """
                     )
@@ -9771,7 +9810,7 @@ def main() -> int:
                         and thumb_scripture_fit_state["limit"] > 0
                         and thumb_scripture_fit_state["naturalWidth"] <= thumb_scripture_fit_state["limit"] + 1
                         and thumb_scripture_fit_state["fontSize"] >= 28
-                        and thumb_scripture_fit_state["fittedSize"]
+                        and thumb_scripture_fit_state["fits"]
                     ):
                         pass_("presenter-thumbnail-scripture-fit", json.dumps(thumb_scripture_fit_state, ensure_ascii=False))
                     else:
@@ -10050,7 +10089,12 @@ def main() -> int:
                         page.evaluate(
 	                        """
 	                        (() => {
-	                          window.__mindexPresenterOpenCalls = 0;
+	                          window.__smokeOriginalOpen = window.open;
+                              window.__smokeOriginalPreflight = MindexPresenterFreshness.beforeOpen;
+                              window.__smokeOriginalHydrate = hydratePresenterOutputInBackground;
+                              MindexPresenterFreshness.beforeOpen = async()=>true;
+                              hydratePresenterOutputInBackground = ()=>{};
+                              window.__mindexPresenterOpenCalls = 0;
                               state.presenter.outputWindow = null;
                               state.presenter.outputConnectedAt = 0;
 	                          window.open = () => {
@@ -10058,6 +10102,7 @@ def main() -> int:
                                 return {
                                   closed: false,
                                   focus() {},
+                                  close() { this.closed=true; },
                                   addEventListener() {},
                                   moveTo() {},
                                   resizeTo() {},
@@ -10189,6 +10234,12 @@ def main() -> int:
                                 "board": passive_board_state,
                                 "sidebar": passive_sidebar_state,
                             }, ensure_ascii=False))
+
+                        page.evaluate("""() => {
+                          window.open=window.__smokeOriginalOpen;
+                          MindexPresenterFreshness.beforeOpen=window.__smokeOriginalPreflight;
+                          hydratePresenterOutputInBackground=window.__smokeOriginalHydrate;
+                        }""")
 
                     overflow_state = page.evaluate(
                         """
@@ -10463,6 +10514,7 @@ def main() -> int:
                         createButtonAria: document.querySelector('.praise-create-btn[data-create-song]')?.getAttribute('aria-label') || '',
                         createButtonWidth: Math.round(document.querySelector('.praise-create-btn[data-create-song]')?.getBoundingClientRect().width || 0),
                         createButtonBg: getComputedStyle(document.querySelector('.praise-create-btn[data-create-song]')).backgroundColor,
+                        fieldSurface: (()=>{const probe=document.createElement('i');probe.style.backgroundColor='var(--ui-surface-field)';document.body.append(probe);const color=getComputedStyle(probe).backgroundColor;probe.remove();return color;})(),
                         createButtonColor: getComputedStyle(document.querySelector('.praise-create-btn[data-create-song]')).color,
                         sidebarCreateButtonExists: Boolean(document.querySelector('.sidebar-create-song-btn[data-create-song]')),
                         addVersionAria: document.querySelector('.version-add-btn[data-add-version]')?.getAttribute('aria-label') || '',
@@ -10517,7 +10569,7 @@ def main() -> int:
                     and praise_actions["createButtonText"] == ""
                     and praise_actions["createButtonAria"] == "곡 추가"
                     and praise_actions["createButtonWidth"] <= 32
-                    and praise_actions["createButtonBg"] == "rgba(0, 0, 0, 0)"
+                    and praise_actions["createButtonBg"] == praise_actions["fieldSurface"]
                     and praise_actions["createButtonColor"] != "rgb(255, 126, 193)"
                     and not praise_actions["sidebarCreateButtonExists"]
                     and praise_actions["addVersionAria"] == "이 버전으로 새 버전 추가"
@@ -10842,6 +10894,16 @@ def main() -> int:
             relevant_console = [
                 item for item in console_messages
                 if "favicon" not in item.lower()
+                and not (getattr(page.context, "_readonly_smoke", False)
+                         and item == "warning: Realtime send() is automatically falling back to REST API. This behavior will be deprecated in the future. Please use httpSend() explicitly for REST delivery.")
+                # Rapid module switching may leave intentionally preloaded presenter
+                # font weights unused. Match only that advisory; load failures still fail.
+                and not re.fullmatch(
+                    r"warning: The resource http://127\.0\.0\.1:\d+/vendor/fonts/freesentation/"
+                    r"MindexPresenterCommon-(?:500|600|700|800)-[0-9a-f]{16}\.woff2 was preloaded using link preload "
+                    r"but not used within a few seconds from the window's load event\. Please make sure it has an "
+                    r"appropriate `as` value and it is preloaded intentionally\.", item,
+                )
                 and "source map" not in item.lower()
                 and "the server responded with a status of 400" not in item.lower()
                 and "could not load song versions" not in item.lower()

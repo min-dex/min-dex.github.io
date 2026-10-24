@@ -1508,3 +1508,14 @@ strong800, CSS only with current decisions preserved. Based on presenter-return
 main bf30a91d, preserving all remote/history/citation assets and behavior.
 Candidate version20261024-readonly-desktop-ready. Final gate/publication and
 unsigned installer build evidence remain separate from scoped local checks.
+
+
+## Broad live smoke alignment ·2026-10-24
+
+Current UI, declared/inferred/manual forms, explicit version choice and output
+session transport are covered by the refreshed broad live suites. The guarded
+runner keeps startup state, output presence and broadcast bookkeeping entirely
+local; canonical production writes remain blocked. See
+`docs/code-organization.md` (Broad live suite alignment) for fixture boundaries,
+real source-preservation coverage and native-fullscreen limitations. Product
+runtime and operational data are unchanged by this test/helper-only update.

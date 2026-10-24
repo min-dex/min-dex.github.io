@@ -33,10 +33,12 @@ def guard(route, bookkeeping=None):
  req=route.request;p=urlsplit(req.url);method=req.method
  rpc=p.path.startswith('/rest/v1/rpc/')
  name=p.path.rsplit('/',1)[-1]
- if p.hostname==host and rpc and method=='POST' and bookkeeping is not None and name in ReadonlyBookkeeping.NAMES:
+ local_broadcast=p.path=='/realtime/v1/api/broadcast'
+ local_rpc=rpc and name in ReadonlyBookkeeping.NAMES
+ if p.hostname==host and method=='POST' and bookkeeping is not None and (local_rpc or local_broadcast):
   try:
-   data=bookkeeping.handle(name,req.post_data_json)
-   fixtures[name]+=1
+   data=bookkeeping.broadcast(req.post_data_json) if local_broadcast else bookkeeping.handle(name,req.post_data_json)
+   fixtures['isolated_broadcast' if local_broadcast else name]+=1
    route.fulfill(status=200,content_type='application/json',headers={'Access-Control-Allow-Origin':'*'},body=json.dumps(data))
   except ValueError:
    blocked['invalid bookkeeping request']+=1
