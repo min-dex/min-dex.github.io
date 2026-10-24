@@ -4573,6 +4573,6 @@ or output behavior changes.
 본문 유형·기존 항목 ID/입력/송폼 보존), `test_calendar_assignee_creation.cjs`
 (부서별 담당자 atomic create), `test_app_runtime.cjs` 통과.
 `smoke_future_outline_consistency.py`는 격리 최신 main 후보의 Chromium·WebKit에서
-각각 14개 예배 유형, 138개 편집 요약과 출력/입력 불변성을 통과했다.
+각각 14개 예배 유형, 140개 편집 요약과 출력/입력 불변성을 통과했다.
 새 회귀 검사는 기본 Cloud gate에 등록했고 분할/실패 전파 검사 5개도 통과했다.
 운영 저장은 미실행이며 웹 배포 근거는 별도 release receipt로 기록한다.
