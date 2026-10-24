@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261024-disclosure-remote-batch",
+  "version": "20261024-audit-ui-alignment",
   "options": {
     "compress": false,
     "mangle": {

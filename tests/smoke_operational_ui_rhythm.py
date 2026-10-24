@@ -47,6 +47,9 @@ try:
                         if name=='section':
                             panel=page.locator('[data-presenter-section-editor]');box=panel.bounding_box()
                             assert box and box['x']>=0 and box['x']+box['width']<=width and box['y']>=50 and box['y']+box['height']<=height,box
+                            page.wait_for_function("!document.querySelector('[data-presenter-section-editor]').getAnimations().some(a=>a.playState==='running')")
+                            heights=panel.locator('.svc-form-hint-slot').evaluate_all('es=>es.map(e=>[e,e.querySelector("input"),e.querySelector("button")].map(n=>n.getBoundingClientRect().height))')
+                            assert heights and all(all(abs(h-30)<1 for h in row) for row in heights),(engine,width,heights)
                             field=page.locator('[data-presenter-section-new-name]');field.fill('입력 유지 검증');field.scroll_into_view_if_needed()
                             assert field.input_value()=='입력 유지 검증'
                             assert page.locator('.presenter-section-editor-body').evaluate('e=>e.scrollWidth<=e.clientWidth+1')

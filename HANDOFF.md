@@ -1519,3 +1519,14 @@ local; canonical production writes remain blocked. See
 `docs/code-organization.md` (Broad live suite alignment) for fixture boundaries,
 real source-preservation coverage and native-fullscreen limitations. Product
 runtime and operational data are unchanged by this test/helper-only update.
+
+## 2026-10-24 audit UI and fixture alignment
+
+Section-editor song-form wrapper/help now share the existing 30px input height.
+The five supplemental smokes use the current server-state fixture, editable-only
+metadata selector, explicit media-file picker and actual flow/visible-rail bounds.
+Operational popup smoke checks input/wrapper/help heights together. No required
+CI selection or assertion timeout was removed. Current Remote/category docs now
+lead with deployed behavior while retaining dated implementation evidence.
+No production migration, data cleanup or single-song candidate is included.
+Publication requires the exact candidate's full gate, Pages and public readback.

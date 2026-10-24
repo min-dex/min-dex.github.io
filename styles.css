@@ -3291,3 +3291,5 @@ body[data-module="praise"] .song-count-badge {
 .svc-form-help-panel dd { margin: 0; }
 .svc-form-help-panel ul { margin: 10px 0; padding-left: 18px; }
 .svc-form-help-panel code { font-size: 12px; overflow-wrap: anywhere; }
+
+.presenter-section-editor .svc-form-hint-slot.compact { height: 30px; }

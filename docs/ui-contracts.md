@@ -941,3 +941,10 @@ the actual normalizer for examples, distinguishes CB from C-B and preserves
 unknown labels. Pointer activation must not blur/normalize unfinished input;
 keyboard activation and Escape preserve selection and return to the input.
 The help does not write worship data or re-render the editor.
+
+
+### Section editor song-form row ·2026-10-24
+
+The section-editor song-form wrapper, input and adjacent help button share the
+existing 30px field height. Do not leave the compact wrapper at22px around a
+30px input. Keep the existing field widths, wrapping, help behavior and focus.

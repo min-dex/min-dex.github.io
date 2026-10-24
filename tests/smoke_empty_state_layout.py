@@ -1,4 +1,6 @@
 """Offline full-pane state alignment; embedded loading remains flow content."""
+import os
+os.environ["MINDEX_SMOKE_OFFLINE"] = "1"
 from smoke_app import launch_chromium,start_local_app_server,sync_playwright
 server,url=start_local_app_server()
 try:
@@ -32,7 +34,11 @@ try:
    assert page.evaluate('''()=>{
     refs.detailPane.innerHTML='<div class="service-dashboard">'+renderLoadingDetail()+'</div>';
     const el=refs.detailPane.querySelector('.detail-loading-skeleton'),css=getComputedStyle(el);
-    return css.alignContent==='start' && el.getBoundingClientRect().height<200 && parseFloat(getComputedStyle(refs.detailPane).paddingTop)>0;
+    const box=el.getBoundingClientRect(),parent=el.parentElement.getBoundingClientRect();
+    return css.position!=='fixed' && css.position!=='absolute' && box.height>0 && box.height<200
+      && box.top>=parent.top && box.bottom<=parent.bottom+1
+      && el.scrollHeight<=el.clientHeight+1 && el.scrollWidth<=el.clientWidth+1
+      && parseFloat(getComputedStyle(refs.detailPane).paddingTop)>0;
    }'''), 'embedded skeleton changed'
    for mode in ('service','presenter'):
     page.evaluate('''mode=>{

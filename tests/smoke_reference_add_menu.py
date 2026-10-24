@@ -1,3 +1,5 @@
+import os
+os.environ["MINDEX_SMOKE_OFFLINE"] = "1"
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 
@@ -47,7 +49,7 @@ def main():
                 assert page.evaluate("mediaCalls[0][1]") == "fixture"
                 assert page.evaluate("mediaCalls[0][2]") == "announcements"
                 summary.click()
-                host.locator("input[type=file]").set_input_files(
+                host.locator("input[data-presenter-reference-media-direct-file]").set_input_files(
                     {"name": "test.png", "mimeType": "image/png", "buffer": b"test"}
                 )
                 assert page.evaluate("mediaCalls[1][0]") == "file"
