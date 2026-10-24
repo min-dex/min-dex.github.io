@@ -11,8 +11,31 @@ def main():
                 try:
                     page = browser.new_page()
                     page.route('**/*supabase*/**', lambda r: r.abort())
-                    page.goto(url, wait_until='domcontentloaded')
+                    page.goto(url+'?mindexSmokeRaw=1', wait_until='domcontentloaded')
                     page.wait_for_function("typeof loadBibleBookVerses==='function' && typeof state!=='undefined' && !document.body.classList.contains('ui-booting')")
+                    print(engine, page.evaluate("""async () => {
+                      const savedLoad=loadBibleTranslations,savedBooks=ensureBibleBookLookups;
+                      const sid='edition-entry',id='00000000-0000-0000-0000-000000000001';
+                      const memo={scriptureTranslationId:id,scriptureReferences:['창세기 1:1']};
+                      const item={id:'reading',label:'성경봉독',raw_title:'창세기 1:1',memo:JSON.stringify(memo)};
+                      const before=JSON.stringify(item);
+                      try {
+                        state.client={};state.auth.session={user:{id:'fixture'}};state.connectionError='';
+                        state.scriptureBooks=[{code:'GEN',koreanName:'창세기',chapterCount:50,testament:'old'}];
+                        state.bibleTranslations=[];state.bibleReaderError='';
+                        ensureBibleBookLookups=async()=>{};
+                        loadBibleTranslations=async()=>{await new Promise(r=>setTimeout(r,30));state.bibleTranslations=[{id,name:'개역개정',abbreviation:'개역개정'}]};
+                        const pending=serviceItemBibleTranslation(item,memo);
+                        state.bibleVerseCache.set(bibleVerseCacheKey(id,'GEN',1),[{book_code:'GEN',chapter:1,verse:1,text:'검증용 본문'}]);
+                        const result=await validateScriptureReferences(item.raw_title,pending);
+                        if(result.translation.id!==id||result.resolved[0].verses[0].text!=='검증용 본문')throw Error('Cold entry edition unresolved');
+                        if(JSON.stringify(item)!==before)throw Error('Saved selection changed');
+                        state.bibleTranslations=[];
+                        const rows=await fetchServiceScriptureVerses(result.entries[0].reference,pending);
+                        if(rows[0]?.text!=='검증용 본문')throw Error('Cold direct fetch unresolved');
+                        return 'PASS delayed entry catalogue keeps explicit edition and scripture body';
+                      } finally {loadBibleTranslations=savedLoad;ensureBibleBookLookups=savedBooks;}
+                    }"""), flush=True)
                     result = page.evaluate('''async () => {
                       const check=(v,m)=>{if(!v)throw Error(m)};
                       state.auth.session={user:{id:'fixture'}};state.connectionError='';state.module='scripture';
