@@ -50,7 +50,10 @@ try:
        if(!sequence)check(!headings[0].formLabel && !input(item).placeholder.startsWith('T-'),'implicit T added to liturgical praise '+label);
        for(const noChromakey of [false,true]) {
         const html=renderPresenterSlideFrame(headings[0],{noChromakey});
-        check(noChromakey ? html.includes('presenter-fullscreen-song-heading')&&html.includes('presenter-slide--fullscreen-song-title')&&!html.includes('presenter-slide--song-note-title')&&html.includes(expectedTitle) : html.includes('presenter-title-assignee--order-content')&&html.includes('♪ '+expectedTitle),'order/content output lost '+label+'/'+mode+'/'+noChromakey);
+        const host=document.createElement('div');host.innerHTML=html;
+        const expectedNote=sequence?'♬':'♪',otherNote=sequence?'♪':'♬';
+        check(host.textContent.includes(expectedTitle)&&host.textContent.includes(expectedNote)&&!host.textContent.includes(otherNote),'note must follow authored Title role '+label+'/'+mode+'/'+sequence+'/'+noChromakey);
+        check(noChromakey ? html.includes('presenter-fullscreen-song-heading')&&html.includes('presenter-slide--fullscreen-song-title')&&!html.includes('presenter-slide--song-note-title') : html.includes('presenter-title-assignee--order-content'),'order/content output lost '+label+'/'+mode+'/'+sequence+'/'+noChromakey);
         const preview=normalizePresenterMiniPreviewSlide({...headings[0],outputContext:noChromakey?'clean':'chromakey'},!noChromakey);
         check(preview.type===headings[0].type && renderPresenterTitleAssigneeSlide(preview)===renderPresenterTitleAssigneeSlide(headings[0]),'preview/output title mismatch '+label+'/'+mode+'/'+noChromakey+' '+JSON.stringify({preview,original:headings[0]}));
        }
@@ -61,11 +64,13 @@ try:
     state.songs=[song];
     const mainTitle=presenterSongTitleSlide({id:'main-title',label:'찬양 1'},{sectionKey:'praise'},song,version,song.title,0);
     const keyed=renderPresenterSlideFrame(mainTitle,{noChromakey:false}),full=renderPresenterSlideFrame(mainTitle,{noChromakey:true});
-    check(keyed.includes('>♪</span>') && !keyed.includes('♬'),'chromakey inline note must be eighth note');
+    check(keyed.includes('>♬</span>') && !keyed.includes('♪'),'authored Title uses double note in chromakey');
     check(full.includes('aria-label="찬양">♬</span>') && !full.includes('♪'),'separate fullscreen note changed');
     const oldContent={...presenterOrderContentTitleSlide({label:'결단찬양'},{sectionKey:'response_song'},0,'결단찬양','♬ '+song.title),songTitle:song.title};
-    const oldFull=renderPresenterSlideFrame(oldContent,{noChromakey:true});
-    check(oldFull.includes('presenter-fullscreen-song-heading')&&oldFull.includes(song.title)&&oldFull.includes('♪ '+song.title)&&!oldFull.includes('presenter-slide--song-note-title'),'old order/content snapshot must restore standard fullscreen composition');
+    const oldBefore=JSON.stringify(oldContent),oldFull=renderPresenterSlideFrame(oldContent,{noChromakey:true});
+    const oldHost=document.createElement('div');oldHost.innerHTML=oldFull;
+    check(JSON.stringify(oldContent)===oldBefore&&oldHost.textContent.includes('♪')&&!oldHost.textContent.includes('♬'),'legacy content note normalization is view-only');
+    check(oldFull.includes('presenter-fullscreen-song-heading')&&oldHost.textContent.includes(song.title)&&!oldFull.includes('presenter-slide--song-note-title'),'old order/content snapshot must restore standard fullscreen composition');
     const fullTitleHost=document.createElement('main');fullTitleHost.className='presenter-output-root no-chromakey';
     fullTitleHost.style.cssText='position:fixed;left:0;top:0;margin:0;width:1920px;height:1080px;transform:none';
     fullTitleHost.innerHTML=oldFull;document.body.append(fullTitleHost);fitPresenterSongTitleText(fullTitleHost);

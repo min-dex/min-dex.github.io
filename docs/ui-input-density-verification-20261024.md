@@ -64,3 +64,11 @@ owner. Board/controller line capacity is redistributed30 lines within the same
 6550-line extracted-owner ceiling, with an explicit aggregate check added.
 Common fit, Title forms, output-only Scripture reading scale and ready/blank
 regressions pass both engines after the helper move. No required check is bypassed.
+
+First combined branch run40046759553 passed three shards but correctly blocked
+publication on the old form-placeholder smoke's glyph expectations. Authored
+Title/T now renders♬ while source contentTitle remains♪; content-only legacy
+snapshots render♪ inside a span. Update rendered-DOM expectations for both
+cases, keep source/save/sequence assertions and add explicit view-only legacy
+normalization. The complete form-placeholder smoke passes both engines locally;
+the revised exact SHA must pass every required shard before publication.
