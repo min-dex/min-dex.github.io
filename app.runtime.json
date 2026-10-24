@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261024-presenter-view-safety",
+  "version": "20261024-runtime-boundaries",
   "options": {
     "compress": false,
     "mangle": {

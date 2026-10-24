@@ -38,5 +38,6 @@
     "screenshotBytesEqual": true,
     "operationalWrites": 0,
     "liveReadSmoke": "blocked identically on candidate and published baseline by existing startup RPC guard"
-  }
+  },
+  "scope": "Structural extraction component; before the separately approved recovery/source editor UI removal"
 }
