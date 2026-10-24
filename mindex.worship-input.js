@@ -256,11 +256,6 @@ function updateNewServiceFormField(field) {
     }
     state.newServiceForm[key] = field.value;
     if (key === "leader") state.newServiceForm.leaderEdited = true;
-    if ((key === "date" || key === "alias") && !state.newServiceForm.leaderEdited) {
-      state.newServiceForm.leader = defaultServicePraiseLeader(state.newServiceForm.type_id, state.newServiceForm);
-      const leaderInput = field.closest(".svc-new-form")?.querySelector('[data-new-service-field="leader"]');
-      if (leaderInput) leaderInput.value = state.newServiceForm.leader;
-    }
   }
 }
 

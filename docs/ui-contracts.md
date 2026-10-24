@@ -986,3 +986,9 @@ Ordinary workspace selects use one shared arrow and a 30px trailing inset.
 The common field padding consumes the same inset token so later specificity
 cannot collapse text clearance. Version/type wrappers do not draw a second
 arrow. Preserve native selection, labels, focus, disabled and error states.
+
+### Praise leader defaults ·2026-10-24
+
+New worship services start with a blank praise leader for every type/date.
+Changing the date or alias never replaces the entered name. Existing saved
+leaders and explicit blank values remain unchanged in worship and setlist views.

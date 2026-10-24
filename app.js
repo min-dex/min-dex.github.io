@@ -13935,30 +13935,8 @@ function serviceItemDefaultAssignee(item = {}, service = selectedServiceForEdito
   return "";
 }
 
-function defaultServicePraiseLeader(typeId, serviceOrDate = null) {
-  const appTypeId = worshipAppServiceTypeId(typeId);
-  const date = serviceDateString(serviceOrDate);
-  const service = typeof serviceOrDate === "object" && serviceOrDate ? serviceOrDate : {};
-  if (appTypeId === "wednesday") {
-    const targetTime = dateOnlyUtcTime(date);
-    const anchorTime = dateOnlyUtcTime("2026-09-16");
-    if (!Number.isFinite(targetTime) || targetTime < anchorTime || new Date(targetTime).getUTCDay() !== 3) return "";
-    const weekIndex = Math.floor((targetTime - anchorTime) / (7 * 24 * 60 * 60 * 1000));
-    return weekIndex % 2 === 0 ? "김석범 목사" : "김광한 전도사";
-  }
-  if (appTypeId === "friday") {
-    return serviceFridayVariantKey({ ...service, type_id: appTypeId }) === "3355" ? "김덕열 집사" : "이재희 청년";
-  }
-  if (appTypeId === "sunday-main") {
-    const alias = service.alias || service.service_alias || service.title || "";
-    return isAllGenerationsWorshipContext(alias) || (date && isAllGenerationsWorshipDate(date)) ? "이재희 청년" : "김석범 목사";
-  }
-  return ({
-    "sunday-afternoon": "박수경 집사",
-    children: "서영윤 선생님",
-    youth: "허호범 선생님",
-    "young-adult": "이재희 청년",
-  })[appTypeId] || "";
+function defaultServicePraiseLeader() {
+  return "";
 }
 
 function canonicalWorshipServiceTypeId(typeId) {

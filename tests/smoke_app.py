@@ -4472,9 +4472,9 @@ def main() -> int:
                             "V-C", "V1-C", "V-V-C-V-V-C", "V1-V2-C-Int-V3-C-C", "V1A-Int-V1-V2-Int-V4-V1B"
                         ]
                         and template_terms["fridayNewServiceLeader"] == {
-                            "formLeader": "이재희 청년",
-                            "inputValue": "이재희 청년",
-                            "defaultLeader": "이재희 청년",
+                            "formLeader": "",
+                            "inputValue": "",
+                            "defaultLeader": "",
                             "monthlyDefaultLeader": "",
                         }
                         and template_terms["fridayScaffold"]["sections"][-2:] == ["결단", "기도회"]
