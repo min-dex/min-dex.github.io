@@ -696,6 +696,7 @@ function preparePresenterRuntimeDependencies() {
     && typeof currentPresenterAudioContext === "function"
     && typeof renderPresenterSlideBoard === "function"
     && typeof runPresenterAction === "function"
+    && typeof window.MindexDisclosure?.attrs === "function"
     && [...document.querySelectorAll('link[rel="stylesheet"]')]
       .some(link => new URL(link.href, document.baseURI).pathname.endsWith("/styles.workspace.css"));
   const url = new URL(location.href);
