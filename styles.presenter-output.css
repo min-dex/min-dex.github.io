@@ -116,6 +116,7 @@
 .presenter-output-body * { box-sizing: border-box; }
 .presenter-output-root {
   --presenter-text-inset: 2.5cqw;
+  --presenter-song-note-scale: .55;
   --presenter-stage-width: min(100vw, 177.777778vh);
   --presenter-stage-height: min(100vh, 56.25vw);
   --presenter-stage-scale: 1;
@@ -871,10 +872,11 @@
   rx: calc(28 * var(--presenter-stage-unit));
   ry: calc(28 * var(--presenter-stage-unit));
 }
-.presenter-song-note {
+.presenter-song-note,
+.presenter-slide-text .presenter-song-note {
   display: inline-block;
   font-family: var(--presenter-font-family);
-  font-size: .55em;
+  font-size: calc(1em * var(--presenter-song-note-scale));
   font-weight: var(--presenter-weight-body);
   line-height: 1;
   transform: translateY(-.04em);
@@ -1643,7 +1645,7 @@ span.presenter-announcement-paren,
 
 /* Fullscreen titles and silent praise video backgrounds. */
 .presenter-slide--song-note-title .presenter-title-content { gap: 3cqh; }
-.presenter-output-root.no-chromakey .presenter-slide--song-note-title .presenter-fullscreen-song-heading { font-size: calc(85 * var(--presenter-stage-unit)); line-height: 1; }
+.presenter-output-root.no-chromakey .presenter-slide--song-note-title .presenter-fullscreen-song-heading { font-size: calc(var(--presenter-size-song-title) * var(--presenter-song-note-scale)); line-height: 1; }
 .presenter-output-root.no-chromakey .presenter-slide--song-note-accent .presenter-fullscreen-song-heading { color: #cba56a; }
 .presenter-output-background-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; z-index: 0; }
 .presenter-slide:has(> .presenter-output-background-video) > :not(video) { position: relative; z-index: 1; }

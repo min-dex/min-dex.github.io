@@ -81,6 +81,20 @@ try:
     check(headingBounds.bottom<=titleBounds.top+1 && Math.abs((titleBounds.top+titleBounds.bottom-stageBounds.top-stageBounds.bottom)/2)<108,'fullscreen order heading above centered title');
     check(parseFloat(getComputedStyle(fullTitle).fontSize)===150,'short fullscreen content title must retain original scale');
     fullTitleHost.remove();
+    for(const slide of [mainTitle,oldContent])for(const noChromakey of [true,false]){
+     const stage=document.createElement('main');stage.className='presenter-output-root'+(noChromakey?' no-chromakey':'');
+     stage.innerHTML=renderPresenterSlideFrame(slide,{noChromakey});document.body.append(stage);
+     const note=stage.querySelector('.presenter-song-note'),heading=stage.querySelector('.presenter-slide--song-note-title .presenter-fullscreen-song-heading');
+     if(note){
+      const ratio=parseFloat(getComputedStyle(note).fontSize)/parseFloat(getComputedStyle(note.parentElement).fontSize);
+      check(Math.abs(ratio-.55)<.005,'inline note ratio '+noChromakey+' '+ratio);
+     }else check(heading,'song note markup missing '+slide.type+' '+noChromakey);
+     if(heading){
+      const ratio=parseFloat(getComputedStyle(heading).fontSize)/parseFloat(getComputedStyle(stage.querySelector('.presenter-title-content-title')).fontSize);
+      check(Math.abs(ratio-.55)<.005,'separate note ratio '+ratio);
+     }
+     stage.remove();
+    }
     const proxyCache=new WeakMap();
     const readOnly=value=>{
      if(!value||typeof value!=='object')return value;
