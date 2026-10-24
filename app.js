@@ -19133,11 +19133,11 @@ function cleanScriptureBookShortName(value) {
 function inspectScriptureReferences(value, translation = null) {
   const source = Array.isArray(value) ? value : [String(value || "")];
   const entries = [];
-  let lastBook = "", lastChapter = null;
-  for (const raw of source.flatMap(text => String(text).split(/[\n;；,，]/)).map(text => text.trim()).filter(Boolean)) {
+  let lastBook = "", lastChapter = null, lastHasVerse = false;
+  for (const raw of source.flatMap(text => String(text).normalize("NFKC").split(/[\n;；,，]/)).map(text => text.trim()).filter(Boolean)) {
     const candidates = [raw];
     if (lastBook) {
-      if (lastChapter && /^\d{1,3}(?:\s*[-–—~]\s*\d{1,3})?$/.test(raw)) candidates.push(`${lastBook} ${lastChapter}:${raw}`);
+      if (lastChapter && lastHasVerse && /^\d{1,3}(?:\s*[-–—~]\s*\d{1,3})?$/.test(raw)) candidates.push(`${lastBook} ${lastChapter}:${raw}`);
       candidates.push(`${lastBook} ${raw}`);
     }
     const reference = candidates.map(text => parseBibleReference(text, translation)).find(Boolean) || null;
@@ -19146,9 +19146,10 @@ function inspectScriptureReferences(value, translation = null) {
     if (reference) {
       lastBook = reference.book.koreanName || reference.book.code;
       lastChapter = reference.chapter;
+      lastHasVerse = reference.verse !== null;
     } else {
       // An invalid fragment must not lend a guessed context to the next fragment.
-      lastBook = ""; lastChapter = null;
+      lastBook = ""; lastChapter = null; lastHasVerse = false;
     }
   }
   const invalid = entries.filter(entry => !entry.reference).map(entry => entry.raw);
@@ -20190,7 +20191,7 @@ function parseBibleReferenceFromNormalizedText(text, translation = null) {
   const lookup = name => { const book = findBibleBookByReferenceName(name); return translation ? bibleReferenceBookForTranslation(book, translation) : book; };
   const special=text.match(/^(.+?)\s+([^:\s]+)(?::\s*(\d+)(?:\s*-\s*(\d+))?)?$/);
   if(special){const book=lookup(special[1]);const option=book?.metadata?.chapter_options?.find(c=>c.label===special[2]);
-    if(option){if(special[3] && Number(special[3])<1)return null;const verse=Number(special[3])||null,verseEnd=Number(special[4])||null;if(verseEnd && verseEnd<(verse||1))return null;return {book,chapter:option.key,verse,verseEnd:verseEnd===verse?null:verseEnd};}}
+    if(option){if((special[3] && Number(special[3])<1)||(special[4] && Number(special[4])<1))return null;const verse=Number(special[3])||null,verseEnd=Number(special[4])||null;if(verseEnd && verseEnd<(verse||1))return null;return {book,chapter:option.key,verse,verseEnd:verseEnd===verse?null:verseEnd};}}
 
   const match =
     text.match(/^(.+?)\s+(\d{1,3})\s+(\d{1,3})(?:\s*-\s*(\d{1,3}))?$/) ||

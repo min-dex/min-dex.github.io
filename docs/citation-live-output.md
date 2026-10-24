@@ -38,3 +38,10 @@ verse (`삼하 2 4-4` → `사무엘하 2:4`). This applies to worship preparati
 reading/citation inputs, song references and live scripture. Non-equal ranges
 and invalid/reversed-range rejection are unchanged. No stored records are
 bulk rewritten. Covered by `smoke_reference_validation.py`.
+
+## Context and numeric guards ·2026-10-24
+
+Normalize NFKC before contextual list parsing. A bare number after a chapter-only
+reference denotes another chapter; after a verse reference it denotes another
+verse in that chapter. Special chapter labels reject explicit zero endpoints
+instead of dropping them. Invalid fragments still invalidate the complete input.

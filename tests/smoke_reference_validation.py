@@ -31,6 +31,10 @@ try:
     }
     check(formatServiceScriptureReferenceList('삼하 2:4-5')==='사무엘하 2:4–5','non-single range retained');
     check(inspectScriptureReferences('삼하 2:4-4, 6-6').references.join(';')==='사무엘하 2:4;사무엘하 2:6','context single endpoints');
+    for(const [raw,wanted] of [['요 3,4','요한복음 3;요한복음 4'],['요 3;4','요한복음 3;요한복음 4'],['요 3:16,１８','요한복음 3:16;요한복음 3:18'],['요 3:16,１８～２０','요한복음 3:16;요한복음 3:18–20']]) {
+      check(inspectScriptureReferences(raw).references.join(';')===wanted,'context normalization '+raw);
+      check(inspectScriptureReferences(inspectScriptureReferences(raw).references).references.join(';')===wanted,'idempotence '+raw);
+    }
     const mixed='요 3:16, 18–20; 빌1:21';
     check(inspectScriptureReferences(mixed).references.join(';')==='요한복음 3:16;요한복음 3:18–20;빌립보서 1:21','context');
     for(const raw of ['요 3:16; 오류','요 3:20-16','요 99:1','요 3:0']){
