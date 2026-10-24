@@ -1,3 +1,4 @@
+import os
 """Read-only UI summaries across future worship templates; no operational writes."""
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
@@ -6,7 +7,7 @@ def main():
     server, url = start_local_app_server()
     try:
         with sync_playwright() as p:
-            browser = launch_chromium(p)
+            browser = p.webkit.launch(headless=True) if os.environ.get('MINDEX_SMOKE_ENGINE') == 'webkit' else launch_chromium(p)
             page = browser.new_page(viewport={"width": 1280, "height": 900})
             page.route('**/*supabase*/**', lambda r: r.abort())
             page.goto(url + '?output=presenter', wait_until='domcontentloaded')
@@ -80,6 +81,24 @@ def main():
               }
               check(presenterBoardSubgroupContentTitle({sectionKey:'sermon',assignee:'테스트 목사'},'설교') === '', 'person used as sermon title');
               check(presenterBoardSubgroupContentTitle({sectionKey:'sermon',contentTitle:'실제 제목',assignee:'테스트 목사'},'설교') === '실제 제목','real title lost');
+              for (const type_id of ['children','youth','young-adult','sunday-main']) {
+                const svc={id:'roles-'+type_id,type_id,date:'2026-10-25'};
+                for (const role of ['다같이','다 같이','다함께','인도자']) {
+                  const item={id:'role-prayer',service_id:svc.id,label:'대표기도',raw_title:'대표기도',assignee:role,
+                    _worshipSectionKey:'prayer',memo:serializeServiceItemMemo({elementType:'title_person'})};
+                  const before=JSON.stringify(item);
+                  const frames=buildPresenterSlidesForServiceItem(item,svc,0);
+                  check(frames.length>0,'role frame missing');
+                  for(const frame of frames) {
+                    check(!frame.assignee&&!frame.sectionAssignee,'generic role leaked in '+type_id);
+                    const host=document.createElement('div');host.innerHTML=renderPresenterSlideBody(frame);
+                    check(!host.textContent.includes(role),'generic role rendered in '+type_id);
+                  }
+                  check(JSON.stringify(item)===before,'bulletin/source role mutated');
+                  item.assignee='김유준 어린이';
+                  check(buildPresenterSlidesForServiceItem(item,svc,0).some(frame=>frame.assignee==='김유준 어린이'),'named assignee lost');
+                }
+              }
               document.documentElement.className = '';
               document.body.className = '';
               document.documentElement.dataset.theme = document.body.dataset.theme = 'dark';

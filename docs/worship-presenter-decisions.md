@@ -4728,3 +4728,22 @@ The production CHECK was expanded and read back as validated on 2026-10-25,
 without worship-row, revision, draft or permission updates. The web writer is a
 separate queued release. Tests cover all five modes, both browsers, the existing
 908 Praise-row snapshot, and an isolated PostgreSQL constraint migration.
+
+## 2026-10-25 — 부서 환영 문구와 공통 참여자 표시
+
+새 어린이부 예배의 광고 상단 기본 문구는 청년부·청소년부와 같은 문장인
+`오늘도 어린이부 예배에 오신 여러분을 환영하고 축복합니다 :)`를 쓴다.
+다른 부서의 주간 활동 문구를 복사하지 않는다. 이미 생성된 예배는 사용자 요청에
+따라 기존 주간 소식·하단·삭제 상태를 유지한 채 별도 atomic 항목 저장으로
+상단만 반영한다. 기본값 변경만으로 기존 운영 레코드가 수정됐다고 보지 않는다.
+
+모든 예배 유형에서 `다같이`, `다함께`, `인도자`와 기존 일반 역할 placeholder는
+공통 Presenter 담당자 정규화로 숨긴다. 저장된 담당자/주보/원문과 실제 이름·직분은
+보존하며 가사 본문의 같은 단어는 필터링하지 않는다. 섹션 담당자와 특송 제목
+슬라이드도 같은 규칙을 사용한다.
+
+사용자 장기 목표: PPTX·Keynote 원본을 보존하고 다양한 환경에서 애니메이션·
+영상·음원을 포함해 Mindex 내부에서 송출한다. 환경별 지원 수준과 검증 여부를
+분리해서 안내해야 하며 아직 보편 지원 완료로 표시하지 않는다. Native Keynote
+후보(`codex/sermon-original-decks`)는 Mac 화면 기록 권한 거부로 실기 capture 검증이
+대기 상태이며 이번 공통 문구 변경의 배포 범위와 분리한다.

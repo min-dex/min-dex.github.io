@@ -169,7 +169,7 @@ function isPresenterAllGenerationsService(service = null) {
 
 function presenterSpecialSongSectionTitleSlide(item = {}, section = {}, index = 0, songTitleSlide = null) {
   const title = item.label || section.sectionLabel || "특송";
-  const assignee = cleanServiceAssignee(item.assignee);
+  const assignee = cleanPresenterAssignee(item.assignee);
   const subtitle = assignee;
   const text = [title, subtitle].filter(Boolean).join("\n");
   return {

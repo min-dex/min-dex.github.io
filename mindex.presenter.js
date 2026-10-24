@@ -720,7 +720,7 @@ function presenterTitleAssigneePerson(item = {}, label = "", displayText = "", t
     return referenceText && compactSearchValue(referenceText) !== compactSearchValue(titleText) ? referenceText : "";
   }
   const assignee = cleanPresenterAssignee(item.assignee)
-    || (typeof serviceItemDefaultAssignee === "function" ? serviceItemDefaultAssignee(item, service) : "");
+    || cleanPresenterAssignee(typeof serviceItemDefaultAssignee === "function" ? serviceItemDefaultAssignee(item, service) : "");
   if (compact === "설교제목") return cleanList([presenterSermonContentTitle(text), assignee]).join("\n");
   if (assignee) return assignee;
   if (!text || compactSearchValue(text) === compactSearchValue(titleText)) return "";
@@ -1304,7 +1304,7 @@ function presenterSectionForServiceItem(item, index, displayText, song = null, v
     elementLabel: label,
     elementTitle,
     ...(connectedPraise ? { connectedPraise } : {}),
-    sectionAssignee: item?.assignee || "",
+    sectionAssignee: cleanPresenterAssignee(item?.assignee),
     sectionName: [sectionLabel || sectionLabelText, elementTitle].filter(Boolean).join(" / "),
   };
 }

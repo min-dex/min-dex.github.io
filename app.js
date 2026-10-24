@@ -21385,7 +21385,7 @@ function childrenWorshipTemplate() {
       sectionKey: "community_confession", elements: [publicWorshipCommunityConfessionElement()] },
     publicWorshipLordsPrayerStep(),
     { label: "광고", name: "광고", required: true, flex: false,
-      sectionKey: "announcements", elementType: "plain_text" },
+      sectionKey: "announcements", elementType: "plain_text", default_text: "오늘도 어린이부 예배에 오신 여러분을 환영하고 축복합니다 :)" },
     { label: "교제", name: "교제", required: false, flex: true,
       sectionKey: "fellowship", elementType: "title" },
   ];
@@ -23899,7 +23899,7 @@ function cleanServiceAssignee(value) {
 }
 
 const GENERIC_PRESENTER_ASSIGNEE_KEYS = new Set([
-  "인도자",
+  "다같이", "다함께", "인도자",
   "예배인도자",
   "찬양인도자",
   "담당",
