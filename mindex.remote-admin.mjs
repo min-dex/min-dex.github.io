@@ -1,4 +1,4 @@
-import {openRemote} from './mindex.remote-session.mjs?v=9';
+import {openRemote} from './mindex.remote-session.mjs?v=10';
 const messages={rate_limited:'입력 횟수가 많아요. 1분 뒤 다시 입력해 주세요.',invalid_code:'숫자 4자리를 확인해 주세요.',expired:'관리자 접속이 만료됐어요. PIN을 다시 입력해 주세요.',invalid_pin:'PIN을 확인해 주세요.',locked:'입력 횟수를 초과했어요. 15분 뒤 다시 시도해 주세요.',offline:'송출 PC의 응답이 없어요.',busy:'이미 연결 중이에요. 기존 연결을 종료한 뒤 다시 선택해 주세요.',host_upgrade:'송출 PC를 새로고침하면 관리자 여러 대를 연결할 수 있어요.',unavailable:'관리자 연결을 아직 사용할 수 없어요.'};
 export async function adminRpc(client,name,args){
  const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),5000);
@@ -38,8 +38,8 @@ export function createOutputRegistry(context,{interval=2000,onUpdate=()=>{}}={})
   const slot={id:link.id,session:null};r[kind].set(link.id,slot);
   const a=kind==='guest'?(r.guestAdapter||r.adapter):r.adapter;
   slot.session=await openRemote({client:c.client,host:true,registration:relayRegistration(link.secret),
-   read:()=>{const current=context();const s=a.read();return {...s,live:s.live&&current?.key===r.key&&current?.client===r.client&&performance.now()-r.seen<6000};},
-   execute:a.execute,onStatus:update,onClose:()=>{
+   read:()=>{const current=context();const s=a.read();return {...s,live:s.live&&current?.key===r.key&&current?.client===r.client,allowed:r.recovering||performance.now()-r.seen>=6000?[]:s.allowed};},
+   execute:action=>{if(r.recovering||performance.now()-r.seen>=6000)throw Error('송출 연결을 확인 중입니다.');return a.execute(action);},onStatus:update,onClose:()=>{
     rememberClosed(r,kind,slot.id);if(r[kind].get(slot.id)===slot)r[kind].delete(slot.id);update();
     void adminRpc(r.client,'mindex_remote_output',{p_action:kind==='guest'?'unlink_guest':'unlink',p_id:r.id,p_token:r.token,p_ready:link.id}).catch(()=>{});
    }});
@@ -62,9 +62,11 @@ export function createOutputRegistry(context,{interval=2000,onUpdate=()=>{}}={})
    const value=await adminRpc(c.client,'mindex_remote_output',{p_action:'tick',p_id:r.id,p_token:r.token,p_info:{...c.info,multiAdmin:true,adminReady:[...r.admin.values()].filter(s=>s.session?.listening).map(s=>s.id),guestReady:[...r.guest.values()].find(s=>s.session?.listening)?.id||null},p_ready:[...r.admin.values()].find(s=>s.session?.listening)?.id||null});
    if(closed||paused||record!==r)return;
    r.seen=performance.now();r.code=value.code||r.code;
-   await syncSlots(r,c,'admin',value.links||(value.link?[value.link]:[]));await syncSlots(r,c,'guest',value.guest?[value.guest]:[]);update();
+   await syncSlots(r,c,'admin',value.links||(value.link?[value.link]:[]));await syncSlots(r,c,'guest',value.guest?[value.guest]:[]);
+   if(r.recovering){r.recovering=false;for(const kind of ['admin','guest'])for(const slot of r[kind].values())slot.session?.refresh();}
+   update();
   }catch(e){
-   if(record){stopSlot(record,'admin');stopSlot(record,'guest');}
+   if(record){record.recovering=true;for(const kind of ['admin','guest'])for(const slot of record[kind].values())slot.session?.suspend();}
    if(e.code==='expired'){const old=record;record=null;remove(old);}
    // A short outage must not create a replacement output/code. Retry the same owner.
    update();retryAt=Date.now()+3000;
@@ -72,7 +74,7 @@ export function createOutputRegistry(context,{interval=2000,onUpdate=()=>{}}={})
  }
  let timer=setInterval(tick,interval);void tick();
  return {notify(){if(!paused&&!closed&&record)for(const kind of ['admin','guest'])for(const slot of record[kind].values())slot.session?.notify();},close(){closed=true;clearInterval(timer);const old=record;record=null;remove(old);update();},tick,
-  suspend(){paused=true;clearInterval(timer);if(record){record.seen=0;stopSlot(record,'admin');stopSlot(record,'guest');}update();},
+  suspend(){paused=true;clearInterval(timer);if(record){record.recovering=true;for(const kind of ['admin','guest'])for(const slot of record[kind].values())slot.session?.suspend();}update();},
   resume(){if(closed||!paused)return;paused=false;timer=setInterval(tick,interval);return tick();},
   async disconnectGuest(){const r=record,s=r?.guest.values().next().value;if(!s)return;await s.session?.end();},
  };

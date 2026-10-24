@@ -33,3 +33,12 @@ let live=true;const dead=createGate({read:()=>({live}),execute:()=>{throw Error(
 const index=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8'),shared=fs.readFileSync(new URL('../mindex.public-config.js',import.meta.url),'utf8');
 const x={window:{}},y={window:{}};vm.runInNewContext(index.match(/window.MINDEX_SUPABASE = \{[\s\S]*?\};/)[0],x);vm.runInNewContext(shared,y);assert.equal(JSON.stringify(x.window),JSON.stringify(y.window));
 console.log('PASS remote codes, authenticated encryption, session keys, stale/replay/ownership/busy/close guards and public config parity');
+
+let recoveredCalls=0;
+const recovery=createGate({read:()=>({live:true}),execute:()=>{recoveredCalls++;}});
+const oldTicket=recovery.connect('peer');recovery.invalidate();
+await assert.rejects(recovery.command('peer',{...oldTicket,id:id(),sequence:1,action:'next'}));
+assert.equal(recoveredCalls,0);
+assert((await recovery.command('peer',{...recovery.snapshot(),id:id(),sequence:2,action:'next'})).ok);
+assert.equal(recoveredCalls,1);recovery.close();
+console.log('PASS recovery invalidates pre-outage tickets; fresh ticket executes once');

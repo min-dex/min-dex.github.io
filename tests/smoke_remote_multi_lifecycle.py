@@ -109,9 +109,9 @@ try:
    assert a.locator('#position').inner_text()==str(host.evaluate('fixture.index+1'))+' / 100'
    dropped.add(2);pump(3.5);assert not enabled(b);next_from(a);next_from(guest)
    dropped.clear();until(lambda:enabled(b));next_from(b)
-   # One peer loses network long enough to close; other peers remain in control.
+   # A longer outage still retains the peer; others remain in control.
    dropped.add(2);rpc_down.add(2);pump(11.5);next_from(a);next_from(guest)
-   dropped.clear();rpc_down.clear();until(lambda:b.locator('#adminOutputs').is_visible());connect(b,login=False)
+   dropped.clear();rpc_down.clear();until(lambda:enabled(b));assert b.locator('#adminOutputs').is_hidden()
    # Lost acknowledgement around sleep must not replay an already executed command.
    count=host.evaluate('calls');a.click('[data-action=next]')
    for packet in a.evaluate('remoteOut.splice(0)'):host.evaluate('p=>deliver(p)',packet)
@@ -120,16 +120,24 @@ try:
    dropped.clear();visibility(a,False);until(lambda:enabled(a));assert host.evaluate('calls')==count+1
    # Actual channel failure for guest must not terminate either admin.
    guest.evaluate("remoteChannels.forEach(c=>c.status('CHANNEL_ERROR'))");pump(.5)
-   assert guest.locator('#pairForm').is_visible();next_from(a);next_from(b);connect(guest,False)
+   assert not enabled(guest);next_from(a);next_from(b);until(lambda:enabled(guest));assert guest.locator('#pairForm').is_hidden()
    if engine=='chromium':
     cdp=contexts[2].new_cdp_session(b);cdp.send('Page.setWebLifecycleState',{'state':'frozen'});frozen.add(2)
     pump(11.5);next_from(a);next_from(guest)
     cdp.send('Page.setWebLifecycleState',{'state':'active'});frozen.clear();visibility(b,False)
-    until(lambda:b.locator('#adminOutputs').is_visible());connect(b,login=False);cdp.detach()
+    until(lambda:enabled(b));assert b.locator('#adminOutputs').is_hidden();cdp.detach()
    a.evaluate("dispatchEvent(new PageTransitionEvent('pagehide',{persisted:true}));dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true}));")
-   pump(.5);assert a.locator('#pairForm').is_visible();next_from(b);next_from(guest)
+   until(lambda:enabled(a));assert a.locator('#pairForm').is_hidden();next_from(b);next_from(guest)
+   # Browser offline/online events recover without entering a code again.
+   guest.evaluate("dispatchEvent(new Event('offline'))");assert not enabled(guest)
+   guest.evaluate("dispatchEvent(new Event('online'))");until(lambda:enabled(guest))
+   # A PC registry outage retains all relay slots and never executes queued input.
+   count=host.evaluate('calls');rpc_down.add(0);pump(3.5)
+   assert all(not enabled(p) for p in (a,b,guest));assert host.evaluate('calls')==count
+   rpc_down.clear();until(lambda:all(enabled(p) for p in (a,b,guest)))
+   assert host.evaluate('calls')==count
    host.evaluate('registry.close()')
    for c in contexts:c.close()
    browser.close()
-   print('PASS',engine,'2 admins + guest: isolated hide/restore, short/long network loss, reconnect, lost ack no replay, channel failure, pagehide/logout'+(', actual renderer freeze' if engine=='chromium' else ''),flush=True)
+   print('PASS',engine,'2 admins + guest: isolated hide/restore, short/long network loss, reconnect, lost ack no replay, channel failure, BFCache retention'+(', actual renderer freeze' if engine=='chromium' else ''),flush=True)
 finally:server.shutdown()

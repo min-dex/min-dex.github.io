@@ -408,3 +408,31 @@ video regression suspends only that heartbeat and confirms native pause/play
 status within 700ms on Chromium/WebKit; it retains stale-frame, duplicate command
 and autoplay-denial coverage. Isolated two-admin/guest lifecycle checks pass on
 both engines after integration with the extracted presenter runtime.
+
+### Three-minute automatic recovery ·2026-10-24 (current)
+
+This supersedes the earlier 10-second disconnect and BFCache logout behavior.
+An established session keeps its in-memory identity/keys for up to 180 seconds
+without a peer response. Controls still lock after 2.5 seconds, on offline or
+hidden/pagehide suspension. A resumed page or replacement Broadcast channel must
+receive a new request-matched snapshot before commands are enabled. A late packet
+cannot revive a session after the deadline; elapsed wall time also covers OS sleep.
+
+Only transport errors retry (1.5-second backoff), within the existing deadline.
+Authentication/protocol failures and explicit end remain terminal. Channel
+callbacks and delayed send failures from retired generations are ignored; queued
+encryption work is invalidated on suspension. Commands are not retained/replayed.
+An action executed just before loss can remain unacknowledged; UI reports that
+uncertainty rather than retrying. Existing revision, ticket, replay and single
+pending-command guards remain. Output registry outages pause relay control while
+retaining links; control requires a fresh successful registry tick after recovery.
+
+BFCache restores keep the session and administrator identity. Normal navigation,
+reload, browser process eviction or explicit disconnect still releases in-memory
+credentials; this is not persistent automatic login. Server authorization expiry,
+revocation and the existing 8-hour maximum remain. No DB/schema change is needed.
+
+Scoped checks cover 179-second recovery, 180-second expiry, command denial while
+suspended, failed-send no replay, reconnect retries while hidden, two administrators
+plus one guest, isolated channel errors, short/long packet loss, lost acknowledgments,
+BFCache and actual Chromium renderer freeze. Physical phone radios remain distinct.

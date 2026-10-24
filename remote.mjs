@@ -1,7 +1,7 @@
-import {obtainOutputPairing} from './mindex.output-pairing.mjs?v=2';
-import {adminRpc,relayRegistration} from './mindex.remote-admin.mjs?v=4';
+import {obtainOutputPairing} from './mindex.output-pairing.mjs?v=3';
+import {adminRpc,relayRegistration} from './mindex.remote-admin.mjs?v=5';
 import {createPreview} from './remote.preview.mjs?v=1';
-import {openRemote} from './mindex.remote-session.mjs?v=9';
+import {openRemote} from './mindex.remote-session.mjs?v=10';
 import {setupPhoneExperience} from './remote.screen.mjs?v=4';
 window.lucide?.createIcons();
 const screenAwake=setupPhoneExperience();
@@ -71,7 +71,7 @@ $('adminLogout').onclick=async()=>{
  catch(e){$('status').textContent=e.message;}finally{ending=false;paint();}
 };
 setInterval(listOutputs,3000);
-window.addEventListener('pagehide',()=>{const token=adminToken;adminToken=null;if(token)void adminRpc(client,'mindex_remote_admin',{p_action:'logout',p_token:token}).catch(()=>{});});
+window.addEventListener('pagehide',event=>{if(event.persisted)return;const token=adminToken;adminToken=null;if(token)void adminRpc(client,'mindex_remote_admin',{p_action:'logout',p_token:token}).catch(()=>{});});
 function reset(){session=null;state(null);$('pairForm').hidden=false;$('disconnect').hidden=true;$('code').value='';paint();}
 function paint(){
  connectionForms();
@@ -125,7 +125,10 @@ for(const button of document.querySelectorAll('[data-action]'))button.onclick=as
  if(button.dataset.action==='output-stop'&&!confirm('선택한 예배의 송출을 종료할까요?'))return;
  try{const promise=session.command(button.dataset.action);$('result').textContent='처리 중…';paint();await promise;}catch(e){$('result').textContent=e.message;}paint();
 };
-document.addEventListener('visibilitychange',()=>{session?.refresh();paint();});
-window.addEventListener('pagehide',()=>session?.close());
+document.addEventListener('visibilitychange',()=>{if(document.hidden)session?.suspend();else session?.refresh();paint();});
+window.addEventListener('offline',()=>{session?.offline();paint();});
+window.addEventListener('online',()=>{session?.refresh();paint();});
+window.addEventListener('pagehide',event=>{if(event.persisted)session?.suspend();else session?.close();});
+window.addEventListener('pageshow',event=>{if(event.persisted){session?.refresh();paint();}});
 setInterval(paint,250);
 paint();
