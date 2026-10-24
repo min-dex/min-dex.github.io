@@ -13768,7 +13768,8 @@ async function copyPreviousDepartmentAnnouncements(service, scaffold) {
     source_kind: "mindex",
     source_ref: { ...cloneDepartmentAnnouncementValue(template?.source_ref || source.source_ref || {}), placeholder: false },
     config,
-    input_mode: source.input_mode || null,
+    input_mode: worshipDbInputModeForSave(source.input_mode) || worshipDbInputModeForSave(sourceConfig.inputMode || sourceConfig.input_mode)
+      || worshipDbInputModeForSave(serviceInputModeForElementType(template?.element_type || source.element_type)),
     content_state: cloneDepartmentAnnouncementValue(source.content_state || {}),
     review_status: source.review_status || null,
     template_modified: true,
