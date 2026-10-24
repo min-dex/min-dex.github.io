@@ -992,3 +992,12 @@ arrow. Preserve native selection, labels, focus, disabled and error states.
 New worship services start with a blank praise leader for every type/date.
 Changing the date or alias never replaces the entered name. Existing saved
 leaders and explicit blank values remain unchanged in worship and setlist views.
+
+### Setlist leader save completion ·2026-10-24
+
+Leader saves retain the attempted value and expected name after failure. Retry
+resolves that attempt before saving newer input; equal server values acknowledge
+a completed save without another write. Live saves replay only their own atomic
+request identity. Other pending requests and genuine remote-name conflicts remain
+blocked. Completion updates an open service only when its identity, leader fields
+and local-draft state are unchanged. Newer/replaced archive drafts remain intact.

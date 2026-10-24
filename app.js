@@ -25141,36 +25141,56 @@ function renderWorshipSetlistLeaderEditor(source) {
   </label>`;
 }
 
-async function persistWorshipSetlistLeader(id, value, expectedLeader) {
+async function persistWorshipSetlistLeader(id, value, expectedLeader, attempt = {}) {
   if (!state.client) throw new Error("DB 연결을 확인해 주세요.");
   const leader = cleanServiceAssignee(value);
   if (leader.length > 100) throw new Error("찬양인도자는 100자 이내로 입력해 주세요.");
   const serviceId = id.startsWith("worship:") ? id.slice(8) : "";
+  const editingService = state.services.find(service => service.id === serviceId);
+  const editingLeader = editingService && [editingService.praiseLeader, editingService.leader];
   let row;
   if (serviceId) {
     const atomic = await worshipAtomicClient();
+    const pending = atomic.pending?.(serviceId);
+    if (pending) {
+      if (!attempt.requestId || pending.request.requestId !== attempt.requestId) throw new Error("이전 예배 저장을 먼저 완료해 주세요.");
+      try { await atomic.commit({ serviceId }); } catch (error) {
+        if (error.message !== "ATOMIC_RETRY_COMMITTED_RELOAD_REQUIRED") throw error;
+      }
+    }
     if (sundayEditSyncHasLocalDraft(serviceId)) throw new Error("이 예배에 편집 중인 내용이 있습니다. 먼저 저장한 뒤 인도자를 변경해 주세요.");
     const aggregate = await atomic.read(serviceId);
-    if (sundayEditSyncHasLocalDraft(serviceId) || String(aggregate.service.praise_leader || "").trim() !== expectedLeader) {
+    if (sundayEditSyncHasLocalDraft(serviceId) || ![expectedLeader, leader].includes(String(aggregate.service.praise_leader || "").trim())) {
       throw new Error("다른 곳에서 인도자가 변경됐거나 편집 중입니다. 최신 예배를 확인해 주세요.");
     }
     const service = normalizeWorshipService(aggregate.service);
     const document = aggregate.service.source_ref?.[MINDEX_SERVICE_DOCUMENT_SOURCE_REF_KEY]
       || buildServiceDocumentSnapshot(service, groupWorshipElements(aggregate.sections, aggregate.elements)[serviceId] || []);
-    const committed = await atomic.commit({ serviceId, rows: { sections: [], elements: [] },
-      metadata: { praise_leader: leader }, document });
-    row = committed.service;
+    row = aggregate.service;
+    if (String(row.praise_leader || "").trim() !== leader) {
+      try {
+        const committed = await atomic.commit({ serviceId, rows: { sections: [], elements: [] },
+          metadata: { praise_leader: leader }, document });
+        row = committed.service;
+      } catch (error) {
+        attempt.requestId = atomic.pending?.(serviceId)?.request?.requestId;
+        throw error;
+      }
+    }
   } else {
     const current = await state.client.from("mindex_worship_import_sources")
       .select("id,raw_payload,updated_at").eq("id", id).single();
     if (current.error) throw current.error;
     const payload = current.data?.raw_payload || {};
-    if (String(payload.service?.leader || "").trim() !== expectedLeader) throw new Error("다른 곳에서 인도자가 변경됐어요. 새로고침 후 다시 확인해 주세요.");
-    const result = await state.client.from("mindex_worship_import_sources")
-      .update({ raw_payload: { ...payload, service: { ...payload.service, leader } } })
-      .eq("id", id).eq("updated_at", current.data.updated_at).select("id").maybeSingle();
-    if (result.error) throw result.error;
-    row = result.data;
+    if (![expectedLeader, leader].includes(String(payload.service?.leader || "").trim())) throw new Error("다른 곳에서 인도자가 변경됐어요. 새로고침 후 다시 확인해 주세요.");
+    if (String(payload.service?.leader || "").trim() === leader) row = current.data;
+    else {
+      const result = await state.client.from("mindex_worship_import_sources")
+        .update({ raw_payload: { ...payload, service: { ...payload.service, leader } } })
+        .eq("id", id).eq("updated_at", current.data.updated_at).select("id").maybeSingle();
+      if (result.error) throw result.error;
+      row = result.data;
+    }
   }
   if (!row) throw new Error("다른 곳에서 인도자가 변경됐어요. 새로고침 후 다시 확인해 주세요.");
   const archive = state.worshipSetlistArchive;
@@ -25178,7 +25198,10 @@ async function persistWorshipSetlistLeader(id, value, expectedLeader) {
     const live = archive.live?.services?.find(service => service.id === serviceId);
     if (live) live.praise_leader = leader;
     const service = state.services.find(service => service.id === serviceId);
-    if (service) { service.praiseLeader = leader; service.leader = leader; }
+    if (service && service === editingService && !sundayEditSyncHasLocalDraft(serviceId)
+      && service.praiseLeader === editingLeader[0] && service.leader === editingLeader[1]) {
+      service.praiseLeader = leader; service.leader = leader;
+    }
   } else {
     const source = archive.sources?.find(source => source.id === id);
     if (source) source.leader = leader;
@@ -25210,7 +25233,7 @@ async function saveWorshipSetlistLeader(id) {
   const draft = worshipSetlistLeaderDrafts.get(id);
   if (!draft || draft.saving) return;
   const value = cleanServiceAssignee(draft.value);
-  if (value === draft.original) {
+  if (value === draft.original && !draft.retry) {
     worshipSetlistLeaderDrafts.delete(id);
     updateWorshipSetlistLeaderInputs(id, value, false, value);
     return;
@@ -25218,12 +25241,29 @@ async function saveWorshipSetlistLeader(id) {
   draft.saving = true;
   updateWorshipSetlistLeaderInputs(id, draft.value, true);
   try {
-    const leader = await persistWorshipSetlistLeader(id, draft.value, draft.original);
-    worshipSetlistLeaderDrafts.delete(id);
-    updateWorshipSetlistLeaderInputs(id, leader, false, leader);
+    let leader = draft.original;
+    if (draft.retry) {
+      const retry = draft.retry;
+      leader = await persistWorshipSetlistLeader(id, retry.value, retry.original, retry);
+      draft.original = leader;
+      delete draft.retry;
+    }
+    if (value !== leader) {
+      const attempt = { value, original: leader };
+      draft.retry = attempt;
+      leader = await persistWorshipSetlistLeader(id, value, leader, attempt);
+      draft.original = leader;
+      delete draft.retry;
+    }
+    if (worshipSetlistLeaderDrafts.get(id) !== draft) return;
+    draft.saving = false;
+    if (cleanServiceAssignee(draft.value) === leader) {
+      worshipSetlistLeaderDrafts.delete(id);
+      updateWorshipSetlistLeaderInputs(id, leader, false, leader);
+    } else updateWorshipSetlistLeaderInputs(id, draft.value, false, leader);
   } catch (error) {
     draft.saving = false;
-    updateWorshipSetlistLeaderInputs(id, draft.value, false);
+    if (worshipSetlistLeaderDrafts.get(id) === draft) updateWorshipSetlistLeaderInputs(id, draft.value, false);
     showToast(error.message || "저장하지 못했어요. 다시 시도해 주세요.", "error");
   }
 }

@@ -1,7 +1,7 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const c={console,document:{addEventListener(){},querySelectorAll(){return []}},localStorage:{getItem(){return null}},setTimeout,clearTimeout,URL,URLSearchParams,crypto:require('node:crypto').webcrypto};c.window=c;c.location={search:'',hash:'',pathname:'/'};vm.createContext(c);
 for(const f of ['mindex.constants.js','mindex.worship-model.js','mindex.presenter.js','mindex.worship-input.js','mindex.worship-persistence.js','mindex.setlist-links.js','app.js'])vm.runInContext(fs.readFileSync(f,'utf8'),c,{filename:f});
-c.assert=assert;
+c.assert=assert;c.setImmediate=setImmediate;
 (async()=>{try{await vm.runInContext(`(async()=>{
  state.config.authRequired=true;state.services=[{id:'live',praiseLeader:'old',leader:'old'}];
  state.worshipSetlistArchive={loaded:true,live:{services:[{id:'live',praise_leader:'old'}]},sources:[{id:'archive',leader:'old'}]};
@@ -23,6 +23,33 @@ c.assert=assert;
  await saveWorshipSetlistLeader('archive');assert.equal(db.mindex_worship_import_sources.raw_payload.service.leader,'서영윤 선생님');
  const beforeNoop=writes;worshipSetlistLeaderDrafts.set('archive',{original:'서영윤 선생님',value:'서영윤 선생님',saving:false});await saveWorshipSetlistLeader('archive');assert.equal(writes,beforeNoop);
  fail=true;worshipSetlistLeaderDrafts.set('archive',{original:'서영윤 선생님',value:'보존할 이름',saving:false});await saveWorshipSetlistLeader('archive');assert.equal(worshipSetlistLeaderDrafts.get('archive').value,'보존할 이름');assert.equal(worshipSetlistLeaderDrafts.get('archive').saving,false);
+
  assert.equal(notifications.length,4);assert.ok(notifications.every(m=>m.kind==='setlist-archive'&&m.id==='all'));
- console.log('PASS live/archive leader save, field-only changes, conflict/failure, clear and dash placeholder');
+ fail=false;await saveWorshipSetlistLeader('archive');assert.equal(db.mindex_worship_import_sources.raw_payload.service.leader,'보존할 이름');
+ worshipSetlistLeaderDrafts.set('archive',{original:'보존할 이름',value:'',saving:false});await saveWorshipSetlistLeader('archive');assert.equal(db.mindex_worship_import_sources.raw_payload.service.leader,'');assert.match(renderWorshipSetlistLeaderEditor({id:'archive',leader:db.mindex_worship_import_sources.raw_payload.service.leader}),/value=""/);
+ fail=true;worshipSetlistLeaderDrafts.set('archive',{original:'',value:'실패 직전',saving:false});await saveWorshipSetlistLeader('archive');worshipSetlistLeaderDrafts.get('archive').value='실패 후 추가 입력';fail=false;await saveWorshipSetlistLeader('archive');assert.equal(db.mindex_worship_import_sources.raw_payload.service.leader,'실패 후 추가 입력');
+ console.log('PASS clear/reopen and rollback failure -> additional input -> retry');
+ const originalClient=state.client;
+ state.client={from(table){const q=originalClient.from(table),original=q.maybeSingle;q.maybeSingle=async()=>{await original();throw Error('lost acknowledgement')};return q}};
+ worshipSetlistLeaderDrafts.set('archive',{original:'실패 후 추가 입력',value:'',saving:false});await saveWorshipSetlistLeader('archive');assert.equal(db.mindex_worship_import_sources.raw_payload.service.leader,'');assert.equal(worshipSetlistLeaderDrafts.get('archive').value,'');
+ state.client=originalClient;let retryError='';showToast=x=>retryError=x;await saveWorshipSetlistLeader('archive');assert.equal(worshipSetlistLeaderDrafts.has('archive'),false);assert.equal(retryError,'');
+ console.log('PASS archive lost acknowledgement resolved by readback without duplicate write');
+ let releaseCommit;worshipAtomicClient=async()=>({read:async()=>({service:{...db.mindex_worship_services,source_ref:{mindexServiceDocument:{sourceText:'Keep'}}},sections:[],elements:[]}),commit:request=>new Promise(resolve=>{releaseCommit=()=>{Object.assign(db.mindex_worship_services,request.metadata);resolve({service:{...db.mindex_worship_services}})}})});
+ const saving=persistWorshipSetlistLeader('worship:live','',db.mindex_worship_services.praise_leader);await new Promise(setImmediate);
+ state.services[0].leader='다른 편집창 추가 입력';state.services[0].praiseLeader='다른 편집창 추가 입력';releaseCommit();await saving;
+ assert.equal(state.services[0].leader,'다른 편집창 추가 입력');assert.equal(state.services[0].praiseLeader,'다른 편집창 추가 입력');
+ console.log('PASS live completion preserves newer service editor input');
+ let pending=null;let lose=true;let replayCount=0;
+ worshipAtomicClient=async()=>({pending:()=>pending,read:async()=>({service:{...db.mindex_worship_services,source_ref:{mindexServiceDocument:{sourceText:'Keep'}}},sections:[],elements:[]}),commit:async request=>{
+  if(pending){replayCount++;pending=null;throw Error('ATOMIC_RETRY_COMMITTED_RELOAD_REQUIRED')}
+  Object.assign(db.mindex_worship_services,request.metadata);
+  if(lose){pending={request:{requestId:'owned-attempt'}};throw Error('lost acknowledgement')}
+  return {service:{...db.mindex_worship_services}};
+ }});
+ worshipSetlistLeaderDrafts.set('worship:live',{original:'',value:'첫 시도',saving:false});await saveWorshipSetlistLeader('worship:live');
+ assert.equal(worshipSetlistLeaderDrafts.get('worship:live').retry.requestId,'owned-attempt');
+ worshipSetlistLeaderDrafts.get('worship:live').value='추가 입력';lose=false;await saveWorshipSetlistLeader('worship:live');assert.equal(replayCount,1);assert.equal(db.mindex_worship_services.praise_leader,'추가 입력');assert.equal(worshipSetlistLeaderDrafts.has('worship:live'),false);
+ pending={request:{requestId:'unrelated'}};await assert.rejects(persistWorshipSetlistLeader('worship:live','x','추가 입력'),/이전 예배 저장/);assert.equal(replayCount,1);
+ console.log('PASS owned atomic replay before newer input, unrelated pending request protected');
+
 })()`,c);}catch(e){console.error(e);process.exitCode=1}})();
