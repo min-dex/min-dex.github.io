@@ -4550,3 +4550,29 @@ The controls wrap by available width and share vertical alignment on each line.
 The label remains explicitly associated with its input. Preparation-editor
 song-form help inherits the 30px dense field height. No timing, draft, playback
 or output behavior changes.
+
+## 2026-10-24 — 어린이부 기본 예배 구성 정상화
+
+`docs/manuals/operations.md`의 어린이부 순서를 구조화된 fallback template로
+반영한다. 준비 → 사도신경 → 찬양(빈 곡 항목 4개) → 예배의 부름 →
+성경봉독 → 설교 → 결단기도 → 봉헌(봉헌찬양·봉헌기도) →
+나래파송(공동체고백) → 주기도문 → 광고 → 교제 순서다.
+준비는 기존 공통 첫 항목 규칙을 따른다. 봉헌 자체를 빈 본문 요소로
+추가하지 않고 두 하위 요소를 같은 봉헌 섹션에 둔다.
+
+설교는 제목·담당자와 인용 구절, 성경봉독은 성경 본문, 나래파송은
+기존 공동체고백 renderer를 사용한다. 어린이부 공동체 이름과 기존
+사도신경·주기도문 본문 규칙을 재사용한다. 고정 찬양곡·새 가사·음원·
+담당자를 임의로 등록하지 않는다. 유치부 템플릿과 자동 생성 정책은
+이번 변경 범위에 포함하지 않는다.
+
+기존 입력 내용·ID·송폼을 보존하며 운영 DB를 일괄 재작성하지 않는다.
+저장은 기존 atomic save를 유지한다. 로컬 검증과 웹 배포는 별도다.
+
+검증: `test_children_worship_template.cjs`(기본 순서·찬양 4곡·봉헌 계층·
+본문 유형·기존 항목 ID/입력/송폼 보존), `test_calendar_assignee_creation.cjs`
+(부서별 담당자 atomic create), `test_app_runtime.cjs` 통과.
+`smoke_future_outline_consistency.py`는 격리 최신 main 후보의 Chromium·WebKit에서
+각각 14개 예배 유형, 140개 편집 요약과 출력/입력 불변성을 통과했다.
+새 회귀 검사는 기본 Cloud gate에 등록했고 분할/실패 전파 검사 5개도 통과했다.
+운영 저장은 미실행이며 웹 배포 근거는 별도 release receipt로 기록한다.

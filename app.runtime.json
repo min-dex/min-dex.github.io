@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261024-reference-input-guards",
+  "version": "20261024-children-worship-order",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "bbfad447e68131c26fdfe8ccfde23b939d8ac21e6b66c573536e1f03431d16d5",
-  "runtime_sha256": "5b0e7397fbd5b28aa66db2a0787ab6c339b8fa201a87eab4ebf0638479611eeb",
-  "source_bytes": 1342229,
-  "runtime_bytes": 958387,
-  "source_gzip": 305725,
-  "runtime_gzip": 239823
+  "source_sha256": "333669c2de1563549aee571c95610e69de4e8d2c1da7d0ff2fa168947c34c530",
+  "runtime_sha256": "b8c2effec3f6768c6da0110c79e9f23018ae36c2843a5161c1e8035fde96d836",
+  "source_bytes": 1343229,
+  "runtime_bytes": 959215,
+  "source_gzip": 305912,
+  "runtime_gzip": 239958
 }

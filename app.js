@@ -21481,6 +21481,27 @@ function publicWorshipResponseStep() {
   };
 }
 
+function childrenWorshipTemplate() {
+  return [
+    { ...publicWorshipCreedStep(), label: "사도신경", name: "사도신경" },
+    publicWorshipPraiseStep({ count: 4, required: true }),
+    { label: "예배의 부름", name: "예배의 부름", required: true, flex: false,
+      sectionKey: "opening", elementType: "body" },
+    publicWorshipScriptureReadingStep(),
+    publicWorshipSermonStep({ typeId: "children" }),
+    { label: "결단기도", name: "결단기도", required: true, flex: false,
+      sectionKey: "response_prayer", elementType: "title", default_text: "결단기도" },
+    publicWorshipOfferingStep({ typeId: "children", praiseLabel: "봉헌찬양" }),
+    { label: "나래파송", name: "나래파송", required: true, flex: false,
+      sectionKey: "community_confession", elements: [publicWorshipCommunityConfessionElement()] },
+    publicWorshipLordsPrayerStep(),
+    { label: "광고", name: "광고", required: true, flex: false,
+      sectionKey: "announcements", elementType: "plain_text" },
+    { label: "교제", name: "교제", required: false, flex: true,
+      sectionKey: "fellowship", elementType: "title" },
+  ];
+}
+
 function youthWorshipTemplate({ revisedOrder = false } = {}) {
   const steps = [
     publicWorshipReadyStep(),
@@ -22093,7 +22114,7 @@ const SERVICE_ORDER_TEMPLATE_FALLBACKS = {
   "holy-week-dawn": ["찬양", "기도", "성경봉독", "설교", "기도"],
   omer: ["찬양", "기도", "특송", "결단"],
   special: [],
-  children: ["사도신경", "찬양", "예배의 부름", "성경봉독", "설교", "결단기도", "봉헌", "봉헌찬양", "봉헌기도", "나래파송", "주기도문", "광고", "교제"],
+  children: childrenWorshipTemplate(),
   nursery: ["사도신경", "찬양", "예배의 부름", "성경봉독", "설교", "결단기도", "봉헌", "봉헌찬양", "봉헌기도", "나래파송", "주기도문", "광고", "교제"],
   youth: youthWorshipTemplate(),
   "young-adult": youngAdultWorshipTemplate(),
