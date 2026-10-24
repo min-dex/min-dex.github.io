@@ -4465,6 +4465,7 @@ function renderPresenterTitleAssigneeSlide(slide) {
   const orderTitle = String(slide.orderTitle || "").trim();
   const rawContentTitle = String(slide.contentTitle || "").trim();
   const contentTitle = PRESENTER_SONG_NOTE_PATTERN.test(rawContentTitle) ? formatPresenterSongTitleText(rawContentTitle) : rawContentTitle;
+  const contentMarkup = PRESENTER_SONG_NOTE_PATTERN.test(contentTitle) ? renderPresenterSongText(contentTitle, slide) : escapeHtml(contentTitle);
   const titleChars = presenterLineCharEstimate(title);
   const assigneeChars = presenterLineCharEstimate(assignee);
   const orderChars = presenterLineCharEstimate(orderTitle);
@@ -4472,7 +4473,7 @@ function renderPresenterTitleAssigneeSlide(slide) {
   if (presenterTitleAssigneeIsSermon(slide) && contentTitle && assignee) {
     return `
       <div class="presenter-slide-text presenter-title-assignee presenter-title-assignee--sermon">
-        <span class="presenter-title-assignee-content" style="--line-chars: ${escapeAttr(contentChars)}">${escapeHtml(contentTitle)}</span>
+        <span class="presenter-title-assignee-content" style="--line-chars: ${escapeAttr(contentChars)}">${contentMarkup}</span>
         <span class="presenter-title-assignee-person" style="--line-chars: ${escapeAttr(assigneeChars)}">${escapeHtml(assignee)}</span>
       </div>
     `;
@@ -4481,7 +4482,7 @@ function renderPresenterTitleAssigneeSlide(slide) {
     return `
       <div class="presenter-slide-text presenter-title-assignee presenter-title-assignee--order-content">
         <span class="presenter-title-assignee-order" style="--line-chars: ${escapeAttr(orderChars)}">${escapeHtml(presenterOrderDisplayLabel(orderTitle))}</span>
-        <span class="presenter-title-assignee-content" style="--line-chars: ${escapeAttr(contentChars)}">${escapeHtml(contentTitle)}</span>
+        <span class="presenter-title-assignee-content" style="--line-chars: ${escapeAttr(contentChars)}">${contentMarkup}</span>
       </div>
     `;
   }
@@ -4489,7 +4490,7 @@ function renderPresenterTitleAssigneeSlide(slide) {
     return `
       <div class="presenter-slide-text presenter-title-assignee presenter-title-assignee--three-part">
         <span class="presenter-title-assignee-order" style="--line-chars: ${escapeAttr(orderChars)}">${escapeHtml(presenterOrderDisplayLabel(orderTitle))}</span>
-        <span class="presenter-title-assignee-content" style="--line-chars: ${escapeAttr(contentChars)}">${escapeHtml(contentTitle)}</span>
+        <span class="presenter-title-assignee-content" style="--line-chars: ${escapeAttr(contentChars)}">${contentMarkup}</span>
         <span class="presenter-title-assignee-person" style="--line-chars: ${escapeAttr(assigneeChars)}">${escapeHtml(assignee)}</span>
       </div>
     `;
@@ -4669,7 +4670,6 @@ function renderPresenterSlideText(slide) {
 
 function renderPresenterSongText(text, slide) {
   const raw = String(text || " ");
-  if (presenterSlideElementType(slide) !== PRESENTER_ELEMENT_TYPES.PRAISE && !slide.fullscreenSongTitle) return escapePresenterSlideLine(raw, slide);
   const match = raw.match(/^(\s*)([\u2669\u266A\u266B\u266C])(\s*)(.*)$/u);
   if (!match) return renderPresenterHighlightedText(raw, slide);
   const [, leading, , spacing, rest] = match;

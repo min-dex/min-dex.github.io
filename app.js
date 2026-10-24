@@ -20190,7 +20190,7 @@ function parseBibleReferenceFromNormalizedText(text, translation = null) {
   const lookup = name => { const book = findBibleBookByReferenceName(name); return translation ? bibleReferenceBookForTranslation(book, translation) : book; };
   const special=text.match(/^(.+?)\s+([^:\s]+)(?::\s*(\d+)(?:\s*-\s*(\d+))?)?$/);
   if(special){const book=lookup(special[1]);const option=book?.metadata?.chapter_options?.find(c=>c.label===special[2]);
-    if(option){if(special[3] && Number(special[3])<1)return null;const verse=Number(special[3])||null,verseEnd=Number(special[4])||null;if(verseEnd && verseEnd<(verse||1))return null;return {book,chapter:option.key,verse,verseEnd};}}
+    if(option){if(special[3] && Number(special[3])<1)return null;const verse=Number(special[3])||null,verseEnd=Number(special[4])||null;if(verseEnd && verseEnd<(verse||1))return null;return {book,chapter:option.key,verse,verseEnd:verseEnd===verse?null:verseEnd};}}
 
   const match =
     text.match(/^(.+?)\s+(\d{1,3})\s+(\d{1,3})(?:\s*-\s*(\d{1,3}))?$/) ||
@@ -20200,7 +20200,7 @@ function parseBibleReferenceFromNormalizedText(text, translation = null) {
   if (!book) return null;
   const chapter = Number(match[2]);
   const verse = match[3] ? Number(match[3]) : null;
-  const verseEnd = match[4] ? Number(match[4]) : null;
+  const verseEnd = match[4] && Number(match[4]) !== verse ? Number(match[4]) : null;
   if (!chapter || chapter < 1 || (verse !== null && verse < 1) || (verseEnd !== null && verseEnd < verse)) return null;
   const options = book.metadata?.chapter_options;
   if (options ? !options.some(option => option.key === chapter && option.label === String(chapter))

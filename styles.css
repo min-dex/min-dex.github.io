@@ -3279,7 +3279,7 @@ body[data-module="praise"] .song-count-badge {
 .background-toolbar > .reference-new-btn { flex:0 0 auto; }
 
 /* The help affordance shares the form field's allocated column, never its text. */
-.svc-form-hint-slot { position: relative; display: inline-flex; min-width: 0; padding: 0; background: transparent; }
+.svc-form-hint-slot:has(> input) { position: relative; display: inline-flex; min-width: 0; padding: 0; background: transparent; }
 .svc-form-hint-slot > input.svc-form-hint { width: calc(100% - 28px) !important; max-width: none !important; min-width: 0; flex: 1 1 auto; box-sizing: border-box; }
 .svc-form-help-button { align-self: stretch; flex: 0 0 28px; width: 28px; min-width: 28px; padding: 0; border: 0; border-radius: var(--r); background: transparent; color: var(--muted); font: inherit; font-size: 18px; cursor: pointer; }
 .svc-form-help-button:hover { color: var(--ink); background: var(--accent-soft); }

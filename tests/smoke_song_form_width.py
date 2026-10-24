@@ -1,4 +1,6 @@
 """Actual song editor allocates space to forms, without a disconnect control."""
+import os
+os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from urllib.parse import urlsplit
 from smoke_app import launch_chromium,start_local_app_server,sync_playwright
 server,url=start_local_app_server()
@@ -29,6 +31,7 @@ try:
      for width in [1500,1200,1100,800,520,360]:
       page.locator('#width-host').evaluate('(e,w)=>e.style.width=w+"px"',width)
       result=page.evaluate('''()=>{const host=document.querySelector('#width-host'),title=host.querySelector('.svc-edit-title'),form=host.querySelector('.svc-form-hint'),row=host.querySelector('.svc-inline-song');const t=title.getBoundingClientRect(),f=form.getBoundingClientRect(),r=row.getBoundingClientRect();return {title:t.width,form:f.width,sameRow:Math.abs(t.y-f.y)<1,overflow:row.scrollWidth>row.clientWidth+1,formFull:Math.abs(f.width-r.width)<1}}''')
+      assert page.locator('.svc-form-hint-slot').first.evaluate("e=>getComputedStyle(e).backgroundColor==='rgba(0, 0, 0, 0)' && getComputedStyle(e).paddingLeft==='0px'"),(engine,theme,width)
       assert not result['overflow'],(engine,theme,db_link,width,result)
       if width>1120:assert result['sameRow'] and min(result['form'],result['title'])>=200,(engine,width,result)
       elif width>=800:assert result['sameRow'] and result['form']>=120,(engine,width,result)

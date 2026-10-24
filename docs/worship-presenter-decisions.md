@@ -4533,6 +4533,15 @@ Retained snapshots with ♪, ♩ or ♫ normalize only while rendering. No saved
 forms, versions, service links or operational records are rewritten.
 
 
+## Consistent song-note proportions ·2026-10-24
+
+All musical title notes share a .55 title-font ratio. Inline notes use the same
+span renderer in main Title and order/content captions; its sizing overrides the
+generic slide-span inheritance. The separate fullscreen heading uses the same
+ratio against the song-title token. Keep placement, colors, title sizing, content
+and saved worship data unchanged.
+
+
 ## Timing popup control alignment ·2026-10-24
 
 Keep each lyric/photo label above its start-time input and stamp/nudge controls.

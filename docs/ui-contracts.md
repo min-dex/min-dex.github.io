@@ -955,3 +955,12 @@ Preparation-editor song-form help shares the dense field height, as in section
 editing. Timing rows retain their associated lyric/photo label above a wrapping
 row of start-time input and stamp/nudge buttons. Align controls to each other,
 not to the combined lyric/photo height; preserve labels, focus and timing values.
+
+### Song-form help surface ·2026-10-24
+
+The song-form help wrapper is layout-only: transparent with zero inset, including
+when later workspace styles load. Keep the controller input underline and adjacent
+help icon, without a second filled box. Retain the existing field geometry,
+keyboard/pointer help behavior, selection and focus indicators.
+
+
