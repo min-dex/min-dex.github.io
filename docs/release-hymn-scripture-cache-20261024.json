@@ -1,0 +1,19 @@
+{
+  "status": "validated-components-awaiting-combined-gate",
+  "components": {
+    "hymnLayout": "2502e06a",
+    "scriptureEditionReadiness": "6b8dcd8b08b02067a8c2c0de5795881ad2051c76",
+    "pipDownloadCache": "6b81cb38c25cfb125ec23dd367c700f0f0e0b1d2"
+  },
+  "coordinator": "codex/hymn-full-layout-recheck",
+  "releaseTicket": "25f94ebc354b420cbbd5c6783a76b086",
+  "scopeFrozen": true,
+  "checks": [
+    "1203 hymn editions and 364 saved references: Chromium/WebKit, three viewports, text/order retained and overflow 0",
+    "hymn runtime/introduction/slide estimate unit tests; hymn metadata browser checks",
+    "scripture parallel preload unit and delayed catalogue browser checks",
+    "Pages gate, scope selection, exact-SHA reuse and partition/failure propagation tests"
+  ],
+  "productionWorshipWrites": 0,
+  "publicationRule": "All four combined exact-SHA shards must pass, then Pages and public bytes must match. Individual component checks do not authorize publication."
+}
