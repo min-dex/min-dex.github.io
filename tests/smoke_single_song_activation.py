@@ -12,10 +12,10 @@ try:
    page.wait_for_function("typeof normalizeServerSong==='function' && typeof ensureSingleSongActivation==='function'")
    print(engine,page.evaluate('''async()=>{
     const check=(v,m)=>{if(!v)throw Error(m)};
-    const records=Array.from({length:201},(_,i)=>({id:'ccm-'+String(i+1).padStart(3,'0'),revision:1,metadata:{title:'fixture '+i,praise_types:['ccm']},content:{name:'기본',forms:[]},relations:{same_song:[],related:[]}}));
+    const records=Array.from({length:201},(_,i)=>({id:'SONG-CONT-'+String(i+1).padStart(4,'0')+'-0001',revision:1,metadata:{title:'fixture '+i,praise_types:['ccm']},content:{name:'기본',forms:[]},relations:{same_song:[],related:[]}}));
     delete globalThis.MINDEX_SINGLE_SONG_BOOTSTRAP_READY;
     let mode='native',calls=0,broken=false,drift=false,finalReads=0;
-    const status=()=>({protocol:1,phase:mode,epoch:'1',recordCount:records.length,manifest:drift&&finalReads>1?'changed':'fixture'});
+    const status=()=>({protocol:1,idFormat:'4-4-4-4',phase:mode,epoch:'1',recordCount:records.length,manifest:drift&&finalReads>1?'changed':'fixture'});
     const client={rpc:async(name,args)=>{
       calls++;if(broken)return {error:{code:'57014',message:'timeout'}};
       if(name==='get_praise_storage_status_v1'){finalReads++;return {data:status()};}
