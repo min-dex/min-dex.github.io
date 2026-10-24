@@ -1,3 +1,5 @@
+import os
+os.environ["MINDEX_SMOKE_OFFLINE"] = "1"
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 
@@ -5,7 +7,7 @@ def run(browser, url, engine):
     page = browser.new_page(viewport={'width': 1440, 'height': 900})
     page.route('**/*supabase*/**', lambda route: route.abort())
     page.goto(url, wait_until='domcontentloaded')
-    page.wait_for_function("typeof renderSingleVersionForms === 'function'")
+    page.wait_for_function("typeof renderSingleVersionForms === 'function' && !document.body.classList.contains('ui-booting')")
     page.evaluate('''() => {
       state.client=state.client||{};state.auth.session={user:{id:'offline-fixture'}};state.connectionError='';
       state.module='praise';state.selectedSongId='fixture';state.selectedVersionId='v1';

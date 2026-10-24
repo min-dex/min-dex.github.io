@@ -871,3 +871,23 @@ selected song. A failed read or input/selection change during the read blocks
 navigation and retains dirty input and the outstanding save request. Only a
 successful unchanged read replaces the selected song, clears its pending retry,
 and captures the clean baseline. Other songs and playback are untouched.
+
+
+### Presenter input row density ·2026-10-24
+
+Worship controller fields wrap by available width with 180px general field,
+140px assignee, 144px linked version and 110px form preferred widths. Keep
+song titles at their existing 140px minimum and allow whole controls to wrap
+on narrow cards. Corporate prayer assignees stack only below361px of group
+width. Expanded lyrics, announcements and multi-part scripture retain their
+separate content rows. Values, tab order and atomic save behavior are unchanged.
+
+
+### Utility input density ·2026-10-24
+
+Supersedes earlier column thresholds: metadata uses two columns from340px of
+content width and Praise three from520px. Reference title/URL use two columns
+from440px, with group as a third from680px. Section name/assignee and add controls
+remain side by side from420px. Background target/file/actions wrap by actual
+panel width with170/220px preferred field widths, independent of viewport.
+Keep narrow layouts, labels, focus, input order and draft/save semantics.

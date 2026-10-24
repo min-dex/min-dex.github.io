@@ -1,3 +1,5 @@
+import os
+os.environ["MINDEX_SMOKE_OFFLINE"] = "1"
 import argparse
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
@@ -14,7 +16,7 @@ def main():
                 page = browser.new_page()
                 page.route('**/*supabase*/**', lambda route: route.abort())
                 page.goto(url, wait_until='domcontentloaded')
-                page.wait_for_function("typeof renderBibleReader === 'function'")
+                page.wait_for_function("typeof renderBibleReader === 'function' && !document.body.classList.contains('ui-booting')")
                 for theme in ('light', 'dark'):
                     for width in (320, 390, 1440):
                         page.set_viewport_size({'width': width, 'height': 900})

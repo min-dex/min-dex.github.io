@@ -1961,12 +1961,12 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   grid-template-columns: minmax(0, 1fr);
   gap: 10px;
 }
-@container (min-width: 600px) {
+@container (min-width: 440px) {
   .reference-editor-main {
     grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
   }
 }
-@container (min-width: 900px) {
+@container (min-width: 680px) {
   .reference-editor-main:has(> label:nth-child(3)) {
     grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
   }
@@ -2710,11 +2710,11 @@ body[data-module="scripture"] .scripture-editor .meta-attribute-label {
   grid-template-columns: minmax(0, 1fr);
   gap: var(--s2);
 }
-@container metadata-editor (min-width: 400px) {
+@container metadata-editor (min-width: 340px) {
   .metadata-popover-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .scripture-metadata-popover-grid { grid-template-columns: minmax(0, 1.2fr) minmax(0, .9fr); }
 }
-@container metadata-editor (min-width: 570px) {
+@container metadata-editor (min-width: 520px) {
   .metadata-popover-grid:not(.scripture-metadata-popover-grid) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 .metadata-popover-grid .field {
@@ -7158,7 +7158,7 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
   padding-left: 2px;
 }
 .svc-board-subgroup-controls .svc-presenter-input-field {
-  flex: 1 1 220px;
+  flex: 1 1 180px;
   max-width: 100%;
   display: grid;
   min-width: 0;
@@ -7190,7 +7190,7 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
   min-width: 156px;
 }
 .svc-board-subgroup-controls .svc-presenter-input-field--assignee {
-  flex: 0 1 180px;
+  flex: 0 1 140px;
   grid-column: 2;
 }
 .svc-board-subgroup-controls .svc-presenter-input-field > span {
@@ -7303,8 +7303,8 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
   flex-wrap: wrap;
 }
 .svc-board-subgroup-controls .svc-song-picker--linked:has(.svc-song-version-select) {
-  flex: 0 1 184px;
-  width: 184px;
+  flex: 0 1 144px;
+  width: 144px;
 }
 .svc-board-subgroup-controls .svc-song-picker--linked .svc-song-version-select {
   flex: 1 1 0;
@@ -7319,7 +7319,7 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
 .svc-board-subgroup-controls .svc-presenter-input-field--song .svc-form-hint.compact {
   height: 30px;
   /* Keep the base width for wrapping, but use spare room so long forms stay readable. */
-  flex: 1 1 144px;
+  flex: 1 1 110px;
   max-width: 240px;
 }
 .svc-board-subgroup-control-item > .svc-presenter-input-field--song,
@@ -7430,7 +7430,7 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
 .svc-board-subgroup-controls .svc-presenter-input-group--corporate-prayer > .svc-presenter-input-field {
   grid-template-columns: max-content minmax(0, 1fr) minmax(130px, .35fr);
 }
-@container (max-width: 480px) {
+@container (max-width: 360px) {
   .svc-board-subgroup-controls .svc-presenter-input-group--corporate-prayer > .svc-presenter-input-field {
     grid-template-columns: max-content minmax(0, 1fr);
   }
@@ -8098,7 +8098,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
     width: calc(100vw - 20px);
   }
 }
-@container section-editor (max-width: 549px) {
+@container section-editor (max-width: 419px) {
   .presenter-section-editor-item,
   .presenter-section-editor-add {
     grid-template-columns: minmax(0, 1fr);
@@ -9729,3 +9729,9 @@ body[data-module="praise"] .praise-forms-panel .version-compare-head > .version-
 /* Version-owned saved audio summary wraps without competing with title inputs. */
 .version-audio-summary { flex: 0 0 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; line-height: 1.5; color: var(--ink-3); }
 .version-audio-summary > span { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+
+/* Background fields follow their panel width, including narrow desktop panes. */
+.background-toolbar { display:flex; flex-wrap:wrap; gap:10px; }
+.background-toolbar > .background-field { flex:1 1 170px; min-width:0; }
+.background-toolbar > .background-file-field { flex:1.3 1 220px; }
+.background-toolbar > .reference-new-btn { flex:0 0 auto; }
