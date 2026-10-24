@@ -979,3 +979,10 @@ Reserve 30px for the month selector arrow independently of the common input
 inset. Keep leader metadata right-aligned, with a transparent resting input
 and field surface on hover/keyboard focus. Editing, auto-save, draft retention
 and focus outlines remain unchanged.
+
+### Select arrow clearance ·2026-10-24
+
+Ordinary workspace selects use one shared arrow and a 30px trailing inset.
+The common field padding consumes the same inset token so later specificity
+cannot collapse text clearance. Version/type wrappers do not draw a second
+arrow. Preserve native selection, labels, focus, disabled and error states.
