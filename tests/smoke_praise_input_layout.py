@@ -12,7 +12,7 @@ try:
     page.evaluate('''()=>{
      const sid=crypto.randomUUID(),songId=crypto.randomUUID(),vid=crypto.randomUUID();
      const service={id:sid,type_id:'layout-fixture',title:'Fixture'};
-     const song={id:songId,title:'교회',_relationalVersionsLoaded:true,praise_types:['ccm'],versions:[{id:vid,name:'대흥교회',forms:[{part_type:'Verse',lyrics:'가사'}]},{id:crypto.randomUUID(),name:'기본',forms:[]}]};
+     const song={id:songId,title:'교회',_relationalVersionsLoaded:true,praise_types:['ccm'],versions:[{id:vid,name:'한영 혼용 라이브 버전',forms:[{part_type:'Verse',lyrics:'가사'}]},{id:crypto.randomUUID(),name:'기본',forms:[]}]};
      state.songs=[song];state.services=[service];state.selectedServiceId=sid;
      const item=normalizeServiceItem({id:crypto.randomUUID(),service_id:sid,label:'특송',raw_title:'교회',song_id:songId,version_id:vid,assignee:'카다로스 중창단',memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formHint:'V1-V2-C-Int-V3-C-Int-C'})});state.serviceItems={[sid]:[item]};
      const model=serviceItemEditorModel(item,{service});model.showAssignee=true;model.assigneeValue='카다로스 중창단';
@@ -25,7 +25,7 @@ try:
       const host=document.querySelector('.svc-board-subgroup-controls');const mode=host.querySelector('.svc-praise-input-mode-control');const ver=host.querySelector('.svc-song-picker--linked .svc-song-version-control');
       if(!mode||!ver)throw Error('missing picker');
       if(host.querySelector('.svc-progression-media'))throw Error('duplicate progression');
-      for(const wrapper of [mode,ver])if(getComputedStyle(wrapper,'::after').right!=='12px')throw Error('arrow inset');
+      for(const wrapper of [mode,ver]){const select=wrapper.querySelector('select'),style=getComputedStyle(select);if(getComputedStyle(wrapper,'::after').content!=='none'||style.backgroundImage==='none')throw Error('select must have one shared arrow');if(parseFloat(style.paddingRight)<25)throw Error('arrow text clearance');const value=select.value;select.focus();if(document.activeElement!==select||getComputedStyle(select).outlineStyle==='none'||select.value!==value)throw Error('select focus/value changed');}
       const boxes=[...host.querySelectorAll('input,select')].map(el=>({el,r:el.getBoundingClientRect()}));
       for(const {r} of boxes)if(r.width<=0||r.right>host.getBoundingClientRect().right+1)throw Error('overflow');
       for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){const a=boxes[i].r,b=boxes[j].r;if(Math.min(a.right,b.right)>Math.max(a.left,b.left)+1&&Math.min(a.bottom,b.bottom)>Math.max(a.top,b.top)+1)throw Error('overlap');}
