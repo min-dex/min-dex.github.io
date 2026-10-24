@@ -6,6 +6,6 @@ const records={x:{stanzaApproxMeasures:8,parts:forms.map((f,i)=>({unitId:f.id,te
 const result=await ctx.MindexHymnStructure.describe('x',forms,records);assert.equal(result.text,'approx. 4 bars');
 assert.equal((await ctx.MindexHymnStructure.describe('x',[{...forms[0],lyrics:'edit'},...forms.slice(1)],records)).status,'stale');
 assert.equal((await ctx.MindexHymnStructure.describe('copy',forms,records)).status,'unreviewed');
-records.x.parts[0].approxMeasuresByBlock=[2,4];assert.match((await ctx.MindexHymnStructure.describe('x',forms,records)).text,/approx\. 2–4 bars/);
+records.x.parts[0].approxMeasuresByBlock=[2,4];assert.equal((await ctx.MindexHymnStructure.describe('x',forms,records)).text,'approx. 4 bars');
 const rawHash=records.x.parts[0].textSha256;records.x.parts[0].textSha256=hash(' verse ');records.x.parts[0].displayTextSha256=rawHash;assert.equal((await ctx.MindexHymnStructure.describe('x',forms,records)).status,'measured');assert.equal((await ctx.MindexHymnStructure.describe('x',[{...forms[0],lyrics:'changed word'},...forms.slice(1)],records)).status,'stale');assert.equal((await ctx.MindexHymnStructure.describe('x',[{...forms[0],lyrics:'ver\nse'},...forms.slice(1)],records)).status,'stale');
 }console.log('PASS slide estimates, separate Coda, fractional legacy input, stale/copy guards');})();

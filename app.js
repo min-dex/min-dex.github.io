@@ -12304,7 +12304,9 @@ async function fetchServiceScriptureVerses(reference, requestedTranslation = nul
     !state.bibleTranslations.length && !state.bibleReaderError
       ? loadBibleTranslations({ silent: true }) : Promise.resolve(),
   ]);
-  const translation = requestedTranslation || selectedPresenterBibleTranslation();
+  const translation = requestedTranslation?.retiredId
+    ? serviceBibleTranslationById(requestedTranslation.retiredId)
+    : requestedTranslation || selectedPresenterBibleTranslation();
   if (!translation?.id || !state.bibleTranslations.some(t=>t.id===translation.id)) return [];
   if (state.client?.auth && !isUuid(translation.id)) return [];
   const targetBook = bibleReferenceBookForTranslation(reference?.book, translation);
@@ -19162,7 +19164,10 @@ function scriptureReferenceProblem(result) {
 async function validateScriptureReferences(value, translation = null) {
   await ensureBibleBookLookups();
   if (!state.bibleTranslations.length && !state.bibleReaderError) await loadBibleTranslations({ silent: true });
-  translation = translation || selectedPresenterBibleTranslation();
+  // A choice resolved before the catalogue loaded may now be available.
+  translation = translation?.retiredId
+    ? serviceBibleTranslationById(translation.retiredId)
+    : translation || selectedPresenterBibleTranslation();
   const result = inspectScriptureReferences(value, translation);
   if (!result.valid) throw new Error(scriptureReferenceProblem(result));
   if (!result.entries.length) return result;

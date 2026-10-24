@@ -400,8 +400,8 @@
           "approxMeasuresByBlock": [
             8,
             9,
-            6,
-            6
+            7,
+            5
           ],
           "approxMeasures": 29,
           "reviewStatus": "score_supported_approximation"
@@ -414,8 +414,8 @@
           "approxMeasuresByBlock": [
             8,
             9,
-            6,
-            6
+            7,
+            5
           ],
           "approxMeasures": 29,
           "reviewStatus": "score_supported_approximation"
@@ -428,8 +428,8 @@
           "approxMeasuresByBlock": [
             8,
             9,
-            6,
-            6
+            7,
+            5
           ],
           "approxMeasures": 29,
           "reviewStatus": "score_supported_approximation"
@@ -442,8 +442,8 @@
           "approxMeasuresByBlock": [
             8,
             9,
-            6,
-            6
+            7,
+            5
           ],
           "approxMeasures": 29,
           "reviewStatus": "score_supported_approximation"
@@ -1468,7 +1468,7 @@
         {
           "unitId": "993e1d5f-b746-4b65-9254-f448e1fbcbb3",
           "kind": "Verse",
-          "textSha256": "4d0208acd82770b29ad0a65c3153744934c3b249d62e3f23903fbac38c729878",
+          "textSha256": "bf09c591c45ccf1abd8ecd90d37242cebb049812d8c4e6008cdadb91c8bea32b",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -1726,8 +1726,8 @@
           "textSha256": "76dc10d293fa9adaef6107cf42466db933b62741c5f7e2e906ac918b9bad894b",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            3,
-            3,
+            4,
+            2,
             4
           ],
           "approxMeasures": 10,
@@ -1739,8 +1739,8 @@
           "textSha256": "59b3e73ff6e28375606e15c40a0a8491a6ced73a8a0187fc5fd704a54fdcfd6b",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            3,
-            3,
+            4,
+            2,
             4
           ],
           "approxMeasures": 10,
@@ -1752,8 +1752,8 @@
           "textSha256": "5d6550a438b90b12e131ee4c3931a4f0fe956f7796db74fece445c5f2c53d530",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            3,
-            3,
+            4,
+            2,
             4
           ],
           "approxMeasures": 10,
@@ -1765,8 +1765,8 @@
           "textSha256": "85773d1bc6e4f5fa919434e8a3ca4bf53fb67c7d73db3faaeae29f02be0a7bfb",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            3,
-            3,
+            4,
+            2,
             4
           ],
           "approxMeasures": 10,
@@ -1778,8 +1778,8 @@
           "textSha256": "da218ead97b96ea45dcae35724fea72fc21649d72e1d34effd52e848f6e2a3dc",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            3,
-            3,
+            4,
+            2,
             4
           ],
           "approxMeasures": 10,
@@ -2068,7 +2068,7 @@
         {
           "unitId": "606c31ea-1ec6-498c-9f82-f65e42c12527",
           "kind": "Chorus",
-          "textSha256": "50b5f59df2e15a7f7b9122c039f103b190f2c67940ba79f57158c8e4f24acc02",
+          "textSha256": "1596d25a8d7144e4dfc85a7d864adc77d8d84436b7c066c0d24188f8797b83a8",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -2166,7 +2166,7 @@
         {
           "unitId": "223fd605-39fb-4875-a97d-1853603d6b09",
           "kind": "Verse",
-          "textSha256": "57cd5f06aef96be296e4520cf3fffad4271e3c5e2e4b72fc330958c0caf46197",
+          "textSha256": "7ed6f878b12465f38cad90cff5f55a1464ef434507fa275cf16a128c88d6acf2",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -2421,8 +2421,8 @@
           "textSha256": "64ba03ee16c6dfd5e9946f34d6ad0e9bd6d35338eec63262fb07c3fd8e63b99e",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            5,
             4,
+            5,
             5
           ],
           "approxMeasures": 14,
@@ -2434,8 +2434,8 @@
           "textSha256": "c9757ff8f7803d65d4a9fc308f4a38eac6c2373e59934c8197f095827af92300",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            5,
             4,
+            5,
             5
           ],
           "approxMeasures": 14,
@@ -2447,8 +2447,8 @@
           "textSha256": "9c5a91554c4a833d34562111c1c8a1834b9f11706b378a3fddea2ee61b4568ef",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            5,
             4,
+            5,
             5
           ],
           "approxMeasures": 14,
@@ -2460,8 +2460,8 @@
           "textSha256": "bb27861c97e227e54f9ca796d11e791d99e98b3cdddb538da189aaf2a3bf39af",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            5,
             4,
+            5,
             5
           ],
           "approxMeasures": 14,
@@ -2503,8 +2503,8 @@
           "textSha256": "d94764e68660797d411c950036a201d1c6de4c27e0fb1e8a7ac2663923f0b985",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            7,
-            6
+            6,
+            7
           ],
           "approxMeasures": 13,
           "reviewStatus": "score_supported_approximation"
@@ -2515,8 +2515,8 @@
           "textSha256": "6145dee7baf3ff6c3991cbc41b21ef6ac0ad9ddc041b02fc8e01d0333ed8d0bb",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            7,
-            6
+            6,
+            7
           ],
           "approxMeasures": 13,
           "reviewStatus": "score_supported_approximation"
@@ -2527,8 +2527,8 @@
           "textSha256": "990ae68d1df2897aaabb00d425499405169849b53d682ecf7a30afcda691b93f",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            7,
-            6
+            6,
+            7
           ],
           "approxMeasures": 13,
           "reviewStatus": "score_supported_approximation"
@@ -2539,8 +2539,8 @@
           "textSha256": "d354f4e9abf3e7971a18094036b144e8e367108271d3ef5f538097225bb8a730",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            7,
-            6
+            6,
+            7
           ],
           "approxMeasures": 13,
           "reviewStatus": "score_supported_approximation"
@@ -3411,7 +3411,7 @@
         {
           "unitId": "76c2ba6e-268d-4cd4-9355-2150c0846850",
           "kind": "Chorus",
-          "textSha256": "c820649a301650a884c854384ef4a772b38f703fe3dfb43488928f5a03e93367",
+          "textSha256": "892597e936086eeb9d91d07a312d5dd64363089aa545f1c8cc31f37b2e0d2940",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             4,
@@ -4109,7 +4109,7 @@
         {
           "unitId": "52a55f73-d687-4f84-9be0-0487ba897a14",
           "kind": "Verse",
-          "textSha256": "33a31bcf5dec3abfe23b69006478d08b9a2d8375a4a9cc90b7c03458da918b69",
+          "textSha256": "66639a45419f0d347d2c0af7e6ef8b46f2d0e0c819ee0cf472c5f04407538fd4",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -4150,7 +4150,7 @@
         {
           "unitId": "37c38283-ddea-4094-9f34-06cd38bd4b63",
           "kind": "Verse",
-          "textSha256": "379ef13b04f0cc8ffcb015cb208c0fd2dfe44b2793f5cbb4df07d16da027ab88",
+          "textSha256": "1198620f3b19c3f481165d8dc6c4553ed881d40d076639a99da5fd003ab01466",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -4162,7 +4162,7 @@
         {
           "unitId": "8c0f4060-c570-41ae-93a4-a20136e8b83f",
           "kind": "Verse",
-          "textSha256": "bfa05e636e627c78944013df43e781b4e30b46333301c4bda631abdcfb5b4508",
+          "textSha256": "4b8a6609b5fc131bd2b46faa6664e32f498472a0c1c2355b3d950093c8f23210",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -4174,7 +4174,7 @@
         {
           "unitId": "7c2a1b44-9167-4ec3-9c59-e6209bcd131c",
           "kind": "Verse",
-          "textSha256": "8b7ccbbeb1b57d9780d3889c002a299106d61590d8b799e800aab948a8d10410",
+          "textSha256": "0a9e230664176f08b99b406bc117c2e38e40696efadc4d30e0cc8ffc6be049a1",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -4306,7 +4306,7 @@
         {
           "unitId": "ddc50dfb-507a-4e42-a5e3-2f5346bc510e",
           "kind": "Verse",
-          "textSha256": "7391fd72ba1d2e0d7402f344e9705c75e34eabcfeb2b37b68d8f56710b1656b9",
+          "textSha256": "52bf06a472da6c4b55452a1c0586a8b537aa9f3eac290637c60c9c0f55c2709f",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -4419,7 +4419,7 @@
       "edition": "new",
       "number": 65,
       "classification": "mixed_blocks",
-      "stanzaApproxMeasures": 25,
+      "stanzaApproxMeasures": 24,
       "reviewStatus": "score_supported_approximation",
       "parts": [
         {
@@ -4428,11 +4428,11 @@
           "textSha256": "e66291fe94d223a092de87e02e5b890fe4a66fecbd9c95985eea7c483bd407b9",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            9,
+            8,
             8,
             8
           ],
-          "approxMeasures": 25,
+          "approxMeasures": 24,
           "reviewStatus": "score_supported_approximation"
         },
         {
@@ -4441,11 +4441,11 @@
           "textSha256": "bdc4490cf66321ed97d70d435d4d86fee94c6246f8eeb0bf4b5809e1694e785e",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            9,
+            8,
             8,
             8
           ],
-          "approxMeasures": 25,
+          "approxMeasures": 24,
           "reviewStatus": "score_supported_approximation"
         },
         {
@@ -4454,11 +4454,11 @@
           "textSha256": "d751738a97fd44ab48fa8289883492dfd5723303b8de6fbd7abea36fd8477a08",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            9,
+            8,
             8,
             8
           ],
-          "approxMeasures": 25,
+          "approxMeasures": 24,
           "reviewStatus": "score_supported_approximation"
         },
         {
@@ -4467,11 +4467,11 @@
           "textSha256": "00a83af1d49740ad0053755507952690286a7580482a9af910b7d716203495fd",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            9,
+            8,
             8,
             8
           ],
-          "approxMeasures": 25,
+          "approxMeasures": 24,
           "reviewStatus": "score_supported_approximation"
         },
         {
@@ -4720,12 +4720,13 @@
         {
           "unitId": "42d6557b-4364-4167-a944-6933a9053e45",
           "kind": "Verse",
-          "textSha256": "75100b1e452f0dfb7f4b79a7579d5181c2f66c16380fdc4439f8f7ee59aa0718",
-          "blockCount": 4,
+          "textSha256": "a7de65c85d66c93f283c4bbdb1d206560d140dd5762d45a0b9198dcd0e12309a",
+          "blockCount": 5,
           "approxMeasuresByBlock": [
             4,
+            2,
             4,
-            4,
+            2,
             4
           ],
           "approxMeasures": 16,
@@ -4734,12 +4735,13 @@
         {
           "unitId": "f3efe74a-8082-47b6-aa3a-4057af394b5a",
           "kind": "Verse",
-          "textSha256": "f78065291a15d772d55297e483a64143712545d01a73bde2d63bfcac9fc51eed",
-          "blockCount": 4,
+          "textSha256": "115ad776afcae339c906dacd4bdcf7de00dc4240e383628160a0084b861083ee",
+          "blockCount": 5,
           "approxMeasuresByBlock": [
             4,
+            2,
             4,
-            4,
+            2,
             4
           ],
           "approxMeasures": 16,
@@ -4748,12 +4750,13 @@
         {
           "unitId": "a3170186-ad5e-4f4f-9dae-32c42df9c85a",
           "kind": "Verse",
-          "textSha256": "d51f7312922d17064fcac849203c9e2873e66cef50ccc4e1c845693afdafec58",
-          "blockCount": 4,
+          "textSha256": "c940494cd546286187078e2cf7495b91dbf02dcbd084ffe3da32e20e7d081f3f",
+          "blockCount": 5,
           "approxMeasuresByBlock": [
             4,
+            2,
             4,
-            4,
+            2,
             4
           ],
           "approxMeasures": 16,
@@ -4762,12 +4765,13 @@
         {
           "unitId": "bd0c7c27-0131-4715-a278-c56fa031d473",
           "kind": "Verse",
-          "textSha256": "a19397e36de4494fa3cb7a93000ed2a159434bca45d9b2443beb4f8cb3e4e130",
-          "blockCount": 4,
+          "textSha256": "2023583185c80aa93187cac54a21b80f0f215a4cc47026ba921ff94d0fe7aee1",
+          "blockCount": 5,
           "approxMeasuresByBlock": [
             4,
+            2,
             4,
-            4,
+            2,
             4
           ],
           "approxMeasures": 16,
@@ -4776,12 +4780,13 @@
         {
           "unitId": "c01186c9-ab4f-4e63-b165-ae1a1b7919c9",
           "kind": "Verse",
-          "textSha256": "36f19d24976b1b6fe438b3e25ae019ced8d8e6df385aaaa1b2c7e972ce6b90a4",
-          "blockCount": 4,
+          "textSha256": "9af36c9969a4b8151cf5910562ec98cd272a6d07e68a124b11f2f839358360e6",
+          "blockCount": 5,
           "approxMeasuresByBlock": [
             4,
+            2,
             4,
-            4,
+            2,
             4
           ],
           "approxMeasures": 16,
@@ -4790,12 +4795,13 @@
         {
           "unitId": "ccb8789d-f0b5-4295-904a-5e4416ac202f",
           "kind": "Verse",
-          "textSha256": "7b972505202c2694134de1cdcb3730ca555f6d9b9b30e0d243ef12a2b0540569",
-          "blockCount": 4,
+          "textSha256": "f1e0a3e50d2bd3f3524c9b33d474322812e922014c2e4c8fddcd8249f19a125a",
+          "blockCount": 5,
           "approxMeasuresByBlock": [
             4,
+            2,
             4,
-            4,
+            2,
             4
           ],
           "approxMeasures": 16,
@@ -4926,7 +4932,7 @@
         {
           "unitId": "d8a1d018-a84b-4d39-9d1b-d754170c16c2",
           "kind": "Verse",
-          "textSha256": "6b6f1f051be2025200a298f07cc37cdedb59bbe494a22aa76790e4d0e6f1a9cb",
+          "textSha256": "4e202424443b4834ca05db24934b6be6997edf1a019c4a9fed92e2811ceb5dd2",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -5196,7 +5202,7 @@
         {
           "unitId": "c21b97e2-6c68-4df7-96c1-b704c047d473",
           "kind": "Verse",
-          "textSha256": "184ca0ee35a60e76371e0b22aee2949b4e39e28b4d2a4ed381e621f01ace5769",
+          "textSha256": "e37cf357de5ffe7a851db1f26d615d28633ca1ee2932c88821fa1f253acc5fb9",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -5757,7 +5763,7 @@
         {
           "unitId": "5ed20ed5-18ab-44c8-add0-d59b86cfad86",
           "kind": "Verse",
-          "textSha256": "37d7b9288fc709803f50978010ed2c4b23446948bc63125e837a57b147b11964",
+          "textSha256": "98b4760f6431ab074362954cb0ccb440d807d83e57e244b4b52ab72e5af6d8cf",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -5909,7 +5915,7 @@
         {
           "unitId": "9b5362c0-8c0c-4df5-b7d8-8a1d13daf609",
           "kind": "Verse",
-          "textSha256": "618b4a0bcad72e0886f453d3b7dc446b84b52a6925c4ff8c958ef9b1832ecf81",
+          "textSha256": "c30eb7aa2573abe01c14f771f6823460972fd4dc6a08374bec7a8d42c198a53c",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -6308,7 +6314,7 @@
         {
           "unitId": "ae24b55e-714d-4a44-ae1e-886bcfcdf1c5",
           "kind": "Verse",
-          "textSha256": "b716be41aac8b5b12cb81463790b18c434e2ea5b62d729ef935dbd5efdd96c40",
+          "textSha256": "c5c6fb70d4b44a035b5cf27c4d1b1286bfc317ee314b76169a558d44e806d520",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -7011,7 +7017,7 @@
         {
           "unitId": "e678cbcc-797e-48be-adab-bd6f91f6b947",
           "kind": "Verse",
-          "textSha256": "a78de0bd670923eb745b3c29e5467794b0be2b1832b05e157744850f77fa5304",
+          "textSha256": "a58eb010aeef65d792659c55151d9a40487469d945e743f86cec98559db99cbc",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -7076,7 +7082,7 @@
         {
           "unitId": "1f9a0085-d977-4f44-b3bd-7bfea6e5fc0c",
           "kind": "Verse",
-          "textSha256": "972395e552a41924b49ef66ebf7883571a78fa7437a6e1744f9e87be1d608b32",
+          "textSha256": "4b501c9550930bb7a0e749b718d472688e2dee86469bb2676ae5f0894011fe2d",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             12,
@@ -7088,7 +7094,7 @@
         {
           "unitId": "2114a66c-5d18-456a-a4f8-fcba424c3834",
           "kind": "Verse",
-          "textSha256": "769e620016eb7e6ce77afb714240cec10ddc10d431cb051d596aa035006abbbc",
+          "textSha256": "1a127d90ccfc8fed631278a81d41731e49505a34a56c34e05d9d8ebb306a6745",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             12,
@@ -7120,7 +7126,7 @@
         {
           "unitId": "f0878673-3556-409a-9867-42b203a9977b",
           "kind": "Verse",
-          "textSha256": "c68af31d17738d2b83a37bfb857f74106fc14c1fbc2679397812a9e2c34957b2",
+          "textSha256": "f1a77059577e1cb704a5d096ba960e961e6eff3efa0c5fc81b1f6422a2e0c96d",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -7204,10 +7210,10 @@
           "approxMeasuresByBlock": [
             5,
             5,
-            4,
+            5,
             3
           ],
-          "approxMeasures": 17,
+          "approxMeasures": 18,
           "reviewStatus": "score_supported_approximation"
         },
         {
@@ -7431,7 +7437,7 @@
         {
           "unitId": "c694c524-a518-437c-9f6c-87416b7de0cc",
           "kind": "Chorus",
-          "textSha256": "3ca78388f6a1a20d9faeed15e30bc7e3660de51a59dc5d62af20b2f5514ce56c",
+          "textSha256": "deba3c083f48fe35ec6dc53f05b4797b24e66110729b62819637ef025c2cd171",
           "blockCount": 1,
           "approxMeasuresByBlock": [
             7
@@ -7712,7 +7718,7 @@
         {
           "unitId": "5159d89a-7908-4a81-beb5-de5f91e7e6fd",
           "kind": "Verse",
-          "textSha256": "0e2980f67981d3678b67f8b72ce094920e41553910a439ffba45a69de19f912c",
+          "textSha256": "926b4a83fc7f5f735f8fe8dc0a5920587c9424d24615d7f1e72f1f1ff2f6c28f",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -7863,7 +7869,7 @@
         {
           "unitId": "a258b26d-50fc-4912-8703-2487f3ce8d30",
           "kind": "Verse",
-          "textSha256": "4c81622aa674616d3c4adffb99f965e2a970224b853ea66b5e5763ba4b79593d",
+          "textSha256": "1d252801fb67d57b7759a4fec6ebd761a47be188e207220b3ed95231a4add121",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -8220,7 +8226,7 @@
         {
           "unitId": "4e5d38fc-e13d-40f3-a8e2-88255d645845",
           "kind": "Verse",
-          "textSha256": "e8f9ac35d63286383f61cbcd7170da376f8268cec36156cfc9580de79774a3ff",
+          "textSha256": "33876b90d08992c9d00c183604f77e3c22350b1cfb9a0a3982f7e47945a92d44",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -8464,7 +8470,7 @@
         {
           "unitId": "090d7344-649c-4792-bdd3-1ec7b765f50f",
           "kind": "Verse",
-          "textSha256": "1c68dcb6a630b637b5b34c012e4333583e2a50d6437183af862da5101436be9f",
+          "textSha256": "d2ca354408db89efae0dd46d94f2dce04ced088a09b2436dfbd98660d6f8a034",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             4,
@@ -8718,7 +8724,7 @@
         {
           "unitId": "920479a1-09a0-4c78-bd40-0b124aed4ca0",
           "kind": "Chorus",
-          "textSha256": "461342d2adb64c4e225e038cdd2aa8f10c288607e17af425913bd7521e82fb67",
+          "textSha256": "3edb03ac6acbe0a5ce9498b42d61b02188496c5a099116323cf9fd0f045931d0",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -8793,7 +8799,7 @@
         {
           "unitId": "5c1f77ab-a94d-4602-b443-9bfc6df59d4e",
           "kind": "Verse",
-          "textSha256": "e201227d251ec62ddeb68a9196226f30c6001b2a4eb7150bfe39bb3885807d3a",
+          "textSha256": "3718342a6a152926269b5ed17f2c47200b3bd564fd5cab9083b70755b3c3d8b1",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -8870,7 +8876,7 @@
         {
           "unitId": "65934f52-5873-47f5-a699-de74b344debc",
           "kind": "Verse",
-          "textSha256": "4e453275d9d8b46840bb8a1855c0c45a8ec848a11dbdcb659d611f3b1ba2358d",
+          "textSha256": "156ab5e5a4bd7dc0e0fa6f03d129933564e56949ae8e92ae31a777d83641e4c1",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -8988,7 +8994,7 @@
         {
           "unitId": "843bf91e-9eaa-466e-8565-de93a15cb3f5",
           "kind": "Verse",
-          "textSha256": "821f34bb27e3ba1786dd353cb2a6964db0fed03399a0a461d7244d802cd563db",
+          "textSha256": "dceefde5d502b68371e68cdbb1d3a127f399a4a39611445d44d25da29f42fcb5",
           "blockCount": 5,
           "approxMeasuresByBlock": [
             4,
@@ -9220,7 +9226,7 @@
         {
           "unitId": "8f68a1dd-a2ae-4015-9987-76d1cfba0511",
           "kind": "Verse",
-          "textSha256": "790a1dc1cae2b53ce7f1bbe70cfa6a8e3fc504f419224589e22985e06d47fcb1",
+          "textSha256": "1e46590abb300c6d90de10515cec8b7428ea07d129e814197a67fb2e1670861f",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -9619,7 +9625,7 @@
         {
           "unitId": "d7d3fb79-1bce-4298-b9f2-f219cb329751",
           "kind": "Chorus",
-          "textSha256": "b4db21d6d80180cb3ccb130b36bfa268d8e0c02ef753053c7215fad21c5a6ed9",
+          "textSha256": "552347df52d5b98dc00a2c6ccc07559ddbb63b78e5776a383e9456b33e7b9cfb",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -9967,7 +9973,7 @@
         {
           "unitId": "4d32b442-3bee-4abf-8903-a56d575f5806",
           "kind": "Verse",
-          "textSha256": "3ef4b3786801adcc5f39e4f140b9046f617511fd16233a764828d033a8d530ad",
+          "textSha256": "06cce9810e42c7711a6ef1e9ed9eac54611b982d75db02862c869365009b40e1",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -9981,7 +9987,7 @@
         {
           "unitId": "4d351c69-b368-434f-ab8a-3777b7aa9149",
           "kind": "Verse",
-          "textSha256": "1c88ea7fc6c1dae908e23d81f223e4b8bdce8743d81025d6ab6605b8dccb2cf0",
+          "textSha256": "5d13d01bf6cf26448293229ba259313011c05d953bb0dc420219f17dd2b09975",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -10103,7 +10109,7 @@
         {
           "unitId": "683190f7-f6fa-4f3b-8185-dd3e3e6a827b",
           "kind": "Verse",
-          "textSha256": "f4d398ff9d375c1471d5e73065c0f0924b9f47dc2c8ace41ca88f89a1c24363d",
+          "textSha256": "2acf6b1014cf1fba8bfbfbd6d933f3e6c55b10afa7a439dc994a63459df16948",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -10115,7 +10121,7 @@
         {
           "unitId": "ff898865-42c5-470a-983a-54f51a4a650d",
           "kind": "Verse",
-          "textSha256": "aa66f24c6655533b371f6005a401c604061a155af1da2d6a7e433a6f53892b33",
+          "textSha256": "46dadf7c473d3eed60e97698ef7afccb1713a03ad8a60bdb37e0d859002786a2",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -10586,7 +10592,7 @@
         {
           "unitId": "19f32302-4ea8-4366-bcd5-a598be2e8e7f",
           "kind": "Chorus",
-          "textSha256": "ec0b3a6148493a95c7999765e593ef856789281417f9e1dc639100388f843390",
+          "textSha256": "39f021341dde0ab2be5899e9ad31088b3d43ce57d8fd4f0c0add970ec87582cd",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -11371,7 +11377,7 @@
         {
           "unitId": "17d1b723-8360-494f-8460-9d514b735d0e",
           "kind": "Chorus",
-          "textSha256": "5f032774d4288fd3ef14590b24faebeb57701c01be85e51728f43b5753019aeb",
+          "textSha256": "88c94efba4e3e296ba2628a0ba8f2bb28393bc53799254beea710a4bce78d002",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -12656,7 +12662,7 @@
         {
           "unitId": "20c6dab9-2c21-4f13-b1ab-b3d9dc29da24",
           "kind": "Verse",
-          "textSha256": "76c6b87e6542c5068228c77951086b94047039bd1402f0da27e150c66d000cb6",
+          "textSha256": "0b6c0318f8c77a8c16ba7ee63d62c361d01b337407e31729bd2a1ff349476622",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -12692,7 +12698,7 @@
         {
           "unitId": "513d110f-8058-433c-ba02-0b09f408bb4a",
           "kind": "Verse",
-          "textSha256": "4e0292421eb39c1677a7cc6b90ac78cf8a79b91c04f1d47292e9d3dd2e0c0da9",
+          "textSha256": "060273d336b68932ab00c158d5ff59c7f05ce3562608d3ae079a525f91ac1b24",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -12770,7 +12776,7 @@
         {
           "unitId": "33c47013-5b90-4b64-9b8c-f523cff8994a",
           "kind": "Verse",
-          "textSha256": "b9fd6e27760f7966d1f2c1632816d1b206b449789c89c6fd7ba8bd2dcc4ffcee",
+          "textSha256": "587a7fa54edea39777d70b46890fb2ef5cef9c5af24b2161298ea6d42f2b8890",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -13040,7 +13046,7 @@
         {
           "unitId": "d01cf68b-5c0d-4ca0-95dc-9bbbdf4c8d7f",
           "kind": "Verse",
-          "textSha256": "8f0c32a52ccedf19f7b4a5d8bb46a9e46ddfdcab415c5da1764e4362441a7e59",
+          "textSha256": "3bd6abb295397423bfe30c97ecadaccd078ded74b327f7721b99756f12b1bdcc",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -13519,7 +13525,7 @@
         {
           "unitId": "adf49f77-02d7-4718-bd63-4e0e5783ee2c",
           "kind": "Verse",
-          "textSha256": "2de09665ba8bf640df1a3da7e8246c42de00cc45639409d4bc9265ee0e0ff42c",
+          "textSha256": "2a882e4bf4aebc110d7121eb3ed6cb7707938d242dc18febfc12d3adf99e2d1b",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -13716,7 +13722,7 @@
         {
           "unitId": "215d8bf6-b6c0-41ac-a8ab-de486cdbcc26",
           "kind": "Chorus",
-          "textSha256": "a5809362814db5467e6c74b0e19f8afc054fbcf680149f2d60a31c2834899d5a",
+          "textSha256": "e15c98a8ce4d471f62689a0ca89171234a2ad8df8c50b5f6525955e6663dab01",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -13859,7 +13865,7 @@
         {
           "unitId": "56cf0e9c-655c-47c8-98e9-848fd57a781e",
           "kind": "Verse",
-          "textSha256": "9d47e044d2c8bea108a95a62a4c0e97ccb4854e4dda0960591f6249815c4c1dd",
+          "textSha256": "c11501af98b11bdd8cf85fa0894f5f9ae1e39391b6f824127b6bfb04182671f5",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -13901,7 +13907,7 @@
         {
           "unitId": "aa490258-f74e-4d29-9eb3-da4532671689",
           "kind": "Verse",
-          "textSha256": "72a4fc140e0cdc143ea9a171fe1e833fb686255ad1d29034927aad8bb137a904",
+          "textSha256": "830e2d5602f19d73ec4b9fd395129e482a3fa073df427a4857d07cbd24678c1d",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             4,
@@ -14111,8 +14117,8 @@
           "textSha256": "957960cf9c98609ea914917754fdf372b19450aafd89de5951a99fbcb34a9ddf",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            7,
-            6
+            6,
+            7
           ],
           "approxMeasures": 13,
           "reviewStatus": "score_supported_approximation"
@@ -14123,8 +14129,8 @@
           "textSha256": "71f0d9e2b13180c120536cd98d7d644c2a308ee7c0330426b327161f67ad1bbb",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            7,
-            6
+            6,
+            7
           ],
           "approxMeasures": 13,
           "reviewStatus": "score_supported_approximation"
@@ -14135,8 +14141,8 @@
           "textSha256": "47c6a13ed210ec850301b821fa45f285aa0fdd0248c6c8a6983656c2449ee6c1",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            7,
-            6
+            6,
+            7
           ],
           "approxMeasures": 13,
           "reviewStatus": "score_supported_approximation"
@@ -14147,8 +14153,8 @@
           "textSha256": "5ca418095c367d032e68f4945f3f29e87dd71762ab98bbcbf80db878c2202eff",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            7,
-            6
+            6,
+            7
           ],
           "approxMeasures": 13,
           "reviewStatus": "score_supported_approximation"
@@ -14275,7 +14281,7 @@
         {
           "unitId": "50c9f870-cf71-45b0-8fec-818cd656ee26",
           "kind": "Verse",
-          "textSha256": "785edebbb04921e7a04a02bc5020cf25a14d734c24f61600065ed233b100f957",
+          "textSha256": "1847e1c65cd3d88a41eabc63591004668037362e341694e3521d3c01f67116b7",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -14287,7 +14293,7 @@
         {
           "unitId": "b286273f-e2a9-4929-8fab-a31ea549c070",
           "kind": "Verse",
-          "textSha256": "dcdc88d474dd57e7d3a970aed7076e1756ae5644681c89c199b026fdb81a1d5f",
+          "textSha256": "54867b88a405c5c98da796c29f4d42846edff4cf73fca91efb38304603027fdb",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -14364,7 +14370,7 @@
         {
           "unitId": "23a30592-b442-4d76-bc6c-faf6b3a7103b",
           "kind": "Verse",
-          "textSha256": "18f3dc77a18af89290c9fd58060760eb1cf5617fd14bf36181d7f6ee6a9f81fd",
+          "textSha256": "e0033ea4672f19452b848827a0479000cfcb66f0131b6283149c4adafad77a00",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -14686,7 +14692,7 @@
         {
           "unitId": "044a988a-dcf4-4924-85e7-d6ac45e009c4",
           "kind": "Verse",
-          "textSha256": "59a617d4a0616082c69072b49e702a6ec459b4c740bb95f191ae3e51f7c53dfe",
+          "textSha256": "dbacd260704f0a115ef28fc5e308f6b63a8ea5d864dcc4693c569f22af253a7a",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -14838,7 +14844,7 @@
         {
           "unitId": "39cb212b-af19-4ed7-8830-2186ab66834d",
           "kind": "Verse",
-          "textSha256": "655a098625ca6945c4fbc3030fd2b440593bf607b1f7086f1556786c4d33a6cb",
+          "textSha256": "79f7ceccf9cdd2cae78f121b2bfa2e74eb6e37cef7610d61dae728a75d3de4d3",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -15242,7 +15248,7 @@
         {
           "unitId": "0567d876-7654-48a9-a0be-d872225dc395",
           "kind": "Verse",
-          "textSha256": "ecc6db421872afdacec02d6c032de8ba184c12812ba7d915f98bfbf3239f0147",
+          "textSha256": "d26f96ca1debd6b08470fc047aa07f2c76f32591404b6729b6ad901770f8b0a6",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -15376,7 +15382,7 @@
         {
           "unitId": "2116ec24-431e-4e3d-93c8-143410957807",
           "kind": "Verse",
-          "textSha256": "a8669e5b9a3eddca421b6c65a8a0459c4b735dadcff971e15ef6b29a02041139",
+          "textSha256": "d66f2c1cc2769ba3a401d8febdbdb1af34d5c051eeeca09e7b3d4aa493b774da",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -16015,7 +16021,7 @@
         {
           "unitId": "643fdafb-adb6-49bb-9e12-c772fdeea244",
           "kind": "Verse",
-          "textSha256": "72d7679f663866dceb52533720173274351a4d20ca6884ea12340a755690f23a",
+          "textSha256": "201402193190f0602af0c27db34b118e3809b53aa82ec03a929c17f2c2417f2f",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -16043,7 +16049,7 @@
         {
           "unitId": "304cf623-fa28-4805-be46-1fcd379170b8",
           "kind": "Verse",
-          "textSha256": "d8bd41f4797128d537761d70a537862d6a1561d53251341a0cbb45e0376e4f9a",
+          "textSha256": "05b01333397092cc5eddce4b1e7d1bb6d50dee703f9e053111f7c78dbfcc0c08",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -16079,8 +16085,8 @@
           "textSha256": "cf26b4cddba311e50636112e632d3fe68c0abd033c78f06bf4be468e5caa3891",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            7,
-            6
+            6,
+            7
           ],
           "approxMeasures": 13,
           "reviewStatus": "score_supported_approximation"
@@ -16091,8 +16097,8 @@
           "textSha256": "c1b8a8125181b2d448d68060d341ddd58f75a911a64a17b6f68fd53b8a702510",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            7,
-            6
+            6,
+            7
           ],
           "approxMeasures": 13,
           "reviewStatus": "score_supported_approximation"
@@ -16103,8 +16109,8 @@
           "textSha256": "81464d10c3c031841dac36974b01698b3b81cdc54697b3882fa39f4f3b30eb64",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            7,
-            6
+            6,
+            7
           ],
           "approxMeasures": 13,
           "reviewStatus": "score_supported_approximation"
@@ -16115,8 +16121,8 @@
           "textSha256": "eb589a4d319511c05cba7a032ec3a64c2d1676784d8497431c88c29e1b2d8f62",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            7,
-            6
+            6,
+            7
           ],
           "approxMeasures": 13,
           "reviewStatus": "score_supported_approximation"
@@ -17249,7 +17255,7 @@
         {
           "unitId": "8aafcda2-04bb-43a6-8b65-463f51b2e045",
           "kind": "Verse",
-          "textSha256": "5cad0b88668f0e6b59a70481cb3210c2f7a0dcc902ce66eb98fc9f149e996d7b",
+          "textSha256": "cf7bd54eee04dd66427b986882b2318e706c365b103b5726c7c01a419981cd4d",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -17261,7 +17267,7 @@
         {
           "unitId": "bbbc3429-7137-4dc6-b23f-2b2c7dbc16e1",
           "kind": "Verse",
-          "textSha256": "e6684669236bc5e4be6ee77decf9206592d9c9755db79112b75f2034179d020d",
+          "textSha256": "7ee4fd4a6369becb4e614d62a0eb54fed7eb0ed04d196e76e9b3d4d2338f4ecd",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -17273,7 +17279,7 @@
         {
           "unitId": "64c69bfb-da8c-4f56-a84d-fde0d6ab8450",
           "kind": "Verse",
-          "textSha256": "0a28bffd021187d3ca1a473e0ed206cb6dbbdbc5299b847a30344cea8fe7242f",
+          "textSha256": "045700400b88249c2d605f99f36d3ba227f0ba4ba0f6aee68ef00730f02316e9",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -17285,7 +17291,7 @@
         {
           "unitId": "241f1879-8e47-4296-9179-24a373bc6d59",
           "kind": "Chorus",
-          "textSha256": "933a8c5c7ac984213fb24bd630b37f97119b1d8f968f42b2a70344805b61c335",
+          "textSha256": "1d03ed6fba865466da4b714dfc878f3bd8177d6e551846b5ef05a323fea7a389",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -17441,8 +17447,8 @@
           "textSha256": "c3c6155e30ccb256cd810471c1047231bc31b91130eeb9ad2e66feb39a090806",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            3,
-            3
+            4,
+            2
           ],
           "approxMeasures": 6,
           "reviewStatus": "score_supported_approximation"
@@ -17528,7 +17534,7 @@
         {
           "unitId": "7ba1bf81-6ab8-4240-91a3-fa74169bccf7",
           "kind": "Chorus",
-          "textSha256": "00bf59c331377d9cd37f9a189b7bf509436de41f4df4a6458ef984fa9c911fa0",
+          "textSha256": "6608613a4c8508abcce63ed522753e0d7cdb78cdb1d7b33e7cbef67248345e94",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -18175,7 +18181,7 @@
         {
           "unitId": "1010e9f1-a69a-484b-9465-7e101055fbdb",
           "kind": "Verse",
-          "textSha256": "8d00d937567d02722ab2d457049bf7d6579e948b49f735d56d56dafbd56d1d20",
+          "textSha256": "7956dbb869a11ba111dbdc938be17abf775c6ddb7790cb9afad403579c1d007c",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             4,
@@ -18608,7 +18614,7 @@
         {
           "unitId": "dfb3eaa9-3963-4e94-9dac-07da484caae1",
           "kind": "Chorus",
-          "textSha256": "63535b0aa81c5311c0c1d5215083e2ed367c10715cf86d7b3e638a470eed872f",
+          "textSha256": "30824fa9c53d22f6371e5c7d6c47d194aa309f75a64845c2ca69def2949b3b99",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -19298,7 +19304,7 @@
         {
           "unitId": "5c9d117f-7dcb-45c1-b596-99390797f281",
           "kind": "Verse",
-          "textSha256": "34c89ff7c0fa1bd0780c1220137b37ce54a2c394693b6982fc5ca395b0d95d76",
+          "textSha256": "ab7f2c92b97377b20d018dda81792d361cc5923696504823aa27baface621cf3",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -19322,7 +19328,7 @@
         {
           "unitId": "1826633c-1e46-4402-b5d4-19cb27e9e085",
           "kind": "Chorus",
-          "textSha256": "2f78acb3e338ea54a936d321db165b935b02863d43dd94d35b8499db65d63aa9",
+          "textSha256": "e244f7d27c9d7e29ca7e2899932e1c69e13bbaaf44d416d27dd24b8a4d63d69f",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -19479,7 +19485,7 @@
         {
           "unitId": "a1810260-3172-42bd-81c2-3bd6f9fa1f50",
           "kind": "Verse",
-          "textSha256": "7890ce61d6347f6ce64db350a640bc8a8769d6434cf49953a7f21b912eab57a4",
+          "textSha256": "14d61bec46e1b8292f248a8579793b9797899684153cccb20d0489e21f04595b",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -19634,7 +19640,7 @@
         {
           "unitId": "2b697e2d-637c-4078-b915-b2d9580e5ee3",
           "kind": "Verse",
-          "textSha256": "3dc86e6b4400a6457ac541b2ec0bae99cc2cf6acc8234c60a911490614629d2a",
+          "textSha256": "c20584ea801c919c4ab7fea78303a0ef707be661f1bb1b0de9763d55985b0b39",
           "blockCount": 1,
           "approxMeasuresByBlock": [
             8
@@ -20028,7 +20034,7 @@
         {
           "unitId": "066c215f-9833-4fbb-abef-5f19e79ef4eb",
           "kind": "Verse",
-          "textSha256": "05f52ba74d44a5afa2c60d7127bec66b7fa8396a082a16f3274a72f06233f783",
+          "textSha256": "bceb6ca9b5b24acae4ec14e74e094861069194320cf102ab89eefd177d94999e",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -20504,7 +20510,7 @@
         {
           "unitId": "5673a5e7-89eb-48ac-a21b-ac695988c745",
           "kind": "Chorus",
-          "textSha256": "f8a27f4bda209158190d862f9c61d293d4abf276831d50be5acb68f5af784a37",
+          "textSha256": "2dc34432b459a3a341c0e210f54ac90fb14cf30fd7482d54046a2d921972ee5f",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -20594,7 +20600,7 @@
         {
           "unitId": "a28e3820-c961-4298-9e29-f3348c5706a9",
           "kind": "Chorus",
-          "textSha256": "760bc682555c40d2e77fdf9b81075aa5721fce0338047bda9b835c7edb6dde4a",
+          "textSha256": "3e7abc32d1ceb2b6a84cd19e1b5155515e45abf9cf82e9b2ae2da74f8bcfdc29",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -20783,8 +20789,8 @@
           "textSha256": "e578f5f3b057ce78a24ef0c8e4fffad6e1f51301a7aecc83fc24136c674adf7a",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            9,
-            9
+            8,
+            10
           ],
           "approxMeasures": 18,
           "reviewStatus": "score_supported_approximation"
@@ -20795,8 +20801,8 @@
           "textSha256": "1f0f018a9410d617306080c4b0896652259babb79ad21ea93059bf5a6794d13b",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            9,
-            9
+            8,
+            10
           ],
           "approxMeasures": 18,
           "reviewStatus": "score_supported_approximation"
@@ -20807,8 +20813,8 @@
           "textSha256": "ec4e7f8314192b73b402ba5d1147701f46ff1edfe19d7a45c24d1255fcebe16d",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            9,
-            9
+            8,
+            10
           ],
           "approxMeasures": 18,
           "reviewStatus": "score_supported_approximation"
@@ -20819,8 +20825,8 @@
           "textSha256": "b1f1b492fa789c08167dbe9cee60963a69675ce2b3dfdb38f577d3a5359b9881",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            9,
-            9
+            8,
+            10
           ],
           "approxMeasures": 18,
           "reviewStatus": "score_supported_approximation"
@@ -20831,8 +20837,8 @@
           "textSha256": "cebc33b0c97c0fd0bc1c4d8c65fa26a03f8d622cf781a983c14f9061616619f0",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            9,
-            9
+            8,
+            10
           ],
           "approxMeasures": 18,
           "reviewStatus": "score_supported_approximation"
@@ -20843,8 +20849,8 @@
           "textSha256": "5fee6fad99ce015b588ac5cbd75da6bea381d0c55968d725917ce4cc51e37f8b",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            9,
-            9
+            8,
+            10
           ],
           "approxMeasures": 18,
           "reviewStatus": "score_supported_approximation"
@@ -21342,7 +21348,7 @@
         {
           "unitId": "cd96352f-3f93-4ba1-820e-c13603ce76f0",
           "kind": "Verse",
-          "textSha256": "f5096760b530f38f9713af567c2228be980069db46f0b676c35756398bc8af6b",
+          "textSha256": "f09d5e5b5694347f163335a5822c4ced1b4f7786c1f996675961c888acbc94fd",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -21445,7 +21451,7 @@
         {
           "unitId": "481de49c-d6bf-494e-9302-84a84ac5c136",
           "kind": "Verse",
-          "textSha256": "817cb7c593aa4cec51289c9b81a08341a7b58af5b9903531091d3273f1f7abc3",
+          "textSha256": "07e87def712355302cf89d00a579a7196abe66b58438c869658e07cda43c9146",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -21756,7 +21762,7 @@
         {
           "unitId": "71a10bde-7df9-4505-8ba3-f7d2a4100836",
           "kind": "Verse",
-          "textSha256": "248da5590ef08e5c18debd69dd25c1790f9d6d3226c2c7c51cf23000b68340e9",
+          "textSha256": "c10d955895bbffbb50a3909c303a4975824890d4b2f7d35ed0ef3ba3a4b99072",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -21938,8 +21944,8 @@
           "approxMeasuresByBlock": [
             4,
             4,
-            3,
-            3
+            4,
+            2
           ],
           "approxMeasures": 14,
           "reviewStatus": "score_supported_approximation"
@@ -21952,8 +21958,8 @@
           "approxMeasuresByBlock": [
             4,
             4,
-            3,
-            3
+            4,
+            2
           ],
           "approxMeasures": 14,
           "reviewStatus": "score_supported_approximation"
@@ -21966,8 +21972,8 @@
           "approxMeasuresByBlock": [
             4,
             4,
-            3,
-            3
+            4,
+            2
           ],
           "approxMeasures": 14,
           "reviewStatus": "score_supported_approximation"
@@ -21980,8 +21986,8 @@
           "approxMeasuresByBlock": [
             4,
             4,
-            3,
-            3
+            4,
+            2
           ],
           "approxMeasures": 14,
           "reviewStatus": "score_supported_approximation"
@@ -21994,8 +22000,8 @@
           "approxMeasuresByBlock": [
             4,
             4,
-            3,
-            3
+            4,
+            2
           ],
           "approxMeasures": 14,
           "reviewStatus": "score_supported_approximation"
@@ -22104,8 +22110,8 @@
           "textSha256": "bb2c4ec2c2c43722f921540d683585ce0e0497efb9763bdd0064249604975783",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            7,
-            6
+            6,
+            7
           ],
           "approxMeasures": 13,
           "reviewStatus": "score_supported_approximation"
@@ -22116,8 +22122,8 @@
           "textSha256": "ec0af8bf20c74de1875a05ded18fa53ce236b01c919680e94e38b7bfaa9e7b71",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            7,
-            6
+            6,
+            7
           ],
           "approxMeasures": 13,
           "reviewStatus": "score_supported_approximation"
@@ -22128,8 +22134,8 @@
           "textSha256": "1b733282da3e8013efc0862eaab91246c979c413c14119732abf977fceaf9a48",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            7,
-            6
+            6,
+            7
           ],
           "approxMeasures": 13,
           "reviewStatus": "score_supported_approximation"
@@ -22140,8 +22146,8 @@
           "textSha256": "73e35ec05d6b1541c38e6c0ec80b81302a252eae5173c67776e66e4de3fb354d",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            7,
-            6
+            6,
+            7
           ],
           "approxMeasures": 13,
           "reviewStatus": "score_supported_approximation"
@@ -22221,7 +22227,7 @@
         {
           "unitId": "a9db732f-7200-4187-accb-8d7a46e99177",
           "kind": "Chorus",
-          "textSha256": "509ab621789cfe308a0e7cb4ce904d69517cdcb7d6d0870fc98ada35c9a1fd3e",
+          "textSha256": "0c62ce41ba34cbe4d2b7b5e799cacf91a2e6db8b8c41df29857e0ee14bb3b655",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -22252,7 +22258,7 @@
         {
           "unitId": "e1d9b7d8-fd22-4db2-8e0e-4b108ab99dd5",
           "kind": "Verse",
-          "textSha256": "6b31130e1ad6ab2554c4bf89f008b8973a237e050d3416e34f287c78076c5dd9",
+          "textSha256": "804ccf8eab659e9f703072a600dbe21c870623d9e1410f09a632566a624a6aca",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -22280,7 +22286,7 @@
         {
           "unitId": "7b805784-75d2-4b98-b773-321416991a95",
           "kind": "Verse",
-          "textSha256": "623fd805805a3a4fce9cd1319796412132f471b7a02bc554e901bde8136eba70",
+          "textSha256": "c545a10490f40ed7bdd8bd6a29af4b1817f4e773eecf6f1f152a290ac178d5ed",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -22495,7 +22501,7 @@
         {
           "unitId": "23b8c7ec-dcd6-4a14-847b-408b5e81d7b7",
           "kind": "Chorus",
-          "textSha256": "888c3b24d06b3db76f453ebf8adc79c28b6f05f2bae40584af6c76a49ce90a46",
+          "textSha256": "bc98b0739fbd4e95a17021db152411562956339b031f177940c48790b1caf1bd",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -22701,7 +22707,7 @@
         {
           "unitId": "3a044a9e-033f-4933-ad8a-b5ce6d9efebc",
           "kind": "Verse",
-          "textSha256": "98fd70c9747a1123fa6d314c8ff794ff86839381ad8e4467251c69718d50499c",
+          "textSha256": "a35b3fdc15dc9bdd48b1d0f8c20dec23d1ba2b3e73a3816157478b5a9321e953",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -22926,7 +22932,7 @@
         {
           "unitId": "f958f7ad-f4ce-46b2-a4ac-df702473f7e9",
           "kind": "Chorus",
-          "textSha256": "5af5f612e173544350b6e8bc3e503d95dd699d995b21319c24b6441705a4c9aa",
+          "textSha256": "25deb2f038b35f3469d8d851c84745ab4eb5efe2f6f61563910a6a7e180dea18",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -23448,7 +23454,7 @@
         {
           "unitId": "2c190109-1b22-4e1a-bd9d-b54fd4f8ec6a",
           "kind": "Verse",
-          "textSha256": "1747c3cf21cc1bc3d8bc691d08bd15ba980fd446d540d58873934c5d0700c1f0",
+          "textSha256": "b196945834b9feb5b80d627fd252f5754ab35363f4e4bfb4334728dd0bf6d1f6",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -23460,7 +23466,7 @@
         {
           "unitId": "4b5f1058-3dc6-4126-b5bd-0e34b1b51e4a",
           "kind": "Verse",
-          "textSha256": "3725e947e9b40aac17954b8810e8234ba6fbda0448118cc45628e679bd3a6ca0",
+          "textSha256": "74e7f343a7661a4c4687a4a10df8b9320749042ffcd8eec6b409d07fc42580b9",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -23503,7 +23509,7 @@
         {
           "unitId": "09cd5dc3-7bf1-47e2-9c41-c898a0749fdc",
           "kind": "Verse",
-          "textSha256": "b2f13fd594356ca274de1993d3542a798fc0971a32c6ca465b6b9d162e06f03c",
+          "textSha256": "a4e511fdb3fff8506c63fece3c6923e02cd93b0049bb3fcd97ce1b3dc589aed9",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -24673,7 +24679,7 @@
         {
           "unitId": "44be286e-1a09-4691-8963-2b86b9051e58",
           "kind": "Verse",
-          "textSha256": "deebbad83906c4139a2035622cf6ebd2b444f2633ac7d530e91ad83c39f22a47",
+          "textSha256": "d6b4c9b0e3b53f78e479e7da305c8b70b9a7328e17e24a445ba85ac8d91f0b09",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -24888,7 +24894,7 @@
         {
           "unitId": "4606f232-1ee4-4475-a8a0-68e990fcba18",
           "kind": "Verse",
-          "textSha256": "90eeec59cea891e3d1d3052e8b09d0e77a2177a6f682f1a92a50d076423a5d19",
+          "textSha256": "da0b7017d43caf82ae67552b6ad92d501d6c8e7eca3bd72862b111ac9453fb1b",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -25044,7 +25050,7 @@
         {
           "unitId": "80818b2b-7652-408f-96ce-a27e7b64ea81",
           "kind": "Verse",
-          "textSha256": "600d8b332ccfc0c92b4c46a2c5f22735bbd83c20d025efb72db2ce533377807d",
+          "textSha256": "a5790b069efb85a120f6bec9bbe8edab3519a1939dcd26bba5557db7205fb656",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -25409,7 +25415,7 @@
         {
           "unitId": "cbfc7a13-dd92-4570-9b80-fab5464fce16",
           "kind": "Verse",
-          "textSha256": "a2ad5163b8f86a4a24ed70a35cc29b32f19c00cb218bea70c498dbc8248cf134",
+          "textSha256": "7b1e41e99d83828c0e362f7721d69e2fb986e02d91c8f639b878facf0fa29378",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -25724,7 +25730,7 @@
         {
           "unitId": "c2163a93-6604-4d22-8dcb-0a11f40e2c34",
           "kind": "Chorus",
-          "textSha256": "9d73a231ccc5156b6b69785959c29b7c42c1a47327bec8df67e425c1ad5b4592",
+          "textSha256": "38ba4ce2eddf60119d12f11dc29c599b14d439d4734a458f858acaf625b76d73",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -26114,9 +26120,9 @@
           "textSha256": "d1588eb7076b6943e7029cab1d2e01dfb6a9574398d432e435e2ec70bfd3b0be",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            4,
+            5,
             3,
-            4
+            3
           ],
           "approxMeasures": 11,
           "reviewStatus": "score_supported_approximation"
@@ -26127,9 +26133,9 @@
           "textSha256": "6559d9bd01e0a267c985600c6d3e9b4f72c4e610a46b1a6bbb705b1141278de5",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            4,
+            5,
             3,
-            4
+            3
           ],
           "approxMeasures": 11,
           "reviewStatus": "score_supported_approximation"
@@ -26140,9 +26146,9 @@
           "textSha256": "8e77c8bad392de5c9bc5973b454d5fe1e575c2dc8402cb31dda4ac3f9d86b601",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            4,
+            5,
             3,
-            4
+            3
           ],
           "approxMeasures": 11,
           "reviewStatus": "score_supported_approximation"
@@ -26153,9 +26159,9 @@
           "textSha256": "c4d338260d8063deddcf044db3a9e1d4f90e1d2eefda8874108a2b7afffbaf0a",
           "blockCount": 3,
           "approxMeasuresByBlock": [
-            4,
+            5,
             3,
-            4
+            3
           ],
           "approxMeasures": 11,
           "reviewStatus": "score_supported_approximation"
@@ -26328,7 +26334,7 @@
         {
           "unitId": "b05e5e91-a978-48bd-9c02-e825c3053b1c",
           "kind": "Chorus",
-          "textSha256": "b0d663e09ae6600c21224878a7f673217e120ccafa8260cf8268592b8a6e278a",
+          "textSha256": "f51ecab2f39712659bd701f793dce3a3fc37e30b53e985193fb9509f8dabb31d",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -26802,7 +26808,7 @@
         {
           "unitId": "94809782-b9b9-4149-b32d-fc0b2044f44f",
           "kind": "Chorus",
-          "textSha256": "a309fab54abcc7e92cd58d2969a1e527ecbd7e0fe79be5b1f447ebb6f35ab483",
+          "textSha256": "1f704859df2b0c3304b0b79db71295cd25d01ce551004ad4e254ef320fced8e8",
           "blockCount": 1,
           "approxMeasuresByBlock": [
             4
@@ -27079,7 +27085,7 @@
         {
           "unitId": "5ce0e9b4-7d82-4036-954e-8dbf852e4eec",
           "kind": "Verse",
-          "textSha256": "39f8999fa77275fb01d75c2d88053d9e787aad7c354938417b24a2d622cc3562",
+          "textSha256": "63c2b1c7098f70ec821e9d15c05657d5bcbb901f68cc2e38cd0ed8cd28a14ad1",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -27624,8 +27630,8 @@
           "textSha256": "0771012b55eb6c4fd44e33de551474077583ee5bcfb942f94c8c8bea7330000f",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            7,
-            6
+            6,
+            7
           ],
           "approxMeasures": 13,
           "reviewStatus": "score_supported_approximation"
@@ -27636,8 +27642,8 @@
           "textSha256": "61f8dea812ad22a739516c575174110ee993ec394eb2e686d4a3d6984df343f0",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            7,
-            6
+            6,
+            7
           ],
           "approxMeasures": 13,
           "reviewStatus": "score_supported_approximation"
@@ -27648,8 +27654,8 @@
           "textSha256": "fe7bdc3c6c43d246c325368775bd571d18b1d8af9c8931aa138381813210ad9f",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            7,
-            6
+            6,
+            7
           ],
           "approxMeasures": 13,
           "reviewStatus": "score_supported_approximation"
@@ -27660,8 +27666,8 @@
           "textSha256": "4fe4c759a6063726a24ed147f76e9a7ee96d4895269814ba74ab389b6db030e7",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            7,
-            6
+            6,
+            7
           ],
           "approxMeasures": 13,
           "reviewStatus": "score_supported_approximation"
@@ -27920,8 +27926,8 @@
           "approxMeasuresByBlock": [
             4,
             4,
-            3,
-            3
+            4,
+            2
           ],
           "approxMeasures": 14,
           "reviewStatus": "score_supported_approximation"
@@ -27934,8 +27940,8 @@
           "approxMeasuresByBlock": [
             4,
             4,
-            3,
-            3
+            4,
+            2
           ],
           "approxMeasures": 14,
           "reviewStatus": "score_supported_approximation"
@@ -27948,8 +27954,8 @@
           "approxMeasuresByBlock": [
             4,
             4,
-            3,
-            3
+            4,
+            2
           ],
           "approxMeasures": 14,
           "reviewStatus": "score_supported_approximation"
@@ -28056,8 +28062,8 @@
           "textSha256": "c8ebfea5e8539006977c4dcfc9c1bae5c406b67363285f63a1111c052999a761",
           "blockCount": 4,
           "approxMeasuresByBlock": [
-            5,
             4,
+            5,
             4,
             4
           ],
@@ -28070,8 +28076,8 @@
           "textSha256": "457e8f95d21ced384a53a2ebad1eef6ed71b157ad5b32b2c288fdfcee4983b17",
           "blockCount": 4,
           "approxMeasuresByBlock": [
-            5,
             4,
+            5,
             4,
             4
           ],
@@ -28084,8 +28090,8 @@
           "textSha256": "58cc8d5836c11d21c56c16decfc2e30300c43ea1e694b1de04f23b661ece1769",
           "blockCount": 4,
           "approxMeasuresByBlock": [
-            5,
             4,
+            5,
             4,
             4
           ],
@@ -28337,7 +28343,7 @@
         {
           "unitId": "58a80a3f-feab-457a-94f2-6a885ebb04b5",
           "kind": "Chorus",
-          "textSha256": "18dfa36977d7c347bb5ea5f28a379adb42ff8647991f0ab9d1f2bd20acabb08e",
+          "textSha256": "a0b9e764124097f03adfef515006536901a82318d8bea1b940d8742c881969f7",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -28532,7 +28538,7 @@
         {
           "unitId": "7242d56f-d19f-477c-85fa-6fab4b1f2fa4",
           "kind": "Verse",
-          "textSha256": "a885a649dd9a40365474c5b3c072967f8f6b882d492c7b81ada0aeb0a7cdf577",
+          "textSha256": "79c78cfd4a2ce7915062e3d151d1ec7f72a5d32731cda83c111e9c783ede30b0",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             6,
@@ -29000,7 +29006,7 @@
         {
           "unitId": "b07744a6-b2e8-4696-8cd4-0dcf9160ac0d",
           "kind": "Verse",
-          "textSha256": "8870301b79607eac675daaf900aee2e7632dae04bd5aef0cf9d666c53ed1cfa6",
+          "textSha256": "6245413a5cae4bc48419aed96e9e22253bec7702a2e7a38bebefbe3185ab8638",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -29640,7 +29646,7 @@
         {
           "unitId": "217483b0-3fd9-48ca-af27-31e75164cec8",
           "kind": "Chorus",
-          "textSha256": "379c43be0dff91140a23c71e720ee246184f3e7c05effa27ee1f4398fbcac6f1",
+          "textSha256": "74af337b888461ee06598c2dee2a69d6302d2de8be9b2e13fb709593db58d8e4",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -30379,7 +30385,7 @@
         {
           "unitId": "df975835-8fe5-4426-9f83-c477a448d0a8",
           "kind": "Chorus",
-          "textSha256": "c774a584466dd549812e8ffa7feed525d7684eb4cfb2350f9b4afd259727f56e",
+          "textSha256": "3fe31de1efc836d6564182a762468d27c597a2c6e9c1c026d6b7887c88572b96",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -30479,7 +30485,7 @@
         {
           "unitId": "52989561-30de-4a57-9963-2c38a47e1228",
           "kind": "Verse",
-          "textSha256": "3ccbcb7615b4835f5aa12604d677e061548d32cfc0b294374ad4685d70f63eaf",
+          "textSha256": "b99bfb5f03cf9c43b6a59807e9bb7ef3ec83236fcd77eb3ad9478644c322e023",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -30661,7 +30667,7 @@
         {
           "unitId": "3da85caf-348d-4259-a194-a57c11f38cdc",
           "kind": "Verse",
-          "textSha256": "8315807c5e980dc5599806532c7da25d87dda96c85c4662842ec5c2dd92167be",
+          "textSha256": "61d3f6ecff0b53a323f1ede34abb3fa2b5caaa434d12b6832373a0cb5454ff80",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -30871,7 +30877,7 @@
         {
           "unitId": "61588d0e-e652-4a1d-b119-16629432db78",
           "kind": "Verse",
-          "textSha256": "41af813a2a587cd5b67b0797b5f36cdaf8794c5df26e2d0a58ace3e2dbbbca7a",
+          "textSha256": "1ec373207a1320d1ac67caa9d71ab65894f2ca7db87afeef3e8b081e79dccc62",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -31191,7 +31197,7 @@
         {
           "unitId": "717aaa77-2c62-4452-8a5d-705bb371a036",
           "kind": "Verse",
-          "textSha256": "84ab847b0722da77a098c293019ff784febe17d783a809c5dea683cf1191ef89",
+          "textSha256": "338b4d4d8dd6d56d9372cd8260c6375f1695b493d79f53d1142404ff619d879f",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -31415,7 +31421,7 @@
         {
           "unitId": "c04eb764-560a-4997-b4eb-ab5867933ef9",
           "kind": "Verse",
-          "textSha256": "d45661bddff2f660c67acb440339d84d384a9a6f36898a68af027fee637f97b5",
+          "textSha256": "97259443d30e4418aabb26b646f9a952542e0600270e2d2f574c6d38b9a533f7",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -31842,7 +31848,7 @@
         {
           "unitId": "f1d1cc6c-044b-4305-aaf8-c2fa90b98cc5",
           "kind": "Chorus",
-          "textSha256": "fc77382b8604ad93e8be3bdea4ab4369e5f5e3c8e081bc32d9fc1dd42f2f122c",
+          "textSha256": "56bca9261342f4e47057eeded0ff17df98acf7d1aca3019645451b8a9db10973",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -31952,7 +31958,7 @@
         {
           "unitId": "e5eaf9d7-5e9a-4351-8e7d-83fa082fabec",
           "kind": "Verse",
-          "textSha256": "2deeb956529622867d6493c6fa421103e855bb679d8ece34d07299fb7b318317",
+          "textSha256": "ae01afbdba6c9d9c1093b4e3f09b0facc0414936e28f7823ae2786a017e259d5",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -32266,7 +32272,7 @@
         {
           "unitId": "d6eca874-9812-4571-8831-acc7a63a1f54",
           "kind": "Chorus",
-          "textSha256": "a3ee247d52a53c0e95dd42f1ade6c41826f6825a10c70c489930e3fdf75f6a37",
+          "textSha256": "767a4ca76812a546aa025509151dbbfc1ddca73adb7390812dd9219f641fcc76",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -32333,7 +32339,7 @@
         {
           "unitId": "2cbc7730-f90c-4cee-80bc-a7e7215c2a65",
           "kind": "Verse",
-          "textSha256": "dfbb9229222907947fdef9e15dfb633c571dcc86f96fbc7617393af393240a30",
+          "textSha256": "7050431c4c0a68692bd0327814c80c45deb9dadaced671902a5ed621183855bb",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -32376,7 +32382,7 @@
         {
           "unitId": "649cc270-c2fe-4c30-8536-35820c5332ed",
           "kind": "Verse",
-          "textSha256": "7a6737b9942e7cfc4bf1f9ed80eb4e0dac7c907719532b1d809bfa6dde54e8db",
+          "textSha256": "9b4e901afebb6b07f0718e2c5a2bb82ed3258e38832925b0198c9423907b07fc",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -32746,7 +32752,7 @@
         {
           "unitId": "5dc8baa9-3de3-4b2a-8bf8-28034e4340a2",
           "kind": "Verse",
-          "textSha256": "9080a687f15902ceb85f29228c7c69fd2c221967fe5086a55bd855fd4af4d636",
+          "textSha256": "3101bb10c25b92a5138ca68f931b3ad02c1e823fc0d80eaac076fe6849528fd0",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -32818,7 +32824,7 @@
         {
           "unitId": "cb3cfc04-51a5-4ebf-a1a2-d18bdda7c255",
           "kind": "Verse",
-          "textSha256": "0a9aac9688a0f0bdb95fd90cf3893173e4750446448f097631e907cfa389dd2e",
+          "textSha256": "8c373262a2b71b4212ee2171a1a18a2d507379d51724fe8fc3f78b7ea18c1b64",
           "blockCount": 1,
           "approxMeasuresByBlock": [
             8
@@ -33429,7 +33435,7 @@
         {
           "unitId": "60454c68-f98b-48ce-9fb2-a54756bb00af",
           "kind": "Verse",
-          "textSha256": "a8ccaac5e383b1df4ba507eff2c08ab1b29dccd8aa9ee3fcc761bd5b7aa3df71",
+          "textSha256": "573d7c58294fd9c3ea8dd8ef21f2a1707e263be2eb7f989d0be5be48286a9653",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -33955,7 +33961,7 @@
         {
           "unitId": "0d4b3ed9-2863-4417-bd1d-1b43bb05ca71",
           "kind": "Chorus",
-          "textSha256": "c83792ff23b29ea3d5b87de6aff44c0751124cd01e585ee84c918b5d5a7defa7",
+          "textSha256": "1c440ac10f13a9d88a5fa43277f7a113ac256d4ab54d8ac176f54ce5f33ddb27",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -34044,7 +34050,7 @@
         {
           "unitId": "1ff45ab3-b243-449c-9bb4-271e3d99518c",
           "kind": "Verse",
-          "textSha256": "09423faf83e2abec329d056c2dc07f337777065ec279c8659261c9f69ea99284",
+          "textSha256": "42cdd7a0ddd56f9dec2ebee8f16446cdad5ad79ce4d9348d8c8afcb4748b6f69",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -34120,7 +34126,7 @@
         {
           "unitId": "72c26abb-b357-4a17-8a72-34e224f0e269",
           "kind": "Verse",
-          "textSha256": "7d53250c892f4af9752f1a74e4903b584ac389966db1a11c34c91b9f08c8b288",
+          "textSha256": "ad263adf3c197638fa15bd4664c1c3e1cba86d21ba4df02597e984d9ccfbf581",
           "blockCount": 1,
           "approxMeasuresByBlock": [
             8
@@ -34703,7 +34709,7 @@
         {
           "unitId": "01748bf4-27a8-472f-b099-e1cbd8407576",
           "kind": "Verse",
-          "textSha256": "aef02e1a155d03ac5ed6f7c734c03f4877212f276e72fe585f8e6d5d05d5274b",
+          "textSha256": "cc2fe6c457bbb2511625c638d562f72bd4c7625599dc3e47de040a52ef87ec0d",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -35128,7 +35134,7 @@
         {
           "unitId": "fee50ebd-258f-4c92-b553-4e80a5df87c2",
           "kind": "Verse",
-          "textSha256": "1b166b796bb2afb7fef797b6c8c22691f6d16e16a92219f7ebbacd235f163fc4",
+          "textSha256": "ec58d165072eadc4509cc8470cd9365ef2dd7a2cf6bb904d4b1fdf3b6199e874",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             4,
@@ -35481,7 +35487,7 @@
         {
           "unitId": "a65e9a59-3a38-4312-9a06-947a16e84ce7",
           "kind": "Verse",
-          "textSha256": "4ac5dc7e4a3dabb3a490c12d3973c2e64d2c18351ce3a0f1c9d3d371dca7553e",
+          "textSha256": "f4998e738db669103d69013477c8ffedc4af6cbc420fdcd8eec27729133013f5",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -35505,7 +35511,7 @@
         {
           "unitId": "8402ab0f-482f-459f-a5d3-0f803275353e",
           "kind": "Chorus",
-          "textSha256": "7f0a1ba9a2bca949e7a350e81928644691f5be5a9fb55cbcebec7cf0c00275c6",
+          "textSha256": "8d2feca275893191efce8dd2cb11e702b6f2c91c7aeb8d7211029f5798d43fb7",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -35689,7 +35695,7 @@
         {
           "unitId": "4a540a6a-36f2-4768-a803-cb0175e50efb",
           "kind": "Verse",
-          "textSha256": "6137a0bf0bee799650c315dc2eede9dca457e29d57299fad71c426722e0aa3bd",
+          "textSha256": "99a9db4441a692eabdf496840e723cfd1213f39b5bd907acf84bb97aa9d44d97",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -35725,7 +35731,7 @@
         {
           "unitId": "627001ee-d946-4f1d-84e2-88fdf8b22ebe",
           "kind": "Chorus",
-          "textSha256": "ae8fe84089193949843fc524678a63616208c2532e6a1485f24e368fecc1b05f",
+          "textSha256": "8b67e3619e9c4f7cc9eda7a406b9e3593cf0f71c856273ad101d0f4a73ff3745",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -35937,7 +35943,7 @@
         {
           "unitId": "3a7e083c-ddfa-4b2d-b114-e46dc4985bba",
           "kind": "Verse",
-          "textSha256": "b3773c701a84ea802e3f5b872f17b24fa01a448648217e2b10bb89c0e65ad7c9",
+          "textSha256": "57cd332f49fbeffdd18ca96a1b79e6e489300016c7b29be818ed274850eeb5c5",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -36327,7 +36333,7 @@
         {
           "unitId": "167d7bd8-7ca9-44d6-850d-8f88795f8e5e",
           "kind": "Chorus",
-          "textSha256": "b564ac96823fc885c33b369f2a572b76ea58ba50f4c3fc8f5a53b902f5056c8f",
+          "textSha256": "65912b3e2b51ec553cb405bc687c84f2d394bf312128601ca6fba01914713495",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -36382,7 +36388,7 @@
         {
           "unitId": "0d7d271c-6913-4376-bfad-01f934e5cee1",
           "kind": "Verse",
-          "textSha256": "87cc002ec5bf46bf5ab2424f22c5a407fb661d4c86ed395daca0853e9d8979cd",
+          "textSha256": "29757f7788f7d37a0b26235edd4786368c576cf7b5599bb5f744f204aeb59694",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -36406,7 +36412,7 @@
         {
           "unitId": "28b9f86d-f1db-4e8f-b289-2f3c21c562be",
           "kind": "Chorus",
-          "textSha256": "7b46834603db30db44c57e53ecdb2bab348aa1231343494490464b23c16284d3",
+          "textSha256": "633d3fbaca702b423a729ba6375de2104ce6add88b4f2b62ca8bb0d0507b7071",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -36767,7 +36773,7 @@
         {
           "unitId": "1f2ea6c4-f8db-4fcf-8bb9-a6f9a07ef0f4",
           "kind": "Chorus",
-          "textSha256": "27727a932aed8a1f7f12cac9f6adcd624c4c1c6f13b81bbac51defb92e260c0c",
+          "textSha256": "f50ac4a9777231f71a790aecc728d160cb06960dbd0dca3fb0e593e467ecb88b",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -36798,7 +36804,7 @@
         {
           "unitId": "46229305-356e-46a2-aff9-2b1715297672",
           "kind": "Verse",
-          "textSha256": "35c0a4eb896a9979c45e76571a8e1602ddd3e399c5c5ef038f73dd0bf3b32b28",
+          "textSha256": "a479348b7e22ab1dc1fdbc9e1d0f2b882dd82974f4a8a0f8c8392c822a3c05b1",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -36834,7 +36840,7 @@
         {
           "unitId": "7dd4aa40-be6d-4e91-8df1-c418b053cbdf",
           "kind": "Chorus",
-          "textSha256": "c11c72255c61bcd7baa58d0aebd79f9694cb5beef2cce89beb10745370528401",
+          "textSha256": "e6599c27322cac2b81235eb297c8c69fd144822fa0a9f11acb909b457934b460",
           "blockCount": 1,
           "approxMeasuresByBlock": [
             4
@@ -36966,7 +36972,7 @@
         {
           "unitId": "3b3133b1-1d17-418f-9087-c2a1490bca37",
           "kind": "Verse",
-          "textSha256": "a9c81a1100ed0a2d667f7e3b37d9d3ec545f13067b3a0482d92c6703c0bb021a",
+          "textSha256": "17456571f2f7678ed11891be5e52b3be424c00c7ef3a618da35d8dc873dab870",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -37002,7 +37008,7 @@
         {
           "unitId": "1e62385d-e420-4393-9f71-2461f9cbc753",
           "kind": "Chorus",
-          "textSha256": "6779eec7e4353f66db6debcdfeb38684e8a99738b85a0fe1b6c7699736a9d568",
+          "textSha256": "0032895fb8ca870de3c27ff7322490b85850de70f7420aa64f9ed60d3c5d3acf",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -37033,7 +37039,7 @@
         {
           "unitId": "45862344-ab68-4115-9856-cbf680b457e2",
           "kind": "Verse",
-          "textSha256": "ece9a8ad7382ebcae7b6957fa7e9e2d00d3acc33bf51fcee554e7185bca2172e",
+          "textSha256": "781b95c014b1e27b3c25efc7cef389eb1d59d66a4a27882a8d4fc398f7da7b33",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -37392,7 +37398,7 @@
         {
           "unitId": "ffdd2f57-48b3-488f-80ce-b35cb3a485e0",
           "kind": "Chorus",
-          "textSha256": "667a6b27302549bb57850437c66fdbcca1d8e9da46a438434beb18f33cfaaeee",
+          "textSha256": "537c1efe0931e23df9eda58bfdf0edea139f17490c04a7247b50deee5a0c98c7",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -37497,7 +37503,7 @@
         {
           "unitId": "f30b6f6e-c785-4db1-bd89-afcd07ce17ee",
           "kind": "Verse",
-          "textSha256": "0ea689295b6a226c42593a4a0b9974e9d05570343523134f00a73c3b214adc9c",
+          "textSha256": "d1ef215c737f26b4559e63c6eb7a783e9996428b0887e6effa1d9601b6b1d9d1",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -37714,7 +37720,7 @@
         {
           "unitId": "8b33d216-2beb-4039-9fb1-0b403245b139",
           "kind": "Verse",
-          "textSha256": "0a3eda8b772243e694098af01ec895473d7f119c98a4efcebdef399ef1550341",
+          "textSha256": "8c7539147ad9fe586de30560f124ca97f37b0577a05e2deb5d07b3be47dbb062",
           "blockCount": 1,
           "approxMeasuresByBlock": [
             8
@@ -37827,7 +37833,7 @@
         {
           "unitId": "749187b0-f9c5-4b3b-a7b4-06842df140fc",
           "kind": "Verse",
-          "textSha256": "980f181d6c7bb2f572556ec22ce885946f6b8ebb58a7db054ab0919b31ca7f37",
+          "textSha256": "434378721db3b862f8fc8adbed4c3a86ef7dc3d2e01183fe37c7ce9ce804753b",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -37875,7 +37881,7 @@
         {
           "unitId": "1aea1bb9-3836-4bb6-9808-a2113b762f37",
           "kind": "Chorus",
-          "textSha256": "d5c6cdb79b89bf40124cf62e1df1824538b133ba4b98e5b729a73bb173afe1e7",
+          "textSha256": "b958f066ab56fde254b72b3fae7f1840aa605e3a1078b2f538ec126cba9de2d1",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -38399,7 +38405,7 @@
         {
           "unitId": "690c9d4a-0185-4cf0-9f73-4942a3b70b13",
           "kind": "Verse",
-          "textSha256": "ba9e761dbe6e0ac32af9cc3ee79bd52e9d1e4ac98f8afbab2e6a18f938db9c2c",
+          "textSha256": "50a165dc2b736bc7b3af72e6602b58ee4b3947b69bc644999832ceae4dd19f56",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -38468,7 +38474,7 @@
         {
           "unitId": "92511a91-7bfa-4292-908b-5b9f75618ac4",
           "kind": "Verse",
-          "textSha256": "26ce5ee126fb48ee55657b0958be4de1d9d2dbf2d3a69f559b42ed98c2a85446",
+          "textSha256": "fbc2091bc89f782d8c7667efa74dd3d4f170c47509f24403290873a55cbadc50",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -38482,7 +38488,7 @@
         {
           "unitId": "44104c69-31b9-4fbb-a472-da07249c8374",
           "kind": "Verse",
-          "textSha256": "9dbae76edd42f8fe9a53868dff99fb95137080dc54c7bc409fad41beac889dcd",
+          "textSha256": "ad68f2e023ebc1a71c0d9402e0a8ed6a0eb8a1290a9c00b97addc54a9a894359",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -38496,7 +38502,7 @@
         {
           "unitId": "10a83532-3482-4eef-af48-38eedae7284f",
           "kind": "Chorus",
-          "textSha256": "70d96dc147041e898e55cea428a832133959a9da8acbe8015ee49aad6e1c5514",
+          "textSha256": "f4ff19c1cbd57226b055ece16ccade3eb66d57953f2b7010e834aa732d6d8ded",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -39227,7 +39233,7 @@
         {
           "unitId": "613dccc6-c3a1-45a3-8cc5-53052486c942",
           "kind": "Verse",
-          "textSha256": "05bb3b07164ca4d5eef3ba8d9ec30a0050f81d6357e9e6c0a76f7a70c51747fb",
+          "textSha256": "64ce21d822047a4d9e1343a3c74a6a6cfaa43c65dd7ca8b9192de8860a1216a7",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -39459,7 +39465,7 @@
         {
           "unitId": "38f828df-c13c-4806-ba4c-6d45b811ee4b",
           "kind": "Verse",
-          "textSha256": "a64674f364b67ea2f7475f6eb930863084e2f71b4d40cb0ab15486ac3ca8441c",
+          "textSha256": "cb5f1e9f745e85b2f034e36a217f19246619f6eab2379522cfa6d566f7b6961f",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -39503,7 +39509,7 @@
         {
           "unitId": "2b5fb1e4-3b7e-448b-8efc-381708e1e31f",
           "kind": "Verse",
-          "textSha256": "c1b2f05821e122e3867e9686b6691f3e58ab3f630b288c93f460bf3a46a183ad",
+          "textSha256": "4516d00566503ee3b8a38f55c7f961ddf887261c65e7a5e118f7c9b3b0a7af28",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -40197,7 +40203,7 @@
         {
           "unitId": "0a637fe9-ca3e-495f-ab31-16da8af67a9b",
           "kind": "Chorus",
-          "textSha256": "1f058293106d0660c9b2fc9f3108718d7a46d786131416aa5ab9dbac238d992a",
+          "textSha256": "4876cb59d1629582a9062bdf82e58f29070f652ab08946753724d602aab24ec6",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -40280,7 +40286,7 @@
         {
           "unitId": "0cc73939-cadf-4801-9179-99c0f92c5c53",
           "kind": "Chorus",
-          "textSha256": "18c9ce30ee9fad22eeb78e1bce58924361b31831a0d8846ed16dda0eb11204e2",
+          "textSha256": "f7c6d17376aee11278657adf5e68c6ef4f7aca8e1d7542e28b1e6dafd4d3a008",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -40668,7 +40674,7 @@
         {
           "unitId": "4377bc71-21c2-4fac-a6f3-8f467ac3135a",
           "kind": "Verse",
-          "textSha256": "7f2f7e5bd44ba82820e396e5173ec76a053356d3c2ffcb79528a2ffa4a57047d",
+          "textSha256": "b46fed7647801d500162ee4590a5e907d1b05fc4a8a4389af90a3dec93c5ec0c",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -40774,7 +40780,7 @@
         {
           "unitId": "ce2b6cf1-1472-47b6-a11c-48bcd3b1ee89",
           "kind": "Verse",
-          "textSha256": "be7f2eb52b380960b0c70442c54cf48df4286ca0f22a75386ba35243a6168bd4",
+          "textSha256": "0d6453cf95e3f812c971601e57f4453886ee9501d883719613ae7afbf3ba97ea",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -41064,7 +41070,7 @@
         {
           "unitId": "99223110-5056-49a7-9cef-cd79bf0085cb",
           "kind": "Verse",
-          "textSha256": "24536ddb5e12a02529dd136801f42cdf05cec0734c9a7fcc33f8ff3b3910531c",
+          "textSha256": "8c1db7e9f849717ce3705759ca7771b97062c7c0df28df9994ce29741e5fd5b5",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -41276,7 +41282,7 @@
         {
           "unitId": "425d5d09-87e0-4f06-b714-b9034bde4c10",
           "kind": "Verse",
-          "textSha256": "31d30d4e01fd258c681f176f8fd64099186d6ea8fbe959fcab149bc7620e245a",
+          "textSha256": "c8df6a9ea1732fdc376e37f36594c74a0906bb65fa25a393bb9676575768b608",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -41483,7 +41489,7 @@
         {
           "unitId": "1bf0a3e2-586f-4c81-a22d-fced38c54f2d",
           "kind": "Verse",
-          "textSha256": "e5e6387e3d94bd754688174b4d242ee1e0f9ea25cb148e9522473c7cd4803e9e",
+          "textSha256": "988b856ccf320ca14bd04972b904a9cfac596700df7a29b0fbc416ba72bf1d70",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -41626,7 +41632,7 @@
         {
           "unitId": "3c30d94b-0a29-4902-baaf-411dc570da9b",
           "kind": "Chorus",
-          "textSha256": "863fa77a1e3186cffdefda1df480978c3c829e1787b8560a1ef8c56131fe7ef1",
+          "textSha256": "0283f100ab740dc0173e7faa2b17b3d73c37be15aba8ae59df18a6ef37224153",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -42450,7 +42456,7 @@
         {
           "unitId": "3a6cce9a-7845-4aa8-ae09-857a7e6a03a6",
           "kind": "Verse",
-          "textSha256": "9a55e308fcc014f42683a3a3aad59bd0726157a6d75a188afde5e0f2b624c0a1",
+          "textSha256": "a392c91e235d9b482e2e54c6b98ef3cb3d33bc16163814dbd96c29cb9e9df7fd",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             8,
@@ -42464,7 +42470,7 @@
         {
           "unitId": "9833af08-7f48-4413-9992-049f4990db37",
           "kind": "Verse",
-          "textSha256": "4ddd08018551ee1f92985ee7eeb11cc8dcc9fe6f7d44caafff917d65ec4105fa",
+          "textSha256": "5812d6749bc140db79970bf4a330fc987e31278eae2b895c4cab887154a2723f",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             8,
@@ -42478,7 +42484,7 @@
         {
           "unitId": "d14e4a40-a165-4cc1-b4dc-e71e7bc819a6",
           "kind": "Verse",
-          "textSha256": "c432314ecfc6fb3bc994adc23fde50aaaa253f765024cd9ee2e8a9248d2b5b37",
+          "textSha256": "957017866f3f6bb4ccf8957654c23a5461a12206fa0cd39b242ecbec0816d6d1",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             8,
@@ -42668,7 +42674,7 @@
         {
           "unitId": "bcb1f143-7dff-4dc1-9d63-5487092fa0be",
           "kind": "Verse",
-          "textSha256": "f878d52a3ed2c0a5ffd66f447114e7f106efbd8a20bc1159952537f92fef81d9",
+          "textSha256": "3b2f5126cc5a0adaea770220df862d373d9ce3ed2458c874afaa934b73ede425",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -42753,7 +42759,7 @@
         {
           "unitId": "cf9834d5-b9d1-4dfe-8fc7-904ee6ace418",
           "kind": "Verse",
-          "textSha256": "44507f3975fded38d1c3d12262e7712b23ef94df8099b260fa83ac2c49e7599c",
+          "textSha256": "1b7a6e118e0a3ace9c081c49d863dffd5d5fca7bbc0380bbd0c5d470fbb8a5e3",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -42914,7 +42920,7 @@
         {
           "unitId": "c2432f93-766e-4191-b4e8-438602e9c817",
           "kind": "Verse",
-          "textSha256": "dab8a5b4e0f7f8428ee91334d7e5961a6e130ff2eda9a9f99f101a5ac5036c79",
+          "textSha256": "4bf6ea6ce74029403aae6bfd85eb058e46d6a64e0a6df86ac35d0c5f9e78c8aa",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -42928,7 +42934,7 @@
         {
           "unitId": "f5c127f8-b459-46c4-b19e-b92d60656772",
           "kind": "Verse",
-          "textSha256": "02242599784d1861c6b474f129c5f2d3d3123a73882b333fe04d285fe054f3dc",
+          "textSha256": "55ad7771b9fbbeffa27bd41c6ca0e7530671f3a1fd3f5ceb6205652cbdfddb3d",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -43038,7 +43044,7 @@
         {
           "unitId": "4baf95cc-5c5c-4e8b-b5a4-45d18aecaa90",
           "kind": "Verse",
-          "textSha256": "4d2156f0639c67a268684dbd4d93e4e8b5911312fcb9de729a314a480074db74",
+          "textSha256": "28729d9d08a8adc3838ace5e63b6e51da3ac1a8f711a4838f4f953cd4dc57293",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -43074,7 +43080,7 @@
         {
           "unitId": "30b89eef-7767-4ba9-9ddd-6c80309d7455",
           "kind": "Verse",
-          "textSha256": "60612d86a6df458c92be7212e3d3555642dc19cff7080a733a0cc0e99c93a411",
+          "textSha256": "f2d5978b986d4c3034ea2ff30645c1b44179045c21d058131b65bef17387674c",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -43269,7 +43275,7 @@
         {
           "unitId": "8c5f9545-724e-4a0d-ab60-c6863240a8a5",
           "kind": "Verse",
-          "textSha256": "9e4fd8f503d9bf0ee1736b5e482ff76e6c045b1b613d32e15ce09798ac187430",
+          "textSha256": "21f8e1e7bf0c5fa39e30d50736676c113d57e58b53babde8dd8e62ff9ad0a1a0",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -43383,7 +43389,7 @@
         {
           "unitId": "64af09ae-d4ff-4923-9b81-e9f152e1a5ce",
           "kind": "Verse",
-          "textSha256": "873e31a315e40b7adfc99cb5ff5ab61cd9522d83ffb28db8d19430f40cc2b7f7",
+          "textSha256": "e2681763b6ddc45a5a792f8caad293fe84ac7def6ac690bdaaf578f8c228b625",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -43430,7 +43436,7 @@
         {
           "unitId": "5c138e95-cefe-4da0-8939-fa6416792fde",
           "kind": "Verse",
-          "textSha256": "098b6b4926b4ec3bf87521704da08758ef6fd071113aecc6218074dcf5ac2a4a",
+          "textSha256": "84f5287497fc7cd1ac4d0e455d465d14751545cc3acfc93a9c228f60440f9fab",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -43478,7 +43484,7 @@
         {
           "unitId": "56d83c41-cf2a-4f29-85e1-7da3eae6f7b4",
           "kind": "Chorus",
-          "textSha256": "e6eb6c76bec2747455a15070ae5f68470c6dc764a79cf6777b3b6c44e3dea89d",
+          "textSha256": "5cea5ee9670891bfbdae46cc29948dec93cb66586d1bbdbe1ceb912b241edb8a",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -43670,7 +43676,7 @@
         {
           "unitId": "fb6ca6f9-58ab-44fb-a838-5311396b1c95",
           "kind": "Verse",
-          "textSha256": "684dc0a0783b49956b5c72248dae8c32445ba398882c764361f7494a24aac3e2",
+          "textSha256": "6081c1d471de3219c9284b21f9627cc4e4384dd2ba950a200f6bf88b0dc35765",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -43710,8 +43716,8 @@
           "blockCount": 3,
           "approxMeasuresByBlock": [
             4,
-            3,
-            3
+            2,
+            4
           ],
           "approxMeasures": 10,
           "reviewStatus": "score_supported_approximation"
@@ -44415,7 +44421,7 @@
         {
           "unitId": "f0d1064a-fee5-40e2-b875-2a8238a57fd6",
           "kind": "Verse",
-          "textSha256": "9251a732dd871329a97fa2faf99b73ade74776632eca70bc1462004dfea95003",
+          "textSha256": "9417e638aa28bb3c77259e1e0fa6010cd5fb38943a24435af5c3648de437d550",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -44536,7 +44542,7 @@
         {
           "unitId": "917a194b-0aa0-4a5b-91ee-f2f4a954bbaa",
           "kind": "Verse",
-          "textSha256": "524d4d5c16b48a3335f8b3cc72ae939048a8d44f522bcd618e195a049b082ed4",
+          "textSha256": "6f83d6252a2cdbb79805128901c58b40800f65408e7deeb35276298ea4657c9a",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -44548,7 +44554,7 @@
         {
           "unitId": "cc5c5a67-e1fa-45e7-9e56-fc0b870f84ac",
           "kind": "Verse",
-          "textSha256": "2e55b6f298adf7bcbc548e7b7a7abf01b98034206b1b5d6473231ba5ba27c69f",
+          "textSha256": "8057914c6487a2f31da6edb9d667ada884c5c56fce1d11192e0baa4e2884cf83",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -44560,7 +44566,7 @@
         {
           "unitId": "5159bb1c-574e-4cca-937a-6855c470677a",
           "kind": "Verse",
-          "textSha256": "af1bf5b89d2e8b3308e9535629dad2dc9ec9e72131aac1882ed49fd91e4703a0",
+          "textSha256": "90ec042feb653ff1d4b969dd9922d20aa91717bef80ea661fefaa4c50ab9dd6e",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -44615,7 +44621,7 @@
         {
           "unitId": "aebdb11d-d986-4382-81cc-f2b999a6dfb7",
           "kind": "Verse",
-          "textSha256": "fafb54ee0fff97d6215194f33126aae35b0bbbdb4abd91bbeaa4673220883ec4",
+          "textSha256": "e4397965d170f985757bdf0b7992d8a307cd007f82b49ab4ad8d5f5721f6216f",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -44657,7 +44663,7 @@
         {
           "unitId": "346b2b0f-af87-4453-8758-227b5afc5c0d",
           "kind": "Verse",
-          "textSha256": "5440207c7f01f8bb451dbb348b53cbde45290f7339a80c0abf7757572bb53780",
+          "textSha256": "ea850ac1835549e1f446f8416967cc6523bac07243e4e784020f2cf1fb4fe132",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -45390,7 +45396,7 @@
         {
           "unitId": "ce2b2631-c442-4e48-87cd-fc03da3a02f2",
           "kind": "Verse",
-          "textSha256": "aac7b20277f6193663c22d8b0d6b1f4ba2bdfa27df0e368769b3020ab927f154",
+          "textSha256": "a5367e3309ea9a536a4c1a8a4649fcd392d85f6d4614805d42a12cb1b897a343",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -45702,7 +45708,7 @@
         {
           "unitId": "e9f36236-6ad3-4b1f-adfb-ed078ee43d15",
           "kind": "Verse",
-          "textSha256": "1cd175d8eafefdbcbe1b21667725355012387f92e993de2a17a80ebd574ed5b6",
+          "textSha256": "cc0a2554255279a8368f3dbffe97422c02bceee84ebfe87b47fdb42c4b33bb93",
           "blockCount": 6,
           "approxMeasuresByBlock": [
             5,
@@ -45990,7 +45996,7 @@
         {
           "unitId": "16f02ae6-fee6-4d0e-9de2-9dad4bd9880d",
           "kind": "Verse",
-          "textSha256": "0e7b2ac1f0aa2d037fa06b8d28686db918a12b4491d525f568800d289220fec8",
+          "textSha256": "cc126e8522f3b7d97a328dd0edab5f19be29885ef87f4e7db6287d1e55580392",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -46280,7 +46286,7 @@
         {
           "unitId": "f65174da-d39e-4f60-827d-164c493a1978",
           "kind": "Verse",
-          "textSha256": "a68929072fde8832d1ab5e12e6bfa5fae006389ae8b407a3d92bfeadfa189e79",
+          "textSha256": "90c791034c8d806ea52e99be0128698e952364595b51d0f39be46a64f3211108",
           "blockCount": 1,
           "approxMeasuresByBlock": null,
           "approxMeasures": null,
@@ -47078,7 +47084,7 @@
         {
           "unitId": "78bf3f9b-7480-5f31-a808-6b4178803185",
           "kind": "Verse",
-          "textSha256": "5a32986fa1648162953fc6d24e74c1a609b72d62a97ffff02011ea187190ec93",
+          "textSha256": "ea1e22fdab66f5627f4c6af434d47c683cf6c2e49eb5fa2aa3de80531fa33d76",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -47493,7 +47499,7 @@
         {
           "unitId": "74efd9d8-9002-5f6b-859e-1b94798be24a",
           "kind": "Verse",
-          "textSha256": "79d15a8a1681f634057da425c256379184fc3b12ae66b2bdcf7ff8c3795f8cf3",
+          "textSha256": "53d07ff5ccf989a3e8b1fd24aacc4b3b6d63f3fadb13c709a6220c0069ebe057",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -47694,7 +47700,7 @@
         {
           "unitId": "d819c109-35e5-5887-9bfd-5bd08813d075",
           "kind": "Verse",
-          "textSha256": "efad73b8100c615aa0a2b8edf696fdd3244b6e3ea0ad624dec39055648b23e10",
+          "textSha256": "1555f002568f93bedca2872f0a1fe821f87c023ba7f0ef5aecc94432663789f3",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -47718,7 +47724,7 @@
         {
           "unitId": "102ff241-c06a-5d59-a274-e5023dca3ef7",
           "kind": "Verse",
-          "textSha256": "690740def5f5827dd61d4db8a1c7d09581870c6b03a16a5c9b16677285b75f01",
+          "textSha256": "879e192198696a669c7754f31c0fbf2a29502e911d5bee4f5be77f0039f10c7c",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -48101,7 +48107,7 @@
         {
           "unitId": "be824e3b-a77a-5b1d-adbe-12cba307cbc9",
           "kind": "Verse",
-          "textSha256": "4d0208acd82770b29ad0a65c3153744934c3b249d62e3f23903fbac38c729878",
+          "textSha256": "bf09c591c45ccf1abd8ecd90d37242cebb049812d8c4e6008cdadb91c8bea32b",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -48909,7 +48915,7 @@
         {
           "unitId": "23daaffe-17e5-5c4f-9e52-f05a8abbfde6",
           "kind": "Verse",
-          "textSha256": "d4baede5ab16d531ce36f502b0f0a93564352701a02b276c5a8416240645f80a",
+          "textSha256": "1ddf014cb60267ad1088d99c81f8d150ef49f52cba212723552670adfb68b655",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -49121,7 +49127,7 @@
         {
           "unitId": "2ff2fec0-d81a-517a-9f53-e3808dcfa273",
           "kind": "Verse",
-          "textSha256": "f4b3a28c60eb357013743b311dfc969ad42a83933eec788e59d1195e0d71ccb4",
+          "textSha256": "64ba03ee16c6dfd5e9946f34d6ad0e9bd6d35338eec63262fb07c3fd8e63b99e",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             4,
@@ -49203,7 +49209,7 @@
         {
           "unitId": "02205aae-5974-537f-8b05-7492e9b90bb5",
           "kind": "Verse",
-          "textSha256": "7811b1bd639d872d9269cb2e70fcb1f21a57c742bebb49900274ee9a806a274f",
+          "textSha256": "d94764e68660797d411c950036a201d1c6de4c27e0fb1e8a7ac2663923f0b985",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             6,
@@ -49362,7 +49368,7 @@
         {
           "unitId": "8a51c7bb-7e09-55d1-bea0-6b877b4a8db9",
           "kind": "Verse",
-          "textSha256": "cddb27fccd2dd18efc84d9e3fc05dede907b5e9982b562cdb21db7cdfe85dca7",
+          "textSha256": "27bb80363d226b8ea798995a5356922830d1929a17c20687a2e7343dd6dabf08",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -49585,7 +49591,7 @@
         {
           "unitId": "28ba051a-b29b-5069-85da-e2b12d88791f",
           "kind": "Verse",
-          "textSha256": "790a1dc1cae2b53ce7f1bbe70cfa6a8e3fc504f419224589e22985e06d47fcb1",
+          "textSha256": "1e46590abb300c6d90de10515cec8b7428ea07d129e814197a67fb2e1670861f",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -49609,7 +49615,7 @@
         {
           "unitId": "ab53a92a-862d-5c1a-8aa2-d77dd44cc445",
           "kind": "Verse",
-          "textSha256": "40c269210b354c05c4391a25f8ffd792f3d8b0d1a00cbbb746cfb49eff954176",
+          "textSha256": "b27256e629879087cda3f41e60e010f177193e537c0d83f47c8b55848eccbac3",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -49621,7 +49627,7 @@
         {
           "unitId": "f9851a0b-471e-57dc-95bd-82af8844e25f",
           "kind": "Verse",
-          "textSha256": "76194712f6c8cd34a5978fa2db8784a3a2cdeb0fd49f757f343ca60251fcce69",
+          "textSha256": "b73ddc8f1fca171b2cd17b13f094f9cba31fbe3ae26add763fcfb5c21eb1e4e0",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -50459,7 +50465,7 @@
         {
           "unitId": "a4787d9c-a587-58a1-9865-becc35f592df",
           "kind": "Verse",
-          "textSha256": "9c11244b4a5d7d93e4783dccbcbf7c3e59196bd5af4b25a05f628866152faf67",
+          "textSha256": "cb6abb3399c4b724505497174786c957e69b962fa5d529a75f5be37ec52926ba",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             8,
@@ -50529,7 +50535,7 @@
         {
           "unitId": "a6ab71c7-68ee-5884-8cb1-2db8e4511dd3",
           "kind": "Verse",
-          "textSha256": "36117aa3fea5c4b38b76f743d6d3cb221df3e979ef4fe66034ac51be7673e21b",
+          "textSha256": "06937580344282869352016b1c9e627f049533701d650d93e776d6f868cad490",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             7,
@@ -50758,7 +50764,7 @@
         {
           "unitId": "8e15e16d-f740-5433-abb9-65e01be47ac6",
           "kind": "Verse",
-          "textSha256": "c080b2c313d396726fe8baf8f8231078cae718832adad4747d7e64575683e473",
+          "textSha256": "bf1f03257adf0d4618bc4a1b729908801b3cfa847a7716fe30a4947e19892042",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -50900,7 +50906,7 @@
       "edition": "union",
       "number": 59,
       "classification": "8_bar_blocks",
-      "stanzaApproxMeasures": 16,
+      "stanzaApproxMeasures": 14,
       "reviewStatus": "score_supported_approximation",
       "parts": [
         {
@@ -50909,10 +50915,10 @@
           "textSha256": "b9ae92b40f649f4939b468f7b1ba709d0e76c4fb9e080302568eabaaccebaa7c",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            8,
-            8
+            7,
+            7
           ],
-          "approxMeasures": 16,
+          "approxMeasures": 14,
           "reviewStatus": "score_supported_approximation"
         },
         {
@@ -50921,10 +50927,10 @@
           "textSha256": "95a15fad00c6a62bf2c77d38af9df1778c3e424211b6e9a062e5007aed4733b9",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            8,
-            8
+            7,
+            7
           ],
-          "approxMeasures": 16,
+          "approxMeasures": 14,
           "reviewStatus": "score_supported_approximation"
         },
         {
@@ -50933,10 +50939,10 @@
           "textSha256": "e27454b2b3d19e8e4f7399254521503a70899f3310f0b52445d070fdbcc728e2",
           "blockCount": 2,
           "approxMeasuresByBlock": [
-            8,
-            8
+            7,
+            7
           ],
-          "approxMeasures": 16,
+          "approxMeasures": 14,
           "reviewStatus": "score_supported_approximation"
         },
         {
@@ -51243,7 +51249,7 @@
         {
           "unitId": "edc21709-3a58-53cf-adfc-97ce722dedb3",
           "kind": "Verse",
-          "textSha256": "cb585b3e1dba057fab5be1113f335893da0f71f7fdfd51a463f2acd1b24bb964",
+          "textSha256": "e987959e98f427612933154139437baaaf9ac5ed954a204036ab0faaad7e6c95",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -51255,7 +51261,7 @@
         {
           "unitId": "674beac5-1144-51e0-93eb-bd75922a3906",
           "kind": "Verse",
-          "textSha256": "a2a37bac5e5e1763120afabbc587d36bce77c1ed22d7ac89411bce561ab42326",
+          "textSha256": "9394ff795f319e000ae35c97e9a1fde6e3c99b2deea56feb784384186b5f5849",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -51267,7 +51273,7 @@
         {
           "unitId": "0aea74fc-8e97-5148-8d78-e41290c2fbb4",
           "kind": "Verse",
-          "textSha256": "cdbd34ff76cd1ffe25c844d9e4d61db6ddb6df4c46e37dc943463d9bbc6d1fcd",
+          "textSha256": "e0421cf8f923177ce6bb21d19ee6a10395c453a097ad001b64ebc8c4ce27c83b",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -51331,7 +51337,7 @@
         {
           "unitId": "212a966c-f9c5-5344-a40c-857fa433fa8e",
           "kind": "Verse",
-          "textSha256": "ec6b1a7057ad39befa616b08c57d97579cb20a17ef057caabc03a035b66d1ea0",
+          "textSha256": "15e1829cc112c1e3c3ae98a774e7351a1159e737993fad10e78be92113dc5b2a",
           "blockCount": 1,
           "approxMeasuresByBlock": [
             16
@@ -51997,7 +52003,7 @@
         {
           "unitId": "d927b6e2-9807-5583-a1ec-c38e29e009dc",
           "kind": "Verse",
-          "textSha256": "0367f5aeaa2f4a39d3b8f2ef50dc10ab67a1fad497bc9dfe57c530089c67462d",
+          "textSha256": "d70ac1566144ccc2c4382201916d7d37370edb754b6a43d5fe3112ca029a805c",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -52500,7 +52506,7 @@
         {
           "unitId": "60f72d58-e317-5595-9430-6f5ff0f0a63a",
           "kind": "Verse",
-          "textSha256": "44cf44c7f30486006eeb748be7e5529eed6517e4a65800a28034b78d6829c6ac",
+          "textSha256": "af96a1a72ca77040cc299690e39c86b0d503c8dd9001a5a337cff76cc1e5e934",
           "blockCount": 1,
           "approxMeasuresByBlock": [
             14
@@ -53155,7 +53161,7 @@
         {
           "unitId": "d68d6257-5096-5161-95d1-06225fb0d192",
           "kind": "Verse",
-          "textSha256": "b716be41aac8b5b12cb81463790b18c434e2ea5b62d729ef935dbd5efdd96c40",
+          "textSha256": "c5c6fb70d4b44a035b5cf27c4d1b1286bfc317ee314b76169a558d44e806d520",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -53403,7 +53409,7 @@
         {
           "unitId": "4c790284-6945-510a-9811-cd5c039eff45",
           "kind": "Verse",
-          "textSha256": "b9bac696a4de04dba92041e0d705d108c60e80fbeaebfc0b1857e9b94f0a5555",
+          "textSha256": "b5e8d60d844718b73da380a55e109daa2a02e5a6783aecdbc6e2cbdd0afbb226",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -53445,7 +53451,7 @@
         {
           "unitId": "ddeee903-fd20-5658-b9f0-616e6f4b7016",
           "kind": "Verse",
-          "textSha256": "44cbce60dc5b77cc3692f01cdc69eb5fa4aeb54515c38b02376794e37fbcdd5f",
+          "textSha256": "884a3c0708f2ec7b75914fb88039802bfd19662e2bfa703302ac8212a6ea3612",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -53663,7 +53669,7 @@
         {
           "unitId": "6559844e-2cce-57e2-b638-612d979f0f02",
           "kind": "Verse",
-          "textSha256": "2ae08f40bac7825976267fc8ea11c682a727d01269768ebef1db058e49e40ff5",
+          "textSha256": "422e56bedbf38419b1c15763053ef14f241cd1b610f48331305c5cf81df3d911",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -53767,7 +53773,7 @@
         {
           "unitId": "6e33accb-f394-5287-9359-4e9af7fe79ff",
           "kind": "Verse",
-          "textSha256": "0395710cde0a473beb2e18fb946670b897627dfcaf4ec33eb1e720d5576517e3",
+          "textSha256": "29923c9c55681de58e3c002735265e76db39da562f007c834ed814510fab26b2",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -54753,7 +54759,7 @@
         {
           "unitId": "4c72903c-be02-5df8-b647-553a5619cb07",
           "kind": "Verse",
-          "textSha256": "4c81622aa674616d3c4adffb99f965e2a970224b853ea66b5e5763ba4b79593d",
+          "textSha256": "1d252801fb67d57b7759a4fec6ebd761a47be188e207220b3ed95231a4add121",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -54895,7 +54901,7 @@
         {
           "unitId": "5a3ea02a-0b6a-52aa-95f4-ef48daa9bbbb",
           "kind": "Verse",
-          "textSha256": "12dadffaf84cf188b222b400166d5b38230e0236b52a105e003bff7b87086fe6",
+          "textSha256": "a67afc936cfcdc242159eba4cdf45b9862b0db08206bed05db57dd1a2eab4e16",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -55151,7 +55157,7 @@
         {
           "unitId": "e8edc941-7716-5c07-b463-46a32fe41f02",
           "kind": "Chorus",
-          "textSha256": "c45d4c2a012f77c4f76d7de7640ac94cc03892e4887583b35816c0f17e04fbb4",
+          "textSha256": "162fac76434bf7056b377cca68555638a1ef8ccab7e9a27892f4be9ec5a7abdf",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             9,
@@ -55688,7 +55694,7 @@
         {
           "unitId": "9721a446-ce68-5dff-b51b-47c2d2e4521e",
           "kind": "Verse",
-          "textSha256": "7b13446d4d5874b14104bc3a90e276ac301961e53824ecc619df18de2f588668",
+          "textSha256": "3df894e0a55bdab40bed64f1b11adc30c439366dd280164332df0a202f07a1ce",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -55923,7 +55929,7 @@
         {
           "unitId": "1a1fb054-c138-51fe-9231-ae3428fbba19",
           "kind": "Verse",
-          "textSha256": "ffb56a251139402da4486edd3ef48bca0bfc727c0116618abae7c956b74fed05",
+          "textSha256": "6ce17e6978ba4b61e0e27fb7c6b2e5a1d55edfc972d530d4298ecd28ccea8fed",
           "blockCount": 5,
           "approxMeasuresByBlock": [
             4,
@@ -55995,7 +56001,7 @@
         {
           "unitId": "017a19d2-376d-5c45-9c11-497e72959da4",
           "kind": "Verse",
-          "textSha256": "5f47e7da78d3eb52450825379a4cdea4e1d14d79960d6808cf5b075c3492c602",
+          "textSha256": "c6aeafff6ac2fd8722d477129990b775a8670df490f2ccf890fc2f3c9fad2a17",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -56007,7 +56013,7 @@
         {
           "unitId": "7bf311c5-9b71-531b-b0dd-413be1e7680b",
           "kind": "Verse",
-          "textSha256": "e46d31119946a15df77ef620871c821802af9054bdf9f1093941264cd539315f",
+          "textSha256": "c0ba7be49dcfb031f6d18e1ffb98bb6fbbe9721d22426fd985485f78ed53db0f",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -56239,7 +56245,7 @@
         {
           "unitId": "0ee9ed8c-d2c2-5a95-8a98-5b9af715a968",
           "kind": "Verse",
-          "textSha256": "1c88ea7fc6c1dae908e23d81f223e4b8bdce8743d81025d6ab6605b8dccb2cf0",
+          "textSha256": "5d13d01bf6cf26448293229ba259313011c05d953bb0dc420219f17dd2b09975",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -56360,7 +56366,7 @@
         {
           "unitId": "057e5b7e-6d7a-5225-9a19-b3ca9d035177",
           "kind": "Verse",
-          "textSha256": "c0d6d54406952c727d4a17126d0953717db32a1b194a3540da8b172500f8ef1d",
+          "textSha256": "903bdad5ee364f535fc7e9b4f0f83e4e3e297d0ef4cb7c9c5af94f22bd819dae",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -57446,7 +57452,7 @@
         {
           "unitId": "ad6cba37-67e0-5f4d-b710-4c43f8bf8968",
           "kind": "Verse",
-          "textSha256": "a8bb3a2c0037d836e1d3377bbefca3263a124cf3261cd6b0303c2a2bdab4150c",
+          "textSha256": "9aeb03f57d0b785657a2341f9579f1d6773723dcb6a0a1cace0f423193b55914",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -57583,7 +57589,7 @@
         {
           "unitId": "52c7bc55-65d6-56fb-ba1b-5981e3fdd1f5",
           "kind": "Verse",
-          "textSha256": "c0a807406ddf8898d55f2ca2ff60f5f8badebadbdc5bd92c04d269fd9063fa39",
+          "textSha256": "451c454dbd1d3b5f7f3e8009a2927a2ed393d6719a985b50c7546d5ba15e31e8",
           "blockCount": 1,
           "approxMeasuresByBlock": [
             16
@@ -57953,7 +57959,7 @@
         {
           "unitId": "c7454d8f-52ac-5d5d-b04f-8685bff628ee",
           "kind": "Verse",
-          "textSha256": "d17a39561d4ca2691e16cfa292a8ab69629507290eee7ba8e33377a31100f59f",
+          "textSha256": "3a54111046bb5b867ede8320ebfaef7436ac97da16f966462223eca874c41f4a",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             6,
@@ -58264,7 +58270,7 @@
         {
           "unitId": "d2fd6917-b997-57f5-b27a-b13f69491e48",
           "kind": "Verse",
-          "textSha256": "fe27d97986196aceeb9c234838d97358066fd20ad55e179fca1c0cc8826ca07d",
+          "textSha256": "45321790371508d2f1ed1ce1c4c88de0b09d8e21542f29fd8c19e9767fdb1573",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -58616,7 +58622,7 @@
         {
           "unitId": "208e0848-5808-54bb-8d12-12996b2c4a25",
           "kind": "Verse",
-          "textSha256": "fb98f0f51f6f717265707cf6d354655794ce6e71f4fe1037c1ff9c2900ef28cf",
+          "textSha256": "79a6f0bbaa314123c84de6b8c18978270d8256254a786f8cd6b8e978ee5f7156",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             4,
@@ -58905,7 +58911,7 @@
         {
           "unitId": "d990d1ad-f8d0-55ca-9dd8-97a96e363588",
           "kind": "Verse",
-          "textSha256": "d7f468b394a4590cac39848782a9aa6d21cfba747f985804dc256fc86a719535",
+          "textSha256": "2a360a87411bb94191424f3010de16e4f3b14fa2245c513f0b69c7e714ba75b4",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             16,
@@ -59127,7 +59133,7 @@
         {
           "unitId": "2311ff04-c826-5af2-9713-5b50fdc99ce5",
           "kind": "Verse",
-          "textSha256": "b5506d8d37b549113c5d7fa1a48e0c63edf5bf0f78098217b7ab2294304653c3",
+          "textSha256": "6bf10570411c5dea3ade1277c450f6e2bee88b05b73375b01ffcee9619ed99d7",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -60086,7 +60092,7 @@
         {
           "unitId": "ae08e158-7efb-5166-9d04-022771b50cfa",
           "kind": "Verse",
-          "textSha256": "2de09665ba8bf640df1a3da7e8246c42de00cc45639409d4bc9265ee0e0ff42c",
+          "textSha256": "2a882e4bf4aebc110d7121eb3ed6cb7707938d242dc18febfc12d3adf99e2d1b",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -60745,7 +60751,7 @@
         {
           "unitId": "d05eedd4-4835-5a60-8501-0090f910e9f5",
           "kind": "Verse",
-          "textSha256": "9af1adbcf5f231d54b751b3571433e9f4387de83fe48aceaa0d183f98164e431",
+          "textSha256": "16f3be20998bc83fb26ce5314a723894f9a0dd12f851d852b91f33248d53ced9",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             4,
@@ -61322,7 +61328,7 @@
         {
           "unitId": "ebcd4026-1c76-551e-8b5f-4b2c723b53fd",
           "kind": "Verse",
-          "textSha256": "de56df5995cead92fd653b3225d9ae983dce1cdcee230e32d1afcbffc827beea",
+          "textSha256": "739874bb6df6b5ab14bd52a64799e515b5edfca8ec2a1941b346b1e5133a07e6",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -61481,7 +61487,7 @@
         {
           "unitId": "2605c5d6-520e-5b8c-9568-e0b4798deec6",
           "kind": "Verse",
-          "textSha256": "34c89ff7c0fa1bd0780c1220137b37ce54a2c394693b6982fc5ca395b0d95d76",
+          "textSha256": "ab7f2c92b97377b20d018dda81792d361cc5923696504823aa27baface621cf3",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -62198,7 +62204,7 @@
         {
           "unitId": "14d3d881-21a2-5d38-b853-abad3d7b3c3e",
           "kind": "Verse",
-          "textSha256": "f8b47e29f239c699430c861ada44ef61da01e99d53f5fb75e9bd1077eaec1241",
+          "textSha256": "856be2c9f74d471c16cecdc7eb7ddffc512390408c52136d245e632749b8b99a",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -62308,7 +62314,7 @@
         {
           "unitId": "8244994c-e47e-5fd0-8dad-0ac2c93187ef",
           "kind": "Verse",
-          "textSha256": "f5096760b530f38f9713af567c2228be980069db46f0b676c35756398bc8af6b",
+          "textSha256": "f09d5e5b5694347f163335a5822c4ced1b4f7786c1f996675961c888acbc94fd",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -62478,7 +62484,7 @@
         {
           "unitId": "db78a197-6882-509a-9e80-ba9b42e0a8e0",
           "kind": "Verse",
-          "textSha256": "00987cf106411de9166d53fe147e43bebb4a706ebc0c6c4afd14cf3717fd8a69",
+          "textSha256": "b3da32791d5364b3052808515737f0dde36f8451ba104753e2ef93ce92e960dd",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -63276,7 +63282,7 @@
         {
           "unitId": "1bb35979-fa35-587d-ab5c-bbe175ddf424",
           "kind": "Verse",
-          "textSha256": "89a7ea786ef52fa2bc76fcadfd2b9879529751c7e06e2dafd3980bc66038b748",
+          "textSha256": "c24abfcebb67ca5a2af43ba2b3011fbd59775e5ef19f87649d8d2db3ae718357",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -63722,7 +63728,7 @@
         {
           "unitId": "7f9b5338-d413-5cbc-97a2-a87c60a030a8",
           "kind": "Verse",
-          "textSha256": "30c146c216881e5cba91f4e566f9e383cca388782eee68cf4605feb66eee93d7",
+          "textSha256": "b5e2d8bd89769b29d5a91af08b9dd2ffea2e92425d59cc66c57aae5635cb0fbf",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -63734,7 +63740,7 @@
         {
           "unitId": "3be26c82-15cd-57ed-90f5-dd2fb50ad0d7",
           "kind": "Verse",
-          "textSha256": "752b1c607e870bb0edd5037895873e7104b7a8ffbae0c33bdfb184fa267a3462",
+          "textSha256": "2ddc4c05495a6c6373dc5f44490aec5583bb88d03d0aa27a9eec44190c7dd9c9",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -63746,7 +63752,7 @@
         {
           "unitId": "6ef6863c-e002-5094-8b8b-61571bdefaff",
           "kind": "Verse",
-          "textSha256": "0a28bffd021187d3ca1a473e0ed206cb6dbbdbc5299b847a30344cea8fe7242f",
+          "textSha256": "045700400b88249c2d605f99f36d3ba227f0ba4ba0f6aee68ef00730f02316e9",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -63758,7 +63764,7 @@
         {
           "unitId": "a15170b6-42be-5b2e-a13e-fcd74b33cf6c",
           "kind": "Chorus",
-          "textSha256": "b7d33d0f41c522059c33f07adcd8efa16fc70f9c3b3a4e0eb3c8a802b49390a3",
+          "textSha256": "0174d4c40ad374a514b05651a9bac69faf8d0f51b8c0f33b5b0c8d82631c36cb",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -64139,7 +64145,7 @@
         {
           "unitId": "fab609a6-947c-54c9-a7ee-8cc885e9cc2e",
           "kind": "Verse",
-          "textSha256": "32d1abc6fce4d7eb9fe01c265e3ab445a414356e11ccd3cf4a39ff13b7a301a0",
+          "textSha256": "2524eaf8503c2dbbcac4e8007194349ae1453933be5aaea72c33c4c50298ee1e",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -64151,7 +64157,7 @@
         {
           "unitId": "de43e9d9-e2dd-5a95-9f2d-87ac03a32420",
           "kind": "Chorus",
-          "textSha256": "9fdbf1fc5964fee3dcac44a35a74442be508029e0cf704865ee0e1aad3ee1cbb",
+          "textSha256": "0ebda259447114eaf562a7ce57bf0c997710357c0e316160c3e6df3e21472530",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -64451,7 +64457,7 @@
         {
           "unitId": "33c30c82-4ce0-57cb-945f-64caca8e3b57",
           "kind": "Verse",
-          "textSha256": "d47ffe2ac81d1db9053bb15fd41ba4f5aac39e298dc5ba12c2aab00ea800a688",
+          "textSha256": "dcf5a57d6a23689051c846a7397ed1c530c7e18f01184b6d34134a61f5d09014",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             4,
@@ -64477,7 +64483,7 @@
         {
           "unitId": "17948f66-1d75-5ccd-a77e-eabbe32375cf",
           "kind": "Chorus",
-          "textSha256": "b92febee71fa23722168642adb21cd8cce09cf41762c830f45a5b41926e64e99",
+          "textSha256": "d2189a4777288e1652de1acd662739e7de22156ba50fee0412ec2d32d1e70783",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -64637,7 +64643,7 @@
         {
           "unitId": "33b2f6e6-a9e8-55ce-8ee8-4d4cddda0b26",
           "kind": "Verse",
-          "textSha256": "028f307f4454d8453ec2dd27211f7717b5341084440ddd0b5d2f2cac7208a732",
+          "textSha256": "a4e808949dfc21484a60132be558f34dde50aac5f78529c26f43dc5f8f43a37c",
           "blockCount": 1,
           "approxMeasuresByBlock": [
             12
@@ -65026,7 +65032,7 @@
         {
           "unitId": "2113ab90-b762-5d47-8436-59200f008be9",
           "kind": "Verse",
-          "textSha256": "8d2df50d3cb4d59e3ec12b1f826234ac38c4f0596583ae2f41ff8dafccbd3dc9",
+          "textSha256": "3d417a64187831675e6068884e147b81b1151dda211509068bf987d23c68dced",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -65266,7 +65272,7 @@
         {
           "unitId": "65a23317-b627-5b61-bd11-8e6bd767b0d6",
           "kind": "Verse",
-          "textSha256": "74319ddb03c7218760e996c30b9ebfdf01c6c2128b5e1616d46f5be6b186cf91",
+          "textSha256": "e7d87cf789cb15d2f9191f567c88d604c17d0c9eab6e92f03b120c03212cc0d4",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -65490,7 +65496,7 @@
         {
           "unitId": "81618477-2560-5d85-89da-dea4d9ce4ca0",
           "kind": "Verse",
-          "textSha256": "7f2f7e5bd44ba82820e396e5173ec76a053356d3c2ffcb79528a2ffa4a57047d",
+          "textSha256": "b46fed7647801d500162ee4590a5e907d1b05fc4a8a4389af90a3dec93c5ec0c",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -65594,7 +65600,7 @@
         {
           "unitId": "1c7f517d-509c-5f02-a7c9-92c065e653ad",
           "kind": "Verse",
-          "textSha256": "44d75724892e4bd24098cf1a2d062705f74319bb5a855ec4c3129ae237823de0",
+          "textSha256": "a3db23a506feb0d6094e5d15a8306b712f029e01cf85fa2546f304e2e0f67359",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             4,
@@ -65905,7 +65911,7 @@
         {
           "unitId": "ae741a07-0aec-5865-9996-d6174c76a96a",
           "kind": "Verse",
-          "textSha256": "6628b8fb71dd696e01d5001cbc62a79b1f2623c0e17d2ac2590a3d5587852343",
+          "textSha256": "1b29f4a3642ff9364703b344616ec0331d6c02d70a92bebe2c729af6777234ca",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -65919,7 +65925,7 @@
         {
           "unitId": "0502f98a-ffcd-5b4d-be04-0ea34721c491",
           "kind": "Verse",
-          "textSha256": "9dbae76edd42f8fe9a53868dff99fb95137080dc54c7bc409fad41beac889dcd",
+          "textSha256": "ad68f2e023ebc1a71c0d9402e0a8ed6a0eb8a1290a9c00b97addc54a9a894359",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -65933,7 +65939,7 @@
         {
           "unitId": "b4580700-780a-5ef5-ab41-09b75e69d635",
           "kind": "Chorus",
-          "textSha256": "70d96dc147041e898e55cea428a832133959a9da8acbe8015ee49aad6e1c5514",
+          "textSha256": "f4ff19c1cbd57226b055ece16ccade3eb66d57953f2b7010e834aa732d6d8ded",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -66038,7 +66044,7 @@
         {
           "unitId": "76070cf9-bd3d-5b5a-a1e2-4787f4a7f67d",
           "kind": "Verse",
-          "textSha256": "ece9a8ad7382ebcae7b6957fa7e9e2d00d3acc33bf51fcee554e7185bca2172e",
+          "textSha256": "781b95c014b1e27b3c25efc7cef389eb1d59d66a4a27882a8d4fc398f7da7b33",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -66317,7 +66323,7 @@
         {
           "unitId": "a3f3272c-bc97-50aa-a3bb-eef8eb370b1e",
           "kind": "Chorus",
-          "textSha256": "6779eec7e4353f66db6debcdfeb38684e8a99738b85a0fe1b6c7699736a9d568",
+          "textSha256": "0032895fb8ca870de3c27ff7322490b85850de70f7420aa64f9ed60d3c5d3acf",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -66505,7 +66511,7 @@
         {
           "unitId": "ebcda781-8713-5b7b-aba7-9e120192f1bb",
           "kind": "Verse",
-          "textSha256": "dab8a5b4e0f7f8428ee91334d7e5961a6e130ff2eda9a9f99f101a5ac5036c79",
+          "textSha256": "4bf6ea6ce74029403aae6bfd85eb058e46d6a64e0a6df86ac35d0c5f9e78c8aa",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -66519,7 +66525,7 @@
         {
           "unitId": "b1af1a97-6222-56ed-a070-590ae4ac3ef8",
           "kind": "Verse",
-          "textSha256": "02242599784d1861c6b474f129c5f2d3d3123a73882b333fe04d285fe054f3dc",
+          "textSha256": "55ad7771b9fbbeffa27bd41c6ca0e7530671f3a1fd3f5ceb6205652cbdfddb3d",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -66566,7 +66572,7 @@
         {
           "unitId": "65572aff-11be-5a2f-a077-2d34f3b65349",
           "kind": "Verse",
-          "textSha256": "d4323473be2cd63f8a7e9919d1773c71b3be103892145f38a5538b930eb8466d",
+          "textSha256": "360973e1011ddcc55eb5b2768be85b32bb68e0b69b452660e1362c347151eaa1",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -66774,7 +66780,7 @@
         {
           "unitId": "ab2c0ad7-db27-52fe-aae7-1ab10c37876c",
           "kind": "Verse",
-          "textSha256": "2522eb189f8f0289a72bf3693ae9fe210493cf81ca023ef32659d3653df29b19",
+          "textSha256": "7c484e10c21700ba8cb8965c3c86597791dc04a75fad56bdeee7a47a9e5d318d",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             4,
@@ -67345,7 +67351,7 @@
         {
           "unitId": "4429bc39-a251-5fba-b386-d9ddbe83d9f1",
           "kind": "Verse",
-          "textSha256": "24713dd4b7b7a8ca5ab1810742d93b1ce798d0b526ac5baaa0deb17c9fa30049",
+          "textSha256": "0ea08e77a7491ab31912faa540dcaaf9c1447da1e040cfce0298440293f25d00",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -67490,7 +67496,7 @@
         {
           "unitId": "ed3b86ad-8830-584b-a5f6-381877ef1788",
           "kind": "Verse",
-          "textSha256": "b3c2f9f578eab48df10c7eee9c0a3fe65a09c842d20975b91d71ee09d259953a",
+          "textSha256": "64d4f12d5e551115fda4ce0026bcb6f7e327d7ddce4be2c61d927528f4777dec",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -67514,7 +67520,7 @@
         {
           "unitId": "5e47fa37-37be-5662-85f9-87ce195d6ed2",
           "kind": "Verse",
-          "textSha256": "e5a5c5460ba8a913b87853ef6ee359a695a8da634bc5ef6e2a4398ae3c3ab5df",
+          "textSha256": "f30e8cf4d38b0c1db9453f1d943b73592482de3548a1e35becdf2c8ee87fd14a",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -67526,7 +67532,7 @@
         {
           "unitId": "177c662d-c3f4-50ae-9100-12a686ff726b",
           "kind": "Chorus",
-          "textSha256": "c11c72255c61bcd7baa58d0aebd79f9694cb5beef2cce89beb10745370528401",
+          "textSha256": "e6599c27322cac2b81235eb297c8c69fd144822fa0a9f11acb909b457934b460",
           "blockCount": 1,
           "approxMeasuresByBlock": [
             4
@@ -67578,7 +67584,7 @@
         {
           "unitId": "36c39380-8918-50a0-956d-06e4a78a225b",
           "kind": "Verse",
-          "textSha256": "0a3eda8b772243e694098af01ec895473d7f119c98a4efcebdef399ef1550341",
+          "textSha256": "8c7539147ad9fe586de30560f124ca97f37b0577a05e2deb5d07b3be47dbb062",
           "blockCount": 1,
           "approxMeasuresByBlock": [
             8
@@ -67654,7 +67660,7 @@
         {
           "unitId": "a0b038ef-f1c0-545d-a3b2-17e128f7277d",
           "kind": "Verse",
-          "textSha256": "dc264f4d23613a4182337bbe674d67de02cf47b4da80713c855710d3a2537618",
+          "textSha256": "6642bb39019469cd68efcc3ad33adb3f16c3000395869f44c206f3e514da118c",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -68189,7 +68195,7 @@
         {
           "unitId": "f832b4ae-8f70-5738-9d84-7f065aec4d7c",
           "kind": "Verse",
-          "textSha256": "785edebbb04921e7a04a02bc5020cf25a14d734c24f61600065ed233b100f957",
+          "textSha256": "1847e1c65cd3d88a41eabc63591004668037362e341694e3521d3c01f67116b7",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -68201,7 +68207,7 @@
         {
           "unitId": "b600df1f-7013-5c34-a4c9-b4f2070239a4",
           "kind": "Verse",
-          "textSha256": "dcdc88d474dd57e7d3a970aed7076e1756ae5644681c89c199b026fdb81a1d5f",
+          "textSha256": "54867b88a405c5c98da796c29f4d42846edff4cf73fca91efb38304603027fdb",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -68302,7 +68308,7 @@
         {
           "unitId": "1f14f8b2-0983-5aa2-be84-67e89d435298",
           "kind": "Verse",
-          "textSha256": "562f92a57fed8af266723a288ccdf230f580288b74d17d7d7a88c127ad776fea",
+          "textSha256": "f786954572472f8a11450e9eaeac1a948beac7e8dfef3382b3d2984ad5372caf",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -68421,7 +68427,7 @@
         {
           "unitId": "27bffc4b-1deb-5e5c-9bf8-2631c1bba443",
           "kind": "Verse",
-          "textSha256": "d3548f4fd33202afa209d24cb849700572bee5748376c5d35c58b7dab9b62838",
+          "textSha256": "1aeab8db0b5da2968edef612672fbaae14a67c275dc5a447bf21ea8da3689db8",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -68517,7 +68523,7 @@
         {
           "unitId": "7c3293a3-dafe-5593-a59c-d38acb1f8388",
           "kind": "Verse",
-          "textSha256": "eb9a7325ce8259765aeb97aec5346c98cee7333e3726b4cea38e91107bc18dcc",
+          "textSha256": "88689f8341d486a84e84d685e8d4a379f3034183868d06d59547267c5f42ecff",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -68849,7 +68855,7 @@
         {
           "unitId": "a07f6579-a511-54f8-b126-bdc26481934a",
           "kind": "Verse",
-          "textSha256": "4ac5dc7e4a3dabb3a490c12d3973c2e64d2c18351ce3a0f1c9d3d371dca7553e",
+          "textSha256": "f4998e738db669103d69013477c8ffedc4af6cbc420fdcd8eec27729133013f5",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -68928,7 +68934,7 @@
         {
           "unitId": "6efed808-88b3-56c1-86ac-d2efa3cbc40c",
           "kind": "Verse",
-          "textSha256": "abb93b4e7ac95faec0e1606f4b3bfd2fb66222cd2f82002ae951ec4c9f30dcae",
+          "textSha256": "5b55877d6116fc95aeedbeacd7e4908482e76f4e4d6da5f24668d95b349a9be2",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             16,
@@ -69077,7 +69083,7 @@
         {
           "unitId": "f556f3f0-3376-5391-913f-658de7cbe9ea",
           "kind": "Verse",
-          "textSha256": "c4b45a4f6b8d1b76aac254d3b7dcbb36d4441482df987ffb1161f6cab3b3c6d1",
+          "textSha256": "1f6d3a8929e5ef8ff12b819a1bdc0924e989d74da23506455824a89ca696ac6f",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -69797,7 +69803,7 @@
         {
           "unitId": "d3568d18-476a-50d2-8b2a-dec0fad4fa3f",
           "kind": "Verse",
-          "textSha256": "301a2864a6ebb2c072f7e4e3002435bce3dbb4a995b967adc308efc9f6e2d070",
+          "textSha256": "44d0c2e53ff2ed2c83658a967655ff8619187ee5560a5dc59a200648ddeddaca",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -69916,7 +69922,7 @@
         {
           "unitId": "3d7ad973-fe11-509b-9112-b372e8ff38f0",
           "kind": "Verse",
-          "textSha256": "53f4b9f6b6704f6527eabb145a7ab58d753bea34be0a203b3532a614a79d7677",
+          "textSha256": "ffb37aaca39887109950067bf879e6d541abadc021477f4b0db4c19229ddc263",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -70156,7 +70162,7 @@
         {
           "unitId": "b6e18ea9-aa96-5e00-94b9-dff1028a4050",
           "kind": "Verse",
-          "textSha256": "1529fd2cbb86de53b13170f14aa5793ce6558b1530c9136dacb2f4eb94640406",
+          "textSha256": "bfa837e25fb7025bc46741a0fa56954c5d826916e63f0bf5a626fe2c19ec91a7",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -70810,7 +70816,7 @@
         {
           "unitId": "edd98fc4-1597-51ec-acba-04c851ee1350",
           "kind": "Chorus",
-          "textSha256": "231b7ca47b45e5ed848d56f74df941ecf0cf50d94244eb6d92f7314e9cf13f69",
+          "textSha256": "a64e10d1f582ded4e1807aa74cc0e7ab4a51b02b710fafded1c276867b137fd5",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -71188,7 +71194,7 @@
         {
           "unitId": "423ffe21-2a2f-5c41-9965-6909f9292f25",
           "kind": "Verse",
-          "textSha256": "a64674f364b67ea2f7475f6eb930863084e2f71b4d40cb0ab15486ac3ca8441c",
+          "textSha256": "cb5f1e9f745e85b2f034e36a217f19246619f6eab2379522cfa6d566f7b6961f",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -71340,7 +71346,7 @@
         {
           "unitId": "29fc16c9-2f86-5388-bb16-8f19dc012269",
           "kind": "Verse",
-          "textSha256": "313db177665eb3198778c76d338e7ccb5880d809da431c2d58c0aa023742b475",
+          "textSha256": "75cf67578453dbbfe596b2f6524e1fb0603fe7fdad47f987c97bac2816b28872",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -71462,7 +71468,7 @@
         {
           "unitId": "5c50aa5a-b747-5a5f-95ab-5be038dab2cd",
           "kind": "Verse",
-          "textSha256": "dbde00e079719f658c31325f89db3e8dd7ca49255f7c945c29b1d10caaf0929e",
+          "textSha256": "a3b97955845476a96b820de7d23deea8cfbccccc5b074a52130607332a653e0e",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -71662,7 +71668,7 @@
         {
           "unitId": "5452b3cf-ad00-503f-9a2f-8b395dab2571",
           "kind": "Verse",
-          "textSha256": "2401bb46eb4b232ea30bb68c72f690686abdb32b8409d36976d0186ef6651e85",
+          "textSha256": "58c63a8af3bc085a932599d0ef2bd702ca1181a217fd423c08e2fda97d4adf66",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -72474,7 +72480,7 @@
         {
           "unitId": "2c6b5bcf-84ba-5c60-a298-584a382f7819",
           "kind": "Verse",
-          "textSha256": "abea9e838fb7d5cc6f39218becade2365952f5395176936f0fa2c3538d5c35d1",
+          "textSha256": "ce1259ecf388a405780037d09f2e704e914b13e41d03878c96f85a6e76aa0e9f",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -72981,7 +72987,7 @@
         {
           "unitId": "4df58abe-9ff2-52db-8d68-0555c13fa468",
           "kind": "Verse",
-          "textSha256": "a8669e5b9a3eddca421b6c65a8a0459c4b735dadcff971e15ef6b29a02041139",
+          "textSha256": "d66f2c1cc2769ba3a401d8febdbdb1af34d5c051eeeca09e7b3d4aa493b774da",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -74489,7 +74495,7 @@
         {
           "unitId": "2b5bb4f0-c369-5aa6-8bcb-2ae657ede80c",
           "kind": "Verse",
-          "textSha256": "600d8b332ccfc0c92b4c46a2c5f22735bbd83c20d025efb72db2ce533377807d",
+          "textSha256": "a5790b069efb85a120f6bec9bbe8edab3519a1939dcd26bba5557db7205fb656",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -74544,7 +74550,7 @@
         {
           "unitId": "0e0f9afd-115e-586c-a3b2-c1dffc273ad1",
           "kind": "Verse",
-          "textSha256": "24349cc5df6d9c3ddf3672554e8998f31f5816adc073a2bbf86f92d3bcbdafc4",
+          "textSha256": "afdd0f770375705dffc300027b35b88a9546c520772026fca2c9e89809ed53df",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -75770,7 +75776,7 @@
         {
           "unitId": "3785ed39-8c10-5bf6-8ff3-70d685cd5fee",
           "kind": "Verse",
-          "textSha256": "fd3ed8b6131eaa0e396de3debd11b710805383af0c42664b8b40b6975016f696",
+          "textSha256": "14f3b804646b42e462b6a92cf4ebdaa884248ac8520a881e7b4fab3c0a14272a",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             8,
@@ -75925,7 +75931,7 @@
         {
           "unitId": "c88f6af2-7cee-50d7-95ab-ec632e4465ea",
           "kind": "Verse",
-          "textSha256": "0a24c4ed7777585523c63ccb5e476b9149d0cc0570cdccd385266f37cff9e42c",
+          "textSha256": "92cd4e22a3fb07ab3fb9b1e840648da1f7b7103cd06de81ed3124dcd325b068a",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -76095,7 +76101,7 @@
         {
           "unitId": "b0e18afb-ef80-527f-9051-ff13c83fc797",
           "kind": "Chorus",
-          "textSha256": "7e9124c85906d551ca7607965af9d34ba74ba59ea6e681b520c5e5174b9f6279",
+          "textSha256": "25a32d7077269f80005eacae427a0b5fff38e99e7a45c4a1011ec1c756261ae5",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -76128,7 +76134,7 @@
         {
           "unitId": "a8097bf3-f49c-58eb-b649-6c0afd72909e",
           "kind": "Verse",
-          "textSha256": "7607eb56c0602474729f4a048f1af9dedf295abd5cc15c3e58a53c2ff1939a15",
+          "textSha256": "a07bfbc5d349f9c4f4293e9fa9799062dde9b152e77d42f5e3fbc8ac154928d2",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -76649,7 +76655,7 @@
         {
           "unitId": "2713ada9-4012-548e-ac78-9e6b5e20539e",
           "kind": "Verse",
-          "textSha256": "c3393c67f1691dcf69fcf01d5a811cc754bcca3716d553870b544f7fbbc6b06f",
+          "textSha256": "caaad867acfb71b7af71f133569989dbf02cc41f13d59dee56f8e1358654700d",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             5,
@@ -76897,7 +76903,7 @@
         {
           "unitId": "b8c6cc7f-acc6-5761-885c-cc7936339a22",
           "kind": "Verse",
-          "textSha256": "e480a88158a0d45116ffc345792b6c157a91ef467b4712e04571f8dc56382283",
+          "textSha256": "4210f941e4fd205a96e701ed63524f18631385327980679fa4ba0d07f164c078",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -77129,7 +77135,7 @@
         {
           "unitId": "42bb3303-dae6-50e4-bb23-75253bb4d336",
           "kind": "Verse",
-          "textSha256": "99cd2ebc8a64ead4c6556ca426c7d413b33fac953d93d22ce21671c4988c3cc7",
+          "textSha256": "5b32c350db37ce5dfcd243315e558ebd9dc105810737b83f1b0ab3088d332ef4",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -77208,7 +77214,7 @@
         {
           "unitId": "88395557-b367-5a4b-a496-2657a3884e4d",
           "kind": "Chorus",
-          "textSha256": "f34ea071291de864a8f535454c203fbda445ef735abe27c6f3b00b5959e8d77f",
+          "textSha256": "86938005a4f7eef8d4f0539ab70bd1608b98914e1e81766ece8d477a24e2e239",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -77704,7 +77710,7 @@
         {
           "unitId": "87d73d94-fdd6-5f64-89f6-bab062f91adf",
           "kind": "Chorus",
-          "textSha256": "bf0f771eeb5d901e42c813ca60922c55a7c0c8a5fd187c7a95982e9a03e10f76",
+          "textSha256": "7f1f315b7437efee8451a395fecfd20363a6e3fdf9ebb63fbc75b7af76fe14bf",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -77995,7 +78001,7 @@
         {
           "unitId": "ca3487a8-8425-531b-afcb-aebbf34bbc2a",
           "kind": "Verse",
-          "textSha256": "580064336044e2f15e02362a4eaebef8bf38f5438b40d05de295d4e8441d2f12",
+          "textSha256": "3cbb2f5873d85a3c196d076018e2c9e362c5ba03398d567cb20eebb126da81ce",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -78306,7 +78312,7 @@
         {
           "unitId": "b02504a1-5b4b-50bd-9299-42ca0c071a1e",
           "kind": "Verse",
-          "textSha256": "248da5590ef08e5c18debd69dd25c1790f9d6d3226c2c7c51cf23000b68340e9",
+          "textSha256": "c10d955895bbffbb50a3909c303a4975824890d4b2f7d35ed0ef3ba3a4b99072",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -79040,7 +79046,7 @@
         {
           "unitId": "c5848ab7-bd41-5ccf-a7e9-aa88e1cb1cf0",
           "kind": "Verse",
-          "textSha256": "fac989298fa636601bb6880c3119c7188bf5fda5638e589f6c3b82803f827537",
+          "textSha256": "17fdf5f199dabc8f989a22d7e784e8b279aa7ee9220797d82bc0d95a2cd865a0",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -79929,7 +79935,7 @@
         {
           "unitId": "28dd5668-9d72-5701-874a-703cad7e6864",
           "kind": "Verse",
-          "textSha256": "69f60811b555112db3dea97517ff285e481ab863a58723c43e2b9a7b1b74c1ca",
+          "textSha256": "08948f8ac3ecc56b4ea49b76ed3192c9f993a15668bf757541565107f66b756e",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -80200,7 +80206,7 @@
         {
           "unitId": "72baa06c-7894-5468-bf26-897cd08a1cff",
           "kind": "Verse",
-          "textSha256": "df2578abf54b26934c9ecbc38c478f6cdc513fd99569ceb79aeba2520d5a84c4",
+          "textSha256": "83a073389bdee5dd8ff8705fb6fed337cc82116be15939f1f68debb5db62c28a",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             5,
@@ -80546,7 +80552,7 @@
         {
           "unitId": "160973e4-ea7f-5615-90d9-930f7dcca6a5",
           "kind": "Verse",
-          "textSha256": "b3ae28f65a15d06dd5747409a92ff5ed132f600a609e976068498bc70e18bf29",
+          "textSha256": "cbdce034d31224a956f049787a31fd822a32aa4428150d29cdc34c8e5956bbfe",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -81571,7 +81577,7 @@
         {
           "unitId": "910f7a94-99c0-585d-ad3a-075685452468",
           "kind": "Verse",
-          "textSha256": "5e267449758eb3fbdc80d3260a10e9e47a5ed2989fc533eededd0799c50c84ad",
+          "textSha256": "bc091960566f827f4a4b83be24dfeadcfbb68c8dac5f951bd8fc62e84d3b53d5",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -81626,7 +81632,7 @@
         {
           "unitId": "460b14a4-cb75-559f-b154-2dce657711f3",
           "kind": "Verse",
-          "textSha256": "9b0c987ba00506e87bb45b6d7984859efd2aceb8a006cca371ecc72383996225",
+          "textSha256": "804ccf8eab659e9f703072a600dbe21c870623d9e1410f09a632566a624a6aca",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -81654,7 +81660,7 @@
         {
           "unitId": "5e54011a-a8c2-56ba-99bf-cff596dc0c85",
           "kind": "Verse",
-          "textSha256": "623fd805805a3a4fce9cd1319796412132f471b7a02bc554e901bde8136eba70",
+          "textSha256": "c545a10490f40ed7bdd8bd6a29af4b1817f4e773eecf6f1f152a290ac178d5ed",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -81790,7 +81796,7 @@
         {
           "unitId": "3385aa03-f660-5382-9e5b-3e4fcf3103e5",
           "kind": "Verse",
-          "textSha256": "f417ba9dbeccca4519272682fc4dc8e5f2e1358986089ab7fe678f6b9dfe156b",
+          "textSha256": "cf6a6e3ee36a002ef79da485ebf7f620340373612c91e5bf2093b36c215f134d",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -82226,7 +82232,7 @@
         {
           "unitId": "8a2d09ff-5de1-5890-b809-5b60f576a690",
           "kind": "Verse",
-          "textSha256": "d761c05ae6533b0abc8c49abc1693c471cc20bf4a43889e68673d572fae10029",
+          "textSha256": "8d39a50af1400303c2f3fd053f85b0bb9b8027695ab5cc780eacacf210e135ab",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -82293,7 +82299,7 @@
         {
           "unitId": "08191614-a656-5eea-a9ed-f45c8788fd76",
           "kind": "Verse",
-          "textSha256": "3ccbcb7615b4835f5aa12604d677e061548d32cfc0b294374ad4685d70f63eaf",
+          "textSha256": "b99bfb5f03cf9c43b6a59807e9bb7ef3ec83236fcd77eb3ad9478644c322e023",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -82408,7 +82414,7 @@
         {
           "unitId": "d00bf704-06b7-5958-a86f-c4b609857670",
           "kind": "Verse",
-          "textSha256": "4603c241bcacddc529d3ee5328f93a86a8599cca9a682422639642bca7c570b7",
+          "textSha256": "bb6a6b4e91ea86cc57072c30787c9940edb307e2bc4ac3f6393a249a3adf8076",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             7,
@@ -82682,7 +82688,7 @@
         {
           "unitId": "5a73afad-9e62-54d1-8e55-091c55e2228d",
           "kind": "Verse",
-          "textSha256": "b3773c701a84ea802e3f5b872f17b24fa01a448648217e2b10bb89c0e65ad7c9",
+          "textSha256": "57cd332f49fbeffdd18ca96a1b79e6e489300016c7b29be818ed274850eeb5c5",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -82749,7 +82755,7 @@
         {
           "unitId": "402a7b28-36f9-546d-bac9-33f6c7e3c49b",
           "kind": "Verse",
-          "textSha256": "3ba26321a25c083fe77ea6dfa89d1a3e56929385ee95ab70251183801371d1c0",
+          "textSha256": "f2a8a09e1e0a27748eea4dda222e52cb92047d6f048b1301e73f3b67cafff629",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -82832,7 +82838,7 @@
         {
           "unitId": "f7d6de78-96b6-58f0-ae49-d93ec896a500",
           "kind": "Verse",
-          "textSha256": "41af813a2a587cd5b67b0797b5f36cdaf8794c5df26e2d0a58ace3e2dbbbca7a",
+          "textSha256": "1ec373207a1320d1ac67caa9d71ab65894f2ca7db87afeef3e8b081e79dccc62",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -83511,7 +83517,7 @@
         {
           "unitId": "a92560e0-eadf-5be2-ac31-1abf6055658e",
           "kind": "Verse",
-          "textSha256": "39f8999fa77275fb01d75c2d88053d9e787aad7c354938417b24a2d622cc3562",
+          "textSha256": "63c2b1c7098f70ec821e9d15c05657d5bcbb901f68cc2e38cd0ed8cd28a14ad1",
           "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
@@ -84261,7 +84267,7 @@
         {
           "unitId": "8d263dbd-2142-41eb-bfa7-8eae2fb61a5d",
           "kind": "Verse",
-          "textSha256": "7a6737b9942e7cfc4bf1f9ed80eb4e0dac7c907719532b1d809bfa6dde54e8db",
+          "textSha256": "9b4e901afebb6b07f0718e2c5a2bb82ed3258e38832925b0198c9423907b07fc",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -84972,7 +84978,7 @@
         {
           "unitId": "d32225dd-4f67-5e7b-8455-83b8d71a81c9",
           "kind": "Verse",
-          "textSha256": "a8ccaac5e383b1df4ba507eff2c08ab1b29dccd8aa9ee3fcc761bd5b7aa3df71",
+          "textSha256": "573d7c58294fd9c3ea8dd8ef21f2a1707e263be2eb7f989d0be5be48286a9653",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -85720,7 +85726,7 @@
         {
           "unitId": "3b6c2bf3-94fe-5d73-880a-14292af14aae",
           "kind": "Verse",
-          "textSha256": "09423faf83e2abec329d056c2dc07f337777065ec279c8659261c9f69ea99284",
+          "textSha256": "42cdd7a0ddd56f9dec2ebee8f16446cdad5ad79ce4d9348d8c8afcb4748b6f69",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -85888,7 +85894,7 @@
         {
           "unitId": "518362c1-8e94-57c3-b268-98437c02b290",
           "kind": "Verse",
-          "textSha256": "a26c0abd010fd31803238f53a1dfe52b924d857ca32591b2a87e3d5bf5281291",
+          "textSha256": "e79bd7c29728f28b3df1c84f2e16934b572e570a0def51996b9d45e4f0accfb1",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -86117,7 +86123,7 @@
         {
           "unitId": "010d8a30-bdad-5e4a-88dc-dda4d85bbfd9",
           "kind": "Verse",
-          "textSha256": "e3d0c607cd37018809947c7cf62b60bfea646b2a318b7d82c9c868dd691ce725",
+          "textSha256": "9e28a001ad45fbfed00106549041070a68883677387125ca3a508a25f7947cba",
           "blockCount": 1,
           "approxMeasuresByBlock": [
             16
@@ -86974,7 +86980,7 @@
         {
           "unitId": "7b48f8f7-f573-5104-a0fa-f768e362ffc6",
           "kind": "Verse",
-          "textSha256": "9526c11fccba1802afc83a057c24366c82999d9d0955e2dd62196f23f83d03d4",
+          "textSha256": "bee05acf1366882e87739d37ce34f10728155dbf35a4c977a68a342c904717df",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -87198,7 +87204,7 @@
         {
           "unitId": "c6231c23-5684-524e-a3db-f0a80fb8cdcf",
           "kind": "Verse",
-          "textSha256": "db981952ed15c6ae82c944f020ea3afb0007aae45d0c9a9acebd4f67245111fc",
+          "textSha256": "e9a29c8420e268d9cd6b5910b4c7d836b752fb3145ed43250506bbccee6bba7d",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -87328,7 +87334,7 @@
         {
           "unitId": "448115a7-569c-52cd-86a0-b159a454719c",
           "kind": "Verse",
-          "textSha256": "bce06af242d1fd64ffebc43395454c58c0925f71a4a18a5a88934a71caa787d9",
+          "textSha256": "7790386ec094d101ef9cf84d4e3ec95b8241f2452b7c8f229638d11194e05eb7",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -87352,7 +87358,7 @@
         {
           "unitId": "a4fc5662-2032-542c-a846-c19311d2b342",
           "kind": "Verse",
-          "textSha256": "309b976af5660eac0848d6c6efeaaf8942b6cf320915351ea7fa0e7adf11a299",
+          "textSha256": "199bdb45fc6aaaf1259c2cb5bd2c1d0d4bb55962dfd1966c65f0bf3bb3381047",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             8,
@@ -87874,7 +87880,7 @@
         {
           "unitId": "fde39f39-589d-5b12-bb8f-d17a2f3b26a6",
           "kind": "Verse",
-          "textSha256": "87cc002ec5bf46bf5ab2424f22c5a407fb661d4c86ed395daca0853e9d8979cd",
+          "textSha256": "29757f7788f7d37a0b26235edd4786368c576cf7b5599bb5f744f204aeb59694",
           "blockCount": 2,
           "approxMeasuresByBlock": [
             4,
@@ -88072,7 +88078,7 @@
         {
           "unitId": "6fb1389b-1c83-53f0-9533-ebff32ba8347",
           "kind": "Verse",
-          "textSha256": "a68929072fde8832d1ab5e12e6bfa5fae006389ae8b407a3d92bfeadfa189e79",
+          "textSha256": "90c791034c8d806ea52e99be0128698e952364595b51d0f39be46a64f3211108",
           "blockCount": 1,
           "approxMeasuresByBlock": null,
           "approxMeasures": null,
@@ -88183,7 +88189,7 @@
         {
           "unitId": "15587bae-ecd4-51c7-b77a-9486c3dd690b",
           "kind": "Verse",
-          "textSha256": "cfb74a4b7ebdc1da98a6c5818c48e9320f5c299c09369da9503bbc4ffff01248",
+          "textSha256": "e912adae371b2faa2a5134d13debaef31b708e1595ca35728ad3ad71f395d19e",
           "blockCount": 5,
           "approxMeasuresByBlock": [
             5,

@@ -439,3 +439,11 @@ List summary and archive invalidations now follow confirmed atomic saves as well
 as create/delete. Remote list reads never adopt atomic baselines; archive reads
 are detached metadata only. Existing live/import leader CAS paths are retained.
 See operations-realtime.md for draft, playback and mixed-snapshot guards.
+
+## Scripture catalogue readiness ·2026-10-24
+
+Validation and direct verse fetch re-resolve an explicit edition captured before
+the catalogue loaded, using its original ID after catalogue readiness. An edition
+that is still unavailable never falls back to the default. No saved selection,
+verse body or worship record is changed by this resolution. Delayed catalogue
+coverage exercises both paths and retains the existing cache/stale-load checks.
