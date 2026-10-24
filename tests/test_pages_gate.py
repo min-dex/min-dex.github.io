@@ -68,7 +68,15 @@ class PagesGate(unittest.TestCase):
                 return subprocess.run(['git', *args], cwd=root, check=True, capture_output=True)
             git('init')
             (root / 'index.html').write_text('tested commit')
-            git('add', 'index.html')
+            excluded = ['tests/fixture.json', 'cloud/check.py', '.github/workflows/test.yml',
+                        'tools/build.js', 'migrations/schema.sql', 'electron/main.js']
+            retained = ['assets/tests/image.webp', 'assets/video.mp4', 'vendor/LICENSE',
+                        'data/runtime.json', 'docs/manual.md', '.nojekyll', 'app.js']
+            for name in excluded + retained:
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text('committed fixture')
+            git('add', '.')
             git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-m', 'fixture')
             (root / 'index.html').write_text('not tested')
             (root / 'private-backup.json').write_text('synthetic untracked fixture')
@@ -77,6 +85,10 @@ class PagesGate(unittest.TestCase):
             self.assertEqual((target / 'index.html').read_text(), 'tested commit')
             self.assertFalse((target / 'private-backup.json').exists())
             self.assertFalse((target / '.git').exists())
+            for name in excluded:
+                self.assertFalse((target / name).exists(), name)
+            for name in retained:
+                self.assertEqual((target / name).read_text(), 'committed fixture', name)
 
 
 if __name__ == '__main__':

@@ -133,7 +133,8 @@ class MindexSmokeServer(ThreadingHTTPServer):
 def start_local_app_server() -> tuple[ThreadingHTTPServer, str]:
     handler = partial(MindexSmokeHandler, directory=str(APP_DIR))
     server = MindexSmokeServer(("127.0.0.1", 0), handler)
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    # Avoid a half-second shutdown wait in every isolated smoke process.
+    thread = threading.Thread(target=server.serve_forever, kwargs={"poll_interval": 0.05}, daemon=True)
     thread.start()
     host, port = server.server_address
     return server, f"http://{host}:{port}/index.html"

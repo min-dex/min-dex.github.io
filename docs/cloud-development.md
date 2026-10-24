@@ -159,6 +159,26 @@ needs the whole matrix to succeed and retains the stale-commit guard.
 The no-argument cloud/check.py command still executes the entire baseline.
 Shard PASS is explicitly partial; per-entry timings support future balancing.
 
+### Conservative smoke teardown and Pages payload ·2026-10-24
+
+The smoke HTTP server uses a 50 ms shutdown poll instead of the standard 500 ms;
+each process retains its own ephemeral loopback port, browser and fixtures.
+No assertion, timeout, engine or test selection is removed. Idle teardown was
+measured separately; this is not a claim that full CI becomes 450 ms faster per
+test, since shutdown can overlap the final poll interval.
+Twelve local shutdown samples had medians of 0.501 s before and 0.049 s after;
+all twelve post-change HTTP probes returned successfully.
+
+Pages staging excludes only top-level `.github`, `cloud`, `tests`, `tools`,
+`migrations` and `electron` directories from the committed archive. All runtime
+files, assets, vendor licenses, data and documentation remain byte-identical.
+Original media are retained even when current source references are absent:
+stored user records or external links may still use them. No repository file is
+deleted. Real upload-time savings require a later deployment measurement.
+The inspected committed snapshot contains 1,455,116,239 bytes; these six
+directories account for 544 files / 4,391,459 bytes (0.302%). Asset/media
+compression or removal is not part of this change.
+
 ### Dependency download cache ·2026-10-24
 
 `setup-python` caches pip downloads keyed by `cloud/requirements.txt`. Each job

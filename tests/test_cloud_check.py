@@ -15,6 +15,19 @@ spec.loader.exec_module(gate)
 
 
 class CloudShards(unittest.TestCase):
+    def test_smoke_server_keeps_isolation_with_short_shutdown_poll(self):
+        spec = importlib.util.spec_from_file_location('smoke_server_contract', ROOT / 'tests/smoke_app.py')
+        smoke = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(smoke)
+        with patch.object(smoke, 'MindexSmokeServer') as server, patch.object(smoke.threading, 'Thread') as thread:
+            server.return_value.server_address = ('127.0.0.1', 12345)
+            instance, url = smoke.start_local_app_server()
+            self.assertIs(instance, server.return_value)
+            self.assertEqual(url, 'http://127.0.0.1:12345/index.html')
+            self.assertEqual(server.call_args.args[0], ('127.0.0.1', 0))
+            thread.assert_called_once_with(target=instance.serve_forever, kwargs={'poll_interval': 0.05}, daemon=True)
+            thread.return_value.start.assert_called_once_with()
+
     def test_complete_disjoint_partition(self):
         full = gate.selected_tests()
         self.assertEqual(len(full), len(set(full)))
