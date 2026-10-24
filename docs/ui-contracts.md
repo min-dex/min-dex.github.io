@@ -972,3 +972,10 @@ under the shared field geometry rules. Error state owns the field border/ink
 tokens; normal background excludes both error markers. Disabled selects keep
 the shared not-allowed cursor rather than the ordinary pointer. Preserve focus
 outlines, dimensions, input values and selection; adjacent wrappers stay neutral.
+
+### Setlist archive metadata and period ·2026-10-24
+
+Reserve 30px for the month selector arrow independently of the common input
+inset. Keep leader metadata right-aligned, with a transparent resting input
+and field surface on hover/keyboard focus. Editing, auto-save, draft retention
+and focus outlines remain unchanged.

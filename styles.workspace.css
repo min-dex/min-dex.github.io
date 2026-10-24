@@ -4982,11 +4982,11 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .svc-presenter-side-panel .svc-presenter-video-health:not(:empty) { height: auto; }
 
 /* Setlist leader edits stay inside the card metadata row. */
-.svc-setlist-leader-form { display: flex; align-items: center; gap: 5px; margin-left: auto; min-width: 0; max-width: 100%; }
-.svc-setlist-leader-form input { width: 130px; min-width: 0; max-width: 100%; padding: 5px 10px; min-height: 30px; border: 0; border-radius: var(--r); background: var(--ui-surface-field); color: var(--ink-2); font: inherit; box-shadow: none; text-align: left; }
+.svc-setlist-leader-form { display: flex; justify-content: flex-end; align-items: center; gap: 5px; margin-left: auto; min-width: 0; max-width: 100%; }
+.svc-setlist-leader-form input { width: 130px; min-width: 0; max-width: 100%; padding: 5px 10px; min-height: 30px; border: 0; border-radius: var(--r); background: transparent; color: var(--ink-2); font: inherit; box-shadow: none; text-align: right; }
 .svc-setlist-leader-form input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-
+.svc-setlist-leader-form input:is(:hover, :focus-visible) { background: var(--ui-surface-field); }
 .svc-setlist-leader-form input::placeholder { color: var(--ink-5); opacity: 1; }
 
 /* One desktop shell at every width; narrow windows keep content reflow. */
@@ -5184,6 +5184,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 
 .svc-setlist-navigation { display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0 20px; }
 .svc-setlist-navigation button, .svc-setlist-navigation select { max-width: 100%; min-width: 0; min-height: 30px; border: 0; border-radius: var(--r); background: var(--ui-surface-panel); color: var(--ink-2); font: inherit; padding: 5px 10px; }
+.svc-setlist-period select { width: calc(5em + 30px); --ui-field-inset-end: 30px; }
 .svc-setlist-navigation button { cursor: pointer; }
 .svc-setlist-navigation button:hover { background: var(--ui-surface-field); color: var(--ink); }
 .svc-setlist-navigation :is(button, select):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -5419,7 +5420,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 
 /* Same editable role across modules, independent of the surrounding panel. */
 @media screen {
-body:not(.presenter-output-body) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="button"]):not([type="submit"]), textarea, select):not([class*="presenter-output"]):not(.is-invalid):not([aria-invalid="true"]):not(.svc-slide-jump-input) { background-color:var(--ui-surface-field); }
+body:not(.presenter-output-body) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="button"]):not([type="submit"]), textarea, select):not([class*="presenter-output"]):not(.is-invalid):not([aria-invalid="true"]):not(.svc-slide-jump-input):not(.svc-setlist-leader-form input) { background-color:var(--ui-surface-field); }
 body:not(.presenter-output-body) :is(input,textarea,select):focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 .service-date-status.is-upcoming { color:var(--ink-3); }
 .service-date-status.is-today { color:var(--accent); }
@@ -5741,7 +5742,7 @@ body[data-module="praise"] .praise-forms-panel .version-compare-column {
     min-height: var(--ui-field-height);
     border: 1px solid var(--ui-field-border, transparent);
     border-radius: var(--r);
-    padding: 0 var(--ui-field-inset);
+    padding: 0 var(--ui-field-inset-end, var(--ui-field-inset)) 0 var(--ui-field-inset);
     color: var(--ui-field-ink, var(--ink));
     font-family: inherit;
     font-size: var(--ui-body-size);
@@ -6187,7 +6188,6 @@ body:has(#servicePresenterControls[data-focus-view="true"]) .right-sidebar { dis
 .svc-music-player--inline .svc-music-toggle { width:85px; flex:0 0 85px; white-space:nowrap; gap:5px; }
 .svc-music-player--inline [data-service-music-action="stop"] { width:30px; flex:0 0 30px; }
 .svc-music-player--inline .svc-music-transport > .icon-btn:hover:not(:disabled) { border-color:var(--ink-3); background:var(--ui-surface-panel); }
-
 
 .svc-music-player--inline > .song-timing-seek { flex:1 0 100%; grid-template-columns:minmax(0,1fr) auto; gap:10px; margin:0; }
 .svc-music-player--inline .song-timing-seek-label { display:none; }
