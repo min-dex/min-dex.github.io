@@ -88,11 +88,13 @@ if args.suite == 'check_guard':
   fixture=RouteFixture(method,path);guard(fixture);assert fixture.denied
  print('PASS nine mutation/unknown-RPC requests blocked without network access')
  raise SystemExit(0)
-oldcontext=Browser.new_context;oldpage=Browser.new_page
+oldcontext=Browser.new_context
 def new_context(self,*a,**k):
  k['service_workers']='block';c=oldcontext(self,*a,**k);protect(c);return c
 def new_page(self,*a,**k):
- k['service_workers']='block';p=oldpage(self,*a,**k);protect(p.context);return p
+ # Use the guarded context factory: Browser.new_page otherwise bypasses the
+ # shared macOS native-fullscreen safety wrapper in smoke_app.
+ return self.new_context(*a,**k).new_page()
 Browser.new_context=new_context;Browser.new_page=new_page
 suite=args.suite
 module=smoke_app if suite=='smoke_app' else importlib.import_module(suite)

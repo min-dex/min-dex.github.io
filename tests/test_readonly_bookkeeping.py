@@ -54,7 +54,7 @@ class NetworkGuard(unittest.TestCase):
     def setUp(self):
         from urllib.parse import urlsplit
         source=Path(__file__).with_name('run_live_readonly_smoke.py').read_text()
-        nodes=[node for node in ast.parse(source).body if isinstance(node,ast.FunctionDef)and node.name in ('guard','protect')]
+        nodes=[node for node in ast.parse(source).body if isinstance(node,ast.FunctionDef)and node.name in ('guard','protect','new_page')]
         self.g={'url':'https://test.fixture.invalid','host':'test.fixture.invalid','urlsplit':urlsplit,'urlencode':urlencode,
                 'json':json,'ReadonlyBookkeeping':ReadonlyBookkeeping,'converted':0,
                 'reads':collections.Counter(),'blocked':collections.Counter(),'fixtures':collections.Counter()}
@@ -80,6 +80,17 @@ class NetworkGuard(unittest.TestCase):
         self.assertIsNone(r.forwarded);self.assertEqual(r.response['status'],403)
         r=self.call('GET','/rest/v1/rpc/mindex_monitor_register')
         self.assertIsNone(r.forwarded);self.assertEqual(r.response['status'],403)
+    def test_convenience_page_uses_shared_guarded_context_factory(self):
+        class Context:
+            def new_page(self):return 'guarded page'
+        class Browser:
+            def new_context(self, **kwargs):
+                self.options=kwargs
+                return Context()
+        browser=Browser()
+        self.assertEqual(self.g['new_page'](browser,viewport={'width':800,'height':600}),'guarded page')
+        self.assertEqual(browser.options,{'viewport':{'width':800,'height':600}})
+
     def test_websocket_mock_never_connects_or_sync_closes(self):
         class Context:
             def route(self,pattern,callback):self.http=callback

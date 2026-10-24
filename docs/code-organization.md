@@ -339,6 +339,8 @@ that skipped later checks passed. Fixture revision/replay/isolation and the
 negative network guard have dedicated coverage. WebSocket routes remain local
 mocks without connecting to a server; calling synchronous `close()` inside the
 Playwright routing callback deadlocks the driver and is explicitly regression-tested.
+Convenience `Browser.new_page` calls also use the shared guarded context factory,
+so they retain the macOS native-fullscreen block before any document loads.
 
 `python3 tests/run_live_readonly_smoke.py smoke_live_readonly_core` exercises real
 startup, service hydration and slide rendering while comparing canonical loaded
