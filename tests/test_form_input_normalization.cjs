@@ -107,3 +107,21 @@ for(const raw of ['L','l','Lyrics','LYRICS',' lyrics ']) {
 }
 assert.equal(c.normalizeServiceFormHint('title-lyrics-Int-l'),'T-L-Int-L');
 console.log('PASS Lyrics/L normalization and shared playback identity');
+
+// Input typo guards must never select a different numbered form.
+for (const [raw,wanted] of [['Ｖ１－Ｃ','V1-C'],['V１–Ｃ','V1-C'],['V1—C','V1-C'],['Pre - Chorus','PC'],['pre – chorus 1 b@ - c','PC1@B-C']]) {
+ assert.equal(c.normalizeServiceFormHint(raw),wanted);
+ assert.equal(c.normalizeServiceFormHint(wanted),wanted);
+}
+for (const raw of ['V0','V00','C0','PC0A','B0@','Coda0','L0']) {
+ assert.equal(c.normalizePresenterFormPresetLabel(raw).invalid,true,raw);
+ assert.equal(c.normalizeSongFormPresetLabel(raw).invalid,true,raw);
+ assert.equal(c.findPresenterFormForPresetLabel([{id:'first',label:'Verse 1',lyrics:'keep'}],raw),null,raw);
+ const result=c.resolvePresenterFormPresetSequence([{id:'lyrics',part_type:'Lyrics',lyrics:'first\n\nsecond'}],[raw,'L']);
+ assert.ok(result.missing.includes(raw),raw);
+}
+const unnumbered=[{id:'plain',label:'Verse',lyrics:'first\nsecond\nthird\nfourth'}];
+for(const raw of ['V2A','V999A','V2@A'])assert.equal(c.findPresenterFormForPresetLabel(unnumbered,raw),null,raw);
+assert.ok(c.findPresenterFormForPresetLabel(unnumbered,'V1A'));
+assert.ok(c.findPresenterFormForPresetLabel(unnumbered,'VA'));
+console.log('PASS zero-number rejection, strict numbered group identity, Unicode delimiters and spaced Pre-Chorus');

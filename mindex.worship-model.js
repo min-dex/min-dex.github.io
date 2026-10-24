@@ -278,7 +278,7 @@ function normalizeServiceFormPreset(value, fallbackHint = "", fallbackStrength =
 
 function canonicalServiceFormToken(value = "") {
   // A trailing @ is an input alias, never a second sequence separator.
-  const raw = String(value || "").trim().replace(
+  const raw = String(value || "").normalize("NFKC").trim().replace(/\bpre\s*[-–—]\s*chorus\b/gi, "PC").replace(/\bp\s*[-–—]\s*c\b/gi, "PC").replace(
     /^(v|verse|c|chorus|pc|prechorus|pre-chorus|p-c|p\.c\.|b|bridge|coda|ending)\s*(\d*)\s*([a-z])\s*@$/i,
     "$1$2@$3",
   );
@@ -320,10 +320,10 @@ function canonicalServiceFormToken(value = "") {
 function normalizeServiceFormPresetForms(value) {
   const forms = Array.isArray(value)
     ? cleanList(value).map(canonicalServiceFormToken).filter(Boolean)
-    : String(value || "")
-    .replace(/\bpre-chorus\b/gi, "PC")
-    .replace(/\bp-c\b/gi, "PC")
-    .split(/\s*(?:,|[-+>→])\s*/)
+    : String(value || "").normalize("NFKC")
+    .replace(/\bpre\s*[-–—]\s*chorus\b/gi, "PC")
+    .replace(/\bp\s*[-–—]\s*c\b/gi, "PC")
+    .split(/\s*(?:,|[-–—+>→])\s*/)
     .map(canonicalServiceFormToken)
     .filter(Boolean);
   return forms;
@@ -333,9 +333,15 @@ function normalizeServiceFormHint(value = "") {
   return normalizeServiceFormPresetForms(value).join("-");
 }
 
+function serviceFormTokenHasInvalidNumber(raw = "") {
+  const match = raw.match(/^(?:V|C|PC|B|Coda|Lyrics|L)(\d+)(?:@?[A-Z])?@?$/i);
+  return Boolean(match && Number(match[1]) === 0);
+}
+
 function normalizeSongFormPresetLabel(value = "") {
   const raw = canonicalServiceFormToken(value);
   const compact = compactSearchValue(raw);
+  if (serviceFormTokenHasInvalidNumber(raw)) return { key: `invalid:${compact}`, type: "invalid", invalid: true };
   if (raw === "T") return { key: "title", type: "title", number: 0 };
   if (raw === "L") return { key: "lyrics", type: "lyrics", number: 0 };
   if (/^(vl|마지막절|lastverse|last)$/i.test(compact)) return { key: "last-verse", type: "verse", number: 0, lastVerse: true };

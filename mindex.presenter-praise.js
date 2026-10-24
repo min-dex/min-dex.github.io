@@ -643,7 +643,7 @@ function presenterScoreFormsFromImageSources(imageSources = []) {
     const label = presenterScoreFormLabelFromAssetSlide(source);
     if (!label) return null;
     const target = normalizePresenterFormPresetLabel(label);
-    if (!target.key) return null;
+    if (!target.key || target.invalid) return null;
     const partType = presenterFormPartTypeForPresetTarget(target);
     const formKey = String(source.formKey || source.form_key || source.scoreFormKey || source.score_form_key || "").trim()
       || `score:${target.key}:${target.type === "lyrics" ? "whole" : index}`;
@@ -1101,6 +1101,7 @@ function resolvePresenterLyricsFormPresetSequence(forms = [], presetForms = [], 
   cleanList(presetForms).forEach((label, index) => {
     const target = normalizePresenterFormPresetLabel(label);
     if (!target.key) return;
+    if (target.invalid) { missing.push(String(label)); return; }
     if (target.type === "title") {
       items.push(findPresenterFormForPresetLabel([], "T"));
       return;
@@ -1238,7 +1239,6 @@ function presenterRepeatLyricsForPresetTarget(lyrics = "", target = {}) {
   if (!text || repeat <= 1) return text;
   return Array.from({ length: Math.min(repeat, 12) }, () => text).join("\n");
 }
-
 function findPresenterFormForPresetTarget(forms = [], target = {}) {
   const sameType = [];
   for (const form of forms) {
@@ -1251,7 +1251,7 @@ function findPresenterFormForPresetTarget(forms = [], target = {}) {
   if (target.type === "verse" && target.number === 1 && sameType.length === 1 && !sameType[0].target.number) {
     return sameType[0].form;
   }
-  if (target.groupIndex && !target.variant && target.type) {
+  if (target.groupIndex && !target.variant && target.type && !target.number) {
     const unnumbered = sameType.filter(({ target: candidate }) => !candidate.number && !candidate.group && !candidate.variant);
     if (unnumbered.length === 1) return unnumbered[0].form;
   }
@@ -1295,10 +1295,10 @@ function presenterFormDisplayLabel(form = {}) {
   if (form._presenterVirtual) return displayLabel(form);
   return presenterFormPresetDisplayLabel(form.label) || String(form.label || "").trim() || displayLabel(form);
 }
-
 function normalizePresenterFormPresetLabel(value = "") {
   const raw = canonicalServiceFormToken(value);
   const compact = compactSearchValue(raw);
+  if (serviceFormTokenHasInvalidNumber(raw)) return { key: `invalid:${compact}`, type: "invalid", invalid: true };
   if (raw === "T") return { key: "title", type: "title", number: 0 };
   if (raw === "L") return { key: "lyrics", type: "lyrics", number: 0 };
   const lastVerse = /^(vl|마지막절|lastverse|last)$/i.test(compact);

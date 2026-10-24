@@ -4576,3 +4576,12 @@ or output behavior changes.
 각각 14개 예배 유형, 140개 편집 요약과 출력/입력 불변성을 통과했다.
 새 회귀 검사는 기본 Cloud gate에 등록했고 분할/실패 전파 검사 5개도 통과했다.
 운영 저장은 미실행이며 웹 배포 근거는 별도 release receipt로 기록한다.
+
+## Song form typo guards ·2026-10-24
+
+Shared normalization accepts NFKC characters and en/em dash separators, and
+protects spaced Pre-Chorus/P-C aliases before sequence splitting. Explicit zero
+part numbers remain authored text but resolve as missing, never as an unnumbered
+wildcard, including unstructured lyric playback. Numbered groups require the
+requested number; only the established single unnumbered Verse → V1 alias stays.
+Unknown labels, repeated order, A/B, @ and authored stored content are retained.
