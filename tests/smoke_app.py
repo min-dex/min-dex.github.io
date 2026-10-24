@@ -3292,7 +3292,7 @@ def main() -> int:
                               badgeText: (() => {
                                 const node = document.createElement('div');
                                 node.innerHTML = badgeHtml;
-                                return node.textContent.trim().replace(/\\s+/g, ' ');
+                                return node.querySelector('.svc-form-preset-badge')?.textContent.trim() || '';
                               })()
                             };
                           })(),
