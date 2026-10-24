@@ -32,3 +32,8 @@ Verification:
 - Runtime hashes, SOLID budget and diff whitespace checks pass.
 
 Local verification is separate from the shared exact-SHA CI/Pages/public receipt.
+
+First branch run40053280687 correctly blocked publication because removing icon
+references changed the generated Lucide subset. Regenerate mindex.icons.js with
+the pinned builder; test_ui_icons.cjs now passes its exact generation/SVG parity
+checks. Revised exact SHA must pass all four required shards before publication.
