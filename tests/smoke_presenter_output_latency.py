@@ -5,7 +5,7 @@ def run(browser, url):
     page = browser.new_page(viewport={"width": 1440, "height": 900})
     page.route("**/*supabase*/**", lambda route: route.abort())
     page.goto(url + "?output=presenter", wait_until="domcontentloaded")
-    page.wait_for_function("typeof preparePresenterNavigation === 'function'")
+    page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof preparePresenterNavigation === 'function')")
     print(page.evaluate('''async () => {
       const assert=(v,m)=>{if(!v)throw Error(m)};
       const service={id:'latency-test',type_id:'sunday-afternoon',date:'2026-09-06'};

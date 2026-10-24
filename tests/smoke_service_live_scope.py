@@ -9,7 +9,7 @@ try:
    browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
    page=browser.new_page(viewport={'width':1000,'height':800})
    page.route('**/*supabase*/**',lambda r:r.abort());page.goto(url,wait_until='load')
-   page.wait_for_function("typeof runLiveScriptureAction==='function'")
+   page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof runLiveScriptureAction==='function')")
    page.locator('#bootStatus').wait_for(state='hidden')
    print(engine,page.evaluate('''async()=>{
     const check=(v,m)=>{if(!v)throw Error(m)};

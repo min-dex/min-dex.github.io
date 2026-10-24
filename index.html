@@ -256,19 +256,20 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261024-presenter-view-safety";
-        const compiledAppVersion = "20261024-presenter-view-safety";
+        const fallbackVersion = "20261024-input-row-density";
+        const compiledAppVersion = "20261024-input-row-density";
         const modules = [
           "mindex.icons.js", "mindex.hymn-structure.js", "vendor/supabase-js.min.js",
           "mindex.constants.js", "mindex.inline-text.js", "mindex.design-tokens.js", "mindex.worship-model.js",
-          "mindex.worship-persistence.js", "mindex.presenter.js",
+          "mindex.worship-persistence.js", "mindex.presenter-praise.js", "mindex.presenter.js",
+          "mindex.presenter-live.js", "mindex.presenter-board.js", "mindex.presenter-controller.js",
           "mindex.pptx.js", "mindex.worship-input.js", "mindex.song-timing.js",
           "mindex.presenter-ui.js", "mindex.worship-week.js", "mindex.setlist-links.js",
           "mindex.manuals.js", "mindex.bulletin.js", "mindex.worship-source.js", "scripture-editions.js", "mindex.server-storage.js", "app.js",
           "mindex.editor-drafts.js", "mindex.draft-handoff.js", "mindex.service-entry.js", "mindex.presenter-freshness.js", "mindex.worship-live.js", "mindex.content-live.js", "mindex.service-list-live.js", "mindex.archive-live.js", "mindex.monitor.js", "mindex.remote.js", "mindex.scripture-repair-display.js",
         ];
         const styles = [
-          "styles.css", "styles.presenter-output.css", "styles.bulletin.css",
+          "styles.css", "styles.workspace.css", "styles.presenter-output.css", "styles.bulletin.css",
           "styles.calendar.css", "styles.monitor.css",
         ];
         const retryUrl = new URL(location.href);

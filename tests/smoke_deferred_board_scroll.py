@@ -8,7 +8,7 @@ try:
             page = browser.new_page(viewport={'width': 1440, 'height': 900})
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url, wait_until='domcontentloaded')
-            page.wait_for_function("typeof mountDeferredPresenterBoardSections === 'function'")
+            page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof mountDeferredPresenterBoardSections === 'function')")
             print(engine, page.evaluate('''async (focused) => {
               const check=(value,label)=>{if(!value)throw Error(label)};
               const service={id:'rapid-scroll',type_id:'sunday'};

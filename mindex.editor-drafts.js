@@ -8,21 +8,12 @@
   .filter(node=>node.type!=='file'&&node.type!=='password'&&node.dataset.initialValue!==undefined&&node.value!==node.dataset.initialValue)
   .map(node=>({id:node.id,data:{...node.dataset},value:node.value,checked:node.checked}));}
  const historyPrefix=(module,id)=>`mindex.editor.draft.v2:${module}:${id}:`;
- const parse=raw=>{try{return JSON.parse(raw)}catch{return null}};
  function snapshot(module,id){
   return {schema:1,module,id,base:state.cleanFingerprints[module],value:structuredClone(dirtyModuleValue(module)),fields:pendingFields(),
    ...(module==='service'?{sourceText:serviceSourceTextareaForService(id)?.value??state.services.find(row=>row.id===id)?._worshipSourceTextDraft,elementIds:[...(state.dirtyServiceElementIds.get(id)||[])],structure:state.dirtyServiceStructureIds.has(id),typeIds:[...state.dirtyServiceTypeIds]}:{})};
  }
  function content(draft){
   return JSON.stringify([draft.value,draft.sourceText??null,(draft.fields||[]).map(field=>({id:field.id,data:Object.fromEntries(Object.entries(field.data||{}).filter(([key])=>key!=='initialValue').sort(([a],[b])=>a.localeCompare(b))),value:field.value,checked:field.checked}))]);
- }
- function candidates(module,id){
-  const storage=window.MINDEX_SERVER_STORAGE,current=content(snapshot(module,id)),seen=new Set();
-  const keys=[keyFor(module,id),...(storage.keys?.('local')||[]).filter(key=>key.startsWith(historyPrefix(module,id)))];
-  return keys.map(key=>({key,draft:parse(storage.getItem('local',key))}))
-   .filter(({draft})=>draft?.schema===1&&draft.module===module&&draft.id===id&&draft.value)
-   .sort((a,b)=>String(b.draft.savedAt||'').localeCompare(String(a.draft.savedAt||'')))
-   .filter(({draft})=>{const value=content(draft);if(value===current||seen.has(value))return false;seen.add(value);return true});
  }
  function capture(){
   const storage=window.MINDEX_SERVER_STORAGE;if(!storage?.ready)return;
@@ -43,48 +34,7 @@
   value.savedAt=new Date().toISOString();
   if(storage.queue('local',key,JSON.stringify(value))){last.set(key,signature);touched.add(key);window.MINDEX_DRAFT_HANDOFF?.publish(module,id,value,value.value?.song?.title||value.value?.title||value.value?.service?.title||'편집 초안')}
  }
- function schedule(){if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;capture();render()})}
- function render(){
-  if(!refs.saveAllBtn||!window.MINDEX_SERVER_STORAGE?.ready)return;
-  let button=document.getElementById('restoreServerEditorDraft');
-  if(!button){button=document.createElement('button');button.id='restoreServerEditorDraft';button.className='btn secondary';const label=document.createElement('span');label.textContent='임시 저장본 복구';button.append(label);button.onclick=restore;refs.saveAllBtn.before(button)}
-  const module=moduleName(),id=idFor(module);
-  button.hidden=!id||!candidates(module,id).length;
- }
- function preview(draft){
-  const lines=[],value=draft.value;
-  const add=(label,text)=>{if(typeof text==='string'&&text.trim())lines.push(`${label}\n${text}`)};
-  if(draft.module==='praise'){add('제목',value.song?.title);for(const form of value.forms||[])add(form.label||form.part_type||'가사',form.lyrics)}
-  else if(draft.module==='scripture'){add('제목',value.title);add('본문',value.body||value.text);add('장절',value.reference);add('역본',value.translation)}
-  else if(draft.module==='service'){add('예배',value.service?.title);add('원문',draft.sourceText||value.service?._worshipSourceTextDraft);for(const item of value.items||[])add(item.label||'순서',[item.raw_title,item.assignee,item.text].filter(Boolean).join(' / '))}
-  else for(const item of value||[])add(item.title||'참고자료',item.url);
-  for(const field of draft.fields||[])add('미반영 입력',field.value);
-  return lines.join('\n\n')||'표시할 본문이 없습니다. 제목·연결·설정 변경이 포함될 수 있습니다.';
- }
- async function restore(){
-  const module=moduleName(),id=idFor(module);if(!id||state.saving)return;
-  const entries=candidates(module,id);if(!entries.length)return;
-  const current=snapshot(module,id),signature=content(current),client=state.client;
-  const dialog=document.createElement('dialog');dialog.className='editor-draft-review';dialog.setAttribute('aria-label','임시 저장본 확인');
-  const title=document.createElement('h2');title.textContent='임시 저장본 확인';dialog.append(title);
-  const note=document.createElement('p');note.textContent='현재 입력은 먼저 별도로 보관합니다. 복구 후 확인하고 저장해야 예배·찬양에 반영됩니다.';dialog.append(note);
-  const label=document.createElement('label');label.textContent='보관 시각';const select=document.createElement('select');select.setAttribute('aria-label','복구할 임시 저장본');
-  entries.forEach(({draft},index)=>{const option=document.createElement('option');option.value=String(index);option.textContent=draft.savedAt?new Date(draft.savedAt).toLocaleString('ko-KR'):'기존 초안 · 보관 시각 정보 없음';select.append(option)});label.append(select);dialog.append(label);
-  const columns=document.createElement('div');columns.className='editor-draft-preview';dialog.append(columns);
-  const field=(name,text)=>{const label=document.createElement('label');label.textContent=name;const area=document.createElement('textarea');area.readOnly=true;area.value=text;area.setAttribute('aria-label',name);label.append(area);columns.append(label);return area};
-  field('현재 입력',preview(current));const saved=field('복구할 내용',preview(entries[0].draft));select.onchange=()=>saved.value=preview(entries[Number(select.value)].draft);
-  const status=document.createElement('p');status.setAttribute('role','status');dialog.append(status);
-  const actions=document.createElement('div');actions.className='editor-draft-actions';dialog.append(actions);
-  const cancel=document.createElement('button');cancel.className='btn secondary';cancel.textContent='닫기';cancel.onclick=()=>dialog.close();actions.append(cancel);
-  const apply=document.createElement('button');apply.className='btn primary';apply.textContent='편집창에 복구';actions.append(apply);
-  apply.onclick=async()=>{
-   if(moduleName()!==module||idFor(module)!==id||state.client!==client||content(snapshot(module,id))!==signature){status.textContent='현재 입력이나 화면이 바뀌었습니다. 닫고 다시 확인해 주세요.';return}
-   apply.disabled=true;select.disabled=true;
-   try{if(await restoreDraft(entries[Number(select.value)].draft,()=>dialog.open&&dialog.isConnected))dialog.close();else status.textContent='복구하지 않았습니다. 현재 입력과 보관본은 유지됩니다.'}
-   finally{apply.disabled=false;select.disabled=false}
-  };
-  dialog.addEventListener('close',()=>dialog.remove(),{once:true});document.body.append(dialog);dialog.showModal();
- }
+ function schedule(){if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;capture()})}
  async function restoreDraft(draft,isActive=()=>true){
   const module=moduleName(),id=idFor(module);
   if(state.saving||state.serviceMusic?.playing||state.serviceMusic?.pending||isPresenterOutputWindowOpen()){showToast('저장이나 재생을 마친 뒤 임시 저장본을 복구해 주세요.','error');return false;}
@@ -158,8 +108,6 @@
   }finally{window.MINDEX_EDITOR_DRAFTS.restoring=false}
   updateSaveState();showToast('임시 저장본을 복구했습니다. 확인 후 저장해 주세요.');return true;
  }
- window.addEventListener('mindex-server-state-settled',render);
- window.addEventListener('mindex-server-storage-ready',render);
  document.addEventListener('input',schedule);document.addEventListener('change',schedule);
  window.MINDEX_EDITOR_DRAFTS={matchesDraft:draft=>!!draft&&draft.module===moduleName()&&draft.id===idFor(moduleName())&&content(draft)===content(snapshot(moduleName(),draft.id)),capture:schedule,restoreDraft,identity:()=>{const kind=moduleName(),id=idFor(kind);return id?{kind,id}:null},restoring:false};
 })();

@@ -11,7 +11,7 @@ def main():
                 page = browser.new_page()
                 page.route("**/*supabase*/**", lambda route: route.abort())
                 page.goto(url, wait_until="domcontentloaded")
-                page.wait_for_function("typeof renderPresenterBoardSubgroup === 'function'")
+                page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof renderPresenterBoardSubgroup === 'function')")
                 print(engine, page.evaluate("""() => {
                   const check=(v,m)=>{if(!v)throw Error(m)};
                   const service={id:'hidden-fixture',type_id:'fixture'};

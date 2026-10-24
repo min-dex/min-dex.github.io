@@ -17,13 +17,13 @@ STYLES_CSS = APP_DIR / "styles.css"
 # target architecture sizes.
 # Ratchets lowered after unused runtime cleanup on 2026-10-13.
 # Lower a limit when code is extracted; do not raise one without documenting why.
-MAX_APP_JS_LINES = 32804
-MAX_PRESENTER_JS_LINES = 5_490
-MAX_STYLES_LINES = 8_430
+MAX_APP_JS_LINES = 30_160
+MAX_PRESENTER_JS_LINES = 5_130
+MAX_STYLES_LINES = 3_300
 MAX_FUNCTION_LINES = 450
-MAX_APP_FUNCTION_COUNT = 1753
-MAX_PRESENTER_FUNCTION_COUNT = 303
-MAX_GLOBAL_COUPLING_MARKERS = 3_129
+MAX_APP_FUNCTION_COUNT = 1_640
+MAX_PRESENTER_FUNCTION_COUNT = 290
+MAX_GLOBAL_COUPLING_MARKERS = 2_970
 
 WATCHED_FUNCTION_LIMITS = {
     "handleDetailClick": 440,
@@ -92,7 +92,30 @@ def main() -> int:
     style_lines = read_lines(STYLES_CSS)
     app_functions = find_functions(app_lines)
     presenter_functions = find_functions(presenter_lines)
-    by_name = {str(function["name"]): function for function in app_functions}
+    extracted_limits = {
+        'mindex.presenter-live.js': (700, 40),
+        'mindex.presenter-board.js': (1730, 95),
+        'mindex.presenter-controller.js': (2670, 115),
+        'mindex.presenter-praise.js': (1450, 75),
+    }
+    if sum(limit[0] for limit in extracted_limits.values()) > 6550:
+        failures.append('aggregate extracted owner line budget exceeds 6550')
+    owners = {path.name: find_functions(read_lines(path)) for path in APP_DIR.glob('*.js') if path.name not in ('app.runtime.js', 'mindex.icons.js')}
+    by_name = {str(function["name"]): function for functions in owners.values() for function in functions}
+    for name, (line_limit, function_limit) in extracted_limits.items():
+        lines = read_lines(APP_DIR / name)
+        functions = owners[name]
+        if len(lines) > line_limit or len(functions) > function_limit:
+            failures.append(f'{name} size exceeds extracted owner budget')
+        for function in functions:
+            if int(function['size']) > MAX_FUNCTION_LINES:
+                failures.append(f"{name}:{function['name']} exceeds function budget")
+    total_coupling = sum(count_matches(GLOBAL_COUPLING_PATTERN, read_lines(APP_DIR / name))
+                         for name in ['app.js', 'mindex.presenter-live.js', 'mindex.presenter-board.js', 'mindex.presenter-controller.js'])
+    if total_coupling > 3552:
+        failures.append('aggregate app/controller coupling exceeds pre-extraction baseline')
+    if len(read_lines(APP_DIR / 'styles.workspace.css')) > 6460:
+        failures.append('styles.workspace.css exceeds extracted owner budget')
     largest = sorted(app_functions, key=lambda function: int(function["size"]), reverse=True)[:12]
     global_coupling = count_matches(GLOBAL_COUPLING_PATTERN, app_lines)
 
@@ -124,15 +147,17 @@ def main() -> int:
         if duplicates:
             failures.append(f"duplicate top-level functions in {label}: {', '.join(duplicates)}")
 
-    cross_file_duplicates = sorted(
-        {str(function["name"]) for function in app_functions}
-        & {str(function["name"]) for function in presenter_functions}
-    )
+    function_owners = {}
+    # Classic global scripts only; IIFE-local functions can legitimately share names.
+    global_owners = ['app.js', 'mindex.presenter.js', *extracted_limits,
+                     'mindex.constants.js', 'mindex.design-tokens.js',
+                     'mindex.worship-model.js', 'mindex.worship-persistence.js']
+    for owner in global_owners:
+        for function in owners[owner]:
+            function_owners.setdefault(str(function['name']), []).append(owner)
+    cross_file_duplicates = sorted(name for name, locations in function_owners.items() if len(locations) > 1)
     if cross_file_duplicates:
-        failures.append(
-            "top-level function ownership collision between app.js and "
-            f"mindex.presenter.js: {', '.join(cross_file_duplicates)}"
-        )
+        failures.append('top-level function ownership collision: ' + ', '.join(cross_file_duplicates))
 
     script_positions = [
         index_html.find("mindex.constants.js"),
@@ -176,6 +201,7 @@ def main() -> int:
         f"{len(presenter_functions)} / {MAX_PRESENTER_FUNCTION_COUNT}"
     )
     print(f"- global coupling markers: {global_coupling} / {MAX_GLOBAL_COUPLING_MARKERS}")
+    print(f"- aggregate app/controller coupling: {total_coupling} / 3552")
     print(f"- cross-file function collisions: {len(cross_file_duplicates)}")
     print("- largest functions:")
     for function in largest:

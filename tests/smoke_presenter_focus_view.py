@@ -23,7 +23,7 @@ try:
       state.serviceItems={[sid]:['첫 번째','두 번째','마지막'].map((title,i)=>({id:'focus-'+i,service_id:sid,label:'설교',raw_title:title,sort_order:i+1,_worshipSectionKey:'sermon',_worshipElementTemplateModified:true,memo:serializeServiceItemMemo({elementType:'title',inputMode:'manual',outputMode:'title'})}))};
       state.loadedWorshipServiceIds=new Set([sid]);state.selectedServiceId=sid;state.module='presenter';document.body.dataset.module='presenter';state.loading=false;
       renderPresenterDetail();
-      window.focusDraft=document.querySelector('.svc-source-text');focusDraft.value='아직 저장하지 않은 원문';
+      window.focusDraft=document.querySelector('[data-service-item-field=raw_title]');focusDraft.value='아직 저장하지 않은 제목';
       window.focusBoard=document.querySelector('.svc-slide-board');
       window.focusAudio={currentTime:42,paused:false};state.serviceMusic.audio=focusAudio;
       state.serviceMusic.playing=true;state.serviceMusic.sourceKey='fixture.wav';state.serviceMusic.ownerServiceId=sid;
@@ -72,7 +72,7 @@ try:
     assert page.locator('#remotePanelBtn').is_visible()
     assert page.locator('.global-playback-trigger').is_visible()
     assert not page.locator('.svc-source-panel').is_visible()
-    assert page.evaluate("focusDraft===document.querySelector('.svc-source-text') && focusDraft.value==='아직 저장하지 않은 원문' && focusAudio===state.serviceMusic.audio && focusAudio.currentTime===42 && focusItems===JSON.stringify(state.serviceItems)")
+    assert page.evaluate("focusDraft===document.querySelector('[data-service-item-field=raw_title]') && focusDraft.value==='아직 저장하지 않은 제목' && focusAudio===state.serviceMusic.audio && focusAudio.currentTime===42 && focusItems===JSON.stringify(state.serviceItems)")
     assert '자동 넘김 해제' in page.locator('[data-focus-music-status]').inner_text()
     assert page.locator('[data-focus-music-label]').inner_text() == '일시정지 · P'
     assert page.evaluate('''()=>{const b=document.querySelector('[data-focus-music="toggle"]');const text=b.firstChild;syncPresenterFocusMusic();return text===b.firstChild}''')
@@ -121,8 +121,8 @@ try:
     Path('output/presenter-focus').mkdir(parents=True,exist_ok=True)
     page.screenshot(path=f'output/presenter-focus/{engine}.png')
     page.locator('[data-presenter-focus-toggle=basic]').click()
-    assert page.locator('.svc-source-panel').is_visible()
-    assert page.evaluate("focusBoard===document.querySelector('.svc-slide-board') && focusDraft.value==='아직 저장하지 않은 원문' && focusAudio.currentTime===42 && state.serviceMusic.playing && state.serviceMusic.autoSyncSuspended && focusItems===JSON.stringify(state.serviceItems)")
+    assert page.locator('.svc-source-panel').count()==0
+    assert page.evaluate("focusBoard===document.querySelector('.svc-slide-board') && focusDraft.value==='아직 저장하지 않은 제목' && focusAudio.currentTime===42 && state.serviceMusic.playing && state.serviceMusic.autoSyncSuspended && focusItems===JSON.stringify(state.serviceItems)")
     page.evaluate("window.originalManagedVideo=presenterManagedVideoState;presenterManagedVideoState=()=>({status:'paused',ready:true});renderGlobalPlaybackControls()")
     for theme in ('light','dark'):
      page.evaluate('(theme)=>{document.body.dataset.theme=theme}',theme)
@@ -133,7 +133,7 @@ try:
       page.locator(f'[data-presenter-focus-toggle={view}]').click()
       assert page.locator(f'[data-presenter-focus-toggle={view}]').get_attribute('aria-pressed')=='true'
       page.locator('.svc-presenter-side-panel .svc-presenter-top').wait_for(state='visible' if view=='basic' else 'hidden')
-      assert page.evaluate("focusBoard===document.querySelector('.svc-slide-board') && focusDraft.value==='아직 저장하지 않은 원문' && focusAudio.currentTime===42")
+      assert page.evaluate("focusBoard===document.querySelector('.svc-slide-board') && focusDraft.value==='아직 저장하지 않은 제목' && focusAudio.currentTime===42")
       for width in (1440,1100,800,390):
        page.set_viewport_size({'width':width,'height':1000})
        page.wait_for_timeout(100)
@@ -188,10 +188,7 @@ try:
           && !save.querySelector('svg,[data-lucide]') && getComputedStyle(save).padding==='0px 10px'
           && Math.abs(add.getBoundingClientRect().height-save.getBoundingClientRect().height)<1;
         }""")
-        page.locator('.svc-source-panel-head').click()
-        assert page.locator('.svc-source-text').is_visible()
-        assert page.locator('.svc-source-panel-body').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
-        page.locator('.svc-source-panel-head').click()
+        assert page.locator('.svc-source-panel,.svc-source-text').count()==0
        if width==1440:
         page.screenshot(path=f'output/presenter-focus/{engine}-{view}-{theme}.png')
     print(engine,'PASS view switch, DOM/draft/audio retention, live/blank/end states, responsive geometry',flush=True)

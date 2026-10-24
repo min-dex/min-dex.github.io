@@ -11,7 +11,7 @@ try:
    page.add_init_script('Element.prototype.requestFullscreen=async()=>{};Element.prototype.webkitRequestFullscreen=()=>{};window.open=()=>null')
    page.route('**/*',lambda r:r.continue_() if urlsplit(r.request.url).netloc==urlsplit(url).netloc else r.abort())
    page.goto(url+'?output=presenter',wait_until='domcontentloaded')
-   page.wait_for_function("typeof presenterBoardSlideBlocks==='function'")
+   page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof presenterBoardSlideBlocks==='function')")
    print(engine,page.evaluate('''()=>{
     const check=(v,m)=>{if(!v)throw Error(m)};
     const lyric=(key,label)=>({elementId:'song',elementType:'praise',layout:'lower_bar_text',type:'lyrics',formKey:key,formLabel:label,text:'주님을 찬양합니다',title:'찬양'});

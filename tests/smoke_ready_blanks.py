@@ -10,7 +10,7 @@ def main():
                 page = browser.new_page()
                 page.route('**/*supabase*/**', lambda r: r.abort())
                 page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-                page.wait_for_function("typeof presenterReadySlide === 'function'")
+                page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof presenterReadySlide === 'function')")
                 print(engine, page.evaluate('''() => {
                   const check=(v,m)=>{if(!v)throw Error(m)};
                   for(const chromakey of [false,true]) {

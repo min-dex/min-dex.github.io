@@ -7,7 +7,7 @@ try:
         page = browser.new_page(viewport={'width': 1280, 'height': 720})
         page.route('**/*supabase*/**', lambda route: route.abort())
         page.goto(url, wait_until='domcontentloaded')
-        page.wait_for_function("typeof isSpecialSongServiceItem === 'function' && typeof presenterSlidesWithSpecialSongTitle === 'function' && typeof renderPresenterSlideFrame === 'function'")
+        page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof isSpecialSongServiceItem === 'function' && typeof presenterSlidesWithSpecialSongTitle === 'function' && typeof renderPresenterSlideFrame === 'function')")
         print(page.evaluate('''() => {
           const check = (v, m) => { if (!v) throw Error(m); };
           const lyric = { id: 'l1', type: 'lyrics', layout: 'lower_bar_text', elementType: 'lyrics', text: '지금은 엘리야 때처럼\\n주 말씀이 선포되고', sectionKey: 'special_song' };

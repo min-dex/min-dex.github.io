@@ -10,7 +10,7 @@ def main():
                 page = browser.new_page(viewport={"width": 1100, "height": 700})
                 page.route("**/*supabase*/**", lambda route: route.abort())
                 page.goto(url, wait_until="domcontentloaded")
-                page.wait_for_function("typeof renderPresenterReferenceMediaQuickAdd === 'function'")
+                page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof renderPresenterReferenceMediaQuickAdd === 'function')")
                 page.evaluate("""() => {
                   window.mediaCalls=[];
                   addPresenterReferenceMedia=(...args)=>mediaCalls.push(['url',...args]);

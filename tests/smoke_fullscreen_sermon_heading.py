@@ -10,7 +10,7 @@ def main():
                 page = browser.new_page(viewport={"width": 1920, "height": 1080})
                 page.route("**/*supabase*/**", lambda route: route.abort())
                 page.goto(url, wait_until="domcontentloaded")
-                page.wait_for_function("typeof normalizeCleanPresenterSlideLayout === 'function'")
+                page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof normalizeCleanPresenterSlideLayout === 'function')")
                 result = page.evaluate("""() => {
                   const root = document.createElement('div');
                   root.className = 'presenter-output-root no-chromakey';

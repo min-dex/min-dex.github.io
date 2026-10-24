@@ -35,7 +35,7 @@ def main():
                 page = browser.new_page(viewport={"width": 1100, "height": 700}, device_scale_factor=dpr)
                 page.route("**/*supabase*/**", lambda route: route.abort())
                 page.goto(url + "?output=presenter", wait_until="domcontentloaded")
-                page.wait_for_function("typeof presenterSlideRenderClass === 'function' && typeof applyPresenterPreviewScales === 'function'")
+                page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof presenterSlideRenderClass === 'function' && typeof applyPresenterPreviewScales === 'function')")
                 page.evaluate(
                     """() => {
                       state.services = [{
