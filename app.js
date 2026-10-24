@@ -697,8 +697,9 @@ function preparePresenterRuntimeDependencies() {
     && typeof renderPresenterSlideBoard === "function"
     && typeof runPresenterAction === "function"
     && typeof window.MindexDisclosure?.attrs === "function"
-    && [...document.querySelectorAll('link[rel="stylesheet"]')]
-      .some(link => new URL(link.href, document.baseURI).pathname.endsWith("/styles.workspace.css"));
+    && typeof renderPresenterVideoTransport === "function"
+    && ["styles.workspace.css", "styles.presenter-media.css"].every(name =>
+      [...document.querySelectorAll('link[rel="stylesheet"]')].some(link => new URL(link.href, document.baseURI).pathname.endsWith(`/${name}`)));
   const url = new URL(location.href);
   if (ready) {
     if (url.searchParams.has("mindex-runtime-upgrade")) {

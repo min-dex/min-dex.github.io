@@ -1037,3 +1037,7 @@ Video input disclosures contain a native controls/metadata-only preview with its
 own clock and explicit remaining time. This element is independent of live output;
 opening it never autoplays. Existing audio input native controls remain available.
 No lyrics, forms, media timings, URLs or worship settings are saved by these controls.
+
+Retained HTML must refresh through the existing bounded runtime upgrade when
+the media controls owner or its stylesheet is absent. No partial media UI startup
+or separate dynamic loader is added.

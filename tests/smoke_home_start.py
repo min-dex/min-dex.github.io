@@ -1,5 +1,5 @@
 """Offline root navigation, shared verse wrapping and explicit detail destinations."""
-import os
+import os,tempfile
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from smoke_app import start_local_app_server,sync_playwright,launch_chromium
 server,url=start_local_app_server()
@@ -53,7 +53,7 @@ try:
    assert page.locator('.home-calendar-context').inner_text().strip()=='교회력 fixture'
    page.locator('.home-calendar-context').focus()
    assert page.locator('.home-calendar-context').evaluate('(el)=>el===document.activeElement')
-   page.screenshot(path=f'/private/tmp/home-calendar-name-{engine}.png')
+   page.screenshot(path=os.path.join(tempfile.gettempdir(),f'home-calendar-name-{engine}.png'))
    for rows in ([], [{'date':'2099-12-25','liturgical':'미래 절기'}],
                 [{'date':'today','liturgical':'  ','note':'다른 일정'}]):
     page.evaluate("""rows=>{state.calendarData=rows.map(row=>({...row,date:row.date==='today'?toLocalDateStr(new Date()):row.date}));render()}""",rows)
