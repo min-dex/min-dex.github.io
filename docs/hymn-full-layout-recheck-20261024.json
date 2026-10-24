@@ -21,7 +21,8 @@
     "numericMetadataParts": 70,
     "numericMetadataEditions": 19,
     "existingSpacingMetadataBindings": 116,
-    "concurrentSpacingMetadataBindings": 56
+    "concurrentSpacingMetadataBindings": 56,
+    "lateConcurrentSpacingMetadataBindings": 98
   },
   "preservation": {
     "worshipContentWrites": 0,
@@ -123,5 +124,11 @@
       "960x540"
     ],
     "metadataSource": "candidate runtime routed over production renderer; public publication pending"
+  },
+  "lateConcurrentChanges": {
+    "hymnSpacingRows": 98,
+    "otherSpacingRows": 7,
+    "worshipChanges": "Observed separate concurrent operational writes; this task made no worship writes. Exact target lyric corrections remain unchanged.",
+    "metadataAction": "Rebind hashes only after identical compact text per slide; no lyrics or page boundaries changed."
   }
 }
