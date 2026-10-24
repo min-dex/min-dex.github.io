@@ -1688,3 +1688,38 @@ function focusPresenterBoardLiveSlide(serviceId, index) {
   });
 }
 
+
+// Remaining authored text uses the same stage grid in output and thumbnails.
+function fitPresenterSupplementalText(host) {
+  const headers = [...host.querySelectorAll(".presenter-scripture-reading-ref, .presenter-scripture-reading-version")];
+  headers.forEach(box => box.style.removeProperty("font-size"));
+  headers.forEach(box => fitPresenterTextBox(box, {role:"title"}));
+  host.querySelectorAll(".presenter-assignee-tab, .presenter-fullscreen-song-detail, .presenter-title-content-body:not(.presenter-slide--liturgical-body .presenter-title-content-body), .presenter-ready-screen-message, .presenter-waiting-loop-title, .presenter-slide[data-element-type='freeform'] > .presenter-slide-text")
+    .forEach(box => {
+      // Tight existing body line-height can put font ink below its line box.
+      // Measure the authored lines, as titles already do, not that ink fringe.
+      let measure = null;
+      if (box.matches(".presenter-ready-screen-message, .presenter-waiting-loop-title, .presenter-slide[data-element-type='freeform'] > .presenter-slide-text")) {
+        measure = box.cloneNode(true);
+        measure.style.cssText = `position:absolute;visibility:hidden;pointer-events:none;width:${box.clientWidth}px;height:auto;max-height:none;min-height:0`;
+        box.parentNode.appendChild(measure);
+      }
+      const fits = box.matches(".presenter-title-content-body") ? () => {
+        const bounds = box.getBoundingClientRect();
+        const tolerance = (box.closest(".presenter-output-root")?.getBoundingClientRect().width || 1920) / 1920;
+        return box.scrollWidth <= box.clientWidth + presenterTextFitScale(box)
+          && [...box.children].every(line => {
+            const rect = line.getBoundingClientRect();
+            return rect.top >= bounds.top - tolerance && rect.bottom <= bounds.bottom + tolerance;
+          });
+      } : measure ? () => {
+        measure.style.width = `${box.clientWidth}px`;
+        measure.style.fontSize = getComputedStyle(box).fontSize;
+        return measure.scrollWidth <= box.clientWidth + presenterTextFitScale(box)
+          && measure.clientHeight <= box.clientHeight + presenterTextFitScale(box);
+      } : () => presenterTextFits(box);
+      try { fitPresenterTextBox(box, {fits}); }
+      finally { measure?.remove(); }
+    });
+}
+

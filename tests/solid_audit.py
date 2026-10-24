@@ -94,10 +94,12 @@ def main() -> int:
     presenter_functions = find_functions(presenter_lines)
     extracted_limits = {
         'mindex.presenter-live.js': (700, 40),
-        'mindex.presenter-board.js': (1700, 95),
-        'mindex.presenter-controller.js': (2700, 115),
+        'mindex.presenter-board.js': (1730, 95),
+        'mindex.presenter-controller.js': (2670, 115),
         'mindex.presenter-praise.js': (1450, 75),
     }
+    if sum(limit[0] for limit in extracted_limits.values()) > 6550:
+        failures.append('aggregate extracted owner line budget exceeds 6550')
     owners = {path.name: find_functions(read_lines(path)) for path in APP_DIR.glob('*.js') if path.name not in ('app.runtime.js', 'mindex.icons.js')}
     by_name = {str(function["name"]): function for functions in owners.values() for function in functions}
     for name, (line_limit, function_limit) in extracted_limits.items():
