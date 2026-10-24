@@ -314,17 +314,28 @@
       } catch(error){finish(error);}
     });
   }
+  function ownsTransport(source, owner = '', elementId = '') {
+    const music = state.serviceMusic;
+    if (!source || source !== music.sourceKey) return false;
+    const serviceId = music.ownerServiceId || (music.mode === 'presenter-audio' ? state.presenter.serviceId : '');
+    if (owner && owner !== serviceId) return false;
+    if (elementId && music.mode === 'presenter-audio' && music.timingGroupId) {
+      const slide = state.presenter.slides.find(s => s.syncTimeline?.groupId === music.timingGroupId);
+      if ((slide?.songTimingElementId || slide?.progressionParentId || slide?.elementId) !== elementId) return false;
+    }
+    return true;
+  }
   let activeSeekInput = null;
   function transport(options = {}) {
     const music = state.serviceMusic;
     const source = options.source || music.sourceKey;
     if (!source || (!options.source && !music.audio)) return '';
     const owner = options.serviceId || '';
-    const active = source === music.sourceKey && (!owner || owner === music.ownerServiceId);
+    const active = ownsTransport(source, owner, options.elementId);
     const duration = active && Number.isFinite(music.audio?.duration) && music.audio.duration > 0 ? music.audio.duration : 0;
     const position = active ? Math.max(0, Math.min(Number(music.audio?.currentTime) || 0, duration)) : 0;
     const synced = !options.source && music.mode === 'presenter-audio' && remoteSources.has(source);
-    return `<label class="song-timing-seek"><span class="song-timing-seek-label">음원 위치</span><input type="range" min="0" max="${duration}" step="0.1" value="${position}" ${duration ? '' : 'disabled'} data-song-timing-seek data-source="${escapeAttr(source)}" data-seek-owner="${escapeAttr(owner)}" aria-label="음원 재생 위치"><span data-song-timing-clock>${transportClock(position)} / ${transportClock(duration)}</span></label>${synced ? `<button type="button" class="btn secondary" data-song-timing-resume ${!music.autoSyncSuspended || !music.playing ? 'hidden' : ''}>자동 넘김 복귀 · R</button>` : ''}`;
+    return `<label class="song-timing-seek"><span class="song-timing-seek-label">음원 위치</span><input type="range" min="0" max="${duration}" step="0.1" value="${position}" ${duration ? '' : 'disabled'} data-song-timing-seek data-source="${escapeAttr(source)}" data-seek-owner="${escapeAttr(owner)}" data-seek-element="${escapeAttr(options.elementId || "")}"${options.remaining ? ' data-clock-remaining="true"' : ""} aria-label="음원 재생 위치"><span data-song-timing-clock>${options.remaining ? presenterMediaClockText(position,duration) : `${transportClock(position)} / ${transportClock(duration)}`}</span></label>${synced ? `<button type="button" class="btn secondary" data-song-timing-resume ${!music.autoSyncSuspended || !music.playing ? 'hidden' : ''}>자동 넘김 복귀 · R</button>` : ''}`;
   }
   function transportClock(seconds) {
     const safe = Number.isFinite(seconds) ? Math.max(0, seconds) : 0;
@@ -332,22 +343,22 @@
   }
   function updateTransport(audio) {
     if (typeof syncPresenterFocusMusic === "function") syncPresenterFocusMusic();
-    const source = state.serviceMusic.sourceKey;
     for (const button of document.querySelectorAll('[data-song-timing-resume]')) {
       if (button.closest('[data-presenter-focus-panel]')) continue;
       button.hidden = !state.serviceMusic.autoSyncSuspended || !state.serviceMusic.playing || !state.presenter.slides[state.presenter.index]?.songTimingEligible || state.serviceMusic.timingGroupId !== state.presenter.slides[state.presenter.index]?.syncTimeline?.groupId;
     }
     for (const input of document.querySelectorAll('[data-song-timing-seek]')) {
-      if (input.dataset.source !== source || (input.dataset.seekOwner && input.dataset.seekOwner !== state.serviceMusic.ownerServiceId)) {
+      if (!ownsTransport(input.dataset.source, input.dataset.seekOwner, input.dataset.seekElement)) {
         input.disabled = true; input.max = 0; input.value = 0;
-        input.parentElement.querySelector('[data-song-timing-clock]').textContent = '0:00 / 0:00';
+        input.parentElement.querySelector('[data-song-timing-clock]').textContent = input.dataset.clockRemaining ? '재생 대기' : '0:00 / 0:00';
         continue;
       }
       input.max = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 0;
       input.disabled = Number(input.max) <= 0;
       if (activeSeekInput !== input) input.value = audio.currentTime || 0;
-      input.parentElement.querySelector('[data-song-timing-clock]').textContent = `${transportClock(audio.currentTime || 0)} / ${transportClock(Number(input.max))}`;
+      input.parentElement.querySelector('[data-song-timing-clock]').textContent = input.dataset.clockRemaining ? presenterMediaClockText(audio.currentTime,Number(input.max),audio.loop) : `${transportClock(audio.currentTime || 0)} / ${transportClock(Number(input.max))}`;
     }
+    if (typeof syncPresenterInputAudioControls === 'function') syncPresenterInputAudioControls();
   }
   function play(serviceId, elementId) {
     if (!presenterControllerIsLive(serviceId)) {
@@ -758,7 +769,7 @@
     });
     document.body.append(dialog); dialog.showModal();
   }
-  root.MindexSongTiming = { resumeAutoSync, snapBeat, detectBeatGrid, composePhotos, validatePhotos, saveToVersion, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, saveToWorship, formsFor, sourceSignature, ownsSource: source => remoteSources.has(source), get revision() { return revision; } };
+  root.MindexSongTiming = { ownsTransport, resumeAutoSync, snapBeat, detectBeatGrid, composePhotos, validatePhotos, saveToVersion, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, saveToWorship, formsFor, sourceSignature, ownsSource: source => remoteSources.has(source), get revision() { return revision; } };
   if (typeof document !== 'undefined') {
     document.addEventListener('pointerdown', e => {
       activeSeekInput = e.target.closest('[data-song-timing-seek]:not(:disabled)');
@@ -777,7 +788,7 @@
   if (typeof document !== 'undefined') document.addEventListener('input', e => {
     const input = e.target.closest('[data-song-timing-seek]');
     const audio = state.serviceMusic.audio;
-    if (!input || !audio || input.disabled || input.dataset.source !== state.serviceMusic.sourceKey || (input.dataset.seekOwner && input.dataset.seekOwner !== state.serviceMusic.ownerServiceId)) return;
+    if (!input?.isConnected || !audio || input.disabled || !ownsTransport(input.dataset.source, input.dataset.seekOwner, input.dataset.seekElement)) return;
     const time = Number(input.value);
     if (Number.isFinite(time) && Number.isFinite(audio.duration)) audio.currentTime = Math.max(0, Math.min(time, audio.duration));
     updateTransport(audio);

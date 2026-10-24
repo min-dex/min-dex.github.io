@@ -158,6 +158,11 @@ try:
     await MindexSongTiming.play(sid,item.id);
    }''',saved)
    page.wait_for_function('state.serviceMusic.playing')
+   page.evaluate("()=>{const sid=state.selectedServiceId,item=getServiceItems(sid)[0],h=document.createElement('aside');h.id='independent-live-bar';h.innerHTML=renderPresenterBoardItemAudioControls(sid,{item,index:0,timingEntries:state.presenter.slides.map(slide=>({slide}))},{manager:true});document.body.append(h);MindexSongTiming.updateTransport(state.serviceMusic.audio)}")
+   bar=page.locator('#independent-live-bar [data-song-timing-seek]')
+   assert not bar.is_disabled()
+   first=float(bar.input_value());page.wait_for_function("Number(document.querySelector('#independent-live-bar input').value)>"+str(first+.15))
+
    for time,n in [(1.1,1),(6.1,2),(9.1,3)]:
     page.evaluate('t=>state.serviceMusic.audio.currentTime=t',time);page.wait_for_function('n=>state.presenter.slides[state.presenter.index]?.syncTimeline?.page===n',arg=n)
    for time,n in [(7.6,2),(11.2,3),(7.6,2)]:

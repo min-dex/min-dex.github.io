@@ -33,6 +33,11 @@ def main():
                       const binding={serviceMusicSource:SERVICE_SLOT_MUSIC['prayer.meeting.free'].source,serviceMusicServiceId:'owner',serviceMusicLabel:'자율기도 음악',serviceMusicRepeatAllowed:'false'};
                       await runServiceMusicAction('toggle',binding);
                       check(!host.hidden&&host.textContent.includes('음악 재생 중'),'playing missing');
+                      const inputRow=document.createElement('aside');inputRow.innerHTML=renderPresenterInputAudioControls(binding.serviceMusicSource,'입력 음원','owner','fixture-element',true);document.body.append(inputRow);
+                      audio.currentTime=8;inputRow.querySelector('button').click();await new Promise(r=>setTimeout(r,0));
+                      check(audio.paused&&audio.currentTime===8&&state.serviceMusic.mode==='manual','input pause switched manual audio to timing restart');
+                      inputRow.querySelector('button').click();await new Promise(r=>setTimeout(r,0));
+                      check(!audio.paused&&audio.currentTime===8&&state.serviceMusic.mode==='manual','input resume reset manual audio');inputRow.remove();
                       const click=async action=>{host.querySelector(`[data-global-playback-action="${action}"]`).click();await new Promise(r=>setTimeout(r,0))};
                       audio.currentTime=42;
                       for(const module of ['praise','scripture','home']){state.module=module;renderModuleSwitcher();check(!host.hidden&&!audio.paused&&audio.currentTime===42,'navigation altered playback');}

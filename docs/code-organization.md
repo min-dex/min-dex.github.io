@@ -434,9 +434,14 @@ The existing versionAudioSummaryStatus/renderVersionAudioSummary/updateVersionAu
 helpers move unchanged to that owner, retaining their shared APIs and status updates.
 
 
-Controller media clocks, native video input markup and slider gesture drafts live
+Controller media clocks, live input transport markup and slider gesture drafts live
 in `mindex.presenter-media-state.js`, including the media-panel renderer and its
 read-only state adapter. Its scoped stylesheet is `styles.presenter-media.css`.
 Presenter retains output health/acknowledged
 command ownership. Media progress is patched independently of transport markup;
 the shared control patcher preserves an active video slider draft.
+
+Input media rows use `mindex.presenter-media-state.js` for compact rendering and
+existing transport actions. `mindex.song-timing.js` owns the shared audio
+service/element/source predicate, used for initial render, live updates and seek
+validation. Input rows create no preview players or playback observers.

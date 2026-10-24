@@ -167,6 +167,27 @@ try:
     page.evaluate("refs.detailPane.innerHTML=keyTestMarkup;document.getElementById('title-key-test').focus()")
    page.keyboard.press('p')
    page.wait_for_function('state.serviceMusic.playing && state.serviceMusic.audio.currentTime>0')
+   page.evaluate("""()=>{const sid=state.selectedServiceId,item=getServiceItems(sid).find(i=>i.id==='children-db-item'),h=document.createElement('aside');h.id='live-audio-header';h.style.cssText='position:fixed;top:0;left:0;width:540px;max-width:100vw;z-index:9999;background:var(--ui-surface-panel);padding:10px;box-sizing:border-box';h.innerHTML=renderPresenterBoardItemAudioControls(sid,{item,index:0,timingEntries:state.presenter.slides.map(slide=>({slide}))},{manager:true});document.body.append(h);window.audioHeaderBefore=JSON.stringify({songs:state.songs,items:state.serviceItems});window.liveAudio=state.serviceMusic.audio;window.loadCount=0;window.realLoad=liveAudio.load;liveAudio.load=function(){loadCount++;return realLoad.call(this)};MindexSongTiming.updateTransport(liveAudio)}""")
+   header=page.locator('#live-audio-header');bar=header.locator('[data-song-timing-seek]')
+   assert header.locator('audio').count()==0
+   assert not bar.is_disabled(), 'auto-sync source with empty ownerServiceId must still own its service header'
+   first=float(bar.input_value())
+   page.wait_for_function("Number(document.querySelector('#live-audio-header [data-song-timing-seek]').value)>"+str(first+.15))
+   assert '남은' in header.locator('[data-song-timing-clock]').inner_text()
+   header.locator('[data-input-audio-controls] button').click();page.wait_for_function('!state.serviceMusic.playing && liveAudio.paused')
+   paused=page.evaluate('liveAudio.currentTime')
+   header.locator('[data-input-audio-controls] button').click();page.wait_for_function('state.serviceMusic.playing && !liveAudio.paused')
+   assert page.evaluate("state.serviceMusic.mode==='presenter-audio' && state.serviceMusic.audio===liveAudio && loadCount===0")
+   assert page.evaluate('liveAudio.currentTime')>=paused
+   bar.evaluate("e=>{e.value=2.2;e.dispatchEvent(new Event('input',{bubbles:true}))}")
+   page.wait_for_function('liveAudio.currentTime>=2.2 && liveAudio.currentTime<4')
+   page.evaluate("()=>{const h=document.createElement('aside');h.id='other-audio-header';h.innerHTML=renderPresenterInputAudioControls(state.serviceMusic.sourceKey,'다른 예배','other-service','children-db-item',true)+renderPresenterInputAudioControls(state.serviceMusic.sourceKey,'다른 순서',state.selectedServiceId,'other-element',true);document.body.append(h);MindexSongTiming.updateTransport(liveAudio)}")
+   assert page.locator('#other-audio-header [data-song-timing-seek]').evaluate_all('es=>es.every(e=>e.disabled)')
+   assert page.evaluate('JSON.stringify({songs:state.songs,items:state.serviceItems})===audioHeaderBefore')
+   header.screenshot(path=f'/tmp/mindex-inline-audio-{engine}.png')
+   page.locator('#other-audio-header').evaluate('e=>e.remove()');header.evaluate('e=>e.remove()')
+   page.evaluate('liveAudio.load=realLoad;void 0')
+
    page.evaluate(r'''()=>{
     const sid=state.selectedServiceId,audio=state.serviceMusic.audio;audio.currentTime=.25;
     runPresenterAction('next',sid,{scroll:false});

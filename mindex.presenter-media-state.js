@@ -25,15 +25,6 @@ function presenterMediaClockText(position, duration, loop = false) {
   return `${presenterMediaClock(current)} / ${presenterMediaClock(known ? duration : NaN)} · ${loop ? "이번 반복 남은" : "남은"} ${presenterMediaClock(known ? Math.max(0, duration - current) : NaN)}`;
 }
 
-function renderPresenterInputVideoPreview(source, name) {
-  return `<div class="svc-input-video-preview"><video controls playsinline preload="metadata" onplay="trackPresenterInputVideoPreview(this)" onpause="untrackPresenterInputVideoPreview(this)" onended="untrackPresenterInputVideoPreview(this)" aria-label="${escapeAttr(name)} 미리보기" src="${escapeAttr(source)}" onloadedmetadata="syncPresenterInputVideoClock(this)" ondurationchange="syncPresenterInputVideoClock(this)" ontimeupdate="syncPresenterInputVideoClock(this)" onemptied="syncPresenterInputVideoClock(this)"></video><span data-input-video-clock>${presenterMediaClockText(0, NaN)}</span><small>미리보기 · 송출 영상과 별도로 재생됩니다.</small></div>`;
-}
-
-function syncPresenterInputVideoClock(video) {
-  const clock = video.parentElement?.querySelector("[data-input-video-clock]");
-  if (clock) clock.textContent = presenterMediaClockText(video.currentTime, video.duration);
-}
-
 function presenterVideoSeekIdentity() {
   const p = state.presenter, h = p.videoHealth;
   return JSON.stringify([p.outputSessionId, h?.clientId, h?.messageId, h?.frameKey, h?.revision]);
@@ -45,21 +36,26 @@ function presenterVideoCanSeek(health, position) {
     && Array.isArray(health.seekable) && health.seekable.some(([start, end]) => Number.isFinite(start) && Number.isFinite(end) && position >= start && position <= end);
 }
 
-function renderPresenterVideoTransport(video, enabled) {
+function renderPresenterVideoTransport(video, enabled, fallback = "") {
   if (!video) return "";
-  return `<label class="song-timing-seek presenter-video-seek"><span class="song-timing-seek-label">영상 위치</span><input type="range" min="0" max="${Number.isFinite(video.durationSeconds) && video.durationSeconds > 0 ? video.durationSeconds : 0}" step="0.1" value="0" disabled data-presenter-video-seek data-video-owner="${escapeAttr(presenterVideoSeekIdentity())}" data-video-enabled="${Boolean(enabled)}" aria-label="송출 영상 재생 위치" onpointerdown="beginPresenterVideoSeek(this)" oninput="previewPresenterVideoSeek(this)" onchange="void commitPresenterVideoSeek(this)" onpointercancel="cancelPresenterVideoSeek(this)" onpointerup="finishPresenterVideoSeekGesture(this)" onblur="finishPresenterVideoSeekGesture(this)"><span data-presenter-video-clock></span></label>`;
+  return `<label class="song-timing-seek presenter-video-seek"><span class="song-timing-seek-label">영상 위치</span><input type="range" min="0" max="${Number.isFinite(video.durationSeconds) && video.durationSeconds > 0 ? video.durationSeconds : 0}" step="0.1" value="0" disabled data-presenter-video-seek data-video-owner="${escapeAttr(presenterVideoSeekIdentity())}" data-video-enabled="${Boolean(enabled)}" aria-label="송출 영상 재생 위치" onpointerdown="beginPresenterVideoSeek(this)" oninput="previewPresenterVideoSeek(this)" onchange="void commitPresenterVideoSeek(this)" onpointercancel="cancelPresenterVideoSeek(this)" onpointerup="finishPresenterVideoSeekGesture(this)" onblur="finishPresenterVideoSeekGesture(this)"><span data-presenter-video-clock>${escapeHtml(fallback)}</span></label>`;
 }
 
 function syncPresenterVideoTransport(video = presenterManagedVideoState()) {
-  const input = document.querySelector("[data-presenter-video-seek]");
-  if (!input) return;
-  const known = Number.isFinite(video?.durationSeconds) && video.durationSeconds > 0;
-  input.disabled = !video?.ready || input.dataset.videoEnabled !== "true" || !known || !video.seekable?.length;
-  if (input._videoSeekOwner) return;
-  input.max = known ? video.durationSeconds : 0;
-  input.value = Math.max(0, Math.min(Number(video?.positionSeconds) || 0, Number(input.max)));
-  input.dataset.videoOwner = presenterVideoSeekIdentity();
-  input.parentElement.querySelector("[data-presenter-video-clock]").textContent = presenterMediaClockText(video?.positionSeconds, video?.durationSeconds, video?.loop);
+  for (const input of document.querySelectorAll("[data-presenter-video-seek]")) {
+    const row = input.closest("[data-input-video-controls]");
+    const current = row ? presenterInputVideoState(row, video) : video;
+    const enabled = row ? Boolean(current?.ready && !presenterVideoRequests.size && state.selectedServiceId === row.dataset.serviceId) : input.dataset.videoEnabled === "true";
+    const known = Number.isFinite(current?.durationSeconds) && current.durationSeconds > 0;
+    input.disabled = !current?.ready || !enabled || !known || !current.seekable?.length;
+    if (!input._videoSeekOwner) {
+      input.max = known ? current.durationSeconds : 0;
+      input.value = Math.max(0, Math.min(Number(current?.positionSeconds) || 0, Number(input.max)));
+      input.dataset.videoOwner = presenterVideoSeekIdentity();
+      input.parentElement.querySelector("[data-presenter-video-clock]").textContent = row && !current ? "송출 대기" : presenterMediaClockText(current?.positionSeconds, current?.durationSeconds, current?.loop);
+    }
+    if (row) syncPresenterInputMediaButton(row.querySelector('button'), current?.status === 'playing', !enabled, '영상');
+  }
 }
 
 function beginPresenterVideoSeek(input) {
@@ -85,7 +81,7 @@ async function commitPresenterVideoSeek(input) {
   const serviceId = state.presenter.serviceId, position = Number(input.value);
   input._videoSeekPending = true;
   try {
-    if (!input.isConnected || owner !== presenterVideoSeekIdentity()) throw Error("송출 영상이 바뀌었습니다. 현재 화면을 확인해 주세요.");
+    if (!input.isConnected || input.disabled || (input.closest("[data-input-video-controls]") && !presenterInputVideoState(input.closest("[data-input-video-controls]"))?.ready) || owner !== presenterVideoSeekIdentity()) throw Error("송출 영상이 바뀌었습니다. 현재 화면을 확인해 주세요.");
     await requestPresenterVideoCommand(serviceId, "seek", position);
   } catch (error) { showToast(error.message, "error"); }
   finally { delete input._videoSeekPending; delete input._videoSeekOwner; renderGlobalPlaybackControls(); }
@@ -114,22 +110,58 @@ function renderPresenterVideoManagement(video) {
 }
 
 
-// Track only playing input previews; never observe or pause output/music elements.
-const presenterInputVideoPreviews = new Set();
-let presenterInputVideoObserver = null;
-function trackPresenterInputVideoPreview(video) {
-  for (const other of presenterInputVideoPreviews) if (other !== video) other.pause();
-  presenterInputVideoPreviews.add(video);
-  if (presenterInputVideoObserver) return;
-  presenterInputVideoObserver = new MutationObserver(() => {
-    for (const preview of presenterInputVideoPreviews) if (!preview.isConnected) { preview.pause(); untrackPresenterInputVideoPreview(preview); }
-  });
-  presenterInputVideoObserver.observe(document.body, {childList: true, subtree: true});
+
+// Input controls share the live transport, never a second preview player.
+function presenterInputVideoState(row, video = presenterManagedVideoState()) {
+  const slide = state.presenter.slides[state.presenter.index];
+  if (!row || !video || row.dataset.serviceId !== state.presenter.serviceId
+    || row.dataset.elementId !== String(slide?.songTimingElementId || slide?.progressionParentId || slide?.elementId || "")
+    || normalizePresenterMediaSource(row.dataset.source) !== normalizePresenterMediaSource(slide?.videoSrc || slide?.text)) return null;
+  return video;
 }
-function untrackPresenterInputVideoPreview(video) {
-  presenterInputVideoPreviews.delete(video);
-  if (!presenterInputVideoPreviews.size) { presenterInputVideoObserver?.disconnect(); presenterInputVideoObserver = null; }
+
+function renderPresenterInputVideoControls(asset, scope = []) {
+  if (!asset?.url) return "";
+  return `<div class="svc-input-media-controls" data-input-video-controls data-service-id="${escapeAttr(scope[0] || "")}" data-element-id="${escapeAttr(String(scope[1] || ""))}" data-source="${escapeAttr(asset.url)}" aria-label="${escapeAttr(`${asset.name || "영상"} 송출 제어`)}"><button type="button" class="icon-btn" onclick="void runPresenterInputVideoAction(this)" aria-label="영상 재생" disabled><i data-lucide="play"></i></button>${renderPresenterVideoTransport({durationSeconds:null}, false, "송출 대기")}</div>`;
 }
-function pauseClosedPresenterInputVideo(details) {
-  if (!details.open) details.querySelector('video')?.pause();
+
+async function runPresenterInputVideoAction(button) {
+  const row = button.closest('[data-input-video-controls]'), video = presenterInputVideoState(row);
+  if (!row?.isConnected || !video?.ready || state.selectedServiceId !== row.dataset.serviceId) return;
+  await runPresenterManagedVideoAction(video.status === 'playing' ? 'pause' : 'play');
+}
+
+function syncPresenterInputMediaButton(button, playing, disabled, label, pending = false) {
+  if (!button) return;
+  button.disabled = disabled;
+  button.setAttribute('aria-pressed', String(playing));
+  button.setAttribute('aria-label', `${label} ${pending ? '준비 취소' : playing ? '일시정지' : '재생'}`);
+  const icon = playing ? 'pause' : 'play';
+  if (button.dataset.mediaIcon !== icon) { button.dataset.mediaIcon = icon; button.innerHTML = `<i data-lucide="${icon}"></i>`; refreshIcons(button); }
+}
+
+function renderPresenterInputAudioControls(source, label, serviceId, elementId, timed = false) {
+  return `<div class="svc-input-media-controls" data-input-audio-controls data-source="${escapeAttr(source)}" data-label="${escapeAttr(label)}" data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(elementId)}" data-timed="${Boolean(timed)}" aria-label="${escapeAttr(`${label} 재생 제어`)}"><button type="button" class="icon-btn" onclick="void runPresenterInputAudioAction(this)" aria-label="음원 재생"><i data-lucide="play"></i></button>${globalThis.MindexSongTiming?.transport({source,serviceId,elementId,remaining:true}) || ""}</div>`;
+}
+
+function syncPresenterInputAudioControls() {
+  const music = state.serviceMusic;
+  for (const row of document.querySelectorAll('[data-input-audio-controls]')) {
+    const active = globalThis.MindexSongTiming?.ownsTransport(row.dataset.source, row.dataset.serviceId, row.dataset.elementId);
+    syncPresenterInputMediaButton(row.querySelector('button'), Boolean(active && music.playing), !active && Boolean(music.playing || music.pending), '음원', active && music.pending);
+  }
+}
+
+async function runPresenterInputAudioAction(button) {
+  const row = button.closest('[data-input-audio-controls]');
+  if (!row?.isConnected) return;
+  const {source,serviceId,elementId,label,timed} = row.dataset;
+  const binding = {serviceMusicSource:source,serviceMusicServiceId:serviceId,serviceMusicLabel:label,serviceMusicRepeatAllowed:'false'};
+  if (globalThis.MindexSongTiming?.ownsTransport(source,serviceId,elementId)) return runServiceMusicAction('toggle', state.serviceMusic.mode === 'presenter-audio' ? null : binding);
+  if (timed === 'true') {
+    const sameSource = presenterSlidesForService(serviceId).some(s => (s.songTimingElementId || s.progressionParentId || s.elementId) === elementId && s.syncTimeline?.localTiming && s.syncTimeline.audioSrc === source);
+    if (sameSource) return globalThis.MindexSongTiming?.play(serviceId,elementId);
+    showToast('음원과 자동 넘김 순서를 다시 확인해 주세요.','info'); return;
+  }
+  return runServiceMusicAction('toggle',binding);
 }

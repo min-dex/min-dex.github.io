@@ -21,7 +21,7 @@ try:
     presenterControllerIsLive=()=>true;isPresenterOutputWindowOpen=()=>true;
     state.presenter.outputWindow={closed:false,postMessage(message){state.presenter.channel.postMessage(message)}};
     window.fixture={serviceId:sid,outputSessionId:'video-session',serviceType:'sunday-afternoon',chromakey:true,
-      slides:[{id:'video',type:'video',elementType:'video',layout:'media',videoSrc:'probe-health.mp4',playback:{autoplay:true,muted:true,loop:true}}],index:0,safetyBlank:false,updatedAt:Date.now()};
+      slides:[{id:'video',elementId:'video-element',type:'video',elementType:'video',layout:'media',videoSrc:'probe-health.mp4',playback:{autoplay:true,muted:true,loop:true}}],index:0,safetyBlank:false,updatedAt:Date.now()};
     state.presenter.slides=fixture.slides;
     window.adapter=MindexRemote.adapter(sid,'video-session',state.presenter.outputWindow);
     publishPresenterPayload(fixture,{force:true});window.mediaSourceBefore=JSON.stringify(fixture);
@@ -54,28 +54,41 @@ try:
    assert host.evaluate("presenterMediaClockText(5,20)==='0:05 / 0:20 · 남은 0:15' && presenterMediaClockText(5,Infinity).endsWith('남은 –:––')")
    for value in (-1, float('inf'), 999999):
     assert host.evaluate("async value=>{try{await requestPresenterVideoCommand('remote-video','seek',value);return false}catch{return true}}",value)
-   # Input preview owns a separate native media element; it never controls live output.
-   host.evaluate("()=>{const h=document.createElement('aside');h.id='input-video-fixture';h.style.cssText='position:fixed;top:10px;left:10px;width:300px;z-index:9999';h.innerHTML=renderPresenterReferenceMediaPreview({url:'probe-health.mp4',name:'영상 입력 미리보기'},'video');h.querySelector('details').open=true;document.body.append(h)}")
-   preview=host.locator('#input-video-fixture video')
-   assert preview.get_attribute('controls') is not None
-   host.wait_for_function("document.querySelector('#input-video-fixture video').readyState>=1")
-   preview.evaluate("v=>{v.currentTime=5}")
-   host.wait_for_function("document.querySelector('#input-video-fixture [data-input-video-clock]').textContent.startsWith('0:05')")
-   assert output.evaluate("document.querySelector('.is-active video').paused && Math.abs(document.querySelector('.is-active video').currentTime-3)<.15")
+   # The input header controls the same live output; there is no second player.
+   host.evaluate("()=>{const h=document.createElement('aside');h.id='input-video-fixture';h.style.cssText='position:fixed;top:10px;left:10px;width:540px;max-width:calc(100vw - 20px);z-index:9999;background:var(--ui-surface-panel);padding:10px;box-sizing:border-box';h.innerHTML='<div class=svc-board-subgroup-controls><div class=svc-board-subgroup-control-item>'+renderPresenterServiceAssetInput({id:'video-element',service_id:'remote-video',label:'영상'},0,{elementType:'video',asset:{url:'probe-health.mp4',name:'확인용 영상',kind:'video'}})+'</div></div>';document.body.append(h);syncPresenterVideoTransport()}")
+   inline=host.locator('#input-video-fixture [data-input-video-controls]')
+   inline_slider=inline.locator('[data-presenter-video-seek]')
+   assert host.locator('#input-video-fixture video, #input-video-fixture details').count()==0
+   assert inline.evaluate("e=>e.parentElement.firstElementChild===e")
+   assert '이번 반복 남은' in inline.locator('[data-presenter-video-clock]').inner_text()
+   inline_slider.focus();inline_slider.press('ArrowRight')
+   output.wait_for_function("Math.abs(document.querySelector('.is-active video').currentTime-3.1)<.04")
+   host.wait_for_function("!presenterVideoRequests.size && state.presenter.videoHealth.status==='paused'")
+   assert output.evaluate("document.querySelector('.is-active video').paused")
+   inline_slider.press('ArrowLeft')
+   output.wait_for_function("Math.abs(document.querySelector('.is-active video').currentTime-3)<.04")
+   host.wait_for_function("!presenterVideoRequests.size && state.presenter.videoHealth.status==='paused'")
+   inline.locator('button').click();host.wait_for_function("state.presenter.videoHealth.status==='playing' && !presenterVideoRequests.size")
+   output.wait_for_function("document.querySelector('.is-active video').currentTime>3.2")
+   inline.locator('button').click();host.wait_for_function("state.presenter.videoHealth.status==='paused' && !presenterVideoRequests.size")
+   host.evaluate("()=>{const h=document.createElement('aside');h.id='other-video-fixture';h.innerHTML=renderPresenterInputVideoControls({url:'other.mp4',name:'다른 영상'},['remote-video','another-element']);document.body.append(h);syncPresenterVideoTransport()}")
+   assert host.locator('#other-video-fixture input').is_disabled()
+   assert host.locator('#other-video-fixture button').is_disabled()
+   host.locator('#other-video-fixture').evaluate('e=>e.remove()')
+   # Return to the same timestamp for the existing stale-gesture checks.
+   host.evaluate("seekNode.value=3;beginPresenterVideoSeek(seekNode);commitPresenterVideoSeek(seekNode)")
+   output.wait_for_function("Math.abs(document.querySelector('.is-active video').currentTime-3)<.05")
+   host.wait_for_function("!presenterVideoRequests.size && state.presenter.videoHealth.status==='paused'")
+   if not host.locator('#globalPlaybackPanel').is_visible():host.click('.global-playback-trigger')
    host.locator('#globalPlaybackPanel').screenshot(path=f'/tmp/mindex-controller-video-panel-{engine}.png')
    host.locator('#input-video-fixture').screenshot(path=f'/tmp/mindex-controller-video-input-{engine}.png')
    for width in (1280,390):
     host.set_viewport_size({'width':width,'height':900})
     assert host.locator('#globalPlaybackPanel').evaluate('e=>e.scrollWidth<=e.clientWidth+1')
+    assert inline.evaluate('e=>e.scrollWidth<=e.clientWidth+1')
    host.set_viewport_size({'width':1280,'height':900})
-   preview.evaluate("v=>{window.inputPreviewVideo=v;v.muted=true;void v.play()}")
-   host.wait_for_function('!inputPreviewVideo.paused')
-   host.locator('#input-video-fixture details').evaluate('e=>e.open=false')
-   host.wait_for_function('inputPreviewVideo.paused')
-   host.locator('#input-video-fixture details').evaluate('e=>e.open=true')
-   preview.evaluate('v=>{void v.play()}');host.wait_for_function('!inputPreviewVideo.paused')
    host.locator('#input-video-fixture').evaluate('e=>e.remove()')
-   host.wait_for_function('inputPreviewVideo.paused && presenterInputVideoPreviews.size===0 && presenterInputVideoObserver===null')
+   assert output.evaluate("document.querySelector('.is-active video').paused && Math.abs(document.querySelector('.is-active video').currentTime-3)<.15")
    # A local output action supersedes a slider gesture captured against the old revision.
    host.evaluate("beginPresenterVideoSeek(seekNode);seekNode.value=4;previewPresenterVideoSeek(seekNode)")
    output.evaluate("void document.querySelector('.is-active video').play()")
@@ -129,6 +142,6 @@ try:
    host.evaluate('channelPost(commandCapture)')
    assert not host.evaluate('pendingVideo')['ok']
    assert output.evaluate('playCalls')==1, output.evaluate('({playCalls,time:video.currentTime,connected:video.isConnected})')
-   print('PASS',engine,'real video play/pause/restart/seek, countdown, separate input preview, stale gesture, duplicate delivery, local/remote race, stale frame and autoplay rejection',flush=True)
+   print('PASS',engine,'real video play/pause/restart/seek, countdown, shared live input header, owner isolation, stale gesture, duplicate delivery, local/remote race, stale frame and autoplay rejection',flush=True)
    context.close();browser.close()
 finally:server.shutdown()

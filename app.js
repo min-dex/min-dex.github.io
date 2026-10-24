@@ -29381,6 +29381,7 @@ function renderPresenterServiceAssetInput(item, index, memo, options = {}) {
     const needsKindSelection = Boolean(asset.url && !detectedKind);
     return `
       <div class="svc-reference-media-input">
+        ${kind === "video" ? renderPresenterInputVideoControls(asset, [serviceId,item.id||index]) : ""}
         ${renderPresenterMediaPlacementInput(item, serviceId)}
         <div class="svc-reference-media-toolbar">
           ${needsKindSelection ? `<label class="svc-presenter-input-field">
@@ -29407,6 +29408,7 @@ function renderPresenterServiceAssetInput(item, index, memo, options = {}) {
   const typeLabel = serviceAssetFileKindLabel(assetKind || elementType);
   return `
     <div class="svc-reference-media-input svc-reference-media-input--asset svc-reference-media-input--${escapeAttr(assetKind)}">
+      ${assetKind === "video" ? renderPresenterInputVideoControls(asset, [serviceId,item.id||index]) : ""}
       <div class="svc-reference-media-toolbar svc-reference-media-toolbar--asset">
         ${options.headerActions ? "" : renderPresenterAssetUpload(item, index, memo, serviceId)}
       </div>
@@ -29436,6 +29438,7 @@ function renderPresenterReferenceMediaPreview(asset, kind, disclosureScope = [])
   const source = String(asset?.url || "").trim();
   if (!source) return "";
   const normalizedKind = String(kind || asset?.kind || "file").trim().toLowerCase();
+  if (normalizedKind === "video") return "";
   const slides = normalizeServiceAssetSlides(asset.slides);
   const slideCount = slides.length;
   const statusLabel = normalizedKind === "imported_deck"
@@ -29454,8 +29457,7 @@ function renderPresenterReferenceMediaPreview(asset, kind, disclosureScope = [])
        <span data-reference-media-preview-error role="status" hidden>이미지를 불러오지 못했습니다. 파일 연결을 확인해 주세요.</span>`
     : normalizedKind === "audio"
       ? `<audio controls preload="metadata" src="${escapeAttr(source)}"></audio>`
-      : normalizedKind === "video" ? renderPresenterInputVideoPreview(source, name)
-        : renderPresenterStaticAssetPreview(asset.pptx ? { ...asset, url: asset.pptx.url } : asset, icon, statusLabel);
+      : renderPresenterStaticAssetPreview(asset.pptx ? { ...asset, url: asset.pptx.url } : asset, icon, statusLabel);
   const slideStrip = normalizedKind === "image" && slideCount > 1
     ? `<div class="svc-reference-media-slide-strip" aria-label="연결된 이미지 ${slideCount}장">
       ${slides.map((slide, index) => {
@@ -29469,7 +29471,7 @@ function renderPresenterReferenceMediaPreview(asset, kind, disclosureScope = [])
     </div>`
     : "";
   return `<div class="svc-reference-media-preview-group">
-    <details ${normalizedKind === "video" ? 'ontoggle="pauseClosedPresenterInputVideo(this)"' : ""} class="svc-reference-media-preview svc-reference-media-preview--collapsible svc-reference-media-preview--${escapeAttr(normalizedKind)}" ${MindexDisclosure.attrs(["media-preview",...disclosureScope])}>
+    <details class="svc-reference-media-preview svc-reference-media-preview--collapsible svc-reference-media-preview--${escapeAttr(normalizedKind)}" ${MindexDisclosure.attrs(["media-preview",...disclosureScope])}>
       <summary>
         <span>${escapeHtml(statusLabel)}</span>
         <b><i data-lucide="${normalizedKind === "audio" ? "headphones" : normalizedKind === "image" ? "eye" : "info"}"></i>${previewLabel}</b>
@@ -29916,6 +29918,7 @@ function renderServiceSlotMusic(context) {
 }
 
 function updateServiceMusicTransportControls() {
+  syncPresenterInputAudioControls();
   window.MindexRemote?.notify();
   renderGlobalPlaybackControls();
   syncPresenterFocusMusic();

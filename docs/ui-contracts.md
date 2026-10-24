@@ -1033,9 +1033,18 @@ Seek uses the existing acknowledged, deduplicated video transport, bound to the
 current output/session/frame/revision and a valid seekable interval. It preserves
 paused/playing state and never controls music. Stale gestures fail without seeking.
 
-Video input disclosures contain a native controls/metadata-only preview with its
-own clock and explicit remaining time. This element is independent of live output;
-opening it never autoplays. Existing audio input native controls remain available.
+Video asset inputs show one compact live control row above the fields, matching
+the audio control rhythm. No separate video player or disclosure is rendered.
+The row shares the current output's play/pause, position and remaining-time state
+with Media management, and only enables for its service/element/source owner.
+Other items remain in output-waiting state. Controller slide previews retain their
+existing silent first-frame behavior; these controls do not start a second player.
+
+Praise audio input rows share the actual serviceMusic audio clock and transport.
+Automatic lyric/photo playback derives its service owner from the presenter when
+ownerServiceId is unbound, and keeps the timing-group element owner. Time updates,
+automatic slide changes and seeks update the input bar; pause/resume preserves the
+same Audio instance and cue profile. Another service/element's bar stays disabled.
 No lyrics, forms, media timings, URLs or worship settings are saved by these controls.
 
 Retained HTML must refresh through the existing bounded runtime upgrade when

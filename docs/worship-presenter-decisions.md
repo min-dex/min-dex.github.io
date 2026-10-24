@@ -4753,8 +4753,8 @@ separate queued release. Tests cover all five modes, both browsers, the existing
 Media management adds output video seeking plus observed current/total/remaining
 time, using the existing owner/frame/revision guards and acknowledgement path.
 Seeking preserves pause/play and never changes audio. Loop countdowns explicitly
-refer to one repetition; unknown duration remains unknown. Native video previews
-in input disclosures have independent controls/clocks and never drive output.
+refer to one repetition; unknown duration remains unknown. Input controls now
+follow the later shared-live-transport decision below.
 No persistent service/media data changes; PPTX/background media keep their existing
 transport scope.
 
@@ -4766,3 +4766,16 @@ use the same selected-presenter-only loader. It shares the existing in-flight
 request and patches controls after success; render calls do not start retries.
 No worship writes, draft replacement, transport publication or media playback is
 part of this warmup. Existing manifest failure/retry behavior remains unchanged.
+
+## Input media controls follow live playback ·2026-10-25
+
+Video inputs use a compact always-visible row at the top, sharing acknowledged
+output transport and ownership guards with Media management. Remove the separate
+input video preview/player. The controller output preview remains a silent first
+frame; no second video decode/playback is started.
+
+Praise audio bars follow the same serviceMusic Audio instance used for automatic
+lyric/photo advance. Resolve auto-sync's unbound service owner from its presenter
+and timing group; keep manual service ownership and cross-item/source guards.
+Input pause/resume uses the existing transport without loading/resetting the audio
+or changing its cue profile. Global/focused controls and saved records remain intact.
