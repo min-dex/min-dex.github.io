@@ -113,7 +113,7 @@ for (const [raw,wanted] of [['Ｖ１－Ｃ','V1-C'],['V１–Ｃ','V1-C'],['V1�
  assert.equal(c.normalizeServiceFormHint(raw),wanted);
  assert.equal(c.normalizeServiceFormHint(wanted),wanted);
 }
-for (const raw of ['V0','V00','C0','PC0A','B0@','Coda0','L0']) {
+for (const raw of ['V0','V00','C0','PC0A','B0@','Coda0','L0','후렴0','후렴0@A']) {
  assert.equal(c.normalizePresenterFormPresetLabel(raw).invalid,true,raw);
  assert.equal(c.normalizeSongFormPresetLabel(raw).invalid,true,raw);
  assert.equal(c.findPresenterFormForPresetLabel([{id:'first',label:'Verse 1',lyrics:'keep'}],raw),null,raw);

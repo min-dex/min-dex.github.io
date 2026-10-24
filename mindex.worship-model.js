@@ -334,7 +334,7 @@ function normalizeServiceFormHint(value = "") {
 }
 
 function serviceFormTokenHasInvalidNumber(raw = "") {
-  const match = raw.match(/^(?:V|C|PC|B|Coda|Lyrics|L)(\d+)(?:@?[A-Z])?@?$/i);
+  const match = raw.match(/^(?:V|C|PC|B|Coda|Lyrics|L|후렴)(\d+)(?:@?[A-Z])?@?$/i);
   return Boolean(match && Number(match[1]) === 0);
 }
 
