@@ -1,6 +1,7 @@
+const { readRuntimeSource } = require('./helpers/runtime-source.cjs');
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const c={console,document:{addEventListener(){}},localStorage:{getItem(){return null}},setTimeout,clearTimeout,URL,URLSearchParams,crypto:require('node:crypto').webcrypto};c.window=c;c.__mindexRuntimeStarted=true;c.location={search:'',hash:'',pathname:'/'};vm.createContext(c);
-for(const f of ['mindex.constants.js','mindex.worship-model.js','mindex.worship-persistence.js','mindex.presenter.js','mindex.worship-input.js','mindex.worship-source.js','mindex.setlist-links.js','app.js'])vm.runInContext(fs.readFileSync(f,'utf8'),c,{filename:f});
+for(const f of ['mindex.constants.js','mindex.worship-model.js','mindex.worship-persistence.js','mindex.presenter.js','mindex.worship-input.js','mindex.worship-source.js','mindex.setlist-links.js','app.js'])vm.runInContext(readRuntimeSource(f),c,{filename:f});
 c.assert=assert;
 (async()=>{try{await vm.runInContext(`(async()=>{
  state.calendarLoaded=true;state.calendarData=[{date:'2026-09-13',nursery_prayer:'유치부 담당',children_prayer:'어린이 담당',youth_prayer:'청소년 담당',young_adult_prayer:'청년 담당',youth_offering_prayer:'봉헌 담당'}];

@@ -1,3 +1,4 @@
+const { readRuntimeSource } = require('./helpers/runtime-source.cjs');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const assert = require('node:assert/strict');
@@ -13,7 +14,7 @@ const context = {
 };
 vm.createContext(context);
 for (const [file, name] of [['mindex.presenter.js', 'presenterTitleAssigneePerson'], ['app.js', 'presenterSlideWithServiceAssigneeFallback']]) {
-  const source = fs.readFileSync(file, 'utf8');
+  const source = readRuntimeSource(file);
   const start = source.indexOf(`function ${name}(`);
   vm.runInContext(source.slice(start, source.indexOf('\n}\n', start) + 2), context);
 }

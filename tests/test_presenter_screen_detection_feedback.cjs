@@ -1,9 +1,10 @@
+const { readRuntimeSource } = require('./helpers/runtime-source.cjs');
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 
-const source = fs.readFileSync(path.join(__dirname, "../app.js"), "utf8");
+const source = readRuntimeSource('app.js');
 const start = source.indexOf("async function requestPresenterScreens(");
 const end = source.indexOf("\nfunction observePresenterScreenDetails(", start);
 assert.ok(start >= 0 && end > start);

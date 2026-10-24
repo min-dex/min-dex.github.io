@@ -1,3 +1,4 @@
+const { readRuntimeSource } = require('./helpers/runtime-source.cjs');
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const src=fs.readFileSync('app.js','utf8');const c={cleanList:x=>x.map(String).map(x=>x.trim()).filter(Boolean),parseObjectPayload:x=>x&&typeof x==='object'&&!Array.isArray(x)?x:null,firstNonBlankString:(...xs)=>xs.map(x=>String(x||'').trim()).find(Boolean)||''};vm.createContext(c);
 vm.runInContext(fs.readFileSync('mindex.worship-model.js','utf8'),c);
@@ -16,7 +17,7 @@ const inputSrc=fs.readFileSync('mindex.worship-input.js','utf8');
 assert.match(inputSrc,/const formHint = normalizeServiceFormHint\(field.value\)/);
 assert.match(src,/const formHint = normalizeServiceFormHint\(value.formHint/);
 console.log('PASS input/save normalization, numbered parts, repeats, Korean hymn aliases, unknown labels, idempotence');
-c.document={};c.compactSearchValue=x=>String(x).replace(/\s+/g,'').toLowerCase();vm.runInContext(fs.readFileSync('mindex.presenter.js','utf8'),c);
+c.document={};c.compactSearchValue=x=>String(x).replace(/\s+/g,'').toLowerCase();vm.runInContext(readRuntimeSource('mindex.presenter.js'),c);
 for(const token of ['1절','2절','후렴','마지막 절','간주','v1a','pc','c2','b','tags'])assert.equal(JSON.stringify(c.normalizePresenterFormPresetLabel(token)),JSON.stringify(c.normalizePresenterFormPresetLabel(c.canonicalServiceFormToken(token))),token+' must keep playback meaning');
 for(const [label,expected] of [['Verse 2 A','verse:2:a'],['Chorus 1 B','chorus:1:b'],['Bridge A','bridge:a']])assert.equal(c.normalizePresenterFormPresetLabel(label).key,expected,label+' must resolve as a stable presenter target');
 for(const [label,expected] of [['Verse 1@','verse:1:@'],['Chorus@','chorus:@'],['Chorus@A','chorus:@:a'],['Coda@','coda:@']])assert.equal(c.normalizePresenterFormPresetLabel(label).key,expected,label+' must keep variant identity');

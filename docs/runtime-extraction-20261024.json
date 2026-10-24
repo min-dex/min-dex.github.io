@@ -1,0 +1,42 @@
+{
+  "baseline": "9da6dce833c34b8fe2f5fcd35a5575798cb2462f",
+  "blocks": {
+    "mindex.presenter-live.js": {
+      "sha256": "edc52238414c29cf80f5382dfad3965c565c5e66887147a6d8b705bb1a42bc58",
+      "lines": 696
+    },
+    "mindex.presenter-board.js": {
+      "sha256": "66225934c3f3413e02ab541e5053ddc02c548faa59c057a839a326ed03c448ca",
+      "lines": 1690
+    },
+    "mindex.presenter-controller.js": {
+      "sha256": "beea0c2adb2d314dce59ce9fb900701446cc12966154b101500b78ff6d2da09e",
+      "lines": 2686
+    },
+    "mindex.presenter-praise.js": {
+      "sha256": "3fac51cbcc5fe7cda7d67bf2b1e5ac56604ef84034f2529c54ed2e12abf5aca3",
+      "lines": 1449
+    },
+    "styles.workspace.css": {
+      "sha256": "b2fb463d2c184a071015cfb24b61ffc2f8c69bab513bc4a2ff4380ba8fc319e5",
+      "lines": 6458
+    }
+  },
+  "sourceProof": {
+    "appRejoinedExactly": true,
+    "presenterRejoinedExactly": true,
+    "cssRejoinedExactly": true,
+    "saveRowExpressionUnchanged": true
+  },
+  "verification": {
+    "nodeGateTests": 49,
+    "changedSourceFixtures": 21,
+    "browserEngines": [
+      "Chromium",
+      "WebKit"
+    ],
+    "screenshotBytesEqual": true,
+    "operationalWrites": 0,
+    "liveReadSmoke": "blocked identically on candidate and published baseline by existing startup RPC guard"
+  }
+}

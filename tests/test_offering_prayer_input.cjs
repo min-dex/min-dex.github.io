@@ -1,8 +1,9 @@
+const { readRuntimeSource } = require('./helpers/runtime-source.cjs');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-const source = fs.readFileSync('app.js', 'utf8');
+const source = readRuntimeSource('app.js');
 const context = {
   compactSearchValue: value => String(value || '').replace(/\s+/g, ''),
   parseServiceItemMemo: value => value || {},

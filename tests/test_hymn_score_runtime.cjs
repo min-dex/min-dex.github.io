@@ -1,3 +1,4 @@
+const { readRuntimeSource } = require('./helpers/runtime-source.cjs');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -5,7 +6,7 @@ const vm = require('node:vm');
 const root = path.resolve(__dirname, '..');
 const source = JSON.parse(fs.readFileSync(path.join(root, 'assets/hymn-scores/manifest.json'), 'utf8'));
 const runtime = JSON.parse(fs.readFileSync(path.join(root, 'assets/hymn-scores/manifest.runtime.json'), 'utf8'));
-const code = fs.readFileSync(path.join(root, 'mindex.presenter.js'), 'utf8');
+const code = readRuntimeSource('mindex.presenter.js');
 const start = code.indexOf('function presenterHymnScoreAssetSlides(');
 const end = code.indexOf('function presenterImageSourcesFromAssetUrl(', start);
 assert(start >= 0 && end > start);

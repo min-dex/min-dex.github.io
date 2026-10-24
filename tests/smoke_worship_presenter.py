@@ -87,7 +87,7 @@ def main() -> int:
     def skip(name: str, detail: str = "") -> None:
         results.append(("SKIP", name, detail))
 
-    app_source = (Path(__file__).resolve().parents[1] / "app.js").read_text(encoding="utf-8")
+    app_source = (Path(__file__).resolve().parents[1] / "app.js").read_text(encoding="utf-8") + "\n" + "\n".join((Path(__file__).resolve().parents[1] / name).read_text(encoding="utf-8") for name in ['mindex.presenter-live.js', 'mindex.presenter-board.js', 'mindex.presenter-controller.js'])
     click_start = app_source.find("function handleServiceOutlineSlideClick(serviceOutlineItem)")
     dblclick_start = app_source.find("function handleServiceOutlineSlideDoubleClick(event)")
     selection_start = app_source.find("function syncServiceOutlineSelection(serviceOutlineItem)")

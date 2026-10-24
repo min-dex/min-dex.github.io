@@ -1,9 +1,10 @@
+const { readRuntimeSource } = require('./helpers/runtime-source.cjs');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
 const index = fs.readFileSync('index.html', 'utf8');
 const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-const app = fs.readFileSync('app.js', 'utf8');
+const app = readRuntimeSource('app.js');
 const input = fs.readFileSync('mindex.worship-input.js', 'utf8');
 const runtimeSources = [
   'mindex.constants.js',
@@ -11,7 +12,7 @@ const runtimeSources = [
   'mindex.worship-persistence.js',
   'mindex.presenter.js',
   'app.js',
-].map((path) => ({ path, source: fs.readFileSync(path, 'utf8') }));
+].map((path) => ({ path, source: readRuntimeSource(path) }));
 
 const extractedHandlers = [
   'handleServiceManagementDetailClick',

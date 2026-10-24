@@ -1,3 +1,4 @@
+const { readRuntimeSource } = require('./helpers/runtime-source.cjs');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -60,7 +61,8 @@ context.materializeSecondaryConnectedPraiseItem = (_service, items, primaryItem,
 // exercises applyPresenterPreparationInput's segment-splitting logic, not song search.
 context.resolvePresenterPreparationSong = (value) => songs[String(value || '').trim()] || null;
 context.createBlankPraiseSongForServiceInput = async () => null;
-const app = fs.readFileSync(path.join(root,'app.js'),'utf8');
+const app = readRuntimeSource('app.js');
+vm.runInContext(app.match(/^function servicePraiseUsesDirectLyrics.*$/m)[0], context);
 const start = app.indexOf('async function applyPresenterPreparationInput(');
 assert.ok(start >= 0);
 vm.runInContext(app.slice(start,app.indexOf('\n}\n',start)+2),context);
