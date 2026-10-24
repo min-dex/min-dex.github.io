@@ -92,7 +92,7 @@ try:
     assert phone.locator('[data-action=play]').bounding_box()['height']==50
    phone.set_viewport_size({'width':390,'height':844})
    if engine=='chromium':phone.screenshot(path='/tmp/mindex-remote-phone.png',full_page=True)
-   phone.click('[data-action=next]');pump();assert host.evaluate('state.presenter.index')==1
+   ready('next');phone.click('[data-action=next]');pump();assert host.evaluate('state.presenter.index')==1
    assert phone.locator('#result').inner_text()=='처리 완료'
    # Encrypted replay must not execute twice.
    command_packet=[packet for source,packet in history if source==phone and packet['payload']['mode']=='session'][-1]
@@ -116,7 +116,11 @@ try:
      assert button.bounding_box()['height']==50
      assert button.evaluate('e=>e.scrollWidth<=e.clientWidth')
      assert button.locator('svg').bounding_box()['width']==16
-   host.evaluate('remoteVideo=null');pump(1.2);assert phone.locator('#videoControls').is_hidden()
+   host.evaluate('remoteVideo=null');pump(1.2);assert phone.locator('#videoControls').is_visible()
+   assert phone.locator('#videoStatus').inner_text()=='연결된 영상 없음'
+   assert all(button.is_disabled() for button in phone.locator('#videoControls button').all())
+   assert phone.locator('#music').bounding_box()['y']<phone.locator('#videoControls').bounding_box()['y']
+   assert phone.locator('[data-action=resume]').bounding_box()['y']<phone.locator('#videoControls').bounding_box()['y']
    # No audio/media objects on the remote page.
    assert phone.locator('audio,video').count()==0
    assert phone.locator('.slide-preview iframe').count()==2

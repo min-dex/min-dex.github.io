@@ -382,3 +382,10 @@ These are browser lifecycle/transport fault tests, not physical iOS/Android lock
 OS process eviction, cellular/Wi-Fi handover or router tests. Long inactivity is
 allowed to close a connection safely; never describe this as an always-connected
 guarantee. CI execution/publication of the new regression remains separate.
+
+### Remote media section order (2026-10-24)
+
+The connected Remote always shows audio controls before video controls. With no
+video attached, the video section stays visible with `연결된 영상 없음`; its
+commands remain disabled through the existing allowed-action guard. This does
+not create a media element or alter the transport/heartbeat frequency.

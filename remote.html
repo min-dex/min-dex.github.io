@@ -25,11 +25,11 @@
 <div class="previews"><article><h2>현재 <span id="position"></span></h2><div id="current" class="slide-preview"></div></article><article><h2>다음</h2><div id="next" class="slide-preview"></div></article></div>
 <div class="navigation"><button data-action="prev"><i data-lucide="arrow-left"></i><span>이전</span></button><button data-action="next" class="primary"><span>다음</span><i data-lucide="arrow-right"></i></button></div>
 <button data-action="blank" id="blank"><i data-lucide="eye-off"></i><span>암전</span></button>
-<section id="videoControls" hidden aria-label="영상 조작"><h2>영상</h2><p id="videoStatus"></p>
-<div class="audio"><button data-action="video-play"><i data-lucide="play"></i><span>재생</span></button><button data-action="video-pause"><i data-lucide="pause"></i><span>일시정지</span></button><button data-action="video-restart"><i data-lucide="rotate-ccw"></i><span>처음부터</span></button></div></section>
 <h2>음원</h2><p id="music"></p>
 <div class="audio"><button data-action="play"><i data-lucide="play"></i><span>재생</span></button><button data-action="pause"><i data-lucide="pause"></i><span>일시정지</span></button><button data-action="stop"><i data-lucide="square"></i><span>정지</span></button></div>
 <button data-action="resume"><i data-lucide="rotate-ccw"></i><span>자동 넘김 복귀</span></button>
+<section id="videoControls" aria-label="영상 조작"><h2>영상</h2><p id="videoStatus"></p>
+<div class="audio"><button data-action="video-play"><i data-lucide="play"></i><span>재생</span></button><button data-action="video-pause"><i data-lucide="pause"></i><span>일시정지</span></button><button data-action="video-restart"><i data-lucide="rotate-ccw"></i><span>처음부터</span></button></div></section>
 <button id="stopOutput" data-action="output-stop" hidden><i data-lucide="square"></i><span>송출 종료</span></button>
 <p id="result" role="status" aria-live="polite"></p>
 </section>
@@ -42,5 +42,5 @@
 <script src="mindex.icons.js?v=remote-controls1"></script>
 <script src="vendor/supabase-js.min.js"></script>
 <script src="mindex.public-config.js"></script>
-<script type="module" src="remote.mjs?v=16"></script>
+<script type="module" src="remote.mjs?v=17"></script>
 </body></html>
