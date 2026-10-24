@@ -4585,3 +4585,29 @@ part numbers remain authored text but resolve as missing, never as an unnumbered
 wildcard, including unstructured lyric playback. Numbered groups require the
 requested number; only the established single unnumbered Verse → V1 alias stays.
 Unknown labels, repeated order, A/B, @ and authored stored content are retained.
+## 2026-10-24 — Existing service order and audio timing preservation
+
+An existing service owns its entered order and section placement. Adding another
+item to a known section inserts it after that section's last peer before using
+blueprint ranks. Resolve peers by section ownership, including the existing main
+praise classifier; offering praise is not a main-praise peer merely because its
+label contains 찬양. This is one common insertion rule, without department/date
+exceptions. Missing sections retain the existing template-rank insertion fallback.
+
+The common memo serializer treats a valid audioTiming object as structured
+content even when no other memo fields remain. Previously that timing-only
+object could return an empty note and lose cue starts, fingerprints and photos.
+No timing values are recalculated and no stored service is bulk rewritten.
+
+Existing children's/nursery/special service opening remains independent of live
+template projection. The newer children's blueprint does not force existing
+services into a new order. Persisted templateSuppressed markers stay hidden after
+clearing the in-memory deletion map and reopening; a failed save retains deletion
+intent. Existing atomic save/CAS and newer-input protection remain authoritative.
+
+Verification: common Node coverage for timing-only serialization and independent
+service input/form/lyrics/timing round-trip; actual offline atomic save/reopen in
+Chromium and WebKit for ten service types plus the old children's string-template
+shape. Cases include authored section order, custom items, add/move/delete,
+cold-memory deletion, failed save/retry and input typed during save. These use
+isolated RPC doubles; no production service is edited by this verification.

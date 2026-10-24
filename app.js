@@ -11780,7 +11780,7 @@ function serializeServiceItemMemo(value = {}) {
   const templateSuppressed = Boolean(value.templateSuppressed || value.template_suppressed);
   const defaultAssetKind = serviceAssetKindForElementType(elementType);
   if (!asset.kind && defaultAssetKind && hasServiceAsset(asset)) asset.kind = defaultAssetKind;
-  if (!normalizeAnnouncementRegions(value.announcementRegions) && !slides.length && !scriptureReference && !scriptureReferences.length && !scriptureTranslationId && !scriptureReferencePayloads.length && !manualScripture && !hasServiceIntroSlide(introSlide) && !formHint && !formPreset && !formPresetDisabled && !formPresetRules.length && !templateKey && !templateVariant && !elementType && !outputMode && !inputMode && !textHighlights.length && !hasServiceAsset(asset) && !hasServiceAsset(audioAsset) && !hasServicePlaybackConfig(playback) && !presenterRole && !connectedPraise && !presentation && !mediaPlacement && !benedictionReplacement && !offeringVariants && !hiddenInPresentation && !templateSuppressed) return note;
+  if (!normalizeAnnouncementRegions(value.announcementRegions) && !slides.length && !scriptureReference && !scriptureReferences.length && !scriptureTranslationId && !scriptureReferencePayloads.length && !manualScripture && !hasServiceIntroSlide(introSlide) && !formHint && !formPreset && !formPresetDisabled && !formPresetRules.length && !templateKey && !templateVariant && !elementType && !outputMode && !inputMode && !textHighlights.length && !hasServiceAsset(asset) && !hasServiceAsset(audioAsset) && !audioTiming && !hasServicePlaybackConfig(playback) && !presenterRole && !connectedPraise && !presentation && !mediaPlacement && !benedictionReplacement && !offeringVariants && !hiddenInPresentation && !templateSuppressed) return note;
   const payload = { note };
   if(normalizeAnnouncementRegions(value.announcementRegions))payload.announcementRegions=normalizeAnnouncementRegions(value.announcementRegions);
   if (scriptureReference) payload.scriptureReference = scriptureReference;
@@ -13663,7 +13663,16 @@ function insertServiceItemInTemplateOrder(items, item, typeId) {
     return;
   }
   const rank = serviceItemTemplateRank(typeId, item);
-  const insertIndex = items.findIndex((candidate) => serviceItemTemplateRank(typeId, candidate) > rank);
+  // An existing section owns its authored position. Match semantic ownership,
+  // not title substrings: offering praise must never become a main-praise peer.
+  const hierarchy = serviceTemplateHierarchyIndex(typeId);
+  const sectionKey = (candidate) => String(candidate?._worshipSectionKey || "").trim()
+    || (isMainPraiseSlotItem(candidate) ? "praise" : "")
+    || serviceTemplateHierarchyMetaForItem(hierarchy, candidate)?.key || "";
+  const targetKey = sectionKey(item);
+  const peerIndex = targetKey ? items.findLastIndex((candidate) => sectionKey(candidate) === targetKey) : -1;
+  const insertIndex = peerIndex >= 0 ? peerIndex + 1
+    : items.findIndex((candidate) => serviceItemTemplateRank(typeId, candidate) > rank);
   items.splice(insertIndex === -1 ? items.length : insertIndex, 0, item);
 }
 

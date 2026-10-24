@@ -11,20 +11,46 @@ try:
     page.route('**/*',lambda r:r.continue_() if urlsplit(r.request.url).netloc==urlsplit(url).netloc else r.abort())
     page.goto(url+'?output=presenter&mindexSmokeRaw=1')
     page.wait_for_function("typeof saveWorshipServiceInstance==='function'")
-    for service_type in ['sunday-first','sunday-second','sunday-main','sunday-afternoon','wednesday','friday','youth','young-adult','children','special']:
+    for service_type in ['sunday-first','sunday-second','sunday-main','sunday-afternoon','wednesday','friday','youth','young-adult','children','children-legacy','special']:
      print(engine,service_type,page.evaluate("""async(serviceType)=>{
                       const check=(ok,msg)=>{if(!ok)throw Error(msg)};
+                      const legacyChildren=serviceType==='children-legacy';
+                      if(legacyChildren)serviceType='children';
                       const sid=crypto.randomUUID();
                       const service={id:sid,type_id:serviceType,date:'2026-10-12',title:'Fixture',_worshipSourceRef:{}};
                       state.services=[service]; state.selectedServiceId=sid;state.songs=[];
                       state.dirty.service=false;state.dirtyServiceElementIds.clear();state.dirtyServiceStructureIds.clear();
                       state.loadedWorshipServiceIds=new Set([sid]);state.templateElementSuppressions.clear();
                       state.serviceAliasSupported=true;
-                      const items=['Fourth','First','Second','Third','Fifth','Sixth','Seventh','Eighth'].map((title,i)=>normalizeServiceItem({
+                      let items=['Fourth','First','Second','Third','Fifth','Sixth','Seventh','Eighth'].map((title,i)=>normalizeServiceItem({
                         id:crypto.randomUUID(),service_id:sid,label:'찬양 '+[4,1,2,3,5,6,7,8][i],raw_title:title,
                         _worshipSectionKey:'praise',_worshipSectionTitle:'찬양',
                         _worshipSlotKey:'praise.song.'+[4,1,2,3,5,6,7,8][i],_worshipElementTemplateModified:true,
                         memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db'})},i));
+                      if(legacyChildren){
+                        const template=SERVICE_ORDER_TEMPLATE_FALLBACKS.children;
+                        try{
+                          SERVICE_ORDER_TEMPLATE_FALLBACKS.children=['사도신경','찬양','예배의 부름','성경봉독','설교','결단기도','봉헌','봉헌찬양','봉헌기도','나래파송','주기도문','광고','교제'];
+                          const legacy=buildWorshipServiceScaffold(sid,'children',{service});
+                          items=groupWorshipElements(legacy.sections,legacy.elements)[sid];
+                        }finally{SERVICE_ORDER_TEMPLATE_FALLBACKS.children=template;}
+                        // A saved service owns its authored section order, even after the blueprint changes.
+                        items.unshift(items.splice(items.findIndex(i=>i.label==='광고'),1)[0]);
+                        items[0].raw_title='직접 입력한 소식';items[0]._worshipElementTemplateModified=true;
+                        items.splice(2,0,normalizeServiceItem({id:crypto.randomUUID(),service_id:sid,label:'직접 추가한 순서',raw_title:'직접 입력한 본문',assignee:'직접 담당',_worshipSectionKey:'custom',_worshipSectionTitle:'직접 추가',_worshipElementTemplateModified:true,memo:serializeServiceItemMemo({elementType:'body',slides:['직접 가사 첫 줄','직접 가사 둘째 줄']})},2));
+                        items=normalizeServiceItemsInCurrentOrder(items);
+                      }
+                      const timing={version:1,audioUrl:'https://example.invalid/song.mp3',audioFingerprint:'audio-hash',duration:23.5,lyricsFingerprint:'lyrics-hash',starts:[0,3.125,null,17.875],enabled:true,photos:[{at:3.125,slideIndex:1,url:'https://example.invalid/photo.png',name:'사진'}]};
+                      for(const item of items){
+                        const memo=parseServiceItemMemo(item.memo);
+                        if(serviceMemoElementType(memo)!=='praise')continue;
+                        item.assignee='사용자 담당';
+                        item.memo=serializeServiceItemMemo({...memo,audioTiming:timing,formPreset:{forms:['V2','C','C','V1'],strength:'manual'},slides:['직접 가사 첫 줄','직접 가사 둘째 줄']});
+                      }
+                      const content=item=>{
+                        const memo=parseServiceItemMemo(item.memo);
+                        return JSON.stringify({label:item.label,title:item.raw_title,person:item.assignee,song:item.song_id||null,version:item.version_id||null,forms:memo.formPreset,slides:memo.slides,audio:memo.audioAsset,timing:memo.audioTiming||null});
+                      };
                       captureWorshipRecoverySnapshot=async()=>{};syncSharedSundayContentAfterSave=async()=>{};
                       const typed={inputMode:true,contentState:true};
                       worshipElementTypedStateColumns=async()=>typed;
@@ -81,13 +107,17 @@ try:
                         const removed=action==='delete'?target.id:null;
                         if(removed)originalIds.delete(removed);
                         const wanted=songs().map(i=>i.id);
+                        const wantedContent=new Map(songs().map(i=>[i.id,content(i)]));
                         const result=await saveWorshipServiceInstance(service);
                         const expected=wanted.map(id=>result.itemIds.get(id)||id);
                         for(const id of expected)originalIds.add(id);
+                        state.templateElementSuppressions.clear(); // Simulate reopen without remembered deletion intent.
                         state.serviceItems[sid]=projectWorshipServiceItemsFromTemplate(service,groupWorshipElements([...db.sections].reverse(),[...db.elements].reverse())[sid]);
                         const visible=getServiceOutlineItems(service);
                         check(JSON.stringify(visible.filter(i=>originalIds.has(i.id)).map(i=>i.id))===JSON.stringify(expected),action+' saved/reloaded order changed');
                         if(removed)check(!visible.some(i=>i.id===removed),action+' resurrected removed row');
+                        for(const [id,value] of wantedContent){const savedId=result.itemIds.get(id)||id;check(content(visible.find(i=>i.id===savedId))===value,action+' changed authored input/forms/audio timing '+value+' -> '+content(visible.find(i=>i.id===savedId)));}
+                        check(new Set(visible.map(i=>i.id)).size===visible.length,'duplicate item identity');
                       }
                       const last=songs().at(-1);
                       runServiceItemAction('delete',getServiceItems(sid).findIndex(i=>i.id===last.id));
@@ -109,7 +139,7 @@ try:
                       const stored=db.elements.find(e=>e.id===retained.id);
                       preserveExistingWorshipContentRows(preserved,db.sections,[stored]);
                       check(preserved.elements.some(e=>e.id===retained.id),'accidental omission protection lost');
-                      return 'PASS structural order, last deletion, failed-save retry, concurrent input and omission protection';
+                      return 'PASS structural order, cold-reopen deletion, input/forms/audio timing, failed-save retry, concurrent input and omission protection';
     }""",service_type))
    finally:browser.close()
 finally:server.shutdown()
