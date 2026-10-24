@@ -91,7 +91,7 @@ try:
     while time.monotonic()<end:
      pump(.1)
      if fn():return
-    raise AssertionError('multi lifecycle timeout: '+str([p.locator('#status').inner_text() for i,p in enumerate(pages) if i not in frozen]))
+    raise AssertionError('multi lifecycle timeout: '+str({'calls':host.evaluate('calls'),'peers':[p.evaluate("({status:document.querySelector('#status').textContent,result:document.querySelector('#result').textContent,position:document.querySelector('#position').textContent})") for i,p in enumerate(pages) if i not in frozen]}))
    def enabled(p):return p.locator('[data-action=next]').is_enabled()
    def connect(p,admin=True,login=True):
     if login:p.fill('#code','7777' if admin else '0123');p.click('#connect')
@@ -114,8 +114,14 @@ try:
    dropped.clear();rpc_down.clear();until(lambda:enabled(b));assert b.locator('#adminOutputs').is_hidden()
    # Lost acknowledgement around sleep must not replay an already executed command.
    count=host.evaluate('calls');a.click('[data-action=next]')
-   for packet in a.evaluate('remoteOut.splice(0)'):host.evaluate('p=>deliver(p)',packet)
-   host.wait_for_function('calls==='+str(count+1));dropped.add(1);visibility(a,True);pump(4)
+   # Encryption dispatch is async: drain only the sender until execution, while
+   # deliberately retaining host replies to simulate a lost acknowledgement.
+   deadline=time.monotonic()+3
+   while host.evaluate('calls')==count and time.monotonic()<deadline:
+    for packet in a.evaluate('remoteOut.splice(0)'):host.evaluate('p=>deliver(p)',packet)
+    host.wait_for_timeout(20)
+   assert host.evaluate('calls')==count+1
+   dropped.add(1);visibility(a,True);pump(4)
    assert host.evaluate('calls')==count+1;assert not enabled(a)
    dropped.clear();visibility(a,False);until(lambda:enabled(a));assert host.evaluate('calls')==count+1
    # Actual channel failure for guest must not terminate either admin.
