@@ -1678,3 +1678,23 @@ globalThis.document?.addEventListener?.('keydown', event => {
   if (!panel) return;
   event.preventDefault(); event.stopImmediatePropagation(); panel.hidePopover(); panel._formInput?.focus({ preventScroll: true });
 }, true);
+
+function serviceFormInputWarnings(item, value = null) {
+  if (!item || item._isDefault) return [];
+  const draft = { ...item };
+  if (value !== null) applyServiceItemMetadataField(draft, { dataset: { serviceItemField: "form_hint" }, value }, null);
+  const service = state.services.find(candidate => candidate.id === item.service_id) || selectedServiceForEditor();
+  if (!service) return [];
+  const slides = buildPresenterSlidesForServiceItem(draft, service, 0, { allowHydration: false });
+  return uniqueList(slides.flatMap(slide => slide.warnings || []));
+}
+
+function syncServiceFormInputError(field) {
+  if (field?.dataset.serviceItemField !== "form_hint") return;
+  const serviceId = field.dataset.serviceId || state.selectedServiceId;
+  const item = getServiceItems(serviceId)[Number(field.dataset.serviceItemIndex)];
+  const warnings = serviceFormInputWarnings(item, field.value);
+  field.classList.toggle("is-invalid", warnings.length > 0);
+  field.setAttribute("aria-invalid", String(warnings.length > 0));
+  field.title = warnings.join(" · ");
+}

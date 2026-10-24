@@ -1423,16 +1423,7 @@ function presenterFormPresetDisplayLabel(value = "") {
 }
 
 function normalizePresenterMissingFormLabel(value = "") {
-  const raw = String(value || "").trim();
-  const target = normalizePresenterFormPresetLabel(raw);
-  if (target.lastVerse) return "마지막 절";
-  if (target.type === "verse" && target.number) return `${target.number}절`;
-  if (target.key === "chorus") return "C";
-  if (target.key === "bridge") return "Bridge";
-  if (target.key === "pre-chorus") return "Pre-Chorus";
-  if (target.type === "coda" || target.type === "lyrics") return presenterFormPresetDisplayLabel(raw);
-  if (target.key === "tag") return "Tag";
-  return raw || "송폼";
+  return String(value || "").trim() || "송폼";
 }
 
 function presenterBlankFormPresetItem(label = "", target = {}) {

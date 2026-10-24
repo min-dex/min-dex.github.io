@@ -9565,6 +9565,7 @@ function handleDetailInput(event) {
   const serviceField = event.target.closest("[data-service-item-field]");
   if (serviceField) {
     markServiceInputFeedbackChanged(serviceField);
+    syncServiceFormInputError(serviceField);
     if (isDeferredServiceTextInput(serviceField)) {
       if (isServiceSongTitleInputField(serviceField)) {
         scheduleServiceSongPickerPreview(serviceField);
@@ -23794,9 +23795,12 @@ function serviceFormPresetSummary(preset) {
 
 function renderServiceFormHintInput(item, index, options = {}) {
   if (!item || item._isDefault) return "";
+  const formWarnings = serviceFormInputWarnings(item);
   return renderServiceFormHelpInput(`
     <input
-      class="svc-form-hint${options.compact ? " compact" : ""}"
+      class="svc-form-hint${options.compact ? " compact" : ""}${formWarnings.length ? " is-invalid" : ""}"
+      aria-invalid="${formWarnings.length > 0}"
+      title="${escapeAttr(formWarnings.join(" · "))}"
       type="text"
       data-service-item-field="form_hint"
       data-service-id="${escapeAttr(item.service_id || options.serviceId || state.selectedServiceId || "")}"

@@ -4653,3 +4653,11 @@ selection; Chromium/WebKit native HTTP WAV playback with title P, manual browse,
 R return, seek/pause/output disconnection/restart, stale occurrence/service ticks,
 actual version selection and unchanged authored inputs. Global playback and save
 continuity also pass both engines with production network writes blocked.
+
+
+## Form input error state ·2026-10-24
+
+Form fields share the rendered slide warning result and common is-invalid/aria-invalid
+colors, both initially and while editing. Validation uses a copy and preserves
+typed value, selection and save behavior. Missing warnings retain the complete
+authored token (V999A 없음), without converting it to a verse-only label.

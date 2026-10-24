@@ -111,5 +111,24 @@ try:
      page.locator('#width-host').evaluate('e=>e.style.width="960px"')
    assert page.evaluate("searchItemBefore===JSON.stringify(state.serviceItems[state.selectedServiceId][0])")
    print('PASS',engine,'live search creation appears/disappears without committing draft')
+   page.evaluate("""()=>{
+    const service=state.services[0],song=state.songs[0],version=song.versions[0];
+    const item=normalizeServiceItem({id:'error-form',service_id:service.id,label:'찬양 1',song_id:song.id,version_id:version.id,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formHint:'V999A-C',formPreset:{forms:['V999A','C'],strength:'manual',titleSequence:true}})});
+    state.serviceItems[service.id]=[item];
+    const host=document.querySelector('#width-host');host.innerHTML=renderServiceFormHintInput(item,0);
+    const field=host.querySelector('.svc-form-hint'),before=JSON.stringify(item);
+    if(field.getAttribute('aria-invalid')!=='true'||field.title!=='V999A 없음')throw Error('initial missing token/error');
+    for(const theme of ['dark','light']){
+      document.body.dataset.theme=theme;
+      const styles=getComputedStyle(field),probe=document.createElement('span');probe.style.color='var(--warn)';host.append(probe);
+      if(styles.color!==getComputedStyle(probe).color||styles.borderBottomColor!==getComputedStyle(probe).color)throw Error('shared error colors');probe.remove();
+    }
+    field.value='C';field.focus();field.setSelectionRange(0,1);syncServiceFormInputError(field);
+    if(field.getAttribute('aria-invalid')!=='false'||field.classList.contains('is-invalid')||field.title)throw Error('error not cleared');
+    field.value='V0-C';field.setSelectionRange(1,2);syncServiceFormInputError(field);
+    if(field.title!=='V0 없음'||field.value!=='V0-C'||field.selectionStart!==1||field.selectionEnd!==2||document.activeElement!==field)throw Error('live input/selection');
+    if(JSON.stringify(item)!==before)throw Error('validation changed stored item');
+   }""")
+   print('PASS',engine,'form error initial/live/recovery, full token, both-theme colors and unchanged input/selection/model')
    browser.close();print('PASS',engine,'actual song editor, wide/narrow form sizing, DB variants, medley control, drafts/focus retained')
 finally:server.shutdown()
