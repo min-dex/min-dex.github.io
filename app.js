@@ -16320,7 +16320,7 @@ function renderHomeStart() {
   const next = getHomeNextService(now);
   const bulletins = services.filter(serviceSupportsBulletin);
   const departments = [...new Set(bulletins.map(service => serviceDisplayTypeName(service)))];
-  const calendarNext = state.calendarLoaded ? [...state.calendarData].filter(row => row.date >= toLocalDateStr(now)).sort((a,b) => a.date.localeCompare(b.date))[0] : null;
+  const calendarName = state.calendarLoaded && !state.calendarError ? String(state.calendarData.find(row => row.date === toLocalDateStr(now))?.liturgical || "").trim() : "";
   const modules = [
     {id:"service", label:"예배", icon:"church", value:servicesReady ? `${thisWeek.length}회` : "—", unit:"이번 주 등록 예배",
       detail:state.serviceError ? "예배 목록을 불러오지 못했습니다." : next ? `${formatServiceDate(next, {compact:true})} · ${serviceDisplayTypeName(next)}` : servicesReady ? "다가오는 예배가 없습니다." : "예배 목록 불러오는 중…"},
@@ -16335,7 +16335,7 @@ function renderHomeStart() {
     <main class="home-start" aria-label="홈">
       <header class="home-start-header"><div><h1>MINDEX</h1><p>전체 현황</p></div>
         <div class="home-header-context"><time datetime="${toLocalDateStr(now)}">${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 ${serviceWeekdayLabel(now)}</time>
-          ${state.calendarError || calendarNext ? `<button class="home-calendar-context" type="button" data-home-module="calendar"><i data-lucide="calendar-days"></i><span>${escapeHtml(state.calendarError ? "교회력을 불러오지 못했습니다." : `${formatServiceDate(calendarNext, {compact:true})} · ${calendarNext.liturgical || calendarNext.note || "교회력 일정"}`)}</span></button>` : ""}
+          ${calendarName ? `<button class="home-calendar-context" type="button" data-home-module="calendar"><i data-lucide="calendar-days"></i><span>${escapeHtml(calendarName)}</span></button>` : ""}
         </div>
       </header>
       ${renderHomeRecentWork()}
