@@ -59,11 +59,19 @@ jobs:
         with:
           node-version: '22'
       - uses: actions/setup-python@v5
-        if: steps.verified.outputs.reuse != 'true'
+        id: python
+        # Branch caches are isolated; keep one default-branch seed for siblings.
+        if: steps.verified.outputs.reuse != 'true' || (github.ref == 'refs/heads/main' && matrix.shard == 0)
         with:
           python-version: '3.12'
           cache: 'pip'
           cache-dependency-path: cloud/requirements.txt
+      - name: Seed default-branch pip downloads
+        id: pip-cache-seed
+        if: github.ref == 'refs/heads/main' && matrix.shard == 0 && steps.verified.outputs.reuse == 'true' && steps.python.outputs.cache-hit != 'true'
+        timeout-minutes: 2
+        run: >-
+          python -m pip download --only-binary=:all: --requirement cloud/requirements.txt --dest "$RUNNER_TEMP/mindex-pip-cache-seed"
       - name: Use the official Ubuntu package mirror
         if: steps.verified.outputs.reuse != 'true'
         # The hosted Azure mirror can stall dependency downloads until timeout.

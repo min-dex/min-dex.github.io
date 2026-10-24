@@ -43,6 +43,8 @@ class PagesGate(unittest.TestCase):
         reuse_step = next(step for step in check['steps'] if step.get('id') == 'verified')
         self.assertEqual(reuse_step['run'], 'python3 cloud/reuse_checks.py')
         for step in check['steps'][2:]:
+            if step.get('id') in ('python', 'pip-cache-seed'):
+                continue
             self.assertEqual(step['if'], "steps.verified.outputs.reuse != 'true'")
         python_step = next(step for step in check['steps'] if step.get('uses') == 'actions/setup-python@v5')
         self.assertEqual(python_step['with']['cache'], 'pip')
@@ -59,6 +61,21 @@ class PagesGate(unittest.TestCase):
         self.assertEqual(deploy['steps'][-1]['uses'], 'actions/deploy-pages@v4')
         # Default success() dependency semantics block failed/cancelled parents.
         self.assertNotIn('always()', deploy['if'])
+
+    def test_default_branch_seed_does_not_repeat_checks_or_browser_setup(self):
+        workflow = yaml.safe_load((ROOT / '.github/workflows/cloud-check.yml').read_text())
+        steps = workflow['jobs']['offline-web']['steps']
+        python = next(step for step in steps if step.get('id') == 'python')
+        seed = next(step for step in steps if step.get('id') == 'pip-cache-seed')
+        self.assertEqual(python['uses'], 'actions/setup-python@v5')
+        self.assertEqual(python['if'], "steps.verified.outputs.reuse != 'true' || (github.ref == 'refs/heads/main' && matrix.shard == 0)")
+        self.assertEqual(seed['if'], "github.ref == 'refs/heads/main' && matrix.shard == 0 && steps.verified.outputs.reuse == 'true' && steps.python.outputs.cache-hit != 'true'")
+        self.assertEqual(seed['timeout-minutes'], 2)
+        self.assertEqual(seed['run'], 'python -m pip download --only-binary=:all: --requirement cloud/requirements.txt --dest "$RUNNER_TEMP/mindex-pip-cache-seed"')
+        self.assertLess(steps.index(python), steps.index(seed))
+        for command in ('bash cloud/setup.sh', '.cache/cloud-venv/bin/python cloud/check.py --shard-index ${{ matrix.shard }} --shard-count 4'):
+            step = next(step for step in steps if step.get('run') == command)
+            self.assertEqual(step['if'], "steps.verified.outputs.reuse != 'true'")
 
     def test_artifact_ignores_untracked_and_modified_files(self):
         with tempfile.TemporaryDirectory() as folder:
