@@ -88,6 +88,7 @@
       "mindex.server-state.mjs",
       "mindex.legacy-state.mjs",
       "mindex.server-storage.js",
+      "mindex.disclosure-state.js",
       "mindex.editor-drafts.js",
       "styles*.css",
       "favicon.ico",
