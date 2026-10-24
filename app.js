@@ -17875,7 +17875,7 @@ function renderEmptyVersionState(version, active) {
   return `<div class="version-empty-state">
     <span>가사가 없습니다</span>
     ${active
-      ? '<button class="btn secondary" type="button" data-add-form="Verse"><i data-lucide="plus"></i><span>첫 가사 추가</span></button>'
+      ? '<button class="btn secondary" type="button" data-add-form="Verse"><span>첫 가사 추가</span></button>'
       : `<button class="btn secondary" type="button" data-version-id="${escapeAttr(version.id)}">이 버전 편집</button>`}
   </div>`;
 }
@@ -18078,7 +18078,6 @@ function renderFormToolbar(song) {
           .map(
             (type) => `
               <button class="btn secondary" type="button" data-add-form="${type}">
-                <i data-lucide="plus"></i>
                 <span>${FORM_ADD_LABELS[type] || type}</span>
               </button>
             `,

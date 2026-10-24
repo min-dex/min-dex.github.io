@@ -900,3 +900,12 @@ Silent draft capture, device handoff, failed-save input retention, exact-request
 retry/conflict review and unsaved-navigation confirmation remain active.
 Individual Worship fields remain the editing interface. Internal source/history
 compatibility helpers are retained for existing save/import records.
+
+
+### Editor action/disclosure consistency ·2026-10-24
+
+Praise empty-state and form-add labels and Bulletin save/print/source-refresh
+actions use text without decorative icons. Keep accessible names, targets and
+actions. Bulletin optional monthly information starts collapsed in every design;
+retain the existing per-document user disclosure-state map across content/layout
+renders. Primary weekly fields, print content and stored records are unchanged.
