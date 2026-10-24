@@ -148,7 +148,7 @@ installer, notarization submission or GitHub Release was produced in this work.
 
 ## Integrity remediation — 2026-10-13
 
-Electron is pinned to 43.8.1 (the maintained 43 line), electron-builder to
+At that remediation Electron was pinned to43.7.9 (the maintained43 line), electron-builder to
 26.15.3 and electron-updater to 6.8.9. Transitive packages were refreshed within
 their supported ranges. The global-agent 3 override to 4.1.3 removes roarr's
 vulnerable sprintf-js dependency; bootstrap/createGlobalProxyAgent stay available.
