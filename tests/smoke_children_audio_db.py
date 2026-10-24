@@ -177,6 +177,26 @@ try:
     if(!MindexSongTiming.resumeAutoSync(sid) || !state.presenter.slides[state.presenter.index]?.syncTimeline?.intro)throw Error('intro resume failed');
     if(audio.currentTime<.25 || state.serviceMusic.playSerial!==serial)throw Error('intro resume reset audio');
    }''')
+   page.evaluate(r"""async()=>{
+    const sid=state.selectedServiceId,audio=state.serviceMusic.audio;
+    const before=JSON.stringify({services:state.services,songs:state.songs,items:state.serviceItems});
+    const index=state.presenter.index,serial=state.serviceMusic.playSerial,time=audio.currentTime;
+    runPresenterAction('jump',sid,{index:-1,scroll:false});
+    if(!state.presenter.safetyBlank||audio.paused)throw Error('blackout paused audio');
+    runPresenterAction('jump',sid,{index,scroll:false});
+    const build=buildLiveScriptureSlide;
+    state.presenterScriptureDrafts||={};state.presenterScriptureDrafts[sid]='Fixture scripture';
+    try{
+      buildLiveScriptureSlide=async()=>({id:'temporary-scripture',type:'scripture',title:'Fixture scripture',text:'Fixture body'});
+      await runLiveScriptureAction('show',sid);
+      if(!state.presenter.liveScripture.active||state.presenter.index!==index||audio.paused)throw Error('live scripture changed song position/audio');
+      await runLiveScriptureAction('clear',sid);
+      if(state.presenter.liveScripture.active||state.presenter.index!==index||audio.paused)throw Error('scripture return changed song position/audio');
+    }finally{buildLiveScriptureSlide=build;}
+    if(audio.currentTime<time||state.serviceMusic.playSerial!==serial)throw Error('temporary output restarted audio');
+    if(JSON.stringify({services:state.services,songs:state.songs,items:state.serviceItems})!==before)throw Error('temporary output changed authored service');
+    if(!MindexSongTiming.resumeAutoSync(sid))throw Error('temporary output could not return to audio clock');
+   }""")
    page.evaluate('state.serviceMusic.audio.currentTime=7.2');page.wait_for_function('state.presenter.slides[state.presenter.index]?.syncTimeline?.page===2')
    page.evaluate("runPresenterAction('prev',state.selectedServiceId,{scroll:false});window.manualIndex=state.presenter.index;window.manualTime=state.serviceMusic.audio.currentTime")
    page.wait_for_function('state.serviceMusic.audio.currentTime>manualTime+.3')

@@ -4669,3 +4669,29 @@ Input validation updates the subgroup header warning slot from the same current
 field drafts, including connected-song fields. Clearing an invalid token clears
 both the field state and its header warning immediately. Preserve unrelated
 header warnings, input DOM/caret and authored save/output timing.
+
+## 2026-10-24 — Output stop survives transport failure
+
+A failed/closed BroadcastChannel must not abort local output stop. Treat the
+session-scoped close message as best-effort, then complete the existing request
+cancellation, selection/PPT/live-state reset, window close, stopped snapshot and
+connection-state refresh. Synchronized timing audio follows its existing stop
+rule; independently playing background music remains active. No new launch,
+reconnect or automatic media restart is introduced.
+
+Existing navigation transport still coalesces to the newest payload and recovers
+missed delivery from receipts. Blackout and temporary live Scripture preserve
+the underlying song position and native media clock; explicit return/navigation
+retains existing auto-sync suspension and R recovery rules. Reconnection of the
+same output retains position; actual close/explicit stop ends that run and a
+fresh launch follows the existing preparation/explicit-selection contract.
+
+Verified offline in Chromium/WebKit: rapid48 payload updates, lost delivery and
+latest-state recovery, blackout/live-Scripture output restoration, unchanged
+slide inputs; native HTTP WAV continues through blackout/Scripture clear and
+R without reloading/seeking; popup stop/reopen with an injected closed channel,
+retired-client rejection, actual reload/transient reconnect, delayed launch
+cancellation and background music retention. Unit coverage separately proves
+closed-channel cleanup stops synchronized audio and preserves manual music.
+All tests use synthetic worship data; operational rows and timing profiles are
+not rewritten by these checks or by the fix.

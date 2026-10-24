@@ -366,7 +366,10 @@ function stopPresenterOutput(serviceId = state.presenter.serviceId) {
   state.presenter.outputGeneration += 1;
   const activeServiceId = serviceId || state.presenter.serviceId;
   const outputWindow = state.presenter.outputWindow;
-  state.presenter.channel?.postMessage({ type: "presenter-output-close", outputSessionId: state.presenter.outputSessionId || "" });
+  // A disconnected/closed transport must not abort local stop and media cleanup.
+  try {
+    state.presenter.channel?.postMessage({ type: "presenter-output-close", outputSessionId: state.presenter.outputSessionId || "" });
+  } catch {}
   const closeDesktopOutput = window.mindexElectron?.closePresenterOutput;
   if (closeDesktopOutput) closeDesktopOutput().catch?.(() => {});
   state.presenter.jumpDraft = "";

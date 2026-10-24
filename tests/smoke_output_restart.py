@@ -35,7 +35,10 @@ try:
      else:out.wait_for_function("!document.body.textContent.includes('이전 송출 내용')")
      out.screenshot(path=f'/tmp/output-restart-{engine}-{expected}.png')
      page.evaluate('window.lastOutputRef=state.presenter.outputWindow')
+     if expected==1:
+      page.evaluate("window.originalChannel=state.presenter.channel;state.presenter.channel={postMessage(){throw new Error('closed channel fixture')}}")
      page.click('#stop');page.wait_for_function('lastOutputRef.closed');page.wait_for_timeout(250)
+     if expected==1:page.evaluate('state.presenter.channel=originalChannel')
      # WebKit can retain a closed popup Page handle; Window.closed is authoritative.
      assert page.evaluate("state.presenter.index===0 && presenterSelectedLaunchIndex(svc.id)===null && state.presenter.pptxProgress===null && musicStops===0 && state.serviceMusic.playing")
      print(engine,'PASS actual popup start',expected,'stop clears selection, background music preserved',flush=True)

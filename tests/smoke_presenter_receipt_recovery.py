@@ -64,7 +64,19 @@ def run(browser, url):
     }''')
     output.wait_for_function("document.querySelector('#presenterOutputRoot').textContent.includes('Receipt 0')", timeout=5000)
     assert output.evaluate('renderCount') == 3, 'recovery replayed intermediate slides'
-    print('PASS dropped delivery recovery, healthy heartbeat no-op, closed channel, latest move only')
+    controller.evaluate("""() => {
+      window.sourceBefore=JSON.stringify(fixture.slides);
+      for(let i=0;i<48;i++)publishPresenterPayload({...fixture,index:i%4,updatedAt:Date.now()});
+      publishPresenterPayload({...fixture,index:2,safetyBlank:true,updatedAt:Date.now()});
+    }""")
+    output.wait_for_function("document.querySelector('#presenterOutputRoot').classList.contains('is-blackout')")
+    controller.evaluate("publishPresenterPayload({...fixture,index:2,safetyBlank:false,liveScripture:{active:true,slide:{id:'temporary',type:'title-assignee',title:'Temporary Scripture',text:'Temporary Scripture'}},updatedAt:Date.now()})")
+    output.wait_for_function("document.querySelector('#presenterOutputRoot').textContent.includes('Temporary Scripture')")
+    controller.evaluate("publishPresenterPayload({...fixture,index:2,safetyBlank:false,liveScripture:{active:false,slide:null},updatedAt:Date.now()})")
+    output.wait_for_function("document.querySelector('#presenterOutputRoot').textContent.includes('Receipt 2')")
+    assert not output.evaluate("document.querySelector('#presenterOutputRoot').classList.contains('is-blackout')")
+    assert controller.evaluate('JSON.stringify(fixture.slides)===sourceBefore')
+    print('PASS dropped delivery recovery, healthy heartbeat no-op, closed channel, latest move only, rapid48 updates, blackout/scripture return and unchanged source')
     context.close()
 
 
