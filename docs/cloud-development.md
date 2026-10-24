@@ -189,6 +189,18 @@ are not cached. Exact-commit verification reuse remains a separate mechanism.
 Local contract tests verify these guards; cold/warm GitHub timing must be
 measured after integration before claiming a deployment-speed improvement.
 
+Sibling push branches cannot restore one another's GitHub cache. Previously,
+exact-commit reuse skipped setup-python on main too, so no default-branch cache
+was populated. Main shard 0 now runs setup-python even when verification is
+reused. On a cache miss only, it downloads pinned binary dependencies into a
+temporary directory, warming pip's download cache for setup-python's post-job
+save in main scope. An exact cache hit skips this download. The seed is bounded
+to two minutes and does not install packages, browsers or repeat tests. Other
+shards retain the existing skip behavior. Cache seeding is never a verification
+receipt; every new candidate still passes its existing required gate. A cold
+main run may take longer once; cross-branch restore remains unverified until
+the updated workflow is published and a later sibling branch runs.
+
 ### Measured balancing and superseded checks ·2026-10-23
 
 The four shards now assign longer smokes first to the least-loaded shard using
