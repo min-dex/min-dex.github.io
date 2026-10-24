@@ -55,3 +55,12 @@ combined local candidate, including supplemental fit paths and source retention.
 Only the append-only decision document conflicted; both entries are retained.
 After the preceding publication, reconcile latest main and rerun integration-
 relevant checks before the one required combined branch gate.
+
+Integration onto preceding runtime candidate `5942150a` preserves the split
+`styles.workspace.css` owner, cached-HTML upgrade guards and runtime metadata.
+All five repaired fixture suites pass again on that integration. Runtime hash,
+module boundary and SOLID audits pass; supplemental fitting has one board-module
+owner. Board/controller line capacity is redistributed30 lines within the same
+6550-line extracted-owner ceiling, with an explicit aggregate check added.
+Common fit, Title forms, output-only Scripture reading scale and ready/blank
+regressions pass both engines after the helper move. No required check is bypassed.
