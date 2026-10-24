@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261024-presenter-return-remote-citation",
+  "version": "20261024-readonly-desktop-ready",
   "options": {
     "compress": false,
     "mangle": {

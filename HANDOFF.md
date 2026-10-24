@@ -1495,7 +1495,16 @@ blocked0/production writes0. Full old app/presenter suites still contain outdate
 UI and fake-output expectations; their failures are recorded, not hidden or PASS.
 
 Electron43.8.1, Undici6.29.1/7.30.1 and fast-uri3.1.9 retain existing major lines.
-Audit10→0, frozen install, updater/preflight/runtime-package, guard7 tests,
+Audit10→0, frozen install, updater/preflight/runtime-package, guard8 tests,
 mutation denial9, CI partition/failure4, check-scope8 and size audit pass locally.
 No production save/schema/permission changes. Final4-shard gate, actual Mac/Win
 unsigned installer artifacts and publication evidence remain pending.
+
+
+### Final approved batch ·2026-10-24
+
+Includes Bulletins user-approved7eba9da0: ready/waiting copy600 and service-name
+strong800, CSS only with current decisions preserved. Based on presenter-return
+main bf30a91d, preserving all remote/history/citation assets and behavior.
+Candidate version20261024-readonly-desktop-ready. Final gate/publication and
+unsigned installer build evidence remain separate from scoped local checks.
