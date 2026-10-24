@@ -891,3 +891,12 @@ from440px, with group as a third from680px. Section name/assignee and add contro
 remain side by side from420px. Background target/file/actions wrap by actual
 panel width with170/220px preferred field widths, independent of viewport.
 Keep narrow layouts, labels, focus, input order and draft/save semantics.
+## Retired editor recovery/source entry points ·2026-10-24
+
+The global temporary-draft recovery notice/button/dialog and the Worship source
+editor are no longer mounted in the app. Keep private archived drafts and source
+document/history data; no migration or deletion accompanies this UI retirement.
+Silent draft capture, device handoff, failed-save input retention, exact-request
+retry/conflict review and unsaved-navigation confirmation remain active.
+Individual Worship fields remain the editing interface. Internal source/history
+compatibility helpers are retained for existing save/import records.

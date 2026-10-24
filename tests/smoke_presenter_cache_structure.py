@@ -14,7 +14,7 @@ def main():
                 page = browser.new_page()
                 page.route('**/*supabase*/**', lambda route: route.abort())
                 page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-                page.wait_for_function("typeof presenterServiceScriptureCacheSignature === 'function'")
+                page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof presenterServiceScriptureCacheSignature === 'function')")
                 result = page.evaluate('''() => {
                   const assert=(v,m)=>{if(!v)throw Error(m)};
                   const service={id:'audit',type_id:'fixture'};state.services=[service];

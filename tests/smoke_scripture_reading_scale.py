@@ -10,7 +10,7 @@ try:
    page=browser.new_page(viewport={'width':1920,'height':1080})
    page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(url.rsplit('/',1)[0]+'/') else r.abort())
    page.goto(url+'?output=presenter')
-   page.wait_for_function("typeof renderPresenterSlideMiniPreview==='function'")
+   page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof renderPresenterSlideMiniPreview==='function')")
    for final in (False,True):
     for repeats in (1,5):
      result=page.evaluate('''async ({final,repeats})=>{

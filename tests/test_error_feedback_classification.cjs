@@ -1,8 +1,9 @@
+const { readRuntimeSource } = require('./helpers/runtime-source.cjs');
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
-const app = fs.readFileSync(path.join(__dirname, "../app.js"), "utf8");
+const app = readRuntimeSource('app.js');
 const monitor = fs.readFileSync(path.join(__dirname, "../mindex.monitor.js"), "utf8");
 
 function between(source, start, end) {
@@ -79,7 +80,7 @@ const remote = vm.createContext({
   state: { client: null }, navigator: { onLine: true },
   AbortController, setTimeout, clearTimeout, requests: new Map(),
 });
-vm.runInContext(between(monitor, "  async function rpc(", "  async function leave("), remote);
+vm.runInContext(between(monitor, "  async function rpc(", "  function readToken("), remote);
 (async () => {
   const failures = [], draft = { text: "unsaved" };
   const saveContext = vm.createContext({

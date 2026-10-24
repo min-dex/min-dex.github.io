@@ -10,7 +10,7 @@ def main():
                 page = browser.new_page()
                 page.route('**/*supabase*/**', lambda r: r.abort())
                 page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-                page.wait_for_function("typeof withPresenterElementTrailingBlanks === 'function'")
+                page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof withPresenterElementTrailingBlanks === 'function')")
                 print(engine, page.evaluate('''() => {
                   const check=(v,m)=>{if(!v)throw Error(m)};
                   const service={id:'example-fixture',type_id:'sunday-second'};

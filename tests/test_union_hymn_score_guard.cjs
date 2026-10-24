@@ -1,8 +1,9 @@
+const { readRuntimeSource } = require('./helpers/runtime-source.cjs');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const assert = require('node:assert/strict');
 function extract(file, name) {
-  const source = fs.readFileSync(file, 'utf8');
+  const source = readRuntimeSource(file);
   const start = source.indexOf('function ' + name + '(');
   assert(start >= 0);
   return source.slice(start, source.indexOf('\n}', start) + 2);

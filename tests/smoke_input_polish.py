@@ -12,7 +12,7 @@ def main():
                 page.route('**/*supabase*/**', lambda r: r.abort())
                 page.route('https://example.test/**', lambda r: r.abort())
                 page.goto(url, wait_until='domcontentloaded')
-                page.wait_for_function("typeof renderPresenterBoardItemActions === 'function'")
+                page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof renderPresenterBoardItemActions === 'function')")
                 result = page.evaluate('''() => {
                   const errors=[];
                   const service={id:'polish-fixture',type_id:'fixture'};

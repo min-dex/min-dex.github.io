@@ -1,3 +1,4 @@
+import { readRuntimeSource } from './helpers/runtime-source.cjs';
 import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';
 const source=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8');
 const supplemental=JSON.parse(fs.readFileSync(new URL('../docs/bible-supplement-books-20261016.json',import.meta.url),'utf8'));
@@ -18,7 +19,7 @@ assert.ok(!source.includes('.select("book_code,chapter,verse,verse_end,text,sect
 assert.ok(source.includes('number: bibleVerseNumberLabel(verse)'));
 console.log('PASS edition availability, stable lookups, sparse chapters, literal special labels, source-order selection, copy/presenter metadata');
 
-const presenterSource=fs.readFileSync(new URL('../mindex.presenter.js',import.meta.url),'utf8');
+const presenterSource=readRuntimeSource('mindex.presenter.js');
 const presenterFn=name=>{const a=presenterSource.indexOf(`function ${name}(`);assert.ok(a>=0,name);return presenterSource.slice(a,presenterSource.indexOf('\n}',a)+2);};
 Object.assign(ctx,{escapeHtml:String,escapeAttr:String,escapePresenterSlideLine:String,presenterScriptureReadingDisplayReference:String,presenterScriptureReadingBookName:String});
 vm.runInContext(['presenterScriptureReadingHeaderReference','presenterScriptureVerseParts','presenterLineCharEstimate','renderPresenterScriptureReadingSlide'].map(presenterFn).join('\n'),ctx);

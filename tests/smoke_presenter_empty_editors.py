@@ -9,7 +9,7 @@ def main():
             page = browser.new_page()
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-            page.wait_for_function("typeof presenterBoardEntries === 'function'")
+            page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof presenterBoardEntries === 'function')")
             result = page.evaluate('''() => {
               const assert = (test, message) => { if (!test) throw Error(message); };
               const service = {id:'empty-editors-test',type_id:'sunday-afternoon'};

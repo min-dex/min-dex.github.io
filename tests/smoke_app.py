@@ -455,7 +455,7 @@ def main() -> int:
     def skip(name: str, detail: str = "") -> None:
         results.append(("SKIP", name, detail))
 
-    app_source = (APP_DIR / "app.js").read_text(encoding="utf-8")
+    app_source = (APP_DIR / "app.js").read_text(encoding="utf-8") + "\n" + "\n".join((Path(__file__).resolve().parents[1] / name).read_text(encoding="utf-8") for name in ['mindex.presenter-live.js', 'mindex.presenter-board.js', 'mindex.presenter-controller.js'])
     full_save_start = app_source.find("async function saveWorshipServiceInstance(service)")
     hydrate_call = app_source.find("await ensureWorshipServiceRowsLoadedForPersistence(serviceId);", full_save_start)
     existing_sections = app_source.find("const existingSections = state.worshipSections", full_save_start)
@@ -6506,11 +6506,11 @@ def main() -> int:
                     if (
                         service_source_view.get("ready")
                         and service_source_view.get("hasRoot")
-                        and service_source_view.get("hasSourcePanel")
-                        and service_source_view.get("hasEditableText")
-                        and service_source_view.get("hasSignature")
-                        and service_source_view.get("hasApply")
-                        and service_source_view.get("hasCopy")
+                        and not service_source_view.get("hasSourcePanel")
+                        and not service_source_view.get("hasEditableText")
+                        and not service_source_view.get("hasSignature")
+                        and not service_source_view.get("hasApply")
+                        and not service_source_view.get("hasCopy")
                         and "# " not in service_source_view["source"]
                         and "date:" not in service_source_view["source"]
                         and "[신앙고백]" not in service_source_view["source"]

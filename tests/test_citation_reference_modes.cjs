@@ -1,8 +1,9 @@
+const { readRuntimeSource } = require('./helpers/runtime-source.cjs');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
-const source = fs.readFileSync(path.join(__dirname, '../mindex.presenter.js'), 'utf8');
+const source = readRuntimeSource('mindex.presenter.js');
 const book = {code: '1KI', koreanName: '열왕기상', shortName: '왕상'};
 const context = {
   MINDEX_CONSTANTS: {KOREAN_BIBLE_BOOK_ABBREVIATIONS: {'1KI': '왕상'}},

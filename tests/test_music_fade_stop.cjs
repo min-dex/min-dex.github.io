@@ -1,7 +1,8 @@
+const { readRuntimeSource } = require('./helpers/runtime-source.cjs');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const source = fs.readFileSync(require.resolve('../app.js'), 'utf8');
+const source = readRuntimeSource('app.js');
 function fixture() {
   let now=1000, id=0;
   const timers=new Map(), retired=[];

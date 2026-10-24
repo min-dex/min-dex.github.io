@@ -14,7 +14,7 @@ try:
    page.add_init_script("Object.defineProperty(window,'MINDEX_SUPABASE',{get:()=>({}),set:()=>{}})")
    page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(url.rsplit('/',1)[0]+'/') else r.abort())
    page.goto(url+'?output=presenter',wait_until='domcontentloaded')
-   page.wait_for_function("typeof presenterPreviewBackgroundSource==='function'")
+   page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof presenterPreviewBackgroundSource==='function')")
    result=page.evaluate('''async()=>{
     const originals=[...WORSHIP_BACKGROUND_STATIC_FILES].map(n=>new URL('assets/worship-backgrounds/'+n,document.baseURI).href);
     for(const source of originals){

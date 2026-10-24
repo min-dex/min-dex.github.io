@@ -12,7 +12,7 @@ def main():
                 page = browser.new_page(viewport={"width": 1920, "height": 1080})
                 page.route("**/*supabase*/**", lambda r: r.abort())
                 page.goto(url, wait_until="domcontentloaded")
-                page.wait_for_function("typeof presenterReadySlide === 'function'")
+                page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof presenterReadySlide === 'function')")
                 for width in (1920, 960, 320):
                     for clean in (True, False):
                         result = page.evaluate("""({width,clean}) => {

@@ -16,7 +16,7 @@ def main():
                     page = browser.new_page()
                     page.route('**/*supabase*/**', lambda route: route.abort())
                     page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-                    page.wait_for_function("typeof presenterFormGroupLabel === 'function'")
+                    page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof presenterFormGroupLabel === 'function')")
                     cases = page.evaluate('''() => {
                       const check=(ok,msg)=>{if(!ok)throw Error(msg)};
                       const form=(label,id=label)=>({id,label,part_type:label.startsWith('Verse')?'Verse':'Chorus',lyrics:'sample',sort_order:1});

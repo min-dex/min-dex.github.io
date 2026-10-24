@@ -9,7 +9,7 @@ try:
    page=browser.new_page(viewport={'width':1440,'height':900})
    page.route('**/*supabase*/**',lambda r:r.abort())
    page.goto(url+'?mindexSmokeRaw=1',wait_until='load')
-   page.wait_for_function("typeof renderPresenterHighlightedText === 'function' && typeof normalizeServiceTextHighlights === 'function' && typeof buildPresenterSlidesForServiceItem === 'function'")
+   page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof renderPresenterHighlightedText === 'function' && typeof normalizeServiceTextHighlights === 'function' && typeof buildPresenterSlidesForServiceItem === 'function')")
    print(engine,page.evaluate('''() => {
     const check=(v,m)=>{if(!v)throw Error(m)};
     const host=document.createElement('div');host.style.cssText='font-size:40px;background:#111;color:white;padding:30px';document.body.prepend(host);

@@ -1,8 +1,9 @@
+const { readRuntimeSource } = require('./helpers/runtime-source.cjs');
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const source = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
+const source = readRuntimeSource('app.js');
 const action = source.match(/function runPresenterAction\([\s\S]*?\n}\n\nfunction setPresenterPendingSlide/);
 
 assert.ok(action, "presenter action handler should exist");

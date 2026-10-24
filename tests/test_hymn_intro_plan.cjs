@@ -1,8 +1,9 @@
+const { readRuntimeSource } = require('./helpers/runtime-source.cjs');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
-const code = fs.readFileSync(path.join(__dirname, '../mindex.presenter.js'), 'utf8');
+const code = readRuntimeSource('mindex.presenter.js');
 function extract(name) {
   const start = code.indexOf(`function ${name}(`);
   const end = code.indexOf('\nfunction ', start + 1);

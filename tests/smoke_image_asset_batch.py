@@ -9,7 +9,7 @@ def main():
             page = browser.new_page(viewport={"width": 1280, "height": 800})
             page.route("**/*supabase*/**", lambda route: route.abort())
             page.goto(url, wait_until="domcontentloaded")
-            page.wait_for_function("typeof renderPresenterAssetUpload === 'function' && typeof presenterElementSlideFromMemo === 'function'")
+            page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof renderPresenterAssetUpload === 'function' && typeof presenterElementSlideFromMemo === 'function')")
             result = page.evaluate(
                 """() => {
                   const memo = parseServiceItemMemo(serializeServiceItemMemo({
