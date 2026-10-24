@@ -180,3 +180,22 @@ await assert.rejects(remoteClient.commit(input),/offline/);
 assert.throws(()=>remoteClient.adoptRemote('service',{...baseline,revision:'4'}),/PENDING_REQUEST/);
 assert.equal(remoteClient.baseline('service').revision,'3');
 console.log('PASS exact remote adoption rejects stale/malformed snapshots and unresolved writes');
+
+
+// Empty/non-praise services also need the native protocol, frozen before journaling.
+for (const operation of ['create','commit','remove']) {
+  const entries=new Map(), seen=[];let native=true;
+  const fixture=createWorshipAtomicClient({usesSingleSongStorage:()=>native,makeId:()=>`native-${operation}`,
+    journal:{getItem:k=>entries.get(k)||null,setItem:(k,v)=>entries.set(k,v),removeItem:k=>entries.delete(k)},
+    rpc:async(name,args)=>{if(name==='get_worship_service_v1')return {data:structuredClone(baseline)};seen.push(structuredClone(args.req));throw Error('offline');}});
+  await fixture.read('service');
+  const run=()=>operation==='create'?fixture.create({service:baseline.service,rows:{sections:[],elements:[]},document:{sourceText:'empty'}})
+    :operation==='commit'?fixture.commit(input):fixture.remove('service');
+  await assert.rejects(run(),/offline/);
+  assert.equal(seen[0].singleSongProtocol,1);
+  assert.equal(fixture.pending('service').request.singleSongProtocol,1);
+  native=false;
+  await assert.rejects(run(),/offline/);
+  assert.deepEqual(seen[1],seen[0]);
+}
+console.log('PASS native empty-service create/save/delete and immutable protocol retry');

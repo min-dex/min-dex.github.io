@@ -4039,7 +4039,8 @@ async function worshipAtomicClient() {
         }
         return result;
       },
-        journal: window.MINDEX_SERVER_STORAGE.journal, namespace: state.config.url })).catch((error) => {
+        journal: window.MINDEX_SERVER_STORAGE.journal, namespace: state.config.url,
+        usesSingleSongStorage: () => state.singleSongStorage === 'native' })).catch((error) => {
           // A failed speculative import must not poison the next detail/open retry.
           if (worshipAtomicRuntime?.promise === promise) worshipAtomicRuntime = null;
           throw error;

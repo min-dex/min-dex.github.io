@@ -125,7 +125,8 @@ function unchangedCommit(payload, baseline) {
   return sameJson(document(payload.document), document(baseline.service.source_ref?.mindexServiceDocument));
 }
 
-export function createWorshipAtomicClient({rpc, journal, namespace = '', makeId = () => crypto.randomUUID()}) {
+export function createWorshipAtomicClient({rpc, journal, namespace = '', makeId = () => crypto.randomUUID(), usesSingleSongStorage = () => false}) {
+  const prepareProtocol = payload => usesSingleSongStorage() ? {...payload,singleSongProtocol:1} : payload;
   const store = createWorshipStore({rpc, journal, namespace, makeId, methods:{
     save:'save_worship_service_v1', create:'create_worship_service_v1', delete:'delete_worship_service_v1',
   }});
@@ -211,7 +212,7 @@ export function createWorshipAtomicClient({rpc, journal, namespace = '', makeId 
       return store.baseline(id).aggregate;
     },
     async create(input) {
-      const payload = prepareWorshipRowsCreate(input);
+      const payload = prepareProtocol(prepareWorshipRowsCreate(input));
       const id = payload.serviceId;
       const pending = store.pending(id);
       if (pending && pending.operation !== 'create') throw new Error('PENDING_REQUEST_REQUIRES_RESOLUTION');
@@ -240,10 +241,10 @@ export function createWorshipAtomicClient({rpc, journal, namespace = '', makeId 
       if (!pending && baseline?.deleted) return true;
       if (!pending && !baseline) throw new Error('BASELINE_REQUIRED');
       try {
-        const receipt = pending ? await store.retry(id) : await store.save('delete', {
+        const receipt = pending ? await store.retry(id) : await store.save('delete', prepareProtocol({
           serviceId:id,expectedRevision:baseline.revision,confirmDelete:true,
           ...((baseline.elements || []).some(row => row.praise_record_id) ? {singleSongProtocol:1} : {}),
-        });
+        }));
         if (receipt.deleted !== true || receipt.aggregate !== null) throw new Error('INVALID_RECEIPT');
         return true;
       } catch (error) { await reject(id, error); }
@@ -260,7 +261,7 @@ export function createWorshipAtomicClient({rpc, journal, namespace = '', makeId 
         throw new Error('ATOMIC_RETRY_COMMITTED_RELOAD_REQUIRED');
       }
       const baseline = store.baseline(id)?.aggregate;
-      const payload = prepareWorshipRowsCommit({...input, baseline});
+      const payload = prepareProtocol(prepareWorshipRowsCommit({...input, baseline}));
       // Pending retry and known-conflict guards above always run first. An
       // unchanged editor does not write or refresh remote state; a later edit
       // still uses the committed revision and normal server conflict checking.
