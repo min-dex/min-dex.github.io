@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261024-audit-ui-alignment",
+  "version": "20261024-unified-song-note",
   "options": {
     "compress": false,
     "mangle": {
