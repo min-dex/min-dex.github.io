@@ -5938,10 +5938,19 @@ function renderServiceViewLoadingIfNeeded(service) {
   return true;
 }
 
+async function loadPresenterHymnScoresForService(serviceId) {
+  if (state.module !== "presenter" || state.selectedServiceId !== serviceId
+    || !canUseClientData() || !presenterServiceNeedsHymnScoreManifest(serviceId)) return;
+  // Cached worship rows still need the independent score manifest on entry.
+  // The shared loader coalesces requests and patches controls without publishing.
+  await loadHymnScoreManifest({ silent: true });
+}
+
 async function loadServiceItems(serviceId) {
   if (!serviceId) return;
   if (state.loadedWorshipServiceIds.has(serviceId)) {
     loadFullServiceSourceRefInBackground(serviceId);
+    await loadPresenterHymnScoresForService(serviceId);
     if (state.selectedServiceId === serviceId && !state.dirty.service) {
       captureCleanFingerprint("service");
     }
@@ -6010,6 +6019,7 @@ async function loadServiceItems(serviceId) {
   renderLoadingStatus();
   try {
     await loadPromise;
+    await loadPresenterHymnScoresForService(serviceId);
   } catch (error) {
     serviceViewLoadErrors.set(serviceId, true);
     throw error;

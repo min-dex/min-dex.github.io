@@ -6,7 +6,7 @@ const c = vm.createContext({console, Map, Set, WeakMap, state:{},
  WORSHIP_SERVICE_LIST_SELECT:'with-alias', WORSHIP_SERVICE_BASE_LIST_SELECT:'base', WORSHIP_EMERGENCY_TODAY_ONLY:false,
  writeStaticSupabaseCache:()=>{}, readStaticSupabaseCache:()=>null, readEmergencyWorshipServices:async()=>null,
  worshipServiceListQuery:q=>q});
-for (const name of ['fetchWorshipServiceListRows','fetchWorshipRowsForServiceIds','loadServiceItems','servicePraiseSongMatchesLookupName']) {
+for (const name of ['fetchWorshipServiceListRows','fetchWorshipRowsForServiceIds','loadServiceItems','loadPresenterHymnScoresForService','servicePraiseSongMatchesLookupName']) {
  const start=source.search(new RegExp('(?:async )?function '+name+'\\('));
  assert.ok(start>=0,name);vm.runInContext(source.slice(start,source.indexOf('\n}\n',start)+2),c);
 }
@@ -38,16 +38,20 @@ vm.runInContext('const servicePraiseLookupNamesCache = new WeakMap()',c);
  song.versions[0].name='Second';assert.ok(!c.servicePraiseSongMatchesLookupName(song,lookup('First')));assert.ok(c.servicePraiseSongMatchesLookupName(song,lookup('Second')));
  let reads=0,sourceReads=0,release;
  const aggregate={service:{id:'s',source_ref:{history:['preserved']}},sections:[],elements:[]};
- c.state={client:{},services:[{id:'s',_worshipSourceRefPartial:true}],loadedWorshipServiceIds:new Set(),dirty:{service:false},selectedServiceId:'s',module:'service',worshipSections:[],worshipElements:[],serviceItems:{}};
- c.serviceItemLoadPromises=new Map();c.worshipAtomicClient=async()=>({read:async()=>{reads++;await new Promise(r=>release=r);return aggregate}});
+ c.state={client:{},services:[{id:'s',_worshipSourceRefPartial:true}],loadedWorshipServiceIds:new Set(),dirty:{service:false},selectedServiceId:'s',module:'presenter',worshipSections:[],worshipElements:[],serviceItems:{}};
+ c.serviceViewLoadErrors=new Map();c.serviceItemLoadPromises=new Map();c.worshipAtomicClient=async()=>({read:async()=>{reads++;await new Promise(r=>release=r);return aggregate}});
  c.sundayEditSyncHasLocalDraft=()=>false;c.normalizeWorshipService=s=>({id:s.id,_worshipSourceRef:s.source_ref,_worshipSourceRefPartial:false});
  c.loadFullServiceSourceRefInBackground=()=>sourceReads++;
- for(const name of ['captureCleanFingerprint','renderLoadingStatus','warmWorshipScriptureReferencesForService','warmServiceItemScriptureReferencesForService','renderCurrentServiceModuleDetail'])c[name]=()=>{};
+ for(const name of ['captureCleanFingerprint','renderLoadingStatus','warmWorshipScriptureReferencesForService','warmServiceItemScriptureReferencesForService','renderCurrentServiceModuleDetail','renderServiceList'])c[name]=()=>{};
+ let manifests=0;c.canUseClientData=()=>true;c.presenterServiceNeedsHymnScoreManifest=()=>!c.state.hymnScoreManifestLoaded;
+ c.loadHymnScoreManifest=async()=>{manifests++;c.state.hymnScoreManifestLoaded=true};c.renderPresenterControlState=()=>{};
  c.shouldDeferPastWorshipServiceLoad=()=>false;c.isServiceDataModule=()=>true;c.loadSongsForIds=async()=>{};
  c.projectWorshipServiceItemsFromTemplate=(_,items)=>items;c.groupWorshipElements=()=>({s:[]});
  const one=c.loadServiceItems('s'),two=c.loadServiceItems('s');
  await new Promise(r=>setImmediate(r));assert.equal(reads,1);assert.equal(sourceReads,0,'no redundant full-source read');release();await Promise.all([one,two]);
  assert.deepEqual(c.state.services[0]._worshipSourceRef,{history:['preserved']});assert.equal(c.state.services[0]._worshipSourceRefPartial,false);
- assert.ok(c.state.loadedWorshipServiceIds.has('s'));
+ assert.ok(c.state.loadedWorshipServiceIds.has('s'));assert.equal(manifests,1,'fresh entry loads scores');
+ await c.loadServiceItems('s');assert.equal(manifests,1,'loaded manifest is reused');
+ c.state.hymnScoreManifestLoaded=false;await c.loadServiceItems('s');assert.equal(manifests,2,'cached rows still load missing scores');assert.equal(reads,1,'cached entry does not reread worship rows');
  console.log('PASS view fast path, legacy/offline fallback, lookup cache invalidation, single aggregate read and full document adoption');
 })().catch(e=>{console.error(e);process.exitCode=1});
