@@ -70,6 +70,7 @@
       "mindex.presenter-praise.js",
       "mindex.presenter-live.js",
       "mindex.presenter-board.js",
+      "mindex.presenter-history.js",
       "mindex.presenter-controller.js",
       "mindex.song-timing.js",
       "mindex.scripture-repair-display.js",

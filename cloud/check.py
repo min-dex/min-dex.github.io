@@ -41,6 +41,7 @@ NODE_TESTS = (
     "test_scripture_lookup_render.cjs",
     "test_app_runtime.cjs",
     "test_runtime_boundaries.cjs",
+    "test_presenter_return.cjs",
     "test_output_fullscreen_close.cjs",
     "test_ui_icons.cjs",
     "test_bulletin.cjs",

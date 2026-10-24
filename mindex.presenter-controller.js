@@ -1,10 +1,29 @@
 function runPresenterAction(action, serviceId = state.selectedServiceId, options = {}) {
+  const p = state.presenter;
+  if (action === "return") {
+    const entry = presenterReturnTarget(serviceId);
+    if (!entry) return;
+    suspendServiceMusicAutoSync();
+    liveScriptureRequestSerial += 1;
+    p.pptxProgress = null;
+    p.jumpDraft = "";
+    p.safetyBlank = false;
+    p.liveScripture = { ...p.liveScripture, active: Boolean(entry.live), slide: entry.live ? structuredClone(entry.live) : null };
+    if (!entry.live) p.index = p.slides.findIndex(slide => slide.id === entry.id);
+    clearPresenterBoardSelection({ render: false });
+    syncSelectedServiceItemToPresenterSlide(serviceId);
+    syncServiceMusicWithPresenterContext(serviceId, { render: false });
+    publishPresenterState();
+    renderPresenterControlState(serviceId);
+    scrollPresenterOutlineToActive(serviceId);
+    return;
+  }
   if (action === "fullscreen") {
     requestPresenterOutputFullscreenFromController();
     return;
   }
   if (["pptx-play", "pptx-pause"].includes(action)) {
-    if (serviceId === state.presenter.serviceId && requestPresenterPptxMedia(state.presenter, action === "pptx-play" ? "play" : "pause")) {
+    if (serviceId === p.serviceId && requestPresenterPptxMedia(p, action === "pptx-play" ? "play" : "pause")) {
       publishPresenterState(); renderPresenterControlState(serviceId);
     }
     return;
@@ -15,7 +34,7 @@ function runPresenterAction(action, serviceId = state.selectedServiceId, options
   }
   if (!["open", "stop", "next", "prev", "first", "last", "jump", "prepare-next-service"].includes(action)) return;
   if (action === "stop") {
-    stopPresenterOutput(serviceId || state.presenter.serviceId);
+    stopPresenterOutput(serviceId || p.serviceId);
     return;
   }
   if (!serviceId) return;
@@ -23,16 +42,16 @@ function runPresenterAction(action, serviceId = state.selectedServiceId, options
     void prepareNextServiceFromPresenter(serviceId, options);
     return;
   }
-  if (action !== "open" && isPresenterOutputWindowOpen() && state.presenter.serviceId && state.presenter.serviceId !== serviceId) return;
+  if (action !== "open" && isPresenterOutputWindowOpen() && p.serviceId && p.serviceId !== serviceId) return;
 
   if (action === "open") {
-    if (state.presenter.outputWindow?.closed) stopPresenterOutput(state.presenter.serviceId);
+    if (p.outputWindow?.closed) stopPresenterOutput(p.serviceId);
     preparePresenterService(serviceId);
-    state.presenter.pptxProgress = null;
+    p.pptxProgress = null;
     const launchIndex = presenterSelectedLaunchIndex(serviceId);
-    if (launchIndex !== null && isValidPresenterIndex(launchIndex, state.presenter.slides.length)) state.presenter.index = launchIndex;
+    if (launchIndex !== null && isValidPresenterIndex(launchIndex, p.slides.length)) p.index = launchIndex;
     clearPresenterBoardSelection({ render: false });
-    state.presenter.safetyBlank = false;
+    p.safetyBlank = false;
     openPresenterOutput(serviceId);
     return;
   }
@@ -42,46 +61,46 @@ function runPresenterAction(action, serviceId = state.selectedServiceId, options
   if (presenterControllerIsLive(serviceId)) clearPresenterBoardSelection({ render: false });
   preparePresenterNavigation(serviceId);
 
-  state.presenter.jumpDraft = "";
+  p.jumpDraft = "";
   if (["next", "prev", "first", "last", "jump"].includes(action)) {
     const requestedIndex = Number(options.index);
     const appliesJump = action !== "jump"
       || requestedIndex === -1
-      || isValidPresenterIndex(requestedIndex, state.presenter.slides.length);
+      || isValidPresenterIndex(requestedIndex, p.slides.length);
     if (!appliesJump) {
       renderPresenterControlState(serviceId);
       return;
     }
     suspendServiceMusicAutoSync();
-    if (["first", "last", "jump"].includes(action)) state.presenter.pptxProgress = null;
+    if (["first", "last", "jump"].includes(action)) p.pptxProgress = null;
     liveScriptureRequestSerial += 1;
-    state.presenter.liveScripture = {
-      ...state.presenter.liveScripture,
+    p.liveScripture = {
+      ...p.liveScripture,
       active: false,
       slide: null,
     };
-    state.presenter.livePraise = emptyLivePraiseState(state.presenter.livePraise?.draft || state.presenter.livePraise?.query || "");
+    p.livePraise = emptyLivePraiseState(p.livePraise?.draft || p.livePraise?.query || "");
   }
 
   if (action === "next") {
-    state.presenter.safetyBlank = false;
+    p.safetyBlank = false;
     movePresenterSlide(1);
   } else if (action === "prev") {
-    state.presenter.safetyBlank = false;
+    p.safetyBlank = false;
     movePresenterSlide(-1);
   } else if (action === "first") {
-    state.presenter.safetyBlank = false;
-    state.presenter.index = firstPresenterNavigableIndex(state.presenter.slides);
+    p.safetyBlank = false;
+    p.index = firstPresenterNavigableIndex(p.slides);
   } else if (action === "last") {
-    state.presenter.safetyBlank = false;
-    state.presenter.index = lastPresenterNavigableIndex(state.presenter.slides);
+    p.safetyBlank = false;
+    p.index = lastPresenterNavigableIndex(p.slides);
   } else if (action === "jump") {
     const requestedIndex = Number(options.index);
     if (requestedIndex === -1) {
-      state.presenter.safetyBlank = true;
-    } else if (isValidPresenterIndex(requestedIndex, state.presenter.slides.length)) {
-      state.presenter.index = requestedIndex;
-      state.presenter.safetyBlank = false;
+      p.safetyBlank = true;
+    } else if (isValidPresenterIndex(requestedIndex, p.slides.length)) {
+      p.index = requestedIndex;
+      p.safetyBlank = false;
     }
   }
 
@@ -91,9 +110,9 @@ function runPresenterAction(action, serviceId = state.selectedServiceId, options
   renderPresenterControlState(serviceId);
   scrollPresenterOutlineToActive(serviceId);
   if (options.scroll !== false && ["next", "prev", "first", "last", "jump"].includes(action)) {
-    scrollPresenterBoardToIndexStable(serviceId, state.presenter.index, { force: false });
+    scrollPresenterBoardToIndexStable(serviceId, p.index, { force: false });
   }
-  if (options.focusActiveSlide === true) focusPresenterBoardLiveSlide(serviceId, state.presenter.index);
+  if (options.focusActiveSlide === true) focusPresenterBoardLiveSlide(serviceId, p.index);
 }
 
 let prepareNextServiceRequestSerial = 0;
@@ -362,6 +381,7 @@ function scrollPresenterOutlineToActive(serviceId = state.presenter.serviceId) {
 }
 
 function stopPresenterOutput(serviceId = state.presenter.serviceId) {
+  MindexPresenterHistory.reset();
   liveScriptureRequestSerial += 1;
   presenterLaunchRequestSerial += 1;
   state.presenter.outputGeneration += 1;
@@ -2667,3 +2687,8 @@ async function openServiceInPresenter(id) {
   await window.MINDEX_SERVICE_ENTRY?.enter(id);
 }
 
+
+function presenterReturnTarget(serviceId) {
+  const p = state.presenter;
+  return isPresenterOutputWindowOpen() && serviceId === p.serviceId ? MindexPresenterHistory.target(p) : null;
+}

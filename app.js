@@ -29656,6 +29656,7 @@ function renderPresenterControlsTop(service, slides, active, index) {
             <span>/ ${escapeHtml(count)}</span>
           </span>
           <button class="icon-btn" type="button" data-presenter-action="jump" data-presenter-index="${active && state.presenter.safetyBlank ? safeIndex : -1}" data-service-id="${escapeAttr(service.id)}" aria-label="${active && state.presenter.safetyBlank ? "암전 해제" : "암전"}" title="${active && state.presenter.safetyBlank ? "암전 해제" : "암전"}" aria-pressed="${Boolean(active && state.presenter.safetyBlank)}" ${count && outputOpen ? "" : "disabled"}><i data-lucide="${active && state.presenter.safetyBlank ? "eye" : "eye-off"}"></i></button>
+          <button class="icon-btn" type="button" data-presenter-action="return" data-service-id="${escapeAttr(service.id)}" aria-label="직전 송출 슬라이드로 돌아가기" title="직전 송출 슬라이드로 돌아가기" ${presenterReturnTarget(service.id) ? "" : "disabled"}><i data-lucide="undo-2"></i></button>
           <span class="svc-presenter-action-group svc-presenter-action-group--nav" aria-label="${escapeAttr(uiText("presenter.aria.slideNav"))}">
             <button class="icon-btn" type="button" data-presenter-action="prev" data-service-id="${escapeAttr(service.id)}" ${count ? "" : "disabled"} aria-label="${escapeAttr(uiText("presenter.action.prev"))}" title="${escapeAttr(uiText("presenter.action.prev"))}">
               <i data-lucide="chevron-left"></i>

@@ -6,6 +6,8 @@ const root = path.resolve(__dirname, '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const modules = ['mindex.presenter-praise.js', 'mindex.presenter-live.js', 'mindex.presenter-board.js', 'mindex.presenter-controller.js'];
 const html = read('index.html');
+assert(html.indexOf('\"mindex.presenter-history.js\"') < html.indexOf('\"mindex.presenter-controller.js\"'));
+assert(JSON.parse(read('package.json')).build.files.includes('mindex.presenter-history.js'));
 const moduleList = html.slice(html.indexOf('const modules = ['), html.indexOf('const styles = ['));
 const packaged = JSON.parse(read('package.json')).build.files;
 for (const file of modules) {

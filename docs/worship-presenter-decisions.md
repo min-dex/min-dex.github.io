@@ -4466,3 +4466,15 @@ Main/special praise keeps the separate-note title style. Render-boundary adaptat
 covers both legacy snapshots and newly built slides without rewriting stored
 forms, titles or service data. Preview and output share the same path. Browser
 regression checks actual glyph placement and title scale, not just HTML classes.
+
+
+## Controller last-output return ·2026-10-24
+
+- Current slide number keeps numeric jump and keyboard focus, with no idle box fill.
+- Icon-only return uses the preceding published slide in this output session, not
+  the preceding numbered slide. Preview/selection and repeated publications do not
+  add history. Blackout can return to its interrupted slide; live scripture can
+  return to/from the prior slide without replacing the live-input draft.
+- History is memory-only, scoped to service/output session and cleared on stop.
+  Missing/deleted targets disable return rather than selecting another index.
+- Existing numbered previous/next and output transport remain the common paths.

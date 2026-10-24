@@ -1811,6 +1811,7 @@ function refreshPresenterOutputConnectionState() {
 function publishPresenterState(options = {}) {
   const payload = presenterStatePayload();
   if (!options.force && !payload.serviceId && !payload.slides.length) return;
+  if (isPresenterOutputWindowOpen()) MindexPresenterHistory.record(payload);
   publishPresenterPayload(payload, options);
 }
 
