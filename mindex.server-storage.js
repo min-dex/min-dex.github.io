@@ -181,7 +181,10 @@
      }
     }
     const migration=await migrateLegacyState({entries,project,legacyProject,stores:next,prepare});
-    if(migration.failed.length)throw Error('LEGACY_STATE_MIGRATION_PENDING');
+    if(migration.failed.length){
+     const reasons=[...new Set(migration.failed.map(entry=>/^[A-Z][A-Z0-9_]{2,80}$/.test(entry.reason)?entry.reason:'MIGRATION_FAILED'))];
+     throw Error('LEGACY_STATE_MIGRATION_PENDING: '+reasons.join(', '));
+    }
     migrationSummary=migration;
    }
    if(connection!==captured)throw Error('SERVER_STORAGE_PROJECT_CHANGED');

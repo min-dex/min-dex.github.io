@@ -2,7 +2,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 const source=fs.readFileSync(require('node:path').join(__dirname,'../app.js'),'utf8');
 const start=source.indexOf('async function fetchWorshipRowsForServiceIds(');
 let requests=[],drafts=new Set();
-const context=vm.createContext({state:{services:[],loadedWorshipServiceIds:new Set()},
+const context=vm.createContext({ensureSingleSongActivation:async()=>{},state:{services:[],loadedWorshipServiceIds:new Set()},
  chunkArray:(a,n)=>Array.from({length:Math.ceil(a.length/n)},(_,i)=>a.slice(i*n,(i+1)*n)),
  sundayEditSyncHasLocalDraft:id=>drafts.has(id),normalizeWorshipService:s=>s,
  worshipAtomicClient:async()=>({read:(id,options)=>new Promise((resolve,reject)=>requests.push({id,options,resolve,reject}))})});

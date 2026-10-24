@@ -3,7 +3,7 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const vm=require('node:vm'),fs=require('node:fs');
 const source=readRuntimeSource('app.js');
-const bind=source.slice(source.indexOf('function bindElectronDesktopEvents()'),source.indexOf('\nfunction loadInitialData()'));
+const bind=source.slice(source.indexOf('function bindElectronDesktopEvents()'),source.indexOf('\nasync function loadInitialData()'));
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 function fixture(initial){
  let status=initial || {status:'available',version:'1.2.3',presenterOpen:false};let live=false,dirty=false,accept=true;
