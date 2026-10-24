@@ -353,3 +353,12 @@ is owned once by presenter-board alongside mini-preview composition and invoked
 by the shared output fit path. Reallocate30 unused controller lines to the board
 owner (2670/1730); keep the combined extracted-owner ceiling6550 and add an
 explicit aggregate ceiling check. Core/function/coupling limits are unchanged.
+
+
+### Output return and media status subscriptions ·2026-10-24
+
+`mindex.presenter-history.js` owns session-only output history and its controller
+adapters. It never writes worship, editor drafts or persisted history.
+`mindex.presenter-media-state.js` owns the coalesced video event subscription and
+cleanup; the existing output heartbeat remains the transport. Both load before
+app bootstrap and ship in the desktop asset list.

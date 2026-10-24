@@ -8,6 +8,9 @@ const modules = ['mindex.presenter-praise.js', 'mindex.presenter-live.js', 'mind
 const html = read('index.html');
 assert(html.indexOf('\"mindex.presenter-history.js\"') < html.indexOf('\"mindex.presenter-controller.js\"'));
 assert(JSON.parse(read('package.json')).build.files.includes('mindex.presenter-history.js'));
+assert(html.includes('\"mindex.presenter-media-state.js\"'));
+assert(JSON.parse(read('package.json')).build.files.includes('mindex.presenter-media-state.js'));
+vm.runInNewContext(read('mindex.presenter-media-state.js'), {});
 const moduleList = html.slice(html.indexOf('const modules = ['), html.indexOf('const styles = ['));
 const packaged = JSON.parse(read('package.json')).build.files;
 for (const file of modules) {

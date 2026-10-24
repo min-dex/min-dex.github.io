@@ -44,6 +44,8 @@ try:
    output.wait_for_function("!document.querySelector('.is-active video').seeking")
    revision=output.evaluate("presenterVideoRevisions.get(document.querySelector('.is-active video')).value")
    host.wait_for_function("state.presenter.videoHealth.revision==="+str(revision))
+   # Seeking increments revision before canplay; wait for the visible action to be ready too.
+   host.wait_for_function("state.presenter.videoHealth.status==='playing' && !document.querySelector('[data-global-playback-action=video-restart]').disabled")
    # Real restart, delivered twice via two controller transports, must execute once.
    output.evaluate("window.playCalls=0;window.video=document.querySelector('.is-active video');window.originalPlay=video.play.bind(video);video.play=()=>{playCalls++;return originalPlay()};void 0")
    host.evaluate("document.querySelector('[data-global-playback-action=video-restart]').click();window.secondCommand=requestPresenterVideoCommand('remote-video','restart').then(()=>true,()=>false)")
