@@ -1745,3 +1745,20 @@ span.presenter-announcement-paren,
   font-weight: 400;
   letter-spacing: -.015em;
 }
+
+/* Shared text fitting needs a bounded allocation, never clipped ellipses. */
+.presenter-assignee-tab,
+.presenter-scripture-reading-ref,
+.presenter-scripture-reading-version { text-overflow: clip; }
+.presenter-scripture-reading-head { grid-template-columns: minmax(0, 1fr) fit-content(44%); }
+.presenter-scripture-reading-ref,
+.presenter-scripture-reading-version { min-width: 0; }
+.presenter-title-content-title { flex-shrink: 0; }
+.presenter-title-content-body,
+.presenter-fullscreen-song-detail { width: 100%; min-height: 0; overflow: visible; }
+.presenter-ready-screen-copy,
+.presenter-waiting-loop-copy { min-width: 0; min-height: 0; grid-template-rows: auto minmax(0, 1fr); }
+.presenter-ready-screen,
+.presenter-waiting-loop { grid-template-rows: minmax(0, auto) auto; }
+.presenter-ready-screen-message,
+.presenter-waiting-loop-title { min-width: 0; min-height: 0; overflow-wrap: anywhere; overflow: visible; }

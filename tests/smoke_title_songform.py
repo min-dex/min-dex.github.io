@@ -36,6 +36,20 @@ try:
       const title=presenterSongTitleSlide({...item,label},{sectionKey:'response_song'},song,version,song.title,0);
       check(title.type==='title-assignee' && title.formLabel==='T' && title.contentTitle==='♪ '+song.title,'order/content title for '+label);
     }
+    for (const sectionKey of ['praise','special_song','response_song','offering','sending']) {
+      const title=presenterSongTitleSlide({...item,label:'찬양'},{sectionKey},song,version,song.title,0);
+      for (const captionTheme of ['', 'cadaros']) for (const noChromakey of [false,true]) {
+        const authored={...title,captionTheme};const before=JSON.stringify(authored);
+        const host=document.createElement('div');host.innerHTML=renderPresenterSlideFrame(authored,{noChromakey});
+        check(host.textContent.includes('♬')&&!host.textContent.includes('♪'),'Title note role '+sectionKey+noChromakey+captionTheme);
+        check(JSON.stringify(authored)===before,'note render mutated Title');
+      }
+    }
+    const content=presenterOrderContentTitleSlide(item,{sectionKey:'offering'},0,'봉헌찬양',formatPresenterSongTitleText(song.title));
+    for (const noChromakey of [false,true]) {
+      const host=document.createElement('div');host.innerHTML=renderPresenterSlideFrame(content,{noChromakey});
+      check(host.textContent.includes('♪')&&!host.textContent.includes('♬'),'content title eighth note');
+    }
     const fresh={...item};
     applyServiceItemMetadataField(fresh,{dataset:{serviceItemField:'form_hint'},value:'V1-C'},{});
     check(presenterFormPlanForServiceItem(version,fresh,song).forms.every(f=>!f._presenterTitle),'first edit can omit Title');

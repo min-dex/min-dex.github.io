@@ -1961,12 +1961,12 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   grid-template-columns: minmax(0, 1fr);
   gap: 10px;
 }
-@container (min-width: 600px) {
+@container (min-width: 440px) {
   .reference-editor-main {
     grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
   }
 }
-@container (min-width: 900px) {
+@container (min-width: 680px) {
   .reference-editor-main:has(> label:nth-child(3)) {
     grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
   }
@@ -2710,11 +2710,11 @@ body[data-module="scripture"] .scripture-editor .meta-attribute-label {
   grid-template-columns: minmax(0, 1fr);
   gap: var(--s2);
 }
-@container metadata-editor (min-width: 400px) {
+@container metadata-editor (min-width: 340px) {
   .metadata-popover-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .scripture-metadata-popover-grid { grid-template-columns: minmax(0, 1.2fr) minmax(0, .9fr); }
 }
-@container metadata-editor (min-width: 570px) {
+@container metadata-editor (min-width: 520px) {
   .metadata-popover-grid:not(.scripture-metadata-popover-grid) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 .metadata-popover-grid .field {
@@ -3271,3 +3271,9 @@ body[data-module="praise"] .song-count-badge {
 @media (max-width: 560px) {
   .form-buttons { width: 100%; }
 }
+
+/* Background fields follow their panel width, including narrow desktop panes. */
+.background-toolbar { display:flex; flex-wrap:wrap; gap:10px; }
+.background-toolbar > .background-field { flex:1 1 170px; min-width:0; }
+.background-toolbar > .background-file-field { flex:1.3 1 220px; }
+.background-toolbar > .reference-new-btn { flex:0 0 auto; }

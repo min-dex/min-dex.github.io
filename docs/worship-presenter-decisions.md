@@ -4466,3 +4466,28 @@ Main/special praise keeps the separate-note title style. Render-boundary adaptat
 covers both legacy snapshots and newly built slides without rewriting stored
 forms, titles or service data. Preview and output share the same path. Browser
 regression checks actual glyph placement and title scale, not just HTML classes.
+
+
+## Complete authored text fitting ·2026-10-24
+
+Extend the existing 1920-stage 1px fitting grid to reading assignee tabs,
+reading address/version headers, song subtitles, generic title/content bodies,
+freeform text, and generated ready/waiting service-name messages. Preserve
+authored base sizes and restore them before every measurement; never enlarge
+short copy or mutate saved content. Header versions use at most44% of their
+row, retaining room for the address; fit both instead of rendering ellipses.
+Constrain body/subtitle allocations while retaining the existing line-height.
+Measure natural line height for ready/freeform text and body line boxes for
+tight title/content bodies, so font ink fringes do not trigger unnecessary
+shrinking. Output and transformed thumbnails invoke the same fitting path;
+font completion invalidates all these fits. Scripture body pagination, actual
+media pixels and file metadata remain unchanged. Chromium/WebKit regression
+coverage checks all six paths, short-copy restoration, stable retries and
+thumbnail/output parity; publication is recorded separately.
+## Praise Title note by role ·2026-10-24
+
+Every praise Title/T frame uses the existing fullscreen double-note glyph ♬,
+including Cadaros and secondary praise, in chromakey and fullscreen rendering.
+A song name appearing only as an order's content title uses the eighth note ♪.
+Choose by Title form/type, not team or section. Preserve placement, font,
+source slides, saved forms and content; normalize the glyph in the view only.

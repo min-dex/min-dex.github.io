@@ -1,3 +1,5 @@
+import os
+os.environ["MINDEX_SMOKE_OFFLINE"] = "1"
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 server, url = start_local_app_server()
@@ -8,7 +10,7 @@ try:
             page = browser.new_page()
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url, wait_until='domcontentloaded')
-            page.wait_for_function("typeof renderGlobalSearchSections === 'function'")
+            page.wait_for_function("typeof renderGlobalSearchSections === 'function' && !document.body.classList.contains('ui-booting')")
             print(engine, page.evaluate('''() => {
               const check=(v,m)=>{if(!v)throw Error(m)};
               songCatalogLoaded=true;state.search='많은 사람들';

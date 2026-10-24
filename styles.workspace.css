@@ -3885,7 +3885,7 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
   padding-left: 2px;
 }
 .svc-board-subgroup-controls .svc-presenter-input-field {
-  flex: 1 1 220px;
+  flex: 1 1 180px;
   max-width: 100%;
   display: grid;
   min-width: 0;
@@ -3917,7 +3917,7 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
   min-width: 156px;
 }
 .svc-board-subgroup-controls .svc-presenter-input-field--assignee {
-  flex: 0 1 180px;
+  flex: 0 1 140px;
   grid-column: 2;
 }
 .svc-board-subgroup-controls .svc-presenter-input-field > span {
@@ -4030,8 +4030,8 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
   flex-wrap: wrap;
 }
 .svc-board-subgroup-controls .svc-song-picker--linked:has(.svc-song-version-select) {
-  flex: 0 1 184px;
-  width: 184px;
+  flex: 0 1 144px;
+  width: 144px;
 }
 .svc-board-subgroup-controls .svc-song-picker--linked .svc-song-version-select {
   flex: 1 1 0;
@@ -4046,7 +4046,7 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
 .svc-board-subgroup-controls .svc-presenter-input-field--song .svc-form-hint.compact {
   height: 30px;
   /* Keep the base width for wrapping, but use spare room so long forms stay readable. */
-  flex: 1 1 144px;
+  flex: 1 1 110px;
   max-width: 240px;
 }
 .svc-board-subgroup-control-item > .svc-presenter-input-field--song,
@@ -4157,7 +4157,7 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
 .svc-board-subgroup-controls .svc-presenter-input-group--corporate-prayer > .svc-presenter-input-field {
   grid-template-columns: max-content minmax(0, 1fr) minmax(130px, .35fr);
 }
-@container (max-width: 480px) {
+@container (max-width: 360px) {
   .svc-board-subgroup-controls .svc-presenter-input-group--corporate-prayer > .svc-presenter-input-field {
     grid-template-columns: max-content minmax(0, 1fr);
   }
@@ -4825,7 +4825,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
     width: calc(100vw - 20px);
   }
 }
-@container section-editor (max-width: 549px) {
+@container section-editor (max-width: 419px) {
   .presenter-section-editor-item,
   .presenter-section-editor-add {
     grid-template-columns: minmax(0, 1fr);

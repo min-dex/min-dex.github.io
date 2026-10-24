@@ -84,6 +84,47 @@ try:
         check(bounds.left>=stage.left-1 && bounds.right<=stage.right+1,'order/person outside stage '+JSON.stringify({sermon,cls:node.className,bounds:bounds.toJSON(),stage:stage.toJSON()}));
       }
     }
+    const E=PRESENTER_ELEMENT_TYPES,L=PRESENTER_SLIDE_LAYOUTS;
+    const supplemental=[
+      {name:'subtitle',selector:'.presenter-fullscreen-song-detail',slide:{type:'song-title',elementType:E.PRAISE,layout:L.LOWER_BAR_TEXT,songTitle:'찬양 제목',songTitleContent:{title:'찬양 제목',detail:('함께 부르는 찬양의 원제와 부제 설명 ').repeat(40),detailKind:'subtitle'}}},
+      {name:'body',selector:'.presenter-title-content-body',slide:{type:'title-content',elementType:E.TITLE_CONTENT,layout:L.CENTER_TEXT,title:'안내',bodyText:Array.from({length:15},(_,i)=>(i+1)+' 예배를 준비하며 함께 나눌 안내 내용입니다.').join('\\n')}},
+      {name:'header',selector:'.presenter-scripture-reading-ref,.presenter-scripture-reading-version',slide:{type:'scripture',elementType:E.SCRIPTURE_TEXT,layout:L.LOWER_BAR_TEXT,scriptureContext:'reading',title:('요한계시록 21:1–22:21, ').repeat(7),translationLabel:'New Revised Standard Version Updated Edition',text:'1 성경 본문'}},
+      {name:'assignee',selector:'.presenter-assignee-tab',slide:{type:'title-assignee',elementType:E.TITLE_ASSIGNEE,layout:L.LOWER_BAR_TEXT,sectionKey:'scripture_reading',label:'성경봉독',title:'성경봉독',scriptureReadingAssignee:'홍길동 집사 · 김민수 집사 · 이영희 집사 · 박민수 집사',assignee:'다같이'}},
+      {name:'ready',selector:'.presenter-ready-screen-message',slide:{type:'ready',readyServiceName:('2026년검단우리교회온세대추수감사절감사찬양예배').repeat(5)}},
+      {name:'waiting',chromakey:true,selector:'.presenter-waiting-loop-title',slide:{type:'ready',presenterRole:'waiting_loop',outputContext:'chromakey',readyServiceName:('2026년검단우리교회온세대추수감사절감사찬양예배').repeat(15)}},
+      {name:'freeform',selector:'.presenter-slide-text',slide:{type:'component',elementType:E.FREEFORM,layout:L.CENTER_TEXT,title:'',text:'함께 드리는 예배의 안내 문장입니다.'.repeat(8)}}
+    ];
+    const supplementalResults=[];
+    for(const row of supplemental){
+      const sizes=[];
+      for(const mini of [false,true]){
+        root.className='presenter-output-root'+(row.chromakey?'':' no-chromakey')+(mini?' svc-slide-mini-canvas':'');
+        root.style.cssText=`position:relative;left:0;top:0;width:1920px;height:1080px;transform:${mini?'scale(.2)':'none'}`;
+        root.innerHTML=renderPresenterSlideFrame(row.slide,{noChromakey:!row.chromakey});
+        const nodes=[...root.querySelectorAll(row.selector)];check(nodes.length>0,'missing fixture '+row.name);
+        const base=nodes.map(n=>parseFloat(getComputedStyle(n).fontSize));
+        fitPresenterSongTitleText(root);fitPresenterSermonTitleText(root);
+        const fitted=nodes.map(n=>parseFloat(getComputedStyle(n).fontSize));
+        check(fitted.some((n,i)=>n<base[i]),'not fitted '+row.name);
+        const stage=root.getBoundingClientRect(),tolerance=stage.width/1920;
+        nodes.forEach((n,i)=>{
+          check(!n.dataset.presenterFitOverflow,'still overflowing '+row.name);
+          check(n.scrollWidth<=n.clientWidth+1,'horizontal overflow '+row.name);
+          const rect=n.getBoundingClientRect();
+          check(rect.left>=stage.left-tolerance&&rect.right<=stage.right+tolerance&&rect.top>=stage.top-tolerance&&rect.bottom<=stage.bottom+tolerance,'outside stage '+row.name);
+          check(Number.isInteger(fitted[i])&&fitted[i]<=base[i],'bad grid '+row.name);
+        });
+        fitPresenterSongTitleText(root);fitPresenterSermonTitleText(root);
+        check(JSON.stringify(fitted)===JSON.stringify(nodes.map(n=>parseFloat(getComputedStyle(n).fontSize))),'supplemental refit drift '+row.name);
+        sizes.push(fitted);
+        // Editing back to short text restores the authored base at the same node.
+        nodes.forEach(n=>n.textContent='짧게');fitPresenterSermonTitleText(root);
+        nodes.forEach((n,i)=>check(parseFloat(getComputedStyle(n).fontSize)===base[i],'short content shrunk '+row.name+JSON.stringify({base:base[i],after:getComputedStyle(n).fontSize,h:n.clientHeight,sh:n.scrollHeight,html:n.outerHTML})));
+      }
+      check(JSON.stringify(sizes[0])===JSON.stringify(sizes[1]),'supplemental preview/output mismatch '+row.name);
+      supplementalResults.push({name:row.name,sizes:sizes[0]});
+    }
+    results.push({supplemental:supplementalResults});
     return {result:'PASS common1px fit, no readability floors, preview/output parity, retry reset and small-copy preservation',results};
    }'''),flush=True)
    browser.close()
