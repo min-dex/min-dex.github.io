@@ -52,4 +52,14 @@ c.assert=assert;c.setImmediate=setImmediate;
  pending={request:{requestId:'unrelated'}};await assert.rejects(persistWorshipSetlistLeader('worship:live','x','추가 입력'),/이전 예배 저장/);assert.equal(replayCount,1);
  console.log('PASS owned atomic replay before newer input, unrelated pending request protected');
 
+ pending=null;fail=false;let conflictMessage='';showToast=x=>conflictMessage=x;
+ for (const id of ['archive','worship:live']) {
+   const get=()=>id==='archive'?db.mindex_worship_import_sources.raw_payload.service.leader:db.mindex_worship_services.praise_leader;
+   const set=value=>{if(id==='archive')db.mindex_worship_import_sources.raw_payload.service.leader=value;else db.mindex_worship_services.praise_leader=value};
+   worshipSetlistLeaderDrafts.set(id,{original:get(),value:'탭 A 입력',saving:false});set('탭 B 저장');
+   await saveWorshipSetlistLeader(id);assert.equal(get(),'탭 B 저장');assert.equal(worshipSetlistLeaderDrafts.get(id).value,'탭 A 입력');assert.equal(worshipSetlistLeaderDrafts.get(id).retry,undefined);
+   worshipSetlistLeaderDrafts.get(id).value='탭 B 저장';await saveWorshipSetlistLeader(id);assert.equal(worshipSetlistLeaderDrafts.has(id),false);
+ }
+ console.log('PASS cross-tab conflict preserves both names; edited retry acknowledges current server name');
+
 })()`,c);}catch(e){console.error(e);process.exitCode=1}})();

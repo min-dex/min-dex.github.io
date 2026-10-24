@@ -447,3 +447,12 @@ the catalogue loaded, using its original ID after catalogue readiness. An editio
 that is still unavailable never falls back to the default. No saved selection,
 verse body or worship record is changed by this resolution. Delayed catalogue
 coverage exercises both paths and retains the existing cache/stale-load checks.
+
+## Setlist leader conflicts · 2026-10-24
+
+A known rejected leader save discards only its retry attempt, retaining current
+input. A leader mismatch records the observed remote name as the next comparison
+baseline; the next explicit save uses the current input and checks again for
+further remote changes. Proven SQL rollback also clears the obsolete attempt.
+Unknown transport/journal outcomes retain exact-request replay before any newer
+input is saved. Neither path reloads the editor or discards unsaved input.
