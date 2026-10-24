@@ -1,10 +1,7 @@
 function runPresenterAction(action, serviceId = state.selectedServiceId, options = {}) {
   const p = state.presenter;
   if (action === "return") { restorePresenterPreviousOutput(serviceId); return; }
-  if (action === "fullscreen") {
-    requestPresenterOutputFullscreenFromController();
-    return;
-  }
+  if (action === "fullscreen") { requestPresenterOutputFullscreenFromController(); return; }
   if (["pptx-play", "pptx-pause"].includes(action)) {
     if (serviceId === p.serviceId && requestPresenterPptxMedia(p, action === "pptx-play" ? "play" : "pause")) {
       publishPresenterState(); renderPresenterControlState(serviceId);
