@@ -43,7 +43,11 @@ try:
     worshipAtomicClient=async()=>({});
     await loadInitialData();check(projected,'home loader missing');
     loadServiceData=originalLoad;worshipAtomicClient=originalAtomic;
-    const saved=state.singleSongRepository;state.client={rpc:()=>{throw Error('wrong project')}};
+    const saved=state.singleSongRepository;
+    const batches=[];state.singleSongRepository={read:async ids=>{batches.push(ids.length);return records.filter(r=>ids.includes(r.id))}};
+    const reread=await readSingleSongs(records.map(r=>r.id));
+    check(reread.length===201&&JSON.stringify(batches)==='[100,100,1]','unbounded native reread');
+    state.singleSongRepository=saved;state.client={rpc:()=>{throw Error('wrong project')}};
     blocked=false;try{await ensureSingleSongActivation()}catch{blocked=true}check(blocked&&state.singleSongRepository===saved,'project changed silently');
     const missing=await MindexSingleSong.loadActivation({rpc:async()=>({error:{code:'PGRST202',message:'get_praise_storage_status_v1 not found'}})});check(missing.phase==='legacy','explicit absent RPC');
     return 'PASS default-off, maintenance/network/drift fail closed, draft retention, paginated native install, coalescing and project boundary';

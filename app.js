@@ -3094,6 +3094,16 @@ async function loadSongsOnce(context = {}) {
   await ensureSingleSongActivation();
   if (state.singleSongRepository) {
     await loadSongsForIds(state.singleSongCatalog.ids());
+    songCatalogLoaded = songCatalogSummaryLoaded = true;
+    clearSearchCaches();
+    if (context.searchOnly) { if (isGlobalSearchActive()) renderGlobalSearchList(); return; }
+    const selectedSong = getSelectedSong();
+    if (selectedSong) {
+      state.selectedVersionId = selectedSong.id;
+      await loadForms(selectedSong.id);
+    }
+    finishDataLoading("praise");
+    render();
     return;
   }
   if (!requireClient()) return;

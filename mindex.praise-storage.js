@@ -296,7 +296,12 @@ function installSingleSongSession(records, repository, {worshipStorage = "native
 
 async function readSingleSongs(ids) {
   const repository = state.singleSongRepository;
-  const rows = await repository.read([...new Set(ids)]);
+  const uniqueIds = [...new Set(ids)];
+  const rows = [];
+  // Bound each read: the full native catalogue exceeds the hosted SQL timeout.
+  for (let at = 0; at < uniqueIds.length; at += 100) {
+    rows.push(...await repository.read(uniqueIds.slice(at, at + 100)));
+  }
   const catalog = globalThis.MindexSingleSong.createCatalog(rows);
   if (ids.some(id => !catalog.ids().includes(id))) throw new Error("SONG_REFERENCE_MISSING");
   if (repository !== state.singleSongRepository) throw new Error("SINGLE_SONG_REPOSITORY_CHANGED");
