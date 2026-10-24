@@ -32,6 +32,13 @@ for (const file of modules) {
 const styles = html.slice(html.indexOf('const styles = ['), html.indexOf('const retryUrl ='));
 assert.match(styles, /"styles.css", "styles.workspace.css", "styles.presenter-output.css"/);
 assert(packaged.includes('styles*.css'), 'all ordered styles must ship in desktop');
+assert(moduleList.includes('"mindex.praise-media.js"'));
+assert(packaged.includes('mindex.praise-media.js'));
+assert(styles.includes('"styles.praise-media.css"'));
+const mediaContext=vm.createContext({});
+vm.runInContext(read('mindex.praise-media.js'),mediaContext);
+assert.equal(typeof mediaContext.MindexPraiseMedia.render,'function');
+assert.equal(typeof mediaContext.MindexPraiseMedia.mount,'function');
 const source = read('app.js');
 assert(!source.includes('function runPresenterAction('), 'controller has one owner');
 assert(!read('mindex.presenter.js').includes('function presenterFormPlanForServiceItem('), 'praise planner has one owner');

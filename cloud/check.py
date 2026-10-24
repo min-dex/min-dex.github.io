@@ -168,6 +168,7 @@ SMOKES = (
     "smoke_independent_photo_timing.py",
     "smoke_song_photo_timing.py",
     "smoke_children_audio_db.py",
+    "smoke_praise_media.py",
     "smoke_reference_batch.py",
     "smoke_theme_bootstrap.py",
     "smoke_theme_switch.py",

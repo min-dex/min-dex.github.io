@@ -76,6 +76,7 @@
       "mindex.presenter-media-state.js",
       "mindex.presenter-controller.js",
       "mindex.song-timing.js",
+      "mindex.praise-media.js",
       "mindex.scripture-repair-display.js",
       "mindex.pptx.js",
       "mindex.worship-input.js",

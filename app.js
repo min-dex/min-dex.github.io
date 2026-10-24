@@ -16995,6 +16995,7 @@ function renderDetail() {
 
   refreshIcons(refs.detailPane);
   resizeFormTextareas();
+  globalThis.MindexPraiseMedia?.mount(refs.detailPane);
 }
 
 function renderPraiseEmptyDetail() {
@@ -17859,6 +17860,7 @@ function renderLinkedSongVersionHead(entry) {
       <div class="version-title-actions">
         <span class="linked-version-open" aria-hidden="true"><i data-lucide="external-link"></i></span>
       </div>
+      ${globalThis.MindexPraiseMedia?.render(entry.song, entry.version) || ""}
     </div>
   `;
 }
@@ -17900,35 +17902,8 @@ function renderVersionTitleContent(song, version, forms, options = {}) {
       </div>
     </div>
     ${renderVersionAudioSummary(version, forms)}
+    ${globalThis.MindexPraiseMedia?.render(song, version) || ""}
   `;
-}
-
-// Read-only summary of the selected version's persisted audio; never borrow song memo data.
-function versionAudioSummaryStatus(version, forms) {
-  const audio = version?.audio_set;
-  if (!audio) return "";
-  const count = Array.isArray(audio.starts) ? audio.starts.filter(value => Number.isFinite(value) && value >= 0).length : 0;
-  const changed = globalThis.MindexSongTiming && audio.sourceSignature !== MindexSongTiming.sourceSignature({ ...version, forms });
-  const status = changed ? "가사 변경 · 타이밍 확인 필요" : `저장된 자동 넘김 ${audio.enabled ? "켜짐" : "꺼짐"}`;
-  return `${count ? `저장 타이밍 ${count}개` : "저장 타이밍 없음"} · ${status}`;
-}
-
-function renderVersionAudioSummary(version, forms) {
-  const audio = version?.audio_set;
-  if (!audio || !String(audio.audioUrl || "").trim()) return "";
-  return `<div class="version-audio-summary" data-version-audio-summary="${escapeAttr(version.id)}" aria-label="버전에 저장된 음원·타이밍">
-    <span class="version-audio-summary-name">음원 · ${escapeHtml(audio.audioName || "등록된 음원")}</span>
-    <span data-version-audio-status>${escapeHtml(versionAudioSummaryStatus(version, forms))}</span>
-  </div>`;
-}
-
-function updateVersionAudioSummary(version, forms) {
-  refs.detailPane?.querySelectorAll("[data-version-audio-summary]").forEach(node => {
-    if (node.dataset.versionAudioSummary !== version.id) return;
-    const status = node.querySelector("[data-version-audio-status]");
-    const text = versionAudioSummaryStatus(version, forms);
-    if (status && status.textContent !== text) status.textContent = text;
-  });
 }
 
 let hymnStructureRenderTicket = 0;
