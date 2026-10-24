@@ -6506,11 +6506,11 @@ def main() -> int:
                     if (
                         service_source_view.get("ready")
                         and service_source_view.get("hasRoot")
-                        and service_source_view.get("hasSourcePanel")
-                        and service_source_view.get("hasEditableText")
-                        and service_source_view.get("hasSignature")
-                        and service_source_view.get("hasApply")
-                        and service_source_view.get("hasCopy")
+                        and not service_source_view.get("hasSourcePanel")
+                        and not service_source_view.get("hasEditableText")
+                        and not service_source_view.get("hasSignature")
+                        and not service_source_view.get("hasApply")
+                        and not service_source_view.get("hasCopy")
                         and "# " not in service_source_view["source"]
                         and "date:" not in service_source_view["source"]
                         and "[신앙고백]" not in service_source_view["source"]

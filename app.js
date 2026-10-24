@@ -7146,7 +7146,7 @@ async function openWorshipConflictReview(serviceId) {
     showToast(toastLines(
       "편집을 계속합니다. 아직 저장하지 않았습니다.",
       serverSnapshotPreserved
-        ? "서버 최신본은 예배 원문의 서버 복구본에 보관했습니다."
+        ? "서버 최신본은 별도 보관본으로 남겼습니다."
         : "서버 최신본 복구본은 보관하지 못했지만, 현재 입력은 그대로 유지됩니다.",
     ), "info");
   });
@@ -7176,7 +7176,7 @@ async function openWorshipConflictReview(serviceId) {
     updateSaveState();
     showToast(toastLines(
       "최신본을 열었습니다.",
-      "기존 입력은 예배 원문의 서버 복구본에서 확인할 수 있습니다.",
+      "기존 입력은 별도 보관본으로 남겼습니다.",
     ), "info");
   });
   worshipConflictReview = dialog;
@@ -25781,7 +25781,6 @@ function renderServicePresenterControlsUnscoped(service, slides = [], active = f
     >
       ${renderPastServiceEditingNotice(service)}
       <div class="svc-presenter-toolbar">
-        ${renderServiceSourcePanel(service)}
         ${renderPresenterThumbScaleControl()}
         ${renderPresenterFocusView()}
         ${serviceSupportsBulletin(service) ? `<button class="svc-output-action" type="button" data-service-bulletin-action="open" data-service-id="${escapeAttr(service.id)}"><i data-lucide="newspaper"></i><span>주보</span></button>` : ""}
