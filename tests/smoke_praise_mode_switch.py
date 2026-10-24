@@ -50,6 +50,7 @@ try:
     const before=JSON.stringify({legacy,hymn});
     const pendingDeck=buildPresenterSlidesForServiceItem(legacy,service,0,{allowHydration:false});
     check(pendingDeck.length>0&&pendingDeck.some(s=>s.loadingContent),'cold score load disappeared');
+    check(serviceFormInputWarnings(legacy).length===0&&!renderServiceFormHintInput(legacy,0).includes('aria-invalid="true"'),'loading became form error');
     const explicit={...legacy,memo:serializeServiceItemMemo({...parseServiceItemMemo(legacy.memo),asset:{kind:'score',slides:[{url:'assets/icon-192.png',formLabel:'V1'}]}})};
     check(buildPresenterSlidesForServiceItem(explicit,service,0,{allowHydration:false}).some(s=>s.type==='image')&&!buildPresenterSlidesForServiceItem(explicit,service,0,{allowHydration:false}).some(s=>s.loadingContent),'authored score waits for manifest');
     state.hymnScoreManifest={'301':{title:'모드 검증',slides:[{src:'assets/icon-192.png',scoreFormLabel:'Verse 1',scoreFormKey:'score:verse-1'},{src:'assets/icon-512.png'},{src:'assets/icon-192.png',scoreFormLabel:'Verse 2',scoreFormKey:'score:verse-2'}]}};state.hymnScoreManifestLoaded=true;

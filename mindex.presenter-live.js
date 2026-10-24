@@ -396,8 +396,7 @@ function syncServiceMusicSyncedLyricsWithCurrentTime(options = {}) {
   const activeIndex = clampPresenterIndex(state.presenter.index, slides.length);
   const activeSync = presenterSyncTimelineForSlide(slides[activeIndex]);
   if (!activeSync) return false;
-  // A URL may be reused by another occurrence. Only its explicitly started
-  // local timing group may drive output; manual navigation keeps audio alive.
+  // A reused URL is not occurrence identity; local timing keeps its explicit owner.
   if (slides[activeIndex]?.syncTimeline?.localTiming
     && state.serviceMusic.timingGroupId !== activeSync.groupId) return false;
   const source = normalizePresenterMediaSource(state.serviceMusic.sourceKey || audio.currentSrc || audio.src || "");

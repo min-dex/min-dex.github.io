@@ -4626,7 +4626,8 @@ rewrites saved config, lyrics, versions, timing or worship rows.
 A hymn awaiting the shared score manifest shows the existing loading frame
 instead of an empty deck. Authored assets remain usable
 without waiting for that manifest. The established loader refreshes the same
-service when the manifest arrives. No production data migration is required.
+service when the manifest arrives. Loading notices are not form-input errors.
+No production data migration is required.
 
 
 ## 2026-10-24 — Auto-sync follows the active playback owner

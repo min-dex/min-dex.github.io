@@ -1686,7 +1686,7 @@ function serviceFormInputWarnings(item, value = null) {
   const service = state.services.find(candidate => candidate.id === item.service_id) || selectedServiceForEditor();
   if (!service) return [];
   const slides = buildPresenterSlidesForServiceItem(draft, service, 0, { allowHydration: false });
-  return uniqueList(slides.flatMap(slide => slide.warnings || []));
+  return uniqueList(slides.flatMap(slide => slide.loadingContent ? [] : slide.warnings || []));
 }
 
 function syncServiceFormInputError(field) {
