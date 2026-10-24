@@ -4511,3 +4511,11 @@ controls inside. Preserve its user-chosen open state across mounted item rerende
 never auto-expand existing manual records. Values/drafts, atomic save and output
 resolution are unchanged. Reference add/upload labels and background disclosures
 use text without decorative icons/triangles, retaining native keyboard behavior.
+
+
+## Ready-message emphasis ·2026-10-24
+
+Fullscreen ready messages and generated waiting-loop messages share600 regular
+copy /800 service-name emphasis. The existing strong span marks the service
+name; preserve100px authored base size, content, layout, colors and the common
+1px overflow fitting. Thumbnails and actual output use the same stylesheet.

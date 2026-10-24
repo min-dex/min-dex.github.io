@@ -448,13 +448,13 @@
   max-width: 100%;
   color: #fff;
   font-size: calc(100 * var(--presenter-stage-unit));
-  font-weight: 760;
+  font-weight: 600;
   line-height: 1.08;
   word-break: keep-all;
 }
 .presenter-ready-screen-message strong {
   color: inherit;
-  font-weight: 860;
+  font-weight: 800;
 }
 .presenter-output-root.no-chromakey.has-background .presenter-ready-screen,
 .presenter-output-root.no-chromakey.has-background .presenter-waiting-loop {
@@ -545,12 +545,12 @@
   max-width: 100%;
   color: #f4d99f;
   font-size: calc(100 * var(--presenter-stage-unit));
-  font-weight: 860;
+  font-weight: 600;
   line-height: 1.04;
   word-break: keep-all;
 }
 .presenter-waiting-loop-title strong {
-  font-weight: inherit;
+  font-weight: 800;
 }
 .presenter-slide--title .presenter-slide-text {
   align-items: center;
