@@ -25,9 +25,22 @@ try:
     const shell=document.createElement('main');shell.id='fixtureHost';shell.style.cssText='padding:20px;width:100%;box-sizing:border-box';
     refs.detailPane.style.cssText='width:100%;padding:0;min-width:0';shell.append(refs.detailPane);document.body.replaceChildren(shell);
    }''')
+   page.evaluate('''()=>{
+    const actions=document.createElement('div');actions.className='svc-board-subgroup-flow';
+    actions.innerHTML=renderPresenterReferenceMediaQuickAdd('sermon',state.selectedServiceId)+renderPresenterProgressionAdd({id:'background',label:'찬양',memo:serializeServiceItemMemo({elementType:'praise'})},0,state.selectedServiceId);
+    document.getElementById('fixtureHost').append(actions);refreshIcons(actions);
+    if(actions.querySelector('.svc-reference-media-quick-add i, .svc-reference-media-quick-add svg'))throw Error('decorative add/upload icon retained');
+    const background=actions.querySelector('.svc-progression-media');
+    if(!background)throw Error('background action fixture missing');
+    for(const open of [false,true]){background.open=open;const marker=getComputedStyle(background.querySelector('summary'),'::before').content;if(!['none','normal','""'].includes(marker))throw Error('background triangle retained');}
+   }''')
    select=page.locator('[data-service-item-field=scripture_reference_translation_id]')
    label=page.locator('[data-service-item-field=manual_scripture_translation_label]')
    body=page.locator('[data-service-item-field=manual_scripture_text]')
+   disclosure=page.locator('details[data-citation-translations]')
+   assert not disclosure.evaluate('e=>e.open') and not body.is_visible()
+   disclosure.locator('summary').click()
+   assert disclosure.evaluate('e=>e.open')
    assert select.input_value()=='__manual__';assert label.input_value()=='새한글성경';assert body.is_visible()
    assert page.evaluate('getServiceItems(state.selectedServiceId)[0].memo===citationBefore')
    assert page.locator('.svc-presenter-input-field--scripture-parts details').count()==0
@@ -96,6 +109,11 @@ try:
     const memo=parseServiceItemMemo(getServiceItems(state.selectedServiceId)[0].memo);
     if(memo.scriptureReferencePayloads.length!==1)throw Error('other reference modified');
    }""")
-   print(engine,'PASS legacy display, real selector/draft/roundtrip, DB/manual resolution, hidden-field guard, focus and wide/narrow layouts',flush=True)
+   disclosure.locator('summary').click()
+   page.evaluate('renderCitationFixture()')
+   assert not disclosure.evaluate('e=>e.open') and not bodies.nth(1).is_visible()
+   disclosure.locator('summary').click()
+   assert bodies.nth(1).input_value()=='16 두 번째 인용'
+   print(engine,'PASS collapsed default, retained disclosure state, legacy display, real selector/draft/roundtrip, DB/manual resolution, hidden-field guard, focus and wide/narrow layouts',flush=True)
    browser.close()
 finally:server.shutdown()

@@ -842,22 +842,22 @@ function renderPresenterReferenceMediaQuickAdd(sectionKey, serviceId) {
   return `
     <details class="svc-reference-media-quick-add">
       <summary class="svc-reference-media-add" aria-label="${escapeAttr(sectionLabel)} 자료 추가" title="자료 추가">
-        <i data-lucide="plus"></i><span>추가</span>
+        <span>추가</span>
       </summary>
       <div class="svc-reference-media-quick-add-actions">
         <label class="svc-reference-media-upload">
           <input type="file" accept=".pptx" data-presenter-pptx-file
             data-presenter-reference-media-section="${escapeAttr(sectionKey)}" data-service-id="${escapeAttr(serviceId)}" aria-label="PPT 삽입" />
-          <i data-lucide="presentation"></i><span>PPT 삽입</span>
+          <span>PPT 삽입</span>
         </label>
         <label class="svc-reference-media-upload">
           <input type="file" multiple accept="${PRESENTER_REFERENCE_MEDIA_ACCEPT}" data-presenter-reference-media-direct-file
             data-presenter-reference-media-section="${escapeAttr(sectionKey)}" data-service-id="${escapeAttr(serviceId)}" aria-label="파일 선택" />
-          <i data-lucide="upload"></i><span>파일 선택</span>
+          <span>파일 선택</span>
         </label>
         <button class="svc-reference-media-add" type="button" data-presenter-reference-media-add
           data-presenter-reference-media-section="${escapeAttr(sectionKey)}" data-service-id="${escapeAttr(serviceId)}">
-          <i data-lucide="link"></i><span>URL 입력</span>
+          <span>URL 입력</span>
         </button>
       </div>
     </details>`;

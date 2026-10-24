@@ -1,3 +1,5 @@
+import os
+os.environ["MINDEX_SMOKE_OFFLINE"]="1"
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 
@@ -8,8 +10,8 @@ try:
           browser = launch_chromium(p) if engine == "chrome" else p.webkit.launch()
           page = browser.new_page(viewport={"width": 1920, "height": 1080})
           page.route("**/*supabase*/**", lambda route: route.abort())
-          page.goto(url, wait_until="domcontentloaded")
-          page.wait_for_function("typeof renderPresenterServiceScriptureInput === 'function'")
+          page.goto(url+'?mindexSmokeRaw=1', wait_until="domcontentloaded")
+          page.wait_for_function("typeof renderPresenterServiceScriptureInput === 'function' && !document.body.classList.contains('ui-booting')")
           result = page.evaluate("""() => {
           document.body.classList.remove('ui-booting'); document.body.dataset.theme='dark';
           const service={id:'citation-compact', type_id:'sunday-main'};
@@ -22,7 +24,10 @@ try:
           const input=host.querySelector('.svc-presenter-input-control-wrap');
           const summary=host.querySelector('summary');
           const box=outer.getBoundingClientRect(), inputBox=input.getBoundingClientRect(), summaryBox=summary.getBoundingClientRect();
-          const details=host.querySelector('details'); details.open=true;
+          const details=host.querySelector('details');
+          if(details.open)throw Error('translations must start collapsed');
+          if(host.querySelector('[data-service-item-field="scripture_reference_translation_id"]').checkVisibility())throw Error('closed translation visible');
+          details.open=true;
           const expanded=host.querySelector('.svc-presenter-scripture-parts').getBoundingClientRect().height;
           return {height:box.height,top:inputBox.top-box.top,bottom:box.bottom-Math.max(inputBox.bottom,summaryBox.bottom),summaryHeight:summaryBox.height,expanded};
           }""")
