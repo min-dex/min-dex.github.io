@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261024-popup-control-alignment",
+  "version": "20261024-song-note-layout-batch",
   "options": {
     "compress": false,
     "mangle": {
