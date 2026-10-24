@@ -45,3 +45,12 @@ Normalize NFKC before contextual list parsing. A bare number after a chapter-onl
 reference denotes another chapter; after a verse reference it denotes another
 verse in that chapter. Special chapter labels reject explicit zero endpoints
 instead of dropping them. Invalid fragments still invalidate the complete input.
+
+## Live input feedback ·2026-10-24
+
+Scripture address fields validate the current draft for field/wrapper colors and
+accessible error text while typing, including after rerender. This is syntax
+feedback only: presenter text/model/output stays committed until Enter. Existing
+endpoint verification and atomic save remain unchanged. Version selection refreshes
+form-field/header warnings immediately before persistence completes, without
+changing form drafts or replacing focused controls.

@@ -9639,6 +9639,7 @@ function handleDetailInput(event) {
   if (serviceField) {
     markServiceInputFeedbackChanged(serviceField);
     syncServiceFormInputError(serviceField);
+    syncServiceScriptureInputError(serviceField);
     if (isDeferredServiceTextInput(serviceField)) {
       if (isServiceSongTitleInputField(serviceField)) {
         scheduleServiceSongPickerPreview(serviceField);
@@ -9848,6 +9849,7 @@ function handleDetailChange(event) {
       return;
     }
     updateServiceItemField(serviceField);
+    syncServiceVersionFormErrors(serviceField);
     if (serviceField.matches("select")) {
       saveCommittedServiceItem(serviceField.dataset.serviceItemIndex, serviceField.dataset.serviceId || state.selectedServiceId, serviceItemSelectSaveOptions(serviceField));
     }
@@ -25412,7 +25414,7 @@ async function persistWorshipSetlistLeader(id, value, expectedLeader, attempt = 
     if (sundayEditSyncHasLocalDraft(serviceId)) throw new Error("이 예배에 편집 중인 내용이 있습니다. 먼저 저장한 뒤 인도자를 변경해 주세요.");
     const aggregate = await atomic.read(serviceId);
     if (sundayEditSyncHasLocalDraft(serviceId) || ![expectedLeader, leader].includes(String(aggregate.service.praise_leader || "").trim())) {
-      throw new Error("다른 곳에서 인도자가 변경됐거나 편집 중입니다. 최신 예배를 확인해 주세요.");
+      throw Object.assign(new Error("다른 곳에서 인도자가 변경됐거나 편집 중입니다. 입력은 유지했어요. 확인 후 다시 저장해 주세요."), { code: "LEADER_CONFLICT", latestLeader: String(aggregate.service.praise_leader || "").trim() });
     }
     const service = normalizeWorshipService(aggregate.service);
     const document = aggregate.service.source_ref?.[MINDEX_SERVICE_DOCUMENT_SOURCE_REF_KEY]
@@ -25433,7 +25435,7 @@ async function persistWorshipSetlistLeader(id, value, expectedLeader, attempt = 
       .select("id,raw_payload,updated_at").eq("id", id).single();
     if (current.error) throw current.error;
     const payload = current.data?.raw_payload || {};
-    if (![expectedLeader, leader].includes(String(payload.service?.leader || "").trim())) throw new Error("다른 곳에서 인도자가 변경됐어요. 새로고침 후 다시 확인해 주세요.");
+    if (![expectedLeader, leader].includes(String(payload.service?.leader || "").trim())) throw Object.assign(new Error("다른 곳에서 인도자가 변경됐어요. 입력은 유지했어요. 확인 후 다시 저장해 주세요."), { code: "LEADER_CONFLICT", latestLeader: String(payload.service?.leader || "").trim() });
     if (String(payload.service?.leader || "").trim() === leader) row = current.data;
     else {
       const result = await state.client.from("mindex_worship_import_sources")
@@ -25443,7 +25445,7 @@ async function persistWorshipSetlistLeader(id, value, expectedLeader, attempt = 
       row = result.data;
     }
   }
-  if (!row) throw new Error("다른 곳에서 인도자가 변경됐어요. 새로고침 후 다시 확인해 주세요.");
+  if (!row) throw Object.assign(new Error("다른 곳에서 인도자가 변경됐어요. 입력은 유지했어요. 다시 저장해 주세요."), { code: "LEADER_CONFLICT" });
   const archive = state.worshipSetlistArchive;
   if (serviceId) {
     const live = archive.live?.services?.find(service => service.id === serviceId);
@@ -25514,7 +25516,15 @@ async function saveWorshipSetlistLeader(id) {
     } else updateWorshipSetlistLeaderInputs(id, draft.value, false, leader);
   } catch (error) {
     draft.saving = false;
-    if (worshipSetlistLeaderDrafts.get(id) === draft) updateWorshipSetlistLeaderInputs(id, draft.value, false);
+    // Only proven rejection can discard the attempt; uncertain writes retain exact replay.
+    if (error.code === "LEADER_CONFLICT" || /^(P0001|22\w{3}|23\w{3}|42501|55P03|57014|40\w{3})$/.test(error.code || "")) {
+      delete draft.retry;
+      if (error.latestLeader === undefined && (error.code === "LEADER_CONFLICT" || /REVISION_CONFLICT/.test(error.message || ""))) {
+        try { const latest = id.startsWith("worship:") ? (await (await worshipAtomicClient()).read(id.slice(8))).service.praise_leader : (await state.client.from("mindex_worship_import_sources").select("raw_payload").eq("id", id).single()).data?.raw_payload?.service?.leader; if (latest !== undefined) error.latestLeader = String(latest || "").trim(); } catch { /* Keep the old comparison baseline when readback fails. */ }
+      }
+      if (error.latestLeader !== undefined) draft.original = error.latestLeader;
+    }
+    if (worshipSetlistLeaderDrafts.get(id) === draft) updateWorshipSetlistLeaderInputs(id, draft.value, false, draft.original);
     showToast(error.message || "저장하지 못했어요. 다시 시도해 주세요.", "error");
   }
 }
@@ -29516,6 +29526,7 @@ function renderPresenterServiceScriptureInput(item, index, memo, service = null)
     : draftValue === null
       ? normalizeServiceItemReferenceSpacing(memo.scriptureReference || item.raw_title || "")
       : draftValue;
+  const draftProblem = serviceScriptureDraftProblem(item, value);
   const citation = isPresenterCitationScriptureItem(item);
   const selectedTranslationId = serviceItemBibleTranslation(item, memo)?.id || "";
   const perReferencePayloads = normalizeServiceScriptureReferencePayloads(memo.scriptureReferencePayloads, references);
@@ -29555,7 +29566,7 @@ function renderPresenterServiceScriptureInput(item, index, memo, service = null)
   return `
     <label class="svc-presenter-input-field svc-presenter-input-field--scripture">
       <div class="svc-presenter-input-control-wrap">
-        <input class="svc-presenter-input-control${serviceItemScriptureInputInvalid(item) ? " is-invalid" : ""}" type="text"
+        <input class="svc-presenter-input-control${draftProblem ? " is-invalid" : ""}" type="text" aria-invalid="${Boolean(draftProblem)}" title="${escapeAttr(draftProblem)}"
           data-service-item-field="raw_title" data-service-item-index="${index}"
           value="${escapeAttr(value)}" list="serviceScriptureOptions" placeholder="말씀 (예: ${serviceItemSupportsScriptureReferenceList(item) ? "렘 3:22; 마 3:11" : "출애굽기 23:14-19"})" aria-label="${escapeAttr(`${item.label || "성경"} 구절`)}" />
         ${renderServiceItemLinkControl(item, index)}

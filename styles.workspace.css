@@ -4194,8 +4194,8 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
 .svc-board-slide-block[data-form-color="bridge"] { --form-color: #21a6d2; }
 .svc-board-slide-block[data-form-color="coda"] { --form-color: #b864b5; }
 .svc-board-slide-block[data-form-color="tag"] { --form-color: #c5a12d; }
-.svc-board-slide-block[data-form-color="bible-light"] { --form-color: #c4c4c4; }
-.svc-board-slide-block[data-form-color="bible-dark"] { --form-color: #686868; }
+.svc-board-slide-block[data-scripture-tone="default"] .svc-slide-form-badge { color: var(--ink-2); }
+.svc-board-slide-block[data-scripture-tone="accent"] .svc-slide-form-badge { color: var(--accent); }
 .svc-board-slide-block[data-form-color="neutral"] { --form-color: #929292; }
 .svc-slide-form-badge[data-form-type] {
   background: transparent;

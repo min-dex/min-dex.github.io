@@ -4707,3 +4707,10 @@ and timing content are preserved. Server status activates native storage only
 after a verified catalog transition. Legacy clients are write-fenced after
 activation, including services without Praise elements. Failed catalog reads
 never silently reactivate the legacy writer. See `single-id-release.md`.
+
+## Scripture controller text tones ·2026-10-24
+
+Scripture reference groups use no background boxes. Only their controller labels
+alternate default ink / current theme accent / default ink across reference
+and translation boundaries. Remove the bible-light/bible-dark gray palette. Song
+form backgrounds, slide numbering/geometry, preview and output remain unchanged.

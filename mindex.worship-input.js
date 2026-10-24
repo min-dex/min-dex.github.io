@@ -1706,3 +1706,27 @@ function syncServiceFormInputError(field) {
   });
   target.innerHTML = renderPresenterWarnings(uniqueList([...JSON.parse(target.dataset.staticWarnings || "[]"), ...liveWarnings]));
 }
+
+function serviceScriptureDraftProblem(item, value) {
+  if (!item || !serviceItemUsesScriptureReferenceInput(item) || parseServiceItemMemo(item.memo).manualScripture || !String(value || "").trim()) return "";
+  return scriptureReferenceProblem(inspectScriptureReferences(value, serviceItemBibleTranslation(item, parseServiceItemMemo(item.memo))));
+}
+
+function syncServiceScriptureInputError(field) {
+  if (!isDeferredServiceScriptureReferenceInput(field)) return;
+  const id = field.dataset.serviceId || state.selectedServiceId;
+  const item = getServiceItems(id)[Number(field.dataset.serviceItemIndex)];
+  const problem = serviceScriptureDraftProblem(item, field.value);
+  field.classList.toggle("is-invalid", Boolean(problem));
+  field.setAttribute("aria-invalid", String(Boolean(problem)));
+  field.title = problem;
+  field.closest(".svc-edit-title-wrap")?.classList.toggle("is-invalid", Boolean(problem));
+}
+
+function syncServiceVersionFormErrors(field) {
+  if (field.dataset.serviceItemField !== "version_id") return;
+  const id = field.dataset.serviceId || state.selectedServiceId;
+  for (const input of document.querySelectorAll('.svc-form-hint')) {
+    if ((input.dataset.serviceId || state.selectedServiceId) === id && input.dataset.serviceItemIndex === field.dataset.serviceItemIndex) syncServiceFormInputError(input);
+  }
+}
