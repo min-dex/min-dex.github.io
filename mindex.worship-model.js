@@ -523,8 +523,8 @@ function canonicalWorshipElementInputMode(element = {}) {
   const precise = modes.find(mode => mode && mode !== "praise_db");
   if (precise === "children_audio") return precise;
   if (["lyrics_db", "score_db"].includes(precise) || primary === "praise_db" || modes.includes("praise_db")) {
-    const output = String(config.outputMode || config.output_mode || config.renderMode || config.render_mode || "").trim();
-    return output === "score" || output === "악보" ? "score_db" : output === "lyrics" || output === "가사" ? "lyrics_db" : precise || "lyrics_db";
+    const output = normalizeServiceOutputMode(config.outputMode || config.output_mode || config.renderMode || config.render_mode);
+    return output === "score" ? "score_db" : output === "lyrics" ? "lyrics_db" : ["lyrics_db", "score_db"].includes(precise) ? precise : "lyrics_db";
   }
   return precise || serviceInputModeForElementType(element.element_type);
 }

@@ -53,7 +53,7 @@ for (const mode of ['lyrics_db','score_db','children_audio','manual_praise','aud
  sanitizeWorshipPersistenceRows(rows,{elementTypedStateColumns:{inputMode:true,contentState:true}});
  assert.equal(rows.elements[0].input_mode,mode);
 }
-assert.equal(canonicalWorshipElementInputMode({input_mode:'praise_db',config:{outputMode:'score'}}),'score_db');
+for(const alias of ['score','music_score','sheet_music','악보']) assert.equal(canonicalWorshipElementInputMode({input_mode:'praise_db',config:{outputMode:alias}}),'score_db');
 assert.equal(canonicalWorshipElementInputMode({input_mode:'praise_db'}),'lyrics_db');
 console.log('PASS canonical modes, legacy read aliases, column precedence and sanitizer');
 `,c);
