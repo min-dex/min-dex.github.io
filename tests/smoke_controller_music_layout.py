@@ -1,11 +1,8 @@
 """Slot seek ownership and children/controller layout, offline without output."""
-import os,io,wave
+import os
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from pathlib import Path
 from smoke_app import start_local_app_server,sync_playwright,launch_chromium
-media=io.BytesIO()
-with wave.open(media,'wb') as wav:
- wav.setnchannels(1);wav.setsampwidth(2);wav.setframerate(8000);wav.writeframes(b'\0\0'*8000*10)
 server,url=start_local_app_server()
 try:
  with sync_playwright() as p:
@@ -13,8 +10,7 @@ try:
    browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
    page=browser.new_page(viewport={'width':1280,'height':800})
    def route(r):
-    if r.request.url.endswith('/fixture.wav'):r.fulfill(body=media.getvalue(),content_type='audio/wav')
-    elif r.request.url.startswith(url.rsplit('/',1)[0]+'/'):r.continue_()
+    if r.request.url.startswith(url.rsplit('/',1)[0]+'/'):r.continue_()
     else:r.abort()
    page.route('**/*',route)
    page.goto(url+'?mindexSmokeRaw=1')
@@ -33,8 +29,10 @@ try:
     if(state.serviceMusic.audio.currentTime!==70)throw Error('other owner changed position');
     MindexSongTiming.updateTransport(state.serviceMusic.audio);
    }''')
-   page.wait_for_function("document.querySelector('.svc-children-audio audio').readyState>=1")
-   assert page.locator('.svc-children-audio audio').evaluate('(e)=>!e.error&&e.paused&&e.duration>=9')
+   assert page.locator('.svc-children-audio audio').count()==0, 'input must not create a separate audio clock'
+   assert page.locator('.svc-children-audio [data-input-audio-controls]').count()==1
+   assert page.locator('.svc-children-audio [data-song-timing-seek]').is_disabled()
+   assert page.locator('.svc-children-audio [data-song-timing-clock]').inner_text()=='재생 대기'
    for theme in ('light','dark'):
     page.evaluate('(t)=>applyTheme(t)',theme)
     page.evaluate("""()=>{
@@ -61,7 +59,7 @@ try:
      assert page.locator('.svc-children-audio').evaluate('(e)=>getComputedStyle(e).display')=='flex'
      assert page.locator('.svc-music-player--inline').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
      assert page.locator('.svc-children-audio').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
-     assert page.locator('.svc-children-audio').evaluate("(e)=>e.querySelector('audio').getBoundingClientRect().top>=e.querySelector('strong').getBoundingClientRect().bottom")
+     assert page.locator('.svc-children-audio').evaluate("(e)=>e.querySelector('[data-input-audio-controls]').getBoundingClientRect().top>=e.querySelector('strong').getBoundingClientRect().bottom")
      page.locator('.svc-music-label').evaluate("e=>e.textContent='A very long music filename with additional details and a long unbroken name '+ 'x'.repeat(80)")
      assert page.locator('#music-layout').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
      page.locator('.svc-music-label').evaluate("e=>e.textContent='자율기도 음악'")
