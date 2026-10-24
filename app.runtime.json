@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261024-form-warning-live-sync",
+  "version": "20261024-output-leader-recovery-batch",
   "options": {
     "compress": false,
     "mangle": {
