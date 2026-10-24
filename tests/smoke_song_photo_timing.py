@@ -64,6 +64,13 @@ try:
    assert d.locator('[data-photo-names]').count()==0
    for width in (390,600,800,1100):
     page.set_viewport_size({'width':width,'height':800})
+    row=d.locator('.song-timing-row').first
+    controls=row.locator('.song-timing-row-controls')
+    assert controls.evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
+    assert row.locator('label').evaluate('(e)=>e.control?.matches("[data-timing-start]")')
+    boxes=controls.locator('input,button').evaluate_all('es=>es.map(e=>({h:e.getBoundingClientRect().height,y:e.getBoundingClientRect().top}))')
+    assert all(abs(b['h']-35)<1 for b in boxes),boxes
+    if width>=600: assert max(b['y'] for b in boxes)-min(b['y'] for b in boxes)<1,boxes
     help=d.locator('[data-beat-help]')
     assert not help.evaluate('el=>el.open')
     help.locator('summary').focus();page.keyboard.press('Enter')

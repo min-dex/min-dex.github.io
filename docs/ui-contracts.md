@@ -948,3 +948,10 @@ The help does not write worship data or re-render the editor.
 The section-editor song-form wrapper, input and adjacent help button share the
 existing 30px field height. Do not leave the compact wrapper at22px around a
 30px input. Keep the existing field widths, wrapping, help behavior and focus.
+
+### Preparation and timing field alignment ·2026-10-24
+
+Preparation-editor song-form help shares the dense field height, as in section
+editing. Timing rows retain their associated lyric/photo label above a wrapping
+row of start-time input and stamp/nudge buttons. Align controls to each other,
+not to the combined lyric/photo height; preserve labels, focus and timing values.
