@@ -953,7 +953,7 @@ function patchPresenterControlTree(current, next) {
     if (current.getAttribute(attr.name) !== attr.value) current.setAttribute(attr.name, attr.value);
   }
   const editingLiveScripture = current === document.activeElement && current.matches?.("[data-live-scripture-input]");
-  if (current instanceof HTMLInputElement && !editingLiveScripture && !preserveCitationDraft && current.value !== next.value) current.value = next.value;
+  if (current instanceof HTMLInputElement && !editingLiveScripture && !preserveCitationDraft && !current._videoSeekOwner && current.value !== next.value) current.value = next.value;
   const previousChildren = [...current.childNodes];
   const nextChildren = [...next.childNodes];
   nextChildren.forEach((child, index) => {

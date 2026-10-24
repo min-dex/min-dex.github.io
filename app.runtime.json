@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261025-canonical-input-mode",
+  "version": "20261025-controller-video-position",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "a5b4f0bf5d3ecee41deafef80e190b52b61b4b30721646760f18456905733f68",
-  "runtime_sha256": "10a5bf649dd8914e9389f4075573574139d0f5e02579193a1079c2ce733d09c6",
-  "source_bytes": 1340971,
-  "runtime_bytes": 958151,
-  "source_gzip": 305479,
-  "runtime_gzip": 239697
+  "source_sha256": "b85c4ad3ed5ef4bd9e7fd905c6e0c675d2583aaf39bcd0974ce6d710331a3653",
+  "runtime_sha256": "ab8603a500eafa7595ce4b247738247d4e91d75e038c77ae849e20f0ce777083",
+  "source_bytes": 1341239,
+  "runtime_bytes": 958350,
+  "source_gzip": 305552,
+  "runtime_gzip": 239757
 }

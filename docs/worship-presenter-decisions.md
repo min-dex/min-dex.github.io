@@ -4728,3 +4728,13 @@ The production CHECK was expanded and read back as validated on 2026-10-25,
 without worship-row, revision, draft or permission updates. The web writer is a
 separate queued release. Tests cover all five modes, both browsers, the existing
 908 Praise-row snapshot, and an isolated PostgreSQL constraint migration.
+
+## Controller video progress ·2026-10-25
+
+Media management adds output video seeking plus observed current/total/remaining
+time, using the existing owner/frame/revision guards and acknowledgement path.
+Seeking preserves pause/play and never changes audio. Loop countdowns explicitly
+refer to one repetition; unknown duration remains unknown. Native video previews
+in input disclosures have independent controls/clocks and never drive output.
+No persistent service/media data changes; PPTX/background media keep their existing
+transport scope.

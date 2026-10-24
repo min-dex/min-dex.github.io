@@ -35,6 +35,7 @@ assert(packaged.includes('styles*.css'), 'all ordered styles must ship in deskto
 assert(moduleList.includes('"mindex.praise-media.js"'));
 assert(packaged.includes('mindex.praise-media.js'));
 assert(styles.includes('"styles.praise-media.css"'));
+assert(styles.includes('"styles.presenter-media.css"'));
 const mediaContext=vm.createContext({});
 vm.runInContext(read('mindex.praise-media.js'),mediaContext);
 assert.equal(typeof mediaContext.MindexPraiseMedia.render,'function');

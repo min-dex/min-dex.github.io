@@ -29436,13 +29436,14 @@ function renderPresenterReferenceMediaPreview(asset, kind, disclosureScope = [])
       : normalizedKind === "audio" ? "audio-lines"
         : normalizedKind === "image" ? "image" : "file";
   const name = String(asset?.name || "").trim() || statusLabel;
-  const previewLabel = normalizedKind === "image" ? "미리보기" : normalizedKind === "audio" ? "듣기" : "파일 정보";
+  const previewLabel = ["image", "video"].includes(normalizedKind) ? "미리보기" : normalizedKind === "audio" ? "듣기" : "파일 정보";
   const body = normalizedKind === "image"
     ? `<img data-reference-media-preview-image src="${escapeAttr(source)}" alt="${escapeAttr(name)}" loading="lazy" onerror="handlePresenterMediaPreviewError(this)" />
        <span data-reference-media-preview-error role="status" hidden>이미지를 불러오지 못했습니다. 파일 연결을 확인해 주세요.</span>`
     : normalizedKind === "audio"
       ? `<audio controls preload="metadata" src="${escapeAttr(source)}"></audio>`
-      : renderPresenterStaticAssetPreview(asset.pptx ? { ...asset, url: asset.pptx.url } : asset, icon, statusLabel);
+      : normalizedKind === "video" ? renderPresenterInputVideoPreview(source, name)
+        : renderPresenterStaticAssetPreview(asset.pptx ? { ...asset, url: asset.pptx.url } : asset, icon, statusLabel);
   const slideStrip = normalizedKind === "image" && slideCount > 1
     ? `<div class="svc-reference-media-slide-strip" aria-label="연결된 이미지 ${slideCount}장">
       ${slides.map((slide, index) => {
@@ -29456,7 +29457,7 @@ function renderPresenterReferenceMediaPreview(asset, kind, disclosureScope = [])
     </div>`
     : "";
   return `<div class="svc-reference-media-preview-group">
-    <details class="svc-reference-media-preview svc-reference-media-preview--collapsible svc-reference-media-preview--${escapeAttr(normalizedKind)}" ${MindexDisclosure.attrs(["media-preview",...disclosureScope])}>
+    <details ${normalizedKind === "video" ? 'ontoggle="pauseClosedPresenterInputVideo(this)"' : ""} class="svc-reference-media-preview svc-reference-media-preview--collapsible svc-reference-media-preview--${escapeAttr(normalizedKind)}" ${MindexDisclosure.attrs(["media-preview",...disclosureScope])}>
       <summary>
         <span>${escapeHtml(statusLabel)}</span>
         <b><i data-lucide="${normalizedKind === "audio" ? "headphones" : normalizedKind === "image" ? "eye" : "info"}"></i>${previewLabel}</b>
@@ -30013,7 +30014,7 @@ function renderGlobalPlaybackControls() {
     </section>`;
   if (!available) root.querySelector(':popover-open')?.hidePopover();
   root.hidden = !available;
-  if (root._playbackMarkup === html) return;
+  if (root._playbackMarkup === html) { syncPresenterVideoTransport(video); return; }
   root._playbackMarkup = html;
   const template = document.createElement("template");
   template.innerHTML = html;
@@ -30024,6 +30025,7 @@ function renderGlobalPlaybackControls() {
     patchPresenterControlTree(root, next);
   } else root.append(template.content);
   if (root.querySelector(":popover-open")) positionGlobalPlaybackPanel();
+  syncPresenterVideoTransport(video);
 }
 
 function renderLiveServiceReturnControl() {

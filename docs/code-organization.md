@@ -432,3 +432,11 @@ view renders. It reuses catalog records, score normalization/manifest loading an
 audio_set data; it does not own persistence or Worship transport.
 The existing versionAudioSummaryStatus/renderVersionAudioSummary/updateVersionAudioSummary
 helpers move unchanged to that owner, retaining their shared APIs and status updates.
+
+
+Controller media clocks, native video input markup and slider gesture drafts live
+in `mindex.presenter-media-state.js`, including the media-panel renderer and its
+read-only state adapter. Its scoped stylesheet is `styles.presenter-media.css`.
+Presenter retains output health/acknowledged
+command ownership. Media progress is patched independently of transport markup;
+the shared control patcher preserves an active video slider draft.

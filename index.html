@@ -256,9 +256,9 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261025-canonical-input-mode";
+        const fallbackVersion = "20261025-controller-video-position";
         globalThis.MINDEX_SINGLE_SONG_BOOTSTRAP_READY = true;
-        const compiledAppVersion = "20261025-canonical-input-mode";
+        const compiledAppVersion = "20261025-controller-video-position";
         const modules = [
           "mindex.icons.js", "mindex.hymn-structure.js", "vendor/supabase-js.min.js",
           "mindex.single-song.js", "mindex.praise-storage.js", "mindex.constants.js", "mindex.inline-text.js", "mindex.design-tokens.js", "mindex.worship-model.js",
@@ -271,7 +271,7 @@
         ];
         const styles = [
           "styles.css", "styles.workspace.css", "styles.presenter-output.css", "styles.bulletin.css",
-          "styles.calendar.css", "styles.monitor.css", "styles.praise-media.css",
+          "styles.calendar.css", "styles.monitor.css", "styles.praise-media.css", "styles.presenter-media.css",
         ];
         const retryUrl = new URL(location.href);
         const retry = retryUrl.searchParams.get("mindex-retry");

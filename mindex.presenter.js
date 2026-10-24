@@ -3545,26 +3545,6 @@ function presenterRemoteVideoState(serviceId) {
   return {status:health.status,ready,revision:health.revision,identity:compactTextSignature(health.frameKey)};
 }
 
-function presenterManagedVideoState() {
-  const serviceId = state.presenter.serviceId;
-  if (!serviceId || !presenterControllerIsLive(serviceId) || !isPresenterOutputWindowOpen()) return null;
-  return presenterRemoteVideoState(serviceId);
-}
-
-function renderPresenterVideoManagement(video) {
-  const busy = presenterVideoRequests.size > 0;
-  const enabled = video?.ready && !busy && state.selectedServiceId === state.presenter.serviceId;
-  const labels = { playing: "재생 중", paused: "일시정지", ended: "재생 완료", blocked: "PC에서 재생 허용 필요", loading: "영상 준비 중", error: "영상 재생 실패" };
-  const status = busy ? "처리 중…" : video ? labels[video.status] || "상태 확인 중" : "송출 중인 영상이 없습니다.";
-  const title = state.presenter.slides[state.presenter.index]?.title || "현재 영상";
-  return `<section class="global-media-section" aria-label="영상"><h3>영상</h3>
-    ${video ? `<div class="global-playback-group"><span class="global-playback-name">${escapeHtml(title)}</span></div>` : ""}
-    <p class="global-playback-state" role="status">${escapeHtml(status)}</p>
-    <div class="global-playback-actions" role="group" aria-label="영상 재생 제어" ${video ? "" : "hidden"}>
-      ${[["play","play","재생"],["pause","pause","일시정지"],["restart","rotate-ccw","처음부터"]].map(([action,icon,label]) => `<button type="button" class="btn secondary" data-global-playback-action="video-${action}" aria-label="영상 ${label}" ${!enabled || (action === "pause" ? video?.status !== "playing" : action === "play" && video?.status === "playing") ? "disabled" : ""}><i data-lucide="${icon}"></i><span>${label}</span></button>`).join("")}
-    </div></section>`;
-}
-
 async function runPresenterManagedVideoAction(action) {
   const serviceId = state.presenter.serviceId;
   if (!presenterManagedVideoState()?.ready || presenterVideoRequests.size) return;
@@ -3573,12 +3553,13 @@ async function runPresenterManagedVideoAction(action) {
   finally { renderGlobalPlaybackControls(); }
 }
 
-function requestPresenterVideoCommand(serviceId, action) {
+function requestPresenterVideoCommand(serviceId, action, position = null) {
   const health = state.presenter.videoHealth;
-  if (state.selectedServiceId !== serviceId || presenterVideoRequests.size || !["play","pause","restart"].includes(action) || !presenterRemoteVideoState(serviceId)?.ready)
+  if (state.selectedServiceId !== serviceId || presenterVideoRequests.size || !["play","pause","restart","seek"].includes(action) || !presenterRemoteVideoState(serviceId)?.ready)
     return Promise.reject(Error("영상의 최신 상태를 확인한 뒤 다시 눌러 주세요."));
+  if (action === "seek" && !presenterVideoCanSeek(health, position)) return Promise.reject(Error("영상의 이동 가능한 구간을 확인해 주세요."));
   const outputSessionId = state.presenter.outputSessionId, requestId = crypto.randomUUID();
-  const message = {type:"presenter-video-command",action,requestId,outputSessionId,clientId:health.clientId,expiresAt:Date.now()+1800,
+  const message = {type:"presenter-video-command",position,action,requestId,outputSessionId,clientId:health.clientId,expiresAt:Date.now()+1800,
     serviceId,index:health.index,frameKey:health.frameKey,messageId:health.messageId,revision:health.revision,status:health.status};
   return new Promise((resolve,reject) => {
     const finish = result => {
@@ -3603,7 +3584,7 @@ async function executePresenterVideoCommand(request, getPayload) {
   const health=presenterOutputVideoHealth(getPayload());
   const matches=health && ["serviceId","index","frameKey","messageId","revision","status"].every(key=>health[key]===request[key]);
   if (!matches || getPayload()?.safetyBlank || !Number.isFinite(request.expiresAt) || Date.now()>request.expiresAt
-    || !["play","pause","restart"].includes(request.action))
+    || !["play","pause","restart","seek"].includes(request.action) || (request.action === "seek" && !presenterVideoCanSeek(health, request.position)))
     return {ok:false,message:"영상 상태가 바뀌었습니다. 최신 상태에서 다시 눌러 주세요."};
   const video=document.querySelector("#presenterOutputRoot .presenter-output-layer.is-active video.presenter-video");
   try {
@@ -3612,7 +3593,9 @@ async function executePresenterVideoCommand(request, getPayload) {
       const timer=setTimeout(()=>{video.removeEventListener(event,done);reject(Error('영상 상태 변경을 확인하지 못했습니다.'));},900);
       video.addEventListener(event,done,{once:true});
     });
-    if(request.action==='pause') {
+    if(request.action==='seek') {
+      if (Math.abs(video.currentTime - request.position) > 0.01) { const seeked = settle('seeked'); video.currentTime = request.position; await seeked; }
+    } else if(request.action==='pause') {
       if(!video.paused){const paused=settle('pause');video.pause();await paused;}
     } else {
       if(request.action==='restart'){const seeked=settle('seeked');video.currentTime=0;await seeked;}
@@ -3626,7 +3609,7 @@ async function executePresenterVideoCommand(request, getPayload) {
     const current=presenterOutputVideoHealth(getPayload());
     if (!video.isConnected || !current || current.messageId!==request.messageId || current.frameKey!==request.frameKey)
       throw Error("송출 화면이 바뀌었습니다. 현재 영상을 확인해 주세요.");
-    if(request.action!=='pause'&&video.paused)throw Error("송출 PC에서 영상 재생을 허용해 주세요.");
+    if(!['pause','seek'].includes(request.action)&&video.paused)throw Error("송출 PC에서 영상 재생을 허용해 주세요.");
     return {ok:true,health:current};
   } catch(error) {return {ok:false,message:error?.name==='NotAllowedError'?"송출 PC에서 영상 재생을 허용해 주세요.":String(error.message||error)};}
 }
@@ -3644,7 +3627,8 @@ function presenterOutputVideoHealth(payload) {
     : video.readyState < HTMLMediaElement.HAVE_FUTURE_DATA ? "loading"
       : video.paused ? "paused" : "playing";
   return { serviceId: payload.serviceId, index: payload.index,
-    frameKey: layer.dataset.presenterFrameKey || "", messageId:payload.messageId || "", revision:presenterVideoRevisions.get(video).value, status };
+    frameKey: layer.dataset.presenterFrameKey || "", messageId:payload.messageId || "", revision:presenterVideoRevisions.get(video).value, status, positionSeconds: Number.isFinite(video.currentTime) ? video.currentTime : 0, durationSeconds: Number.isFinite(video.duration) && video.duration > 0 ? video.duration : null,
+    loop: Boolean(video.loop), seekable: Array.from({length: video.seekable.length}, (_, i) => [video.seekable.start(i), video.seekable.end(i)]) };
 }
 
 async function retryPresenterOutputVideo(request, payload) {

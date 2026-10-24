@@ -1020,3 +1020,20 @@ audio node/clock; closing the disclosure pauses it, and leaving/removing its rec
 releases it. Worship transport and saved lyrics, forms, timing and version names
 remain untouched. The reader accepts the existing record/version view shape and
 does not depend on UUID format or perform database reads/writes.
+
+
+## Controller video position and input preview ·2026-10-25
+
+Controller Media management displays the acknowledged output video's position,
+finite duration and remaining time. A looping video labels the remaining time as
+one repetition; unknown/infinite duration stays unknown and cannot be sought.
+Position updates use the existing output heartbeat and do not change Remote's
+command signature. Slider gestures retain their draft across heartbeat patches.
+Seek uses the existing acknowledged, deduplicated video transport, bound to the
+current output/session/frame/revision and a valid seekable interval. It preserves
+paused/playing state and never controls music. Stale gestures fail without seeking.
+
+Video input disclosures contain a native controls/metadata-only preview with its
+own clock and explicit remaining time. This element is independent of live output;
+opening it never autoplays. Existing audio input native controls remain available.
+No lyrics, forms, media timings, URLs or worship settings are saved by these controls.
