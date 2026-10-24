@@ -94,7 +94,7 @@
   }
   function decorate(slides, item, song, version) {
     if (!song?.id) return slides;
-    const key = keyFor(song.id, version?.id || item.version_id || item.song_version_id);
+    const key = version?._legacyTimingKey || keyFor(song.id, version?.id || item.version_id || item.song_version_id);
     const profile = versionProfile(song, version);
     const children = isChildrenVersion(song, version);
     const childMode = isChildrenMode(item);
@@ -434,11 +434,25 @@
     const audioSet = {version:1,audioUrl:draft.audioUrl,audioName:draft.audioName,audioFingerprint:draft.audioFingerprint,
       duration:draft.duration,starts:[...draft.starts],enabled:draft.enabled,lyricsFingerprint:draft.lyricsFingerprint,
       sourceSignature:draft.sourceSignature,forms:draft.forms};
-    let query = state.client.from('mindex_song_versions').update({audio_set:audioSet}).eq('id',version.id).eq('lyric_signature',signature);
-    query = previous == null ? query.is('audio_set',null) : query.eq('audio_set',JSON.stringify(previous));
-    const result = await query.select('id');
-    if (result.error) throw Error(`곡 버전 저장 실패: ${result.error.message || 'DB 연결을 확인해 주세요.'}`);
-    if (result.data?.length !== 1) throw Error('다른 곳에서 버전 자료가 변경됐습니다. 새로고침 후 다시 확인해 주세요.');
+    if (song?._singleSongRecord) {
+      const repository = state.singleSongRepository;
+      if (!repository) throw Error('SINGLE_SONG_REPOSITORY_REQUIRED');
+      let next = repository.pendingRecord?.(song.id);
+      if (next && JSON.stringify(next.content.audio_set) !== JSON.stringify(audioSet)) throw Error('SONG_SAVE_OUTCOME_UNKNOWN');
+      if (!next) {
+        const rows = await repository.read([song.id]);
+        next = structuredClone(rows[0]);
+        if (next.content.lyric_signature !== signature || JSON.stringify(next.content.audio_set || null) !== JSON.stringify(previous)) throw Error('SINGLE_SONG_CONFLICT');
+        next.content.audio_set = audioSet;
+      }
+      await repository.save(next);
+    } else {
+      let query = state.client.from('mindex_song_versions').update({audio_set:audioSet}).eq('id',version.id).eq('lyric_signature',signature);
+      query = previous == null ? query.is('audio_set',null) : query.eq('audio_set',JSON.stringify(previous));
+      const result = await query.select('id');
+      if (result.error) throw Error(`곡 버전 저장 실패: ${result.error.message || 'DB 연결을 확인해 주세요.'}`);
+      if (result.data?.length !== 1) throw Error('다른 곳에서 버전 자료가 변경됐습니다. 새로고침 후 다시 확인해 주세요.');
+    }
     version.audio_set = audioSet; remoteSources.add(audioSet.audioUrl); revision++;
     root.MINDEX_CONTENT_LIVE?.publish('song',song.id);
   }

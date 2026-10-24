@@ -59,6 +59,7 @@ export function prepareWorshipRowsCommit({baseline, rows, metadata = {}, documen
   const elementWrites = rows.elements.map(row => ({...change(row, elements.get(row.id)), sectionId:row.section_id}));
   return {
     serviceId, expectedRevision:baseline.revision, metadataPatch, document:clone(document),
+    ...((baseline.elements || []).some(row => row.praise_record_id) || rows.elements.some(row => row.praise_record_id) ? {singleSongProtocol:1} : {}),
     sectionPatches:sectionWrites.filter(row => sections.has(row.id) && Object.keys(row.patch).length),
     newSections:sectionWrites.filter(row => !sections.has(row.id)),
     elementPatches:elementWrites.filter(row => elements.has(row.id) && Object.keys(row.patch).length)
@@ -82,7 +83,7 @@ export function prepareWorshipRowsCreate({service, rows, document}) {
     metadataPatch.source_ref = {...metadataPatch.source_ref};
     for (const key of protectedSourceKeys) delete metadataPatch.source_ref[key];
   }
-  return clone({serviceId:sid,serviceTypeId:service.service_type_id,serviceDate:service.service_date,
+  return clone({...(rows.elements.some(row => row.praise_record_id) ? {singleSongProtocol:1} : {}),serviceId:sid,serviceTypeId:service.service_type_id,serviceDate:service.service_date,
     metadataPatch,document,
     sections:rows.sections.map(row => change(row)),
     elements:rows.elements.map(row => ({...change(row),sectionId:row.section_id})),
@@ -241,6 +242,7 @@ export function createWorshipAtomicClient({rpc, journal, namespace = '', makeId 
       try {
         const receipt = pending ? await store.retry(id) : await store.save('delete', {
           serviceId:id,expectedRevision:baseline.revision,confirmDelete:true,
+          ...((baseline.elements || []).some(row => row.praise_record_id) ? {singleSongProtocol:1} : {}),
         });
         if (receipt.deleted !== true || receipt.aggregate !== null) throw new Error('INVALID_RECEIPT');
         return true;

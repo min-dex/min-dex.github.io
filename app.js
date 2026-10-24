@@ -3088,6 +3088,11 @@ function scheduleBackgroundSongLoad() {
 }
 
 async function loadSongsOnce(context = {}) {
+  await ensureSingleSongActivation();
+  if (state.singleSongRepository) {
+    await loadSongsForIds(state.singleSongCatalog.ids());
+    return;
+  }
   if (!requireClient()) return;
 
   if (!context.searchOnly) {
@@ -3184,6 +3189,14 @@ async function loadSongsOnce(context = {}) {
 }
 
 async function loadSongsForIds(songIds = []) {
+  await ensureSingleSongActivation();
+  if (state.singleSongRepository) {
+    const ids = [...new Set(songIds.filter(Boolean))].map(id => state.singleSongCatalog.resolve(id));
+    const loaded = await readSingleSongs(ids);
+    const map = new Map(state.songs.map(s => [s.id, s]));
+    loaded.forEach(s => map.set(s.id, s)); state.songs = [...map.values()];
+    clearSearchCaches(); return;
+  }
   if (!state.client) return;
   const ids = [...new Set(songIds.map((id) => String(id || "").trim()).filter(Boolean))];
   const pendingPromises = [...new Set(ids.map((id) => linkedSongLoadPromises.get(id)).filter(Boolean))];
@@ -4907,8 +4920,9 @@ function groupWorshipElements(sections = [], elements = []) {
       label: sourceRef.label || section.title || "",
       assignee: element.person || "",
       raw_title: worshipElementDisplayTitle(element, section, sourceRef, config),
-      song_id: element.song_id || null,
-      song_version_id: element.song_version_id || null,
+      ...(state.singleSongCatalog
+        ? state.singleSongCatalog.singleItem({ praise_record_id: element.praise_record_id || null, song_id: element.song_id || null, song_version_id: element.song_version_id || null })
+        : { song_id: element.song_id || null, song_version_id: element.song_version_id || null }),
       memo: serializeServiceItemMemo({
         note: config.note,
         elementType,
@@ -6419,6 +6433,18 @@ const praiseDeleteRequests = new WeakMap();
 const praiseServiceCreates = new Set();
 
 async function createEmptyPraiseAtomic(options = {}, scope = "sidebar") {
+  if (state.singleSongCatalog) {
+    const types = normalizePraiseTypes(options.praiseTypes);
+    if (options.reuseExisting) {
+      const matches = state.songs.filter(song => normalizeTitle(song.title) === normalizeTitle(options.title));
+      if (matches.length === 1) return matches[0];
+      if (matches.length > 1) throw new Error("같은 제목의 곡이 여러 개입니다. 목록에서 선택해 주세요.");
+    }
+    const result = await mutateSingleSong("create", {prefix:types.includes("children") ? "kid" : "ccm",
+      metadata:{title:options.title || nextPraiseSongTitle(),praise_types:types.length ? types : ["ccm"]},
+      content:{name:"기본",raw_section_name:"기본",is_primary:true,forms:[]}}, `create:${scope}`);
+    return state.songs.find(song=>song.id===result.id);
+  }
   const client = state.client, project = state.config.url;
   if (!client) throw new Error("서버 연결을 확인해 주세요.");
   let pending = praiseCreateRequests.get(client);
@@ -6540,6 +6566,7 @@ function canDeletePraiseSong(song = getSelectedSong()) {
 
 async function deleteSelectedSong() {
   const song = getSelectedSong();
+  if (song?._singleSongRecord) return deleteSingleSong(song);
   if (!song || !requireClient() || state.saving) return;
   if (state.dirty.song || state.dirty.forms) { showToast("편집 중인 입력이 있어 삭제하지 않았습니다. 먼저 저장하거나 변경을 취소해 주세요.","info"); return; }
   if (!canDeletePraiseSong(song)) {
@@ -7463,6 +7490,7 @@ async function saveWorshipServiceInstance(service) {
   const elementTypedStateColumns = await worshipElementTypedStateColumns();
   const rows = buildWorshipPersistenceRows(service, items, existingSectionById, existingElementById, {
     elementTypedStateColumns,
+    singleSongCatalog: state.singleSongCatalog, singleSongStorage: state.singleSongStorage,
   });
   const savedIdentities = new Map(items.map((item, index) => [item.id, {
     id: rows.elements[index].id,
@@ -7502,7 +7530,7 @@ async function saveWorshipServiceInstance(service) {
       virtualSuppressedItems,
       existingSectionById,
       existingElementById,
-      { elementTypedStateColumns },
+      { elementTypedStateColumns, singleSongCatalog: state.singleSongCatalog, singleSongStorage: state.singleSongStorage },
     );
     virtualRows.sections.forEach((section) => {
       if (!rows.sections.some((row) => row.id === section.id)) rows.sections.push(section);
@@ -7672,6 +7700,7 @@ async function saveWorshipServiceElementPatch(service, itemId) {
   const elementTypedStateColumns = await worshipElementTypedStateColumns();
   const rows = buildWorshipPersistenceRows(service, items, existingSectionById, existingElementById, {
     elementTypedStateColumns,
+    singleSongCatalog: state.singleSongCatalog, singleSongStorage: state.singleSongStorage,
     targetElementId: targetItemId,
   });
   sanitizeWorshipPersistenceRows(rows, { elementTypedStateColumns });
@@ -8080,12 +8109,12 @@ async function persistSundayEditSync(job, options = {}) {
   const existing = elements.find((row) => row.id === item.id);
   const typed = options.elementTypedStateColumns || await worshipElementTypedStateColumns();
   const rows = buildWorshipPersistenceRows(freshService, [next],
-    Object.fromEntries(sections.map((row) => [row.id, row])), { [existing.id]: existing }, { elementTypedStateColumns: typed });
+    Object.fromEntries(sections.map((row) => [row.id, row])), { [existing.id]: existing }, { elementTypedStateColumns: typed, singleSongCatalog: state.singleSongCatalog, singleSongStorage: state.singleSongStorage });
   sanitizeWorshipPersistenceRows(rows, { elementTypedStateColumns: typed });
   compactWorshipPersistenceRows(rows);
   validateWorshipPersistenceRows(rows, { serviceId: target.id });
   const generated = rows.elements[0];
-  const fields = ["title", "person", "body", "song_id", "song_version_id", "scripture_reference", "config", "content_state", "input_mode", "template_modified"];
+  const fields = ["title", "person", "body", "song_id", "song_version_id", "praise_record_id", "scripture_reference", "config", "content_state", "input_mode", "template_modified"];
   const patch = Object.fromEntries(fields.filter((key) => Object.hasOwn(generated, key)).map((key) => [key, generated[key]]));
   if (job.key === "sermon-citation") {
     patch.source_ref = { ...existing.source_ref };
@@ -8183,6 +8212,40 @@ function praiseSaveComparable(song) {
 }
 
 async function saveSongMeta(liveSong) {
+  if (liveSong?._singleSongRecord) {
+    if (!state.singleSongRepository) throw new Error("SINGLE_SONG_REPOSITORY_REQUIRED");
+    const record = state.singleSongCatalog.get(liveSong.id);
+    const version = liveSong.versions?.[0];
+    if (liveSong.versions?.length !== 1 || version?.id !== liveSong.id) throw new Error("SINGLE_SONG_IDENTITY_CHANGED");
+    const repository = state.singleSongRepository;
+    const pending = praisePendingSaves.get(liveSong);
+    if (pending && pending.singleRepository !== repository) throw new Error("SINGLE_SONG_REPOSITORY_CHANGED");
+    const before = pending?.before || structuredClone(liveSong), formsBefore = pending?.formsBefore || JSON.stringify(state.forms);
+    const next = pending?.next || globalThis.MindexSingleSong.fromLegacySong(before, before.versions[0], liveSong.id);
+    if (!pending) {
+      next.legacy = record.legacy; next.provenance = record.provenance;
+      next.relations = record.relations; next.revision = before._singleSongRevision ?? record.revision;
+      praisePendingSaves.set(liveSong, {singleRepository:repository,before,formsBefore,next});
+    }
+    let saved;
+    try { saved = await repository.save(next); }
+    catch (error) {
+      if (/SINGLE_SONG_CONFLICT|SINGLE_SONG_REQUEST_REUSED|INVALID_SINGLE_SONG/.test(error.message)) praisePendingSaves.delete(liveSong);
+      throw error;
+    }
+    praisePendingSaves.delete(liveSong);
+    if (repository !== state.singleSongRepository) return false;
+    const records = state.singleSongCatalog.ids().map(id => id === saved.id ? saved : state.singleSongCatalog.get(id));
+    state.singleSongCatalog = globalThis.MindexSingleSong.createCatalog(records);
+    const savedSong = state.singleSongCatalog.appSong(saved.id);
+    const unchanged = JSON.stringify(liveSong) === JSON.stringify(before) && JSON.stringify(state.forms) === formsBefore;
+    const { mergeEditorDraft } = await import(`./mindex.draft-merge.mjs?v=${encodeURIComponent(window.MINDEX_RELEASE || "draft-merge")}`);
+    Object.assign(liveSong, mergeEditorDraft(before, liveSong, savedSong).value);
+    state.cleanFingerprints.praise = JSON.stringify(dirtyComparableValue({song:savedSong,versionId:saved.id,forms:savedSong.versions[0].forms||[]}));
+    if (!unchanged) { state.dirty.song = true; state.dirty.forms = true; }
+    clearSearchCaches();
+    return unchanged;
+  }
   const client = state.client, project = state.config.url;
   const pending = praisePendingSaves.get(liveSong);
   if (pending && (pending.client !== client || pending.project !== project)) throw new Error("연결이 변경되었습니다. 이전 저장 결과 확인 전에는 덮어쓸 수 없습니다.");
@@ -8311,6 +8374,7 @@ function buildPraiseVersionSaveRows(song, versions, canonicalSongId, versionOrde
 }
 
 async function saveSongVersions(song, { detached = false, planOnly = false } = {}) {
+  if (song?._singleSongRecord) throw new Error("SINGLE_SONG_NATIVE_SAVE_REQUIRED");
   if (!song?.id || !state.client) return;
 
   const canonicalSongId = await ensureCanonicalSongRow(song, {planOnly});
@@ -8439,6 +8503,7 @@ async function saveSongVersions(song, { detached = false, planOnly = false } = {
 }
 
 async function ensureCanonicalSongRow(song, {planOnly = false} = {}) {
+  if (song?._singleSongRecord) throw new Error("SINGLE_SONG_NATIVE_SAVE_REQUIRED");
   const title = cleanSongTitleForSave(song) || "제목 없는 찬양";
   const normalizedTitle = await resolveCanonicalNormalizedTitle(song, title);
   const payload = {
@@ -8667,6 +8732,7 @@ function assignStableVersionOrders(versions, existingCanonicalRows = [], sourceS
 }
 
 async function saveSongRelationsIfAvailable(song) {
+  if (song?._singleSongRecord) throw new Error("SINGLE_SONG_RELATION_EDITOR_REQUIRED");
   if (!song?.id || !state.client) return false;
   if (!state.songRelationsSupported) {
     state.songRelationsSupported = await detectTableColumnSupport("mindex_song_relations", "source_song_id");
@@ -8742,6 +8808,13 @@ function handleDetailSearchResultClick(event) {
 }
 
 function handleDetailClick(event) {
+  const relationButton = event.target.closest("[data-single-relation]");
+  if (relationButton) {
+    const box = relationButton.closest("[data-single-relations]");
+    const target = box?.querySelector("select")?.value;
+    if (target) void editSingleSongRelation(getSelectedSong(), relationButton.dataset.singleRelation, target, relationButton.dataset.remove === "true");
+    return;
+  }
   if (event.target.closest("button:disabled")) return;
   const serviceRetry = event.target.closest("[data-service-load-retry]");
   if (serviceRetry) {
@@ -10290,6 +10363,7 @@ function movePraiseVersion(versionId, direction) {
 let praiseVersionDeletePending = false;
 async function deletePraiseVersion(versionId) {
   const song = getSelectedSong();
+  if (song?._singleSongRecord && song.id===versionId) return deleteSingleSong(song);
   const version = song?.versions?.find(item => item.id === versionId);
   if (!version || state.saving || praiseVersionDeletePending) return;
   if (song.versions.length <= 1) {
@@ -10327,6 +10401,7 @@ async function deletePraiseVersion(versionId) {
 
 function addVersion(sourceVersionId = getSelectedVersionId()) {
   const song = getSelectedSong();
+  if (song?._singleSongRecord) return addSingleSongArrangement(song);
   if (!song) return;
 
   try {
@@ -11890,11 +11965,13 @@ function serviceItemVersionSelectionInvalid(item = {}, service = selectedService
 }
 
 function serviceItemNeedsVersionChoice(item = {}) {
+  if (serviceItemLinkedSong(item)?._singleSongRecord) return false;
   return Boolean(item.song_id && !item.version_id && !item.song_version_id
     && !servicePraiseUsesDirectLyrics(servicePraiseInputMode(item)));
 }
 
 function serviceItemSongVersionIdForSave(item = {}, service = selectedServiceForEditor()) {
+  if (serviceItemLinkedSong(item)?._singleSongRecord) return null;
   if (!item.version_id && !item.song_version_id) return null;
   const song = serviceItemLinkedSong(item);
   if (item.song_id && !song) {
@@ -17409,7 +17486,7 @@ function shortUrl(value) {
 
 function renderSongDescription(song, primary, items = [], relatedSongs = []) {
   const supportItems = items.filter(Boolean);
-  if (!primary && !supportItems.length && !relatedSongs.length) return "";
+  if (!primary && !supportItems.length && !relatedSongs.length && !song?._singleSongRecord) return "";
   return `
     <section class="song-description song-description--song" aria-label="찬양 설명">
       ${primary ? `<p class="song-description-title">${escapeHtml(primary)}</p>` : ""}
@@ -17419,6 +17496,7 @@ function renderSongDescription(song, primary, items = [], relatedSongs = []) {
         </div>
       ` : ""}
       ${renderRelatedSongLinks(relatedSongs)}
+      ${renderSingleSongRelations(song)}
     </section>
   `;
 }
@@ -17776,7 +17854,12 @@ function renderFormsTab(song) {
 }
 
 function linkedSongVersionEntries(song) {
-  return relatedSongsForSong(song).flatMap((linkedSong) =>
+  const linked = relatedSongsForSong(song);
+  if (song?._singleSongRecord) for (const id of song.same_song_ids || []) {
+    const peer = state.songs.find(row=>row.id===id);
+    if (peer && !linked.some(row=>row.id===id)) linked.push(peer);
+  }
+  return linked.flatMap((linkedSong) =>
     (linkedSong.versions?.length ? linkedSong.versions : normalizeSongVersions(linkedSong, [])).map((version) => ({
       song: linkedSong,
       version,
@@ -17995,7 +18078,7 @@ function updateVersionMusicalStructure(node, version, forms) {
   if (node.matches("input")) node.value = "확인 중…";
   else node.textContent = "마디 정보 확인 중…";
   const snapshot = (forms || []).map(form => ({id:form.id, part_type:form.part_type, lyrics:form.lyrics || ""}));
-  MindexHymnStructure.describe(version.id, snapshot)
+  MindexHymnStructure.describe(version._legacyVersionId || version.id, snapshot)
     .catch(() => ({text:"마디 정보를 불러오지 못했어요",status:"error"}))
     .then(result => {
       if (!node.isConnected || node.dataset.hymnStructureRequest !== ticket) return;
@@ -19186,7 +19269,175 @@ async function validateServiceItemScriptureInput(item) {
   }
 }
 
+// Native lifecycle remains behind the explicit localhost-only session installer.
+function singleSongRevisions(ids) {
+  return Object.fromEntries([...new Set(ids)].sort().map(id=>[id,state.singleSongCatalog.get(id).revision]));
+}
+function singleSongGroup(id) {
+  return [id,...(state.singleSongCatalog.get(id).relations?.same_song || [])];
+}
+async function mutateSingleSong(operation, input, scope) {
+  const repository = state.singleSongRepository;
+  if (!repository?.mutate) throw new Error("SINGLE_SONG_LIFECYCLE_REQUIRED");
+  const result = await repository.mutate(operation,input,scope);
+  if (repository !== state.singleSongRepository) throw new Error("SINGLE_SONG_REPOSITORY_CHANGED");
+  const cached = new Map(state.singleSongCatalog.ids().map(id=>[id,state.singleSongCatalog.get(id)]));
+  for (const id of result.deleted) cached.delete(id);
+  for (const record of result.records) {
+    if (!cached.has(record.id) || record.revision >= cached.get(record.id).revision) cached.set(record.id,record);
+  }
+  state.singleSongCatalog = globalThis.MindexSingleSong.createCatalog([...cached.values()]);
+  // Relationship writes never replace an editor's lyrics or a late title edit.
+  state.songs = state.songs.filter(song=>!result.deleted.includes(song.id));
+  for (const record of result.records) {
+    const fresh = state.singleSongCatalog.appSong(record.id), live = state.songs.find(song=>song.id===record.id);
+    if (live) Object.assign(live,{same_song_ids:fresh.same_song_ids,related_song_ids:fresh.related_song_ids,_singleSongRevision:fresh._singleSongRevision});
+    else state.songs.push(fresh);
+  }
+  state.songs.sort(sortSongs);clearSearchCaches();return result;
+}
+async function editSingleSongRelation(song, kind, targetId, remove = false) {
+  if (!song?._singleSongRecord || state.saving) return;
+  if (state.dirty.song || state.dirty.forms) {showToast("편집 중인 곡을 먼저 저장해 주세요.","info");return;}
+  if (!["same_song","related"].includes(kind) || targetId===song.id) return;
+  let members, affected;
+  if (kind==="same_song") {
+    if (remove && !singleSongGroup(song.id).includes(targetId)) return;
+    affected=[...new Set([...singleSongGroup(song.id),...singleSongGroup(targetId)])];
+    members=remove ? singleSongGroup(song.id).filter(id=>id!==targetId) : affected;
+  } else {
+    members=[...new Set(state.singleSongCatalog.get(song.id).relations?.related || [])].filter(id=>id!==targetId);
+    if (!remove) members.push(targetId);
+    affected=[song.id];
+  }
+  state.saving=true;updateSaveState();
+  try {
+    await mutateSingleSong(kind,{id:song.id,members,expectedRevisions:singleSongRevisions(affected)});
+    if (!state.dirty.song && !state.dirty.forms) captureCleanFingerprint("praise");
+    renderDetail();showToast("곡 관계를 저장했습니다.");
+  } catch(error) {showToast(error.message,"error");}
+  finally {state.saving=false;updateSaveState();}
+}
+async function deleteSingleSong(song) {
+  if (state.saving || state.dirty.song || state.dirty.forms) {showToast("편집 중인 곡을 먼저 저장해 주세요.","info");return;}
+  if (!canDeletePraiseSong(song)) {showToast("내용이 비어 있는 곡만 삭제할 수 있어요.","error");return;}
+  if (!confirm(`“${song.title}”을 삭제할까요?`)) return;
+  const before=JSON.stringify({song,forms:state.forms});state.saving=true;updateSaveState();
+  try {
+    await mutateSingleSong("delete",{id:song.id,expectedRevisions:singleSongRevisions(singleSongGroup(song.id))});
+    if (state.selectedSongId===song.id && before!==JSON.stringify({song,forms:state.forms})) {
+      state.songs.push(song);state.dirty.song=true;
+      showToast("빈 곡은 삭제됐지만 대기 중 입력은 화면에 유지했습니다. 새 곡으로 복사해 주세요.","info");return;
+    }
+    if (state.selectedSongId===song.id) {state.selectedSongId=null;state.selectedVersionId=null;state.forms=[];captureCleanFingerprint("praise");}
+    persistUiState();render();showToast("빈 곡을 삭제했습니다.");
+  } catch(error) {showToast(error.message,"error");}
+  finally {state.saving=false;updateSaveState();}
+}
+async function addSingleSongArrangement(song) {
+  if (state.saving || state.dirty.song || state.dirty.forms) {showToast("편집 중인 곡을 먼저 저장해 주세요.","info");return;}
+  const pending=state.singleSongRepository.pendingMutation?.(`arrangement:${song.id}`);
+  const name=pending?.content?.name ?? prompt("새 버전 이름 (가사는 복사하고 음원은 별도로 등록)","새 버전");if (name===null) return;
+  const source=state.singleSongCatalog.get(song.id);
+  const metadata=structuredClone(source.metadata);
+  for (const key of ["id","versions","related_song_ids","same_song_ids","_singleSongRecord","_singleSongRevision"]) delete metadata[key];
+  // Match existing add-version behavior: new units, identical lyrics, no inherited audio/timing.
+  const content=pending?.content || {name:name.trim()||"새 버전",raw_section_name:name.trim()||"새 버전",is_primary:true,
+    praise_types:source.content.praise_types || source.metadata.praise_types,
+    forms:(source.content.forms||[]).map(form=>({...structuredClone(form),id:createUuid()}))};
+  state.saving=true;updateSaveState();
+  try {
+    const result=await mutateSingleSong("create",{baseId:song.id,metadata:pending?.metadata || metadata,content,
+      expectedRevisions:pending?.expectedRevisions || singleSongRevisions(singleSongGroup(song.id))},`arrangement:${song.id}`);
+    if (getSelectedSong()===song && !state.dirty.song && !state.dirty.forms) {
+      state.selectedSongId=result.id;state.selectedVersionId=result.id;
+      state.forms=normalizeForms(state.singleSongCatalog.get(result.id).content.forms);captureCleanFingerprint("praise");
+    }
+    persistUiState();render();showToast("별도 ID로 새 버전을 만들었습니다.");
+  } catch(error) {showToast(error.message,"error");}
+  finally {state.saving=false;updateSaveState();}
+}
+function renderSingleSongRelations(song) {
+  if (!song?._singleSongRecord) return "";
+  const options=state.songs.filter(row=>row.id!==song.id).map(row=>`<option value="${escapeAttr(row.id)}">${escapeHtml(row.title)} · ${escapeHtml(row.versions?.[0]?.name || "기본")} (${escapeHtml(row.id)})</option>`).join("");
+  return `<details><summary>곡 관계 편집</summary><div data-single-relations>
+    <select aria-label="연결할 곡">${options}</select>
+    <button type="button" data-single-relation="same_song">같은 곡으로 묶기</button>
+    <button type="button" data-single-relation="same_song" data-remove="true">같은 곡에서 분리</button>
+    <button type="button" data-single-relation="related">관련 곡 연결</button>
+    <button type="button" data-single-relation="related" data-remove="true">관련 곡 해제</button>
+    <p>같은 곡: ${escapeHtml((song.same_song_ids||[]).map(id=>state.songs.find(row=>row.id===id)?.title||id).join(" · ")||"없음")}</p>
+  </div></details>`;
+}
+
+// Release bootstrap checks server phase before enabling native storage.
+let singleSongActivationPending = null;
+async function ensureSingleSongActivation() {
+  if (globalThis.MINDEX_SINGLE_SONG_BOOTSTRAP_READY !== true || !state.client) return false;
+  const client = state.client;
+  if (state.singleSongRepository) {
+    if (state.singleSongClient !== client) throw new Error("연결이 변경되었습니다. 입력을 보존한 뒤 앱을 다시 열어 주세요.");
+    return true;
+  }
+  if (singleSongActivationPending) {
+    if (singleSongActivationPending.client !== client) throw new Error("PRAISE_STORAGE_CLIENT_CHANGED");
+    return singleSongActivationPending.promise;
+  }
+  const promise = (async () => {
+    const prepared = await globalThis.MindexSingleSong.loadActivation(client);
+    if (state.client !== client) throw new Error("PRAISE_STORAGE_CLIENT_CHANGED");
+    if (prepared.phase === 'legacy') return false;
+    if (state.saving || Object.values(state.dirty || {}).some(Boolean)) throw new Error("미저장 입력을 보존한 뒤 다시 열어 주세요.");
+    const catalog = globalThis.MindexSingleSong.createCatalog(prepared.records);
+    state.singleSongStorage = 'native';
+    state.singleSongCatalog = catalog;
+    state.singleSongRepository = prepared.repository;
+    state.singleSongClient = client;
+    state.songs = catalog.ids().map(id => catalog.appSong(id));
+    state.selectedSongId = state.selectedVersionId = null;
+    state.forms = [];
+    clearSearchCaches();
+    return true;
+  })();
+  singleSongActivationPending = {client,promise};
+  try { return await promise; }
+  finally { if (singleSongActivationPending?.promise === promise) singleSongActivationPending = null; }
+}
+
+function installSingleSongSession(records, repository, {worshipStorage = "native"} = {}) {
+  if (!["localhost", "127.0.0.1", "[::1]"].includes(location.hostname)) {
+    throw new Error("SINGLE_SONG_LOCAL_VERIFICATION_ONLY");
+  }
+  if (!repository || typeof repository.read !== "function" || typeof repository.save !== "function") {
+    throw new Error("SINGLE_SONG_REPOSITORY_REQUIRED");
+  }
+  const catalog = globalThis.MindexSingleSong.createCatalog(records);
+  if (!["native", "legacy"].includes(worshipStorage)) throw new Error("INVALID_SINGLE_SONG_STORAGE");
+  state.singleSongStorage = worshipStorage;
+  state.singleSongCatalog = catalog;
+  state.singleSongRepository = repository;
+  state.songs = catalog.ids().map(id => catalog.appSong(id));
+  clearSearchCaches();
+}
+
+async function readSingleSongs(ids) {
+  const repository = state.singleSongRepository;
+  const rows = await repository.read([...new Set(ids)]);
+  const catalog = globalThis.MindexSingleSong.createCatalog(rows);
+  if (ids.some(id => !catalog.ids().includes(id))) throw new Error("SONG_REFERENCE_MISSING");
+  if (repository !== state.singleSongRepository) throw new Error("SINGLE_SONG_REPOSITORY_CHANGED");
+  const cached = new Map(state.singleSongCatalog.ids().map(id => [id, state.singleSongCatalog.get(id)]));
+  for (const row of rows) {
+    if (!cached.has(row.id) || row.revision >= (cached.get(row.id).revision ?? -1)) cached.set(row.id, row);
+  }
+  state.singleSongCatalog = globalThis.MindexSingleSong.createCatalog([...cached.values()]);
+  return ids.map(id => state.singleSongCatalog.appSong(id));
+}
+
 function normalizeServerSong(row) {
+  if (row?.content && row?.metadata && globalThis.MindexSingleSong?.isId(row.id)) {
+    return globalThis.MindexSingleSong.createCatalog([row]).appSong(row.id);
+  }
   const memo = parseSongMemo(row.memo);
   const scriptureRefs = cleanList(row.scripture_refs).length ? cleanList(row.scripture_refs) : cleanList(memo.scripture);
   const metadata = mergePromotedSongMetadata(row, memo.metadata);
@@ -26132,7 +26383,7 @@ function serviceSourceItemLines(item = {}, service = null, memo = parseServiceIt
   const audio = normalizeServiceAudioAsset(memo.audioAsset || memo.audio_asset);
   return serializePortableServiceSourceItem({
     label, value, elementType, inputMode, outputMode, formHint: memo.formHint, titleSequence: memo.formPreset?.titleSequence,
-    songTitle: song?.title, songId: item.song_id, versionId: item.version_id || item.song_version_id,
+    songTitle: song?.title, songId: item.song_id, versionId: song?._singleSongRecord ? null : item.version_id || item.song_version_id,
     assignee, hasTranslation: Boolean(translation), translationLabel, translationId, sermonReference,
     lyrics, slides: memo.slides, manualScripture, manualTranslation, asset, audio, audioTiming:memo.audioTiming, presentation:memo.presentation,
     announcementRegions: isAnnouncementTextInputItem(item) || memo.announcementRegions ? serviceAnnouncementRegions(item, memo) : null,
@@ -26458,6 +26709,11 @@ function applyServiceSourceRecord(serviceId, index, record = {}) {
     item.song_id = record.songId;
     item.version_id = record.versionId || null;
     item.song_version_id = item.version_id;
+    if (state.singleSongCatalog) {
+      const single = state.singleSongCatalog.singleItem(item);
+      item.song_id = single.song_id;
+      delete item.version_id; delete item.song_version_id;
+    }
   }
   if (record.hasManualScripture) {
     const nextMemo = parseServiceItemMemo(item.memo);
