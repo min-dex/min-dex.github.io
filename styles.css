@@ -3277,3 +3277,24 @@ body[data-module="praise"] .song-count-badge {
 .background-toolbar > .background-field { flex:1 1 170px; min-width:0; }
 .background-toolbar > .background-file-field { flex:1.3 1 220px; }
 .background-toolbar > .reference-new-btn { flex:0 0 auto; }
+
+/* The help affordance shares the form field's allocated column, never its text. */
+.svc-form-hint-slot { position: relative; display: inline-flex; min-width: 0; padding: 0; background: transparent; }
+.svc-form-hint-slot > input.svc-form-hint { width: calc(100% - 28px) !important; max-width: none !important; min-width: 0; flex: 1 1 auto; box-sizing: border-box; }
+.svc-form-help-button { align-self: stretch; flex: 0 0 28px; width: 28px; min-width: 28px; padding: 0; border: 0; border-radius: var(--r); background: transparent; color: var(--muted); font: inherit; font-size: 18px; cursor: pointer; }
+.svc-form-help-button:hover { color: var(--ink); background: var(--accent-soft); }
+.svc-form-help-button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.svc-form-help-panel { position: fixed; inset: auto; margin: 0; box-sizing: border-box; width: 390px; max-width: calc(100vw - 16px); max-height: calc(100dvh - 16px); overflow: auto; padding: 16px; border: 1px solid var(--line); border-radius: var(--r); background: var(--panel, var(--bg)); color: var(--ink); box-shadow: 0 8px 28px #0004; font-size: 13px; line-height: 1.5; }
+.svc-form-help-panel header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.svc-form-help-panel p { margin: 10px 0; }
+.svc-form-help-panel dl { display: grid; grid-template-columns: max-content 1fr; gap: 3px 16px; margin: 12px 0; }
+.svc-form-help-panel dd { margin: 0; }
+.svc-form-help-panel ul { margin: 10px 0; padding-left: 18px; }
+.svc-form-help-panel code { font-size: 12px; overflow-wrap: anywhere; }
+
+:is(.presenter-section-editor, .svc-prep-editor) .svc-form-hint-slot.compact { height: var(--ui-field-height, 30px); }
+
+/* Keep timing actions beside the time field, below its lyric/photo label. */
+.song-timing-row > label { flex-basis: 100%; overflow-wrap: anywhere; }
+.song-timing-row-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; width: 100%; min-width: 0; }
+.song-timing-row .song-timing-row-controls input { margin-top: 0; }

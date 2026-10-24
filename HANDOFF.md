@@ -1508,3 +1508,25 @@ strong800, CSS only with current decisions preserved. Based on presenter-return
 main bf30a91d, preserving all remote/history/citation assets and behavior.
 Candidate version20261024-readonly-desktop-ready. Final gate/publication and
 unsigned installer build evidence remain separate from scoped local checks.
+
+
+## Broad live smoke alignment ·2026-10-24
+
+Current UI, declared/inferred/manual forms, explicit version choice and output
+session transport are covered by the refreshed broad live suites. The guarded
+runner keeps startup state, output presence and broadcast bookkeeping entirely
+local; canonical production writes remain blocked. See
+`docs/code-organization.md` (Broad live suite alignment) for fixture boundaries,
+real source-preservation coverage and native-fullscreen limitations. Product
+runtime and operational data are unchanged by this test/helper-only update.
+
+## 2026-10-24 audit UI and fixture alignment
+
+Section-editor song-form wrapper/help now share the existing 30px input height.
+The five supplemental smokes use the current server-state fixture, editable-only
+metadata selector, explicit media-file picker and actual flow/visible-rail bounds.
+Operational popup smoke checks input/wrapper/help heights together. No required
+CI selection or assertion timeout was removed. Current Remote/category docs now
+lead with deployed behavior while retaining dated implementation evidence.
+No production migration, data cleanup or single-song candidate is included.
+Publication requires the exact candidate's full gate, Pages and public readback.

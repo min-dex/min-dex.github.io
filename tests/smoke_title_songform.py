@@ -34,7 +34,7 @@ try:
     check(serviceItemEffectiveFormHint(item)==='T-V1-C','legacy sequence exposes title');
     for(const label of ['파송찬양','마침찬양','결단찬양']) {
       const title=presenterSongTitleSlide({...item,label},{sectionKey:'response_song'},song,version,song.title,0);
-      check(title.type==='title-assignee' && title.formLabel==='T' && title.contentTitle==='♪ '+song.title,'order/content title for '+label);
+      check(title.type==='title-assignee' && title.formLabel==='T' && title.contentTitle==='♬ '+song.title,'order/content title for '+label);
     }
     for (const sectionKey of ['praise','special_song','response_song','offering','sending']) {
       const title=presenterSongTitleSlide({...item,label:'찬양'},{sectionKey},song,version,song.title,0);
@@ -48,7 +48,7 @@ try:
     const content=presenterOrderContentTitleSlide(item,{sectionKey:'offering'},0,'봉헌찬양',formatPresenterSongTitleText(song.title));
     for (const noChromakey of [false,true]) {
       const host=document.createElement('div');host.innerHTML=renderPresenterSlideFrame(content,{noChromakey});
-      check(host.textContent.includes('♪')&&!host.textContent.includes('♬'),'content title eighth note');
+      check(host.textContent.includes('♬')&&!host.textContent.includes('♪'),'content title shared note');
     }
     const fresh={...item};
     applyServiceItemMetadataField(fresh,{dataset:{serviceItemField:'form_hint'},value:'V1-C'},{});

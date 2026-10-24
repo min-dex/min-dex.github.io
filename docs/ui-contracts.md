@@ -909,3 +909,49 @@ actions use text without decorative icons. Keep accessible names, targets and
 actions. Bulletin optional monthly information starts collapsed in every design;
 retain the existing per-document user disclosure-state map across content/layout
 renders. Primary weekly fields, print content and stored records are unchanged.
+
+
+### Disclosure preferences ·2026-10-24
+
+Editor disclosures retain explicit open AND closed choices across rerenders,
+leaving/returning to the screen, and same-tab refresh. Use the existing
+project/session server-state store, not worship/Bulletin content or new browser
+content storage. Per-item controls use service/item identity; Bulletin sections
+use scope/document/section identity. Missing/malformed values preserve original
+defaults. Disconnected startup keeps an in-memory fallback only until storage is
+ready; existing state retry/conflict UI reports persistence failures.
+
+Covers citation translations, manual lyrics, announcement headers/footers, item
+settings, authoring/source/recovery panels, template inventories/guides, media
+previews, Bible edition/source notes, presenter help, timing help/bulk input and
+Bulletin property/help sections. Add/upload action menus, pairing dialogs and
+conflict confirmations remain transient actions. Display preferences contain
+only identities and booleans, never draft field values or media URLs.
+
+### Worship sidebar child-name weight ·2026-10-24
+
+Individual item names under worship outline sections use600 weight. Preserve
+the12px size,16px line height, existing spacing, truncation and parent heading
+weights. This sidebar rule does not change presenter output typography.
+
+### Song form input help ·2026-10-24
+
+Worship form fields reserve a right-hand help button. Its read-only popover uses
+the actual normalizer for examples, distinguishes CB from C-B and preserves
+unknown labels. Pointer activation must not blur/normalize unfinished input;
+keyboard activation and Escape preserve selection and return to the input.
+The help does not write worship data or re-render the editor.
+
+
+### Section editor song-form row ·2026-10-24
+
+The section-editor song-form wrapper, input and adjacent help button share the
+existing 30px field height. Do not leave the compact wrapper at22px around a
+30px input. Keep the existing field widths, wrapping, help behavior and focus.
+
+### Preparation and timing field alignment ·2026-10-24
+
+Preparation-editor song-form help shares the dense field height, as in section
+editing. Timing rows retain their associated lyric/photo label above a wrapping
+row of start-time input and stamp/nudge buttons. Align controls to each other,
+not to the combined lyric/photo height; preserve labels, focus and timing values.

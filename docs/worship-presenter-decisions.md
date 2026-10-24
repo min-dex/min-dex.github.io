@@ -4519,3 +4519,24 @@ Fullscreen ready messages and generated waiting-loop messages share600 regular
 copy /800 service-name emphasis. The existing strong span marks the service
 name; preserve100px authored base size, content, layout, colors and the common
 1px overflow fitting. Thumbnails and actual output use the same stylesheet.
+
+
+## Unified musical title note ·2026-10-24
+
+Supersedes the note distinction in “Praise Title note by role” and earlier inline
+note decisions. All song-title notes use the original ♬, including main/special
+Title/T frames and songs displayed as an order's content title. One shared note
+constant owns generation and render-boundary normalization; no role-based glyph
+branch remains. Keep the separate heading above fullscreen main/special titles,
+inline content-title placement, chromakey positions, font/fit and preview parity.
+Retained snapshots with ♪, ♩ or ♫ normalize only while rendering. No saved lyrics,
+forms, versions, service links or operational records are rewritten.
+
+
+## Timing popup control alignment ·2026-10-24
+
+Keep each lyric/photo label above its start-time input and stamp/nudge controls.
+The controls wrap by available width and share vertical alignment on each line.
+The label remains explicitly associated with its input. Preparation-editor
+song-form help inherits the 30px dense field height. No timing, draft, playback
+or output behavior changes.

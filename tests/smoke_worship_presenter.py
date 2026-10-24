@@ -22,8 +22,9 @@ from smoke_app import (
 )
 
 
-def presenter_output_url(app_url: str) -> str:
-    return f"{app_url}?mindexSmokeRaw=1&output=presenter"
+def presenter_output_url(controller) -> str:
+    # Use the current output-session nonce; no fullscreen=start in background QA.
+    return controller.evaluate("presenterOutputUrl()")
 
 
 def rgb_at(image_bytes: bytes, x_ratio: float, y_ratio: float) -> tuple[int, int, int]:
@@ -827,10 +828,10 @@ def main() -> int:
                     "disabledOrder": ["v1", "c", "v2", "c"],
                     "inferredOrder": ["v1", "c", "v2", "c"],
                     "forcedOrder": ["v1", "c", "v1"],
-                    "groupedLabels": ["V1A", "V1B"],
+                    "groupedLabels": ["Verse 1 A", "Verse 1 B"],
                     "groupedLyrics": ["1행\n2행\n3행\n4행", "5행\n6행\n7행\n8행"],
-                    "specialHymnOrder": ["sv1", "sc", "sv2", "sc", "preset-blank:instrumental", "sv4", "sc"],
-                    "specialHymnLabels": ["1절", "Chorus", "2절", "Chorus", "Instrumental", "마지막 절", "Chorus"],
+                    "specialHymnOrder": ["preset-title", "sv1", "sc", "sv2", "sc", "preset-blank:instrumental", "sv4", "sc"],
+                    "specialHymnLabels": ["T", "1절", "Chorus", "2절", "Chorus", "Instrumental", "마지막 절", "Chorus"],
                     "specialHymnWithoutChorusWarnings": [],
                 }:
                     pass_("presenter-ccm-repeats-chorus", json.dumps(ccm_form_order_state, ensure_ascii=False))
@@ -941,7 +942,7 @@ def main() -> int:
                         sidebarLaunch: {
                           exists: Boolean(sidebarLaunch),
                           action: sidebarLaunch?.dataset.presenterAction || '',
-                          label: sidebarLaunch?.querySelector('span')?.textContent.trim() || '',
+                          label: sidebarLaunch?.getAttribute('aria-label') || '',
                           icon: sidebarLaunch?.querySelector('svg')?.getAttribute('data-lucide') || '',
                           width: Math.round(sidebarLaunch?.getBoundingClientRect().width || 0),
                         },
@@ -978,10 +979,10 @@ def main() -> int:
                     and sticky_title_state["usesSidebarTitle"]
                     and sticky_title_state["controllerTitleRemoved"]
                     and sticky_title_state["presenterHeaderRemoved"]
-                    and sticky_title_state["titleFontSize"] >= 18
-                    and int(sticky_title_state["titleFontWeight"]) >= 800
-                    and sticky_title_state["dateFontSize"] >= 13
-                    and int(sticky_title_state["dateFontWeight"]) >= 700
+                    and sticky_title_state["titleFontSize"] == 16
+                    and int(sticky_title_state["titleFontWeight"]) == 700
+                    and sticky_title_state["dateFontSize"] == 12
+                    and int(sticky_title_state["dateFontWeight"]) == 500
                     and sticky_title_state["contextBackground"] != "rgba(0, 0, 0, 0)"
                     and abs(sticky_title_state["contextLeft"] - sticky_title_state["searchLeft"]) <= 1
                     and abs(sticky_title_state["contextWidth"] - sticky_title_state["searchWidth"]) <= 1
@@ -989,7 +990,7 @@ def main() -> int:
                     and sticky_title_state["sidebarLaunch"]["action"] in ("open", "stop")
                     and sticky_title_state["sidebarLaunch"]["label"] in ("송출 시작", "송출 종료")
                     and sticky_title_state["sidebarLaunch"]["icon"] in ("screen-share", "screen-share-off")
-                    and sticky_title_state["sidebarLaunch"]["width"] >= 90
+                    and sticky_title_state["sidebarLaunch"]["width"] == 35
                     and sticky_title_state["pageTabsVisible"]
                     and 8 <= sticky_title_state["rightSidebarTopGap"] <= 28
                     and sticky_title_state["rightSidebarVisible"]
@@ -1011,6 +1012,8 @@ def main() -> int:
                       const serviceId = state.selectedServiceId;
                       let openCall = null;
                       const originalOpen = window.open;
+                      const originalPreflight = MindexPresenterFreshness.beforeOpen;
+                      MindexPresenterFreshness.beforeOpen = async () => true;
                       const originalHydrate = hydratePresenterOutputInBackground;
                       window.open = (url, name, features) => {
                         openCall = { url, name, features };
@@ -1030,7 +1033,7 @@ def main() -> int:
                       const stopButton = document.querySelector('.service-sidebar-presenter-context .svc-presenter-launch--sidebar');
                       const stopState = {
                         action: stopButton?.dataset.presenterAction || '',
-                        label: stopButton?.querySelector('span')?.textContent.trim() || '',
+                        label: stopButton?.getAttribute('aria-label') || '',
                         icon: stopButton?.querySelector('svg')?.getAttribute('data-lucide') || '',
                       };
                       stopButton?.click();
@@ -1038,10 +1041,11 @@ def main() -> int:
                       const restartButton = document.querySelector('.service-sidebar-presenter-context .svc-presenter-launch--sidebar');
                       const restartState = {
                         action: restartButton?.dataset.presenterAction || '',
-                        label: restartButton?.querySelector('span')?.textContent.trim() || '',
+                        label: restartButton?.getAttribute('aria-label') || '',
                         icon: restartButton?.querySelector('svg')?.getAttribute('data-lucide') || '',
                       };
                       window.open = originalOpen;
+                      MindexPresenterFreshness.beforeOpen = originalPreflight;
                       hydratePresenterOutputInBackground = originalHydrate;
                       const presenterServiceId = state.presenter.serviceId || '';
                       state.presenter.outputWindow = null;
@@ -1214,6 +1218,7 @@ def main() -> int:
 	                      const startedAt = performance.now();
 	                      thumb?.click();
 	                      const immediateIndex = state.presenter.index;
+                          const clickElapsedMs = performance.now() - startedAt;
 	                      await new Promise((resolve) => requestAnimationFrame(resolve));
 	                      Element.prototype.scrollIntoView = originalScrollIntoView;
                       const boardAfter = document.querySelector('.svc-slide-board');
@@ -1223,7 +1228,7 @@ def main() -> int:
                         targetIndex,
                         immediateIndex,
                         inputValue: input?.value || '',
-                        elapsedMs: Number((performance.now() - startedAt).toFixed(2)),
+                        elapsedMs: Number(clickElapsedMs.toFixed(2)),
                         sameBoard: boardBefore === boardAfter,
                         scrollBefore,
                         scrollAfter: detail.scrollTop,
@@ -2186,7 +2191,7 @@ def main() -> int:
                         "title": "공동기도",
                         "subgroups": [
                             {"label": "공동기도 1·2", "title": "공동기도 1·2", "slides": 3, "slideTitles": ["'교회 부흥을 위해'", "'선교와 민족을 위해'", "빈 화면"]},
-                            {"label": "기도찬양", "title": "기도찬양", "slides": 1},
+                            {"label": "기도찬양", "title": "기도찬양", "slides": 2},
                             {"label": "공동기도 3·4", "title": "공동기도 3·4", "slides": 3, "slideTitles": ["'치유와 회복을 위해'", "'교회학교를 위해'", "빈 화면"]},
                         ],
                     }]
@@ -4359,7 +4364,7 @@ def main() -> int:
                             requiresSong: serviceItemRequiresSongSelection(item, targetService),
                           };
                         })(),
-                        manualSlidesOutsideSundayMain: (() => {
+                        legacySlidesDoNotSelectManualMode: (() => {
                           const item = {
                             id: '__smoke_special_mode_manual_slides__',
                             label: '특송',
@@ -4911,13 +4916,13 @@ def main() -> int:
                         "후렴 첫 줄\n후렴 둘째 줄",
                         "아멘",
                     ]
-                    and len(form_preset_state["scoreTitleSlides"]) == 1
-                    and form_preset_state["scoreTitleTexts"] == ["♬ 999 특송 테스트"]
-                    and form_preset_state["scoreManifestTitleTexts"] == ["♬ 5 이 천지간 만물들아"]
-                    and form_preset_state["scoreRawTitleTexts"] == ["♬ 5 이 천지간 만물들아"]
-                    and form_preset_state["scoreImageTitleSlides"]
-                    and form_preset_state["scoreManifestTitleSlides"]
-                    and form_preset_state["scoreRawTitleTitleSlides"] == ["5 이 천지간 만물들아"]
+                    and len(form_preset_state["scoreTitleSlides"]) == 0
+                    and form_preset_state["scoreTitleTexts"] == []
+                    and form_preset_state["scoreManifestTitleTexts"] == []
+                    and form_preset_state["scoreRawTitleTexts"] == []
+                    and form_preset_state["scoreImageTitleSlides"] == []
+                    and form_preset_state["scoreManifestTitleSlides"] == []
+                    and form_preset_state["scoreRawTitleTitleSlides"] == []
                     and len(form_preset_state["offeringScoreTitleSlides"]) == 0
                     and form_preset_state["flexibleOfferingScoreMode"] == "score"
                     and form_preset_state["flexibleOfferingScoreSlides"] == [
@@ -5045,8 +5050,8 @@ def main() -> int:
                         "elementType": "title_assignee",
                         "layout": "lower_bar_text",
                         "title": "특송",
-                        "assignee": "",
-                        "text": "특송",
+                        "assignee": "할렐루야 찬양대",
+                        "text": "특송\n할렐루야 찬양대",
                         "sectionKey": "special_song",
                         "body": form_preset_state["specialSectionTitleSlides"][0]["body"],
                     }]
@@ -5056,8 +5061,8 @@ def main() -> int:
                         "elementType": "title_assignee",
                         "layout": "lower_bar_text",
                         "title": "특송",
-                        "assignee": "",
-                        "text": "특송",
+                        "assignee": "할렐루야 찬양대",
+                        "text": "특송\n할렐루야 찬양대",
                         "sectionKey": "special_song",
                     }]
                     and form_preset_state["thirdEmptySpecialMissingSlides"] == [{
@@ -5069,8 +5074,8 @@ def main() -> int:
                         "text": "특송",
                         "sectionKey": "special_song",
                         "missingContent": True,
-                        "missingReason": "manual_praise_empty",
-                        "inputMode": "manual_praise",
+                        "missingReason": "song_empty",
+                        "inputMode": "lyrics_db",
                         "contentState": "missing",
                         "warnings": ["입력 필요"],
                     }]
@@ -5085,8 +5090,8 @@ def main() -> int:
                     }]
                     and form_preset_state["specialInputModes"] == {
                         "sundayMain": {
-                            "mode": "manual_praise",
-                            "requiresSong": False,
+                            "mode": "lyrics_db",
+                            "requiresSong": True,
                         },
                         "sundaySecond": {
                             "mode": "lyrics_db",
@@ -5096,9 +5101,9 @@ def main() -> int:
                             "mode": "lyrics_db",
                             "requiresSong": True,
                         },
-                        "manualSlidesOutsideSundayMain": {
-                            "mode": "manual_praise",
-                            "requiresSong": False,
+                        "legacySlidesDoNotSelectManualMode": {
+                            "mode": "lyrics_db",
+                            "requiresSong": True,
                         },
                     }
                     and form_preset_state["emptyTemplateInputSlides"] == [{
@@ -5134,8 +5139,8 @@ def main() -> int:
                         "elementType": "title_assignee",
                         "layout": "lower_bar_text",
                         "title": "설교",
-                        "assignee": "",
-                        "text": "설교",
+                        "assignee": "김남영 목사",
+                        "text": "설교\n김남영 목사",
                         "sectionKey": "sermon",
                         "missingContent": True,
                         "missingReason": "title_empty",
@@ -5173,19 +5178,19 @@ def main() -> int:
 	                        {
 	                            "label": "특송",
 	                            "songId": "",
-	                            "inputMode": "manual_praise",
+	                            "inputMode": "lyrics_db",
 	                            "typedInputMode": "praise_db",
 	                            "contentState": {
 	                                "state": "missing",
-	                                "reason": "manual_praise_empty",
-	                                "inputMode": "manual_praise",
+	                                "reason": "song_empty",
+	                                "inputMode": "lyrics_db",
 	                                "elementType": "praise",
 	                                "required": True,
 	                            },
 	                            "typedContentState": {
 	                                "state": "missing",
-	                                "reason": "manual_praise_empty",
-	                                "inputMode": "manual_praise",
+	                                "reason": "song_empty",
+	                                "inputMode": "lyrics_db",
 	                                "elementType": "praise",
 	                                "required": True,
 	                            },
@@ -5216,18 +5221,18 @@ def main() -> int:
 	                            "inputMode": "lyrics_db",
 	                            "typedInputMode": "praise_db",
 	                            "contentState": {
-	                                "state": "filled",
-	                                "reason": "song",
+	                                "state": "missing",
+	                                "reason": "song_version_required",
 	                                "inputMode": "lyrics_db",
 	                                "elementType": "praise",
-	                                "required": False,
+	                                "required": True,
 	                            },
 	                            "typedContentState": {
-	                                "state": "filled",
-	                                "reason": "song",
+	                                "state": "missing",
+	                                "reason": "song_version_required",
 	                                "inputMode": "lyrics_db",
 	                                "elementType": "praise",
-	                                "required": False,
+	                                "required": True,
 	                            },
 	                        },
 	                    ]
@@ -5938,11 +5943,11 @@ def main() -> int:
                         safetyBlank: false,
                       });
                       const root = document.getElementById('presenterOutputRoot');
-                      const slide = root?.querySelector('.presenter-slide--title-assignee');
-	                      const songLayout = root?.querySelector('.presenter-section-song-title');
+                      const slide = root?.querySelector('.presenter-slide--fullscreen-song-title');
+	                      const songLayout = root?.querySelector('.presenter-fullscreen-song-heading');
 	                      const orderContent = root?.querySelector('.presenter-title-assignee--order-content');
-	                      const heading = root?.querySelector('.presenter-title-assignee-order');
-	                      const name = root?.querySelector('.presenter-title-assignee-content');
+	                      const heading = root?.querySelector('.presenter-fullscreen-song-heading');
+	                      const name = root?.querySelector('.presenter-title-content-title');
 	                      const size = (node) => node ? Number.parseFloat(getComputedStyle(node).fontSize) : 0;
 	                      const result = {
 	                        hasRoot: Boolean(root),
@@ -5962,12 +5967,12 @@ def main() -> int:
                 )
                 if (
 	                    offering_song_title_output_font_state["sectionKey"] == "offering"
-	                    and not offering_song_title_output_font_state["hasSongLayout"]
-	                    and offering_song_title_output_font_state["hasOrderContent"]
+	                    and offering_song_title_output_font_state["hasSongLayout"]
+	                    and not offering_song_title_output_font_state["hasOrderContent"]
 	                    and "내 주 되신 주를 참 사랑하고" in offering_song_title_output_font_state["text"]
-	                    and offering_song_title_output_font_state["headingFontSize"] >= 65
-	                    and offering_song_title_output_font_state["headingFontWeight"] == "800"
-	                    and 50 <= offering_song_title_output_font_state["nameFontSize"] <= 55
+	                    and offering_song_title_output_font_state["headingFontSize"] == 60
+	                    and offering_song_title_output_font_state["headingFontWeight"] == "700"
+	                    and offering_song_title_output_font_state["nameFontSize"] == 112.5
 	                    and offering_song_title_output_font_state["nameFontWeight"] == "800"
 	                ):
                     pass_("presenter-offering-song-title-output-font", json.dumps(offering_song_title_output_font_state, ensure_ascii=False))
@@ -6685,6 +6690,10 @@ def main() -> int:
                             availWidth: 1920,
                             availHeight: 1080,
                           };
+                          window.__mindexOriginalPreflight = MindexPresenterFreshness.beforeOpen;
+                          window.__mindexOriginalHydrate = hydratePresenterOutputInBackground;
+                          hydratePresenterOutputInBackground = () => {};
+                          MindexPresenterFreshness.beforeOpen = async () => true;
                           window.__mindexScreenDetailsCalls = 0;
                           window.getScreenDetails = async () => {
                             window.__mindexScreenDetailsCalls += 1;
@@ -6727,7 +6736,7 @@ def main() -> int:
                     page.evaluate("() => requestPresenterScreens()")
                     page.wait_for_function("() => state.presenter.screens.length === 2", timeout=5000)
                     page.click(f'.svc-presenter-side-panel .svc-presenter-launch[data-service-id="{service["id"]}"]')
-                    page.wait_for_function("() => Boolean(window.__mindexPresenterOpenArgs)", timeout=5000)
+                    page.wait_for_function("() => Boolean(window.__mindexPresenterOpenArgs) && isPresenterOutputWindowOpen() && window.__mindexPresenterFocusCalls === 1", timeout=5000)
                     target_state = page.evaluate(
                         """
                         (() => ({
@@ -7035,10 +7044,13 @@ def main() -> int:
                           const previousMusic = { ...state.serviceMusic };
                           const audio = getServiceMusicAudio();
                           const previousPlay = audio.play;
-                          let playCalls = 0;
+                          let playCalls = 0, paused = true;
+                          const pausedDescriptor = Object.getOwnPropertyDescriptor(audio, 'paused');
+                          Object.defineProperty(audio, 'paused', {configurable:true,get:()=>paused});
                           audio.play = () => {
                             playCalls += 1;
                             if (playCalls === 1) return Promise.reject(new Error('temporary interruption'));
+                            paused = false;
                             return Promise.resolve();
                           };
                           state.serviceMusic.sourceKey = 'assets/audio/retry-survive.mp3';
@@ -7056,6 +7068,7 @@ def main() -> int:
                             sourceKey: state.serviceMusic.sourceKey,
                           };
                           audio.play = previousPlay;
+                          if (pausedDescriptor) Object.defineProperty(audio, 'paused', pausedDescriptor); else delete audio.paused;
                           clearServiceMusicResumeTimer();
                           state.serviceMusic = previousMusic;
                           return result;
@@ -7130,8 +7143,17 @@ def main() -> int:
                     else:
                         fail("presenter-controller-music-nav-keys-do-not-stop", json.dumps(music_key_state, ensure_ascii=False))
 
+                    page.evaluate("""() => {
+                      stopPresenterOutputWindowMonitor();
+                      state.presenter.outputWindow=null;
+                      state.presenter.outputConnectedAt=0;
+                      state.presenter.outputPendingAt=0;
+                      state.presenter.outputStopAt=0;
+                      window.__mindexPresenterOpenCalls=0;
+                      renderPresenterControlState(state.selectedServiceId);
+                    }""")
                     page.click(f'.svc-presenter-side-panel .svc-presenter-launch[data-service-id="{service["id"]}"]')
-                    page.wait_for_function("() => (window.__mindexPresenterOpenCalls || 0) === 2", timeout=5000)
+                    page.wait_for_function("() => (window.__mindexPresenterOpenCalls || 0) === 1 && isPresenterOutputWindowOpen()", timeout=5000)
 
                     dbl_target = min(service["slides"] - 1, 4)
                     page.evaluate(
@@ -7303,7 +7325,7 @@ def main() -> int:
                     ))
                 page.set_viewport_size({"width": 1440, "height": 980})
                 page.wait_for_timeout(80)
-                if all(item["overlaps"] == 0 and item["canvasWidth"] >= 700 and item["top"]["right"] <= item["canvasWidth"] + 1 and abs(item["overflow"] - max(0, item["canvasWidth"] - item["width"])) <= 2 for item in responsive_control_states):
+                if all(item["overlaps"] == 0 and abs(item["canvasWidth"] - item["width"]) <= 1 and item["top"]["right"] <= item["canvasWidth"] + 1 and abs(item["overflow"] - max(0, item["canvasWidth"] - item["width"])) <= 2 for item in responsive_control_states):
                     pass_("presenter-responsive-controls", json.dumps(responsive_control_states, ensure_ascii=False))
                 else:
                     fail("presenter-responsive-controls", json.dumps(responsive_control_states, ensure_ascii=False))
@@ -7326,6 +7348,7 @@ def main() -> int:
                     """,
                     service["id"],
                 )
+                page.evaluate("async () => { if (window.__mindexOriginalPreflight) MindexPresenterFreshness.beforeOpen = window.__mindexOriginalPreflight; if (window.__mindexOriginalHydrate) hydratePresenterOutputInBackground = window.__mindexOriginalHydrate; await MINDEX_SERVER_STORAGE.flush(); }")
                 output_page = context.new_page()
                 output_page.set_viewport_size({"width": 1280, "height": 800})
                 output_page.on("pageerror", lambda error: page_errors.append(f"output: {error}"))
@@ -7336,10 +7359,23 @@ def main() -> int:
                     if msg.type in ("error", "warning")
                     else None,
                 )
-                output_page.goto(presenter_output_url(app_url), wait_until="load")
+                output_page.goto(presenter_output_url(page), wait_until="load")
                 output_page.wait_for_selector("#presenterOutputRoot", timeout=5000)
+                output_page.wait_for_function("typeof renderPresenterOutput === 'function' && !document.body.classList.contains('ui-booting')", timeout=15000)
+                # Output transport is ephemeral and need not initialize server storage.
+                # Observe accepted render messages; do not replace the channel or renderer.
+                output_page.evaluate("""() => {
+                  const render = renderPresenterOutput;
+                  let observed = null;
+                  renderPresenterOutput = (payload, options) => {
+                    if (payload?.messageId && payload.messageId !== observed?.messageId) observed = structuredClone(payload);
+                    return render(payload, options);
+                  };
+                  window.readSmokeOutputPayload = () => observed ? structuredClone(observed) : null;
+                }""")
+                page.evaluate("publishPresenterState({force:true})")
                 output_page.wait_for_function(
-                    "(serviceId) => (readPresenterStoredPayload() || {}).serviceId === serviceId",
+                    "(serviceId) => (readSmokeOutputPayload() || {}).serviceId === serviceId",
                     arg=service["id"],
                     timeout=5000,
                 )
@@ -7441,7 +7477,7 @@ def main() -> int:
                         requestCalls += 1;
                         return Promise.resolve();
                       };
-                      const before = (readPresenterStoredPayload() || {}).index;
+                      const before = (readSmokeOutputPayload() || {}).index;
                       const fEvent = new KeyboardEvent('keydown', { key: 'f', bubbles: true, cancelable: true });
                       const fDispatched = window.dispatchEvent(fEvent);
                       await new Promise((resolve) => setTimeout(resolve, 80));
@@ -7449,7 +7485,7 @@ def main() -> int:
                       await new Promise((resolve) => setTimeout(resolve, 80));
                       window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
                       await new Promise((resolve) => setTimeout(resolve, 80));
-                      const after = (readPresenterStoredPayload() || {}).index;
+                      const after = (readSmokeOutputPayload() || {}).index;
                       document.documentElement.requestFullscreen = originalRequestFullscreen;
                       return { requestCalls, before, after, fPrevented: !fDispatched || fEvent.defaultPrevented };
                     }
@@ -7508,6 +7544,9 @@ def main() -> int:
                     async (serviceId) => {
                       const originalOpen = window.open;
                       const originalHydrate = hydratePresenterServiceData;
+                      const originalPreflight = MindexPresenterFreshness.beforeOpen;
+                      const outputSessionId = state.presenter.outputSessionId;
+                      MindexPresenterFreshness.beforeOpen = async () => true;
                       window.__mindexPresenterOpenCalls = 0;
                       let hydrateCalls = 0;
                       state.presenter.outputWindow = null;
@@ -7523,9 +7562,14 @@ def main() -> int:
                         hydrateCalls += 1;
                         return originalHydrate(...args);
                       };
-                      await openPresenterOutput(serviceId);
-                      window.open = originalOpen;
-                      hydratePresenterServiceData = originalHydrate;
+                      try { await openPresenterOutput(serviceId); }
+                      finally {
+                        window.open = originalOpen;
+                        hydratePresenterServiceData = originalHydrate;
+                        MindexPresenterFreshness.beforeOpen = originalPreflight;
+                        // This isolated blocked-popup case must not invalidate the live output fixture.
+                        state.presenter.outputSessionId = outputSessionId;
+                      }
                       return {
                         openCalls: window.__mindexPresenterOpenCalls || 0,
                         hydrateCalls,
@@ -7572,7 +7616,7 @@ def main() -> int:
                     service["id"],
                 )
                 output_page.wait_for_function(
-                    "(expectedIndex) => (readPresenterStoredPayload() || {}).index === expectedIndex",
+                    "(expectedIndex) => (readSmokeOutputPayload() || {}).index === expectedIndex",
                     arg=payload["index"],
                     timeout=5000,
                 )
@@ -8189,7 +8233,7 @@ def main() -> int:
                     service["id"],
                 )
                 output_page.wait_for_function(
-                    "() => (readPresenterStoredPayload() || {}).liveScripture?.active === true",
+                    "() => (readSmokeOutputPayload() || {}).liveScripture?.active === true",
                     timeout=5000,
                 )
                 output_page.wait_for_function(
@@ -8405,7 +8449,7 @@ def main() -> int:
                 jump_input.fill("1")
                 jump_input.press("Enter")
                 output_page.wait_for_function(
-                    "() => { const payload = (readPresenterStoredPayload() || {}); return payload.index === 0 && payload.safetyBlank !== true; }",
+                    "() => { const payload = (readSmokeOutputPayload() || {}); return payload.index === 0 && payload.safetyBlank !== true; }",
                     timeout=5000,
                 )
                 output_page.wait_for_function(
@@ -8462,7 +8506,7 @@ def main() -> int:
                 jump_input.fill("0")
                 jump_input.press("Enter")
                 output_page.wait_for_function(
-                    "() => (readPresenterStoredPayload() || {}).safetyBlank === true",
+                    "() => (readSmokeOutputPayload() || {}).safetyBlank === true",
                     timeout=5000,
                 )
                 output_page.wait_for_function(
@@ -8472,7 +8516,7 @@ def main() -> int:
                 safety_blank_state = output_page.evaluate(
                     """
                     (() => {
-                      const payload = (readPresenterStoredPayload() || {});
+                      const payload = (readSmokeOutputPayload() || {});
                       const slide = document.querySelector('.presenter-slide');
                       return {
                         index: payload.index,
@@ -8636,7 +8680,7 @@ def main() -> int:
                 jump_input.fill("2")
                 jump_input.press("Enter")
                 output_page.wait_for_function(
-                    "() => { const payload = (readPresenterStoredPayload() || {}); return payload.index === 1 && payload.safetyBlank !== true; }",
+                    "() => { const payload = (readSmokeOutputPayload() || {}); return payload.index === 1 && payload.safetyBlank !== true; }",
                     timeout=10000,
                 )
 
@@ -8665,13 +8709,13 @@ def main() -> int:
 
                 output_page.keyboard.press("ArrowRight")
                 output_page.wait_for_function(
-                    "() => (readPresenterStoredPayload() || {}).index === 2",
+                    "() => (readSmokeOutputPayload() || {}).index === 2",
                     timeout=10000,
                 )
                 channel_state = output_page.evaluate(
                     """
                     (() => {
-                      const payload = (readPresenterStoredPayload() || {});
+                      const payload = (readSmokeOutputPayload() || {});
                       const text = document.querySelector('.presenter-slide')?.innerText.trim() || '';
                       return {
                         index: payload.index,
@@ -8705,7 +8749,7 @@ def main() -> int:
                         selectedServiceTypeId: state.selectedServiceTypeId,
                         module: state.module,
                         presenter: { ...state.presenter },
-                        storedPayload: localStorage.getItem(PRESENTER_STORAGE_KEY),
+                        storedPayload: safeStorageGet("local", PRESENTER_STORAGE_KEY),
                       };
                       const service = {
                         id: '__smoke_presenter_restore_hydration__',
@@ -8762,7 +8806,7 @@ def main() -> int:
                           liveScripture: null,
                           updatedAt: Date.now(),
                         });
-                        localStorage.setItem(PRESENTER_STORAGE_KEY, JSON.stringify(restorePayload));
+                        safeStorageSet("local", PRESENTER_STORAGE_KEY, JSON.stringify(restorePayload));
 
                         delete state.serviceItems[service.id];
                         state.module = 'presenter';
@@ -8792,7 +8836,7 @@ def main() -> int:
                           index: state.presenter.index,
                           expectedIndex: targetIndex,
                           slideTitle: state.presenter.slides[state.presenter.index]?.title || '',
-                          payloadIndex: JSON.parse(localStorage.getItem(PRESENTER_STORAGE_KEY) || '{}').index,
+                          payloadIndex: JSON.parse(safeStorageGet("local", PRESENTER_STORAGE_KEY) || '{}').index,
                         };
                       } finally {
                         state.services = previous.services;
@@ -8802,8 +8846,8 @@ def main() -> int:
                         state.selectedServiceTypeId = previous.selectedServiceTypeId;
                         state.module = previous.module;
                         state.presenter = previous.presenter;
-                        if (previous.storedPayload === null) localStorage.removeItem(PRESENTER_STORAGE_KEY);
-                        else localStorage.setItem(PRESENTER_STORAGE_KEY, previous.storedPayload);
+                        if (previous.storedPayload === null) safeStorageRemove("local", PRESENTER_STORAGE_KEY);
+                        else safeStorageSet("local", PRESENTER_STORAGE_KEY, previous.storedPayload);
                       }
                     })()
                     """
@@ -8821,6 +8865,12 @@ def main() -> int:
                 else:
                     fail("presenter-controller-restore-after-hydration", json.dumps(controller_restore_after_hydration, ensure_ascii=False))
 
+                # The restore unit case broadcasts a synthetic service. Re-publish the
+                # restored live controller before asserting passive navigation.
+                page.evaluate("publishPresenterState({ force: true })")
+                output_page.wait_for_function(
+                    "id => readSmokeOutputPayload()?.serviceId === id", arg=service["id"], timeout=5000,
+                )
                 selection_state = page.evaluate(
                     """
                     () => {
@@ -8857,12 +8907,10 @@ def main() -> int:
                       state.presenter.viewServiceId = service.id;
                       renderPresenterDetail();
                       renderServiceList();
-                      const payload = (readPresenterStoredPayload() || {});
                       return {
                         switchId: service.id,
                         selectedServiceId: state.selectedServiceId,
                         presenterServiceId: state.presenter.serviceId,
-                        outputServiceId: payload.serviceId || '',
                         selectedThumbs: document.querySelectorAll('.svc-slide-thumb').length,
                         selectedActiveThumbs: document.querySelectorAll('.svc-slide-thumb.active').length,
                         status: document.querySelector('.svc-presenter-status')?.textContent.trim() || '',
@@ -8871,6 +8919,10 @@ def main() -> int:
                     }
                     """
                 )
+                selection_state.update(output_page.evaluate("""() => {
+                  const payload = readSmokeOutputPayload() || {};
+                  return {outputServiceId: payload.serviceId || '', outputIndex: payload.index};
+                }"""))
                 if (
                     selection_state["switchId"] == selection_state["selectedServiceId"]
                     and selection_state["presenterServiceId"] == service["id"]
@@ -8892,18 +8944,19 @@ def main() -> int:
                 other_live_keyboard_state = page.evaluate(
                     """
                     () => {
-                      const payload = (readPresenterStoredPayload() || {});
                       return {
                         presenterServiceId: state.presenter.serviceId,
                         presenterIndex: state.presenter.index,
-                        outputServiceId: payload.serviceId || '',
-                        outputIndex: payload.index,
                         status: document.querySelector('.svc-presenter-status')?.textContent.trim() || '',
                         mode: document.querySelector('.svc-presenter-mode')?.textContent.trim() || '',
                       };
                     }
                     """
                 )
+                other_live_keyboard_state.update(output_page.evaluate("""() => {
+                  const payload = readSmokeOutputPayload() || {};
+                  return {outputServiceId: payload.serviceId || '', outputIndex: payload.index};
+                }"""))
                 if (
                     other_live_keyboard_state["presenterServiceId"] == service["id"]
                     and other_live_keyboard_state["presenterIndex"] == 2
@@ -9021,6 +9074,7 @@ def main() -> int:
                       };
                       const input = document.createElement('input');
                       document.body.appendChild(input);
+                      const previousSignal = safeStorageGet("local", PRESENTER_SIGNAL_KEY);
                       const handled = handlePresenterShortcut({
                         key: 'F11',
                         target: input,
@@ -9030,7 +9084,7 @@ def main() -> int:
                         preventDefault() { preventCount += 1; },
                         stopPropagation() { stopCount += 1; },
                       });
-                      const signal = JSON.parse(localStorage.getItem(PRESENTER_SIGNAL_KEY) || '{}');
+                      const signalUnchanged = safeStorageGet('local', PRESENTER_SIGNAL_KEY) === previousSignal;
                       input.remove();
                       state.module = previousModule;
                       state.selectedServiceId = previousSelectedServiceId;
@@ -9048,7 +9102,7 @@ def main() -> int:
                         electronFullscreenCalls,
                         outputFocusCalls,
                         messageTypes: messages.map((message) => message.type),
-                        signalType: signal.type || '',
+                        signalUnchanged,
                       };
                     }
                     """
@@ -9061,7 +9115,7 @@ def main() -> int:
                     and controller_f11_state["electronFullscreenCalls"] == 1
                     and controller_f11_state["outputFocusCalls"] == 0  # Electron main owns output focus (e9d05ec3)
                     and controller_f11_state["messageTypes"] == []
-                    and controller_f11_state["signalType"] == ""
+                    and controller_f11_state["signalUnchanged"]
                 ):
                     pass_("presenter-controller-f11-output-fullscreen", json.dumps(controller_f11_state, ensure_ascii=False))
                 else:
@@ -9071,6 +9125,9 @@ def main() -> int:
                     """
                     async (serviceId) => {
                       const previousElectron = window.mindexElectron;
+                      const previousPreflight = MindexPresenterFreshness.beforeOpen;
+                      const previousHydrate = hydratePresenterOutputInBackground;
+                      const previousSessionId = state.presenter.outputSessionId;
                       const previousScreens = state.presenter.screens;
                       const previousSelectedScreenId = state.presenter.selectedScreenId;
                       const previousAlwaysOnTop = state.presenter.alwaysOnTop;
@@ -9081,10 +9138,12 @@ def main() -> int:
                       const previousOutputAttemptServiceId = state.presenter.outputAttemptServiceId;
                       const previousOutputStopAt = state.presenter.outputStopAt;
                       const previousOpen = window.open;
-                      const previousAlwaysStorage = localStorage.getItem(PRESENTER_ALWAYS_ON_TOP_STORAGE_KEY);
+                      const previousAlwaysStorage = safeStorageGet("local", PRESENTER_ALWAYS_ON_TOP_STORAGE_KEY);
                       const openedPayloads = [];
                       const alwaysUpdates = [];
                       try {
+                        MindexPresenterFreshness.beforeOpen = async () => true;
+                        hydratePresenterOutputInBackground = () => {};
                         window.mindexElectron = {
                           getPresenterDisplays: async () => ({
                             ok: true,
@@ -9137,6 +9196,9 @@ def main() -> int:
                           })),
                         };
                       } finally {
+                        MindexPresenterFreshness.beforeOpen = previousPreflight;
+                        hydratePresenterOutputInBackground = previousHydrate;
+                        state.presenter.outputSessionId = previousSessionId;
                         if (previousElectron === undefined) delete window.mindexElectron;
                         else window.mindexElectron = previousElectron;
                         window.open = previousOpen;
@@ -9149,8 +9211,8 @@ def main() -> int:
                         state.presenter.outputBlockedAt = previousOutputBlockedAt;
                         state.presenter.outputAttemptServiceId = previousOutputAttemptServiceId;
                         state.presenter.outputStopAt = previousOutputStopAt;
-                        if (previousAlwaysStorage === null) localStorage.removeItem(PRESENTER_ALWAYS_ON_TOP_STORAGE_KEY);
-                        else localStorage.setItem(PRESENTER_ALWAYS_ON_TOP_STORAGE_KEY, previousAlwaysStorage);
+                        if (previousAlwaysStorage === null) safeStorageRemove("local", PRESENTER_ALWAYS_ON_TOP_STORAGE_KEY);
+                        else safeStorageSet("local", PRESENTER_ALWAYS_ON_TOP_STORAGE_KEY, previousAlwaysStorage);
                         renderPresenterControlState(serviceId);
                       }
                     }
@@ -9206,14 +9268,14 @@ def main() -> int:
                     selection_state["switchId"],
                 )
                 output_page.wait_for_function(
-                    "(serviceId) => (readPresenterStoredPayload() || {}).serviceId === serviceId",
+                    "(serviceId) => (readSmokeOutputPayload() || {}).serviceId === serviceId",
                     arg=selection_state["switchId"],
                     timeout=5000,
                 )
                 switch_output_state = output_page.evaluate(
                     """
                     (() => {
-                      const payload = (readPresenterStoredPayload() || {});
+                      const payload = (readSmokeOutputPayload() || {});
                       const root = document.getElementById('presenterOutputRoot');
                       return {
                         serviceId: payload.serviceId || '',
@@ -9247,23 +9309,24 @@ def main() -> int:
 
                 page.keyboard.press("Space")
                 output_page.wait_for_function(
-                    "() => (readPresenterStoredPayload() || {}).index === 1",
+                    "() => (readSmokeOutputPayload() || {}).index === 1",
                     timeout=5000,
                 )
                 active_keyboard_state = page.evaluate(
                     """
                     (() => {
-                      const payload = (readPresenterStoredPayload() || {});
                       return {
                         presenterServiceId: state.presenter.serviceId,
                         presenterIndex: state.presenter.index,
-                        outputServiceId: payload.serviceId || '',
-                        outputIndex: payload.index,
                         status: document.querySelector('.svc-presenter-status')?.textContent.trim() || '',
                       };
                     })()
                     """
                 )
+                active_keyboard_state.update(output_page.evaluate("""() => {
+                  const payload = readSmokeOutputPayload() || {};
+                  return {outputServiceId: payload.serviceId || '', outputIndex: payload.index};
+                }"""))
                 if (
                     active_keyboard_state["presenterServiceId"] == selection_state["switchId"]
                     and active_keyboard_state["presenterIndex"] == 1
@@ -9285,23 +9348,25 @@ def main() -> int:
                 )
                 page.keyboard.press("ArrowRight")
                 output_page.wait_for_function(
-                    "() => (readPresenterStoredPayload() || {}).index === 2",
+                    "() => (readSmokeOutputPayload() || {}).index === 2",
                     timeout=5000,
                 )
                 page.wait_for_timeout(100)  # include deferred board/layout work
                 thumb_focus_keyboard_state = page.evaluate(
                     """
                     (() => {
-                      const payload = (readPresenterStoredPayload() || {});
                       return {
                         presenterIndex: state.presenter.index,
-                        outputIndex: payload.index,
                         focusedIndex: Number(document.activeElement?.dataset.presenterIndex ?? -1),
                         focusedThumb: document.activeElement?.matches('.svc-slide-thumb[data-presenter-index][data-service-id]') || false,
                       };
                     })()
                     """
                 )
+                thumb_focus_keyboard_state.update(output_page.evaluate("""() => {
+                  const payload = readSmokeOutputPayload() || {};
+                  return {outputServiceId: payload.serviceId || '', outputIndex: payload.index};
+                }"""))
                 if (
                     thumb_focus_keyboard_state["presenterIndex"] == 2
                     and thumb_focus_keyboard_state["outputIndex"] == 2
@@ -9328,22 +9393,24 @@ def main() -> int:
                 )
                 page.keyboard.press("Space")
                 output_page.wait_for_function(
-                    "() => (readPresenterStoredPayload() || {}).index === 2",
+                    "() => (readSmokeOutputPayload() || {}).index === 2",
                     timeout=5000,
                 )
                 page.wait_for_timeout(200)
                 thumb_space_keyboard_state = page.evaluate(
                     """
                     (() => {
-                      const payload = (readPresenterStoredPayload() || {});
                       return {
                         presenterIndex: state.presenter.index,
-                        outputIndex: payload.index,
                         focusedThumb: document.activeElement?.matches('.svc-slide-thumb[data-presenter-index][data-service-id]') || false,
                       };
                     })()
                     """
                 )
+                thumb_space_keyboard_state.update(output_page.evaluate("""() => {
+                  const payload = readSmokeOutputPayload() || {};
+                  return {outputServiceId: payload.serviceId || '', outputIndex: payload.index};
+                }"""))
                 if (
                     thumb_space_keyboard_state["presenterIndex"] == 2
                     and thumb_space_keyboard_state["outputIndex"] == 2
@@ -10153,7 +10220,7 @@ def main() -> int:
                     """
                 )
                 output_page.wait_for_function(
-                    "(serviceId) => (readPresenterStoredPayload() || {}).serviceId === serviceId",
+                    "(serviceId) => (readSmokeOutputPayload() || {}).serviceId === serviceId",
                     arg=no_chromakey_payload["serviceId"],
                     timeout=5000,
                 )
@@ -10857,6 +10924,8 @@ def main() -> int:
                       state.presenter.outputWindow = null;
                       state.presenter.outputConnectedAt = 0;
                       state.presenter.outputClientId = "";
+                      state.presenter.outputStopAt = 0;
+                      state.presenter.outputSessionId = crypto.randomUUID();
                       stopPresenterOutputWindowMonitor();
                       publishPresenterState({ force: true });
                       renderPresenterDetail();
@@ -10875,7 +10944,7 @@ def main() -> int:
                     if msg.type in ("error", "warning")
                     else None,
                 )
-                disconnect_page.goto(presenter_output_url(app_url), wait_until="load")
+                disconnect_page.goto(presenter_output_url(page), wait_until="load")
                 disconnect_page.wait_for_selector("#presenterOutputRoot", timeout=5000)
                 page.wait_for_function(
                     "() => state.presenter.outputConnectedAt > 0 && isPresenterOutputWindowOpen()",
@@ -10883,7 +10952,7 @@ def main() -> int:
                 )
                 disconnect_page.evaluate("window.dispatchEvent(new PageTransitionEvent('pagehide'))")
                 page.wait_for_function(
-                    "() => state.presenter.outputConnectedAt === 0 && !isPresenterOutputWindowOpen()",
+                    "() => state.presenter.outputConnectedAt === 0 && !isPresenterOutputWindowOpen() && state.presenter.outputWindowMonitor === null",
                     timeout=5000,
                 )
                 disconnect_state = page.evaluate(
@@ -10944,6 +11013,8 @@ def main() -> int:
             relevant_console = [
                 item for item in console_messages
                 if "favicon" not in item.lower()
+                and not (getattr(page.context, "_readonly_smoke", False)
+                         and item == "warning: Realtime send() is automatically falling back to REST API. This behavior will be deprecated in the future. Please use httpSend() explicitly for REST delivery.")
                 and "source map" not in item.lower()
                 and "the server responded with a status of 400" not in item.lower()
                 and "scripts may close only the windows that were opened by them" not in item.lower()

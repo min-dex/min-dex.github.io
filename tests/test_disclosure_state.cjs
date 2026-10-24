@@ -1,0 +1,24 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+(async () => {
+ const events = {}, requests = [];
+ let stored = null;
+ const storage = {ready:true,getItem:()=>stored,setItem:(_scope,_key,value)=>new Promise((resolve,reject)=>requests.push({value,resolve:()=>{stored=value;resolve();},reject}))};
+ const window = {MINDEX_SERVER_STORAGE:storage,addEventListener:(name,fn)=>events[name]=fn};
+ vm.runInNewContext(fs.readFileSync('mindex.disclosure-state.js','utf8'),{window,document:{querySelectorAll:()=>[],addEventListener:()=>{}},HTMLDetailsElement:class{},queueMicrotask});
+ const ui = window.MindexDisclosure, key = ['rapid-toggle'];
+ for(const value of [true,false,true])ui.write(key,value);
+ requests[0].resolve();await new Promise(setImmediate);
+ assert.equal(ui.read(key),true);
+ requests[1].resolve();await new Promise(setImmediate);
+ assert.equal(ui.read(key),true,'intermediate write cannot replace the latest user choice');
+ requests[2].resolve();await new Promise(setImmediate);
+ assert.equal(ui.read(key),true);
+ ui.write(key,false);requests[3].reject(Error('offline'));await new Promise(setImmediate);
+ assert.equal(ui.read(key),false,'failed preference stays visible for existing retry UI');
+ stored='false';events['mindex-server-state-settled']();stored='true';
+ assert.equal(ui.read(key),true,'successful retry removes the failed in-memory overlay');
+ stored='malformed';assert.equal(ui.read(key,true),true);assert.equal(ui.read(key,false),false);
+ console.log('PASS rapid disclosure choices, late writes, retry settlement and malformed defaults');
+})().catch(error=>{console.error(error);process.exitCode=1;});

@@ -346,13 +346,43 @@ so they retain the macOS native-fullscreen block before any document loads.
 startup, service hydration and slide rendering while comparing canonical loaded
 service/section/element/song data before and after. Projected editor items may gain
 normal rendering placeholders/indices; they are not canonical saved rows. This
-explicit live test is separate from the offline CI gate. The old full suites
-remain available for diagnosis, but their October13 PASS receipt above is
-historical: current home/calendar typography, title forms, asynchronous launch,
-preview selectors and responsive layout expectations require a separate refresh.
-Their current failures/timeouts must not be reported as PASS. Simulated output
-registry/broadcast writes in those broad suites are still denied by the guard;
-this change does not grant a production write exception.
+explicit live test is separate from the offline CI gate.
+
+### Broad live suite alignment ·2026-10-24
+
+The broad `smoke_app` and `smoke_worship_presenter` suites now follow current
+module tabs/typography, responsive layout, song/version selection and T/inline-note
+contracts. Template defaults are tested twice: omitted persisted fields stay
+empty, while the effective declaration resolver restores the specified sequence.
+Existing populated closing hymns remain in projected all-generations services.
+Creation fixtures exercise `create_praise_v1` and verify its returned identities,
+without invoking a production mutation. Current storage assertions use the shared
+storage API rather than retired local/session storage mirrors.
+
+Output checks observe accepted payloads in the actual output document and use
+the controller's current session nonce. Popup-only and desktop-API fixtures stub
+the freshness preflight and background hydration, restore them and their session
+state afterward, and do not invoke native fullscreen APIs. The separate unchanged
+`smoke_presenter_freshness.py` covers fresh reads, failed reads, live lyric
+isolation, restart, missing versions and navigation/cancellation races in both
+browser engines. Disconnect assertions wait for the existing monitor cleanup.
+This does not claim real native macOS fullscreen integration coverage.
+
+Output registration/heartbeat/removal and HTTP broadcast fallback are exact-shape
+local fixtures, isolated per browser context. They never contact production,
+retain broadcast bodies, expose peers or save service content. Unknown actions,
+extra fields, cross-host requests and canonical mutations still fail closed.
+The exact vendor REST-fallback warning is expected only in guarded contexts where
+the WebSocket is deliberately isolated. The known unused presenter-font preload
+advisory is also distinguished from failures during rapid module switching;
+its exact localhost/common-font URL and browser text must match. Font loading
+errors and all other browser warnings/errors still fail.
+
+Local guarded runs passed all130 app checks and129 presenter checks with no blocked
+requests or production writes. The source-preservation live test separately read
+8 saved services and rendered298 slides without changing canonical source data.
+These live receipts complement, and never replace, the required offline GitHub gate.
+The historical October13 receipt above remains historical.
 
 
 A retained older HTML shell can discover a newer release whose dependency list

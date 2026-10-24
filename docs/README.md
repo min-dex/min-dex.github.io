@@ -6,6 +6,8 @@ stale document in the same change.
 
 ## Current Contracts
 
+- `presenter-remote-design.md`: 배포된 원격 조작의 현행 연결·명령·복구 계약과 실기기 검증 한계.
+
 - `server-state-current.md`: 서버 저장 통일 구현·격리 검증과 운영 적용 전 경계.
 
 - `citation-live-output.md`: dedicated live scripture input, optional immediate
@@ -44,8 +46,6 @@ stale document in the same change.
   read-back verification.
 
 ## Planning Or Deferred Work
-
-- `presenter-remote-design.md`: 다른 기기 원격 조작의 화면·승인·명령/연결 실패 설계안(미구현).
 
 - `electron-packaging-plan.md`: packaging and auto-update plan.
 - `admin-access-security.md`: admin and access-control planning.

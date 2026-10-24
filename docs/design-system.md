@@ -55,8 +55,8 @@ shell, navigation, buttons, labels, and shared UI copy.
 - Home tab default: five-module overview of worship, bulletins, Praise, Scripture and operations; detail/editor work stays in its module; full week board remains an explicit `최근 예배` destination.
 - Module rail defaults: show each module’s centered verse landing and its module name.
   Worship’s weekly board (`최근 예배`) opens explicitly from the sidebar.
-- The weekly board groups this week and next week; `전체 예배` remains a separate list action.
-- Service list title: `전체 예배`.
+- The weekly board groups this week and next week. Worship sidebar lists use
+  `공예배`, `부서 예배` and `기타 예배`; preserve their existing classification.
 - Template surfaces should not appear as ordinary default navigation unless
   the user is explicitly managing templates.
 

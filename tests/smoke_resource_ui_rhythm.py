@@ -31,7 +31,7 @@ try:
       page.set_viewport_size({'width':width,'height':600})
       box=page.locator('.metadata-popover').bounding_box()
       assert box['y']>=50 and box['y']+box['height']<=600,(engine,width,box)
-      fields=page.locator('.metadata-popover input');fields.last.fill('검증 중인 입력')
+      fields=page.locator('.metadata-popover input:not([readonly])');fields.last.fill('검증 중인 입력')
       fields.last.scroll_into_view_if_needed()
       assert fields.last.input_value()=='검증 중인 입력'
       assert fields.last.bounding_box()['y']+fields.last.bounding_box()['height']<=600

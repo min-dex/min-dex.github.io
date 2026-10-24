@@ -7,7 +7,7 @@ from urllib.parse import urlsplit, parse_qs
 from smoke_app import start_local_app_server, launch_chromium, sync_playwright
 
 MODULES = ['mindex.presenter-praise.js', 'mindex.presenter-live.js',
-           'mindex.presenter-board.js', 'mindex.presenter-controller.js']
+           'mindex.presenter-board.js', 'mindex.presenter-controller.js', 'mindex.disclosure-state.js']
 ASSETS = MODULES + ['styles.workspace.css']
 html = Path('index.html').read_text()
 html = re.sub(r'window\.MINDEX_SUPABASE\s*=\s*\{[^}]*\};', 'window.MINDEX_SUPABASE = {};', html)

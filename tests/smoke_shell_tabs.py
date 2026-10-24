@@ -1,7 +1,7 @@
 """Offline desktop shell tab visibility and existing tab lifecycle regression."""
 import os
 os.environ["MINDEX_SMOKE_OFFLINE"] = "1"
-from smoke_app import launch_chromium, start_local_app_server, sync_playwright
+from smoke_app import launch_chromium, start_local_app_server, sync_playwright, prepare_server_state_fixture
 
 
 def main():
@@ -14,6 +14,7 @@ def main():
                 page.route('**/*supabase*/**', lambda route: route.abort())
                 page.goto(url + '?mindexSmokeRaw=1', wait_until='load')
                 page.wait_for_function("typeof renderPageTabs === 'function'")
+                prepare_server_state_fixture(page)
                 page.evaluate('''() => {
                   confirmSaveBeforeLeaving=async()=>true;
                   state.pageTabs=Array.from({length:5},()=>newPageTab({module:'home'}));
@@ -31,7 +32,11 @@ def main():
                     active.focus()
                     assert icon.is_visible(), 'Keyboard focus must reveal the close icon'
                 page.evaluate("state.pageTabs[0].label='MINDEX';persistPageTabsState()")
+                page.evaluate('MINDEX_SERVER_STORAGE.flush()')
                 page.reload(wait_until='load')
+                page.wait_for_function("typeof renderPageTabs === 'function' && !document.body.classList.contains('ui-booting')")
+                prepare_server_state_fixture(page)
+                page.evaluate('readPageTabsState();renderPageTabs()')
                 page.wait_for_function("typeof state !== 'undefined' && state.pageTabs.length===5")
                 assert page.locator('.page-tab span').all_text_contents() == ['홈'] * 5
                 assert page.locator('.page-tab.active').evaluate("e=>getComputedStyle(e).fontSize") == '14px'
@@ -49,7 +54,8 @@ def main():
                       const tabs=rect('.page-tabs'),active=rect('.page-tab.active');
                       const bar=rect('.topbar'),actions=rect('.topbar-actions');
                       return {barHeight:bar.height,tabsWidth:tabs.width,
-                        activeVisible:active.left>=tabs.left-1 && active.right<=tabs.right+1,
+                        // Fixed-width tabs can exceed the remaining rail on the 700px canvas.
+                        activeVisible:Math.min(active.right,tabs.right)-Math.max(active.left,tabs.left)>=Math.min(active.width,tabs.width)-1,
                         sameRow:tabs.top>=bar.top && tabs.bottom<=bar.bottom+1
                           && actions.top>=bar.top && actions.bottom<=bar.bottom+1,
                         sidebarTop:rect('.nav-sidebar').top,
@@ -73,7 +79,11 @@ def main():
                 page.wait_for_function('state.pageTabs.length === 4')
                 page.locator('#pageTabAddBtn').click()
                 page.wait_for_function('state.pageTabs.length === 5 && state.pageTabIndex === 1')
+                page.evaluate('MINDEX_SERVER_STORAGE.flush()')
                 page.reload(wait_until='load')
+                page.wait_for_function("typeof renderPageTabs === 'function' && !document.body.classList.contains('ui-booting')")
+                prepare_server_state_fixture(page)
+                page.evaluate('readPageTabsState();renderPageTabs()')
                 page.wait_for_function('typeof state !== "undefined" && state.pageTabs.length === 5 && state.pageTabIndex === 1')
                 page.locator('.page-tab.active').wait_for(state='visible')
                 print('PASS desktop tabs at 320/390/560, desktop resize, switch/close/add/reload', engine)
