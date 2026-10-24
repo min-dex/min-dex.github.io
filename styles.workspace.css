@@ -458,7 +458,7 @@ body[data-module="presenter"] .detail-pane {
   max-width: 100%;
   color: var(--sidebar-sub);
   font-size: 12px;
-  font-weight: 560;
+  font-weight: 600;
   line-height: 16px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1335,7 +1335,7 @@ body[data-theme="dark"] .service-week-card:hover {
   align-items: center;
   gap: 5px;
 }
-.svc-form-hint {
+:is(.svc-form-hint, .svc-form-hint-slot) {
   width: 156px;
   height: 24px;
   max-width: 100%;
@@ -1350,13 +1350,13 @@ body[data-theme="dark"] .service-week-card:hover {
   outline: none;
   padding: 0 8px;
 }
-.svc-form-hint.compact {
+:is(.svc-form-hint, .svc-form-hint-slot).compact {
   width: 144px;
   flex-basis: 144px;
   height: 22px;
   font-size: var(--ui-meta-size);
 }
-.svc-form-hint:focus {
+:is(.svc-form-hint, .svc-form-hint-slot):focus {
   background: var(--accent-soft);
   color: var(--ink);
 }
@@ -4043,7 +4043,7 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
   flex: 1 1 160px;
   min-width: min(100%, 140px);
 }
-.svc-board-subgroup-controls .svc-presenter-input-field--song .svc-form-hint.compact {
+.svc-board-subgroup-controls .svc-presenter-input-field--song :is(.svc-form-hint, .svc-form-hint-slot).compact {
   height: 30px;
   /* Keep the base width for wrapping, but use spare room so long forms stay readable. */
   flex: 1 1 110px;
@@ -4132,7 +4132,7 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
 }
 .svc-board-subgroup-controls :is(input.svc-presenter-input-control, select.svc-presenter-input-control,
   .svc-edit-title, .svc-edit-assignee, .svc-song-version-select, .svc-praise-input-mode-select,
-  .svc-form-hint.compact, .svc-item-link, .svc-reference-media-upload),
+  :is(.svc-form-hint, .svc-form-hint-slot).compact, .svc-item-link, .svc-reference-media-upload),
 .svc-board-subgroup-flow :is(.svc-board-subgroup-commit, .svc-reference-media-upload, .svc-board-subgroup-audio-upload) {
   box-sizing: border-box;
   height: var(--svc-control-height);
@@ -4146,7 +4146,7 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
   font-size: var(--ui-label-size);
   letter-spacing: 0;
 }
-.svc-board-subgroup-controls .svc-form-hint.compact {
+.svc-board-subgroup-controls :is(.svc-form-hint, .svc-form-hint-slot).compact {
   font-size: var(--ui-body-size);
 }
 .svc-presenter-input-group--corporate-prayer {
@@ -5495,7 +5495,7 @@ body[data-module="praise"] .praise-forms-panel .form-meta { gap: 5px; }
   flex: 0 1 130px;
   width: 130px;
 }
-.svc-board-subgroup-controls .svc-board-subgroup-control-item:not(.service-offering-editor):has(.svc-praise-input-mode-control) .svc-form-hint.compact {
+.svc-board-subgroup-controls .svc-board-subgroup-control-item:not(.service-offering-editor):has(.svc-praise-input-mode-control) :is(.svc-form-hint, .svc-form-hint-slot).compact {
   flex: 1 1 120px;
   width: auto;
   min-width: 0;
@@ -5659,7 +5659,7 @@ body[data-module="praise"] .praise-forms-panel .version-compare-column {
 .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor > *,
 .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-edit-title,
 .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-song-picker--linked,
-.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-form-hint.compact,
+.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor :is(.svc-form-hint, .svc-form-hint-slot).compact,
 .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-praise-input-mode-control,
 .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor > .svc-presenter-input-field--assignee {
   grid-column: 1 / -1; grid-row: auto; min-width: 0; max-width: 100%; width: 100%;
@@ -5692,7 +5692,7 @@ body[data-module="praise"] .praise-forms-panel .version-compare-column {
   }
   .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-edit-title { grid-column: 2 / -1; }
   .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-song-picker--linked { grid-column: 1; grid-row: 3; }
-  .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-form-hint.compact { grid-column: 2; grid-row: 3; }
+  .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor :is(.svc-form-hint, .svc-form-hint-slot).compact { grid-column: 2; grid-row: 3; }
   .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor > .svc-presenter-input-field--assignee { grid-column: 3; grid-row: 3; }
 }
 

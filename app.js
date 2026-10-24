@@ -23790,7 +23790,7 @@ function serviceFormPresetSummary(preset) {
 
 function renderServiceFormHintInput(item, index, options = {}) {
   if (!item || item._isDefault) return "";
-  return `
+  return renderServiceFormHelpInput(`
     <input
       class="svc-form-hint${options.compact ? " compact" : ""}"
       type="text"
@@ -23800,7 +23800,7 @@ function renderServiceFormHintInput(item, index, options = {}) {
       value="${escapeAttr(serviceItemEffectiveFormHint(item))}"
       placeholder="${escapeAttr(serviceItemDefaultFormHint(item) || options.placeholder || "송폼")}"
       aria-label="섹션 송폼/범위"
-    />`;
+    />`, options);
 }
 
 // A synchronous render asks for the same service's items hundreds of times, and each
