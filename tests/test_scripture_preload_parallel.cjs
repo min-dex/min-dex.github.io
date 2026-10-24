@@ -1,5 +1,6 @@
+const { readRuntimeSource } = require('./helpers/runtime-source.cjs');
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-const source=fs.readFileSync(require('node:path').join(__dirname,'../app.js'),'utf8');
+const source=readRuntimeSource('app.js');
 const names=['preloadServiceItemScriptureReferences','preloadWorshipScriptureReferences'];
 (async()=>{
  for(const name of names) for(const failure of [false,true]) {

@@ -871,3 +871,13 @@ selected song. A failed read or input/selection change during the read blocks
 navigation and retains dirty input and the outstanding save request. Only a
 successful unchanged read replaces the selected song, clears its pending retry,
 and captures the clean baseline. Other songs and playback are untouched.
+
+## Retired editor recovery/source entry points ·2026-10-24
+
+The global temporary-draft recovery notice/button/dialog and the Worship source
+editor are no longer mounted in the app. Keep private archived drafts and source
+document/history data; no migration or deletion accompanies this UI retirement.
+Silent draft capture, device handoff, failed-save input retention, exact-request
+retry/conflict review and unsaved-navigation confirmation remain active.
+Individual Worship fields remain the editing interface. Internal source/history
+compatibility helpers are retained for existing save/import records.

@@ -10,7 +10,7 @@ try:
    try:
     page=browser.new_page(viewport={'width':1400,'height':900});page.set_default_timeout(8000)
     page.route('**/*',lambda r:r.abort() if '.supabase.co/' in r.request.url or r.request.method not in ('GET','HEAD') else r.continue_())
-    page.goto(url+'?mindexSmokeRaw=1');page.wait_for_function("typeof presenterElementTrailingBlankSlide==='function'")
+    page.goto(url+'?mindexSmokeRaw=1');page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof presenterElementTrailingBlankSlide==='function')")
     result=page.evaluate('''() => {
       const service={id:'pending-hymn-fixture',type_id:'fixture',date:'2026-10-14',title:'Fixture'};
       const song={id:'pending-song',title:'이 천지간 만물들아',hymn_no:'5',praise_types:['hymn'],_relationalVersionsLoaded:true,

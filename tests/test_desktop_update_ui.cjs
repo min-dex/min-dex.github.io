@@ -1,7 +1,8 @@
+const { readRuntimeSource } = require('./helpers/runtime-source.cjs');
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const vm=require('node:vm'),fs=require('node:fs');
-const source=fs.readFileSync(require.resolve('../app.js'),'utf8');
+const source=readRuntimeSource('app.js');
 const bind=source.slice(source.indexOf('function bindElectronDesktopEvents()'),source.indexOf('\nfunction loadInitialData()'));
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 function fixture(initial){

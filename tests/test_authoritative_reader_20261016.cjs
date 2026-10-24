@@ -1,5 +1,6 @@
+const { readRuntimeSource } = require('./helpers/runtime-source.cjs');
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-const source=fs.readFileSync(require('node:path').join(__dirname,'../app.js'),'utf8'),presenter=fs.readFileSync(require('node:path').join(__dirname,'../mindex.presenter.js'),'utf8');
+const source=readRuntimeSource('app.js'),presenter=readRuntimeSource('mindex.presenter.js');
 const fn=(s,name)=>{const a=s.indexOf(`function ${name}(`);assert.ok(a>=0,name);return s.slice(a,s.indexOf('\n}',a)+2);};
 const c=vm.createContext({state:{bibleTranslations:[{id:'active',name:'공식 역본'}]},parseServiceItemMemo:()=>({}),selectedPresenterBibleTranslation:()=>({id:'active'}),serviceItemScriptureReferences:()=>['욥기 40:1'],normalizeServiceScriptureReferencePayloads:x=>x||[],normalizeServiceScriptureReferenceKey:String});
 vm.runInContext(['serviceBibleTranslationById','serviceItemBibleTranslation','serviceItemBibleTranslationForReference'].map(n=>fn(source,n)).join('\n'),c);

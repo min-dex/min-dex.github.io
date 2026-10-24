@@ -9,7 +9,7 @@ try:
  with sync_playwright() as p:
   for engine in ('chromium','webkit'):
    browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
-   for case in ('app.js','app.runtime.js','mindex.constants.js','mindex.icons.js','vendor/supabase-js.min.js','styles.css','original-wins'):
+   for case in ('app.js','app.runtime.js','mindex.constants.js','mindex.icons.js','vendor/supabase-js.min.js','styles.css','styles.workspace.css','mindex.presenter-praise.js','mindex.presenter-live.js','mindex.presenter-board.js','mindex.presenter-controller.js','original-wins'):
     target='app.js' if case=='original-wins' else case
     version=json.loads(Path('app.runtime.json').read_text())['version'] if case=='app.runtime.js' else 'qa-current-release'
     page=browser.new_page();held=[];retries=[];errors=[]

@@ -40,6 +40,7 @@ NODE_TESTS = (
     "test_union_hymn_score_guard.cjs",
     "test_scripture_lookup_render.cjs",
     "test_app_runtime.cjs",
+    "test_runtime_boundaries.cjs",
     "test_output_fullscreen_close.cjs",
     "test_ui_icons.cjs",
     "test_bulletin.cjs",
@@ -159,11 +160,12 @@ SMOKES = (
     "smoke_startup_projection.py",
     "smoke_ui_font_cache.py",
     "smoke_stalled_download_recovery.py",
+    "smoke_runtime_dependency_upgrade.py",
     "smoke_startup_overlap_recovery.py",
     "smoke_boot_loading_indicator.py",
 )
 
-GOVERNANCE_TESTS = ("test_pages_gate.py", "test_cloud_check.py", "test_reuse_checks.py", "test_check_scope.py", "test_release_queue.py")
+GOVERNANCE_TESTS = ("solid_audit.py", "test_pages_gate.py", "test_cloud_check.py", "test_reuse_checks.py", "test_check_scope.py", "test_release_queue.py")
 
 
 def selected_tests(shard_index=0, shard_count=1, *, smokes=None, node_tests=None):

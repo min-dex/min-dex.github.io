@@ -11,7 +11,7 @@ def main():
                 page = browser.new_page(viewport={'width': 1440, 'height': 1000})
                 page.route('**/*supabase*/**', lambda route: route.abort())
                 page.goto(url + '?mindexSmokeRaw=1', wait_until='domcontentloaded')
-                page.wait_for_function("typeof buildServicePresenterSlidesUncached === 'function'")
+                page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof buildServicePresenterSlidesUncached === 'function')")
                 result = page.evaluate('''() => {
                   const service = {id:'sermon-fixture',type_id:'sunday-main',date:'2026-09-27'};
                   const reading = {id:'reading',service_id:service.id,label:'성경봉독',

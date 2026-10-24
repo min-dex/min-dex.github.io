@@ -7,11 +7,13 @@ is a maintenance contract, not a request to split large files mechanically.
 
 `index.html` must load the runtime scripts in this order:
 
-1. `mindex.constants.js`
-2. `mindex.design-tokens.js`
-3. `mindex.presenter.js`
-4. `mindex.pptx.js` (small adapter; renderer modules load only on demand)
-5. `app.js`
+1. Shared constants, design tokens, worship model and persistence helpers.
+2. `mindex.presenter-praise.js`, then `mindex.presenter.js` (including slide-model constants).
+3. `mindex.presenter-live.js`, `mindex.presenter-board.js`, `mindex.presenter-controller.js`.
+4. Existing adapters and domain modules, then `app.js` bootstrap.
+
+The exact ordered list remains in `index.html`. Modules are downloaded in parallel
+and executed in that order; source and compiled app use the same dependencies.
 
 The order is checked by `tests/solid_audit.py`.
 
@@ -40,8 +42,12 @@ The order is checked by `tests/solid_audit.py`.
   compaction, and save-row construction, validation, preservation, and ordering.
   It loads before `app.js`; its helpers run after app bootstrap. It does not
   perform database I/O or access controller state/DOM directly.
-- `app.js` owns bootstrap, state, persistence orchestration, DOM events, canonical shared
-  helpers, and controller integration.
+- `app.js` owns bootstrap, state, persistence orchestration, DOM events and canonical shared helpers.
+- `mindex.presenter-praise.js` owns song/score slide composition and form planning.
+- `mindex.presenter-live.js` owns music transport, synchronized lyrics and live scripture actions.
+- `mindex.presenter-board.js` owns board construction, grouping, selection and previews.
+- `mindex.presenter-controller.js` owns navigation, output launch/synchronization and slide-model validation. These controller modules call the existing app state/save interfaces; they do not introduce another persistence owner.
+- `styles.css` owns the initial shell and catalogue styles. `styles.workspace.css` continues at the original Service module boundary, including later shared editor overrides. Load it immediately after `styles.css`, before dedicated output styles; their concatenation preserves the original cascade byte for byte.
 - A top-level function name has exactly one owner. Do not shadow or redeclare a
   function in another runtime file to change behavior through load order.
 - User-facing behavior belongs in the current contract documents under
@@ -289,7 +295,7 @@ Bible short-name and alias objects have one owner in `mindex.constants.js`; app 
 `mindex.presenter-freshness.js` owns read-only output-start DB revalidation,
 blank-window reservation, live song snapshots and change notifications. It is
 loaded before app.js; hooks execute after bootstrap. Output orchestration stays
-in app.js, song selection stays in mindex.presenter.js and existing live modules
+in app.js, song selection stays in mindex.presenter-praise.js and existing live modules
 forward change notifications without rewriting service records.
 
 
@@ -306,10 +312,37 @@ The existing browser regression traps writes/deletes to source objects and check
 repeated rendering plus actual fullscreen title geometry.
 
 
-The legacy SOLID size ratchets already fail on the published 819a0776 baseline
-(app/presenter/style line counts, function counts, coupling-marker count and
-saveSongVersions size). This change leaves those thresholds intact and records
-the existing failure separately from passing load-order/collision, source-write
-protection, atomic-save and browser geometry checks. It adds one pure projection
-helper to shorten the renderer's inline decision block; it does not claim a
-repository-wide size/coupling cleanup.
+The size audit failures observed at 819a0776/9da6dce8 are resolved by the
+2026-10-24 role extraction. Original functions and CSS blocks move unchanged;
+source-only hashes in `runtime-extraction-20261024.json` record their provenance.
+Slide element/layout constants initialize in the presenter before controller
+compatibility tables. Version save row construction is a named helper; field
+values, mutation order and atomic save orchestration remain unchanged.
+
+Old file/function/coupling ceilings are lowered; each extracted module has its
+own line/function budget. The aggregate app/controller coupling count is also
+bounded at its original 3,552, so moving state access cannot hide new coupling.
+The audit checks global function ownership across the classic global scripts;
+private IIFE-local helpers may share names. The size audit and dependency/desktop
+packaging test are part of the required Cloud gate. Stalled-download recovery
+covers every extracted module and the new stylesheet in both browser engines.
+
+The broad live-read smoke runner currently blocks startup's existing server-state
+read and monitor registration RPCs. Those suites are recorded as blocked rather
+than passed; operational writes remain forbidden. Offline fixture coverage and
+the required Linux gate are independent verification, not a claim that every
+production record or physical output device was retested.
+
+
+A retained older HTML shell can discover a newer release whose dependency list
+has grown. Before startup is scheduled, the app verifies its required presenter
+modules and workspace stylesheet. A missing dependency refreshes the HTML once,
+keeping route/query state and using the existing cache-bypass retry parameter.
+The fresh HTML then runs the single existing ordered asset loader; no second
+script loader races later peer modules. If the refreshed shell is still missing
+dependencies, startup fails closed rather than looping or connecting to data.
+The upgrade marker is removed after readiness. Normal HTML does not reload.
+`smoke_runtime_dependency_upgrade.py` covers retained HTML, current startup,
+all five asset error/retry cases, and failed refresh before connection/save.
+
+Shared output-window/heartbeat status queries stay in app.js because later peer modules read them at load time. They remain available even while a retained HTML shell is being refreshed; their behavior is unchanged.
