@@ -1,4 +1,4 @@
-import {openRemote} from './mindex.remote-session.mjs?v=10';
+import {openRemote} from './mindex.remote-session.mjs?v=11';
 const messages={rate_limited:'입력 횟수가 많아요. 1분 뒤 다시 입력해 주세요.',invalid_code:'숫자 4자리를 확인해 주세요.',expired:'관리자 접속이 만료됐어요. PIN을 다시 입력해 주세요.',invalid_pin:'PIN을 확인해 주세요.',locked:'입력 횟수를 초과했어요. 15분 뒤 다시 시도해 주세요.',offline:'송출 PC의 응답이 없어요.',busy:'이미 연결 중이에요. 기존 연결을 종료한 뒤 다시 선택해 주세요.',host_upgrade:'송출 PC를 새로고침하면 관리자 여러 대를 연결할 수 있어요.',unavailable:'관리자 연결을 아직 사용할 수 없어요.'};
 export async function adminRpc(client,name,args){
  const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),5000);
@@ -39,7 +39,8 @@ export function createOutputRegistry(context,{interval=2000,onUpdate=()=>{}}={})
   const a=kind==='guest'?(r.guestAdapter||r.adapter):r.adapter;
   slot.session=await openRemote({client:c.client,host:true,registration:relayRegistration(link.secret),
    read:()=>{const current=context();const s=a.read();return {...s,live:s.live&&current?.key===r.key&&current?.client===r.client,allowed:r.recovering||performance.now()-r.seen>=6000?[]:s.allowed};},
-   execute:action=>{if(r.recovering||performance.now()-r.seen>=6000)throw Error('송출 연결을 확인 중입니다.');return a.execute(action);},onStatus:update,onClose:()=>{
+   browse:options=>{if(r.recovering||performance.now()-r.seen>=6000)return null;return a.browse?.(options);},
+   execute:(action,target)=>{if(r.recovering||performance.now()-r.seen>=6000)throw Error('송출 연결을 확인 중입니다.');return a.execute(action,target);},onStatus:update,onClose:()=>{
     rememberClosed(r,kind,slot.id);if(r[kind].get(slot.id)===slot)r[kind].delete(slot.id);update();
     void adminRpc(r.client,'mindex_remote_output',{p_action:kind==='guest'?'unlink_guest':'unlink',p_id:r.id,p_token:r.token,p_ready:link.id}).catch(()=>{});
    }});

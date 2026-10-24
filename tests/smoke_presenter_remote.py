@@ -29,7 +29,7 @@ try:
     Object.assign(state.presenter,{serviceId:'remote-fixture',outputSessionId:'test-session',outputWindow:{closed:false},index:0,slides:[{title:'첫 번째',body:'긴 내용 '.repeat(150)},{title:'두 번째'},{title:'마지막'}],safetyBlank:false});
     presenterControllerIsLive=()=>true;isPresenterOutputWindowOpen=()=>true;
     window.remoteCalls=[];
-    runPresenterAction=(action,sid,options)=>{remoteCalls.push(action);if(action==='next')state.presenter.index=Math.min(2,state.presenter.index+1);if(action==='prev')state.presenter.index=Math.max(0,state.presenter.index-1);if(action==='jump')state.presenter.safetyBlank=options.index===-1;};
+    runPresenterAction=(action,sid,options)=>{remoteCalls.push(action);if(action==='next')state.presenter.index=Math.min(2,state.presenter.index+1);if(action==='prev')state.presenter.index=Math.max(0,state.presenter.index-1);if(action==='jump'){state.presenter.safetyBlank=options.index===-1;if(options.index>=0)state.presenter.index=options.index;}};
     Object.assign(state.serviceMusic,{sourceKey:'fixture.wav',ownerServiceId:'remote-fixture',mode:'presenter-audio',playing:false,pending:false,fadeStop:null,autoSyncSuspended:true,timingGroupId:'group'});
     for(const s of state.presenter.slides){s.syncTimeline={groupId:'group',audioSrc:'fixture.wav',localTiming:true};s.songTimingEligible=true;}
     runServiceMusicAction=async action=>{remoteCalls.push(action);state.serviceMusic.playing=action==='toggle'?!state.serviceMusic.playing:false;};
@@ -92,6 +92,33 @@ try:
     assert phone.locator('[data-action=play]').bounding_box()['height']==50
    phone.set_viewport_size({'width':390,'height':844})
    if engine=='chromium':phone.screenshot(path='/tmp/mindex-remote-phone.png',full_page=True)
+   # Browsing is read-only; selecting a fresh target uses the encrypted command gate.
+   host.evaluate("state.presenter.slides.push(...Array.from({length:10},(_,i)=>({title:'추가 '+i,body:'미리보기',sectionLabel:'광고'})))");pump(1.2)
+   before=host.evaluate('remoteCalls.length');phone.click('#slidesOpen');pump(1)
+   assert phone.locator('#slidesList button').count()==6
+   assert host.evaluate('remoteCalls.length')==before
+   assert phone.locator('#slidesList button[aria-current=true]').get_attribute('data-index')=='0'
+   for width in (320,390,768):
+    phone.set_viewport_size({'width':width,'height':844})
+    assert phone.locator('#slidesDialog').evaluate('e=>e.scrollWidth<=e.clientWidth')
+   phone.set_viewport_size({'width':390,'height':844})
+   phone.screenshot(path='/tmp/mindex-remote-slides-'+engine+'.png',full_page=True)
+   phone.click('#slidesNext');pump(.5);assert phone.locator('#slidesList button').first.get_attribute('data-index')=='6'
+   phone.click('#slidesPrev');pump(.5);assert phone.locator('#slidesList button').first.get_attribute('data-index')=='0'
+   phone.fill('#slidesQuery','마지막');phone.locator('#slidesSearch button').click();pump(.5)
+   assert phone.locator('#slidesList button').count()==1
+   phone.locator('#slidesList button').click();pump(.5)
+   assert host.evaluate('state.presenter.index')==2
+   assert not phone.locator('#slidesDialog').is_visible()
+   ready('prev');phone.click('#slidesOpen');pump(.5)
+   # Structural edit invalidates the old catalog even when a new command ticket arrives.
+   host.evaluate("state.presenter.sourceSignature='changed-slides'");pump(1.2)
+   assert phone.locator('#slidesList button').first.is_disabled()
+   phone.locator('#slidesSearch button').click();pump(.5)
+   assert phone.locator('#slidesList button').first.is_enabled()
+   phone.locator('#slidesList button').first.click();pump(.5)
+   assert host.evaluate('state.presenter.index')==0
+   host.evaluate('state.presenter.slides.splice(3)');pump(1.2)
    ready('next');phone.click('[data-action=next]');pump();assert host.evaluate('state.presenter.index')==1
    assert phone.locator('#result').inner_text()=='처리 완료'
    # Encrypted replay must not execute twice.

@@ -120,3 +120,16 @@ try{
  retryRemote.refresh();await wait(1600);await until(()=>retryRemote.usable);assert.equal(retryCalls,1);
 }finally{retryHost.close();retryRemote.close();}
 console.log('PASS failed send recovers automatically without replaying its command');
+// Slide browsing is display-only; jumps retain the same encrypted command gate.
+let browseCalls=0,jumpTarget=null,slideResult=null;
+const listHost=await openRemote({client,host:true,read:()=>({live:true,allowed:['jump'],catalogKey:'catalog'}),browse:()=>{browseCalls++;return {key:'catalog',offset:0,total:1,items:[{index:0,title:'제목'}]};},execute:(action,target)=>{assert.equal(action,'jump');jumpTarget=target;}});
+const listRemote=await openRemote({client,code:listHost.code,onSlides:r=>slideResult=r});
+try{
+ await until(()=>listRemote.usable);await listRemote.requestSlides();await until(()=>slideResult);
+ assert.equal(browseCalls,1);assert.equal(jumpTarget,null);
+ await listRemote.command('jump',{index:0,key:slideResult.key});await until(()=>jumpTarget);
+ assert.deepEqual(jumpTarget,{index:0,key:'catalog'});
+ listRemote.suspend();await assert.rejects(listRemote.requestSlides());await assert.rejects(listRemote.command('jump',{index:0,key:'catalog'}));
+ assert.equal(browseCalls,1);
+}finally{listHost.close();listRemote.close();}
+console.log('PASS encrypted read-only slide browsing, targeted jump and suspended control guards');

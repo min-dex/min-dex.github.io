@@ -1,7 +1,7 @@
-import {obtainOutputPairing} from './mindex.output-pairing.mjs?v=3';
-import {adminRpc,relayRegistration} from './mindex.remote-admin.mjs?v=5';
-import {createPreview} from './remote.preview.mjs?v=1';
-import {openRemote} from './mindex.remote-session.mjs?v=10';
+import {obtainOutputPairing} from './mindex.output-pairing.mjs?v=4';
+import {adminRpc,relayRegistration} from './mindex.remote-admin.mjs?v=6';
+import {createPreview} from './remote.preview.mjs?v=2';
+import {openRemote} from './mindex.remote-session.mjs?v=11';
 import {setupPhoneExperience} from './remote.screen.mjs?v=4';
 window.lucide?.createIcons();
 const screenAwake=setupPhoneExperience();
@@ -60,7 +60,7 @@ async function connectAdmin(selected){
    await new Promise(resolve=>setTimeout(resolve,500));
   }while(performance.now()<deadline&&adminToken===token);
   if(!result.ready||adminToken!==token)throw Error('송출 PC의 응답이 없어요. 다시 선택해 주세요.');
-  session=await openRemote({client,registration:relayRegistration(result.secret),onClose:()=>{void releaseAdminLink();reset();},onState:state,onStatus:s=>{$('status').textContent=s;paint();},onResult:r=>{$('result').textContent=r.message;paint();}});
+  session=await openRemote({client,registration:relayRegistration(result.secret),onClose:()=>{void releaseAdminLink();reset();},onSlides:renderSlides,onState:state,onStatus:s=>{$('status').textContent=s;paint();},onResult:remoteResult});
   $('disconnect').hidden=true;
  }catch(e){await releaseAdminLink();$('status').textContent=e.message;}
  finally{opening=false;paint();}
@@ -72,11 +72,13 @@ $('adminLogout').onclick=async()=>{
 };
 setInterval(listOutputs,3000);
 window.addEventListener('pagehide',event=>{if(event.persisted)return;const token=adminToken;adminToken=null;if(token)void adminRpc(client,'mindex_remote_admin',{p_action:'logout',p_token:token}).catch(()=>{});});
-function reset(){session=null;state(null);$('pairForm').hidden=false;$('disconnect').hidden=true;$('code').value='';paint();}
+function reset(){$('slidesDialog').close();clearTimeout(slidesTimer);slidesData=null;jumpPending=false;session=null;state(null);$('pairForm').hidden=false;$('disconnect').hidden=true;$('code').value='';paint();}
 function paint(){
  connectionForms();
  screenAwake.update({active:!!session?.connected,visible:!document.hidden});
  const usable=session?.usable&&!document.hidden;
+ $('slidesOpen').disabled=!usable||!view?.allowed?.includes('jump');
+ paintSlides(usable);
  for(const button of document.querySelectorAll('[data-action]'))button.disabled=!usable||!view?.allowed?.includes(button.dataset.action);
  $('connect').disabled=opening||ending||!!session;
  $('disconnect').disabled=ending;
@@ -97,6 +99,58 @@ function state(value){
  }
  paint();
 }
+const slidePreviews=[];
+let slidesData=null,slidesLoading=false,slidesTimer=null,jumpPending=false;
+function paintSlides(usable){
+ if(!$('slidesDialog').open)return;
+ const current=!!slidesData&&slidesData.key===view?.catalogKey;
+ for(const b of $('slidesList').querySelectorAll('button')){
+  b.disabled=!usable||!current||slidesLoading||jumpPending;
+  b.setAttribute('aria-current',String(Number(b.dataset.index)===view?.index));
+ }
+ $('slidesPrev').disabled=!usable||slidesLoading||!slidesData||slidesData.offset===0;
+ $('slidesNext').disabled=!usable||slidesLoading||!slidesData||slidesData.offset+6>=slidesData.total;
+ if(!usable)$('slidesStatus').textContent='연결 확인 중 · 이동 잠김';
+ else if(current&&$('slidesStatus').textContent==='연결 확인 중 · 이동 잠김')$('slidesStatus').textContent='원하는 슬라이드를 선택하세요.';
+ else if(slidesData&&!current)$('slidesStatus').textContent='슬라이드가 변경됐어요. 검색을 눌러 새 목록을 받아 주세요.';
+}
+async function loadSlides(offset=0){
+ if(!session?.usable)return;
+ slidesLoading=true;$('slidesStatus').textContent='불러오는 중…';paint();clearTimeout(slidesTimer);
+ slidesTimer=setTimeout(()=>{slidesLoading=false;$('slidesStatus').textContent='목록을 받지 못했어요. 검색을 눌러 다시 시도해 주세요.';paint();},5000);
+ try{await session.requestSlides({offset,query:$('slidesQuery').value});}catch(e){clearTimeout(slidesTimer);slidesLoading=false;$('slidesStatus').textContent=e.message;paint();}
+}
+function renderSlides(data){
+ if(!$('slidesDialog').open||!data||!Array.isArray(data.items))return;
+ clearTimeout(slidesTimer);slidesLoading=false;slidesData=data;
+ for(const preview of slidePreviews.splice(0))preview.dispose();
+ const list=$('slidesList');list.replaceChildren();let group='';
+ for(const item of data.items){
+  if(item.group!==group){const h=document.createElement('h3');h.textContent=item.group;list.append(h);group=item.group;}
+  const b=document.createElement('button'),mini=document.createElement('div'),label=document.createElement('span');
+  b.type='button';b.dataset.index=item.index;mini.className='slide-preview';label.textContent=`${item.index+1}. ${item.title}`;
+  b.append(mini,label);list.append(b);if(item.preview){const draw=createPreview(mini,`${item.index+1}번 슬라이드`);slidePreviews.push(draw);draw(item.preview,item.text);}
+  else{mini.classList.add('slide-text-preview');const excerpt=document.createElement('span');excerpt.textContent=item.text||item.title;mini.append(excerpt);}
+  b.onclick=async()=>{
+   if(!session?.usable||jumpPending||data.key!==view?.catalogKey)return;
+   jumpPending=true;$('slidesStatus').textContent='이동 중…';paint();
+   try{await session.command('jump',{index:item.index,key:data.key});}catch(e){jumpPending=false;$('slidesStatus').textContent=e.message;paint();}
+  };
+ }
+ $('slidesStatus').textContent=data.total?'원하는 슬라이드를 선택하세요.':'검색 결과가 없어요.';
+ $('slidesPage').textContent=data.total?`${Math.floor(data.offset/6)+1} / ${Math.ceil(data.total/6)}`:'0 / 0';paint();
+}
+function remoteResult(r){
+ $('result').textContent=r.message;
+ if(jumpPending){jumpPending=false;if(r.ok)$('slidesDialog').close();else $('slidesStatus').textContent=r.message;}
+ paint();
+}
+$('slidesOpen').onclick=()=>{slidesData=null;$('slidesList').replaceChildren();$('slidesQuery').value='';$('slidesDialog').showModal();void loadSlides();};
+$('slidesClose').onclick=()=>$('slidesDialog').close();
+$('slidesDialog').addEventListener('close',()=>{clearTimeout(slidesTimer);slidesLoading=false;for(const preview of slidePreviews.splice(0))preview.dispose();$('slidesList').replaceChildren();});
+$('slidesSearch').onsubmit=e=>{e.preventDefault();void loadSlides();};
+$('slidesPrev').onclick=()=>loadSlides(Math.max(0,(slidesData?.offset||0)-6));
+$('slidesNext').onclick=()=>loadSlides((slidesData?.offset||0)+6);
 $('pairForm').addEventListener('submit',async e=>{
  e.preventDefault();if(opening||ending||session)return;opening=true;paint();$('result').textContent='';
  try{
@@ -110,7 +164,7 @@ $('pairForm').addEventListener('submit',async e=>{
   if(entry.kind!=='guest')throw Error('연결 응답을 확인할 수 없어요.');
   $('disconnect').textContent='연결 종료';
   const registration=await obtainOutputPairing(client,$('code').value);
-  session=await openRemote({client,registration,onClose:reset,onState:state,onStatus:s=>{$('status').textContent=s;paint();},onResult:r=>{$('result').textContent=r.message;paint();}});
+  session=await openRemote({client,registration,onClose:reset,onSlides:renderSlides,onState:state,onStatus:s=>{$('status').textContent=s;paint();},onResult:remoteResult});
   $('disconnect').hidden=false;
  }catch(e){$('status').textContent=e.message;}finally{opening=false;paint();if(adminMode&&adminToken)void listOutputs();}
 });

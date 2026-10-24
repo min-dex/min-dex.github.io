@@ -58,3 +58,26 @@ button :is([data-lucide], svg.lucide) { width: var(--ui-icon-size); height: var(
 #backOutputs { width: auto; }
 .selected-output { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-top: 15px; }
 .selected-output strong { min-width: 0; overflow-wrap: anywhere; }
+
+#slidesOpen { margin-bottom: 10px; }
+#slidesDialog { width:min(900px,calc(100% - 20px)); max-height:calc(100dvh - 30px); box-sizing:border-box; overflow:auto; margin:auto; padding:20px; border:1px solid var(--line); border-radius:var(--r); background:var(--bg); color:var(--ink); }
+#slidesDialog::backdrop { background:rgba(0,0,0,.65); }
+#slidesDialog header { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+#slidesClose { width:50px; flex:0 0 50px; }
+#slidesSearch { display:flex; gap:10px; margin:15px 0; }
+#slidesQuery { margin:0; min-width:0; font-size:var(--ui-body-size); letter-spacing:normal; text-transform:none; }
+#slidesSearch button { width:70px; flex:0 0 70px; }
+#slidesList { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+#slidesList h3 { grid-column:1/-1; margin:10px 0 0; font-size:var(--ui-body-size); overflow-wrap:anywhere; }
+#slidesList button { display:flex; flex-direction:column; min-width:0; padding:8px; border:2px solid transparent; }
+#slidesList button[aria-current=true] { border-color:var(--accent); }
+#slidesList .slide-preview { margin:0; }
+#slidesList button>span { width:100%; text-align:left; overflow-wrap:anywhere; font-size:var(--ui-meta-size); }
+#slidesStatus { color:var(--ink-3); font-size:var(--ui-meta-size); }
+.slides-pages { display:flex; align-items:center; gap:10px; margin-top:20px; }
+#slidesPage { white-space:nowrap; font-size:var(--ui-meta-size); }
+@media(min-width:700px){ #slidesList { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+
+#slidesList .slide-text-preview { color:#fff; padding:8px; display:grid; place-content:center; white-space:pre-line; overflow:hidden; font-size:11px; line-height:1.3; text-align:center; overflow-wrap:anywhere; }
+
+#slidesList .slide-text-preview>span { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden; }

@@ -1,6 +1,6 @@
 // Ephemeral pairing only: no persistent credentials or offline command queue.
 const enc=new TextEncoder(),dec=new TextDecoder();
-export const actions=new Set(['prev','next','blank','unblank','play','pause','stop','resume','video-play','video-pause','video-restart','output-stop']);
+export const actions=new Set(['jump','prev','next','blank','unblank','play','pause','stop','resume','video-play','video-pause','video-restart','output-stop']);
 export const id=()=>crypto.randomUUID();
 const hex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
 export async function pairing(secret){
@@ -48,7 +48,7 @@ export function createGate({read,execute,now=()=>performance.now()}){
  // Consume before execution: uncertain actions are never retried automatically.
  const result={id:m.id,ok:false,message:'실행 여부를 확인할 수 없습니다.'};receipts.set(m.id,result);
  if(receipts.size>128)receipts.delete(receipts.keys().next().value);
- try{await execute(m.action);result.ok=true;result.message='처리 완료';}catch(e){result.message=String(e.message||e).slice(0,200);}finally{busy=false;}
+ try{await execute(m.action,m.target);result.ok=true;result.message='처리 완료';}catch(e){result.message=String(e.message||e).slice(0,200);}finally{busy=false;}
  return result;
  }
  return {connect,command,snapshot,invalidate(){tickets.clear();revision++;},close(){closed=true;controller=null;tickets.clear();},get connected(){return !!controller&&!closed;}};

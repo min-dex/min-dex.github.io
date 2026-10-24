@@ -23,6 +23,17 @@ try:
     const adapter=MindexRemote.adapter(sid,'fixture',output);
     check(adapter.read().live,'host live');await adapter.execute('next');check(state.presenter.index===1,'real next');
     await adapter.execute('prev');check(state.presenter.index===0,'real previous');
+    const catalog=adapter.browse({offset:0});check(catalog.total===state.presenter.slides.filter(s=>!presenterSlideIsHidden(s)).length&&catalog.items.length===Math.min(6,catalog.total),'visible catalog');
+    check(state.presenter.index===0,'browse does not navigate');
+    await adapter.execute('jump',{index:2,key:catalog.key});check(state.presenter.index===2,'real direct jump');
+    for(const target of [{index:-1,key:catalog.key},{index:999,key:catalog.key},{index:1.5,key:catalog.key},{index:0,key:'stale'}]){
+     let denied=false;try{await adapter.execute('jump',target)}catch{denied=true}check(denied,'invalid jump rejected');
+    }
+    state.presenter.slides[1].hidden=true;let hiddenDenied=false;try{await adapter.execute('jump',{index:1,key:catalog.key})}catch{hiddenDenied=true}check(hiddenDenied,'hidden jump rejected');state.presenter.slides[1].hidden=false;
+    await adapter.execute('jump',{index:0,key:catalog.key});
+    const source=state.presenter.sourceSignature;state.presenter.sourceSignature='edited';
+    let denied=false;try{await adapter.execute('jump',{index:1,key:catalog.key})}catch{denied=true}check(denied,'old catalog rejected');state.presenter.sourceSignature=source;
+
     await adapter.execute('blank');check(state.presenter.safetyBlank,'real blackout');
     await adapter.execute('unblank');check(!state.presenter.safetyBlank,'real unblank');
     const audio={paused:true,ended:false,currentTime:12,src:'fixture.wav',pause(){this.paused=true},play(){this.paused=false;return Promise.resolve()},removeAttribute(){this.src=''},load(){}};

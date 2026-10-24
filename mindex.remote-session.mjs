@@ -1,8 +1,8 @@
-import {pairing,identity,sessionKey,seal,unseal,id,createGate} from './mindex.remote-core.mjs?v=6';
+import {pairing,identity,sessionKey,seal,unseal,id,createGate} from './mindex.remote-core.mjs?v=7';
 import {obtainPairing} from './mindex.remote-pairing.mjs?v=4';
 
 // The relay carries ciphertext only. A code grants one ephemeral controller.
-export async function openRemote({client,code,host=false,registration:providedRegistration,read,execute,onState=()=>{},onStatus=()=>{},onResult=()=>{},onClose=()=>{}}){
+export async function openRemote({client,code,host=false,registration:providedRegistration,read,execute,browse,onSlides=()=>{},onState=()=>{},onStatus=()=>{},onResult=()=>{},onClose=()=>{}}){
  const registration=providedRegistration||await obtainPairing(client,host,code);
  let pair,keys;try{pair=await pairing(registration.secret);keys=await identity();}catch(e){await registration.revoke();throw e;}
  const peer=id(),nonce=id();
@@ -11,7 +11,7 @@ export async function openRemote({client,code,host=false,registration:providedRe
  let outgoing=0,incoming=0,sequence=0,lastSeen=performance.now(),snapshot=null,pending=null;
  let timer,expiry,ackTimer,queue=Promise.resolve(),queued=0,rateAt=0,rate=0;
  let freshRequest=id(),fresh=false,changeTimer=null,lastState='',sendQueue=Promise.resolve();
- let paused=false,held=false,lastWall=Date.now(),retryTimer=null,transport=0,sendEpoch=0;
+ let browseRequest='',paused=false,held=false,lastWall=Date.now(),retryTimer=null,transport=0,sendEpoch=0;
  const retention=180000;
  const born=performance.now();
  const status=s=>{if(!closed)onStatus(s);};
@@ -46,6 +46,7 @@ export async function openRemote({client,code,host=false,registration:providedRe
  }
  function hold(){
   if(closed)return;
+  browseRequest='';
   if(!held){held=true;sendEpoch++;fresh=false;freshRequest=id();gate?.invalidate();
    clearTimeout(ackTimer);
    if(pending){pending=null;onResult({ok:false,message:'연결이 끊겨 실행 여부를 확인할 수 없습니다. 명령은 다시 보내지 않습니다.'});}
@@ -103,6 +104,9 @@ export async function openRemote({client,code,host=false,registration:providedRe
   if(host){
    if(m.type==='ready'&&!ready){gate.connect(other);ready=true;clearTimeout(expiry);status('리모컨 연결됨');await publish(m.request);}
    else if(ready&&m.type==='ping'){held=false;await publish(m.request);}
+   else if(ready&&m.type==='browse'&&!held&&browse&&typeof m.request==='string'&&m.request.length<=64){
+    const result=browse(m.options);await send({type:'slides',request:m.request,result});
+   }
    else if(ready&&m.type==='command'){
     let result;try{if(held)throw Error('최신 연결 상태를 확인해 주세요.');result=await gate.command(other,m.command);}catch(e){result={id:m.command?.id,ok:false,message:e.message};}
     await send({type:'result',result});await publish();
@@ -112,6 +116,8 @@ export async function openRemote({client,code,host=false,registration:providedRe
    ready=true;clearTimeout(expiry);snapshot=m.snapshot;
    if(m.request===freshRequest){fresh=true;held=false;}
    onState(snapshot.state);status(fresh?'연결됨':'최신 상태 확인 중');
+  }else if(m.type==='slides'&&fresh&&!held&&m.request===browseRequest){
+   browseRequest='';onSlides(m.result);
   }else if(m.type==='result'&&pending===m.result?.id){
    pending=null;clearTimeout(ackTimer);onResult(m.result);
   }
@@ -162,9 +168,13 @@ export async function openRemote({client,code,host=false,registration:providedRe
   get listening(){return subscribed&&!closed;},
   get connected(){return ready&&!closed;},
   get usable(){return ready&&fresh&&subscribed&&!paused&&!held&&!closed&&!pending&&Math.max(performance.now()-lastSeen,Date.now()-lastWall)<=2500;},
-  async command(action){
+  async requestSlides(options={}){
+   if(!this.usable)throw Error('최신 연결 상태를 확인한 뒤 열어 주세요.');
+   browseRequest=id();await send({type:'browse',request:browseRequest,options}).catch(handleFailure);
+  },
+  async command(action,target){
    if(!this.usable)throw Error('최신 연결 상태를 확인한 뒤 눌러 주세요.');
-   const command={id:id(),action,sequence:++sequence,epoch:snapshot.epoch,revision:snapshot.revision,ticket:snapshot.ticket};
+   const command={id:id(),action,target,sequence:++sequence,epoch:snapshot.epoch,revision:snapshot.revision,ticket:snapshot.ticket};
    pending=command.id;
    ackTimer=setTimeout(()=>{pending=null;fresh=false;freshRequest=id();onResult({ok:false,message:'실행 여부를 확인할 수 없습니다. 현재 화면을 확인해 주세요.'});},3000);
    try{await send({type:'command',command});}catch(e){handleFailure(e);throw e;}

@@ -26,6 +26,8 @@
  $('[data-remote-end]').onclick=async()=>{if(ending)return;ending=true;paintPanel();try{await registry?.disconnectGuest();}finally{ending=false;paintPanel();}};
  const text=s=>[s?.title,s?.body||s?.text||s?.bodyText||s?.content].filter(v=>typeof v==='string').join('\n').slice(0,1800);
  function adapter(serviceId,outputSession,outputWindow,admin=false,followOutput=admin){
+  let slideSet,slideSignature,slideKey;
+  function catalogKey(){const p=state.presenter;if(slideSet!==p.slides||slideSignature!==p.sourceSignature){slideSet=p.slides;slideSignature=p.sourceSignature;slideKey=crypto.randomUUID();}return slideKey;}
   let previewRevision,previews=new WeakMap();
   function preview(slide){
    if(!slide?.type)return '';
@@ -60,7 +62,7 @@
   function read(){
    const {p,m,slide,sync,own,intro}=context();
    const live=p.serviceId===serviceId&&(followOutput||state.selectedServiceId===serviceId)&&p.outputSessionId===outputSession&&p.outputWindow===outputWindow&&presenterControllerIsLive(serviceId)&&isPresenterOutputWindowOpen();
-   const allowed=['prev','next',p.safetyBlank?'unblank':'blank'];
+   const allowed=['jump','prev','next',p.safetyBlank?'unblank':'blank'];
    if(admin)allowed.push('output-stop');
    if(!m.pending&&!m.fadeStop){
     if((own||intro)&&!m.playing)allowed.push('play');
@@ -71,15 +73,19 @@
    const video=presenterRemoteVideoState(serviceId);
    if(video?.ready)allowed.push(...(video.status==='playing'?['video-pause']:['video-play']), 'video-restart');
    const next=p.slides.slice(p.index+1).find(s=>!presenterSlideIsHidden(s));
-   return {live,video,index:p.index,total:p.slides.length,blank:!!p.safetyBlank,current:text(p.liveScripture?.active?p.liveScripture.slide:slide),next:text(next),allowed,
+   return {live,video,catalogKey:catalogKey(),index:p.index,total:p.slides.length,blank:!!p.safetyBlank,current:text(p.liveScripture?.active?p.liveScripture.slide:slide),next:text(next),allowed,
     previewCurrent:p.safetyBlank?'<div style="width:100%;height:100%;background:#000"></div>':preview(p.liveScripture?.active?p.liveScripture.slide:slide),previewNext:preview(next),
     music:!own&&!intro?'연결된 음원 없음':m.pending?'음원 준비 중':m.fadeStop?'페이드아웃 중':`${m.playing?'재생 중':'정지 / 일시정지'}${sync?.localTiming?m.autoSyncSuspended?' · 자동 넘김 해제':' · 자동 넘김':''}`,
     // Compare identities without disclosing media URLs or the full worship source.
     version:compactTextSignature(JSON.stringify([remoteRevision,p.sourceSignature,presenterTransportSequence,m.playSerial,m.sourceKey,m.timingGroupId,m.mode,p.livePraise,p.liveScripture?.active]))};
   }
-  async function perform(action){
+  async function perform(action,target){
    if(!read().live||!read().allowed.includes(action))throw Error('현재 상태에서는 이 조작을 할 수 없습니다.');
    const {p,m,slide,intro}=context();
+   if(action==='jump'){
+    if(!target||target.key!==catalogKey()||!Number.isSafeInteger(target.index)||target.index<0||target.index>=p.slides.length||presenterSlideIsHidden(p.slides[target.index]))throw Error('슬라이드가 변경됐습니다. 목록을 다시 열어 주세요.');
+    return runPresenterAction('jump',serviceId,{index:target.index,scroll:false});
+   }
    if(action==='output-stop'&&admin)return stopPresenterOutput(serviceId);
    if(action==='prev'||action==='next')return runPresenterAction(action,serviceId,{scroll:false});
    if(action==='blank'||action==='unblank')return runPresenterAction('jump',serviceId,{index:action==='blank'?-1:p.index,scroll:false});
@@ -95,10 +101,20 @@
    }
    if(action==='play'&&!state.serviceMusic.playing)throw Error('송출 PC에서 음원 재생이 차단됐습니다. PC에서 한 번 재생해 주세요.');
   }
-  return {read,async execute(action){
+  function browse(options={}){
+   if(!read().live)return null;
+   const query=String(options?.query||'').slice(0,80).trim().toLocaleLowerCase();
+   const rows=state.presenter.slides.map((slide,index)=>({slide,index})).filter(({slide})=>!presenterSlideIsHidden(slide)&&[slide.sectionLabel,slide.elementLabel,text(slide)].join(' ').toLocaleLowerCase().includes(query));
+   const offset=Number.isSafeInteger(options?.offset)?Math.min(Math.max(0,options.offset),Math.max(0,Math.floor((rows.length-1)/6)*6)):0;
+   const result={key:catalogKey(),offset,total:rows.length,items:rows.slice(offset,offset+6).map(({slide,index})=>({index,group:String(slide.sectionLabel||slide.elementLabel||'예배').slice(0,60),title:String(slide.title||slide.elementLabel||'슬라이드').slice(0,80),text:text(slide).slice(0,300),preview:preview(slide)}))};
+   // Keep each encrypted response below the transport envelope limit.
+   for(const item of [...result.items].reverse())if(new TextEncoder().encode(JSON.stringify(result)).length>14000)item.preview='';
+   return result;
+  }
+  return {read,browse,async execute(action,target){
    if(remoteBusy)throw Error('다른 조작을 처리 중입니다.');
    remoteBusy=true;remoteRevision++;
-   try{return await perform(action);}finally{remoteBusy=false;remoteRevision++;registry?.notify();}
+   try{return await perform(action,target);}finally{remoteBusy=false;remoteRevision++;registry?.notify();}
   }};
  }
  // Each actual output gets its own ephemeral registry identity; no PC registration.
@@ -107,7 +123,7 @@
   if(!registryActive||registry||registryLoading||!state.client||!isPresenterOutputWindowOpen())return;
   registryLoading=true;const epoch=registryEpoch;
   try{
-   const {createOutputRegistry}=await import('./mindex.remote-admin.mjs?v=5');
+   const {createOutputRegistry}=await import('./mindex.remote-admin.mjs?v=6');
    if(!registryActive||epoch!==registryEpoch)return;
    registry=createOutputRegistry(()=>{
     const p=state.presenter;
