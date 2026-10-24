@@ -1697,4 +1697,12 @@ function syncServiceFormInputError(field) {
   field.classList.toggle("is-invalid", warnings.length > 0);
   field.setAttribute("aria-invalid", String(warnings.length > 0));
   field.title = warnings.join(" · ");
+  const group = field.closest(".svc-board-subgroup");
+  const target = group?.querySelector("[data-live-form-warnings]");
+  if (!target) return;
+  const liveWarnings = [...group.querySelectorAll('.svc-form-hint')].flatMap(input => {
+    const id = input.dataset.serviceId || state.selectedServiceId;
+    return serviceFormInputWarnings(getServiceItems(id)[Number(input.dataset.serviceItemIndex)], input.value);
+  });
+  target.innerHTML = renderPresenterWarnings(uniqueList([...JSON.parse(target.dataset.staticWarnings || "[]"), ...liveWarnings]));
 }

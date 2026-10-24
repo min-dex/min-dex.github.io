@@ -922,6 +922,8 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
   const interactionLabel = presenterSlideInteractionHint(serviceId, subgroup.name || visibleLabel);
   const warnings = presenterWarningsForEntries(subgroup.slides);
   const inputContexts = presenterBoardSubgroupInputContexts(serviceId, subgroup);
+  const formWarnings = uniqueList(inputContexts.flatMap(({ item }) => serviceFormInputWarnings(item)));
+  const staticWarnings = warnings.filter(warning => !formWarnings.includes(warning));
   // Single-song rows use the same compact controls as medley rows.
   const inlineSong = inputContexts.length === 1
     && ["praise_db", "lyrics_db", "score_db"].includes(presenterServiceInputItem(inputContexts[0].item, inputContexts[0].service)?.mode);
@@ -950,7 +952,7 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
             ${visibleLabel ? `<span>${escapeHtml(visibleLabel)}</span>` : ""}
             ${visibleTitle ? `<strong>${escapeHtml(visibleTitle)}</strong>` : ""}
             ${hidden ? `<span class="svc-element-hidden-badge">숨김</span>` : ""}
-            ${renderPresenterWarnings(warnings)}
+            <span data-live-form-warnings data-static-warnings="${escapeAttr(JSON.stringify(staticWarnings))}">${renderPresenterWarnings(warnings)}</span>
           </button>
           ${headerDbContext ? renderServiceItemLinkControl(headerDbContext.item, headerDbContext.index) : ""}
           ${headerActions}

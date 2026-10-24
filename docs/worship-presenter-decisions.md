@@ -4662,3 +4662,10 @@ Form fields share the rendered slide warning result and common is-invalid/aria-i
 colors, both initially and while editing. Validation uses a copy and preserves
 typed value, selection and save behavior. Missing warnings retain the complete
 authored token (V999A 없음), without converting it to a verse-only label.
+
+## Live form warning synchronization ·2026-10-24
+
+Input validation updates the subgroup header warning slot from the same current
+field drafts, including connected-song fields. Clearing an invalid token clears
+both the field state and its header warning immediately. Preserve unrelated
+header warnings, input DOM/caret and authored save/output timing.

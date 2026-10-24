@@ -115,7 +115,7 @@ try:
     const service=state.services[0],song=state.songs[0],version=song.versions[0];
     const item=normalizeServiceItem({id:'error-form',service_id:service.id,label:'찬양 1',song_id:song.id,version_id:version.id,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formHint:'V999A-C',formPreset:{forms:['V999A','C'],strength:'manual',titleSequence:true}})});
     state.serviceItems[service.id]=[item];
-    const host=document.querySelector('#width-host');host.innerHTML=renderServiceFormHintInput(item,0);
+    const host=document.querySelector('#width-host');host.innerHTML=`<div class="svc-board-subgroup"><header><span data-live-form-warnings data-static-warnings='["별도 안내"]'>${renderPresenterWarnings(["별도 안내","V999A 없음"])}</span></header>${renderServiceFormHintInput(item,0)}</div>`;
     const field=host.querySelector('.svc-form-hint'),before=JSON.stringify(item);
     if(field.getAttribute('aria-invalid')!=='true'||field.title!=='V999A 없음')throw Error('initial missing token/error');
     for(const theme of ['dark','light']){
@@ -125,8 +125,10 @@ try:
     }
     field.value='C';field.focus();field.setSelectionRange(0,1);syncServiceFormInputError(field);
     if(field.getAttribute('aria-invalid')!=='false'||field.classList.contains('is-invalid')||field.title)throw Error('error not cleared');
+    if(host.querySelector('[data-live-form-warnings]').textContent!=='별도 안내')throw Error('stale header or unrelated warning lost');
     field.value='V0-C';field.setSelectionRange(1,2);syncServiceFormInputError(field);
     if(field.title!=='V0 없음'||field.value!=='V0-C'||field.selectionStart!==1||field.selectionEnd!==2||document.activeElement!==field)throw Error('live input/selection');
+    if(host.querySelector('[data-live-form-warnings]').textContent!=='별도 안내V0 없음')throw Error('header live token');
     if(JSON.stringify(item)!==before)throw Error('validation changed stored item');
    }""")
    print('PASS',engine,'form error initial/live/recovery, full token, both-theme colors and unchanged input/selection/model')
