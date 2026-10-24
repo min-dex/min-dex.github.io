@@ -510,3 +510,21 @@ function resolveDomainAlias(value, aliases) {
     candidate.normalize("NFKC").toLowerCase().replace(/[\s_-]+/g, "") === compact);
   return key === undefined ? "" : aliases[key];
 }
+
+// Concrete column values are authoritative; legacy buckets are adapted only on read.
+function canonicalWorshipElementInputMode(element = {}) {
+  const primary = normalizeServiceInputMode(element.input_mode);
+  if (primary && primary !== "praise_db") return primary;
+  const config = element.config || {};
+  const content = element.content_state || {};
+  const modes = [config.inputMode || config.input_mode || config.contentState?.inputMode || config.content_state?.input_mode,
+    content.inputMode || content.input_mode].map(normalizeServiceInputMode);
+  for (const explicit of ["audio_praise", "manual_praise"]) if (modes.includes(explicit)) return explicit;
+  const precise = modes.find(mode => mode && mode !== "praise_db");
+  if (precise === "children_audio") return precise;
+  if (["lyrics_db", "score_db"].includes(precise) || primary === "praise_db" || modes.includes("praise_db")) {
+    const output = String(config.outputMode || config.output_mode || config.renderMode || config.render_mode || "").trim();
+    return output === "score" || output === "악보" ? "score_db" : output === "lyrics" || output === "가사" ? "lyrics_db" : precise || "lyrics_db";
+  }
+  return precise || serviceInputModeForElementType(element.element_type);
+}

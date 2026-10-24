@@ -516,14 +516,17 @@ Current data basis:
   - `lyrics_db`: "가사 불러오기" loads a Praise DB song and renders lyric output.
   - `manual_praise`: "직접 입력하기" stores the title and manual lyric slides on
     the worship element, without requiring `song_id` or `song_version_id`.
-- `mindex_worship_elements.input_mode` is a DB-compatible bucket. Persist
-  praise-specific modes (`score_db`, `lyrics_db`, `manual_praise`) as
-  `praise_db` in this column so older Supabase constraints do not reject saves.
-  Keep the exact choice in `content_state.inputMode` and `config.inputMode`.
-- `mindex_worship_elements.input_mode` must allow at least:
-  `''`, `praise_db`, `text`, `scripture`, `asset`, `config`, and `none`.
-  Newer schemas may also allow `score_db`, `lyrics_db`, and `manual_praise`,
-  but app persistence must not depend on that.
+- `mindex_worship_elements.input_mode` stores the concrete input mode: `lyrics_db`,
+  `score_db`, `children_audio`, `manual_praise` or `audio_praise` for Praise.
+  New saves must not collapse these into `praise_db`. A concrete column value
+  takes precedence over stale detail copies; save paths keep detail copies aligned.
+- Existing `praise_db`/empty values are read aliases. Resolve their precise
+  config/content mode and score/lyrics output before the established type fallback.
+  Do not bulk-rewrite existing worship records or ambiguous historical content.
+- Deploy `2026-10-25-worship-canonical-input-mode.sql` and verify the live CHECK
+  before publishing the canonical writer. It changes only the allowed values;
+  no content, draft, service revision, permission or runtime playback is modified.
+  This rollout is prepared locally; production application is not yet confirmed.
 
 ```text
 Element Type (템플릿/저장 타입)

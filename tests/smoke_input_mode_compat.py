@@ -1,4 +1,4 @@
-"""Verify legacy input_mode constraints without writing to the live database."""
+"""Verify canonical input modes and legacy reads without writing to the live database."""
 
 import argparse
 
@@ -18,7 +18,7 @@ def main():
             page.goto(url + '?output=presenter', wait_until='domcontentloaded')
             page.wait_for_function("typeof buildWorshipPersistenceRows === 'function' && typeof serializeServiceItemMemo === 'function'")
             result = page.evaluate("""() => {
-              const allowed = ['', 'praise_db', 'text', 'scripture', 'asset', 'config', 'none'];
+              const allowed = ['', 'lyrics_db', 'score_db', 'children_audio', 'audio_praise', 'manual_praise', 'text', 'scripture', 'asset', 'config', 'none'];
               const mapped = [...WORSHIP_DB_ELEMENT_INPUT_MODES].map(worshipDbInputModeForSave);
               if (!mapped.every(mode => allowed.includes(mode))) throw Error('legacy CHECK violation');
               const service = {id:'compat-test', type_id:'sunday-first', date:'2026-09-06'};
@@ -33,9 +33,9 @@ def main():
                     _worshipElementTemplateModified:true, _worshipTemplatePlaceholder:false}, 0);
                   const options = {elementTypedStateColumns:{inputMode:true, contentState}};
                   const rows = buildWorshipPersistenceRows(service, [item], {}, {}, options);
-                  if (rows.elements[0].input_mode !== 'praise_db') throw Error('builder CHECK violation');
+                  if (rows.elements[0].input_mode !== 'manual_praise') throw Error('builder CHECK violation');
                   // Retry/legacy row sanitization must use the same compatibility mapping.
-                  rows.elements[0].input_mode = 'manual_praise';
+                  rows.elements[0].input_mode = 'praise_db';
                   sanitizeWorshipPersistenceRows(rows, options);
                   validateWorshipPersistenceRows(rows, {serviceId:service.id});
                   if (!rows.elements.every(row => allowed.includes(row.input_mode))) throw Error('sanitizer CHECK violation');
@@ -48,9 +48,9 @@ def main():
               return results;
             }""")
             for row in result:
-                assert row['dbMode'] == 'praise_db' and row['mode'] == 'manual_praise', row
+                assert row['dbMode'] == 'manual_praise' and row['mode'] == 'manual_praise', row
                 assert row['title'] == '은혜' and row['slides'] == ['첫 줄\n둘째 줄', '후렴'], row
-                print('PASS legacy constraint and manual lyrics roundtrip', row, flush=True)
+                print('PASS canonical save and legacy read roundtrip', row, flush=True)
             browser.close()
     finally:
         if server:

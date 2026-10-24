@@ -364,7 +364,13 @@ function sanitizeWorshipPersistenceRows(rows = {}, options = {}) {
     }
     sanitizeSongContentStateWithoutSong(element.content_state, element);
     sanitizeSongContentStateWithoutSong(element.config.contentState, element);
-    if (hasInputModeColumn) element.input_mode = worshipDbInputModeForSave(element.input_mode || element.content_state?.inputMode || element.config.inputMode);
+    if (hasInputModeColumn) {
+      element.input_mode = canonicalWorshipElementInputMode(element);
+      element.config.inputMode = element.input_mode;
+      for (const detail of [element.content_state, element.config.contentState]) {
+        if (detail && typeof detail === "object") detail.inputMode = element.input_mode;
+      }
+    }
     else delete element.input_mode;
   });
   return rows;
@@ -723,7 +729,7 @@ function serviceElementContentStateForSave(item = {}, parsed = parseServiceItemM
   const praiseInputMode = servicePraiseInputMode(item, parsed, service);
   const inputMode = praiseInputMode === "audio_praise" ? "audio_praise" : praiseInputMode === "manual_praise"
     ? (serviceItemAllowsManualSongText(item, service) ? "manual_praise" : "lyrics_db")
-    : contentState.inputMode;
+    : contentState.elementType === "praise" ? praiseInputMode : contentState.inputMode;
   return {
     state: contentState.state,
     reason: contentState.reason,

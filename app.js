@@ -4837,21 +4837,7 @@ function groupWorshipElements(sections = [], elements = []) {
     const departmentAnnouncementBody = sectionKey === "announcements"
       && (["청소년부광고", "청년부광고"].includes(compactSearchValue(elementLabel))
         || (compactSearchValue(elementLabel) === "광고" && ["body", "plain_text"].includes(configuredElementType)));
-    const dbInputMode = normalizeServiceInputMode(element.input_mode);
-    const contentInputMode = normalizeServiceInputMode(element.content_state?.inputMode || element.content_state?.input_mode);
-    const configInputMode = normalizeServiceInputMode(
-      config.inputMode
-      || config.input_mode
-      || config.contentState?.inputMode
-      || config.content_state?.input_mode,
-    );
-    const precisePraiseMode = [configInputMode, contentInputMode]
-      .find(mode => ["lyrics_db", "score_db", "children_audio", "audio_praise", "manual_praise"].includes(mode));
-    const inputMode = [configInputMode, contentInputMode].includes("audio_praise") ? "audio_praise" : [configInputMode, contentInputMode].includes("manual_praise")
-      ? "manual_praise"
-      : dbInputMode === "praise_db" && precisePraiseMode
-        ? precisePraiseMode
-        : (dbInputMode || contentInputMode || configInputMode);
+    const inputMode = canonicalWorshipElementInputMode(element);
     const asset = normalizeServiceAsset(config.asset || config.media || element.asset || sourceRef.asset);
     const mediaAnnouncement = sectionKey === "announcements"
       && !departmentAnnouncementBody
@@ -4913,7 +4899,7 @@ function groupWorshipElements(sections = [], elements = []) {
         note: config.note,
         elementType,
         inputMode,
-        outputMode: config.outputMode || config.output_mode || config.renderMode || config.render_mode,
+        outputMode: ["score_db", "lyrics_db"].includes(normalizeServiceInputMode(element.input_mode)) ? servicePraiseInputModeOutputMode(inputMode) : config.outputMode || config.output_mode || config.renderMode || config.render_mode,
         formHint,
         formPreset,
         formPresetDisabled,
@@ -10962,10 +10948,8 @@ function normalizeServiceInputMode(value) {
 }
 
 function worshipDbInputModeForSave(value) {
-  const inputMode = normalizeServiceInputMode(value);
-  // Older schemas accept praise_db only; config/content_state retain the exact mode.
-  if (["score_db", "lyrics_db", "children_audio", "audio_praise", "manual_praise"].includes(inputMode)) return "praise_db";
-  return WORSHIP_DB_ELEMENT_INPUT_MODES.has(inputMode) ? inputMode : "";
+  const mode = normalizeServiceInputMode(value);
+  return mode === "praise_db" ? "lyrics_db" : mode;
 }
 
 function serviceInputModeForElementType(elementType = "") {
