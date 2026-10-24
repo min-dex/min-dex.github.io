@@ -13,16 +13,17 @@
       writeKey(key, mounted.open);
     }
     if (transient.has(key)) return transient.get(key);
-    const raw = pending.has(key) ? pending.get(key) : window.MINDEX_SERVER_STORAGE?.getItem('session', key);
+    const raw = pending.has(key) ? pending.get(key).value : window.MINDEX_SERVER_STORAGE?.getItem('session', key);
     return raw === 'true' || (raw !== 'false' && fallback);
   }
   function writeKey(key, open) {
     const storage = window.MINDEX_SERVER_STORAGE, value = String(open);
     if (!storage?.ready) { transient.set(key, open); return; }
-    pending.set(key, value);
+    const entry = {value, failed:false};
+    pending.set(key, entry);
     void storage.setItem('session', key, value).then(() => {
-      if (pending.get(key) === value) pending.delete(key);
-    }).catch(() => {}); // Existing state-store retry/conflict UI owns failures.
+      if (pending.get(key) === entry) pending.delete(key);
+    }).catch(() => { entry.failed = true; }); // Existing state-store retry/conflict UI owns failures.
   }
   function attrs(parts, fallback = false) {
     const open = read(parts, fallback);
@@ -46,8 +47,8 @@
     writeKey(node.dataset.disclosureKey, node.open);
   }, true);
   window.addEventListener('mindex-server-state-settled', () => {
-    for (const [key,value] of pending) {
-      if (window.MINDEX_SERVER_STORAGE?.getItem('session', key) === value) pending.delete(key);
+    for (const [key,entry] of pending) {
+      if (entry.failed && window.MINDEX_SERVER_STORAGE?.getItem('session', key) === entry.value) pending.delete(key);
     }
   });
   window.MindexDisclosure = Object.freeze({attrs, read, write:(parts,open)=>writeKey(keyFor(parts),open)});

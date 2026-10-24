@@ -24,6 +24,7 @@ NODE_TESTS = (
     "test_editor_draft_recovery.cjs",
     "test_save_input_retention.cjs",
     "test_server_storage.cjs",
+    "test_disclosure_state.cjs",
     "test_legacy_state.mjs",
     "test_worship_store.mjs",
     "test_worship_atomic_client.mjs",
