@@ -868,7 +868,9 @@ function bindElectronDesktopEvents() {
   desktop.getUpdateState?.().then(result => { if (result?.ok) void handleState(result.state); }).catch(() => {});
 }
 
-function loadInitialData() {
+async function loadInitialData() {
+  // Establish the active ID protocol before any worship projection or summary.
+  await ensureSingleSongActivation();
   const pending = [];
   if (state.module === "praise" || state.selectedSongId) {
     pending.push(loadSongs());
@@ -3589,6 +3591,7 @@ async function loadServiceDataOnce({ silent = false } = {}) {
     return;
   }
   try {
+    await ensureSingleSongActivation();
     await loadWorshipData();
     if (state.selectedServiceId && presenterServiceNeedsHymnScoreManifest(state.selectedServiceId)) {
       await loadHymnScoreManifest({ silent });
@@ -4055,6 +4058,7 @@ async function fetchWorshipRowsForServiceIds(serviceIds = []) {
   const ids = [...new Set(serviceIds.map((id) => String(id || "").trim()).filter(Boolean))];
   if (!ids.length) return { sections: [], elements: [] };
 
+  await ensureSingleSongActivation();
   const atomic = await worshipAtomicClient();
   const results = new Array(ids.length);
   let nextIndex = 0, failed = false, failure;
@@ -4097,6 +4101,14 @@ async function loadWorshipSetlistSongCatalog({ force = false } = {}) {
   const catalog = { key, status: "loading", index: current.key === key ? current.index : null };
   state.worshipSetlistSongCatalog = catalog;
   try {
+    await ensureSingleSongActivation();
+    if (state.singleSongCatalog) {
+      const songs = state.singleSongCatalog.ids().map(id => state.singleSongCatalog.appSong(id));
+      const versions = songs.flatMap(song => song.versions.map(version => ({...version,
+        source_song_id: song.id, curated_version_name: version.name})));
+      catalog.index = window.MindexSetlistLinks.buildIndex(songs, versions);
+      catalog.status = "loaded";
+    } else {
     // Metadata only: links must not wait on the complete lyrics catalogue.
     const results = await Promise.allSettled([
       fetchSupabasePaged("mindex_songs", "id,title,subtitle,original_title,hymn_no,artist", (query) => query.order("id")),
@@ -4106,6 +4118,7 @@ async function loadWorshipSetlistSongCatalog({ force = false } = {}) {
     if (failure) throw failure.reason;
     catalog.index = window.MindexSetlistLinks.buildIndex(results[0].value, results[1].value);
     catalog.status = "loaded";
+    }
   } catch (error) {
     catalog.status = "failed";
     console.warn("Could not load setlist song links.", error);
@@ -4114,15 +4127,16 @@ async function loadWorshipSetlistSongCatalog({ force = false } = {}) {
 }
 
 async function fetchWorshipSetlistServices() {
+  await ensureSingleSongActivation();
   // Only card metadata; do not load lyrics, slides, or full source documents.
   const results = await Promise.allSettled([
     fetchSupabasePaged("mindex_worship_services", "id,service_type_id,service_date,title,service_alias,status,praise_leader,worship_leader,no_gathering:source_ref->no_gathering", q => q.order("id")),
     fetchSupabasePaged("mindex_worship_sections", "id,service_id,sort_order,section_key,title", q => q.order("id")),
-    fetchSupabasePaged("mindex_worship_elements", "id,section_id,sort_order,element_type,title,song_id,label:source_ref->>label,template_suppressed:config->templateSuppressed,legacy_template_suppressed:config->template_suppressed,connectedPraise:config->connectedPraise,connected_praise:config->connected_praise,source_connectedPraise:source_ref->connectedPraise,source_connected_praise:source_ref->connected_praise", q => q.eq("element_type", "praise").order("id")),
+    fetchSupabasePaged("mindex_worship_elements", `id,section_id,sort_order,element_type,title,song_id,${state.singleSongCatalog ? "praise_record_id," : ""}label:source_ref->>label,template_suppressed:config->templateSuppressed,legacy_template_suppressed:config->template_suppressed,connectedPraise:config->connectedPraise,connected_praise:config->connected_praise,source_connectedPraise:source_ref->connectedPraise,source_connected_praise:source_ref->connected_praise`, q => q.eq("element_type", "praise").order("id")),
   ]);
   const failure = results.find(result => result.status === "rejected");
   if (failure) throw failure.reason;
-  return {services:results[0].value, sections:results[1].value, elements:results[2].value};
+  return {services:results[0].value, sections:results[1].value, elements:results[2].value.map(row => state.singleSongCatalog ? state.singleSongCatalog.singleItem(row) : row)};
 }
 
 async function loadWorshipSetlistArchive({ force = false } = {}) {
@@ -16285,8 +16299,9 @@ async function loadHomeOverviewStats({ force = false } = {}) {
     if (state.client === client && state.module === "home" && refs.detailPane.querySelector(".home-overview") && !isGlobalSearchActive()) renderHomeStart();
   };
   stats.promise = (async () => {
+    await ensureSingleSongActivation();
     const results = await Promise.allSettled([
-      client.from("mindex_songs").select("id", { count:"exact", head:true }).abortSignal(abort.signal),
+      state.singleSongCatalog ? Promise.resolve({count:state.singleSongCatalog.ids().length}) : client.from("mindex_songs").select("id", { count:"exact", head:true }).abortSignal(abort.signal),
       client.from("mindex_bible_translations").select("id,name,language,canonical_source:metadata->canonical_source").eq("is_active", true).abortSignal(abort.signal),
     ]);
     if (state.client !== client || homeOverviewStats !== stats) return;

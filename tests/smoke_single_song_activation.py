@@ -35,6 +35,14 @@ try:
     state.dirty.forms=true;blocked=false;try{await ensureSingleSongActivation()}catch{blocked=true}check(blocked&&state.forms[0].lyrics==='keep','dirty draft lost');state.dirty={};finalReads=0;
     await Promise.all([ensureSingleSongActivation(),ensureSingleSongActivation()]);
     check(state.songs.length===201&&state.singleSongStorage==='native'&&state.songs[0]._singleSongRecord,'native install failed');
+    const originalLoad=loadServiceData,originalAtomic=worshipAtomicClient;
+    state.singleSongRepository=null;state.singleSongCatalog=null;state.singleSongStorage=null;
+    state.module='home';state.selectedSongId=null;state.selectedScriptureId=null;state.selectedBookCode=null;
+    let projected=false;
+    loadServiceData=async()=>{check(state.singleSongStorage==='native'&&state.singleSongCatalog,'home projected before native activation');projected=true};
+    worshipAtomicClient=async()=>({});
+    await loadInitialData();check(projected,'home loader missing');
+    loadServiceData=originalLoad;worshipAtomicClient=originalAtomic;
     const saved=state.singleSongRepository;state.client={rpc:()=>{throw Error('wrong project')}};
     blocked=false;try{await ensureSingleSongActivation()}catch{blocked=true}check(blocked&&state.singleSongRepository===saved,'project changed silently');
     const missing=await MindexSingleSong.loadActivation({rpc:async()=>({error:{code:'PGRST202',message:'get_praise_storage_status_v1 not found'}})});check(missing.phase==='legacy','explicit absent RPC');
