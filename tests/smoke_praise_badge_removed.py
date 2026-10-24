@@ -13,7 +13,7 @@ def main():
             page = browser.new_page()
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-            page.wait_for_function("typeof renderPresenterBoardSection === 'function'")
+            page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof renderPresenterBoardSection === 'function')")
             result = page.evaluate("""() => {
               const group = {id:'badge-test', kind:'main-praise', title:'찬양', name:'찬양',
                 label:'찬양', meta:'테힐라 찬양단', slides:[], subgroups:[]};

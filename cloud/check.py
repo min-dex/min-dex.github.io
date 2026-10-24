@@ -160,6 +160,7 @@ SMOKES = (
     "smoke_startup_projection.py",
     "smoke_ui_font_cache.py",
     "smoke_stalled_download_recovery.py",
+    "smoke_runtime_dependency_upgrade.py",
     "smoke_startup_overlap_recovery.py",
     "smoke_boot_loading_indicator.py",
 )

@@ -640,23 +640,6 @@ function presenterOutputWindowFeatures(targetRect = null) {
   return features.join(",");
 }
 
-function isPresenterOutputWindowOpen() {
-  try {
-    return Boolean((state.presenter.outputWindow && !state.presenter.outputWindow.closed) || isPresenterOutputHeartbeatOpen());
-  } catch {
-    return isPresenterOutputHeartbeatOpen();
-  }
-}
-
-function isPresenterOutputHeartbeatOpen() {
-  return Boolean(
-    !state.presenter.outputStopAt
-    &&
-    state.presenter.outputConnectedAt
-    && Date.now() - state.presenter.outputConnectedAt <= PRESENTER_OUTPUT_HEARTBEAT_TTL_MS,
-  );
-}
-
 function startPresenterOutputWindowMonitor(serviceId) {
   stopPresenterOutputWindowMonitor();
   state.presenter.outputWindowMonitor = window.setInterval(() => {

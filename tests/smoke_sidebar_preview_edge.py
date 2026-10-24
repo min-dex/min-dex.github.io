@@ -14,7 +14,7 @@ def main():
                 page.route('**/*supabase*/**', lambda r: r.abort())
                 page.route('**/chromakey-ready-loop-pingpong.mp4*', lambda r: r.abort())
                 page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-                page.wait_for_function("typeof presenterSlideRenderClass === 'function' && typeof applyPresenterPreviewScales === 'function'")
+                page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof presenterSlideRenderClass === 'function' && typeof applyPresenterPreviewScales === 'function')")
                 page.evaluate('''() => {
                   const host=document.createElement('div');
                   host.className='svc-presenter-side-panel';host.id='edge-fixture';

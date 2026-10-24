@@ -664,8 +664,58 @@ function startMindexRuntime() {
   scheduleMicrotask(() => void init().catch(error => window.MINDEX_BOOT_FAIL?.(error)));
 }
 
-if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", startMindexRuntime, { once: true });
-else startMindexRuntime();
+if (
+  typeof document.getElementById !== "function"
+  || window.__mindexRuntimeStarted
+  || preparePresenterRuntimeDependencies()
+) {
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", startMindexRuntime, { once: true });
+  else startMindexRuntime();
+}
+
+function isPresenterOutputWindowOpen() {
+  try {
+    return Boolean((state.presenter.outputWindow && !state.presenter.outputWindow.closed) || isPresenterOutputHeartbeatOpen());
+  } catch {
+    return isPresenterOutputHeartbeatOpen();
+  }
+}
+
+function isPresenterOutputHeartbeatOpen() {
+  return Boolean(
+    !state.presenter.outputStopAt
+    &&
+    state.presenter.outputConnectedAt
+    && Date.now() - state.presenter.outputConnectedAt <= PRESENTER_OUTPUT_HEARTBEAT_TTL_MS,
+  );
+}
+
+// A retained HTML shell must refresh through the existing ordered asset loader.
+function preparePresenterRuntimeDependencies() {
+  const ready = typeof presenterFormPlanForServiceItem === "function"
+    && typeof currentPresenterAudioContext === "function"
+    && typeof renderPresenterSlideBoard === "function"
+    && typeof runPresenterAction === "function"
+    && [...document.querySelectorAll('link[rel="stylesheet"]')]
+      .some(link => new URL(link.href, document.baseURI).pathname.endsWith("/styles.workspace.css"));
+  const url = new URL(location.href);
+  if (ready) {
+    if (url.searchParams.has("mindex-runtime-upgrade")) {
+      url.searchParams.delete("mindex-runtime-upgrade");
+      history.replaceState(history.state, "", url.href);
+    }
+    return true;
+  }
+  const version = String(window.MINDEX_RELEASE || "current");
+  if (url.searchParams.get("mindex-runtime-upgrade") === version) {
+    window.MINDEX_BOOT_FAIL?.(new Error("화면 준비를 완료하지 못했습니다. 새로고침 후 다시 시도해 주세요."));
+    return false;
+  }
+  url.searchParams.set("mindex-runtime-upgrade", version);
+  url.searchParams.set("mindex-retry", String(Date.now()));
+  location.replace(url.href);
+  return false;
+}
 
 // ─── Runtime bootstrap and UI wiring ─────────────────────────────────────────
 async function init() {

@@ -11,7 +11,7 @@ def main():
                 page = browser.new_page()
                 page.route('**/*', lambda r: r.abort() if '.supabase.co/' in r.request.url or r.request.method not in ('GET', 'HEAD', 'OPTIONS') else r.continue_())
                 page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-                page.wait_for_function("typeof buildPresenterSlidesForServiceItem === 'function'")
+                page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof buildPresenterSlidesForServiceItem === 'function')")
                 print(engine, page.evaluate(r'''() => {
                   const assert=(v,m)=>{if(!v)throw Error(m)};
                   const service={id:'test-service',type_id:'sunday-main',date:'2026-07-19',alias:'온세대 찬양예배'};

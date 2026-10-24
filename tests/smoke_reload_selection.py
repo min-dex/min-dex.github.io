@@ -15,7 +15,7 @@ def main():
             page = browser.new_page()
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url, wait_until='domcontentloaded')
-            page.wait_for_function("typeof restorePresenterControllerSession === 'function' && typeof openServiceInPresenter === 'function'")
+            page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof restorePresenterControllerSession === 'function' && typeof openServiceInPresenter === 'function')")
             result = page.evaluate("""async () => {
               const check = (ok, message) => { if (!ok) throw new Error(message); };
               const live = { id: '__live__', type_id: 'sunday-main', date: '2026-09-13', title: '주일예배 [3부]' };

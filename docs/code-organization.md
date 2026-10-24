@@ -332,3 +332,17 @@ read and monitor registration RPCs. Those suites are recorded as blocked rather
 than passed; operational writes remain forbidden. Offline fixture coverage and
 the required Linux gate are independent verification, not a claim that every
 production record or physical output device was retested.
+
+
+A retained older HTML shell can discover a newer release whose dependency list
+has grown. Before startup is scheduled, the app verifies its required presenter
+modules and workspace stylesheet. A missing dependency refreshes the HTML once,
+keeping route/query state and using the existing cache-bypass retry parameter.
+The fresh HTML then runs the single existing ordered asset loader; no second
+script loader races later peer modules. If the refreshed shell is still missing
+dependencies, startup fails closed rather than looping or connecting to data.
+The upgrade marker is removed after readiness. Normal HTML does not reload.
+`smoke_runtime_dependency_upgrade.py` covers retained HTML, current startup,
+all five asset error/retry cases, and failed refresh before connection/save.
+
+Shared output-window/heartbeat status queries stay in app.js because later peer modules read them at load time. They remain available even while a retained HTML shell is being refreshed; their behavior is unchanged.

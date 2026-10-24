@@ -13,7 +13,7 @@ def main():
             page = browser.new_page()
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-            page.wait_for_function("typeof presenterSpecialSongHymnFormPreset === 'function' && typeof isSpecialSongServiceItem === 'function'")
+            page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof presenterSpecialSongHymnFormPreset === 'function' && typeof isSpecialSongServiceItem === 'function')")
             result = page.evaluate('''() => {
               const assert=(test,message)=>{if(!test)throw Error(message)};
               const song={hymn_no:'304',title:'찬송가'};

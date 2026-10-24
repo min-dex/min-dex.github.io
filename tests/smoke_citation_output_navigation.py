@@ -13,7 +13,7 @@ def main():
             page = browser.new_page()
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url + '?output=presenter', wait_until='domcontentloaded')
-            page.wait_for_function("typeof appendPresenterCitationReference === 'function'")
+            page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof appendPresenterCitationReference === 'function')")
             result = page.evaluate('''async () => {
               const assert=(value,message)=>{if(!value)throw Error(message)};
               const slide={type:'scripture',elementType:'scripture_text',layout:'lower_bar_text',

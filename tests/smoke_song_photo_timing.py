@@ -138,7 +138,7 @@ try:
    }'''))
    # Persisted timing and audio survive a browser reload, with identical fixture identity.
    snapshot=page.evaluate('photoTimingSnapshot')
-   page.reload();page.wait_for_function("typeof buildPresenterSlidesForServiceItem==='function' && !!globalThis.MindexSongTiming")
+   page.reload();page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof buildPresenterSlidesForServiceItem==='function' && !!globalThis.MindexSongTiming)")
    page.evaluate('''async data=>{const saved=JSON.parse(data.snapshot);state.services=saved.services;state.songs=saved.songs;state.serviceItems=saved.items;state.selectedServiceId=data.ids.serviceId;state.loadedWorshipServiceIds=new Set([data.ids.serviceId]);state.client={storage:{},from(){throw Error('DB forbidden')}};saveServiceItemMutation=async()=>true;renderPresenterControlState=()=>{};publishPresenterState=()=>{};}''',{'snapshot':snapshot,'ids':ids})
    assert page.evaluate('(id)=>presenterSlidesForService(id).some(s=>s.syncTimeline?.serviceTiming)',ids['serviceId'])
    page.evaluate('({serviceId,elementId})=>MindexSongTiming.open(serviceId,elementId)',ids)
