@@ -38,6 +38,21 @@ try:
      page.locator('#width-host').evaluate('e=>e.style.width="1500px"')
      assert title.input_value()=='미저장 제목' and form.input_value()=='V1-C-C-Tag'
      assert form.evaluate('e=>document.activeElement===e')
+     form.evaluate("e=>e.setSelectionRange(2,5)")
+     page.locator('[data-form-help]').click()
+     assert page.locator('.svc-form-help-panel:popover-open').count()==1
+     assert form.input_value()=='V1-C-C-Tag'
+     assert form.evaluate('e=>document.activeElement===e && e.selectionStart===2 && e.selectionEnd===5')
+     assert page.locator('.svc-form-help-panel').inner_text().find('V1@B')>=0
+     page.locator('.svc-form-help-panel').screenshot(path=f'/tmp/mindex-form-help-{engine}-{theme}.png')
+     page.keyboard.press('Escape')
+     assert page.locator('.svc-form-help-panel:popover-open').count()==0
+     assert form.evaluate('e=>document.activeElement===e && e.selectionStart===2 && e.selectionEnd===5')
+     page.locator('[data-form-help]').focus();page.keyboard.press('Enter')
+     assert page.locator('.svc-form-help-panel:popover-open').count()==1
+     page.keyboard.press('Escape')
+     assert form.evaluate('e=>document.activeElement===e && e.selectionStart===2 && e.selectionEnd===5')
+
      assert page.evaluate("widthBefore===JSON.stringify({service:state.services[0],song:state.songs[0],item:state.serviceItems['width-fixture'][0]})")
    for mode in ['lyrics_db','manual_praise','audio_praise']:
     for label in ['찬양 1','특송']:

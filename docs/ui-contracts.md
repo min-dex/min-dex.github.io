@@ -915,3 +915,11 @@ renders. Primary weekly fields, print content and stored records are unchanged.
 Individual item names under worship outline sections use600 weight. Preserve
 the12px size,16px line height, existing spacing, truncation and parent heading
 weights. This sidebar rule does not change presenter output typography.
+
+### Song form input help ·2026-10-24
+
+Worship form fields reserve a right-hand help button. Its read-only popover uses
+the actual normalizer for examples, distinguishes CB from C-B and preserves
+unknown labels. Pointer activation must not blur/normalize unfinished input;
+keyboard activation and Escape preserve selection and return to the input.
+The help does not write worship data or re-render the editor.
