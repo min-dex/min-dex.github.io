@@ -29214,8 +29214,12 @@ function renderPresenterServiceScriptureInput(item, index, memo, service = null)
   const perReferencePayloads = normalizeServiceScriptureReferencePayloads(memo.scriptureReferencePayloads, references);
   const payloadByReference = new Map(perReferencePayloads.map((payload) => [normalizeServiceScriptureReferenceKey(payload.reference), payload]));
   const legacyManual = references.length === 1 ? normalizeServiceManualScripture(memo.manualScripture) : null;
+  const translationEditorKey = JSON.stringify([serviceId, item.id || index]);
+  const translationEditorOpen = [...(document.getElementById("detailPane")?.querySelectorAll("details[data-citation-translations]") || [])]
+    .find(node => node.dataset.citationTranslations === translationEditorKey)?.open;
   const perReferenceControls = citation && references.length ? `
-    <div class="svc-presenter-input-field svc-presenter-input-field--scripture-parts" role="group" aria-label="인용별 역본">
+    <details class="svc-presenter-input-field svc-presenter-input-field--scripture-parts" data-citation-translations="${escapeAttr(translationEditorKey)}"${translationEditorOpen ? " open" : ""}>
+      <summary>인용별 역본</summary>
       <div class="svc-presenter-scripture-parts">
         ${references.map((reference, referenceIndex) => {
           const payload = payloadByReference.get(normalizeServiceScriptureReferenceKey(reference)) || {};
@@ -29242,7 +29246,7 @@ function renderPresenterServiceScriptureInput(item, index, memo, service = null)
             </div>`;
         }).join("")}
       </div>
-    </div>` : "";
+    </details>` : "";
   return `
     <label class="svc-presenter-input-field svc-presenter-input-field--scripture">
       <div class="svc-presenter-input-control-wrap">

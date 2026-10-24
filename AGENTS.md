@@ -30,6 +30,10 @@ Keep deployment and credential access out of setup scripts and default tests.
 ## Shared release queue
 
 Prefer one coordinated batch of ready, approved changes over a release per chat.
+The user authorizes routine coordination messages with other Mindex chats to
+batch their ready, approved changes and report the shared result. Maintain all
+required checks; reduce duplicate setup/gates through exact-SHA reuse. Do not
+interrupt an already-running release or add scope after its final gate starts.
 With user-authorized thread coordination, freeze exact commits and local checks,
 have participating owners stop individual final gates and release their waiting
 tickets, then let one coordinator own the batch ticket through publication.

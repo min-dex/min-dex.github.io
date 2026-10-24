@@ -2800,8 +2800,7 @@ textarea.svc-presenter-input-control--multiline {
   display: none;
 }
 .svc-presenter-side-panel .svc-slide-jump-input {
-  width: 48px;
-  height: var(--svc-panel-control-height);
+  width: 48px; height: var(--svc-panel-control-height);
   background: transparent; border-color: transparent; box-shadow: none;
   font-size: var(--ui-body-size);
   line-height: normal;
@@ -5711,8 +5710,6 @@ body[data-module="praise"] .praise-forms-panel .version-compare-column {
   .service-offering-editor .service-offering-modes > .btn { min-width: 50px; padding: 0 5px; }
 }
 
-.service-offering-editor .svc-progression-media > summary::before { content: "▸"; font-size: 10px; }
-.service-offering-editor .svc-progression-media[open] > summary::before { content: "▾"; }
 
 /* Backgrounds follow the original grid; they never participate in layout. */
 .svc-board-grid { position: relative; isolation: isolate; }
@@ -6129,8 +6126,6 @@ body:has(#servicePresenterControls[data-focus-view="true"]) .svc-presenter-live-
 }
 .svc-board-subgroup-flow .svc-progression-media > summary { list-style: none; }
 .svc-board-subgroup-flow .svc-progression-media > summary::-webkit-details-marker { display: none; }
-.svc-board-subgroup-flow .svc-progression-media > summary::before { content: "▸"; font-size: 10px; }
-.svc-board-subgroup-flow .svc-progression-media[open] > summary::before { content: "▾"; }
 .svc-board-subgroup-flow :is(.svc-progression-media > summary, .svc-board-subgroup-audio-upload, .svc-board-subgroup-commit):is(:hover, :focus-visible, :focus-within),
 #servicePresenterControls :is(.svc-progression-media > summary, .svc-board-subgroup-audio-upload, .svc-board-subgroup-commit):is(:hover, :focus-visible, :focus-within) {
   background: var(--ui-surface-field);
@@ -6457,3 +6452,9 @@ body[data-module="praise"] .praise-forms-panel .version-compare-head > .version-
 /* Version-owned saved audio summary wraps without competing with title inputs. */
 .version-audio-summary { flex: 0 0 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; line-height: 1.5; color: var(--ink-3); }
 .version-audio-summary > span { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+/* Optional citation translations start collapsed; disclosure actions are text-only. */
+.svc-board-subgroup-control-item > details.svc-presenter-input-field--scripture-parts:not([open]) { display:block; flex:0 0 auto; width:auto; }
+.svc-presenter-input-field--scripture-parts > summary { width:fit-content; min-height:30px; padding:5px 10px; cursor:pointer; list-style:none; font-size:var(--ui-label-size); }
+.svc-presenter-input-field--scripture-parts > summary::-webkit-details-marker { display:none; }
+.svc-presenter-input-field--scripture-parts[open] > summary { margin-bottom:10px; }
+.svc-presenter-input-field--scripture-parts > summary:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }

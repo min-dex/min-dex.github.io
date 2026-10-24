@@ -4501,3 +4501,13 @@ including Cadaros and secondary praise, in chromakey and fullscreen rendering.
 A song name appearing only as an order's content title uses the eighth note ♪.
 Choose by Title form/type, not team or section. Preserve placement, font,
 source slides, saved forms and content; normalize the glyph in the view only.
+
+
+## Optional citation translations and text actions ·2026-10-24
+
+Supersedes the always-visible citation translation editor: one outer native
+disclosure starts closed, with independent per-reference translation/manual
+controls inside. Preserve its user-chosen open state across mounted item rerenders;
+never auto-expand existing manual records. Values/drafts, atomic save and output
+resolution are unchanged. Reference add/upload labels and background disclosures
+use text without decorative icons/triangles, retaining native keyboard behavior.
