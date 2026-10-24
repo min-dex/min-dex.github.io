@@ -355,3 +355,30 @@ that code is renewed; the output identity, links and actual worship stay intact.
 Heartbeat reports do not perform extra PIN hash verification. Operator installation and production entry/list readback are complete; isolated
 PostgreSQL and Chromium/WebKit checks pass. Publication remains a separate
 deployment receipt.
+
+## Multi-device lifecycle regression ·2026-10-24
+
+Four isolated browser contexts run the real output registry, Remote page and
+encrypted relay protocol: one host, two administrators and one ordinary guest.
+Offline RPC and packet routing inject faults into only the selected peer; no
+production data or physical device is used. Chromium and WebKit pass:
+
+- Hide/restore one administrator while the other administrator and guest continue
+  operating; restore requires a fresh snapshot before controls become usable.
+- A 3.5-second packet outage temporarily locks only that peer, then recovers.
+- An 11.5-second relay/RPC outage terminates only that administrator connection;
+  the administrator can choose the output again without displacing other peers.
+- A command executed before sleep with its acknowledgement lost is not replayed
+  after restoration. Commands from stale snapshots remain intentionally rejected.
+- Guest channel failure returns that guest to entry; both administrators remain
+  usable and the guest can reconnect using the same output code.
+- Administrator persisted pagehide/logout leaves the other administrator and
+  guest active. Chromium additionally freezes a real renderer for 11.5 seconds
+  while the other contexts continue, then verifies safe reconnection.
+
+No product-code defect was reproduced. Added smoke_remote_multi_lifecycle.py to
+the required offline suite; local partition/failure-propagation checks pass.
+These are browser lifecycle/transport fault tests, not physical iOS/Android lock,
+OS process eviction, cellular/Wi-Fi handover or router tests. Long inactivity is
+allowed to close a connection safely; never describe this as an always-connected
+guarantee. CI execution/publication of the new regression remains separate.
