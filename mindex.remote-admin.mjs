@@ -18,7 +18,7 @@ export function createOutputRegistry(context,{interval=2000,onUpdate=()=>{}}={})
  function rememberClosed(r,kind,id){r.closedLinks.add(kind+':'+id);}
  function stopSlot(r,kind,id){
   const slots=r[kind];
-  for(const [key,slot] of [...slots])if(id===undefined||id===key){slots.delete(key);rememberClosed(r,kind,key);slot.session?.close();}
+  for(const [key,slot] of [...slots])if(id===undefined||id===key){slots.delete(key);rememberClosed(r,kind,key);void slot.session?.end();}
  }
  function remove(old){
   if(!old)return;stopSlot(old,'admin');stopSlot(old,'guest');

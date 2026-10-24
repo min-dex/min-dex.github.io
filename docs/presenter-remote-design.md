@@ -431,6 +431,9 @@ BFCache restores keep the session and administrator identity. Normal navigation,
 reload, browser process eviction or explicit disconnect still releases in-memory
 credentials; this is not persistent automatic login. Server authorization expiry,
 revocation and the existing 8-hour maximum remain. No DB/schema change is needed.
+Explicit output removal and output-stop notify connected peers with a terminal
+message, closing the host command gate immediately. They do not enter the
+three-minute recovery window; administrators return to output selection promptly.
 
 Scoped checks cover 179-second recovery, 180-second expiry, command denial while
 suspended, failed-send no replay, reconnect retries while hidden, two administrators

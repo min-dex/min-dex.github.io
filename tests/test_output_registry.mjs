@@ -66,9 +66,10 @@ try{
   sessions[1].refresh();await until(()=>sessions[1].usable);await sessions[1].command('next');await until(()=>index===2);
   sessions[2].refresh();await until(()=>sessions[2].usable);await sessions[2].command('next');await until(()=>index===3);
   assert(packets.every(p=>p.box?.data&&!JSON.stringify(p).includes('"action"')));
-  registry.close();await until(()=>channels.size===2);
-  // Output removal stops host-side execution immediately; remote peers notice via heartbeat.
-  sessions.forEach(s=>s.close());await until(()=>channels.size===0);
+  registry.close();await until(()=>channels.size===0);
+  // Explicit output removal is terminal, not a three-minute recovery wait.
+  assert(sessions.every(s=>!s.connected&&!s.usable));
+  await assert.rejects(sessions[1].command('next'));assert.equal(index,3);
   console.log('PASS encrypted two-admin/guest coexistence, simultaneous stale rejection, independent disconnect, continued controls and stop-all cleanup');
  }finally{sessions.forEach(s=>s.close());registry.close();}
 }

@@ -7,7 +7,7 @@ export async function openRemote({client,code,host=false,registration:providedRe
  let pair,keys;try{pair=await pairing(registration.secret);keys=await identity();}catch(e){await registration.revoke();throw e;}
  const peer=id(),nonce=id();
  const gate=host?createGate({read,execute}):null;
- let channel,key,other,closed=false,ready=false,subscribed=false,reserved=false;
+ let channel,key,other,closed=false,ending=false,ready=false,subscribed=false,reserved=false;
  let outgoing=0,incoming=0,sequence=0,lastSeen=performance.now(),snapshot=null,pending=null;
  let timer,expiry,ackTimer,queue=Promise.resolve(),queued=0,rateAt=0,rate=0;
  let freshRequest=id(),fresh=false,changeTimer=null,lastState='',sendQueue=Promise.resolve();
@@ -57,31 +57,32 @@ export async function openRemote({client,code,host=false,registration:providedRe
   retryTimer=setTimeout(()=>{retryTimer=null;if(expired()||paused)return;try{bind();}catch{retry();}},1500);
  }
  function lost(){
-  if(closed)return;
+  if(closed||ending)return;
   if(!ready){close('연결 준비에 실패했습니다. 다시 연결해 주세요.');return;}
   subscribed=false;transport++;hold();
   const old=channel;channel=null;
   Promise.resolve().then(()=>old&&client.removeChannel(old)).catch(()=>{}).then(retry);
  }
  function refresh(){
-  if(expired())return;
+  if(ending||expired())return;
   paused=false;hold();freshRequest=id();
   if(!subscribed){retry();return;}
   if(ready){if(host)void publish();else send({type:'ping',request:freshRequest}).catch(handleFailure);}
  }
- async function end(){let deadline;try{if(ready)await Promise.race([send({type:'end'}),new Promise(resolve=>{deadline=setTimeout(resolve,1000);})]);}catch{}finally{clearTimeout(deadline);close();}}
+ async function end(){if(closed||ending)return;ending=true;fresh=false;sendEpoch++;gate?.close();let deadline;try{if(ready)await Promise.race([send({type:'end'}),new Promise(resolve=>{deadline=setTimeout(resolve,1000);})]);}catch{}finally{clearTimeout(deadline);close();}}
  async function publish(request='',changedOnly=false){
-  if(!host||!ready||paused||!subscribed)return;
+  if(!host||!ready||paused||!subscribed||ending)return;
   try{
+   if(!read()?.live){void end();return;}
    const snapshot=gate.snapshot(),signature=JSON.stringify(snapshot.state);
    if(changedOnly&&signature===lastState)return;
    lastState=signature;await send({type:'state',request,snapshot}).catch(handleFailure);
   }catch(e){close(e.message);}
  }
  async function receive(packet){
-  if(expired()||!packet||!['pair','session'].includes(packet.mode))return;
+  if(ending||expired()||!packet||!['pair','session'].includes(packet.mode))return;
   let m;try{m=await unseal(packet.mode==='pair'?pair.key:key,packet.box,pair.topic);}catch{return;}
-  if(expired()||!m||typeof m.peer!=='string'||m.peer.length>64||!Number.isSafeInteger(m.seq))return;
+  if(ending||expired()||!m||typeof m.peer!=='string'||m.peer.length>64||!Number.isSafeInteger(m.seq))return;
   if(packet.mode==='pair'){
    if(host&&m.type==='hello'&&!reserved&&performance.now()-born<120000){
     reserved=true;other=m.peer;
@@ -138,10 +139,10 @@ export async function openRemote({client,code,host=false,registration:providedRe
  if(closed)throw Error('연결 준비에 실패했습니다. 같은 송출 코드로 다시 연결해 주세요.');
  expiry=setTimeout(()=>close('연결 대기 시간이 지났습니다. 같은 송출 코드로 다시 연결해 주세요.'),host?120000:15000);
  timer=setInterval(()=>{
-  if(expired())return;
+  if(ending||expired())return;
   if(performance.now()-born>8*3600000)return close('연결 시간이 만료됐습니다. 같은 송출 코드로 다시 연결해 주세요.');
   if(host){
-   try{if(!read()?.live)return close('송출 종료 또는 예배 변경으로 연결이 종료됐습니다.');}catch{return close();}
+   try{if(!read()?.live)return void end();}catch{return close();}
    if(ready&&performance.now()-lastSeen>2500)hold();
    void publish();
   }else if(ready){
