@@ -14,12 +14,13 @@ try:
             page.goto(url)
             page.wait_for_function("typeof renderPresenterSectionEditorLayer==='function'&&!document.body.classList.contains('ui-booting')")
             for theme in ('light', 'dark'):
-                for name in ('background', 'toolbar', 'section', 'unsaved'):
+                for name in ('background', 'toolbar', 'section', 'prep', 'unsaved'):
                     page.evaluate('''({name,theme}) => {
                       document.body.dataset.theme=theme;
                       document.querySelector('[data-presenter-section-editor]')?.remove();
                       const service={id:'ui-fixture',type_id:'young-adult',date:'2026-10-18'};
                       state.services=[service];state.serviceItems={'ui-fixture':Array.from({length:12},(_,i)=>({id:'item-'+i,service_id:service.id,label:'특송',raw_title:'검증 제목 '+i,sort_order:i,memo:JSON.stringify({elementType:'title_person'}),_worshipSectionId:'fixture-section',_worshipSectionTitle:'특송'}))};
+                      if(name==='prep')refs.detailPane.innerHTML=renderServicePrepEditorDialog(service);
                       if(name==='background')renderWorshipBackgroundsDetail();
                       if(name==='toolbar')refs.detailPane.innerHTML=renderServicePresenterControls(service,[],false,0);
                       if(name==='section'){
@@ -41,6 +42,9 @@ try:
                         if name=='background':
                             sizes=page.locator('.background-toolbar input,.background-toolbar select,.background-toolbar > button').evaluate_all('es=>es.map(e=>e.getBoundingClientRect().height)')
                             assert all(h==35 for h in sizes),sizes
+                        if name=='prep':
+                            heights=page.locator('.svc-prep-editor .svc-form-hint-slot').evaluate_all('es=>es.map(e=>[e,e.querySelector("input"),e.querySelector("button")].map(n=>n.getBoundingClientRect().height))')
+                            assert heights and all(all(abs(h-30)<1 for h in row) for row in heights),(engine,width,heights)
                         if name=='toolbar':
                             assert page.locator('.svc-presenter-toolbar-utilities .svc-presenter-help > summary').evaluate('e=>e.getBoundingClientRect().height')==35
                             page.locator('.svc-presenter-toolbar-utilities').scroll_into_view_if_needed()

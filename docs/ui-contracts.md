@@ -962,3 +962,5 @@ The song-form help wrapper is layout-only: transparent with zero inset, includin
 when later workspace styles load. Keep the controller input underline and adjacent
 help icon, without a second filled box. Retain the existing field geometry,
 keyboard/pointer help behavior, selection and focus indicators.
+
+

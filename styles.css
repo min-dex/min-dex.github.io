@@ -3292,4 +3292,9 @@ body[data-module="praise"] .song-count-badge {
 .svc-form-help-panel ul { margin: 10px 0; padding-left: 18px; }
 .svc-form-help-panel code { font-size: 12px; overflow-wrap: anywhere; }
 
-.presenter-section-editor .svc-form-hint-slot.compact { height: 30px; }
+:is(.presenter-section-editor, .svc-prep-editor) .svc-form-hint-slot.compact { height: var(--ui-field-height, 30px); }
+
+/* Keep timing actions beside the time field, below its lyric/photo label. */
+.song-timing-row > label { flex-basis: 100%; overflow-wrap: anywhere; }
+.song-timing-row-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; width: 100%; min-width: 0; }
+.song-timing-row .song-timing-row-controls input { margin-top: 0; }

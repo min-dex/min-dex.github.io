@@ -4540,3 +4540,12 @@ span renderer in main Title and order/content captions; its sizing overrides the
 generic slide-span inheritance. The separate fullscreen heading uses the same
 ratio against the song-title token. Keep placement, colors, title sizing, content
 and saved worship data unchanged.
+
+
+## Timing popup control alignment ·2026-10-24
+
+Keep each lyric/photo label above its start-time input and stamp/nudge controls.
+The controls wrap by available width and share vertical alignment on each line.
+The label remains explicitly associated with its input. Preparation-editor
+song-form help inherits the 30px dense field height. No timing, draft, playback
+or output behavior changes.
