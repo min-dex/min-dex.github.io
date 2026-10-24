@@ -1,0 +1,12 @@
+/* Catalog-only media controls reuse the shared surfaces and native audio transport. */
+.praise-version-media { min-width: 0; font-size: var(--ui-meta-size); }
+.praise-version-media > summary { width: fit-content; padding: 4px 0; color: var(--ink-3); cursor: pointer; }
+.praise-version-media > summary:focus-visible,
+.praise-score-previews a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--r); }
+.praise-version-media-content { display: grid; gap: 8px; min-width: 0; padding-top: 6px; }
+.praise-version-media audio { width: 100%; height: 36px; }
+.praise-score-previews { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr)); gap: 8px; max-height: 330px; overflow: auto; padding: 2px; }
+.praise-score-previews a { display: grid; gap: 3px; min-width: 0; color: var(--ink-3); text-align: center; text-decoration: none; }
+.praise-score-previews img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: contain; border: 1px solid var(--line); border-radius: var(--r); background: #fff; }
+.praise-media-status { margin: 0; color: var(--ink-4); overflow-wrap: anywhere; }
+.praise-media-status[data-praise-audio-error] { color: var(--danger, #b23b3b); }

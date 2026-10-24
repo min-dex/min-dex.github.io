@@ -689,7 +689,9 @@ function buildWorshipPersistenceRows(service, items, existingSectionById = {}, e
     };
     if (options.elementTypedStateColumns?.inputMode) elementRow.input_mode = worshipDbInputModeForSave(contentState.inputMode);
     if (options.elementTypedStateColumns?.contentState) elementRow.content_state = contentState;
-    elementRows.push(elementRow);
+    elementRows.push(options.singleSongCatalog
+      ? (options.singleSongStorage === "native" ? options.singleSongCatalog.nativeElement(elementRow) : options.singleSongCatalog.legacyElement(elementRow))
+      : elementRow);
     if (item.id) persistedItemIds.set(item.id, elementId);
   });
 

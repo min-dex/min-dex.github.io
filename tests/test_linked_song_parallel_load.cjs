@@ -9,6 +9,7 @@ const c=vm.createContext({console,state:{songs:[],client:{}},linkedSongLoadPromi
  fetchSupabasePaged:async(table)=>{events.push(table);if(table==='mindex_songs')return metadata.promise;if(table==='mindex_song_versions')return versions.promise;if(failUnits)throw Error('units failed');return units.promise},
  attachRelationalSongVersionRows:(v,u,ids)=>{assert.ok(c.state.songs.length,'must load metadata before publish');events.push('publish');for(const s of c.state.songs)if(ids.includes(s.id)){s._relationalVersionsLoaded=true;s.units=u}},
 });
+vm.runInContext(fs.readFileSync(require('node:path').join(__dirname,'../mindex.praise-storage.js'),'utf8'),c);
 for(const name of ['loadSongsForIds','songNeedsRelationalHydration','loadMissingSongsForIds','loadRelationalSongVersionData','publishRelationalSongVersionData']){
  const re=new RegExp('(?:async )?function '+name+'\\(');const start=app.search(re);assert.ok(start>=0,name);
  vm.runInContext(app.slice(start,app.indexOf('\n}\n',start)+2),c);
@@ -16,7 +17,7 @@ for(const name of ['loadSongsForIds','songNeedsRelationalHydration','loadMissing
 const tick=()=>new Promise(r=>setImmediate(r));
 const reset=()=>{metadata=deferred();versions=deferred();units=deferred();events=[];c.state.songs=[]};
 (async()=>{
- reset();const one=c.loadSongsForIds(['s']);const two=c.loadSongsForIds(['s']);
+ reset();const one=c.loadSongsForIds(['s']);const two=c.loadSongsForIds(['s']);await tick();
  assert.equal(events.filter(x=>x==='mindex_songs').length,1,'deduplicate metadata');
  assert.equal(events.filter(x=>x==='mindex_song_versions').length,2,'parallel source/canonical lookups');
  versions.resolve([{id:'v',source_song_id:'s'}]);await tick();

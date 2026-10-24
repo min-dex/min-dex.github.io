@@ -14,6 +14,7 @@
   }
   async function freshSongs(ids) {
     if (!ids.length) return [];
+    if (state.singleSongRepository) return readSingleSongs(ids);
     const songs = await fetchSupabaseBatches(ids, batch => fetchSupabasePaged('mindex_songs', '*', q => q.in('id', batch).order('id')));
     if (ids.some(id => !songs.some(s => s.id === id))) throw Error('연결된 찬양을 찾지 못했습니다. 곡 연결을 확인해 주세요.');
     const versions = [...new Map((await Promise.all(['source_song_id', 'canonical_song_id'].map(column =>
@@ -100,7 +101,14 @@
   async function checkLiveRevision() {
     if (checking || !session || !live() || session.notified) return;
     checking = true;
-    try { if (await revision(state.client, session.serviceId) !== session.revision) notify(); }
+    try {
+      if (await revision(state.client, session.serviceId) !== session.revision) notify();
+      if (state.singleSongRepository && session && !session.notified) {
+        const current = session;
+        const songs = await readSingleSongs([...current.songs.keys()]);
+        if (session === current && songs.some(song => song._singleSongRevision !== current.songs.get(song.id)?._singleSongRevision)) notify();
+      }
+    }
     catch { /* Keep current output on network loss; next preparation remains strict. */ }
     finally { checking = false; }
   }

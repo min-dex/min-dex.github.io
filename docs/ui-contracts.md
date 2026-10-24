@@ -1001,3 +1001,22 @@ a completed save without another write. Live saves replay only their own atomic
 request identity. Other pending requests and genuine remote-name conflicts remain
 blocked. Completion updates an open service only when its identity, leader fields
 and local-draft state are unchanged. Newer/replaced archive drafts remain intact.
+
+
+## Catalog score and audio previews ·2026-10-25
+
+Praise record headers expose a quiet native disclosure for available score/audio
+media, including linked comparison records. New-hymnal editions reuse the shared
+verified score manifest; unified/other editions never borrow new-hymnal pages.
+Pages open as normal image links for enlargement. Audio uses only that record's
+version audio_set, native controls and preload=none; no automatic playback,
+service music takeover, cue edits or inferred audio from another record. Existing
+audio/timing summaries stay visible. Missing assets are stated plainly and failed
+score loads offer an explicit retry.
+
+Media controls do not select the surrounding version header or discard drafts.
+Only one catalog preview plays at once. Same-record/source rerenders retain its
+audio node/clock; closing the disclosure pauses it, and leaving/removing its record
+releases it. Worship transport and saved lyrics, forms, timing and version names
+remain untouched. The reader accepts the existing record/version view shape and
+does not depend on UUID format or perform database reads/writes.

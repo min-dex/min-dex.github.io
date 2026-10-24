@@ -1423,6 +1423,12 @@ function splitPresenterLyricChunks(lyrics, linesPerSlide = 2) {
 }
 
 function getServiceItemVersion(song, item, service) {
+  if (song?._singleSongRecord) {
+    if (typeof servicePraiseInputMode === "function" && servicePraiseInputMode(item) === "manual_praise") return null;
+    const explicit = item?.version_id || item?.song_version_id;
+    if (explicit && explicit !== song.id) throw new Error("SONG_REFERENCE_MISMATCH");
+    return song.versions?.find(v => v.id === song.id) || null;
+  }
   if (typeof serviceItemNeedsVersionChoice === "function" && (serviceItemNeedsVersionChoice(item) || servicePraiseInputMode(item) === "manual_praise")) return null;
   const versions = song?.versions || [];
   if (!versions.length) return null;

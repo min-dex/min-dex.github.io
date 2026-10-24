@@ -4696,6 +4696,18 @@ closed-channel cleanup stops synchronized audio and preserves manual music.
 All tests use synthetic worship data; operational rows and timing profiles are
 not rewritten by these checks or by the fix.
 
+
+## Single Praise ID rollout - 2026-10-25
+
+A native Praise record represents one arrangement with one readable ID. The UI
+keeps a one-version adapter for existing editors; serialized worship references
+use `praise_record_id` rather than two UUIDs. Original aliases remain internal
+for recovery, hymn metadata, and timing-key continuity. Lyrics, forms, media
+and timing content are preserved. Server status activates native storage only
+after a verified catalog transition. Legacy clients are write-fenced after
+activation, including services without Praise elements. Failed catalog reads
+never silently reactivate the legacy writer. See `single-id-release.md`.
+
 ## Scripture controller text tones ·2026-10-24
 
 Scripture reference groups use no background boxes. Only their controller labels
