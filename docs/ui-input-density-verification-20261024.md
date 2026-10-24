@@ -36,3 +36,22 @@ print isolation. Current receipt supersedes the initial failure report.
 
 Release queue, exact commit CI, Pages and public readback are recorded below when
 completed. Local passing results alone do not claim publication.
+
+## Authorized shared batch
+
+The user explicitly approved coordinating other waiting chats on2026-10-24.
+Participating owners stopped individual final gates/pushes and released their own
+waiting tickets. The input coordinator retains ticket
+`eaef298aaff2479c87b2be453acae975`; the unrelated running runtime-boundary release
+keeps its existing slot until publication/readback.
+
+Frozen component commits:
+- `bd47ba43`: this input layout and fixture repair.
+- `3f9b8cc0a60e77e33cf829c3ee86a4e414e11351`: complete authored text fitting.
+- `70a496c839856d799148b9291314d1e6f394e790`: praise Title/T note by form role.
+
+Common fitting and Title song-form smokes both pass Chromium/WebKit on the
+combined local candidate, including supplemental fit paths and source retention.
+Only the append-only decision document conflicted; both entries are retained.
+After the preceding publication, reconcile latest main and rerun integration-
+relevant checks before the one required combined branch gate.
