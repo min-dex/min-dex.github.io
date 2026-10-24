@@ -909,3 +909,9 @@ actions use text without decorative icons. Keep accessible names, targets and
 actions. Bulletin optional monthly information starts collapsed in every design;
 retain the existing per-document user disclosure-state map across content/layout
 renders. Primary weekly fields, print content and stored records are unchanged.
+
+### Worship sidebar child-name weight ·2026-10-24
+
+Individual item names under worship outline sections use600 weight. Preserve
+the12px size,16px line height, existing spacing, truncation and parent heading
+weights. This sidebar rule does not change presenter output typography.

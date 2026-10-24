@@ -458,7 +458,7 @@ body[data-module="presenter"] .detail-pane {
   max-width: 100%;
   color: var(--sidebar-sub);
   font-size: 12px;
-  font-weight: 560;
+  font-weight: 600;
   line-height: 16px;
   overflow: hidden;
   text-overflow: ellipsis;
