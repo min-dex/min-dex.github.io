@@ -62,6 +62,8 @@ jobs:
         if: steps.verified.outputs.reuse != 'true'
         with:
           python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: cloud/requirements.txt
       - name: Use the official Ubuntu package mirror
         if: steps.verified.outputs.reuse != 'true'
         # The hosted Azure mirror can stall dependency downloads until timeout.

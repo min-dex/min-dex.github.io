@@ -159,6 +159,16 @@ needs the whole matrix to succeed and retains the stale-commit guard.
 The no-argument cloud/check.py command still executes the entire baseline.
 Shard PASS is explicitly partial; per-entry timings support future balancing.
 
+### Dependency download cache ·2026-10-24
+
+`setup-python` caches pip downloads keyed by `cloud/requirements.txt`. Each job
+still creates its virtual environment and installs the pinned requirements and
+both browsers with OS dependencies. Cache availability never selects tests or
+skips setup. Virtual environments, browser profiles, outputs and test results
+are not cached. Exact-commit verification reuse remains a separate mechanism.
+Local contract tests verify these guards; cold/warm GitHub timing must be
+measured after integration before claiming a deployment-speed improvement.
+
 ### Measured balancing and superseded checks ·2026-10-23
 
 The four shards now assign longer smokes first to the least-loaded shard using
