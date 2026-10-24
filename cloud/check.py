@@ -47,6 +47,7 @@ NODE_TESTS = (
     "test_runtime_boundaries.cjs",
     "test_presenter_return.cjs",
     "test_output_fullscreen_close.cjs",
+    "test_output_stop_recovery.cjs",
     "test_ui_icons.cjs",
     "test_bulletin.cjs",
     "test_bible_translation_sidebar.cjs",
