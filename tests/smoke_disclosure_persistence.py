@@ -27,7 +27,7 @@ fixture='''() => {
    +'<div id="bulletinFixture" style="height:700px"></div>';
   const B=MindexBulletin,source=B.resolveSource({service:{id:'disclosure-service',service_type_id:'children',service_date:'2026-10-11'},sections:[],elements:[]});
   source.autoBackground={key:'26-C5.png',url:'assets/worship-backgrounds/26-C5.png'};
-  window.bulletinDisclosureController=B.mount(document.getElementById('bulletinFixture'),{serviceId:source.id,scope:'disclosure-fixture',services:[{id:source.id,label:'검증'}],loadSource:async()=>source,loadDraft:async()=>null,saveDraft:async()=>{throw Error('Unexpected operational save')}});
+  window.bulletinDisclosureController=B.mount(document.getElementById('bulletinFixture'),{serviceId:source.id,scope:'https://fixture.supabase.co',services:[{id:source.id,label:'검증'}],loadSource:async()=>source,loadDraft:async()=>null,saveDraft:async()=>{throw Error('Unexpected operational save')}});
  };
  mountDisclosureFixture();
 }'''
@@ -42,6 +42,14 @@ try:
     else: page.goto(url+'?mindexSmokeRaw=1')
     page.wait_for_function("typeof renderPresenterServiceScriptureInput==='function'&&!document.body.classList.contains('ui-booting')")
     prepare_server_state_fixture(page)
+    page.evaluate("""()=>{
+      const rpc=window.__mindexStateFixtureRpc;
+      window.__mindexStateFixtureRpc=(name,args)=>{
+        if(name==='mindex_state_write_v1' && (!/^mindex[.:]/.test(args.p_key)||args.p_key.length>512||/(supabase|auth|credential|deviceReporter)/i.test(args.p_key)))
+          throw Error('INVALID_STATE_VALUE: production key guard');
+        return rpc(name,args);
+      };
+    }""")
     page.evaluate(fixture)
     page.wait_for_function("document.querySelector('.bulletin-properties')?.dataset.sectionsReady==='true'",timeout=10000)
    mount()

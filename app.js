@@ -25721,7 +25721,7 @@ function renderServiceDetail() {
 function renderServiceAuthoringPanel(kicker, title, body) {
   if (!body) return "";
   return `
-    <details class="svc-authoring-panel" ${MindexDisclosure.attrs(["authoring",title],title === "예배 정보")}>
+    <details class="svc-authoring-panel" ${MindexDisclosure.attrs(["service-panel",title],title === "예배 정보")}>
       <summary class="svc-authoring-panel-head">
         <span>${escapeHtml(kicker)}</span>
         <strong>${escapeHtml(title)}</strong>
