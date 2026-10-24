@@ -2,7 +2,14 @@
 (function(root) {
   'use strict';
   const copy = value => structuredClone(value);
-  const code = value => /^(?:knh|kth|ccm|kid)-\d{3,}(?:-\d{3})?$/.test(String(value || ''));
+  const code = value => {
+    const text = String(value || '');
+    if (/^(?:knh|kth|ccm|kid)-\d{3,}(?:-\d{3})?$/.test(text)) return true;
+    const m = /^SONG-(HYMN-([NT])(\d{3})|(?:CONT|CHLD)-(\d{4}))-(\d{4})$/.exec(text);
+    return !!m && Number(m[5]) > 0 && (m[2]
+      ? Number(m[3]) > 0 && Number(m[3]) <= (m[2] === 'N' ? 645 : 558)
+      : Number(m[4]) > 0);
+  };
   const fail = message => { throw new Error(message); };
   function fromLegacySong(song, version, id) {
     if (!code(id) || !song?.id || !version?.id) fail('INVALID_SINGLE_SONG_MAPPING');
@@ -175,6 +182,7 @@
     }
     const status = statusResponse.data;
     if (status?.protocol !== 1 || !['legacy','maintenance','native'].includes(status.phase)) fail('PRAISE_STORAGE_PROTOCOL_UNSUPPORTED');
+    if (status.idFormat && status.idFormat !== '4-4-4-4') fail('PRAISE_STORAGE_ID_FORMAT_UNSUPPORTED');
     if (status.phase === 'legacy') return {phase:'legacy',records:[]};
     if (status.phase === 'maintenance') fail('찬양 저장소 전환 중입니다. 잠시 후 다시 열어 주세요.');
     if (!Number.isSafeInteger(status.recordCount) || status.recordCount < 1 || typeof status.epoch !== 'string' || typeof status.manifest !== 'string') fail('INVALID_CATALOG_MANIFEST');

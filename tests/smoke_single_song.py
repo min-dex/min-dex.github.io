@@ -32,7 +32,7 @@ try:
        .map(x=>({type:x.type,text:x.text,formKey:x.formKey,formLabel:x.formLabel}));
     };
     const before=render(oldSong,v,item);
-    const record={...MindexSingleSong.fromLegacySong(oldSong,v,'ccm-001'),revision:0};
+    const record={...MindexSingleSong.fromLegacySong(oldSong,v,'SONG-CONT-0001-0001'),revision:0};
     let stored=structuredClone(record),writes=0,saveGate=null,failAfterCommit=false;const receipts=new Map();
     const repository=MindexSingleSong.createRepository({read:async()=>[structuredClone(stored)],commit:async request=>{
       if(receipts.has(request.requestId))return structuredClone(receipts.get(request.requestId));
@@ -45,15 +45,15 @@ try:
     const s=state.songs[0],ver=getServiceItemVersion(s,selected,service);
     check(equal(render(s,ver,selected),before),'lyrics/form/amen slide sequence changed');
     const text=serviceSourceItemLines(selected,service).join('\n');
-    check(text.includes('- 곡 ID: ccm-001')&&!text.includes('버전 ID:'),'source has duplicate ID');
-    const parsed=parseServiceSourceText('[[찬양]]\n'+text)[0];check(parsed.songId==='ccm-001'&&!parsed.versionId,'source reopen');
+    check(text.includes('- 곡 ID: SONG-CONT-0001-0001')&&!text.includes('버전 ID:'),'source has duplicate ID');
+    const parsed=parseServiceSourceText('[[찬양]]\n'+text)[0];check(parsed.songId==='SONG-CONT-0001-0001'&&!parsed.versionId,'source reopen');
     const row1=buildWorshipPersistenceRows(service,[selected],{},{},{singleSongCatalog:state.singleSongCatalog});
     check(row1.elements[0].song_id===oldSong.id&&row1.elements[0].song_version_id===v.id,'atomic compatibility refs');
     const reopened=groupWorshipElements(row1.sections,row1.elements)[service.id][0];
-    check(reopened.song_id==='ccm-001'&&!reopened.song_version_id,'DB reopen single identity');
+    check(reopened.song_id==='SONG-CONT-0001-0001'&&!reopened.song_version_id,'DB reopen single identity');
     check(equal(render(s,getServiceItemVersion(s,reopened,service),reopened),before),'saved/reopened output changed');
     const nativeRows=buildWorshipPersistenceRows(service,[selected],{},{},{singleSongCatalog:state.singleSongCatalog,singleSongStorage:'native'});
-    check(nativeRows.elements[0].praise_record_id==='ccm-001'&&nativeRows.elements[0].song_id===null&&nativeRows.elements[0].song_version_id===null,'native single reference');
+    check(nativeRows.elements[0].praise_record_id==='SONG-CONT-0001-0001'&&nativeRows.elements[0].song_id===null&&nativeRows.elements[0].song_version_id===null,'native single reference');
     const nativeAgain=groupWorshipElements(nativeRows.sections,nativeRows.elements)[service.id][0];
     check(equal(render(s,getServiceItemVersion(s,nativeAgain,service),nativeAgain),before),'native reopen output changed');
     const second={...structuredClone(selected),id:uid(),label:'찬양 2',sort_order:2};
@@ -72,7 +72,7 @@ try:
     }
     check(await saveSongMeta(s)===true,'unchanged save acknowledgment');check(writes===1,'single record not saved');
     stored.relations={same_song:[],related:['ccm-002']};
-    const reloaded=await readSingleSongs(['ccm-001']);check(equal(state.singleSongCatalog.get('ccm-001').relations,stored.relations),'fresh metadata catalog stayed stale');check(equal(render(reloaded[0],getServiceItemVersion(reloaded[0],selected,service),selected),before),'record save/reload changed output');
+    const reloaded=await readSingleSongs(['SONG-CONT-0001-0001']);check(equal(state.singleSongCatalog.get('SONG-CONT-0001-0001').relations,stored.relations),'fresh metadata catalog stayed stale');check(equal(render(reloaded[0],getServiceItemVersion(reloaded[0],selected,service),selected),before),'record save/reload changed output');
     let release;saveGate=new Promise(resolve=>{release=resolve;});
     const saving=saveSongMeta(s);s.title='저장 중 바꾼 제목';release();
     check(await saving===false,'late edits wrongly acknowledged');
@@ -90,7 +90,7 @@ try:
     state.client={from:()=>({select(){return this},eq(){return this},async single(){return {data:{id:service.id,save_revision:1}}}})};
     showToast=text=>notices.push(text);
     await MindexPresenterFreshness.verify(service.id);live=true;
-    const frozen=MindexPresenterFreshness.song('ccm-001',service.id);
+    const frozen=MindexPresenterFreshness.song('SONG-CONT-0001-0001',service.id);
     const prior=frozen.versions[0].forms[0].lyrics;
     stored.content.forms[0].lyrics='DB에서 변경한 가사';stored.revision++;
     await MindexPresenterFreshness.checkLiveRevision();

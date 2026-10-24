@@ -1,6 +1,32 @@
 # Single-ID release - 2026-10-25
 
-Status: candidate; production cutover and Pages verification pending.
+Status: 4-4-4-4 resume SQL prepared; production ID cutover has NOT occurred.
+
+The deployed older client is not yet compatible with SONG-HYMN-N001-0001 IDs.
+The operator's failed 01 committed the scoped backup, store and worship column;
+lifecycle ownership transfer failed because postgres is not a superuser.
+Operator readback confirms no writer role, issued_ids or rollout table.
+Do not rerun old 01 or use old 02–04. The new resume migration requires this
+exact empty partial state and performs lifecycle/rollout in one transaction.
+Temporary SET/INHERIT membership and schema CREATE are revoked before commit.
+Administrator EXECUTE grant options remain for controlled activation/rollback.
+
+Current mapping: SONG-HYMN-Nnnn-0001 / SONG-HYMN-Tnnn-0001,
+SONG-CONT-nnnn-vvvv / SONG-CHLD-nnnn-vvvv. Existing canonical groups
+share the CONT/CHLD sequence with distinct final version numbers; no parent
+record is introduced. Hymn limits are N001–645 and T001–558. Zero numbers
+and overflow are rejected; reserved old candidate numbers are not recycled.
+Worship service IDs remain UUIDs: this package only migrates Praise references.
+
+Private package and non-superuser full rehearsal:
+`backups/20261025-id4444/`. Latest readback matches the frozen source content.
+1662 records, 6751 lyric units, 38 audio sets; reference-only changes affect
+86 service rows and 846 elements. Exact full-row rollback, source/catalog drift,
+old-client write fencing, private backup denial, ID allocation/variant/delete,
+and rollback refusal after native client writes pass in local PostgreSQL18.4.
+This is not production application or PostgreSQL17.6 certification.
+Final activation requires verified compatible client publication first.
+
 
 User approved scoped backup and rollback verification before actual migration.
 Storage blobs are unchanged. Private evidence is outside version control under
