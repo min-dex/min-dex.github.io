@@ -401,3 +401,10 @@ Encryption/dispatch is ordered so a fast state event cannot overtake a command
 result. Closing a session clears queued notification timers. Unit coverage turns
 off heartbeats and checks two-peer fan-out, unchanged-state suppression, burst
 coalescing and close cleanup. Actual network/physical-device latency varies.
+
+Output video play/pause/end/readiness events also coalesce a 40ms status report
+to the PC controller, rather than awaiting its periodic heartbeat. The existing
+video regression suspends only that heartbeat and confirms native pause/play
+status within 700ms on Chromium/WebKit; it retains stale-frame, duplicate command
+and autoplay-denial coverage. Isolated two-admin/guest lifecycle checks pass on
+both engines after integration with the extracted presenter runtime.
