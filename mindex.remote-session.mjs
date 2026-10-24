@@ -10,25 +10,37 @@ export async function openRemote({client,code,host=false,registration:providedRe
  let channel,key,other,closed=false,ready=false,subscribed=false,reserved=false;
  let outgoing=0,incoming=0,sequence=0,lastSeen=performance.now(),snapshot=null,pending=null;
  let timer,expiry,ackTimer,queue=Promise.resolve(),queued=0,rateAt=0,rate=0;
- let freshRequest=id(),fresh=false;
+ let freshRequest=id(),fresh=false,changeTimer=null,lastState='',sendQueue=Promise.resolve();
  const born=performance.now();
  const status=s=>{if(!closed)onStatus(s);};
  async function send(message,pairMode=false){
   if(closed||!subscribed)return;
-  const box=await seal(pairMode?pair.key:key,{...message,peer,seq:++outgoing},pair.topic);
-  if(closed)return;
-  const result=await channel.send({type:'broadcast',event:'packet',payload:{mode:pairMode?'pair':'session',box}});
+  // Serialize encryption/dispatch so a newer snapshot cannot overtake a result.
+  // Transport acknowledgements do not block later dispatches or shutdown.
+  const dispatch=sendQueue.then(async()=>{
+   if(closed)return {};
+   const box=await seal(pairMode?pair.key:key,{...message,peer,seq:++outgoing},pair.topic);
+   if(closed)return {};
+   return {ack:channel.send({type:'broadcast',event:'packet',payload:{mode:pairMode?'pair':'session',box}})};
+  });
+  sendQueue=dispatch.then(()=>{},()=>{});
+  const {ack}=await dispatch;if(!ack)return;
+  const result=await ack;
   if(result!=='ok')throw Error('연결이 끊겼습니다. PC와 폰의 인터넷을 확인하고 같은 송출 코드로 다시 연결해 주세요.');
  }
  function close(reason='연결이 종료됐습니다.'){
   if(closed)return;closed=true;ready=false;fresh=false;snapshot=null;
-  clearInterval(timer);clearTimeout(expiry);clearTimeout(ackTimer);gate?.close();void registration.revoke();
+  clearInterval(timer);clearTimeout(changeTimer);clearTimeout(expiry);clearTimeout(ackTimer);gate?.close();void registration.revoke();
   if(channel)Promise.resolve().then(()=>client.removeChannel(channel)).catch(()=>{});onStatus(reason);onState(null);onClose();
  }
  async function end(){let deadline;try{if(ready)await Promise.race([send({type:'end'}),new Promise(resolve=>{deadline=setTimeout(resolve,1000);})]);}catch{}finally{clearTimeout(deadline);close();}}
- async function publish(request=''){
+ async function publish(request='',changedOnly=false){
   if(!host||!ready)return;
-  try{await send({type:'state',request,snapshot:gate.snapshot()});}catch(e){close(e.message);}
+  try{
+   const snapshot=gate.snapshot(),signature=JSON.stringify(snapshot.state);
+   if(changedOnly&&signature===lastState)return;
+   lastState=signature;await send({type:'state',request,snapshot});
+  }catch(e){close(e.message);}
  }
  async function receive(packet){
   if(closed||!packet||!['pair','session'].includes(packet.mode))return;
@@ -96,6 +108,11 @@ export async function openRemote({client,code,host=false,registration:providedRe
  },1000);
  return {
   close,end,code:registration.code,
+  notify(){
+   if(!host||!ready||closed||changeTimer!==null)return;
+   // Coalesce a single UI operation's synchronous changes; no extra polling.
+   changeTimer=setTimeout(()=>{changeTimer=null;void publish('',true);},40);
+  },
   get listening(){return subscribed&&!closed;},
   get connected(){return ready&&!closed;},
   get usable(){return ready&&fresh&&!closed&&!pending&&performance.now()-lastSeen<=2500;},

@@ -355,3 +355,56 @@ that code is renewed; the output identity, links and actual worship stay intact.
 Heartbeat reports do not perform extra PIN hash verification. Operator installation and production entry/list readback are complete; isolated
 PostgreSQL and Chromium/WebKit checks pass. Publication remains a separate
 deployment receipt.
+
+## Multi-device lifecycle regression ·2026-10-24
+
+Four isolated browser contexts run the real output registry, Remote page and
+encrypted relay protocol: one host, two administrators and one ordinary guest.
+Offline RPC and packet routing inject faults into only the selected peer; no
+production data or physical device is used. Chromium and WebKit pass:
+
+- Hide/restore one administrator while the other administrator and guest continue
+  operating; restore requires a fresh snapshot before controls become usable.
+- A 3.5-second packet outage temporarily locks only that peer, then recovers.
+- An 11.5-second relay/RPC outage terminates only that administrator connection;
+  the administrator can choose the output again without displacing other peers.
+- A command executed before sleep with its acknowledgement lost is not replayed
+  after restoration. Commands from stale snapshots remain intentionally rejected.
+- Guest channel failure returns that guest to entry; both administrators remain
+  usable and the guest can reconnect using the same output code.
+- Administrator persisted pagehide/logout leaves the other administrator and
+  guest active. Chromium additionally freezes a real renderer for 11.5 seconds
+  while the other contexts continue, then verifies safe reconnection.
+
+No product-code defect was reproduced. Added smoke_remote_multi_lifecycle.py to
+the required offline suite; local partition/failure-propagation checks pass.
+These are browser lifecycle/transport fault tests, not physical iOS/Android lock,
+OS process eviction, cellular/Wi-Fi handover or router tests. Long inactivity is
+allowed to close a connection safely; never describe this as an always-connected
+guarantee. CI execution/publication of the new regression remains separate.
+
+### Remote media section order (2026-10-24)
+
+The connected Remote always shows audio controls before video controls. With no
+video attached, the video section stays visible with `연결된 영상 없음`; its
+commands remain disabled through the existing allowed-action guard. This does
+not create a media element or alter the transport/heartbeat frequency.
+
+### Event-driven Remote state (2026-10-24)
+
+Presenter payload publication, audio control rendering, video health changes and
+completed Remote commands notify all linked administrator/guest sessions. Each
+session coalesces changes for 40ms and sends only changed snapshots; there is no
+new polling or DB write. The existing 1s heartbeat remains the recovery path,
+with unchanged freshness, revision/ticket, pending-command and expiry guards.
+Encryption/dispatch is ordered so a fast state event cannot overtake a command
+result. Closing a session clears queued notification timers. Unit coverage turns
+off heartbeats and checks two-peer fan-out, unchanged-state suppression, burst
+coalescing and close cleanup. Actual network/physical-device latency varies.
+
+Output video play/pause/end/readiness events also coalesce a 40ms status report
+to the PC controller, rather than awaiting its periodic heartbeat. The existing
+video regression suspends only that heartbeat and confirms native pause/play
+status within 700ms on Chromium/WebKit; it retains stale-frame, duplicate command
+and autoplay-denial coverage. Isolated two-admin/guest lifecycle checks pass on
+both engines after integration with the extracted presenter runtime.

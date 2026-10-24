@@ -1864,6 +1864,7 @@ function publishPresenterPayload(payload, options = {}) {
     snapshotId: previousSnapshotId, messageId: previousMessageId, ...content } = payload;
   const contentKey = JSON.stringify(content);
   const messageId = `${presenterTransportSession}:${++presenterTransportSequence}`;
+  window.MindexRemote?.notify();
   const compact = !options.force && state.presenter.outputTransportVersion === 1
     && presenterTransportSnapshot?.contentKey === contentKey;
   if (compact) {
@@ -2265,8 +2266,17 @@ function initPresenterOutputCore() {
       warmup: presenterOutputWarmupSummary(),
     });
   };
+  let mediaStateTimer = null;
+  const mediaEvents = ['play', 'pause', 'ended', 'waiting', 'canplay', 'error', 'emptied', 'seeked'];
+  const onMediaState = event => {
+    if (outputStopping || !event.target?.matches?.('#presenterOutputRoot video.presenter-video') || mediaStateTimer !== null) return;
+    mediaStateTimer = window.setTimeout(() => { mediaStateTimer = null; postHeartbeat(); }, 40);
+  };
+  mediaEvents.forEach(type => document.addEventListener(type, onMediaState, true));
   presenterOutputImageWarmupState.onProgress = postHeartbeat;
   const closeOutputChannel = () => {
+    window.clearTimeout(mediaStateTimer);
+    mediaEvents.forEach(type => document.removeEventListener(type, onMediaState, true));
     if (heartbeatTimer) {
       window.clearInterval(heartbeatTimer);
       heartbeatTimer = null;
@@ -3581,6 +3591,7 @@ function requestPresenterVideoCommand(serviceId, action) {
     const finish = result => {
       clearTimeout(timer);presenterVideoRequests.delete(requestId);
       queueMicrotask(renderGlobalPlaybackControls);
+      window.MindexRemote?.notify();
       if (state.presenter.outputSessionId !== outputSessionId || state.presenter.serviceId !== serviceId
         || state.selectedServiceId !== serviceId || state.presenter.index !== message.index
         || presenterTransportLatest?.payload?.messageId !== message.messageId)
@@ -3590,6 +3601,7 @@ function requestPresenterVideoCommand(serviceId, action) {
     };
     const timer=setTimeout(()=>finish({ok:false,message:"영상 응답을 확인하지 못했습니다. 현재 화면을 확인해 주세요."}),1800);
     presenterVideoRequests.set(requestId,{clientId:health.clientId,outputSessionId,finish});
+    window.MindexRemote?.notify();
     renderGlobalPlaybackControls();
     try { state.presenter.outputWindow?.postMessage(message,window.location.origin); } catch {}
     try { state.presenter.channel?.postMessage(message); } catch {}

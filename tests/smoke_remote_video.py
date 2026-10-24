@@ -27,7 +27,7 @@ try:
     publishPresenterPayload(fixture,{force:true});
    }''')
    VideoHealthHandler.failed=False
-   output=context.new_page();output.goto(url+'?output=presenter&outputSession=video-session')
+   output=context.new_page();output.add_init_script("const originalInterval=window.setInterval;window.setInterval=(fn,ms,...args)=>originalInterval(()=>{if(fn.name!=='postHeartbeat'||!window.pauseHeartbeat)fn(...args)},ms)");output.goto(url+'?output=presenter&outputSession=video-session')
    host.wait_for_function("adapter.read().allowed.includes('video-pause')")
    output.wait_for_function("document.querySelector('.is-active video')?.currentTime>.3")
    host.evaluate("state.module='presenter';renderGlobalPlaybackControls()")
@@ -41,7 +41,9 @@ try:
    host.evaluate("adapter.execute('video-play')")
    output.wait_for_function("document.querySelector('.is-active video').currentTime>"+str(position))
    output.evaluate("document.querySelector('.is-active video').currentTime=5")
-   host.wait_for_function("state.presenter.videoHealth.revision>=3")
+   output.wait_for_function("!document.querySelector('.is-active video').seeking")
+   revision=output.evaluate("presenterVideoRevisions.get(document.querySelector('.is-active video')).value")
+   host.wait_for_function("state.presenter.videoHealth.revision==="+str(revision))
    # Real restart, delivered twice via two controller transports, must execute once.
    output.evaluate("window.playCalls=0;window.video=document.querySelector('.is-active video');window.originalPlay=video.play.bind(video);video.play=()=>{playCalls++;return originalPlay()};void 0")
    host.evaluate("document.querySelector('[data-global-playback-action=video-restart]').click();window.secondCommand=requestPresenterVideoCommand('remote-video','restart').then(()=>true,()=>false)")
@@ -49,6 +51,13 @@ try:
    host.wait_for_function('!presenterVideoRequests.size')
    assert output.evaluate('playCalls')==1, output.evaluate('({playCalls,time:video.currentTime,connected:video.isConnected})')
    assert output.evaluate('video.currentTime')<2
+   # Native media state events report promptly with periodic heartbeats disabled.
+   output.evaluate("window.pauseHeartbeat=true")
+   output.evaluate('video.pause()')
+   host.wait_for_function("state.presenter.videoHealth.status==='paused'",timeout=700)
+   output.evaluate('originalPlay()')
+   host.wait_for_function("state.presenter.videoHealth.status==='playing'",timeout=700)
+   output.evaluate("window.pauseHeartbeat=false")
    # Freeze heartbeat state, then PC/output pause wins over an outdated remote play state.
    host.evaluate("window.savedHealth=structuredClone(state.presenter.videoHealth);window.originalHandler=handlePresenterControllerMessage;handlePresenterControllerMessage=m=>{if(m.type!=='presenter-heartbeat')originalHandler(m)};void 0")
    output.evaluate('video.pause()')

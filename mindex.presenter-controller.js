@@ -673,6 +673,7 @@ function stopPresenterOutputWindowMonitor() {
 }
 
 function renderPresenterControlState(serviceId = state.selectedServiceId) {
+  window.MindexRemote?.notify();
   const result = withServiceItemsScope(() => renderPresenterControlStateUnscoped(serviceId));
   syncPresenterFocusView();
   return result;
