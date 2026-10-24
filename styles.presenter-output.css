@@ -116,7 +116,7 @@
 .presenter-output-body * { box-sizing: border-box; }
 .presenter-output-root {
   --presenter-text-inset: 2.5cqw;
-  --presenter-song-note-scale: .55;
+  --presenter-song-note-scale: .65;
   --presenter-stage-width: min(100vw, 177.777778vh);
   --presenter-stage-height: min(100vh, 56.25vw);
   --presenter-stage-scale: 1;
