@@ -167,7 +167,7 @@ function renderPresenterHelpControl() {
     ["예배 입력", "반영 버튼 또는 Cmd/Ctrl+Enter"],
   ];
   return `
-    <details class="svc-presenter-help" data-presenter-help>
+    <details class="svc-presenter-help" data-presenter-help ${window.MindexDisclosure?.attrs(["presenter-help"])||""}>
       <summary class="icon-btn" aria-label="${escapeAttr(uiText("presenter.action.help"))}" title="${escapeAttr(uiText("presenter.action.help"))}">
         <i data-lucide="circle-help"></i>
       </summary>

@@ -109,6 +109,7 @@ SMOKES = (
     "smoke_music_seek.py",
     "smoke_controller_music_layout.py",
     "smoke_citation_translation_editor.py",
+    "smoke_disclosure_persistence.py",
     "smoke_explicit_worship_order.py",
     "smoke_section_editor_actions.py",
     "smoke_draft_handoff.py",

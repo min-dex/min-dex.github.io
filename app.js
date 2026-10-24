@@ -9066,8 +9066,7 @@ function handlePresenterDetailClick(event) {
     if (!textarea) return true;
     const expanded = lyricsToggle.getAttribute("aria-expanded") !== "true";
     const key = lyricsToggle.dataset.presenterLyricsToggle;
-    if (expanded) expandedPresenterLyricsFields.add(key);
-    else expandedPresenterLyricsFields.delete(key);
+    MindexDisclosure.write(["presenter-lyrics",key], expanded);
     field.classList.toggle("is-collapsed", !expanded);
     textarea.rows = expanded ? Math.max(2, Math.min(12, textarea.value.split("\n").length)) : 3;
     textarea.style.height = "";
@@ -11468,7 +11467,7 @@ function renderServiceAnnouncementEditor(item,index,serviceId,memo) {
   const regions=serviceAnnouncementRegions(item,memo);
   regions.news=window.MindexInlineText.numbered(regions.news).value;
   const field=(key,label)=>`<label class="svc-presenter-input-field"><span>${label}</span><textarea data-inline-bold ${key==="news"?'data-announcement-numbered':''} class="svc-presenter-input-control svc-presenter-input-control--multiline" data-service-id="${escapeAttr(serviceId||"")}" data-service-item-index="${index}" data-service-item-field="announcement_${key}" data-initial-value="${escapeAttr(regions[key])}" rows="1" aria-label="${label}" onkeydown="handleDetailKeydown(event)">${escapeHtml(regions[key])}</textarea></label>`;
-  return `<div class="svc-announcement-editor">${field("news","주간 소식")}<small class="svc-presenter-input-hint">Enter: 다음 번호 · Shift+Enter: 같은 항목에서 줄바꿈</small><details><summary>상하단 문구</summary>${field("welcome","상단")}${field("footer","하단")}</details></div>`;
+  return `<div class="svc-announcement-editor">${field("news","주간 소식")}<small class="svc-presenter-input-hint">Enter: 다음 번호 · Shift+Enter: 같은 항목에서 줄바꿈</small><details ${MindexDisclosure.attrs(["announcement",serviceId,item.id||index])}><summary>상하단 문구</summary>${field("welcome","상단")}${field("footer","하단")}</details></div>`;
 }
 
 function normalizeServiceAudioTiming(value) {
@@ -18313,7 +18312,7 @@ function renderBibleReaderControls(options = {}) {
 function renderBibleEditionInfo() {
   const edition = window.BibleEditionInfo?.get(getSelectedBibleTranslation());
   if (!edition) return "";
-  return `<details class="bible-reader-note bible-edition-info">
+  return `<details class="bible-reader-note bible-edition-info" ${MindexDisclosure.attrs(["bible-edition-info"])}>
     <summary>출처·판본</summary>
     <p>${escapeHtml(edition.textEdition)}</p>
     <p>${escapeHtml(edition.history)} · 확보일 ${escapeHtml(edition.retrievedAt)}</p>
@@ -18408,7 +18407,7 @@ function renderBibleVerseList(verses) {
               <i data-lucide="copy"></i>
             </button>
           </p>
-          ${Array.isArray(verse.metadata?.notes) && verse.metadata.notes.length ? `<details class="bible-reader-note bible-source-annotations"><summary>출처 주석${verse.text ? "" : " · 독립 본문 없음"}</summary>${verse.metadata.notes.map(note => `<p>${escapeHtml(String(note))}</p>`).join("")}</details>` : ""}
+          ${Array.isArray(verse.metadata?.notes) && verse.metadata.notes.length ? `<details class="bible-reader-note bible-source-annotations" ${MindexDisclosure.attrs(["bible-source-note",verse.id])}><summary>출처 주석${verse.text ? "" : " · 독립 본문 없음"}</summary>${verse.metadata.notes.map(note => `<p>${escapeHtml(String(note))}</p>`).join("")}</details>` : ""}
         `;
       }).join("")}
     </div>
@@ -25422,7 +25421,7 @@ function renderWorshipTemplateInventoryCard(template, templatesById, itemsByTemp
   const sectionItems = itemsByTemplateId[template.id] || [];
   const status = template.is_active ? "Active" : "Draft";
   return `
-    <details class="svc-template-inventory-card" open>
+    <details class="svc-template-inventory-card" ${MindexDisclosure.attrs(["template-inventory",template.id],true)}>
       <summary>
         <span title="${escapeAttr(template.name || "Service Template")}">${escapeHtml(template.name || "Service Template")}</span>
         <small>${escapeHtml(status)} · ${sectionItems.length} sections</small>
@@ -25483,7 +25482,7 @@ function renderWorshipTemplateDraftCard(type) {
         </span>`).join("")
     : `<span class="svc-template-empty-chip">요소 없음</span>`;
   return `
-    <details class="svc-template-draft-card">
+    <details class="svc-template-draft-card" ${MindexDisclosure.attrs(["template-draft",type.id||type.name])}>
       <summary>
         <span title="${escapeAttr(type.name)}">${escapeHtml(type.name)}</span>
         <small>${type.services} 예배 · ${type.slides} 슬라이드</small>
@@ -25721,7 +25720,7 @@ function renderServiceDetail() {
 function renderServiceAuthoringPanel(kicker, title, body) {
   if (!body) return "";
   return `
-    <details class="svc-authoring-panel"${title === "예배 정보" ? " open" : ""}>
+    <details class="svc-authoring-panel" ${MindexDisclosure.attrs(["authoring",title],title === "예배 정보")}>
       <summary class="svc-authoring-panel-head">
         <span>${escapeHtml(kicker)}</span>
         <strong>${escapeHtml(title)}</strong>
@@ -25855,7 +25854,7 @@ function renderServiceSourcePanel(service) {
   if (!service?.id) return "";
   const source = serviceSourceTextForEditor(service);
   return `
-    <details class="svc-source-panel">
+    <details class="svc-source-panel" ${MindexDisclosure.attrs(["service-source",service.id])}>
       <summary class="svc-source-panel-head">
         <span>예배 원문</span>
       </summary>
@@ -25923,7 +25922,7 @@ function renderServiceSourceRecovery(service) {
         <span>${escapeHtml(serviceSourceRecoveryLabel(snapshot))}</span>
         <small>${escapeHtml(serviceSourceHistoryMeta(document))}</small>
       </button>` : ""}
-      ${pending.length ? `<details class="svc-source-recovery-pending"><summary>미반영 입력 ${pending.length}개</summary>
+      ${pending.length ? `<details class="svc-source-recovery-pending" ${MindexDisclosure.attrs(["source-recovery",service.id])}><summary>미반영 입력 ${pending.length}개</summary>
         ${pending.map(input => `<label>${escapeHtml(`${input.itemId || input.index} · ${input.field}`)}<textarea readonly aria-label="보관된 미반영 입력">${escapeHtml(input.value)}</textarea></label>`).join("")}
       </details>` : ""}
     </div>`;
@@ -26835,7 +26834,7 @@ function renderServiceOrderTemplate(typeObj) {
   const template = serviceOrderTemplate(typeObj?.id);
   if (!template.length) return "";
   return `
-    <details class="svc-template-guide" aria-label="섹션 템플릿">
+    <details class="svc-template-guide" aria-label="섹션 템플릿" ${MindexDisclosure.attrs(["template-guide",typeObj?.id])}>
       <summary class="svc-template-head">
         <span>섹션 추가</span>
       </summary>
@@ -27282,7 +27281,7 @@ function renderServiceItemMemoEditor(item, index, options = {}) {
   const hasContent = Boolean(preparation || parsed.note || (showSlideOverrideInput && parsed.slides.length) || parsed.formHint || parsed.formPreset || parsed.formPresetRules?.length || elementType || hasServiceAsset(parsed.asset) || parsed.presenterRole || autoAdvanceAt);
   const summary = renderServiceItemMemoSummary({ parsed, preparation, elementType, autoAdvanceAt });
   return `
-    <details class="svc-item-note${options.compact ? " compact" : ""}${hasContent ? " has-content" : ""}"${servicePraiseUsesDirectLyrics(praiseInputMode) ? " open" : ""}>
+    <details class="svc-item-note${options.compact ? " compact" : ""}${hasContent ? " has-content" : ""}" ${MindexDisclosure.attrs(["item-settings",item.service_id,item.id||index],servicePraiseUsesDirectLyrics(praiseInputMode))}>
       <summary>
         <span>설정</span>
         ${summary}
@@ -29219,10 +29218,8 @@ function renderPresenterServiceScriptureInput(item, index, memo, service = null)
   const payloadByReference = new Map(perReferencePayloads.map((payload) => [normalizeServiceScriptureReferenceKey(payload.reference), payload]));
   const legacyManual = references.length === 1 ? normalizeServiceManualScripture(memo.manualScripture) : null;
   const translationEditorKey = JSON.stringify([serviceId, item.id || index]);
-  const translationEditorOpen = [...(document.getElementById("detailPane")?.querySelectorAll("details[data-citation-translations]") || [])]
-    .find(node => node.dataset.citationTranslations === translationEditorKey)?.open;
   const perReferenceControls = citation && references.length ? `
-    <details class="svc-presenter-input-field svc-presenter-input-field--scripture-parts" data-citation-translations="${escapeAttr(translationEditorKey)}"${translationEditorOpen ? " open" : ""}>
+    <details class="svc-presenter-input-field svc-presenter-input-field--scripture-parts" data-citation-translations="${escapeAttr(translationEditorKey)}" ${MindexDisclosure.attrs(["citation-translations",serviceId,item.id||index])}>
       <summary>인용별 역본</summary>
       <div class="svc-presenter-scripture-parts">
         ${references.map((reference, referenceIndex) => {
@@ -29421,7 +29418,7 @@ function renderPresenterServiceAssetInput(item, index, memo, options = {}) {
             value="${escapeAttr(asset.name)}" placeholder="참고 화면 제목" aria-label="참고 화면 제목" />
         </label>
         ${renderPresenterServiceAssetUrlInput(asset, index, serviceId, "참고 화면 공개 링크", "공개 링크", "파일을 선택하거나 공개 URL 입력")}
-        ${renderPresenterReferenceMediaPreview(asset, kind)}
+        ${renderPresenterReferenceMediaPreview(asset, kind, [serviceId,item.id||index])}
         ${renderPresenterMediaOrder(item, serviceId)}
       </div>`;
   }
@@ -29438,7 +29435,7 @@ function renderPresenterServiceAssetInput(item, index, memo, options = {}) {
           value="${escapeAttr(asset.name)}" placeholder="${escapeAttr(`${typeLabel} 이름`)}" aria-label="${escapeAttr(`${item.label || "파일"} 이름`)}" title="${escapeAttr(asset.name)}" />
       </label>
       ${renderPresenterServiceAssetUrlInput(asset, index, serviceId, `${item.label || "파일"} 링크`, "파일/링크", "파일을 선택하거나 공개 URL 입력")}
-      ${renderPresenterReferenceMediaPreview(asset, assetKind)}
+      ${renderPresenterReferenceMediaPreview(asset, assetKind, [serviceId,item.id||index])}
     </div>`;
 }
 
@@ -29455,7 +29452,7 @@ function renderPresenterServiceAssetUrlInput(asset, index, serviceId, ariaLabel,
     </label>`;
 }
 
-function renderPresenterReferenceMediaPreview(asset, kind) {
+function renderPresenterReferenceMediaPreview(asset, kind, disclosureScope = []) {
   const source = String(asset?.url || "").trim();
   if (!source) return "";
   const normalizedKind = String(kind || asset?.kind || "file").trim().toLowerCase();
@@ -29491,7 +29488,7 @@ function renderPresenterReferenceMediaPreview(asset, kind) {
     </div>`
     : "";
   return `<div class="svc-reference-media-preview-group">
-    <details class="svc-reference-media-preview svc-reference-media-preview--collapsible svc-reference-media-preview--${escapeAttr(normalizedKind)}">
+    <details class="svc-reference-media-preview svc-reference-media-preview--collapsible svc-reference-media-preview--${escapeAttr(normalizedKind)}" ${MindexDisclosure.attrs(["media-preview",...disclosureScope])}>
       <summary>
         <span>${escapeHtml(statusLabel)}</span>
         <b><i data-lucide="${normalizedKind === "audio" ? "headphones" : normalizedKind === "image" ? "eye" : "info"}"></i>${previewLabel}</b>
@@ -29533,11 +29530,9 @@ function renderPresenterStaticAssetPreview(asset, icon, statusLabel) {
     </div>`;
 }
 
-const expandedPresenterLyricsFields = new Set();
-
 function renderPresenterManualLyricsField(item, index, serviceId = "") {
   const key = JSON.stringify([serviceId, item.id || index]);
-  const expanded = expandedPresenterLyricsFields.has(key);
+  const expanded = MindexDisclosure.read(["presenter-lyrics",key]);
   const lyrics = formatServiceManualPraiseLyricsInput(item.memo);
   const title = expanded ? "가사 접기" : "가사 펼치기";
   return `<div class="svc-presenter-input-field svc-presenter-input-field--lyrics${expanded ? "" : " is-collapsed"}">
