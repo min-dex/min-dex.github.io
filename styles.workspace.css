@@ -4987,7 +4987,6 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .svc-setlist-leader-form input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 
-
 .svc-setlist-leader-form input::placeholder { color: var(--ink-5); opacity: 1; }
 
 /* One desktop shell at every width; narrow windows keep content reflow. */
@@ -5271,7 +5270,6 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .song-timing-row input { display: block; width: 100px; margin-top: 5px; }
 .song-timing-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; }
 
-
 /* Service-instance media placement uses ordinary native controls. */
 .svc-progression-media { min-width: 0; font-size: 12px; }
 .svc-progression-media > summary { cursor: pointer; padding: 5px; }
@@ -5421,7 +5419,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 
 /* Same editable role across modules, independent of the surrounding panel. */
 @media screen {
-body:not(.presenter-output-body) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="button"]):not([type="submit"]), textarea, select):not([class*="presenter-output"]):not(.is-invalid):not(.svc-slide-jump-input) { background-color:var(--ui-surface-field); }
+body:not(.presenter-output-body) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="button"]):not([type="submit"]), textarea, select):not([class*="presenter-output"]):not(.is-invalid):not([aria-invalid="true"]):not(.svc-slide-jump-input) { background-color:var(--ui-surface-field); }
 body:not(.presenter-output-body) :is(input,textarea,select):focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 .service-date-status.is-upcoming { color:var(--ink-3); }
 .service-date-status.is-today { color:var(--accent); }
@@ -5710,7 +5708,6 @@ body[data-module="praise"] .praise-forms-panel .version-compare-column {
   .service-offering-editor .service-offering-modes > .btn { min-width: 50px; padding: 0 5px; }
 }
 
-
 /* Backgrounds follow the original grid; they never participate in layout. */
 .svc-board-grid { position: relative; isolation: isolate; }
 .svc-board-slide-block { display: contents; }
@@ -5742,10 +5739,10 @@ body[data-module="praise"] .praise-forms-panel .version-compare-column {
     min-width: 0;
     height: var(--ui-field-height);
     min-height: var(--ui-field-height);
-    border: 1px solid transparent;
+    border: 1px solid var(--ui-field-border, transparent);
     border-radius: var(--r);
     padding: 0 var(--ui-field-inset);
-    color: var(--ink);
+    color: var(--ui-field-ink, var(--ink));
     font-family: inherit;
     font-size: var(--ui-body-size);
     font-weight: var(--ui-row-weight);
@@ -5758,7 +5755,7 @@ body[data-module="praise"] .praise-forms-panel .version-compare-column {
     background-position: right 14px center, right 9px center;
     background-size: 5px 5px;
     background-repeat: no-repeat;
-    cursor: pointer;
+    cursor: var(--ui-field-cursor, pointer);
   }
   body:not(.presenter-output-body) textarea {
     box-sizing: border-box;
@@ -5783,11 +5780,14 @@ body[data-module="praise"] .praise-forms-panel .version-compare-column {
   }
   body:not(.presenter-output-body) :is(input, textarea, select).is-invalid,
   body:not(.presenter-output-body) :is(input, textarea, select)[aria-invalid="true"] {
+    --ui-field-border: var(--warn);
+    --ui-field-ink: var(--warn);
     color: var(--warn);
     background-color: var(--warn-bg);
     border-color: var(--warn);
   }
   body:not(.presenter-output-body) :is(input, textarea, select):disabled {
+    --ui-field-cursor: not-allowed;
     cursor: not-allowed;
     opacity: .55;
   }

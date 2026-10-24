@@ -27,11 +27,37 @@ try:
       assert not page.locator('.song-description-title.empty').count()
       assert page.locator('#editorSongTitle').bounding_box()['width']>=150
       assert page.locator('.form-type-select').bounding_box()['height']==30
+      select=page.locator('.form-type-select').first
+      before=select.input_value();select.evaluate('e=>e.disabled=true')
+      assert select.evaluate('e=>getComputedStyle(e).cursor')=='not-allowed'
+      assert float(select.evaluate('e=>getComputedStyle(e).opacity'))<1
+      select.evaluate('e=>e.disabled=false');assert select.input_value()==before
+
      if name=='metadata':
       page.set_viewport_size({'width':width,'height':600})
       box=page.locator('.metadata-popover').bounding_box()
       assert box['y']>=50 and box['y']+box['height']<=600,(engine,width,box)
       fields=page.locator('.metadata-popover input:not([readonly])');fields.last.fill('검증 중인 입력')
+      page.evaluate("""()=>{
+        const field=document.querySelector('.metadata-popover input[data-song-field="scripture"]');
+        if(!field)throw Error('scripture field missing');
+        const previous=field.getAttribute('aria-invalid'),value=field.value;
+        const size=field.getBoundingClientRect();
+        field.focus();field.setSelectionRange(0,value.length);
+        const probe=document.createElement('span');document.body.append(probe);
+        for(const marker of ['aria','class']){
+          field.removeAttribute('aria-invalid');field.classList.remove('is-invalid');
+          if(marker==='aria')field.setAttribute('aria-invalid','true');else field.classList.add('is-invalid');
+          probe.style.color='var(--warn)';const warning=getComputedStyle(probe).color;
+          probe.style.color='var(--warn-bg)';const background=getComputedStyle(probe).color;
+          const c=getComputedStyle(field),box=field.getBoundingClientRect();
+          if(c.color!==warning||c.borderTopColor!==warning||c.backgroundColor!==background)throw Error('error style overridden '+marker);
+          if(box.width!==size.width||box.height!==size.height||field.value!==value||document.activeElement!==field||field.selectionStart!==0||field.selectionEnd!==value.length)throw Error('error state changed input');
+          if(c.outlineStyle==='none')throw Error('error focus missing');
+        }
+        probe.remove();field.classList.remove('is-invalid');
+        if(previous===null)field.removeAttribute('aria-invalid');else field.setAttribute('aria-invalid',previous);
+      }""")
       fields.last.scroll_into_view_if_needed()
       assert fields.last.input_value()=='검증 중인 입력'
       assert fields.last.bounding_box()['y']+fields.last.bounding_box()['height']<=600

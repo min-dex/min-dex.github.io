@@ -964,3 +964,11 @@ help icon, without a second filled box. Retain the existing field geometry,
 keyboard/pointer help behavior, selection and focus indicators.
 
 
+
+### Input error and disabled states ·2026-10-24
+
+Both aria-invalid=true and is-invalid retain warning text, background and border
+under the shared field geometry rules. Error state owns the field border/ink
+tokens; normal background excludes both error markers. Disabled selects keep
+the shared not-allowed cursor rather than the ordinary pointer. Preserve focus
+outlines, dimensions, input values and selection; adjacent wrappers stay neutral.
