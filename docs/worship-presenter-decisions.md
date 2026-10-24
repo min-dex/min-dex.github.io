@@ -4484,3 +4484,10 @@ font completion invalidates all these fits. Scripture body pagination, actual
 media pixels and file metadata remain unchanged. Chromium/WebKit regression
 coverage checks all six paths, short-copy restoration, stable retries and
 thumbnail/output parity; publication is recorded separately.
+## Praise Title note by role ·2026-10-24
+
+Every praise Title/T frame uses the existing fullscreen double-note glyph ♬,
+including Cadaros and secondary praise, in chromakey and fullscreen rendering.
+A song name appearing only as an order's content title uses the eighth note ♪.
+Choose by Title form/type, not team or section. Preserve placement, font,
+source slides, saved forms and content; normalize the glyph in the view only.

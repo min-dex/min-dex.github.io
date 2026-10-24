@@ -2641,12 +2641,17 @@ function presenterSongTitleUsesSectionHeading(item = {}, section = {}) {
   return false;
 }
 
-function formatPresenterSongTitleText(title) {
+function presenterSongTitleNote(slide = {}) {
+  return slide.type === "song-title" || normalizePresenterFormPresetLabel(slide.formLabel).type === "title"
+    || /^title:/.test(String(slide.formKey || "")) ? PRESENTER_SONG_NOTE : PRESENTER_INLINE_SONG_NOTE;
+}
+
+function formatPresenterSongTitleText(title, note = PRESENTER_INLINE_SONG_NOTE) {
   const cleanTitle = String(title || "").trim();
   if (!cleanTitle) return "";
   return PRESENTER_SONG_NOTE_PATTERN.test(cleanTitle)
-    ? cleanTitle.replace(PRESENTER_SONG_NOTE_PATTERN, `${PRESENTER_INLINE_SONG_NOTE} `)
-    : `${PRESENTER_INLINE_SONG_NOTE} ${cleanTitle}`;
+    ? cleanTitle.replace(PRESENTER_SONG_NOTE_PATTERN, `${note} `)
+    : `${note} ${cleanTitle}`;
 }
 
 function presenterPraiseTitle(song, fallbackText = "", version = null) {
@@ -5619,7 +5624,7 @@ function presenterFullscreenSongTitleView(slide, options = {}) {
     ? { orderTitle: slide.orderTitle, title: slide.contentTitle, detail: "" }
     : { ...presenterSongTitleContent(slide) };
   const title = isSectionSong
-    ? formatPresenterSongTitleText(content.title)
+    ? formatPresenterSongTitleText(content.title, presenterSongTitleNote(slide))
     : String(content.title || "").replace(PRESENTER_SONG_NOTE_PATTERN, "").trim();
   const hideDetail = normalizePresenterServiceDesign(options.presentationDesign)?.songTitleStyle === "note-title";
 
@@ -5921,7 +5926,7 @@ function renderPresenterTitleAssigneeSlide(slide) {
   const assignee = String(slide.assignee || slide.subtitle || "").trim();
   const orderTitle = String(slide.orderTitle || "").trim();
   const rawContentTitle = String(slide.contentTitle || "").trim();
-  const contentTitle = PRESENTER_SONG_NOTE_PATTERN.test(rawContentTitle) ? formatPresenterSongTitleText(rawContentTitle) : rawContentTitle;
+  const contentTitle = PRESENTER_SONG_NOTE_PATTERN.test(rawContentTitle) ? formatPresenterSongTitleText(rawContentTitle, presenterSongTitleNote(slide)) : rawContentTitle;
   const titleChars = presenterLineCharEstimate(title);
   const assigneeChars = presenterLineCharEstimate(assignee);
   const orderChars = presenterLineCharEstimate(orderTitle);
@@ -6126,11 +6131,11 @@ function renderPresenterSlideText(slide) {
 
 function renderPresenterSongText(text, slide) {
   const raw = String(text || " ");
-  if (presenterSlideElementType(slide) !== PRESENTER_ELEMENT_TYPES.PRAISE) return escapePresenterSlideLine(raw, slide);
+  if (presenterSlideElementType(slide) !== PRESENTER_ELEMENT_TYPES.PRAISE && !slide.fullscreenSongTitle) return escapePresenterSlideLine(raw, slide);
   const match = raw.match(/^(\s*)([\u2669\u266A\u266B\u266C])(\s*)(.*)$/u);
   if (!match) return renderPresenterHighlightedText(raw, slide);
   const [, leading, , spacing, rest] = match;
-  return `${escapeHtml(leading)}<span class="presenter-song-note" aria-hidden="true">${escapeHtml(PRESENTER_INLINE_SONG_NOTE)}</span>${escapeHtml(spacing || " ")}${renderPresenterHighlightedText(rest || " ", slide)}`;
+  return `${escapeHtml(leading)}<span class="presenter-song-note" aria-hidden="true">${escapeHtml(presenterSongTitleNote(slide))}</span>${escapeHtml(spacing || " ")}${renderPresenterHighlightedText(rest || " ", slide)}`;
 }
 
 function presenterLyricVerseNumber(slide, lines = presenterDisplayLines(slide)) {
