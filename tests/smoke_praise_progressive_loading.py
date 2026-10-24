@@ -11,7 +11,7 @@ try:
                 page.wait_for_function("typeof loadSongs==='function'")
                 print(engine,page.evaluate('''async()=>{
                   const check=(v,m)=>{if(!v)throw Error(m)};
-                  state.client={};state.config={...state.config,authRequired:false};
+                  state.client={rpc:async(name)=>{check(name==='get_praise_storage_status_v1','unexpected RPC');return {data:{protocol:1,phase:'legacy'}}}};state.config={...state.config,authRequired:false};
                   state.module='praise';state.search='';state.praiseTypeFilter='all';
                   state.selectedSongId=null;state.selectedVersionId=null;state.songs=[];
                   songCatalogLoaded=false;state.connectionError='';
