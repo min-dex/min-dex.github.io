@@ -526,7 +526,8 @@ Current data basis:
 - Deploy `2026-10-25-worship-canonical-input-mode.sql` and verify the live CHECK
   before publishing the canonical writer. It changes only the allowed values;
   no content, draft, service revision, permission or runtime playback is modified.
-  This rollout is prepared locally; production application is not yet confirmed.
+  Production CHECK was applied and read back as validated on 2026-10-25.
+  Existing rows were not rewritten; web writer publication is tracked separately.
 
 ```text
 Element Type (템플릿/저장 타입)
