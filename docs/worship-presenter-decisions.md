@@ -4757,3 +4757,12 @@ refer to one repetition; unknown duration remains unknown. Native video previews
 in input disclosures have independent controls/clocks and never drive output.
 No persistent service/media data changes; PPTX/background media keep their existing
 transport scope.
+
+## 2026-10-25 cached worship entry score hydration
+
+Entering the presenter loads the independent hymn score manifest even when the
+worship rows were already cached. Both fresh and cached `loadServiceItems` paths
+use the same selected-presenter-only loader. It shares the existing in-flight
+request and patches controls after success; render calls do not start retries.
+No worship writes, draft replacement, transport publication or media playback is
+part of this warmup. Existing manifest failure/retry behavior remains unchanged.

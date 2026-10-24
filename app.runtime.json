@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261025-single-id-4444",
+  "version": "20261025-score-entry",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "29feae7cca2619e18606e224edd1d9f6048a730e9068cb19091ea53316a93337",
-  "runtime_sha256": "f72d973620e4ccaebd23637f26f02d0274703d62016f20d387a49de960846cdf",
-  "source_bytes": 1341354,
-  "runtime_bytes": 958462,
-  "source_gzip": 305590,
-  "runtime_gzip": 239798
+  "source_sha256": "b03cf3c12775adbf95564be5d0e56bb661561daab0312fe386ed00d659e712b3",
+  "runtime_sha256": "c1918ab464aa5389a2e75a63badfa12658c7ae534afb53c24925ae6e8742c47f",
+  "source_bytes": 1341906,
+  "runtime_bytes": 958774,
+  "source_gzip": 305747,
+  "runtime_gzip": 239863
 }
