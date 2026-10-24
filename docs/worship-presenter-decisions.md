@@ -4779,3 +4779,33 @@ lyric/photo advance. Resolve auto-sync's unbound service owner from its presente
 and timing group; keep manual service ownership and cross-item/source guards.
 Input pause/resume uses the existing transport without loading/resetting the audio
 or changing its cue profile. Global/focused controls and saved records remain intact.
+## Sermon original deck retention · 2026-10-25
+
+User requires .key/.pptx originals to remain intact in sermon reference materials.
+Section Add accepts both formats. Keynote is preserved as an opaque original
+file, never automatically exported to images; its web output is a file card,
+not a claim of native Keynote playback. PPTX keeps its existing thumbnail/effect
+renderer and retains its original bytes. Existing legacy image-only imports
+remain readable; their missing originals cannot be reconstructed.
+
+The existing asset JSON carries optional original {format,url,name,size,sha256}.
+Normalization preserves it in element asset/config and service source documents.
+No schema or permissions change. Before upload the existing public-storage
+confirmation explicitly covers notes/hidden slides and the Keynote playback
+limitation. Original download restores filename and verifies total bytes/hash.
+Large Keynote originals use the same bounded 16MiB transport as PPTX, with
+source.key.parts.json / mindex-deck-parts-v1; PPTX transport remains compatible.
+
+Preparation checks client/project/service identity and the complete item source
+signature before upload/adoption. Late edits/navigation reject attachment.
+Pre-save failures clean only this import's new objects; uncertain atomic save
+keeps immutable originals/drafts for retry. Same-service repeated imports are
+serialized; originals are never silently replaced by generated previews.
+
+Offline Chromium/WebKit tests cover exact small/large Keynote bytes, Unicode
+filename download, reload from serialized asset, document/row preservation,
+corruption rejection, replacement affordance, late input/project changes, failed
+upload and uncertain save retention. Existing PPTX thumbnail/effect/navigation,
+metadata round trip and 50MiB+ transport suites also run separately. Actual
+operational attachment and publication remain separate; production writes are
+paused while the Praise cutover owner completes the coordinated transition.

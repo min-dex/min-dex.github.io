@@ -150,6 +150,13 @@ function normalizeServiceAsset(value) {
     ...(slides.length ? { slides } : {}),
   };
   if (value.pptx?.url) normalized.pptx = { url: String(value.pptx.url).trim() };
+  const original = value.original;
+  if (original && ['key', 'pptx'].includes(original.format) && typeof original.url === 'string'
+    && Number.isSafeInteger(original.size) && original.size > 0 && original.size <= 500 * 1024 * 1024
+    && /^[a-f0-9]{64}$/.test(original.sha256 || '')) {
+    normalized.original = { format: original.format, url: original.url.trim(), name: String(original.name || '').trim(),
+      size: original.size, sha256: original.sha256 };
+  }
   if (audio.url) normalized.audio = audio;
   if (timing.pages.length || timing.cross !== null || timing.duration) normalized.timing = timing;
   if (String(value.manifestUrl || value.manifest_url || manifest.url || "").trim()) {

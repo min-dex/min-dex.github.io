@@ -846,9 +846,9 @@ function renderPresenterReferenceMediaQuickAdd(sectionKey, serviceId) {
       </summary>
       <div class="svc-reference-media-quick-add-actions">
         <label class="svc-reference-media-upload">
-          <input type="file" accept=".pptx" data-presenter-pptx-file
-            data-presenter-reference-media-section="${escapeAttr(sectionKey)}" data-service-id="${escapeAttr(serviceId)}" aria-label="PPT 삽입" />
-          <span>PPT 삽입</span>
+          <input type="file" accept=".key,.pptx" data-presenter-pptx-file
+            data-presenter-reference-media-section="${escapeAttr(sectionKey)}" data-service-id="${escapeAttr(serviceId)}" aria-label="설교·발표 자료 삽입" />
+          <span>Keynote / PPT</span>
         </label>
         <label class="svc-reference-media-upload">
           <input type="file" multiple accept="${PRESENTER_REFERENCE_MEDIA_ACCEPT}" data-presenter-reference-media-direct-file

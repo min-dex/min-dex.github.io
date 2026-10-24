@@ -423,7 +423,7 @@ function presenterImportedDeckSlidesFromAsset(asset, item, section, index, title
           pptx: { ...slide.pptx, url: asset.pptx.url },
           hiddenInPresentation: Boolean(slide.pptx.hidden),
         } : {}),
-        asset: { ...(asset.pptx ? { kind: asset.kind, pptx: asset.pptx } : asset), url: source, name: slide.name || asset.name || "" },
+        asset: { ...(asset.pptx ? { kind: asset.kind, pptx: asset.pptx, ...(asset.original ? { original: asset.original } : {}) } : asset), url: source, name: slide.name || asset.name || "" },
         importedDeck: {
           manifestUrl: asset.manifestUrl || "",
           fingerprint: asset.fingerprint || "",

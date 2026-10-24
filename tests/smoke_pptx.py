@@ -69,11 +69,12 @@ def main():
                   const memo=parseServiceItemMemo(item.memo),asset=normalizeServiceAsset(memo.asset);
                   check(memo.note==='Preserve me','metadata overwritten');
                   check(asset.kind==='imported_deck'&&asset.pptx.url===source&&asset.slides.length===4,'asset lost');
+                  check(asset.original.name===file.name&&asset.original.format==='pptx'&&asset.original.url===source&&asset.original.sha256===await presenterPptxDigest(await file.arrayBuffer()),'PPTX original metadata lost');
                   check(asset.slides[0].pptx.clicks===1&&asset.slides[2].pptx.clicks===0,'click/auto counts');
                   const slides=presenterImportedDeckSlidesFromAsset(asset,item,{sectionKey:'sermon'},0,'PPT','자료');
                   check(slides.length===4&&slides[0].pptx.url===source,'presenter build');
                   const persisted=normalizeServiceDocumentSlides(slides);
-                  check(persisted[0].pptx.page===0&&persisted[0].asset.pptx.url===source,'document round trip');
+                  check(persisted[0].pptx.page===0&&persisted[0].asset.pptx.url===source&&persisted[0].asset.original.sha256===asset.original.sha256,'document round trip');
                   window.pp={serviceId:service.id,index:0,slides};
                   let moved=applyPresenterActionToPayload(pp,'next');
                   check(moved.index===0&&presenterPptxStep(moved)===1,'click skipped');

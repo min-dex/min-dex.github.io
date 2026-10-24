@@ -89,9 +89,9 @@ async function fetchPresenterPptxBytes(url, limit) {
 }
 
 async function readPresenterPptxSource(source) {
-  if (!source.pathname.endsWith(".pptx.parts.json")) return fetchPresenterPptxBytes(source.href, PRESENTER_PPTX_MAX_BYTES);
+  if (!/\.(?:pptx|key)\.parts\.json$/.test(source.pathname)) return fetchPresenterPptxBytes(source.href, PRESENTER_PPTX_MAX_BYTES);
   const manifest = JSON.parse(new TextDecoder().decode(await fetchPresenterPptxBytes(source.href, 32768)));
-  if (manifest.format !== "mindex-pptx-parts-v1" || !Number.isSafeInteger(manifest.size)
+  if (!["mindex-pptx-parts-v1", "mindex-deck-parts-v1"].includes(manifest.format) || !Number.isSafeInteger(manifest.size)
       || manifest.size <= 0 || manifest.size > PRESENTER_PPTX_MAX_BYTES || !Array.isArray(manifest.parts)
       || manifest.parts.length !== Math.ceil(manifest.size / PRESENTER_PPTX_PART_BYTES)) {
     throw new Error("PPT 저장 정보를 확인해 주세요.");
@@ -124,7 +124,8 @@ async function readPresenterPptxSource(source) {
 }
 
 async function uploadPresenterPptxSource(file, upload) {
-  if (file.size <= PRESENTER_PPTX_SINGLE_BYTES) return upload(file, "source.pptx");
+  const extension = /\.key$/i.test(file.name) ? "key" : "pptx";
+  if (file.size <= PRESENTER_PPTX_SINGLE_BYTES) return upload(file, `source.${extension}`);
   const parts = [];
   for (let offset = 0; offset < file.size; offset += PRESENTER_PPTX_PART_BYTES) {
     const blob = file.slice(offset, offset + PRESENTER_PPTX_PART_BYTES, "application/octet-stream");
@@ -133,7 +134,7 @@ async function uploadPresenterPptxSource(file, upload) {
     parts.push({ url, size: blob.size, sha256 });
     showToast(`PPT 올리는 중 · ${Math.min(100, Math.round((offset + blob.size) / file.size * 100))}%`, "info");
   }
-  return upload(new Blob([JSON.stringify({ format: "mindex-pptx-parts-v1", size: file.size, parts })], { type: "application/json" }), "source.pptx.parts.json");
+  return upload(new Blob([JSON.stringify({ format: extension === "pptx" ? "mindex-pptx-parts-v1" : "mindex-deck-parts-v1", size: file.size, parts })], { type: "application/json" }), `source.${extension}.parts.json`);
 }
 
 async function loadPresenterPptx(url) {
@@ -531,18 +532,24 @@ async function importPresenterPptx(input, existingItem = null) {
   const serviceId = input?.dataset?.serviceId || state.selectedServiceId;
   if (!file || !serviceId) return false;
   if (presenterPptxImports.has(serviceId)) { showToast("PPT 삽입을 마친 뒤 다시 선택해 주세요.", "info"); return false; }
-  if (!/\.pptx$/i.test(file.name) || file.size > PRESENTER_PPTX_MAX_BYTES) { showToast("PPTX 파일을 500MB 이하로 선택해 주세요.", "error"); input.value = ""; return false; }
+  if (!/\.(key|pptx)$/i.test(file.name) || !file.size || file.size > PRESENTER_PPTX_MAX_BYTES) { showToast("Keynote 또는 PPTX 파일을 500MB 이하로 선택해 주세요.", "error"); input.value = ""; return false; }
   if (!state.client?.storage) { showToast("파일 저장소 연결을 확인해 주세요.", "error"); input.value = ""; return false; }
+  if (!existingItem && input.dataset.serviceItemIndex !== undefined) existingItem = getServiceItems(serviceId)[Number(input.dataset.serviceItemIndex)] || null;
+  if (input.dataset.serviceItemIndex !== undefined && !existingItem) { showToast("자료를 연결할 항목이 변경됐습니다. 다시 선택해 주세요.", "error"); input.value = ""; return false; }
   presenterPptxImports.add(serviceId);
   input.disabled = true;
-  if (!existingItem && input.dataset.serviceItemIndex !== undefined) existingItem = getServiceItems(serviceId)[Number(input.dataset.serviceItemIndex)] || null;
   let parsed, item = existingItem, saveAttempted = false;
+  const client = state.client, project = state.config.url;
+  const service = state.services.find(row => row.id === serviceId);
+  const sourceSignature = JSON.stringify(getServiceItems(serviceId));
+  const unchanged = () => service && state.services.includes(service) && client === state.client && project === state.config.url && serviceId === state.selectedServiceId
+    && sourceSignature === JSON.stringify(getServiceItems(serviceId));
   const previousMemo = existingItem?.memo;
   const paths = [];
   const upload = async (blob, name) => {
     const path = `services/${String(serviceId).replace(/[^a-zA-Z0-9_-]/g, "")}/pptx/${crypto.randomUUID()}/${name}`;
-    const bucket = state.client.storage.from(PRESENTER_MEDIA_STORAGE_BUCKET);
-    const { error } = await bucket.upload(path, blob, { contentType: blob.type || "application/vnd.openxmlformats-officedocument.presentationml.presentation", cacheControl: PRESENTER_MEDIA_CACHE_CONTROL, upsert: false });
+    const bucket = client.storage.from(PRESENTER_MEDIA_STORAGE_BUCKET);
+    const { error } = await bucket.upload(path, blob, { contentType: blob.type || (/\.key$/i.test(name) ? "application/vnd.apple.keynote" : "application/octet-stream"), cacheControl: PRESENTER_MEDIA_CACHE_CONTROL, upsert: false });
     if (error) throw error;
     paths.push(path);
     const url = bucket.getPublicUrl(path)?.data?.publicUrl;
@@ -550,13 +557,24 @@ async function importPresenterPptx(input, existingItem = null) {
     return url;
   };
   try {
-    showToast("PPT를 검사하고 있습니다.", "info");
-    parsed = await parsePresenterPptx(new Uint8Array(await file.arrayBuffer()));
-    const { deck, runtime } = parsed;
-    if (!window.confirm(`${file.name} · ${deck.slides.length}장\n\n기본 나타내기·사라지기·이동 효과와 클릭 순서를 재생합니다. 포함된 영상·음원을 함께 재생합니다. 복잡한 효과·글꼴은 PowerPoint와 다를 수 있어 송출 전 확인이 필요합니다.\n\n원본 PPTX(메모·숨긴 장 포함)와 미리보기를 기존 공개 자료 저장소에 올려 이 예배에 연결할까요?`)) return false;
+    const isKeynote = /\.key$/i.test(file.name);
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const sha256 = await presenterPptxDigest(bytes);
+    let deck, runtime;
+    if (!isKeynote) {
+      showToast("PPT를 검사하고 있습니다.", "info");
+      parsed = await parsePresenterPptx(bytes);
+      ({ deck, runtime } = parsed);
+    }
+    const details = isKeynote
+      ? "Keynote 원본을 변환하지 않고 보존합니다. 웹에서 Keynote 효과를 직접 재생하지는 못하며, 원본을 내려받아 Keynote에서 열 수 있습니다."
+      : `${deck.slides.length}장 · 기본 효과와 포함된 영상·음원을 재생합니다. 복잡한 효과·글꼴은 PowerPoint와 다를 수 있어 송출 전 확인이 필요합니다.`;
+    if (!window.confirm(`${file.name}\n\n${details}\n\n원본 파일(메모·숨긴 장 포함)${isKeynote ? '' : '과 미리보기'}을 기존 공개 자료 저장소에 올려 이 예배에 연결할까요?`)) return false;
+    if (!unchanged()) throw new Error("자료를 준비하는 동안 예배나 입력이 변경됐습니다. 다시 선택해 주세요.");
     const sourceUrl = await uploadPresenterPptxSource(file, upload);
+    const original = { format: isKeynote ? "key" : "pptx", url: sourceUrl, name: file.name, size: file.size, sha256 };
     const slides = [];
-    for (let page = 0; page < deck.slides.length; page += 1) {
+    for (let page = 0; page < (deck?.slides.length || 0); page += 1) {
       const slide = deck.slides[page];
       const thumbnail = await runtime.slideToPng(deck, slide, Math.min(1, 480 / deck.width));
       const url = await upload(thumbnail, `slide-${page + 1}.png`);
@@ -566,6 +584,7 @@ async function importPresenterPptx(input, existingItem = null) {
       } });
       if (page === 0 || (page + 1) % 10 === 0) showToast(`PPT 준비 중 · ${page + 1}/${deck.slides.length}장`, "info");
     }
+    if (!unchanged()) throw new Error("자료를 준비하는 동안 예배나 입력이 변경됐습니다. 다시 선택해 주세요.");
     if (item) {
       item = getServiceItems(serviceId).find(candidate => candidate.id === item.id);
       if (!item || item.memo !== previousMemo) throw new Error("파일을 준비하는 동안 항목이 변경됐습니다. 현재 내용을 확인하고 다시 선택해 주세요.");
@@ -574,10 +593,11 @@ async function importPresenterPptx(input, existingItem = null) {
     }
     if (!item) throw new Error("PPT를 연결할 항목을 찾지 못했습니다.");
     const memo = parseServiceItemMemo(item.memo);
-    memo.elementType = "image";
-    memo.componentType = "image";
+    memo.elementType = isKeynote ? "file" : "image";
+    memo.componentType = isKeynote ? "file" : "image";
     memo.inputMode = "asset";
-    memo.asset = normalizeServiceAsset({ kind: "imported_deck", name: file.name, url: slides[0].url, pptx: { url: sourceUrl }, slides });
+    memo.asset = normalizeServiceAsset({ kind: isKeynote ? "file" : "imported_deck", name: file.name,
+      url: isKeynote ? sourceUrl : slides[0].url, original, ...(!isKeynote ? { pptx: { url: sourceUrl }, slides } : {}) });
     item.memo = serializeServiceItemMemo(memo);
     item._worshipElementTemplateModified = true;
     state.dirty.service = true;
@@ -587,13 +607,13 @@ async function importPresenterPptx(input, existingItem = null) {
     saveAttempted = true;
     const saved = await saveServiceItemMutation(serviceId, index, { silent: true, renderAfterSave: false, throwOnError: true });
     if (!saved) throw new Error("예배 저장을 완료하지 못했습니다. 저장 상태를 확인하고 다시 저장해 주세요.");
-    showToast(`PPT ${slides.length}장을 연결했습니다. 다음 버튼으로 클릭 효과를 진행할 수 있습니다.`);
+    showToast(isKeynote ? "Keynote 원본을 보존했습니다. 원본 다운로드로 다시 열 수 있습니다." : `PPT ${slides.length}장을 연결했습니다. 다음 버튼으로 클릭 효과를 진행할 수 있습니다.`);
     return true;
   } catch (error) {
     // An RPC timeout may already have committed. Keep its immutable media and
     // pending draft for the existing atomic retry/reconciliation workflow.
     if (!saveAttempted && paths.length) {
-      try { await state.client.storage.from(PRESENTER_MEDIA_STORAGE_BUCKET).remove(paths); } catch {}
+      try { await client.storage.from(PRESENTER_MEDIA_STORAGE_BUCKET).remove(paths); } catch {}
     }
     showToast(error?.message || "PPT를 삽입하지 못했습니다.", "error");
     return false;
@@ -606,4 +626,36 @@ async function importPresenterPptx(input, existingItem = null) {
     renderServiceList();
     updateSaveState();
   }
+}
+
+
+function renderPresenterDeckOriginalActions(asset, serviceId, itemId) {
+  if (!asset.original && !asset.pptx) return "";
+  return `<button class="btn secondary" type="button" data-deck-original-download data-service-id="${escapeAttr(serviceId)}" data-deck-original-item-id="${escapeAttr(itemId)}">원본 다운로드</button>`;
+}
+
+async function downloadPresenterDeckOriginal(event) {
+  const button = event.target.closest("[data-deck-original-download]");
+  if (!button || button.disabled) return;
+  event.preventDefault();
+  const item = getServiceItems(button.dataset.serviceId).find(row => row.id === button.dataset.deckOriginalItemId);
+  const asset = normalizeServiceAsset(parseServiceItemMemo(item?.memo).asset);
+  const original = asset.original;
+  if (!original && !asset.pptx) return;
+  button.disabled = true;
+  let objectUrl;
+  try {
+    const url = new URL(original?.url || asset.pptx.url, location.href);
+    if (!["https:", "http:"].includes(url.protocol) || url.username || url.password) throw new Error("원본 파일 주소를 확인해 주세요.");
+    const bytes = await readPresenterPptxSource(url);
+    if (original && (bytes.byteLength !== original.size || await presenterPptxDigest(bytes) !== original.sha256)) {
+      throw new Error("원본 파일 검증에 실패했습니다. 다시 내려받거나 자료를 확인해 주세요.");
+    }
+    objectUrl = URL.createObjectURL(new Blob([bytes], { type: original?.format === "key" ? "application/vnd.apple.keynote" : "application/vnd.openxmlformats-officedocument.presentationml.presentation" }));
+    const anchor = document.createElement("a");
+    anchor.href = objectUrl;
+    anchor.download = original?.name || asset.name || "source.pptx";
+    document.body.append(anchor);anchor.click();anchor.remove();
+  } catch (error) { showToast(error.message || "원본을 내려받지 못했습니다.", "error"); }
+  finally { button.disabled = false;if (objectUrl) setTimeout(() => URL.revokeObjectURL(objectUrl), 60000); }
 }

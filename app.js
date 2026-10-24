@@ -8673,6 +8673,7 @@ function handleDetailClick(event) {
     return;
   }
   if (event.target.closest("button:disabled")) return;
+  if (event.target.closest("[data-deck-original-download]")) { void downloadPresenterDeckOriginal(event); return; }
   const serviceRetry = event.target.closest("[data-service-load-retry]");
   if (serviceRetry) {
     serviceViewLoadErrors.delete(serviceRetry.dataset.serviceLoadRetry);
@@ -13043,7 +13044,7 @@ async function importServiceItemDeckAssetFile(input) {
   const index = Number(input?.dataset?.serviceItemIndex);
   const item = getServiceItems(serviceId)[index];
   const targetItem = currentServiceItemForMutation(serviceId, item);
-  if (/\.pptx$/i.test(file?.name || "")) return importPresenterPptx(input, targetItem);
+  if (/\.(key|pptx)$/i.test(file?.name || "")) return importPresenterPptx(input, targetItem);
   const desktop = window.mindexElectron;
   const inputPath = desktop?.filePathForFile?.(file) || file?.path || "";
   if (!file || !targetItem || !isDeckAssetFile(file)) {
@@ -29368,7 +29369,7 @@ function renderPresenterAssetUpload(item, index, memo, serviceId) {
       ${reference ? "data-presenter-reference-media-file" : "data-service-item-asset-file"}
       data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${index}" />
     <i data-lucide="upload"></i><span>${kind === "image" ? "이미지 추가" : "파일 선택"}</span>
-  </label>${asset.pptx ? `<label class="svc-reference-media-upload"><input type="file" accept=".pptx" data-presenter-pptx-file data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${index}" aria-label="PPT 교체" /><i data-lucide="presentation"></i><span>PPT 교체</span></label>` : ""}`;
+  </label>${renderPresenterDeckOriginalActions(asset, serviceId, item.id)}${asset.pptx || asset.original ? `<label class="svc-reference-media-upload"><input type="file" accept=".key,.pptx" data-presenter-pptx-file data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${index}" aria-label="원본 자료 교체" /><i data-lucide="presentation"></i><span>자료 교체</span></label>` : ""}`;
 }
 
 function renderPresenterServiceAssetInput(item, index, memo, options = {}) {
@@ -29377,8 +29378,8 @@ function renderPresenterServiceAssetInput(item, index, memo, options = {}) {
   const serviceId = item.service_id || state.selectedServiceId;
   if (isPresenterReferenceMediaItem(item, memo)) {
     const detectedKind = presenterReferenceMediaKindForSource(asset.url);
-    const kind = asset.pptx ? "imported_deck" : detectedKind || (["image", "video", "audio"].includes(elementType) ? elementType : "image");
-    const needsKindSelection = Boolean(asset.url && !detectedKind);
+    const kind = asset.original?.format === "key" ? "file" : asset.pptx ? "imported_deck" : detectedKind || (["image", "video", "audio"].includes(elementType) ? elementType : "image");
+    const needsKindSelection = Boolean(asset.url && !detectedKind && !asset.original);
     return `
       <div class="svc-reference-media-input">
         ${kind === "video" ? renderPresenterInputVideoControls(asset, [serviceId,item.id||index]) : ""}
