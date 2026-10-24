@@ -98,7 +98,7 @@
   return {read,async execute(action){
    if(remoteBusy)throw Error('다른 조작을 처리 중입니다.');
    remoteBusy=true;remoteRevision++;
-   try{return await perform(action);}finally{remoteBusy=false;remoteRevision++;}
+   try{return await perform(action);}finally{remoteBusy=false;remoteRevision++;registry?.notify();}
   }};
  }
  // Each actual output gets its own ephemeral registry identity; no PC registration.
@@ -107,7 +107,7 @@
   if(!registryActive||registry||registryLoading||!state.client||!isPresenterOutputWindowOpen())return;
   registryLoading=true;const epoch=registryEpoch;
   try{
-   const {createOutputRegistry}=await import('./mindex.remote-admin.mjs?v=3');
+   const {createOutputRegistry}=await import('./mindex.remote-admin.mjs?v=4');
    if(!registryActive||epoch!==registryEpoch)return;
    registry=createOutputRegistry(()=>{
     const p=state.presenter;
@@ -122,6 +122,6 @@
  window.addEventListener('pagehide',event=>{registryActive=false;registryEpoch++;clearInterval(registryTimer);if(event.persisted)registry?.suspend();else{registry?.close();registry=null;}});
  window.addEventListener('pageshow',()=>{if(registryActive)return;registryActive=true;registryTimer=setInterval(ensureRegistry,2000);void registry?.resume();void ensureRegistry();});
  // Read-only adapter entry is also used by isolated regression tests.
- window.MindexRemote={adapter,buttonLabel,open:()=>panel.showModal()};
+ window.MindexRemote={adapter,buttonLabel,notify:()=>registry?.notify(),open:()=>panel.showModal()};
  paintPanel();
 })();

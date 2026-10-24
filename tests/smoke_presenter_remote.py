@@ -121,6 +121,11 @@ try:
    assert all(button.is_disabled() for button in phone.locator('#videoControls button').all())
    assert phone.locator('#music').bounding_box()['y']<phone.locator('#videoControls').bounding_box()['y']
    assert phone.locator('[data-action=resume]').bounding_box()['y']<phone.locator('#videoControls').bounding_box()['y']
+   # Real PC media hooks fan out promptly without increasing the heartbeat rate.
+   host.evaluate('state.serviceMusic.pending=true;updateServiceMusicTransportControls()');pump(.4)
+   assert phone.locator('#music').inner_text()=='음원 준비 중'
+   host.evaluate('state.serviceMusic.pending=false;updateServiceMusicTransportControls()');pump(.4)
+   assert phone.locator('#music').inner_text()!='음원 준비 중'
    # No audio/media objects on the remote page.
    assert phone.locator('audio,video').count()==0
    assert phone.locator('.slide-preview iframe').count()==2

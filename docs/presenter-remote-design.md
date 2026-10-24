@@ -389,3 +389,15 @@ The connected Remote always shows audio controls before video controls. With no
 video attached, the video section stays visible with `연결된 영상 없음`; its
 commands remain disabled through the existing allowed-action guard. This does
 not create a media element or alter the transport/heartbeat frequency.
+
+### Event-driven Remote state (2026-10-24)
+
+Presenter payload publication, audio control rendering, video health changes and
+completed Remote commands notify all linked administrator/guest sessions. Each
+session coalesces changes for 40ms and sends only changed snapshots; there is no
+new polling or DB write. The existing 1s heartbeat remains the recovery path,
+with unchanged freshness, revision/ticket, pending-command and expiry guards.
+Encryption/dispatch is ordered so a fast state event cannot overtake a command
+result. Closing a session clears queued notification timers. Unit coverage turns
+off heartbeats and checks two-peer fan-out, unchanged-state suppression, burst
+coalescing and close cleanup. Actual network/physical-device latency varies.

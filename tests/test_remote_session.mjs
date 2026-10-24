@@ -60,3 +60,28 @@ for(const failure of ['CHANNEL_ERROR','TIMED_OUT','CLOSED']){
 }
 await until(()=>channels.size===0);
 console.log('PASS transport error/timeout/close, idempotent cleanup and failed execution feedback');
+// Event notifications work without any heartbeat, fan out to independent peers,
+// coalesce bursts and do not send unchanged state or survive close.
+const savedInterval=globalThis.setInterval;
+globalThis.setInterval=(fn,ms,...args)=>ms===1000?null:savedInterval(fn,ms,...args);
+const fast=[];let position=0,seenA=-1,seenB=-1;
+try{
+ const read=()=>({live:true,index:position});
+ const a=await openRemote({client,host:true,read,execute:()=>{position++;for(const h of fast)h.notify();}});fast.push(a);
+ const b=await openRemote({client,host:true,read,execute:()=>{position++;for(const h of fast)h.notify();}});fast.push(b);
+ const x=await openRemote({client,code:a.code,onState:s=>{if(s)seenA=s.index;}});
+ const y=await openRemote({client,code:b.code,onState:s=>{if(s)seenB=s.index;}});
+ try{
+  await until(()=>x.usable&&y.usable);
+  const before=packets.length,start=performance.now();position=4;
+  for(let i=0;i<50;i++)for(const h of fast)h.notify();
+  await until(()=>seenA===4&&seenB===4);
+  assert(performance.now()-start<500,'event update waited for heartbeat');
+  assert.equal(packets.length-before,2,'burst must send once per peer');
+  for(const h of fast)h.notify();await wait(80);assert.equal(packets.length-before,2,'unchanged state sent');
+  await x.command('next');await until(()=>seenA===5&&seenB===5&&x.usable);
+  for(const h of fast){h.notify();h.close();}
+  const closedCount=packets.length;await wait(80);assert.equal(packets.length,closedCount);
+ }finally{x.close();y.close();}
+}finally{for(const h of fast)h.close();globalThis.setInterval=savedInterval;}
+console.log('PASS immediate two-peer state updates without heartbeat, coalescing, deduplication, command fan-out and timer cleanup');

@@ -29693,6 +29693,7 @@ function renderPresenterVideoHealthControl(serviceId) {
 }
 
 function syncPresenterVideoHealthControl() {
+  window.MindexRemote?.notify();
   renderGlobalPlaybackControls();
   document.querySelectorAll("[data-presenter-video-health]").forEach((host) => {
     const html = renderPresenterVideoHealthControl(host.dataset.serviceId);
@@ -29900,6 +29901,7 @@ function renderServiceSlotMusic(context) {
 }
 
 function updateServiceMusicTransportControls() {
+  window.MindexRemote?.notify();
   renderGlobalPlaybackControls();
   syncPresenterFocusMusic();
   const music = state.serviceMusic;
@@ -33127,6 +33129,7 @@ function stopPresenterOutputWindowMonitor() {
 }
 
 function renderPresenterControlState(serviceId = state.selectedServiceId) {
+  window.MindexRemote?.notify();
   const result = withServiceItemsScope(() => renderPresenterControlStateUnscoped(serviceId));
   syncPresenterFocusView();
   return result;

@@ -3284,6 +3284,7 @@ function publishPresenterPayload(payload, options = {}) {
     snapshotId: previousSnapshotId, messageId: previousMessageId, ...content } = payload;
   const contentKey = JSON.stringify(content);
   const messageId = `${presenterTransportSession}:${++presenterTransportSequence}`;
+  window.MindexRemote?.notify();
   const compact = !options.force && state.presenter.outputTransportVersion === 1
     && presenterTransportSnapshot?.contentKey === contentKey;
   if (compact) {
