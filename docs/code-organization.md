@@ -445,3 +445,6 @@ Input media rows use `mindex.presenter-media-state.js` for compact rendering and
 existing transport actions. `mindex.song-timing.js` owns the shared audio
 service/element/source predicate, used for initial render, live updates and seek
 validation. Input rows create no preview players or playback observers.
+
+The same controller preparation skin owns the screen-only empty song-form hint
+tone. It preserves output exclusion, real invalid-field styling and focus outlines.

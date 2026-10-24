@@ -12,3 +12,12 @@
 .global-playback-panel .presenter-video-seek .song-timing-seek-label { grid-column: 1; grid-row: 1; }
 .global-playback-panel [data-presenter-video-seek] { grid-column: 1; grid-row: 2; height: 30px; margin: 0; padding: 0; }
 .global-playback-panel [data-presenter-video-clock] { grid-column: 1; grid-row: 3; }
+
+@media screen {
+  /* An empty song form is an unfinished field, not a malformed entry. */
+  body:not(.presenter-output-body) input.svc-form-hint.is-invalid:placeholder-shown {
+    --ui-field-border: transparent;
+    background-color: color-mix(in srgb, var(--warn-bg) 58%, transparent);
+    border-color: transparent;
+  }
+}

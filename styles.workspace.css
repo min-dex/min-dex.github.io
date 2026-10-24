@@ -5785,12 +5785,6 @@ body[data-module="praise"] .praise-forms-panel .version-compare-column {
     background-color: var(--warn-bg);
     border-color: var(--warn);
   }
-  /* An empty song form is an unfinished field, not a malformed entry. */
-  body:not(.presenter-output-body) input.svc-form-hint.is-invalid:placeholder-shown {
-    --ui-field-border: transparent;
-    background-color: color-mix(in srgb, var(--warn-bg) 58%, transparent);
-    border-color: transparent;
-  }
   body:not(.presenter-output-body) :is(input, textarea, select):disabled {
     --ui-field-cursor: not-allowed;
     cursor: not-allowed;
