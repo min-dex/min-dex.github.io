@@ -48,8 +48,8 @@ try:
     const crossSections=[verse('3:16'),{...verse('4:1'),elementId:'bible-2',sectionKey:'sermon'}, {...verse('5:1'),elementId:'bible-3',sectionKey:'citation'}];
     const crossBefore=JSON.stringify(crossSections);
     const sections=groupPresenterSlidesBySection(crossSections,'fixture');
-    const crossColors=sections.flatMap(g=>g.subgroups).flatMap(g=>[...renderPresenterBoardSlideBlocks(g.slides,-1,'fixture',g.scriptureColorStart).matchAll(/data-form-color="([a-z-]+)"/g)].map(m=>m[1]));
-    check(crossColors.join()==='bible-light,bible-dark,bible-light','Bible alternation reset at section/element boundary');
+    const crossColors=sections.flatMap(g=>g.subgroups).flatMap(g=>[...renderPresenterBoardSlideBlocks(g.slides,-1,'fixture',g.scriptureColorStart).matchAll(/data-scripture-tone="([a-z-]+)"/g)].map(m=>m[1]));
+    check(crossColors.join()==='default,accent,default','Bible alternation reset at section/element boundary');
     check(JSON.stringify(crossSections)===crossBefore,'Bible output changed');
     const before=JSON.stringify(entries), blocks=presenterBoardSlideBlocks(entries);
     check(blocks.map(b=>b.entries.length).join()==='2,1,1,1,2,1,1','group boundaries');
@@ -78,7 +78,7 @@ try:
     const palette=document.createElement('div');palette.id='palette';palette.className='svc-board-grid';
     palette.innerHTML=colorHtml+renderPresenterBoardSlideBlocks(entries.slice(5),-1,'fixture');
     document.body.prepend(palette);
-    check([...palette.querySelectorAll('.svc-board-slide-block')].slice(-3).map(e=>e.dataset.formColor).join()==='bible-light,bible-dark,bible-light','Bible reference/translation alternation');
+    check([...palette.querySelectorAll('.svc-board-slide-block')].slice(-3).map(e=>e.dataset.scriptureTone).join()==='default,accent,default','Bible reference/translation alternation');
     return 'PASS form boundaries, source/order, grid geometry, plain Title/Int and click targets';
    }'''),flush=True)
    for width in [320,700,1100]:
@@ -95,6 +95,14 @@ try:
        if(plain.querySelectorAll('.svc-board-block-background').length<2)throw Error('lyric group backgrounds lost');
        const palette=document.getElementById('palette');
        const formBlocks=[...palette.querySelectorAll('.svc-board-slide-block')];
+       const scriptureBlocks=[...palette.querySelectorAll('[data-scripture-tone]')];
+       const probe=document.createElement('span');palette.append(probe);
+       for(const block of scriptureBlocks){
+         if(block.querySelector('.svc-board-block-background'))throw Error('scripture background remains');
+         probe.style.color=block.dataset.scriptureTone==='accent'?'var(--accent)':'var(--ink-2)';
+         if(getComputedStyle(block.querySelector('.svc-slide-form-badge')).color!==getComputedStyle(probe).color)throw Error('scripture text tone');
+       }
+       probe.remove();
        const color=block=>getComputedStyle(block).getPropertyValue('--form-color').trim();
        const expected=['#d65a62','#248449','#4f65d5','#21a6d2','#b864b5','#c5a12d'];
        if([0,5,6,7,8,9].some((i,j)=>color(formBlocks[i])!==expected[j]))throw Error('form palette');
@@ -120,7 +128,7 @@ try:
        if(actual.some((box,i)=>box.some((v,j)=>Math.abs(v-original[i][j])>0.1)))throw Error('original grid geometry changed');
        baseline.remove();
        const backgrounds=[...grid.querySelectorAll('.svc-board-block-background')];
-       if(backgrounds.length<6 || backgrounds.some(e=>getComputedStyle(e).position!=='absolute'||getComputedStyle(e).pointerEvents!=='none'))throw Error('background enters layout or intercepts clicks');
+       if(backgrounds.length<3 || backgrounds.some(e=>getComputedStyle(e).position!=='absolute'||getComputedStyle(e).pointerEvents!=='none'))throw Error('background enters layout or intercepts clicks');
      }''')
      assert page.evaluate('''()=>[...document.querySelectorAll('.svc-board-grid,.svc-board-slide-block')].every(e=>e.scrollWidth<=e.clientWidth+1)'''),(engine,width,theme)
      if width==1100:page.locator('#palette').screenshot(path=f'/tmp/mindex-slide-blocks-{engine}-{theme}.png')

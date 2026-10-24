@@ -9566,6 +9566,7 @@ function handleDetailInput(event) {
   if (serviceField) {
     markServiceInputFeedbackChanged(serviceField);
     syncServiceFormInputError(serviceField);
+    syncServiceScriptureInputError(serviceField);
     if (isDeferredServiceTextInput(serviceField)) {
       if (isServiceSongTitleInputField(serviceField)) {
         scheduleServiceSongPickerPreview(serviceField);
@@ -9775,6 +9776,7 @@ function handleDetailChange(event) {
       return;
     }
     updateServiceItemField(serviceField);
+    syncServiceVersionFormErrors(serviceField);
     if (serviceField.matches("select")) {
       saveCommittedServiceItem(serviceField.dataset.serviceItemIndex, serviceField.dataset.serviceId || state.selectedServiceId, serviceItemSelectSaveOptions(serviceField));
     }
@@ -29268,6 +29270,7 @@ function renderPresenterServiceScriptureInput(item, index, memo, service = null)
     : draftValue === null
       ? normalizeServiceItemReferenceSpacing(memo.scriptureReference || item.raw_title || "")
       : draftValue;
+  const draftProblem = serviceScriptureDraftProblem(item, value);
   const citation = isPresenterCitationScriptureItem(item);
   const selectedTranslationId = serviceItemBibleTranslation(item, memo)?.id || "";
   const perReferencePayloads = normalizeServiceScriptureReferencePayloads(memo.scriptureReferencePayloads, references);
@@ -29307,7 +29310,7 @@ function renderPresenterServiceScriptureInput(item, index, memo, service = null)
   return `
     <label class="svc-presenter-input-field svc-presenter-input-field--scripture">
       <div class="svc-presenter-input-control-wrap">
-        <input class="svc-presenter-input-control${serviceItemScriptureInputInvalid(item) ? " is-invalid" : ""}" type="text"
+        <input class="svc-presenter-input-control${draftProblem ? " is-invalid" : ""}" type="text" aria-invalid="${Boolean(draftProblem)}" title="${escapeAttr(draftProblem)}"
           data-service-item-field="raw_title" data-service-item-index="${index}"
           value="${escapeAttr(value)}" list="serviceScriptureOptions" placeholder="말씀 (예: ${serviceItemSupportsScriptureReferenceList(item) ? "렘 3:22; 마 3:11" : "출애굽기 23:14-19"})" aria-label="${escapeAttr(`${item.label || "성경"} 구절`)}" />
         ${renderServiceItemLinkControl(item, index)}

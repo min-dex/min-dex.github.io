@@ -4695,3 +4695,10 @@ cancellation and background music retention. Unit coverage separately proves
 closed-channel cleanup stops synchronized audio and preserves manual music.
 All tests use synthetic worship data; operational rows and timing profiles are
 not rewritten by these checks or by the fix.
+
+## Scripture controller text tones ·2026-10-24
+
+Scripture reference groups use no background boxes. Only their controller labels
+alternate default ink / current theme accent / default ink across reference
+and translation boundaries. Remove the bible-light/bible-dark gray palette. Song
+form backgrounds, slide numbering/geometry, preview and output remain unchanged.

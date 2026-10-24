@@ -72,6 +72,7 @@ SMOKES = (
     "smoke_future_outline_consistency.py",
     "smoke_legacy_title_restore.py",
     "smoke_song_form_width.py",
+    "smoke_input_feedback_sync.py",
     "smoke_medley_unlink.py",
     "smoke_editor_save_status.py",
     "smoke_service_browse_categories.py",

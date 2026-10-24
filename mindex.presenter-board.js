@@ -1286,9 +1286,9 @@ function renderPresenterBoardSlideBlocks(entries, activeIndex, serviceId, script
     const formType = normalizePresenterFormPresetLabel(block.label).type;
     const plain = !scripture && ["title", "instrumental"].includes(formType);
     const color = scripture
-      ? (scriptureIndex++ % 2 === 0 ? "bible-light" : "bible-dark")
+      ? (scriptureIndex++ % 2 === 0 ? "default" : "accent")
       : ["verse", "pre-chorus", "chorus", "bridge", "coda", "tag"].includes(formType) ? formType : "neutral";
-    const colorAttribute = block.key && !plain ? ` data-form-color="${color}"` : "";
+    const colorAttribute = block.key && !plain ? ` data-${scripture ? "scripture-tone" : "form-color"}="${color}"` : "";
     const thumbs = block.entries.map(({ slide, slideIndex, formLabel }) =>
       renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, formLabel)).join("");
     return block.key
@@ -1303,7 +1303,7 @@ function updatePresenterBoardBlockBackgrounds(host = refs.detailPane) {
     const origin = grid.getBoundingClientRect();
     if (!origin.width) continue;
     for (const block of grid.querySelectorAll(":scope > .svc-board-slide-block")) {
-      if (block.dataset.formPlain === "true") {
+      if (block.dataset.formPlain === "true" || block.dataset.scriptureTone) {
         block.querySelectorAll(":scope > .svc-board-block-background").forEach(background => background.remove());
         continue;
       }
