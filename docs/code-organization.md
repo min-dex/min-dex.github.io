@@ -413,3 +413,14 @@ adapters. It never writes worship, editor drafts or persisted history.
 `mindex.presenter-media-state.js` owns the coalesced video event subscription and
 cleanup; the existing output heartbeat remains the transport. Both load before
 app bootstrap and ship in the desktop asset list.
+
+
+## Praise persistence owner - 2026-10-25
+
+`mindex.praise-storage.js` owns legacy/native Praise saving, lifecycle edits,
+activation and catalog reads. It defines controller functions without startup
+I/O, loads before app bootstrap, and uses the existing editor state boundary.
+`mindex.single-song.js` remains the independent record/catalog/RPC model.
+Late-input retention and offline activation tests cover the extracted owner;
+the runtime-boundary test checks packaging and initialization. Existing main
+file size/coupling ratchets are unchanged.

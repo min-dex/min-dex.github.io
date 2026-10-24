@@ -9,7 +9,7 @@ try:
   for engine in ('chromium','webkit'):
    b=launch_chromium(pw) if engine=='chromium' else pw.webkit.launch(headless=True)
    page=b.new_page();page.route('**/*supabase*/**',lambda r:r.abort());page.route('**/app.runtime.js*',lambda r:r.fulfill(path=str(Path(__file__).resolve().parents[1]/'app.js'),content_type='text/javascript'));page.goto(url+'?mindexSmokeRaw=1')
-   page.wait_for_function("typeof ensureSingleSongActivation==='function'")
+   page.wait_for_function("typeof normalizeServerSong==='function' && typeof ensureSingleSongActivation==='function'")
    print(engine,page.evaluate('''async()=>{
     const check=(v,m)=>{if(!v)throw Error(m)};
     const records=Array.from({length:201},(_,i)=>({id:'ccm-'+String(i+1).padStart(3,'0'),revision:1,metadata:{title:'fixture '+i,praise_types:['ccm']},content:{name:'기본',forms:[]},relations:{same_song:[],related:[]}}));

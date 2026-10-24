@@ -12,7 +12,7 @@ try:
    page.on('pageerror',lambda e:print('PAGE ERROR',str(e),flush=True))
    page.route('**/*supabase*/**',lambda r:r.abort())
    page.route('**/app.runtime.js*',lambda r:r.fulfill(path=str(Path(__file__).resolve().parents[1]/'app.js'),content_type='text/javascript'));page.goto(url+'?mindexSmokeRaw=1')
-   page.wait_for_function("typeof installSingleSongSession==='function' && typeof MindexSingleSong==='object'")
+   page.wait_for_function("typeof normalizeServerSong==='function' && typeof installSingleSongSession==='function' && typeof MindexSingleSong==='object'")
    print(engine,page.evaluate(r'''async()=>{
     const check=(v,m)=>{if(!v)throw Error(m)}, equal=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
     const uid=()=>crypto.randomUUID();

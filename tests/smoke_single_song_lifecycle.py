@@ -11,7 +11,7 @@ try:
    page=browser.new_page()
    page.route('**/*supabase*/**',lambda r:r.abort())
    page.route('**/app.runtime.js*',lambda r:r.fulfill(path=str(Path(__file__).resolve().parents[1]/'app.js'),content_type='text/javascript'));page.goto(url+'?mindexSmokeRaw=1')
-   page.wait_for_function("typeof installSingleSongSession==='function'")
+   page.wait_for_function("typeof normalizeServerSong==='function' && typeof installSingleSongSession==='function'")
    print(engine,page.evaluate(r'''async()=>{
     const check=(v,m)=>{if(!v)throw Error(m)};
     let number=0,attempts=[],lost=false;const rows=new Map(),receipts=new Map();
