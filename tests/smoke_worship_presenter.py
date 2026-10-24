@@ -5405,9 +5405,9 @@ def main() -> int:
                             },
                         },
                     ]
-                    and form_preset_state["missingWarnings"] == ["Bridge 없음"]
-                    and "Bridge 없음" not in form_preset_state["missingPreviewText"]
-                    and form_preset_state["warningChipText"] == "Bridge 없음"
+                    and form_preset_state["missingWarnings"] == ["B 없음"]
+                    and "B 없음" not in form_preset_state["missingPreviewText"]
+                    and form_preset_state["warningChipText"] == "B 없음"
                     and form_preset_state["warningLayout"]["headDisplay"] in ("flex", "inline-flex")
                     and 0 <= form_preset_state["warningLayout"]["chipGap"] <= 16
                 ):
