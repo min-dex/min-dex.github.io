@@ -327,11 +327,30 @@ private IIFE-local helpers may share names. The size audit and dependency/deskto
 packaging test are part of the required Cloud gate. Stalled-download recovery
 covers every extracted module and the new stylesheet in both browser engines.
 
-The broad live-read smoke runner currently blocks startup's existing server-state
-read and monitor registration RPCs. Those suites are recorded as blocked rather
-than passed; operational writes remain forbidden. Offline fixture coverage and
-the required Linux gate are independent verification, not a claim that every
-production record or physical output device was retested.
+The live-read smoke runner keeps production mutations blocked. Startup server
+state and monitor registration/presence use an ephemeral per-browser-context
+fixture instead of contacting their production RPCs. Worship aggregate reads
+are rewritten to GET in the browser, preserving PostgREST read-only transactions
+without a serial Python HTTP proxy. Business songs, services and scripture are
+still real read-only data. Fixture counts are reported separately from actual
+reads; a blocked mutation or unknown RPC fails the run. The optional `--fail-fast`
+mode and redacted progress labels diagnose the first failure without claiming
+that skipped later checks passed. Fixture revision/replay/isolation and the
+negative network guard have dedicated coverage. WebSocket routes remain local
+mocks without connecting to a server; calling synchronous `close()` inside the
+Playwright routing callback deadlocks the driver and is explicitly regression-tested.
+
+`python3 tests/run_live_readonly_smoke.py smoke_live_readonly_core` exercises real
+startup, service hydration and slide rendering while comparing canonical loaded
+service/section/element/song data before and after. Projected editor items may gain
+normal rendering placeholders/indices; they are not canonical saved rows. This
+explicit live test is separate from the offline CI gate. The old full suites
+remain available for diagnosis, but their October13 PASS receipt above is
+historical: current home/calendar typography, title forms, asynchronous launch,
+preview selectors and responsive layout expectations require a separate refresh.
+Their current failures/timeouts must not be reported as PASS. Simulated output
+registry/broadcast writes in those broad suites are still denied by the guard;
+this change does not grant a production write exception.
 
 
 A retained older HTML shell can discover a newer release whose dependency list

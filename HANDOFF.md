@@ -1482,3 +1482,20 @@ repeatable as one form; native unit IDs and content remain intact. Direct-input
 paragraphs and score pages preserve their boundaries. Legacy explicit V/C mapping
 for unstructured lyrics remains. No operational data writes. Scoped browser and
 normalization checks pass; required branch/main/Pages verification pending.
+
+## Read-only guard and desktop security repair ·2026-10-24
+
+`codex/readonly-smoke-desktop-repair`: startup state/monitor RPCs are local,
+per-context fixtures; unknown RPCs/canonical writes stay blocked. Aggregate
+worship reads use browser GET, and local WebSocket mocks avoid synchronous-close
+deadlock. Added guard/CAS/replay/isolation regression tests to governance gate.
+The explicit core live check read8 services/157 projected items, rendered298
+slides, preserved canonical loaded records,40 real reads incl8 aggregate GET,
+blocked0/production writes0. Full old app/presenter suites still contain outdated
+UI and fake-output expectations; their failures are recorded, not hidden or PASS.
+
+Electron43.8.1, Undici6.29.1/7.30.1 and fast-uri3.1.9 retain existing major lines.
+Audit10→0, frozen install, updater/preflight/runtime-package, guard7 tests,
+mutation denial9, CI partition/failure4, check-scope8 and size audit pass locally.
+No production save/schema/permission changes. Final4-shard gate, actual Mac/Win
+unsigned installer artifacts and publication evidence remain pending.

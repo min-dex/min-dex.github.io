@@ -7,3 +7,7 @@ allowBuilds:
 # v4 preserves bootstrap/createGlobalProxyAgent and removes that logger dependency.
 overrides:
   'global-agent@3.0.0': 4.1.3
+
+  # Security fixes within the existing transitive major versions (Oct 2026).
+  'undici@6.29.0': 6.29.1
+  'fast-uri@3.1.8': 3.1.9

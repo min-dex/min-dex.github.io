@@ -1444,7 +1444,7 @@ def main() -> int:
                     })()
                     """
                 )
-                expected_home_order = ["예배", "최근 예배", "공예배", "부서 예배", "기타 예배", "역대 콘티", "다가오는 예배"]
+                expected_home_order = ["예배", "최근 예배", "공예배", "부서 예배", "기타 예배", "다가오는 예배"]
                 if (
                     home_order == expected_home_order
                     and not home_visibility_state["hasActivities"]
@@ -1457,36 +1457,27 @@ def main() -> int:
                     fail("home-sidebar-hierarchy", json.dumps({"order": home_order, "visibility": home_visibility_state}, ensure_ascii=False))
 
                 home_design_state = page.evaluate(
-                    """
-                    (() => {
-                      const dashboard = document.querySelector('.service-dashboard');
-                      const weekBoard = document.querySelector('.service-week-board');
-                      const recentCards = [...document.querySelectorAll('.service-dashboard .service-week-card')];
-                      return {
-                        hasDashboard: Boolean(dashboard),
-                        weekDays: weekBoard?.children.length || 0,
-                        recentCards: recentCards.length,
-                        text: dashboard?.innerText || '',
-                        overflow: Math.max(document.documentElement.scrollWidth - window.innerWidth, document.body.scrollWidth - window.innerWidth)
-                      };
-                    })()
-                    """
+                    """() => ({
+                      hasOverview: Boolean(document.querySelector('.home-start .home-overview')),
+                      modules: [...document.querySelectorAll('.home-module h2')].map(n=>n.textContent.trim()),
+                      values: [...document.querySelectorAll('.home-module-value')].map(n=>n.textContent.trim()),
+                      duplicateCatalogue: Boolean(document.querySelector('.home-start .service-week-board, .home-start .service-presenter-controls')),
+                      text: document.querySelector('.home-start')?.innerText || '',
+                      overflow: Math.max(document.documentElement.scrollWidth-window.innerWidth, document.body.scrollWidth-window.innerWidth)
+                    })"""
                 )
-                if (
-                    home_design_state["hasDashboard"]
-                    and home_design_state["weekDays"] == 7
-                    and home_design_state["recentCards"] > 0
-                    and "최근 예배" in home_design_state["text"]
-                    and "이번 주" in home_design_state["text"]
-                    and home_design_state["overflow"] <= 2
-                ):
-                    pass_("home-design-shell", json.dumps(home_design_state, ensure_ascii=False))
+                if (home_design_state['hasOverview']
+                    and home_design_state['modules'] == ['예배','주보','찬양','말씀','운영']
+                    and len(home_design_state['values']) == 4
+                    and all(home_design_state['values'])
+                    and not home_design_state['duplicateCatalogue']
+                    and '이번 주 등록 예배' in home_design_state['text']
+                    and home_design_state['overflow'] <= 2):
+                    pass_('home-design-shell', json.dumps(home_design_state, ensure_ascii=False))
                 else:
-                    fail("home-design-shell", json.dumps(home_design_state, ensure_ascii=False))
+                    fail('home-design-shell', json.dumps(home_design_state, ensure_ascii=False))
 
-                page.evaluate("switchModule('service')")
-                page.wait_for_function("() => document.body.dataset.module === 'service'", timeout=5000)
-                page.locator('[data-service-setlist-archive]').first.click()
+                page.locator('[data-home-module="setlists"]').first.click()
                 page.wait_for_function("() => document.querySelector('.page-tab.active > span')?.textContent === '역대 콘티'", timeout=5000)
                 archive_tab = page.evaluate("() => state.pageTabs[state.pageTabIndex]")
                 if archive_tab["label"] == "역대 콘티" and archive_tab["snapshot"]["selectedServiceTypeId"] == "__setlist_archive":
@@ -1511,6 +1502,8 @@ def main() -> int:
                     fail("setlist-archive-view-groups", "group membership or count mismatch")
                 page.locator('[data-service-setlist-view="date"]').click()
                 page.wait_for_function("() => document.querySelector('[data-service-setlist-view=date]')?.getAttribute('aria-pressed') === 'true'", timeout=5000)
+                page.evaluate("switchModule('service')")
+                page.wait_for_function("document.body.dataset.module === 'service'")
                 page.locator('[data-service-week]').first.click()
                 page.wait_for_function("() => document.querySelector('.page-tab.active > span')?.textContent === '최근 예배'", timeout=5000)
                 service_default_state = page.evaluate(

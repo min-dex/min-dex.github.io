@@ -178,6 +178,8 @@ def main() -> int:
                     bodyOpen: document.body.classList.contains('right-sidebar-open'),
                     sidebarTop: sidebarRect ? Math.round(sidebarRect.top) : 0,
                     topbarBottom: topbarRect ? Math.round(topbarRect.bottom) : 0,
+                    topbarLeft: topbarRect?.left || 0,
+                    topbarRight: topbarRect?.right || 0,
                     sidebarWidth: sidebar ? Math.round(sidebar.getBoundingClientRect().width) : 0,
                     topbarActionColumnWidth: parseFloat(getComputedStyle(topbar).gridTemplateColumns.split(" ").at(-1)),
                     topbarActionsLeft: topbarActionsRect ? Math.round(topbarActionsRect.left) : 0,
@@ -202,7 +204,8 @@ def main() -> int:
                 and not loading_right_rail_state["hidden"]
                 and loading_right_rail_state["bodyOpen"]
                 and loading_right_rail_state["sidebarWidth"] >= 180
-                and loading_right_rail_state["topbarActionsLeft"] >= loading_right_rail_state["sidebarLeft"]
+                and loading_right_rail_state["topbarActionsLeft"] >= loading_right_rail_state["topbarLeft"]
+                and loading_right_rail_state["topbarActionsLeft"] + loading_right_rail_state["topbarActionsWidth"] <= loading_right_rail_state["topbarRight"] + 1
                 and abs(loading_right_rail_state["topbarActionsLeft"] + loading_right_rail_state["topbarActionsWidth"] - loading_right_rail_state["sidebarLeft"] - loading_right_rail_state["sidebarWidth"]) <= 1
                 and abs(loading_right_rail_state["topbarActionsWidth"] - loading_right_rail_state["topbarActionColumnWidth"]) <= 1
                 and loading_right_rail_state["sidebarBackground"] == loading_right_rail_state["topbarBackground"]
