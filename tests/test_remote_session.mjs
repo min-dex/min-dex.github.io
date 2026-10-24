@@ -54,8 +54,9 @@ for(const failure of ['CHANNEL_ERROR','TIMED_OUT','CLOSED']){
  let outcome;const b=await openRemote({client:failing,code:a.code,onClose:()=>closeCount++,onResult:r=>outcome=r});
  try{
   await until(()=>b.usable);await b.command('play');await until(()=>outcome);assert(!outcome.ok);assert.match(outcome.message,/audio blocked/);
-  channelsForTest[1].fail();channelsForTest[1].fail();assert(!b.usable);assert.equal(closeCount,1);
+  channelsForTest[1].fail();channelsForTest[1].fail();assert(!b.usable);assert.equal(closeCount,0);
   await assert.rejects(b.command('next'));
+  await wait(1600);await until(()=>b.usable);assert.equal(closeCount,0);
  }finally{a.close();b.close();}
 }
 await until(()=>channels.size===0);
@@ -85,3 +86,37 @@ try{
  }finally{x.close();y.close();}
 }finally{for(const h of fast)h.close();globalThis.setInterval=savedInterval;}
 console.log('PASS immediate two-peer state updates without heartbeat, coalescing, deduplication, command fan-out and timer cleanup');
+// Suspension retains identity, rejects commands and requires a fresh response.
+const wallNow=Date.now;let wallOffset=0,holdCalls=0;
+Date.now=()=>wallNow()+wallOffset;
+const heldHost=await openRemote({client,host:true,read:()=>({live:true,index:holdCalls}),execute:()=>holdCalls++});
+const heldRemote=await openRemote({client,code:heldHost.code});
+try{
+ await until(()=>heldRemote.usable);heldRemote.suspend();
+ assert(heldRemote.connected);assert(!heldRemote.usable);
+ await assert.rejects(heldRemote.command('next'));assert.equal(holdCalls,0);
+ wallOffset=179000;heldRemote.refresh();assert(!heldRemote.usable);
+ await until(()=>heldRemote.usable);assert.equal(holdCalls,0);
+ await heldRemote.command('next');await until(()=>heldRemote.usable);assert.equal(holdCalls,1);
+ heldRemote.suspend();wallOffset+=180001;heldRemote.refresh();assert(!heldRemote.connected);
+ await assert.rejects(heldRemote.command('next'));assert.equal(holdCalls,1);
+}finally{Date.now=wallNow;heldHost.close();heldRemote.close();}
+console.log('PASS suspended commands rejected, 179s recovery requires fresh state, 180s expiry including browser sleep');
+// A transport send failure is recoverable, but its command is never queued.
+let breakSend=false,retryCalls=0;
+const retryClient={...client,channel(topic){const c=client.channel(topic),send=c.send;c.send=function(m){if(breakSend)return Promise.reject(Error('offline'));return send.call(this,m);};return c;}};
+const retryHost=await openRemote({client:retryClient,host:true,read:()=>({live:true}),execute:()=>retryCalls++});
+const retryRemote=await openRemote({client:retryClient,code:retryHost.code});
+try{
+ await until(()=>retryRemote.usable);
+ const queuedCommand=retryRemote.command('next');retryRemote.suspend();await queuedCommand;
+ await wait(80);assert.equal(retryCalls,0);
+ retryRemote.refresh();await until(()=>retryRemote.usable);breakSend=true;
+ await assert.rejects(retryRemote.command('next'));assert(!retryRemote.usable);assert(retryRemote.connected);
+ breakSend=false;await wait(1600);await until(()=>retryRemote.usable);assert.equal(retryCalls,0);
+ await retryRemote.command('next');await until(()=>retryRemote.usable);assert.equal(retryCalls,1);
+ retryRemote.offline();retryRemote.suspend();await wait(1700);
+ assert(retryRemote.connected);assert(!retryRemote.usable);
+ retryRemote.refresh();await wait(1600);await until(()=>retryRemote.usable);assert.equal(retryCalls,1);
+}finally{retryHost.close();retryRemote.close();}
+console.log('PASS failed send recovers automatically without replaying its command');

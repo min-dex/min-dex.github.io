@@ -50,21 +50,23 @@ try:
    assert phone.locator('[data-action=next]').is_disabled()
    assert '확인할 수 없' in phone.locator('#result').inner_text()
    visibility(False);ready();assert host.evaluate('calls')==1
-   # Longer transport outage must end the session; reconnection cannot replay commands.
-   pump(11.5,drop=True);assert not host.evaluate('s.connected')
-   pump(1);assert phone.locator('#pairForm').is_visible();assert host.evaluate('calls')==1
-   connect();phone.click('[data-action=next]');pump();assert host.evaluate('calls')==2
-   # BFCache-style pagehide closes rather than reviving a previously authorized session.
+   # A short outage and BFCache retain the same session without code entry.
+   pump(11.5,drop=True);assert host.evaluate('s.connected')
+   assert phone.locator('[data-action=next]').is_disabled();ready()
+   assert phone.locator('#pairForm').is_hidden();assert host.evaluate('calls')==1
+   phone.click('[data-action=next]');pump();assert host.evaluate('calls')==2
    phone.evaluate("dispatchEvent(new PageTransitionEvent('pagehide',{persisted:true}));dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true}));")
-   pump(.5);assert phone.locator('#pairForm').is_visible();assert phone.locator('[data-action=next]').is_disabled()
-   host.evaluate('s.close()');connect()
+   assert phone.locator('[data-action=next]').is_disabled();ready();assert phone.locator('#pairForm').is_hidden()
    if engine=='chromium':
-    # Actual Chromium renderer freeze: no phone JS/timer execution for > host timeout.
     cdp=pc.new_cdp_session(phone);cdp.send('Page.setWebLifecycleState',{'state':'frozen'})
-    host.wait_for_timeout(11500);assert not host.evaluate('s.connected')
-    cdp.send('Page.setWebLifecycleState',{'state':'active'});visibility(False);pump(1)
-    assert phone.locator('[data-action=next]').is_disabled();assert host.evaluate('calls')==2
-    cdp.detach()
+    host.wait_for_timeout(11500);assert host.evaluate('s.connected')
+    cdp.send('Page.setWebLifecycleState',{'state':'active'});visibility(False);ready()
+    assert host.evaluate('calls')==2;cdp.detach()
+   # Expired authorization cannot be revived by a late packet after browser sleep.
+   visibility(True)
+   phone.evaluate("window.originalWall=Date.now;Date.now=()=>originalWall()+180001")
+   visibility(False);pump(.2);assert phone.locator('#pairForm').is_visible()
+   assert phone.locator('[data-action=next]').is_disabled();assert host.evaluate('calls')==2
    host.evaluate('s.close()');hc.close();pc.close();browser.close()
-   print('PASS',engine,'hidden/visible freshness, lost ack without replay, long outage/new connection, persisted pagehide'+(', renderer freeze/resume' if engine=='chromium' else ''),flush=True)
+   print('PASS',engine,'hidden/visible freshness, lost ack without replay, 3-minute retention/expiry, BFCache recovery'+(', renderer freeze/resume' if engine=='chromium' else ''),flush=True)
 finally:server.shutdown()

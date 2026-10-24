@@ -51,5 +51,5 @@ export function createGate({read,execute,now=()=>performance.now()}){
  try{await execute(m.action);result.ok=true;result.message='처리 완료';}catch(e){result.message=String(e.message||e).slice(0,200);}finally{busy=false;}
  return result;
  }
- return {connect,command,snapshot,close(){closed=true;controller=null;tickets.clear();},get connected(){return !!controller&&!closed;}};
+ return {connect,command,snapshot,invalidate(){tickets.clear();revision++;},close(){closed=true;controller=null;tickets.clear();},get connected(){return !!controller&&!closed;}};
 }
