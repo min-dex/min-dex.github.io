@@ -1,11 +1,24 @@
 # MINDEX Current
 
+## Current web checkpoint ·2026-10-24
+
+Latest verified web release: `f4e0470a` (`20261024-audit-ui-alignment`). Required
+full gate, same-SHA Pages and public-file checks passed; isolated public-asset
+Chromium/WebKit checks confirmed 30px form/help controls and input/cursor retention.
+Disclosure/Remote release `554f5146` and cross-branch pip cache reuse are also
+verified. Evidence lives in `output/audit-ui-alignment-20261024/deployment.json`,
+`output/disclosure-state-20261024/deployment.json` and
+`output/hq-cache-reuse-20261024/verification.json`.
+The release queue was empty at HQ review. Praise deletion/12-empty-record cleanup
+still requires its separate SQL application and operational confirmation. No
+physical-device certification or blanket approval of older data candidates follows.
+
 ## Children audio completion · 2026-10-20
 
 Core integration is complete. Bible page numbers and whole-service PNG export
 are excluded. Focused presenter view is implemented with isolated Chromium/WebKit
 verification; publication status is recorded in deployment receipts. Phone-first remote control
-is implemented and locally/relay verified, pending deployment and physical-device checks
+is implemented and web-deployed with isolated local/relay verification; physical-device checks remain separate
 (see `docs/presenter-remote-design.md`). Sequence-linked audio/lighting and integrated
 video/caption/broadcast remain ideas. See `docs/children-audio-status.md` and `docs/presenter-control-ideas.md`.
 

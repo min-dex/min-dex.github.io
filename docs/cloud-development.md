@@ -198,8 +198,12 @@ save in main scope. An exact cache hit skips this download. The seed is bounded
 to two minutes and does not install packages, browsers or repeat tests. Other
 shards retain the existing skip behavior. Cache seeding is never a verification
 receipt; every new candidate still passes its existing required gate. A cold
-main run may take longer once; cross-branch restore remains unverified until
-the updated workflow is published and a later sibling branch runs.
+main run may take longer once. Verified on 2026-10-24: main run40056676528
+saved the default-branch cache, then fresh sibling run40056945873 restored it
+in all four jobs and used cached Playwright/Pillow/PyYAML wheels. Its complete
+gate passed; Pages was skipped on the proof branch. Evidence:
+`output/hq-cache-reuse-20261024/verification.json`. This proves reuse, not a
+guaranteed reduction in total CI duration or cached OS/browser installation.
 
 ### Measured balancing and superseded checks ·2026-10-23
 
