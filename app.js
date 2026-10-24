@@ -25266,6 +25266,9 @@ async function saveWorshipSetlistLeader(id) {
     // Only proven rejection can discard the attempt; uncertain writes retain exact replay.
     if (error.code === "LEADER_CONFLICT" || /^(P0001|22\w{3}|23\w{3}|42501|55P03|57014|40\w{3})$/.test(error.code || "")) {
       delete draft.retry;
+      if (error.latestLeader === undefined && (error.code === "LEADER_CONFLICT" || /REVISION_CONFLICT/.test(error.message || ""))) {
+        try { const latest = id.startsWith("worship:") ? (await (await worshipAtomicClient()).read(id.slice(8))).service.praise_leader : (await state.client.from("mindex_worship_import_sources").select("raw_payload").eq("id", id).single()).data?.raw_payload?.service?.leader; if (latest !== undefined) error.latestLeader = String(latest || "").trim(); } catch { /* Keep the old comparison baseline when readback fails. */ }
+      }
       if (error.latestLeader !== undefined) draft.original = error.latestLeader;
     }
     if (worshipSetlistLeaderDrafts.get(id) === draft) updateWorshipSetlistLeaderInputs(id, draft.value, false, draft.original);
