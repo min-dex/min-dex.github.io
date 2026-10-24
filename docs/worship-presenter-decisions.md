@@ -4535,8 +4535,8 @@ forms, versions, service links or operational records are rewritten.
 
 ## Consistent song-note proportions ·2026-10-24
 
-All musical title notes share a .65 title-font ratio (increased from .55 after
-visual review). Inline notes use the same
+All musical title notes share a .80 title-font ratio (increased from .65 after
+visual review of .75 and explicit approval of .80). Inline notes use the same
 span renderer in main Title and order/content captions; its sizing overrides the
 generic slide-span inheritance. The separate fullscreen heading uses the same
 ratio against the song-title token. Keep placement, colors, title sizing, content

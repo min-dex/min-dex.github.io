@@ -87,11 +87,11 @@ try:
      const note=stage.querySelector('.presenter-song-note'),heading=stage.querySelector('.presenter-slide--song-note-title .presenter-fullscreen-song-heading');
      if(note){
       const ratio=parseFloat(getComputedStyle(note).fontSize)/parseFloat(getComputedStyle(note.parentElement).fontSize);
-      check(Math.abs(ratio-.65)<.005,'inline note ratio '+noChromakey+' '+ratio);
+      check(Math.abs(ratio-.80)<.005,'inline note ratio '+noChromakey+' '+ratio);
      }else check(heading,'song note markup missing '+slide.type+' '+noChromakey);
      if(heading){
       const ratio=parseFloat(getComputedStyle(heading).fontSize)/parseFloat(getComputedStyle(stage.querySelector('.presenter-title-content-title')).fontSize);
-      check(Math.abs(ratio-.65)<.005,'separate note ratio '+ratio);
+      check(Math.abs(ratio-.80)<.005,'separate note ratio '+ratio);
      }
      stage.remove();
     }
