@@ -7,8 +7,8 @@ from urllib.parse import urlsplit, parse_qs
 from smoke_app import start_local_app_server, launch_chromium, sync_playwright
 
 MODULES = ['mindex.presenter-praise.js', 'mindex.presenter-live.js',
-           'mindex.presenter-board.js', 'mindex.presenter-controller.js', 'mindex.disclosure-state.js']
-ASSETS = MODULES + ['styles.workspace.css']
+           'mindex.presenter-board.js', 'mindex.presenter-controller.js', 'mindex.disclosure-state.js', 'mindex.presenter-media-state.js']
+ASSETS = MODULES + ['styles.workspace.css', 'styles.presenter-media.css']
 html = Path('index.html').read_text()
 html = re.sub(r'window\.MINDEX_SUPABASE\s*=\s*\{[^}]*\};', 'window.MINDEX_SUPABASE = {};', html)
 legacy = html
@@ -66,6 +66,7 @@ try:
                     styles = result['styles']
                     assert styles[styles.index('styles.css') + 1] == 'styles.workspace.css', styles
                     assert styles.index('styles.workspace.css') < styles.index('styles.presenter-output.css')
+                    assert styles.count('styles.presenter-media.css') == 1
                     if case in ASSETS:
                         assert len(requests) == 2 and requests[1].get('boot-retry') == ['1'], requests
                 assert len(documents) == (1 if case == 'current' else 2), documents

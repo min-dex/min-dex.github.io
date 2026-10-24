@@ -1,0 +1,10 @@
+/* Controller input previews are independent of the live output transport. */
+.svc-input-video-preview { display: grid; gap: 5px; min-width: 0; }
+.svc-input-video-preview video { display: block; width: 100%; max-height: 280px; background: #000; }
+.svc-input-video-preview :is(small, [data-input-video-clock]) { color: var(--ink-3); font-size: var(--ui-meta-size); font-variant-numeric: tabular-nums; }
+.presenter-video-seek { min-width: 0; }
+.presenter-video-seek [data-presenter-video-clock] { white-space: normal; font-variant-numeric: tabular-nums; }
+.global-playback-panel .presenter-video-seek { grid-template-columns: minmax(0, 1fr); gap: 3px; }
+.global-playback-panel .presenter-video-seek .song-timing-seek-label { grid-column: 1; grid-row: 1; }
+.global-playback-panel [data-presenter-video-seek] { grid-column: 1; grid-row: 2; height: 30px; margin: 0; padding: 0; }
+.global-playback-panel [data-presenter-video-clock] { grid-column: 1; grid-row: 3; }

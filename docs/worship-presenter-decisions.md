@@ -4747,3 +4747,13 @@ separate queued release. Tests cover all five modes, both browsers, the existing
 분리해서 안내해야 하며 아직 보편 지원 완료로 표시하지 않는다. Native Keynote
 후보(`codex/sermon-original-decks`)는 Mac 화면 기록 권한 거부로 실기 capture 검증이
 대기 상태이며 이번 공통 문구 변경의 배포 범위와 분리한다.
+
+## Controller video progress ·2026-10-25
+
+Media management adds output video seeking plus observed current/total/remaining
+time, using the existing owner/frame/revision guards and acknowledgement path.
+Seeking preserves pause/play and never changes audio. Loop countdowns explicitly
+refer to one repetition; unknown duration remains unknown. Native video previews
+in input disclosures have independent controls/clocks and never drive output.
+No persistent service/media data changes; PPTX/background media keep their existing
+transport scope.

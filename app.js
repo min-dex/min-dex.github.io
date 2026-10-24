@@ -697,8 +697,9 @@ function preparePresenterRuntimeDependencies() {
     && typeof renderPresenterSlideBoard === "function"
     && typeof runPresenterAction === "function"
     && typeof window.MindexDisclosure?.attrs === "function"
-    && [...document.querySelectorAll('link[rel="stylesheet"]')]
-      .some(link => new URL(link.href, document.baseURI).pathname.endsWith("/styles.workspace.css"));
+    && typeof renderPresenterVideoTransport === "function"
+    && ["styles.workspace.css", "styles.presenter-media.css"].every(name =>
+      [...document.querySelectorAll('link[rel="stylesheet"]')].some(link => new URL(link.href, document.baseURI).pathname.endsWith(`/${name}`)));
   const url = new URL(location.href);
   if (ready) {
     if (url.searchParams.has("mindex-runtime-upgrade")) {
@@ -16321,7 +16322,7 @@ function renderHomeStart() {
   const next = getHomeNextService(now);
   const bulletins = services.filter(serviceSupportsBulletin);
   const departments = [...new Set(bulletins.map(service => serviceDisplayTypeName(service)))];
-  const calendarNext = state.calendarLoaded ? [...state.calendarData].filter(row => row.date >= toLocalDateStr(now)).sort((a,b) => a.date.localeCompare(b.date))[0] : null;
+  const calendarName = state.calendarLoaded && !state.calendarError ? String(state.calendarData.find(row => row.date === toLocalDateStr(now))?.liturgical || "").trim() : "";
   const modules = [
     {id:"service", label:"예배", icon:"church", value:servicesReady ? `${thisWeek.length}회` : "—", unit:"이번 주 등록 예배",
       detail:state.serviceError ? "예배 목록을 불러오지 못했습니다." : next ? `${formatServiceDate(next, {compact:true})} · ${serviceDisplayTypeName(next)}` : servicesReady ? "다가오는 예배가 없습니다." : "예배 목록 불러오는 중…"},
@@ -16336,7 +16337,7 @@ function renderHomeStart() {
     <main class="home-start" aria-label="홈">
       <header class="home-start-header"><div><h1>MINDEX</h1><p>전체 현황</p></div>
         <div class="home-header-context"><time datetime="${toLocalDateStr(now)}">${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 ${serviceWeekdayLabel(now)}</time>
-          ${state.calendarError || calendarNext ? `<button class="home-calendar-context" type="button" data-home-module="calendar"><i data-lucide="calendar-days"></i><span>${escapeHtml(state.calendarError ? "교회력을 불러오지 못했습니다." : `${formatServiceDate(calendarNext, {compact:true})} · ${calendarNext.liturgical || calendarNext.note || "교회력 일정"}`)}</span></button>` : ""}
+          ${calendarName ? `<button class="home-calendar-context" type="button" data-home-module="calendar"><i data-lucide="calendar-days"></i><span>${escapeHtml(calendarName)}</span></button>` : ""}
         </div>
       </header>
       ${renderHomeRecentWork()}
@@ -29437,13 +29438,14 @@ function renderPresenterReferenceMediaPreview(asset, kind, disclosureScope = [])
       : normalizedKind === "audio" ? "audio-lines"
         : normalizedKind === "image" ? "image" : "file";
   const name = String(asset?.name || "").trim() || statusLabel;
-  const previewLabel = normalizedKind === "image" ? "미리보기" : normalizedKind === "audio" ? "듣기" : "파일 정보";
+  const previewLabel = ["image", "video"].includes(normalizedKind) ? "미리보기" : normalizedKind === "audio" ? "듣기" : "파일 정보";
   const body = normalizedKind === "image"
     ? `<img data-reference-media-preview-image src="${escapeAttr(source)}" alt="${escapeAttr(name)}" loading="lazy" onerror="handlePresenterMediaPreviewError(this)" />
        <span data-reference-media-preview-error role="status" hidden>이미지를 불러오지 못했습니다. 파일 연결을 확인해 주세요.</span>`
     : normalizedKind === "audio"
       ? `<audio controls preload="metadata" src="${escapeAttr(source)}"></audio>`
-      : renderPresenterStaticAssetPreview(asset.pptx ? { ...asset, url: asset.pptx.url } : asset, icon, statusLabel);
+      : normalizedKind === "video" ? renderPresenterInputVideoPreview(source, name)
+        : renderPresenterStaticAssetPreview(asset.pptx ? { ...asset, url: asset.pptx.url } : asset, icon, statusLabel);
   const slideStrip = normalizedKind === "image" && slideCount > 1
     ? `<div class="svc-reference-media-slide-strip" aria-label="연결된 이미지 ${slideCount}장">
       ${slides.map((slide, index) => {
@@ -29457,7 +29459,7 @@ function renderPresenterReferenceMediaPreview(asset, kind, disclosureScope = [])
     </div>`
     : "";
   return `<div class="svc-reference-media-preview-group">
-    <details class="svc-reference-media-preview svc-reference-media-preview--collapsible svc-reference-media-preview--${escapeAttr(normalizedKind)}" ${MindexDisclosure.attrs(["media-preview",...disclosureScope])}>
+    <details ${normalizedKind === "video" ? 'ontoggle="pauseClosedPresenterInputVideo(this)"' : ""} class="svc-reference-media-preview svc-reference-media-preview--collapsible svc-reference-media-preview--${escapeAttr(normalizedKind)}" ${MindexDisclosure.attrs(["media-preview",...disclosureScope])}>
       <summary>
         <span>${escapeHtml(statusLabel)}</span>
         <b><i data-lucide="${normalizedKind === "audio" ? "headphones" : normalizedKind === "image" ? "eye" : "info"}"></i>${previewLabel}</b>
@@ -30014,7 +30016,7 @@ function renderGlobalPlaybackControls() {
     </section>`;
   if (!available) root.querySelector(':popover-open')?.hidePopover();
   root.hidden = !available;
-  if (root._playbackMarkup === html) return;
+  if (root._playbackMarkup === html) { syncPresenterVideoTransport(video); return; }
   root._playbackMarkup = html;
   const template = document.createElement("template");
   template.innerHTML = html;
@@ -30025,6 +30027,7 @@ function renderGlobalPlaybackControls() {
     patchPresenterControlTree(root, next);
   } else root.append(template.content);
   if (root.querySelector(":popover-open")) positionGlobalPlaybackPanel();
+  syncPresenterVideoTransport(video);
 }
 
 function renderLiveServiceReturnControl() {

@@ -1,5 +1,5 @@
 """Offline root navigation, shared verse wrapping and explicit detail destinations."""
-import os
+import os,tempfile
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from smoke_app import start_local_app_server,sync_playwright,launch_chromium
 server,url=start_local_app_server()
@@ -50,6 +50,17 @@ try:
    assert '2개 역본' in page.locator('.home-module').nth(3).inner_text()
    assert '교회력 fixture' in page.locator('.home-start-header').inner_text()
    assert '교회력 fixture' not in page.locator('.home-module--operations').inner_text()
+   assert page.locator('.home-calendar-context').inner_text().strip()=='교회력 fixture'
+   page.locator('.home-calendar-context').focus()
+   assert page.locator('.home-calendar-context').evaluate('(el)=>el===document.activeElement')
+   page.screenshot(path=os.path.join(tempfile.gettempdir(),f'home-calendar-name-{engine}.png'))
+   for rows in ([], [{'date':'2099-12-25','liturgical':'미래 절기'}],
+                [{'date':'today','liturgical':'  ','note':'다른 일정'}]):
+    page.evaluate("""rows=>{state.calendarData=rows.map(row=>({...row,date:row.date==='today'?toLocalDateStr(new Date()):row.date}));render()}""",rows)
+    assert page.locator('.home-calendar-context').count()==0
+    assert page.locator('.home-header-context time').count()==1
+   page.evaluate("()=>{state.calendarData=[{date:toLocalDateStr(new Date()),liturgical:'교회력 fixture'}];render()}")
+
    # Saved receipts and browsing history are independent; latest save wins.
    page.evaluate("""()=>{
     rememberRecentEdit({module:'praise',selectedSongId:'one',selectedVersionId:'v1'},'Test Song','2026-10-20T01:00:00Z');
