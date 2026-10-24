@@ -48,6 +48,8 @@ def main():
                   check(!findBibleTranslation('공동번역 2099'),'unknown revision');
                   for(const text of ['Tobit 99:1 공동번역','다니엘 추가 본문 1:1 공동번역','Tobit 1:1 개역개정','Additions to Esther 13`:8 개역개정','다니엘 14:1 개역개정','창세기 51:1'])check(!parseLiveScriptureQuery(text).reference,text);
                   check(parseLiveScriptureQuery('Additions to Esther 13`:8 공동번역').reference.chapter===1004,'literal chapter');
+                  check(parseLiveScriptureQuery('Additions to Esther 13`:8-8 공동번역').reference.verseEnd===null,'literal chapter equal endpoints');
+                  check(parseLiveScriptureQuery('Genesis 1:1-1 King James Version').reference.verseEnd===null,'live equal endpoints');
                   check(parseLiveScriptureQuery('다니엘 14:1 공동번역 개정').reference.chapter===14,'target edition chapter');
                   state.selectedBibleTranslationId='cognew';check(!parseLiveScriptureQuery('다니엘 14:1 개역개정').reference,'reader chapter count must not leak');state.selectedBibleTranslationId='gae';
                   check(!parseLiveScriptureQuery('다니엘 추가 본문 13:1 공동번역 개정').reference,'never map DA1 to DAN');

@@ -22,6 +22,15 @@ try:
     state.client={from(table){check(table==='mindex_bible_verses','unexpected write '+table);const filters={};const q={select(){return q},eq(k,v){filters[k]=v;return q},async order(){const n=fixtures[filters.book_code]?.[filters.chapter]||0;return {data:Array.from({length:n},(_,i)=>({book_code:filters.book_code,chapter:filters.chapter,verse:i+1,text:'fixture '+(i+1)}))}}};return q}};
     const inputs=['요3장16절','John 3:16','요 3.16','요 3:16'];
     for(const raw of inputs){check(normalizeSongScriptureRefs([raw])[0]==='요한복음 3:16','song '+raw);check(normalizeServiceItemReferenceSpacing(raw)==='요한복음 3:16','service '+raw);await validateScriptureReferences(raw)}
+    state.scriptureBooks.push({code:'2SA',koreanName:'사무엘하',englishName:'2 Samuel',chapterCount:24});
+    for(const raw of ['삼하 2 4-4','사무엘하 2:4–4','2 Samuel 2:4-4']){
+      check(parseBibleReference(raw).verseEnd===null,'equal endpoint parser '+raw);
+      check(normalizeServiceItemReferenceSpacing(raw)==='사무엘하 2:4','equal endpoint service '+raw);
+      check(normalizeSongScriptureRefs(raw)[0]==='사무엘하 2:4','equal endpoint song '+raw);
+      check(formatServiceScriptureReferenceList(raw)==='사무엘하 2:4','equal endpoint list '+raw);
+    }
+    check(formatServiceScriptureReferenceList('삼하 2:4-5')==='사무엘하 2:4–5','non-single range retained');
+    check(inspectScriptureReferences('삼하 2:4-4, 6-6').references.join(';')==='사무엘하 2:4;사무엘하 2:6','context single endpoints');
     const mixed='요 3:16, 18–20; 빌1:21';
     check(inspectScriptureReferences(mixed).references.join(';')==='요한복음 3:16;요한복음 3:18–20;빌립보서 1:21','context');
     for(const raw of ['요 3:16; 오류','요 3:20-16','요 99:1','요 3:0']){

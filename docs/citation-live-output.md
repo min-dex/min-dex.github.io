@@ -30,3 +30,11 @@ Song reference fields show syntax errors inline. Service saves retain the atomic
 save path and reject edits arriving during asynchronous reference verification.
 Tests: `smoke_reference_validation.py`, `smoke_scripture_aliases.py`,
 `smoke_citation_translation_editor.py`, `smoke_atomic_save_runtime.py`.
+
+## Equal verse endpoints ·2026-10-24
+
+The shared Bible reference parser collapses equal start/end verses to a single
+verse (`삼하 2 4-4` → `사무엘하 2:4`). This applies to worship preparation,
+reading/citation inputs, song references and live scripture. Non-equal ranges
+and invalid/reversed-range rejection are unchanged. No stored records are
+bulk rewritten. Covered by `smoke_reference_validation.py`.
