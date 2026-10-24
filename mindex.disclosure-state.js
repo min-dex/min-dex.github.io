@@ -45,5 +45,10 @@
     node.dataset.disclosureInitial = String(node.open);
     writeKey(node.dataset.disclosureKey, node.open);
   }, true);
+  window.addEventListener('mindex-server-state-settled', () => {
+    for (const [key,value] of pending) {
+      if (window.MINDEX_SERVER_STORAGE?.getItem('session', key) === value) pending.delete(key);
+    }
+  });
   window.MindexDisclosure = Object.freeze({attrs, read, write:(parts,open)=>writeKey(keyFor(parts),open)});
 })();

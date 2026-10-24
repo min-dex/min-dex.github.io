@@ -9,13 +9,16 @@ fixture='''() => {
  const shell=document.createElement('main');shell.style.cssText='width:100%;padding:20px';shell.append(refs.detailPane);document.body.replaceChildren(shell);
  const item={id:'disclosure-item',service_id:'disclosure-service',label:'인용 구절',raw_title:'요 3:16',memo:serializeServiceItemMemo({elementType:'scripture_body',inputMode:'scripture',scriptureReferences:['요 3:16']})};
  state.services=[{id:item.service_id,type_id:'fixture'}];
- state.bibleTranslations=[{id:'edition',name:'검증 역본',is_active:true}];
+ state.bibleTranslations=[{id:'t01',name:'KJV',is_active:true}];state.selectedBibleTranslationId='t01';
+ const verse={id:'fixture-verse',verse:1,text:'검증 본문',metadata:{notes:['검증 주석']}};state.bibleBookVerses=[verse];
  state.serviceItems[item.service_id]=[item];
  window.mountDisclosureFixture=()=>{
   refs.detailPane.innerHTML=renderPresenterServiceScriptureInput(item,0,parseServiceItemMemo(item.memo),state.services[0])
    +renderServiceAnnouncementEditor(item,0,item.service_id,{})
    +renderServiceAuthoringPanel('예배','예배 정보','<p>입력 유지 검증</p>')
    +renderWorshipTemplateInventoryCard({id:'template-fixture',name:'검증 양식'}, {}, {})
+   +renderWorshipTemplateDraftCard({id:'draft-fixture',name:'검증',sections:[],elementTypes:[],services:0,slides:0})
+   +renderBibleEditionInfo()+renderBibleVerseList([verse])+renderPresenterHelpControl()
    +renderServiceSourcePanel(state.services[0])
    +renderServiceItemMemoEditor(item,0,{service:state.services[0]})
    +renderPresenterReferenceMediaPreview({url:'assets/bulletin/children-mark.png',name:'검증'},'image',[item.service_id,item.id])
@@ -41,7 +44,7 @@ try:
     page.evaluate(fixture)
     page.wait_for_function("document.querySelector('.bulletin-properties')?.dataset.sectionsReady==='true'",timeout=10000)
    mount()
-   selectors=['[data-citation-translations]','.svc-announcement-editor details','.svc-authoring-panel','.svc-template-inventory-card','.svc-source-panel','.svc-item-note','.svc-reference-media-preview--collapsible','[data-bulletin-section=monthly]']
+   selectors=['[data-citation-translations]','.svc-announcement-editor details','.svc-authoring-panel','.svc-template-inventory-card','.svc-template-draft-card','.bible-edition-info','.bible-source-annotations','[data-presenter-help]','.svc-source-panel','.svc-item-note','.svc-reference-media-preview--collapsible','[data-bulletin-section=monthly]','[data-bulletin-section=weekly]','[data-bulletin-section=common]']
    for wanted in (True,False):
     for selector in selectors:
      node=page.locator(selector)
