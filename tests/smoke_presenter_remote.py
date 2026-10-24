@@ -139,7 +139,9 @@ try:
    host.evaluate("isPresenterOutputWindowOpen=()=>false;presenterControllerIsLive=()=>false");pump(2.2)
    assert host.locator('[data-remote-code]').inner_text()==''
    pump(3.2);assert phone.locator('[data-action=next]').is_disabled()
-   phone.click('#disconnect');assert phone.locator('#pairForm').is_visible()
+   # Explicit output end returns to pairing automatically, without a manual disconnect.
+   assert phone.locator('#disconnect').is_hidden()
+   assert phone.locator('#pairForm').is_visible()
    phone.fill('#code','9999');phone.click('#connect');pump();assert '확인' in phone.locator('#status').inner_text()
    print('PASS',engine,'separate contexts: phone/tablet layout, pairing, actions, replay, stale revision, outage, service switch, invalid code')
    host_context.close();phone_context.close();browser.close()
