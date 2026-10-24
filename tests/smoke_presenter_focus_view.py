@@ -61,7 +61,9 @@ try:
       remote.click();assert page.locator('.remote-panel').is_visible()
       assert '예배 송출을 시작하면 코드가 표시됩니다.' in page.locator('[data-remote-status]').text_content()
       page.keyboard.press('Escape')
-      assert not page.locator('.remote-panel').is_visible()
+      # WebKit queues the native dialog cancel action after key dispatch.
+      page.locator('.remote-panel').wait_for(state='hidden',timeout=2000)
+      assert not page.locator('.remote-panel').evaluate('e=>e.open')
       music.click();assert page.locator('#globalPlaybackPanel').is_visible()
       page.keyboard.press('Escape')
       assert music.evaluate('e=>e===document.activeElement')
