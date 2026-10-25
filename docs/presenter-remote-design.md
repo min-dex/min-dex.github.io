@@ -492,3 +492,10 @@ integer bounds, visibility and catalog identity again before moving. No offline
 queue/replay is added. The dialog closes only on a successful command result;
 rejected/stale commands stay visible for correction. Old hosts simply do not
 advertise jump, so the picker stays disabled until both sides are updated.
+
+## Controller placement · 2026-10-25
+
+The active output code is shown automatically at the bottom-right of its sidebar
+worship card; the launch/stop icon sits at the top-right. Clicking the code opens
+the existing remote dialog. A different prepared worship card never shows the
+active output's code. The header remote entry remains available.

@@ -51,25 +51,16 @@ try:
     page.wait_for_selector('#remotePanelBtn',state='attached')
     for width in (1440,390):
       page.set_viewport_size({'width':width,'height':1000})
-      remote=page.locator('[data-presenter-remote]')
+      remote=page.locator('#remotePanelBtn')
       music=page.locator('[data-presenter-music-manager]')
       assert remote.is_visible() and music.is_visible()
-      assert not page.locator('#remotePanelBtn').is_visible()
+      assert page.locator('[data-presenter-remote]').is_hidden()
       assert not page.locator('.global-playback-trigger').is_visible()
-      # Compare equal grid tracks in one frame, not across resize transitions.
-      geometry=page.evaluate("""()=>{
-        const remote=document.querySelector('[data-presenter-remote]').getBoundingClientRect();
-        const music=document.querySelector('[data-presenter-music-manager]').getBoundingClientRect();
-        return {rh:remote.height,mh:music.height,rw:remote.width,mw:music.width};
-      }""")
-      assert geometry['rh']==geometry['mh']==35,geometry
-      assert abs(geometry['rw']-geometry['mw'])<1,geometry
+      assert music.evaluate('e=>e.getBoundingClientRect().height')==35
       remote.click();assert page.locator('.remote-panel').is_visible()
       assert '예배 송출을 시작하면 코드가 표시됩니다.' in page.locator('[data-remote-status]').text_content()
       page.keyboard.press('Escape')
-      # WebKit queues the native dialog cancel action after key dispatch.
       page.locator('.remote-panel').wait_for(state='hidden',timeout=2000)
-      assert not page.locator('.remote-panel').evaluate('e=>e.open')
       music.click();assert page.locator('#globalPlaybackPanel').is_visible()
       page.keyboard.press('Escape')
       assert music.evaluate('e=>e===document.activeElement')

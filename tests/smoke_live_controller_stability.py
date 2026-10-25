@@ -115,6 +115,7 @@ def main():
                   citationInput.dataset.serviceId=service.id;citationInput.dataset.presenterCitationElementId=citation.id;
                   citationInput.value='마 5:45';
                   presenterControllerIsLive=()=>true;
+                  validateScriptureReferences=async()=>({});
                   resolveServiceScriptureBeforeSave=async()=>{};
                   presenterSlidesForService=()=>[{elementId:citation.id,type:'scripture',title:'마태복음 5:45'}];
                   saveServiceItemPatch=async()=>true;

@@ -6409,13 +6409,11 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
 .svc-presentation-controls input[type="text"] { width: 100%; min-width: 0; }
 .svc-presentation-controls > .btn { width: fit-content; }
 
-/* Basic presenter keeps music and remote entry alongside output controls.
-   Focus view retains the global launchers because its right rail is hidden. */
-body:has(#servicePresenterControls[data-focus-view="false"]):has([data-presenter-right-sidebar]) .topbar-actions #remotePanelBtn,
+/* Basic presenter keeps media in the rail; remote access stays in the topbar
+   and the active worship card. Focus view retains the global media launcher. */
 body:has(#servicePresenterControls[data-focus-view="false"]):has([data-presenter-right-sidebar]) .topbar-actions #globalPlaybackControls > .global-playback-trigger { display:none; }
 body:has(#servicePresenterControls[data-focus-view="false"]):has([data-presenter-right-sidebar]) .topbar-actions #globalPlaybackControls { margin:0; }
-.svc-presenter-output-group [data-presenter-remote] { grid-column:1; grid-row:3; }
-.svc-presenter-output-group [data-presenter-music-manager] { grid-column:2; grid-row:3; }
+.svc-presenter-output-group [data-presenter-music-manager] { grid-column:1 / -1; grid-row:3; }
 
 /* Pairing code is available directly on either remote launcher. */
 #remotePanelBtn [data-remote-button-label] { display:none; }

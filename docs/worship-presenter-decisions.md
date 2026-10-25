@@ -4825,3 +4825,12 @@ controller presents the complete Lyrics sequence as one plain logical group,
 with the word Lyrics like Title/Interlude and no colored grouping box. It does
 not render a literal L label. Other named forms and Scripture grouping retain
 their current display.
+
+## Explicit next worship transition · 2026-10-25
+
+“다음 예배 준비” now also transfers the active output when its source is the
+currently output worship. It keeps the existing output window/session, prepares
+the next worship first and publishes its first slide only after successful
+hydration/freshness checks. Failed preparation or superseded navigation leaves
+the output unchanged. Unsaved-change confirmation is retained; ordinary browsing
+of other worships still never transfers the live output.

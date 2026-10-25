@@ -9561,7 +9561,7 @@ def main() -> int:
 
                 next_prep_state = page.evaluate(
                     """
-                    (() => {
+                    (async () => {
                       const previous = {
                         services: state.services,
                         serviceItems: state.serviceItems,
@@ -9612,6 +9612,7 @@ def main() -> int:
                           nextFromThird: nextPreparationService(state.services.find((service) => service.id === '__smoke_next_third__'))?.id || '',
                         };
                         button?.click();
+                        await new Promise(resolve => setTimeout(resolve, 0));
                         const after = {
                           selectedServiceId: state.selectedServiceId,
                           selectedServiceTypeId: state.selectedServiceTypeId,
@@ -9625,6 +9626,7 @@ def main() -> int:
                         state.presenter.outputWindow = { closed: false };
                         renderPresenterDetail();
                         document.querySelector('[data-presenter-action="prepare-next-service"]')?.click();
+                        await new Promise(resolve => setTimeout(resolve, 0));
                         const liveAfter = {
                           selectedServiceId: state.selectedServiceId,
                           viewServiceId: state.presenter.viewServiceId,
@@ -9680,7 +9682,7 @@ def main() -> int:
                     and next_prep_state["after"]["nextFromYouth"] == "__smoke_next_young__"
                     and next_prep_state["liveAfter"]["selectedServiceId"] == "__smoke_next_youth__"
                     and next_prep_state["liveAfter"]["viewServiceId"] == "__smoke_next_youth__"
-                    and next_prep_state["liveAfter"]["presenterServiceId"] == "__smoke_next_first__"
+                    and next_prep_state["liveAfter"]["presenterServiceId"] == "__smoke_next_youth__"
                     and next_prep_state["liveAfter"]["outputStillOpen"]
                     and next_prep_state["third"]["text"] == "다음 예배 준비 주일오후예배"
                     and next_prep_state["third"]["nextServiceId"] == "__smoke_next_afternoon__"

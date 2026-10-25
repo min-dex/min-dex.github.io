@@ -373,3 +373,8 @@ document.addEventListener('click', event => {
     void runServiceMusicAction(music.dataset.focusMusic, binding);
   }
 });
+
+function renderPresenterSidebarRemoteCode(serviceId) {
+  const code = window.MindexRemote?.codeFor?.(serviceId) || "";
+  return `<button type="button" class="service-sidebar-remote-code" data-presenter-remote data-remote-service-id="${escapeAttr(serviceId)}" aria-label="원격 조작 예배 코드${code ? ` ${escapeAttr(code)}` : ""}" ${code ? "" : "hidden"}><i data-lucide="smartphone" aria-hidden="true"></i><span data-remote-button-label>${escapeHtml(code)}</span></button>`;
+}

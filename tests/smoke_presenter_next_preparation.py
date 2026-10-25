@@ -10,7 +10,7 @@ try:
             page.route("**/*supabase*/**", lambda route: route.abort())
             page.goto(url, wait_until="domcontentloaded")
             page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof prepareNextServiceFromPresenter === 'function')")
-            print(engine, page.evaluate("""() => {
+            print(engine, page.evaluate("""async () => {
               const check = (value, label) => { if (!value) throw Error(label); };
               const previous = {
                 services: state.services,
@@ -36,7 +36,7 @@ try:
                 const button = renderPresenterNextPreparationButton(first.id, nextPreparationTarget(first));
                 check(button.includes(`data-next-service-id=\"${youth.id}\"`), 'button payload missing target');
                 refs.detailPane.innerHTML = button;
-                refs.detailPane.querySelector('[data-presenter-action="prepare-next-service"]')?.click();
+                await prepareNextServiceFromPresenter(first.id, { nextServiceId: youth.id });
                 check(state.selectedServiceId === youth.id, 'idle selection did not move');
                 check(state.presenter.viewServiceId === youth.id, 'idle view did not move');
                 check(state.presenter.serviceId === youth.id, 'idle presenter did not prepare target');
@@ -46,12 +46,28 @@ try:
                 state.selectedServiceTypeId = first.type_id;
                 preparePresenterService(first.id);
                 state.presenter.outputWindow = { closed: false };
-                runPresenterAction('prepare-next-service', first.id, { nextServiceId: youth.id });
+                await prepareNextServiceFromPresenter(first.id, { nextServiceId: youth.id });
                 check(state.selectedServiceId === youth.id, 'live selection did not move');
                 check(state.presenter.viewServiceId === youth.id, 'live view did not move');
-                check(state.presenter.serviceId === first.id, 'live output switched service');
+                check(state.presenter.serviceId === youth.id, 'live output did not switch service');
                 check(isPresenterOutputWindowOpen(), 'live output closed');
-                return 'PASS next preparation links target and preserves live output';
+                const oldCan=canUseClientData,oldHydrate=hydratePresenterServiceData,oldDirty=hasDirtyChanges,oldConfirm=confirmSaveBeforeLeaving;
+                state.selectedServiceId=first.id;preparePresenterService(first.id);
+                const oldWindow=state.presenter.outputWindow,oldSlides=state.presenter.slides;
+                canUseClientData=()=>true;state.loadedWorshipServiceIds.delete(youth.id);
+                hydratePresenterServiceData=async()=>{throw Error('fixture offline')};
+                await prepareNextServiceFromPresenter(first.id,{nextServiceId:youth.id});
+                check(state.selectedServiceId===first.id&&state.presenter.serviceId===first.id&&state.presenter.slides===oldSlides&&state.presenter.outputWindow===oldWindow,'failed hydration changed output');
+                hasDirtyChanges=()=>true;confirmSaveBeforeLeaving=async()=>false;
+                await prepareNextServiceFromPresenter(first.id,{nextServiceId:youth.id});
+                check(state.presenter.serviceId===first.id,'cancelled unsaved confirmation changed output');
+                hasDirtyChanges=()=>false;
+                let release;hydratePresenterServiceData=()=>new Promise(resolve=>{release=resolve});
+                const pending=prepareNextServiceFromPresenter(first.id,{nextServiceId:youth.id});
+                state.selectedServiceId='other';release();await pending;
+                check(state.presenter.serviceId===first.id,'stale preparation changed output');
+                canUseClientData=oldCan;hydratePresenterServiceData=oldHydrate;hasDirtyChanges=oldDirty;confirmSaveBeforeLeaving=oldConfirm;
+                return 'PASS next preparation moves live output to target without closing window';
               } finally {
                 state.services = previous.services;
                 state.serviceItems = previous.serviceItems;

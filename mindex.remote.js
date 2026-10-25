@@ -5,12 +5,14 @@
  document.getElementById('monitorPanelBtn')?.before(trigger);window.lucide?.createIcons({root:trigger});
  let ending=false,remoteRevision=0,remoteBusy=false,remoteState={code:'',connected:false,available:false};
  const buttonLabel=()=>remoteState.code||'원격 조작';
+ const codeFor=id=>isPresenterOutputWindowOpen()&&state.presenter.serviceId===id?remoteState.code||'':'';
  const panel=document.createElement('dialog');panel.className='remote-panel';panel.setAttribute('aria-labelledby','remoteTitle');
  panel.innerHTML='<header><span class="remote-brand-mark" aria-hidden="true"></span><h2 id="remoteTitle">Mindex Remote</h2><button class="icon-btn" data-remote-close aria-label="닫기" title="닫기"><i data-lucide="x"></i></button></header><section class="remote-connection"><p data-remote-status role="status"></p><strong data-remote-code></strong><p data-remote-help></p></section><footer class="remote-actions"><a class="btn secondary" data-remote-link target="_blank" rel="noopener"><i data-lucide="external-link"></i><span>Remote 열기</span></a><button class="btn secondary" data-remote-end disabled>연결 해제</button></footer>';
  document.body.append(panel);window.lucide?.createIcons({root:panel});const $=s=>panel.querySelector(s);
  function paintPanel(){
   for(const button of [trigger,...document.querySelectorAll('[data-presenter-remote]')]){
    let text=button.querySelector('[data-remote-button-label]');if(!text){text=document.createElement('span');text.dataset.remoteButtonLabel='';button.append(text);}
+   if(button.dataset.remoteServiceId){const code=codeFor(button.dataset.remoteServiceId);button.hidden=!code;text.textContent=code;button.disabled=ending;button.setAttribute('aria-label','원격 조작 예배 코드 '+code);continue;}
    text.textContent=buttonLabel();button.disabled=ending;button.dataset.remotePairing=String(!!remoteState.code);
    button.title=remoteState.code?'송출 코드 '+remoteState.code:'원격 조작';button.setAttribute('aria-label',button.title);
   }
@@ -60,6 +62,7 @@
    return {p,m,slide,sync,own,intro};
   }
   function read(){
+   if(followOutput&&state.presenter.outputSessionId===outputSession&&state.presenter.outputWindow===outputWindow)serviceId=state.presenter.serviceId;
    const {p,m,slide,sync,own,intro}=context();
    const live=p.serviceId===serviceId&&(followOutput||state.selectedServiceId===serviceId)&&p.outputSessionId===outputSession&&p.outputWindow===outputWindow&&presenterControllerIsLive(serviceId)&&isPresenterOutputWindowOpen();
    const allowed=['jump','prev','next',p.safetyBlank?'unblank':'blank'];
@@ -138,6 +141,6 @@
  window.addEventListener('pagehide',event=>{registryActive=false;registryEpoch++;clearInterval(registryTimer);if(event.persisted)registry?.suspend();else{registry?.close();registry=null;}});
  window.addEventListener('pageshow',()=>{if(registryActive)return;registryActive=true;registryTimer=setInterval(ensureRegistry,2000);void registry?.resume();void ensureRegistry();});
  // Read-only adapter entry is also used by isolated regression tests.
- window.MindexRemote={adapter,buttonLabel,notify:()=>registry?.notify(),open:()=>panel.showModal()};
+ window.MindexRemote={adapter,buttonLabel,codeFor,notify:()=>registry?.notify(),open:()=>panel.showModal()};
  paintPanel();
 })();
