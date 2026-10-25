@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261025-native-form-display",
+  "version": "20261025-children-preserved-cleanup",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "d0cffb43ce7af04e0fd7674a7648254044e63ac380275621d9e24b6cdc940944",
-  "runtime_sha256": "bf3d2709e9b3b9439c31f773beddbdca09fb089a585afc9333cdf95bebdbd869",
-  "source_bytes": 1345051,
-  "runtime_bytes": 961095,
-  "source_gzip": 306479,
-  "runtime_gzip": 240533
+  "source_sha256": "623d1db17e5e840d9b144bd28b68060018f72904f742ee648744fbf2f331cf33",
+  "runtime_sha256": "69364dd021bc85cfca64173fcd54eaf97306e75212cf74d5ba4f0f9c16601c24",
+  "source_bytes": 1345861,
+  "runtime_bytes": 961579,
+  "source_gzip": 306749,
+  "runtime_gzip": 240667
 }
