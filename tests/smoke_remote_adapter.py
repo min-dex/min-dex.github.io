@@ -92,12 +92,35 @@ try:
     output.closed=true;check(!adapter.read().live,'closed output revoked');output.closed=false;
     state.serviceMusic.ownerServiceId='another-service';check(!adapter.read().allowed.includes('play'),'foreign audio protected');
     state.presenter.outputSessionId='new-session';check(!adapter.read().live,'replacement output revoked');clearServiceMusicSyncTimer();
-    state.presenter.outputSessionId='fixture';let registrations=0,reports=0;
-    state.client={async rpc(name,args){if(name!=='mindex_remote_output')return {data:{ok:true}};if(args.p_action==='register'){registrations++;return {data:{ok:true,id:crypto.randomUUID(),token:'fixture'}};}reports++;return {data:{ok:true,link:null}};}};
+    state.presenter.outputSessionId='fixture';let registrations=0,reports=0,lastInfo=null;
+    state.client={async rpc(name,args){if(name!=='mindex_remote_output')return {data:{ok:true}};if(args.p_action==='register'){registrations++;return {data:{ok:true,id:crypto.randomUUID(),token:'fixture'}};}reports++;if(args.p_action==='tick')lastInfo=args.p_info;return {data:{ok:true,link:null}};}};
     const until=async f=>{for(let i=0;i<60;i++){if(f())return;await new Promise(r=>setTimeout(r,100));}throw Error('registry timeout');};
     await until(()=>registrations===1&&reports>0);const beforeReports=reports;window.dispatchEvent(new PageTransitionEvent('pagehide',{persisted:true}));window.dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true}));await until(()=>reports>beforeReports);check(registrations===1,'page restore keeps output identity');
+    // All supported types have a concrete official name, with no title/date fallback.
+    const types=Object.values(SERVICE_CATEGORIES).flat();
+    for(const type of types){
+     const official=serviceTypeDisplayName(type),service={type_id:type,title:'옛 제목',date:'2026-10-18',_worshipSourceRef:{sunday_main_variant:'all_generations',friday_variant_name:'옛 세부명'}};
+     check(official&&official!==type&&official!=='예배','missing official name: '+type);
+     const original=JSON.stringify(service);
+     check(serviceDisplayTypeName(service)===official,'official name: '+type);
+     check(serviceDisplayTypeName({...service,alias:'  특별  예배 '})==='특별 예배','alias priority: '+type);
+     check(JSON.stringify(service)===original,'name rendering mutated source');
+    }
+    // Names sent to Remote must use the same display contract as the main app.
+    for(const [service,expected] of [
+     [{id:sid,type_id:'children',title:''},'어린이부 예배'],
+     [{id:sid,type_id:'children',title:'옛 제목'},'어린이부 예배'],
+     [{id:sid,type_id:'fixture',title:'저장 제목',alias:'베데스다 예배'},'베데스다 예배'],
+     [{id:sid,type_id:'friday',title:'',_worshipSourceRef:{friday_variant_name:'삼삼오오예배'}},'금요기도회'],
+     [{id:sid,type_id:'friday',alias:'삼삼오오예배'},'삼삼오오예배'],
+     [{id:sid,type_id:'sunday-main',alias:'온세대 찬양예배'},'온세대 찬양예배']
+    ]){
+     state.services=[service];check(serviceDisplayTypeName(service)===expected,'main display fixture');
+     const before=reports;MindexRemote.notify();await until(()=>reports>before&&lastInfo?.title===expected);
+    }
+    state.services=[];MindexRemote.notify();await until(()=>lastInfo?.title==='예배');
     window.dispatchEvent(new PageTransitionEvent('pagehide'));state.client=null;
-    return 'PASS page restore registration; real navigation/blackout/music/auto-sync adapter, source ownership, autoplay failure and output identity';
+    return 'PASS shared worship names in registry; page restore registration; real navigation/blackout/music/auto-sync adapter, source ownership, autoplay failure and output identity';
    }'''),flush=True)
    browser.close()
 finally:server.shutdown()

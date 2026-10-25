@@ -1050,3 +1050,12 @@ No lyrics, forms, media timings, URLs or worship settings are saved by these con
 Retained HTML must refresh through the existing bounded runtime upgrade when
 the media controls owner or its stylesheet is absent. No partial media UI startup
 or separate dynamic loader is added.
+
+## Worship display names · 2026-10-25
+
+- 모든 예배 이름은 **명시적으로 저장한 별칭 → 예배 종류의 공식 명칭** 두 단계만 쓴다.
+- 공통 진입점은 `serviceDisplayTypeName(service)`이다. 본체 목록·탭·프레젠터·송출 이름·Remote registry/snapshot은 이 값을 사용한다.
+- 공식 명칭은 `serviceTypeDisplayName(typeId)`에서 가져온다. 지원하는 모든 예배 종류는 구체적인 공식 명칭을 가져야 한다(주일예배 [1부/2부/3부], 금요기도회, 어린이부 예배 등). 제목 필드가 비었다고 `예배`로 대체하지 않는다.
+- 온세대 찬양예배·삼삼오오예배 등은 저장된 별칭일 때 우선한다. 날짜, 예전 title, source_ref의 세부 유형 이름으로 표시 이름을 추론하거나 덮어쓰지 않는다. 별칭을 비우면 공식 명칭으로 돌아간다.
+- 예전 title/source_ref는 자료·템플릿 판단을 위해 보존한다. 표시 이름 수정으로 운영 데이터나 예배 유형·순서·자동 생성 규칙을 변경하지 않는다.
+- 실제 예배 레코드를 아직 찾지 못한 상태의 `예배` 표시는 별개다. 정상적으로 로드된 지원 예배의 이름으로 쓰지 않는다.

@@ -133,7 +133,7 @@
     if(!state.client||!presenterControllerIsLive(p.serviceId)||!isPresenterOutputWindowOpen())return null;
     const service=state.services.find(s=>s.id===p.serviceId);
     return {key:p.outputSessionId,client:state.client,adapter:adapter(p.serviceId,p.outputSessionId,p.outputWindow,true),guestAdapter:adapter(p.serviceId,p.outputSessionId,p.outputWindow,false,true),
-     info:{title:service?.title||service?.name||'예배',device:document.getElementById('monitorName')?.value||'송출 PC',position:`${p.index+1} / ${p.slides.length}`}};
+     info:{title:serviceDisplayTypeName(service)||'예배',device:document.getElementById('monitorName')?.value||'송출 PC',position:`${p.index+1} / ${p.slides.length}`}};
    },{onUpdate:value=>{remoteState=value;paintPanel();}});
   }catch{}finally{registryLoading=false;}
  }

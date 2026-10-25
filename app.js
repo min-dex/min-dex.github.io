@@ -5939,11 +5939,11 @@ function serviceViewIsLoading(serviceId) {
 
 function renderServiceViewLoadState(service) {
   const failed = serviceViewLoadErrors.has(service.id);
-  if (!failed) return `<section class="service-view-loading" data-service-view-loading="${escapeAttr(service.id)}" aria-busy="true">${renderLoadingRow("예배 자료 불러오는 중…")}<p>${escapeHtml(service.title || serviceTypeDisplayName(service.type_id))}</p></section>`;
+  if (!failed) return `<section class="service-view-loading" data-service-view-loading="${escapeAttr(service.id)}" aria-busy="true">${renderLoadingRow("예배 자료 불러오는 중…")}<p>${escapeHtml(serviceDisplayTypeName(service))}</p></section>`;
   return `<section class="service-view-loading" data-service-view-loading="${escapeAttr(service.id)}" aria-busy="${!failed}">
     ${failed ? '<i data-lucide="cloud-off" aria-hidden="true"></i>' : '<span class="service-view-loading-spinner" aria-hidden="true"></span>'}
     <h2>${failed ? "예배 자료를 불러오지 못했습니다" : "예배를 준비하고 있어요"}</h2>
-    <p>${escapeHtml(service.title || serviceTypeDisplayName(service.type_id))}</p>
+    <p>${escapeHtml(serviceDisplayTypeName(service))}</p>
     <span class="service-view-loading-message" role="status">${failed ? "연결을 확인한 뒤 다시 시도해 주세요." : "예배 순서와 연결된 찬양 자료를 불러오는 중입니다."}</span>
     ${failed ? `<button class="btn secondary" type="button" data-service-load-retry="${escapeAttr(service.id)}">다시 시도</button>` : ""}
   </section>`;
@@ -23296,34 +23296,14 @@ function serviceIsFridayVariant(service = null, variantKey = "") {
 }
 
 function serviceVariantDisplayName(service = null) {
-  if (!serviceIsFridayFamily(service)) return "";
-  const sourceRef = serviceRawSourceRef(service);
-  const fromSource = String(sourceRef.friday_variant_name || "").trim();
-  if (fromSource) return fromSource;
-  const key = serviceFridayVariantKey(service);
-  if (key === "monthly") return "월삭예배";
-  if (key === "culture") return "문화예배";
-  if (key === "3355") return "삼삼오오예배";
-  if (key === "district-union") return "구역연합예배";
-  return serviceAlias(service) || serviceCustomTitle(service) || "금요기도회";
+  return serviceIsFridayFamily(service) ? serviceDisplayTypeName(service) : "";
 }
 
 function serviceDisplayTypeName(service) {
   if (!service) return "";
-  const alias = serviceAlias(service);
-  if (alias) return alias;
-  if (worshipAppServiceTypeId(service.type_id) === "sunday-main" && isAllGenerationsWorshipService(service)) {
-    return ALL_GENERATION_MAIN_PRAISE_SERVICE_ALIAS;
-  }
-  const sourceRef = service?._worshipSourceRef && typeof service._worshipSourceRef === "object" ? service._worshipSourceRef : {};
-  if (worshipAppServiceTypeId(service.type_id) === "friday") {
-    const fridayName = String(sourceRef.friday_variant_name || "").trim();
-    if (fridayName) return fridayName;
-  }
-  if (serviceTypeUsesCanonicalTitle(service.type_id)) return serviceTypeDisplayName(service.type_id);
-  const customTitle = serviceCustomTitle(service);
-  if (customTitle) return normalizeWorshipServiceTitle(customTitle, service);
-  return serviceTypeDisplayName(service.type_id);
+  // Every service uses one naming contract: explicit alias, then official type name.
+  // Titles, dates and template variants must never invent a different display name.
+  return serviceAlias(service) || serviceTypeDisplayName(service.type_id || service.service_type_id);
 }
 
 function serviceTypeById(typeId) {
@@ -24281,11 +24261,7 @@ function renderPresenterSidebar(query, services, selectedService, outlineMarkup 
 
 function renderPresenterSidebarServiceSummary(service) {
   if (!service?.id) return "";
-  const serviceName = cleanList([
-    serviceDisplayTypeName(service),
-    serviceCustomTitle(service),
-    serviceTypeDisplayName(service.type_id),
-  ])[0] || "예배";
+  const serviceName = serviceDisplayTypeName(service) || "예배";
   const variantName = serviceVariantDisplayName(service);
   const dateStr = formatServiceIsoDate(service);
   const details = cleanList([
