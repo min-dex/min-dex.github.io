@@ -107,3 +107,13 @@ Version headers show the saved audio name, recorded timing count and saved auto-
 Isolated Chromium/WebKit checks cover 320/800px, escaped names, empty/disabled timing, draft mismatch and no mutation. Special-service taxonomy was checked through a read-only ID query: the operational `special` row exists, so no client-side taxonomy upsert was restored. The local fullscreen-skip and hidden-element blank assertions are included separately; Linux native integration remains distinct from the macOS SKIP.
 
 Lyric/type/variant input refreshes only the matching version summary status text in the existing header. It never rerenders the editor, replaces its input node, moves focus/caret, mutates audio metadata or updates another version's header. Returning to the saved lyric signature clears the notice. Isolated actual input/selection checks cover both browser engines.
+
+## Single-record version navigation · 2026-10-25
+
+Same-song arrangements remain independent saved records and existing worship
+references stay unchanged. The editor offers a version selector for the current
+same-song group, using the ordinary unsaved-change confirmation on navigation.
+Cancelling restores the selector and retains the draft. Relationship management
+is available in metadata editing, not the normal description. Duplicate display
+names receive a temporary position suffix without changing saved names. Lyrics
+preview headers use the full label Lyrics; song-form token L stays unchanged.

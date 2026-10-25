@@ -10,3 +10,8 @@
 .praise-score-previews img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: contain; border: 1px solid var(--line); border-radius: var(--r); background: #fff; }
 .praise-media-status { margin: 0; color: var(--ink-4); overflow-wrap: anywhere; }
 .praise-media-status[data-praise-audio-error] { color: var(--danger, #b23b3b); }
+
+.single-song-version-picker {
+  width: min(100%, 320px);
+  margin-bottom: 15px;
+}

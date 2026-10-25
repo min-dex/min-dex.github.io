@@ -313,3 +313,19 @@ async function readSingleSongs(ids) {
   return ids.map(id => state.singleSongCatalog.appSong(id));
 }
 
+
+// Same-song arrangements keep independent records but use one editor navigation.
+function renderSingleSongVersionPicker(song) {
+  if (!song?._singleSongRecord) return "";
+  const ids = new Set([song.id, ...(song.same_song_ids || [])]);
+  const peers = state.songs.filter(row => ids.has(row.id));
+  const names = peers.map(row => versionDisplayName(row, row.versions?.[0] || {}));
+  return `<label class="field compact single-song-version-picker"><span>버전</span><select data-single-version-select aria-label="곡 버전">${peers.map((row, index) => `<option value="${escapeAttr(row.id)}"${row.id === song.id ? " selected" : ""}>${escapeHtml(names.filter(name => name === names[index]).length > 1 ? `${names[index]} · ${index + 1}` : names[index])}</option>`).join("")}</select></label>`;
+}
+
+async function selectSingleSongVersion(field) {
+  const song = getSelectedSong(), id = field.value;
+  if (!song?._singleSongRecord || ![song.id, ...(song.same_song_ids || [])].includes(id)) { field.value = song?.id || ""; return; }
+  try { await selectSong(id); }
+  finally { if (field.isConnected) field.value = getSelectedSong()?.id || ""; }
+}

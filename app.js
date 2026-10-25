@@ -9615,6 +9615,8 @@ function handleDetailSubmit(event) {
 }
 
 function handleDetailChange(event) {
+  const nativeVersion = event.target.closest("[data-single-version-select]");
+  if (nativeVersion) { void selectSingleSongVersion(nativeVersion); return; }
   const backgroundVideoFile = event.target.closest("[data-praise-background-file]");
   if (backgroundVideoFile) { void uploadPresenterPraiseBackground(backgroundVideoFile); return; }
   const fadeStop = event.target.closest("[data-service-music-fade-stop]");
@@ -17398,7 +17400,6 @@ function renderSongDescription(song, primary, items = [], relatedSongs = []) {
         </div>
       ` : ""}
       ${renderRelatedSongLinks(relatedSongs)}
-      ${renderSingleSongRelations(song)}
     </section>
   `;
 }
@@ -17465,6 +17466,7 @@ function renderSongMetadataDialog(song) {
           ${renderInput("성구", "scripture", cleanList(song.scripture).join(LIST_INPUT_SEPARATOR), "compact meta-ref")}
           ${renderVersionMusicalStructure(getSelectedVersion(), state.forms, { metadataField: true })}
         </div>
+        ${renderSingleSongRelations(song)}
       </section>
     </div>
   `;
@@ -17745,6 +17747,7 @@ function renderFormsTab(song) {
   const linkedEntries = linkedSongVersionEntries(song);
   return `
     <section class="panel praise-forms-panel">
+      ${renderSingleSongVersionPicker(song)}
       ${renderFormToolbar(song)}
       ${
         versions.length > 1 || linkedEntries.length
@@ -18421,7 +18424,7 @@ function renderReadonlyFormBlock(form, options = {}) {
     <article class="form-block readonly">
       <div class="form-head">
         <div class="form-meta">
-          <span class="form-label-text">${escapeHtml(songFormPresetDisplayLabel(displayLabel(form)) || displayLabel(form))}</span>
+          <span class="form-label-text">${escapeHtml(form.part_type === "Lyrics" ? "Lyrics" : songFormPresetDisplayLabel(displayLabel(form)) || displayLabel(form))}</span>
         </div>
         ${options.showActions ? renderFormBlockActions(options.index, options.formCount, options.version?.id) : ""}
       </div>
