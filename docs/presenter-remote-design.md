@@ -2,7 +2,8 @@
 
 ## 현재 사용 계약 ·2026-10-24
 
-웹 배포 완료: `20261024-disclosure-remote-batch` (`554f5146`).
+웹 배포 기준: `20261024-disclosure-remote-batch` (`554f5146`).
+2026-10-25의 3분 종료 제한 제거는 아래 소스 변경이며 아직 운영 배포하지 않았다.
 로컬 Chromium/WebKit 및 실제 중계 검증과 물리 휴대폰·현장 장비 검증은 구분한다.
 
 1. 예배 송출을 시작하면 활성 송출에 **4자리 코드**가 자동 배정된다.
@@ -12,14 +13,26 @@
 3. 현재/다음 미리보기, 암전, 슬라이드와 음원·영상 조작은 PC의 기존 API를 사용한다.
    다른 기기가 상태를 바꾸면 오래된 명령은 거절하며, 끊긴 동안의 명령은 재실행하지 않는다.
 4. 무응답 2.5초 초과 또는 백그라운드 전환 시 조작을 잠그고, 마지막 응답부터
-   최대 **3분** 동안 메모리의 연결을 유지한다. 복귀 후 최신 상태를 확인해야 조작을 재개한다.
+   **3분 무응답 종료 제한 없이** 메모리의 연결을 유지한다. 복귀 후 최신 상태를 확인해야 조작을 재개한다.
+   서버 권한 만료·명시적 종료·기존 8시간 상한은 별개로 유지한다.
 5. 명시적 연결 종료·송출 종료는 즉시 종료한다. 새로고침·일반 페이지 이동·브라우저
    프로세스 종료는 연결 정보를 영구 복구하지 않는다. BFCache 복귀는 별도 지원한다.
 
 세부 기준은 아래 **Stable four-digit output codes**, **Multiple administrators, one guest**,
-**Unified entry** 및 **Three-minute automatic recovery (current)** 절을 따른다.
+**Unified entry** 및 **Automatic recovery without a three-minute cutoff (current)** 절을 따른다.
 이하 날짜별 초기 구현·검증 기록은 당시 근거이며, 현행 계약과 충돌하면 위 기준과
 최신 해당 절이 우선한다. 초기 6자리·2분 코드, 관리자 한 명, 10초 종료는 현재 규칙이 아니다.
+
+### Automatic recovery without a three-minute cutoff (current) ·2026-10-25
+
+사용자 요청으로 연결 후 무응답 180초 경과에 따른 자동 종료만 제거했다.
+네트워크/백그라운드 복귀 때 같은 메모리 세션으로 재연결하고 새 request에 맞는 최신 응답을
+받은 뒤에만 조작을 허용한다. 2.5초 freshness 잠금, 명령 미보관/재전송 금지, generation·ticket·
+revision 검사, 단일 일반 Remote 제한은 유지한다. 송출 종료와 명시적 종료는 계속 즉시 종료한다.
+서버 권한 만료와 기존 8시간 세션 상한, 브라우저 프로세스 종료/새로고침의 비영속성은 바꾸지 않는다.
+DB 변경은 없다. 3분 제한 제거는 소스 변경이며 운영 배포 완료를 뜻하지 않는다.
+검사: 3분 초과·10분·1시간 시계 이동 후 fresh-state 복구/명령 거절/재실행 없음과 종료,
+두 브라우저의 10분 sleep 복귀 및 송출 종료. 실제 휴대폰 절전/네트워크는 별도다.
 
 ## 초기 연결 구현 기록 ·2026-10-21~22 (현행 계약 아님)
 
@@ -432,7 +445,7 @@ status within 700ms on Chromium/WebKit; it retains stale-frame, duplicate comman
 and autoplay-denial coverage. Isolated two-admin/guest lifecycle checks pass on
 both engines after integration with the extracted presenter runtime.
 
-### Three-minute automatic recovery ·2026-10-24 (current)
+### Three-minute automatic recovery ·2026-10-24 (historical; cutoff removed 2026-10-25)
 
 This supersedes the earlier 10-second disconnect and BFCache logout behavior.
 An established session keeps its in-memory identity/keys for up to 180 seconds

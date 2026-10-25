@@ -12,7 +12,6 @@ export async function openRemote({client,code,host=false,registration:providedRe
  let timer,expiry,ackTimer,queue=Promise.resolve(),queued=0,rateAt=0,rate=0;
  let freshRequest=id(),fresh=false,changeTimer=null,lastState='',sendQueue=Promise.resolve();
  let browseRequest='',paused=false,held=false,lastWall=Date.now(),retryTimer=null,transport=0,sendEpoch=0;
- const retention=180000;
  const born=performance.now();
  const status=s=>{if(!closed)onStatus(s);};
  const transportError=(generation=transport)=>Object.assign(Error('연결 복구 중에는 조작할 수 없습니다.'),{code:'remote_transport',generation});
@@ -40,10 +39,6 @@ export async function openRemote({client,code,host=false,registration:providedRe
   transport++;clearInterval(timer);clearTimeout(retryTimer);clearTimeout(changeTimer);clearTimeout(expiry);clearTimeout(ackTimer);gate?.close();void registration.revoke();
   if(channel)Promise.resolve().then(()=>client.removeChannel(channel)).catch(()=>{});onStatus(reason);onState(null);onClose();
  }
- function expired(){
-  if(ready&&Math.max(performance.now()-lastSeen,Date.now()-lastWall)>=retention){close('3분 동안 응답이 없어 연결을 종료했습니다. 다시 연결해 주세요.');return true;}
-  return closed;
- }
  function hold(){
   if(closed)return;
   browseRequest='';
@@ -55,7 +50,7 @@ export async function openRemote({client,code,host=false,registration:providedRe
  }
  function retry(){
   if(closed||paused||retryTimer!==null)return;
-  retryTimer=setTimeout(()=>{retryTimer=null;if(expired()||paused)return;try{bind();}catch{retry();}},1500);
+  retryTimer=setTimeout(()=>{retryTimer=null;if(closed||paused)return;try{bind();}catch{retry();}},1500);
  }
  function lost(){
   if(closed||ending)return;
@@ -65,7 +60,7 @@ export async function openRemote({client,code,host=false,registration:providedRe
   Promise.resolve().then(()=>old&&client.removeChannel(old)).catch(()=>{}).then(retry);
  }
  function refresh(){
-  if(ending||expired())return;
+  if(ending||closed)return;
   paused=false;hold();freshRequest=id();
   if(!subscribed){retry();return;}
   if(ready){if(host)void publish();else send({type:'ping',request:freshRequest}).catch(handleFailure);}
@@ -81,9 +76,9 @@ export async function openRemote({client,code,host=false,registration:providedRe
   }catch(e){close(e.message);}
  }
  async function receive(packet){
-  if(ending||expired()||!packet||!['pair','session'].includes(packet.mode))return;
+  if(ending||closed||!packet||!['pair','session'].includes(packet.mode))return;
   let m;try{m=await unseal(packet.mode==='pair'?pair.key:key,packet.box,pair.topic);}catch{return;}
-  if(ending||expired()||!m||typeof m.peer!=='string'||m.peer.length>64||!Number.isSafeInteger(m.seq))return;
+  if(ending||closed||!m||typeof m.peer!=='string'||m.peer.length>64||!Number.isSafeInteger(m.seq))return;
   if(packet.mode==='pair'){
    if(host&&m.type==='hello'&&!reserved&&performance.now()-born<120000){
     reserved=true;other=m.peer;
@@ -145,7 +140,7 @@ export async function openRemote({client,code,host=false,registration:providedRe
  if(closed)throw Error('연결 준비에 실패했습니다. 같은 송출 코드로 다시 연결해 주세요.');
  expiry=setTimeout(()=>close('연결 대기 시간이 지났습니다. 같은 송출 코드로 다시 연결해 주세요.'),host?120000:15000);
  timer=setInterval(()=>{
-  if(ending||expired())return;
+  if(ending||closed)return;
   if(performance.now()-born>8*3600000)return close('연결 시간이 만료됐습니다. 같은 송출 코드로 다시 연결해 주세요.');
   if(host){
    try{if(!read()?.live)return void end();}catch{return close();}
@@ -158,7 +153,7 @@ export async function openRemote({client,code,host=false,registration:providedRe
  },1000);
  return {
   close,end,refresh,code:registration.code,
-  suspend(){if(expired())return;paused=true;hold();},
+  suspend(){if(closed)return;paused=true;hold();},
   offline(){if(ready)lost();},
   notify(){
    if(!host||!ready||closed||changeTimer!==null)return;

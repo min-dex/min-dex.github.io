@@ -62,11 +62,14 @@ try:
     host.wait_for_timeout(11500);assert host.evaluate('s.connected')
     cdp.send('Page.setWebLifecycleState',{'state':'active'});visibility(False);ready()
     assert host.evaluate('calls')==2;cdp.detach()
-   # Expired authorization cannot be revived by a late packet after browser sleep.
+   # Sleep beyond three minutes keeps the session, but commands need a fresh reply.
    visibility(True)
-   phone.evaluate("window.originalWall=Date.now;Date.now=()=>originalWall()+180001")
-   visibility(False);pump(.2);assert phone.locator('#pairForm').is_visible()
-   assert phone.locator('[data-action=next]').is_disabled();assert host.evaluate('calls')==2
+   phone.evaluate("window.originalWall=Date.now;Date.now=()=>originalWall()+600001")
+   visibility(False);assert phone.locator('[data-action=next]').is_disabled()
+   ready();assert phone.locator('#pairForm').is_hidden();assert host.evaluate('calls')==2
+   phone.click('[data-action=next]');pump();assert host.evaluate('calls')==3
+   host.evaluate('fixture.live=false;s.notify()');pump(1.2)
+   assert phone.locator('#pairForm').is_visible();assert phone.locator('[data-action=next]').is_disabled()
    host.evaluate('s.close()');hc.close();pc.close();browser.close()
-   print('PASS',engine,'hidden/visible freshness, lost ack without replay, 3-minute retention/expiry, BFCache recovery'+(', renderer freeze/resume' if engine=='chromium' else ''),flush=True)
+   print('PASS',engine,'hidden/visible freshness, lost ack without replay, 10-minute sleep recovery, output-stop termination, BFCache recovery'+(', renderer freeze/resume' if engine=='chromium' else ''),flush=True)
 finally:server.shutdown()

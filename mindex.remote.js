@@ -123,7 +123,7 @@
   if(!registryActive||registry||registryLoading||!state.client||!isPresenterOutputWindowOpen())return;
   registryLoading=true;const epoch=registryEpoch;
   try{
-   const {createOutputRegistry}=await import('./mindex.remote-admin.mjs?v=6');
+   const {createOutputRegistry}=await import('./mindex.remote-admin.mjs?v=7');
    if(!registryActive||epoch!==registryEpoch)return;
    registry=createOutputRegistry(()=>{
     const p=state.presenter;

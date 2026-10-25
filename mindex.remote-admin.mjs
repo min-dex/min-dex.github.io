@@ -1,4 +1,4 @@
-import {openRemote} from './mindex.remote-session.mjs?v=11';
+import {openRemote} from './mindex.remote-session.mjs?v=12';
 const messages={rate_limited:'입력 횟수가 많아요. 1분 뒤 다시 입력해 주세요.',invalid_code:'숫자 4자리를 확인해 주세요.',expired:'관리자 접속이 만료됐어요. PIN을 다시 입력해 주세요.',invalid_pin:'PIN을 확인해 주세요.',locked:'입력 횟수를 초과했어요. 15분 뒤 다시 시도해 주세요.',offline:'송출 PC의 응답이 없어요.',busy:'이미 연결 중이에요. 기존 연결을 종료한 뒤 다시 선택해 주세요.',host_upgrade:'송출 PC를 새로고침하면 관리자 여러 대를 연결할 수 있어요.',unavailable:'관리자 연결을 아직 사용할 수 없어요.'};
 export async function adminRpc(client,name,args){
  const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),5000);

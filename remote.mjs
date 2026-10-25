@@ -1,7 +1,7 @@
 import {obtainOutputPairing} from './mindex.output-pairing.mjs?v=4';
-import {adminRpc,relayRegistration} from './mindex.remote-admin.mjs?v=6';
+import {adminRpc,relayRegistration} from './mindex.remote-admin.mjs?v=7';
 import {createPreview} from './remote.preview.mjs?v=2';
-import {openRemote} from './mindex.remote-session.mjs?v=11';
+import {openRemote} from './mindex.remote-session.mjs?v=12';
 import {setupPhoneExperience} from './remote.screen.mjs?v=4';
 window.lucide?.createIcons();
 const screenAwake=setupPhoneExperience();

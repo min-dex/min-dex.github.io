@@ -98,10 +98,17 @@ try{
  wallOffset=179000;heldRemote.refresh();assert(!heldRemote.usable);
  await until(()=>heldRemote.usable);assert.equal(holdCalls,0);
  await heldRemote.command('next');await until(()=>heldRemote.usable);assert.equal(holdCalls,1);
- heldRemote.suspend();wallOffset+=180001;heldRemote.refresh();assert(!heldRemote.connected);
- await assert.rejects(heldRemote.command('next'));assert.equal(holdCalls,1);
+ for(const outage of [180001,600000,3600000]){
+  heldRemote.suspend();wallOffset+=outage;
+  assert(heldRemote.connected);await assert.rejects(heldRemote.command('next'));
+  heldRemote.refresh();assert(!heldRemote.usable);
+  await until(()=>heldRemote.usable);assert.equal(holdCalls,1);
+ }
+ await heldRemote.command('next');await until(()=>heldRemote.usable);assert.equal(holdCalls,2);
+ await heldHost.end();await until(()=>!heldRemote.connected);
+ await assert.rejects(heldRemote.command('next'));assert.equal(holdCalls,2);
 }finally{Date.now=wallNow;heldHost.close();heldRemote.close();}
-console.log('PASS suspended commands rejected, 179s recovery requires fresh state, 180s expiry including browser sleep');
+console.log('PASS suspended commands rejected, recovery beyond 3min/10min/1h requires fresh state, no replay, explicit end still terminal');
 // A transport send failure is recoverable, but its command is never queued.
 let breakSend=false,retryCalls=0;
 const retryClient={...client,channel(topic){const c=client.channel(topic),send=c.send;c.send=function(m){if(breakSend)return Promise.reject(Error('offline'));return send.call(this,m);};return c;}};
