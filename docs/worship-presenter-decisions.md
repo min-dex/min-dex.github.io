@@ -4821,5 +4821,7 @@ by this display correction. Covered by smoke_form_default_placeholder.py.
 ## Lyrics slide chrome ·2026-10-25
 
 Lyrics/L slides retain their content, boundaries, order and audio timing. The
-controller omits the L form badge and its colored grouping box; other named
-forms and Scripture grouping retain their current display.
+controller presents the complete Lyrics sequence as one plain logical group,
+with the word Lyrics like Title/Interlude and no colored grouping box. It does
+not render a literal L label. Other named forms and Scripture grouping retain
+their current display.

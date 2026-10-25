@@ -1284,14 +1284,14 @@ function renderPresenterBoardSlideBlocks(entries, activeIndex, serviceId, script
   return presenterBoardSlideBlocks(entries).map((block) => {
     const scripture = presenterSlideElementType(block.entries[0]?.slide) === PRESENTER_ELEMENT_TYPES.SCRIPTURE_TEXT;
     const formType = normalizePresenterFormPresetLabel(block.label).type;
-    const plain = !scripture && ["title", "instrumental"].includes(formType);
+    const plain = !scripture && ["title", "instrumental", "lyrics"].includes(formType);
     const color = scripture
       ? (scriptureIndex++ % 2 === 0 ? "default" : "accent")
       : ["verse", "pre-chorus", "chorus", "bridge", "coda", "tag"].includes(formType) ? formType : "neutral";
     const colorAttribute = block.key && !plain ? ` data-${scripture ? "scripture-tone" : "form-color"}="${color}"` : "";
     const thumbs = block.entries.map(({ slide, slideIndex, formLabel }) =>
       renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, formLabel)).join("");
-    return block.key && formType !== "lyrics"
+    return block.key
       ? `<div class="svc-board-slide-block"${plain ? ' data-form-plain="true"' : colorAttribute} role="group" aria-label="${escapeAttr(block.label)}">${thumbs}</div>`
       : thumbs;
   }).join("");
@@ -1417,10 +1417,11 @@ function renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, fo
     && state.presenterBoardSelection.elementKey === elementKey
     && (state.presenterBoardSelection.indexes || []).map(Number).includes(slideIndex);
   const formType = normalizePresenterFormPresetLabel(formLabel).type;
-  const normalizedFormLabel = formType === "title" ? "Title"
+  const normalizedFormLabel = formType === "lyrics" ? "Lyrics"
+    : formType === "title" ? "Title"
     : formType === "instrumental" ? "Interlude"
     : songFormPresetDisplayLabel(formLabel) || String(formLabel || "").trim();
-  const visibleFormLabel = formType === "lyrics" || (formType !== "instrumental" && presenterLabelDuplicatesSlideText(normalizedFormLabel, slide)) ? "" : normalizedFormLabel;
+  const visibleFormLabel = formType !== "instrumental" && presenterLabelDuplicatesSlideText(normalizedFormLabel, slide) ? "" : normalizedFormLabel;
   const ariaPrefix = presenterSlideInteractionHint(serviceId, `${slideIndex + 1}번 슬라이드${hidden ? " · 숨김" : ""}`);
   const slideNumber = slideIndex + 1;
   const formBadge = visibleFormLabel ? `
