@@ -17391,7 +17391,7 @@ function shortUrl(value) {
 
 function renderSongDescription(song, primary, items = [], relatedSongs = []) {
   const supportItems = items.filter(Boolean);
-  if (!primary && !supportItems.length && !relatedSongs.length && !song?._singleSongRecord) return "";
+  if (!primary && !supportItems.length && !relatedSongs.length) return "";
   return `
     <section class="song-description song-description--song" aria-label="찬양 설명">
       ${primary ? `<p class="song-description-title">${escapeHtml(primary)}</p>` : ""}
