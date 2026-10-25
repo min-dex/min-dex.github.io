@@ -265,6 +265,11 @@ function presenterKeynoteHtmlPreviewSource(slide) {
   return presenterKeynoteHtmlPreviews.get(`${slide.elementId}|${slide.asset.keynoteHtml.sha256}`)?.url || slide.asset.keynoteHtml.poster || '';
 }
 
+function presenterKeynoteHtmlPreviewSlide(slide) {
+  const preview = presenterKeynoteHtmlPreviewSource(slide);
+  return preview ? { ...slide, type: 'image', elementType: PRESENTER_ELEMENT_TYPES.IMAGE, layout: PRESENTER_SLIDE_LAYOUTS.MEDIA, imageSrc: preview, text: '', asset: { ...slide.asset, url: preview } } : slide;
+}
+
 function handlePresenterKeynoteHtmlAction(event) {
   const button = event.target.closest('[data-keynote-html-action]');
   if (!button || button.disabled) return false;
