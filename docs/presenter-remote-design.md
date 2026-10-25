@@ -479,7 +479,7 @@ BFCache and actual Chromium renderer freeze. Physical phone radios remain distin
 
 ### On-demand slide picker ·2026-10-24
 
-Remote opens a read-only modal with ordered groups, current-slide highlight,
+Remote expands an inline list with element names, current-slide highlight,
 search and six-slide pages. Phones use two columns; wider screens use three.
 Only explicit browse requests send catalog/preview data, never heartbeat state.
 Responses omit hidden slides, bound search/labels and cap preview payload at
@@ -490,7 +490,7 @@ Selecting sends a jump through the existing encrypted, revision/ticket/sequence
 gate and real runPresenterAction path. The target carries the source catalog
 identity; replaced slides/source changes invalidate old lists. Host validates
 integer bounds, visibility and catalog identity again before moving. No offline
-queue/replay is added. The dialog closes only on a successful command result;
+queue/replay is added. The list remains open after a command result;
 rejected/stale commands stay visible for correction. Old hosts simply do not
 advertise jump, so the picker stays disabled until both sides are updated.
 
