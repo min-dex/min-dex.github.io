@@ -28,8 +28,8 @@
  $('[data-remote-end]').onclick=async()=>{if(ending)return;ending=true;paintPanel();try{await registry?.disconnectGuest();}finally{ending=false;paintPanel();}};
  const text=s=>[s?.title,s?.body||s?.text||s?.bodyText||s?.content].filter(v=>typeof v==='string').join('\n').slice(0,1800);
  function adapter(serviceId,outputSession,outputWindow,admin=false,followOutput=admin){
-  let slideSet,slideSignature,slideKey;
-  function catalogKey(){const p=state.presenter;if(slideSet!==p.slides||slideSignature!==p.sourceSignature){slideSet=p.slides;slideSignature=p.sourceSignature;slideKey=crypto.randomUUID();}return slideKey;}
+  let slideSet,slideSignature,slideService,slideKey;
+  function catalogKey(){const p=state.presenter;if(slideService!==p.serviceId||slideSet!==p.slides||slideSignature!==p.sourceSignature){slideService=p.serviceId;slideSet=p.slides;slideSignature=p.sourceSignature;slideKey=crypto.randomUUID();}return slideKey;}
   let previewRevision,previews=new WeakMap();
   function preview(slide){
    if(!slide?.type)return '';
@@ -76,11 +76,11 @@
    const video=presenterRemoteVideoState(serviceId);
    if(video?.ready)allowed.push(...(video.status==='playing'?['video-pause']:['video-play']), 'video-restart');
    const next=p.slides.slice(p.index+1).find(s=>!presenterSlideIsHidden(s));
-   return {live,video,catalogKey:catalogKey(),index:p.index,total:p.slides.length,blank:!!p.safetyBlank,current:text(p.liveScripture?.active?p.liveScripture.slide:slide),next:text(next),allowed,
+   return {live,video,serviceTitle:serviceDisplayTypeName(state.services.find(s=>s.id===serviceId))||'예배',catalogKey:catalogKey(),index:p.index,total:p.slides.length,blank:!!p.safetyBlank,current:text(p.liveScripture?.active?p.liveScripture.slide:slide),next:text(next),allowed,
     previewCurrent:p.safetyBlank?'<div style="width:100%;height:100%;background:#000"></div>':preview(p.liveScripture?.active?p.liveScripture.slide:slide),previewNext:preview(next),
     music:!own&&!intro?'연결된 음원 없음':m.pending?'음원 준비 중':m.fadeStop?'페이드아웃 중':`${m.playing?'재생 중':'정지 / 일시정지'}${sync?.localTiming?m.autoSyncSuspended?' · 자동 넘김 해제':' · 자동 넘김':''}`,
     // Compare identities without disclosing media URLs or the full worship source.
-    version:compactTextSignature(JSON.stringify([remoteRevision,p.sourceSignature,presenterTransportSequence,m.playSerial,m.sourceKey,m.timingGroupId,m.mode,p.livePraise,p.liveScripture?.active]))};
+    version:compactTextSignature(JSON.stringify([remoteRevision,p.serviceId,p.sourceSignature,presenterTransportSequence,m.playSerial,m.sourceKey,m.timingGroupId,m.mode,p.livePraise,p.liveScripture?.active]))};
   }
   async function perform(action,target){
    if(!read().live||!read().allowed.includes(action))throw Error('현재 상태에서는 이 조작을 할 수 없습니다.');
@@ -107,9 +107,9 @@
   function browse(options={}){
    if(!read().live)return null;
    const query=String(options?.query||'').slice(0,80).trim().toLocaleLowerCase();
-   const rows=state.presenter.slides.map((slide,index)=>({slide,index})).filter(({slide})=>!presenterSlideIsHidden(slide)&&[slide.sectionLabel,slide.elementLabel,text(slide)].join(' ').toLocaleLowerCase().includes(query));
+   const rows=state.presenter.slides.map((slide,index)=>({slide,index})).filter(({slide})=>!presenterSlideIsHidden(slide)&&[slide.sectionLabel,slide.elementLabel,slide.elementTitle,slide.title,text(slide)].join(' ').toLocaleLowerCase().includes(query));
    const offset=Number.isSafeInteger(options?.offset)?Math.min(Math.max(0,options.offset),Math.max(0,Math.floor((rows.length-1)/6)*6)):0;
-   const result={key:catalogKey(),offset,total:rows.length,items:rows.slice(offset,offset+6).map(({slide,index})=>({index,group:String(slide.sectionLabel||slide.elementLabel||'예배').slice(0,60),title:String(slide.title||slide.elementLabel||'슬라이드').slice(0,80),text:text(slide).slice(0,300),preview:preview(slide)}))};
+   const result={key:catalogKey(),offset,total:rows.length,items:rows.slice(offset,offset+6).map(({slide,index})=>({index,groupKey:String(slide.elementId||slide.sectionId||'').slice(0,120),group:[...new Set([slide.elementLabel||slide.sectionLabel,slide.elementTitle].filter(Boolean))].join(' · ').slice(0,160)||'예배',title:String(slide.title||slide.elementLabel||'슬라이드').slice(0,80),text:text(slide).slice(0,300),preview:preview(slide)}))};
    // Keep each encrypted response below the transport envelope limit.
    for(const item of [...result.items].reverse())if(new TextEncoder().encode(JSON.stringify(result)).length>14000)item.preview='';
    return result;
@@ -133,7 +133,7 @@
     if(!state.client||!presenterControllerIsLive(p.serviceId)||!isPresenterOutputWindowOpen())return null;
     const service=state.services.find(s=>s.id===p.serviceId);
     return {key:p.outputSessionId,client:state.client,adapter:adapter(p.serviceId,p.outputSessionId,p.outputWindow,true),guestAdapter:adapter(p.serviceId,p.outputSessionId,p.outputWindow,false,true),
-     info:{title:service?.title||service?.name||'예배',device:document.getElementById('monitorName')?.value||'송출 PC',position:`${p.index+1} / ${p.slides.length}`}};
+     info:{title:serviceDisplayTypeName(service)||'예배',device:document.getElementById('monitorName')?.value||'송출 PC',position:`${p.index+1} / ${p.slides.length}`}};
    },{onUpdate:value=>{remoteState=value;paintPanel();}});
   }catch{}finally{registryLoading=false;}
  }

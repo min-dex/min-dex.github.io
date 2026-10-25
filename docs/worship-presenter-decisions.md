@@ -4894,3 +4894,23 @@ multiple builds and audible movies. Offline protocol/import tests use explicit
 engine doubles; they do not certify every Apple effect, codec or font. Actual
 operational sidecar connection, required CI, publication and Storage playback
 readback remain separately recorded release steps.
+
+
+## Native worship input version selection · 2026-10-25
+
+The worship input exposes a version selector for native single-ID songs again.
+Options are the current record and its explicit transitive `same_song` group;
+unrelated same-title songs and `related` links are not version alternatives.
+Catalogue-only peers are resolved without network I/O during rendering. Missing
+peers remain disabled with an explicit retry; no default variant is inferred.
+Mode restrictions still apply. Selection changes only that item's native song
+reference, clears legacy version aliases, and uses the existing atomic item save.
+User title, form, connected-medley membership, direct lyrics and audio timing are
+retained. Incompatible forms remain visible for user correction rather than being
+rewritten. Sibling medley members are unchanged. The selected native ID is checked
+again at save time. Legacy/manual identity contracts above must not be used to
+reintroduce a second version identity into native records.
+
+Offline regression: `tests/smoke_worship_native_version_picker.py` exercises both
+engines, DOM selection, catalogue-only/transitive/missing peers, invalid choices,
+per-member preservation and the native persistence/reopen boundary.

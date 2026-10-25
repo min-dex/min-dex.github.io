@@ -354,3 +354,28 @@ bulletin.template의 project URL도 정상 식별자로 인식한다. 나머지 
 비동기 병합 후 확인 전, 각 보관 단계 전, 편집창 적용 직전에 취소 여부를 재검사한다.
 닫기/Escape 후 이미 요청한 보관은 취소하거나 삭제하지 않고 완료를 허용한다.
 현재 입력은 바꾸지 않으며 새 복구 창에서 다시 시도할 수 있다.
+
+## Read RPC disk spill · 2026-10-25
+
+`mindex_state_read_v1` only validates its capability and selects rows, but its
+original implicit `VOLATILE` marking forces PostgREST's `pgrst_source` CTE to
+materialize the entire scalar JSON response. Large private namespaces can spill
+to temporary disk on every read. The production query statistics recorded
+336,406 temporary blocks over 2,164 calls while the dashboard warned about its
+Disk IO budget. This establishes avoidable I/O; it does not attribute every
+historical timeout exclusively to that I/O.
+
+`2026-10-25-state-read-stable.sql` changes only this function's volatility to
+`STABLE`, with an exact body-hash guard. It retains the body, signature, owner,
+ACL, namespace isolation and timeouts. No stored records are rewritten. The
+function has one data SELECT and an immutable capability calculation, so a
+single statement snapshot is appropriate. PostgREST is notified to refresh its
+schema cache. Original `VOLATILE` metadata is recoverable with `ALTER FUNCTION
+public.mindex_state_read_v1(text,text) VOLATILE` followed by the same notification;
+no data restore is needed. Operational application is a separate recorded step.
+
+`test_server_state_read_plan.mjs` uses real PostgreSQL 17.6 and the scalar RPC
+wrapper: synthetic large state spills 1,345 blocks before the change and zero
+afterward. Ordered output, null tombstones, private isolation, ACL/body/row
+preservation, write CAS/replay and rollback/reapplication are verified. Original
+server-state DB tests also pass. Runtime/client code is unchanged.

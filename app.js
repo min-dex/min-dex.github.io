@@ -5939,11 +5939,11 @@ function serviceViewIsLoading(serviceId) {
 
 function renderServiceViewLoadState(service) {
   const failed = serviceViewLoadErrors.has(service.id);
-  if (!failed) return `<section class="service-view-loading" data-service-view-loading="${escapeAttr(service.id)}" aria-busy="true">${renderLoadingRow("예배 자료 불러오는 중…")}<p>${escapeHtml(service.title || serviceTypeDisplayName(service.type_id))}</p></section>`;
+  if (!failed) return `<section class="service-view-loading" data-service-view-loading="${escapeAttr(service.id)}" aria-busy="true">${renderLoadingRow("예배 자료 불러오는 중…")}<p>${escapeHtml(serviceDisplayTypeName(service))}</p></section>`;
   return `<section class="service-view-loading" data-service-view-loading="${escapeAttr(service.id)}" aria-busy="${!failed}">
     ${failed ? '<i data-lucide="cloud-off" aria-hidden="true"></i>' : '<span class="service-view-loading-spinner" aria-hidden="true"></span>'}
     <h2>${failed ? "예배 자료를 불러오지 못했습니다" : "예배를 준비하고 있어요"}</h2>
-    <p>${escapeHtml(service.title || serviceTypeDisplayName(service.type_id))}</p>
+    <p>${escapeHtml(serviceDisplayTypeName(service))}</p>
     <span class="service-view-loading-message" role="status">${failed ? "연결을 확인한 뒤 다시 시도해 주세요." : "예배 순서와 연결된 찬양 자료를 불러오는 중입니다."}</span>
     ${failed ? `<button class="btn secondary" type="button" data-service-load-retry="${escapeAttr(service.id)}">다시 시도</button>` : ""}
   </section>`;
@@ -10634,6 +10634,11 @@ function assertServicePraiseModeReference(row, expected) {
 
 function serviceItemSelectSaveOptions(field) {
   const key = String(field?.dataset?.serviceItemField || "").trim();
+  if (key === "praise_record_id" && state.singleSongStorage === "native") {
+    const serviceId = field.dataset.serviceId || state.selectedServiceId;
+    const item = getServiceItems(serviceId)[Number(field.dataset.serviceItemIndex)];
+    if (item && field.value) return { expectedPraiseReference: { itemId:item.id, songId:field.value } };
+  }
   if (key === "praise_input_mode" && state.singleSongStorage === "native"
     && ["lyrics_db", "score_db", "children_audio"].includes(normalizeServiceInputMode(field.value))) {
     const serviceId = field.dataset.serviceId || state.selectedServiceId;
@@ -23299,34 +23304,14 @@ function serviceIsFridayVariant(service = null, variantKey = "") {
 }
 
 function serviceVariantDisplayName(service = null) {
-  if (!serviceIsFridayFamily(service)) return "";
-  const sourceRef = serviceRawSourceRef(service);
-  const fromSource = String(sourceRef.friday_variant_name || "").trim();
-  if (fromSource) return fromSource;
-  const key = serviceFridayVariantKey(service);
-  if (key === "monthly") return "월삭예배";
-  if (key === "culture") return "문화예배";
-  if (key === "3355") return "삼삼오오예배";
-  if (key === "district-union") return "구역연합예배";
-  return serviceAlias(service) || serviceCustomTitle(service) || "금요기도회";
+  return serviceIsFridayFamily(service) ? serviceDisplayTypeName(service) : "";
 }
 
 function serviceDisplayTypeName(service) {
   if (!service) return "";
-  const alias = serviceAlias(service);
-  if (alias) return alias;
-  if (worshipAppServiceTypeId(service.type_id) === "sunday-main" && isAllGenerationsWorshipService(service)) {
-    return ALL_GENERATION_MAIN_PRAISE_SERVICE_ALIAS;
-  }
-  const sourceRef = service?._worshipSourceRef && typeof service._worshipSourceRef === "object" ? service._worshipSourceRef : {};
-  if (worshipAppServiceTypeId(service.type_id) === "friday") {
-    const fridayName = String(sourceRef.friday_variant_name || "").trim();
-    if (fridayName) return fridayName;
-  }
-  if (serviceTypeUsesCanonicalTitle(service.type_id)) return serviceTypeDisplayName(service.type_id);
-  const customTitle = serviceCustomTitle(service);
-  if (customTitle) return normalizeWorshipServiceTitle(customTitle, service);
-  return serviceTypeDisplayName(service.type_id);
+  // Every service uses one naming contract: explicit alias, then official type name.
+  // Titles, dates and template variants must never invent a different display name.
+  return serviceAlias(service) || serviceTypeDisplayName(service.type_id || service.service_type_id);
 }
 
 function serviceTypeById(typeId) {
@@ -24284,11 +24269,7 @@ function renderPresenterSidebar(query, services, selectedService, outlineMarkup 
 
 function renderPresenterSidebarServiceSummary(service) {
   if (!service?.id) return "";
-  const serviceName = cleanList([
-    serviceDisplayTypeName(service),
-    serviceCustomTitle(service),
-    serviceTypeDisplayName(service.type_id),
-  ])[0] || "예배";
+  const serviceName = serviceDisplayTypeName(service) || "예배";
   const variantName = serviceVariantDisplayName(service);
   const dateStr = formatServiceIsoDate(service);
   const details = cleanList([
@@ -27154,8 +27135,37 @@ function renderServiceSongPicker(item, index, model = serviceItemEditorModel(ite
     </div>`;
 }
 
+// Native variants are distinct records; this never reconstructs legacy version IDs.
+function serviceNativeSongVariants(item, service = selectedServiceForEditor()) {
+  const current = serviceItemLinkedSong(item);
+  if (!current?._singleSongRecord) return [];
+  const found = new Map(), queue = [current.id];
+  while (queue.length) {
+    const id = queue.shift();
+    if (found.has(id)) continue;
+    let song = state.songs.find(row => row.id === id);
+    if (!song && state.singleSongCatalog) {
+      try { song = state.singleSongCatalog.appSong(id); } catch { /* Explicitly unavailable, never substitute by title. */ }
+    }
+    if (!song?._singleSongRecord) { found.set(id, {id, unavailable:true}); continue; }
+    found.set(id, song);
+    for (const peer of song.same_song_ids || []) if (!found.has(peer)) queue.push(peer);
+  }
+  return [...found.values()].filter(song => song.id === current.id || song.unavailable
+    || ((!serviceItemRequiresNewHymnalScoreSong(item) || isNewHymnalScoreSong(song))
+      && serviceSelectableSongVersions(song, item, service).length));
+}
+
 function renderServiceSongVersionPicker(item, index, model = serviceItemEditorModel(item)) {
-  if (model.linkedSong?._singleSongRecord) return "";
+  if (model.linkedSong?._singleSongRecord) {
+    const variants = serviceNativeSongVariants(item, model.service);
+    const missing = variants.find(song => song.unavailable);
+    const names = variants.map(song => song.unavailable ? "판본 불러오지 못함" : versionDisplayName(song, song.versions?.[0]) || "기본");
+    return `<span class="svc-song-version-control"><select class="svc-song-version-select"
+      data-service-item-field="praise_record_id" data-service-item-index="${index}" data-service-id="${escapeAttr(model.service?.id || item.service_id || "")}" aria-label="찬양 버전">
+      ${variants.map((song, at) => `<option value="${escapeAttr(song.id)}"${song.id === item.song_id ? " selected" : ""}${song.unavailable ? " disabled" : ""}>${escapeHtml(song.unavailable ? names[at] : `버전: ${names[at]}${names.filter(name => name === names[at]).length > 1 ? ` · ${at + 1}` : ""}`)}</option>`).join("")}
+      </select>${missing ? `<button class="icon-btn" type="button" data-service-song-retry="${escapeAttr(missing.id)}" aria-label="연결된 판본 다시 불러오기"><i data-lucide="refresh-cw"></i></button>` : ""}</span>`;
+  }
   const versions = model.songVersions || [];
   if (!versions.length && !item.song_id) return "";
   const selectedId = item.version_id

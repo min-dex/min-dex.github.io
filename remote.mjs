@@ -1,4 +1,4 @@
-import {obtainOutputPairing} from './mindex.output-pairing.mjs?v=4';
+import {obtainOutputPairing} from './mindex.output-pairing.mjs?v=5';
 import {adminRpc,relayRegistration} from './mindex.remote-admin.mjs?v=7';
 import {createPreview} from './remote.preview.mjs?v=2';
 import {openRemote} from './mindex.remote-session.mjs?v=12';
@@ -9,18 +9,22 @@ const $=id=>document.getElementById(id);
 const currentPreview=createPreview($('current'),'현재 슬라이드'),nextPreview=createPreview($('next'),'다음 슬라이드');
 let session,view=null,opening=false,ending=false;
 let client;
-let adminMode=false,adminToken=null,adminLink=null,listBusy=false;
+let adminMode=false,adminToken=null,adminLink=null,listBusy=false,selectedOutput=null;
 function getClient(){
  if(!window.supabase||!window.MINDEX_SUPABASE)throw Error('연결 준비에 실패했습니다. 페이지를 새로고침해 주세요.');
  return client ||= window.supabase.createClient(window.MINDEX_SUPABASE.url,window.MINDEX_SUPABASE.anonKey,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
 }
 function connectionForms(){
  $('pairForm').hidden=!!adminToken||!!session;
- $('adminOutputs').hidden=!adminMode||!adminToken||!!session;
+ $('adminOutputs').hidden=!!session||!!selectedOutput;
+ $('pairSelection').hidden=!selectedOutput||!!session;
+ $('pairTitle').textContent=selectedOutput?.title||'';
+ $('chooseOutput').disabled=opening||ending;
+ for(const b of $('outputList').querySelectorAll('button'))b.disabled=opening||ending;
  $('adminLogout').hidden=!adminMode||!adminToken||!!session;
  $('adminContext').hidden=!adminLink||!view;
- if(adminLink){$('selectedOutputTitle').textContent=adminLink.title;$('selectedOutputCode').textContent=adminLink.code?'코드 '+adminLink.code:'';}
- $('stopOutput').hidden=!adminLink||!view;
+ if(adminLink){$('selectedOutputTitle').textContent=view?.serviceTitle||adminLink.title;$('selectedOutputCode').textContent=adminLink.code?'코드 '+adminLink.code:'';}
+ $('disconnect').hidden=!session;
  $('adminLogout').disabled=opening||ending||!!session;
 }
 async function releaseAdminLink(){
@@ -28,12 +32,18 @@ async function releaseAdminLink(){
  if(link)await adminRpc(client,'mindex_remote_admin',{p_action:'disconnect',p_token:link.token,p_output:link.output,p_request:link.request}).catch(()=>{});
 }
 async function listOutputs(){
- if(!adminMode||!adminToken||listBusy||opening||session)return;listBusy=true;const token=adminToken;
+ if(document.hidden||listBusy||opening||ending||session)return;listBusy=true;const token=adminToken;
  try{
-  const data=await adminRpc(client,'mindex_remote_admin',{p_action:'list',p_token:token});
-  if(token!==adminToken)return;
+  const data=token?await adminRpc(getClient(),'mindex_remote_admin',{p_action:'list',p_token:token}):await adminRpc(getClient(),'mindex_remote_outputs',{});
+  if(token!==adminToken||opening||session)return;
+  if(!Array.isArray(data.outputs))throw Error('예배 목록을 불러오지 못했어요.');
+  if(selectedOutput){
+   const current=data.outputs.find(o=>o.id===selectedOutput.id);
+   if(current)selectedOutput=current;else{selectedOutput=null;$('code').value='';$('status').textContent='선택한 송출이 종료됐어요. 예배를 다시 선택해 주세요.';}
+   connectionForms();
+  }
   const list=$('outputList');
-  const signature=JSON.stringify(data.outputs);
+  const signature=JSON.stringify([!!token,data.outputs]);
   if(list.dataset.signature===signature)return;
   list.dataset.signature=signature;list.replaceChildren();
   if(!data.outputs.length){const p=document.createElement('p');p.textContent='송출 중인 예배가 없어요.';list.append(p);}
@@ -42,9 +52,9 @@ async function listOutputs(){
    row.className='output-row';code.className='output-code';
    title.textContent=output.title||'예배';code.textContent=output.code?'코드 '+output.code:'코드 준비 중';
    detail.textContent=[output.device,output.position].filter(Boolean).join(' · ');
-   row.append(title,code);button.append(row,detail);button.onclick=()=>connectAdmin(output);list.append(button);
+   row.append(title);if(token)row.append(code);button.append(row,detail);button.onclick=()=>{if(opening||ending||session)return;if(adminToken){void connectAdmin(output);return;}selectedOutput=output;$('code').value='';$('status').textContent='';paint();$('code').focus();};list.append(button);
   }
- }catch(e){$('status').textContent=e.message;if(e.code==='expired'){adminToken=null;connectionForms();}}
+ }catch(e){$('status').textContent=token?e.message:'예배 목록을 불러오지 못했어요. 코드를 입력해 연결할 수 있어요.';if(e.code==='expired'){adminToken=null;adminMode=false;$('outputList').replaceChildren();delete $('outputList').dataset.signature;connectionForms();}}
  finally{listBusy=false;}
 }
 async function connectAdmin(selected){
@@ -61,18 +71,19 @@ async function connectAdmin(selected){
   }while(performance.now()<deadline&&adminToken===token);
   if(!result.ready||adminToken!==token)throw Error('송출 PC의 응답이 없어요. 다시 선택해 주세요.');
   session=await openRemote({client,registration:relayRegistration(result.secret),onClose:()=>{void releaseAdminLink();reset();},onSlides:renderSlides,onState:state,onStatus:s=>{$('status').textContent=s;paint();},onResult:remoteResult});
-  $('disconnect').hidden=true;
+  $('disconnect').hidden=false;
  }catch(e){await releaseAdminLink();$('status').textContent=e.message;}
  finally{opening=false;paint();}
 }
 $('adminLogout').onclick=async()=>{
- if(opening||ending||session)return;const token=adminToken;adminToken=null;adminMode=false;ending=true;paint();
+ if(opening||ending||session)return;const token=adminToken;adminToken=null;adminMode=false;$('outputList').replaceChildren();delete $('outputList').dataset.signature;ending=true;paint();
  try{await adminRpc(client,'mindex_remote_admin',{p_action:'logout',p_token:token});$('status').textContent='관리자 접속 종료';}
- catch(e){$('status').textContent=e.message;}finally{ending=false;paint();}
+ catch(e){$('status').textContent=e.message;}finally{ending=false;paint();void listOutputs();}
 };
+$('chooseOutput').onclick=()=>{if(opening||ending)return;selectedOutput=null;$('code').value='';$('status').textContent='';paint();void listOutputs();};
 setInterval(listOutputs,3000);
 window.addEventListener('pagehide',event=>{if(event.persisted)return;const token=adminToken;adminToken=null;if(token)void adminRpc(client,'mindex_remote_admin',{p_action:'logout',p_token:token}).catch(()=>{});});
-function reset(){$('slidesDialog').close();clearTimeout(slidesTimer);slidesData=null;jumpPending=false;session=null;state(null);$('pairForm').hidden=false;$('disconnect').hidden=true;$('code').value='';paint();}
+function reset(){closeSlides();clearTimeout(slidesTimer);slidesData=null;jumpPending=false;session=null;selectedOutput=null;state(null);$('pairForm').hidden=false;$('disconnect').hidden=true;$('code').value='';paint();}
 function paint(){
  connectionForms();
  screenAwake.update({active:!!session?.connected,visible:!document.hidden});
@@ -102,7 +113,7 @@ function state(value){
 const slidePreviews=[];
 let slidesData=null,slidesLoading=false,slidesTimer=null,jumpPending=false;
 function paintSlides(usable){
- if(!$('slidesDialog').open)return;
+ if($('slidesPanel').hidden)return;
  const current=!!slidesData&&slidesData.key===view?.catalogKey;
  for(const b of $('slidesList').querySelectorAll('button')){
   b.disabled=!usable||!current||slidesLoading||jumpPending;
@@ -121,12 +132,12 @@ async function loadSlides(offset=0){
  try{await session.requestSlides({offset,query:$('slidesQuery').value});}catch(e){clearTimeout(slidesTimer);slidesLoading=false;$('slidesStatus').textContent=e.message;paint();}
 }
 function renderSlides(data){
- if(!$('slidesDialog').open||!data||!Array.isArray(data.items))return;
+ if($('slidesPanel').hidden||!data||!Array.isArray(data.items))return;
  clearTimeout(slidesTimer);slidesLoading=false;slidesData=data;
  for(const preview of slidePreviews.splice(0))preview.dispose();
  const list=$('slidesList');list.replaceChildren();let group='';
  for(const item of data.items){
-  if(item.group!==group){const h=document.createElement('h3');h.textContent=item.group;list.append(h);group=item.group;}
+  if((item.groupKey||item.group)!==group){const h=document.createElement('h3');h.textContent=item.group;list.append(h);group=item.groupKey||item.group;}
   const b=document.createElement('button'),mini=document.createElement('div'),label=document.createElement('span');
   b.type='button';b.dataset.index=item.index;mini.className='slide-preview';label.textContent=`${item.index+1}. ${item.title}`;
   b.append(mini,label);list.append(b);if(item.preview){const draw=createPreview(mini,`${item.index+1}번 슬라이드`);slidePreviews.push(draw);draw(item.preview,item.text);}
@@ -142,12 +153,19 @@ function renderSlides(data){
 }
 function remoteResult(r){
  $('result').textContent=r.message;
- if(jumpPending){jumpPending=false;if(r.ok)$('slidesDialog').close();else $('slidesStatus').textContent=r.message;}
+ if(jumpPending){jumpPending=false;$('slidesStatus').textContent=r.message;}
  paint();
 }
-$('slidesOpen').onclick=()=>{slidesData=null;$('slidesList').replaceChildren();$('slidesQuery').value='';$('slidesDialog').showModal();void loadSlides();};
-$('slidesClose').onclick=()=>$('slidesDialog').close();
-$('slidesDialog').addEventListener('close',()=>{clearTimeout(slidesTimer);slidesLoading=false;for(const preview of slidePreviews.splice(0))preview.dispose();$('slidesList').replaceChildren();});
+function closeSlides(){
+ $('slidesPanel').hidden=true;$('slidesOpen').setAttribute('aria-expanded','false');
+ clearTimeout(slidesTimer);slidesLoading=false;slidesData=null;
+ for(const preview of slidePreviews.splice(0))preview.dispose();$('slidesList').replaceChildren();
+}
+$('slidesOpen').onclick=()=>{
+ if(!$('slidesPanel').hidden){closeSlides();return;}
+ $('slidesPanel').hidden=false;$('slidesOpen').setAttribute('aria-expanded','true');$('slidesQuery').value='';void loadSlides();
+};
+$('slidesClose').onclick=()=>{closeSlides();$('slidesOpen').focus();};
 $('slidesSearch').onsubmit=e=>{e.preventDefault();void loadSlides();};
 $('slidesPrev').onclick=()=>loadSlides(Math.max(0,(slidesData?.offset||0)-6));
 $('slidesNext').onclick=()=>loadSlides((slidesData?.offset||0)+6);
@@ -159,14 +177,14 @@ $('pairForm').addEventListener('submit',async e=>{
   const entry=await adminRpc(client,'mindex_remote_entry',{p_code:$('code').value.trim()});
   if(entry.kind==='admin'){
    adminMode=true;adminToken=entry.token;$('code').value='';
-   $('status').textContent='예배를 선택해 주세요.';return;
+   if(selectedOutput){const chosen=selectedOutput;selectedOutput=null;opening=false;await connectAdmin(chosen);}else $('status').textContent='예배를 선택해 주세요.';return;
   }
   if(entry.kind!=='guest')throw Error('연결 응답을 확인할 수 없어요.');
-  $('disconnect').textContent='연결 종료';
-  const registration=await obtainOutputPairing(client,$('code').value);
+  $('disconnect').textContent='원격 연결 종료';
+  const registration=await obtainOutputPairing(client,$('code').value,selectedOutput?.id||null);
   session=await openRemote({client,registration,onClose:reset,onSlides:renderSlides,onState:state,onStatus:s=>{$('status').textContent=s;paint();},onResult:remoteResult});
   $('disconnect').hidden=false;
- }catch(e){$('status').textContent=e.message;}finally{opening=false;paint();if(adminMode&&adminToken)void listOutputs();}
+ }catch(e){$('status').textContent=e.message;}finally{opening=false;paint();void listOutputs();}
 });
 async function disconnectController(){
  if(ending||opening)return;ending=true;const old=session;session=null;paint();
@@ -176,13 +194,13 @@ async function disconnectController(){
 $('disconnect').onclick=disconnectController;
 $('backOutputs').onclick=disconnectController;
 for(const button of document.querySelectorAll('[data-action]'))button.onclick=async()=>{
- if(button.dataset.action==='output-stop'&&!confirm('선택한 예배의 송출을 종료할까요?'))return;
  try{const promise=session.command(button.dataset.action);$('result').textContent='처리 중…';paint();await promise;}catch(e){$('result').textContent=e.message;}paint();
 };
-document.addEventListener('visibilitychange',()=>{if(document.hidden)session?.suspend();else session?.refresh();paint();});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)session?.suspend();else{session?.refresh();void listOutputs();}paint();});
 window.addEventListener('offline',()=>{session?.offline();paint();});
-window.addEventListener('online',()=>{session?.refresh();paint();});
+window.addEventListener('online',()=>{session?.refresh();paint();void listOutputs();});
 window.addEventListener('pagehide',event=>{if(event.persisted)session?.suspend();else session?.close();});
 window.addEventListener('pageshow',event=>{if(event.persisted){session?.refresh();paint();}});
 setInterval(paint,250);
 paint();
+void listOutputs();
