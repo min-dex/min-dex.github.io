@@ -25,7 +25,13 @@
 <div id="adminContext" hidden><button id="backOutputs" type="button"><i data-lucide="arrow-left"></i><span>예배 선택</span></button><div class="selected-output"><strong id="selectedOutputTitle"></strong><span id="selectedOutputCode" class="output-code"></span></div></div>
 <div class="previews"><article><h2>현재 <span id="position"></span></h2><div id="current" class="slide-preview"></div></article><article><h2>다음</h2><div id="next" class="slide-preview"></div></article></div>
 <div class="navigation"><button data-action="prev"><i data-lucide="arrow-left"></i><span>이전</span></button><button data-action="next" class="primary"><span>다음</span><i data-lucide="arrow-right"></i></button></div>
-<button id="slidesOpen" type="button"><i data-lucide="layout-grid"></i><span>슬라이드 목록</span></button>
+<button id="slidesOpen" type="button" aria-expanded="false" aria-controls="slidesPanel"><i data-lucide="layout-grid"></i><span>슬라이드 목록</span></button>
+<section id="slidesPanel" hidden aria-labelledby="slidesTitle">
+<header><h2 id="slidesTitle">슬라이드 목록</h2><button id="slidesClose" type="button" aria-label="슬라이드 목록 접기"><i data-lucide="x"></i></button></header>
+<form id="slidesSearch"><input id="slidesQuery" aria-label="슬라이드 검색" placeholder="제목·내용 검색" maxlength="80"><button type="submit">검색</button></form>
+<p id="slidesStatus" role="status"></p><div id="slidesList"></div>
+<nav class="slides-pages" aria-label="슬라이드 목록 페이지"><button id="slidesPrev" type="button">이전 목록</button><span id="slidesPage"></span><button id="slidesNext" type="button">다음 목록</button></nav>
+</section>
 <button data-action="blank" id="blank"><i data-lucide="eye-off"></i><span>암전</span></button>
 <h2>음원</h2><p id="music"></p>
 <div class="audio"><button data-action="play"><i data-lucide="play"></i><span>재생</span></button><button data-action="pause"><i data-lucide="pause"></i><span>일시정지</span></button><button data-action="stop"><i data-lucide="square"></i><span>정지</span></button></div>
@@ -40,12 +46,7 @@
 
 </section>
 </main>
-<dialog id="slidesDialog" aria-labelledby="slidesTitle">
-<header><h2 id="slidesTitle">슬라이드 목록</h2><button id="slidesClose" type="button" aria-label="닫기"><i data-lucide="x"></i></button></header>
-<form id="slidesSearch"><input id="slidesQuery" aria-label="슬라이드 검색" placeholder="제목·내용 검색" maxlength="80"><button type="submit">검색</button></form>
-<p id="slidesStatus" role="status"></p><div id="slidesList"></div>
-<nav class="slides-pages" aria-label="슬라이드 목록 페이지"><button id="slidesPrev" type="button">이전 목록</button><span id="slidesPage"></span><button id="slidesNext" type="button">다음 목록</button></nav>
-</dialog>
+
 <script src="mindex.icons.js?v=remote-controls1"></script>
 <script src="vendor/supabase-js.min.js"></script>
 <script src="mindex.public-config.js"></script>

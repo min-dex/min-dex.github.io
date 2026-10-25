@@ -83,7 +83,7 @@ $('adminLogout').onclick=async()=>{
 $('chooseOutput').onclick=()=>{if(opening||ending)return;selectedOutput=null;$('code').value='';$('status').textContent='';paint();void listOutputs();};
 setInterval(listOutputs,3000);
 window.addEventListener('pagehide',event=>{if(event.persisted)return;const token=adminToken;adminToken=null;if(token)void adminRpc(client,'mindex_remote_admin',{p_action:'logout',p_token:token}).catch(()=>{});});
-function reset(){$('slidesDialog').close();clearTimeout(slidesTimer);slidesData=null;jumpPending=false;session=null;selectedOutput=null;state(null);$('pairForm').hidden=false;$('disconnect').hidden=true;$('code').value='';paint();}
+function reset(){closeSlides();clearTimeout(slidesTimer);slidesData=null;jumpPending=false;session=null;selectedOutput=null;state(null);$('pairForm').hidden=false;$('disconnect').hidden=true;$('code').value='';paint();}
 function paint(){
  connectionForms();
  screenAwake.update({active:!!session?.connected,visible:!document.hidden});
@@ -113,7 +113,7 @@ function state(value){
 const slidePreviews=[];
 let slidesData=null,slidesLoading=false,slidesTimer=null,jumpPending=false;
 function paintSlides(usable){
- if(!$('slidesDialog').open)return;
+ if($('slidesPanel').hidden)return;
  const current=!!slidesData&&slidesData.key===view?.catalogKey;
  for(const b of $('slidesList').querySelectorAll('button')){
   b.disabled=!usable||!current||slidesLoading||jumpPending;
@@ -132,12 +132,12 @@ async function loadSlides(offset=0){
  try{await session.requestSlides({offset,query:$('slidesQuery').value});}catch(e){clearTimeout(slidesTimer);slidesLoading=false;$('slidesStatus').textContent=e.message;paint();}
 }
 function renderSlides(data){
- if(!$('slidesDialog').open||!data||!Array.isArray(data.items))return;
+ if($('slidesPanel').hidden||!data||!Array.isArray(data.items))return;
  clearTimeout(slidesTimer);slidesLoading=false;slidesData=data;
  for(const preview of slidePreviews.splice(0))preview.dispose();
  const list=$('slidesList');list.replaceChildren();let group='';
  for(const item of data.items){
-  if(item.group!==group){const h=document.createElement('h3');h.textContent=item.group;list.append(h);group=item.group;}
+  if((item.groupKey||item.group)!==group){const h=document.createElement('h3');h.textContent=item.group;list.append(h);group=item.groupKey||item.group;}
   const b=document.createElement('button'),mini=document.createElement('div'),label=document.createElement('span');
   b.type='button';b.dataset.index=item.index;mini.className='slide-preview';label.textContent=`${item.index+1}. ${item.title}`;
   b.append(mini,label);list.append(b);if(item.preview){const draw=createPreview(mini,`${item.index+1}번 슬라이드`);slidePreviews.push(draw);draw(item.preview,item.text);}
@@ -153,12 +153,19 @@ function renderSlides(data){
 }
 function remoteResult(r){
  $('result').textContent=r.message;
- if(jumpPending){jumpPending=false;if(r.ok)$('slidesDialog').close();else $('slidesStatus').textContent=r.message;}
+ if(jumpPending){jumpPending=false;$('slidesStatus').textContent=r.message;}
  paint();
 }
-$('slidesOpen').onclick=()=>{slidesData=null;$('slidesList').replaceChildren();$('slidesQuery').value='';$('slidesDialog').showModal();void loadSlides();};
-$('slidesClose').onclick=()=>$('slidesDialog').close();
-$('slidesDialog').addEventListener('close',()=>{clearTimeout(slidesTimer);slidesLoading=false;for(const preview of slidePreviews.splice(0))preview.dispose();$('slidesList').replaceChildren();});
+function closeSlides(){
+ $('slidesPanel').hidden=true;$('slidesOpen').setAttribute('aria-expanded','false');
+ clearTimeout(slidesTimer);slidesLoading=false;slidesData=null;
+ for(const preview of slidePreviews.splice(0))preview.dispose();$('slidesList').replaceChildren();
+}
+$('slidesOpen').onclick=()=>{
+ if(!$('slidesPanel').hidden){closeSlides();return;}
+ $('slidesPanel').hidden=false;$('slidesOpen').setAttribute('aria-expanded','true');$('slidesQuery').value='';void loadSlides();
+};
+$('slidesClose').onclick=()=>{closeSlides();$('slidesOpen').focus();};
 $('slidesSearch').onsubmit=e=>{e.preventDefault();void loadSlides();};
 $('slidesPrev').onclick=()=>loadSlides(Math.max(0,(slidesData?.offset||0)-6));
 $('slidesNext').onclick=()=>loadSlides((slidesData?.offset||0)+6);

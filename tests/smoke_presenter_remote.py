@@ -7,7 +7,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 from smoke_app import start_local_app_server,sync_playwright,launch_chromium
 MOCK='''window.remoteOut=[];window.remoteChannels=[];
-window.remoteClient={async rpc(name,args={}){if(name==='mindex_remote_entry')return {data:{ok:true,kind:'guest'}};if(name==='mindex_remote_output'){if(args.p_action==='register')return {data:{ok:true,id:'fixture-output',token:'22'.repeat(32),code:'0123'}};if(args.p_action==='unlink_guest')window.remoteGuestEnded=true;return {data:{ok:true,code:'0123',link:null,guest:window.remoteGuestEnded?null:{id:'fixture-guest',secret:'11'.repeat(32)}}};}if(name==='mindex_remote_guest')return {data:args.p_action==='disconnect'?{ok:true}:args.p_code==='0123'?{ok:true,ready:true,output:'fixture-output',secret:'11'.repeat(32)}:{ok:false,error:'invalid_code'}};if(name==='mindex_remote_create_code')return {data:{ok:true,code:'012345',secret:'11'.repeat(32),owner_token:'22'.repeat(32)}};if(name==='mindex_remote_claim_code')return {data:args.p_code==='012345'?{ok:true,secret:'11'.repeat(32)}:{ok:false,error:'invalid_code'}};return {data:true};},channel(topic){const c={topic,handler:null,on(t,f,h){this.handler=h;return this;},subscribe(cb){this.status=cb;setTimeout(()=>cb('SUBSCRIBED'),0);return this;},async send(m){window.remoteOut.push({topic,payload:m.payload});return 'ok';}};remoteChannels.push(c);return c;},async removeChannel(c){remoteChannels=remoteChannels.filter(x=>x!==c);}};
+window.remoteClient={async rpc(name,args={}){if(name==='mindex_remote_public_outputs')return {data:{ok:true,outputs:[]}};if(name==='mindex_remote_entry')return {data:{ok:true,kind:'guest'}};if(name==='mindex_remote_output'){if(args.p_action==='register')return {data:{ok:true,id:'fixture-output',token:'22'.repeat(32),code:'0123'}};if(args.p_action==='unlink_guest')window.remoteGuestEnded=true;return {data:{ok:true,code:'0123',link:null,guest:window.remoteGuestEnded?null:{id:'fixture-guest',secret:'11'.repeat(32)}}};}if(name==='mindex_remote_guest')return {data:args.p_action==='disconnect'?{ok:true}:args.p_code==='0123'?{ok:true,ready:true,output:'fixture-output',secret:'11'.repeat(32)}:{ok:false,error:'invalid_code'}};if(name==='mindex_remote_create_code')return {data:{ok:true,code:'012345',secret:'11'.repeat(32),owner_token:'22'.repeat(32)}};if(name==='mindex_remote_claim_code')return {data:args.p_code==='012345'?{ok:true,secret:'11'.repeat(32)}:{ok:false,error:'invalid_code'}};return {data:true};},channel(topic){const c={topic,handler:null,on(t,f,h){this.handler=h;return this;},subscribe(cb){this.status=cb;setTimeout(()=>cb('SUBSCRIBED'),0);return this;},async send(m){window.remoteOut.push({topic,payload:m.payload});return 'ok';}};remoteChannels.push(c);return c;},async removeChannel(c){remoteChannels=remoteChannels.filter(x=>x!==c);}};
 window.supabase={createClient:()=>window.remoteClient};
 window.deliver=p=>{for(const c of remoteChannels)if(c.topic===p.topic)c.handler({payload:p.payload});};'''
 server,url=start_local_app_server()
@@ -26,7 +26,7 @@ try:
    host.evaluate(MOCK)
    host.evaluate('''()=>{
     state.client=remoteClient;state.selectedServiceId='remote-fixture';
-    Object.assign(state.presenter,{serviceId:'remote-fixture',outputSessionId:'test-session',outputWindow:{closed:false},index:0,slides:[{title:'첫 번째',body:'긴 내용 '.repeat(150)},{title:'두 번째'},{title:'마지막'}],safetyBlank:false});
+    Object.assign(state.presenter,{serviceId:'remote-fixture',outputSessionId:'test-session',outputWindow:{closed:false},index:0,slides:[{title:'첫 번째',sectionLabel:'찬양',elementLabel:'찬양 1',elementTitle:'첫 곡 이름',elementId:'praise-one',body:'긴 내용 '.repeat(150)},{title:'두 번째'},{title:'마지막'}],safetyBlank:false});
     presenterControllerIsLive=()=>true;isPresenterOutputWindowOpen=()=>true;
     window.remoteCalls=[];
     runPresenterAction=(action,sid,options)=>{remoteCalls.push(action);if(action==='next')state.presenter.index=Math.min(2,state.presenter.index+1);if(action==='prev')state.presenter.index=Math.max(0,state.presenter.index-1);if(action==='jump'){state.presenter.safetyBlank=options.index===-1;if(options.index>=0)state.presenter.index=options.index;}};
@@ -96,11 +96,17 @@ try:
    host.evaluate("state.presenter.slides.push(...Array.from({length:10},(_,i)=>({title:'추가 '+i,body:'미리보기',sectionLabel:'광고'})))");pump(1.2)
    before=host.evaluate('remoteCalls.length');phone.click('#slidesOpen');pump(1)
    assert phone.locator('#slidesList button').count()==6
+   assert phone.locator('dialog:visible').count()==0
+   assert phone.locator('#slidesOpen').get_attribute('aria-expanded')=='true'
+   assert '찬양 1 · 첫 곡 이름' in phone.locator('#slidesList h3').all_text_contents()
+   phone.fill('#slidesQuery','첫 곡 이름');phone.locator('#slidesSearch button').click();pump(.5)
+   assert phone.locator('#slidesList button').count()==1
+   phone.fill('#slidesQuery','');phone.locator('#slidesSearch button').click();pump(.5)
    assert host.evaluate('remoteCalls.length')==before
    assert phone.locator('#slidesList button[aria-current=true]').get_attribute('data-index')=='0'
    for width in (320,390,768):
     phone.set_viewport_size({'width':width,'height':844})
-    assert phone.locator('#slidesDialog').evaluate('e=>e.scrollWidth<=e.clientWidth')
+    assert phone.locator('#slidesPanel').evaluate('e=>e.scrollWidth<=e.clientWidth')
    phone.set_viewport_size({'width':390,'height':844})
    phone.screenshot(path='/tmp/mindex-remote-slides-'+engine+'.png',full_page=True)
    phone.click('#slidesNext');pump(.5);assert phone.locator('#slidesList button').first.get_attribute('data-index')=='6'
@@ -109,7 +115,9 @@ try:
    assert phone.locator('#slidesList button').count()==1
    phone.locator('#slidesList button').click();pump(.5)
    assert host.evaluate('state.presenter.index')==2
-   assert not phone.locator('#slidesDialog').is_visible()
+   assert phone.locator('#slidesPanel').is_visible()
+   phone.click('#slidesClose')
+   assert phone.locator('#slidesOpen').evaluate('e=>document.activeElement===e')
    ready('prev');phone.click('#slidesOpen');pump(.5)
    # Structural edit invalidates the old catalog even when a new command ticket arrives.
    host.evaluate("state.presenter.sourceSignature='changed-slides'");pump(1.2)

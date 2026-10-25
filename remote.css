@@ -60,9 +60,9 @@ button :is([data-lucide], svg.lucide) { width: var(--ui-icon-size); height: var(
 .selected-output strong { min-width: 0; overflow-wrap: anywhere; }
 
 #slidesOpen { margin-bottom: 10px; }
-#slidesDialog { width:min(900px,calc(100% - 20px)); max-height:calc(100dvh - 30px); box-sizing:border-box; overflow:auto; margin:auto; padding:20px; border:1px solid var(--line); border-radius:var(--r); background:var(--bg); color:var(--ink); }
-#slidesDialog::backdrop { background:rgba(0,0,0,.65); }
-#slidesDialog header { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+#slidesPanel { margin:0 0 15px; padding:15px 0; border-block:1px solid var(--line); }
+#slidesPanel header { display:flex; align-items:center; justify-content:space-between; gap:10px; border:0; padding:0; margin:0; }
+#slidesPanel h2 { margin:0; }
 #slidesClose { width:50px; flex:0 0 50px; }
 #slidesSearch { display:flex; gap:10px; margin:15px 0; }
 #slidesQuery { margin:0; min-width:0; font-size:var(--ui-body-size); letter-spacing:normal; text-transform:none; }

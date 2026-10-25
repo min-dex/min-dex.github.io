@@ -107,9 +107,9 @@
   function browse(options={}){
    if(!read().live)return null;
    const query=String(options?.query||'').slice(0,80).trim().toLocaleLowerCase();
-   const rows=state.presenter.slides.map((slide,index)=>({slide,index})).filter(({slide})=>!presenterSlideIsHidden(slide)&&[slide.sectionLabel,slide.elementLabel,text(slide)].join(' ').toLocaleLowerCase().includes(query));
+   const rows=state.presenter.slides.map((slide,index)=>({slide,index})).filter(({slide})=>!presenterSlideIsHidden(slide)&&[slide.sectionLabel,slide.elementLabel,slide.elementTitle,slide.title,text(slide)].join(' ').toLocaleLowerCase().includes(query));
    const offset=Number.isSafeInteger(options?.offset)?Math.min(Math.max(0,options.offset),Math.max(0,Math.floor((rows.length-1)/6)*6)):0;
-   const result={key:catalogKey(),offset,total:rows.length,items:rows.slice(offset,offset+6).map(({slide,index})=>({index,group:String(slide.sectionLabel||slide.elementLabel||'예배').slice(0,60),title:String(slide.title||slide.elementLabel||'슬라이드').slice(0,80),text:text(slide).slice(0,300),preview:preview(slide)}))};
+   const result={key:catalogKey(),offset,total:rows.length,items:rows.slice(offset,offset+6).map(({slide,index})=>({index,groupKey:String(slide.elementId||slide.sectionId||'').slice(0,120),group:[...new Set([slide.elementLabel||slide.sectionLabel,slide.elementTitle].filter(Boolean))].join(' · ').slice(0,160)||'예배',title:String(slide.title||slide.elementLabel||'슬라이드').slice(0,80),text:text(slide).slice(0,300),preview:preview(slide)}))};
    // Keep each encrypted response below the transport envelope limit.
    for(const item of [...result.items].reverse())if(new TextEncoder().encode(JSON.stringify(result)).length>14000)item.preview='';
    return result;

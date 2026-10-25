@@ -542,3 +542,11 @@ active outputs, `codes_and_secrets_excluded=true`, and the expected guest body
 hash (`selected_output_check_applied=true`). No actual output connection was made.
 The prior guest definition was checked by hash before replacement; drift aborts
 the whole migration. Web publication remains separate.
+
+## Inline slide list ·2026-10-25
+
+The slide picker expands inside the controller, not a modal. Element labels and
+content titles form each group heading (for example 찬양 1 · 곡명); search includes
+both. Selecting a slide keeps the list open and highlights the current position.
+Collapse releases preview observers and returns keyboard focus to the toggle.
+Six-slide paging, on-demand payload bounds and stale catalog/ticket guards remain.
