@@ -69,6 +69,10 @@ try:
     let crossStale=false;try{await gate.command('phone',guestCommand)}catch{crossStale=true}check(crossStale,'guest stale command after admin refused');
     check(!adapter.read().allowed.includes('output-stop')&&adminAdapter.read().allowed.includes('output-stop'),'admin-only stop');
     state.selectedServiceId='another-editor';check(adminAdapter.read().live&&!adapter.read().live,'admin retains actual output while PC browses another service');state.selectedServiceId=sid;
+    const followingGuest=MindexRemote.adapter(sid,'fixture',output,false,true);
+    state.presenter.serviceId='next-output';state.selectedServiceId='next-output';
+    check(adminAdapter.read().live&&followingGuest.read().live&&!adapter.read().live,'remote did not follow same-session worship transfer');
+    state.presenter.serviceId=sid;state.selectedServiceId=sid;
     adminGate.close();gate.close();
     output.closed=true;check(!adapter.read().live,'closed output revoked');output.closed=false;
     state.serviceMusic.ownerServiceId='another-service';check(!adapter.read().allowed.includes('play'),'foreign audio protected');

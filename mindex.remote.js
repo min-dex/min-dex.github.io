@@ -62,6 +62,7 @@
    return {p,m,slide,sync,own,intro};
   }
   function read(){
+   if(followOutput&&state.presenter.outputSessionId===outputSession&&state.presenter.outputWindow===outputWindow)serviceId=state.presenter.serviceId;
    const {p,m,slide,sync,own,intro}=context();
    const live=p.serviceId===serviceId&&(followOutput||state.selectedServiceId===serviceId)&&p.outputSessionId===outputSession&&p.outputWindow===outputWindow&&presenterControllerIsLive(serviceId)&&isPresenterOutputWindowOpen();
    const allowed=['jump','prev','next',p.safetyBlank?'unblank':'blank'];
