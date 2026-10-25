@@ -140,6 +140,17 @@ try:
     songById(retained.id).metadata.retiredInto=successor.id;songById(successor.id).metadata.retiredInto=retained.id;
     check(isSelectablePraiseSong(songById(retained.id))&&isSelectablePraiseSong(songById(successor.id)),'cycle hides records');
     delete songById(retained.id).metadata.retiredInto;check(isSelectablePraiseSong(songById(retained.id)),'retirement removal not reversible');
+    const lyricSlides=[
+      {id:'l1',elementId:'audio-song',type:'lyrics',elementType:'praise',layout:'lower_bar_text',marker:'L',formKey:'audio-page-1:0',text:'첫 화면',syncTimeline:{start:1}},
+      {id:'l2',elementId:'audio-song',type:'lyrics',elementType:'praise',layout:'lower_bar_text',marker:'L',formKey:'audio-page-2:1',text:'둘째 화면',syncTimeline:{start:5}},
+      {id:'i',elementId:'audio-song',type:'blank',elementType:'praise',layout:'lower_bar_text',formLabel:'간주',formKey:'interlude:2',text:'',syncTimeline:{start:9}},
+      {id:'l3',elementId:'audio-song',type:'lyrics',elementType:'praise',layout:'lower_bar_text',marker:'L',formKey:'audio-page-3:3',text:'셋째 화면',syncTimeline:{start:13}}];
+    const originalSlides=JSON.stringify(lyricSlides), annotations=annotatePresenterFormStarts(lyricSlides.map((slide,slideIndex)=>({slide,slideIndex}))).entries;
+    const host=document.createElement('div');host.innerHTML=renderPresenterBoardSlideBlocks(annotations,0,'local');
+    check([...host.querySelectorAll('.svc-slide-form-badge')].filter(e=>e.textContent.trim()==='Lyrics').length===1,'Lyrics heading repeated per audio page or interlude');
+    check(!host.querySelector('[data-form-color]'),'Lyrics has colored grouping box');
+    check([...host.querySelectorAll('.svc-slide-form-badge')].some(e=>e.textContent.trim()==='Interlude'),'interlude heading lost');
+    check(host.querySelectorAll('.svc-slide-thumb').length===4&&JSON.stringify(lyricSlides)===originalSlides,'Lyrics grouping changed slides or timing');
     return 'PASS single ID source/save/reopen, order/delete/medley, lyrics/form/amen, late edits/retry, live freeze/restart, audio CAS, preserved retirement selection';
    }'''),flush=True)
    browser.close()

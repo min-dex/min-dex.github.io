@@ -1284,14 +1284,14 @@ function renderPresenterBoardSlideBlocks(entries, activeIndex, serviceId, script
   return presenterBoardSlideBlocks(entries).map((block) => {
     const scripture = presenterSlideElementType(block.entries[0]?.slide) === PRESENTER_ELEMENT_TYPES.SCRIPTURE_TEXT;
     const formType = normalizePresenterFormPresetLabel(block.label).type;
-    const plain = !scripture && ["title", "instrumental"].includes(formType);
+    const plain = !scripture && ["title", "instrumental", "lyrics"].includes(formType);
     const color = scripture
       ? (scriptureIndex++ % 2 === 0 ? "default" : "accent")
       : ["verse", "pre-chorus", "chorus", "bridge", "coda", "tag"].includes(formType) ? formType : "neutral";
     const colorAttribute = block.key && !plain ? ` data-${scripture ? "scripture-tone" : "form-color"}="${color}"` : "";
     const thumbs = block.entries.map(({ slide, slideIndex, formLabel }) =>
       renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, formLabel)).join("");
-    return block.key && formType !== "lyrics"
+    return block.key
       ? `<div class="svc-board-slide-block"${plain ? ' data-form-plain="true"' : colorAttribute} role="group" aria-label="${escapeAttr(block.label)}">${thumbs}</div>`
       : thumbs;
   }).join("");
@@ -1333,7 +1333,9 @@ function updatePresenterBoardBlockBackgrounds(host = refs.detailPane) {
 }
 
 function annotatePresenterFormStarts(entries = [], initialPreviousKey = "") {
+  const lyricsLabelOwners = new Set();
   let previousKey = initialPreviousKey;
+  let previousSourceKey = initialPreviousKey;
   let currentFormLabel = "";
   let scoreKey = "";
   let scoreLabel = "";
@@ -1345,20 +1347,22 @@ function annotatePresenterFormStarts(entries = [], initialPreviousKey = "") {
     if (!score || owner !== previousOwner) { scoreKey = ""; scoreLabel = ""; }
     if (score && slide.formKey) { scoreKey = slide.formKey; scoreLabel = presenterFormGroupLabel(slide); }
     previousOwner = owner;
-    const controllerFormKey = score ? scoreKey : slide.formKey;
+    let controllerFormKey = score ? scoreKey : slide.formKey;
     const controllerFormLabel = score ? scoreLabel : presenterFormGroupLabel(slide)
-      || (controllerFormKey && previousKey === `${owner}:form:${controllerFormKey}` ? currentFormLabel : "");
+      || (controllerFormKey && previousSourceKey === `${owner}:form:${controllerFormKey}` ? currentFormLabel : "");
+    previousSourceKey = controllerFormKey ? `${owner}:form:${controllerFormKey}` : "";
+    const lyrics = !score && normalizePresenterFormPresetLabel(controllerFormLabel).type === "lyrics";
+    if (lyrics) controllerFormKey = "lyrics";
     const formSlide = presenterSlideSupportsFormGrouping(slide, controllerFormLabel) && (!score || (controllerFormKey && controllerFormLabel));
     const key = formSlide ? `${owner}:form:${controllerFormKey || slideIndex}` : "";
     const startsForm = Boolean(formSlide && key !== previousKey);
-    if (startsForm) currentFormLabel = controllerFormLabel;
-    if (!formSlide) currentFormLabel = "";
+    currentFormLabel = startsForm ? controllerFormLabel : formSlide ? currentFormLabel : "";
     previousKey = key;
+    const showLabel = startsForm && (!lyrics || !lyricsLabelOwners.has(owner));
+    if (lyrics) lyricsLabelOwners.add(owner);
     return {
-      ...entry,
-      formLabel: startsForm ? currentFormLabel : "",
-      controllerFormKey,
-      controllerFormLabel,
+      ...entry, formLabel: showLabel ? currentFormLabel : "",
+      controllerFormKey, controllerFormLabel,
     };
   });
   return { entries: annotatedEntries, lastKey: previousKey };
@@ -1417,10 +1421,9 @@ function renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, fo
     && state.presenterBoardSelection.elementKey === elementKey
     && (state.presenterBoardSelection.indexes || []).map(Number).includes(slideIndex);
   const formType = normalizePresenterFormPresetLabel(formLabel).type;
-  const normalizedFormLabel = formType === "title" ? "Title"
-    : formType === "instrumental" ? "Interlude"
-    : songFormPresetDisplayLabel(formLabel) || String(formLabel || "").trim();
-  const visibleFormLabel = formType === "lyrics" || (formType !== "instrumental" && presenterLabelDuplicatesSlideText(normalizedFormLabel, slide)) ? "" : normalizedFormLabel;
+  const normalizedFormLabel = ({ lyrics: "Lyrics", title: "Title", instrumental: "Interlude" })[formType]
+    || songFormPresetDisplayLabel(formLabel) || String(formLabel || "").trim();
+  const visibleFormLabel = formType !== "instrumental" && presenterLabelDuplicatesSlideText(normalizedFormLabel, slide) ? "" : normalizedFormLabel;
   const ariaPrefix = presenterSlideInteractionHint(serviceId, `${slideIndex + 1}번 슬라이드${hidden ? " · 숨김" : ""}`);
   const slideNumber = slideIndex + 1;
   const formBadge = visibleFormLabel ? `
