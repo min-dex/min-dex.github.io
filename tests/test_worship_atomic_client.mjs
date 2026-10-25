@@ -199,3 +199,43 @@ for (const operation of ['create','commit','remove']) {
   assert.deepEqual(seen[1],seen[0]);
 }
 console.log('PASS native empty-service create/save/delete and immutable protocol retry');
+
+// A JSONB round trip reorders object keys, but not song-form/medley arrays.
+// Editing one person must not update every element's unchanged nested config.
+{
+  const config = {inputMode:'lyrics_db',formPreset:{forms:['V1','V2','V1'],strength:'manual'},
+    connectedPraise:{itemIds:['a','b'],primaryItemId:'a'},audioTiming:{cues:[{at:0,slide:0},{at:8,slide:1}]}};
+  const reorder = value => Array.isArray(value) ? value.map(reorder)
+    : value && typeof value === 'object' ? Object.fromEntries(Object.entries(value).reverse().map(([k,v])=>[k,reorder(v)])) : value;
+  const base = {revision:'1',service:{id:'s',source_ref:{a:1,b:2}},
+    sections:[{id:'sec',service_id:'s',config:{a:1,b:2}}],
+    elements:Array.from({length:24},(_,i)=>({id:'e'+i,section_id:'sec',person:'',config:reorder(config),source_ref:{b:2,a:1}}))};
+  const rows={sections:[{...base.sections[0],config:{b:2,a:1}}],
+    elements:base.elements.map((e,i)=>({...e,person:i===2?'Edited':'',config:structuredClone(config),source_ref:{a:1,b:2}}))};
+  const before=structuredClone({base,rows});
+  const patch=prepareWorshipRowsCommit({serviceId:'s',baseline:base,rows,document:{}});
+  assert.deepEqual(patch.sectionPatches,[]);
+  assert.deepEqual(patch.elementPatches,[{id:'e2',patch:{person:'Edited'}}]);
+  assert.deepEqual({base,rows},before);
+  rows.elements[3].config.formPreset.forms=['V2','V1','V1'];
+  rows.elements[4].config.connectedPraise.itemIds=['b','a'];
+  rows.elements[5].config.audioTiming.cues[1].at=9;
+  delete rows.elements[6].config.inputMode;
+  const changed=prepareWorshipRowsCommit({serviceId:'s',baseline:base,rows,document:{}});
+  assert.deepEqual(changed.elementPatches.map(p=>p.id),['e2','e3','e4','e5','e6']);
+  assert.deepEqual(changed.elementPatches.at(-1).removeKeys,{config:['inputMode']});
+  console.log('PASS JSONB key order skips 23 redundant writes; ordered forms/medleys/timing and removals remain changes');
+}
+{
+  const memory=new Map();let fail=true, writes=0;
+  const c=createWorshipAtomicClient({journal:{getItem:k=>memory.get(k)||null,setItem:(k,v)=>memory.set(k,v),removeItem:k=>memory.delete(k)},
+    makeId:()=> 'timeout-'+(++writes), rpc:async(name)=>name==='get_worship_service_v1'?{data:structuredClone(baseline)}:
+      fail?{error:{code:'57014',message:'canceling statement due to statement timeout'}}:
+      {data:{aggregate:{...baseline,revision:'2'},committedRevision:'2',replayed:false}}});
+  await c.read('service');const draft=structuredClone(input);
+  await assert.rejects(c.commit(draft),e=>e.code==='57014');
+  assert.equal(c.pending('service'),null);assert.equal(c.baseline('service').revision,'1');
+  assert.deepEqual(draft,input);fail=false;await c.commit(draft);
+  assert.equal(c.baseline('service').revision,'2');assert.equal(c.pending('service'),null);
+  console.log('PASS proven SQL timeout preserves draft/baseline and permits explicit retry');
+}

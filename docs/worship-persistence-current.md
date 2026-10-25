@@ -486,3 +486,16 @@ Previously the initial atomic read showed correct links, then the delayed entry
 refresh replaced them with legacy-only rows. The entry regression applies the
 actual selected-column projection and verifies native identity and forms remain
 unchanged after refresh. This reproduces the missing-reference UI path.
+
+
+## Semantic row differences · 2026-10-25
+
+Atomic row preparation compares JSON values structurally: object key order is
+irrelevant, while array order and every nested value remain significant. PostgreSQL
+JSONB key ordering previously made a one-person edit resend unchanged config and
+source_ref values for every element. Only changed rows/columns are now sent;
+explicit removed keys, ordered forms/medley IDs, and audio cue edits still persist.
+This changes neither stored worship content nor the atomic CAS/journal protocol.
+SQLSTATE 57014 proves rollback and clears the pending request while preserving the
+draft and committed baseline; uncertain transport failures still retain the exact
+request for replay. Tests cover both cases. No DB timeout or permissions are raised.

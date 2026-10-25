@@ -1,6 +1,6 @@
 """Medley order survives real partial-save acknowledgements and repeated mode switches."""
 from urllib.parse import urlsplit
-from smoke_app import launch_chromium, start_local_app_server, sync_playwright
+from smoke_app import launch_chromium, start_local_app_server, sync_playwright, prepare_server_state_fixture
 server,url=start_local_app_server()
 try:
  with sync_playwright() as p:
@@ -11,7 +11,9 @@ try:
     page.route('**/*',lambda r:r.continue_() if urlsplit(r.request.url).netloc==urlsplit(url).netloc else r.abort())
     page.goto(url+'?output=presenter&mindexSmokeRaw=1')
     page.wait_for_function("typeof saveWorshipServiceInstance==='function'")
+    prepare_server_state_fixture(page)
     print(engine,page.evaluate("""async()=>{
+                      globalThis.MINDEX_SINGLE_SONG_BOOTSTRAP_READY=false;
                       const check=(ok,msg)=>{if(!ok)throw Error(msg)};
                       const sid=crypto.randomUUID();
                       const service={id:sid,type_id:'wednesday',date:'2026-10-12',title:'Fixture',_worshipSourceRef:{}};

@@ -18,7 +18,9 @@ function index(rows) {
 function change(row, previous = {}) {
   const patch = {}, removeKeys = {};
   for (const [key, value] of Object.entries(row)) {
-    if (ignored.has(key) || equal(value, previous[key])) continue;
+    // JSONB returns object keys in its own order. Do not rewrite unchanged
+    // nested settings (and fire DB triggers) when another field is edited.
+    if (ignored.has(key) || sameJson(value, previous[key])) continue;
     patch[key] = value;
     if (jsonFields.has(key)) {
       if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('INVALID_JSON_PATCH');
