@@ -4817,3 +4817,9 @@ legacy version ID. Its editor does not ask for a separate version. Default form
 placeholders use that same content; explicit worship form input remains first.
 Mismatched content IDs remain unresolved. No saved worship or Praise data is migrated
 by this display correction. Covered by smoke_form_default_placeholder.py.
+
+## Lyrics slide chrome ·2026-10-25
+
+Lyrics/L slides retain their content, boundaries, order and audio timing. The
+controller omits the L form badge and its colored grouping box; other named
+forms and Scripture grouping retain their current display.

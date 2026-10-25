@@ -16081,6 +16081,7 @@ function getGlobalPraiseResults(tokens) {
   if (!tokens.length) return [];
   const includeLyrics = true;
   return state.songs
+    .filter(isSelectablePraiseSong)
     .map((song) => ({ song, match: getSongSearchMatch(song, tokens, { includeLyrics, crossFields: true }) }))
     .filter((item) => item.match)
     .sort((a, b) => b.match.score - a.match.score || sortSongsForCurrentList(a.song, b.song))
@@ -17764,7 +17765,7 @@ function linkedSongVersionEntries(song) {
     const peer = state.songs.find(row=>row.id===id);
     if (peer && !linked.some(row=>row.id===id)) linked.push(peer);
   }
-  return linked.flatMap((linkedSong) =>
+  return linked.filter(isSelectablePraiseSong).flatMap((linkedSong) =>
     (linkedSong.versions?.length ? linkedSong.versions : normalizeSongVersions(linkedSong, [])).map((version) => ({
       song: linkedSong,
       version,
@@ -19649,6 +19650,16 @@ function cleanSongTitleForSave(song) {
   return song?.hymn_no ? stripHymnNumber(title) : title;
 }
 
+// Retired duplicates remain readable by ID for historical worship output.
+// Only an explicit, valid same-song successor suppresses new selection.
+function isSelectablePraiseSong(song) {
+  const targetId = song?.metadata?.retiredInto;
+  if (!song?._singleSongRecord || typeof targetId !== "string" || targetId === song.id) return true;
+  const target = songById(targetId);
+  return !(target?._singleSongRecord && !target.metadata?.retiredInto
+    && (song.same_song_ids || []).includes(targetId));
+}
+
 function getFilteredSongs() {
   const tokens = getSearchTokens(state.search);
   const filterSongs = getSongsForPraiseFilter();
@@ -19656,6 +19667,7 @@ function getFilteredSongs() {
 
   const filterSet = new Set(filterSongs.map((s) => s.id));
   const allMatched = state.songs
+    .filter(isSelectablePraiseSong)
     .map((song) => ({ song, match: getSongSearchMatch(song, tokens), inFilter: filterSet.has(song.id) }))
     .filter((item) => item.match);
   const phraseMatched = allMatched.filter((item) => item.match.phraseMatched);
@@ -19670,13 +19682,14 @@ function getFilteredSongs() {
 }
 
 function getSongsForPraiseFilter() {
-  if (state.praiseFilter === "hymns") return state.songs.filter((song) => songHasPraiseType(song, "hymn"));
-  if (state.praiseFilter === "ccm") return state.songs.filter((song) => songHasPraiseType(song, "ccm"));
-  if (state.praiseFilter === "children") return state.songs.filter((song) => songHasPraiseType(song, "children"));
+  const songs = state.songs.filter(isSelectablePraiseSong);
+  if (state.praiseFilter === "hymns") return songs.filter((song) => songHasPraiseType(song, "hymn"));
+  if (state.praiseFilter === "ccm") return songs.filter((song) => songHasPraiseType(song, "ccm"));
+  if (state.praiseFilter === "children") return songs.filter((song) => songHasPraiseType(song, "children"));
   if (["empty", "review"].includes(state.praiseFilter)) {
-    return state.songs.filter((song) => songMatchesPraiseStatusFilter(song, state.praiseFilter));
+    return songs.filter((song) => songMatchesPraiseStatusFilter(song, state.praiseFilter));
   }
-  return state.songs;
+  return songs;
 }
 
 function joinMetaItems(items) {
@@ -26777,6 +26790,7 @@ function servicePrepEditorItems(serviceId) {
 
 function renderServicePraiseDatalist() {
   const options = state.songs
+    .filter(isSelectablePraiseSong)
     .map((song) => songServiceOptionLabel(song))
     .filter(Boolean)
     .slice(0, 1200)
@@ -27193,6 +27207,7 @@ function serviceSongPickerResults(query, item = {}, service = selectedServiceFor
   ].join("::");
   if (state.searchCache.songPicker.has(cacheKey)) return state.searchCache.songPicker.get(cacheKey);
   const candidates = state.songs
+    .filter(isSelectablePraiseSong)
     .filter((song) => (!requiresNewHymnal || isNewHymnalScoreSong(song))
       && (!requiresChildren || serviceSelectableSongVersions(song, item, service).length))
     .map((song) => ({ song, match: getSongSearchMatch(song, tokens, { includeLyrics }) }))
@@ -27200,7 +27215,7 @@ function serviceSongPickerResults(query, item = {}, service = selectedServiceFor
   const phraseMatches = candidates.filter((entry) => entry.match.phraseMatched);
   const results = phraseMatches.length ? phraseMatches : candidates;
   const songs = uniqueSongsById([
-    ...(directMatch && (!requiresNewHymnal || isNewHymnalScoreSong(directMatch)) && (!requiresChildren || serviceSelectableSongVersions(directMatch, item, service).length) ? [directMatch] : []),
+    ...(directMatch && isSelectablePraiseSong(directMatch) && (!requiresNewHymnal || isNewHymnalScoreSong(directMatch)) && (!requiresChildren || serviceSelectableSongVersions(directMatch, item, service).length) ? [directMatch] : []),
     ...results
     .sort((a, b) => b.match.score - a.match.score || sortSongsForCurrentList(a.song, b.song))
     .slice(0, limit)
@@ -28212,12 +28227,12 @@ function findServicePraiseSong(value) {
     }))
     .filter((candidate) => candidate.lookup || candidate.compact);
   if (!lookups.length) return null;
-  const exactTitleMatches = state.songs.filter((song) => servicePraiseSongMatchesLookupName(song, lookups, { titleOnly: true }));
+  const exactTitleMatches = state.songs.filter((song) => isSelectablePraiseSong(song) && servicePraiseSongMatchesLookupName(song, lookups, { titleOnly: true }));
   if (exactTitleMatches.length) {
     return exactTitleMatches
       .sort((a, b) => servicePraiseExactTitlePriority(a) - servicePraiseExactTitlePriority(b) || sortSongsForCurrentList(a, b))[0];
   }
-  return state.songs.find((song) => servicePraiseSongMatchesLookupName(song, lookups)) || null;
+  return state.songs.find((song) => isSelectablePraiseSong(song) && servicePraiseSongMatchesLookupName(song, lookups)) || null;
 }
 
 function splitHymnNo(raw) {

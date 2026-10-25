@@ -1291,7 +1291,7 @@ function renderPresenterBoardSlideBlocks(entries, activeIndex, serviceId, script
     const colorAttribute = block.key && !plain ? ` data-${scripture ? "scripture-tone" : "form-color"}="${color}"` : "";
     const thumbs = block.entries.map(({ slide, slideIndex, formLabel }) =>
       renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, formLabel)).join("");
-    return block.key
+    return block.key && formType !== "lyrics"
       ? `<div class="svc-board-slide-block"${plain ? ' data-form-plain="true"' : colorAttribute} role="group" aria-label="${escapeAttr(block.label)}">${thumbs}</div>`
       : thumbs;
   }).join("");
@@ -1420,7 +1420,7 @@ function renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, fo
   const normalizedFormLabel = formType === "title" ? "Title"
     : formType === "instrumental" ? "Interlude"
     : songFormPresetDisplayLabel(formLabel) || String(formLabel || "").trim();
-  const visibleFormLabel = formType !== "instrumental" && presenterLabelDuplicatesSlideText(normalizedFormLabel, slide) ? "" : normalizedFormLabel;
+  const visibleFormLabel = formType === "lyrics" || (formType !== "instrumental" && presenterLabelDuplicatesSlideText(normalizedFormLabel, slide)) ? "" : normalizedFormLabel;
   const ariaPrefix = presenterSlideInteractionHint(serviceId, `${slideIndex + 1}번 슬라이드${hidden ? " · 숨김" : ""}`);
   const slideNumber = slideIndex + 1;
   const formBadge = visibleFormLabel ? `

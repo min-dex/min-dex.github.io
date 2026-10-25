@@ -1042,3 +1042,15 @@ the whole unit and form separate controller occurrences. Source-only Lyrics
 structures infer one L sequence token, rather than hiding their form identity.
 Legacy V/C mapping of unstructured lyrics is retained when those forms are
 explicitly requested. Direct-input and score pages follow the same L identity.
+
+
+## Preserved duplicate retirement ·2026-10-25
+
+An explicitly reviewed native duplicate may carry metadata.metadata.retiredInto
+(the app song metadata.retiredInto) naming an existing active same-song peer.
+This suppresses the duplicate from new Praise searches, linked-version comparisons
+and worship selection only. It does not delete, redirect, renumber or rewrite the
+record, its legacy aliases, historical references, lyrics or output. ID resolution
+continues to return the exact original record. Invalid/missing/self/cyclic targets
+never hide records. Removing the marker restores ordinary selection. Changes use
+the existing native record revision CAS; no lifecycle guard is bypassed.

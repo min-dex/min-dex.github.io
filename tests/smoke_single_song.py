@@ -118,7 +118,29 @@ try:
     await MindexSongTiming.saveToVersion(child,cv,audioDraft,audioSlides);
     check(equal(childStore.content.audio_set.starts,[1,5,9]),'single-record audio timing save failed');
     check(equal(childStore.content.forms,childVersion.forms),'audio save modified lyrics/forms');
-    return 'PASS single ID source/save/reopen, order/delete/medley, lyrics/form/amen, late edits/retry, live freeze/restart, audio CAS';
+    const retained={...structuredClone(childStore),id:'SONG-CHLD-0001-0001'};
+    const successor={...structuredClone(childStore),id:'SONG-CHLD-0001-0002'};successor.legacy={songId:uid(),versionId:uid()};
+    retained.metadata.title=successor.metadata.title='보존 통합 시험';
+    retained.metadata.metadata={retiredInto:successor.id};successor.metadata.metadata={};
+    retained.relations={same_song:[successor.id],related:[]};successor.relations={same_song:[retained.id],related:[]};
+    retained.content.forms[0].lyrics='옛 예배 고유 가사';successor.content.forms[0].lyrics='새 선택 가사';
+    installSingleSongSession([retained,successor],childRepo);state.praiseFilter='children';state.search='보존 통합';clearSearchCaches();
+    const historic=structuredClone(state.singleSongCatalog.get(retained.id));
+    check(getFilteredSongs().length===1&&getFilteredSongs()[0].id===successor.id,'retired duplicate visible in Praise search');
+    check(getGlobalPraiseResults(getSearchTokens(state.search)).every(x=>x.song.id===successor.id),'retired duplicate in global search');
+    check(findServicePraiseSong('보존 통합 시험').id===successor.id,'new title lookup chooses retired record');
+    check(serviceSongPickerResults('보존 통합 시험',{},service).every(x=>x.id===successor.id),'retired duplicate in worship picker');
+    check(linkedSongVersionEntries(songById(successor.id)).length===0,'retired duplicate in version comparison');
+    check(songById(retained.id).versions[0].forms[0].lyrics==='옛 예배 고유 가사','historic identity redirected');
+    check(state.singleSongCatalog.resolve(retained.legacy.songId,retained.legacy.versionId)===retained.id,'historic legacy alias redirected');
+    check(equal(historic,state.singleSongCatalog.get(retained.id)),'selection mutated historical record');
+    for(const target of ['SONG-CHLD-9999-0001',retained.id]){
+      songById(retained.id).metadata.retiredInto=target;check(isSelectablePraiseSong(songById(retained.id)),'invalid retirement hides source');
+    }
+    songById(retained.id).metadata.retiredInto=successor.id;songById(successor.id).metadata.retiredInto=retained.id;
+    check(isSelectablePraiseSong(songById(retained.id))&&isSelectablePraiseSong(songById(successor.id)),'cycle hides records');
+    delete songById(retained.id).metadata.retiredInto;check(isSelectablePraiseSong(songById(retained.id)),'retirement removal not reversible');
+    return 'PASS single ID source/save/reopen, order/delete/medley, lyrics/form/amen, late edits/retry, live freeze/restart, audio CAS, preserved retirement selection';
    }'''),flush=True)
    browser.close()
 finally:
