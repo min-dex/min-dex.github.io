@@ -464,3 +464,13 @@ modes fall back to source config then the copied element type using existing DB
 compatibility rules, avoiding explicit null in the required column. Previous
 services, announcement text/media, forms and versions remain unchanged. Creation
 still uses the existing atomic aggregate path.
+
+## Native praise content preservation ·2026-10-25
+
+The persistence sanitizer and retained-content classifier recognize
+`praise_record_id` as a linked song alongside legacy song references. Native
+records intentionally have null legacy IDs; that alone must not change their
+content state to missing or discard an otherwise content-only retained row.
+The single-song browser regression covers sanitation of both content-state
+copies and preservation of a native-reference-only row. This does not establish
+that every UI save path preserves identity; operational readback remains required.

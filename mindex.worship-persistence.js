@@ -377,7 +377,7 @@ function sanitizeWorshipPersistenceRows(rows = {}, options = {}) {
 }
 
 function sanitizeSongContentStateWithoutSong(contentState = null, element = {}) {
-  if (!contentState || typeof contentState !== "object" || element?.song_id) return;
+  if (!contentState || typeof contentState !== "object" || element?.song_id || element?.praise_record_id) return;
   const inputMode = normalizeServiceInputMode(
     contentState.inputMode
     || contentState.input_mode
@@ -444,7 +444,8 @@ function worshipElementHasPersistedContent(element = {}) {
     ? element.content_state
     : {};
   return Boolean(
-    element.song_id
+    element.praise_record_id
+    || element.song_id
     || element.song_version_id
     || String(element.title || "").trim()
     || String(element.person || "").trim()

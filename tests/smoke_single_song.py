@@ -54,6 +54,12 @@ try:
     check(equal(render(s,getServiceItemVersion(s,reopened,service),reopened),before),'saved/reopened output changed');
     const nativeRows=buildWorshipPersistenceRows(service,[selected],{},{},{singleSongCatalog:state.singleSongCatalog,singleSongStorage:'native'});
     check(nativeRows.elements[0].praise_record_id==='SONG-CONT-0001-0001'&&nativeRows.elements[0].song_id===null&&nativeRows.elements[0].song_version_id===null,'native single reference');
+    const nativeRow=nativeRows.elements[0];
+    nativeRow.content_state={state:'filled',reason:'song',inputMode:'lyrics_db',elementType:'praise',required:false};
+    nativeRow.config.contentState=structuredClone(nativeRow.content_state);
+    sanitizeWorshipPersistenceRows(nativeRows,{elementTypedStateColumns:{inputMode:true,contentState:true}});
+    check(nativeRow.praise_record_id===record.id&&nativeRow.content_state.state==='filled'&&nativeRow.config.contentState.reason==='song','native linked praise became empty during save sanitization');
+    check(worshipElementHasPersistedContent({praise_record_id:record.id}),'native-only hidden row is not preserved');
     const nativeAgain=groupWorshipElements(nativeRows.sections,nativeRows.elements)[service.id][0];
     check(equal(render(s,getServiceItemVersion(s,nativeAgain,service),nativeAgain),before),'native reopen output changed');
     const second={...structuredClone(selected),id:uid(),label:'찬양 2',sort_order:2};
