@@ -45,15 +45,27 @@ async function listOutputs(){
   const list=$('outputList');
   const signature=JSON.stringify([!!token,data.outputs]);
   if(list.dataset.signature===signature)return;
-  list.dataset.signature=signature;list.replaceChildren();
+  list.dataset.signature=signature;
+  const existing=new Map([...list.querySelectorAll('button[data-output-id]')].map(b=>[b.dataset.outputId,b]));
+  const active=new Set(data.outputs.map(o=>o.id));
+  for(const [id,b] of existing)if(!active.has(id))b.remove();
+  list.querySelector('p')?.remove();
   if(!data.outputs.length){const p=document.createElement('p');p.textContent='송출 중인 예배가 없어요.';list.append(p);}
   for(const output of data.outputs){
-   const button=document.createElement('button'),row=document.createElement('span'),title=document.createElement('span'),code=document.createElement('span'),detail=document.createElement('small');
-   row.className='output-row';code.className='output-code';
-   title.textContent=output.title||'예배';code.textContent=output.code?'코드 '+output.code:'코드 준비 중';
+   let button=existing.get(output.id);
+   if(!button){
+    button=document.createElement('button');button.type='button';button.dataset.outputId=output.id;
+    const row=document.createElement('span'),title=document.createElement('span'),code=document.createElement('span'),detail=document.createElement('small');
+    row.className='output-row';code.className='output-code';row.append(title,code);button.append(row,detail);
+    button.onclick=()=>{if(opening||ending||session)return;const current=button.remoteOutput;if(adminToken){void connectAdmin(current);return;}selectedOutput=current;$('code').value='';$('status').textContent='';paint();$('code').focus();};
+    list.append(button);
+   }
+   button.remoteOutput=output;
+   const row=button.querySelector('.output-row'),title=row.firstElementChild,code=row.lastElementChild,detail=button.querySelector('small');
+   title.textContent=output.title||'예배';code.hidden=!token;code.textContent=token?(output.code?'코드 '+output.code:'코드 준비 중'):'';
    detail.textContent=[output.device,output.position].filter(Boolean).join(' · ');
-   row.append(title);if(token)row.append(code);button.append(row,detail);button.onclick=()=>{if(opening||ending||session)return;if(adminToken){void connectAdmin(output);return;}selectedOutput=output;$('code').value='';$('status').textContent='';paint();$('code').focus();};list.append(button);
   }
+
  }catch(e){$('status').textContent=token?e.message:'예배 목록을 불러오지 못했어요. 코드를 입력해 연결할 수 있어요.';if(e.code==='expired'){adminToken=null;adminMode=false;$('outputList').replaceChildren();delete $('outputList').dataset.signature;connectionForms();}}
  finally{listBusy=false;}
 }

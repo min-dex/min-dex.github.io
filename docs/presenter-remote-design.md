@@ -550,3 +550,10 @@ content titles form each group heading (for example 찬양 1 · 곡명); search 
 both. Selecting a slide keeps the list open and highlights the current position.
 Collapse releases preview observers and returns keyboard focus to the toggle.
 Six-slide paging, on-demand payload bounds and stale catalog/ticket guards remain.
+
+### Stable output directory ·2026-10-25
+
+Heartbeat response ordering does not move existing output buttons. Rows retain
+their first-displayed position and DOM identity; newly seen outputs append and
+ended outputs disappear. Titles/position/code refresh in place without losing
+keyboard focus. This applies to public and administrator lists, without DB changes.

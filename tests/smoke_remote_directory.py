@@ -27,11 +27,20 @@ try:
    page.route('**/vendor/supabase-js.min.js',lambda r:r.fulfill(body=MOCK,content_type='text/javascript'))
    page.route('**/mindex.remote-session.mjs*',lambda r:r.fulfill(body=SESSION,content_type='text/javascript'))
    page.goto(url);page.wait_for_function("document.querySelectorAll('#outputList button').length===2")
-   assert page.locator('#outputList .output-code').count()==0
+   assert page.locator('#outputList .output-code:not([hidden])').count()==0
    assert '0123' not in page.locator('#outputList').inner_text()
    for width in (320,390,768,1280):
     page.set_viewport_size({'width':width,'height':844});assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
    page.set_viewport_size({'width':390,'height':844})
+   # Arrival order can flip on every heartbeat; existing rows/focus must not move.
+   page.locator('#outputList button').first.focus()
+   page.evaluate("window.originalButton=document.querySelector('#outputList button');rows=[{...rows[1],position:'2 / 10'},{...rows[0],title:'어린이부 예배',position:'3 / 20'},{id:'c',title:'새 예배',device:'새 PC'}]")
+   page.wait_for_function("document.querySelectorAll('#outputList button').length===3")
+   assert page.locator('#outputList button').evaluate_all("bs=>bs.map(b=>b.dataset.outputId)")==['a','b','c']
+   assert page.evaluate('document.activeElement===originalButton && originalButton===document.querySelector("#outputList button")')
+   assert '3 / 20' in page.locator('#outputList button').first.inner_text()
+   page.evaluate("rows=rows.filter(o=>o.id!=='c').reverse()")
+   page.wait_for_function("document.querySelectorAll('#outputList button').length===2")
    page.locator('#outputList button').first.click();assert page.locator('#pairTitle').inner_text()=='어린이부 예배'
    page.fill('#code','0456');page.click('#connect');page.wait_for_function("document.querySelector('#status').textContent.includes('코드') && !document.querySelector('#connect').disabled")
    assert page.evaluate('window.opened||0')==0
@@ -42,9 +51,12 @@ try:
    page.locator('#outputList button').last.click();page.fill('#code','7777');page.click('#connect');page.wait_for_function('window.opened===2');page.wait_for_function("!document.querySelector('#controller').hidden")
    assert page.evaluate("rpcCalls.some(c=>c.name==='mindex_remote_admin'&&c.p_action==='connect'&&c.p_output==='b')")
    assert page.locator('#selectedOutputTitle').inner_text()=='주일예배 [3부]'
-   page.click('#backOutputs');page.wait_for_function("document.querySelectorAll('#outputList .output-code').length===2")
-   page.click('#adminLogout');page.wait_for_function("document.querySelectorAll('#outputList button').length===2 && document.querySelectorAll('#outputList .output-code').length===0")
-   page.locator('#outputList button').first.click();page.fill('#code','01');page.evaluate("rows=rows.filter(o=>o.id!=='a')")
+   page.click('#backOutputs');page.wait_for_function("document.querySelectorAll('#outputList .output-code:not([hidden])').length===2")
+   page.evaluate("rows.reverse();rows[0].position='8 / 20'")
+   page.wait_for_function("document.querySelector('#outputList').textContent.includes('8 / 20')")
+   assert page.locator('#outputList button').evaluate_all("bs=>bs.map(b=>b.dataset.outputId)")==['a','b']
+   page.click('#adminLogout');page.wait_for_function("document.querySelectorAll('#outputList button').length===2 && document.querySelectorAll('#outputList .output-code:not([hidden])').length===0")
+   page.locator('#outputList button[data-output-id=a]').click();page.fill('#code','01');page.evaluate("rows=rows.filter(o=>o.id!=='a')")
    page.wait_for_function("document.querySelector('#pairSelection').hidden");assert page.locator('#code').input_value()==''
    assert '종료' in page.locator('#status').inner_text()
    page.evaluate('rows=[]');page.wait_for_function("document.querySelector('#outputList').textContent.includes('없어요')")
