@@ -1335,6 +1335,7 @@ function updatePresenterBoardBlockBackgrounds(host = refs.detailPane) {
 function annotatePresenterFormStarts(entries = [], initialPreviousKey = "") {
   const lyricsLabelOwners = new Set();
   let previousKey = initialPreviousKey;
+  let previousSourceKey = initialPreviousKey;
   let currentFormLabel = "";
   let scoreKey = "";
   let scoreLabel = "";
@@ -1348,7 +1349,8 @@ function annotatePresenterFormStarts(entries = [], initialPreviousKey = "") {
     previousOwner = owner;
     let controllerFormKey = score ? scoreKey : slide.formKey;
     const controllerFormLabel = score ? scoreLabel : presenterFormGroupLabel(slide)
-      || (controllerFormKey && previousKey === `${owner}:form:${controllerFormKey}` ? currentFormLabel : "");
+      || (controllerFormKey && previousSourceKey === `${owner}:form:${controllerFormKey}` ? currentFormLabel : "");
+    previousSourceKey = controllerFormKey ? `${owner}:form:${controllerFormKey}` : "";
     const lyrics = !score && normalizePresenterFormPresetLabel(controllerFormLabel).type === "lyrics";
     if (lyrics) controllerFormKey = "lyrics";
     const formSlide = presenterSlideSupportsFormGrouping(slide, controllerFormLabel) && (!score || (controllerFormKey && controllerFormLabel));
@@ -1359,10 +1361,8 @@ function annotatePresenterFormStarts(entries = [], initialPreviousKey = "") {
     const showLabel = startsForm && (!lyrics || !lyricsLabelOwners.has(owner));
     if (lyrics) lyricsLabelOwners.add(owner);
     return {
-      ...entry,
-      formLabel: showLabel ? currentFormLabel : "",
-      controllerFormKey,
-      controllerFormLabel,
+      ...entry, formLabel: showLabel ? currentFormLabel : "",
+      controllerFormKey, controllerFormLabel,
     };
   });
   return { entries: annotatedEntries, lastKey: previousKey };
