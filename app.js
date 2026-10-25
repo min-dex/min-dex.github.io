@@ -3784,7 +3784,9 @@ const MINDEX_SERVICE_DOCUMENT_HISTORY_LIMIT = 3;
 const MINDEX_SERVICE_DOCUMENT_HISTORY_MAX_BYTES = 450000;
 
 async function worshipElementListSelect() {
-  return WORSHIP_ELEMENT_BASE_LIST_SELECT;
+  return state.singleSongStorage === "native"
+    ? `${WORSHIP_ELEMENT_BASE_LIST_SELECT},praise_record_id`
+    : WORSHIP_ELEMENT_BASE_LIST_SELECT;
 }
 
 function staticSupabaseCacheKey(table, select = "*") {
