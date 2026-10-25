@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261025-lyrics-plain-heading",
+  "version": "20261025-praise-version-navigation",
   "options": {
     "compress": false,
     "mangle": {
