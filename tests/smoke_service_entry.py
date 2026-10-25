@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from smoke_app import launch_chromium,start_local_app_server,sync_playwright
 from smoke_app import prepare_server_state_fixture
@@ -10,6 +11,7 @@ try:
    page=browser.new_page(viewport={'width':1280,'height':900})
    page.add_init_script('Element.prototype.requestFullscreen=async()=>{};window.open=()=>null')
    page.route('**/*supabase*/**',lambda r:r.abort())
+   page.route('**/app.runtime.js*',lambda r:r.fulfill(path=str(Path(__file__).resolve().parents[1]/'app.js'),content_type='text/javascript'))
    page.goto(url+'?mindexSmokeRaw=1',wait_until='load')
    page.wait_for_function("!!window.MINDEX_SERVICE_ENTRY")
    prepare_server_state_fixture(page)
@@ -23,9 +25,8 @@ try:
     pendingSundayEditSync.clear();state.dirtyServiceElementIds.clear();state.dirtyServiceStructureIds.clear();state.dirtyServiceTypeIds.clear();
     hasDirtyChanges=()=>dirty;isPresenterOutputWindowOpen=()=>live;render=()=>{renders++};showToast=()=>{};captureCleanFingerprint=()=>{};
     state.services=[{id:sid,title:'old',type_id:'test'},{id:'other',title:'retain'}];state.serviceItems={[sid]:[]};state.serviceTypes=[];state.worshipSections=[];state.worshipElements=[];
-    worshipElementListSelect=async()=>'*';
     const rows={mindex_worship_services:[{id:sid,title:'fresh',service_date:'2026-10-18',service_type_id:'test'}],mindex_worship_sections:[{id:sec,service_id:sid,title:'찬양',section_key:'praise',sort_order:1}],mindex_worship_elements:[{id:'ffffffff-ffff-4fff-8fff-ffffffffffff',section_id:sec,element_type:'praise',sort_order:1,config:{manualLyrics:'사용자 가사',formHint:'V2-C-V1-C'},source_ref:{label:'찬양'}}],mindex_worship_presenter_slides:[]};
-    fetchSupabasePaged=async(table,sel,build)=>{reads++;let result=structuredClone(rows[table]||[]);const q={in:(key,ids)=>{result=result.filter(r=>ids.includes(r[key]));return q},order:()=>q};build(q);if(entered){entered();entered=null}if(gate)await gate;if(fail)throw Error('fixture');return result};
+    fetchSupabasePaged=async(table,sel,build)=>{reads++;let result=structuredClone(rows[table]||[]);const q={in:(key,ids)=>{result=result.filter(r=>ids.includes(r[key]));return q},order:()=>q};build(q);if(sel!=='*')result=result.map(row=>Object.fromEntries(sel.split(',').filter(key=>Object.hasOwn(row,key)).map(key=>[key,row[key]])));if(entered){entered();entered=null}if(gate)await gate;if(fail)throw Error('fixture');return result};
     const run=()=>MINDEX_SERVICE_ENTRY.check(sid);
     const hold=()=>{let release;gate=new Promise(r=>release=r);return {started:new Promise(r=>entered=r),release:()=>{gate=null;release()}}};
     const presenter=JSON.stringify(state.presenter),songs=JSON.stringify(state.songs),music=state.serviceMusic;
@@ -39,6 +40,19 @@ try:
     check(state.worshipElements[0].config.formHint==='V2-C-V1-C','manual form');
     check(JSON.stringify(state.presenter)===presenter&&JSON.stringify(state.songs)===songs&&state.serviceMusic===music,'transport or song modified');
     check(!document.getElementById('refreshDbBtn'),'button remains');
+    // Entry refresh must read the native reference, not replace an already loaded
+    // atomic model with a legacy-only row after the initial render.
+    const nativeId='SONG-HYMN-N301-0001';
+    const nativeRecord={id:nativeId,revision:1,metadata:{title:'지금까지 지내온 것',hymn_no:'301'},content:{name:'새찬송가',forms:[]}};
+    installSingleSongSession([nativeRecord],{read:async()=>[nativeRecord],save:async()=>{throw Error('forbidden')}});
+    rows.mindex_worship_elements[0].praise_record_id=nativeId;
+    rows.mindex_worship_elements[0].song_id=null;
+    rows.mindex_worship_elements[0].song_version_id=null;
+    state.serviceItems[sid]=groupWorshipElements(rows.mindex_worship_sections,rows.mindex_worship_elements)[sid];
+    check(state.serviceItems[sid][0].song_id===nativeId,'initial native reference');
+    check(await run()===true,'native entry refresh');
+    check(state.worshipElements[0].praise_record_id===nativeId&&state.serviceItems[sid][0].song_id===nativeId,'entry refresh erased native reference');
+    check(state.worshipElements[0].config.formHint==='V2-C-V1-C','native form preserved');
     // Background tab refresh adopts the same atomic revision as the visible model.
     let duringAtomic=null;
     const aggregate={revision:'2',service:{...rows.mindex_worship_services[0],title:'atomic fresh'},sections:rows.mindex_worship_sections,elements:rows.mindex_worship_elements,slides:[]};

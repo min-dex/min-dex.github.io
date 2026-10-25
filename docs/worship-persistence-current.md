@@ -480,3 +480,9 @@ the selector. Both element and full-save preparation reject a different or lost
 reference before the atomic commit. Explicit direct-audio conversion is outside
 this preservation guard. The observed production reference loss has been rolled
 back; its exact initiating cause remains under investigation.
+
+Native entry refresh includes `praise_record_id` in its detached element query.
+Previously the initial atomic read showed correct links, then the delayed entry
+refresh replaced them with legacy-only rows. The entry regression applies the
+actual selected-column projection and verifies native identity and forms remain
+unchanged after refresh. This reproduces the missing-reference UI path.
