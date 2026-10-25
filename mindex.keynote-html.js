@@ -244,9 +244,13 @@ async function importPresenterKeynoteHtml(input) {
     };
     await Promise.all([upload(), upload(), upload()]);if (failure) throw failure;
     if (!unchanged()) throw Error('업로드 중 예배나 입력이 변경됐습니다. 기존 입력을 유지했습니다.');
-    item.memo = module.attachKeynoteHtmlToMemo(item.memo, descriptor);item._worshipElementTemplateModified = true;
-    state.dirty.service = true;markServiceElementDirty(serviceId, item);
-    const index = getServiceItems(serviceId).findIndex(row => row.id === itemId);
+    // Projection may replace equivalent item objects while files upload. Commit
+    // the current editor row, never the detached object captured before upload.
+    const currentItems = getServiceItems(serviceId), currentItem = currentItems.find(row => row.id === itemId);
+    if (!currentItem) throw Error('자료를 연결할 항목을 확인해 주세요.');
+    currentItem.memo = module.attachKeynoteHtmlToMemo(currentItem.memo, descriptor);currentItem._worshipElementTemplateModified = true;
+    state.dirty.service = true;markServiceElementDirty(serviceId, currentItem);
+    const index = currentItems.findIndex(row => row.id === itemId);
     if (index < 0) throw Error('자료를 연결할 항목을 확인해 주세요.');
     saveAttempted = true;
     if (!await saveServiceItemMutation(serviceId, index, { silent:true, renderAfterSave:false, throwOnError:true })) throw Error('저장 상태를 확인한 후 다시 저장해 주세요.');

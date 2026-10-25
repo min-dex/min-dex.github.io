@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261025-keynote-html-playback",
+  "version": "20261025-keynote-attachment-current-row",
   "options": {
     "compress": false,
     "mangle": {

@@ -4914,3 +4914,13 @@ reintroduce a second version identity into native records.
 Offline regression: `tests/smoke_worship_native_version_picker.py` exercises both
 engines, DOM selection, catalogue-only/transitive/missing peers, invalid choices,
 per-member preservation and the native persistence/reopen boundary.
+
+
+### Keynote attachment projection identity · 2026-10-25
+
+`getServiceItems` may replace equivalent projected row objects while an export
+folder uploads. After the unchanged-content guard, attachment must reacquire the
+current editor collection and target row before adding `asset.keynoteHtml`. It
+must never mutate the detached pre-upload row. Existing atomic item save remains
+the persistence boundary. The attachment regression includes equivalent object
+replacement as well as actual concurrent edits and uncertain save outcomes.

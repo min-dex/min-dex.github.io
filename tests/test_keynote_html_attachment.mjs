@@ -12,13 +12,13 @@ const manifest={format:'apple-keynote-html-v1',sourceSha256:sourceHash,pages:1,s
 contents['manifest.json']=Buffer.from(JSON.stringify(manifest));
 async function run(mode){
  const memo={userMemo:'preserved',offeringVariants:{praise:{value:'unchanged'}},asset:{kind:'file',original:{format:'key',name:'original.key',sha256:sourceHash,url:'https://example.test/original.key'},custom:'preserved'}};
- const item={id:'item',memo:JSON.stringify(memo),title:'keep-title',lyrics:'keep-lyrics',form:'V-C',timing:[1,2]};
+ let item={id:'item',memo:JSON.stringify(memo),title:'keep-title',lyrics:'keep-lyrics',form:'V-C',timing:[1,2]};
  const state={client:{},config:{url:'https://example.test'},selectedServiceId:'service',dirty:{service:false}};
  let uploads=[],removed=[],saves=0,toasts=[];
  const bucket={getPublicUrl:path=>({data:{publicUrl:'https://example.test/'+path}}),upload:async path=>{uploads.push(path);if(mode==='race'&&uploads.length===1)item.title='user-edited-during-upload';return {};},remove:async paths=>{removed.push(...paths);return {};}};
  state.client.storage={from:()=>bucket};
  const context=vm.createContext({console,window:{MINDEX_RELEASE:'test',confirm:()=>true},state,crypto:webcrypto,TextDecoder,Uint8Array,URL,Map,Set,Error,JSON,Number,Promise,
- getServiceItems:()=>[item],parseServiceItemMemo:value=>JSON.parse(value),normalizeServiceAsset:value=>value||{},serializeServiceItemMemo:value=>JSON.stringify(value),
+ getServiceItems:()=>{if(mode==='projection')item=structuredClone(item);return [item]},parseServiceItemMemo:value=>JSON.parse(value),normalizeServiceAsset:value=>value||{},serializeServiceItemMemo:value=>JSON.stringify(value),
  showToast:(...args)=>toasts.push(args),presenterPptxImports:new Set(),PRESENTER_MEDIA_STORAGE_BUCKET:'media',PRESENTER_MEDIA_CACHE_CONTROL:'3600',presenterPptxDigest:hash,
  markServiceElementDirty:()=>{},saveServiceItemMutation:async()=>{saves++;return mode!=='uncertain';},renderCurrentServiceModuleDetail:()=>{},renderServiceList:()=>{},updateSaveState:()=>{}});
  vm.runInContext(fs.readFileSync(new URL('../mindex.keynote-html.js',import.meta.url),'utf8'),context);
@@ -29,12 +29,12 @@ async function run(mode){
  const result=await vm.runInContext('importPresenterKeynoteHtml(input)',context);
  assert.equal(item.lyrics,'keep-lyrics');assert.equal(item.form,'V-C');assert.deepEqual(item.timing,[1,2]);
  const after=JSON.parse(item.memo);assert.deepEqual(after.offeringVariants,memo.offeringVariants);assert.equal(after.userMemo,memo.userMemo);assert.deepEqual(after.asset.original,memo.asset.original);assert.equal(after.asset.custom,'preserved');
- if(mode==='success'){assert.equal(result,true);assert.equal(saves,1);assert.ok(after.asset.keynoteHtml);assert.equal(removed.length,0);}
+ if(mode==='success'||mode==='projection'){assert.equal(result,true);assert.equal(saves,1);assert.ok(after.asset.keynoteHtml);assert.equal(removed.length,0);}
  if(mode==='race'){assert.equal(result,false);assert.equal(saves,0);assert.equal(item.title,'user-edited-during-upload');assert.equal(item.memo,JSON.stringify(memo));assert.equal(removed.length,uploads.length);}
  if(mode==='uncertain'){assert.equal(result,false);assert.equal(saves,1);assert.equal(removed.length,0);assert.ok(after.asset.keynoteHtml);assert.equal(state.dirty.service,true);}
  return {mode,result,uploads:uploads.length,saves,removed:removed.length,preserved:true};
 }
-for(const mode of ['success','race','uncertain'])test('sidecar attachment '+mode+' preserves original/input/timing and atomic outcome',async()=>{await run(mode)});
+for(const mode of ['success','projection','race','uncertain'])test('sidecar attachment '+mode+' preserves original/input/timing and atomic outcome',async()=>{await run(mode)});
 
 test('native ending transition requests common next exactly once and preserves a real last build',()=>{
  for(const terminalTransition of [true,false]){
