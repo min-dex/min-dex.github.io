@@ -1,3 +1,24 @@
+## Production checkpoint ·2026-10-25
+
+Native activation completed:1662 records, epoch2, 4-4-4-4. Compatible client
+b3b1e61e passed branch40115705179 and main40116326866 attempt2, all four
+checks and Pages;12 public files matched. Complete1662-record/11-table readback
+matched expected rows, including exact Unicode after a scoped four-document
+repair.6751 lyric units and38 audio sets are unchanged.846 element references
+and86 source documents migrated;132 affected service revisions advanced once.
+Historical payloads and legacy tables remain. The nullable-reference history
+comparison repair preserves all other fields and array order strictly.
+Transactional native create/save/read/delete passed without retained test data.
+
+Follow-up pending: native catalog initialization must precede home/service
+projection. The correction restores today's seven services' linked titles in
+local read-only verification. Browser legacy-state migration diagnostics are
+still being checked; do not claim complete public UI validation yet.
+Private evidence: backups/20261025-id4444/. Another authorized task has saved
+since activation: no blind rollback; preserve subsequent changes.
+
+The following is the historical preparation checkpoint, not current phase.
+
 # Single-ID release - 2026-10-25
 
 Status: production preparation and 1662-record staging verified in legacy phase; native cutover has NOT occurred.

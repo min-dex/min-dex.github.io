@@ -24,6 +24,8 @@ def main():
                     page.wait_for_function("typeof saveWorshipServiceInstance==='function'")
                     prepare_server_state_fixture(page)
                     fixtures.append(page.evaluate('''async () => {
+                      // This fixture supplies the legacy atomic protocol; native activation has its own smoke.
+                      globalThis.MINDEX_SINGLE_SONG_BOOTSTRAP_READY=false;
                       const check=(ok,msg)=>{if(!ok)throw Error(msg)};
                       const sid=crypto.randomUUID();
                       const service={id:sid,type_id:'fixture',date:'2026-10-12',title:'Fixture',_worshipSourceRef:{}};

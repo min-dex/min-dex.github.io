@@ -12,6 +12,7 @@ try:
    page.goto(url+'?mindexSmokeRaw=1')
    page.wait_for_function("typeof handleNavigationRailClick==='function'&&!document.body.classList.contains('ui-booting')")
    page.evaluate('''()=>{
+    globalThis.MINDEX_SINGLE_SONG_BOOTSTRAP_READY=false;
     state.client={};state.connectionError='';state.serviceError='';state.serviceTypes=[{id:'sunday-main',name:'주일예배 [3부]'}];state.services=[];
     state.scriptures=[{id:'fixture',title:'Fixture',text:'Original'}];state.scripturesLoaded=true;state.scriptureBooks=[{code:'GEN',koreanName:'창세기',englishName:'Genesis'}];
     state.bibleTranslations=[{id:'fixture',name:'개역개정'}];state.selectedBibleTranslationId='fixture';
@@ -183,6 +184,7 @@ try:
      state.client=client;canUseClientData=()=>true;homeOverviewStats=null;
      state.module='home';renderHomeStart();
      const pending=loadHomeOverviewStats();
+     await new Promise(resolve=>setTimeout(resolve,0));
      check(calls.length===2,'duplicate summary requests');
      state.module='praise';render();
      resolveSongs({count:1133,error:null});
