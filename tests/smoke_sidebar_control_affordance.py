@@ -54,12 +54,26 @@ try:
     const children=[...copy.children];
     if(!children[0].matches('strong')||!children[1].matches('.service-sidebar-presenter-date')||!children[2].matches('.service-date-status'))throw Error('text order');
     const rect=copy.getBoundingClientRect(),btn=button.getBoundingClientRect();
-    if(Math.abs((rect.top+rect.bottom)/2-(btn.top+btn.bottom)/2)>1)throw Error('button not vertically centered');
+    if(Math.abs(rect.top-btn.top)>1)throw Error('button not aligned to top');
     if(children.some((e,i)=>i&&e.getBoundingClientRect().top<children[i-1].getBoundingClientRect().bottom))throw Error('text not stacked');
     isPresenterOutputWindowOpen=()=>true;
     const html=renderPresenterSidebarServiceSummary(sidebarFixtureService);
     if(!html.includes('data-presenter-action="stop"')||!html.includes('is-stop'))throw Error('stop changed');
    }''')
+   page.evaluate("""()=>{
+    MindexRemote.codeFor=id=>id===sidebarFixtureService.id?'1234':'';
+    document.querySelector('.service-sidebar-presenter-context').outerHTML=renderPresenterSidebarServiceSummary(sidebarFixtureService);
+    refreshIcons();
+   }""")
+   code=page.locator('.service-sidebar-remote-code');assert code.is_visible()
+   code.focus();assert code.evaluate("e=>getComputedStyle(e).outlineStyle")!='none'
+   page.evaluate("""()=>{
+    const card=document.querySelector('.service-sidebar-presenter-context');
+    const code=card.querySelector('.service-sidebar-remote-code').getBoundingClientRect();
+    const launch=card.querySelector('[data-presenter-action]').getBoundingClientRect();
+    if(code.top<launch.bottom||Math.abs(code.right-launch.right)>2)throw Error('code not bottom right');
+   }""")
+   page.screenshot(path=f'/tmp/mindex-remote-card-{engine}.png')
    print(engine,'PASS visible filters, hover/focus, original grouping, Enter/Space, sidebar start/stop labels without opening output',flush=True)
    browser.close()
 finally:server.shutdown()

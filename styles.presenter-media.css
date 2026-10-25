@@ -21,3 +21,17 @@
     border-color: transparent;
   }
 }
+
+.service-sidebar-presenter-context { align-items: start; }
+.service-sidebar-presenter-context .svc-presenter-launch--sidebar { justify-self: end; }
+.service-sidebar-presenter-meta { grid-column: 1; grid-row: 1 / span 2; }
+.service-sidebar-remote-code {
+  grid-column: 2; grid-row: 2; align-self: end; justify-self: end;
+  display: inline-flex; align-items: center; gap: 4px; padding: 4px;
+  background: transparent; border: 0; color: var(--sidebar-ink);
+  font-size: 12px; font-variant-numeric: tabular-nums; cursor: pointer;
+}
+.service-sidebar-remote-code[hidden] { display: none; }
+.service-sidebar-remote-code svg { width: 14px; height: 14px; }
+.service-sidebar-remote-code:hover { background: var(--ui-surface-field); }
+.service-sidebar-remote-code:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

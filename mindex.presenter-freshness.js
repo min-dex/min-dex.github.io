@@ -28,7 +28,8 @@
     attachRelationalSongVersionRows(versions, units, ids, normalized);
     return normalized;
   }
-  async function verify(serviceId, token = null) {
+  async function verify(serviceId, token = null, transition = false) {
+    const outputService = state.presenter.serviceId, outputSession = state.presenter.outputSessionId;
     const client = state.client, project = state.config.url, selected = state.selectedServiceId, generation = state.presenter.outputGeneration;
     if (!client) throw Error('DB에 연결한 뒤 송출을 시작해 주세요.');
     if (state.dirty.song || state.dirty.forms) throw Error('편집 중인 찬양을 저장한 뒤 송출을 시작해 주세요.');
@@ -45,7 +46,7 @@
     const songs = await freshSongs(ids);
     const after = await revision(client, serviceId);
     if (generation !== state.presenter.outputGeneration || (token && pending !== token) || selected !== state.selectedServiceId || before !== after || client !== state.client || project !== state.config.url || signature !== JSON.stringify(getServiceItems(serviceId))
-      || state.dirty.song || state.dirty.forms || live()) throw Error('확인 중 자료가 변경되었습니다. 다시 송출을 시작해 주세요.');
+      || state.dirty.song || state.dirty.forms || (live() && !transition) || (transition && (outputService !== state.presenter.serviceId || outputSession !== state.presenter.outputSessionId))) throw Error('확인 중 자료가 변경되었습니다. 다시 송출을 시작해 주세요.');
     for (const item of items) {
       if (!item.song_id || ['manual_praise', 'audio_praise'].includes(servicePraiseInputMode(item))) continue;
       const song = songs.find(s => s.id === item.song_id);
@@ -58,7 +59,23 @@
     }
     const map = new Map(state.songs.map(s => [s.id, s]));
     songs.forEach(s => map.set(s.id, s));state.songs = [...map.values()];clearSearchCaches();presenterSlideBuildCache.delete(serviceId);
-    session = { serviceId, revision: after, songs: new Map(songs.map(s => [s.id, structuredClone(s)])), notified: false };
+    const verified = { serviceId, revision: after, songs: new Map(songs.map(s => [s.id, structuredClone(s)])), notified: false };
+    if (transition) return () => { session = verified; };
+    session = verified;
+    return true;
+  }
+  async function prepareNext(serviceId, transfer, currentRequest) {
+    if (canUseClientData() && !state.loadedWorshipServiceIds.has(serviceId)) await hydratePresenterServiceData(serviceId);
+    if (!currentRequest()) return false;
+    let activate;
+    if (transfer && live() && canUseClientData()) activate = await verify(serviceId, null, true);
+    if (!currentRequest()) return false;
+    if (transfer) {
+      if (live() && !buildServicePresenterSlides(serviceId).length) throw Error('다음 예배에 송출할 슬라이드가 없습니다.');
+      const previous = { ...state.presenter };
+      try { preparePresenterService(serviceId); activate?.(); }
+      catch (error) { Object.assign(state.presenter, previous); throw error; }
+    }
     return true;
   }
   async function beforeOpen(serviceId) {
@@ -112,5 +129,5 @@
     catch { /* Keep current output on network loss; next preparation remains strict. */ }
     finally { checking = false; }
   }
-  globalThis.MindexPresenterFreshness = { beforeOpen, verify, freshSongs, song, notify, checkLiveRevision };
+  globalThis.MindexPresenterFreshness = { beforeOpen, verify, prepareNext, freshSongs, song, notify, checkLiveRevision };
 })();

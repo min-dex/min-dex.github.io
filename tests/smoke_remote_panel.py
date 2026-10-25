@@ -2,7 +2,7 @@
 import os
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from smoke_app import start_local_app_server,sync_playwright,launch_chromium
-HTML='''<meta charset="utf-8"><button id="monitorPanelBtn">현황</button><button data-presenter-remote><span data-remote-button-label>원격 조작</span></button><script>window.isPresenterOutputRoute=()=>false;window.state={client:{},selectedServiceId:'s',services:[],presenter:{serviceId:'s',outputSessionId:'o',outputWindow:{}}};window.presenterControllerIsLive=()=>true;window.isPresenterOutputWindowOpen=()=>true;window.ends=0;window.starts=0;</script><script src="/mindex.remote.js"></script>'''
+HTML='''<meta charset="utf-8"><button id="monitorPanelBtn">현황</button><button data-presenter-remote data-remote-service-id="s" hidden><span data-remote-button-label>원격 조작</span></button><script>window.isPresenterOutputRoute=()=>false;window.state={client:{},selectedServiceId:'s',services:[],presenter:{serviceId:'s',outputSessionId:'o',outputWindow:{}}};window.presenterControllerIsLive=()=>true;window.isPresenterOutputWindowOpen=()=>true;window.ends=0;window.starts=0;</script><script src="/mindex.remote.js"></script>'''
 REGISTRY="""export function createOutputRegistry(context,{onUpdate}){window.starts++;window.updateRemote=onUpdate;onUpdate({code:'0123',connected:false,available:true});return {close(){onUpdate({code:'',connected:false,available:false});},async disconnectGuest(){window.ends++;await new Promise(r=>window.finishEnd=r);onUpdate({code:'0123',connected:false,available:true});}};} export async function adminRpc(client,name){return name==='mindex_remote_entry'?{ok:true,kind:'guest'}:{ok:true}} export const relayRegistration=secret=>({secret,revoke:async()=>{}});"""
 PAIRING="""export async function obtainOutputPairing(){return {secret:'11'.repeat(32),code:'0123',revoke:async()=>{}};}"""
 SESSION="""export async function openRemote(options){return {async end(){window.ends++;await new Promise(r=>window.finishEnd=r);options.onClose();},close(){options.onClose();}};}"""
@@ -16,6 +16,9 @@ try:
    assert not page.locator('.remote-panel').is_visible()
    assert page.locator('#remotePanelBtn [data-remote-button-label]').inner_text()=='0123'
    assert page.locator('[data-presenter-remote] [data-remote-button-label]').inner_text()=='0123'
+   assert page.locator('[data-remote-service-id]').is_visible()
+   page.evaluate("state.presenter.serviceId='other';updateRemote({code:'0123',connected:false,available:true})");assert page.locator('[data-remote-service-id]').is_hidden()
+   page.evaluate("state.presenter.serviceId='s';updateRemote({code:'0123',connected:false,available:true})")
    page.click('#remotePanelBtn');assert page.locator('.remote-panel').is_visible();assert page.evaluate('starts')==1
    page.evaluate("updateRemote({code:'0123',connected:true,available:true})")
    assert page.locator('#remotePanelBtn').get_attribute('aria-label')=='송출 코드 0123'

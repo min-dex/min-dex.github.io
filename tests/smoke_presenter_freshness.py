@@ -31,6 +31,11 @@ try:
     MindexPresenterFreshness.notify(songId);MindexPresenterFreshness.notify(songId);check(notices.filter(x=>x.includes('현재 송출')).length===1,'notice missing/duplicate');
     check(await MindexPresenterFreshness.beforeOpen(sid)&&requests===n,'live refreshed');
     live=false;db.mindex_version_units[0].text='LATEST';check(await MindexPresenterFreshness.beforeOpen(sid),'restart');check(songById(songId).versions[0].forms[0].lyrics==='LATEST','restart stale');
+    live=true;state.presenter.serviceId=sid;
+    db.mindex_version_units[0].text='NEXT';
+    const activate=await MindexPresenterFreshness.verify(sid,null,true);
+    check(MindexPresenterFreshness.song(songId,sid).versions[0].forms[0].lyrics==='LATEST','preflight replaced live snapshot');
+    activate();check(MindexPresenterFreshness.song(songId,sid).versions[0].forms[0].lyrics==='NEXT','transition snapshot not activated');
     live=true;revision='2';await MindexPresenterFreshness.checkLiveRevision();check(notices.filter(x=>x.includes('현재 송출')).length===2,'revision notice');live=false;
     state.serviceItems[sid]=[];check(!await MindexPresenterFreshness.beforeOpen(sid)&&reserved.closed,'snapshot admitted');state.serviceItems[sid]=[item];
     const savedVersions=db.mindex_song_versions;db.mindex_song_versions=[];check(!await MindexPresenterFreshness.beforeOpen(sid),'missing version admitted');db.mindex_song_versions=savedVersions;

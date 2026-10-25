@@ -104,25 +104,23 @@ async function prepareNextServiceFromPresenter(serviceId = state.selectedService
   const next = state.services.find((service) => service.id === nextServiceId) || nextPreparationService(current);
   if (!next) return;
   const requestSerial = ++prepareNextServiceRequestSerial;
-  if (canUseClientData() && !state.loadedWorshipServiceIds.has(next.id)) {
-    try {
-      await hydratePresenterServiceData(next.id);
-    } catch (error) {
-      showToast(error.message || "다음 예배 내용을 불러오지 못했습니다.", "error");
-      return;
-    }
-    if (requestSerial !== prepareNextServiceRequestSerial) return;
+  const outputService = state.presenter.serviceId, outputSession = state.presenter.outputSessionId;
+  if (hasDirtyChanges({ reconcile: true }) && !await confirmSaveBeforeLeaving()) return;
+  const shouldSwitchPresenter = outputService === serviceId;
+  try {
+    const currentRequest = () => requestSerial === prepareNextServiceRequestSerial && state.selectedServiceId === serviceId
+      && outputService === state.presenter.serviceId && outputSession === state.presenter.outputSessionId;
+    if (!await MindexPresenterFreshness.prepareNext(next.id, shouldSwitchPresenter, currentRequest)) return;
+  } catch (error) {
+    showToast(error.message || "다음 예배 내용을 불러오지 못했습니다.", "error");
+    return;
   }
-  // Preparing a later service must never replace an active output. The selected
-  // view moves forward while the return-to-live control keeps the live service reachable.
-  const shouldSwitchPresenter = !isPresenterOutputWindowOpen() && state.presenter.serviceId === serviceId;
   state.selectedServiceId = next.id;
   state.selectedServiceTypeId = next.type_id;
   state.selectedServiceItemIndex = null;
   state.presenter.viewServiceId = next.id;
   state.presenter.jumpDraft = "";
   if (shouldSwitchPresenter) {
-    preparePresenterService(next.id);
     state.presenter.index = 0;
     state.presenter.safetyBlank = false;
     state.presenter.liveScripture = {

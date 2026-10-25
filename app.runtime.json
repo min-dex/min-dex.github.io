@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261025-praise-version-navigation",
+  "version": "20261025-presenter-next-remote-card",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "c3774be022e147fe2b2cbdecfc6ca6d4bf91afad648bb4932c6c37c4293639a5",
-  "runtime_sha256": "ceb8ec9e179fa6be4d6067375726e8e5a65f9b41ac39259b8ec529ee79b13cdb",
-  "source_bytes": 1346077,
-  "runtime_bytes": 961735,
-  "source_gzip": 306786,
-  "runtime_gzip": 240713
+  "source_sha256": "0e75266cd32968b713f413d81286277fe50f9fb3c2683298b48a11eaf3593d79",
+  "runtime_sha256": "8c6b7aa3ab9d2df96d64e15e5653be0a1a18a61c465fc869481e2e0a5de70d84",
+  "source_bytes": 1345659,
+  "runtime_bytes": 961399,
+  "source_gzip": 306674,
+  "runtime_gzip": 240592
 }
