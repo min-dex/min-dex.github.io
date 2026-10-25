@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261025-worship-media-stability",
+  "version": "20261025-worship-media-stability-2",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "bfaab4974d3859432a76620ca8b4346c692d7cdba228edf2e306c21620832d45",
-  "runtime_sha256": "37b1162aa88a2b01fdf52811b840662b13266f89a87680522bb586642cf8ad04",
-  "source_bytes": 1343667,
-  "runtime_bytes": 960060,
-  "source_gzip": 306153,
-  "runtime_gzip": 240201
+  "source_sha256": "77a8d19772169fd4b741b40ead33e0d983704e4058e9389630a8c68bd6a6a062",
+  "runtime_sha256": "e535e2f0930242dcc68a642410767785df8df984517ccb5a218b527bbc95cc07",
+  "source_bytes": 1344784,
+  "runtime_bytes": 960887,
+  "source_gzip": 306427,
+  "runtime_gzip": 240486
 }
