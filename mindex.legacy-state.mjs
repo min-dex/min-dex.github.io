@@ -27,13 +27,17 @@ export async function migrateLegacyState({entries,project,legacyProject,stores,p
      // value, but retaining them only in that browser is not a server migration.
      const sourceHash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(entry)))),b=>b.toString(16).padStart(2,'0')).join('');
      const archiveKey='mindex.legacy.alternative.v1:'+sourceHash,backup=stores.device;
-     if(backup.pendingKeys().includes(archiveKey))await backup.retry(archiveKey);
+     let needsReadback=false;
+     if(backup.pendingKeys().includes(archiveKey)){await backup.retry(archiveKey);needsReadback=true;}
      if(!backup.keys().includes(archiveKey)){
       const value=await prepare(entry);
       if(typeof value!=='string')throw Error('MIGRATION_VALUE_REQUIRED');
       await backup.setItem(archiveKey,JSON.stringify({scope:entry.scope,key:entry.key,value,sourceHash}));
+      needsReadback=true;
      }
-     await backup.load();
+     // Existing archives came from the initial server read. Only newly written
+     // or replayed archives require another independent readback.
+     if(needsReadback)await backup.load();
      const archived=JSON.parse(backup.getItem(archiveKey)||'null');
      if(archived?.sourceHash!==sourceHash||archived.key!==entry.key||archived.scope!==entry.scope)throw Error('MIGRATION_ARCHIVE_READBACK_FAILED');
      result.archived.push({key:entry.key,archiveKey});

@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import {createServerState} from '../mindex.server-state.mjs';
 import {legacyStateDestination,migrateLegacyState,retireConfirmedLegacyState} from '../mindex.legacy-state.mjs';
-const db=new Map();let writes=0,lose=false;
+const db=new Map();let writes=0,reads=0,lose=false;
 const rpc=async(name,args)=>{
  const key=args.p_scope+':'+args.p_key;
- if(name==='mindex_state_read_v1')return {data:[...db].filter(([id])=>id.startsWith(args.p_scope+':')).map(([,v])=>v)};
+ if(name==='mindex_state_read_v1'){reads++;return {data:[...db].filter(([id])=>id.startsWith(args.p_scope+':')).map(([,v])=>v)};}
  writes++;const old=db.get(key);if(old?.requestId===args.p_request_id)return {data:old};
  if((old?.revision||'0')!==args.p_revision)throw Error('STATE_REVISION_CONFLICT');
  const row={key:args.p_key,value:args.p_value,revision:String(BigInt(args.p_revision)+1n),requestId:args.p_request_id};db.set(key,row);
@@ -23,7 +23,7 @@ await stores.shared.setItem('mindex.theme','light');await stores.session.removeI
 let result=await migrateLegacyState({entries,project,legacyProject:project,stores});
 assert.equal(result.confirmed.length,1);assert.equal(result.retained.length,2);assert.equal(result.archived.length,2);
 for(const entry of result.archived)assert.ok(JSON.parse(stores.device.getItem(entry.archiveKey)).sourceHash);
-const archiveWrites=writes;await migrateLegacyState({entries,project,legacyProject:project,stores});assert.equal(writes,archiveWrites,'repeat migration cannot duplicate backups');
+const archiveWrites=writes,archiveReads=reads;await migrateLegacyState({entries,project,legacyProject:project,stores});assert.equal(writes,archiveWrites,'repeat migration cannot duplicate backups');assert.equal(reads,archiveReads,'already loaded archives must not repeatedly reload the entire device state');
 assert.equal(stores.shared.getItem('mindex.theme'),'light');assert.equal(stores.session.getItem('mindex.ui.module'),null);
 const source=new Map(entries.map(e=>[e.key,e.value]));const access=()=>({getItem:key=>source.get(key),removeItem:key=>source.delete(key)});
 source.set(entries[1].key,'newer edit');assert.deepEqual(retireConfirmedLegacyState(result,access),[]);
