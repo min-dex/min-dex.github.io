@@ -4809,3 +4809,11 @@ upload and uncertain save retention. Existing PPTX thumbnail/effect/navigation,
 metadata round trip and 50MiB+ transport suites also run separately. Actual
 operational attachment and publication remain separate; production writes are
 paused while the Praise cutover owner completes the coordinated transition.
+
+## Native Praise editor content · 2026-10-25
+
+Single-record Praise resolves editor content by the linked record ID, without a
+legacy version ID. Its editor does not ask for a separate version. Default form
+placeholders use that same content; explicit worship form input remains first.
+Mismatched content IDs remain unresolved. No saved worship or Praise data is migrated
+by this display correction. Covered by smoke_form_default_placeholder.py.

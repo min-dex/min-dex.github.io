@@ -16,6 +16,20 @@ try:
     state.songs=[song];
     const service={id:'svc',type_id:'fixture',date:'2000-01-01'};state.services=[service];
     const input=item=>{const host=document.createElement('div');host.innerHTML=renderServiceFormHintInput(item,0);return host.querySelector('input.svc-form-hint')};
+    const native={...song,id:'SONG-CONT-0001-0001',_singleSongRecord:true,versions:[{...version,id:'SONG-CONT-0001-0001',_singleSongRecord:true}]};
+    state.songs=[native];
+    const nativeItem={id:'native',service_id:service.id,song_id:native.id,label:'찬양 1',raw_title:native.title,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db'})};
+    const nativeBefore=JSON.stringify({native,nativeItem});
+    check(serviceItemLinkedVersion(nativeItem)===native.versions[0],'native content resolves without legacy version id');
+    check(input(nativeItem).placeholder==='T-V-C','native inferred form must include lyrics, not only T');
+    check(renderServiceSongVersionPicker(nativeItem,0,serviceItemEditorModel(nativeItem,{service}))==='','native record must not request a separate version');
+    check(JSON.stringify({native,nativeItem})===nativeBefore,'native read must preserve record and worship input');
+    const authored={...nativeItem,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formHint:'C-V1-C'})};
+    check(input(authored).value==='C-V1-C','authored native form remains authoritative');
+    const noMatch={...native,versions:[{...version,id:'other'}]};
+    check(serviceItemLinkedVersion(nativeItem,noMatch)===null,'never borrow another record content');
+    state.songs=[song];
+    check(serviceItemLinkedVersion({...nativeItem,song_id:song.id},song)===null,'legacy unresolved selection remains unresolved');
     for(const [label,key,hasTitle] of [['찬양 1','praise',true],['특송','special_song',true],['봉헌특송','offering',true],['파송찬양','sending',false],['결단찬양','response_song',false]]) {
      const item={id:key,service_id:service.id,song_id:song.id,version_id:version.id,label,_worshipSectionKey:key,raw_title:song.title,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db'})};
      const before=JSON.stringify({item,song});

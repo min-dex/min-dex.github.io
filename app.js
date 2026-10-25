@@ -11923,6 +11923,7 @@ function songById(songId = "") {
 }
 
 function serviceItemLinkedVersion(item = {}, song = serviceItemLinkedSong(item)) {
+  if (song?._singleSongRecord) return (song.versions || []).find(version => version.id === song.id) || null;
   const versionId = item?.version_id || item?.song_version_id || "";
   if (!song || !versionId) return null;
   return (song.versions || []).find((version) => version.id === versionId) || null;
@@ -27131,6 +27132,7 @@ function renderServiceSongPicker(item, index, model = serviceItemEditorModel(ite
 }
 
 function renderServiceSongVersionPicker(item, index, model = serviceItemEditorModel(item)) {
+  if (model.linkedSong?._singleSongRecord) return "";
   const versions = model.songVersions || [];
   if (!versions.length && !item.song_id) return "";
   const selectedId = item.version_id
