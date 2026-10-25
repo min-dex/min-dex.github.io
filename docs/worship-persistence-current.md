@@ -474,3 +474,9 @@ content state to missing or discard an otherwise content-only retained row.
 The single-song browser regression covers sanitation of both content-state
 copies and preservation of a native-reference-only row. This does not establish
 that every UI save path preserves identity; operational readback remains required.
+
+DB presentation-mode changes capture the native song reference before handling
+the selector. Both element and full-save preparation reject a different or lost
+reference before the atomic commit. Explicit direct-audio conversion is outside
+this preservation guard. The observed production reference loss has been rolled
+back; its exact initiating cause remains under investigation.

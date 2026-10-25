@@ -7411,7 +7411,7 @@ async function saveService(serviceId = state.selectedServiceId, options = {}) {
     if (scriptureSaveSnapshot !== JSON.stringify(getServiceItems(serviceId))) throw new Error("예배 입력이 변경되었습니다. 다시 저장해 주세요.");
     let saved = { unchanged: true };
     if (service && !service._isExpected) {
-      saved = await saveWorshipServiceInstance(service);
+      saved = await saveWorshipServiceInstance(service, options);
     }
     const unchanged = saved?.unchanged !== false;
     if (unchanged) {
@@ -7473,7 +7473,7 @@ async function worshipElementTypedStateColumns() {
   };
 }
 
-async function saveWorshipServiceInstance(service) {
+async function saveWorshipServiceInstance(service, options = {}) {
   const serviceId = service.id;
   await ensureWorshipServiceRowsLoadedForPersistence(serviceId);
   await requireFullServiceSourceRef(serviceId);
@@ -7514,6 +7514,7 @@ async function saveWorshipServiceInstance(service) {
     elementTypedStateColumns,
     singleSongCatalog: state.singleSongCatalog, singleSongStorage: state.singleSongStorage,
   });
+  assertServicePraiseModeReference(rows.elements.find(row => row.id === options.expectedPraiseReference?.itemId), options.expectedPraiseReference);
   const savedIdentities = new Map(items.map((item, index) => [item.id, {
     id: rows.elements[index].id,
     sectionId: rows.elements[index].section_id,
@@ -7674,7 +7675,7 @@ async function saveServiceItemPatch(serviceId = state.selectedServiceId, index =
     const scriptureSaveSnapshot = JSON.stringify(item);
     await validateServiceItemScriptureInput(item);
     if (scriptureSaveSnapshot !== JSON.stringify(getServiceItems(serviceId).find(candidate => candidate.id === itemId))) throw new Error("예배 입력이 변경되었습니다. 다시 저장해 주세요.");
-    const saved = await saveWorshipServiceElementPatch(service, item.id);
+    const saved = await saveWorshipServiceElementPatch(service, item.id, options);
     if (!saved) {
       needsFullSave = true;
       return false;
@@ -7698,7 +7699,7 @@ async function saveServiceItemMutation(serviceId = state.selectedServiceId, inde
   return saveService(serviceId, options);
 }
 
-async function saveWorshipServiceElementPatch(service, itemId) {
+async function saveWorshipServiceElementPatch(service, itemId, options = {}) {
   const serviceId = service?.id || "";
   const targetItemId = String(itemId || "").trim();
   if (!serviceId || !targetItemId) return false;
@@ -7731,6 +7732,7 @@ async function saveWorshipServiceElementPatch(service, itemId) {
 
   let elementRow = rows.elements.find((element) => element.id === targetItemId);
   if (!elementRow) return false;
+  assertServicePraiseModeReference(elementRow, options.expectedPraiseReference);
   let sectionRow = existingSectionById[elementRow.section_id]
     || rows.sections.find((section) => section.id === elementRow.section_id);
   await captureWorshipRecoverySnapshot(service, "before-element-patch");
@@ -9730,10 +9732,11 @@ function handleDetailChange(event) {
       commitDeferredServiceTextInput(serviceField, { save: true });
       return;
     }
+    const selectSaveOptions = serviceField.matches("select") ? serviceItemSelectSaveOptions(serviceField) : {};
     updateServiceItemField(serviceField);
     syncServiceVersionFormErrors(serviceField);
     if (serviceField.matches("select")) {
-      saveCommittedServiceItem(serviceField.dataset.serviceItemIndex, serviceField.dataset.serviceId || state.selectedServiceId, serviceItemSelectSaveOptions(serviceField));
+      saveCommittedServiceItem(serviceField.dataset.serviceItemIndex, serviceField.dataset.serviceId || state.selectedServiceId, selectSaveOptions);
     }
     return;
   }
@@ -10616,8 +10619,20 @@ function saveCommittedServiceItem(index, serviceId = state.selectedServiceId, op
   void resolveAndSaveCommittedServiceItem(serviceId, Number(index), options);
 }
 
+function assertServicePraiseModeReference(row, expected) {
+  if (expected && (expected.itemId !== row?.id || expected.songId !== row?.praise_record_id)) {
+    throw new Error("출력 방식 변경 중 찬양 연결이 달라져 저장하지 않았습니다. 예배를 다시 열어 확인해 주세요.");
+  }
+}
+
 function serviceItemSelectSaveOptions(field) {
   const key = String(field?.dataset?.serviceItemField || "").trim();
+  if (key === "praise_input_mode" && state.singleSongStorage === "native"
+    && ["lyrics_db", "score_db", "children_audio"].includes(normalizeServiceInputMode(field.value))) {
+    const serviceId = field.dataset.serviceId || state.selectedServiceId;
+    const item = getServiceItems(serviceId)[Number(field.dataset.serviceItemIndex)];
+    if (item?.song_id) return { expectedPraiseReference: { itemId: item.id, songId: item.song_id } };
+  }
   if (key === "scripture_reference_translation_id") {
     return {
       renderAfterSave: false,
