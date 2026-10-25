@@ -58,7 +58,12 @@ try:
    page.wait_for_function("!document.querySelector('[data-action=next]').disabled")
    page.click('[data-action=next]');page.wait_for_function('hosts[0].index===1')
    assert page.evaluate('hosts[1].index')==0
-   assert page.locator('#stopOutput').is_visible()
+   assert page.locator('#stopOutput').count()==0
+   assert page.locator('#disconnect').inner_text()=='원격 연결 종료'
+   page.keyboard.press('Tab');page.locator('#disconnect').focus()
+   assert page.locator('#disconnect').evaluate("e=>document.activeElement===e && (!e.matches(':focus-visible') || getComputedStyle(e).outlineStyle!=='none')")
+   assert page.locator('#disconnect').bounding_box()['width']<page.locator('main').bounding_box()['width']-30
+   page.screenshot(path='/tmp/mindex-remote-disconnect-'+engine+'.png',full_page=True)
    assert page.locator('#selectedOutputTitle').inner_text()=='첫째 예배'
    assert page.locator('#selectedOutputCode').inner_text()=='코드 1000'
    assert page.locator('#backOutputs').is_visible()
@@ -67,13 +72,12 @@ try:
    page.locator('#outputList button').filter(has_text='둘째 예배').click()
    page.wait_for_function("!document.querySelector('[data-action=next]').disabled")
    page.click('[data-action=next]');page.wait_for_function('hosts[1].index===1')
-   page.wait_for_function("!document.querySelector('#stopOutput').disabled")
-   page.once('dialog',lambda d:d.accept());page.click('#stopOutput')
-   page.wait_for_function('!hosts[1].live');assert page.evaluate('hosts[0].live')
+   page.click('#disconnect')
+   assert page.evaluate('hosts.every(h=>h.live)')
    page.wait_for_function("!document.querySelector('#adminOutputs').hidden")
    page.click('#adminLogout');page.wait_for_function("!document.querySelector('#pairForm').hidden")
    assert page.locator('#code').input_value()==''
    assert page.locator('#pairForm').is_visible()
    page.evaluate('hosts.forEach(h=>h.registry.close())')
-   browser.close();print('PASS',engine,'PIN UI, two outputs, encrypted commands, switch preserves outputs, selected stop, logout',flush=True)
+   browser.close();print('PASS',engine,'PIN UI, two outputs, encrypted commands, switch preserves outputs, disconnect preserves both outputs, logout',flush=True)
 finally:server.shutdown()

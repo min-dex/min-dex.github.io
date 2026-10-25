@@ -1567,7 +1567,7 @@ function renderPresenterSlideMiniPreview(slide, serviceId = state.presenter.serv
 }
 
 function normalizePresenterMiniPreviewSlide(slide = null, serviceChromakey = true) {
-  if (!slide) return slide;
+  if (!(slide = presenterKeynoteHtmlPreviewSlide(slide))) return slide;
   const outputContext = presenterSlideOutputContext(slide, serviceChromakey);
   const normalizedSlide = outputContext === "clean"
     ? normalizeCleanPresenterSlideLayout(slide)

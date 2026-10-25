@@ -5110,7 +5110,7 @@ def main() -> int:
                         "monthly": "월삭예배",
                         "otherMonth": "월삭예배",
                         "monthlyCustomTitle": "월삭예배",
-                        "specialCustomTitle": "청년 연합 월삭예배",
+                        "specialCustomTitle": "특별예배",
                         "allGenerationsAlias": "온세대 찬양예배",
                         "youthDedicationAlias": "청소년부 제자헌신예배",
                         "fridayFamily": "삼삼오오예배",

@@ -321,6 +321,11 @@ function updateServiceItemField(field, options = {}) {
     && songNeedsRelationalHydration(item.song_id) && !options.manualPraiseHydrated) {
     return hydrateServiceManualPraiseBeforeSwitch(field, options, item, serviceId);
   }
+  let nativeVariant = null;
+  if (key === "praise_record_id") {
+    nativeVariant = serviceNativeSongVariants(item, service).find(song => song.id === field.value && !song.unavailable);
+    if (!nativeVariant || nativeVariant.id === item.song_id) { field.value = item.song_id || ""; return; }
+  }
   const persistenceBefore = serviceItemPersistenceSignature(item);
   let connectedPraiseApplied = false;
   item._worshipElementTemplateModified = true;
@@ -367,6 +372,17 @@ function updateServiceItemField(field, options = {}) {
       }
       scheduleServiceScriptureBodyResolve(serviceId, index);
     }
+  }
+  if (key === "praise_record_id") {
+    // A variant switch changes this member's reference only. User forms, lyrics,
+    // medley membership and audio timing remain explicit editor data.
+    if (!state.songs.some(song => song.id === nativeVariant.id)) {
+      state.songs = [...state.songs, nativeVariant];
+      clearSearchCaches();
+    }
+    item.song_id = nativeVariant.id;
+    item.version_id = null;
+    item.song_version_id = null;
   }
   if (key === "version_id") {
     const song = serviceItemLinkedSong(item);
@@ -521,7 +537,7 @@ function updateServiceItemField(field, options = {}) {
     }
     scheduleServiceScriptureBodyResolve(serviceId, index);
   }
-  applyServicePreparationDefaults(item, serviceId);
+  if (key !== "praise_record_id") applyServicePreparationDefaults(item, serviceId);
   if (persistenceBefore === serviceItemPersistenceSignature(item)) {
     return;
   }
@@ -1724,7 +1740,7 @@ function syncServiceScriptureInputError(field) {
 }
 
 function syncServiceVersionFormErrors(field) {
-  if (field.dataset.serviceItemField !== "version_id") return;
+  if (!["version_id", "praise_record_id"].includes(field.dataset.serviceItemField)) return;
   const id = field.dataset.serviceId || state.selectedServiceId;
   for (const input of document.querySelectorAll('.svc-form-hint')) {
     if ((input.dataset.serviceId || state.selectedServiceId) === id && input.dataset.serviceItemIndex === field.dataset.serviceItemIndex) syncServiceFormInputError(input);

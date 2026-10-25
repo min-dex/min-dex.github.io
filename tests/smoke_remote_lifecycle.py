@@ -68,6 +68,15 @@ try:
    visibility(False);assert phone.locator('[data-action=next]').is_disabled()
    ready();assert phone.locator('#pairForm').is_hidden();assert host.evaluate('calls')==2
    phone.click('[data-action=next]');pump();assert host.evaluate('calls')==3
+   # A delayed old-worship packet cannot act after transfer, even at the same index.
+   phone.click('[data-action=next]');old_packets=phone.evaluate('remoteOut.splice(0)')
+   phone.evaluate("dispatchEvent(new Event('offline'))")
+   host.evaluate("fixture={...fixture,index:0,current:'새 예배',version:'next-worship'};s.notify()")
+   for packet in old_packets:host.evaluate('p=>deliver(p)',packet)
+   pump(.3);assert host.evaluate('calls')==3
+   phone.evaluate("dispatchEvent(new Event('online'))");ready()
+   assert phone.locator('#position').inner_text()=='1 / 20'
+   phone.click('[data-action=next]');pump();assert host.evaluate('calls')==4
    host.evaluate('fixture.live=false;s.notify()');pump(1.2)
    assert phone.locator('#pairForm').is_visible();assert phone.locator('[data-action=next]').is_disabled()
    host.evaluate('s.close()');hc.close();pc.close();browser.close()

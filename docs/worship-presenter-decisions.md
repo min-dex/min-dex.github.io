@@ -4834,3 +4834,93 @@ the next worship first and publishes its first slide only after successful
 hydration/freshness checks. Failed preparation or superseded navigation leaves
 the output unchanged. Unsaved-change confirmation is retained; ordinary browsing
 of other worships still never transfers the live output.
+
+## Keynote HTML playback and original preservation ·2026-10-25
+
+A `.key` original remains byte-identical and attached to the same worship item.
+An Apple Keynote HTML export is a separate playback sidecar, not slide-image
+conversion or a replacement source. Preparation currently requires Keynote on a
+Mac: export HTML, run `tools/prepare_keynote_html.py` against the preserved source
+and export folder, then choose **재생 자료 연결** on the original item. A raw KEY
+uploaded in Chrome is not automatically converted. The verified Apple 15.4
+runtime is hash pinned; unsupported versions fail before upload/execution.
+Prepared playback runs inside Mindex web and desktop without Keynote at playback
+time. Total export limit is 500 MiB, at most 5,000 resources and 300 slides;
+individual resources currently must fit the 50 MiB Storage upload limit.
+
+The sidecar manifest identifies the original hash, resource hashes, slide/scene
+mapping and native runtime version. Folder import verifies every resource,
+uses one immutable upload prefix, and changes only `asset.keynoteHtml` through
+the existing atomic element-save path. Concurrent edits/project changes abort;
+an uncertain save retains both the sidecar upload and pending input. Original
+metadata, unknown memo/asset fields, lyrics/forms, order and other items survive.
+No production schema, permissions or second persistence owner is introduced.
+
+Exported scripts execute only inside an opaque iframe (`sandbox=allow-scripts`,
+without allow-same-origin). A restricted resource-path CSP blocks unrelated
+network access and navigation. The app verifies the pinned runtime before adding
+a small control bridge to an in-memory copy. Original exported bytes remain
+unchanged. Command messages check iframe/parent identity, random session token,
+immutable request receipts and recovery generation. Status reconnection cancels
+older queued requests rather than replaying next/previous after an unknown result.
+
+The output owns the only active player. Controller previews use the current
+static thumbnail and page count, so preview never starts a second audio stream.
+The deck retains one worship item; next/previous operate Keynote builds until the
+known beginning/end, then navigate the ordinary worship order. Blackout and
+Scripture overlays retain the iframe and its media. Leaving the item removes its
+frame, timers and media.
+
+Checkpoints preserve scene, initial/final phase, actual displayed slide and media
+times/resume intent in the existing presenter transport. Scene and slide indices
+are not interchangeable: a completed event can display its successor slide.
+Reload restores the equivalent canonical initial scene without replaying the
+transition. Media stays paused until explicitly resumed; restore acknowledgement
+waits for metadata/seek completion and verifies the actual time. Native-paused or
+ended cached media are excluded from resume. Complex interrupted animation is
+recovered at its last acknowledged stable boundary, not at a guessed animation
+fraction. Unconfirmed pending commands are reported and never silently replayed.
+
+Browser autoplay policy is retained. When audible playback is blocked, the
+output shows **영상·음원 재생 허용** for a real user gesture. That click does not
+advance a build, and keyboard focus returns to the output controller afterward.
+A browser can require this again after reload or for newly created media.
+This is distinct from native Mac system-audio/window capture; no screen-recording
+permission is needed for the HTML playback path.
+
+Evidence boundaries: the supplied 24-slide original has no embedded audio/video;
+its actual export is tested separately from a generated Keynote fixture with
+multiple builds and audible movies. Offline protocol/import tests use explicit
+engine doubles; they do not certify every Apple effect, codec or font. Actual
+operational sidecar connection, required CI, publication and Storage playback
+readback remain separately recorded release steps.
+
+
+## Native worship input version selection · 2026-10-25
+
+The worship input exposes a version selector for native single-ID songs again.
+Options are the current record and its explicit transitive `same_song` group;
+unrelated same-title songs and `related` links are not version alternatives.
+Catalogue-only peers are resolved without network I/O during rendering. Missing
+peers remain disabled with an explicit retry; no default variant is inferred.
+Mode restrictions still apply. Selection changes only that item's native song
+reference, clears legacy version aliases, and uses the existing atomic item save.
+User title, form, connected-medley membership, direct lyrics and audio timing are
+retained. Incompatible forms remain visible for user correction rather than being
+rewritten. Sibling medley members are unchanged. The selected native ID is checked
+again at save time. Legacy/manual identity contracts above must not be used to
+reintroduce a second version identity into native records.
+
+Offline regression: `tests/smoke_worship_native_version_picker.py` exercises both
+engines, DOM selection, catalogue-only/transitive/missing peers, invalid choices,
+per-member preservation and the native persistence/reopen boundary.
+
+
+### Keynote attachment projection identity · 2026-10-25
+
+`getServiceItems` may replace equivalent projected row objects while an export
+folder uploads. After the unchanged-content guard, attachment must reacquire the
+current editor collection and target row before adding `asset.keynoteHtml`. It
+must never mutate the detached pre-upload row. Existing atomic item save remains
+the persistence boundary. The attachment regression includes equivalent object
+replacement as well as actual concurrent edits and uncertain save outcomes.

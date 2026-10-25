@@ -113,7 +113,9 @@
       "mindex.draft-handoff.js",
       "mindex.presenter-freshness.js",
       "mindex.hymn-structure.js",
-      "mindex.hymn-structure.runtime.json"
+      "mindex.hymn-structure.runtime.json",
+      "mindex.keynote-html.js",
+      "mindex.keynote-html-engine.mjs"
     ],
     "mac": {
       "target": [
