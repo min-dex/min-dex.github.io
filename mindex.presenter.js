@@ -1716,6 +1716,7 @@ function handlePresenterControllerMessage(message = {}) {
     if (message.pptxError && message.pptxError !== state.presenter.pptxError) showToast(message.pptxError, "error");
     state.presenter.pptxError = message.pptxError || "";
     adoptPresenterPptxMetadata(message.pptxMetadata);
+    adoptPresenterKeynoteHtmlMetadata(message.keynoteMetadata);
     return;
   }
   if (message.type === "presenter-output-disconnect") {
@@ -2262,13 +2263,17 @@ function initPresenterOutputCore() {
       receivedMessageId: currentPayload?.messageId || "",
       pptxError: document.getElementById("presenterOutputRoot")?.dataset.pptxError || "",
       pptxMetadata: document.getElementById("presenterOutputRoot")?._pptxMetadata || null,
+      keynoteMetadata: document.getElementById("presenterOutputRoot")?._keynoteHtmlMetadata || null,
       videoHealth: presenterOutputVideoHealth(currentPayload),
       warmup: presenterOutputWarmupSummary(),
     });
   };
+  const keynoteRoot = document.getElementById("presenterOutputRoot");
+  if (keynoteRoot) keynoteRoot._onKeynoteAcknowledgement = postHeartbeat;
   const releaseMediaStateEvents = bindPresenterOutputMediaState(() => !outputStopping, postHeartbeat);
   presenterOutputImageWarmupState.onProgress = postHeartbeat;
   const closeOutputChannel = () => {
+    if (keynoteRoot) delete keynoteRoot._onKeynoteAcknowledgement;
     releaseMediaStateEvents();
     if (heartbeatTimer) {
       window.clearInterval(heartbeatTimer);
@@ -2653,6 +2658,7 @@ function renderPresenterOutput(payload, options = {}) {
     ? presenterSafetyBlankSlide()
     : liveSlide || slides[clampPresenterIndex(payload?.index, slides.length)];
   const frameState = presenterOutputFrameStateForSlide(slide, payload);
+  if (renderPresenterKeynoteHtmlOutput(root, payload)) return;
   if (slide?.pptx?.url) {
     void renderPresenterPptxOutput(root, payload, slide, frameState);
     return;
@@ -4017,6 +4023,8 @@ function presenterSlidePreloadGroupKey(slide) {
 
 function presenterSlideImageSource(slide) {
   if (!slide) return "";
+  const keynotePreview = presenterKeynoteHtmlPreviewSource(slide);
+  if (keynotePreview) return keynotePreview;
   if (slide.scriptureContext === "reading" && !slide.suppressBackgroundImage && !slide.noBackgroundImage) {
     return PRESENTER_SCRIPTURE_READING_BACKGROUND;
   }

@@ -448,3 +448,16 @@ validation. Input rows create no preview players or playback observers.
 
 The same controller preparation skin owns the screen-only empty song-form hint
 tone. It preserves output exclusion, real invalid-field styling and focus outlines.
+
+### Keynote HTML sidecar playback
+
+`mindex.keynote-html.js` owns sidecar upload, controller preview metadata and the
+single output iframe. `mindex.keynote-html-engine.mjs` owns the pinned export
+adapter, manifest/checkpoint validation and sandbox-local command bridge. It is
+loaded dynamically with the active release version. Native Mac screen-capture
+candidates stay separate; they are not a prerequisite for HTML playback.
+The original/sidecar continue through the existing worship asset and atomic-save
+interfaces. `tools/prepare_keynote_html.py` only reads a preserved KEY and an
+existing Apple HTML export to generate a manifest; it never automates Keynote,
+changes the source or uploads operational files. Do not add actual user exports
+or their bundled Apple runtime to this public repository as test fixtures.

@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261025-remote-recovery",
+  "version": "20261025-keynote-html-playback",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "0e75266cd32968b713f413d81286277fe50f9fb3c2683298b48a11eaf3593d79",
-  "runtime_sha256": "8c6b7aa3ab9d2df96d64e15e5653be0a1a18a61c465fc869481e2e0a5de70d84",
-  "source_bytes": 1345659,
-  "runtime_bytes": 961399,
-  "source_gzip": 306674,
-  "runtime_gzip": 240592
+  "source_sha256": "a0fbcc733860c44b572887e34dd482f5f5d5b43722a57e02f1bde51d3fe851f5",
+  "runtime_sha256": "5173f9ca5b54c7188c296c89656d246607784b93bf27b5be31554b9946926711",
+  "source_bytes": 1345924,
+  "runtime_bytes": 961595,
+  "source_gzip": 306760,
+  "runtime_gzip": 240646
 }

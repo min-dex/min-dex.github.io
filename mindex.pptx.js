@@ -27,6 +27,7 @@ function presenterPptxStep(owner, slide = owner.slides?.[owner.index]) {
 }
 
 function advancePresenterPptx(owner, delta) {
+  if (advancePresenterKeynoteHtml(owner, delta)) return true;
   const slide = owner.slides?.[owner.index];
   const step = presenterPptxStep(owner, slide);
   if (slide?.pptx && ((delta > 0 && step < slide.pptx.clicks) || (delta < 0 && step > 0))) {
@@ -184,6 +185,7 @@ function presenterPptxPageMetadata(entry, page) {
 }
 
 function requestPresenterPptxMedia(owner, action) {
+  if (requestPresenterKeynoteHtmlMedia(owner, action)) return true;
   const slide = owner.slides?.[owner.index];
   if (!slide?.pptx || owner.safetyBlank || owner.liveScripture?.active) return false;
   owner.pptxProgress = { key: presenterPptxKey(slide), step: presenterPptxStep(owner, slide),
@@ -631,7 +633,7 @@ async function importPresenterPptx(input, existingItem = null) {
 
 function renderPresenterDeckOriginalActions(asset, serviceId, itemId) {
   if (!asset.original && !asset.pptx) return "";
-  return `<button class="btn secondary" type="button" data-deck-original-download data-service-id="${escapeAttr(serviceId)}" data-deck-original-item-id="${escapeAttr(itemId)}">원본 다운로드</button>`;
+  return `<button class="btn secondary" type="button" data-deck-original-download data-service-id="${escapeAttr(serviceId)}" data-deck-original-item-id="${escapeAttr(itemId)}">원본 다운로드</button>${renderPresenterKeynoteHtmlControls(asset, serviceId, itemId)}`;
 }
 
 async function downloadPresenterDeckOriginal(event) {

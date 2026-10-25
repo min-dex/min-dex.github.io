@@ -8701,6 +8701,7 @@ function handleDetailClick(event) {
     return;
   }
   if (event.target.closest("button:disabled")) return;
+  if (event.target.closest("[data-keynote-html-action]")) { handlePresenterKeynoteHtmlAction(event);return; }
   if (event.target.closest("[data-deck-original-download]")) { void downloadPresenterDeckOriginal(event); return; }
   const serviceRetry = event.target.closest("[data-service-load-retry]");
   if (serviceRetry) {
@@ -9615,6 +9616,8 @@ function handleDetailSubmit(event) {
 }
 
 function handleDetailChange(event) {
+  const keynoteFolder = event.target.closest("[data-keynote-html-files]");
+  if (keynoteFolder) { void importPresenterKeynoteHtml(keynoteFolder);return; }
   const nativeVersion = event.target.closest("[data-single-version-select]");
   if (nativeVersion) { void selectSingleSongVersion(nativeVersion); return; }
   const backgroundVideoFile = event.target.closest("[data-praise-background-file]");

@@ -1568,6 +1568,8 @@ function renderPresenterSlideMiniPreview(slide, serviceId = state.presenter.serv
 
 function normalizePresenterMiniPreviewSlide(slide = null, serviceChromakey = true) {
   if (!slide) return slide;
+  const keynotePreview = presenterKeynoteHtmlPreviewSource(slide);
+  if (keynotePreview) slide = { ...slide, type: 'image', elementType: PRESENTER_ELEMENT_TYPES.IMAGE, layout: PRESENTER_SLIDE_LAYOUTS.MEDIA, imageSrc: keynotePreview, text: '', asset: { ...slide.asset, url: keynotePreview } };
   const outputContext = presenterSlideOutputContext(slide, serviceChromakey);
   const normalizedSlide = outputContext === "clean"
     ? normalizeCleanPresenterSlideLayout(slide)

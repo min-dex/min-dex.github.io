@@ -157,6 +157,15 @@ function normalizeServiceAsset(value) {
     normalized.original = { format: original.format, url: original.url.trim(), name: String(original.name || '').trim(),
       size: original.size, sha256: original.sha256 };
   }
+  const keynote = value.keynoteHtml;
+  if (normalized.original?.format === 'key' && keynote?.format === 'apple-keynote-html-v1'
+    && keynote.sourceSha256 === normalized.original.sha256 && /^[a-f0-9]{64}$/.test(keynote.sha256 || '')
+    && Number.isSafeInteger(keynote.pages) && keynote.pages > 0 && keynote.pages <= 300
+    && typeof keynote.url === 'string' && /^https?:\/\//.test(keynote.url)) {
+    normalized.keynoteHtml = { format: keynote.format, url: keynote.url.trim(), sha256: keynote.sha256,
+      sourceSha256: keynote.sourceSha256, pages: keynote.pages,
+      ...(typeof keynote.poster === 'string' && keynote.poster.startsWith(keynote.url.slice(0, keynote.url.lastIndexOf('/') + 1)) && /\.(jpeg|jpg|png)$/.test(keynote.poster) ? { poster: keynote.poster } : {}) };
+  }
   if (audio.url) normalized.audio = audio;
   if (timing.pages.length || timing.cross !== null || timing.duration) normalized.timing = timing;
   if (String(value.manifestUrl || value.manifest_url || manifest.url || "").trim()) {

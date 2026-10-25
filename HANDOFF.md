@@ -1530,3 +1530,15 @@ CI selection or assertion timeout was removed. Current Remote/category docs now
 lead with deployed behavior while retaining dated implementation evidence.
 No production migration, data cleanup or single-song candidate is included.
 Publication requires the exact candidate's full gate, Pages and public readback.
+
+
+## Keynote HTML playback candidate ·2026-10-25
+
+`codex/keynote-html-playback` preserves the original KEY and attaches a verified
+Apple 15.4 HTML playback sidecar through the existing atomic element save.
+Opaque output/one-player ownership, canonical build/media recovery, controller
+thumbnail/page count and browser audible-playback activation are implemented.
+Actual 24-slide source and separate 7-scene media/build fixture pass Chromium
+and WebKit; offline protocol/import/unit coverage is separate. Required CI,
+Pages and actual operational sidecar attachment remain pending. No native
+screen-capture candidate or production data change is included in this commit.

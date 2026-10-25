@@ -1054,3 +1054,16 @@ record, its legacy aliases, historical references, lyrics or output. ID resoluti
 continues to return the exact original record. Invalid/missing/self/cyclic targets
 never hide records. Removing the marker restores ordinary selection. Changes use
 the existing native record revision CAS; no lifecycle guard is bypassed.
+
+## Keynote original plus playback sidecar ·2026-10-25
+
+A preserved `asset.original.format=key` may add `asset.keynoteHtml` with
+`format=apple-keynote-html-v1`, immutable manifest `url`/`sha256`, matching
+`sourceSha256`, `pages`, and an optional same-package `poster` thumbnail. The
+original URL/name/size/hash and item identity remain unchanged. The manifest owns
+its relative files and cumulative scene counts; no new row/schema is required.
+Prepared exports are derivatives, never the authoritative source. Runtime
+normalization drops a mismatched source hash or malformed sidecar while retaining
+the original. The attachment helper patches raw structured memo JSON so unknown
+user fields and stored whitespace survive. Presenter checkpoint/command data are
+transient session state, never saved into worship lyrics, timing or asset source.
