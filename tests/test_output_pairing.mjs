@@ -13,3 +13,12 @@ let cancelled=false;
 await assert.rejects(obtainOutputPairing({async rpc(n,a){if(a.p_action==='disconnect'){cancelled=true;return {data:{ok:true}};}return {data:{ok:true,output:'test-output',ready:true,secret:'short'}};}},'0123'));
 assert(cancelled);
 console.log('PASS four-digit leading zero, readiness polling uses one request token, idempotent cleanup, denied/invalid responses fail closed');
+
+// A selected output is bound on every poll and cannot resolve to a different PC.
+let boundCalls=[];
+const bound=await obtainOutputPairing({async rpc(n,a){boundCalls.push(a);return {data:{ok:true,output:'selected',ready:true,secret:'ab'.repeat(32)}};}},'0123','selected');
+assert.equal(boundCalls[0].p_output,'selected');await bound.revoke();
+let wrongRevoke;
+await assert.rejects(obtainOutputPairing({async rpc(n,a){if(a.p_action==='disconnect')wrongRevoke=a;return {data:{ok:true,output:'other',ready:true,secret:'ab'.repeat(32)}};}},'0123','selected'),/선택한 예배/);
+assert(wrongRevoke);assert.equal(wrongRevoke.p_output,null);
+console.log('PASS selected output enforced and mismatched response never opens relay');

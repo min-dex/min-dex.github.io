@@ -103,6 +103,7 @@ SMOKES = (
     "smoke_remote_multi_lifecycle.py",
     "smoke_remote_adapter.py",
     "smoke_remote_admin.py",
+    "smoke_remote_directory.py",
     "smoke_remote_video.py",
     "smoke_reference_validation.py",
     "smoke_praise_atomic_save.py",

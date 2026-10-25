@@ -509,3 +509,36 @@ and old catalog selections are rejected; reconnect requires a fresh snapshot.
 The phone offers a compact “원격 연결 종료” action for both guests and admins.
 It ends only that phone connection and leaves PC output running. The large
 output-stop action is removed from the phone UI; PC output controls remain.
+
+### Public worship directory ·2026-10-25 (DB applied; web not deployed)
+
+Remote entry shows active output names and device labels before authentication.
+`mindex_remote_outputs()` returns only output ID, title and device for hosts seen
+in the last ten seconds; codes, position, relay secrets and owner/admin tokens
+are not part of this public response. Full private table access remains revoked.
+Selecting an output retains that ID through each guest readiness poll; the server
+checks the code against that same ID before creating a link. A code belonging to
+another output must fail without reserving its guest slot. Old direct-code clients
+remain supported when no output is supplied. Existing attempt limits still apply.
+
+The selected output's code opens a guest connection; the administrator PIN opens
+that selected output directly with administrator privileges. An already-authorized
+administrator can switch outputs without re-entering the PIN. The authenticated
+admin list retains its code display; logout clears that list before public reload.
+Direct code entry also remains available if the directory cannot load. Refreshes
+do not erase partially entered codes or steal focus. An ended selected output
+returns to the list and clears its input. No service contents/lyrics are public.
+
+Deployment dependency: first apply `migrations/2026-10-25-remote-public-outputs.sql`,
+then publish the client. Local PostgreSQL 17.6 tests verify response projection,
+private ACL, selected-ID binding, retry binding, old clients and reapplication.
+Browser tests cover public/guest/admin routes, wrong-output denial, logout, ended
+outputs, empty/error states and narrow/desktop layouts. This is not an operational
+SQL application or publication receipt.
+
+Operating DB application verified in Safari SQL Editor: `remote_directory_ready=true`.
+A separate read-only anonymous-role query returned `public_list_ok=true`, two
+active outputs, `codes_and_secrets_excluded=true`, and the expected guest body
+hash (`selected_output_check_applied=true`). No actual output connection was made.
+The prior guest definition was checked by hash before replacement; drift aborts
+the whole migration. Web publication remains separate.
