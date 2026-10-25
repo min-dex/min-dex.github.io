@@ -49,6 +49,19 @@ try:
     check(reread.length===201&&JSON.stringify(batches)==='[100,100,1]','unbounded native reread');
     state.singleSongRepository=saved;state.client={rpc:()=>{throw Error('wrong project')}};
     blocked=false;try{await ensureSingleSongActivation()}catch{blocked=true}check(blocked&&state.singleSongRepository===saved,'project changed silently');
+    finalReads=0;const pageCalls=[];let timeoutOnce=true;
+    const smallClient={rpc:async(name,args)=>{
+      if(name==='get_single_praise_catalog_page_v1'){
+        pageCalls.push({after:args.after_id,size:args.page_size});
+        if(timeoutOnce){timeoutOnce=false;return {error:{code:'57014',message:'timeout'}};}
+      }
+      return client.rpc(name,args);
+    }};
+    const recovered=await MindexSingleSong.loadActivation(smallClient);
+    check(recovered.records.length===201&&pageCalls[0].size===100&&pageCalls[1].size===25&&pageCalls[0].after===pageCalls[1].after&&pageCalls.slice(1).every(p=>p.size===25),'timeout retry changed cursor or lost records');
+    let repeated=0;blocked=false;
+    try{await MindexSingleSong.loadActivation({rpc:async(name,args)=>name==='get_single_praise_catalog_page_v1'?(repeated++,{error:{code:'57014'}}):client.rpc(name,args)})}catch{blocked=true}
+    check(blocked&&repeated===2,'persistent timeout retried indefinitely or installed partial records');
     const missing=await MindexSingleSong.loadActivation({rpc:async()=>({error:{code:'PGRST202',message:'get_praise_storage_status_v1 not found'}})});check(missing.phase==='legacy','explicit absent RPC');
     return 'PASS default-off, maintenance/network/drift fail closed, draft retention, paginated native install, coalescing and project boundary';
    }'''),flush=True);b.close()

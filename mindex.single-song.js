@@ -186,12 +186,15 @@
     if (status.phase === 'legacy') return {phase:'legacy',records:[]};
     if (status.phase === 'maintenance') fail('찬양 저장소 전환 중입니다. 잠시 후 다시 열어 주세요.');
     if (!Number.isSafeInteger(status.recordCount) || status.recordCount < 1 || typeof status.epoch !== 'string' || typeof status.manifest !== 'string') fail('INVALID_CATALOG_MANIFEST');
-    const records = [], seen = new Set(); let after = null;
+    const records = [], seen = new Set(); let after = null, pageSize = 100;
     while (records.length < status.recordCount) {
-      const response = await client.rpc('get_single_praise_catalog_page_v1', {after_id:after,page_size:200,expected_epoch:status.epoch,expected_manifest:status.manifest});
+      const response = await client.rpc('get_single_praise_catalog_page_v1', {after_id:after,page_size:pageSize,expected_epoch:status.epoch,expected_manifest:status.manifest});
+      // Retry a timed-out read at the same cursor, with a bounded smaller batch.
+      // All manifest checks remain mandatory; never install a partial catalog.
+      if (response.error?.code === '57014' && pageSize > 25) { pageSize = 25; continue; }
       if (response.error) fail('PRAISE_STORAGE_CHANGED');
       const page = response.data;
-      if (page?.epoch !== status.epoch || page.manifest !== status.manifest || !Array.isArray(page.records) || !page.records.length || page.records.length > 200) fail('INVALID_CATALOG_PAGE');
+      if (page?.epoch !== status.epoch || page.manifest !== status.manifest || !Array.isArray(page.records) || !page.records.length || page.records.length > pageSize) fail('INVALID_CATALOG_PAGE');
       for (const r of page.records) {
         if (!code(r.id) || seen.has(r.id) || (after !== null && r.id <= after)) fail('INVALID_CATALOG_PAGE');
         seen.add(r.id);records.push(r);after=r.id;
