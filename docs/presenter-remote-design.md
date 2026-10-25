@@ -500,3 +500,12 @@ The active output code is shown automatically at the bottom-right of its sidebar
 worship card; the launch/stop icon sits at the top-right. Clicking the code opens
 the existing remote dialog. A different prepared worship card never shows the
 active output's code. The header remote entry remains available.
+
+## Transfer recovery and disconnect ·2026-10-25
+
+A same-window worship transfer keeps pairing but changes the remote snapshot and
+catalog identity even if both worships have identical slide content. Old tickets
+and old catalog selections are rejected; reconnect requires a fresh snapshot.
+The phone offers a compact “원격 연결 종료” action for both guests and admins.
+It ends only that phone connection and leaves PC output running. The large
+output-stop action is removed from the phone UI; PC output controls remain.

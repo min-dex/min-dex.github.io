@@ -39,14 +39,14 @@ input::placeholder { color: var(--placeholder-ink); opacity: .55; font-weight: 4
 button :is([data-lucide], svg.lucide) { width: var(--ui-icon-size); height: var(--ui-icon-size); flex: 0 0 var(--ui-icon-size); stroke-width: var(--ui-icon-stroke); }
 .navigation :is([data-lucide], svg.lucide) { width: var(--ui-icon-lg); height: var(--ui-icon-lg); flex-basis: var(--ui-icon-lg); }
 #music, #videoStatus, #result { font-size: var(--ui-meta-size); color: var(--ink-3); }
-#disconnect { background: transparent; border: 1px solid var(--line); }
+#disconnect { display: flex; width: auto; min-height: 44px; margin-left: auto; padding-inline: 15px; background: transparent; border: 1px solid var(--line); }
 @media (min-width: 600px) { main { padding: 25px; } .previews { grid-template-columns: 1fr 1fr; } .previews article { min-height: 180px; } }
 
 .phone-options { border-top: 1px solid var(--line); margin-top: 20px; padding-top: 15px; }
 #screenStatus { font-size: var(--ui-meta-size); color: var(--ink-3); }
 @media (display-mode: standalone) { main { padding-top: max(25px, env(safe-area-inset-top)); } }
 
-#adminLogout, #stopOutput { margin-top: 15px; }
+#adminLogout { margin-top: 15px; }
 #outputList { display: grid; gap: 10px; }
 #outputList button { flex-direction: column; align-items: flex-start; text-align: left; overflow-wrap: anywhere; }
 #outputList small { color: var(--ink-3); font-weight: var(--ui-meta-weight); }

@@ -28,8 +28,8 @@
  $('[data-remote-end]').onclick=async()=>{if(ending)return;ending=true;paintPanel();try{await registry?.disconnectGuest();}finally{ending=false;paintPanel();}};
  const text=s=>[s?.title,s?.body||s?.text||s?.bodyText||s?.content].filter(v=>typeof v==='string').join('\n').slice(0,1800);
  function adapter(serviceId,outputSession,outputWindow,admin=false,followOutput=admin){
-  let slideSet,slideSignature,slideKey;
-  function catalogKey(){const p=state.presenter;if(slideSet!==p.slides||slideSignature!==p.sourceSignature){slideSet=p.slides;slideSignature=p.sourceSignature;slideKey=crypto.randomUUID();}return slideKey;}
+  let slideSet,slideSignature,slideService,slideKey;
+  function catalogKey(){const p=state.presenter;if(slideService!==p.serviceId||slideSet!==p.slides||slideSignature!==p.sourceSignature){slideService=p.serviceId;slideSet=p.slides;slideSignature=p.sourceSignature;slideKey=crypto.randomUUID();}return slideKey;}
   let previewRevision,previews=new WeakMap();
   function preview(slide){
    if(!slide?.type)return '';
@@ -76,11 +76,11 @@
    const video=presenterRemoteVideoState(serviceId);
    if(video?.ready)allowed.push(...(video.status==='playing'?['video-pause']:['video-play']), 'video-restart');
    const next=p.slides.slice(p.index+1).find(s=>!presenterSlideIsHidden(s));
-   return {live,video,catalogKey:catalogKey(),index:p.index,total:p.slides.length,blank:!!p.safetyBlank,current:text(p.liveScripture?.active?p.liveScripture.slide:slide),next:text(next),allowed,
+   return {live,video,serviceTitle:serviceDisplayTypeName(state.services.find(s=>s.id===serviceId))||'예배',catalogKey:catalogKey(),index:p.index,total:p.slides.length,blank:!!p.safetyBlank,current:text(p.liveScripture?.active?p.liveScripture.slide:slide),next:text(next),allowed,
     previewCurrent:p.safetyBlank?'<div style="width:100%;height:100%;background:#000"></div>':preview(p.liveScripture?.active?p.liveScripture.slide:slide),previewNext:preview(next),
     music:!own&&!intro?'연결된 음원 없음':m.pending?'음원 준비 중':m.fadeStop?'페이드아웃 중':`${m.playing?'재생 중':'정지 / 일시정지'}${sync?.localTiming?m.autoSyncSuspended?' · 자동 넘김 해제':' · 자동 넘김':''}`,
     // Compare identities without disclosing media URLs or the full worship source.
-    version:compactTextSignature(JSON.stringify([remoteRevision,p.sourceSignature,presenterTransportSequence,m.playSerial,m.sourceKey,m.timingGroupId,m.mode,p.livePraise,p.liveScripture?.active]))};
+    version:compactTextSignature(JSON.stringify([remoteRevision,p.serviceId,p.sourceSignature,presenterTransportSequence,m.playSerial,m.sourceKey,m.timingGroupId,m.mode,p.livePraise,p.liveScripture?.active]))};
   }
   async function perform(action,target){
    if(!read().live||!read().allowed.includes(action))throw Error('현재 상태에서는 이 조작을 할 수 없습니다.');

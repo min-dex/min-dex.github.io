@@ -19,8 +19,8 @@ function connectionForms(){
  $('adminOutputs').hidden=!adminMode||!adminToken||!!session;
  $('adminLogout').hidden=!adminMode||!adminToken||!!session;
  $('adminContext').hidden=!adminLink||!view;
- if(adminLink){$('selectedOutputTitle').textContent=adminLink.title;$('selectedOutputCode').textContent=adminLink.code?'코드 '+adminLink.code:'';}
- $('stopOutput').hidden=!adminLink||!view;
+ if(adminLink){$('selectedOutputTitle').textContent=view?.serviceTitle||adminLink.title;$('selectedOutputCode').textContent=adminLink.code?'코드 '+adminLink.code:'';}
+ $('disconnect').hidden=!session;
  $('adminLogout').disabled=opening||ending||!!session;
 }
 async function releaseAdminLink(){
@@ -61,7 +61,7 @@ async function connectAdmin(selected){
   }while(performance.now()<deadline&&adminToken===token);
   if(!result.ready||adminToken!==token)throw Error('송출 PC의 응답이 없어요. 다시 선택해 주세요.');
   session=await openRemote({client,registration:relayRegistration(result.secret),onClose:()=>{void releaseAdminLink();reset();},onSlides:renderSlides,onState:state,onStatus:s=>{$('status').textContent=s;paint();},onResult:remoteResult});
-  $('disconnect').hidden=true;
+  $('disconnect').hidden=false;
  }catch(e){await releaseAdminLink();$('status').textContent=e.message;}
  finally{opening=false;paint();}
 }
@@ -162,7 +162,7 @@ $('pairForm').addEventListener('submit',async e=>{
    $('status').textContent='예배를 선택해 주세요.';return;
   }
   if(entry.kind!=='guest')throw Error('연결 응답을 확인할 수 없어요.');
-  $('disconnect').textContent='연결 종료';
+  $('disconnect').textContent='원격 연결 종료';
   const registration=await obtainOutputPairing(client,$('code').value);
   session=await openRemote({client,registration,onClose:reset,onSlides:renderSlides,onState:state,onStatus:s=>{$('status').textContent=s;paint();},onResult:remoteResult});
   $('disconnect').hidden=false;
@@ -176,7 +176,6 @@ async function disconnectController(){
 $('disconnect').onclick=disconnectController;
 $('backOutputs').onclick=disconnectController;
 for(const button of document.querySelectorAll('[data-action]'))button.onclick=async()=>{
- if(button.dataset.action==='output-stop'&&!confirm('선택한 예배의 송출을 종료할까요?'))return;
  try{const promise=session.command(button.dataset.action);$('result').textContent='처리 중…';paint();await promise;}catch(e){$('result').textContent=e.message;}paint();
 };
 document.addEventListener('visibilitychange',()=>{if(document.hidden)session?.suspend();else session?.refresh();paint();});

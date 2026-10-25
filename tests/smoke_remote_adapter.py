@@ -70,8 +70,23 @@ try:
     check(!adapter.read().allowed.includes('output-stop')&&adminAdapter.read().allowed.includes('output-stop'),'admin-only stop');
     state.selectedServiceId='another-editor';check(adminAdapter.read().live&&!adapter.read().live,'admin retains actual output while PC browses another service');state.selectedServiceId=sid;
     const followingGuest=MindexRemote.adapter(sid,'fixture',output,false,true);
+    const transferGate=createGate(followingGuest),beforeTransfer=transferGate.connect('returning-phone');
+    const oldCatalog=followingGuest.browse({offset:0}).key;
     state.presenter.serviceId='next-output';state.selectedServiceId='next-output';
     check(adminAdapter.read().live&&followingGuest.read().live&&!adapter.read().live,'remote did not follow same-session worship transfer');
+    let oldDenied=false;try{await transferGate.command('returning-phone',{...beforeTransfer,id:id(),sequence:1,action:'next'})}catch{oldDenied=true}
+    check(oldDenied,'old worship command accepted after transfer');
+    check(followingGuest.browse({offset:0}).key!==oldCatalog,'old worship catalog retained');
+    transferGate.close();
+    const rejoined=createGate(MindexRemote.adapter('next-output','fixture',output,false,true));
+    const freshTransfer=rejoined.connect('rejoined-phone'),oldRun=runPresenterAction;
+    let operatedService='';runPresenterAction=(action,serviceId)=>{operatedService=serviceId};
+    try {
+      const result=await rejoined.command('rejoined-phone',{...freshTransfer,id:id(),sequence:1,action:'next'});
+      check(result.ok&&operatedService==='next-output','rejoined phone targeted previous worship');
+      let replayDenied=false;try{await rejoined.command('rejoined-phone',{...beforeTransfer,id:id(),sequence:2,action:'next'})}catch{replayDenied=true}
+      check(replayDenied,'old-session command accepted after rejoin');
+    } finally { runPresenterAction=oldRun;rejoined.close(); }
     state.presenter.serviceId=sid;state.selectedServiceId=sid;
     adminGate.close();gate.close();
     output.closed=true;check(!adapter.read().live,'closed output revoked');output.closed=false;
