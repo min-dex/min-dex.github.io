@@ -1354,8 +1354,7 @@ function annotatePresenterFormStarts(entries = [], initialPreviousKey = "") {
     const formSlide = presenterSlideSupportsFormGrouping(slide, controllerFormLabel) && (!score || (controllerFormKey && controllerFormLabel));
     const key = formSlide ? `${owner}:form:${controllerFormKey || slideIndex}` : "";
     const startsForm = Boolean(formSlide && key !== previousKey);
-    if (startsForm) currentFormLabel = controllerFormLabel;
-    if (!formSlide) currentFormLabel = "";
+    currentFormLabel = startsForm ? controllerFormLabel : formSlide ? currentFormLabel : "";
     previousKey = key;
     const showLabel = startsForm && (!lyrics || !lyricsLabelOwners.has(owner));
     if (lyrics) lyricsLabelOwners.add(owner);
@@ -1422,10 +1421,8 @@ function renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, fo
     && state.presenterBoardSelection.elementKey === elementKey
     && (state.presenterBoardSelection.indexes || []).map(Number).includes(slideIndex);
   const formType = normalizePresenterFormPresetLabel(formLabel).type;
-  const normalizedFormLabel = formType === "lyrics" ? "Lyrics"
-    : formType === "title" ? "Title"
-    : formType === "instrumental" ? "Interlude"
-    : songFormPresetDisplayLabel(formLabel) || String(formLabel || "").trim();
+  const normalizedFormLabel = ({ lyrics: "Lyrics", title: "Title", instrumental: "Interlude" })[formType]
+    || songFormPresetDisplayLabel(formLabel) || String(formLabel || "").trim();
   const visibleFormLabel = formType !== "instrumental" && presenterLabelDuplicatesSlideText(normalizedFormLabel, slide) ? "" : normalizedFormLabel;
   const ariaPrefix = presenterSlideInteractionHint(serviceId, `${slideIndex + 1}번 슬라이드${hidden ? " · 숨김" : ""}`);
   const slideNumber = slideIndex + 1;
