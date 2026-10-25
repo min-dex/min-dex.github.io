@@ -105,5 +105,43 @@ try {
   const raced=await Promise.all([x.query('select public.mutate_single_praise_v1($1)',[create('race1')]),y.query('select public.mutate_single_praise_v1($1)',[create('race2')])]);
   assert.notEqual(raced[0].rows[0].mutate_single_praise_v1.id,raced[1].rows[0].mutate_single_praise_v1.id);
  }
+ // Imported empty versions carry technical defaults, not user content.
+ await db.exec('reset role');
+ const attrs=async()=> (await db.query("select proowner,proacl,proconfig,prosecdef,pg_get_functiondef(oid) as definition from pg_proc where oid='public.mutate_single_praise_v1(jsonb)'::regprocedure")).rows[0];
+ const original=await attrs();
+ const migration=await load('../migrations/2026-10-25-imported-empty-defaults.sql');
+ const fixture={metadata:{title:'새 찬양 3',normalized_title:'새찬양3',created_at:'2026-01-01T00:00:00Z',source_count:1,metadata:{},scripture:[]},content:{name:'기본',forms:[],audio_set:null,version_label:'기본',curated_version_name:'기본',version_order:1,lyric_signature:'mindex-0',_audioSetSupported:true},legacy:{songId:'11111111-1111-4111-8111-111111111111'},provenance:{source:{id:'11111111-1111-4111-8111-111111111111',title:'새 찬양 3',created_at:'2026-01-01T00:00:00Z',source_count:1}}};
+ const imported=await call(create('imported'));
+ const importedRecord={...imported.records[0],...fixture};
+ const put=async rec=>db.query('update mindex_single_song.records set payload=$2 where id=$1',[imported.id,rec]);
+ const erase=()=>call(request('delete',{id:imported.id,expectedRevisions:{[imported.id]:1}}));
+ await put(importedRecord);await assert.rejects(erase(),/NOT_EMPTY/);
+ await db.exec(migration);await db.exec(migration);
+ const patched=await attrs();assert.deepEqual({...patched,definition:original.definition},original);
+ for(const [area,key,value] of [
+  ['content','forms',[{lyrics:'real'}]],['content','audio_set',{starts:[0,4]}],['content','deck_key','score'],['content','timing',[0]],
+  ['content','version_label','편곡'],['content','version_order',2],['content','lyric_signature','mindex-1'],['content','unknown','keep'],
+  ['metadata','subtitle','real'],['metadata','metadata',{composer:'real'}],['metadata','scripture',['Jn 3:16']],
+  ['metadata','source_count',2],['metadata','created_at','different'],['metadata','normalized_title','different'],['metadata','unknown','keep']]){
+   const rec=structuredClone(importedRecord);rec[area][key]=value;await put(rec);await assert.rejects(erase(),/NOT_EMPTY/,area+'.'+key);
+ }
+ const noProvenance=structuredClone(importedRecord);delete noProvenance.provenance;await put(noProvenance);await assert.rejects(erase(),/NOT_EMPTY/);
+ await put(importedRecord);
+ await assert.rejects(call(request('delete',{id:imported.id,expectedRevisions:{[imported.id]:0}})),/CONFLICT/);
+ const incoming=await call(create('incoming'));
+ await db.query("update mindex_single_song.records set payload=jsonb_set(payload,'{relations,related}',$2) where id=$1",[incoming.id,JSON.stringify([imported.id])]);
+ await assert.rejects(erase(),/NOT_EMPTY/);
+ await db.query("update mindex_single_song.records set payload=jsonb_set(payload,'{relations,related}','[]') where id=$1",[incoming.id]);
+ const worshipId=randomUUID();await db.query("insert into mindex_worship_services(id,service_type_id,service_date,title,source_ref) values($1,'fixture','2026-01-01','fixture',$2)",[worshipId,{songId:imported.id}]);
+ await assert.rejects(erase(),/IN_USE/);await db.query('delete from mindex_worship_services where id=$1',[worshipId]);
+ // Restoring the exact original definition restores the old refusal, without data edits.
+ await db.exec(original.definition);await assert.rejects(erase(),/NOT_EMPTY/);await db.exec(migration);
+ if(process.env.MINDEX_EMPTY_IMPORT_FIXTURE){
+  const snapshot=JSON.parse(await fs.readFile(process.env.MINDEX_EMPTY_IMPORT_FIXTURE,'utf8'));
+  await put({...snapshot.candidates[0],id:imported.id,revision:1});
+ }
+ await db.exec('begin');const deleted=await erase();assert.deepEqual(deleted.deleted,[imported.id]);await db.exec('rollback');assert.equal((await read([imported.id])).length,1);
+ await db.exec('set role fixture_client');assert.deepEqual((await erase()).deleted,[imported.id]);await db.exec('reset role');
+ console.log('PASS imported defaults: exact values/provenance, meaningful fields denied, incoming refs/CAS, function attributes and rollback preserved');
  console.log('PASS lifecycle: allocator/replay/no reuse, arrangement, group merge/split/CAS, related preservation, referenced/content deletion guards, closed direct access');
 } finally {await db.close();}

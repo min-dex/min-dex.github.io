@@ -80,3 +80,19 @@ records. Keep the release queue ticket through readback.
 Native worship requests now freeze the single-song protocol before durable journaling,
 including creation/save/deletion of services without praise rows. Existing uncertain
 requests remain byte-identical on retry; no transport-time payload mutation occurs.
+
+## Imported empty-record deletion compatibility ·2026-10-25
+
+The lifecycle deletion guard formerly treated imported technical defaults as user
+content. The scoped migration ignores only exact default version labels, order 1,
+empty lyric signature and the audio-support flag. Imported creation time must
+match source provenance and legacy source ID; source count must be 1 and match
+provenance; normalized title must equal the current title without spaces and the
+source title must be unchanged. Unknown or meaningful fields remain protected.
+No fields are stripped or saved before deletion. Existing reference/history,
+related-record, CAS, transaction and receipt checks remain byte-identical.
+Private source backups and pre/post operational evidence stay outside Git.
+The lifecycle PostgreSQL test covers the imported empty shape, meaningful-value
+counterexamples, incoming references, CAS, permission attributes and rollback.
+Production application and actual cleanup require their separate verification;
+a successful local test does not establish either.
