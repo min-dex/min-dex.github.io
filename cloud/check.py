@@ -72,6 +72,7 @@ SMOKES = (
     "smoke_single_song.py",
     "smoke_single_song_lifecycle.py",
     "smoke_single_song_activation.py",
+    "smoke_worship_native_version_picker.py",
     "smoke_native_praise_mode_reference.py",
     "smoke_presenter_return.py",
     "smoke_controller_slide_blocks.py",

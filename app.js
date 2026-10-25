@@ -10631,6 +10631,11 @@ function assertServicePraiseModeReference(row, expected) {
 
 function serviceItemSelectSaveOptions(field) {
   const key = String(field?.dataset?.serviceItemField || "").trim();
+  if (key === "praise_record_id" && state.singleSongStorage === "native") {
+    const serviceId = field.dataset.serviceId || state.selectedServiceId;
+    const item = getServiceItems(serviceId)[Number(field.dataset.serviceItemIndex)];
+    if (item && field.value) return { expectedPraiseReference: { itemId:item.id, songId:field.value } };
+  }
   if (key === "praise_input_mode" && state.singleSongStorage === "native"
     && ["lyrics_db", "score_db", "children_audio"].includes(normalizeServiceInputMode(field.value))) {
     const serviceId = field.dataset.serviceId || state.selectedServiceId;
@@ -27127,8 +27132,37 @@ function renderServiceSongPicker(item, index, model = serviceItemEditorModel(ite
     </div>`;
 }
 
+// Native variants are distinct records; this never reconstructs legacy version IDs.
+function serviceNativeSongVariants(item, service = selectedServiceForEditor()) {
+  const current = serviceItemLinkedSong(item);
+  if (!current?._singleSongRecord) return [];
+  const found = new Map(), queue = [current.id];
+  while (queue.length) {
+    const id = queue.shift();
+    if (found.has(id)) continue;
+    let song = state.songs.find(row => row.id === id);
+    if (!song && state.singleSongCatalog) {
+      try { song = state.singleSongCatalog.appSong(id); } catch { /* Explicitly unavailable, never substitute by title. */ }
+    }
+    if (!song?._singleSongRecord) { found.set(id, {id, unavailable:true}); continue; }
+    found.set(id, song);
+    for (const peer of song.same_song_ids || []) if (!found.has(peer)) queue.push(peer);
+  }
+  return [...found.values()].filter(song => song.id === current.id || song.unavailable
+    || ((!serviceItemRequiresNewHymnalScoreSong(item) || isNewHymnalScoreSong(song))
+      && serviceSelectableSongVersions(song, item, service).length));
+}
+
 function renderServiceSongVersionPicker(item, index, model = serviceItemEditorModel(item)) {
-  if (model.linkedSong?._singleSongRecord) return "";
+  if (model.linkedSong?._singleSongRecord) {
+    const variants = serviceNativeSongVariants(item, model.service);
+    const missing = variants.find(song => song.unavailable);
+    const names = variants.map(song => song.unavailable ? "판본 불러오지 못함" : versionDisplayName(song, song.versions?.[0]) || "기본");
+    return `<span class="svc-song-version-control"><select class="svc-song-version-select"
+      data-service-item-field="praise_record_id" data-service-item-index="${index}" data-service-id="${escapeAttr(model.service?.id || item.service_id || "")}" aria-label="찬양 버전">
+      ${variants.map((song, at) => `<option value="${escapeAttr(song.id)}"${song.id === item.song_id ? " selected" : ""}${song.unavailable ? " disabled" : ""}>${escapeHtml(song.unavailable ? names[at] : `버전: ${names[at]}${names.filter(name => name === names[at]).length > 1 ? ` · ${at + 1}` : ""}`)}</option>`).join("")}
+      </select>${missing ? `<button class="icon-btn" type="button" data-service-song-retry="${escapeAttr(missing.id)}" aria-label="연결된 판본 다시 불러오기"><i data-lucide="refresh-cw"></i></button>` : ""}</span>`;
+  }
   const versions = model.songVersions || [];
   if (!versions.length && !item.song_id) return "";
   const selectedId = item.version_id
