@@ -198,7 +198,7 @@
     return entries.filter(({ slide }) => slide.songTimingKey && slide.songTimingEligible
       && (options.audioSource || slide.serviceTimingAudioSource || !slide.serviceTimingPage)
       && !seen.has(slide.songTimingElementId || slide.elementId) && seen.add(slide.songTimingElementId || slide.elementId))
-      .map(({ slide }) => `<button type="button" class="btn secondary" data-song-timing-open data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(slide.songTimingElementId || slide.elementId)}">음원 동기화</button>${presenterControllerIsLive(serviceId) && entries.some(({ slide: candidate }) => (candidate.songTimingElementId || candidate.elementId) === (slide.songTimingElementId || slide.elementId) && candidate.syncTimeline?.localTiming) ? `<button type="button" class="btn secondary" data-song-timing-play data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(slide.songTimingElementId || slide.elementId)}">자동 넘김 재생</button>` : ''}`).join('');
+      .map(({ slide }) => `<button type="button" class="btn secondary" data-song-timing-open data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(slide.songTimingElementId || slide.elementId)}">음원 동기화</button>${presenterControllerIsLive(serviceId) && entries.some(({ slide: candidate }) => (candidate.songTimingElementId || candidate.elementId) === (slide.songTimingElementId || slide.elementId) && candidate.syncTimeline?.localTiming) ? `<button type="button" class="btn secondary" data-song-timing-play data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(slide.songTimingElementId || slide.elementId)}" title="음원을 처음부터 재생하고 가사·사진을 자동으로 넘깁니다.">음원 재생 · 자동 넘김</button>` : ''}`).join('');
   }
   function resumeAutoSync(serviceId = state.presenter.serviceId, expected = null) {
     const music = state.serviceMusic, audio = music.audio;
@@ -362,7 +362,7 @@
   }
   function play(serviceId, elementId) {
     if (!presenterControllerIsLive(serviceId)) {
-      showToast('이 예배를 송출한 뒤 자동 넘김을 재생해 주세요.', 'info'); return;
+      showToast('이 예배를 송출한 뒤 음원 재생 · 자동 넘김을 눌러 주세요.', 'info'); return;
     }
     if (state.serviceMusic.playing || state.serviceMusic.pending) {
       showToast('재생 중인 음악을 일시정지한 뒤 시작해 주세요.', 'info'); return;
@@ -512,7 +512,7 @@
       </fieldset>
       <div class="song-timing-record"><button type="button" class="btn secondary" data-timing-next>다음 장 전환 기록</button><span data-timing-next-label></span></div>
       <div class="song-timing-pages">${slides.map((slide, i) => `<div class="song-timing-row"><label for="song-timing-start-${i}">${slide.formBackgroundImage ? `<img class="song-timing-photo" src="${escapeAttr(slide.formBackgroundImage)}" alt="${i + 1}장 배경 사진">` : ''}${i + 1}장 · ${formLabels.get(slide.formKey) ? escapeHtml(formLabels.get(slide.formKey)) + ' · ' : ''}${escapeHtml(slide.text || '빈 화면')}</label><div class="song-timing-row-controls"><input id="song-timing-start-${i}" aria-label="${i + 1}장 시작 초" type="number" min="0" step="0.1" data-timing-start="${i}" value="${draft.starts[i] ?? ''}" placeholder="초"><button type="button" class="btn secondary" data-timing-stamp="${i}">현재 시각 기록</button><button type="button" class="btn secondary" data-timing-nudge="${i}" data-delta="-0.2" aria-label="${i+1}장 0.2초 앞당기기">−0.2초</button><button type="button" class="btn secondary" data-timing-nudge="${i}" data-delta="0.2" aria-label="${i+1}장 0.2초 늦추기">+0.2초</button></div></div>`).join('')}</div>
-      ${serviceTiming ? `<fieldset data-photo-section tabindex="-1"><legend>사진 별도 자동 전환</legend>
+      ${serviceTiming ? `<fieldset data-photo-section tabindex="-1"><legend>사진 자동 넘김</legend>
         <p>사진을 전환 시각이나 가사 슬라이드에 연결하세요. 가사 시각은 바뀌지 않습니다. 가사 구간에는 하단 자막을, 간주에는 사진만 표시합니다.</p>
         <label>사진 선택 <input type="file" accept="image/*" multiple data-timing-photos></label>
         <div data-photo-editor></div>
