@@ -28,7 +28,9 @@ try:
     except Exception:
      print(page.evaluate('({hit,classes:testRoot.className,marker:testRoot._presenterVideoEndFade,video:oldVideo && {time:oldVideo.currentTime,duration:oldVideo.duration,ended:oldVideo.ended,loop:oldVideo.loop},html:testRoot.innerHTML.slice(0,300)})'),flush=True);raise
     assert page.evaluate("getComputedStyle(testRoot.querySelector('.is-active')).transitionDuration")=='0.5s'
-    assert page.evaluate('oldVideo.volume')==.37
+    # Linux WebKit exposes the media backend's float32 volume rounding.
+    volume=page.evaluate('oldVideo.volume')
+    assert abs(volume-.37)<1e-6, volume
     page.wait_for_function('!testRoot.classList.contains("is-transitioning")')
     assert page.evaluate('hit')==1
    page.evaluate('''()=>{const payload=makePayload();renderPresenterOutput(payload);renderPresenterOutput({...payload,index:1});if(testRoot.classList.contains('is-video-end-transition'))throw Error('manual fade');}''')
