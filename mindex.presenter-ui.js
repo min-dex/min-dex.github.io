@@ -210,6 +210,25 @@ function renderServicePresenterControls(service, slides, active, index) {
     </section>`;
 }
 
+function presenterControlPreviewIndex(serviceId, slides, index) {
+  const live = presenterControllerIsLive(serviceId);
+  const selection = state.presenterBoardSelection;
+  const selected = selection.serviceId === serviceId ? selection.indexes?.at(-1) : null;
+  return clampPresenterIndex(live ? index : selected ?? index, slides.length);
+}
+
+function syncPresenterPreparedPreview() {
+  const serviceId = state.selectedServiceId;
+  if (presenterControllerIsLive(serviceId)) return;
+  const host = document.querySelector('[data-presenter-right-sidebar] .svc-presenter-top');
+  const service = state.services.find(row => row.id === serviceId);
+  if (!host || !service || host.closest('[data-service-id]')?.dataset.serviceId !== serviceId) return;
+  const active = state.presenter.serviceId === serviceId;
+  host.outerHTML = renderPresenterControlsTop(service, presenterSlidesForService(serviceId), active, active ? state.presenter.index : 0);
+  refreshIcons(document.querySelector('[data-presenter-right-sidebar]'));
+  schedulePresenterPreviewLayoutUpdate(document.querySelector('[data-presenter-right-sidebar]'));
+}
+
 function renderPresenterRightSidebar(service, slides, active, index) {
   if (!service?.id) return "";
   return `

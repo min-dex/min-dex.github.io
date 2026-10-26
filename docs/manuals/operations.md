@@ -36,10 +36,11 @@
 
 1. 사도신경 Apostles’ Creed (신앙고백)
 2. 찬양 Praise (4 songs)
-3. 예배의 부름 (Opening)
+3. 예배의 부름 Call to Worship (전례문)
 4. 성경봉독 Scripture Reading
 5. 설교 Sermon
-6. 기도 Prayer
+6. 결단 Response
+   - 결단기도 Prayer of Commitment
 7. 봉헌 Offering
    - 봉헌찬양 Offertory Song
    - 봉헌기도 Prayer of Dedication

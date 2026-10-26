@@ -75,7 +75,7 @@ window.MINDEX_MANUALS = Object.freeze([
             "title": "찬양 Praise (4 songs)"
           },
           {
-            "title": "예배의 부름 (Opening)"
+            "title": "예배의 부름 Call to Worship (전례문)"
           },
           {
             "title": "성경봉독 Scripture Reading"
@@ -84,7 +84,8 @@ window.MINDEX_MANUALS = Object.freeze([
             "title": "설교 Sermon"
           },
           {
-            "title": "기도 Prayer"
+            "title": "결단 Response",
+            "items": ["결단기도 Prayer of Commitment"]
           },
           {
             "title": "봉헌 Offering",

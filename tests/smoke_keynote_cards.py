@@ -56,6 +56,29 @@ try:
    }''')
    cards.nth(11).click()
    assert page.evaluate('state.presenterBoardSelection.indexes[0]===cardIndexes()[11]')
+   # Prepared cards must update the common preview/count without opening output
+   # or changing the live cursor. Editor inputs outside the transport stay intact.
+   page.evaluate('''()=>{
+    const sidebar=document.createElement('aside');sidebar.id='prepared-preview-fixture';
+    sidebar.innerHTML=renderPresenterRightSidebar(state.services[0],state.presenter.slides,true,state.presenter.index);
+    sidebar.querySelector('.svc-presenter-input-stack').innerHTML='<input value="unsaved draft">';
+    document.body.append(sidebar);refs.detailPane.id='servicePresenterControls';window.beforePreviewCursor=state.presenter.index;
+   }''')
+   cards.nth(2).click()
+   assert page.locator('#prepared-preview-fixture [data-presenter-jump-input]').input_value()==str(page.evaluate('cardIndexes()[2]+1'))
+   assert page.locator('#prepared-preview-fixture .svc-presenter-live-preview img').get_attribute('src').endswith('page2.jpeg')
+   assert page.locator('#prepared-preview-fixture .svc-presenter-input-stack input').input_value()=='unsaved draft'
+   assert page.evaluate('!isPresenterOutputWindowOpen()'), page.evaluate('({index:state.presenter.index,before:beforePreviewCursor,open:isPresenterOutputWindowOpen()})')
+   assert '선택 화면' in page.locator('#prepared-preview-fixture .svc-presenter-live-panel').inner_text()
+   page.evaluate('''()=>{
+    const live=presenterControllerIsLive;presenterControllerIsLive=()=>true;
+    try { check(presenterControlPreviewIndex('cards-service',state.presenter.slides,5)===5,'offline selection replaced the live preview index'); }
+    finally { presenterControllerIsLive=live; }
+    const options={active:true,outputOpen:true};
+    check(presenterLiveStatusPreviewSlide(state.presenter.slides,5,options)===state.presenter.slides[5],'live preview changed to selection');
+    state.presenter.safetyBlank=true;check(presenterLiveStatusPreviewSlide(state.presenter.slides,5,options).id==='presenter:safety-blank','live blackout lost');state.presenter.safetyBlank=false;
+   }''')
+   page.evaluate('document.getElementById("prepared-preview-fixture").remove()')
    page.evaluate('''()=>{
     window.root=document.createElement('main');document.body.append(root);
     window.cardPayload=()=>({serviceId:'cards-service',slides:state.presenter.slides,index:state.presenter.index,pptxProgress:state.presenter.pptxProgress});

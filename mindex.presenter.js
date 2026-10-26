@@ -90,7 +90,7 @@ function isLiturgicalBodyServiceItem(item = {}) {
 function isLiturgicalBodyLabel(...values) {
   return values.some((value) => {
     const compact = compactSearchValue(value);
-    return compact === "사도신경" || compact === "신앙고백" || compact === "주기도문" || compact === "공동체고백";
+    return compact === "사도신경" || compact === "신앙고백" || compact === "주기도문" || compact === "공동체고백" || compact === "예배의부름";
   });
 }
 
@@ -98,6 +98,7 @@ function liturgicalBodyTitle(item = {}) {
   const label = compactSearchValue(item?.label || "");
   const title = compactSearchValue(item?.raw_title || "");
   if (isAnnouncementTextInputItem(item)) return "광고";
+  if (label === "예배의부름" || title === "예배의부름") return "예배의 부름";
   if (label === "주기도문" || title === "주기도문" || String(item?._worshipSectionKey || "") === "lords_prayer") return "주기도문";
   if (label === "공동체고백" || title === "공동체고백" || String(item?._worshipSectionKey || "") === "community_confession") return "공동체고백";
   return "사도신경";
@@ -146,6 +147,7 @@ function presenterAnnouncementBodyText(text = "") {
 function liturgicalBodyText(item = {}, memo = parseServiceItemMemo(item?.memo), displayText = "", service = {}) {
   const title = liturgicalBodyTitle(item);
   const canonical = presenterCanonicalLiturgicalBodyText(title, service);
+  if (title === '예배의 부름') return worshipOpeningText(item, memo, displayText, canonical);
   if (canonical && !item?.template_modified && !item?.templateModified) return canonical;
   const announcement = isAnnouncementTextInputItem(item);
   if (memo.slides?.length) {
@@ -167,6 +169,7 @@ function presenterCanonicalLiturgicalBodyText(title = "", service = {}) {
   if (key === "주기도문") return PRESENTER_PUBLIC_LORDS_PRAYER_TEXT;
   if (key === "공동체고백") return PRESENTER_PUBLIC_COMMUNITY_CONFESSION_TEXT.replace("검단우리교회 공동체", presenterCommunityConfessionCommunityName(service));
   if (key === "사도신경" || key === "신앙고백") return PRESENTER_PUBLIC_APOSTLES_CREED_TEXT;
+  if (key === "예배의부름") return worshipOpeningBodyText(worshipAppServiceTypeId(service?.type_id || service?.service_type_id || ''));
   return "";
 }
 

@@ -1,4 +1,36 @@
 // Pure worship-domain rules shared by service loading, editing, and presenter preparation.
+const WORSHIP_LITURGICAL_DEFAULTS = {
+  children: { opening: '꿈꾸는 어린이부 여러분,\n예배를 통해 하나님의 말씀에 청종하고,\n우리를 구원하신 하나님의 말씀으로\n사회를 새롭게 만들어가기를 소망하며\n하나님을 예배합니다.' },
+};
+
+function worshipOpeningBodyText(typeId = '') {
+  return WORSHIP_LITURGICAL_DEFAULTS[WORSHIP_SERVICE_TYPE_ALIASES[typeId] || typeId]?.opening || '';
+}
+
+function worshipOpeningText(item, memo, displayText, canonical) {
+  const explicit = Array.isArray(memo.slides) ? memo.slides.join('\n\n').trim() : '';
+  if (explicit) return explicit;
+  if (memo.elementType === 'body' && item._worshipElementTemplateModified && Array.isArray(memo.slides)) return '';
+  const text = String(item.raw_title || displayText || '').trim();
+  return !text || ['예배의부름', '인도자', '다같이', '다함께'].includes(text.replace(/\s+/g, '')) ? canonical : text;
+}
+
+function normalizeLegacyWorshipRoleItem(item = {}) {
+  const key = String(item._worshipSectionKey || '').trim();
+  const label = String(item.label || '').replace(/\s+/g, '');
+  if (key === 'call') return { ...item, _worshipSectionKey: 'opening' };
+  if (!['decision', 'response_prayer'].includes(key)) return item;
+  const prayer = ['기도', '대표기도', '결단기도', '결단의기도'].includes(label);
+  return { ...item, _worshipSectionKey: 'response_song',
+    ...(['기도', '결단기도'].includes(String(item._worshipSectionTitle || '').replace(/\s+/g, '')) ? { _worshipSectionTitle: '결단' } : {}),
+    ...(prayer ? { label: '결단기도', _worshipSlotKey: 'response.prayer' } : {}),
+  };
+}
+
+function normalizeLegacyWorshipRoleItems(items = []) {
+  const normalized = items.map(normalizeLegacyWorshipRoleItem);
+  return normalized.some((item, index) => item !== items[index]) ? normalized : items;
+}
 // Keep these functions global for the current classic-script runtime; callers in app.js keep
 // their existing names while the model is extracted incrementally.
 const WORSHIP_SERVICE_TYPE_ALIASES = {

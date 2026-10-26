@@ -361,6 +361,7 @@ function updateServiceItemField(field, options = {}) {
       } else if (isLiturgicalBodyServiceItem(item)) {
         const bodyText = String(item.raw_title || "").trim();
         parsed.slides = bodyText ? [bodyText] : [];
+        if (liturgicalBodyTitle(item) === "예배의 부름") parsed.elementType = "body";
       }
       if (serviceItemUsesFlexibleOfferingSlot(item) && !serviceItemUsesScoreInputMode(item, parsed)) parsed.outputMode = "";
       item.memo = serializeServiceItemMemo(parsed);

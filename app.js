@@ -21454,11 +21454,10 @@ function childrenWorshipTemplate() {
     { ...publicWorshipCreedStep(), label: "사도신경", name: "사도신경" },
     publicWorshipPraiseStep({ count: 4, required: true }),
     { label: "예배의 부름", name: "예배의 부름", required: true, flex: false,
-      sectionKey: "opening", elementType: "body" },
+      sectionKey: "opening", elementType: "body", slides: [worshipOpeningBodyText('children')] },
     publicWorshipScriptureReadingStep(),
     publicWorshipSermonStep({ typeId: "children" }),
-    { label: "결단기도", name: "결단기도", required: true, flex: false,
-      sectionKey: "response_prayer", elementType: "title", default_text: "결단기도" },
+    { ...publicWorshipResponseStep(), required: true, flex: false },
     publicWorshipOfferingStep({ typeId: "children", praiseLabel: "봉헌찬양" }),
     { label: "나래파송", name: "나래파송", required: true, flex: false,
       sectionKey: "community_confession", elements: [publicWorshipCommunityConfessionElement()] },
@@ -22188,6 +22187,7 @@ function recoverAllGenerationsOfferingItems(service, items = []) {
 }
 
 function projectWorshipServiceItemsFromTemplate(service, items = []) {
+  items = normalizeLegacyWorshipRoleItems(items);
   const appTypeId = worshipAppServiceTypeId(service?.type_id);
   if (!TEMPLATE_PROJECTED_SERVICE_TYPES.has(appTypeId)) {
     // Preserve the live collection/item identities when there is no deletion.
@@ -29637,7 +29637,7 @@ function serviceItemAssigneeInputLabel(item = {}) {
 
 function renderPresenterControlsTop(service, slides, active, index) {
   const count = slides.length;
-  const safeIndex = clampPresenterIndex(index, count);
+  const safeIndex = presenterControlPreviewIndex(service.id, slides, index);
   const activeSlide = slides[safeIndex] || null;
   const showLiveScriptureControl = (state.presenter.serviceId === service.id && state.presenter.liveScripture?.active) || presenterSlideIsLiveScriptureElement(activeSlide);
   const current = active && state.presenter.safetyBlank ? 0 : count ? safeIndex + 1 : 0;
@@ -29777,15 +29777,15 @@ function syncPresenterVideoHealthControl() {
 }
 
 function presenterLiveStatusPreviewSlide(slides = [], safeIndex = 0, options = {}) {
-  if (!options.active || !options.outputOpen) return null;
+  if (!options.outputOpen) return slides[clampPresenterIndex(safeIndex, slides.length)] || null;
+  if (!options.active) return null;
   if (state.presenter.liveScripture?.active && state.presenter.liveScripture.slide) return state.presenter.liveScripture.slide;
   if (state.presenter.safetyBlank) return presenterSafetyBlankSlide();
   return slides[clampPresenterIndex(safeIndex, slides.length)] || null;
 }
-
 function presenterLiveStatusPreviewTitle(slide = null, options = {}) {
   if (options.outputOpenElsewhere) return "다른 예배 송출 중";
-  if (!options.outputOpen) return "송출 대기";
+  if (!options.outputOpen) return "선택 화면 · 송출 대기";
   if (state.presenter.safetyBlank) return "빈 화면";
   if (state.presenter.liveScripture?.active) return state.presenter.liveScripture.reference || slide?.title || "실시간 말씀";
   return String(slide?.title || slide?.label || slide?.elementTitle || slide?.text || "현재 화면").split(/\r?\n/)[0].trim() || "현재 화면";

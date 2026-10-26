@@ -257,7 +257,7 @@ function clearPresenterBoardSelection(options = {}) {
 
 function syncPresenterBoardSelectionClasses(root = document.getElementById("servicePresenterControls")) {
   if (!root) return;
-  syncPresenterFocusView();
+  syncPresenterFocusView();syncPresenterPreparedPreview();
   const selected = selectedPresenterBoardIndexes(state.selectedServiceId);
   root.querySelectorAll(".svc-slide-thumb[data-presenter-index][data-service-id]").forEach((thumb) => {
     const serviceId = thumb.dataset.serviceId;

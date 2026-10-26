@@ -2046,7 +2046,7 @@ function resolvePresenterServiceItemContentState(item = {}, memo = emptyServiceI
   if (isConfessionPrayerServiceItem(item)) return filled("confession_title");
   if (elementType === "title_content" && labelKey === "환영") return filled("title_content");
   if (isLiturgicalBodyServiceItem(item)) {
-    return liturgicalBodyText(item, memo, rawText) ? filled("liturgical_body") : missing("liturgical_body_empty");
+    return liturgicalBodyText(item, memo, rawText, service) ? filled("liturgical_body") : missing("liturgical_body_empty");
   }
   if (isPublicClosingImageServiceItem(item, memo)) return filled("closing_visual_asset");
   if (isPublicFixedDoxologyServiceItem(item, memo, service)) return filled("fixed_doxology");
