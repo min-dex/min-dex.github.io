@@ -35,10 +35,10 @@ try:
                 "어린이부 예배": [
                   "사도신경 Apostles’ Creed (신앙고백)",
                   "찬양 Praise (4 songs)",
-                  "예배의 부름 (Opening)",
+                  "예배의 부름 Call to Worship (전례문)",
                   "성경봉독 Scripture Reading",
                   "설교 Sermon",
-                  "기도 Prayer",
+                  "결단 Response",
                   "봉헌 Offering",
                   "나래파송 Sending (공동체고백)",
                   "주기도문 Lord’s Prayer",
@@ -78,6 +78,7 @@ try:
               check(!refs.detailPane.textContent.includes('귀여운')&&!refs.detailPane.textContent.includes('꿈꾸는'),'department adjectives retained');
               check(find('예배의 구성과 네 가지 흐름').textContent.includes('Classic Components')&&find('예배의 구성과 네 가지 흐름').textContent.includes('Fourfold Order of Worship'),'worship order English headings missing');
               const children=find('어린이부 예배'),youth=find('TOV 청소년부 예배'),youngAdult=find('RIA 청년부 예배');
+              check(children.textContent.includes('결단기도 Prayer of Commitment'),'children response prayer missing');
               for(const section of [children,youth,youngAdult]){
                 check(section.textContent.includes('Offertory Song')&&section.textContent.includes('Prayer of Dedication')&&section.textContent.includes('Fellowship'),'nested English names missing');
               }
