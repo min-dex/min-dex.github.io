@@ -165,3 +165,30 @@ async function runPresenterInputAudioAction(button) {
   }
   return runServiceMusicAction('toggle',binding);
 }
+
+// Natural media completion owns automatic advance and its visual transition marker.
+function bindPresenterOutputAutoAdvanceOnEnd(root, payload, slide, options = {}) {
+  if (!presenterSlideShouldAutoAdvanceOnEnd(slide)) return;
+  const video = root?.querySelector(".presenter-output-layer.is-active video.presenter-video");
+  const onAutoAdvance = typeof options.onAutoAdvance === "function" ? options.onAutoAdvance : null;
+  if (!video || !onAutoAdvance) return;
+  const serviceId = payload?.serviceId || "";
+  const slideId = slide?.id || "";
+  const slideIndex = clampPresenterIndex(payload?.index, Array.isArray(payload?.slides) ? payload.slides.length : 0);
+  video.onended = () => {
+    if (root.querySelector(".presenter-output-layer.is-active video.presenter-video") !== video) return;
+    root._presenterVideoEndFade = { serviceId, frameKey: video.closest('.presenter-output-layer')?.dataset.presenterFrameKey,
+      nextIndex: (payload.slides || []).findIndex((candidate, index) => index > slideIndex && !presenterSlideIsHidden(candidate)) };
+    onAutoAdvance({ serviceId, slideId, slideIndex });
+  };
+}
+
+function presenterSlideShouldAutoAdvanceOnEnd(slide) {
+  if (!slide || presenterSlideElementType(slide) !== PRESENTER_ELEMENT_TYPES.VIDEO) return false;
+  if (presenterSlideLayout(slide) !== PRESENTER_SLIDE_LAYOUTS.MEDIA) return false;
+  if (slide.live) return false;
+  const presenterRole = normalizeServicePresenterRole(slide.presenterRole);
+  if (["ready", "waiting_loop"].includes(presenterRole)) return false;
+  const playback = presenterPlaybackConfig(slide.playback, presenterRole === "intro" ? "intro-video" : "video");
+  return playback.autoAdvanceOnEnd !== false && playback.loop !== true;
+}
