@@ -14,11 +14,21 @@
 .global-playback-panel [data-presenter-video-clock] { grid-column: 1; grid-row: 3; }
 
 @media screen {
-  /* An empty song form is an unfinished field, not a malformed entry. */
-  body:not(.presenter-output-body) input.svc-form-hint.is-invalid:placeholder-shown {
+  /* Empty forms use the ordinary field treatment; nonempty errors stay visible. */
+  body:not(.presenter-output-body) input.svc-form-hint:is(.is-invalid, [aria-invalid="true"]):placeholder-shown {
     --ui-field-border: transparent;
-    background-color: color-mix(in srgb, var(--warn-bg) 58%, transparent);
-    border-color: transparent;
+    --r: 0px;
+    --ui-field-ink: var(--ink);
+    color: var(--ink);
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-bottom-color: var(--line-2);
+    border-radius: 0;
+    box-shadow: inset 0 -1px var(--line-2);
+  }
+  body:not(.presenter-output-body) input.svc-form-hint:is(.is-invalid, [aria-invalid="true"]):placeholder-shown:focus {
+    --ui-field-border: var(--accent);
+    border-color: var(--accent);
   }
 }
 

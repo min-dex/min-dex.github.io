@@ -1297,7 +1297,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   gap: 10px;
   border-left: 2px solid var(--line);
   margin: 0;
-  padding: 10px 15px; background: var(--ui-surface-panel); border-radius: 5px;
+  padding: 5px 10px; background: transparent;
 }
 .manuals-notice strong {
   flex: 0 0 auto;
@@ -1335,7 +1335,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   display: flex;
   min-width: 0;
   align-items: baseline;
-  gap: 10px; min-height: 35px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 5px; background: var(--ui-surface-panel);
+  gap: 10px; min-height: 35px; padding: 5px 10px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent;
   color: var(--ink-2);
   font-size: var(--ui-meta-size);
   font-weight: 600;
