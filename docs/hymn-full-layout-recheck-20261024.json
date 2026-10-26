@@ -1,6 +1,6 @@
 {
   "date": "2026-10-24",
-  "status": "confirmed-data-applied-metadata-publication-pending",
+  "status": "confirmed-data-applied-metadata-publication-verified",
   "scope": {
     "newEditions": 645,
     "unionEditions": 558,
@@ -130,5 +130,19 @@
     "otherSpacingRows": 7,
     "worshipChanges": "Observed separate concurrent operational writes; this task made no worship writes. Exact target lyric corrections remain unchanged.",
     "metadataAction": "Rebind hashes only after identical compact text per slide; no lyrics or page boundaries changed."
+  },
+  "publicationRecheck": {
+    "date": "2026-10-26",
+    "publicVersion": "20261026-department-display-order",
+    "runtimeSHA256": "3c086ba47453c84582561ad4d2a2fdb7007fc0cfbb10fbf2e89c743de316d607",
+    "runtimeMatches20261024PublicReceipt": true,
+    "currentNativeEditions": 1203,
+    "currentUnits": 5419,
+    "measured": 1197,
+    "recitative": 6,
+    "staleOrMissing": 0,
+    "verification": "Public asset readback + current native record/hash/type binding; downloaded public display function tested offline in Chromium/WebKit. Historical rendering checks below retain their original date/scope.",
+    "privateEvidence": "backups/20261026-completion-evidence",
+    "scopeLimit": "No fresh complete printed-score reading, no new full presenter layout sweep, no production writes."
   }
 }
