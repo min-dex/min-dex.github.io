@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261026-liturgy-evidence-batch",
+  "version": "20261026-remote-calendar-batch",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "fcb96e15795f178bcbe544d18643ee21c66743d48228738676c4dae6b30f4d11",
-  "runtime_sha256": "c5782e54e1c7eab1acbd16224198abaa86c3569b3483f525719685396dc773c2",
-  "source_bytes": 1346366,
-  "runtime_bytes": 961981,
-  "source_gzip": 306962,
-  "runtime_gzip": 240737
+  "source_sha256": "cd375e7e51d9cc666b3cc14f04eff8cc3a1e56329071133babc12ff4a52ed840",
+  "runtime_sha256": "624bb950979bce2346172f51d5d11adc65e8b994561aff1f6d30f67c5852ce1d",
+  "source_bytes": 1346446,
+  "runtime_bytes": 962045,
+  "source_gzip": 307002,
+  "runtime_gzip": 240755
 }
