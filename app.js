@@ -13839,7 +13839,7 @@ async function calendarAssigneeRowsForNewService(service) {
         ? calendarAssigneeValueForService(service, ["children_prayer"])
         : label === "봉헌기도" && worshipAppServiceTypeId(service.type_id) === "youth"
           ? calendarAssigneeValueForService(service, ["youth_offering_prayer"]) : "";
-    if (!person && !copiedAnnouncementElementIds.has(element.id)) return [];
+    if (!person && !copiedAnnouncementElementIds.has(element.id)) return worshipAppServiceTypeId(service.type_id) === "children" ? [element] : [];
     return [{ ...element, person: cleanServiceAssignee(person),
       source_ref: { ...element.source_ref, placeholder: false } }];
   });
