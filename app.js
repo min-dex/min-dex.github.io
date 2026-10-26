@@ -5597,6 +5597,7 @@ function buildDepartmentCalendarServiceRequest(aggregate, field, value, prepareC
   }
   const document = withServiceDocumentSnapshot(service, committedItems)[MINDEX_SERVICE_DOCUMENT_SOURCE_REF_KEY];
   return { ...prepareCommit({ baseline: aggregate, rows: { sections: insertedSection ? [insertedSection] : [], elements: [target] }, document }),
+    ...(state.singleSongStorage === "native" ? { singleSongProtocol: 1 } : {}),
     protocolVersion: 1, requestId: createUuid() };
 }
 

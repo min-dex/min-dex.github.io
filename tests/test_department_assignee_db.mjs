@@ -135,5 +135,31 @@ try {
     const two=await scalar('select public.save_calendar_assignee_v1($1)',[{requestId:randomUUID(),calendarId:cid,field,expected:'B',value:'C',requests:[patch(one.committedRevision,'C')]}]);
     assert.equal(two.calendar[field],'C');assert.equal(two.services[0].elements[0].person,'C');
   }
+  // Native rollout requires the protocol even when every element is plain text.
+  await db.exec('reset session authorization');
+  await db.exec(await load('../migrations/2026-10-24-single-song-store-candidate.sql'));
+  await db.exec(await load('../migrations/2026-10-24-single-song-worship-candidate.sql'));
+  await db.exec(await load('../migrations/2026-10-24-single-song-lifecycle-candidate.sql'));
+  await db.exec(await load('../migrations/2026-10-24-single-song-rollout-candidate.sql'));
+  await db.exec("update mindex_single_song.rollout set phase='native'");
+  await db.exec('set session authorization anon');
+  const nativeBefore=await scalar('select public.get_department_assignee_context_v1($1,$2)',[cal,'children_prayer']);
+  assert.ok(nativeBefore.services.every(s=>s.elements.every(e=>!e.praise_record_id)));
+  const nativeRequest={requestId:randomUUID(),calendarId:cal,field:'children_prayer',expected:nativeBefore.calendar.children_prayer,value:'native assignee',
+    requests:nativeBefore.services.map(s=>({protocolVersion:1,requestId:randomUUID(),serviceId:s.service.id,expectedRevision:s.revision,
+      metadataPatch:{},sectionPatches:[],elementPatches:[{id:s.elements[0].id,patch:{person:'native assignee'}}],document:{sourceText:'native assignee'}}))};
+  await assert.rejects(scalar('select public.save_calendar_assignee_v1($1)',[nativeRequest]),/SINGLE_SONG_CLIENT_REQUIRED/);
+  assert.deepEqual(await scalar('select public.get_department_assignee_context_v1($1,$2)',[cal,'children_prayer']),nativeBefore);
+  for(const request of nativeRequest.requests)request.singleSongProtocol=1;
+  const nativeSaved=await scalar('select public.save_calendar_assignee_v1($1)',[nativeRequest]);
+  assert.equal(nativeSaved.calendar.children_prayer,'native assignee');
+  assert.ok(nativeSaved.services.every(s=>s.elements[0].person==='native assignee'));
+  assert.equal((await scalar('select public.save_calendar_assignee_v1($1)',[nativeRequest])).replayed,true);
+  for(const after of nativeSaved.services){
+    const before=nativeBefore.services.find(s=>s.service.id===after.service.id);
+    assert.deepEqual(after.sections,before.sections);
+    for(const element of after.elements){const original=before.elements.find(e=>e.id===element.id);const strip=e=>Object.fromEntries(Object.entries(e).filter(([k])=>!['person','updated_at'].includes(k)));assert.deepEqual(strip(element),strip(original));}
+  }
+  console.log('PASS native calendar without praise links: missing flag rejected atomically, explicit protocol accepted, exact replay and element content preserved');
   console.log('PASS department bidirectional commit, exact retry, stale/changed replay rejection, rollback, legacy bypass guard and explicit clear');
 } finally {await db.close();}

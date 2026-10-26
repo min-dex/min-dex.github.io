@@ -4938,3 +4938,14 @@ current editor collection and target row before adding `asset.keynoteHtml`. It
 must never mutate the detached pre-upload row. Existing atomic item save remains
 the persistence boundary. The attachment regression includes equivalent object
 replacement as well as actual concurrent edits and uncertain save outcomes.
+
+
+### Department assignee native protocol · 2026-10-26
+
+The calendar assignee builder freezes `singleSongProtocol:1` when the store is
+native, including services with no praise links and newly inserted prayer slots.
+This batch uses `save_calendar_assignee_v1` directly, so the atomic client's
+ordinary save wrapper cannot add the flag. Set it before the batch enters the
+durable journal; uncertain requests remain byte-identical on retry. Legacy mode,
+existing person-only patches, source-document synchronization and content remain
+unchanged. This is a client-only fix; no operational assignee is edited by tests.
