@@ -31,6 +31,37 @@ function normalizeLegacyWorshipRoleItems(items = []) {
   const normalized = items.map(normalizeLegacyWorshipRoleItem);
   return normalized.some((item, index) => item !== items[index]) ? normalized : items;
 }
+
+// Only the old calendar-created seed qualifies; arbitrary edited/deleted orders do not.
+function worshipDefaultOrderSeedEligible(aggregate = {}) {
+  const { service = {}, sections = [], elements = [] } = aggregate;
+  if ((WORSHIP_SERVICE_TYPE_ALIASES[service.service_type_id] || service.service_type_id) !== 'children'
+    || service.source_ref?.created_from !== 'mindex_template' || sections.length !== 2 || elements.length !== 2) return false;
+  return ['offering', 'announcements'].every(key => {
+    const section = sections.find(row => row.section_key === key);
+    const members = elements.filter(row => row.section_id === section?.id);
+    const element = members[0];
+    return section && members.length === 1 && element.source_ref?.label === (key === 'offering' ? '봉헌기도' : '광고')
+      && ![element.config, element.content_state].some(value => value?.templateSuppressed || value?.hiddenInPresentation);
+  });
+}
+
+function completeWorshipDefaultOrderSeed(aggregate, scaffold) {
+  if (!worshipDefaultOrderSeedEligible(aggregate)) throw Error('기본 순서 보충 대상인지 다시 확인해 주세요.');
+  const sectionIds = new Map();
+  const sections = scaffold.sections.map(section => {
+    const previous = aggregate.sections.find(row => row.section_key === section.section_key);
+    sectionIds.set(section.id, previous?.id || section.id);
+    return previous ? { ...previous, sort_order: section.sort_order } : { ...section };
+  });
+  const elements = scaffold.elements.map(element => {
+    const section = scaffold.sections.find(row => row.id === element.section_id);
+    const previousSection = aggregate.sections.find(row => row.section_key === section.section_key);
+    const previous = aggregate.elements.find(row => row.section_id === previousSection?.id && row.source_ref?.label === element.source_ref?.label);
+    return previous ? { ...previous, sort_order: element.sort_order } : { ...element, section_id: sectionIds.get(element.section_id) };
+  });
+  return { sections, elements };
+}
 // Keep these functions global for the current classic-script runtime; callers in app.js keep
 // their existing names while the model is extracted incrementally.
 const WORSHIP_SERVICE_TYPE_ALIASES = {

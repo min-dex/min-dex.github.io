@@ -217,6 +217,16 @@ function presenterControlPreviewIndex(serviceId, slides, index) {
   return clampPresenterIndex(live ? index : selected ?? index, slides.length);
 }
 
+function renderWorshipDefaultOrderFillControl(service) {
+  if (!state.loadedWorshipServiceIds.has(service.id) || worshipServiceIsPast(service) || getServiceItems(service.id).length !== 2) return '';
+  const sections = state.worshipSections.filter(row => row.service_id === service.id);
+  const sectionIds = new Set(sections.map(row => row.id));
+  const aggregate = { service: { service_type_id: service.type_id, source_ref: serviceRawSourceRef(service) }, sections,
+    elements: state.worshipElements.filter(row => sectionIds.has(row.section_id)) };
+  if (!worshipDefaultOrderSeedEligible(aggregate)) return '';
+  return `<button class="btn secondary" type="button" data-service-default-order-fill="${escapeAttr(service.id)}" ${state.saving || state.dirty.service || worshipDefaultOrderFills.has(service.id) ? 'disabled' : ''}>기본 순서 채우기</button>`;
+}
+
 function syncPresenterPreparedPreview() {
   const serviceId = state.selectedServiceId;
   if (presenterControllerIsLive(serviceId)) return;

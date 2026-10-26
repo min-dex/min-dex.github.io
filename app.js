@@ -25835,7 +25835,7 @@ function renderServicePresenterControlsUnscoped(service, slides = [], active = f
       ${renderPastServiceEditingNotice(service)}
       <div class="svc-presenter-toolbar">
         ${renderPresenterThumbScaleControl()}
-        ${renderPresenterFocusView()}
+        ${renderPresenterFocusView()}${renderWorshipDefaultOrderFillControl(service)}
         ${serviceSupportsBulletin(service) ? `<button class="svc-output-action" type="button" data-service-bulletin-action="open" data-service-id="${escapeAttr(service.id)}"><i data-lucide="newspaper"></i><span>주보</span></button>` : ""}
         <span class="svc-presenter-toolbar-utilities" aria-label="송출 보조 도구">
           ${renderServiceMusicPlayer()}

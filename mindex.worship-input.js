@@ -2,6 +2,11 @@
 // Loaded before app.js so these browser globals stay available to app orchestration.
 
 function handleServiceManagementDetailClick(event) {
+  const fillDefaults = event.target.closest('[data-service-default-order-fill]');
+  if (fillDefaults) {
+    void fillWorshipDefaultOrderDraft(fillDefaults.dataset.serviceDefaultOrderFill);
+    return true;
+  }
   const cancelNewServiceBtn = event.target.closest("[data-cancel-new-service]");
   if (cancelNewServiceBtn) {
     state.newServiceForm = null;
@@ -109,6 +114,40 @@ function handleServiceManagementDetailClick(event) {
     return true;
   }
   return false;
+}
+
+const worshipDefaultOrderFills = new Set();
+async function fillWorshipDefaultOrderDraft(serviceId) {
+  if (worshipDefaultOrderFills.has(serviceId)) return false;
+  const service = state.services.find(row => row.id === serviceId), client = state.client;
+  reconcileDirtyState();
+  const unchanged = () => state.client === client && state.selectedServiceId === serviceId
+    && state.services.includes(service) && !state.dirty.service && !state.saving
+    && !serviceHasPendingTextEdits(serviceId) && !isPresenterOutputWindowOpen();
+  if (!service || worshipServiceIsPast(service) || !unchanged()) {
+    showToast('편집 중인 내용을 먼저 저장하고 송출을 종료한 뒤 다시 시도해 주세요.', 'info');return false;
+  }
+  const signature = JSON.stringify(getServiceItems(serviceId)), metadata = serviceSaveMetadataSignature(service);
+  worshipDefaultOrderFills.add(serviceId);
+  try {
+    const atomic = await worshipAtomicClient();
+    if (atomic.pending(serviceId)) throw Error('이전 저장 결과를 먼저 확인해 주세요.');
+    const baseline = atomic.baseline(serviceId), fresh = await atomic.read(serviceId, { adopt: false });
+    reconcileDirtyState();
+    if (!unchanged() || signature !== JSON.stringify(getServiceItems(serviceId)) || metadata !== serviceSaveMetadataSignature(service)) throw Error('확인 중 입력이 변경되어 보충하지 않았습니다.');
+    if (!baseline || JSON.stringify(baseline) !== JSON.stringify(fresh)) throw Error('다른 곳에서 예배가 변경됐습니다. 다시 열어 확인해 주세요.');
+    if (!worshipDefaultOrderSeedEligible(fresh)) throw Error('이미 순서가 있거나 변경된 예배라 보충하지 않았습니다.');
+    const scaffold = buildWorshipServiceScaffold(serviceId, service.type_id, { service });
+    const rows = completeWorshipDefaultOrderSeed(fresh, scaffold);
+    state.serviceItems[serviceId] = groupWorshipElements(rows.sections, rows.elements)[serviceId] || [];
+    state.dirty.service = true;markServiceStructureDirty(serviceId);
+    refreshPresenterForService(serviceId, { publish: false });
+    renderCurrentServiceModuleDetail();renderServiceList();updateSaveState();
+    showToast('기본 순서를 채웠습니다. 기존 담당자와 광고를 확인한 뒤 상단 저장을 눌러 주세요.', 'info');
+    return true;
+  } catch (error) {
+    showToast(error.message || '기본 순서를 확인하지 못했습니다. 입력은 유지했습니다.', 'error');return false;
+  } finally { worshipDefaultOrderFills.delete(serviceId); }
 }
 
 function handleDetailServiceWorkspaceClick(event) {
