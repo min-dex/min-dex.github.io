@@ -88,7 +88,8 @@ try:
               check(find('순서와 미확인 항목의 적용 기준').textContent.includes('확인 필요'),'unconfirmed scheduling missing');
               check(find('음악 관리와 페이드아웃 정지').textContent.includes('기본 체크'),'fade default missing');
               check(find('사진·타이밍 편집').textContent.includes('0.2초'),'photo validation missing');
-              check(find('자동 넘김과 수동 전환').textContent.includes('음악은 계속'),'manual override contract missing');
+              check(find('미디어 재생과 자동 넘김').textContent.includes('음악은 계속'),'manual override contract missing');
+              for(const label of ['자동 재생:', '자동 넘김:', '종료 후 다음 이동:', '예약 전환:'])check(find('미디어 재생과 자동 넘김').textContent.includes(label),'media term missing: '+label);
               check(refs.detailPane.querySelectorAll('.manual-sources a[href^="https://www.notion.so/"]').length===2,'original source links missing');
               check(!refs.detailPane.querySelector('[data-song-timing-open],[data-service-item-commit],[data-presenter-action]'),'manual caused operational actions');
               return 'PASS grouped navigation, exact source department order, unknowns, current music/photo controls and read-only source links';
