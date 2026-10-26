@@ -15,7 +15,7 @@ function getClient(){
  return client ||= window.supabase.createClient(window.MINDEX_SUPABASE.url,window.MINDEX_SUPABASE.anonKey,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
 }
 function connectionForms(){
- $('pairForm').hidden=!!adminToken||!!session;
+ $('pairForm').hidden=!selectedOutput||!!adminToken||!!session;
  $('adminOutputs').hidden=!!session||!!selectedOutput;
  $('pairSelection').hidden=!selectedOutput||!!session;
  $('pairTitle').textContent=selectedOutput?.title||'';
@@ -66,7 +66,7 @@ async function listOutputs(){
    detail.textContent=[output.device,output.position].filter(Boolean).join(' · ');
   }
 
- }catch(e){$('status').textContent=token?e.message:'예배 목록을 불러오지 못했어요. 코드를 입력해 연결할 수 있어요.';if(e.code==='expired'){adminToken=null;adminMode=false;$('outputList').replaceChildren();delete $('outputList').dataset.signature;connectionForms();}}
+ }catch(e){$('status').textContent=token?e.message:'예배 목록을 불러오지 못했어요. 연결을 확인하면 자동으로 다시 불러와요.';if(e.code==='expired'){adminToken=null;adminMode=false;$('outputList').replaceChildren();delete $('outputList').dataset.signature;connectionForms();}}
  finally{listBusy=false;}
 }
 async function connectAdmin(selected){
@@ -95,7 +95,7 @@ $('adminLogout').onclick=async()=>{
 $('chooseOutput').onclick=()=>{if(opening||ending)return;selectedOutput=null;$('code').value='';$('status').textContent='';paint();void listOutputs();};
 setInterval(listOutputs,3000);
 window.addEventListener('pagehide',event=>{if(event.persisted)return;const token=adminToken;adminToken=null;if(token)void adminRpc(client,'mindex_remote_admin',{p_action:'logout',p_token:token}).catch(()=>{});});
-function reset(){closeSlides();clearTimeout(slidesTimer);slidesData=null;jumpPending=false;session=null;selectedOutput=null;state(null);$('pairForm').hidden=false;$('disconnect').hidden=true;$('code').value='';paint();}
+function reset(){closeSlides();clearTimeout(slidesTimer);slidesData=null;jumpPending=false;session=null;selectedOutput=null;state(null);$('disconnect').hidden=true;$('code').value='';paint();}
 function paint(){
  connectionForms();
  screenAwake.update({active:!!session?.connected,visible:!document.hidden});
@@ -182,7 +182,7 @@ $('slidesSearch').onsubmit=e=>{e.preventDefault();void loadSlides();};
 $('slidesPrev').onclick=()=>loadSlides(Math.max(0,(slidesData?.offset||0)-6));
 $('slidesNext').onclick=()=>loadSlides((slidesData?.offset||0)+6);
 $('pairForm').addEventListener('submit',async e=>{
- e.preventDefault();if(opening||ending||session)return;opening=true;paint();$('result').textContent='';
+ e.preventDefault();if(opening||ending||session||!selectedOutput)return;opening=true;paint();$('result').textContent='';
  try{
   if(!window.supabase||!window.MINDEX_SUPABASE)throw Error('연결 준비에 실패했습니다. 페이지를 새로고침해 주세요.');
   client=getClient();

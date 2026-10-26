@@ -32,7 +32,7 @@ try:
     raise AssertionError(phone.locator('#status').inner_text())
    def connect():
     host.evaluate("async()=>{window.s=await mod.openRemote({client:remoteClient,host:true,read:()=>fixture,execute:()=>{calls++;fixture.index++;}});}")
-    phone.fill('#code','0123');phone.click('#connect');ready()
+    phone.locator('#outputList button').click();phone.fill('#code','0123');phone.click('#connect');ready()
    def visibility(hidden):
     phone.evaluate("hidden=>{Object.defineProperty(document,'hidden',{configurable:true,value:hidden});Object.defineProperty(document,'visibilityState',{configurable:true,value:hidden?'hidden':'visible'});document.dispatchEvent(new Event('visibilitychange'));}",hidden)
    connect()
@@ -78,7 +78,7 @@ try:
    assert phone.locator('#position').inner_text()=='1 / 20'
    phone.click('[data-action=next]');pump();assert host.evaluate('calls')==4
    host.evaluate('fixture.live=false;s.notify()');pump(1.2)
-   assert phone.locator('#pairForm').is_visible();assert phone.locator('[data-action=next]').is_disabled()
+   assert phone.locator('#pairForm').is_hidden();assert phone.locator('[data-action=next]').is_disabled()
    host.evaluate('s.close()');hc.close();pc.close();browser.close()
    print('PASS',engine,'hidden/visible freshness, lost ack without replay, 10-minute sleep recovery, output-stop termination, BFCache recovery'+(', renderer freeze/resume' if engine=='chromium' else ''),flush=True)
 finally:server.shutdown()

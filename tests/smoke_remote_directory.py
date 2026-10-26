@@ -26,7 +26,7 @@ try:
    page.route('**/*',lambda r:r.continue_() if urlsplit(r.request.url).netloc==urlsplit(url).netloc and r.request.method in ('GET','HEAD') else r.abort())
    page.route('**/vendor/supabase-js.min.js',lambda r:r.fulfill(body=MOCK,content_type='text/javascript'))
    page.route('**/mindex.remote-session.mjs*',lambda r:r.fulfill(body=SESSION,content_type='text/javascript'))
-   page.goto(url);page.wait_for_function("document.querySelectorAll('#outputList button').length===2")
+   page.goto(url);assert page.locator('#pairForm').is_hidden();page.wait_for_function("document.querySelectorAll('#outputList button').length===2")
    assert page.locator('#outputList .output-code:not([hidden])').count()==0
    assert '0123' not in page.locator('#outputList').inner_text()
    for width in (320,390,768,1280):
@@ -61,6 +61,10 @@ try:
    assert '종료' in page.locator('#status').inner_text()
    page.evaluate('rows=[]');page.wait_for_function("document.querySelector('#outputList').textContent.includes('없어요')")
    page.evaluate('directoryFail=true');page.wait_for_function("document.querySelector('#status').textContent.includes('불러오지 못')")
-   assert not page.locator('#connect').is_disabled()
+   assert page.locator('#pairForm').is_hidden()
+   page.evaluate("directoryFail=false;rows=[{id:'c',title:'금요기도회',device:'PC'}]")
+   page.wait_for_function("document.querySelectorAll('#outputList button').length===1")
+   page.locator('#outputList button').click();assert page.locator('#pairForm').is_visible()
+   page.click('#chooseOutput');assert page.locator('#pairForm').is_hidden()
    browser.close();print('PASS',engine,'public names without codes, selected guest/admin entry, wrong-output denial, draft retained, stopped output, empty/error, responsive layout',flush=True)
 finally:server.shutdown()

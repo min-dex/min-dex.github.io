@@ -14,6 +14,7 @@ try:
   for engine in ('chromium','webkit'):
    outputs={};tokens=set()
    def rpc(n,a):
+    if n=='mindex_remote_outputs':return dict(ok=True,outputs=[dict(id=o['id'],title=o['info'].get('title','예배'),device='PC') for o in outputs.values()])
     if n=='mindex_remote_entry':
      if a['p_code']=='7777':
       token=str(uuid.uuid4());tokens.add(token);return dict(ok=True,kind='admin',token=token)
@@ -94,10 +95,9 @@ try:
     raise AssertionError('multi lifecycle timeout: '+str({'calls':host.evaluate('calls'),'peers':[p.evaluate("({status:document.querySelector('#status').textContent,result:document.querySelector('#result').textContent,position:document.querySelector('#position').textContent})") for i,p in enumerate(pages) if i not in frozen]}))
    def enabled(p):return p.locator('[data-action=next]').is_enabled()
    def connect(p,admin=True,login=True):
+    until(lambda:p.locator('#outputList button').count()==1)
+    p.locator('#outputList button').click()
     if login:p.fill('#code','7777' if admin else '0123');p.click('#connect')
-    if admin:
-     until(lambda:p.locator('#outputList button').count()==1)
-     p.locator('#outputList button').click()
     until(lambda:enabled(p))
    def visibility(p,hidden):
     p.evaluate("h=>{Object.defineProperty(document,'hidden',{configurable:true,value:h});document.dispatchEvent(new Event('visibilitychange'));}",hidden)

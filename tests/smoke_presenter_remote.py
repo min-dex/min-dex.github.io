@@ -7,7 +7,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 from smoke_app import start_local_app_server,sync_playwright,launch_chromium
 MOCK='''window.remoteOut=[];window.remoteChannels=[];
-window.remoteClient={async rpc(name,args={}){if(name==='mindex_remote_outputs')return {data:{ok:true,outputs:[]}};if(name==='mindex_remote_entry')return {data:{ok:true,kind:'guest'}};if(name==='mindex_remote_output'){if(args.p_action==='register')return {data:{ok:true,id:'fixture-output',token:'22'.repeat(32),code:'0123'}};if(args.p_action==='unlink_guest')window.remoteGuestEnded=true;return {data:{ok:true,code:'0123',link:null,guest:window.remoteGuestEnded?null:{id:'fixture-guest',secret:'11'.repeat(32)}}};}if(name==='mindex_remote_guest')return {data:args.p_action==='disconnect'?{ok:true}:args.p_code==='0123'?{ok:true,ready:true,output:'fixture-output',secret:'11'.repeat(32)}:{ok:false,error:'invalid_code'}};if(name==='mindex_remote_create_code')return {data:{ok:true,code:'012345',secret:'11'.repeat(32),owner_token:'22'.repeat(32)}};if(name==='mindex_remote_claim_code')return {data:args.p_code==='012345'?{ok:true,secret:'11'.repeat(32)}:{ok:false,error:'invalid_code'}};return {data:true};},channel(topic){const c={topic,handler:null,on(t,f,h){this.handler=h;return this;},subscribe(cb){this.status=cb;setTimeout(()=>cb('SUBSCRIBED'),0);return this;},async send(m){window.remoteOut.push({topic,payload:m.payload});return 'ok';}};remoteChannels.push(c);return c;},async removeChannel(c){remoteChannels=remoteChannels.filter(x=>x!==c);}};
+window.remoteClient={async rpc(name,args={}){if(name==='mindex_remote_outputs')return {data:{ok:true,outputs:[{id:'fixture-output',title:'검증 예배',device:'PC'}]}};if(name==='mindex_remote_entry')return {data:{ok:true,kind:'guest'}};if(name==='mindex_remote_output'){if(args.p_action==='register')return {data:{ok:true,id:'fixture-output',token:'22'.repeat(32),code:'0123'}};if(args.p_action==='unlink_guest')window.remoteGuestEnded=true;return {data:{ok:true,code:'0123',link:null,guest:window.remoteGuestEnded?null:{id:'fixture-guest',secret:'11'.repeat(32)}}};}if(name==='mindex_remote_guest')return {data:args.p_action==='disconnect'?{ok:true}:args.p_code==='0123'?{ok:true,ready:true,output:'fixture-output',secret:'11'.repeat(32)}:{ok:false,error:'invalid_code'}};if(name==='mindex_remote_create_code')return {data:{ok:true,code:'012345',secret:'11'.repeat(32),owner_token:'22'.repeat(32)}};if(name==='mindex_remote_claim_code')return {data:args.p_code==='012345'?{ok:true,secret:'11'.repeat(32)}:{ok:false,error:'invalid_code'}};return {data:true};},channel(topic){const c={topic,handler:null,on(t,f,h){this.handler=h;return this;},subscribe(cb){this.status=cb;setTimeout(()=>cb('SUBSCRIBED'),0);return this;},async send(m){window.remoteOut.push({topic,payload:m.payload});return 'ok';}};remoteChannels.push(c);return c;},async removeChannel(c){remoteChannels=remoteChannels.filter(x=>x!==c);}};
 window.supabase={createClient:()=>window.remoteClient};
 window.deliver=p=>{for(const c of remoteChannels)if(c.topic===p.topic)c.handler({payload:p.payload});};'''
 server,url=start_local_app_server()
@@ -56,7 +56,7 @@ try:
     assert phone.locator('#connect').evaluate('e=>getComputedStyle(e).borderRadius')=='5px'
     if engine=='chromium':phone.screenshot(path='/tmp/mindex-remote-unified-'+theme+'.png',full_page=True)
    phone.emulate_media(color_scheme='light')
-   phone.fill('#code',code.lower());phone.click('#connect')
+   phone.locator('#outputList button').click();phone.fill('#code',code.lower());phone.click('#connect')
    history=[]
    def pump(seconds=.3,drop=False):
     until=time.monotonic()+seconds
@@ -176,7 +176,8 @@ try:
    pump(3.2);assert phone.locator('[data-action=next]').is_disabled()
    # Explicit output end returns to pairing automatically, without a manual disconnect.
    assert phone.locator('#disconnect').is_hidden()
-   assert phone.locator('#pairForm').is_visible()
+   assert phone.locator('#pairForm').is_hidden()
+   phone.locator('#outputList button').click()
    phone.fill('#code','9999');phone.click('#connect');pump();assert '확인' in phone.locator('#status').inner_text()
    print('PASS',engine,'separate contexts: phone/tablet layout, pairing, actions, replay, stale revision, outage, service switch, invalid code')
    host_context.close();phone_context.close();browser.close()

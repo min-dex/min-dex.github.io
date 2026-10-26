@@ -6,6 +6,7 @@ from smoke_app import start_local_app_server,sync_playwright,launch_chromium
 MOCK=r'''const channels=new Set(),outputs=new Map();window.calls=[];
 window.remoteClient={async rpc(name,a={}){
  let data={ok:true};
+ if(name==='mindex_remote_outputs')data={ok:true,outputs:[...outputs.values()].map(o=>({id:o.id,title:o.info.title,device:o.info.device}))};
  if(name==='mindex_remote_entry')data=a.p_code==='7777'?{ok:true,kind:'admin',token:'test-token'}:{ok:true,kind:'guest'};
  if(name==='mindex_remote_output'){
   if(a.p_action==='register'){const id=crypto.randomUUID();outputs.set(id,{id,token:id,code:String(1000+outputs.size),info:{},link:null});data={ok:true,id,token:id};}
@@ -44,7 +45,10 @@ try:
      h.registry=createOutputRegistry(()=>h.live?{key:title,client:remoteClient,info:{title,device:'송출 PC',position:String(h.index+1)},adapter:{read:()=>({live:h.live,index:h.index,total:5,current:title,next:'다음',music:'음원 없음',version:h.version,allowed:['next','prev','output-stop']}),execute:async action=>{calls.push([i,action]);h.version++;if(action==='next')h.index++;if(action==='prev')h.index--;if(action==='output-stop')h.live=false;}}}:null,{interval:100});return h;
     });
    }''')
+   page.locator('#outputList button').filter(has_text='첫째 예배').click()
    page.fill('#code','7777');page.click('#connect')
+   page.wait_for_function("!document.querySelector('[data-action=next]').disabled")
+   page.click('#backOutputs')
    page.wait_for_function("document.querySelectorAll('#outputList button').length===2")
    assert page.locator('#code').input_value()==''
    assert page.locator('#outputList .output-code').all_text_contents()==['코드 1000','코드 1001']
@@ -75,9 +79,9 @@ try:
    page.click('#disconnect')
    assert page.evaluate('hosts.every(h=>h.live)')
    page.wait_for_function("!document.querySelector('#adminOutputs').hidden")
-   page.click('#adminLogout');page.wait_for_function("!document.querySelector('#pairForm').hidden")
+   page.click('#adminLogout');page.wait_for_function("!document.querySelector('#adminOutputs').hidden")
    assert page.locator('#code').input_value()==''
-   assert page.locator('#pairForm').is_visible()
+   assert page.locator('#pairForm').is_hidden()
    page.evaluate('hosts.forEach(h=>h.registry.close())')
    browser.close();print('PASS',engine,'PIN UI, two outputs, encrypted commands, switch preserves outputs, disconnect preserves both outputs, logout',flush=True)
 finally:server.shutdown()

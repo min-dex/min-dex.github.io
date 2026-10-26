@@ -8,8 +8,9 @@
 로컬 Chromium/WebKit 및 실제 중계 검증과 물리 휴대폰·현장 장비 검증은 구분한다.
 
 1. 예배 송출을 시작하면 활성 송출에 **4자리 코드**가 자동 배정된다.
-2. 폰의 `remote.html`에서 송출 코드를 입력한다. 일반 조작자는 송출당 한 명이며,
-   같은 입력창에서 관리자 PIN으로 들어가면 활성 송출을 선택할 수 있다.
+2. 폰의 `remote.html`에서는 먼저 활성 예배 목록만 보여 준다. 예배를 선택한 뒤
+   나타나는 입력창에 해당 송출 코드 또는 관리자 PIN을 넣어 연결한다.
+   일반 조작자는 송출당 한 명이며, 관리자는 연결 후 다른 활성 송출로 전환할 수 있다.
    관리자는 여러 명이 동시에 연결할 수 있다. PIN 값은 문서에 기록하지 않는다.
 3. 현재/다음 미리보기, 암전, 슬라이드와 음원·영상 조작은 PC의 기존 API를 사용한다.
    다른 기기가 상태를 바꾸면 오래된 명령은 거절하며, 끊긴 동안의 명령은 재실행하지 않는다.
@@ -525,7 +526,9 @@ The selected output's code opens a guest connection; the administrator PIN opens
 that selected output directly with administrator privileges. An already-authorized
 administrator can switch outputs without re-entering the PIN. The authenticated
 admin list retains its code display; logout clears that list before public reload.
-Direct code entry also remains available if the directory cannot load. Refreshes
+The initial screen shows only the output directory; code entry appears only after
+selecting an output (including administrator PIN entry). Empty/error states and
+returning to the list keep the form hidden; failed loads retry automatically. Refreshes
 do not erase partially entered codes or steal focus. An ended selected output
 returns to the list and clears its input. No service contents/lyrics are public.
 
