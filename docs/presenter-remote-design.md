@@ -2,9 +2,8 @@
 
 ## 현재 사용 계약 ·2026-10-24
 
-웹 배포 기준: `20261024-disclosure-remote-batch` (`554f5146`).
-2026-10-25의 3분 종료 제한 제거는 `20261025-remote-recovery` 배포 후보에 포함한다.
-운영 반영 여부는 해당 버전의 Pages/public 검증 결과로 확인한다.
+웹 배포 기준: `20261026-remote-select-before-code` (`9cab71b9`).
+첫 화면은 예배 목록만 표시하고 선택 후 코드 입력을 연다. 3분 무응답 종료 제한 제거도 배포됐다.
 로컬 Chromium/WebKit 및 실제 중계 검증과 물리 휴대폰·현장 장비 검증은 구분한다.
 
 1. 예배 송출을 시작하면 활성 송출에 **4자리 코드**가 자동 배정된다.
@@ -32,7 +31,7 @@
 받은 뒤에만 조작을 허용한다. 2.5초 freshness 잠금, 명령 미보관/재전송 금지, generation·ticket·
 revision 검사, 단일 일반 Remote 제한은 유지한다. 송출 종료와 명시적 종료는 계속 즉시 종료한다.
 서버 권한 만료와 기존 8시간 세션 상한, 브라우저 프로세스 종료/새로고침의 비영속성은 바꾸지 않는다.
-DB 변경은 없다. 3분 제한 제거는 소스 변경이며 운영 배포 완료를 뜻하지 않는다.
+DB 변경 없이 `20261025-remote-recovery`에 배포했다.
 검사: 3분 초과·10분·1시간 시계 이동 후 fresh-state 복구/명령 거절/재실행 없음과 종료,
 두 브라우저의 10분 sleep 복귀 및 송출 종료. 실제 휴대폰 절전/네트워크는 별도다.
 
@@ -511,7 +510,7 @@ The phone offers a compact “원격 연결 종료” action for both guests and
 It ends only that phone connection and leaves PC output running. The large
 output-stop action is removed from the phone UI; PC output controls remain.
 
-### Public worship directory ·2026-10-25 (DB applied; web not deployed)
+### Public worship directory ·2026-10-25 (DB and web deployed)
 
 Remote entry shows active output names and device labels before authentication.
 `mindex_remote_outputs()` returns only output ID, title and device for hosts seen
@@ -544,7 +543,9 @@ A separate read-only anonymous-role query returned `public_list_ok=true`, two
 active outputs, `codes_and_secrets_excluded=true`, and the expected guest body
 hash (`selected_output_check_applied=true`). No actual output connection was made.
 The prior guest definition was checked by hash before replacement; drift aborts
-the whole migration. Web publication remains separate.
+the whole migration. Directory and selection-first entry are deployed as of
+`20261026-remote-select-before-code`: full branch gate 40283776817, main/Pages
+40284793140, exact public file comparison and Chromium/WebKit UI checks passed.
 
 ## Inline slide list ·2026-10-25
 

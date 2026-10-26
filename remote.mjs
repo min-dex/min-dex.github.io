@@ -9,7 +9,7 @@ const $=id=>document.getElementById(id);
 const currentPreview=createPreview($('current'),'현재 슬라이드'),nextPreview=createPreview($('next'),'다음 슬라이드');
 let session,view=null,opening=false,ending=false;
 let client;
-let adminMode=false,adminToken=null,adminLink=null,listBusy=false,selectedOutput=null;
+let adminToken=null,adminLink=null,listBusy=false,selectedOutput=null;
 function getClient(){
  if(!window.supabase||!window.MINDEX_SUPABASE)throw Error('연결 준비에 실패했습니다. 페이지를 새로고침해 주세요.');
  return client ||= window.supabase.createClient(window.MINDEX_SUPABASE.url,window.MINDEX_SUPABASE.anonKey,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
@@ -21,7 +21,7 @@ function connectionForms(){
  $('pairTitle').textContent=selectedOutput?.title||'';
  $('chooseOutput').disabled=opening||ending;
  for(const b of $('outputList').querySelectorAll('button'))b.disabled=opening||ending;
- $('adminLogout').hidden=!adminMode||!adminToken||!!session;
+ $('adminLogout').hidden=!adminToken||!!session;
  $('adminContext').hidden=!adminLink||!view;
  if(adminLink){$('selectedOutputTitle').textContent=view?.serviceTitle||adminLink.title;$('selectedOutputCode').textContent=adminLink.code?'코드 '+adminLink.code:'';}
  $('disconnect').hidden=!session;
@@ -66,7 +66,7 @@ async function listOutputs(){
    detail.textContent=[output.device,output.position].filter(Boolean).join(' · ');
   }
 
- }catch(e){$('status').textContent=token?e.message:'예배 목록을 불러오지 못했어요. 연결을 확인하면 자동으로 다시 불러와요.';if(e.code==='expired'){adminToken=null;adminMode=false;$('outputList').replaceChildren();delete $('outputList').dataset.signature;connectionForms();}}
+ }catch(e){$('status').textContent=token?e.message:'예배 목록을 불러오지 못했어요. 연결을 확인하면 자동으로 다시 불러와요.';if(e.code==='expired'){adminToken=null;$('outputList').replaceChildren();delete $('outputList').dataset.signature;connectionForms();}}
  finally{listBusy=false;}
 }
 async function connectAdmin(selected){
@@ -88,7 +88,7 @@ async function connectAdmin(selected){
  finally{opening=false;paint();}
 }
 $('adminLogout').onclick=async()=>{
- if(opening||ending||session)return;const token=adminToken;adminToken=null;adminMode=false;$('outputList').replaceChildren();delete $('outputList').dataset.signature;ending=true;paint();
+ if(opening||ending||session)return;const token=adminToken;adminToken=null;$('outputList').replaceChildren();delete $('outputList').dataset.signature;ending=true;paint();
  try{await adminRpc(client,'mindex_remote_admin',{p_action:'logout',p_token:token});$('status').textContent='관리자 접속 종료';}
  catch(e){$('status').textContent=e.message;}finally{ending=false;paint();void listOutputs();}
 };
@@ -182,18 +182,18 @@ $('slidesSearch').onsubmit=e=>{e.preventDefault();void loadSlides();};
 $('slidesPrev').onclick=()=>loadSlides(Math.max(0,(slidesData?.offset||0)-6));
 $('slidesNext').onclick=()=>loadSlides((slidesData?.offset||0)+6);
 $('pairForm').addEventListener('submit',async e=>{
- e.preventDefault();if(opening||ending||session||!selectedOutput)return;opening=true;paint();$('result').textContent='';
+ e.preventDefault();if(opening||ending||session||!selectedOutput)return;const chosen=selectedOutput;opening=true;paint();$('result').textContent='';
  try{
   if(!window.supabase||!window.MINDEX_SUPABASE)throw Error('연결 준비에 실패했습니다. 페이지를 새로고침해 주세요.');
   client=getClient();
   const entry=await adminRpc(client,'mindex_remote_entry',{p_code:$('code').value.trim()});
   if(entry.kind==='admin'){
-   adminMode=true;adminToken=entry.token;$('code').value='';
-   if(selectedOutput){const chosen=selectedOutput;selectedOutput=null;opening=false;await connectAdmin(chosen);}else $('status').textContent='예배를 선택해 주세요.';return;
+   adminToken=entry.token;$('code').value='';
+   selectedOutput=null;opening=false;await connectAdmin(chosen);return;
   }
   if(entry.kind!=='guest')throw Error('연결 응답을 확인할 수 없어요.');
   $('disconnect').textContent='원격 연결 종료';
-  const registration=await obtainOutputPairing(client,$('code').value,selectedOutput?.id||null);
+  const registration=await obtainOutputPairing(client,$('code').value,chosen.id);
   session=await openRemote({client,registration,onClose:reset,onSlides:renderSlides,onState:state,onStatus:s=>{$('status').textContent=s;paint();},onResult:remoteResult});
   $('disconnect').hidden=false;
  }catch(e){$('status').textContent=e.message;}finally{opening=false;paint();void listOutputs();}
@@ -201,7 +201,7 @@ $('pairForm').addEventListener('submit',async e=>{
 async function disconnectController(){
  if(ending||opening)return;ending=true;const old=session;session=null;paint();
  try{await old?.end();await releaseAdminLink();}finally{ending=false;}
- reset();if(adminMode&&adminToken){$('status').textContent='예배를 선택해 주세요.';void listOutputs();}
+ reset();if(adminToken){$('status').textContent='예배를 선택해 주세요.';void listOutputs();}
 }
 $('disconnect').onclick=disconnectController;
 $('backOutputs').onclick=disconnectController;
