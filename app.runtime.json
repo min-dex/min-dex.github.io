@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261026-media-playback-wording",
+  "version": "20261026-video-end-fade",
   "options": {
     "compress": false,
     "mangle": {

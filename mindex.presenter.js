@@ -2837,6 +2837,10 @@ function commitPresenterOutputFrame(root, payload, slide, frameState, token, opt
       warmPresenterOutputImages(payload, slide || null);
       return;
     }
+    const ended = root._presenterVideoEndFade;
+    frameState = { ...frameState, videoEndFade: Boolean(ended && ended.serviceId === payload?.serviceId
+      && ended.nextIndex === payload?.index && ended.frameKey === layers.active?.dataset.presenterFrameKey) };
+    delete root._presenterVideoEndFade;
     const nextLayer = layers.next;
     if (nextLayer.dataset.presenterFrameToken !== String(token)) {
       populatePresenterOutputLayer(nextLayer, html);
@@ -2904,11 +2908,13 @@ function populatePresenterOutputLayer(layer, html) {
 
 function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState = {}, token = presenterOutputRenderState.token, onActivated = null) {
   if (!activeLayer || !nextLayer) return;
-  const animated = presenterOutputShouldAnimateFrameTransition(root, frameState);
-  const transitionClearDelay = 260;
+  const videoEndFade = Boolean(frameState.videoEndFade && !frameState.blackoutOutput && !frameState.blankOutput);
+  const animated = videoEndFade || presenterOutputShouldAnimateFrameTransition(root, frameState);
+  const transitionClearDelay = videoEndFade ? 520 : 260;
   const transitionEntryDelay = 220;
   const swap = () => {
     if (token !== presenterOutputRenderState.token) return;
+    root.classList.toggle("is-video-end-transition", videoEndFade);
     if (animated) {
       root.classList.add("is-transitioning");
       root.dataset.presenterTransitionToken = String(token);
@@ -2925,7 +2931,7 @@ function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState =
     activeLayer.classList.remove("is-active");
     activeLayer.classList.remove("is-next");
     nextLayer.classList.add("is-active");
-    if (animated) nextLayer.classList.add("is-entering");
+    if (animated && !videoEndFade) nextLayer.classList.add("is-entering");
     nextLayer.classList.remove("is-next");
     // Keep composited media layers attached while swapping their visibility.
     applyPresenterOutputFrameState(root, frameState);
@@ -2956,7 +2962,7 @@ function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState =
     if (animated) {
       window.setTimeout(() => {
         if (root.dataset.presenterTransitionToken !== String(token)) return;
-        root.classList.remove("is-transitioning");
+        root.classList.remove("is-transitioning", "is-video-end-transition");
         delete root.dataset.presenterTransitionToken;
       }, transitionClearDelay);
     }
@@ -3267,7 +3273,12 @@ function bindPresenterOutputAutoAdvanceOnEnd(root, payload, slide, options = {})
   const serviceId = payload?.serviceId || "";
   const slideId = slide?.id || "";
   const slideIndex = clampPresenterIndex(payload?.index, Array.isArray(payload?.slides) ? payload.slides.length : 0);
-  video.onended = () => onAutoAdvance({ serviceId, slideId, slideIndex });
+  video.onended = () => {
+    if (root.querySelector(".presenter-output-layer.is-active video.presenter-video") !== video) return;
+    root._presenterVideoEndFade = { serviceId, frameKey: video.closest('.presenter-output-layer')?.dataset.presenterFrameKey,
+      nextIndex: (payload.slides || []).findIndex((candidate, index) => index > slideIndex && !presenterSlideIsHidden(candidate)) };
+    onAutoAdvance({ serviceId, slideId, slideIndex });
+  };
 }
 
 function bindPresenterOutputAutoAdvanceAt(payload, slide, options = {}, token = presenterOutputRenderState.token) {
@@ -3296,8 +3307,8 @@ function presenterSlideShouldAutoAdvanceOnEnd(slide) {
   if (presenterSlideLayout(slide) !== PRESENTER_SLIDE_LAYOUTS.MEDIA) return false;
   if (slide.live) return false;
   const presenterRole = normalizeServicePresenterRole(slide.presenterRole);
-  if (presenterRole !== "intro") return false;
-  const playback = presenterPlaybackConfig(slide.playback, "intro-video");
+  if (["ready", "waiting_loop"].includes(presenterRole)) return false;
+  const playback = presenterPlaybackConfig(slide.playback, presenterRole === "intro" ? "intro-video" : "video");
   return playback.autoAdvanceOnEnd !== false && playback.loop !== true;
 }
 

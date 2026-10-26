@@ -4949,3 +4949,12 @@ ordinary save wrapper cannot add the flag. Set it before the batch enters the
 durable journal; uncertain requests remain byte-identical on retry. Legacy mode,
 existing person-only patches, source-document synchronization and content remain
 unchanged. This is a client-only fix; no operational assignee is edited by tests.
+
+
+## 영상 종료 후 이동과 화면 페이드 ·2026-10-26
+
+인트로와 일반 media 영상은 자연 종료 시 다음 슬라이드로 이동한다. ready/waiting_loop,
+live, loop=true, autoAdvanceOnEnd=false는 제외한다. 실제 ended에 따른 동일 예배의
+다음 표시 슬라이드 전환만 화면 opacity 500ms 페이드하며 음량은 변경하지 않는다.
+수동 이동·암전·다른 예배 전환에는 이 페이드를 적용하지 않고 기존 전환 규칙을 유지한다.
+OS reduced-motion 설정은 기존대로 애니메이션을 끈다. 저장된 재생 설정과 운영 자료를 변경하지 않는다.
