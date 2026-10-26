@@ -1542,3 +1542,14 @@ Actual 24-slide source and separate 7-scene media/build fixture pass Chromium
 and WebKit; offline protocol/import/unit coverage is separate. Required CI,
 Pages and actual operational sidecar attachment remain pending. No native
 screen-capture candidate or production data change is included in this commit.
+
+
+## Keynote per-slide cards ·2026-10-26
+
+`codex/keynote-slide-cards` fixes the earlier single-card controller limitation.
+Verified sidecar metadata projects each native slide into the common deck cards
+without rewriting the original worship attachment. Explicit jumps select native
+scene starts; build acknowledgements move the active card without replaying a
+jump. One output iframe/media owner, recovery and the last-build handoff remain.
+Scoped offline and actual-export evidence is separate from required CI, Pages
+and production readback; these final publication steps are still pending.

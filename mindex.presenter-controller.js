@@ -1739,6 +1739,7 @@ function presenterElementTrailingBlankSlide(slide, index, service = null) {
     imageSrc: "",
     videoSrc: "",
     media: {},
+    keynote: null,
     asset: {},
     sourceType: "",
     componentType: "",
@@ -2241,7 +2242,7 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   }
   const memoElementType = serviceMemoElementType(memo);
   const outputMode = serviceItemOutputMode(item, memo);
-  const configuredAsset = normalizeServiceAsset(memo.asset || item.asset);
+  const configuredAsset = presenterKeynoteHtmlDeckAsset(normalizeServiceAsset(memo.asset || item.asset), service.id);
   if (isServicePreparationItemForEditor(item, memo)) {
     return [presenterPreparationSlide(service, item, index)];
   }

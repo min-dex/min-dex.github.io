@@ -4864,12 +4864,26 @@ unchanged. Command messages check iframe/parent identity, random session token,
 immutable request receipts and recovery generation. Status reconnection cancels
 older queued requests rather than replaying next/previous after an unknown result.
 
-The output owns the only active player. Controller previews use the current
-static thumbnail and page count, so preview never starts a second audio stream.
-The deck retains one worship item; next/previous operate Keynote builds until the
+The output owns the only active player. A verified manifest projects every native
+slide into the common imported-deck card structure, with its own thumbnail and
+stable page identity. This is a read-only projection: existing KEY attachments
+expand without rewriting operational items. A single click selects the card for
+preparation; normal launch/double-click/jump selects that native slide's first
+scene. Thumbnails never replace animated output or start another audio stream.
+Native next/previous acknowledgements update the active card without issuing a
+second jump. Explicit selection cancels older queued builds, pauses the previous
+page's media and retains the same opaque iframe. The deck retains one worship
+item; next/previous operate Keynote builds until the
 known beginning/end, then navigate the ordinary worship order. Blackout and
 Scripture overlays retain the iframe and its media. Leaving the item removes its
 frame, timers and media.
+
+The common trailing transition blank carries no Keynote page identity. Native
+last-page selection alone does not leave the deck; only the confirmed last build
+or ordinary boundary navigation hands off to that blank/next worship element.
+Metadata-load failures retain the original attachment and support explicit
+**재연결** retry. Late loads re-check project/client identity, invalidate only the
+affected slide-build cache and preserve a live checkpoint's actual page.
 
 Checkpoints preserve scene, initial/final phase, actual displayed slide and media
 times/resume intent in the existing presenter transport. Scene and slide indices

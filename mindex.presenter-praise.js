@@ -419,11 +419,12 @@ function presenterImportedDeckSlidesFromAsset(asset, item, section, index, title
         marker: slide.name || `Stage ${slideIndex + 1}`,
         text: slide.name || title,
         imageSrc: source,
+        ...(asset.keynoteHtml ? { keynote: { page: slideIndex } } : {}),
         ...(asset.pptx?.url && slide.pptx ? {
           pptx: { ...slide.pptx, url: asset.pptx.url },
           hiddenInPresentation: Boolean(slide.pptx.hidden),
         } : {}),
-        asset: { ...(asset.pptx ? { kind: asset.kind, pptx: asset.pptx, ...(asset.original ? { original: asset.original } : {}) } : asset), url: source, name: slide.name || asset.name || "" },
+        asset: { ...(asset.pptx || asset.keynoteHtml ? { kind: asset.kind, ...(asset.pptx ? { pptx: asset.pptx } : { keynoteHtml: asset.keynoteHtml }), ...(asset.original ? { original: asset.original } : {}) } : asset), url: source, name: slide.name || asset.name || "" },
         importedDeck: {
           manifestUrl: asset.manifestUrl || "",
           fingerprint: asset.fingerprint || "",

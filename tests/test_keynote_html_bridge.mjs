@@ -60,3 +60,22 @@ test('terminal native scene retains the last page when Apple reports slide minus
  const f=fixture();f.ready();f.e.script.events[2].effects=[{type:'transition'}];Object.assign(f.e,{currentSceneIndex:2,nextSceneIndex:-1,currentSlideIndex:-1,state:'IdleAtFinalState'});f.tick();
  const value=f.messages.findLast(x=>x.kind==='checkpoint').checkpoint;assert.equal(value.atEnd,true);assert.equal(value.terminalTransition,true);assert.equal(value.slide,1);f.close();
 });
+
+test('select jumps to a slide boundary once, cancels older builds and stops previous media',async()=>{
+ const f=fixture();f.ready();const audio=new f.Track('previous.mp4');
+ await f.send({id:'playfirst',action:'play'});await audio.play();f.e.state='Playing';
+ await f.send({id:'old-build',action:'next'});
+ await f.send({id:'select002',action:'select',page:1,scene:2});
+ await new Promise(resolve=>setTimeout(resolve,70));
+ assert.equal(f.e.currentSceneIndex,2);assert.equal(f.e.currentSlideIndex,1);assert.equal(f.e.advances,0);assert.equal(audio.paused,true);
+ await f.send({id:'select002',action:'select',page:1,scene:2});assert.equal(f.e.currentSceneIndex,2);
+ await f.send({id:'select002',action:'select',page:0,scene:0});assert.equal(f.e.currentSceneIndex,2);assert.equal(f.messages.at(-1).kind,'error');
+ await f.send({id:'playagain',action:'play'});assert.equal(audio.paused,true);f.close();
+});
+
+test('select rejects a build inside a slide and a page/scene mismatch',async()=>{
+ for (const target of [{page:0,scene:1},{page:1,scene:0},{page:2,scene:2},{page:1,scene:999}]) {
+  const f=fixture();f.ready();await f.send({id:'invalid01',action:'select',...target});
+  assert.equal(f.e.currentSceneIndex,0);assert.equal(f.messages.at(-1).kind,'error');f.close();
+ }
+});

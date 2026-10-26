@@ -3,19 +3,71 @@ let presenterKeynoteHtmlModule;
 const presenterKeynoteHtmlLoads = new Map();
 const presenterKeynoteHtmlPreviews = new Map();
 const presenterKeynoteHtmlReconnects = new Set();
+const presenterKeynoteHtmlManifests = new Map();
 function keynoteHtmlRuntime() { return presenterKeynoteHtmlModule ||= import(`./mindex.keynote-html-engine.mjs?v=${encodeURIComponent(window.MINDEX_RELEASE || 'local')}`); }
 function presenterKeynoteHtmlSlide(slide) { return slide?.asset?.keynoteHtml && slide.asset.original?.format === 'key' ? slide : null; }
 function presenterKeynoteHtmlKey(payload, slide) { return JSON.stringify([payload.serviceId, slide.elementId, slide.asset.original.sha256, slide.asset.keynoteHtml.sha256]); }
+function loadPresenterKeynoteHtmlManifest(descriptor, original) {
+  const key = descriptor.url + '|' + descriptor.sha256;
+  if (!presenterKeynoteHtmlManifests.has(key)) {
+    const entry = { value: null, error: null, watchers: new Map() };
+    entry.promise = (async () => {
+      const module = await keynoteHtmlRuntime();
+      if (!module.normalizeKeynoteHtml(descriptor, original)) throw Error('Keynote 재생 자료 주소나 원본 정보를 확인해 주세요.');
+      const bytes = await fetchPresenterPptxBytes(descriptor.url, 2 * 1024 * 1024);
+      if (await presenterPptxDigest(bytes) !== descriptor.sha256) throw Error('Keynote 재생 정보가 손상됐습니다.');
+      const manifest = module.validateKeynoteHtmlManifest(JSON.parse(new TextDecoder().decode(bytes)), descriptor);
+      module.assertKnownKeynoteHtmlRuntime(manifest);entry.value = manifest;return manifest;
+    })().catch(error => { entry.error = error;throw error; });
+    presenterKeynoteHtmlManifests.set(key, entry);
+  }
+  return presenterKeynoteHtmlManifests.get(key).promise;
+}
+function presenterKeynoteHtmlCardIndex(owner, page) {
+  const slide = presenterKeynoteHtmlSlide(owner.slides?.[owner.index]);
+  if (!slide?.keynote || !Number.isInteger(page)) return -1;
+  const key = presenterKeynoteHtmlKey(owner, slide);
+  return owner.slides.findIndex(candidate => candidate.keynote?.page === page && presenterKeynoteHtmlSlide(candidate) && presenterKeynoteHtmlKey(owner, candidate) === key);
+}
+function refreshPresenterKeynoteHtmlCards(serviceId) {
+  const previousSlides = presenterSlideBuildCache.get(serviceId)?.slides || [];
+  const selection = state.presenterBoardSelection;
+  presenterSlideBuildCache.delete(serviceId);
+  const slides = buildServicePresenterSlides(serviceId);
+  if (selection?.serviceId === serviceId && selection.indexes?.length) {
+    const relocate = index => reconcilePresenterIndexForSlides(previousSlides, index, slides);
+    state.presenterBoardSelection = { ...selection, indexes: [...new Set(selection.indexes.map(relocate))], anchorIndex: relocate(selection.anchorIndex) };
+  }
+  refreshPresenterForService(serviceId, { publish: false, renderControls: false });
+  const owner = state.presenter;
+  if (owner.serviceId === serviceId) {
+    const index = presenterKeynoteHtmlCardIndex(owner, owner.pptxProgress?.checkpoint?.slide);
+    if (index >= 0) owner.index = index;
+    publishPresenterState();
+  }
+  if (state.module === 'presenter' && state.selectedServiceId === serviceId) renderPresenterControlState(serviceId);
+}
+function presenterKeynoteHtmlDeckAsset(asset, serviceId) {
+  if (asset?.original?.format !== 'key' || !asset.keynoteHtml) return asset;
+  const descriptor = asset.keynoteHtml, key = descriptor.url + '|' + descriptor.sha256;
+  const promise = loadPresenterKeynoteHtmlManifest(descriptor, asset.original), entry = presenterKeynoteHtmlManifests.get(key);
+  const watcher = state.config.url + '|' + serviceId;
+  if (entry.watchers.get(watcher) !== state.client) {
+    entry.watchers.set(watcher, state.client);const client = state.client, project = state.config.url;
+    void promise.then(() => {
+      if (state.client !== client || state.config.url !== project) return;
+      refreshPresenterKeynoteHtmlCards(serviceId);
+    }).catch(error => { if (state.client === client && state.config.url === project && state.selectedServiceId === serviceId) showToast(error.message, 'error'); });
+  }
+  if (!entry.value) return asset;
+  return { ...asset, kind: 'imported_deck', slides: entry.value.slides.map((slide, page) => ({ url: new URL(slide.thumbnail, descriptor.url).href, name: `${page + 1}번 슬라이드`, order: page + 1 })) };
+}
 async function loadPresenterKeynoteHtml(descriptor, original) {
   const key = descriptor.url + '|' + descriptor.sha256;
   if (!presenterKeynoteHtmlLoads.has(key)) {
     const promise = (async () => {
       const module = await keynoteHtmlRuntime();
-      if (!module.normalizeKeynoteHtml(descriptor, original)) throw Error("Keynote 재생 자료 주소나 원본 정보를 확인해 주세요.");
-      const bytes = await fetchPresenterPptxBytes(descriptor.url, 2 * 1024 * 1024);
-      if (await presenterPptxDigest(bytes) !== descriptor.sha256) throw Error('Keynote 재생 정보가 손상됐습니다.');
-      const manifest = module.validateKeynoteHtmlManifest(JSON.parse(new TextDecoder().decode(bytes)), descriptor);
-      module.assertKnownKeynoteHtmlRuntime(manifest);
+      const manifest = await loadPresenterKeynoteHtmlManifest(descriptor, original);
       const source = new URL('assets/player/main.js', descriptor.url);
       const file = manifest.files['assets/player/main.js'];
       const player = await fetchPresenterPptxBytes(source.href, file.size);
@@ -55,6 +107,9 @@ function adoptPresenterKeynoteHtmlMetadata(metadata) {
     ...(metadata.checkpoint ? { checkpoint: metadata.checkpoint } : {}),
     ...(ack ? { command: null } : {}), error: metadata.error || '' };
   if (ack && metadata.recoveredUnknown) showToast('새로고침 전에 대기하던 효과는 다시 실행하지 않았습니다. 현재 화면을 확인해 주세요.', 'info');
+  const cardIndex = presenterKeynoteHtmlCardIndex(owner, metadata.checkpoint?.slide);
+  const cardChanged = cardIndex >= 0 && cardIndex !== owner.index;
+  if (cardChanged) owner.index = cardIndex;
   let previewChanged = false;
   if (metadata.thumbnail) {
     try {
@@ -66,8 +121,8 @@ function adoptPresenterKeynoteHtmlMetadata(metadata) {
       }
     } catch {}
   }
-  publishPresenterState();if (previewChanged) renderPresenterControlState(owner.serviceId);
-  for (const label of document.querySelectorAll('[data-keynote-page]')) if (label.dataset.keynoteItemId === slide.elementId) label.textContent = `슬라이드 ${(metadata.checkpoint?.slide || 0) + 1}/${slide.asset.keynoteHtml.pages} · 효과 재생`;
+  publishPresenterState();if (previewChanged || cardChanged) renderPresenterControlState(owner.serviceId);
+  for (const label of document.querySelectorAll('[data-keynote-page]')) if (label.dataset.keynoteItemId === slide.elementId) label.textContent = presenterKeynoteHtmlPageLabel(slide.asset, owner.serviceId, slide.elementId);
   if (ack && !metadata.recoveredUnknown && (metadata.accepted === false || metadata.checkpoint?.terminalTransition)) {
     if (metadata.checkpoint?.atEnd && current.command?.action === 'next') runPresenterAction('next', owner.serviceId);
     else if (metadata.checkpoint?.scene === 0 && metadata.checkpoint.phase === 'initial' && current.command?.action === 'previous') runPresenterAction('prev', owner.serviceId);
@@ -92,7 +147,7 @@ function renderPresenterKeynoteHtmlOutput(root, payload) {
     const frame = document.createElement('iframe');frame.setAttribute('sandbox', 'allow-scripts');frame.setAttribute('allow','autoplay *');
     frame.title = 'Keynote 슬라이드';frame.style.cssText = 'width:100%;height:100%;border:0';host.append(frame);document.body.append(host);
     const session = { key, host, frame, token: crypto.randomUUID(), disposed: false, ready: false, initialized: false,
-      version: 0, sent: new Set(), obsolete: new Set(), payload, initialCommand: payload.pptxProgress?.key === key ? payload.pptxProgress.command?.id || '' : '', initialUnknown: payload.pptxProgress?.command?.action !== 'status', checkpoint: null, lastCheckpoint: '', inFlight: null };
+      version: 0, sent: new Set(), obsolete: new Set(), payload, cardId: slide.id, hadProgress: Boolean(payload.pptxProgress?.key === key), selecting: false, initialCommand: payload.pptxProgress?.key === key ? payload.pptxProgress.command?.id || '' : '', initialUnknown: payload.pptxProgress?.command?.action !== 'status', checkpoint: null, lastCheckpoint: '', inFlight: null };
     root._keynoteHtml = session;
     if (session.initialCommand && !session.initialUnknown) presenterKeynoteHtmlReconnects.add(session.initialCommand);
     const active = () => root._keynoteHtml === session && !session.disposed;
@@ -111,6 +166,14 @@ function renderPresenterKeynoteHtmlOutput(root, payload) {
       frame.contentWindow.postMessage({ type: 'mindex-keynote-html-command', token: session.token, request }, '*');
     };
     session.send = send;
+    session.selectPage = page => {
+      const target = session.manifest?.slides[page];
+      if (!Number.isInteger(page) || !target) return;
+      if (session.inFlight) session.obsolete.add(session.inFlight);
+      session.mediaBlocked = false;session.host.style.pointerEvents = 'none';delete root.dataset.pptxError;
+      session.selecting = true;session.selectionId = crypto.randomUUID();session.uncertain = false;
+      send({ id: session.selectionId, action: 'select', page, scene: target.sceneStart });
+    };
     session.onMessage = event => {
       const message = event.data;
       if (!active() || event.source !== frame.contentWindow || event.origin !== 'null' || message?.type !== 'mindex-keynote-html' || message.token !== session.token) return;
@@ -120,6 +183,8 @@ function renderPresenterKeynoteHtmlOutput(root, payload) {
         // Only a command already present when the frame was created has an unknown outcome.
         if (progress.checkpoint) {
           session.restoreId = crypto.randomUUID();send({ id: session.restoreId, action: 'restore', checkpoint: progress.checkpoint });
+        } else if (session.payload.slides[session.payload.index]?.keynote?.page > 0) {
+          session.selectPage(session.payload.slides[session.payload.index].keynote.page);
         } else {
           session.initialized = true;session.checkpoint = message.checkpoint || session.checkpoint;
           metadata({ checkpoint: message.checkpoint, ...(session.initialCommand ? { id: session.initialCommand, recoveredUnknown: session.initialUnknown, accepted: !session.initialUnknown } : {}) });
@@ -128,13 +193,17 @@ function renderPresenterKeynoteHtmlOutput(root, payload) {
       } else if (message.kind === 'ack') {
         if (!session.sent.has(message.id) || session.obsolete.has(message.id)) return;
         if (session.inFlight === message.id) session.inFlight = null;
+        session.checkpoint = message.checkpoint || session.checkpoint;
         if (!session.mediaBlocked) delete root.dataset.pptxError;
-        if (message.id === session.restoreId) {
+        if (message.id === session.selectionId) {
+          session.selecting = false;
+          const first = !session.initialized;session.initialized = true;
+          metadata({ id: message.id, checkpoint: message.checkpoint, ...(first && session.initialCommand ? { id: session.initialCommand, recoveredUnknown: session.initialUnknown, accepted: !session.initialUnknown } : {}) });
+        } else if (message.id === session.restoreId) {
           session.initialized = true;
           metadata({ checkpoint: message.checkpoint, ...(session.initialCommand ? { id: session.initialCommand, recoveredUnknown: session.initialUnknown, accepted: !session.initialUnknown } : {}) });
         } else metadata({ id: message.id, checkpoint: message.checkpoint, accepted: message.accepted, recoveredUnknown: false, error: session.mediaBlocked ? root.dataset.pptxError : '' });
-        session.checkpoint = message.checkpoint || session.checkpoint;
-      } else if (message.kind === 'checkpoint' && session.initialized && message.checkpoint) {
+      } else if (message.kind === 'checkpoint' && session.initialized && !session.selecting && message.checkpoint) {
         session.checkpoint = message.checkpoint || session.checkpoint;
         // Heartbeats carry stable positions only; never publish mid-effect guesses.
         const signature = JSON.stringify(message.checkpoint);
@@ -143,7 +212,7 @@ function renderPresenterKeynoteHtmlOutput(root, payload) {
         session.mediaBlocked = false;session.host.style.pointerEvents = 'none';session.frame.blur();document.body.tabIndex = -1;document.body.focus({ preventScroll: true });delete root.dataset.pptxError;metadata({ checkpoint: message.checkpoint, error: '' });
       } else if (message.kind === 'error' || message.kind === 'media-blocked') {
         if (message.id && session.obsolete.has(message.id)) return;
-        if (message.id === session.inFlight) { session.inFlight = null;session.uncertain = true; }
+        if (message.id === session.inFlight) { session.inFlight = null;session.uncertain = true;if (message.id === session.selectionId) session.selecting = false; }
         if (message.kind === 'media-blocked') { session.mediaBlocked = true;session.host.style.pointerEvents = 'auto'; }
         root.dataset.pptxError = message.message || 'Keynote 재생 연결을 확인해 주세요.';
         metadata({ id: message.id, checkpoint: session.checkpoint, error: root.dataset.pptxError });
@@ -155,6 +224,7 @@ function renderPresenterKeynoteHtmlOutput(root, payload) {
       if (active() && session.inFlight && Date.now() - session.sentAt > 35000) {
         metadata({ error: '효과 응답을 확인하지 못했습니다. 재연결로 현재 위치를 확인해 주세요.', checkpoint: session.checkpoint });
         session.inFlight = null;session.uncertain = true;
+        session.selecting = false;
       }
     }, 1000);
     void loadPresenterKeynoteHtml(slide.asset.keynoteHtml, slide.asset.original).then(({ player, module, manifest }) => {
@@ -169,6 +239,10 @@ function renderPresenterKeynoteHtmlOutput(root, payload) {
   if (payload.liveScripture?.active) return false;
   if (payload.safetyBlank) { session.host.hidden = false;session.frame.style.visibility = 'hidden'; } else session.frame.style.visibility = '';
   const progress = payload.pptxProgress?.key === key ? payload.pptxProgress : null;
+  const changedCard = slide.keynote && session.cardId !== slide.id;
+  const restartCard = slide.keynote && !progress && session.hadProgress && !session.selecting;
+  session.cardId = slide.id;session.hadProgress = Boolean(progress);
+  if (session.ready && (restartCard || (changedCard && session.checkpoint?.slide !== slide.keynote.page))) session.selectPage(slide.keynote.page);
   if (progress?.command?.action === 'status' && !session.initialized) {
     const id = progress.command.id;
     if (!session.ready && root.dataset.pptxError && !presenterKeynoteHtmlReconnects.has(id)) {
@@ -178,19 +252,29 @@ function renderPresenterKeynoteHtmlOutput(root, payload) {
       if (session.inFlight) session.obsolete.add(session.inFlight);
       session.initialCommand = id;session.initialUnknown = false;session.restoreId = id;session.uncertain = false;
       session.send({ id, action: 'restore', checkpoint: progress.checkpoint });
+    } else if (session.ready && !progress.checkpoint && !session.sent.has(id) && !session.selecting) {
+      session.initialCommand = id;session.initialUnknown = false;session.selectPage(slide.keynote?.page || 0);
     }
   }
-  if (session.initialized && progress?.command && !session.sent.has(progress.command.id) && progress.command.id !== session.initialCommand) {
+  if (session.initialized && !session.selecting && progress?.command && !session.sent.has(progress.command.id) && progress.command.id !== session.initialCommand) {
     if (progress.command.action === 'status' && session.inFlight) { session.obsolete.add(session.inFlight);session.inFlight = null; }
     if (!session.inFlight && (!session.uncertain || progress.command.action === 'status')) { session.uncertain = false;session.send(progress.command); }
   }
   return true;
 }
 
+function presenterKeynoteHtmlPageLabel(asset, serviceId, itemId) {
+  const descriptor = asset.keynoteHtml, entry = presenterKeynoteHtmlManifests.get(descriptor.url + '|' + descriptor.sha256);
+  if (entry && !entry.value) return entry.error ? `슬라이드 ${descriptor.pages}장 · 목록 재연결 필요` : `슬라이드 ${descriptor.pages}장 불러오는 중…`;
+  const owner = state.presenter, active = presenterKeynoteHtmlSlide(owner.slides?.[owner.index]);
+  const live = typeof presenterControllerIsLive === 'function' && presenterControllerIsLive(serviceId);
+  const checkpoint = active?.elementId === itemId && owner.serviceId === serviceId && owner.pptxProgress?.key === presenterKeynoteHtmlKey(owner, active) ? owner.pptxProgress.checkpoint : null;
+  return live && checkpoint ? `송출 ${checkpoint.slide + 1}/${descriptor.pages} · 효과 재생` : `슬라이드 ${descriptor.pages}장 · 효과 재생`;
+}
 function renderPresenterKeynoteHtmlControls(asset, serviceId, itemId) {
   if (asset.original?.format !== 'key') return '';
   const identity = `data-service-id="${escapeAttr(serviceId)}" data-keynote-item-id="${escapeAttr(itemId)}" data-keynote-source-hash="${escapeAttr(asset.original.sha256)}"`;
-  const controls = asset.keynoteHtml ? `<span data-keynote-page data-keynote-item-id="${escapeAttr(itemId)}">슬라이드 ${presenterKeynoteHtmlPreviews.get(`${itemId}|${asset.keynoteHtml.sha256}`)?.page || 1}/${asset.keynoteHtml.pages} · 효과 재생</span><button class="btn secondary" type="button" data-keynote-html-action="play" ${identity}>음원·영상 재생</button><button class="btn secondary" type="button" data-keynote-html-action="pause" ${identity}>일시정지</button><button class="btn secondary" type="button" data-keynote-html-action="status" ${identity}>재연결</button>` : '<span>원본 보존됨 · 재생 자료 연결 필요</span>';
+  const controls = asset.keynoteHtml ? `<span data-keynote-page data-keynote-item-id="${escapeAttr(itemId)}">${presenterKeynoteHtmlPageLabel(asset, serviceId, itemId)}</span><button class="btn secondary" type="button" data-keynote-html-action="play" ${identity}>음원·영상 재생</button><button class="btn secondary" type="button" data-keynote-html-action="pause" ${identity}>일시정지</button><button class="btn secondary" type="button" data-keynote-html-action="status" ${identity}>재연결</button>` : '<span>원본 보존됨 · 재생 자료 연결 필요</span>';
   return `<div class="svc-reference-media-toolbar">${controls}<label class="btn secondary">재생 자료 연결<input type="file" webkitdirectory multiple hidden data-keynote-html-files ${identity}></label></div>`;
 }
 async function importPresenterKeynoteHtml(input) {
@@ -266,6 +350,7 @@ async function importPresenterKeynoteHtml(input) {
 
 function presenterKeynoteHtmlPreviewSource(slide) {
   if (!presenterKeynoteHtmlSlide(slide)) return '';
+  if (slide.keynote) return slide.imageSrc || '';
   return presenterKeynoteHtmlPreviews.get(`${slide.elementId}|${slide.asset.keynoteHtml.sha256}`)?.url || slide.asset.keynoteHtml.poster || '';
 }
 
@@ -278,6 +363,15 @@ function handlePresenterKeynoteHtmlAction(event) {
   const button = event.target.closest('[data-keynote-html-action]');
   if (!button || button.disabled) return false;
   event.preventDefault();
+  if (button.dataset.keynoteHtmlAction === 'status' && state.selectedServiceId === button.dataset.serviceId) {
+    const item = getServiceItems(button.dataset.serviceId).find(row => row.id === button.dataset.keynoteItemId);
+    const asset = normalizeServiceAsset(parseServiceItemMemo(item?.memo).asset);
+    const key = asset.keynoteHtml?.url + '|' + asset.keynoteHtml?.sha256;
+    if (asset.original?.sha256 === button.dataset.keynoteSourceHash && presenterKeynoteHtmlManifests.get(key)?.error) {
+      presenterKeynoteHtmlManifests.delete(key);presenterSlideBuildCache.delete(button.dataset.serviceId);
+      refreshPresenterForService(button.dataset.serviceId);return true;
+    }
+  }
   const owner = state.presenter, slide = presenterKeynoteHtmlSlide(owner.slides?.[owner.index]);
   if (!slide || owner.serviceId !== button.dataset.serviceId || slide.elementId !== button.dataset.keynoteItemId || slide.asset.original.sha256 !== button.dataset.keynoteSourceHash) {
     showToast('이 자료를 송출 대상으로 선택한 뒤 조작해 주세요.', 'info');return false;

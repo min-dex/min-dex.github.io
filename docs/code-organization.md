@@ -451,7 +451,8 @@ tone. It preserves output exclusion, real invalid-field styling and focus outlin
 
 ### Keynote HTML sidecar playback
 
-`mindex.keynote-html.js` owns sidecar upload, controller preview metadata and the
+`mindex.keynote-html.js` owns sidecar upload, verified read-only manifest/card
+projection, native page selection, controller preview metadata and the
 single output iframe. `mindex.keynote-html-engine.mjs` owns the pinned export
 adapter, manifest/checkpoint validation and sandbox-local command bridge. It is
 loaded dynamically with the active release version. Native Mac screen-capture

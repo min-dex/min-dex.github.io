@@ -86,7 +86,8 @@ export function keynoteHtmlFrameBridge(token) {
     if (!media.has(this)) { media.add(this);this.addEventListener('ended', () => resumeIntent.delete(this)); }
     if (!restored || !held || restored.media?.some(saved => saved.src === (this.currentSrc || this.src) && (saved.resume ?? !saved.paused))) resumeIntent.add(this);
     if (held || disposed) { pause.call(this);return Promise.resolve(); }
-    return play.call(this).catch(error => { if (error.name === 'NotAllowedError') requireActivation();
+    const epoch = recoveryEpoch;
+    return play.call(this).catch(error => { if (epoch !== recoveryEpoch || disposed) return;if (error.name === 'NotAllowedError') requireActivation();
       report('media-blocked', { message: error.name === 'NotAllowedError' ? '송출 화면에서 영상·음원 재생을 허용해 주세요.' : '포함된 미디어 재생을 확인해 주세요.' }); });
   };
   const engine = () => window.__mindexKeynoteController;
@@ -160,23 +161,32 @@ export function keynoteHtmlFrameBridge(token) {
   }
   async function command(request) {
     if (!ready || disposed || !request || !/^[a-zA-Z0-9-]{8,80}$/.test(request.id || '')
-      || !['next', 'previous', 'play', 'pause', 'restore', 'status', 'dispose'].includes(request.action)) return;
-    const digest = JSON.stringify([request.action, request.checkpoint || null]);
+      || !['next', 'previous', 'select', 'play', 'pause', 'restore', 'status', 'dispose'].includes(request.action)) return;
+    const digest = JSON.stringify([request.action, request.checkpoint || null, request.page ?? null, request.scene ?? null]);
     const old = receipts.get(request.id);
     if (old) { if (old.digest !== digest) report('error', { id: request.id, message: '같은 요청 번호를 다른 조작에 사용할 수 없습니다.' });else if (old.response) report('ack', old.response);return; }
     if (receipts.size >= 10000) { report('error', { message: '송출 요청 한도에 도달했습니다.' });return; }
-    if (request.action === 'status') recoveryEpoch++;
+    if (['status', 'select'].includes(request.action)) recoveryEpoch++;
     const epoch = recoveryEpoch;
     const receipt = { digest, response: null };receipts.set(request.id, receipt);
     const execute = async () => {
       if (epoch !== recoveryEpoch) return;
       currentRequest = request.id;
-      if (uncertain && !['status', 'dispose', 'pause', 'restore'].includes(request.action)) throw Error('재연결로 현재 효과 위치를 먼저 확인해 주세요.');
+      if (uncertain && !['status', 'select', 'dispose', 'pause', 'restore'].includes(request.action)) throw Error('재연결로 현재 효과 위치를 먼저 확인해 주세요.');
       const e = engine();
       if (request.action === 'dispose') { disposed = true;held = true;tracks().forEach(m => { m.pause();m.removeAttribute('src');m.load(); });clearInterval(timer);return; }
-      if (!['play', 'pause', 'status', 'restore'].includes(request.action)) await settled(epoch);
+      if (!['play', 'pause', 'status', 'select', 'restore'].includes(request.action)) await settled(epoch);
       if (epoch !== recoveryEpoch) return;
-      if (request.action === 'restore') await restore(request.checkpoint, epoch);
+      if (request.action === 'select') {
+        if (!Number.isInteger(request.page) || !Number.isInteger(request.scene) || request.page < 0 || request.page >= e.script.slideList.length
+          || request.scene < 0 || request.scene >= e.script.numScenes || e.scriptManager.slideIndexFromSceneIndex(request.scene) !== request.page
+          || (request.scene > 0 && e.scriptManager.slideIndexFromSceneIndex(request.scene - 1) === request.page)) throw Error('선택한 Keynote 슬라이드 위치를 확인해 주세요.');
+        held = true;tracks().forEach(m => pause.call(m));resumeIntent.clear();restored = null;
+        activationButton?.remove();activationButton = null;activationPending = false;
+        if (!stable()) e.changeState('ReadyToJump');
+        e.jumpToScene(request.scene, false);await settled(epoch);held = false;uncertain = false;
+      }
+      else if (request.action === 'restore') await restore(request.checkpoint, epoch);
       else if (request.action === 'pause') { for (const track of tracks()) if (!track.paused) resumeIntent.add(track);held = true;tracks().forEach(m => pause.call(m)); }
       else if (request.action === 'play') {
         held = false;
@@ -198,7 +208,7 @@ export function keynoteHtmlFrameBridge(token) {
       }
       receipt.response = { id: request.id, checkpoint: checkpoint(), accepted: true };report('ack', receipt.response);
     };
-    const operation = ['play', 'pause', 'status'].includes(request.action) ? execute() : serial.then(execute);
+    const operation = ['play', 'pause', 'status', 'select'].includes(request.action) ? execute() : serial.then(execute);
     const handled = operation.catch(error => { if (epoch !== recoveryEpoch) return;uncertain = true;held = true;tracks().forEach(m => pause.call(m));report('error', { id: request.id, message: error.message }); });
     if (!['play', 'pause', 'status'].includes(request.action)) serial = handled;
   }
