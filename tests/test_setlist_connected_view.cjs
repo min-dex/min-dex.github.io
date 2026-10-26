@@ -41,7 +41,7 @@ assert.equal(links.fromServices(interrupted,[],index).candidates.find(c=>c.id===
 const context = {
   window:{MindexSetlistLinks:links}, state:{worshipSetlistSongCatalog:{index}},
   worshipAppServiceTypeId:id=>id,
-  serviceTypeSortOrder:id=>({children:10,nursery:11,youth:12}[id] ?? 20),
+  serviceTypeSortOrder:id=>({nursery:10,children:11,youth:12}[id] ?? 20),
 };
 vm.createContext(context);
 for(const name of ['worshipSetlistCandidateLinks','worshipSetlistArchiveTypeOrder','renderSearchResultsForCurrentModule','isSetlistArchiveView']) {

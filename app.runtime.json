@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261026-keynote-slide-cards",
+  "version": "20261026-department-display-order",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "6bd7c1cddb95cccde445968a3568bfabf543836e59f8954941ad83953fe8280b",
-  "runtime_sha256": "d2272e4dcf40c83407e16ca9a22f24585a7779d9144ebd428a415422ae9ce274",
-  "source_bytes": 1347273,
-  "runtime_bytes": 962440,
-  "source_gzip": 307198,
-  "runtime_gzip": 240846
+  "source_sha256": "114f8efbbfee581c05303fd3bef09d296c596901a950bc8d8c4c23930f59b7f0",
+  "runtime_sha256": "1b374e363227ea320b2dd8cd5ce51df5ef6668061040a70a749babe4c265080c",
+  "source_bytes": 1346260,
+  "runtime_bytes": 961906,
+  "source_gzip": 306914,
+  "runtime_gzip": 240681
 }

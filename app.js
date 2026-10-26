@@ -23061,7 +23061,7 @@ function confirmDiscardServiceChanges() {
 }
 
 function getFilteredServiceTypes() {
-  let types = state.serviceTypes;
+  let types = [...state.serviceTypes].sort((a, b) => serviceTypeSortOrder(a.id) - serviceTypeSortOrder(b.id));
   const q = normalizeSearchValue(state.search);
   if (!q) return types.filter((t) => SERVICE_RECURRENCE[t.id] || getServicesByType(t.id).length);
   return types.filter((t) => getServicesByType(t.id).some((s) => serviceMatchesSearch(s, q)));
@@ -23090,13 +23090,13 @@ function getServicesByType(typeId) {
 
 function sortServicesByDate(services, direction = "asc") {
   const weight = direction === "desc" ? -1 : 1;
-  return [...services].sort((a, b) => {
+  return orderDepartmentServiceSlots([...services].sort((a, b) => {
     const dateCompare = String(a.date || "").localeCompare(String(b.date || ""));
     if (dateCompare) return dateCompare * weight;
     const timeCompare = serviceStartSortMinutes(a) - serviceStartSortMinutes(b);
     if (timeCompare) return timeCompare;
     return serviceTypeSortOrder(a.type_id) - serviceTypeSortOrder(b.type_id);
-  });
+  }));
 }
 
 function serviceStartSortMinutes(service = {}) {
@@ -23107,25 +23107,6 @@ function serviceStartSortMinutes(service = {}) {
   return (Number(match[1]) * 60) + Number(match[2]);
 }
 
-function serviceTypeSortOrder(typeId) {
-  const appTypeId = worshipAppServiceTypeId(typeId);
-  const storedOrder = (id) => state.serviceTypes.find((type) => type.id === id)?.sort_order;
-  const order = storedOrder(appTypeId);
-  if (Number.isFinite(order)) return order;
-  const group = Object.values(SERVICE_CATEGORIES).find((ids) => ids.includes(appTypeId));
-  if (!group) return 999;
-  const index = group.indexOf(appTypeId);
-  // A type absent from the catalog keeps its place beside registered peers.
-  for (let next = index + 1; next < group.length; next += 1) {
-    const nextOrder = storedOrder(group[next]);
-    if (Number.isFinite(nextOrder)) return nextOrder - (next - index) / (group.length + 1);
-  }
-  for (let previous = index - 1; previous >= 0; previous -= 1) {
-    const previousOrder = storedOrder(group[previous]);
-    if (Number.isFinite(previousOrder)) return previousOrder + (index - previous) / (group.length + 1);
-  }
-  return Object.values(SERVICE_CATEGORIES).flat().indexOf(appTypeId) + 1;
-}
 
 function serviceTypeName(typeId) {
   const appTypeId = worshipAppServiceTypeId(typeId);
@@ -24896,8 +24877,7 @@ function worshipSetlistArchiveTypeName(typeId) {
 function worshipSetlistArchiveTypeOrder(typeId) {
   const type = worshipAppServiceTypeId(typeId);
   if (type === "sunday-main") return -1;
-  const order = serviceTypeSortOrder(type);
-  return type === "nursery" ? Math.min(order, serviceTypeSortOrder("children") - 0.5) : order;
+  return serviceTypeSortOrder(type);
 }
 
 function worshipSetlistArchiveEntries() {

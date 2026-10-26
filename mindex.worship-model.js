@@ -544,3 +544,44 @@ function canonicalWorshipElementInputMode(element = {}) {
   }
   return precise || serviceInputModeForElementType(element.element_type);
 }
+
+// Keep date/time placement of other services; only reorder department slots within each date.
+function orderDepartmentServiceSlots(services) {
+  const result = [...services], dates = new Map();
+  services.forEach((service, index) => {
+    if (!SERVICE_CATEGORIES.ministry.includes(worshipAppServiceTypeId(service.type_id))) return;
+    const date = String(service.date || "");
+    if (!dates.has(date)) dates.set(date, []);
+    dates.get(date).push(index);
+  });
+  for (const indices of dates.values()) {
+    const ordered = indices.map(index => services[index]).sort((a, b) => serviceTypeSortOrder(a.type_id) - serviceTypeSortOrder(b.type_id));
+    indices.forEach((index, position) => { result[index] = ordered[position]; });
+  }
+  return result;
+}
+
+function serviceTypeSortOrder(typeId) {
+  const appTypeId = worshipAppServiceTypeId(typeId);
+  const storedOrder = (id) => state.serviceTypes.find((type) => type.id === id)?.sort_order;
+  const ministryIndex = SERVICE_CATEGORIES.ministry.indexOf(appTypeId);
+  if (ministryIndex >= 0) {
+    const orders = SERVICE_CATEGORIES.ministry.map(storedOrder).filter(Number.isFinite);
+    return (orders.length ? Math.min(...orders) : SERVICE_CATEGORIES.public.length + 1) + ministryIndex / 5;
+  }
+  const order = storedOrder(appTypeId);
+  if (Number.isFinite(order)) return order;
+  const group = Object.values(SERVICE_CATEGORIES).find((ids) => ids.includes(appTypeId));
+  if (!group) return 999;
+  const index = group.indexOf(appTypeId);
+  // A type absent from the catalog keeps its place beside registered peers.
+  for (let next = index + 1; next < group.length; next += 1) {
+    const nextOrder = storedOrder(group[next]);
+    if (Number.isFinite(nextOrder)) return nextOrder - (next - index) / (group.length + 1);
+  }
+  for (let previous = index - 1; previous >= 0; previous -= 1) {
+    const previousOrder = storedOrder(group[previous]);
+    if (Number.isFinite(previousOrder)) return previousOrder + (index - previous) / (group.length + 1);
+  }
+  return Object.values(SERVICE_CATEGORIES).flat().indexOf(appTypeId) + 1;
+}
