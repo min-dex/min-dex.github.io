@@ -93,6 +93,12 @@
     if (slides && validate(profile, slides, true)) return '음원은 있지만 자동 넘김 타이밍이 맞지 않습니다. 타이밍을 확인해 주세요.';
     return '';
   }
+  function statusMarkup(context, entries) {
+    const song = serviceItemLinkedSong(context.item);
+    const version = song ? getPresenterServiceItemVersion(song, context.item, context.service) : null;
+    const status = audioStatus(version, entries.length ? entries.map(entry => entry.slide) : null);
+    return status ? `<p class="praise-media-status" role="status" data-song-audio-status>${escapeHtml(status)}</p>` : '';
+  }
   const versionProfile = (song, version) => {
     const stored = version?.audio_set;
     return stored ? {...stored, url:stored.audioUrl, databaseTiming:true} : null;
@@ -779,7 +785,7 @@
     });
     document.body.append(dialog); dialog.showModal();
   }
-  root.MindexSongTiming = { audioStatus, ownsTransport, resumeAutoSync, snapBeat, detectBeatGrid, composePhotos, validatePhotos, saveToVersion, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, saveToWorship, formsFor, sourceSignature, ownsSource: source => remoteSources.has(source), get revision() { return revision; } };
+  root.MindexSongTiming = { audioStatus, statusMarkup, ownsTransport, resumeAutoSync, snapBeat, detectBeatGrid, composePhotos, validatePhotos, saveToVersion, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, saveToWorship, formsFor, sourceSignature, ownsSource: source => remoteSources.has(source), get revision() { return revision; } };
   if (typeof document !== 'undefined') {
     document.addEventListener('pointerdown', e => {
       activeSeekInput = e.target.closest('[data-song-timing-seek]:not(:disabled)');
