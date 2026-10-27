@@ -31,7 +31,15 @@
       // A shorter closing phrase does not turn the ordinary slide size into a range.
       return [...counts].sort((a,b) => b[1]-a[1] || b[0]-a[0])[0][0];
     };
-    const body = record.parts.filter(part => part.kind !== 'Coda').flatMap(part => part.approxMeasuresByBlock || []);
+    // Repeated verses do not make their layout more representative than a refrain.
+    // Compare one copy of each musical section layout, independent of stanza count.
+    const layouts = new Map();
+    for (const part of record.parts.filter(part => part.kind !== 'Coda')) {
+      const measures = part.approxMeasuresByBlock || [];
+      const key = JSON.stringify([part.kind, measures.map(approx)]);
+      if (!layouts.has(key)) layouts.set(key, measures);
+    }
+    const body = [...layouts.values()].flat();
     const coda = record.parts.filter(part => part.kind === 'Coda').flatMap(part => part.approxMeasuresByBlock || []);
     const unmeasured = record.parts.some(part => !part.approxMeasuresByBlock && part.blockCount > 0);
     const labels = [];

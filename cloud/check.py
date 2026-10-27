@@ -36,6 +36,7 @@ NODE_TESTS = (
     "test_live_refresh_scheduler.cjs",
     "test_hymn_score_runtime.cjs",
     "test_hymn_intro_plan.cjs",
+    "test_hymn_slide_estimates.cjs",
     "test_department_assignee_requests.cjs",
     "test_calendar_assignee_creation.cjs",
     "test_children_default_completion.cjs",

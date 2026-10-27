@@ -853,3 +853,29 @@ estimates for auditing. Detailed data and publication status:
 기존 띄어쓰기 교정116단위와 작업 중 동시 교정56단위는 이전 페이지별 글자열이 같음을 확인하여 metadata hash만 갱신했다. 이전의 기계적인 균등 분할/못갖춘 경계 배분 때문에 실제 악구와 맞지 않던70개 마디 배열(19판본)도 실제 화면 경계 기준 근사치로 바로잡았다. 판본별 문구·응답·도입부·아멘 저장 차이는 유지했다.
 
 검증/배포 단계와 범위 한계는 `hymn-full-layout-recheck-20261024.json`을 따른다. 자동 후보가 없다는 사실은 전곡 무오류를 뜻하지 않는다.
+
+
+## 2026-10-28 paired screen alignment — staged, not applied
+
+All1203 editions and481 linked pairs were compared from the current native
+records. Matching representative numbers alone is not proof of matching screens.
+Actual line/page boundaries and edition-specific wording/form membership were
+compared separately.
+
+Six editions/twelve units have newline-only candidates: New49/Union72 response,
+New375 final Amen, New638/Union550 phrase and Amen screens, Union394 lead-voice
+line alignment. Words, unit IDs/types/order and stored forms remain unchanged.
+New638 retains its independent seventh-Amen Coda; Union550 preserves seven
+Amens with the final one on its own screen inside its existing unit. Union53
+second system is nine bars, matching New9; its existing screen divisions match.
+
+The representative estimate counts each distinct kind/page-measure layout once,
+so repeated verses cannot outweigh a refrain merely because more stanzas exist.
+Per-page evidence remains intact; display aggregation never changes lyrics.
+
+Candidate checks:1203 editions and366 saved references preserve performed text
+and form order. Chromium and WebKit each rendered7373 unique screens at three
+sizes without overflow. The six edited records have no current worship reference
+or registered audio. This is not a new visual transcription of every printed
+score. Production application and publication remain separate pending steps.
+Private evidence: backups/20261028-hymn-page-alignment/.
