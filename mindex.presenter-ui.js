@@ -283,8 +283,8 @@ function renderPresenterServiceInputRail(service) {
 let presenterFocusView = false;
 function renderPresenterFocusView() {
   return `<div class="svc-presenter-view-switch" role="group" aria-label="예배 보기">
-    <button type="button" class="btn secondary" data-presenter-focus-toggle="basic" aria-pressed="${!presenterFocusView}">기본 보기</button>
-    <button type="button" class="btn secondary" data-presenter-focus-toggle="focus" aria-pressed="${presenterFocusView}">집중 보기</button>
+    <button type="button" class="btn secondary" data-presenter-focus-toggle="basic" aria-pressed="${!presenterFocusView}">슬라이드 보기</button>
+    <button type="button" class="btn secondary" data-presenter-focus-toggle="focus" aria-pressed="${presenterFocusView}">발표자 보기</button>
   </div>`;
 }
 
@@ -305,7 +305,7 @@ function syncPresenterFocusView() {
     panel = document.createElement('section');
     panel.className = 'svc-focus-panel';
     panel.dataset.presenterFocusPanel = '';
-    panel.setAttribute('aria-label', '발표자 집중 보기');
+    panel.setAttribute('aria-label', '발표자 보기');
     root.querySelector('.svc-presenter-workspace').before(panel);
   }
   panel.hidden = false;

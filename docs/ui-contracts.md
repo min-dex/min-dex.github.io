@@ -1098,3 +1098,10 @@ The unmounted source panel/history/recovery renderers, their delegated UI events
 and dedicated CSS are removed. Internal source serialization, archived history,
 pending-draft protection, atomic saves and conflict review remain unchanged.
 No stored drafts or production records are deleted.
+
+### Presenter view names ·2026-10-28
+
+The visible view controls are 슬라이드 보기 and 발표자 보기. The presenter
+panel accessible name is 발표자 보기. Internal basic/focus values, state,
+DOM retention and the existing toggle behavior are unchanged. Earlier dated
+records may use the previous 기본 보기/집중 보기 labels.
