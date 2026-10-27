@@ -13,7 +13,7 @@ try:
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url + '?mindexSmokeRaw=1')
             page.wait_for_function('typeof state !== "undefined" && !document.body.classList.contains("ui-booting")')
-            result = page.evaluate('''() => {
+            result = page.evaluate('''async () => {
               const check=(value,message)=>{if(!value)throw Error(message)};
               let missingCount=0;
               for(const type_id of ['sunday-first','sunday-second','sunday-main','sunday-afternoon',
@@ -79,6 +79,27 @@ try:
               check(actual.some(slide=>slide.type==='song-title'),'explicit real T removed');
               check(actual.some(slide=>slide.text==='실제 가사'),'real verse removed');
               check(JSON.stringify({song,praise})===original,'lyrics/form/version source changed');
+              const left=make('navigation-left','앞 순서','title','앞 순서');left.sort_order=1;
+              item.sort_order=2;
+              const right=make('navigation-right','다음 순서','title','다음 순서');right.sort_order=3;
+              state.serviceItems[service.id]=[left,item,right];state.client=null;state.loading=false;
+              state.module='presenter';state.selectedServiceId=service.id;
+              preparePresenterService(service.id);
+              const output={closed:false,postMessage(){}};
+              state.presenter.outputSessionId='empty-navigation';state.presenter.outputWindow=output;
+              const adapter=MindexRemote.adapter(service.id,'empty-navigation',output);
+              const catalog=adapter.browse();check(catalog,'remote catalog unavailable');
+              check(catalog.total===state.presenter.slides.length,'remote numbering diverged');
+              check(!catalog.items.some(entry=>entry.groupKey===item.id),'remote catalog retained empty item');
+              const outline=document.createElement('div');outline.innerHTML=renderServiceOutlineChildRow(service,item,1,-1,state.presenter.slides);
+              check(serviceOutlineSlideTarget(outline.querySelector('button'))===null,'empty outline jumps to another output');
+              const target=state.presenter.slides.findIndex(slide=>slide.elementId===right.id);
+              await adapter.execute('jump',{index:target,key:catalog.key});
+              check(state.presenter.index===target,'remote jump missed surviving slide');
+              await adapter.execute('prev');check(state.presenter.index===target-1,'remote previous numbering drifted');
+              await adapter.execute('next');check(state.presenter.index===target,'remote next numbering drifted');
+              const payload=presenterStatePayload(service.id);
+              check(payload.slides.length===catalog.total&&!payload.slides.some(slide=>slide.elementId===item.id),'actual output payload includes empty element');
               check(missingCount>20,'template coverage unexpectedly empty');
               return {missingCount,types:14,storedWrites:0};
             }''')
