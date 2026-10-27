@@ -1074,3 +1074,13 @@ or separate dynamic loader is added.
 동기화 시작 버튼은 `음원 재생 · 자동 넘김`, 시각 입력과 요약은 `예약 전환 시각`/
 `예약 전환`, 사진 타이밍은 `사진 자동 넘김`으로 표시한다.
 기존 동작·저장 키·단축키·입력값과 포커스 계약은 변경하지 않는다.
+
+## Worship navigation names ·2026-10-27
+
+App list/type headings, cards, sidebar, tabs, search and setlist headings use
+`종류 (별명)` through serviceNavigationName; equal names are shown once.
+Sunday third is `주일예배 [3부] (온세대 찬양예배)`. Friday uses `금요예배`
+with `금요기도회` or its monthly/culture variant in parentheses. Stored names,
+classification/order, original serviceDisplayTypeName output naming and print
+content remain unchanged. Archive aliases are included in the heading instead
+of repeated as a separate right-side name.

@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261026-video-end-fade",
+  "version": "20261027-worship-ui",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "9f156ea34af553096cb299063f1fdce832cff80a70ce636f300f970ded7f551d",
-  "runtime_sha256": "11f258c4a6551e80baa02a8c364733d72439b8819b8b32d29ae3c70346571b35",
-  "source_bytes": 1346565,
-  "runtime_bytes": 962141,
-  "source_gzip": 307037,
-  "runtime_gzip": 240783
+  "source_sha256": "b15ca7f3f62b0b01267745512abdc5f3346e53e5ec318de0cbb16ecccce2cb9f",
+  "runtime_sha256": "5764705cc840bea3dbb43f1e88e175102d30de0396236177b8493cbf130f13d0",
+  "source_bytes": 1346241,
+  "runtime_bytes": 961856,
+  "source_gzip": 306977,
+  "runtime_gzip": 240713
 }

@@ -2520,7 +2520,7 @@ async function deleteService(serviceId) {
   if (!serviceId || !requireClient() || state.saving) return;
   const service = state.services.find((svc) => svc.id === serviceId);
   if (!service) return;
-  const title = [formatServiceDate(service), serviceDisplayTypeName(service)]
+  const title = [formatServiceDate(service), serviceNavigationName(service)]
     .map((part) => String(part || "").trim())
     .filter(Boolean)
     .join(" · ") || "이 예배";
