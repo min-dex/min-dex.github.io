@@ -679,9 +679,12 @@ function normalizePresenterScoreFormLabel(value = "") {
 }
 
 function presenterHymnScoreAssetSlides(song = null, version = null, displayText = "") {
-  const hymnNo = normalizedHymnScoreNumber(song?.hymn_no || version?.hymn_no || displayText);
-  if (!hymnNo) return [];
-  const entry = state.hymnScoreManifest?.[hymnNo];
+  // Exact version entries support any book/song; numeric entries belong only to new hymnal editions.
+  const labels = [version?.name, version?.curated_version_name, version?.raw_section_name, version?.version_label, version?.hymn_no].join(' ');
+  const union = /통(?:일)?(?:\s|\d|$)/.test(labels) || /^SONG-HYMN-T/.test(version?.id || song?.id || '');
+  const number = version?.hymn_no || (!version || /^새/.test(labels.trim()) ? song?.hymn_no : '');
+  const hymnNo = union ? '' : normalizedHymnScoreNumber(number);
+  const entry = state.hymnScoreManifest?.[version?.id] || (hymnNo ? state.hymnScoreManifest?.[hymnNo] : null);
   const slides = Array.isArray(entry?.slides) ? entry.slides : [];
   return slides
     .map((slide, index) => ({

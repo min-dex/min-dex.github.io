@@ -35,18 +35,16 @@ globalThis.MindexPraiseMedia = (() => {
   let requestSerial = 0;
   const keyFor = (song, version) => JSON.stringify([song.id, version.id]);
   const audioSource = version => normalizePresenterMediaSource(version?.audio_set?.audioUrl || "");
-  const scoreEligible = (song, version) => serviceVersionIsNewHymnalScoreVersion(song, version);
 
   function render(song, version) {
     if (!song?.id || !version?.id) return "";
-    const score = scoreEligible(song, version), audio = audioSource(version);
-    if (!score && !audio) return "";
-    const key = keyFor(song, version), label = [score ? "악보" : "", audio ? "음원" : ""].filter(Boolean).join(" · ");
+    const audio = globalThis.MindexSingleSong.hasAudio(version) ? audioSource(version) : "";
+    const key = keyFor(song, version), label = "악보 · 음원";
     return `<details class="praise-version-media" data-praise-version-media data-praise-media-song="${escapeAttr(song.id)}" data-praise-media-version="${escapeAttr(version.id)}" data-praise-media-key="${escapeAttr(key)}"${opened.has(key) ? " open" : ""}>
       <summary>${label} 보기</summary>
       <div class="praise-version-media-content">
-        ${score ? '<div data-praise-score-preview aria-live="polite"></div>' : ""}
-        ${audio ? `<audio controls preload="none" class="praise-audio-preview" data-praise-audio-key="${escapeAttr(key)}" aria-label="${escapeAttr(`${song.title || "찬양"} · ${versionDisplayName(song, version)} 미리 듣기`)}" src="${escapeAttr(audio)}"></audio><p class="praise-media-status" data-praise-audio-error role="status" hidden>음원을 불러오지 못했어요.</p>` : ""}
+        <div data-praise-score-preview aria-live="polite"></div>
+        ${audio ? `<audio controls preload="none" class="praise-audio-preview" data-praise-audio-key="${escapeAttr(key)}" aria-label="${escapeAttr(`${song.title || "찬양"} · ${versionDisplayName(song, version)} 미리 듣기`)}" src="${escapeAttr(audio)}"></audio><p class="praise-media-status" data-praise-audio-error role="status" hidden>음원을 불러오지 못했어요.</p>` : `<p class="praise-media-status">${escapeHtml(globalThis.MindexSongTiming?.audioStatus(version) || '등록된 음원이 없습니다.')}</p>`}
       </div>
     </details>`;
   }
@@ -58,7 +56,6 @@ globalThis.MindexPraiseMedia = (() => {
   }
 
   function scoreMarkup(song, version) {
-    if (!scoreEligible(song, version)) return '<p class="praise-media-status">이 판본에 등록된 악보가 없습니다.</p>';
     const sources = presenterHymnScoreAssetSlides(song, version).map(slide => ({ ...slide, url: normalizePresenterMediaSource(slide.url) })).filter(slide => slide.url);
     if (!sources.length) return '<p class="praise-media-status">등록된 악보가 없습니다.</p>';
     return `<div class="praise-score-previews">${sources.map((slide, index) => `<a href="${escapeAttr(slide.url)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeAttr(`${song.title} 악보 ${index + 1}장 크게 보기`)}"><img src="${escapeAttr(slide.url)}" alt="${escapeAttr(`${song.title} 악보 ${index + 1}장`)}" loading="lazy" decoding="async"><span>${index + 1} / ${sources.length}</span></a>`).join("")}</div>`;

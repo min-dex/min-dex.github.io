@@ -36,7 +36,7 @@ const context = {
   refreshPresenterForService: () => {}, updateSaveState: () => {},
   renderCurrentServiceModuleDetail: () => {},
   serviceItemRequiresNewHymnalScoreSong: () => false,
-  isNewHymnalScoreSong: () => true,
+  serviceSongHasScore: () => true,
   defaultServiceSongVersion: () => ({id:'v1'}),
   serviceSongHasMultipleSelectableVersions: () => false,
   createLocalId: () => `local-${nextLocalId++}`,

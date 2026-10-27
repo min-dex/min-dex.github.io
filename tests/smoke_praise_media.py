@@ -29,7 +29,7 @@ try:
    page.route('**/*',route);page.goto(url);page.wait_for_function("typeof MindexPraiseMedia==='object'&&!document.body.classList.contains('ui-booting')")
    page.evaluate('''()=>{
     state.config={...state.config,authRequired:false};state.client={};state.connectionError='';state.module='praise';state.loading=false;state.metadataPopupOpen=false;
-    const version=(id,name)=>({id,name,version_label:name,curated_version_name:name,hymn_no:'301',praise_types:['hymn'],_worshipVersionPersisted:true,forms:[{id:id+'-v',part_type:'Verse',part_number:1,lyrics:'보존할 가사'}],audio_set:{audioUrl:'/tests/praise-preview.wav?edition='+id,audioName:name+' 음원',enabled:true,starts:[0],sourceSignature:'saved-profile'}});
+    const version=(id,name)=>({id,name,version_label:name,curated_version_name:name,hymn_no:'301',praise_types:['hymn'],_worshipVersionPersisted:true,forms:[{id:id+'-v',part_type:'Verse',part_number:1,lyrics:'보존할 가사'}],audio_set:{audioUrl:new URL('/tests/praise-preview.wav?edition='+id,location.href).href,audioFingerprint:'fixture',duration:6,audioName:name+' 음원',enabled:true,starts:[0],sourceSignature:'saved-profile'}});
     state.songs=[{id:'catalog',title:'자료 확인',memo:'',hymn_no:'301',praise_types:['hymn'],_relationalVersionsLoaded:true,versions:[version('new','새찬송가'),version('union','통일 460 자료 확인')]},{id:'empty',title:'자료 없는 곡',memo:'',versions:[{id:'empty-v',name:'기본',forms:[]}]}];
     state.selectedSongId='catalog';state.selectedVersionId='new';state.forms=normalizeForms(structuredClone(state.songs[0].versions[0].forms));state.forms[0].lyrics='미저장 가사';state.dirty.forms=true;
     state.hymnScoreManifest={};state.hymnScoreManifestLoaded=false;clearSearchCaches();
@@ -39,7 +39,7 @@ try:
    }''')
    panels=page.locator('[data-praise-version-media]');assert panels.count()==2
    assert page.locator('[data-praise-media-version="new"] [data-praise-score-preview]').count()==1
-   assert page.locator('[data-praise-media-version="union"] [data-praise-score-preview]').count()==0
+   assert page.locator('[data-praise-media-version="union"] [data-praise-score-preview]').count()==1
    assert counts['manifest']==0
    assert page.locator('audio.praise-audio-preview').evaluate_all("nodes=>nodes.every(a=>a.paused&&a.preload==='none')")
    panel=page.locator('[data-praise-media-version="new"]');panel.locator('summary').click()
@@ -54,6 +54,8 @@ try:
    page.wait_for_timeout(100)
    assert page.evaluate("document.querySelector('[data-praise-media-version=\"new\"] audio')===oldCatalogPreview&&!oldCatalogPreview.paused&&oldCatalogPreview.currentTime>=previewTime"),(engine,'same-record rerender reset preview')
    union=page.locator('[data-praise-media-version="union"]');union.locator('summary').click()
+   union.locator('[data-praise-score-preview]').get_by_text('등록된 악보가 없습니다.',exact=True).wait_for()
+   assert union.locator('.praise-score-previews').count()==0
    page.evaluate("document.querySelector('#test-preview-play').onclick=()=>{const a=document.querySelector('[data-praise-media-version=\"union\"] audio');a.muted=true;a.play()}")
    page.locator('#test-preview-play').click();page.wait_for_function("!document.querySelector('[data-praise-media-version=\"union\"] audio').paused&&document.querySelector('[data-praise-media-version=\"new\"] audio').paused")
    assert page.evaluate('state.selectedVersionId')=='new','Media selected surrounding version header'
@@ -62,7 +64,8 @@ try:
    page.locator('#test-preview-play').click();page.wait_for_function('!oldCatalogPreview.paused')
    page.evaluate("state.selectedSongId='empty';state.selectedVersionId='empty-v';state.forms=[];renderDetail()")
    page.wait_for_function('oldCatalogPreview.paused&&!oldCatalogPreview.hasAttribute("src")')
-   assert page.locator('[data-praise-version-media]').count()==0
+   assert page.locator('[data-praise-version-media]').count()==1
+   assert '등록된 음원이 없습니다.' in page.locator('[data-praise-version-media]').text_content()
    assert page.evaluate("JSON.stringify(state.songs)===mediaBefore&&state.serviceMusic.audio.currentTime===17&&state.serviceMusic.sourceKey==='preserve-service.mp3'&&state.serviceMusic.timingGroupId==='keep-group'&&state.serviceMusic.autoSyncSuspended")
    assert counts['writes']==0,counts
    page.evaluate("state.selectedSongId='catalog';state.selectedVersionId='new';state.forms=JSON.parse(mediaDraft);renderDetail()")

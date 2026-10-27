@@ -1526,7 +1526,7 @@ function findConfidentServicePraiseSong(value, item = {}, service = selectedServ
   const requiresNewHymnal = serviceItemRequiresNewHymnalScoreSong(item);
   const query = compactSearchValue(songInput);
   const ranked = state.songs
-    .filter((song) => !requiresNewHymnal || isNewHymnalScoreSong(song))
+    .filter((song) => !requiresNewHymnal || serviceSongHasScore(song))
     .map((song) => ({ song, match: getSongSearchMatch(song, tokens) }))
     .filter((entry) => entry.match)
     .sort((a, b) => b.match.score - a.match.score || sortSongsForCurrentList(a.song, b.song));

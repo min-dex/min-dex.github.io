@@ -87,7 +87,7 @@
   function audioStatus(version, slides = null) {
     if (!version) return '';
     const profile = version.audio_set;
-    if (!String(profile?.audioUrl || '').trim()) return '이 판본에 등록된 음원이 없습니다.';
+    if (!String(profile?.audioUrl || '').trim()) return '등록된 음원이 없습니다.';
     if (!hasVersionAudio(version)) return '등록된 음원 정보를 확인해 주세요.';
     if (!validSet(profile, version)) return '음원에 대응하는 가사·송폼이 변경됐습니다. 타이밍을 확인해 주세요.';
     if (slides && validate(profile, slides, true)) return '음원은 있지만 자동 넘김 타이밍이 맞지 않습니다. 타이밍을 확인해 주세요.';

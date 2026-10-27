@@ -42,7 +42,7 @@ try:
     const paint=()=>{const has=MindexSongTiming.audioFor(context.timingEntries,item.id);host.innerHTML=renderPresenterBoardItemAudioControls(service.id,context,{manager:!!has?.url});return host.textContent;};
     check(!paint().includes('등록된 음원이 없습니다'),'valid audio not missing');
     const saved=version.audio_set;delete version.audio_set;context.timingEntries=[];
-    check(paint().includes('이 판본에 등록된 음원이 없습니다.'),'missing audio empty state');
+    check(paint().includes('등록된 음원이 없습니다.'),'missing audio empty state');
     check(!host.querySelector('[data-song-timing-play]'),'missing audio cannot play');
     version.audio_set={...saved,sourceSignature:'stale'};
     check(paint().includes('가사·송폼이 변경'),'stale lyrics distinct');
@@ -53,6 +53,20 @@ try:
     version.audio_set=saved;
     version.audio_set.enabled=false;check(versionHasAudio(version),'paused autosync has audio');
     check(MindexSongTiming.decorate(slides,item,song,version).every(s=>!s.syncTimeline),'disabled timing remains disabled');
-    return 'PASS visible filters, legacy preference, single classification, CCM audio/select/manual modes, cue and reference preservation';
+    state.hymnScoreManifestLoaded=true;
+    state.hymnScoreManifest={'301':{slides:[{url:'assets/icon-192.png'}]},'custom-score':{slides:[{url:'assets/icon-512.png'}]}};
+    const hymn={id:'h',hymn_no:'301',praise_types:['hymn'],versions:[{id:'new-score',name:'새찬송가',hymn_no:'301'},{id:'union-score',name:'통일찬송가',hymn_no:'통 460'}]};
+    check(presenterHymnScoreAssetSlides(hymn,hymn.versions[0]).length===1,'registered new hymnal');
+    check(presenterHymnScoreAssetSlides(hymn,hymn.versions[1]).length===0,'union never borrows new hymnal');
+    check(presenterHymnScoreAssetSlides(hymn,{id:'other',name:'다른 편곡'}).length===0,'arrangement never borrows parent number');
+    const custom={id:'custom',praise_types:['ccm'],versions:[{id:'custom-score',name:'직접 악보',forms:[]}]};
+    check(serviceSongHasScore(custom),'non-hymnal registered score');
+    check(presenterHymnScoreAssetSlides(custom,custom.versions[0])[0].url==='assets/icon-512.png','exact version source');
+    check(!serviceSongHasScore(manual),'no score absent');
+    const scoreItem={id:'score-slot',label:'찬양',memo:serializeServiceItemMemo({inputMode:'score_db',elementType:'praise'})};
+    check(serviceSelectableSongVersions(custom,scoreItem,service).length===1,'non-hymnal score selectable');
+    state.songs.push(custom);clearSearchCaches();
+    check(!serviceItemSongSelectionInvalid({...scoreItem,song_id:custom.id,version_id:'custom-score'},service,custom),'registered custom selection accepted');
+    return 'PASS audio/source ownership, empty/stale/timing states, real score presence, new/other edition isolation, manual mode and preserved cues';
    }"""),flush=True);b.close()
 finally:server.shutdown()

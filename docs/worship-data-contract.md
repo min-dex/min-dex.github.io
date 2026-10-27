@@ -1094,3 +1094,11 @@ DB: 음원 and DB: 악보 omit category suffixes. Only the audio-present list
 filter is exposed. Within a selected DB audio item, missing audio is an explicit
 empty state; source/form mismatch and invalid cue timing have distinct notices.
 No absent-audio list badge/filter, cross-version fallback or autoplay is added.
+
+Score eligibility is actual selected-version manifest source presence, not a
+new-hymnal category gate. Exact version-ID entries support any edition; legacy
+numeric entries resolve only the selected new-hymnal number, never an old-edition
+number or an unrelated parent's number. Existing selected records stay linked
+when files are absent. Catalog media panels distinguish missing resources from
+load failures/retry. Empty wording is 등록된 악보가 없습니다./등록된 음원이 없습니다.
+No score/audio/lyrics or worship data is rewritten by this UI change.

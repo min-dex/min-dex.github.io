@@ -1224,6 +1224,7 @@ async function loadHymnScoreManifest({ silent = false } = {}) {
       const data = await response.json();
       state.hymnScoreManifest = data && typeof data === "object" && !Array.isArray(data) ? data : {};
       state.hymnScoreManifestLoaded = true;
+      state.searchCache.songPicker.clear();
       presenterSlideBuildCache.clear();
       if (state.module === "presenter") renderPresenterControlState(presenterViewServiceId());
       else if (isServiceDataModule()) render();
@@ -10761,7 +10762,7 @@ async function resolveServiceSongSelectionBeforeSave(serviceId, index) {
   if (!rawTitle) return false;
   const song = await resolveExistingPraiseSongForServiceInputAfterCatalogLoad(rawTitle, item, service);
   if (!song) return false;
-  if (serviceItemRequiresNewHymnalScoreSong(item) && !isNewHymnalScoreSong(song)) return false;
+  if (serviceItemRequiresNewHymnalScoreSong(item) && !serviceSongHasScore(song)) return false;
   linkServiceItemToPraiseSong(item, song, service, {
     forceLyricsMode: isSpecialSongServiceItem(item)
       && servicePraiseUsesDirectLyrics(inputMode),
@@ -11857,7 +11858,7 @@ function serviceItemSongSelectionInvalid(item = {}, service = selectedServiceFor
   if (!serviceItemRequiresSongSelection(item, service)) return false;
   const song = resolvedSong || serviceItemLinkedSong(item);
   if (!song) return Boolean(item.song_id || String(item.raw_title || "").trim());
-  if (serviceItemRequiresNewHymnalScoreSong(item) && !isNewHymnalScoreSong(song)) return true;
+  if (serviceItemRequiresNewHymnalScoreSong(item) && item.song_id !== song.id && !serviceSongHasScore(song)) return true;
   if (servicePraiseInputMode(item, parseServiceItemMemo(item.memo), service) === "children_audio"
     && !serviceSelectableSongVersions(song, item, service).length) return true;
   if (resolvedSong && !item.song_id) return false;
@@ -11948,6 +11949,10 @@ function serviceItemRequiresNewHymnalScoreSong(item = {}) {
   return serviceItemOutputMode(item, parseServiceItemMemo(item?.memo)) === "score";
 }
 
+function serviceSongHasScore(song = null) {
+  return (song?.versions || []).some(version => presenterHymnScoreAssetSlides(song, version).length);
+}
+
 function isNewHymnalScoreSong(song = null) {
   return Boolean(/^\d{1,3}$/.test(String(song?.hymn_no || "").trim()) && songHasPraiseType(song, "hymn"));
 }
@@ -11963,7 +11968,8 @@ function serviceSelectableSongVersions(song = null, item = {}, service = selecte
     return versions.filter(version => versionHasAudio(version) || version === linked);
   }
   if (!serviceItemRequiresNewHymnalScoreSong(item)) return versions;
-  const hymnVersions = versions.filter((version) => serviceVersionIsNewHymnalScoreVersion(song, version));
+  const linked = item.song_id === song.id ? serviceItemLinkedVersion(item, song) : null;
+  const hymnVersions = versions.filter((version) => presenterHymnScoreAssetSlides(song, version).length || version === linked);
   return hymnVersions.length ? hymnVersions : versions;
 }
 
@@ -12006,7 +12012,7 @@ function preferredServiceSongVersion(song = null, item = {}, service = selectedS
   const memo = parseServiceItemMemo(item?.memo);
   const inputMode = servicePraiseInputMode(item, memo, service);
   if (inputMode === "score_db") {
-    return preferredNewHymnalVersion(song, versions) || fallbackVersion;
+    return versions.find(version => presenterHymnScoreAssetSlides(song, version).length) || fallbackVersion;
   }
   if (inputMode === "lyrics_db" || inputMode === "praise_db") {
     const defaultVersionId = getDefaultVersionId(song);
@@ -12749,8 +12755,8 @@ function selectServiceSongForItem(index, songId) {
   const item = items[index];
   const song = songById(songId);
   if (!serviceId || !item || !song) return;
-  if (serviceItemRequiresNewHymnalScoreSong(item) && !isNewHymnalScoreSong(song)) {
-    showToast("악보 항목은 새찬송가 곡만 선택할 수 있습니다.", "error");
+  if (serviceItemRequiresNewHymnalScoreSong(item) && !serviceSongHasScore(song)) {
+    showToast("악보 항목은 등록된 악보가 있는 곡을 선택해 주세요.", "error");
     return;
   }
   const queryField = findDeferredServiceTextInput(serviceId, index, "raw_title");
@@ -27106,8 +27112,8 @@ function renderServiceSongPicker(item, index, model = serviceItemEditorModel(ite
   const query = String(item?.raw_title || "").trim();
   const versionPicker = renderServiceSongVersionPicker(item, index, model);
   if (song) {
-    const typeWarning = serviceItemRequiresNewHymnalScoreSong(item) && !isNewHymnalScoreSong(song)
-      ? `<span class="svc-song-picker-warning">새찬송가 곡만 선택 가능</span>`
+    const typeWarning = serviceItemRequiresNewHymnalScoreSong(item) && !serviceSongHasScore(song)
+      ? `<span class="svc-song-picker-warning">${state.hymnScoreManifestLoaded ? "등록된 악보가 없습니다." : hymnScoreManifestLoadPromise ? "악보를 불러오는 중…" : "악보를 불러오지 못했어요."}</span>`
       : "";
     return `
       <div class="svc-song-picker svc-song-picker--linked">
@@ -27144,7 +27150,7 @@ function serviceNativeSongVariants(item, service = selectedServiceForEditor()) {
     for (const peer of song.same_song_ids || []) if (!found.has(peer)) queue.push(peer);
   }
   return [...found.values()].filter(song => song.id === current.id || song.unavailable
-    || ((!serviceItemRequiresNewHymnalScoreSong(item) || isNewHymnalScoreSong(song))
+    || ((!serviceItemRequiresNewHymnalScoreSong(item) || serviceSongHasScore(song))
       && serviceSelectableSongVersions(song, item, service).length));
 }
 
@@ -27205,7 +27211,7 @@ function serviceSongPickerResults(query, item = {}, service = selectedServiceFor
   const includeLyrics = getSearchPhrase(tokens).compact.length >= 4;
   const cacheKey = [
     normalizeSearchValue(normalizedQuery),
-    requiresNewHymnal ? "hymn" : requiresChildren ? `audio:${item.song_id || ""}` : "all",
+    requiresNewHymnal ? `score:${state.hymnScoreManifestLoaded}:${item.song_id || ""}` : requiresChildren ? `audio:${item.song_id || ""}` : "all",
     includeLyrics ? "lyrics" : "summary",
     service?.id || "",
     state.songs.length,
@@ -27214,14 +27220,14 @@ function serviceSongPickerResults(query, item = {}, service = selectedServiceFor
   if (state.searchCache.songPicker.has(cacheKey)) return state.searchCache.songPicker.get(cacheKey);
   const candidates = state.songs
     .filter(isSelectablePraiseSong)
-    .filter((song) => (!requiresNewHymnal || isNewHymnalScoreSong(song))
+    .filter((song) => (!requiresNewHymnal || serviceSongHasScore(song))
       && (!requiresChildren || serviceSelectableSongVersions(song, item, service).length))
     .map((song) => ({ song, match: getSongSearchMatch(song, tokens, { includeLyrics }) }))
     .filter((entry) => entry.match);
   const phraseMatches = candidates.filter((entry) => entry.match.phraseMatched);
   const results = phraseMatches.length ? phraseMatches : candidates;
   const songs = uniqueSongsById([
-    ...(directMatch && isSelectablePraiseSong(directMatch) && (!requiresNewHymnal || isNewHymnalScoreSong(directMatch)) && (!requiresChildren || serviceSelectableSongVersions(directMatch, item, service).length) ? [directMatch] : []),
+    ...(directMatch && isSelectablePraiseSong(directMatch) && (!requiresNewHymnal || serviceSongHasScore(directMatch)) && (!requiresChildren || serviceSelectableSongVersions(directMatch, item, service).length) ? [directMatch] : []),
     ...results
     .sort((a, b) => b.match.score - a.match.score || sortSongsForCurrentList(a.song, b.song))
     .slice(0, limit)
@@ -28946,8 +28952,8 @@ async function applyPresenterPreparationInput(serviceId = state.selectedServiceI
               }
             }
             if (!segmentSong) { unresolvedSegment = segment; break; }
-            if (serviceItemRequiresNewHymnalScoreSong(item) && !isNewHymnalScoreSong(segmentSong)) {
-              errors.push(`${entry.label}은 새찬송가 곡만 선택할 수 있습니다.`);
+            if (serviceItemRequiresNewHymnalScoreSong(item) && !serviceSongHasScore(segmentSong)) {
+              errors.push(`${entry.label}은 등록된 악보가 있는 곡을 선택해 주세요.`);
               unresolvedSegment = segment;
               break;
             }
@@ -29008,8 +29014,8 @@ async function applyPresenterPreparationInput(serviceId = state.selectedServiceI
           errors.push(`${entry.label} 곡을 찬양 DB에서 하나로 찾지 못했습니다.`);
           continue;
         }
-        if (serviceItemRequiresNewHymnalScoreSong(item) && !isNewHymnalScoreSong(song)) {
-          errors.push(`${entry.label}은 새찬송가 곡만 선택할 수 있습니다.`);
+        if (serviceItemRequiresNewHymnalScoreSong(item) && !serviceSongHasScore(song)) {
+          errors.push(`${entry.label}은 등록된 악보가 있는 곡을 선택해 주세요.`);
           continue;
         }
         item.song_id = song.id;
