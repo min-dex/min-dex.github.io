@@ -9331,7 +9331,7 @@ function handleDetailKeydown(event) {
     return;
   }
 
-  if (event.key === "Enter" && event.target.matches("input[data-song-field], input[data-song-meta-field], input[data-version-name-field], input[data-version-output-title-field]")) {
+  if (event.key === "Enter" && event.target.matches("input[data-song-field], input[data-song-meta-field], input[data-version-name-field], input[data-version-output-title-field], input[data-hymn-structure-version]")) {
     event.preventDefault();
     saveAll();
     return;
@@ -9587,6 +9587,9 @@ function handleDetailInput(event) {
     return;
   }
 
+  const measureField = event.target.closest("input[data-hymn-structure-version]");
+  if (measureField) { updateVersionMeasureField(measureField); return; }
+
   const songMetaField = event.target.closest("[data-song-meta-field]");
   if (songMetaField) {
     updateSongMetadataField(songMetaField);
@@ -9806,6 +9809,9 @@ function handleDetailChange(event) {
     updateVersionNameField(versionNameField);
     return;
   }
+
+  const measureField = event.target.closest("input[data-hymn-structure-version]");
+  if (measureField) { updateVersionMeasureField(measureField); return; }
 
   const songMetaField = event.target.closest("[data-song-meta-field]");
   if (songMetaField) {
@@ -17955,13 +17961,22 @@ function renderVersionTitleContent(song, version, forms, options = {}) {
   `;
 }
 
+function updateVersionMeasureField(field) {
+  const version = getSelectedVersion();
+  if (!version || version.id !== field.dataset.hymnStructureVersion) return;
+  field.dataset.hymnStructureRequest = String(++hymnStructureRenderTicket);
+  version.hymn_structure = {...(version.hymn_structure || {}),
+    displayText: globalThis.MindexHymnStructure.normalizeDisplayText(field.value)};
+  field.dataset.reviewStatus = "manual";
+  state.dirty.song = true;
+  updateSaveState();
+}
 let hymnStructureRenderTicket = 0;
 function updateVersionMusicalStructure(node, version, forms) {
   if (!node || !globalThis.MindexHymnStructure) return;
   const ticket = String(++hymnStructureRenderTicket);
   node.dataset.hymnStructureRequest = ticket;
-  if (node.matches("input")) node.value = "확인 중…";
-  else node.textContent = "마디 정보 확인 중…";
+  if (!node.matches("input")) node.textContent = "마디 정보 확인 중…";
   const snapshot = (forms || []).map(form => ({id:form.id, part_type:form.part_type, lyrics:form.lyrics || ""}));
   MindexHymnStructure.describe(version._legacyVersionId || version.id, snapshot,
     version._singleSongRecord ? {[version._legacyVersionId || version.id]: version.hymn_structure} : undefined)
@@ -17969,8 +17984,8 @@ function updateVersionMusicalStructure(node, version, forms) {
     .then(result => {
       if (!node.isConnected || node.dataset.hymnStructureRequest !== ticket) return;
       if (node.matches("input")) {
-        node.value = result.text.replace(/^마디:\s*/, "").split(" · 블록 ")[0];
-        node.title = `${node.dataset.hymnStructureLabel} · ${result.text}`;
+        if (document.activeElement !== node) node.value = result.status === "manual" ? result.text : result.text.replace(/^마디:\s*/, "").split(" · 블록 ")[0];
+        node.title = `${node.dataset.hymnStructureLabel} · ${result.text}${result.validationStatus === "stale" ? " · 악보 검증: 가사가 바뀌어 재검토 필요" : ""}`;
       } else node.textContent = result.text;
       node.dataset.reviewStatus = result.status;
     });
@@ -17981,7 +17996,7 @@ function renderVersionMusicalStructure(version, forms, options = {}) {
   queueMicrotask(() => updateVersionMusicalStructure(document.querySelector(`[data-hymn-structure-ticket="${ticket}"]`), version, forms));
   if (options.metadataField) {
     const label = `마디 수 · ${versionEditableName(getSelectedSong(), version)}`;
-    return `<label class="field compact"><span>마디 수</span><input type="text" readonly aria-label="${escapeAttr(label)}" value="확인 중…" data-hymn-structure-label="${escapeAttr(label)}" data-hymn-structure-ticket="${ticket}" data-hymn-structure-version="${escapeAttr(version.id)}" /></label>`;
+    return `<label class="field compact"><span>마디 수</span><input type="text" maxlength="100" aria-label="${escapeAttr(label)}" value="${escapeAttr(version.hymn_structure?.displayText ?? "")}" placeholder="예: 4 → approx. 4 bars" data-hymn-structure-label="${escapeAttr(label)}" data-hymn-structure-ticket="${ticket}" data-hymn-structure-version="${escapeAttr(version.id)}" /></label>`;
   }
   return `<div class="version-musical-structure" data-hymn-structure-ticket="${ticket}" data-hymn-structure-version="${escapeAttr(version.id)}" aria-label="버전별 마디 정보">마디 정보 확인 중…</div>`;
 }
