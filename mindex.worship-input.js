@@ -1505,7 +1505,7 @@ function findConfidentServicePraiseSong(value, item = {}, service = selectedServ
   const requiresNewHymnal = serviceItemRequiresNewHymnalScoreSong(item);
   const query = compactSearchValue(songInput);
   const ranked = state.songs
-    .filter((song) => !requiresNewHymnal || isNewHymnalScoreSong(song))
+    .filter((song) => !requiresNewHymnal || serviceSongHasScore(song))
     .map((song) => ({ song, match: getSongSearchMatch(song, tokens) }))
     .filter((entry) => entry.match)
     .sort((a, b) => b.match.score - a.match.score || sortSongsForCurrentList(a.song, b.song));
@@ -1531,7 +1531,7 @@ async function createBlankPraiseSongForServiceInput(value, service = selectedSer
   if (presenterPreparationSongContentHasConnection(title)) return null;
   if (!title) return null;
 
-  const praiseType = ["children", "nursery"].includes(service?.type_id) ? "children" : "ccm";
+  const praiseType = "ccm";
   return await createEmptyPraiseAtomic({title,praiseTypes:[praiseType],reuseExisting:true},`input:${service?.id || ""}:${title}`);
 }
 

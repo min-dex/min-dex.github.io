@@ -1,4 +1,4 @@
-/* Version-owned children audio and worship-owned occurrence timing. */
+/* Version-owned audio and worship-owned occurrence timing. */
 (function (root) {
   'use strict';
   let revision = 0;
@@ -66,7 +66,8 @@
   const lyricsText = value => typeof normalizeLyricsForStorage === 'function' ? normalizeLyricsForStorage(value) : String(value || '').normalize('NFC');
   const sourceSignature = version => JSON.stringify((version?.forms || []).map(f => [f.id || '', f.part_type || '', f.part_number ?? null, f.part_variant || '', lyricsText(f.lyrics || f.text)]));
   const isChildrenMode = item => typeof servicePraiseInputMode === 'function' && servicePraiseInputMode(item) === 'children_audio';
-  const isChildrenVersion = (song, version) => typeof versionEffectivePraiseTypes === 'function' && versionEffectivePraiseTypes(song, version).includes('children');
+  const hasVersionAudio = version => !!version?.audio_set && /^https?:\/\//.test(version.audio_set.audioUrl || '')
+    && Number.isFinite(version.audio_set.duration) && version.audio_set.duration > 0 && !!version.audio_set.audioFingerprint;
   // Audio page boundaries/repetitions may differ from the stored lyric blocks.
   // Ranges refer to the current version text, with only spacing/punctuation folded.
   const audioText = value => String(value || '').normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
@@ -83,12 +84,27 @@
         return (version?.forms || []).some(v => v.id === f.id && lyricsText(v.lyrics) === lyricsText(f.lyrics));
       });
   }
+  function audioStatus(version, slides = null) {
+    if (!version) return '';
+    const profile = version.audio_set;
+    if (!String(profile?.audioUrl || '').trim()) return '등록된 음원이 없습니다.';
+    if (!hasVersionAudio(version)) return '등록된 음원 정보를 확인해 주세요.';
+    if (!validSet(profile, version)) return '음원에 대응하는 가사·송폼이 변경됐습니다. 타이밍을 확인해 주세요.';
+    if (slides && validate(profile, slides, true)) return '음원은 있지만 자동 넘김 타이밍이 맞지 않습니다. 타이밍을 확인해 주세요.';
+    return '';
+  }
+  function statusMarkup(context, entries) {
+    const song = serviceItemLinkedSong(context.item);
+    const version = song ? getPresenterServiceItemVersion(song, context.item, context.service) : null;
+    const status = audioStatus(version, entries.length ? entries.map(entry => entry.slide) : null);
+    return status ? `<p class="praise-media-status" role="status" data-song-audio-status>${escapeHtml(status)}</p>` : '';
+  }
   const versionProfile = (song, version) => {
     const stored = version?.audio_set;
     return stored ? {...stored, url:stored.audioUrl, databaseTiming:true} : null;
   };
   function formsFor(item, song, version, fallback) {
-    if (!isChildrenMode(item) || !isChildrenVersion(song, version)) return fallback;
+    if (!isChildrenMode(item) || !hasVersionAudio(version)) return fallback;
     const profile = versionProfile(song, version);
     return validSet(profile, version) ? profile.forms.map(form => ({ ...form })) : fallback;
   }
@@ -96,19 +112,19 @@
     if (!song?.id) return slides;
     const key = version?._legacyTimingKey || keyFor(song.id, version?.id || item.version_id || item.song_version_id);
     const profile = versionProfile(song, version);
-    const children = isChildrenVersion(song, version);
+    const audioPresent = hasVersionAudio(version);
     const childMode = isChildrenMode(item);
-    const valid = childMode && children && validSet(profile, version) && profile?.enabled && profile.url && !validate(profile, slides, true);
+    const valid = childMode && audioPresent && validSet(profile, version) && profile?.enabled && profile.url && !validate(profile, slides, true);
     if (valid && profile.databaseTiming) remoteSources.add(profile.url);
     let page = 0;
     return slides.map(slide => {
       const timed = slide.type === 'lyrics' || slide.type === 'blank';
       const intro = slide.type === 'song-title' && page === 0;
-      const result = { ...slide, songTimingKey: key, songTimingEligible: children && childMode, songTimingAudio: childMode && children && validSet(profile, version) && profile?.url ? {url:profile.url,name:profile.audioName} : null };
+      const result = { ...slide, songTimingKey: key, songTimingEligible: audioPresent && childMode, songTimingAudio: childMode && audioPresent && validSet(profile, version) && profile?.url ? {url:profile.url,name:profile.audioName} : null };
       if (childMode && !valid) result.warnings = [...(slide.warnings || []), "버전 음원·타이밍이 없거나 변경됐습니다. 버전 음원·타이밍에서 자료를 확인하세요."];
       if (timed || intro) {
         // Missing, stale or disabled DB timing must not inherit another timeline.
-        if (children || profile || childMode) delete result.syncTimeline;
+        if (audioPresent || profile || childMode) delete result.syncTimeline;
         if (valid) result.syncTimeline = {
           groupId: `${item.id}:local-song-timing`, audioSrc: profile.url,
           audioTitle: profile.audioName, page: timed ? page + 1 : 0,
@@ -428,7 +444,7 @@
   }
   async function saveToVersion(song, version, draft, slides) {
     if (version?._audioSetSupported === false) throw Error('버전 음원 저장 기능이 아직 준비되지 않았습니다. DB 업데이트 후 곡을 새로 불러와 주세요.');
-    if (!isChildrenVersion(song, version) || !version?._worshipVersionPersisted || !version.lyric_signature) throw Error('저장된 어린이 곡·버전을 새로 불러온 뒤 시도해 주세요.');
+    if (!version?._worshipVersionPersisted || !version.lyric_signature) throw Error('저장된 곡·버전을 새로 불러온 뒤 시도해 주세요.');
     if (!validSet(draft, version)) throw Error('버전의 가사·폼이 바뀌었습니다. 다시 열어 주세요.');
     const issue = validate(draft, slides, Boolean(draft.audioUrl));
     if (issue) throw Error(issue);
@@ -479,7 +495,7 @@
     const song = serviceItemLinkedSong(item);
     const version = getPresenterServiceItemVersion(song, item, service);
     const serviceTiming = all.some(s => s.serviceTimingPage);
-    if (!serviceTiming && (!isChildrenVersion(song, version) || !isChildrenMode(item))) { showToast('어린이 유형의 버전을 선택해 주세요.', 'error'); return; }
+    if (!serviceTiming && (!version || !isChildrenMode(item))) { showToast('음원을 연결할 곡을 선택해 주세요.', 'error'); return; }
     const setForms = serviceTiming ? null : formsFor(item, song, version, presenterFormPlanForServiceItem(version, item, song).forms.filter(form => !form._presenterTitle));
     const linkedAudio = normalizeServiceAudioAsset(parseServiceItemMemo(item.memo).audioAsset);
     const stored = serviceTiming ? parseServiceItemMemo(item.memo).audioTiming : null;
@@ -494,9 +510,9 @@
     const dialog = document.createElement('dialog');
     dialog.className = 'song-timing-dialog'; dialog.dataset.songTimingDialog = '';
     dialog.setAttribute('aria-labelledby', 'song-timing-title');
-    dialog.innerHTML = `<h2 id="song-timing-title">${serviceTiming ? '예배 음원·가사·타이밍' : '어린이 버전 음원·타이밍'}</h2>
+    dialog.innerHTML = `<h2 id="song-timing-title">${serviceTiming ? '예배 음원·가사·타이밍' : '곡 음원·타이밍'}</h2>
       <p>${escapeHtml(all[0]?.elementTitle || all[0]?.title || '')}</p>
-      <p>${serviceTiming ? '음원·가사·전환 시각을 이 예배에만 저장합니다. 다른 기기에서도 이 예배를 열면 사용할 수 있습니다.' : '가사·송폼·음원·전환 시각을 이 곡의 버전에 저장합니다. ‘어린이: 음원 불러오기’로 이 버전을 사용하는 예배에 적용됩니다.'}</p>
+      <p>${serviceTiming ? '음원·가사·전환 시각을 이 예배에만 저장합니다. 다른 기기에서도 이 예배를 열면 사용할 수 있습니다.' : '가사·송폼·음원·전환 시각을 이 곡의 버전에 저장합니다. ‘DB: 음원’로 이 버전을 사용하는 예배에 적용됩니다.'}</p>
       <p>${serviceTiming ? '' : '가사·악보 불러오기에는 적용되지 않습니다.'} 음원을 들으며 각 장의 시작 시각을 기록하세요. ${serviceTiming ? '가사는 부르기 시작하는 시각보다 1초 먼저, 가사 없는 사진·간주는 기록한 시각에 넘깁니다.' : '가사는 1초 먼저, 빈 화면·음표는 기록한 시각에 넘깁니다.'} 수동 전환 시 자동 넘김만 꺼지고 음악은 계속 재생됩니다.</p>
       ${linkedAudio.url ? `<button type="button" class="btn secondary" data-timing-linked>연결된 음원 사용 · ${escapeHtml(linkedAudio.name || '음원')}</button>` : ''}
       <label>음원 선택 <input type="file" accept="audio/*" data-timing-file></label>
@@ -769,7 +785,7 @@
     });
     document.body.append(dialog); dialog.showModal();
   }
-  root.MindexSongTiming = { ownsTransport, resumeAutoSync, snapBeat, detectBeatGrid, composePhotos, validatePhotos, saveToVersion, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, saveToWorship, formsFor, sourceSignature, ownsSource: source => remoteSources.has(source), get revision() { return revision; } };
+  root.MindexSongTiming = { audioStatus, statusMarkup, ownsTransport, resumeAutoSync, snapBeat, detectBeatGrid, composePhotos, validatePhotos, saveToVersion, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, saveToWorship, formsFor, sourceSignature, ownsSource: source => remoteSources.has(source), get revision() { return revision; } };
   if (typeof document !== 'undefined') {
     document.addEventListener('pointerdown', e => {
       activeSeekInput = e.target.closest('[data-song-timing-seek]:not(:disabled)');

@@ -25,11 +25,11 @@ try:
     const restored=groupWorshipElements(rows.sections,rows.elements)[service.id][0];
     check(restored.song_id==='song'&&restored.version_id==='v2','round trip lost song/version');
     check(servicePraiseInputMode(restored,parseServiceItemMemo(restored.memo),service)==='lyrics_db','round trip lost effective mode');
-    current().version_id='v1';current().song_version_id='v1';change('score_db');check(current().version_id==='v2','score mode kept incompatible version');
+    current().version_id='v1';current().song_version_id='v1';change('score_db');check(current().version_id==='v1','score mode replaced explicitly linked version without a score');
     // A linked record can be absent or only metadata-hydrated when the user changes mode.
-    state.songs=[];clearSearchCaches();change('score_db');check(current().version_id==='v2','missing catalog cleared version');
+    state.songs=[];clearSearchCaches();change('score_db');check(current().version_id==='v1','missing catalog cleared version');
     const pending='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';current().song_id=pending;
-    state.songs=[{id:pending,title:'pending',versions:[]}];clearSearchCaches();change('lyrics_db');check(current().version_id==='v2','pending versions cleared ID');
+    state.songs=[{id:pending,title:'pending',versions:[]}];clearSearchCaches();change('lyrics_db');check(current().version_id==='v1','pending versions cleared ID');
     current().memo=serializeServiceItemMemo({...parseServiceItemMemo(current().memo),slides:['manual draft']});
     change('manual_praise');check(current().song_id===pending&&!current().version_id,'manual mode lost song or kept version');
     const hymn={id:'hymn',title:'모드 검증',hymn_no:'301',praise_types:['hymn'],_relationalVersionsLoaded:true,versions:[{id:'hv',name:'새찬송가',praise_types:['hymn'],hymn_no:'301',_worshipVersionPersisted:true,forms:[{id:'v1',part_type:'Verse',part_number:1,lyrics:'첫 절'},{id:'v2',part_type:'Verse',part_number:2,lyrics:'둘째 절'}]}]};

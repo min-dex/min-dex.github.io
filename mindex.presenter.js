@@ -1464,7 +1464,7 @@ function getServiceItemVersion(song, item, service) {
     if (hymnVersion) return hymnVersion;
   } else if (song?.hymn_no) {
     const nonHymnVersion = versions.find((version) =>
-      versionEffectivePraiseTypes(song, version).some((type) => type === "ccm" || type === "children"),
+      versionEffectivePraiseTypes(song, version).some((type) => type === "ccm"),
     );
     if (nonHymnVersion) return nonHymnVersion;
   }
@@ -1520,7 +1520,7 @@ function presenterVersionHasUsableLyrics(version = null) {
 }
 
 function serviceTypePreferredPraiseTypes(typeId) {
-  if (["children", "nursery"].includes(typeId)) return ["children"];
+  if (["children", "nursery"].includes(typeId)) return ["ccm"];
   if (typeId === "youth" || typeId === "young-adult") return ["ccm"];
   return [];
 }

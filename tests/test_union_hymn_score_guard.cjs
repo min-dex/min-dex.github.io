@@ -24,8 +24,10 @@ for (const number of ['10', '010']) {
   assert.equal(context.normalizedHymnScoreNumber(number), '10');
   assert.equal(context.isNewHymnalScoreSong({hymn_no:number,praise_types:['hymn']}), true);
 }
-// Existing old-edition versions of a new-hymnal song keep the explicitly linked new score.
-assert.equal(context.presenterHymnScoreAssetSlides({hymn_no:'10'}, {hymn_no:'통 10'}, '')[0].url, 'new-10.webp');
+// A selected old edition must never borrow its parent new-hymnal score.
+assert.equal(context.presenterHymnScoreAssetSlides({hymn_no:'10'}, {hymn_no:'통 10'}, '').length, 0);
+context.state.hymnScoreManifest.custom={title:'소유 악보',slides:[{url:'own.webp'}]};
+assert.equal(context.presenterHymnScoreAssetSlides({}, {id:'custom',hymn_no:'통 10'}, '')[0].url,'own.webp');
 assert.equal(context.presenterHymnScoreAssetSlides(null, {hymn_no:'통 10'}, '').length, 0);
 assert.equal(context.normalizedHymnScoreNumber('새찬송가 10장'), '10');
 console.log('PASS union hymn score isolation');

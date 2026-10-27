@@ -4982,3 +4982,17 @@ followed by offering prayer. The existing original MP4 attachment from the
 The default is applied only in calendarAssigneeRowsForNewService, before the
 existing atomic create. Projection, reopen, save and existing services are not
 retrofitted; exact-request create retries retain their frozen element payload.
+
+## 화면 진입·탭 복귀 시 최신 조회 · 2026-10-28
+
+교회력·역대 콘티·찬양·말씀 자료·참고자료·예배 목록은 화면 진입과 열린 페이지
+복원, 브라우저 창 복귀 때 서버의 최신 데이터를 확인한다. 이미 loaded 상태여도
+생략하지 않는다. 기존 목록/선택/스크롤을 유지하고 안전 대기열에서 갱신한다.
+찬양은 native single-song catalog를 사용하며 새 곡·변경·삭제를 반영한다.
+삭제된 현재 편집 대상은 유지한다. 성경 본문 전체 재다운로드는 하지 않는다.
+
+입력 포커스·미저장 초안·저장·재생·송출·대화상자 등 기존 작업 보호를 유지한다.
+조회 중 입력이나 화면/프로젝트가 바뀌면 적용하지 않는다. 보호가 풀리면 재시도하고,
+실패하면 기존 화면을 보존하며 backoff 후 재시도한다. 기존 저장 알림과 60초 revision
+확인은 유지하고, 전체 찬양 catalog 조회는 진입/복귀 때만 사용한다.
+저장 알림과 주기적 복구는 해당 찬양 한 곡만 조회한다. 자동 갱신은 운영 데이터를 쓰지 않는다.

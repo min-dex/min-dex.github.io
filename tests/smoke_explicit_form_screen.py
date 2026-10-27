@@ -12,7 +12,7 @@ try:
     const lyrics=buildPresenterSlidesForServiceItem(item,service,0).filter(s=>s.type==='lyrics');
     if(lyrics.map(s=>s.text).join('|')!=='둘째 절 가사|후렴 가사|첫째 절 가사|후렴 가사')throw Error('lyric sequence');
     const scoreItem={...item,id:crypto.randomUUID(),memo:JSON.stringify({elementType:'praise',inputMode:'score',outputMode:'score',formHint:'V2-C-V1-C',asset:{kind:'score',slides:[{url:'assets/hymn-scores/359/slide-01.webp',formLabel:'Verse 1'},{url:'assets/hymn-scores/359/slide-02.webp'},{url:'assets/hymn-scores/359/slide-05.webp',formLabel:'Verse 2'},{url:'assets/hymn-scores/359/slide-06.webp'},{url:'assets/hymn-scores/359/slide-03.webp',formLabel:'Chorus'},{url:'assets/hymn-scores/359/slide-04.webp'}]}})};
-    const scoreMemo=JSON.parse(scoreItem.memo);state.hymnScoreManifest={'359':{title:'검증 악보',slides:scoreMemo.asset.slides.map(x=>({...x,src:x.url}))}};delete scoreMemo.asset;scoreItem.memo=JSON.stringify(scoreMemo);song.hymn_no='359';song.versions[0].praise_types=['hymn'];state.serviceItems[sid].push(scoreItem);clearSearchCaches();
+    const scoreMemo=JSON.parse(scoreItem.memo);state.hymnScoreManifest={'359':{title:'검증 악보',slides:scoreMemo.asset.slides.map(x=>({...x,src:x.url}))}};delete scoreMemo.asset;scoreItem.memo=JSON.stringify(scoreMemo);song.hymn_no='359';song.versions[0].hymn_no='359';song.versions[0].praise_types=['hymn'];state.serviceItems[sid].push(scoreItem);clearSearchCaches();
     const scores=buildPresenterSlidesForServiceItem(scoreItem,service,1).filter(s=>s.sourceType==='score');
     const source=scores.map(s=>s.asset?.url||s.imageSrc||'');
     if(source.map(x=>x.match(/slide-(\d+)/)?.[1]).join(',')!=='05,06,03,04,01,02,03,04')throw Error('score order '+source.join(','));

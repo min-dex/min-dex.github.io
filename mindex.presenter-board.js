@@ -1146,7 +1146,7 @@ function renderPresenterBoardItemAudioControls(serviceId, context = {}, options 
       ${source ? `
         <strong title="${escapeAttr(label)}">${escapeHtml(label)}</strong>
         ${renderPresenterInputAudioControls(source, label, serviceId, context.item.id, entries.some(({slide}) => slide.syncTimeline?.localTiming))}` : ""}
-      ${childrenAudio && source ? '<span class="svc-children-audio-hint">송출 중 제목에서 <kbd>P</kbd> 재생</span>' : ""}
+      ${childrenAudio ? globalThis.MindexSongTiming?.statusMarkup(context, entries) || (source ? '<span class="svc-children-audio-hint">송출 중 제목에서 <kbd>P</kbd> 재생</span>' : "") : ""}
       <div class="svc-board-subgroup-audio-actions">
         ${!source && servicePraiseInputMode(context.item) === "children_audio" ? `<button class="btn secondary" type="button" data-song-timing-open data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(context.item.id)}">버전 음원·타이밍</button>` : ""}
         ${source ? globalThis.MindexSongTiming?.controls(serviceId, entries, { audioSource: source }) || "" : ""}

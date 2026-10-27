@@ -234,10 +234,11 @@ const PRAISE_LIST_FILTERS = [
   ["review", "검토 필요"],
   ["hymns", "찬송가"],
   ["ccm", "CCM"],
-  ["children", "어린이"],
+  ["audio", "음원"],
 ];
 const PRAISE_LIST_FILTER_KEYS = PRAISE_LIST_FILTERS.map(([key]) => key);
 const PRAISE_LIST_FILTER_ALIASES = {
+  children: "audio",
   "all-review": "review",
   "attention-pink": "review",
   "attention-blue": "review",
@@ -268,8 +269,8 @@ const SERVICE_ELEMENT_TYPE_UI_OPTIONS = [
 const SERVICE_ELEMENT_LABELS = Object.fromEntries(SERVICE_ELEMENT_TYPE_UI_OPTIONS.filter(([value]) => value));
 const SERVICE_PRAISE_INPUT_MODES = [
   ["lyrics_db", "DB: 가사"],
-  ["children_audio", "DB: 음원 (어린이)"],
-  ["score_db", "DB: 악보 (찬송가)"],
+  ["children_audio", "DB: 음원"],
+  ["score_db", "DB: 악보"],
   ["manual_praise", "직접 추가: 가사"],
   ["audio_praise", "직접 추가: 음원"],
 ];
@@ -901,7 +902,7 @@ async function loadInitialData() {
   }
   if (state.module === "references") pending.push(loadReferenceLinks({ silent: true }));
   if (state.module === "calendar") pending.push(loadCalendarData({ silent: true }));
-  return Promise.allSettled(pending);
+  return Promise.allSettled(pending).then(results => { window.MINDEX_CONTENT_LIVE?.enter(); return results; });
 }
 
 function isServiceDataModule(moduleName = state.module) {
@@ -1223,6 +1224,7 @@ async function loadHymnScoreManifest({ silent = false } = {}) {
       const data = await response.json();
       state.hymnScoreManifest = data && typeof data === "object" && !Array.isArray(data) ? data : {};
       state.hymnScoreManifestLoaded = true;
+      clearSearchCaches();
       presenterSlideBuildCache.clear();
       if (state.module === "presenter") renderPresenterControlState(presenterViewServiceId());
       else if (isServiceDataModule()) render();
@@ -2625,6 +2627,7 @@ async function applyBrowserHistorySnapshot(snapshot) {
     }
   } finally {
     state.applyingBrowserHistory = false;
+    window.MINDEX_CONTENT_LIVE?.enter();
   }
 }
 
@@ -3044,13 +3047,14 @@ function runModuleEntryLoads(moduleName) {
       await loadWorshipPresenterSlides(presenterViewServiceId());
     }
 
-    if (moduleName === "calendar" && !state.calendarLoading && !state.calendarCellSaves.size && !departmentCalendarWrites.size) {
-      await loadCalendarData({ refresh: true });
+    if (moduleName === "calendar" && !state.calendarLoaded && !state.calendarLoading) {
+      await loadCalendarData({ silent: true });
     }
 
     if (moduleName === "references" && !state.referenceLinksLoaded && !state.referenceError) {
       await loadReferenceLinks();
     }
+    window.MINDEX_CONTENT_LIVE?.enter();
   })().catch((error) => {
     console.error("[Navigation] module load failed:", error);
     showToast(error?.message || "화면 데이터를 불러오지 못했습니다.", "error");
@@ -6465,9 +6469,9 @@ async function createEmptyPraiseAtomic(options = {}, scope = "sidebar") {
       if (matches.length === 1) return matches[0];
       if (matches.length > 1) throw new Error("같은 제목의 곡이 여러 개입니다. 목록에서 선택해 주세요.");
     }
-    const result = await mutateSingleSong("create", {prefix:types.includes("children") ? "kid" : "ccm",
-      metadata:{title:options.title || nextPraiseSongTitle(),praise_types:types.length ? types : ["ccm"]},
-      content:{name:"기본",raw_section_name:"기본",is_primary:true,forms:[]}}, `create:${scope}`);
+    const result = await mutateSingleSong("create", {prefix:"ccm",
+      metadata:{title:options.title || nextPraiseSongTitle()},
+      content:{name:"기본",raw_section_name:"기본",is_primary:true,praise_types:types.length ? types : ["ccm"],forms:[]}}, `create:${scope}`);
     return state.songs.find(song=>song.id===result.id);
   }
   const client = state.client, project = state.config.url;
@@ -8448,7 +8452,7 @@ async function resolveCanonicalNormalizedTitle(song, title) {
 function canonicalSongVariantKey(song) {
   const title = cleanSongTitleForSave(song);
   const types = normalizePraiseTypes(song?.praise_types || aggregateSongPraiseTypes(song));
-  if (types.includes("children")) return "children";
+
   const subtitle = nullIfBlank(song?.subtitle);
   if (subtitle && normalizeCanonicalTitle(subtitle) !== normalizeCanonicalTitle(title)) {
     return normalizeCanonicalTitle(subtitle);
@@ -8478,7 +8482,7 @@ function isCompatibleCanonicalSong(existing, song) {
 
   const existingTypes = normalizePraiseTypes(existing?.praise_types || []);
   const songTypes = normalizePraiseTypes(song?.praise_types || aggregateSongPraiseTypes(song));
-  if (existingTypes.includes("children") !== songTypes.includes("children")) return false;
+
 
   return true;
 }
@@ -10203,7 +10207,7 @@ function toggleVersionPraiseType(type, versionId = getSelectedVersionId()) {
 function renderVersionPraiseTypeTags(version) {
   if (!version) return "";
   const active = versionEffectivePraiseTypes(getSelectedSong(), version);
-  const labels = { hymn: "찬송가", ccm: "CCM", children: "어린이" };
+  const labels = { hymn: "찬송가", ccm: "CCM" };
   return `<div class="version-type-tags">${
     PRAISE_TYPES.map(type => `
       <button class="version-type-tag${active.includes(type) ? " on" : ""}" type="button"
@@ -10754,7 +10758,7 @@ async function resolveServiceSongSelectionBeforeSave(serviceId, index) {
   if (!rawTitle) return false;
   const song = await resolveExistingPraiseSongForServiceInputAfterCatalogLoad(rawTitle, item, service);
   if (!song) return false;
-  if (serviceItemRequiresNewHymnalScoreSong(item) && !isNewHymnalScoreSong(song)) return false;
+  if (serviceItemRequiresNewHymnalScoreSong(item) && !serviceSongHasScore(song)) return false;
   linkServiceItemToPraiseSong(item, song, service, {
     forceLyricsMode: isSpecialSongServiceItem(item)
       && servicePraiseUsesDirectLyrics(inputMode),
@@ -11850,7 +11854,7 @@ function serviceItemSongSelectionInvalid(item = {}, service = selectedServiceFor
   if (!serviceItemRequiresSongSelection(item, service)) return false;
   const song = resolvedSong || serviceItemLinkedSong(item);
   if (!song) return Boolean(item.song_id || String(item.raw_title || "").trim());
-  if (serviceItemRequiresNewHymnalScoreSong(item) && !isNewHymnalScoreSong(song)) return true;
+  if (serviceItemRequiresNewHymnalScoreSong(item) && item.song_id !== song.id && !serviceSongHasScore(song)) return true;
   if (servicePraiseInputMode(item, parseServiceItemMemo(item.memo), service) === "children_audio"
     && !serviceSelectableSongVersions(song, item, service).length) return true;
   if (resolvedSong && !item.song_id) return false;
@@ -11941,6 +11945,10 @@ function serviceItemRequiresNewHymnalScoreSong(item = {}) {
   return serviceItemOutputMode(item, parseServiceItemMemo(item?.memo)) === "score";
 }
 
+function serviceSongHasScore(song = null) {
+  return (song?.versions || []).some(version => presenterHymnScoreAssetSlides(song, version).length);
+}
+
 function isNewHymnalScoreSong(song = null) {
   return Boolean(/^\d{1,3}$/.test(String(song?.hymn_no || "").trim()) && songHasPraiseType(song, "hymn"));
 }
@@ -11950,10 +11958,14 @@ function serviceSelectableSongVersions(song = null, item = {}, service = selecte
   const versions = song?.versions || [];
   if (!versions.length) return [];
   if (servicePraiseInputMode(item, parseServiceItemMemo(item.memo), service) === "children_audio") {
-    return versions.filter(version => versionEffectivePraiseTypes(song, version).includes("children"));
+    // Keep an already-linked record editable when its audio is absent/stale.
+    // New choices are still filtered by actual audio presence.
+    const linked = item.song_id === song.id ? serviceItemLinkedVersion(item, song) : null;
+    return versions.filter(version => versionHasAudio(version) || version === linked);
   }
   if (!serviceItemRequiresNewHymnalScoreSong(item)) return versions;
-  const hymnVersions = versions.filter((version) => serviceVersionIsNewHymnalScoreVersion(song, version));
+  const linked = item.song_id === song.id ? serviceItemLinkedVersion(item, song) : null;
+  const hymnVersions = versions.filter((version) => presenterHymnScoreAssetSlides(song, version).length || version === linked);
   return hymnVersions.length ? hymnVersions : versions;
 }
 
@@ -11996,7 +12008,7 @@ function preferredServiceSongVersion(song = null, item = {}, service = selectedS
   const memo = parseServiceItemMemo(item?.memo);
   const inputMode = servicePraiseInputMode(item, memo, service);
   if (inputMode === "score_db") {
-    return preferredNewHymnalVersion(song, versions) || fallbackVersion;
+    return versions.find(version => presenterHymnScoreAssetSlides(song, version).length) || fallbackVersion;
   }
   if (inputMode === "lyrics_db" || inputMode === "praise_db") {
     const defaultVersionId = getDefaultVersionId(song);
@@ -12713,8 +12725,7 @@ async function createPraiseSongFromServiceItem(index) {
       if (!requireClient()) return;
       const title = stripHymnNo(presenterPreparationSongContent(inputTitle)).title.trim();
       if (!title) return;
-      const type = servicePraiseInputMode(item,parseServiceItemMemo(item.memo),service)==="children_audio"
-        || ["children","nursery"].includes(service.type_id) ? "children" : "ccm";
+      const type = "ccm";
       song = await createEmptyPraiseAtomic({title,praiseTypes:[type],reuseExisting:true},`service:${serviceId}:${item.id || index}`);
     }
     if (!current()) { showToast("곡 등록은 확인했습니다. 변경 중인 예배 항목은 덮어쓰지 않았습니다.","info"); return; }
@@ -12740,8 +12751,8 @@ function selectServiceSongForItem(index, songId) {
   const item = items[index];
   const song = songById(songId);
   if (!serviceId || !item || !song) return;
-  if (serviceItemRequiresNewHymnalScoreSong(item) && !isNewHymnalScoreSong(song)) {
-    showToast("악보 항목은 새찬송가 곡만 선택할 수 있습니다.", "error");
+  if (serviceItemRequiresNewHymnalScoreSong(item) && !serviceSongHasScore(song)) {
+    showToast("악보 항목은 등록된 악보가 있는 곡을 선택해 주세요.", "error");
     return;
   }
   const queryField = findDeferredServiceTextInput(serviceId, index, "raw_title");
@@ -19487,6 +19498,10 @@ function songListView(song) {
   };
 }
 
+function versionHasAudio(version) {
+  return globalThis.MindexSingleSong.hasAudio(version);
+}
+
 function versionEffectivePraiseTypes(song, version) {
   const explicitTypes = normalizePraiseTypes(version?.praise_types);
   if (explicitTypes.length) return explicitTypes;
@@ -19518,13 +19533,17 @@ function computeSongTypes(song) {
 function resolveSongForFilter(song, filterKey) {
   if (!song) return { matches: false, version: null };
   if (filterKey === "all") return { matches: true, version: null };
+  if (filterKey === "audio") {
+    const version = (song.versions || []).find(versionHasAudio) || null;
+    return { matches: !!version, version };
+  }
 
   const types = computeSongTypes(song);
   const matches = types.has(filterKey);
   if (!matches) return { matches: false, version: null };
 
   let version = null;
-  if (filterKey === "ccm" || filterKey === "children") {
+  if (filterKey === "ccm") {
     version = (song.versions || []).find((v) =>
       versionEffectivePraiseTypes(song, v).includes(filterKey)
     ) || null;
@@ -19689,7 +19708,7 @@ function getSongsForPraiseFilter() {
   const songs = state.songs.filter(isSelectablePraiseSong);
   if (state.praiseFilter === "hymns") return songs.filter((song) => songHasPraiseType(song, "hymn"));
   if (state.praiseFilter === "ccm") return songs.filter((song) => songHasPraiseType(song, "ccm"));
-  if (state.praiseFilter === "children") return songs.filter((song) => songHasPraiseType(song, "children"));
+  if (state.praiseFilter === "audio") return songs.filter(song => resolveSongForFilter(song, state.praiseFilter).matches);
   if (["empty", "review"].includes(state.praiseFilter)) {
     return songs.filter((song) => songMatchesPraiseStatusFilter(song, state.praiseFilter));
   }
@@ -20652,11 +20671,11 @@ function normalizePraiseTypes(value) {
     praise: "ccm",
     찬양: "ccm",
     복음성가: "ccm",
-    children: "children",
-    어린이: "children",
-    파이디온: "children",
-    elem: "children",
-    어린이찬양: "children",
+    children: "ccm",
+    어린이: "ccm",
+    파이디온: "ccm",
+    elem: "ccm",
+    어린이찬양: "ccm",
   };
   return canonicalPraiseTypes(parseList(value).map((item) => resolveDomainAlias(item, aliases)));
 }
@@ -26980,8 +26999,8 @@ function renderServiceSongPicker(item, index, model = serviceItemEditorModel(ite
   const query = String(item?.raw_title || "").trim();
   const versionPicker = renderServiceSongVersionPicker(item, index, model);
   if (song) {
-    const typeWarning = serviceItemRequiresNewHymnalScoreSong(item) && !isNewHymnalScoreSong(song)
-      ? `<span class="svc-song-picker-warning">새찬송가 곡만 선택 가능</span>`
+    const typeWarning = serviceItemRequiresNewHymnalScoreSong(item) && !serviceSongHasScore(song)
+      ? `<span class="svc-song-picker-warning">${state.hymnScoreManifestLoaded ? "등록된 악보가 없습니다." : hymnScoreManifestLoadPromise ? "악보를 불러오는 중…" : "악보를 불러오지 못했어요."}</span>`
       : "";
     return `
       <div class="svc-song-picker svc-song-picker--linked">
@@ -27018,7 +27037,7 @@ function serviceNativeSongVariants(item, service = selectedServiceForEditor()) {
     for (const peer of song.same_song_ids || []) if (!found.has(peer)) queue.push(peer);
   }
   return [...found.values()].filter(song => song.id === current.id || song.unavailable
-    || ((!serviceItemRequiresNewHymnalScoreSong(item) || isNewHymnalScoreSong(song))
+    || ((!serviceItemRequiresNewHymnalScoreSong(item) || serviceSongHasScore(song))
       && serviceSelectableSongVersions(song, item, service).length));
 }
 
@@ -27079,7 +27098,7 @@ function serviceSongPickerResults(query, item = {}, service = selectedServiceFor
   const includeLyrics = getSearchPhrase(tokens).compact.length >= 4;
   const cacheKey = [
     normalizeSearchValue(normalizedQuery),
-    requiresNewHymnal ? "hymn" : requiresChildren ? "children" : "all",
+    requiresNewHymnal ? `score:${state.hymnScoreManifestLoaded}:${item.song_id || ""}` : requiresChildren ? `audio:${item.song_id || ""}` : "all",
     includeLyrics ? "lyrics" : "summary",
     service?.id || "",
     state.songs.length,
@@ -27088,14 +27107,14 @@ function serviceSongPickerResults(query, item = {}, service = selectedServiceFor
   if (state.searchCache.songPicker.has(cacheKey)) return state.searchCache.songPicker.get(cacheKey);
   const candidates = state.songs
     .filter(isSelectablePraiseSong)
-    .filter((song) => (!requiresNewHymnal || isNewHymnalScoreSong(song))
+    .filter((song) => (!requiresNewHymnal || serviceSongHasScore(song))
       && (!requiresChildren || serviceSelectableSongVersions(song, item, service).length))
     .map((song) => ({ song, match: getSongSearchMatch(song, tokens, { includeLyrics }) }))
     .filter((entry) => entry.match);
   const phraseMatches = candidates.filter((entry) => entry.match.phraseMatched);
   const results = phraseMatches.length ? phraseMatches : candidates;
   const songs = uniqueSongsById([
-    ...(directMatch && isSelectablePraiseSong(directMatch) && (!requiresNewHymnal || isNewHymnalScoreSong(directMatch)) && (!requiresChildren || serviceSelectableSongVersions(directMatch, item, service).length) ? [directMatch] : []),
+    ...(directMatch && isSelectablePraiseSong(directMatch) && (!requiresNewHymnal || serviceSongHasScore(directMatch)) && (!requiresChildren || serviceSelectableSongVersions(directMatch, item, service).length) ? [directMatch] : []),
     ...results
     .sort((a, b) => b.match.score - a.match.score || sortSongsForCurrentList(a.song, b.song))
     .slice(0, limit)
@@ -28820,8 +28839,8 @@ async function applyPresenterPreparationInput(serviceId = state.selectedServiceI
               }
             }
             if (!segmentSong) { unresolvedSegment = segment; break; }
-            if (serviceItemRequiresNewHymnalScoreSong(item) && !isNewHymnalScoreSong(segmentSong)) {
-              errors.push(`${entry.label}은 새찬송가 곡만 선택할 수 있습니다.`);
+            if (serviceItemRequiresNewHymnalScoreSong(item) && !serviceSongHasScore(segmentSong)) {
+              errors.push(`${entry.label}은 등록된 악보가 있는 곡을 선택해 주세요.`);
               unresolvedSegment = segment;
               break;
             }
@@ -28882,8 +28901,8 @@ async function applyPresenterPreparationInput(serviceId = state.selectedServiceI
           errors.push(`${entry.label} 곡을 찬양 DB에서 하나로 찾지 못했습니다.`);
           continue;
         }
-        if (serviceItemRequiresNewHymnalScoreSong(item) && !isNewHymnalScoreSong(song)) {
-          errors.push(`${entry.label}은 새찬송가 곡만 선택할 수 있습니다.`);
+        if (serviceItemRequiresNewHymnalScoreSong(item) && !serviceSongHasScore(song)) {
+          errors.push(`${entry.label}은 등록된 악보가 있는 곡을 선택해 주세요.`);
           continue;
         }
         item.song_id = song.id;

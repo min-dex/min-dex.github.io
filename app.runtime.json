@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261028-source-offering-default",
+  "version": "20261028-media-launcher-batch",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "e81e76b12ab81ce1c39bdc9edde2a04f93b21f81dc50442651fc0ca1cd92abc2",
-  "runtime_sha256": "c1b1d53093c0bdf0af5b9d794737e5da88eb498b6c03c92ab87cc9834f8e59a6",
-  "source_bytes": 1340240,
-  "runtime_bytes": 956776,
-  "source_gzip": 305622,
-  "runtime_gzip": 239540
+  "source_sha256": "0b47b5b225bba0f9a830cfa28cbb580bc76827ea02cf7d1c604f1ea791747519",
+  "runtime_sha256": "30e8caf6d32718599aa4f04fbf454917c4ba82ad119cc48be37356f0546b886f",
+  "source_bytes": 1340983,
+  "runtime_bytes": 957192,
+  "source_gzip": 305799,
+  "runtime_gzip": 239649
 }

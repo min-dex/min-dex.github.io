@@ -186,7 +186,7 @@
             <button class="filter-tab active" type="button" data-list-filter="all">전체</button>
             <button class="filter-tab" type="button" data-list-filter="hymns">찬송가</button>
             <button class="filter-tab" type="button" data-list-filter="ccm">CCM</button>
-            <button class="filter-tab" type="button" data-list-filter="children" hidden>어린이</button>
+            <button class="filter-tab" type="button" data-list-filter="audio" hidden>음원</button>
             <button class="filter-tab" type="button" data-list-filter="empty" hidden>빈 곡</button>
             <button class="filter-tab" type="button" data-list-filter="partial-empty" hidden>일부 빈 곡</button>
             <button class="filter-tab" type="button" data-list-filter="review" hidden>검토 필요</button>
@@ -256,9 +256,9 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261028-source-offering-default";
+        const fallbackVersion = "20261028-media-launcher-batch";
         globalThis.MINDEX_SINGLE_SONG_BOOTSTRAP_READY = true;
-        const compiledAppVersion = "20261028-source-offering-default";
+        const compiledAppVersion = "20261028-media-launcher-batch";
         const modules = [
           "mindex.icons.js", "mindex.hymn-structure.js", "vendor/supabase-js.min.js",
           "mindex.single-song.js", "mindex.praise-storage.js", "mindex.constants.js", "mindex.inline-text.js", "mindex.design-tokens.js", "mindex.worship-model.js",

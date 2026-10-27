@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOf": "2026-10-23",
+  "asOf": "2026-10-28",
   "purpose": "Score-supported approximate measures per output slide; preserve song-form and independent Amen boundaries, not exact performance totals.",
   "countingPolicy": {
     "basis": "Approximate measures per output slide, before performance repeats; stanza totals retained only as historical source metadata.",
@@ -3363,11 +3363,12 @@
         {
           "unitId": "38f5d1cb-573f-4e8d-9fb6-8dfd75ffa9e9",
           "kind": "Verse",
-          "textSha256": "ddb994a3adf2fcfd3a950d45c197d369db4fea89f0fad705daa2048daadec09b",
-          "blockCount": 2,
+          "textSha256": "bc0599b107adbadad591e06e8ba9f71a720e27bf27c2c9ccbef8ceca84a1bdb9",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
             4,
-            4
+            2,
+            2
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -3375,11 +3376,12 @@
         {
           "unitId": "f7ea4498-3e0f-4c75-b7bd-c3ba3e852bea",
           "kind": "Verse",
-          "textSha256": "41fbea0b8b037847f4f9119c4ab98c939332c48423375ed983aeb6dd4ebc4100",
-          "blockCount": 2,
+          "textSha256": "85e3af4504096c1ff0d033d1f96cfda4ffdef5f5bab158687203ef4c3ebd3c42",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
             4,
-            4
+            2,
+            2
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -3387,11 +3389,12 @@
         {
           "unitId": "38fc5003-d0fa-465d-b64f-1cc032e9b2e2",
           "kind": "Verse",
-          "textSha256": "86796de1acc430aaba8ecb39b01326a7314684f9c9037c2977499266e13c4ea7",
-          "blockCount": 2,
+          "textSha256": "ff5f9dbb18f26af7744385f51d1864b34932fc32f5917283055f34e4e678fe61",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
             4,
-            4
+            2,
+            2
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -3399,11 +3402,12 @@
         {
           "unitId": "81783339-d63b-4b96-9972-dea1b51ebc4b",
           "kind": "Verse",
-          "textSha256": "1b234714627a53d1b1b406675dc55c3577d8f6cc921dbdf71ea9304593fc0ab0",
-          "blockCount": 2,
+          "textSha256": "3dbaaca6b77891218e99830db42edc0630d1d32b3cc4926675a26b214a838d88",
+          "blockCount": 3,
           "approxMeasuresByBlock": [
             4,
-            4
+            2,
+            2
           ],
           "approxMeasures": 8,
           "reviewStatus": "score_supported_approximation"
@@ -3429,7 +3433,9 @@
         }
       ],
       "meter": "4/4",
-      "reviewNotes": "Visual printed-score measure and stored-block mapping; lyrics and song forms unchanged. Verse systems 4+4; refrain systems 4+4+4 map to stored 8+4. Overlapping lower voice is simultaneous, not additional bars."
+      "reviewNotes": "Visual printed-score measure and stored-block mapping; lyrics and song forms unchanged. Verse systems 4+4; refrain systems 4+4+4 map to stored 8+4. Overlapping lower voice is simultaneous, not additional bars.",
+      "reviewBatch": "paired-page-alignment-20261028",
+      "reviewNote": "Separate the shared two-bar response at the Verse/Chorus storage boundary; preserve each edition form membership."
     },
     {
       "versionId": "83e41b33-a89d-5050-ae3f-62c21ff50604",
@@ -27823,12 +27829,13 @@
         {
           "unitId": "8b8c9b32-127b-4804-a216-0c20ba2fc6b1",
           "kind": "Verse",
-          "textSha256": "34b7fdc22f76f43894351bceea6f6393bb37a64198b72ea50cf33fb02886ee01",
-          "blockCount": 3,
+          "textSha256": "877259a9911d3db481d3823ee563931a1b4c5812466ba61c01bd96cf75428ca1",
+          "blockCount": 4,
           "approxMeasuresByBlock": [
             4,
             4,
-            6
+            4,
+            2
           ],
           "approxMeasures": 14,
           "reviewStatus": "score_supported_approximation"
@@ -27841,8 +27848,8 @@
         }
       ],
       "reviewedAt": "2026-10-23",
-      "reviewBatch": "hymn-remaining",
-      "reviewNote": "2026-10-23 natural phrase review: Score visually compared: retain complete phrases, printed responses and short cadences; no arithmetic-only split."
+      "reviewBatch": "paired-page-alignment-20261028",
+      "reviewNote": "Separate the final Amen screen to match Union421; keep existing Verse4 membership and Union Coda unchanged."
     },
     {
       "versionId": "c66268c4-be55-54c1-b4c9-34bc7549c357",
@@ -46397,11 +46404,14 @@
         {
           "unitId": "6059af47-4145-416e-bc3e-2ead8d9fd582",
           "kind": "Verse",
-          "textSha256": "35be01ea33177b601f72288d7689b0a95953f52c3bf93e71a2126ef6e282d4a4",
-          "blockCount": 2,
+          "textSha256": "d6416581eb2f824319eaea3109ea7166b18dc4efe9f5341671c493d0fc698f2f",
+          "blockCount": 5,
           "approxMeasuresByBlock": [
-            10,
-            14
+            5,
+            2,
+            5,
+            3,
+            9
           ],
           "approxMeasures": 24,
           "reviewStatus": "score_supported_approximation"
@@ -46425,9 +46435,9 @@
         }
       ],
       "reviewedAt": "2026-10-23",
-      "reviewBatch": "hymn-slide-approx-final",
+      "reviewBatch": "paired-page-alignment-20261028",
       "reviewDisposition": "reviewed",
-      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep user-curated choral/Amen boundaries retained."
+      "reviewNote": "Match Union550 phrase screens and six-Amen screen; seventh Amen stays existing independent Coda."
     },
     {
       "versionId": "99b61048-aad9-5d8a-a616-f9e79523ba99",
@@ -50417,7 +50427,7 @@
       "edition": "union",
       "number": 53,
       "classification": "mixed_blocks",
-      "stanzaApproxMeasures": 28,
+      "stanzaApproxMeasures": 29,
       "reviewStatus": "score_supported_approximation",
       "parts": [
         {
@@ -50427,11 +50437,11 @@
           "blockCount": 4,
           "approxMeasuresByBlock": [
             8,
-            8,
+            9,
             7,
             5
           ],
-          "approxMeasures": 28,
+          "approxMeasures": 29,
           "reviewStatus": "score_supported_approximation"
         },
         {
@@ -50441,11 +50451,11 @@
           "blockCount": 4,
           "approxMeasuresByBlock": [
             8,
-            8,
+            9,
             7,
             5
           ],
-          "approxMeasures": 28,
+          "approxMeasures": 29,
           "reviewStatus": "score_supported_approximation"
         },
         {
@@ -50455,11 +50465,11 @@
           "blockCount": 4,
           "approxMeasuresByBlock": [
             8,
-            8,
+            9,
             7,
             5
           ],
-          "approxMeasures": 28,
+          "approxMeasures": 29,
           "reviewStatus": "score_supported_approximation"
         },
         {
@@ -50469,11 +50479,11 @@
           "blockCount": 4,
           "approxMeasuresByBlock": [
             8,
-            8,
+            9,
             7,
             5
           ],
-          "approxMeasures": 28,
+          "approxMeasures": 29,
           "reviewStatus": "score_supported_approximation"
         },
         {
@@ -50495,8 +50505,8 @@
         }
       ],
       "reviewedAt": "2026-10-23",
-      "reviewBatch": "hymn-remaining",
-      "reviewNote": "2026-10-23 natural phrase review: Printed score: move 온 with 땅에 on same line; natural screen boundaries retained."
+      "reviewBatch": "paired-page-alignment-20261028",
+      "reviewNote": "Both printed scores inspected: second system has nine bars; existing corresponding lyric screen boundaries already match New9."
     },
     {
       "versionId": "5189e86f-603d-5489-bb1d-f0eb891e36ec",
@@ -51861,11 +51871,12 @@
         {
           "unitId": "a455cdcc-32ba-558b-85e8-99fb1aa06948",
           "kind": "Chorus",
-          "textSha256": "e233b5d43816a43c14b1d042580ac8044bb2ba5a1462bde470ba87a220b8af57",
-          "blockCount": 3,
+          "textSha256": "3a8e95dc354fae76f24e845d3b033b78d78ad89513c106f4393e28c9bd808246",
+          "blockCount": 4,
           "approxMeasuresByBlock": [
-            5,
-            5,
+            2,
+            4,
+            4,
             4
           ],
           "approxMeasures": 14,
@@ -51879,8 +51890,8 @@
         }
       ],
       "reviewedAt": "2026-10-23",
-      "reviewBatch": "hymn-final20-recheck",
-      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep verse short cadence; chorus distinct lead/response phrases."
+      "reviewBatch": "paired-page-alignment-20261028",
+      "reviewNote": "Same printed 2-bar response then 4+4+4 refrain; no simultaneous lower-voice double counting."
     },
     {
       "versionId": "2a55d556-69fd-4b0a-b84d-be28cedbb72b",
@@ -76629,7 +76640,7 @@
         {
           "unitId": "39018fb0-fb02-5e99-bce6-f1950f1f408b",
           "kind": "Verse",
-          "textSha256": "b026646b20f5e035a5b30d0224564d559764f0ee84e4adfd111c56250d28df00",
+          "textSha256": "e9fba9d46463a11d19a4d562069c12394d138ca899532438ffd2bb1a45b8c6c0",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             5,
@@ -76642,7 +76653,7 @@
         {
           "unitId": "02a33476-cfde-5d57-a3dd-97abaa1afaf5",
           "kind": "Verse",
-          "textSha256": "97726b47f656596ec7c826fb9630b71721e80e9922684eddaf81a2290a6cb639",
+          "textSha256": "6329d5d1a95af02606f78ef04eb5fea513965d03a14ca3d36bc8d66cdbde6a38",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             5,
@@ -76655,7 +76666,7 @@
         {
           "unitId": "2713ada9-4012-548e-ac78-9e6b5e20539e",
           "kind": "Verse",
-          "textSha256": "caaad867acfb71b7af71f133569989dbf02cc41f13d59dee56f8e1358654700d",
+          "textSha256": "6394b80616d73a38cd49416a140c908010ce41a7e8d9b942e0d371444e7a7939",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             5,
@@ -76668,7 +76679,7 @@
         {
           "unitId": "72c90d86-8f46-5147-aa8f-480563c03dd4",
           "kind": "Verse",
-          "textSha256": "ab767972c6e15d8ddc6327a4de38c90523a482f5a3fe727c089eb8373d558c23",
+          "textSha256": "2980c0b41062559b85b5aacd26e4757e30f22a6f3f1aa8dc2430f727e0c371bb",
           "blockCount": 3,
           "approxMeasuresByBlock": [
             5,
@@ -76698,8 +76709,8 @@
         }
       ],
       "reviewedAt": "2026-10-23",
-      "reviewBatch": "hymn351-370-paired",
-      "reviewNote": "2026-10-23 natural phrase review: Printed score compared with existing screens: retain complete phrases, extended responses and short endings; no mechanical equalization."
+      "reviewBatch": "paired-page-alignment-20261028",
+      "reviewNote": "Match corresponding lead-voice line boundaries with New354; retain New edition parenthetical responses."
     },
     {
       "versionId": "8b571be9-c7b8-465e-a252-ffede095c53c",
@@ -88189,14 +88200,15 @@
         {
           "unitId": "15587bae-ecd4-51c7-b77a-9486c3dd690b",
           "kind": "Verse",
-          "textSha256": "e912adae371b2faa2a5134d13debaef31b708e1595ca35728ad3ad71f395d19e",
-          "blockCount": 5,
+          "textSha256": "05c38cce98573c3a50e8de901697e95468640282a628700e2c6a2698ed5d2f6c",
+          "blockCount": 6,
           "approxMeasuresByBlock": [
             5,
             2,
             5,
             3,
-            10
+            9,
+            1
           ],
           "approxMeasures": 25,
           "reviewStatus": "score_supported_approximation"
@@ -88209,9 +88221,9 @@
         }
       ],
       "reviewedAt": "2026-10-23",
-      "reviewBatch": "hymn-slide-approx-final",
+      "reviewBatch": "paired-page-alignment-20261028",
       "reviewDisposition": "reviewed",
-      "reviewNote": "2026-10-23 natural phrase review: Printed score inspected: keep irregular choral responses; all seven Amen and their screen retained."
+      "reviewNote": "Match New638 six-Amen then final-Amen screens, preserving all seven and existing form identity."
     },
     {
       "versionId": "446c74e8-c659-58f3-92ac-1215e1fb9118",

@@ -8,6 +8,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 NODE_TESTS = (
+    "test_praise_classification.cjs",
     "test_single_song.cjs",
     "test_remote_core.mjs",
     "test_remote_pairing.mjs",
@@ -33,8 +34,10 @@ NODE_TESTS = (
     "test_form_input_normalization.cjs",
     "test_worship_form_model.cjs",
     "test_live_refresh_scheduler.cjs",
+    "test_content_entry_refresh.cjs",
     "test_hymn_score_runtime.cjs",
     "test_hymn_intro_plan.cjs",
+    "test_hymn_slide_estimates.cjs",
     "test_department_assignee_requests.cjs",
     "test_calendar_assignee_creation.cjs",
     "test_children_default_completion.cjs",
@@ -73,6 +76,7 @@ CSS_NODE_TESTS = (
     "test_single_song.cjs",'test_app_runtime.cjs', 'test_ui_icons.cjs',
                   'test_remote_theme.cjs', 'test_bulletin.cjs')
 SMOKES = (
+    "smoke_audio_presence.py",
     "smoke_single_song.py",
     "smoke_single_song_lifecycle.py",
     "smoke_single_song_activation.py",

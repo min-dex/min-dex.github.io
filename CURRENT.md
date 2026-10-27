@@ -603,3 +603,20 @@ scene starts; build acknowledgements move the active card without replaying a
 jump. One output iframe/media owner, recovery and the last-build handoff remain.
 Scoped offline and actual-export evidence is separate from required CI, Pages
 and production readback; these final publication steps are still pending.
+
+## Audio presence and one classification owner · 2026-10-28 candidate
+
+User approved retiring the children song classification. The candidate exposes
+an audio-present filter only, preserves stored children_audio worship mode and
+manual lyric playback, and writes classification only in content.praise_types.
+No lyrics, forms, audio, cue times, IDs or explicit version names are migrated.
+The two unrelated Maranatha records were unlinked through existing revision CAS;
+independent full-record and worship readback verified preservation.
+
+Classification normalization and its single-owner CHECK remain unapplied. Publish
+and verify the compatible app first, then regenerate plans from fresh native
+records, CAS-save only classification fields and independently compare complete
+records/services/sections/elements/import references before CHECK installation.
+Private originals/receipts remain outside Git. Scoped unit and Chromium/WebKit
+audio/manual/preservation tests pass; complete local and required shared GitHub
+gates, Pages and public readback are separate pending checkpoints.

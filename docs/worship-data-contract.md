@@ -1067,3 +1067,38 @@ normalization drops a mismatched source hash or malformed sidecar while retainin
 the original. The attachment helper patches raw structured memo JSON so unknown
 user fields and stored whitespace survive. Presenter checkpoint/command data are
 transient session state, never saved into worship lyrics, timing or asset source.
+
+
+## Praise classification owner · 2026-10-28 candidate
+
+User approved removing the `children` song classification. Store only
+`content.praise_types` (`hymn`/`ccm`) in native Praise records;
+`metadata.praise_types` is a read-time UI projection, not another stored value.
+Read old children tags as CCM without renaming records, explicit version names,
+legacy aliases or department IDs. Historical provenance/checkpoints remain intact.
+
+Audio presence is derived from the version's persisted HTTP(S) audio URL,
+fingerprint and positive finite duration. It is independent of `enabled`, cue
+validity and age group. Lists expose only 음원; no absence filter or badge is shown. Playback still validates
+source signature, pages and every cue; lyrics-only use never starts audio.
+Existing `children_audio` worship values remain readable and unchanged; the
+visible choice is DB: 음원. Department names/types (어린이부) are unrelated.
+
+Rollout order: publish compatible app, verify public old-record/manual/audio
+paths, fresh full-record CAS normalization, independent full readback, then
+install the validated single-owner CHECK. Old stale clients cannot reintroduce
+duplicate fields after enforcement; retain their drafts and require reload.
+No operational migration is implied by this candidate document.
+
+DB: 음원 and DB: 악보 omit category suffixes. Only the audio-present list
+filter is exposed. Within a selected DB audio item, missing audio is an explicit
+empty state; source/form mismatch and invalid cue timing have distinct notices.
+No absent-audio list badge/filter, cross-version fallback or autoplay is added.
+
+Score eligibility is actual selected-version manifest source presence, not a
+new-hymnal category gate. Exact version-ID entries support any edition; legacy
+numeric entries resolve only the selected new-hymnal number, never an old-edition
+number or an unrelated parent's number. Existing selected records stay linked
+when files are absent. Catalog media panels distinguish missing resources from
+load failures/retry. Empty wording is 등록된 악보가 없습니다./등록된 음원이 없습니다.
+No score/audio/lyrics or worship data is rewritten by this UI change.

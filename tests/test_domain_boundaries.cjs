@@ -16,8 +16,8 @@ assert.equal(c.serviceElementTypeValue('말씀'),'');assert.equal(c.serviceInput
 assert.equal(c.serviceElementTypeValue('scripture_reading'),'scripture_reading');assert.equal(c.serviceInputModeValue('manual_praise'),'manual_praise');
 for(const unknown of ['toString','__proto__','not-known']){assert.equal(c.normalizeServiceElementType(unknown),'');assert.equal(c.normalizeServiceInputMode(unknown),'');}
 const values=['어린이 찬양','ＣＣＭ','찬송가','children','복음 성가'];const before=JSON.stringify(values);
-assert.equal(JSON.stringify(c.normalizePraiseTypes(values)),JSON.stringify(['hymn','ccm','children']));assert.equal(JSON.stringify(values),before);
-assert.equal(JSON.stringify(c.canonicalPraiseTypes(['children','hymn','ccm','children','찬송가'])),JSON.stringify(['hymn','ccm','children']));
+assert.equal(JSON.stringify(c.normalizePraiseTypes(values)),JSON.stringify(['hymn','ccm']));assert.equal(JSON.stringify(values),before);
+assert.equal(JSON.stringify(c.canonicalPraiseTypes(['children','hymn','ccm','children','찬송가'])),JSON.stringify(['hymn','ccm']));
 assert.equal(c.normalizeGeneratedVersionName(' Default '),'Default');
 for(const name of ['KOREAN_BIBLE_BOOK_ABBREVIATIONS','ENGLISH_BIBLE_BOOK_ABBREVIATIONS','BIBLE_BOOK_ALIASES'])assert.ok(!app.includes('const '+name+' ='),name+' has one owner');
 for(const key of ['TOB','JDT','WSD','SIR','BAR','1MA','2MA','GKE','DA1'])assert.ok(c.BIBLE_BOOK_ALIASES[key]?.length,key);

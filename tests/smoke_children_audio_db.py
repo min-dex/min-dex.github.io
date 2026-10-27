@@ -46,7 +46,7 @@ try:
     page.route(re.compile(r'^https?://(?!'+re.escape(urlsplit(url).netloc)+r'/)'),lambda r:r.abort());page.goto(url+'?mindexSmokeRaw=1');page.wait_for_function("typeof presenterSlidesForService==='function' && !!globalThis.MindexSongTiming && !document.body.classList.contains('ui-booting')")
     page.evaluate(fixture);return ctx,page
    ctx,page=load()
-   assert page.evaluate("renderServicePraiseInputModeControl(state.serviceItems[state.selectedServiceId][0],0).includes('DB: 음원 (어린이)')")
+   assert page.evaluate("renderServicePraiseInputModeControl(state.serviceItems[state.selectedServiceId][0],0).includes('DB: 음원')")
    page.evaluate(r'''()=>{
     const sid=state.selectedServiceId,item=getServiceItems(sid).find(i=>i.id==='children-db-item'),entries=presenterSlidesForService(sid).map(slide=>({slide}));
     const html=renderPresenterBoardItemAudioControls(sid,{item,index:0,timingEntries:entries});
