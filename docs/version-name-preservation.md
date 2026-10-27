@@ -117,3 +117,19 @@ Cancelling restores the selector and retains the draft. Relationship management
 is available in metadata editing, not the normal description. Duplicate display
 names receive a temporary position suffix without changing saved names. Lyrics
 preview headers use the full label Lyrics; song-form token L stays unchanged.
+
+## Song-level catalog navigation · 2026-10-28 candidate
+
+Confirmed native same_song edges form read-only display groups. Lists, global
+search and worship song search show one row per group; matching variant titles
+and lyrics remain searchable. No title-based inference or DB record merge occurs.
+The representative is deterministic (new hymnal first, then native ID); selecting
+another member keeps the common catalog heading and exact member identity.
+Existing worship links, record titles, version names, forms, audio and cues are
+unchanged. Search opens the matched member. Filters include a group when any
+member matches. An explicit worship choice selects the exact eligible variant;
+opening a group never writes a default variant. One-member groups have no version
+selector. Native lyrics display only the selected member; names and optional
+output titles remain editable in song information, with differing titles visible.
+Legacy multi-version records retain their existing editing and persistence path.
+Required release/public verification is separate from scoped local checks.

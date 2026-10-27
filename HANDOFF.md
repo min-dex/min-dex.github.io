@@ -1570,3 +1570,14 @@ records/services/sections/elements/import references before CHECK installation.
 Private originals/receipts remain outside Git. Scoped unit and Chromium/WebKit
 audio/manual/preservation tests pass; complete local and required shared GitHub
 gates, Pages and public readback are separate pending checkpoints.
+
+## Song-level list and variant navigation ·2026-10-28 candidate
+
+Confirmed same_song relations now project into one catalog/search row; native
+records remain independent and exact worship IDs are preserved. Variant titles
+remain searchable, single-member selectors disappear, and native lyrics show
+only the selected variant with optional differing title. Version name/output
+editing remains in song information. Worship group expansion requires an explicit
+variant choice before the existing save path. No production rows are migrated.
+Scoped two-engine grouping/search/selection/draft/audio preservation tests pass;
+shared gate/publication is pending. See version-name-preservation.md.

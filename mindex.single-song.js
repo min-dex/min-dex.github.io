@@ -44,6 +44,32 @@
       canonicalId: version.canonical_song_id || null,
       timingKey: JSON.stringify([String(song.id), String(version.id)]) } };
   }
+  // Read-only display groups. Identity, saves and worship references remain record-owned.
+  function groupSongs(songs) {
+    const byId = new Map(songs.map(song => [song.id, song])), edges = new Map();
+    for (const song of songs) {
+      if (!edges.has(song.id)) edges.set(song.id, new Set());
+      if (!song._singleSongRecord) continue;
+      for (const id of song.same_song_ids || []) {
+        if (!byId.get(id)?._singleSongRecord || id === song.id) continue;
+        if (!edges.has(id)) edges.set(id, new Set());
+        edges.get(song.id).add(id); edges.get(id).add(song.id);
+      }
+    }
+    const seen = new Set(), groups = [];
+    for (const song of songs) {
+      if (seen.has(song.id)) continue;
+      const queue = [song.id], members = [];
+      while (queue.length) {
+        const id = queue.shift(); if (seen.has(id)) continue;
+        seen.add(id); members.push(byId.get(id));
+        for (const peer of edges.get(id) || []) if (!seen.has(peer)) queue.push(peer);
+      }
+      members.sort((a,b) => Number(/^SONG-HYMN-N/.test(b.id)) - Number(/^SONG-HYMN-N/.test(a.id)) || a.id.localeCompare(b.id));
+      groups.push({id: members[0].id, representative: members[0], members});
+    }
+    return groups;
+  }
   function createCatalog(records) {
     const byId = new Map(), versions = new Map(), songs = new Map();
     function add(map, id, record) {
@@ -287,7 +313,7 @@
     for (const line of lines) { if (/^\[/.test(line)) flush(); block.push(line); }
     flush(); return {text:out.join(eol),pending};
   }
-  const api = Object.freeze({isId:code,praiseTypes,hasAudio,recordForWrite,fromLegacySong,createCatalog,createRepository,createRpcRepository,loadActivation,rewriteStructured,rewriteSource,parseMemo});
+  const api = Object.freeze({isId:code,praiseTypes,hasAudio,recordForWrite,groupSongs,fromLegacySong,createCatalog,createRepository,createRpcRepository,loadActivation,rewriteStructured,rewriteSource,parseMemo});
   root.MindexSingleSong=api;
   if (typeof module!=='undefined' && module.exports) module.exports=api;
 })(typeof globalThis!=='undefined' ? globalThis : this);

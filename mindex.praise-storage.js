@@ -314,18 +314,92 @@ async function readSingleSongs(ids) {
 }
 
 
-// Same-song arrangements keep independent records but use one editor navigation.
+// Display projection only: never put a group object into state.songs or persistence.
+function praiseDisplayGroups() {
+  return globalThis.MindexSingleSong.groupSongs(state.songs.filter(isSelectablePraiseSong));
+}
+function praiseDisplayGroup(song) {
+  return praiseDisplayGroups().find(group => group.members.some(row => row.id === song?.id))
+    || {id:song?.id, representative:song, members:song ? [song] : []};
+}
+function groupPraiseSongs(matches) {
+  const groups = praiseDisplayGroups(), byId = new Map();
+  for (const group of groups) for (const member of group.members) byId.set(member.id, group);
+  const seen = new Set();
+  return matches.flatMap(song => {
+    const group = byId.get(song.id); if (!group || group.members.length < 2) return [song];
+    if (seen.has(group.id)) return []; seen.add(group.id);
+    return [{...song, _praiseGroupIds:group.members.map(row=>row.id),
+      hymn_no:group.representative.hymn_no, _praiseGroupTitle:group.representative.title, _praiseGroupRepresentative:group.representative,
+      _praiseGroupCount:group.members.length}];
+  });
+}
+function praiseGroupIsSelected(song) {
+  return song.id === state.selectedSongId || song._praiseGroupIds?.includes(state.selectedSongId);
+}
+function praiseGroupTitle(song) {
+  const representative = praiseDisplayGroup(song).representative || song;
+  return (representative.hymn_no ? stripHymnNumber(representative.title) : representative.title) || "제목 없는 찬양";
+}
+function praiseVariantLabel(song, peers) {
+  const name = versionDisplayName(song, song.versions?.[0] || {});
+  const repeated = peers.filter(row=>versionDisplayName(row,row.versions?.[0]||{})===name).length > 1;
+  if (!repeated) return name;
+  const detail = song.versions?.[0]?.output_title || song.title;
+  return `${name} · ${detail}${peers.filter(row => (row.versions?.[0]?.output_title || row.title) === detail).length > 1 ? ` · ${peers.findIndex(row=>row.id===song.id)+1}` : ""}`;
+}
 function renderSingleSongVersionPicker(song) {
   if (!song?._singleSongRecord) return "";
-  const ids = new Set([song.id, ...(song.same_song_ids || [])]);
-  const peers = state.songs.filter(row => ids.has(row.id));
-  const names = peers.map(row => versionDisplayName(row, row.versions?.[0] || {}));
-  return `<label class="field compact single-song-version-picker"><span>버전</span><select data-single-version-select aria-label="곡 버전">${peers.map((row, index) => `<option value="${escapeAttr(row.id)}"${row.id === song.id ? " selected" : ""}>${escapeHtml(names.filter(name => name === names[index]).length > 1 ? `${names[index]} · ${index + 1}` : names[index])}</option>`).join("")}</select></label>`;
+  const peers = praiseDisplayGroup(song).members;
+  if (peers.length < 2) return "";
+  return `<label class="field compact single-song-version-picker"><span>판본</span><select data-single-version-select aria-label="곡 판본">${peers.map(row => `<option value="${escapeAttr(row.id)}"${row.id === song.id ? " selected" : ""}>${escapeHtml(praiseVariantLabel(row,peers))}</option>`).join("")}</select></label>`;
 }
-
 async function selectSingleSongVersion(field) {
   const song = getSelectedSong(), id = field.value;
-  if (!song?._singleSongRecord || ![song.id, ...(song.same_song_ids || [])].includes(id)) { field.value = song?.id || ""; return; }
+  if (!song?._singleSongRecord || !praiseDisplayGroup(song).members.some(row=>row.id===id)) { field.value = song?.id || ""; return; }
   try { await selectSong(id); }
   finally { if (field.isConnected) field.value = getSelectedSong()?.id || ""; }
+}
+
+function renderNativeVersionHeading(song, version) {
+  const title = String(version?.output_title || song.title || "").trim();
+  return title && (song.hymn_no ? stripHymnNumber(title) : title) !== praiseGroupTitle(song)
+    ? `<span class="version-title-text">${escapeHtml(title)}</span>` : "";
+}
+function renderNativeVersionMetadata(song) {
+  if (!song?._singleSongRecord) return "";
+  const version = song.versions[0];
+  return `<div class="metadata-popover-grid">
+    ${praiseDisplayGroup(song).members.length > 1 ? `<label class="field compact"><span>판본 이름</span><input data-version-name-field="${escapeAttr(version.id)}" value="${escapeAttr(versionEditableName(song,version))}" aria-label="버전 이름" /></label>` : ""}
+    <label class="field compact"><span>다른 출력 제목</span><input data-version-output-title-field="${escapeAttr(version.id)}" value="${escapeAttr(version.output_title || "")}" placeholder="비워 두면 이 판본의 곡 제목 사용" aria-label="버전 전용 제목" /></label>
+  </div>`;
+}
+function renderServicePraiseGroupChoice(song,index) {
+  const item = getServiceItems(state.selectedServiceId)[index] || {}, service = selectedServiceForEditor();
+  const peers = praiseDisplayGroup(song).members.filter(row =>
+    (!serviceItemRequiresNewHymnalScoreSong(item) || serviceSongHasScore(row))
+    && serviceSelectableSongVersions(row,item,service).length);
+  if (peers.length < 2) return peers.length ? renderServiceSongPickerResult(peers[0],index) : "";
+  return `<details class="svc-song-group-choice"><summary>${escapeHtml(praiseGroupTitle(song))} · ${peers.length}개 판본</summary>
+    ${peers.map(row => `<button class="svc-song-picker-result" type="button" data-service-song-select="${escapeAttr(row.id)}" data-service-song-index="${index}" role="option"><strong>${escapeHtml(praiseVariantLabel(row,peers))}</strong>${row.title !== song._praiseGroupTitle ? `<span>${escapeHtml(row.title)}</span>` : ""}</button>`).join("")}</details>`;
+}
+
+function getGlobalPraiseResults(tokens) {
+  if (!tokens.length) return [];
+  const matches = state.songs.filter(isSelectablePraiseSong)
+    .map(song => ({song, match:getSongSearchMatch(song,tokens,{includeLyrics:true,crossFields:true})}))
+    .filter(entry=>entry.match)
+    .sort((a,b)=>b.match.score-a.match.score || sortSongsForCurrentList(a.song,b.song));
+  const byId = new Map(matches.map(entry=>[entry.song.id,entry.match]));
+  return groupPraiseSongs(matches.map(entry=>entry.song)).slice(0,8).map(song=>({song,match:byId.get(song.id)}));
+}
+
+function praiseGroupSearchMatches(tokens, options) {
+  const matches = new Map();
+  for (const group of praiseDisplayGroups()) {
+    const best = group.members.map(song=>getSongSearchMatch(song,tokens,options)).filter(Boolean)
+      .sort((a,b)=>b.score-a.score)[0];
+    if (best) for (const song of group.members) matches.set(song.id,best);
+  }
+  return matches;
 }
