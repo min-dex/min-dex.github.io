@@ -17,9 +17,13 @@ test('manifest bounds files, resource paths and scene continuity',()=>{
  const m=manifest();m.slides[0].sceneStart=1;assert.throws(()=>validateKeynoteHtmlManifest(m,descriptor));
 });
 test('bridge patches only a recognized export and preserves original input string',()=>{
- const source='UC=new Eg;let p={url:Q,cMapUrl:_C};obj.workerSrc="./assets/player/pdfjs/pdf.worker.min.js";';const patched=patchKeynoteHtmlPlayer(source);
+ const cap='UC.isFullscreen||A>this.showWidth&&(A=this.showWidth);';
+ const source='UC=new Eg;let p={url:Q,cMapUrl:_C};obj.workerSrc="./assets/player/pdfjs/pdf.worker.min.js";'+cap;const patched=patchKeynoteHtmlPlayer(source);
  assert.match(patched,/window\.__mindexKeynoteController/);assert.match(patched,/document.baseURI/);assert.ok(!source.includes('__mindex'));
  assert.throws(()=>patchKeynoteHtmlPlayer(source+'UC=new Eg'));
+ assert.ok(!patched.includes(cap));assert.ok(source.includes(cap));
+ assert.throws(()=>patchKeynoteHtmlPlayer(source.replace(cap,'')));
+ assert.throws(()=>patchKeynoteHtmlPlayer(source+cap));
  assert.throws(()=>patchKeynoteHtmlPlayer('unsupported runtime'));
 });
 test('checkpoint preserves scene, phase, actual slide and final successor without rewind',()=>{

@@ -38,10 +38,14 @@ export function validateKeynoteHtmlManifest(manifest, descriptor) {
 }
 export function patchKeynoteHtmlPlayer(source) {
   // A narrowly recognized Apple export receives a bridge; unknown exports fail closed.
-  for (const marker of ['UC=new Eg', 'url:Q,cMapUrl:_C', 'workerSrc="./assets/player/pdfjs/pdf.worker.min.js"']) {
+  const nativeSizeCap = 'UC.isFullscreen||A>this.showWidth&&(A=this.showWidth);';
+  for (const marker of ['UC=new Eg', 'url:Q,cMapUrl:_C', 'workerSrc="./assets/player/pdfjs/pdf.worker.min.js"', nativeSizeCap]) {
     if (source.split(marker).length !== 2) throw Error('이 Keynote 내보내기 버전은 아직 지원하지 않습니다.');
   }
   return source.replace('UC=new Eg', 'UC=window.__mindexKeynoteController=new Eg')
+    // Keep Apple's aspect-fit layout, including resize handling, without its
+    // original-width ceiling when the output viewport is larger than the deck.
+    .replace(nativeSizeCap, '')
     .replace('url:Q,cMapUrl:_C', 'url:new URL(Q,document.baseURI).href,cMapUrl:new URL(_C,document.baseURI).href')
     .replace('workerSrc="./assets/player/pdfjs/pdf.worker.min.js"', 'workerSrc=new URL("./assets/player/pdfjs/pdf.worker.min.js",document.baseURI).href');
 }
