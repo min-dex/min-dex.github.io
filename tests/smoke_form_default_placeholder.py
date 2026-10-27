@@ -249,7 +249,7 @@ try:
      check(JSON.stringify(direct)===before,'direct stored sequence rewritten');
     }
     song.metadata={};state.services=[service];
-    const scoreSong={...hymn,id:'score-song',hymn_no:9,versions:[{...hymnVersion,id:'score-version'}]};
+    const scoreSong={...hymn,id:'score-song',hymn_no:9,versions:[{...hymnVersion,id:'score-version',hymn_no:9}]};
     state.songs=[...state.songs,scoreSong];
     state.hymnScoreManifest={9:{title:'하늘에 가득 찬 영광의 하나님',slides:[
      {src:'v1-a.png',formLabel:'Verse 1'},{src:'v1-b.png',formLabel:'Verse 1'},

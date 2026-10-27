@@ -86,7 +86,7 @@ try:
                       }
                       // Picking a search result and resolving an exact title are also content edits.
                       const song={id:crypto.randomUUID(),title:'Replacement',hymn_no:1,praise_types:['hymn'],versions:[{id:crypto.randomUUID(),name:'새찬송가',praise_types:['hymn'],_worshipVersionPersisted:true}]};
-                      state.songs=[song];clearSearchCaches();
+                      state.songs=[song];state.hymnScoreManifest={'1':{slides:[{url:'assets/icon-192.png'}]}};state.hymnScoreManifestLoaded=true;clearSearchCaches();
                       renderCurrentServiceModuleDetail=()=>{};
                       let pendingSave;
                       saveCommittedServiceItem=(index)=>{pendingSave=saveWorshipServiceElementPatch(service,getServiceItems(sid)[index].id)};
