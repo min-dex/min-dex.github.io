@@ -234,8 +234,7 @@ const PRAISE_LIST_FILTERS = [
   ["review", "검토 필요"],
   ["hymns", "찬송가"],
   ["ccm", "CCM"],
-  ["audio", "음원 있음"],
-  ["no_audio", "음원 없음"],
+  ["audio", "음원"],
 ];
 const PRAISE_LIST_FILTER_KEYS = PRAISE_LIST_FILTERS.map(([key]) => key);
 const PRAISE_LIST_FILTER_ALIASES = {
@@ -19531,9 +19530,9 @@ function computeSongTypes(song) {
 function resolveSongForFilter(song, filterKey) {
   if (!song) return { matches: false, version: null };
   if (filterKey === "all") return { matches: true, version: null };
-  if (filterKey === "audio" || filterKey === "no_audio") {
+  if (filterKey === "audio") {
     const version = (song.versions || []).find(versionHasAudio) || null;
-    return { matches: filterKey === "audio" ? !!version : !version, version };
+    return { matches: !!version, version };
   }
 
   const types = computeSongTypes(song);
@@ -19706,7 +19705,7 @@ function getSongsForPraiseFilter() {
   const songs = state.songs.filter(isSelectablePraiseSong);
   if (state.praiseFilter === "hymns") return songs.filter((song) => songHasPraiseType(song, "hymn"));
   if (state.praiseFilter === "ccm") return songs.filter((song) => songHasPraiseType(song, "ccm"));
-  if (["audio", "no_audio"].includes(state.praiseFilter)) return songs.filter(song => resolveSongForFilter(song, state.praiseFilter).matches);
+  if (state.praiseFilter === "audio") return songs.filter(song => resolveSongForFilter(song, state.praiseFilter).matches);
   if (["empty", "review"].includes(state.praiseFilter)) {
     return songs.filter((song) => songMatchesPraiseStatusFilter(song, state.praiseFilter));
   }

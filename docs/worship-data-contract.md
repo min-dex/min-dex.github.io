@@ -1079,7 +1079,7 @@ legacy aliases or department IDs. Historical provenance/checkpoints remain intac
 
 Audio presence is derived from the version's persisted HTTP(S) audio URL,
 fingerprint and positive finite duration. It is independent of `enabled`, cue
-validity and age group. Lists expose 음원 있음/음원 없음. Playback still validates
+validity and age group. Lists expose only 음원; no absence filter or badge is shown. Playback still validates
 source signature, pages and every cue; lyrics-only use never starts audio.
 Existing `children_audio` worship values remain readable and unchanged; the
 visible choice is DB: 음원. Department names/types (어린이부) are unrelated.

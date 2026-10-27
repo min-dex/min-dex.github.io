@@ -21,8 +21,8 @@ try:
     const manual={id:'SONG-CONT-0002-0001',title:'반주로 부를 곡',versions:[{id:'SONG-CONT-0002-0001',name:'기본',praise_types:['ccm'],forms:structuredClone(forms)}]};
     state.songs=[song,manual];state.module='praise';state.praiseFilter='audio';renderListFilter();
     check(same(getSongsForPraiseFilter().map(s=>s.id),[song.id]),'audio filter');
-    check(refs.listFilter.textContent.includes('음원 있음') && refs.listFilter.textContent.includes('음원 없음') && !refs.listFilter.textContent.includes('어린이'),'visible names');
-    state.praiseFilter='no_audio';check(same(getSongsForPraiseFilter().map(s=>s.id),[manual.id]),'no audio filter');
+    check(!!refs.listFilter.querySelector('[data-list-filter=audio]') && !refs.listFilter.textContent.includes('음원 없음') && !refs.listFilter.textContent.includes('어린이'),'visible names');
+    state.praiseFilter='all';check(getSongsForPraiseFilter().length===2,'all retains manual songs');
     check(normalizePraiseListFilterKey('children')==='audio','old filter preference');
     check(!renderVersionPraiseTypeTags(version).includes('어린이'),'no children editor tag');
     const item={id:'slot',song_id:song.id,memo:serializeServiceItemMemo({inputMode:'children_audio',elementType:'praise'})};

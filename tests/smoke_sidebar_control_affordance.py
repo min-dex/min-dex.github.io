@@ -26,9 +26,9 @@ try:
     for module in ('praise','scripture'):
      page.evaluate('(m)=>{state.module=m;renderListFilter()}',module)
      buttons=page.locator('.filter-tab:visible')
-     assert buttons.count()==(7 if module=='praise' else 4)
+     assert buttons.count()==(6 if module=='praise' else 4)
      if module=='praise':
-      assert [text.strip() for text in buttons.all_text_contents()]==['전체', '빈 곡', '검토 필요', '찬송가', 'CCM', '음원 있음', '음원 없음']
+      assert [text.strip() for text in buttons.all_text_contents()]==['전체', '빈 곡', '검토 필요', '찬송가', 'CCM', '음원']
      for i in range(buttons.count()):
       button=buttons.nth(i)
       button.focus()

@@ -607,7 +607,7 @@ and production readback; these final publication steps are still pending.
 ## Audio presence and one classification owner · 2026-10-28 candidate
 
 User approved retiring the children song classification. The candidate exposes
-audio present/absent filters, preserves stored children_audio worship mode and
+an audio-present filter only, preserves stored children_audio worship mode and
 manual lyric playback, and writes classification only in content.praise_types.
 No lyrics, forms, audio, cue times, IDs or explicit version names are migrated.
 The two unrelated Maranatha records were unlinked through existing revision CAS;
