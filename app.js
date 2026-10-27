@@ -9511,12 +9511,6 @@ function handleDetailInput(event) {
     return;
   }
 
-  const serviceSourceText = event.target.closest("[data-service-source-text]");
-  if (serviceSourceText) {
-    updateServiceSourceTextDraft(serviceSourceText);
-    return;
-  }
-
   const serviceDefaultField = event.target.closest("[data-service-default-field]");
   if (serviceDefaultField) {
     updateServiceDefaultItemField(serviceDefaultField);
@@ -13830,6 +13824,7 @@ async function copyPreviousDepartmentAnnouncements(service, scaffold) {
 
 async function calendarAssigneeRowsForNewService(service) {
   const scaffold = buildWorshipServiceScaffold(service.id, service.type_id, { service });
+  applyChildrenOfferingCreationDefault(service, scaffold);
   const copiedAnnouncementElementIds = await copyPreviousDepartmentAnnouncements(service, scaffold);
   const elements = scaffold.elements.flatMap((element) => {
     const label = compactSearchValue(element.source_ref?.label || "");
@@ -25850,34 +25845,6 @@ function renderServicePresenterControlsUnscoped(service, slides = [], active = f
     </section>`;
 }
 
-function renderServiceSourcePanel(service) {
-  if (!service?.id) return "";
-  const source = serviceSourceTextForEditor(service);
-  return `
-    <details class="svc-source-panel" ${MindexDisclosure.attrs(["service-source",service.id])}>
-      <summary class="svc-source-panel-head">
-        <span>예배 원문</span>
-      </summary>
-      <div class="svc-source-panel-body">
-        <textarea class="svc-source-text" data-service-source-text="${escapeAttr(service.id)}" data-service-source-signature="${escapeAttr(compactTextSignature(source))}" spellcheck="false" aria-label="예배 원문">${escapeHtml(source)}</textarea>
-        <div class="svc-source-side">
-          <div data-service-recovery-root${renderServiceSourceRecovery(service) ? "" : " hidden"}>${renderServiceSourceRecovery(service)}</div>
-          ${renderServiceSourceHistory(service)}
-          <div class="svc-source-actions">
-            <button class="reference-new-btn svc-source-apply" type="button" data-service-source-apply="${escapeAttr(service.id)}">
-              <i data-lucide="check"></i>
-              <span>반영</span>
-            </button>
-            <button class="reference-new-btn secondary svc-source-copy" type="button" data-service-source-copy="${escapeAttr(service.id)}">
-              <i data-lucide="clipboard"></i>
-              <span>복사</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </details>`;
-}
-
 function serviceDocumentHistoryFromRef(service = null) {
   const history = serviceSourceRef(service)[MINDEX_SERVICE_DOCUMENT_HISTORY_SOURCE_REF_KEY];
   return Array.isArray(history) ? history.filter((entry) => entry && typeof entry === "object") : [];
@@ -25906,86 +25873,6 @@ function serviceDocumentFromRecoverySnapshot(snapshot = null) {
   return document && typeof document === "object" ? document : null;
 }
 
-function renderServiceSourceRecovery(service) {
-  const snapshot = latestWorshipRecoverySnapshotForService(service?.id);
-  const document = serviceDocumentFromRecoverySnapshot(snapshot);
-  const hasSource = Boolean(String(document?.sourceText || "").trim()) && document.sourceText !== (serviceSourceTextareaForService(service?.id)?.value ?? serviceSourceTextForEditor(service));
-  const pending = Array.isArray(snapshot?.draft?.pendingInputs) ? snapshot.draft.pendingInputs : [];
-  if (!hasSource && !pending.length) return "";
-  return `
-    <div class="svc-source-history" aria-label="서버 복구본">
-      <div class="svc-source-history-head">
-        <span>서버 복구본</span>
-        <small>${escapeHtml(formatServiceSourceHistoryTime(snapshot.capturedAt) || "최근")}</small>
-      </div>
-      ${hasSource ? `<button class="svc-source-history-item svc-source-recovery-item" type="button" data-service-source-recovery="${escapeAttr(service.id)}">
-        <span>${escapeHtml(serviceSourceRecoveryLabel(snapshot))}</span>
-        <small>${escapeHtml(serviceSourceHistoryMeta(document))}</small>
-      </button>` : ""}
-      ${pending.length ? `<details class="svc-source-recovery-pending" ${MindexDisclosure.attrs(["source-recovery",service.id])}><summary>미반영 입력 ${pending.length}개</summary>
-        ${pending.map(input => `<label>${escapeHtml(`${input.itemId || input.index} · ${input.field}`)}<textarea readonly aria-label="보관된 미반영 입력">${escapeHtml(input.value)}</textarea></label>`).join("")}
-      </details>` : ""}
-    </div>`;
-}
-
-function serviceSourceRecoveryLabel(snapshot = {}) {
-  const reason = String(snapshot.reason || "").trim();
-  if (reason === "before-conflict-reopen") return "충돌 전 내 입력";
-  if (reason === "conflict-server-latest") return "충돌 당시 서버 최신본";
-  if (reason === "before-full-save") return "저장 직전";
-  if (reason === "before-element-patch") return "항목 저장 직전";
-  if (reason === "before-service-delete") return "삭제 직전";
-  if (reason === "after-source-text-apply") return "원문 반영 직후";
-  if (reason === "before-save-source-text-apply") return "원문 저장 직전";
-  return "최근 복구본";
-}
-
-function renderServiceSourceHistory(service) {
-  const history = serviceDocumentHistoryFromRef(service)
-    .filter((entry) => String(entry.sourceText || "").trim())
-    .slice(0, MINDEX_SERVICE_DOCUMENT_HISTORY_LIMIT);
-  if (!history.length) return "";
-  return `
-    <div class="svc-source-history" aria-label="이전 저장본">
-      <div class="svc-source-history-head">
-        <span>이전 저장본</span>
-        <small>원문 복구</small>
-      </div>
-      <div class="svc-source-history-list">
-        ${history.map((entry, index) => `
-          <button class="svc-source-history-item" type="button" data-service-source-history="${escapeAttr(service.id)}" data-service-source-history-index="${escapeAttr(index)}">
-            <span>${escapeHtml(serviceSourceHistoryLabel(entry, index))}</span>
-            <small>${escapeHtml(serviceSourceHistoryMeta(entry))}</small>
-          </button>
-        `).join("")}
-      </div>
-    </div>`;
-}
-
-function serviceSourceHistoryLabel(entry = {}, index = 0) {
-  const captured = entry.updatedAt ? formatServiceSourceHistoryTime(entry.updatedAt) : "";
-  return captured || `이전 저장본 ${index + 1}`;
-}
-
-function formatServiceSourceHistoryTime(value = "") {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  const mm = String(date.getMonth() + 1).padStart(2, "0");
-  const dd = String(date.getDate()).padStart(2, "0");
-  const hh = String(date.getHours()).padStart(2, "0");
-  const min = String(date.getMinutes()).padStart(2, "0");
-  return `${mm}/${dd} ${hh}:${min}`;
-}
-
-function serviceSourceHistoryMeta(entry = {}) {
-  const records = Array.isArray(entry.sourceRecords) ? entry.sourceRecords.length : Number(entry.sourceRecordCount) || 0;
-  const slides = Array.isArray(entry.slides) ? entry.slides.length : Number(entry.slideCount) || 0;
-  return cleanList([
-    records ? `항목 ${records}` : "",
-    slides ? `슬라이드 ${slides}` : "",
-  ]).join(" · ") || "원문";
-}
-
 async function restoreServiceSourceText(id, sourceText) {
   const textarea = serviceSourceTextareaForService(id);
   const service = state.services.find(candidate => candidate.id === id);
@@ -26001,7 +25888,7 @@ async function restoreServiceSourceText(id, sourceText) {
       showToast("복구 중 입력이나 화면이 바뀌어 현재 내용을 유지했습니다.", "info");return false;
     }
     textarea.value = sourceText;
-    textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    updateServiceSourceTextDraft(textarea);
     showToast("원문을 불러왔습니다. 확인 후 반영·저장해 주세요.", "info");return true;
   } catch (error) { showToast(error.message || "원문 보관을 확인하지 못해 현재 입력을 유지했습니다.", "error");return false; }
 }
@@ -26118,8 +26005,6 @@ function updateServiceSourceTextDraft(textarea = null) {
   const service = state.services.find((candidate) => candidate.id === id);
   if (!service || !textarea) return false;
   service._worshipSourceTextDraft = textarea.value;
-  const recovery = textarea.closest(".svc-source-panel")?.querySelector("[data-service-recovery-root]");
-  if (recovery) { recovery.innerHTML = renderServiceSourceRecovery(service); recovery.hidden = !recovery.innerHTML; }
   if (serviceSourceTextHasPendingChanges(textarea)) state.dirty.service = true;
   updateSaveState();
   return true;

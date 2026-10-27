@@ -1091,3 +1091,10 @@ Basic presenter hides the topbar media launcher as soon as the presenter module
 is selected, including before the right rail has mounted. Focus view exposes
 the topbar launcher. Rail mounting must not briefly reveal a duplicate launcher;
 shared media controls and playback stay mounted.
+
+## Source editor residue removal ·2026-10-28
+
+The unmounted source panel/history/recovery renderers, their delegated UI events
+and dedicated CSS are removed. Internal source serialization, archived history,
+pending-draft protection, atomic saves and conflict review remain unchanged.
+No stored drafts or production records are deleted.
