@@ -270,7 +270,7 @@ const SERVICE_ELEMENT_LABELS = Object.fromEntries(SERVICE_ELEMENT_TYPE_UI_OPTION
 const SERVICE_PRAISE_INPUT_MODES = [
   ["lyrics_db", "DB: 가사"],
   ["children_audio", "DB: 음원"],
-  ["score_db", "DB: 악보 (찬송가)"],
+  ["score_db", "DB: 악보"],
   ["manual_praise", "직접 추가: 가사"],
   ["audio_praise", "직접 추가: 음원"],
 ];
