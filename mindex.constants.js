@@ -303,7 +303,7 @@
       Bridge: "Bridge",
       Coda: "Coda",
     },
-    PRAISE_TYPES: ["hymn", "ccm", "children"],
+    PRAISE_TYPES: ["hymn", "ccm"],
     PROMOTED_SONG_METADATA_COLUMNS: {
       artist: "artist",
       lyricist: "lyricist",

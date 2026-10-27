@@ -1067,3 +1067,25 @@ normalization drops a mismatched source hash or malformed sidecar while retainin
 the original. The attachment helper patches raw structured memo JSON so unknown
 user fields and stored whitespace survive. Presenter checkpoint/command data are
 transient session state, never saved into worship lyrics, timing or asset source.
+
+
+## Praise classification owner · 2026-10-28 candidate
+
+User approved removing the `children` song classification. Store only
+`content.praise_types` (`hymn`/`ccm`) in native Praise records;
+`metadata.praise_types` is a read-time UI projection, not another stored value.
+Read old children tags as CCM without renaming records, explicit version names,
+legacy aliases or department IDs. Historical provenance/checkpoints remain intact.
+
+Audio presence is derived from the version's persisted HTTP(S) audio URL,
+fingerprint and positive finite duration. It is independent of `enabled`, cue
+validity and age group. Lists expose 음원 있음/음원 없음. Playback still validates
+source signature, pages and every cue; lyrics-only use never starts audio.
+Existing `children_audio` worship values remain readable and unchanged; the
+visible choice is DB: 음원. Department names/types (어린이부) are unrelated.
+
+Rollout order: publish compatible app, verify public old-record/manual/audio
+paths, fresh full-record CAS normalization, independent full readback, then
+install the validated single-owner CHECK. Old stale clients cannot reintroduce
+duplicate fields after enforcement; retain their drafts and require reload.
+No operational migration is implied by this candidate document.

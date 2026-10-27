@@ -1,0 +1,43 @@
+"""Audio presence replaces children classification; no production IO."""
+import os
+from pathlib import Path
+os.environ['MINDEX_SMOKE_OFFLINE']='1'
+from smoke_app import start_local_app_server,launch_chromium,sync_playwright
+server,url=start_local_app_server()
+try:
+ with sync_playwright() as p:
+  for engine in ('chromium','webkit'):
+   b=launch_chromium(p) if engine=='chromium' else p.webkit.launch(headless=True)
+   page=b.new_page();page.route('**/*supabase*/**',lambda r:r.abort())
+   page.route('**/app.runtime.js*',lambda route:route.fulfill(path=str(Path(__file__).resolve().parents[1]/'app.js'),content_type='text/javascript'))
+   page.goto(url+'?mindexSmokeRaw=1');page.wait_for_function("typeof versionHasAudio==='function' && !!globalThis.MindexSongTiming && !document.body.classList.contains('ui-booting')")
+   print(engine,page.evaluate(r"""()=>{
+    const check=(v,m)=>{if(!v)throw Error(m)},same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+    const forms=[{id:'f',label:'Lyrics',part_type:'Lyrics',lyrics:'첫 줄\n둘째 줄\n\n다음 장'}];
+    const slides=[{type:'lyrics',text:'첫 줄\n둘째 줄'},{type:'lyrics',text:'다음 장'}];
+    const old={id:'SONG-CHLD-0001-0001',revision:1,metadata:{title:'음원 있는 곡',praise_types:['children']},content:{name:'보존할 이름',praise_types:['children'],forms},relations:{same_song:[],related:[]}};
+    old.content.audio_set={enabled:true,audioUrl:'https://example.test/a.mp3',audioFingerprint:'hash',duration:20,starts:[2,9],forms:structuredClone(forms),sourceSignature:MindexSongTiming.sourceSignature(old.content),lyricsFingerprint:MindexSongTiming.fingerprint(slides)};
+    const clean=MindexSingleSong.recordForWrite(old),song=MindexSingleSong.createCatalog([clean]).appSong(clean.id),version=song.versions[0];
+    const manual={id:'SONG-CONT-0002-0001',title:'반주로 부를 곡',versions:[{id:'SONG-CONT-0002-0001',name:'기본',praise_types:['ccm'],forms:structuredClone(forms)}]};
+    state.songs=[song,manual];state.module='praise';state.praiseFilter='audio';renderListFilter();
+    check(same(getSongsForPraiseFilter().map(s=>s.id),[song.id]),'audio filter');
+    check(refs.listFilter.textContent.includes('음원 있음') && refs.listFilter.textContent.includes('음원 없음') && !refs.listFilter.textContent.includes('어린이'),'visible names');
+    state.praiseFilter='no_audio';check(same(getSongsForPraiseFilter().map(s=>s.id),[manual.id]),'no audio filter');
+    check(normalizePraiseListFilterKey('children')==='audio','old filter preference');
+    check(!renderVersionPraiseTypeTags(version).includes('어린이'),'no children editor tag');
+    const item={id:'slot',song_id:song.id,memo:serializeServiceItemMemo({inputMode:'children_audio',elementType:'praise'})};
+    const before=JSON.stringify({item,clean});
+    check(serviceSelectableSongVersions(song,item,{}).length===1,'CCM audio selectable');
+    check(serviceSelectableSongVersions(manual,item,{}).length===0,'missing audio excluded');
+    check(same(MindexSongTiming.formsFor(item,song,version,[]),forms),'saved audio form order');
+    const rendered=MindexSongTiming.decorate(slides,item,song,version);
+    check(rendered.every(s=>s.syncTimeline?.audioSrc===version.audio_set.audioUrl),'CCM auto timing');
+    check(rendered[0].syncTimeline.start===2 && rendered[1].syncTimeline.start===9,'cue preservation');
+    const lyricsItem={...item,memo:serializeServiceItemMemo({inputMode:'lyrics_db',elementType:'praise'})};
+    check(MindexSongTiming.decorate(slides,lyricsItem,song,version).every(s=>!s.syncTimeline&&!s.songTimingAudio),'manual lyrics without audio');
+    check(JSON.stringify({item,clean})===before,'inputs unchanged');
+    version.audio_set.enabled=false;check(versionHasAudio(version),'paused autosync has audio');
+    check(MindexSongTiming.decorate(slides,item,song,version).every(s=>!s.syncTimeline),'disabled timing remains disabled');
+    return 'PASS visible filters, legacy preference, single classification, CCM audio/select/manual modes, cue and reference preservation';
+   }"""),flush=True);b.close()
+finally:server.shutdown()

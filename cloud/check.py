@@ -8,6 +8,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 NODE_TESTS = (
+    "test_praise_classification.cjs",
     "test_single_song.cjs",
     "test_remote_core.mjs",
     "test_remote_pairing.mjs",
@@ -73,6 +74,7 @@ CSS_NODE_TESTS = (
     "test_single_song.cjs",'test_app_runtime.cjs', 'test_ui_icons.cjs',
                   'test_remote_theme.cjs', 'test_bulletin.cjs')
 SMOKES = (
+    "smoke_audio_presence.py",
     "smoke_single_song.py",
     "smoke_single_song_lifecycle.py",
     "smoke_single_song_activation.py",

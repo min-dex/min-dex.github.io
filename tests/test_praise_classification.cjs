@@ -1,0 +1,15 @@
+const assert = require('node:assert/strict');
+const api = require('../mindex.single-song.js');
+const base={id:'SONG-CHLD-0001-0001',revision:2,metadata:{title:'같은 이름',praise_types:['children']},content:{name:'명시한 이름',praise_types:['children'],forms:[{id:'f',lyrics:'첫 줄\n둘째 줄\n\n반복'}],audio_set:{audioUrl:'https://example.test/a',audioFingerprint:'hash',duration:10,starts:[1,5],enabled:false}},legacy:{versionId:'old'},relations:{same_song:[],related:[]},provenance:{source:{praise_types:['children']}}};
+const original=structuredClone(base),clean=api.recordForWrite(base);
+assert.deepEqual(base,original);
+assert.ok(!Object.hasOwn(clean.metadata,'praise_types'));
+assert.deepEqual(clean.content.praise_types,['ccm']);
+const expected=structuredClone(base);delete expected.metadata.praise_types;expected.content.praise_types=['ccm'];
+assert.deepEqual(clean,expected);assert.deepEqual(api.recordForWrite(clean),clean);
+assert.equal(api.hasAudio(clean.content),true,'disabled autosync still has audio');
+for(const audio of [null,{}, {...base.content.audio_set,audioUrl:'javascript:alert(1)'},{...base.content.audio_set,duration:0},{...base.content.audio_set,audioFingerprint:''}])assert.equal(api.hasAudio({audio_set:audio}),false);
+const view=api.createCatalog([base]).appSong(base.id);assert.deepEqual(view.praise_types,['ccm']);assert.deepEqual(view.versions[0].praise_types,['ccm']);assert.deepEqual(view.versions[0].audio_set,base.content.audio_set);
+assert.deepEqual(api.praiseTypes({praise_types:['hymn']},{praise_types:['children']}),['hymn']);
+assert.deepEqual(api.praiseTypes({}, {praise_types:['children']}),['ccm']);
+(async()=>{let stored=structuredClone(base),request;const repo=api.createRepository({read:async()=>[stored],commit:async req=>{request=req;stored={...req.record,revision:req.expectedRevision+1};return stored;},mutate:async req=>{assert.ok(!Object.hasOwn(req.metadata,'praise_types'));assert.deepEqual(req.content.praise_types,['ccm']);assert.equal(req.prefix,'ccm');return {id:base.id,records:[{...base,revision:1}],deleted:[]};}});await repo.save(base);assert.deepEqual(request.record,clean);await repo.mutate('create',{prefix:'kid',metadata:{title:'새 곡',praise_types:['children']},content:{forms:[]}});console.log('PASS single stored classification, legacy projection, canonical create/save, untouched lyrics/audio/provenance, audio presence independent of autosync');})().catch(e=>{console.error(e);process.exitCode=1});

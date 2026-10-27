@@ -11,10 +11,32 @@
       : Number(m[4]) > 0);
   };
   const fail = message => { throw new Error(message); };
+  // Classification belongs only to content. Old children tags are read as CCM;
+  // audio availability is derived, never persisted as another classification.
+  function praiseTypes(content = {}, metadata = {}) {
+    const values = Array.isArray(content.praise_types) ? content.praise_types
+      : Array.isArray(metadata.praise_types) ? metadata.praise_types : [];
+    const types = new Set(values.map(value => value === 'children' ? 'ccm' : value));
+    const result = ['hymn', 'ccm'].filter(value => types.has(value));
+    return result.length ? result : [content.hymn_no || metadata.hymn_no ? 'hymn' : 'ccm'];
+  }
+  function hasAudio(version) {
+    const audio = version?.audio_set;
+    return !!audio && /^https?:\/\//.test(audio.audioUrl || '')
+      && Number.isFinite(audio.duration) && audio.duration > 0 && !!audio.audioFingerprint;
+  }
+  function recordForWrite(record) {
+    const next = copy(record);
+    next.content.praise_types = praiseTypes(next.content, next.metadata);
+    delete next.metadata.praise_types;
+    return next;
+  }
   function fromLegacySong(song, version, id) {
     if (!code(id) || !song?.id || !version?.id) fail('INVALID_SINGLE_SONG_MAPPING');
     const metadata = copy(song), content = copy(version);
     delete metadata.id; delete metadata.versions;
+    content.praise_types = praiseTypes(content, metadata);
+    delete metadata.praise_types;
     for (const key of ['_singleSongRecord','_singleSongRevision','same_song_ids','related_song_ids']) delete metadata[key];
     for (const key of ['_singleSongRecord','_legacyTimingKey','_legacyVersionId']) delete content[key];
     for (const key of ['id', 'canonical_song_id', 'source_song_id']) delete content[key];
@@ -60,10 +82,10 @@
     }
     function appSong(id) {
       const r = get(id);
-      return { ...r.metadata, id, _singleSongRecord: true, _singleSongRevision: r.revision,
+      return { ...r.metadata, praise_types: praiseTypes(r.content, r.metadata), id, _singleSongRecord: true, _singleSongRevision: r.revision,
         same_song_ids: copy(r.relations?.same_song || []),
         related_song_ids: copy(r.relations?.related || r.metadata.related_song_ids || []),
-        versions: [{ ...r.content, id, _singleSongRecord: true, _legacyTimingKey: r.legacy?.timingKey || null, _legacyVersionId: r.legacy?.versionId || null }] };
+        versions: [{ ...r.content, praise_types: praiseTypes(r.content, r.metadata), id, _singleSongRecord: true, _legacyTimingKey: r.legacy?.timingKey || null, _legacyVersionId: r.legacy?.versionId || null }] };
     }
     function singleItem(input) {
       const item = copy(input);
@@ -110,6 +132,7 @@
       return copy(rows);
     }
     async function save(record) {
+      record = recordForWrite(record);
       createCatalog([record]);
       if (!Number.isSafeInteger(record.revision) || record.revision < 0) fail('SONG_REVISION_MISSING');
       const frozen = copy(record), signature = JSON.stringify(frozen);
@@ -134,7 +157,14 @@
     }
     async function mutate(operation, input, scope = input.id || 'create') {
       if (typeof transport.mutate !== 'function') fail('SINGLE_SONG_LIFECYCLE_REQUIRED');
-      const frozen = copy(input), signature = JSON.stringify({operation,input:frozen});
+      const frozen = copy(input);
+      if (operation === 'create') {
+        frozen.content ||= {}; frozen.metadata ||= {};
+        frozen.content.praise_types = praiseTypes(frozen.content, frozen.metadata);
+        delete frozen.metadata.praise_types;
+        if (['kid', 'chi'].includes(frozen.prefix)) frozen.prefix = 'ccm';
+      }
+      const signature = JSON.stringify({operation,input:frozen});
       let job = mutations.get(scope);
       if (job && job.signature !== signature) fail('SONG_MUTATION_OUTCOME_UNKNOWN');
       if (!job) {
@@ -164,7 +194,10 @@
   function createRpcRepository(client) {
     async function rpc(name, args) {
       const response = await client.rpc(name, args);
-      if (response.error) throw new Error(response.error.message || 'SINGLE_SONG_RPC_FAILED');
+      if (response.error) {
+        if (/praise_classification_single_owner/.test(response.error.message || '')) throw new Error('찬양 분류 방식이 바뀌었습니다. 입력을 보존한 뒤 앱을 새로 열어 주세요.');
+        throw new Error(response.error.message || 'SINGLE_SONG_RPC_FAILED');
+      }
       return response.data;
     }
     return createRepository({
@@ -254,7 +287,7 @@
     for (const line of lines) { if (/^\[/.test(line)) flush(); block.push(line); }
     flush(); return {text:out.join(eol),pending};
   }
-  const api = Object.freeze({isId:code,fromLegacySong,createCatalog,createRepository,createRpcRepository,loadActivation,rewriteStructured,rewriteSource,parseMemo});
+  const api = Object.freeze({isId:code,praiseTypes,hasAudio,recordForWrite,fromLegacySong,createCatalog,createRepository,createRpcRepository,loadActivation,rewriteStructured,rewriteSource,parseMemo});
   root.MindexSingleSong=api;
   if (typeof module!=='undefined' && module.exports) module.exports=api;
 })(typeof globalThis!=='undefined' ? globalThis : this);

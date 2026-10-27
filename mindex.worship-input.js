@@ -1552,7 +1552,7 @@ async function createBlankPraiseSongForServiceInput(value, service = selectedSer
   if (presenterPreparationSongContentHasConnection(title)) return null;
   if (!title) return null;
 
-  const praiseType = ["children", "nursery"].includes(service?.type_id) ? "children" : "ccm";
+  const praiseType = "ccm";
   return await createEmptyPraiseAtomic({title,praiseTypes:[praiseType],reuseExisting:true},`input:${service?.id || ""}:${title}`);
 }
 
