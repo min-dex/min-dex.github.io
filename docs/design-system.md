@@ -215,3 +215,10 @@ Empty status regions occupy no space; phone touch target sizes are unchanged.
 Use one compact Mindex Remote heading with the existing mindex-cross.svg mark
 (20×25px) in the shared accent color. Avoid repeated wordmarks or explanatory
 subtitles; status text only appears when present.
+
+## Connection status dialog ·2026-10-27
+
+The connection-status dialog shares the Remote dialog shell: token radius (`--r`),
+20px insets at desktop and phone widths, card-title size/weight, and a non-wrapping
+header with 10px gap and 20px bottom margin. Close and refresh retain the standard
+35px icon target with 16px/1.5 Lucide icons. Presence and refresh behavior are unchanged.
