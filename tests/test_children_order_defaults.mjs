@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {planChildrenOrderDefaults as plan} from '../tools/plan_children_order_defaults.mjs';
+const reference={service:{id:'reference',service_type_id:'children',service_date:'2026-10-25'},sections:[{section_key:'creed',sort_order:1},{section_key:'praise',sort_order:2},{section_key:'send',sort_order:3},{section_key:'lords',sort_order:4}]};
+const aggregate={revision:'3',service:{id:'target',service_type_id:'children',service_date:'2026-11-01'},sections:[{id:'praise',service_id:'target',section_key:'praise',sort_order:10},{id:'custom',service_id:'target',section_key:'custom',sort_order:20},{id:'creed',service_id:'target',section_key:'creed',sort_order:30},{id:'sending',service_id:'target',section_key:'community_confession',sort_order:40},{id:'lords',service_id:'target',section_key:'lords_prayer',sort_order:50}],elements:[{id:'praise',section_id:'praise',song_id:'song',title:'Dated song',body:'Lyrics',config:{audioTiming:{starts:[0,2]},formPreset:['C','C']}},{id:'creed',section_id:'creed',body:'Creed unchanged',config:{introSlide:{title:'신앙고백',body:'사도신경'},slides:['authored text']}},{id:'custom-intro',section_id:'lords',config:{introSlide:{title:'My own heading'}}},{id:'sending',section_id:'sending',source_ref:{label:'공동체고백',other:'retain'},config:{introSlide:{title:'공동체고백'}},body:'Confession unchanged'}]};
+const before=structuredClone(aggregate),refBefore=structuredClone(reference),result=plan(aggregate,reference);
+assert.deepEqual(aggregate,before);assert.deepEqual(reference,refBefore);
+assert.equal(result.changedOrder,true);
+assert.deepEqual([...result.rows.sections].sort((a,b)=>a.sort_order-b.sort_order).map(row=>row.id),['creed','custom','praise','sending','lords']);
+assert.deepEqual(result.rows.elements[0],aggregate.elements[0]);
+assert.deepEqual(result.rows.elements[1].config,{slides:['authored text']});
+assert.deepEqual(result.rows.elements[2],aggregate.elements[2]);
+assert.equal(result.rows.elements[3].source_ref.label,'나래파송');assert.equal(result.rows.elements[3].body,aggregate.elements[3].body);
+assert.equal(plan({...aggregate,...result.rows},reference).changes.length,0,'idempotent default cleanup');
+assert.equal(plan({...aggregate,...result.rows},reference).changedOrder,false);
+assert.throws(()=>plan({...aggregate,service:{...aggregate.service,service_date:'2026-10-25'}},reference),/REFERENCE/);
+assert.throws(()=>plan({...aggregate,service:{...aggregate.service,service_type_id:'youth'}},reference),/CHILDREN/);
+console.log('PASS children-only explicit order/default plan, reference exclusion, no source mutation, dated content/media preservation and custom intro protection');

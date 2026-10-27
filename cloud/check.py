@@ -42,6 +42,7 @@ NODE_TESTS = (
     "test_calendar_assignee_creation.cjs",
     "test_children_default_completion.cjs",
     "test_children_worship_template.cjs",
+    "test_children_order_defaults.mjs",
     "test_worship_template_preservation.cjs",
     "test_shared_offering_integrity.cjs",
     "test_music_fade_stop.cjs",

@@ -21465,8 +21465,9 @@ function publicWorshipResponseStep() {
 }
 
 function childrenWorshipTemplate() {
+  const bodyOnly = step => ({ ...step, elements: step.elements.map(element => ({ ...element, introSlide: null })) });
   return [
-    { ...publicWorshipCreedStep(), label: "사도신경", name: "사도신경" },
+    { ...bodyOnly(publicWorshipCreedStep()), label: "사도신경", name: "사도신경" },
     publicWorshipPraiseStep({ count: 4, required: true }),
     { label: "예배의 부름", name: "예배의 부름", required: true, flex: false,
       sectionKey: "opening", elementType: "body", slides: [worshipOpeningBodyText('children')] },
@@ -21475,8 +21476,8 @@ function childrenWorshipTemplate() {
     { ...publicWorshipResponseStep(), required: true, flex: false },
     publicWorshipOfferingStep({ typeId: "children", praiseLabel: "봉헌찬양" }),
     { label: "나래파송", name: "나래파송", required: true, flex: false,
-      sectionKey: "community_confession", elements: [publicWorshipCommunityConfessionElement()] },
-    publicWorshipLordsPrayerStep(),
+      sectionKey: "community_confession", elements: [{ ...publicWorshipCommunityConfessionElement(), label: "나래파송", name: "나래파송", introSlide: null }] },
+    bodyOnly(publicWorshipLordsPrayerStep()),
     { label: "광고", name: "광고", required: true, flex: false,
       sectionKey: "announcements", elementType: "plain_text", default_text: "오늘도 어린이부 예배에 오신 여러분을 환영하고 축복합니다 :)" },
     { label: "교제", name: "교제", required: false, flex: true,
