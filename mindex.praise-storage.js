@@ -322,14 +322,15 @@ function praiseDisplayGroup(song) {
   return praiseDisplayGroups().find(group => group.members.some(row => row.id === song?.id))
     || {id:song?.id, representative:song, members:song ? [song] : []};
 }
-function groupPraiseSongs(matches) {
+function groupPraiseSongs(matches, preferRepresentative = false) {
   const groups = praiseDisplayGroups(), byId = new Map();
   for (const group of groups) for (const member of group.members) byId.set(member.id, group);
-  const seen = new Set();
+  const seen = new Set(), matching = new Map(matches.map(song=>[song.id,song]));
   return matches.flatMap(song => {
     const group = byId.get(song.id); if (!group || group.members.length < 2) return [song];
     if (seen.has(group.id)) return []; seen.add(group.id);
-    return [{...song, _praiseGroupIds:group.members.map(row=>row.id),
+    const selected = preferRepresentative ? matching.get(group.id) || song : song;
+    return [{...selected, _praiseGroupIds:group.members.map(row=>row.id),
       hymn_no:group.representative.hymn_no, _praiseGroupTitle:group.representative.title, _praiseGroupRepresentative:group.representative,
       _praiseGroupCount:group.members.length}];
   });

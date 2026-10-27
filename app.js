@@ -19678,7 +19678,7 @@ function isSelectablePraiseSong(song) {
 function getFilteredSongs() {
   const tokens = getSearchTokens(state.search);
   const filterSongs = getSongsForPraiseFilter();
-  if (!tokens.length) return groupPraiseSongs([...filterSongs].sort(sortSongsForCurrentList)).sort(sortSongsForCurrentList);
+  if (!tokens.length) return groupPraiseSongs([...filterSongs].sort(sortSongsForCurrentList), true).sort(sortSongsForCurrentList);
 
   const filterSet = new Set(filterSongs.map((s) => s.id));
   const allMatched = state.songs

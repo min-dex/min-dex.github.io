@@ -23,6 +23,7 @@ try:
     persistUiState=()=>{};state.client={};state.connectionError='';state.auth.session={user:{id:'fixture'}};state.module='praise';state.search='';state.praiseFilter='all';state.selectedSongId=v.id;state.selectedVersionId=v.id;state.forms=structuredClone(v.content.forms);state.dirty.song=false;state.dirty.forms=false;
     const original=JSON.stringify(state.songs),items=[{id:uid(),song_id:v.id,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'children_audio'})}],itemBefore=JSON.stringify(items);
     const group=groupPraiseSongs(state.songs);check(group.length===3,'one row per confirmed song');check(group.filter(s=>s.title==='마라나타').length===2,'different Maranatha separate');
+    check(getFilteredSongs().find(s=>s._praiseGroupCount===2).id===a.id,'catalog starts at representative when no search');
     renderSongList();check(refs.songCount.textContent==='3곡','group count: '+refs.songCount.textContent);check(refs.songList.querySelectorAll('.song-item').length===3,'list rows');check(refs.songList.querySelector('.song-item.active')?.dataset.songId===v.id,'selected variant navigation');
     check(refs.songList.querySelector('.song-item.active').textContent.includes('대표곡'),'common list title');
     const found=getGlobalPraiseResults(getSearchTokens('다른 제목'));check(found.length===1&&found[0].song.id===v.id,'variant-title search opens exact match');check(songListView(found[0].song).title==='대표곡','search common title');
