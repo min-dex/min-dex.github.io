@@ -370,7 +370,7 @@ function renderNativeVersionMetadata(song) {
   if (!song?._singleSongRecord) return "";
   const version = song.versions[0];
   return `<div class="metadata-popover-grid">
-    ${praiseDisplayGroup(song).members.length > 1 ? `<label class="field compact"><span>판본 이름</span><input data-version-name-field="${escapeAttr(version.id)}" value="${escapeAttr(versionEditableName(song,version))}" aria-label="버전 이름" /></label>` : ""}
+    ${praiseDisplayGroup(song).members.length > 1 || !isDefaultVersionName(versionEditableName(song,version)) ? `<label class="field compact"><span>판본 이름</span><input data-version-name-field="${escapeAttr(version.id)}" value="${escapeAttr(versionEditableName(song,version))}" aria-label="버전 이름" /></label>` : ""}
     <label class="field compact"><span>다른 출력 제목</span><input data-version-output-title-field="${escapeAttr(version.id)}" value="${escapeAttr(version.output_title || "")}" placeholder="비워 두면 이 판본의 곡 제목 사용" aria-label="버전 전용 제목" /></label>
   </div>`;
 }

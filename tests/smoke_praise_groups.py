@@ -32,6 +32,7 @@ try:
     check(!renderSingleSongVersionPicker(state.songs.find(s=>s.id===m.id)),'single version no selector');
     const markup=renderFormsTab(selected);check(!markup.includes('linked-version-title'),'one editable version not all columns');check(!markup.includes('data-version-name-field')&&!markup.includes('data-version-output-title-field'),'identity edit not repeated on lyrics');check(markup.includes('다른 제목'),'different title visible');
     check(renderNativeVersionMetadata(selected).includes('data-version-output-title-field'),'title editing retained');
+    selected.related_song_ids=[m.id];check(renderFormsTab(selected).includes('linked-version-title'),'unrelated linked song comparison retained');selected.related_song_ids=[];
     const svc={id:uid(),type_id:'custom',date:'2026-10-28'},manual={id:uid(),song_id:null,raw_title:'대표곡',memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db'})};
     state.services=[svc];state.selectedServiceId=svc.id;state.serviceItems={[svc.id]:[manual]};clearSearchCaches();
     const audioItem={...manual,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'children_audio'})};

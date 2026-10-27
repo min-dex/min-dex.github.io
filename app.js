@@ -17755,13 +17755,13 @@ function shouldReviewVersionStructure(song, version, forms = version?.forms || [
 
 function renderFormsTab(song) {
   const versions = song.versions || [];
-  const linkedEntries = linkedSongVersionEntries(song);
+  const linkedEntries = linkedSongVersionEntries(song).filter(entry => !song._singleSongRecord || !praiseDisplayGroup(song).members.some(row => row.id === entry.song.id));
   return `
     <section class="panel praise-forms-panel">
       ${renderSingleSongVersionPicker(song)}
       ${renderFormToolbar(song)}
       ${
-        !song._singleSongRecord && (versions.length > 1 || linkedEntries.length)
+        versions.length > 1 || linkedEntries.length
           ? renderVersionCompare(song, versions, linkedEntries)
           : renderSingleVersionForms()
       }
