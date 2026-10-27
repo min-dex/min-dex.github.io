@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261027-worship-ui",
+  "version": "20261028-popup-keynote-batch",
   "options": {
     "compress": false,
     "mangle": {
