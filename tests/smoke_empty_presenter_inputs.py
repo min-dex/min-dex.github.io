@@ -64,6 +64,7 @@ try:
                 const source=make('empty-'+elementType,'자료',elementType);
                 check(buildPresenterSlidesForServiceItem(source,service,1,{allowHydration:false}).length===0,'empty media emitted output '+elementType);
               }
+              check(buildPresenterSlidesForServiceItem(make('empty-title','제목','title'),service,1,{allowHydration:false}).length===0,'generic title placeholder emitted output');
               for(const source of [make('blank','빈 화면','blank'),make('confession','참회기도','title'),
                 make('fixed','고정 순서','title'),make('creed','신앙고백','body')]) {
                 check(buildPresenterSlidesForServiceItem(source,service,1,{allowHydration:false}).length>0,'intentional content removed '+source.label);

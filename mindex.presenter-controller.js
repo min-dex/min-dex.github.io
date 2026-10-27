@@ -1986,6 +1986,8 @@ function presenterFixedTitleText(item = {}) {
   if (isAnnouncementTextInputItem(item)) return "";
   const memo = parseServiceItemMemo(item.memo);
   if (serviceMemoElementType(memo) === "title" && String(item.label || "").trim()) {
+    if (!String(item.raw_title || item.title || "").trim()
+      && compactSearchValue(item.label) === compactSearchValue(serviceElementTypeLabel("title"))) return "";
     return independentServiceContentTitle(item.label, item.raw_title || item.title, "title") || String(item.label).trim();
   }
   const label = compactSearchValue(item?.label || item?.raw_title || "");

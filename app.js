@@ -24546,14 +24546,6 @@ function renderServiceOutlineChildRow(service, item, index, selectedIndex, slide
     </button>`;
 }
 
-function serviceOutlineMissingState(item = {}, slides = [], service = null) {
-  const existing = slides.find((slide) => slide?.missingContent && presenterSlideBelongsToItem(slide, item));
-  if (existing) return existing;
-  const song = presenterSongForServiceItem(item, serviceItemDisplayText(item), item.label || "", service);
-  const content = resolvePresenterServiceItemContentState(item, parseServiceItemMemo(item.memo), song, service);
-  return content.required ? { ...content, missingContent: true } : null;
-}
-
 function renderServiceOutlineMissingBadge(missing = null) {
   if (!missing?.missingContent) return "";
   return `<span class="service-outline-badge">입력 필요</span>`;
