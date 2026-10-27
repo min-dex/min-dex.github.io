@@ -4835,6 +4835,19 @@ hydration/freshness checks. Failed preparation or superseded navigation leaves
 the output unchanged. Unsaved-change confirmation is retained; ordinary browsing
 of other worships still never transfers the live output.
 
+## Standalone media viewport fit ·2026-10-28
+
+Image, video (including waiting-loop video), imported slide images and live PPTX
+use the entire output viewport as their available area. Fit the original aspect
+ratio into that area at the largest contained size, enlarging or shrinking as
+needed; never crop or stretch to fill. Landscape and portrait media follow the
+same rule, independently of the fixed 16:9 text/lyric design stage. Live PPTX
+retains its native SVG aspect-fit rendering and animation/media sessions.
+Controller thumbnails retain their existing design-stage scaling. Existing
+service themes, caption/background layouts, playback settings, original assets
+and operational worship data are not rewritten. Resize must only change layout,
+not recreate media, restart audio/video or replay slide effects.
+
 ## Keynote HTML playback and original preservation ·2026-10-25
 
 A `.key` original remains byte-identical and attached to the same worship item.

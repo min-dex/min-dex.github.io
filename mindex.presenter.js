@@ -2752,6 +2752,8 @@ function presenterOutputFrameStateForSlide(slide, payload = {}) {
   const showBackground = Boolean(!blackoutOutput && backgroundImages.length && cleanOutput && presenterSlideUsesServiceBackground(slide));
   return {
     cleanOutput,
+    mediaOutput: Boolean(slide?.pptx?.url || (presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.MEDIA
+      && [PRESENTER_ELEMENT_TYPES.IMAGE, PRESENTER_ELEMENT_TYPES.VIDEO].includes(presenterSlideElementType(slide)))),
     formBackground: Boolean(slide?.formBackgroundImage),
     showBackground,
     blankOutput: Boolean(blankSlide && cleanOutput && !blackoutOutput && !slide?.formBackgroundImage),
@@ -2807,6 +2809,7 @@ function presenterFrameNormalizeOutputContext(value = "") {
 function presenterOutputFrameClassNames(frameState = {}) {
   return [
     frameState.noChromakey ? "no-chromakey" : "",
+    frameState.mediaOutput ? "is-media-output" : "",
     frameState.showBackground ? "has-background" : "",
     frameState.formBackground ? "has-form-background" : "",
     frameState.blankOutput ? "is-blank" : "",
@@ -3459,6 +3462,7 @@ function applyPresenterOutputFrameState(root, frameState = {}) {
   document.body.classList.toggle("has-background", Boolean(frameState.showBackground));
   document.body.classList.toggle("is-blank", Boolean(frameState.blankOutput));
   root.classList.toggle("no-chromakey", Boolean(frameState.noChromakey));
+  root.classList.toggle("is-media-output", Boolean(frameState.mediaOutput));
   root.classList.toggle("has-background", Boolean(frameState.showBackground));
   root.classList.toggle("has-form-background", Boolean(frameState.formBackground));
   root.classList.toggle("is-blank", Boolean(frameState.blankOutput));
