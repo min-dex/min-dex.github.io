@@ -20609,7 +20609,7 @@ function updateSaveState() {
 
 function updateEditorTitle(song) {
   const title = refs.detailPane.querySelector("#editorSongTitle");
-  if (title) title.textContent = song.title || "제목 없는 찬양";
+  if (title) (title.querySelector("span") || title).textContent = praiseGroupTitle(song);
 }
 
 function parseList(value) {

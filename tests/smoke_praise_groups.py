@@ -57,6 +57,14 @@ try:
    assert page.locator('#editorSongTitle').inner_text().strip()=='대표곡'
    assert page.locator('[data-form-field=lyrics]').count()==1
    assert '다음 화면' in page.locator('[data-form-field=lyrics]').input_value()
+   page.locator('[data-open-metadata]').click()
+   page.locator('[data-song-field="title"]').fill('편곡의 다른 곡 제목')
+   page.locator('[data-song-field="title"]').dispatch_event('input')
+   assert page.locator('#editorSongTitle').inner_text().strip()=='대표곡'
+   page.locator('[data-version-output-title-field]').fill('명시한 출력 제목')
+   page.locator('[data-version-output-title-field]').dispatch_event('input')
+   assert page.evaluate("getSelectedVersion().output_title==='명시한 출력 제목'")
+   page.locator('[data-close-metadata]').click()
    page.evaluate("()=>{window.groupChoiceCalls=[];selectServiceSongForItem=(index,id)=>groupChoiceCalls.push({index,id});const item=getServiceItems(state.selectedServiceId)[0];refs.detailPane.innerHTML=renderServiceSongPickerResult(serviceSongPickerResults('대표곡',item,selectedServiceForEditor())[0],0)}")
    page.locator('.svc-song-group-choice > summary').click()
    assert page.evaluate('groupChoiceCalls.length')==0
