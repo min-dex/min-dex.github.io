@@ -9,7 +9,7 @@ assert.deepEqual([...result.rows.sections].sort((a,b)=>a.sort_order-b.sort_order
 assert.deepEqual(result.rows.elements[0],aggregate.elements[0]);
 assert.deepEqual(result.rows.elements[1].config,{slides:['authored text']});
 assert.deepEqual(result.rows.elements[2],aggregate.elements[2]);
-assert.equal(result.rows.elements[3].source_ref.label,'나래파송');assert.equal(result.rows.elements[3].body,aggregate.elements[3].body);
+assert.equal(result.rows.elements[3].source_ref.label,'공동체고백');assert.equal(result.rows.elements[3].body,aggregate.elements[3].body);
 assert.equal(plan({...aggregate,...result.rows},reference).changes.length,0,'idempotent default cleanup');
 assert.equal(plan({...aggregate,...result.rows},reference).changedOrder,false);
 assert.throws(()=>plan({...aggregate,service:{...aggregate.service,service_date:'2026-10-25'}},reference),/REFERENCE/);

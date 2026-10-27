@@ -21476,7 +21476,7 @@ function childrenWorshipTemplate() {
     { ...publicWorshipResponseStep(), required: true, flex: false },
     publicWorshipOfferingStep({ typeId: "children", praiseLabel: "봉헌찬양" }),
     { label: "나래파송", name: "나래파송", required: true, flex: false,
-      sectionKey: "community_confession", elements: [{ ...publicWorshipCommunityConfessionElement(), label: "나래파송", name: "나래파송", introSlide: null }] },
+      sectionKey: "community_confession", elements: [{ ...publicWorshipCommunityConfessionElement(), introSlide: null }] },
     bodyOnly(publicWorshipLordsPrayerStep()),
     { label: "광고", name: "광고", required: true, flex: false,
       sectionKey: "announcements", elementType: "plain_text", default_text: "오늘도 어린이부 예배에 오신 여러분을 환영하고 축복합니다 :)" },

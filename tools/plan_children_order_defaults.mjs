@@ -39,10 +39,6 @@ export function planChildrenOrderDefaults(aggregate, reference) {
         changes.push({id:element.id,field:field+'.introSlide',action:'remove-exact-default'});
       }
     }
-    if(key==='community_confession'&&element.source_ref?.label==='공동체고백'){
-      element.source_ref.label='나래파송';
-      changes.push({id:element.id,field:'source_ref.label',action:'rename-order-label'});
-    }
   }
   return {rows:{sections,elements},changes,changedOrder};
 }

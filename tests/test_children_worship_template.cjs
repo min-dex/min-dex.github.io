@@ -23,8 +23,10 @@ assert.match(opening.config.slides.join('\\n'),/하나님을 예배합니다\\./
 const response=rows.sections.find(s=>s.section_key==='response_song');
 assert.equal(response.title,'결단');
 assert.equal(rows.elements.find(e=>e.section_id===response.id).source_ref.label,'결단기도');
-const confession=rows.elements.find(e=>e.source_ref.label==='나래파송');
+const confession=rows.elements.find(e=>e.source_ref.label==='공동체고백');
 assert.equal(confession.element_type,'body');
+assert.equal(rows.sections.find(s=>s.id===confession.section_id).title,'나래파송');
+assert.equal(confession.source_ref.label,'공동체고백');
 for(const key of ['creed','community_confession','lords_prayer']) {
  const section=rows.sections.find(row=>row.section_key===key);
  for(const element of rows.elements.filter(row=>row.section_id===section.id))assert.ok(!element.config.introSlide,'Children liturgy uses body directly');
