@@ -879,3 +879,14 @@ sizes without overflow. The six edited records have no current worship reference
 or registered audio. This is not a new visual transcription of every printed
 score. Production application and publication remain separate pending steps.
 Private evidence: backups/20261028-hymn-page-alignment/.
+
+
+## 판본 DB 마디 메타데이터 ·2026-10-28
+
+Native Praise 레코드의 `content.hymn_structure`가 판본별 마디 표시의 owner다.
+기존 검증 자료를 그대로 이전하며, parts의 가사 해시·종류·단위 ID가 현재 가사와
+일치할 때만 approx. N bars를 표시한다. DB 값이 없거나 오래된 경우 번들 자료로
+검증 완료를 대체하지 않는다. 가사와 마디 기록은 기존 revision/CAS 저장 경로로
+함께 갱신할 수 있다. 가사 편집만으로 검증 해시를 자동 갱신하지 않는다.
+송폼·타이밍·실제 예배에는 관여하지 않는다. 정적 대장은 과거 근거로 보존한다.
+운영 이전·배포 완료 여부는 별도 receipt로 기록한다.

@@ -17968,7 +17968,8 @@ function updateVersionMusicalStructure(node, version, forms) {
   if (node.matches("input")) node.value = "확인 중…";
   else node.textContent = "마디 정보 확인 중…";
   const snapshot = (forms || []).map(form => ({id:form.id, part_type:form.part_type, lyrics:form.lyrics || ""}));
-  MindexHymnStructure.describe(version._legacyVersionId || version.id, snapshot)
+  MindexHymnStructure.describe(version._legacyVersionId || version.id, snapshot,
+    version._singleSongRecord ? {[version._legacyVersionId || version.id]: version.hymn_structure} : undefined)
     .catch(() => ({text:"마디 정보를 불러오지 못했어요",status:"error"}))
     .then(result => {
       if (!node.isConnected || node.dataset.hymnStructureRequest !== ticket) return;

@@ -46,6 +46,14 @@ def main():
      settle[1]({status:'stale',text:'new result'});await Promise.resolve();await Promise.resolve();settle[0]({status:'measured',text:'old result'});await Promise.resolve();await Promise.resolve();check(node.value==='new result','stale async completion');
      MindexHymnStructure.describe=()=>Promise.reject(Error('offline'));updateVersionMusicalStructure(node,version,forms);await new Promise(r=>setTimeout(r,10));check(node.dataset.reviewStatus==='error','fetch error distinct from unmeasured');
      MindexHymnStructure.describe=(id,fs)=>describe(id,fs,records);updateVersionMusicalStructure(node,version,forms);await new Promise(r=>setTimeout(r,10));check(node.dataset.reviewStatus==='measured','retry after failure');
+     // Native DB metadata needs no static lookup and updates without rebuilding the app.
+     MindexHymnStructure.describe=describe;
+     version._singleSongRecord=true;version.hymn_structure=structuredClone(records.v);
+     updateVersionMusicalStructure(node,version,forms);await new Promise(r=>setTimeout(r,30));
+     check(node.dataset.reviewStatus==='measured','native DB metadata renders');
+     delete version.hymn_structure;
+     updateVersionMusicalStructure(node,version,forms);await new Promise(r=>setTimeout(r,30));
+     check(node.dataset.reviewStatus==='unreviewed','missing DB metadata never falls back to bundled evidence');
      return 'PASS values, partial/unknown, copy/edit/delete, caret, race and retry';
     }'''),flush=True)
     for width in [390,1200]:

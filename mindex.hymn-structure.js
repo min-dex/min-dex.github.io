@@ -1,4 +1,4 @@
-/* Read-only, version-owned score measurements. Never supplies a song form. */
+/* Version-owned DB measurements; static evidence supports legacy fixtures only. Never supplies a song form. */
 (function (root) {
   'use strict';
   let pending;
@@ -16,6 +16,7 @@
   async function describe(versionId, forms, records) {
     const record = (records || await load())[versionId];
     if (!record) return {status:'unreviewed',text:'마디: 미확인'};
+    if (!Array.isArray(record.parts)) return {status:'stale',text:'마디: 검증 정보 확인 필요'};
     const current = forms || [];
     const hashes = await Promise.all(current.map(async form => [form.id, await textHash(form.lyrics ?? form.text)]));
     const byId = new Map(hashes);

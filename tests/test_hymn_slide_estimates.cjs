@@ -15,5 +15,11 @@ const pairedRecords={p:{parts:pairedParts}};
 assert.equal((await ctx.MindexHymnStructure.describe('p',pairedForms,pairedRecords)).text,'approx. 4 bars');
 const singleForms=[pairedForms[0],pairedForms[4]];
 assert.equal((await ctx.MindexHymnStructure.describe('p',singleForms,{p:{parts:[pairedParts[0],pairedParts[4]]}})).text,'approx. 4 bars');
+// Native DB values win without a runtime-file request; missing/malformed stay explicit.
+assert.equal((await ctx.MindexHymnStructure.describe('db',singleForms,{db:{parts:[pairedParts[0],pairedParts[4]]}})).text,'approx. 4 bars');
+assert.equal((await ctx.MindexHymnStructure.describe('db',singleForms,{db:undefined})).status,'unreviewed');
+assert.equal((await ctx.MindexHymnStructure.describe('db',singleForms,{db:{}})).status,'stale');
+const edited=structuredClone(pairedParts[0]);edited.approxMeasuresByBlock=[8,8,8];
+assert.equal((await ctx.MindexHymnStructure.describe('db',[singleForms[0]],{db:{parts:[edited]}})).text,'approx. 8 bars');
 assert.equal(pairedParts.length,5); // Display calculation never changes stored sections.
 }console.log('PASS slide estimates, separate Coda, fractional legacy input, stale/copy guards');})();
