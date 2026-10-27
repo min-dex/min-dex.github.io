@@ -632,7 +632,7 @@ function serviceCanonicalSectionTitle(sectionKey = "") {
 function serviceSectionDisplayTitle(sectionKey = "", title = "") {
   const rawTitle = String(title || "").trim();
   const canonical = serviceCanonicalSectionTitle(sectionKey);
-  return canonical || rawTitle;
+  return sectionKey === "community_confession" && rawTitle === "나래파송" ? rawTitle : canonical || rawTitle;
 }
 
 function addPresenterSlideToSubgroup(group, entry) {

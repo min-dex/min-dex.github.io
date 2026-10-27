@@ -31,6 +31,8 @@ for(const key of ['creed','community_confession','lords_prayer']) {
 }
 assert.ok(publicWorshipCreedStep().elements[0].introSlide,'Keep other services shared defaults');
 assert.ok(publicWorshipLordsPrayerStep().elements[0].introSlide);
+assert.equal(serviceSectionDisplayTitle('community_confession','나래파송'),'나래파송');
+assert.equal(serviceSectionDisplayTitle('community_confession','공동체고백'),'공동체고백');
 assert.match(presenterCanonicalLiturgicalBodyText('공동체고백',service),/꿈꾸는 어린이부 공동체/);
 const items=groupWorshipElements(rows.sections,rows.elements)[service.id];
 const oldPrayer={id:'legacy-prayer',label:'기도',assignee:'담당자',raw_title:'',memo:serializeServiceItemMemo({elementType:'title_person',note:'보존'}),_worshipSectionKey:'decision',_worshipSectionTitle:'기도',_worshipSectionId:'legacy-section',_worshipElementTemplateModified:true};
