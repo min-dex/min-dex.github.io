@@ -3545,11 +3545,12 @@ function presenterRemoteVideoState(serviceId) {
   const p = state.presenter, health = p.videoHealth;
   if (!health || health.serviceId !== serviceId || p.serviceId !== serviceId || health.index !== p.index
     || p.safetyBlank || p.liveScripture?.active) return null;
+  const source = presenterMediaSourceIdentity(p.slides?.[p.index]?.videoSrc || p.slides?.[p.index]?.text);
   const ready = Date.now() - health.receivedAt <= 2500 && ["playing","paused","ended","blocked"].includes(health.status)
     && Number.isSafeInteger(health.revision) && Boolean(health.messageId)
-    && Boolean(health.source) && health.source === presenterMediaSourceIdentity(p.slides?.[p.index]?.videoSrc || p.slides?.[p.index]?.text)
+    && Boolean(health.source) && health.source === source
     && health.messageId === presenterTransportLatest?.payload?.messageId;
-  return {status:health.status,ready,revision:health.revision,identity:compactTextSignature(health.frameKey)};
+  return {status:health.status,ready,revision:health.revision,identity:compactTextSignature(health.frameKey),sourceProblem:!health.source?'unverified':health.source===source?'':'mismatch'};
 }
 
 async function runPresenterManagedVideoAction(action) {

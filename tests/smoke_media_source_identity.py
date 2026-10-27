@@ -95,6 +95,7 @@ try:
                       checkIdentity(presenterRemoteVideoState(currentIdentity.serviceId).ready,'matching source disabled');
                       state.presenter.slides=identityPayload('video','/different.mp4').slides;
                       checkIdentity(!presenterRemoteVideoState(currentIdentity.serviceId).ready,'old frame controls a new source');
+                      checkIdentity(presenterVideoSourceFeedback(presenterRemoteVideoState(currentIdentity.serviceId))==='새 영상 반영 대기','source mismatch guidance missing');
                       checkIdentity(health.source===presenterMediaSourceIdentity(identityNode.currentSrc),'observed source not bound to real video');
                     }''')
                 page.evaluate('args=>renderIdentity(...args)', [kind,sources[1]])
