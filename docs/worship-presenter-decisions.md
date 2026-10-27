@@ -4848,6 +4848,15 @@ Prepared playback runs inside Mindex web and desktop without Keynote at playback
 time. Total export limit is 500 MiB, at most 5,000 resources and 300 slides;
 individual resources currently must fit the 50 MiB Storage upload limit.
 
+Output uses Apple's aspect-fit layout at the largest size contained in the
+viewport, including enlargement beyond the original slide dimensions. The
+verified runtime's original-width ceiling is removed only from the in-memory
+copy; its aspect calculation and resize handling remain unchanged. A 16:9 deck
+fills a 1920×1080 viewport, while a different viewport ratio retains only the
+necessary letterboxing. No crop, stretch, original-file rewrite or sidecar
+re-upload is used. The pinned runtime hash and exact patch markers remain
+mandatory, so an unrecognized export fails closed.
+
 The sidecar manifest identifies the original hash, resource hashes, slide/scene
 mapping and native runtime version. Folder import verifies every resource,
 uses one immutable upload prefix, and changes only `asset.keynoteHtml` through

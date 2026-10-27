@@ -1250,8 +1250,8 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .manuals-shell {
   display: grid;
   width: min(100%, 1180px);
-  gap: 15px;
-  padding: 0 0 25px;
+  gap: 20px; container: manual / inline-size;
+  padding: 0 0 30px;
 }
 .sr-only {
   position: absolute;
@@ -1276,9 +1276,9 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .manuals-head > div > span,
 .manual-guide > header span {
   color: var(--ink-3);
-  font-size: var(--ui-meta-size);
+  font-size: var(--ui-page-title-size);
   font-weight: 700;
-  line-height: 16px;
+  line-height: 26px;
 }
 .manual-guide h3,
 .manual-guide h4 {
@@ -1295,9 +1295,9 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   display: flex;
   align-items: baseline;
   gap: 10px;
-  border-left: 2px solid var(--accent);
+  border-left: 2px solid var(--line);
   margin: 0;
-  padding: 5px 0 5px 10px;
+  padding: 5px 10px; background: transparent;
 }
 .manuals-notice strong {
   flex: 0 0 auto;
@@ -1321,10 +1321,10 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 }
 .manuals-index {
   display: grid;
-  grid-template-columns: 142px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
   border-bottom: 1px solid var(--line);
-  padding: 10px 0;
+  padding: 0 0 20px;
 }
 .manuals-index > div {
   display: flex;
@@ -1332,23 +1332,23 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   gap: 5px 15px;
 }
 .manuals-index a {
-  display: inline-flex;
+  display: flex;
   min-width: 0;
   align-items: baseline;
-  gap: 5px;
-  color: var(--ink-3);
+  gap: 10px; min-height: 35px; padding: 5px 10px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent;
+  color: var(--ink-2);
   font-size: var(--ui-meta-size);
   font-weight: 600;
   line-height: 20px;
   text-decoration: none;
 }
 .manuals-index a:hover,
-.manuals-index a:focus-visible { color: var(--accent); }
+.manuals-index a:focus-visible { color: var(--ink); border-color: var(--ink-3); background: color-mix(in srgb, var(--ink) 8%, var(--ui-surface-panel)); }
 .manuals-index a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.manuals-index > .manuals-index-groups { display: grid; gap: 10px; min-width: 0; }
+.manuals-index > .manuals-index-groups { display: grid; grid-template-columns: 1fr; gap: 20px; min-width: 0; align-items: start; }
 .manuals-index-group { min-width: 0; }
-.manuals-index-group > strong { display: block; margin-bottom: 5px; color: var(--ink); font-size: var(--ui-meta-size); }
-.manuals-index-group > div { display: flex; flex-wrap: wrap; gap: 5px 15px; }
+.manuals-index-group > strong { display: block; margin-bottom: 10px; color: var(--ink); font-size: 14px; }
+.manuals-index-group > div { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px 10px; }
 .manual-guide h3.manual-category-title { margin: 0; padding: 25px 0 10px; border-bottom: 1px solid var(--line); font-size: var(--ui-card-title-size); line-height: 24px; }
 .manual-order { margin: 0; padding-left: 25px; line-height: 1.7; }
 .manual-order > li { padding: 5px 0; }
@@ -1378,10 +1378,10 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .manual-section {
   display: grid;
   min-width: 0;
-  grid-template-columns: minmax(150px, .72fr) minmax(0, 2.28fr);
-  gap: 25px;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 30px;
   border-bottom: 1px solid var(--line);
-  padding: 20px 0;
+  padding: 25px 0;
   scroll-margin-top: 20px;
 }
 .manual-section-head {
@@ -1389,8 +1389,8 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   align-items: baseline;
   gap: 10px;
 }
-.manual-guide h4 { color: var(--ink); font-size: var(--ui-card-title-size); font-weight: 700; line-height: 21px; }
-.manual-section-content { min-width: 0; }
+.manual-guide h4 { color: var(--ink); font-size: var(--ui-card-title-size); font-weight: 700; line-height: 21px; word-break: keep-all; }
+.manual-section-content { min-width: 0; font-size: 14px; line-height: 1.7; overflow-wrap: anywhere; }
 .manual-guide h5 {
   margin: 0;
   color: var(--ink);
@@ -1404,9 +1404,9 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   margin: 0;
   padding: 0;
   color: var(--ink-2);
-  font-size: var(--ui-meta-size);
+  font-size: 14px;
   font-weight: 500;
-  line-height: 20px;
+  line-height: 1.7;
   list-style: none;
 }
 .manual-checklist li {
@@ -1421,9 +1421,9 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .manual-checklist li::before {
   width: 5px;
   height: 5px;
-  align-self: center;
+  align-self: start; margin-top: 9px;
   border-radius: 50%;
-  background: var(--ui-surface-panel);
+  background: var(--ink-3);
   content: "";
 }
 .manual-schedule-grid,
@@ -1503,15 +1503,15 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   font-size: var(--ui-meta-size);
   font-weight: 700;
 }
-@media (max-width: 860px) {
-  .manual-section { grid-template-columns: 1fr; gap: 10px; padding: 20px 0; }
-  .manual-schedule-grid,
+@container manual (max-width: 800px) {
+  .manuals-index > .manuals-index-groups { grid-template-columns: 1fr; }
+  .manuals-index-group > div { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .manual-section { grid-template-columns: 1fr; gap: 15px; }
   .manual-camera-grid { grid-template-columns: 1fr; }
-  .manuals-index { grid-template-columns: 1fr; gap: 10px; }
 }
-@media (max-width: 580px) {
-  .manuals-head { display: grid; }
-  .manuals-index > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px 10px; }
+@container manual (max-width: 480px) {
+  .manuals-index-group > div, .manual-schedule-grid { grid-template-columns: 1fr; }
+  .manuals-notice { display: grid; gap: 5px; }
 }
 .background-manager {
   display: grid;

@@ -1,7 +1,8 @@
-:is(.monitor-panel, .remote-panel) { box-sizing: border-box; width: min(560px, calc(100% - 24px)); max-height: 85vh; padding: 20px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); overflow-y: auto; }
+:is(.monitor-panel, .remote-panel) { box-sizing: border-box; width: min(560px, calc(100% - 24px)); max-height: 85vh; padding: 20px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); color: var(--ink); overflow-y: auto; }
 :is(.monitor-panel, .remote-panel)::backdrop { background: #0008; }
-:is(.monitor-panel, .remote-panel) header, :is(.monitor-panel, .remote-panel) form, .monitor-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
-:is(.monitor-panel, .remote-panel) h2 { margin: 0; flex: 1; font-size: var(--ui-page-title-size); }
+:is(.monitor-panel, .remote-panel) form, .monitor-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+:is(.monitor-panel, .remote-panel) header { display: flex; align-items: center; flex-wrap: nowrap; gap: 10px; margin-bottom: 20px; }
+:is(.monitor-panel, .remote-panel) h2 { margin: 0; flex: 1; font-size: var(--ui-card-title-size); font-weight: var(--ui-title-weight); }
 :is(.monitor-panel, .remote-panel) h3 { font-size: var(--ui-card-title-size); margin: 16px 0 8px; }
 :is(.monitor-panel, .remote-panel) input:not([type=checkbox]) { min-width: 0; flex: 1; padding: 10px; background: var(--panel-2); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; }
 :is(.monitor-panel, .remote-panel) label { display: flex; align-items: center; gap: 8px; }
@@ -30,7 +31,7 @@
 :is(.monitor-panel, .remote-panel) [data-count] { margin-left: auto; font-size: 12px; color: var(--muted); }
 :is(.monitor-panel, .remote-panel) summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 :is(.monitor-panel, .remote-panel) [hidden] { display: none !important; }
-@media (max-width: 480px) { :is(.monitor-panel, .remote-panel) { padding: 16px; } :is(.monitor-panel, .remote-panel) form label { flex-basis: 100%; } }
+@media (max-width: 480px) { :is(.monitor-panel, .remote-panel) form label { flex-basis: 100%; } }
 
 /* Remote dialog follows shared dialog rhythm without changing device-status UI. */
 .remote-panel { border-radius: var(--r); padding: 20px; }
