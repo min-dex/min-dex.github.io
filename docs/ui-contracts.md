@@ -1077,15 +1077,14 @@ or separate dynamic loader is added.
 
 ## Worship navigation names ·2026-10-27
 
-App list/type headings, cards, sidebar, tabs, search and setlist headings use
-`종류 (별명)` through serviceNavigationName; equal names are shown once.
-Sunday third without an explicit alias is `주일예배 [3부]`; only a service
-whose alias is 온세대 찬양예배 adds `(온세대 찬양예배)`. Type headings and
-archive entries without aliases never invent that alias. Friday uses `금요예배`
-with `금요기도회` or its monthly/culture variant in parentheses. Stored names,
-classification/order, original serviceDisplayTypeName output naming and print
-content remain unchanged. Archive aliases are included in the heading instead
-of repeated as a separate right-side name.
+App cards, sidebar, tabs, search and setlist headings display an explicitly
+stored alias alone, otherwise the official type name. Type-group headings always
+show the type, not an individual alias. A normal Sunday third remains
+`주일예배 [3부]`; an explicit 온세대 찬양예배 alias displays `온세대 찬양예배`.
+Friday/monthly services follow the same rule without a synthetic parenthesized
+name. Titles, dates and template variants never invent an alias. Stored names,
+classification/order, output naming and print content remain unchanged.
+This supersedes the earlier `종류 (별명)` display request.
 
 ### Presenter media launcher during loading
 
