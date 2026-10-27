@@ -9,8 +9,7 @@ vm.createContext(sdk);
 vm.runInContext(fs.readFileSync(path.join(__dirname, '../vendor/supabase-js.min.js'), 'utf8'), sdk);
 const {createClient} = sdk.supabase;
 // Service-document history owns its persistence contract in this module. The
-// display-only summary remains in the app shell, so load each helper from its
-// actual owner instead of assuming the shell owns the full history contract.
+// retired display-only summary is absent; test the stored history contract.
 const sources = [
   fs.readFileSync(path.join(__dirname, '../mindex.worship-persistence.js'), 'utf8'),
   fs.readFileSync(path.join(__dirname, '../app.js'), 'utf8'),
@@ -36,7 +35,7 @@ const context = {
 };
 vm.createContext(context);
 for (const name of ['serviceDocumentHistoryWithPrevious', 'compactServiceDocumentHistoryEntry',
-  'serviceDocumentHistoryContentSignature', 'serviceSourceHistoryMeta',
+  'serviceDocumentHistoryContentSignature',
   'serviceDocumentHistoryEntryKey', 'trimServiceDocumentHistory',
   'normalizeServiceDocumentSnapshot', 'normalizeServiceDocumentSourceRecords',
   'normalizeServiceDocumentSlides', 'normalizeServiceDocumentExceptions',
@@ -104,9 +103,12 @@ assert.equal(kept.length, 2);
 assert.equal(kept[1].slideCount, 7);
 assert.equal(context.serviceDocumentHistoryWithPrevious(original, [rewritten, rewritten], {...original, sourceText: 'Next'}).length, 2, 'duplicate rewritten entries collapse');
 // The list meta shows counts for slim, rewritten and legacy entries.
-assert.equal(context.serviceSourceHistoryMeta(slim), '항목 5 · 슬라이드 40');
-assert.equal(context.serviceSourceHistoryMeta(rewritten), '항목 2 · 슬라이드 7');
-assert.equal(context.serviceSourceHistoryMeta(big), '항목 5 · 슬라이드 40');
+assert.equal(slim.sourceRecordCount, 5);
+assert.equal(slim.slideCount, 40);
+assert.equal(rewritten.sourceRecordCount, 2);
+assert.equal(rewritten.slideCount, 7);
+assert.equal(context.compactServiceDocumentHistoryEntry(big).sourceRecordCount, 5);
+assert.equal(context.compactServiceDocumentHistoryEntry(big).slideCount, 40);
 console.log('PASS history entries are stored slim, keep restorable text and counts, and still deduplicate');
 (async () => {
   for (const count of [0, 1, null]) {

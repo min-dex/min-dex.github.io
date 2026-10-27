@@ -38,7 +38,7 @@ Where the bytes are, summed over all 60 entries:
 | `sourceText` | 35 | 0.7 % |
 | everything else (signatures, ids, dates) | ~10 | 0.2 % |
 
-## How history is used today (client, `app.js`)
+## Historical UI usage (before source-editor removal)
 
 | where | use |
 | --- | --- |
@@ -193,3 +193,10 @@ create index mindex_worship_service_history_service_idx
   (Option S assumes only the source text, which matches the current behaviour.)
 - Is 3 entries enough, or should recent services keep more once entries are ~1 KB each?
 - Should the backup table from the rewrite be kept, and for how long?
+
+### Source editor retired ·2026-10-28
+
+The source-history display and its metadata formatter have been removed. The
+UI references above describe the earlier implementation, not current controls.
+Stored text, counts, signatures and bounded history remain covered by persistence
+tests. Disclosure tests now exercise only current editor panels.
