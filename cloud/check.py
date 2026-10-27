@@ -65,6 +65,7 @@ NODE_TESTS = (
     "test_asv_reader_20261016.cjs",
     "test_worship_deleted_slot.cjs",
     "test_setlist_period.cjs",
+    "test_setlist_links.cjs",
     "test_setlist_leader_edit.cjs",
     "test_setlist_archive_loading.cjs",
     "test_song_timing.cjs",

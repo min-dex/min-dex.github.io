@@ -24904,7 +24904,7 @@ function worshipSetlistArchiveEntries() {
   const live = window.MindexSetlistLinks?.fromServices(archive.live, archive.sources, state.worshipSetlistSongCatalog?.index) || {sources:[], candidates:[]};
   const candidatesBySource = worshipSetlistArchiveCandidatesBySource();
   for (const candidate of live.candidates) (candidatesBySource[candidate.import_source_id] ||= []).push(candidate);
-  const entries = [...(archive.sources || []), ...live.sources].map((source) => {
+  const entries = window.MindexSetlistLinks.preferLiveSources(archive.sources || [], archive.live, live.sources, worshipAppServiceTypeId).map((source) => {
     const rows = (candidatesBySource[source.id] || []).filter(isSetlistPraiseCandidate);
     const candidates = source.source_kind === "worship"
       ? rows.map(candidate => ({...candidate, archive_display_label:worshipSetlistArchiveDisplayLabel(candidate.raw_label),

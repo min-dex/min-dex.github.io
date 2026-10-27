@@ -91,7 +91,8 @@
   }
   function fromServices(snapshot = {}, archivedSources = [], index = null) {
     const hasSong = element => Boolean(element.song_id || String(element.title || "").trim());
-    const occupied = new Set(archivedSources.map(s => s.service_date + "|" + s.service_type_id));
+    void archivedSources; // Imported records never suppress the current worship projection.
+    const occupied = new Set();
     const sections = new Map((snapshot.sections || []).map(s => [s.id, s]));
     const grouped = new Map();
     for (const element of snapshot.elements || []) {
@@ -164,6 +165,13 @@
     }
     return {sources, candidates};
   }
+  function preferLiveSources(archivedSources = [], snapshot = {}, liveSources = [], normalizeType = value => value) {
+    const identity = source => source.service_date + "|" + normalizeType(source.service_type_id);
+    const occupied = new Set((snapshot?.services || []).filter(service => service.service_date).map(identity));
+    // Even an empty actual service is authoritative. Do not resurrect an old
+    // import after the user clears its songs. The stored import remains intact.
+    return [...archivedSources.filter(source => !occupied.has(identity(source))), ...liveSources];
+  }
   function mergeSundayEntries(entries = []) {
     const isType = (entry, ...types) => types.includes(entry.source.service_type_id);
     return entries.filter(entry => !isType(entry, "sun_1st", "sunday-first", "sun_2nd", "sunday-second")).map(entry => {
@@ -187,5 +195,5 @@
         needsReview:rows.filter(row => row.review_status === "needs_review").length};
     });
   }
-  root.MindexSetlistLinks = { buildTitlePeers, artistHint, titleKey:key, buildIndex, resolve, split, isExcluded, fromServices, mergeSundayEntries };
+  root.MindexSetlistLinks = { buildTitlePeers, artistHint, titleKey:key, buildIndex, resolve, split, isExcluded, fromServices, preferLiveSources, mergeSundayEntries };
 })(typeof window === "undefined" ? globalThis : window);
