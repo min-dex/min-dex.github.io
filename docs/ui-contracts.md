@@ -1084,3 +1084,10 @@ with `금요기도회` or its monthly/culture variant in parentheses. Stored nam
 classification/order, original serviceDisplayTypeName output naming and print
 content remain unchanged. Archive aliases are included in the heading instead
 of repeated as a separate right-side name.
+
+### Presenter media launcher during loading
+
+Basic presenter hides the topbar media launcher as soon as the presenter module
+is selected, including before the right rail has mounted. Focus view exposes
+the topbar launcher. Rail mounting must not briefly reveal a duplicate launcher;
+shared media controls and playback stay mounted.

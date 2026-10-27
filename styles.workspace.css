@@ -6411,8 +6411,8 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
 
 /* Basic presenter keeps media in the rail; remote access stays in the topbar
    and the active worship card. Focus view retains the global media launcher. */
-body:has(#servicePresenterControls[data-focus-view="false"]):has([data-presenter-right-sidebar]) .topbar-actions #globalPlaybackControls > .global-playback-trigger { display:none; }
-body:has(#servicePresenterControls[data-focus-view="false"]):has([data-presenter-right-sidebar]) .topbar-actions #globalPlaybackControls { margin:0; }
+body[data-module="presenter"]:not(:has(#servicePresenterControls[data-focus-view="true"])) .topbar-actions #globalPlaybackControls > .global-playback-trigger { display:none; }
+body[data-module="presenter"]:not(:has(#servicePresenterControls[data-focus-view="true"])) .topbar-actions #globalPlaybackControls { margin:0; }
 .svc-presenter-output-group [data-presenter-music-manager] { grid-column:1 / -1; grid-row:3; }
 
 /* Pairing code is available directly on either remote launcher. */
