@@ -5940,11 +5940,11 @@ function serviceViewIsLoading(serviceId) {
 
 function renderServiceViewLoadState(service) {
   const failed = serviceViewLoadErrors.has(service.id);
-  if (!failed) return `<section class="service-view-loading" data-service-view-loading="${escapeAttr(service.id)}" aria-busy="true">${renderLoadingRow("예배 자료 불러오는 중…")}<p>${escapeHtml(serviceDisplayTypeName(service))}</p></section>`;
+  if (!failed) return `<section class="service-view-loading" data-service-view-loading="${escapeAttr(service.id)}" aria-busy="true">${renderLoadingRow("예배 자료 불러오는 중…")}<p>${escapeHtml(serviceNavigationName(service))}</p></section>`;
   return `<section class="service-view-loading" data-service-view-loading="${escapeAttr(service.id)}" aria-busy="${!failed}">
     ${failed ? '<i data-lucide="cloud-off" aria-hidden="true"></i>' : '<span class="service-view-loading-spinner" aria-hidden="true"></span>'}
     <h2>${failed ? "예배 자료를 불러오지 못했습니다" : "예배를 준비하고 있어요"}</h2>
-    <p>${escapeHtml(serviceDisplayTypeName(service))}</p>
+    <p>${escapeHtml(serviceNavigationName(service))}</p>
     <span class="service-view-loading-message" role="status">${failed ? "연결을 확인한 뒤 다시 시도해 주세요." : "예배 순서와 연결된 찬양 자료를 불러오는 중입니다."}</span>
     ${failed ? `<button class="btn secondary" type="button" data-service-load-retry="${escapeAttr(service.id)}">다시 시도</button>` : ""}
   </section>`;
@@ -14432,11 +14432,11 @@ function currentPageTabTitle() {
   if (state.module === "bulletin" || (state.module === "presenter" && state.presenterBulletinServiceId)) return bulletinPageTabTitle(state.presenterBulletinServiceId);
   if (state.module === "presenter") {
     const service = state.services.find((svc) => svc.id === presenterViewServiceId());
-    return service ? serviceDisplayTypeName(service) : "예배";
+    return service ? serviceNavigationName(service) : "예배";
   }
   if (state.module === "service") {
     const service = state.services.find((svc) => svc.id === state.selectedServiceId);
-    if (service) return serviceDisplayTypeName(service);
+    if (service) return serviceNavigationName(service);
     if (state.selectedServiceTypeId === SERVICE_WEEK_PANEL_ID) return SERVICE_WEEK_PANEL_TITLE;
     if (state.selectedServiceTypeId === SERVICE_LIST_PANEL_ID) return serviceBrowseCategory().label;
     if (state.selectedServiceTypeId === SERVICE_TEMPLATES_PANEL_ID) return SERVICE_TEMPLATES_PANEL_TITLE;
@@ -14517,11 +14517,11 @@ function pageTabTitleForSnapshot(snapshot = {}) {
   if (moduleName === "presenter") {
     const serviceId = snapshot.selectedServiceId || state.presenter.serviceId;
     const service = state.services.find((svc) => svc.id === serviceId);
-    return service ? serviceDisplayTypeName(service) : "예배";
+    return service ? serviceNavigationName(service) : "예배";
   }
   if (moduleName === "service") {
     const service = state.services.find((svc) => svc.id === snapshot.selectedServiceId);
-    if (service) return serviceDisplayTypeName(service);
+    if (service) return serviceNavigationName(service);
     if (snapshot.selectedServiceTypeId === SERVICE_WEEK_PANEL_ID) return SERVICE_WEEK_PANEL_TITLE;
     if (snapshot.selectedServiceTypeId === SERVICE_LIST_PANEL_ID) return serviceBrowseCategory(snapshot.serviceFilter).label;
     if (snapshot.selectedServiceTypeId === SERVICE_TEMPLATES_PANEL_ID) return SERVICE_TEMPLATES_PANEL_TITLE;
@@ -15111,7 +15111,7 @@ function mountServiceBulletinWorkbench(service) {
     onStateChange: () => syncSaveButtonChrome(),
     serviceId: service.id,
     services: state.services.filter(serviceSupportsBulletin).sort((a,b) => b.date.localeCompare(a.date))
-      .map(s => ({id:s.id, label:`${formatServiceDate(s)} · ${serviceDisplayTypeName(s)}`})),
+      .map(s => ({id:s.id, label:`${formatServiceDate(s)} · ${serviceNavigationName(s)}`})),
     scope: state.client?.supabaseUrl || window.MINDEX_SUPABASE?.url || "local",
     getBackgrounds: () => worshipBackgroundTargets()
       .filter(({fileName}) => state.worshipBackgroundRegistry[fileName]?.dataUrl || WORSHIP_BACKGROUND_STATIC_FILES.has(fileName))
@@ -16203,7 +16203,7 @@ function renderGlobalScriptureResult(result) {
 }
 
 function renderGlobalServiceResult(service) {
-  const title = `${formatServiceDate(service, { weekday: false })} ${serviceTypeDisplayName(service.type_id)}`;
+  const title = `${formatServiceDate(service, { weekday: false })} ${serviceNavigationName(service)}`;
   return `
     <button class="song-item global-search-result" type="button" data-global-service-id="${escapeAttr(service.id)}" aria-label="${escapeAttr(title)}">
       <span class="song-title">
@@ -16387,11 +16387,11 @@ function renderHomeStart() {
   const thisWeek = services.filter(service => service.date >= toLocalDateStr(week.start) && service.date <= toLocalDateStr(week.end));
   const next = getHomeNextService(now);
   const bulletins = services.filter(serviceSupportsBulletin);
-  const departments = [...new Set(bulletins.map(service => serviceDisplayTypeName(service)))];
+  const departments = [...new Set(bulletins.map(service => serviceNavigationName(service)))];
   const calendarName = state.calendarLoaded && !state.calendarError ? String(state.calendarData.find(row => row.date === toLocalDateStr(now))?.liturgical || "").trim() : "";
   const modules = [
     {id:"service", label:"예배", icon:"church", value:servicesReady ? `${thisWeek.length}회` : "—", unit:"이번 주 등록 예배",
-      detail:state.serviceError ? "예배 목록을 불러오지 못했습니다." : next ? `${formatServiceDate(next, {compact:true})} · ${serviceDisplayTypeName(next)}` : servicesReady ? "다가오는 예배가 없습니다." : "예배 목록 불러오는 중…"},
+      detail:state.serviceError ? "예배 목록을 불러오지 못했습니다." : next ? `${formatServiceDate(next, {compact:true})} · ${serviceNavigationName(next)}` : servicesReady ? "다가오는 예배가 없습니다." : "예배 목록 불러오는 중…"},
     {id:"bulletin", label:"주보", icon:"newspaper", value:servicesReady ? `${departments.length}개 부서` : "—", unit:"예배와 연결된 주보",
       detail:state.serviceError ? "주보 목록을 불러오지 못했습니다." : departments.join(" · ") || (servicesReady ? "연결된 주보가 없습니다." : "주보 목록 불러오는 중…")},
     {id:"praise", label:"찬양", icon:"music", value:songCount != null ? `${formatCount(songCount)}곡` : "—", unit:"등록된 곡",
@@ -23320,7 +23320,7 @@ function serviceNavigationBlocked(serviceId) {
 
 function renderNoGatheringServiceDetail(service) {
   setRightSidebarContent("");
-  refs.detailPane.innerHTML = `<div class="empty-detail"><div class="empty-detail-inner"><h2>${escapeHtml(serviceDisplayTypeName(service))}</h2><p>${escapeHtml(formatServiceDate(service))} · 집회 없음</p></div></div>`;
+  refs.detailPane.innerHTML = `<div class="empty-detail"><div class="empty-detail-inner"><h2>${escapeHtml(serviceNavigationName(service))}</h2><p>${escapeHtml(formatServiceDate(service))} · 집회 없음</p></div></div>`;
 }
 
 function serviceOrderTemplate(typeId, options = {}) {
@@ -24251,12 +24251,12 @@ function renderPresenterSidebar(query, services, selectedService, outlineMarkup 
 
 function renderPresenterSidebarServiceSummary(service) {
   if (!service?.id) return "";
-  const serviceName = serviceDisplayTypeName(service) || "예배";
+  const serviceName = serviceNavigationName(service) || "예배";
   const variantName = serviceVariantDisplayName(service);
   const dateStr = formatServiceIsoDate(service);
   const details = cleanList([
     dateStr,
-    variantName && compactSearchValue(variantName) !== compactSearchValue(serviceName) ? variantName : "",
+    variantName && !serviceName.includes(variantName) ? variantName : "",
   ]);
   const noGathering = serviceIsNoGathering(service);
   const anyOutputOpen = isPresenterOutputWindowOpen();
@@ -24386,10 +24386,10 @@ function renderServiceSidebarCard(service, options = {}) {
       class="service-sidebar-card${showDate ? "" : " service-sidebar-card--compact"}${active}${noGathering ? " is-no-gathering" : ""}"
       type="button"
       ${noGathering ? 'disabled aria-disabled="true"' : `data-service-id="${escapeAttr(service.id)}"`}
-      aria-label="${escapeAttr(`${formatServiceDate(service, { compact: true })} ${serviceDisplayTypeName(service)} ${noGathering ? "집회 없음" : "열기"}`)}"
+      aria-label="${escapeAttr(`${formatServiceDate(service, { compact: true })} ${serviceNavigationName(service)} ${noGathering ? "집회 없음" : "열기"}`)}"
     >
       ${showDate ? `<span class="service-sidebar-date">${escapeHtml(formatServiceDate(service, { compact: true }))}</span>` : ""}
-      <span class="service-sidebar-title">${escapeHtml(serviceDisplayTypeName(service))}</span>
+      <span class="service-sidebar-title">${escapeHtml(serviceNavigationName(service))}</span>
     </button>`;
   if (!showDate) {
     return `
@@ -24872,7 +24872,7 @@ function prepareWorshipSetlistArchiveCandidates(candidates = [], source = {}) {
 }
 
 function worshipSetlistArchiveTypeName(typeId) {
-  return worshipAppServiceTypeId(typeId) === "sunday-main" ? "주일예배" : serviceTypeDisplayName(typeId);
+  return serviceNavigationTypeName(typeId);
 }
 
 function worshipSetlistArchiveTypeOrder(typeId) {
@@ -25011,7 +25011,7 @@ function groupWorshipSetlistArchiveEntries(entries = [], view = state.worshipSet
     const key = byService ? (typeId === "monthly" ? "friday" : typeId) : week.key;
     if (!groups.has(key)) groups.set(key, {
       key,
-      title: byService ? (key === "friday" ? "금요예배" : key ? worshipSetlistArchiveTypeName(key) : "예배 미지정") : week.title,
+      title: byService ? (key ? worshipSetlistArchiveTypeName(key) : "예배 미지정") : week.title,
       entries: [],
     });
     groups.get(key).entries.push(entry);
@@ -25044,7 +25044,7 @@ function renderWorshipSetlistArchiveGroups(entries = []) {
 }
 
 function renderWorshipWeekStatus(entry) {
-  const title = state.worshipSetlistArchiveView === "service" ? entry.source.service_date : entry.slotName;
+  const title = state.worshipSetlistArchiveView === "service" ? entry.source.service_date : worshipSetlistNavigationName(entry.source);
   const status = entry.weeklyStatus;
   const kind = status === "집회 없음" ? "absent" : status === "콘티 미등록" ? "missing" : "unknown";
   const serviceId = kind === "missing" ? worshipSetlistArchiveServiceId(entry.source) : "";
@@ -25053,7 +25053,7 @@ function renderWorshipWeekStatus(entry) {
     : `<strong>${escapeHtml(title)}</strong>`;
   return `<article class="svc-setlist-entry svc-setlist-entry--status svc-setlist-entry--${kind}">
     <header><div class="svc-setlist-entry-title">
-      <div class="svc-setlist-entry-heading">${heading}${worshipSetlistArchiveAliases(entry.source) ? `<span class="svc-setlist-alias" title="${escapeAttr(worshipSetlistArchiveAliases(entry.source))}">${escapeHtml(worshipSetlistArchiveAliases(entry.source))}</span>` : ""}</div>
+      <div class="svc-setlist-entry-heading">${heading}${state.worshipSetlistArchiveView === "service" ? `<span class="svc-setlist-alias">${escapeHtml(worshipSetlistNavigationName(entry.source))}</span>` : ""}</div>
       ${state.worshipSetlistArchiveView !== "service" ? `<span class="svc-setlist-leader">${escapeHtml(entry.source.service_date)}</span>` : ""}
     </div></header>
     <div class="svc-setlist-week-status"><strong>${escapeHtml(status === "기록 없음" ? "집회 여부 미확인" : status)}</strong>
@@ -25235,10 +25235,10 @@ function renderWorshipSetlistArchiveEntry(entry) {
   if (!entry.candidates.length && entry.source.weekly_status) return renderWorshipWeekStatus({...entry,slotName:worshipSetlistArchiveTypeName(entry.source.service_type_id),weeklyStatus:entry.source.weekly_status,weeklyReason:entry.source.weekly_reason || ""});
   const source = entry.source || {};
   const serviceId = worshipSetlistArchiveServiceId(source);
-  const typeName = worshipSetlistArchiveTypeName(source.service_type_id);
+  const typeName = worshipSetlistNavigationName(source);
   const title = state.worshipSetlistArchiveView === "service" ? source.service_date || "날짜 없음" : typeName;
   const leader = String(source.leader || "").trim();
-  const aliases = worshipSetlistArchiveAliases(source);
+  const aliases = state.worshipSetlistArchiveView === "service" ? typeName : "";
   return `
     <article class="svc-setlist-entry${entry.missing ? " is-missing" : ""}${entry.needsReview ? " needs-review" : ""}">
       <header>
@@ -25373,7 +25373,7 @@ function buildWorshipTemplateDraftSummary(types = []) {
         .map(([key, count]) => ({ key, count }));
       return {
         id: type.id,
-        name: serviceTypeDisplayName(type.id),
+        name: serviceNavigationTypeName(type.id),
         services: services.length,
         sections,
         elementTypes,
@@ -25558,7 +25558,7 @@ function serviceListTypeEntriesForGroup(types = [], query = "") {
         type,
         services,
         familyKey,
-        title: familyKey === "friday-family" ? "금요예배" : serviceTypeDisplayName(type.id),
+        title: serviceNavigationTypeName(type.id),
       });
     }
   }
@@ -25572,7 +25572,7 @@ function serviceListTypeFamilyKey(typeId = "") {
 
 function renderServiceListTypeBlock(type, services, query, options = {}) {
   const sorted = sortServicesByDate(services, "desc");
-  const typeName = options.title || serviceTypeDisplayName(type.id);
+  const typeName = options.title || serviceNavigationTypeName(type.id);
   return `
     <section class="service-list-type-block">
       <header>
@@ -25637,7 +25637,7 @@ function renderServiceDetail() {
     const q = normalizeSearchValue(state.search);
     const expectedServices = q ? [] : getExpectedServicesForType(typeId);
     const services = sortServicesByDate([...actualServices, ...expectedServices], "desc");
-    const typeName = serviceTypeDisplayName(typeId);
+    const typeName = serviceNavigationTypeName(typeId);
     const form = state.newServiceForm;
     refs.detailPane.innerHTML = `
       <div class="service-date-list">
@@ -26635,9 +26635,9 @@ function renderPresenterSectionEditorItem(item, localIndex, context) {
 function renderServicePrepEditorDialog(service) {
   const items = servicePrepEditorItems(service.id);
   const typeObj = serviceTypeById(service.type_id);
-  const serviceName = serviceDisplayTypeName(service);
+  const serviceName = serviceNavigationName(service);
   const variantName = serviceVariantDisplayName(service);
-  const variantHint = variantName && compactSearchValue(variantName) !== compactSearchValue(serviceName) ? variantName : "";
+  const variantHint = variantName && !serviceName.includes(variantName) ? variantName : "";
   return `
     <div class="svc-prep-editor-layer" role="presentation">
       <section class="svc-prep-editor" role="dialog" aria-labelledby="svcPrepEditorTitle">
@@ -27621,7 +27621,7 @@ function renderServiceWeekCard(service) {
   const noGathering = serviceIsNoGathering(service);
   const preview = serviceItemPreviewParts(service.id, { compact: true });
   const variant = serviceVariantDisplayName(service);
-  const serviceName = serviceDisplayTypeName(service);
+  const serviceName = serviceNavigationName(service);
   return `
     <button
       class="service-week-card"
@@ -27630,7 +27630,7 @@ function renderServiceWeekCard(service) {
     >
       <strong>${escapeHtml(serviceName)}</strong>
       ${noGathering ? '<span class="service-week-card-preview">집회 없음</span>' : ""}
-      ${variant && compactSearchValue(variant) !== compactSearchValue(serviceName) ? `<span class="service-week-card-preview">${escapeHtml(variant)}</span>` : ""}
+      ${variant && !serviceName.includes(variant) ? `<span class="service-week-card-preview">${escapeHtml(variant)}</span>` : ""}
       ${preview.text ? renderServiceCardPreviewHtml(preview, "service-week-card-preview") : ""}
     </button>`;
 }
@@ -27640,12 +27640,12 @@ function renderServiceDateCard(service, options = {}) {
   const preview = serviceItemPreviewParts(service.id);
   const calendarRow = (state.calendarData || []).find((row) => String(row?.date || "").trim() === String(service?.date || "").trim());
   const variant = serviceVariantDisplayName(service);
-  const serviceName = serviceDisplayTypeName(service);
+  const serviceName = serviceNavigationName(service);
   const note = cleanList([
     variant,
     calendarRow?.note,
     serviceIsNoGathering(service) ? "집회 없음" : "",
-  ]).filter((value) => compactSearchValue(value) !== compactSearchValue(serviceName)).join(" · ");
+  ]).filter((value) => !serviceName.includes(value)).join(" · ");
   return `
     <button
       class="service-date-card ${serviceDateStatus(service).key === "past" ? "is-past" : ""}"
@@ -27668,7 +27668,7 @@ function renderDeferredPastServiceDetail(service) {
   return `
     <div class="empty-detail">
       <section class="empty-detail-inner service-deferred-empty">
-        <h2>${escapeHtml(serviceDisplayTypeName(service))}</h2>
+        <h2>${escapeHtml(serviceNavigationName(service))}</h2>
         <p>${escapeHtml(`${formatServiceDate(service)} · 지난 예배`)}</p>
         <p>예배 자료를 불러오면 내용을 확인할 수 있습니다.</p>
         <button class="btn secondary" type="button" data-open-presenter-service="${escapeAttr(service.id)}">예배 불러오기</button>

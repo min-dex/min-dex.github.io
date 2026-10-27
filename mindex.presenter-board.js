@@ -883,7 +883,7 @@ function renderPresenterNextPreparationButton(serviceId, nextTarget = null) {
   const nextService = nextTarget.service || null;
   const typeId = nextTarget.typeId || nextService?.type_id || "";
   const date = nextTarget.date || nextService?.date || "";
-  const displayName = nextService ? serviceDisplayTypeName(nextService) : serviceTypeDisplayName(typeId);
+  const displayName = nextService ? serviceNavigationName(nextService) : serviceNavigationTypeName(typeId);
   if (!displayName || !typeId || !date) return "";
   const label = `다음 예배 준비: ${displayName}`;
   return `
