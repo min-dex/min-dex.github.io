@@ -92,7 +92,7 @@ try:
     const area=document.createElement('textarea');area.dataset.serviceSourceText='source-fixture';area.value='same source';refs.detailPane.append(area);
     const service={id:'source-fixture',_worshipSourceTextDraft:'same source'};state.services=[service];
     await originalSet('local',worshipRecoveryLatestSnapshotKey(service.id),JSON.stringify({serviceId:service.id,serviceDocument:{sourceText:'same source'}}));
-    if(renderServiceSourceRecovery(service).includes('data-service-source-recovery='))throw Error('identical source offered');
+    if(typeof renderServiceSourceRecovery!=='undefined')throw Error('retired source recovery UI remains');
     if(await restoreServiceSourceText(service.id,'same source'))throw Error('identical source restored');
     if(!await restoreServiceSourceText(service.id,'other source'))throw Error('source restore failed');
     return area.value==='other source'&&MINDEX_SERVER_STORAGE.keys('local').some(k=>k.startsWith('mindex.source.recovery.v1:')&&JSON.parse(MINDEX_SERVER_STORAGE.getItem('local',k)).current==='same source');

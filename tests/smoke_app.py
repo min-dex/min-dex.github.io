@@ -6570,7 +6570,7 @@ def main() -> int:
                         (() => {
                           if (
                             typeof applyServiceSourceText !== 'function'
-                            || typeof renderServiceSourcePanel !== 'function'
+                            || typeof buildServiceSourceText !== 'function'
                           ) return { ready: false, reason: 'functions' };
                           const service = { id: '__smoke_source_apply__', type_id: 'special', date: '2026-08-02', alias: '찬양예배' };
                           const items = [
@@ -6634,7 +6634,7 @@ def main() -> int:
                             state.selectedServiceId = service.id;
                             state.module = 'presenter';
                             state.dirty.service = false;
-                            refs.detailPane.innerHTML = renderServiceSourcePanel(service);
+                            refs.detailPane.innerHTML = `<textarea data-service-source-text="${escapeAttr(service.id)}" data-service-source-signature="${escapeAttr(compactTextSignature(serviceSourceTextForEditor(service)))}">${escapeHtml(serviceSourceTextForEditor(service))}</textarea>`;
                             const textarea = refs.detailPane.querySelector('[data-service-source-text="__smoke_source_apply__"]');
                             if (!textarea) return { ready: false, reason: 'textarea' };
                             const pendingBefore = serviceSourceTextHasPendingChanges(textarea);
@@ -6655,11 +6655,11 @@ def main() -> int:
                               '  파일: 새광고.mp4',
                               '  링크: https://example.com/new.mp4',
                             ].join('\\n');
-                            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                            updateServiceSourceTextDraft(textarea);
                             const pendingAfterEdit = serviceSourceTextHasPendingChanges(textarea);
                             const draftAfterInput = service._worshipSourceTextDraft || '';
                             const saveDirtyAfterInput = currentSaveButtonState().dirty;
-                            const rerenderedSource = renderServiceSourcePanel(service);
+                            const rerenderedSource = `<textarea data-service-source-text="${escapeAttr(service.id)}" data-service-source-signature="${escapeAttr(compactTextSignature(serviceSourceTextForEditor(service)))}">${escapeHtml(serviceSourceTextForEditor(service))}</textarea>`;
                             renderCurrentServiceModuleDetail = () => { rendered = true; };
                             renderServiceList = () => {};
                             refreshPresenterForService = (serviceId, options = {}) => refreshes.push({ serviceId, publish: options.publish });
@@ -6672,8 +6672,8 @@ def main() -> int:
                             const specialMemo = parseServiceItemMemo(special.memo);
                             const videoMemo = parseServiceItemMemo(video.memo);
                             const recovery = JSON.parse(safeStorageGet("local", recoveryKey) || '{}');
-                            refs.detailPane.innerHTML = renderServiceSourcePanel(service);
-                            const recoveryButton = refs.detailPane.querySelector('[data-service-source-recovery]');
+                            refs.detailPane.innerHTML = `<textarea data-service-source-text="${escapeAttr(service.id)}" data-service-source-signature="${escapeAttr(compactTextSignature(serviceSourceTextForEditor(service)))}">${escapeHtml(serviceSourceTextForEditor(service))}</textarea>`;
+                            const recoveryButton = latestWorshipRecoverySnapshotForService(service.id);
                             const recoveryRestored = restoreServiceSourceRecovery(service.id);
                             const recoveryTextarea = refs.detailPane.querySelector('[data-service-source-text="__smoke_source_apply__"]');
                             return {
@@ -6840,8 +6840,8 @@ def main() -> int:
                             state.serviceItems[service.id] = [placeholder, pendingReference];
                             presenterSlideBuildCache.delete(service.id);
                             const pendingSlides = buildServicePresenterSlides(service.id);
-                            refs.detailPane.innerHTML = renderServiceSourcePanel(service);
-                            const historyButton = refs.detailPane.querySelector('[data-service-source-history]');
+                            refs.detailPane.innerHTML = `<textarea data-service-source-text="${escapeAttr(service.id)}" data-service-source-signature="${escapeAttr(compactTextSignature(serviceSourceTextForEditor(service)))}">${escapeHtml(serviceSourceTextForEditor(service))}</textarea>`;
+                            const historyButton = serviceDocumentHistoryFromRef(service)[0];
                             const restored = restoreServiceSourceHistory(service.id, 0);
                             const textarea = refs.detailPane.querySelector('[data-service-source-text="__smoke_service_document__"]');
                             return {

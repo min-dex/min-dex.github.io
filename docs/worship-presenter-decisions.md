@@ -3671,8 +3671,8 @@ English 이름이나 원제에서 자동 추론하지 않는다. 선택한 버�
 ### 두 보기의 공통 도구막대 · 2026-10-20
 
 기본 보기/집중 보기를 고정된 두 버튼으로 표시하고 현재 보기만 선택 상태로 표시한다.
-같은 보기를 다시 누르면 상태를 바꾸지 않는다. 원문·배율·주보·도움말은 공통
-도구막대에 정렬하고 폭이 좁으면 줄바꿈한다. 원문 펼침은 그 아래 전체 폭을 사용한다.
+같은 보기를 다시 누르면 상태를 바꾸지 않는다. 배율·주보·도움말은 공통
+도구막대에 정렬하고 폭이 좁으면 줄바꿈한다. 원문 편집 UI는 제거되었다.
 두 보기의 초안·음원·썸네일 DOM 보존 계약은 유지한다.
 
 ### 보조 버튼 디자인 통일 · 2026-10-20
@@ -4967,6 +4967,21 @@ live, loop=true, autoAdvanceOnEnd=false는 제외한다. 실제 ended에 따른 
 다음 표시 슬라이드 전환만 화면 opacity 500ms 페이드하며 음량은 변경하지 않는다.
 수동 이동·암전·다른 예배 전환에는 이 페이드를 적용하지 않고 기존 전환 규칙을 유지한다.
 OS reduced-motion 설정은 기존대로 애니메이션을 끈다. 저장된 재생 설정과 운영 자료를 변경하지 않는다.
+
+## 미디어 관리 진입 버튼 로딩 ·2026-10-28
+
+기본 보기에서는 우측 패널이 만들어지기 전부터 상단 미디어 관리 버튼을 숨긴다.
+집중 보기에서는 상단 버튼을 표시한다. 패널 재구성 중에도 중복 버튼이 깜빡이지
+않아야 하며, 공유 미디어 제어 DOM과 재생 상태는 그대로 유지한다.
+
+## Children offering creation default ·2026-10-28
+
+New children services receive one video element for `문들아 머리 들어라`,
+followed by offering prayer. The existing original MP4 attachment from the
+2026-10-25 children service is reused, with no upload, transcoding or song lookup.
+The default is applied only in calendarAssigneeRowsForNewService, before the
+existing atomic create. Projection, reopen, save and existing services are not
+retrofitted; exact-request create retries retain their frozen element payload.
 
 ## 화면 진입·탭 복귀 시 최신 조회 · 2026-10-28
 

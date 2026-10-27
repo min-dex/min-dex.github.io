@@ -194,7 +194,7 @@ def main():
                       const archived = latestWorshipRecoverySnapshotForService(id);
                       check(archived.draft.items[0].raw_title === '새 입력' && archived.serviceDocument.sourceText === '보관할 입력','complete draft not archived');
                       check(archived.draft.pendingInputs[0].value === '읽는 동안 추가 입력','pending input not archived');
-                      check(renderServiceSourceRecovery({id}).includes('읽는 동안 추가 입력'),'archived pending input not available in recovery UI');
+                      check(JSON.stringify(archived).includes('읽는 동안 추가 입력'),'archived pending input remains preserved');
                       check(writes === 0 && publishes === 0,'reopen wrote DB or published output');
                       window.MINDEX_SERVER_STORAGE = realStorage;
                       return 'PASS recovery action archives full draft; server failure and in-flight edits block; unrelated drafts and live output untouched';

@@ -156,27 +156,6 @@ function handleDetailServiceWorkspaceClick(event) {
     unlinkServiceMedley(unlink.dataset.serviceId || state.selectedServiceId, unlink.dataset.serviceMedleyUnlink);
     return true;
   }
-  const serviceSourceCopyBtn = event.target.closest("[data-service-source-copy]");
-  if (serviceSourceCopyBtn) {
-    const service = state.services.find((candidate) => candidate.id === serviceSourceCopyBtn.dataset.serviceSourceCopy);
-    if (service) void copyText(serviceSourceTextForEditor(service));
-    return true;
-  }
-  const serviceSourceApplyBtn = event.target.closest("[data-service-source-apply]");
-  if (serviceSourceApplyBtn) {
-    applyServiceSourceText(serviceSourceApplyBtn.dataset.serviceSourceApply || state.selectedServiceId);
-    return true;
-  }
-  const serviceSourceHistoryBtn = event.target.closest("[data-service-source-history]");
-  if (serviceSourceHistoryBtn) {
-    restoreServiceSourceHistory(serviceSourceHistoryBtn.dataset.serviceSourceHistory || state.selectedServiceId, Number(serviceSourceHistoryBtn.dataset.serviceSourceHistoryIndex));
-    return true;
-  }
-  const serviceSourceRecoveryBtn = event.target.closest("[data-service-source-recovery]");
-  if (serviceSourceRecoveryBtn) {
-    restoreServiceSourceRecovery(serviceSourceRecoveryBtn.dataset.serviceSourceRecovery || state.selectedServiceId);
-    return true;
-  }
   const serviceItemCommit = event.target.closest("[data-service-item-commit]");
   if (serviceItemCommit) {
     void commitServiceItemInputs(serviceItemCommit.dataset.serviceId || state.selectedServiceId, Number(serviceItemCommit.dataset.serviceItemIndex));
@@ -1785,4 +1764,23 @@ function syncServiceVersionFormErrors(field) {
   for (const input of document.querySelectorAll('.svc-form-hint')) {
     if ((input.dataset.serviceId || state.selectedServiceId) === id && input.dataset.serviceItemIndex === field.dataset.serviceItemIndex) syncServiceFormInputError(input);
   }
+}
+
+// Creation-only default: never applied by existing-service template projection.
+function applyChildrenOfferingCreationDefault(service, scaffold) {
+  if (worshipAppServiceTypeId(service?.type_id) !== "children") return;
+  const section = scaffold.sections.find(row => row.section_key === "offering");
+  const element = scaffold.elements.find(row => row.section_id === section?.id && row.source_ref?.label === "봉헌찬양");
+  if (!element) return;
+  const asset = {
+    kind: "video",
+    name: "봉헌찬양 · 문들아 머리 들어라-송출용.mp4",
+    url: "https://tdulobbnppmpiqqxbvqy.supabase.co/storage/v1/object/public/mindex-worship-media/services/222e03ec-096e-4530-af33-d952eb23f9b7/35e6f2a3-ec9a-456d-9a28-d648e3f91a03/1792893957703-.mp4",
+  };
+  Object.assign(element, {
+    element_type: "video", title: "문들아 머리 들어라", song_id: null, song_version_id: null,
+    input_mode: "asset", asset, template_modified: true,
+    source_ref: { ...element.source_ref, label: "영상", slotKey: "offering.video", placeholder: false },
+    config: { ...element.config, elementType: "video", inputMode: "asset", asset },
+  });
 }
