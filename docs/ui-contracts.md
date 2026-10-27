@@ -1098,3 +1098,11 @@ The unmounted source panel/history/recovery renderers, their delegated UI events
 and dedicated CSS are removed. Internal source serialization, archived history,
 pending-draft protection, atomic saves and conflict review remain unchanged.
 No stored drafts or production records are deleted.
+
+### Setlist archive card headings · 2026-10-28
+
+Archive card titles use the same card-title size/weight and 1.4 line height
+whether the heading opens a service or is plain text (missing/absent/unknown).
+Long titles wrap inside their card, including unspaced text; they must not
+shrink the font, clip the title, or overlap the next card. Existing navigation
+and service data are unchanged.
