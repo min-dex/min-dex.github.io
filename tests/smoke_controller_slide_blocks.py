@@ -75,6 +75,25 @@ try:
     check(groups[1].dataset.formColor==='verse' && groups[3].dataset.formColor==='chorus','Title/Int consumed lyric colors');
     check(plain.querySelectorAll('.svc-slide-form-badge').length===4,'plain group labels lost');
     check([...plain.querySelectorAll('.svc-slide-thumb')].map(e=>e.dataset.presenterIndex).join()==='20,21,22,23','plain group click targets changed');
+    const lyricsEntries=['Lyrics','L','lyrics'].flatMap((label,i)=>[0,1].map(page=>({
+      slide:{...lyric('lyrics-'+i,label),id:'lyrics-'+i+'-'+page,text:'실제 가사 '+i+' '+page},slideIndex:30+i*2+page})));
+    const lyricsBefore=JSON.stringify(lyricsEntries);
+    const outputBefore=lyricsEntries.map(({slide})=>renderPresenterSlideFrame(slide));
+    const unlabelled=document.createElement('div');unlabelled.className='svc-board-grid';
+    unlabelled.innerHTML=renderPresenterBoardSlideBlocks(annotatePresenterFormStarts(lyricsEntries).entries,-1,'fixture');
+    document.body.append(unlabelled);
+    check(!unlabelled.querySelector('.svc-slide-form-badge'),'Lyrics badge remained visible');
+    check(!unlabelled.querySelector('.has-form-label'),'hidden Lyrics badge retained reserved space');
+    check(unlabelled.querySelectorAll('.svc-board-slide-block').length===1,'whole-song Lyrics grouping changed');
+    check([...unlabelled.querySelectorAll('.svc-slide-thumb')].map(e=>e.dataset.presenterIndex).join()==='30,31,32,33,34,35','Lyrics click indexes changed');
+    check([...unlabelled.querySelectorAll('.svc-slide-thumb-no')].map(e=>e.textContent).join()==='31,32,33,34,35,36','Lyrics numbering changed');
+    check(unlabelled.textContent.includes('실제 가사 0 0'),'actual lyrics removed');
+    check(JSON.stringify(lyricsEntries)===lyricsBefore&&JSON.stringify(outputBefore)===JSON.stringify(lyricsEntries.map(({slide})=>renderPresenterSlideFrame(slide))),'Lyrics source/output altered');
+    check(presenterFormPresetDisplayLabel('Lyrics')==='L'&&normalizePresenterFormPresetLabel('L').type==='lyrics','functional L normalization changed');
+    for(const label of ['V1','C','B','T']) {
+      const host=document.createElement('div');host.innerHTML=renderPresenterSlideThumb(lyric('real-'+label,label),40,-1,'fixture',label);
+      check(host.querySelector('.svc-slide-form-badge'),'real form badge removed '+label);
+    }
     const palette=document.createElement('div');palette.id='palette';palette.className='svc-board-grid';
     palette.innerHTML=colorHtml+renderPresenterBoardSlideBlocks(entries.slice(5),-1,'fixture');
     document.body.prepend(palette);

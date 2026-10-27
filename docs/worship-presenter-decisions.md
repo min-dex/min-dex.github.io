@@ -5021,3 +5021,10 @@ retrofitted; exact-request create retries retain their frozen element payload.
 바꾸지 않는다. 기존 예배의 사용자 introSlide는 자동으로 지우지 않는다.
 사용자가 지정한 10/25 제외 6건의 순서/기본값 정리는 별도 운영 적용으로
 구분하며 10/25 원본과 모든 날짜별 내용은 보존한다.
+
+## Controller Lyrics label ·2026-10-28
+
+썸네일 위 송폼 배지에서 Lyrics 유형의 표시만 숨긴다. L/Lyrics 입력 정규화,
+송폼 구간 묶음, 슬라이드 번호·이동·선택과 실제 가사·송출 화면은 유지한다.
+V1·C·B·T 등 다른 송폼 배지는 유지하고, 숨긴 배지의 별도 공간도 남기지 않는다.
+DB 가사 블록의 유형 선택과 저장 데이터는 변경하지 않는다.

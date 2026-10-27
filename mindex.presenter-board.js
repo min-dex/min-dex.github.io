@@ -1423,7 +1423,7 @@ function renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, fo
   const formType = normalizePresenterFormPresetLabel(formLabel).type;
   const normalizedFormLabel = ({ lyrics: "Lyrics", title: "Title", instrumental: "Interlude" })[formType]
     || songFormPresetDisplayLabel(formLabel) || String(formLabel || "").trim();
-  const visibleFormLabel = formType !== "instrumental" && presenterLabelDuplicatesSlideText(normalizedFormLabel, slide) ? "" : normalizedFormLabel;
+  const visibleFormLabel = formType === "lyrics" || (formType !== "instrumental" && presenterLabelDuplicatesSlideText(normalizedFormLabel, slide)) ? "" : normalizedFormLabel;
   const ariaPrefix = presenterSlideInteractionHint(serviceId, `${slideIndex + 1}번 슬라이드${hidden ? " · 숨김" : ""}`);
   const slideNumber = slideIndex + 1;
   const formBadge = visibleFormLabel ? `
