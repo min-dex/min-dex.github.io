@@ -40,7 +40,7 @@ try:
                 check(state.selectedServiceId === youth.id, 'idle selection did not move');
                 check(state.presenter.viewServiceId === youth.id, 'idle view did not move');
                 check(state.presenter.serviceId === youth.id, 'idle presenter did not prepare target');
-                check(state.pageTabs[state.pageTabIndex]?.label === serviceDisplayTypeName(youth), 'page tab label did not update');
+                check(state.pageTabs[state.pageTabIndex]?.label === serviceNavigationName(youth), 'page tab label did not update');
 
                 state.selectedServiceId = first.id;
                 state.selectedServiceTypeId = first.type_id;
