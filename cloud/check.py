@@ -86,6 +86,7 @@ SMOKES = (
     "smoke_presenter_return.py",
     "smoke_controller_slide_blocks.py",
     "smoke_future_outline_consistency.py",
+    "smoke_empty_presenter_inputs.py",
     "smoke_legacy_title_restore.py",
     "smoke_song_form_width.py",
     "smoke_input_feedback_sync.py",

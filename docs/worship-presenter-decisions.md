@@ -687,10 +687,11 @@ Small visual polish that does not alter behavior does not need an entry.
   새찬송가 score 전용 슬롯을 제외하고 입력 제목의 빈 Praise record를
   만들고 해당 예배 항목에 연결한다. 사용자는 나중에 Praise 탭에서
   가사와 버전을 채운다.
-- Fullscreen/clean output의 찬양·특송 등 song-like 항목은 입력 전
-  `입력 필요` placeholder도 실제 곡 입력 후와 같은 lower-bar song frame을
-  사용한다. 담당자/기도 등 title-person 항목은 기존 center title-content
-  placeholder를 유지한다.
+- 필수 입력이 없는 항목은 컨트롤러 편집 행·outline의 `입력 필요` 안내만
+  유지하며, 실제 출력 순서에는 제목/T/빈 슬라이드를 생성하지 않는다.
+  명시한 blank, 제목만 쓰는 참회기도·고정 순서, 전례 본문, 실제 자료가 있는
+  제목과 송폼은 유지한다. 입력·삭제·재진입은 원본 요소를 그대로 재평가하며
+  가사·송폼·음원·타이밍·기존 저장 설정을 고쳐 쓰지 않는다.
 - 찬양 제목 앞 표기는 16분음표 `♬`를 쓰며, 한글 제목 폰트를 바꾸지 않고 별도 inline glyph로
   크기와 baseline만 보정한다. 풀스크린/clean output은 실제 송출 화면에만
   250ms 이하의 약한 opacity/brightness dissolve를 적용할 수 있으며,

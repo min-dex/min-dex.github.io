@@ -24526,7 +24526,7 @@ function renderServiceOutlineChildRow(service, item, index, selectedIndex, slide
   const titleParts = serviceItemSummaryDisplayParts(item, service);
   const title = [titleParts.meta, titleParts.title].filter(Boolean).join(" · ") || serviceSidebarChildItemTitle(item, service);
   const interactionHint = presenterSlideInteractionHint(service.id, title);
-  const missing = serviceOutlineMissingState(item, slides);
+  const missing = serviceOutlineMissingState(item, slides, service);
   const showMissingBadge = missing?.missingContent;
   return `
     <button class="service-outline-row service-outline-row--child${selected ? " selected" : ""}${activeSlide ? " active" : ""}" type="button"${activeSlide ? ' aria-current="step"' : ""}
@@ -24546,8 +24546,12 @@ function renderServiceOutlineChildRow(service, item, index, selectedIndex, slide
     </button>`;
 }
 
-function serviceOutlineMissingState(item = {}, slides = []) {
-  return slides.find((slide) => slide?.missingContent && presenterSlideBelongsToItem(slide, item)) || null;
+function serviceOutlineMissingState(item = {}, slides = [], service = null) {
+  const existing = slides.find((slide) => slide?.missingContent && presenterSlideBelongsToItem(slide, item));
+  if (existing) return existing;
+  const song = presenterSongForServiceItem(item, serviceItemDisplayText(item), item.label || "", service);
+  const content = resolvePresenterServiceItemContentState(item, parseServiceItemMemo(item.memo), song, service);
+  return content.required ? { ...content, missingContent: true } : null;
 }
 
 function renderServiceOutlineMissingBadge(missing = null) {
