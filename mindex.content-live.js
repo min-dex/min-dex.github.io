@@ -33,6 +33,7 @@
     if(result.error)throw result.error;if(!Array.isArray(result.data))throw Error("Incomplete catalog response");return result.data;
   }
   async function refreshSong(id){
+    if(state.singleSongRepository)return refreshPraiseCatalog(id);
     if(praiseBlocked())return false;
     const client=state.client,project=state.config.url,revision=edit,selected=state.selectedSongId,versionId=state.selectedVersionId;
     const before=dirtyModuleFingerprint('praise');
@@ -136,6 +137,101 @@
     restoreDetailViewportSnapshot(viewport);if(refs.songList&&listTop!=null)refs.songList.scrollTop=listTop;
     return true;
   }
+  // Entry refreshes use the same deferred queue as saved notifications. Fetch into
+  // detached values and recheck interaction/context before adopting any response.
+  const entryContext=()=>JSON.stringify([state.module,state.pageTabIndex,state.selectedServiceId,state.selectedServiceTypeId,state.selectedSongId,state.selectedVersionId,state.search]);
+  function entryBlocked(){return departmentRefreshBlocked()||hasDirtyChanges()||state.applyingBrowserHistory
+    ||songLoadPromise||scriptureLoadPromise||referenceLinksLoadPromise||calendarLoadPromise||serviceDataLoadPromise||activeServiceSavePromise
+    ||state.newServiceForm||state.dirtyServiceTypeIds.size||pendingSundayEditSync.size
+    ||document.querySelector('[data-input-status="saving"],[data-input-status="error"],[data-input-status="modified"]');}
+  async function refreshEntry(message){
+    if(message.context!==entryContext())return true;
+    if(entryBlocked())return false;
+    const module=state.module;
+    if(module==='praise')return refreshPraiseCatalog();
+    if(module==='calendar')return refreshCalendar();
+    if(module==='scripture')return refreshScriptures();
+    if(module==='references')return refreshShared('references');
+    if(isSetlistArchiveView())return window.MINDEX_ARCHIVE_LIVE?.refresh();
+    if(['home','service','presenter','bulletin'].includes(module)){
+      const done=await window.MINDEX_SERVICE_LIST_LIVE?.refresh();
+      if(message.context!==entryContext()||entryBlocked())return false;
+      if(['service','presenter'].includes(module)&&state.selectedServiceId){
+        return await window.MINDEX_SERVICE_ENTRY?.check(state.selectedServiceId,undefined,{background:true})&&done;
+      }
+      const target=controller()?.remoteIdentity();
+      return target?await controller().refreshRemote(target.kind,target.recordId)&&done:done;
+    }
+    return true;
+  }
+  async function refreshCalendar(){
+    const client=state.client,project=state.config.url,context=entryContext(),revision=edit,before=state.calendarData;
+    const result=await rows(client,'mindex_sunday_calendar',q=>q.gte('date',CALENDAR_MIN_DATE));
+    if(client!==state.client||project!==state.config.url||context!==entryContext()||revision!==edit||before!==state.calendarData||entryBlocked())return false;
+    result.sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+    if(JSON.stringify(before)===JSON.stringify(result))return true;
+    const viewport=captureDetailViewportSnapshot(),top=refs.songList?.scrollTop;
+    state.calendarData=result;state.calendarLoaded=true;state.calendarError='';
+    renderSongList();renderCalendarView();restoreDetailViewportSnapshot(viewport);
+    if(refs.songList&&top!=null)refs.songList.scrollTop=top;
+    return true;
+  }
+  async function refreshPraiseCatalog(recordId=""){
+    if(praiseBlocked())return false;
+    const client=state.client,project=state.config.url,context=entryContext(),revision=edit;
+    const previous=state.songs,repository=state.singleSongRepository,oldCatalog=state.singleSongCatalog;
+    let catalog,next;
+    if(repository){
+      if(recordId){
+        const records=await repository.read([recordId]);
+        const fresh=new Map(oldCatalog.ids().map(id=>[id,oldCatalog.get(id)]));
+        for(const record of records)fresh.set(record.id,record);
+        catalog=globalThis.MindexSingleSong.createCatalog([...fresh.values()]);
+      }else{
+        const prepared=await globalThis.MindexSingleSong.loadActivation(client);
+        if(prepared.phase!=='native')throw Error('Praise storage changed during entry');
+        catalog=globalThis.MindexSingleSong.createCatalog(prepared.records);
+      }
+      next=catalog.ids().map(id=>catalog.appSong(id));
+    }else{
+      const data=await rows(client,'mindex_songs',q=>q);
+      next=data.map(normalizeServerSong);
+      if(state.songVersionTablesSupported){
+        const versions=await rows(client,'mindex_song_versions',q=>q),units=await rows(client,'mindex_version_units',q=>q);
+        attachRelationalSongVersionRows(versions,units,next.map(song=>song.id),next);
+      }
+      if(state.songRelationsSupported){
+        const relations=await rows(client,'mindex_song_relations',q=>q.eq('relation_type','related'));
+        for(const song of next)song.related_song_ids=[...new Set(relations.flatMap(r=>r.source_song_id===song.id?[r.related_song_id]:r.related_song_id===song.id?[r.source_song_id]:[]))];
+      }
+    }
+    if(client!==state.client||project!==state.config.url||context!==entryContext()||revision!==edit||previous!==state.songs
+      ||repository!==state.singleSongRepository||oldCatalog!==state.singleSongCatalog||entryBlocked()||praiseBlocked())return false;
+    // A remote deletion must not clear the open record or its authored selection.
+    const selected=previous.find(song=>song.id===state.selectedSongId);
+    if(selected&&!next.some(song=>song.id===selected.id)){
+      next.push(selected);
+      if(catalog)catalog=globalThis.MindexSingleSong.createCatalog([...catalog.ids().map(id=>catalog.get(id)),oldCatalog.get(selected.id)]);
+    }
+    next.sort(sortSongs);
+    if(JSON.stringify(dirtyComparableValue(previous))===JSON.stringify(dirtyComparableValue(next)))return true;
+    const viewport=captureDetailViewportSnapshot(),top=refs.songList?.scrollTop;
+    if(catalog)state.singleSongCatalog=catalog;
+    state.songs=next;clearSearchCaches();
+    const song=next.find(song=>song.id===state.selectedSongId);
+    if(song){
+      if(!song.versions.some(version=>version.id===state.selectedVersionId))state.selectedVersionId=getPreferredVersionId(song);
+      state.forms=normalizeForms((getSelectedVersion()?.forms||[]).map(form=>withLocalId({...form,song_id:state.selectedVersionId})));
+      captureCleanFingerprint('praise');
+    }
+    render();restoreDetailViewportSnapshot(viewport);if(refs.songList&&top!=null)refs.songList.scrollTop=top;
+    return true;
+  }
+  function enter(){
+    pending.set('entry',{kind:'entry',project:state.config.url,context:entryContext()});
+    window.MINDEX_SERVICE_LIST_LIVE?.invalidate();
+    schedule();
+  }
   async function flush(){
     if(busy||!pending.size)return;
     if(departmentRefreshBlocked()){schedule(2000);return;}
@@ -143,7 +239,7 @@
     try{
       for(const [id,m] of [...pending]){
         if(m.project!==state.config.url){if(pending.get(id)===m)pending.delete(id);continue;}
-        const done=m.kind==='scripture'?await refreshScriptures():m.kind==='setlist-archive'?await window.MINDEX_ARCHIVE_LIVE?.refresh():['references','service-settings'].includes(m.kind)?await refreshShared(m.kind):m.kind==='service-list'?await window.MINDEX_SERVICE_LIST_LIVE?.refresh():m.kind==='song'?await refreshSong(m.recordId):await controller()?.refreshRemote(m.kind,m.recordId);
+        const done=m.kind==='entry'?await refreshEntry(m):m.kind==='scripture'?await refreshScriptures():m.kind==='setlist-archive'?await window.MINDEX_ARCHIVE_LIVE?.refresh():['references','service-settings'].includes(m.kind)?await refreshShared(m.kind):m.kind==='service-list'?await window.MINDEX_SERVICE_LIST_LIVE?.refresh():m.kind==='song'?await refreshSong(m.recordId):await controller()?.refreshRemote(m.kind,m.recordId);
         if(done&&pending.get(id)===m)pending.delete(id);
       }
     }catch{delay=15000;}
@@ -165,8 +261,8 @@
   }
   try{channel=new BroadcastChannel(key);channel.onmessage=e=>receive(e.data);}catch{}
   window.addEventListener('storage',e=>{if(e.key===key&&e.newValue)try{receive(JSON.parse(e.newValue));}catch{}});
-  function wake(){schedule();void reconcile();}
+  function wake(){enter();schedule();void reconcile();}
   window.addEventListener('focus',wake);window.addEventListener('online',wake);document.addEventListener('visibilitychange',wake);
   setInterval(()=>void reconcile(),60000);
-  window.MINDEX_CONTENT_LIVE={publish,receive,reconcile};
+  window.MINDEX_CONTENT_LIVE={publish,receive,reconcile,enter};
 })();

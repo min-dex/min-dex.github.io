@@ -902,7 +902,7 @@ async function loadInitialData() {
   }
   if (state.module === "references") pending.push(loadReferenceLinks({ silent: true }));
   if (state.module === "calendar") pending.push(loadCalendarData({ silent: true }));
-  return Promise.allSettled(pending);
+  return Promise.allSettled(pending).then(results => { window.MINDEX_CONTENT_LIVE?.enter(); return results; });
 }
 
 function isServiceDataModule(moduleName = state.module) {
@@ -2627,6 +2627,7 @@ async function applyBrowserHistorySnapshot(snapshot) {
     }
   } finally {
     state.applyingBrowserHistory = false;
+    window.MINDEX_CONTENT_LIVE?.enter();
   }
 }
 
@@ -3046,13 +3047,14 @@ function runModuleEntryLoads(moduleName) {
       await loadWorshipPresenterSlides(presenterViewServiceId());
     }
 
-    if (moduleName === "calendar" && !state.calendarLoading && !state.calendarCellSaves.size && !departmentCalendarWrites.size) {
-      await loadCalendarData({ refresh: true });
+    if (moduleName === "calendar" && !state.calendarLoaded && !state.calendarLoading) {
+      await loadCalendarData({ silent: true });
     }
 
     if (moduleName === "references" && !state.referenceLinksLoaded && !state.referenceError) {
       await loadReferenceLinks();
     }
+    window.MINDEX_CONTENT_LIVE?.enter();
   })().catch((error) => {
     console.error("[Navigation] module load failed:", error);
     showToast(error?.message || "화면 데이터를 불러오지 못했습니다.", "error");

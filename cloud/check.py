@@ -34,6 +34,7 @@ NODE_TESTS = (
     "test_form_input_normalization.cjs",
     "test_worship_form_model.cjs",
     "test_live_refresh_scheduler.cjs",
+    "test_content_entry_refresh.cjs",
     "test_hymn_score_runtime.cjs",
     "test_hymn_intro_plan.cjs",
     "test_hymn_slide_estimates.cjs",
