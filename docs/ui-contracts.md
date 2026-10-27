@@ -1098,3 +1098,11 @@ The unmounted source panel/history/recovery renderers, their delegated UI events
 and dedicated CSS are removed. Internal source serialization, archived history,
 pending-draft protection, atomic saves and conflict review remain unchanged.
 No stored drafts or production records are deleted.
+
+### Shared offering input actions ·2026-10-28
+
+Offering keeps the hymn/special/video choices and their existing transitions.
+Its fields now share praise/media layout and the same action renderer as other
+service inputs: background, audio or attachment, then one Save action. Separate
+offering-only save/tool rows and duplicate button styling are retired. Service
+rules, persistence, generated defaults and existing records are unchanged.
