@@ -113,6 +113,7 @@ try:
    dropped.add(2);rpc_down.add(2);pump(11.5);next_from(a);next_from(guest)
    dropped.clear();rpc_down.clear();until(lambda:enabled(b));assert b.locator('#adminOutputs').is_hidden()
    # Lost acknowledgement around sleep must not replay an already executed command.
+   until(lambda:enabled(a) and a.locator('#position').inner_text()==str(host.evaluate('fixture.index+1'))+' / 100')
    count=host.evaluate('calls');a.click('[data-action=next]')
    # Encryption dispatch is async: drain only the sender until execution, while
    # deliberately retaining host replies to simulate a lost acknowledgement.
