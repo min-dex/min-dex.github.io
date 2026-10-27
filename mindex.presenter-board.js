@@ -1139,10 +1139,14 @@ function renderPresenterBoardItemAudioControls(serviceId, context = {}, options 
     (slide.songTimingElementId || slide.progressionParentId || slide.elementId) === context.item.id);
   const timingAudio = globalThis.MindexSongTiming?.audioFor(entries, context.item.id);
   const source = String(audioAsset.url || timingAudio?.url || "").trim();
+  const linkedSong = childrenAudio ? serviceItemLinkedSong(context.item) : null;
+  const linkedVersion = linkedSong ? getPresenterServiceItemVersion(linkedSong, context.item, context.service) : null;
+  const audioStatus = childrenAudio ? globalThis.MindexSongTiming?.audioStatus(linkedVersion, entries.length ? entries.map(entry => entry.slide) : null) || "" : "";
   if (Boolean(source) !== Boolean(options.manager)) return "";
   const label = audioAsset.url ? audioAsset.name || "연결된 음원" : timingAudio?.name || "연결된 음원";
   return `
     <div class="svc-board-subgroup-audio${source ? " has-audio svc-audio-manager" : ""}${childrenAudio ? " svc-children-audio" : ""}" aria-label="${escapeAttr(`${context.item.label || "찬양"} 음원 관리`)}">
+      ${audioStatus ? `<p class="praise-media-status" role="status" data-song-audio-status>${escapeHtml(audioStatus)}</p>` : ""}
       ${source ? `
         <strong title="${escapeAttr(label)}">${escapeHtml(label)}</strong>
         ${renderPresenterInputAudioControls(source, label, serviceId, context.item.id, entries.some(({slide}) => slide.syncTimeline?.localTiming))}` : ""}

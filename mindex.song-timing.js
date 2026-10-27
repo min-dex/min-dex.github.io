@@ -84,6 +84,15 @@
         return (version?.forms || []).some(v => v.id === f.id && lyricsText(v.lyrics) === lyricsText(f.lyrics));
       });
   }
+  function audioStatus(version, slides = null) {
+    if (!version) return '';
+    const profile = version.audio_set;
+    if (!String(profile?.audioUrl || '').trim()) return '이 판본에 등록된 음원이 없습니다.';
+    if (!hasVersionAudio(version)) return '등록된 음원 정보를 확인해 주세요.';
+    if (!validSet(profile, version)) return '음원에 대응하는 가사·송폼이 변경됐습니다. 타이밍을 확인해 주세요.';
+    if (slides && validate(profile, slides, true)) return '음원은 있지만 자동 넘김 타이밍이 맞지 않습니다. 타이밍을 확인해 주세요.';
+    return '';
+  }
   const versionProfile = (song, version) => {
     const stored = version?.audio_set;
     return stored ? {...stored, url:stored.audioUrl, databaseTiming:true} : null;
@@ -770,7 +779,7 @@
     });
     document.body.append(dialog); dialog.showModal();
   }
-  root.MindexSongTiming = { ownsTransport, resumeAutoSync, snapBeat, detectBeatGrid, composePhotos, validatePhotos, saveToVersion, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, saveToWorship, formsFor, sourceSignature, ownsSource: source => remoteSources.has(source), get revision() { return revision; } };
+  root.MindexSongTiming = { audioStatus, ownsTransport, resumeAutoSync, snapBeat, detectBeatGrid, composePhotos, validatePhotos, saveToVersion, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, saveToWorship, formsFor, sourceSignature, ownsSource: source => remoteSources.has(source), get revision() { return revision; } };
   if (typeof document !== 'undefined') {
     document.addEventListener('pointerdown', e => {
       activeSeekInput = e.target.closest('[data-song-timing-seek]:not(:disabled)');
