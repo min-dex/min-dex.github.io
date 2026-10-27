@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261028-popup-keynote-batch",
+  "version": "20261028-media-source-classification",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "729932f18a4e1b6e0b1b8c41c46f5474b1dbd95c1b0e9e233c96e2f88e290ca9",
-  "runtime_sha256": "a815255ee9117ca0680087f41d4ae81307150f1f554009da19d39306c90ae84c",
-  "source_bytes": 1347001,
-  "runtime_bytes": 962289,
-  "source_gzip": 307155,
-  "runtime_gzip": 240816
+  "source_sha256": "0ee908d44747b017fc84ce2486fdc08192533946ece0c7ab98444afd969b5960",
+  "runtime_sha256": "9dae9a290ab33ae44ec5bd51adcd0a0d6e9083aa2116d7cd25ed6f94234d0311",
+  "source_bytes": 1346984,
+  "runtime_bytes": 962272,
+  "source_gzip": 307154,
+  "runtime_gzip": 240815
 }

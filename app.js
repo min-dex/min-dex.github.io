@@ -1224,7 +1224,7 @@ async function loadHymnScoreManifest({ silent = false } = {}) {
       const data = await response.json();
       state.hymnScoreManifest = data && typeof data === "object" && !Array.isArray(data) ? data : {};
       state.hymnScoreManifestLoaded = true;
-      state.searchCache.songPicker.clear();
+      clearSearchCaches();
       presenterSlideBuildCache.clear();
       if (state.module === "presenter") renderPresenterControlState(presenterViewServiceId());
       else if (isServiceDataModule()) render();
