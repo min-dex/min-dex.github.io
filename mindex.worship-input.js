@@ -1680,7 +1680,7 @@ function renderServiceFormHelpInput(input, options = {}) {
     <section id="${id}" class="svc-form-help-panel" popover aria-label="송폼 입력 도움말">
       <header><strong>송폼 입력</strong><button type="button" class="icon-btn" data-form-help-close aria-label="송폼 도움말 닫기">×</button></header>
       <p>순서는 <b>-</b>로 구분해요. 풀네임·소문자는 정식 약어로 정리돼요.</p>
-      <dl><dt>T · Title</dt><dd>제목 슬라이드</dd><dt>V · Verse / VL</dt><dd>절 / 마지막 절</dd><dt>PC · Pre-Chorus</dt><dd>프리코러스</dd><dt>C · Chorus</dt><dd>후렴</dd><dt>B · Bridge</dt><dd>브리지</dd><dt>Int · Interlude</dt><dd>간주</dd><dt>Coda</dt><dd>마무리</dd><dt>Tag / Tags</dt><dd>후렴 마지막 슬라이드 1회 / 2회</dd><dt>L · Lyrics</dt><dd>가사 블록</dd></dl>
+      <dl><dt>T · Title</dt><dd>제목 슬라이드</dd><dt>V · Verse / VL</dt><dd>절 / 마지막 절</dd><dt>PC · Pre-Chorus</dt><dd>프리코러스</dd><dt>C · Chorus</dt><dd>후렴</dd><dt>B · Bridge</dt><dd>브리지</dd><dt>Int · Interlude</dt><dd>간주</dd><dt>Coda</dt><dd>마무리</dd><dt>Tag / Tags</dt><dd>후렴 마지막 줄 1회 / 2회</dd><dt>L · Lyrics</dt><dd>가사 블록</dd></dl>
       <p>A/B는 구간, @는 변주 표시예요. 번호·구간은 연결된 버전의 블록에 맞춰 입력해요.</p>
       <ul>${examples.map(raw => `<li><code>${escapeHtml(raw)}</code> → <code>${escapeHtml(normalizeServiceFormHint(raw))}</code></li>`).join('')}</ul>
       <p><code>C B → CB</code>는 후렴 B 구간, <code>C-B</code>는 후렴 다음 브리지예요. 공백만으로 순서를 나누지 않아요.</p>
