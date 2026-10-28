@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261028-screen-management",
+  "version": "20261028-liturgical-navigation",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "0b0143ec2c7847663c2fe0f2f915fe57f6bd9b71491fab3e7b74ec0c67d47fb5",
-  "runtime_sha256": "1c09dca033f7765641e2cb715b3cabbb115d386759a4903cd8b341b8f23a74fb",
-  "source_bytes": 1339316,
-  "runtime_bytes": 955871,
-  "source_gzip": 305535,
-  "runtime_gzip": 239468
+  "source_sha256": "e995eb1e79be898269d90edbe4153c5bbd2874dbcfe1f117a435622e6892333c",
+  "runtime_sha256": "e3ecf84df1805bf42152cdb640476de51284c7c75680b85b9f1d0fccbb3e1716",
+  "source_bytes": 1339688,
+  "runtime_bytes": 956082,
+  "source_gzip": 305601,
+  "runtime_gzip": 239511
 }
