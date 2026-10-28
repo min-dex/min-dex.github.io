@@ -743,7 +743,7 @@ function presenterHymnOnceOnlyIntro(forms = [], version = {}) {
   const count = ({
     "5bf20e2d-cb7e-5c2a-86ca-0a75acfdd7c0": 4, // 새찬송가 163
     "7ab06cc7-99cf-5e67-b236-78a6758734e8": 3, // 새찬송가 166
-  })[version?.id];
+  })[version?._legacyVersionId || version?.id];
   if (!count) return forms;
   const prefix = `${Array(count).fill("할렐루야").join(" ")}\n`;
   let playedIntro = false;

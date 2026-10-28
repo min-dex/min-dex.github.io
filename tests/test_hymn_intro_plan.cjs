@@ -30,9 +30,12 @@ for (const [id, count, verses] of [['5bf20e2d-cb7e-5c2a-86ca-0a75acfdd7c0', 4, 5
   forms.push({id:'coda',label:'Coda',lyrics:'아멘'});
   const original = JSON.stringify(forms);
   const version = {id, forms};
+  const nativeVersion = {id: `native-${id}`, _singleSongRecord: true, _legacyVersionId: id, forms};
   for (const ids of [null, ['v2'], ['v2','v1','v2','coda'], ['v1','v1']]) {
     const item = ids ? {preset: {forms: ids}} : {};
     const plan = context.presenterFormPlanForServiceItem(version, item);
+    const nativePlan = context.presenterFormPlanForServiceItem(nativeVersion, item);
+    assert.deepEqual(plain(nativePlan), plain(plan), 'native identity must retain the reviewed once-only intro');
     const selected = ids ? ids.map(id => forms.find(f => f.id === id)) : forms;
     assert.deepEqual(plain(plan.forms.map(f => f.id)), selected.map(f => f.id));
     assert.equal(plan.forms.filter(f => f.lyrics.startsWith(intro)).length, 1);
@@ -44,7 +47,10 @@ for (const [id, count, verses] of [['5bf20e2d-cb7e-5c2a-86ca-0a75acfdd7c0', 4, 5
   assert.deepEqual(plain(context.presenterHymnOnceOnlyIntro(forms, {id:'other-edition'})), forms);
   const manual = forms.map(f => ({...f, lyrics: '직접 수정 ' + f.lyrics}));
   assert.deepEqual(plain(context.presenterHymnOnceOnlyIntro(manual, version)), manual);
+  assert.deepEqual(plain(context.presenterHymnOnceOnlyIntro(manual, nativeVersion)), manual);
   const segmented = forms.slice(0,2).map(f => ({...f, label:'Verse 1 A', _presenterVirtual:true, _presenterSourceFormId:f.id}));
   assert.deepEqual(plain(context.presenterHymnOnceOnlyIntro(segmented, version)), segmented);
+  assert.deepEqual(plain(context.presenterHymnOnceOnlyIntro(segmented, nativeVersion)), segmented);
+  assert.deepEqual(plain(context.presenterHymnOnceOnlyIntro(forms, {id:'native-unrelated', _legacyVersionId:'unreviewed'})), forms);
 }
 console.log('PASS 163/166 intro once per playback plan; selection/repeats/order, other editions, manual lyrics and stored IDs preserved');

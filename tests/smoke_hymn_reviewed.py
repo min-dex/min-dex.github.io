@@ -29,6 +29,9 @@ def main():
                   } : {})};
                   const before=JSON.stringify({version,item,song});
                   const plan=presenterFormPlanForServiceItem(version,item,song);
+                  const nativeVersion={...version,id:'native-'+number,_singleSongRecord:true,_legacyVersionId:id};
+                  const nativePlan=presenterFormPlanForServiceItem(nativeVersion,item,{...song,versions:[nativeVersion]});
+                  assert(JSON.stringify(nativePlan)===JSON.stringify(plan),'native identity intro parity '+number);
                   assert(plan.forms.filter(f=>f.lyrics.startsWith(intro)).length===1,'intro count '+number);
                   assert(Boolean(plan.forms[0]._presenterTitle)===(!sequence||sequence.includes('T')),'inferred or explicit Title ownership');
                   const content=plan.forms.filter(f=>!f._presenterTitle);

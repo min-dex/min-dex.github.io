@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-28",
+  "scope": {
+    "editions": 1203,
+    "units": 5419,
+    "linkedNewUnionPairs": 481,
+    "comparablePairedUnits": 2235
+  },
+  "dataChecks": {
+    "missingMetadata": 0,
+    "staleLyricHashes": 0,
+    "unitTypeOrSetMismatch": 0,
+    "pageCountMismatch": 0,
+    "measureSumMismatch": 0,
+    "screensOverTwoLines": 0,
+    "directRenderedTextLoss": 0,
+    "changedWordsSincePriorReviewedSnapshot": "Only the separately approved Union550 lead-voice correction; all other unit text is identical after whitespace removal."
+  },
+  "confirmedRuntimeDefect": {
+    "editions": [
+      "new163",
+      "new166"
+    ],
+    "cause": "The reviewed once-only opening alleluias rule inspected the old version ID only. Native records expose their new ID in version.id and retain the old identity in _legacyVersionId.",
+    "fix": "Resolve the existing edition rule through _legacyVersionId when present, otherwise id. No new edition-specific rule or saved-data transformation.",
+    "scoreEvidence": "Both New163/166 and linked Union160/156 printed scores place the segno after the opening alleluias; D.S. returns to the verse body.",
+    "currentWorshipReferences": 0,
+    "registeredAudioSets": 0,
+    "status": "scoped tests passed; queued for a later coordinated release, not yet deployed"
+  },
+  "preservedCandidates": [
+    "New441/Union498 verse3 wording/order differs in their respective printed scores. Their 8+8 screen layout is retained.",
+    "New69 verse6 has an additional alleluia within the preceding phrase; identical-substring boundary matching is not a musical mismatch.",
+    "Union6 has no printed final Amen. Its existing empty Coda is retained for saved-form compatibility; no text is invented.",
+    "New375 final-verse Amen remains on its own screen within the existing unit; no form or Amen relocation.",
+    "Union84 Chorus1/2/3 intentionally contain the same refrain; the user-approved numbered chorus structure is preserved.",
+    "Short closing phrases and printed repeats are not removed merely to make every screen numerically equal. Same-song editions retain their own wording and form membership."
+  ],
+  "candidateBrowserChecks": {
+    "engines": [
+      "Chromium",
+      "WebKit"
+    ],
+    "sizes": [
+      "1920x1080",
+      "1280x720",
+      "960x540"
+    ],
+    "uniqueScreensPerEngine": 7390,
+    "rendersPerEngine": 22170,
+    "overflow": 0,
+    "nativeLegacyPlanDifferencesAfterFix": 0,
+    "storedFormsAndLyricsChanged": false
+  },
+  "productionWrites": 0,
+  "privateEvidenceDirectory": "backups/20261028-hymn-full-reaudit/",
+  "limits": "Whole-catalog metadata, text continuity, layout and identity checks plus score review of suspicious cases. This is not a new visual transcription of all 1203 printed scores or a guarantee of no undiscovered source errors.",
+  "savedWorshipCheck": {
+    "references": 370,
+    "missingVersions": 0,
+    "formWarnings": 0,
+    "textLoss": 0,
+    "productionWrites": 0
+  }
+}
