@@ -1,5 +1,12 @@
 function runPresenterAction(action, serviceId = state.selectedServiceId, options = {}) {
   const p = state.presenter;
+  if (action === "blackout" || action === "transparent") {
+    if (!presenterControllerIsLive(serviceId) || !p.slides.length) return;
+    const mode = action === "transparent" ? "transparent" : "black";
+    const restore = p.safetyBlank && (p.safetyBlankMode || "black") === mode;
+    runPresenterAction("jump", serviceId, { index: restore ? p.index : -1, blankMode: mode, scroll: false });
+    return;
+  }
   if (action === "return") { restorePresenterPreviousOutput(serviceId); return; }
   if (action === "fullscreen") { requestPresenterOutputFullscreenFromController(); return; }
   if (["pptx-play", "pptx-pause"].includes(action)) {
@@ -78,6 +85,7 @@ function runPresenterAction(action, serviceId = state.selectedServiceId, options
     const requestedIndex = Number(options.index);
     if (requestedIndex === -1) {
       p.safetyBlank = true;
+      p.safetyBlankMode = options.blankMode === "transparent" ? "transparent" : "black";
     } else if (isValidPresenterIndex(requestedIndex, p.slides.length)) {
       p.index = requestedIndex;
       p.safetyBlank = false;

@@ -41,6 +41,27 @@ def main():
                             testPayload=applyPresenterActionToPayload(testPayload,'next');
                             if(testPayload.safetyBlank||testPayload.index!==1)throw Error('next after zero');
                         }''')
+                    page.evaluate("""() => {
+                        testPayload=applyPresenterActionToPayload(testPayload,'jump',{index:-1,blankMode:'transparent'});
+                        testPayload=normalizePresenterPayload(testPayload);
+                        if(testPayload.safetyBlankMode!=='transparent')throw Error('lost transparent mode');
+                        renderPresenterOutput(testPayload);
+                        const root=document.getElementById('presenterOutputRoot');
+                        if(root.classList.contains('no-chromakey')||root.classList.contains('is-blackout')||root.classList.contains('has-background'))throw Error('transparent frame state');
+                    }""")
+                    image=Image.open(BytesIO(page.locator('#presenterOutputRoot').screenshot())).convert('RGB')
+                    image.save('/tmp/mindex-transparent.png')
+                    chroma=page.locator('#presenterOutputRoot').evaluate('(e)=>getComputedStyle(e).backgroundColor')
+                    expected=tuple(map(int,chroma.removeprefix('rgb(').removesuffix(')').split(',')))
+                    assert set(image.getdata()) == {expected} and expected != (0,0,0), (engine,'transparent must be solid configured key color')
+                    page.evaluate("""() => {
+                        testPayload=applyPresenterActionToPayload(testPayload,'jump',{index:-1});
+                        if(testPayload.safetyBlankMode!=='black')throw Error('zero must always be black');
+                        renderPresenterOutput(testPayload);
+                        if(!document.getElementById('presenterOutputRoot').classList.contains('is-blackout'))throw Error('black after transparent');
+                        testPayload=applyPresenterActionToPayload(testPayload,'next');
+                        if(testPayload.safetyBlank)throw Error('transparent restoration');
+                    }""")
                     print('PASS',engine,'zero is pure black, immediate, restores navigation, preserves ordinary blanks')
                 finally:
                     browser.close()

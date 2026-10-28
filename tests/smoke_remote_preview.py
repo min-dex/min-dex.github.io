@@ -27,6 +27,7 @@ try:
     createPreview(document.getElementById('next'),'다음')(packet.previewNext,packet.next);
    }''',packet)
    frame=phone.frame_locator('#current iframe');frame.locator('body').get_by_text('기쁨으로 찬양해요',exact=False).wait_for()
+   phone.locator('#nextPreview summary').click()
    phone.frame_locator('#next iframe').locator('img').wait_for()
    phone.wait_for_timeout(300)
    assert phone.frame_locator('#next iframe').locator('img').evaluate('(el)=>el.complete && el.naturalWidth>0')

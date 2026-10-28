@@ -234,6 +234,7 @@ function renderPresenterKeynoteHtmlOutput(root, payload) {
     }).catch(error => { if (active()) { root.dataset.pptxError = error.message;metadata({ error: error.message }); } });
   }
   const session = root._keynoteHtml;session.payload = payload;
+  session.host.style.background = payload.safetyBlank && payload.safetyBlankMode === 'transparent' ? getComputedStyle(root).getPropertyValue('--presenter-chromakey').trim() || '#00ff00' : 'black';
   session.host.hidden = Boolean(payload.safetyBlank || payload.liveScripture?.active);
   root.style.visibility = payload.liveScripture?.active ? '' : 'hidden';
   if (payload.liveScripture?.active) return false;

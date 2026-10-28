@@ -160,7 +160,7 @@ try:
        if width<=980:
         assert page.evaluate("document.querySelector('.app-shell').scrollWidth<=innerWidth+1")
         if view=='focus':
-         assert page.locator('.svc-focus-output').is_visible()
+         assert page.locator('.svc-focus-panel .svc-screen-management .svc-presenter-launch').is_visible()
         selector='.svc-presenter-side-panel [data-presenter-action]' if view=='basic' else '.svc-focus-navigation button,.svc-presenter-toolbar > .svc-output-action'
         assert page.locator(selector).evaluate_all("es=>es.filter(e=>e.getBoundingClientRect().width>0).every(e=>{const r=e.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth+1})")
        if view=='focus':

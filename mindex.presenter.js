@@ -1587,6 +1587,7 @@ function presenterStatePayload(serviceId = state.presenter.serviceId) {
     slideAnchor: presenterSlideAnchor(slides[clampPresenterIndex(state.presenter.index, slides.length)]),
     pptxProgress: state.presenter.pptxProgress || null,
     safetyBlank: Boolean(state.presenter.safetyBlank),
+    safetyBlankMode: state.presenter.safetyBlankMode === "transparent" ? "transparent" : "black",
     liveScripture: state.presenter.liveScripture?.active ? state.presenter.liveScripture : null,
     livePraise: null,
     updatedAt: Date.now(),
@@ -1632,6 +1633,7 @@ function restorePresenterControllerSession() {
   );
   state.presenter.pptxProgress = payload.pptxProgress || null;
   state.presenter.safetyBlank = Boolean(payload.safetyBlank);
+  state.presenter.safetyBlankMode = payload.safetyBlankMode === "transparent" ? "transparent" : "black";
   state.presenter.jumpDraft = "";
   state.presenter.liveScripture = payload.liveScripture?.active
     ? {
@@ -1872,7 +1874,7 @@ function readPresenterStoredPayload() {
 }
 
 function publishPresenterPayload(payload, options = {}) {
-  const { index, slideAnchor, pptxProgress, safetyBlank, liveScripture, livePraise, updatedAt,
+  const { index, slideAnchor, pptxProgress, safetyBlank, safetyBlankMode, liveScripture, livePraise, updatedAt,
     snapshotId: previousSnapshotId, messageId: previousMessageId, ...content } = payload;
   const contentKey = JSON.stringify(content);
   const messageId = `${presenterTransportSession}:${++presenterTransportSequence}`;
@@ -1881,7 +1883,7 @@ function publishPresenterPayload(payload, options = {}) {
     && presenterTransportSnapshot?.contentKey === contentKey;
   if (compact) {
     const navigation = { snapshotId: presenterTransportSnapshot.id, messageId,
-      index, slideAnchor, pptxProgress, safetyBlank, liveScripture, livePraise, updatedAt };
+      index, slideAnchor, pptxProgress, safetyBlank, safetyBlankMode, liveScripture, livePraise, updatedAt };
     presenterTransportLatest = { payload: { ...payload, ...navigation }, sentAt: Date.now(), retriedAt: 0 };
     safeStorageSet("local", PRESENTER_NAVIGATION_STORAGE_KEY, JSON.stringify(navigation));
     try { state.presenter.outputWindow?.postMessage({type:"presenter-navigation",payload:navigation},window.location.origin); } catch {}
@@ -2589,6 +2591,7 @@ function normalizePresenterPayload(payload) {
     slideAnchor: payload?.slideAnchor || presenterSlideAnchor(slides[clampPresenterIndex(payload?.index, slides.length)]),
     pptxProgress: payload?.pptxProgress || null,
     safetyBlank: Boolean(payload?.safetyBlank),
+    safetyBlankMode: payload?.safetyBlankMode === "transparent" ? "transparent" : "black",
     liveScripture: normalizeLiveScripturePayload(payload?.liveScripture),
     livePraise: null,
     updatedAt: Number(payload?.updatedAt) || Date.now(),
@@ -2628,6 +2631,7 @@ function applyPresenterActionToPayload(payload, action, options = {}) {
   } else if (action === "jump" && next.slides.length) {
     if (requestedIndex === -1) {
       next.safetyBlank = true;
+      next.safetyBlankMode = options.blankMode === "transparent" ? "transparent" : "black";
     } else if (isValidPresenterIndex(requestedIndex, next.slides.length)) {
       next.index = requestedIndex;
       next.safetyBlank = false;
@@ -2666,7 +2670,7 @@ function renderPresenterOutput(payload, options = {}) {
   const slides = Array.isArray(payload?.slides) ? payload.slides : [];
   const liveSlide = payload?.liveScripture?.active ? payload.liveScripture.slide : null;
   const slide = payload?.safetyBlank
-    ? presenterSafetyBlankSlide()
+    ? presenterSafetyBlankSlide(payload.safetyBlankMode)
     : liveSlide || slides[clampPresenterIndex(payload?.index, slides.length)];
   const frameState = presenterOutputFrameStateForSlide(slide, payload);
   if (renderPresenterKeynoteHtmlOutput(root, payload)) return;
@@ -4234,14 +4238,15 @@ function presenterSlideExtraClasses(slide) {
   return classes.join(" ");
 }
 
-function presenterSafetyBlankSlide() {
+function presenterSafetyBlankSlide(mode = "black") {
+  const transparent = mode === "transparent";
   return {
-    id: "presenter:safety-blank",
-    outputContext: "clean",
+    id: transparent ? "presenter:safety-transparent" : "presenter:safety-blank",
+    outputContext: transparent ? "chromakey" : "clean",
     elementType: PRESENTER_ELEMENT_TYPES.BLANK,
     layout: PRESENTER_SLIDE_LAYOUTS.BLANK,
     type: "blank",
-    title: "암전",
+    title: transparent ? "투명" : "암전",
     text: "",
   };
 }

@@ -1,6 +1,6 @@
 // Ephemeral pairing only: no persistent credentials or offline command queue.
 const enc=new TextEncoder(),dec=new TextDecoder();
-export const actions=new Set(['jump','prev','next','blank','unblank','play','pause','stop','resume','video-play','video-pause','video-restart','output-stop']);
+export const actions=new Set(['jump','prev','next','blank','unblank','play','pause','stop','resume','video-play','video-pause','video-restart','output-stop','transparent','untransparent','output-fullscreen','output-pin','output-unpin']);
 export const id=()=>crypto.randomUUID();
 const hex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
 export async function pairing(secret){

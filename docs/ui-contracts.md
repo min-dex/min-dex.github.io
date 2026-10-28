@@ -1142,3 +1142,18 @@ it; typing never does. Manual reopen/collapse is retained per service for this
 session, without writing a shared server preference. Existing input parsing and
 normalization at Apply remain the single path; original text is not normalized
 during keystrokes.
+### Shared output screen management ·2026-10-28
+
+슬라이드 보기와 발표자 보기는 같은 송출 화면 관리 렌더러를 사용한다.
+송출 시작/종료, 전체 화면, 항상 위, 암전, 투명을 한 영역에 모은다.
+화면 감지와 미디어 관리는 별도 도구 영역에 남긴다. 화면 버튼은35px 높이,
+10px 좌우 패딩,16px 아이콘,5px 아이콘 간격을 공유한다.
+암전·투명은 상호 배타적이며 다시 누르면 현재 슬라이드로 복귀한다.
+기존0번 이동은 항상 암전이다. 투명은 기존 믹서 출력의 설정된 크로마키
+단색이며 실제 브라우저 창을 투명화하거나 다른 프로그램을 드러내지 않는다.
+음원 자동 넘김은 기존 암전과 동일하게 멈추며 수동 복귀할 수 있다.
+
+Remote도 같은 영역으로 정리하되50px 터치 크기를 유지한다. 종료는 기존
+관리자 권한을 유지하며 확인 후 실행한다. 전체 화면 요청·항상 위는 지원되는
+데스크톱 호스트에서만 활성화한다. 출력 종료는 원격 세션도 종료하며, 대기 중
+PC로 원격 송출을 시작하는 별도 연결 수명 확장은 이 변경의 범위가 아니다.

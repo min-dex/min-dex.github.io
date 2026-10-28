@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261028-presenter-structured-input",
+  "version": "20261028-screen-management",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "3acb74c6ae09937644b7db2441e12f1024242f2a2d5b884773b33816388c0843",
-  "runtime_sha256": "96a21657f6ea302555538ae94c359535878db46892c1955da19246b94c3b9e0c",
-  "source_bytes": 1341215,
-  "runtime_bytes": 957351,
-  "source_gzip": 305878,
-  "runtime_gzip": 239811
+  "source_sha256": "0b0143ec2c7847663c2fe0f2f915fe57f6bd9b71491fab3e7b74ec0c67d47fb5",
+  "runtime_sha256": "1c09dca033f7765641e2cb715b3cabbb115d386759a4903cd8b341b8f23a74fb",
+  "source_bytes": 1339316,
+  "runtime_bytes": 955871,
+  "source_gzip": 305535,
+  "runtime_gzip": 239468
 }

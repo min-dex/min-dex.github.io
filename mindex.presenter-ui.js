@@ -205,6 +205,23 @@ function presenterLyricsSlidesForServiceItem({
   });
 }
 
+function renderPresenterScreenManagement(serviceId, slides = []) {
+  const live = isPresenterOutputWindowOpen();
+  const own = live && state.presenter.serviceId === serviceId;
+  const mode = own && state.presenter.safetyBlank ? state.presenter.safetyBlankMode || 'black' : '';
+  const toggle = (value, label, icon) => `<button type="button" class="icon-btn svc-presenter-window-button" data-presenter-action="${value === 'black' ? 'blackout' : 'transparent'}" data-service-id="${escapeAttr(serviceId)}" aria-pressed="${mode === value}" aria-label="${label}${mode === value ? ' 해제' : ''}" ${own && slides.length ? '' : 'disabled'}><i data-lucide="${icon}"></i><span>${label}</span></button>`;
+  return `<section class="svc-screen-management" aria-label="송출 화면 관리">
+    <h3>송출 화면 관리</h3>
+    <div class="svc-screen-management-grid">
+      <button type="button" class="icon-btn svc-presenter-launch" data-presenter-action="${live ? 'stop' : 'open'}" data-service-id="${escapeAttr(serviceId)}" aria-label="${live ? '송출 종료' : '송출 시작'}"><i data-lucide="${live ? 'screen-share-off' : 'screen-share'}"></i><span>${live ? '송출 종료' : '송출 시작'}</span></button>
+      <button type="button" class="icon-btn svc-presenter-fullscreen svc-presenter-window-button" data-presenter-action="fullscreen" data-service-id="${escapeAttr(serviceId)}" aria-label="송출 화면 전체 화면" ${live ? '' : 'disabled'}><i data-lucide="maximize"></i><span>전체 화면</span></button>
+      ${renderPresenterAlwaysOnTopControl({ buttonStyle: true })}
+      ${toggle('black', '암전', 'eye-off')}
+      ${toggle('transparent', '투명', 'layers')}
+    </div>
+  </section>`;
+}
+
 function renderPresenterScreenControl() {
   if (state.presenter.screens.length) {
     return `
@@ -435,15 +452,13 @@ function syncPresenterFocusView() {
     ? presenterLiveStatusPreviewSlide(slides, index, {active, outputOpen}) : slides[index];
   const nextIndex = presenterNextNavigableIndex(slides, index);
   const next = nextIndex !== index ? slides[nextIndex] : null;
-  const label = outputOpen ? (state.presenter.safetyBlank ? '암전' : '현재 송출')
+  const label = outputOpen ? (state.presenter.safetyBlank ? (state.presenter.safetyBlankMode === 'transparent' ? '투명' : '암전') : '현재 송출')
     : isPresenterOutputWindowOpen() ? '선택 화면 · 다른 예배 송출 중' : '선택 화면 · 송출 대기';
   const frame = (slide, title) => `<div class="svc-focus-preview"><strong>${escapeHtml(title)}</strong><div class="svc-slide-thumb-frame">${slide ? renderPresenterSlideMiniPreview(slide, serviceId) : '<span>다음 슬라이드 없음</span>'}</div></div>`;
-  const outputControl = document.querySelector('[data-presenter-right-sidebar] .svc-presenter-launch');
-  const narrowOutput = outputControl ? `<button type="button" class="btn secondary svc-focus-output" data-presenter-action="${escapeAttr(outputControl.dataset.presenterAction)}" data-service-id="${escapeAttr(serviceId)}" ${outputControl.disabled ? 'disabled' : ''}><i data-lucide="${outputControl.dataset.presenterAction === 'stop' ? 'screen-share-off' : 'screen-share'}"></i><span>${escapeHtml(outputControl.getAttribute('aria-label') || outputControl.textContent.trim())}</span></button>` : '';
-  const markup = `<div class="svc-focus-screens">${frame(current, label)}${frame(next, '다음 화면')}</div>
+  const markup = `<div class="svc-focus-screens">${frame(current, label)}${frame(next, '다음 화면')}</div>${renderPresenterScreenManagement(serviceId, slides)}
     <div class="svc-focus-transport"><div class="svc-focus-navigation" role="group" aria-label="슬라이드 이동"><span class="svc-focus-count">${slides.length ? index + 1 : 0} <span>/ ${slides.length}</span></span>
       <button type="button" class="btn secondary" data-presenter-action="prev" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}><i data-lucide="chevron-left"></i><span>이전</span></button>
-      <button type="button" class="btn secondary" data-presenter-action="next" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}><i data-lucide="chevron-right"></i><span>다음</span></button>${narrowOutput}</div>
+      <button type="button" class="btn secondary" data-presenter-action="next" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}><i data-lucide="chevron-right"></i><span>다음</span></button></div>
       <div class="svc-focus-audio" role="group" aria-label="음원 조작"><span data-focus-music-status role="status"></span>
       <button type="button" class="btn secondary" data-focus-music="toggle"><i data-lucide="play"></i><span data-focus-music-label>재생 · P</span></button>
       <button type="button" class="btn secondary" data-focus-music="stop" aria-label="음악 정지"><i data-lucide="square"></i><span>정지</span></button>
