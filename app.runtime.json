@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261028-setlist-card-titles",
+  "version": "20261028-setlist-live-native",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "d9e6a42db4494fb971147edbc4a532d4b04081e6d90d79d159176ed9ee75266d",
-  "runtime_sha256": "dc8218b85329bfae983c4c8428cf9d4cfa97888975770f4b68f1a98ea2a8fa43",
-  "source_bytes": 1341600,
-  "runtime_bytes": 957827,
-  "source_gzip": 305979,
-  "runtime_gzip": 239928
+  "source_sha256": "b7a94ef68feddb295a52155671c62b29f241add9dfcee25d0faffc6ccfbc4846",
+  "runtime_sha256": "29d26ae019027292b3e618f2f7725d3857f7fb2fef4c8141fed1638797b00cbd",
+  "source_bytes": 1341674,
+  "runtime_bytes": 957895,
+  "source_gzip": 305992,
+  "runtime_gzip": 239946
 }

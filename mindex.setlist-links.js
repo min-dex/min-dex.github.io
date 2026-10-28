@@ -90,8 +90,10 @@
     return { status: "linked", song, detail: artistHint(song, sameTitle), text: `${prefix}${title}${part.verse ? ` ${part.verse}` : ""}`, candidates: numbered };
   }
   function fromServices(snapshot = {}, archivedSources = [], index = null) {
-    const hasSong = element => Boolean(element.song_id || String(element.title || "").trim());
-    const occupied = new Set(archivedSources.map(s => s.service_date + "|" + s.service_type_id));
+    const songId = element => element.praise_record_id || element.song_id || "";
+    const hasSong = element => Boolean(songId(element) || String(element.title || "").trim());
+    void archivedSources; // Imported records never suppress the current worship projection.
+    const occupied = new Set();
     const sections = new Map((snapshot.sections || []).map(s => [s.id, s]));
     const grouped = new Map();
     for (const element of snapshot.elements || []) {
@@ -121,16 +123,16 @@
       const serviceCandidates = rows.map(({element, section}, i) => {
         let label = String(element.label || element.source_ref?.label || section.title || "찬양").trim();
         if (/^찬양(?:\s*\d+)?$/.test(label)) {
-          const count = element.song_id ? 1 : Math.max(1, split(element.title).length);
+          const count = songId(element) ? 1 : Math.max(1, split(element.title).length);
           const first = mainNumber + 1;
           mainNumber += count;
           label = `찬양 ${first}${count > 1 ? `–${mainNumber}` : ""}`;
         }
         return {id:element.id, import_source_id:id, sort_order:i+1, archive_display_order:i+1,
           candidate_level:"element", candidate_key:section.section_key || "praise", suggested_type:"praise",
-          raw_label:label, raw_title:String(index?.byId.get(element.song_id)?.title || element.title || "").trim(), suggested_song_id:element.song_id || null,
+          raw_label:label, raw_title:String(index?.byId.get(songId(element))?.title || element.title || "").trim(), suggested_song_id:songId(element) || null,
           archive_live:true,
-          archive_manual_song:!element.song_id, review_status:"approved"};
+          archive_manual_song:!songId(element), review_status:"approved"};
       });
       const connection = element => element.connectedPraise || element.connected_praise
         || element.config?.connectedPraise || element.config?.connected_praise
@@ -164,6 +166,13 @@
     }
     return {sources, candidates};
   }
+  function preferLiveSources(archivedSources = [], snapshot = {}, liveSources = [], normalizeType = value => value) {
+    const identity = source => source.service_date + "|" + normalizeType(source.service_type_id);
+    const occupied = new Set((snapshot?.services || []).filter(service => service.service_date).map(identity));
+    // Even an empty actual service is authoritative. Do not resurrect an old
+    // import after the user clears its songs. The stored import remains intact.
+    return [...archivedSources.filter(source => !occupied.has(identity(source))), ...liveSources];
+  }
   function mergeSundayEntries(entries = []) {
     const isType = (entry, ...types) => types.includes(entry.source.service_type_id);
     return entries.filter(entry => !isType(entry, "sun_1st", "sunday-first", "sun_2nd", "sunday-second")).map(entry => {
@@ -187,5 +196,5 @@
         needsReview:rows.filter(row => row.review_status === "needs_review").length};
     });
   }
-  root.MindexSetlistLinks = { buildTitlePeers, artistHint, titleKey:key, buildIndex, resolve, split, isExcluded, fromServices, mergeSundayEntries };
+  root.MindexSetlistLinks = { buildTitlePeers, artistHint, titleKey:key, buildIndex, resolve, split, isExcluded, fromServices, preferLiveSources, mergeSundayEntries };
 })(typeof window === "undefined" ? globalThis : window);
