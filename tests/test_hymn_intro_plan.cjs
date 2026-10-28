@@ -25,7 +25,10 @@ vm.runInContext(fs.readFileSync(path.join(__dirname, '../mindex.worship-model.js
 for (const name of ['presenterFormPresetDisplayLabel', 'presenterFormDisplayLabel', 'normalizePresenterFormType', 'normalizePresenterFormPresetLabel', 'presenterHymnOnceOnlyIntro', 'presenterFormPlanForServiceItem']) vm.runInContext(extract(name), context);
 const plain = value => JSON.parse(JSON.stringify(value));
 for (const [id, count, verses] of [['5bf20e2d-cb7e-5c2a-86ca-0a75acfdd7c0', 4, 5], ['7ab06cc7-99cf-5e67-b236-78a6758734e8', 3, 4]]) {
-  const intro = Array(count).fill('할렐루야').join(' ') + '\n';
+  for (const separator of [' ', '\n']) {
+  const intro = count === 4 && separator === '\n'
+    ? '할렐루야 할렐루야\n할렐루야 할렐루야\n'
+    : Array(count).fill('할렐루야').join(separator) + '\n';
   const forms = Array.from({length: verses}, (_, i) => ({id: `v${i+1}`, label: `Verse ${i+1}`, lyrics: intro + `본절 ${i+1}\n\n끝말 할렐루야`, sort_order: i+1}));
   forms.push({id:'coda',label:'Coda',lyrics:'아멘'});
   const original = JSON.stringify(forms);
@@ -48,9 +51,12 @@ for (const [id, count, verses] of [['5bf20e2d-cb7e-5c2a-86ca-0a75acfdd7c0', 4, 5
   const manual = forms.map(f => ({...f, lyrics: '직접 수정 ' + f.lyrics}));
   assert.deepEqual(plain(context.presenterHymnOnceOnlyIntro(manual, version)), manual);
   assert.deepEqual(plain(context.presenterHymnOnceOnlyIntro(manual, nativeVersion)), manual);
+  const separated = forms.map(f => ({...f, lyrics: f.lyrics.replace(/^할렐루야[ \n]/, '할렐루야\n\n')}));
+  assert.deepEqual(plain(context.presenterHymnOnceOnlyIntro(separated, nativeVersion)), separated, 'do not infer across slide boundaries');
   const segmented = forms.slice(0,2).map(f => ({...f, label:'Verse 1 A', _presenterVirtual:true, _presenterSourceFormId:f.id}));
   assert.deepEqual(plain(context.presenterHymnOnceOnlyIntro(segmented, version)), segmented);
   assert.deepEqual(plain(context.presenterHymnOnceOnlyIntro(segmented, nativeVersion)), segmented);
   assert.deepEqual(plain(context.presenterHymnOnceOnlyIntro(forms, {id:'native-unrelated', _legacyVersionId:'unreviewed'})), forms);
+}
 }
 console.log('PASS 163/166 intro once per playback plan; selection/repeats/order, other editions, manual lyrics and stored IDs preserved');
