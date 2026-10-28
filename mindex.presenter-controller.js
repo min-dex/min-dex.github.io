@@ -926,41 +926,6 @@ function clearPresenterTransientBoardActiveMarks(root = document.getElementById(
   syncPresenterBoardSelectionClasses(root);
 }
 
-function patchPresenterControlTree(current, next) {
-  if (current.isEqualNode(next)) return;
-  if (current.nodeType !== next.nodeType || current.nodeName !== next.nodeName) {
-    current.replaceWith(next.cloneNode(true));
-    return;
-  }
-  if (current.nodeType !== Node.ELEMENT_NODE) {
-    current.textContent = next.textContent;
-    return;
-  }
-  // Preview geometry belongs to the mounted frame, not the slide markup.
-  const preserveCitationDraft = current.matches?.("[data-presenter-citation-reference-input]")
-    && next.matches?.("[data-presenter-citation-reference-input]")
-    && current.dataset.serviceId === next.dataset.serviceId
-    && current.dataset.presenterCitationElementId === next.dataset.presenterCitationElementId;
-  const scale = current.style?.getPropertyValue("--presenter-preview-scale");
-  if (scale) next.style.setProperty("--presenter-preview-scale", scale);
-  if (current.tagName === "DETAILS" && current.open) next.open = true;
-  for (const attr of [...current.attributes]) {
-    if (!next.hasAttribute(attr.name)) current.removeAttribute(attr.name);
-  }
-  for (const attr of [...next.attributes]) {
-    if (current.getAttribute(attr.name) !== attr.value) current.setAttribute(attr.name, attr.value);
-  }
-  const editingLiveScripture = current === document.activeElement && current.matches?.("[data-live-scripture-input]");
-  if (current instanceof HTMLInputElement && !editingLiveScripture && !preserveCitationDraft && !current._videoSeekOwner && current.value !== next.value) current.value = next.value;
-  const previousChildren = [...current.childNodes];
-  const nextChildren = [...next.childNodes];
-  nextChildren.forEach((child, index) => {
-    if (previousChildren[index]) patchPresenterControlTree(previousChildren[index], child);
-    else current.appendChild(child.cloneNode(true));
-  });
-  previousChildren.slice(nextChildren.length).forEach((child) => child.remove());
-}
-
 function patchPresenterControlsTop(root, service, slides, active, index) {
   if (!root || !service) return;
   root.setAttribute("aria-label", uiText("presenter.controls"));

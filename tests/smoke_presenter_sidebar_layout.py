@@ -31,10 +31,10 @@ def main():
                   const root=document.querySelector('#fixture');
                   const box=s=>root.querySelector(s).getBoundingClientRect();
                   const header=box('.svc-presenter-live-copy'), top=box('.svc-presenter-top');
-                  const preview=box('.svc-presenter-live-preview'), nav=box('.svc-presenter-main'), output=box('.svc-presenter-output-group'), rail=box('.svc-presenter-input-rail');
+                  const preview=box('.svc-presenter-live-preview'), nav=box('.svc-presenter-main'), output=box('.svc-presenter-output-group');
                   const overflow=[...root.querySelectorAll('button,input,textarea,select')].filter(e=>e.getClientRects().length).some(e=>e.getBoundingClientRect().right>width+.5 || e.getBoundingClientRect().left<0);
                   return {ordered:header.top>=top.top && header.height>0 && nav.width>0
-                      && header.bottom<=preview.top && preview.bottom<=nav.top && nav.bottom<=output.top && output.bottom<=rail.top,overflow,
+                      && header.bottom<=preview.top && preview.bottom<=nav.top && nav.bottom<=output.top && !root.querySelector('.svc-presenter-input-rail'),overflow,
                     readyHidden:getComputedStyle(root.querySelector('.svc-presenter-warmup--ready')).display==='none',
                     redundant:root.textContent.includes('빠른 반영')};
                 }''', width)

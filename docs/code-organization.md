@@ -462,3 +462,12 @@ interfaces. `tools/prepare_keynote_html.py` only reads a preserved KEY and an
 existing Apple HTML export to generate a manifest; it never automates Keynote,
 changes the source or uploads operational files. Do not add actual user exports
 or their bundled Apple runtime to this public repository as test fixtures.
+
+## Presenter input placement ·2026-10-28
+
+`mindex.presenter-ui.js` owns sidebar DOM reconciliation and preparation field
+focus/draft lookup, including `patchPresenterControlTree`. The same single editor
+is mounted in the left sidebar; input parsing and atomic persistence stay with
+their existing owners. Active editor DOM is retained through same-service refreshes
+to preserve composition and selection. This replaces the right-panel bottom-input
+layout regression with `smoke_presenter_left_input.py` and its atomic-save companion.

@@ -174,6 +174,8 @@ SMOKES = (
     "smoke_offering_layout.py",
     "smoke_global_playback.py",
     "smoke_presenter_focus_view.py",
+    "smoke_presenter_left_input.py",
+    "smoke_presenter_left_input_save.py",
     "smoke_presenter_focus.py",
     "smoke_output_session_isolation.py",
     "smoke_output_restart.py",

@@ -18,7 +18,7 @@ try:
               state.serviceItems={[service.id]:[{id:'citation',service_id:service.id,label:'인용 구절',sort_order:0,memo:JSON.stringify({elementType:'scripture_body'})}]};
               state.serviceError='';state.connectionError='';
               document.body.classList.remove('ui-booting');document.body.dataset.module='presenter';
-              renderPresenterDetail();
+              renderServiceList();renderPresenterDetail();
             }''')
             page.wait_for_timeout(200)
             for width,height in [(1440,900),(1000,600),(390,700)]:
@@ -30,10 +30,10 @@ try:
                   assert(input,'sidebar input missing');
                   assert(document.querySelectorAll('[data-presenter-citation-reference-input]').length===1,'duplicate input');
                   const composer=input.closest('.svc-citation-composer');
-                  const rail=sidebar.querySelector('.svc-presenter-input-rail');
+                  const rail=refs.songList.querySelector('.svc-presenter-input-rail');
                   const preview=sidebar.querySelector('.svc-presenter-live-panel');
                   assert(preview.getBoundingClientRect().bottom<=composer.getBoundingClientRect().top+1,'live scripture must follow preview');
-                  assert(composer.getBoundingClientRect().bottom<=rail.getBoundingClientRect().top+1,'input order/overlap');
+                  assert(rail&&!sidebar.querySelector('.svc-presenter-input-rail'),'order input belongs to left rail');
                   assert(sidebar.scrollWidth<=sidebar.clientWidth+1,'sidebar overflow');
                   input.value='요 15:9';input.focus({preventScroll:true});input.setSelectionRange(2,4);
                   const paneScroll=refs.detailPane.scrollTop,sideScroll=sidebar.scrollTop;

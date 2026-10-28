@@ -1352,6 +1352,9 @@ function bindStaticEvents() {
   refs.songList.addEventListener("keydown", handleDetailKeydown);
   refs.songList.addEventListener("input", handleDetailInput);
   refs.songList.addEventListener("paste", handlePresenterPreparationPaste);
+  refs.songList.addEventListener("focusin", event => {
+    if (event.target.matches('[data-presenter-preparation-field]')) syncPresenterPreparationControls(event.target);
+  });
   refs.songList.addEventListener("change", handleDetailChange);
   refs.songList.addEventListener("dblclick", handleServiceOutlineSlideDoubleClick);
 
@@ -24209,7 +24212,7 @@ function renderServiceList() {
   if (state.module === "presenter") {
     const outlineMarkup = selectedService && !serviceIsNoGathering(selectedService)
       ? renderServiceCurrentSidebar(selectedService).trim() : "";
-    refs.songList.innerHTML = renderPresenterSidebar(q, services, selectedService, outlineMarkup);
+    setPresenterSidebarContent(renderPresenterSidebar(q, services, selectedService, outlineMarkup), selectedService);
     const outline = refs.songList.querySelector(".service-sidebar-section--current");
     if (outline) outline._presenterOutlineMarkup = outlineMarkup;
     finishListRender();
@@ -24264,9 +24267,10 @@ function renderPresenterSidebar(query, services, selectedService, outlineMarkup 
           : `<p class="service-no-results">검색 결과가 없습니다.</p>`}
       </section>` : "";
   return `
-    <div class="service-sidebar service-sidebar--presenter">
-      ${searchSection}
+    <div class="service-sidebar service-sidebar--presenter" data-service-id="${escapeAttr(selectedService?.id || "")}">
+      <div class="service-sidebar-search-results">${searchSection}</div>
       ${selectedService ? renderPresenterSidebarServiceSummary(selectedService) : ""}
+      ${selectedService && !serviceIsNoGathering(selectedService) && !serviceViewIsLoading(selectedService.id) ? renderPresenterServiceInputRail(selectedService) : ""}
       ${outlineMarkup || (!selectedService ? renderUpcomingServiceShortcuts() : "")}
     </div>`;
 }
@@ -24323,6 +24327,7 @@ function patchPresenterSidebarOutline(service, slides) {
 function patchPresenterSidebarOutlineUnscoped(service, slides) {
   const current = refs.songList?.querySelector(".service-sidebar-section--current");
   if (!current || !service) return;
+  syncPresenterSidebarInputRail(service);
   const markup = renderServiceCurrentSidebar(service, slides).trim();
   if (current._presenterOutlineMarkup === markup) return;
   const scrollTop = refs.songList.scrollTop;
@@ -28594,35 +28599,6 @@ function presenterPreparationDraftNearApplyButton(button) {
     || button?.parentElement
     || null;
   return presenterPreparationDraftFromRoot(root, service);
-}
-
-function focusPresenterPreparationTarget(serviceId, target = {}) {
-  if (!serviceId || !target) return;
-  requestAnimationFrame(() => {
-    const roots = [refs.rightSidebar, refs.detailPane];
-    const root = roots.find((candidate) => candidate?.querySelector?.(`[data-presenter-preparation-field][data-service-id="${cssEscape(serviceId)}"]`));
-    if (!root) return;
-    const inputRoot = root.querySelector(".svc-presenter-input-rail .svc-presenter-preparation-input");
-    const selector = target.apply
-      ? `[data-presenter-preparation-apply][data-service-id="${cssEscape(serviceId)}"]`
-      : `[data-presenter-preparation-field][data-service-id="${cssEscape(serviceId)}"][data-presenter-preparation-field-label="${cssEscape(target.label || "")}"]`;
-    const field = inputRoot?.querySelector(selector) || root.querySelector(selector);
-    field?.focus?.();
-    if (!target.apply && typeof field?.select === "function") field.select();
-  });
-}
-
-function presenterPreparationDraftForService(serviceId, options = {}) {
-  if (options.draft != null) return String(options.draft || "").trim();
-  const service = state.services.find((candidate) => candidate.id === serviceId);
-  const selector = `[data-presenter-preparation-field][data-service-id="${cssEscape(serviceId)}"]`;
-  const input = refs.rightSidebar?.querySelector(selector)
-    || refs.detailPane?.querySelector(selector)
-    || null;
-  const draft = input && service
-    ? presenterPreparationDraftFromRoot(input.closest(".svc-presenter-preparation-input"), service)
-    : state.presenterPreparationDrafts[serviceId];
-  return String(draft || "").trim();
 }
 
 function presenterPreparationPlaceholderForService(service) {

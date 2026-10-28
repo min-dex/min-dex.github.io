@@ -448,8 +448,12 @@ states retain their message but do not repeat edition buttons; use the sidebar.
 ## Controller essentials and conflict choices · 2026-10-17
 
 The presenter keeps preview, slide navigation, start/stop, blackout and live
-scripture immediately available. Live scripture follows the preview, followed by always-visible `예배 순서 입력`
-fields and Apply in the right controller. The separate order editor retains
+scripture immediately available. Live scripture follows the preview in the right controller.
+The single `예배 순서 입력` editor and Apply live above the outline in the left sidebar;
+its disclosure, draft parsing and atomic save remain unchanged. Same-service list and
+preview refreshes preserve the mounted editor while focused, including IME composition.
+The board toolbar sticks inside the actual scroll container (detail pane on desktop,
+document on narrow screens); view/scale/music/help controls keep their existing actions. The separate order editor retains
 structural editing without a duplicate preparation form. Screen detection and always-on-top live in the `송출·음악` popover.
 A compact topbar launcher opens it without widening tabs or extending a sidebar.
 State refresh preserves the open panel; Esc closes it without stopping output.

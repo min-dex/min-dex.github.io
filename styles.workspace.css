@@ -1919,10 +1919,6 @@ body[data-theme="dark"] .service-week-card:hover {
   align-self: end;
   min-width: 0;
 }
-.right-sidebar .svc-presenter-input-rail {
-  align-self: end;
-  border-top: 0;
-}
 .svc-presenter-input-rail {
   display: grid;
   min-width: 0;
@@ -2789,10 +2785,6 @@ textarea.svc-presenter-input-control--multiline {
   padding-block: 0;
 }
 .svc-presenter-side-panel .svc-presenter-help > summary { width: 34px; }
-.svc-presenter-side-panel .svc-presenter-input-rail {
-  gap: 5px;
-  padding-block: 15px;
-}
 .svc-presenter-actions .icon-btn { width: var(--ui-icon-btn-inline); height: var(--ui-icon-btn-inline); }
 .svc-presenter-actions .icon-btn.is-active { background: transparent; color: var(--accent); }
 .svc-presenter-utility-actions {
@@ -6070,7 +6062,7 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
 .svc-presenter-toolbar .svc-music-name { height:35px; min-height:35px; padding:0 10px; font-weight:600; }
 .svc-presenter-side-panel .svc-presenter-action-group--nav { height:35px; }
 .svc-presenter-side-panel .svc-presenter-action-group--nav .icon-btn { width:35px; height:35px; flex:0 0 35px; }
-.svc-presenter-side-panel button.svc-presenter-preparation-apply { padding:0 10px; font-weight:600; }
+.svc-presenter-input-rail button.svc-presenter-preparation-apply { min-height:35px; height:35px; padding:0 10px; font-weight:600; }
 
 .server-conflict-review { box-sizing: border-box; width: min(90vw, 760px); max-height: 85vh; overflow: auto; padding: 25px; background: var(--ui-surface-panel); color: var(--ink); border: 1px solid var(--line); border-radius: var(--r); }
 .server-conflict-review label { display: block; margin-top: 15px; }
@@ -6250,3 +6242,17 @@ body[data-module="praise"] .praise-forms-panel .version-compare-head > .version-
 .svc-presenter-input-field--scripture-parts > summary::-webkit-details-marker { display:none; }
 .svc-presenter-input-field--scripture-parts[open] > summary { margin-bottom:10px; }
 .svc-presenter-input-field--scripture-parts > summary:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+
+/* Order entry shares the left outline rail; only the board scrolls under tools. */
+.service-sidebar-search-results:empty { display:none; }
+.service-sidebar--presenter > .svc-presenter-input-rail {
+  width:auto; min-width:0; padding:15px; margin:0; border-top:0; border-bottom:1px solid var(--line);
+}
+.service-sidebar--presenter .svc-presenter-preparation-field-row {
+  grid-template-columns:minmax(0, 1fr); gap:5px;
+}
+.service-sidebar--presenter .svc-presenter-preparation-field-label { white-space:normal; }
+body[data-module="presenter"] .svc-presenter-toolbar {
+  position:sticky; top:0; z-index:12; background:var(--bg);
+  padding:10px 0; border-bottom:1px solid var(--line);
+}

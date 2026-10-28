@@ -1,3 +1,98 @@
+function focusPresenterPreparationTarget(serviceId, target = {}) {
+  if (!serviceId || !target) return;
+  requestAnimationFrame(() => {
+    const roots = [refs.songList, refs.rightSidebar, refs.detailPane];
+    const root = roots.find((candidate) => candidate?.querySelector?.(`[data-presenter-preparation-field][data-service-id="${cssEscape(serviceId)}"]`));
+    if (!root) return;
+    const inputRoot = root.querySelector(".svc-presenter-input-rail .svc-presenter-preparation-input");
+    const selector = target.apply
+      ? `[data-presenter-preparation-apply][data-service-id="${cssEscape(serviceId)}"]`
+      : `[data-presenter-preparation-field][data-service-id="${cssEscape(serviceId)}"][data-presenter-preparation-field-label="${cssEscape(target.label || "")}"]`;
+    const field = inputRoot?.querySelector(selector) || root.querySelector(selector);
+    field?.focus?.();
+    if (!target.apply && typeof field?.select === "function") field.select();
+  });
+}
+
+function presenterPreparationDraftForService(serviceId, options = {}) {
+  if (options.draft != null) return String(options.draft || "").trim();
+  const service = state.services.find((candidate) => candidate.id === serviceId);
+  const selector = `[data-presenter-preparation-field][data-service-id="${cssEscape(serviceId)}"]`;
+  const input = refs.songList?.querySelector(selector)
+    || refs.rightSidebar?.querySelector(selector)
+    || refs.detailPane?.querySelector(selector)
+    || null;
+  const draft = input && service
+    ? presenterPreparationDraftFromRoot(input.closest(".svc-presenter-preparation-input"), service)
+    : state.presenterPreparationDrafts[serviceId];
+  return String(draft || "").trim();
+}
+
+// Keep the mounted left editor during same-service list/remote refreshes.
+function setPresenterSidebarContent(html, service) {
+  const current = refs.songList.querySelector('.service-sidebar--presenter');
+  const template = document.createElement('template');
+  template.innerHTML = html.trim();
+  const next = template.content.firstElementChild;
+  if (service?.id && current?.dataset.serviceId === service.id) {
+    refreshIcons(next);
+    patchPresenterControlTree(current, next);
+  } else refs.songList.replaceChildren(template.content);
+  refs.songList.querySelectorAll('[data-presenter-preparation-field]').forEach(syncPresenterPreparationControls);
+}
+
+function syncPresenterSidebarInputRail(service) {
+  const current = refs.songList?.querySelector('.svc-presenter-input-rail');
+  if (!service?.id) return;
+  const sidebar = refs.songList?.querySelector('.service-sidebar--presenter');
+  if (sidebar?.dataset.serviceId !== service.id) return;
+  const template = document.createElement('template');
+  template.innerHTML = renderPresenterServiceInputRail(service).trim();
+  refreshIcons(template.content);
+  if (current) patchPresenterControlTree(current, template.content.firstElementChild);
+  else sidebar.insertBefore(template.content.firstElementChild, sidebar.querySelector('.service-sidebar-section--current'));
+}
+
+function patchPresenterControlTree(current, next) {
+  // An active order editor owns its DOM, including an unfinished IME composition.
+  // Input events already retain its draft; remote/preview refreshes must not rewrite it.
+  if (current.matches?.('.svc-presenter-input-rail')
+    && current.dataset.serviceId === next.dataset?.serviceId
+    && current.contains(document.activeElement)) return;
+  if (current.isEqualNode(next)) return;
+  if (current.nodeType !== next.nodeType || current.nodeName !== next.nodeName) {
+    current.replaceWith(next.cloneNode(true));
+    return;
+  }
+  if (current.nodeType !== Node.ELEMENT_NODE) {
+    current.textContent = next.textContent;
+    return;
+  }
+  // Preview geometry belongs to the mounted frame, not the slide markup.
+  const preserveCitationDraft = current.matches?.("[data-presenter-citation-reference-input]")
+    && next.matches?.("[data-presenter-citation-reference-input]")
+    && current.dataset.serviceId === next.dataset.serviceId
+    && current.dataset.presenterCitationElementId === next.dataset.presenterCitationElementId;
+  const scale = current.style?.getPropertyValue("--presenter-preview-scale");
+  if (scale) next.style.setProperty("--presenter-preview-scale", scale);
+  if (current.tagName === "DETAILS" && current.open) next.open = true;
+  for (const attr of [...current.attributes]) {
+    if (!next.hasAttribute(attr.name)) current.removeAttribute(attr.name);
+  }
+  for (const attr of [...next.attributes]) {
+    if (current.getAttribute(attr.name) !== attr.value) current.setAttribute(attr.name, attr.value);
+  }
+  const editingLiveScripture = current === document.activeElement && current.matches?.("[data-live-scripture-input]");
+  if (current instanceof HTMLInputElement && !editingLiveScripture && !preserveCitationDraft && !current._videoSeekOwner && current.value !== next.value) current.value = next.value;
+  const previousChildren = [...current.childNodes];
+  const nextChildren = [...next.childNodes];
+  nextChildren.forEach((child, index) => {
+    if (previousChildren[index]) patchPresenterControlTree(previousChildren[index], child);
+    else current.appendChild(child.cloneNode(true));
+  });
+  previousChildren.slice(nextChildren.length).forEach((child) => child.remove());
+}
+
 function bindPresenterViewportLifecycleEvents() {
   const refreshPreviewLayout = () => {
     if (state.module !== "presenter") return;
@@ -248,7 +343,6 @@ function renderPresenterRightSidebar(service, slides, active, index) {
         ${slides.filter((slide, index) => slide.liveScriptureControl && slide.elementId
           && slides.findIndex((candidate) => candidate.liveScriptureControl && candidate.elementId === slide.elementId) === index)
           .map((slide) => renderPresenterCitationComposer({ slides: [{ slide }] }, service.id)).join("")}
-        ${renderPresenterServiceInputRail(service)}
       </div>
     </div>`;
 }
@@ -262,7 +356,7 @@ function renderPresenterServiceInputRail(service) {
   const applying = state.presenterPreparationApplyingServiceIds.has(service.id);
   const hasValues = presenterPreparationDraftHasValues(service, draft);
   return `
-    <aside class="svc-presenter-input-rail" aria-label="예배 입력">
+    <aside class="svc-presenter-input-rail" data-service-id="${escapeAttr(service.id)}" aria-label="예배 입력">
       <button type="button" class="svc-presenter-input-rail-head svc-presenter-input-disclosure" data-presenter-order-toggle aria-expanded="${expanded}" aria-controls="presenterOrderInputBody">
         <span>예배 순서 입력</span><i data-lucide="chevron-down" aria-hidden="true"></i>
       </button>

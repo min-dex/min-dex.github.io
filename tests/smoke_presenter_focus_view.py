@@ -17,12 +17,12 @@ try:
     page.goto(url)
     page.wait_for_function("typeof syncPresenterFocusView==='function' && !document.body.classList.contains('ui-booting')")
     page.evaluate('''()=>{
-      const sid='focus-fixture';state.client={};state.serviceError='';
+      const sid='focus-fixture';state.client={};state.serviceError='';state.connectionError='';
       state.services=[{id:sid,type_id:'fixture',date:'2026-10-25',title:'주일예배'}];
       state.serviceTypes=[{id:'fixture',name:'주일예배'}];
       state.serviceItems={[sid]:['첫 번째','두 번째','마지막'].map((title,i)=>({id:'focus-'+i,service_id:sid,label:'설교',raw_title:title,sort_order:i+1,_worshipSectionKey:'sermon',_worshipElementTemplateModified:true,memo:serializeServiceItemMemo({elementType:'title',inputMode:'manual',outputMode:'title'})}))};
       state.loadedWorshipServiceIds=new Set([sid]);state.selectedServiceId=sid;state.module='presenter';document.body.dataset.module='presenter';state.loading=false;
-      renderPresenterDetail();
+      renderServiceList();renderPresenterDetail();
       window.focusDraft=document.querySelector('[data-service-item-field=raw_title]');focusDraft.value='아직 저장하지 않은 제목';
       window.focusBoard=document.querySelector('.svc-slide-board');
       window.focusAudio={currentTime:42,paused:false};state.serviceMusic.audio=focusAudio;

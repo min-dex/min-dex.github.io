@@ -34,8 +34,8 @@ def main():
                     check(fields(renderPresenterServiceInputRail(service)).some((input) => input.value), 'cleared draft restores template defaults');
 
                     state.module='presenter';document.body.dataset.module='presenter';
-                    setRightSidebarContent(renderPresenterServiceInputRail(service));
-                    const interaction = refs.rightSidebar;
+                    refs.songList.innerHTML = renderPresenterServiceInputRail(service);
+                    const interaction = refs.songList;
                     const enterFields = [...interaction.querySelectorAll('[data-presenter-preparation-field]')];
                     let enterCall = null;
                     applyPresenterPreparationInput = async (...args) => { enterCall = args; focusPresenterPreparationTarget(args[0], args[1].focusTarget); };
@@ -45,18 +45,18 @@ def main():
                     enterFields[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
                     check(enterCall && enterCall[1].focusTarget.label === enterFields[1].dataset.presenterPreparationFieldLabel, 'Enter applies then targets the next field');
                     await settle();
-                    check(document.activeElement === enterFields[1], 'Enter focuses next right-rail field');
+                    check(document.activeElement === enterFields[1], 'Enter focuses next left-rail field');
                     const last = enterFields.at(-1);last.focus();
                     last.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
                     await settle();
                     check(enterCall[1].focusTarget.apply, 'last field targets apply');
                     check(document.activeElement === interaction.querySelector('[data-presenter-preparation-apply]'), 'last Enter focuses apply button');
-                    setRightSidebarContent('');
+                    refs.songList.replaceChildren();
                     return 'ok';
                   } finally { state.services = previous.services; state.serviceItems = previous.items; state.presenterPreparationDrafts = previous.drafts; state.dirty.service = previous.dirty; applyPresenterPreparationInput = previous.apply; }
                 }""")
                 assert result == "ok", result
-                print("PASS", engine, "right-rail defaults, draft retention, next-field and apply-button focus", flush=True)
+                print("PASS", engine, "left-rail defaults, draft retention, next-field and apply-button focus", flush=True)
                 browser.close()
 
     finally:
