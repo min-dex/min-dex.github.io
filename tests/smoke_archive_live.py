@@ -61,6 +61,10 @@ try:
    assert page.evaluate('state.worshipSetlistArchive.sources.length===1002&&writes===0')
    page.evaluate('reads=[];for(let i=0;i<100;i++)signal()');page.wait_for_timeout(500)
    assert page.evaluate('reads.length')==4, '100 signals coalesce; one paginated revision pass'
+   page.evaluate("state.singleSongCatalog={};db.mindex_worship_services=[{id:'native',save_revision:'1',service_date:'2026-10-25',service_type_id:'children'}];db.mindex_worship_sections=[{id:'native-section',service_id:'native'}];db.mindex_worship_elements=[{id:'native-song',section_id:'native-section',element_type:'praise',title:'',song_id:null,praise_record_id:'SONG-CHLD-0001-0001'}];reads=[]")
+   assert page.evaluate('MINDEX_ARCHIVE_LIVE.refresh()') is True
+   assert page.evaluate("reads.some(r=>r.table==='mindex_worship_elements'&&r.fields.includes('praise_record_id'))")
+   assert page.evaluate("MindexSetlistLinks.fromServices(state.worshipSetlistArchive.live).candidates[0].suggested_song_id==='SONG-CHLD-0001-0001'")
    print('PASS',engine,'archive live/import edits, revisions only/no-op, focus/draft/playback/race guards, deletions, failed/null reads, recovery, pagination, coalescing and zero writes',flush=True)
    context.close();browser.close()
 finally:server.shutdown()

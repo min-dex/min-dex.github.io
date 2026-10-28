@@ -1077,13 +1077,14 @@ or separate dynamic loader is added.
 
 ## Worship navigation names ·2026-10-27
 
-App list/type headings, cards, sidebar, tabs, search and setlist headings use
-`종류 (별명)` through serviceNavigationName; equal names are shown once.
-Sunday third is `주일예배 [3부] (온세대 찬양예배)`. Friday uses `금요예배`
-with `금요기도회` or its monthly/culture variant in parentheses. Stored names,
-classification/order, original serviceDisplayTypeName output naming and print
-content remain unchanged. Archive aliases are included in the heading instead
-of repeated as a separate right-side name.
+App cards, sidebar, tabs, search and setlist headings display an explicitly
+stored alias alone, otherwise the official type name. Type-group headings always
+show the type, not an individual alias. A normal Sunday third remains
+`주일예배 [3부]`; an explicit 온세대 찬양예배 alias displays `온세대 찬양예배`.
+Friday/monthly services follow the same rule without a synthetic parenthesized
+name. Titles, dates and template variants never invent an alias. Stored names,
+classification/order, output naming and print content remain unchanged.
+This supersedes the earlier `종류 (별명)` display request.
 
 ### Presenter media launcher during loading
 
@@ -1105,3 +1106,25 @@ Existing hymn classification remains stored and available to catalog filters.
 The lyric editor has no hymn/CCM classification toggle. New manual praise drafts
 default to CCM independently of the active catalog filter; rendering an existing
 record must not change its classification, lyrics, audio or worship references.
+
+### Setlist archive card headings · 2026-10-28
+
+Archive card titles use the same card-title size/weight and 1.4 line height
+whether the heading opens a service or is plain text (missing/absent/unknown).
+Long titles wrap inside their card, including unspaced text; they must not
+shrink the font, clip the title, or overlap the next card. Existing navigation
+and service data are unchanged.
+### Presenter view names ·2026-10-28
+
+The visible view controls are 슬라이드 보기 and 발표자 보기. The presenter
+panel accessible name is 발표자 보기. Internal basic/focus values, state,
+DOM retention and the existing toggle behavior are unchanged. Earlier dated
+records may use the previous 기본 보기/집중 보기 labels.
+
+### Shared offering input actions ·2026-10-28
+
+Offering keeps the hymn/special/video choices and their existing transitions.
+Its fields now share praise/media layout and the same action renderer as other
+service inputs: background, audio or attachment, then one Save action. Separate
+offering-only save/tool rows and duplicate button styling are retired. Service
+rules, persistence, generated defaults and existing records are unchanged.

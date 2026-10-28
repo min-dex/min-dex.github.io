@@ -4800,7 +4800,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
   display: flex; align-items: baseline; justify-content: space-between;
   gap: 12px; min-width: 0;
 }
-.svc-setlist-entry-heading > strong { flex-shrink: 0; }
+.svc-setlist-entry-heading > strong { min-width: 0; flex-shrink: 1; line-height: 1.4; }
 .svc-setlist-entry-heading > .svc-setlist-alias { margin-left: auto; text-align: right; }
 
 .svc-setlist-entry--status { background: transparent; border: 1px dashed var(--line); gap: 10px; padding: 15px 20px; }
@@ -4984,8 +4984,10 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 /* Setlist card titles use the existing service navigation. */
 .svc-setlist-service-link {
   appearance: none; border: 0; background: none; padding: 0; margin: 0;
-  color: inherit; font: inherit; font-weight: 700; text-align: left;
-  cursor: pointer; flex-shrink: 0;
+  color: inherit; font: inherit; font-size: var(--ui-card-title-size);
+  font-weight: var(--ui-title-weight); line-height: 1.4; text-align: left;
+  cursor: pointer; min-width: 0; max-width: 100%; flex-shrink: 1;
+  white-space: normal; overflow-wrap: anywhere;
 }
 .svc-setlist-service-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 .svc-setlist-service-link:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; border-radius: 2px; }
@@ -5324,58 +5326,58 @@ body[data-module="praise"] .praise-forms-panel .form-meta { gap: 5px; }
 .praise-forms-panel .linked-version-title { box-shadow: none; }
 
 /* Praise inputs share available width across DB, direct lyrics and direct audio. */
-.svc-board-subgroup-controls .svc-board-subgroup-control-item:not(.service-offering-editor):has(.svc-praise-input-mode-control) {
+.svc-board-subgroup-controls .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control) {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
 }
-.svc-board-subgroup-controls .svc-board-subgroup-control-item:not(.service-offering-editor):has(.svc-praise-input-mode-control) .svc-praise-input-mode-control {
+.svc-board-subgroup-controls .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control) .svc-praise-input-mode-control {
   flex: 0 1 130px;
   width: 130px;
   max-width: 100%;
 }
-.svc-board-subgroup-controls .svc-board-subgroup-control-item:not(.service-offering-editor):has(.svc-praise-input-mode-control) .svc-edit-title {
+.svc-board-subgroup-controls .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control) .svc-edit-title {
   flex: 1 1 160px;
   width: auto;
   min-width: min(100%, 140px);
 }
-.svc-board-subgroup-controls .svc-board-subgroup-control-item:not(.service-offering-editor):has(.svc-praise-input-mode-control) .svc-song-picker--linked {
+.svc-board-subgroup-controls .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control) .svc-song-picker--linked {
   flex: 0 1 130px;
   width: 130px;
 }
-.svc-board-subgroup-controls .svc-board-subgroup-control-item:not(.service-offering-editor):has(.svc-praise-input-mode-control) :is(.svc-form-hint, .svc-form-hint-slot).compact {
+.svc-board-subgroup-controls .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control) :is(.svc-form-hint, .svc-form-hint-slot).compact {
   flex: 1 1 120px;
   width: auto;
   min-width: 0;
   max-width: none;
 }
-.svc-board-subgroup-controls .svc-board-subgroup-control-item:not(.service-offering-editor):has(.svc-praise-input-mode-control) > .svc-board-subgroup-flow {
+.svc-board-subgroup-controls .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control) > .svc-board-subgroup-flow {
   flex: 0 1 auto;
   margin-left: auto;
   gap: 5px;
 }
-.svc-board-subgroup-controls .svc-board-subgroup-control-item:not(.service-offering-editor):has(.svc-praise-input-mode-control) > .svc-presenter-input-field--assignee {
+.svc-board-subgroup-controls .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control) > .svc-presenter-input-field--assignee {
   flex: 0 1 160px;
 }
-.svc-board-subgroup-controls .svc-board-subgroup-control-item:not(.service-offering-editor):has(.svc-praise-input-mode-control):has(.svc-progression-media[open]) > .svc-board-subgroup-flow {
+.svc-board-subgroup-controls .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control):has(.svc-progression-media[open]) > .svc-board-subgroup-flow {
   flex: 1 1 100%;
   width: 100%;
 }
 
 /* Unwrap only praise title fields; lyrics and media retain their own areas. */
-.svc-board-subgroup-controls .svc-board-subgroup-control-item:not(.service-offering-editor):has(.svc-praise-input-mode-control) > .svc-presenter-input-field:has(.svc-praise-input-mode-control),
-.svc-board-subgroup-controls .svc-board-subgroup-control-item:not(.service-offering-editor):has(.svc-praise-input-mode-control) > .svc-presenter-input-field:has(.svc-praise-input-mode-control) > .svc-edit-title-wrap {
+.svc-board-subgroup-controls .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control) > .svc-presenter-input-field:has(.svc-praise-input-mode-control),
+.svc-board-subgroup-controls .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control) > .svc-presenter-input-field:has(.svc-praise-input-mode-control) > .svc-edit-title-wrap {
   display: contents;
 }
-.svc-board-subgroup-controls .svc-board-subgroup-control-item:not(.service-offering-editor):has(.svc-praise-input-mode-control) > .svc-presenter-input-field:has(.svc-praise-input-mode-control) > span {
+.svc-board-subgroup-controls .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control) > .svc-presenter-input-field:has(.svc-praise-input-mode-control) > span {
   display: none;
 }
-.svc-board-subgroup-controls .svc-board-subgroup-control-item:not(.service-offering-editor):has(.svc-praise-input-mode-control) > .svc-presenter-input-field:has(> [data-service-item-field="assignee"]) {
+.svc-board-subgroup-controls .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control) > .svc-presenter-input-field:has(> [data-service-item-field="assignee"]) {
   flex: 0 1 160px;
 }
-.svc-board-subgroup-controls .svc-board-subgroup-control-item:not(.service-offering-editor):has(.svc-praise-input-mode-control) > .svc-board-subgroup-control-head,
-.svc-board-subgroup-controls .svc-board-subgroup-control-item:not(.service-offering-editor):has(.svc-praise-input-mode-control) .svc-song-picker[role="listbox"] {
+.svc-board-subgroup-controls .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control) > .svc-board-subgroup-control-head,
+.svc-board-subgroup-controls .svc-board-subgroup-control-item:has(.svc-praise-input-mode-control) .svc-song-picker[role="listbox"] {
   flex: 1 1 100%;
 }
 
@@ -5435,6 +5437,7 @@ html.ui-theme-switching:not(.presenter-output-document) *::after {
 .svc-presenter-side-panel .svc-presenter-window-controls { grid-column: 2; grid-template-columns: minmax(0, 1fr); gap: 0; }
 .svc-presenter-side-panel .svc-presenter-fullscreen { height: 35px; padding: 0 10px; gap: 5px; white-space: nowrap; }
 /* Repeated editing actions share a visible, compact button surface. */
+.service-offering-modes > .btn,
 .svc-board-subgroup-flow :is(.svc-board-subgroup-commit, .svc-reference-media-upload, .svc-board-subgroup-audio-upload, .svc-progression-media > summary) {
   box-sizing: border-box;
   min-height: 30px;
@@ -5448,10 +5451,12 @@ html.ui-theme-switching:not(.presenter-output-document) *::after {
   line-height: 18px;
   cursor: pointer;
 }
+.service-offering-modes > .btn:hover,
 .svc-board-subgroup-flow :is(.svc-board-subgroup-commit, .svc-reference-media-upload, .svc-board-subgroup-audio-upload, .svc-progression-media > summary):hover {
   border-color: var(--ink-3);
   background: var(--ui-surface-panel);
 }
+.service-offering-modes > .btn:focus-visible,
 .svc-board-subgroup-flow :is(.svc-board-subgroup-commit, .svc-reference-media-upload, .svc-board-subgroup-audio-upload, .svc-progression-media > summary):focus-visible,
 .svc-board-subgroup-flow :is(.svc-reference-media-upload, .svc-board-subgroup-audio-upload):focus-within {
   outline: 2px solid var(--accent);
@@ -5496,68 +5501,9 @@ body[data-module="praise"] .praise-forms-panel .version-compare-column {
 .svc-presenter-display-settings > .icon-btn { width:auto; padding:0 8px; gap:6px; }
 .svc-presenter-display-settings .svc-presenter-screen-select { min-width:0; max-width:100%; }
 
-.service-offering-modes { display: flex; gap: 8px; margin-top: 8px; }
-.service-offering-modes .btn[aria-pressed="true"] {
-  color: var(--accent); border-color: var(--accent);
-}
-
-/* Offering variants keep their selection and commit controls in one stable row. */
-.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor {
-  display: grid; grid-template-columns: minmax(0, 180px) minmax(0, 1fr); gap: 10px; align-items: start;
-}
-.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor > *,
-.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-edit-title,
-.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-song-picker--linked,
-.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor :is(.svc-form-hint, .svc-form-hint-slot).compact,
-.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-praise-input-mode-control,
-.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor > .svc-presenter-input-field--assignee {
-  grid-column: 1 / -1; grid-row: auto; min-width: 0; max-width: 100%; width: 100%;
-}
-.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-praise-input-mode-control { grid-column: 1; grid-row: 2; }
-.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-edit-title { grid-column: 2; grid-row: 2; }
-.service-offering-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 10px; }
-.service-offering-toolbar .service-offering-modes { margin: 0; gap: 5px; flex-wrap: nowrap; }
-.service-offering-toolbar > .svc-board-subgroup-flow { display: contents; }
-.service-offering-toolbar .service-offering-modes { grid-column: 1; grid-row: 1; }
-.service-offering-toolbar .svc-board-subgroup-commit { grid-column: 2; grid-row: 1; }
-.service-offering-toolbar .svc-input-status { grid-column: 1 / -1; grid-row: 2; justify-self: end; }
-.service-offering-toolbar .svc-input-status:empty { display: none; }
-.service-offering-tools { display: flex; justify-content: flex-end; }
-.service-offering-tools:has(> .svc-board-subgroup-flow:empty) { display: none; }
-.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor > .svc-reference-media-input { width: 100%; }
-
-.svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor > .service-offering-toolbar { grid-column: 1 / -1; grid-row: 1; }
-
-.svc-board-subgroup-controls .service-offering-editor .svc-reference-media-input > .svc-presenter-input-field.svc-reference-media-title { flex: 1 1 100%; width: 100%; max-width: none; }
-@container (max-width: 400px) {
-  .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-praise-input-mode-control,
-  .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-edit-title { grid-column: 1 / -1; grid-row: auto; }
-}
-
-/* Medium offering cards use two input rows, independent of the fixed toolbar. */
-@container (min-width: 550px) {
-  .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
-  }
-  .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-edit-title { grid-column: 2 / -1; }
-  .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor .svc-song-picker--linked { grid-column: 1; grid-row: 3; }
-  .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor :is(.svc-form-hint, .svc-form-hint-slot).compact { grid-column: 2; grid-row: 3; }
-  .svc-board-subgroup-controls .svc-board-subgroup-control-item.service-offering-editor > .svc-presenter-input-field--assignee { grid-column: 3; grid-row: 3; }
-}
-
-.service-offering-editor :is(.service-offering-modes > .btn, .svc-board-subgroup-commit, .svc-reference-media-upload, .svc-board-subgroup-audio-upload, .svc-progression-media > summary) {
-  display: inline-flex; align-items: center; justify-content: center;
-  box-sizing: border-box; height: 30px; min-height: 30px; min-width: 70px;
-  padding: 0 10px; gap: 5px; line-height: 18px; font-size: var(--ui-label-size);
-  font-weight: 600; border: 1px solid var(--line); border-radius: var(--r);
-  background: var(--ui-surface-field); color: var(--ink);
-}
-.service-offering-editor .service-offering-modes { gap: 5px; }
-.service-offering-editor .service-offering-modes > .btn[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
-.service-offering-editor :is(.service-offering-modes > .btn, .svc-board-subgroup-commit, .svc-reference-media-upload, .svc-board-subgroup-audio-upload, .svc-progression-media > summary) svg { width: 14px; height: 14px; }
-@container (max-width: 400px) {
-  .service-offering-editor .service-offering-modes > .btn { min-width: 50px; padding: 0 5px; }
-}
+/* Offering choices retain their meaning; input and actions use the common layout. */
+.service-offering-modes { display: flex; flex: 1 0 100%; grid-column: 1 / -1; gap: 5px; flex-wrap: wrap; }
+.service-offering-modes .btn[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
 
 /* Backgrounds follow the original grid; they never participate in layout. */
 .svc-board-grid { position: relative; isolation: isolate; }

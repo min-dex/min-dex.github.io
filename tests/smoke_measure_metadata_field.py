@@ -1,4 +1,4 @@
-"""Read-only measure slot follows selected version and rejects stale lyric hashes."""
+"""Editable measure slot follows selected version and rejects stale lyric hashes."""
 import os
 os.environ["MINDEX_SMOKE_OFFLINE"] = "1"
 from smoke_app import launch_chromium,start_local_app_server,sync_playwright
@@ -17,7 +17,8 @@ try:
     window.paintMeasure=()=>{document.querySelector('#measure-fixture')?.remove();const host=document.createElement('div');host.id='measure-fixture';document.body.append(host);host.innerHTML=renderSongMetadataDialog(state.songs[0]);};paintMeasure();
    }''')
    field=page.locator('input[data-hymn-structure-label]');page.wait_for_function("document.querySelector('input[data-hymn-structure-label]')?.value==='approx. 16 bars'")
-   assert field.get_attribute('readonly') is not None
+   assert field.get_attribute('readonly') is None
+   assert field.get_attribute('maxlength') == '100'
    assert field.get_attribute('data-song-meta-field') is None
    assert page.locator('.metadata-popover-grid .field').count()==12
    assert '새찬송가' in field.get_attribute('aria-label')
@@ -46,5 +47,5 @@ try:
     assert scripture.input_value()=='시편'
     assert page.locator('.metadata-popover-grid').evaluate('e=>e.scrollWidth<=e.clientWidth+1')
     page.screenshot(path=f'/tmp/metadata-hint-alignment-{engine}-{width}.png')
-   print(engine,'PASS 12 slots; version selection; readonly; stale/unknown; no dirty writes',flush=True);b.close()
+   print(engine,'PASS 12 slots; version selection; editable field; stale/unknown; no navigation dirty writes',flush=True);b.close()
 finally:server.shutdown();server.server_close()

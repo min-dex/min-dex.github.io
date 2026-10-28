@@ -44,18 +44,32 @@ try:
      bounds.append(page.evaluate('''()=>{
        const editor=document.querySelector('.service-offering-editor');
        const box=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height}};
-       const save=editor.querySelector('[data-service-item-commit]');
+       const save=document.querySelector('[data-service-item-commit]');
+       const actions=save.closest('[data-service-item-actions]');
+       if(document.querySelectorAll('[data-service-item-actions]').length!==1)throw Error('actions split across rows');
+       if(editor.querySelector('.service-offering-toolbar,.service-offering-tools'))throw Error('separate offering layout remains');
+       if(editor.querySelectorAll('[data-service-offering-toggle]').length!==3)throw Error('offering choices lost');
        if(document.querySelectorAll('[data-service-item-commit]').length!==1)throw Error('duplicate save');
        if(editor.scrollWidth>editor.clientWidth+1)throw Error('editor overflow');
-       for(const button of editor.querySelectorAll('.service-offering-modes > .btn, .svc-board-subgroup-commit, .svc-reference-media-upload, .svc-board-subgroup-audio-upload, .svc-progression-media > summary')) {
+       for(const button of document.querySelectorAll('.svc-board-subgroup-commit, .svc-reference-media-upload, .svc-board-subgroup-audio-upload, .svc-progression-media > summary')) {
          if(Math.abs(box(button).h-30)>1)throw Error('inconsistent action height');
        }
        const assignee=editor.querySelector('.svc-presenter-input-field--assignee input');
        if(assignee && assignee.placeholder.includes('예:'))throw Error('redundant assignee example');
-       return {mode:box(editor.querySelector('.service-offering-modes')),save:box(save)};
+       return {saveCount:document.querySelectorAll('[data-service-item-commit]').length};
      }'''))
+     field=page.locator('#capture input:not([type=hidden]):not([type=file])').first
+     if field.count():
+      field.fill('미저장 입력 검증')
+      field.evaluate("e=>{e.focus();e.setSelectionRange(2,4);window.preservedField=e}")
+      page.set_viewport_size({'width':width+1,'height':900})
+      assert page.evaluate("()=>document.activeElement===preservedField&&preservedField.value==='미저장 입력 검증'&&preservedField.selectionStart===2&&preservedField.selectionEnd===4")
+      page.set_viewport_size({'width':width,'height':900})
+     choice=page.locator('[data-service-offering-toggle]').first
+     choice.focus()
+     assert choice.evaluate("e=>document.activeElement===e")
     assert bounds[0]==bounds[1]==bounds[2], (width,bounds)
-    print('PASS stable choice/save geometry',width,flush=True)
+    print('PASS shared actions, preserved choices and responsive input layout',width,flush=True)
    browser.close()
 
 finally:server.shutdown()

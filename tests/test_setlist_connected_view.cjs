@@ -51,6 +51,23 @@ for(const name of ['worshipSetlistCandidateLinks','worshipSetlistArchiveTypeOrde
 const matches=context.worshipSetlistCandidateLinks(result.candidates[0]);
 assert.deepEqual(Array.from(matches,m=>m.song.id),['a','b'],'each explicit DB link survives same-title medley');
 assert.deepEqual(Array.from(matches,m=>m.text),['동명곡','91 동명곡']);
+const nativeIndex=links.buildIndex([
+  {id:'representative',title:'대표 제목'},
+  {id:'alternate',title:'다른 판본 제목'},
+  {id:'maranatha-a',title:'마라나타'},
+  {id:'maranatha-b',title:'마라나타'},
+]);
+const nativeSnapshot={services:snapshot.services,sections:snapshot.sections,elements:[
+  {id:'native-alternate',praise_record_id:'alternate',song_id:'representative'},
+  {id:'native-same-title',praise_record_id:'maranatha-b'},
+  {id:'native-video',praise_record_id:'representative',element_type:'video'},
+].map((row,i)=>({section_id:'p',sort_order:i,element_type:'praise',...row}))};
+const nativeCandidates=links.fromServices(nativeSnapshot,[],nativeIndex).candidates;
+context.state.worshipSetlistSongCatalog.index=nativeIndex;
+assert.deepEqual(nativeCandidates.map(c=>c.suggested_song_id),['alternate','maranatha-b']);
+assert.deepEqual(Array.from(context.worshipSetlistCandidateLinks(nativeCandidates[0]),m=>[m.song.id,m.text]),[['alternate','다른 판본 제목']]);
+assert.deepEqual(Array.from(context.worshipSetlistCandidateLinks(nativeCandidates[1]),m=>m.song.id),['maranatha-b']);
+context.state.worshipSetlistSongCatalog.index=index;
 assert.deepEqual(Array.from(context.worshipSetlistCandidateLinks(result.candidates[1]),m=>m.status),['linked','excluded','linked']);
 assert(context.worshipSetlistArchiveTypeOrder('nursery') < context.worshipSetlistArchiveTypeOrder('children'));
 let renders=0;

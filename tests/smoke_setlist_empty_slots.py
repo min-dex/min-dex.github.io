@@ -23,7 +23,28 @@ def main():
                       const labels=rows.map(r=>r.archive_display_label).join('|');
                       if(labels!=='찬양 1|찬양 4') throw Error(labels);
                       if(JSON.stringify(elements)!==before) throw Error('mutated elements');
-                      return labels;
+                      state.client=null;state.module='setlists';state.selectedServiceId=null;state.search='';
+                      state.worshipSetlistSongCatalog={status:'loaded',index:MindexSetlistLinks.buildIndex([])};
+                      const sources=[{id:'old',source_kind:'setlist',service_date:'2026-10-07',service_type_id:'wed'},
+                        {id:'archive-only',source_kind:'setlist',service_date:'2026-09-30',service_type_id:'wed'}];
+                      const candidates=sources.map(source=>({id:source.id+'-song',import_source_id:source.id,
+                        candidate_level:'element',candidate_key:'praise',suggested_type:'praise',raw_label:'찬양 1',
+                        raw_title:source.id==='old'?'가려져야 할 옛 콘티':'독립 과거 콘티',review_status:'approved'}));
+                      state.worshipSetlistArchive={loaded:true,loading:false,sources,candidates,live:{services,sections,elements}};
+                      const original=JSON.stringify({sources,candidates});
+                      const check=(value,message)=>{if(!value)throw Error(message)};
+                      check(!worshipSetlistArchiveEntries().some(entry=>entry.source.id==='old'),'Import took precedence');
+                      renderServiceSetlistArchiveDetail();
+                      check(refs.detailPane.textContent.includes('첫 곡')&&!refs.detailPane.textContent.includes('가려져야 할 옛 콘티'),'Wrong visible source');
+                      check(refs.detailPane.textContent.includes('독립 과거 콘티'),'Import-only record missing');
+                      elements[0].title='수정한 첫 곡';renderServiceSetlistArchiveDetail();
+                      check(refs.detailPane.textContent.includes('수정한 첫 곡'),'Latest worship edit hidden');
+                      for(const element of elements)element.title='';
+                      check(!worshipSetlistArchiveEntries().some(entry=>entry.source.id==='old'),'Empty actual worship resurrected old songs');
+                      state.worshipSetlistArchive.live.services=[];
+                      check(worshipSetlistArchiveEntries().some(entry=>entry.source.id==='old'),'Import fallback lost when actual worship absent');
+                      check(JSON.stringify({sources,candidates})===original,'Stored import mutated');
+                      return {labels,livePriority:true,visibleEdit:true,emptyLive:true,importFallback:true,immutableImports:true};
                     }''')
                     print(engine, 'PASS', result)
                 finally:

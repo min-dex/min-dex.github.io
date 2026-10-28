@@ -50,13 +50,7 @@
 // App navigation labels; stored titles and output/print naming remain independent.
 function serviceNavigationName(service = {}) {
   const typeId = worshipAppServiceTypeId(service.type_id || service.service_type_id || "");
-  const base = ["friday", "monthly"].includes(typeId) ? "금요예배" : serviceTypeDisplayName(typeId);
-  const raw = serviceAlias(service) || (typeId === "sunday-main" ? ALL_GENERATION_MAIN_PRAISE_SERVICE_ALIAS
-    : serviceIsFridayFamily(service) ? serviceVariantDisplayName(service) : serviceDisplayTypeName(service));
-  const alias = normalizeServiceDisplayName(raw);
-  if (!alias || compactSearchValue(alias) === compactSearchValue(base)) return base;
-  if (alias.startsWith(`${base} (`) && alias.endsWith(")")) return alias;
-  return base ? `${base} (${alias})` : alias;
+  return normalizeServiceDisplayName(serviceAlias(service)) || serviceTypeDisplayName(typeId);
 }
 function serviceNavigationTypeName(typeId) {
   return serviceNavigationName({ type_id: typeId });
@@ -64,7 +58,6 @@ function serviceNavigationTypeName(typeId) {
 function worshipSetlistNavigationName(source = {}) {
   const aliases = Array.isArray(source.aliases) ? source.aliases : [source.aliases || ""];
   const typeId = worshipAppServiceTypeId(source.service_type_id);
-  const base = ["friday", "monthly"].includes(typeId) ? "금요예배" : serviceTypeDisplayName(typeId);
-  const alias = [...new Set(aliases.map(value => String(value || "").trim()).filter(value => value && value !== base))].join(" · ");
+  const alias = [...new Set(aliases.map(value => String(value || "").trim()).filter(Boolean))].join(" · ");
   return serviceNavigationName({type_id:typeId, alias});
 }

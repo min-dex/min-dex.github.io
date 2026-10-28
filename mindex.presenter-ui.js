@@ -283,8 +283,8 @@ function renderPresenterServiceInputRail(service) {
 let presenterFocusView = false;
 function renderPresenterFocusView() {
   return `<div class="svc-presenter-view-switch" role="group" aria-label="예배 보기">
-    <button type="button" class="btn secondary" data-presenter-focus-toggle="basic" aria-pressed="${!presenterFocusView}">기본 보기</button>
-    <button type="button" class="btn secondary" data-presenter-focus-toggle="focus" aria-pressed="${presenterFocusView}">집중 보기</button>
+    <button type="button" class="btn secondary" data-presenter-focus-toggle="basic" aria-pressed="${!presenterFocusView}">슬라이드 보기</button>
+    <button type="button" class="btn secondary" data-presenter-focus-toggle="focus" aria-pressed="${presenterFocusView}">발표자 보기</button>
   </div>`;
 }
 
@@ -305,7 +305,7 @@ function syncPresenterFocusView() {
     panel = document.createElement('section');
     panel.className = 'svc-focus-panel';
     panel.dataset.presenterFocusPanel = '';
-    panel.setAttribute('aria-label', '발표자 집중 보기');
+    panel.setAttribute('aria-label', '발표자 보기');
     root.querySelector('.svc-presenter-workspace').before(panel);
   }
   panel.hidden = false;
@@ -406,4 +406,12 @@ document.addEventListener('click', event => {
 function renderPresenterSidebarRemoteCode(serviceId) {
   const code = window.MindexRemote?.codeFor?.(serviceId) || "";
   return `<button type="button" class="service-sidebar-remote-code" data-presenter-remote data-remote-service-id="${escapeAttr(serviceId)}" aria-label="원격 조작 예배 코드${code ? ` ${escapeAttr(code)}` : ""}" ${code ? "" : "hidden"}><i data-lucide="smartphone" aria-hidden="true"></i><span data-remote-button-label>${escapeHtml(code)}</span></button>`;
+}
+
+function serviceOutlineMissingState(item = {}, slides = [], service = null) {
+  const existing = slides.find((slide) => slide?.missingContent && presenterSlideBelongsToItem(slide, item));
+  if (existing) return existing;
+  const song = presenterSongForServiceItem(item, serviceItemDisplayText(item), item.label || "", service);
+  const content = resolvePresenterServiceItemContentState(item, parseServiceItemMemo(item.memo), song, service);
+  return content.required ? { ...content, missingContent: true } : null;
 }

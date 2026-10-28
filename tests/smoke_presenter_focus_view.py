@@ -30,6 +30,8 @@ try:
       state.serviceMusic.mode='presenter-audio';state.serviceMusic.timingGroupId='group';state.serviceMusic.autoSyncSuspended=true;
       window.focusItems=JSON.stringify(state.serviceItems);
     }''')
+    assert page.get_by_role('button',name='슬라이드 보기',exact=True).count()==1
+    assert page.get_by_role('button',name='발표자 보기',exact=True).count()==1
     page.evaluate("""()=>{
       const original=window.MINDEX_SERVER_STORAGE;
       const writes=[];window.MINDEX_SERVER_STORAGE={queue:(...args)=>{writes.push(args);return true;}};
@@ -128,6 +130,7 @@ try:
      for view in ('basic','focus'):
       page.locator(f'[data-presenter-focus-toggle={view}]').click()
       assert page.locator(f'[data-presenter-focus-toggle={view}]').get_attribute('aria-pressed')=='true'
+      if view=='focus': assert page.locator('[data-presenter-focus-panel]').get_attribute('aria-label')=='발표자 보기'
       page.locator('.svc-presenter-side-panel .svc-presenter-top').wait_for(state='visible' if view=='basic' else 'hidden')
       page.locator(f'[data-presenter-focus-toggle={view}]').click()
       assert page.locator(f'[data-presenter-focus-toggle={view}]').get_attribute('aria-pressed')=='true'
