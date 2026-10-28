@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261028-praise-editor-mobile",
+  "version": "20261028-presenter-left-input",
   "options": {
     "compress": false,
     "mangle": {
