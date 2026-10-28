@@ -90,7 +90,20 @@ try:
                       delete state.presenterPreparationDrafts[sid];renderServiceList();renderPresenterDetail();
                       check(JSON.stringify(state.serviceItems[sid]).includes('왼쪽에서 입력한 공지'),'reopen lost saved input');
                       check(JSON.stringify(state.presenter)===beforeOutput,'edit/save touched output');
-                      return 'PASS real left input/preparation, atomic failure retains draft, retry and reopen';
+                      const completeDraft = presenterPreparationFieldValues(service, presenterPreparationDefaultDraftForService(service))
+                        .map(row=>({...row,value:row.label.includes('기도')?'김민수 집사':'완료된 공지'}));
+                      state.presenterPreparationDrafts[sid]=presenterPreparationDraftFromFields(service,completeDraft);
+                      renderServiceList();
+                      check(!refs.songList.querySelector('.svc-presenter-preparation-input').hidden,'pending input auto-collapsed');
+                      await applyPresenterPreparationInput(sid);
+                      check(presenterPreparationFieldValues(service,presenterPreparationDefaultDraftForService(service)).every(row=>row.value),'fixture incomplete');
+                      check(refs.songList.querySelector('.svc-presenter-preparation-input').hidden,'completed input did not collapse');
+                      refs.songList.querySelector('[data-presenter-order-toggle]').click();renderServiceList();
+                      check(!refs.songList.querySelector('.svc-presenter-preparation-input').hidden,'manual reopen lost');
+                      const edit=refs.songList.querySelector('[data-presenter-preparation-field]');edit.focus();edit.value='아직 반영하지 않은 입력';edit.dispatchEvent(new Event('input',{bubbles:true}));
+                      renderServiceList();
+                      check(!refs.songList.querySelector('.svc-presenter-preparation-input').hidden&&edit.value==='아직 반영하지 않은 입력','new draft auto-collapsed');
+                      return 'PASS real input/save retry/reopen and complete auto-collapse/manual reopen/pending preservation';
     }'''),flush=True)
    finally:browser.close()
 finally:server.shutdown()

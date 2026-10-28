@@ -6256,3 +6256,12 @@ body[data-module="presenter"] .svc-presenter-toolbar {
   position:sticky; top:0; z-index:12; background:var(--bg);
   padding:10px 0; border-bottom:1px solid var(--line);
 }
+
+/* Cover the scroll container's top padding above its sticky toolbar. */
+body[data-module="presenter"] .svc-presenter-toolbar::before {
+  content:""; position:absolute; left:0; right:0;
+  bottom:100%; height:var(--content-pad-y); background:var(--bg); pointer-events:none;
+}
+@media (max-width:980px) {
+  body[data-module="presenter"] .svc-presenter-toolbar::before { height:var(--content-pad-tight); }
+}

@@ -1132,3 +1132,13 @@ Its fields now share praise/media layout and the same action renderer as other
 service inputs: background, audio or attachment, then one Save action. Separate
 offering-only save/tool rows and duplicate button styling are retired. Service
 rules, persistence, generated defaults and existing records are unchanged.
+
+
+### Presenter order-entry completion ·2026-10-28
+The sticky toolbar masks the scroll container's top inset; scrolling thumbnails
+must not show through above it. Order entry starts collapsed when every defined
+field has applied content and there is no pending draft. Completing Apply collapses
+it; typing never does. Manual reopen/collapse is retained per service for this
+session, without writing a shared server preference. Existing input parsing and
+normalization at Apply remain the single path; original text is not normalized
+during keystrokes.

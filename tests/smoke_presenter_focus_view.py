@@ -45,7 +45,7 @@ try:
         if(!renderPresenterServiceInputRail(state.services[0]).includes('aria-expanded="false"'))throw Error('rerender lost collapse state');
         toggle.click();
         if(body.hidden || body.querySelector('input,textarea')!==field || field.value!=='접어도 유지되는 입력')throw Error('disclosure lost draft');
-        if(writes.length!==2 || writes[0][1]!=='mindex.ui.presenterOrderInputOpen' || writes[0][2]!=='false' || writes[1][2]!=='true')throw Error('server UI preference missing');
+        if(writes.length)throw Error('view-only disclosure wrote server preference');
         field.value=before;
       } finally {window.MINDEX_SERVER_STORAGE=original;}
     }""")

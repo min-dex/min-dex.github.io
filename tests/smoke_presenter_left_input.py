@@ -57,12 +57,15 @@ try:
         else pane.scrollTop=300;
       }""")
       page.wait_for_timeout(50)
+      if width==1440 and theme=='dark': page.screenshot(path=str(out/f'{engine}-sticky-scrolled.png'))
       page.evaluate("""()=>{
         const pane=refs.detailPane,bar=document.querySelector('.svc-presenter-toolbar');
         const r=bar.getBoundingClientRect(),p=pane.getBoundingClientRect();
         const expected=getComputedStyle(pane).overflowY==='visible'?0:p.top+parseFloat(getComputedStyle(pane).paddingTop);
         if(getComputedStyle(bar).position!=='sticky'||Math.abs(r.top-expected)>1)throw Error('toolbar not pinned '+JSON.stringify({top:r.top,pane:p.top,scroll:pane.scrollTop}));
         if(r.right>p.right+1)throw Error('toolbar overflow');
+        const mask=getComputedStyle(bar,'::before');
+        if(mask.content==='none'||parseFloat(mask.height)<(getComputedStyle(pane).overflowY==='visible'?0:r.top-p.top)||mask.backgroundColor!==getComputedStyle(pane).backgroundColor)throw Error('slides visible above sticky tools '+JSON.stringify({content:mask.content,height:mask.height,gap:r.top-p.top,background:mask.backgroundColor,paneBackground:getComputedStyle(pane).backgroundColor,width:innerWidth}));
         pane.scrollTop=0;window.scrollTo(0,0);
       }""")
       page.screenshot(path=str(out/f'{engine}-{theme}-{width}.png'))

@@ -58,7 +58,15 @@ function patchPresenterControlTree(current, next) {
   // Input events already retain its draft; remote/preview refreshes must not rewrite it.
   if (current.matches?.('.svc-presenter-input-rail')
     && current.dataset.serviceId === next.dataset?.serviceId
-    && current.contains(document.activeElement)) return;
+    && current.contains(document.activeElement)) {
+    if (!Object.prototype.hasOwnProperty.call(state.presenterPreparationDrafts, current.dataset.serviceId)
+      && next.querySelector('.svc-presenter-preparation-input')?.hidden) {
+      current.querySelector('.svc-presenter-preparation-input').hidden = true;
+      current.querySelector('[data-presenter-order-toggle]').setAttribute('aria-expanded', 'false');
+      current.querySelector('[data-presenter-order-toggle]').focus({preventScroll:true});
+    }
+    return;
+  }
   if (current.isEqualNode(next)) return;
   if (current.nodeType !== next.nodeType || current.nodeName !== next.nodeName) {
     current.replaceWith(next.cloneNode(true));
@@ -347,11 +355,24 @@ function renderPresenterRightSidebar(service, slides, active, index) {
     </div>`;
 }
 
-const PRESENTER_ORDER_INPUT_OPEN_KEY = 'mindex.ui.presenterOrderInputOpen';
-let presenterOrderInputOpen = null;
+const presenterOrderInputViews = new Map();
+
+function presenterOrderInputView(service) {
+  const saved = presenterPreparationDefaultDraftForService(service);
+  const fields = presenterPreparationFieldValues(service, saved);
+  const pending = Object.prototype.hasOwnProperty.call(state.presenterPreparationDrafts, service.id);
+  const complete = fields.length > 0 && fields.every(field => field.value.trim()) && !pending;
+  let view = presenterOrderInputViews.get(service.id);
+  if (!view) view = { expanded: !complete, complete };
+  else if (complete && !view.complete) view.expanded = false;
+  else if (pending && view.complete) view.expanded = true;
+  view.complete = complete;
+  presenterOrderInputViews.set(service.id, view);
+  return view;
+}
 
 function renderPresenterServiceInputRail(service) {
-  const expanded = presenterOrderInputOpen ?? safeStorageGet('local', PRESENTER_ORDER_INPUT_OPEN_KEY, 'true') !== 'false';
+  const expanded = presenterOrderInputView(service).expanded;
   const draft = presenterPreparationDisplayTextForService(service);
   const applying = state.presenterPreparationApplyingServiceIds.has(service.id);
   const hasValues = presenterPreparationDraftHasValues(service, draft);
@@ -471,12 +492,12 @@ document.addEventListener('click', event => {
   if (orderToggle) {
     const body = orderToggle.closest('.svc-presenter-input-rail')?.querySelector('.svc-presenter-preparation-input');
     if (!body) return;
-    presenterOrderInputOpen = orderToggle.getAttribute('aria-expanded') !== 'true';
-    orderToggle.setAttribute('aria-expanded', String(presenterOrderInputOpen));
-    body.hidden = !presenterOrderInputOpen;
-    if (!safeStorageSet('local', PRESENTER_ORDER_INPUT_OPEN_KEY, String(presenterOrderInputOpen))) {
-      showToast('펼침 상태를 서버에 보관하지 못했습니다. 연결 후 다시 변경해 주세요.', 'error');
-    }
+    const service = state.services.find(row => row.id === orderToggle.closest('.svc-presenter-input-rail').dataset.serviceId);
+    if (!service) return;
+    const view = presenterOrderInputView(service);
+    view.expanded = orderToggle.getAttribute('aria-expanded') !== 'true';
+    orderToggle.setAttribute('aria-expanded', String(view.expanded));
+    body.hidden = !view.expanded;
     return;
   }
   const toggle = event.target.closest('[data-presenter-focus-toggle]');
