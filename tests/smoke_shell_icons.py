@@ -43,7 +43,7 @@ def main():
                         assert metrics[0] == metrics[1], metrics
                         remote.click()
                         assert page.locator('.remote-panel').evaluate('(el) => el.open')
-                        assert '예배 송출을 시작하면 코드가 표시됩니다.' in page.locator('[data-remote-status]').text_content()
+                        assert 'PC에서 예배 화면을 열면 코드가 표시됩니다.' in page.locator('[data-remote-status]').text_content()
                         page.locator('[data-remote-close]').click()
                         assert not page.locator('.remote-panel').evaluate('(el) => el.open')
                         print('PASS', engine, module, phase, flush=True)
