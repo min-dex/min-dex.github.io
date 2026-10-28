@@ -147,7 +147,7 @@ try:
       {id:'l3',elementId:'audio-song',type:'lyrics',elementType:'praise',layout:'lower_bar_text',marker:'L',formKey:'audio-page-3:3',text:'셋째 화면',syncTimeline:{start:13}}];
     const originalSlides=JSON.stringify(lyricSlides), annotations=annotatePresenterFormStarts(lyricSlides.map((slide,slideIndex)=>({slide,slideIndex}))).entries;
     const host=document.createElement('div');host.innerHTML=renderPresenterBoardSlideBlocks(annotations,0,'local');
-    check([...host.querySelectorAll('.svc-slide-form-badge')].filter(e=>e.textContent.trim()==='Lyrics').length===1,'Lyrics heading repeated per audio page or interlude');
+    check([...host.querySelectorAll('.svc-slide-form-badge')].filter(e=>e.textContent.trim()==='Lyrics').length===0,'Lyrics badge must stay hidden without changing functional L groups');
     check(!host.querySelector('[data-form-color]'),'Lyrics has colored grouping box');
     check([...host.querySelectorAll('.svc-slide-form-badge')].some(e=>e.textContent.trim()==='Interlude'),'interlude heading lost');
     check(host.querySelectorAll('.svc-slide-thumb').length===4&&JSON.stringify(lyricSlides)===originalSlides,'Lyrics grouping changed slides or timing');
