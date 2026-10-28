@@ -2,24 +2,10 @@
 import os
 import re
 os.environ['MINDEX_SMOKE_OFFLINE'] = '1'
-from io import BytesIO
 from pathlib import Path
 from urllib.parse import urlsplit, urljoin
-from pptx import Presentation
-from pptx.enum.shapes import MSO_SHAPE
-from pptx.dml.color import RGBColor
+from media_fit_fixture import deck_bytes
 from smoke_app import start_local_app_server, sync_playwright, launch_chromium
-
-
-def deck_bytes(width, height):
-    deck = Presentation()
-    deck.slide_width, deck.slide_height = width * 100000, height * 100000
-    slide = deck.slides.add_slide(deck.slide_layouts[6])
-    shape = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, deck.slide_width, deck.slide_height)
-    shape.fill.solid(); shape.fill.fore_color.rgb = RGBColor(20, 160, 80)
-    shape.line.fill.background()
-    output = BytesIO(); deck.save(output)
-    return output.getvalue()
 
 
 server, url = start_local_app_server()
