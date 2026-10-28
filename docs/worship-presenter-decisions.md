@@ -4844,6 +4844,11 @@ even without an explicitly attached asset; it must not receive an input-required
 badge. Ordinary unattached media keep their existing missing-input state. No
 stored assets, playback options or worship settings are rewritten.
 
+Explicit special-song score assets also count as content independently of a song
+DB selection, matching the existing asset-first slide path. Normalized image
+pages and file URLs qualify; metadata without a usable source does not bypass
+song selection. This preserves older input-mode metadata without rewriting it.
+
 ## Standalone media viewport fit ·2026-10-28
 
 Image, video (including waiting-loop video), imported slide images and live PPTX

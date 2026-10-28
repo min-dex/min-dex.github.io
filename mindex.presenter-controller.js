@@ -2003,6 +2003,7 @@ function resolvePresenterServiceItemContentState(item = {}, memo = emptyServiceI
   const missing = (reason) => result("missing", false, reason);
   const loading = (reason) => result("loading", false, reason);
   if (serviceItemPresentationHidden(item, memo)) return filled("hidden_in_presentation");
+  if (presenterSpecialSongHasAssetOutput(item, memo)) return filled("special_song_asset");
   if (isServicePreparationItemForEditor(item, memo)) {
     const prepared = presenterPreparationSlide(service, item, 0);
     return prepared?.type === "ready" || prepared?.videoSrc || prepared?.imageSrc
