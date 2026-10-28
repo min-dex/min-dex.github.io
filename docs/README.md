@@ -157,3 +157,5 @@ records above for the retained repair evidence and Git reference.
 - Keynote 원본+HTML 재생의 준비·복구 계약은 `worship-presenter-decisions.md`의 Keynote HTML 항목과 `worship-data-contract.md`를 따른다. Mac 화면 캡처 후보와 별도다.
 
 - `worship-data-contract.md`의 Praise classification owner: 어린이 분류 제거·음원 유무 표시·분류 단일 저장 후보와 운영 적용 순서. 배포/운영 정규화는 별도 검증.
+
+- `praise-id-transition.md`: CHLD→CONT 오프라인 전환 도구와 미완료 운영 적용 경계.

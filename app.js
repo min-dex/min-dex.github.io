@@ -11903,7 +11903,12 @@ function songById(songId = "") {
   const id = String(songId || "").trim();
   if (!id) return null;
   const lookup = songLookupMap();
-  return lookup.get(id) || null;
+  if (lookup.has(id)) return lookup.get(id);
+  if (state.singleSongCatalog) {
+    try { return lookup.get(state.singleSongCatalog.resolve(id)) || null; }
+    catch { return null; }
+  }
+  return null;
 }
 
 function serviceItemLinkedVersion(item = {}, song = serviceItemLinkedSong(item)) {
