@@ -37,9 +37,7 @@ def main():
                     check(!host.querySelector('[data-presenter-preparation-form]'), 'the form button must not render');
                     inputs[0].value = '공지 내용'; inputs[1].value = '김은혜 집사';
                     const draft = presenterPreparationDraftFromRoot(host, service);
-                    check(draft === '광고: 공지 내용\\n대표기도: 김은혜 집사', 'field mapping: ' + draft);
-                    const prepared = presenterPreparationDraftForApply(service, draft);
-                    check(prepared.value === draft, 'prepared labeled draft');
+                    check(draft.kind === 'fields' && draft.fields[0].value === '공지 내용' && draft.fields[1].value === '김은혜 집사', 'independent field mapping');
                     const legacy = presenterPreparationDraftForApply(service, '광고: 기존 공지\\n대표기도: 김은혜 집사');
                     check(legacy.value.includes('광고: 기존 공지'), 'legacy labels remain supported');
                     host.remove();

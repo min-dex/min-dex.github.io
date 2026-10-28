@@ -1696,7 +1696,7 @@ function fitPresenterSupplementalText(host) {
       let measure = null;
       if (box.matches(".presenter-ready-screen-message, .presenter-waiting-loop-title, .presenter-slide[data-element-type='freeform'] > .presenter-slide-text")) {
         measure = box.cloneNode(true);
-        measure.style.cssText = `position:absolute;visibility:hidden;pointer-events:none;width:${box.clientWidth}px;height:auto;max-height:none;min-height:0`;
+        measure.style.cssText = `position:absolute;visibility:hidden;pointer-events:none;width:${getComputedStyle(box).width};height:auto;max-height:none;min-height:0`;
         box.parentNode.appendChild(measure);
       }
       const fits = box.matches(".presenter-title-content-body") ? () => {
@@ -1708,7 +1708,9 @@ function fitPresenterSupplementalText(host) {
             return rect.top >= bounds.top - tolerance && rect.bottom <= bounds.bottom + tolerance;
           });
       } : measure ? () => {
-        measure.style.width = `${box.clientWidth}px`;
+        // Preserve fractional layout width: rounding it down can wrap a
+        // fitted line in WebKit and trigger repeated font shrinking.
+        measure.style.width = getComputedStyle(box).width;
         measure.style.fontSize = getComputedStyle(box).fontSize;
         return measure.scrollWidth <= box.clientWidth + presenterTextFitScale(box)
           && measure.clientHeight <= box.clientHeight + presenterTextFitScale(box);

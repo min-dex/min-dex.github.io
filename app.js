@@ -9224,7 +9224,7 @@ function handleDetailKeydown(event) {
   }
   const preparationInput = event.target.closest("[data-presenter-preparation-field]");
   if (preparationInput) {
-    if (event.key === "Enter" && !event.isComposing && !event.metaKey && !event.ctrlKey && !event.altKey) {
+    if (event.key === "Enter" && preparationInput.tagName !== "TEXTAREA" && !event.isComposing && !event.metaKey && !event.ctrlKey && !event.altKey) {
       event.preventDefault();
       event.stopPropagation();
       const root = preparationInput.closest(".svc-presenter-preparation-input");
@@ -25818,7 +25818,6 @@ function renderServicePresenterControlsUnscoped(service, slides = [], active = f
       data-board-key="${escapeAttr(boardKey)}"
       aria-label="${escapeAttr(uiText("presenter.controls"))}"
     >
-      ${renderPastServiceEditingNotice(service)}
       <div class="svc-presenter-toolbar">
         ${renderPresenterThumbScaleControl()}
         ${renderPresenterFocusView()}${renderWorshipDefaultOrderFillControl(service)}
@@ -25828,6 +25827,7 @@ function renderServicePresenterControlsUnscoped(service, slides = [], active = f
           ${renderPresenterHelpControl()}
         </span>
       </div>
+      ${renderPastServiceEditingNotice(service)}
       <div class="svc-presenter-workspace">
         <div class="svc-presenter-board-column">
           ${renderPresenterSlideBoard(slides, presenterBoardActiveIndex(slides, active, index), service?.id)}
@@ -28385,7 +28385,7 @@ function resolvePresenterTargetScreenRect() {
 function presenterPreparationDisplayTextForService(service) {
   const drafts = state.presenterPreparationDrafts;
   if (Object.prototype.hasOwnProperty.call(drafts, service.id)) return drafts[service.id] || "";
-  return presenterPreparationDefaultDraftForService(service);
+  return presenterPreparationStructuredDraft(service);
 }
 
 function presenterPreparationDefaultDraftForService(service) {
@@ -28465,6 +28465,10 @@ function presenterPreparationFieldsForService(service) {
 }
 
 function presenterPreparationFieldValues(service, draft = "") {
+  if (draft?.kind === "fields") {
+    const definitions = presenterPreparationStructuredFields(service);
+    return draft.fields.map(field => ({ ...definitions.find(row => row.label === field.label), ...field }));
+  }
   const fields = presenterPreparationFieldsForService(service);
   const values = new Map(fields.map((field) => [compactSearchValue(field.label), ""]));
   const lines = String(draft || "").split(/\r\n?|\n/);
@@ -28505,10 +28509,12 @@ function presenterPreparationRenderedFields(root, service) {
 }
 
 function presenterPreparationDraftFromRoot(root, service) {
+  if (root?.querySelector('[data-preparation-role]')) return { kind: 'fields', fields: presenterPreparationRenderedFields(root, service) };
   return presenterPreparationDraftFromFields(service, presenterPreparationRenderedFields(root, service));
 }
 
 function presenterPreparationDraftHasValues(service, draft = "") {
+  if (draft?.kind === "fields") return presenterPreparationStructuredEntries(service, draft).length > 0;
   return presenterPreparationFieldValues(service, draft).some((field) => field.value.trim());
 }
 
@@ -28516,11 +28522,7 @@ function renderPresenterPreparationFieldRows(service, draft = "") {
   const fields = presenterPreparationFieldValues(service, draft);
   if (!fields.length) return '<p class="svc-presenter-preparation-empty">입력할 항목이 없습니다.</p>';
   return `<div class="svc-presenter-preparation-fields">
-    ${fields.map((field) => `
-      <label class="svc-presenter-preparation-field-row">
-        <span class="svc-presenter-preparation-field-label">${escapeHtml(field.label)}</span>
-        <input class="svc-presenter-preparation-field-value" type="text" data-presenter-preparation-field data-service-id="${escapeAttr(service.id)}" data-presenter-preparation-field-label="${escapeAttr(field.label)}" value="${escapeAttr(field.value)}" placeholder="${escapeAttr(field.example)}" aria-label="${escapeAttr(`${field.label} 값`)}" />
-      </label>`).join("")}
+    ${fields.map(field => renderPresenterPreparationField(service, field)).join("")}
   </div>`;
 }
 
@@ -28693,17 +28695,20 @@ async function applyPresenterPreparationInput(serviceId = state.selectedServiceI
   if (!service || !draft) return;
   if (state.presenterPreparationApplyingServiceIds.has(serviceId)) return;
 
+  const draftSnapshot = JSON.stringify(state.presenterPreparationDrafts[serviceId]);
   state.presenterPreparationApplyingServiceIds.add(serviceId);
   renderServiceList();
 
   let applied = false;
   try {
-    const prepared = presenterPreparationDraftForApply(service, draft);
+    const prepared = draft?.kind === "fields" ? { value: "" } : presenterPreparationDraftForApply(service, draft);
     if (prepared.error) {
       showToast(prepared.error, "error");
       return;
     }
-    const { entries, errors, skipped } = parsePresenterPreparationInput(prepared.value, { skipEmptyLabels: true });
+    const { entries, errors, skipped } = draft?.kind === "fields"
+      ? { entries: presenterPreparationStructuredEntries(service, draft), errors: [], skipped: [] }
+      : parsePresenterPreparationInput(prepared.value, { skipEmptyLabels: true });
     if (errors.length) {
       showToast(errors[0], "error");
       return;
@@ -28748,13 +28753,20 @@ async function applyPresenterPreparationInput(serviceId = state.selectedServiceI
       if (corporatePrayerIndex !== undefined) {
         const prayers = monthlyCorporatePrayerEntries(item, memo);
         prayers[corporatePrayerIndex] = { ...prayers[corporatePrayerIndex], title: content,
-          assignee: assignee || prayers[corporatePrayerIndex].assignee };
+          assignee: entry.structured ? assignee : assignee || prayers[corporatePrayerIndex].assignee };
         item.memo = serializeServiceItemMemo({ ...memo, corporatePrayers: prayers, slides: [] });
         item._worshipElementTemplateModified = true;
         item._worshipTemplatePlaceholder = false;
         continue;
       }
 
+      if (entry.structured && entry.hasAssignee) item.assignee = assignee;
+      if (entry.structured && (!entry.contentChanged || !content) && (isSongServiceLabel(item.label) || isSpecialSongServiceItem(item))) {
+        item._worshipElementTemplateModified = true;
+        markServiceItemSharedContentDirty(item, service);
+        item._worshipTemplatePlaceholder = false;
+        continue;
+      }
       if (servicePraiseUsesDirectLyrics(mode) && isSpecialSongServiceItem(item)) {
         const existingSong = await resolveExistingPraiseSongForServiceInputAfterCatalogLoad(content, item, service);
         if (existingSong) {
@@ -28904,7 +28916,10 @@ async function applyPresenterPreparationInput(serviceId = state.selectedServiceI
         continue;
       }
 
-      if (entry.key === "대표기도" || entry.rawKey === "대표기도") {
+      if (entry.structured) {
+        if (entry.hasContent) item.raw_title = normalizeServiceItemRawTitleForItem(item, content);
+        if (entry.hasAssignee) item.assignee = assignee;
+      } else if (entry.key === "대표기도" || entry.rawKey === "대표기도") {
         item.assignee = assignee || content;
       } else if ((entry.rawKey || entry.key) === "설교" && isPresenterPreparationSermonTitleItem(item) && !assignee && presenterPreparationContentLooksAssignee(content)) {
         item.assignee = content;
@@ -28944,7 +28959,7 @@ async function applyPresenterPreparationInput(serviceId = state.selectedServiceI
 
     finalizePresenterPreparationApply({
       service, serviceId, items, entries, skipped, scriptureItemIds, textFieldUpdates,
-      createdSongTitles, versionWarnings,
+      createdSongTitles, versionWarnings, draftSnapshot,
     });
     applied = true;
   } finally {

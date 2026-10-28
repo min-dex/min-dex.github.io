@@ -94,6 +94,16 @@ try:
       {name:'waiting',chromakey:true,selector:'.presenter-waiting-loop-title',slide:{type:'ready',presenterRole:'waiting_loop',outputContext:'chromakey',readyServiceName:('2026년검단우리교회온세대추수감사절감사찬양예배').repeat(15)}},
       {name:'freeform',selector:'.presenter-slide-text',slide:{type:'component',elementType:E.FREEFORM,layout:L.CENTER_TEXT,title:'',text:'함께 드리는 예배의 안내 문장입니다.'.repeat(8)}}
     ];
+    // Fractional shrink-to-fit width must not create an extra measured line.
+    for (const width of [1920,1280]) for (const mini of [false,true]) {
+      root.className='presenter-output-root no-chromakey'+(mini?' svc-slide-mini-canvas':'');
+      root.style.cssText=`position:relative;width:${width}px;height:${width*9/16}px;transform:${mini?'scale(.2)':'none'};container-type:size`;
+      root.innerHTML=renderPresenterSlideFrame({type:'ready',readyServiceName:'금요기도회'},{noChromakey:true});
+      const message=root.querySelector('.presenter-ready-screen-message');
+      const base=getComputedStyle(message).fontSize;
+      fitPresenterSupplementalText(root);fitPresenterSupplementalText(root);
+      check(getComputedStyle(message).fontSize===base,'normal ready message shrank '+width);
+    }
     const supplementalResults=[];
     for(const row of supplemental){
       const sizes=[];

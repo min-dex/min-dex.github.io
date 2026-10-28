@@ -24,9 +24,9 @@ try:
                       state.dirty.service=false;state.dirtyServiceElementIds.clear();state.dirtyServiceStructureIds.clear();
                       state.loadedWorshipServiceIds=new Set([sid]);state.templateElementSuppressions.clear();
                       state.serviceAliasSupported=true;
-                      const items=['First','Second'].map((title,i)=>normalizeServiceItem({
-                        id:crypto.randomUUID(),service_id:sid,label:i?'대표기도':'광고',raw_title:title,
-                        _worshipSectionKey:i?'prayer':'announcements',_worshipSectionTitle:i?'대표기도':'광고',
+                      const items=['First','Second','Third'].map((title,i)=>normalizeServiceItem({
+                        id:crypto.randomUUID(),service_id:sid,label:i===2?'설교':i?'대표기도':'광고',raw_title:title,
+                        _worshipSectionKey:i===2?'sermon':i?'prayer':'announcements',_worshipSectionTitle:i===2?'설교':i?'대표기도':'광고',
                         _worshipSlotKey:'test.'+i,_worshipElementTemplateModified:true,
                         memo:serializeServiceItemMemo({elementType:i?'title_person':'body',inputMode:'text'})},i));
                       const typed={inputMode:true,contentState:true};
@@ -72,38 +72,56 @@ try:
                       renderServiceList();renderPresenterDetail();
                       const field=refs.songList.querySelector('[data-presenter-preparation-field-label="광고"]');
                       check(field,'left announcement input missing');field.focus();field.value='왼쪽에서 입력한 공지';field.dispatchEvent(new Event('input',{bubbles:true}));
+                      const titleField=refs.songList.querySelector('[data-presenter-preparation-field-label="설교 제목"]');
+                      const personField=refs.songList.querySelector('[data-presenter-preparation-field-label="설교자"]');
+                      check(titleField&&personField,'separate sermon inputs missing');
+                      titleField.value='사랑 / 믿음';titleField.dispatchEvent(new Event('input',{bubbles:true}));
+                      personField.value='김민수 목사';personField.dispatchEvent(new Event('input',{bubbles:true}));
                       const beforeOutput=JSON.stringify(state.presenter);
                       const realApply=applyPresenterPreparationInput;let applying;
                       applyPresenterPreparationInput=(...args)=>(applying=realApply(...args));
                       refs.songList.querySelector('[data-presenter-preparation-apply]').click();
                       await applying;applyPresenterPreparationInput=realApply;
                       check(state.serviceItems[sid].some(i=>i.raw_title.includes('왼쪽에서 입력한 공지')),'real preparation did not update item');
+                      const sermon=state.serviceItems[sid].find(item=>item.label==='설교');
+                      check(sermon.raw_title==='사랑 / 믿음'&&sermon.assignee==='김민수 목사','title delimiter was parsed as assignee');
                       const draftBefore=JSON.stringify(state.serviceItems[sid]);failure=true;
                       try{await saveWorshipServiceInstance(service);throw Error('failure accepted')}catch(e){check(e.message==='INJECTED_FAILURE',e.message)}
                       check(JSON.stringify(state.serviceItems[sid])===draftBefore,'failure lost input');check(!client.pending(sid),'failed save blocked retry');
-                      const retained=presenterPreparationDraftForService(sid);check(retained.includes('왼쪽에서 입력한 공지'),'failed save lost left draft');
+                      const retained=presenterPreparationDraftForService(sid);check(JSON.stringify(retained).includes('왼쪽에서 입력한 공지'),'failed save lost left draft');
                       failure=false;duringSave=()=>{field.value='저장 중 추가 입력';field.dispatchEvent(new Event('input',{bubbles:true}));};await saveWorshipServiceInstance(service);
-                      check(field.isConnected&&field.value==='저장 중 추가 입력'&&presenterPreparationDraftForService(sid).includes('저장 중 추가 입력'),'receipt overwrote newer left input');
+                      check(field.isConnected&&field.value==='저장 중 추가 입력'&&JSON.stringify(presenterPreparationDraftForService(sid)).includes('저장 중 추가 입력'),'receipt overwrote newer left input');
                       check(writes.length===1,'retry wrote unexpected count');
                       check(JSON.stringify(db).includes('왼쪽에서 입력한 공지'),'atomic server receipt missing input');
                       state.serviceItems[sid]=groupWorshipElements(db.sections,db.elements)[sid];
                       delete state.presenterPreparationDrafts[sid];renderServiceList();renderPresenterDetail();
                       check(JSON.stringify(state.serviceItems[sid]).includes('왼쪽에서 입력한 공지'),'reopen lost saved input');
                       check(JSON.stringify(state.presenter)===beforeOutput,'edit/save touched output');
-                      const completeDraft = presenterPreparationFieldValues(service, presenterPreparationDefaultDraftForService(service))
-                        .map(row=>({...row,value:row.label.includes('기도')?'김민수 집사':'완료된 공지'}));
-                      state.presenterPreparationDrafts[sid]=presenterPreparationDraftFromFields(service,completeDraft);
+                      for(const input of refs.songList.querySelectorAll('[data-presenter-preparation-field]')) {
+                        input.value=input.dataset.preparationRole==='assignee'?'김민수 집사':'완료된 공지';
+                        input.dispatchEvent(new Event('input',{bubbles:true}));
+                      }
                       renderServiceList();
                       check(!refs.songList.querySelector('.svc-presenter-preparation-input').hidden,'pending input auto-collapsed');
                       await applyPresenterPreparationInput(sid);
                       check(presenterPreparationFieldValues(service,presenterPreparationDefaultDraftForService(service)).every(row=>row.value),'fixture incomplete');
-                      check(refs.songList.querySelector('.svc-presenter-preparation-input').hidden,'completed input did not collapse');
+                      check(refs.songList.querySelector('.svc-presenter-preparation-input').hidden,'completed input did not collapse '+JSON.stringify({fields:presenterPreparationStructuredFields(service),pending:state.presenterPreparationDrafts[sid],view:presenterOrderInputView(service)}));
                       refs.songList.querySelector('[data-presenter-order-toggle]').click();renderServiceList();
                       check(!refs.songList.querySelector('.svc-presenter-preparation-input').hidden,'manual reopen lost');
                       const edit=refs.songList.querySelector('[data-presenter-preparation-field]');edit.focus();edit.value='아직 반영하지 않은 입력';edit.dispatchEvent(new Event('input',{bubbles:true}));
                       renderServiceList();
                       check(!refs.songList.querySelector('.svc-presenter-preparation-input').hidden&&edit.value==='아직 반영하지 않은 입력','new draft auto-collapsed');
-                      return 'PASS real input/save retry/reopen and complete auto-collapse/manual reopen/pending preservation';
+                      const other={id:crypto.randomUUID(),type_id:'fixture',date:'2026-10-13',title:'Other'};
+                      state.services.push(other);state.serviceItems[other.id]=[];state.loadedWorshipServiceIds.add(other.id);
+                      state.selectedServiceId=other.id;renderServiceList();renderPresenterDetail();
+                      state.selectedServiceId=sid;renderServiceList();renderPresenterDetail();
+                      let returned=refs.songList.querySelector('[data-presenter-preparation-field]');
+                      check(returned.value==='아직 반영하지 않은 입력','service return lost pending input');
+                      for(let i=0;i<2;i++)refs.songList.querySelector('[data-presenter-order-toggle]').click();
+                      returned=refs.songList.querySelector('[data-presenter-preparation-field]');
+                      check(returned.value==='아직 반영하지 않은 입력'&&!returned.closest('.svc-presenter-preparation-input').hidden,'collapse/reopen lost pending input');
+                      check(JSON.stringify(state.presenter)===beforeOutput,'service return changed output');
+                      return 'PASS real input/save retry/reopen, service return, disclosure and pending preservation';
     }'''),flush=True)
    finally:browser.close()
 finally:server.shutdown()

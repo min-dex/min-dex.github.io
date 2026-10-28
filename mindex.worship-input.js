@@ -661,8 +661,9 @@ function applyServiceItemMetadataField(item, field, service) {
 function syncPresenterPreparationControls(field) {
   const root = field?.closest?.(".svc-presenter-input-rail");
   if (!root) return;
-  const hasValues = [...root.querySelectorAll("[data-presenter-preparation-field]")]
-    .some((input) => String(input.value || "").trim());
+  const service = state.services.find(row => row.id === field.dataset.serviceId);
+  const hasValues = service ? presenterPreparationDraftHasValues(service, presenterPreparationDraftFromRoot(root, service))
+    : [...root.querySelectorAll("[data-presenter-preparation-field]")].some(input => String(input.value || "").trim());
   const applying = Boolean(field.dataset?.serviceId && state.presenterPreparationApplyingServiceIds?.has(field.dataset.serviceId));
   const apply = root.querySelector("[data-presenter-preparation-apply]");
   if (apply) {
@@ -802,9 +803,9 @@ function planPresenterPreparationEntries(entries, service) {
       continue;
     }
     const targetLabel = presenterPreparationTargetLabel(entry.rawLabel || entry.label, service, entry.content);
-    const contentParts = entry.content.split(/\s+\/\s+/);
+    const contentParts = entry.structured ? [entry.content] : entry.content.split(/\s+\/\s+/);
     const content = String(contentParts.shift() || "").trim();
-    const assignee = contentParts.join(" / ").trim();
+    const assignee = entry.structured ? entry.assignee : contentParts.join(" / ").trim();
     const prayerNumber = Number(entry.key.match(/^공동기도(\d+)$/)?.[1]);
     const prayerGroups = prayerNumber ? servicePrepEditorItems(service.id).filter((item) => {
       if (!isMonthlyCorporatePrayerGroupItem(item)) return false;
@@ -815,7 +816,7 @@ function planPresenterPreparationEntries(entries, service) {
       errors.push(`${entry.line}번째 줄 공동기도의 대상이 여러 개입니다.`);
       continue;
     }
-    const projected = prayerGroups[0] || findPresenterPreparationProjectedItem(service, targetLabel);
+    const projected = prayerGroups[0] || (entry.structured && servicePrepEditorItems(service.id).find(item => item.id === entry.itemId)) || findPresenterPreparationProjectedItem(service, targetLabel);
     const corporatePrayerIndex = prayerGroups.length
       ? prayerNumber - Number(String(projected.label).match(/\d+/)?.[0]) : undefined;
     if (!projected) {
@@ -1537,7 +1538,7 @@ async function createBlankPraiseSongForServiceInput(value, service = selectedSer
 
 function finalizePresenterPreparationApply({
   service, serviceId, items, entries, skipped, scriptureItemIds, textFieldUpdates,
-  createdSongTitles, versionWarnings,
+  createdSongTitles, versionWarnings, draftSnapshot,
 }) {
   const uniqueItems = textFieldUpdates.length ? items.filter((item) => {
     const itemId = String(item.id || "");
@@ -1582,6 +1583,7 @@ function finalizePresenterPreparationApply({
     applyPresenterPreparationTextUpdateToWorshipElementCache(service, update);
   });
   entries.forEach((entry) => {
+    if (entry.structured) return;
     const entryKey = compactSearchValue(entry.rawLabel || entry.label || "");
     if (entryKey !== "기도" && entryKey !== "대표기도") return;
     const contentParts = String(entry.content || "").split(/\s+\/\s+/);
@@ -1602,7 +1604,7 @@ function finalizePresenterPreparationApply({
     normalizeMainPraiseSlots(service, projectedItems),
   );
   state.dirty.service = true;
-  delete state.presenterPreparationDrafts[serviceId];
+  if (JSON.stringify(state.presenterPreparationDrafts[serviceId]) === draftSnapshot) delete state.presenterPreparationDrafts[serviceId];
   refreshPresenterForService(serviceId);
   updateSaveState();
   [...scriptureItemIds]

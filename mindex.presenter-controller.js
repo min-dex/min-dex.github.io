@@ -193,7 +193,7 @@ function scrollPresenterBoardToIndex(serviceId, index, options = {}) {
       : thumb.closest(".svc-slide-thumb-wrap") || thumb;
     const viewportRect = viewport.getBoundingClientRect();
     const thumbRect = scrollTarget.getBoundingClientRect();
-    const fullyVisible = thumbRect.top >= viewportRect.top
+    const fullyVisible = thumbRect.top >= viewportRect.top + (focusBoard ? 0 : presenterViewportStickyTopOffset(viewport))
       && thumbRect.bottom <= viewportRect.bottom
       && thumbRect.left >= viewportRect.left
       && thumbRect.right <= viewportRect.right;
@@ -251,7 +251,7 @@ function scrollPresenterBoardToServiceItem(serviceId, itemIndex, options = {}) {
     }
     const viewportRect = viewport.getBoundingClientRect();
     const subgroupRect = subgroup.getBoundingClientRect();
-    const fullyVisible = subgroupRect.top >= viewportRect.top
+    const fullyVisible = subgroupRect.top >= viewportRect.top + presenterViewportStickyTopOffset(viewport)
       && subgroupRect.bottom <= viewportRect.bottom
       && subgroupRect.left >= viewportRect.left
       && subgroupRect.right <= viewportRect.right;
@@ -300,6 +300,7 @@ function scrollPresenterBoardToIndexStable(serviceId, index, options = {}) {
 
 function scrollWithinPresenterViewport(target, options = {}) {
   if (!target?.getBoundingClientRect) return false;
+  ++presenterViewportRestoreSerial; // Explicit navigation wins over queued viewport restoration.
   const viewport = refs.detailPane?.isConnected ? refs.detailPane : target.closest(".detail-pane");
   if (!viewport?.getBoundingClientRect || typeof viewport.scrollTo !== "function") {
     target.scrollIntoView({
@@ -312,8 +313,10 @@ function scrollWithinPresenterViewport(target, options = {}) {
   const block = options.block || "nearest";
   const behavior = options.behavior || "auto";
   const targetRect = target.getBoundingClientRect();
-  const viewportRect = viewport.getBoundingClientRect();
-  const currentTop = viewport.scrollTop;
+  const documentScroll = getComputedStyle(viewport).overflowY === "visible";
+  const viewportRect = documentScroll ? { top: 0, bottom: innerHeight } : viewport.getBoundingClientRect();
+  const currentTop = documentScroll ? window.scrollY : viewport.scrollTop;
+  const height = documentScroll ? innerHeight : viewport.clientHeight;
   const targetTop = targetRect.top - viewportRect.top + currentTop;
   const targetBottom = targetRect.bottom - viewportRect.top + currentTop;
   const padding = Number(options.padding) || 18;
@@ -322,28 +325,26 @@ function scrollWithinPresenterViewport(target, options = {}) {
   if (block === "start") {
     top = targetTop - padding - stickyTop;
   } else if (block === "center") {
-    top = targetTop - Math.max(0, (viewport.clientHeight - targetRect.height) / 2);
+    top = targetTop - stickyTop - Math.max(0, (height - stickyTop - targetRect.height) / 2);
   } else if (targetRect.top < viewportRect.top + stickyTop + padding) {
     top = targetTop - padding - stickyTop;
   } else if (targetRect.bottom > viewportRect.bottom - padding) {
-    top = targetBottom - viewport.clientHeight + padding;
+    top = targetBottom - height + padding;
   } else {
     return true;
   }
-  const maxTop = Math.max(0, viewport.scrollHeight - viewport.clientHeight);
+  const maxTop = Math.max(0, documentScroll ? document.documentElement.scrollHeight - height : viewport.scrollHeight - height);
   const nextTop = Math.max(0, Math.min(maxTop, top));
   if (Math.abs(nextTop - currentTop) < 2) return true;
-  viewport.scrollTo({ top: nextTop, behavior });
+  (documentScroll ? window : viewport).scrollTo({ top: nextTop, behavior });
   return true;
 }
 
 function presenterViewportStickyTopOffset(viewport) {
-  const sticky = viewport?.querySelector?.(".svc-presenter-top");
-  if (!sticky?.getBoundingClientRect) return 0;
-  const viewportRect = viewport.getBoundingClientRect();
-  const stickyRect = sticky.getBoundingClientRect();
-  if (stickyRect.bottom <= viewportRect.top || stickyRect.top > viewportRect.top + viewport.clientHeight) return 0;
-  return Math.max(0, Math.min(viewport.clientHeight, stickyRect.bottom - viewportRect.top));
+  const toolbar = viewport?.querySelector?.('.svc-presenter-toolbar');
+  if (!toolbar) return 0;
+  const inset = getComputedStyle(viewport).overflowY === 'visible' ? 0 : parseFloat(getComputedStyle(viewport).paddingTop) || 0;
+  return inset + toolbar.getBoundingClientRect().height;
 }
 
 function scrollPresenterOutlineToActive(serviceId = state.presenter.serviceId) {

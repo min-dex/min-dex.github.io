@@ -54,9 +54,9 @@ def main():
                     host.innerHTML=renderPresenterServiceInputRail(service);
                     document.body.append(host);
                     const inputs=[...host.querySelectorAll('[data-presenter-preparation-field]')];
-                    check(inputs.length===(expected.length?examples.split('\\n').length:0),`${type}: rendered field count differs`);
+                    check(inputs.length===presenterPreparationStructuredFields(service).length,`${type}: rendered field count differs`);
                     const fieldValues=presenterPreparationFieldValues(service,presenterPreparationDisplayTextForService(service));
-                    check(inputs.every((input,index)=>input.dataset.presenterPreparationFieldLabel&&input.value===fieldValues[index]?.value),`${type}: labels or default values missing`);
+                    check(inputs.every((input,index)=>input.dataset.presenterPreparationFieldLabel&&input.value===fieldValues[index]?.value),`${type}: labels or default values missing ${JSON.stringify(inputs.map((input,index)=>({label:input.dataset.presenterPreparationFieldLabel,actual:input.value,expected:fieldValues[index]?.value})))}`);
                     check(!host.querySelector('[data-presenter-preparation-form]'),`${type}: form button remains`);
                     host.remove();
                     results.push({type,date,lines:parsed.entries.length});

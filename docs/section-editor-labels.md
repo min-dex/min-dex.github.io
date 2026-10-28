@@ -11,3 +11,18 @@ field update path. Persistence adapters and database contracts are unchanged.
 
 Regression tests: smoke_section_label_display.py and smoke_section_editor_actions.py
 (Chrome and WebKit, synthetic data with Supabase requests blocked).
+
+
+### Presenter preparation fields · 2026-10-28
+
+Left preparation inputs hold structured content and assignee values separately.
+A title/person section displays two labelled fields; person-only sections retain
+one. Separators inside titles are literal text, not field delimiters. Existing
+input-boundary normalization and the atomic worship save remain in use. Pending
+text entered during apply/save is retained, and unchanged linked songs are not
+re-resolved. Complete saved fields collapse initially; pending or missing values
+remain open, and explicit reopening preserves editing.
+
+The board toolbar starts at its sticky origin. Outline navigation clears queued
+viewport restoration and reserves the actual toolbar height so the destination
+heading and first input remain visible. These operations do not control output.

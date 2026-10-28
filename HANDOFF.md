@@ -1581,3 +1581,15 @@ editing remains in song information. Worship group expansion requires an explici
 variant choice before the existing save path. No production rows are migrated.
 Scoped two-engine grouping/search/selection/draft/audio preservation tests pass;
 shared gate/publication is pending. See version-name-preservation.md.
+
+## Structured presenter input · 2026-10-28 candidate
+
+Preparation title and assignee inputs now own separate values; delimiter text is
+preserved. Unchanged song links are not re-resolved and edits made during apply
+or save remain pending. Left controls share 10px padding. The board toolbar starts
+at its sticky origin and outline jumps reserve its actual height. Supplemental
+text measurement retains fractional widths so WebKit does not shrink a normal
+ready message after falsely wrapping its measurement clone.
+Scoped Chromium/WebKit checks cover service return, disclosure, actual apply,
+atomic failure/retry, additional input, IME, sticky navigation and text fitting.
+Required GitHub gate, main integration and public readback remain pending.

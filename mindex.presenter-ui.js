@@ -15,7 +15,7 @@ function focusPresenterPreparationTarget(serviceId, target = {}) {
 }
 
 function presenterPreparationDraftForService(serviceId, options = {}) {
-  if (options.draft != null) return String(options.draft || "").trim();
+  if (options.draft != null) return options.draft?.kind === "fields" ? options.draft : String(options.draft || "").trim();
   const service = state.services.find((candidate) => candidate.id === serviceId);
   const selector = `[data-presenter-preparation-field][data-service-id="${cssEscape(serviceId)}"]`;
   const input = refs.songList?.querySelector(selector)
@@ -25,7 +25,7 @@ function presenterPreparationDraftForService(serviceId, options = {}) {
   const draft = input && service
     ? presenterPreparationDraftFromRoot(input.closest(".svc-presenter-preparation-input"), service)
     : state.presenterPreparationDrafts[serviceId];
-  return String(draft || "").trim();
+  return draft?.kind === "fields" ? draft : String(draft || "").trim();
 }
 
 // Keep the mounted left editor during same-service list/remote refreshes.
@@ -358,7 +358,7 @@ function renderPresenterRightSidebar(service, slides, active, index) {
 const presenterOrderInputViews = new Map();
 
 function presenterOrderInputView(service) {
-  const saved = presenterPreparationDefaultDraftForService(service);
+  const saved = presenterPreparationStructuredDraft(service);
   const fields = presenterPreparationFieldValues(service, saved);
   const pending = Object.prototype.hasOwnProperty.call(state.presenterPreparationDrafts, service.id);
   const complete = fields.length > 0 && fields.every(field => field.value.trim()) && !pending;
@@ -536,4 +536,66 @@ function serviceItemsAreHydrating(serviceId = "") {
   const id = String(serviceId || "").trim();
   if (!id || state.loadedWorshipServiceIds.has(id)) return false;
   return state.loading || serviceItemLoadPromises.has(id) || isServiceDataModule();
+}
+
+// Each visible input owns one value; labels and separators are never storage.
+function presenterPreparationStructuredFields(service) {
+  const items = servicePrepEditorItems(service.id);
+  return presenterPreparationFieldsForService(service).flatMap(definition => {
+    const number = Number(compactSearchValue(definition.label).match(/^공동기도(\d+)$/)?.[1]);
+    const group = number && items.find(item => isMonthlyCorporatePrayerGroupItem(item) && monthlyCorporatePrayerOrdinalsForItem(item).includes(number));
+    const item = group || findPresenterPreparationProjectedItem(service, definition.label);
+    const context = item && presenterServiceInputItem(item, service);
+    if (!context) return [{ ...definition, value: '', role: 'content', targetLabel: definition.label }];
+    const { mode, model, memo } = context;
+    const prayerIndex = group ? monthlyCorporatePrayerOrdinalsForItem(group).indexOf(number) : undefined;
+    const prayer = group ? monthlyCorporatePrayerEntries(item, memo)[prayerIndex] : null;
+    const songMode = isSongServiceLabel(item.label) || isSpecialSongServiceItem(item);
+    const scripture = mode === 'scripture' || isScriptureBodyServiceItem(item);
+    const spec = prayer ? { needsTitle: true, needsAssignee: true }
+      : songMode ? { needsTitle: true, needsAssignee: isSpecialSongServiceItem(item) }
+      : scripture ? { needsTitle: true, needsAssignee: false } : presenterServiceTextInputSpec(item, model, memo);
+    const current = presenterServiceRequiredTextInputState(item, model, memo, service);
+    const title = prayer ? prayer.title : songMode ? serviceItemLinkedSong(item)?.title || item.raw_title || ''
+      : scripture ? formatServiceScriptureReferenceList(serviceItemScriptureReferences(item, memo, service)) : current.titleText;
+    const assignee = prayer ? prayer.assignee : current.assignee;
+    const base = { targetLabel: definition.label, itemId: item.id, prayerIndex, multiline: isAnnouncementTextInputItem(item) };
+    const paired = spec.needsTitle && spec.needsAssignee;
+    const fields = [];
+    if (spec.needsTitle) fields.push({ ...base, role: 'content', label: paired ? `${definition.label} 제목` : definition.label,
+      example: paired ? '제목' : definition.example, value: String(title || '') });
+    if (spec.needsAssignee) fields.push({ ...base, role: 'assignee', label: paired ? `${definition.label}${compactSearchValue(item.label) === '설교' ? '자' : ' 담당자'}` : definition.label,
+      example: paired ? '담당자' : definition.example, value: String(assignee || '') });
+    return fields;
+  });
+}
+function presenterPreparationStructuredDraft(service) {
+  return { kind: 'fields', fields: presenterPreparationStructuredFields(service) };
+}
+function presenterPreparationStructuredEntries(service, draft) {
+  const groups = new Map();
+  const definitions = presenterPreparationStructuredFields(service);
+  for (const field of draft.fields) {
+    const definition = definitions.find(row => row.label === field.label);
+    if (!definition) continue;
+    const key = `${definition.itemId || definition.targetLabel}:${definition.prayerIndex ?? ''}`;
+    if (!groups.has(key)) groups.set(key, { line: groups.size + 1, label: definition.targetLabel, rawLabel: definition.targetLabel,
+      key: compactSearchValue(definition.targetLabel), rawKey: compactSearchValue(definition.targetLabel),
+      itemId: definition.itemId, structured: true, content: '', assignee: '' });
+    const entry = groups.get(key);
+    entry.changed ||= String(field.value || '') !== definition.value;
+    entry[definition.role + 'Changed'] ||= String(field.value || '') !== definition.value;
+    entry[definition.role] = String(field.value || '').trim();
+    entry[definition.role === 'content' ? 'hasContent' : 'hasAssignee'] = true;
+  }
+  return [...groups.values()].filter(entry => entry.changed).map(entry => ({ ...entry,
+    content: normalizePresenterPreparationEntryContent(entry.label, entry.content) }));
+}
+
+function renderPresenterPreparationField(service, field) {
+  const attributes = `class="svc-presenter-preparation-field-value" data-presenter-preparation-field data-service-id="${escapeAttr(service.id)}" data-presenter-preparation-field-label="${escapeAttr(field.label)}" ${field.role ? `data-preparation-role="${field.role}"` : ''} placeholder="${escapeAttr(field.example)}" aria-label="${escapeAttr(`${field.label} 값`)}"`;
+  const control = /[\r\n]/.test(field.value) || field.multiline
+    ? `<textarea ${attributes} rows="3">${escapeHtml(field.value)}</textarea>`
+    : `<input ${attributes} type="text" value="${escapeAttr(field.value)}" />`;
+  return `<label class="svc-presenter-preparation-field-row"><span class="svc-presenter-preparation-field-label">${escapeHtml(field.label)}</span>${control}</label>`;
 }
