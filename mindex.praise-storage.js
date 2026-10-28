@@ -373,9 +373,19 @@ function renderNativeVersionMetadata(song) {
   if (!song?._singleSongRecord) return "";
   const version = song.versions[0];
   return `<div class="metadata-popover-grid">
-    ${praiseDisplayGroup(song).members.length > 1 || !isDefaultVersionName(versionEditableName(song,version)) ? `<label class="field compact"><span>판본 이름</span><input data-version-name-field="${escapeAttr(version.id)}" value="${escapeAttr(versionEditableName(song,version))}" aria-label="버전 이름" /></label>` : ""}
-    <label class="field compact"><span>다른 출력 제목</span><input data-version-output-title-field="${escapeAttr(version.id)}" value="${escapeAttr(version.output_title || "")}" placeholder="비워 두면 이 판본의 곡 제목 사용" aria-label="버전 전용 제목" /></label>
+    <label class="field compact"><span>판본 구분명</span><input data-version-name-field="${escapeAttr(version.id)}" value="${escapeAttr(versionEditableName(song,version))}" aria-label="판본 구분명" /><small>예: 원곡, 영어, 편곡 · 판본을 고를 때 표시</small></label>
+    <label class="field compact"><span>송출 제목</span><input data-version-output-title-field="${escapeAttr(version.id)}" value="${escapeAttr(version.output_title || "")}" placeholder="비워 두면 이 판본의 곡 제목 사용" aria-label="송출 제목" /><small>선택한 판본의 제목 화면에 표시 · 구분명과 별도로 저장</small></label>
+    <div class="field compact"><span>곡목 대표 제목</span><span data-native-group-title>${escapeHtml(praiseGroupTitle(song))}</span></div>
+    <div class="field compact"><span>송출 제목 미리보기</span><span data-native-output-title>${escapeHtml(presenterSongTitleDisplayTitle(song,version))}</span><small>찬송가 번호는 선택한 판본의 기존 번호 규칙을 사용합니다.</small></div>
   </div>`;
+}
+function updateNativeVersionTitlePreview(song) {
+  if (!song?._singleSongRecord) return;
+  const dialog = document.querySelector('.metadata-popover');
+  const heading = dialog?.querySelector('[data-native-group-title]');
+  const output = dialog?.querySelector('[data-native-output-title]');
+  if (heading) heading.textContent = praiseGroupTitle(song);
+  if (output) output.textContent = presenterSongTitleDisplayTitle(song,song.versions[0]);
 }
 function renderServicePraiseGroupChoice(song,index) {
   const item = getServiceItems(state.selectedServiceId)[index] || {}, service = selectedServiceForEditor();
