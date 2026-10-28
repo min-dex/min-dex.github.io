@@ -48,13 +48,16 @@ try:
      page.evaluate('(theme)=>applyTheme(theme)',theme)
      for width in (1440,1000,700):
       page.set_viewport_size({'width':width,'height':900})
+      # Initial render/resize restores the previous viewport on its next frame.
+      # Finish that lifecycle before starting the independent scroll assertion.
+      page.evaluate('''async()=>{await document.fonts.ready;await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));}''')
       page.evaluate("""()=>{
         const rail=document.querySelector('.svc-presenter-input-rail');
         if(rail.scrollWidth>rail.clientWidth+1)throw Error('left editor overflow');
         if(document.activeElement!==orderField||orderField.value!=='추가 입력 보존'||orderField.selectionStart!==2)throw Error('resize lost focus');
         const pane=refs.detailPane;
         if(getComputedStyle(pane).overflowY==='visible')window.scrollTo(0,document.querySelector('.svc-presenter-toolbar').getBoundingClientRect().top+window.scrollY+100);
-        else pane.scrollTop=300;
+        else {pane.scrollTop=300;if(pane.scrollTop<1)throw Error('fixture has no scrollable board');}
       }""")
       page.wait_for_timeout(50)
       page.evaluate("""()=>{
