@@ -5,7 +5,7 @@
  document.getElementById('monitorPanelBtn')?.before(trigger);window.lucide?.createIcons({root:trigger});
  let ending=false,remoteRevision=0,remoteBusy=false,remoteState={code:'',connected:false,available:false};
  const buttonLabel=()=>remoteState.code||'원격 조작';
- const codeFor=id=>isPresenterOutputWindowOpen()&&state.presenter.serviceId===id?remoteState.code||'':'';
+ const codeFor=id=>hostContext()?.serviceId===id?remoteState.code||'':'';
  const panel=document.createElement('dialog');panel.className='remote-panel';panel.setAttribute('aria-labelledby','remoteTitle');
  panel.innerHTML='<header><span class="remote-brand-mark" aria-hidden="true"></span><h2 id="remoteTitle">Mindex Remote</h2><button class="icon-btn" data-remote-close aria-label="닫기" title="닫기"><i data-lucide="x"></i></button></header><section class="remote-connection"><p data-remote-status role="status"></p><strong data-remote-code></strong><p data-remote-help></p></section><footer class="remote-actions"><a class="btn secondary" data-remote-link target="_blank" rel="noopener"><i data-lucide="external-link"></i><span>Remote 열기</span></a><button class="btn secondary" data-remote-end disabled>연결 해제</button></footer>';
  document.body.append(panel);window.lucide?.createIcons({root:panel});const $=s=>panel.querySelector(s);
@@ -17,8 +17,8 @@
    button.title=remoteState.code?'송출 코드 '+remoteState.code:'원격 조작';button.setAttribute('aria-label',button.title);
   }
   $('[data-remote-code]').textContent=remoteState.code;
-  $('[data-remote-status]').textContent=remoteState.code?(remoteState.available?(remoteState.connected?'연결됨':'송출 코드'):'연결 확인 중'):(isPresenterOutputWindowOpen()?'송출 코드 준비 중':'예배 송출을 시작하면 코드가 표시됩니다.');
-  $('[data-remote-help]').textContent=remoteState.code?'송출 중 유지 · Remote에서 코드 입력':'';
+  $('[data-remote-status]').textContent=remoteState.code?(remoteState.available?(remoteState.connected?'연결됨':hostContext()?.output?'송출 코드':'송출 대기'):'연결 확인 중'):(isPresenterOutputWindowOpen()?'송출 코드 준비 중':'PC에서 예배 화면을 열면 코드가 표시됩니다.');
+  $('[data-remote-help]').textContent=remoteState.code?'예배 화면에서 유지 · Remote에서 코드 입력':'';
   $('[data-remote-end]').disabled=ending||!remoteState.connected;
  }
  $('[data-remote-link]').href=location.protocol==='file:'?'https://min-dex.github.io/remote.html':new URL('remote.html',location.href).href;
@@ -143,20 +143,63 @@
    try{return await perform(action,target);}finally{remoteBusy=false;remoteRevision++;registry?.notify();}
   }};
  }
- // Each actual output gets its own ephemeral registry identity; no PC registration.
+ // One page owns one registry identity across standby/start/stop. No permanent PC ID.
+ const hostKey=crypto.randomUUID();
+ let starting=false;
+ function hostContext(){
+  if(!state.client)return null;
+  const output=isPresenterOutputWindowOpen();
+  const pending=!!state.presenter.outputPendingAt&&!isPresenterOutputHeartbeatOpen();
+  const serviceId=output||pending?state.presenter.serviceId:state.module==='presenter'?state.selectedServiceId:null;
+  if(!serviceId||(!output&&!pending&&!state.services.some(s=>s.id===serviceId)))return null;
+  return {serviceId,output,pending};
+ }
+ function hostAdapter(admin=false){
+  let current=null,sessionId=null,outputWindow=null;
+  function outputAdapter(){
+   const p=state.presenter;
+   if(!current||sessionId!==p.outputSessionId||outputWindow!==p.outputWindow){
+    sessionId=p.outputSessionId;outputWindow=p.outputWindow;current=adapter(p.serviceId,sessionId,outputWindow,admin,true);
+   }
+   return current;
+  }
+  function read(){
+   const c=hostContext();if(!c)return {live:false};
+   const p=state.presenter,busy=starting||c.pending;
+   const outputState=busy?'starting':c.output?'live':'standby';
+   const idle={index:-1,total:0,current:'송출 대기',next:'',previewCurrent:'',previewNext:'',music:'연결된 음원 없음',video:null,allowed:[]};
+   const value=c.output?outputAdapter().read():idle;
+   return {...value,live:true,outputState,serviceTitle:serviceDisplayTypeName(state.services.find(s=>s.id===c.serviceId))||'예배',
+    allowed:busy||remoteBusy?[]:c.output?value.allowed:admin?['output-start']:[],
+    version:JSON.stringify([value.version,c.serviceId,p.outputGeneration,outputState,remoteRevision,state.dirty.service,state.dirty.song,state.dirty.forms])};
+  }
+  return {read,browse:options=>hostContext()?.output?outputAdapter().browse(options):null,async execute(action,target){
+   const c=hostContext();
+   if(!c||!read().allowed.includes(action))throw Error('현재 상태에서는 이 조작을 할 수 없습니다.');
+   if(action!=='output-start')return outputAdapter().execute(action,target);
+   if(!admin||c.output||c.pending||remoteBusy||starting)throw Error('이미 송출을 준비 중입니다.');
+   const client=state.client,generation=state.presenter.outputGeneration,serviceId=c.serviceId;
+   const guard=()=>registryActive&&state.client===client&&state.module==='presenter'&&state.selectedServiceId===serviceId&&state.presenter.outputGeneration===generation;
+   remoteBusy=true;starting=true;remoteRevision++;registry?.notify();
+   try{
+    await runPresenterAction('open',serviceId,{throwOnError:true,guard});
+    if(!isPresenterOutputWindowOpen()&&!state.presenter.outputPendingAt)throw Error('송출을 시작하지 못했습니다. PC의 예배와 팝업 허용 상태를 확인해 주세요.');
+   }finally{starting=false;remoteBusy=false;remoteRevision++;registry?.notify();}
+  }};
+ }
  let registry=null,registryLoading=false,registryActive=true,registryEpoch=0;
+ const adminHost=hostAdapter(true),guestHost=hostAdapter(false);
  async function ensureRegistry(){
-  if(!registryActive||registry||registryLoading||!state.client||!isPresenterOutputWindowOpen())return;
+  if(!registryActive||registry||registryLoading||!hostContext())return;
   registryLoading=true;const epoch=registryEpoch;
   try{
-   const {createOutputRegistry}=await import('./mindex.remote-admin.mjs?v=8');
+   const {createOutputRegistry}=await import('./mindex.remote-admin.mjs?v=9');
    if(!registryActive||epoch!==registryEpoch)return;
    registry=createOutputRegistry(()=>{
-    const p=state.presenter;
-    if(!state.client||!presenterControllerIsLive(p.serviceId)||!isPresenterOutputWindowOpen())return null;
-    const service=state.services.find(s=>s.id===p.serviceId);
-    return {key:p.outputSessionId,client:state.client,adapter:adapter(p.serviceId,p.outputSessionId,p.outputWindow,true),guestAdapter:adapter(p.serviceId,p.outputSessionId,p.outputWindow,false,true),
-     info:{title:serviceDisplayTypeName(service)||'예배',device:document.getElementById('monitorName')?.value||'송출 PC',position:`${p.index+1} / ${p.slides.length}`}};
+    const c=hostContext();if(!c)return null;
+    const service=state.services.find(s=>s.id===c.serviceId),device=document.getElementById('monitorName')?.value||'송출 PC';
+    return {key:hostKey,client:state.client,adapter:adminHost,guestAdapter:guestHost,
+     info:{title:serviceDisplayTypeName(service)||'예배',device:device+(c.output?'':' · 송출 대기'),position:c.output?`${state.presenter.index+1} / ${state.presenter.slides.length}`:'송출 대기'}};
    },{onUpdate:value=>{remoteState=value;paintPanel();}});
   }catch{}finally{registryLoading=false;}
  }
@@ -164,6 +207,6 @@
  window.addEventListener('pagehide',event=>{registryActive=false;registryEpoch++;clearInterval(registryTimer);if(event.persisted)registry?.suspend();else{registry?.close();registry=null;}});
  window.addEventListener('pageshow',()=>{if(registryActive)return;registryActive=true;registryTimer=setInterval(ensureRegistry,2000);void registry?.resume();void ensureRegistry();});
  // Read-only adapter entry is also used by isolated regression tests.
- window.MindexRemote={adapter,buttonLabel,codeFor,notify:()=>registry?.notify(),open:()=>panel.showModal()};
+ window.MindexRemote={adapter,hostAdapter,buttonLabel,codeFor,notify:()=>registry?.notify(),open:()=>panel.showModal()};
  paintPanel();
 })();

@@ -78,7 +78,7 @@
     }
     return true;
   }
-  async function beforeOpen(serviceId) {
+  async function beforeOpen(serviceId, options = {}) {
     if (live()) {
       if (session && session.serviceId !== serviceId) {
         showToast('현재 송출을 종료한 뒤 다른 예배의 송출을 시작해 주세요.', 'info');
@@ -89,12 +89,16 @@
     if (pending) return false;
     // Reserve inside the click gesture, but never send slides before verification.
     const reserved = !window.mindexElectron?.openPresenterOutput ? window.open('about:blank', 'mindexPresenterOutput', presenterOutputWindowFeatures(resolvePresenterTargetScreenRect())) : null;
+    if (!reserved && !window.mindexElectron?.openPresenterOutput && options.throwOnError) {
+      throw Error('송출 PC에서 이 사이트의 팝업을 허용한 뒤 다시 시작해 주세요.');
+    }
     const token = {}; pending = token;
     let timeout;
     try {
       await Promise.race([verify(serviceId, token), new Promise((_, reject) => {
         timeout = setTimeout(() => reject(Error('최신 가사 확인이 지연되었습니다. 연결 상태를 확인하고 다시 시도해 주세요.')), 20000);
       })]);
+      if (options.guard && !options.guard()) throw Error('선택한 예배 또는 PC 상태가 변경되었습니다. 다시 시작해 주세요.');
       if (reserved?.closed) throw Error('송출 준비가 취소되었습니다.');
       if (reserved) {
         // This newly reserved popup must not inherit a stopped output session.
@@ -108,6 +112,7 @@
       if (reserved && !reserved.closed) reserved.close();
       session = null;
       showToast(`송출을 시작하지 않았습니다. ${error.message || '최신 가사를 확인하지 못했습니다.'}`, 'error');
+      if (options.throwOnError) throw error;
       return false;
     } finally { clearTimeout(timeout); if (pending === token) pending = null; }
   }

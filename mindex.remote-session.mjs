@@ -1,4 +1,4 @@
-import {pairing,identity,sessionKey,seal,unseal,id,createGate} from './mindex.remote-core.mjs?v=8';
+import {pairing,identity,sessionKey,seal,unseal,id,createGate} from './mindex.remote-core.mjs?v=9';
 import {obtainPairing} from './mindex.remote-pairing.mjs?v=4';
 
 // The relay carries ciphertext only. A code grants one ephemeral controller.

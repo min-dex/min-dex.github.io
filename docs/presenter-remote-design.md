@@ -1,5 +1,28 @@
 # Mindex Remote Controller
 
+## Remote output start (current) ·2026-10-28
+
+PC에서 예배 화면을 열면 송출 전에도 코드가 배정되고 Remote 목록에 나타난다.
+관리자는 송출 시작/종료를 할 수 있고, 일반 Remote는 시작/종료 권한이 없다.
+송출을 종료해도 PC의 예배 화면이 열려 있으면 코드와 연결을 유지한다.
+송출이 없는 상태에서 PC가 예배 화면을 떠나면 연결을 폐기한다.
+아래 이전 기록의 송출 종료 시 연결 폐기 규칙은 이 계약으로 대체한다.
+
+The registry identifies one open controller page across standby, starting and
+live output generations, not a permanent physical device. Live output stays
+available while the PC edits other modules. Reload/close and server expiry keep
+their existing revocation rules. No production schema change.
+
+Starts use the existing read-only freshness preflight and output API. Shared
+busy/revision/generation checks reject simultaneous/replayed starts and changed
+worship/client. Starting locks controls; popup denial is reported to Remote.
+The browser PC must allow site popups; native output uses its existing bridge.
+This cannot power on a PC or launch a closed Mindex app.
+
+Local Chromium/WebKit coverage: standby registration, stable identity, admin/guest
+permissions, simultaneous/replayed start, selection race, popup failure/recovery,
+and mobile standby/starting/live controls. Physical output is a separate check.
+
 ## 현재 사용 계약 ·2026-10-24
 
 웹 배포 기준: `20261026-remote-select-before-code` (`9cab71b9`).

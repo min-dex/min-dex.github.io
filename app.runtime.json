@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261028-liturgical-navigation",
+  "version": "20261028-remote-output-start",
   "options": {
     "compress": false,
     "mangle": {

@@ -75,7 +75,7 @@ try:
     raise AssertionError('not ready: '+action+' '+phone.locator('#status').inner_text())
    ready('next')
    assert host.locator('[data-remote-link]').is_visible()
-   assert '송출 중 유지' in host.locator('[data-remote-help]').inner_text()
+   assert '예배 화면에서 유지' in host.locator('[data-remote-help]').inner_text()
    if engine=='chromium':host.screenshot(path='/tmp/mindex-remote-panel-compact.png')
    assert phone.frame_locator('#current iframe').locator('body').inner_text().startswith('첫 번째')
    for width in (320,390,768):

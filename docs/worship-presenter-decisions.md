@@ -5080,3 +5080,12 @@ Never infer a navigation title from `raw_title` body text, text length or a know
 prayer opening. Ordinary sermon and praise titles retain their existing resolver.
 This only changes navigation metadata: authored body fields, output text, slide
 IDs, catalog indexes and persisted records remain unchanged.
+
+## Remote output start ·2026-10-28
+
+An open Presenter worship page is remotely discoverable before output. Admin
+controllers start through the same freshness/preflight and output API as the PC.
+Stop returns to standby without replacing its code while the worship page remains
+open. Guests cannot start/stop. Host browser popup permission is required;
+blocked launch is an error, not success. This supersedes earlier output-only
+registration/stop-revocation notes. See presenter-remote-design.md for lifecycle.

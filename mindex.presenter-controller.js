@@ -39,8 +39,7 @@ function runPresenterAction(action, serviceId = state.selectedServiceId, options
     if (launchIndex !== null && isValidPresenterIndex(launchIndex, p.slides.length)) p.index = launchIndex;
     clearPresenterBoardSelection({ render: false });
     p.safetyBlank = false;
-    openPresenterOutput(serviceId);
-    return;
+    return openPresenterOutput(serviceId, options);
   }
 
   // A board selection is for offline editing. Once the controller is live, the
@@ -492,11 +491,12 @@ function setPresenterPendingSlide(serviceId, index, options = {}) {
   return true;
 }
 
-async function openPresenterOutput(serviceId = state.selectedServiceId) {
+async function openPresenterOutput(serviceId = state.selectedServiceId, options = {}) {
+  if (options.guard && !options.guard()) throw Error("선택한 예배가 변경되었습니다. 다시 선택해 주세요.");
   if (!serviceId) return;
   if (serviceNavigationBlocked(serviceId)) return;
   if (!globalThis.MindexPresenterFreshness) { showToast("송출 준비 기능을 불러오는 중입니다. 잠시 후 다시 시도해 주세요.", "info"); return; }
-  if (!await globalThis.MindexPresenterFreshness.beforeOpen(serviceId)) return;
+  if (!await globalThis.MindexPresenterFreshness.beforeOpen(serviceId, options)) return;
   preparePresenterService(serviceId);
   if (!isPresenterOutputWindowOpen()) {
     state.presenter.outputSessionId = crypto.randomUUID();

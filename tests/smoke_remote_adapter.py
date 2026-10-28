@@ -119,6 +119,56 @@ try:
      const before=reports;MindexRemote.notify();await until(()=>reports>before&&lastInfo?.title===expected);
     }
     state.services=[];MindexRemote.notify();await until(()=>lastInfo?.title==='예배');
+    // A controller identity survives output stop/start; no operational media/window is used.
+    state.services=[{id:sid,type_id:'children'}];state.module='presenter';state.selectedServiceId=sid;
+    state.presenter.outputWindow=null;state.presenter.outputConnectedAt=0;state.presenter.outputPendingAt=0;state.presenter.outputStopAt=Date.now();
+    const host=MindexRemote.hostAdapter(true),guest=MindexRemote.hostAdapter(false);
+    check(host.read().outputState==='standby'&&host.read().allowed.includes('output-start'),'standby admin start');
+    check(!guest.read().allowed.length,'standby guest cannot operate');
+    let guestDenied=false;try{await guest.execute('output-start')}catch{guestDenied=true}check(guestDenied,'guest start rejected');
+    MindexRemote.notify();await until(()=>lastInfo?.position==='송출 대기');check(registrations===1,'stop changed registry identity');
+    const gateA=createGate(host),gateB=createGate(MindexRemote.hostAdapter(true));
+    const snapA=gateA.connect('admin-a'),snapB=gateB.connect('admin-b');
+    const savedRun=runPresenterAction;let starts=0,finishStart;
+    runPresenterAction=async(action,service,options)=>{
+     check(action==='open'&&service===sid&&options.throwOnError,'wrong start path');starts++;
+     await new Promise(r=>finishStart=r);if(!options.guard())throw Error('selection changed');
+     state.presenter.serviceId=sid;state.presenter.outputSessionId='started';state.presenter.outputGeneration++;
+     state.presenter.outputStopAt=0;state.presenter.outputWindow={closed:false,postMessage(){}};
+    };
+    try{
+     const commandA={...snapA,id:id(),sequence:1,action:'output-start'};
+     const pending=gateA.command('admin-a',commandA);
+     check(host.read().outputState==='starting'&&!host.read().allowed.length,'start lock');
+     let duplicateDenied=false;try{await gateB.command('admin-b',{...snapB,id:id(),sequence:1,action:'output-start'})}catch{duplicateDenied=true}
+     check(duplicateDenied&&starts===1,'simultaneous start repeated');finishStart();check((await pending).ok,'start failed');
+     check(host.read().outputState==='live'&&host.read().allowed.includes('output-stop'),'live actions not restored');
+     await gateA.command('admin-a',commandA);check(starts===1,'start replay executed');
+     state.presenter.outputWindow=null;state.presenter.outputConnectedAt=0;state.presenter.outputStopAt=Date.now();state.presenter.outputGeneration++;
+     check(host.read().outputState==='standby'&&gateA.connected,'stop disconnected controller');
+     const next=gateA.snapshot();const cancelled=gateA.command('admin-a',{...next,id:id(),sequence:2,action:'output-start'});
+     state.selectedServiceId='changed';finishStart();check(!(await cancelled).ok&&!state.presenter.outputWindow,'selection race started wrong output');
+     state.selectedServiceId=sid;
+     runPresenterAction=async()=>{throw Error('팝업 허용 필요')};
+     const failed=await gateA.command('admin-a',{...gateA.snapshot(),id:id(),sequence:3,action:'output-start'});
+     check(!failed.ok&&failed.message.includes('팝업')&&host.read().allowed.includes('output-start'),'failure recovery');
+     MindexRemote.notify();await until(()=>lastInfo?.position==='송출 대기');check(registrations===1,'restart changed code identity');
+    }finally{runPresenterAction=savedRun;gateA.close();gateB.close();}
+    const savedPreflight=MindexPresenterFreshness.beforeOpen,originalItems=JSON.stringify(state.serviceItems);
+    MindexPresenterFreshness.beforeOpen=async(service,options)=>{
+     check(service===sid&&options.guard(),'actual open lost guard');
+     state.presenter.outputWindow={closed:false,postMessage(){},focus(){},close(){this.closed=true}};
+     return true;
+    };
+    try{
+     await host.execute('output-start');check(isPresenterOutputWindowOpen(),'actual start did not open');
+     state.presenter.outputPendingAt=0;state.presenter.outputConnectedAt=Date.now();
+     await host.execute('output-stop');check(!isPresenterOutputWindowOpen()&&host.read().outputState==='standby','actual stop did not return standby');
+     await host.execute('output-start');check(isPresenterOutputWindowOpen(),'actual restart failed');
+     check(JSON.stringify(state.serviceItems)===originalItems,'start/stop changed worship data');
+    }finally{MindexPresenterFreshness.beforeOpen=savedPreflight;state.presenter.outputWindow=null;state.presenter.outputPendingAt=0;state.presenter.outputConnectedAt=0;state.presenter.outputStopAt=Date.now();stopPresenterOutputWindowMonitor();}
+
+
     window.dispatchEvent(new PageTransitionEvent('pagehide'));state.client=null;
     return 'PASS shared worship names in registry; page restore registration; real navigation/blackout/music/auto-sync adapter, source ownership, autoplay failure and output identity';
    }'''),flush=True)

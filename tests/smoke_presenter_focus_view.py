@@ -61,7 +61,7 @@ try:
       assert not page.locator('.global-playback-trigger').is_visible()
       assert music.evaluate('e=>e.getBoundingClientRect().height')==35
       remote.click();assert page.locator('.remote-panel').is_visible()
-      assert '예배 송출을 시작하면 코드가 표시됩니다.' in page.locator('[data-remote-status]').text_content()
+      assert 'PC에서 예배 화면을 열면 코드가 표시됩니다.' in page.locator('[data-remote-status]').text_content()
       page.keyboard.press('Escape')
       page.locator('.remote-panel').wait_for(state='hidden',timeout=2000)
       music.click();assert page.locator('#globalPlaybackPanel').is_visible()

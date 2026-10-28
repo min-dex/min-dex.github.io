@@ -16,7 +16,7 @@ window.supabase={createClient:()=>({async rpc(name,a={}){
  }
  return {data:{ok:false,error:'unexpected'}};
 }})};'''
-SESSION=r'''export async function openRemote(o){window.opened=(window.opened||0)+1;const s={connected:true,usable:true,close(){o.onClose();},async end(){o.onClose();},suspend(){},refresh(){},offline(){}};setTimeout(()=>o.onState({index:0,total:2,current:'예배',next:'다음',music:'음원 없음',allowed:[]}),0);return s;}'''
+SESSION=r'''export async function openRemote(o){window.opened=(window.opened||0)+1;const s={connected:true,usable:true,close(){o.onClose();},async end(){o.onClose();},suspend(){},refresh(){},offline(){}};window.setRemoteState=o.onState;setTimeout(()=>o.onState({index:0,total:2,current:'예배',next:'다음',music:'음원 없음',allowed:[]}),0);return s;}'''
 server,url=start_local_app_server();url=url.replace('index.html','remote.html')
 try:
  with sync_playwright() as p:
@@ -51,6 +51,20 @@ try:
    page.locator('#outputList button').last.click();page.fill('#code','7777');page.click('#connect');page.wait_for_function('window.opened===2');page.wait_for_function("!document.querySelector('#controller').hidden")
    assert page.evaluate("rpcCalls.some(c=>c.name==='mindex_remote_admin'&&c.p_action==='connect'&&c.p_output==='b')")
    assert page.locator('#selectedOutputTitle').inner_text()=='주일예배 [3부]'
+   page.wait_for_function("document.querySelector('#position').textContent==='1 / 2'")
+   page.evaluate("setRemoteState({outputState:'standby',index:-1,total:0,current:'송출 대기',allowed:['output-start']})")
+   assert page.locator('#outputStop span').inner_text()=='송출 시작'
+   assert page.locator('#outputStop').get_attribute('data-action')=='output-start'
+   assert page.locator('#outputStop').is_enabled()
+   for width in (320,390,768):
+    page.set_viewport_size({'width':width,'height':844});assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+   page.screenshot(path='/tmp/mindex-remote-start-'+engine+'.png',full_page=True)
+   page.evaluate("setRemoteState({outputState:'starting',index:-1,total:0,current:'송출 대기',allowed:[]})")
+   assert page.locator('#outputStop span').inner_text()=='송출 준비 중' and page.locator('#outputStop').is_disabled()
+   page.evaluate("setRemoteState({outputState:'live',index:0,total:2,current:'예배',allowed:['output-stop']})")
+   assert page.locator('#outputStop span').inner_text()=='송출 종료'
+   assert page.locator('#outputStop').get_attribute('data-action')=='output-stop'
+
    page.click('#backOutputs');page.wait_for_function("document.querySelectorAll('#outputList .output-code:not([hidden])').length===2")
    page.evaluate("rows.reverse();rows[0].position='8 / 20'")
    page.wait_for_function("document.querySelector('#outputList').textContent.includes('8 / 20')")
