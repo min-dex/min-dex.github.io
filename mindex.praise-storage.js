@@ -14,6 +14,7 @@ async function saveSongMeta(liveSong) {
     const next = pending?.next || globalThis.MindexSingleSong.fromLegacySong(before, before.versions[0], liveSong.id);
     if (!pending) {
       next.legacy = record.legacy; next.provenance = record.provenance;
+      if (record.previousIds) next.previousIds = structuredClone(record.previousIds);
       next.relations = record.relations; next.revision = before._singleSongRevision ?? record.revision;
       praisePendingSaves.set(liveSong, {singleRepository:repository,before,formsBefore,next});
     }
@@ -302,11 +303,12 @@ async function readSingleSongs(ids) {
   for (let at = 0; at < uniqueIds.length; at += 100) {
     rows.push(...await repository.read(uniqueIds.slice(at, at + 100)));
   }
-  const catalog = globalThis.MindexSingleSong.createCatalog(rows);
-  if (ids.some(id => !catalog.ids().includes(id))) throw new Error("SONG_REFERENCE_MISSING");
+  const catalog = globalThis.MindexSingleSong.createCatalog([...new Map(rows.map(row => [row.id, row])).values()]);
+  for (const id of ids) catalog.get(id);
   if (repository !== state.singleSongRepository) throw new Error("SINGLE_SONG_REPOSITORY_CHANGED");
   const cached = new Map(state.singleSongCatalog.ids().map(id => [id, state.singleSongCatalog.get(id)]));
   for (const row of rows) {
+    for (const alias of row.previousIds || []) cached.delete(alias);
     if (!cached.has(row.id) || row.revision >= (cached.get(row.id).revision ?? -1)) cached.set(row.id, row);
   }
   state.singleSongCatalog = globalThis.MindexSingleSong.createCatalog([...cached.values()]);

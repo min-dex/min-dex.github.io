@@ -71,7 +71,7 @@
     return groups;
   }
   function createCatalog(records) {
-    const byId = new Map(), versions = new Map(), songs = new Map();
+    const byId = new Map(), versions = new Map(), songs = new Map(), aliases = new Map();
     function add(map, id, record) {
       if (!id) return;
       if (!map.has(id)) map.set(id, new Set());
@@ -83,6 +83,14 @@
       add(versions, r.legacy?.versionId, r);
       add(songs, r.legacy?.songId, r); add(songs, r.legacy?.canonicalId, r);
     }
+    for (const record of byId.values()) {
+      if (record.previousIds !== undefined && !Array.isArray(record.previousIds)) fail('INVALID_SONG_ID_ALIASES');
+      for (const alias of record.previousIds || []) {
+        if (!code(alias) || byId.has(alias) || aliases.has(alias)) fail('INVALID_SONG_ID_ALIASES');
+        aliases.set(alias, record.id);
+      }
+    }
+    const canonical = id => aliases.get(id) || id;
     function unique(ids) {
       if (!ids?.size) fail('SONG_REFERENCE_MISSING');
       if (ids.size !== 1) fail('SONG_REFERENCE_AMBIGUOUS');
@@ -90,6 +98,7 @@
     }
     function resolve(songId, versionId = null) {
       if (!songId && !versionId) return null;
+      songId = canonical(songId); versionId = canonical(versionId);
       if (code(songId)) {
         if (!byId.has(songId)) fail('SONG_REFERENCE_MISSING');
         if (versionId && versionId !== songId && unique(versions.get(versionId)) !== songId) fail('SONG_REFERENCE_MISMATCH');
@@ -103,11 +112,13 @@
       return unique(songs.get(songId));
     }
     function get(id) {
+      id = canonical(id);
       if (!byId.has(id)) fail('SONG_REFERENCE_MISSING');
       return copy(byId.get(id));
     }
     function appSong(id) {
       const r = get(id);
+      id = r.id;
       return { ...r.metadata, praise_types: praiseTypes(r.content, r.metadata), id, _singleSongRecord: true, _singleSongRevision: r.revision,
         same_song_ids: copy(r.relations?.same_song || []),
         related_song_ids: copy(r.relations?.related || r.metadata.related_song_ids || []),
@@ -153,7 +164,7 @@
     async function read(ids) {
       const rows = await transport.read([...new Set(ids)]);
       const catalog = createCatalog(rows);
-      if (ids.some(id => !catalog.ids().includes(id))) fail('SONG_REFERENCE_MISSING');
+      for (const id of ids) catalog.get(id);
       if (rows.some(r => !Number.isSafeInteger(r.revision) || r.revision < 0)) fail('SONG_REVISION_MISSING');
       return copy(rows);
     }
