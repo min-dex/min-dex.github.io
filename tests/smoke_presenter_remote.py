@@ -29,7 +29,7 @@ try:
     Object.assign(state.presenter,{serviceId:'remote-fixture',outputSessionId:'test-session',outputWindow:{closed:false},index:0,slides:[{title:'첫 번째',sectionLabel:'찬양',elementLabel:'찬양 1',elementTitle:'첫 곡 이름',elementId:'praise-one',body:'긴 내용 '.repeat(150)},{title:'두 번째'},{title:'마지막'}],safetyBlank:false});
     presenterControllerIsLive=()=>true;isPresenterOutputWindowOpen=()=>true;
     window.remoteCalls=[];
-    runPresenterAction=(action,sid,options)=>{remoteCalls.push(action);if(action==='next')state.presenter.index=Math.min(2,state.presenter.index+1);if(action==='prev')state.presenter.index=Math.max(0,state.presenter.index-1);if(action==='jump'){state.presenter.safetyBlank=options.index===-1;if(options.index>=0)state.presenter.index=options.index;}};
+    runPresenterAction=(action,sid,options)=>{remoteCalls.push(action);if(action==='next')state.presenter.index=Math.min(2,state.presenter.index+1);if(action==='prev')state.presenter.index=Math.max(0,state.presenter.index-1);if(action==='jump'){state.presenter.safetyBlank=options.index===-1;state.presenter.safetyBlankMode=options.blankMode==='transparent'?'transparent':'black';if(options.index>=0)state.presenter.index=options.index;}};
     Object.assign(state.serviceMusic,{sourceKey:'fixture.wav',ownerServiceId:'remote-fixture',mode:'presenter-audio',playing:false,pending:false,fadeStop:null,autoSyncSuspended:true,timingGroupId:'group'});
     for(const s of state.presenter.slides){s.syncTimeline={groupId:'group',audioSrc:'fixture.wav',localTiming:true};s.songTimingEligible=true;}
     runServiceMusicAction=async action=>{remoteCalls.push(action);state.serviceMusic.playing=action==='toggle'?!state.serviceMusic.playing:false;};
@@ -147,10 +147,18 @@ try:
    # Encrypted replay must not execute twice.
    command_packet=[packet for source,packet in history if source==phone and packet['payload']['mode']=='session'][-1]
    count=host.evaluate('remoteCalls.length');host.evaluate('p=>deliver(p)',command_packet);pump();assert host.evaluate('remoteCalls.length')==count
-   for action in ('prev','blank','unblank','play','resume','pause','play','stop'):
+   for action in ('prev','transparent','untransparent','blank','unblank','play','resume','pause','play','stop'):
     ready(action);phone.click(f'[data-action="{action}"]');pump();assert phone.locator('#result').inner_text()=='처리 완료',action
    assert phone.locator('#blank svg.lucide-eye-off').count()==1
    assert not host.evaluate('state.serviceMusic.playing')
+   assert phone.locator('[data-action=output-fullscreen]').is_disabled()
+   assert phone.locator('#outputPin').is_disabled()
+   assert phone.locator('#outputStop').is_hidden()
+   host.evaluate("window.mindexElectron={fullscreenPresenterOutput:async()=>{remoteCalls.push('fullscreen')},setPresenterAlwaysOnTop:async({enabled})=>{remoteCalls.push(enabled?'pin':'unpin')}};void 0")
+   for action,expected in (('output-fullscreen','fullscreen'),('output-pin','pin'),('output-unpin','unpin')):
+    ready(action);phone.click(f'[data-action="{action}"]');pump()
+    assert host.evaluate('remoteCalls.at(-1)')==expected
+   host.evaluate('delete window.mindexElectron')
    # A local change between displayed state and command rejects the stale request.
    ready('next');host.evaluate('state.presenter.index=2');phone.click('[data-action=next]');pump()
    assert '바뀌었습니다' in phone.locator('#result').inner_text()

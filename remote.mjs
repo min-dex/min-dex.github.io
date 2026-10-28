@@ -1,7 +1,7 @@
 import {obtainOutputPairing} from './mindex.output-pairing.mjs?v=5';
-import {adminRpc,relayRegistration} from './mindex.remote-admin.mjs?v=7';
+import {adminRpc,relayRegistration} from './mindex.remote-admin.mjs?v=8';
 import {createPreview} from './remote.preview.mjs?v=2';
-import {openRemote} from './mindex.remote-session.mjs?v=12';
+import {openRemote} from './mindex.remote-session.mjs?v=13';
 import {setupPhoneExperience} from './remote.screen.mjs?v=4';
 window.lucide?.createIcons();
 const screenAwake=setupPhoneExperience();
@@ -111,10 +111,15 @@ function state(value){
  view=value;$('controller').hidden=!value;
  if(!value){currentPreview('','');nextPreview('','');$('nextPreview').open=false;$('nextTitle').textContent='마지막 슬라이드';return paint();}
  $('pairForm').hidden=true;$('position').textContent=`${value.index+1} / ${value.total}`;
- currentPreview(value.previewCurrent,value.blank?'암전 중':value.current||'내용 없음');nextPreview(value.previewNext,value.next||'마지막 슬라이드');
+ currentPreview(value.previewCurrent,value.transparent?'투명':value.blank?'암전 중':value.current||'내용 없음');nextPreview(value.previewNext,value.next||'마지막 슬라이드');
  $('nextTitle').textContent=value.nextTitle||String(value.next||'마지막 슬라이드').split('\n')[0].slice(0,200);
  $('music').textContent=value.music;
  $('videoStatus').textContent=value.video ? ({playing:'재생 중',paused:'일시정지',ended:'재생 완료',blocked:'PC에서 재생 허용 필요',loading:'영상 준비 중',error:'영상 재생 실패'}[value.video.status]||'영상 상태 확인 중') : '연결된 영상 없음';
+ $('outputStop').hidden=!value.allowed?.includes('output-stop');
+ $('outputPin').dataset.action=value.alwaysOnTop?'output-unpin':'output-pin';$('outputPin').setAttribute('aria-pressed',String(!!value.alwaysOnTop));
+ $('transparent').dataset.action=value.transparent?'untransparent':'transparent';$('transparent').setAttribute('aria-pressed',String(!!value.transparent));
+ $('transparent').querySelector('span').textContent=value.transparent?'투명 해제':'투명';
+ $('blank').setAttribute('aria-pressed',String(!!value.blank));
  $('blank').dataset.action=value.blank?'unblank':'blank';$('blank').querySelector('span').textContent=value.blank?'암전 해제':'암전';
  const icon=value.blank?'eye':'eye-off';
  if($('blank').querySelector('[data-lucide]')?.getAttribute('data-lucide')!==icon){
@@ -213,6 +218,7 @@ async function disconnectController(){
 $('disconnect').onclick=disconnectController;
 $('backOutputs').onclick=disconnectController;
 for(const button of document.querySelectorAll('[data-action]'))button.onclick=async()=>{
+ if(button.dataset.action==='output-stop'&&!confirm('송출을 종료할까요? 리모트 연결도 종료됩니다.'))return;
  try{const promise=session.command(button.dataset.action);$('result').textContent='처리 중…';paint();await promise;}catch(e){$('result').textContent=e.message;}paint();
 };
 document.addEventListener('visibilitychange',()=>{if(document.hidden)session?.suspend();else{session?.refresh();void listOutputs();}paint();});

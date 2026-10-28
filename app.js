@@ -29540,33 +29540,20 @@ function renderPresenterControlsTop(service, slides, active, index) {
   const statusTone = outputBlocked ? "blocked" : outputPending ? "pending" : outputOpen ? "live" : outputOpenElsewhere ? "other" : "ready";
   const mode = presenterControllerMode(service, { active, count, current, outputOpen, outputOpenElsewhere, safeIndex });
   const warmup = presenterOutputWarmupUiState(service.id, { active, outputOpen });
-  const launchAction = anyOutputOpen ? "stop" : "open";
-  const launchLabel = uiText(anyOutputOpen ? "presenter.action.stop" : "presenter.action.present");
-  const launchIcon = anyOutputOpen ? "screen-share-off" : "screen-share";
-  const launchTone = anyOutputOpen ? "stop" : "start";
-  const fullscreenLabel = anyOutputOpen ? "송출 화면 전체 화면" : "송출을 시작하면 전체 화면을 사용할 수 있습니다";
-  const fullscreenControl = `<button class="icon-btn svc-presenter-fullscreen svc-presenter-window-button" type="button" data-presenter-action="fullscreen" aria-label="${escapeAttr(fullscreenLabel)}" title="${escapeAttr(fullscreenLabel)}" ${anyOutputOpen ? "" : "disabled"}><i data-lucide="maximize"></i><span>전체 화면</span></button>`;
   return `
       <div class="svc-presenter-top">
         <div class="svc-presenter-output-group">
           <div class="svc-presenter-display-slot">${renderPresenterScreenControl()}</div>
-          <button class="svc-present-btn svc-presenter-launch svc-presenter-launch--${launchTone}${anyOutputOpen ? " is-stop" : ""}" type="button" data-presenter-action="${escapeAttr(launchAction)}" data-service-id="${escapeAttr(service.id)}" aria-label="${escapeAttr(launchLabel)}">
-            <i data-lucide="${escapeAttr(launchIcon)}"></i>
-            <span>${escapeHtml(launchLabel)}</span>
-          </button>
-          <div class="svc-presenter-window-controls">
-          ${anyOutputOpen ? fullscreenControl : `<span class="svc-presenter-disabled-control" title="${escapeAttr(fullscreenLabel)}">${fullscreenControl}</span>`}
-          </div>
-          ${renderPresenterAlwaysOnTopControl({ buttonStyle: true })}
           <button class="icon-btn" type="button" data-presenter-music-manager popovertarget="globalPlaybackPanel" aria-label="미디어 관리" title="미디어 관리"><i data-lucide="video"></i><span>미디어 관리</span></button>
         </div>
+        ${renderPresenterScreenManagement(service.id, slides)}
         <div class="svc-presenter-main" aria-live="polite">
           <span class="svc-slide-counter" aria-label="${escapeAttr(uiText("presenter.aria.slideCount", { current, count }))}">
             <span class="svc-presenter-mini-label">${escapeHtml(uiText("presenter.label.slide"))}</span>
             <input class="svc-slide-jump-input" type="number" inputmode="numeric" min="0" max="${escapeAttr(count || 1)}" value="${escapeAttr(jumpInputValue)}" data-presenter-jump-input data-service-id="${escapeAttr(service.id)}" aria-label="${escapeAttr(uiText("presenter.aria.slideNumber"))}" ${count ? "" : "disabled"} />
             <span>/ ${escapeHtml(count)}</span>
           </span>
-          <button class="icon-btn" type="button" data-presenter-action="jump" data-presenter-index="${active && state.presenter.safetyBlank ? safeIndex : -1}" data-service-id="${escapeAttr(service.id)}" aria-label="${active && state.presenter.safetyBlank ? "암전 해제" : "암전"}" title="${active && state.presenter.safetyBlank ? "암전 해제" : "암전"}" aria-pressed="${Boolean(active && state.presenter.safetyBlank)}" ${count && outputOpen ? "" : "disabled"}><i data-lucide="${active && state.presenter.safetyBlank ? "eye" : "eye-off"}"></i></button>
+
           <button class="icon-btn" type="button" data-presenter-action="return" data-service-id="${escapeAttr(service.id)}" aria-label="직전 송출 슬라이드로 돌아가기" title="직전 송출 슬라이드로 돌아가기" ${presenterReturnTarget(service.id) ? "" : "disabled"}><i data-lucide="undo-2"></i></button>
           <span class="svc-presenter-action-group svc-presenter-action-group--nav" aria-label="${escapeAttr(uiText("presenter.aria.slideNav"))}">
             <button class="icon-btn" type="button" data-presenter-action="prev" data-service-id="${escapeAttr(service.id)}" ${count ? "" : "disabled"} aria-label="${escapeAttr(uiText("presenter.action.prev"))}" title="${escapeAttr(uiText("presenter.action.prev"))}">
@@ -29650,13 +29637,13 @@ function presenterLiveStatusPreviewSlide(slides = [], safeIndex = 0, options = {
   if (!options.outputOpen) return slides[clampPresenterIndex(safeIndex, slides.length)] || null;
   if (!options.active) return null;
   if (state.presenter.liveScripture?.active && state.presenter.liveScripture.slide) return state.presenter.liveScripture.slide;
-  if (state.presenter.safetyBlank) return presenterSafetyBlankSlide();
+  if (state.presenter.safetyBlank) return presenterSafetyBlankSlide(state.presenter.safetyBlankMode);
   return slides[clampPresenterIndex(safeIndex, slides.length)] || null;
 }
 function presenterLiveStatusPreviewTitle(slide = null, options = {}) {
   if (options.outputOpenElsewhere) return "다른 예배 송출 중";
   if (!options.outputOpen) return "선택 화면 · 송출 대기";
-  if (state.presenter.safetyBlank) return "빈 화면";
+  if (state.presenter.safetyBlank) return state.presenter.safetyBlankMode === "transparent" ? "투명" : "암전";
   if (state.presenter.liveScripture?.active) return state.presenter.liveScripture.reference || slide?.title || "실시간 말씀";
   return String(slide?.title || slide?.label || slide?.elementTitle || slide?.text || "현재 화면").split(/\r?\n/)[0].trim() || "현재 화면";
 }

@@ -94,3 +94,9 @@ button :is([data-lucide], svg.lucide) { width: var(--ui-icon-size); height: var(
 #pairTitle { min-width:0; overflow-wrap:anywhere; }
 
 #pairForm { margin-top:20px; }
+
+.screen-management { border-block:1px solid var(--line); padding:15px 0; margin:5px 0 15px; }
+.screen-management h2 { margin:0 0 10px; }
+.screen-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.screen-actions #outputStop { grid-column:1/-1; }
+.screen-actions [aria-pressed=true] { color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent); }
