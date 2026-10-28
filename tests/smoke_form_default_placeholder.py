@@ -23,7 +23,7 @@ try:
     check(serviceItemLinkedVersion(nativeItem)===native.versions[0],'native content resolves without legacy version id');
     check(input(nativeItem).placeholder==='T-V-C','native inferred form must include lyrics, not only T');
     const picker=document.createElement('div');picker.innerHTML=renderServiceSongVersionPicker(nativeItem,0,serviceItemEditorModel(nativeItem,{service}));
-    check(picker.querySelector('select').value===native.id&&picker.querySelector('select').dataset.serviceItemField==='praise_record_id'&&!picker.querySelector('[aria-invalid]'),'native picker must keep current record without legacy version warning');
+    check(!picker.querySelector('select')&&!picker.querySelector('[aria-invalid]')&&serviceItemLinkedVersion(nativeItem)===native.versions[0],'singleton keeps exact native record without redundant selector or legacy warning');
     check(JSON.stringify({native,nativeItem})===nativeBefore,'native read must preserve record and worship input');
     const authored={...nativeItem,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formHint:'C-V1-C'})};
     check(input(authored).value==='C-V1-C','authored native form remains authoritative');
