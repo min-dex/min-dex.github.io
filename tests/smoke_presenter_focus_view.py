@@ -38,6 +38,7 @@ try:
       try {
         const toggle=document.querySelector('[data-presenter-order-toggle]');
         const body=document.getElementById('presenterOrderInputBody');
+        if(body.hidden)toggle.click();
         const field=body.querySelector('input,textarea');
         const before=field.value;field.value='접어도 유지되는 입력';
         toggle.click();

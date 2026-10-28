@@ -71,7 +71,7 @@ try:
     mount(True)
     for selector in selectors:assert page.locator(selector).evaluate('e=>e.open')==wanted,(engine,'reload',selector,wanted)
     # Order entry uses applied completeness on a fresh session, unlike persisted disclosures.
-    auto_open=page.evaluate('''()=>{const service=state.services[0];const fields=presenterPreparationFieldValues(service,presenterPreparationDefaultDraftForService(service));return !(fields.length&&fields.every(field=>field.value.trim()));}''')
+    auto_open=page.evaluate('''()=>{const service=state.services[0];const fields=presenterPreparationFieldValues(service,presenterPreparationStructuredDraft(service));return !(fields.length&&fields.every(field=>field.value.trim()));}''')
     assert (page.locator('[data-presenter-order-toggle]').get_attribute('aria-expanded')=='true')==auto_open
     assert (page.locator('[data-presenter-lyrics-toggle]').get_attribute('aria-expanded')=='true')==wanted
    # Explicit closed choice overrides open-by-default; other items keep defaults.
