@@ -81,7 +81,10 @@ try:
    for width in (320,390,768):
     phone.set_viewport_size({'width':width,'height':844});pump(.1)
     assert phone.evaluate('document.documentElement.scrollWidth<=innerWidth'),f'overflow {width}'
-    assert phone.locator('[data-action=next]').bounding_box()['height']==70
+    assert phone.locator('[data-action=next]').bounding_box()['height']>=70
+    current=phone.locator('#current').bounding_box();prev=phone.locator('[data-action=prev]').bounding_box();nxt=phone.locator('[data-action=next]').bounding_box()
+    assert prev['x']+prev['width']<=current['x'] and current['x']+current['width']<=nxt['x']
+    assert prev['width']==nxt['width']==50
     for button in phone.locator('[data-action]:visible').all():
      assert button.locator('svg').count()==1
      assert button.evaluate('e=>e.scrollWidth<=e.clientWidth')
@@ -92,13 +95,20 @@ try:
     assert phone.locator('[data-action=play]').bounding_box()['height']==50
    phone.set_viewport_size({'width':390,'height':844})
    if engine=='chromium':phone.screenshot(path='/tmp/mindex-remote-phone.png',full_page=True)
+   assert not phone.locator('#nextPreview').evaluate('e=>e.open')
+   phone.locator('#nextPreview summary').click();assert phone.locator('#next').is_visible()
+   phone.locator('#nextPreview summary').click();assert phone.locator('#next').is_hidden()
    # Browsing is read-only; selecting a fresh target uses the encrypted command gate.
    host.evaluate("state.presenter.slides.push(...Array.from({length:10},(_,i)=>({title:'추가 '+i,body:'미리보기',sectionLabel:'광고'})))");pump(1.2)
    before=host.evaluate('remoteCalls.length');phone.click('#slidesOpen');pump(1)
-   assert phone.locator('#slidesList button').count()==6
+   assert phone.locator('#slidesList.groups button').count()==4
+   assert '찬양 1 · 첫 곡 이름' in phone.locator('#slidesList button').first.inner_text()
+   phone.locator('#slidesList button').first.click();pump(.5)
+   assert phone.locator('#slidesList button').count()==1
+   assert host.evaluate('remoteCalls.length')==before
+   phone.click('#slideGroups');pump(.5)
    assert phone.locator('dialog:visible').count()==0
    assert phone.locator('#slidesOpen').get_attribute('aria-expanded')=='true'
-   assert '찬양 1 · 첫 곡 이름' in phone.locator('#slidesList h3').all_text_contents()
    phone.fill('#slidesQuery','첫 곡 이름');phone.locator('#slidesSearch button').click();pump(.5)
    assert phone.locator('#slidesList button').count()==1
    phone.fill('#slidesQuery','');phone.locator('#slidesSearch button').click();pump(.5)
@@ -109,8 +119,11 @@ try:
     assert phone.locator('#slidesPanel').evaluate('e=>e.scrollWidth<=e.clientWidth')
    phone.set_viewport_size({'width':390,'height':844})
    phone.screenshot(path='/tmp/mindex-remote-slides-'+engine+'.png',full_page=True)
-   phone.click('#slidesNext');pump(.5);assert phone.locator('#slidesList button').first.get_attribute('data-index')=='6'
-   phone.click('#slidesPrev');pump(.5);assert phone.locator('#slidesList button').first.get_attribute('data-index')=='0'
+   phone.locator('#slidesList button').last.click();pump(.5)
+   assert phone.locator('#slidesList button').count()==6
+   assert phone.locator('#slidesList button').first.get_attribute('data-index')=='3'
+   phone.click('#slidesNext');pump(.5);assert phone.locator('#slidesList button').first.get_attribute('data-index')=='9'
+   phone.click('#slidesPrev');pump(.5);assert phone.locator('#slidesList button').first.get_attribute('data-index')=='3'
    phone.fill('#slidesQuery','마지막');phone.locator('#slidesSearch button').click();pump(.5)
    assert phone.locator('#slidesList button').count()==1
    phone.locator('#slidesList button').click();pump(.5)
@@ -124,6 +137,8 @@ try:
    assert phone.locator('#slidesList button').first.is_disabled()
    phone.locator('#slidesSearch button').click();pump(.5)
    assert phone.locator('#slidesList button').first.is_enabled()
+   phone.locator('#slidesList button').first.click();pump(.5)
+   assert host.evaluate('state.presenter.index')==2
    phone.locator('#slidesList button').first.click();pump(.5)
    assert host.evaluate('state.presenter.index')==0
    host.evaluate('state.presenter.slides.splice(3)');pump(1.2)
