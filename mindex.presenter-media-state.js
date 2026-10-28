@@ -19,6 +19,10 @@ function presenterMediaClock(seconds) {
   return `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 }
 
+function presenterVideoSourceFeedback(video) {
+  return {unverified:"송출 창을 다시 열어 주세요.",mismatch:"새 영상 반영 대기"}[video?.sourceProblem] || "";
+}
+
 function presenterMediaClockText(position, duration, loop = false) {
   const known = Number.isFinite(duration) && duration > 0;
   const current = Number.isFinite(position) ? Math.max(0, known ? Math.min(position, duration) : position) : 0;
@@ -46,13 +50,14 @@ function syncPresenterVideoTransport(video = presenterManagedVideoState()) {
     const row = input.closest("[data-input-video-controls]");
     const current = row ? presenterInputVideoState(row, video) : video;
     const enabled = row ? Boolean(current?.ready && !presenterVideoRequests.size && state.selectedServiceId === row.dataset.serviceId) : input.dataset.videoEnabled === "true";
-    const known = Number.isFinite(current?.durationSeconds) && current.durationSeconds > 0;
+    const known = !current?.sourceProblem && Number.isFinite(current?.durationSeconds) && current.durationSeconds > 0;
     input.disabled = !current?.ready || !enabled || !known || !current.seekable?.length;
     if (!input._videoSeekOwner) {
       input.max = known ? current.durationSeconds : 0;
       input.value = Math.max(0, Math.min(Number(current?.positionSeconds) || 0, Number(input.max)));
       input.dataset.videoOwner = presenterVideoSeekIdentity();
-      input.parentElement.querySelector("[data-presenter-video-clock]").textContent = row && !current ? "송출 대기" : presenterMediaClockText(current?.positionSeconds, current?.durationSeconds, current?.loop);
+      const feedback = presenterVideoSourceFeedback(current);
+      input.parentElement.querySelector("[data-presenter-video-clock]").textContent = row && !current ? "송출 대기" : feedback ? (row ? feedback : "–:––") : presenterMediaClockText(current?.positionSeconds, current?.durationSeconds, current?.loop);
     }
     if (row) syncPresenterInputMediaButton(row.querySelector('button'), current?.status === 'playing', !enabled, '영상');
   }
@@ -98,7 +103,7 @@ function renderPresenterVideoManagement(video) {
   const busy = presenterVideoRequests.size > 0;
   const enabled = video?.ready && !busy && state.selectedServiceId === state.presenter.serviceId;
   const labels = { playing: "재생 중", paused: "일시정지", ended: "재생 완료", blocked: "PC에서 재생 허용 필요", loading: "영상 준비 중", error: "영상 재생 실패" };
-  const status = busy ? "처리 중…" : video ? labels[video.status] || "상태 확인 중" : "송출 중인 영상이 없습니다.";
+  const status = busy ? "처리 중…" : video ? presenterVideoSourceFeedback(video) || labels[video.status] || "상태 확인 중" : "송출 중인 영상이 없습니다.";
   const title = state.presenter.slides[state.presenter.index]?.title || "현재 영상";
   return `<section class="global-media-section" aria-label="영상"><h3>영상</h3>
     ${video ? `<div class="global-playback-group"><span class="global-playback-name">${escapeHtml(title)}</span></div>` : ""}

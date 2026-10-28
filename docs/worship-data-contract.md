@@ -1102,3 +1102,19 @@ number or an unrelated parent's number. Existing selected records stay linked
 when files are absent. Catalog media panels distinguish missing resources from
 load failures/retry. Empty wording is 등록된 악보가 없습니다./등록된 음원이 없습니다.
 No score/audio/lyrics or worship data is rewritten by this UI change.
+
+## Song-level catalog navigation · 2026-10-28 candidate
+
+Confirmed native same_song edges form read-only display groups. Lists, global
+search and worship song search show one row per group; matching variant titles
+and lyrics remain searchable. No title-based inference or DB record merge occurs.
+The representative is deterministic (new hymnal first, then native ID); selecting
+another member keeps the common catalog heading and exact member identity.
+Existing worship links, record titles, version names, forms, audio and cues are
+unchanged. Search opens the matched member. Filters include a group when any
+member matches. An explicit worship choice selects the exact eligible variant;
+opening a group never writes a default variant. One-member groups have no version
+selector. Native lyrics display only the selected member; names and optional
+output titles remain editable in song information, with differing titles visible.
+Legacy multi-version records retain their existing editing and persistence path.
+Required release/public verification is separate from scoped local checks.

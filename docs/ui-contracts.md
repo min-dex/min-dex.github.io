@@ -1106,3 +1106,11 @@ The visible view controls are 슬라이드 보기 and 발표자 보기. The pres
 panel accessible name is 발표자 보기. Internal basic/focus values, state,
 DOM retention and the existing toggle behavior are unchanged. Earlier dated
 records may use the previous 기본 보기/집중 보기 labels.
+
+### Shared offering input actions ·2026-10-28
+
+Offering keeps the hymn/special/video choices and their existing transitions.
+Its fields now share praise/media layout and the same action renderer as other
+service inputs: background, audio or attachment, then one Save action. Separate
+offering-only save/tool rows and duplicate button styling are retired. Service
+rules, persistence, generated defaults and existing records are unchanged.

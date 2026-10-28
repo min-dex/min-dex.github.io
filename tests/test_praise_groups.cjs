@@ -1,0 +1,17 @@
+const assert=require('assert/strict'),single=require('../mindex.single-song.js');
+const row=(id,title,links=[],native=true)=>({id,title,_singleSongRecord:native,same_song_ids:links,versions:[{id,forms:[{lyrics:'원문'}],audio_set:{starts:[1,3]}}]});
+const a=row('SONG-HYMN-N009-0001','대표 제목',['SONG-HYMN-T053-0001']);
+const b=row('SONG-HYMN-T053-0001','다른 옛 제목',['SONG-CONT-0002-0001']);
+const c=row('SONG-CONT-0002-0001','영어 제목');
+const m=row('SONG-CONT-0118-0001','마라나타'),n=row('SONG-CHLD-0019-0001','마라나타');
+const legacy=row('legacy','대표 제목',[a.id],false);
+const rows=[c,b,n,legacy,m,a],before=structuredClone(rows),groups=single.groupSongs(rows);
+assert.equal(groups.length,4);assert.deepEqual(rows,before);
+assert.equal(groups.find(g=>g.members.includes(a)).representative,a);
+assert.deepEqual(groups.find(g=>g.members.includes(a)).members.map(r=>r.id),[a.id,c.id,b.id]);
+assert.equal(groups.find(g=>g.members.includes(m)).members.length,1);
+assert.equal(groups.find(g=>g.members.includes(n)).members.length,1);
+assert.equal(groups.find(g=>g.members.includes(legacy)).members.length,1);
+assert.deepEqual(single.groupSongs([...rows].reverse()).map(g=>g.id).sort(),groups.map(g=>g.id).sort());
+assert.equal(single.groupSongs([row('one','가',['missing'])]).length,1);
+console.log('PASS explicit graph groups, stable representative, same-title separation, no mutation');

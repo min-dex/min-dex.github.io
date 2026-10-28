@@ -9,6 +9,7 @@ import time
 ROOT = Path(__file__).resolve().parents[1]
 NODE_TESTS = (
     "test_praise_classification.cjs",
+    "test_praise_groups.cjs",
     "test_single_song.cjs",
     "test_remote_core.mjs",
     "test_remote_pairing.mjs",
@@ -42,6 +43,7 @@ NODE_TESTS = (
     "test_calendar_assignee_creation.cjs",
     "test_children_default_completion.cjs",
     "test_children_worship_template.cjs",
+    "test_children_order_defaults.mjs",
     "test_worship_template_preservation.cjs",
     "test_shared_offering_integrity.cjs",
     "test_music_fade_stop.cjs",
@@ -77,6 +79,7 @@ CSS_NODE_TESTS = (
                   'test_remote_theme.cjs', 'test_bulletin.cjs')
 SMOKES = (
     "smoke_audio_presence.py",
+    "smoke_praise_groups.py",
     "smoke_single_song.py",
     "smoke_single_song_lifecycle.py",
     "smoke_single_song_activation.py",
@@ -85,6 +88,7 @@ SMOKES = (
     "smoke_presenter_return.py",
     "smoke_controller_slide_blocks.py",
     "smoke_future_outline_consistency.py",
+    "smoke_empty_presenter_inputs.py",
     "smoke_legacy_title_restore.py",
     "smoke_song_form_width.py",
     "smoke_input_feedback_sync.py",
@@ -98,6 +102,8 @@ SMOKES = (
     "smoke_form_default_placeholder.py",
     "smoke_lyrics_form.py",
     "smoke_presenter_common_fit.py",
+    "smoke_media_viewport_fit.py",
+    "smoke_media_source_identity.py",
     "smoke_transition_logo.py",
     "smoke_fullscreen_praise.py",
     "smoke_service_design.py",

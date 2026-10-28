@@ -9331,7 +9331,7 @@ function handleDetailKeydown(event) {
     return;
   }
 
-  if (event.key === "Enter" && event.target.matches("input[data-song-field], input[data-song-meta-field], input[data-version-name-field], input[data-version-output-title-field]")) {
+  if (event.key === "Enter" && event.target.matches("input[data-song-field], input[data-song-meta-field], input[data-version-name-field], input[data-version-output-title-field], input[data-hymn-structure-version]")) {
     event.preventDefault();
     saveAll();
     return;
@@ -9587,6 +9587,9 @@ function handleDetailInput(event) {
     return;
   }
 
+  const measureField = event.target.closest("input[data-hymn-structure-version]");
+  if (measureField) { updateVersionMeasureField(measureField); return; }
+
   const songMetaField = event.target.closest("[data-song-meta-field]");
   if (songMetaField) {
     updateSongMetadataField(songMetaField);
@@ -9806,6 +9809,9 @@ function handleDetailChange(event) {
     updateVersionNameField(versionNameField);
     return;
   }
+
+  const measureField = event.target.closest("input[data-hymn-structure-version]");
+  if (measureField) { updateVersionMeasureField(measureField); return; }
 
   const songMetaField = event.target.closest("[data-song-meta-field]");
   if (songMetaField) {
@@ -14455,7 +14461,7 @@ function currentPageTabTitle() {
   }
   if (state.module === "praise") {
     const song = getSelectedSong();
-    return song ? songListView(song).title || song.title || "찬양" : "찬양";
+    return song ? praiseGroupTitle(song) : "찬양";
   }
   if (state.module === "setlists") return SERVICE_SETLIST_ARCHIVE_PANEL_TITLE;
   if (state.module === "operations") return "운영";
@@ -14540,7 +14546,7 @@ function pageTabTitleForSnapshot(snapshot = {}) {
   }
   if (moduleName === "praise") {
     const song = songById(snapshot.selectedSongId);
-    return song ? songListView(song).title || song.title || "찬양" : "찬양";
+    return song ? praiseGroupTitle(song) : "찬양";
   }
   if (moduleName === "setlists") return SERVICE_SETLIST_ARCHIVE_PANEL_TITLE;
   if (moduleName === "operations") return "운영";
@@ -15943,7 +15949,7 @@ function renderSongList() {
 
   const filtered = getFilteredSongs();
   const hasSearch = Boolean(normalizeSearchValue(state.search));
-  const filterBase = getSongsForPraiseFilter();
+  const filterBase = groupPraiseSongs(getSongsForPraiseFilter());
   refs.songCount.textContent = hasSearch
     ? `${formatCount(filterBase.length)}곡 중 ${formatCount(filtered.length)}곡`
     : `${formatCount(filtered.length)}곡`;
@@ -15960,23 +15966,23 @@ function renderSongList() {
   if (state.praiseListWindow.key !== listWindowKey) {
     state.praiseListWindow = { key: listWindowKey, limit: 180 };
   }
-  const activeSongIndex = filtered.findIndex((song) => song.id === state.selectedSongId);
+  const activeSongIndex = filtered.findIndex(praiseGroupIsSelected);
   if (activeSongIndex >= state.praiseListWindow.limit) {
     state.praiseListWindow.limit = Math.ceil((activeSongIndex + 1) / 180) * 180;
   }
   const visibleSongs = filtered.slice(0, state.praiseListWindow.limit);
   refs.songList.innerHTML = visibleSongs
     .map((song) => {
-      const active = song.id === state.selectedSongId ? " active" : "";
+      const active = praiseGroupIsSelected(song) ? " active" : "";
       const muted = song._outOfFilter ? " muted" : "";
       const view = songListView(song);
       const hasMeta = view.meta ? " has-meta" : "";
       return `
-        <button class="song-item${active}${muted}${hasMeta}" type="button" data-song-id="${escapeAttr(song.id)}">
+        <button class="song-item${active}${muted}${hasMeta}" type="button" data-song-id="${escapeAttr(praiseGroupIsSelected(song) ? state.selectedSongId : song.id)}">
           <span class="song-title">
             ${view.showHymnMarker ? `<span class="song-hymn-no">${escapeHtml(formatHymnMarker(song.hymn_no))}</span>` : ""}
             <span class="song-title-text" title="${escapeAttr(view.title)}">${escapeHtml(view.title)}</span>
-            ${song.versions?.length > 1 ? `<span class="song-count-badge">${song.versions.length}</span>` : ""}
+            ${(song._praiseGroupCount || song.versions?.length) > 1 ? `<span class="song-count-badge" aria-label="${song._praiseGroupCount || song.versions.length}개 판본">${song._praiseGroupCount || song.versions.length}</span>` : ""}
             ${renderSongAttentionIcon(song)}
           </span>
           ${view.meta ? `<span class="song-meta-line" title="${escapeAttr(view.meta)}">${escapeHtml(view.meta)}</span>` : ""}
@@ -16092,17 +16098,6 @@ function getGlobalSearchResults() {
   return results;
 }
 
-function getGlobalPraiseResults(tokens) {
-  if (!tokens.length) return [];
-  const includeLyrics = true;
-  return state.songs
-    .filter(isSelectablePraiseSong)
-    .map((song) => ({ song, match: getSongSearchMatch(song, tokens, { includeLyrics, crossFields: true }) }))
-    .filter((item) => item.match)
-    .sort((a, b) => b.match.score - a.match.score || sortSongsForCurrentList(a.song, b.song))
-    .slice(0, 8);
-}
-
 function getGlobalScriptureResults(query, tokens) {
   if (!query) return [];
 
@@ -16151,7 +16146,7 @@ function renderGlobalPraiseResult(result) {
       <span class="song-title">
         ${view.showHymnMarker ? `<span class="song-hymn-no">${escapeHtml(formatHymnMarker(song.hymn_no))}</span>` : ""}
         <span class="song-title-text" title="${escapeAttr(view.title)}">${escapeHtml(view.title)}</span>
-        ${song.versions?.length > 1 ? `<span class="song-count-badge">${song.versions.length}</span>` : ""}
+        ${(song._praiseGroupCount || song.versions?.length) > 1 ? `<span class="song-count-badge" aria-label="${song._praiseGroupCount || song.versions.length}개 판본">${song._praiseGroupCount || song.versions.length}</span>` : ""}
         ${renderSongAttentionIcon(song)}
       </span>
       ${meta ? `<span class="song-meta-line" title="${escapeAttr(meta)}">${escapeHtml(meta)}</span>` : ""}
@@ -17019,7 +17014,7 @@ function renderDetail() {
       <header class="editor-head">
         <div class="editor-title">
           <h2 id="editorSongTitle">
-            <span>${escapeHtml((song.hymn_no ? stripHymnNumber(song.title) : song.title) || "제목 없는 찬양")}</span>
+            <span>${escapeHtml(praiseGroupTitle(song))}</span>
             ${song.hymn_no ? `<span class="scripture-book-marker">${escapeHtml(song.hymn_no)}</span>` : ""}
           </h2>
           ${renderSongDescription(song, titleMetaLine, [], relatedSongs)}
@@ -17469,7 +17464,7 @@ function renderSongMetadataDialog(song) {
           </button>
         </header>
         <div class="metadata-popover-grid">
-          ${renderInput("제목", "title", (song.hymn_no ? stripHymnNumber(song.title) : song.title) || "", "compact meta-title")}
+          ${renderInput(song._singleSongRecord && praiseDisplayGroup(song).members.length > 1 ? "이 판본의 곡 제목" : "제목", "title", (song.hymn_no ? stripHymnNumber(song.title) : song.title) || "", "compact meta-title")}
           ${renderInput("부제", "subtitle", song.subtitle || "", "compact")}
           ${renderInput("원제", "original_title", song.original_title || "", "compact")}
           ${renderMetadataInput("아티스트", "artist", metadata.artist || "", "compact")}
@@ -17482,6 +17477,7 @@ function renderSongMetadataDialog(song) {
           ${renderInput("성구", "scripture", cleanList(song.scripture).join(LIST_INPUT_SEPARATOR), "compact meta-ref")}
           ${renderVersionMusicalStructure(getSelectedVersion(), state.forms, { metadataField: true })}
         </div>
+        ${renderNativeVersionMetadata(song)}
         ${renderSingleSongRelations(song)}
       </section>
     </div>
@@ -17760,7 +17756,7 @@ function shouldReviewVersionStructure(song, version, forms = version?.forms || [
 
 function renderFormsTab(song) {
   const versions = song.versions || [];
-  const linkedEntries = linkedSongVersionEntries(song);
+  const linkedEntries = linkedSongVersionEntries(song).filter(entry => !song._singleSongRecord || !praiseDisplayGroup(song).members.some(row => row.id === entry.song.id));
   return `
     <section class="panel praise-forms-panel">
       ${renderSingleSongVersionPicker(song)}
@@ -17943,8 +17939,8 @@ function renderVersionTitleContent(song, version, forms, options = {}) {
   const versionName = versionEditableName(song, version || {});
   return `
     <div class="version-title-main">
-      <input class="version-title-input" type="text" data-version-name-field="${escapeAttr(version?.id || "")}" value="${escapeAttr(versionName)}" aria-label="버전 이름" />
-      <input class="version-output-title-input" type="text" data-version-output-title-field="${escapeAttr(version?.id || "")}" value="${escapeAttr(version?.output_title || "")}" placeholder="${escapeAttr(`버전 전용 제목 · 미입력 시 ${song?.title || "대표 제목"}`)}" aria-label="버전 전용 제목" title="비워 두면 대표 제목으로 출력합니다" />
+      ${song?._singleSongRecord ? renderNativeVersionHeading(song,version) : `      <input class="version-title-input" type="text" data-version-name-field="${escapeAttr(version?.id || "")}" value="${escapeAttr(versionName)}" aria-label="버전 이름" />
+      <input class="version-output-title-input" type="text" data-version-output-title-field="${escapeAttr(version?.id || "")}" value="${escapeAttr(version?.output_title || "")}" placeholder="${escapeAttr(`버전 전용 제목 · 미입력 시 ${song?.title || "대표 제목"}`)}" aria-label="버전 전용 제목" title="비워 두면 대표 제목으로 출력합니다" />` }
       ${renderVersionAttentionStatus(song, version, forms, { active })}
     </div>
     <div class="version-title-actions">
@@ -17965,21 +17961,31 @@ function renderVersionTitleContent(song, version, forms, options = {}) {
   `;
 }
 
+function updateVersionMeasureField(field) {
+  const version = getSelectedVersion();
+  if (!version || version.id !== field.dataset.hymnStructureVersion) return;
+  field.dataset.hymnStructureRequest = String(++hymnStructureRenderTicket);
+  version.hymn_structure = {...(version.hymn_structure || {}),
+    displayText: globalThis.MindexHymnStructure.normalizeDisplayText(field.value)};
+  field.dataset.reviewStatus = "manual";
+  state.dirty.song = true;
+  updateSaveState();
+}
 let hymnStructureRenderTicket = 0;
 function updateVersionMusicalStructure(node, version, forms) {
   if (!node || !globalThis.MindexHymnStructure) return;
   const ticket = String(++hymnStructureRenderTicket);
   node.dataset.hymnStructureRequest = ticket;
-  if (node.matches("input")) node.value = "확인 중…";
-  else node.textContent = "마디 정보 확인 중…";
+  if (!node.matches("input")) node.textContent = "마디 정보 확인 중…";
   const snapshot = (forms || []).map(form => ({id:form.id, part_type:form.part_type, lyrics:form.lyrics || ""}));
-  MindexHymnStructure.describe(version._legacyVersionId || version.id, snapshot)
+  MindexHymnStructure.describe(version._legacyVersionId || version.id, snapshot,
+    version._singleSongRecord ? {[version._legacyVersionId || version.id]: version.hymn_structure} : undefined)
     .catch(() => ({text:"마디 정보를 불러오지 못했어요",status:"error"}))
     .then(result => {
       if (!node.isConnected || node.dataset.hymnStructureRequest !== ticket) return;
       if (node.matches("input")) {
-        node.value = result.text.replace(/^마디:\s*/, "").split(" · 블록 ")[0];
-        node.title = `${node.dataset.hymnStructureLabel} · ${result.text}`;
+        if (document.activeElement !== node) node.value = result.status === "manual" ? result.text : result.text.replace(/^마디:\s*/, "").split(" · 블록 ")[0];
+        node.title = `${node.dataset.hymnStructureLabel} · ${result.text}${result.validationStatus === "stale" ? " · 악보 검증: 가사가 바뀌어 재검토 필요" : ""}`;
       } else node.textContent = result.text;
       node.dataset.reviewStatus = result.status;
     });
@@ -17990,7 +17996,7 @@ function renderVersionMusicalStructure(version, forms, options = {}) {
   queueMicrotask(() => updateVersionMusicalStructure(document.querySelector(`[data-hymn-structure-ticket="${ticket}"]`), version, forms));
   if (options.metadataField) {
     const label = `마디 수 · ${versionEditableName(getSelectedSong(), version)}`;
-    return `<label class="field compact"><span>마디 수</span><input type="text" readonly aria-label="${escapeAttr(label)}" value="확인 중…" data-hymn-structure-label="${escapeAttr(label)}" data-hymn-structure-ticket="${ticket}" data-hymn-structure-version="${escapeAttr(version.id)}" /></label>`;
+    return `<label class="field compact"><span>마디 수</span><input type="text" maxlength="100" aria-label="${escapeAttr(label)}" value="${escapeAttr(version.hymn_structure?.displayText ?? "")}" placeholder="예: 4 → approx. 4 bars" data-hymn-structure-label="${escapeAttr(label)}" data-hymn-structure-ticket="${ticket}" data-hymn-structure-version="${escapeAttr(version.id)}" /></label>`;
   }
   return `<div class="version-musical-structure" data-hymn-structure-ticket="${ticket}" data-hymn-structure-version="${escapeAttr(version.id)}" aria-label="버전별 마디 정보">마디 정보 확인 중…</div>`;
 }
@@ -19485,6 +19491,7 @@ function songTitleMetaLine(song) {
 }
 
 function songListView(song) {
+  if (song?._praiseGroupRepresentative) return songListView(song._praiseGroupRepresentative);
   const listVersion = getPraiseFilterListVersion(song);
   const title = song?.hymn_no ? stripHymnNumber(song.title) : song?.title || "";
   songTitlePeers ||= window.MindexSetlistLinks?.buildTitlePeers(state.songs);
@@ -19686,7 +19693,7 @@ function isSelectablePraiseSong(song) {
 function getFilteredSongs() {
   const tokens = getSearchTokens(state.search);
   const filterSongs = getSongsForPraiseFilter();
-  if (!tokens.length) return [...filterSongs].sort(sortSongsForCurrentList);
+  if (!tokens.length) return groupPraiseSongs([...filterSongs].sort(sortSongsForCurrentList), true).sort(sortSongsForCurrentList);
 
   const filterSet = new Set(filterSongs.map((s) => s.id));
   const allMatched = state.songs
@@ -19696,12 +19703,12 @@ function getFilteredSongs() {
   const phraseMatched = allMatched.filter((item) => item.match.phraseMatched);
   const results = phraseMatched.length ? phraseMatched : allMatched;
 
-  return results
+  return groupPraiseSongs(results
     .sort((a, b) => {
       if (a.inFilter !== b.inFilter) return a.inFilter ? -1 : 1;
       return b.match.score - a.match.score || sortSongsForCurrentList(a.song, b.song);
     })
-    .map((item) => ({ ...item.song, _outOfFilter: !item.inFilter }));
+    .map((item) => ({ ...item.song, _outOfFilter: !item.inFilter })));
 }
 
 function getSongsForPraiseFilter() {
@@ -20612,7 +20619,7 @@ function updateSaveState() {
 
 function updateEditorTitle(song) {
   const title = refs.detailPane.querySelector("#editorSongTitle");
-  if (title) title.textContent = song.title || "제목 없는 찬양";
+  if (title) (title.querySelector("span") || title).textContent = praiseGroupTitle(song);
 }
 
 function parseList(value) {
@@ -21465,8 +21472,9 @@ function publicWorshipResponseStep() {
 }
 
 function childrenWorshipTemplate() {
+  const bodyOnly = step => ({ ...step, elements: step.elements.map(element => ({ ...element, introSlide: null })) });
   return [
-    { ...publicWorshipCreedStep(), label: "사도신경", name: "사도신경" },
+    { ...bodyOnly(publicWorshipCreedStep()), label: "사도신경", name: "사도신경" },
     publicWorshipPraiseStep({ count: 4, required: true }),
     { label: "예배의 부름", name: "예배의 부름", required: true, flex: false,
       sectionKey: "opening", elementType: "body", slides: [worshipOpeningBodyText('children')] },
@@ -21475,8 +21483,8 @@ function childrenWorshipTemplate() {
     { ...publicWorshipResponseStep(), required: true, flex: false },
     publicWorshipOfferingStep({ typeId: "children", praiseLabel: "봉헌찬양" }),
     { label: "나래파송", name: "나래파송", required: true, flex: false,
-      sectionKey: "community_confession", elements: [publicWorshipCommunityConfessionElement()] },
-    publicWorshipLordsPrayerStep(),
+      sectionKey: "community_confession", elements: [{ ...publicWorshipCommunityConfessionElement(), introSlide: null }] },
+    bodyOnly(publicWorshipLordsPrayerStep()),
     { label: "광고", name: "광고", required: true, flex: false,
       sectionKey: "announcements", elementType: "plain_text", default_text: "오늘도 어린이부 예배에 오신 여러분을 환영하고 축복합니다 :)" },
     { label: "교제", name: "교제", required: false, flex: true,
@@ -24525,7 +24533,7 @@ function renderServiceOutlineChildRow(service, item, index, selectedIndex, slide
   const titleParts = serviceItemSummaryDisplayParts(item, service);
   const title = [titleParts.meta, titleParts.title].filter(Boolean).join(" · ") || serviceSidebarChildItemTitle(item, service);
   const interactionHint = presenterSlideInteractionHint(service.id, title);
-  const missing = serviceOutlineMissingState(item, slides);
+  const missing = serviceOutlineMissingState(item, slides, service);
   const showMissingBadge = missing?.missingContent;
   return `
     <button class="service-outline-row service-outline-row--child${selected ? " selected" : ""}${activeSlide ? " active" : ""}" type="button"${activeSlide ? ' aria-current="step"' : ""}
@@ -24543,10 +24551,6 @@ function renderServiceOutlineChildRow(service, item, index, selectedIndex, slide
       </span>
       <span class="service-outline-start"></span>
     </button>`;
-}
-
-function serviceOutlineMissingState(item = {}, slides = []) {
-  return slides.find((slide) => slide?.missingContent && presenterSlideBelongsToItem(slide, item)) || null;
 }
 
 function renderServiceOutlineMissingBadge(missing = null) {
@@ -27024,7 +27028,7 @@ function renderServiceSongPicker(item, index, model = serviceItemEditorModel(ite
 function serviceNativeSongVariants(item, service = selectedServiceForEditor()) {
   const current = serviceItemLinkedSong(item);
   if (!current?._singleSongRecord) return [];
-  const found = new Map(), queue = [current.id];
+  const found = new Map(), queue = [current.id, ...praiseDisplayGroup(current).members.map(row=>row.id)];
   while (queue.length) {
     const id = queue.shift();
     if (found.has(id)) continue;
@@ -27044,6 +27048,7 @@ function serviceNativeSongVariants(item, service = selectedServiceForEditor()) {
 function renderServiceSongVersionPicker(item, index, model = serviceItemEditorModel(item)) {
   if (model.linkedSong?._singleSongRecord) {
     const variants = serviceNativeSongVariants(item, model.service);
+    if (variants.length === 1 && !variants[0].unavailable) return "";
     const missing = variants.find(song => song.unavailable);
     const names = variants.map(song => song.unavailable ? "판본 불러오지 못함" : versionDisplayName(song, song.versions?.[0]) || "기본");
     return `<span class="svc-song-version-control"><select class="svc-song-version-select"
@@ -27105,21 +27110,21 @@ function serviceSongPickerResults(query, item = {}, service = selectedServiceFor
     limit,
   ].join("::");
   if (state.searchCache.songPicker.has(cacheKey)) return state.searchCache.songPicker.get(cacheKey);
+  const groupMatches = praiseGroupSearchMatches(tokens, {includeLyrics});
   const candidates = state.songs
     .filter(isSelectablePraiseSong)
     .filter((song) => (!requiresNewHymnal || serviceSongHasScore(song))
       && (!requiresChildren || serviceSelectableSongVersions(song, item, service).length))
-    .map((song) => ({ song, match: getSongSearchMatch(song, tokens, { includeLyrics }) }))
+    .map((song) => ({ song, match: groupMatches.get(song.id) }))
     .filter((entry) => entry.match);
   const phraseMatches = candidates.filter((entry) => entry.match.phraseMatched);
   const results = phraseMatches.length ? phraseMatches : candidates;
-  const songs = uniqueSongsById([
+  const songs = groupPraiseSongs(uniqueSongsById([
     ...(directMatch && isSelectablePraiseSong(directMatch) && (!requiresNewHymnal || serviceSongHasScore(directMatch)) && (!requiresChildren || serviceSelectableSongVersions(directMatch, item, service).length) ? [directMatch] : []),
     ...results
     .sort((a, b) => b.match.score - a.match.score || sortSongsForCurrentList(a.song, b.song))
-    .slice(0, limit)
     .map((entry) => entry.song),
-  ]).slice(0, limit);
+  ])).slice(0, limit);
   if (state.searchCache.songPicker.size > 80) state.searchCache.songPicker.clear();
   state.searchCache.songPicker.set(cacheKey, songs);
   return songs;
@@ -27136,6 +27141,7 @@ function uniqueSongsById(songs = []) {
 }
 
 function renderServiceSongPickerResult(song, index) {
+  if (song._praiseGroupIds?.length > 1) return renderServicePraiseGroupChoice(song,index);
   const meta = joinMetaItems([
     song.subtitle,
     song.original_title,

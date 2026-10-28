@@ -37,7 +37,7 @@ def main():
      document.body.innerHTML='<div id="fixture">'+renderVersionTitleContent(song,version,state.forms,{active:true})+renderVersionMusicalStructure(version,state.forms,{metadataField:true})+'</div><textarea data-form-field="lyrics" data-index="0"></textarea>';
      const toolbar=document.createElement('div');toolbar.innerHTML=renderFormToolbar(song);check(!toolbar.querySelector('.form-toolbar-title')&&toolbar.querySelectorAll('[data-add-form]').length===5,'toolbar buttons without redundant heading');const before=JSON.stringify(song);
      await new Promise(r=>setTimeout(r,30));
-     check(!document.querySelector('.version-musical-structure'),'no measure line on version card');const node=document.querySelector('[data-hymn-structure-version]');check(node.tagName==='INPUT'&&node.readOnly,'dedicated read-only metadata field');check(node.dataset.reviewStatus==='measured','rendered measured');
+     check(!document.querySelector('.version-musical-structure'),'no measure line on version card');const node=document.querySelector('[data-hymn-structure-version]');check(node.tagName==='INPUT'&&!node.readOnly,'editable metadata field');check(node.dataset.reviewStatus==='measured','rendered measured');
      const field=document.querySelector('textarea');field.value='Edited lyrics';field.focus();field.setSelectionRange(3,3);updateFormField(field);
      await new Promise(r=>setTimeout(r,30));check(node.dataset.reviewStatus==='stale','editing immediately invalidates');check(document.activeElement===field&&field.selectionStart===3,'caret preserved');check(JSON.stringify(song)===before,'no stored song mutation');
      field.value=forms[0].lyrics;updateFormField(field);await new Promise(r=>setTimeout(r,30));check(node.dataset.reviewStatus==='measured','restored draft matches');
@@ -46,6 +46,22 @@ def main():
      settle[1]({status:'stale',text:'new result'});await Promise.resolve();await Promise.resolve();settle[0]({status:'measured',text:'old result'});await Promise.resolve();await Promise.resolve();check(node.value==='new result','stale async completion');
      MindexHymnStructure.describe=()=>Promise.reject(Error('offline'));updateVersionMusicalStructure(node,version,forms);await new Promise(r=>setTimeout(r,10));check(node.dataset.reviewStatus==='error','fetch error distinct from unmeasured');
      MindexHymnStructure.describe=(id,fs)=>describe(id,fs,records);updateVersionMusicalStructure(node,version,forms);await new Promise(r=>setTimeout(r,10));check(node.dataset.reviewStatus==='measured','retry after failure');
+     // Native DB metadata needs no static lookup and updates without rebuilding the app.
+     MindexHymnStructure.describe=describe;
+     version._singleSongRecord=true;version.hymn_structure=structuredClone(records.v);
+     updateVersionMusicalStructure(node,version,forms);await new Promise(r=>setTimeout(r,30));
+     check(node.dataset.reviewStatus==='measured','native DB metadata renders');
+     const evidenceBefore=JSON.stringify(version.hymn_structure.parts);
+     node.value='8';updateVersionMeasureField(node);
+     check(version.hymn_structure.displayText==='approx. 8 bars'&&state.dirty.song,'manual edit marks ordinary save dirty');
+     check(JSON.stringify(version.hymn_structure.parts)===evidenceBefore,'editing display preserves score evidence');
+     updateVersionMusicalStructure(node,version,forms);await new Promise(r=>setTimeout(r,30));
+     check(node.value==='approx. 8 bars'&&node.dataset.reviewStatus==='manual','manual value renders after reopen');
+     node.value='';updateVersionMeasureField(node);updateVersionMusicalStructure(node,version,forms);await new Promise(r=>setTimeout(r,30));
+     check(node.value==='','clearing stays empty instead of restoring an estimate');
+     delete version.hymn_structure;
+     updateVersionMusicalStructure(node,version,forms);await new Promise(r=>setTimeout(r,30));
+     check(node.dataset.reviewStatus==='unreviewed','missing DB metadata never falls back to bundled evidence');
      return 'PASS values, partial/unknown, copy/edit/delete, caret, race and retry';
     }'''),flush=True)
     for width in [390,1200]:

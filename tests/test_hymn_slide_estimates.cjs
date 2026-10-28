@@ -15,5 +15,33 @@ const pairedRecords={p:{parts:pairedParts}};
 assert.equal((await ctx.MindexHymnStructure.describe('p',pairedForms,pairedRecords)).text,'approx. 4 bars');
 const singleForms=[pairedForms[0],pairedForms[4]];
 assert.equal((await ctx.MindexHymnStructure.describe('p',singleForms,{p:{parts:[pairedParts[0],pairedParts[4]]}})).text,'approx. 4 bars');
+// Native DB values win without a runtime-file request; missing/malformed stay explicit.
+assert.equal((await ctx.MindexHymnStructure.describe('db',singleForms,{db:{parts:[pairedParts[0],pairedParts[4]]}})).text,'approx. 4 bars');
+assert.equal((await ctx.MindexHymnStructure.describe('db',singleForms,{db:undefined})).status,'unreviewed');
+assert.equal((await ctx.MindexHymnStructure.describe('db',singleForms,{db:{}})).status,'stale');
+const edited=structuredClone(pairedParts[0]);edited.approxMeasuresByBlock=[8,8,8];
+assert.equal((await ctx.MindexHymnStructure.describe('db',[singleForms[0]],{db:{parts:[edited]}})).text,'approx. 8 bars');
+assert.equal(ctx.MindexHymnStructure.normalizeDisplayText('약 4마디'),'approx. 4 bars');
+assert.equal(ctx.MindexHymnStructure.normalizeDisplayText('낭송형'),'낭송형');
+const manual={parts:pairedParts,displayText:'approx. 8 bars'};
+const staleManual=await ctx.MindexHymnStructure.describe('m',[],{m:manual});
+assert.equal(staleManual.text,'approx. 8 bars');assert.equal(staleManual.validationStatus,'stale');
+assert.equal((await ctx.MindexHymnStructure.describe('m',[],{m:{...manual,displayText:''}})).text,'');
+// Exercise the native save/read boundary, including deliberate clearing.
+const api=require('../mindex.single-song.js');
+let stored={id:'SONG-HYMN-N001-0001',revision:1,metadata:{title:'fixture'},legacy:{versionId:'old'},content:{forms:structuredClone(pairedForms),audio_set:{timing:[0,4]},hymn_structure:structuredClone(manual)},relations:{same_song:[],related:[]}};
+const original=structuredClone(stored);
+const repository=api.createRepository({read:async()=>[structuredClone(stored)],commit:async req=>{assert.equal(req.expectedRevision,stored.revision);stored=JSON.parse(JSON.stringify({...req.record,revision:stored.revision+1}));return stored;}});
+for(const value of ['approx. 6 bars','']) {
+ const song=api.createCatalog(await repository.read([stored.id])).appSong(stored.id);
+ song.versions[0].hymn_structure.displayText=value;
+ const next=api.fromLegacySong(song,song.versions[0],stored.id);next.legacy=stored.legacy;next.relations=stored.relations;next.revision=stored.revision;
+ await repository.save(next);
+ const reopened=api.createCatalog(await repository.read([stored.id])).appSong(stored.id);
+ assert.equal(reopened.versions[0].hymn_structure.displayText,value);
+ assert.deepEqual(reopened.versions[0].forms,original.content.forms);
+ assert.deepEqual(reopened.versions[0].audio_set,original.content.audio_set);
+ assert.deepEqual(reopened.versions[0].hymn_structure.parts,original.content.hymn_structure.parts);
+}
 assert.equal(pairedParts.length,5); // Display calculation never changes stored sections.
 }console.log('PASS slide estimates, separate Coda, fractional legacy input, stale/copy guards');})();
