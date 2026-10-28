@@ -6275,7 +6275,7 @@ body[data-module="presenter"] .svc-presenter-toolbar::before {
 .svc-screen-management { min-width:0; margin:0; padding:10px 0; border-block:1px solid var(--line); }
 .svc-screen-management h3 { margin:0 0 10px; font-size:var(--ui-label-size); font-weight:600; color:var(--ink-3); }
 .svc-screen-management-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
-.svc-screen-management-grid > :is(button,label) {
+.svc-screen-management .svc-screen-management-grid > :is(.icon-btn,.svc-presenter-pin-button) {
   display:flex; align-items:center; justify-content:center; box-sizing:border-box;
   width:100%; min-width:0; height:35px; min-height:35px; margin:0; padding:0 10px; gap:5px;
   border:1px solid var(--line); border-radius:var(--r); background:var(--ui-surface-field);
@@ -6284,9 +6284,9 @@ body[data-module="presenter"] .svc-presenter-toolbar::before {
 .svc-screen-management-grid > .svc-presenter-launch { grid-column:1/-1; grid-row:auto; }
 .svc-screen-management-grid > .svc-presenter-pin-button { grid-column:auto; grid-row:auto; }
 .svc-screen-management-grid :is(i,svg) { width:16px; height:16px; flex:0 0 16px; stroke-width:var(--ui-icon-stroke); }
-.svc-screen-management-grid > :is(button,label):hover { background:var(--ui-surface-panel); }
-.svc-screen-management-grid > :is([aria-pressed=true],label:has(input:checked)) { color:var(--accent); border-color:var(--accent); background:var(--accent-soft); }
-.svc-screen-management-grid > :is(:disabled,.is-unavailable) { opacity:.5; cursor:not-allowed; }
+.svc-screen-management .svc-screen-management-grid > :is(.icon-btn,.svc-presenter-pin-button):hover { background:var(--ui-surface-panel); }
+.svc-screen-management .svc-screen-management-grid > .svc-presenter-window-button:is([aria-pressed=true],:has(input:checked)) { color:var(--accent); border-color:var(--accent); background:var(--accent-soft); }
+.svc-screen-management .svc-screen-management-grid > :is(:disabled,.is-unavailable) { color:var(--ink-4); background:transparent; opacity:.5; cursor:not-allowed; }
 .svc-screen-management-grid > :is(:focus-visible,:has(input:focus-visible)) { outline:2px solid var(--accent); outline-offset:2px; }
 .svc-presenter-side-panel .svc-screen-management { order:3; }
 .svc-presenter-side-panel .svc-presenter-output-group { order:4; }
