@@ -70,3 +70,23 @@ Duplicate/canonical-ID collisions are rejected. Old source fields and native
 references project to the canonical ID. Editor saves preserve this identity field.
 Backend alias read/write guards and transactional rekey remain prerequisites;
 this client candidate alone does not authorize operational migration.
+
+## Administrator inspection and local data rehearsal
+
+Administrator SQL access was recovered through native Chrome control; extension
+inventory calls still time out. Current allocation/constraint/function metadata
+and scoped private references were exported privately. The observed CONT counter
+and issued maximum were444; those are time-bound evidence, not an allocation lock.
+
+A local PostgreSQL18.4 rehearsal transformed72 native rows (60 identities plus12
+relation-only rows),3 service documents,12 elements,16 historical aggregates,
+3 checkpoints and53 saved state entries, then reversed every transformation exactly.
+One further state entry referenced only a previously deleted identity outside this
+mapping and was deliberately not resurrected. Native content remained exactly equal.
+The strict adapter also verifies adjacent source-ID lines, typed references, original
+nested JSON serialization and rejection of unknown fields/invalid mappings.
+
+This tests the reference adapter only. The production executor, monotonic-revision
+rollback, restore-function integration, old-client write fencing, compatible release
+and independent operational readback are still unfinished. No operational ID was
+changed and no production migration/helper SQL was installed.

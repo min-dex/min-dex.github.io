@@ -7,6 +7,12 @@ declare result jsonb; child jsonb; pair record; raw text; updated text; decoded 
   old_id text; new_id text; expected jsonb;
 begin
  if jsonb_typeof(mapping) is distinct from 'object' then raise exception 'INVALID_REKEY_MAP'; end if;
+ if exists(select from jsonb_each(mapping) e where e.key !~ '^SONG-(CONT|CHLD)-[0-9]{4}-[0-9]{4}$'
+  or jsonb_typeof(e.value)<>'string' or (e.value#>>'{}') !~ '^SONG-(CONT|CHLD)-[0-9]{4}-[0-9]{4}$'
+  or mapping ? (e.value#>>'{}'))
+  or (select count(*) from jsonb_each(mapping))<>(select count(distinct value) from jsonb_each(mapping)) then
+  raise exception 'INVALID_REKEY_MAP';
+ end if;
  if field='previousIds' then return doc; end if;
  if jsonb_typeof(doc)='object' then
   result:='{}';
@@ -30,9 +36,9 @@ begin
  end if;
  if field='sourceText' then
   for pair in select key,value#>>'{}' as target from jsonb_each(mapping) loop
-   updated:=regexp_replace(updated,'(^|\n)([ \t]*-[ \t]*곡 ID:[ \t]*)'||pair.key||'([ \t]*\r?)(\n|$)',E'\\1\\2'||pair.target||E'\\3\\4','g');
+   updated:=regexp_replace(updated,'(^|\n)([ \t]*-[ \t]*곡 ID:[ \t]*)'||pair.key||'([ \t]*\r?)(?=\n|$)',E'\\1\\2'||pair.target||E'\\3','g');
   end loop;
- elsif field='key' and (raw like 'praise:SONG-%' or raw like 'mindex.editor.draft.v2:praise:SONG-%') then
+ elsif field='key' and raw ~ '^(praise:SONG-(CONT|CHLD)-[0-9]{4}-[0-9]{4}|mindex\.editor\.draft\.v2:praise:SONG-(CONT|CHLD)-[0-9]{4}-[0-9]{4}:[0-9a-f-]{36})$' then
   for pair in select key,value#>>'{}' as target from jsonb_each(mapping) loop
    updated:=replace(updated,':'||pair.key,':'||pair.target);
   end loop;
