@@ -6548,7 +6548,7 @@ async function createPraiseSong(options = {}) {
 }
 
 function buildNewPraiseSongDraft(options = {}) {
-  const praiseTypes = normalizePraiseTypes(options.praiseTypes || options.praise_types || state.praiseFilter);
+  const praiseTypes = normalizePraiseTypes(options.praiseTypes || options.praise_types || ["ccm"]);
   const version = {
     id: createUuid(),
     name: "기본",
@@ -8983,12 +8983,6 @@ function handleDetailClick(event) {
     return;
   }
 
-  const versionTypeToggle = event.target.closest("[data-version-type-toggle]");
-  if (versionTypeToggle) {
-    toggleVersionPraiseType(versionTypeToggle.dataset.versionTypeToggle, versionTypeToggle.dataset.typeVersionId);
-    return;
-  }
-
   const formAction = event.target.closest("[data-form-action]");
   if (formAction) {
     event.preventDefault();
@@ -10185,36 +10179,6 @@ function addForm(type) {
     field?.focus({ preventScroll: true });
     field?.scrollIntoView({ block: "nearest" });
   });
-}
-
-function toggleVersionPraiseType(type, versionId = getSelectedVersionId()) {
-  if (!PRAISE_TYPES.includes(type) || state.saving) return;
-  const song = getSelectedSong();
-  const version = song?.versions?.find(candidate => candidate.id === versionId);
-  if (!version) return;
-  const types = canonicalPraiseTypes(version.praise_types);
-  const idx = types.indexOf(type);
-  if (idx >= 0) types.splice(idx, 1);
-  else types.push(type);
-  version.praise_types = canonicalPraiseTypes(types);
-  updateSongPraiseTypesFromVersions(song);
-  state.dirty.forms = true;
-  state.dirty.song = true;
-  updateSaveState();
-  renderDetail();
-}
-
-function renderVersionPraiseTypeTags(version) {
-  if (!version) return "";
-  const active = versionEffectivePraiseTypes(getSelectedSong(), version);
-  const labels = { hymn: "찬송가", ccm: "CCM" };
-  return `<div class="version-type-tags">${
-    PRAISE_TYPES.map(type => `
-      <button class="version-type-tag${active.includes(type) ? " on" : ""}" type="button"
-              data-version-type-toggle="${escapeAttr(type)}" data-type-version-id="${escapeAttr(version.id)}" aria-pressed="${active.includes(type)}" ${state.saving ? "disabled" : ""}>
-        ${escapeHtml(labels[type])}
-      </button>`).join("")
-  }</div>`;
 }
 
 async function assertPraiseVersionsUnused(versionIds) {
@@ -17938,7 +17902,6 @@ function renderVersionTitleContent(song, version, forms, options = {}) {
       ${renderVersionAttentionStatus(song, version, forms, { active })}
     </div>
     <div class="version-title-actions">
-      ${renderVersionPraiseTypeTags(version)}
       <div class="version-edit-actions" role="group" aria-label="버전 관리">
       ${[-1, 1].map(direction => {
         const index = song.versions.findIndex(item => item.id === version.id);

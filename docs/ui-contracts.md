@@ -1098,3 +1098,10 @@ The unmounted source panel/history/recovery renderers, their delegated UI events
 and dedicated CSS are removed. Internal source serialization, archived history,
 pending-draft protection, atomic saves and conflict review remain unchanged.
 No stored drafts or production records are deleted.
+
+### Praise classification editor · 2026-10-28
+
+Existing hymn classification remains stored and available to catalog filters.
+The lyric editor has no hymn/CCM classification toggle. New manual praise drafts
+default to CCM independently of the active catalog filter; rendering an existing
+record must not change its classification, lyrics, audio or worship references.
