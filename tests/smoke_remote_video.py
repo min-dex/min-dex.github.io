@@ -39,6 +39,17 @@ try:
    # Controller uses the output clock and seeks the paused video without starting it.
    host.wait_for_function("state.presenter.videoHealth.durationSeconds>0 && !document.querySelector('[data-presenter-video-seek]').disabled")
    assert '이번 반복 남은' in host.locator('[data-presenter-video-clock]').inner_text()
+   host.evaluate('''()=>{
+    const health=state.presenter.videoHealth,source=health.source;
+    delete health.source;renderGlobalPlaybackControls();
+    if(!document.querySelector('#globalPlaybackPanel').textContent.includes('송출 창을 다시 열어 주세요.')||presenterRemoteVideoState(state.presenter.serviceId).ready)throw Error('Legacy output has no safe source guidance');
+    if(Number(document.querySelector('[data-presenter-video-seek]').max)!==0||document.querySelector('[data-presenter-video-clock]').textContent!=='–:––')throw Error('Unverified output shows another file clock');
+    health.source='https://example.invalid/different.mp4';renderGlobalPlaybackControls();
+    if(!document.querySelector('#globalPlaybackPanel').textContent.includes('새 영상 반영 대기')||presenterRemoteVideoState(state.presenter.serviceId).ready)throw Error('Different actual source was controllable');
+    if(!document.querySelector('[data-presenter-video-seek]').disabled||Number(document.querySelector('[data-presenter-video-seek]').max)!==0)throw Error('Different source retains a seek range');
+    health.source=source;renderGlobalPlaybackControls();
+   }''')
+   assert output.evaluate("document.querySelector('.is-active video').paused"), 'Guidance restarted paused output'
    host.evaluate("window.seekNode=document.querySelector('[data-presenter-video-seek]');beginPresenterVideoSeek(seekNode);seekNode.value=3;previewPresenterVideoSeek(seekNode);renderGlobalPlaybackControls()")
    assert host.evaluate("document.querySelector('[data-presenter-video-seek]')===seekNode && Number(seekNode.value)===3")
    host.evaluate("commitPresenterVideoSeek(seekNode)")

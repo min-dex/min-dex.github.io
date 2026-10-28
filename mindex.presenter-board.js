@@ -457,14 +457,14 @@ function presenterBoardEntries(slides, service) {
   const ownership = entries.map(({ slide }) => ownershipFor(slide));
   items.forEach((item, index) => {
     if (ownership.some((entry) => entry.indexes.has(index))) return;
-    // Controller-only entries keep editors reachable without adding output slides.
+    const missing = serviceOutlineMissingState(item, slides, service);
     const slide = {
       ...presenterSectionForServiceItem(item, index, serviceItemDisplayText(item)),
       id: `${item.id}:editor-only`,
       controllerEditorOnly: true,
       label: item.label || "",
       title: serviceItemDisplayText(item),
-      text: "",
+      text: "", warnings: missing ? ["입력 필요"] : [],
     };
     const nextIndex = ownership.findIndex((entry) => entry.lastIndex > index);
     const insertionIndex = nextIndex < 0 ? entries.length : nextIndex;
@@ -632,7 +632,7 @@ function serviceCanonicalSectionTitle(sectionKey = "") {
 function serviceSectionDisplayTitle(sectionKey = "", title = "") {
   const rawTitle = String(title || "").trim();
   const canonical = serviceCanonicalSectionTitle(sectionKey);
-  return canonical || rawTitle;
+  return sectionKey === "community_confession" && rawTitle === "나래파송" ? rawTitle : canonical || rawTitle;
 }
 
 function addPresenterSlideToSubgroup(group, entry) {
@@ -930,7 +930,7 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
   const headerContext = options.showHead && inputContexts.length === 1 && !inlineSong ? { ...inputContexts[0], timingEntries: subgroup.slides } : null;
   const headerDbContext = options.showHead && inputContexts.length === 1 ? inputContexts[0] : null;
   const inputControls = renderPresenterBoardSubgroupInputControls(serviceId, subgroup, { headerActions: Boolean(headerContext), headerDbLink: Boolean(headerDbContext) });
-  const headerActions = headerContext && inputControls && !serviceItemCanToggleOfferingSpecial(headerContext.item) ? renderPresenterBoardItemActions(serviceId, headerContext) : "";
+  const headerActions = headerContext && inputControls ? renderPresenterBoardItemActions(serviceId, headerContext) : "";
   const context = presenterBoardSubgroupItemContext(serviceId, subgroup);
   const itemIndexAttr = context ? ` data-service-item-index="${escapeAttr(String(context.index))}"` : "";
   const elementIdAttr = context?.item?.id ? ` data-service-element-id="${escapeAttr(context.item.id)}"` : "";
@@ -991,7 +991,7 @@ function renderPresenterCitationComposer(subgroup, serviceId) {
     </div>`;
 }
 
-function renderPresenterBoardItemActions(serviceId, context, options = {}) {
+function renderPresenterBoardItemActions(serviceId, context) {
   const photoTiming = servicePraiseInputMode(context.item) === "audio_praise"
     && (context.timingEntries || []).some(({slide}) => slide.serviceTimingPage && slide.songTimingEligible);
   const audioControls = serviceItemSupportsHeaderAudio(context.item)
@@ -1001,17 +1001,17 @@ function renderPresenterBoardItemActions(serviceId, context, options = {}) {
     ? renderPresenterAssetUpload(context.item, context.index, inputContext.memo, serviceId) : "";
   return `
     <div class="svc-board-subgroup-flow" data-service-item-actions data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}">
-      ${options.omitCommit ? "" : `<span class="svc-input-status sr-only" data-service-input-status role="status" aria-live="polite"></span>`}
-      ${!options.commitOnly && serviceItemConnectedPraise(context.item)?.groupId ? `<button class="reference-new-btn secondary svc-medley-unlink" type="button" data-service-medley-unlink="${escapeAttr(context.item.id)}" data-service-id="${escapeAttr(serviceId)}" title="곡과 순서를 유지하고 메들리 묶음 해제">메들리 해제</button>` : ""}
-      ${options.commitOnly ? "" : fileControls}
-      ${!options.commitOnly && photoTiming ? `<button class="btn secondary" type="button" data-song-timing-open data-song-timing-focus="photos"
+      <span class="svc-input-status sr-only" data-service-input-status role="status" aria-live="polite"></span>
+      ${serviceItemConnectedPraise(context.item)?.groupId ? `<button class="reference-new-btn secondary svc-medley-unlink" type="button" data-service-medley-unlink="${escapeAttr(context.item.id)}" data-service-id="${escapeAttr(serviceId)}" title="곡과 순서를 유지하고 메들리 묶음 해제">메들리 해제</button>` : ""}
+      ${fileControls}
+      ${photoTiming ? `<button class="btn secondary" type="button" data-song-timing-open data-song-timing-focus="photos"
         data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(context.item.id)}">사진·타이밍 편집</button>` : ""}
-      ${options.commitOnly ? "" : renderPresenterProgressionAdd(context.item, context.index, serviceId)}
-      ${options.commitOnly ? "" : audioControls}
-      ${options.omitCommit ? "" : `<button class="reference-new-btn svc-board-subgroup-commit" type="button" data-service-item-commit
+      ${renderPresenterProgressionAdd(context.item, context.index, serviceId)}
+      ${audioControls}
+      <button class="reference-new-btn svc-board-subgroup-commit" type="button" data-service-item-commit
         data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}">
         <span>저장</span>
-      </button>`}
+      </button>
     </div>`;
 }
 
@@ -1032,21 +1032,11 @@ function renderPresenterBoardSubgroupInputControls(serviceId, subgroup = {}, opt
     const audioManager = renderPresenterBoardItemAudioControls(serviceId, context, {manager:true});
     const dbLink = renderServiceItemLinkControl(context.item, context.index);
     if (dbLink && (options.headerActions || options.headerDbLink || label)) controls = controls.replace(dbLink, "");
-    if (offering) return `
-      <div class="svc-board-subgroup-control-item service-offering-editor" data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(context.item.id || "")}" data-service-item-index="${escapeAttr(String(context.index))}">
-        ${label ? `<div class="svc-board-subgroup-control-label">${escapeHtml(label)}</div>` : ""}
-        <div class="service-offering-toolbar">
-          ${renderServiceOfferingSpecialToggle(context.item, context.service)}
-          ${renderPresenterBoardItemActions(serviceId, context, { commitOnly: true })}
-        </div>
-        ${controls}
-        <div class="service-offering-tools">${renderPresenterBoardItemActions(serviceId, context, { omitCommit: true })}</div>
-        ${audioManager}
-      </div>`;
     return `
-      <div class="svc-board-subgroup-control-item${!options.headerActions && !label && ["lyrics_db", "score_db"].includes(servicePraiseInputMode(context.item)) ? " svc-inline-song" : ""}" data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(context.item.id || "")}" data-service-item-index="${escapeAttr(String(context.index))}">
+      <div class="svc-board-subgroup-control-item${offering ? " service-offering-editor" : ""}${!options.headerActions && !label && ["lyrics_db", "score_db"].includes(servicePraiseInputMode(context.item)) ? " svc-inline-song" : ""}" data-service-id="${escapeAttr(serviceId)}" data-service-item-id="${escapeAttr(context.item.id || "")}" data-service-item-index="${escapeAttr(String(context.index))}">
         ${label ? `<div class="svc-board-subgroup-control-head"><span class="svc-board-subgroup-control-label">${escapeHtml(label)}</span>${dbLink}${renderPresenterBoardItemActions(serviceId, context)}</div>` : ""}
         ${audioLed ? audioManager : ""}
+        ${offering ? renderServiceOfferingSpecialToggle(context.item, context.service) : ""}
         ${controls}
         ${options.headerActions || label ? "" : renderPresenterBoardItemActions(serviceId, context)}
         ${audioLed ? "" : audioManager}
@@ -1423,7 +1413,7 @@ function renderPresenterSlideThumb(slide, slideIndex, activeIndex, serviceId, fo
   const formType = normalizePresenterFormPresetLabel(formLabel).type;
   const normalizedFormLabel = ({ lyrics: "Lyrics", title: "Title", instrumental: "Interlude" })[formType]
     || songFormPresetDisplayLabel(formLabel) || String(formLabel || "").trim();
-  const visibleFormLabel = formType !== "instrumental" && presenterLabelDuplicatesSlideText(normalizedFormLabel, slide) ? "" : normalizedFormLabel;
+  const visibleFormLabel = formType === "lyrics" || (formType !== "instrumental" && presenterLabelDuplicatesSlideText(normalizedFormLabel, slide)) ? "" : normalizedFormLabel;
   const ariaPrefix = presenterSlideInteractionHint(serviceId, `${slideIndex + 1}번 슬라이드${hidden ? " · 숨김" : ""}`);
   const slideNumber = slideIndex + 1;
   const formBadge = visibleFormLabel ? `

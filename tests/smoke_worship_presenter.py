@@ -2660,10 +2660,11 @@ def main() -> int:
                       };
                       try {
                         state.songs = [song, ...originalSongs];
-                        const missingSlide = normalizePresenterSlidesForServiceOutput(
+                        const missingSlides = normalizePresenterSlidesForServiceOutput(
                           buildPresenterSlidesForServiceItem({ ...baseItem, raw_title: '' }, service, 0),
                           service,
-                        )[0] || {};
+                        );
+                        const missingSlide = missingSlides[0] || {};
                         const filledSlides = normalizePresenterSlidesForServiceOutput(
                           buildPresenterSlidesForServiceItem({
                             ...baseItem,
@@ -2685,6 +2686,7 @@ def main() -> int:
                             return container.textContent.trim();
                           });
                         return {
+                          missingOutputCount: missingSlides.length,
                           missing: {
                             elementType: missingSlide.elementType || '',
                             layout: missingSlide.layout || '',
@@ -2718,14 +2720,7 @@ def main() -> int:
                     """
                 )
                 if (
-                    fullscreen_missing_layout_state["missing"]["elementType"] == "praise"
-                    and fullscreen_missing_layout_state["missing"]["layout"] == "lower_bar_text"
-                    and fullscreen_missing_layout_state["missing"]["type"] == "song-title"
-                    and fullscreen_missing_layout_state["missing"]["renderClass"] == "song-title"
-                    and fullscreen_missing_layout_state["missing"]["title"] == "입력 필요"
-                    and fullscreen_missing_layout_state["missing"]["text"] == "입력 필요"
-                    and fullscreen_missing_layout_state["missing"]["outputContext"] == "clean"
-                    and fullscreen_missing_layout_state["missing"]["missingContent"] is True
+                    fullscreen_missing_layout_state["missingOutputCount"] == 0
                     and fullscreen_missing_layout_state["outlineBadges"] == ["입력 필요"] * 7
                     and fullscreen_missing_layout_state["filled"]["elementType"] == "praise"
                     and fullscreen_missing_layout_state["filled"]["layout"] == "lower_bar_text"
@@ -5056,38 +5051,9 @@ def main() -> int:
                         "body": form_preset_state["specialSectionTitleSlides"][0]["body"],
                     }]
                     and "presenter-title-assignee" in form_preset_state["specialSectionTitleSlides"][0]["body"]
-                    and form_preset_state["thirdManualSpecialTitleSlides"] == [{
-                        "type": "title-assignee",
-                        "elementType": "title_assignee",
-                        "layout": "lower_bar_text",
-                        "title": "특송",
-                        "assignee": "할렐루야 찬양대",
-                        "text": "특송\n할렐루야 찬양대",
-                        "sectionKey": "special_song",
-                    }]
-                    and form_preset_state["thirdEmptySpecialMissingSlides"] == [{
-                        "type": "title-assignee",
-                        "elementType": "title_assignee",
-                        "layout": "lower_bar_text",
-                        "title": "특송",
-                        "assignee": "",
-                        "text": "특송",
-                        "sectionKey": "special_song",
-                        "missingContent": True,
-                        "missingReason": "song_empty",
-                        "inputMode": "lyrics_db",
-                        "contentState": "missing",
-                        "warnings": ["입력 필요"],
-                    }]
-                    and form_preset_state["thirdTitlePersonSpecialSlides"] == [{
-                        "type": "title-assignee",
-                        "elementType": "title_assignee",
-                        "layout": "lower_bar_text",
-                        "title": "특송",
-                        "assignee": "청년부",
-                        "text": "특송\n청년부",
-                        "sectionKey": "special_song",
-                    }]
+                    and form_preset_state["thirdManualSpecialTitleSlides"] == []
+                    and form_preset_state["thirdEmptySpecialMissingSlides"] == []
+                    and form_preset_state["thirdTitlePersonSpecialSlides"] == []
                     and form_preset_state["specialInputModes"] == {
                         "sundayMain": {
                             "mode": "lyrics_db",
@@ -5106,64 +5072,12 @@ def main() -> int:
                             "requiresSong": True,
                         },
                     }
-                    and form_preset_state["emptyTemplateInputSlides"] == [{
-                        "type": "title-assignee",
-                        "elementType": "title_assignee",
-                        "layout": "lower_bar_text",
-                        "title": "대표기도",
-                        "assignee": "불러오는 중",
-                        "text": "대표기도\n불러오는 중",
-                        "sectionKey": "prayer",
-                        "missingContent": False,
-                        "missingReason": "service_items_hydrating",
-                        "inputMode": "text",
-                        "contentState": "loading",
-                        "warnings": ["불러오는 중"],
-                    }]
-                    and form_preset_state["missingSermonBodySlides"] == [{
-                        "type": "title-assignee",
-                        "elementType": "title_assignee",
-                        "layout": "lower_bar_text",
-                        "title": "설교 본문",
-                        "assignee": "",
-                        "text": "설교 본문",
-                        "sectionKey": "sermon",
-                        "missingContent": True,
-                        "missingReason": "scripture_body_empty",
-                        "inputMode": "scripture",
-                        "contentState": "missing",
-                        "warnings": ["입력 필요"],
-                    }]
-                    and form_preset_state["missingSermonTitleSlides"] == [{
-                        "type": "title-assignee",
-                        "elementType": "title_assignee",
-                        "layout": "lower_bar_text",
-                        "title": "설교",
-                        "assignee": "김남영 목사",
-                        "text": "설교\n김남영 목사",
-                        "sectionKey": "sermon",
-                        "missingContent": True,
-                        "missingReason": "title_empty",
-                        "inputMode": "text",
-                        "contentState": "missing",
-                        "warnings": ["입력 필요"],
-                    }]
+                    and form_preset_state["emptyTemplateInputSlides"] == []
+                    and form_preset_state["missingSermonBodySlides"] == []
+                    and form_preset_state["missingSermonTitleSlides"] == []
                     and form_preset_state["sermonSubgroupHeaderLabels"] == ["설교"]
                     and form_preset_state["sermonSubgroupControlLabels"] == []  # single-item subgroups reuse the header label
-                    and form_preset_state["missingTitlePersonAssigneeSlides"] == [{
-                        "type": "title-assignee",
-                        "elementType": "title_assignee",
-                        "layout": "lower_bar_text",
-                        "title": "공동기도",
-                        "assignee": "",
-                        "text": "공동기도",
-                        "sectionKey": "corporate_prayer",
-                        "missingContent": True,
-                        "missingReason": "assignee_empty",
-                        "inputMode": "text",
-                        "contentState": "missing",
-                        "warnings": ["입력 필요"],
-                    }]
+                    and form_preset_state["missingTitlePersonAssigneeSlides"] == []
 	                    and form_preset_state["defaultTemplateInputSlides"] == [{
 	                        "type": "title-assignee",
 	                        "elementType": "title_assignee",

@@ -561,3 +561,10 @@ Heartbeat response ordering does not move existing output buttons. Rows retain
 their first-displayed position and DOM identity; newly seen outputs append and
 ended outputs disappear. Titles/position/code refresh in place without losing
 keyboard focus. This applies to public and administrator lists, without DB changes.
+
+### Mobile current/next previews ·2026-10-28
+
+Current and next previews remain in two equal columns on phones as well as larger
+screens. Mobile cards use the slide list’s compact 8px padding while preserving
+16:9 previews, responsive renderer scaling and existing control touch targets.
+Position labels can wrap without widening the cards.

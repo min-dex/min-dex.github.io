@@ -2264,7 +2264,7 @@ function initPresenterOutputCore() {
       clientId: outputClientId,
       transportVersion: 1,
       receivedMessageId: currentPayload?.messageId || "",
-      pptxError: document.getElementById("presenterOutputRoot")?.dataset.pptxError || "",
+      pptxError: presenterPptxOutputError(document.getElementById("presenterOutputRoot"), currentPayload),
       pptxMetadata: document.getElementById("presenterOutputRoot")?._pptxMetadata || null,
       keynoteMetadata: document.getElementById("presenterOutputRoot")?._keynoteHtmlMetadata || null,
       videoHealth: presenterOutputVideoHealth(currentPayload),
@@ -2752,6 +2752,8 @@ function presenterOutputFrameStateForSlide(slide, payload = {}) {
   const showBackground = Boolean(!blackoutOutput && backgroundImages.length && cleanOutput && presenterSlideUsesServiceBackground(slide));
   return {
     cleanOutput,
+    mediaOutput: Boolean(slide?.pptx?.url || (presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.MEDIA
+      && [PRESENTER_ELEMENT_TYPES.IMAGE, PRESENTER_ELEMENT_TYPES.VIDEO].includes(presenterSlideElementType(slide)))),
     formBackground: Boolean(slide?.formBackgroundImage),
     showBackground,
     blankOutput: Boolean(blankSlide && cleanOutput && !blackoutOutput && !slide?.formBackgroundImage),
@@ -2807,6 +2809,7 @@ function presenterFrameNormalizeOutputContext(value = "") {
 function presenterOutputFrameClassNames(frameState = {}) {
   return [
     frameState.noChromakey ? "no-chromakey" : "",
+    frameState.mediaOutput ? "is-media-output" : "",
     frameState.showBackground ? "has-background" : "",
     frameState.formBackground ? "has-form-background" : "",
     frameState.blankOutput ? "is-blank" : "",
@@ -2975,6 +2978,12 @@ function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState =
   swap();
 }
 
+function presenterMediaSourceIdentity(value) {
+  const source = normalizePresenterMediaSource(value);
+  if (!source) return "";
+  try { return new URL(source, document.baseURI).href; } catch { return source; }
+}
+
 function presenterOutputFrameKey(payload = {}, slide = null, frameState = {}) {
   if (!slide) return "empty";
   return [
@@ -2989,6 +2998,8 @@ function presenterOutputFrameKey(payload = {}, slide = null, frameState = {}) {
     frameState.blankOutput ? "blank" : "",
     frameState.backgroundImage || "",
     frameState.backgroundVideo || "",
+    presenterMediaSourceIdentity(presenterSlideImageSource(slide)),
+    presenterMediaSourceIdentity(slide.videoSrc || ""),
     frameState.blankOutput ? JSON.stringify(normalizePresenterTransitionLogo(payload.transitionLogo)) : "",
     JSON.stringify(normalizePresenterServiceDesign(payload.presentationDesign)),
     slide.title || "",
@@ -3459,6 +3470,7 @@ function applyPresenterOutputFrameState(root, frameState = {}) {
   document.body.classList.toggle("has-background", Boolean(frameState.showBackground));
   document.body.classList.toggle("is-blank", Boolean(frameState.blankOutput));
   root.classList.toggle("no-chromakey", Boolean(frameState.noChromakey));
+  root.classList.toggle("is-media-output", Boolean(frameState.mediaOutput));
   root.classList.toggle("has-background", Boolean(frameState.showBackground));
   root.classList.toggle("has-form-background", Boolean(frameState.formBackground));
   root.classList.toggle("is-blank", Boolean(frameState.blankOutput));
@@ -3533,10 +3545,12 @@ function presenterRemoteVideoState(serviceId) {
   const p = state.presenter, health = p.videoHealth;
   if (!health || health.serviceId !== serviceId || p.serviceId !== serviceId || health.index !== p.index
     || p.safetyBlank || p.liveScripture?.active) return null;
+  const source = presenterMediaSourceIdentity(p.slides?.[p.index]?.videoSrc || p.slides?.[p.index]?.text);
   const ready = Date.now() - health.receivedAt <= 2500 && ["playing","paused","ended","blocked"].includes(health.status)
     && Number.isSafeInteger(health.revision) && Boolean(health.messageId)
+    && Boolean(health.source) && health.source === source
     && health.messageId === presenterTransportLatest?.payload?.messageId;
-  return {status:health.status,ready,revision:health.revision,identity:compactTextSignature(health.frameKey)};
+  return {status:health.status,ready,revision:health.revision,identity:compactTextSignature(health.frameKey),sourceProblem:!health.source?'unverified':health.source===source?'':'mismatch'};
 }
 
 async function runPresenterManagedVideoAction(action) {
@@ -3621,6 +3635,7 @@ function presenterOutputVideoHealth(payload) {
     : video.readyState < HTMLMediaElement.HAVE_FUTURE_DATA ? "loading"
       : video.paused ? "paused" : "playing";
   return { serviceId: payload.serviceId, index: payload.index,
+    source: presenterMediaSourceIdentity(video.currentSrc || video.getAttribute("src")),
     frameKey: layer.dataset.presenterFrameKey || "", messageId:payload.messageId || "", revision:presenterVideoRevisions.get(video).value, status, positionSeconds: Number.isFinite(video.currentTime) ? video.currentTime : 0, durationSeconds: Number.isFinite(video.duration) && video.duration > 0 ? video.duration : null,
     loop: Boolean(video.loop), seekable: Array.from({length: video.seekable.length}, (_, i) => [video.seekable.start(i), video.seekable.end(i)]) };
 }

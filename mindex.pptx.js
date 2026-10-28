@@ -18,7 +18,7 @@ function presenterPptxRuntime() {
 }
 
 function presenterPptxKey(slide) {
-  return slide?.pptx?.url ? `${slide.id}|${slide.pptx.url}|${slide.pptx.page}` : "";
+  return slide?.pptx?.url ? `${slide.id}|${presenterMediaSourceIdentity(slide.pptx.url)}|${slide.pptx.page}` : "";
 }
 
 function presenterPptxStep(owner, slide = owner.slides?.[owner.index]) {
@@ -210,7 +210,20 @@ function adoptPresenterPptxMetadata(metadata) {
 // track pins its parsed deck until it stops, so blob URLs cannot be evicted.
 function presenterPptxScope(payload, slide) {
   const item = slide.elementId || (String(slide.id || "").includes(":imported-deck:") ? String(slide.id).split(":imported-deck:")[0] : slide.sectionId || "");
-  return `${payload.serviceId}|${item}|${slide.pptx.url}`;
+  return `${payload.serviceId}|${item}|${presenterMediaSourceIdentity(slide.pptx.url)}`;
+}
+function setPresenterPptxError(root, message, scope = "") {
+  if (!root) return;
+  if (scope && root._pptxActiveScope !== undefined && root._pptxActiveScope !== scope) return;
+  if (message) { root.dataset.pptxError = message; root.dataset.pptxErrorScope = scope; }
+  else if (!scope || !root.dataset.pptxErrorScope || root.dataset.pptxErrorScope === scope) {
+    delete root.dataset.pptxError; delete root.dataset.pptxErrorScope;
+  }
+}
+function presenterPptxOutputError(root, payload) {
+  const scope = root?.dataset.pptxErrorScope, slide = payload?.slides?.[payload.index];
+  if (scope && (!slide?.pptx || scope !== presenterPptxScope(payload, slide))) return "";
+  return root?.dataset.pptxError || "";
 }
 function presenterPptxBackground(root) {
   return root._pptxBackground || (root._pptxBackground = new Set());
@@ -289,7 +302,7 @@ async function createPresenterPptxSession(host, entry, pageIndex, context = {}) 
   const report = message => {
     if (!destroyed) {
       const root = context.root || host.closest("#presenterOutputRoot");
-      if (root) { if (message) root.dataset.pptxError = message; else delete root.dataset.pptxError; }
+      setPresenterPptxError(root, message, context.scope);
     }
   };
   const cancelTimers = () => { timers.forEach(clearTimeout); timers.clear(); waits.forEach(cancel => cancel()); waits.clear(); };
@@ -359,8 +372,7 @@ async function createPresenterPptxSession(host, entry, pageIndex, context = {}) 
       node.addEventListener("error", () => report("PPT 영상·음원을 읽지 못했습니다. MP4(H.264/AAC) 또는 MP3/WAV 형식인지 확인해 주세요."));
       media.set(Number(element.id), node);
       tracks.set(Number(element.id), createPresenterPptxTrack(node, settings, message => {
-        const root = context.root;
-        if (root) { if (message) root.dataset.pptxError = message; else delete root.dataset.pptxError; }
+        if (context.root) setPresenterPptxError(context.root, message, context.scope);
         else report(message);
       }));
     }
@@ -459,17 +471,21 @@ async function createPresenterPptxSession(host, entry, pageIndex, context = {}) 
 }
 
 function releasePresenterPptxOutput(root) {
+  root._pptxActiveScope = null;
   stopPresenterPptxBackground(root);
   root._pptxRequest = null;
   root._pptxMetadata = null;
   presenterOutputLayers(root).active?._pptxSession?.pause();
-  delete root.dataset.pptxError;
+  setPresenterPptxError(root, "");
 }
 
 async function renderPresenterPptxOutput(root, payload, slide, frameState) {
   const key = `${payload.serviceId}|${presenterPptxKey(slide)}`;
+  const scope = presenterPptxScope(payload, slide);
+  root._pptxActiveScope = scope;
   const layers = presenterOutputLayers(root);
   if (layers.active?._pptxSession && layers.active.dataset.presenterFrameKey === key) {
+    if (root.dataset.pptxErrorScope !== scope) setPresenterPptxError(root, "");
     root._pptxRequest = null;
     ++presenterOutputRenderState.token;
     root.removeAttribute("aria-busy");
@@ -479,7 +495,6 @@ async function renderPresenterPptxOutput(root, payload, slide, frameState) {
     return;
   }
   if (root._pptxRequest?.key === key) { root._pptxRequest.payload = payload; return; }
-  const scope = presenterPptxScope(payload, slide);
   for (const track of presenterPptxBackground(root)) {
     if (track.scope !== scope || slide.pptx.page < track.lastPage || slide.pptx.page >= track.page + track.settings.slideCount) {
       track.destroy(); root._pptxBackground.delete(track);
@@ -490,7 +505,7 @@ async function renderPresenterPptxOutput(root, payload, slide, frameState) {
   const request = { key, payload, token: ++presenterOutputRenderState.token };
   root._pptxRequest = request;
   root.setAttribute("aria-busy", "true");
-  delete root.dataset.pptxError;
+  setPresenterPptxError(root, "");
   let session;
   const current = () => root._pptxRequest === request && request.token === presenterOutputRenderState.token;
   try {
@@ -524,7 +539,7 @@ async function renderPresenterPptxOutput(root, payload, slide, frameState) {
     root._pptxRequest = null;
     root.removeAttribute("aria-busy");
     stopPresenterPptxBackground(root);
-    root.dataset.pptxError = error?.message || "PPT를 불러오지 못했습니다.";
+    setPresenterPptxError(root, error?.message || "PPT를 불러오지 못했습니다.", scope);
     // Retain the old live frame; never silently substitute a static thumbnail.
   }
 }
