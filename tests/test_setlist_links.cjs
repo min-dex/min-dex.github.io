@@ -111,3 +111,8 @@ assert.deepEqual(prioritized.map(s=>s.id),['only','worship:s','worship:other']);
 assert.equal(JSON.stringify(archivedSources),originalImports);assert.equal(JSON.stringify({services,sections,elements}),originalLive);
 assert.equal(MindexSetlistLinks.preferLiveSources(archivedSources,{services:[]},[],normalizeType).length,3,'Deleted actual service reveals retained historical import');
 console.log('PASS actual worship priority, type aliases, empty worship suppression, import-only fallback, deletion recovery and immutable data');
+
+const native=MindexSetlistLinks.fromServices({services:[{id:'native',service_date:'2026-10-25',service_type_id:'children'}],sections:[{id:'n',service_id:'native'}],elements:[{id:'np',section_id:'n',element_type:'praise',praise_record_id:'native-song',song_id:null,title:'',label:'찬양 1'},{id:'nv',section_id:'n',element_type:'video',praise_record_id:'native-song',title:'Video'}]},[],MindexSetlistLinks.buildIndex([{id:'native-song',title:'Native linked song'}]));
+assert.equal(native.sources.length,1);assert.equal(native.candidates.length,1);
+assert.equal(native.candidates[0].suggested_song_id,'native-song');assert.equal(native.candidates[0].raw_title,'Native linked song');assert.equal(native.candidates[0].archive_manual_song,false);
+console.log('PASS native-only praise links survive archive refresh; linked video remains excluded');
