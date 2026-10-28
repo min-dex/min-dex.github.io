@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261028-media-launcher-batch",
+  "version": "20261028-song-group-catalog",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "ffd21a2f2eea99da87617a589e12346c9d5a78281eb5d2fbc41b1ca2929ddbf6",
-  "runtime_sha256": "3fcddd64ac3be2a33d86ccb0d2ff6e558ef8beb82c3f433d052ac64132a8e51d",
-  "source_bytes": 1341647,
+  "source_sha256": "b8e92f385830ad34eb7bd00d899c6c93ec439f7666a845c97e36d8be657a17db",
+  "runtime_sha256": "560ce7a42740111ae80ac3a51ecc6774f2d46020b96c68d8289a36b988c25cf7",
+  "source_bytes": 1341646,
   "runtime_bytes": 957781,
-  "source_gzip": 305982,
-  "runtime_gzip": 239843
+  "source_gzip": 305994,
+  "runtime_gzip": 239868
 }

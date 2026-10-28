@@ -687,10 +687,11 @@ Small visual polish that does not alter behavior does not need an entry.
   새찬송가 score 전용 슬롯을 제외하고 입력 제목의 빈 Praise record를
   만들고 해당 예배 항목에 연결한다. 사용자는 나중에 Praise 탭에서
   가사와 버전을 채운다.
-- Fullscreen/clean output의 찬양·특송 등 song-like 항목은 입력 전
-  `입력 필요` placeholder도 실제 곡 입력 후와 같은 lower-bar song frame을
-  사용한다. 담당자/기도 등 title-person 항목은 기존 center title-content
-  placeholder를 유지한다.
+- 필수 입력이 없는 항목은 컨트롤러 편집 행·outline의 `입력 필요` 안내만
+  유지하며, 실제 출력 순서에는 제목/T/빈 슬라이드를 생성하지 않는다.
+  명시한 blank, 제목만 쓰는 참회기도·고정 순서, 전례 본문, 실제 자료가 있는
+  제목과 송폼은 유지한다. 입력·삭제·재진입은 원본 요소를 그대로 재평가하며
+  가사·송폼·음원·타이밍·기존 저장 설정을 고쳐 쓰지 않는다.
 - 찬양 제목 앞 표기는 16분음표 `♬`를 쓰며, 한글 제목 폰트를 바꾸지 않고 별도 inline glyph로
   크기와 baseline만 보정한다. 풀스크린/clean output은 실제 송출 화면에만
   250ms 이하의 약한 opacity/brightness dissolve를 적용할 수 있으며,
@@ -4835,6 +4836,19 @@ hydration/freshness checks. Failed preparation or superseded navigation leaves
 the output unchanged. Unsaved-change confirmation is retained; ordinary browsing
 of other worships still never transfers the live output.
 
+## Standalone media viewport fit ·2026-10-28
+
+Image, video (including waiting-loop video), imported slide images and live PPTX
+use the entire output viewport as their available area. Fit the original aspect
+ratio into that area at the largest contained size, enlarging or shrinking as
+needed; never crop or stretch to fill. Landscape and portrait media follow the
+same rule, independently of the fixed 16:9 text/lyric design stage. Live PPTX
+retains its native SVG aspect-fit rendering and animation/media sessions.
+Controller thumbnails retain their existing design-stage scaling. Existing
+service themes, caption/background layouts, playback settings, original assets
+and operational worship data are not rewritten. Resize must only change layout,
+not recreate media, restart audio/video or replay slide effects.
+
 ## Keynote HTML playback and original preservation ·2026-10-25
 
 A `.key` original remains byte-identical and attached to the same worship item.
@@ -4996,3 +5010,14 @@ retrofitted; exact-request create retries retain their frozen element payload.
 실패하면 기존 화면을 보존하며 backoff 후 재시도한다. 기존 저장 알림과 60초 revision
 확인은 유지하고, 전체 찬양 catalog 조회는 진입/복귀 때만 사용한다.
 저장 알림과 주기적 복구는 해당 찬양 한 곡만 조회한다. 자동 갱신은 운영 데이터를 쓰지 않는다.
+
+## 어린이부 기본 전례 순서 화면 · 2026-10-28
+
+10/25 실제 예배를 구성 기준으로 삼아 어린이부 신규 scaffold의 사도신경·
+나래파송·주기도문은 별도 제목 슬라이드 없이 본문부터 표시한다. 나래파송의
+상위 순서명은 나래파송, 하위 내용명은 공동체고백으로 구분한다. 이는
+신앙고백 순서 안에 사도신경이 있는 관계와 같다. 기존 공동체고백 본문 renderer를 사용한다.
+다른 예배의 공통 전례 제목 페이지와 날짜별 찬양·본문·담당·광고·첨부는
+바꾸지 않는다. 기존 예배의 사용자 introSlide는 자동으로 지우지 않는다.
+사용자가 지정한 10/25 제외 6건의 순서/기본값 정리는 별도 운영 적용으로
+구분하며 10/25 원본과 모든 날짜별 내용은 보존한다.

@@ -1986,6 +1986,8 @@ function presenterFixedTitleText(item = {}) {
   if (isAnnouncementTextInputItem(item)) return "";
   const memo = parseServiceItemMemo(item.memo);
   if (serviceMemoElementType(memo) === "title" && String(item.label || "").trim()) {
+    if (!String(item.raw_title || item.title || "").trim()
+      && compactSearchValue(item.label) === compactSearchValue(serviceElementTypeLabel("title"))) return "";
     return independentServiceContentTitle(item.label, item.raw_title || item.title, "title") || String(item.label).trim();
   }
   const label = compactSearchValue(item?.label || item?.raw_title || "");
@@ -2272,7 +2274,8 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   if (fixedTitle) return [presenterTitleOnlySlide(item, section, index, fixedTitle)];
   const monthlyCorporatePrayerSlides = presenterMonthlyCorporatePrayerSlides(item, section, index, memo);
   if (monthlyCorporatePrayerSlides.length) return monthlyCorporatePrayerSlides;
-  if (contentState.state === "loading") return withIntroAndSpecialTitle([presenterMissingContentSlide(item, section, index, contentState, service)]);
+  if (contentState.state === "loading") return contentState.reason === "service_items_hydrating" ? []
+    : withIntroAndSpecialTitle([presenterMissingContentSlide(item, section, index, contentState, service)]);
   if (isOptionalCitationScriptureServiceItem(item)) {
     const scriptureTextSlides = buildPresenterScriptureTextSlides(item, section, index, service);
     if (scriptureTextSlides.length) {
@@ -2290,10 +2293,8 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
     return [presenterOptionalCitationLiveControlSlide(item, section, index)];
   }
   if (!confessionPrayer && !contentState.hasOutputContent) {
-    if (isPresenterReferenceMediaItem(item, memo)) {
-      return [presenterReferenceMediaPendingSlide(item, section, index)];
-    }
-    return withIntroAndSpecialTitle([presenterMissingContentSlide(item, section, index, contentState, service)]);
+    // Missing input belongs to the editor, never to the output sequence.
+    return [];
   }
   if (confessionPrayer) return [presenterConfessionPrayerSlide(item, section, index)];
   if (memoElementType === "title") return withIntroAndSpecialTitle([presenterTitleOnlySlide(item, section, index, displayText || label || "제목")]);

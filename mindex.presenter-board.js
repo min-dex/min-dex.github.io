@@ -457,14 +457,14 @@ function presenterBoardEntries(slides, service) {
   const ownership = entries.map(({ slide }) => ownershipFor(slide));
   items.forEach((item, index) => {
     if (ownership.some((entry) => entry.indexes.has(index))) return;
-    // Controller-only entries keep editors reachable without adding output slides.
+    const missing = serviceOutlineMissingState(item, slides, service);
     const slide = {
       ...presenterSectionForServiceItem(item, index, serviceItemDisplayText(item)),
       id: `${item.id}:editor-only`,
       controllerEditorOnly: true,
       label: item.label || "",
       title: serviceItemDisplayText(item),
-      text: "",
+      text: "", warnings: missing ? ["입력 필요"] : [],
     };
     const nextIndex = ownership.findIndex((entry) => entry.lastIndex > index);
     const insertionIndex = nextIndex < 0 ? entries.length : nextIndex;
@@ -632,7 +632,7 @@ function serviceCanonicalSectionTitle(sectionKey = "") {
 function serviceSectionDisplayTitle(sectionKey = "", title = "") {
   const rawTitle = String(title || "").trim();
   const canonical = serviceCanonicalSectionTitle(sectionKey);
-  return canonical || rawTitle;
+  return sectionKey === "community_confession" && rawTitle === "나래파송" ? rawTitle : canonical || rawTitle;
 }
 
 function addPresenterSlideToSubgroup(group, entry) {
