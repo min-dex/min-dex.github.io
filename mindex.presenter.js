@@ -104,6 +104,14 @@ function liturgicalBodyTitle(item = {}) {
   return "사도신경";
 }
 
+// Navigation metadata must never promote a body field to a content title.
+// Keep explicit intro titles; body text is resolved separately for output.
+function serviceItemLiturgicalNavigationTitle(item = {}) {
+  if (!isLiturgicalBodyServiceItem(item)) return null;
+  const memo = parseServiceItemMemo(item.memo);
+  return String(memo.introSlide?.title || item.label || liturgicalBodyTitle(item)).trim();
+}
+
 function presenterCircledNumber(index) {
   const circledNumbers = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫", "⑬", "⑭", "⑮", "⑯", "⑰", "⑱", "⑲", "⑳"];
   return circledNumbers[index] || `${index + 1}.`;
@@ -1288,7 +1296,7 @@ function presenterSectionForServiceItem(item, index, displayText, song = null, v
   const { no, title } = splitHymnNo(displayText);
   const linkedSongTitle = song ? presenterSongTitleDisplayTitle(song, version, displayText) : "";
   const linkedElementTitle = linkedSongTitle || (song ? presenterPraiseElementTitle(song, version, displayText) : "");
-  const elementTitle = linkedElementTitle || [no, title].filter(Boolean).join(" ") || displayText || label || `항목 ${index + 1}`;
+  const elementTitle = linkedElementTitle || serviceItemLiturgicalNavigationTitle(item) || [no, title].filter(Boolean).join(" ") || displayText || label || `항목 ${index + 1}`;
   const sectionLabelText = cleanList([label, formHint]).join(" · ");
   // Count the source version, not the selected/repeated performance sequence.
   const verseForms = normalizeForms(version?.forms || []).filter((form) =>

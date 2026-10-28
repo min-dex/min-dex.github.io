@@ -98,5 +98,19 @@ for(const type of ['children','youth','young-adult','sunday-main']) {
  assert.equal(cleanPresenterAssignee('김유준 어린이'),'김유준 어린이');
  assert.equal(cleanPresenterAssignee('박소영 전도사님'),'박소영 전도사님');
 }
+// Navigation uses typed metadata, never the body or a known-text prefix.
+for (const label of ['주기도문','사도신경','공동체고백','예배의 부름']) {
+ const item={id:'navigation-'+label,label,raw_title:'새로 작성한 본문',memo:serializeServiceItemMemo({elementType:'body',slides:['새로 작성한 본문']})};
+ const before=JSON.stringify(item);
+ assert.equal(serviceItemLiturgicalNavigationTitle(item),label);
+ assert.equal(presenterSectionForServiceItem(item,0,item.raw_title).elementTitle,label);
+ assert.equal(serviceSidebarChildItemDisplayParts(item,service).title,'');
+ const named={...item,memo:serializeServiceItemMemo({elementType:'body',introSlide:{title:'함께 드리는 고백'},slides:['새로 작성한 본문']})};
+ assert.equal(serviceItemLiturgicalNavigationTitle(named),'함께 드리는 고백');
+ assert.equal(serviceSidebarChildItemDisplayParts(named,service).title,'함께 드리는 고백');
+ assert.equal(JSON.stringify(item),before,'Navigation cannot mutate authored body');
+}
+assert.equal(serviceItemLiturgicalNavigationTitle({label:'설교',raw_title:'소망',memo:serializeServiceItemMemo({elementType:'title_person'})}),null);
+assert.equal(serviceItemLiturgicalNavigationTitle({label:'찬양',_worshipSectionKey:'creed',memo:serializeServiceItemMemo({elementType:'praise'})}),null);
 console.log('PASS children order, four praise slots, offering hierarchy, typed content, authored content preservation');
 `,c);

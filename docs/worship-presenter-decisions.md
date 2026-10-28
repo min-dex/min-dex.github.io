@@ -5069,3 +5069,14 @@ fragment는 식별에 유지하며 원본 첨부 주소나 예배 설정을 다�
 Native 예배 찬양의 `praise_record_id`도 콘티 연결로 인정한다. 자동 revision
 갱신은 native 모드에서 이 열을 함께 조회해 초기 로드의 곡 연결을 잃지 않는다.
 곡 ID가 남아 있어도 영상·본문 등 praise가 아닌 항목은 콘티에 넣지 않는다.
+
+
+## Liturgical navigation titles · 2026-10-28
+
+Controller outline, board headings and Remote catalog metadata share
+`serviceItemLiturgicalNavigationTitle`. For typed liturgical body items, use the
+explicit intro title when provided, otherwise the element label/canonical title.
+Never infer a navigation title from `raw_title` body text, text length or a known
+prayer opening. Ordinary sermon and praise titles retain their existing resolver.
+This only changes navigation metadata: authored body fields, output text, slide
+IDs, catalog indexes and persisted records remain unchanged.

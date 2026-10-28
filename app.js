@@ -24629,6 +24629,11 @@ function serviceSidebarChildItemDisplayParts(item, service = null) {
     };
   }
   const label = serviceElementDisplayLabel(serviceItemOrdinalDisplayLabel(item, service));
+  const liturgicalTitle = serviceItemLiturgicalNavigationTitle(item);
+  if (liturgicalTitle !== null) return {
+    meta: label || "항목",
+    title: compactSearchValue(liturgicalTitle) === compactSearchValue(label) ? "" : liturgicalTitle,
+  };
   if (serviceSidebarUsesLabelOnly(item)) return { meta: label || "항목", title: "" };
   const fallback = serviceSidebarChildItemTitle(item, service);
   if (!label) return { meta: "", title: serviceSidebarOutlineFirstLine(fallback || "항목", item) };
@@ -24652,6 +24657,8 @@ function serviceSidebarChildItemDisplayText(item = {}) {
     const version = getPresenterServiceItemVersion(song, effectiveItem, service);
     return presenterSongTitleDisplayTitle(song, version, serviceItemDisplayText(effectiveItem));
   }
+  const liturgicalTitle = serviceItemLiturgicalNavigationTitle(item);
+  if (liturgicalTitle !== null) return liturgicalTitle;
   if (serviceTitlePersonRawTitleAssignee(item)) return "";
   const rawTitle = String(item?.raw_title || "").trim();
   if (rawTitle) {
