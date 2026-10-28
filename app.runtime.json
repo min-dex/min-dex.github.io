@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261028-presenter-structured-input",
+  "version": "20261028-screen-management",
   "options": {
     "compress": false,
     "mangle": {
