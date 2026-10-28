@@ -18,7 +18,8 @@ def main():
                 ['5bf20e2d-cb7e-5c2a-86ca-0a75acfdd7c0','163',4],
                 ['7ab06cc7-99cf-5e67-b236-78a6758734e8','166',3]
               ]) {
-                const intro=Array(count).fill('할렐루야').join(' ')+'\\n';
+                for(const multiline of [false,true]) {
+                const intro=(multiline && count===4 ? '할렐루야 할렐루야\\n할렐루야 할렐루야' : Array(count).fill('할렐루야').join(' '))+'\\n';
                 const forms=[1,2].map(n=>({id:'review-v'+n,label:'Verse '+n,
                   part_type:'Verse',part_number:n,sort_order:n,lyrics:intro+'본절 '+n+'\\n\\n끝말 할렐루야'}));
                 const version={id,hymn_no:number,praise_types:['hymn'],forms};
@@ -43,6 +44,7 @@ def main():
                   assert(JSON.stringify(presenterFormPlanForServiceItem(version,reopened,song))===JSON.stringify(plan),'memo roundtrip');
                   checked.push(number+':'+(sequence||'default'));
                 }
+              }
               }
               return checked;
             }''')
