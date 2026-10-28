@@ -57,7 +57,6 @@ try:
         else pane.scrollTop=300;
       }""")
       page.wait_for_timeout(50)
-      if width==1440 and theme=='dark': page.screenshot(path=str(out/f'{engine}-sticky-scrolled.png'))
       page.evaluate("""()=>{
         const pane=refs.detailPane,bar=document.querySelector('.svc-presenter-toolbar');
         const r=bar.getBoundingClientRect(),p=pane.getBoundingClientRect();
