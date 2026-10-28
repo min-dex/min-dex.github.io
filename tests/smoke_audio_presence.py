@@ -24,7 +24,12 @@ try:
     check(!!refs.listFilter.querySelector('[data-list-filter=audio]') && !refs.listFilter.textContent.includes('음원 없음') && !refs.listFilter.textContent.includes('어린이'),'visible names');
     state.praiseFilter='all';check(getSongsForPraiseFilter().length===2,'all retains manual songs');
     check(normalizePraiseListFilterKey('children')==='audio','old filter preference');
-    check(!renderVersionPraiseTypeTags(version).includes('어린이'),'no children editor tag');
+    state.selectedSongId=song.id;state.selectedVersionId=version.id;state.forms=structuredClone(forms);
+    check(!renderFormsTab(song).includes('data-version-type-toggle'),'no classification editor toggle');
+    const editorHymn={...manual,id:'editorHymn',praise_types:['hymn'],versions:[{...manual.versions[0],id:'editorHymn-v',praise_types:['hymn']}]};
+    const hymnBefore=JSON.stringify(editorHymn);state.songs=[...state.songs,editorHymn];state.selectedSongId=editorHymn.id;state.selectedVersionId=editorHymn.versions[0].id;renderFormsTab(editorHymn);state.songs=state.songs.filter(s=>s!==editorHymn);state.selectedSongId=song.id;state.selectedVersionId=version.id;check(JSON.stringify(editorHymn)===hymnBefore,'existing editorHymn rendering preserves data');
+    state.praiseFilter='hymn';check(same(buildNewPraiseSongDraft({title:'새 곡'}).praise_types,['ccm']),'new song independent of hymn filter');state.praiseFilter='all';
+
     const item={id:'slot',song_id:song.id,memo:serializeServiceItemMemo({inputMode:'children_audio',elementType:'praise'})};
     const before=JSON.stringify({item,clean});
     check(serviceSelectableSongVersions(song,item,{}).length===1,'CCM audio selectable');

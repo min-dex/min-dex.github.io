@@ -410,7 +410,7 @@ Small visual polish that does not alter behavior does not need an entry.
 - 역대 콘티는 기존 import 콘티와 실제 Worship 예배를 함께 표시한다. 실제 예배는
   저장된 praise 항목에 곡 ID 또는 제목이 있을 때만 카드를 만들고 빈 순서는 제외한다.
   section/element 순서와 찬양 인도자를 사용한다. 가사·슬라이드는 조회하지 않는다.
-  같은 날짜·예배 유형의 import 콘티가 있으면 기존 콘티를 우선해 중복 카드를 만들지 않는다.
+  같은 날짜·예배 유형의 실제 예배가 있으면 그 예배 찬양을 우선하며, 실제 예배가 없을 때만 import 콘티를 표시한다.
   1·2·3부는 서로 다른 예배로 취급한다. 실제 예배 자료는 복사 저장하지 않고 조회해서 구성하며,
   콘티를 다시 열거나 새로고침하면 변경된 예배 내용이 반영된다. 직접 입력한 곡명은 임의 매칭하지 않는다.
 - 청소년부의 서로 다른 날짜에 반복된 콘티는 각각 유지한다. 2026-09-06 원문 대조로
@@ -4836,6 +4836,19 @@ hydration/freshness checks. Failed preparation or superseded navigation leaves
 the output unchanged. Unsaved-change confirmation is retained; ordinary browsing
 of other worships still never transfers the live output.
 
+## Preparation input readiness ·2026-10-28
+
+Preparation input readiness uses the same `presenterPreparationSlide` resolver
+as slide construction. A built-in waiting video or ready screen is usable content
+even without an explicitly attached asset; it must not receive an input-required
+badge. Ordinary unattached media keep their existing missing-input state. No
+stored assets, playback options or worship settings are rewritten.
+
+Explicit special-song score assets also count as content independently of a song
+DB selection, matching the existing asset-first slide path. Normalized image
+pages and file URLs qualify; metadata without a usable source does not bypass
+song selection. This preserves older input-mode metadata without rewriting it.
+
 ## Standalone media viewport fit ·2026-10-28
 
 Image, video (including waiting-loop video), imported slide images and live PPTX
@@ -5021,3 +5034,38 @@ retrofitted; exact-request create retries retain their frozen element payload.
 바꾸지 않는다. 기존 예배의 사용자 introSlide는 자동으로 지우지 않는다.
 사용자가 지정한 10/25 제외 6건의 순서/기본값 정리는 별도 운영 적용으로
 구분하며 10/25 원본과 모든 날짜별 내용은 보존한다.
+
+## Controller Lyrics label ·2026-10-28
+
+썸네일 위 송폼 배지에서 Lyrics 유형의 표시만 숨긴다. L/Lyrics 입력 정규화,
+송폼 구간 묶음, 슬라이드 번호·이동·선택과 실제 가사·송출 화면은 유지한다.
+V1·C·B·T 등 다른 송폼 배지는 유지하고, 숨긴 배지의 별도 공간도 남기지 않는다.
+DB 가사 블록의 유형 선택과 저장 데이터는 변경하지 않는다.
+
+## Actual media source identity ·2026-10-28
+
+이미지·영상의 출력 캐시는 실제 미디어 주소를 포함한다. 같은 항목의 파일만
+교체해도 새 파일을 표시하며, 같은 주소의 반복 전달과 동등한 상대·절대 URL은
+재생 위치·일시정지·음량·PPTX native session을 다시 만들지 않는다. URL의 query와
+fragment는 식별에 유지하며 원본 첨부 주소나 예배 설정을 다시 저장하지 않는다.
+영상 조작은 관측된 실제 파일 주소가 선택한 영상과 일치할 때만 허용한다.
+늦은 이전 파일의 로딩 결과는 새 선택을 덮지 않는다. PPTX 읽기 실패는 이전
+송출 화면을 보존하며 오류는 해당 예배·항목·자료 주소에 귀속된다. 다른 자료나
+해제된 세션의 오류가 현재 화면에 붙거나 현재 오류를 지우지 않는다.
+
+새 controller가 파일 주소를 관측하지 못하는 구형 송출 창에 연결되면 임의로
+영상을 조작하지 않고 `송출 창을 다시 열어 주세요.`로 안내한다. 새 파일이 아직
+실제 화면에 반영되지 않았으면 `새 영상 반영 대기`로 표시하고 이전 파일의 시간을
+새 영상의 재생바에 표시하지 않는다. 안내 자체는 송출을 중단하거나 재생을 바꾸지 않는다.
+
+## 실제 예배 우선 콘티 ·2026-10-28
+
+같은 날짜·예배 종류에 실제 예배가 있으면 해당 예배의 현재 찬양을 역대 콘티에
+표시한다. 유형 alias를 정규화해 같은 예배의 중복 카드를 막는다. 빈 실제 예배도
+그 상태가 기준이며, 찬양 삭제 후 옛 import 콘티를 다시 표시하지 않는다. 실제
+예배 자체가 없을 때만 기존 import 기록을 표시한다. Import 원본·곡 연결은
+삭제하거나 복사 저장하지 않는다. 기존 자동 갱신과 작업 보호는 유지한다.
+
+Native 예배 찬양의 `praise_record_id`도 콘티 연결로 인정한다. 자동 revision
+갱신은 native 모드에서 이 열을 함께 조회해 초기 로드의 곡 연결을 잃지 않는다.
+곡 ID가 남아 있어도 영상·본문 등 praise가 아닌 항목은 콘티에 넣지 않는다.

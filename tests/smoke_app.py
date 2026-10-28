@@ -6013,8 +6013,8 @@ def main() -> int:
                           renderPresenterDetail();
                           const legacyContext = document.querySelector('.service-sidebar-input-context');
                           const rightSidebar = document.querySelector('#mindexRightSidebar');
-                          const bulkInput = rightSidebar?.querySelector('.svc-presenter-side-panel [data-presenter-preparation-field]');
-                          const bulkButton = rightSidebar?.querySelector('.svc-presenter-side-panel [data-presenter-preparation-apply]');
+                          const bulkInput = refs.songList?.querySelector('[data-presenter-preparation-field]');
+                          const bulkButton = refs.songList?.querySelector('[data-presenter-preparation-apply]');
                           const sidePanel = rightSidebar?.querySelector('.svc-presenter-side-panel');
                           const topbarToggle = document.querySelector('#presenterRightSidebarBtn');
                           const headerToggle = document.querySelector('.svc-header-actions [data-presenter-right-sidebar-toggle]');
@@ -6074,7 +6074,7 @@ def main() -> int:
                             saveHidden: Boolean(document.querySelector('#saveAllBtn')?.hidden),
                             saveVisible: Boolean(document.querySelector('#saveAllBtn:not([hidden])')),
                             headerToggleRemoved: !headerToggle,
-                            railMounted: Boolean(rightSidebar?.querySelector('.svc-presenter-input-rail')),
+                            railMounted: Boolean(refs.songList?.querySelector('.svc-presenter-input-rail')),
                             sidePanelMounted: Boolean(sidePanel),
                             sidebarContext: sidebarContext?.textContent?.replace(/\\s+/g, ' ').trim() || '',
                             controlGroupCount: controlGroups.length,
@@ -6090,7 +6090,7 @@ def main() -> int:
                             fieldCount: controls.length,
                             songFieldCount: songFields.length,
                             expectedSongFieldCount: [...document.querySelectorAll(".svc-board-subgroup-control-item")].filter(node => { const item=getServiceItems(service.id)[Number(node.dataset.serviceItemIndex)]; return item && serviceItemRequiresSongSelection(item, service); }).length,
-                            railLabels: [...rightSidebar.querySelectorAll("[data-presenter-preparation-field]")].map(field => field.dataset.presenterPreparationFieldLabel),
+                            railLabels: [...refs.songList.querySelectorAll("[data-presenter-preparation-field]")].map(field => field.dataset.presenterPreparationFieldLabel),
                             headerLabels,
                             editableLabels,
                             bulkInput: Boolean(bulkInput),
@@ -9670,7 +9670,7 @@ def main() -> int:
                             hasControls: Boolean(document.querySelector('#servicePresenterControls')),
                             legacyInputContextRemoved: !document.querySelector('.service-sidebar-input-context'),
                             headerControls: document.querySelectorAll('.svc-board-subgroup-controls [data-service-item-field]').length,
-                            railMounted: Boolean(document.querySelector('#mindexRightSidebar .svc-presenter-input-rail')),
+                            railMounted: Boolean(document.querySelector('#songList .svc-presenter-input-rail')),
                             sidePanelMounted: Boolean(document.querySelector('#mindexRightSidebar .svc-presenter-side-panel')),
                             rightSidebarMounted: Boolean(document.querySelector('#mindexRightSidebar:not([hidden])')),
                             topbarToggleVisible: Boolean(document.querySelector('#presenterRightSidebarBtn:not([hidden])')),

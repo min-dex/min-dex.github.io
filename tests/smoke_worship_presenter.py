@@ -524,8 +524,8 @@ def main() -> int:
                       const sidePanel = sidebar?.querySelector('.svc-presenter-side-panel');
                       const rightSidebarHead = sidebar?.querySelector('.right-sidebar-head');
                       const presenterTop = sidebar?.querySelector('.svc-presenter-top');
-                      const inputRail = sidebar?.querySelector('.svc-presenter-input-rail');
-                      const inputRailHead = sidebar?.querySelector('.svc-presenter-input-rail-head');
+                      const inputRail = refs.songList?.querySelector('.svc-presenter-input-rail');
+                      const inputRailHead = refs.songList?.querySelector('.svc-presenter-input-rail-head');
                       const leftSidebar = document.querySelector('#mindexSidebarPanel');
                       const headerToggle = document.querySelector('.svc-header-actions [data-presenter-right-sidebar-toggle]');
                       const presenterHeader = document.querySelector('.presenter-viewer .svc-header');

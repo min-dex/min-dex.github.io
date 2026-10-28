@@ -280,6 +280,11 @@ function presenterServiceItemScoreManifestPending(item, song, memo = parseServic
     && !asset.url && !presenterScoreImageSourcesFromAsset(asset, song, version, serviceItemDisplayText(item)).length;
 }
 
+function presenterSpecialSongHasAssetOutput(item, memo) {
+  const asset = normalizeServiceAsset(memo.asset || item.asset);
+  return isSpecialSongServiceItem(item) && Boolean(normalizePresenterMediaSource(asset.url) || presenterScoreImageSourcesFromAsset(asset).length);
+}
+
 function presenterScoreSlidesForServiceItem(
   item,
   section,
@@ -743,19 +748,18 @@ function presenterHymnOnceOnlyIntro(forms = [], version = {}) {
   const count = ({
     "5bf20e2d-cb7e-5c2a-86ca-0a75acfdd7c0": 4, // 새찬송가 163
     "7ab06cc7-99cf-5e67-b236-78a6758734e8": 3, // 새찬송가 166
-  })[version?.id];
+  })[version?._legacyVersionId || version?.id];
   if (!count) return forms;
-  const prefix = `${Array(count).fill("할렐루야").join(" ")}\n`;
+  const introPattern = new RegExp(`^${Array(count).fill("할렐루야").join("(?:[ \t]+|\\n)")}\\n`);
   let playedIntro = false;
   return forms.map((form) => {
     const target = normalizePresenterFormPresetLabel(presenterFormDisplayLabel(form));
     // Explicit A/B segments and user-edited wording are not inferred here.
-    if (target.type !== "verse" || target.group || target.variant || !String(form.lyrics || "").startsWith(prefix)) return form;
-    if (!playedIntro) {
-      playedIntro = true;
-      return form;
-    }
-    return { ...form, lyrics: form.lyrics.slice(prefix.length) };
+    const intro = String(form.lyrics || "").match(introPattern)?.[0];
+    if (target.type !== "verse" || target.group || target.variant || !intro) return form;
+    if (playedIntro) return { ...form, lyrics: form.lyrics.slice(intro.length) };
+    playedIntro = true;
+    return form;
   });
 }
 

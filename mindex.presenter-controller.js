@@ -926,41 +926,6 @@ function clearPresenterTransientBoardActiveMarks(root = document.getElementById(
   syncPresenterBoardSelectionClasses(root);
 }
 
-function patchPresenterControlTree(current, next) {
-  if (current.isEqualNode(next)) return;
-  if (current.nodeType !== next.nodeType || current.nodeName !== next.nodeName) {
-    current.replaceWith(next.cloneNode(true));
-    return;
-  }
-  if (current.nodeType !== Node.ELEMENT_NODE) {
-    current.textContent = next.textContent;
-    return;
-  }
-  // Preview geometry belongs to the mounted frame, not the slide markup.
-  const preserveCitationDraft = current.matches?.("[data-presenter-citation-reference-input]")
-    && next.matches?.("[data-presenter-citation-reference-input]")
-    && current.dataset.serviceId === next.dataset.serviceId
-    && current.dataset.presenterCitationElementId === next.dataset.presenterCitationElementId;
-  const scale = current.style?.getPropertyValue("--presenter-preview-scale");
-  if (scale) next.style.setProperty("--presenter-preview-scale", scale);
-  if (current.tagName === "DETAILS" && current.open) next.open = true;
-  for (const attr of [...current.attributes]) {
-    if (!next.hasAttribute(attr.name)) current.removeAttribute(attr.name);
-  }
-  for (const attr of [...next.attributes]) {
-    if (current.getAttribute(attr.name) !== attr.value) current.setAttribute(attr.name, attr.value);
-  }
-  const editingLiveScripture = current === document.activeElement && current.matches?.("[data-live-scripture-input]");
-  if (current instanceof HTMLInputElement && !editingLiveScripture && !preserveCitationDraft && !current._videoSeekOwner && current.value !== next.value) current.value = next.value;
-  const previousChildren = [...current.childNodes];
-  const nextChildren = [...next.childNodes];
-  nextChildren.forEach((child, index) => {
-    if (previousChildren[index]) patchPresenterControlTree(previousChildren[index], child);
-    else current.appendChild(child.cloneNode(true));
-  });
-  previousChildren.slice(nextChildren.length).forEach((child) => child.remove());
-}
-
 function patchPresenterControlsTop(root, service, slides, active, index) {
   if (!root || !service) return;
   root.setAttribute("aria-label", uiText("presenter.controls"));
@@ -2002,12 +1967,6 @@ function presenterFixedTitleText(item = {}) {
   return "";
 }
 
-function serviceItemsAreHydrating(serviceId = "") {
-  const id = String(serviceId || "").trim();
-  if (!id || state.loadedWorshipServiceIds.has(id)) return false;
-  return state.loading || serviceItemLoadPromises.has(id) || isServiceDataModule();
-}
-
 function resolvePresenterServiceItemContentState(item = {}, memo = emptyServiceItemMemo(), song = null, service = null) {
   const effectiveItem = serviceItemWithSharedSundayContent(item, service);
   if (effectiveItem !== item) {
@@ -2044,6 +2003,12 @@ function resolvePresenterServiceItemContentState(item = {}, memo = emptyServiceI
   const missing = (reason) => result("missing", false, reason);
   const loading = (reason) => result("loading", false, reason);
   if (serviceItemPresentationHidden(item, memo)) return filled("hidden_in_presentation");
+  if (presenterSpecialSongHasAssetOutput(item, memo)) return filled("special_song_asset");
+  if (isServicePreparationItemForEditor(item, memo)) {
+    const prepared = presenterPreparationSlide(service, item, 0);
+    return prepared?.type === "ready" || prepared?.videoSrc || prepared?.imageSrc
+      ? filled("preparation_output") : missing("preparation_asset_empty");
+  }
   if (presenterFixedTitleText(item)) return filled("fixed_title");
   if (isConfessionPrayerServiceItem(item)) return filled("confession_title");
   if (elementType === "title_content" && labelKey === "환영") return filled("title_content");

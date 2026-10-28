@@ -17,12 +17,12 @@ try:
     page.goto(url)
     page.wait_for_function("typeof syncPresenterFocusView==='function' && !document.body.classList.contains('ui-booting')")
     page.evaluate('''()=>{
-      const sid='focus-fixture';state.client={};state.serviceError='';
+      const sid='focus-fixture';state.client={};state.serviceError='';state.connectionError='';
       state.services=[{id:sid,type_id:'fixture',date:'2026-10-25',title:'주일예배'}];
       state.serviceTypes=[{id:'fixture',name:'주일예배'}];
       state.serviceItems={[sid]:['첫 번째','두 번째','마지막'].map((title,i)=>({id:'focus-'+i,service_id:sid,label:'설교',raw_title:title,sort_order:i+1,_worshipSectionKey:'sermon',_worshipElementTemplateModified:true,memo:serializeServiceItemMemo({elementType:'title',inputMode:'manual',outputMode:'title'})}))};
       state.loadedWorshipServiceIds=new Set([sid]);state.selectedServiceId=sid;state.module='presenter';document.body.dataset.module='presenter';state.loading=false;
-      renderPresenterDetail();
+      renderServiceList();renderPresenterDetail();
       window.focusDraft=document.querySelector('[data-service-item-field=raw_title]');focusDraft.value='아직 저장하지 않은 제목';
       window.focusBoard=document.querySelector('.svc-slide-board');
       window.focusAudio={currentTime:42,paused:false};state.serviceMusic.audio=focusAudio;
@@ -30,6 +30,8 @@ try:
       state.serviceMusic.mode='presenter-audio';state.serviceMusic.timingGroupId='group';state.serviceMusic.autoSyncSuspended=true;
       window.focusItems=JSON.stringify(state.serviceItems);
     }''')
+    assert page.get_by_role('button',name='슬라이드 보기',exact=True).count()==1
+    assert page.get_by_role('button',name='발표자 보기',exact=True).count()==1
     page.evaluate("""()=>{
       const original=window.MINDEX_SERVER_STORAGE;
       const writes=[];window.MINDEX_SERVER_STORAGE={queue:(...args)=>{writes.push(args);return true;}};
@@ -43,7 +45,7 @@ try:
         if(!renderPresenterServiceInputRail(state.services[0]).includes('aria-expanded="false"'))throw Error('rerender lost collapse state');
         toggle.click();
         if(body.hidden || body.querySelector('input,textarea')!==field || field.value!=='접어도 유지되는 입력')throw Error('disclosure lost draft');
-        if(writes.length!==2 || writes[0][1]!=='mindex.ui.presenterOrderInputOpen' || writes[0][2]!=='false' || writes[1][2]!=='true')throw Error('server UI preference missing');
+        if(writes.length)throw Error('view-only disclosure wrote server preference');
         field.value=before;
       } finally {window.MINDEX_SERVER_STORAGE=original;}
     }""")
@@ -128,6 +130,7 @@ try:
      for view in ('basic','focus'):
       page.locator(f'[data-presenter-focus-toggle={view}]').click()
       assert page.locator(f'[data-presenter-focus-toggle={view}]').get_attribute('aria-pressed')=='true'
+      if view=='focus': assert page.locator('[data-presenter-focus-panel]').get_attribute('aria-label')=='발표자 보기'
       page.locator('.svc-presenter-side-panel .svc-presenter-top').wait_for(state='visible' if view=='basic' else 'hidden')
       page.locator(f'[data-presenter-focus-toggle={view}]').click()
       assert page.locator(f'[data-presenter-focus-toggle={view}]').get_attribute('aria-pressed')=='true'

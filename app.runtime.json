@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261028-song-group-catalog",
+  "version": "20261028-praise-id-compatibility",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "274649c01e8cefec62cc31d63f26c0982ef2783aaa8056f19c756c9c6a53d27b",
-  "runtime_sha256": "29d007d3ed9021f037eddfe6a0045307ba0dd87b780e6f6ea6165062e7ea076a",
-  "source_bytes": 1341813,
-  "runtime_bytes": 957905,
-  "source_gzip": 306039,
-  "runtime_gzip": 239898
+  "source_sha256": "874bdfccc80a925ca396ed9a8d7943c5a25ba9d168dceffdd94a71e74a91bac7",
+  "runtime_sha256": "07f861985bd63c88a265a2c2eacf22105e56512e752b5e4212969d505fdaf4e6",
+  "source_bytes": 1340288,
+  "runtime_bytes": 956856,
+  "source_gzip": 305648,
+  "runtime_gzip": 239578
 }

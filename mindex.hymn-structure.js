@@ -13,7 +13,7 @@
     const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(text || '')));
     return Array.from(new Uint8Array(bytes), byte => byte.toString(16).padStart(2,'0')).join('');
   }
-  async function describe(versionId, forms, records) {
+  async function describeEvidence(versionId, forms, records) {
     const record = (records || await load())[versionId];
     if (!record) return {status:'unreviewed',text:'마디: 미확인'};
     if (!Array.isArray(record.parts)) return {status:'stale',text:'마디: 검증 정보 확인 필요'};
@@ -49,5 +49,19 @@
     if (unmeasured) labels.push('일부 구간 미확인');
     return {status:'measured',text:labels.join(' / ') || '마디: 미확인'};
   }
-  root.MindexHymnStructure = {describe};
+  async function describe(versionId, forms, records) {
+    const source = records || await load();
+    const record = source[versionId];
+    const evidence = await describeEvidence(versionId, forms, source);
+    if (record && Object.prototype.hasOwnProperty.call(record, 'displayText')) {
+      return {status:'manual', text:String(record.displayText ?? ''), validationStatus:evidence.status};
+    }
+    return evidence;
+  }
+  function normalizeDisplayText(value) {
+    const text = String(value ?? '').trim();
+    const match = /^(?:approx\.\s*|약\s*)?(\d+(?:\.\d+)?)\s*(?:bars?|마디)?$/i.exec(text);
+    return match && Number(match[1]) > 0 ? `approx. ${Number(match[1])} bars` : text;
+  }
+  root.MindexHymnStructure = {describe, normalizeDisplayText};
 })(globalThis);

@@ -1352,6 +1352,9 @@ function bindStaticEvents() {
   refs.songList.addEventListener("keydown", handleDetailKeydown);
   refs.songList.addEventListener("input", handleDetailInput);
   refs.songList.addEventListener("paste", handlePresenterPreparationPaste);
+  refs.songList.addEventListener("focusin", event => {
+    if (event.target.matches('[data-presenter-preparation-field]')) syncPresenterPreparationControls(event.target);
+  });
   refs.songList.addEventListener("change", handleDetailChange);
   refs.songList.addEventListener("dblclick", handleServiceOutlineSlideDoubleClick);
 
@@ -6548,7 +6551,7 @@ async function createPraiseSong(options = {}) {
 }
 
 function buildNewPraiseSongDraft(options = {}) {
-  const praiseTypes = normalizePraiseTypes(options.praiseTypes || options.praise_types || state.praiseFilter);
+  const praiseTypes = normalizePraiseTypes(options.praiseTypes || options.praise_types || ["ccm"]);
   const version = {
     id: createUuid(),
     name: "기본",
@@ -8983,12 +8986,6 @@ function handleDetailClick(event) {
     return;
   }
 
-  const versionTypeToggle = event.target.closest("[data-version-type-toggle]");
-  if (versionTypeToggle) {
-    toggleVersionPraiseType(versionTypeToggle.dataset.versionTypeToggle, versionTypeToggle.dataset.typeVersionId);
-    return;
-  }
-
   const formAction = event.target.closest("[data-form-action]");
   if (formAction) {
     event.preventDefault();
@@ -9331,7 +9328,7 @@ function handleDetailKeydown(event) {
     return;
   }
 
-  if (event.key === "Enter" && event.target.matches("input[data-song-field], input[data-song-meta-field], input[data-version-name-field], input[data-version-output-title-field]")) {
+  if (event.key === "Enter" && event.target.matches("input[data-song-field], input[data-song-meta-field], input[data-version-name-field], input[data-version-output-title-field], input[data-hymn-structure-version]")) {
     event.preventDefault();
     saveAll();
     return;
@@ -9587,6 +9584,9 @@ function handleDetailInput(event) {
     return;
   }
 
+  const measureField = event.target.closest("input[data-hymn-structure-version]");
+  if (measureField) { updateVersionMeasureField(measureField); return; }
+
   const songMetaField = event.target.closest("[data-song-meta-field]");
   if (songMetaField) {
     updateSongMetadataField(songMetaField);
@@ -9806,6 +9806,9 @@ function handleDetailChange(event) {
     updateVersionNameField(versionNameField);
     return;
   }
+
+  const measureField = event.target.closest("input[data-hymn-structure-version]");
+  if (measureField) { updateVersionMeasureField(measureField); return; }
 
   const songMetaField = event.target.closest("[data-song-meta-field]");
   if (songMetaField) {
@@ -10185,36 +10188,6 @@ function addForm(type) {
     field?.focus({ preventScroll: true });
     field?.scrollIntoView({ block: "nearest" });
   });
-}
-
-function toggleVersionPraiseType(type, versionId = getSelectedVersionId()) {
-  if (!PRAISE_TYPES.includes(type) || state.saving) return;
-  const song = getSelectedSong();
-  const version = song?.versions?.find(candidate => candidate.id === versionId);
-  if (!version) return;
-  const types = canonicalPraiseTypes(version.praise_types);
-  const idx = types.indexOf(type);
-  if (idx >= 0) types.splice(idx, 1);
-  else types.push(type);
-  version.praise_types = canonicalPraiseTypes(types);
-  updateSongPraiseTypesFromVersions(song);
-  state.dirty.forms = true;
-  state.dirty.song = true;
-  updateSaveState();
-  renderDetail();
-}
-
-function renderVersionPraiseTypeTags(version) {
-  if (!version) return "";
-  const active = versionEffectivePraiseTypes(getSelectedSong(), version);
-  const labels = { hymn: "찬송가", ccm: "CCM" };
-  return `<div class="version-type-tags">${
-    PRAISE_TYPES.map(type => `
-      <button class="version-type-tag${active.includes(type) ? " on" : ""}" type="button"
-              data-version-type-toggle="${escapeAttr(type)}" data-type-version-id="${escapeAttr(version.id)}" aria-pressed="${active.includes(type)}" ${state.saving ? "disabled" : ""}>
-        ${escapeHtml(labels[type])}
-      </button>`).join("")
-  }</div>`;
 }
 
 async function assertPraiseVersionsUnused(versionIds) {
@@ -17943,7 +17916,6 @@ function renderVersionTitleContent(song, version, forms, options = {}) {
       ${renderVersionAttentionStatus(song, version, forms, { active })}
     </div>
     <div class="version-title-actions">
-      ${renderVersionPraiseTypeTags(version)}
       <div class="version-edit-actions" role="group" aria-label="버전 관리">
       ${[-1, 1].map(direction => {
         const index = song.versions.findIndex(item => item.id === version.id);
@@ -17960,13 +17932,22 @@ function renderVersionTitleContent(song, version, forms, options = {}) {
   `;
 }
 
+function updateVersionMeasureField(field) {
+  const version = getSelectedVersion();
+  if (!version || version.id !== field.dataset.hymnStructureVersion) return;
+  field.dataset.hymnStructureRequest = String(++hymnStructureRenderTicket);
+  version.hymn_structure = {...(version.hymn_structure || {}),
+    displayText: globalThis.MindexHymnStructure.normalizeDisplayText(field.value)};
+  field.dataset.reviewStatus = "manual";
+  state.dirty.song = true;
+  updateSaveState();
+}
 let hymnStructureRenderTicket = 0;
 function updateVersionMusicalStructure(node, version, forms) {
   if (!node || !globalThis.MindexHymnStructure) return;
   const ticket = String(++hymnStructureRenderTicket);
   node.dataset.hymnStructureRequest = ticket;
-  if (node.matches("input")) node.value = "확인 중…";
-  else node.textContent = "마디 정보 확인 중…";
+  if (!node.matches("input")) node.textContent = "마디 정보 확인 중…";
   const snapshot = (forms || []).map(form => ({id:form.id, part_type:form.part_type, lyrics:form.lyrics || ""}));
   MindexHymnStructure.describe(version._legacyVersionId || version.id, snapshot,
     version._singleSongRecord ? {[version._legacyVersionId || version.id]: version.hymn_structure} : undefined)
@@ -17974,8 +17955,8 @@ function updateVersionMusicalStructure(node, version, forms) {
     .then(result => {
       if (!node.isConnected || node.dataset.hymnStructureRequest !== ticket) return;
       if (node.matches("input")) {
-        node.value = result.text.replace(/^마디:\s*/, "").split(" · 블록 ")[0];
-        node.title = `${node.dataset.hymnStructureLabel} · ${result.text}`;
+        if (document.activeElement !== node) node.value = result.status === "manual" ? result.text : result.text.replace(/^마디:\s*/, "").split(" · 블록 ")[0];
+        node.title = `${node.dataset.hymnStructureLabel} · ${result.text}${result.validationStatus === "stale" ? " · 악보 검증: 가사가 바뀌어 재검토 필요" : ""}`;
       } else node.textContent = result.text;
       node.dataset.reviewStatus = result.status;
     });
@@ -17986,7 +17967,7 @@ function renderVersionMusicalStructure(version, forms, options = {}) {
   queueMicrotask(() => updateVersionMusicalStructure(document.querySelector(`[data-hymn-structure-ticket="${ticket}"]`), version, forms));
   if (options.metadataField) {
     const label = `마디 수 · ${versionEditableName(getSelectedSong(), version)}`;
-    return `<label class="field compact"><span>마디 수</span><input type="text" readonly aria-label="${escapeAttr(label)}" value="확인 중…" data-hymn-structure-label="${escapeAttr(label)}" data-hymn-structure-ticket="${ticket}" data-hymn-structure-version="${escapeAttr(version.id)}" /></label>`;
+    return `<label class="field compact"><span>마디 수</span><input type="text" maxlength="100" aria-label="${escapeAttr(label)}" value="${escapeAttr(version.hymn_structure?.displayText ?? "")}" placeholder="예: 4 → approx. 4 bars" data-hymn-structure-label="${escapeAttr(label)}" data-hymn-structure-ticket="${ticket}" data-hymn-structure-version="${escapeAttr(version.id)}" /></label>`;
   }
   return `<div class="version-musical-structure" data-hymn-structure-ticket="${ticket}" data-hymn-structure-version="${escapeAttr(version.id)}" aria-label="버전별 마디 정보">마디 정보 확인 중…</div>`;
 }
@@ -24199,7 +24180,7 @@ function renderServiceList() {
   if (state.module === "presenter") {
     const outlineMarkup = selectedService && !serviceIsNoGathering(selectedService)
       ? renderServiceCurrentSidebar(selectedService).trim() : "";
-    refs.songList.innerHTML = renderPresenterSidebar(q, services, selectedService, outlineMarkup);
+    setPresenterSidebarContent(renderPresenterSidebar(q, services, selectedService, outlineMarkup), selectedService);
     const outline = refs.songList.querySelector(".service-sidebar-section--current");
     if (outline) outline._presenterOutlineMarkup = outlineMarkup;
     finishListRender();
@@ -24254,9 +24235,10 @@ function renderPresenterSidebar(query, services, selectedService, outlineMarkup 
           : `<p class="service-no-results">검색 결과가 없습니다.</p>`}
       </section>` : "";
   return `
-    <div class="service-sidebar service-sidebar--presenter">
-      ${searchSection}
+    <div class="service-sidebar service-sidebar--presenter" data-service-id="${escapeAttr(selectedService?.id || "")}">
+      <div class="service-sidebar-search-results">${searchSection}</div>
       ${selectedService ? renderPresenterSidebarServiceSummary(selectedService) : ""}
+      ${selectedService && !serviceIsNoGathering(selectedService) && !serviceViewIsLoading(selectedService.id) ? renderPresenterServiceInputRail(selectedService) : ""}
       ${outlineMarkup || (!selectedService ? renderUpcomingServiceShortcuts() : "")}
     </div>`;
 }
@@ -24313,6 +24295,7 @@ function patchPresenterSidebarOutline(service, slides) {
 function patchPresenterSidebarOutlineUnscoped(service, slides) {
   const current = refs.songList?.querySelector(".service-sidebar-section--current");
   if (!current || !service) return;
+  syncPresenterSidebarInputRail(service);
   const markup = renderServiceCurrentSidebar(service, slides).trim();
   if (current._presenterOutlineMarkup === markup) return;
   const scrollTop = refs.songList.scrollTop;
@@ -24894,7 +24877,7 @@ function worshipSetlistArchiveEntries() {
   const live = window.MindexSetlistLinks?.fromServices(archive.live, archive.sources, state.worshipSetlistSongCatalog?.index) || {sources:[], candidates:[]};
   const candidatesBySource = worshipSetlistArchiveCandidatesBySource();
   for (const candidate of live.candidates) (candidatesBySource[candidate.import_source_id] ||= []).push(candidate);
-  const entries = [...(archive.sources || []), ...live.sources].map((source) => {
+  const entries = window.MindexSetlistLinks.preferLiveSources(archive.sources || [], archive.live, live.sources, worshipAppServiceTypeId).map((source) => {
     const rows = (candidatesBySource[source.id] || []).filter(isSetlistPraiseCandidate);
     const candidates = source.source_kind === "worship"
       ? rows.map(candidate => ({...candidate, archive_display_label:worshipSetlistArchiveDisplayLabel(candidate.raw_label),
@@ -28584,35 +28567,6 @@ function presenterPreparationDraftNearApplyButton(button) {
     || button?.parentElement
     || null;
   return presenterPreparationDraftFromRoot(root, service);
-}
-
-function focusPresenterPreparationTarget(serviceId, target = {}) {
-  if (!serviceId || !target) return;
-  requestAnimationFrame(() => {
-    const roots = [refs.rightSidebar, refs.detailPane];
-    const root = roots.find((candidate) => candidate?.querySelector?.(`[data-presenter-preparation-field][data-service-id="${cssEscape(serviceId)}"]`));
-    if (!root) return;
-    const inputRoot = root.querySelector(".svc-presenter-input-rail .svc-presenter-preparation-input");
-    const selector = target.apply
-      ? `[data-presenter-preparation-apply][data-service-id="${cssEscape(serviceId)}"]`
-      : `[data-presenter-preparation-field][data-service-id="${cssEscape(serviceId)}"][data-presenter-preparation-field-label="${cssEscape(target.label || "")}"]`;
-    const field = inputRoot?.querySelector(selector) || root.querySelector(selector);
-    field?.focus?.();
-    if (!target.apply && typeof field?.select === "function") field.select();
-  });
-}
-
-function presenterPreparationDraftForService(serviceId, options = {}) {
-  if (options.draft != null) return String(options.draft || "").trim();
-  const service = state.services.find((candidate) => candidate.id === serviceId);
-  const selector = `[data-presenter-preparation-field][data-service-id="${cssEscape(serviceId)}"]`;
-  const input = refs.rightSidebar?.querySelector(selector)
-    || refs.detailPane?.querySelector(selector)
-    || null;
-  const draft = input && service
-    ? presenterPreparationDraftFromRoot(input.closest(".svc-presenter-preparation-input"), service)
-    : state.presenterPreparationDrafts[serviceId];
-  return String(draft || "").trim();
 }
 
 function presenterPreparationPlaceholderForService(service) {
