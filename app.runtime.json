@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261028-setlist-card-titles",
+  "version": "20261028-setlist-live-native",
   "options": {
     "compress": false,
     "mangle": {
