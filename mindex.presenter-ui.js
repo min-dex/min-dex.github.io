@@ -509,3 +509,10 @@ function serviceOutlineMissingState(item = {}, slides = [], service = null) {
   const content = resolvePresenterServiceItemContentState(item, parseServiceItemMemo(item.memo), song, service);
   return content.required ? { ...content, missingContent: true } : null;
 }
+
+
+function serviceItemsAreHydrating(serviceId = "") {
+  const id = String(serviceId || "").trim();
+  if (!id || state.loadedWorshipServiceIds.has(id)) return false;
+  return state.loading || serviceItemLoadPromises.has(id) || isServiceDataModule();
+}

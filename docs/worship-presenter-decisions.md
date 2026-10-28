@@ -4836,6 +4836,14 @@ hydration/freshness checks. Failed preparation or superseded navigation leaves
 the output unchanged. Unsaved-change confirmation is retained; ordinary browsing
 of other worships still never transfers the live output.
 
+## Preparation input readiness ·2026-10-28
+
+Preparation input readiness uses the same `presenterPreparationSlide` resolver
+as slide construction. A built-in waiting video or ready screen is usable content
+even without an explicitly attached asset; it must not receive an input-required
+badge. Ordinary unattached media keep their existing missing-input state. No
+stored assets, playback options or worship settings are rewritten.
+
 ## Standalone media viewport fit ·2026-10-28
 
 Image, video (including waiting-loop video), imported slide images and live PPTX

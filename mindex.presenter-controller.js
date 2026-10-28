@@ -1967,12 +1967,6 @@ function presenterFixedTitleText(item = {}) {
   return "";
 }
 
-function serviceItemsAreHydrating(serviceId = "") {
-  const id = String(serviceId || "").trim();
-  if (!id || state.loadedWorshipServiceIds.has(id)) return false;
-  return state.loading || serviceItemLoadPromises.has(id) || isServiceDataModule();
-}
-
 function resolvePresenterServiceItemContentState(item = {}, memo = emptyServiceItemMemo(), song = null, service = null) {
   const effectiveItem = serviceItemWithSharedSundayContent(item, service);
   if (effectiveItem !== item) {
@@ -2009,6 +2003,11 @@ function resolvePresenterServiceItemContentState(item = {}, memo = emptyServiceI
   const missing = (reason) => result("missing", false, reason);
   const loading = (reason) => result("loading", false, reason);
   if (serviceItemPresentationHidden(item, memo)) return filled("hidden_in_presentation");
+  if (isServicePreparationItemForEditor(item, memo)) {
+    const prepared = presenterPreparationSlide(service, item, 0);
+    return prepared?.type === "ready" || prepared?.videoSrc || prepared?.imageSrc
+      ? filled("preparation_output") : missing("preparation_asset_empty");
+  }
   if (presenterFixedTitleText(item)) return filled("fixed_title");
   if (isConfessionPrayerServiceItem(item)) return filled("confession_title");
   if (elementType === "title_content" && labelKey === "환영") return filled("title_content");

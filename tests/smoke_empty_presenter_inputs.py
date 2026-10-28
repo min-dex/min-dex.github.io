@@ -15,7 +15,7 @@ try:
             page.wait_for_function('typeof state !== "undefined" && !document.body.classList.contains("ui-booting")')
             result = page.evaluate('''async () => {
               const check=(value,message)=>{if(!value)throw Error(message)};
-              let missingCount=0;
+              let missingCount=0,preparationCount=0;
               for(const type_id of ['sunday-first','sunday-second','sunday-main','sunday-afternoon',
                 'wednesday','friday','monthly','children','nursery','youth','young-adult','special','holy-week-dawn','omer']) {
                 const service={id:'empty-'+type_id,type_id,date:'2099-10-25'};
@@ -26,7 +26,15 @@ try:
                 const slides=buildServicePresenterSlidesUncached(service.id,{allowHydration:false});
                 const board=document.createElement('div');board.innerHTML=renderPresenterSlideBoard(slides,0,service.id);
                 for(const [index,item] of items.entries()) {
-                  if(isServicePreparationItemForEditor(item,parseServiceItemMemo(item.memo)))continue;
+                  if(isServicePreparationItemForEditor(item,parseServiceItemMemo(item.memo))){
+                    preparationCount++;
+                    const prepared=buildPresenterSlidesForServiceItem(item,service,index,{allowHydration:false});
+                    const content=resolvePresenterServiceItemContentState(item,parseServiceItemMemo(item.memo),null,service);
+                    check(prepared.length===1&&content.hasOutputContent&&!content.required,type_id+': built-in preparation marked missing');
+                    const outline=document.createElement('div');outline.innerHTML=renderServiceOutlineChildRow(service,item,index,-1,slides);
+                    check(!outline.querySelector('.service-outline-badge'),type_id+': valid preparation missing badge');
+                    continue;
+                  }
                   const song=presenterSongForServiceItem(item,serviceItemDisplayText(item),item.label||'',service);
                   const content=resolvePresenterServiceItemContentState(item,parseServiceItemMemo(item.memo),song,service);
                   if(!content.required)continue;
@@ -102,7 +110,7 @@ try:
               const payload=presenterStatePayload(service.id);
               check(payload.slides.length===catalog.total&&!payload.slides.some(slide=>slide.elementId===item.id),'actual output payload includes empty element');
               check(missingCount>20,'template coverage unexpectedly empty');
-              return {missingCount,types:14,storedWrites:0};
+              return {missingCount,preparationCount,types:14,storedWrites:0};
             }''')
             print('PASS', engine, result, flush=True)
             browser.close()
