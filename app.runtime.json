@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261028-hymn-intro-wrap",
+  "version": "20261028-presenter-order-completion",
   "options": {
     "compress": false,
     "mangle": {
