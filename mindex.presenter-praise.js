@@ -757,11 +757,9 @@ function presenterHymnOnceOnlyIntro(forms = [], version = {}) {
     // Explicit A/B segments and user-edited wording are not inferred here.
     const intro = String(form.lyrics || "").match(introPattern)?.[0];
     if (target.type !== "verse" || target.group || target.variant || !intro) return form;
-    if (!playedIntro) {
-      playedIntro = true;
-      return form;
-    }
-    return { ...form, lyrics: form.lyrics.slice(intro.length) };
+    if (playedIntro) return { ...form, lyrics: form.lyrics.slice(intro.length) };
+    playedIntro = true;
+    return form;
   });
 }
 
