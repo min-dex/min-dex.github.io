@@ -72,6 +72,23 @@ try:
                 const source=make('empty-'+elementType,'자료',elementType);
                 check(buildPresenterSlidesForServiceItem(source,service,1,{allowHydration:false}).length===0,'empty media emitted output '+elementType);
               }
+              let attachedSpecialCount=0;
+              for(const label of ['특송','봉헌특송'])for(const inputMode of ['asset','score_db','lyrics_db']){
+                for(const asset of [{kind:'image',url:'https://example.invalid/score.png'},
+                  {kind:'image',slides:[{url:'https://example.invalid/page.png'}]},
+                  {kind:'file',url:'https://example.invalid/score.pdf'}]){
+                  const source={...make('attached-special-'+attachedSpecialCount,label,'praise'),
+                    _worshipSectionKey:label==='특송'?'special_song':'offering',
+                    memo:serializeServiceItemMemo({elementType:'praise',inputMode,outputMode:'score',asset})};
+                  const before=JSON.stringify(source),memo=parseServiceItemMemo(source.memo);
+                  const content=resolvePresenterServiceItemContentState(source,memo,null,service);
+                  const rendered=buildPresenterSlidesForServiceItem(source,service,1,{allowHydration:false});
+                  check(content.hasOutputContent&&!content.required&&rendered.length>0,'attached special asset marked missing '+label+':'+inputMode);
+                  const outline=document.createElement('div');outline.innerHTML=renderServiceOutlineChildRow(service,source,1,-1,rendered);
+                  check(!outline.querySelector('.service-outline-badge'),'attached special asset missing badge');
+                  check(JSON.stringify(source)===before,'attached special asset changed source');attachedSpecialCount++;
+                }
+              }
               check(buildPresenterSlidesForServiceItem(make('empty-title','제목','title'),service,1,{allowHydration:false}).length===0,'generic title placeholder emitted output');
               for(const source of [make('blank','빈 화면','blank'),make('confession','참회기도','title'),
                 make('fixed','고정 순서','title'),make('creed','신앙고백','body')]) {
@@ -110,7 +127,7 @@ try:
               const payload=presenterStatePayload(service.id);
               check(payload.slides.length===catalog.total&&!payload.slides.some(slide=>slide.elementId===item.id),'actual output payload includes empty element');
               check(missingCount>20,'template coverage unexpectedly empty');
-              return {missingCount,preparationCount,types:14,storedWrites:0};
+              return {missingCount,preparationCount,attachedSpecialCount,types:14,storedWrites:0};
             }''')
             print('PASS', engine, result, flush=True)
             browser.close()

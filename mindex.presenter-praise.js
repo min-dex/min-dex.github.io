@@ -280,6 +280,11 @@ function presenterServiceItemScoreManifestPending(item, song, memo = parseServic
     && !asset.url && !presenterScoreImageSourcesFromAsset(asset, song, version, serviceItemDisplayText(item)).length;
 }
 
+function presenterSpecialSongHasAssetOutput(item, memo) {
+  const asset = normalizeServiceAsset(memo.asset || item.asset);
+  return isSpecialSongServiceItem(item) && Boolean(normalizePresenterMediaSource(asset.url) || presenterScoreImageSourcesFromAsset(asset).length);
+}
+
 function presenterScoreSlidesForServiceItem(
   item,
   section,
