@@ -568,3 +568,11 @@ Current and next previews remain in two equal columns on phones as well as large
 screens. Mobile cards use the slide list’s compact 8px padding while preserving
 16:9 previews, responsive renderer scaling and existing control touch targets.
 Position labels can wrap without widening the cards.
+
+### Remote mobile overflow and list scrolling ·2026-10-28
+
+Slide-card captions show at most two lines while retaining their full DOM text
+and accessible name. The slide-list heading and close button stay visible while
+scrolling within that section; no nested scrolling container is introduced.
+Search uses at least 16px text. Main content respects horizontal safe-area insets
+in portrait and landscape without shrinking existing touch targets.

@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261028-setlist-live-native",
+  "version": "20261028-praise-editor-mobile",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "b7a94ef68feddb295a52155671c62b29f241add9dfcee25d0faffc6ccfbc4846",
-  "runtime_sha256": "29d26ae019027292b3e618f2f7725d3857f7fb2fef4c8141fed1638797b00cbd",
-  "source_bytes": 1341674,
-  "runtime_bytes": 957895,
-  "source_gzip": 305992,
-  "runtime_gzip": 239946
+  "source_sha256": "0c97323c3eb702bc56794576baa07188d2943d3e04fb9188b307764b86fe6adb",
+  "runtime_sha256": "f22786e140bd92cc17691c036957282f7f090172a984327b01d84dec3cb849a2",
+  "source_bytes": 1340121,
+  "runtime_bytes": 956732,
+  "source_gzip": 305600,
+  "runtime_gzip": 239547
 }

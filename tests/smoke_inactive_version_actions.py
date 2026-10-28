@@ -21,11 +21,8 @@ try:
     render();
    }''')
    bid=page.evaluate('__fixture.versions[1].id')
-   tags=page.locator(f'[data-type-version-id="{bid}"]')
-   assert tags.count()==3
-   page.locator(f'[data-type-version-id="{bid}"][data-version-type-toggle="children"]').click()
-   assert page.evaluate("__fixture.versions[1].praise_types.includes('children')&&!(__fixture.versions[0].praise_types||[]).includes('children')&&getSelectedVersionId()===__fixture.versions[0].id&&state.forms[0].lyrics==='미저장 초안'")
-   assert page.locator(f'[data-type-version-id="{bid}"][data-version-type-toggle="children"]').get_attribute('aria-pressed')=='true'
+   assert page.locator('[data-version-type-toggle]').count()==0
+   assert page.evaluate("getSelectedVersionId()===__fixture.versions[0].id&&state.forms[0].lyrics==='미저장 초안'")
    controls=page.locator(f'[data-form-version-id="{bid}"]')
    assert controls.count()==8
    assert page.locator(f'[data-form-version-id="{bid}"][data-form-action="up"][data-index="0"]').is_disabled()
