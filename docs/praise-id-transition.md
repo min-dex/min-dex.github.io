@@ -90,3 +90,34 @@ This tests the reference adapter only. The production executor, monotonic-revisi
 rollback, restore-function integration, old-client write fencing, compatible release
 and independent operational readback are still unfinished. No operational ID was
 changed and no production migration/helper SQL was installed.
+
+## Transaction/recovery candidate · later 2026-10-28
+
+`2026-10-28-praise-id-transition-candidate.sql` now implements administrator-only
+apply and recovery candidates. Apply compares the complete snapshot fingerprint
+under the existing writer locks, refuses issued destination groups, preserves
+variant suffix/group identity, and changes native references through the existing
+atomic service CAS save. It compares the resulting service/sections/elements/slides
+before accepting the transaction. Saved state keys/serialized values use the strict
+adapter; pending requests and key collisions abort. Private job receipts retain
+before/after snapshots. Recovery refuses intervening edits, advances all revisions,
+keeps newly issued numbers reserved and maintains reverse aliases.
+
+`tests/test_praise_id_transition_store.mjs` passed on isolated PostgreSQL18.4 using
+actual repository atomic-save migrations: partial failure rollback, snapshot CAS,
+body/form/timing/state preservation, replay, recovery drift rejection, monotonic
+recovery and denial to anon. This is synthetic coverage, not production readback.
+
+`tools/build_praise_id_compatibility.py` generates guarded replacements from explicit
+administrator function exports. It checks exact old definitions before replacing
+them, retaining existing ownership/ACLs. Candidates cover old-ID reads, immutable
+aliases on content saves, checkpoint resolution, historical-use guards, stale
+worship/state writes and retirement of new CHLD creation. An isolated rehearsal
+using exported operational function definitions passed alias/dedup, stale worship
+writes, retired prefix, history references and helper isolation.
+
+Still required before production: complete current-schema rehearsal including
+operational document-preservation triggers and derived document signatures,
+compatibility publication/required gate, fresh locked preflight, actual apply and
+independent full preservation/public-app verification. **Production SQL installation
+and ID writes remain zero.** Candidate files are not evidence of application.
