@@ -104,14 +104,6 @@ function liturgicalBodyTitle(item = {}) {
   return "사도신경";
 }
 
-// Navigation metadata must never promote a body field to a content title.
-// Keep explicit intro titles; body text is resolved separately for output.
-function serviceItemLiturgicalNavigationTitle(item = {}) {
-  if (!isLiturgicalBodyServiceItem(item)) return null;
-  const memo = parseServiceItemMemo(item.memo);
-  return String(memo.introSlide?.title || item.label || liturgicalBodyTitle(item)).trim();
-}
-
 function presenterCircledNumber(index) {
   const circledNumbers = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫", "⑬", "⑭", "⑮", "⑯", "⑰", "⑱", "⑲", "⑳"];
   return circledNumbers[index] || `${index + 1}.`;

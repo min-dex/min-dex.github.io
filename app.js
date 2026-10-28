@@ -24605,6 +24605,14 @@ function serviceItemOrdinalDisplayLabel(item, service = null, automaticOnly = fa
   return peers.length === 1 ? base : `${base} ${index + 1}`;
 }
 
+// Navigation metadata must never promote a body field to a content title.
+// Keep explicit intro titles; body text is resolved separately for output.
+function serviceItemLiturgicalNavigationTitle(item = {}) {
+  if (!isLiturgicalBodyServiceItem(item)) return null;
+  const memo = parseServiceItemMemo(item.memo);
+  return String(memo.introSlide?.title || item.label || liturgicalBodyTitle(item)).trim();
+}
+
 // Controller and outline share the same read-only title/person summary.
 function serviceItemSummaryDisplayParts(item, service = null) {
   const titleParts = serviceSidebarChildItemDisplayParts(item, service);
