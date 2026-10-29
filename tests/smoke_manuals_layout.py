@@ -18,7 +18,7 @@ try:
             print(engine, page.evaluate('''() => {
               const check=(value,message)=>{if(!value)throw Error(message)};
               state.module='manuals';state.search='';render();syncBrowserHistory({replace:true});
-              check(JSON.stringify([...refs.songList.querySelectorAll('[data-home-module]')].map(e=>e.textContent.trim()))===JSON.stringify(['교회력','예배 매뉴얼','역대 찬양 콘티','참고자료']),'operations sidebar order: '+JSON.stringify([...refs.songList.querySelectorAll('[data-home-module]')].map(e=>e.textContent.trim())));
+              check(JSON.stringify([...refs.songList.querySelectorAll('[data-home-module]')].map(e=>e.textContent.trim()))===JSON.stringify(['교회력','역대 찬양 콘티','예배 매뉴얼','참고자료']),'operations sidebar order: '+JSON.stringify([...refs.songList.querySelectorAll('[data-home-module]')].map(e=>e.textContent.trim())));
               const sections=[...refs.detailPane.querySelectorAll('.manual-section')];
               const links=[...refs.detailPane.querySelectorAll('.manuals-index a')];
               check(sections.length>8,'manual sections missing');
