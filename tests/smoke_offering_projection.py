@@ -83,7 +83,10 @@ for (const type of ['sunday-first','sunday-second','sunday-main']) {
   if(!v||videoItems.some(i=>i.label==='봉헌찬송')||v.song_id||v.version_id)throw Error('video projection lost type');
   if(serviceMemoInputMode(parseServiceItemMemo(v.memo),v)!=='asset')throw Error('video input mode lost');
   if(!replaceServiceOfferingSpecial(v,'hymn'))throw Error('return from video failed');
-  if(v.song_id!==hymn.song_id||v.version_id!==hymn.version_id||parseServiceItemMemo(v.memo).formHint!=='V2-C-V1-C')throw Error('video round-trip lost song/version/form');
+  if(v.song_id||v.version_id||v.raw_title||parseServiceItemMemo(v.memo).formHint||parseServiceItemMemo(v.memo).offeringVariants)throw Error('video return revived prior song/version/form');
+  const clearedRows=buildWorshipPersistenceRows(svc,[v,prayer],{},{});
+  const cleared=groupWorshipElements(clearedRows.sections,clearedRows.elements)[svc.id].find(i=>i.label==='봉헌찬송');
+  if(!cleared||cleared.song_id||cleared.version_id||parseServiceItemMemo(cleared.memo).formHint)throw Error('save/readback revived prior offering');
 
  }
 }
