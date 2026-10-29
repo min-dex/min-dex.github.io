@@ -36,7 +36,7 @@
       const main=actual.find(e=>type(e.source.service_type_id)==='sunday-main')?.source || scheduled.find(s=>type(s.service_type_id)==='sunday-main');
       const allGeneration=main && /온세대/.test(aliases(main));
       const cells=actual.map(e=>{
-        const id=type(e.source.service_type_id),name=slots.find(row=>row[0]===id)?.[1];
+        const id=type(e.source.service_type_id),name=e.source.service_type_id==='monthly'?'월삭예배':slots.find(row=>row[0]===id)?.[1];
         if(e.candidates.length)return {...e,slotName:name};
         const saved=scheduled.find(s=>s.id===(e.source.service_id||e.source.id)) || scheduled.find(s=>s.service_date===e.source.service_date&&type(s.service_type_id)===id);
         const noGathering=absent(e.source)||absent(saved);
@@ -46,7 +46,7 @@
         if(saved.id&&actual.some(e=>e.source.service_id===saved.id||e.source.id===saved.id||e.source.id==='worship:'+saved.id))continue;
         if(actual.some(e=>!e.source.service_id&&e.source.service_date===saved.service_date&&type(e.source.service_type_id)===type(saved.service_type_id)))continue;
         const id=type(saved.service_type_id),merged=allGeneration&&['children','youth'].includes(id),noGathering=absent(saved);
-        cells.push({source:{...saved,service_id:saved.id,aliases:saved.service_alias||''},candidates:[],missing:true,slotName:slots.find(row=>row[0]===id)?.[1],weeklyStatus:merged||noGathering?'집회 없음':'콘티 미등록',weeklyReason:merged?'온세대 찬양예배':noGathering?(saved.service_alias||saved.title||''):'찬양 목록이 아직 등록되지 않았습니다'});
+        cells.push({source:{...saved,service_id:saved.id,aliases:saved.service_alias||''},candidates:[],missing:true,slotName:saved.service_type_id==='monthly'?'월삭예배':slots.find(row=>row[0]===id)?.[1],weeklyStatus:merged||noGathering?'집회 없음':'콘티 미등록',weeklyReason:merged?'온세대 찬양예배':noGathering?(saved.service_alias||saved.title||''):'찬양 목록이 아직 등록되지 않았습니다'});
       }
       if(cells.length)groups.push({...info(key),entries:cells});
     }
