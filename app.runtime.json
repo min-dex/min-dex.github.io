@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261029-variant-title",
+  "version": "20261029-worship-controls",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "a1eeeaecf2ad78d64b0988aa94f1af353a18651e601aad130f86c39753481a76",
-  "runtime_sha256": "01a8593474a4dfcdcb52a028cfb5e176f5246df17c06c7589076ddda96df0b5a",
-  "source_bytes": 1340179,
-  "runtime_bytes": 956363,
-  "source_gzip": 305754,
-  "runtime_gzip": 239578
+  "source_sha256": "bef0748cb48b489d86293483ad3184d928e051e943d8b6f09bafa7b16c28d886",
+  "runtime_sha256": "de2475813d363512402a45d8d929ff33afd4235c6c8dd5397f2359d0d096673f",
+  "source_bytes": 1339648,
+  "runtime_bytes": 955962,
+  "source_gzip": 305670,
+  "runtime_gzip": 239561
 }

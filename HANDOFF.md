@@ -1593,3 +1593,16 @@ ready message after falsely wrapping its measurement clone.
 Scoped Chromium/WebKit checks cover service return, disclosure, actual apply,
 atomic failure/retry, additional input, IME, sticky navigation and text fitting.
 Required GitHub gate, main integration and public readback remain pending.
+
+## Worship controls follow-up ·2026-10-29 candidate
+
+Current-mode sending/offering selection no longer creates hidden prior-mode
+snapshots. Legacy backups are only read for an explicit switch; authored sending
+items are retained. Weekly setlists use Wednesday month/week and fixed public/
+department slots, preserving 2nd-service specials. Controller thumbnails use
+100/150/200 percent fixed frames; scripture tones restart per element.
+Scoped Chromium/WebKit mode-save/failure/roundtrip, setlist responsive layout,
+frame ratios/focus/output preservation and block grouping checks pass.
+Candidate queue ticket bdc7ab921c9149009ed22aa465448fdd is owned by
+codex/worship-controls-followup. Required GitHub gate/Pages/public readback are
+pending; no operational writes, playback, output or printing were performed.

@@ -87,7 +87,7 @@ try:
         pane.scrollTop=0;window.scrollTo(0,0);
       }""")
       if width >= 1000:
-       for scale in ('1','1.3','2'):
+       for scale in ('1','1.5','2'):
         page.locator('[data-presenter-thumb-scale="'+scale+'"]').click()
         page.evaluate("async()=>{await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))}")
         page.evaluate("""()=>{
