@@ -58,7 +58,10 @@ try:
        if(assignee && assignee.placeholder.includes('예:'))throw Error('redundant assignee example');
        return {saveCount:document.querySelectorAll('[data-service-item-commit]').length};
      }'''))
-     field=page.locator('#capture input:not([type=hidden]):not([type=file])').first
+     field=page.locator('#capture input:not([type=hidden]):not([type=file]):visible').first
+     if not field.count():
+      page.locator('#capture details:has(input:not([type=hidden]):not([type=file])) > summary').first.click()
+     assert field.count(), 'No editable field after opening details'
      if field.count():
       field.fill('미저장 입력 검증')
       field.evaluate("e=>{e.focus();e.setSelectionRange(2,4);window.preservedField=e}")
