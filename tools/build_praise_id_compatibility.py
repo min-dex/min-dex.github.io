@@ -37,6 +37,15 @@ def build(schema,supplement):
          "  perform mindex_atomic.validate_document(sid,req->'document');\n  update public.mindex_worship_services set\n    source_ref=source_ref || jsonb_build_object('mindexServiceDocument',req->'document'),",
          "  if req->'document' = '{\"idTransitionPreserveAbsentDocument\":true}'::jsonb then\n    if session_user not in ('postgres','supabase_admin') or current_user not in ('postgres','supabase_admin') or exists(select from public.mindex_worship_services where id=sid and source_ref ? 'mindexServiceDocument') then raise exception 'REKEY_DOCUMENT_PRESERVE_FORBIDDEN'; end if;\n  else\n    perform mindex_atomic.validate_document(sid,req->'document');\n  end if;\n  update public.mindex_worship_services set\n    source_ref=case when req->'document' = '{\"idTransitionPreserveAbsentDocument\":true}'::jsonb then source_ref else source_ref || jsonb_build_object('mindexServiceDocument',req->'document') end,")
     sql=['begin;','set local lock_timeout=\'5s\';','select pg_advisory_xact_lock(1296649822,0);']
+    # These invoker functions run inside the atomic writer, not the installer.
+    # Reject the incompatible privilege boundary before changing any function.
+    # Do not grant access here: a reviewed narrow adapter is still required.
+    sql.append("""do $caller_guard$ begin
+ if not has_schema_privilege('mindex_atomic_writer','mindex_single_song','USAGE')
+ or not has_table_privilege('mindex_atomic_writer','mindex_single_song.records','SELECT') then
+  raise exception 'REKEY_ATOMIC_CALLER_COMPATIBILITY_NOT_READY';
+ end if;
+end $caller_guard$;""")
     for name,(old,new) in edits.items():
         sql.append("do $guard$ begin if pg_get_functiondef("+literal(name)+"::regprocedure) is distinct from "+literal(old)+" then raise exception 'REKEY_FUNCTION_DRIFT'; end if; end $guard$;")
     sql += ["""create or replace function mindex_single_song.id_alias_mapping() returns jsonb
