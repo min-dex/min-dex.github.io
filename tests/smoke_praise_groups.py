@@ -31,6 +31,7 @@ try:
     const selected=state.songs.find(s=>s.id===v.id);check(praiseGroupTitle(selected)==='대표곡','detail common title');
     const picker=document.createElement('div');picker.innerHTML=renderSingleSongVersionPicker(selected);check(picker.querySelectorAll('option').length===2&&picker.querySelector('select').value===v.id,'exact selected version');
     check(!renderSingleSongVersionPicker(state.songs.find(s=>s.id===m.id)),'single version no selector');
+    check(renderNativeVersionMetadata(state.songs.find(s=>s.id===m.id)).includes('data-version-name-field'),'single default variant still editable');
     const markup=renderFormsTab(selected);check(!markup.includes('linked-version-title'),'one editable version not all columns');check(!markup.includes('data-version-name-field')&&!markup.includes('data-version-output-title-field'),'identity edit not repeated on lyrics');check(markup.includes('다른 제목'),'different title visible');
     check(renderNativeVersionMetadata(selected).includes('data-version-output-title-field'),'title editing retained');
     selected.related_song_ids=[m.id];check(renderFormsTab(selected).includes('linked-version-title'),'unrelated linked song comparison retained');selected.related_song_ids=[];
@@ -59,12 +60,28 @@ try:
    assert page.locator('[data-form-field=lyrics]').count()==1
    assert '다음 화면' in page.locator('[data-form-field=lyrics]').input_value()
    page.locator('[data-open-metadata]').click()
+   assert page.get_by_role('textbox',name='판본 구분명',exact=True).count()==1
+   assert page.get_by_role('textbox',name='송출 제목',exact=True).count()==1
+   page.evaluate("window.titleEditPreserved=JSON.stringify({forms:state.forms,audio:getSelectedVersion().audio_set,items:state.serviceItems,relations:state.singleSongCatalog.get(state.selectedSongId).relations})")
+   page.get_by_role('textbox',name='판본 구분명',exact=True).fill('편곡 (직접 정한 이름)')
+   page.get_by_role('textbox',name='판본 구분명',exact=True).dispatch_event('input')
+   assert page.evaluate("getSelectedVersion().name==='편곡 (직접 정한 이름)' && getSelectedSong().title==='다른 제목'")
    page.locator('[data-song-field="title"]').fill('편곡의 다른 곡 제목')
    page.locator('[data-song-field="title"]').dispatch_event('input')
    assert page.locator('#editorSongTitle').inner_text().strip()=='대표곡'
    page.locator('[data-version-output-title-field]').fill('명시한 출력 제목')
    page.locator('[data-version-output-title-field]').dispatch_event('input')
    assert page.evaluate("getSelectedVersion().output_title==='명시한 출력 제목'")
+   assert page.locator('[data-native-output-title]').inner_text()=='명시한 출력 제목'
+   assert page.locator('[data-native-group-title]').inner_text()=='대표곡'
+   page.locator('[data-version-output-title-field]').fill('')
+   page.locator('[data-version-output-title-field]').dispatch_event('input')
+   assert page.locator('[data-native-output-title]').inner_text()=='편곡의 다른 곡 제목'
+   assert page.evaluate("titleEditPreserved===JSON.stringify({forms:state.forms,audio:getSelectedVersion().audio_set,items:state.serviceItems,relations:state.singleSongCatalog.get(state.selectedSongId).relations})")
+   assert page.evaluate("(()=>{const s=getSelectedSong(),r=MindexSingleSong.fromLegacySong(s,s.versions[0],s.id),fresh=MindexSingleSong.createCatalog([r]).appSong(r.id);return fresh.versions[0].name==='편곡 (직접 정한 이름)' && !fresh.versions[0].output_title && fresh.title==='편곡의 다른 곡 제목'})()")
+   page.set_viewport_size({'width':800,'height':800})
+   assert page.evaluate("(()=>{const d=document.querySelector('.metadata-popover');return d.scrollWidth<=d.clientWidth})()")
+   page.screenshot(path='/tmp/praise-variant-title-'+engine+'.png')
    page.locator('[data-close-metadata]').click()
    page.evaluate("()=>{window.groupChoiceCalls=[];selectServiceSongForItem=(index,id)=>groupChoiceCalls.push({index,id});const item=getServiceItems(state.selectedServiceId)[0];refs.detailPane.innerHTML=renderServiceSongPickerResult(serviceSongPickerResults('대표곡',item,selectedServiceForEditor())[0],0)}")
    page.locator('.svc-song-group-choice > summary').click()

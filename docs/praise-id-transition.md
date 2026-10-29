@@ -121,3 +121,28 @@ operational document-preservation triggers and derived document signatures,
 compatibility publication/required gate, fresh locked preflight, actual apply and
 independent full preservation/public-app verification. **Production SQL installation
 and ID writes remain zero.** Candidate files are not evidence of application.
+
+
+## Emergency compatibility rollback · 2026-10-28
+
+The installed alias calls in the invoker protocol/checkpoint functions were
+incompatible with the existing atomic writer: that role has no usage on the
+private single-song schema. This caused normal worship saves to fail with
+`permission denied for schema mindex_single_song`. Both functions were restored
+to their exact pre-install definitions without changing owners, grants or user
+data. The migration apply function is now fail-closed with
+`REKEY_MIGRATION_HELD_FOR_COMPATIBILITY_REPAIR`; no ID migration may run.
+
+An isolated actual-role test reproduced the error and passed after restoration.
+Independent public readback matched all1656 records and5 full service aggregates
+exactly. The administrator could not SET ROLE to the atomic writer in production;
+no role membership was added and no user worship save was used as a probe.
+The SQL generator now rejects the incompatible caller privileges before editing
+functions. This is an installation stop, not a completed alias adapter or a
+reason to broaden schema/table grants. A reviewed least-privilege adapter and
+fresh resource/stability assessment remain prerequisites for the transition.
+
+Production save RPC non-writing probe passed through the actual atomic-writer
+role to the expected INVALID_PROTOCOL rejection. No service ID or content was
+supplied; the transaction was rolled back. This verifies the repaired privilege
+boundary, not a real user save or completion of the ID transition.

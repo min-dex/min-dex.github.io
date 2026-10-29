@@ -133,3 +133,17 @@ selector. Native lyrics display only the selected member; names and optional
 output titles remain editable in song information, with differing titles visible.
 Legacy multi-version records retain their existing editing and persistence path.
 Required release/public verification is separate from scoped local checks.
+
+## Explicit variant identity and output title ·2026-10-29 candidate
+
+Native song information always exposes `판본 구분명` independently from
+`송출 제목`, including a single default variant. The group representative title
+is shown separately. An output preview uses the actual presenter title resolver
+and updates text only while typing, retaining the input node and draft.
+Blank output titles keep the existing selected record's song-title fallback;
+they do not adopt another variant's representative title. Hymnal numbering uses
+the selected variant's existing rule. No strings are parsed into labels/titles,
+no existing names are inferred or rewritten, and no DB migration is involved.
+Existing explicit edits and native serialization remain the sole save path.
+Lyrics, audio, cue timing, same-song relations and worship links are unchanged.
+Local verification and shared publication remain separate checkpoints.

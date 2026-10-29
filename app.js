@@ -10065,6 +10065,7 @@ function updateSongField(field) {
 
   if (key === "title") {
     updateEditorTitle(song);
+    updateNativeVersionTitlePreview(song);
   }
 
   state.dirty.song = true;
@@ -10076,6 +10077,7 @@ function updateVersionOutputTitleField(field) {
   const version = song?.versions?.find(item => item.id === field.dataset.versionOutputTitleField);
   if (!version) return;
   version.output_title = field.value.trim();
+  updateNativeVersionTitlePreview(song);
   clearSearchCaches();
   state.dirty.song = true;
   updateSaveState();
