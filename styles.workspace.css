@@ -4076,11 +4076,11 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
   --svc-thumb-wrap-min-width: calc(var(--svc-thumb-width) + (var(--svc-thumb-ring-space) * 2));
   width: 100%;
   min-width: 0;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--svc-thumb-wrap-min-width)), 1fr));
+  grid-template-columns: repeat(auto-fill, var(--svc-thumb-wrap-min-width));
   justify-content: start;
   gap: 12px;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: auto;
   padding: 0;
 }
 .svc-board-next-prep {
@@ -6295,3 +6295,16 @@ body[data-module="presenter"] .svc-presenter-toolbar::before {
   .svc-focus-panel .svc-screen-management-grid { grid-template-columns:repeat(5,minmax(0,1fr)); }
   .svc-focus-panel .svc-screen-management-grid > .svc-presenter-launch { grid-column:auto; }
 }
+
+
+/* Weekly archive slots retain their ministry group even on narrow containers. */
+.svc-setlist-month-group { container-type:inline-size; }
+.svc-setlist-week-layout, .svc-setlist-week-slot { display:grid; gap:15px; min-width:0; }
+.svc-setlist-week-row { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:15px; align-items:start; }
+.svc-setlist-week-range { color:var(--ink-3); font-weight:var(--ui-meta-weight); }
+.svc-setlist-slot-empty { min-height:100px; padding:15px; display:flex; flex-direction:column; gap:10px; color:var(--ink-4); border:1px solid var(--line); border-radius:var(--r); }
+.svc-setlist-slot-empty strong { font-size:var(--ui-row-size); font-weight:var(--ui-row-weight); }
+.svc-setlist-slot-empty span { font-size:var(--ui-meta-size); }
+@container (max-width:1050px) { .svc-setlist-week-row { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@container (max-width:650px) { .svc-setlist-week-row { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@container (max-width:420px) { .svc-setlist-week-row { grid-template-columns:minmax(0,1fr); } }

@@ -48,8 +48,8 @@ try:
     const crossSections=[verse('3:16'),{...verse('4:1'),elementId:'bible-2',sectionKey:'sermon'}, {...verse('5:1'),elementId:'bible-3',sectionKey:'citation'}];
     const crossBefore=JSON.stringify(crossSections);
     const sections=groupPresenterSlidesBySection(crossSections,'fixture');
-    const crossColors=sections.flatMap(g=>g.subgroups).flatMap(g=>[...renderPresenterBoardSlideBlocks(g.slides,-1,'fixture',g.scriptureColorStart).matchAll(/data-scripture-tone="([a-z-]+)"/g)].map(m=>m[1]));
-    check(crossColors.join()==='default,accent,default','Bible alternation reset at section/element boundary');
+    const crossColors=sections.flatMap(g=>g.subgroups).flatMap(g=>[...renderPresenterBoardSlideBlocks(g.slides,-1,'fixture',g.scriptureColorStarts).matchAll(/data-scripture-tone="([a-z-]+)"/g)].map(m=>m[1]));
+    check(crossColors.join()==='default,default,default','Bible alternation reset at section/element boundary');
     check(JSON.stringify(crossSections)===crossBefore,'Bible output changed');
     const before=JSON.stringify(entries), blocks=presenterBoardSlideBlocks(entries);
     check(blocks.map(b=>b.entries.length).join()==='2,1,1,1,2,1,1','group boundaries');

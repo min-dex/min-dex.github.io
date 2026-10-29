@@ -1,6 +1,6 @@
 """Instance-only benediction replacement, persistence, projection and restore."""
 
-from smoke_app import launch_chromium, start_local_app_server, sync_playwright
+from smoke_app import launch_chromium, start_local_app_server, sync_playwright, prepare_server_state_fixture
 
 
 def run(browser, url):
@@ -9,6 +9,7 @@ def run(browser, url):
     page = context.new_page()
     page.goto(url + '?output=presenter', wait_until='domcontentloaded')
     page.wait_for_function("typeof replaceServiceBenediction === 'function'")
+    prepare_server_state_fixture(page)
     results = page.evaluate("""async () => {
       const check = (ok, msg) => { if (!ok) throw Error(msg); };
       const clone = value => JSON.parse(JSON.stringify(value));
@@ -75,43 +76,51 @@ def run(browser, url):
         check(original, type+' missing original');
         const before = clone(original);
         check(parseServiceItemMemo(before.memo).note === '원래 메모', type+' stored note not loaded');
-        check(presenterServiceInputControls(original, 0, service).includes('주기도문으로 변경'), type+' missing common button');
+        check(presenterServiceInputControls(original, 0, service).includes('>주기도문</button>'), type+' missing common button');
         check(replaceServiceBenediction(original, true), type+' switch rejected');
         let rows = roundtrip(service);
-        let replacement = getServiceItems(sid).find(x => parseServiceItemMemo(x.memo).benedictionReplacement);
+        let replacement = getServiceItems(sid).find(x => x.label === '주기도문');
         check(replacement?.label === '주기도문' && replacement.assignee === '', type+' replacement lost');
         check(!getServiceItems(sid).some(x => x.label === '축도'), type+' benediction regenerated');
-        check(presenterServiceInputControls(replacement, 0, service).includes('축도로 되돌리기'), type+' missing restore');
+        check(presenterServiceInputControls(replacement, 0, service).includes('>축도</button>'), type+' missing restore');
         state.saving = true;
         check(!presenterServiceInputControls(replacement, 0, service).includes('disabled'), type+' save-time render leaves button locked');
         state.saving = false;
         const slides = buildPresenterSlidesForServiceItem(replacement, service, 0);
         check(JSON.stringify(slides).includes('하늘에 계신'), type+' prayer body missing from slides');
-        replacement = getServiceItems(sid).find(x => parseServiceItemMemo(x.memo).benedictionReplacement);
+        replacement = getServiceItems(sid).find(x => x.label === '주기도문');
         check(replaceServiceBenediction(replacement, false), type+' restore rejected');
         rows = roundtrip(service);
         const restored = getServiceItems(sid).find(x => x.label === '축도');
-        check(restored?.assignee === before.assignee && restored.raw_title === before.raw_title, type+' original content lost '+JSON.stringify({before,restored}));
-        check(restored.memo === before.memo, type+' original memo lost');
+        check(restored?.assignee === '' && !restored.raw_title, type+' original content lost '+JSON.stringify({before,restored}));
+        check(parseServiceItemMemo(restored.memo).note === parseServiceItemMemo(before.memo).note, type+' original memo lost');
         check(!JSON.stringify(buildPresenterSlidesForServiceItem(restored, service, 0)).includes('하늘에 계신'), type+' prayer remained after restore');
         check(!rows.elements.some(x => x.config.benedictionReplacement), type+' stale override persisted');
         results.push(type+' common control / DB roundtrip / slides / restoration');
       }
+      const authored = [{id:'a',label:'축도',raw_title:'사용자 제목',assignee:'담당자',_worshipSectionKey:'sending',_worshipElementTemplateModified:true},
+        {id:'b',label:'주기도문',raw_title:'별도 입력 본문',_worshipSectionKey:'sending',_worshipElementTemplateModified:true}];
+      const authoredBefore=JSON.stringify(authored);
+      check(normalizeSendingConclusionProjectionItems(authored).length===2 && JSON.stringify(authored)===authoredBefore,'authored conclusions removed');
+      const legacy={...authored[1],memo:serializeServiceItemMemo({benedictionReplacement:{version:1,original:{label:'축도',raw_title:'옛 제목',assignee:'옛 담당',memo:'보관 메모'}}})};
+      check(replaceServiceBenediction(legacy,false) && legacy.raw_title==='옛 제목' && legacy.assignee==='옛 담당','legacy explicit switch lost');
+      check(!parseServiceItemMemo(legacy.memo).benedictionReplacement,'legacy snapshot regenerated');
       const service = fixture('wednesday');
       let target = getServiceItems(sid).find(x => x.label === '축도');
       const other = clone(target);
       check(await setServiceBenedictionReplacement(sid, target.id, true), 'save failed');
-      check(writes.some(x => x.rows.elements.some(e => e.config.benedictionReplacement)), 'replacement not sent to RPC');
+      check(writes.some(x => x.rows.elements.some(e => e.source_ref.label === '주기도문')), 'selected mode not sent to RPC');
+      check(!writes.some(x => x.rows.elements.some(e => e.config.benedictionReplacement)), 'prior-mode snapshot persisted');
       check(other.label === '축도', 'separate instance changed');
-      target = getServiceItems(sid).find(x => parseServiceItemMemo(x.memo).benedictionReplacement);
+      target = getServiceItems(sid).find(x => x.label === '주기도문');
       check(await setServiceBenedictionReplacement(sid, target.id, false), 'restore save failed');
       target = getServiceItems(sid).find(x => x.label === '축도');
       fail = true;
       check(await setServiceBenedictionReplacement(sid, target.id, true) === false, 'failure reported success');
-      check(state.dirty.service && getServiceItems(sid).some(x => parseServiceItemMemo(x.memo).benedictionReplacement), 'failure lost draft');
+      check(state.dirty.service && getServiceItems(sid).some(x => x.label === '주기도문'), 'failure lost draft');
       results.push('real save path / restore / failure retains draft');
       fail = false;
-      target = getServiceItems(sid).find(x => parseServiceItemMemo(x.memo).benedictionReplacement);
+      target = getServiceItems(sid).find(x => x.label === '주기도문');
       refs.detailPane.innerHTML = presenterServiceInputControls(target, getServiceItems(sid).findIndex(x => x.id === target.id), service);
       refs.detailPane.addEventListener('click', handleDetailClick);
       document.getElementById('presenterOutputRoot')?.remove();
@@ -119,7 +128,7 @@ def run(browser, url):
     }""")
     for result in results:
         print('PASS', result, flush=True)
-    page.get_by_role('button', name='축도로 되돌리기').click()
+    page.get_by_role('button', name='축도', exact=True).click()
     page.wait_for_function("!state.saving && getServiceItems(state.selectedServiceId).some(x => x.label === '축도')")
     print('PASS actual delegated button click', flush=True)
     context.close()

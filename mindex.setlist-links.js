@@ -174,27 +174,8 @@
     return [...archivedSources.filter(source => !occupied.has(identity(source))), ...liveSources];
   }
   function mergeSundayEntries(entries = []) {
-    const isType = (entry, ...types) => types.includes(entry.source.service_type_id);
-    return entries.filter(entry => !isType(entry, "sun_1st", "sunday-first", "sun_2nd", "sunday-second")).map(entry => {
-      if (!isType(entry, "sun_3rd", "sunday-main")) return entry;
-      const label = row => String(row.archive_display_label || row.raw_label || "").replace(/\s+/gu, "");
-      const rows = entry.candidates.map(row => label(row) === "특송"
-        ? {...row, raw_label:"3부 특송", archive_display_label:"3부 특송"} : row);
-      if (!rows.some(row => label(row) === "2부특송")) {
-        const second = entries.find(other => isType(other, "sun_2nd", "sunday-second")
-          && other.source.service_date === entry.source.service_date);
-        const specials = (second?.candidates || []).filter(row => /^(?:2부)?특송$/.test(label(row))).map(row => ({
-          ...row, raw_label:"2부 특송", archive_display_label:"2부 특송", archive_source_service_type:"sun_2nd",
-        }));
-        rows.push(...specials);
-      }
-      const orderedRows = [
-        ...rows.filter(row => label(row) === "2부특송"),
-        ...rows.filter(row => label(row) !== "2부특송"),
-      ];
-      return {...entry, candidates:orderedRows, missing:rows.length === 0,
-        needsReview:rows.filter(row => row.review_status === "needs_review").length};
-    });
+    // 2부 owns its additional special song; never move it into the 3부 card.
+    return entries.filter(entry => !['sun_1st','sunday-first'].includes(entry.source.service_type_id));
   }
   root.MindexSetlistLinks = { buildTitlePeers, artistHint, titleKey:key, buildIndex, resolve, split, isExcluded, fromServices, preferLiveSources, mergeSundayEntries };
 })(typeof window === "undefined" ? globalThis : window);

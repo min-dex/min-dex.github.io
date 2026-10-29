@@ -92,11 +92,12 @@ def run(browser, url):
       check(parseServiceItemMemo(target.memo).note === parseServiceItemMemo(praiseMemo).note, 'praise memo lost');
       check(await setServiceOfferingSpecial(sid, target.id, 'video'), 'video restore failed');
       target = getServiceItems(sid).find(x => x.label === '봉헌영상');
-      check(target.raw_title === '봉헌 영상 제목', 'video title lost');
-      check(parseServiceItemMemo(target.memo).asset.url === parseServiceItemMemo(videoMemo).asset.url, 'video asset lost');
+      check(!target.raw_title, 'prior video title revived');
+      check(!parseServiceItemMemo(target.memo).asset.url, 'prior video asset revived');
+      check(!parseServiceItemMemo(target.memo).offeringVariants, 'prior-mode snapshot retained');
       check(await setServiceOfferingSpecial(sid, target.id, 'hymn'), 'hymn restore failed');
       target = getServiceItems(sid).find(x => x.label === '봉헌찬송');
-      results.push('three modes / atomic reload / video asset restoration / shared exclusion');
+      results.push('three modes / atomic reload / prior-mode removal / shared exclusion');
       fail = true;
       check(await setServiceOfferingSpecial(sid, target.id, true) === false, 'failure reported success');
       check(state.dirty.service && getServiceItems(sid).some(x => x.label === '봉헌특송'), 'failure lost draft');

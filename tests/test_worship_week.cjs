@@ -27,3 +27,16 @@ const nursery=build([entry('2026-08-23','kindergarten')]);assert.equal(nursery[0
 const explicit=build([{source:{service_date:'2026-04-05',service_type_id:'youth',weekly_status:'집회 없음',weekly_reason:'부활절 연합예배'},candidates:[]}]);
 assert.equal(explicit[0].entries[0].weeklyReason,'부활절 연합예배');
 console.log('PASS actual worship records only, no fabricated weeks or departments, future saved worship preserved, explicit absence, immutability');
+
+const {info,layout}=globalThis.MindexWorshipWeek;
+assert.equal(info('2026-11-01').title,'11월 1주');
+assert.equal(info('2026-12-05').title,'12월 1주');
+assert.equal(info('2026-11-29').key,'2026-11-29');
+assert.equal(info('2026-02-31').key,'');
+const fixed=layout([entry('2026-11-05','special'),entry('2026-11-01','sun_2nd'),entry('2026-11-02','special')]);
+assert.deepEqual(fixed.public.map(s=>s.id),['sunday-second','sunday-main','sunday-afternoon','wednesday','friday']);
+assert.deepEqual(fixed.departments.map(s=>s.id),['nursery','children','youth','young-adult']);
+assert.equal(fixed.public[0].entries.length,1);
+assert.equal(fixed.public[1].entries.length,0);
+assert.deepEqual(fixed.special.map(s=>s.source.service_date),['2026-11-02','2026-11-05']);
+console.log('PASS Wednesday month/week, fixed empty slots and date-ordered special services');

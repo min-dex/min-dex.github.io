@@ -5,13 +5,17 @@ const path = require('node:path');
 
 const source = fs.readFileSync(path.join(__dirname, '../app.js'), 'utf8');
 require("../mindex.setlist-links.js");
+require("../mindex.worship-week.js");
 const context = {
-  window: {MindexSetlistLinks:globalThis.MindexSetlistLinks},
+  window: {MindexSetlistLinks:globalThis.MindexSetlistLinks,MindexWorshipWeek:globalThis.MindexWorshipWeek},
   worshipSetlistCandidateLinks: candidate => [{text:candidate.raw_title}],
   normalizeTitle: value => value.trim(),
   worshipAppServiceTypeId: value => value === 'fri' ? 'friday' : value,
 };
+context.serviceAlias = service => service.alias || '';
+context.normalizeServiceDisplayName = value => value;
 vm.createContext(context);
+vm.runInContext(fs.readFileSync(path.join(__dirname, '../mindex.worship-week.js'),'utf8'),context);
 for (const name of ['worshipSetlistArchiveTypeName', 'worshipSetlistArchiveTypeOrder', 'worshipSetlistArchiveAliases']) {
   const start = source.indexOf(`function ${name}(`);
   vm.runInContext(source.slice(start, source.indexOf('\n}\n', start) + 2), context);
@@ -68,7 +72,7 @@ console.log('PASS: Archive role labels across services and no duplicated suffix'
 context.state = { search: '이재희', worshipSetlistArchiveView: 'date' };
 context.worshipSetlistLeaderDrafts = new Map();
 context.normalizeSearchValue = value => String(value || '').trim().toLowerCase();
-context.serviceTypeDisplayName = () => '금요기도회';
+context.serviceTypeDisplayName = id => id === 'sunday-main' ? '주일예배 [3부]' : '금요기도회';
 context.escapeHtml = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 context.escapeAttr = value => context.escapeHtml(value).replaceAll('"', '&quot;');
 for (const name of ['worshipSetlistArchiveServiceId', 'worshipSetlistLeaderInputWidth', 'renderWorshipSetlistLeaderEditor', 'filterWorshipSetlistArchiveEntries', 'renderWorshipSetlistArchiveEntry', 'renderWorshipSetlistCandidate']) {
@@ -96,9 +100,9 @@ const week = context.worshipSetlistArchiveWeek;
 assert.equal(week('2026-07-12').key, '2026-07-12');
 assert.equal(week('2026-07-18').key, '2026-07-12');
 assert.equal(week('2026-07-19').key, '2026-07-19');
-assert.equal(week('2026-07-15').title, '7월 12–18일');
-assert.equal(week('2026-09-02').title, '8월 30일–9월 5일');
-assert.equal(week('2026-01-01').title, '2025년 12월 28일–2026년 1월 3일');
+assert.equal(week('2026-07-15').title, '7월 3주');
+assert.equal(week('2026-09-02').title, '9월 1주');
+assert.equal(week('2026-01-01').title, '12월 5주');
 assert.equal(week('2026-02-31').key, '');
 assert.equal(week('').title, '날짜 없음');
 const weeklyEntries = ['2026-07-17','2026-07-12','2026-07-19','2026-07-15'].map(service_date => ({source:{service_date,service_type_id:'fri'}}));
@@ -116,13 +120,13 @@ console.log('PASS: Sunday/Saturday boundaries, year boundary, invalid dates, wee
 const shared = prepare([song('찬양', '첫 곡', 1), song('찬양', '둘째 곡', 2), song('2부 특송', '2부 곡', 3), song('3부 특송', '3부 곡', 4)], { service_type_id: 'sun_3rd' });
 assert.equal(shared.map(row => row.archive_display_label).join('|'), '찬양 1|찬양 2|2부 특송|3부 특송');
 console.log('PASS: all-service numbering and shared-source 2nd/3rd service special songs');
-assert.equal(context.worshipSetlistArchiveTypeName('sunday-main'), '주일예배');
+assert.equal(context.worshipSetlistArchiveTypeName('sunday-main'), '주일예배 [3부]');
 assert.ok(context.worshipSetlistArchiveTypeOrder('sunday-main') < context.worshipSetlistArchiveTypeOrder('youth'));
 const sundayGroups = context.groupWorshipSetlistArchiveEntries([
   {source:{service_type_id:'youth',service_date:'2026-06-21'}},
   {source:{service_type_id:'sunday-main',service_date:'2026-06-21'}},
 ], 'service');
-assert.equal(sundayGroups[0].title, '주일예배');
+assert.equal(sundayGroups[0].title, '주일예배 [3부]');
 assert.equal(context.groupWorshipSetlistArchiveEntries(sundayGroups.flatMap(g=>g.entries), 'date')[0].entries[0].source.service_type_id, 'sunday-main');
 console.log('PASS: archive Sunday name and priority in service/week views');
 

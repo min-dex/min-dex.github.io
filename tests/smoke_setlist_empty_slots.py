@@ -11,7 +11,8 @@ def main():
                     page = browser.new_page()
                     page.route('**/*supabase*/**', lambda r: r.abort())
                     page.goto(url, wait_until='domcontentloaded')
-                    page.wait_for_function("typeof prepareWorshipSetlistArchiveCandidates === 'function'")
+                    page.wait_for_function("typeof prepareWorshipSetlistArchiveCandidates === 'function' && !document.body.classList.contains('ui-booting')")
+                    page.locator('.mindex-boot').wait_for(state='hidden')
                     result = page.evaluate('''() => {
                       const services=[{id:'fixture',service_date:'2026-10-07',service_type_id:'wed'}];
                       const sections=[{id:'p',service_id:'fixture',title:'찬양'}];
@@ -47,6 +48,18 @@ def main():
                       return {labels,livePriority:true,visibleEdit:true,emptyLive:true,importFallback:true,immutableImports:true};
                     }''')
                     print(engine, 'PASS', result)
+                    for width in (1440, 700, 420):
+                        page.set_viewport_size({'width':width,'height':900})
+                        layout = page.evaluate("""() => {
+                          const root=refs.detailPane;
+                          const slots=[...root.querySelectorAll('[data-setlist-slot]')].slice(0,9).map(n=>n.dataset.setlistSlot);
+                          if(slots.join()!=='sunday-second,sunday-main,sunday-afternoon,wednesday,friday,nursery,children,youth,young-adult')throw Error('slot order');
+                          if([...root.querySelectorAll('.svc-setlist-week-row')].some(n=>n.scrollWidth>n.clientWidth+1))throw Error('row overflow');
+                          return slots;
+                        }""")
+                        if width==1440: page.screenshot(path='/private/tmp/setlist-fixed-'+engine+'.png')
+                    print(engine, 'PASS fixed slots and narrow layout', flush=True)
+
                 finally:
                     browser.close()
     finally:

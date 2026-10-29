@@ -522,12 +522,16 @@ function groupPresenterSlidesBySection(slides, serviceId = state.selectedService
     addPresenterSlideToSubgroup(group, entry);
   });
   // UI-only offsets stay stable when sections are rendered lazily or refreshed.
-  let scriptureColorStart = 0;
+  const scriptureCounts = new Map();
   for (const group of groups) {
     for (const subgroup of group.subgroups) {
-      subgroup.scriptureColorStart = scriptureColorStart;
-      scriptureColorStart += presenterBoardSlideBlocks(subgroup.slides).filter(block =>
-        presenterSlideElementType(block.entries[0]?.slide) === PRESENTER_ELEMENT_TYPES.SCRIPTURE_TEXT).length;
+      subgroup.scriptureColorStarts = Object.fromEntries(scriptureCounts);
+      for (const block of presenterBoardSlideBlocks(subgroup.slides)) {
+        const slide = block.entries[0]?.slide;
+        if (presenterSlideElementType(slide) !== PRESENTER_ELEMENT_TYPES.SCRIPTURE_TEXT) continue;
+        const owner = presenterSlideElementGroupKey(slide) || "";
+        scriptureCounts.set(owner, (scriptureCounts.get(owner) || 0) + 1);
+      }
     }
   }
 
@@ -960,7 +964,7 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
       ${inputControls}
       ${renderServiceSlotMusic(context)}
       <div class="svc-board-grid">
-        ${renderPresenterBoardSlideBlocks(slides, activeIndex, serviceId, subgroup.scriptureColorStart)}
+        ${renderPresenterBoardSlideBlocks(slides, activeIndex, serviceId, subgroup.scriptureColorStarts)}
       </div>
       ${subgroup.slides.some(({ slide }) => slide?.liveScriptureControl) ? `
         <button class="svc-output-action" type="button" data-presenter-citation-focus="${escapeAttr(subgroup.slides.find(({ slide }) => slide?.liveScriptureControl).slide.elementId)}" data-service-id="${escapeAttr(serviceId)}">
@@ -1269,14 +1273,17 @@ function presenterBoardSlideBlocks(entries = []) {
   return blocks;
 }
 
-function renderPresenterBoardSlideBlocks(entries, activeIndex, serviceId, scriptureColorStart = 0) {
-  let scriptureIndex = scriptureColorStart;
+function renderPresenterBoardSlideBlocks(entries, activeIndex, serviceId, scriptureColorStarts = {}) {
+  const scriptureCounts = new Map(Object.entries(scriptureColorStarts));
   return presenterBoardSlideBlocks(entries).map((block) => {
     const scripture = presenterSlideElementType(block.entries[0]?.slide) === PRESENTER_ELEMENT_TYPES.SCRIPTURE_TEXT;
     const formType = normalizePresenterFormPresetLabel(block.label).type;
     const plain = !scripture && ["title", "instrumental", "lyrics"].includes(formType);
+    const owner = presenterSlideElementGroupKey(block.entries[0]?.slide) || "";
+    const scriptureIndex = scriptureCounts.get(owner) || 0;
+    if (scripture) scriptureCounts.set(owner, scriptureIndex + 1);
     const color = scripture
-      ? (scriptureIndex++ % 2 === 0 ? "default" : "accent")
+      ? (scriptureIndex % 2 === 0 ? "default" : "accent")
       : ["verse", "pre-chorus", "chorus", "bridge", "coda", "tag"].includes(formType) ? formType : "neutral";
     const colorAttribute = block.key && !plain ? ` data-${scripture ? "scripture-tone" : "form-color"}="${color}"` : "";
     const thumbs = block.entries.map(({ slide, slideIndex, formLabel }) =>

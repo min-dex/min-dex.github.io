@@ -911,15 +911,17 @@ Small visual polish that does not alter behavior does not need an entry.
   subgroup의 시작점으로 board를 이동한다. 긴 찬양/지연 렌더 구간에서도
   선택된 순서의 입력·thumb 영역이 빈 화면 없이 보이는 것이 우선이다.
 
-## Benediction Replacement
-- 모든 예배의 축도 입력 영역에 `주기도문으로 변경` 버튼을 제공한다.
-- 변경은 해당 예배 요소에만 저장하며 공통 양식과 다른 예배는 수정하지 않는다.
-- `config.benedictionReplacement` version 1에 원래 축도 필드를 보관한다.
-  원래 slot identity를 유지하여 재조회 시 축도가 다시 생성되지 않게 한다.
-- 주기도문은 기존 공통 본문/렌더러를 사용한다. `축도로 되돌리기`는 보관한
-  담당자, 제목, 메모를 복원하며 replacement metadata를 제거한다.
-- 예배 document exceptions에는 `benediction_replacement` 사유를 남긴다.
-- 주일 1부의 기존 설교자별 기본 순서 판정은 변경하지 않는다.
+## Sending prayer selection · 2026-10-29
+- 파송 입력은 `축도` / `주기도문` 선택으로 표시하며 해당 예배 요소만 변경한다.
+- 선택된 label/type/body가 현재 저장 기준이다. 새 전환은 이전 모드의
+  `benedictionReplacement.original` 또는 `offeringVariants`를 만들지 않는다.
+- 새 전환에서 이전 모드로 돌아가면 현재 모드에 맞는 빈 입력을 제공한다.
+  기존 저장값의 legacy backup은 명시적 전환 시 한 번 읽을 수 있지만 재생성하지 않는다.
+- 실제 저장 대상의 config에서 prior-mode metadata만 제거한다. 읽기/미저장 입력,
+  실패한 저장 초안, 기존 복구 이력과 사용자 원문을 일괄 수정하지 않는다.
+- projection은 두 파송 label을 같은 template slot으로 취급한다. 명확한 template
+  placeholder만 접고 서로 다른 실제 작성 요소가 여러 개면 임의 삭제하지 않는다.
+- 주기도문 공통 렌더러와 다른 예배의 기본 순서, 송출 동작은 유지한다.
 
 ## Service Auto-Schedule Rules
 - 금요 2주 문화예배와 3주 삼삼오오예배의 자동 배정은 2026년 8월에만
@@ -1049,7 +1051,7 @@ Small visual polish that does not alter behavior does not need an entry.
 
 ### 2026-09-20 컨트롤러 슬라이드 크기 설정
 - 컨트롤러를 크게 보려고 브라우저 확대를 쓰면 같은 사이트의 모든 창(설치한 앱의 송출 창 포함)에 같은 배율이 적용된다. 컨트롤러 전용 확대는 브라우저 확대 대신 앱 설정으로 제공한다.
-- 슬라이드 보드 위 ‘슬라이드 크기’(기본·크게·더 크게·가장 크게)가 썸네일 기준 너비(`--svc-thumb-width`)에 1·1.3·1.6·2배를 곱한다. 좁은 화면 구간(1180px, 760px 이하)의 기준 너비에도 같은 배수를 적용한다. 값은 이 기기의 localStorage(`mindex.ui.presenterThumbScale`)에 저장한다.
+- 보기 배율은 100·150·200%다. 일반 보드는 기준 너비 184px(좁은 화면 168/148px)에 정확히 배수를 적용하고 16:9를 유지한다. 남은 폭에 맞춰 썸네일을 늘리지 않으며 한 장보다 좁으면 보드 안에서 가로 스크롤한다. 발표자 보기도 고정 너비에 같은 배수를 적용한다. 이전 130/160% 설정은 150%로 읽고, 선택값은 기존 서버 UI 설정 경로에 저장한다.
 - 송출 창(`?output=presenter`)은 이 값을 읽지 않는다. 컨트롤러 초기화 경로에서만 적용한다.
 
 
@@ -5089,3 +5091,7 @@ Stop returns to standby without replacing its code while the worship page remain
 open. Guests cannot start/stop. Host browser popup permission is required;
 blocked launch is an error, not success. This supersedes earlier output-only
 registration/stop-revocation notes. See presenter-remote-design.md for lifecycle.
+
+### 2026-10-29 콘티 주차·슬라이드 구분
+- 콘티의 월·주차는 해당 주 수요일 기준이며 날짜 범위는 주일–토요일이다. 공예배 2부·3부·오후·수요·금요, 부서 유치·어린이·청소년·청년 순으로 자리를 유지한다. 등록되지 않은 자리는 표시만 하고 레코드는 만들지 않는다. 기타 예배는 날짜 오름차순으로 최대 5열에 배치한다. 2부 특송은 2부 콘티에 유지한다.
+- 말씀 블록 회색/분홍 교대는 각 엘리먼트에서 회색으로 시작한다. 같은 본문 여러 페이지는 한 블록이며 실제 송출 슬라이드 내용·ID·순서는 바꾸지 않는다.
