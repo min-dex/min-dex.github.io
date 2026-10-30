@@ -9,7 +9,7 @@ try:
    b=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
    page=b.new_page(viewport={'width':1920,'height':1080})
    page.route('**/*supabase*/**',lambda r:r.abort())
-   page.goto(url+'?mindexSmokeRaw=1');page.wait_for_function('typeof presenterSongTitleSlide === "function"')
+   page.goto(url+'?mindexSmokeRaw=1');page.wait_for_function('typeof presenterSongTitleSlide === "function" && typeof serviceItemConnectedPraiseTitle === "function" && !document.body.classList.contains("ui-booting")')
    result=page.evaluate('''()=>{
     const check=(ok,message)=>{if(!ok)throw Error(message)}, results=[];
     const cases=[
