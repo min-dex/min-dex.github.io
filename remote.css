@@ -101,4 +101,6 @@ button :is([data-lucide], svg.lucide) { width: var(--ui-icon-size); height: var(
 
 .remote-scripture { margin-bottom:20px; }
 #scriptureQuery { margin:0 0 10px; font-size:max(16px,var(--ui-body-size)); text-align:left; letter-spacing:normal; text-transform:none; }
+#scriptureFeedback:empty { display:none; }
+#scriptureFeedback { font-size:var(--ui-meta-size); color:var(--ink-3); overflow-wrap:anywhere; }
 #scriptureStatus { color:var(--ink-3); font-size:var(--ui-meta-size); overflow-wrap:anywhere; }

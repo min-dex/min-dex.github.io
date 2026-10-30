@@ -19,7 +19,7 @@ for(const form of [$('pairForm'),$('slidesSearch'),$('scriptureForm')]){
 }
 
 const currentPreview=createPreview($('current'),'현재 슬라이드'),nextPreview=createPreview($('next'),'다음 슬라이드');
-let session,view=null,opening=false,ending=false;
+let session,view=null,opening=false,ending=false,feedbackAction='';
 let client;
 let adminToken=null,adminLink=null,listBusy=false,selectedOutput=null;
 function getClient(){
@@ -107,7 +107,7 @@ $('adminLogout').onclick=async()=>{
 $('chooseOutput').onclick=()=>{if(opening||ending)return;selectedOutput=null;$('code').value='';$('status').textContent='';paint();void listOutputs();};
 setInterval(listOutputs,3000);
 window.addEventListener('pagehide',event=>{if(event.persisted)return;const token=adminToken;adminToken=null;if(token)void adminRpc(client,'mindex_remote_admin',{p_action:'logout',p_token:token}).catch(()=>{});});
-function reset(){closeSlides();clearTimeout(slidesTimer);slidesData=null;jumpPending=false;session=null;selectedOutput=null;state(null);$('disconnect').hidden=true;$('code').value='';$('scriptureQuery').value='';paint();}
+function reset(){closeSlides();clearTimeout(slidesTimer);slidesData=null;jumpPending=false;session=null;selectedOutput=null;state(null);$('disconnect').hidden=true;$('code').value='';$('scriptureQuery').value='';$('scriptureFeedback').textContent='';feedbackAction='';paint();}
 function paint(){
  connectionForms();
  screenAwake.update({active:!!session?.connected,visible:!document.hidden});
@@ -152,7 +152,7 @@ function state(value){
 }
 const slidePreviews=[];
 let slidesData=null,slidesLoading=false,slidesTimer=null,jumpPending=false,slidesMode='groups',selectedGroup=null;
-let slidesDraftRevision=0,requestedSlidesDraft=null,slidesBatch=null;
+let slidesDraftRevision=0,requestedSlidesDraft=null,slidesBatch=null,slidesFocusRequested=false,slidesReturnIndex=0;
 $('slidesQuery').addEventListener('input',()=>{slidesDraftRevision++;slidesBatch=null;slidesData=null;slidesLoading=false;clearTimeout(slidesTimer);$('slidesStatus').textContent='검색을 눌러 새 목록을 받아 주세요.';paint();});
 function paintSlides(usable){
  if($('slidesPanel').hidden)return;
@@ -192,12 +192,14 @@ function renderSlides(data){
  data={...data,offset:0,items:batch.items};slidesBatch=null;
  clearTimeout(slidesTimer);slidesLoading=false;slidesData=data;
  for(const preview of slidePreviews.splice(0))preview.dispose();
- const list=$('slidesList');list.replaceChildren();list.classList.toggle('groups',data.mode==='groups');$('slideGroups').hidden=data.mode==='groups';let group='';
+ const list=$('slidesList');
+ const restoreFocus=slidesFocusRequested&&(document.activeElement===document.body||list.contains(document.activeElement)||document.activeElement===$('slideGroups'));
+ list.replaceChildren();list.classList.toggle('groups',data.mode==='groups');$('slideGroups').hidden=data.mode==='groups';let group='';
  for(const item of data.items){
   if(data.mode==='groups'){
    const button=document.createElement('button'),label=document.createElement('span'),count=document.createElement('small');
    button.type='button';button.dataset.index=item.index;button.dataset.endIndex=item.endIndex??item.index;label.textContent=item.title;count.textContent=`${item.count}장`;button.append(label,count);list.append(button);
-   button.onclick=()=>{if(!session?.usable||data.key!==view?.catalogKey)return;selectedGroup=item.index;slidesMode='slides';void loadSlides();};continue;
+   button.onclick=()=>{if(!session?.usable||data.key!==view?.catalogKey)return;selectedGroup=item.index;slidesReturnIndex=item.index;slidesFocusRequested=true;slidesMode='slides';void loadSlides();};continue;
   }
   if((item.groupKey||item.group)!==group){const h=document.createElement('h3');h.textContent=item.group;list.append(h);group=item.groupKey||item.group;}
   const b=document.createElement('button'),mini=document.createElement('div'),label=document.createElement('span');
@@ -206,21 +208,26 @@ function renderSlides(data){
   else{mini.classList.add('slide-text-preview');const excerpt=document.createElement('span');excerpt.textContent=item.text||item.title;mini.append(excerpt);}
   b.onclick=async()=>{
    if(!session?.usable||jumpPending||data.key!==view?.catalogKey)return;
-   jumpPending=true;$('slidesStatus').textContent='이동 중…';paint();
+   feedbackAction='';jumpPending=true;$('slidesStatus').textContent='이동 중…';paint();
    try{await session.command('jump',{index:item.index,key:data.key});}catch(e){jumpPending=false;$('slidesStatus').textContent=e.message;paint();}
   };
  }
+ if(restoreFocus){
+  const target=data.mode==='groups'?list.querySelector(`[data-index="${slidesReturnIndex}"]`):list.querySelector('button');
+  (target||$('slidesQuery')).focus();
+ }
+ slidesFocusRequested=false;
  $('slidesStatus').textContent=data.total?(data.mode==='groups'?'예배 순서를 선택하세요.':'원하는 슬라이드를 선택하세요.'):'검색 결과가 없어요.';
  paint();
 }
 function remoteResult(r){
- $('result').textContent=r.message;
+ $(['scripture-show','sermon-title'].includes(feedbackAction)?'scriptureFeedback':'result').textContent=r.message;
  if(jumpPending){jumpPending=false;$('slidesStatus').textContent=r.message;}
  paint();
 }
 function closeSlides(){
  $('slidesPanel').hidden=true;$('slidesOpen').setAttribute('aria-expanded','false');
- clearTimeout(slidesTimer);slidesLoading=false;slidesData=null;slidesBatch=null;
+ clearTimeout(slidesTimer);slidesLoading=false;slidesData=null;slidesBatch=null;slidesFocusRequested=false;
  for(const preview of slidePreviews.splice(0))preview.dispose();$('slidesList').replaceChildren();
 }
 $('slidesOpen').onclick=()=>{
@@ -228,7 +235,7 @@ $('slidesOpen').onclick=()=>{
  $('slidesPanel').hidden=false;$('slidesOpen').setAttribute('aria-expanded','true');$('slidesQuery').value='';slidesMode='groups';selectedGroup=null;void loadSlides();
 };
 $('slidesClose').onclick=()=>{closeSlides();$('slidesOpen').focus();};
-$('slideGroups').onclick=()=>{slidesMode='groups';selectedGroup=null;$('slidesQuery').value='';void loadSlides();};
+$('slideGroups').onclick=()=>{slidesFocusRequested=true;slidesMode='groups';selectedGroup=null;$('slidesQuery').value='';void loadSlides();};
 $('slidesSearch').onsubmit=e=>{e.preventDefault();if(compositionSubmitBlocked(e.currentTarget))return;slidesMode=$('slidesQuery').value.trim()?'slides':'groups';selectedGroup=null;void loadSlides();};
 $('pairForm').addEventListener('submit',async e=>{
  e.preventDefault();if(compositionSubmitBlocked(e.currentTarget)||opening||ending||session||!selectedOutput)return;const chosen=selectedOutput,code=$('code').value.trim();opening=true;paint();$('result').textContent='';
@@ -256,13 +263,15 @@ $('disconnect').onclick=disconnectController;
 $('backOutputs').onclick=disconnectController;
 for(const button of document.querySelectorAll('[data-action]'))button.onclick=async()=>{
  if(button.dataset.action==='output-stop'&&!confirm('송출을 종료할까요?'))return;
- try{const promise=session.command(button.dataset.action);$('result').textContent='처리 중…';paint();await promise;}catch(e){$('result').textContent=e.message;}paint();
+ feedbackAction=button.dataset.action;const feedback=$(['scripture-show','sermon-title'].includes(feedbackAction)?'scriptureFeedback':'result');
+ try{const promise=session.command(button.dataset.action);feedback.textContent='처리 중…';paint();await promise;}catch(e){feedback.textContent=e.message;}paint();
 };
 $('scriptureQuery').addEventListener('input',paint);
 $('scriptureForm').onsubmit=async event=>{
  event.preventDefault();if(compositionSubmitBlocked(event.currentTarget)||$('scriptureShow').disabled)return;
- try{const promise=session.command('scripture-show',{query:$('scriptureQuery').value.trim()});$('result').textContent='말씀을 불러오는 중…';paint();await promise;}
- catch(error){$('result').textContent=error.message;}paint();
+ feedbackAction='scripture-show';
+ try{const promise=session.command('scripture-show',{query:$('scriptureQuery').value.trim()});$('scriptureFeedback').textContent='말씀을 불러오는 중…';paint();await promise;}
+ catch(error){$('scriptureFeedback').textContent=error.message;}paint();
 };
 document.addEventListener('visibilitychange',()=>{if(document.hidden)session?.suspend();else{session?.refresh();void listOutputs();}paint();});
 window.addEventListener('offline',()=>{session?.offline();paint();});

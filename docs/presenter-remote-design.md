@@ -654,3 +654,12 @@ sermon-title item in this service and uses the normal presenter jump path, which
 clears temporary scripture. It is disabled if no such slide exists.
 Live reference is displayed separately; state updates never replace typed input.
 No worship document, DB schema or stored lyrics are changed.
+
+
+### Remote flow feedback and focus ·2026-10-31
+
+Explicit group opening and return restore focus inside the new list (returning
+to the selected group). Search typing during loading keeps its input focus.
+Live-scripture/sermon-return progress and errors appear beside the scripture
+form, not below media controls. Drafts remain unchanged on failure. This changes
+only feedback/focus; authenticated command, freshness and offline guards remain.
