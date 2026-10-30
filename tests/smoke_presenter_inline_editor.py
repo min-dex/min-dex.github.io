@@ -135,6 +135,31 @@ def exercise(page, url, engine):
       renderServiceList();renderPresenterDetail();renderPresenterControlState(state.selectedServiceId);
       check(document.activeElement===retainedInline&&retainedInline.value==='사랑 / 믿음'&&retainedInline.selectionStart===2&&retainedInline.selectionEnd===4,'refresh lost IME/caret');
       retainedInline.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true,data:'믿음'}));""")
+    # Both refresh entry points must leave the deferred markup eligible after blur.
+    for refresh in ('outline', 'list'):
+        field(2, '설교 제목').focus()
+        page.evaluate("""kind=>{
+          const check=inlineFixture.assert,service=state.services.find(row=>row.id===inlineFixture.sid);
+          const item=state.serviceItems[service.id].find(row=>row.id===inlineFixture.ids[1]);
+          inlineFixture.beforeRefreshTitle=item.raw_title;
+          inlineFixture.deferredTitle='Deferred outline '+kind;
+          window.retainedInline=document.activeElement;retainedInline.setSelectionRange(2,4);
+          retainedInline.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true,data:'믿'}));
+          item.raw_title=inlineFixture.deferredTitle;
+          if(kind==='list')renderServiceList();
+          else patchPresenterSidebarOutline(service,presenterSlidesForService(service.id));
+          check(document.activeElement===retainedInline&&retainedInline.value==='사랑 / 믿음'&&retainedInline.selectionStart===2&&retainedInline.selectionEnd===4,'deferred refresh lost IME/caret');
+          check(!refs.songList.querySelector('.service-sidebar-section--current').textContent.includes(inlineFixture.deferredTitle),'focused refresh replaced protected outline');
+          retainedInline.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true,data:'믿음'}));
+          retainedInline.blur();
+          patchPresenterSidebarOutline(service,presenterSlidesForService(service.id));
+          check(refs.songList.querySelector('.service-sidebar-section--current').textContent.includes(inlineFixture.deferredTitle),'same markup refresh after blur permanently skipped: '+kind);
+          check(retainedInline.isConnected&&retainedInline.value==='사랑 / 믿음','blur refresh lost mounted draft');
+          check(!inlineFixture.attempts,'outline refresh unexpectedly saved');
+          inlineFixture.checkQuiet();
+          item.raw_title=inlineFixture.beforeRefreshTitle;
+          patchPresenterSidebarOutline(service,presenterSlidesForService(service.id));
+        }""", refresh)
     toggle(0).click()
     toggle(0).focus()
     page.keyboard.press('Space')

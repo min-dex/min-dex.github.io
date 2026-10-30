@@ -24207,9 +24207,9 @@ function renderServiceList() {
   if (state.module === "presenter") {
     const outlineMarkup = selectedService && !serviceIsNoGathering(selectedService)
       ? renderServiceCurrentSidebar(selectedService).trim() : "";
-    setPresenterSidebarContent(renderPresenterSidebar(q, services, selectedService, outlineMarkup), selectedService);
+    const patched = setPresenterSidebarContent(renderPresenterSidebar(q, services, selectedService, outlineMarkup), selectedService);
     const outline = refs.songList.querySelector(".service-sidebar-section--current");
-    if (outline) outline._presenterOutlineMarkup = outlineMarkup;
+    if (outline && patched) outline._presenterOutlineMarkup = outlineMarkup;
     finishListRender();
     return;
   }
@@ -24331,7 +24331,9 @@ function patchPresenterSidebarOutlineUnscoped(service, slides) {
   template.innerHTML = markup;
   const next = template.content.firstElementChild;
   next._presenterOutlineMarkup = markup;
-  patchPresenterControlTree(current, next);
+  // A focused inline editor defers its patch. Do not acknowledge markup that
+  // has not reached the DOM; the same refresh must still apply after blur.
+  if (!patchPresenterControlTree(current, next)) return;
   current._presenterOutlineMarkup = markup;
   if (focusedIndex != null && !current.contains(document.activeElement)) {
     current.querySelector(`[data-service-outline-item-index="${CSS.escape(focusedIndex)}"]`)?.focus({ preventScroll: true });

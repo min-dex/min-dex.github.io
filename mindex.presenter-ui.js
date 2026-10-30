@@ -34,11 +34,13 @@ function setPresenterSidebarContent(html, service) {
   const template = document.createElement('template');
   template.innerHTML = html.trim();
   const next = template.content.firstElementChild;
+  let patched = true;
   if (service?.id && current?.dataset.serviceId === service.id) {
     refreshIcons(next);
-    patchPresenterControlTree(current, next);
+    patched = patchPresenterControlTree(current, next);
   } else refs.songList.replaceChildren(template.content);
   refs.songList.querySelectorAll('[data-presenter-preparation-field]').forEach(syncPresenterPreparationControls);
+  return patched;
 }
 
 function patchPresenterControlTree(current, next) {
@@ -47,16 +49,16 @@ function patchPresenterControlTree(current, next) {
   if (current.matches?.('.svc-presenter-input-rail')
     && current.dataset.serviceId === next.dataset?.serviceId
     && current.contains(document.activeElement)) {
-    return;
+    return false;
   }
-  if (current.isEqualNode(next)) return;
+  if (current.isEqualNode(next)) return true;
   if (current.nodeType !== next.nodeType || current.nodeName !== next.nodeName) {
     current.replaceWith(next.cloneNode(true));
-    return;
+    return true;
   }
   if (current.nodeType !== Node.ELEMENT_NODE) {
     current.textContent = next.textContent;
-    return;
+    return true;
   }
   // Preview geometry belongs to the mounted frame, not the slide markup.
   const preserveCitationDraft = current.matches?.("[data-presenter-citation-reference-input]")
@@ -76,11 +78,15 @@ function patchPresenterControlTree(current, next) {
   if (current instanceof HTMLInputElement && !editingLiveScripture && !preserveCitationDraft && !current._videoSeekOwner && current.value !== next.value) current.value = next.value;
   const previousChildren = [...current.childNodes];
   const nextChildren = [...next.childNodes];
+  let patched = true;
   nextChildren.forEach((child, index) => {
-    if (previousChildren[index]) patchPresenterControlTree(previousChildren[index], child);
+    if (previousChildren[index]) {
+      if (!patchPresenterControlTree(previousChildren[index], child)) patched = false;
+    }
     else current.appendChild(child.cloneNode(true));
   });
   previousChildren.slice(nextChildren.length).forEach((child) => child.remove());
+  return patched;
 }
 
 function bindPresenterViewportLifecycleEvents() {
