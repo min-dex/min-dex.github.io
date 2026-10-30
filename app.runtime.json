@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261030-input-fixes",
+  "version": "20261030-freshness-title",
   "options": {
     "compress": false,
     "mangle": {
