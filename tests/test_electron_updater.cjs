@@ -54,7 +54,7 @@ test('main-process IPC accepts controller only and blocks install while presente
  const display={id:1,bounds:{x:0,y:0,width:1920,height:1080}};
  const electron={app,BrowserWindow:Window,ipcMain:{handle:(k,h)=>handlers[k]=h},
   screen:{getAllDisplays:()=>[display],getPrimaryDisplay:()=>display},Menu:{getApplicationMenu:()=>null,buildFromTemplate:()=>({append(){}}),setApplicationMenu(){}},MenuItem:class {}};
- const context={require:name=>name==='../mindex-build.json'?{channel:'release'}:name==='../package.json'?{mindexTestBuild:testBuild}:name==='electron'?electron:name==='electron-updater'?{autoUpdater:updater}:name==='./updater'?{createUpdateController}:name==='./keynote-importer'?{}:require(name),
+ const context={require:name=>name==='./test-isolation'?require('../electron/test-isolation'):name==='../mindex-build.json'?{channel:'release'}:name==='../package.json'?{mindexTestBuild:testBuild}:name==='electron'?electron:name==='electron-updater'?{autoUpdater:updater}:name==='./updater'?{createUpdateController}:name==='./keynote-importer'?{}:require(name),
   process:{platform:'darwin',env:{}},__dirname:path.resolve(__dirname,'../electron'),console,setTimeout:()=>0,setInterval:()=>0,clearInterval(){}};
  vm.runInNewContext(fs.readFileSync(path.resolve(__dirname,'../electron/main.js'),'utf8'),context);
  await new Promise(r=>setImmediate(r));const event={sender:windows[0].webContents};

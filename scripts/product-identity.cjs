@@ -2,7 +2,7 @@
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const {execFileSync}=require('node:child_process');
 const git=(root,args)=>execFileSync('git',args,{cwd:root,encoding:'utf8',maxBuffer:8*1024*1024});
-const runtime=name=>!name.includes('/')?/^(?:app(?:\.runtime)?\.js|mindex\.(?!build\.json$).+\.(?:js|mjs|json)|remote\..+|styles.*\.css|index\.html|favicon\.ico|manifest\.webmanifest)$/.test(name):/^(assets|vendor)\//.test(name);
+const runtime=name=>!name.includes('/')?/^(?:app(?:\.runtime)?\.js|scripture-editions\.js|mindex\.(?!build\.json$).+\.(?:js|mjs|json)|remote\..+|styles.*\.css|index\.html|favicon\.ico|manifest\.webmanifest)$/.test(name):/^(assets|vendor)\//.test(name);
 function identity(root,{test=false}={}){
  const read=name=>JSON.parse(git(root,['show',`HEAD:${name}`]));
  const pkg=read('package.json'),policy=read('product-release.json'),release=read('mindex-release.json');

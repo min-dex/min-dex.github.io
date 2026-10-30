@@ -11,7 +11,8 @@ class ElectronRuntimeFilesTests(unittest.TestCase):
         includes = json.loads((root / 'package.json').read_text(encoding="utf-8"))['build']['files']
         index_html = (root / 'index.html').read_text(encoding="utf-8")
         static_scripts = re.findall(r'<script src="\./([^?"/]+\.js)', index_html)
-        runtime_scripts = re.findall(r'"(mindex(?:\.[A-Za-z0-9_-]+)+\.js|app(?:\.runtime)?\.js)"', index_html)
+        module_list = re.search(r'const modules = (\[[\s\S]*?\]);', index_html).group(1)
+        runtime_scripts = re.findall(r'"([^"?]+\.js)"', module_list)
         scripts = sorted(set(static_scripts + runtime_scripts))
         for script in scripts:
             with self.subTest(script=script):

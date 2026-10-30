@@ -66,6 +66,7 @@
       "mindex.single-song.js",
       "mindex.praise-storage.js",
       "mindex.constants.js",
+      "scripture-editions.js",
       "mindex.design-tokens.js",
       "mindex.worship-model.js",
       "mindex.worship-persistence.js",
