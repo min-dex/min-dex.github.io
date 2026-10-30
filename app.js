@@ -25017,9 +25017,10 @@ function worshipSetlistArchiveYears(entries = []) {
 
 function filterWorshipSetlistArchivePeriod(entries = []) {
   const year = normalizedSetlistArchiveYear(state.worshipSetlistArchiveYear);
+  const month = state.worshipSetlistArchiveMonth;
   return entries.filter(({source}) => {
     const date = String(source.service_date || "");
-    return date.slice(0,4) === year && (!state.worshipSetlistArchiveMonth || date.slice(5,7) === state.worshipSetlistArchiveMonth);
+    return date.slice(0,4) === year && (!month || date.slice(5,7) === month);
   });
 }
 
