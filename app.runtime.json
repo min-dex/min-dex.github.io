@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261030-title-remote-input",
+  "version": "20261030-toolbar-scripture",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "2a43dc8c9c503a16454b2cf54e54505b880a0dc1a5656715b9c4b4dc6b57023d",
-  "runtime_sha256": "f99fc269464b091d9f785a618b0774fb3ceff4cec999b42bfc1c052efeb0e85a",
-  "source_bytes": 1349950,
-  "runtime_bytes": 963437,
-  "source_gzip": 308435,
-  "runtime_gzip": 241690
+  "source_sha256": "b81c3f5253c15db6ac4ea2dfa5331a57d1672c4c939970539e50ae2213de1560",
+  "runtime_sha256": "598ba30631d14384cc2545c051b7c1ff0806bd0803506e069900e2fb5eb4b3b2",
+  "source_bytes": 1350246,
+  "runtime_bytes": 963628,
+  "source_gzip": 308514,
+  "runtime_gzip": 241762
 }
