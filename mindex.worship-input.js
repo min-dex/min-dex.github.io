@@ -1495,6 +1495,8 @@ function resolvePresenterPreparationSong(value, item, service) {
   if (titleExact.length === 1) return eligible(titleExact[0]);
   const praiseSong = findServicePraiseSong(songInput);
   if (praiseSong) return eligible(praiseSong);
+  const firstLine = resolvePraiseFirstLine(songInput, item, service);
+  if (firstLine.candidates.length) return eligible(firstLine.song);
   return eligible(findConfidentServicePraiseSong(songInput, item, service));
 }
 
@@ -1514,10 +1516,8 @@ function resolveExistingPraiseSongForServiceInput(value, item = {}, service = se
 }
 
 async function resolveExistingPraiseSongForServiceInputAfterCatalogLoad(value, item = {}, service = selectedServiceForEditor()) {
-  const existing = resolveExistingPraiseSongForServiceInput(value, item, service);
-  if (existing) return existing;
-  if (!state.client || songCatalogLoaded) return null;
-  await loadSongs();
+  // Do not trust a partial/stale catalogue before the creation boundary.
+  if (state.client && !songCatalogLoaded) await loadSongs();
   return resolveExistingPraiseSongForServiceInput(value, item, service);
 }
 
@@ -1550,6 +1550,9 @@ function findConfidentServicePraiseSong(value, item = {}, service = selectedServ
   if (exact.length === 1) return exact[0].song;
   if (exact.length > 1) return exact[0].song;
 
+  const firstLine = resolvePraiseFirstLine(songInput, item, service);
+  if (firstLine.candidates.length || praiseFirstLineMatches(songInput).length) return firstLine.song;
+
   const [best, second] = ranked;
   const gap = best.match.score - (second?.match.score || 0);
   if (best.match.phraseMatched && (gap >= 20 || ranked.length === 1)) return best.song;
@@ -1563,6 +1566,10 @@ async function createBlankPraiseSongForServiceInput(value, service = selectedSer
     throw new Error("해당 번호의 찬송가를 찾지 못했습니다. 새찬송가·통일찬송가 번호와 목록을 확인해 주세요. 입력은 유지됩니다.");
   }
   if (!state.client) return null;
+  if (!songCatalogLoaded) throw new Error("찬양 목록을 불러온 뒤 다시 선택해 주세요. 입력은 유지됩니다.");
+  if (praiseFirstLineMatches(presenterPreparationSongContent(value)).length) {
+    throw new Error("첫 소절과 일치하는 곡이 있습니다. 검색 목록에서 곡과 판본을 선택해 주세요. 입력은 유지됩니다.");
+  }
 
   const title = stripHymnNo(presenterPreparationSongContent(value)).title.trim();
   if (presenterPreparationSongContentHasConnection(title)) return null;

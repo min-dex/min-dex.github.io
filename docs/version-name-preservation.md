@@ -147,3 +147,36 @@ no existing names are inferred or rewritten, and no DB migration is involved.
 Existing explicit edits and native serialization remain the sole save path.
 Lyrics, audio, cue timing, same-song relations and worship links are unchanged.
 Local verification and shared publication remain separate checkpoints.
+
+
+## Derived Verse/Chorus first-line search ·2026-10-30 candidate
+
+Search derives an alias from the first meaningful nonempty line of every Verse
+and Chorus in the loaded selectable record's forms. Display tags, standalone V/C
+markers and inline verse numbers are removed from this derived text only. No
+subtitle, title, form, lyric, audio, timing, relationship or worship row is rewritten.
+Native version-specific forms stay with their original record identity. Title
+matches take precedence; song grouping uses confirmed relations, never lyric equality.
+
+Global/catalog and picker summary search use the existing spacing, punctuation,
+Hangul-initial and token matching rules. First-line fields carry weight95 (title120,
+full lyrics24) and the label 첫 소절; later lines remain full-lyric search only.
+Fields share the existing per-song search cache and normal invalidation. Resolution
+reads current forms so a cached old alias cannot authorize creation. The creation
+boundary awaits catalogue loading before matching and blocks incomplete loads.
+
+Only an exact normalized first line belonging to one confirmed song group may
+resolve automatically. Partial/initial-only or cross-song ambiguous first lines
+remain picker suggestions and cannot create an empty duplicate. Audio-only choices
+use their eligible versions; an unavailable audio variant is not replaced by a
+text-only one. Legacy multi-version matches require explicit selection. New input
+links the selected existing native ID, not a new alias-titled record. Catalog headings
+retain the representative main title; the selected version's output-title contract
+is unchanged. No old services are normalized or resaved.
+
+`smoke_praise_first_line_input.py` covers isolated Chromium/WebKit real input,
+cold native catalogue load, exact/partial/ambiguous/title priority, marker/multilingual
+and empty forms, global/summary/full-lyric ranking, actual picker candidates/click,
+native atomic save failure/retry/rehydration and exact source/form/timing preservation.
+Only repository/atomic RPC boundaries use synthetic fixtures. Publication remains
+pending the coordinated complete gate, Pages and public verification.

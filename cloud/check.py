@@ -200,6 +200,7 @@ SMOKES = (
     "smoke_presenter_left_input_save.py",
     "smoke_hymn_number_create_guard.py",
     "smoke_hymn_number_input_save.py",
+    "smoke_praise_first_line_input.py",
     "smoke_presenter_inline_editor.py",
     "smoke_inline_scripture_audit.py",
     "smoke_holy_week_prayers.py",
