@@ -5344,8 +5344,8 @@ async function loadCalendarDataOnce({ silent = false } = {}) {
     state.calendarError = "";
   } catch (e) {
     state.calendarLoaded = false;
-    state.calendarError = e.message || "교회력을 불러오지 못했습니다.";
-    if (!silent) showToast(e.message || "교회력을 불러오지 못했습니다.", "error");
+    state.calendarError = departmentInputError(e, "교회력 불러오기").message;
+    if (!silent) showToast(state.calendarError, "error");
   } finally {
     state.calendarLoading = false;
     if (state.module === "calendar") {
@@ -5738,10 +5738,11 @@ function renderCalendarView() {
     pane.innerHTML = isConnectionUnavailableMessage(state.calendarError)
       ? renderConnectionEmptyDetail(state.connectionError || state.calendarError)
       : `
-        <div class="empty-detail">
+        <div class="empty-detail" role="alert">
           <div class="empty-detail-inner">
             <p class="empty-verse">교회력을 불러올 수 없습니다</p>
             <span>${escapeHtml(state.calendarError)}</span>
+            <button class="btn secondary" type="button" data-calendar-retry>다시 시도</button>
           </div>
         </div>`;
     return;
@@ -8759,6 +8760,11 @@ function handleDetailClick(event) {
     return;
   }
   if (event.target.closest("button:disabled")) return;
+  if (event.target.closest("[data-calendar-retry]")) {
+    void loadCalendarData({ refresh: true, silent: true });
+    renderCalendarView();
+    return;
+  }
   if (event.target.closest("[data-keynote-html-action]")) { handlePresenterKeynoteHtmlAction(event);return; }
   if (event.target.closest("[data-deck-original-download]")) { void downloadPresenterDeckOriginal(event); return; }
   const serviceRetry = event.target.closest("[data-service-load-retry]");

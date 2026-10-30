@@ -58,7 +58,7 @@ try:
    }''')
    assert result['pages']>=2 and result['count']==1005 and result['first']=='2025-01-01' and result['lastId']=='page-1004' and result['writes']==0,result
    failed=page.evaluate("async()=>{const before=state.calendarData;failPage=true;await loadCalendarData({refresh:true,silent:true});return {kept:before===state.calendarData,error:state.calendarError}}")
-   assert failed=={'kept':True,'error':'second page failed'}
+   assert failed=={'kept':True,'error':'교회력 불러오기에 실패했습니다. 잠시 후 다시 시도해 주세요.'}
    page.evaluate("async()=>{failPage=false;await loadCalendarData({refresh:true,silent:true})}")
    for width in (390,768,1400):
     page.set_viewport_size({'width':width,'height':900});year.focus();assert year.evaluate('e=>getComputedStyle(e).outlineWidth')=='2px'

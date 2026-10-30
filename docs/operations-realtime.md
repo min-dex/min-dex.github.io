@@ -154,4 +154,14 @@ adventStartDate로 계산하며, 연초 주기→대림절 이후 주기와 전�
 안내한다. 대기 요청이 있으면 다음 요청 결과를 확인하도록 알린다. 기존 원복·재시도·
 atomic journal 정책은 바꾸지 않는다. 실제 Enter/실패/재시도 양엔진 검증은
 smoke_calendar_save_order.py와 smoke_calendar_late_failure.py에 포함한다.
+
+## 교회력 조회 실패의 재시도 · 2026-10-31
+
+교회력 초기 조회 실패는 오류 안내와 ‘다시 시도’를 표시한다. 버튼은 기존
+loadCalendarData 경로를 다시 호출하고 조회 중 표시로 전환한다. 중복 요청은
+기존 calendarLoadPromise로 합친다. 성공한 빈 결과는 해당 연도의 빈 상태로
+표시하며 오류로 남기지 않는다. 조회 오류에도 부서 오류 분류 함수를 재사용해
+서버 원문·주소를 화면에 붙이지 않는다. 로그인/전체 연결 설정 화면은 기존
+동작을 유지한다. smoke_calendar_load_retry.py에서 실제 조회 어댑터·Enter 클릭·
+권한/회선 실패·재시도·중복 방지·빈 결과 복귀를 양엔진으로 확인한다.
 이 변경은 독립 READY이며 통합 필수 gate/Pages/공개 UI 확인과 구분한다.
