@@ -1,5 +1,6 @@
 """Offline Praise header geometry across themes, widths and media error states."""
 import os
+import tempfile
 from pathlib import Path
 os.environ['MINDEX_SMOKE_OFFLINE'] = '1'
 from smoke_app import start_local_app_server, launch_chromium, sync_playwright
@@ -29,7 +30,7 @@ try:
               window.protectedLayoutState=JSON.stringify({forms:state.forms,audio:getSelectedVersion().audio_set,relations:state.singleSongCatalog.get(id).relations,items:state.serviceItems});
             }""")
             import json
-            out=Path(os.environ.get('MINDEX_PRAISE_LAYOUT_OUTPUT','/private/tmp/mindex-praise-header-layout'));out.mkdir(parents=True,exist_ok=True)
+            out=Path(os.environ.get('MINDEX_PRAISE_LAYOUT_OUTPUT',str(Path(tempfile.gettempdir()) / 'mindex-praise-header-layout')));out.mkdir(parents=True,exist_ok=True)
             for theme in ('light','dark'):
                 page.evaluate('(theme)=>applyTheme(theme)',theme)
                 for width in (1280,390):
