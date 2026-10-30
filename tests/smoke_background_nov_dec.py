@@ -23,7 +23,7 @@ try:
     state.worshipBackgroundRegistry={'27-S2.png':{dataUrl:'data:image/png;base64,season'},'26-A6.png':{dataUrl:'data:image/png;base64,custom'}};
     check(presenterBackgroundSourcesForService({type_id:'young-adult',date:'2026-12-25',alias:'성탄예배'})[0]==='data:image/png;base64,season','season precedence');
     check(presenterBackgroundSourcesForService({type_id:'young-adult',date:'2026-11-01'})[0]==='data:image/png;base64,custom','registry precedence');
-    for(const g of ['A','B','C']){const im=new Image();im.src=`assets/worship-backgrounds/26-${g}6.png`;await im.decode();check(im.naturalWidth===3508&&im.naturalHeight===2480,'image dimensions')}
+    for(const g of ['A','B','C']){const im=new Image();im.src=`assets/worship-backgrounds/26-${g}6.png`;await im.decode();check(im.naturalWidth===3508&&im.naturalHeight===2480,'image dimensions');const preview=new Image();preview.src=presenterPreviewBackgroundSource(im.src);await preview.decode();check(preview.naturalWidth===1280&&preview.naturalHeight===905,'preview dimensions')}
     return 'PASS 32 date/group mappings, explicit and registry preservation, season priority, year boundary, three image decode';
    }"""),flush=True);b.close()
 finally:server.shutdown()
