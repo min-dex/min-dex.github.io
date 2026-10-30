@@ -367,6 +367,7 @@ function updateServiceItemField(field, options = {}) {
         const references = serviceItemSupportsScriptureReferenceList(item)
           ? normalizeServiceScriptureReferenceList(field.value)
           : [];
+        if (String(field.value || "").trim()) parsed.scriptureInputCleared = false;
         parsed.scriptureReferences = references;
         parsed.scriptureReference = references[0] || normalizeServiceItemReferenceSpacing(item.raw_title || "");
         parsed.scriptureReferencePayloads = normalizeServiceScriptureReferencePayloads(parsed.scriptureReferencePayloads, references);
@@ -789,12 +790,18 @@ function isPresenterPreparationContextLine(text = "") {
   return /(?:예배|기도회|찬양예배|집회)입니다[!.。]?$/u.test(value);
 }
 
+// Only an edited structured content field can intentionally clear scripture.
+// Untouched defaults and legacy bulk-input blanks are not deletion requests.
+function presenterPreparationClearsScripture(entry, content) {
+  return Boolean(entry.structured && entry.hasContent && entry.contentChanged && !String(content || "").trim());
+}
+
 function planPresenterPreparationEntries(entries, service) {
   const planned = [];
   const errors = [];
   const targets = new Set();
   for (const entry of entries) {
-    if (entry.key === "인용구절") {
+    if (entry.key === "인용구절" && !entry.structured) {
       const references = normalizeServiceScriptureReferenceList(entry.content);
       if (!references.length || references.some((reference) => !parseBibleReference(reference))) {
         errors.push(`${entry.line}번째 줄 인용 구절의 성경 주소를 확인해 주세요.`);
@@ -837,7 +844,7 @@ function planPresenterPreparationEntries(entries, service) {
       : serviceMemoInputMode(memo, projected);
     if (mode === "scripture" || isScriptureBodyServiceItem(projected)) {
       const references = normalizeServiceScriptureReferenceList(content);
-      if (!references.length || references.some((reference) => !parseBibleReference(reference))) {
+      if ((!references.length && !presenterPreparationClearsScripture(entry, content)) || references.some((reference) => !parseBibleReference(reference))) {
         errors.push(`${entry.line}번째 줄 ${entry.label}의 성경 주소를 확인해 주세요.`);
       }
     }

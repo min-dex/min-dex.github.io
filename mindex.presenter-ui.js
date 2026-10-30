@@ -596,7 +596,7 @@ function presenterPreparationStructuredFields(service) {
       : scripture ? { needsTitle: true, needsAssignee: false } : presenterServiceTextInputSpec(item, model, memo);
     const current = presenterServiceRequiredTextInputState(item, model, memo, service);
     const title = prayer ? prayer.title : songMode ? serviceItemLinkedSong(item)?.title || item.raw_title || ''
-      : scripture ? formatServiceScriptureReferenceList(serviceItemScriptureReferences(item, memo, service)) : current.titleText;
+      : scripture ? (memo.scriptureInputCleared ? '' : formatServiceScriptureReferenceList(serviceItemScriptureReferences(item, memo, service))) : current.titleText;
     const assignee = prayer ? prayer.assignee : current.assignee;
     const base = { targetLabel: definition.label, itemId: item.id, prayerIndex, multiline: isAnnouncementTextInputItem(item) };
     const paired = spec.needsTitle && spec.needsAssignee;

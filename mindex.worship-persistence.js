@@ -652,10 +652,11 @@ function buildWorshipPersistenceRows(service, items, existingSectionById = {}, e
       contentState,
     });
     const sourceRef = slotKey ? { ...sourceRefBase, slotKey } : sourceRefBase;
-    const scriptureReferences = scriptureBody
+    const scriptureCleared = scriptureBody && parsed.scriptureInputCleared === true;
+    const scriptureReferences = scriptureBody && !scriptureCleared
       ? serviceItemScriptureReferences(item, parsed, service)
       : [];
-    const scriptureReference = scriptureBody
+    const scriptureReference = scriptureCleared ? "" : scriptureBody
       ? (scriptureReferences[0] || normalizeServiceItemReferenceSpacing(parsed.scriptureReference || item.raw_title || (isOptionalCitationScriptureServiceItem(item) ? "" : existingElement?.scripture_reference) || ""))
       : (existingElement?.scripture_reference || "");
     const elementRow = {
@@ -678,7 +679,7 @@ function buildWorshipPersistenceRows(service, items, existingSectionById = {}, e
       body: manualBody || "",
       song_id: item.song_id || null,
       song_version_id: serviceItemSongVersionIdForSave(item, service),
-      scripture_id: existingElement?.scripture_id || null,
+      scripture_id: scriptureCleared ? null : existingElement?.scripture_id || null,
       scripture_reference: scriptureReference,
       asset,
       template_id: existingElement?.template_id || null,
@@ -868,11 +869,13 @@ function serviceElementConfigForSave(existingConfig = {}, parsed = emptyServiceI
     delete config.scriptureReferences;
     delete config.scripture_references;
   }
-  if (isOptionalCitationScriptureServiceItem(options.item || {})) {
+  if (parsed.scriptureInputCleared || isOptionalCitationScriptureServiceItem(options.item || {})) {
     delete config.scriptureReference;
     delete config.scripture_reference;
     delete config.scripture_references;
   }
+  if (parsed.scriptureInputCleared) config.scriptureInputCleared = true;
+  else delete config.scriptureInputCleared;
   if (parsed.scriptureTranslationId) {
     config.scriptureTranslationId = parsed.scriptureTranslationId;
     delete config.scripture_translation_id;
@@ -955,7 +958,7 @@ function serviceElementConfigForSave(existingConfig = {}, parsed = emptyServiceI
 
 function serviceElementSourceRefForSave(existingSourceRef = {}, item = {}, parsed = emptyServiceItemMemo(), manualBody = false) {
   const sourceRef = { ...(existingSourceRef && typeof existingSourceRef === "object" ? existingSourceRef : {}) };
-  if (isOptionalCitationScriptureServiceItem(item)) {
+  if (parsed.scriptureInputCleared || isOptionalCitationScriptureServiceItem(item)) {
     delete sourceRef.scriptureReferences;
     delete sourceRef.scripture_references;
     delete sourceRef.scriptureReference;

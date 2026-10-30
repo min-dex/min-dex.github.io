@@ -5190,3 +5190,25 @@ element ID를 먼저 사용한다. 기존 저장된 두 ID가 같은 slot을 가
 실제 재조회·재열기로 ID/값/slot을 확인한다. 기존 고유 slot과 body/source
 확장값 보존, 기존 중복의 비파괴 실패도 별도로 검증한다. 배포와 운영 데이터
 정리 여부는 이 로컬 검증으로 대신하지 않는다.
+
+### 2026-10-30 Explicit inline scripture clearing
+
+- Clearing an existing scripture input and explicitly saving is intentional deletion
+  of that row's reference/body and reference-specific linked data. Only a changed
+  structured content field requests this; untouched blanks and legacy bulk-input
+  omissions retain their existing behavior. IME Enter does not submit.
+- Persist `config.scriptureInputCleared` with the atomic edit to distinguish this
+  state from an untouched default. Clear the scripture ID, generated body/slides,
+  manual verse payloads and legacy reference aliases together. Retain the selected
+  translation and unrelated row metadata; entering a new reference removes the flag.
+  A blank reference alone also represents untouched template defaults, while
+  `contentState` is derived from effective content (including reading/body display
+  fallback); neither records deletion intent after reopening. The flag prevents
+  a later save or resolver from reintroducing a cleared source through that fallback.
+- A cleared editor stays blank after reload and repeated save. Existing reading /
+  sermon-body display fallback remains available, but background resolution must
+  not copy that display fallback back into an explicitly cleared source.
+- Failed saves retain the open draft and leave the committed aggregate unchanged.
+  The offline `smoke_inline_scripture_audit.py` uses real parse, validation,
+  scripture fetching, atomic save and reload handlers with synthetic transport,
+  including late lookup/save responses, retry, untouched blanks and other-row preservation.

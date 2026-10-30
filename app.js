@@ -4970,6 +4970,7 @@ function groupWorshipElements(sections = [], elements = []) {
         scriptureReference,
         scriptureReferences,
         scriptureTranslationId: config.scriptureTranslationId || config.scripture_translation_id,
+        scriptureInputCleared: config.scriptureInputCleared === true,
         scriptureReferencePayloads: config.scriptureReferencePayloads || config.scripture_reference_payloads,
         manualScripture: config.manualScripture || config.manual_scripture,
         textHighlights,
@@ -5071,6 +5072,7 @@ function isScriptureBodyWorshipElement(element = {}, section = {}, sourceRef = {
 }
 
 function serviceElementScriptureReference(element = {}, section = {}, sourceRef = {}, config = {}) {
+  if (config.scriptureInputCleared) return "";
   const candidates = [
     element.scripture_reference,
     config.scriptureReference,
@@ -5091,6 +5093,7 @@ function serviceElementScriptureReference(element = {}, section = {}, sourceRef 
 }
 
 function serviceElementScriptureReferences(element = {}, section = {}, sourceRef = {}, config = {}) {
+  if (config.scriptureInputCleared) return [];
   const configured = config.scriptureReferences || config.scripture_references
     || sourceRef.scriptureReferences || sourceRef.scripture_references;
   const references = preferCompleteServiceScriptureReferenceList(
@@ -11194,6 +11197,7 @@ function emptyServiceItemMemo(rawNote = "") {
     scriptureReferences: [],
     scriptureTranslationId: "",
     scriptureReferencePayloads: [],
+    scriptureInputCleared: false,
     manualScripture: null,
     introSlide: null,
     formHint: "",
@@ -11500,6 +11504,7 @@ function parseServiceItemMemo(value) {
         scriptureReference: String(parsed.scriptureReference || parsed.scripture_reference || "").trim(),
         scriptureReferences: normalizeServiceScriptureReferenceList(parsed.scriptureReferences || parsed.scripture_references),
         scriptureTranslationId: String(parsed.scriptureTranslationId || parsed.scripture_translation_id || "").trim(),
+        scriptureInputCleared: parsed.scriptureInputCleared === true,
         scriptureReferencePayloads: normalizeServiceScriptureReferencePayloads(parsed.scriptureReferencePayloads || parsed.scripture_reference_payloads),
         manualScripture: normalizeServiceManualScripture(parsed.manualScripture || parsed.manual_scripture),
         introSlide,
@@ -11778,9 +11783,10 @@ function serializeServiceItemMemo(value = {}) {
   const templateSuppressed = Boolean(value.templateSuppressed || value.template_suppressed);
   const defaultAssetKind = serviceAssetKindForElementType(elementType);
   if (!asset.kind && defaultAssetKind && hasServiceAsset(asset)) asset.kind = defaultAssetKind;
-  if (!normalizeAnnouncementRegions(value.announcementRegions) && !slides.length && !scriptureReference && !scriptureReferences.length && !scriptureTranslationId && !scriptureReferencePayloads.length && !manualScripture && !hasServiceIntroSlide(introSlide) && !formHint && !formPreset && !formPresetDisabled && !formPresetRules.length && !templateKey && !templateVariant && !elementType && !outputMode && !inputMode && !textHighlights.length && !hasServiceAsset(asset) && !hasServiceAsset(audioAsset) && !audioTiming && !hasServicePlaybackConfig(playback) && !presenterRole && !connectedPraise && !presentation && !mediaPlacement && !benedictionReplacement && !offeringVariants && !hiddenInPresentation && !templateSuppressed) return note;
+  if (!normalizeAnnouncementRegions(value.announcementRegions) && !slides.length && !scriptureReference && !scriptureReferences.length && !scriptureTranslationId && !scriptureReferencePayloads.length && !value.scriptureInputCleared && !manualScripture && !hasServiceIntroSlide(introSlide) && !formHint && !formPreset && !formPresetDisabled && !formPresetRules.length && !templateKey && !templateVariant && !elementType && !outputMode && !inputMode && !textHighlights.length && !hasServiceAsset(asset) && !hasServiceAsset(audioAsset) && !audioTiming && !hasServicePlaybackConfig(playback) && !presenterRole && !connectedPraise && !presentation && !mediaPlacement && !benedictionReplacement && !offeringVariants && !hiddenInPresentation && !templateSuppressed) return note;
   const payload = { note };
   if(normalizeAnnouncementRegions(value.announcementRegions))payload.announcementRegions=normalizeAnnouncementRegions(value.announcementRegions);
+  if (value.scriptureInputCleared === true) payload.scriptureInputCleared = true;
   if (scriptureReference) payload.scriptureReference = scriptureReference;
   if (scriptureReferences.length) payload.scriptureReferences = scriptureReferences;
   if (scriptureTranslationId) payload.scriptureTranslationId = scriptureTranslationId;
@@ -12182,6 +12188,7 @@ function serviceTitlePersonDisallowsTitleInput(item = {}, memo = parseServiceIte
 }
 
 function serviceItemEditorScriptureTitleValue(item = {}, parsed = parseServiceItemMemo(item.memo), service = null, scripturePayload = null) {
+  if (parsed.scriptureInputCleared) return "";
   if (isScriptureBodyServiceItem(item)) {
     const references = serviceItemScriptureReferences(item, parsed, service);
     if (references.length) return formatServiceScriptureReferenceList(references);
@@ -12240,7 +12247,7 @@ function scheduleServiceScriptureBodyResolveWithOptions(serviceId = state.select
   const items = getServiceItems(serviceId);
   const item = items[index];
   if (!item || !serviceItemSupportsScriptureResolution(item)) return;
-  if (parseServiceItemMemo(item.memo).manualScripture) return;
+  if (parseServiceItemMemo(item.memo).manualScripture || parseServiceItemMemo(item.memo).scriptureInputCleared) return;
   const references = serviceItemScriptureReferences(item);
   if (!references.length || !state.client) return;
   const key = `${serviceId}:${index}`;
@@ -12270,7 +12277,7 @@ async function resolveServiceScriptureBodyReference(serviceId, index, options = 
   const safeIndex = targetIndex >= 0 ? targetIndex : index;
   const item = items[safeIndex];
   if (!item || !serviceItemSupportsScriptureResolution(item)) return;
-  if (parseServiceItemMemo(item.memo).manualScripture) return;
+  if (parseServiceItemMemo(item.memo).manualScripture || parseServiceItemMemo(item.memo).scriptureInputCleared) return;
   const memo = parseServiceItemMemo(item.memo);
   const references = serviceItemScriptureReferences(item, memo);
   if (!references.length) return;
@@ -12287,7 +12294,7 @@ async function resolveServiceScriptureBodyReference(serviceId, index, options = 
       : currentItems.find((candidate) => candidate === item);
     if (!currentItem || serviceItemScriptureReferences(currentItem).join(";") !== referenceSignature) return;
     const parsed = parseServiceItemMemo(currentItem.memo);
-    if (parsed.manualScripture) return;
+    if (parsed.manualScripture || parsed.scriptureInputCleared) return;
     parsed.scriptureReferences = references;
     parsed.scriptureReference = references[0] || "";
     parsed.slides = [];
@@ -28831,7 +28838,7 @@ async function applyPresenterPreparationInput(serviceId = state.selectedServiceI
     let citationReferences = null;
 
     for (const { entry, projected, content, assignee, mode, corporatePrayerIndex } of plan.planned) {
-      if (entry.key === "인용구절") {
+      if (entry.key === "인용구절" && !entry.structured) {
         const references = normalizeServiceScriptureReferenceList(entry.content);
         if (!references.length || references.some((reference) => !parseBibleReference(reference))) {
           errors.push("인용 구절의 성경 주소를 확인해 주세요.");
@@ -28994,7 +29001,8 @@ async function applyPresenterPreparationInput(serviceId = state.selectedServiceI
 
       if (mode === "scripture" || isScriptureBodyServiceItem(item)) {
         const references = normalizeServiceScriptureReferenceList(content);
-        if (!references.length || references.some((reference) => !parseBibleReference(reference))) {
+        const explicitlyCleared = presenterPreparationClearsScripture(entry, content);
+        if ((!references.length && !explicitlyCleared) || references.some((reference) => !parseBibleReference(reference))) {
           errors.push(`${entry.label}의 성경 주소를 확인해 주세요.`);
           continue;
         }
@@ -29008,6 +29016,9 @@ async function applyPresenterPreparationInput(serviceId = state.selectedServiceI
           inputMode: "scripture",
           scriptureReference: references[0] || "",
           scriptureReferences: references,
+          scriptureInputCleared: explicitlyCleared,
+          scriptureReferencePayloads: explicitlyCleared ? [] : normalizeServiceScriptureReferencePayloads(memo.scriptureReferencePayloads, references),
+          manualScripture: explicitlyCleared ? null : memo.manualScripture,
           slides: [],
         });
         scriptureItemIds.add(item.id);
