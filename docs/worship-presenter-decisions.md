@@ -5160,3 +5160,21 @@ text later matches again. Changing the active live-scripture draft invalidates
 its pending verse lookup; other-service drafts do not interrupt the live owner.
 A deliberate retry retains the current input. No actual output is exercised by
 the isolated request-race tests.
+
+## 특별새벽기도회 두 기도 slot · 2026-10-30
+
+신규 특별새벽기도회 scaffold는 말씀 전 기도를 `prayer.representative`,
+말씀 후 기도를 `response.prayer`로 구분한다. 화면의 두 `기도` 이름과 순서,
+입력 유형, 원래 내용은 유지한다. 동일한 section/label이라도 서로 다른 명시
+slot은 독립 항목이므로 한 기도 입력이 다른 기도를 삭제하거나 덮지 않는다.
+
+기존 `slotKey`/`slot_key`의 명시값과 source 우선순위를 유지하고, 이 값이
+없을 때 정상화된 runtime `_worshipSlotKey`를 사용한다. 저장 cache는 정확한
+element ID를 먼저 사용한다. 기존 저장된 두 ID가 같은 slot을 가진 경우에도
+자동 합치거나 내용을 삭제하지 않고 기존 중복 검증으로 저장을 차단한다.
+기존 운영 자료의 중복 slot 일괄 변경·DB migration은 이 수정에 포함하지 않는다.
+
+격리 browser 검증은 두 기도에 다른 값을 입력하고 각각 atomic 저장한 뒤
+실제 재조회·재열기로 ID/값/slot을 확인한다. 기존 고유 slot과 body/source
+확장값 보존, 기존 중복의 비파괴 실패도 별도로 검증한다. 배포와 운영 데이터
+정리 여부는 이 로컬 검증으로 대신하지 않는다.

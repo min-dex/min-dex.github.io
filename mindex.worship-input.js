@@ -1284,10 +1284,13 @@ function applyPresenterPreparationTextUpdateToWorshipElementCache(service = null
   const candidates = state.worshipElements
     .map((element) => ({ element, section: sectionById[element.section_id] }))
     .filter(({ section }) => Boolean(section));
-  const matchesUpdateSlot = ({ element, section }) => {
+  const slotForElement = (element) => {
     const sourceRef = element.source_ref && typeof element.source_ref === "object" ? element.source_ref : {};
     const config = element.config && typeof element.config === "object" ? element.config : {};
-    const elementSlotKey = normalizeWorshipSlotKey(element.slot_key || sourceRef.slotKey || sourceRef.slot_key || config.slotKey || config.slot_key);
+    return normalizeWorshipSlotKey(element.slot_key || sourceRef.slotKey || sourceRef.slot_key || config.slotKey || config.slot_key);
+  };
+  const matchesUpdateSlot = ({ element, section }) => {
+    const elementSlotKey = slotForElement(element);
     return Boolean(
       updateSlotKey
       && elementSlotKey === updateSlotKey
@@ -1304,13 +1307,16 @@ function applyPresenterPreparationTextUpdateToWorshipElementCache(service = null
       && labelKey === updateLabelKey,
     );
   };
+  const exactCandidates = candidates.filter(({ element }) => updateId && element.id === updateId);
   const matchedElements = uniqueList(
-    candidates
-      .filter((candidate) =>
-        (updateId && candidate.element.id === updateId)
-        || matchesUpdateSlot(candidate)
-        || matchesUpdateLabel(candidate)
-        || (updateSectionKey && String(candidate.section.section_key || "").trim() === updateSectionKey))
+    (exactCandidates.length ? exactCandidates : candidates
+      .filter((candidate) => {
+        // Repeated labels can be separate roles. An explicit distinct slot
+        // must never be overwritten by the legacy label/section fallback.
+        if (updateSlotKey && slotForElement(candidate.element)) return matchesUpdateSlot(candidate);
+        return matchesUpdateLabel(candidate)
+          || (updateSectionKey && String(candidate.section.section_key || "").trim() === updateSectionKey);
+      }))
       .map(({ element }) => element),
   );
   const rawTitle = String(update.raw_title || "").trim();
@@ -1563,6 +1569,7 @@ function finalizePresenterPreparationApply({
   service, serviceId, items, entries, skipped, scriptureItemIds, textFieldUpdates,
   createdSongTitles, versionWarnings, draftSnapshot, appliedDraft, notify = true,
 }) {
+  const persistedElementIds = new Set(state.worshipElements.map(element => element.id));
   const uniqueItems = textFieldUpdates.length ? items.filter((item) => {
     const itemId = String(item.id || "");
     const itemSlotKey = serviceItemSlotKey(item);
@@ -1570,9 +1577,12 @@ function finalizePresenterPreparationApply({
     const itemLabelKey = compactSearchValue(item.label || "");
     return !textFieldUpdates.some((update) => {
       if (String(update.id || "") === itemId) return false;
+      // Do not discard a second stored row to hide an invalid legacy collision.
+      // Preserve both identities so the existing save validator can reject it.
+      if (persistedElementIds.has(itemId) && persistedElementIds.has(update.id)) return false;
       const updateSectionKey = String(update.sectionKey || "").trim();
       const updateLabelKey = compactSearchValue(update.label || "");
-      if (update.slotKey && itemSlotKey && update.slotKey === itemSlotKey) return true;
+      if (update.slotKey && itemSlotKey) return update.slotKey === itemSlotKey;
       return Boolean(updateSectionKey && updateLabelKey
         && updateSectionKey === itemSectionKey && updateLabelKey === itemLabelKey);
     });

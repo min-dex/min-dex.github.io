@@ -499,3 +499,24 @@ This changes neither stored worship content nor the atomic CAS/journal protocol.
 SQLSTATE 57014 proves rollback and clears the pending request while preserving the
 draft and committed baseline; uncertain transport failures still retain the exact
 request for replay. Tests cover both cases. No DB timeout or permissions are raised.
+
+## Repeated prayer identities · 2026-10-30
+
+New `holy-week-dawn` scaffolds use `prayer.representative` before the sermon and
+`response.prayer` after it, retaining the two existing prayer labels and order.
+The explicit slot adapter keeps `slotKey`, then `slot_key` precedence; the runtime
+`_worshipSlotKey` is only a fallback after all explicit sources are checked.
+Invalid explicit metadata on a row is not reinterpreted through its runtime
+value. Source ordering and the numbered-main-praise rule remain unchanged.
+
+Preparation updates preserve distinct slots even when section keys and labels
+match. Cache updates prefer the exact persisted element ID. A second stored ID
+is not deduplicated to hide a legacy slot collision: the existing validator still
+blocks that save, with both records and the editable draft retained. There is no
+read-time or bulk operational rewrite of old duplicate slots. Such records need
+separate reviewed repair; this change only makes new scaffolds valid and protects
+independent existing identities during normal edits.
+
+The default offline gate runs `test_worship_slot_identity.cjs` and the three-case
+`smoke_holy_week_prayers.py` on Chromium/WebKit. The full template save matrix
+remains an explicit audit in `smoke_inline_template_save_audit.py`.
