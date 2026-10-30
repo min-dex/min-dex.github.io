@@ -6319,3 +6319,20 @@ body[data-module="presenter"] .svc-presenter-toolbar::before {
 .svc-outline-editor :is(input,textarea,select) { min-width:0; max-width:100%; box-sizing:border-box; }
 
 .svc-presenter-input-rail button.svc-outline-editor-save { min-height:35px; height:35px; padding:0 10px; font-weight:600; }
+
+/* Only date-grouped upcoming shortcuts: compact date, right-aligned full name. */
+.service-sidebar-date-groups.is-upcoming .service-sidebar-title { text-align:right; white-space:normal; overflow-wrap:anywhere; }
+.service-sidebar-date-groups.is-upcoming .service-sidebar-card { text-align:right; }
+.service-sidebar-date-groups.is-upcoming .service-sidebar-date-group { grid-template-columns:max-content minmax(0,1fr); }
+
+/* One live scripture composer in the shared toolbar; wrap using available space. */
+.svc-toolbar-scripture { order:1; flex:1 1 280px; min-width:0; max-width:520px; margin-inline:auto; }
+.svc-toolbar-scripture .svc-citation-composer { margin:0; padding:0; border:0; border-radius:0; background:none; display:flex; flex-wrap:wrap; align-items:center; gap:5px 10px; }
+.svc-toolbar-scripture .svc-citation-composer-heading { display:contents; margin:0; }
+.svc-toolbar-scripture .svc-citation-composer-heading > span { display:inline-flex; font-size:var(--ui-meta-size); white-space:nowrap; }
+.svc-toolbar-scripture .svc-citation-composer-entry { order:0; flex:1 1 170px; min-width:0; }
+.svc-toolbar-scripture .svc-slide-citation-auto-output { order:1; }
+.svc-toolbar-scripture .svc-slide-citation-reference-input { width:100%; box-sizing:border-box; height:35px; min-height:35px; }
+.svc-toolbar-scripture .svc-citation-composer + .svc-citation-composer { margin-top:5px; }
+
+.svc-toolbar-scripture .svc-slide-citation-reference-input:focus-visible { outline-offset:-2px; }

@@ -5254,3 +5254,23 @@ sermon-title item in this service and uses the normal presenter jump path, which
 clears temporary scripture. It is disabled if no such slide exists.
 Live reference is displayed separately; state updates never replace typed input.
 No worship document, DB schema or stored lyrics are changed.
+
+
+## Upcoming sidebar labels ·2026-10-30
+
+Only date-grouped upcoming shortcuts in home/worship sidebar show original service
+type followed by an explicit distinct alias in parentheses. A replacement's
+normalized alias omits redundant department prefixes. Dates use content width;
+service names align right and wrap without truncating. Archive cards and other
+service naming policies stay unchanged. No alias/title records are rewritten.
+
+
+## Live scripture toolbar ·2026-10-30
+
+Move the existing citation composer from the right preview rail into the shared
+presenter toolbar between view switching and scale/music controls. Keep one input
+per citation element and its original label, immediate-output checkbox and event
+handlers. Same-service refresh patches the mounted viewer so the input DOM,
+IME composition, draft, caret and focus survive; resizing only wraps CSS. The
+existing dynamic toolbar-height scroll inset remains authoritative. No scripture
+submission happens merely because the composer moved or the viewport resized.

@@ -143,6 +143,8 @@ SMOKES = (
     "smoke_presenter_freshness.py",
     "smoke_native_freshness_title.py",
     "smoke_title_metadata.py",
+    "smoke_citation_sidebar.py",
+    "smoke_upcoming_sidebar.py",
     "smoke_calendar_generated_readonly.py",
     "smoke_deck_original.py",
     "smoke_keynote_html.py",

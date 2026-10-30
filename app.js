@@ -8758,7 +8758,7 @@ function handleDetailClick(event) {
   const citationFocus = event.target.closest("[data-presenter-citation-focus]");
   if (citationFocus) {
     applyRightSidebarVisibility();
-    const input = refs.rightSidebar?.querySelector(`[data-presenter-citation-reference-input][data-service-id="${CSS.escape(citationFocus.dataset.serviceId)}"][data-presenter-citation-element-id="${CSS.escape(citationFocus.dataset.presenterCitationFocus)}"]`);
+    const input = refs.detailPane?.querySelector(`[data-presenter-citation-reference-input][data-service-id="${CSS.escape(citationFocus.dataset.serviceId)}"][data-presenter-citation-element-id="${CSS.escape(citationFocus.dataset.presenterCitationFocus)}"]`);
     input?.focus({ preventScroll: true });
     input?.scrollIntoView({ block: "nearest" });
     return;
@@ -24424,7 +24424,7 @@ function renderUpcomingServiceShortcuts() {
       <div class="service-sidebar-head">
         <span>다가오는 예배</span>
       </div>
-      ${renderServiceSidebarDateGroups(services)}
+      ${renderServiceSidebarDateGroups(services, { upcoming: true })}
     </section>`;
 }
 
@@ -24436,11 +24436,11 @@ function renderHomeSidebarRecentServiceShortcuts() {
       <div class="service-sidebar-head">
           <span>다가오는 예배</span>
       </div>
-      ${renderServiceSidebarDateGroups(services)}
+      ${renderServiceSidebarDateGroups(services, { upcoming: true })}
     </section>`;
 }
 
-function renderServiceSidebarDateGroups(services = []) {
+function renderServiceSidebarDateGroups(services = [], options = {}) {
   const groups = [];
   for (const service of services) {
     const key = serviceSidebarDateKey(service);
@@ -24456,14 +24456,14 @@ function renderServiceSidebarDateGroups(services = []) {
     }
   }
   return `
-    <div class="service-sidebar-date-groups">
+    <div class="service-sidebar-date-groups${options.upcoming ? " is-upcoming" : ""}">
       ${groups.map((group) => `
         <section class="service-sidebar-date-group">
           <div class="service-sidebar-date-head">
             <span>${escapeHtml(group.label)}</span>
           </div>
           <div class="service-sidebar-stack">
-            ${group.services.map((service) => renderServiceSidebarCard(service, { showDate: false })).join("")}
+            ${group.services.map((service) => renderServiceSidebarCard(service, { showDate: false, upcoming: options.upcoming })).join("")}
           </div>
         </section>
       `).join("")}
@@ -24478,15 +24478,16 @@ function renderServiceSidebarCard(service, options = {}) {
   const noGathering = serviceIsNoGathering(service);
   const active = !noGathering && service.id === state.selectedServiceId ? " active" : "";
   const showDate = options.showDate !== false;
+  const name = options.upcoming ? serviceUpcomingNavigationName(service) : serviceNavigationName(service);
   const cardButton = `
     <button
       class="service-sidebar-card${showDate ? "" : " service-sidebar-card--compact"}${active}${noGathering ? " is-no-gathering" : ""}"
       type="button"
       ${noGathering ? 'disabled aria-disabled="true"' : `data-service-id="${escapeAttr(service.id)}"`}
-      aria-label="${escapeAttr(`${formatServiceDate(service, { compact: true })} ${serviceNavigationName(service)} ${noGathering ? "집회 없음" : "열기"}`)}"
+      aria-label="${escapeAttr(`${formatServiceDate(service, { compact: true })} ${name} ${noGathering ? "집회 없음" : "열기"}`)}"
     >
       ${showDate ? `<span class="service-sidebar-date">${escapeHtml(formatServiceDate(service, { compact: true }))}</span>` : ""}
-      <span class="service-sidebar-title">${escapeHtml(serviceNavigationName(service))}</span>
+      <span class="service-sidebar-title">${escapeHtml(name)}</span>
     </button>`;
   if (!showDate) {
     return `
@@ -25916,13 +25917,13 @@ function renderPresenterDetailUnscoped() {
   // Reading it afterwards forces layout of every newly inserted thumbnail.
   patchPresenterSidebarOutline(svc, presenterSlides);
   setRightSidebarContent(renderPresenterRightSidebar(svc, presenterSlides, presenterActive, presenterIndex));
-  refs.detailPane.innerHTML = `
+  setPresenterDetailContent(`
     <div class="service-viewer presenter-viewer">
       ${renderServicePresenterControls(svc, presenterSlides, presenterActive, presenterIndex)}
       ${renderPresenterSectionEditorLayer(svc)}
       ${renderServicePraiseDatalist()}
       ${renderServiceScriptureDatalist()}
-    </div>`;
+    </div>`, serviceId);
   refreshIcons();
   mountDeferredPresenterBoardSections(document.getElementById("servicePresenterControls"), serviceId, presenterSlides);
   restorePresenterFocusedThumb(document.getElementById("servicePresenterControls"), focusedThumb);
@@ -25949,6 +25950,7 @@ function renderServicePresenterControlsUnscoped(service, slides = [], active = f
       aria-label="${escapeAttr(uiText("presenter.controls"))}"
     >
       <div class="svc-presenter-toolbar">
+        ${renderPresenterToolbarScripture(service, slides)}
         ${renderPresenterThumbScaleControl()}
         ${renderPresenterFocusView()}${renderWorshipDefaultOrderFillControl(service)}
         ${serviceSupportsBulletin(service) ? `<button class="svc-output-action" type="button" data-service-bulletin-action="open" data-service-id="${escapeAttr(service.id)}"><i data-lucide="newspaper"></i><span>주보</span></button>` : ""}

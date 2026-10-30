@@ -352,11 +352,7 @@ function renderPresenterRightSidebar(service, slides, active, index) {
   return `
     <div class="svc-presenter-side-panel" data-presenter-right-sidebar data-service-id="${escapeAttr(service.id)}">
       ${renderPresenterControlsTop(service, slides, active, index)}
-      <div class="svc-presenter-input-stack">
-        ${slides.filter((slide, index) => slide.liveScriptureControl && slide.elementId
-          && slides.findIndex((candidate) => candidate.liveScriptureControl && candidate.elementId === slide.elementId) === index)
-          .map((slide) => renderPresenterCitationComposer({ slides: [{ slide }] }, service.id)).join("")}
-      </div>
+
     </div>`;
 }
 
@@ -637,4 +633,22 @@ function renderPresenterPreparationField(service, field) {
     ? `<textarea ${attributes} rows="3">${escapeHtml(field.value)}</textarea>`
     : `<input ${attributes} type="text" value="${escapeAttr(field.value)}" />`;
   return `<label class="svc-presenter-preparation-field-row"><span class="svc-presenter-preparation-field-label">${escapeHtml(field.label)}</span>${control}</label>`;
+}
+
+function renderPresenterToolbarScripture(service, slides) {
+  const controls = slides.filter((slide, index) => slide.liveScriptureControl && slide.elementId
+    && slides.findIndex(candidate => candidate.liveScriptureControl && candidate.elementId === slide.elementId) === index);
+  return controls.length ? `<div class="svc-toolbar-scripture">${controls.map(slide => renderPresenterCitationComposer({slides:[{slide}]}, service.id)).join("")}</div>` : "";
+}
+
+// Patch a same-service toolbar in place so IME/caret and unsent text keep their DOM owner.
+function setPresenterDetailContent(markup, serviceId) {
+  const current = refs.detailPane.querySelector('.service-viewer.presenter-viewer');
+  const input = current?.querySelector('[data-presenter-citation-reference-input]');
+  if (input?.dataset.serviceId === serviceId) {
+    const template = document.createElement('template');
+    template.innerHTML = markup.trim();
+    refreshIcons(template.content);
+    patchPresenterControlTree(current, template.content.firstElementChild);
+  } else refs.detailPane.innerHTML = markup;
 }
