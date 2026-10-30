@@ -28,6 +28,10 @@ export function verifyRelease({ offline = false, platform = process.platform ===
   const env = offline ? { GH_TOKEN:'fixture', CSC_LINK:'fixture', CSC_KEY_PASSWORD:'fixture', APPLE_KEYCHAIN_PROFILE:'fixture' } : process.env;
   const problems = releaseProblems(pkg, env, platform);
   if (!offline) {
+    const policy = JSON.parse(readFileSync(new URL('../product-release.json', import.meta.url)));
+    if (policy.channel !== 'release') problems.push('reviewed product release channel');
+    const tag = spawnSync('git',['ls-remote','--tags','origin',`refs/tags/v${pkg.version}`],{encoding:'utf8'});
+    if (tag.status !== 0 || tag.stdout.trim()) problems.push('new unused product version verified against remote tags');
     if ((platform === 'mac' && process.platform !== 'darwin') || (platform === 'win' && process.platform !== 'win32')) problems.push(`build on a ${platform} release host`);
     const dirty = spawnSync('git', ['status','--porcelain'], { encoding:'utf8' });
     if (dirty.status !== 0 || dirty.stdout.trim()) problems.push('clean committed checkout');
@@ -36,6 +40,7 @@ export function verifyRelease({ offline = false, platform = process.platform ===
   for (const args of [
     ['--test','tests/test_electron_updater.cjs','tests/test_release_preflight.mjs','tests/test_desktop_update_ui.cjs'],
     ['tests/test_worship_input_module_contract.cjs'],
+    ['--test','tests/test_product_identity.cjs'],
   ]) {
     const result = spawnSync(process.execPath,args,{stdio:'inherit'});
     if (result.status !== 0) throw new Error('Release stopped. Desktop checks failed.');

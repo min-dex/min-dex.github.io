@@ -8,7 +8,7 @@ module.exports = {
   artifactName: 'Mindex-Test-${version}-${os}-${arch}.${ext}',
   extraMetadata: {
     name: 'mindex-test', productName: 'Mindex Test',
-    version: `${pkg.version}-test.20261011`, mindexTestBuild: true,
+    version: `${pkg.version}-test`, mindexTestBuild: true,
   },
   mac: { ...pkg.build.mac, identity: null, notarize: false },
   win: { ...pkg.build.win, signAndEditExecutable: false },

@@ -18,6 +18,8 @@ on:
       - electron/**
       - tests/test_electron_runtime_files.py
       - scripts/verify-release.mjs
+      - scripts/product-identity.cjs
+      - product-release.json
 
 permissions:
   contents: read
@@ -125,4 +127,5 @@ jobs:
           fi
           test -f release-artifacts/latest-mac.yml
           test -f release-artifacts/latest.yml
-          gh release create "$tag" release-artifacts/* --target "$GITHUB_SHA" --draft --title "Mindex $tag" --notes 'Signed desktop packages. Validate upgrade and presenter output before publishing.'
+          node -e 'const fs=require("fs"),p=require("./product-release.json");fs.writeFileSync("release-notes.md",p.changes.map(x=>"- "+x).join("\n")+"\n\n"+p.upgradeNotes+"\n\n소스: "+process.env.GITHUB_SHA+"\n")'
+          gh release create "$tag" release-artifacts/* --target "$GITHUB_SHA" --draft --title "Mindex $tag" --notes-file release-notes.md

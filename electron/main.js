@@ -9,7 +9,9 @@ let updateController = null;
 let mainWindowEnsureTimer = null;
 
 function updatesEnabled() {
-  return app.isPackaged && require("../package.json").mindexTestBuild !== true
+  let build;
+  try { build = require("../mindex-build.json"); } catch { return false; }
+  return build.channel === "release" && app.isPackaged && require("../package.json").mindexTestBuild !== true
     && process.env.MINDEX_DISABLE_UPDATES !== "1";
 }
 
@@ -251,6 +253,13 @@ ipcMain.handle("mindex:get-presenter-displays", () => ({
 ipcMain.handle("mindex:set-presenter-always-on-top", (_event, payload = {}) => ({
   ok: applyPresenterAlwaysOnTop(Boolean(payload.enabled)),
 }));
+
+ipcMain.handle("mindex:get-build-info", event => {
+  if (!mainWindow || event.sender !== mainWindow.webContents) return { ok: false, reason: "untrusted-window" };
+  let build = null;
+  try { build = JSON.parse(require("node:fs").readFileSync(path.join(appRoot(), "mindex-build.json"), "utf8")); } catch {}
+  return { ok: true, installedVersion: app.getVersion(), testBuild: require("../package.json").mindexTestBuild === true, build };
+});
 
 ipcMain.handle("mindex:get-update-state", event => updateRequest(event, "state"));
 ipcMain.handle("mindex:check-for-updates", event => updateRequest(event, "check"));

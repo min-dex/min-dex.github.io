@@ -1,5 +1,29 @@
 # Mindex Electron Packaging Plan
 
+## Product release policy · 2026-10-30
+
+The user requests installed packages and meaningful versioned updates as the
+default product delivery path. A successful Pages deployment is a web build,
+not a new installed-app release. Keep the existing web build identifier for
+diagnostics, and show the installed semantic version separately.
+
+- Patch: fixes and stability improvements; minor: compatible user-facing
+  features; major: a reviewed product milestone or incompatible change.
+- Each desktop release has a concise Korean changelog, exact source commit,
+  matching version/tag, installers and updater metadata. Do not bump a product
+  version for each intermediate CI run or internal web deployment.
+- Installers bundle the verified renderer. Do not silently substitute a newer
+  hosted renderer beneath an installed version.
+- Updates require confirmation and preserve sessions, drafts and preferences;
+  defer installation during output, pending edits or saves. An upgrade from the
+  previous signed version must be tested before declaring update completion.
+- The current `0.1.1` package value is historical configuration, not proof of a
+  published desktop version. Check actual releases before choosing the next
+  version. Mindex 2.0 remains held until its existing release conditions pass.
+- Prepare and verify unsigned isolated packages locally first. Public signing,
+  notarization and update publication retain the existing release safeguards;
+  never read credentials to discover whether they are available.
+
 Mindex keeps the existing web UI as the renderer. Electron is only responsible for the desktop shell: stable Chromium runtime, native presenter windows, app updates, and later native helpers.
 
 ## Goals
@@ -173,3 +197,37 @@ The updater and builder versions, installer identity/isolation, signing gates,
 user profile and database paths remain unchanged. Security audit10→0 and offline
 updater/package preflight pass locally. Actual Mac/Windows CI installer creation
 and publication evidence must be recorded separately; no signed release is implied.
+
+## Shared product identity ·2026-10-30
+
+`package.json.version` is the single product semantic-version source. Keep
+`mindex-release.json.version` as the web asset/cache build identifier. The two
+values have different jobs; intermediate web deployments do not bump products.
+`product-release.json` owns the development/release channel, Korean changes and
+upgrade notes. It intentionally has no duplicate product version. Version 0.1.1
+remains development configuration: public GitHub Releases returned none during
+this audit; the existing stable-2026-08-16 tag is not a versioned desktop release.
+
+Pages staging and Electron beforePack generate `mindex-build.json` from the same
+committed HEAD: product version, channel, exact source commit, web build ID and
+a deterministic tree digest of shared renderer/scripts/assets/data. The generated
+file is excluded from Git to avoid self-referential commit IDs. Pages still stages
+only git archive bytes. Packaging refuses dirty tracked files, untracked runtime
+assets and symlinks. Runtime includes now cover all Remote/draft modules and the
+public runtime data directory. No private backups or credentials are included.
+
+The app information section of the existing connection panel shows development
+vs test vs release explicitly, with installed version separate from web build.
+Missing receipt never claims a product release. Desktop always loads its bundled
+renderer. Development/test packages cannot join automatic updates. Release
+publication requires an explicitly reviewed release channel and an unused remote
+version tag; reuse of an already published version is refused. Korean changelog
+and exact source are included in the draft release. Existing output/dirty-edit
+installation guards remain mandatory. No version bump, signing, notarization,
+installation or public Release is authorized by this preparation.
+
+Unsigned validation: commit the candidate, use the isolated test builder config
+with identity discovery disabled and `--publish never`; never use operational
+profiles. macOS/Windows installer and updater parity still require artifact and
+upgrade verification before a formal product release. Synthetic checks cannot
+certify physical output or signed upgrade behavior.

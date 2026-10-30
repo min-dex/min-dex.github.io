@@ -1,4 +1,5 @@
 import json
+import fnmatch
 import re
 import unittest
 from pathlib import Path
@@ -17,6 +18,16 @@ class ElectronRuntimeFilesTests(unittest.TestCase):
                 packaged_by_glob = script.startswith('vendor/') and 'vendor/**/*' in includes
                 self.assertTrue(script in includes or packaged_by_glob)
                 self.assertTrue((root / script).is_file())
+
+    def test_remote_and_draft_modules_are_packaged(self):
+        root = Path(__file__).resolve().parents[1]
+        includes = json.loads((root / 'package.json').read_text())['build']['files']
+        for pattern in ('mindex.*.mjs', 'remote.*'):
+            for source in root.glob(pattern):
+                if source.suffix not in ('.js', '.mjs', '.css', '.webmanifest'): continue
+                self.assertTrue(any(fnmatch.fnmatch(source.name,p) for p in includes if not p.startswith('!')),source.name)
+        self.assertIn('mindex-build.json', includes)
+        self.assertIn('data/**/*', includes)
 
     def test_update_runtime_and_release_commands_are_available(self):
         root = Path(__file__).resolve().parents[1]

@@ -2,6 +2,7 @@ const { contextBridge, ipcRenderer, webUtils } = require("electron");
 
 contextBridge.exposeInMainWorld("mindexElectron", {
   isDesktop: true,
+  getBuildInfo: () => ipcRenderer.invoke("mindex:get-build-info"),
   openPresenterOutput: (payload) => ipcRenderer.invoke("mindex:open-presenter", payload),
   closePresenterOutput: () => ipcRenderer.invoke("mindex:close-presenter"),
   fullscreenPresenterOutput: () => ipcRenderer.invoke("mindex:fullscreen-presenter"),

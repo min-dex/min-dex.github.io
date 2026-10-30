@@ -24,7 +24,8 @@
     "electron:release:mac": "node scripts/release-electron.mjs --platform=mac",
     "electron:release:win": "node scripts/release-electron.mjs --platform=win",
     "electron:test:mac": "node scripts/verify-release.mjs --offline && electron-builder --config electron-builder.test.cjs --mac dmg --arm64 --x64 --publish never",
-    "electron:test:win": "node scripts/verify-release.mjs --offline && electron-builder --config electron-builder.test.cjs --win nsis --x64 --publish never"
+    "electron:test:win": "node scripts/verify-release.mjs --offline && electron-builder --config electron-builder.test.cjs --win nsis --x64 --publish never",
+    "product:check": "node --test tests/test_product_identity.cjs"
   },
   "build": {
     "appId": "kr.mindex.app",
@@ -107,7 +108,6 @@
       "!docs/**/*",
       "docs/manuals/**/*",
       "!scripts/**/*",
-      "!data/**/*",
       "!node_modules/electron/**/*",
       "!node_modules/electron-builder/**/*",
       "mindex.draft-handoff.js",
@@ -115,7 +115,16 @@
       "mindex.hymn-structure.js",
       "mindex.hymn-structure.runtime.json",
       "mindex.keynote-html.js",
-      "mindex.keynote-html-engine.mjs"
+      "mindex.keynote-html-engine.mjs",
+      "mindex.draft-handoff.mjs",
+      "mindex.draft-merge.mjs",
+      "mindex.output-pairing.mjs",
+      "mindex.remote-admin.mjs",
+      "remote.preview.mjs",
+      "mindex.product-info.js",
+      "mindex-build.json",
+      "product-release.json",
+      "data/**/*"
     ],
     "mac": {
       "target": [
@@ -135,7 +144,8 @@
       "perMachine": false,
       "allowToChangeInstallationDirectory": false
     },
-    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}"
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "beforePack": "scripts/product-identity.cjs"
   },
   "devDependencies": {
     "electron": "43.8.1",

@@ -1,5 +1,6 @@
 """Offline deployment contract + committed-only artifact regression."""
 import importlib.util
+import json
 from pathlib import Path
 import subprocess
 import tempfile
@@ -93,6 +94,9 @@ class PagesGate(unittest.TestCase):
                 path = root / name
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text('committed fixture')
+            (root / 'package.json').write_text(json.dumps({'version':'0.1.1'}))
+            (root / 'product-release.json').write_text(json.dumps({'channel':'development','changes':['검증용 변경']}))
+            (root / 'mindex-release.json').write_text(json.dumps({'version':'fixture-build'}))
             git('add', '.')
             git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-m', 'fixture')
             (root / 'index.html').write_text('not tested')
@@ -102,6 +106,10 @@ class PagesGate(unittest.TestCase):
             self.assertEqual((target / 'index.html').read_text(), 'tested commit')
             self.assertFalse((target / 'private-backup.json').exists())
             self.assertFalse((target / '.git').exists())
+            identity=json.loads((target / 'mindex-build.json').read_text())
+            self.assertEqual(identity['sourceCommit'],git('rev-parse','HEAD').stdout.decode().strip())
+            self.assertEqual(identity['channel'],'development')
+            self.assertEqual(identity['productVersion'],'0.1.1')
             for name in excluded:
                 self.assertFalse((target / name).exists(), name)
             for name in retained:

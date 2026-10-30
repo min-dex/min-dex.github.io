@@ -40,3 +40,6 @@ backups/
 assets/youtube/
 \[external references\]/
 !scripts/check_hymn_structure_summary.py
+
+!scripts/product-identity.cjs
+mindex-build.json

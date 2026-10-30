@@ -30,6 +30,8 @@ def stage(root, destination):
                 if path.name == '.env' or path.name.startswith('.env.'):
                     raise ValueError('Environment files are not publishable')
             bundle.extractall(destination, members=[m for m in members if is_public_path(Path(m.name))])
+    subprocess.run(['node', str(Path(__file__).resolve().parents[1] / 'scripts/product-identity.cjs'),
+                    str(root), str(destination)], check=True)
     if not (destination / 'index.html').is_file():
         raise ValueError('Pages entry point missing')
 
