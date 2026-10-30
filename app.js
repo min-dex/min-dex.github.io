@@ -5935,6 +5935,7 @@ function renderCalendarDetailTabs() {
 
 function renderCalendarEditCell(row, field) {
   const val = escapeHtml(row[field] || "");
+  if (row._generatedFeast) return `<td class="cal-cell ${escapeAttr(calendarCellClassForField(field))}" title="자동 생성된 절기 참고">${val || "—"}</td>`;
   return `<td class="cal-cell ${escapeAttr(calendarCellClassForField(field))}" data-cal-id="${escapeAttr(row.id)}" data-cal-field="${escapeAttr(field)}" data-placeholder="—" contenteditable="true" spellcheck="false" title="입력 후 자동 저장">${val}</td>`;
 }
 
@@ -5951,7 +5952,7 @@ function renderCalendarOccasionScheduleItem(row, field, label) {
   return `
     <div class="cal-occasion-schedule-item">
       <span class="cal-occasion-schedule-label">${escapeHtml(label)}</span>
-      <span class="cal-cell cal-occasion-schedule-value ${escapeAttr(calendarCellClassForField(field))}" data-cal-id="${escapeAttr(row.id)}" data-cal-field="${escapeAttr(field)}" contenteditable="true" spellcheck="false" title="입력 후 자동 저장">${val}</span>
+      <span class="cal-cell cal-occasion-schedule-value ${escapeAttr(calendarCellClassForField(field))}" ${row._generatedFeast ? 'title="자동 생성된 절기 참고"' : `data-cal-id="${escapeAttr(row.id)}" data-cal-field="${escapeAttr(field)}" contenteditable="true" spellcheck="false" title="입력 후 자동 저장"`}>${val}</span>
     </div>`;
 }
 
