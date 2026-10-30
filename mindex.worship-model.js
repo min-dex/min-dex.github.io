@@ -159,6 +159,13 @@ function explicitWorshipSlotKey(...sources) {
     const slotKey = normalizeWorshipSlotKey(source.slotKey || source.slot_key);
     if (slotKey) return slotKey;
   }
+  // Runtime metadata is a fallback; it cannot outrank an explicit value in
+  // another source or reinterpret an invalid explicit value on its own row.
+  for (const source of sources) {
+    if (!source || typeof source !== "object" || source.slotKey || source.slot_key) continue;
+    const slotKey = normalizeWorshipSlotKey(source._worshipSlotKey);
+    if (slotKey) return slotKey;
+  }
   return "";
 }
 
