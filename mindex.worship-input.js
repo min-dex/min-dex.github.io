@@ -1561,7 +1561,7 @@ async function createBlankPraiseSongForServiceInput(value, service = selectedSer
 
 function finalizePresenterPreparationApply({
   service, serviceId, items, entries, skipped, scriptureItemIds, textFieldUpdates,
-  createdSongTitles, versionWarnings, draftSnapshot, appliedDraft,
+  createdSongTitles, versionWarnings, draftSnapshot, appliedDraft, notify = true,
 }) {
   const uniqueItems = textFieldUpdates.length ? items.filter((item) => {
     const itemId = String(item.id || "");
@@ -1649,7 +1649,7 @@ function finalizePresenterPreparationApply({
   const versionNote = versionWarnings.length
     ? `${versionWarnings.join(", ")}에 여러 버전이 있어 첫 번째 버전을 우선 선택했습니다. 필요하면 버전을 골라 주세요.` : "";
   const skippedNote = skipped.length ? `비어 있는 ${skipped.length}개 항목은 건너뛰었습니다.` : "";
-  showToast(toastLines(
+  if (notify) showToast(toastLines(
     `예배 입력 ${entries.length}개 항목을 반영했습니다.`, skippedNote, createdNote,
     versionNote, "상단 저장을 눌러 확정해 주세요.",
   ), "info");

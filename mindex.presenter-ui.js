@@ -428,7 +428,7 @@ async function commitPresenterInlineInput(panel) {
   panel.querySelector('[data-presenter-inline-apply]').disabled = true;
   try {
     const changed = presenterPreparationStructuredEntries(service, draft).length > 0;
-    if (changed && !await applyPresenterPreparationInput(serviceId, {draft})) return false;
+    if (changed && !await applyPresenterPreparationInput(serviceId, {draft, notify:false})) return false;
     const saved = await saveService(serviceId, {silent:true, renderAfterSave:false});
     if (!saved) return false;
     const mounted = [...(refs.songList?.querySelectorAll('.svc-outline-editor') || [])].find(row => row.dataset.serviceId === serviceId && row.dataset.inlineItemId === itemId);

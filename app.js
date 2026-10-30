@@ -29052,7 +29052,7 @@ async function applyPresenterPreparationInput(serviceId = state.selectedServiceI
 
     finalizePresenterPreparationApply({
       service, serviceId, items, entries, skipped, scriptureItemIds, textFieldUpdates,
-      createdSongTitles, versionWarnings, draftSnapshot, appliedDraft: draft,
+      createdSongTitles, versionWarnings, draftSnapshot, appliedDraft: draft, notify: options.notify !== false,
     });
     applied = true;
   } finally {

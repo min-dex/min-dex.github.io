@@ -15,7 +15,7 @@ FIXTURE = r"""async()=>{
                       const service={id:sid,type_id:'fixture',date:'2026-10-12',title:'Fixture',_worshipSourceRef:{}};
                       state.services=[service]; state.selectedServiceId=sid;state.songs=[];
                       state.dirty.service=false;state.dirtyServiceElementIds.clear();state.dirtyServiceStructureIds.clear();
-                      state.loadedWorshipServiceIds=new Set([sid]);state.templateElementSuppressions.clear();
+                      state.loadedWorshipServiceIds=new Set([sid]);markWorshipServiceExplicitlyRequested(sid);state.templateElementSuppressions.clear();
                       state.serviceAliasSupported=true;
                       const items=['First','Second','Third'].map((title,i)=>normalizeServiceItem({
                         id:crypto.randomUUID(),service_id:sid,label:i===2?'설교':i?'대표기도':'광고',raw_title:title,
@@ -195,6 +195,7 @@ def exercise(page, url, engine):
     panel(2).locator('[data-presenter-inline-apply]').click()
     settled()
     assert panel(2).is_visible(), 'failure collapsed editor'
+    assert not page.locator('.toast').filter(has_text='상단 저장을 눌러 확정').count(), 'inline save displayed local-only apply confirmation'
     assert field(2, '설교 제목').input_value() == '사랑 / 믿음', 'failed save lost draft'
     check("check(inlineFixture.attempts===1&&inlineFixture.writes.length===0,'failure did not reach atomic RPC')")
     page.evaluate('inlineFixture.failure=false;inlineFixture.delay=true')
@@ -222,6 +223,43 @@ def exercise(page, url, engine):
     check("""const db=inlineFixture.db();
       check(JSON.stringify(db).includes('저장 중 새 제목'),'confirmed save missing final input');
       check(inlineFixture.writes.length===2,'unexpected duplicate writes');""")
+
+    # Empty edits are intentional deletions, not absent fields.
+    field(2, '설교 제목').fill('')
+    field(2, '설교자').fill('')
+    panel(2).locator('[data-presenter-inline-apply]').click()
+    settled()
+    check("""const db=inlineFixture.db();const sermon=groupWorshipElements(db.sections,db.elements)[inlineFixture.sid].find(i=>i.label==='설교');
+      check(!sermon.raw_title&&!sermon.assignee,'empty title/person resurrected old values');""")
+    toggle(2).click()
+    assert field(2, '설교 제목').input_value()==''
+    assert field(2, '설교자').input_value()==''
+    # A different row may be submitted while the first real atomic receipt waits.
+    field(0,'광고').fill('동시 저장 광고')
+    page.evaluate('inlineFixture.delay=true;inlineFixture.release=null')
+    panel(0).locator('[data-presenter-inline-apply]').click()
+    page.wait_for_function('typeof inlineFixture.release==="function"')
+    field(2,'설교 제목').fill('동시 저장 설교')
+    field(2,'설교자').fill('새 담당자')
+    panel(2).locator('[data-presenter-inline-apply]').click()
+    field(2,'설교 제목').fill('두 번째 요청 뒤 추가 입력')
+    page.evaluate('inlineFixture.delay=false;inlineFixture.release()')
+    settled()
+    assert panel(2).is_visible(), 'queued receipt hid later draft'
+    assert field(2,'설교 제목').input_value()=='두 번째 요청 뒤 추가 입력', 'queued save overwrote later draft'
+    check("""const items=groupWorshipElements(inlineFixture.db().sections,inlineFixture.db().elements)[inlineFixture.sid];
+      check(items.find(i=>i.label==='광고').raw_title==='동시 저장 광고','first row missing');
+      check(items.find(i=>i.label==='설교').raw_title==='동시 저장 설교','queued second row missing');""")
+    panel(2).locator('[data-presenter-inline-apply]').click()
+    settled()
+    # Discard only this test's clean mounted cache, then use the real read path.
+    page.evaluate("""async()=>{const sid=inlineFixture.sid;if(state.dirty.service)throw Error('audit still dirty '+JSON.stringify({draft:state.presenterPreparationDrafts[sid],elements:[...state.dirtyServiceElementIds],structure:[...state.dirtyServiceStructureIds]}));state.loadedWorshipServiceIds.delete(sid);await loadServiceItems(sid);renderServiceList();renderPresenterDetail()}""")
+    toggle(2).click()
+    assert field(2,'설교 제목').input_value()=='두 번째 요청 뒤 추가 입력', 'server reload lost confirmed text'
+    assert field(2,'설교자').input_value()=='새 담당자', 'server reload lost confirmed person'
+    check("inlineFixture.checkQuiet()")
+    print(engine,'PASS empty-field deletion, concurrent different-row real saves, queued later input and real reload',flush=True)
+
     page.unroute_all(behavior='wait')
 
 
