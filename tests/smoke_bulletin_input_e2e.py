@@ -32,8 +32,9 @@ try:
     window.template={template_key:B.TEMPLATE_KEY,revision:1,...B.templateValue({...B.normalizeSnapshot({fields:{welcome:'공통 환영 원본'},settings:{design:'simple',theme:''}}),source:sources[a]})};
     state.config.url='bulletin-e2e-fixture';state.module='bulletin';state.client={from(table){let patch=null,filters={};const q={select(){return q},eq(k,v){filters[k]=v;return q},update(v){patch=v;return q},insert(v){patch=v;return q},maybeSingle(){
       const id=filters.service_id||patch?.service_id,key=filters.template_key||patch?.template_key;const current=table==='mindex_bulletin_templates'?template:store[id];
-      if(!patch)return Promise.resolve({data:structuredClone(current),error:null});
+      if(!patch)return window.readFailure ? Promise.reject(readFailure) : Promise.resolve({data:structuredClone(current),error:null});
       return new Promise(resolve=>{sent.push({table,id,key,value:structuredClone(patch),expected:filters.revision});respond.push(ok=>{
+       if(typeof ok==='object')return resolve({data:null,error:ok});
        if(!ok)return resolve({data:null,error:{code:'42501',message:'fixture save rejected'}});
        if(filters.revision!==current.revision)return resolve({data:null,error:null});
        const saved={...current,...structuredClone(patch),revision:current.revision+1};if(table==='mindex_bulletin_templates')template=saved;else store[id]=saved;
@@ -72,7 +73,25 @@ try:
    page.wait_for_function("!document.querySelector('[data-bulletin-save]').getAttribute('aria-busy')||document.querySelector('[data-bulletin-save]').getAttribute('aria-busy')==='false'")
    assert welcome.input_value()=='저장 중 새 공통 환영'
    assert welcome.evaluate('e=>e===templateInput&&document.activeElement===e&&e.selectionStart===5'),(engine,'template reply replaced active input/caret')
+   # Exercise the real error adapter and DOM status, without exposing server details.
+   for error,phrase in [({'code':'42501','message':'permission denied secret-token https://private.invalid'},'권한'),({'code':'23505','message':'duplicate secret-token'},'다른 곳'),({'message':'Failed to fetch https://private.invalid?token=secret-token'},'서버 응답'),({'code':'XX000','message':'internal secret-token sql relation private'},'실패')]:
+    n=page.evaluate('sent.length');welcome.focus();welcome.fill('실패 뒤 유지할 공통 문구');welcome.evaluate('e=>e.setSelectionRange(4,4)');welcome.press('Control+s')
+    page.wait_for_function('(n)=>sent.length===n+1',arg=n);page.evaluate('([n,e])=>respond[n](e)',[n,error])
+    page.wait_for_function("document.querySelector('[data-bulletin-save]').getAttribute('aria-busy')==='false'")
+    status=page.locator('.bulletin-status');assert phrase in status.inner_text(),status.inner_text()
+    assert status.get_attribute('data-state')=='error' and 'secret-token' not in page.locator('body').inner_text()
+    assert welcome.input_value()=='실패 뒤 유지할 공통 문구' and welcome.evaluate('e=>document.activeElement===e&&e.selectionStart===4')
+    welcome.press('Control+s');page.wait_for_function('(n)=>sent.length===n+2',arg=n);page.evaluate('(n)=>respond[n+1](true)',n)
+    page.wait_for_function("document.querySelector('[data-bulletin-save]').getAttribute('aria-busy')==='false'")
+    assert page.evaluate('template.common.welcome')=='실패 뒤 유지할 공통 문구'
    assert page.evaluate('store[a].content.fields.outline')=='저장 중 새 요점\n두 번째 줄'
+   # Rejected transport promises must also reach the actual load UI in safe language.
+   page.evaluate("editor.destroy();docs.clear();window.readFailure={message:'Failed to fetch https://private.invalid?token=secret-token'};window.editor=MindexBulletin.mount(host,{documents:docs,scope:'bulletin-read-error',serviceId:a,services:[{id:a,label:'11/1 청년부'}],loadSource:async id=>structuredClone(sources[id]),loadDraft:loadBulletinDraft,saveDraft:saveBulletinDraft})")
+   page.wait_for_function("document.querySelector('.bulletin-status')?.dataset.state==='error'")
+   assert '서버 응답' in page.locator('.bulletin-status').inner_text()
+   assert 'secret-token' not in page.locator('body').inner_text()
+   page.evaluate('window.readFailure=null;editor.reload()');page.wait_for_function('docs.get(a)?.dbLoaded')
+   assert page.locator('[data-bulletin-field=outline]').input_value()=='저장 중 새 요점\n두 번째 줄'
    assert page.locator('iframe.bulletin-print-frame').count()==0
    print('PASS',engine,'actual app adapters: weekly late edit/caret, service/date return, failed CAS save/retry, assignee input, template late typing; production writes/print 0',flush=True)
    context.close();browser.close()

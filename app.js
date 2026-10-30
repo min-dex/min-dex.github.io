@@ -5682,13 +5682,27 @@ async function saveCalendarCellOnce(id, field, value, options = {}) {
       }
       setCalendarCellSaveState(cell, "error");
     }
-    showToast(error.message || "저장하지 못했습니다.", "error");
+    const retained = cell && cell.textContent.replace(/\n/g, " ").trim() !== previousValue;
+    const guidance = saves.has(key) ? "다음 입력의 저장을 계속 확인해 주세요." : retained ? "현재 화면의 새 입력은 유지됩니다." : "화면에는 이전 값이 표시됩니다. 저장하려던 값을 확인해 주세요.";
+    showToast(`${departmentInputError(error, "교회력 저장").message} ${guidance}`, "error");
     return false;
   }
 }
 
 function calendarCellSaveKey(id, field) {
   return `${id || ""}:${field || ""}`;
+}
+
+function departmentInputError(error, action) {
+  const code = String(error?.code || ""), raw = String(error?.message || "");
+  let message = `${action}에 실패했습니다. 잠시 후 다시 시도해 주세요.`;
+  if (code === "42501" || /permission denied|row.level security/i.test(raw)) message = "자료에 접근할 권한이 없습니다. 로그인 상태와 접근 권한을 확인해 주세요.";
+  else if (/^PGRST30[12]$/.test(code) || /JWT expired/i.test(raw)) message = "로그인이 만료되었거나 확인되지 않았습니다. 다시 로그인한 뒤 시도해 주세요.";
+  else if (/Failed to fetch|Failed to send a request|NetworkError|Load failed|Network request failed|timeout/i.test(raw)) message = `서버 응답을 받지 못했습니다. ${action.includes("저장") ? "저장 완료 여부를 확인하지 못했습니다. " : ""}연결을 확인한 뒤 다시 시도해 주세요.`;
+  else if (/^(23505|40001|40P01)$/.test(code) || /REVISION_CONFLICT|다른 곳에서 변경/.test(raw)) message = "다른 곳에서 자료가 변경되었습니다. 최신 자료를 확인한 뒤 다시 시도해 주세요.";
+  else if (raw === "이전 저장 결과를 확인했어요. 교회력을 다시 열어 현재 담당자를 확인해 주세요.") message = "이전 저장 결과를 확인했습니다. 교회력을 다시 열어 현재 담당자를 확인해 주세요.";
+  else if (/같은 담당 순서|담당 순서를 찾지/.test(raw)) message = "예배의 담당 순서를 확인하지 못했습니다. 예배 순서를 확인한 뒤 다시 시도해 주세요.";
+  return new Error(message, { cause: error });
 }
 
 function setCalendarCellSaveState(cell, status) {
@@ -15111,16 +15125,16 @@ async function loadBulletinReusableContent(service) {
       .select("service_id,content,mindex_worship_services!inner(service_date,service_type_id)")
       .eq("mindex_worship_services.service_type_id",service.service_type_id)
       .lte("mindex_worship_services.service_date",service.service_date)
-      .neq("service_id",service.id).order("service_id").range(offset,offset+199);
-    if(error)throw new Error(`주보 공통 내용을 불러오지 못했습니다: ${error.message}`);
+      .neq("service_id",service.id).order("service_id").range(offset,offset+199).then(null,error=>{throw departmentInputError(error,"주보 공통 내용 불러오기");});
+    if(error)throw departmentInputError(error,"주보 공통 내용 불러오기");
     rows.push(...(data||[]).map(row=>({id:row.service_id,date:row.mindex_worship_services.service_date,content:row.content})));
     if(!data||data.length<200)return rows;
   }
 }
 
 async function loadBulletinDraft(serviceId) {
-  const {data,error}=await state.client.from("mindex_bulletins").select("service_id,content,layout,revision").eq("service_id",serviceId).maybeSingle();
-  if(error)throw new Error(`주보 DB를 불러오지 못했습니다: ${error.message}`);
+  const {data,error}=await state.client.from("mindex_bulletins").select("service_id,content,layout,revision").eq("service_id",serviceId).maybeSingle().then(null,error=>{throw departmentInputError(error,"주보 불러오기");});
+  if(error)throw departmentInputError(error,"주보 불러오기");
   return data;
 }
 
@@ -15130,9 +15144,9 @@ async function saveBulletinDraft(serviceId, value, revision) {
   const query=revision
     ? table.update(value).eq("service_id",serviceId).eq("revision",revision)
     : table.insert({service_id:serviceId,...value});
-  const {data,error}=await query.select("service_id,content,layout,revision,updated_at").maybeSingle();
-  if(error?.code==="23505"||(!error&&!data))throw new Error("다른 곳에서 주보가 변경되었습니다. DB 다시 불러오기로 확인해 주세요. 현재 수정 내용은 이 화면에 남아 있습니다.");
-  if(error)throw new Error(`주보 DB 저장 실패: ${error.message}`);
+  const {data,error}=await query.select("service_id,content,layout,revision,updated_at").maybeSingle().then(null,error=>{throw new Error(`${departmentInputError(error,"주보 저장").message} 편집 내용은 유지됩니다.`,{cause:error});});
+  if(error?.code==="23505"||(!error&&!data))throw new Error("다른 곳에서 주보가 변경되었습니다. ‘저장본 불러오기’로 확인해 주세요. 현재 수정 내용은 이 화면에 남아 있습니다.",{cause:error});
+  if(error)throw new Error(`${departmentInputError(error,"주보 저장").message} 편집 내용은 유지됩니다.`,{cause:error});
   if(publishClient===state.client) {
     rememberRecentEdit({module:"bulletin",selectedServiceId:serviceId},"",data.updated_at);
     window.MINDEX_CONTENT_LIVE?.publish("bulletin",serviceId);
@@ -15141,17 +15155,17 @@ async function saveBulletinDraft(serviceId, value, revision) {
 }
 
 async function loadBulletinTemplate(key) {
-  const {data,error}=await state.client.from("mindex_bulletin_templates").select("template_key,title,department,effective_from,layout,common,revision").eq("template_key",key).maybeSingle();
-  if(error)throw new Error(`공통 양식 저장소를 불러오지 못했습니다: ${error.message}`);
+  const {data,error}=await state.client.from("mindex_bulletin_templates").select("template_key,title,department,effective_from,layout,common,revision").eq("template_key",key).maybeSingle().then(null,error=>{throw departmentInputError(error,"공통 양식 불러오기");});
+  if(error)throw departmentInputError(error,"공통 양식 불러오기");
   return data;
 }
 async function saveBulletinTemplate(key,value,revision) {
   const publishClient=state.client;
   const table=publishClient.from("mindex_bulletin_templates");
   const query=revision?table.update(value).eq("template_key",key).eq("revision",revision):table.insert({template_key:key,...value});
-  const {data,error}=await query.select("template_key,title,department,effective_from,layout,common,revision").maybeSingle();
+  const {data,error}=await query.select("template_key,title,department,effective_from,layout,common,revision").maybeSingle().then(null,error=>{throw new Error(`${departmentInputError(error,"공통 양식 저장").message} 편집 내용은 유지됩니다.`,{cause:error});});
   if(error?.code==="23505"||(!error&&!data))throw new Error("다른 곳에서 공통 양식을 변경했습니다. 편집 내용은 유지됩니다. 창을 다시 열어 최신 양식을 확인해 주세요.");
-  if(error)throw new Error(`공통 양식 저장 실패: ${error.message}`);
+  if(error)throw new Error(`${departmentInputError(error,"공통 양식 저장").message} 편집 내용은 유지됩니다.`,{cause:error});
   if(publishClient===state.client)window.MINDEX_CONTENT_LIVE?.publish("bulletin-template",key);
   return data;
 }
