@@ -27,7 +27,8 @@ class ElectronRuntimeFilesTests(unittest.TestCase):
                 if source.suffix not in ('.js', '.mjs', '.css', '.webmanifest'): continue
                 self.assertTrue(any(fnmatch.fnmatch(source.name,p) for p in includes if not p.startswith('!')),source.name)
         self.assertIn('mindex-build.json', includes)
-        self.assertIn('data/**/*', includes)
+        self.assertIn('!data/**/*', includes)
+        self.assertNotIn('data/**/*', includes)
 
     def test_update_runtime_and_release_commands_are_available(self):
         root = Path(__file__).resolve().parents[1]

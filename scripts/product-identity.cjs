@@ -2,7 +2,7 @@
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const {execFileSync}=require('node:child_process');
 const git=(root,args)=>execFileSync('git',args,{cwd:root,encoding:'utf8',maxBuffer:8*1024*1024});
-const runtime=name=>!name.includes('/')?/^(?:app(?:\.runtime)?\.js|mindex\.(?!build\.json$).+\.(?:js|mjs|json)|remote\..+|styles.*\.css|index\.html|favicon\.ico|manifest\.webmanifest)$/.test(name):/^(assets|vendor|data)\//.test(name);
+const runtime=name=>!name.includes('/')?/^(?:app(?:\.runtime)?\.js|mindex\.(?!build\.json$).+\.(?:js|mjs|json)|remote\..+|styles.*\.css|index\.html|favicon\.ico|manifest\.webmanifest)$/.test(name):/^(assets|vendor)\//.test(name);
 function identity(root,{test=false}={}){
  const read=name=>JSON.parse(git(root,['show',`HEAD:${name}`]));
  const pkg=read('package.json'),policy=read('product-release.json'),release=read('mindex-release.json');
@@ -32,7 +32,7 @@ function validateWorkingRuntime(root,record){
  const dirty=git(root,['diff','--name-only','HEAD','--']).trim().split('\n').filter(Boolean);
  if(dirty.length)throw Error('Commit runtime and product metadata before packaging');
  const names=new Set(record.files.map(f=>f.name));
- for(const dir of ['assets','vendor','data']){
+ for(const dir of ['assets','vendor']){
   const walk=folder=>{if(!fs.existsSync(folder))return;for(const item of fs.readdirSync(folder,{withFileTypes:true})){
    const full=path.join(folder,item.name),name=path.relative(root,full).split(path.sep).join('/');
    if(item.isSymbolicLink())throw Error('Unreviewed runtime symlink');

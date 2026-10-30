@@ -43,3 +43,13 @@ test('formal web version rejects absent or different-source tags',()=>{
   assert.throws(()=>verifyWebReleaseTag(f.root,{...identity(f.root),channel:'release'}),/matching published/);
  }finally{f.close();}
 });
+
+test('historical data is outside the shared native runtime identity',()=>{
+ const f=fixture();try{
+  const before=identity(f.root);fs.mkdirSync(path.join(f.root,'data'));
+  fs.writeFileSync(path.join(f.root,'data/emergency-worship.json'),'synthetic historical record');f.commit();
+  const after=identity(f.root);assert.equal(after.rendererTree,before.rendererTree);
+  assert.ok(after.files.every(file=>!file.name.startsWith('data/')));
+  validateWorkingRuntime(f.root,after);
+ }finally{f.close();}
+});

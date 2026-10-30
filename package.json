@@ -124,7 +124,7 @@
       "mindex.product-info.js",
       "mindex-build.json",
       "product-release.json",
-      "data/**/*"
+      "!data/**/*"
     ],
     "mac": {
       "target": [

@@ -210,11 +210,14 @@ this audit; the existing stable-2026-08-16 tag is not a versioned desktop releas
 
 Pages staging and Electron beforePack generate `mindex-build.json` from the same
 committed HEAD: product version, channel, exact source commit, web build ID and
-a deterministic tree digest of shared renderer/scripts/assets/data. The generated
+a deterministic tree digest of shared renderer/scripts/assets. The generated
 file is excluded from Git to avoid self-referential commit IDs. Pages still stages
 only git archive bytes. Packaging refuses dirty tracked files, untracked runtime
-assets and symlinks. Runtime includes now cover all Remote/draft modules and the
-public runtime data directory. No private backups or credentials are included.
+assets and symlinks. Runtime includes now cover all Remote/draft modules.
+The historical `data/` directory remains excluded from native packages and the
+shared runtime digest; its source files are preserved. Runtime hymn structure
+uses the existing root-level generated JSON. Pages archive policy is unchanged.
+The installer must not acquire old worship snapshots via a broad data glob.
 
 The app information section of the existing connection panel shows development
 vs test vs release explicitly, with installed version separate from web build.
@@ -239,3 +242,8 @@ signed desktop candidates first, verify upgrades and publish the reviewed versio
 tag/Release, then publish the matching formal web artifact. Later source changes
 cannot continue claiming that formal version; return to development or review a
 new version. None of these promotion steps have been performed by this work.
+
+First formal product target is **1.0.0**, as agreed on 2026-10-30. Dawn remains
+a preparation/preview direction; this does not activate it, bump development
+package 0.1.1, or authorize signing, installation or a public release. Existing
+real-device and upgrade release conditions still apply.
