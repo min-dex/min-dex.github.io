@@ -9967,7 +9967,7 @@ def main() -> int:
                         { type_id: 'sunday-first', date: '2026-04-05', calendarNote: '부활주일', expected: '26-S5.png', defaultFile: '26-A2.png', seasonFile: '26-S5.png', chromakey: false },
                         { type_id: 'sunday-first', date: '2026-05-24', calendarNote: '성령강림주일', expected: '26-S6.png', defaultFile: '26-A3.png', seasonFile: '26-S6.png', chromakey: false },
                         { type_id: 'sunday-first', date: '2026-07-05', calendarNote: '맥추감사주일', expected: '26-A4.png', defaultFile: '26-A4.png', seasonFile: '26-SH.png', chromakey: false },
-                        { type_id: 'sunday-first', date: '2026-11-15', calendarNote: '추수감사주일', expected: '', defaultFile: '26-A6.png', seasonFile: '26-ST.png', chromakey: false },
+                        { type_id: 'sunday-first', date: '2026-11-15', calendarNote: '추수감사주일', expected: '26-A6.png', defaultFile: '26-A6.png', seasonFile: '26-ST.png', chromakey: false },
                         { type_id: 'sunday-first', date: '2027-01-03', expected: '', defaultFile: '27-A1.png', seasonFile: '', chromakey: false },
                         { type_id: 'sunday-second', date: '2026-07-05', expected: '', defaultFile: '26-A4.png', seasonFile: '26-SH.png', chromakey: true },
                         { type_id: 'sunday-main', date: '2026-07-05', expected: '', defaultFile: '26-A4.png', seasonFile: '26-SH.png', chromakey: true },

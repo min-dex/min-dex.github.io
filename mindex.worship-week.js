@@ -56,19 +56,31 @@
 })(typeof window==='undefined'?globalThis:window);
 
 // App navigation labels; stored titles and output/print naming remain independent.
-function serviceNavigationName(service = {}) {
+function serviceNavigationDetails(service = {}) {
   const typeId = worshipAppServiceTypeId(service.type_id || service.service_type_id || "");
-  return normalizeServiceDisplayName(serviceAlias(service)) || serviceTypeDisplayName(typeId);
+  const base = serviceTypeDisplayName(typeId);
+  const source = service._worshipSourceRef || service.source_ref || {};
+  const raw = normalizeServiceDisplayName(serviceAlias(service));
+  const reason = String(source.no_gathering_reason || service.weekly_reason || "").trim();
+  const absent = source.no_gathering === true || source.no_gathering === "true" || service.no_gathering === true || /집회\s*없음/.test(raw);
+  let alias = raw.replace(/\s*·\s*정규 집회 없음\s*$/, "").replace(/\s+대체\s*$/, "").trim();
+  if (!alias && absent && /(?:으로|로) 대체$/.test(reason)) alias = reason.replace(/(?:으로|로) 대체$/, "").trim();
+  const replacement = absent && Boolean(alias) && alias !== base && !/집회\s*없음/.test(alias);
+  if (replacement) {
+    const department = base.replace(/\s*예배$/, "");
+    if (/부$/.test(department) && alias.startsWith(department + " ")) alias = alias.slice(department.length + 1);
+  }
+  const name = alias || base;
+  return {name, context:replacement ? `${base} 대체` : name !== base ? base : "", replacement, absent};
 }
-function serviceNavigationTypeName(typeId) {
-  return serviceNavigationName({ type_id: typeId });
+function serviceNavigationName(service = {}) { return serviceNavigationDetails(service).name; }
+function serviceNavigationTypeName(typeId) { return serviceNavigationName({ type_id: typeId }); }
+function worshipSetlistNavigationService(source = {}) {
+  const aliases = Array.isArray(source.aliases) ? source.aliases : [source.aliases || source.service_alias || ""];
+  return {...source, type_id:worshipAppServiceTypeId(source.service_type_id),
+    alias:[...new Set(aliases.map(value => String(value || "").trim()).filter(Boolean))].join(" · ")};
 }
-function worshipSetlistNavigationName(source = {}) {
-  const aliases = Array.isArray(source.aliases) ? source.aliases : [source.aliases || ""];
-  const typeId = worshipAppServiceTypeId(source.service_type_id);
-  const alias = [...new Set(aliases.map(value => String(value || "").trim()).filter(Boolean))].join(" · ");
-  return serviceNavigationName({type_id:typeId, alias});
-}
+function worshipSetlistNavigationName(source = {}) { return serviceNavigationName(worshipSetlistNavigationService(source)); }
 
 function renderWorshipSetlistWeekLayout(entries) {
   const card=entry=>entry.weeklyStatus ? renderWorshipWeekStatus(entry) : renderWorshipSetlistArchiveEntry(entry);

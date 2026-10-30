@@ -20,8 +20,9 @@ body:has(.bulletin-workbench) .right-sidebar{display:none}
 .bulletin-status,.bulletin-help{font-size:var(--ui-meta-size);line-height:1.6;color:var(--ink-3,#70756d)}
 .bulletin-status{flex:1;min-width:0}
 .bulletin-status::before{content:"";display:inline-block;width:5px;height:5px;margin:0 5px 2px 0;border-radius:50%;background:var(--ink-4,#90958d)}
-.bulletin-status[data-state=warning]{color:var(--accent,#a64937)}
-.bulletin-status[data-state=warning]::before{background:currentColor}
+.bulletin-status[data-state=warning]{color:var(--warn)}
+.bulletin-status[data-state=error]{color:var(--danger)}
+.bulletin-status:is([data-state=warning],[data-state=error])::before{background:currentColor}
 .bulletin-meta button{border:1px solid var(--line-2);background:var(--ui-surface-field);padding:5px 10px;min-height:35px;color:var(--ink-2);font-size:var(--ui-label-size);white-space:nowrap}
 .bulletin-meta button:hover:not(:disabled){background:color-mix(in srgb,var(--ui-surface-field) 85%,var(--ink) 15%)}
 .bulletin-body{display:grid;grid-template-columns:300px minmax(0,1fr);gap:15px;min-height:0;flex:1}

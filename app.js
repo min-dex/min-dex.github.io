@@ -5652,7 +5652,7 @@ async function saveCalendarCell(id, field, value, options = {}) {
     if (state.calendarCellSaves.get(key) === token) {
       state.calendarCellSaves.delete(key);
       if (cell) {
-        cell.textContent = previousValue;
+        if (cell.textContent.replace(/\n/g, " ").trim() === value) cell.textContent = previousValue;
         cell.dataset.initialValue = previousValue;
       }
       setCalendarCellSaveState(cell, "error");
@@ -15261,15 +15261,18 @@ const WORSHIP_BACKGROUND_STATIC_FILES = new Set([
   "26-A3.png",
   "26-A4.png",
   "26-A5.png",
+  "26-A6.png",
   "26-B1.png",
   "26-B2.png",
   "26-B3.png",
   "26-B4.png",
   "26-B5.png",
+  "26-B6.png",
   "26-C1.png",
   "26-C2.png",
   "26-C3.png",
   "26-C5.png",
+  "26-C6.png",
   "26-S4.png",
   "26-S5.png",
   "26-S6.png",
@@ -15429,7 +15432,10 @@ function worshipBackgroundYearCode(value = new Date()) {
 
 function worshipBackgroundFileName(group, slot, yearSource = new Date()) {
   const code = String(group || "A").trim().toUpperCase();
-  const year = worshipBackgroundYearCode(yearSource);
+  const churchYear = churchYearForCalendarDate(yearSource);
+  const year = (/^S[1-6]$/.test(code) || code === "S") && churchYear
+    ? String(churchYear % 100).padStart(2, "0")
+    : worshipBackgroundYearCode(yearSource);
   if (code === "SH" || code === "ST") return `${year}-${code}.png`;
   if (/^S[1-6]$/.test(code)) return `${year}-${code}.png`;
   if (code === "S") return `${year}-S${Number(slot) || 1}.png`;
@@ -15506,13 +15512,15 @@ async function saveWorshipBackgroundRegistry(registry) {
   return persistServerValue("local", WORSHIP_BACKGROUND_REGISTRY_STORAGE_KEY, JSON.stringify(registry || {}));
 }
 
-function worshipBackgroundTargets() {
-  const currentYear = new Date();
+function worshipBackgroundTargets(currentYear = new Date()) {
+  const churchYear = churchYearForCalendarDate(currentYear) || new Date().getFullYear();
+  const nextAdvent = adventStartDate(churchYear + 1);
   return [...new Set([
     ...WORSHIP_BACKGROUND_REGISTRY_GROUPS.flatMap((group) =>
       WORSHIP_BACKGROUND_REGISTRY_SLOTS.map((slot) => worshipBackgroundFileName(group, slot, currentYear))
     ),
     ...WORSHIP_BACKGROUND_SEASON_CODES.map((code) => worshipBackgroundFileName(code, "", currentYear)),
+    ...["S1", "S2"].map((code) => worshipBackgroundFileName(code, "", nextAdvent)),
     ...WORSHIP_BACKGROUND_STATIC_FILES,
     ...Object.keys(state.worshipBackgroundRegistry || {}),
   ])]
@@ -25050,6 +25058,7 @@ function renderWorshipSetlistArchiveGroups(entries = []) {
 
 function renderWorshipWeekStatus(entry) {
   const title = state.worshipSetlistArchiveView === "service" ? entry.source.service_date : worshipSetlistNavigationName(entry.source);
+  const details = serviceNavigationDetails(worshipSetlistNavigationService(entry.source));
   const status = entry.weeklyStatus;
   const kind = status === "집회 없음" ? "absent" : status === "콘티 미등록" ? "missing" : "unknown";
   const serviceId = kind === "missing" ? worshipSetlistArchiveServiceId(entry.source) : "";
@@ -25060,9 +25069,10 @@ function renderWorshipWeekStatus(entry) {
     <header><div class="svc-setlist-entry-title">
       <div class="svc-setlist-entry-heading">${heading}${state.worshipSetlistArchiveView === "service" ? `<span class="svc-setlist-alias">${escapeHtml(worshipSetlistNavigationName(entry.source))}</span>` : ""}</div>
       ${state.worshipSetlistArchiveView !== "service" ? `<span class="svc-setlist-leader">${escapeHtml(entry.source.service_date)}</span>` : ""}
+      ${!details.replacement && details.context ? `<span class="svc-setlist-leader">${escapeHtml(details.context)}</span>` : ""}
     </div></header>
-    <div class="svc-setlist-week-status"><strong>${escapeHtml(status === "기록 없음" ? "집회 여부 미확인" : status)}</strong>
-      ${entry.weeklyReason && entry.weeklyReason !== "집회 여부 미확인" ? `<span>${escapeHtml(entry.weeklyReason)}</span>` : ""}
+    <div class="svc-setlist-week-status"><strong>${escapeHtml(details.replacement ? details.context : status === "기록 없음" ? "집회 여부 미확인" : status)}</strong>
+      ${!details.replacement && entry.weeklyReason && entry.weeklyReason !== "집회 여부 미확인" && entry.weeklyReason !== details.name ? `<span>${escapeHtml(entry.weeklyReason)}</span>` : ""}
       ${serviceId ? `<button type="button" class="svc-setlist-status-open" data-setlist-open-service="${escapeAttr(serviceId)}">예배 열기 →</button>` : ""}</div>
   </article>`;
 }
@@ -25240,7 +25250,8 @@ function renderWorshipSetlistArchiveEntry(entry) {
   if (!entry.candidates.length && entry.source.weekly_status) return renderWorshipWeekStatus({...entry,slotName:worshipSetlistArchiveTypeName(entry.source.service_type_id),weeklyStatus:entry.source.weekly_status,weeklyReason:entry.source.weekly_reason || ""});
   const source = entry.source || {};
   const serviceId = worshipSetlistArchiveServiceId(source);
-  const typeName = worshipSetlistNavigationName(source);
+  const details = serviceNavigationDetails(worshipSetlistNavigationService(source));
+  const typeName = details.name;
   const title = state.worshipSetlistArchiveView === "service" ? source.service_date || "날짜 없음" : typeName;
   const leader = String(source.leader || "").trim();
   const aliases = state.worshipSetlistArchiveView === "service" ? typeName : "";
@@ -25254,6 +25265,7 @@ function renderWorshipSetlistArchiveEntry(entry) {
           </div>
           <div class="svc-setlist-entry-meta">
             ${state.worshipSetlistArchiveView !== "service" ? `<span class="svc-setlist-leader">${escapeHtml(source.service_date || "날짜 없음")}</span>` : ""}
+            ${details.context ? `<span class="svc-setlist-leader">${escapeHtml(details.context)}</span>` : ""}
             ${renderWorshipSetlistLeaderEditor(source)}
           </div>
         </div>
@@ -27518,7 +27530,8 @@ function renderServiceWeekCard(service) {
   const noGathering = serviceIsNoGathering(service);
   const preview = serviceItemPreviewParts(service.id, { compact: true });
   const variant = serviceVariantDisplayName(service);
-  const serviceName = serviceNavigationName(service);
+  const details = serviceNavigationDetails(service);
+  const serviceName = details.name;
   return `
     <button
       class="service-week-card"
@@ -27526,8 +27539,9 @@ function renderServiceWeekCard(service) {
       ${noGathering ? 'disabled aria-disabled="true"' : `data-service-id="${escapeAttr(service.id)}"`}
     >
       <strong>${escapeHtml(serviceName)}</strong>
-      ${noGathering ? '<span class="service-week-card-preview">집회 없음</span>' : ""}
-      ${variant && !serviceName.includes(variant) ? `<span class="service-week-card-preview">${escapeHtml(variant)}</span>` : ""}
+      ${details.context ? `<span class="service-week-card-preview">${escapeHtml(details.context)}</span>` : ""}
+      ${noGathering && !details.replacement ? '<span class="service-week-card-preview">집회 없음</span>' : ""}
+      ${!details.replacement && variant && !serviceName.includes(variant) ? `<span class="service-week-card-preview">${escapeHtml(variant)}</span>` : ""}
       ${preview.text ? renderServiceCardPreviewHtml(preview, "service-week-card-preview") : ""}
     </button>`;
 }
@@ -27537,18 +27551,20 @@ function renderServiceDateCard(service, options = {}) {
   const preview = serviceItemPreviewParts(service.id);
   const calendarRow = (state.calendarData || []).find((row) => String(row?.date || "").trim() === String(service?.date || "").trim());
   const variant = serviceVariantDisplayName(service);
-  const serviceName = serviceNavigationName(service);
+  const details = serviceNavigationDetails(service);
+  const serviceName = details.name;
   const note = cleanList([
-    variant,
+    details.context,
+    !details.replacement ? variant : "",
     calendarRow?.note,
-    serviceIsNoGathering(service) ? "집회 없음" : "",
+    noGathering && !details.replacement ? "집회 없음" : "",
   ]).filter((value) => !serviceName.includes(value)).join(" · ");
   return `
     <button
       class="service-date-card ${serviceDateStatus(service).key === "past" ? "is-past" : ""}"
       type="button"
       ${noGathering ? 'disabled aria-disabled="true"' : `data-service-id="${escapeAttr(service.id)}"`}
-      aria-label="${escapeAttr(`${formatServiceDate(service, { compact: true })} ${cleanList([serviceName, variant]).join(" ")} ${noGathering ? "집회 없음" : "열기"}`)}"
+      aria-label="${escapeAttr(`${formatServiceDate(service, { compact: true })} ${cleanList([serviceName, details.context]).join(" ")} ${noGathering ? "집회 없음" : "열기"}`)}"
     >
       <span class="service-date-card-top">
         <span class="service-date-card-date">${escapeHtml(formatServiceDate(service, { compact: true }))}</span>

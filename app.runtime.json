@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261030-input-ime",
+  "version": "20261030-ready-ui",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "1ffb874bbd71d640e270628db4a59dd529668960f131b4121b33865270cfe13f",
-  "runtime_sha256": "6b1923527ef48665e5ded214f45936afd0d3650b2f9dfe2a44d012554b7e8720",
-  "source_bytes": 1339876,
-  "runtime_bytes": 956126,
-  "source_gzip": 305725,
-  "runtime_gzip": 239600
+  "source_sha256": "6fc76fcad9eb8d1817969082dd7cc98ad06cc7a41d0ed7e523a6ea4f61ae3889",
+  "runtime_sha256": "5fb7322546bbcbe0de8524da3a107789b5d38d1c35057c62a93b67abfbe87c70",
+  "source_bytes": 1341153,
+  "runtime_bytes": 957033,
+  "source_gzip": 305936,
+  "runtime_gzip": 239831
 }

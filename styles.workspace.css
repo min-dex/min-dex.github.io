@@ -6218,10 +6218,10 @@ body[data-module="presenter"]:not(:has(#servicePresenterControls[data-focus-view
 .praise-forms-panel .version-move-btn { width: 30px; height: 30px; }
 
 /* Version header tracks are shared, including optional review and type metadata. */
-.praise-forms-panel .version-compare-head { grid-template-rows: repeat(3, auto); }
+.praise-forms-panel .version-compare-head { grid-template-rows: repeat(4, auto); }
 body[data-module="praise"] .praise-forms-panel .version-compare-head > .version-compare-title {
   display: grid;
-  grid-row: span 3;
+  grid-row: span 4;
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: subgrid;
   align-items: start;

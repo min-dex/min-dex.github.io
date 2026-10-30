@@ -721,9 +721,15 @@ Use this for date, status, the canonical service title, an optional human-facing
 source lineage. Do not add generic tags back: church-calendar occasions belong
 to the calendar, while machine state belongs to typed keys in `source_ref`.
 
-Presenter background is opt-in. Until a dedicated column exists, keep an
-explicit source in `source_ref.presenter_background`; Presenter must not infer
-or rotate backgrounds from service type, date, or season.
+Keep an explicit background source in `source_ref.presenter_background`.
+The current Presenter resolver first uses an available calendar/alias-matched
+seasonal asset, then the explicit source, then the service-type two-month default.
+Chromakey exclusions remain unchanged. A/B/C and SH/ST filenames use the civil
+year; S1–S6 use the church year beginning at Advent (`churchYearForCalendarDate`).
+Thus Advent/Christmas 2026 use 27-S1/S2, followed by 2027 S3–S6. Missing assets
+follow the existing fallback path; do not rename stored backgrounds or rewrite
+worship records. The manager retains existing entries and offers next church
+year S1/S2 for preparation before Advent.
 
 ### `mindex_worship_sections`
 

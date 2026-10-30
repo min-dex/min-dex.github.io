@@ -1259,7 +1259,7 @@
         issues.size?`영역 넘침·겹침: ${[...issues].map(frameLabel).join(", ")}`:"");
       q(".bulletin-status").textContent=[text,`${templateSession?"공통 양식 편집":"이번 주 편집"} · ${doc?.saving?"저장 중…":doc?.dirty?"수정 중":doc?.revision?"저장됨":"저장 전"}`,templateSession?"":templateError,doc?.backupUnavailable?"서버 초안 보관 실패":doc?.backupPending?"서버 초안 보관 중":""].filter(Boolean).join(" · ");
       q(".bulletin-status").hidden=!q(".bulletin-status").textContent;
-      q(".bulletin-status").dataset.state=error||saveError||printError||doc?.backupUnavailable||issues.size?"warning":loading||!assetLoaded?"loading":"saved";
+      q(".bulletin-status").dataset.state=error||saveError||printError||doc?.backupUnavailable?"error":issues.size?"warning":loading||!assetLoaded?"loading":"saved";
       q("[data-bulletin-print]").disabled=printing||loading||!assetLoaded||!!error||!doc?.source?.order.length||issues.size>0;
       q("[data-bulletin-undo]").disabled=loading||!doc?.history.length;
       q("[data-bulletin-redo]").disabled=loading||!doc?.future.length;

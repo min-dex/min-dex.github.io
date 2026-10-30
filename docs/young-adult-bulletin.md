@@ -381,3 +381,9 @@ apply a new template to a saved weekly bulletin implicitly.
 않는다. isComposing과 keyCode 229 모두 보호하며 조합 완료 뒤의 단축키와
 여러 줄 입력·소식 번호·저장 실패 후 초안 보존은 유지한다. 운영 인쇄 검증과는
 구분하며 격리 fixture의 저장 spy 및 인쇄 iframe 미생성으로 확인한다.
+
+## 편집 상태의 의미 색상 · 2026-10-30
+
+주보 안내의 영역 넘침·겹침은 warning/경고색, 자료 읽기·저장·인쇄 준비·초안
+보관 실패는 error/오류색으로 구분한다. 선택 상태의 accent를 오류 안내에 쓰지
+않는다. 상태 문구·저장 재시도·초안·인쇄 차단 조건은 그대로 유지한다.

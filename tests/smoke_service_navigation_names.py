@@ -18,6 +18,16 @@ try:
     if(worshipSetlistNavigationName({service_type_id:'sun_3rd',aliases:[]})!=='주일예배 [3부]')throw Error('archive invented alias');
     if(worshipSetlistNavigationName({service_type_id:'fri',aliases:['문화예배','문화예배']})!=='문화예배')throw Error('explicit Friday archive alias changed');
     if(serviceNavigationName({type_id:'sunday-main',alias:'',title:'온세대 찬양예배'})!=='주일예배 [3부]')throw Error('title inferred as alias');
+    const replacements=[['young-adult','청년부 야외예배','야외예배','청년부 예배 대체'],['young-adult','자율 셀 모임','자율 셀 모임','청년부 예배 대체'],['young-adult','연합 셀 모임','연합 셀 모임','청년부 예배 대체'],['wednesday','다니엘기도회 대체 · 정규 집회 없음','다니엘기도회','수요예배 대체'],['friday','다니엘기도회 대체 · 정규 집회 없음','다니엘기도회','금요기도회 대체'],['sunday-afternoon','','다니엘기도회','주일오후예배 대체']];
+    for(const [type_id,alias,title,context] of replacements){
+      const svc={id:'replace-'+type_id,type_id,alias,date:'2026-11-01',_worshipSourceRef:{no_gathering:true,no_gathering_reason:'다니엘기도회로 대체'}},source=JSON.stringify(svc);
+      const details=serviceNavigationDetails(svc);if(details.name!==title||details.context!==context)throw Error(JSON.stringify(details));
+      state.services=[svc];state.serviceItems={[svc.id]:[]};state.calendarData=[];state.worshipSetlistArchiveView='week';
+      const entry={source:{...svc,service_type_id:type_id,service_date:svc.date,aliases:alias,source_ref:svc._worshipSourceRef},candidates:[],weeklyStatus:'집회 없음',weeklyReason:alias};
+      for(const html of [renderServiceWeekCard(svc),renderServiceDateCard(svc,{showType:true}),renderWorshipWeekStatus(entry)])if(!html.includes(title)||!html.includes(context)||html.includes('정규 집회 없음')||html.includes('>집회 없음<'))throw Error(html);
+      if(JSON.stringify(svc)!==source)throw Error('replacement mutated input');
+    }
+    if(serviceNavigationDetails({type_id:'sunday-main',alias:'온세대 찬양예배'}).context!=='주일예배 [3부]')throw Error('ordinary alias lost type');
     const regular={id:'regular',type_id:'sunday-main',alias:'',date:'2026-10-25'};state.services=[regular];state.serviceItems={regular:[]};state.calendarData=[];
     for(const html of [renderServiceDateCard(regular,{showType:true}),renderServiceWeekCard(regular),renderPresenterSidebarServiceSummary(regular),renderServiceListTypeBlock({id:'sunday-main'},[regular],'')])if(html.includes('온세대'))throw Error('regular service UI invented alias');
     const svc={id:'fixture',type_id:'sunday-main',alias:'온세대 찬양예배',date:'2026-10-25'};
