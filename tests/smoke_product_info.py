@@ -16,7 +16,12 @@ try:
     page.goto(url)
     page.evaluate("window.isPresenterOutputRoute=()=>false")
     if channel=='test':page.evaluate('(build)=>window.mindexElectron={isDesktop:true,getBuildInfo:async()=>({ok:true,installedVersion:"0.1.1-test",build})}',build)
+    page.evaluate("document.querySelector('.monitor-panel').close()")
+    requests=[]
+    page.on('request',lambda request:requests.append(request.url) if 'mindex-build.json' in request.url else None)
     page.add_script_tag(url=url.replace('index.html','mindex.product-info.js'))
+    page.wait_for_timeout(150);assert requests==[], 'closed panel must not fetch during startup/reload'
+    page.evaluate("document.querySelector('.monitor-panel').showModal()")
     page.wait_for_function("!document.querySelector('.monitor-panel').textContent.includes('확인 중')")
     text=page.locator('.monitor-panel').inner_text()
     assert {'development':'개발 빌드','test':'테스트 앱','release':'Mindex 0.1.1','missing':'제품 배포 정보 없음'}[channel] in text, (channel,text)

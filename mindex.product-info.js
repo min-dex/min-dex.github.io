@@ -6,7 +6,10 @@
  const title=document.createElement('h3');title.textContent='앱 정보';
  const label=document.createElement('p');label.textContent='빌드 정보 확인 중';
  section.append(title,label);panel.append(section);
- void (async()=>{
+ let loaded=false;
+ const load=()=>{
+  if(loaded||!panel.open)return;loaded=true;
+  void (async()=>{
   try{
    const desktop=window.mindexElectron?.isDesktop;
    const info=desktop?await window.mindexElectron.getBuildInfo?.():null;
@@ -21,5 +24,8 @@
    diagnostic.textContent=[desktop?`설치 버전 ${info?.installedVersion||'확인 불가'}`:'웹',`빌드 ${build.buildVersion}`,`소스 ${String(build.sourceCommit||'').slice(0,12)}`].join(' · ');details.append(diagnostic);
    const note=document.createElement('p');note.textContent=build.upgradeNotes||'';details.append(note);section.append(details);
   }catch{label.textContent='빌드 정보를 확인하지 못했어요.';}
- })();
+  })();
+ };
+ new MutationObserver(load).observe(panel,{attributes:true,attributeFilter:["open"]});
+ load();
 })();
