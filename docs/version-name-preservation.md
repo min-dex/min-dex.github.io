@@ -186,7 +186,8 @@ pending the coordinated complete gate, Pages and public verification.
 
 Native selectors display the explicit saved variant name even when version_label
 mirrors it; that equality no longer hides 별도 가사 as 기본. Standard native hymnal
-labels display 새찬송가 N장 / 통일찬송가 N장 using their existing edition/number.
+labels display 새찬송가 / 통일찬송가 only. Hymn numbers and per-variant song
+titles remain separate information, not suffixes of the variant name.
 Imported redundant titles disappear from the selector only. Custom labels such
 as 영어 remain explicit. Metadata edit values, raw evidence, record titles, output
 titles, lyrics/media/timing and worship identities are unchanged. Legacy version

@@ -19499,7 +19499,7 @@ function versionDisplayName(song, version = {}) {
       const standard = !name || isDefaultVersionName(name) || /^(?:새찬송가|통일찬송가|통일 찬송가)$/.test(name)
         || /^통(?:일)?\s*\d+(?:\s|$)/.test(name) && name === String(version.raw_section_name || "").trim()
         || /^통(?:일)?\s*\d+(?:\s|$)/.test(name) && normalizeTitle(name.replace(/^통(?:일)?\s*\d+\s*/, "")) === normalizeTitle(song.title);
-      if (standard) return `${edition[1] === "T" ? "통일찬송가" : "새찬송가"} ${Number(edition[2])}장`;
+      if (standard) return edition[1] === "T" ? "통일찬송가" : "새찬송가";
     }
     // A native version_label mirrors its explicit name; equality is not evidence
     // that the user-authored label is redundant with the song title.
