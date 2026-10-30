@@ -5239,3 +5239,18 @@ Only visible/nearby thumbnail documents mount; offscreen cards retain text and
 fixed aspect ratio, limiting iframe cost without losing loaded catalog data.
 Swiping browses only. Explicit slide taps still use the existing fresh ticket,
 catalog identity and jump guards; no output command is queued offline.
+
+
+### Remote live scripture and sermon return ·2026-10-30
+
+Connected Remote controllers have a 말씀 form. Typing/IME confirmation never
+publishes; explicit 말씀 송출 sends a bounded 200-character query through the
+existing encrypted command gate. PC's buildLiveScriptureSlide owns parsing,
+translation selection and verse validation. Lookup failure preserves current
+output and the Remote draft. PC navigation/service/source/live scripture changes
+during lookup reject the late result; no automatic retry is introduced.
+설교 제목으로 finds a visible title-assignee/title-content slide belonging to a canonical
+sermon-title item in this service and uses the normal presenter jump path, which
+clears temporary scripture. It is disabled if no such slide exists.
+Live reference is displayed separately; state updates never replace typed input.
+No worship document, DB schema or stored lyrics are changed.

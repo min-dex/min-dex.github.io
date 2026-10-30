@@ -128,15 +128,19 @@ try{
 }finally{retryHost.close();retryRemote.close();}
 console.log('PASS failed send recovers automatically without replaying its command');
 // Slide browsing is display-only; jumps retain the same encrypted command gate.
-let browseCalls=0,jumpTarget=null,slideResult=null;
-const listHost=await openRemote({client,host:true,read:()=>({live:true,allowed:['jump'],catalogKey:'catalog'}),browse:()=>{browseCalls++;return {key:'catalog',offset:0,total:1,items:[{index:0,title:'제목'}]};},execute:(action,target)=>{assert.equal(action,'jump');jumpTarget=target;}});
+let browseCalls=0,jumpTarget=null,slideResult=null;const scriptureCommands=[];
+const listHost=await openRemote({client,host:true,read:()=>({live:true,allowed:['jump'],catalogKey:'catalog'}),browse:()=>{browseCalls++;return {key:'catalog',offset:0,total:1,items:[{index:0,title:'제목'}]};},execute:(action,target)=>{if(action==='jump')jumpTarget=target;else scriptureCommands.push({action,target});}});
 const listRemote=await openRemote({client,code:listHost.code,onSlides:r=>slideResult=r});
 try{
  await until(()=>listRemote.usable);await listRemote.requestSlides();await until(()=>slideResult);
  assert.equal(browseCalls,1);assert.equal(jumpTarget,null);
  await listRemote.command('jump',{index:0,key:slideResult.key});await until(()=>jumpTarget);
  assert.deepEqual(jumpTarget,{index:0,key:'catalog'});
- listRemote.suspend();await assert.rejects(listRemote.requestSlides());await assert.rejects(listRemote.command('jump',{index:0,key:'catalog'}));
+ await until(()=>listRemote.usable);await listRemote.command('scripture-show',{query:'요 3:16'});await until(()=>scriptureCommands.length===1);
+ assert.deepEqual(scriptureCommands[0],{action:'scripture-show',target:{query:'요 3:16'}});
+ await until(()=>listRemote.usable);await listRemote.command('sermon-title');await until(()=>scriptureCommands.length===2);
+ assert.equal(scriptureCommands[1].action,'sermon-title');
+ listRemote.suspend();await assert.rejects(listRemote.command('scripture-show',{query:'요 3:16'}));await assert.rejects(listRemote.requestSlides());await assert.rejects(listRemote.command('jump',{index:0,key:'catalog'}));
  assert.equal(browseCalls,1);
 }finally{listHost.close();listRemote.close();}
 console.log('PASS encrypted read-only slide browsing, targeted jump and suspended control guards');

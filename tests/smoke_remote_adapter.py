@@ -23,6 +23,28 @@ try:
     const adapter=MindexRemote.adapter(sid,'fixture',output);
     check(adapter.read().live,'host live');await adapter.execute('next');check(state.presenter.index===1,'real next');
     await adapter.execute('prev');check(state.presenter.index===0,'real previous');
+    // Keep real presenter actions; substitute only scripture lookup/network.
+    const originalBuild=buildLiveScriptureSlide;
+    check(adapter.read().allowed.includes('scripture-show')&&adapter.read().allowed.includes('sermon-title'),'scripture actions missing '+JSON.stringify({slides:state.presenter.slides.map(s=>({id:s.elementId,type:s.type})),items:state.serviceItems[sid].map(i=>({id:i.id,label:i.label,key:i._worshipSectionKey,match:isPresenterPreparationSermonTitleItem(i)}))}));
+    buildLiveScriptureSlide=async query=>({type:'scripture',title:query,text:'검증 말씀',layout:'lower-bar-text'});
+    await adapter.execute('scripture-show',{query:'요 3:16'});
+    check(state.presenter.liveScripture.active&&adapter.read().liveReference==='요 3:16','remote scripture not published');
+    await adapter.execute('sermon-title');
+    check(state.presenter.slides[state.presenter.index].elementId==='remote-0'&&!state.presenter.liveScripture.active,'real sermon return did not clear overlay');
+    for(const query of ['', 'x'.repeat(201), 123]){
+     let denied=false;try{await adapter.execute('scripture-show',{query})}catch{denied=true}check(denied,'invalid query allowed');
+    }
+    const before=state.presenter.liveScripture;
+    buildLiveScriptureSlide=async()=>{throw Error('조회 실패')};
+    let failed=false;try{await adapter.execute('scripture-show',{query:'요 3:16'})}catch(e){failed=e.message==='조회 실패'}
+    check(failed&&state.presenter.liveScripture===before,'lookup failure altered output');
+    let finish;buildLiveScriptureSlide=()=>new Promise(resolve=>finish=resolve);
+    const pending=adapter.execute('scripture-show',{query:'요 3:16'}).then(()=>false,()=>true);
+    runPresenterAction('next',sid,{scroll:false});finish({title:'늦은 말씀',text:'늦음'});
+    check(await pending,'late lookup overwrote PC navigation');
+    check(!state.presenter.liveScripture.active,'late scripture remained active');
+    buildLiveScriptureSlide=originalBuild;
+    await adapter.execute('jump',{index:0,key:adapter.read().catalogKey});
     const catalog=adapter.browse({offset:0});check(catalog.total===state.presenter.slides.filter(s=>!presenterSlideIsHidden(s)).length&&catalog.items.length===Math.min(6,catalog.total),'visible catalog');
     check(state.presenter.index===0,'browse does not navigate');
     await adapter.execute('jump',{index:2,key:catalog.key});check(state.presenter.index===2,'real direct jump');

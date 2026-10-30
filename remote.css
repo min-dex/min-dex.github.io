@@ -98,3 +98,7 @@ button :is([data-lucide], svg.lucide) { width: var(--ui-icon-size); height: var(
 .screen-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
 .screen-actions #outputStop { grid-column:1/-1; }
 .screen-actions [aria-pressed=true] { color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent); }
+
+.remote-scripture { margin-bottom:20px; }
+#scriptureQuery { margin:0 0 10px; font-size:max(16px,var(--ui-body-size)); text-align:left; letter-spacing:normal; text-transform:none; }
+#scriptureStatus { color:var(--ink-3); font-size:var(--ui-meta-size); overflow-wrap:anywhere; }

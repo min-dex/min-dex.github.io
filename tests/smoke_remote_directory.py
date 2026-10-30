@@ -17,7 +17,7 @@ window.supabase={createClient:()=>({async rpc(name,a={}){
  }
  return {data:{ok:false,error:'unexpected'}};
 }})};'''
-SESSION=r'''export async function openRemote(o){window.opened=(window.opened||0)+1;const s={connected:true,usable:true,close(){o.onClose();},async end(){o.onClose();},suspend(){},refresh(){},offline(){}};window.setRemoteState=o.onState;window.setSlides=o.onSlides;window.slideRequests=[];s.requestSlides=async options=>{slideRequests.push(options)};setTimeout(()=>o.onState({index:0,total:2,current:'예배',next:'다음',music:'음원 없음',allowed:[]}),0);return s;}'''
+SESSION=r'''export async function openRemote(o){window.opened=(window.opened||0)+1;const s={connected:true,usable:true,close(){o.onClose();},async end(){o.onClose();},suspend(){},refresh(){},offline(){}};window.setRemoteState=o.onState;window.setSlides=o.onSlides;window.slideRequests=[];s.requestSlides=async options=>{slideRequests.push(options)};window.commands=[];s.command=async(action,target)=>commands.push({action,target});setTimeout(()=>o.onState({index:0,total:2,current:'예배',next:'다음',music:'음원 없음',allowed:[]}),0);return s;}'''
 server,url=start_local_app_server();url=url.replace('index.html','remote.html')
 try:
  with sync_playwright() as p:
@@ -64,6 +64,20 @@ try:
    assert page.locator('#selectedOutputTitle').inner_text()=='주일예배 [3부]'
    page.wait_for_function("document.querySelector('#position').textContent==='1 / 2'")
    page.evaluate("setRemoteState({index:0,total:2,current:'예배',catalogKey:'fixture',allowed:['jump']})")
+   page.evaluate("setRemoteState({index:0,total:2,current:'예배',catalogKey:'fixture',allowed:['jump','scripture-show','sermon-title'],liveReference:'요한복음 3:16'})")
+   page.fill('#scriptureQuery','시 23:1')
+   assert page.evaluate('commands.length')==0
+   assert page.locator('#scriptureStatus').inner_text()=='요한복음 3:16'
+   page.evaluate("()=>{const f=document.querySelector('#scriptureForm');f.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));f.requestSubmit();f.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true}));f.requestSubmit();}")
+   assert page.evaluate('commands.length')==0
+   page.wait_for_timeout(10);page.click('#scriptureShow')
+   assert page.evaluate('commands[0]')=={'action':'scripture-show','target':{'query':'시 23:1'}}
+   assert page.locator('#scriptureQuery').input_value()=='시 23:1'
+   page.click('[data-action=sermon-title]')
+   assert page.evaluate('commands[1].action')=='sermon-title'
+   page.evaluate("setRemoteState({index:0,total:2,current:'예배',catalogKey:'fixture',allowed:['jump']})")
+   assert page.locator('#scriptureShow').is_disabled()
+   assert page.locator('[data-action=sermon-title]').is_disabled()
    page.click('#slidesOpen');page.wait_for_function('slideRequests.length===1')
    page.evaluate("setSlides({key:'fixture',mode:'groups',total:1,offset:0,items:[{index:0,title:'찬양',count:2}]})")
    page.fill('#slidesQuery','새검색')

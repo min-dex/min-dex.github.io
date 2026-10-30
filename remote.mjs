@@ -1,7 +1,7 @@
 import {obtainOutputPairing} from './mindex.output-pairing.mjs?v=5';
-import {adminRpc,relayRegistration} from './mindex.remote-admin.mjs?v=9';
+import {adminRpc,relayRegistration} from './mindex.remote-admin.mjs?v=10';
 import {createPreview,createListPreview} from './remote.preview.mjs?v=3';
-import {openRemote} from './mindex.remote-session.mjs?v=14';
+import {openRemote} from './mindex.remote-session.mjs?v=15';
 import {setupPhoneExperience} from './remote.screen.mjs?v=4';
 window.lucide?.createIcons();
 const screenAwake=setupPhoneExperience();
@@ -9,7 +9,7 @@ const $=id=>document.getElementById(id);
 // Composition confirmation belongs to the keyboard, never to form actions.
 const composingForms=new WeakSet(),committingForms=new WeakSet();
 function compositionSubmitBlocked(form){return composingForms.has(form)||committingForms.has(form);}
-for(const form of [$('pairForm'),$('slidesSearch')]){
+for(const form of [$('pairForm'),$('slidesSearch'),$('scriptureForm')]){
  const commit=()=>{committingForms.add(form);setTimeout(()=>committingForms.delete(form),0);};
  form.addEventListener('compositionstart',()=>composingForms.add(form));
  form.addEventListener('compositionend',()=>{composingForms.delete(form);commit();});
@@ -107,7 +107,7 @@ $('adminLogout').onclick=async()=>{
 $('chooseOutput').onclick=()=>{if(opening||ending)return;selectedOutput=null;$('code').value='';$('status').textContent='';paint();void listOutputs();};
 setInterval(listOutputs,3000);
 window.addEventListener('pagehide',event=>{if(event.persisted)return;const token=adminToken;adminToken=null;if(token)void adminRpc(client,'mindex_remote_admin',{p_action:'logout',p_token:token}).catch(()=>{});});
-function reset(){closeSlides();clearTimeout(slidesTimer);slidesData=null;jumpPending=false;session=null;selectedOutput=null;state(null);$('disconnect').hidden=true;$('code').value='';paint();}
+function reset(){closeSlides();clearTimeout(slidesTimer);slidesData=null;jumpPending=false;session=null;selectedOutput=null;state(null);$('disconnect').hidden=true;$('code').value='';$('scriptureQuery').value='';paint();}
 function paint(){
  connectionForms();
  screenAwake.update({active:!!session?.connected,visible:!document.hidden});
@@ -115,6 +115,7 @@ function paint(){
  $('slidesOpen').disabled=!usable||!view?.allowed?.includes('jump');
  paintSlides(usable);
  for(const button of document.querySelectorAll('[data-action]'))button.disabled=!usable||!view?.allowed?.includes(button.dataset.action);
+ $('scriptureShow').disabled=!usable||!view?.allowed?.includes('scripture-show')||!$('scriptureQuery').value.trim();
  $('connect').disabled=opening||ending||!!session;
  $('code').readOnly=opening||ending||!!session;
  $('disconnect').disabled=ending;
@@ -127,6 +128,7 @@ function state(value){
  currentPreview(value.previewCurrent,value.transparent?'투명':value.blank?'암전 중':value.current||'내용 없음');nextPreview(value.previewNext,value.next||'마지막 슬라이드');
  $('nextTitle').textContent=value.nextTitle||String(value.next||'마지막 슬라이드').split('\n')[0].slice(0,200);
  $('music').textContent=value.music;
+ $('scriptureStatus').textContent=value.liveReference||'송출 중인 실시간 말씀 없음';
  $('videoStatus').textContent=value.video ? ({playing:'재생 중',paused:'일시정지',ended:'재생 완료',blocked:'PC에서 재생 허용 필요',loading:'영상 준비 중',error:'영상 재생 실패'}[value.video.status]||'영상 상태 확인 중') : '연결된 영상 없음';
  $('outputStop').hidden=!value.allowed?.includes('output-stop')&&!value.allowed?.includes('output-start')&&value.outputState!=='starting';
  $('outputStop').dataset.action=value.outputState==='standby'||value.outputState==='starting'?'output-start':'output-stop';
@@ -255,6 +257,12 @@ $('backOutputs').onclick=disconnectController;
 for(const button of document.querySelectorAll('[data-action]'))button.onclick=async()=>{
  if(button.dataset.action==='output-stop'&&!confirm('송출을 종료할까요?'))return;
  try{const promise=session.command(button.dataset.action);$('result').textContent='처리 중…';paint();await promise;}catch(e){$('result').textContent=e.message;}paint();
+};
+$('scriptureQuery').addEventListener('input',paint);
+$('scriptureForm').onsubmit=async event=>{
+ event.preventDefault();if(compositionSubmitBlocked(event.currentTarget)||$('scriptureShow').disabled)return;
+ try{const promise=session.command('scripture-show',{query:$('scriptureQuery').value.trim()});$('result').textContent='말씀을 불러오는 중…';paint();await promise;}
+ catch(error){$('result').textContent=error.message;}paint();
 };
 document.addEventListener('visibilitychange',()=>{if(document.hidden)session?.suspend();else{session?.refresh();void listOutputs();}paint();});
 window.addEventListener('offline',()=>{session?.offline();paint();});

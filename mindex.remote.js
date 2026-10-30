@@ -62,15 +62,33 @@
    const intro=slide?.type==='song-title'&&slide.songTimingEligible&&sync?.localTiming&&sync.intro;
    return {p,m,slide,sync,own,intro};
   }
+  function sermonIndex(){
+   const ids=new Set((state.serviceItems[serviceId]||[]).filter(isPresenterPreparationSermonTitleItem).map(item=>item.id));
+   return state.presenter.slides.findIndex(slide=>ids.has(slide.elementId)&&['title-assignee','title-content'].includes(slide.type)&&!presenterSlideIsHidden(slide));
+  }
+  async function showScripture(target){
+   const query=typeof target?.query==='string'?target.query.trim():'';
+   if(!query||query.length>200)throw Error('성구를 200자 이내로 입력해 주세요.');
+   const p=state.presenter,owner=serviceId,index=p.index,slides=p.slides,signature=p.sourceSignature,live=p.liveScripture,transport=presenterTransportSequence;
+   const serial=++liveScriptureRequestSerial;
+   const slide=await buildLiveScriptureSlide(query);
+   if(serial!==liveScriptureRequestSerial||!read().live||owner!==serviceId||p.index!==index||p.slides!==slides||p.sourceSignature!==signature||p.liveScripture!==live||presenterTransportSequence!==transport)throw Error('PC 화면이나 말씀이 바뀌었어요. 확인 후 다시 송출해 주세요.');
+   if(!slide)throw Error('성구를 불러오지 못했습니다. 입력을 확인해 주세요.');
+   updateLiveScriptureDraft(query,serviceId);
+   p.liveScripture={reference:slide.title,draft:query,active:true,slide};
+   p.livePraise=emptyLivePraiseState(p.livePraise?.draft||p.livePraise?.query||'');p.safetyBlank=false;
+   publishPresenterState({force:true});renderPresenterControlState(serviceId);
+  }
   function read(){
    if(followOutput&&state.presenter.outputSessionId===outputSession&&state.presenter.outputWindow===outputWindow)serviceId=state.presenter.serviceId;
    const {p,m,slide,sync,own,intro}=context();
    const live=p.serviceId===serviceId&&(followOutput||state.selectedServiceId===serviceId)&&p.outputSessionId===outputSession&&p.outputWindow===outputWindow&&presenterControllerIsLive(serviceId)&&isPresenterOutputWindowOpen();
    const transparent=p.safetyBlank&&p.safetyBlankMode==='transparent';
-   const allowed=['jump','prev','next',p.safetyBlank&&!transparent?'unblank':'blank',transparent?'untransparent':'transparent'];
+   const allowed=['scripture-show','jump','prev','next',p.safetyBlank&&!transparent?'unblank':'blank',transparent?'untransparent':'transparent'];
    if(window.mindexElectron?.fullscreenPresenterOutput)allowed.push('output-fullscreen');
    if(window.mindexElectron?.setPresenterAlwaysOnTop)allowed.push(p.alwaysOnTop?'output-unpin':'output-pin');
    if(admin)allowed.push('output-stop');
+   if(sermonIndex()>=0)allowed.push('sermon-title');
    if(!m.pending&&!m.fadeStop){
     if((own||intro)&&!m.playing)allowed.push('play');
     if(own&&m.playing)allowed.push('pause');
@@ -80,7 +98,7 @@
    const video=presenterRemoteVideoState(serviceId);
    if(video?.ready)allowed.push(...(video.status==='playing'?['video-pause']:['video-play']), 'video-restart');
    const next=p.slides.slice(p.index+1).find(s=>!presenterSlideIsHidden(s));
-   return {live,video,serviceTitle:serviceDisplayTypeName(state.services.find(s=>s.id===serviceId))||'예배',catalogKey:catalogKey(),index:p.index,total:p.slides.length,blank:!!p.safetyBlank&&!transparent,transparent:!!transparent,alwaysOnTop:!!p.alwaysOnTop,current:text(p.liveScripture?.active?p.liveScripture.slide:slide),next:text(next),nextTitle:[...new Set([next?.elementLabel||next?.sectionLabel,next?.elementTitle||next?.title].filter(Boolean))].join(' · ').slice(0,200),allowed,
+   return {live,video,liveReference:p.liveScripture?.active?p.liveScripture.reference:'',serviceTitle:serviceDisplayTypeName(state.services.find(s=>s.id===serviceId))||'예배',catalogKey:catalogKey(),index:p.index,total:p.slides.length,blank:!!p.safetyBlank&&!transparent,transparent:!!transparent,alwaysOnTop:!!p.alwaysOnTop,current:text(p.liveScripture?.active?p.liveScripture.slide:slide),next:text(next),nextTitle:[...new Set([next?.elementLabel||next?.sectionLabel,next?.elementTitle||next?.title].filter(Boolean))].join(' · ').slice(0,200),allowed,
     previewCurrent:p.safetyBlank&&p.safetyBlankMode==='transparent'?preview(presenterSafetyBlankSlide('transparent')):p.safetyBlank?'<div style="width:100%;height:100%;background:#000"></div>':preview(p.liveScripture?.active?p.liveScripture.slide:slide),previewNext:preview(next),
     music:!own&&!intro?'연결된 음원 없음':m.pending?'음원 준비 중':m.fadeStop?'페이드아웃 중':`${m.playing?'재생 중':'정지 / 일시정지'}${sync?.localTiming?m.autoSyncSuspended?' · 자동 넘김 해제':' · 자동 넘김':''}`,
     // Compare identities without disclosing media URLs or the full worship source.
@@ -89,6 +107,12 @@
   async function perform(action,target){
    if(!read().live||!read().allowed.includes(action))throw Error('현재 상태에서는 이 조작을 할 수 없습니다.');
    const {p,m,slide,intro}=context();
+   if(action==='scripture-show')return showScripture(target);
+   if(action==='sermon-title'){
+    const index=sermonIndex();if(index<0)throw Error('설교 제목 슬라이드가 없습니다.');
+    ++liveScriptureRequestSerial;
+    return runPresenterAction('jump',serviceId,{index,scroll:false});
+   }
    if(action==='jump'){
     if(!target||target.key!==catalogKey()||!Number.isSafeInteger(target.index)||target.index<0||target.index>=p.slides.length||presenterSlideIsHidden(p.slides[target.index]))throw Error('슬라이드가 변경됐습니다. 목록을 다시 열어 주세요.');
     return runPresenterAction('jump',serviceId,{index:target.index,scroll:false});
@@ -194,7 +218,7 @@
   if(!registryActive||registry||registryLoading||!hostContext())return;
   registryLoading=true;const epoch=registryEpoch;
   try{
-   const {createOutputRegistry}=await import('./mindex.remote-admin.mjs?v=9');
+   const {createOutputRegistry}=await import('./mindex.remote-admin.mjs?v=10');
    if(!registryActive||epoch!==registryEpoch)return;
    registry=createOutputRegistry(()=>{
     const c=hostContext();if(!c)return null;
