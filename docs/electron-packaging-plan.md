@@ -247,3 +247,9 @@ First formal product target is **1.0.0**, as agreed on 2026-10-30. Dawn remains
 a preparation/preview direction; this does not activate it, bump development
 package 0.1.1, or authorize signing, installation or a public release. Existing
 real-device and upgrade release conditions still apply.
+
+Unsigned native smoke may opt into `MINDEX_ISOLATED_TEST=1`. Only a test-marked
+package accepts it; before any renderer starts, a fresh temporary profile is
+selected, outbound web requests and permissions are denied, audio is muted, and
+presenter-output IPC is refused. This mode never copies an installed profile.
+It does not certify real output or online upgrades.

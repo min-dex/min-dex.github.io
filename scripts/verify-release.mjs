@@ -40,7 +40,7 @@ export function verifyRelease({ offline = false, platform = process.platform ===
   for (const args of [
     ['--test','tests/test_electron_updater.cjs','tests/test_release_preflight.mjs','tests/test_desktop_update_ui.cjs'],
     ['tests/test_worship_input_module_contract.cjs'],
-    ['--test','tests/test_product_identity.cjs'],
+    ['--test','tests/test_product_identity.cjs','tests/test_electron_test_isolation.cjs'],
   ]) {
     const result = spawnSync(process.execPath,args,{stdio:'inherit'});
     if (result.status !== 0) throw new Error('Release stopped. Desktop checks failed.');

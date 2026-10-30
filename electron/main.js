@@ -1,5 +1,7 @@
-const { app, BrowserWindow, ipcMain, screen, Menu, MenuItem } = require("electron");
+const { app, BrowserWindow, ipcMain, screen, Menu, MenuItem, session } = require("electron");
 const path = require("node:path");
+const testIsolation = require("./test-isolation").configureTestIsolation({ app, session }, require("../package.json"));
+globalThis.__mindexTestIsolation = testIsolation;
 const { createUpdateController } = require("./updater");
 const { importKeynoteDeck } = require("./keynote-importer");
 
@@ -40,6 +42,7 @@ function bindMainWindowReloadShortcut(window) {
 }
 
 function createMainWindow() {
+  if (testIsolation && !testIsolation.networkBlocked) throw new Error("Test isolation is not ready");
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.show();
     mainWindow.focus();
@@ -228,6 +231,7 @@ function updateRequest(event, action) {
 }
 
 ipcMain.handle("mindex:open-presenter", (_event, payload = {}) => {
+  if (testIsolation) return { ok: false, reason: "isolated-test" };
   createPresenterWindow(payload);
   return { ok: true };
 });
