@@ -43,7 +43,7 @@
       for(const row of candidateMarks)if(previous?.candidates.get(row.id)!==JSON.stringify(row))changedSources.add(row.import_source_id);
       if(previous)for(const [id,value] of previous.candidates)if(!candidateIndex.has(id))changedSources.add(JSON.parse(value).import_source_id);
       const sourceBatch=[...changedSources].filter(id=>sourceIds.has(id));
-      const services=await batches(client,'mindex_worship_services','id,service_type_id,service_date,title,service_alias,status,praise_leader,worship_leader,no_gathering:source_ref->no_gathering','id',changedServices);
+      const services=await batches(client,'mindex_worship_services','id,service_type_id,service_date,title,service_alias,status,praise_leader,worship_leader,no_gathering:source_ref->no_gathering,no_gathering_reason:source_ref->>no_gathering_reason','id',changedServices);
       const sections=await batches(client,'mindex_worship_sections','id,service_id,sort_order,section_key,title','service_id',changedServices);
       const elements=await batches(client,'mindex_worship_elements',`id,section_id,sort_order,element_type,title,song_id,${state.singleSongCatalog ? "praise_record_id," : ""}label:source_ref->>label,template_suppressed:config->templateSuppressed,legacy_template_suppressed:config->template_suppressed,connectedPraise:config->connectedPraise,connected_praise:config->connected_praise,source_connectedPraise:source_ref->connectedPraise,source_connected_praise:source_ref->connected_praise`,'section_id',sections.map(row=>row.id),q=>q.eq('element_type','praise'));
       const sources=await batches(client,'mindex_worship_import_sources',WORSHIP_IMPORT_SOURCE_LIST_SELECT,'id',sourceBatch);

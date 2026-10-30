@@ -61,7 +61,7 @@ function serviceNavigationDetails(service = {}) {
   const base = serviceTypeDisplayName(typeId);
   const source = service._worshipSourceRef || service.source_ref || {};
   const raw = normalizeServiceDisplayName(serviceAlias(service));
-  const reason = String(source.no_gathering_reason || service.weekly_reason || "").trim();
+  const reason = String(source.no_gathering_reason || service.no_gathering_reason || service.weekly_reason || "").trim();
   const absent = source.no_gathering === true || source.no_gathering === "true" || service.no_gathering === true || /집회\s*없음/.test(raw);
   let alias = raw.replace(/\s*·\s*정규 집회 없음\s*$/, "").replace(/\s+대체\s*$/, "").trim();
   if (!alias && absent && /(?:으로|로) 대체$/.test(reason)) alias = reason.replace(/(?:으로|로) 대체$/, "").trim();

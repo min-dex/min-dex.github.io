@@ -4152,7 +4152,7 @@ async function fetchWorshipSetlistServices() {
   await ensureSingleSongActivation();
   // Only card metadata; do not load lyrics, slides, or full source documents.
   const results = await Promise.allSettled([
-    fetchSupabasePaged("mindex_worship_services", "id,service_type_id,service_date,title,service_alias,status,praise_leader,worship_leader,no_gathering:source_ref->no_gathering", q => q.order("id")),
+    fetchSupabasePaged("mindex_worship_services", "id,service_type_id,service_date,title,service_alias,status,praise_leader,worship_leader,no_gathering:source_ref->no_gathering,no_gathering_reason:source_ref->>no_gathering_reason", q => q.order("id")),
     fetchSupabasePaged("mindex_worship_sections", "id,service_id,sort_order,section_key,title", q => q.order("id")),
     fetchSupabasePaged("mindex_worship_elements", `id,section_id,sort_order,element_type,title,song_id,${state.singleSongCatalog ? "praise_record_id," : ""}label:source_ref->>label,template_suppressed:config->templateSuppressed,legacy_template_suppressed:config->template_suppressed,connectedPraise:config->connectedPraise,connected_praise:config->connected_praise,source_connectedPraise:source_ref->connectedPraise,source_connected_praise:source_ref->connected_praise`, q => q.eq("element_type", "praise").order("id")),
   ]);
@@ -4167,7 +4167,7 @@ async function loadWorshipSetlistArchive({ force = false } = {}) {
   if (state.worshipSetlistArchive.loading) return;
   if (state.worshipSetlistArchive.loaded && !force) return;
   // Keep a complete snapshot only; authenticated projects never use this public cache.
-  const cacheKey = `${state.config.url}:live-services-v4:${WORSHIP_IMPORT_SOURCE_LIST_SELECT}:${WORSHIP_IMPORT_CANDIDATE_LIST_SELECT}`;
+  const cacheKey = `${state.config.url}:live-services-v5:${WORSHIP_IMPORT_SOURCE_LIST_SELECT}:${WORSHIP_IMPORT_CANDIDATE_LIST_SELECT}`;
   const useCache = !state.config.authRequired;
   if (!state.worshipSetlistArchive.loaded && useCache && !force) {
     const cached = readStaticSupabaseCache("worship_setlist_archive", cacheKey)?.[0];
@@ -25176,7 +25176,7 @@ async function persistWorshipSetlistLeader(id, value, expectedLeader, attempt = 
     if (source) source.leader = leader;
   }
   if (!state.config.authRequired && archive.loaded) {
-    const cacheKey = `${state.config.url}:live-services-v4:${WORSHIP_IMPORT_SOURCE_LIST_SELECT}:${WORSHIP_IMPORT_CANDIDATE_LIST_SELECT}`;
+    const cacheKey = `${state.config.url}:live-services-v5:${WORSHIP_IMPORT_SOURCE_LIST_SELECT}:${WORSHIP_IMPORT_CANDIDATE_LIST_SELECT}`;
     writeStaticSupabaseCache("worship_setlist_archive", cacheKey, [{ sources: archive.sources, candidates: archive.candidates, live: archive.live }]);
   }
   window.MINDEX_CONTENT_LIVE?.publish("setlist-archive", "all");

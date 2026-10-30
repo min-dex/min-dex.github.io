@@ -27,6 +27,12 @@ try:
       for(const html of [renderServiceWeekCard(svc),renderServiceDateCard(svc,{showType:true}),renderWorshipWeekStatus(entry)])if(!html.includes(title)||!html.includes(context)||html.includes('정규 집회 없음')||html.includes('>집회 없음<'))throw Error(html);
       if(JSON.stringify(svc)!==source)throw Error('replacement mutated input');
     }
+    const narrow={id:'narrow',service_type_id:'sunday-afternoon',service_date:'2026-11-01',service_alias:'',no_gathering:true,no_gathering_reason:'다니엘기도회로 대체'};
+    const originalNarrow=JSON.stringify(narrow);state.worshipSetlistArchiveView='date';
+    const narrowEntry=MindexWorshipWeek.build([],[narrow])[0].entries[0];
+    const narrowHtml=renderWorshipWeekStatus(narrowEntry);
+    if(!narrowHtml.includes('다니엘기도회')||!narrowHtml.includes('주일오후예배 대체')||narrowHtml.includes('>집회 없음<'))throw Error(narrowHtml);
+    if(JSON.stringify(narrow)!==originalNarrow)throw Error('narrow payload mutated');
     if(serviceNavigationDetails({type_id:'sunday-main',alias:'온세대 찬양예배'}).context!=='주일예배 [3부]')throw Error('ordinary alias lost type');
     const regular={id:'regular',type_id:'sunday-main',alias:'',date:'2026-10-25'};state.services=[regular];state.serviceItems={regular:[]};state.calendarData=[];
     for(const html of [renderServiceDateCard(regular,{showType:true}),renderServiceWeekCard(regular),renderPresenterSidebarServiceSummary(regular),renderServiceListTypeBlock({id:'sunday-main'},[regular],'')])if(html.includes('온세대'))throw Error('regular service UI invented alias');
