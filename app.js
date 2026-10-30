@@ -20145,48 +20145,6 @@ function getSongSearchMatch(song, tokens = getSearchTokens(state.search), option
   };
 }
 
-// Derived search aliases only. Never persist these as titles or subtitles.
-function praiseFirstLineAliases(song, versions = song?.versions || []) {
-  const aliases = [];
-  for (const version of versions) {
-    for (const form of version.forms || []) {
-      const type = normalizeFormPartType(form.part_type);
-      if (type !== "Verse" && type !== "Chorus") continue;
-      const line = splitFreeShowLines(normalizeLyricsForCopy(form.lyrics))
-        .map(text => text.replace(/<[^>]*>/g, "").trim())
-        .map(text => presenterLyricLineWithoutInlineVerseNumber(text,
-          String(Number((text.match(/^\s*(\d{1,2})(?:\s*[.)])?\s+(?=\S)/) || [])[1]) || "")))
-        .find(text => compactSearchValue(text) && !/^\[?(?:(?:verse|chorus|v|c)\s*\d*|\d{1,2}\s*절?|후렴)\]?[.)]?$/i.test(text));
-      if (line) aliases.push(line);
-    }
-  }
-  return [...new Set(aliases)];
-}
-
-function praiseFirstLineMatches(value, item = null, service = null) {
-  const tokens = getSearchTokens(value), key = compactSearchValue(value);
-  if (!key || !tokens.length) return [];
-  return (state.songs || []).filter(isSelectablePraiseSong).flatMap(song => {
-    const versions = item ? serviceSelectableSongVersions(song, item, service) : song.versions || [];
-    const fields = praiseFirstLineAliases(song, versions).map(text => searchField("incipit", text, 95, "첫 소절"));
-    const exact = fields.some(field => field.candidate.compact === key);
-    return exact || fields.some(field => tokens.every(token => matchSearchField(field, token))) ? [{song, exact}] : [];
-  });
-}
-
-function resolvePraiseFirstLine(value, item = null, service = null) {
-  const matches = praiseFirstLineMatches(value, item, service);
-  const exact = matches.filter(match => match.exact);
-  const candidates = exact.length ? exact : matches;
-  // A partial line is a suggestion, never permission to choose/create a song.
-  if (!exact.length) return {song:null, candidates};
-  const groups = groupPraiseSongs(exact.map(match => match.song), true);
-  const song = groups.length === 1 ? state.songs.find(song => song.id === groups[0].id) : null;
-  // Legacy multi-version records require an explicit version choice; an alias
-  // from a later version must never silently select the first version.
-  return {song: song && !song._singleSongRecord && (song.versions || []).length > 1 ? null : song, candidates};
-}
-
 function getSongSearchFields(song, options = {}) {
   if (!song || typeof song !== "object") return [];
   const includeLyrics = options.includeLyrics !== false;
