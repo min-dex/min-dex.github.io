@@ -87,8 +87,12 @@ try:
     assert prev['x']+prev['width']<=current['x'] and current['x']+current['width']<=nxt['x']
     assert prev['width']==nxt['width']==50
     for button in phone.locator('[data-action]:visible').all():
-     assert button.locator('svg').count()==1
      assert button.evaluate('e=>e.scrollWidth<=e.clientWidth')
+     if button.get_attribute('data-action') == 'sermon-title':
+      assert button.inner_text() == '설교 제목으로'
+      assert button.locator('svg').count() == 0
+      continue
+     assert button.locator('svg').count()==1
      icon=button.locator('svg')
      expected=20 if button.get_attribute('data-action') in ('prev','next') else 16
      assert icon.bounding_box()['width']==expected
