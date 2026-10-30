@@ -14,14 +14,16 @@ try:
    page=browser.new_page();page.route('**/remote-panel-fixture',lambda r:r.fulfill(body=HTML,content_type='text/html'));page.route('**/mindex.remote-admin.mjs*',lambda r:r.fulfill(body=REGISTRY,content_type='text/javascript'))
    page.goto(url.rsplit('/',1)[0]+'/remote-panel-fixture');page.wait_for_function("document.querySelector('[data-remote-code]').textContent==='0123'")
    assert not page.locator('.remote-panel').is_visible()
-   assert page.locator('#remotePanelBtn [data-remote-button-label]').inner_text()=='0123'
+   assert page.locator('#remotePanelBtn [data-remote-button-label]').count()==0
+   assert page.locator('#remotePanelBtn').inner_text()==''
    assert page.locator('[data-presenter-remote] [data-remote-button-label]').inner_text()=='0123'
    assert page.locator('[data-remote-service-id]').is_visible()
    page.evaluate("state.presenter.serviceId='other';updateRemote({code:'0123',connected:false,available:true})");assert page.locator('[data-remote-service-id]').is_hidden()
    page.evaluate("state.presenter.serviceId='s';updateRemote({code:'0123',connected:false,available:true})")
    page.click('#remotePanelBtn');assert page.locator('.remote-panel').is_visible();assert page.evaluate('starts')==1
    page.evaluate("updateRemote({code:'0123',connected:true,available:true})")
-   assert page.locator('#remotePanelBtn').get_attribute('aria-label')=='송출 코드 0123'
+   assert page.locator('#remotePanelBtn').get_attribute('aria-label')=='원격 조작'
+   assert page.locator('#remotePanelBtn').get_attribute('title')=='원격 조작'
    page.evaluate("document.querySelector('[data-remote-end]').onclick();document.querySelector('[data-remote-end]').onclick();")
    assert page.evaluate('ends')==1;assert page.locator('[data-remote-end]').is_disabled()
    page.evaluate('finishEnd()');page.wait_for_function("!document.querySelector('#remotePanelBtn').disabled");assert page.locator('[data-remote-code]').inner_text()=='0123'

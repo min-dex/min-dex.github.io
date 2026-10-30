@@ -10,7 +10,8 @@
  panel.innerHTML='<header><span class="remote-brand-mark" aria-hidden="true"></span><h2 id="remoteTitle">Mindex Remote</h2><button class="icon-btn" data-remote-close aria-label="닫기" title="닫기"><i data-lucide="x"></i></button></header><section class="remote-connection"><p data-remote-status role="status"></p><strong data-remote-code></strong><p data-remote-help></p></section><footer class="remote-actions"><a class="btn secondary" data-remote-link target="_blank" rel="noopener"><i data-lucide="external-link"></i><span>Remote 열기</span></a><button class="btn secondary" data-remote-end disabled>연결 해제</button></footer>';
  document.body.append(panel);window.lucide?.createIcons({root:panel});const $=s=>panel.querySelector(s);
  function paintPanel(){
-  for(const button of [trigger,...document.querySelectorAll('[data-presenter-remote]')]){
+  trigger.disabled=ending;
+  for(const button of document.querySelectorAll('[data-presenter-remote]')){
    let text=button.querySelector('[data-remote-button-label]');if(!text){text=document.createElement('span');text.dataset.remoteButtonLabel='';button.append(text);}
    if(button.dataset.remoteServiceId){const code=codeFor(button.dataset.remoteServiceId);button.hidden=!code;text.textContent=code;button.disabled=ending;button.setAttribute('aria-label','원격 조작 예배 코드 '+code);continue;}
    text.textContent=buttonLabel();button.disabled=ending;button.dataset.remotePairing=String(!!remoteState.code);

@@ -6205,9 +6205,6 @@ body[data-module="presenter"]:not(:has(#servicePresenterControls[data-focus-view
 .svc-presenter-output-group [data-presenter-music-manager] { grid-column:1 / -1; grid-row:3; }
 
 /* Pairing code is available directly on either remote launcher. */
-#remotePanelBtn [data-remote-button-label] { display:none; }
-#remotePanelBtn[data-remote-pairing="true"] { width:auto; min-width:100px; padding:0 8px; gap:6px; }
-#remotePanelBtn[data-remote-pairing="true"] [data-remote-button-label] { display:inline; }
 [data-remote-button-label] { font-variant-numeric:tabular-nums; }
 
 /* One media popover shared by both presenter views. */

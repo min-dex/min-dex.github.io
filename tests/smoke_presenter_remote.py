@@ -37,7 +37,8 @@ try:
    }''')
    host.click('#remotePanelBtn');host.wait_for_function("document.querySelector('[data-remote-code]').textContent.length>0")
    assert host.locator('.remote-panel').is_visible()
-   assert host.locator('#remotePanelBtn [data-remote-button-label]').inner_text()==host.locator('[data-remote-code]').text_content()
+   assert host.locator('#remotePanelBtn [data-remote-button-label]').count()==0
+   assert host.locator('#remotePanelBtn').get_attribute('aria-label')=='원격 조작'
    assert host.locator('[data-remote-close] svg.lucide-x').count()==1
    assert host.locator('.remote-panel').evaluate('e=>getComputedStyle(e).borderRadius')=='5px'
    assert host.locator('[data-remote-start]').count()==0
