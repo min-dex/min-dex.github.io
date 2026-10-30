@@ -5212,3 +5212,16 @@ element ID를 먼저 사용한다. 기존 저장된 두 ID가 같은 slot을 가
   The offline `smoke_inline_scripture_audit.py` uses real parse, validation,
   scripture fetching, atomic save and reload handlers with synthetic transport,
   including late lookup/save responses, retry, untouched blanks and other-row preservation.
+
+
+## Title metadata roles ·2026-10-30
+
+Song title metadata contains orderTitle, authored/selected-version output title,
+and detail. Hymn detail uses a verified canonical hymn identity or explicit
+hymnal name with the number; unknown books show only the number. Never expose
+editing version names such as 기본 as title detail. Ordinary songs use original
+title, then subtitle; identical main/detail text omits detail. Section-heading
+conversion retains the same metadata. Fullscreen and chromakey retain their
+existing layout and typography, including intentional design-specific detail
+suppression; prayer/sermon assignees keep their existing roles. No stored title,
+lyrics, form, operational data or playback state is rewritten.

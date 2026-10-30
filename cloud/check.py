@@ -142,6 +142,7 @@ SMOKES = (
     "smoke_praise_lifecycle.py",
     "smoke_presenter_freshness.py",
     "smoke_native_freshness_title.py",
+    "smoke_title_metadata.py",
     "smoke_deck_original.py",
     "smoke_keynote_html.py",
     "smoke_keynote_cards.py",

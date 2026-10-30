@@ -1028,7 +1028,8 @@ function presenterSlidesWithSongContentHeading(item, section, song, version, dis
   if (!heading || !slides.length || isServiceConnectedPraiseSecondaryItem(item) || slides.some(slide => normalizePresenterFormPresetLabel(slide.formLabel).type === "title" || (slide.orderTitle === heading && slide.contentTitle))) return slides;
   const content = presenterSongTitleDisplayTitle(song, version, displayText);
   if (!content) return slides;
-  return [presenterOrderContentTitleSlide(item, section, index, heading, formatPresenterSongTitleText(content)), ...slides];
+  return [{ ...presenterOrderContentTitleSlide(item, section, index, heading, formatPresenterSongTitleText(content)),
+    songTitleContent: { orderTitle: heading, title: content, detail: presenterSongTitleDetail(song, version), detailKind: presenterSongTitleDetailKind(song, version) } }, ...slides];
 }
 
 function presenterSongTitleSlide(item, section, song, version, displayText, index) {
@@ -1048,7 +1049,7 @@ function presenterSongTitleSlide(item, section, song, version, displayText, inde
   };
   if (sectionHeading) {
     return { ...presenterOrderContentTitleSlide(item, section, index, sectionHeading, titleText),
-      formKey: "title:0", formLabel: "T" };
+      formKey: "title:0", formLabel: "T", songTitleContent };
   }
   return {
     id: `${item.id || index}:song-title`,
@@ -1059,7 +1060,7 @@ function presenterSongTitleSlide(item, section, song, version, displayText, inde
     formKey: "title:0", formLabel: "T",
     label: item.label || "",
     title: displayTitle,
-    subtitle: connectedTitle ? "" : versionDisplayName(song, version),
+    subtitle: songDetail,
     songTitleContent,
     marker,
     sectionHeading,
@@ -1080,8 +1081,11 @@ function presenterSongTitleDetail(song = null, version = null) {
   const hymnNo = presenterSongTitleHymnNo(song, version);
   if (hymnNo) {
     const number = hymnNo.replace(/^통\s*/, "");
-    const versionName = versionDisplayName(song, version);
-    return `${versionName} ${number}장`;
+    const identity = String(song?.id || "");
+    const names = [version?.name, version?.curated_version_name, version?.raw_section_name, version?.version_label].join(" ");
+    const book = /^통/.test(hymnNo) || /^SONG-HYMN-T/.test(identity) || /^kth-/.test(identity)
+      ? "통일찬송가" : /^SONG-HYMN-N/.test(identity) || /^knh-/.test(identity) || /새찬송가/.test(names) ? "새찬송가" : "";
+    return [book, `${number}장`].filter(Boolean).join(" ");
   }
   return String(song?.original_title || "").trim() || String(song?.subtitle || "").trim();
 }
@@ -1093,13 +1097,13 @@ function presenterSongTitleDetailKind(song = null, version = null) {
 }
 
 function presenterSongTitleContent(slide = {}) {
-  if (slide.songTitleContent) return slide.songTitleContent;
-  // Older in-memory snapshots use separate fields; normalize at the boundary.
-  return {
+  const content = slide.songTitleContent || {
     orderTitle: slide.omitFullscreenOrderTitle ? "" : String(slide.orderTitle || slide.sectionHeading || slide.label || "").trim(),
-    title: String(slide.fullscreenSongName || slide.songTitle || slide.title || slide.text || "").trim(),
+    title: String(slide.contentTitle || slide.fullscreenSongName || slide.songTitle || slide.title || slide.text || "").trim(),
     detail: String(slide.songDetail || "").trim(),
   };
+  const key = value => compactSearchValue(String(value || "").replace(PRESENTER_SONG_NOTE_PATTERN, ""));
+  return { ...content, detail: key(content.detail) === key(content.title) ? "" : content.detail };
 }
 
 function presenterOrderContentTitleSlide(item, section, index, orderTitle = "", contentTitle = "") {
@@ -4140,9 +4144,7 @@ function presenterFullscreenSongTitleView(slide, options = {}) {
     || (slide.type === "song-title" && presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE));
   if (!isSectionSong && !isStandaloneSong) return slide;
 
-  const content = isSectionSong
-    ? { orderTitle: slide.orderTitle, title: slide.contentTitle, detail: "" }
-    : { ...presenterSongTitleContent(slide) };
+  const content = presenterSongTitleContent(slide);
   const title = isSectionSong
     ? formatPresenterSongTitleText(content.title)
     : String(content.title || "").replace(PRESENTER_SONG_NOTE_PATTERN, "").trim();
