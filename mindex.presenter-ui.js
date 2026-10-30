@@ -390,7 +390,7 @@ function renderPresenterInlineEditor(service, item, fields = []) {
     button: `<button type="button" class="icon-btn service-outline-edit" data-presenter-inline-toggle="${escapeAttr(item.id)}" data-service-id="${escapeAttr(service.id)}" aria-expanded="${open}" aria-controls="${escapeAttr(id)}" aria-label="${escapeAttr(item.label || '예배 순서')} 편집" title="편집"><i data-lucide="pencil" aria-hidden="true"></i></button>`,
     panel: `<div id="${escapeAttr(id)}" class="svc-outline-editor" data-inline-item-id="${escapeAttr(item.id)}" data-service-id="${escapeAttr(service.id)}" ${open ? '' : 'hidden'}>
       ${fields.map(field => renderPresenterPreparationField(service, field)).join('')}
-      <div class="svc-presenter-preparation-actions"><button type="button" class="btn secondary svc-outline-editor-save" data-presenter-inline-apply ${saving ? 'disabled' : ''}>${saving ? '저장 중' : '저장'}</button></div>
+      <div class="svc-presenter-preparation-actions"><button type="button" class="btn primary svc-outline-editor-save" data-presenter-inline-apply ${saving ? 'disabled' : ''}>${saving ? '저장 중' : '저장'}</button></div>
     </div>`,
   };
 }

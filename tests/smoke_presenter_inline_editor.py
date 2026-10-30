@@ -1,5 +1,7 @@
 """Offline actual inline clicks, atomic failure/late receipt and independent drafts."""
 import os
+import tempfile
+from pathlib import Path
 os.environ['MINDEX_SMOKE_OFFLINE'] = '1'
 from urllib.parse import urlsplit
 from smoke_app import (start_local_app_server, sync_playwright, launch_chromium,
@@ -162,7 +164,7 @@ def exercise(page, url, engine):
         }''', sidebar_width)
         if sidebar_width == 320:
             panel(2).scroll_into_view_if_needed()
-            page.screenshot(path=f'/private/tmp/inline-editor-final-{engine}.png')
+            page.screenshot(path=str(Path(tempfile.gettempdir()) / f'inline-editor-final-{engine}.png'))
     page.evaluate("document.querySelector('.service-sidebar--presenter').removeAttribute('style');document.querySelector('.app-shell').style.removeProperty('--shell-left-w')")
     page.evaluate('inlineFixture.failure=true')
     panel(2).locator('[data-presenter-inline-apply]').click()
