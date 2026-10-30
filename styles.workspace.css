@@ -1916,10 +1916,6 @@ body[data-theme="dark"] .service-week-card:hover {
   grid-template-rows: minmax(min-content, 1fr);
   align-content: stretch;
 }
-.svc-presenter-input-stack {
-  align-self: end;
-  min-width: 0;
-}
 .svc-presenter-input-rail {
   display: grid;
   min-width: 0;
@@ -5758,8 +5754,7 @@ body[data-module="praise"] .praise-forms-panel .version-compare-column {
 #servicePresenterControls[data-focus-view="true"] .svc-board-subgroup-controls,
 #servicePresenterControls[data-focus-view="true"] .svc-board-subgroup-commit,
 #servicePresenterControls[data-focus-view="true"] .svc-reference-media-quick-add,
-#servicePresenterControls[data-focus-view="true"] .svc-board-subgroup-head-row > :not(.svc-board-subgroup-head),
-body:has(#servicePresenterControls[data-focus-view="true"]) .svc-presenter-input-stack { display: none; }
+#servicePresenterControls[data-focus-view="true"] .svc-board-subgroup-head-row > :not(.svc-board-subgroup-head) { display: none; }
 #servicePresenterControls[data-focus-view="true"] .svc-slide-board {
   --svc-thumb-ring-space: 4px;
   --svc-focus-thumb-width: calc(184px * var(--svc-thumb-scale, 1) + 8px);
@@ -6136,7 +6131,6 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
   body:has(#servicePresenterControls) .svc-presenter-side-panel > .svc-presenter-top {
     grid-column:1; grid-row:2; padding:10px 15px; min-width:0;
   }
-  body:has(#servicePresenterControls) .svc-presenter-input-stack { grid-column:1; grid-row:4; padding:0 15px 15px; }
   body:has(#servicePresenterControls) .svc-presenter-input-rail { width:100%; }
   body:has(#servicePresenterControls) .svc-presenter-side-panel .svc-presenter-main { width:100%; }
   body:has(#servicePresenterControls) .svc-presenter-live-panel { max-width:100%; }

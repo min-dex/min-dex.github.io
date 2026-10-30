@@ -27,7 +27,7 @@ try:
                 page.evaluate('(theme)=>document.body.dataset.theme=theme',theme)
                 for width,height in [(1440,900),(1000,600),(768,700),(390,700),(320,700)]:
                     page.set_viewport_size({'width':width,'height':height})
-                    result=page.evaluate('''() => {
+                    result=page.evaluate('''async () => {
                       const assert=(ok,msg)=>{if(!ok)throw Error(msg)};
                       const sidebar=refs.rightSidebar;
                       const toolbar=document.querySelector('.svc-presenter-toolbar');
@@ -66,6 +66,15 @@ try:
                       assert(document.activeElement===document.querySelector('.svc-presenter-toolbar [data-presenter-citation-reference-input]'),'shortcut focus');
                       if(!document.querySelector('.svc-presenter-toolbar [data-presenter-citation-auto-output]').checked) document.querySelector('.svc-presenter-toolbar [data-presenter-citation-auto-output]').click();
                       renderPresenterDetail();
+                      if(innerWidth>=1000){
+                        const frame=()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+                        refs.detailPane.scrollTop=400;await frame();const top=toolbar.getBoundingClientRect().top;
+                        refs.detailPane.scrollTop+=50;await frame();
+                        assert(Math.abs(toolbar.getBoundingClientRect().top-top)<2,'toolbar unpinned while scrolling');
+                        assert(presenterViewportStickyTopOffset(refs.detailPane)>=toolbar.getBoundingClientRect().height,'scroll offset omits composer');
+                        renderPresenterDetail();assert(document.querySelector('[data-presenter-citation-reference-input]')===input&&input.value==='요 15:9','scroll refresh lost draft owner');
+                        refs.detailPane.scrollTop=0;
+                      }
                       return {width:innerWidth,composerHeight:composer.getBoundingClientRect().height};
                     }''')
                     print('PASS',engine,theme,result,flush=True)

@@ -61,13 +61,15 @@ try:
    page.evaluate('''()=>{
     const sidebar=document.createElement('aside');sidebar.id='prepared-preview-fixture';
     sidebar.innerHTML=renderPresenterRightSidebar(state.services[0],state.presenter.slides,true,state.presenter.index);
-    sidebar.querySelector('.svc-presenter-input-stack').innerHTML='<input value="unsaved draft">';
+    const toolbar=document.createElement('div');toolbar.className='svc-presenter-toolbar';
+    toolbar.innerHTML=renderPresenterToolbarScripture(state.services[0],[{liveScriptureControl:true,elementId:'citation'}]);
+    toolbar.querySelector('input[type=text]').value='unsaved draft';document.body.append(toolbar);
     document.body.append(sidebar);refs.detailPane.id='servicePresenterControls';window.beforePreviewCursor=state.presenter.index;
    }''')
    cards.nth(2).click()
    assert page.locator('#prepared-preview-fixture [data-presenter-jump-input]').input_value()==str(page.evaluate('cardIndexes()[2]+1'))
    assert page.locator('#prepared-preview-fixture .svc-presenter-live-preview img').get_attribute('src').endswith('page2.jpeg')
-   assert page.locator('#prepared-preview-fixture .svc-presenter-input-stack input').input_value()=='unsaved draft'
+   assert page.locator('.svc-presenter-toolbar [data-presenter-citation-reference-input]').input_value()=='unsaved draft'
    assert page.evaluate('!isPresenterOutputWindowOpen()'), page.evaluate('({index:state.presenter.index,before:beforePreviewCursor,open:isPresenterOutputWindowOpen()})')
    assert '선택 화면' in page.locator('#prepared-preview-fixture .svc-presenter-live-panel').inner_text()
    page.evaluate('''()=>{
