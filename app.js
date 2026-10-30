@@ -5621,17 +5621,33 @@ function buildDepartmentCalendarServiceRequest(aggregate, field, value, prepareC
     protocolVersion: 1, requestId: createUuid() };
 }
 
+const calendarCellWrites = new Map();
 async function saveCalendarCell(id, field, value, options = {}) {
+  const key = calendarCellSaveKey(id, field), client = state.client, token = createLocalId();
+  const saves = state.calendarCellSaves;
+  const earlier = calendarCellWrites.get(key) || Promise.resolve();
+  saves.set(key, token);setCalendarCellSaveState(options.cell, "saving");
+  const pending = earlier.catch(() => false).then(() => client === state.client && saveCalendarCellOnce(id, field, value, { ...options, token, saves, client }));
+  calendarCellWrites.set(key, pending);
+  try { return await pending; } finally {
+    if (calendarCellWrites.get(key) === pending) calendarCellWrites.delete(key);
+    if (saves.get(key) === token) {
+      saves.delete(key);setCalendarCellSaveState(options.cell, "");
+    }
+  }
+}
+
+async function saveCalendarCellOnce(id, field, value, options = {}) {
   const cell = options.cell || null;
-  const previousValue = String(options.previousValue || "");
   const row = state.calendarData.find((item) => String(item.id) === String(id));
+  const previousValue = String(row?.[field] ?? options.previousValue ?? "");
   const allowedFields = new Set([
     "note",
     "church_schedule",
     ...CALENDAR_DEPARTMENT_FIELDS.map(([fieldName]) => fieldName),
     ...CALENDAR_LECTIONARY_FIELDS.map(([fieldName]) => fieldName),
   ]);
-  if (!state.client || !row || row._generatedFeast || !allowedFields.has(field)) {
+  if (!options.client || !row || row._generatedFeast || !allowedFields.has(field)) {
     if (cell) {
       cell.textContent = previousValue;
       cell.dataset.initialValue = previousValue;
@@ -5639,29 +5655,27 @@ async function saveCalendarCell(id, field, value, options = {}) {
     return false;
   }
 
-  const publishClient = state.client;
+  const publishClient = options.client, saves = options.saves;
   const key = calendarCellSaveKey(id, field);
-  const token = createLocalId();
-  state.calendarCellSaves.set(key, token);
-  setCalendarCellSaveState(cell, "saving");
+  const token = options.token;
   try {
     if (DEPARTMENT_ASSIGNEE_FIELDS.has(field)) {
       await departmentCalendarSave(row, field, value, previousValue);
     } else {
-      const { error } = await state.client.from("mindex_sunday_calendar").update({ [field]: value }).eq("id", id);
+      const { error } = await publishClient.from("mindex_sunday_calendar").update({ [field]: value }).eq("id", id);
       if (error) throw error;
     }
     row[field] = value;
-    if (state.calendarCellSaves.get(key) === token) {
-      state.calendarCellSaves.delete(key);
+    if (saves.get(key) === token) {
+      saves.delete(key);
       setCalendarCellSaveState(cell, "saved");
       if (cell) cell.dataset.initialValue = value;
     }
     if (publishClient === state.client && !DEPARTMENT_ASSIGNEE_FIELDS.has(field)) publishDepartmentTabChange(row, [], { calendarOnly: true });
     return true;
   } catch (error) {
-    if (state.calendarCellSaves.get(key) === token) {
-      state.calendarCellSaves.delete(key);
+    if (saves.get(key) === token) {
+      saves.delete(key);
       if (cell) {
         if (cell.textContent.replace(/\n/g, " ").trim() === value) cell.textContent = previousValue;
         cell.dataset.initialValue = previousValue;
