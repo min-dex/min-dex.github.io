@@ -132,6 +132,10 @@ try:
                       state.serviceItems[sid]=groupWorshipElements(db.sections,db.elements)[sid];
                       delete state.presenterPreparationDrafts[sid];renderServiceList();renderPresenterDetail();
                       check(state.serviceItems[sid][0].song_id===hymn.id,'rehydrate lost hymn reference');
+                      const emptyPicker=document.querySelector('.svc-board-subgroup-controls .svc-song-picker--linked');
+                      check(emptyPicker && !emptyPicker.textContent.trim(),'single-variant fixture has unexpected picker content: '+(emptyPicker?.outerHTML||document.querySelectorAll('.svc-song-picker--linked').length));
+                      check(emptyPicker.getClientRects().length===0,'empty variant picker still occupies controller title/form space');
+
                       const savedMemo=parseServiceItemMemo(state.serviceItems[sid][0].memo);
                       check(savedMemo.formHint==='V1'&&JSON.stringify(savedMemo.audioTiming)===originalTiming,'form/timing changed '+JSON.stringify(savedMemo));
                       check(JSON.stringify(records)===recordBefore&&creates===0,'shared praise data changed');

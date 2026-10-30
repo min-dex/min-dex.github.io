@@ -193,3 +193,14 @@ as 영어 remain explicit. Metadata edit values, raw evidence, record titles, ou
 titles, lyrics/media/timing and worship identities are unchanged. Legacy version
 naming remains under its existing rules. The first-line browser regression also
 asserts compact labels, custom-name retention and zero stored-object mutation.
+
+
+## Single-variant controller spacing ·2026-10-30 follow-up
+
+When the native version picker and score warning are both absent, its linked
+wrapper is hidden too. Previously the empty flex item still occupied space
+between the controller song title and form. The DOM replacement target remains
+for subsequent search/variant changes; loading failures, score warnings and
+multi-variant controls stay visible. No song, form, media, timing or service data
+changes. The actual controller regression fails on the old nonempty layout box
+and verifies no client rectangle after repair in Chromium and WebKit.

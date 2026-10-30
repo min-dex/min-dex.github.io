@@ -27107,7 +27107,7 @@ function renderServiceSongPicker(item, index, model = serviceItemEditorModel(ite
       ? `<span class="svc-song-picker-warning">${state.hymnScoreManifestLoaded ? "등록된 악보가 없습니다." : hymnScoreManifestLoadPromise ? "악보를 불러오는 중…" : "악보를 불러오지 못했어요."}</span>`
       : "";
     return `
-      <div class="svc-song-picker svc-song-picker--linked">
+      <div class="svc-song-picker svc-song-picker--linked"${!versionPicker && !typeWarning ? " hidden" : ""}>
         ${versionPicker}
         ${typeWarning}
       </div>`;
