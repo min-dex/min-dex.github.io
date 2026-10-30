@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261031-remote-calendar-ux",
+  "version": "20261031-scripture-chapter-reference",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "04584d908dde454e214cf3505266ef8a097450710054491cdb7af919a67e294d",
-  "runtime_sha256": "785a33aa68465398353b049916df1e3c541bcb310f2683d37a0ed62c505323bd",
-  "source_bytes": 1352791,
-  "runtime_bytes": 965844,
-  "source_gzip": 309175,
-  "runtime_gzip": 242369
+  "source_sha256": "02ceebba98f17abf076e9c8c7505e6ec2c1c6bfc01a69f0f6140ca15e718921d",
+  "runtime_sha256": "d6e78d4de7ee7bb86fac2360d8ee0b1af09f0118edfa5532c42e911ed1fd3471",
+  "source_bytes": 1352904,
+  "runtime_bytes": 965881,
+  "source_gzip": 309216,
+  "runtime_gzip": 242395
 }

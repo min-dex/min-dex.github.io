@@ -209,6 +209,7 @@ SMOKES = (
     "smoke_praise_mutation_errors.py",
     "smoke_presenter_inline_editor.py",
     "smoke_inline_scripture_audit.py",
+    "smoke_scripture_chapter_reference.py",
     "smoke_holy_week_prayers.py",
     "smoke_preparation_service_matrix.py",
     "smoke_preparation_form_default.py",

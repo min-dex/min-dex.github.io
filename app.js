@@ -27845,20 +27845,21 @@ function formatServiceScriptureReferenceList(value, options = {}) {
       const separator = index ? "; " : "";
       return `${formatted}${separator}${referenceText}`;
     }
+    const chapterLabel = bibleChapterDisplayLabel(reference.book,reference.chapter);
     const versePart = reference.verse
-      ? `${bibleChapterDisplayLabel(reference.book,reference.chapter)}:${reference.verse}${reference.verseEnd ? `–${reference.verseEnd}` : ""}`
-      : bibleChapterDisplayLabel(reference.book,reference.chapter);
+      ? `${chapterLabel}:${reference.verse}${reference.verseEnd ? `–${reference.verseEnd}` : ""}`
+      : `${chapterLabel}${/^\d+$/.test(chapterLabel) ? "장" : ""}`;
     const sameBook = previous
       && previous.book?.code === reference.book?.code;
     const sameBookAndChapter = sameBook
-      && previous.chapter === reference.chapter;
+      && previous.chapter === reference.chapter && previous.verse && reference.verse;
     const display = sameBookAndChapter
-      ? versePart.replace(`${reference.chapter}:`, "")
+      ? versePart.replace(`${chapterLabel}:`, "")
       : sameBook
         ? versePart
         : options.abbreviated
           ? `${KOREAN_BIBLE_BOOK_ABBREVIATIONS[reference.book.code] || reference.book.shortName || reference.book.koreanName || reference.book.code} ${versePart}`
-          : formatServiceBibleReference(reference, referenceText);
+          : `${reference.book.koreanName || reference.book.shortName || reference.book.code} ${versePart}`;
     const separator = index ? (sameBookAndChapter ? ", " : "; ") : "";
     return `${formatted}${separator}${display}`;
   }, "");

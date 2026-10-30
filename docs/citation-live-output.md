@@ -54,3 +54,14 @@ feedback only: presenter text/model/output stays committed until Enter. Existing
 endpoint verification and atomic save remain unchanged. Version selection refreshes
 form-field/header warnings immediately before persistence completes, without
 changing form drafts or replacing focused controls.
+
+
+## Chapter/verse reference display ·2026-10-31
+
+Reference-list display marks a whole chapter explicitly with `장`. Only consecutive
+verse references in the same book/chapter may omit the repeated chapter number.
+A whole chapter followed by a verse keeps the full chapter:verse address. This
+preserves parser/formatter round trips for `마태복음 1:1; 1장` and the reverse
+order, including a following different whole chapter. Existing reference order,
+translation, authored text, intentional overlaps and slide content are not rewritten.
+The existing input normalization policy is unchanged; this is display disambiguation.
