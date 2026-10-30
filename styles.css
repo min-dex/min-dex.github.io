@@ -1065,8 +1065,9 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .song-title { display: flex; min-width: 0; align-items: center; gap: 4px; font-size: var(--ui-row-size); font-weight: var(--ui-row-weight); line-height: 20px; }
 .song-hymn-no {
   display: inline-flex;
-  width: 22px;
-  flex: 0 0 22px;
+  min-width: 22px;
+  flex: 0 0 auto;
+  white-space: nowrap;
   justify-content: flex-start;
   color: var(--sidebar-label);
   font-size: 12px;
