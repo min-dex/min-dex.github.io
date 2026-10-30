@@ -1029,7 +1029,7 @@ function presenterSlidesWithSongContentHeading(item, section, song, version, dis
   const content = presenterSongTitleDisplayTitle(song, version, displayText);
   if (!content) return slides;
   return [{ ...presenterOrderContentTitleSlide(item, section, index, heading, formatPresenterSongTitleText(content)),
-    songTitleContent: { orderTitle: heading, title: content, detail: presenterSongTitleDetail(song, version), detailKind: presenterSongTitleDetailKind(song, version) } }, ...slides];
+    songTitleContent: { orderTitle: heading, title: presenterSongTitleHymnNo(song, version) ? splitHymnNo(content).title || content : content, detail: presenterSongTitleDetail(song, version), detailKind: presenterSongTitleDetailKind(song, version) } }, ...slides];
 }
 
 function presenterSongTitleSlide(item, section, song, version, displayText, index) {

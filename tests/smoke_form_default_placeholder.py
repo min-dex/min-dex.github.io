@@ -67,8 +67,9 @@ try:
         const html=renderPresenterSlideFrame(headings[0],{noChromakey});
         const host=document.createElement('div');host.innerHTML=html;
         const expectedNote='♬',otherNote='♪';
-        check(host.textContent.includes(expectedTitle)&&host.textContent.includes(expectedNote)&&!host.textContent.includes(otherNote),'all song title roles use shared note '+label+'/'+mode+'/'+sequence+'/'+noChromakey);
+        check(host.textContent.includes(noChromakey && mode==='score_db' ? song.title : expectedTitle)&&host.textContent.includes(expectedNote)&&!host.textContent.includes(otherNote),'all song title roles use shared note '+label+'/'+mode+'/'+sequence+'/'+noChromakey);
         check(noChromakey ? html.includes('presenter-fullscreen-song-heading')&&html.includes('presenter-slide--fullscreen-song-title')&&!html.includes('presenter-slide--song-note-title') : html.includes('presenter-title-assignee--order-content'),'order/content output lost '+label+'/'+mode+'/'+sequence+'/'+noChromakey);
+        if(noChromakey && mode==='score_db')check(host.querySelector('.presenter-fullscreen-song-detail')?.textContent==='새찬송가 9장' && !host.querySelector('.presenter-title-content-title').textContent.includes('9 '),'hymn number must occur in detail, not twice');
         const preview=normalizePresenterMiniPreviewSlide({...headings[0],outputContext:noChromakey?'clean':'chromakey'},!noChromakey);
         check(preview.type===headings[0].type && renderPresenterTitleAssigneeSlide(preview)===renderPresenterTitleAssigneeSlide(headings[0]),'preview/output title mismatch '+label+'/'+mode+'/'+noChromakey+' '+JSON.stringify({preview,original:headings[0]}));
        }
