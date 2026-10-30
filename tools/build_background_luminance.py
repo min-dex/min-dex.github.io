@@ -29,7 +29,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--check', action='store_true')
     args = parser.parse_args()
-    path = ROOT / 'mindex.presenter.js'
+    path = ROOT / 'mindex.design-tokens.js'
     text = path.read_text()
     start, end = text.index(START), text.index(END) + len(END)
     replacement = generated()
