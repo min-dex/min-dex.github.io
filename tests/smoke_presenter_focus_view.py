@@ -14,6 +14,7 @@ try:
     page=browser.new_page(viewport={'width':1440,'height':1000})
     page.add_init_script('window.open=()=>null')
     page.route('**/*',lambda r:r.continue_() if urlsplit(r.request.url).netloc==urlsplit(url).netloc and r.request.method in ('GET','HEAD') else r.abort())
+    page.route("**/mindex-release.json*",lambda r:r.fulfill(json={"version":"inline-source-test"}))
     page.goto(url)
     page.wait_for_function("typeof syncPresenterFocusView==='function' && !document.body.classList.contains('ui-booting')")
     page.evaluate('''()=>{
@@ -36,14 +37,14 @@ try:
       const original=window.MINDEX_SERVER_STORAGE;
       const writes=[];window.MINDEX_SERVER_STORAGE={queue:(...args)=>{writes.push(args);return true;}};
       try {
-        const toggle=document.querySelector('[data-presenter-order-toggle]');
-        const body=document.getElementById('presenterOrderInputBody');
+        const toggle=document.querySelector('[data-presenter-inline-toggle]');
+        const body=document.getElementById(toggle.getAttribute('aria-controls'));
         if(body.hidden)toggle.click();
         const field=body.querySelector('input,textarea');
         const before=field.value;field.value='접어도 유지되는 입력';
         toggle.click();
         if(!body.hidden || toggle.getAttribute('aria-expanded')!=='false')throw Error('collapse failed');
-        if(!renderPresenterServiceInputRail(state.services[0]).includes('aria-expanded="false"'))throw Error('rerender lost collapse state');
+        if(presenterInlineInputViews.get(presenterInlineInputKey(toggle.dataset.serviceId,toggle.dataset.presenterInlineToggle))!==false)throw Error('rerender lost collapse state');
         toggle.click();
         if(body.hidden || body.querySelector('input,textarea')!==field || field.value!=='접어도 유지되는 입력')throw Error('disclosure lost draft');
         if(writes.length)throw Error('view-only disclosure wrote server preference');
@@ -172,7 +173,7 @@ try:
        if view=='basic':
         assert page.evaluate("""()=>{
          const music=document.querySelector('.svc-presenter-toolbar .svc-music-name');
-         const apply=document.querySelector('.svc-presenter-preparation-apply');
+         const apply=document.querySelector('[data-presenter-inline-apply]');
          const nav=[...document.querySelectorAll('.svc-presenter-side-panel .svc-presenter-action-group--nav .icon-btn')];
          return music.getBoundingClientRect().height===35 && getComputedStyle(music).padding==='0px 10px'
           && getComputedStyle(apply).padding==='0px 10px' && getComputedStyle(apply).fontWeight==='600'

@@ -1538,7 +1538,7 @@ async function createBlankPraiseSongForServiceInput(value, service = selectedSer
 
 function finalizePresenterPreparationApply({
   service, serviceId, items, entries, skipped, scriptureItemIds, textFieldUpdates,
-  createdSongTitles, versionWarnings, draftSnapshot,
+  createdSongTitles, versionWarnings, draftSnapshot, appliedDraft,
 }) {
   const uniqueItems = textFieldUpdates.length ? items.filter((item) => {
     const itemId = String(item.id || "");
@@ -1604,7 +1604,15 @@ function finalizePresenterPreparationApply({
     normalizeMainPraiseSlots(service, projectedItems),
   );
   state.dirty.service = true;
-  if (JSON.stringify(state.presenterPreparationDrafts[serviceId]) === draftSnapshot) delete state.presenterPreparationDrafts[serviceId];
+  if (appliedDraft?.kind === 'fields' && state.presenterPreparationDrafts[serviceId]?.kind === 'fields') {
+    const submitted = new Map(appliedDraft.fields.map(field => [field.label, field.value]));
+    const latest = new Map(state.presenterPreparationDrafts[serviceId].fields.map(field => [field.label, field.value]));
+    const definitions = presenterPreparationStructuredFields(service);
+    const fields = definitions.map(field => ({...field, value: latest.has(field.label)
+      && (!submitted.has(field.label) || latest.get(field.label) !== submitted.get(field.label)) ? latest.get(field.label) : field.value}));
+    if (fields.some((field,index) => field.value !== definitions[index].value)) state.presenterPreparationDrafts[serviceId] = {kind:'fields',fields};
+    else delete state.presenterPreparationDrafts[serviceId];
+  } else if (JSON.stringify(state.presenterPreparationDrafts[serviceId]) === draftSnapshot) delete state.presenterPreparationDrafts[serviceId];
   refreshPresenterForService(serviceId);
   updateSaveState();
   [...scriptureItemIds]

@@ -41,30 +41,12 @@ function setPresenterSidebarContent(html, service) {
   refs.songList.querySelectorAll('[data-presenter-preparation-field]').forEach(syncPresenterPreparationControls);
 }
 
-function syncPresenterSidebarInputRail(service) {
-  const current = refs.songList?.querySelector('.svc-presenter-input-rail');
-  if (!service?.id) return;
-  const sidebar = refs.songList?.querySelector('.service-sidebar--presenter');
-  if (sidebar?.dataset.serviceId !== service.id) return;
-  const template = document.createElement('template');
-  template.innerHTML = renderPresenterServiceInputRail(service).trim();
-  refreshIcons(template.content);
-  if (current) patchPresenterControlTree(current, template.content.firstElementChild);
-  else sidebar.insertBefore(template.content.firstElementChild, sidebar.querySelector('.service-sidebar-section--current'));
-}
-
 function patchPresenterControlTree(current, next) {
   // An active order editor owns its DOM, including an unfinished IME composition.
   // Input events already retain its draft; remote/preview refreshes must not rewrite it.
   if (current.matches?.('.svc-presenter-input-rail')
     && current.dataset.serviceId === next.dataset?.serviceId
     && current.contains(document.activeElement)) {
-    if (!Object.prototype.hasOwnProperty.call(state.presenterPreparationDrafts, current.dataset.serviceId)
-      && next.querySelector('.svc-presenter-preparation-input')?.hidden) {
-      current.querySelector('.svc-presenter-preparation-input').hidden = true;
-      current.querySelector('[data-presenter-order-toggle]').setAttribute('aria-expanded', 'false');
-      current.querySelector('[data-presenter-order-toggle]').focus({preventScroll:true});
-    }
     return;
   }
   if (current.isEqualNode(next)) return;
@@ -372,43 +354,91 @@ function renderPresenterRightSidebar(service, slides, active, index) {
     </div>`;
 }
 
-const presenterOrderInputViews = new Map();
-
-function presenterOrderInputView(service) {
-  const saved = presenterPreparationStructuredDraft(service);
-  const fields = presenterPreparationFieldValues(service, saved);
-  const pending = Object.prototype.hasOwnProperty.call(state.presenterPreparationDrafts, service.id);
-  const complete = fields.length > 0 && fields.every(field => field.value.trim()) && !pending;
-  let view = presenterOrderInputViews.get(service.id);
-  if (!view) view = { expanded: !complete, complete };
-  else if (complete && !view.complete) view.expanded = false;
-  else if (pending && view.complete) view.expanded = true;
-  view.complete = complete;
-  presenterOrderInputViews.set(service.id, view);
-  return view;
-}
-
-function renderPresenterServiceInputRail(service) {
-  const expanded = presenterOrderInputView(service).expanded;
+const presenterInlineInputViews = new Map();
+const presenterInlineInputSaves = new Set();
+function presenterInlineInputKey(serviceId, itemId) { return `${serviceId}:${itemId}`; }
+function presenterInlineInputFields(service, groups) {
+  const items = groups.flatMap(group => group.items.filter(({item}) => !isServiceConnectedPraiseSecondaryItem(item)).map(({item}) => item));
+  const result = new Map(items.map(item => [item.id, []]));
   const draft = presenterPreparationDisplayTextForService(service);
-  const applying = state.presenterPreparationApplyingServiceIds.has(service.id);
-  const hasValues = presenterPreparationDraftHasValues(service, draft);
-  return `
-    <aside class="svc-presenter-input-rail" data-service-id="${escapeAttr(service.id)}" aria-label="예배 입력">
-      <button type="button" class="svc-presenter-input-rail-head svc-presenter-input-disclosure" data-presenter-order-toggle aria-expanded="${expanded}" aria-controls="presenterOrderInputBody">
-        <span>예배 순서 입력</span><i data-lucide="chevron-down" aria-hidden="true"></i>
-      </button>
-      <section id="presenterOrderInputBody" class="svc-presenter-preparation-input" ${expanded ? '' : 'hidden'}>
-        ${renderPresenterPreparationFieldRows(service, draft)}
-        <div class="svc-presenter-preparation-actions">
-          <button class="svc-presenter-preparation-apply" type="button" data-presenter-preparation-apply data-service-id="${escapeAttr(service.id)}"
-            aria-label="${applying ? "예배 입력 반영 중" : "예배 입력 반영"}" title="${applying ? "반영 중" : hasValues ? "입력 반영" : "반영할 입력이 없습니다"}" ${applying || !hasValues ? "disabled" : ""}>
-            <i data-lucide="wand-sparkles"></i>
-            <span>${applying ? "반영 중" : "반영"}</span>
-          </button>
-        </div>
-      </section>
-    </aside>`;
+  const values = presenterPreparationFieldValues(service, draft);
+  const definitions = presenterPreparationStructuredFields(service);
+  // Upgrade only the display/input boundary of an older in-memory text draft.
+  const fields = draft?.kind === 'fields' ? values : definitions.map(definition => {
+    const value = values.find(field => compactSearchValue(field.label) === compactSearchValue(definition.targetLabel))?.value || '';
+    const paired = definitions.some(field => field.targetLabel === definition.targetLabel && field.role !== definition.role);
+    const parts = paired ? value.split(/\s+\/\s+/) : [value];
+    const personOnly = paired && parts.length === 1 && presenterPreparationContentLooksAssignee(value);
+    return { ...definition, value: !paired ? value : definition.role === 'assignee'
+      ? (personOnly ? value : parts.slice(1).join(' / ')) : (personOnly ? '' : parts[0]) };
+  });
+  for (const field of fields) {
+    const item = items.find(item => item.id === field.itemId)
+      || items.find(item => compactSearchValue(item.label) === compactSearchValue(field.targetLabel))
+      || (compactSearchValue(field.targetLabel) === '인용구절' ? items.find(item => /설교/.test(item.label)) : null);
+    if (item) result.get(item.id).push(field);
+  }
+  return result;
+}
+function renderPresenterInlineEditor(service, item, fields = []) {
+  if (!fields.length) return { button: '', panel: '' };
+  const key = presenterInlineInputKey(service.id, item.id);
+  const open = presenterInlineInputViews.get(key) === true;
+  const id = `inline-order-${service.id}-${item.id}`;
+  const saving = presenterInlineInputSaves.has(key);
+  return {
+    button: `<button type="button" class="icon-btn service-outline-edit" data-presenter-inline-toggle="${escapeAttr(item.id)}" data-service-id="${escapeAttr(service.id)}" aria-expanded="${open}" aria-controls="${escapeAttr(id)}" aria-label="${escapeAttr(item.label || '예배 순서')} 편집" title="편집"><i data-lucide="pencil" aria-hidden="true"></i></button>`,
+    panel: `<div id="${escapeAttr(id)}" class="svc-outline-editor" data-inline-item-id="${escapeAttr(item.id)}" data-service-id="${escapeAttr(service.id)}" ${open ? '' : 'hidden'}>
+      ${fields.map(field => renderPresenterPreparationField(service, field)).join('')}
+      <div class="svc-presenter-preparation-actions"><button type="button" class="btn secondary svc-outline-editor-save" data-presenter-inline-apply ${saving ? 'disabled' : ''}>${saving ? '저장 중' : '저장'}</button></div>
+    </div>`,
+  };
+}
+function handlePresenterInlineEditorClick(event) {
+  const toggle = event.target.closest('[data-presenter-inline-toggle]');
+  const save = event.target.closest('[data-presenter-inline-apply]');
+  if (!toggle && !save) return false;
+  event.preventDefault();event.stopPropagation();
+  if (save) { void commitPresenterInlineInput(save.closest('.svc-outline-editor')); return true; }
+  const panel = document.getElementById(toggle.getAttribute('aria-controls'));
+  if (!panel) return true;
+  const expanded = toggle.getAttribute('aria-expanded') !== 'true';
+  presenterInlineInputViews.set(presenterInlineInputKey(toggle.dataset.serviceId, toggle.dataset.presenterInlineToggle), expanded);
+  toggle.setAttribute('aria-expanded', String(expanded));panel.hidden = !expanded;
+  if (expanded) panel.querySelector('[data-presenter-preparation-field]')?.focus({preventScroll:true});
+  return true;
+}
+async function commitPresenterInlineInput(panel) {
+  if (!panel) return false;
+  const serviceId = panel.dataset.serviceId, itemId = panel.dataset.inlineItemId;
+  const key = presenterInlineInputKey(serviceId, itemId);
+  if (presenterInlineInputSaves.has(key) || state.presenterPreparationApplyingServiceIds.has(serviceId)) return false;
+  const service = state.services.find(row => row.id === serviceId);
+  if (!service) return false;
+  const fields = presenterPreparationRenderedFields(panel, service);
+  const draft = {kind:'fields', fields};
+  const snapshot = JSON.stringify(fields);
+  presenterInlineInputSaves.add(key);
+  panel.querySelector('[data-presenter-inline-apply]').disabled = true;
+  try {
+    const changed = presenterPreparationStructuredEntries(service, draft).length > 0;
+    if (changed && !await applyPresenterPreparationInput(serviceId, {draft})) return false;
+    const saved = await saveService(serviceId, {silent:true, renderAfterSave:false});
+    if (!saved) return false;
+    const mounted = [...(refs.songList?.querySelectorAll('.svc-outline-editor') || [])].find(row => row.dataset.serviceId === serviceId && row.dataset.inlineItemId === itemId);
+    if (mounted && JSON.stringify(presenterPreparationRenderedFields(mounted, service)) === snapshot) {
+      presenterInlineInputViews.set(key, false);mounted.hidden = true;
+      const toggle = mounted.parentElement.querySelector('[data-presenter-inline-toggle]');
+      toggle.setAttribute('aria-expanded','false');
+      if (mounted.contains(document.activeElement)) toggle.focus({preventScroll:true});
+    }
+    return true;
+  } finally {
+    presenterInlineInputSaves.delete(key);
+    for (const row of refs.songList?.querySelectorAll('.svc-outline-editor') || []) {
+      if (row.dataset.serviceId === serviceId && row.dataset.inlineItemId === itemId) row.querySelector('[data-presenter-inline-apply]').disabled = false;
+    }
+  }
 }
 
 // View-only state: switching layouts never saves or rebuilds the worship document.
@@ -503,18 +533,6 @@ function syncPresenterFocusMusic() {
 }
 
 document.addEventListener('click', event => {
-  const orderToggle = event.target.closest('[data-presenter-order-toggle]');
-  if (orderToggle) {
-    const body = orderToggle.closest('.svc-presenter-input-rail')?.querySelector('.svc-presenter-preparation-input');
-    if (!body) return;
-    const service = state.services.find(row => row.id === orderToggle.closest('.svc-presenter-input-rail').dataset.serviceId);
-    if (!service) return;
-    const view = presenterOrderInputView(service);
-    view.expanded = orderToggle.getAttribute('aria-expanded') !== 'true';
-    orderToggle.setAttribute('aria-expanded', String(view.expanded));
-    body.hidden = !view.expanded;
-    return;
-  }
   const toggle = event.target.closest('[data-presenter-focus-toggle]');
   if (toggle) {
     const nextView = toggle.dataset.presenterFocusToggle === 'focus';

@@ -22,7 +22,6 @@ fixture='''() => {
    +renderServiceItemMemoEditor(item,0,{service:state.services[0]})
    +renderPresenterReferenceMediaPreview({url:'assets/bulletin/children-mark.png',name:'검증'},'image',[item.service_id,item.id])
    +renderPresenterManualLyricsField(item,0,item.service_id)
-   +renderPresenterServiceInputRail(state.services[0])
    +'<div id="bulletinFixture" style="height:700px"></div>';
   const B=MindexBulletin,source=B.resolveSource({service:{id:'disclosure-service',service_type_id:'children',service_date:'2026-10-11'},sections:[],elements:[]});
   source.autoBackground={key:'26-C5.png',url:'assets/worship-backgrounds/26-C5.png'};
@@ -36,6 +35,7 @@ try:
    browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
    page=browser.new_page(viewport={'width':1000,'height':1000})
    page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(url.rsplit('/',1)[0]+'/') else r.abort())
+   page.route('**/mindex-release.json*',lambda r:r.fulfill(json={'version':'inline-source-test'}))
    def mount(reload=False):
     if reload: page.reload()
     else: page.goto(url+'?mindexSmokeRaw=1')
@@ -58,26 +58,20 @@ try:
     for selector in selectors:
      node=page.locator(selector)
      if node.evaluate('e=>e.open')!=wanted: node.locator('summary').click()
-    order=page.locator('[data-presenter-order-toggle]')
-    if (order.get_attribute('aria-expanded')=='true')!=wanted:order.click()
     lyrics=page.locator('[data-presenter-lyrics-toggle]')
     if (lyrics.get_attribute('aria-expanded')=='true')!=wanted:lyrics.click()
     page.wait_for_function('!MINDEX_SERVER_STORAGE.pending')
     page.evaluate("bulletinDisclosureController.destroy();refs.detailPane.replaceChildren();mountDisclosureFixture()")
     page.wait_for_function("document.querySelector('.bulletin-properties')?.dataset.sectionsReady==='true'")
     for selector in selectors:assert page.locator(selector).evaluate('e=>e.open')==wanted,(engine,'remount',selector,wanted)
-    assert (page.locator('[data-presenter-order-toggle]').get_attribute('aria-expanded')=='true')==wanted
     assert (page.locator('[data-presenter-lyrics-toggle]').get_attribute('aria-expanded')=='true')==wanted
     mount(True)
     for selector in selectors:assert page.locator(selector).evaluate('e=>e.open')==wanted,(engine,'reload',selector,wanted)
-    # Order entry uses applied completeness on a fresh session, unlike persisted disclosures.
-    auto_open=page.evaluate('''()=>{const service=state.services[0];const fields=presenterPreparationFieldValues(service,presenterPreparationStructuredDraft(service));return !(fields.length&&fields.every(field=>field.value.trim()));}''')
-    assert (page.locator('[data-presenter-order-toggle]').get_attribute('aria-expanded')=='true')==auto_open
     assert (page.locator('[data-presenter-lyrics-toggle]').get_attribute('aria-expanded')=='true')==wanted
    # Explicit closed choice overrides open-by-default; other items keep defaults.
    assert not page.locator('.svc-authoring-panel').evaluate('e=>e.open')
    assert not page.evaluate("MindexDisclosure.read(['citation-translations','other-service','disclosure-item'])")
    assert page.evaluate("MindexDisclosure.read(['unknown-default'],true)")
-   print('PASS',engine,'disclosures persist; order entry keeps session choice and recomputes fresh-session completeness',flush=True)
+   print('PASS',engine,'disclosures persist; row editor session state is covered by smoke_presenter_inline_editor',flush=True)
    browser.close()
 finally:server.shutdown()

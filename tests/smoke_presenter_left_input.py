@@ -14,7 +14,8 @@ try:
     page=browser.new_page(viewport={'width':1440,'height':900})
     page.add_init_script('window.open=()=>null')
     page.route('**/*',lambda r:r.continue_() if urlsplit(r.request.url).netloc==urlsplit(url).netloc and r.request.method in ('GET','HEAD') else r.abort())
-    page.goto(url);page.wait_for_function("typeof setPresenterSidebarContent==='function' && !document.body.classList.contains('ui-booting')")
+    page.route('**/mindex-release.json*',lambda r:r.fulfill(json={'version':'inline-source-test'}))
+    page.goto(url+'?mindexSmokeRaw=1');page.wait_for_function("typeof setPresenterSidebarContent==='function' && !document.body.classList.contains('ui-booting')")
     page.evaluate('''()=>{
       const sid='focus-fixture';state.client={};state.serviceError='';state.connectionError='';
       state.services=[{id:sid,type_id:'fixture',date:'2026-10-25',title:'주일예배'}];
@@ -29,8 +30,7 @@ try:
       state.serviceMusic.mode='presenter-audio';state.serviceMusic.timingGroupId='group';state.serviceMusic.autoSyncSuspended=true;
       window.focusItems=JSON.stringify(state.serviceItems);
     }''')
-    if page.locator('[data-presenter-order-toggle]').get_attribute('aria-expanded') == 'false':
-     page.locator('[data-presenter-order-toggle]').click()
+    page.locator('[data-presenter-inline-toggle]').first.click()
     field=page.locator('.service-sidebar--presenter [data-presenter-preparation-field]').first
     field.fill('추가 입력 보존')
     field.focus()
@@ -120,5 +120,6 @@ try:
       if(JSON.stringify(state.presenter)!==before||state.serviceMusic.audio!==musicBefore.audio||musicBefore.audio.currentTime!==musicBefore.time)throw Error('browse refresh changed other service output/media');
     }""")
     print(engine,'PASS left single editor, IME/selection/draft, themes/widths, sticky tools and output/audio preservation',flush=True)
+    page.unroute_all(behavior='wait')
    finally:browser.close()
 finally:server.shutdown()

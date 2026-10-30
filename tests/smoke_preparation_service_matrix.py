@@ -1,5 +1,9 @@
 """Audit bulk-input examples using each service's real template and parser."""
 import json
+import os
+from urllib.parse import urlsplit
+
+os.environ["MINDEX_SMOKE_OFFLINE"] = "1"
 
 import smoke_app
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
@@ -13,12 +17,14 @@ def main():
             for engine in ("chrome", "webkit"):
                 browser = launch_chromium(p) if engine == "chrome" else p.webkit.launch()
                 page = browser.new_page()
-                page.route("**/*", lambda route: route.continue_() if route.request.url.startswith(url.rsplit("/", 1)[0] + "/") else route.abort())
-                page.goto(url, wait_until="domcontentloaded")
+                page.route("**/*", lambda route: route.continue_() if urlsplit(route.request.url).netloc == urlsplit(url).netloc and route.request.method in ("GET", "HEAD") else route.abort())
+                page.route("**/mindex-release.json*", lambda route: route.fulfill(json={"version": "inline-source-test"}))
+                page.add_init_script("window.open=()=>null;window.print=()=>{throw Error('print forbidden')}")
+                page.goto(url+"?mindexSmokeRaw=1", wait_until="domcontentloaded")
                 page.wait_for_function("typeof presenterPreparationPlaceholderForService === 'function' && !document.body.classList.contains('ui-booting')")
                 result = page.evaluate("""() => {
-                  const results=[];
-                  const check=(value,message)=>{if(!value)throw Error(message)};
+                  const results=[],failures=[];
+                  const check=(value,message)=>{if(!value)failures.push(message)};
                   const cases=Object.keys(SERVICE_TYPE_DISPLAY_NAMES).filter(t=>!/[가-힣]/.test(t))
                     .map(type=>[type,'2026-09-13']);
                   for(const date of ['2026-08-07','2026-08-14','2026-08-21','2026-08-28',
@@ -28,6 +34,8 @@ def main():
                     const service={...target,id:'matrix-'+type+date,type_id:target.typeId||type,date,
                       _worshipSourceRef:target.sourceRef};
                     state.services=[service];
+                    state.selectedServiceId=service.id;
+                    state.loadedWorshipServiceIds=new Set([service.id]);
                     state.serviceTypes=[{id:type,name:SERVICE_TYPE_DISPLAY_NAMES[type]}];
                     const scaffold=buildWorshipServiceScaffold(service.id,service.type_id,{service});
                     state.serviceItems={[service.id]:groupWorshipElements(scaffold.sections,scaffold.elements)[service.id]||[]};
@@ -51,21 +59,33 @@ def main():
                     check(!blank.errors.length && !blank.entries.length,`${type}: blank form must apply nothing: ${blank.errors.join(', ')} ${blank.entries.map(e=>e.label+'='+e.content).join(', ')}`);
                     const host=document.createElement('div');
                     host.style.width='300px';
-                    host.innerHTML=renderPresenterServiceInputRail(service);
+                    host.innerHTML=renderServiceCurrentSidebar(service,[]);
                     document.body.append(host);
                     const inputs=[...host.querySelectorAll('[data-presenter-preparation-field]')];
-                    check(inputs.length===presenterPreparationStructuredFields(service).length,`${type}: rendered field count differs`);
+                    check(inputs.length===presenterPreparationStructuredFields(service).length,`${type} ${date}: rendered field count differs ${JSON.stringify({actual:inputs.map(input=>input.dataset.presenterPreparationFieldLabel),expected:presenterPreparationStructuredFields(service).map(field=>field.label),items:items.map(item=>({label:item.label,id:item.id}))})}`);
                     const fieldValues=presenterPreparationFieldValues(service,presenterPreparationDisplayTextForService(service));
-                    check(inputs.every((input,index)=>input.dataset.presenterPreparationFieldLabel&&input.value===fieldValues[index]?.value),`${type}: labels or default values missing ${JSON.stringify(inputs.map((input,index)=>({label:input.dataset.presenterPreparationFieldLabel,actual:input.value,expected:fieldValues[index]?.value})))}`);
+                    const actual=inputs.map(input=>({label:input.dataset.presenterPreparationFieldLabel,value:input.value}));
+                    const expectedValues=fieldValues.map(field=>({label:field.label,value:field.value}));
+                    const canonical=rows=>JSON.stringify(rows.map(row=>[row.label,row.value]).sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b))));
+                    check(actual.every(row=>row.label),`${type} ${date}: field without label`);
+                    check(new Set(inputs.map(input=>JSON.stringify([input.closest(".svc-outline-editor")?.dataset.inlineItemId,input.dataset.presenterPreparationFieldLabel,input.dataset.preparationRole]))).size===inputs.length,`${type} ${date}: duplicate field binding`);
+                    check(canonical(actual)===canonical(expectedValues),`${type} ${date}: exact label/value mapping differs ${JSON.stringify({actual,expected:expectedValues})}`);
+                    check(inputs.every(input=>input.closest('.svc-outline-editor[data-inline-item-id][data-service-id]')),`${type} ${date}: field missing inline item owner`);
+                    const panels=[...host.querySelectorAll('.svc-outline-editor')];
+                    const toggles=[...host.querySelectorAll('[data-presenter-inline-toggle]')];
+                    check(panels.length===toggles.length&&new Set(panels.map(panel=>panel.dataset.inlineItemId)).size===panels.length,`${type} ${date}: duplicate or missing inline editor`);
+                    check(panels.every(panel=>panel.hidden&&panel.dataset.serviceId===service.id&&toggles.some(toggle=>toggle.dataset.presenterInlineToggle===panel.dataset.inlineItemId&&toggle.getAttribute('aria-controls')===panel.id)),`${type} ${date}: inline toggle ownership mismatch`);
                     check(!host.querySelector('[data-presenter-preparation-form]'),`${type}: form button remains`);
                     host.remove();
-                    results.push({type,date,lines:parsed.entries.length});
+                    results.push({type,date,lines:parsed.entries.length,fields:inputs.length,missing:0,duplicates:0});
                   }
                   check(presenterPreparationPlaceholderLinesForItem({label:'참고 화면'},null,{mode:'asset',memo:{}}).length===0,'asset example');
                   check(presenterPreparationPlaceholderLinesForItem({label:'주기도문'},null,{mode:'benediction',memo:{benedictionReplacement:{}}}).length===0,'replaced benediction example');
+                  if(failures.length)throw Error(failures.join('\\n'));
                   return results;
                 }""")
                 print(engine, json.dumps(result, ensure_ascii=False), flush=True)
+                page.unroute_all(behavior="wait")
                 browser.close()
     finally:
         server.shutdown()

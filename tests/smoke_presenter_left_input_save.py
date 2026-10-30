@@ -12,6 +12,7 @@ try:
     page=browser.new_page()
     page.route('**/*',lambda r:r.continue_() if urlsplit(r.request.url).netloc==urlsplit(url).netloc and r.request.method in ('GET','HEAD') else r.abort())
     page.add_init_script('window.open=()=>null')
+    page.route('**/mindex-release.json*',lambda r:r.fulfill(json={'version':'inline-source-test'}))
     page.goto(url+'?mindexSmokeRaw=1');page.wait_for_function("typeof saveWorshipServiceInstance==='function' && !!refs.songList && !document.body.classList.contains('ui-booting')")
     prepare_server_state_fixture(page)
     print(engine,page.evaluate('''async()=>{
@@ -70,6 +71,7 @@ try:
                       state.module='presenter';state.serviceTypes=[{id:'fixture',name:'검증 예배'}];state.serviceError='';state.connectionError='';state.search='';
                       document.body.dataset.module='presenter';document.body.classList.remove('ui-booting');
                       renderServiceList();renderPresenterDetail();
+                      for(const toggle of refs.songList.querySelectorAll('[data-presenter-inline-toggle]'))toggle.click();
                       const field=refs.songList.querySelector('[data-presenter-preparation-field-label="광고"]');
                       check(field,'left announcement input missing');field.focus();field.value='왼쪽에서 입력한 공지';field.dispatchEvent(new Event('input',{bubbles:true}));
                       const titleField=refs.songList.querySelector('[data-presenter-preparation-field-label="설교 제목"]');
@@ -78,10 +80,7 @@ try:
                       titleField.value='사랑 / 믿음';titleField.dispatchEvent(new Event('input',{bubbles:true}));
                       personField.value='김민수 목사';personField.dispatchEvent(new Event('input',{bubbles:true}));
                       const beforeOutput=JSON.stringify(state.presenter);
-                      const realApply=applyPresenterPreparationInput;let applying;
-                      applyPresenterPreparationInput=(...args)=>(applying=realApply(...args));
-                      refs.songList.querySelector('[data-presenter-preparation-apply]').click();
-                      await applying;applyPresenterPreparationInput=realApply;
+                      await applyPresenterPreparationInput(sid);
                       check(state.serviceItems[sid].some(i=>i.raw_title.includes('왼쪽에서 입력한 공지')),'real preparation did not update item');
                       const sermon=state.serviceItems[sid].find(item=>item.label==='설교');
                       check(sermon.raw_title==='사랑 / 믿음'&&sermon.assignee==='김민수 목사','title delimiter was parsed as assignee');
@@ -102,26 +101,32 @@ try:
                         input.dispatchEvent(new Event('input',{bubbles:true}));
                       }
                       renderServiceList();
-                      check(!refs.songList.querySelector('.svc-presenter-preparation-input').hidden,'pending input auto-collapsed');
+                      check(!refs.songList.querySelector('.svc-outline-editor').hidden,'pending input auto-collapsed');
                       await applyPresenterPreparationInput(sid);
                       check(presenterPreparationFieldValues(service,presenterPreparationDefaultDraftForService(service)).every(row=>row.value),'fixture incomplete');
-                      check(refs.songList.querySelector('.svc-presenter-preparation-input').hidden,'completed input did not collapse '+JSON.stringify({fields:presenterPreparationStructuredFields(service),pending:state.presenterPreparationDrafts[sid],view:presenterOrderInputView(service)}));
-                      refs.songList.querySelector('[data-presenter-order-toggle]').click();renderServiceList();
-                      check(!refs.songList.querySelector('.svc-presenter-preparation-input').hidden,'manual reopen lost');
+                      const firstPanel=refs.songList.querySelector('.svc-outline-editor');
+                      check(!firstPanel.hidden,'apply without confirmed save collapsed editor');
+                      failure=true;await commitPresenterInlineInput(firstPanel);
+                      check(!firstPanel.hidden,'failed inline save collapsed editor');
+                      failure=false;await commitPresenterInlineInput(firstPanel);
+                      check(refs.songList.querySelector('.svc-outline-editor').hidden,'confirmed inline save did not collapse');
+                      refs.songList.querySelector('[data-presenter-inline-toggle]').click();renderServiceList();
+                      check(!refs.songList.querySelector('.svc-outline-editor').hidden,'manual reopen lost');
                       const edit=refs.songList.querySelector('[data-presenter-preparation-field]');edit.focus();edit.value='아직 반영하지 않은 입력';edit.dispatchEvent(new Event('input',{bubbles:true}));
                       renderServiceList();
-                      check(!refs.songList.querySelector('.svc-presenter-preparation-input').hidden&&edit.value==='아직 반영하지 않은 입력','new draft auto-collapsed');
+                      check(!refs.songList.querySelector('.svc-outline-editor').hidden&&edit.value==='아직 반영하지 않은 입력','new draft auto-collapsed');
                       const other={id:crypto.randomUUID(),type_id:'fixture',date:'2026-10-13',title:'Other'};
                       state.services.push(other);state.serviceItems[other.id]=[];state.loadedWorshipServiceIds.add(other.id);
                       state.selectedServiceId=other.id;renderServiceList();renderPresenterDetail();
                       state.selectedServiceId=sid;renderServiceList();renderPresenterDetail();
                       let returned=refs.songList.querySelector('[data-presenter-preparation-field]');
                       check(returned.value==='아직 반영하지 않은 입력','service return lost pending input');
-                      for(let i=0;i<2;i++)refs.songList.querySelector('[data-presenter-order-toggle]').click();
+                      for(let i=0;i<2;i++)refs.songList.querySelector('[data-presenter-inline-toggle]').click();
                       returned=refs.songList.querySelector('[data-presenter-preparation-field]');
-                      check(returned.value==='아직 반영하지 않은 입력'&&!returned.closest('.svc-presenter-preparation-input').hidden,'collapse/reopen lost pending input');
+                      check(returned.value==='아직 반영하지 않은 입력'&&!returned.closest('.svc-outline-editor').hidden,'collapse/reopen lost pending input');
                       check(JSON.stringify(state.presenter)===beforeOutput,'service return changed output');
-                      return 'PASS real input/save retry/reopen, service return, disclosure and pending preservation';
+                      return 'PASS real input/save retry/reopen, service return, inline save confirmation and pending preservation';
     }'''),flush=True)
+    page.unroute_all(behavior='wait')
    finally:browser.close()
 finally:server.shutdown()

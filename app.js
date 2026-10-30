@@ -1362,6 +1362,7 @@ function bindStaticEvents() {
     const bulletin = event.target.closest("[data-bulletin-open]");
     if (bulletin) {await runServiceBulletinAction("open", bulletin.dataset.bulletinOpen);return;}
 
+    if (handlePresenterInlineEditorClick(event)) return;
     if (handleSidebarPresenterActionClick(event)) return;
     if (handleServiceOutlineSlideEvent(event)) return;
 
@@ -9231,6 +9232,8 @@ function handleDetailKeydown(event) {
     if (event.key === "Enter" && preparationInput.tagName !== "TEXTAREA" && !event.isComposing && !event.metaKey && !event.ctrlKey && !event.altKey) {
       event.preventDefault();
       event.stopPropagation();
+      const inline = preparationInput.closest(".svc-outline-editor");
+      if (inline) { void commitPresenterInlineInput(inline); return; }
       const root = preparationInput.closest(".svc-presenter-preparation-input");
       const fields = [...(root?.querySelectorAll("[data-presenter-preparation-field]") || [])];
       const currentIndex = fields.indexOf(preparationInput);
@@ -9253,6 +9256,8 @@ function handleDetailKeydown(event) {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
       event.preventDefault();
       event.stopPropagation();
+      const inline = preparationInput.closest(".svc-outline-editor");
+      if (inline) { void commitPresenterInlineInput(inline); return; }
       void applyPresenterPreparationInput(
         preparationInput.dataset.serviceId || state.selectedServiceId,
         { draft: presenterPreparationDraftFromRoot(preparationInput.closest(".svc-presenter-preparation-input"), state.services.find((service) => service.id === (preparationInput.dataset.serviceId || state.selectedServiceId))) },
@@ -24260,7 +24265,6 @@ function renderPresenterSidebar(query, services, selectedService, outlineMarkup 
     <div class="service-sidebar service-sidebar--presenter" data-service-id="${escapeAttr(selectedService?.id || "")}">
       <div class="service-sidebar-search-results">${searchSection}</div>
       ${selectedService ? renderPresenterSidebarServiceSummary(selectedService) : ""}
-      ${selectedService && !serviceIsNoGathering(selectedService) && !serviceViewIsLoading(selectedService.id) ? renderPresenterServiceInputRail(selectedService) : ""}
       ${outlineMarkup || (!selectedService ? renderUpcomingServiceShortcuts() : "")}
     </div>`;
 }
@@ -24317,7 +24321,6 @@ function patchPresenterSidebarOutline(service, slides) {
 function patchPresenterSidebarOutlineUnscoped(service, slides) {
   const current = refs.songList?.querySelector(".service-sidebar-section--current");
   if (!current || !service) return;
-  syncPresenterSidebarInputRail(service);
   const markup = renderServiceCurrentSidebar(service, slides).trim();
   if (current._presenterOutlineMarkup === markup) return;
   const scrollTop = refs.songList.scrollTop;
@@ -24328,9 +24331,10 @@ function patchPresenterSidebarOutlineUnscoped(service, slides) {
   template.innerHTML = markup;
   const next = template.content.firstElementChild;
   next._presenterOutlineMarkup = markup;
-  current.replaceWith(next);
-  if (focusedIndex != null) {
-    next.querySelector(`[data-service-outline-item-index="${CSS.escape(focusedIndex)}"]`)?.focus({ preventScroll: true });
+  patchPresenterControlTree(current, next);
+  current._presenterOutlineMarkup = markup;
+  if (focusedIndex != null && !current.contains(document.activeElement)) {
+    current.querySelector(`[data-service-outline-item-index="${CSS.escape(focusedIndex)}"]`)?.focus({ preventScroll: true });
   }
   refs.songList.scrollTop = scrollTop;
   refreshIcons(next);
@@ -24427,13 +24431,14 @@ function renderServiceCurrentSidebar(service, slides = presenterSlidesForService
   const slideIndexByItemId = buildPresenterSlideItemIndexMap(slides);
   const selectedIndex = serviceSidebarSelectedItemIndex(service.id, editorItems, slides);
   const outlineGroups = groupServiceSidebarOutlineItems(items);
+  const inlineFields = presenterInlineInputFields(service, outlineGroups);
   const readyRow = renderServiceReadyOutlineRow(service, slides, items);
   return `
-    <section class="service-sidebar-section service-sidebar-section--current">
-      <div class="service-outline-list">
+    <section class="service-sidebar-section service-sidebar-section--current svc-presenter-input-rail" data-service-id="${escapeAttr(service.id)}">
+      <div class="service-outline-list svc-presenter-preparation-input">
         ${readyRow}
         ${items.length
-          ? outlineGroups.map((group, index) => renderServiceOutlineGroup(service, group, index, selectedIndex, slides, slideIndexByItemId)).join("")
+          ? outlineGroups.map((group, index) => renderServiceOutlineGroup(service, group, index, selectedIndex, slides, slideIndexByItemId, inlineFields)).join("")
           : `<p class="service-no-results">순서가 없습니다.</p>`}
       </div>
     </section>
@@ -24486,11 +24491,11 @@ function renderServiceReadyOutlineRow(service, slides = [], items = getServiceIt
     </button>`;
 }
 
-function renderServiceOutlineGroup(service, group, groupIndex, selectedIndex, slides = [], slideIndexByItemId = null) {
+function renderServiceOutlineGroup(service, group, groupIndex, selectedIndex, slides = [], slideIndexByItemId = null, inlineFields = new Map()) {
   if (!group?.items?.length) return "";
   const firstEntry = group.items[0];
   const childEntries = group.items.filter(({ item }) =>
-    !isServiceSidebarSectionMarkerItem(item, group)
+    (!isServiceSidebarSectionMarkerItem(item, group) || (inlineFields.get(item.id)?.length || 0) > 0)
     && !isServiceConnectedPraiseSecondaryItem(item));
   const firstSlideEntry = group.items.find(({ item }) => firstPresenterSlideIndexForServiceItem(item, slides, slideIndexByItemId) >= 0) || firstEntry;
   const firstSlideIndex = firstPresenterSlideIndexForServiceItem(firstSlideEntry.item, slides, slideIndexByItemId);
@@ -24516,12 +24521,12 @@ function renderServiceOutlineGroup(service, group, groupIndex, selectedIndex, sl
       </button>
       ${childEntries.length ? `
         <div class="service-outline-children">
-          ${childEntries.map(({ item, index }) => renderServiceOutlineChildRow(service, item, index, selectedIndex, slides, slideIndexByItemId)).join("")}
+          ${childEntries.map(({ item, index }) => renderServiceOutlineChildRow(service, item, index, selectedIndex, slides, slideIndexByItemId, inlineFields.get(item.id) || [])).join("")}
         </div>` : ""}
     </div>`;
 }
 
-function renderServiceOutlineChildRow(service, item, index, selectedIndex, slides = [], slideIndexByItemId = null) {
+function renderServiceOutlineChildRow(service, item, index, selectedIndex, slides = [], slideIndexByItemId = null, inlineFields = []) {
   const slideIndex = firstPresenterSlideIndexForServiceItem(item, slides, slideIndexByItemId);
   const activeSlide = presenterControllerIsLive(service.id) && slideIndex >= 0 && presenterSlideBelongsToItem(state.presenter.slides[state.presenter.index], item);
   const selected = index === selectedIndex;
@@ -24530,7 +24535,10 @@ function renderServiceOutlineChildRow(service, item, index, selectedIndex, slide
   const interactionHint = presenterSlideInteractionHint(service.id, title);
   const missing = serviceOutlineMissingState(item, slides, service);
   const showMissingBadge = missing?.missingContent;
+  const editor = renderPresenterInlineEditor(service, item, inlineFields);
   return `
+    <div class="service-outline-element" data-inline-element-id="${escapeAttr(item.id || "")}">
+    <div class="service-outline-element-heading">
     <button class="service-outline-row service-outline-row--child${selected ? " selected" : ""}${activeSlide ? " active" : ""}" type="button"${activeSlide ? ' aria-current="step"' : ""}
       data-service-outline-slide="${escapeAttr(slideIndex >= 0 ? slideIndex : "")}"
       data-service-outline-item-index="${index}"
@@ -24545,7 +24553,7 @@ function renderServiceOutlineChildRow(service, item, index, selectedIndex, slide
         ${showMissingBadge ? renderServiceOutlineMissingBadge(missing) : ""}
       </span>
       <span class="service-outline-start"></span>
-    </button>`;
+    </button>${editor.button}</div>${editor.panel}</div>`;
 }
 
 function renderServiceOutlineMissingBadge(missing = null) {
@@ -28994,7 +29002,7 @@ async function applyPresenterPreparationInput(serviceId = state.selectedServiceI
 
     finalizePresenterPreparationApply({
       service, serviceId, items, entries, skipped, scriptureItemIds, textFieldUpdates,
-      createdSongTitles, versionWarnings, draftSnapshot,
+      createdSongTitles, versionWarnings, draftSnapshot, appliedDraft: draft,
     });
     applied = true;
   } finally {
@@ -29002,6 +29010,7 @@ async function applyPresenterPreparationInput(serviceId = state.selectedServiceI
     renderServiceList();
     if (applied && options.focusTarget) focusPresenterPreparationTarget(serviceId, options.focusTarget);
   }
+  return applied;
 }
 
 function presenterServiceInputItem(item, service) {
