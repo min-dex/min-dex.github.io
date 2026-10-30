@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261030-inline-outline",
+  "version": "20261030-product-identity",
   "options": {
     "compress": false,
     "mangle": {
