@@ -171,6 +171,24 @@ async function mutateSingleSong(operation, input, scope) {
   }
   state.songs.sort(sortSongs);clearSearchCaches();return result;
 }
+// Display-only translation: keep original errors and pending requests intact.
+function praiseMutationErrorMessage(error) {
+  const message = String(error?.message || (typeof error === "string" ? error : ""));
+  const code = String(error?.code || error?.name || "");
+  const signature = `${code} ${message}`;
+  if (/SINGLE_SONG_IN_USE|SONG_IN_USE/.test(signature)) return "예배에서 사용 중인 곡이라 삭제하지 않았습니다. 연결된 예배를 확인해 주세요.";
+  if (/401|PGRST301|JWT|not authenticated|로그인/i.test(signature)) return "로그인 상태를 확인하지 못했습니다. 현재 입력을 보관하고 다시 로그인한 뒤 시도해 주세요.";
+  if (/42501|403|permission denied|row.level security|forbidden/i.test(signature)) return "이 작업을 저장할 권한이 없습니다. 현재 입력을 보관하고 관리자에게 권한을 확인해 주세요.";
+  if (/CONFLICT|REVISION_MISSING|STALE/.test(signature)) return "다른 변경과 충돌해 작업을 완료하지 못했습니다. 현재 입력을 보관하고 최신 곡 정보와 비교한 뒤 다시 시도해 주세요.";
+  if (/REFERENCE_MISSING|NOT_FOUND/.test(signature)) return "연결할 곡을 찾지 못했습니다. 현재 입력을 보관하고 찬양 목록에서 곡을 다시 확인해 주세요.";
+  if (/REFERENCE_AMBIGUOUS|REFERENCE_MISMATCH/.test(signature)) return "곡과 판본의 연결이 맞지 않습니다. 현재 입력을 보관하고 연결할 판본을 다시 선택해 주세요.";
+  if (/OUTCOME_UNKNOWN|ACK_INVALID|timeout|timed out|57014/i.test(signature)) return "서버의 처리 결과를 확인하지 못했습니다. 현재 입력을 보관하고 연결을 확인한 뒤 같은 작업을 다시 시도해 주세요.";
+  // Reuse only the shared resolver's known-safe network branch, never its raw fallback.
+  if (/Failed to fetch|Failed to send a request|NetworkError|Load failed|Network request failed/i.test(message)) return serviceSaveErrorMessage(error);
+  if (/REPOSITORY_CHANGED|BACKEND_REQUIRED|LIFECYCLE_REQUIRED|TRANSPORT_REQUIRED/.test(signature)) return "찬양 저장 연결을 확인하지 못했습니다. 현재 입력을 보관하고 앱 연결 상태를 확인한 뒤 다시 시도해 주세요.";
+  return "찬양 작업을 완료하지 못했습니다. 현재 입력을 보관하고 다시 시도해 주세요. 반복되면 관리자에게 알려 주세요.";
+}
+
 async function editSingleSongRelation(song, kind, targetId, remove = false) {
   if (!song?._singleSongRecord || state.saving) return;
   if (state.dirty.song || state.dirty.forms) {showToast("편집 중인 곡을 먼저 저장해 주세요.","info");return;}
@@ -190,7 +208,7 @@ async function editSingleSongRelation(song, kind, targetId, remove = false) {
     await mutateSingleSong(kind,{id:song.id,members,expectedRevisions:singleSongRevisions(affected)});
     if (!state.dirty.song && !state.dirty.forms) captureCleanFingerprint("praise");
     renderDetail();showToast("곡 관계를 저장했습니다.");
-  } catch(error) {showToast(error.message,"error");}
+  } catch(error) {showToast(praiseMutationErrorMessage(error),"error");}
   finally {state.saving=false;updateSaveState();}
 }
 async function deleteSingleSong(song) {
@@ -206,18 +224,18 @@ async function deleteSingleSong(song) {
     }
     if (state.selectedSongId===song.id) {state.selectedSongId=null;state.selectedVersionId=null;state.forms=[];captureCleanFingerprint("praise");}
     persistUiState();render();showToast("빈 곡을 삭제했습니다.");
-  } catch(error) {showToast(error.message,"error");}
+  } catch(error) {showToast(praiseMutationErrorMessage(error),"error");}
   finally {state.saving=false;updateSaveState();}
 }
 async function addSingleSongArrangement(song) {
   if (state.saving || state.dirty.song || state.dirty.forms) {showToast("편집 중인 곡을 먼저 저장해 주세요.","info");return;}
   const pending=state.singleSongRepository.pendingMutation?.(`arrangement:${song.id}`);
-  const name=pending?.content?.name ?? prompt("새 버전 이름 (가사는 복사하고 음원은 별도로 등록)","새 버전");if (name===null) return;
+  const name=pending?.content?.name ?? prompt("새 판본 이름 (가사는 복사하고 음원은 별도로 등록)","새 판본");if (name===null) return;
   const source=state.singleSongCatalog.get(song.id);
   const metadata=structuredClone(source.metadata);
   for (const key of ["id","versions","related_song_ids","same_song_ids","_singleSongRecord","_singleSongRevision"]) delete metadata[key];
   // Match existing add-version behavior: new units, identical lyrics, no inherited audio/timing.
-  const content=pending?.content || {name:name.trim()||"새 버전",raw_section_name:name.trim()||"새 버전",is_primary:true,
+  const content=pending?.content || {name:name.trim()||"새 판본",raw_section_name:name.trim()||"새 판본",is_primary:true,
     praise_types:source.content.praise_types || source.metadata.praise_types,
     forms:(source.content.forms||[]).map(form=>({...structuredClone(form),id:createUuid()}))};
   state.saving=true;updateSaveState();
@@ -228,8 +246,8 @@ async function addSingleSongArrangement(song) {
       state.selectedSongId=result.id;state.selectedVersionId=result.id;
       state.forms=normalizeForms(state.singleSongCatalog.get(result.id).content.forms);captureCleanFingerprint("praise");
     }
-    persistUiState();render();showToast("별도 ID로 새 버전을 만들었습니다.");
-  } catch(error) {showToast(error.message,"error");}
+    persistUiState();render();showToast("새 판본을 만들었습니다.");
+  } catch(error) {showToast(praiseMutationErrorMessage(error),"error");}
   finally {state.saving=false;updateSaveState();}
 }
 function renderSingleSongRelations(song) {

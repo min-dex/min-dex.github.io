@@ -204,3 +204,17 @@ for subsequent search/variant changes; loading failures, score warnings and
 multi-variant controls stay visible. No song, form, media, timing or service data
 changes. The actual controller regression fails on the old nonempty layout box
 and verifies no client rectangle after repair in Chromium and WebKit.
+
+
+## Native mutation error wording ·2026-10-30 follow-up
+
+Relationship, deletion and new-variant failures use a praise-scoped fixed-message
+resolver. Login, permission, revision conflict, missing/mismatched references,
+in-use protection and uncertain acknowledgements remain distinct failures with
+next steps. Only the existing service resolver's safe network branch is reused;
+its raw fallback is not. Unknown server messages/record bodies never reach the
+toast. Original errors, request replay, CAS, dirty drafts and deletion guards
+remain unchanged. This is message handling, not a backend error repair or bypass.
+New-variant prompt and success wording use 판본; existing saved labels are not
+rewritten. Both-engine injected relationship failures verify error-only toasts,
+state release, unchanged lyrics/forms/audio/relationships and zero production writes.
