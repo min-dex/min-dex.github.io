@@ -28,6 +28,16 @@
     attachRelationalSongVersionRows(versions, units, ids, normalized);
     return normalized;
   }
+  function explicitlyTitleOnly(item, song, version) {
+    if (servicePraiseInputMode(item) === 'children_audio') return false;
+    // Only an authored declaration can omit lyrics. An inferred empty-song
+    // title must not turn a missing lyric record into a successful preflight.
+    const declared = presenterServiceItemDeclaredFormSource(item, song, version);
+    const labels = declared?.preset?.forms || [];
+    if (!labels.length || !labels.every(label => normalizePresenterFormPresetLabel(label).type === 'title')) return false;
+    const plan = presenterFormPlanForServiceItem(version, item, song);
+    return !plan.warnings.length && plan.forms.length > 0 && plan.forms.every(form => form._presenterTitle);
+  }
   async function verify(serviceId, token = null, transition = false) {
     const outputService = state.presenter.serviceId, outputSession = state.presenter.outputSessionId;
     const client = state.client, project = state.config.url, selected = state.selectedServiceId, generation = state.presenter.outputGeneration;
@@ -51,10 +61,12 @@
       if (!item.song_id || ['manual_praise', 'audio_praise'].includes(servicePraiseInputMode(item))) continue;
       const song = songs.find(s => s.id === item.song_id);
       const selectedId = item.version_id || item.song_version_id;
-      const version = selectedId ? song.versions.find(v => v.id === selectedId) : song.versions[0];
-      if (!version) throw Error('연결된 찬양 버전을 확인하지 못했습니다. 버전을 선택해 주세요.');
-      if (serviceItemOutputMode(item, parseServiceItemMemo(item.memo)) !== 'score' && !presenterVersionHasUsableLyrics(version)) {
-        throw Error('선택한 찬양 버전에 가사가 없습니다. 가사를 확인해 주세요.');
+      const version = selectedId ? song?.versions.find(v => v.id === selectedId) : song?.versions[0];
+      const context = [item.label, song?.title].filter(Boolean).join(' · ');
+      if (!version) throw Error(`${context ? `${context}: ` : ''}연결된 찬양 버전을 확인하지 못했습니다. 버전을 선택해 주세요.`);
+      if (serviceItemOutputMode(item, parseServiceItemMemo(item.memo)) !== 'score' && !presenterVersionHasUsableLyrics(version)
+        && !explicitlyTitleOnly(item, song, version)) {
+        throw Error(`${context ? `${context}: ` : ''}선택한 찬양 버전에 가사가 없습니다. 가사를 확인해 주세요.`);
       }
     }
     const map = new Map(state.songs.map(s => [s.id, s]));
