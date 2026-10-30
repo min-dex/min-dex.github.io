@@ -6330,3 +6330,7 @@ body[data-module="presenter"] .svc-presenter-toolbar::before {
 .svc-toolbar-scripture .svc-citation-composer + .svc-citation-composer { margin-top:5px; }
 
 .svc-toolbar-scripture .svc-slide-citation-reference-input:focus-visible { outline-offset:-2px; }
+.global-playback-volume { margin-top:10px; }
+.global-playback-volume .svc-volume-control { display:flex; width:100%; }
+.global-playback-volume .svc-music-volume { flex:1; min-width:0; }
+.svc-volume-control:has(input:disabled) { opacity:0.5; }

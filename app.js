@@ -29889,6 +29889,31 @@ function serviceMusicSourceIsSlotOwned(source = state.serviceMusic.sourceKey) {
   return Boolean(source) && Object.values(SERVICE_SLOT_MUSIC).some(config => config.source === source);
 }
 
+function renderServiceMusicVolumeControl() {
+  const music = state.serviceMusic;
+  const percent = Math.round(music.volumeLevel * 20);
+  const enabled = isPresenterOutputWindowOpen();
+  return `<span class="svc-volume-control" title="${enabled ? "음악 볼륨" : "송출 중에만 볼륨을 조절할 수 있습니다"}">
+    <i data-lucide="volume-2" aria-hidden="true"></i>
+    <input class="svc-music-volume" type="range" min="0" max="5" step="0.25" value="${music.volumeLevel}" data-service-music-volume aria-label="${escapeAttr(uiText("presenter.music.volume"))}" aria-valuetext="${percent}%" ${enabled ? "" : "disabled"}>
+    <output data-service-music-volume-value aria-hidden="true">${percent}%</output>
+  </span>`;
+}
+
+function syncServiceMusicVolumeControls() {
+  const enabled = isPresenterOutputWindowOpen();
+  const level = state.serviceMusic.volumeLevel;
+  document.querySelectorAll("[data-service-music-volume]").forEach(input => {
+    input.disabled = !enabled;
+    input.value = String(level);
+    input.setAttribute("aria-valuetext", `${Math.round(level * 20)}%`);
+    input.closest(".svc-volume-control").title = enabled ? "음악 볼륨" : "송출 중에만 볼륨을 조절할 수 있습니다";
+  });
+  document.querySelectorAll("[data-service-music-volume-value]").forEach(output => {
+    output.textContent = `${Math.round(level * 20)}%`;
+  });
+}
+
 function renderServiceMusicPlayer(options = {}) {
   const slotOwned = !options.source && serviceMusicSourceIsSlotOwned();
   const music = slotOwned ? { ...state.serviceMusic, sourceKey: "", sourceLabel: "", objectUrl: "", fileName: "", playing: false, pending: false } : state.serviceMusic;
@@ -29901,7 +29926,6 @@ function renderServiceMusicPlayer(options = {}) {
   const pending = active && music.pending;
   const playing = active && !pending && music.playing;
   const key = pending ? "loading" : playing ? "playing" : "idle";
-  const volumePercent = Math.round(music.volumeLevel * 20);
   return `
     <span class="svc-music-player${inline ? " svc-music-player--inline" : ""}" data-service-music-player data-service-music-service-id="${escapeAttr(options.serviceId || "")}" data-service-music-source="${escapeAttr(options.source || "")}" data-service-music-label="${escapeAttr(options.label || "")}" data-service-music-repeat-allowed="${options.repeatAllowed !== false}">
       ${inline ? `<span class="svc-music-label">${escapeHtml(options.label)}</span>` : `
@@ -29918,11 +29942,7 @@ function renderServiceMusicPlayer(options = {}) {
         </button>
         ${inline ? `<button type="button" class="icon-btn" data-service-music-action="stop" aria-label="음악 정지" ${active && (music.pending || music.playing || music.audio?.currentTime) ? "" : "disabled"}><i data-lucide="square"></i></button>` : ""}
         ${options.repeatAllowed !== false && music.repeatAllowed !== false ? `<button class="icon-btn svc-music-repeat" type="button" data-service-music-action="repeat" aria-label="음악 반복 재생" aria-pressed="${Boolean(music.repeat ?? context.playback?.loop)}"><i data-lucide="repeat"></i></button>` : ""}
-        <span class="svc-volume-control">
-          <i data-lucide="volume-2" aria-hidden="true"></i>
-          <input class="svc-music-volume" type="range" min="0" max="5" step="0.05" value="${music.volumeLevel}" data-service-music-volume aria-label="${escapeAttr(uiText("presenter.music.volume"))}" aria-valuetext="${volumePercent}%">
-          <output data-service-music-volume-value aria-hidden="true">${volumePercent}%</output>
-        </span>` : ""}
+        ${renderServiceMusicVolumeControl()}` : ""}
       </span>
       ${inline ? globalThis.MindexSongTiming?.transport({ source: options.source, serviceId: options.serviceId }) || "" : ""}
     </span>`;
@@ -30062,6 +30082,7 @@ function positionGlobalPlaybackPanel() {
 }
 
 function renderGlobalPlaybackControls() {
+  syncServiceMusicVolumeControls();
   const root = document.getElementById("globalPlaybackControls");
   if (!root) return;
   const music = state.serviceMusic;
@@ -30081,6 +30102,7 @@ function renderGlobalPlaybackControls() {
         <span class="global-playback-label"><span class="global-playback-name">${escapeHtml(music.sourceLabel || music.fileName || "음악")}</span><span class="global-playback-state" role="status">${musicState}</span></span>
       </div>
       ${globalThis.MindexSongTiming?.transport() || ""}
+      <div class="global-playback-volume" ${hasMusic ? "" : "hidden"}>${renderServiceMusicVolumeControl()}</div>
       <div class="global-playback-actions" role="group" aria-label="음악 재생 제어" ${hasMusic ? "" : "hidden"}>
         <button type="button" class="btn secondary" data-global-playback-action="toggle" title="${toggleLabel}" aria-label="${toggleLabel}" aria-pressed="${Boolean(music.playing)}"><i data-lucide="${icon}"></i><span>${music.pending ? "준비 취소" : music.playing ? "일시정지" : "재생"}</span></button>
         <button type="button" class="btn secondary global-playback-stop" data-global-playback-action="stop" aria-label="음악 정지" ${music.pending || music.playing || music.audio?.currentTime ? "" : "disabled"}><i data-lucide="square"></i><span>정지</span></button>

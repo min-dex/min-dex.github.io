@@ -44,6 +44,19 @@ def main():
                       await click('toggle');check(audio.paused&&audio.currentTime===42&&host.textContent.includes('일시정지'),'global pause');
                       await click('toggle');check(!audio.paused&&state.serviceMusic.ownerServiceId==='owner'&&audio.currentTime===42,'global resume changed owner');
                       state.presenter.serviceId='owner';state.presenter.outputWindow={closed:false,close(){this.closed=true}};
+                      const inline=document.createElement('aside');inline.id='volume-fixture';inline.innerHTML=renderServiceMusicPlayer({source:binding.serviceMusicSource,serviceId:'owner'});document.body.append(inline);
+                      updateServiceMusicTransportControls();
+                      const volume=host.querySelector('[data-service-music-volume]');
+                      check(!volume.disabled&&volume.step==='0.25','live volume unavailable or wrong step');
+                      volume.value='3.25';volume.dispatchEvent(new Event('input',{bubbles:true}));
+                      check(audio.volume===0.65&&inline.querySelector('input').value==='3.25','global volume not shared');
+                      setServiceMusicVolume(3.13);check(audio.volume===0.65,'setter did not quantize to 5%');
+                      state.presenter.outputWindow.closed=true;renderGlobalPlaybackControls();
+                      check(host.querySelector('[data-service-music-volume]').disabled&&inline.querySelector('input').disabled,'off-air slider enabled');
+                      setServiceMusicVolume(5);check(audio.volume===0.65,'off-air stale event changed volume');
+                      state.presenter.outputWindow.closed=false;renderGlobalPlaybackControls();
+                      check(!host.querySelector('[data-service-music-volume]').disabled,'restart did not unlock slider');
+                      inline.remove();
                       renderLiveServiceReturnControl();check(!host.querySelector('[data-global-playback-action="output-stop"]'),'output controls leaked into music panel');
                       confirmSaveBeforeLeaving=async()=>false;
                       await returnToLiveService();check(state.module==='home'&&state.selectedServiceId==='other','return bypassed dirty guard');
@@ -72,6 +85,11 @@ def main():
                     launcher.click()
                     panel=page.locator('#globalPlaybackPanel')
                     assert panel.is_visible()
+                    volume=panel.get_by_role('slider',name='음악 볼륨')
+                    volume.focus();volume.press('Home');volume.press('ArrowRight')
+                    assert volume.get_attribute('aria-valuetext')=='5%'
+                    assert page.evaluate('state.serviceMusic.audio.volume===0.05')
+                    assert volume.evaluate('e=>document.activeElement===e')
                     assert panel.locator('[data-global-playback-action="toggle"]').evaluate("e=>{const s=getComputedStyle(e);return s.height==='30px'&&s.paddingLeft==='10px'&&s.paddingRight==='10px'&&s.fontWeight==='600'}")
                     fade=panel.get_by_label('페이드아웃 정지', exact=True)
                     assert fade.is_checked()

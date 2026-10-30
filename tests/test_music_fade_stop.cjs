@@ -8,7 +8,7 @@ function fixture() {
   const timers=new Map(), retired=[];
   const audio={paused:false,ended:false,currentTime:42,volume:.6,src:'a',pause(){this.paused=true},play(){this.paused=false;return Promise.resolve()},removeAttribute(){this.src=''}};
   const music={audio,playing:true,pending:false,volumeLevel:3,fadeStopEnabled:true,fadeStop:null,playSerial:0,sourceKey:'a',mode:'manual'};
-  const c=vm.createContext({state:{serviceMusic:music,presenter:{},services:[]},Date:{now:()=>now},
+  const c=vm.createContext({isPresenterOutputWindowOpen:()=>true,state:{serviceMusic:music,presenter:{},services:[]},Date:{now:()=>now},
     setInterval(fn){timers.set(++id,fn);return id},clearInterval(id){if(timers.has(id))retired.push(timers.get(id));timers.delete(id)},clearTimeout(){},
     renderPresenterControlState(){},updateServiceMusicTransportControls(){},serviceMusicSourceIsSlotOwned:()=>false,
     currentPresenterAudioContext:()=>({}),syncServiceMusicSyncedLyricsWithCurrentTime(){},showToast(){}});

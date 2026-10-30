@@ -1,3 +1,13 @@
+## Shared music volume during output (2026-10-30)
+
+The media management popover and inline music player share one0–100% volume
+control, in5% increments. Volume changes require an active presenter output
+window (including the existing heartbeat detection); merely playing music does
+not enable them. The UI disables the controls off-air and the setter rechecks
+output state, blocking stale events. Closing output retains the selected volume
+and ongoing playback. Volume remains session state, without modifying songs,
+worship records or audio timing. Existing fade-out multiplication is preserved.
+
 ## Explicit Deletion In Worship Order Editor (2026-10-14)
 
 - The order editor now records the same template suppression intent as the

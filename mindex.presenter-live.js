@@ -322,8 +322,12 @@ function loadServiceMusicFile(file) {
 }
 
 function setServiceMusicVolume(value, binding = null) {
+  if (!isPresenterOutputWindowOpen()) {
+    updateServiceMusicTransportControls();
+    return;
+  }
   if (binding?.serviceMusicSource && binding.serviceMusicServiceId !== state.serviceMusic.ownerServiceId) return;
-  const level = Math.min(Math.max(Number(value) || 0, 0), 5);
+  const level = Math.round(Math.min(Math.max(Number(value) || 0, 0), 5) * 4) / 4;
   state.serviceMusic.volumeLevel = level;
   const audio = getServiceMusicAudio();
   const fade = state.serviceMusic.fadeStop;
