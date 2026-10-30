@@ -417,6 +417,8 @@ function syncServiceMusicSyncedLyricsWithCurrentTime(options = {}) {
 function updateLiveScriptureDraft(value, serviceId = state.selectedServiceId || state.presenter.serviceId) {
   if (!serviceId) return;
   state.presenterScriptureDrafts ||= {};
+  const previous = state.presenterScriptureDrafts[serviceId] ?? (state.presenter.serviceId === serviceId ? state.presenter.liveScripture.draft : "");
+  if (String(previous || "") !== String(value || "") && state.presenter.serviceId === serviceId) liveScriptureRequestSerial += 1;
   state.presenterScriptureDrafts[serviceId] = String(value || "");
   if (state.presenter.serviceId === serviceId) state.presenter.liveScripture.draft = String(value || "");
 }
@@ -585,8 +587,8 @@ async function runLiveScriptureAction(action, serviceId = state.selectedServiceI
     showToast("다른 예배가 송출 중입니다. 해당 예배에서 실시간 말씀을 조작해 주세요.", "info");
     return;
   }
-  const requestSerial = ++liveScriptureRequestSerial;
   if (action === "clear") {
+    liveScriptureRequestSerial += 1;
     state.presenter.liveScripture = { reference: "", draft: state.presenter.liveScripture.draft || "", active: false, slide: null };
     publishPresenterState({ force: true });
     renderPresenterControlState(serviceId);
@@ -599,6 +601,7 @@ async function runLiveScriptureAction(action, serviceId = state.selectedServiceI
     : document.querySelector("[data-live-scripture-input]");
   const query = String(input?.value ?? state.presenterScriptureDrafts?.[serviceId] ?? (state.presenter.serviceId === serviceId ? state.presenter.liveScripture.draft : "") ?? "").trim();
   updateLiveScriptureDraft(query, serviceId);
+  const requestSerial = ++liveScriptureRequestSerial;
   if (!query) {
     showToast("성구를 입력해 주세요.", "error");
     return;

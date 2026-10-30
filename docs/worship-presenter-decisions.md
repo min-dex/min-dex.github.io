@@ -5152,3 +5152,11 @@ CCM 제목으로 우회하거나 번호만으로 새 빈 곡을 만들지 않는
 ### 인라인 저장 안내와 입력 보존 · 2026-10-30
 
 각 행의 저장은 로컬 반영 직후의 ‘상단 저장을 눌러 확정’ 안내를 띄우지 않고 실제 atomic 저장 결과를 따른다. 별도 반영 동작의 기존 안내와 저장 오류·재시도는 유지한다. 제목/담당자 빈칸 삭제, 서로 다른 행의 연속 저장, 대기 중 추가 입력 및 확정 후 실제 재조회를 격리 Chromium/WebKit에서 검증했다. 운영 데이터·실제 송출/음원/인쇄는 조작하지 않았다.
+### Pending input requests · 2026-10-30
+
+Global Enter navigation belongs to one input revision and module visit. Editing,
+leaving the module, or a newer Enter invalidates the older result even when the
+text later matches again. Changing the active live-scripture draft invalidates
+its pending verse lookup; other-service drafts do not interrupt the live owner.
+A deliberate retry retains the current input. No actual output is exercised by
+the isolated request-race tests.

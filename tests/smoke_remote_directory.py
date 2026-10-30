@@ -7,6 +7,7 @@ MOCK=r'''window.rpcCalls=[];window.directoryFail=false;window.rows=[{id:'a',titl
 window.supabase={createClient:()=>({async rpc(name,a={}){
  rpcCalls.push({name,...a});
  if(name==='mindex_remote_outputs')return directoryFail?{error:{message:'offline'}}:{data:{ok:true,outputs:rows}};
+ if(name==='mindex_remote_entry'&&window.entryHold)await new Promise(r=>window.releaseEntry=r);
  if(name==='mindex_remote_entry')return {data:a.p_code==='7777'?{ok:true,kind:'admin',token:'fixture-token'}:{ok:true,kind:'guest'}};
  if(name==='mindex_remote_admin')return {data:a.p_action==='list'?{ok:true,outputs:rows.map(o=>({...o,code:o.id==='a'?'0123':'0456'}))}:{ok:true,ready:true,secret:'ab'.repeat(32)}};
  if(name==='mindex_remote_guest'){
@@ -55,7 +56,8 @@ try:
    assert page.evaluate('window.opened||0')==0
    assert page.evaluate("rpcCalls.some(c=>c.name==='mindex_remote_guest'&&c.p_output==='a'&&c.p_code==='0456')")
    page.fill('#code','01');page.wait_for_timeout(3200);assert page.locator('#code').input_value()=='01'
-   page.fill('#code','0123');page.click('#connect');page.wait_for_function('window.opened===1');page.wait_for_function("!document.querySelector('#controller').hidden")
+   page.fill('#code','0123');page.evaluate('entryHold=true');page.click('#connect');page.wait_for_function("typeof releaseEntry==='function'");assert page.locator('#code').get_attribute('readonly') is not None
+   page.evaluate("document.querySelector('#code').value='0456';entryHold=false;releaseEntry()");page.wait_for_function('window.opened===1');page.wait_for_function("!document.querySelector('#controller').hidden")
    page.click('#disconnect');page.wait_for_function("!document.querySelector('#adminOutputs').hidden")
    page.locator('#outputList button').last.click();page.fill('#code','7777');page.click('#connect');page.wait_for_function('window.opened===2');page.wait_for_function("!document.querySelector('#controller').hidden")
    assert page.evaluate("rpcCalls.some(c=>c.name==='mindex_remote_admin'&&c.p_action==='connect'&&c.p_output==='b')")

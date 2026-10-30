@@ -1309,6 +1309,7 @@ function bindStaticEvents() {
   refs.sidebar?.addEventListener("click", handleSidebarPresenterActionClick);
   refs.bibleSidebarTranslation?.addEventListener("change", handleDetailChange);
   refs.searchInput.addEventListener("input", (event) => {
+    searchNavigationSerial += 1;
     saveCurrentListScroll();
     state.search = event.target.value;
     if (shouldClearBibleTextSearchOnInput()) {
@@ -1910,8 +1911,10 @@ function handlePresenterBoardPointerOver(event) {
 }
 
 // ─── Navigation, keyboard input, and local UI state ──────────────────────────
+let searchNavigationSerial = 0;
 async function handleSearchKeydown(event) {
   if (event.key !== "Enter" || event.isComposing || event.keyCode === 229) return;
+  const requestSerial = ++searchNavigationSerial;
   const query = state.search;
   const moduleName = state.module;
   if (!normalizeSearchValue(query)) return;
@@ -1924,7 +1927,7 @@ async function handleSearchKeydown(event) {
   }
 
   const scriptureShortcut = await getScriptureSearchShortcut(query);
-  if (state.search !== query || state.module !== moduleName) return;
+  if (requestSerial !== searchNavigationSerial || state.search !== query || state.module !== moduleName) return;
   if (state.module !== "references" && scriptureShortcut && (state.module !== "scripture" || scriptureShortcut.type !== "text")) {
     event.preventDefault();
     await runScriptureSearchShortcut(scriptureShortcut);
@@ -3008,6 +3011,7 @@ async function switchModule(moduleName, options = {}) {
   window.MINDEX_SERVICE_ENTRY?.invalidate();
   if (!(await confirmSaveBeforeLeaving())) return;
 
+  searchNavigationSerial += 1;
   const clearSearch = options.clearSearch !== false;
   const syncHistory = options.syncHistory !== false;
   saveCurrentListScroll();

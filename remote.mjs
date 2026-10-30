@@ -116,6 +116,7 @@ function paint(){
  paintSlides(usable);
  for(const button of document.querySelectorAll('[data-action]'))button.disabled=!usable||!view?.allowed?.includes(button.dataset.action);
  $('connect').disabled=opening||ending||!!session;
+ $('code').readOnly=opening||ending||!!session;
  $('disconnect').disabled=ending;
  $('backOutputs').disabled=ending||opening;
 }
@@ -216,18 +217,18 @@ $('slidesSearch').onsubmit=e=>{e.preventDefault();if(compositionSubmitBlocked(e.
 $('slidesPrev').onclick=()=>loadSlides(Math.max(0,(slidesData?.offset||0)-(slidesData?.pageSize||6)));
 $('slidesNext').onclick=()=>loadSlides((slidesData?.offset||0)+(slidesData?.pageSize||6));
 $('pairForm').addEventListener('submit',async e=>{
- e.preventDefault();if(compositionSubmitBlocked(e.currentTarget)||opening||ending||session||!selectedOutput)return;const chosen=selectedOutput;opening=true;paint();$('result').textContent='';
+ e.preventDefault();if(compositionSubmitBlocked(e.currentTarget)||opening||ending||session||!selectedOutput)return;const chosen=selectedOutput,code=$('code').value.trim();opening=true;paint();$('result').textContent='';
  try{
   if(!window.supabase||!window.MINDEX_SUPABASE)throw Error('연결 준비에 실패했습니다. 페이지를 새로고침해 주세요.');
   client=getClient();
-  const entry=await adminRpc(client,'mindex_remote_entry',{p_code:$('code').value.trim()});
+  const entry=await adminRpc(client,'mindex_remote_entry',{p_code:code});
   if(entry.kind==='admin'){
    adminToken=entry.token;$('code').value='';
    selectedOutput=null;opening=false;await connectAdmin(chosen);return;
   }
   if(entry.kind!=='guest')throw Error('연결 응답을 확인할 수 없어요.');
   $('disconnect').textContent='원격 연결 종료';
-  const registration=await obtainOutputPairing(client,$('code').value,chosen.id);
+  const registration=await obtainOutputPairing(client,code,chosen.id);
   session=await openRemote({client,registration,onClose:reset,onSlides:renderSlides,onState:state,onStatus:s=>{$('status').textContent=s;paint();},onResult:remoteResult});
   $('disconnect').hidden=false;
  }catch(e){$('status').textContent=e.message;}finally{opening=false;paint();void listOutputs();}
