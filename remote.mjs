@@ -6,6 +6,18 @@ import {setupPhoneExperience} from './remote.screen.mjs?v=4';
 window.lucide?.createIcons();
 const screenAwake=setupPhoneExperience();
 const $=id=>document.getElementById(id);
+// Composition confirmation belongs to the keyboard, never to form actions.
+const composingForms=new WeakSet(),committingForms=new WeakSet();
+function compositionSubmitBlocked(form){return composingForms.has(form)||committingForms.has(form);}
+for(const form of [$('pairForm'),$('slidesSearch')]){
+ const commit=()=>{committingForms.add(form);setTimeout(()=>committingForms.delete(form),0);};
+ form.addEventListener('compositionstart',()=>composingForms.add(form));
+ form.addEventListener('compositionend',()=>{composingForms.delete(form);commit();});
+ form.addEventListener('keydown',event=>{
+  if(event.key==='Enter'&&(event.isComposing||event.keyCode===229||compositionSubmitBlocked(form))){event.preventDefault();commit();}
+ });
+}
+
 const currentPreview=createPreview($('current'),'현재 슬라이드'),nextPreview=createPreview($('next'),'다음 슬라이드');
 let session,view=null,opening=false,ending=false;
 let client;
@@ -137,6 +149,8 @@ function state(value){
 }
 const slidePreviews=[];
 let slidesData=null,slidesLoading=false,slidesTimer=null,jumpPending=false,slidesMode='groups',selectedGroup=null;
+let slidesDraftRevision=0,requestedSlidesDraft=null;
+$('slidesQuery').addEventListener('input',()=>{slidesDraftRevision++;slidesData=null;slidesLoading=false;clearTimeout(slidesTimer);$('slidesStatus').textContent='검색을 눌러 새 목록을 받아 주세요.';paint();});
 function paintSlides(usable){
  if($('slidesPanel').hidden)return;
  const current=!!slidesData&&slidesData.key===view?.catalogKey;
@@ -152,12 +166,13 @@ function paintSlides(usable){
 }
 async function loadSlides(offset=0,atCurrent=false){
  if(!session?.usable)return;
+ requestedSlidesDraft={revision:slidesDraftRevision,query:$('slidesQuery').value};
  slidesLoading=true;$('slidesStatus').textContent='불러오는 중…';paint();clearTimeout(slidesTimer);
  slidesTimer=setTimeout(()=>{slidesLoading=false;$('slidesStatus').textContent='목록을 받지 못했어요. 검색을 눌러 다시 시도해 주세요.';paint();},5000);
  try{await session.requestSlides({offset,query:$('slidesQuery').value,mode:slidesMode,groupIndex:selectedGroup,key:slidesData?.key,atCurrent});}catch(e){clearTimeout(slidesTimer);slidesLoading=false;$('slidesStatus').textContent=e.message;paint();}
 }
 function renderSlides(data){
- if($('slidesPanel').hidden||!data||!Array.isArray(data.items))return;
+ if($('slidesPanel').hidden||!data||!Array.isArray(data.items)||requestedSlidesDraft?.revision!==slidesDraftRevision||requestedSlidesDraft?.query!==$('slidesQuery').value)return;
  clearTimeout(slidesTimer);slidesLoading=false;slidesData=data;
  for(const preview of slidePreviews.splice(0))preview.dispose();
  const list=$('slidesList');list.replaceChildren();list.classList.toggle('groups',data.mode==='groups');$('slideGroups').hidden=data.mode==='groups';let group='';
@@ -197,11 +212,11 @@ $('slidesOpen').onclick=()=>{
 };
 $('slidesClose').onclick=()=>{closeSlides();$('slidesOpen').focus();};
 $('slideGroups').onclick=()=>{slidesMode='groups';selectedGroup=null;$('slidesQuery').value='';void loadSlides(0,true);};
-$('slidesSearch').onsubmit=e=>{e.preventDefault();slidesMode=$('slidesQuery').value.trim()?'slides':'groups';selectedGroup=null;void loadSlides();};
+$('slidesSearch').onsubmit=e=>{e.preventDefault();if(compositionSubmitBlocked(e.currentTarget))return;slidesMode=$('slidesQuery').value.trim()?'slides':'groups';selectedGroup=null;void loadSlides();};
 $('slidesPrev').onclick=()=>loadSlides(Math.max(0,(slidesData?.offset||0)-(slidesData?.pageSize||6)));
 $('slidesNext').onclick=()=>loadSlides((slidesData?.offset||0)+(slidesData?.pageSize||6));
 $('pairForm').addEventListener('submit',async e=>{
- e.preventDefault();if(opening||ending||session||!selectedOutput)return;const chosen=selectedOutput;opening=true;paint();$('result').textContent='';
+ e.preventDefault();if(compositionSubmitBlocked(e.currentTarget)||opening||ending||session||!selectedOutput)return;const chosen=selectedOutput;opening=true;paint();$('result').textContent='';
  try{
   if(!window.supabase||!window.MINDEX_SUPABASE)throw Error('연결 준비에 실패했습니다. 페이지를 새로고침해 주세요.');
   client=getClient();

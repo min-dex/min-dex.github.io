@@ -16,7 +16,7 @@ window.supabase={createClient:()=>({async rpc(name,a={}){
  }
  return {data:{ok:false,error:'unexpected'}};
 }})};'''
-SESSION=r'''export async function openRemote(o){window.opened=(window.opened||0)+1;const s={connected:true,usable:true,close(){o.onClose();},async end(){o.onClose();},suspend(){},refresh(){},offline(){}};window.setRemoteState=o.onState;setTimeout(()=>o.onState({index:0,total:2,current:'예배',next:'다음',music:'음원 없음',allowed:[]}),0);return s;}'''
+SESSION=r'''export async function openRemote(o){window.opened=(window.opened||0)+1;const s={connected:true,usable:true,close(){o.onClose();},async end(){o.onClose();},suspend(){},refresh(){},offline(){}};window.setRemoteState=o.onState;window.setSlides=o.onSlides;window.slideRequests=[];s.requestSlides=async options=>{slideRequests.push(options)};setTimeout(()=>o.onState({index:0,total:2,current:'예배',next:'다음',music:'음원 없음',allowed:[]}),0);return s;}'''
 server,url=start_local_app_server();url=url.replace('index.html','remote.html')
 try:
  with sync_playwright() as p:
@@ -42,6 +42,15 @@ try:
    page.evaluate("rows=rows.filter(o=>o.id!=='c').reverse()")
    page.wait_for_function("document.querySelectorAll('#outputList button').length===2")
    page.locator('#outputList button').first.click();assert page.locator('#pairTitle').inner_text()=='어린이부 예배'
+   page.fill('#code','0123')
+   page.evaluate('''()=>{
+    const form=document.querySelector('#pairForm'),input=document.querySelector('#code');window.entryBefore=rpcCalls.filter(c=>c.name==='mindex_remote_entry').length;
+    input.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));form.requestSubmit();
+    input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',keyCode:229,bubbles:true,cancelable:true}));form.requestSubmit();
+    input.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true}));form.requestSubmit();
+   }''')
+   assert page.evaluate("rpcCalls.filter(c=>c.name==='mindex_remote_entry').length===entryBefore")
+   assert page.locator('#code').input_value()=='0123'
    page.fill('#code','0456');page.click('#connect');page.wait_for_function("document.querySelector('#status').textContent.includes('코드') && !document.querySelector('#connect').disabled")
    assert page.evaluate('window.opened||0')==0
    assert page.evaluate("rpcCalls.some(c=>c.name==='mindex_remote_guest'&&c.p_output==='a'&&c.p_code==='0456')")
@@ -51,6 +60,28 @@ try:
    page.locator('#outputList button').last.click();page.fill('#code','7777');page.click('#connect');page.wait_for_function('window.opened===2');page.wait_for_function("!document.querySelector('#controller').hidden")
    assert page.evaluate("rpcCalls.some(c=>c.name==='mindex_remote_admin'&&c.p_action==='connect'&&c.p_output==='b')")
    assert page.locator('#selectedOutputTitle').inner_text()=='주일예배 [3부]'
+   page.wait_for_function("document.querySelector('#position').textContent==='1 / 2'")
+   page.evaluate("setRemoteState({index:0,total:2,current:'예배',catalogKey:'fixture',allowed:['jump']})")
+   page.click('#slidesOpen');page.wait_for_function('slideRequests.length===1')
+   page.evaluate("setSlides({key:'fixture',mode:'groups',total:1,offset:0,items:[{index:0,title:'찬양',count:2}]})")
+   page.fill('#slidesQuery','새검색')
+   assert page.locator('#slidesList button').is_disabled()
+   page.evaluate('''()=>{
+    const input=document.querySelector('#slidesQuery'),form=document.querySelector('#slidesSearch');input.focus();
+    input.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));form.requestSubmit();
+    input.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true}));form.requestSubmit();
+   }''')
+   assert page.evaluate('slideRequests.length')==1
+   page.evaluate("setSlides({key:'fixture',mode:'slides',total:1,offset:0,items:[{index:0,title:'늦은이전검색',text:'이전',group:'찬양'}]})")
+   assert '늦은이전검색' not in page.locator('#slidesList').inner_text()
+   page.evaluate('new Promise(resolve=>setTimeout(resolve,0))');page.press('#slidesQuery','Enter');page.wait_for_function('slideRequests.length===2')
+   page.evaluate("setSlides({key:'fixture',mode:'slides',total:1,offset:0,items:[{index:0,title:'새검색결과',text:'새검색',group:'찬양'}]})")
+   assert '새검색결과' in page.locator('#slidesList').inner_text()
+   assert page.locator('#slidesQuery').input_value()=='새검색'
+   page.press('#slidesQuery','Escape');assert page.locator('#slidesQuery').input_value()=='새검색'
+   page.press('#slidesQuery','Tab');assert page.locator('#slidesQuery').input_value()=='새검색'
+   page.click('#slidesClose')
+
    page.wait_for_function("document.querySelector('#position').textContent==='1 / 2'")
    page.evaluate("setRemoteState({outputState:'standby',index:-1,total:0,current:'송출 대기',allowed:['output-start']})")
    assert page.locator('#outputStop span').inner_text()=='송출 시작'

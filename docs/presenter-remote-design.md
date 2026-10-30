@@ -608,3 +608,14 @@ and accessible name. The slide-list heading and close button stay visible while
 scrolling within that section; no nested scrolling container is introduced.
 Search uses at least 16px text. Main content respects horizontal safe-area insets
 in portrait and landscape without shrinking existing touch targets.
+
+## Input composition and search drafts ·2026-10-30
+
+Code entry and slide search ignore submission during IME composition and its
+commit event turn, including legacy keyCode 229. The next deliberate Enter or
+search/connection click works normally. Escape/Tab retain native input behavior.
+Changing a slide query immediately disables old-result navigation, retains the
+input node/caret, and rejects a late response for a different draft revision.
+Only a new explicit search installs matching results; no operational writes.
+Browser fixtures simulate composition events in Chromium and WebKit; physical
+mobile keyboards remain a separate verification boundary.

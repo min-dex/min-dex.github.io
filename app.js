@@ -1562,6 +1562,7 @@ function bindStaticEvents() {
   window.addEventListener("keydown", handleSaveShortcut, { capture: true });
 
   window.addEventListener("keydown", (event) => {
+    if (event.isComposing || event.keyCode === 229) return;
     const isThemeToggle =
       (event.metaKey || event.ctrlKey) &&
       event.shiftKey &&
@@ -6657,6 +6658,7 @@ async function deleteSelectedSong() {
 }
 
 function handleSaveShortcut(event) {
+  if (event.isComposing || event.keyCode === 229) return;
   if (!(event.metaKey || event.ctrlKey) || event.altKey || event.shiftKey) return;
   if (event.code !== "KeyS" && String(event.key).toLowerCase() !== "s") return;
   event.preventDefault();
@@ -9202,6 +9204,7 @@ function isPresenterPreparationInputEvent(event) {
 }
 
 function handleDetailKeydown(event) {
+  if (event.isComposing || event.keyCode === 229) return;
   if (event.target.closest(".bulletin-workbench")) return;
   const leaderInput = event.target.closest("[data-setlist-leader-input]");
   if (leaderInput) {

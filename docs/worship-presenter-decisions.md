@@ -5095,3 +5095,12 @@ registration/stop-revocation notes. See presenter-remote-design.md for lifecycle
 ### 2026-10-29 콘티 주차·슬라이드 구분
 - 콘티의 월·주차는 해당 주 수요일 기준이며 날짜 범위는 주일–토요일이다. 공예배 2부·3부·오후·수요·금요, 부서 유치·어린이·청소년·청년 순으로 자리를 유지한다. 등록되지 않은 자리는 표시만 하고 레코드는 만들지 않는다. 기타 예배는 날짜 오름차순으로 최대 5열에 배치한다. 2부 특송은 2부 콘티에 유지한다.
 - 말씀 블록 회색/분홍 교대는 각 엘리먼트에서 회색으로 시작한다. 같은 본문 여러 페이지는 한 블록이며 실제 송출 슬라이드 내용·ID·순서는 바꾸지 않는다.
+
+## IME command boundary ·2026-10-30
+
+Detail input commands, the global save shortcut and global keyboard actions
+ignore isComposing/keyCode 229 events. Composition-confirmation Enter/Escape
+must not save, show/clear live scripture, jump slides or trigger global actions.
+Ordinary Enter/Escape/Tab and Ctrl/Cmd+S retain their existing behavior.
+The existing global search async query/module guard remains in place.
+Tests use isolated inputs and stubbed actions, never operational saves/output.
