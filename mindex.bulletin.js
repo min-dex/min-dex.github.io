@@ -1229,7 +1229,7 @@
         const current=snapshot(target);current.settings.templateRevision=JSON.parse(before).settings.templateRevision;
         target.dirty=JSON.stringify(current)!==before;target.saveError="";backup(target);return !target.dirty;
       }catch(e){target.dirty=true;target.saveError=e.message;saveError=e.message;return false;}
-      finally{target.saving=false;properties();status();}
+      finally{target.saving=false;if(!signal.aborted&&doc===target)status();}
     }
     async function save(){
       if(templateSession)return saveTemplate();
