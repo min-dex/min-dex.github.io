@@ -19,7 +19,7 @@ def main():
                   state.services=[{id:'fixture',type_id:'sunday-main',service_date:'2026-07-19'}];
                   state.selectedServiceId=null; state.selectedServiceTypeId=SERVICE_SETLIST_ARCHIVE_PANEL_ID;
                   state.search='fixture-song'; refs.searchInput.value=state.search;
-                  state.worshipSetlistArchiveView='date'; state.worshipSetlistArchiveMonth='07';
+                  state.worshipSetlistArchiveView='date'; state.worshipSetlistArchiveYear='2026'; state.worshipSetlistArchiveMonth='07';
                   state.worshipSetlistSongCatalog={status:'loaded',index:MindexSetlistLinks.buildIndex([])};
                   const sources=Array.from({length:28},(_,i)=>({id:'s'+i,service_date:'2026-07-'+String(i+1).padStart(2,'0'),service_type_id:'sun_3rd',source_kind:'worship'}));
                   state.worshipSetlistArchive={loaded:true,loading:false,error:'',sources,
@@ -40,6 +40,17 @@ def main():
                 page.wait_for_function("state.search==='fixture-song' && !isGlobalSearchActive()")
                 page.screenshot(path='/tmp/mindex-setlists-operations-'+os.environ.get('MINDEX_ENGINE','chromium')+'.png')
                 print('PASS Operations entry, active navigation, route title and scoped archive search')
+                page.locator('[data-setlist-period="year"]').select_option('2027')
+                assert page.locator('.service-no-results').inner_text() == '2027년 7월에 표시할 역대 콘티가 없습니다.'
+                assert page.locator('.svc-setlist-entry').count()==0
+                page.locator('[data-service-setlist-view="service"]').click()
+                assert page.locator('[data-setlist-period="year"]').input_value()=='2027'
+                assert page.locator('.svc-setlist-entry').count()==0
+                page.locator('[data-setlist-period="year"]').select_option('2028')
+                assert '2028년' in page.locator('.service-no-results').inner_text()
+                page.locator('[data-setlist-period="year"]').select_option('2026')
+                assert page.locator('.svc-setlist-entry').count()==28
+                print('PASS native year selection in both views, future empty state and no fabricated records')
                 for view in ('date', 'service'):
                     expected = page.evaluate('''view => {
                       state.worshipSetlistArchiveView=view; renderServiceSetlistArchiveDetail();
@@ -49,7 +60,7 @@ def main():
                       selectService('fixture');
                       // Change state while away, to prove that Back uses the saved entry.
                       state.worshipSetlistArchiveView=view==='date'?'service':'date';
-                      state.worshipSetlistArchiveMonth='09';
+                      state.worshipSetlistArchiveMonth='09';state.worshipSetlistArchiveYear='2027';
                       return top;
                     }''', view)
                     page.wait_for_function("state.module==='presenter'")
@@ -65,8 +76,8 @@ def main():
                     assert abs(page.evaluate('refs.detailPane.scrollTop') - expected) < 2
 
                     assert page.evaluate("state.module")=="setlists"
-                    result = page.evaluate("() => ({view:state.worshipSetlistArchiveView,month:state.worshipSetlistArchiveMonth,search:state.search,title:currentPageTabTitle()})")
-                    assert result == dict(view=view, month='07', search='fixture-song', title='역대 콘티'), result
+                    result = page.evaluate("() => ({view:state.worshipSetlistArchiveView,month:state.worshipSetlistArchiveMonth,year:state.worshipSetlistArchiveYear,search:state.search,title:currentPageTabTitle()})")
+                    assert result == dict(view=view, month='07', year='2026', search='fixture-song', title='역대 콘티'), result
                     print('PASS browser Back restores', result, 'scroll', expected)
                 page.evaluate("""async () => {
                   const songs=[{id:'old',title:'문들아 머리 들어라',versions:[],metadata:{}},

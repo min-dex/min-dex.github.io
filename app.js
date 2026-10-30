@@ -467,6 +467,7 @@ const state = {
   worshipTemplateItems: [],
   worshipSetlistSongCatalog: { key: "", status: "idle", index: null },
   worshipSetlistArchiveView: "date",
+  worshipSetlistArchiveYear: String(new Date().getFullYear()),
   worshipSetlistArchiveMonth: "",
   worshipSetlistArchive: {
     sources: [],
@@ -2517,6 +2518,7 @@ function currentBrowserHistorySnapshot() {
     bibleTextSearchPage: state.bibleTextSearchPage,
     ...(isSetlistArchiveView() ? {setlistArchive: {
       view: state.worshipSetlistArchiveView,
+      year: state.worshipSetlistArchiveYear,
       month: state.worshipSetlistArchiveMonth,
       viewport: captureDetailViewportSnapshot(),
     }} : {}),
@@ -2585,6 +2587,7 @@ async function applyBrowserHistorySnapshot(snapshot) {
     state.selectedServiceItemIndex = null;
     if (snapshot.setlistArchive && isSetlistArchiveView()) {
       state.worshipSetlistArchiveView = snapshot.setlistArchive.view === "service" ? "service" : "date";
+      state.worshipSetlistArchiveYear = normalizedSetlistArchiveYear(snapshot.setlistArchive.year);
       state.worshipSetlistArchiveMonth = /^(0[1-9]|1[0-2])$/.test(snapshot.setlistArchive.month) ? snapshot.setlistArchive.month : "";
     }
     clearBibleTextSearch();
@@ -9641,6 +9644,7 @@ function handleDetailChange(event) {
   const setlistPeriod = event.target.closest("[data-setlist-period]");
   if (setlistPeriod) {
     const field = setlistPeriod.dataset.setlistPeriod;
+    if (field === "year") state.worshipSetlistArchiveYear = normalizedSetlistArchiveYear(setlistPeriod.value);
     if (field === "month") state.worshipSetlistArchiveMonth = setlistPeriod.value;
     renderServiceSetlistArchiveDetail();
     refs.detailPane.querySelector(`[data-setlist-period="${field}"]`)?.focus();
@@ -24972,22 +24976,36 @@ function filterWorshipSetlistArchiveEntries(entries = []) {
   });
 }
 
+function normalizedSetlistArchiveYear(value) {
+  return /^[1-9]\d{3}$/.test(String(value || "")) ? String(value) : String(new Date().getFullYear());
+}
+
+function worshipSetlistArchiveYears(entries = []) {
+  const current = new Date().getFullYear();
+  const selected = Number(normalizedSetlistArchiveYear(state.worshipSetlistArchiveYear));
+  return [...new Set([
+    current - 1, current, current + 1, selected - 1, selected, selected + 1,
+    ...entries.map(entry => Number(String(entry.source?.service_date || "").slice(0, 4))),
+  ])].filter(year => Number.isInteger(year) && year >= 1000 && year <= 9999).sort((a,b) => b-a).map(String);
+}
+
 function filterWorshipSetlistArchivePeriod(entries = []) {
-  if (state.worshipSetlistArchiveView !== "date") return entries;
+  const year = normalizedSetlistArchiveYear(state.worshipSetlistArchiveYear);
   return entries.filter(({source}) => {
     const date = String(source.service_date || "");
-    return !state.worshipSetlistArchiveMonth || date.slice(5,7) === state.worshipSetlistArchiveMonth;
+    return date.slice(0,4) === year && (!state.worshipSetlistArchiveMonth || date.slice(5,7) === state.worshipSetlistArchiveMonth);
   });
 }
 
-function renderWorshipSetlistArchiveNavigation(entries) {
-  if (state.worshipSetlistArchiveView === "service") {
-    return `<nav class="svc-setlist-navigation" aria-label="예배별 바로가기">${groupWorshipSetlistArchiveEntries(entries, "service").map(group =>
-      `<button type="button" data-setlist-jump="setlist-group-${escapeAttr(group.key)}">${escapeHtml(group.title)}</button>`).join("")}</nav>`;
-  }
-  return `<div class="svc-setlist-navigation svc-setlist-period" role="group" aria-label="콘티 기간 선택">
+function renderWorshipSetlistArchiveNavigation(entries, allEntries = entries) {
+  const year = normalizedSetlistArchiveYear(state.worshipSetlistArchiveYear);
+  const period = `<div class="svc-setlist-navigation svc-setlist-period" role="group" aria-label="콘티 기간 선택">
+    <select data-setlist-period="year" aria-label="연도">${worshipSetlistArchiveYears(allEntries).map(value => `<option value="${value}" ${value === year ? "selected" : ""}>${value}년</option>`).join("")}</select>
     <select data-setlist-period="month" aria-label="월"><option value="">전체 월</option>${Array.from({length:12}, (_,index) => {const month=String(index+1).padStart(2,"0");return `<option value="${month}" ${state.worshipSetlistArchiveMonth === month ? "selected" : ""}>${index+1}월</option>`;}).join("")}</select>
   </div>`;
+  if (state.worshipSetlistArchiveView !== "service") return period;
+  return period + `<nav class="svc-setlist-navigation" aria-label="예배별 바로가기">${groupWorshipSetlistArchiveEntries(entries, "service").map(group =>
+    `<button type="button" data-setlist-jump="setlist-group-${escapeAttr(group.key)}">${escapeHtml(group.title)}</button>`).join("")}</nav>`;
 }
 
 function renderServiceSetlistArchiveDetail() {
@@ -25016,7 +25034,7 @@ function renderServiceSetlistArchiveDetail() {
         </div>
       </div>
       ${archive.error ? `<p class="service-no-results">${escapeHtml(archive.error)}</p>` : ""}
-      ${renderWorshipSetlistArchiveNavigation(entries)}
+      ${renderWorshipSetlistArchiveNavigation(entries, allEntries)}
       ${archive.loading && !archive.loaded ? renderLoadingDetail() : renderWorshipSetlistArchiveGroups(entries)}
     </div>`;
   finishDetailRender();
@@ -25054,7 +25072,7 @@ function groupWorshipSetlistArchiveEntries(entries = [], view = state.worshipSet
 
 function renderWorshipSetlistArchiveGroups(entries = []) {
   const groups = groupWorshipSetlistArchiveEntries(entries);
-  if (!groups.length) return `<p class="service-no-results">표시할 역대 콘티가 없습니다.</p>`;
+  if (!groups.length) return `<p class="service-no-results">${normalizedSetlistArchiveYear(state.worshipSetlistArchiveYear)}년${state.worshipSetlistArchiveMonth ? ` ${Number(state.worshipSetlistArchiveMonth)}월` : ""}에 표시할 역대 콘티가 없습니다.</p>`;
   return `
     <div class="svc-setlist-month-groups">
       ${groups.map((group) => `

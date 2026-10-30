@@ -3,7 +3,7 @@
   if(isPresenterOutputRoute())return;
   let busy=false,edit=0,marks=null,markClient=null,markProject='',markArchive=null;
   for(const event of ['input','change','pointerdown','keydown'])document.addEventListener(event,()=>edit++,true);
-  const context=()=>JSON.stringify([state.module,state.selectedServiceId,state.selectedServiceTypeId,state.worshipSetlistArchiveView,state.worshipSetlistArchiveMonth,state.search]);
+  const context=()=>JSON.stringify([state.module,state.selectedServiceId,state.selectedServiceTypeId,state.worshipSetlistArchiveView,state.worshipSetlistArchiveYear,state.worshipSetlistArchiveMonth,state.search]);
   function blocked(){
     return !isSetlistArchiveView()||departmentRefreshBlocked()||hasDirtyChanges()||worshipSetlistLeaderDrafts.size
       ||!state.worshipSetlistArchive.loaded||state.worshipSetlistArchive.loading||state.worshipSetlistSongCatalog.status==='loading';
