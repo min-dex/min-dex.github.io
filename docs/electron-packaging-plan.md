@@ -231,3 +231,11 @@ with identity discovery disabled and `--publish never`; never use operational
 profiles. macOS/Windows installer and updater parity still require artifact and
 upgrade verification before a formal product release. Synthetic checks cannot
 certify physical output or signed upgrade behavior.
+
+Formal web publication is additionally fail-closed: a `release` channel manifest
+requires the remote `v<productVersion>` tag (peeled for annotated tags) to match
+the exact source commit. Development builds do not consult remote tags. Build
+signed desktop candidates first, verify upgrades and publish the reviewed version
+tag/Release, then publish the matching formal web artifact. Later source changes
+cannot continue claiming that formal version; return to development or review a
+new version. None of these promotion steps have been performed by this work.

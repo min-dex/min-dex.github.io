@@ -17,8 +17,15 @@ function identity(root,{test=false}={}){
  return {schema:1,productVersion:pkg.version,channel:test?'test':policy.channel,buildVersion:release.version,
   sourceCommit:git(root,['rev-parse','HEAD']).trim(),rendererTree,changes:policy.changes,upgradeNotes:policy.upgradeNotes||'',files};
 }
+function verifyWebReleaseTag(root,record){
+ if(record.channel!=='release')return;
+ const tag=`refs/tags/v${record.productVersion}`;
+ const rows=git(root,['ls-remote','--tags','origin',tag,`${tag}^{}`]).trim().split('\n').filter(Boolean).map(row=>row.split(/\s+/));
+ const target=rows.find(row=>row[1]===`${tag}^{}`)?.[0]||rows.find(row=>row[1]===tag)?.[0];
+ if(target!==record.sourceCommit)throw Error('Formal web product version requires a matching published source tag');
+}
 function writeIdentity(root,destination,options){
- const result=identity(root,options);const {files,...publicInfo}=result;
+ const result=identity(root,options);if(options?.web)verifyWebReleaseTag(root,result);const {files,...publicInfo}=result;
  fs.writeFileSync(path.join(destination,'mindex-build.json'),JSON.stringify(publicInfo,null,2)+'\n');return result;
 }
 function validateWorkingRuntime(root,record){
@@ -41,8 +48,8 @@ async function beforePack(context){
  const test=context.packager.config.extraMetadata?.mindexTestBuild===true;
  const record=identity(root,{test});validateWorkingRuntime(root,record);writeIdentity(root,root,{test});
 }
-module.exports=beforePack;Object.assign(module.exports,{identity,writeIdentity,validateWorkingRuntime,sameRelease,runtime});
+module.exports=beforePack;Object.assign(module.exports,{identity,writeIdentity,validateWorkingRuntime,sameRelease,runtime,verifyWebReleaseTag});
 if(require.main===module){
- try{writeIdentity(path.resolve(process.argv[2]),path.resolve(process.argv[3]));}
+ try{writeIdentity(path.resolve(process.argv[2]),path.resolve(process.argv[3]),{web:true});}
  catch(error){console.error(error.message);process.exitCode=1;}
 }

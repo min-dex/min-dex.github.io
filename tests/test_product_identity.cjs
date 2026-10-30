@@ -1,7 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const {execFileSync}=require('node:child_process');
-const {identity,writeIdentity,validateWorkingRuntime,sameRelease}=require('../scripts/product-identity.cjs');
+const {identity,writeIdentity,validateWorkingRuntime,sameRelease,verifyWebReleaseTag}=require('../scripts/product-identity.cjs');
 function fixture(){
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'mindex-identity-'));
  const git=(...args)=>execFileSync('git',args,{cwd:root,encoding:'utf8',stdio:['ignore','pipe','pipe']});git('init');
@@ -32,4 +32,14 @@ test('installed app retains bundled renderer and test package remains outside up
  assert.match(main,/mainWindow\.loadFile\(indexPath\(\)\)/);assert.doesNotMatch(main,/mainWindow\.loadURL/);
  assert.match(main,/mindexTestBuild !== true/);
  const config=require('../electron-builder.test.cjs');assert.equal(config.publish,null);assert.equal(config.extraMetadata.mindexTestBuild,true);
+});
+
+test('formal web version rejects absent or different-source tags',()=>{
+ const f=fixture();try{
+  f.git('remote','add','origin',f.root);const record={...identity(f.root),channel:'release'};
+  assert.throws(()=>verifyWebReleaseTag(f.root,record),/matching published/);
+  f.git('tag','v0.1.1');verifyWebReleaseTag(f.root,record);
+  fs.writeFileSync(path.join(f.root,'index.html'),'next');f.commit();
+  assert.throws(()=>verifyWebReleaseTag(f.root,{...identity(f.root),channel:'release'}),/matching published/);
+ }finally{f.close();}
 });
