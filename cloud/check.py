@@ -192,6 +192,8 @@ SMOKES = (
     "smoke_presenter_focus_view.py",
     "smoke_presenter_left_input.py",
     "smoke_presenter_left_input_save.py",
+    "smoke_hymn_number_create_guard.py",
+    "smoke_hymn_number_input_save.py",
     "smoke_presenter_inline_editor.py",
     "smoke_preparation_service_matrix.py",
     "smoke_preparation_form_default.py",

@@ -876,8 +876,6 @@ function normalizePresenterPreparationEntryContent(label = "", content = "") {
   if (!isSongSlot) return text;
   const hymnOnly = text.match(/^(?:새\s*)?(?:찬송가|찬)?\s*(\d{1,4})\s*장?\s*$/);
   if (!hymnOnly) return text;
-  const hasHymnSignal = /(?:찬송가|찬|장)/.test(text);
-  if (!hasHymnSignal && !/^찬양\d+$/.test(labelKey)) return text;
   return `찬 ${Number(hymnOnly[1])}장`;
 }
 
@@ -1377,6 +1375,24 @@ function presenterPreparationSongExactIndex() {
   return index;
 }
 
+function presenterPreparationNumberOnlyHymnReference(value = "") {
+  const text = String(value || "").normalize("NFKC").trim();
+  const match = text.match(/^(?:(새|통일|통)\s*)?(?:찬송가|찬송|찬)?\s*(\d+)\s*장?$/u);
+  return match ? { hymnNo: match[2].replace(/^0+(?=\d)/, ""), legacy: /^통/.test(match[1] || "") } : null;
+}
+
+function resolvePresenterPreparationNumberOnlyHymn(reference) {
+  const candidates = (state.songs || []).filter(song => {
+    const values = [song.hymn_no, ...(song.versions || []).map(v => v.hymn_no)].filter(Boolean);
+    if (!values.some(value => presenterPreparationNumberOnlyHymnReference(value)?.hymnNo === reference.hymnNo)) return false;
+    const nativeEdition = String(song.id || "").match(/^SONG-HYMN-([NT])/);
+    const legacy = nativeEdition ? nativeEdition[1] === "T" : [song.hymn_no, ...(song.versions || []).flatMap(v => [v.name, v.hymn_no, v.version_label])]
+      .some(value => /^통(?:일)?(?:\s|찬송|\d|$)/u.test(String(value || "").trim()));
+    return legacy === reference.legacy;
+  });
+  return presenterPreparationHymnNumberCandidates(candidates)[0] || null;
+}
+
 function parsePresenterPreparationHymnHint(value = "") {
   const raw = String(value || "").replace(/\s+/g, " ").trim();
   if (!raw) return { title: "", hymnNo: "" };
@@ -1455,6 +1471,8 @@ function resolvePresenterPreparationSong(value, item, service) {
   const query = compactSearchValue(songInput);
   if (!query) return null;
   if (presenterPreparationSongContentHasConnection(songInput)) return null;
+  const numberReference = presenterPreparationNumberOnlyHymnReference(songInput);
+  if (numberReference) return eligible(resolvePresenterPreparationNumberOnlyHymn(numberReference));
   const hymnSong = resolvePresenterPreparationHymnSong(songInput);
   if (hymnSong) return eligible(hymnSong);
   const songIndex = presenterPreparationSongExactIndex();
@@ -1469,6 +1487,8 @@ function resolvePresenterPreparationSong(value, item, service) {
 
 function resolveExistingPraiseSongForServiceInput(value, item = {}, service = selectedServiceForEditor()) {
   const songInput = presenterPreparationSongContent(value);
+  // A number is a hymn reference, never an exact/fuzzy match to a CCM title.
+  if (presenterPreparationNumberOnlyHymnReference(songInput)) return resolvePresenterPreparationSong(songInput, item, service);
   const title = stripHymnNo(songInput).title.trim();
   const candidates = [...new Set([songInput, title].map((entry) => String(entry || "").trim()).filter(Boolean))];
   for (const candidate of candidates) {
@@ -1526,6 +1546,9 @@ function findConfidentServicePraiseSong(value, item = {}, service = selectedServ
 async function createBlankPraiseSongForServiceInput(value, service = selectedServiceForEditor(), item = {}) {
   const existing = await resolveExistingPraiseSongForServiceInputAfterCatalogLoad(value, item, service);
   if (existing) return existing;
+  if (presenterPreparationNumberOnlyHymnReference(presenterPreparationSongContent(value))) {
+    throw new Error("해당 번호의 찬송가를 찾지 못했습니다. 새찬송가·통일찬송가 번호와 목록을 확인해 주세요. 입력은 유지됩니다.");
+  }
   if (!state.client) return null;
 
   const title = stripHymnNo(presenterPreparationSongContent(value)).title.trim();

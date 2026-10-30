@@ -12743,6 +12743,9 @@ async function createPraiseSongFromServiceItem(index) {
     if (!current()) return;
     const existed = !!song;
     if (!song) {
+      if (presenterPreparationNumberOnlyHymnReference(presenterPreparationSongContent(inputTitle))) {
+        throw new Error("해당 번호의 찬송가를 찾지 못했습니다. 번호와 판본을 확인해 주세요. 입력은 유지됩니다.");
+      }
       if (!requireClient()) return;
       const title = stripHymnNo(presenterPreparationSongContent(inputTitle)).title.trim();
       if (!title) return;
@@ -28875,7 +28878,7 @@ async function applyPresenterPreparationInput(serviceId = state.selectedServiceI
           const resolvedSongs = [];
           let unresolvedSegment = "";
           for (const segment of segments) {
-            let segmentSong = resolvePresenterPreparationSong(segment, item, service);
+            let segmentSong = await resolveExistingPraiseSongForServiceInputAfterCatalogLoad(segment, item, service);
             if (!segmentSong && !serviceItemRequiresNewHymnalScoreSong(item)) {
               try {
                 segmentSong = await createBlankPraiseSongForServiceInput(segment, service, item);
@@ -28934,7 +28937,7 @@ async function applyPresenterPreparationInput(serviceId = state.selectedServiceI
           });
           continue;
         }
-        let song = resolvePresenterPreparationSong(content, item, service);
+        let song = await resolveExistingPraiseSongForServiceInputAfterCatalogLoad(content, item, service);
         if (!song && !serviceItemRequiresNewHymnalScoreSong(item)) {
           try {
             song = await createBlankPraiseSongForServiceInput(content, service, item);
