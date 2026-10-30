@@ -594,8 +594,6 @@ async function runLiveScriptureAction(action, serviceId = state.selectedServiceI
     renderPresenterControlState(serviceId);
     return;
   }
-  if (action !== "show") return;
-
   const input = serviceId
     ? document.querySelector(`[data-live-scripture-input][data-service-id="${CSS.escape(String(serviceId))}"]`)
     : document.querySelector("[data-live-scripture-input]");
@@ -700,4 +698,3 @@ function formatLiveScriptureReference(reference, translation = selectedPresenter
     : `${reference.verse}`;
   return `${bookName} ${bibleChapterDisplayLabel(reference.book,reference.chapter)}:${verseRange}`;
 }
-

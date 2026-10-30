@@ -125,6 +125,8 @@ SMOKES = (
     "smoke_remote_directory.py",
     "smoke_save_shortcut.py",
     "smoke_input_request_races.py",
+    "smoke_calendar_save_order.py",
+    "smoke_bulletin_input_e2e.py",
     "smoke_praise_input_keyboard.py",
     "smoke_department_input_ime.py",
     "smoke_background_nov_dec.py",
