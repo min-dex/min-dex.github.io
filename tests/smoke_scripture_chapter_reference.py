@@ -16,10 +16,11 @@ try:
    page.add_init_script("window.forbiddenActions=[];window.open=()=>{forbiddenActions.push('open');return null};window.print=()=>forbiddenActions.push('print');HTMLMediaElement.prototype.play=()=>{forbiddenActions.push('play');return Promise.resolve()}")
    page.goto(url+'?mindexSmokeRaw=1');page.wait_for_function("typeof renderPresenterInlineEditor==='function'&&!document.body.classList.contains('ui-booting')")
    prepare_server_state_fixture(page);data=page.evaluate(FIXTURE)
+   page.evaluate("state.scriptureBooks=[...state.scriptureBooks,{code:'MAT',koreanName:'마태복음',englishName:'Matthew',chapterCount:28,testament:'new'},{code:'JHN',koreanName:'요한복음',englishName:'John',chapterCount:21,testament:'new'}]")
    cases=[['창세기 1:1','창세기 1'],['창세기 1','창세기 1:1'],['창세기 1:1','창세기 2'],['창세기 2','창세기 1:1'],['창세기 1:1–2','창세기 1'],['창세기 1:1','창세기 1:3'],['마태복음 1:1','마태복음 1'],['마태복음 1','마태복음 1:1'],['마태복음 1:1','요한복음 1']]
    cases += [['창세기 1:1–2','창세기 1:2–3'],['창세기 1','창세기 2','창세기 1:3']]
    for refs in cases:
-    page.evaluate('''refs=>{const before=JSON.stringify(refs),expected=normalizeServiceScriptureReferenceList(refs);for(const abbreviated of [false,true]){const text=formatServiceScriptureReferenceList(refs,{abbreviated});if(JSON.stringify(normalizeServiceScriptureReferenceList(text))!==JSON.stringify(expected))throw Error('roundtrip '+text)}if(JSON.stringify(refs)!==before)throw Error('source mutated')}''',refs)
+    page.evaluate('''refs=>{const before=JSON.stringify(refs),expected=normalizeServiceScriptureReferenceList(refs);if(!expected.length)throw Error('fixture reference missing');for(const abbreviated of [false,true]){const text=formatServiceScriptureReferenceList(refs,{abbreviated});if(JSON.stringify(normalizeServiceScriptureReferenceList(text))!==JSON.stringify(expected))throw Error('roundtrip '+text)}if(JSON.stringify(refs)!==before)throw Error('source mutated')}''',refs)
    panel=page.locator(f'.svc-outline-editor[data-inline-item-id="{data["ids"][0]}"]')
    toggle=page.locator(f'[data-presenter-inline-toggle="{data["ids"][0]}"]');field=panel.locator('[data-presenter-preparation-field]')
    for refs in cases[:6]:
