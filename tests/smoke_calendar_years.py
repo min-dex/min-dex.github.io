@@ -1,10 +1,11 @@
 """Multi-year calendar selection/cycle boundaries and read paging, without production I/O."""
 import os
+import tempfile
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from datetime import datetime,timezone
 from urllib.parse import urlsplit
 from pathlib import Path
-OUTPUT=Path('/Users/parkjihun/Code/Apps/Mindex/output/calendar-multi-year-20261030');OUTPUT.mkdir(parents=True,exist_ok=True)
+OUTPUT=Path(os.environ.get('MINDEX_CALENDAR_YEARS_OUTPUT', str(Path(tempfile.gettempdir()) / 'calendar-multi-year-20261030')));OUTPUT.mkdir(parents=True,exist_ok=True)
 from smoke_app import start_local_app_server,sync_playwright,launch_chromium
 server,url=start_local_app_server()
 try:
