@@ -35,6 +35,9 @@ body[data-theme="dark"] .cal-view {
   padding: 0 0 10px;
 }
 .cal-subtitle { display: block; color: var(--cal-soft); font-size: var(--ui-meta-size); font-weight: var(--ui-meta-weight); line-height: 16px; }
+.cal-year-heading { display:flex; align-items:center; flex-wrap:wrap; gap:10px; min-width:0; }
+.cal-year-heading label { display:flex; align-items:center; gap:10px; font-size:var(--ui-label-size); font-weight:var(--ui-label-weight); }
+.cal-year-heading select { width:110px; }
 .cal-tabs {
   display: inline-flex;
   flex-shrink: 0;

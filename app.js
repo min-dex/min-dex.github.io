@@ -324,7 +324,6 @@ const SERVICE_WEEK_PANEL_TITLE = SERVICE_NAVIGATION_LABELS.serviceWeekTitle || "
 const SERVICE_LIST_PANEL_TITLE = SERVICE_NAVIGATION_LABELS.serviceListTitle || "전체 예배";
 const SERVICE_TEMPLATES_PANEL_TITLE = SERVICE_NAVIGATION_LABELS.templatesTitle || "템플릿";
 const SERVICE_SETLIST_ARCHIVE_PANEL_TITLE = "역대 콘티";
-const CALENDAR_MIN_DATE = "2025-11-30";
 const {
   SUPABASE_PAGE_SIZE,
   UI_SCRIPTURE_PREFIX,
@@ -594,6 +593,8 @@ const state = {
   calendarScrollTargetMonth: null,
   calendarAutoScrolledMonth: null,
   calendarDetailTab: "departments",
+  calendarYear: new Date().getFullYear(),
+  calendarYearScrollMonths: {},
   calendarCellSaves: new Map(),
   listScroll: {},
   searchCache: {
@@ -5326,11 +5327,10 @@ async function loadCalendarDataOnce({ silent = false } = {}) {
   state.calendarLoading = true;
   state.calendarError = "";
   try {
-    const { data, error } = await state.client
+    const { data, error } = await fetchAllRows(() => state.client
       .from("mindex_sunday_calendar")
       .select("*")
-      .gte("date", CALENDAR_MIN_DATE)
-      .order("date");
+      .order("date").order("id"));
     if (error) throw error;
     state.calendarData = data || [];
     state.calendarLoaded = true;
@@ -5691,15 +5691,16 @@ function setCalendarCellSaveState(cell, status) {
 }
 
 function renderCalendarView() {
+  const pane = refs.detailPane;
   if (!state.client) {
-    refs.detailPane.innerHTML = renderConnectionEmptyDetail();
+    pane.innerHTML = renderConnectionEmptyDetail();
     return;
   }
   if (!state.calendarLoaded && !state.calendarLoading && !state.calendarError) {
     void loadCalendarData({ silent: true });
   }
   if (state.calendarError) {
-    refs.detailPane.innerHTML = isConnectionUnavailableMessage(state.calendarError)
+    pane.innerHTML = isConnectionUnavailableMessage(state.calendarError)
       ? renderConnectionEmptyDetail(state.connectionError || state.calendarError)
       : `
         <div class="empty-detail">
@@ -5711,24 +5712,31 @@ function renderCalendarView() {
     return;
   }
   if (!state.calendarLoaded) {
-    refs.detailPane.innerHTML = renderLoadingDetail();
+    pane.innerHTML = renderLoadingDetail();
     return;
   }
   const calendarRows = getCalendarDisplayRows();
+  const year = calendarYearValue();
+  const header = `<div class="cal-header"><div class="cal-year-heading">
+    <label>연도<select data-calendar-year aria-label="연도">${calendarYearOptions().map(value => `<option value="${value}" ${value === year ? "selected" : ""}>${value}년</option>`).join("")}</select></label>
+    <span class="cal-subtitle">${escapeHtml(churchYearSeriesSummary())}</span>
+  </div>${renderCalendarDetailTabs()}</div>`;
   if (!calendarRows.length) {
-    refs.detailPane.innerHTML = `<div class="empty-detail"><div class="empty-detail-inner"><p class="empty-verse">교회력 데이터가 없습니다.</p></div></div>`;
+    pane.innerHTML = `<div class="cal-view">${header}<div class="empty-detail" role="status"><div class="empty-detail-inner"><p class="empty-verse">${year}년 교회력 데이터가 없습니다.</p></div></div></div>`;
     return;
   }
-  const existingTable = refs.detailPane.querySelector(".cal-table");
+  const existingTable = pane.querySelector(".cal-table");
+  const scroll = existingTable?.dataset.calendarYear === String(year) && !state.calendarScrollTargetMonth ? [existingTable.parentElement.scrollTop, existingTable.parentElement.scrollLeft] : null;
   if (
     existingTable?.classList.contains(`cal-table--${state.calendarDetailTab}`) &&
+    existingTable.dataset.calendarYear === String(year) && existingTable.calendarData === state.calendarData &&
     !state.calendarScrollTargetMonth
   ) return;
 
   const today = toLocalDateStr(new Date());
-  const currentMonth = today.slice(0, 7);
+  const currentMonth = Number(today.slice(0, 4)) === year ? today.slice(0, 7) : `${year}-01`;
   const visibleMonth = currentCalendarViewportMonth();
-  if (!state.calendarScrollTargetMonth && visibleMonth) {
+  if (!state.calendarScrollTargetMonth && visibleMonth?.startsWith(`${year}-`)) {
     state.calendarScrollTargetMonth = visibleMonth;
   }
   if (!state.calendarScrollTargetMonth && state.calendarAutoScrolledMonth !== currentMonth) {
@@ -5770,7 +5778,7 @@ function renderCalendarView() {
     ].filter(Boolean).join(" ");
 
     tbodyHtml += `
-      <tr class="${rowCls}">
+      <tr class="${rowCls}" data-calendar-date="${escapeAttr(row.date)}" data-church-year="${churchYearForCalendarDate(row.date)}">
         <td class="cal-date">${dateLabel}</td>
         <td class="cal-lit">${escapeHtml(row.liturgical || "")}</td>
         ${renderCalendarOccasionScheduleCell(row)}
@@ -5778,14 +5786,11 @@ function renderCalendarView() {
       </tr>`;
   }
 
-  refs.detailPane.innerHTML = `
+  pane.innerHTML = `
     <div class="cal-view">
-      <div class="cal-header">
-        <span class="cal-subtitle">${escapeHtml(churchYearSeriesSummary(calendarRows))}</span>
-        ${renderCalendarDetailTabs()}
-      </div>
+      ${header}
       <div class="cal-table-wrap">
-        <table class="cal-table cal-table--${escapeAttr(state.calendarDetailTab)}">
+        <table class="cal-table cal-table--${escapeAttr(state.calendarDetailTab)}" data-calendar-year="${year}">
           ${renderCalendarColumnGroup(calendarDetailFields)}
           <thead>
             <tr>
@@ -5800,7 +5805,9 @@ function renderCalendarView() {
       </div>
       <p class="cal-footnote">${escapeHtml(CALENDAR_LECTIONARY_FOOTNOTE.join(" "))}</p>
     </div>`;
+  pane.querySelector(".cal-table").calendarData = state.calendarData;
   scrollCalendarToTargetMonth();
+  if (scroll) { const wrap = pane.querySelector(".cal-table-wrap");wrap.scrollTop = scroll[0];wrap.scrollLeft = scroll[1]; }
 }
 
 function renderCalendarColumnGroup(calendarDetailFields = []) {
@@ -9627,6 +9634,21 @@ function handleDetailSubmit(event) {
 }
 
 function handleDetailChange(event) {
+  const calendarYear = event.target.closest("[data-calendar-year]");
+  if (calendarYear) {
+    const before = calendarYearValue(), next = Number(calendarYear.value);
+    if (!Number.isInteger(next) || next < 1 || next > 9999 || state.calendarCellSaves.size || refs.detailPane.querySelector('.cal-cell.is-save-error') || document.activeElement?.matches('.cal-cell') || [...refs.detailPane.querySelectorAll('.cal-cell')].some(cell => cell.dataset.initialValue !== undefined && cell.textContent.replace(/\n/g, ' ').trim() !== String(cell.dataset.initialValue).replace(/\n/g, ' ').trim())) {
+      calendarYear.value = String(before);showToast("현재 입력과 저장을 마친 뒤 연도를 바꿔 주세요.");return;
+    }
+    if (next !== before) {
+      state.calendarYearScrollMonths[before] = currentCalendarViewportMonth();
+      state.calendarYear = next;
+      state.calendarScrollTargetMonth = state.calendarYearScrollMonths[next] || (next === new Date().getFullYear() ? toLocalDateStr(new Date()).slice(0, 7) : `${next}-01`);
+      state.calendarAutoScrolledMonth = null;renderCalendarView();
+      refs.detailPane.querySelector('[data-calendar-year]')?.focus();
+    }
+    return;
+  }
   const keynoteFolder = event.target.closest("[data-keynote-html-files]");
   if (keynoteFolder) { void importPresenterKeynoteHtml(keynoteFolder);return; }
   const nativeVersion = event.target.closest("[data-single-version-select]");
@@ -14255,6 +14277,7 @@ function isCalendarInlineFeast(row) {
 function getCalendarDisplayRows() {
   const rows = (state.calendarData || []).filter((row) => {
     if (!isCalendarDisplayDate(row?.date)) return false;
+    if (Number(row.date.slice(0, 4)) !== calendarYearValue()) return false;
     if (parseLocalDate(row.date).getDay() === 0) return true;
     return cleanList([
       row.liturgical,
@@ -14265,7 +14288,6 @@ function getCalendarDisplayRows() {
     ]).length > 0;
   });
   const years = [...new Set(rows.map((row) => Number(String(row.date).slice(0, 4))).filter((year) => year > 0))];
-  if (!years.length) years.push(new Date().getFullYear());
   const generated = years
     .flatMap(majorChurchFeastsForYear)
     .filter((feast) => isCalendarDisplayDate(feast.date))
@@ -14280,7 +14302,7 @@ function getCalendarDisplayRows() {
 }
 
 function isCalendarDisplayDate(value) {
-  return Boolean(value) && String(value) >= CALENDAR_MIN_DATE;
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(value || "")) && toLocalDateStr(parseLocalDate(value)) === value;
 }
 
 function calendarRowsContainFeast(rows, feast) {
@@ -14363,7 +14385,7 @@ function renderCalendarInlineFeastRow(row, dateLabel, options = {}) {
   ].filter(Boolean).join(" ");
 
   return `
-    <tr class="${rowCls}">
+    <tr class="${rowCls}" data-calendar-date="${escapeAttr(row.date)}" data-church-year="${churchYearForCalendarDate(row.date)}">
       <td class="cal-inline-date">${escapeHtml(dateLabel)}</td>
       <td class="cal-inline-summary" colspan="${Number(options.summaryColspan) || 8}">
         <span class="cal-inline-title">${escapeHtml(title)}</span>
@@ -14372,22 +14394,26 @@ function renderCalendarInlineFeastRow(row, dateLabel, options = {}) {
     </tr>`;
 }
 
-function churchYearSeriesSummary(rows = state.calendarData) {
-  return cleanList([calendarYearLabel(rows), churchYearSeriesValue(rows)]).join(" · ");
+function churchYearSeriesSummary() {
+  return cleanList([calendarYearLabel(), churchYearSeriesValue()]).join(" · ");
 }
 
-function calendarYearValue(rows = state.calendarData) {
-  const firstDisplayDate = rows.find((row) => isCalendarDisplayDate(row?.date))?.date;
-  return churchYearForCalendarDate(firstDisplayDate) || churchYearForCalendarDate(toLocalDateStr(new Date())) || new Date().getFullYear();
+function calendarYearValue() {
+  return Number(state.calendarYear) || new Date().getFullYear();
 }
 
-function calendarYearLabel(rows = state.calendarData) {
-  return `${calendarYearValue(rows)}년`;
+function calendarYearOptions() {
+  const year = calendarYearValue(), now = new Date().getFullYear();
+  return [...new Set([year - 1, year, year + 1, now - 1, now, now + 1, ...state.calendarData.filter(row => isCalendarDisplayDate(row?.date)).map(row => Number(row.date.slice(0, 4)))])].filter(value => value > 0 && value <= 9999).sort((a, b) => a - b);
 }
 
-function churchYearSeriesValue(rows = state.calendarData) {
-  const year = churchYearForCalendarDate(rows.find((row) => isCalendarDisplayDate(row?.date))?.date) || new Date().getFullYear();
-  return `Year ${["C", "A", "B"][year % 3]}`;
+function calendarYearLabel() {
+  return `${calendarYearValue()}년`;
+}
+
+function churchYearSeriesValue() {
+  const year = calendarYearValue(), first = churchYearForCalendarDate(`${year}-01-01`), last = churchYearForCalendarDate(`${year}-12-31`), advent = adventStartDate(last);
+  return `교회력 Year ${["C", "A", "B"][first % 3]} → Year ${["C", "A", "B"][last % 3]} · ${advent.getMonth() + 1}/${advent.getDate()} 대림절부터`;
 }
 
 function churchYearForCalendarDate(value) {

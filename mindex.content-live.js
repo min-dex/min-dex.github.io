@@ -166,7 +166,7 @@
   }
   async function refreshCalendar(){
     const client=state.client,project=state.config.url,context=entryContext(),revision=edit,before=state.calendarData;
-    const result=await rows(client,'mindex_sunday_calendar',q=>q.gte('date',CALENDAR_MIN_DATE));
+    const result=await rows(client,'mindex_sunday_calendar',q=>q.order('date').order('id'));
     if(client!==state.client||project!==state.config.url||context!==entryContext()||revision!==edit||before!==state.calendarData||entryBlocked())return false;
     result.sort((a,b)=>String(a.date).localeCompare(String(b.date)));
     if(JSON.stringify(before)===JSON.stringify(result))return true;
