@@ -619,3 +619,10 @@ input node/caret, and rejects a late response for a different draft revision.
 Only a new explicit search installs matching results; no operational writes.
 Browser fixtures simulate composition events in Chromium and WebKit; physical
 mobile keyboards remain a separate verification boundary.
+
+### Input request ownership · 2026-10-30
+
+A connection attempt freezes the submitted output/code pair; the code field is
+read-only until the attempt completes, then errors retain an editable draft.
+IME confirmation remains separate from form submission. Delayed search results
+never regain authority after an input edit, including edit-and-revert.

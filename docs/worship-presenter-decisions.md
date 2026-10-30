@@ -5164,3 +5164,11 @@ CCM 제목으로 우회하거나 번호만으로 새 빈 곡을 만들지 않는
 격리 native 읽기/실제 송폼·슬라이드 생성 및 기존 freshness 회귀 검증은
 Chromium/WebKit에서 수행한다. 이 재현은 제목 전용 차단 결함을 확인한 것이며,
 특정 운영 예배의 오류 원인이나 실제 송출 복구를 입증하지 않는다.
+### Pending input requests · 2026-10-30
+
+Global Enter navigation belongs to one input revision and module visit. Editing,
+leaving the module, or a newer Enter invalidates the older result even when the
+text later matches again. Changing the active live-scripture draft invalidates
+its pending verse lookup; other-service drafts do not interrupt the live owner.
+A deliberate retry retains the current input. No actual output is exercised by
+the isolated request-race tests.
