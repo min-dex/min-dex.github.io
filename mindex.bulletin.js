@@ -1265,7 +1265,8 @@
       q("[data-bulletin-redo]").disabled=loading||!doc?.future.length;
       q("[data-bulletin-refresh]").disabled=loading||!!doc?.saving||!!templateSession;
       q("[data-bulletin-save]").disabled=loading||!!error||!!doc?.saving||!doc?.dbLoaded||(!doc?.dirty&&!!doc?.revision);
-      q("[data-bulletin-save] span").textContent=doc?.saving?"저장 중…":templateSession?"공통 양식 저장":"주보 저장";
+      const saveLabel=q("[data-bulletin-save] span"),saveText=doc?.saving?"저장 중…":templateSession?"공통 양식 저장":"주보 저장";
+      if(saveLabel.textContent!==saveText)saveLabel.textContent=saveText;
       q("[data-bulletin-save]").setAttribute("aria-busy",String(!!doc?.saving));
       q("[data-bulletin-print] span").textContent=printing?"인쇄 준비 중…":"인쇄 / PDF";
       q("[data-bulletin-reload]").disabled=loading||!!doc?.saving||!!templateSession;

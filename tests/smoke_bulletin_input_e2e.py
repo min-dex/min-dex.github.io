@@ -3,6 +3,19 @@ import os
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from urllib.parse import urlsplit
 from smoke_app import start_local_app_server,sync_playwright,launch_chromium,prepare_server_state_fixture
+
+def click_save(page, expected):
+ # A real server-state status update between mouse down/up must not consume a save click.
+ page.evaluate("async()=>{await document.fonts.ready;await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))}")
+ button=page.locator('[data-bulletin-save]');button.scroll_into_view_if_needed()
+ button.evaluate("async e=>{window.saveButtonUnderTest=e;await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))}")
+ page.evaluate("window.saveClicks=[];for(const name of ['pointerdown','pointerup','click'])host.addEventListener(name,e=>saveClicks.push({type:name,save:!!e.target.closest('[data-bulletin-save]'),same:e.target.closest('[data-bulletin-save]')===saveButtonUnderTest}),{capture:true,once:true})")
+ try:
+  box=button.bounding_box();page.mouse.move(box['x']+box['width']/2,box['y']+box['height']/2);page.mouse.down();page.evaluate("window.dispatchEvent(new Event('mindex-server-state-settled'))");page.mouse.up();page.wait_for_function('(n)=>sent.length===n',arg=expected,timeout=30000)
+ except Exception:
+  print('SAVE_CLICK_DIAGNOSTIC',page.evaluate("({sent:sent.length,events:saveClicks,dirty:docs.get(a)?.dirty,saving:docs.get(a)?.saving,loaded:docs.get(a)?.dbLoaded,disabled:host.querySelector('[data-bulletin-save]')?.disabled,retained:saveButtonUnderTest.isConnected,focus:document.activeElement?.tagName})"),flush=True)
+  raise
+
 server,url=start_local_app_server()
 try:
  with sync_playwright() as p:
@@ -49,7 +62,7 @@ try:
    # Exercise an actual assigned-person input, not just textarea editing.
    page.locator('details[data-bulletin-section=weekly] summary').click();leader=page.locator('[data-bulletin-field=leader]');leader.fill('새 인도자');leader.press('Tab')
    assert page.evaluate('docs.get(a).fields.leader')=='새 인도자'
-   page.locator('[data-bulletin-save]').click();page.wait_for_function('sent.length===4');page.evaluate('respond[3](true)');page.wait_for_function('!docs.get(a).dirty')
+   click_save(page,4);page.evaluate('respond[3](true)');page.wait_for_function('!docs.get(a).dirty')
    assert page.evaluate('store[a].content.fields.leader')=='새 인도자'
    # The shared-template editor remains editable while its own request is pending.
    page.locator('[data-bulletin-template-edit]').click();page.wait_for_function("!document.querySelector('[data-bulletin-template-exit]').hidden")
