@@ -121,10 +121,12 @@ try:
    phone.set_viewport_size({'width':390,'height':844})
    phone.screenshot(path='/tmp/mindex-remote-slides-'+engine+'.png',full_page=True)
    phone.locator('#slidesList button').last.click();pump(.5)
-   assert phone.locator('#slidesList button').count()==6
+   assert phone.locator('#slidesList button').count()==10
    assert phone.locator('#slidesList button').first.get_attribute('data-index')=='3'
-   phone.click('#slidesNext');pump(.5);assert phone.locator('#slidesList button').first.get_attribute('data-index')=='9'
-   phone.click('#slidesPrev');pump(.5);assert phone.locator('#slidesList button').first.get_attribute('data-index')=='3'
+   assert phone.locator('#slidesNext, #slidesPrev').count()==0
+   phone.locator('#slidesList button').last.scroll_into_view_if_needed()
+   assert phone.locator('#slidesList button').last.get_attribute('data-index')=='12'
+   assert host.evaluate('remoteCalls.length')==before
    phone.fill('#slidesQuery','마지막');phone.locator('#slidesSearch button').click();pump(.5)
    assert phone.locator('#slidesList button').count()==1
    phone.locator('#slidesList button').click();pump(.5)

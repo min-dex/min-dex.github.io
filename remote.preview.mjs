@@ -17,3 +17,20 @@ export function createPreview(host,label){
  };
  update.dispose=()=>observer.disconnect();return update;
 }
+
+// Keep the complete catalog in memory, but only mount visible preview documents.
+const pendingPreviews=new Map();
+const visibility=new IntersectionObserver(entries=>{
+ for(const entry of entries)pendingPreviews.get(entry.target)?.(entry.isIntersecting);
+},{rootMargin:'200px'});
+export function createListPreview(host,label,html,text){
+ let draw=null;
+ const fallback=()=>{host.classList.add('slide-text-preview');const excerpt=document.createElement('span');excerpt.textContent=text||label;host.replaceChildren(excerpt);};
+ fallback();
+ pendingPreviews.set(host,visible=>{
+  if(visible&&!draw){host.classList.remove('slide-text-preview');draw=createPreview(host,label);draw(html,text);}
+  else if(!visible&&draw){draw.dispose();draw=null;fallback();}
+ });
+ visibility.observe(host);
+ return {dispose(){visibility.unobserve(host);pendingPreviews.delete(host);draw?.dispose();}};
+}

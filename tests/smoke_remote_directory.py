@@ -82,7 +82,32 @@ try:
    assert page.locator('#slidesQuery').input_value()=='새검색'
    page.press('#slidesQuery','Escape');assert page.locator('#slidesQuery').input_value()=='새검색'
    page.press('#slidesQuery','Tab');assert page.locator('#slidesQuery').input_value()=='새검색'
+   # Complete results load once, then scroll without additional browse requests.
+   page.fill('#slidesQuery','전체');page.locator('#slidesSearch button').click()
+   page.evaluate("window.catalogItems=Array.from({length:60},(_,index)=>({index,title:'슬라이드 '+index,text:'본문 '+index,group:'찬양',preview:'<p>미리보기</p>'}))")
+   for offset in range(0,60,6):
+    page.evaluate("o=>setSlides({key:'fixture',mode:'slides',total:60,offset:o,items:catalogItems.slice(o,o+6)})",offset)
+   assert page.locator('#slidesList button').count()==60
+   assert page.locator('#slidesPrev, #slidesNext').count()==0
+   requests=page.evaluate('slideRequests.length')
+   page.locator('#slidesList button').last.scroll_into_view_if_needed()
+   page.wait_for_timeout(150)
+   assert page.locator('#slidesList iframe').count()<20
+   assert page.locator('#slidesList button').last.is_visible()
+   assert page.evaluate('slideRequests.length')==requests
+   for width in (320,390,768):
+    page.set_viewport_size({'width':width,'height':844})
+    assert page.locator('#slidesList').evaluate('e=>e.scrollWidth<=e.clientWidth')
+   # Reject mixed catalogs rather than presenting a partially stale list.
+   page.locator('#slidesSearch button').click()
+   page.evaluate("setSlides({key:'fixture',mode:'slides',total:12,offset:0,items:catalogItems.slice(0,6)})")
+   page.evaluate("setSlides({key:'changed',mode:'slides',total:12,offset:6,items:catalogItems.slice(6,12)})")
+   assert '목록이 변경' in page.locator('#slidesStatus').inner_text()
+   assert page.locator('#slidesList button:enabled').count()==0
+   # A response arriving after close cannot reopen/populate the list.
    page.click('#slidesClose')
+   page.evaluate("setSlides({key:'fixture',mode:'slides',total:6,offset:0,items:catalogItems.slice(0,6)})")
+   assert page.locator('#slidesList button').count()==0
 
    page.wait_for_function("document.querySelector('#position').textContent==='1 / 2'")
    page.evaluate("setRemoteState({outputState:'standby',index:-1,total:0,current:'송출 대기',allowed:['output-start']})")

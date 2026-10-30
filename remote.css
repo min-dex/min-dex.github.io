@@ -81,8 +81,6 @@ button :is([data-lucide], svg.lucide) { width: var(--ui-icon-size); height: var(
 #slidesList .slide-preview { margin:0; }
 #slidesList button>span { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; width:100%; text-align:left; overflow-wrap:anywhere; font-size:var(--ui-meta-size); }
 #slidesStatus { color:var(--ink-3); font-size:var(--ui-meta-size); }
-.slides-pages { display:flex; align-items:center; gap:10px; margin-top:20px; }
-#slidesPage { white-space:nowrap; font-size:var(--ui-meta-size); }
 @media(min-width:700px){ #slidesList { grid-template-columns:repeat(3,minmax(0,1fr)); } }
 
 #slidesList .slide-text-preview { color:#fff; padding:8px; display:grid; place-content:center; white-space:pre-line; overflow:hidden; font-size:11px; line-height:1.3; text-align:center; overflow-wrap:anywhere; }

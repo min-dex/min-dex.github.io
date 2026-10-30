@@ -1,6 +1,6 @@
 import {obtainOutputPairing} from './mindex.output-pairing.mjs?v=5';
 import {adminRpc,relayRegistration} from './mindex.remote-admin.mjs?v=9';
-import {createPreview} from './remote.preview.mjs?v=2';
+import {createPreview,createListPreview} from './remote.preview.mjs?v=3';
 import {openRemote} from './mindex.remote-session.mjs?v=14';
 import {setupPhoneExperience} from './remote.screen.mjs?v=4';
 window.lucide?.createIcons();
@@ -150,8 +150,8 @@ function state(value){
 }
 const slidePreviews=[];
 let slidesData=null,slidesLoading=false,slidesTimer=null,jumpPending=false,slidesMode='groups',selectedGroup=null;
-let slidesDraftRevision=0,requestedSlidesDraft=null;
-$('slidesQuery').addEventListener('input',()=>{slidesDraftRevision++;slidesData=null;slidesLoading=false;clearTimeout(slidesTimer);$('slidesStatus').textContent='검색을 눌러 새 목록을 받아 주세요.';paint();});
+let slidesDraftRevision=0,requestedSlidesDraft=null,slidesBatch=null;
+$('slidesQuery').addEventListener('input',()=>{slidesDraftRevision++;slidesBatch=null;slidesData=null;slidesLoading=false;clearTimeout(slidesTimer);$('slidesStatus').textContent='검색을 눌러 새 목록을 받아 주세요.';paint();});
 function paintSlides(usable){
  if($('slidesPanel').hidden)return;
  const current=!!slidesData&&slidesData.key===view?.catalogKey;
@@ -159,21 +159,35 @@ function paintSlides(usable){
   b.disabled=!usable||!current||slidesLoading||jumpPending;
   b.setAttribute('aria-current',String(slidesData?.mode==='groups'?Number(b.dataset.index)<=view?.index&&view?.index<=Number(b.dataset.endIndex):Number(b.dataset.index)===view?.index));
  }
- $('slidesPrev').disabled=!usable||slidesLoading||!slidesData||slidesData.offset===0;
- $('slidesNext').disabled=!usable||slidesLoading||!slidesData||slidesData.offset+(slidesData.pageSize||6)>=slidesData.total;
  if(!usable)$('slidesStatus').textContent='연결 확인 중 · 이동 잠김';
  else if(current&&$('slidesStatus').textContent==='연결 확인 중 · 이동 잠김')$('slidesStatus').textContent=slidesData.mode==='groups'?'예배 순서를 선택하세요.':'원하는 슬라이드를 선택하세요.';
  else if(slidesData&&!current)$('slidesStatus').textContent='슬라이드가 변경됐어요. 검색을 눌러 새 목록을 받아 주세요.';
 }
-async function loadSlides(offset=0,atCurrent=false){
+async function loadSlides(){
  if(!session?.usable)return;
- requestedSlidesDraft={revision:slidesDraftRevision,query:$('slidesQuery').value};
- slidesLoading=true;$('slidesStatus').textContent='불러오는 중…';paint();clearTimeout(slidesTimer);
- slidesTimer=setTimeout(()=>{slidesLoading=false;$('slidesStatus').textContent='목록을 받지 못했어요. 검색을 눌러 다시 시도해 주세요.';paint();},5000);
- try{await session.requestSlides({offset,query:$('slidesQuery').value,mode:slidesMode,groupIndex:selectedGroup,key:slidesData?.key,atCurrent});}catch(e){clearTimeout(slidesTimer);slidesLoading=false;$('slidesStatus').textContent=e.message;paint();}
+ const batch={revision:slidesDraftRevision,query:$('slidesQuery').value,mode:slidesMode,groupIndex:selectedGroup,key:slidesData?.key,items:[],offset:0};
+ requestedSlidesDraft=batch;slidesBatch=batch;slidesLoading=true;
+ $('slidesStatus').textContent='불러오는 중…';paint();void requestSlideBatch(batch);
+}
+async function requestSlideBatch(batch){
+ clearTimeout(slidesTimer);
+ const fail=message=>{if(slidesBatch!==batch)return;slidesBatch=null;slidesLoading=false;clearTimeout(slidesTimer);$('slidesStatus').textContent=message;paint();};
+ slidesTimer=setTimeout(()=>fail('목록을 받지 못했어요. 검색을 눌러 다시 시도해 주세요.'),5000);
+ try{await session.requestSlides({offset:batch.offset,query:batch.query,mode:batch.mode,groupIndex:batch.groupIndex,key:batch.key});}
+ catch(e){fail(e.message);}
 }
 function renderSlides(data){
  if($('slidesPanel').hidden||!data||!Array.isArray(data.items)||requestedSlidesDraft?.revision!==slidesDraftRevision||requestedSlidesDraft?.query!==$('slidesQuery').value)return;
+ const batch=slidesBatch;
+ if(!batch)return;
+ if(data.offset!==batch.offset||(batch.items.length&&(data.key!==batch.key||data.total!==batch.total||data.mode!==batch.responseMode))){
+  clearTimeout(slidesTimer);slidesBatch=null;slidesLoading=false;slidesData=null;$('slidesStatus').textContent='목록이 변경됐어요. 검색을 눌러 다시 받아 주세요.';paint();return;
+ }
+ batch.key=data.key;batch.total=data.total;batch.responseMode=data.mode;batch.items.push(...data.items);
+ batch.offset+=data.items.length;
+ if(batch.offset<data.total&&data.items.length){$('slidesStatus').textContent=`불러오는 중… ${batch.offset} / ${data.total}`;void requestSlideBatch(batch);return;}
+ if(batch.offset!==data.total){clearTimeout(slidesTimer);slidesBatch=null;slidesLoading=false;$('slidesStatus').textContent='목록을 받지 못했어요. 다시 검색해 주세요.';paint();return;}
+ data={...data,offset:0,items:batch.items};slidesBatch=null;
  clearTimeout(slidesTimer);slidesLoading=false;slidesData=data;
  for(const preview of slidePreviews.splice(0))preview.dispose();
  const list=$('slidesList');list.replaceChildren();list.classList.toggle('groups',data.mode==='groups');$('slideGroups').hidden=data.mode==='groups';let group='';
@@ -186,7 +200,7 @@ function renderSlides(data){
   if((item.groupKey||item.group)!==group){const h=document.createElement('h3');h.textContent=item.group;list.append(h);group=item.groupKey||item.group;}
   const b=document.createElement('button'),mini=document.createElement('div'),label=document.createElement('span');
   b.type='button';b.dataset.index=item.index;mini.className='slide-preview';label.textContent=`${item.index+1}. ${item.title}`;
-  b.append(mini,label);list.append(b);if(item.preview){const draw=createPreview(mini,`${item.index+1}번 슬라이드`);slidePreviews.push(draw);draw(item.preview,item.text);}
+  b.append(mini,label);list.append(b);if(item.preview){slidePreviews.push(createListPreview(mini,`${item.index+1}번 슬라이드`,item.preview,item.text));}
   else{mini.classList.add('slide-text-preview');const excerpt=document.createElement('span');excerpt.textContent=item.text||item.title;mini.append(excerpt);}
   b.onclick=async()=>{
    if(!session?.usable||jumpPending||data.key!==view?.catalogKey)return;
@@ -195,7 +209,7 @@ function renderSlides(data){
   };
  }
  $('slidesStatus').textContent=data.total?(data.mode==='groups'?'예배 순서를 선택하세요.':'원하는 슬라이드를 선택하세요.'):'검색 결과가 없어요.';
- $('slidesPage').textContent=data.total?`${Math.floor(data.offset/(data.pageSize||6))+1} / ${Math.ceil(data.total/(data.pageSize||6))}`:'0 / 0';paint();
+ paint();
 }
 function remoteResult(r){
  $('result').textContent=r.message;
@@ -204,18 +218,16 @@ function remoteResult(r){
 }
 function closeSlides(){
  $('slidesPanel').hidden=true;$('slidesOpen').setAttribute('aria-expanded','false');
- clearTimeout(slidesTimer);slidesLoading=false;slidesData=null;
+ clearTimeout(slidesTimer);slidesLoading=false;slidesData=null;slidesBatch=null;
  for(const preview of slidePreviews.splice(0))preview.dispose();$('slidesList').replaceChildren();
 }
 $('slidesOpen').onclick=()=>{
  if(!$('slidesPanel').hidden){closeSlides();return;}
- $('slidesPanel').hidden=false;$('slidesOpen').setAttribute('aria-expanded','true');$('slidesQuery').value='';slidesMode='groups';selectedGroup=null;void loadSlides(0,true);
+ $('slidesPanel').hidden=false;$('slidesOpen').setAttribute('aria-expanded','true');$('slidesQuery').value='';slidesMode='groups';selectedGroup=null;void loadSlides();
 };
 $('slidesClose').onclick=()=>{closeSlides();$('slidesOpen').focus();};
-$('slideGroups').onclick=()=>{slidesMode='groups';selectedGroup=null;$('slidesQuery').value='';void loadSlides(0,true);};
+$('slideGroups').onclick=()=>{slidesMode='groups';selectedGroup=null;$('slidesQuery').value='';void loadSlides();};
 $('slidesSearch').onsubmit=e=>{e.preventDefault();if(compositionSubmitBlocked(e.currentTarget))return;slidesMode=$('slidesQuery').value.trim()?'slides':'groups';selectedGroup=null;void loadSlides();};
-$('slidesPrev').onclick=()=>loadSlides(Math.max(0,(slidesData?.offset||0)-(slidesData?.pageSize||6)));
-$('slidesNext').onclick=()=>loadSlides((slidesData?.offset||0)+(slidesData?.pageSize||6));
 $('pairForm').addEventListener('submit',async e=>{
  e.preventDefault();if(compositionSubmitBlocked(e.currentTarget)||opening||ending||session||!selectedOutput)return;const chosen=selectedOutput,code=$('code').value.trim();opening=true;paint();$('result').textContent='';
  try{

@@ -626,3 +626,16 @@ A connection attempt freezes the submitted output/code pair; the code field is
 read-only until the attempt completes, then errors retain an editable draft.
 IME confirmation remains separate from form submission. Delayed search results
 never regain authority after an input edit, including edit-and-revert.
+
+### Remote continuous slide browsing ·2026-10-30
+
+Opening a directory, group or search loads its complete result automatically.
+The existing encrypted six-slide/twelve-group response bounds remain; the client
+collects successive pages before rendering one continuous native-scroll grid.
+There are no previous/next-list buttons or additional fetches while swiping.
+A changed catalog or result size during collection rejects the whole batch;
+closing, editing the query or replacing a request invalidates pending results.
+Only visible/nearby thumbnail documents mount; offscreen cards retain text and
+fixed aspect ratio, limiting iframe cost without losing loaded catalog data.
+Swiping browses only. Explicit slide taps still use the existing fresh ticket,
+catalog identity and jump guards; no output command is queued offline.
