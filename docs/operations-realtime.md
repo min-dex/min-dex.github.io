@@ -83,3 +83,9 @@ raw_payload 전체와 source document는 읽지 않는다. 새 연결이나 주�
 smoke_archive_live.py의 실예배/과거 기록·revision 복구·혼합 조회 거부·인도자 초안·
 조회 실패/null·삭제·1000행 초과 페이지·알림 병합, smoke_worship_live.py의 확정 저장
 알림과 실패 미전송, test_setlist_leader_edit.cjs의 기존 CAS/필드 보존을 확인한다.
+
+## 교회력 한글 조합 키 보호 · 2026-10-30
+
+교회력 셀의 한글 조합 중에는 Enter로 포커스를 빼거나 자동 저장하지 않고,
+Esc로 입력을 초기값으로 되돌리지 않는다. isComposing과 keyCode 229를 함께
+확인한다. 조합 완료 뒤의 Enter·Tab 저장과 Esc 취소는 기존 규칙을 따른다.

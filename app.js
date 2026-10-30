@@ -1659,6 +1659,7 @@ function bindDetailInteractionRoot(root, options = {}) {
   root.addEventListener("keydown", (e) => {
     const cell = e.target.closest(".cal-cell");
     if (!cell) return;
+    if (e.isComposing || e.keyCode === 229) return;
     if (e.key === "Enter") { e.preventDefault(); cell.blur(); }
     if (e.key === "Escape") {
       cell.textContent = cell.dataset.initialValue || "";

@@ -1485,6 +1485,7 @@
     function endDrag(){if(!drag)return;if(JSON.stringify(drag.before)!==JSON.stringify(snapshot(doc))){remember(drag.before);persist();}drag=null;properties();preview();}
     on(document,"pointerup",endDrag);on(document,"pointercancel",endDrag);
     on(root,"keydown",event=>{
+      if(event.isComposing||event.keyCode===229)return;
       if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="s"){event.preventDefault();event.stopPropagation();void save();return;}
       if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="p"){event.preventDefault();event.stopPropagation();void print();return;}
       if(event.target.matches("input,textarea,select"))return;
