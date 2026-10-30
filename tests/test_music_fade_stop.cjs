@@ -13,6 +13,7 @@ function fixture() {
     renderPresenterControlState(){},updateServiceMusicTransportControls(){},serviceMusicSourceIsSlotOwned:()=>false,
     currentPresenterAudioContext:()=>({}),syncServiceMusicSyncedLyricsWithCurrentTime(){},showToast(){}});
   vm.runInContext(source.slice(source.indexOf('function getServiceMusicAudio()'),source.indexOf('function presenterSyncTimelineForSlide(')),c);
+  vm.runInContext(readRuntimeSource('mindex.presenter-media-state.js'),c);
   return {c,music,audio,retired,tick(ms){now+=ms;[...timers.values()].forEach(fn=>fn())}};
 }
 (async()=>{

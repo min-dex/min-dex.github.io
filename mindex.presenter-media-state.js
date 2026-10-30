@@ -197,3 +197,43 @@ function presenterSlideShouldAutoAdvanceOnEnd(slide) {
   const playback = presenterPlaybackConfig(slide.playback, presenterRole === "intro" ? "intro-video" : "video");
   return playback.autoAdvanceOnEnd !== false && playback.loop !== true;
 }
+
+// Shared audio volume UI and guarded changes follow the current output state.
+function renderServiceMusicVolumeControl() {
+  const music = state.serviceMusic;
+  const percent = Math.round(music.volumeLevel * 20);
+  const enabled = isPresenterOutputWindowOpen();
+  return `<span class="svc-volume-control" title="${enabled ? "음악 볼륨" : "송출 중에만 볼륨을 조절할 수 있습니다"}">
+    <i data-lucide="volume-2" aria-hidden="true"></i>
+    <input class="svc-music-volume" type="range" min="0" max="5" step="0.25" value="${music.volumeLevel}" data-service-music-volume aria-label="${escapeAttr(uiText("presenter.music.volume"))}" aria-valuetext="${percent}%" ${enabled ? "" : "disabled"}>
+    <output data-service-music-volume-value aria-hidden="true">${percent}%</output>
+  </span>`;
+}
+
+function syncServiceMusicVolumeControls() {
+  const enabled = isPresenterOutputWindowOpen();
+  const level = state.serviceMusic.volumeLevel;
+  document.querySelectorAll("[data-service-music-volume]").forEach(input => {
+    input.disabled = !enabled;
+    input.value = String(level);
+    input.setAttribute("aria-valuetext", `${Math.round(level * 20)}%`);
+    input.closest(".svc-volume-control").title = enabled ? "음악 볼륨" : "송출 중에만 볼륨을 조절할 수 있습니다";
+  });
+  document.querySelectorAll("[data-service-music-volume-value]").forEach(output => {
+    output.textContent = `${Math.round(level * 20)}%`;
+  });
+}
+
+function setServiceMusicVolume(value, binding = null) {
+  if (!isPresenterOutputWindowOpen()) {
+    updateServiceMusicTransportControls();
+    return;
+  }
+  if (binding?.serviceMusicSource && binding.serviceMusicServiceId !== state.serviceMusic.ownerServiceId) return;
+  const level = Math.round(Math.min(Math.max(Number(value) || 0, 0), 5) * 4) / 4;
+  state.serviceMusic.volumeLevel = level;
+  const audio = getServiceMusicAudio();
+  const fade = state.serviceMusic.fadeStop;
+  audio.volume = (level / 5) * (fade ? Math.max(0, 1 - (Date.now() - fade.started) / 1200) : 1);
+  updateServiceMusicTransportControls();
+}

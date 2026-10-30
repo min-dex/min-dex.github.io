@@ -6,7 +6,9 @@ window (including the existing heartbeat detection); merely playing music does
 not enable them. The UI disables the controls off-air and the setter rechecks
 output state, blocking stale events. Closing output retains the selected volume
 and ongoing playback. Volume remains session state, without modifying songs,
-worship records or audio timing. Existing fade-out multiplication is preserved.
+worship records or audio timing. Existing fade-out multiplication is preserved. The shared volume rendering,
+synchronization and guarded setter live with media transport state in
+`mindex.presenter-media-state.js`, without increasing controller size budgets.
 
 ## Explicit Deletion In Worship Order Editor (2026-10-14)
 

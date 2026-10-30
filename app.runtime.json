@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261030-toolbar-scripture",
+  "version": "20261030-input-errors-volume",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "b81c3f5253c15db6ac4ea2dfa5331a57d1672c4c939970539e50ae2213de1560",
-  "runtime_sha256": "598ba30631d14384cc2545c051b7c1ff0806bd0803506e069900e2fb5eb4b3b2",
-  "source_bytes": 1350246,
-  "runtime_bytes": 963628,
-  "source_gzip": 308514,
-  "runtime_gzip": 241762
+  "source_sha256": "bf3e3276774eca49f89cee493c21d98d739d7d50c90ef26221c631e54dc5233e",
+  "runtime_sha256": "cde7517eb83655473e0c863318c578acb17df8215643db84931f0316fe1d69f5",
+  "source_bytes": 1352560,
+  "runtime_bytes": 965642,
+  "source_gzip": 309138,
+  "runtime_gzip": 242313
 }

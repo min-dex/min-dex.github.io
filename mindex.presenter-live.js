@@ -321,20 +321,6 @@ function loadServiceMusicFile(file) {
   renderPresenterControlState();
 }
 
-function setServiceMusicVolume(value, binding = null) {
-  if (!isPresenterOutputWindowOpen()) {
-    updateServiceMusicTransportControls();
-    return;
-  }
-  if (binding?.serviceMusicSource && binding.serviceMusicServiceId !== state.serviceMusic.ownerServiceId) return;
-  const level = Math.round(Math.min(Math.max(Number(value) || 0, 0), 5) * 4) / 4;
-  state.serviceMusic.volumeLevel = level;
-  const audio = getServiceMusicAudio();
-  const fade = state.serviceMusic.fadeStop;
-  audio.volume = (level / 5) * (fade ? Math.max(0, 1 - (Date.now() - fade.started) / 1200) : 1);
-  updateServiceMusicTransportControls();
-}
-
 function presenterSyncTimelineForSlide(slide = null) {
   const sync = slide?.syncTimeline && typeof slide.syncTimeline === "object" ? slide.syncTimeline : null;
   if (!sync) return null;

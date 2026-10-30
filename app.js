@@ -29889,31 +29889,6 @@ function serviceMusicSourceIsSlotOwned(source = state.serviceMusic.sourceKey) {
   return Boolean(source) && Object.values(SERVICE_SLOT_MUSIC).some(config => config.source === source);
 }
 
-function renderServiceMusicVolumeControl() {
-  const music = state.serviceMusic;
-  const percent = Math.round(music.volumeLevel * 20);
-  const enabled = isPresenterOutputWindowOpen();
-  return `<span class="svc-volume-control" title="${enabled ? "음악 볼륨" : "송출 중에만 볼륨을 조절할 수 있습니다"}">
-    <i data-lucide="volume-2" aria-hidden="true"></i>
-    <input class="svc-music-volume" type="range" min="0" max="5" step="0.25" value="${music.volumeLevel}" data-service-music-volume aria-label="${escapeAttr(uiText("presenter.music.volume"))}" aria-valuetext="${percent}%" ${enabled ? "" : "disabled"}>
-    <output data-service-music-volume-value aria-hidden="true">${percent}%</output>
-  </span>`;
-}
-
-function syncServiceMusicVolumeControls() {
-  const enabled = isPresenterOutputWindowOpen();
-  const level = state.serviceMusic.volumeLevel;
-  document.querySelectorAll("[data-service-music-volume]").forEach(input => {
-    input.disabled = !enabled;
-    input.value = String(level);
-    input.setAttribute("aria-valuetext", `${Math.round(level * 20)}%`);
-    input.closest(".svc-volume-control").title = enabled ? "음악 볼륨" : "송출 중에만 볼륨을 조절할 수 있습니다";
-  });
-  document.querySelectorAll("[data-service-music-volume-value]").forEach(output => {
-    output.textContent = `${Math.round(level * 20)}%`;
-  });
-}
-
 function renderServiceMusicPlayer(options = {}) {
   const slotOwned = !options.source && serviceMusicSourceIsSlotOwned();
   const music = slotOwned ? { ...state.serviceMusic, sourceKey: "", sourceLabel: "", objectUrl: "", fileName: "", playing: false, pending: false } : state.serviceMusic;
