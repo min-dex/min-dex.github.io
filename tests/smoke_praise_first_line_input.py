@@ -76,6 +76,15 @@ try:
                       const client=await worshipAtomicClient();await client.read(sid);
 
                       const song=state.songs.find(row=>row.id===hymn.id);
+                      const labelled={id:'SONG-CONT-0800-0001',_singleSongRecord:true,title:'예수로 나의 구주 삼고',versions:[{id:'SONG-CONT-0800-0001',name:'별도 가사',version_label:'별도 가사',forms:[]}]};
+                      const oldHymn={id:'SONG-HYMN-T204-0001',_singleSongRecord:true,title:'예수를 나의 구주 삼고',hymn_no:'통 204',versions:[{id:'SONG-HYMN-T204-0001',name:'통일 204 예수로 나의 구주 삼고',raw_section_name:'통일 204 예수로 나의 구주 삼고',forms:[]}]};
+                      const displayBefore=JSON.stringify([labelled,oldHymn]);
+                      check(versionDisplayName(labelled,labelled.versions[0])==='별도 가사','explicit native label hidden');
+                      check(versionDisplayName(oldHymn,oldHymn.versions[0])==='통일찬송가 204장','old hymnal label not compact');
+                      check(versionDisplayName(oldHymn,{name:'영어',raw_section_name:'영어'})==='영어','custom hymn label lost');
+                      check(praiseVariantLabel(labelled,[labelled,oldHymn])==='별도 가사','picker label differs');
+                      check(JSON.stringify([labelled,oldHymn])===displayBefore,'display mutated stored names');
+
                       check(praiseFirstLineAliases(song)[0]==='보존할 첫 줄','first line missing');
                       const firstMatch=getSongSearchMatch(song,getSearchTokens('보존할 첫 줄'),{includeLyrics:false});
                       check(firstMatch?.field.label==='첫 소절','summary search did not index alias');

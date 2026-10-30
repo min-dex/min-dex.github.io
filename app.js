@@ -19491,6 +19491,19 @@ async function selectVersion(versionId) {
 
 function versionDisplayName(song, version = {}) {
   version = version || {};
+  if (song?._singleSongRecord) {
+    const name = String(version.name || version.curated_version_name || version.version_label || "").trim();
+    const edition = String(song.id || "").match(/^SONG-HYMN-([NT])(\d+)-/);
+    if (edition) {
+      const standard = !name || isDefaultVersionName(name) || /^(?:새찬송가|통일찬송가|통일 찬송가)$/.test(name)
+        || /^통(?:일)?\s*\d+(?:\s|$)/.test(name) && name === String(version.raw_section_name || "").trim()
+        || /^통(?:일)?\s*\d+(?:\s|$)/.test(name) && normalizeTitle(name.replace(/^통(?:일)?\s*\d+\s*/, "")) === normalizeTitle(song.title);
+      if (standard) return `${edition[1] === "T" ? "통일찬송가" : "새찬송가"} ${Number(edition[2])}장`;
+    }
+    // A native version_label mirrors its explicit name; equality is not evidence
+    // that the user-authored label is redundant with the song title.
+    return displayVersionName(name);
+  }
   const hymnalName = hymnalVersionName(song, version);
   if (hymnalName) return hymnalName;
   if (song?.hymn_no && isDefaultVersionName(version.name || version.curated_version_name)) return "새찬송가";

@@ -180,3 +180,15 @@ and empty forms, global/summary/full-lyric ranking, actual picker candidates/cli
 native atomic save failure/retry/rehydration and exact source/form/timing preservation.
 Only repository/atomic RPC boundaries use synthetic fixtures. Publication remains
 pending the coordinated complete gate, Pages and public verification.
+
+
+## Native picker labels ·2026-10-30 candidate
+
+Native selectors display the explicit saved variant name even when version_label
+mirrors it; that equality no longer hides 별도 가사 as 기본. Standard native hymnal
+labels display 새찬송가 N장 / 통일찬송가 N장 using their existing edition/number.
+Imported redundant titles disappear from the selector only. Custom labels such
+as 영어 remain explicit. Metadata edit values, raw evidence, record titles, output
+titles, lyrics/media/timing and worship identities are unchanged. Legacy version
+naming remains under its existing rules. The first-line browser regression also
+asserts compact labels, custom-name retention and zero stored-object mutation.
