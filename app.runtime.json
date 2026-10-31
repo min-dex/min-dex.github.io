@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261101-song-selection-receipt",
+  "version": "20261101-bulletin-praise-controls",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "e0807c0b269b027328471f723492c120ab614e35219f6fd4332a02b1c6c1d81d",
-  "runtime_sha256": "7f8570e6ea12d193d5a37a1f2299147461f00ed63fac2321b72d1228298fbf17",
-  "source_bytes": 1355874,
-  "runtime_bytes": 967462,
-  "source_gzip": 310336,
-  "runtime_gzip": 243244
+  "source_sha256": "965ba5d5c1ddf54bec7c541b033abc0afba2413bbdf3902e3e9bf012090398d8",
+  "runtime_sha256": "1e0819dc832c59d48b3cd3e164a48b365065a09891a5705835e803844910bfe4",
+  "source_bytes": 1355747,
+  "runtime_bytes": 967368,
+  "source_gzip": 310321,
+  "runtime_gzip": 243236
 }
