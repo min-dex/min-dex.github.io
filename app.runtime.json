@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261101-keynote-controls-safe-update",
+  "version": "20261101-song-selection-receipt",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "8e5df94c0c038f735bd2981aa0b09268dfbd0e088d366641f061d2c1a1878334",
-  "runtime_sha256": "5c9126d6205bbda6ffcecb1f62d46b085d63735a734e2b32f3d45153afeacf39",
-  "source_bytes": 1355720,
-  "runtime_bytes": 967347,
-  "source_gzip": 310284,
-  "runtime_gzip": 243200
+  "source_sha256": "e0807c0b269b027328471f723492c120ab614e35219f6fd4332a02b1c6c1d81d",
+  "runtime_sha256": "7f8570e6ea12d193d5a37a1f2299147461f00ed63fac2321b72d1228298fbf17",
+  "source_bytes": 1355874,
+  "runtime_bytes": 967462,
+  "source_gzip": 310336,
+  "runtime_gzip": 243244
 }

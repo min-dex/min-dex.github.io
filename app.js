@@ -10627,6 +10627,7 @@ async function commitServiceItemInputs(serviceId = state.selectedServiceId, inde
     field.dataset.initialValue = field.value;
     field.dataset.presenterPreviewValue = field.value;
   }
+  if (await consumeSongSelectionSave(serviceId, itemIndex)) return true;
   return Boolean(await resolveAndSaveCommittedServiceItem(serviceId, itemIndex, {
     renderAfterSave: false,
     resolveScriptureBeforeSave: false,
@@ -10654,7 +10655,7 @@ function saveCommittedServiceItem(index, serviceId = state.selectedServiceId, op
   const item = getServiceItems(serviceId)[Number(index)];
   const service = state.services.find((candidate) => candidate.id === serviceId);
   if (!item || !service || serviceItemScriptureInputInvalid(item)) return;
-  void resolveAndSaveCommittedServiceItem(serviceId, Number(index), options);
+  return resolveAndSaveCommittedServiceItem(serviceId, Number(index), options);
 }
 
 function assertServicePraiseModeReference(row, expected) {
@@ -12829,7 +12830,7 @@ function selectServiceSongForItem(index, songId) {
   if (serviceSongHasMultipleSelectableVersions(song, item, service)) {
     showServiceSongVersionChoiceNotice([songServiceOptionLabel(song) || song.title || item.label || "찬양"]);
   }
-  saveCommittedServiceItem(index, serviceId);
+  recentSongSelectionSave.set(service, { itemId:item.id, songId:song.id, done:saveCommittedServiceItem(index, serviceId) });
 }
 
 function getActiveServiceTypeId() {

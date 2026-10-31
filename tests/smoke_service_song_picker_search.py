@@ -67,6 +67,19 @@ try:
                 page.locator('[data-service-song-select="range"]').click()
                 assert page.evaluate("savedSelections.length===1 && savedSelections[0]==='range'"), 'Candidate click saved twice'
 
+                page.evaluate("""async()=>{
+                  const sid='picker-test',service=state.services.find(s=>s.id===sid),item=getServiceItems(sid)[1];
+                  const attempt=done=>recentSongSelectionSave.set(service,{itemId:item.id,songId:item.song_id,done});
+                  state.dirtyServiceElementIds.delete(sid);state.dirtyServiceStructureIds.delete(sid);
+                  let confirm;
+                  attempt(new Promise(resolve=>{confirm=resolve}));
+                  const joined=consumeSongSelectionSave(sid,1);confirm(true);
+                  if(!await joined || await consumeSongSelectionSave(sid,1))throw Error('duplicate save receipt');
+                  attempt(Promise.resolve(false));
+                  if(await consumeSongSelectionSave(sid,1))throw Error('failed save suppressed retry');
+                  markServiceElementDirty(sid,item);attempt(Promise.resolve(true));
+                  if(await consumeSongSelectionSave(sid,1))throw Error('new edit suppressed');
+                }""")
                 print(engine, 'PASS multiple results, range, focus, draft/output isolation, click selection, linked replacement, empty search and cold-load latest query')
             finally:
                 browser.close()

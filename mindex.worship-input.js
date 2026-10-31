@@ -1921,3 +1921,15 @@ function resolvePraiseFirstLine(value, item = null, service = null) {
   return {song: song && !song._singleSongRecord && (song.versions || []).length > 1 ? null : song, candidates};
 }
 
+
+// The picker saves immediately. A following row-save click joins that receipt.
+const recentSongSelectionSave = new WeakMap();
+async function consumeSongSelectionSave(serviceId, itemIndex) {
+  const service = state.services.find(row => row.id === serviceId);
+  const selected = recentSongSelectionSave.get(service);
+  const item = getServiceItems(serviceId)[itemIndex];
+  if (!selected || selected.itemId !== item?.id || selected.songId !== item.song_id) return false;
+  recentSongSelectionSave.delete(service);
+  return Boolean(await selected.done) && !state.dirtyServiceElementIds.get(serviceId)?.has(item.id)
+    && !state.dirtyServiceStructureIds.has(serviceId);
+}
