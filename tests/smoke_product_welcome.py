@@ -13,7 +13,7 @@ with sync_playwright() as p:
     errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     page.route('**/*',lambda r:r.abort())
     page.set_content(f'<html data-theme="{theme}"><body data-theme="{theme}" class="ui-booting"><main class="home-start"></main></body></html>')
-    page.add_style_tag(content=(ROOT/'styles.css').read_text())
+    page.add_style_tag(content=(ROOT/'styles.css').read_text()+(ROOT/'styles-product.css').read_text())
     assert page.evaluate("getComputedStyle(document.body).getPropertyValue('--panel').trim()")==('#232320' if theme=='dark' else '#f4f4ef')
     page.evaluate('''channel=>{window.writes=[];window.store=new Map([['existing-draft','keep']]);
      window.MINDEX_SERVER_STORAGE={ready:false,getItem:(scope,key)=>store.get(key)||null,setItem:async(scope,key,value)=>{writes.push({scope,key,value});if(window.rejectSave)throw Error('offline');store.set(key,value)}};
