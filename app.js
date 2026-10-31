@@ -15039,16 +15039,16 @@ const savedBulletinList = window.MindexBulletin.createSavedList(
   error => departmentInputError(error, "주보 목록 불러오기").message,
   () => { if (state.module === "bulletin") renderBulletinList(); });
 function getBulletinSidebarServices() {
-  return savedBulletinList.select(state.services.filter(serviceSupportsBulletin), normalizeSearchValue(state.search), service => normalizeSearchValue(`${service.date} ${bulletinPageTabTitle(service.id)} ${service.title||""}`));
+  const query = normalizeSearchValue(state.search);
+  return state.services.filter(service => serviceSupportsBulletin(service) && (!query || normalizeSearchValue(`${service.date} ${bulletinPageTabTitle(service.id)} ${service.title||""}`).includes(query))).sort((a,b) => b.date.localeCompare(a.date));
 }
 
 function renderBulletinList() {
   refs.songCount.textContent = "";
   if (!state.client || state.connectionError) {refs.songList.innerHTML=renderConnectionList(state.connectionError);return;}
   if (state.serviceError || !state.serviceTypes.length) {refs.songList.innerHTML=state.serviceError?renderListEmptyState("주보 목록을 불러오지 못했습니다",state.serviceError):renderLoadingList();return;}
-  if (savedBulletinList.renderStatus(refs.songList, renderLoadingList, renderListEmptyState)) return;
   const services=getBulletinSidebarServices();
-  refs.songList.innerHTML=`<div class="service-sidebar"><section class="service-sidebar-section"><div class="service-sidebar-head"><span>주보</span></div><div class="service-sidebar-stack service-sidebar-stack--navigation">${services.map(service=>`<button type="button" class="service-type-row${state.presenterBulletinServiceId===service.id?" active":""}" data-bulletin-open="${escapeAttr(service.id)}" aria-current="${state.presenterBulletinServiceId===service.id?"page":"false"}"><span>${escapeHtml(formatServiceDate(service))} · ${escapeHtml(bulletinPageTabTitle(service.id))}</span></button>`).join("")||'<p class="muted">저장된 주보가 없습니다.</p>'}</div></section></div>`;
+  refs.songList.innerHTML=`<div class="service-sidebar"><section class="service-sidebar-section"><div class="service-sidebar-head"><span>주보</span></div><div class="service-sidebar-stack service-sidebar-stack--navigation">${services.map(service=>`<button type="button" class="service-type-row${state.presenterBulletinServiceId===service.id?" active":""}" data-bulletin-open="${escapeAttr(service.id)}" aria-current="${state.presenterBulletinServiceId===service.id?"page":"false"}"><span>${escapeHtml(formatServiceDate(service))} · ${escapeHtml(bulletinPageTabTitle(service.id))}</span></button>`).join("")||'<p class="muted">표시할 부서 예배가 없습니다.</p>'}</div></section></div>`;
   finishListRender();
 }
 
