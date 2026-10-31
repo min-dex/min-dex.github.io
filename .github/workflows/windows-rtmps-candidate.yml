@@ -11,6 +11,7 @@ jobs:
     env:
       CSC_IDENTITY_AUTO_DISCOVERY: 'false'
       MINDEX_EXPECT_LOCAL_ENCODER: '1'
+      PYTHONIOENCODING: utf-8
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,6 +27,13 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install "pyinstaller==6.16.0" "imageio-ffmpeg==0.6.0" "pywin32==311" "cryptography==46.0.3" playwright
       - run: ./tools/broadcast-engine/build-win.ps1
+      - name: Probe frozen Windows receiver with local synthetic A/V
+        shell: python
+        run: |
+          import pathlib, subprocess
+          folder=pathlib.Path('.cache/engine-stage/mindex-receiver')
+          sample=subprocess.check_output([str(folder/'ffmpeg.exe'),'-loglevel','error','-f','lavfi','-i','color=s=320x180:r=30','-f','lavfi','-i','sine=frequency=440','-t','2','-c:v','libvpx','-c:a','libopus','-f','webm','pipe:1'])
+          subprocess.run([str(folder/'mindex-receiver.exe')],input=sample,check=True,timeout=45)
       - run: pnpm install --frozen-lockfile
       - run: node scripts/verify-release.mjs --offline
       - run: pnpm exec electron-builder --config electron-builder.native-test.cjs --win nsis --x64 --publish never

@@ -25,7 +25,7 @@ function registerBroadcastEngine({ipcMain,app,getLab}) {
       const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'mindex-engine-test-'));
       const exe=path.join(process.resourcesPath,'broadcast-engine',windows?'mindex-receiver.exe':'mindex-receiver');
       const env=windows?{SystemRoot:process.env.SystemRoot,TEMP:tmp,TMP:tmp,PATH:path.join(process.env.SystemRoot,'System32')}:{TMPDIR:tmp,PATH:'/usr/bin:/bin',LANG:'C'};
-      const proc=spawn(exe,[],{cwd:tmp,env,windowsHide:true,detached:!windows,stdio:['pipe','pipe','ignore']});
+      const proc=spawn(exe,[],{cwd:tmp,env,windowsHide:true,detached:!windows,stdio:['pipe','pipe',process.env.MINDEX_ISOLATED_TEST==='1'?'inherit':'ignore']});
       const run={proc,total:0,writing:false,finishing:false};
       active=run;
       let receipt='';

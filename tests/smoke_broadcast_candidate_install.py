@@ -104,5 +104,9 @@ with tempfile.TemporaryDirectory() as temp:
     assert not errors,errors
     print('PASS packaged candidate dual lyrics; one navigation, independent exclusion, CH8 popup, close/reopen, isolated host unchanged',flush=True)
     print(json.dumps(dict(sha=sha,title=page.title(),version=record['productVersion'],channel=record['channel'],module=page.evaluate('state.module'),dmg=str(dmg)),ensure_ascii=False))
+  except Exception:
+   log.seek(0)
+   print(log.read()[-6000:],flush=True)
+   raise
   finally:
    if proc.poll() is None:proc.terminate();proc.wait(timeout=15)
