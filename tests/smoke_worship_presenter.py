@@ -4974,7 +4974,7 @@ def main() -> int:
                         },
                         {
                             "type": "song-title",
-                            "title": "999 특송 테스트",
+                            "title": "특송 테스트",
                             "assignee": "",
                             "text": "♬ 특송 테스트",
                             "sectionKey": "special_song",
