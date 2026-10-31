@@ -24496,7 +24496,7 @@ function renderServiceSidebarDateGroups(services = [], options = {}) {
       ${groups.map((group) => `
         <section class="service-sidebar-date-group">
           <div class="service-sidebar-date-head">
-            <span>${escapeHtml(group.label)}</span>
+            <span data-upcoming-date="${options.upcoming ? escapeAttr(group.services[0]?.date || "") : ""}" class="${options.upcoming && group.services[0]?.date === upcomingTodayDateKey() ? "is-today" : ""}">${escapeHtml(group.label)}</span>
           </div>
           <div class="service-sidebar-stack">
             ${group.services.map((service) => renderServiceSidebarCard(service, { showDate: false, upcoming: options.upcoming })).join("")}
