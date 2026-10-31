@@ -236,7 +236,7 @@ function renderPresenterAlwaysOnTopControl({ buttonStyle = false } = {}) {
   const supported = Boolean(window.mindexElectron?.setPresenterAlwaysOnTop);
   return `
     <label class="svc-presenter-pin-toggle${buttonStyle ? " svc-presenter-pin-button svc-presenter-window-button" : ""}${supported ? "" : " is-unavailable"}" title="${supported ? "출력 창을 항상 위에 표시" : "웹 버전에서는 항상 위 표시를 지원하지 않습니다"}">
-      <input type="checkbox" data-presenter-always-on-top ${supported && state.presenter.alwaysOnTop ? "checked" : ""} ${supported ? "" : "disabled"} />
+      <input type="checkbox" data-presenter-always-on-top aria-label="항상 위" ${supported && state.presenter.alwaysOnTop ? "checked" : ""} ${supported ? "" : "disabled"} />
       ${buttonStyle ? `<i data-lucide="pin" aria-hidden="true"></i>` : `<span class="svc-presenter-pin-track" aria-hidden="true"></span>`}
       <span>항상 위</span>
     </label>`;

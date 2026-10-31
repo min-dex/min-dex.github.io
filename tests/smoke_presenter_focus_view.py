@@ -151,6 +151,21 @@ try:
        assert panel.evaluate('e=>{const r=e.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth+1&&r.bottom<=innerHeight+1}')
        panel.locator('[popovertargetaction="hide"]').click()
 
+       assert page.evaluate("""()=>{
+        for(const group of document.querySelectorAll('.svc-screen-management-grid')) {
+         if(!group.getBoundingClientRect().width)continue;
+         const controls=[...group.querySelectorAll(':scope > .svc-presenter-window-button')];
+         if(controls.length!==4)return false;
+         const top=controls[0].getBoundingClientRect().top;
+         for(const control of controls) {
+          const input=control.querySelector('input');
+          if(Math.abs(control.getBoundingClientRect().top-top)>1)return false;
+          if(!(input||control).getAttribute('aria-label'))return false;
+          if(getComputedStyle(control.querySelector('span')).position!=='absolute')return false;
+         }
+        }
+        return true;
+       }""")
        assert page.locator('.svc-presenter-toolbar').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
        assert page.evaluate("""()=>{
         const left=document.querySelector('.module-switcher-tab').getBoundingClientRect();

@@ -6258,7 +6258,7 @@ body[data-module="presenter"] .svc-presenter-toolbar::before {
 /* Shared screen controls in slide and presenter views. */
 .svc-screen-management { min-width:0; margin:0; padding:10px 0; border-block:1px solid var(--line); }
 .svc-screen-management h3 { margin:0 0 10px; font-size:var(--ui-label-size); font-weight:600; color:var(--ink-3); }
-.svc-screen-management-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.svc-screen-management-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
 .svc-screen-management .svc-screen-management-grid > :is(.icon-btn,.svc-presenter-pin-button) {
   display:flex; align-items:center; justify-content:center; box-sizing:border-box;
   width:100%; min-width:0; height:35px; min-height:35px; margin:0; padding:0 10px; gap:5px;
@@ -6267,6 +6267,15 @@ body[data-module="presenter"] .svc-presenter-toolbar::before {
 }
 .svc-screen-management-grid > .svc-presenter-launch { grid-column:1/-1; grid-row:auto; }
 .svc-screen-management-grid > .svc-presenter-pin-button { grid-column:auto; grid-row:auto; }
+.svc-screen-management-grid > .svc-presenter-window-button { position:relative; }
+.svc-screen-management-grid > .svc-presenter-window-button > span {
+  position:absolute; bottom:calc(100% + 5px); left:50%; transform:translateX(-50%);
+  width:max-content; max-width:200px; padding:5px 10px; border:1px solid var(--line);
+  border-radius:var(--r); background:var(--bg); color:var(--ink); font-size:var(--ui-meta-size);
+  white-space:nowrap; pointer-events:none; visibility:hidden; z-index:20;
+}
+.svc-screen-management-grid > .svc-presenter-window-button:is(:hover,:focus-visible,:focus-within) > span { visibility:visible; }
+
 .svc-screen-management-grid :is(i,svg) { width:16px; height:16px; flex:0 0 16px; stroke-width:var(--ui-icon-stroke); }
 .svc-screen-management .svc-screen-management-grid > :is(.icon-btn,.svc-presenter-pin-button):hover { background:var(--ui-surface-panel); }
 .svc-screen-management .svc-screen-management-grid > .svc-presenter-window-button:is([aria-pressed=true],:has(input:checked)) { color:var(--accent); border-color:var(--accent); background:var(--accent-soft); }
