@@ -50,7 +50,7 @@ try:
       for(const sequence of [null,['T','V1','C'],['V1','T','C']]) {
        const direct=['manual_praise','audio_praise'].includes(mode);
        state.songs=[mode==='score_db'?{...song,hymn_no:'9',praise_types:['hymn'],versions:[{...version,name:'새찬송가',hymn_no:'9',praise_types:['hymn']}]}:song];
-       const expectedTitle=(mode==='score_db'?'9 ':'')+song.title;
+       const expectedTitle=song.title;
        const item={id:'content-'+label+'-'+mode,service_id:service.id,label,_worshipSectionKey:key,raw_title:song.title,
         song_id:direct?null:song.id,version_id:direct?null:version.id,_worshipElementTemplateModified:true,
         memo:serializeServiceItemMemo({elementType:'praise',inputMode:mode,outputMode:mode==='score_db'?'score':'lyrics',
@@ -69,6 +69,7 @@ try:
         const expectedNote='♬',otherNote='♪';
         check(host.textContent.includes(noChromakey && mode==='score_db' ? song.title : expectedTitle)&&host.textContent.includes(expectedNote)&&!host.textContent.includes(otherNote),'all song title roles use shared note '+label+'/'+mode+'/'+sequence+'/'+noChromakey);
         check(noChromakey ? html.includes('presenter-fullscreen-song-heading')&&html.includes('presenter-slide--fullscreen-song-title')&&!html.includes('presenter-slide--song-note-title') : html.includes('presenter-title-assignee--order-content'),'order/content output lost '+label+'/'+mode+'/'+sequence+'/'+noChromakey);
+        if(!noChromakey && mode==='score_db')check(host.querySelector('.presenter-song-book')?.textContent==='새찬송가 9장','keyed hymn subtitle');
         if(noChromakey && mode==='score_db')check(host.querySelector('.presenter-fullscreen-song-detail')?.textContent==='새찬송가 9장' && !host.querySelector('.presenter-title-content-title').textContent.includes('9 '),'hymn number must occur in detail, not twice');
         const preview=normalizePresenterMiniPreviewSlide({...headings[0],outputContext:noChromakey?'clean':'chromakey'},!noChromakey);
         check(preview.type===headings[0].type && renderPresenterTitleAssigneeSlide(preview)===renderPresenterTitleAssigneeSlide(headings[0]),'preview/output title mismatch '+label+'/'+mode+'/'+noChromakey+' '+JSON.stringify({preview,original:headings[0]}));
