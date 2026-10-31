@@ -126,10 +126,9 @@ button :is([data-lucide], svg.lucide) { width: var(--ui-icon-size); height: var(
     padding:8px max(15px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(15px,env(safe-area-inset-left));
     background:var(--bg); border-top:1px solid var(--line);
   }
-  .slide-stepper button { min-height:50px; }
   #phonePosition { display:block; grid-column:2; grid-row:1; font-variant-numeric:tabular-nums; }
   .current-slide #position { display:none; }
-  main:has(#controller:not([hidden])) { padding-bottom:calc(90px + env(safe-area-inset-bottom)); }
-  html:has(#controller:not([hidden])) { scroll-padding-bottom:calc(75px + env(safe-area-inset-bottom)); }
+  main:has(#controller:not([hidden])) { padding-bottom:calc(110px + env(safe-area-inset-bottom)); }
+  html:has(#controller:not([hidden])) { scroll-padding-bottom:calc(95px + env(safe-area-inset-bottom)); }
   #controller:has(input:focus) .slide-stepper { display:none; }
 }
