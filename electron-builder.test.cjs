@@ -1,6 +1,7 @@
 const pkg = require('./package.json');
 module.exports = {
   ...pkg.build,
+  files: [...pkg.build.files, 'tools/broadcast-prototype/**/*'],
   appId: 'kr.mindex.app.test',
   productName: 'Mindex Test',
   publish: null,

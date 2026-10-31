@@ -40,7 +40,13 @@
  async function mount(){
   const host=document.querySelector('.home-start .product-welcome');if(!host)return;
   host.querySelector('[data-product-notes]').onclick=async event=>{const opener=event.currentTarget;await load(true);if(opener.isConnected)show(opener);};
-  await load();if(eligible())show(null,true);
+  await load();
+  if(identity?.channel==='test'&&window.mindexElectron?.openBroadcastLab&&!host.querySelector('[data-broadcast-lab]')){
+   const button=document.createElement('button');button.type='button';button.className='btn secondary';
+   button.dataset.broadcastLab='';button.textContent='방송 합성 시험';button.onclick=()=>window.mindexElectron.openBroadcastLab();
+   host.querySelector('[data-product-notes]').after(button);
+  }
+  if(eligible())show(null,true);
  }
  window.addEventListener('mindex-server-storage-ready',()=>void mount());
  const bootObserver=new MutationObserver(()=>{if(!document.body.classList.contains('ui-booting')){bootObserver.disconnect();void mount();}});

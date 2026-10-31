@@ -208,6 +208,33 @@ function configureAutoUpdater() {
   return updateController;
 }
 
+let broadcastLab = null;
+function openBroadcastLab() {
+  if (require("../package.json").mindexTestBuild !== true) return false;
+  if (broadcastLab && !broadcastLab.isDestroyed()) { broadcastLab.focus(); return true; }
+  const directory = path.join(appRoot(), "tools", "broadcast-prototype");
+  const lab = new BrowserWindow({ width: 1320, height: 900, parent: mainWindow,
+    webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false } });
+  broadcastLab = lab;
+  lab.on("closed", () => { broadcastLab = null; });
+  lab.webContents.on("will-navigate", event => event.preventDefault());
+  const hall = require("node:url").pathToFileURL(path.join(directory, "hall-output.html")).href;
+  lab.webContents.setWindowOpenHandler(({ url }) => {
+    if (!url.startsWith(hall + "#") || !/^[0-9a-f-]{36}$/.test(url.slice(hall.length+1))) return { action: "deny" };
+    return { action: "allow", overrideBrowserWindowOptions: { parent: lab,
+      webPreferences: { sandbox: true, nodeIntegration: false, contextIsolation: true } } };
+  });
+  lab.webContents.on("did-create-window", child => {
+    child.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+    child.webContents.on("will-navigate", event => event.preventDefault());
+    lab.once("closed", () => { if (!child.isDestroyed()) child.close(); });
+  });
+  lab.loadFile(path.join(directory, "index.html")).catch(() => { if (!lab.isDestroyed()) lab.close(); });
+  return true;
+}
+ipcMain.handle("mindex:open-broadcast-lab", event =>
+  event.sender === mainWindow?.webContents && openBroadcastLab());
+
 function bindUpdateMenu() {
   const menu = Menu.getApplicationMenu() || Menu.buildFromTemplate([
     ...(process.platform === "darwin" ? [{ role: "appMenu" }] : []),
