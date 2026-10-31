@@ -82,7 +82,12 @@ with tempfile.TemporaryDirectory() as temp:
      until(lab,"broadcastPrototype.stats().source==='file'")
      for excluded in (True,False):
       if not excluded:lab.locator('#excludeBroadcast').click()
-      expected=lab.evaluate("Array.from(document.getElementById('broadcast').getContext('2d').getImageData(10,10,1,1).data).slice(0,3)")
+      # The corner is outside both caption overlays. The CH8 source is an
+      # independent reference immediately after unblocking, before the next RAF.
+      surface='broadcast' if excluded else 'program'
+      expected=lab.evaluate("id=>Array.from(document.getElementById(id).getContext('2d').getImageData(10,10,1,1).data).slice(0,3)",surface)
+      if excluded:blocked_pixel=expected
+      else:assert max(abs(a-b) for a,b in zip(blocked_pixel,expected))>10
       lab.locator('#engineRun').click()
       until(lab,"!document.getElementById('engineRun').disabled",timeout=45000)
       receipt=lab.locator('#engineStatus').inner_text()
