@@ -22,11 +22,13 @@ try:
               document.body.classList.remove('ui-booting');document.body.dataset.module='presenter';
               renderServiceList();renderPresenterDetail();
             }''')
-            page.wait_for_timeout(200)
+            # Flush and await actual registered rail transitions, which Linux WebKit may start after the fixture task.
+            page.wait_for_function("document.body.getAnimations().every(a=>!a.pending&&a.playState!=='running')")
             for theme in ('dark','light'):
                 page.evaluate('(theme)=>document.body.dataset.theme=theme',theme)
                 for width,height in [(1440,900),(1000,600),(768,700),(390,700),(320,700)]:
                     page.set_viewport_size({'width':width,'height':height})
+                    page.wait_for_function("document.body.getAnimations().every(a=>!a.pending&&a.playState!=='running')")
                     result=page.evaluate('''async () => {
                       const assert=(ok,msg)=>{if(!ok)throw Error(msg)};
                       const sidebar=refs.rightSidebar;
@@ -41,6 +43,7 @@ try:
                       assert(toolbar.contains(composer)&&toolbar.scrollWidth<=toolbar.clientWidth+1,'toolbar overflow');
                       assert(composer.querySelector('.svc-citation-composer-heading > span').getClientRects().length,'label hidden');
                       assert(rail&&!sidebar.querySelector('.svc-presenter-input-rail'),'order input belongs to left rail '+JSON.stringify({rail:!!rail,side:!!sidebar.querySelector('.svc-presenter-input-rail'),list:refs.songList.innerHTML.slice(0,500)}));
+                      assert(innerWidth<1000||sidebar.clientWidth>0,'desktop sidebar collapsed');
                       assert(sidebar.scrollWidth<=sidebar.clientWidth+1,'sidebar overflow');
                       input.value='요 15:9';input.focus({preventScroll:true});input.setSelectionRange(2,4);
                       const paneScroll=refs.detailPane.scrollTop,sideScroll=sidebar.scrollTop;

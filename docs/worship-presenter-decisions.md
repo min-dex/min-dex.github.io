@@ -5311,3 +5311,14 @@ their existing modes. Scaffold construction preserves explicitly declared input
 modes in element config. Existing saved choices, titles, lyrics, forms, links
 and media remain authoritative; this change performs no data migration.
 Assignee alone is incomplete; an authored title remains valid title-only content.
+
+
+### Linux WebKit rail-transition verification ·2026-10-31
+
+The citation sidebar regression waits for actual body rail transitions before
+measuring overflow after entry or resize. An isolated Ubuntu trace showed the
+registered right rail at0px before its0→260px transition and260px after completion,
+with fonts loaded and focus view disabled. Fixed elapsed sleeps did not establish
+that layout state in Linux WebKit. Overflow tolerances and all viewport cases stay
+unchanged; desktop cases additionally require a non-collapsed sidebar. Product
+rail widths, animation and visibility rules are unchanged.
