@@ -6316,6 +6316,7 @@ body[data-module="presenter"] .svc-presenter-toolbar::before {
 
 /* Only date-grouped upcoming shortcuts: compact date, right-aligned full name. */
 .service-sidebar-date-groups.is-upcoming .service-sidebar-title { text-align:right; white-space:normal; overflow-wrap:anywhere; }
+.service-sidebar-alias { display:block; font-size:var(--ui-meta-size); font-weight:500; color:var(--ink-3); }
 .service-sidebar-date-groups.is-upcoming .service-sidebar-card { text-align:right; }
 .service-sidebar-date-groups.is-upcoming .service-sidebar-date-group { grid-template-columns:max-content minmax(0,1fr); }
 

@@ -15261,7 +15261,7 @@ const SERVICE_TYPE_DISPLAY_NAMES = {
   youth: "청소년부 예배",
   "young-adult": "청년부 예배",
   special: "특별예배",
-  "holy-week-dawn": "특별새벽기도회",
+  "holy-week-dawn": "새벽기도회",
   omer: "오멜세기기도회",
 };
 
@@ -15282,7 +15282,7 @@ const SERVICE_TYPE_LEGACY_NAMES = {
   nursery: "유치부 예배",
   youth: "청소년부 예배",
   young_adult: "청년부 예배",
-  holy_week_dawn: "특별새벽기도회",
+  holy_week_dawn: "새벽기도회",
   omer: "오멜세기기도회",
   special: "특별예배",
 };
@@ -23236,6 +23236,7 @@ function serviceTypeName(typeId) {
 
 function serviceTypeDisplayName(typeId) {
   const appTypeId = worshipAppServiceTypeId(typeId);
+  if (appTypeId === "holy-week-dawn") return SERVICE_TYPE_DISPLAY_NAMES[appTypeId];
   const rawName = String(serviceTypeName(appTypeId) || "").trim();
   if (rawName && rawName !== appTypeId && !SERVICE_TYPE_LEGACY_NAMES[rawName]) return normalizeServiceDisplayName(rawName);
   return normalizeServiceDisplayName(SERVICE_TYPE_DISPLAY_NAMES[appTypeId] || SERVICE_TYPE_LEGACY_NAMES[rawName] || rawName || appTypeId || "");
@@ -24505,16 +24506,18 @@ function renderServiceSidebarCard(service, options = {}) {
   const noGathering = serviceIsNoGathering(service);
   const active = !noGathering && service.id === state.selectedServiceId ? " active" : "";
   const showDate = options.showDate !== false;
-  const name = options.upcoming ? serviceUpcomingNavigationName(service) : serviceNavigationName(service);
+  const { base, name } = serviceNavigationDetails(service);
+  const title = options.upcoming ? base : name;
+  const alias = options.upcoming && compactSearchValue(base) !== compactSearchValue(name) ? `(${name})` : "";
   const cardButton = `
     <button
       class="service-sidebar-card${showDate ? "" : " service-sidebar-card--compact"}${active}${noGathering ? " is-no-gathering" : ""}"
       type="button"
       ${noGathering ? 'disabled aria-disabled="true"' : `data-service-id="${escapeAttr(service.id)}"`}
-      aria-label="${escapeAttr(`${formatServiceDate(service, { compact: true })} ${name} ${noGathering ? "집회 없음" : "열기"}`)}"
+      aria-label="${escapeAttr(`${formatServiceDate(service, { compact: true })} ${alias ? title + " " + alias : title} ${noGathering ? "집회 없음" : "열기"}`)}"
     >
       ${showDate ? `<span class="service-sidebar-date">${escapeHtml(formatServiceDate(service, { compact: true }))}</span>` : ""}
-      <span class="service-sidebar-title">${escapeHtml(name)}</span>
+      <span class="service-sidebar-title">${escapeHtml(title)}${alias ? ` <small class="service-sidebar-alias">${escapeHtml(alias)}</small>` : ""}</span>
     </button>`;
   if (!showDate) {
     return `

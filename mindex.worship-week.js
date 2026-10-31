@@ -71,7 +71,7 @@ function serviceNavigationDetails(service = {}) {
     if (/부$/.test(department) && alias.startsWith(department + " ")) alias = alias.slice(department.length + 1);
   }
   const name = alias || base;
-  return {name, context:replacement ? `${base} 대체` : name !== base ? base : "", replacement, absent};
+  return {base, name, context:replacement ? `${base} 대체` : name !== base ? base : "", replacement, absent};
 }
 function serviceNavigationName(service = {}) { return serviceNavigationDetails(service).name; }
 function serviceNavigationTypeName(typeId) { return serviceNavigationName({ type_id: typeId }); }
@@ -88,11 +88,4 @@ function renderWorshipSetlistWeekLayout(entries) {
   const layout=window.MindexWorshipWeek.layout(entries);
   const row=(cells,label)=>`<div class="svc-setlist-week-row" aria-label="${label}">${cells.map(cell=>`<div class="svc-setlist-week-slot" data-setlist-slot="${cell.id}">${cell.entries.length?cell.entries.map(card).join(''):`<div class="svc-setlist-slot-empty"><strong>${escapeHtml(cell.name)}</strong><span>등록된 예배 없음</span></div>`}</div>`).join('')}</div>`;
   return `<div class="svc-setlist-week-layout">${row(layout.public,'공예배')}${row(layout.departments,'부서 예배')}${layout.special.length?`<div class="svc-setlist-week-row" aria-label="기타 예배">${layout.special.map(card).join('')}</div>`:''}</div>`;
-}
-
-// Date-grouped upcoming shortcuts keep the original type visible beside its alias.
-function serviceUpcomingNavigationName(service = {}) {
-  const base = serviceTypeDisplayName(worshipAppServiceTypeId(service.type_id || service.service_type_id || ""));
-  const alias = serviceNavigationDetails(service).name;
-  return alias && compactSearchValue(alias) !== compactSearchValue(base) ? `${base} (${alias})` : base;
 }
