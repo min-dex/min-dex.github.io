@@ -30,6 +30,11 @@ try:
                         _worshipSectionKey:i===2?'sermon':i?'prayer':'announcements',_worshipSectionTitle:i===2?'설교':i?'대표기도':'광고',
                         _worshipSlotKey:'test.'+i,_worshipElementTemplateModified:true,
                         memo:serializeServiceItemMemo({elementType:i?'title_person':'body',inputMode:'text'})},i));
+                      const regions={welcome:'상단 문구',news:'1. 기존 소식',footer:'하단 문구'};
+                      items[0].raw_title='인도자';
+                      items[0].assignee='명시 담당';
+                      items[0].memo=serializeServiceItemMemo({elementType:'plain_text',inputMode:'text',announcementRegions:regions,
+                        slides:[regions.welcome,regions.news,regions.footer]});
                       const typed={inputMode:true,contentState:true};
                       worshipElementTypedStateColumns=async()=>typed;
                       refreshPresenterForService=()=>{};
@@ -73,7 +78,9 @@ try:
                       renderServiceList();renderPresenterDetail();
                       for(const toggle of refs.songList.querySelectorAll('[data-presenter-inline-toggle]'))toggle.click();
                       const field=refs.songList.querySelector('[data-presenter-preparation-field-label="광고"]');
-                      check(field,'left announcement input missing');field.focus();field.value='왼쪽에서 입력한 공지';field.dispatchEvent(new Event('input',{bubbles:true}));
+                      check(field?.value===regions.news,'left announcement must show weekly news body');
+                      const editedNews='1. 왼쪽에서 입력한 공지\\n같은 항목의 상세\\n\\n2. 다음 소식';
+                      field.focus();field.value=editedNews;field.dispatchEvent(new Event('input',{bubbles:true}));
                       const titleField=refs.songList.querySelector('[data-presenter-preparation-field-label="설교 제목"]');
                       const personField=refs.songList.querySelector('[data-presenter-preparation-field-label="설교자"]');
                       check(titleField&&personField,'separate sermon inputs missing');
@@ -81,7 +88,7 @@ try:
                       personField.value='김민수 목사';personField.dispatchEvent(new Event('input',{bubbles:true}));
                       const beforeOutput=JSON.stringify(state.presenter);
                       await applyPresenterPreparationInput(sid);
-                      check(state.serviceItems[sid].some(i=>i.raw_title.includes('왼쪽에서 입력한 공지')),'real preparation did not update item');
+                      check(serviceAnnouncementRegions(state.serviceItems[sid].find(i=>i.label==='광고')).news===editedNews,'real preparation did not update item');
                       const sermon=state.serviceItems[sid].find(item=>item.label==='설교');
                       check(sermon.raw_title==='사랑 / 믿음'&&sermon.assignee==='김민수 목사','title delimiter was parsed as assignee');
                       const draftBefore=JSON.stringify(state.serviceItems[sid]);failure=true;
@@ -94,7 +101,19 @@ try:
                       check(JSON.stringify(db).includes('왼쪽에서 입력한 공지'),'atomic server receipt missing input');
                       state.serviceItems[sid]=groupWorshipElements(db.sections,db.elements)[sid];
                       delete state.presenterPreparationDrafts[sid];renderServiceList();renderPresenterDetail();
-                      check(JSON.stringify(state.serviceItems[sid]).includes('왼쪽에서 입력한 공지'),'reopen lost saved input');
+                      const reopened=state.serviceItems[sid].find(i=>i.label==='광고');
+                      const restored=serviceAnnouncementRegions(reopened);
+                      check(restored.news===editedNews && restored.welcome===regions.welcome && restored.footer===regions.footer,'reopen lost announcement regions');
+                      check(reopened.raw_title==='인도자' && JSON.stringify(parseServiceItemMemo(reopened.memo).slides)===JSON.stringify([regions.welcome,editedNews,regions.footer]),'announcement changed independent title or slide boundaries');
+                      check(reopened.assignee==='명시 담당','reopen lost explicit announcement assignee');
+                      const summary=serviceItemSummaryDisplayParts(reopened,service).title;
+                      check(summary.includes('왼쪽에서 입력한 공지') && summary.includes('명시 담당') && !summary.includes('인도자'),'closed row shows unrelated title');
+                      const preview=buildPresenterSlidesForServiceItem(reopened,service,0).find(slide=>slide.announcementRegions);
+                      check(preview && preview.announcementRegions.news===editedNews,'preview lost ordered multiline news');
+                      const cleared=structuredClone(reopened);
+                      for(const key of ['news','welcome','footer'])applyServiceAnnouncementRegion(cleared,key,'');
+                      check(!liturgicalBodyText(cleared,parseServiceItemMemo(cleared.memo),'',service),'cleared announcement fell back to independent title');
+                      check(presenterPreparationStructuredFields(service).find(f=>f.label==='광고').value===editedNews,'fresh sidebar news changed on reopen');
                       check(JSON.stringify(state.presenter)===beforeOutput,'edit/save touched output');
                       for(const input of refs.songList.querySelectorAll('[data-presenter-preparation-field]')) {
                         input.value=input.dataset.preparationRole==='assignee'?'김민수 집사':'완료된 공지';

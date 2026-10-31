@@ -24756,6 +24756,7 @@ function serviceSidebarChildItemDisplayParts(item, service = null) {
     };
   }
   const label = serviceElementDisplayLabel(serviceItemOrdinalDisplayLabel(item, service));
+  if (isAnnouncementTextInputItem(item)) return { meta: label, title: serviceSidebarOutlineFirstLine(serviceAnnouncementRegions(item).news) };
   const liturgicalTitle = serviceItemLiturgicalNavigationTitle(item);
   if (liturgicalTitle !== null) return {
     meta: label || "항목",
@@ -29071,7 +29072,8 @@ async function applyPresenterPreparationInput(serviceId = state.selectedServiceI
       }
 
       if (entry.structured) {
-        if (entry.hasContent) item.raw_title = normalizeServiceItemRawTitleForItem(item, content);
+        if (entry.contentChanged && isAnnouncementTextInputItem(item)) applyServiceAnnouncementRegion(item, "news", content);
+        else if (entry.hasContent) item.raw_title = normalizeServiceItemRawTitleForItem(item, content);
         if (entry.hasAssignee) item.assignee = assignee;
       } else if (entry.key === "대표기도" || entry.rawKey === "대표기도") {
         item.assignee = assignee || content;

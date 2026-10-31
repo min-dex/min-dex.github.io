@@ -13,6 +13,8 @@ assert.equal(rows.elements.filter(e=>e.section_id===praise.id).length,4);
 const offering=rows.sections.find(s=>s.section_key==='offering');
 assert.deepEqual(Array.from(rows.elements.filter(e=>e.section_id===offering.id),e=>e.source_ref.label),['봉헌찬양','봉헌기도']);
 const announcement=rows.elements.find(e=>e.source_ref.label==='광고');
+assert.ok(!announcement.person);
+assert.ok(rows.elements.every(element => element.person !== '인도자'));
 assert.match(announcement.body||announcement.title||'',/오늘도 어린이부 예배에 오신 여러분을 환영하고 축복합니다/);
 const sermon=rows.elements.find(e=>e.source_ref.label==='설교');
 assert.equal(sermon.element_type,'title_person');

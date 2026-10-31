@@ -150,6 +150,8 @@ function liturgicalBodyText(item = {}, memo = parseServiceItemMemo(item?.memo), 
   if (title === '예배의 부름') return worshipOpeningText(item, memo, displayText, canonical);
   if (canonical && !item?.template_modified && !item?.templateModified) return canonical;
   const announcement = isAnnouncementTextInputItem(item);
+  const regions = announcement && normalizeAnnouncementRegions(memo.announcementRegions);
+  if (regions) return presenterAnnouncementBodyText(Object.values(regions).filter(text => text.trim()).join("\n\n"));
   if (memo.slides?.length) {
     const memoText = memo.slides.join("\n\n");
     return announcement ? presenterAnnouncementBodyText(memoText) : memoText.trim();
