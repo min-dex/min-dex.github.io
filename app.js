@@ -10833,8 +10833,7 @@ function clearServiceElementDirty(serviceId = state.selectedServiceId, item = nu
   const dirtyIds = state.dirtyServiceElementIds.get(id);
   if (!dirtyIds) return;
   dirtyIds.delete(itemId);
-  if (dirtyIds.size) state.dirtyServiceElementIds.set(id, dirtyIds);
-  else state.dirtyServiceElementIds.delete(id);
+  if (!dirtyIds.size) state.dirtyServiceElementIds.delete(id);
 }
 
 function markServiceStructureDirty(serviceId = state.selectedServiceId) {
