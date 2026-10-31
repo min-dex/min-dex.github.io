@@ -27,6 +27,12 @@ try:
        window.trace = [];
        for (const t of ['beforeinput','input','change','focusin','focusout','pointerdown','pointerup','click'])
            document.addEventListener(t,e=>{if(e.target.closest('.svc-outline-editor'))trace.push([t,e.target.tagName,e.target.value,document.querySelector('.svc-outline-editor:not([hidden]) input')?.value])},true);
+       const sid=inlineFixture.sid;
+       const pick=a=>{const x=a?.find(x=>x.id===inlineFixture.ids[0]);return x&&[x.raw_title,parseServiceItemMemo(x.memo).scriptureReferences]};
+       let items=state.serviceItems[sid];
+       Object.defineProperty(state.serviceItems,sid,{configurable:true,get(){return items},set(v){const prev=pick(items),next=pick(v);if(JSON.stringify(prev)!==JSON.stringify(next)) trace.push(['items',prev,next,new Error().stack?.split('\\n').slice(0,8)]);items=v}});
+       const save=saveService;saveService=async(...args)=>{trace.push(['save-in',pick(items)]);const r=await save(...args);trace.push(['save-out',pick(items)]);return r};
+       const finalize=finalizePresenterPreparationApply;finalizePresenterPreparationApply=o=>{trace.push(['finalize-in',pick(o.items)]);finalize(o);trace.push(['finalize-out',pick(items)])};
        const commit = commitPresenterInlineInput;commitPresenterInlineInput=async(panel)=>{trace.push(['commit',panel.querySelector('input')?.value]);const r=await commit(panel);trace.push(['returned',r]);return r};
        const apply=applyPresenterPreparationInput;applyPresenterPreparationInput=async(id,opts)=>{trace.push(['apply',opts?.draft]);return apply(id,opts)};
    }""")
