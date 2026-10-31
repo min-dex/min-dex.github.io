@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261031-keynote-auto-winter-bulletin",
+  "version": "20261031-upcoming-sidebar-alias",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "567c6b3a5134dd980f8db39ec47709221ee5b5cb723f3b6049fdc2f750683a3d",
-  "runtime_sha256": "ac030f5a51dd3f8114bf80a82f333bf5c19fbd5ebb6476479bf563b7afc1084c",
-  "source_bytes": 1354486,
-  "runtime_bytes": 966460,
-  "source_gzip": 309929,
-  "runtime_gzip": 242883
+  "source_sha256": "b9f2686db4a5f44f2a4db7103da42738dcb0cfaf9ff0526906c1e27117f21430",
+  "runtime_sha256": "5a97e180b23d60a6370bc5909bd357bf293933010aeefe5db5fe2d0aa6b9f696",
+  "source_bytes": 1354785,
+  "runtime_bytes": 966664,
+  "source_gzip": 310027,
+  "runtime_gzip": 242957
 }
