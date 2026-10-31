@@ -9,7 +9,7 @@ exec(compile(fixture_source.split('\ndef exercise(')[0],str(Path(__file__).with_
 server,url=start_local_app_server()
 try:
  with sync_playwright() as p:
-  for engine in ('chromium','webkit'):
+  for engine in ('webkit',)*12:
    browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
    page=browser.new_page(viewport={'width':1440,'height':900})
    page.route('**/*',lambda r:r.continue_() if urlsplit(r.request.url).netloc==urlsplit(url).netloc and r.request.method in ('GET','HEAD') else r.abort())
@@ -23,11 +23,19 @@ try:
     page.evaluate('''refs=>{const before=JSON.stringify(refs),expected=normalizeServiceScriptureReferenceList(refs);if(!expected.length)throw Error('fixture reference missing');for(const abbreviated of [false,true]){const text=formatServiceScriptureReferenceList(refs,{abbreviated});if(JSON.stringify(normalizeServiceScriptureReferenceList(text))!==JSON.stringify(expected))throw Error('roundtrip '+text)}if(JSON.stringify(refs)!==before)throw Error('source mutated')}''',refs)
    panel=page.locator(f'.svc-outline-editor[data-inline-item-id="{data["ids"][0]}"]')
    toggle=page.locator(f'[data-presenter-inline-toggle="{data["ids"][0]}"]');field=panel.locator('[data-presenter-preparation-field]')
+   page.evaluate("""() => {
+       window.trace = [];
+       for (const t of ['beforeinput','input','change','focusin','focusout','pointerdown','pointerup','click'])
+           document.addEventListener(t,e=>{if(e.target.closest('.svc-outline-editor'))trace.push([t,e.target.tagName,e.target.value,document.querySelector('.svc-outline-editor:not([hidden]) input')?.value])},true);
+       const commit = commitPresenterInlineInput;commitPresenterInlineInput=async(panel)=>{trace.push(['commit',panel.querySelector('input')?.value]);const r=await commit(panel);trace.push(['returned',r]);return r};
+       const apply=applyPresenterPreparationInput;applyPresenterPreparationInput=async(id,opts)=>{trace.push(['apply',opts?.draft]);return apply(id,opts)};
+   }""")
    for refs in cases[:6]:
+    page.evaluate('trace.length=0')
     if not panel.is_visible():toggle.click()
     display=page.evaluate('refs=>formatServiceScriptureReferenceList(refs)',refs);field.fill(display);panel.locator('[data-presenter-inline-apply]').click()
     page.wait_for_function('!presenterInlineInputSaves.size&&!state.saving&&!state.presenterPreparationApplyingServiceIds.size')
-    plan=page.evaluate('''refs=>{const item=state.serviceItems[inlineFixture.sid].find(x=>x.id===inlineFixture.ids[0]);const actual=serviceItemScriptureReferences(item,parseServiceItemMemo(item.memo));if(JSON.stringify(actual)!==JSON.stringify(normalizeServiceScriptureReferenceList(refs)))throw Error('apply lost reference '+JSON.stringify(actual));if(parseServiceItemMemo(item.memo).scriptureTranslationId!==state.selectedBibleTranslationId)throw Error('translation changed');inlineFixture.checkQuiet();return JSON.stringify(presenterSlidesForService(inlineFixture.sid))}''',refs)
+    plan=page.evaluate('''refs=>{const item=state.serviceItems[inlineFixture.sid].find(x=>x.id===inlineFixture.ids[0]);const actual=serviceItemScriptureReferences(item,parseServiceItemMemo(item.memo));if(JSON.stringify(actual)!==JSON.stringify(normalizeServiceScriptureReferenceList(refs)))throw Error(JSON.stringify({actual,refs,trace,writes:inlineFixture.writes.length,attempts:inlineFixture.attempts,toast:[...document.querySelectorAll('.toast')].map(e=>e.textContent)}));if(parseServiceItemMemo(item.memo).scriptureTranslationId!==state.selectedBibleTranslationId)throw Error('translation changed');inlineFixture.checkQuiet();return JSON.stringify(presenterSlidesForService(inlineFixture.sid))}''',refs)
     assert '합성 검증 본문' in plan,'missing fixture slide content'
     page.evaluate('async()=>{const id=inlineFixture.sid;state.loadedWorshipServiceIds.delete(id);await loadServiceItems(id);renderServiceList();renderPresenterDetail()}')
     if not panel.is_visible():toggle.click()

@@ -1,0 +1,19 @@
+name: Isolated scripture input trace
+on:
+  push:
+    branches: [diagnostic/rc-scripture-linux]
+permissions:
+  contents: read
+jobs:
+  trace:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: bash cloud/setup.sh
+      - run: .cache/cloud-venv/bin/python tests/smoke_scripture_chapter_reference.py
