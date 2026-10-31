@@ -1421,6 +1421,12 @@ function presenterPreparationNumberOnlyHymnReference(value = "") {
   return match ? { hymnNo: match[2].replace(/^0+(?=\d)/, ""), legacy: /^통/.test(match[1] || "") } : null;
 }
 
+// Number-search cards describe the matched edition, not its linked new-hymnal number.
+function songForHymnNumberResult(song) {
+  const edition = /^SONG-HYMN-([NT])(\d{3})-/.exec(song.id);
+  return edition ? { ...song, hymn_no: (edition[1] === "T" ? "통" : "새") + Number(edition[2]) } : song;
+}
+
 function songMatchesHymnReference(song, reference) {
   const edition = String(song.id || "").match(/^SONG-HYMN-([NT])(\d{3})-/);
   if (edition) return (edition[1] === "T") === reference.legacy

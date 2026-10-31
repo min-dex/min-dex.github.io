@@ -28159,12 +28159,6 @@ function formatServiceBibleReference(reference, fallback = "") {
   return [book, versePart].filter(Boolean).join(" ");
 }
 
-// Number-search cards describe the matched edition, not its linked new-hymnal number.
-function songForHymnNumberResult(song) {
-  const edition = /^SONG-HYMN-([NT])(\d{3})-/.exec(song.id);
-  return edition ? { ...song, hymn_no: (edition[1] === "T" ? "통" : "새") + Number(edition[2]) } : song;
-}
-
 function songServiceOptionLabel(song) {
   if (!song) return "";
   const no = String(song.hymn_no || "").trim();
