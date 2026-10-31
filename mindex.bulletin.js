@@ -1596,7 +1596,7 @@
         remember();Object.assign(target,normalizeSnapshot(draft.value));persist();properties();preview();status();return true;
       }catch(e){saveError=e.message;status();return false;}
     }
-    return {matchesDraft:draft=>!!doc&&draft?.schema===1&&draftSignature(draft.value)===draftSignature(doc),destroy, refreshRemote, remoteIdentity,handoffIdentity,restoreHandoff, reload(){return load(q("[data-bulletin-service]").value);}};
+    return {canApplyUpdate:()=>!remoteBusy&&!remoteBlocked()&&!templateDraft?.dirty&&!templateDraft?.saving&&!templateDraft?.saveError,matchesDraft:draft=>!!doc&&draft?.schema===1&&draftSignature(draft.value)===draftSignature(doc),destroy, refreshRemote, remoteIdentity,handoffIdentity,restoreHandoff, reload(){return load(q("[data-bulletin-service]").value);}};
   }
   // Saved-ID catalogue owns no worship state or document DOM. Callers supply
   // their client/project identity, paginated reader and presentation callbacks.

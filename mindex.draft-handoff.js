@@ -112,6 +112,6 @@
  window.addEventListener('focus',()=>{void syncConnection();void refresh()});
  window.addEventListener('storage',event=>{if(event.key===tokenKey(project))void syncConnection()});
  window.addEventListener('beforeunload',event=>{if(core?.pending){event.preventDefault();event.returnValue=''}});
- window.MINDEX_DRAFT_HANDOFF={publish,open,refresh,flush,status};
+ window.MINDEX_DRAFT_HANDOFF={publish,open,refresh,flush,status,get pending(){return Boolean(connecting||core?.pending||(!core&&pending.size))}};
  if(window.MINDEX_SERVER_STORAGE?.ready)void initialize();
 })();

@@ -6,6 +6,8 @@ stale document in the same change.
 
 ## Current Contracts
 
+- `live-web-updates.md`: 켜 둔 웹/PWA 앱의 새 버전 감지와 편집·저장·인쇄·송출 보호.
+
 - `presenter-remote-design.md`: 배포된 원격 조작의 현행 연결·명령·복구 계약과 실기기 검증 한계.
 
 - `server-state-current.md`: 서버 저장 통일 구현·격리 검증과 운영 적용 전 경계.
