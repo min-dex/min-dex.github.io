@@ -128,6 +128,14 @@ try:
             page.locator('#detailPane').screenshot(path=f'/tmp/mindex-manuals-{engine}-mobile.png')
             page.evaluate("applyTheme('dark')")
             page.locator('#detailPane').screenshot(path=f'/tmp/mindex-manuals-{engine}-dark.png')
+            # Keep navigation/layout stress and native popup input independent. On
+            # macOS WebKit the long TOC/resize/capture sequence can leave pointer
+            # down/up without a click (no app preventDefault); fresh-document input
+            # succeeds. Do not retry failed actions or reload between popup actions:
+            # popup-close -> Enter and both source links must still work in sequence.
+            page.reload(wait_until="domcontentloaded")
+            page.wait_for_function("typeof renderManualsDetail === 'function' && !document.body.classList.contains('ui-booting')")
+            page.evaluate("state.module='manuals';state.search='';render();syncBrowserHistory({replace:true});applyTheme('dark')")
             # Original Notion hosts can be handed off outside macOS WebKit before a popup
             # event. Check exact host URLs in Linux CI; on macOS WebKit retain DOM URL
             # assertions and exercise the same anchors against isolated local responses.
