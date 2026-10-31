@@ -4637,7 +4637,7 @@ async function hydrateSupplementalWorshipDataAfterInitialRender() {
   }
 
   if (isServiceDataModule()) {
-    renderServiceList();
+    if (state.module === "bulletin") renderBulletinList(); else renderServiceList();
     renderCurrentServiceModuleDetail();
   }
 }
@@ -8715,24 +8715,6 @@ async function saveSongRelationsIfAvailable(song) {
   return true;
 }
 
-function writeFormsToSelectedVersion() {
-  state.forms = normalizeForms(state.forms);
-  const version = getSelectedVersion();
-  if (!version) return;
-  version.forms = state.forms.map((form, index) => ({
-    id: form.id || createLocalId(),
-    part_type: form.part_type,
-    part_number: form.part_number,
-    part_variant: form.part_variant || "",
-    label: displayLabel(form),
-    lyrics: form.lyrics || "",
-    sort_order: index + 1,
-    ...(form.review_status && form.review_status !== "reviewed" ? { review_status: form.review_status } : {}),
-    ...(form.review_status === "reviewed" ? { review_status: "reviewed" } : {}),
-    ...(form.import_source ? { import_source: form.import_source } : {}),
-  }));
-}
-
 function handleSidebarPresenterActionClick(event) {
   const presenterAction = event.target.closest("[data-presenter-action]");
   if (!presenterAction || !refs.sidebar?.contains(presenterAction)) return false;
@@ -11499,6 +11481,7 @@ function serviceAnnouncementRegions(item,memo=parseServiceItemMemo(item.memo)) {
   if(saved)return saved;
   const text=memo.slides?.length?memo.slides.join("\n\n"):item.raw_title||"";
   const regions=presenterAnnouncementRegions(presenterAnnouncementItems(text));
+  if (!regions.welcome.length && !regions.footer.length) return { welcome: "", news: text, footer: "" };
   return Object.fromEntries(Object.entries(regions).map(([key,items])=>[key,items.map(item=>item.lines.map((line,i)=>i===0&&item.marker?`${item.marker} ${line}`:line).join("\n")).join("\n")]));
 }
 
@@ -13751,7 +13734,7 @@ function startNewServiceForm(typeId = state.selectedServiceTypeId) {
 }
 
 const SERVICE_MINISTER_DEFAULTS = Object.freeze({
-  "sunday-first": { sermon: "김석범 목사", benediction: "김석범 목사" },
+  "sunday-first": { sermon: "김석범 목사", offeringPrayer: "김석범 목사", benediction: "김석범 목사" },
   "sunday-second": { sermon: "김남영 목사", offeringPrayer: "김남영 목사", benediction: "김남영 목사" },
   "sunday-main": { sermon: "김남영 목사", offeringPrayer: "김남영 목사", benediction: "김남영 목사" },
   "sunday-afternoon": { sermon: "김남영 목사", benediction: "김남영 목사" },
@@ -13786,12 +13769,15 @@ function sundayFirstRotationLeaderForDate(dateValue = "") {
 }
 
 function sundayFirstMinisterDefaultsForService(serviceOrDate = null) {
-  const leader = sundayFirstRotationLeaderForDate(serviceDateString(serviceOrDate));
-  if (!leader) return SERVICE_MINISTER_DEFAULTS["sunday-first"];
-  const pastor = compactSearchValue(leader).includes("목사");
+  const date = serviceDateString(serviceOrDate);
+  const defaults = SERVICE_MINISTER_DEFAULTS["sunday-first"];
+  const leader = sundayFirstRotationLeaderForDate(date);
+  if (!leader) return defaults;
+  // The fixed sermon and offering assignment begins after the November 1 service.
   return {
-    sermon: leader,
-    benediction: pastor ? leader : "",
+    sermon: date >= "2026-11-02" ? defaults.sermon : leader,
+    offeringPrayer: date >= "2026-11-02" ? defaults.offeringPrayer : "",
+    benediction: compactSearchValue(leader).includes("목사") ? leader : "",
   };
 }
 
@@ -13809,8 +13795,8 @@ function defaultServiceBenedictionLeader(typeId = "", serviceOrDate = null) {
   return serviceMinisterDefaults(typeId, serviceOrDate).benediction || "";
 }
 
-function defaultServiceOfferingPrayerLeader(typeId = "") {
-  return serviceMinisterDefaults(typeId).offeringPrayer || "";
+function defaultServiceOfferingPrayerLeader(typeId = "", serviceOrDate = null) {
+  return serviceMinisterDefaults(typeId, serviceOrDate).offeringPrayer || "";
 }
 
 function serviceBulletinCalendarRow(service = null) {
@@ -13989,7 +13975,7 @@ function defaultServicePrayerLeader(service = null) {
 
 function defaultServiceOfferingPrayerLeaderForService(service = null) {
   const typeId = worshipAppServiceTypeId(service?.type_id);
-  return defaultServiceOfferingPrayerLeader(typeId);
+  return defaultServiceOfferingPrayerLeader(typeId, service);
 }
 
 function serviceItemDefaultAssignee(item = {}, service = selectedServiceForEditor()) {
@@ -15046,17 +15032,21 @@ function serviceSupportsBulletin(service = null) {
     && !serviceIsNoGathering(service));
 }
 
+const savedBulletinList = window.MindexBulletin.createSavedList(
+  () => [state.client, state.config.url], fetchAllRows,
+  error => departmentInputError(error, "주보 목록 불러오기").message,
+  () => { if (state.module === "bulletin") renderBulletinList(); });
 function getBulletinSidebarServices() {
-  const query=normalizeSearchValue(state.search);
-  return state.services.filter(serviceSupportsBulletin).filter(service=>!query||normalizeSearchValue(`${service.date} ${bulletinPageTabTitle(service.id)} ${service.title||""}`).includes(query)).sort((a,b)=>b.date.localeCompare(a.date));
+  return savedBulletinList.select(state.services.filter(serviceSupportsBulletin), normalizeSearchValue(state.search), service => normalizeSearchValue(`${service.date} ${bulletinPageTabTitle(service.id)} ${service.title||""}`));
 }
 
 function renderBulletinList() {
   refs.songCount.textContent = "";
   if (!state.client || state.connectionError) {refs.songList.innerHTML=renderConnectionList(state.connectionError);return;}
   if (state.serviceError || !state.serviceTypes.length) {refs.songList.innerHTML=state.serviceError?renderListEmptyState("주보 목록을 불러오지 못했습니다",state.serviceError):renderLoadingList();return;}
+  if (savedBulletinList.renderStatus(refs.songList, renderLoadingList, renderListEmptyState)) return;
   const services=getBulletinSidebarServices();
-  refs.songList.innerHTML=`<div class="service-sidebar"><section class="service-sidebar-section"><div class="service-sidebar-head"><span>주보</span></div><div class="service-sidebar-stack service-sidebar-stack--navigation">${services.map(service=>`<button type="button" class="service-type-row${state.presenterBulletinServiceId===service.id?" active":""}" data-bulletin-open="${escapeAttr(service.id)}" aria-current="${state.presenterBulletinServiceId===service.id?"page":"false"}"><span>${escapeHtml(formatServiceDate(service))} · ${escapeHtml(bulletinPageTabTitle(service.id))}</span></button>`).join("")||'<p class="muted">표시할 주보가 없습니다.</p>'}</div></section></div>`;
+  refs.songList.innerHTML=`<div class="service-sidebar"><section class="service-sidebar-section"><div class="service-sidebar-head"><span>주보</span></div><div class="service-sidebar-stack service-sidebar-stack--navigation">${services.map(service=>`<button type="button" class="service-type-row${state.presenterBulletinServiceId===service.id?" active":""}" data-bulletin-open="${escapeAttr(service.id)}" aria-current="${state.presenterBulletinServiceId===service.id?"page":"false"}"><span>${escapeHtml(formatServiceDate(service))} · ${escapeHtml(bulletinPageTabTitle(service.id))}</span></button>`).join("")||'<p class="muted">저장된 주보가 없습니다.</p>'}</div></section></div>`;
   finishListRender();
 }
 
@@ -15157,6 +15147,7 @@ async function saveBulletinDraft(serviceId, value, revision) {
   if(error)throw new Error(`${departmentInputError(error,"주보 저장").message} 편집 내용은 유지됩니다.`,{cause:error});
   if(publishClient===state.client) {
     rememberRecentEdit({module:"bulletin",selectedServiceId:serviceId},"",data.updated_at);
+    savedBulletinList.remember(serviceId);
     window.MINDEX_CONTENT_LIVE?.publish("bulletin",serviceId);
   }
   return data;
@@ -21361,7 +21352,7 @@ function publicWorshipOfferingStep(options = {}) {
   const hiddenInPresentation = Boolean(options.hiddenInPresentation || options.hidden_in_presentation);
   const praiseLabel = options.praiseLabel || "봉헌찬송";
   const prayerPerson = cleanServiceAssignee(
-    options.prayerPerson || options.person || defaultServiceOfferingPrayerLeader(options.typeId || options.type_id),
+    options.prayerPerson || options.person || defaultServiceOfferingPrayerLeader(options.typeId || options.type_id, options.service),
   );
   return {
     label: "봉헌",
@@ -21472,7 +21463,7 @@ function publicWorshipPraiseStep(options = {}) {
           default_text: defaultTitle,
           defaultSong: { title: defaultTitle },
         } : {}),
-        ...scoreOutputMode(score),
+        ...scoreOutputMode(score), ...(options.inputMode ? { inputMode: normalizeServiceInputMode(options.inputMode) } : {}),
       };
     }),
     ...extraElements,
@@ -21577,7 +21568,7 @@ function childrenWorshipTemplate() {
   const bodyOnly = step => ({ ...step, elements: step.elements.map(element => ({ ...element, introSlide: null })) });
   return [
     { ...bodyOnly(publicWorshipCreedStep()), label: "사도신경", name: "사도신경" },
-    publicWorshipPraiseStep({ count: 4, required: true }),
+    publicWorshipPraiseStep({ count: 4, required: true, inputMode: "children_audio" }),
     { label: "예배의 부름", name: "예배의 부름", required: true, flex: false,
       sectionKey: "opening", elementType: "body", slides: [worshipOpeningBodyText('children')] },
     publicWorshipScriptureReadingStep(),
@@ -21889,9 +21880,9 @@ function publicSundayFirstTemplate(options = {}) {
     publicWorshipScriptureReadingStep(),
     publicWorshipSermonStep({ typeId, service: options.service, person: leader }),
     publicWorshipResponseStep(),
-    publicWorshipOfferingStep({ score, typeId }),
+    publicWorshipOfferingStep({ score, typeId, service: options.service }),
     publicWorshipAnnouncementsStep(),
-    publicWorshipSendingStep({ score, benediction, lordsPrayer, typeId, service: options.service, benedictionPerson: leader }),
+    publicWorshipSendingStep({ score, benediction, lordsPrayer, typeId, service: options.service, benedictionPerson: sundayFirstRotationLeaderForDate(serviceDateString(options.service)) || leader }),
     publicWorshipClosingStep(),
   ];
 }
@@ -23635,6 +23626,7 @@ function serviceHasPastorSermonLeader(service = null, items = []) {
   const sermonMinister = cleanServiceAssignee(sermonTitle?.assignee || sermonTitle?.person || "");
   const resolvedMinister = sermonMinister
     || serviceWorshipLeaderLabel(service)
+    || (worshipAppServiceTypeId(service?.type_id) === "sunday-first" && sundayFirstRotationLeaderForDate(serviceDateString(service)))
     || defaultServiceSermonLeader(service?.type_id, service);
   return compactSearchValue(resolvedMinister).includes("목사");
 }
@@ -24774,6 +24766,7 @@ function serviceSidebarChildItemDisplayParts(item, service = null) {
     };
   }
   const label = serviceElementDisplayLabel(serviceItemOrdinalDisplayLabel(item, service));
+  if (isAnnouncementTextInputItem(item)) return { meta: label, title: serviceSidebarOutlineFirstLine(serviceAnnouncementRegions(item).news) };
   const liturgicalTitle = serviceItemLiturgicalNavigationTitle(item);
   if (liturgicalTitle !== null) return {
     meta: label || "항목",
@@ -29089,7 +29082,8 @@ async function applyPresenterPreparationInput(serviceId = state.selectedServiceI
       }
 
       if (entry.structured) {
-        if (entry.hasContent) item.raw_title = normalizeServiceItemRawTitleForItem(item, content);
+        if (entry.contentChanged && isAnnouncementTextInputItem(item)) applyServiceAnnouncementRegion(item, "news", content);
+        else if (entry.hasContent) item.raw_title = normalizeServiceItemRawTitleForItem(item, content);
         if (entry.hasAssignee) item.assignee = assignee;
       } else if (entry.key === "대표기도" || entry.rawKey === "대표기도") {
         item.assignee = assignee || content;
@@ -29470,49 +29464,37 @@ function renderPresenterServiceAssetInput(item, index, memo, options = {}) {
   const asset = normalizeServiceAsset(memo.asset);
   const elementType = serviceMemoElementType(memo);
   const serviceId = item.service_id || state.selectedServiceId;
-  if (isPresenterReferenceMediaItem(item, memo)) {
-    const detectedKind = presenterReferenceMediaKindForSource(asset.url);
-    const kind = asset.original?.format === "key" ? "file" : asset.pptx ? "imported_deck" : detectedKind || (["image", "video", "audio"].includes(elementType) ? elementType : "image");
-    const needsKindSelection = Boolean(asset.url && !detectedKind && !asset.original);
-    return `
-      <div class="svc-reference-media-input">
-        ${kind === "video" ? renderPresenterInputVideoControls(asset, [serviceId,item.id||index]) : ""}
-        ${renderPresenterMediaPlacementInput(item, serviceId)}
-        <div class="svc-reference-media-toolbar">
-          ${needsKindSelection ? `<label class="svc-presenter-input-field">
-            <span>종류</span>
-            <select class="svc-presenter-input-control" data-service-item-field="element_type" data-service-item-index="${index}" data-service-id="${escapeAttr(serviceId)}" aria-label="참고 화면 종류">
-              <option value="image"${kind === "image" ? " selected" : ""}>이미지</option>
-              <option value="video"${kind === "video" ? " selected" : ""}>영상</option>
-              <option value="audio"${kind === "audio" ? " selected" : ""}>음원</option>
-            </select>
-          </label>` : detectedKind ? `<span class="svc-reference-media-kind">${escapeHtml(serviceAssetFileKindLabel(kind))}</span>` : ""}
-          ${options.headerActions ? "" : renderPresenterAssetUpload(item, index, memo, serviceId)}
-        </div>
-        <label class="svc-presenter-input-field svc-reference-media-title">
-          <input class="svc-presenter-input-control" type="text" data-service-item-field="asset_name" data-service-item-index="${index}" data-service-id="${escapeAttr(serviceId)}"
-            value="${escapeAttr(asset.name)}" placeholder="참고 화면 제목" aria-label="참고 화면 제목" />
-        </label>
-        ${renderPresenterServiceAssetUrlInput(asset, index, serviceId, "참고 화면 공개 링크", "공개 링크", "파일을 선택하거나 공개 URL 입력")}
-        ${renderPresenterReferenceMediaPreview(asset, kind, [serviceId,item.id||index])}
-        ${renderPresenterMediaOrder(item, serviceId)}
-      </div>`;
-  }
-  const kind = ["image", "video", "audio"].includes(elementType) ? elementType : "";
-  const assetKind = asset.kind && asset.kind !== kind ? asset.kind : kind || asset.kind || elementType || "file";
-  const typeLabel = serviceAssetFileKindLabel(assetKind || elementType);
+  const reference = isPresenterReferenceMediaItem(item, memo);
+  const detected = reference ? presenterReferenceMediaKindForSource(asset.url) : "";
+  const kind = reference
+    ? asset.original?.format === "key" ? "file" : asset.pptx ? "imported_deck" : detected || (["image", "video", "audio"].includes(elementType) ? elementType : "image")
+    : asset.kind || elementType || "file";
+  const typeLabel = serviceAssetFileKindLabel(kind);
+  const commonLayout = !reference || kind === "video";
+  const nameLabel = commonLayout ? `${item.label || "파일"} 이름` : "참고 화면 제목";
+  const unknownKind = reference && asset.url && !detected && !asset.original;
   return `
-    <div class="svc-reference-media-input svc-reference-media-input--asset svc-reference-media-input--${escapeAttr(assetKind)}">
-      ${assetKind === "video" ? renderPresenterInputVideoControls(asset, [serviceId,item.id||index]) : ""}
-      <div class="svc-reference-media-toolbar svc-reference-media-toolbar--asset">
+    <div class="svc-reference-media-input${commonLayout ? ` svc-reference-media-input--asset svc-reference-media-input--${escapeAttr(kind)}` : ""}">
+      ${kind === "video" ? renderPresenterInputVideoControls(asset, [serviceId,item.id||index]) : ""}
+      ${reference ? renderPresenterMediaPlacementInput(item, serviceId) : ""}
+      <div class="svc-reference-media-toolbar${commonLayout ? " svc-reference-media-toolbar--asset" : ""}">
+        ${unknownKind ? `<label class="svc-presenter-input-field">
+          <span>종류</span>
+          <select class="svc-presenter-input-control" data-service-item-field="element_type" data-service-item-index="${index}" data-service-id="${escapeAttr(serviceId)}" aria-label="참고 화면 종류">
+            <option value="image"${kind === "image" ? " selected" : ""}>이미지</option>
+            <option value="video"${kind === "video" ? " selected" : ""}>영상</option>
+            <option value="audio"${kind === "audio" ? " selected" : ""}>음원</option>
+          </select>
+        </label>` : detected && !commonLayout ? `<span class="svc-reference-media-kind">${escapeHtml(typeLabel)}</span>` : ""}
         ${options.headerActions ? "" : renderPresenterAssetUpload(item, index, memo, serviceId)}
       </div>
       <label class="svc-presenter-input-field svc-reference-media-title">
         <input class="svc-presenter-input-control" type="text" data-service-item-field="asset_name" data-service-item-index="${index}" data-service-id="${escapeAttr(serviceId)}"
-          value="${escapeAttr(asset.name)}" placeholder="${escapeAttr(`${typeLabel} 이름`)}" aria-label="${escapeAttr(`${item.label || "파일"} 이름`)}" title="${escapeAttr(asset.name)}" />
+          value="${escapeAttr(asset.name)}" placeholder="${escapeAttr(commonLayout ? `${typeLabel} 이름` : nameLabel)}" aria-label="${escapeAttr(nameLabel)}" title="${escapeAttr(asset.name)}" />
       </label>
-      ${renderPresenterServiceAssetUrlInput(asset, index, serviceId, `${item.label || "파일"} 링크`, "파일/링크", "파일을 선택하거나 공개 URL 입력")}
-      ${renderPresenterReferenceMediaPreview(asset, assetKind, [serviceId,item.id||index])}
+      ${renderPresenterServiceAssetUrlInput(asset, index, serviceId, reference ? "참고 화면 공개 링크" : `${item.label || "파일"} 링크`, reference ? "공개 링크" : "파일/링크", "파일을 선택하거나 공개 URL 입력")}
+      ${renderPresenterReferenceMediaPreview(asset, kind, [serviceId,item.id||index])}
+      ${reference ? renderPresenterMediaOrder(item, serviceId) : ""}
     </div>`;
 }
 

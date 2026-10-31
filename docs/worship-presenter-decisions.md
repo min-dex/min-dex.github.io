@@ -3119,6 +3119,14 @@ long quoted-text checks cover the actual renderers.
 
 ## 2026-10-17 — 어린이 DB 음원과 예배 음원의 소유권 분리
 
+기본값 정정 ·2026-10-31: 어린이부 메인 찬양 네 슬롯의 양식 입력 방식은
+`children_audio`(DB: 음원)이다. 새 예배의 scaffold를 만들 때 이를 명시한다.
+어린이부는 기존 예배를 자동 template projection하는 유형이 아니므로 읽기 중
+빈 항목을 생성하지 않는다. 다른 예배의 DB 가사 기본값과 저장된 명시 입력 방식·가사·곡/버전
+연결·담당자를 바꾸지 않는다. 기존에 저장된 빈 DB 가사 행의 운영 보정은 별도
+최신 조회/보존 조건 확인 없이 실행하지 않는다. 실제 scaffold/projection/select와
+기존 값 보존은 `smoke_children_audio_default.py`로 확인한다.
+
 앞의 ‘기존 children_audio는 열기 용도만 유지’ 결정은 사용자 정정으로 폐기한다.
 `어린이: 음원 로드`는 새 항목에도 계속 제공한다. 어린이 곡·버전은 DB에
 음원 주소·지정 폼·가사 fingerprint·타이밍 세트를 소유하고 여러 예배에서 사용한다.
@@ -4865,6 +4873,13 @@ song selection. This preserves older input-mode metadata without rewriting it.
 
 ## Standalone media viewport fit ·2026-10-28
 
+Correction ·2026-10-31: generated clean ready/waiting copy is a text-and-logo
+design slide, even when its compatibility metadata says image/media. Keep that
+rendered ready screen inside the centered 16:9 design stage, matching its blank
+cross transition. Only actual standalone media uses the viewport-fit exception.
+`smoke_ready_stage_ratio.py` exercises the real ready/preparation builders and
+output renderer at five viewport ratios, alongside the standalone-media checks.
+
 Image, video (including waiting-loop video), imported slide images and live PPTX
 use the entire output viewport as their available area. Fit the original aspect
 ratio into that area at the largest contained size, enlarging or shrinking as
@@ -5296,3 +5311,14 @@ their existing modes. Scaffold construction preserves explicitly declared input
 modes in element config. Existing saved choices, titles, lyrics, forms, links
 and media remain authoritative; this change performs no data migration.
 Assignee alone is incomplete; an authored title remains valid title-only content.
+
+
+### Linux WebKit rail-transition verification ·2026-10-31
+
+The citation sidebar regression waits for actual body rail transitions before
+measuring overflow after entry or resize. An isolated Ubuntu trace showed the
+registered right rail at0px before its0→260px transition and260px after completion,
+with fonts loaded and focus view disabled. Fixed elapsed sleeps did not establish
+that layout state in Linux WebKit. Overflow tolerances and all viewport cases stay
+unchanged; desktop cases additionally require a non-collapsed sidebar. Product
+rail widths, animation and visibility rules are unchanged.

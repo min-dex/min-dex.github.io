@@ -150,6 +150,8 @@ function liturgicalBodyText(item = {}, memo = parseServiceItemMemo(item?.memo), 
   if (title === '예배의 부름') return worshipOpeningText(item, memo, displayText, canonical);
   if (canonical && !item?.template_modified && !item?.templateModified) return canonical;
   const announcement = isAnnouncementTextInputItem(item);
+  const regions = announcement && normalizeAnnouncementRegions(memo.announcementRegions);
+  if (regions) return presenterAnnouncementBodyText(Object.values(regions).filter(text => text.trim()).join("\n\n"));
   if (memo.slides?.length) {
     const memoText = memo.slides.join("\n\n");
     return announcement ? presenterAnnouncementBodyText(memoText) : memoText.trim();
@@ -2745,6 +2747,7 @@ function presenterOutputFrameStateForSlide(slide, payload = {}) {
   const blackoutOutput = slide?.id === "presenter:safety-blank";
   const slideChromakey = !blackoutOutput && presenterFrameSlideOutputContext(slide, fallbackChromakey) === "chromakey";
   const cleanOutput = !slideChromakey;
+  const generatedReadyOutput = slide?.type === "ready" && cleanOutput;
   const blankSlide = presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.BLANK;
   const scoreOutput = presenterSlideIsScoreLike(slide);
   const videoOutput = presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.VIDEO || Boolean(slide?.videoSrc);
@@ -2754,8 +2757,8 @@ function presenterOutputFrameStateForSlide(slide, payload = {}) {
   const showBackground = Boolean(!blackoutOutput && backgroundImages.length && cleanOutput && presenterSlideUsesServiceBackground(slide));
   return {
     cleanOutput,
-    mediaOutput: Boolean(slide?.pptx?.url || (presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.MEDIA
-      && [PRESENTER_ELEMENT_TYPES.IMAGE, PRESENTER_ELEMENT_TYPES.VIDEO].includes(presenterSlideElementType(slide)))),
+    mediaOutput: Boolean(!generatedReadyOutput && (slide?.pptx?.url || (presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.MEDIA
+      && [PRESENTER_ELEMENT_TYPES.IMAGE, PRESENTER_ELEMENT_TYPES.VIDEO].includes(presenterSlideElementType(slide))))),
     formBackground: Boolean(slide?.formBackgroundImage),
     showBackground,
     blankOutput: Boolean(blankSlide && cleanOutput && !blackoutOutput && !slide?.formBackgroundImage),

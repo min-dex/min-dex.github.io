@@ -40,6 +40,21 @@ try:
       stored={...structuredClone(request.record),revision:stored.revision+1};receipts.set(request.requestId,structuredClone(stored));if(failAfterCommit){failAfterCommit=false;throw Error('lost acknowledgment');}return structuredClone(stored);
     }});
     installSingleSongSession([record],repository);
+    const previousEditor = [state.selectedSongId,state.selectedVersionId,state.forms];
+    state.selectedSongId = state.selectedVersionId = record.id;
+    const editVersion = getSelectedVersion(), firstForm = editVersion.forms[0];
+    const originalForms = structuredClone(editVersion.forms);
+    Object.assign(firstForm, {_localId:uid(), song_id:record.id, review_status:null, import_source:null, future_field:{source:null}});
+    state.forms = normalizeForms(editVersion.forms.map(form=>withLocalId({...form,song_id:record.id})));
+    writeFormsToSelectedVersion();
+    for (const key of ['_localId','song_id','review_status','import_source']) {
+      check(editVersion.forms[0][key] === firstForm[key], 'metadata save dropped form field '+key);
+    }
+    check(equal(editVersion.forms[0].future_field,{source:null}), 'unknown nested metadata lost');
+    check(editVersion.forms[0].song_id === record.id, 'current ID changed');
+    check(!Object.hasOwn(editVersion.forms[1],'_localId'), 'temporary editor id persisted');
+    editVersion.forms = originalForms;
+    [state.selectedSongId,state.selectedVersionId,state.forms] = previousEditor;
     const selected=state.singleSongCatalog.singleItem(item);
     state.services=[service];state.serviceItems={[service.id]:[selected]};state.selectedServiceId=service.id;
     const s=state.songs[0],ver=getServiceItemVersion(s,selected,service);

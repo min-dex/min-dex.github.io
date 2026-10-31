@@ -448,3 +448,30 @@ function updateVersionOutputTitleField(field) {
   state.dirty.song = true;
   updateSaveState();
 }
+
+function writeFormsToSelectedVersion() {
+  state.forms = normalizeForms(state.forms);
+  const version = getSelectedVersion();
+  if (!version) return;
+  // Keep persisted native fields by form ID. The editor supplies temporary
+  // song_id and _localId values that must never replace the stored originals.
+  const originalForms = new Map((version._singleSongRecord ? version.forms || [] : [])
+    .map(form => [form.id, form]));
+  version.forms = state.forms.map((form, index) => {
+    const original = originalForms.get(form.id);
+    const row = {
+      ...original,
+      id: form.id || createLocalId(),
+      part_type: form.part_type,
+      part_number: form.part_number,
+      part_variant: form.part_variant || "",
+      label: displayLabel(form),
+      lyrics: form.lyrics || "",
+      sort_order: index + 1,
+    };
+    for (const field of ["review_status", "import_source"]) {
+      if (form[field] || (original && Object.hasOwn(original, field))) row[field] = form[field] || null;
+    }
+    return row;
+  });
+}
