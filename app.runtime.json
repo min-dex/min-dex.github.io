@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261101-remote-order-slide-search",
+  "version": "20261101-dawn-music-bulletin",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "965ba5d5c1ddf54bec7c541b033abc0afba2413bbdf3902e3e9bf012090398d8",
-  "runtime_sha256": "1e0819dc832c59d48b3cd3e164a48b365065a09891a5705835e803844910bfe4",
-  "source_bytes": 1355747,
-  "runtime_bytes": 967368,
-  "source_gzip": 310321,
-  "runtime_gzip": 243236
+  "source_sha256": "065438d47a5d676133a8481328025e0bf5012d497485adbea804240460a4cf14",
+  "runtime_sha256": "d51c9a11dbd721a69081aacc36f8120adbd981b87d5c2e1378e8e2fccc5dea2b",
+  "source_bytes": 1355654,
+  "runtime_bytes": 967321,
+  "source_gzip": 310290,
+  "runtime_gzip": 243232
 }
