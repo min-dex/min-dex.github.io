@@ -103,7 +103,7 @@ try:
                       delete state.presenterPreparationDrafts[sid];renderServiceList();renderPresenterDetail();
                       const reopened=state.serviceItems[sid].find(i=>i.label==='광고');
                       const restored=serviceAnnouncementRegions(reopened);
-                      check(restored.news===editedNews && restored.welcome===regions.welcome && restored.footer===regions.footer,'reopen lost announcement regions');
+                      check(restored.news===editedNews && restored.welcome===regions.welcome && restored.footer==='◈ '+regions.footer,'reopen lost announcement regions');
                       check(reopened.raw_title==='인도자' && JSON.stringify(parseServiceItemMemo(reopened.memo).slides)===JSON.stringify([regions.welcome,editedNews,regions.footer]),'announcement changed independent title or slide boundaries');
                       check(reopened.assignee==='명시 담당','reopen lost explicit announcement assignee');
                       const summary=serviceItemSummaryDisplayParts(reopened,service).title;
