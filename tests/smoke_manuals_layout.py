@@ -1,5 +1,4 @@
 import os
-import sys
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
@@ -90,9 +89,9 @@ try:
               check(find('사진·타이밍 편집').textContent.includes('0.2초'),'photo validation missing');
               check(find('미디어 재생과 자동 넘김').textContent.includes('음악은 계속'),'manual override contract missing');
               for(const label of ['자동 재생:', '자동 넘김:', '종료 후 다음 이동:', '예약 전환:'])check(find('미디어 재생과 자동 넘김').textContent.includes(label),'media term missing: '+label);
-              check(refs.detailPane.querySelectorAll('.manual-sources a[href^="https://www.notion.so/"]').length===2,'original source links missing');
+              check(!refs.detailPane.querySelector('.manual-sources'),'obsolete source footer visible');
               check(!refs.detailPane.querySelector('[data-song-timing-open],[data-service-item-commit],[data-presenter-action]'),'manual caused operational actions');
-              return 'PASS grouped navigation, exact source department order, unknowns, current music/photo controls and read-only source links';
+              return 'PASS grouped navigation, exact source department order, unknowns, current music/photo controls and retired source footer absent';
             }'''))
             for width in (1440, 640, 390):
                 page.set_viewport_size({"width": width, "height": 900})
@@ -128,46 +127,6 @@ try:
             page.locator('#detailPane').screenshot(path=f'/tmp/mindex-manuals-{engine}-mobile.png')
             page.evaluate("applyTheme('dark')")
             page.locator('#detailPane').screenshot(path=f'/tmp/mindex-manuals-{engine}-dark.png')
-            # Keep navigation/layout stress and native popup input independent. On
-            # macOS WebKit the long TOC/resize/capture sequence can leave pointer
-            # down/up without a click (no app preventDefault); fresh-document input
-            # succeeds. Do not retry failed actions or reload between popup actions:
-            # popup-close -> Enter and both source links must still work in sequence.
-            page.reload(wait_until="domcontentloaded")
-            page.wait_for_function("typeof renderManualsDetail === 'function' && !document.body.classList.contains('ui-booting')")
-            page.evaluate("state.module='manuals';state.search='';render();syncBrowserHistory({replace:true});applyTheme('dark')")
-            # Original Notion hosts can be handed off outside macOS WebKit before a popup
-            # event. Check exact host URLs in Linux CI; on macOS WebKit retain DOM URL
-            # assertions and exercise the same anchors against isolated local responses.
-            context = page.context
-            context.route('https://www.notion.so/**', lambda r: r.fulfill(status=200, content_type='text/html', body='<title>Isolated manual source</title>'))
-            context.route('**/manual-source-fixture/*', lambda r: r.fulfill(status=200, content_type='text/html', body='<title>Isolated manual source</title>'))
-            sources = page.locator('.manual-sources a')
-            original_urls = sources.evaluate_all('es=>es.map(e=>e.href)')
-            assert original_urls == page.evaluate('MINDEX_MANUALS[0].sources.map(s=>s.url)')
-            mapped = sys.platform == 'darwin' and engine == 'webkit'
-            if mapped:
-                sources.evaluate_all("es=>es.forEach((e,i)=>e.href=new URL('/manual-source-fixture/'+i,location.href).href)")
-            route_before = page.url
-            history_before = page.evaluate('history.length')
-            for index in range(sources.count()):
-                for activation in ('click', 'Enter'):
-                    link = sources.nth(index)
-                    expected = link.get_attribute('href')
-                    with context.expect_page(timeout=10000) as opened:
-                        if activation == 'click':
-                            link.click()
-                        else:
-                            link.focus()
-                            page.keyboard.press('Enter')
-                    popup = opened.value
-                    popup.wait_for_load_state()
-                    assert popup.url == expected
-                    assert popup.evaluate('window.opener===null')
-                    assert page.url == route_before and page.evaluate('state.module') == 'manuals'
-                    assert page.evaluate('history.length') == history_before
-                    popup.close()
-            print(engine, 'PASS both source links click/Enter, noopener and app route/history preserved;', 'macOS isolated destinations' if mapped else 'original source URLs')
             browser.close()
 finally:
     server.shutdown()

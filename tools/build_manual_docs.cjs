@@ -37,9 +37,10 @@ for (const section of manual.sections) {
   if (section.items?.length) lines.push('');
   if (section.note) lines.push(`> ${section.note}`, '');
 }
-lines.push('## 원본·출처', '', `정리 기준: ${manual.reviewedAt}`, '');
+if (manual.sources.length) lines.push('## 원본·출처', '');
+lines.push(`정리 기준: ${manual.reviewedAt}`, '');
 for (const source of manual.sources) lines.push(`- [${source.title}](${source.url})`);
-lines.push('', '노션 「예배」 원본의 정리·삭제는 통합 내용과 운영 반영을 확인한 뒤 사용자가 결정한다.', '내용 수정은 `mindex.manuals.js`에서 한 뒤', '`node tools/build_manual_docs.cjs`로 이 문서를 갱신한다.', '');
+lines.push('', '내용 수정은 `mindex.manuals.js`에서 한 뒤', '`node tools/build_manual_docs.cjs`로 이 문서를 갱신한다.', '');
 const output = lines.join('\n');
 const target = path.join(root, 'docs/manuals/operations.md');
 if (process.argv.includes('--check')) {

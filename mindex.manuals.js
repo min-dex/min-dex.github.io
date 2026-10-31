@@ -593,15 +593,6 @@ window.MINDEX_MANUALS = Object.freeze([
       }
     ],
     "reviewedAt": "2026-10-18",
-    "sources": [
-      {
-        "title": "예배 — 부서별 순서 원문",
-        "url": "https://www.notion.so/2c6405b70b5580fd84e3cb72cf322cd3"
-      },
-      {
-        "title": "예배 운영 매뉴얼 26-Q4 — 현장 운영 원문",
-        "url": "https://www.notion.so/f74405b70b55839c824801b3c179777c"
-      }
-    ]
+    "sources": []
   }
 ]);
