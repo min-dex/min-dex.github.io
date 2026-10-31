@@ -74,13 +74,6 @@ try:
  warmer.events.loadedmetadata();check(warmer.released,'warmup not bounded');
  check(state.serviceMusic.audio===originalAudio&&state.serviceMusic.sourceKey==='fixture-other.mp3'&&state.serviceMusic.ownerServiceId===owner&&originalAudio.currentTime===clock,'warmup touched active player');
  state.serviceMusic.sourceKey=oldSource;window.Audio=NativeAudio;
- runServiceMusicAction('stop',binding);
- m.innerHTML=dawnMarkup;
- const dawnBinding=m.querySelector('[data-service-music-player]').dataset;
- await runServiceMusicAction('toggle',dawnBinding);
- check(a.src.includes('dawn-free-prayer.mp3')&&state.serviceMusic.ownerServiceId===dawn.id&&state.serviceMusic.playing,'dawn explicit playback failed');
- renderServiceSlotMusic({service,item});check(a.src.includes('dawn-free-prayer.mp3')&&state.serviceMusic.playing,'Friday navigation interrupted dawn');
- runServiceMusicAction('stop',dawnBinding);check(a.paused&&a.currentTime===0,'dawn stop failed');
  clearServiceMusicSyncTimer();return 'PASS shared engine, side-effect-free rendering, state, cancellation, source isolation, repeat disabled, volume, widths';
 }'''), flush=True)
             page.evaluate("""()=>{
@@ -92,6 +85,18 @@ try:
             slider.focus();slider.press('Home');slider.press('ArrowRight')
             assert slider.evaluate("e=>e===document.activeElement && e===window.auditRange && e.value==='0.25' && e.getAttribute('aria-valuetext')==='5%'")
             assert page.evaluate("Math.abs(state.serviceMusic.audio.volume-0.05)<0.00001")
+            print(engine,page.evaluate("""async()=>{
+ const check=(v,m)=>{if(!v)throw Error(m)},m=document.getElementById('music-test');
+ const old=m.querySelector('[data-service-music-player]').dataset;
+ runServiceMusicAction('stop',old);
+ m.innerHTML=renderServiceSlotMusic({service:{id:'dawn-fixture',type_id:'holy_week_dawn'},item:{_worshipSlotKey:'response.prayer',label:'기도'}});
+ const binding=m.querySelector('[data-service-music-player]').dataset,a=state.serviceMusic.audio;
+ await runServiceMusicAction('toggle',binding);
+ check(a.src.includes('dawn-free-prayer.mp3')&&state.serviceMusic.ownerServiceId==='dawn-fixture'&&state.serviceMusic.playing,'dawn explicit playback failed');
+ renderServiceSlotMusic({service:{id:'friday',type_id:'friday'},item:{_worshipSlotKey:'prayer.meeting.free'}});
+ check(a.src.includes('dawn-free-prayer.mp3')&&state.serviceMusic.playing,'navigation interrupted dawn');
+ runServiceMusicAction('stop',binding);check(a.paused&&a.currentTime===0,'dawn stop failed');clearServiceMusicSyncTimer();return 'PASS dawn explicit playback/owner/navigation/stop';
+}"""),flush=True)
             page.locator('#music-test').screenshot(path='/tmp/mindex-prayer-controls-'+engine+'.png')
             browser.close()
 finally:
