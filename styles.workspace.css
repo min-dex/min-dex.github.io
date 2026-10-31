@@ -5876,15 +5876,8 @@ body:has(#servicePresenterControls[data-focus-view="true"]) .svc-presenter-live-
 }
 .svc-presenter-side-panel .svc-presenter-fullscreen:disabled { color: var(--ink-4); }
 
-/* Reference creation keeps its icon-and-label width. */
-#servicePresenterControls .svc-reference-media-quick-add > summary {
-  width: 70px;
-  min-width: 70px;
-  flex: 0 0 70px;
-  justify-content: center;
-}
-
-/* Text-only background/audio/save actions share one compact button grammar. */
+/* Compact text actions in the controller. */
+#servicePresenterControls .svc-reference-media-quick-add > summary,
 .svc-board-subgroup-flow :is(.svc-progression-media > summary, .svc-board-subgroup-audio-upload, .svc-board-subgroup-commit),
 #servicePresenterControls :is(.svc-progression-media > summary, .svc-board-subgroup-audio-upload, .svc-board-subgroup-commit) {
   display: inline-flex;

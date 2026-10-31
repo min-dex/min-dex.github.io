@@ -187,8 +187,9 @@ try:
         assert page.evaluate("""()=>{
          const add=document.querySelector('.svc-reference-media-quick-add > summary');
          const save=document.querySelector('.svc-board-subgroup-commit');
-         // Add retains its icon; text-only save uses the compact edit-action width.
-         return Math.abs(add.getBoundingClientRect().width-70)<1 && Math.abs(save.getBoundingClientRect().width-60)<1
+         // Section add and save share the compact text action dimensions.
+         return Math.abs(add.getBoundingClientRect().width-save.getBoundingClientRect().width)<1
+          && getComputedStyle(add).fontSize===getComputedStyle(save).fontSize && getComputedStyle(add).padding===getComputedStyle(save).padding && Math.abs(save.getBoundingClientRect().width-60)<1
           && !save.querySelector('svg,[data-lucide]') && getComputedStyle(save).padding==='0px 10px'
           && Math.abs(add.getBoundingClientRect().height-save.getBoundingClientRect().height)<1;
         }""")

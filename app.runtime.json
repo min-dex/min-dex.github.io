@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261031-announcement-footer",
+  "version": "20261101-section-add-size",
   "options": {
     "compress": false,
     "mangle": {
