@@ -18,13 +18,20 @@ try:
    page.route('**/mindex.remote-session.mjs*',lambda r:r.fulfill(body=SESSION,content_type='text/javascript'))
    page.goto(url);page.locator('#outputList button').first.click();page.fill('#code','0123');page.click('#connect');page.wait_for_function("typeof window.setRemoteState==='function' && !document.querySelector('#controller').hidden")
    page.evaluate("window.currentState={index:0,total:60,current:'현재',next:'다음',catalogKey:'fixture',allowed:['jump','scripture-show','sermon-title']};setRemoteState(currentState)")
+   assert page.locator('#audioControls').is_hidden() and page.locator('#videoControls').is_hidden()
    page.click('#slidesOpen')
-   page.evaluate("setSlides({key:'fixture',mode:'groups',total:1,offset:0,items:[{index:0,title:'긴 찬양 제목 '.repeat(20),count:60}]})")
+   page.evaluate("setSlides({key:'fixture',mode:'groups',total:1,offset:0,items:[{index:1,endIndex:59,audio:true,video:false,title:'긴 찬양 제목 '.repeat(20),count:59}]})")
    page.locator('#slidesList button').focus();page.press('#slidesList button','Enter')
    page.evaluate("setSlides({key:'fixture',mode:'slides',total:2,offset:0,items:[0,1].map(index=>({index,title:'긴 제목 '.repeat(30),text:'긴 내용 '.repeat(100),group:'찬양'}))})")
    assert page.evaluate("document.activeElement===document.querySelector('#slidesList button')"),'group replacement lost keyboard focus'
+   assert page.locator('#audioControls').is_visible() and page.locator('#audioBrowseHint').is_visible()
+   assert page.locator('[data-action=play]').is_disabled()
+   page.evaluate("setRemoteState({...currentState,audioActive:true,music:'재생 중',allowed:['jump','pause','stop'],video:{status:'playing',ready:true}})")
+   assert page.locator('[data-action=pause]').is_enabled() and page.locator('#videoControls').is_visible()
+   assert page.evaluate('commands.length')==0,'browsing or playback notification issued a command'
+   page.evaluate("setRemoteState(currentState)")
    page.click('#slideGroups')
-   page.evaluate("setSlides({key:'fixture',mode:'groups',total:1,offset:0,items:[{index:0,title:'찬양',count:60}]})")
+   page.evaluate("setSlides({key:'fixture',mode:'groups',total:1,offset:0,items:[{index:1,endIndex:59,title:'찬양',count:59}]})")
    assert page.evaluate("document.activeElement===document.querySelector('#slidesList button')"),'return lost focus'
    page.locator('#slidesList button').click();page.locator('#slidesQuery').focus()
    page.evaluate("setSlides({key:'fixture',mode:'slides',total:1,offset:0,items:[{index:0,title:'찬양',text:'본문',group:'찬양'}]})")

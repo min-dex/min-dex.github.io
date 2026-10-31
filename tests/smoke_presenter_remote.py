@@ -169,6 +169,7 @@ try:
    # A local change between displayed state and command rejects the stale request.
    ready('next');host.evaluate('state.presenter.index=2');phone.click('[data-action=next]');pump()
    assert '바뀌었습니다' in phone.locator('#result').inner_text()
+   phone.click("#slidesClose")
    # Encrypted video transport and phone touch targets; actual media is tested separately.
    host.evaluate("window.remoteVideo={status:'paused',ready:true,revision:0,identity:'fixture'};presenterRemoteVideoState=()=>remoteVideo;requestPresenterVideoCommand=async(sid,action)=>{remoteCalls.push('video-'+action);remoteVideo.status=action==='pause'?'paused':'playing';remoteVideo.revision++;};void 0")
    for action in ('video-play','video-pause','video-restart'):
@@ -181,11 +182,10 @@ try:
      assert button.bounding_box()['height']==50
      assert button.evaluate('e=>e.scrollWidth<=e.clientWidth')
      assert button.locator('svg').bounding_box()['width']==16
-   host.evaluate('remoteVideo=null');pump(1.2);assert phone.locator('#videoControls').is_visible()
+   assert phone.locator('#audioControls').bounding_box()['y']<phone.locator('#videoControls').bounding_box()['y']
+   host.evaluate('remoteVideo=null');pump(1.2);assert phone.locator('#videoControls').is_hidden()
    assert phone.locator('#videoStatus').inner_text()=='연결된 영상 없음'
    assert all(button.is_disabled() for button in phone.locator('#videoControls button').all())
-   assert phone.locator('#music').bounding_box()['y']<phone.locator('#videoControls').bounding_box()['y']
-   assert phone.locator('[data-action=resume]').bounding_box()['y']<phone.locator('#videoControls').bounding_box()['y']
    # Real PC media hooks fan out promptly without increasing the heartbeat rate.
    host.evaluate('state.serviceMusic.pending=true;updateServiceMusicTransportControls()');pump(.4)
    assert phone.locator('#music').inner_text()=='음원 준비 중'

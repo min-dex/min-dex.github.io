@@ -114,7 +114,21 @@ function paint(){
  const usable=session?.usable&&!document.hidden;
  $('slidesOpen').disabled=!usable||!view?.allowed?.includes('jump');
  paintSlides(usable);
- for(const button of document.querySelectorAll('[data-action]'))button.disabled=!usable||!view?.allowed?.includes(button.dataset.action);
+ const group=selectedMedia?.key===view?.catalogKey?selectedMedia:null;
+ const liveGroup=!group||(view.index>=group.index&&view.index<=group.endIndex);
+ const audioActive=view?.audioActive??view?.allowed?.includes('pause');
+ const videoActive=view?.video?.status==='playing';
+ const audioAvailable=view?.media?.audio??view?.allowed?.includes('play');
+ $('audioControls').hidden=!(audioActive||(group?.audio??(liveGroup&&audioAvailable)));
+ $('videoControls').hidden=!(videoActive||(group?.video??(liveGroup&&(view?.media?.video||view?.video))));
+ $('audioBrowseHint').hidden=liveGroup||audioActive;
+ $('videoBrowseHint').hidden=liveGroup||videoActive;
+ $('music').hidden=!$('audioBrowseHint').hidden;
+ $('videoStatus').hidden=!$('videoBrowseHint').hidden;
+ for(const button of document.querySelectorAll('[data-action]')){
+  const ownerAvailable=liveGroup||(button.closest('#audioControls')?audioActive:button.closest('#videoControls')?videoActive:true);
+  button.disabled=!usable||!ownerAvailable||!view?.allowed?.includes(button.dataset.action);
+ }
  $('scriptureShow').disabled=!usable||!view?.allowed?.includes('scripture-show')||!$('scriptureQuery').value.trim();
  $('connect').disabled=opening||ending||!!session;
  $('code').readOnly=opening||ending||!!session;
@@ -152,6 +166,7 @@ function state(value){
 }
 const slidePreviews=[];
 let slidesData=null,slidesLoading=false,slidesTimer=null,jumpPending=false,slidesMode='groups',selectedGroup=null;
+let selectedMedia=null;
 let slidesDraftRevision=0,requestedSlidesDraft=null,slidesBatch=null,slidesFocusRequested=false,slidesReturnIndex=0;
 $('slidesQuery').addEventListener('input',()=>{slidesDraftRevision++;slidesBatch=null;slidesData=null;slidesLoading=false;clearTimeout(slidesTimer);$('slidesStatus').textContent='검색을 눌러 새 목록을 받아 주세요.';paint();});
 function paintSlides(usable){
@@ -199,7 +214,7 @@ function renderSlides(data){
   if(data.mode==='groups'){
    const button=document.createElement('button'),label=document.createElement('span'),count=document.createElement('small');
    button.type='button';button.dataset.index=item.index;button.dataset.endIndex=item.endIndex??item.index;label.textContent=item.title;count.textContent=`${item.count}장`;button.append(label,count);list.append(button);
-   button.onclick=()=>{if(!session?.usable||data.key!==view?.catalogKey)return;selectedGroup=item.index;slidesReturnIndex=item.index;slidesFocusRequested=true;slidesMode='slides';void loadSlides();};continue;
+   button.onclick=()=>{if(!session?.usable||data.key!==view?.catalogKey)return;selectedMedia={...item,endIndex:item.endIndex??item.index,key:data.key};selectedGroup=item.index;slidesReturnIndex=item.index;slidesFocusRequested=true;slidesMode='slides';void loadSlides();};continue;
   }
   if((item.groupKey||item.group)!==group){const h=document.createElement('h3');h.textContent=item.group;list.append(h);group=item.groupKey||item.group;}
   const b=document.createElement('button'),mini=document.createElement('div'),label=document.createElement('span');
@@ -226,17 +241,18 @@ function remoteResult(r){
  paint();
 }
 function closeSlides(){
+ selectedMedia=null;
  $('slidesPanel').hidden=true;$('slidesOpen').setAttribute('aria-expanded','false');
  clearTimeout(slidesTimer);slidesLoading=false;slidesData=null;slidesBatch=null;slidesFocusRequested=false;
  for(const preview of slidePreviews.splice(0))preview.dispose();$('slidesList').replaceChildren();
 }
 $('slidesOpen').onclick=()=>{
- if(!$('slidesPanel').hidden){closeSlides();return;}
+ if(!$('slidesPanel').hidden){closeSlides();paint();return;}
  $('slidesPanel').hidden=false;$('slidesOpen').setAttribute('aria-expanded','true');$('slidesQuery').value='';slidesMode='groups';selectedGroup=null;void loadSlides();
 };
-$('slidesClose').onclick=()=>{closeSlides();$('slidesOpen').focus();};
-$('slideGroups').onclick=()=>{slidesFocusRequested=true;slidesMode='groups';selectedGroup=null;$('slidesQuery').value='';void loadSlides();};
-$('slidesSearch').onsubmit=e=>{e.preventDefault();if(compositionSubmitBlocked(e.currentTarget))return;slidesMode=$('slidesQuery').value.trim()?'slides':'groups';selectedGroup=null;void loadSlides();};
+$('slidesClose').onclick=()=>{closeSlides();paint();$('slidesOpen').focus();};
+$('slideGroups').onclick=()=>{selectedMedia=null;slidesFocusRequested=true;slidesMode='groups';selectedGroup=null;$('slidesQuery').value='';void loadSlides();};
+$('slidesSearch').onsubmit=e=>{e.preventDefault();if(compositionSubmitBlocked(e.currentTarget))return;selectedMedia=null;slidesMode=$('slidesQuery').value.trim()?'slides':'groups';selectedGroup=null;void loadSlides();};
 $('pairForm').addEventListener('submit',async e=>{
  e.preventDefault();if(compositionSubmitBlocked(e.currentTarget)||opening||ending||session||!selectedOutput)return;const chosen=selectedOutput,code=$('code').value.trim();opening=true;paint();$('result').textContent='';
  try{
