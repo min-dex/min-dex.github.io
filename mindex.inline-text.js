@@ -94,6 +94,22 @@
     input.value=saved.value;input.setSelectionRange(saved.start,saved.end,saved.direction);
     input.dispatchEvent(new Event('input',{bubbles:true}));
   }
+  function deleteEmptyItem(input) {
+    const caret=input.selectionStart;
+    if(caret!==input.selectionEnd)return false;
+    const start=input.value.slice(0,caret).lastIndexOf('\n')+1;
+    const next=input.value.indexOf('\n',caret);
+    const end=next<0?input.value.length:next;
+    const marker=listLine(input.value.slice(start,end));
+    if(!marker||marker.body.trim())return false;
+    const before=snapshot(input);
+    // Consume only one line break so both neighbouring items stay intact.
+    if(next>=0)input.setRangeText('',start,end+1,'start');
+    else input.setRangeText('',Math.max(0,start-1),end,'start');
+    applyNumbered(input,true);remember(input,before);
+    input.dispatchEvent(new Event('input',{bubbles:true}));
+    return true;
+  }
   function enter(input,shift=false) {
     const before=snapshot(input),start=input.selectionStart,end=input.selectionEnd;
     const lineStart=start===0?0:input.value.lastIndexOf('\n',start-1)+1;
@@ -116,6 +132,9 @@
     if((event.metaKey||event.ctrlKey)&&['z','y'].includes(event.key.toLowerCase())){
       event.preventDefault();event.stopPropagation();restore(input,event.shiftKey||event.key.toLowerCase()==='y');return;
     }
+    if(!event.metaKey&&!event.ctrlKey&&['Backspace','Delete'].includes(event.key)&&deleteEmptyItem(input)){
+      event.preventDefault();event.stopPropagation();return;
+    }
     if(event.key!=='Enter'||event.metaKey||event.ctrlKey)return;
     event.preventDefault();event.stopPropagation();enter(input,event.shiftKey);
   },true);
@@ -123,6 +142,7 @@
     const input=event.target;
     if(!numberedInput(input))return;
     if(!event.isComposing&&!composing.has(input)&&event.cancelable){
+      if(['deleteContentBackward','deleteContentForward'].includes(event.inputType)&&deleteEmptyItem(input)){event.preventDefault();return;}
       if(['historyUndo','historyRedo'].includes(event.inputType)){event.preventDefault();restore(input,event.inputType==='historyRedo');return;}
       if(['insertParagraph','insertLineBreak'].includes(event.inputType)){event.preventDefault();enter(input);return;}
     }

@@ -31,6 +31,12 @@ assert.equal(await field.inputValue(),'① 첫 안내\n② ');
 await field.type('둘째');await field.press('Shift+Enter');await field.type('자세한 설명');
 assert.equal(await field.inputValue(),'① 첫 안내\n② 둘째\n　 자세한 설명');
 await field.press('Enter');assert.match(await field.inputValue(),/\n③ $/);
+for(const key of ['Backspace','Delete']){
+ const before=await field.inputValue();await field.press(key);
+ assert.equal(await field.inputValue(),before.slice(0,-3));
+ assert.equal(await field.evaluate(el=>el.selectionStart),before.length-3);
+ await field.press('Meta+z');assert.equal(await field.inputValue(),before);
+}
 await field.press('Enter');assert.match(await field.inputValue(),/자세한 설명\n$/);
 await field.evaluate(el=>{el.value='3. 첫 안내\n일시: 내일\n8. 다음 안내';el.setSelectionRange(el.value.length,el.value.length);el.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertFromPaste'}));});
 assert.equal(await field.inputValue(),'① 첫 안내\n　 일시: 내일\n② 다음 안내');
