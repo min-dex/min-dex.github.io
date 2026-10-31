@@ -11475,7 +11475,7 @@ async function setServiceOfferingSpecial(serviceId, itemId, enabled) {
 
 function normalizeAnnouncementRegions(value) {
   if(!value||typeof value!=="object"||Array.isArray(value))return null;
-  return Object.fromEntries(["welcome","news","footer"].map(key=>[key,String(value[key]??"")]));
+  return Object.fromEntries(["welcome","news","footer"].map(key=>[key,key==="footer"?String(value[key]??"").split("\n").map(window.MindexInlineText.footerLine).join("\n"):String(value[key]??"")]));
 }
 
 function serviceAnnouncementRegions(item,memo=parseServiceItemMemo(item.memo)) {
@@ -11490,7 +11490,7 @@ function serviceAnnouncementRegions(item,memo=parseServiceItemMemo(item.memo)) {
 function renderServiceAnnouncementEditor(item,index,serviceId,memo) {
   const regions=serviceAnnouncementRegions(item,memo);
   regions.news=window.MindexInlineText.numbered(regions.news).value;
-  const field=(key,label)=>`<label class="svc-presenter-input-field"><span>${label}</span><textarea data-inline-bold ${key==="news"?'data-announcement-numbered':''} class="svc-presenter-input-control svc-presenter-input-control--multiline" data-service-id="${escapeAttr(serviceId||"")}" data-service-item-index="${index}" data-service-item-field="announcement_${key}" data-initial-value="${escapeAttr(regions[key])}" rows="1" aria-label="${label}" onkeydown="handleDetailKeydown(event)">${escapeHtml(regions[key])}</textarea></label>`;
+  const field=(key,label)=>`<label class="svc-presenter-input-field"><span>${label}</span><textarea data-inline-bold ${key==="news"?'data-announcement-numbered':key==="footer"?'data-announcement-footer':''} class="svc-presenter-input-control svc-presenter-input-control--multiline" data-service-id="${escapeAttr(serviceId||"")}" data-service-item-index="${index}" data-service-item-field="announcement_${key}" data-initial-value="${escapeAttr(regions[key])}" rows="1" aria-label="${label}" onkeydown="handleDetailKeydown(event)">${escapeHtml(regions[key])}</textarea></label>`;
   return `<div class="svc-announcement-editor">${field("news","주간 소식")}<small class="svc-presenter-input-hint">Enter: 다음 번호 · Shift+Enter: 같은 항목에서 줄바꿈</small><details ${MindexDisclosure.attrs(["announcement",serviceId,item.id||index])}><summary>상하단 문구</summary>${field("welcome","상단")}${field("footer","하단")}</details></div>`;
 }
 

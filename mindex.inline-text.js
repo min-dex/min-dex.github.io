@@ -22,7 +22,7 @@
     const selected=value.slice(from,to),lines=selected.split('\n');
     // A list marker is structure, not part of the bold range.
     const parts=lines.map(line=>{
-      const prefix=before?line.match(numberPattern)?.[0]||'':'';
+      const prefix=before?line.match(isFooter(input)?footerPattern:numberPattern)?.[0]||'':'';
       return {prefix,body:line.slice(prefix.length)};
     });
     const isBold=line=>/^\*\*[^*\r\n]+\*\*$/.test(line);
@@ -36,6 +36,12 @@
     input.dispatchEvent(new Event('input',{bubbles:true}));
   }
   const numberPattern=/^[ \t　]*(?:(\d+)[.)]|([①-⑳]))[ \t]*/u;
+  const footerPattern=/^[ \t]*(?:[◈◇◆♢][ \t]*)+/u;
+  function footerLine(line) {
+    if(!line.trim()||line.startsWith(continuation))return line;
+    return '◈ '+line.replace(footerPattern,'').trimStart();
+  }
+  const isFooter=input=>input.hasAttribute('data-announcement-footer');
   const numberLabel=n=>n<=20?String.fromCodePoint(0x2460+n-1):`${n}.`;
   const continuation="　 ";
   function listLine(line,preserveSpacing=false) {
@@ -57,10 +63,11 @@
     if(column>=before.length-suffix)return after.length-(before.length-column);
     return markersOnly?Math.min(column,after.length-suffix):after.length-suffix;
   }
-  function numbered(value,caret=String(value).length,markersOnly=false) {
+  function numbered(value,caret=String(value).length,markersOnly=false,footer=false) {
     value=String(value);let count=0;
     const originals=value.split('\n');
     const lines=originals.map(line=>{
+      if(footer)return markersOnly&&!footerPattern.test(line)?line:footerLine(line);
       const marker=listLine(line);
       if(marker)return `${numberLabel(++count)} ${marker.body}`;
       if(markersOnly||!line.trim())return line;
@@ -72,14 +79,14 @@
     return {value:result,caret:Math.min(result.length,lines.slice(0,row).reduce((n,line)=>n+line.length+1,0)+mapped)};
   }
   function applyNumbered(input,markersOnly=false) {
-    const result=numbered(input.value,input.selectionStart,markersOnly);
+    const result=numbered(input.value,input.selectionStart,markersOnly,isFooter(input));
     if(result.value===input.value)return;
-    const end=numbered(input.value,input.selectionEnd,markersOnly).caret,direction=input.selectionDirection;
+    const end=numbered(input.value,input.selectionEnd,markersOnly,isFooter(input)).caret,direction=input.selectionDirection;
     input.value=result.value;input.setSelectionRange(result.caret,end,direction);
   }
-  window.MindexInlineText=Object.freeze({runs,plain:value=>runs(value).map(r=>r.text).join(''),toggle,numbered,listLine});
+  window.MindexInlineText=Object.freeze({runs,plain:value=>runs(value).map(r=>r.text).join(''),toggle,numbered,listLine,footerLine});
   if(typeof document==='undefined')return;
-  const numberedInput=input=>input.matches?.('[data-announcement-numbered]')&&!input.disabled&&!input.readOnly;
+  const numberedInput=input=>input.matches?.('[data-announcement-numbered],[data-announcement-footer]')&&!input.disabled&&!input.readOnly;
   const histories=new WeakMap(),pending=new WeakMap(),composing=new WeakSet();
   const snapshot=input=>({value:input.value,start:input.selectionStart,end:input.selectionEnd,direction:input.selectionDirection});
   function remember(input,before) {
@@ -114,14 +121,16 @@
     const before=snapshot(input),start=input.selectionStart,end=input.selectionEnd;
     const lineStart=start===0?0:input.value.lastIndexOf('\n',start-1)+1;
     const lineEnd=input.value.indexOf('\n',start),tailEnd=lineEnd<0?input.value.length:lineEnd;
-    const line=input.value.slice(lineStart,tailEnd),marker=listLine(line);
-    const prefix=line.match(numberPattern)?.[0]||'';
+    const line=input.value.slice(lineStart,tailEnd);
+    const next=isFooter(input)?"◈ ":"1. ";
+    const prefix=line.match(isFooter(input)?footerPattern:numberPattern)?.[0]||'';
+    const marker=isFooter(input)?prefix&&{body:line.slice(prefix.length)}:listLine(line);
     if(!shift&&marker&&!marker.body.trim()){
       input.setRangeText('',lineStart,Math.max(lineStart+prefix.length,end),'end');
     }else if(!shift&&marker&&start===end&&start<=lineStart+prefix.length){
-      input.setRangeText('1. \n',lineStart,lineStart,'start');input.setSelectionRange(lineStart+3,lineStart+3);
+      input.setRangeText(next+'\n',lineStart,lineStart,'start');input.setSelectionRange(lineStart+next.length,lineStart+next.length);
     }else{
-      input.setRangeText('\n'+(shift?continuation:'1. '),start,end,'end');
+      input.setRangeText('\n'+(shift?continuation:next),start,end,'end');
     }
     applyNumbered(input);remember(input,before);
     input.dispatchEvent(new Event('input',{bubbles:true}));
@@ -157,7 +166,7 @@
     const before=pending.get(input);pending.delete(input);
     if(type==='insertFromPaste')applyNumbered(input);
     else if(type?.startsWith('delete'))applyNumbered(input,true);
-    else if(type?.startsWith('insert')&&before&&!before.value.trim()&&input.value.trim())applyNumbered(input);
+    else if(type?.startsWith('insert')&&before&&(isFooter(input)||!before.value.trim())&&input.value.trim())applyNumbered(input);
     remember(input,before);
   }
   document.addEventListener('compositionend',event=>{

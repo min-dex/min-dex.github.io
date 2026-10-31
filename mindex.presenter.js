@@ -4557,7 +4557,7 @@ function presenterAnnouncementRegions(items) {
     const numbered=plain.match(/^(?:(\d+)[.)]|([①-⑳]))\s*/u);
     if(welcome||footer||numbered||index===0||role==="welcome") {
       role=welcome?"welcome":footer?"footer":"news";
-      current={marker:footer?"◇":numbered?(numbered[1]?presenterCircledNumber(Number(numbered[1])-1):numbered[2]):index===0?item.marker:"",lines:[]};
+      current={marker:footer?"◈":numbered?(numbered[1]?presenterCircledNumber(Number(numbered[1])-1):numbered[2]):index===0?item.marker:"",lines:[]};
       regions[role].push(current);
     }
     if(!current){current={marker:"",lines:[]};regions.news.push(current);}
