@@ -4859,7 +4859,7 @@ def main() -> int:
                 )
                 if (
                     form_preset_state["hymnTypes"] == ["title-assignee", "song-title", "lyrics", "lyrics", "lyrics", "lyrics", "blank", "lyrics", "lyrics", "lyrics"]
-                    and form_preset_state["hymnTitleTexts"] == ["♬ 999 특송 테스트"]
+                    and form_preset_state["hymnTitleTexts"] == ["♬ 특송 테스트"]
                     and form_preset_state["hymnMarkers"] == ["Verse 1", "Chorus", "Verse 2", "Chorus", "Verse 4", "Chorus", "Coda"]
                     and form_preset_state["hymnTexts"] == [
                         "1절 첫 줄\n1절 둘째 줄",
@@ -4976,7 +4976,7 @@ def main() -> int:
                             "type": "song-title",
                             "title": "999 특송 테스트",
                             "assignee": "",
-                            "text": "♬ 999 특송 테스트",
+                            "text": "♬ 특송 테스트",
                             "sectionKey": "special_song",
                         },
                     ]
