@@ -210,9 +210,9 @@ function configureAutoUpdater() {
 
 let broadcastLab = null;
 const localEncoderEnabled = require("../package.json").mindexTestBuild === true && require("../package.json").mindexLocalEncoder === true;
-const stopBroadcastEngine = require("./broadcast-engine").registerBroadcastEngine({
-  ipcMain,app,getLab:()=>broadcastLab,enabled:localEncoderEnabled
-});
+const stopBroadcastEngine = localEncoderEnabled ? require("./broadcast-engine").registerBroadcastEngine({
+  ipcMain,app,getLab:()=>broadcastLab
+}) : () => {};
 function openBroadcastLab() {
   if (require("../package.json").mindexTestBuild !== true) return false;
   if (broadcastLab && !broadcastLab.isDestroyed()) { broadcastLab.focus(); return true; }

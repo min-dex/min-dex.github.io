@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-function registerBroadcastEngine({ipcMain,app,getLab,enabled}) {
+function registerBroadcastEngine({ipcMain,app,getLab}) {
   let active;
   function cancel() {
     if (!active) return;
@@ -16,7 +16,7 @@ function registerBroadcastEngine({ipcMain,app,getLab,enabled}) {
   app.on('before-quit',cancel);
   ipcMain.handle('mindex:rehearse-rtmps',async (event,action,chunk)=>{
     const lab = getLab();
-    if (!enabled || !lab || event.sender!==lab.webContents || event.senderFrame!==lab.webContents.mainFrame)
+    if (!lab || event.sender!==lab.webContents || event.senderFrame!==lab.webContents.mainFrame)
       throw Error('시험 창에서만 사용할 수 있습니다.');
     if (action==='cancel') { cancel(); return; }
     if (action==='start') {
