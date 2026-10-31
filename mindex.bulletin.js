@@ -301,6 +301,24 @@
   }
 };
   const inkLayout=date=>date>="2026-07-05"&&date<"2026-09-06";
+  const liturgyOrderLabels = new Set(["사도신경", "신앙고백", "주기도문", "공동체고백", "예배의부름", "묵도", "참회기도", "사죄의선언"]);
+  const liturgyOrderSlots = new Set(["faith.creed", "sending.lords_prayer", "community.confession", "prayer.silent", "confession.prayer", "confession.assurance"]);
+  const liturgyOrderSections = new Set(["creed", "lords_prayer", "community_confession", "opening", "call", "silent_prayer", "confession"]);
+  const liturgyOrderLabel = value => liturgyOrderLabels.has(clean(value).replace(/\s+/g, ""));
+  function isLiturgyOrderElement(element, section, type, slot, label) {
+    // A shared liturgical heading must not swallow a linked praise or reading.
+    if (element.song_id || ["praise", "scripture_body", "scripture"].includes(type) || ["scripture_reading", "announcements"].includes(section.section_key)) return false;
+    if (liturgyOrderSlots.has(slot)) return true;
+    if (section.section_key === "sermon") return false;
+    return liturgyOrderSections.has(section.section_key) || liturgyOrderLabel(label) || liturgyOrderLabel(element.title);
+  }
+  function orderRowsForDisplay(source) {
+    const kinds = source?.orderSummaryOnly || {};
+    return (source?.order || []).map(row => {
+      const summaryOnly = Object.hasOwn(kinds, row.id) ? kinds[row.id] : liturgyOrderLabel(row.label);
+      return summaryOnly ? {...row, content: ""} : row;
+    });
+  }
   function resolveSource({service, sections=[], elements=[], songs=[], scriptures=[], calendar=[], settings={}, services=[], history=[]}) {
     const compactOrder=settings.compactOrder!==false;
     const songById = new Map(songs.map(s=>[s.id,s]));
@@ -310,7 +328,7 @@
     const department=service.service_type_id==="children"?"children":"young-adult";
     const today = calendar.find(r=>r.date===date) || {};
     const source = {id:service.id, date, department, leader:clean(service.worship_leader), liturgical:[clean(today.liturgical),clean(today.note)].filter(Boolean).join(" / "),
-      sermon:"", scripture:"", news:"", order:[], prayers:[], events:"", loadedAt:new Date().toISOString()};
+      sermon:"", scripture:"", news:"", order:[], orderSummaryOnly:Object.create(null), prayers:[], events:"", loadedAt:new Date().toISOString()};
     const hasReading=elements.some(e=>sectionById.get(e.section_id)?.section_key==="scripture_reading");
     const ordered = elements.filter(e=>sectionById.has(e.section_id)).sort((a,b)=>
       (sectionById.get(a.section_id).sort_order-sectionById.get(b.section_id).sort_order) || (a.sort_order-b.sort_order));
@@ -320,6 +338,7 @@
       let slot=clean(ref.slotKey||config.slotKey);
       let label=clean(ref.label||section.title);
       if(!slot&&section.section_key==="sermon")slot=({"설교 제목":"sermon.title","설교 본문":"sermon.scripture","인용 구절":"sermon.citation"})[label]||"";
+      source.orderSummaryOnly[el.id] = isLiturgyOrderElement(el, section, type, slot, label);
       if(compactOrder&&section.section_key==="prayer"&&label==="기도")label="대표기도";
       if(compactOrder&&section.section_key==="announcements"&&type==="title"&&!clean(el.title)&&!clean(el.body))continue;
       if ((compactOrder && (/^(ready|preparation|closing|fellowship)(\.|$)/.test(slot) || /^sermon\.citation(?:\.|$)/.test(slot)
@@ -349,9 +368,10 @@
       if (label.replace(/\s/g,"")==="대표기도"||(department==="children"&&label.replace(/\s/g,"")==="봉헌기도")) person=clean(today[department==="children"?"children_prayer":"young_adult_prayer"])||person;
       if(compactOrder&&!person&&["사도신경","찬양","찬송","기도","성경봉독","결단찬양","결단기도","봉헌찬양","봉헌","파송찬양"].includes(label))person="다같이";
       if (content===label||(compactOrder&&["title_person","title_assignee"].includes(type)&&content===person)) content="";
-      if(compactOrder&&["사도신경","주기도문","공동체 고백"].includes(label))content="";
+      const summaryOnly = source.orderSummaryOnly[el.id];
+      if(compactOrder&&summaryOnly&&["사도신경","주기도문","공동체 고백"].includes(label))content="";
       const last=source.order[source.order.length-1];
-      if (compactOrder && last && last.label===label && last.person===person && content) last.content=[last.content,content].filter(Boolean).join("\n");
+      if (compactOrder && last && last.label===label && last.person===person && content && source.orderSummaryOnly[last.id]===summaryOnly) last.content=[last.content,content].filter(Boolean).join("\n");
       else source.order.push({id:el.id,label,content,person});
     }
     source.announcements=source.news;
@@ -592,7 +612,7 @@
           for(let y=0;y<=f.h;y+=(simple?10:7.5))group.append(svg("line",{x1:f.x,y1:f.y+y,x2:f.x+f.w,y2:f.y+y,stroke:line,"stroke-width":.2}));
         }else if(f.type==="order"){
           let y=f.y;
-          for(const row of doc.source?.order||[]){
+          for(const row of orderRowsForDisplay(doc.source)){
             const person=personText(row.label==="광고"?fieldValue(doc,"announcer"):row.person);
             const widths=[25,f.w-55,25],texts=[row.label,row.content,person];
             if(widths[1]<15){check.add(f.id);break;}
@@ -922,7 +942,7 @@
             if(y>f.y+f.h+.01)frameIssues.add(f.id);
           }
         } else if(f.type==="order") {
-          const list=(doc.source?.order||[]).map(row=>({...row,person:personText(row.label==="광고"?fieldValue(doc,"announcer"):row.person)})),inner=f.w-60;
+          const list=orderRowsForDisplay(doc.source).map(row=>({...row,person:personText(row.label==="광고"?fieldValue(doc,"announcer"):row.person)})),inner=f.w-60;
           if(inner<10){frameIssues.add(f.id);root.append(group);continue;}
           const leading=snap(f.size*1.2)/MM;
           const counts=list.map(row=>Math.max(wrap(row.label,30,f.size).length,wrap(row.content,inner,f.size,700).length,wrap(row.person,30,f.size).length));
@@ -1657,5 +1677,5 @@
     }
     return {state: savedState, remember, load, select, renderStatus};
   }
-  window.MindexBulletin=Object.freeze({createSavedList,mount,resolveSource,reusableContent,fieldValue,defaultFrames,renderPages,readyAssets,TOKENS,wrap,profileForDate,monthlyView,storedValue,applyStored,normalizeSnapshot,applySourceSnapshot,templateValue,normalizeTemplate,applyTemplate,TEMPLATE_KEY});
+  window.MindexBulletin=Object.freeze({createSavedList,mount,resolveSource,orderRowsForDisplay,reusableContent,fieldValue,defaultFrames,renderPages,readyAssets,TOKENS,wrap,profileForDate,monthlyView,storedValue,applyStored,normalizeSnapshot,applySourceSnapshot,templateValue,normalizeTemplate,applyTemplate,TEMPLATE_KEY});
 })();
