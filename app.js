@@ -8246,7 +8246,17 @@ async function ensureWorshipServiceRowsLoadedForPersistence(serviceId = "") {
       .map((section) => section.id)
       .filter(Boolean),
   );
-  const { sections, elements } = await fetchWorshipRowsForServiceIds([id]);
+  const atomic = await worshipAtomicClient();
+  const fetched = await fetchWorshipRowsForServiceIds([id]);
+  // A missing load marker does not mean the editor is empty. Keep its edits
+  // and build the save against the same revision the editor originally read.
+  const keepDraft = Array.isArray(state.serviceItems[id]) && (
+    state.dirtyServiceElementIds.get(id)?.size || state.dirtyServiceStructureIds.has(id)
+    || (state.selectedServiceId === id && state.dirty.service) || serviceHasPendingTextEdits(id)
+  );
+  const rows = keepDraft ? atomic.baseline(id) : fetched;
+  if (!rows) throw new Error("BASELINE_REQUIRED");
+  const { sections, elements } = keepDraft ? structuredClone(rows) : rows;
   const loadedSectionIds = new Set([
     ...previousSectionIds,
     ...sections.map((section) => section.id).filter(Boolean),
@@ -8261,7 +8271,7 @@ async function ensureWorshipServiceRowsLoadedForPersistence(serviceId = "") {
   ];
   state.loadedWorshipServiceIds.add(id);
   const loadedService = state.services.find((service) => service.id === id);
-  if (loadedService) {
+  if (loadedService && !keepDraft) {
     state.serviceItems[id] = projectWorshipServiceItemsFromTemplate(
       loadedService,
       groupWorshipElements(sections, elements)[id] || [],
@@ -8703,24 +8713,6 @@ async function saveSongRelationsIfAvailable(song) {
     .upsert(rows, { onConflict: "source_song_id,related_song_id,relation_type" });
   if (error) throw error;
   return true;
-}
-
-function writeFormsToSelectedVersion() {
-  state.forms = normalizeForms(state.forms);
-  const version = getSelectedVersion();
-  if (!version) return;
-  version.forms = state.forms.map((form, index) => ({
-    id: form.id || createLocalId(),
-    part_type: form.part_type,
-    part_number: form.part_number,
-    part_variant: form.part_variant || "",
-    label: displayLabel(form),
-    lyrics: form.lyrics || "",
-    sort_order: index + 1,
-    ...(form.review_status && form.review_status !== "reviewed" ? { review_status: form.review_status } : {}),
-    ...(form.review_status === "reviewed" ? { review_status: "reviewed" } : {}),
-    ...(form.import_source ? { import_source: form.import_source } : {}),
-  }));
 }
 
 function handleSidebarPresenterActionClick(event) {
@@ -10142,20 +10134,11 @@ function updateSongField(field) {
 
   if (key === "title") {
     updateEditorTitle(song);
+  }
+  if (["title", "subtitle", "original_title"].includes(key)) {
     updateNativeVersionTitlePreview(song);
   }
 
-  state.dirty.song = true;
-  updateSaveState();
-}
-
-function updateVersionOutputTitleField(field) {
-  const song = getSelectedSong();
-  const version = song?.versions?.find(item => item.id === field.dataset.versionOutputTitleField);
-  if (!version) return;
-  version.output_title = field.value.trim();
-  updateNativeVersionTitlePreview(song);
-  clearSearchCaches();
   state.dirty.song = true;
   updateSaveState();
 }
@@ -17541,8 +17524,8 @@ function renderSongMetadataDialog(song) {
           </button>
         </header>
         <div class="metadata-popover-grid">
-          ${renderInput(song._singleSongRecord && praiseDisplayGroup(song).members.length > 1 ? "이 판본의 곡 제목" : "제목", "title", (song.hymn_no ? stripHymnNumber(song.title) : song.title) || "", "compact meta-title")}
-          ${renderInput("부제", "subtitle", song.subtitle || "", "compact")}
+          ${renderInput(song._singleSongRecord ? "판본 제목" : "제목", "title", (song.hymn_no ? stripHymnNumber(song.title) : song.title) || "", "compact meta-title")}
+          ${renderInput(song._singleSongRecord ? "판본 부제" : "부제", "subtitle", song.subtitle || "", "compact")}
           ${renderInput("원제", "original_title", song.original_title || "", "compact")}
           ${renderMetadataInput("아티스트", "artist", metadata.artist || "", "compact")}
           ${renderMetadataInput("작사", "lyricist", metadata.lyricist || "", "compact")}
@@ -19383,7 +19366,7 @@ function songVersionOutputTitles(song) {
 }
 
 function songOutputTitle(song, version = null) {
-  return String(version?.output_title || "").trim() || String(song?.title || "").trim();
+  return String((!song?._singleSongRecord && version?.output_title) || "").trim() || String(song?.title || "").trim();
 }
 
 function serializeSongMemo(song, options = {}) {
@@ -24799,7 +24782,8 @@ function serviceSidebarChildItemDisplayText(item = {}) {
   const song = serviceItemLinkedSong(effectiveItem);
   if (song) {
     const version = getPresenterServiceItemVersion(song, effectiveItem, service);
-    return presenterSongTitleDisplayTitle(song, version, serviceItemDisplayText(effectiveItem));
+    const fallback = serviceItemDisplayText(effectiveItem);
+    return [presenterSongTitleHymnNo(song, version, fallback), presenterSongTitleDisplayTitle(song, version, fallback)].filter(Boolean).join(" ");
   }
   const liturgicalTitle = serviceItemLiturgicalNavigationTitle(item);
   if (liturgicalTitle !== null) return liturgicalTitle;

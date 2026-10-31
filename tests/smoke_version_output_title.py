@@ -35,8 +35,8 @@ def main():
       const unloaded={...song,memo,versions:[{id:song.id,name:'기본'}],_relationalVersionsLoaded:false};
       check(JSON.parse(serializeSongMemo(unloaded,{omitVersions:true})).versionOutputTitles.en==='English Title','lazy metadata save retention');
       const hymn={title:'대표 찬송 제목',hymn_no:'251'};
-      check(presenterSongTitleDisplayTitle(hymn,{hymn_no:'통 137',output_title:'판본 제목'})==='통 137 판본 제목','hymn uses explicit title');
-      check(presenterSongTitleDisplayTitle(hymn,{hymn_no:'통 137'})==='통 137 대표 찬송 제목','hymn defaults');
+      check(presenterSongTitleDisplayTitle(hymn,{hymn_no:'통 137',output_title:'판본 제목'})==='판본 제목','hymn uses explicit title');
+      check(presenterSongTitleDisplayTitle(hymn,{hymn_no:'통 137'})==='대표 찬송 제목','hymn defaults');
       state.songs=[song];state.selectedSongId=song.id;state.selectedVersionId='en';
       updateSaveState=()=>{}; // Output-only fixture has no application toolbar.
       document.body.innerHTML='<div id="fixture">'+renderVersionTitleContent(song,song.versions[1],song.versions[1].forms,{active:true})+'</div>';

@@ -1029,7 +1029,7 @@ function presenterSlidesWithSongContentHeading(item, section, song, version, dis
   const content = presenterSongTitleDisplayTitle(song, version, displayText);
   if (!content) return slides;
   return [{ ...presenterOrderContentTitleSlide(item, section, index, heading, formatPresenterSongTitleText(content)),
-    songTitleContent: { orderTitle: heading, title: presenterSongTitleHymnNo(song, version) ? splitHymnNo(content).title || content : content, detail: presenterSongTitleDetail(song, version), detailKind: presenterSongTitleDetailKind(song, version) } }, ...slides];
+    songTitleContent: { orderTitle: heading, title: content, detail: presenterSongTitleDetail(song, version), detailKind: presenterSongTitleDetailKind(song, version) } }, ...slides];
 }
 
 function presenterSongTitleSlide(item, section, song, version, displayText, index) {
@@ -1042,8 +1042,7 @@ function presenterSongTitleSlide(item, section, song, version, displayText, inde
   const songDetail = connectedTitle ? "" : presenterSongTitleDetail(song, version);
   const songTitleContent = {
     orderTitle: sectionHeading || item.label || "",
-    title: songDetail && presenterSongTitleHymnNo(song, version)
-      ? splitHymnNo(displayTitle).title || displayTitle : displayTitle,
+    title: displayTitle,
     detail: songDetail,
     detailKind: connectedTitle ? "" : presenterSongTitleDetailKind(song, version),
   };
@@ -1087,13 +1086,13 @@ function presenterSongTitleDetail(song = null, version = null) {
       ? "통일찬송가" : /^SONG-HYMN-N/.test(identity) || /^knh-/.test(identity) || /새찬송가/.test(names) ? "새찬송가" : "";
     return [book, `${number}장`].filter(Boolean).join(" ");
   }
-  return String(song?.original_title || "").trim() || String(song?.subtitle || "").trim();
+  return String(song?.subtitle || "").trim() || String(song?.original_title || "").trim();
 }
 
 function presenterSongTitleDetailKind(song = null, version = null) {
   if (presenterSongTitleHymnNo(song, version)) return "hymn";
-  if (String(song?.original_title || "").trim()) return "original";
-  return String(song?.subtitle || "").trim() ? "subtitle" : "";
+  if (String(song?.subtitle || "").trim()) return "subtitle";
+  return String(song?.original_title || "").trim() ? "original" : "";
 }
 
 function presenterSongTitleContent(slide = {}) {
@@ -1128,12 +1127,7 @@ function presenterOrderContentTitleSlide(item, section, index, orderTitle = "", 
 
 function presenterSongTitleDisplayTitle(song = null, version = null, fallbackText = "", sectionHeading = "") {
   void sectionHeading;
-  const title = presenterPraiseTitle(song, fallbackText, version);
-  const hymnNo = presenterSongTitleHymnNo(song, version, fallbackText);
-  if (!hymnNo) return title;
-  const titleParts = splitHymnNo(title);
-  if (titleParts.no) return [titleParts.no, titleParts.title].filter(Boolean).join(" ");
-  return [hymnNo, title].filter(Boolean).join(" ");
+  return presenterPraiseTitle(song, fallbackText, version);
 }
 
 function presenterSongTitleHymnNo(song = null, version = null, fallbackText = "") {
@@ -4163,7 +4157,7 @@ function presenterFullscreenSongTitleView(slide, options = {}) {
     assignee: "",
     fullscreenSongTitle: true,
     fullscreenSongTitleStyle: isSectionSong ? "standard" : "note-title",
-    fullscreenSongTitleHideDetail: hideDetail,
+    fullscreenSongTitleHideDetail: hideDetail && content.detailKind !== "hymn",
   };
 }
 
@@ -4657,9 +4651,11 @@ function renderPresenterSlideText(slide) {
 function renderPresenterSongText(text, slide) {
   const raw = String(text || " ");
   const match = raw.match(/^(\s*)([\u2669\u266A\u266B\u266C])(\s*)(.*)$/u);
-  if (!match) return renderPresenterHighlightedText(raw, slide);
+  const detail = !slide?.fullscreenSongTitle && slide?.songTitleContent?.detailKind === "hymn"
+    ? ` <small class="presenter-song-book">${escapeHtml(slide.songTitleContent.detail)}</small>` : "";
+  if (!match) return renderPresenterHighlightedText(raw, slide) + detail;
   const [, leading, , spacing, rest] = match;
-  return `${escapeHtml(leading)}<span class="presenter-song-note" aria-hidden="true">${escapeHtml(PRESENTER_SONG_NOTE)}</span>${escapeHtml(spacing || " ")}${renderPresenterHighlightedText(rest || " ", slide)}`;
+  return `${escapeHtml(leading)}<span class="presenter-song-note" aria-hidden="true">${escapeHtml(PRESENTER_SONG_NOTE)}</span>${escapeHtml(spacing || " ")}${renderPresenterHighlightedText(rest || " ", slide)}${detail}`;
 }
 
 function presenterLyricVerseNumber(slide, lines = presenterDisplayLines(slide)) {

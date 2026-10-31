@@ -218,3 +218,12 @@ remain unchanged. This is message handling, not a backend error repair or bypass
 New-variant prompt and success wording use 판본; existing saved labels are not
 rewritten. Both-engine injected relationship failures verify error-only toasts,
 state release, unchanged lyrics/forms/audio/relationships and zero production writes.
+
+## 판본 제목·부제 · 2026-10-31
+
+운영 단일 레코드의 제목과 부제는 해당 판본의 metadata.title과 metadata.subtitle이다.
+판본 구분명은 선택용으로 보존한다. 곡목 목록은 묶음 대표 판본을 표시하고
+선택한 판본의 제목이 송출된다. 찬송가 제목의 부제 자리에는 판본과 장 번호를
+표시한다. 일반 곡은 부제를 우선하고 비었을 때 원제를 표시한다. 원제·부제는
+별도 필드로 보존하며 제목과 같은 문구는 화면에서 중복 표시하지 않는다.
+이전 다중 버전 자료를 읽을 때는 기존 버전 제목 해석을 지원한다.

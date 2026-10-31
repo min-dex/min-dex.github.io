@@ -25,9 +25,14 @@ try:
    toggle=page.locator(f'[data-presenter-inline-toggle="{data["ids"][0]}"]');field=panel.locator('[data-presenter-preparation-field]')
    for refs in cases[:6]:
     if not panel.is_visible():toggle.click()
-    display=page.evaluate('refs=>formatServiceScriptureReferenceList(refs)',refs);field.fill(display);panel.locator('[data-presenter-inline-apply]').click()
+    display=page.evaluate('refs=>formatServiceScriptureReferenceList(refs)',refs)
+    field.fill(display)
+    if refs == cases[1]:
+     # Exercise persistence after the loaded marker was invalidated while editing.
+     page.evaluate('state.loadedWorshipServiceIds.delete(inlineFixture.sid)')
+    panel.locator('[data-presenter-inline-apply]').click()
     page.wait_for_function('!presenterInlineInputSaves.size&&!state.saving&&!state.presenterPreparationApplyingServiceIds.size')
-    plan=page.evaluate('''refs=>{const item=state.serviceItems[inlineFixture.sid].find(x=>x.id===inlineFixture.ids[0]);const actual=serviceItemScriptureReferences(item,parseServiceItemMemo(item.memo));if(JSON.stringify(actual)!==JSON.stringify(normalizeServiceScriptureReferenceList(refs)))throw Error('apply lost reference '+JSON.stringify(actual));if(parseServiceItemMemo(item.memo).scriptureTranslationId!==state.selectedBibleTranslationId)throw Error('translation changed');inlineFixture.checkQuiet();return JSON.stringify(presenterSlidesForService(inlineFixture.sid))}''',refs)
+    plan=page.evaluate('''refs=>{const item=state.serviceItems[inlineFixture.sid].find(x=>x.id===inlineFixture.ids[0]);const actual=serviceItemScriptureReferences(item,parseServiceItemMemo(item.memo));if(JSON.stringify(actual)!==JSON.stringify(normalizeServiceScriptureReferenceList(refs)))throw Error('apply lost reference '+JSON.stringify({expected:refs,actual}));if(parseServiceItemMemo(item.memo).scriptureTranslationId!==state.selectedBibleTranslationId)throw Error('translation changed');inlineFixture.checkQuiet();return JSON.stringify(presenterSlidesForService(inlineFixture.sid))}''',refs)
     assert '합성 검증 본문' in plan,'missing fixture slide content'
     page.evaluate('async()=>{const id=inlineFixture.sid;state.loadedWorshipServiceIds.delete(id);await loadServiceItems(id);renderServiceList();renderPresenterDetail()}')
     if not panel.is_visible():toggle.click()
