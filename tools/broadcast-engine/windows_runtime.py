@@ -1,5 +1,6 @@
 """Windows-only dependencies, frozen into the test receiver."""
 import datetime
+import uuid
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
@@ -8,7 +9,7 @@ import win32api
 import win32job
 
 def own_process_tree():
-    job = win32job.CreateJobObject(None, None)
+    job = win32job.CreateJobObject(None, 'Mindex-rehearsal-' + uuid.uuid4().hex)
     limits = win32job.QueryInformationJobObject(job, win32job.JobObjectExtendedLimitInformation)
     limits['BasicLimitInformation']['LimitFlags'] |= win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
     win32job.SetInformationJobObject(job, win32job.JobObjectExtendedLimitInformation, limits)
