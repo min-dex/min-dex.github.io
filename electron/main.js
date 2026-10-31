@@ -224,9 +224,9 @@ function openBroadcastLab() {
     return { action: "allow", overrideBrowserWindowOptions: { parent: lab,
       webPreferences: { sandbox: true, nodeIntegration: false, contextIsolation: true } } };
   });
-  lab.webContents.on("did-create-window", child => {
+  lab.webContents.on("did-create-window", (child, details) => {
     child.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
-    child.webContents.on("will-navigate", event => event.preventDefault());
+    child.webContents.on("will-navigate", (event, url) => { if (url !== details.url) event.preventDefault(); });
     lab.once("closed", () => { if (!child.isDestroyed()) child.close(); });
   });
   lab.loadFile(path.join(directory, "index.html")).catch(() => { if (!lab.isDestroyed()) lab.close(); });
