@@ -8246,7 +8246,17 @@ async function ensureWorshipServiceRowsLoadedForPersistence(serviceId = "") {
       .map((section) => section.id)
       .filter(Boolean),
   );
-  const { sections, elements } = await fetchWorshipRowsForServiceIds([id]);
+  const atomic = await worshipAtomicClient();
+  const fetched = await fetchWorshipRowsForServiceIds([id]);
+  // A missing load marker does not mean the editor is empty. Keep its edits
+  // and build the save against the same revision the editor originally read.
+  const keepDraft = Array.isArray(state.serviceItems[id]) && (
+    state.dirtyServiceElementIds.get(id)?.size || state.dirtyServiceStructureIds.has(id)
+    || (state.selectedServiceId === id && state.dirty.service) || serviceHasPendingTextEdits(id)
+  );
+  const rows = keepDraft ? atomic.baseline(id) : fetched;
+  if (!rows) throw new Error("BASELINE_REQUIRED");
+  const { sections, elements } = keepDraft ? structuredClone(rows) : rows;
   const loadedSectionIds = new Set([
     ...previousSectionIds,
     ...sections.map((section) => section.id).filter(Boolean),
@@ -8261,7 +8271,7 @@ async function ensureWorshipServiceRowsLoadedForPersistence(serviceId = "") {
   ];
   state.loadedWorshipServiceIds.add(id);
   const loadedService = state.services.find((service) => service.id === id);
-  if (loadedService) {
+  if (loadedService && !keepDraft) {
     state.serviceItems[id] = projectWorshipServiceItemsFromTemplate(
       loadedService,
       groupWorshipElements(sections, elements)[id] || [],
