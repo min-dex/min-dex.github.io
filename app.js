@@ -4637,7 +4637,7 @@ async function hydrateSupplementalWorshipDataAfterInitialRender() {
   }
 
   if (isServiceDataModule()) {
-    renderServiceList();
+    if (state.module === "bulletin") renderBulletinList(); else renderServiceList();
     renderCurrentServiceModuleDetail();
   }
 }

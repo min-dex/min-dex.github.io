@@ -75,7 +75,16 @@ try:
             assert page.locator('[data-bulletin-open]').count() == 1
             assert page.locator('[data-bulletin-open=old]').count() == 1
             assert page.evaluate("JSON.stringify(state.services)===worshipBefore&&document.getElementById('preserved-draft')===draftNode&&draftNode.value==='미저장 주보 내용'"), 'worship records or open draft replaced'
-            print('PASS saved-only bulletin UI: empty, historical, save success/failure, remote deletion, recovery, retry, search and worship/draft preservation', engine)
+            # Late supplemental worship hydration must keep the saved-bulletin sidebar.
+            page.evaluate("""async()=>{
+                const previous=[fetchCachedSupabasePaged,loadCalendarData,ensureUpcomingPublicWorshipServices];
+                fetchCachedSupabasePaged=async()=>[];loadCalendarData=async()=>{};ensureUpcomingPublicWorshipServices=async()=>[];
+                try{await hydrateSupplementalWorshipDataAfterInitialRender()}
+                finally{[fetchCachedSupabasePaged,loadCalendarData,ensureUpcomingPublicWorshipServices]=previous}
+            }""")
+            assert page.locator('[data-bulletin-open=old]').count() == 1, 'late hydration replaced saved bulletin list with worship list'
+            assert page.evaluate('JSON.stringify(state.services)===worshipBefore')
+            print('PASS saved-only bulletin UI: empty, historical, save success/failure, remote deletion, recovery, retry, search, late hydration and worship/draft preservation', engine)
             browser.close()
 finally:
     server.shutdown()
