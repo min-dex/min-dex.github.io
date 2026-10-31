@@ -10142,20 +10142,11 @@ function updateSongField(field) {
 
   if (key === "title") {
     updateEditorTitle(song);
+  }
+  if (["title", "subtitle", "original_title"].includes(key)) {
     updateNativeVersionTitlePreview(song);
   }
 
-  state.dirty.song = true;
-  updateSaveState();
-}
-
-function updateVersionOutputTitleField(field) {
-  const song = getSelectedSong();
-  const version = song?.versions?.find(item => item.id === field.dataset.versionOutputTitleField);
-  if (!version) return;
-  version.output_title = field.value.trim();
-  updateNativeVersionTitlePreview(song);
-  clearSearchCaches();
   state.dirty.song = true;
   updateSaveState();
 }
@@ -17541,8 +17532,8 @@ function renderSongMetadataDialog(song) {
           </button>
         </header>
         <div class="metadata-popover-grid">
-          ${renderInput(song._singleSongRecord && praiseDisplayGroup(song).members.length > 1 ? "이 판본의 곡 제목" : "제목", "title", (song.hymn_no ? stripHymnNumber(song.title) : song.title) || "", "compact meta-title")}
-          ${renderInput("부제", "subtitle", song.subtitle || "", "compact")}
+          ${renderInput(song._singleSongRecord ? "판본 제목" : "제목", "title", (song.hymn_no ? stripHymnNumber(song.title) : song.title) || "", "compact meta-title")}
+          ${renderInput(song._singleSongRecord ? "판본 부제" : "부제", "subtitle", song.subtitle || "", "compact")}
           ${renderInput("원제", "original_title", song.original_title || "", "compact")}
           ${renderMetadataInput("아티스트", "artist", metadata.artist || "", "compact")}
           ${renderMetadataInput("작사", "lyricist", metadata.lyricist || "", "compact")}
@@ -19383,7 +19374,7 @@ function songVersionOutputTitles(song) {
 }
 
 function songOutputTitle(song, version = null) {
-  return String(version?.output_title || "").trim() || String(song?.title || "").trim();
+  return String((!song?._singleSongRecord && version?.output_title) || "").trim() || String(song?.title || "").trim();
 }
 
 function serializeSongMemo(song, options = {}) {
@@ -24799,7 +24790,8 @@ function serviceSidebarChildItemDisplayText(item = {}) {
   const song = serviceItemLinkedSong(effectiveItem);
   if (song) {
     const version = getPresenterServiceItemVersion(song, effectiveItem, service);
-    return presenterSongTitleDisplayTitle(song, version, serviceItemDisplayText(effectiveItem));
+    const fallback = serviceItemDisplayText(effectiveItem);
+    return [presenterSongTitleHymnNo(song, version, fallback), presenterSongTitleDisplayTitle(song, version, fallback)].filter(Boolean).join(" ");
   }
   const liturgicalTitle = serviceItemLiturgicalNavigationTitle(item);
   if (liturgicalTitle !== null) return liturgicalTitle;

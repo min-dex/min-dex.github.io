@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261031-focus-choir-default",
+  "version": "20261031-variant-title",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "87282e3ccf341d9c05831421beafe6d4e987c6094c671ae2cdf4897aa4ddc1a7",
-  "runtime_sha256": "7502a9903fcbe2de419f5d90aa6b6abb0d7c9f996cfe1f149b9a4274bd4381b4",
-  "source_bytes": 1353798,
-  "runtime_bytes": 966483,
-  "source_gzip": 309534,
-  "runtime_gzip": 242648
+  "source_sha256": "00cbaf074d5a968dcb85afe71263322a3a8e4b81019239b67a085fda03dae1c6",
+  "runtime_sha256": "b87ac6285e063ee1f63896b0e067291b0151ddf7e7b00bd55a0f3eccb37021a7",
+  "source_bytes": 1353625,
+  "runtime_bytes": 966337,
+  "source_gzip": 309507,
+  "runtime_gzip": 242647
 }
