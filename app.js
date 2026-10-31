@@ -29460,49 +29460,37 @@ function renderPresenterServiceAssetInput(item, index, memo, options = {}) {
   const asset = normalizeServiceAsset(memo.asset);
   const elementType = serviceMemoElementType(memo);
   const serviceId = item.service_id || state.selectedServiceId;
-  if (isPresenterReferenceMediaItem(item, memo)) {
-    const detectedKind = presenterReferenceMediaKindForSource(asset.url);
-    const kind = asset.original?.format === "key" ? "file" : asset.pptx ? "imported_deck" : detectedKind || (["image", "video", "audio"].includes(elementType) ? elementType : "image");
-    const needsKindSelection = Boolean(asset.url && !detectedKind && !asset.original);
-    return `
-      <div class="svc-reference-media-input">
-        ${kind === "video" ? renderPresenterInputVideoControls(asset, [serviceId,item.id||index]) : ""}
-        ${renderPresenterMediaPlacementInput(item, serviceId)}
-        <div class="svc-reference-media-toolbar">
-          ${needsKindSelection ? `<label class="svc-presenter-input-field">
-            <span>종류</span>
-            <select class="svc-presenter-input-control" data-service-item-field="element_type" data-service-item-index="${index}" data-service-id="${escapeAttr(serviceId)}" aria-label="참고 화면 종류">
-              <option value="image"${kind === "image" ? " selected" : ""}>이미지</option>
-              <option value="video"${kind === "video" ? " selected" : ""}>영상</option>
-              <option value="audio"${kind === "audio" ? " selected" : ""}>음원</option>
-            </select>
-          </label>` : detectedKind ? `<span class="svc-reference-media-kind">${escapeHtml(serviceAssetFileKindLabel(kind))}</span>` : ""}
-          ${options.headerActions ? "" : renderPresenterAssetUpload(item, index, memo, serviceId)}
-        </div>
-        <label class="svc-presenter-input-field svc-reference-media-title">
-          <input class="svc-presenter-input-control" type="text" data-service-item-field="asset_name" data-service-item-index="${index}" data-service-id="${escapeAttr(serviceId)}"
-            value="${escapeAttr(asset.name)}" placeholder="참고 화면 제목" aria-label="참고 화면 제목" />
-        </label>
-        ${renderPresenterServiceAssetUrlInput(asset, index, serviceId, "참고 화면 공개 링크", "공개 링크", "파일을 선택하거나 공개 URL 입력")}
-        ${renderPresenterReferenceMediaPreview(asset, kind, [serviceId,item.id||index])}
-        ${renderPresenterMediaOrder(item, serviceId)}
-      </div>`;
-  }
-  const kind = ["image", "video", "audio"].includes(elementType) ? elementType : "";
-  const assetKind = asset.kind && asset.kind !== kind ? asset.kind : kind || asset.kind || elementType || "file";
-  const typeLabel = serviceAssetFileKindLabel(assetKind || elementType);
+  const reference = isPresenterReferenceMediaItem(item, memo);
+  const detected = reference ? presenterReferenceMediaKindForSource(asset.url) : "";
+  const kind = reference
+    ? asset.original?.format === "key" ? "file" : asset.pptx ? "imported_deck" : detected || (["image", "video", "audio"].includes(elementType) ? elementType : "image")
+    : asset.kind || elementType || "file";
+  const typeLabel = serviceAssetFileKindLabel(kind);
+  const commonLayout = !reference || kind === "video";
+  const nameLabel = commonLayout ? `${item.label || "파일"} 이름` : "참고 화면 제목";
+  const unknownKind = reference && asset.url && !detected && !asset.original;
   return `
-    <div class="svc-reference-media-input svc-reference-media-input--asset svc-reference-media-input--${escapeAttr(assetKind)}">
-      ${assetKind === "video" ? renderPresenterInputVideoControls(asset, [serviceId,item.id||index]) : ""}
-      <div class="svc-reference-media-toolbar svc-reference-media-toolbar--asset">
+    <div class="svc-reference-media-input${commonLayout ? ` svc-reference-media-input--asset svc-reference-media-input--${escapeAttr(kind)}` : ""}">
+      ${kind === "video" ? renderPresenterInputVideoControls(asset, [serviceId,item.id||index]) : ""}
+      ${reference ? renderPresenterMediaPlacementInput(item, serviceId) : ""}
+      <div class="svc-reference-media-toolbar${commonLayout ? " svc-reference-media-toolbar--asset" : ""}">
+        ${unknownKind ? `<label class="svc-presenter-input-field">
+          <span>종류</span>
+          <select class="svc-presenter-input-control" data-service-item-field="element_type" data-service-item-index="${index}" data-service-id="${escapeAttr(serviceId)}" aria-label="참고 화면 종류">
+            <option value="image"${kind === "image" ? " selected" : ""}>이미지</option>
+            <option value="video"${kind === "video" ? " selected" : ""}>영상</option>
+            <option value="audio"${kind === "audio" ? " selected" : ""}>음원</option>
+          </select>
+        </label>` : detected && !commonLayout ? `<span class="svc-reference-media-kind">${escapeHtml(typeLabel)}</span>` : ""}
         ${options.headerActions ? "" : renderPresenterAssetUpload(item, index, memo, serviceId)}
       </div>
       <label class="svc-presenter-input-field svc-reference-media-title">
         <input class="svc-presenter-input-control" type="text" data-service-item-field="asset_name" data-service-item-index="${index}" data-service-id="${escapeAttr(serviceId)}"
-          value="${escapeAttr(asset.name)}" placeholder="${escapeAttr(`${typeLabel} 이름`)}" aria-label="${escapeAttr(`${item.label || "파일"} 이름`)}" title="${escapeAttr(asset.name)}" />
+          value="${escapeAttr(asset.name)}" placeholder="${escapeAttr(commonLayout ? `${typeLabel} 이름` : nameLabel)}" aria-label="${escapeAttr(nameLabel)}" title="${escapeAttr(asset.name)}" />
       </label>
-      ${renderPresenterServiceAssetUrlInput(asset, index, serviceId, `${item.label || "파일"} 링크`, "파일/링크", "파일을 선택하거나 공개 URL 입력")}
-      ${renderPresenterReferenceMediaPreview(asset, assetKind, [serviceId,item.id||index])}
+      ${renderPresenterServiceAssetUrlInput(asset, index, serviceId, reference ? "참고 화면 공개 링크" : `${item.label || "파일"} 링크`, reference ? "공개 링크" : "파일/링크", "파일을 선택하거나 공개 URL 입력")}
+      ${renderPresenterReferenceMediaPreview(asset, kind, [serviceId,item.id||index])}
+      ${reference ? renderPresenterMediaOrder(item, serviceId) : ""}
     </div>`;
 }
 
