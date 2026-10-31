@@ -159,10 +159,17 @@
       if(['service','presenter'].includes(module)&&state.selectedServiceId){
         return await window.MINDEX_SERVICE_ENTRY?.check(state.selectedServiceId,undefined,{background:true})&&done;
       }
+      if(module==='bulletin'&&!await loadSavedBulletinList({force:true}))return false;
+      if(message.context!==entryContext()||entryBlocked())return false;
       const target=controller()?.remoteIdentity();
       return target?await controller().refreshRemote(target.kind,target.recordId)&&done:done;
     }
     return true;
+  }
+  async function refreshBulletin(id){
+    if(state.module==='bulletin'&&!await loadSavedBulletinList({force:true}))return false;
+    const active=controller(),target=active?.remoteIdentity();
+    return target?.kind==='bulletin'&&(id==='all'||target.recordId===id)?active.refreshRemote('bulletin',target.recordId):true;
   }
   async function refreshCalendar(){
     const client=state.client,project=state.config.url,context=entryContext(),revision=edit,before=state.calendarData;
@@ -239,7 +246,7 @@
     try{
       for(const [id,m] of [...pending]){
         if(m.project!==state.config.url){if(pending.get(id)===m)pending.delete(id);continue;}
-        const done=m.kind==='entry'?await refreshEntry(m):m.kind==='scripture'?await refreshScriptures():m.kind==='setlist-archive'?await window.MINDEX_ARCHIVE_LIVE?.refresh():['references','service-settings'].includes(m.kind)?await refreshShared(m.kind):m.kind==='service-list'?await window.MINDEX_SERVICE_LIST_LIVE?.refresh():m.kind==='song'?await refreshSong(m.recordId):await controller()?.refreshRemote(m.kind,m.recordId);
+        const done=m.kind==='entry'?await refreshEntry(m):m.kind==='scripture'?await refreshScriptures():m.kind==='setlist-archive'?await window.MINDEX_ARCHIVE_LIVE?.refresh():['references','service-settings'].includes(m.kind)?await refreshShared(m.kind):m.kind==='service-list'?await window.MINDEX_SERVICE_LIST_LIVE?.refresh():m.kind==='song'?await refreshSong(m.recordId):m.kind==='bulletin'?await refreshBulletin(m.recordId):await controller()?.refreshRemote(m.kind,m.recordId);
         if(done&&pending.get(id)===m)pending.delete(id);
       }
     }catch{delay=15000;}
@@ -253,6 +260,7 @@
       window.MINDEX_ARCHIVE_LIVE?.reconcile();
       if(!scriptureBlocked())receive({id:createUuid(),project:state.config.url,kind:'scripture',recordId:'all'});
       for(const kind of ['references','service-settings'])if(!sharedBlocked(kind))receive({id:createUuid(),project:state.config.url,kind,recordId:'all'});
+      if(state.module==='bulletin')receive({id:createUuid(),project:state.config.url,kind:'bulletin',recordId:'all'});
       // Only the visible record is fetched on recovery; no full lyrics corpus polling.
       if(state.module==='praise'&&state.selectedSongId)receive({id:createUuid(),project:state.config.url,kind:'song',recordId:state.selectedSongId});
       const target=controller()?.remoteIdentity();

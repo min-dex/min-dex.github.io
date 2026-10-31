@@ -15029,17 +15029,84 @@ function serviceSupportsBulletin(service = null) {
     && !serviceIsNoGathering(service));
 }
 
+let savedBulletinListCache = null;
+
+function savedBulletinListState() {
+  const client = state.client, project = state.config.url;
+  if (!savedBulletinListCache || savedBulletinListCache.client !== client || savedBulletinListCache.project !== project) {
+    savedBulletinListCache = {client, project, ids: new Set(), loaded: false, error: "", promise: null, revision: 0};
+  }
+  return savedBulletinListCache;
+}
+
+function rememberSavedBulletin(serviceId) {
+  const cache = savedBulletinListState();
+  cache.ids.add(serviceId);
+  cache.revision++;
+  cache.error = "";
+  if (state.module === "bulletin") renderBulletinList();
+}
+
+async function loadSavedBulletinList({force = false} = {}) {
+  if (!state.client) return false;
+  const cache = savedBulletinListState();
+  if (cache.promise) return cache.promise;
+  if (cache.loaded && !force) return true;
+  const revision = cache.revision;
+  const current = () => savedBulletinListCache === cache && cache.client === state.client && cache.project === state.config.url;
+  let changed = !cache.loaded || Boolean(cache.error);
+  cache.promise = (async () => {
+    try {
+      const result = await fetchAllRows(() => ({async range(from, to) {
+        const page = await cache.client.from("mindex_bulletins").select("service_id").order("service_id").range(from, to);
+        if (!page?.error && !Array.isArray(page?.data)) throw new Error("Incomplete bulletin list page");
+        return page;
+      }}));
+      if (result.error) throw result.error;
+      if (result.data.some(row => !row || typeof row.service_id !== "string" || !row.service_id)) throw new Error("Invalid bulletin list");
+      if (!current() || revision !== cache.revision) return false;
+      const ids = new Set(result.data.map(row => row.service_id));
+      changed ||= JSON.stringify([...ids].sort()) !== JSON.stringify([...cache.ids].sort());
+      cache.ids = ids;
+      cache.loaded = true;
+      cache.error = "";
+      return true;
+    } catch (error) {
+      if (!current() || revision !== cache.revision) return false;
+      cache.error = departmentInputError(error, "주보 목록 불러오기").message;
+      changed = true;
+      return false;
+    } finally {
+      cache.promise = null;
+      if (current() && state.module === "bulletin" && (changed || !cache.loaded)) renderBulletinList();
+    }
+  })();
+  return cache.promise;
+}
+
 function getBulletinSidebarServices() {
   const query=normalizeSearchValue(state.search);
-  return state.services.filter(serviceSupportsBulletin).filter(service=>!query||normalizeSearchValue(`${service.date} ${bulletinPageTabTitle(service.id)} ${service.title||""}`).includes(query)).sort((a,b)=>b.date.localeCompare(a.date));
+  return state.services.filter(serviceSupportsBulletin).filter(service => savedBulletinListState().ids.has(service.id)).filter(service=>!query||normalizeSearchValue(`${service.date} ${bulletinPageTabTitle(service.id)} ${service.title||""}`).includes(query)).sort((a,b)=>b.date.localeCompare(a.date));
 }
 
 function renderBulletinList() {
   refs.songCount.textContent = "";
   if (!state.client || state.connectionError) {refs.songList.innerHTML=renderConnectionList(state.connectionError);return;}
   if (state.serviceError || !state.serviceTypes.length) {refs.songList.innerHTML=state.serviceError?renderListEmptyState("주보 목록을 불러오지 못했습니다",state.serviceError):renderLoadingList();return;}
+  const saved = savedBulletinListState();
+  if (!saved.loaded && !saved.error) {
+    void loadSavedBulletinList();
+    refs.songList.innerHTML = renderLoadingList();
+    return;
+  }
+  if (saved.error) {
+    refs.songList.innerHTML = renderListEmptyState("주보 목록을 불러오지 못했습니다", saved.error)
+      + '<button class="btn secondary" type="button" data-bulletin-list-retry>다시 시도</button>';
+    refs.songList.querySelector("[data-bulletin-list-retry]").addEventListener("click", () => { void loadSavedBulletinList({force: true}); });
+    return;
+  }
   const services=getBulletinSidebarServices();
-  refs.songList.innerHTML=`<div class="service-sidebar"><section class="service-sidebar-section"><div class="service-sidebar-head"><span>주보</span></div><div class="service-sidebar-stack service-sidebar-stack--navigation">${services.map(service=>`<button type="button" class="service-type-row${state.presenterBulletinServiceId===service.id?" active":""}" data-bulletin-open="${escapeAttr(service.id)}" aria-current="${state.presenterBulletinServiceId===service.id?"page":"false"}"><span>${escapeHtml(formatServiceDate(service))} · ${escapeHtml(bulletinPageTabTitle(service.id))}</span></button>`).join("")||'<p class="muted">표시할 주보가 없습니다.</p>'}</div></section></div>`;
+  refs.songList.innerHTML=`<div class="service-sidebar"><section class="service-sidebar-section"><div class="service-sidebar-head"><span>주보</span></div><div class="service-sidebar-stack service-sidebar-stack--navigation">${services.map(service=>`<button type="button" class="service-type-row${state.presenterBulletinServiceId===service.id?" active":""}" data-bulletin-open="${escapeAttr(service.id)}" aria-current="${state.presenterBulletinServiceId===service.id?"page":"false"}"><span>${escapeHtml(formatServiceDate(service))} · ${escapeHtml(bulletinPageTabTitle(service.id))}</span></button>`).join("")||'<p class="muted">저장된 주보가 없습니다.</p>'}</div></section></div>`;
   finishListRender();
 }
 
@@ -15140,6 +15207,7 @@ async function saveBulletinDraft(serviceId, value, revision) {
   if(error)throw new Error(`${departmentInputError(error,"주보 저장").message} 편집 내용은 유지됩니다.`,{cause:error});
   if(publishClient===state.client) {
     rememberRecentEdit({module:"bulletin",selectedServiceId:serviceId},"",data.updated_at);
+    rememberSavedBulletin(serviceId);
     window.MINDEX_CONTENT_LIVE?.publish("bulletin",serviceId);
   }
   return data;

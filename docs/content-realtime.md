@@ -187,3 +187,12 @@ Real anon/authenticated creation, title reuse, replay, stale/audio deletion guar
 empty deletion/replay and no resurrection PASS with all fixtures/receipts rolled back.
 Production source_count lacks the baseline default; both inserts now supply it
 explicitly and the PostgreSQL fixture removes those defaults as a regression.
+
+## 저장 주보 날짜 목록 · 2026-10-31
+
+주보 화면에서는 저장된 주보의 service_id만 전체 페이지로 읽어 목록의
+추가/삭제를 대조한다. 기존 화면 진입·저장 알림·60초 복구 큐를 공유하며
+새 timer/socket은 만들지 않는다. 저장 성공 시 현재 기기의 목록도 즉시
+반영한다. 입력 중 초안이나 공통 양식만 있는 예배는 저장 주보로 취급하지
+않으며, 목록 조회 실패는 빈 목록으로 적용하지 않는다. 예배 원본과 현재
+열린 주보 문서의 DOM/입력/인쇄 세션은 목록 갱신으로 바꾸지 않는다.
