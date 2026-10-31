@@ -69,6 +69,13 @@ export async function exportWithKeynote(source, target) {
   });
 }
 
+export async function exportPrivateCopy(source, target, exporter) {
+  const folder=await fs.mkdtemp(path.join(path.dirname(source),'working-')),working=path.join(folder,'source.key');
+  await fs.copyFile(source,working);let completed=false;
+  try {await exporter(working,target);completed=true;}
+  finally {if(completed)await fs.rm(folder,{recursive:true,force:true});}
+}
+
 export async function createBridge({ port=43181, origin='https://min-dex.github.io', cacheDir, exporter=exportWithKeynote, approveTtl=120000 }={}) {
   if (origin !== 'https://min-dex.github.io' && !/^http:\/\/127\.0\.0\.1:\d+$/.test(origin)) throw Error('허용되지 않은 민덱스 주소입니다.');
   const root = cacheDir || await fs.mkdtemp(path.join(os.tmpdir(),'mindex-keynote-bridge-'));
@@ -141,7 +148,7 @@ export async function createBridge({ port=43181, origin='https://min-dex.github.
           await fs.mkdir(folder,{recursive:true,mode:0o700});await fs.writeFile(source,bytes,{mode:0o600});
           let manifest;
           try {manifest=JSON.parse(await fs.readFile(path.join(exported,'manifest.json'),'utf8'));validateKeynoteHtmlManifest(manifest,manifest);assertKnownKeynoteHtmlRuntime(manifest);if(manifest.sourceSha256!==sha)throw Error();}
-          catch {await fs.rm(exported,{recursive:true,force:true});await exporter(source,exported);manifest=await prepareExport(source,exported);}
+          catch {await fs.rm(exported,{recursive:true,force:true});await exportPrivateCopy(source,exported,exporter);manifest=await prepareExport(source,exported);}
           const id=crypto.randomUUID();jobs.set(id,{folder:exported,manifest,token,created:Date.now()});
           return json(200,{id,manifest});
         } finally {converting=false;}

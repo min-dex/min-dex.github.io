@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import {createBridge,prepareExport,PROTOCOL} from '../tools/keynote-browser-bridge.mjs';
+import {createBridge,prepareExport,exportPrivateCopy,PROTOCOL} from '../tools/keynote-browser-bridge.mjs';
 import {KEYNOTE_HTML_RUNTIME_SHA256} from '../mindex.keynote-html-engine.mjs';
 import {prepareBundle,agentPlist} from '../tools/install-keynote-browser-bridge.mjs';
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -77,5 +77,22 @@ test('reviewable helper bundle pins its local runtime and keeps launch arguments
     const plist=agentPlist('/Users/test & review',folder);
     assert.ok(plist.includes('test &amp; review'));assert.ok(plist.includes('<key>RunAtLoad</key><true/>'));
     assert.ok(plist.includes('<key>ProgramArguments</key><array>'));assert.ok(!plist.includes('/bin/sh'));
+  } finally {await fs.rm(root,{recursive:true,force:true});}
+});
+
+test('native auto-save can only rewrite its disposable working copy, never the preserved KEY',async()=>{
+  const root=await fs.mkdtemp(path.join(os.tmpdir(),'mindex-bridge-copy-')),source=path.join(root,'source.key');
+  try {
+    await fs.writeFile(source,'byte-identical original');let working;
+    await exportPrivateCopy(source,path.join(root,'playback'),async(copy)=>{
+      working=copy;assert.notEqual(copy,source);await fs.writeFile(copy,'native format upgrade');
+    });
+    assert.equal(await fs.readFile(source,'utf8'),'byte-identical original');
+    await assert.rejects(fs.stat(working),'successful disposable copy removed');
+    await assert.rejects(exportPrivateCopy(source,path.join(root,'playback'),async(copy)=>{
+      working=copy;await fs.writeFile(copy,'recovery copy');throw Error('export interrupted');
+    }),/interrupted/);
+    assert.equal(await fs.readFile(source,'utf8'),'byte-identical original');
+    assert.equal(await fs.readFile(working,'utf8'),'recovery copy');
   } finally {await fs.rm(root,{recursive:true,force:true});}
 });
