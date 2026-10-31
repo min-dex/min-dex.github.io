@@ -14,7 +14,7 @@
   })();loading.then(()=>{if(!identity)loading=null;});return loading;
  }
  function markup(){return `<section class="product-welcome"><details ${window.MindexDisclosure?.attrs(['product','home-intro'],true)||'open'}><summary>민덱스 소개</summary><p>예배 슬라이드와 주보를 만들고, 찬양·말씀·음원을 관리해요. 다른 기기에서도 예배 진행을 조작할 수 있어요.</p></details><button type="button" class="btn secondary" data-product-notes>업데이트 내용</button><p class="product-welcome-status" role="status" hidden></p></section>`;}
- function eligible(){return identity?.channel==='release'&&storage()?.ready&&!document.body.classList.contains('ui-booting')&&document.querySelector('.home-start .product-welcome')&&!document.querySelector('dialog[open],.modal:not([hidden])')&&!document.activeElement?.matches('input,textarea,[contenteditable=true]')&&!attempted&&!acknowledged&&storage().getItem('local',seenKey)!==identity.productVersion;}
+ function eligible(){return identity?.channel==='release'&&storage()?.ready&&!document.body.classList.contains('ui-booting')&&document.querySelector('.home-start .product-welcome')&&!document.querySelector('dialog[open],.modal:not([hidden]),[role=dialog][aria-modal=true]:not([hidden])')&&!document.activeElement?.matches('input,textarea,[contenteditable=true]')&&!attempted&&!acknowledged&&storage().getItem('local',seenKey)!==identity.productVersion;}
  function show(opener,automatic=false){
   if(dialog?.open)return;
   if(!identity){const note=document.querySelector('.product-welcome-status');if(note){note.hidden=false;note.textContent='업데이트 정보를 불러오지 못했어요.';}return;}
