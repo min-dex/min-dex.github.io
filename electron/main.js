@@ -209,14 +209,20 @@ function configureAutoUpdater() {
 }
 
 let broadcastLab = null;
+const localEncoderEnabled = require("../package.json").mindexTestBuild === true && require("../package.json").mindexLocalEncoder === true;
+const stopBroadcastEngine = require("./broadcast-engine").registerBroadcastEngine({
+  ipcMain,app,getLab:()=>broadcastLab,enabled:localEncoderEnabled
+});
 function openBroadcastLab() {
   if (require("../package.json").mindexTestBuild !== true) return false;
   if (broadcastLab && !broadcastLab.isDestroyed()) { broadcastLab.focus(); return true; }
   const directory = path.join(appRoot(), "tools", "broadcast-prototype");
   const lab = new BrowserWindow({ width: 1320, height: 900, parent: mainWindow,
-    webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false } });
+    webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false,
+      ...(localEncoderEnabled ? { preload:path.join(__dirname,"broadcast-preload.js") } : {}) } });
   broadcastLab = lab;
-  lab.on("closed", () => { broadcastLab = null; });
+  lab.on("closed", () => { stopBroadcastEngine(); broadcastLab = null; });
+  lab.webContents.on("render-process-gone",stopBroadcastEngine);
   lab.webContents.on("will-navigate", event => event.preventDefault());
   const hall = require("node:url").pathToFileURL(path.join(directory, "hall-output.html")).href;
   lab.webContents.setWindowOpenHandler(({ url }) => {

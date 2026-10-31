@@ -63,6 +63,26 @@ with tempfile.TemporaryDirectory() as temp:
     assert not lab.evaluate('broadcastPrototype.routing().broadcast')
     lab.wait_for_timeout(80)
     assert pixels()[0]==second[0] and pixels()[1]!=second[1]
+    if lab.locator('#engineTest').is_visible():
+     import io, math, struct, wave
+     signal=io.BytesIO()
+     with wave.open(signal,'wb') as wav:
+      wav.setparams((1,2,16000,0,'NONE',''))
+      wav.writeframes(b''.join(struct.pack('<h',round(4500*math.sin(i*2*math.pi*440/16000))) for i in range(16000)))
+     lab.bring_to_front()
+     lab.locator('#file').set_input_files({'name':'test-tone.wav','mimeType':'audio/wav','buffer':signal.getvalue()})
+     until(lab,"broadcastPrototype.stats().source==='file'")
+     for excluded in (True,False):
+      if not excluded:lab.locator('#excludeBroadcast').click()
+      lab.locator('#engineRun').click()
+      until(lab,"!document.getElementById('engineRun').disabled",timeout=45000)
+      receipt=lab.locator('#engineStatus').inner_text()
+      assert '1280×720 · H.264 / AAC · TLS 인증서 확인' in receipt,receipt
+      assert ('무음' if excluded else '음성 신호 있음') in receipt,receipt
+      print(receipt,flush=True)
+     assert lab.evaluate('broadcastPrototype.stats().source')=='file'
+    elif os.environ.get('MINDEX_EXPECT_LOCAL_ENCODER')=='1':
+     raise AssertionError('packaged encoder is missing')
     lab.close();hall.wait_for_event('close') if not hall.is_closed() else None
     with ctx.expect_page() as again:page.locator('[data-broadcast-lab]:visible').click()
     lab=again.value;until(lab,'window.broadcastPrototype');assert lab.evaluate('broadcastPrototype.routing().broadcast')

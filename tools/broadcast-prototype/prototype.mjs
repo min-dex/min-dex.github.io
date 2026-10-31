@@ -173,3 +173,28 @@ captureInput=mountCaptureInput({policy:()=>outputPolicy.read(),video,onStart(){
 },onStop(){if(source==='capture'){source='test';paused=false;$('pause').textContent='일시정지';$('pause').disabled=false;$('sourceState').textContent='테스트 영상';}}});
 
 const stopHallOutput=mountHallOutput({getFrame(){if(disposed)return null;if(document.hidden)render(performance.now(),false);return canvas;}});
+
+if(window.localEncoder){
+ $('engineTest').hidden=false;
+ $('engineRun').onclick=async()=>{
+  const button=$('engineRun'),status=$('engineStatus');button.disabled=true;
+  let stream,silentContext;
+  try{
+   if(!captureInput.active())await $('prepareAudio').onclick();
+   const bus=captureInput.active()?captureInput.broadcastStream():broadcastAudio?.stream;
+   stream=broadcast.captureStream(30);
+   // A video-only capture still gets an explicit silent audio track.
+   let silent;
+   if(!bus?.getAudioTracks().length){
+    silentContext=new AudioContext();await silentContext.resume();
+    silent=silentContext.createMediaStreamDestination();
+   }
+   const track=(silent?.stream||bus).getAudioTracks()[0];stream.addTrack(track.clone());
+   status.textContent='합성 영상·음성 로컬 수신 중…';
+   const {rehearse}=await import('./encoder-test.mjs');
+   const receipt=await rehearse(stream,window.localEncoder);
+   status.textContent=`로컬 수신 확인 · ${receipt.width}×${receipt.height} · ${receipt.video} / ${receipt.audio} · TLS 인증서 확인 · ${receipt.receivedBytes}바이트 · ${receipt.audioPeak===0?'무음':'음성 신호 있음'}`;
+  }catch{status.textContent='로컬 수신 시험 실패 · 입력을 확인하고 다시 시도해 주세요.';}
+  finally{stream?.getTracks().forEach(track=>track.stop());if(silentContext)await silentContext.close();button.disabled=false;}
+ };
+}
