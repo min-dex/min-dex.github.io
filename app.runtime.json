@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261031-scripture-chapter-reference",
+  "version": "20261031-focus-choir-default",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "c9468c13bfae3ba99169639730ed4b71530a3c319a87dc030fb3c6ab71b4a114",
-  "runtime_sha256": "7e9e956cdc57f61e18d4aa7fa0d8e0d41c4b1dbe5fef9d1eaa4adad25443d7f4",
-  "source_bytes": 1353002,
-  "runtime_bytes": 965975,
-  "source_gzip": 309247,
-  "runtime_gzip": 242425
+  "source_sha256": "8026a0fa608b26131b34dc60b9139db64d9c8d0ca525ff9c15d4a82c762262bb",
+  "runtime_sha256": "15ab12fd9b4af7a1479afb55caae72b84f1d9f788c67619fdbc8a2dbc36c73b9",
+  "source_bytes": 1353807,
+  "runtime_bytes": 966491,
+  "source_gzip": 309526,
+  "runtime_gzip": 242644
 }

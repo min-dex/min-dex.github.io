@@ -14086,6 +14086,7 @@ function buildWorshipServiceScaffold(serviceId, typeId, options = {}) {
         source_kind: "mindex",
         source_ref: { label: elementLabel, ...(slotKey ? { slotKey } : {}), template: true, placeholder: !ready, ...(templateVersion ? { template_version: templateVersion } : {}) },
         config: {
+          ...(inputMode ? { inputMode } : {}),
           ...(formPresetRules.length ? { formPresetRules } : {}),
           ...(defaultStrength ? { defaultStrength } : {}),
           ...(outputMode ? { outputMode } : {}),
@@ -20585,10 +20586,10 @@ function confirmUnsavedChangesAction() {
   if (unsavedChangesDialogPromise) return unsavedChangesDialogPromise;
 
   unsavedChangesDialogPromise = new Promise((resolve) => {
-    const overlay = document.createElement("div");
+    const overlay = document.createElement("div"), returnFocus = document.activeElement;
     overlay.className = "unsaved-dialog-backdrop";
     overlay.innerHTML = `
-      <div class="unsaved-dialog" role="dialog" aria-modal="true" aria-labelledby="unsavedDialogTitle">
+      <div class="unsaved-dialog" role="dialog" aria-modal="true" aria-labelledby="unsavedDialogTitle" tabindex="-1">
         <div class="unsaved-dialog-copy">
           <h2 id="unsavedDialogTitle">저장하지 않은 변경이 있어요</h2>
         </div>
@@ -20600,14 +20601,23 @@ function confirmUnsavedChangesAction() {
       </div>
     `;
 
+    const dialog = overlay.querySelector('[role="dialog"]');
     const cleanup = (action) => {
       document.removeEventListener("keydown", handleKeydown);
       overlay.remove();
       unsavedChangesDialogPromise = null;
+      if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
       resolve(action);
     };
     const handleKeydown = (event) => {
-      if (event.key === "Escape") cleanup("cancel");
+      if (event.key === "Escape") { event.preventDefault();event.stopPropagation();cleanup("cancel");return; }
+      if (event.key !== "Tab") return;
+      const buttons = [...dialog.querySelectorAll('button:not(:disabled)')].filter(button => button.getClientRects().length && getComputedStyle(button).visibility !== "hidden");
+      const first = buttons[0], last = buttons.at(-1), active = document.activeElement;
+      if (!first || !dialog.contains(active) || (event.shiftKey ? active === first : active === last)) {
+        event.preventDefault();(event.shiftKey ? last : first)?.focus();
+        if (!first) dialog.focus();
+      }
     };
 
     overlay.addEventListener("click", (event) => {
@@ -21195,6 +21205,7 @@ function sundayThirdSpecialSongTemplateForDate(dateValue = "") {
   return {
     defaultText: "",
     defaultAssignee: "할렐루야 찬양대",
+    inputMode: "manual_praise",
   };
 }
 
@@ -21411,6 +21422,7 @@ function publicWorshipSpecialSongStep(options = {}) {
     elementType: "praise",
     default_text: defaultText,
     assignee: defaultAssignee,
+    ...(options.inputMode ? { inputMode: normalizeServiceInputMode(options.inputMode) } : {}),
     formPresetRules: [PUBLIC_SPECIAL_HYMN_FORM_PRESET_RULE],
     ...(options.hiddenInPresentation || options.hidden_in_presentation ? { hiddenInPresentation: true } : {}),
     ...scoreOutputMode(score),
@@ -21934,10 +21946,7 @@ function publicSundayThirdTemplate(options = {}) {
       { label: "대표기도", name: "대표기도", elementType: "title_person" },
     ] },
     publicWorshipScriptureReadingStep(),
-    publicWorshipSpecialSongStep(specialSong ? {
-      defaultText: String(specialSong.defaultText || "").trim(),
-      defaultAssignee: String(specialSong.defaultAssignee || "").trim(),
-    } : {}),
+    publicWorshipSpecialSongStep(specialSong || {}),
     publicWorshipThirdSermonStep({ typeId }),
     { label: "결단", name: "결단", required: false, flex: true, sectionKey: "response_song", elements: [
       { label: "결단기도", name: "결단기도", elementType: "title_person" },

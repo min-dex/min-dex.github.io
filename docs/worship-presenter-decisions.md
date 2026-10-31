@@ -5286,3 +5286,13 @@ handlers. Same-service refresh patches the mounted viewer so the input DOM,
 IME composition, draft, caret and focus survive; resizing only wraps CSS. The
 existing dynamic toolbar-height scroll inset remains authoritative. No scripture
 submission happens merely because the composer moved or the viewport resized.
+
+## Regular third-service choir input default · 2026-10-31
+
+New regular Sunday third-service special-song slots carrying the Hallelujah
+choir default (template effective 2026-07-26) declare `manual_praise`. Other
+special-song templates, all-generations variants and earlier templates retain
+their existing modes. Scaffold construction preserves explicitly declared input
+modes in element config. Existing saved choices, titles, lyrics, forms, links
+and media remain authoritative; this change performs no data migration.
+Assignee alone is incomplete; an authored title remains valid title-only content.
