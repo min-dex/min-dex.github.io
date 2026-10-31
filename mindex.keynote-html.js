@@ -276,12 +276,13 @@ function renderPresenterKeynoteHtmlControls(asset, serviceId, itemId) {
   if (asset.original?.format !== 'key') return '';
   const identity = `data-service-id="${escapeAttr(serviceId)}" data-keynote-item-id="${escapeAttr(itemId)}" data-keynote-source-hash="${escapeAttr(asset.original.sha256)}"`;
   const controls = asset.keynoteHtml ? `<span data-keynote-page data-keynote-item-id="${escapeAttr(itemId)}">${presenterKeynoteHtmlPageLabel(asset, serviceId, itemId)}</span><button class="btn secondary" type="button" data-keynote-html-action="play" ${identity}>음원·영상 재생</button><button class="btn secondary" type="button" data-keynote-html-action="pause" ${identity}>일시정지</button><button class="btn secondary" type="button" data-keynote-html-action="status" ${identity}>재연결</button>` : '<span>원본 보존됨 · 재생 자료 연결 필요</span>';
-  return `<div class="svc-reference-media-toolbar">${controls}<label class="btn secondary">재생 자료 연결<input type="file" webkitdirectory multiple hidden data-keynote-html-files ${identity}></label></div>`;
+  return `<div class="svc-reference-media-toolbar">${controls}<button class="btn secondary" type="button" data-keynote-auto-connect ${identity}>${asset.keynoteHtml ? '재생 자료 다시 준비' : '슬라이드 자동 연결'}</button><label class="btn secondary">재생 자료 연결<input type="file" webkitdirectory multiple hidden data-keynote-html-files ${identity}></label></div>`;
 }
-async function importPresenterKeynoteHtml(input) {
+async function importPresenterKeynoteHtml(input, options = {}) {
   const serviceId = input.dataset.serviceId, itemId = input.dataset.keynoteItemId;
   const files = [...(input.files || [])];
   if (!files.length || presenterPptxImports.has(serviceId)) return false;
+  if (options.requireClean && state.dirty.service) { showToast('입력 중인 내용을 먼저 저장한 뒤 Keynote를 연결해 주세요.', 'info');return false; }
   const client = state.client, project = state.config.url;
   const item = getServiceItems(serviceId).find(row => row.id === itemId);
   const signature = JSON.stringify(getServiceItems(serviceId));
@@ -313,7 +314,7 @@ async function importPresenterKeynoteHtml(input) {
       if (!file || file.size !== expected.size || await presenterPptxDigest(await file.arrayBuffer()) !== expected.sha256) throw Error('재생 폴더의 파일이 누락되거나 변경됐습니다.');
     }
     if (!unchanged()) throw Error('자료를 준비하는 동안 예배나 입력이 변경됐습니다.');
-    if (!window.confirm(`${original.name}\n\n원본은 그대로 두고 슬라이드 ${manifest.pages}장과 효과·포함 미디어의 재생 자료를 이 예배에 연결할까요? 기존 공개 자료 저장소를 사용합니다.`)) return false;
+    if (!options.confirmed && !window.confirm(`${original.name}\n\n원본은 그대로 두고 슬라이드 ${manifest.pages}장과 효과·포함 미디어의 재생 자료를 이 예배에 연결할까요? 기존 공개 자료 저장소를 사용합니다.`)) return false;
     const mime = name => ({ js:'application/javascript', css:'text/css', html:'text/html', json:'application/json', pdf:'application/pdf', jpeg:'image/jpeg', jpg:'image/jpeg', png:'image/png', svg:'image/svg+xml', mp4:'video/mp4', mov:'video/quicktime', mp3:'audio/mpeg', m4a:'audio/mp4', wav:'audio/wav', woff:'font/woff', woff2:'font/woff2' }[name.split('.').pop().toLowerCase()] || 'application/octet-stream');
     const entries = [...byName.entries()].sort(([a],[b]) => (a === 'manifest.json') - (b === 'manifest.json'));
     let cursor = 0, failure = null, finished = 0;

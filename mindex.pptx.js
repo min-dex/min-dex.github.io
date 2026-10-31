@@ -555,7 +555,7 @@ async function importPresenterPptx(input, existingItem = null) {
   if (input.dataset.serviceItemIndex !== undefined && !existingItem) { showToast("자료를 연결할 항목이 변경됐습니다. 다시 선택해 주세요.", "error"); input.value = ""; return false; }
   presenterPptxImports.add(serviceId);
   input.disabled = true;
-  let parsed, item = existingItem, saveAttempted = false;
+  let parsed, item = existingItem, saveAttempted = false, automaticKeynoteFiles = null, automaticKeynoteItem = null;
   const client = state.client, project = state.config.url;
   const service = state.services.find(row => row.id === serviceId);
   const sourceSignature = JSON.stringify(getServiceItems(serviceId));
@@ -583,8 +583,9 @@ async function importPresenterPptx(input, existingItem = null) {
       parsed = await parsePresenterPptx(bytes);
       ({ deck, runtime } = parsed);
     }
+    if (isKeynote) automaticKeynoteFiles = await preparePresenterKeynoteBrowserFile(file, unchanged);
     const details = isKeynote
-      ? "Keynote 원본을 변환하지 않고 보존합니다. 웹에서 Keynote 효과를 직접 재생하지는 못하며, 원본을 내려받아 Keynote에서 열 수 있습니다."
+      ? `Keynote 원본을 그대로 보존하고, 준비한 슬라이드 ${JSON.parse(await automaticKeynoteFiles.find(row => row.webkitRelativePath.endsWith('/manifest.json')).text()).pages}장과 재생 자료를 함께 연결합니다.`
       : `${deck.slides.length}장 · 기본 효과와 포함된 영상·음원을 재생합니다. 복잡한 효과·글꼴은 PowerPoint와 다를 수 있어 송출 전 확인이 필요합니다.`;
     if (!window.confirm(`${file.name}\n\n${details}\n\n원본 파일(메모·숨긴 장 포함)${isKeynote ? '' : '과 미리보기'}을 기존 공개 자료 저장소에 올려 이 예배에 연결할까요?`)) return false;
     if (!unchanged()) throw new Error("자료를 준비하는 동안 예배나 입력이 변경됐습니다. 다시 선택해 주세요.");
@@ -624,7 +625,8 @@ async function importPresenterPptx(input, existingItem = null) {
     saveAttempted = true;
     const saved = await saveServiceItemMutation(serviceId, index, { silent: true, renderAfterSave: false, throwOnError: true });
     if (!saved) throw new Error("예배 저장을 완료하지 못했습니다. 저장 상태를 확인하고 다시 저장해 주세요.");
-    showToast(isKeynote ? "Keynote 원본을 보존했습니다. 원본 다운로드로 다시 열 수 있습니다." : `PPT ${slides.length}장을 연결했습니다. 다음 버튼으로 클릭 효과를 진행할 수 있습니다.`);
+    if (isKeynote) automaticKeynoteItem = item.id;
+    showToast(isKeynote ? "Keynote 원본을 보존했고 슬라이드를 연결하고 있습니다." : `PPT ${slides.length}장을 연결했습니다. 다음 버튼으로 클릭 효과를 진행할 수 있습니다.`);
     return true;
   } catch (error) {
     // An RPC timeout may already have committed. Keep its immutable media and
@@ -637,11 +639,19 @@ async function importPresenterPptx(input, existingItem = null) {
   } finally {
     parsed?.deck.dispose?.();
     presenterPptxImports.delete(serviceId);
+    let connected = true;
+    try {
+      if (automaticKeynoteFiles && automaticKeynoteItem) {
+        if (state.client !== client || state.config.url !== project || state.selectedServiceId !== serviceId || state.dirty.service) throw Error('예배나 입력이 변경돼 원본만 보존했습니다. 입력을 저장한 뒤 슬라이드 자동 연결을 다시 눌러 주세요.');
+        connected = await importPresenterKeynoteHtml({ dataset: { serviceId, keynoteItemId: automaticKeynoteItem }, files: automaticKeynoteFiles, disabled: false, value: '' }, { requireClean: true, confirmed: true });
+      }
+    } catch (error) { connected = false;showToast(error.message || '원본은 보존됐지만 슬라이드 연결을 마치지 못했습니다.', 'error'); }
     input.disabled = false;
     input.value = "";
     renderCurrentServiceModuleDetail();
     renderServiceList();
     updateSaveState();
+    if (!connected) return false;
   }
 }
 
