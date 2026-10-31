@@ -9,7 +9,7 @@
   const artworkPath=key=>`assets/worship-backgrounds/${themeArtwork[key]}`;
   const logoPath="assets/bulletin/ria-mark.webp";
   const inkLogoPath="assets/bulletin/ria-mark-ink.svg";
-  const childrenLogoPath="assets/bulletin/children-mark.png";
+  const childrenLogoPath="assets/bulletin/children-mark-2026-11.png";
   const assets = [logoPath,inkLogoPath];
   const fields = {brand:"공동체 이름",eventsText:"교회 일정 (주보용)",issue:"호수", church:"교회명", news:"부서 소식", welcome:"환영 문구", notices:"상시 안내", staff:"섬김이 명단",
     motto:"공동체 표어", verse:"표어 성구", website:"웹사이트", address:"주소", meeting:"예배 시간·장소", outline:"설교 요점", leader:"인도자", announcer:"광고 담당", sermonReference:"요약 본문·쪽수", outlineTitle:"요약 표제",monthlyTheme:"이달의 주제",memoryVerse:"새길 말씀",memoryReference:"새길 말씀 출처",readingPlan:"잠잠성경 읽기표"};
