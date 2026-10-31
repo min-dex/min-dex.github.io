@@ -1,0 +1,15 @@
+{
+  "target_version": "1.0.0",
+  "preview_only": true,
+  "all_features_release_approved": false,
+  "web_checkpoint": "befc8730",
+  "originals_preserved": true,
+  "activation": false,
+  "remaining": [
+    "final source freeze and exact web/native renderer parity",
+    "certificate and notarization availability; no secrets inspected",
+    "actual macOS ARM/Intel and Windows install acceptance",
+    "signed upgrade and sessions/drafts/settings retention",
+    "capture/mixer/CH8/YouTube and physical Remote acceptance"
+  ]
+}

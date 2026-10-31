@@ -1,0 +1,18 @@
+--- a/package.json
++++ b/package.json
+@@ -128,6 +128,7 @@
+       "!data/**/*"
+     ],
+     "mac": {
++      "icon": "design/mindex-1/native/dawn-dark.icns",
+       "target": [
+         "dmg",
+         "zip"
+@@ -136,6 +137,7 @@
+       "notarize": true
+     },
+     "win": {
++      "icon": "design/mindex-1/native/dawn-dark.ico",
+       "target": [
+         "nsis"
+       ]
