@@ -155,7 +155,9 @@
    }
    const directory=options?.mode==='groups'&&!query;
    const chosen=options?.key===catalogKey()?groups.find(g=>g.index===options.groupIndex):null;
-   const rows=(chosen?chosen.rows:all).filter(({slide})=>[slide.sectionLabel,slide.elementLabel,slide.elementTitle,slide.title,text(slide)].join(' ').toLocaleLowerCase().includes(query));
+   const compact=value=>value.normalize('NFC').toLocaleLowerCase().replace(/\s+/gu,'');
+   const needle=compact(query),number=/^#(\d+)$/.exec(query);
+   const rows=(chosen?chosen.rows:all).filter(({slide,index})=>number?index+1===Number(number[1]):!needle||compact([slide.sectionLabel,slide.elementLabel,slide.elementTitle,slide.title,text(slide)].join(' ')).includes(needle));
    const pageSize=directory?12:6, source=directory?groups:rows;
    const currentGroup=groups.findIndex(g=>g.rows.some(r=>r.index===state.presenter.index));
    const requested=directory&&options?.atCurrent?Math.floor(Math.max(0,currentGroup)/pageSize)*pageSize:options?.offset;

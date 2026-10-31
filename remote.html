@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Mindex Remote">
 <link rel="stylesheet" href="remote.shared.css?v=2">
-<link rel="stylesheet" href="remote.css?v=23">
+<link rel="stylesheet" href="remote.css?v=24">
 <script>const theme=matchMedia("(prefers-color-scheme: dark)");function applyTheme(){document.documentElement.dataset.theme=theme.matches?"dark":"light";document.querySelector('meta[name="theme-color"]').content=theme.matches?"#181816":"#ffffff";}applyTheme();theme.addEventListener("change",applyTheme);</script>
 </head>
 <body>
@@ -30,8 +30,8 @@
 <details id="nextPreview"><summary>다음: <span id="nextTitle">마지막 슬라이드</span></summary><div id="next" class="slide-preview"></div></details>
 <button id="slidesOpen" type="button" aria-expanded="false" aria-controls="slidesPanel"><i data-lucide="layout-grid"></i><span>예배 순서에서 이동</span></button>
 <section id="slidesPanel" hidden aria-labelledby="slidesTitle">
-<header><h2 id="slidesTitle">슬라이드 목록</h2><button id="slidesClose" type="button" aria-label="슬라이드 목록 접기"><i data-lucide="x"></i></button></header>
-<form id="slidesSearch"><input id="slidesQuery" aria-label="슬라이드 검색" placeholder="제목·내용 검색" maxlength="80"><button type="submit">검색</button></form>
+<header><h2 id="slidesTitle">슬라이드 목록</h2><button id="slidesClose" type="button" aria-label="슬라이드 목록 접기"><i data-lucide="x"></i></button><div id="orderTools" hidden><select id="orderPicker" aria-label="살펴볼 예배 순서"></select><button id="orderLive" type="button" aria-label="현재 송출 중인 순서 보기">현재 순서</button></div></header>
+<form id="slidesSearch"><input id="slidesQuery" aria-label="슬라이드 검색" placeholder="순서·가사 또는 번호 (#12)" maxlength="80"><button type="submit">검색</button></form>
 <button id="slideGroups" type="button" hidden>예배 순서로 돌아가기</button>
 <p id="slidesStatus" role="status"></p><div id="slidesList"></div>
 </section>
@@ -66,5 +66,5 @@
 <script src="mindex.icons.js?v=remote-controls1"></script>
 <script src="vendor/supabase-js.min.js"></script>
 <script src="mindex.public-config.js"></script>
-<script type="module" src="remote.mjs?v=35"></script>
+<script type="module" src="remote.mjs?v=36"></script>
 </body></html>

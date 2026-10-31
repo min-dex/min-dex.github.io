@@ -98,7 +98,7 @@ v3 운영 서버 적용 완료. 클라이언트 배포 검증 진행 중.
 기기 색상 모드를 따르며 테마를 별도 저장하지 않는다.
 현재 미리보기 양옆에 이전·다음 버튼을 배치하고, 다음 슬라이드는 제목을 눌러 펼친다.
 예배 순서에서 이동은 순서 목록을 먼저 표시하며, 순서를 선택한 뒤 실제 슬라이드를 눌러야 송출이 이동한다.
-검색은 전체 슬라이드를 대상으로 하며, 목록을 열 때 현재 순서가 있는 페이지를 표시한다.
+검색은 숨기지 않은 슬라이드를 대상으로 한다. 가사는 띄어쓰기·줄바꿈을 무시하며, `#12`는 화면에 표시되는 12번 슬라이드만 찾는다. 검색은 송출 위치를 바꾸지 않으며, 목록을 열 때 현재 순서가 있는 페이지를 표시한다.
 각진 5px 모서리, 공용 색상/글꼴/타이포 크기, 5/10px 간격 규칙을 사용한다.
 화면 크기와 무관하게 같은 조작 배치를 유지한다. 버튼 최소 높이50px, 이전·다음 너비50px·최소 높이70px.
 긴 텍스트는 미리보기 안에서 스크롤하며 가로 페이지 넘침을 방지한다.
@@ -454,7 +454,7 @@ guarantee. CI execution/publication of the new regression remains separate.
 
 ### Remote order browsing and media controls
 
-The inline order list requests slide metadata. Choosing an order opens its slide
+The inline order list requests slide metadata. Its sticky picker can switch directly between orders or browse the order currently on air. Both actions reuse the directory for the current catalog and never send a jump. Choosing an order opens its slide
 list. Choosing a slide sends a jump. Browsing leaves the output index and
 playback owners alone. Audio precedes video when both sections are visible.
 The selected order supplies the media flags while browsing. Otherwise the

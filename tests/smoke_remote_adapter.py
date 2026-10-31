@@ -46,6 +46,11 @@ try:
     buildLiveScriptureSlide=originalBuild;
     await adapter.execute('jump',{index:0,key:adapter.read().catalogKey});
     const catalog=adapter.browse({offset:0});check(catalog.total===state.presenter.slides.filter(s=>!presenterSlideIsHidden(s)).length&&catalog.items.length===Math.min(6,catalog.total),'visible catalog');
+    const sample=state.presenter.slides[1],savedBody=sample.body;
+    sample.body='주는 나의'+String.fromCharCode(10)+'목자';
+    check(adapter.browse({query:'주는나의 목자'}).items.some(i=>i.index===1),'lyric line break/spacing search');
+    check(adapter.browse({query:'#2'}).items.map(i=>i.index).join(',')==='1','exact slide number');
+    sample.hidden=true;check(!adapter.browse({query:'#2'}).total,'hidden number surfaced');sample.hidden=false;sample.body=savedBody;
     check(state.presenter.index===0,'browse does not navigate');
     await adapter.execute('jump',{index:2,key:catalog.key});check(state.presenter.index===2,'real direct jump');
     for(const target of [{index:-1,key:catalog.key},{index:999,key:catalog.key},{index:1.5,key:catalog.key},{index:0,key:'stale'}]){
