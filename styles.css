@@ -3298,3 +3298,12 @@ body[data-module="praise"] .song-count-badge {
 .song-timing-row > label { flex-basis: 100%; overflow-wrap: anywhere; }
 .song-timing-row-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; width: 100%; min-width: 0; }
 .song-timing-row .song-timing-row-controls input { margin-top: 0; }
+
+/* 1.0 candidate introduction: inherits existing app tokens and controls. */
+.product-welcome { margin-block: 15px 25px; padding: 15px; border: 1px solid var(--line); border-radius: 10px; }
+.product-welcome summary { cursor: pointer; font-weight: 600; }
+.product-welcome p { color: var(--ink-3); overflow-wrap: anywhere; }
+.product-welcome > button { margin-top: 10px; }
+.product-release-dialog { background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 15px; padding: 25px; width: min(550px, calc(100% - 30px)); max-height: 85vh; overflow: auto; }
+.product-release-dialog::backdrop { background: #0009; }
+.product-release-dialog :is(li,p) { overflow-wrap: anywhere; }

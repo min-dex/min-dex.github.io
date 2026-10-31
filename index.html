@@ -134,7 +134,7 @@
   <body class="ui-booting">
     <div id="bootStatus" class="mindex-boot" role="status" aria-label="MINDEX 시작 중">
       <svg class="mindex-boot-cross" viewBox="128 104 256 304" fill="currentColor" aria-hidden="true">
-        <path d="M224 104h64v80h96v64h-96v160h-64V248h-96v-64h96z" />
+        <defs><linearGradient id="bootDawn" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#0068aa"/><stop offset=".5" stop-color="#a27fc9"/><stop offset="1" stop-color="#ff8bc2"/></linearGradient></defs><path fill="url(#bootDawn)" d="M224 104h64v80h96v64h-96v160h-64V248h-96v-64h96z" />
       </svg>
       <span class="mindex-boot-wordmark" aria-hidden="true">MINDEX</span>
       <div class="mindex-boot-feedback">
@@ -266,7 +266,7 @@
           "mindex.presenter-live.js", "mindex.presenter-board.js", "mindex.presenter-history.js", "mindex.presenter-media-state.js", "mindex.presenter-controller.js",
           "mindex.pptx.js", "mindex.keynote-html.js", "mindex.worship-input.js", "mindex.song-timing.js", "mindex.praise-media.js",
           "mindex.presenter-ui.js", "mindex.worship-week.js", "mindex.setlist-links.js",
-          "mindex.manuals.js", "mindex.bulletin.js", "mindex.worship-source.js", "scripture-editions.js", "mindex.server-storage.js", "mindex.disclosure-state.js", "app.js",
+          "mindex.manuals.js", "mindex.bulletin.js", "mindex.worship-source.js", "scripture-editions.js", "mindex.server-storage.js", "mindex.disclosure-state.js", "mindex.product-welcome.js", "app.js",
           "mindex.editor-drafts.js", "mindex.draft-handoff.js", "mindex.service-entry.js", "mindex.presenter-freshness.js", "mindex.worship-live.js", "mindex.content-live.js", "mindex.service-list-live.js", "mindex.archive-live.js", "mindex.monitor.js", "mindex.product-info.js", "mindex.remote.js", "mindex.scripture-repair-display.js",
         ];
         const styles = [

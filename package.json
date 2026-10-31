@@ -123,11 +123,13 @@
       "mindex.remote-admin.mjs",
       "remote.preview.mjs",
       "mindex.product-info.js",
+      "mindex.product-welcome.js",
       "mindex-build.json",
       "product-release.json",
       "!data/**/*"
     ],
     "mac": {
+      "icon": "assets/brand/dawn/dawn-dark.icns",
       "target": [
         "dmg",
         "zip"
@@ -136,6 +138,7 @@
       "notarize": true
     },
     "win": {
+      "icon": "assets/brand/dawn/dawn-dark.ico",
       "target": [
         "nsis"
       ]

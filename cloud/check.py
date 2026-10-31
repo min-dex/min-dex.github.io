@@ -161,6 +161,7 @@ SMOKES = (
     "smoke_sidebar_control_affordance.py",
     "smoke_module_landings.py",
     "smoke_home_start.py",
+    "smoke_product_welcome.py",
     "smoke_music_seek.py",
     "smoke_controller_music_layout.py",
     "smoke_citation_translation_editor.py",

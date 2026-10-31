@@ -16483,6 +16483,7 @@ function renderHomeStart() {
           ${calendarName ? `<button class="home-calendar-context" type="button" data-home-module="calendar"><i data-lucide="calendar-days"></i><span>${escapeHtml(calendarName)}</span></button>` : ""}
         </div>
       </header>
+      ${window.MindexProductWelcome?.markup() || ''}
       ${renderHomeRecentWork()}
       <div class="home-overview">
         ${modules.map(module => `<section class="home-module" aria-labelledby="home-${module.id}-heading">
@@ -16498,6 +16499,7 @@ function renderHomeStart() {
       </div>
     </main>`;
   refreshIcons();
+  void window.MindexProductWelcome?.mount();
   void loadHomeOverviewStats();
 }
 
