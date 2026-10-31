@@ -104,3 +104,8 @@ button :is([data-lucide], svg.lucide) { width: var(--ui-icon-size); height: var(
 #scriptureFeedback:empty { display:none; }
 #scriptureFeedback { font-size:var(--ui-meta-size); color:var(--ink-3); overflow-wrap:anywhere; }
 #scriptureStatus { color:var(--ink-3); font-size:var(--ui-meta-size); overflow-wrap:anywhere; }
+
+#slidesPanel header { flex-wrap:wrap; }
+#orderTools { flex:0 0 100%; display:flex; gap:8px; padding-bottom:5px; }
+#orderPicker { flex:1; min-width:0; min-height:50px; padding:0 10px; border:1px solid var(--line); border-radius:var(--r); background:var(--panel); color:var(--ink); font:inherit; }
+#orderLive { width:auto; flex:none; }

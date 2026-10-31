@@ -166,11 +166,23 @@ function state(value){
 }
 const slidePreviews=[];
 let slidesData=null,slidesLoading=false,slidesTimer=null,jumpPending=false,slidesMode='groups',selectedGroup=null;
-let selectedMedia=null;
+let selectedMedia=null,orderDirectory=null;
+function browseOrder(item,focus=false){
+ if(!session?.usable||!item||orderDirectory?.key!==view?.catalogKey)return;
+ selectedMedia={...item,endIndex:item.endIndex??item.index,key:orderDirectory.key};
+ selectedGroup=item.index;slidesReturnIndex=item.index;slidesFocusRequested=focus;slidesMode='slides';
+ $('slidesQuery').value='';void loadSlides();
+}
+$('orderPicker').onchange=e=>browseOrder(orderDirectory?.items.find(item=>item.index===Number(e.target.value)));
+$('orderLive').onclick=()=>browseOrder(orderDirectory?.items.find(item=>item.index<=view.index&&view.index<=(item.endIndex??item.index)),true);
 let slidesDraftRevision=0,requestedSlidesDraft=null,slidesBatch=null,slidesFocusRequested=false,slidesReturnIndex=0;
 $('slidesQuery').addEventListener('input',()=>{slidesDraftRevision++;slidesBatch=null;slidesData=null;slidesLoading=false;clearTimeout(slidesTimer);$('slidesStatus').textContent='검색을 눌러 새 목록을 받아 주세요.';paint();});
 function paintSlides(usable){
  if($('slidesPanel').hidden)return;
+ const directoryReady=!!orderDirectory&&orderDirectory.key===view?.catalogKey;
+ $('orderTools').hidden=!directoryReady;
+ $('orderPicker').disabled=!usable||jumpPending;
+ $('orderLive').disabled=!usable||jumpPending||!directoryReady||!orderDirectory.items.some(item=>item.index<=view.index&&view.index<=(item.endIndex??item.index));
  const current=!!slidesData&&slidesData.key===view?.catalogKey;
  for(const b of $('slidesList').querySelectorAll('button')){
   b.disabled=!usable||!current||slidesLoading||jumpPending;
@@ -182,7 +194,7 @@ function paintSlides(usable){
 }
 async function loadSlides(){
  if(!session?.usable)return;
- const batch={revision:slidesDraftRevision,query:$('slidesQuery').value,mode:slidesMode,groupIndex:selectedGroup,key:slidesData?.key,items:[],offset:0};
+ const batch={revision:slidesDraftRevision,query:$('slidesQuery').value,mode:slidesMode,groupIndex:selectedGroup,key:selectedMedia?.key??slidesData?.key,items:[],offset:0};
  requestedSlidesDraft=batch;slidesBatch=batch;slidesLoading=true;
  $('slidesStatus').textContent='불러오는 중…';paint();void requestSlideBatch(batch);
 }
@@ -207,14 +219,20 @@ function renderSlides(data){
  data={...data,offset:0,items:batch.items};slidesBatch=null;
  clearTimeout(slidesTimer);slidesLoading=false;slidesData=data;
  for(const preview of slidePreviews.splice(0))preview.dispose();
+ if(data.mode==='groups'){
+  orderDirectory=data;
+  const prompt=new Option('순서 선택','');prompt.disabled=true;
+  $('orderPicker').replaceChildren(prompt,...data.items.map(item=>new Option(item.title,String(item.index))));
+ }
+ $('orderPicker').value=data.mode==='slides'&&selectedMedia?String(selectedMedia.index):'';
  const list=$('slidesList');
- const restoreFocus=slidesFocusRequested&&(document.activeElement===document.body||list.contains(document.activeElement)||document.activeElement===$('slideGroups'));
+ const restoreFocus=slidesFocusRequested&&(document.activeElement===document.body||list.contains(document.activeElement)||document.activeElement===$('orderLive')||document.activeElement===$('slideGroups'));
  list.replaceChildren();list.classList.toggle('groups',data.mode==='groups');$('slideGroups').hidden=data.mode==='groups';let group='';
  for(const item of data.items){
   if(data.mode==='groups'){
    const button=document.createElement('button'),label=document.createElement('span'),count=document.createElement('small');
    button.type='button';button.dataset.index=item.index;button.dataset.endIndex=item.endIndex??item.index;label.textContent=item.title;count.textContent=`${item.count}장`;button.append(label,count);list.append(button);
-   button.onclick=()=>{if(!session?.usable||data.key!==view?.catalogKey)return;selectedMedia={...item,endIndex:item.endIndex??item.index,key:data.key};selectedGroup=item.index;slidesReturnIndex=item.index;slidesFocusRequested=true;slidesMode='slides';void loadSlides();};continue;
+   button.onclick=()=>browseOrder(item,true);continue;
   }
   if((item.groupKey||item.group)!==group){const h=document.createElement('h3');h.textContent=item.group;list.append(h);group=item.groupKey||item.group;}
   const b=document.createElement('button'),mini=document.createElement('div'),label=document.createElement('span');
@@ -228,7 +246,7 @@ function renderSlides(data){
   };
  }
  if(restoreFocus){
-  const target=data.mode==='groups'?list.querySelector(`[data-index="${slidesReturnIndex}"]`):list.querySelector('button');
+  const target=data.mode==='groups'?list.querySelector(`[data-index="${slidesReturnIndex}"]`):(list.querySelector('[data-index="'+view.index+'"]')||list.querySelector('button'));
   (target||$('slidesQuery')).focus();
  }
  slidesFocusRequested=false;
@@ -241,7 +259,7 @@ function remoteResult(r){
  paint();
 }
 function closeSlides(){
- selectedMedia=null;
+ selectedMedia=null;orderDirectory=null;$('orderPicker').replaceChildren();
  $('slidesPanel').hidden=true;$('slidesOpen').setAttribute('aria-expanded','false');
  clearTimeout(slidesTimer);slidesLoading=false;slidesData=null;slidesBatch=null;slidesFocusRequested=false;
  for(const preview of slidePreviews.splice(0))preview.dispose();$('slidesList').replaceChildren();

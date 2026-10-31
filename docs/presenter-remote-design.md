@@ -454,7 +454,7 @@ guarantee. CI execution/publication of the new regression remains separate.
 
 ### Remote order browsing and media controls
 
-The inline order list requests slide metadata. Choosing an order opens its slide
+The inline order list requests slide metadata. Its sticky picker can switch directly between orders or browse the order currently on air. Both actions reuse the directory for the current catalog and never send a jump. Choosing an order opens its slide
 list. Choosing a slide sends a jump. Browsing leaves the output index and
 playback owners alone. Audio precedes video when both sections are visible.
 The selected order supplies the media flags while browsing. Otherwise the

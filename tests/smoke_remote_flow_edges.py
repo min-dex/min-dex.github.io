@@ -36,6 +36,18 @@ try:
    page.locator('#slidesList button').click();page.locator('#slidesQuery').focus()
    page.evaluate("setSlides({key:'fixture',mode:'slides',total:1,offset:0,items:[{index:0,title:'찬양',text:'본문',group:'찬양'}]})")
    assert page.evaluate("document.activeElement===document.querySelector('#slidesQuery')"),'late list stole search focus'
+   page.click('#slideGroups')
+   page.evaluate("setSlides({key:'fixture',mode:'groups',total:2,offset:0,items:[{index:0,endIndex:2,title:'찬양',count:3},{index:3,endIndex:4,title:'설교',count:2}]})")
+   page.select_option('#orderPicker','3')
+   assert page.evaluate('slideRequests.at(-1).groupIndex')==3
+   page.evaluate("setSlides({key:'fixture',mode:'slides',total:1,offset:0,items:[{index:3,title:'설교 제목',group:'설교'}]})")
+   page.click('#orderLive')
+   assert page.evaluate('slideRequests.at(-1).groupIndex')==0
+   page.evaluate("setSlides({key:'fixture',mode:'slides',total:1,offset:0,items:[{index:0,title:'현재 가사',group:'찬양'}]})")
+   assert page.locator('#orderPicker').input_value()=='0' and page.evaluate('commands.length')==0
+   page.evaluate("setRemoteState({...currentState,catalogKey:'revised'})")
+   assert page.locator('#orderTools').is_hidden()
+   page.evaluate("setRemoteState(currentState)")
    page.click('#slidesClose');assert page.evaluate("document.activeElement===document.querySelector('#slidesOpen')")
    page.fill('#scriptureQuery','시 23:1');page.evaluate("document.querySelector('#scriptureQuery').setSelectionRange(2,2)")
    page.evaluate('setRemoteState({...currentState,liveReference:"요한복음 3:16"})')
