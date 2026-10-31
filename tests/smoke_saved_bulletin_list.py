@@ -1,4 +1,4 @@
-"""Saved bulletin list membership; no production requests, writes or printing."""
+"""Bulletin visibility regardless of saved membership; no production requests, writes or printing."""
 import os
 os.environ['MINDEX_SMOKE_OFFLINE'] = '1'
 from urllib.parse import urlsplit
@@ -39,11 +39,11 @@ try:
                 window.draftNode=document.getElementById('preserved-draft');
                 renderBulletinList();
             }''')
-            page.get_by_text('저장된 주보가 없습니다.', exact=True).wait_for()
-            assert page.locator('[data-bulletin-open]').count() == 0
+            assert page.locator('[data-bulletin-open]').count() == 3
+            assert page.evaluate('indexReads') == 0, 'visibility must not depend on saved index'
             page.evaluate("async()=>{savedIds=['old'];await savedBulletinList.load({force:true})}")
             assert page.locator('[data-bulletin-open=old]').count() == 1
-            assert page.locator('[data-bulletin-open=new]').count() == 0
+            assert page.locator('[data-bulletin-open=new]').count() == 1
             assert page.evaluate("serviceSupportsBulletin(state.services[1])"), 'new documents can still be created from worship'
             # Actual save adapter adds only a successfully saved record to membership.
             page.evaluate('''async()=>{
@@ -56,21 +56,18 @@ try:
                 try{await saveBulletinDraft('unsaved',{content:{},layout:{}},0);throw Error('Save unexpectedly passed')}
                 catch(error){if(!error.message.includes('권한'))throw error}finally{saveFailure=false}
             }''')
-            assert page.locator('[data-bulletin-open=unsaved]').count() == 0
+            assert page.locator('[data-bulletin-open=unsaved]').count() == 1
             # A different record's notification updates the list without an open controller.
             page.evaluate("()=>{savedIds=['new'];MINDEX_CONTENT_LIVE.receive({id:'remote-delete',project:state.config.url,kind:'bulletin',recordId:'old'})}")
-            page.wait_for_function("!document.querySelector('[data-bulletin-open=old]')")
+            page.locator('[data-bulletin-open=old]').wait_for()
             # SQL changes without notifications are recovered by the existing reconciliation path.
             page.evaluate("async()=>{savedIds=['old','new'];await MINDEX_CONTENT_LIVE.reconcile()}")
             page.locator('[data-bulletin-open=old]').wait_for()
-            # Lookup failure is distinct from a successful empty list and supports retry.
-            page.evaluate("async()=>{readFailure=true;await savedBulletinList.load({force:true})}")
-            page.get_by_text('주보 목록을 불러오지 못했습니다', exact=True).wait_for()
-            assert not page.get_by_text('저장된 주보가 없습니다.', exact=True).is_visible()
-            page.evaluate('readFailure=false')
-            page.get_by_role('button', name='다시 시도', exact=True).click()
-            page.locator('[data-bulletin-open=old]').wait_for()
-            # The search still filters confirmed saved documents, including historical dates.
+            # Saved-index failure cannot hide worship-derived bulletins.
+            page.evaluate("async()=>{readFailure=true;await savedBulletinList.load({force:true});renderBulletinList()}")
+            assert page.locator('[data-bulletin-open]').count() == 3
+            assert not page.get_by_text('주보 목록을 불러오지 못했습니다', exact=True).is_visible()
+            # The search still filters all supported worship dates, including historical dates.
             page.evaluate("()=>{state.search='2026-09';renderBulletinList()}")
             assert page.locator('[data-bulletin-open]').count() == 1
             assert page.locator('[data-bulletin-open=old]').count() == 1
@@ -84,7 +81,7 @@ try:
             }""")
             assert page.locator('[data-bulletin-open=old]').count() == 1, 'late hydration replaced saved bulletin list with worship list'
             assert page.evaluate('JSON.stringify(state.services)===worshipBefore')
-            print('PASS saved-only bulletin UI: empty, historical, save success/failure, remote deletion, recovery, retry, search, late hydration and worship/draft preservation', engine)
+            print('PASS bulletin visibility: unsaved November, saved/failed saves, remote changes, index failure, search and worship/draft preservation', engine)
             browser.close()
 finally:
     server.shutdown()
