@@ -29466,12 +29466,12 @@ function renderPresenterAssetUpload(item, index, memo, serviceId) {
   const asset = normalizeServiceAsset(memo.asset);
   const kind = asset.kind || serviceMemoElementType(memo);
   const acceptsMultiple = reference || kind === "image";
-  return `<label class="svc-reference-media-upload">
+  return `${asset.original || asset.pptx ? "" : `<label class="svc-reference-media-upload">
     <input type="file" ${acceptsMultiple ? "multiple" : ""} accept="${escapeAttr(memo.mediaPlacement ? "image/*" : reference ? PRESENTER_REFERENCE_MEDIA_ACCEPT : serviceAssetFileAcceptForKind(kind))}"
       ${reference ? "data-presenter-reference-media-file" : "data-service-item-asset-file"}
       data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${index}" />
     <i data-lucide="upload"></i><span>${kind === "image" ? "이미지 추가" : "파일 선택"}</span>
-  </label>${renderPresenterDeckOriginalActions(asset, serviceId, item.id)}${asset.pptx || asset.original ? `<label class="svc-reference-media-upload"><input type="file" accept=".key,.pptx" data-presenter-pptx-file data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${index}" aria-label="원본 자료 교체" /><i data-lucide="presentation"></i><span>자료 교체</span></label>` : ""}`;
+  </label>`}${renderPresenterDeckOriginalActions(asset, serviceId, item.id)}${asset.pptx || asset.original ? `<label class="svc-reference-media-upload"><input type="file" accept=".key,.pptx" data-presenter-pptx-file data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${index}" aria-label="원본 자료 교체" /><i data-lucide="presentation"></i><span>자료 교체</span></label>` : ""}`;
 }
 
 function renderPresenterServiceAssetInput(item, index, memo, options = {}) {
@@ -29526,6 +29526,7 @@ function renderPresenterServiceAssetUrlInput(asset, index, serviceId, ariaLabel,
 }
 
 function renderPresenterReferenceMediaPreview(asset, kind, disclosureScope = []) {
+  if (asset.original || asset.pptx) return "";
   const source = String(asset?.url || "").trim();
   if (!source) return "";
   const normalizedKind = String(kind || asset?.kind || "file").trim().toLowerCase();

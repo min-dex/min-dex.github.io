@@ -45,6 +45,7 @@ try:
    page.wait_for_function('[...presenterKeynoteHtmlManifests.values()].some(entry=>entry.error)')
    assert page.evaluate('cardIndexes().length')==0
    page.locator('.svc-slide-thumb[data-presenter-slide-id="other-deck:imported-deck:1"]').click()
+   page.get_by_text('자료 관리',exact=True).click()
    page.get_by_role('button',name='재연결',exact=True).click()
    page.wait_for_function('cardIndexes().length===24')
    cards=page.locator('.svc-slide-thumb[data-presenter-slide-id^="card-item:imported-deck:"]:not([data-presenter-slide-id$=":after-blank"])')

@@ -270,13 +270,14 @@ function presenterKeynoteHtmlPageLabel(asset, serviceId, itemId) {
   const owner = state.presenter, active = presenterKeynoteHtmlSlide(owner.slides?.[owner.index]);
   const live = typeof presenterControllerIsLive === 'function' && presenterControllerIsLive(serviceId);
   const checkpoint = active?.elementId === itemId && owner.serviceId === serviceId && owner.pptxProgress?.key === presenterKeynoteHtmlKey(owner, active) ? owner.pptxProgress.checkpoint : null;
-  return live && checkpoint ? `송출 ${checkpoint.slide + 1}/${descriptor.pages} · 효과 재생` : `슬라이드 ${descriptor.pages}장 · 효과 재생`;
+  return live && checkpoint ? `송출 ${checkpoint.slide + 1}/${descriptor.pages} · 효과 재생` : `슬라이드 ${descriptor.pages}장`;
 }
-function renderPresenterKeynoteHtmlControls(asset, serviceId, itemId) {
+function renderPresenterKeynoteHtmlControls(asset, serviceId, itemId, download = '') {
   if (asset.original?.format !== 'key') return '';
   const identity = `data-service-id="${escapeAttr(serviceId)}" data-keynote-item-id="${escapeAttr(itemId)}" data-keynote-source-hash="${escapeAttr(asset.original.sha256)}"`;
-  const controls = asset.keynoteHtml ? `<span data-keynote-page data-keynote-item-id="${escapeAttr(itemId)}">${presenterKeynoteHtmlPageLabel(asset, serviceId, itemId)}</span><button class="btn secondary" type="button" data-keynote-html-action="play" ${identity}>음원·영상 재생</button><button class="btn secondary" type="button" data-keynote-html-action="pause" ${identity}>일시정지</button><button class="btn secondary" type="button" data-keynote-html-action="status" ${identity}>재연결</button>` : '<span>원본 보존됨 · 재생 자료 연결 필요</span>';
-  return `<div class="svc-reference-media-toolbar">${controls}<button class="btn secondary" type="button" data-keynote-auto-connect ${identity}>${asset.keynoteHtml ? '재생 자료 다시 준비' : '슬라이드 자동 연결'}</button><label class="btn secondary">재생 자료 연결<input type="file" webkitdirectory multiple hidden data-keynote-html-files ${identity}></label></div>`;
+  const automatic = `<button class="btn secondary" type="button" data-keynote-auto-connect ${identity}>${asset.keynoteHtml ? '슬라이드 다시 준비' : '슬라이드 자동 연결'}</button>`;
+  const controls = asset.keynoteHtml ? `<span class="svc-deck-status" data-keynote-page data-keynote-item-id="${escapeAttr(itemId)}">${presenterKeynoteHtmlPageLabel(asset, serviceId, itemId)}</span><button class="btn secondary" type="button" data-keynote-html-action="play" ${identity}>음원·영상 재생</button><button class="btn secondary" type="button" data-keynote-html-action="pause" ${identity}>일시정지</button>` : automatic;
+  return `<div class="svc-deck-controls"><div class="svc-deck-playback">${controls}</div><details class="svc-deck-more"><summary>자료 관리</summary><div class="svc-deck-menu">${download}${asset.keynoteHtml ? `<button class="btn secondary" type="button" data-keynote-html-action="status" ${identity}>재연결</button>${automatic}` : ''}<label class="svc-reference-media-upload">폴더로 연결<input type="file" webkitdirectory multiple hidden data-keynote-html-files ${identity} aria-label="Keynote 재생 폴더 연결"></label></div></details></div>`;
 }
 async function importPresenterKeynoteHtml(input, options = {}) {
   const serviceId = input.dataset.serviceId, itemId = input.dataset.keynoteItemId;

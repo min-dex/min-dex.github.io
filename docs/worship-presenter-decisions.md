@@ -4906,6 +4906,13 @@ individual resources currently must fit the 50 MiB Storage upload limit.
 
 ### Chrome Keynote automatic preparation ·2026-10-31
 
+Connected KEY/PPTX controls show one replacement chooser and omit the redundant
+generic file card; the normal deck cards provide the preview. KEY keeps its
+slide count and play/pause controls visible. Original download, reconnect,
+re-preparation and manual folder connection live under the native **자료 관리**
+disclosure. An original-only KEY keeps automatic connection visible. These are
+presentation changes only; source metadata, handlers and atomic saves remain.
+
 PPTX keeps its existing direct browser import. KEY upload first prepares the
 Apple HTML export through the paired Mac helper, verifies the original hash,
 known native runtime and every resource, then saves the byte-identical original

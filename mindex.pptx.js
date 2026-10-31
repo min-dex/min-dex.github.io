@@ -658,7 +658,8 @@ async function importPresenterPptx(input, existingItem = null) {
 
 function renderPresenterDeckOriginalActions(asset, serviceId, itemId) {
   if (!asset.original && !asset.pptx) return "";
-  return `<button class="btn secondary" type="button" data-deck-original-download data-service-id="${escapeAttr(serviceId)}" data-deck-original-item-id="${escapeAttr(itemId)}">원본 다운로드</button>${renderPresenterKeynoteHtmlControls(asset, serviceId, itemId)}`;
+  const download = `<button class="btn secondary" type="button" data-deck-original-download data-service-id="${escapeAttr(serviceId)}" data-deck-original-item-id="${escapeAttr(itemId)}">원본 다운로드</button>`;
+  return asset.original?.format === 'key' ? renderPresenterKeynoteHtmlControls(asset, serviceId, itemId, download) : download;
 }
 
 async function downloadPresenterDeckOriginal(event) {

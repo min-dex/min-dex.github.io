@@ -1,4 +1,12 @@
 /* Input rows and Media management share the actual media clocks. */
+.svc-deck-controls, .svc-deck-playback { display:flex; flex-wrap:wrap; align-items:center; gap:5px 10px; min-width:0; }
+.svc-deck-controls { flex:1 1 auto; }
+.svc-deck-status { color:var(--ink-3); font-size:var(--ui-meta-size); white-space:nowrap; }
+.svc-deck-more { min-width:0; }
+.svc-deck-more > summary { cursor:pointer; padding:5px 10px; font-size:var(--ui-label-size); color:var(--ink-3); }
+.svc-deck-more[open] { flex:1 0 100%; }
+.svc-deck-menu { display:flex; flex-wrap:wrap; align-items:center; gap:5px 10px; padding:5px 0; min-width:0; }
+.svc-deck-controls :is(button, label, summary) { max-width:100%; white-space:normal; }
 .svc-input-media-controls { display:flex; flex-wrap:wrap; flex:1 1 100%; grid-column:1 / -1; align-items:center; width:100%; min-width:0; gap:5px 10px; padding:5px 0; }
 .svc-input-media-controls > .icon-btn { flex:0 0 30px; width:30px; height:30px; min-width:30px; }
 .svc-input-media-controls > .song-timing-seek { display:contents; }

@@ -59,6 +59,7 @@ try:
     check(document.querySelector('[aria-label="원본 자료 교체"]').accept==='.key,.pptx','replacement accept');
     return {saved,hash:before};
    }''')
+   page.get_by_text('자료 관리',exact=True).click()
    with page.expect_download() as download:
     page.locator('[data-deck-original-download]').click()
    path=download.value.path();assert Path(path).read_bytes()==bytes([80,75,3,4,0,255,13,10])+b'original notes and hidden slides'
@@ -92,6 +93,7 @@ try:
     if(!asset.original||!document.querySelector('[data-deck-original-download]'))throw Error('reload lost original');
    }''',result['saved'])
    page.route('**/deck-store/**',lambda r:r.fulfill(body=bytes([80,75,3,4,0,255,13,10])+b'original notes and hidden slides',content_type='application/vnd.apple.keynote'))
+   page.get_by_text('자료 관리',exact=True).click()
    with page.expect_download() as restored_download:
     page.locator('[data-deck-original-download]').click()
    assert Path(restored_download.value.path()).read_bytes()==bytes([80,75,3,4,0,255,13,10])+b'original notes and hidden slides'
