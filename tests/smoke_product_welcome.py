@@ -48,4 +48,15 @@ with sync_playwright() as p:
      page.set_viewport_size({'width':width,'height':844});assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
     assert not errors,errors
     page.close()
+  page=browser.new_page()
+  page.set_content('<main class="home-start"></main>')
+  page.evaluate("()=>{window.reads=0;window.aborts=0;window.fetch=(_,o)=>{reads++;return new Promise((resolve,reject)=>o.signal.addEventListener('abort',()=>{aborts++;reject(Error('timeout'))}))}}")
+  page.add_script_tag(content=(ROOT/'mindex.product-welcome.js').read_text())
+  page.evaluate("document.querySelector('main').innerHTML=MindexProductWelcome.markup();void MindexProductWelcome.mount()")
+  page.wait_for_function('aborts===1',timeout=5000)
+  page.evaluate('MindexProductWelcome.mount()');assert page.evaluate('reads')==1
+  page.evaluate("()=>{window.fetch=async()=>{reads++;return {ok:true,json:async()=>({schema:1,productVersion:'1.0.0',channel:'development',changes:['복구']})}}}")
+  page.click('[data-product-notes]');page.locator('dialog[open]').wait_for()
+  assert page.evaluate('reads')==2
+  page.close()
   browser.close();print('PASS',engine,'themes, channel gating, boot/storage readiness, first-run, close/save failure, draft preservation, collapse, widths')

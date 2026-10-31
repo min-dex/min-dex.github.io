@@ -3,15 +3,19 @@
  const seenKey='mindex.product.releaseSeen.v1';
  let identity=null,loading=null,dialog=null,attempted=false,acknowledged=false;
  const storage=()=>window.MINDEX_SERVER_STORAGE;
- function load(){
-  if(loading)return loading;
+ function load(retry=false){
+  if(loading&&!(retry&&!identity))return loading;
   loading=(async()=>{
+   const controller=new AbortController();let timer;
    try{
+    const deadline=new Promise((_,reject)=>{timer=setTimeout(()=>{controller.abort();reject(new Error('BUILD_INFO_TIMEOUT'));},3000)});
     const desktop=window.mindexElectron?.isDesktop;
-    const value=desktop?(await window.mindexElectron.getBuildInfo?.())?.build:await fetch('./mindex-build.json',{cache:'no-store'}).then(r=>r.ok?r.json():null);
+    const request=desktop?Promise.resolve(window.mindexElectron.getBuildInfo?.()).then(info=>info?.build):fetch('./mindex-build.json',{cache:'no-store',signal:controller.signal}).then(async r=>{if(r.ok)return r.json();await r.body?.cancel();return null;});
+    const value=await Promise.race([request,deadline]);
     if(value?.schema===1&&/^\d+\.\d+\.\d+$/.test(value.productVersion)&&['release','development','test'].includes(value.channel)&&Array.isArray(value.changes))identity=value;
    }catch{} // Optional introduction must never block app startup or editing.
-  })();loading.then(()=>{if(!identity)loading=null;});return loading;
+   finally{clearTimeout(timer);controller.abort();}
+  })();return loading;
  }
  function markup(){return `<section class="product-welcome"><details ${window.MindexDisclosure?.attrs(['product','home-intro'],true)||'open'}><summary>민덱스 소개</summary><p>예배 슬라이드와 주보를 만들고, 찬양·말씀·음원을 관리해요. 다른 기기에서도 예배 진행을 조작할 수 있어요.</p></details><button type="button" class="btn secondary" data-product-notes>업데이트 내용</button><p class="product-welcome-status" role="status" hidden></p></section>`;}
  function eligible(){return identity?.channel==='release'&&storage()?.ready&&!document.body.classList.contains('ui-booting')&&document.querySelector('.home-start .product-welcome')&&!document.querySelector('dialog[open],.modal:not([hidden]),[role=dialog][aria-modal=true]:not([hidden])')&&!document.activeElement?.matches('input,textarea,[contenteditable=true]')&&!attempted&&!acknowledged&&storage().getItem('local',seenKey)!==identity.productVersion;}
@@ -35,7 +39,7 @@
  }
  async function mount(){
   const host=document.querySelector('.home-start .product-welcome');if(!host)return;
-  host.querySelector('[data-product-notes]').onclick=async event=>{const opener=event.currentTarget;await load();if(opener.isConnected)show(opener);};
+  host.querySelector('[data-product-notes]').onclick=async event=>{const opener=event.currentTarget;await load(true);if(opener.isConnected)show(opener);};
   await load();if(eligible())show(null,true);
  }
  window.addEventListener('mindex-server-storage-ready',()=>void mount());
