@@ -52,8 +52,17 @@ export async function exportWithKeynote(source, target) {
   if (process.platform !== 'darwin') throw Error('Keynote가 설치된 Mac에서 실행해 주세요.');
   // Only the received private temporary copy is opened. Paths are argv, never script text.
   const script = [
-    'on run argv','with timeout of 300 seconds','tell application id "com.apple.Keynote"',
-    'set importedDocument to open (POSIX file (item 1 of argv))',
+    'on run argv','set sourceAlias to (POSIX file (item 1 of argv)) as alias',
+    'set expectedFile to sourceAlias as text',
+    'with timeout of 300 seconds','tell application id "com.apple.Keynote"',
+    'ignoring application responses','open sourceAlias','end ignoring',
+    'set importedDocument to missing value','repeat 120 times',
+    'repeat with candidate in documents','try',
+    'if ((get file of candidate) as text) is expectedFile then',
+    'set importedDocument to contents of candidate','exit repeat','end if',
+    'end try','end repeat',
+    'if importedDocument is not missing value then exit repeat','delay 0.25','end repeat',
+    'if importedDocument is missing value then error "Selected working copy did not open" number -1712',
     'try','export importedDocument to (POSIX file (item 2 of argv)) as HTML',
     'on error messageText number errorNumber','close importedDocument saving no',
     'error messageText number errorNumber','end try','close importedDocument saving no',
