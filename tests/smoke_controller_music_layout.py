@@ -19,6 +19,7 @@ try:
     state.serviceMusic.audio={currentTime:45,duration:180};state.serviceMusic.sourceKey='fixture';state.serviceMusic.ownerServiceId='owner';
     const item={id:'child',label:'찬양 1',memo:serializeServiceItemMemo({elementType:'praise',inputMode:'children_audio'})};
     const entries=[{slide:{songTimingKey:'child-key',songTimingElementId:'child',elementId:'child',songTimingEligible:true,songTimingAudio:{url:'./fixture.wav',name:'어린이부 찬양 음원'}}}];
+    MindexSongTiming.statusMarkup=()=>''; // Healthy DB audio has a playback shortcut instead of a warning.
     refs.detailPane.innerHTML=`<div id="servicePresenterControls"><div id="music-layout" style="padding:20px;width:600px;max-width:100%;box-sizing:border-box"><h2>자율기도</h2>${renderServiceMusicPlayer({source:'fixture',serviceId:'owner',label:'자율기도 음악',repeatAllowed:false})}<h2>어린이부 찬양</h2><div class="svc-board-subgroup-controls">${renderPresenterBoardItemAudioControls('owner',{item,timingEntries:entries},{manager:true})}</div></div></div>`;
     refreshIcons();
     const input=document.querySelector('[data-seek-owner="owner"]');input.value=70;input.dispatchEvent(new Event('input',{bubbles:true}));
@@ -60,6 +61,12 @@ try:
      assert page.locator('.svc-music-player--inline').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
      assert page.locator('.svc-children-audio').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
      assert page.locator('.svc-children-audio').evaluate("(e)=>e.querySelector('[data-input-audio-controls]').getBoundingClientRect().top>=e.querySelector('strong').getBoundingClientRect().bottom")
+     if width >= 600:
+      assert page.locator('.svc-children-audio').evaluate("""e=>{
+        const rect=s=>e.querySelector(s).getBoundingClientRect();
+        return rect('.svc-children-audio-hint').bottom <= rect('[data-input-audio-controls]').top
+          && rect('.svc-board-subgroup-audio-actions').top < rect('strong').bottom;
+      }"""), 'filename, shortcut and timing action should share a compact header'
      page.locator('.svc-music-label').evaluate("e=>e.textContent='A very long music filename with additional details and a long unbroken name '+ 'x'.repeat(80)")
      assert page.locator('#music-layout').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
      page.locator('.svc-music-label').evaluate("e=>e.textContent='자율기도 음악'")

@@ -6,6 +6,22 @@
 .svc-input-media-controls input[type="range"] { flex:1 1 90px; width:auto; min-width:70px; height:30px; padding:0; margin:0; }
 .svc-input-media-controls :is([data-song-timing-clock],[data-presenter-video-clock]) { flex:0 1 auto; margin-left:auto; font-size:var(--ui-meta-size); font-variant-numeric:tabular-nums; color:var(--ink-3); white-space:nowrap; }
 .svc-board-subgroup-audio.has-audio > .svc-input-media-controls { order:2; }
+/* DB audio: keep the shortcut with the filename and timing action above the transport. */
+.svc-board-subgroup-controls .svc-children-audio.has-audio {
+  gap: 2px 8px;
+  padding-block: 2px;
+}
+.svc-board-subgroup-audio.has-audio.svc-children-audio > .svc-children-audio-hint {
+  order: 0;
+  flex: 0 0 auto;
+}
+.svc-children-audio.has-audio > .svc-input-media-controls {
+  padding-block: 0;
+}
+.svc-children-audio > .praise-media-status {
+  flex: 1 1 12em;
+  min-width: 0;
+}
 .presenter-video-seek { min-width: 0; }
 .presenter-video-seek [data-presenter-video-clock] { white-space: normal; font-variant-numeric: tabular-nums; }
 .global-playback-panel .presenter-video-seek { grid-template-columns: minmax(0, 1fr); gap: 3px; }
