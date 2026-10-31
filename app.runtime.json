@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261031-sending-prayer-projection",
+  "version": "20261031-db-audio-layout",
   "options": {
     "compress": false,
     "mangle": {
