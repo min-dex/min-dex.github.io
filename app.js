@@ -14086,6 +14086,7 @@ function buildWorshipServiceScaffold(serviceId, typeId, options = {}) {
         source_kind: "mindex",
         source_ref: { label: elementLabel, ...(slotKey ? { slotKey } : {}), template: true, placeholder: !ready, ...(templateVersion ? { template_version: templateVersion } : {}) },
         config: {
+          ...(inputMode ? { inputMode } : {}),
           ...(formPresetRules.length ? { formPresetRules } : {}),
           ...(defaultStrength ? { defaultStrength } : {}),
           ...(outputMode ? { outputMode } : {}),
@@ -21202,6 +21203,7 @@ function sundayThirdSpecialSongTemplateForDate(dateValue = "") {
   return {
     defaultText: "",
     defaultAssignee: "할렐루야 찬양대",
+    inputMode: "manual_praise",
   };
 }
 
@@ -21418,6 +21420,7 @@ function publicWorshipSpecialSongStep(options = {}) {
     elementType: "praise",
     default_text: defaultText,
     assignee: defaultAssignee,
+    ...(options.inputMode ? { inputMode: normalizeServiceInputMode(options.inputMode) } : {}),
     formPresetRules: [PUBLIC_SPECIAL_HYMN_FORM_PRESET_RULE],
     ...(options.hiddenInPresentation || options.hidden_in_presentation ? { hiddenInPresentation: true } : {}),
     ...scoreOutputMode(score),
@@ -21941,10 +21944,7 @@ function publicSundayThirdTemplate(options = {}) {
       { label: "대표기도", name: "대표기도", elementType: "title_person" },
     ] },
     publicWorshipScriptureReadingStep(),
-    publicWorshipSpecialSongStep(specialSong ? {
-      defaultText: String(specialSong.defaultText || "").trim(),
-      defaultAssignee: String(specialSong.defaultAssignee || "").trim(),
-    } : {}),
+    publicWorshipSpecialSongStep(specialSong || {}),
     publicWorshipThirdSermonStep({ typeId }),
     { label: "결단", name: "결단", required: false, flex: true, sectionKey: "response_song", elements: [
       { label: "결단기도", name: "결단기도", elementType: "title_person" },
