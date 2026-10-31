@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261031-hymn-number-search",
+  "version": "20261031-announcement-footer",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "e141c718503737c615bd8c5e8a69536f2c905c82fff0a180c07ceef07da2405d",
-  "runtime_sha256": "1ed267f744def90b18de029d0903435b03ae599580e486e85e0edd7061064b03",
-  "source_bytes": 1355489,
-  "runtime_bytes": 967156,
-  "source_gzip": 310234,
-  "runtime_gzip": 243143
+  "source_sha256": "0bfe17ee849cb4879987113797a0c03deee43e60cfdf6f19cdf6bb3a46c31053",
+  "runtime_sha256": "dbde4295252d1776999dec6d3727c22e37aec31a56fb812ee159596fde7cc5f0",
+  "source_bytes": 1355632,
+  "runtime_bytes": 967289,
+  "source_gzip": 310263,
+  "runtime_gzip": 243177
 }
