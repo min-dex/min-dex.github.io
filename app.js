@@ -10616,20 +10616,17 @@ async function commitServiceItemInputs(serviceId = state.selectedServiceId, inde
   const fields = [...(refs.detailPane || document).querySelectorAll("[data-service-item-field]")]
     .filter((field) => Number(field.dataset.serviceItemIndex) === itemIndex)
     .filter((field) => !field.dataset.serviceId || field.dataset.serviceId === serviceId);
-  let touched = false;
-  fields.forEach((field) => {
-    if (!field.matches("input, textarea, select")) return;
-    if (isDeferredServiceTextInput(field)) {
-      clearDeferredServiceTextPreview(field);
-      updateServiceItemField(field, { deferPresenterRefresh: true });
-      field.dataset.initialValue = field.value;
-      field.dataset.presenterPreviewValue = field.value;
-    } else {
-      updateServiceItemField(field, { deferPresenterRefresh: true });
-    }
-    touched = true;
-  });
-  if (!touched) return false;
+  if (!fields.length) return false;
+  for (const field of fields) {
+    // Selects already commit on change. Replaying an unchanged title here
+    // resolves it again and can replace an explicitly selected hymn edition.
+    if (!isDeferredServiceTextInput(field)
+      || field.value === (field.dataset.initialValue ?? field.defaultValue)) continue;
+    clearDeferredServiceTextPreview(field);
+    updateServiceItemField(field, { deferPresenterRefresh: true });
+    field.dataset.initialValue = field.value;
+    field.dataset.presenterPreviewValue = field.value;
+  }
   return Boolean(await resolveAndSaveCommittedServiceItem(serviceId, itemIndex, {
     renderAfterSave: false,
     resolveScriptureBeforeSave: false,
@@ -10728,8 +10725,10 @@ function setServiceInputFeedback(editor, status) {
   const button = actions.querySelector("[data-service-item-commit]");
   if (button) {
     const busy = status === "saving";
-    button.title = labels[status] || "저장";
-    button.setAttribute("aria-label", busy ? "저장 중" : status === "error" ? "저장 재시도" : "저장");
+    const title = labels[status] || "저장";
+    const label = busy ? "저장 중" : status === "error" ? "저장 재시도" : "저장";
+    if (button.title !== title) button.title = title;
+    if (button.getAttribute("aria-label") !== label) button.setAttribute("aria-label", label);
     if (button.disabled !== busy) button.disabled = busy;
     if (button.getAttribute("aria-busy") !== String(busy)) button.setAttribute("aria-busy", String(busy));
   }

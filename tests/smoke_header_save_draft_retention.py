@@ -110,7 +110,19 @@ def run(browser, url):
           release(true);
           check(await pending === true, 'final save failed');
           assertDraft('Latest unsaved draft');
-          check(status.textContent === '저장됨' && !button.disabled, 'confirmed unchanged draft not saved');
+          check(editor.dataset.inputStatus === 'saved' && status.textContent === '' && !button.disabled, 'confirmed unchanged draft not saved');
+          const version = document.createElement('select');
+          version.dataset.serviceItemField = 'praise_record_id';
+          version.dataset.serviceItemIndex = '0';
+          editor.append(version);
+          const replayed = [];
+          updateServiceItemField = input => replayed.push(input.dataset.serviceItemField);
+          started = armSave();
+          pending = commitServiceItemInputs(service.id, 0);
+          await started;
+          release(true);
+          check(await pending && replayed.length === 0,
+            'row save replayed the title or version selection: ' + replayed);
           return 'PASS header pending/failure/retry, newer draft, focus and selection';
         }"""), flush=True)
     finally:
