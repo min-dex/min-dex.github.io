@@ -6246,7 +6246,7 @@ body[data-module="praise"] .praise-forms-panel .version-compare-head > .version-
 .service-sidebar--presenter .svc-presenter-preparation-field-label { white-space:normal; }
 body[data-module="presenter"] .svc-presenter-toolbar {
   position:sticky; top:0; z-index:12; background:var(--bg);
-  padding:10px 0; border-bottom:1px solid var(--line);
+  padding:10px 0 15px; border-bottom:1px solid var(--line);
 }
 
 /* Cover the scroll container's top padding above its sticky toolbar. */
