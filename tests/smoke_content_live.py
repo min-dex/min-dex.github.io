@@ -25,7 +25,7 @@ try:
       state.songVersionTablesSupported=true;state.songRelationsSupported=false;
       state.client={channel:()=>({on(event,filter,fn){if(filter.event==='content-committed')window.remoteReceive=fn;return this},subscribe(fn){window.remoteStatus=fn;return this},send:remoteSend}),removeChannel:async()=>{},
         from(table){const q={select(){return q},eq(){return q},in(){return q},order(){return q},range(){return q},maybeSingle(){return q},
-          then(resolve,reject){reads++;if(window.onRead){const fn=onRead;onRead=null;fn()};return Promise.resolve({data:structuredClone(table==='mindex_songs'?db.song:table==='mindex_song_versions'?db.versions:db.units)}).then(resolve,reject)}};return q}};
+          then(resolve,reject){reads++;if(window.onRead){const fn=onRead;onRead=null;fn()};return Promise.resolve({data:structuredClone(table==='mindex_bulletins'?[{service_id:'bulletin'}]:table==='mindex_songs'?db.song:table==='mindex_song_versions'?db.versions:db.units)}).then(resolve,reject)}};return q}};
       state.songs=[normalizeServerSong(db.song)];attachRelationalSongVersionRows(db.versions,[],[sid],state.songs);
       state.selectedSongId=sid;state.selectedVersionId=vid;state.forms=[];state.dirty.song=false;state.dirty.forms=false;captureCleanFingerprint('praise');
       document.body.innerHTML='<div id="pane" style="height:200px;overflow:auto"><div style="height:2000px">editor</div></div><textarea id="draft"></textarea><button id="outside">Outside</button>';

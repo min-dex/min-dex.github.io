@@ -584,10 +584,37 @@ function updateServiceItemField(field, options = {}) {
 function applyServiceAnnouncementRegion(item, key, value) {
   const parsed = parseServiceItemMemo(item.memo);
   const regions = serviceAnnouncementRegions(item, parsed);
+  const previous = regions[key];
+  if (previous === value) return;
+  const previousBody = parsed.slides.join("\n\n");
+  const previousRegions = Object.values(regions).filter(text => text.trim()).join("\n\n");
   regions[key] = value;
   parsed.announcementRegions = regions;
-  item.raw_title = [regions.welcome, regions.news, regions.footer].filter(text => text.trim()).join("\n\n");
-  parsed.slides = item.raw_title ? [item.raw_title] : [];
+  const body = Object.values(regions).filter(text => text.trim()).join("\n\n");
+  if (previousBody === previousRegions || !parsed.slides.length) {
+    // Keep unchanged screens on either side of the edit, including their internal blank lines.
+    const screens = parsed.slides.slice();
+    let remaining = body;
+    const before = [], after = [];
+    while (screens.length && remaining.startsWith(screens[0] + "\n\n")) {
+      before.push(screens.shift());
+      remaining = remaining.slice(before.at(-1).length + 2);
+    }
+    while (screens.length && remaining.endsWith("\n\n" + screens.at(-1))) {
+      after.unshift(screens.pop());
+      remaining = remaining.slice(0, -after[0].length - 2);
+    }
+    const changed = screens.length > 1 ? remaining.split("\n\n") : [remaining];
+    parsed.slides = [...before, ...changed.filter(Boolean), ...after];
+  } else {
+    // A legacy body may contain independent copy in addition to the displayed regions.
+    // Update a unique literal match without rewriting the other authored screens.
+    const matching = previous ? parsed.slides.filter(text => text.includes(previous)) : [];
+    if (matching.length === 1 && matching[0].indexOf(previous) === matching[0].lastIndexOf(previous)) {
+      parsed.slides = parsed.slides.map(text => text === matching[0] ? text.replace(previous, () => value) : text).filter(Boolean);
+    }
+  }
+  if (item.raw_title && (item.raw_title === previousBody || item.raw_title === previousRegions)) item.raw_title = body;
   item.memo = serializeServiceItemMemo(parsed);
 }
 

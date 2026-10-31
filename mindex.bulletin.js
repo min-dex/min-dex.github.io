@@ -1578,5 +1578,84 @@
     }
     return {matchesDraft:draft=>!!doc&&draft?.schema===1&&draftSignature(draft.value)===draftSignature(doc),destroy, refreshRemote, remoteIdentity,handoffIdentity,restoreHandoff, reload(){return load(q("[data-bulletin-service]").value);}};
   }
-  window.MindexBulletin=Object.freeze({mount,resolveSource,reusableContent,fieldValue,defaultFrames,renderPages,readyAssets,TOKENS,wrap,profileForDate,monthlyView,storedValue,applyStored,normalizeSnapshot,applySourceSnapshot,templateValue,normalizeTemplate,applyTemplate,TEMPLATE_KEY});
+  // Saved-ID catalogue owns no worship state or document DOM. Callers supply
+  // their client/project identity, paginated reader and presentation callbacks.
+  function createSavedList(getContext, readAll, errorMessage, onChange) {
+    let cacheState = null;
+
+    function savedState() {
+      const [client, project] = getContext();
+      if (!cacheState || cacheState.client !== client || cacheState.project !== project) {
+        cacheState = {client, project, ids: new Set(), loaded: false, error: "", promise: null, revision: 0};
+      }
+      return cacheState;
+    }
+
+    function remember(serviceId) {
+      const cache = savedState();
+      cache.ids.add(serviceId);
+      cache.revision++;
+      cache.error = "";
+      onChange();
+    }
+
+    async function load({force = false} = {}) {
+      if (!getContext()[0]) return false;
+      const cache = savedState();
+      if (cache.promise) return cache.promise;
+      if (cache.loaded && !force) return true;
+      const revision = cache.revision;
+      const current = () => cacheState === cache && cache.client === getContext()[0] && cache.project === getContext()[1];
+      let changed = !cache.loaded || Boolean(cache.error);
+      cache.promise = (async () => {
+        try {
+          const result = await readAll(() => ({async range(from, to) {
+            const page = await cache.client.from("mindex_bulletins").select("service_id").order("service_id").range(from, to);
+            if (!page?.error && !Array.isArray(page?.data)) throw new Error("Incomplete bulletin list page");
+            return page;
+          }}));
+          if (result.error) throw result.error;
+          if (result.data.some(row => !row || typeof row.service_id !== "string" || !row.service_id)) throw new Error("Invalid bulletin list");
+          if (!current() || revision !== cache.revision) return false;
+          const ids = new Set(result.data.map(row => row.service_id));
+          changed ||= JSON.stringify([...ids].sort()) !== JSON.stringify([...cache.ids].sort());
+          cache.ids = ids;
+          cache.loaded = true;
+          cache.error = "";
+          return true;
+        } catch (error) {
+          if (!current() || revision !== cache.revision) return false;
+          cache.error = errorMessage(error);
+          changed = true;
+          return false;
+        } finally {
+          cache.promise = null;
+          if (current() && (changed || !cache.loaded)) onChange();
+        }
+      })();
+      return cache.promise;
+    }
+
+    function select(services, query, text) {
+      const ids = savedState().ids;
+      return services.filter(service => ids.has(service.id) && (!query || text(service).includes(query))).sort((a, b) => b.date.localeCompare(a.date));
+    }
+    function renderStatus(list, loading, empty) {
+      const saved = savedState();
+      if (!saved.loaded && !saved.error) {
+        void load();
+        list.innerHTML = loading();
+        return true;
+      }
+      if (saved.error) {
+        list.innerHTML = empty("주보 목록을 불러오지 못했습니다", saved.error)
+          + '<button class="btn secondary" type="button" data-bulletin-list-retry>다시 시도</button>';
+        list.querySelector("[data-bulletin-list-retry]").addEventListener("click", () => { void load({force: true}); });
+        return true;
+      }
+      return false;
+    }
+    return {state: savedState, remember, load, select, renderStatus};
+  }
+  window.MindexBulletin=Object.freeze({createSavedList,mount,resolveSource,reusableContent,fieldValue,defaultFrames,renderPages,readyAssets,TOKENS,wrap,profileForDate,monthlyView,storedValue,applyStored,normalizeSnapshot,applySourceSnapshot,templateValue,normalizeTemplate,applyTemplate,TEMPLATE_KEY});
 })();

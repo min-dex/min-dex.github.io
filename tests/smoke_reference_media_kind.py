@@ -32,7 +32,12 @@ def main():
                     const select=host.querySelector('select');
                     check(Boolean(select)===(source.endsWith('/live')),'wrong selector visibility');
                     check(host.querySelector('input[type=file]'),'missing file replacement');
-                    if(source.endsWith('.MP4'))check(host.querySelector('.svc-reference-media-kind')?.textContent==='영상','missing detected label');
+                    if(source.endsWith('.MP4')){
+                      const wrapper=host.querySelector('.svc-reference-media-input--video');
+                      check(wrapper && !wrapper.querySelector('.svc-reference-media-kind'),'video title layout differs');
+                      check(wrapper.querySelector('[data-service-item-field="asset_name"]').placeholder==='영상 이름','video title input');
+                      check(wrapper.querySelector('[data-input-video-controls]'),'missing video controls');
+                    }
                   }
                   state.services=[service];state.selectedServiceId=service.id;state.serviceItems={[service.id]:[item]};
                   const context={item,index:0,service};

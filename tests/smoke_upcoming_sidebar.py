@@ -14,8 +14,10 @@ try:
    page.evaluate('''()=>{
     state.serviceTypes=[{id:'young-adult',name:'청년부 예배'},{id:'wednesday',name:'수요예배'},{id:'sunday-main',name:'주일예배 [3부]'}];
     window.rows=[{id:'a',date:'2026-11-01',type_id:'young-adult',alias:'청년부 야외예배',_worshipSourceRef:{no_gathering:true}},{id:'b',date:'2026-11-01',type_id:'sunday-main',alias:'온세대 찬양예배'},{id:'c',date:'2026-11-04',type_id:'wednesday',alias:'다니엘기도회'},{id:'d',date:'2026-11-04',type_id:'wednesday',alias:'수요예배'}];
+    const afternoon={date:'2026-11-04',type_id:'sunday-afternoon',alias:'',_worshipSourceRef:{no_gathering:true,no_gathering_reason:'다니엘기도회로 대체'}};
+    rows.push({...afternoon,id:'e'}, {...afternoon,id:'f',alias:'특별 모임'}, {...afternoon,id:'g',_worshipSourceRef:{no_gathering:true,no_gathering_reason:'집회 없음'}});
     window.before=JSON.stringify(rows);state.services=rows;state.selectedServiceId='b';
-    window.expected=['청년부 예배 (야외예배)','주일예배 [3부] (온세대 찬양예배)','수요예배 (다니엘기도회)','수요예배'];
+    window.expected=['청년부 예배 (야외예배)','주일예배 [3부] (온세대 찬양예배)','수요예배 (다니엘기도회)','수요예배','주일오후예배 (다니엘기도회)','주일오후예배 (특별 모임)','주일오후예배'];
     if(JSON.stringify(rows.map(serviceUpcomingNavigationName))!==JSON.stringify(expected))throw Error(JSON.stringify(rows.map(serviceUpcomingNavigationName)));
     if(serviceNavigationName(rows[1])!=='온세대 찬양예배')throw Error('other screen naming changed');
     const old=document.createElement('div');old.innerHTML=renderServiceSidebarDateGroups(rows);if(old.querySelector('.is-upcoming')||old.querySelectorAll('.service-sidebar-title')[1].textContent!=='온세대 찬양예배')throw Error('search result layout/name changed');
