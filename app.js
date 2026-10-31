@@ -12153,7 +12153,7 @@ function serviceItemEditorModel(item = {}, options = {}) {
     : "";
   const titlePersonParts = titlePerson ? serviceTitlePersonEffectiveParts(item, parsed, service) : null;
   const titleValue = strictSong && linkedSong
-    ? songServiceOptionLabel(linkedSong)
+    ? serviceSelectedPraiseLabel(item, linkedSong, service)
     : servicePraiseUsesDirectLyrics(praiseInputMode)
       ? String(item.raw_title || "").trim() || (linkedSong ? songServiceOptionLabel(linkedSong) : "")
     : scripture
@@ -24797,11 +24797,7 @@ function serviceSidebarChildItemDisplayText(item = {}) {
   const service = state.services.find((candidate) => candidate.id === item.service_id) || null;
   const effectiveItem = serviceItemWithSharedSundayContent(item, service);
   const song = serviceItemLinkedSong(effectiveItem);
-  if (song) {
-    const version = getPresenterServiceItemVersion(song, effectiveItem, service);
-    const fallback = serviceItemDisplayText(effectiveItem);
-    return [presenterSongTitleHymnNo(song, version, fallback), presenterSongTitleDisplayTitle(song, version, fallback)].filter(Boolean).join(" ");
-  }
+  if (song) return serviceSelectedPraiseLabel(effectiveItem, song, service);
   const liturgicalTitle = serviceItemLiturgicalNavigationTitle(item);
   if (liturgicalTitle !== null) return liturgicalTitle;
   if (serviceTitlePersonRawTitleAssignee(item)) return "";

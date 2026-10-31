@@ -1132,6 +1132,12 @@ function presenterSongTitleDisplayTitle(song = null, version = null, fallbackTex
   return presenterPraiseTitle(song, fallbackText, version);
 }
 
+function serviceSelectedPraiseLabel(item, song, service) {
+  const version = getPresenterServiceItemVersion(song, item, service);
+  const fallback = serviceItemDisplayText(item);
+  return [presenterSongTitleHymnNo(song, version, fallback), presenterSongTitleDisplayTitle(song, version, fallback)].filter(Boolean).join(" ");
+}
+
 function presenterSongTitleHymnNo(song = null, version = null, fallbackText = "") {
   const rawNo = String(presenterUnifiedHymnVersionNo(version) || song?.hymn_no || version?.hymn_no || splitHymnNo(fallbackText).no || "").trim();
   if (!rawNo) return "";
