@@ -31,7 +31,7 @@ try:
             page.locator('[data-open-metadata]').click()
             result = page.evaluate("""() => {
               const failures=[];
-              for(const selector of ['[data-song-field="title"]','[data-version-name-field]','[data-version-output-title-field]']){
+              for(const selector of ['[data-song-field="title"]','[data-version-name-field]','[data-song-field="subtitle"]']){
                 const field=document.querySelector(selector);if(!field)throw Error('Missing '+selector);
                 field.focus();field.value='한글 입력';field.setSelectionRange(2,2);
                 field.dispatchEvent(new Event('input',{bubbles:true}));
@@ -58,7 +58,7 @@ try:
             failures.extend((engine, item) for item in result)
             page.set_viewport_size({'width':390, 'height':844})
             page.locator('[data-open-metadata]').click()
-            field = page.locator('[data-version-output-title-field]')
+            field = page.locator('[data-song-field="subtitle"]')
             field.fill('모바일 입력 유지')
             field.focus()
             count = page.evaluate('inputSaves')

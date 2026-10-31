@@ -32,8 +32,8 @@ def main():
               return {results,manual:serviceSidebarChildItemDisplayText({label:'특송',raw_title:'직접 입력 곡'})};
             }''')
             assert result['results']==[
-                {'sidebar':'250 구주의 십자가 보혈로','output':'250 구주의 십자가 보혈로'},
-                {'sidebar':'통 182 구주의 십자가 보혈로','output':'통 182 구주의 십자가 보혈로'}],result
+                {'sidebar':'250 구주의 십자가 보혈로','output':'구주의 십자가 보혈로'},
+                {'sidebar':'통 182 구주의 십자가 보혈로','output':'구주의 십자가 보혈로'}],result
             assert result['manual']=='직접 입력 곡',result
             print('PASS sidebar matches selected hymn version; source fields retained')
             browser.close()

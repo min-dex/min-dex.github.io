@@ -4894,7 +4894,7 @@ def main() -> int:
                         "감사 3절 첫 줄\n감사 3절 둘째 줄",
                         "감사 코다 첫 줄\n감사 코다 둘째 줄",
                     ]
-                    and form_preset_state["unifiedHymnTitleText"] == "♬ 통 1 만복의 근원 하나님"
+                    and form_preset_state["unifiedHymnTitleText"] == "♬ 만복의 근원 하나님"
                     and form_preset_state["fallbackVersionTexts"] == ["하나님은 너를 지키시는 자\n너의 우편에 그늘 되시니"]
                     and form_preset_state["fallbackVersionWarnings"] == []
                     and form_preset_state["fallbackTitleTexts"] == ["하나님은 너를 지키시는 자\n너의 우편에 그늘 되시니"]

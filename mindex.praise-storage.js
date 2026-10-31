@@ -366,8 +366,8 @@ function praiseVariantLabel(song, peers) {
   const name = versionDisplayName(song, song.versions?.[0] || {});
   const repeated = peers.filter(row=>versionDisplayName(row,row.versions?.[0]||{})===name).length > 1;
   if (!repeated) return name;
-  const detail = song.versions?.[0]?.output_title || song.title;
-  return `${name} · ${detail}${peers.filter(row => (row.versions?.[0]?.output_title || row.title) === detail).length > 1 ? ` · ${peers.findIndex(row=>row.id===song.id)+1}` : ""}`;
+  const detail = song.title;
+  return `${name} · ${detail}${peers.filter(row => row.title === detail).length > 1 ? ` · ${peers.findIndex(row=>row.id===song.id)+1}` : ""}`;
 }
 function renderSingleSongVersionPicker(song) {
   if (!song?._singleSongRecord) return "";
@@ -383,7 +383,7 @@ async function selectSingleSongVersion(field) {
 }
 
 function renderNativeVersionHeading(song, version) {
-  const title = String(version?.output_title || song.title || "").trim();
+  const title = String(song.title || "").trim();
   return title && (song.hymn_no ? stripHymnNumber(title) : title) !== praiseGroupTitle(song)
     ? `<span class="version-title-text">${escapeHtml(title)}</span>` : "";
 }
@@ -392,9 +392,8 @@ function renderNativeVersionMetadata(song) {
   const version = song.versions[0];
   return `<div class="metadata-popover-grid">
     <label class="field compact"><span>판본 구분명</span><input data-version-name-field="${escapeAttr(version.id)}" value="${escapeAttr(versionEditableName(song,version))}" aria-label="판본 구분명" /><small>예: 원곡, 영어, 편곡 · 판본을 고를 때 표시</small></label>
-    <label class="field compact"><span>송출 제목</span><input data-version-output-title-field="${escapeAttr(version.id)}" value="${escapeAttr(version.output_title || "")}" placeholder="비워 두면 이 판본의 곡 제목 사용" aria-label="송출 제목" /><small>선택한 판본의 제목 화면에 표시 · 구분명과 별도로 저장</small></label>
     <div class="field compact"><span>곡목 대표 제목</span><span data-native-group-title>${escapeHtml(praiseGroupTitle(song))}</span></div>
-    <div class="field compact"><span>송출 제목 미리보기</span><span data-native-output-title>${escapeHtml(presenterSongTitleDisplayTitle(song,version))}</span><small>찬송가 번호는 선택한 판본의 기존 번호 규칙을 사용합니다.</small></div>
+    <div class="field compact"><span>제목 슬라이드 미리보기</span><span data-native-output-title>${escapeHtml(presenterSongTitleDisplayTitle(song,version))}</span><small data-native-title-detail>${escapeHtml(presenterSongTitleContent({songTitleContent:{title:presenterSongTitleDisplayTitle(song,version),detail:presenterSongTitleDetail(song,version)}}).detail)}</small></div>
   </div>`;
 }
 function updateNativeVersionTitlePreview(song) {
@@ -402,6 +401,10 @@ function updateNativeVersionTitlePreview(song) {
   const dialog = document.querySelector('.metadata-popover');
   const heading = dialog?.querySelector('[data-native-group-title]');
   const output = dialog?.querySelector('[data-native-output-title]');
+  const detail = dialog?.querySelector('[data-native-title-detail]');
+  if (detail) detail.textContent = presenterSongTitleContent({songTitleContent:{
+    title:presenterSongTitleDisplayTitle(song,song.versions[0]), detail:presenterSongTitleDetail(song,song.versions[0])
+  }}).detail;
   if (heading) heading.textContent = praiseGroupTitle(song);
   if (output) output.textContent = presenterSongTitleDisplayTitle(song,song.versions[0]);
 }
