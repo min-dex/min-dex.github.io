@@ -4895,14 +4895,44 @@ not recreate media, restart audio/video or replay slide effects.
 
 A `.key` original remains byte-identical and attached to the same worship item.
 An Apple Keynote HTML export is a separate playback sidecar, not slide-image
-conversion or a replacement source. Preparation currently requires Keynote on a
-Mac: export HTML, run `tools/prepare_keynote_html.py` against the preserved source
-and export folder, then choose **재생 자료 연결** on the original item. A raw KEY
-uploaded in Chrome is not automatically converted. The verified Apple 15.4
+conversion or a replacement source. Chrome can prepare an uploaded KEY through
+an explicitly paired local Mac Keynote companion (see the2026-10-31 section
+below). Manual HTML export and **재생 자료 연결** remain available. Unpaired web
+uploads stop before storing an incomplete replacement. The verified Apple15.4
 runtime is hash pinned; unsupported versions fail before upload/execution.
 Prepared playback runs inside Mindex web and desktop without Keynote at playback
 time. Total export limit is 500 MiB, at most 5,000 resources and 300 slides;
 individual resources currently must fit the 50 MiB Storage upload limit.
+
+### Chrome Keynote automatic preparation ·2026-10-31
+
+PPTX keeps its existing direct browser import. KEY upload first prepares the
+Apple HTML export through the paired Mac helper, verifies the original hash,
+known native runtime and every resource, then saves the byte-identical original
+and attaches playback through the existing atomic element-save path. These are
+two acknowledged saves: if the second stage fails, the original remains attached
+and **슬라이드 자동 연결** can resume it. An uncertain save retains immutable
+uploads and the pending edit for normal atomic reconciliation. A new edit,
+service/project switch or source mismatch stops attachment; it never saves
+another pending edit just to complete conversion. Existing original-only KEY
+items can use the same automatic connection button, without replacing content.
+
+The opt-in companion binds IPv4 loopback only, validates Host and the exact
+Mindex origin, and requires approval in its local connection page. Session
+tokens stay in the requesting tab's memory and expire after eight hours or helper
+shutdown. No worship credentials, arbitrary source paths or permission changes
+are accepted over the protocol. Only selected source bytes are received; a
+private copy is opened/exported/closed by Keynote, preserving the user's original.
+Resources are served only from the hash-identified export and verified again
+before upload. Browser playback retains its opaque sandbox and pinned runtime.
+
+`tools/install-keynote-browser-bridge.mjs --prepare FOLDER` creates a reviewable
+local bundle without executing it. Actual installation, login startup and Mac
+Keynote automation require the user's explicit setup approval. The companion
+is not a hosted conversion service, and a Mac with Keynote must be available
+while preparing a new KEY. The existing Python manual preparation tool remains
+compatible. Neither a protocol-double browser check nor a successful web gate
+certifies every native Keynote effect/audio/video combination.
 
 Output uses Apple's aspect-fit layout at the largest size contained in the
 viewport, including enlargement beyond the original slide dimensions. The

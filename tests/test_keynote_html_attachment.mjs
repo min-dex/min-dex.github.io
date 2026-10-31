@@ -26,15 +26,17 @@ async function run(mode){
  context.moduleFixture={...engine,assertKnownKeynoteHtmlRuntime:()=>{}};vm.runInContext('keynoteHtmlRuntime=async()=>moduleFixture',context);
  const files=Object.entries(contents).map(([name,bytes])=>({webkitRelativePath:'export/'+name,size:bytes.length,arrayBuffer:async()=>bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)}));
  context.input={dataset:{serviceId:'service',keynoteItemId:'item'},files,value:'set',disabled:false};
- const result=await vm.runInContext('importPresenterKeynoteHtml(input)',context);
+ if(mode==='dirty')state.dirty.service=true;
+ const result=await vm.runInContext(mode==='dirty'?'importPresenterKeynoteHtml(input,{requireClean:true})':'importPresenterKeynoteHtml(input)',context);
  assert.equal(item.lyrics,'keep-lyrics');assert.equal(item.form,'V-C');assert.deepEqual(item.timing,[1,2]);
  const after=JSON.parse(item.memo);assert.deepEqual(after.offeringVariants,memo.offeringVariants);assert.equal(after.userMemo,memo.userMemo);assert.deepEqual(after.asset.original,memo.asset.original);assert.equal(after.asset.custom,'preserved');
  if(mode==='success'||mode==='projection'){assert.equal(result,true);assert.equal(saves,1);assert.ok(after.asset.keynoteHtml);assert.equal(removed.length,0);}
  if(mode==='race'){assert.equal(result,false);assert.equal(saves,0);assert.equal(item.title,'user-edited-during-upload');assert.equal(item.memo,JSON.stringify(memo));assert.equal(removed.length,uploads.length);}
  if(mode==='uncertain'){assert.equal(result,false);assert.equal(saves,1);assert.equal(removed.length,0);assert.ok(after.asset.keynoteHtml);assert.equal(state.dirty.service,true);}
+ if(mode==='dirty'){assert.equal(result,false);assert.equal(saves,0);assert.equal(uploads.length,0);assert.equal(item.memo,JSON.stringify(memo));assert.equal(state.dirty.service,true);}
  return {mode,result,uploads:uploads.length,saves,removed:removed.length,preserved:true};
 }
-for(const mode of ['success','projection','race','uncertain'])test('sidecar attachment '+mode+' preserves original/input/timing and atomic outcome',async()=>{await run(mode)});
+for(const mode of ['success','projection','race','uncertain','dirty'])test('sidecar attachment '+mode+' preserves original/input/timing and atomic outcome',async()=>{await run(mode)});
 
 test('native ending transition requests common next exactly once and preserves a real last build',()=>{
  for(const terminalTransition of [true,false]){

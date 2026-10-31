@@ -1074,6 +1074,14 @@ the original. The attachment helper patches raw structured memo JSON so unknown
 user fields and stored whitespace survive. Presenter checkpoint/command data are
 transient session state, never saved into worship lyrics, timing or asset source.
 
+Chrome automatic KEY preparation uses this same sidecar contract. The paired
+loopback Mac companion receives selected original bytes and returns a
+hash-verified Apple HTML export; it never receives worship credentials or writes
+services. Its pairing tokens are tab-memory state, not service memo, shared
+server storage or permanent browser credentials. Original upload and sidecar
+attachment use the existing acknowledged atomic element saves. A second-stage
+failure preserves the original and follows normal pending-save reconciliation.
+
 
 ## Praise classification owner · 2026-10-28 candidate
 
