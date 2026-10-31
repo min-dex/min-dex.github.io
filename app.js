@@ -11347,6 +11347,7 @@ function replaceServiceBenediction(item, enabled) {
       ...(enabled ? { introSlide: { title: "주기도문" } } : {}) });
   }
   item.memo = serializeServiceItemMemo(serviceMemoWithoutPriorModes(parseServiceItemMemo(item.memo)));
+  item._worshipSlotKey = enabled ? "sending.lords_prayer" : "sending.benediction";
   item._worshipElementTemplateModified = true;
   item._worshipTemplatePlaceholder = false;
   return true;
@@ -11364,7 +11365,10 @@ async function setServiceBenedictionReplacement(serviceId, itemId, enabled) {
     showToast("편집 중인 예배 원문을 먼저 반영한 뒤 변경해 주세요.", "info");
     return false;
   }
-  if (serviceBenedictionUsesLordsPrayer(item) === enabled) return true;
+  if (serviceBenedictionUsesLordsPrayer(item) === enabled) {
+    return !state.dirtyServiceElementIds.get(serviceId)?.has(item.id)
+      || saveServiceItemPatch(serviceId, index, { renderAfterSave: false });
+  }
   for (const field of refs.detailPane?.querySelectorAll("[data-service-item-field]") || []) {
     if ((field.dataset.serviceId || state.selectedServiceId) !== serviceId
       || Number(field.dataset.serviceItemIndex) !== index) continue;
@@ -22708,7 +22712,10 @@ function templateProjectionSectionKey(item = {}) {
 
 function mergeTemplateProjectionItem(templateItem = {}, existingItem = {}) {
   const sectionModified = Boolean(existingItem._worshipSectionTemplateModified);
-  const elementModified = Boolean(existingItem._worshipElementTemplateModified
+  const storedSendingMode = templateProjectionSectionKey(existingItem) === "sending"
+    && serviceItemCanReplaceBenediction(existingItem) && serviceItemCanReplaceBenediction(templateItem)
+    && existingItem.label !== templateItem.label && !serviceSendingConclusionIsTemplateOnly(existingItem);
+  const elementModified = Boolean(storedSendingMode || existingItem._worshipElementTemplateModified
     || (serviceItemCanToggleOfferingSpecial(existingItem) && serviceOfferingMode(existingItem) !== "hymn"));
   const templateLabel = String(templateItem.label || "").trim();
   const existingLabel = String(existingItem.label || "").trim();
@@ -22746,7 +22753,7 @@ function mergeTemplateProjectionItem(templateItem = {}, existingItem = {}) {
       ))
       : (existingLabel || templateLabel);
     merged._worshipElementOrder = existingItem._worshipElementOrder || templateItem._worshipElementOrder;
-    if (serviceItemCanToggleOfferingSpecial(existingItem)) merged._worshipSlotKey = serviceItemSlotKey(existingItem);
+    if (storedSendingMode || serviceItemCanToggleOfferingSpecial(existingItem)) merged._worshipSlotKey = serviceItemSlotKey(existingItem);
   }
   if (serviceItemCanToggleOfferingSpecial(existingItem) && serviceOfferingMode(existingItem) === "video") {
     merged.song_id = null; merged.version_id = null; merged.song_version_id = null;

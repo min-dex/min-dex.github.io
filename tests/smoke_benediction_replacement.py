@@ -102,6 +102,12 @@ def run(browser, url):
         {id:'b',label:'주기도문',raw_title:'별도 입력 본문',_worshipSectionKey:'sending',_worshipElementTemplateModified:true}];
       const authoredBefore=JSON.stringify(authored);
       check(normalizeSendingConclusionProjectionItems(authored).length===2 && JSON.stringify(authored)===authoredBefore,'authored conclusions removed');
+      const storedPrayer={...authored[1],raw_title:PUBLIC_LORDS_PRAYER_TEXT,assignee:'',_worshipElementTemplateModified:false,
+        _worshipSlotKey:'sending.lords_prayer',memo:serializeServiceItemMemo({elementType:'body',inputMode:'text'})};
+      const projected=mergeTemplateProjectionItem({...authored[0],_worshipSlotKey:'sending.benediction',memo:serializeServiceItemMemo({elementType:'title_person',inputMode:'text'})},storedPrayer);
+      check(projected.label==='주기도문' && projected.raw_title===storedPrayer.raw_title && serviceMemoElementType(parseServiceItemMemo(projected.memo))==='body','stored prayer mixed with benediction template');
+      check(projected._worshipSlotKey==='sending.lords_prayer','stored prayer lost slot');
+      check(serviceElementContentStateForSave(projected).state!=='missing','prayer incorrectly missing');
       const legacy={...authored[1],memo:serializeServiceItemMemo({benedictionReplacement:{version:1,original:{label:'축도',raw_title:'옛 제목',assignee:'옛 담당',memo:'보관 메모'}}})};
       check(replaceServiceBenediction(legacy,false) && legacy.raw_title==='옛 제목' && legacy.assignee==='옛 담당','legacy explicit switch lost');
       check(!parseServiceItemMemo(legacy.memo).benedictionReplacement,'legacy snapshot regenerated');
@@ -121,6 +127,8 @@ def run(browser, url):
       results.push('real save path / restore / failure retains draft');
       fail = false;
       target = getServiceItems(sid).find(x => x.label === '주기도문');
+      const failedWrites=writes.length;
+      check(await setServiceBenedictionReplacement(sid,target.id,true) && writes.length>failedWrites,'retry did not save selected prayer');
       refs.detailPane.innerHTML = presenterServiceInputControls(target, getServiceItems(sid).findIndex(x => x.id === target.id), service);
       refs.detailPane.addEventListener('click', handleDetailClick);
       document.getElementById('presenterOutputRoot')?.remove();
