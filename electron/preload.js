@@ -26,3 +26,15 @@ contextBridge.exposeInMainWorld("mindexElectron", {
     return () => ipcRenderer.removeListener("mindex:check-update-requested", handler);
   },
 });
+
+// The offline test can still open when the database-backed home cannot load.
+window.addEventListener("DOMContentLoaded", async () => {
+  const error = document.getElementById("bootError");
+  if (!error) return;
+  const info = await ipcRenderer.invoke("mindex:get-build-info");
+  if (!info.testBuild) return;
+  const button = document.createElement("button");
+  button.type = "button"; button.dataset.broadcastLab = ""; button.textContent = "방송 합성 시험";
+  button.onclick = () => ipcRenderer.invoke("mindex:open-broadcast-lab");
+  error.append(button);
+}, { once:true });

@@ -247,6 +247,9 @@ function bindUpdateMenu() {
       mainWindow.webContents.send("mindex:check-update-requested");
     },
   }] }));
+  if (require("../package.json").mindexTestBuild === true) {
+    menu.append(new MenuItem({label:"방송 시험",submenu:[{label:"방송 합성 시험 열기",click:openBroadcastLab}]}));
+  }
   Menu.setApplicationMenu(menu);
 }
 
