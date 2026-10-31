@@ -21471,7 +21471,7 @@ function publicWorshipPraiseStep(options = {}) {
           default_text: defaultTitle,
           defaultSong: { title: defaultTitle },
         } : {}),
-        ...scoreOutputMode(score),
+        ...scoreOutputMode(score), ...(options.inputMode ? { inputMode: normalizeServiceInputMode(options.inputMode) } : {}),
       };
     }),
     ...extraElements,
@@ -21576,7 +21576,7 @@ function childrenWorshipTemplate() {
   const bodyOnly = step => ({ ...step, elements: step.elements.map(element => ({ ...element, introSlide: null })) });
   return [
     { ...bodyOnly(publicWorshipCreedStep()), label: "사도신경", name: "사도신경" },
-    publicWorshipPraiseStep({ count: 4, required: true }),
+    publicWorshipPraiseStep({ count: 4, required: true, inputMode: "children_audio" }),
     { label: "예배의 부름", name: "예배의 부름", required: true, flex: false,
       sectionKey: "opening", elementType: "body", slides: [worshipOpeningBodyText('children')] },
     publicWorshipScriptureReadingStep(),

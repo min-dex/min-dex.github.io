@@ -3119,6 +3119,14 @@ long quoted-text checks cover the actual renderers.
 
 ## 2026-10-17 — 어린이 DB 음원과 예배 음원의 소유권 분리
 
+기본값 정정 ·2026-10-31: 어린이부 메인 찬양 네 슬롯의 양식 입력 방식은
+`children_audio`(DB: 음원)이다. 새 예배의 scaffold를 만들 때 이를 명시한다.
+어린이부는 기존 예배를 자동 template projection하는 유형이 아니므로 읽기 중
+빈 항목을 생성하지 않는다. 다른 예배의 DB 가사 기본값과 저장된 명시 입력 방식·가사·곡/버전
+연결·담당자를 바꾸지 않는다. 기존에 저장된 빈 DB 가사 행의 운영 보정은 별도
+최신 조회/보존 조건 확인 없이 실행하지 않는다. 실제 scaffold/projection/select와
+기존 값 보존은 `smoke_children_audio_default.py`로 확인한다.
+
 앞의 ‘기존 children_audio는 열기 용도만 유지’ 결정은 사용자 정정으로 폐기한다.
 `어린이: 음원 로드`는 새 항목에도 계속 제공한다. 어린이 곡·버전은 DB에
 음원 주소·지정 폼·가사 fingerprint·타이밍 세트를 소유하고 여러 예배에서 사용한다.

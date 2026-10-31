@@ -231,6 +231,7 @@ SMOKES = (
     "smoke_song_photo_timing.py",
     "smoke_video_end_transition.py",
     "smoke_children_audio_db.py",
+    "smoke_children_audio_default.py",
     "smoke_praise_media.py",
     "smoke_reference_batch.py",
     "smoke_theme_bootstrap.py",
