@@ -41,7 +41,7 @@ try:
             }''')
             page.get_by_text('저장된 주보가 없습니다.', exact=True).wait_for()
             assert page.locator('[data-bulletin-open]').count() == 0
-            page.evaluate("async()=>{savedIds=['old'];await loadSavedBulletinList({force:true})}")
+            page.evaluate("async()=>{savedIds=['old'];await savedBulletinList.load({force:true})}")
             assert page.locator('[data-bulletin-open=old]').count() == 1
             assert page.locator('[data-bulletin-open=new]').count() == 0
             assert page.evaluate("serviceSupportsBulletin(state.services[1])"), 'new documents can still be created from worship'
@@ -64,7 +64,7 @@ try:
             page.evaluate("async()=>{savedIds=['old','new'];await MINDEX_CONTENT_LIVE.reconcile()}")
             page.locator('[data-bulletin-open=old]').wait_for()
             # Lookup failure is distinct from a successful empty list and supports retry.
-            page.evaluate("async()=>{readFailure=true;await loadSavedBulletinList({force:true})}")
+            page.evaluate("async()=>{readFailure=true;await savedBulletinList.load({force:true})}")
             page.get_by_text('주보 목록을 불러오지 못했습니다', exact=True).wait_for()
             assert not page.get_by_text('저장된 주보가 없습니다.', exact=True).is_visible()
             page.evaluate('readFailure=false')

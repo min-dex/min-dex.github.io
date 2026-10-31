@@ -159,7 +159,7 @@
       if(['service','presenter'].includes(module)&&state.selectedServiceId){
         return await window.MINDEX_SERVICE_ENTRY?.check(state.selectedServiceId,undefined,{background:true})&&done;
       }
-      if(module==='bulletin'&&!await loadSavedBulletinList({force:true}))return false;
+      if(module==='bulletin'&&!await savedBulletinList.load({force:true}))return false;
       if(message.context!==entryContext()||entryBlocked())return false;
       const target=controller()?.remoteIdentity();
       return target?await controller().refreshRemote(target.kind,target.recordId)&&done:done;
@@ -167,7 +167,7 @@
     return true;
   }
   async function refreshBulletin(id){
-    if(state.module==='bulletin'&&!await loadSavedBulletinList({force:true}))return false;
+    if(state.module==='bulletin'&&!await savedBulletinList.load({force:true}))return false;
     const active=controller(),target=active?.remoteIdentity();
     return target?.kind==='bulletin'&&(id==='all'||target.recordId===id)?active.refreshRemote('bulletin',target.recordId):true;
   }

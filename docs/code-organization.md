@@ -19,6 +19,10 @@ The order is checked by `tests/solid_audit.py`.
 
 ## Ownership
 
+- `mindex.bulletin.js` owns the saved-bulletin ID catalogue and its list-status UI
+  through `createSavedList`. The app supplies client/project identity, paginated
+  reads, error text and a sidebar refresh callback; the helper does not access
+  app state or replace an open bulletin document.
 - `mindex.constants.js` owns static values shared by the app and presenter.
 - `mindex.design-tokens.js` owns app-shell design tokens, button grammar
   labels, and shared UI copy. It must not own worship domain data.
