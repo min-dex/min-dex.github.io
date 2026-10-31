@@ -64,7 +64,7 @@ export async function exportWithKeynote(source, target) {
     let error='';const timer=setTimeout(()=>{child.kill();reject(nativeError('keynote-timeout'));},310000);
     child.stderr.on('data',chunk=>{if(error.length<8192)error+=chunk;});
     child.on('error',()=>{clearTimeout(timer);reject(nativeError('keynote-unavailable'));});
-    child.on('close',code=>{clearTimeout(timer);code===0?resolve():reject(nativeError(error.includes('-1743')?'automation-permission':'keynote-export-failed'));});
+    child.on('close',code=>{clearTimeout(timer);code===0?resolve():reject(nativeError(error.includes('-1743')?'automation-permission':error.includes('-1712')?'keynote-timeout':'keynote-export-failed'));});
     child.stdin.end(script);
   });
 }
