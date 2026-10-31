@@ -13,6 +13,7 @@ try:
    page=browser.new_page(viewport={'width':1600,'height':1200})
    page.route('**/*',lambda r:r.continue_() if r.request.method=='GET' and urlsplit(r.request.url).netloc==urlsplit(url).netloc else r.abort())
    page.route('**/print-reference-fixture.html',lambda r:r.fulfill(content_type='text/html',body='<meta charset="utf-8"><style>body{margin:0}svg{width:1600px;display:block}</style><script src="/mindex.inline-text.js"></script><script src="/mindex.bulletin.js"></script><main></main>'))
+   page.on('console',lambda msg:print(msg.text,flush=True))
    page.goto(url.rsplit('/',1)[0]+'/print-reference-fixture.html')
    result=page.evaluate(r'''async()=>{
     const B=MindexBulletin;await B.readyAssets();await document.fonts.ready;
@@ -22,7 +23,7 @@ try:
     const doc={source,fields,settings:{design:'children',theme:'auto'},frames:B.defaultFrames('children'),inherited:{common:{},months:{}}};
     const before=JSON.stringify(doc),cases=[];
     for(const mode of ['preview','print']){
-     const rendered=B.renderPages(doc,mode);if(rendered.issues.size)throw Error('default overflow: '+[...rendered.issues]);
+     const rendered=B.renderPages(doc,mode);document.querySelector('main').replaceChildren(...rendered.pages);const ctx=document.createElement('canvas').getContext('2d'),value=B.fieldValue(doc,'verse');ctx.font='500 10px MindexBulletin';console.log('PRINT_DIAG',JSON.stringify({mode,issues:[...rendered.issues],fonts:[...document.fonts].map(f=>({family:f.family,weight:f.weight,status:f.status})),font:ctx.font,fullWidth:ctx.measureText(value.split('\n')[0]).width,gaWidth:ctx.measureText('가').width,wrapped:B.wrap(value,128.5,10,500),frame:doc.frames.find(f=>f.id==='verse'),svg:[...document.querySelectorAll('[data-frame-id=verse] text')].map(n=>({text:n.textContent,y:n.getAttribute('y'),computed:getComputedStyle(n).font,runs:[...n.children].map(t=>({text:t.textContent,font:getComputedStyle(t).font,family:t.getAttribute('font-family'),size:t.getAttribute('font-size'),weight:t.getAttribute('font-weight')}))}))})));if(rendered.issues.size)throw Error('default overflow: '+[...rendered.issues]);
      const [front,inside]=rendered.pages;
      if(front.querySelectorAll('[data-children-corner]').length!==4||inside.querySelectorAll('[data-children-corner]').length!==2)throw Error('missing corner symbols');
      for(const id of ['website','issue','address','meeting'])if(front.querySelector('[data-frame-id='+id+'] text').getAttribute('fill')!=='#231f20')throw Error('low contrast margin '+id);
