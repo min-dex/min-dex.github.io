@@ -501,9 +501,11 @@
     const frames=legacyChildrenFrames();
     const changes={
       verse:{y:180},order:{h:145},
+      newsTitle:{y:87.5,w:75},welcome:{x:85,y:87.5,w:53.5,h:10,size:10,align:"right"},
       memoryTitle:{y:62.5},memoryReference:{y:62.5,size:12.5},memoryVerse:{y:75},
       readingPlan:{y:140,h:55,size:12.5},readingFooter:{y:180,h:12.5,size:12.5},
       website:{x:8.5},address:{x:8.5},insideChurch:{x:8.5},
+      issue:{w:130},meeting:{w:130},insideBrand:{w:130},
     };
     for(const f of frames)Object.assign(f,changes[f.id]||{});
     return frames;
@@ -682,6 +684,8 @@
   let fontReady;
   function readyAssets() {
     if (!fontReady) fontReady=(async()=>{
+      const themeFont=new FontFace("MindexChildrenTheme",`url(${new URL("vendor/fonts/dnf-bitbit-v2/DNFBitBitv2.otf",document.baseURI)})`,{weight:"400"});
+      document.fonts.add(await themeFont.load());
       await Promise.all([[500,"5Medium"],[700,"7Bold"],[800,"8ExtraBold"]].map(async([weight,name])=>{
         const font=new FontFace("MindexBulletin",`url(${new URL(`vendor/fonts/freesentation/Freesentation-${name}.woff2`,document.baseURI)})`,{weight:String(weight)});
         document.fonts.add(await font.load());
@@ -746,11 +750,11 @@
   function writeStyled(parent,runs,box,issues,id) {
     const size=box.size||12.5,weight=box.weight||500,ctx=wrap.context||(wrap.context=document.createElement("canvas").getContext("2d"));
     const groups=chars=>{
-      const result=[];for(const c of chars){const last=result.at(-1);if(last&&last.size===c.size&&last.weight===c.weight)last.text+=c.text;else result.push({...c});}return result;
+      const result=[];for(const c of chars){const last=result.at(-1);if(last&&last.size===c.size&&last.weight===c.weight&&last.family===c.family)last.text+=c.text;else result.push({...c});}return result;
     };
-    const measure=chars=>groups(chars).reduce((sum,r)=>{ctx.font=`${r.weight} ${r.size}px MindexBulletin`;return sum+ctx.measureText(r.text).width/MM;},0);
+    const measure=chars=>groups(chars).reduce((sum,r)=>{ctx.font=`${r.weight} ${r.size}px ${r.family}`;return sum+ctx.measureText(r.text).width/MM;},0);
     if(box.w<=0||box.h<=0){issues.add(id);return 0;}
-    const chars=runs.flatMap(r=>Array.from(r.text||"").map(text=>({text,size:r.size||size,weight:r.weight||weight})));
+    const chars=runs.flatMap(r=>Array.from(r.text||"").map(text=>({text,size:r.size||size,weight:r.weight||weight,family:r.family||"MindexBulletin"})));
     const lines=[];let line=[];
     const flush=()=>{while(line.at(-1)?.text===" ")line.pop();lines.push(line);line=[];};
     for(const c of chars){
@@ -771,7 +775,7 @@
       if(measure(chars)>box.w+.01)issues.add(id);
       const y=first+i*leading/MM,anchor=box.align==="right"?"end":box.align==="center"?"middle":"start";
       const node=svg("text",{x:box.x+(anchor==="end"?box.w:anchor==="middle"?box.w/2:0),y,"text-anchor":anchor,"font-family":"MindexBulletin",fill:box.color||"#231f20","xml:space":"preserve"});
-      for(const r of groups(chars))node.append(svg("tspan",{"font-size":r.size/MM,"font-weight":r.weight},r.text));
+      for(const r of groups(chars))node.append(svg("tspan",{"font-size":r.size/MM,"font-weight":r.weight,...(r.family!=="MindexBulletin"?{"font-family":r.family}:{})},r.text));
       parent.append(node);bottom=y+Math.max(size,...chars.map(c=>c.size))*.25/MM;
     });
     if(bottom>box.y+box.h+.01)issues.add(id);
@@ -782,12 +786,25 @@
     return String(value||"").replace(/(^|[\s/·,])([가-힣]{2,5})[ \t]*(선생님|어린이|청년|(?:목사|전도사|집사|권사|장로|서기)(?:님)?)(?=$|[\s/·,])/gu,
       (all,prefix,name,title)=>["위임","담임","원로","부담임","교육","담당"].includes(name)?all:`${prefix}${name} ${title}`);
   }
-  function personRuns(value,size=12.5) {
+  function personRuns(value,size=12.5,roleSize=size) {
     value=personText(value);
     const match=value.match(/^(.+?)( (?:청년|어린이|선생님|(?:목사|전도사|집사|권사|장로|서기)(?:님)?))$/);
-    return match?[{text:match[1],weight:700,size},{text:match[2],weight:500,size}]:[{text:value,size}];
+    return match?[{text:match[1],weight:700,size},{text:match[2],weight:500,size:roleSize}]:[{text:value,size}];
   }
   function copyRuns(value,kind,size) {
+    if(kind==="children-welcome"&&!value.includes("**")&&window.MindexInlineText.plain(value).replace(/\s/g,"")==="오늘도어린이부예배에오신여러분을환영하고축복합니다:)")return [
+      {text:"오늘도 ",size},{text:"어린이부 예배",size,weight:700},{text:"에 오신 여러분을\n",size},
+      {text:"환영",size:size+2.5,weight:700},{text:"하고 ",size:size+2.5},{text:"축복",size:size+2.5,weight:800},
+      {text:"합니다 ",size:size+2.5},{text:":)",size:size+2.5,weight:700}];
+    if(kind==="children-notices"){
+      const runs=window.MindexInlineText.runs(value),plain=runs.map(r=>r.text).join(""),key=plain.replace(/\s/g,"");
+      const expression=key==="◈잠들기전,잠언읽기!잠잠성경을매일읽고체크해서선생님들께확인받아요!"?/잠들기 전, 잠언 읽기!|잠잠성경/g:
+        key==="◈연말에잠잠성경과주보모으기시상식이있습니다!"?/잠잠성경과 주보 모으기 시상식/g:null;
+      if(expression){
+        const ranges=[...plain.matchAll(expression)].map(m=>[m.index,m.index+m[0].length]);let offset=0;
+        return runs.flatMap(run=>Array.from(run.text,text=>{const bold=run.bold||ranges.some(([start,end])=>offset>=start&&offset<end);offset++;return {text,...(bold?{weight:700}:{})};}));
+      }
+    }
     if(kind==="church"&&value.startsWith("기독교대한성결교회 "))return [{text:"기독교대한성결교회 ",weight:500},{text:value.slice("기독교대한성결교회 ".length),weight:700}];
     if(kind==="welcome"&&window.MindexInlineText.plain(value).replace(/\s/g,"")==="오늘도청년부예배에오신여러분을환영하고축복합니다:)")return [
       {text:"오늘도 ",size},{text:"청년부 예배",size,weight:700},{text:"에 오신 여러분을\n",size},
@@ -855,7 +872,7 @@
       const detail=f.id==="news"&&/^\s*(?:-\s*)?(?:일시|장소|교재):/.test(plain);
       if(marker&&index>0&&y>f.y)y+=f.itemGap??(f.id==="news"?(mainCount>2?0:5):2.5);
       let skip=marker?plain.length-marker[3].length:0;
-      const bodyRuns=copyRuns(paragraph,f.id,f.size).flatMap(run=>{
+      const bodyRuns=copyRuns(paragraph,f.childrenReference&&f.id==="notices"?"children-notices":f.id,f.size).flatMap(run=>{
         const text=run.text.slice(skip);skip=Math.max(0,skip-run.text.length);
         return text?[{...run,text}]:[];
       });
@@ -895,6 +912,12 @@
       if(page===0)root.append(svg("image",{href:new URL(doc.source?.department==="children"?childrenLogoPath:ink?inkLogoPath:logoPath,document.baseURI).href,x:doc.source?.department==="children"?172.75:170,y:doc.source?.department==="children"?53.75:67.5,width:doc.source?.department==="children"?100:105,height:doc.source?.department==="children"?85.89:72.5}));
       for(const f of doc.frames.filter(f=>f.page===page&&(!f.hidden||mode==="layout"))) {
         const group=svg("g",{"data-frame-id":f.id}),frameIssues=f.hidden?new Set():issues;
+        if(doc.source?.department==="children"&&["website","address","insideChurch","issue","meeting","insideBrand"].includes(f.id)&&String(boundText(doc,f)||"").trim()){
+          const left=["website","address","insideChurch"].includes(f.id),right=["issue","meeting","insideBrand"].includes(f.id);
+          const x=left?f.x-2.5:f.x+f.w+2.5,y=f.y+1;
+          if((left||right)&&x>=1&&x<=296&&y>=0&&y+3<=210)group.append(svg("path",{
+            d:`M${x} ${y}v3 M${x-1} ${y+1}h2`,stroke:"#231f20","stroke-width":.5,fill:"none","data-children-corner":f.id}));
+        }
         if(f.type==="reading") {
           const lines=boundText(doc,f).split("\n").filter(Boolean),rows=Math.ceil(lines.length/2),w=(f.w-7.5)/2;
           const step=rows>4?7.5:25/MM;
@@ -907,7 +930,7 @@
           if(rows*step>f.h+.01)frameIssues.add(f.id);
         } else if(doc.source?.department==="children"&&f.id==="monthlyTheme"){
           const lines=boundText(doc,f).split("\n");
-          writeStyled(group,lines.map((text,i)=>({text:(i?"\n":"")+text,size:i?Math.max(7.5,f.size-2.5):f.size,weight:i?500:700})),{...f,leading:15},frameIssues,f.id);
+          writeStyled(group,lines.map((text,i)=>({text:(i?"\n":"")+text,size:i?Math.max(7.5,f.size-2.5):f.size,weight:i?500:400,...(!i?{family:"MindexChildrenTheme"}:{})})),{...f,leading:15},frameIssues,f.id);
         } else if(doc.source?.department==="children"&&f.id==="memoryReference"){
           const value=boundText(doc,f),parts=value.match(/^(.+?)\s+(\d+):(\d+(?:[–-]\d+)?)$/);
           writeStyled(group,parts?[{text:parts[1],weight:700},{text:`\n${parts[2]}장 ${parts[3]}절`,size:Math.max(7.5,f.size-2.5)}]:[{text:value}],{...f,leading:15},frameIssues,f.id);
@@ -925,15 +948,17 @@
           writeStyled(group,[{text:year||""},{text:month?"\n"+month:"",size:f.size+2.5,weight:700}],f,frameIssues,f.id);
         } else if(f.binding==="leader") {
           const leader=fieldValue(doc,"leader");
-          if(leader)writeStyled(group,[{text:"인도자\n",size:f.size},...personRuns(leader,f.size+2.5)],{...f,leading:15},frameIssues,f.id);
+          const people=doc.source?.department==="children"?String(leader||"").split(/(\s*\/\s*)/).flatMap(part=>part.includes("/")?[{text:part,size:f.size+2.5}]:personRuns(part,f.size+2.5,f.size)):personRuns(leader,f.size+2.5);
+          if(leader)writeStyled(group,[{text:"인도자\n",size:f.size},...people],{...f,leading:15},frameIssues,f.id);
         } else if(["church","welcome","verse"].includes(f.id)) {
-          writeStyled(group,copyRuns(boundText(doc,f),f.id,f.size),f,frameIssues,f.id);
+          const kind=doc.source?.department==="children"&&f.id==="welcome"?"children-welcome":f.id,runs=copyRuns(boundText(doc,f),kind,f.size);
+          writeStyled(group,runs,{...f,...(kind==="children-welcome"&&runs.some(r=>r.size>f.size)?{leading:f.size+2.5}:{})},frameIssues,f.id);
         } else if(f.binding==="sermon") {
           writeText(group,doc.source?.sermon,{...f,h:7.5},frameIssues,f.id);
           writeText(group,Object.hasOwn(doc.fields,"sermonReference")?fieldValue(doc,"sermonReference"):fieldValue(doc,"sermonReference")||doc.source?.scripture,{...f,y:f.y+7.5,h:f.h-7.5,size:Math.max(7.5,f.size-2.5),weight:500},frameIssues,f.id);
         } else if(f.type==="list") {
           if(f.id==="outline"&&fieldValue(doc,"outlineTitle"))writeText(group,fieldValue(doc,"outlineTitle"),{...f,y:f.y-15,w:45,h:10,size:17.5,weight:700},frameIssues,f.id);
-          renderList(group,boundText(doc,f),f,frameIssues,f.id==="outline"?(doc.settings.outlineColumns||doc.source?.outlineColumns||1):1);
+          renderList(group,boundText(doc,f),{...f,childrenReference:doc.source?.department==="children"},frameIssues,f.id==="outline"?(doc.settings.outlineColumns||doc.source?.outlineColumns||1):1);
         } else if(f.type==="staff") {
           const value=boundText(doc,f),pairs=value.split(/\n|\s*·\s*/).filter(Boolean);
           const parsed=pairs.map(t=>t.match(/^(위임목사|담당 교역자|회장|총무|서기|회계|부장)\s+(.+)$/));
@@ -994,7 +1019,7 @@
             writeStyled(group,personRuns(r.person,f.size),{...f,x:x+38.5,y,w:col-38.5,h:10,align:"right"},frameIssues,f.id);
             if(y+10>f.y+f.h+.01)frameIssues.add(f.id);
           });
-        } else writeText(group,boundText(doc,f),{...f,color:(doc.source?.department==="children"?["website","meeting"].includes(f.id):f.y<10||f.y>=200)&&(background||theme==="ink")?"#fff":"#231f20"},frameIssues,f.id);
+        } else writeText(group,boundText(doc,f),{...f,color:doc.source?.department!=="children"&&(f.y<10||f.y>=200)&&(background||theme==="ink")?"#fff":"#231f20"},frameIssues,f.id);
         if(mode==="layout") {
           group.append(svg("rect",{class:`bulletin-frame-hit${selected===f.id?" is-selected":""}`,x:f.x,y:f.y,width:f.w,height:f.h,
             fill:"transparent",stroke:selected===f.id?"#477953":"#47795380","stroke-width":.25,"data-frame-hit":f.id}));
@@ -1548,7 +1573,7 @@
         const rendered=renderPages(output,"print",null);if(rendered.issues.size)throw new Error("내용이 편집 영역을 넘습니다. 크기나 간격을 조정해 주세요.");
         printFrame?.remove();printFrame=document.createElement("iframe");
         printFrame.title="주보 인쇄";printFrame.className="bulletin-print-frame";
-        const fontCSS=[[500,"5Medium"],[700,"7Bold"],[800,"8ExtraBold"]].map(([w,n])=>`@font-face{font-family:MindexBulletin;font-weight:${w};src:url('${new URL(`vendor/fonts/freesentation/Freesentation-${n}.woff2`,document.baseURI)}')}`).join("");
+        const fontCSS=[[500,"5Medium"],[700,"7Bold"],[800,"8ExtraBold"]].map(([w,n])=>`@font-face{font-family:MindexBulletin;font-weight:${w};src:url('${new URL(`vendor/fonts/freesentation/Freesentation-${n}.woff2`,document.baseURI)}')}`).join("")+`@font-face{font-family:MindexChildrenTheme;font-weight:400;src:url('${new URL("vendor/fonts/dnf-bitbit-v2/DNFBitBitv2.otf",document.baseURI)}')}`;
         const frame=printFrame;
         const loaded=new Promise(resolve=>{
           const abort=()=>resolve(false);
@@ -1558,6 +1583,7 @@
         printFrame.srcdoc=`<!doctype html><html lang="ko"><meta charset="utf-8"><title>주보 ${escape(output.source.date)}</title><style>${fontCSS}@page{size:297mm 210mm;margin:0}body{margin:0}svg{display:block;width:297mm;height:210mm;break-after:page}svg:last-child{break-after:auto}*{print-color-adjust:exact;-webkit-print-color-adjust:exact}</style><body>${rendered.pages.map(p=>p.outerHTML).join("")}</body></html>`;
         document.body.append(frame);if(!await loaded||signal.aborted)return;
         await Promise.all([500,700,800].map(w=>frame.contentDocument.fonts.load(`${w} 12.5pt MindexBulletin`)));
+        await frame.contentDocument.fonts.load("400 15pt MindexChildrenTheme");
         await frame.contentDocument.fonts.ready;
         if(signal.aborted||!frame.isConnected)return;
         printSession=true;

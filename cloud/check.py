@@ -138,6 +138,7 @@ SMOKES = (
     "smoke_calendar_save_order.py",
     "smoke_calendar_load_retry.py",
     "smoke_bulletin_input_e2e.py",
+    "smoke_bulletin_print_reference.py",
     "smoke_bulletin_liturgy_order.py",
     "smoke_saved_bulletin_list.py",
     "smoke_live_update.py",
