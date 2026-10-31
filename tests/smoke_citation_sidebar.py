@@ -10,6 +10,7 @@ try:
             page = browser.new_page(viewport={'width':1440,'height':900})
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.route('**/app.runtime.js*',lambda r:r.fulfill(path=str(Path(__file__).resolve().parents[1]/'app.js'),content_type='text/javascript'))
+            page.on('console',lambda msg:print('TRACE',msg.text,flush=True))
             page.goto(url+'?mindexSmokeRaw=1', wait_until='load')
             page.wait_for_function("typeof renderPresenterDetail === 'function' && !document.body.classList.contains('ui-booting')")
             page.evaluate('''() => {
@@ -30,6 +31,11 @@ try:
                     result=page.evaluate('''async () => {
                       const assert=(ok,msg)=>{if(!ok)throw Error(msg)};
                       const sidebar=refs.rightSidebar;
+                      if(sidebar.clientWidth===0){
+                        const snap=()=>({width:sidebar.clientWidth,module:document.body.dataset.module,value:getComputedStyle(document.body).getPropertyValue('--shell-right-w'),animations:document.body.getAnimations().map(a=>({state:a.playState,time:a.currentTime,frames:a.effect?.getKeyframes()}))});
+                        console.log('ZERO_BEFORE',JSON.stringify(snap()));
+                        await new Promise(r=>setTimeout(r,1000));console.log('ZERO_AFTER',JSON.stringify(snap()));
+                      }
                       const toolbar=document.querySelector('.svc-presenter-toolbar');
                       const input=toolbar.querySelector('[data-presenter-citation-reference-input]');
                       assert(input,'toolbar input missing');
