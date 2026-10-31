@@ -1,21 +1,29 @@
-"""macOS unsigned test DMG acceptance. Synthetic signals in a disposable profile."""
+"""Native unsigned test installer acceptance. Synthetic signals in a disposable profile."""
 import json, os, pathlib, re, subprocess, sys, tempfile, time
 from playwright.sync_api import sync_playwright
 root=pathlib.Path(__file__).resolve().parents[1]
 dmg=pathlib.Path(sys.argv[1]).resolve(strict=True)
 sha=subprocess.check_output(['git','-C',str(root),'rev-parse','HEAD'],text=True).strip()
 with tempfile.TemporaryDirectory() as temp:
- mount=pathlib.Path(temp)/'disk';mount.mkdir()
- subprocess.run(['hdiutil','verify',str(dmg)],stdout=subprocess.DEVNULL,check=True)
- subprocess.run(['hdiutil','attach','-readonly','-nobrowse','-mountpoint',str(mount),str(dmg)],check=True,stdout=subprocess.DEVNULL)
- try:
-  app=next(mount.glob('*.app')); copy=pathlib.Path(temp)/app.name
-  subprocess.run(['ditto',str(app),str(copy)],check=True)
- finally: subprocess.run(['hdiutil','detach',str(mount)],check=True,stdout=subprocess.DEVNULL)
- with tempfile.TemporaryFile(mode='w+') as log:
-  proc=subprocess.Popen([str(copy/'Contents/MacOS/Mindex Test'),'--remote-debugging-port=0'],env={**os.environ,'MINDEX_ISOLATED_TEST':'1'},stdout=log,stderr=log)
+ if sys.platform=='win32':
+  assert os.environ.get('GITHUB_ACTIONS')=='true' and dmg.suffix=='.exe'
+  subprocess.run([str(dmg),'/S','/currentuser'],check=True,timeout=240)
+  exe,=(pathlib.Path(os.environ['LOCALAPPDATA'])/'Programs').glob('*/Mindex Test.exe')
+  for file in ('mindex-receiver.exe','ffmpeg.exe'):
+   assert (exe.parent/'resources'/'broadcast-engine'/file).is_file()
+ else:
+  mount=pathlib.Path(temp)/'disk';mount.mkdir()
+  subprocess.run(['hdiutil','verify',str(dmg)],stdout=subprocess.DEVNULL,check=True)
+  subprocess.run(['hdiutil','attach','-readonly','-nobrowse','-mountpoint',str(mount),str(dmg)],check=True,stdout=subprocess.DEVNULL)
   try:
-   for _ in range(150):
+   app=next(mount.glob('*.app')); copy=pathlib.Path(temp)/app.name
+   subprocess.run(['ditto',str(app),str(copy)],check=True)
+  finally: subprocess.run(['hdiutil','detach',str(mount)],check=True,stdout=subprocess.DEVNULL)
+  exe=copy/'Contents/MacOS/Mindex Test'
+ with tempfile.TemporaryFile(mode='w+') as log:
+  proc=subprocess.Popen([str(exe),'--remote-debugging-port=0'],env={**os.environ,'MINDEX_ISOLATED_TEST':'1'},stdout=log,stderr=log)
+  try:
+   for _ in range(300):
     log.seek(0);s=log.read();match=re.search(r'DevTools listening on (ws://[^\s]+)',s)
     if match:break
     if proc.poll() is not None:raise RuntimeError(s[-1300:])
@@ -74,12 +82,17 @@ with tempfile.TemporaryDirectory() as temp:
      until(lab,"broadcastPrototype.stats().source==='file'")
      for excluded in (True,False):
       if not excluded:lab.locator('#excludeBroadcast').click()
+      expected=lab.evaluate("Array.from(document.getElementById('broadcast').getContext('2d').getImageData(10,10,1,1).data).slice(0,3)")
       lab.locator('#engineRun').click()
       until(lab,"!document.getElementById('engineRun').disabled",timeout=45000)
       receipt=lab.locator('#engineStatus').inner_text()
       assert '1280×720 · H.264 / AAC · TLS 인증서 확인' in receipt,receipt
       assert ('무음' if excluded else '음성 신호 있음') in receipt,receipt
-      print(receipt,flush=True)
+      received=json.loads(lab.locator('#engineStatus').get_attribute('data-receipt'))
+      assert received['externalPublishing'] is False and received['certificateVerified'] and received['receivedBytes']>0
+      assert max(abs(a-b) for a,b in zip(received['pixel'],expected))<=10,(expected,received)
+      assert received['audioPeak']==0 if excluded else received['audioPeak']>.01
+      print(json.dumps(dict(excluded=excluded,expectedPixel=expected,receipt=received)),flush=True)
      assert lab.evaluate('broadcastPrototype.stats().source')=='file'
     elif os.environ.get('MINDEX_EXPECT_LOCAL_ENCODER')=='1':
      raise AssertionError('packaged encoder is missing')

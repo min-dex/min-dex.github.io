@@ -6,7 +6,7 @@ MAX_TOTAL=20*1024*1024
 
 def encoder_path():
  # The test package has one pinned encoder alongside the frozen helper.
- exe=pathlib.Path(sys.executable).resolve().with_name('ffmpeg')
+ exe=pathlib.Path(sys.executable).resolve().with_name('ffmpeg.exe' if os.name=='nt' else 'ffmpeg')
  if not exe.is_file():raise RuntimeError('Packaged encoder missing')
  return str(exe)
 
@@ -48,10 +48,14 @@ class LoopbackSession:
   try:
    self.exe=encoder_path()
    # New test-only key, never an existing credential. It is neither logged nor returned.
-   config=self.path/'cert.cnf';config.write_text('[req]\ndistinguished_name=dn\nx509_extensions=ext\nprompt=no\n[dn]\nCN=localhost\n[ext]\nsubjectAltName=DNS:localhost\nbasicConstraints=critical,CA:TRUE\n')
    cert=self.path/'cert.pem';key=self.path/'key.pem'
-   subprocess.run(['/usr/bin/openssl','req','-x509','-newkey','rsa:2048','-nodes','-days','1','-config',str(config),'-keyout',str(key),'-out',str(cert)],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,check=True,timeout=10)
-   key.chmod(0o600)
+   if os.name=='nt':
+    from windows_runtime import issue_local_certificate
+    issue_local_certificate(cert,key)
+   else:
+    config=self.path/'cert.cnf';config.write_text('[req]\ndistinguished_name=dn\nx509_extensions=ext\nprompt=no\n[dn]\nCN=localhost\n[ext]\nsubjectAltName=DNS:localhost\nbasicConstraints=critical,CA:TRUE\n')
+    subprocess.run(['/usr/bin/openssl','req','-x509','-newkey','rsa:2048','-nodes','-days','1','-config',str(config),'-keyout',str(key),'-out',str(cert)],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,check=True,timeout=10)
+    key.chmod(0o600)
    context=ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER);context.minimum_version=ssl.TLSVersion.TLSv1_2;context.load_cert_chain(cert,key)
    with socket.socket() as reserve:reserve.bind(('127.0.0.1',0));rtmp_port=reserve.getsockname()[1]
    self.receiver=subprocess.Popen([self.exe,'-hide_banner','-loglevel','error','-nostdin','-rw_timeout','3000000','-listen','1','-timeout','10','-i',f'rtmp://127.0.0.1:{rtmp_port}/live/local-test','-c','copy','-f','flv',str(self.output)],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,env=self.env)
@@ -114,10 +118,12 @@ class LoopbackSession:
    if type(seq) is not int or seq!=self.seq:raise ValueError('chunk order')
    if not data or len(data)>MAX_CHUNK or self.bytes+len(data)>self.max_bytes:raise ValueError('media limit')
    # Nonblocking pipe with bounded backpressure; never queue unbounded media.
-   fd=self.encoder.stdin.fileno();os.set_blocking(fd,False);view=memoryview(data);deadline=time.monotonic()+5
+   fd=self.encoder.stdin.fileno();
+   if os.name!='nt':os.set_blocking(fd,False)
+   view=memoryview(data);deadline=time.monotonic()+5
    while view:
     if self.closed or time.monotonic()>deadline:raise ValueError('encoder backpressure')
-    if select.select([],[fd],[],.1)[1]:
+    if os.name=='nt' or select.select([],[fd],[],.1)[1]:
      try:n=os.write(fd,view);view=view[n:]
      except BlockingIOError:pass
    self.seq+=1;self.bytes+=len(data);self.last=time.monotonic()
@@ -140,7 +146,7 @@ class LoopbackSession:
     try:
      while True:
       if time.monotonic()>deadline:raise ValueError('audio inspection timeout')
-      if not select.select([decoder.stdout],[],[],.1)[0]:continue
+      if os.name!='nt' and not select.select([decoder.stdout],[],[],.1)[0]:continue
       block=os.read(decoder.stdout.fileno(),65536)
       if not block:break
       block=tail+block;size=len(block)//4*4;tail=block[size:]

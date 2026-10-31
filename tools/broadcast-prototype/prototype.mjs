@@ -177,7 +177,7 @@ const stopHallOutput=mountHallOutput({getFrame(){if(disposed)return null;if(docu
 if(window.localEncoder){
  $('engineTest').hidden=false;
  $('engineRun').onclick=async()=>{
-  const button=$('engineRun'),status=$('engineStatus');button.disabled=true;
+  const button=$('engineRun'),status=$('engineStatus');button.disabled=true;delete status.dataset.receipt;
   let stream,silentContext;
   try{
    if(!captureInput.active())await $('prepareAudio').onclick();
@@ -193,6 +193,7 @@ if(window.localEncoder){
    status.textContent='합성 영상·음성 로컬 수신 중…';
    const {rehearse}=await import('./encoder-test.mjs');
    const receipt=await rehearse(stream,window.localEncoder);
+   status.dataset.receipt=JSON.stringify(receipt);
    status.textContent=`로컬 수신 확인 · ${receipt.width}×${receipt.height} · ${receipt.video} / ${receipt.audio} · TLS 인증서 확인 · ${receipt.receivedBytes}바이트 · ${receipt.audioPeak===0?'무음':'음성 신호 있음'}`;
   }catch{status.textContent='로컬 수신 시험 실패 · 입력을 확인하고 다시 시도해 주세요.';}
   finally{stream?.getTracks().forEach(track=>track.stop());if(silentContext)await silentContext.close();button.disabled=false;}

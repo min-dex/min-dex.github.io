@@ -4,13 +4,14 @@ const os = require('node:os');
 const path = require('node:path');
 
 function registerBroadcastEngine({ipcMain,app,getLab}) {
+  const windows=process.platform==='win32';
   let active;
   function cancel() {
     if (!active) return;
     const {proc} = active;
     if (proc.pid) {
       // On macOS the helper and its encoder/receiver share this private process group.
-      try { process.kill(-proc.pid,'SIGKILL'); } catch (error) { if(error.code!=='ESRCH') throw error; }
+      try { if(windows)proc.kill();else process.kill(-proc.pid,'SIGKILL'); } catch (error) { if(error.code!=='ESRCH') throw error; }
     }
   }
   app.on('before-quit',cancel);
@@ -22,8 +23,9 @@ function registerBroadcastEngine({ipcMain,app,getLab}) {
     if (action==='start') {
       if (active) throw Error('시험이 이미 진행 중입니다.');
       const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'mindex-engine-test-'));
-      const exe=path.join(process.resourcesPath,'broadcast-engine','mindex-receiver');
-      const proc=spawn(exe,[],{cwd:tmp,env:{TMPDIR:tmp,PATH:'/usr/bin:/bin',LANG:'C'},detached:true,stdio:['pipe','pipe','ignore']});
+      const exe=path.join(process.resourcesPath,'broadcast-engine',windows?'mindex-receiver.exe':'mindex-receiver');
+      const env=windows?{SystemRoot:process.env.SystemRoot,TEMP:tmp,TMP:tmp,PATH:path.join(process.env.SystemRoot,'System32')}:{TMPDIR:tmp,PATH:'/usr/bin:/bin',LANG:'C'};
+      const proc=spawn(exe,[],{cwd:tmp,env,windowsHide:true,detached:!windows,stdio:['pipe','pipe','ignore']});
       const run={proc,total:0,writing:false,finishing:false};
       active=run;
       let receipt='';
@@ -34,7 +36,7 @@ function registerBroadcastEngine({ipcMain,app,getLab}) {
       run.result=new Promise(resolve=>proc.once('close',code=>{
         clearTimeout(timeout);
         if(active===run)active=null;
-        fs.rmSync(tmp,{recursive:true,force:true});
+        fs.rm(tmp,{recursive:true,force:true,maxRetries:5},()=>{});
         try { resolve(code===0?JSON.parse(receipt):null); } catch { resolve(null); }
       }));
       return true;
