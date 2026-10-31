@@ -110,6 +110,11 @@ try:
                       check(summary.includes('왼쪽에서 입력한 공지') && summary.includes('명시 담당') && !summary.includes('인도자'),'closed row shows unrelated title');
                       const preview=buildPresenterSlidesForServiceItem(reopened,service,0).find(slide=>slide.announcementRegions);
                       check(preview && preview.announcementRegions.news===editedNews,'preview lost ordered multiline news');
+                      const legacy=structuredClone(reopened);
+                      legacy.memo=serializeServiceItemMemo({elementType:'plain_text',inputMode:'text',slides:['1. 소식\\n설명','2. 소식']});
+                      check(serviceAnnouncementRegions(legacy).news==='1. 소식\\n설명\\n\\n2. 소식','legacy news lost numbering or paragraphs');
+                      applyServiceAnnouncementRegion(legacy,'news','1. 소식\\n설명\\n\\n2. 변경');
+                      check(JSON.stringify(parseServiceItemMemo(legacy.memo).slides)===JSON.stringify(['1. 소식\\n설명','2. 변경']),'legacy edit lost slide boundaries');
                       const cleared=structuredClone(reopened);
                       for(const key of ['news','welcome','footer'])applyServiceAnnouncementRegion(cleared,key,'');
                       check(!liturgicalBodyText(cleared,parseServiceItemMemo(cleared.memo),'',service),'cleared announcement fell back to independent title');

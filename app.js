@@ -11481,6 +11481,7 @@ function serviceAnnouncementRegions(item,memo=parseServiceItemMemo(item.memo)) {
   if(saved)return saved;
   const text=memo.slides?.length?memo.slides.join("\n\n"):item.raw_title||"";
   const regions=presenterAnnouncementRegions(presenterAnnouncementItems(text));
+  if (!regions.welcome.length && !regions.footer.length) return { welcome: "", news: text, footer: "" };
   return Object.fromEntries(Object.entries(regions).map(([key,items])=>[key,items.map(item=>item.lines.map((line,i)=>i===0&&item.marker?`${item.marker} ${line}`:line).join("\n")).join("\n")]));
 }
 
