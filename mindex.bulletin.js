@@ -319,6 +319,21 @@
       return summaryOnly ? {...row, content: ""} : row;
     });
   }
+  async function readLinkedSongs(client, elements) {
+    const ids = [...new Set(elements.map(row => row.praise_record_id).filter(Boolean))];
+    const legacyIds = [...new Set(elements.filter(row => !row.praise_record_id).map(row => row.song_id).filter(Boolean))];
+    const [records, legacy] = await Promise.all([
+      ids.length ? window.MindexSingleSong.createRpcRepository(client).read(ids) : [],
+      legacyIds.length ? client.from("mindex_songs").select("id,title,hymn_no").in("id", legacyIds) : {data:[]},
+    ]);
+    if (legacy.error) throw legacy.error;
+    if (!ids.length) return legacy.data || [];
+    const catalog = window.MindexSingleSong.createCatalog(records);
+    return [...(legacy.data || []), ...ids.map(id => {
+      const {title, hymn_no} = catalog.appSong(id);
+      return {id, title, hymn_no};
+    })];
+  }
   function resolveSource({service, sections=[], elements=[], songs=[], scriptures=[], calendar=[], settings={}, services=[], history=[]}) {
     const compactOrder=settings.compactOrder!==false;
     const songById = new Map(songs.map(s=>[s.id,s]));
@@ -328,7 +343,7 @@
     const department=service.service_type_id==="children"?"children":"young-adult";
     const today = calendar.find(r=>r.date===date) || {};
     const source = {id:service.id, date, department, leader:clean(service.worship_leader), liturgical:[clean(today.liturgical),clean(today.note)].filter(Boolean).join(" / "),
-      sermon:"", scripture:"", news:"", order:[], orderSummaryOnly:Object.create(null), prayers:[], events:"", loadedAt:new Date().toISOString()};
+      sermon:"", scripture:"", news:"", order:[], orderSummaryOnly:Object.create(null), linkedPraiseTitles:Object.create(null), prayers:[], events:"", loadedAt:new Date().toISOString()};
     const hasReading=elements.some(e=>sectionById.get(e.section_id)?.section_key==="scripture_reading");
     const ordered = elements.filter(e=>sectionById.has(e.section_id)).sort((a,b)=>
       (sectionById.get(a.section_id).sort_order-sectionById.get(b.section_id).sort_order) || (a.sort_order-b.sort_order));
@@ -347,10 +362,11 @@
         || ["blank","image","video","audio","file","ppt","pdf","live_scripture"].includes(type)
         || config.templateSuppressed || el.content_state?.status==="suppressed" || el.content_state?.state==="suppressed") continue;
       if(compactOrder)label=label.replace(/^(찬양|찬송)\s*\d+(?:\s*[–~-]\s*\d+)?$/, "$1");
-      const linked = songById.get(el.song_id);
+      const linked = songById.get(el.praise_record_id || el.song_id);
       const scripture = scriptureById.get(el.scripture_id);
       let content = linked ? [linked.hymn_no,linked.title].filter(Boolean).join(" ")
         : clean(["body","plain_text","editable"].includes(type)?el.body||el.title:el.title);
+      if (el.praise_record_id && linked && content) source.linkedPraiseTitles[el.id] = content;
       const reference = clean(el.scripture_reference||config.scriptureReference||config.scripture_reference||(Array.isArray(config.scriptureReferences)?config.scriptureReferences.map(clean).filter(Boolean).join(" / "):"")||scripture?.reference);
       if(slot==="sermon.scripture") {if(reference)source.scripture=reference;if(hasReading&&compactOrder)continue;}
       if (reference && /scripture|성경|본문/.test([type,slot,label].join(" "))) {
@@ -1067,6 +1083,9 @@
     const saved=normalizeSourceSnapshot(value);
     if(!saved||saved.serviceId!==source.id||saved.date!==source.date)return source;
     const result={...source,...clone(saved.weekly)};
+    // Older snapshots kept the order row but missed titles on native praise links.
+    result.order = result.order.map(row => !row.content && source.linkedPraiseTitles?.[row.id]
+      ? {...row, content:source.linkedPraiseTitles[row.id]} : row);
     if(saved.rosters[source.rosterMonth])result.prayers=clone(saved.rosters[source.rosterMonth]);
     return result;
   }
@@ -1677,5 +1696,5 @@
     }
     return {state: savedState, remember, load, select, renderStatus};
   }
-  window.MindexBulletin=Object.freeze({createSavedList,mount,resolveSource,orderRowsForDisplay,reusableContent,fieldValue,defaultFrames,renderPages,readyAssets,TOKENS,wrap,profileForDate,monthlyView,storedValue,applyStored,normalizeSnapshot,applySourceSnapshot,templateValue,normalizeTemplate,applyTemplate,TEMPLATE_KEY});
+  window.MindexBulletin=Object.freeze({createSavedList,mount,readLinkedSongs,resolveSource,orderRowsForDisplay,reusableContent,fieldValue,defaultFrames,renderPages,readyAssets,TOKENS,wrap,profileForDate,monthlyView,storedValue,applyStored,normalizeSnapshot,applySourceSnapshot,templateValue,normalizeTemplate,applyTemplate,TEMPLATE_KEY});
 })();

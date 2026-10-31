@@ -15094,10 +15094,9 @@ async function loadServiceBulletinSource(serviceId, settings = {}) {
   const monthStart = `${months[0]}-01`;
   const [year, month] = months[months.length - 1].split("-").map(Number);
   const rangeEnd = new Date(Date.UTC(year, month, 7)).toISOString().slice(0, 10);
-  const songIds = [...new Set(aggregate.elements.map(row => row.song_id).filter(Boolean))];
   const scriptureIds = [...new Set(aggregate.elements.map(row => row.scripture_id).filter(Boolean))];
   const [songs, scriptures, calendar, bulletinServices, history] = await Promise.all([
-    songIds.length ? read(state.client.from("mindex_songs").select("id,title,hymn_no").in("id", songIds)) : [],
+    window.MindexBulletin.readLinkedSongs(state.client, aggregate.elements),
     scriptureIds.length ? read(state.client.from("mindex_scriptures").select("id,reference").in("id", scriptureIds)) : [],
     read(state.client.from("mindex_sunday_calendar").select("date,liturgical,note,church_schedule,young_adult_prayer,children_prayer").gte("date", monthStart).lte("date", rangeEnd).order("date")),
     read(state.client.from("mindex_worship_services").select("id,service_type_id,service_date,title,service_alias,source_ref").gte("service_date", monthStart).lte("service_date", rangeEnd).order("service_date")),
