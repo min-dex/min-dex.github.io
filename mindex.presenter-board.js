@@ -1516,7 +1516,7 @@ function presenterPreviewBackgroundSource(source) {
   try {
     const url = new URL(source, document.baseURI);
     const directory = new URL("assets/worship-backgrounds/", document.baseURI);
-    const name = url.pathname.slice(directory.pathname.length);
+    const name = decodeURIComponent(url.pathname.slice(directory.pathname.length));
     if (url.origin !== directory.origin || !url.pathname.startsWith(directory.pathname)
       || !WORSHIP_BACKGROUND_STATIC_FILES.has(name)) return source;
     url.pathname = `${directory.pathname}previews/${name.replace(/\.png$/i, ".webp")}`;

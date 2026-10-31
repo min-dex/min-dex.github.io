@@ -5365,3 +5365,22 @@ with fonts loaded and focus view disabled. Fixed elapsed sleeps did not establis
 that layout state in Linux WebKit. Overflow tolerances and all viewport cases stay
 unchanged; desktop cases additionally require a non-collapsed sidebar. Product
 rail widths, animation and visibility rules are unchanged.
+
+
+## 승인된 보랏빛 B6·감사특새 배경 후보 · 2026-11-01
+
+디자인에서 사용자가 선택한 보랏빛 `26-B6.png` 원본을 그대로 등록한다. 기존
+2026년 11–12월 금요/청소년 B 배정과 명시 배경·레지스트리·절기·크로마키
+우선순위는 유지한다. 원본 SHA-256:
+`6917a85f84e441b0a42e6733d8454dfb245862d3bacf674139db5d19ac998f56`.
+
+먹빛 바탕·황토 잎 세 장의 `26-감사특새.png`는 2026 감사 특별새벽기도회
+전용 후보로 정적 등록한다. 시안 이름 C는 어린이부 `26-C6.png`와 별개다.
+실제 감사특새의 alias/source_ref 근거와 공개 반영 승인이 확정되기 전에는
+날짜·일반 특별새벽기도회 전체에 자동 배정하지 않는다. 명시 파일 선택은
+기존 경로를 사용한다. 원본 SHA-256:
+`11bf8b2db38ba0be248abb93860a8a353fede1bd2e981521fb04c726fc3a22a9`.
+
+두 A4 가로 원본(3508×2480)은 보존하고 미리보기만 1280×905 lossless
+WebP로 생성한다. 운영 예배·주보·저장 배경·OneDrive 원본은 재저장하지 않는다.
+후보/격리 미리보기 검증은 공개 배포나 실장비 송출 완료를 뜻하지 않는다.
