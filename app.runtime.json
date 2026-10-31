@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261101-section-add-size",
+  "version": "20261101-keynote-controls-safe-update",
   "options": {
     "compress": false,
     "mangle": {
