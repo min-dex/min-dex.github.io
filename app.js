@@ -10616,20 +10616,17 @@ async function commitServiceItemInputs(serviceId = state.selectedServiceId, inde
   const fields = [...(refs.detailPane || document).querySelectorAll("[data-service-item-field]")]
     .filter((field) => Number(field.dataset.serviceItemIndex) === itemIndex)
     .filter((field) => !field.dataset.serviceId || field.dataset.serviceId === serviceId);
-  let touched = false;
-  fields.forEach((field) => {
-    if (!field.matches("input, textarea, select")) return;
-    if (isDeferredServiceTextInput(field)) {
-      clearDeferredServiceTextPreview(field);
-      updateServiceItemField(field, { deferPresenterRefresh: true });
-      field.dataset.initialValue = field.value;
-      field.dataset.presenterPreviewValue = field.value;
-    } else {
-      updateServiceItemField(field, { deferPresenterRefresh: true });
-    }
-    touched = true;
-  });
-  if (!touched) return false;
+  if (!fields.length) return false;
+  for (const field of fields) {
+    // Selects already commit on change. Replaying an unchanged title here
+    // resolves it again and can replace an explicitly selected hymn edition.
+    if (!isDeferredServiceTextInput(field)
+      || field.value === (field.dataset.initialValue ?? field.defaultValue)) continue;
+    clearDeferredServiceTextPreview(field);
+    updateServiceItemField(field, { deferPresenterRefresh: true });
+    field.dataset.initialValue = field.value;
+    field.dataset.presenterPreviewValue = field.value;
+  }
   return Boolean(await resolveAndSaveCommittedServiceItem(serviceId, itemIndex, {
     renderAfterSave: false,
     resolveScriptureBeforeSave: false,
@@ -10728,8 +10725,10 @@ function setServiceInputFeedback(editor, status) {
   const button = actions.querySelector("[data-service-item-commit]");
   if (button) {
     const busy = status === "saving";
-    button.title = labels[status] || "저장";
-    button.setAttribute("aria-label", busy ? "저장 중" : status === "error" ? "저장 재시도" : "저장");
+    const title = labels[status] || "저장";
+    const label = busy ? "저장 중" : status === "error" ? "저장 재시도" : "저장";
+    if (button.title !== title) button.title = title;
+    if (button.getAttribute("aria-label") !== label) button.setAttribute("aria-label", label);
     if (button.disabled !== busy) button.disabled = busy;
     if (button.getAttribute("aria-busy") !== String(busy)) button.setAttribute("aria-busy", String(busy));
   }
@@ -10834,8 +10833,7 @@ function clearServiceElementDirty(serviceId = state.selectedServiceId, item = nu
   const dirtyIds = state.dirtyServiceElementIds.get(id);
   if (!dirtyIds) return;
   dirtyIds.delete(itemId);
-  if (dirtyIds.size) state.dirtyServiceElementIds.set(id, dirtyIds);
-  else state.dirtyServiceElementIds.delete(id);
+  if (!dirtyIds.size) state.dirtyServiceElementIds.delete(id);
 }
 
 function markServiceStructureDirty(serviceId = state.selectedServiceId) {
@@ -11348,6 +11346,7 @@ function replaceServiceBenediction(item, enabled) {
       ...(enabled ? { introSlide: { title: "주기도문" } } : {}) });
   }
   item.memo = serializeServiceItemMemo(serviceMemoWithoutPriorModes(parseServiceItemMemo(item.memo)));
+  item._worshipSlotKey = enabled ? "sending.lords_prayer" : "sending.benediction";
   item._worshipElementTemplateModified = true;
   item._worshipTemplatePlaceholder = false;
   return true;
@@ -11365,7 +11364,10 @@ async function setServiceBenedictionReplacement(serviceId, itemId, enabled) {
     showToast("편집 중인 예배 원문을 먼저 반영한 뒤 변경해 주세요.", "info");
     return false;
   }
-  if (serviceBenedictionUsesLordsPrayer(item) === enabled) return true;
+  if (serviceBenedictionUsesLordsPrayer(item) === enabled) {
+    return !state.dirtyServiceElementIds.get(serviceId)?.has(item.id)
+      || saveServiceItemPatch(serviceId, index, { renderAfterSave: false });
+  }
   for (const field of refs.detailPane?.querySelectorAll("[data-service-item-field]") || []) {
     if ((field.dataset.serviceId || state.selectedServiceId) !== serviceId
       || Number(field.dataset.serviceItemIndex) !== index) continue;
@@ -12150,7 +12152,7 @@ function serviceItemEditorModel(item = {}, options = {}) {
     : "";
   const titlePersonParts = titlePerson ? serviceTitlePersonEffectiveParts(item, parsed, service) : null;
   const titleValue = strictSong && linkedSong
-    ? songServiceOptionLabel(linkedSong)
+    ? serviceSelectedPraiseLabel(item, linkedSong, service)
     : servicePraiseUsesDirectLyrics(praiseInputMode)
       ? String(item.raw_title || "").trim() || (linkedSong ? songServiceOptionLabel(linkedSong) : "")
     : scripture
@@ -22709,7 +22711,10 @@ function templateProjectionSectionKey(item = {}) {
 
 function mergeTemplateProjectionItem(templateItem = {}, existingItem = {}) {
   const sectionModified = Boolean(existingItem._worshipSectionTemplateModified);
-  const elementModified = Boolean(existingItem._worshipElementTemplateModified
+  const storedSendingMode = templateProjectionSectionKey(existingItem) === "sending"
+    && serviceItemCanReplaceBenediction(existingItem) && serviceItemCanReplaceBenediction(templateItem)
+    && existingItem.label !== templateItem.label && !serviceSendingConclusionIsTemplateOnly(existingItem);
+  const elementModified = Boolean(storedSendingMode || existingItem._worshipElementTemplateModified
     || (serviceItemCanToggleOfferingSpecial(existingItem) && serviceOfferingMode(existingItem) !== "hymn"));
   const templateLabel = String(templateItem.label || "").trim();
   const existingLabel = String(existingItem.label || "").trim();
@@ -22747,7 +22752,7 @@ function mergeTemplateProjectionItem(templateItem = {}, existingItem = {}) {
       ))
       : (existingLabel || templateLabel);
     merged._worshipElementOrder = existingItem._worshipElementOrder || templateItem._worshipElementOrder;
-    if (serviceItemCanToggleOfferingSpecial(existingItem)) merged._worshipSlotKey = serviceItemSlotKey(existingItem);
+    if (storedSendingMode || serviceItemCanToggleOfferingSpecial(existingItem)) merged._worshipSlotKey = serviceItemSlotKey(existingItem);
   }
   if (serviceItemCanToggleOfferingSpecial(existingItem) && serviceOfferingMode(existingItem) === "video") {
     merged.song_id = null; merged.version_id = null; merged.song_version_id = null;
@@ -24791,11 +24796,7 @@ function serviceSidebarChildItemDisplayText(item = {}) {
   const service = state.services.find((candidate) => candidate.id === item.service_id) || null;
   const effectiveItem = serviceItemWithSharedSundayContent(item, service);
   const song = serviceItemLinkedSong(effectiveItem);
-  if (song) {
-    const version = getPresenterServiceItemVersion(song, effectiveItem, service);
-    const fallback = serviceItemDisplayText(effectiveItem);
-    return [presenterSongTitleHymnNo(song, version, fallback), presenterSongTitleDisplayTitle(song, version, fallback)].filter(Boolean).join(" ");
-  }
+  if (song) return serviceSelectedPraiseLabel(effectiveItem, song, service);
   const liturgicalTitle = serviceItemLiturgicalNavigationTitle(item);
   if (liturgicalTitle !== null) return liturgicalTitle;
   if (serviceTitlePersonRawTitleAssignee(item)) return "";

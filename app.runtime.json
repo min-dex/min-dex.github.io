@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261031-announcements-bulletins",
+  "version": "20261031-sending-prayer-projection",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "125ca43e447b6a93a18b8041d3165e1c0175b2d0c45d4ce8a232b76fcc1f7e0e",
-  "runtime_sha256": "f0226b5599d47670204607b0e496b4349f6b668d948162f6774cadfa961be0c1",
-  "source_bytes": 1354040,
-  "runtime_bytes": 966312,
-  "source_gzip": 309789,
-  "runtime_gzip": 242840
+  "source_sha256": "e282cf8a24018bd0512387aed3406fb5d21472427f24052b08d8250d8c3a8cff",
+  "runtime_sha256": "f94ebe5010323cb21a84e8a75901782027cf3b536bb0e346f95adfd4f71f701a",
+  "source_bytes": 1354508,
+  "runtime_bytes": 966502,
+  "source_gzip": 309932,
+  "runtime_gzip": 242894
 }
