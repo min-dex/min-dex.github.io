@@ -93,6 +93,6 @@ function renderWorshipSetlistWeekLayout(entries) {
 // Date-grouped upcoming shortcuts keep the original type visible beside its alias.
 function serviceUpcomingNavigationName(service = {}) {
   const base = serviceTypeDisplayName(worshipAppServiceTypeId(service.type_id || service.service_type_id || ""));
-  const alias = serviceAlias(service) ? serviceNavigationDetails(service).name : "";
+  const alias = serviceNavigationDetails(service).name;
   return alias && compactSearchValue(alias) !== compactSearchValue(base) ? `${base} (${alias})` : base;
 }
