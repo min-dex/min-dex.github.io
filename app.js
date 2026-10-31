@@ -20583,10 +20583,10 @@ function confirmUnsavedChangesAction() {
   if (unsavedChangesDialogPromise) return unsavedChangesDialogPromise;
 
   unsavedChangesDialogPromise = new Promise((resolve) => {
-    const overlay = document.createElement("div");
+    const overlay = document.createElement("div"), returnFocus = document.activeElement;
     overlay.className = "unsaved-dialog-backdrop";
     overlay.innerHTML = `
-      <div class="unsaved-dialog" role="dialog" aria-modal="true" aria-labelledby="unsavedDialogTitle">
+      <div class="unsaved-dialog" role="dialog" aria-modal="true" aria-labelledby="unsavedDialogTitle" tabindex="-1">
         <div class="unsaved-dialog-copy">
           <h2 id="unsavedDialogTitle">저장하지 않은 변경이 있어요</h2>
         </div>
@@ -20598,14 +20598,23 @@ function confirmUnsavedChangesAction() {
       </div>
     `;
 
+    const dialog = overlay.querySelector('[role="dialog"]');
     const cleanup = (action) => {
       document.removeEventListener("keydown", handleKeydown);
       overlay.remove();
       unsavedChangesDialogPromise = null;
+      if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
       resolve(action);
     };
     const handleKeydown = (event) => {
-      if (event.key === "Escape") cleanup("cancel");
+      if (event.key === "Escape") { event.preventDefault();event.stopPropagation();cleanup("cancel");return; }
+      if (event.key !== "Tab") return;
+      const buttons = [...dialog.querySelectorAll('button:not(:disabled)')].filter(button => button.getClientRects().length && getComputedStyle(button).visibility !== "hidden");
+      const first = buttons[0], last = buttons.at(-1), active = document.activeElement;
+      if (!first || !dialog.contains(active) || (event.shiftKey ? active === first : active === last)) {
+        event.preventDefault();(event.shiftKey ? last : first)?.focus();
+        if (!first) dialog.focus();
+      }
     };
 
     overlay.addEventListener("click", (event) => {

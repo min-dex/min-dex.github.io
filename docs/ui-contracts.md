@@ -4,6 +4,13 @@ Read `HANDOFF.md` first. This file is the short UI contract for Codex threads so
 
 ## Shell
 
+- The shared unsaved-change dialog keeps its initial save-button focus. Tab and
+  Shift+Tab cycle through its currently enabled, visible choices; an async disabled
+  state must not send focus into the page. With no enabled choice, focus remains
+  on the dialog. Escape keeps editing. Closing restores the opener when it still
+  exists. Choice resolution and dirty data remain unchanged. This is covered by
+  `smoke_unsaved_dialog_focus.py` with the actual dialog handler and no writes.
+
 - Use one desktop shell at every viewport width: a persistent 260px left sidebar, a single 50px topbar, and an in-flow right panel. No mobile drawer, auto-collapse, portrait navigation variant, or stored sidebar-collapse state.
 
 - Praise sidebar filters use three equal columns: all/empty/review, then hymn/CCM/children. Keep this 3-by-2 layout at every sidebar width; do not override it with auto-fit.
