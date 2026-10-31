@@ -29,7 +29,7 @@ async function connectPresenterKeynoteBridge() {
   if (presenterKeynoteBridgePairing) return presenterKeynoteBridgePairing;
   presenterKeynoteBridgePairing = (async () => {
     let health;
-    try { health = await presenterKeynoteBridgeRequest('/health', {}, 2000); }
+    try { health = await presenterKeynoteBridgeRequest('/health', {}, 30000); }
     catch { throw Error('이 Mac에서 Keynote 연결 도우미를 먼저 실행해 주세요. 선택한 파일은 아직 저장하지 않았습니다.'); }
     if (health.protocol !== 'mindex-keynote-bridge-v1') throw Error('Keynote 연결 도우미를 업데이트해 주세요.');
     const client = Array.from(crypto.getRandomValues(new Uint8Array(32)), b => b.toString(16).padStart(2, '0')).join('');
@@ -106,6 +106,8 @@ async function connectPresenterKeynoteItemAutomatically(button) {
   presenterPptxImports.add(serviceId);button.disabled = true;
   let files;
   try {
+    await connectPresenterKeynoteBridge();
+    if (!unchanged()) throw Error('예배나 입력이 변경돼 기존 작업을 보존했습니다.');
     const bytes = await readPresenterPptxSource(new URL(original.url));
     if (await presenterPptxDigest(bytes) !== original.sha256) throw Error('Keynote 원본을 다시 확인해 주세요.');
     files = await preparePresenterKeynoteBrowserFile(new File([bytes], original.name, { type: 'application/vnd.apple.keynote' }), unchanged);

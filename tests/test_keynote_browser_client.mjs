@@ -50,7 +50,7 @@ test('existing KEY automatic reconnect preserves content and guards dirty/projec
       if(mode==='project')state.config.url='other';
       if(mode==='selection')state.selectedServiceId='other';
       return [];
-    };vm.runInContext('preparePresenterKeynoteBrowserFile=prepared',ctx);
+    };vm.runInContext('connectPresenterKeynoteBridge=async()=>{};preparePresenterKeynoteBrowserFile=prepared',ctx);
     const result=await vm.runInContext('connectPresenterKeynoteItemAutomatically(button)',ctx);
     assert.equal(result,mode==='success');assert.equal(saves,mode==='success'?1:0);
     assert.equal(reads,mode==='dirty'?0:1);assert.equal(JSON.stringify(item),before);
