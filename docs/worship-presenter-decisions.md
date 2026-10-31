@@ -4926,6 +4926,12 @@ private copy is opened/exported/closed by Keynote, preserving the user's origina
 Resources are served only from the hash-identified export and verified again
 before upload. Browser playback retains its opaque sandbox and pinned runtime.
 
+Chrome must allow its local-network connection prompt on first use; an isolated
+test profile's grant does not certify the user's existing Chrome permission.
+The helper starts Keynote through macOS Launch Services even when it is closed,
+then opens the disposable copy asynchronously and matches its exact file before
+exporting. It never closes another document to make conversion proceed.
+
 `tools/install-keynote-browser-bridge.mjs --prepare FOLDER` creates a reviewable
 local bundle without executing it. Actual installation, login startup and Mac
 Keynote automation require the user's explicit setup approval. The companion

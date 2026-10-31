@@ -30,7 +30,7 @@ async function connectPresenterKeynoteBridge() {
   presenterKeynoteBridgePairing = (async () => {
     let health;
     try { health = await presenterKeynoteBridgeRequest('/health', {}, 30000); }
-    catch { throw Error('이 Mac에서 Keynote 연결 도우미를 먼저 실행해 주세요. 선택한 파일은 아직 저장하지 않았습니다.'); }
+    catch { throw Error('이 Mac의 Keynote 도우미 실행과 브라우저의 로컬 네트워크 연결 허용을 확인해 주세요. 선택한 파일은 아직 저장하지 않았습니다.'); }
     if (health.protocol !== 'mindex-keynote-bridge-v1') throw Error('Keynote 연결 도우미를 업데이트해 주세요.');
     const client = Array.from(crypto.getRandomValues(new Uint8Array(32)), b => b.toString(16).padStart(2, '0')).join('');
     const pair = await presenterKeynoteBridgeRequest('/pair', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ client }) });

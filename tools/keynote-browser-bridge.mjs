@@ -50,11 +50,17 @@ export async function prepareExport(source, folder) {
 
 export async function exportWithKeynote(source, target) {
   if (process.platform !== 'darwin') throw Error('Keynote가 설치된 Mac에서 실행해 주세요.');
+  await new Promise((resolve,reject)=>{
+    const launcher=spawn('/usr/bin/open',['-g','-b','com.apple.Keynote'],{stdio:'ignore'});
+    const timer=setTimeout(()=>{launcher.kill();reject(nativeError('keynote-unavailable'));},15000);
+    launcher.on('error',()=>{clearTimeout(timer);reject(nativeError('keynote-unavailable'));});
+    launcher.on('close',code=>{clearTimeout(timer);code===0?resolve():reject(nativeError('keynote-unavailable'));});
+  });
   // Only the received private temporary copy is opened. Paths are argv, never script text.
   const script = [
     'on run argv','set sourceAlias to (POSIX file (item 1 of argv)) as alias',
     'set expectedFile to sourceAlias as text',
-    'with timeout of 300 seconds','tell application id "com.apple.Keynote"',
+    'with timeout of 300 seconds','tell application id "com.apple.Keynote"','launch',
     'ignoring application responses','open sourceAlias','end ignoring',
     'set importedDocument to missing value','repeat 120 times',
     'repeat with candidate in documents','try',
@@ -73,7 +79,12 @@ export async function exportWithKeynote(source, target) {
     let error='';const timer=setTimeout(()=>{child.kill();reject(nativeError('keynote-timeout'));},310000);
     child.stderr.on('data',chunk=>{if(error.length<8192)error+=chunk;});
     child.on('error',()=>{clearTimeout(timer);reject(nativeError('keynote-unavailable'));});
-    child.on('close',code=>{clearTimeout(timer);code===0?resolve():reject(nativeError(error.includes('-1743')?'automation-permission':error.includes('-1712')?'keynote-timeout':'keynote-export-failed'));});
+    child.on('close',code=>{
+      clearTimeout(timer);
+      if(code===0)return resolve();
+      console.error('Keynote native error code:',error.match(/\((-?\d+)\)\s*$/)?.[1]||'unknown');
+      reject(nativeError(error.includes('-1743')?'automation-permission':error.includes('-1712')?'keynote-timeout':error.includes('-600')?'keynote-unavailable':'keynote-export-failed'));
+    });
     child.stdin.end(script);
   });
 }

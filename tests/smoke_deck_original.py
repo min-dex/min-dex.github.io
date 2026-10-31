@@ -1,4 +1,4 @@
-"""Original Keynote/PPTX preservation without production storage or database writes."""
+"""Original byte preservation; companion/sidecar behavior has separate browser checks."""
 import os
 import unicodedata
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
@@ -29,14 +29,24 @@ try:
     })}};
     const nativeFetch=window.fetch;window.fetch=(address,options)=>String(address).includes('/deck-store/')?Promise.resolve(stored.has(String(address))?new Response(stored.get(String(address))):new Response('',{status:404})):nativeFetch(address,options);
     window.confirm=()=>true;showToast=text=>window.lastToast=text;
+    // This suite isolates original upload/download/chunk integrity. The real
+    // companion and sidecar/CAS paths are covered by their dedicated suites.
+    window.originalPreparations=0;
+    preparePresenterKeynoteBrowserFile=async(_file,unchanged)=>{
+     check(unchanged(),'original fixture changed before preparation');originalPreparations++;
+     const manifest=new File([JSON.stringify({pages:20})],'manifest.json');
+     Object.defineProperty(manifest,'webkitRelativePath',{value:'playback/manifest.json'});return [manifest];
+    };
+    importPresenterKeynoteHtml=async()=>true;
     renderCurrentServiceModuleDetail=()=>{};renderServiceList=()=>{};updateSaveState=()=>{};markServiceElementDirty=()=>{};
-    saveServiceItemMutation=async()=>{saves++;if(failSave)throw Error('uncertain save');saved=JSON.parse(JSON.stringify(item));return true};
+    saveServiceItemMutation=async()=>{saves++;if(failSave)throw Error('uncertain save');saved=JSON.parse(JSON.stringify(item));state.dirty.service=false;return true};
     window.file=new File([new Uint8Array([80,75,3,4,0,255,13,10]),'original notes and hidden slides'],'설교 원본.key',{type:'application/vnd.apple.keynote'});
     window.input=()=>({files:[file],dataset:{serviceId:sid},value:'selected'});
    }''')
    result=page.evaluate('''async()=>{
     const before=await presenterPptxDigest(await file.arrayBuffer());
-    check(await importPresenterPptx(input(),item),'key import failed');
+    check(await importPresenterPptx(input(),item),'key import failed: '+lastToast);
+    check(originalPreparations===1,'KEY skipped automatic preparation');
     const memo=parseServiceItemMemo(saved.memo),asset=normalizeServiceAsset(memo.asset);
     check(memo.note==='Keep note'&&memo.elementType==='file'&&asset.kind==='file'&&!asset.slides&&!asset.pptx,'key converted or note lost');
     check(asset.original.name===file.name&&asset.original.sha256===before&&asset.original.size===file.size,'original metadata lost');
