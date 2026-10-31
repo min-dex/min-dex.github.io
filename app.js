@@ -10151,17 +10151,6 @@ function updateSongField(field) {
   updateSaveState();
 }
 
-function updateVersionOutputTitleField(field) {
-  const song = getSelectedSong();
-  const version = song?.versions?.find(item => item.id === field.dataset.versionOutputTitleField);
-  if (!version) return;
-  version.output_title = field.value.trim();
-  updateNativeVersionTitlePreview(song);
-  clearSearchCaches();
-  state.dirty.song = true;
-  updateSaveState();
-}
-
 function updateVersionNameField(field) {
   const song = getSelectedSong();
   if (!song) return;
