@@ -13734,7 +13734,7 @@ function startNewServiceForm(typeId = state.selectedServiceTypeId) {
 }
 
 const SERVICE_MINISTER_DEFAULTS = Object.freeze({
-  "sunday-first": { sermon: "김석범 목사", benediction: "김석범 목사" },
+  "sunday-first": { sermon: "김석범 목사", offeringPrayer: "김석범 목사", benediction: "김석범 목사" },
   "sunday-second": { sermon: "김남영 목사", offeringPrayer: "김남영 목사", benediction: "김남영 목사" },
   "sunday-main": { sermon: "김남영 목사", offeringPrayer: "김남영 목사", benediction: "김남영 목사" },
   "sunday-afternoon": { sermon: "김남영 목사", benediction: "김남영 목사" },
@@ -13769,12 +13769,15 @@ function sundayFirstRotationLeaderForDate(dateValue = "") {
 }
 
 function sundayFirstMinisterDefaultsForService(serviceOrDate = null) {
-  const leader = sundayFirstRotationLeaderForDate(serviceDateString(serviceOrDate));
-  if (!leader) return SERVICE_MINISTER_DEFAULTS["sunday-first"];
-  const pastor = compactSearchValue(leader).includes("목사");
+  const date = serviceDateString(serviceOrDate);
+  const defaults = SERVICE_MINISTER_DEFAULTS["sunday-first"];
+  const leader = sundayFirstRotationLeaderForDate(date);
+  if (!leader) return defaults;
+  // The fixed sermon and offering assignment begins after the November 1 service.
   return {
-    sermon: leader,
-    benediction: pastor ? leader : "",
+    sermon: date >= "2026-11-02" ? defaults.sermon : leader,
+    offeringPrayer: date >= "2026-11-02" ? defaults.offeringPrayer : "",
+    benediction: compactSearchValue(leader).includes("목사") ? leader : "",
   };
 }
 
@@ -13792,8 +13795,8 @@ function defaultServiceBenedictionLeader(typeId = "", serviceOrDate = null) {
   return serviceMinisterDefaults(typeId, serviceOrDate).benediction || "";
 }
 
-function defaultServiceOfferingPrayerLeader(typeId = "") {
-  return serviceMinisterDefaults(typeId).offeringPrayer || "";
+function defaultServiceOfferingPrayerLeader(typeId = "", serviceOrDate = null) {
+  return serviceMinisterDefaults(typeId, serviceOrDate).offeringPrayer || "";
 }
 
 function serviceBulletinCalendarRow(service = null) {
@@ -13972,7 +13975,7 @@ function defaultServicePrayerLeader(service = null) {
 
 function defaultServiceOfferingPrayerLeaderForService(service = null) {
   const typeId = worshipAppServiceTypeId(service?.type_id);
-  return defaultServiceOfferingPrayerLeader(typeId);
+  return defaultServiceOfferingPrayerLeader(typeId, service);
 }
 
 function serviceItemDefaultAssignee(item = {}, service = selectedServiceForEditor()) {
@@ -21349,7 +21352,7 @@ function publicWorshipOfferingStep(options = {}) {
   const hiddenInPresentation = Boolean(options.hiddenInPresentation || options.hidden_in_presentation);
   const praiseLabel = options.praiseLabel || "봉헌찬송";
   const prayerPerson = cleanServiceAssignee(
-    options.prayerPerson || options.person || defaultServiceOfferingPrayerLeader(options.typeId || options.type_id),
+    options.prayerPerson || options.person || defaultServiceOfferingPrayerLeader(options.typeId || options.type_id, options.service),
   );
   return {
     label: "봉헌",
@@ -21877,9 +21880,9 @@ function publicSundayFirstTemplate(options = {}) {
     publicWorshipScriptureReadingStep(),
     publicWorshipSermonStep({ typeId, service: options.service, person: leader }),
     publicWorshipResponseStep(),
-    publicWorshipOfferingStep({ score, typeId }),
+    publicWorshipOfferingStep({ score, typeId, service: options.service }),
     publicWorshipAnnouncementsStep(),
-    publicWorshipSendingStep({ score, benediction, lordsPrayer, typeId, service: options.service, benedictionPerson: leader }),
+    publicWorshipSendingStep({ score, benediction, lordsPrayer, typeId, service: options.service, benedictionPerson: sundayFirstRotationLeaderForDate(serviceDateString(options.service)) || leader }),
     publicWorshipClosingStep(),
   ];
 }
@@ -23623,6 +23626,7 @@ function serviceHasPastorSermonLeader(service = null, items = []) {
   const sermonMinister = cleanServiceAssignee(sermonTitle?.assignee || sermonTitle?.person || "");
   const resolvedMinister = sermonMinister
     || serviceWorshipLeaderLabel(service)
+    || (worshipAppServiceTypeId(service?.type_id) === "sunday-first" && sundayFirstRotationLeaderForDate(serviceDateString(service)))
     || defaultServiceSermonLeader(service?.type_id, service);
   return compactSearchValue(resolvedMinister).includes("목사");
 }
