@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261031-db-audio-layout",
+  "version": "20261031-keynote-auto-winter-bulletin",
   "options": {
     "compress": false,
     "mangle": {
