@@ -28,6 +28,29 @@ try:
               check(getGlobalSearchResults().praise[0]?.song.id===id, moduleName+' '+query);
             }
           }
+          const editions=['N','T'].map(book=>({id:'SONG-HYMN-'+book+'382-0001',
+            title:'동명 찬송',hymn_no:book==='T'?'347':'382',versions:[],_singleSongRecord:true}));
+          state.songs=editions;clearSearchCaches();
+          for(const [q,index] of [['새382',0],['새찬송가 382장',0],['통382',1],['통일 찬송가 382장',1]]) {
+            state.search=q;
+            check(getGlobalPraiseResults(getSearchTokens(q))[0]?.song.id===editions[index].id,'전역 '+q);
+            check(getFilteredSongs()[0]?.id===editions[index].id,'목록 '+q);
+            const marker=(index?'통':'새')+'382';
+            check(getGlobalPraiseResults(getSearchTokens(q))[0]?.song.hymn_no===marker && getFilteredSongs()[0]?.hymn_no===marker && serviceSongPickerResults(q)[0]?.hymn_no===marker,'판본 번호 표시 '+q);
+            check(serviceSongPickerResults(q)[0]?.id===editions[index].id,'예배 곡 검색 '+q);
+          }
+          check(serviceSongPickerResults('382').map(song=>song.id).join()===editions[0].id,'번호 단독 선택기');
+          check(resolveExistingPraiseSongForServiceInput('382').id===editions[0].id,'번호 단독 연결');
+          const firstLines={id:'first-lines',title:'별개 제목',versions:[{forms:[
+            {part_type:'Verse',lyrics:'1. 아침 햇살 아래'},
+            {part_type:'Chorus',lyrics:'함께 손을 들고'}
+          ]}]};
+          state.songs=[firstLines];clearSearchCaches();
+          for(const q of ['아침햇살','함께손을']) {
+            check(getGlobalPraiseResults(getSearchTokens(q))[0]?.song.id===firstLines.id,'첫 소절 '+q);
+            check(serviceSongPickerResults(q)[0]?.id===firstLines.id,'예배 첫 소절 '+q);
+          }
+          state.songs=songs;clearSearchCaches();
           state.search='zzznomatch';clearSearchCaches();
           check(getGlobalSearchResults().praise.length===0,'Unmatched praise');
           renderGlobalSearchList();check(refs.songCount.textContent==='0개 표시','Action counted as result');

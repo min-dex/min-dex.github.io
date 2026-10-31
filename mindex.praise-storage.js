@@ -425,7 +425,9 @@ function getGlobalPraiseResults(tokens) {
     .filter(entry=>entry.match)
     .sort((a,b)=>b.match.score-a.match.score || sortSongsForCurrentList(a.song,b.song));
   const byId = new Map(matches.map(entry=>[entry.song.id,entry.match]));
-  return groupPraiseSongs(matches.map(entry=>entry.song)).slice(0,8).map(song=>({song,match:byId.get(song.id)}));
+  const songs = matches.map(entry => entry.song);
+  const results = matches.some(entry => entry.match.exactEdition) ? songs.map(songForHymnNumberResult) : groupPraiseSongs(songs);
+  return results.slice(0,8).map(song=>({song,match:byId.get(song.id)}));
 }
 
 function praiseGroupSearchMatches(tokens, options) {

@@ -1421,15 +1421,19 @@ function presenterPreparationNumberOnlyHymnReference(value = "") {
   return match ? { hymnNo: match[2].replace(/^0+(?=\d)/, ""), legacy: /^통/.test(match[1] || "") } : null;
 }
 
+function songMatchesHymnReference(song, reference) {
+  const edition = String(song.id || "").match(/^SONG-HYMN-([NT])(\d{3})-/);
+  if (edition) return (edition[1] === "T") === reference.legacy
+    && Number(edition[2]) === Number(reference.hymnNo);
+  const values = [song.hymn_no, ...(song.versions || []).map(v => v.hymn_no)].filter(Boolean);
+  if (!values.some(value => presenterPreparationNumberOnlyHymnReference(value)?.hymnNo === reference.hymnNo)) return false;
+  const legacy = [song.hymn_no, ...(song.versions || []).flatMap(v => [v.name, v.hymn_no, v.version_label])]
+    .some(value => /^통(?:일)?(?:\s|찬송|\d|$)/u.test(String(value || "").trim()));
+  return legacy === reference.legacy;
+}
+
 function resolvePresenterPreparationNumberOnlyHymn(reference) {
-  const candidates = (state.songs || []).filter(song => {
-    const values = [song.hymn_no, ...(song.versions || []).map(v => v.hymn_no)].filter(Boolean);
-    if (!values.some(value => presenterPreparationNumberOnlyHymnReference(value)?.hymnNo === reference.hymnNo)) return false;
-    const nativeEdition = String(song.id || "").match(/^SONG-HYMN-([NT])/);
-    const legacy = nativeEdition ? nativeEdition[1] === "T" : [song.hymn_no, ...(song.versions || []).flatMap(v => [v.name, v.hymn_no, v.version_label])]
-      .some(value => /^통(?:일)?(?:\s|찬송|\d|$)/u.test(String(value || "").trim()));
-    return legacy === reference.legacy;
-  });
+  const candidates = (state.songs || []).filter(song => songMatchesHymnReference(song, reference));
   return presenterPreparationHymnNumberCandidates(candidates)[0] || null;
 }
 

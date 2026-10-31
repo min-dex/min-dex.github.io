@@ -19786,12 +19786,13 @@ function getFilteredSongs() {
   const phraseMatched = allMatched.filter((item) => item.match.phraseMatched);
   const results = phraseMatched.length ? phraseMatched : allMatched;
 
-  return groupPraiseSongs(results
+  const sorted = results
     .sort((a, b) => {
       if (a.inFilter !== b.inFilter) return a.inFilter ? -1 : 1;
       return b.match.score - a.match.score || sortSongsForCurrentList(a.song, b.song);
     })
-    .map((item) => ({ ...item.song, _outOfFilter: !item.inFilter })));
+    .map((item) => ({ ...item.song, _outOfFilter: !item.inFilter }));
+  return results.some(item => item.match.exactEdition) ? sorted.map(songForHymnNumberResult) : groupPraiseSongs(sorted);
 }
 
 function getSongsForPraiseFilter() {
@@ -20122,10 +20123,15 @@ function getSongSearchMatch(song, tokens = getSearchTokens(state.search), option
 
   let query = songScriptureQueryCache.get(tokens);
   if (!query || query.books !== state.scriptureBooks) {
-    query = { books: state.scriptureBooks, reference: parseBibleReference(tokens.map((token) => token.normalized).join(" ")) };
+    const text = tokens.map(token => token.normalized).join(" ");
+    query = { books: state.scriptureBooks, reference: parseBibleReference(text),
+      edition: /^(새|통)/u.test(text) ? presenterPreparationNumberOnlyHymnReference(text) : null };
     songScriptureQueryCache.set(tokens, query);
   }
   if (query.reference) return getSongScriptureSearchMatch(song, query.reference);
+  if (query.edition) return songMatchesHymnReference(song, query.edition)
+    ? { exactEdition: true, score: 500, field: searchField("hymn", query.edition.hymnNo, 125, "찬송가 번호"), phraseMatched: true }
+    : null;
 
   const fields = getSongSearchFields(song, options);
   const phrase = getSearchPhrase(tokens);
@@ -27228,6 +27234,10 @@ function serviceSongPickerResults(query, item = {}, service = selectedServiceFor
   if (!tokens.length) return [];
   const requiresNewHymnal = serviceItemRequiresNewHymnalScoreSong(item);
   const requiresChildren = servicePraiseInputMode(item, parseServiceItemMemo(item.memo), service) === "children_audio";
+  if (presenterPreparationNumberOnlyHymnReference(normalizedQuery)) {
+    return directMatch && isSelectablePraiseSong(directMatch)
+      && (!requiresNewHymnal || serviceSongHasScore(directMatch)) ? [songForHymnNumberResult(directMatch)] : [];
+  }
   const includeLyrics = getSearchPhrase(tokens).compact.length >= 4;
   const cacheKey = [
     normalizeSearchValue(normalizedQuery),
@@ -28147,6 +28157,12 @@ function formatServiceBibleReference(reference, fallback = "") {
     ? `${bibleChapterDisplayLabel(reference.book,reference.chapter)}:${reference.verse}${reference.verseEnd ? `–${reference.verseEnd}` : ""}`
     : bibleChapterDisplayLabel(reference.book,reference.chapter);
   return [book, versePart].filter(Boolean).join(" ");
+}
+
+// Number-search cards describe the matched edition, not its linked new-hymnal number.
+function songForHymnNumberResult(song) {
+  const edition = /^SONG-HYMN-([NT])(\d{3})-/.exec(song.id);
+  return edition ? { ...song, hymn_no: (edition[1] === "T" ? "통" : "새") + Number(edition[2]) } : song;
 }
 
 function songServiceOptionLabel(song) {
