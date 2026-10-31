@@ -72,6 +72,12 @@ try:
     // Existing smaller helper copy is never enlarged to the shared floor.
     box.style.setProperty('--test-base','30px');box.textContent='작은 안내';fitPresenterTextBox(box);check(parseFloat(getComputedStyle(box).fontSize)===30,'helper enlarged');
     root.className='presenter-output-root no-chromakey';
+    // Fullscreen assignees use the same support role as subtitle metadata.
+    root.innerHTML=renderPresenterSlideFrame({type:'title-assignee',elementType:PRESENTER_ELEMENT_TYPES.TITLE_ASSIGNEE,layout:PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT,label:'대표기도',title:'대표기도',assignee:'홍길동 집사'},{noChromakey:true});
+    const person=root.querySelector('.presenter-title-assignee-person');
+    const meta=document.createElement('span');meta.className='presenter-slide-meta';meta.textContent='보조제목';root.append(meta);
+    check(getComputedStyle(person).fontSize===getComputedStyle(meta).fontSize,'fullscreen assignee differs from support size');
+    check(getComputedStyle(person).fontWeight==='800','fullscreen assignee original weight changed');
     for(const kind of ['pair','solo','sermon','order-content','three-part']) {
       const sermon=kind==='sermon';
       const slide={type:'title-assignee',elementType:PRESENTER_ELEMENT_TYPES.TITLE_ASSIGNEE,layout:PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT,label:sermon?'설교':'대표기도',title:'함께 드리는 감사의 기도 제목입니다'.repeat(3),assignee:'홍길동 집사와 함께하는 예배 준비 위원회 대표'.repeat(2),...(sermon?{sectionKey:'sermon',contentTitle:'함께 드리는 감사의 말씀 제목입니다'.repeat(3)}:{}),...(['order-content','three-part'].includes(kind)?{orderTitle:'순서 제목'.repeat(8),contentTitle:'함께 부르는 찬양의 긴 제목'.repeat(4)}:{}),...(['solo','order-content'].includes(kind)?{assignee:''}:{})};
