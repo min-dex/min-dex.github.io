@@ -3,7 +3,9 @@
 ## Scope
 
 - Friday free-prayer items (slot `prayer.meeting.free` or exact label `자율기도`) offer a dedicated player at the element, separate from sidebar background music.
-- Other service types do not receive this player. Existing explicit slide audio is unchanged.
+- Dawn prayer services also use this player for the closing `response.prayer` slot
+  or explicitly labelled 자율기도, with the separately supplied dawn music.
+  Opening prayer and other service types are unchanged. Explicit dawn item audio takes priority.
 - Selection and rendering never start playback. The operator starts music explicitly.
 - Play/pause, stop, repeat and volume have independent session state and a persistent, lazily created Audio instance. Navigation does not stop playback. No worship records or schema are changed.
 - While output is open, the topbar offers a return to the live service from other views, protecting unsaved edits and preserving output/index without reloading service data.
@@ -24,6 +26,12 @@
 - Offline Chromium/WebKit coverage: `tests/smoke_global_playback.py`.
 
 ## Audio
+
+- Dawn music (user approved public upload on 2026-11-01): unchanged supplied MP3,
+  `assets/presenter/dawn-free-prayer.mp3`, 55,081,269 bytes, 3417.12 seconds,
+  stereo 48kHz. SHA-256:
+  `b8939186c2434d0280e787d02103cbfd136c77ea73b2096faa01a85ab026f7d9`.
+  No transcoding, trimming, automatic playback or worship-record mutation.
 
 - Original supplied M4A, unchanged, approximately 46 minutes 42 seconds.
 - SHA-256: `8c888a525cde94b7fbd91046f0ee774a7ba8fda06a199646112b201eb57f72da`

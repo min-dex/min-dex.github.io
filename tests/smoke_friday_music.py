@@ -10,13 +10,22 @@ try:
             page = browser.new_page()
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url, wait_until='domcontentloaded')
-            page.wait_for_function("typeof renderServiceSlotMusic === 'function'")
+            page.wait_for_function("typeof renderServiceSlotMusic === 'function' && typeof state !== 'undefined' && !document.body.classList.contains('ui-booting')")
             print(engine, page.evaluate('''async () => {
  const check=(v,m)=>{if(!v)throw Error(m)};
  const service={id:'fixture',type_id:'friday'},item={_worshipSlotKey:'prayer.meeting.free'};
  const a={paused:true,currentTime:0,src:'',load(){this.loads=(this.loads||0)+1},pause(){this.paused=true},play(){this.paused=false;return Promise.resolve()}};
  state.serviceMusic.audio=a;
  state.serviceMusic.fadeStopEnabled=false; // Immediate-stop cases; fade envelope is verified separately.
+ const dawn={id:'dawn-fixture',type_id:'holy_week_dawn'};
+ const dawnItem={label:'기도',_worshipSlotKey:'response.prayer'};
+ const dawnMarkup=renderServiceSlotMusic({service:dawn,item:dawnItem});
+ check(dawnMarkup.includes('dawn-free-prayer.mp3')&&!dawnMarkup.includes('friday-free-prayer'),'dawn source wrong');
+ check(!renderServiceSlotMusic({service:dawn,item:{label:'기도',_worshipSlotKey:'prayer.opening'}}),'opening prayer received music');
+ check(!renderServiceSlotMusic({service:{id:'other',type_id:'wednesday'},item:dawnItem}),'other service received dawn music');
+ const explicit={...dawnItem,memo:serializeServiceItemMemo({audioAsset:{url:'https://example.invalid/preserved.mp3',name:'별도 음원'}})};
+ check(!renderServiceSlotMusic({service:dawn,item:explicit}),'explicit audio replaced');
+ check(!a.loads&&a.paused&&!state.serviceMusic.sourceKey,'dawn rendering changed audio');
  const m=document.createElement('div');m.id='music-test';m.style.width='254px';m.innerHTML=renderServiceSlotMusic({service,item});document.body.append(m);refreshIcons(m);
  check(!('prayerMusic' in state),'dedicated state left');
  check(!a.loads&&a.paused&&!state.serviceMusic.sourceKey,'render mutated player');
@@ -65,6 +74,13 @@ try:
  warmer.events.loadedmetadata();check(warmer.released,'warmup not bounded');
  check(state.serviceMusic.audio===originalAudio&&state.serviceMusic.sourceKey==='fixture-other.mp3'&&state.serviceMusic.ownerServiceId===owner&&originalAudio.currentTime===clock,'warmup touched active player');
  state.serviceMusic.sourceKey=oldSource;window.Audio=NativeAudio;
+ runServiceMusicAction('stop',binding);
+ m.innerHTML=dawnMarkup;
+ const dawnBinding=m.querySelector('[data-service-music-player]').dataset;
+ await runServiceMusicAction('toggle',dawnBinding);
+ check(a.src.includes('dawn-free-prayer.mp3')&&state.serviceMusic.ownerServiceId===dawn.id&&state.serviceMusic.playing,'dawn explicit playback failed');
+ renderServiceSlotMusic({service,item});check(a.src.includes('dawn-free-prayer.mp3')&&state.serviceMusic.playing,'Friday navigation interrupted dawn');
+ runServiceMusicAction('stop',dawnBinding);check(a.paused&&a.currentTime===0,'dawn stop failed');
  clearServiceMusicSyncTimer();return 'PASS shared engine, side-effect-free rendering, state, cancellation, source isolation, repeat disabled, volume, widths';
 }'''), flush=True)
             page.evaluate("""()=>{

@@ -688,3 +688,13 @@ function formatLiveScriptureReference(reference, translation = selectedPresenter
     : `${reference.verse}`;
   return `${bookName} ${bibleChapterDisplayLabel(reference.book,reference.chapter)}:${verseRange}`;
 }
+
+function renderServiceSlotMusic(context) {
+  const item = context?.item, slot = item?._worshipSlotKey;
+  const dawn = worshipAppServiceTypeId(context?.service?.type_id || "") === "holy-week-dawn";
+  const freePrayer = slot === "response.prayer" || compactSearchValue(item?.label || "") === "자율기도";
+  if (dawn && freePrayer && hasServiceAsset(parseServiceItemMemo(item?.memo).audioAsset)) return "";
+  const config = SERVICE_SLOT_MUSIC[dawn && freePrayer ? "dawn.free" : slot];
+  if (!config) return "";
+  return renderServiceMusicPlayer({ ...config, serviceId: context.service?.id || "" });
+}

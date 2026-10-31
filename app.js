@@ -29956,6 +29956,7 @@ function renderLiveScriptureControl(serviceId) {
 }
 
 const SERVICE_SLOT_MUSIC = Object.freeze({
+  "dawn.free": { source: "./assets/presenter/dawn-free-prayer.mp3", label: "새벽기도 자율기도 음악", repeatAllowed: false },
   "prayer.meeting.free": { source: "./assets/presenter/friday-free-prayer.m4a?v=faststart-20260919", label: "자율기도 음악", repeatAllowed: false },
 });
 
@@ -29983,11 +29984,6 @@ function warmServiceSlotMusic(target) {
   audio.src = source;
 }
 
-function renderServiceSlotMusic(context) {
-  const config = SERVICE_SLOT_MUSIC[context?.item?._worshipSlotKey];
-  if (!config) return "";
-  return renderServiceMusicPlayer({ ...config, serviceId: context.service?.id || "" });
-}
 
 function updateServiceMusicTransportControls() {
   syncPresenterInputAudioControls();
