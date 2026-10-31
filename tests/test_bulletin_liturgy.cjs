@@ -40,3 +40,17 @@ const before=JSON.stringify(legacy),legacyDisplay=B.orderRowsForDisplay(legacy);
 assert.equal(legacyDisplay[0].content,'');assert.equal(legacyDisplay[1].content,'주기도문에 관한 사용자 안내');
 assert.equal(JSON.stringify(legacy),before);assert.equal(JSON.stringify(data),original,'worship aggregate is never changed');
 console.log('PASS bulletin liturgy summaries by slot/type/section/legacy label, praise/scripture/sermon/news preservation and immutable snapshots');
+
+const native={service:{id:'native-praise',service_type_id:'children',service_date:'2026-11-01'},
+ sections:[{id:'praise',section_key:'praise',title:'찬양',sort_order:1}],
+ elements:[1,2,3,4].map(i=>({id:'native-'+i,section_id:'praise',element_type:'praise',praise_record_id:'record-'+i,title:'',sort_order:i,source_ref:{label:'찬양 '+i}})),
+ songs:[1,2,3,4].map(i=>({id:'record-'+i,title:'곡 '+i}))};
+const nativeBefore=JSON.stringify(native),source=B.resolveSource(native);
+assert.equal(source.order[0].content,'곡 1\n곡 2\n곡 3\n곡 4');
+const saved=B.storedValue({source,fields:{news:'수동 소식'},settings:{},frames:[]}).content.sourceSnapshot;
+saved.weekly.order=native.elements.map((e,i)=>({id:e.id,label:'찬양',content:i===3?'직접 보존한 제목':'',person:'다같이'}));
+const savedBefore=JSON.stringify(saved),restored=B.applySourceSnapshot(source,saved);
+assert.deepEqual(Array.from(restored.order,r=>r.content),['곡 1','곡 2','곡 3','직접 보존한 제목']);
+assert.equal(JSON.stringify(saved),savedBefore);
+assert.equal(JSON.stringify(native),nativeBefore);
+console.log('PASS native praise links, original order, blank publication titles, preserved existing copy');
