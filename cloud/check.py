@@ -108,6 +108,7 @@ SMOKES = (
     "smoke_lyrics_form.py",
     "smoke_presenter_common_fit.py",
     "smoke_media_viewport_fit.py",
+    "smoke_ready_stage_ratio.py",
     "smoke_media_source_identity.py",
     "smoke_transition_logo.py",
     "smoke_fullscreen_praise.py",

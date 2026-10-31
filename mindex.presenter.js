@@ -2751,6 +2751,7 @@ function presenterOutputFrameStateForSlide(slide, payload = {}) {
   const blackoutOutput = slide?.id === "presenter:safety-blank";
   const slideChromakey = !blackoutOutput && presenterFrameSlideOutputContext(slide, fallbackChromakey) === "chromakey";
   const cleanOutput = !slideChromakey;
+  const generatedReadyOutput = slide?.type === "ready" && cleanOutput;
   const blankSlide = presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.BLANK;
   const scoreOutput = presenterSlideIsScoreLike(slide);
   const videoOutput = presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.VIDEO || Boolean(slide?.videoSrc);
@@ -2760,8 +2761,8 @@ function presenterOutputFrameStateForSlide(slide, payload = {}) {
   const showBackground = Boolean(!blackoutOutput && backgroundImages.length && cleanOutput && presenterSlideUsesServiceBackground(slide));
   return {
     cleanOutput,
-    mediaOutput: Boolean(slide?.pptx?.url || (presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.MEDIA
-      && [PRESENTER_ELEMENT_TYPES.IMAGE, PRESENTER_ELEMENT_TYPES.VIDEO].includes(presenterSlideElementType(slide)))),
+    mediaOutput: Boolean(!generatedReadyOutput && (slide?.pptx?.url || (presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.MEDIA
+      && [PRESENTER_ELEMENT_TYPES.IMAGE, PRESENTER_ELEMENT_TYPES.VIDEO].includes(presenterSlideElementType(slide))))),
     formBackground: Boolean(slide?.formBackgroundImage),
     showBackground,
     blankOutput: Boolean(blankSlide && cleanOutput && !blackoutOutput && !slide?.formBackgroundImage),

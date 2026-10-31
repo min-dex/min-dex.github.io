@@ -4865,6 +4865,13 @@ song selection. This preserves older input-mode metadata without rewriting it.
 
 ## Standalone media viewport fit ·2026-10-28
 
+Correction ·2026-10-31: generated clean ready/waiting copy is a text-and-logo
+design slide, even when its compatibility metadata says image/media. Keep that
+rendered ready screen inside the centered 16:9 design stage, matching its blank
+cross transition. Only actual standalone media uses the viewport-fit exception.
+`smoke_ready_stage_ratio.py` exercises the real ready/preparation builders and
+output renderer at five viewport ratios, alongside the standalone-media checks.
+
 Image, video (including waiting-loop video), imported slide images and live PPTX
 use the entire output viewport as their available area. Fit the original aspect
 ratio into that area at the largest contained size, enlarging or shrinking as
