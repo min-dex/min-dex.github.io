@@ -12,8 +12,9 @@ with sync_playwright() as p:
     page=browser.new_page(viewport={'width':390,'height':844})
     errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     page.route('**/*',lambda r:r.abort())
-    page.set_content(f'<html data-theme="{theme}"><body class="ui-booting"><main class="home-start"></main></body></html>')
+    page.set_content(f'<html data-theme="{theme}"><body data-theme="{theme}" class="ui-booting"><main class="home-start"></main></body></html>')
     page.add_style_tag(content=(ROOT/'styles.css').read_text())
+    assert page.evaluate("getComputedStyle(document.body).getPropertyValue('--panel').trim()")==('#232320' if theme=='dark' else '#f4f4ef')
     page.evaluate('''channel=>{window.writes=[];window.store=new Map([['existing-draft','keep']]);
      window.MINDEX_SERVER_STORAGE={ready:false,getItem:(scope,key)=>store.get(key)||null,setItem:async(scope,key,value)=>{writes.push({scope,key,value});if(window.rejectSave)throw Error('offline');store.set(key,value)}};
      window.fetch=async()=>({ok:channel!=='missing',json:async()=>({schema:1,productVersion:'1.0.0',channel,changes:['예배와 말씀 편집 개선','긴 설명 '.repeat(60)],upgradeNotes:'편집 내용은 먼저 저장해 주세요.'})});}''',channel)
