@@ -23968,10 +23968,7 @@ function adaptServiceItemsForPresenterView(service, items = [], options = {}) {
     normalizeServiceItemsForTemplateHierarchy(service, items, options),
     ));
   return visibleServiceItemsForPresentation(annotated).map((original, index) => {
-    const item = serviceItemIsFreePrayer(original, service) ? {
-      ...original, label: "자율기도", _worshipSectionKey: "free_prayer", _worshipSectionTitle: "자율기도",
-      ...(["", "기도", "기도회", "통성기도", "자율기도"].includes(compactSearchValue(original.raw_title || "")) ? { raw_title: "" } : {}),
-    } : original;
+    const item = presenterFreePrayerDisplayItem(original, service);
     return { ...item, sort_order: index + 1 };
   });
 }

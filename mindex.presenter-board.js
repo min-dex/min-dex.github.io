@@ -1127,39 +1127,6 @@ function presenterBoardConnectedPraiseItemTitles(contexts = []) {
     });
 }
 
-function renderPresenterBoardItemAudioControls(serviceId, context = {}, options = {}) {
-  if (!context || !serviceItemSupportsHeaderAudio(context.item)) return "";
-  const memo = parseServiceItemMemo(context.item.memo);
-  const childrenAudio = servicePraiseInputMode(context.item, memo) === "children_audio";
-  const audioAsset = normalizeServiceAudioAsset(childrenAudio ? null : memo.audioAsset);
-  const entries = (context.timingEntries || []).filter(({ slide }) =>
-    (slide.songTimingElementId || slide.progressionParentId || slide.elementId) === context.item.id);
-  const timingAudio = globalThis.MindexSongTiming?.audioFor(entries, context.item.id);
-  const source = String(audioAsset.url || timingAudio?.url || "").trim();
-  if (Boolean(source) !== Boolean(options.manager)) return "";
-  const label = serviceItemIsFreePrayer(context.item, context.service)
-    ? serviceFreePrayerAudioLabel(context.service)
-    : audioAsset.url ? audioAsset.name || "연결된 음원" : timingAudio?.name || "연결된 음원";
-  return `
-    <div class="svc-board-subgroup-audio${source ? " has-audio svc-audio-manager" : ""}${childrenAudio ? " svc-children-audio" : ""}" aria-label="${escapeAttr(`${context.item.label || "찬양"} 음원 관리`)}">
-      ${source ? `
-        <strong title="${escapeAttr(label)}">${escapeHtml(label)}</strong>
-        ${renderPresenterInputAudioControls(source, label, serviceId, context.item.id, entries.some(({slide}) => slide.syncTimeline?.localTiming))}` : ""}
-      ${childrenAudio ? globalThis.MindexSongTiming?.statusMarkup(context, entries) || (source ? '<span class="svc-children-audio-hint">송출 중 제목에서 <kbd>P</kbd> 재생</span>' : "") : ""}
-      <div class="svc-board-subgroup-audio-actions">
-        ${!source && servicePraiseInputMode(context.item) === "children_audio" ? `<button class="btn secondary" type="button" data-song-timing-open data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(context.item.id)}">버전 음원·타이밍</button>` : ""}
-        ${source ? globalThis.MindexSongTiming?.controls(serviceId, entries, { audioSource: source }) || "" : ""}
-        ${audioAsset.url ? `<button class="icon-btn" type="button" data-service-item-audio-clear
-            data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${context.index}"
-          aria-label="음원 연결 해제" title="음원 연결 해제"><i data-lucide="x"></i></button>` : ""}
-        ${childrenAudio ? "" : `<label class="svc-board-subgroup-audio-upload" title="${source ? "음원 교체" : "음원 추가"}">
-          <input type="file" accept="${SERVICE_ITEM_AUDIO_ACCEPT}" data-service-item-audio-file
-            data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${context.index}" />
-          <span>${source ? "교체" : "음원"}</span>
-        </label>`}
-      </div>
-    </div>`;
-}
 
 function presenterBoardSubgroupItemContext(serviceId, subgroup = {}) {
   const service = state.services.find((svc) => svc.id === serviceId);
@@ -1730,38 +1697,4 @@ function fitPresenterSupplementalText(host) {
       try { fitPresenterTextBox(box, {fits}); }
       finally { measure?.remove(); }
     });
-}
-
-
-// One transport location for item media, regardless of its source or service.
-// Move existing nodes once: listeners, focus, media ownership and clocks survive.
-function arrangePresenterBoardMediaControls(host = document) {
-  const groups = new Set(host.querySelectorAll('.svc-board-subgroup'));
-  const owner = host.closest?.('.svc-board-subgroup');
-  if (owner) groups.add(owner);
-  for (const group of groups) {
-    const grid = group.querySelector(':scope > .svc-board-grid, :scope > .svc-board-media-layout > .svc-board-grid');
-    if (!grid) continue;
-    let layout = group.querySelector(':scope > .svc-board-media-layout');
-    let rail = layout?.querySelector(':scope > .svc-board-media-rail');
-    const controls = [...group.querySelectorAll('.svc-music-player--inline, .svc-input-media-controls, .svc-deck-playback')]
-      .filter(node => node.closest('.svc-board-subgroup') === group && !rail?.contains(node));
-    if (!controls.length) continue;
-    if (!layout) {
-      layout = document.createElement('div');
-      layout.className = 'svc-board-media-layout';
-      rail = document.createElement('div');
-      rail.className = 'svc-board-media-rail';
-      rail.setAttribute('role', 'group');
-      rail.setAttribute('aria-label', '미디어 재생 제어');
-      grid.before(layout);
-      layout.append(rail, grid);
-    }
-    for (const control of controls) {
-      const label = control.parentElement?.matches('.svc-audio-manager')
-        ? control.parentElement.querySelector(':scope > strong') : null;
-      if (label) rail.append(label);
-      rail.append(control);
-    }
-  }
 }

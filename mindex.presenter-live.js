@@ -688,26 +688,3 @@ function formatLiveScriptureReference(reference, translation = selectedPresenter
     : `${reference.verse}`;
   return `${bookName} ${bibleChapterDisplayLabel(reference.book,reference.chapter)}:${verseRange}`;
 }
-
-function serviceItemIsFreePrayer(item = {}, service = null) {
-  const slot = item._worshipSlotKey || item.slotKey || "";
-  const section = item._worshipSectionKey || item.sectionKey || item.section_key || "";
-  return slot === "prayer.meeting.free" || section === "free_prayer"
-    || compactSearchValue(item.label || "") === "자율기도"
-    || (worshipAppServiceTypeId(service?.type_id || "") === "holy-week-dawn" && slot === "response.prayer");
-}
-
-function serviceFreePrayerAudioLabel(service) {
-  const serviceName = serviceNavigationName(service) || serviceDisplayTypeName(service) || "예배";
-  return `${serviceName} 자율기도 음원`;
-}
-
-function renderServiceSlotMusic(context) {
-  const item = context?.item, slot = item?._worshipSlotKey;
-  const dawn = worshipAppServiceTypeId(context?.service?.type_id || "") === "holy-week-dawn";
-  const freePrayer = slot === "response.prayer" || compactSearchValue(item?.label || "") === "자율기도";
-  if (dawn && freePrayer && hasServiceAsset(parseServiceItemMemo(item?.memo).audioAsset)) return "";
-  const config = SERVICE_SLOT_MUSIC[dawn && freePrayer ? "dawn.free" : slot];
-  if (!config) return "";
-  return renderServiceMusicPlayer({ ...config, label: serviceFreePrayerAudioLabel(context.service), serviceId: context.service?.id || "" });
-}
