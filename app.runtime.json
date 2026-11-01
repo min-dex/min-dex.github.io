@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261101-input-media-remote",
+  "version": "20261101-service-media-preload",
   "options": {
     "compress": false,
     "mangle": {
