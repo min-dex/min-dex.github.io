@@ -3898,7 +3898,7 @@ function localDateStringWithOffset(baseDate = new Date(), offsetDays = 0) {
 }
 
 function worshipServiceIsPast(service, baseDate = new Date()) {
-  const dateValue = String(service?.date_end || service?.service_date_end || service?.date || service?.service_date || "").trim();
+  const dateValue = worshipServicePeriod(service, baseDate).end;
   if (!dateValue) return false;
   const serviceDate = parseLocalDate(dateValue);
   const today = parseLocalDate(baseDate);
@@ -15358,6 +15358,8 @@ const WORSHIP_BACKGROUND_STATIC_FILES = new Set([
   "26-감사특새.png",
 ]);
 function presenterServiceUsesChromakey(service) {
+  const explicit = worshipServiceOutputContext(service);
+  if (explicit) return explicit === "chromakey";
   if (serviceUsesAllGenerationsChromakeyOutput(service)) return true;
   if (serviceUsesDistrictUnionChromakeyOutput(service)) return true;
   return serviceTypeUsesChromakey(service?.type_id);
@@ -23206,7 +23208,7 @@ function getServicesByType(typeId) {
 function sortServicesByDate(services, direction = "asc") {
   const weight = direction === "desc" ? -1 : 1;
   return orderDepartmentServiceSlots([...services].sort((a, b) => {
-    const dateCompare = String(a.date || "").localeCompare(String(b.date || ""));
+    const dateCompare = worshipServicePeriod(a).start.localeCompare(worshipServicePeriod(b).start);
     if (dateCompare) return dateCompare * weight;
     const timeCompare = serviceStartSortMinutes(a) - serviceStartSortMinutes(b);
     if (timeCompare) return timeCompare;
@@ -24156,18 +24158,18 @@ function getServiceDashboardServices(base = new Date()) {
   const start = weeks[0].start;
   const end = weeks[1].end;
   const upcoming = getFilteredServices().filter((service) => {
-    const serviceDate = new Date(`${service.date}T00:00:00`);
-    return serviceDate >= start && serviceDate <= end;
+    return worshipServiceOverlapsDates(service, start, end);
   });
   return sortServicesByDate([...upcoming, ...getExpectedServicesInRange(start, end)]);
 }
 
-function serviceTimeWindow(service) {
-  const day = parseLocalDate(service?.date);
+function serviceTimeWindow(service, baseDate = new Date()) {
+  const period = worshipServicePeriod(service, baseDate, true);
+  const day = parseLocalDate(period.start);
   if (Number.isNaN(day.getTime())) return null;
   const range = SERVICE_TIME_WINDOWS[worshipAppServiceTypeId(service?.type_id)];
   if (!range) {
-    const finalDay = parseLocalDate(service?.date_end || service?.date);
+    const finalDay = parseLocalDate(period.end);
     finalDay.setHours(23, 59, 59, 999);
     return { start: day, end: finalDay, timed: false };
   }
@@ -24185,7 +24187,7 @@ function getHomeNextService(baseDate = new Date()) {
   if (Number.isNaN(now.getTime())) return null;
   const candidates = state.services
     .filter(service => !serviceIsNoGathering(service))
-    .map((service) => ({ service, window: serviceTimeWindow(service) }))
+    .map((service) => ({ service, window: serviceTimeWindow(service, baseDate) }))
     .filter(({ window }) => window && window.end >= now);
   const ongoing = candidates
     .filter(({ window }) => window.timed && window.start <= now)
@@ -24238,8 +24240,7 @@ function getServiceSidebarServices() {
   const end = new Date(today);
   end.setDate(today.getDate() + SERVICE_FUTURE_LOOKAHEAD_DAYS);
   const upcoming = getFilteredServices().filter((service) => {
-    const serviceDate = new Date(`${service.date}T00:00:00`);
-    return serviceDate >= today && serviceDate <= end;
+    return worshipServiceOverlapsDates(service, today, end);
   });
   return sortServicesByDate([...upcoming, ...getExpectedServicesInRange(today, end)]).slice(0, 36);
 }
@@ -24251,8 +24252,7 @@ function getRecentServiceShortcuts(limit = 8) {
 function getUpcomingServiceShortcuts(limit = 8, baseDate = new Date()) {
   const today = upcomingServiceBaseDate(baseDate);
   return sortServicesByDate(state.services.filter((service) => {
-    const serviceDate = parseLocalDate(service?.date);
-    return !Number.isNaN(serviceDate.getTime()) && serviceDate >= today;
+    return worshipServicePeriod(service, today).end >= toLocalDateStr(today);
   })).slice(0, limit);
 }
 
@@ -24267,8 +24267,7 @@ function homeSidebarServiceWeekRange(baseDate = new Date()) {
 function getHomeSidebarRecentServiceShortcuts(limit = 8, baseDate = new Date()) {
   const { start, end } = homeSidebarServiceWeekRange(baseDate);
   return sortServicesByDate(state.services.filter((service) => {
-    const serviceDate = parseLocalDate(service?.date);
-    return !Number.isNaN(serviceDate.getTime()) && serviceDate >= start && serviceDate <= end;
+    return worshipServiceOverlapsDates(service, start, end);
   })).slice(0, limit);
 }
 
@@ -27573,12 +27572,7 @@ function renderServiceDashboard(options = {}) {
   const q = normalizeSearchValue(state.search);
   const title = options.title || SERVICE_HOME_WEEK_TITLE;
   const weeks = recentServiceWeeks();
-  const servicesByDate = new Map();
-  for (const service of services) {
-    const key = service.date;
-    if (!servicesByDate.has(key)) servicesByDate.set(key, []);
-    servicesByDate.get(key).push(service);
-  }
+  const servicesByDate = worshipServiceDateGroups(services, weeks[0].start, weeks[1].end);
   refs.detailPane.innerHTML = `
     <div class="service-dashboard" role="region" aria-label="${escapeAttr(title)}">
       ${q ? `<section class="service-dashboard-section">
@@ -27616,8 +27610,7 @@ function formatServiceWeekRange(start, end) {
 
 function serviceDateStatus(service) {
   const today = toLocalDateStr(new Date());
-  const start = String(service?.date || "");
-  const end = String(service?.date_end || start);
+  const { start, end } = worshipServicePeriod(service);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(start)) return {key:"", label:""};
   return end < today ? {key:"past", label:"지난 예배"}
     : start > today ? {key:"upcoming", label:"다가오는 예배"}
@@ -27717,6 +27710,8 @@ function renderDeferredPastServiceDetail(service) {
 }
 
 function formatServiceDate(service, options = {}) {
+  const annual = worshipAnnualServiceDateLabel(service, options.compact);
+  if (annual) return annual;
   const start = new Date(`${service.date}T00:00:00`);
   const startText = options.compact
     ? `${start.getMonth() + 1}/${start.getDate()} ${serviceWeekdayLabel(start)}`
@@ -27734,6 +27729,8 @@ function serviceWeekdayLabel(date) {
 }
 
 function formatServiceIsoDate(service) {
+  const annual = worshipAnnualServiceDateLabel(service);
+  if (annual) return annual;
   const start = String(service?.date || "").trim();
   const end = String(service?.date_end || "").trim();
   if (!start) return "";

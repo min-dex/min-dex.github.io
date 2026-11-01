@@ -255,7 +255,7 @@ function serviceFreePrayerAudioLabel(service) {
 function presenterSlotMusicConfig(context) {
   if (!context?.item || !serviceItemIsFreePrayer(context.item, context.service)) return "";
   if (hasServiceAsset(parseServiceItemMemo(context.item.memo).audioAsset)) return "";
-  return SERVICE_SLOT_MUSIC[worshipFreePrayerAudioKey(context.service?.type_id || "")];
+  return SERVICE_SLOT_MUSIC[worshipFreePrayerAudioKey(context.service || "")];
 }
 
 function renderServiceSlotMusic(context) {

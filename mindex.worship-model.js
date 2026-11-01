@@ -679,6 +679,65 @@ function worshipFreePrayerTemplate(steps, service) {
     ? { label: '자율기도', name: '자율기도', required: false, sectionKey: 'free_prayer', elements: [worshipFreePrayerElement()] } : step);
 }
 function worshipFreePrayerAudioKey(typeId) {
+  const service = typeId && typeof typeId === 'object' ? typeId : {};
+  const key = (service._worshipSourceRef || service.source_ref || {}).free_prayer_audio_key;
+  if (['dawn.free','prayer.meeting.free'].includes(key)) return key;
+  typeId = service.type_id || service.service_type_id || typeId;
   const type = WORSHIP_SERVICE_TYPE_ALIASES[typeId] || typeId;
   return type === 'holy-week-dawn' ? 'dawn.free' : ['friday', 'monthly'].includes(type) ? 'prayer.meeting.free' : '';
+}
+
+// Reuse one persisted worship aggregate across its annual date window.
+function worshipServicePeriod(service = {}, baseDate = new Date(), daily = false) {
+  service = service || {};
+  let start = String(service.date || service.service_date || '').slice(0, 10);
+  let end = String(service.date_end || service.service_date_end || start).slice(0, 10);
+  const source = service._worshipSourceRef || service.source_ref || {};
+  const annual = source.reuse_annually === true && /^\d{4}-\d{2}-\d{2}$/.test(start) && /^\d{4}-\d{2}-\d{2}$/.test(end);
+  if (annual) {
+    const today = worshipPeriodDateKey(baseDate), year = Number(today.slice(0, 4));
+    const startDay = start.slice(5), endDay = end.slice(5), crossesYear = endDay < startDay;
+    const firstYear = year - (crossesYear && today.slice(5) <= endDay ? 1 : 0);
+    start = `${firstYear}-${startDay}`; end = `${firstYear + Number(crossesYear)}-${endDay}`;
+    if (daily && today >= start && today <= end) start = end = today;
+  }
+  return { start, end, annual };
+}
+
+function worshipPeriodDateKey(value) {
+  if (typeof value === 'string') return value.slice(0, 10);
+  const date = new Date(value);
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+}
+
+function worshipServiceOverlapsDates(service, start, end) {
+  const first = worshipPeriodDateKey(start), last = worshipPeriodDateKey(end);
+  for (let year = Number(first.slice(0,4)); year <= Number(last.slice(0,4)); year++) {
+    const period = worshipServicePeriod(service, `${year}-${first.slice(5)}`);
+    if (period.start <= last && period.end >= first) return true;
+  }
+  return false;
+}
+
+function worshipAnnualServiceDateLabel(service, compact = false) {
+  const period = worshipServicePeriod(service);
+  if (!period.annual) return '';
+  const label = value => { const [,month,day] = value.split('-').map(Number); return compact ? `${month}/${day}` : `${month}월 ${day}일`; };
+  return `매년 ${label(period.start)}–${label(period.end)}${compact ? '' : ' · 매일 재사용'}`;
+}
+
+function worshipServiceDateGroups(services, start, end) {
+  const groups = new Map(), first = new Date(`${worshipPeriodDateKey(start)}T00:00:00`), last = worshipPeriodDateKey(end);
+  for (const day = first; worshipPeriodDateKey(day) <= last; day.setDate(day.getDate()+1)) {
+    const key = worshipPeriodDateKey(day);
+    const rows = services.filter(service => worshipServicePeriod(service).annual
+      ? worshipServiceOverlapsDates(service, key, key) : service.date === key);
+    if (rows.length) groups.set(key, rows);
+  }
+  return groups;
+}
+
+function worshipServiceOutputContext(service = {}) {
+  const source = service?._worshipSourceRef || service?.source_ref || {};
+  return ['chromakey','clean'].includes(source.presenter_output_context) ? source.presenter_output_context : '';
 }

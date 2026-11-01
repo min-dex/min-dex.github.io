@@ -1132,3 +1132,14 @@ selector. Native lyrics display only the selected member; names and optional
 output titles remain editable in song information, with differing titles visible.
 Legacy multi-version records retain their existing editing and persistence path.
 Required release/public verification is separate from scoped local checks.
+
+### Annual reusable instance metadata ·2026-11-01
+
+An explicitly marked `source_ref.reuse_annually: true` aggregate uses its stored
+`service_date` / `service_date_end` month-day interval every year. It remains one
+service ID; rendering, browsing and daily cards must not rewrite the anchor dates
+or create daily/yearly copies. Unmarked services retain their persisted dates.
+`presenter_output_context` optionally selects `chromakey` or `clean` for that
+instance without changing the service type. `free_prayer_audio_key` may select an
+existing built-in track (`dawn.free` or `prayer.meeting.free`) while retaining the
+same shared free-prayer element and slot. No DB schema or permission change.
