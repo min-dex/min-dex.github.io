@@ -178,7 +178,9 @@
         const row=document.createElement('div');row.className='monitor-device';
         const title=document.createElement('strong');title.textContent=item.title||'예배';
         const detail=document.createElement('p');detail.className='monitor-environment';
-        detail.textContent=[item.device,item.position,/^\d{4}$/.test(item.code)&&token?'송출 코드 '+item.code:''].filter(Boolean).join(' · ');
+        const device = item.position === '송출 대기'
+          ? item.device?.replace(/ · 송출 대기$/, '') : item.device;
+        detail.textContent=[device,item.position,/^\d{4}$/.test(item.code)&&token?'송출 코드 '+item.code:''].filter(Boolean).join(' · ');
         row.append(title,detail);return row;
       });
       $('[data-outputs]').replaceChildren(...(rows.length?rows:['현재 등록된 송출이 없습니다.']));

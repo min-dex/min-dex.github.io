@@ -75,7 +75,9 @@ async function listOutputs(){
    button.remoteOutput=output;
    const row=button.querySelector('.output-row'),title=row.firstElementChild,code=row.lastElementChild,detail=button.querySelector('small');
    title.textContent=output.title||'예배';code.hidden=!token;code.textContent=token?(output.code?'코드 '+output.code:'코드 준비 중'):'';
-   detail.textContent=[output.device,output.position].filter(Boolean).join(' · ');
+   const device = output.position === '송출 대기'
+     ? output.device?.replace(/ · 송출 대기$/, '') : output.device;
+   detail.textContent=[device,output.position].filter(Boolean).join(' · ');
   }
 
  }catch(e){$('status').textContent=token?e.message:'예배 목록을 불러오지 못했어요. 연결을 확인하면 자동으로 다시 불러와요.';if(e.code==='expired'){adminToken=null;$('outputList').replaceChildren();delete $('outputList').dataset.signature;connectionForms();}}

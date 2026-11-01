@@ -22,7 +22,7 @@ def main():
                       state.presenter.outputConnectedAt=Date.now();
                       state.client={rpc:(name,args)=>({abortSignal:signal=>{
                         monitorCalls.push({name,args});
-                        if(name==='mindex_remote_outputs')return Promise.resolve({data:{ok:true,outputs:[{id:'s1',title:'주일예배 [3부]',device:'본당 PC',position:'93 / 224'}]}});
+                        if(name==='mindex_remote_outputs')return Promise.resolve({data:{ok:true,outputs:[{id:'s1',title:'주일예배 [3부]',device:'본당 PC',position:'93 / 224'},{id:'s2',title:'대기 예배',device:'교육관 PC · 송출 대기',position:'송출 대기'}]}});
                         if(name==='mindex_remote_admin_login')return Promise.resolve({data:{ok:true,token:'fixture-only'}});
                         if(name==='mindex_remote_admin')return Promise.resolve({data:{ok:true,outputs:[{id:'s1',title:'주일예배 [3부]',device:'본당 PC',position:'93 / 224',code:'0123'}]}});
                         if(monitorMode==='pending')return new Promise(resolve=>window.monitorRelease=resolve);
@@ -41,6 +41,7 @@ def main():
                     page.locator('[data-outputs]').get_by_text('주일예배 [3부]').wait_for()
                     assert '0123' not in page.locator('[data-outputs]').inner_text()
                     assert '93 / 224' in page.locator('[data-outputs]').inner_text()
+                    assert page.locator('[data-outputs]').inner_text().count('송출 대기') == 1
                     page.click('[data-show-codes]');page.fill('[data-pin]','1111');page.click('[data-check-pin]')
                     page.wait_for_function("document.querySelector('[data-outputs]').textContent.includes('송출 코드 0123')")
                     assert '93 / 224' in page.locator('[data-outputs]').inner_text()
