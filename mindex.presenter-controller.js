@@ -779,6 +779,7 @@ function renderPresenterControlStateUnscoped(serviceId) {
 }
 
 function patchPresenterBoardSections(root, nextRoot, serviceId, slides, active, index) {
+  arrangePresenterBoardMediaControls(nextRoot);
   const board = root.querySelector(".svc-slide-board");
   const nextBoard = nextRoot?.querySelector(".svc-slide-board");
   if (!board || !nextBoard) return false;
@@ -800,6 +801,7 @@ function patchPresenterBoardSections(root, nextRoot, serviceId, slides, active, 
       const template = document.createElement("template");
       template.innerHTML = renderPresenterBoardSection(group, activeIndex, serviceId).trim();
       const expanded = template.content.firstElementChild;
+      arrangePresenterBoardMediaControls(expanded);
       next.replaceWith(expanded);
       next = expanded;
     }
@@ -1958,6 +1960,7 @@ function presenterSlideIsTitleContent(slide) {
 
 function presenterFixedTitleText(item = {}) {
   if (isAnnouncementTextInputItem(item)) return "";
+  if (serviceItemIsFreePrayer(item, state.services.find(service => service.id === item.service_id))) return "자율기도";
   const memo = parseServiceItemMemo(item.memo);
   if (serviceMemoElementType(memo) === "title" && String(item.label || "").trim()) {
     if (!String(item.raw_title || item.title || "").trim()
@@ -1966,12 +1969,12 @@ function presenterFixedTitleText(item = {}) {
   }
   const label = compactSearchValue(item?.label || item?.raw_title || "");
   const sectionKey = String(item?._worshipSectionKey || item?.sectionKey || item?.section_key || "").trim();
+  if (sectionKey === "free_prayer" || label === "자율기도") return "자율기도";
   if (sectionKey === "confession" && label === "사죄의선언") return "사죄의 선언";
   if (sectionKey === "announcements" && ["교회소식", "광고"].includes(label)) return "교회소식";
   if (sectionKey === "announcements" && label === "새가족환영") return "새가족환영";
   if (sectionKey === "response_song" && label === "결단기도") return "결단기도";
   if (sectionKey === "prayer_meeting" || label === "기도회" || label === "통성기도") return "통성기도";
-  if (sectionKey === "free_prayer" || label === "자율기도") return "자율기도";
   if (sectionKey === "fellowship" && label === "반별모임") return "반별 모임";
   return "";
 }

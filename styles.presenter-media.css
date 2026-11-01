@@ -72,3 +72,15 @@
 
 /* Keep the remote code from making an extra bottom row below the service status. */
 .service-sidebar-remote-code { padding-block:0; line-height:17px; }
+/* Playback belongs beside its slides; editing/upload controls stay above. */
+.svc-board-media-layout { display:flex; flex-wrap:wrap; align-items:flex-start; gap:15px; min-width:0; }
+.svc-board-media-layout > .svc-board-media-rail { flex:0 1 200px; min-width:0; max-width:100%; display:flex; flex-direction:column; gap:10px; }
+.svc-board-media-layout > .svc-board-grid { flex:1 1 240px; min-width:0; margin:0; }
+.svc-board-media-rail > strong { font-size:var(--ui-meta-size); overflow-wrap:anywhere; }
+.svc-board-media-rail .svc-music-label { flex:1 0 100%; }
+.svc-board-media-rail .svc-music-player--inline > .svc-music-transport { flex:1 0 100%; }
+.svc-board-media-rail .svc-music-player--inline [data-service-music-action="stop"] { width:auto; flex:0 0 auto; padding-inline:10px; gap:5px; }
+.svc-board-media-rail .song-timing-seek { min-width:0; }
+.svc-board-media-rail .svc-deck-playback { flex-direction:column; align-items:flex-start; }
+#servicePresenterControls[data-focus-view="true"] .svc-board-media-layout { display:contents; }
+#servicePresenterControls[data-focus-view="true"] .svc-board-media-rail { display:none; }

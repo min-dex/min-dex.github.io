@@ -23966,10 +23966,13 @@ function adaptServiceItemsForPresenterView(service, items = [], options = {}) {
     normalizeSendingConclusionProjectionItems(
     normalizeServiceItemsForTemplateHierarchy(service, items, options),
     ));
-  return visibleServiceItemsForPresentation(annotated).map((item, index) => ({
-    ...item,
-    sort_order: index + 1,
-  }));
+  return visibleServiceItemsForPresentation(annotated).map((original, index) => {
+    const item = serviceItemIsFreePrayer(original, service) ? {
+      ...original, label: "자율기도", _worshipSectionKey: "free_prayer", _worshipSectionTitle: "자율기도",
+      ...(["", "기도", "기도회", "통성기도", "자율기도"].includes(compactSearchValue(original.raw_title || "")) ? { raw_title: "" } : {}),
+    } : original;
+    return { ...item, sort_order: index + 1 };
+  });
 }
 
 function visibleServiceItemsForPresentation(items = []) {
@@ -29932,7 +29935,7 @@ function renderServiceMusicPlayer(options = {}) {
         <button class="icon-btn svc-music-toggle" type="button" data-service-music-action="toggle" data-playback-state="${key}" aria-busy="${Boolean(pending)}" aria-pressed="${Boolean(playing)}" aria-label="${pending ? "음악 준비 중, 누르면 취소" : playing ? "일시정지" : "재생"}">
           <i data-lucide="${pending ? "loader-circle" : playing ? "pause" : "play"}"></i>${inline ? pending ? "준비 중" : playing ? "일시정지" : "재생" : ""}
         </button>
-        ${inline ? `<button type="button" class="icon-btn" data-service-music-action="stop" aria-label="음악 정지" ${active && (music.pending || music.playing || music.audio?.currentTime) ? "" : "disabled"}><i data-lucide="square"></i></button>` : ""}
+        ${inline ? `<button type="button" class="icon-btn" data-service-music-action="stop" aria-label="음원 정지" ${active && (music.pending || music.playing || music.audio?.currentTime) ? "" : "disabled"}><i data-lucide="square"></i><span>정지</span></button>` : ""}
         ${options.repeatAllowed !== false && music.repeatAllowed !== false ? `<button class="icon-btn svc-music-repeat" type="button" data-service-music-action="repeat" aria-label="음악 반복 재생" aria-pressed="${Boolean(music.repeat ?? context.playback?.loop)}"><i data-lucide="repeat"></i></button>` : ""}
         ${renderServiceMusicVolumeControl()}` : ""}
       </span>

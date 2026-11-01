@@ -2122,6 +2122,7 @@ function applyPresenterOutputViewportScale(root = document.getElementById("prese
 
 function applyPresenterPreviewScales(host = document) {
   if (!host?.querySelectorAll) return;
+  arrangePresenterBoardMediaControls(host);
   // Read every frame before writing styles, avoiding one forced layout per slide.
   const updates = [...host.querySelectorAll(".svc-slide-mini-canvas.presenter-output-root")].map((canvas) => {
     const frame = canvas.closest(".svc-slide-thumb-frame, .svc-presenter-live-preview") || canvas.parentElement;

@@ -573,6 +573,7 @@ function isPresenterEntrancePraiseSlide(slide = {}) {
 
 function presenterBoardSectionGroupId(slide = {}, slideIndex = 0) {
   const sectionKey = String(slide.sectionKey || "").trim();
+  if (sectionKey === "free_prayer") return `free-prayer:${presenterSlideElementGroupKey(slide) || slide.sectionId || slideIndex}`;
   if (sectionKey === "closing_visual" || sectionKey === "closing_hymn") return "section-key:closing_visual";
   return slide.sectionId || `section:${slideIndex}`;
 }
@@ -621,6 +622,7 @@ function serviceCanonicalSectionTitle(sectionKey = "") {
     pre_scripture_praise: "찬양",
     entrance_praise: "입례찬양",
     prayer_meeting_praise: "기도회",
+    free_prayer: "자율기도",
     offering: "봉헌",
     announcements: "광고",
     community_confession: "공동체고백",
@@ -1061,6 +1063,7 @@ function presenterBoardSubgroupDisplay(serviceId, subgroup = {}) {
   };
   const contexts = presenterBoardSubgroupInputContexts(serviceId, subgroup);
   const item = contexts.length === 1 ? contexts[0]?.item : null;
+  if (item && serviceItemIsFreePrayer(item, contexts[0].service)) return { label: "자율기도", title: "" };
   if (item && !serviceItemConnectedPraise(item)
       && !isMonthlyCorporatePrayerGroupItem(item, parseServiceItemMemo(item.memo))) {
     const parts = serviceItemSummaryDisplayParts(item, contexts[0].service);
@@ -1134,7 +1137,9 @@ function renderPresenterBoardItemAudioControls(serviceId, context = {}, options 
   const timingAudio = globalThis.MindexSongTiming?.audioFor(entries, context.item.id);
   const source = String(audioAsset.url || timingAudio?.url || "").trim();
   if (Boolean(source) !== Boolean(options.manager)) return "";
-  const label = audioAsset.url ? audioAsset.name || "연결된 음원" : timingAudio?.name || "연결된 음원";
+  const label = serviceItemIsFreePrayer(context.item, context.service)
+    ? serviceFreePrayerAudioLabel(context.service)
+    : audioAsset.url ? audioAsset.name || "연결된 음원" : timingAudio?.name || "연결된 음원";
   return `
     <div class="svc-board-subgroup-audio${source ? " has-audio svc-audio-manager" : ""}${childrenAudio ? " svc-children-audio" : ""}" aria-label="${escapeAttr(`${context.item.label || "찬양"} 음원 관리`)}">
       ${source ? `
@@ -1727,3 +1732,36 @@ function fitPresenterSupplementalText(host) {
     });
 }
 
+
+// One transport location for item media, regardless of its source or service.
+// Move existing nodes once: listeners, focus, media ownership and clocks survive.
+function arrangePresenterBoardMediaControls(host = document) {
+  const groups = new Set(host.querySelectorAll('.svc-board-subgroup'));
+  const owner = host.closest?.('.svc-board-subgroup');
+  if (owner) groups.add(owner);
+  for (const group of groups) {
+    const grid = group.querySelector(':scope > .svc-board-grid, :scope > .svc-board-media-layout > .svc-board-grid');
+    if (!grid) continue;
+    let layout = group.querySelector(':scope > .svc-board-media-layout');
+    let rail = layout?.querySelector(':scope > .svc-board-media-rail');
+    const controls = [...group.querySelectorAll('.svc-music-player--inline, .svc-input-media-controls, .svc-deck-playback')]
+      .filter(node => node.closest('.svc-board-subgroup') === group && !rail?.contains(node));
+    if (!controls.length) continue;
+    if (!layout) {
+      layout = document.createElement('div');
+      layout.className = 'svc-board-media-layout';
+      rail = document.createElement('div');
+      rail.className = 'svc-board-media-rail';
+      rail.setAttribute('role', 'group');
+      rail.setAttribute('aria-label', '미디어 재생 제어');
+      grid.before(layout);
+      layout.append(rail, grid);
+    }
+    for (const control of controls) {
+      const label = control.parentElement?.matches('.svc-audio-manager')
+        ? control.parentElement.querySelector(':scope > strong') : null;
+      if (label) rail.append(label);
+      rail.append(control);
+    }
+  }
+}
