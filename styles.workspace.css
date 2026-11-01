@@ -6366,3 +6366,5 @@ body[data-module="presenter"] .svc-presenter-toolbar::before {
   .svc-focus-tools { grid-template-columns:repeat(5,minmax(0,1fr)); }
   .svc-focus-tools [data-slide-tool="minus"] { grid-column:1; }
 }
+/* Keep the final tool's tooltip inside the panel at intermediate widths. */
+.svc-focus-tools > .svc-presenter-window-button:last-child > span { left:auto; right:0; transform:none; }
