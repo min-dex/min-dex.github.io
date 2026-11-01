@@ -655,3 +655,11 @@ function serviceTypeSortOrder(typeId) {
   }
   return Object.values(SERVICE_CATEGORIES).flat().indexOf(appTypeId) + 1;
 }
+
+
+function departmentFellowshipStep(meetingName = "반별 모임") {
+  return {
+    label: "교제", name: "교제", required: false, flex: true, sectionKey: "fellowship",
+    elements: [{ label: meetingName, name: meetingName, elementType: "title", default_text: meetingName }],
+  };
+}

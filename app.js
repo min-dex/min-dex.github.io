@@ -21591,8 +21591,7 @@ function childrenWorshipTemplate() {
     bodyOnly(publicWorshipLordsPrayerStep()),
     { label: "광고", name: "광고", required: true, flex: false,
       sectionKey: "announcements", elementType: "plain_text", default_text: "오늘도 어린이부 예배에 오신 여러분을 환영하고 축복합니다 :)" },
-    { label: "교제", name: "교제", required: false, flex: true,
-      sectionKey: "fellowship", elementType: "title" },
+    departmentFellowshipStep(),
   ];
 }
 
@@ -21627,14 +21626,7 @@ function youthWorshipTemplate({ revisedOrder = false } = {}) {
     publicWorshipResponseStep(),
     youthWorshipAnnouncementsStep(),
     publicWorshipLordsPrayerStep(),
-    {
-      label: "교제",
-      name: "교제",
-      required: false,
-      flex: true,
-      sectionKey: "fellowship",
-      elements: [{ label: "반별 모임", name: "반별 모임", elementType: "title", default_text: "반별 모임" }],
-    },
+    departmentFellowshipStep(),
   ];
   if (!revisedOrder) return steps;
   const prayer = steps.find(step => step.sectionKey === "lords_prayer");
@@ -21690,14 +21682,7 @@ function youngAdultWorshipTemplate() {
         defaultStrength: "default",
       }],
     }),
-    {
-      label: "교제",
-      name: "교제",
-      required: false,
-      flex: true,
-      sectionKey: "fellowship",
-      elements: [{ label: "셀 모임", name: "셀 모임", elementType: "title", default_text: "셀 모임" }],
-    },
+    departmentFellowshipStep("셀 모임"),
   ];
 }
 
