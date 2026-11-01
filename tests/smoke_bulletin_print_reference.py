@@ -18,12 +18,23 @@ try:
     const B=MindexBulletin;await B.readyAssets();await document.fonts.ready;
     const source=B.resolveSource({service:{id:'print-reference',service_type_id:'children',service_date:'2026-11-01'},sections:[],elements:[]});
     source.autoBackground={key:'26-C6.png',url:'assets/worship-backgrounds/26-C6.png'};
+    source.order=[
+     {id:'all',label:'기도',content:'',person:'다같이'},
+     {id:'teacher',label:'설교',content:'',person:'박소영 전도사님'},
+     {id:'child',label:'봉헌기도',content:'',person:'김하준 어린이'},
+    ];
     const fields={news:'① 첫 번째 안내입니다.\n② 두 번째 안내입니다.',monthlyTheme:'섬김\n가진 것을 먼저 나누어요\n예수님을 본받아 섬겨요',memoryVerse:'비교용 말씀을 그대로 보존합니다.',memoryReference:'누가복음 10:36–37',issue:'32',leader:'서영윤 선생님 / 박소영 전도사님'};
     const doc={source,fields,settings:{design:'children',theme:'auto'},frames:B.defaultFrames('children'),inherited:{common:{},months:{}}};
     const before=JSON.stringify(doc),cases=[];
     for(const mode of ['preview','print']){
      const rendered=B.renderPages(doc,mode);if(rendered.issues.size)throw Error('default overflow: '+[...rendered.issues]);
      const [front,inside]=rendered.pages;
+     const order=inside.querySelector('[data-frame-id=order]'),orderFrame=doc.frames.find(f=>f.id==='order');
+     const edge=orderFrame.x+orderFrame.w;
+     for(const text of ['이','박소영 전도사님','김하준 어린이']){
+      const node=[...order.querySelectorAll('text')].find(n=>n.textContent===text);
+      if(!node||node.getAttribute('text-anchor')!=='end'||Math.abs(Number(node.getAttribute('x'))-edge)>.001)throw Error('assignee right edge differs: '+text);
+     }
      if(front.querySelectorAll('[data-children-corner]').length!==4||inside.querySelectorAll('[data-children-corner]').length!==2)throw Error('missing corner symbols');
      for(const id of ['website','issue','address','meeting'])if(front.querySelector('[data-frame-id='+id+'] text').getAttribute('fill')!=='#231f20')throw Error('low contrast margin '+id);
      const welcome=front.querySelector('[data-frame-id=welcome]'),lines=[...welcome.querySelectorAll('text')];

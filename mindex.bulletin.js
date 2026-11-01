@@ -1008,7 +1008,7 @@
             });
             writeStyled(group,songRuns,{...base,x:f.x+30,w:inner,align:"center",weight:700},frameIssues,f.id);
             const personLetters=Array.from(row.person.replace(/\s/g,""));
-            if(!/\s/.test(row.person)&&personLetters.length>1&&personLetters.length<=6)personLetters.forEach((letter,j)=>writeText(group,letter,{...base,y:centered,x:f.x+f.w-30+j*25/(personLetters.length-1),w:5},frameIssues,f.id));
+            if(!/\s/.test(row.person)&&personLetters.length>1&&personLetters.length<=6)personLetters.forEach((letter,j)=>writeText(group,letter,{...base,y:centered,x:f.x+f.w-30+j*25/(personLetters.length-1),w:5,align:"right"},frameIssues,f.id));
             else writeText(group,row.person,{...base,y:centered,x:f.x+f.w-30,w:30,align:"right"},frameIssues,f.id);
             y+=height+(i<list.length-1?gap:0);
           });
