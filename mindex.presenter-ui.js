@@ -490,7 +490,7 @@ function syncPresenterFocusView() {
   const frame = (slide, title) => `<div class="svc-focus-preview"><strong>${escapeHtml(title)}</strong><div class="svc-slide-thumb-frame">${slide ? renderPresenterSlideMiniPreview(slide, serviceId) : '<span>다음 슬라이드 없음</span>'}</div></div>`;
   const toolsKey = current && !(outputOpen && state.presenter.safetyBlank)
     ? presenterTools.key(serviceId, index, current, outputOpen && state.presenter.liveScripture?.active) : '';
-  const markup = `<div class="svc-focus-screens">${frame(current, label)}${frame(next, '다음 화면')}</div>${toolsKey ? presenterTools.toolbar : ''}${renderPresenterScreenManagement(serviceId, slides)}
+  const markup = `<div class="svc-focus-screens">${frame(current, label)}${frame(next, '다음 화면')}</div><div class="svc-focus-control-row">${renderPresenterScreenManagement(serviceId, slides)}${toolsKey ? presenterTools.toolbar : ''}</div>
     <div class="svc-focus-transport"><div class="svc-focus-navigation" role="group" aria-label="슬라이드 이동"><span class="svc-focus-count">${slides.length ? index + 1 : 0} <span>/ ${slides.length}</span></span>
       <button type="button" class="btn secondary" data-presenter-action="prev" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}><i data-lucide="chevron-left"></i><span>이전</span></button>
       <button type="button" class="btn secondary" data-presenter-action="next" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}><i data-lucide="chevron-right"></i><span>다음</span></button></div>

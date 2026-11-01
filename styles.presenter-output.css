@@ -1782,9 +1782,6 @@ span.presenter-announcement-paren,
 .svc-focus-preview [data-ink-mode] { touch-action: none; user-select: none; cursor: crosshair; }
 .svc-focus-preview [data-ink-mode="pan"] { cursor: grab; }
 .svc-focus-preview [data-ink-mode="pan"]:active { cursor: grabbing; }
-.svc-focus-tools { display:flex; align-items:center; flex-wrap:wrap; gap:5px; }
-.svc-focus-tools button[aria-pressed="true"] { background:var(--accent); color:var(--bg); }
-.svc-focus-tools output { font-variant-numeric:tabular-nums; min-width:4ch; text-align:center; }
 
 .presenter-lyric-song-name, .presenter-lyric-song-steps {
   position: absolute;

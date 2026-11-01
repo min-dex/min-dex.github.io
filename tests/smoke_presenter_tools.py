@@ -31,6 +31,17 @@ try:
             field = operator.locator('[data-presenter-citation-reference-input]')
             assert field.is_visible()
             field.fill('요 3:16')
+            for width in (1440, 390):
+                operator.set_viewport_size({'width':width, 'height':850})
+                layout = operator.locator('.svc-focus-control-row').evaluate('''row => {
+                    const [screens, tools] = [...row.children].map(e => e.getBoundingClientRect());
+                    const buttons = [...row.querySelectorAll('[data-slide-tool]')];
+                    return {beside: tools.left >= screens.right && tools.top === screens.top,
+                            stacked: tools.top >= screens.bottom, fits: row.scrollWidth <= row.clientWidth + 1,
+                            icons: buttons.length === 8 && buttons.every(b => b.querySelector('svg') && b.getAttribute('aria-label') && b.offsetHeight === 35)};
+                }''')
+                assert layout['fits'] and layout['icons'] and layout['beside' if width==1440 else 'stacked'], layout
+            operator.set_viewport_size({'width':1100, 'height':850})
             tool = lambda name: operator.locator(f'[data-slide-tool="{name}"]')
             stage = operator.locator('.svc-focus-preview .svc-slide-thumb-frame').first
             def drag():

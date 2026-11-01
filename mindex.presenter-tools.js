@@ -1,8 +1,9 @@
 // Session-only presenter marks. Coordinates are fractions of the unzoomed slide.
 const presenterTools = (() => {
   const modes = {highlight:'형광펜', underline:'밑줄', spot:'스포트라이트', pan:'이동'};
-  const button = (id, label) => `<button type="button" class="btn secondary" data-slide-tool="${id}"${modes[id] ? ' aria-pressed="false"' : ''}>${label}</button>`;
-  const toolbar = `<div class="svc-focus-tools" role="group" aria-label="발표 도구">${Object.entries(modes).map(([id,label]) => button(id,label)).join('')}${button('minus','축소')}<output aria-label="화면 배율">100%</output>${button('plus','확대')}${button('undo','한 획 취소')}${button('reset','초기화')}</div>`;
+  const icons = {highlight:'highlighter', underline:'underline', spot:'flashlight', pan:'hand', minus:'zoom-out', plus:'zoom-in', undo:'undo-2', reset:'rotate-ccw'};
+  const button = (id, label) => `<button type="button" class="icon-btn svc-presenter-window-button" aria-label="${label}" data-slide-tool="${id}"${modes[id] ? ' aria-pressed="false"' : ''}><i data-lucide="${icons[id]}" aria-hidden="true"></i><span>${label}</span></button>`;
+  const toolbar = `<section class="svc-screen-management" aria-label="발표 도구"><h3>발표 도구</h3><div class="svc-focus-tools">${Object.entries(modes).map(([id,label]) => button(id,label)).join('')}${button('minus','축소')}<output aria-label="화면 배율">100%</output>${button('plus','확대')}${button('undo','한 획 취소')}${button('reset','초기화')}</div></section>`;
   const key = (service, index, slide, live) => JSON.stringify([service,index,!!live,slide.id,slide.elementId,slide.type,slide.title,slide.text]);
   const empty = () => ({zoom:1,x:0,y:0,lines:[],spot:null});
   const clamp = (n,a,b) => Math.min(b,Math.max(a,n));
