@@ -5672,6 +5672,14 @@ body[data-module="praise"] .praise-forms-panel .version-compare-column {
   }
   #servicePresenterControls .svc-board-subgroup-control-item,
   #servicePresenterControls .svc-board-subgroup-flow { gap: 5px; }
+  /* Validation changes color, never the text inset or border geometry. */
+  #servicePresenterControls .svc-board-subgroup-controls :is(
+    input:not([type]), input[type="text"], input[type="url"], input[type="number"], select, textarea
+  ) {
+    border-width: 1px;
+    border-style: solid;
+    padding-inline: 5px;
+  }
   #servicePresenterControls .svc-board-subgroup-controls :is(
     input:not([type]), input[type="text"], input[type="url"], input[type="number"], select, textarea
   ):not(.is-invalid):not([aria-invalid="true"]) {

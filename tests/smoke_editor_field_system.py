@@ -32,6 +32,22 @@ refreshIcons();resizeFormTextareas();
     for width in [1300,700]:
      page.set_viewport_size({'width':width,'height':1500})
      page.evaluate('resizeFormTextareas()')
+     page.evaluate("""()=>{
+const host=document.createElement('section');host.id='servicePresenterControls';host.className='audit-panel';
+host.innerHTML='<div class="svc-board-subgroup-controls"><input type="text" value="입력 중인 제목"><textarea>입력 중인 광고 내용</textarea></div>';document.getElementById('audit').append(host);
+for(const field of host.querySelectorAll('input,textarea')){
+ field.focus();field.setSelectionRange(2,4);
+ const start=()=>{const s=getComputedStyle(field),r=field.getBoundingClientRect();return r.left+parseFloat(s.borderLeftWidth)+parseFloat(s.paddingLeft)};
+ const before=start(),value=field.value,color=getComputedStyle(field).color;
+ field.classList.add('is-invalid');field.setAttribute('aria-invalid','true');
+ if(Math.abs(start()-before)>.01)throw Error('warning moves text '+field.tagName+' '+before+' => '+start());
+ if(field.value!==value||field.selectionStart!==2||field.selectionEnd!==4||document.activeElement!==field)throw Error('warning changed input state');
+ if(getComputedStyle(field).color===color)throw Error('warning color lost');
+ field.classList.remove('is-invalid');field.removeAttribute('aria-invalid');
+ if(Math.abs(start()-before)>.01)throw Error('cleared warning moves text');
+}
+host.remove();
+}""")
      page.screenshot(path=f'/tmp/mindex-fields-{engine}-{theme}-{width}.png',full_page=True)
      print(engine,theme,width,page.evaluate('''()=>{
 const visible=[...document.querySelectorAll('input,textarea,select')].filter(e=>e.getBoundingClientRect().width);
