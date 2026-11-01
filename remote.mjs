@@ -139,6 +139,7 @@ function state(value){
  view=value;$('controller').hidden=!value;
  if(!value){currentPreview('','');nextPreview('','');$('nextPreview').open=false;$('nextTitle').textContent='마지막 슬라이드';return paint();}
  $('pairForm').hidden=true;$('position').textContent=value.outputState==='standby'?'송출 대기':value.outputState==='starting'?'송출 준비 중':`${value.index+1} / ${value.total}`;
+ $('phonePosition').textContent=$('position').textContent;
  currentPreview(value.previewCurrent,value.transparent?'투명':value.blank?'암전 중':value.current||'내용 없음');nextPreview(value.previewNext,value.next||'마지막 슬라이드');
  $('nextTitle').textContent=value.nextTitle||String(value.next||'마지막 슬라이드').split('\n')[0].slice(0,200);
  $('music').textContent=value.music;
@@ -239,6 +240,10 @@ function renderSlides(data){
   b.type='button';b.dataset.index=item.index;mini.className='slide-preview';label.textContent=`${item.index+1}. ${item.title}`;
   b.append(mini,label);list.append(b);if(item.preview){slidePreviews.push(createListPreview(mini,`${item.index+1}번 슬라이드`,item.preview,item.text));}
   else{mini.classList.add('slide-text-preview');const excerpt=document.createElement('span');excerpt.textContent=item.text||item.title;mini.append(excerpt);}
+  if(item.matchLine){
+   const line=document.createElement('small');
+   line.className='match-line';line.textContent=item.matchLine;b.append(line);
+  }
   b.onclick=async()=>{
    if(!session?.usable||jumpPending||data.key!==view?.catalogKey)return;
    feedbackAction='';jumpPending=true;$('slidesStatus').textContent='이동 중…';paint();

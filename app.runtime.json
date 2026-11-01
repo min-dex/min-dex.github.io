@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261101-dawn-music-bulletin",
+  "version": "20261101-worship-urgent-fixes",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "bcd4c24ad01c7b64f3b2e3c5ddb688ca9fd0d293e55f0780afd7f27c2a1f917c",
-  "runtime_sha256": "1e0e77b833da874270e544d7b0c7c5d25e6b0b2aff8d011af69c57ac2dab4233",
-  "source_bytes": 1356031,
-  "runtime_bytes": 967605,
-  "source_gzip": 310409,
-  "runtime_gzip": 243318
+  "source_sha256": "48ce73120642e38dbe1296049484b4f07372e31154b7c12a913e7fcf9d4940ae",
+  "runtime_sha256": "cf638373b67a78d022b5c76f1736b35d658ffd549ed23e35e45fb41224ab6b47",
+  "source_bytes": 1356325,
+  "runtime_bytes": 967830,
+  "source_gzip": 310494,
+  "runtime_gzip": 243416
 }

@@ -15355,6 +15355,7 @@ const WORSHIP_BACKGROUND_STATIC_FILES = new Set([
   "26-S4.png",
   "26-S5.png",
   "26-S6.png",
+  "26-감사특새.png",
 ]);
 function presenterServiceUsesChromakey(service) {
   if (serviceUsesAllGenerationsChromakeyOutput(service)) return true;

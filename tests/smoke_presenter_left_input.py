@@ -124,6 +124,26 @@ try:
       orderField.focus();renderPresenterControlState(state.selectedServiceId);
       if(JSON.stringify(state.presenter)!==before||state.serviceMusic.audio!==musicBefore.audio||musicBefore.audio.currentTime!==musicBefore.time)throw Error('browse refresh changed other service output/media');
     }""")
+    page.set_viewport_size({'width':1440,'height':900})
+    page.evaluate("""()=>{
+      const sid=state.selectedServiceId;
+      canUseClientData=()=>false;songCatalogLoaded=true;
+      preparePresenterService(sid);
+      state.presenter.index=2;
+      window.onAirDeck=state.presenter.slides;
+      const build=buildServicePresenterSlides;
+      buildServicePresenterSlides=(...args)=>[
+        {...onAirDeck[0],id:'inserted-before-live',elementId:'inserted-before-live'},...build(...args)
+      ];
+      state.presenter.sourceSignature='before-insertion';
+    }""")
+    row=page.locator('#songList .service-outline-row--section[data-service-outline-item-index="3"]')
+    row.click()
+    assert page.evaluate('state.presenter.index===2 && state.presenter.slides===onAirDeck && state.selectedServiceItemIndex===3')
+    target=page.evaluate('state.presenterBoardSelection.indexes[0]')
+    assert isinstance(target,int) and target!=2
+    row.dblclick()
+    assert page.evaluate('state.presenter.index')==target
     print(engine,'PASS left single editor, IME/selection/draft, themes/widths, sticky tools and output/audio preservation',flush=True)
     page.unroute_all(behavior='wait')
    finally:browser.close()

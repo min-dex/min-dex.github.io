@@ -84,7 +84,7 @@ const PRESENTER_BACKGROUND_LUMINANCE = Object.freeze({
   "26-B3": 0.307186,
   "26-B4": 0.005927,
   "26-B5": 0.052116,
-  "26-B6": 0.018370,
+  "26-B6": 0.017046,
   "26-C1": 0.273571,
   "26-C2": 0.290693,
   "26-C3": 0.710122,
@@ -93,6 +93,7 @@ const PRESENTER_BACKGROUND_LUMINANCE = Object.freeze({
   "26-S4": 0.836764,
   "26-S5": 0.727394,
   "26-S6": 0.606454,
+  "26-감사특새": 0.022246,
   "scripture-reading-cross": 0.009832,
 });
 // END GENERATED BACKGROUND LUMINANCE

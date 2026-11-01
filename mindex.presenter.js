@@ -3394,7 +3394,7 @@ function presenterKnownBackgroundLuminance(source) {
   try {
     const url = new URL(source, window.location.href);
     if (url.origin !== window.location.origin) return null;
-    const name = url.pathname.match(/\/assets\/worship-backgrounds\/(?:previews\/)?([^/]+)\.(?:png|webp)$/i)?.[1];
+    const name = decodeURIComponent(url.pathname.match(/\/assets\/worship-backgrounds\/(?:previews\/)?([^/]+)\.(?:png|webp)$/i)?.[1] || "");
     return Object.hasOwn(PRESENTER_BACKGROUND_LUMINANCE, name) ? PRESENTER_BACKGROUND_LUMINANCE[name] : null;
   } catch { return null; }
 }
