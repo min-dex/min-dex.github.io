@@ -2346,23 +2346,18 @@ function initPresenterOutputCore() {
     sendControllerMessage(payload);
   };
 
-  const renderStoredState = () => {
+  const renderStoredState = (freshOnly = false) => {
+    let stored;
     try {
-      const stored = readPresenterStoredPayload();
-      applyPayload(stored);
+      stored = readPresenterStoredPayload();
     } catch {
-      applyPayload(null);
+      return;
     }
-  };
-  const renderFreshStoredState = () => {
-    try {
-      const stored = readPresenterStoredPayload();
-      if (!stored?.updatedAt || Date.now() - Number(stored.updatedAt) > 5000) return false;
-      applyPayload(stored);
-      return true;
-    } catch {
-      return false;
-    }
+    // A missing recovery snapshot is not a new frame. Keep the live payload
+    // and its receipt together until the controller supplies the next state.
+    if (!stored || !Array.isArray(stored.slides)) return;
+    if (freshOnly && (!stored.updatedAt || Date.now() - Number(stored.updatedAt) > 5000)) return;
+    applyPayload(stored);
   };
   const videoCommandReceipts = new Map();
   let lastVideoRetryId = "";
@@ -2426,7 +2421,7 @@ function initPresenterOutputCore() {
     }
   }
   if (channel) {
-    renderFreshStoredState();
+    renderStoredState(true);
     channel.onmessage = (event) => {
       if (["presenter-tools", "presenter-video-retry", "presenter-video-command"].includes(event.data?.type)) {
         handleOutputSignalMessage(event.data);
