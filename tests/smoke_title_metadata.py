@@ -40,7 +40,7 @@ try:
       if(!noChromakey && content.detailKind==='hymn'){
        const prefix=(detail.startsWith('통일')?'통 ':'')+detail.match(/\d+/)[0];
        const keyed=host.querySelector('.presenter-title-assignee-content,.presenter-section-song-title-name') || host.querySelector('.presenter-slide-text');
-       check(keyed.textContent.trim()===prefix+' '+title,'keyed title '+keyed.textContent);
+       check(keyed.textContent.trim()===PRESENTER_SONG_NOTE+' '+prefix+' '+title,'keyed title '+keyed.textContent);check(keyed.querySelectorAll('.presenter-song-note').length===1,'hymn note missing or duplicated');
       }
       const text=host.querySelector('.presenter-title-content-title,.presenter-title-assignee-content,.presenter-slide-text');
       results.push({sectionKey,noChromakey,detail:!!node,font:getComputedStyle(text).fontSize,weight:getComputedStyle(text).fontWeight});host.remove();

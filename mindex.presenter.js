@@ -4677,7 +4677,7 @@ function renderPresenterSongText(text, slide) {
     const edition = slide.songTitleContent.detail.match(/^(?:(새찬송가|통일찬송가)\s*)?(\d+)장$/);
     if (edition) {
       const prefix = edition[1] === "통일찬송가" ? `통 ${edition[2]}` : edition[2];
-      return renderPresenterHighlightedText(`${prefix} ${match ? match[4] : raw}`, slide);
+      return `<span class="presenter-song-note" aria-hidden="true">${escapeHtml(PRESENTER_SONG_NOTE)}</span> ${renderPresenterHighlightedText(`${prefix} ${match ? match[4] : raw}`, slide)}`;
     }
   }
   if (!match) return renderPresenterHighlightedText(raw, slide);
