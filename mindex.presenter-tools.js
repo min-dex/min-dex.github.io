@@ -3,7 +3,7 @@ const presenterTools = (() => {
   const modes = {highlight:'형광펜', underline:'밑줄', spot:'스포트라이트', pan:'이동'};
   const icons = {highlight:'highlighter', underline:'underline', spot:'flashlight', pan:'hand', minus:'zoom-out', plus:'zoom-in', undo:'undo-2', reset:'rotate-ccw'};
   const button = (id, label) => `<button type="button" class="icon-btn svc-presenter-window-button" aria-label="${label}" data-slide-tool="${id}"${modes[id] ? ' aria-pressed="false"' : ''}><i data-lucide="${icons[id]}" aria-hidden="true"></i><span>${label}</span></button>`;
-  const toolbar = `<section class="svc-screen-management" aria-label="발표 도구"><h3>발표 도구</h3><div class="svc-focus-tools">${Object.entries(modes).map(([id,label]) => button(id,label)).join('')}${button('minus','축소')}<output aria-label="화면 배율">100%</output>${button('plus','확대')}${button('undo','한 획 취소')}${button('reset','초기화')}</div></section>`;
+  const toolbar = `<section class="svc-screen-management" aria-label="발표 도구"><h3>발표 도구</h3><div class="svc-focus-tools">${Object.entries(modes).map(([id,label]) => button(id,label)).join('')}${button('minus','축소')}<output aria-label="화면 배율" title="현재 화면에서 Ctrl 또는 ⌘ + 휠로 확대·축소">100%</output>${button('plus','확대')}${button('undo','한 획 취소')}${button('reset','초기화')}</div></section>`;
   const key = (service, index, slide, live) => JSON.stringify([service,index,!!live,slide.id,slide.elementId,slide.type,slide.title,slide.text]);
   const empty = () => ({zoom:1,x:0,y:0,lines:[],spot:null});
   const clamp = (n,a,b) => Math.min(b,Math.max(a,n));
@@ -66,16 +66,36 @@ const presenterTools = (() => {
     if (!frame) return;
     cancelAnimationFrame(tick);tick=0;watcher?.disconnect();
     send(empty()); paint(frame,frame.querySelector('.svc-slide-mini-output'),empty());
+    frame.removeEventListener('wheel', wheelZoom);
     delete frame.dataset.inkMode;frame=null;scope='';session='';gesture=null;mode='';view=empty();
+  }
+  function setZoom(requested, anchor) {
+    const [slideX, slideY] = slidePoint(anchor);
+    view.zoom = clamp(requested, 1, 3);
+    const limit = (view.zoom - 1) / 2;
+    view.x = clamp(anchor[0] - .5 - (slideX - .5) * view.zoom, -limit, limit);
+    view.y = clamp(anchor[1] - .5 - (slideY - .5) * view.zoom, -limit, limit);
+    if (!mode || mode === 'pan') mode = view.zoom > 1 ? 'pan' : '';
+  }
+  function wheelZoom(event) {
+    if (event.currentTarget !== frame || (!event.ctrlKey && !event.metaKey) || !event.deltaY || !event.cancelable) return;
+    event.preventDefault();
+    if (gesture) return;
+    const anchor = point(event);
+    const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? frame.clientHeight : 1;
+    // Normalize wheel notches and fine trackpad deltas to the same zoom curve.
+    setZoom(view.zoom * Math.pow(1.25, -event.deltaY * unit / 100), anchor);
+    if (mode === 'spot') view.spot = anchor;
+    controls();
+    schedule();
   }
   function action(id) {
     if (modes[id]) {mode=mode===id?'':id;view.spot=null;}
     else if (id==='reset') {mode='';view=empty();}
     else if (id==='undo') view.lines.pop();
     else {
-      view.zoom=clamp(view.zoom+(id==='plus'?.5:-.5),1,3);
-      const limit=(view.zoom-1)/2;view.x=clamp(view.x,-limit,limit);view.y=clamp(view.y,-limit,limit);
-      mode=view.zoom>1?'pan':'';view.spot=null;
+      setZoom(view.zoom + (id === 'plus' ? .5 : -.5), [.5, .5]);
+      if (mode !== 'spot') mode = view.zoom > 1 ? 'pan' : '';
     }
     gesture=null;controls();schedule();
   }
@@ -100,6 +120,7 @@ const presenterTools = (() => {
     schedule();
   }
   function bind(node) {
+    node.addEventListener('wheel', wheelZoom, {passive:false});
     node.onpointerdown=e=>{
       if (!mode || !e.isPrimary || e.button!==0) return;
       e.preventDefault();node.setPointerCapture(e.pointerId);

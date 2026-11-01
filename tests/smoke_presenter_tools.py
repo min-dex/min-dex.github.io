@@ -63,6 +63,37 @@ try:
             output.wait_for_function("document.querySelectorAll('.presenter-tool-overlay line').length===1")
             tool('spot').click();stage.hover()
             output.locator('.presenter-tool-overlay path').wait_for()
+            def wheel(target, delta, modifier=None):
+                return target.evaluate("""(node, [dy, key]) => {
+                  const box=node.getBoundingClientRect();
+                  const event=new WheelEvent('wheel', {deltaY:dy, [key]:true, bubbles:true, cancelable:true,
+                    clientX:box.left+box.width*.75, clientY:box.top+box.height*.25});
+                  node.dispatchEvent(event); return event.defaultPrevented;
+                }""", [delta,modifier or 'unused'])
+            assert not wheel(stage,-100)
+            assert not wheel(operator.locator('.svc-focus-preview .svc-slide-thumb-frame').nth(1),-100,'ctrlKey')
+            assert wheel(stage,-100,'ctrlKey')
+            output.wait_for_function("document.querySelector('#presenterOutputRoot').style.scale==='1.25'")
+            root=output.locator('#presenterOutputRoot')
+            def spot_bounds():
+                return output.locator('.presenter-tool-overlay path').evaluate("""path=>{
+                    const circle=path.cloneNode();circle.setAttribute('d',circle.getAttribute('d').split('z ')[1]);
+                    path.after(circle);const {x,y,width,height}=circle.getBBox();circle.remove();
+                    return [x,y,width,height];
+                }""")
+            def check_spot():
+                x, y, width, height = spot_bounds()
+                assert abs(x-1088)<4 and abs(y-113)<4 and (width,height)==(224,224)
+            check_spot()
+            translation=root.evaluate("e=>e.style.translate.split(' ').map(parseFloat)")
+            assert all(abs(a-b)<.5 for a,b in zip(translation,[-6.25,6.25])), translation
+            assert wheel(stage,-10000,'metaKey')
+            output.wait_for_function("document.querySelector('#presenterOutputRoot').style.scale==='3'")
+            check_spot()
+            assert wheel(stage,10000,'metaKey')
+            output.wait_for_function("!document.querySelector('#presenterOutputRoot').style.scale")
+            check_spot()
+            assert tool('spot').get_attribute('aria-pressed')=='true'
             tool('reset').click()
             output.locator('.presenter-tool-overlay').wait_for(state='detached')
             tool('highlight').click();drag()
