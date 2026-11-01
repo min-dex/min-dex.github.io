@@ -177,7 +177,11 @@ function presenterCanonicalLiturgicalBodyText(title = "", service = {}) {
 
 function liturgicalBodyTextHighlights(item = {}, memo = parseServiceItemMemo(item?.memo), service = {}) {
   const explicit = normalizeServiceTextHighlights(memo?.textHighlights || memo?.text_highlights || memo?.highlights);
-  if (explicit.length) return explicit;
+  if (explicit.length) {
+    const communityName = presenterCommunityConfessionCommunityName(service);
+    return liturgicalBodyTitle(item) === "공동체고백" && communityName !== "검단우리교회 공동체" && !explicit.some(highlight => highlight.text === communityName) && liturgicalBodyText(item, memo, "", service).includes(communityName)
+      ? explicit.map(highlight => highlight.text === "검단우리교회 공동체" ? { ...highlight, text: communityName } : highlight) : explicit;
+  }
   if (liturgicalBodyTitle(item) !== "공동체고백") return [];
   return [
     { text: "하나님의 거룩한 백성", bold: true },
@@ -3009,7 +3013,7 @@ function presenterOutputFrameKey(payload = {}, slide = null, frameState = {}) {
     slide.layout || "",
     slide.elementType || "",
     slide.outputContext || slide.output_context || "",
-    frameState.noChromakey ? "clean" : "chromakey",
+    frameState.noChromakey ? JSON.stringify(slide.songPosition || "clean") : "chromakey",
     frameState.blankOutput ? "blank" : "",
     frameState.backgroundImage || "",
     frameState.backgroundVideo || "",
@@ -4197,6 +4201,7 @@ function renderPresenterSlideFrame(slide, options = {}) {
       ${renderPresenterSlideMeta(slide)}
       ${options.previewStage && presenterSlideBackgroundVideoSource(slide, options.noChromakey) ? `<video class="presenter-output-background-video" src="${escapeAttr(presenterSlideBackgroundVideoSource(slide, options.noChromakey))}" muted playsinline preload="metadata" aria-hidden="true"></video>` : ""}
       ${body}
+      ${options.noChromakey && !transitionLogo ? renderPresenterSongPosition(slide) : ""}
     </section>
   `;
 }

@@ -2343,7 +2343,7 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   if (serviceItemRequiresSongSelection(item, service) && (!song || serviceItemSongSelectionInvalid(item, service, song))) return [];
 
   const customSlides = buildPresenterCustomSlides(item, section, index);
-  if (customSlides.length) return withIntroAndSpecialTitle(customSlides);
+  if (customSlides.length) return withIntroAndSpecialTitle(presenterSongPositionSlides(customSlides, presenterPraiseTitle(song, displayText, version)));
 
   const scoreOutput = !specialSongItem && outputMode === "score";
   if (scoreOutput && !linkedSongId && !song && !templateOwnedScoreSong) {
@@ -2366,7 +2366,7 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
       item, section, index, song, version, displayText, label, forms, formWarnings,
     });
     const syncConfig = presenterSyncedLyricsConfigFromAsset(configuredAsset);
-    const slides = presenterSlidesWithSpecialSongTitle(item, section, lyricsSlides, index, service);
+    const slides = presenterSlidesWithSpecialSongTitle(item, section, presenterSongPositionSlides(lyricsSlides, presenterPraiseTitle(song, displayText, version)), index, service);
     const syncedSlides = presenterApplySyncedLyricsConfig(slides, syncConfig, item, index);
     return withIntro(globalThis.MindexSongTiming?.decorate(syncedSlides, item, song, version) || syncedSlides);
   }

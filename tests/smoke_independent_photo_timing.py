@@ -179,7 +179,11 @@ try:
     page.evaluate('''t=>{const slides=state.presenter.slides,index=slides.findIndex(s=>s.syncTimeline?.page===1),target=presenterSyncedLyricsTargetForTime(slides,index,t);renderPresenterOutput({slides,index:target.index,serviceId:state.presenter.serviceId,chromakey:false})}''',time)
     page.wait_for_function('''n=>{const root=document.querySelector('#presenterOutputRoot');return !root.hasAttribute('aria-busy')&&root.querySelector('.presenter-output-background img')?.src.endsWith('/photo-'+n+'.png')}''',arg=number)
     active=page.locator('#presenterOutputRoot .is-active').first
-    assert active.inner_text().strip()==lyric,active.inner_text()
+    if lyric:
+     assert active.locator('.presenter-slide-text').inner_text().strip()==lyric
+     assert active.locator('.presenter-lyric-song-name').inner_text()=='♬ 테스트 곡'
+    else:
+     assert active.inner_text().strip()==''
    page.evaluate('''()=>renderPresenterOutput({slides:state.presenter.slides,index:state.presenter.index,safetyBlank:true,chromakey:false})''')
    page.wait_for_function("document.querySelector('#presenterOutputRoot').classList.contains('is-blackout')")
 

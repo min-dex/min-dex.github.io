@@ -27,6 +27,15 @@ try:
     check(JSON.stringify({native,nativeItem})===nativeBefore,'native read must preserve record and worship input');
     const authored={...nativeItem,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formHint:'C-V1-C'})};
     check(input(authored).value==='C-V1-C','authored native form remains authoritative');
+    const repeated=buildPresenterSlidesForServiceItem({...authored,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',formPreset:{forms:['C','V1','C','C'],strength:'manual'}})},service,0).filter(s=>s.type==='lyrics');
+    check(repeated.length===4,'repeated lyric sequence');
+    repeated.forEach((s,i)=>{
+      const host=document.createElement('div');host.innerHTML=renderPresenterSlideFrame(s,{noChromakey:true});
+      check(host.querySelector('.presenter-lyric-song-name')?.textContent==='♬ '+native.title,'lyric heading');
+      const nodes=[...host.querySelectorAll('.presenter-lyric-song-steps span')];
+      check(nodes.map(n=>n.textContent).join('-')==='C-V1-C-C' && nodes[i].getAttribute('aria-current')==='step' && nodes.filter(n=>n.hasAttribute('aria-current')).length===1,'lyric occurrence '+i);
+      check(!renderPresenterSlideFrame(s,{noChromakey:false}).includes('presenter-lyric-song-steps'),'chromakey label');
+    });
     const noMatch={...native,versions:[{...version,id:'other'}]};
     check(serviceItemLinkedVersion(nativeItem,noMatch)===null,'never borrow another record content');
     state.songs=[song];

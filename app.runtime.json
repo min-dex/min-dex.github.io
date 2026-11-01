@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261101-monitor-standby",
+  "version": "20261101-fullscreen-song-position",
   "options": {
     "compress": false,
     "mangle": {

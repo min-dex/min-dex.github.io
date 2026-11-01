@@ -184,6 +184,7 @@ function presenterLyricsSlidesForServiceItem({
       title: presenterPraiseTitle(song, displayText),
       subtitle: versionDisplayName(song, version),
       marker: chunkIndex === 0 ? presenterFormMarker(form) : "",
+      songStepLabel: presenterResolvedFormMarker(form) || "L",
       formKey,
       segment: "",
       text: chunk,
@@ -489,7 +490,7 @@ function syncPresenterFocusView() {
   const frame = (slide, title) => `<div class="svc-focus-preview"><strong>${escapeHtml(title)}</strong><div class="svc-slide-thumb-frame">${slide ? renderPresenterSlideMiniPreview(slide, serviceId) : '<span>다음 슬라이드 없음</span>'}</div></div>`;
   const toolsKey = current && !(outputOpen && state.presenter.safetyBlank)
     ? presenterTools.key(serviceId, index, current, outputOpen && state.presenter.liveScripture?.active) : '';
-  const markup = `<div class="svc-focus-screens">${frame(current, label)}${frame(next, '다음 화면')}</div>${toolsKey ? presenterTools.toolbar : ''}${renderPresenterScreenManagement(serviceId, slides)}
+  const markup = `<div class="svc-focus-screens">${frame(current, label)}${frame(next, '다음 화면')}</div><div class="svc-focus-control-row">${renderPresenterScreenManagement(serviceId, slides)}${toolsKey ? presenterTools.toolbar : ''}</div>
     <div class="svc-focus-transport"><div class="svc-focus-navigation" role="group" aria-label="슬라이드 이동"><span class="svc-focus-count">${slides.length ? index + 1 : 0} <span>/ ${slides.length}</span></span>
       <button type="button" class="btn secondary" data-presenter-action="prev" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}><i data-lucide="chevron-left"></i><span>이전</span></button>
       <button type="button" class="btn secondary" data-presenter-action="next" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}><i data-lucide="chevron-right"></i><span>다음</span></button></div>
@@ -655,4 +656,27 @@ function setPresenterDetailContent(markup, serviceId) {
     refreshIcons(template.content);
     patchPresenterControlTree(current, template.content.firstElementChild);
   } else refs.detailPane.innerHTML = markup;
+}
+
+function presenterSongPositionSlides(slides, title) {
+  const steps = new Map();
+  for (const slide of slides) {
+    if (!slide.formKey || steps.has(slide.formKey) || !["lyrics", "blank"].includes(slide.type)) continue;
+    const label = canonicalServiceFormToken(slide.songStepLabel || slide.formLabel || slide.marker);
+    if (label) steps.set(slide.formKey, { index: steps.size, label });
+  }
+  const labels = [...steps.values()].map(step => step.label);
+  return slides.map(slide => slide.type === "lyrics" && slide.elementType === PRESENTER_ELEMENT_TYPES.PRAISE
+    ? { ...slide, songPosition: { title, labels, index: steps.get(slide.formKey)?.index ?? -1 } }
+    : slide);
+}
+
+function renderPresenterSongPosition(slide) {
+  const position = slide.songPosition;
+  if (slide.type !== "lyrics" || !position) return "";
+  const heading = position.title ? `<div class="presenter-lyric-song-name">♬ ${escapeHtml(position.title)}</div>` : "";
+  if (position.index < 0) return heading;
+  const steps = position.labels.map((label, i) =>
+    `<span${i === position.index ? ' aria-current="step"' : ""}>${escapeHtml(label)}</span>`);
+  return heading + `<div class="presenter-lyric-song-steps" aria-label="송폼">${steps.join('<i aria-hidden="true">·</i>')}</div>`;
 }
