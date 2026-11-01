@@ -294,8 +294,14 @@ function arrangePresenterBoardMediaControls(host = document) {
       if (label) rail.append(label);
       const editor = control.closest('.svc-reference-media-input');
       if (editor) {
+        const origin = editor.parentElement;
         rail.append(editor);
         editor.append(control);
+        if (!origin.children.length && !origin.textContent.trim()) {
+          origin.hidden = true;
+          const wrapper = origin.parentElement;
+          if (wrapper?.matches('.svc-board-subgroup-controls') && [...wrapper.children].every(node => node.hidden)) wrapper.hidden = true;
+        }
       } else rail.append(control);
     }
   }

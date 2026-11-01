@@ -90,3 +90,4 @@
 .svc-board-media-rail > .svc-reference-media-input > .svc-presenter-input-field.svc-reference-media-title { flex:0 0 auto; width:100%; }
 .svc-board-media-rail .svc-reference-media-toolbar:empty { display:none; }
 .svc-board-media-rail .svc-input-media-controls { flex:0 0 auto; padding:0; }
+.svc-board-subgroup-controls[hidden], .svc-board-subgroup-control-item[hidden] { display:none; }
