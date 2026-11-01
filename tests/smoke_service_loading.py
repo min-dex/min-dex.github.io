@@ -13,13 +13,13 @@ def main():
                     page.goto(url+'?mindexSmokeRaw=1',wait_until='domcontentloaded')
                     page.wait_for_function("typeof renderServiceViewLoadingIfNeeded==='function'")
                     page.evaluate("""()=>{
-                      window.loadTest={reads:0,queue:[],songs:[]};
+                      window.loadTest={reads:0,queue:[],songs:[],scriptures:[]};
                       state.client={};canUseClientData=()=>true;shouldDeferPastWorshipServiceLoad=()=>false;
                       loadFullServiceSourceRefInBackground=()=>{};
                       warmWorshipScriptureReferencesForService=()=>Promise.resolve(false);
                       warmServiceItemScriptureReferencesForService=()=>Promise.resolve(false);
                       preloadPresenterServiceAssetsBeforeOutput=()=>false;
-                      preloadPresenterServiceScripturesBeforeOutput=()=>Promise.resolve(false);
+                      preloadPresenterServiceScripturesBeforeOutput=()=>new Promise(resolve=>loadTest.scriptures.push(resolve));
                       presenterServiceNeedsHymnScoreManifest=()=>false;
                       state.module='presenter';state.serviceError='';state.connectionError='';state.loading=false;
                       state.serviceTypes=[{id:'sunday-main',name:'주일예배 [3부]'}];
@@ -40,7 +40,7 @@ def main():
                             page.set_viewport_size({'width':width,'height':height})
                             geometry=page.locator('.service-view-loading').evaluate("""el=>{
                               const pane=el.parentElement.getBoundingClientRect(),box=el.getBoundingClientRect();
-                              const children=[...el.children].map(x=>{const r=x.getBoundingClientRect();return {top:r.top+(r.height-x.offsetHeight)/2,bottom:r.bottom-(r.height-x.offsetHeight)/2,height:x.offsetHeight}}).filter(x=>x.height);
+                              const children=[...el.children].map(x=>{const r=x.getBoundingClientRect();return {top:r.top+(r.height-(x.offsetHeight??r.height))/2,bottom:r.bottom-(r.height-(x.offsetHeight??r.height))/2,height:x.offsetHeight??r.height}}).filter(x=>x.height);
                               const top=Math.min(...children.map(x=>x.top)),bottom=Math.max(...children.map(x=>x.bottom));
                               return {height:Math.abs(box.height-pane.height),center:Math.abs((top+bottom-pane.top-pane.bottom)/2),overflow:el.scrollWidth>el.clientWidth+1};
                             }""")
@@ -58,7 +58,12 @@ def main():
                     page.evaluate('loadTest.songs.shift()()')
                     page.wait_for_function('loadTest.songs.length===1')
                     page.evaluate('loadTest.songs.shift()()')
+                    page.wait_for_function('loadTest.scriptures.length===1')
+                    assert page.locator('[data-service-view-loading="a"] .mindex-boot-wordmark').is_visible()
+                    assert not page.locator('#servicePresenterControls').count()
+                    page.evaluate('loadTest.scriptures.shift()(true)')
                     page.wait_for_selector('#servicePresenterControls')
+                    assert page.get_by_text('예배 화면 준비 완료', exact=True).is_visible()
                     assert not page.locator('[data-service-view-loading]').count()
                     assert page.locator('.service-outline-badge').count()>0, 'real missing input not shown after readiness'
                     assert page.evaluate('loadTest.reads')==1

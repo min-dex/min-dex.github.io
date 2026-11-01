@@ -83,7 +83,7 @@ try:
                 }""")
             def check_spot():
                 x, y, width, height = spot_bounds()
-                assert abs(x-1088)<4 and abs(y-113)<4 and (width,height)==(224,224)
+                assert abs(x-1080)<4 and abs(y-105)<4 and abs(width-240)<.01 and abs(height-240)<.01, (engine,x,y,width,height)
             check_spot()
             translation=root.evaluate("e=>e.style.translate.split(' ').map(parseFloat)")
             assert all(abs(a-b)<.5 for a,b in zip(translation,[-6.25,6.25])), translation
