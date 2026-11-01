@@ -184,6 +184,7 @@ function presenterLyricsSlidesForServiceItem({
       title: presenterPraiseTitle(song, displayText),
       subtitle: versionDisplayName(song, version),
       marker: chunkIndex === 0 ? presenterFormMarker(form) : "",
+      songStepLabel: presenterResolvedFormMarker(form) || "L",
       formKey,
       segment: "",
       text: chunk,
@@ -655,4 +656,27 @@ function setPresenterDetailContent(markup, serviceId) {
     refreshIcons(template.content);
     patchPresenterControlTree(current, template.content.firstElementChild);
   } else refs.detailPane.innerHTML = markup;
+}
+
+function presenterSongPositionSlides(slides, title) {
+  const steps = new Map();
+  for (const slide of slides) {
+    if (!slide.formKey || steps.has(slide.formKey) || !["lyrics", "blank"].includes(slide.type)) continue;
+    const label = canonicalServiceFormToken(slide.songStepLabel || slide.formLabel || slide.marker);
+    if (label) steps.set(slide.formKey, { index: steps.size, label });
+  }
+  const labels = [...steps.values()].map(step => step.label);
+  return slides.map(slide => slide.type === "lyrics" && slide.elementType === PRESENTER_ELEMENT_TYPES.PRAISE
+    ? { ...slide, songPosition: { title, labels, index: steps.get(slide.formKey)?.index ?? -1 } }
+    : slide);
+}
+
+function renderPresenterSongPosition(slide) {
+  const position = slide.songPosition;
+  if (slide.type !== "lyrics" || !position) return "";
+  const heading = position.title ? `<div class="presenter-lyric-song-name">♬ ${escapeHtml(position.title)}</div>` : "";
+  if (position.index < 0) return heading;
+  const steps = position.labels.map((label, i) =>
+    `<span${i === position.index ? ' aria-current="step"' : ""}>${escapeHtml(label)}</span>`);
+  return heading + `<div class="presenter-lyric-song-steps" aria-label="송폼">${steps.join('<i aria-hidden="true">·</i>')}</div>`;
 }

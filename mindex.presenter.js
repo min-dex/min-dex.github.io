@@ -3009,7 +3009,7 @@ function presenterOutputFrameKey(payload = {}, slide = null, frameState = {}) {
     slide.layout || "",
     slide.elementType || "",
     slide.outputContext || slide.output_context || "",
-    frameState.noChromakey ? "clean" : "chromakey",
+    frameState.noChromakey ? JSON.stringify(slide.songPosition || "clean") : "chromakey",
     frameState.blankOutput ? "blank" : "",
     frameState.backgroundImage || "",
     frameState.backgroundVideo || "",
@@ -4197,6 +4197,7 @@ function renderPresenterSlideFrame(slide, options = {}) {
       ${renderPresenterSlideMeta(slide)}
       ${options.previewStage && presenterSlideBackgroundVideoSource(slide, options.noChromakey) ? `<video class="presenter-output-background-video" src="${escapeAttr(presenterSlideBackgroundVideoSource(slide, options.noChromakey))}" muted playsinline preload="metadata" aria-hidden="true"></video>` : ""}
       ${body}
+      ${options.noChromakey && !transitionLogo ? renderPresenterSongPosition(slide) : ""}
     </section>
   `;
 }
