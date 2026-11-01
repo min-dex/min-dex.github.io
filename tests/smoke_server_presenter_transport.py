@@ -32,6 +32,11 @@ try:
     with page.expect_popup() as popup:page.click('#transportOpen')
     output=popup.value;output.wait_for_selector('#presenterOutputRoot')
     output.wait_for_function("document.body.textContent.includes('Fixture text 1')")
+    # A delayed navigation can arrive after the referenced snapshot was replaced.
+    page.evaluate("""()=>state.presenter.outputWindow.postMessage({type:'presenter-navigation',
+      payload:{snapshotId:'unavailable-snapshot',index:0}},location.origin)""")
+    output.evaluate("""()=>new Promise(resolve=>setTimeout(resolve,100))""")
+    assert 'Fixture text 1' in output.locator('.presenter-output-layer.is-active').inner_text()
     output.keyboard.press('ArrowRight')
     page.wait_for_function('state.presenter.index===2')
     output.wait_for_function("document.body.textContent.includes('Fixture text 2')")

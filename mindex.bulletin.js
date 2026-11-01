@@ -11,9 +11,9 @@
   const inkLogoPath="assets/bulletin/ria-mark-ink.svg";
   const childrenLogoPath="assets/bulletin/children-mark-2026-11.png";
   const assets = [logoPath,inkLogoPath];
-  const fields = {brand:"공동체 이름",eventsText:"교회 일정 (주보용)",issue:"호수", church:"교회명", news:"부서 소식", welcome:"환영 문구", notices:"상시 안내", staff:"섬김이 명단",
+  const fields = {coverTitle:"표지 제목",brand:"공동체 이름",eventsText:"교회 일정 (주보용)",issue:"호수", church:"교회명", news:"부서 소식", welcome:"환영 문구", notices:"상시 안내", staff:"섬김이 명단",
     motto:"공동체 표어", verse:"표어 성구", website:"웹사이트", address:"주소", meeting:"예배 시간·장소", outline:"설교 요점", leader:"인도자", announcer:"광고 담당", sermonReference:"요약 본문·쪽수", outlineTitle:"요약 표제",monthlyTheme:"이달의 주제",memoryVerse:"새길 말씀",memoryReference:"새길 말씀 출처",readingPlan:"잠잠성경 읽기표"};
-  const frameLabels={cross:"십자가",brand:"공동체 이름",eventsMonth:"일정 월",prayersMonth:"위원표 월",insideChurch:"안쪽 교회명",insideBrand:"안쪽 공동체명",eventsTitle:"교회 일정 제목",events:"교회 일정",newsTitle:"부서 소식 제목",monthlyThemeTitle:"이달의 주제 제목",themeMonth:"주제 월",memoryTitle:"새길 말씀 제목",readingTitle:"잠잠성경 제목",readingHelp:"읽기 안내",readingFooter:"확인 안내",liturgical:"교회력 명칭",
+  const frameLabels={forestLogo:"어린이부 로고",forestArt:"작은 숲 그림",coverTheme:"표지 주제",cross:"십자가",brand:"공동체 이름",eventsMonth:"일정 월",prayersMonth:"위원표 월",insideChurch:"안쪽 교회명",insideBrand:"안쪽 공동체명",eventsTitle:"교회 일정 제목",events:"교회 일정",newsTitle:"부서 소식 제목",monthlyThemeTitle:"이달의 주제 제목",themeMonth:"주제 월",memoryTitle:"새길 말씀 제목",readingTitle:"잠잠성경 제목",readingHelp:"읽기 안내",readingFooter:"확인 안내",liturgical:"교회력 명칭",
     orderTitle:"예배 순서 제목",order:"예배 순서",leader:"인도자",prayersTitle:"예배 위원 제목",prayers:"예배 위원",
     sermon:"설교 제목·본문",notesTitle:"설교 노트 제목",notes:"노트 줄"};
   const frameLabel=id=>fields[id]||frameLabels[id]||id;
@@ -439,6 +439,7 @@
   function defaultFrames(design) {
     if(design==="simple")return simpleFrames();
     if(design==="children")return childrenFrames();
+    if(design==="children-forest")return window.MindexBulletinForest.frames();
     if(design==="editorial")return editorialFrames();
     const frames=[];
     const text=(id,page,x,y,w,h,size,binding,align="left",weight=500)=>frames.push({id,page,x,y,w,h,size,binding,align,weight,type:"text"});
@@ -702,6 +703,10 @@
     await readyAssets();
     if(doc.settings?.design==="simple")return;
     if(doc.source?.department==="children")await new Promise((resolve,reject)=>{const image=new Image();image.onload=resolve;image.onerror=()=>reject(new Error("어린이부 로고를 불러오지 못했습니다."));image.src=new URL(childrenLogoPath,document.baseURI).href;});
+    if(doc.settings?.design==="children-forest"){
+      await new Promise((resolve,reject)=>{const image=new Image();image.onload=resolve;image.onerror=()=>reject(new Error("작은 숲 그림을 불러오지 못했습니다."));image.src=new URL(window.MindexBulletinForest.artwork,document.baseURI).href;});
+      return;
+    }
     const background=backgroundFor(doc);
     if(backgroundKey(doc.settings?.theme)==="auto"&&!background)throw new Error("날짜·부서에 맞는 배경이 없습니다. 민덱스 배경에 등록하거나 직접 선택해 주세요.");
     if(doc.settings?.theme&&!background&&!["paper","ink"].includes(doc.settings.theme))throw new Error("이 기기에 선택한 배경이 없습니다. 민덱스 배경 목록에 등록해 주세요.");
@@ -843,6 +848,7 @@
       if(Object.hasOwn(doc.inherited?.months||{},month))return doc.inherited.months[month];
     }
     if(Object.hasOwn(doc.fields,key))return doc.fields[key];
+    if(key==="coverTitle")return doc.source?.sermon||"";
     if(Object.hasOwn(doc.inherited?.common||{},key))return doc.inherited.common[key];
     if(Object.hasOwn(doc.source?.commonOverrides||{},key))return doc.source.commonOverrides[key];
     if(["news","welcome","notices","leader","announcer","outline","sermonReference","outlineTitle","monthlyTheme","memoryVerse","memoryReference","readingPlan","issue"].includes(key)&&doc.source?.[key])return doc.source[key];
@@ -905,6 +911,7 @@
     return result;
   }
   function renderPageContent(doc,mode,selected) {
+    if(doc.settings?.design==="children-forest")return window.MindexBulletinForest.render(doc,mode,selected,{svg,text:writeText,styled:writeStyled,value:fieldValue,bound:boundText,order:orderRowsForDisplay,person:personText,personRuns,wrap,MM,logo:childrenLogoPath,runs:value=>window.MindexInlineText.runs(String(value||"")).map(r=>({text:r.text,...(r.bold?{weight:700}:{})}))});
     if(["simple","editorial"].includes(doc.settings?.design))return renderEditorial(doc,mode,selected);
     const issues=new Set(); const pages=[];
     for(let page=0;page<2;page++) {
@@ -1046,7 +1053,7 @@
     if(typeof value.settings?.theme==="string")settings.theme=value.settings.theme;
     settings.compactOrder=value.settings?.compactOrder!==false;
     settings.archiveReference=value.settings?.archiveReference!==false;
-    if(["auto","ink","panels","editorial","simple","children"].includes(value.settings?.design))settings.design=value.settings.design;
+    if(["auto","ink","panels","editorial","simple","children","children-forest"].includes(value.settings?.design))settings.design=value.settings.design;
     for(const [key,min,max] of [["lineHeight",1.2,1.9],["itemGap",1,8],["orderPadding",1,5]])if(Number.isFinite(value.settings?.[key])&&value.settings[key]>=min&&value.settings[key]<=max)settings[key]=value.settings[key];
     if(value.settings?.templateKey===TEMPLATE_KEY){settings.templateKey=TEMPLATE_KEY;settings.templateRevision=Number(value.settings.templateRevision)||0;}
     if([1,2].includes(value.settings?.outlineColumns))settings.outlineColumns=value.settings.outlineColumns;
@@ -1379,7 +1386,7 @@
           p.innerHTML=`<section class="bulletin-property-section"><h3>2027 청년부 공통 문구</h3><p class="bulletin-help">새 주보에 사용할 문구입니다.</p>${profileKeys.map(field).join("")}</section>`;
           fitInputs();return;
         }
-        p.innerHTML=`${!child&&options.loadTemplate?`<div class="bulletin-connected"><strong>2027 청년부 공통 양식</strong><button type="button" data-bulletin-template-apply title="이번 주 내용은 유지하고 배치·공통 문구를 가져옵니다.">최신 공통 양식 가져오기</button></div>`:""}${!child&&doc.settings.design!=="simple"?'<button type="button" data-bulletin-use-simple title="내용은 유지하고 배치만 바꿉니다.">새 청년부 양식 적용</button>':""}${modern?`<div class="bulletin-connected"><span>예배에서 연결됨</span><strong>${escape(doc.source?.sermon||"설교 제목 미입력")}</strong><small>${escape(doc.source?.scripture||"본문 미입력")}</small></div>`:""}<section class="bulletin-property-section"><h3>이번 주 편집</h3>${doc.source?.hasArchiveReference?`<label><input type="checkbox" data-bulletin-setting="archiveReference" ${doc.settings.archiveReference!==false?"checked":""}> 발행 원본의 담당·요점·위원표 사용</label>`:""}${(child?["news","memoryVerse","memoryReference","readingPlan","leader","issue"]:modern?["news","outline"]:["news","outline","leader","issue"]).map(field).join("")}<details class="bulletin-property-section" data-bulletin-section="weekly" ${window.MindexDisclosure?.attrs(["bulletin",doc.id,"weekly"])||""}><summary>담당·발행 정보</summary>${(child?["announcer"]:modern?["leader","issue","announcer","sermonReference","outlineTitle"]:["announcer","sermonReference","outlineTitle"]).map(field).join("")}</details></section>
+        p.innerHTML=`${child?`<div class="bulletin-connected"><strong>${doc.settings.design==="children-forest"?"작은 숲 · A4 반접지":"어린이부 기존 양식"}</strong>${doc.settings.design!=="children-forest"?'<button type="button" data-bulletin-use-forest title="작성한 내용은 유지하고 배치만 바꿉니다.">작은 숲 양식 적용</button>':'<small>표지 · 소식 · 예배 순서 · 말씀과 읽기표</small>'}</div>`:""}${!child&&options.loadTemplate?`<div class="bulletin-connected"><strong>2027 청년부 공통 양식</strong><button type="button" data-bulletin-template-apply title="이번 주 내용은 유지하고 배치·공통 문구를 가져옵니다.">최신 공통 양식 가져오기</button></div>`:""}${!child&&doc.settings.design!=="simple"?'<button type="button" data-bulletin-use-simple title="내용은 유지하고 배치만 바꿉니다.">새 청년부 양식 적용</button>':""}${modern?`<div class="bulletin-connected"><span>예배에서 연결됨</span><strong>${escape(doc.source?.sermon||"설교 제목 미입력")}</strong><small>${escape(doc.source?.scripture||"본문 미입력")}</small></div>`:""}<section class="bulletin-property-section"><h3>이번 주 편집</h3>${doc.source?.hasArchiveReference?`<label><input type="checkbox" data-bulletin-setting="archiveReference" ${doc.settings.archiveReference!==false?"checked":""}> 발행 원본의 담당·요점·위원표 사용</label>`:""}${(child?[...(doc.settings.design==="children-forest"?["coverTitle"]:[]),"news","memoryVerse","memoryReference","readingPlan","leader","issue"]:modern?["news","outline"]:["news","outline","leader","issue"]).map(field).join("")}<details class="bulletin-property-section" data-bulletin-section="weekly" ${window.MindexDisclosure?.attrs(["bulletin",doc.id,"weekly"])||""}><summary>담당·발행 정보</summary>${(child?["announcer"]:modern?["leader","issue","announcer","sermonReference","outlineTitle"]:["announcer","sermonReference","outlineTitle"]).map(field).join("")}</details></section>
           ${modern?`<details class="bulletin-property-section" data-bulletin-section="greetings" ${window.MindexDisclosure?.attrs(["bulletin",doc.id,"greetings"])||""}><summary>환영 문구 · 정기 안내</summary><p class="bulletin-help">${doc.settings.templateKey?"이번 주에만 적용됩니다.":"새 주보에도 이어지는 문구입니다."}</p>${field("welcome")}${field("notices")}</details>`:""}
           <details class="bulletin-property-section" data-bulletin-section="monthly" ${window.MindexDisclosure?.attrs(["bulletin",doc.id,"monthly"])||""}><summary>이번 달 · ${child?"일정과 주제":"일정과 위원"}</summary><p class="bulletin-help">일정 변경은 같은 달의 새 주보에도 적용됩니다.</p>${child?field("monthlyTheme"):""}${field("eventsText")}<button type="button" data-bulletin-calendar-events>교회력 일정 불러오기</button><div class="bulletin-number-grid">
           <label>교회 일정<input type="month" data-bulletin-setting="eventsMonth" value="${escape(doc.settings.eventsMonth||doc.source?.eventsMonth||"")}"></label>
@@ -1388,12 +1395,16 @@
 
       } else {
         const f=doc.frames.find(f=>f.id===selected)||doc.frames[0];selected=f.id;
-        p.innerHTML=`${templateSession?'<h3>2027 청년부 공통 양식</h3><p class="bulletin-help">새 주보에 사용할 양식입니다.</p><button type="button" data-bulletin-template-reload>공통 저장본 다시 불러오기</button>':""}${doc.settings.design==="simple"?`<div class="bulletin-number-grid">${[["lineHeight","줄간격",1.55,1.2,1.9,.05],["itemGap","광고 항목 간격 (mm)",3.5,1,8,.5],["orderPadding","예배 행 여백 (mm)",3,1,5,.5]].map(([k,label,fallback,min,max,step])=>`<label>${label}<input type="number" data-bulletin-setting="${k}" value="${doc.settings[k]??fallback}" min="${min}" max="${max}" step="${step}"></label>`).join("")}</div>`:""}<button type="button" data-bulletin-reset-layout title="문구는 유지하고 기본 배치로 되돌립니다.">배치 초기화</button><label>배경<select data-bulletin-setting="theme"><option value="auto" ${backgroundKey(doc.settings.theme)==="auto"?"selected":""}>자동 · 날짜/부서</option><option value="" ${doc.settings.theme===""?"selected":""}>배경 없음</option>${(doc.backgrounds||[]).map(({key})=>`<option value="${escape(key)}" ${backgroundKey(doc.settings.theme)===key?"selected":""}>${escape(key)}</option>`).join("")}${doc.settings.theme&&doc.settings.theme!=="auto"&&!(doc.backgrounds||[]).some(b=>b.key===backgroundKey(doc.settings.theme))?`<option value="${escape(doc.settings.theme)}" selected>기존 초안: ${escape(backgroundKey(doc.settings.theme))}</option>`:""}</select></label><label><input type="checkbox" data-bulletin-setting="compactOrder" ${doc.settings.compactOrder?"checked":""}> 인쇄용 순서로 간추리기</label><label>지면<select data-bulletin-setting="design">${(doc.source?.department==="children"?[["children","어린이부 · 2026년"]]:[["simple","청년부 · 담백한 양식"],["editorial","2026년 10월"],["auto","기존 자동 양식"],["ink","연속 지면 · 검정 로고"],["panels","분리 지면 · 물결 로고"]]).map(([value,label])=>`<option value="${value}" ${(doc.settings.design||"auto")===value?"selected":""}>${label}</option>`).join("")}</select></label>${doc.source?.department==="children"?"":`<label>설교 요점 배치<select data-bulletin-setting="outlineColumns"><option value="1" ${(doc.settings.outlineColumns||doc.source?.outlineColumns||1)===1?"selected":""}>한 열</option><option value="2" ${(doc.settings.outlineColumns||doc.source?.outlineColumns)===2?"selected":""}>두 열</option></select></label>`}<label>편집 영역<select data-bulletin-frame>${doc.frames.map(f=>`<option value="${f.id}" ${f.id===selected?"selected":""}>${escape(frameLabel(f.id))} · ${f.page?"안쪽":"겉면"}</option>`).join("")}</select></label>
+        p.innerHTML=`${templateSession?'<h3>2027 청년부 공통 양식</h3><p class="bulletin-help">새 주보에 사용할 양식입니다.</p><button type="button" data-bulletin-template-reload>공통 저장본 다시 불러오기</button>':""}${doc.settings.design==="simple"?`<div class="bulletin-number-grid">${[["lineHeight","줄간격",1.55,1.2,1.9,.05],["itemGap","광고 항목 간격 (mm)",3.5,1,8,.5],["orderPadding","예배 행 여백 (mm)",3,1,5,.5]].map(([k,label,fallback,min,max,step])=>`<label>${label}<input type="number" data-bulletin-setting="${k}" value="${doc.settings[k]??fallback}" min="${min}" max="${max}" step="${step}"></label>`).join("")}</div>`:""}<button type="button" data-bulletin-reset-layout title="문구는 유지하고 기본 배치로 되돌립니다.">배치 초기화</button><label>배경<select data-bulletin-setting="theme"><option value="auto" ${backgroundKey(doc.settings.theme)==="auto"?"selected":""}>자동 · 날짜/부서</option><option value="" ${doc.settings.theme===""?"selected":""}>배경 없음</option>${(doc.backgrounds||[]).map(({key})=>`<option value="${escape(key)}" ${backgroundKey(doc.settings.theme)===key?"selected":""}>${escape(key)}</option>`).join("")}${doc.settings.theme&&doc.settings.theme!=="auto"&&!(doc.backgrounds||[]).some(b=>b.key===backgroundKey(doc.settings.theme))?`<option value="${escape(doc.settings.theme)}" selected>기존 초안: ${escape(backgroundKey(doc.settings.theme))}</option>`:""}</select></label><label><input type="checkbox" data-bulletin-setting="compactOrder" ${doc.settings.compactOrder?"checked":""}> 인쇄용 순서로 간추리기</label><label>지면<select data-bulletin-setting="design">${(doc.source?.department==="children"?[["children-forest","어린이부 · 작은 숲"],["children","어린이부 · 기존 양식"]]:[["simple","청년부 · 담백한 양식"],["editorial","2026년 10월"],["auto","기존 자동 양식"],["ink","연속 지면 · 검정 로고"],["panels","분리 지면 · 물결 로고"]]).map(([value,label])=>`<option value="${value}" ${(doc.settings.design||"auto")===value?"selected":""}>${label}</option>`).join("")}</select></label>${doc.source?.department==="children"?"":`<label>설교 요점 배치<select data-bulletin-setting="outlineColumns"><option value="1" ${(doc.settings.outlineColumns||doc.source?.outlineColumns||1)===1?"selected":""}>한 열</option><option value="2" ${(doc.settings.outlineColumns||doc.source?.outlineColumns)===2?"selected":""}>두 열</option></select></label>`}<label>편집 영역<select data-bulletin-frame>${doc.frames.map(f=>`<option value="${f.id}" ${f.id===selected?"selected":""}>${escape(frameLabel(f.id))} · ${f.page?"안쪽":"겉면"}</option>`).join("")}</select></label>
           <label><input type="checkbox" data-bulletin-hidden ${f.hidden?"":"checked"}> 출력에 표시</label><div class="bulletin-number-grid">`+
           [["x","가로 위치"],["y","세로 위치"],["w","너비"],["h","높이"]].map(([key,label])=>`<label>${label} (mm)<input type="number" step="2.5" data-bulletin-dimension="${key}" ${isFlowFrame(doc,f.id)&&["y","h"].includes(key)?'readonly title="내용에 따라 자동 계산"':""} value="${isFlowFrame(doc,f.id)?Number(simpleFlow(doc).frames.find(item=>item.id===f.id)[key].toFixed(2)):f[key]}"></label>`).join("")+`</div>
           <label>글자 크기 (pt)<select data-bulletin-dimension="size">${[...new Set([...TOKENS.fontSizes,f.size])].sort((a,b)=>a-b).map(n=>`<option ${f.size===n?"selected":""}>${n}</option>`).join("")}</select></label>
           <label>정렬<select data-bulletin-align>${[["left","왼쪽"],["center","가운데"],["right","오른쪽"]].map(([v,t])=>`<option value="${v}" ${f.align===v?"selected":""}>${t}</option>`).join("")}</select></label>
           <details class="bulletin-property-section" data-bulletin-section="layout-help" ${window.MindexDisclosure?.attrs(["bulletin",doc.id,"layout-help"])||""}><summary>편집 도움말</summary><p class="bulletin-help">드래그로 이동하고 모서리로 크기를 조절합니다. 방향키는 2.5mm씩 이동합니다.</p><p class="bulletin-help">광고·안내·일정·섬김이는 내용에 맞춰 자동 배치됩니다.</p><p class="bulletin-help">순서 간추리기는 준비·마침·교제·보조 성구와 고백 전문을 생략하고 같은 순서를 묶습니다.</p>${templateSession?'<p class="bulletin-help">광고·설교는 예시입니다. 11월부터 새 주보에 적용되며, 저장된 주보는 유지됩니다.</p>':""}</details>`;
+      }
+      if(mode==="layout"&&doc.settings.design==="children-forest"){
+        const background=p.querySelector('[data-bulletin-setting="theme"]')?.closest('label');if(background)background.hidden=true;
+        const help=document.createElement("p");help.className="bulletin-help";help.textContent="작은 숲 양식의 색상과 그림을 사용합니다.";p.append(help);
       }
       p.dataset.documentId=doc.id;
       p.dataset.sectionsReady=String(!!doc.source&&assetLoaded);
@@ -1432,7 +1443,7 @@
         }
         const source=await options.loadSource(id,target.settings);if(request!==serial||signal.aborted)return;
         target.source=applySourceSnapshot(source,target.sourceSnapshot);
-        if(source.department==="children"&&!target.settings.design&&!target.revision&&!target.hasLocal){target.settings.design="children";target.frames=defaultFrames("children");}
+        if(source.department==="children"&&!target.settings.design&&!target.revision&&!target.hasLocal){target.settings.design="children-forest";target.frames=defaultFrames("children-forest");}
         if(!target.settings.design&&source.date>="2026-10-01"&&!target.revision&&!target.hasLocal){target.settings.design="simple";target.frames=defaultFrames("simple");}
         if(source.department==="young-adult"&&options.loadTemplate&&!target.templateChecked){
           try{
@@ -1515,6 +1526,7 @@
           row=normalizeTemplate(row);remember();applyTemplate(doc,row);for(const key of profileKeys)delete doc.fields[key];persist();templateError="";
         }).catch(e=>{if(doc===target)saveError=e.message;}).finally(()=>{if(!signal.aborted){loading=false;properties();preview();status();}});return;
       }
+      if(b.hasAttribute("data-bulletin-use-forest")){remember();doc.settings.design="children-forest";doc.frames=defaultFrames("children-forest");assetLoaded=false;persist();properties();preview();void readyBackground(doc).then(()=>{assetLoaded=true;preview();}).catch(e=>{error=e.message;status();});return;}
       if(b.hasAttribute("data-bulletin-use-simple")){remember();doc.settings.design="simple";doc.frames=defaultFrames("simple");persist();properties();preview();void readyBackground(doc).then(()=>{assetLoaded=true;preview();});return;}
       if(b.hasAttribute("data-bulletin-reset-layout")){remember();doc.frames=defaultFrames(doc.settings.design);persist();properties();preview();return;}
       if(b.hasAttribute("data-bulletin-calendar-events")){

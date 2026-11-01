@@ -1,0 +1,149 @@
+// A4 half-fold children's forest layout. Only the presentation changes.
+(() => {
+  'use strict';
+  const palette=Object.freeze({paper:'#fffdf5',cover:'#f0f2df',ink:'#294b3b',accent:'#4c785b',soft:'#e9efdf',peach:'#f7eadb',line:'#cad8c6',muted:'#627262'});
+  const artwork='assets/bulletin/children-forest.svg';
+  function frames(){
+    const result=[];
+    const add=(id,page,x,y,w,h,size,binding,type='text',align='left',weight=500)=>result.push({id,page,x,y,w,h,size,binding,type,align,weight});
+    add('newsTitle',0,11,12.5,100,12.5,22.5,'label:우리의 주일','text','left',700);
+    add('welcome',0,11,30,126.5,15,11.5,'field:welcome');
+    add('news',0,11,50,126.5,42.5,12.5,'field:news','news');
+    add('eventsTitle',0,11,97.5,95,10,15,'label:함께 기억해요','text','left',700);
+    add('eventsMonth',0,111,97.5,26.5,10,10,'month:eventsMonth','text','right');
+    add('events',0,11,110,126.5,35,10,'field:eventsText','events');
+    add('staff',0,11,150,126.5,15,10,'field:staff');
+    add('notices',0,11,170,126.5,22.5,10,'field:notices','list');
+    add('address',0,11,196,126.5,5,7.5,'field:address');
+    add('website',0,11,202,126.5,5,7.5,'field:website');
+    add('forestLogo',0,159.5,12.5,37.5,22.5,10,'label:꿈꾸는 어린이부','logo');
+    add('church',0,204.5,15,81.5,10,10,'field:church','text','right',700);
+    add('liturgical',0,204.5,27.5,81.5,10,10,'source:liturgical','text','right');
+    add('issue',0,159.5,40,126.5,7.5,10,'issue','text','left',700);
+    add('coverTitle',0,159.5,52.5,126.5,40,35,'field:coverTitle','text','left',700);
+    add('coverTheme',0,159.5,97.5,126.5,22.5,12.5,'field:monthlyTheme');
+    add('forestArt',0,159.5,120,126.5,47.5,10,'label:작은 숲','art');
+    add('verse',0,159.5,177.5,126.5,15,10,'field:verse','text','center');
+    add('meeting',0,159.5,199,126.5,7.5,10,'field:meeting','text','left',700);
+    add('orderTitle',1,11,12.5,90,12.5,22.5,'label:예배 순서','text','left',700);
+    add('leader',1,11,27.5,126.5,12.5,10,'leader','text','right');
+    add('order',1,11,45,126.5,120,12.5,'source:order','order');
+    add('motto',1,11,175,126.5,20,12.5,'field:motto');
+    add('insideChurch',1,11,202,126.5,5,7.5,'field:church');
+    add('monthlyThemeTitle',1,165.5,16,110.5,7.5,10,'label:이달의 주제','text','left',700);
+    add('monthlyTheme',1,165.5,26,110.5,30,20,'field:monthlyTheme','text','left',700);
+    add('themeMonth',1,250,16,30,7.5,10,'month:curriculumMonth','text','right');
+    add('memoryTitle',1,159.5,67.5,60,10,17.5,'label:새길 말씀','text','left',700);
+    add('memoryReference',1,222,67.5,64,10,10,'field:memoryReference','text','right');
+    add('memoryVerse',1,159.5,82.5,126.5,35,12.5,'field:memoryVerse');
+    add('readingTitle',1,159.5,125,62.5,10,17.5,'label:잠잠성경','text','left',700);
+    add('readingHelp',1,224.5,125,61.5,10,10,'label:잠들기 전, 잠언 읽기!','text','right');
+    add('readingPlan',1,159.5,140,126.5,42.5,10,'field:readingPlan','reading');
+    add('readingFooter',1,159.5,187.5,126.5,10,10,'label:부모님께 확인받고, 선생님께 달란트 받자!');
+    add('insideBrand',1,159.5,202,126.5,5,7.5,'label:꿈꾸는 어린이부','text','right');
+    return result;
+  }
+  function paragraphs(value){
+    const items=[];
+    for(const line of String(value||'').split('\n').filter(line=>line.trim())){
+      const marker=line.match(/^\s*(?:[①-⑳❶-❿]|\d+[.)]|[-•])\s*/u);
+      if(marker||!items.length)items.push(marker?line.slice(marker[0].length):line);
+      else items[items.length-1]+='\n'+line;
+    }
+    return items;
+  }
+  function news(group,value,f,issues,a){
+    let y=f.y;
+    paragraphs(value).forEach((text,i)=>{
+      const body=a.svg('g'),runs=a.runs(text);
+      const used=a.styled(body,runs,{...f,x:f.x+12.5,y:y+3,w:f.w-17.5,h:f.y+f.h-y-6,color:palette.ink},issues,f.id);
+      const h=Math.max(17.5,used+7.5);
+      group.append(a.svg('rect',{x:f.x,y,width:f.w,height:h,rx:4,fill:i%2?palette.soft:palette.peach}));
+      a.text(group,String(i+1),{...f,x:f.x+2.5,y:y+3,w:7.5,h:10,size:15,weight:700,align:'center',color:palette.accent},issues,f.id);
+      group.append(body);y+=h+3.5;
+      if(y-3.5>f.y+f.h+.01)issues.add(f.id);
+    });
+  }
+  function events(group,value,f,issues,a){
+    let y=f.y;
+    for(const line of String(value||'').split('\n').filter(Boolean)){
+      const match=line.match(/^(.+?) \| (.+)$/)||line.match(/^(\d+월 \d+일)\s+(.+)$/);
+      const date=match?.[1]||'',body=match?.[2]||line,w=date?f.w-30:f.w;
+      const h=Math.max(8.5,Math.max(a.wrap(date,27.5,f.size).length,a.wrap(body,w,f.size).length)*12.5/a.MM+3);
+      if(date)a.text(group,date,{...f,y,w:27.5,h,weight:700,color:palette.accent},issues,f.id);
+      a.styled(group,a.runs(body),{...f,x:f.x+(date?30:0),y,w,h,color:palette.ink},issues,f.id);
+      y+=h;group.append(a.svg('line',{x1:f.x,y1:y,x2:f.x+f.w,y2:y,stroke:palette.line,'stroke-width':.25}));
+      if(y>f.y+f.h+.01)issues.add(f.id);
+    }
+  }
+  function order(group,doc,f,issues,a){
+    const rows=[];
+    for(const original of a.order(doc.source)){
+      const row={...original,person:a.person(original.label==='광고'?a.value(doc,'announcer'):original.person)};
+      const last=rows.at(-1);
+      if(doc.settings.compactOrder!==false&&last&&['찬양','찬송'].includes(row.label)&&last.label===row.label&&last.person===row.person){last.content=[last.content,row.content].filter(Boolean).join('\n');}
+      else rows.push(row);
+    }
+    const inner=f.w-60;
+    if(inner<10){issues.add(f.id);return;}
+    let y=f.y;
+    group.append(a.svg('line',{x1:f.x,y1:y,x2:f.x+f.w,y2:y,stroke:palette.accent,'stroke-width':.5}));
+    for(const row of rows){
+      const n=Math.max(a.wrap(row.label,25,f.size).length,a.wrap(row.content,inner,f.size,700).length,a.wrap(row.person,28,Math.max(7.5,f.size-2.5)).length);
+      const h=n*15/a.MM+4,base={...f,y:y+1.5,h:h-2,leading:15,color:palette.ink};
+      const center=base.y+(n-1)*15/a.MM/2;
+      a.text(group,row.label,{...base,y:center,w:25,size:Math.max(7.5,f.size-1)},issues,f.id);
+      a.text(group,row.content,{...base,x:f.x+27.5,w:inner,align:'center',weight:700},issues,f.id);
+      a.text(group,row.person,{...base,y:center,x:f.x+f.w-28,w:28,size:Math.max(7.5,f.size-2.5),align:'right'},issues,f.id);
+      y+=h;group.append(a.svg('line',{x1:f.x,y1:y,x2:f.x+f.w,y2:y,stroke:palette.line,'stroke-width':.25}));
+      if(y>f.y+f.h+.01)issues.add(f.id);
+    }
+  }
+  function reading(group,value,f,issues,a){
+    const lines=String(value||'').split('\n').filter(Boolean),cols=lines.length>8?3:2,rows=Math.ceil(lines.length/cols),w=(f.w-4*(cols-1))/cols,step=10;
+    lines.forEach((text,i)=>{
+      const col=i%cols,row=Math.floor(i/cols),x=f.x+col*(w+4),y=f.y+row*step;
+      group.append(a.svg('rect',{x,y,width:w,height:8.5,rx:2,fill:palette.paper,stroke:palette.line,'stroke-width':.3}));
+      group.append(a.svg('rect',{x:x+2.5,y:y+2.5,width:2.5,height:2.5,fill:'none',stroke:palette.accent,'stroke-width':.25}));
+      a.text(group,text,{...f,x:x+7.5,y:y+.5,w:w-10,h:8,leading:12.5,color:palette.ink},issues,f.id);
+    });
+    if(rows*step-1.5>f.h+.01)issues.add(f.id);
+  }
+  function render(doc,mode,selected,a){
+    const issues=new Set(),pages=[];
+    for(let page=0;page<2;page++){
+      const root=a.svg('svg',{viewBox:'0 0 297 210',class:'bulletin-sheet',role:'img','aria-label':page?'주보 안쪽':'주보 겉면','data-bulletin-design':'children-forest'});
+      root.append(a.svg('rect',{width:297,height:210,fill:palette.paper}));
+      if(!page)root.append(a.svg('rect',{x:148.5,width:148.5,height:210,fill:palette.cover}));
+      const month=doc.frames.find(f=>f.id==='monthlyTheme');
+      if(page&&month&&!month.hidden)root.append(a.svg('rect',{x:month.x-6,y:month.y-15,width:month.w+12,height:month.h+21,rx:7,fill:palette.soft}));
+      for(const f of doc.frames.filter(f=>f.page===page&&(!f.hidden||mode==='layout'))){
+        const group=a.svg('g',{'data-frame-id':f.id}),check=f.hidden?new Set():issues,box={...f,color:palette.ink},value=a.bound(doc,f);
+        if(f.type==='logo'||f.type==='art')group.append(a.svg('image',{href:new URL(f.type==='logo'?a.logo:artwork,document.baseURI).href,x:f.x,y:f.y,width:f.w,height:f.h,preserveAspectRatio:'xMinYMid meet'}));
+        else if(f.id==='coverTitle')a.text(group,String(value).replace(/^(\S{2,8})[ \t]+(\S{2,8})$/u,'$1\n$2'),{...box,leading:40},check,f.id);
+        else if(f.id==='coverTheme')a.text(group,value,{...box,size:12.5,leading:17.5,color:palette.accent},check,f.id);
+        else if(f.type==='news')news(group,value,box,check,a);
+        else if(f.type==='events')events(group,value,box,check,a);
+        else if(f.type==='order')order(group,doc,box,check,a);
+        else if(f.type==='reading')reading(group,value,box,check,a);
+        else if(f.id==='monthlyTheme'){
+          const lines=String(value).split('\n');
+          a.styled(group,lines.map((text,i)=>({text:(i?'\n':'')+text,size:i?12.5:f.size,weight:i?500:700})),{...box,leading:17.5},check,f.id);
+        }else if(f.id==='motto'||f.id==='notices'){
+          group.append(a.svg('rect',{x:f.x-1.5,y:f.y-1.5,width:f.w+3,height:f.h+3,rx:4,fill:f.id==='motto'?palette.peach:palette.soft}));
+          a.styled(group,a.runs(value),box,check,f.id);
+        }else if(f.binding==='leader'){const leader=a.value(doc,'leader');if(leader)a.styled(group,[{text:'인도 · ',size:f.size},...a.personRuns(leader,f.size)],box,check,f.id);}
+        else if(f.binding.startsWith('month:'))a.text(group,String(value).replace('\n',' '),box,check,f.id);
+        else a.styled(group,a.runs(value),box,check,f.id);
+        if(mode==='layout'){
+          group.append(a.svg('rect',{x:f.x,y:f.y,width:f.w,height:f.h,fill:'transparent',stroke:selected===f.id?palette.accent:palette.line,'stroke-width':.25,'data-frame-hit':f.id,class:'bulletin-frame-hit'}));
+          if(selected===f.id)group.append(a.svg('rect',{x:f.x+f.w-1.5,y:f.y+f.h-1.5,width:3,height:3,fill:palette.accent,'data-resize':f.id,class:'bulletin-resize'}));
+        }
+        root.append(group);
+      }
+      pages.push(root);
+    }
+    return {pages,issues};
+  }
+  window.MindexBulletinForest=Object.freeze({frames,render,artwork});
+})();
