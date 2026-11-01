@@ -19170,7 +19170,9 @@ function inspectScriptureReferences(value, translation = null) {
   const source = Array.isArray(value) ? value : [String(value || "")];
   const entries = [];
   let lastBook = "", lastChapter = null, lastHasVerse = false;
-  for (const raw of source.flatMap(text => String(text).normalize("NFKC").split(/[\n;；,，]/)).map(text => text.trim()).filter(Boolean)) {
+  for (const token of source.flatMap(text => [...String(text).normalize("NFKC").split(/([\n;；,，])/), ";"])) {
+    if (/^[\n;；,，]$/.test(token)) { if (!/^[,，]$/.test(token)) lastHasVerse = false; continue; }
+    const raw = token.trim(); if (!raw) continue;
     const candidates = [raw];
     if (lastBook) {
       if (lastChapter && lastHasVerse && /^\d{1,3}(?:\s*[-–—~]\s*\d{1,3})?$/.test(raw)) candidates.push(`${lastBook} ${lastChapter}:${raw}`);
@@ -27866,7 +27868,7 @@ function formatServiceScriptureReferenceList(value, options = {}) {
     const chapterLabel = bibleChapterDisplayLabel(reference.book,reference.chapter);
     const versePart = reference.verse
       ? `${chapterLabel}:${reference.verse}${reference.verseEnd ? `–${reference.verseEnd}` : ""}`
-      : `${chapterLabel}${/^\d+$/.test(chapterLabel) ? "장" : ""}`;
+      : chapterLabel;
     const sameBook = previous
       && previous.book?.code === reference.book?.code;
     const sameBookAndChapter = sameBook
