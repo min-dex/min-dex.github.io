@@ -292,7 +292,11 @@ function arrangePresenterBoardMediaControls(host = document) {
       const label = control.parentElement?.matches('.svc-audio-manager')
         ? control.parentElement.querySelector(':scope > strong') : null;
       if (label) rail.append(label);
-      rail.append(control);
+      const editor = control.closest('.svc-reference-media-input');
+      if (editor) {
+        rail.append(editor);
+        editor.append(control);
+      } else rail.append(control);
     }
   }
 }

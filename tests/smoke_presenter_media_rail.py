@@ -28,13 +28,23 @@ try:
     const asset={url:'https://example.invalid/video.mp4',name:'영상'},key={original:{format:'key',sha256:'a'.repeat(64)},keynoteHtml:{pages:20}};
     const controls=[slot,renderPresenterInputAudioControls('https://example.invalid/a.mp3','연결 음원',dawn.id,'audio'),renderPresenterInputVideoControls(asset,[dawn.id,'video']),renderPresenterKeynoteHtmlControls(key,dawn.id,'key')];
     host.innerHTML=controls.map((html,i)=>`<section class="svc-board-subgroup"><h3>${['자율기도','음원','영상','Keynote'][i]}</h3><div class="editor"><input style="box-sizing:border-box;width:100%;min-width:0" value="draft-${i}">${html}</div><div class="svc-board-grid"><div style="aspect-ratio:16/9;background:#111;color:white">슬라이드 ${i+1}</div></div></section>`).join('');
+    const videoEditor=host.children[2].querySelector('.editor');
+    const videoInput=videoEditor.querySelector('input');
+    videoEditor.classList.add('svc-reference-media-input');
+    const title=document.createElement('label');title.className='svc-presenter-input-field svc-reference-media-title';
+    videoInput.before(title);title.append(videoInput);
+    const emptyToolbar=document.createElement('div');emptyToolbar.className='svc-reference-media-toolbar';videoEditor.prepend(emptyToolbar);
     const originalMarkup=host.innerHTML;
-    const players=[...host.querySelectorAll('.svc-music-player--inline,.svc-input-media-controls,.svc-deck-playback')],inputs=[...host.querySelectorAll('.editor > input')],audio=state.serviceMusic.audio;
+    const players=[...host.querySelectorAll('.svc-music-player--inline,.svc-input-media-controls,.svc-deck-playback')],inputs=[...host.querySelectorAll('.editor > input,.editor > .svc-reference-media-title > input')],audio=state.serviceMusic.audio;
     const identity=JSON.stringify({source:state.serviceMusic.sourceKey,owner:state.serviceMusic.ownerServiceId,playing:state.serviceMusic.playing});
     for(const theme of ['light','dark'])for(const width of [1000,600,254]){
      document.body.dataset.theme=theme;host.style.width=width+'px';arrangePresenterBoardMediaControls(host);await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
      check(host.querySelectorAll('.svc-board-media-rail').length===4,'missing or duplicate rail');
      check(players.every(x=>x.isConnected&&x.closest('.svc-board-media-rail')),'transport not moved');
+     check(videoEditor.closest('.svc-board-media-rail')&&videoInput.isConnected,'video name separated from transport');
+     check(getComputedStyle(emptyToolbar).display==='none','empty toolbar reserved space');
+     check(videoInput.getBoundingClientRect().bottom<=players[2].getBoundingClientRect().top+1,'transport not below name');
+     check(players[2].getBoundingClientRect().top-videoInput.getBoundingClientRect().bottom<=15,'excessive gap below media name');
      for(const group of host.querySelectorAll('.svc-board-subgroup')){
       check(group.scrollWidth<=group.clientWidth+1,'overflow '+width+' '+group.querySelector('h3').textContent+' '+group.scrollWidth+'/'+group.clientWidth+' '+[...group.querySelectorAll('*')].filter(x=>x.getBoundingClientRect().right>group.getBoundingClientRect().right+1).map(x=>x.className).join(',')+' dimensions '+[...group.querySelectorAll('.editor,.editor>input,.svc-board-media-layout,.svc-board-media-rail,.svc-music-player,.svc-music-transport,.svc-volume-control,.song-timing-seek,.svc-board-grid')].map(x=>[x.className,x.clientWidth,x.scrollWidth,getComputedStyle(x).minWidth]).join(';'));
       const rail=group.querySelector('.svc-board-media-rail').getBoundingClientRect(),grid=group.querySelector('.svc-board-grid').getBoundingClientRect();
@@ -45,7 +55,7 @@ try:
     const next=document.createElement('div');next.innerHTML=originalMarkup;arrangePresenterBoardMediaControls(next);
     [...host.querySelectorAll('.svc-board-subgroup')].forEach((current,i)=>patchPresenterControlTree(current,next.children[i]));
     check(document.activeElement===focused&&players.every(x=>x.isConnected),'patch replaced transport/focus');
-    check(inputs.every((input,i)=>input.isConnected&&input.value==='draft-'+i),'editor replaced');
+    check(inputs.every((input,i)=>input.isConnected&&input.value==='draft-'+i),'editor replaced '+inputs.map((input,i)=>[i,input.isConnected,input.value]).join(';'));
     check(state.serviceMusic.audio===audio&&JSON.stringify({source:state.serviceMusic.sourceKey,owner:state.serviceMusic.ownerServiceId,playing:state.serviceMusic.playing})===identity,'player changed');
     check(players[0].querySelector('[data-service-music-action=stop]').textContent.includes('정지'),'unlabeled square');
     host.id='servicePresenterControls';host.dataset.focusView='true';check([...host.querySelectorAll('.svc-board-media-rail')].every(x=>getComputedStyle(x).display==='none'),'focus view exposed controls');delete host.dataset.focusView;host.id='rail-proof';

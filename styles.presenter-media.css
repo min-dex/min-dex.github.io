@@ -84,3 +84,9 @@
 .svc-board-media-rail .svc-deck-playback { flex-direction:column; align-items:flex-start; }
 #servicePresenterControls[data-focus-view="true"] .svc-board-media-layout { display:contents; }
 #servicePresenterControls[data-focus-view="true"] .svc-board-media-rail { display:none; }
+
+/* File names and their transport stay together beside the corresponding slides. */
+.svc-board-media-rail > .svc-reference-media-input { width:100%; flex-direction:column; align-items:stretch; gap:10px; }
+.svc-board-media-rail > .svc-reference-media-input > .svc-presenter-input-field.svc-reference-media-title { flex:0 0 auto; width:100%; }
+.svc-board-media-rail .svc-reference-media-toolbar:empty { display:none; }
+.svc-board-media-rail .svc-input-media-controls { flex:0 0 auto; padding:0; }
