@@ -5784,7 +5784,7 @@ body[data-module="praise"] .praise-forms-panel .version-compare-column {
 #servicePresenterControls[data-focus-view="true"] :is(
   .svc-board-section-head-row, .svc-board-subgroup-head-row,
   .svc-board-block-background, [data-service-music-player], .svc-output-action,
-  .svc-citation-composer
+  .svc-slide-board .svc-citation-composer
 ) { display: none; }
 #servicePresenterControls[data-focus-view="true"] .svc-slide-thumb-wrap {
   flex: 0 0 var(--svc-focus-thumb-width);

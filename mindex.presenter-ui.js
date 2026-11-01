@@ -454,7 +454,7 @@ function renderPresenterFocusView() {
 
 function syncPresenterFocusView() {
   const root = document.getElementById('servicePresenterControls');
-  if (!root) return;
+  if (!root) { presenterTools.close(); return; }
   const layoutChanged = root.dataset.focusView !== String(presenterFocusView);
   root.dataset.focusView = String(presenterFocusView);
   if (layoutChanged) {
@@ -464,7 +464,7 @@ function syncPresenterFocusView() {
     button.setAttribute('aria-pressed', String((button.dataset.presenterFocusToggle === 'focus') === presenterFocusView));
   });
   let panel = root.querySelector('[data-presenter-focus-panel]');
-  if (!presenterFocusView) { if (panel) panel.hidden = true; return; }
+  if (!presenterFocusView) { presenterTools.close(); if (panel) panel.hidden = true; return; }
   if (!panel) {
     panel = document.createElement('section');
     panel.className = 'svc-focus-panel';
@@ -487,7 +487,9 @@ function syncPresenterFocusView() {
   const label = outputOpen ? (state.presenter.safetyBlank ? (state.presenter.safetyBlankMode === 'transparent' ? '투명' : '암전') : '현재 송출')
     : isPresenterOutputWindowOpen() ? '선택 화면 · 다른 예배 송출 중' : '선택 화면 · 송출 대기';
   const frame = (slide, title) => `<div class="svc-focus-preview"><strong>${escapeHtml(title)}</strong><div class="svc-slide-thumb-frame">${slide ? renderPresenterSlideMiniPreview(slide, serviceId) : '<span>다음 슬라이드 없음</span>'}</div></div>`;
-  const markup = `<div class="svc-focus-screens">${frame(current, label)}${frame(next, '다음 화면')}</div>${renderPresenterScreenManagement(serviceId, slides)}
+  const toolsKey = current && !(outputOpen && state.presenter.safetyBlank)
+    ? presenterTools.key(serviceId, index, current, outputOpen && state.presenter.liveScripture?.active) : '';
+  const markup = `<div class="svc-focus-screens">${frame(current, label)}${frame(next, '다음 화면')}</div>${toolsKey ? presenterTools.toolbar : ''}${renderPresenterScreenManagement(serviceId, slides)}
     <div class="svc-focus-transport"><div class="svc-focus-navigation" role="group" aria-label="슬라이드 이동"><span class="svc-focus-count">${slides.length ? index + 1 : 0} <span>/ ${slides.length}</span></span>
       <button type="button" class="btn secondary" data-presenter-action="prev" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}><i data-lucide="chevron-left"></i><span>이전</span></button>
       <button type="button" class="btn secondary" data-presenter-action="next" data-service-id="${escapeAttr(serviceId)}" ${slides.length ? '' : 'disabled'}><i data-lucide="chevron-right"></i><span>다음</span></button></div>
@@ -497,6 +499,7 @@ function syncPresenterFocusView() {
       <button type="button" class="btn secondary" data-song-timing-resume><i data-lucide="rotate-ccw"></i><span>자동 넘김 복귀 · R</span></button></div>
     </div><div class="svc-focus-filmstrip-heading">전체 슬라이드</div>`;
   if (panel._markup !== markup) { panel.innerHTML = markup; panel._markup = markup; refreshIcons(panel); }
+  presenterTools.mount(panel, toolsKey, outputOpen ? state.presenter.outputSessionId : "");
   syncPresenterFocusMusic();
   schedulePresenterPreviewLayoutUpdate(panel);
 }

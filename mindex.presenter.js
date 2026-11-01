@@ -2219,7 +2219,7 @@ function initPresenterOutputCore() {
   document.documentElement.classList.add("presenter-output-document");
   document.body.className = "presenter-output-body";
   document.body.innerHTML = `
-    <main id="presenterOutputRoot" class="presenter-output-root no-chromakey" aria-live="polite"></main>
+    <div class="presenter-tool-stage"><main id="presenterOutputRoot" class="presenter-output-root no-chromakey" aria-live="polite"></main></div>
   `;
   // The HTML bootstrap hides the controller shell until this output root exists.
   document.documentElement.classList.remove("presenter-output-pending");
@@ -2363,6 +2363,7 @@ function initPresenterOutputCore() {
   const videoCommandReceipts = new Map();
   let lastVideoRetryId = "";
   const handleOutputSignalMessage = (message = {}) => {
+    if (message.type === "presenter-tools") { presenterTools.receive(message, outputSessionId); return; }
     if (message.type === "presenter-video-command") {
       if (message.clientId !== outputClientId || message.outputSessionId !== outputSessionId
         || typeof message.requestId !== "string" || message.requestId.length > 80) return;
@@ -2423,7 +2424,7 @@ function initPresenterOutputCore() {
   if (channel) {
     renderFreshStoredState();
     channel.onmessage = (event) => {
-      if (["presenter-video-retry", "presenter-video-command"].includes(event.data?.type)) {
+      if (["presenter-tools", "presenter-video-retry", "presenter-video-command"].includes(event.data?.type)) {
         handleOutputSignalMessage(event.data);
         return;
       }
@@ -2672,6 +2673,7 @@ function renderPresenterOutput(payload, options = {}) {
     ? presenterSafetyBlankSlide(payload.safetyBlankMode)
     : liveSlide || slides[clampPresenterIndex(payload?.index, slides.length)];
   const frameState = presenterOutputFrameStateForSlide(slide, payload);
+  presenterTools.outputFrame(root, slide && !payload.safetyBlank ? presenterTools.key(payload.serviceId, payload.index, slide, !!liveSlide) : "");
   if (renderPresenterKeynoteHtmlOutput(root, payload)) return;
   if (slide?.pptx?.url) {
     void renderPresenterPptxOutput(root, payload, slide, frameState);

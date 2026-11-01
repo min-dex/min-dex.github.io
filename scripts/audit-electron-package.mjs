@@ -12,6 +12,7 @@ const roots = [
   "mindex.song-timing.js",
   "mindex.scripture-repair-display.js",
   "mindex.worship-input.js",
+  "mindex.presenter-tools.js",
   "mindex.presenter-ui.js",
   "mindex.setlist-links.js",
   "styles.css",
