@@ -1306,11 +1306,12 @@ function presenterSlidesForService(serviceId) {
     && state.presenter.sourceSignature === signature
     && Array.isArray(state.presenter.slides)
     && state.presenter.slides.length) {
-    state.presenter.index = clampPresenterIndex(state.presenter.index, state.presenter.slides.length);
     return state.presenter.slides;
   }
   const slides = buildServicePresenterSlides(serviceId, signature);
-  if (state.presenter.serviceId === serviceId) {
+  // Browsing the board can rebuild its slides. Only explicit navigation or
+  // refresh may replace the deck currently being broadcast.
+  if (state.presenter.serviceId === serviceId && !presenterControllerIsLive(serviceId)) {
     const previousSlides = state.presenter.slides;
     const previousIndex = state.presenter.index;
     state.presenter.slides = slides;

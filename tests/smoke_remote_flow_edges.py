@@ -48,6 +48,19 @@ try:
    page.evaluate("setRemoteState({...currentState,catalogKey:'revised'})")
    assert page.locator('#orderTools').is_hidden()
    page.evaluate("setRemoteState(currentState)")
+   page.fill('#slidesQuery','찾은 가사');assert page.locator('.slide-stepper').is_hidden()
+   page.click('#slidesSearch button')
+   page.evaluate("setSlides({key:'fixture',mode:'slides',total:1,offset:0,items:[{index:2,title:'찬양',group:'찬양',matchLine:'찾은 가사 한 줄'}]})")
+   assert page.locator('#slidesList .match-line').inner_text()=='찾은 가사 한 줄'
+   page.evaluate("setRemoteState({...currentState,index:1,allowed:['prev','next','jump']});window.scrollTo(0,document.body.scrollHeight)")
+   assert page.locator('#phonePosition').inner_text()=='2 / 60'
+   for action in ('prev','next'):
+    b=page.locator(f'[data-action={action}]');box=b.bounding_box()
+    assert 0<=box['y'] and box['y']+box['height']<=845 and box['height']>=44
+    b.click()
+   assert page.evaluate('commands.length')==2
+   page.set_viewport_size({'width':900,'height':844});assert page.locator('#phonePosition').is_hidden() and page.locator('#position').is_visible()
+   page.set_viewport_size({'width':390,'height':844});page.evaluate('setRemoteState(currentState)')
    page.click('#slidesClose');assert page.evaluate("document.activeElement===document.querySelector('#slidesOpen')")
    page.fill('#scriptureQuery','시 23:1');page.evaluate("document.querySelector('#scriptureQuery').setSelectionRange(2,2)")
    page.evaluate('setRemoteState({...currentState,liveReference:"요한복음 3:16"})')

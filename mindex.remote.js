@@ -158,11 +158,32 @@
    const compact=value=>value.normalize('NFC').toLocaleLowerCase().replace(/\s+/gu,'');
    const needle=compact(query),number=/^#(\d+)$/.exec(query);
    const rows=(chosen?chosen.rows:all).filter(({slide,index})=>number?index+1===Number(number[1]):!needle||compact([slide.sectionLabel,slide.elementLabel,slide.elementTitle,slide.title,text(slide)].join(' ')).includes(needle));
+   function matchingLine(slide){
+    if(!needle||number)return '';
+    const body=slide.body||slide.text||slide.bodyText||slide.content;
+    if(typeof body!=='string')return '';
+    const lines=body.normalize('NFC').split(/\r?\n/).map(line=>line.trim()).filter(Boolean);
+    const normalized=lines.map(compact);
+    let offset=normalized.join('').indexOf(needle);
+    if(offset<0)return '';
+    for(let i=0;i<lines.length;i++){
+     if(offset>=normalized[i].length){offset-=normalized[i].length;continue;}
+     // Keep the matching words visible even in a long unbroken lyric line.
+     let end=i, length=normalized[i].length-offset;
+     while(length<needle.length&&end+1<lines.length)length+=normalized[++end].length;
+     const words=lines.slice(i,end+1).join(' ').replace(/\s+/gu,' ');
+     let start=0;
+     while(offset>0&&start<words.length){if(words[start++]!==' ')offset--;}
+     const leading=Math.max(0,start-8);
+     return (leading?'…':'')+words.slice(leading,Math.max(start+needle.length+12,leading+65)).trim();
+    }
+    return '';
+   }
    const pageSize=directory?12:6, source=directory?groups:rows;
    const currentGroup=groups.findIndex(g=>g.rows.some(r=>r.index===state.presenter.index));
    const requested=directory&&options?.atCurrent?Math.floor(Math.max(0,currentGroup)/pageSize)*pageSize:options?.offset;
    const offset=Number.isSafeInteger(requested)?Math.min(Math.max(0,requested),Math.max(0,Math.floor((source.length-1)/pageSize)*pageSize)):0;
-   const result={key:catalogKey(),mode:directory?'groups':'slides',pageSize,offset,total:source.length,groupIndex:chosen?.index??null,items:directory?groups.slice(offset,offset+pageSize).map(g=>({index:g.index,title:g.title,audio:g.rows.some(r=>slideMedia(r.slide).audio),video:g.rows.some(r=>slideMedia(r.slide).video),count:g.rows.length,endIndex:g.rows.at(-1).index,current:g.rows.some(r=>r.index===state.presenter.index)})):rows.slice(offset,offset+pageSize).map(({slide,index})=>({index,groupKey:String(slide.elementId||slide.sectionId||'').slice(0,120),group:[...new Set([slide.elementLabel||slide.sectionLabel,slide.elementTitle].filter(Boolean))].join(' · ').slice(0,160)||'예배',title:String(slide.title||slide.elementLabel||'슬라이드').slice(0,80),text:text(slide).slice(0,300),preview:preview(slide)}))};
+   const result={key:catalogKey(),mode:directory?'groups':'slides',pageSize,offset,total:source.length,groupIndex:chosen?.index??null,items:directory?groups.slice(offset,offset+pageSize).map(g=>({index:g.index,title:g.title,audio:g.rows.some(r=>slideMedia(r.slide).audio),video:g.rows.some(r=>slideMedia(r.slide).video),count:g.rows.length,endIndex:g.rows.at(-1).index,current:g.rows.some(r=>r.index===state.presenter.index)})):rows.slice(offset,offset+pageSize).map(({slide,index})=>({index,groupKey:String(slide.elementId||slide.sectionId||'').slice(0,120),group:[...new Set([slide.elementLabel||slide.sectionLabel,slide.elementTitle].filter(Boolean))].join(' · ').slice(0,160)||'예배',title:String(slide.title||slide.elementLabel||'슬라이드').slice(0,80),text:text(slide).slice(0,300),...(needle&&!number?{matchLine:matchingLine(slide)}:{}),preview:preview(slide)}))};
    // Keep each encrypted response below the transport envelope limit.
    for(const item of [...result.items].reverse())if(new TextEncoder().encode(JSON.stringify(result)).length>14000)item.preview='';
    return result;

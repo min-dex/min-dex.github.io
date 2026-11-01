@@ -84,8 +84,11 @@ try:
     assert phone.evaluate('document.documentElement.scrollWidth<=innerWidth'),f'overflow {width}'
     assert phone.locator('[data-action=next]').bounding_box()['height']>=70
     current=phone.locator('#current').bounding_box();prev=phone.locator('[data-action=prev]').bounding_box();nxt=phone.locator('[data-action=next]').bounding_box()
-    assert prev['x']+prev['width']<=current['x'] and current['x']+current['width']<=nxt['x']
-    assert prev['width']==nxt['width']==50
+    middle=phone.locator('#phonePosition').bounding_box() if width<600 else current
+    assert prev['x']+prev['width']<=middle['x'] and middle['x']+middle['width']<=nxt['x']
+    if width<600:
+     assert prev['y']==nxt['y'] and 835<=prev['y']+prev['height']<=844
+    else:assert prev['width']==nxt['width']==50
     for button in phone.locator('[data-action]:visible').all():
      assert button.evaluate('e=>e.scrollWidth<=e.clientWidth')
      if button.get_attribute('data-action') == 'sermon-title':
