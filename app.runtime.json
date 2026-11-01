@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261101-shared-free-prayer",
+  "version": "20261101-presenter-wheel-zoom",
   "options": {
     "compress": false,
     "mangle": {
