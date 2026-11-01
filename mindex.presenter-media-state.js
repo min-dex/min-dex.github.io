@@ -239,6 +239,7 @@ function setServiceMusicVolume(value, binding = null) {
 }
 
 function serviceItemIsFreePrayer(item = {}, service = null) {
+  if (serviceMemoElementType(parseServiceItemMemo(item.memo)) === "title_person") return false;
   const slot = item._worshipSlotKey || item.slotKey || "";
   const section = item._worshipSectionKey || item.sectionKey || item.section_key || "";
   return slot === "prayer.meeting.free" || section === "free_prayer"
