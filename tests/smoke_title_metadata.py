@@ -20,6 +20,9 @@ try:
      [{title:'대표 제목',original_title:'Original',subtitle:'보조'},{name:'기본',output_title:'선택한 판본 제목'},'보조','선택한 판본 제목'],
      [{title:'같은 제목',original_title:'같은 제목'},{name:'기본'},'','같은 제목'],
      [{title:'같은 제목',subtitle:'같은 제목'},{name:'기본'},'','같은 제목'],
+     [{id:'SONG-HYMN-N260-0001',title:'우리를 죄에서 구하시려',hymn_no:'260'},{name:'새찬송가'},'새찬송가 260장','우리를 죄에서 구하시려'],
+     [{id:'SONG-HYMN-T182-0001',title:'구주의 십자가 보혈로',hymn_no:'통 182'},{name:'통일찬송가'},'통일찬송가 182장','구주의 십자가 보혈로'],
+     [{title:'대표 제목',hymn_no:'260'},{name:'통일 182',output_title:'사용자가 지정한 긴 제목 '.repeat(6).trim()},'통일찬송가 182장','사용자가 지정한 긴 제목 '.repeat(6).trim()],
      [{title:'제목만'},{name:'기본'},'','제목만'],
      [{title:'긴 제목 '.repeat(12),subtitle:'긴 설명 '.repeat(12)},{name:'편집용 구분'},'긴 설명 '.repeat(12).trim(),'긴 제목 '.repeat(12).trim()],
     ];
@@ -34,7 +37,11 @@ try:
       const host=document.createElement('div');host.className='presenter-output-root'+(noChromakey?' no-chromakey':'');host.style.cssText='position:fixed;width:1920px;height:1080px;left:0;top:0';host.innerHTML=frame;document.body.append(host);
       const node=host.querySelector('.presenter-fullscreen-song-detail');
       if(noChromakey){check(Boolean(node)===Boolean(detail),'empty or lost detail');check(!node||node.textContent.replace(/^\\(|\\)$/g,'')===detail,'rendered detail');}
-      if(!noChromakey && content.detailKind==='hymn')check(host.querySelector('.presenter-song-book')?.textContent===detail,'keyed hymn edition missing');
+      if(!noChromakey && content.detailKind==='hymn'){
+       const prefix=(detail.startsWith('통일')?'통 ':'')+detail.match(/\d+/)[0];
+       const keyed=host.querySelector('.presenter-title-assignee-content,.presenter-section-song-title-name') || host.querySelector('.presenter-slide-text');
+       check(keyed.textContent.trim()===prefix+' '+title,'keyed title '+keyed.textContent);
+      }
       const text=host.querySelector('.presenter-title-content-title,.presenter-title-assignee-content,.presenter-slide-text');
       results.push({sectionKey,noChromakey,detail:!!node,font:getComputedStyle(text).fontSize,weight:getComputedStyle(text).fontWeight});host.remove();
      }
