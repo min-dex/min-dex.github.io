@@ -339,3 +339,51 @@ function renderPresenterBoardItemAudioControls(serviceId, context = {}, options 
       </div>
     </div>`;
 }
+
+// Detached elements buffer only the open service and never own playback until selected.
+const presenterPreparedAudio = new Map();
+function prepareServiceAudio(sources) {
+  const connection = navigator.connection;
+  const wanted = new Set((connection?.saveData || /(^|-)2g$/.test(connection?.effectiveType || "") ? [] :
+    [...new Set(sources.map(normalizePresenterMediaSource).filter(s =>
+      s && !presenterMediaSourceIsYoutube(s) && s !== state.serviceMusic.sourceKey))]).slice(0, 8));
+  for (const [source, audio] of presenterPreparedAudio) {
+    if (wanted.has(source) && !audio.error) continue;
+    presenterPreparedAudio.delete(source);
+    audio.removeAttribute("src");
+    audio.load();
+  }
+  for (const source of wanted) {
+    if (presenterPreparedAudio.has(source)) continue;
+    const audio = new Audio();
+    audio.preload = "auto";
+    presenterPreparedAudio.set(source, audio);
+    audio.src = source;
+  }
+}
+
+function warmSelectedServiceAudio(serviceId, service, slides) {
+  if (serviceId === state.selectedServiceId) {
+    const sources = [];
+    for (const slide of slides) {
+      if (presenterSlideIsHidden(slide)) continue;
+      sources.push(presenterSlideAudioSource(slide), slide.songTimingEligible && slide.songTimingAudio?.url);
+    }
+    for (const item of getServiceOutputItems(serviceId)) {
+      const memo = parseServiceItemMemo(item.memo);
+      if (servicePraiseInputMode(item, memo) !== "children_audio") sources.push(memo.audioAsset?.url);
+      sources.push(presenterSlotMusicConfig({ service, item })?.source);
+    }
+    prepareServiceAudio(sources.filter(Boolean));
+  }
+}
+
+function takePreparedServiceAudio(source) {
+  const prepared = presenterPreparedAudio.get(source);
+  const previous = state.serviceMusic.audio;
+  if (!prepared || prepared.error || state.serviceMusic.pending || (previous && !previous.paused)) return null;
+  presenterPreparedAudio.delete(source);
+  previous?.removeAttribute?.("src");
+  previous?.load?.();
+  return prepared;
+}

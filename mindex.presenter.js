@@ -3809,19 +3809,7 @@ function warmPresenterServiceAssets(serviceId = state.selectedServiceId) {
   const service = state.services.find((candidate) => candidate.id === serviceId);
   if (!service) return { images: 0, videos: 0 };
   const slides = buildServicePresenterSlides(serviceId);
-  if (serviceId === state.selectedServiceId) {
-    const sources = [];
-    for (const slide of slides) {
-      if (presenterSlideIsHidden(slide)) continue;
-      sources.push(presenterSlideAudioSource(slide), slide.songTimingEligible && slide.songTimingAudio?.url);
-    }
-    for (const item of getServiceOutputItems(serviceId)) {
-      const memo = parseServiceItemMemo(item.memo);
-      if (servicePraiseInputMode(item, memo) !== "children_audio") sources.push(memo.audioAsset?.url);
-      sources.push(presenterSlotMusicConfig({ service, item })?.source);
-    }
-    prepareServiceAudio(sources.filter(Boolean));
-  }
+  warmSelectedServiceAudio(serviceId, service, slides);
   if (!slides.length) return { images: 0, videos: 0 };
   const index = presenterFirstNavigableIndex(slides);
   const activeSlide = slides[index] || null;

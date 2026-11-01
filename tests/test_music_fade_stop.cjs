@@ -12,7 +12,7 @@ function fixture() {
     setInterval(fn){timers.set(++id,fn);return id},clearInterval(id){if(timers.has(id))retired.push(timers.get(id));timers.delete(id)},clearTimeout(){},
     renderPresenterControlState(){},updateServiceMusicTransportControls(){},serviceMusicSourceIsSlotOwned:()=>false,
     currentPresenterAudioContext:()=>({}),syncServiceMusicSyncedLyricsWithCurrentTime(){},showToast(){}});
-  vm.runInContext(source.slice(source.indexOf('const presenterPreparedAudio ='),source.indexOf('function presenterSyncTimelineForSlide(')),c);
+  vm.runInContext(source.slice(source.indexOf('function getServiceMusicAudio('),source.indexOf('function presenterSyncTimelineForSlide(')),c);
   vm.runInContext(readRuntimeSource('mindex.presenter-media-state.js'),c);
   return {c,music,audio,retired,tick(ms){now+=ms;[...timers.values()].forEach(fn=>fn())}};
 }

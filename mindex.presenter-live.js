@@ -15,40 +15,10 @@ function currentPresenterAudioContext(serviceId = state.presenter.serviceId) {
   };
 }
 
-// Detached elements buffer only the open service and never own playback until selected.
-const presenterPreparedAudio = new Map();
-function prepareServiceAudio(sources) {
-  const connection = navigator.connection;
-  const wanted = new Set((connection?.saveData || /(^|-)2g$/.test(connection?.effectiveType || "") ? [] :
-    [...new Set(sources.map(normalizePresenterMediaSource).filter(s =>
-      s && !presenterMediaSourceIsYoutube(s) && s !== state.serviceMusic.sourceKey))]).slice(0, 8));
-  for (const [source, audio] of presenterPreparedAudio) {
-    if (wanted.has(source) && !audio.error) continue;
-    presenterPreparedAudio.delete(source);
-    audio.removeAttribute("src");
-    audio.load();
-  }
-  for (const source of wanted) {
-    if (presenterPreparedAudio.has(source)) continue;
-    const audio = new Audio();
-    audio.preload = "auto";
-    presenterPreparedAudio.set(source, audio);
-    audio.src = source;
-  }
-}
-
 function getServiceMusicAudio(source = "") {
-  const prepared = presenterPreparedAudio.get(source);
-  const adopt = prepared && !prepared.error && !state.serviceMusic.pending
-    && (!state.serviceMusic.audio || state.serviceMusic.audio.paused);
-  if (!state.serviceMusic.audio || adopt) {
-    const audio = adopt ? prepared : new Audio();
-    if (adopt) {
-      presenterPreparedAudio.delete(source);
-      const previous = state.serviceMusic.audio;
-      previous?.removeAttribute?.("src");
-      previous?.load?.();
-    }
+  const prepared = takePreparedServiceAudio(source);
+  if (!state.serviceMusic.audio || prepared) {
+    const audio = prepared || new Audio();
     const on = (event, handle) => audio.addEventListener(event, () => {
       if (state.serviceMusic.audio === audio) handle();
     });
