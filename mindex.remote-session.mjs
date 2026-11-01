@@ -104,7 +104,8 @@ export async function openRemote({client,code,host=false,registration:providedRe
    }
    else if(ready&&m.type==='command'){
     let result;try{if(held)throw Error('최신 연결 상태를 확인해 주세요.');result=await gate.command(other,m.command);}catch(e){result={id:m.command?.id,ok:false,message:e.message};}
-    await send({type:'result',result});await publish();
+    // sendQueue preserves result/state order while both relay acknowledgements are pending.
+    await Promise.all([send({type:'result',result}),publish()]);
    }
   }else if(m.type==='state'){
    if(!m.snapshot?.state||typeof m.snapshot.ticket!=='string')return;
