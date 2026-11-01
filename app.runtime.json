@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261101-approved-backgrounds",
+  "version": "20261101-worship-urgent-fixes",
   "options": {
     "compress": false,
     "mangle": {
