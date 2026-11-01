@@ -43,6 +43,20 @@ try:
      document.querySelector('main').replaceChildren(...rendered.pages);cases.push(mode);
     }
     if(JSON.stringify(doc)!==before)throw Error('renderer modified authored content or layout');
+    const measureText=CanvasRenderingContext2D.prototype.measureText;
+    // Reproduce small-font integer advances even on macOS. Vector measurements
+    // and rendered SVG must remain identical; overflow checks stay enabled.
+    CanvasRenderingContext2D.prototype.measureText=function(text){
+     const metrics=measureText.call(this,text),size=Number(this.font.match(/([\d.]+)px/)[1]);
+     const width=size<=20?[...text].reduce((sum,c)=>sum+Math.round(measureText.call(this,c).width),0):metrics.width;
+     return new Proxy(metrics,{get:(target,key)=>key==='width'?width:Reflect.get(target,key,target)});
+    };
+    try{
+     if(B.wrap('가'.repeat(10),27,10).length!==1)throw Error('integer hinting changed vector wrapping');
+     const hinted=B.renderPages(doc,'print');
+     if(hinted.issues.size||hinted.pages.map(p=>p.outerHTML).join('')!==document.querySelector('main').innerHTML)throw Error('integer hinting changed layout or overflow');
+     if(hinted.pages[0].querySelectorAll('[data-frame-id=verse] text').length!==2)throw Error('printed motto citation must stay in two lines');
+    }finally{CanvasRenderingContext2D.prototype.measureText=measureText;}
     const legacy=B.defaultFrames('children');
     Object.assign(legacy.find(f=>f.id==='newsTitle'),{y:77.5,w:128.5});
     Object.assign(legacy.find(f=>f.id==='welcome'),{x:10,y:90,w:128.5,h:12.5,size:12.5,align:'left'});

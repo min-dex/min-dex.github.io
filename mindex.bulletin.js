@@ -710,10 +710,15 @@
       image.src=new URL(background.url,document.baseURI).href;
     });
   }
-  function wrap(text,width,size,weight=500) {
+  // Measure vector-font advances at an em scale. Linux's small-pixel hinting
+  // rounds a 7.56px Hangul advance to 8px and otherwise changes print wrapping.
+  function textWidth(text,size,weight=500,family="MindexBulletin") {
     const ctx=wrap.context||(wrap.context=document.createElement("canvas").getContext("2d"));
-    ctx.font=`${weight} ${size}px MindexBulletin`; ctx.fontKerning="normal";
-    const fits=s=>ctx.measureText(s).width/MM<=width+.001;
+    ctx.font=`${weight} 1000px ${family}`;ctx.fontKerning="normal";
+    return ctx.measureText(text).width*size/1000/MM;
+  }
+  function wrap(text,width,size,weight=500) {
+    const fits=s=>textWidth(s,size,weight)<=width+.001;
     const result=[];
     for (const paragraph of String(text).split("\n")) {
       let line="";
@@ -736,7 +741,7 @@
     const size=box.size||12.5,weight=box.weight||500;
     const leading=box.leading||snap(size*1.2,TOKENS.baseline);
     const lines=wrap(text,box.w,size,weight);
-    if(lines.some(line=>wrap.context.measureText(line).width/MM>box.w+.01))issues.add(id);
+    if(lines.some(line=>textWidth(line,size,weight)>box.w+.01))issues.add(id);
     const first=Math.ceil((box.y*MM+size)/TOKENS.baseline)*TOKENS.baseline/MM;
     const end=first+(lines.length-1)*leading/MM;
     if (end+size*.25/MM>box.y+box.h+.01) issues.add(id);
@@ -748,11 +753,11 @@
   }
   // Preserve IDML character ranges through wrapping instead of flattening a frame.
   function writeStyled(parent,runs,box,issues,id) {
-    const size=box.size||12.5,weight=box.weight||500,ctx=wrap.context||(wrap.context=document.createElement("canvas").getContext("2d"));
+    const size=box.size||12.5,weight=box.weight||500;
     const groups=chars=>{
       const result=[];for(const c of chars){const last=result.at(-1);if(last&&last.size===c.size&&last.weight===c.weight&&last.family===c.family)last.text+=c.text;else result.push({...c});}return result;
     };
-    const measure=chars=>groups(chars).reduce((sum,r)=>{ctx.font=`${r.weight} ${r.size}px ${r.family}`;return sum+ctx.measureText(r.text).width/MM;},0);
+    const measure=chars=>groups(chars).reduce((sum,r)=>sum+textWidth(r.text,r.size,r.weight,r.family),0);
     if(box.w<=0||box.h<=0){issues.add(id);return 0;}
     const chars=runs.flatMap(r=>Array.from(r.text||"").map(text=>({text,size:r.size||size,weight:r.weight||weight,family:r.family||"MindexBulletin"})));
     const lines=[];let line=[];
