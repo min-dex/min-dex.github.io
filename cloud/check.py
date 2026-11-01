@@ -164,6 +164,7 @@ SMOKES = (
     "smoke_deck_original.py",
     "smoke_keynote_html.py",
     "smoke_keynote_cards.py",
+    "smoke_presenter_media_rail.py",
     "smoke_keynote_browser.py",
     "smoke_shell_icons.py",
     "smoke_praise_progressive_loading.py",

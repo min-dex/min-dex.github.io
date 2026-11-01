@@ -38,6 +38,12 @@ try:
       check(!buttons[3].querySelector('small')&&!alias.children.length,'plain title or escaping');
       check(buttons.at(-1).getAttribute('aria-label').includes(expected.at(-1)), 'accessible label');
       let clicked;root.addEventListener('click',event=>{clicked=event.target.closest('button')?.dataset.serviceId},{once:true});alias.click();check(clicked==='dawn','alias click target');
+      refreshUpcomingTodayLabels(new Date('2026-10-31T15:00:00Z'));
+      check(document.querySelectorAll('[data-upcoming-date="2026-11-01"].is-today').length===1,'Seoul today missing');
+      check(document.querySelectorAll('[data-upcoming-date="2026-11-04"].is-today').length===0,'future highlighted');
+      refreshUpcomingTodayLabels(new Date('2026-11-03T15:00:00Z'));
+      check(document.querySelectorAll('[data-upcoming-date="2026-11-01"].is-today').length===0,'previous today retained');
+      check(document.querySelectorAll('[data-upcoming-date="2026-11-04"][aria-current="date"]').length===1,'midnight highlight missing');
       check(before===JSON.stringify(rows),'data changed');return {width:innerWidth,groups:groups.length};
      }''')
      print(engine,theme,'PASS',result,flush=True)

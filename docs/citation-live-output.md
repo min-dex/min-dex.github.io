@@ -42,8 +42,8 @@ bulk rewritten. Covered by `smoke_reference_validation.py`.
 ## Context and numeric guards ·2026-10-24
 
 Normalize NFKC before contextual list parsing. A bare number after a chapter-only
-reference denotes another chapter; after a verse reference it denotes another
-verse in that chapter. Special chapter labels reject explicit zero endpoints
+reference denotes another chapter; after a verse reference a comma continues
+verses in that chapter. A semicolon or newline resets the chapter context. Special chapter labels reject explicit zero endpoints
 instead of dropping them. Invalid fragments still invalidate the complete input.
 
 ## Live input feedback ·2026-10-24
@@ -56,12 +56,12 @@ form-field/header warnings immediately before persistence completes, without
 changing form drafts or replacing focused controls.
 
 
-## Chapter/verse reference display ·2026-10-31
+## Chapter and verse separators · 2026-11-01
 
-Reference-list display marks a whole chapter explicitly with `장`. Only consecutive
-verse references in the same book/chapter may omit the repeated chapter number.
-A whole chapter followed by a verse keeps the full chapter:verse address. This
-preserves parser/formatter round trips for `마태복음 1:1; 1장` and the reverse
-order, including a following different whole chapter. Existing reference order,
-translation, authored text, intentional overlaps and slide content are not rewritten.
-The existing input normalization policy is unchanged; this is display disambiguation.
+In shorthand references, a comma continues verses in the previous chapter;
+a semicolon or newline starts a chapter context while retaining the book.
+`살전 1:2-3, 6-8; 2` means chapter 1 verses 2–3 and 6–8, followed by all of
+chapter 2. Display it as `살전 1:2–3, 6–8; 2`, without inserting `장`.
+Explicit `장` input remains supported. Reference order and existing verse content
+are preserved across formatting, saving and re-entry.
+

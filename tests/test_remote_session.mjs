@@ -22,6 +22,30 @@ try{
  // The consumed channel cannot be joined again after revocation.
  await assert.rejects(openRemote({client,code}),/만료/);
 }finally{for(const s of sessions)s.close();}
+// Ignore the heartbeat in this case so only the command path can supply the new position.
+{
+ const heartbeat=globalThis.setInterval;
+ globalThis.setInterval=(fn,ms,...args)=>heartbeat(fn,ms===1000?60000:ms,...args);
+ let delayNext=false,release,shown=0,position=0;
+ const delayedHost={...client,channel(topic){
+  const channel=client.channel(topic),dispatch=channel.send.bind(channel);
+  channel.send=async packet=>{
+   const ack=await dispatch(packet);
+   if(delayNext){delayNext=false;await new Promise(resolve=>{release=resolve;});}
+   return ack;
+  };
+  return channel;
+ }};
+ const peers=[];
+ try{
+  const pc=await openRemote({client:delayedHost,host:true,read:()=>({live:true,index:position}),execute:()=>{position++;}});
+  peers.push(pc);
+  const phone=await openRemote({client,code:pc.code,onState:s=>{shown=s?.index;}});
+  peers.push(phone);await until(()=>phone.usable);
+  delayNext=true;await phone.command('next');await until(()=>release&&shown===1);
+  assert.equal(position,1);
+ }finally{release?.();for(const peer of peers)peer.close();globalThis.setInterval=heartbeat;}
+}
 // Exercise code-expiry callback without waiting two real minutes.
 const realTimeout=globalThis.setTimeout;let expire,expired=false;
 globalThis.setTimeout=(fn,ms,...args)=>{if(ms===120000)expire=fn;return realTimeout(fn,ms,...args);};

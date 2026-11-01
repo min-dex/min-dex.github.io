@@ -97,3 +97,23 @@
   }
   window.MINDEX_SERVICE_LIST_LIVE={refresh,reconcile,invalidate(){retryAfter=0;}};
 })();
+
+function upcomingTodayDateKey(now = new Date()) {
+  return new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
+}
+function refreshUpcomingTodayLabels(now = new Date()) {
+  const today = upcomingTodayDateKey(now);
+  document.querySelectorAll('[data-upcoming-date]').forEach(node => {
+    const active = node.dataset.upcomingDate === today;
+    node.classList.toggle('is-today', active);
+    if (active) node.setAttribute('aria-current', 'date'); else node.removeAttribute('aria-current');
+  });
+}
+(() => {
+  if (isPresenterOutputRoute()) return;
+  const refresh = () => refreshUpcomingTodayLabels();
+  document.addEventListener('visibilitychange', refresh);
+  window.addEventListener('focus', refresh);
+  window.addEventListener('pageshow', refresh);
+  setInterval(refresh, 60000);
+})();

@@ -19171,7 +19171,9 @@ function inspectScriptureReferences(value, translation = null) {
   const source = Array.isArray(value) ? value : [String(value || "")];
   const entries = [];
   let lastBook = "", lastChapter = null, lastHasVerse = false;
-  for (const raw of source.flatMap(text => String(text).normalize("NFKC").split(/[\n;；,，]/)).map(text => text.trim()).filter(Boolean)) {
+  for (const token of source.flatMap(text => [...String(text).normalize("NFKC").split(/([\n;；,，])/), ";"])) {
+    if (/^[\n;；,，]$/.test(token)) { if (!/^[,，]$/.test(token)) lastHasVerse = false; continue; }
+    const raw = token.trim(); if (!raw) continue;
     const candidates = [raw];
     if (lastBook) {
       if (lastChapter && lastHasVerse && /^\d{1,3}(?:\s*[-–—~]\s*\d{1,3})?$/.test(raw)) candidates.push(`${lastBook} ${lastChapter}:${raw}`);
@@ -23965,10 +23967,10 @@ function adaptServiceItemsForPresenterView(service, items = [], options = {}) {
     normalizeSendingConclusionProjectionItems(
     normalizeServiceItemsForTemplateHierarchy(service, items, options),
     ));
-  return visibleServiceItemsForPresentation(annotated).map((item, index) => ({
-    ...item,
-    sort_order: index + 1,
-  }));
+  return visibleServiceItemsForPresentation(annotated).map((original, index) => {
+    const item = presenterFreePrayerDisplayItem(original, service);
+    return { ...item, sort_order: index + 1 };
+  });
 }
 
 function visibleServiceItemsForPresentation(items = []) {
@@ -24495,7 +24497,7 @@ function renderServiceSidebarDateGroups(services = [], options = {}) {
       ${groups.map((group) => `
         <section class="service-sidebar-date-group">
           <div class="service-sidebar-date-head">
-            <span>${escapeHtml(group.label)}</span>
+            <span data-upcoming-date="${options.upcoming ? escapeAttr(group.services[0]?.date || "") : ""}" class="${options.upcoming && group.services[0]?.date === upcomingTodayDateKey() ? "is-today" : ""}">${escapeHtml(group.label)}</span>
           </div>
           <div class="service-sidebar-stack">
             ${group.services.map((service) => renderServiceSidebarCard(service, { showDate: false, upcoming: options.upcoming })).join("")}
@@ -27867,7 +27869,7 @@ function formatServiceScriptureReferenceList(value, options = {}) {
     const chapterLabel = bibleChapterDisplayLabel(reference.book,reference.chapter);
     const versePart = reference.verse
       ? `${chapterLabel}:${reference.verse}${reference.verseEnd ? `–${reference.verseEnd}` : ""}`
-      : `${chapterLabel}${/^\d+$/.test(chapterLabel) ? "장" : ""}`;
+      : chapterLabel;
     const sameBook = previous
       && previous.book?.code === reference.book?.code;
     const sameBookAndChapter = sameBook
@@ -29931,7 +29933,7 @@ function renderServiceMusicPlayer(options = {}) {
         <button class="icon-btn svc-music-toggle" type="button" data-service-music-action="toggle" data-playback-state="${key}" aria-busy="${Boolean(pending)}" aria-pressed="${Boolean(playing)}" aria-label="${pending ? "음악 준비 중, 누르면 취소" : playing ? "일시정지" : "재생"}">
           <i data-lucide="${pending ? "loader-circle" : playing ? "pause" : "play"}"></i>${inline ? pending ? "준비 중" : playing ? "일시정지" : "재생" : ""}
         </button>
-        ${inline ? `<button type="button" class="icon-btn" data-service-music-action="stop" aria-label="음악 정지" ${active && (music.pending || music.playing || music.audio?.currentTime) ? "" : "disabled"}><i data-lucide="square"></i></button>` : ""}
+        ${inline ? `<button type="button" class="icon-btn" data-service-music-action="stop" aria-label="음원 정지" ${active && (music.pending || music.playing || music.audio?.currentTime) ? "" : "disabled"}><i data-lucide="square"></i><span>정지</span></button>` : ""}
         ${options.repeatAllowed !== false && music.repeatAllowed !== false ? `<button class="icon-btn svc-music-repeat" type="button" data-service-music-action="repeat" aria-label="음악 반복 재생" aria-pressed="${Boolean(music.repeat ?? context.playback?.loop)}"><i data-lucide="repeat"></i></button>` : ""}
         ${renderServiceMusicVolumeControl()}` : ""}
       </span>

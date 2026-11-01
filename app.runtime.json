@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261101-worship-urgent-fixes",
+  "version": "20261101-input-media-remote",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "47494efc0f1aa5ccdc54f02b2f734e3bb19cad16cebe00cb93ea91112b9cf64e",
-  "runtime_sha256": "b3e506a5d574ce6e153855ac0ba489f57227f45585068fdb06a12133a138331a",
-  "source_bytes": 1355679,
-  "runtime_bytes": 967343,
-  "source_gzip": 310308,
-  "runtime_gzip": 243247
+  "source_sha256": "41ac51add91ee727faba672cf6563faeb9ad0d5e5c89e01d4390fda05990274b",
+  "runtime_sha256": "360acc0c195803d26df77b7f4f00d8c27d4be82fae4542ccf090f079cc74ebee",
+  "source_bytes": 1356044,
+  "runtime_bytes": 967615,
+  "source_gzip": 310421,
+  "runtime_gzip": 243355
 }

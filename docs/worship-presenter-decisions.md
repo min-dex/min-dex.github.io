@@ -5366,6 +5366,18 @@ that layout state in Linux WebKit. Overflow tolerances and all viewport cases st
 unchanged; desktop cases additionally require a non-collapsed sidebar. Product
 rail widths, animation and visibility rules are unchanged.
 
+## 자율기도·미디어 재생 위치 공통화 ·2026-11-01
+
+사용자 정정에 따라 특정 두 예배를 데이터 수정하는 대신 공통 표시 규칙을 쓴다.
+자율기도 slot의 순서/슬라이드는 `자율기도`, 음원 표시명은 실제 예배명을 사용한
+`<예배명> 자율기도 음원`이다. 기존 `기도회`·`통성기도` 명칭의 해당 새벽 closing
+기도도 같은 투영을 따른다. 말씀 전 기도·기도찬양·금요 결단기도는 유지한다.
+canonical section/slot/파일·사용자 문구는 읽기 표시만으로 다시 저장하지 않는다.
+
+슬롯 음원·연결 음원·영상·Keynote 조작부는 동일한 슬라이드 왼쪽 영역으로
+배치하고, 좁은 화면에서는 위로 흐른다. 기존 플레이어와 조작 노드를 유지하며
+재생 엔진·자동 재생·음량·동기화·소유권을 새로 만들지 않는다. 파일 교체·복구·편집은
+상단에 둔다. 정지 아이콘에는 문구를 붙인다. `docs/ui-contracts.md`의 공통 계약을 따른다.
 
 ## 승인된 보랏빛 B6·감사특새 배경 후보 · 2026-11-01
 

@@ -573,6 +573,7 @@ function isPresenterEntrancePraiseSlide(slide = {}) {
 
 function presenterBoardSectionGroupId(slide = {}, slideIndex = 0) {
   const sectionKey = String(slide.sectionKey || "").trim();
+  if (sectionKey === "free_prayer") return `free-prayer:${presenterSlideElementGroupKey(slide) || slide.sectionId || slideIndex}`;
   if (sectionKey === "closing_visual" || sectionKey === "closing_hymn") return "section-key:closing_visual";
   return slide.sectionId || `section:${slideIndex}`;
 }
@@ -621,6 +622,7 @@ function serviceCanonicalSectionTitle(sectionKey = "") {
     pre_scripture_praise: "찬양",
     entrance_praise: "입례찬양",
     prayer_meeting_praise: "기도회",
+    free_prayer: "자율기도",
     offering: "봉헌",
     announcements: "광고",
     community_confession: "공동체고백",
@@ -1061,6 +1063,7 @@ function presenterBoardSubgroupDisplay(serviceId, subgroup = {}) {
   };
   const contexts = presenterBoardSubgroupInputContexts(serviceId, subgroup);
   const item = contexts.length === 1 ? contexts[0]?.item : null;
+  if (item && serviceItemIsFreePrayer(item, contexts[0].service)) return { label: "자율기도", title: "" };
   if (item && !serviceItemConnectedPraise(item)
       && !isMonthlyCorporatePrayerGroupItem(item, parseServiceItemMemo(item.memo))) {
     const parts = serviceItemSummaryDisplayParts(item, contexts[0].service);
@@ -1124,37 +1127,6 @@ function presenterBoardConnectedPraiseItemTitles(contexts = []) {
     });
 }
 
-function renderPresenterBoardItemAudioControls(serviceId, context = {}, options = {}) {
-  if (!context || !serviceItemSupportsHeaderAudio(context.item)) return "";
-  const memo = parseServiceItemMemo(context.item.memo);
-  const childrenAudio = servicePraiseInputMode(context.item, memo) === "children_audio";
-  const audioAsset = normalizeServiceAudioAsset(childrenAudio ? null : memo.audioAsset);
-  const entries = (context.timingEntries || []).filter(({ slide }) =>
-    (slide.songTimingElementId || slide.progressionParentId || slide.elementId) === context.item.id);
-  const timingAudio = globalThis.MindexSongTiming?.audioFor(entries, context.item.id);
-  const source = String(audioAsset.url || timingAudio?.url || "").trim();
-  if (Boolean(source) !== Boolean(options.manager)) return "";
-  const label = audioAsset.url ? audioAsset.name || "연결된 음원" : timingAudio?.name || "연결된 음원";
-  return `
-    <div class="svc-board-subgroup-audio${source ? " has-audio svc-audio-manager" : ""}${childrenAudio ? " svc-children-audio" : ""}" aria-label="${escapeAttr(`${context.item.label || "찬양"} 음원 관리`)}">
-      ${source ? `
-        <strong title="${escapeAttr(label)}">${escapeHtml(label)}</strong>
-        ${renderPresenterInputAudioControls(source, label, serviceId, context.item.id, entries.some(({slide}) => slide.syncTimeline?.localTiming))}` : ""}
-      ${childrenAudio ? globalThis.MindexSongTiming?.statusMarkup(context, entries) || (source ? '<span class="svc-children-audio-hint">송출 중 제목에서 <kbd>P</kbd> 재생</span>' : "") : ""}
-      <div class="svc-board-subgroup-audio-actions">
-        ${!source && servicePraiseInputMode(context.item) === "children_audio" ? `<button class="btn secondary" type="button" data-song-timing-open data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(context.item.id)}">버전 음원·타이밍</button>` : ""}
-        ${source ? globalThis.MindexSongTiming?.controls(serviceId, entries, { audioSource: source }) || "" : ""}
-        ${audioAsset.url ? `<button class="icon-btn" type="button" data-service-item-audio-clear
-            data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${context.index}"
-          aria-label="음원 연결 해제" title="음원 연결 해제"><i data-lucide="x"></i></button>` : ""}
-        ${childrenAudio ? "" : `<label class="svc-board-subgroup-audio-upload" title="${source ? "음원 교체" : "음원 추가"}">
-          <input type="file" accept="${SERVICE_ITEM_AUDIO_ACCEPT}" data-service-item-audio-file
-            data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${context.index}" />
-          <span>${source ? "교체" : "음원"}</span>
-        </label>`}
-      </div>
-    </div>`;
-}
 
 function presenterBoardSubgroupItemContext(serviceId, subgroup = {}) {
   const service = state.services.find((svc) => svc.id === serviceId);
@@ -1726,4 +1698,3 @@ function fitPresenterSupplementalText(host) {
       finally { measure?.remove(); }
     });
 }
-
