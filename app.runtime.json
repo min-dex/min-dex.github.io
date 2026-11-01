@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261101-service-media-preload",
+  "version": "20261101-presenter-tools-monitor",
   "options": {
     "compress": false,
     "mangle": {
