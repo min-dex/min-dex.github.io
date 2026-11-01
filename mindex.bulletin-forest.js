@@ -2,6 +2,9 @@
 (() => {
   'use strict';
   const palette=Object.freeze({paper:'#fffdf5',cover:'#f0f2df',ink:'#294b3b',accent:'#4c785b',soft:'#e9efdf',peach:'#f7eadb',line:'#cad8c6',muted:'#627262'});
+  // Keep stored frames and authored values; omit repeated print furniture.
+  const redundant=new Set(['coverTheme','readingHelp','readingFooter','insideChurch','insideBrand']);
+  const visibleFrame=frame=>!redundant.has(frame.id);
   const artwork='assets/bulletin/children-forest.svg';
   function frames(){
     const result=[];
@@ -117,7 +120,7 @@
       if(!page)root.append(a.svg('rect',{x:148.5,width:148.5,height:210,fill:palette.cover}));
       const month=doc.frames.find(f=>f.id==='monthlyTheme');
       if(page&&month&&!month.hidden)root.append(a.svg('rect',{x:month.x-6,y:month.y-15,width:month.w+12,height:month.h+21,rx:7,fill:palette.soft}));
-      for(const f of doc.frames.filter(f=>f.page===page&&(!f.hidden||mode==='layout'))){
+      for(const f of doc.frames.filter(f=>f.page===page&&visibleFrame(f)&&(!f.hidden||mode==='layout'))){
         const group=a.svg('g',{'data-frame-id':f.id}),check=f.hidden?new Set():issues,box={...f,color:palette.ink},value=a.bound(doc,f);
         if(f.type==='logo'||f.type==='art')group.append(a.svg('image',{href:new URL(f.type==='logo'?a.logo:artwork,document.baseURI).href,x:f.x,y:f.y,width:f.w,height:f.h,preserveAspectRatio:'xMinYMid meet'}));
         else if(f.id==='coverTitle')a.text(group,String(value).replace(/^(\S{2,8})[ \t]+(\S{2,8})$/u,'$1\n$2'),{...box,leading:40},check,f.id);
@@ -145,5 +148,5 @@
     }
     return {pages,issues};
   }
-  window.MindexBulletinForest=Object.freeze({frames,render,artwork});
+  window.MindexBulletinForest=Object.freeze({frames,render,artwork,visibleFrame});
 })();

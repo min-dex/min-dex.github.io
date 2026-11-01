@@ -26,6 +26,7 @@ try:
      const r=B.renderPages(doc,mode,'news');
      if(r.issues.size)throw Error('forest overflow '+[...r.issues]);
      if(r.pages.length!==2||r.pages.some(p=>p.getAttribute('viewBox')!=='0 0 297 210'))throw Error('wrong fold format');
+     for(const id of ['coverTheme','readingHelp','readingFooter','insideChurch','insideBrand'])if(r.pages.some(p=>p.querySelector('[data-frame-id='+id+']')))throw Error('duplicate print furniture '+id);
      const text=r.pages.map(p=>p.textContent).join('\n');
      for(const phrase of ['함께 나누는 반별 모임','온세대 예배','원하고','김어린 어린이'].filter(x=>x!=='원하고'))if(!text.includes(phrase))throw Error('lost content '+phrase);
      for(const phrase of ['첫 번째 찬양','두 번째 찬양','세 번째 찬양','네 번째 찬양','다니엘기도회'])if(!text.includes(phrase))throw Error('lost source '+phrase);
@@ -48,6 +49,7 @@ try:
    page.wait_for_function("document.querySelector('[data-bulletin-field=coverTitle]')?.disabled===false")
    assert page.evaluate("JSON.stringify(MindexBulletin.storedValue(docs.get('forest-fixture')).content)===JSON.stringify(oldContent)")
    page.wait_for_function("document.querySelector('[data-bulletin-print]')?.disabled===false")
+   assert '표지 · 소식 · 예배 순서 · 말씀과 읽기표' not in page.locator('#host').inner_text()
    page.locator('[data-bulletin-save]').click();page.wait_for_function('sent.length===1&&!docs.get("forest-fixture").dirty')
    assert page.evaluate("JSON.stringify(sent[0].content)===JSON.stringify(oldContent)&&sent[0].layout.design==='children-forest'")
    page.evaluate('editor.reload()');page.wait_for_function("document.querySelector('[data-bulletin-field=coverTitle]')?.disabled===false")
