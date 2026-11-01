@@ -253,11 +253,9 @@ function serviceFreePrayerAudioLabel(service) {
 }
 
 function presenterSlotMusicConfig(context) {
-  const item = context?.item, slot = item?._worshipSlotKey;
-  const dawn = worshipAppServiceTypeId(context?.service?.type_id || "") === "holy-week-dawn";
-  const freePrayer = slot === "response.prayer" || compactSearchValue(item?.label || "") === "자율기도";
-  if (dawn && freePrayer && hasServiceAsset(parseServiceItemMemo(item?.memo).audioAsset)) return "";
-  return SERVICE_SLOT_MUSIC[dawn && freePrayer ? "dawn.free" : slot];
+  if (!context?.item || !serviceItemIsFreePrayer(context.item, context.service)) return "";
+  if (hasServiceAsset(parseServiceItemMemo(context.item.memo).audioAsset)) return "";
+  return SERVICE_SLOT_MUSIC[worshipFreePrayerAudioKey(context.service?.type_id || "")];
 }
 
 function renderServiceSlotMusic(context) {

@@ -22142,7 +22142,7 @@ function publicFridayTemplate() {
       elements: [
         { label: "기도찬양 1", name: "기도찬양 1", elementType: "praise" },
         { label: "기도찬양 2", name: "기도찬양 2", elementType: "praise" },
-        { label: "자율기도", name: "자율기도", elementType: "title", default_text: "자율기도" },
+        worshipFreePrayerElement(),
       ],
     },
   ];
@@ -23461,7 +23461,7 @@ function serviceOrderTemplate(typeId, options = {}) {
 function serviceOrderTemplateFallback(appTypeId = "", options = {}) {
   const versionedPublicTemplate = materializePublicWorshipTemplate(appTypeId, options);
   if (versionedPublicTemplate) return versionedPublicTemplate.steps;
-  return SERVICE_ORDER_TEMPLATE_FALLBACKS[appTypeId] || [];
+  return worshipFreePrayerTemplate(SERVICE_ORDER_TEMPLATE_FALLBACKS[appTypeId] || [], options.service);
 }
 
 function materializePublicWorshipTemplate(typeId = "", options = {}) {

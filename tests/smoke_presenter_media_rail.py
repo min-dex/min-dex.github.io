@@ -13,7 +13,7 @@ try:
    print(engine,page.evaluate(r'''async()=>{
     const check=(v,m)=>{if(!v)throw Error(m)};
     const dawn={id:'rail-dawn',type_id:'holy_week_dawn',date:'2026-11-02'},friday={id:'rail-friday',type_id:'friday',date:'2026-11-06'};
-    const closing={id:'closing',service_id:dawn.id,label:'기도회',raw_title:'통성기도',_worshipSlotKey:'response.prayer',_worshipSectionKey:'prayer_meeting',memo:serializeServiceItemMemo({elementType:'title'})};
+    const closing={id:'closing',service_id:dawn.id,label:'기도회',raw_title:'통성기도',_worshipSlotKey:'prayer.meeting.free',_worshipSectionKey:'prayer_meeting',memo:serializeServiceItemMemo({elementType:'title'})};
     const before=JSON.stringify(closing);state.services=[dawn,friday];state.serviceItems={[dawn.id]:[closing]};
     const projected=adaptServiceItemsForPresenterView(dawn,[closing]);check(projected[0].label==='자율기도'&&projected[0]._worshipSectionTitle==='자율기도','projection');
     check(presenterFixedTitleText(projected[0])==='자율기도','fixed slide title');check(JSON.stringify(closing)===before,'source rewritten');
@@ -21,6 +21,7 @@ try:
     check(!serviceItemIsFreePrayer({...closing,_worshipSlotKey:'prayer.opening',label:'기도'},dawn),'opening prayer renamed');
     check(!serviceItemIsFreePrayer({...closing,label:'기도',memo:serializeServiceItemMemo({elementType:'title_person'})},dawn),'assigned prayer renamed or made static');
     check(!serviceItemIsFreePrayer({...closing,_worshipSlotKey:'response.prayer'},friday),'Friday response renamed');
+    check(!presenterSlotMusicConfig({service:dawn,item:{label:'기도',_worshipSlotKey:'response.prayer',memo:serializeServiceItemMemo({elementType:'title_person'})}}),'assigned prayer gained music');
     const slot=renderServiceSlotMusic({service:dawn,item:closing});check(slot.includes('새벽기도회 자율기도 음원')&&!slot.includes('자율기도 음악'),'audio label');
     check(renderServiceSlotMusic({service:friday,item:{_worshipSlotKey:'prayer.meeting.free'}}).includes('금요기도회 자율기도 음원'),'Friday audio label');
     const host=document.createElement('div');host.id='rail-proof';host.style.cssText='position:fixed;inset:0;overflow:auto;background:var(--bg);z-index:99999;padding:15px';document.body.append(host);

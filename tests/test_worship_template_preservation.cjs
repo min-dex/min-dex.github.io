@@ -3,6 +3,16 @@ const c={console,document:{addEventListener(){}},localStorage:{getItem(){return 
 for(const f of ['mindex.constants.js','mindex.worship-model.js','mindex.worship-persistence.js','mindex.presenter.js','mindex.presenter-praise.js','mindex.presenter-media-state.js','mindex.presenter-controller.js','mindex.worship-input.js','mindex.worship-source.js','mindex.setlist-links.js','mindex.bulletin.js','app.js'])vm.runInContext(fs.readFileSync(f,'utf8'),c,{filename:f});
 c.assert=assert;
 vm.runInContext(`
+const sharedElement=worshipFreePrayerElement();
+assert.equal(sharedElement.elementType,'title');assert.equal(sharedElement.config.slotKey,'prayer.meeting.free');
+const freeServices=[{id:crypto.randomUUID(),type_id:'friday',date:'2026-10-30',title:'금요기도회'},{id:crypto.randomUUID(),type_id:'holy_week_dawn',date:'2026-11-02',title:'감사 특별새벽기도회'}];
+const freeRows=freeServices.map(service=>buildWorshipServiceScaffold(service.id,service.type_id,{service}).elements.filter(e=>e.source_ref.slotKey==='prayer.meeting.free'));
+assert.equal(freeRows[0].length,1);assert.equal(freeRows[1].length,1);
+assert.equal(freeRows[0][0].element_type,freeRows[1][0].element_type);
+assert.equal(freeRows[0][0].source_ref.label,'자율기도');assert.equal(freeRows[1][0].source_ref.label,'자율기도');
+assert.equal(worshipFreePrayerAudioKey('fri'),'prayer.meeting.free');assert.equal(worshipFreePrayerAudioKey('holy_week_dawn'),'dawn.free');
+const ordinaryDawn={...freeServices[1],title:'일반 특별새벽기도회'};
+assert.equal(buildWorshipServiceScaffold(ordinaryDawn.id,ordinaryDawn.type_id,{service:ordinaryDawn}).elements.filter(e=>e.source_ref.slotKey==='prayer.meeting.free').length,0,'ordinary prayers changed');
 const timing={version:1,audioUrl:'https://example.invalid/track.mp3',audioFingerprint:'audio-hash',duration:17.25,lyricsFingerprint:'lyrics-hash',starts:[0,3.125,null,12.875],enabled:true,photos:[{at:3.125,slideIndex:1,url:'https://example.invalid/photo.png',name:'사진'}]};
 assert.deepEqual(JSON.parse(JSON.stringify(parseServiceItemMemo(serializeServiceItemMemo({audioTiming:timing})).audioTiming)),timing,'Timing-only memo must survive serialization');
 for(const type of ['children','nursery','special']) {

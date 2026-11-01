@@ -663,3 +663,22 @@ function departmentFellowshipStep(meetingName = "반별 모임") {
     elements: [{ label: meetingName, name: meetingName, elementType: "title", default_text: meetingName }],
   };
 }
+
+// One free-prayer element; the owning service chooses only its audio source.
+function worshipFreePrayerElement() {
+  return { label: '자율기도', name: '자율기도', elementType: 'title', default_text: '자율기도', config: { slotKey: 'prayer.meeting.free' } };
+}
+function worshipServiceHasDawnFreePrayer(service = {}) {
+  const type = WORSHIP_SERVICE_TYPE_ALIASES[service.type_id || service.service_type_id] || service.type_id || service.service_type_id;
+  const name = [service.title, service.alias, service._worshipSourceRef?.mindexServiceDocument?.serviceAlias, service.source_ref?.mindexServiceDocument?.serviceAlias].filter(Boolean).join(' ').replace(/\s+/g, '');
+  return type === 'holy-week-dawn' && name.includes('감사특별새벽기도회');
+}
+function worshipFreePrayerTemplate(steps, service) {
+  if (!service || !worshipServiceHasDawnFreePrayer(service)) return steps;
+  return steps.map(step => step?.config?.slotKey === 'response.prayer'
+    ? { label: '자율기도', name: '자율기도', required: false, sectionKey: 'free_prayer', elements: [worshipFreePrayerElement()] } : step);
+}
+function worshipFreePrayerAudioKey(typeId) {
+  const type = WORSHIP_SERVICE_TYPE_ALIASES[typeId] || typeId;
+  return type === 'holy-week-dawn' ? 'dawn.free' : ['friday', 'monthly'].includes(type) ? 'prayer.meeting.free' : '';
+}

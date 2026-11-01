@@ -18,7 +18,7 @@ try:
  state.serviceMusic.audio=a;
  state.serviceMusic.fadeStopEnabled=false; // Immediate-stop cases; fade envelope is verified separately.
  const dawn={id:'dawn-fixture',type_id:'holy_week_dawn'};
- const dawnItem={label:'기도',_worshipSlotKey:'response.prayer'};
+ const dawnItem={label:'자율기도',_worshipSlotKey:'prayer.meeting.free',memo:serializeServiceItemMemo({elementType:'title'})};
  const dawnMarkup=renderServiceSlotMusic({service:dawn,item:dawnItem});
  check(dawnMarkup.includes('dawn-free-prayer.mp3')&&!dawnMarkup.includes('friday-free-prayer'),'dawn source wrong');
  check(!renderServiceSlotMusic({service:dawn,item:{label:'기도',_worshipSlotKey:'prayer.opening'}}),'opening prayer received music');
@@ -53,7 +53,7 @@ try:
  check(!renderServiceMusicPlayer().includes('data-service-music-action="toggle"'),'slot transport leaked');
  check(state.serviceMusic.playing&&!a.paused,'toolbar render stopped playback');
  runServiceMusicAction('toggle');check(state.serviceMusic.playing&&!a.paused,'generic control changed slot playback');
- const other=document.createElement('div');other.innerHTML=renderServiceSlotMusic({service:{id:'other-friday'},item});document.body.append(other);
+ const other=document.createElement('div');other.innerHTML=renderServiceSlotMusic({service:{id:'other-friday',type_id:'friday'},item});document.body.append(other);
  const otherRoot=other.querySelector('[data-service-music-player]');const otherBinding=otherRoot.dataset;
  check(other.querySelector('[data-service-music-action="toggle"]').getAttribute('aria-pressed')==='false','another Friday claims playing');
  const serial=state.serviceMusic.playSerial;const volume=a.volume;
@@ -77,7 +77,7 @@ try:
  clearServiceMusicSyncTimer();return 'PASS shared engine, side-effect-free rendering, state, cancellation, source isolation, repeat disabled, volume, widths';
 }'''), flush=True)
             page.evaluate("""()=>{
- const m=document.getElementById('music-test');m.innerHTML=renderServiceSlotMusic({service:{id:'other-friday'},item:{_worshipSlotKey:'prayer.meeting.free'}});m.style.cssText='position:fixed;top:20px;left:20px;width:320px;padding:15px;background:var(--ui-surface-panel);z-index:999999';
+ const m=document.getElementById('music-test');m.innerHTML=renderServiceSlotMusic({service:{id:'other-friday',type_id:'friday'},item:{_worshipSlotKey:'prayer.meeting.free'}});m.style.cssText='position:fixed;top:20px;left:20px;width:320px;padding:15px;background:var(--ui-surface-panel);z-index:999999';
  document.body.classList.remove('ui-booting');refreshIcons(m);m.addEventListener('input',handleDetailInput);
  window.auditRange=m.querySelector('[data-service-music-volume]');
 }""")
@@ -89,7 +89,7 @@ try:
  const check=(v,m)=>{if(!v)throw Error(m)},m=document.getElementById('music-test');
  const old=m.querySelector('[data-service-music-player]').dataset;
  runServiceMusicAction('stop',old);
- m.innerHTML=renderServiceSlotMusic({service:{id:'dawn-fixture',type_id:'holy_week_dawn'},item:{_worshipSlotKey:'response.prayer',label:'기도'}});
+ m.innerHTML=renderServiceSlotMusic({service:{id:'dawn-fixture',type_id:'holy_week_dawn'},item:{_worshipSlotKey:'prayer.meeting.free',label:'자율기도',memo:serializeServiceItemMemo({elementType:'title'})}});
  const binding=m.querySelector('[data-service-music-player]').dataset,a=state.serviceMusic.audio;
  await runServiceMusicAction('toggle',binding);
  check(a.src.includes('dawn-free-prayer.mp3')&&state.serviceMusic.ownerServiceId==='dawn-fixture'&&state.serviceMusic.playing,'dawn explicit playback failed');

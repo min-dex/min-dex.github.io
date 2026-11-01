@@ -103,3 +103,15 @@ shared audio/source/owner, or runs from rendering. Warmup stops after metadata
 or ten seconds; failure permits a later retry. The original media is unchanged.
 This reduces first-click waiting when there is preparation time; it cannot
 guarantee instant playback on a cold or slow network.
+
+## Shared free-prayer element · 2026-11-01
+
+Friday and configured Thanksgiving dawn services use the same title element
+(`plain_text`, config `elementType: title`, slot `prayer.meeting.free`, label
+`자율기도`). Both templates use `worshipFreePrayerElement()`. Only the service
+context chooses the default audio source. Explicit attached audio takes priority.
+Do not infer free prayer from an ordinary `response.prayer` assignee row.
+Existing assigned prayers and authored content remain unchanged. Empty legacy
+Thanksgiving `기도회` rows can be explicitly normalized through the revision-checked
+atomic save path, preserving their IDs, parent sections and all other rows.
+This is a stored-type correction, not a label-only projection.
