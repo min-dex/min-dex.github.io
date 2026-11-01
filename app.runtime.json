@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261101-fullscreen-song-position",
+  "version": "20261101-shared-free-prayer",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "9e9ea203e830ace25e6c7ee8bb72073e344cca0ee5930a8f43794a2d1da294c0",
-  "runtime_sha256": "fc13fa8791b4d7c3037c86456d175d14536ccfc7b0ce1539133cdd764514e915",
-  "source_bytes": 1355531,
-  "runtime_bytes": 967247,
-  "source_gzip": 310387,
-  "runtime_gzip": 243333
+  "source_sha256": "467457a32f7fae87f867858e3796c27a1efdecf35509f3c13f5ca3ae0f4a86a4",
+  "runtime_sha256": "397b5d092ee8dd0efb1e56c3d4550e700d0a38c13823091ff5471b5adead31e9",
+  "source_bytes": 1355502,
+  "runtime_bytes": 967220,
+  "source_gzip": 310395,
+  "runtime_gzip": 243340
 }
