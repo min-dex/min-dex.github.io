@@ -1776,8 +1776,8 @@ span.presenter-announcement-paren,
 .presenter-waiting-loop-title { min-width: 0; min-height: 0; overflow-wrap: anywhere; overflow: visible; }
 
 /* Keep annotations and zoom clipped to the same 16:9 viewport on both screens. */
-.presenter-tool-stage { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(100vw, 177.777778vh); height: min(100vh, 56.25vw); overflow: hidden; }
-.presenter-tool-stage > #presenterOutputRoot { position: absolute; inset: 0; transform: none; }
+.presenter-tool-stage { pointer-events: none; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(100vw, 177.777778vh); height: min(100vh, 56.25vw); overflow: hidden; }
+.presenter-tool-stage > #presenterOutputRoot { pointer-events: auto; position: absolute; inset: 0; transform: none; }
 .presenter-tool-overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; }
 .svc-focus-preview [data-ink-mode] { touch-action: none; user-select: none; cursor: crosshair; }
 .svc-focus-preview [data-ink-mode="pan"] { cursor: grab; }
