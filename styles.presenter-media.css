@@ -69,3 +69,6 @@
 .service-sidebar-remote-code svg { width: 14px; height: 14px; }
 .service-sidebar-remote-code:hover { background: var(--ui-surface-field); }
 .service-sidebar-remote-code:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Keep the remote code from making an extra bottom row below the service status. */
+.service-sidebar-remote-code { padding-block:0; line-height:17px; }

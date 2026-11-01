@@ -60,6 +60,11 @@ try:
          if(Math.abs(bar.top-pane.top-parseFloat(getComputedStyle(refs.detailPane).paddingTop))>1)throw Error('toolbar initial position differs from pinned position '+JSON.stringify({pane:pane.top,bar:bar.top,scroll:refs.detailPane.scrollTop,padding:getComputedStyle(refs.detailPane).paddingTop,prev:document.querySelector('.svc-presenter-toolbar').previousElementSibling?.className}));
        }""")
       page.evaluate("""()=>{
+        const toolbar=document.querySelector('.svc-presenter-toolbar');
+        const tc=getComputedStyle(toolbar),pc=getComputedStyle(refs.detailPane);
+        if(Math.abs(parseFloat(tc.paddingBottom)-parseFloat(tc.paddingTop)-parseFloat(pc.paddingTop))>1)throw Error('toolbar visible insets differ');
+        const card=document.querySelector('.service-sidebar-presenter-context');
+        if(card){const cs=getComputedStyle(card);if(cs.paddingTop!==cs.paddingBottom)throw Error('service card insets differ');}
         const rail=document.querySelector('.svc-presenter-input-rail');
         if(rail.scrollWidth>rail.clientWidth+1)throw Error('left editor overflow');
         for(const field of rail.querySelectorAll('[data-presenter-preparation-field]')) {
