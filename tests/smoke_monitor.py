@@ -22,6 +22,9 @@ def main():
                       state.presenter.outputConnectedAt=Date.now();
                       state.client={rpc:(name,args)=>({abortSignal:signal=>{
                         monitorCalls.push({name,args});
+                        if(name==='mindex_remote_outputs')return Promise.resolve({data:{ok:true,outputs:[{id:'s1',title:'주일예배 [3부]',device:'본당 PC'}]}});
+                        if(name==='mindex_remote_admin_login')return Promise.resolve({data:{ok:true,token:'fixture-only'}});
+                        if(name==='mindex_remote_admin')return Promise.resolve({data:{ok:true,outputs:[{id:'s1',title:'주일예배 [3부]',device:'본당 PC',position:'93 / 224',code:'0123'}]}});
                         if(monitorMode==='pending')return new Promise(resolve=>window.monitorRelease=resolve);
                         if(monitorMode==='missing')return Promise.resolve({error:{code:'PGRST202'}});
                         const data=name==='mindex_monitor_register'?'a'.repeat(64):name==='mindex_monitor_login'?(args.p_password==='test-secret'?'admin-token':null):name==='mindex_monitor_presence'?[{
@@ -35,6 +38,18 @@ def main():
                     assert not page.locator('.monitor-panel').is_visible()
                     page.locator('#monitorPanelBtn').click()
                     assert page.locator('.monitor-panel').is_visible()
+                    page.locator('[data-outputs]').get_by_text('주일예배 [3부]').wait_for()
+                    assert '0123' not in page.locator('[data-outputs]').inner_text()
+                    page.click('[data-show-codes]');page.fill('[data-pin]','1111');page.click('[data-check-pin]')
+                    page.wait_for_function("document.querySelector('[data-outputs]').textContent.includes('송출 코드 0123')")
+                    assert '93 / 224' in page.locator('[data-outputs]').inner_text()
+                    page.click('[data-show-codes]');assert '0123' not in page.locator('[data-outputs]').inner_text()
+                    page.set_viewport_size({'width':390,'height':430})
+                    header=page.locator('.monitor-panel header')
+                    y=header.bounding_box()['y']
+                    assert page.locator('.monitor-scroll').evaluate('el=>{el.scrollTop=el.scrollHeight;return el.scrollTop>0}')
+                    assert header.bounding_box()['y']==y
+                    page.locator('.monitor-scroll').evaluate('el=>el.scrollTop=0')
                     assert page.locator('[data-share]').count() == 0
                     assert page.locator('[data-local]').count()==0
                     assert page.get_by_label('접속명').is_visible()

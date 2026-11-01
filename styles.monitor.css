@@ -48,3 +48,9 @@
 .remote-panel :is([data-remote-code], [data-remote-help]):empty { display: none; }
 .remote-actions { display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 10px; }
 .remote-actions [data-remote-link] { margin-right: auto; text-decoration: none; color: var(--ink-3); }
+
+.monitor-panel[open] { display:flex; flex-direction:column; overflow:hidden; }
+.monitor-panel > header { flex:none; }
+.monitor-scroll { min-height:0; overflow:auto; overscroll-behavior:contain; }
+.monitor-panel [data-show-codes] { margin-left:auto; }
+.monitor-panel [data-code-status]:empty { display:none; }

@@ -26,9 +26,13 @@
   panel.className = "monitor-panel"; panel.setAttribute("aria-labelledby", "monitorTitle");
   panel.innerHTML = `<header><h2 id="monitorTitle">접속 현황</h2><button class="icon-btn" data-close title="닫기" aria-label="닫기"><i data-lucide="x"></i></button></header>
 
+    <div class="monitor-scroll"><section class="monitor-section" aria-label="송출 현황">
+    <div class="monitor-section-heading"><h3>송출 현황</h3><button type="button" data-show-codes>코드 보기</button></div>
+    <div data-code-entry hidden><label>관리자 PIN <input data-pin type="password" inputmode="numeric" maxlength="4" autocomplete="off"></label> <button type="button" data-check-pin>확인</button></div>
+    <p data-code-status role="status"></p><div data-outputs></div></section>
     <section class="monitor-section" aria-labelledby="monitorRemoteTitle"><div class="monitor-section-heading"><h3 id="monitorRemoteTitle">현재 접속</h3><span data-count></span><button class="icon-btn" data-refresh title="새로고침" aria-label="새로고침"><i data-lucide="refresh-cw"></i></button></div>
-    <p class="monitor-message" role="status"></p><div data-devices></div><p class="monitor-environment" data-cadence>60초마다 갱신하며, 3분간 응답이 없으면 목록에서 제외합니다. 송출 변경은 먼저 반영되지만 네트워크·절전 상태에 따라 늦어질 수 있습니다.</p></section>
-    <section class="monitor-section"><h3>이 브라우저</h3><div class="monitor-toolbar"><label for="monitorName">접속명</label><input id="monitorName" maxlength="60" autocomplete="off" placeholder="예: 본당 송출 PC"></div><p class="monitor-share-status" role="status"></p><p>같은 브라우저 프로필의 창·탭은 하나로 표시합니다. 다른 브라우저·프로필은 별도로 표시하며, 브라우저 데이터 삭제 시 이름이 초기화됩니다.</p></section>`;
+    <p class="monitor-message" role="status"></p><div data-devices></div></section>
+    <section class="monitor-section"><h3>이 브라우저</h3><div class="monitor-toolbar"><label for="monitorName">접속명</label><input id="monitorName" maxlength="60" autocomplete="off" placeholder="예: 본당 송출 PC"></div><p class="monitor-share-status" role="status"></p><p>같은 브라우저 프로필의 창·탭은 하나로 표시합니다. 다른 브라우저·프로필은 별도로 표시하며, 브라우저 데이터 삭제 시 이름이 초기화됩니다.</p></section></div>`;
   document.body.append(panel);
   const $ = (selector) => panel.querySelector(selector);
   $("#monitorName").value = name || `${os} ${browser}`;
@@ -149,8 +153,59 @@
       shareMessage(`${e.message} 자동 재시도 예정 · 최근 전송 ${lastReportAt ? new Date(lastReportAt).toLocaleTimeString() : "없음"}`);
     } finally { uploading = false; }
   }
+  let codeToken='', outputRequest=0, outputBusy=false, outputKey='';
+  function logout(token){
+    if(token)void rpc('mindex_remote_admin',{p_action:'logout',p_token:token}).catch(()=>{});
+  }
+  function hideCodes(){
+    logout(codeToken);codeToken='';outputRequest++;outputBusy=false;outputKey='';
+    $('[data-outputs]').replaceChildren();$('[data-pin]').value='';
+    $('[data-code-entry]').hidden=true;$('[data-code-status]').textContent='';
+    $('[data-show-codes]').textContent='코드 보기';
+  }
+  async function refreshOutputs(){
+    if(!panel.open||document.hidden||outputBusy)return;
+    const serial=++outputRequest, token=codeToken;outputBusy=true;
+    try{
+      const result=token?await rpc('mindex_remote_admin',{p_action:'list',p_token:token}):await rpc('mindex_remote_outputs',{});
+      if(serial!==outputRequest)return;
+      if(token&&result?.error==='expired'){hideCodes();void refreshOutputs();return;}
+      if(!result?.ok||!Array.isArray(result.outputs))throw Error();
+      const items=result.outputs;
+      const key=JSON.stringify([!!token,items]);if(key===outputKey)return;
+      outputKey=key;
+      const rows=items.map(item=>{
+        const row=document.createElement('div');row.className='monitor-device';
+        const title=document.createElement('strong');title.textContent=item.title||'예배';
+        const detail=document.createElement('p');detail.className='monitor-environment';
+        detail.textContent=[item.device,item.position,/^\d{4}$/.test(item.code)&&token?'송출 코드 '+item.code:''].filter(Boolean).join(' · ');
+        row.append(title,detail);return row;
+      });
+      $('[data-outputs]').replaceChildren(...(rows.length?rows:['현재 등록된 송출이 없습니다.']));
+    }catch{if(serial===outputRequest){outputKey='';$('[data-outputs]').textContent='송출 정보를 불러오지 못했습니다.';}}
+    finally{if(serial===outputRequest)outputBusy=false;}
+  }
+  $('[data-show-codes]').onclick=()=>{
+    if(codeToken){hideCodes();void refreshOutputs();return;}
+    const entry=$('[data-code-entry]');entry.hidden=!entry.hidden;if(!entry.hidden)$('[data-pin]').focus();
+  };
+  $('[data-pin]').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('[data-check-pin]').click();}};
+  $('[data-check-pin]').onclick=async()=>{
+    const pin=$('[data-pin]'),button=$('[data-check-pin]'),serial=viewSerial;
+    if(button.disabled||!/^\d{4}$/.test(pin.value)){if(!button.disabled)$('[data-code-status]').textContent='숫자 4자리를 입력해 주세요.';return;}
+    button.disabled=true;
+    try{
+      const request=rpc('mindex_remote_admin_login',{p_pin:pin.value});pin.value='';
+      const result=await request;
+      if(serial!==viewSerial||!panel.open){logout(result?.token);return;}
+      if(!result?.ok||!result.token)throw Error(result?.error==='locked'?'잠시 후 다시 시도해 주세요.':'PIN을 확인해 주세요.');
+      codeToken=result.token;outputRequest++;outputBusy=false;$('[data-code-entry]').hidden=true;
+      $('[data-code-status]').textContent='';$('[data-show-codes]').textContent='코드 숨기기';void refreshOutputs();
+    }catch(e){if(serial===viewSerial)$('[data-code-status]').textContent=e.message;}
+    finally{button.disabled=false;}
+  };
   function clearView() {
-    viewSerial++;
+    viewSerial++;hideCodes();
     for (const [controller, scope] of requests) if (scope === "viewer") controller.abort();
     $("[data-devices]").replaceChildren(); $("[data-count]").textContent = "";
     remoteRows = []; remoteVerified = false; renderKeys.delete($("[data-devices]")); message("");
@@ -171,9 +226,9 @@
     } catch (e) { if (serial === viewSerial) { remoteVerified = false; renderRemote(); message(e.message); } }
     finally { reading = false; }
   }
-  trigger.onclick = () => { if (!panel.open) panel.showModal(); void refresh(); window.lucide?.createIcons({ root: panel }); };
+  trigger.onclick = () => { if (!panel.open) panel.showModal(); void refreshOutputs(); void refresh(); window.lucide?.createIcons({ root: panel }); };
   $("[data-close]").onclick = () => panel.close(); panel.addEventListener("close", clearView);
-  $("[data-refresh]").onclick = () => { void refresh(); if (enabled && Date.now() - lastReportAt >= REPORT_MS) { retryAt = 0; void upload(); } };
+  $("[data-refresh]").onclick = () => { void refreshOutputs(); void refresh(); if (enabled && Date.now() - lastReportAt >= REPORT_MS) { retryAt = 0; void upload(); } };
   $("#monitorName").onchange = async () => {
     const next=$("#monitorName").value.trim().slice(0,60);
     try{
@@ -207,7 +262,7 @@
     if(enabled && (localOutput()!==lastTabOutput || Date.now()-lastTabWrite>30000)) { recordTab(); lastTabOutput=localOutput(); lastTabWrite=Date.now(); }
     if (enabled && (!lastReportAt || snapshot().output !== reportedOutput)) void upload();
     if (panel.open) {
-        renderRemote();
+        renderRemote();void refreshOutputs();
     }
   }, 2000);
   // Telemetry never awaits, rebuilds, or publishes the presenter state.

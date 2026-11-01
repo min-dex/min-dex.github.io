@@ -5,7 +5,7 @@
  const section=document.createElement('section');section.className='monitor-section';
  const title=document.createElement('h3');title.textContent='앱 정보';
  const label=document.createElement('p');label.textContent='빌드 정보 확인 중';
- section.append(title,label);panel.append(section);
+ section.append(title,label);(panel.querySelector('.monitor-scroll')||panel).append(section);
  let loaded=false;
  const load=()=>{
   if(loaded||!panel.open)return;loaded=true;
