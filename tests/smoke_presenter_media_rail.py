@@ -19,6 +19,7 @@ try:
     check(presenterFixedTitleText(projected[0])==='자율기도','fixed slide title');check(JSON.stringify(closing)===before,'source rewritten');
     const prayerSlides=presenterSlidesForService(dawn.id).filter(s=>s.elementId===closing.id&&!s.autoTrailingBlank);check(prayerSlides.some(s=>s.text==='자율기도'&&s.sectionKey==='free_prayer'),'actual generated prayer slide');
     check(!serviceItemIsFreePrayer({...closing,_worshipSlotKey:'prayer.opening',label:'기도'},dawn),'opening prayer renamed');
+    check(!serviceItemIsFreePrayer({...closing,label:'기도',memo:serializeServiceItemMemo({elementType:'title_person'})},dawn),'assigned prayer renamed or made static');
     check(!serviceItemIsFreePrayer({...closing,_worshipSlotKey:'response.prayer'},friday),'Friday response renamed');
     const slot=renderServiceSlotMusic({service:dawn,item:closing});check(slot.includes('새벽기도회 자율기도 음원')&&!slot.includes('자율기도 음악'),'audio label');
     check(renderServiceSlotMusic({service:friday,item:{_worshipSlotKey:'prayer.meeting.free'}}).includes('금요기도회 자율기도 음원'),'Friday audio label');
