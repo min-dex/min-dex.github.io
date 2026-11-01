@@ -5,7 +5,7 @@ import {openWorshipTestDb} from './helpers/worship-test-db.mjs';
 const db=await openWorshipTestDb({requirePostgres:true});
 try{
  await db.exec('create role anon;create role authenticated;');
- for(const file of ['2026-10-22-remote-pin.sql','2026-10-24-remote-admin.sql','2026-10-24-output-codes.sql','2026-10-24-multi-admin.sql','2026-10-24-remote-entry.sql','2026-10-25-remote-public-outputs.sql','2026-10-25-remote-public-outputs.sql'])await db.exec(fs.readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));
+ for(const file of ['2026-10-22-remote-pin.sql','2026-10-24-remote-admin.sql','2026-10-24-output-codes.sql','2026-10-24-multi-admin.sql','2026-10-24-remote-entry.sql','2026-10-25-remote-public-outputs.sql','2026-11-01-remote-public-position.sql','2026-11-01-remote-public-position.sql'])await db.exec(fs.readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));
  const c=await db.connect();await c.query('set role anon');
  const rpc=async(sql,args=[])=>(await c.query(sql,args)).rows[0].r;
  const host=(action,h={},info={})=>rpc('select public.mindex_remote_output($1,$2,$3,$4) r',[action,h.id||null,h.token||null,info]);
@@ -13,10 +13,12 @@ try{
  const list=()=>rpc('select public.mindex_remote_outputs() r');
  const token=()=>randomBytes(32).toString('hex');
  const a=await host('register'),b=await host('register'),empty=await host('register');
- await host('tick',a,{title:'어린이부 예배',device:'1층 PC',position:'1 / 20'});await host('tick',b,{title:'주일예배 [3부]',device:'본당 PC'});
+ await host('tick',a,{title:'어린이부 예배',device:'1층 PC',position:'1 / 20'});await host('tick',b,{title:'주일예배 [3부]',device:'본당 PC',position:'private-fixture'});
  await db.query("update mindex_remote_private.outputs set info=info||$2::jsonb where id=$1",[a.id,JSON.stringify({code:a.code,secret:'private-fixture',token:a.token})]);
  const directory=await list();assert.equal(directory.outputs.length,2);
- for(const o of directory.outputs)assert.deepEqual(Object.keys(o).sort(),['device','id','title']);
+ for(const o of directory.outputs)assert.deepEqual(Object.keys(o).sort(),['device','id','position','title']);
+ assert.equal(directory.outputs.find(o=>o.id===a.id).position,'1 / 20');
+ assert.equal(directory.outputs.find(o=>o.id===b.id).position,'');
  assert(!JSON.stringify(directory).includes(a.code));assert(!JSON.stringify(directory).includes(a.token));assert(!JSON.stringify(directory).includes('private-fixture'));
  assert(!directory.outputs.some(o=>o.id===empty.id));
  const t=token();assert.equal((await guest(t,b.code,a.id)).error,'invalid_code');

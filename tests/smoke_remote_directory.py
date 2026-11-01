@@ -3,7 +3,7 @@ import os
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from urllib.parse import urlsplit
 from smoke_app import start_local_app_server,sync_playwright,launch_chromium
-MOCK=r'''window.rpcCalls=[];window.directoryFail=false;window.rows=[{id:'a',title:'어린이부 예배',device:'1층 PC'},{id:'b',title:'주일예배 [3부]',device:'본당 PC'}];
+MOCK=r'''window.rpcCalls=[];window.directoryFail=false;window.rows=[{id:'a',title:'어린이부 예배',device:'1층 PC'},{id:'b',title:'주일예배 [3부]',device:'본당 PC · 송출 대기',position:'송출 대기'}];
 window.supabase={createClient:()=>({async rpc(name,a={}){
  rpcCalls.push({name,...a});
  if(name==='mindex_remote_outputs')return directoryFail?{error:{message:'offline'}}:{data:{ok:true,outputs:rows}};
@@ -28,6 +28,7 @@ try:
    page.route('**/vendor/supabase-js.min.js',lambda r:r.fulfill(body=MOCK,content_type='text/javascript'))
    page.route('**/mindex.remote-session.mjs*',lambda r:r.fulfill(body=SESSION,content_type='text/javascript'))
    page.goto(url);assert page.locator('#pairForm').is_hidden();page.wait_for_function("document.querySelectorAll('#outputList button').length===2")
+   assert page.locator('#outputList').inner_text().count('송출 대기') == 1
    assert page.locator('#outputList .output-code:not([hidden])').count()==0
    assert '0123' not in page.locator('#outputList').inner_text()
    for width in (320,390,768,1280):

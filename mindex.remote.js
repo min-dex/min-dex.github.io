@@ -250,7 +250,7 @@
     const c=hostContext();if(!c)return null;
     const service=state.services.find(s=>s.id===c.serviceId),device=document.getElementById('monitorName')?.value||'송출 PC';
     return {key:hostKey,client:state.client,adapter:adminHost,guestAdapter:guestHost,
-     info:{title:serviceDisplayTypeName(service)||'예배',device:device+(c.output?'':' · 송출 대기'),position:c.output?`${state.presenter.index+1} / ${state.presenter.slides.length}`:'송출 대기'}};
+     info:{title:serviceDisplayTypeName(service)||'예배',device,position:c.output?`${state.presenter.index+1} / ${state.presenter.slides.length}`:'송출 대기'}};
    },{onUpdate:value=>{remoteState=value;paintPanel();}});
   }catch{}finally{registryLoading=false;}
  }
