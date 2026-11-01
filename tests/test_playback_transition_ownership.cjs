@@ -6,7 +6,7 @@ function fixture(){
  const slide=(id,group,start)=>({id,elementId:group,type:'lyrics',syncTimeline:{groupId:group,audioSrc:'shared.wav',start,lead:0,localTiming:true}});
  const state={serviceMusic:music,presenter:{serviceId:'service',index:0,slides:[slide('a','first',2),slide('b','first',6),slide('c','second',2),slide('d','second',6)],liveScripture:{}},module:'presenter',selectedServiceId:'service'};
  const c=vm.createContext({state,Date,Audio:function(){},setInterval:()=>1,clearInterval(){},setTimeout:()=>1,clearTimeout(){},normalizePresenterMediaSource:s=>String(s||''),presenterSlideIsHidden:s=>!!s.hiddenInPresentation,presenterSlideAudioSource:s=>s?.syncTimeline?.audioSrc||'',presenterFileDisplayTitle:()=>'',presenterFileTypeLabel:()=>'',presenterPlaybackConfig:p=>p||{},clampPresenterIndex:i=>i,syncSelectedServiceItemToPresenterSlide(){},publishPresenterState(){},renderPresenterControlState(){},scrollPresenterBoardToIndexStable(){},updateServiceMusicTransportControls(){},showToast(){},serviceMusicSourceIsSlotOwned:()=>false,currentPresenterAudioContext:()=>({})});
- vm.runInContext(fs.readFileSync('mindex.presenter-live.js','utf8'),c);
+ for(const file of ['mindex.presenter-live.js','mindex.presenter-media-state.js']) vm.runInContext(fs.readFileSync(file,'utf8'),c);
  return {c,state,music,audio};
 }
 (async()=>{
