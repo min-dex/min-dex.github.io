@@ -2922,7 +2922,8 @@ function populatePresenterOutputLayer(layer, html) {
 
 function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState = {}, token = presenterOutputRenderState.token, onActivated = null) {
   if (!activeLayer || !nextLayer) return;
-  const videoEndFade = Boolean(frameState.videoEndFade && !frameState.blackoutOutput && !frameState.blankOutput);
+  // Blending video pixels into the key color creates unkeyed intermediate colors.
+  const videoEndFade = Boolean(frameState.videoEndFade && frameState.noChromakey && !frameState.blackoutOutput && !frameState.blankOutput);
   const animated = videoEndFade || presenterOutputShouldAnimateFrameTransition(root, frameState);
   const transitionClearDelay = videoEndFade ? 520 : 260;
   const transitionEntryDelay = 220;

@@ -40,6 +40,17 @@ try:
     testRoot.querySelector('.is-active video').dispatchEvent(new Event('ended'));
     if(testRoot.classList.contains('is-video-end-transition'))throw Error('cross-service fade');
    }""")
+   # A chromakey destination must cut without partially blending the video into green.
+   page.evaluate("""() => {
+    const payload=makePayload();payload.chromakey=true;
+    payload.slides[1].outputContext='chromakey';
+    renderPresenterOutput(payload,{onAutoAdvance:()=>renderPresenterOutput({...payload,index:1})});
+    testRoot.querySelector('.is-active video').dispatchEvent(new Event('ended'));
+    if(testRoot.classList.contains('is-transitioning') || testRoot.classList.contains('is-video-end-transition'))throw Error('video blends into chromakey');
+    const layer=testRoot.querySelector('.is-active');
+    if(getComputedStyle(layer).opacity!=='1' || getComputedStyle(layer).transitionDuration!=='0s')throw Error('partial key frame');
+    if(testRoot.classList.contains('no-chromakey'))throw Error('missing chromakey destination');
+   }""")
    page.emulate_media(reduced_motion='reduce')
    page.evaluate('''()=>{const payload=makePayload();renderPresenterOutput(payload,{onAutoAdvance:()=>renderPresenterOutput({...payload,index:1})});testRoot.querySelector('.is-active video').dispatchEvent(new Event('ended'));}''')
    assert page.evaluate("getComputedStyle(testRoot.querySelector('.is-active')).transitionDuration")=='0s'
