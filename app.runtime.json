@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261101-presenter-tools-monitor",
+  "version": "20261101-department-fellowship",
   "options": {
     "compress": false,
     "mangle": {
