@@ -49,6 +49,9 @@ try:
     const sample=state.presenter.slides[1],savedBody=sample.body;
     sample.body='주는 나의'+String.fromCharCode(10)+'목자';
     check(adapter.browse({query:'주는나의 목자'}).items.some(i=>i.index===1),'lyric line break/spacing search');
+    check(adapter.browse({query:'나의 목자'}).items.find(i=>i.index===1).matchLine==='주는 나의 목자','lyric excerpt spans matching lines');
+    sample.body='시작'+String.fromCharCode(10)+'앞'.repeat(400)+'찾은 가사 한 줄';
+    check(adapter.browse({query:'찾은가사'}).items.find(i=>i.index===1).matchLine.includes('찾은 가사'),'match beyond preview excerpt');
     check(adapter.browse({query:'#2'}).items.map(i=>i.index).join(',')==='1','exact slide number');
     sample.hidden=true;check(!adapter.browse({query:'#2'}).total,'hidden number surfaced');sample.hidden=false;sample.body=savedBody;
     check(state.presenter.index===0,'browse does not navigate');
