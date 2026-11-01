@@ -4660,11 +4660,16 @@ function renderPresenterSlideText(slide) {
 function renderPresenterSongText(text, slide) {
   const raw = String(text || " ");
   const match = raw.match(/^(\s*)([\u2669\u266A\u266B\u266C])(\s*)(.*)$/u);
-  const detail = !slide?.fullscreenSongTitle && slide?.songTitleContent?.detailKind === "hymn"
-    ? ` <small class="presenter-song-book">${escapeHtml(slide.songTitleContent.detail)}</small>` : "";
-  if (!match) return renderPresenterHighlightedText(raw, slide) + detail;
+  if (!slide?.fullscreenSongTitle && slide?.songTitleContent?.detailKind === "hymn") {
+    const edition = slide.songTitleContent.detail.match(/^(?:(새찬송가|통일찬송가)\s*)?(\d+)장$/);
+    if (edition) {
+      const prefix = edition[1] === "통일찬송가" ? `통 ${edition[2]}` : edition[2];
+      return renderPresenterHighlightedText(`${prefix} ${match ? match[4] : raw}`, slide);
+    }
+  }
+  if (!match) return renderPresenterHighlightedText(raw, slide);
   const [, leading, , spacing, rest] = match;
-  return `${escapeHtml(leading)}<span class="presenter-song-note" aria-hidden="true">${escapeHtml(PRESENTER_SONG_NOTE)}</span>${escapeHtml(spacing || " ")}${renderPresenterHighlightedText(rest || " ", slide)}${detail}`;
+  return `${escapeHtml(leading)}<span class="presenter-song-note" aria-hidden="true">${escapeHtml(PRESENTER_SONG_NOTE)}</span>${escapeHtml(spacing || " ")}${renderPresenterHighlightedText(rest || " ", slide)}`;
 }
 
 function presenterLyricVerseNumber(slide, lines = presenterDisplayLines(slide)) {
