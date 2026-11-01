@@ -165,8 +165,19 @@ try:
     page.add_style_tag(content='#bootLoadingOverlay,.boot-loading-overlay { display:none !important; }')
     page.locator('.svc-board-subgroup-controls').screenshot(path='/private/tmp/mindex-children-input-'+engine+'.png')
     page.evaluate("refs.detailPane.innerHTML=keyTestMarkup;document.getElementById('title-key-test').focus()")
+   page.evaluate("""()=>{
+    warmPresenterServiceAssets(state.selectedServiceId);
+    const src=state.presenter.slides[state.presenter.index].syncTimeline.audioSrc;
+    window.preparedTitleAudio=presenterPreparedAudio.get(src);
+    if(!preparedTitleAudio || !preparedTitleAudio.paused || state.serviceMusic.playing)throw Error('title audio not prepared silently');
+    window.preparedLoads=0;
+    const load=preparedTitleAudio.load.bind(preparedTitleAudio);
+    preparedTitleAudio.load=()=>{preparedLoads++;return load()};
+   }""")
+   page.wait_for_function("preparedTitleAudio.readyState>=2")
    page.keyboard.press('p')
    page.wait_for_function('state.serviceMusic.playing && state.serviceMusic.audio.currentTime>0')
+   assert page.evaluate("state.serviceMusic.audio===preparedTitleAudio && preparedLoads===0")
    page.evaluate("""()=>{const sid=state.selectedServiceId,item=getServiceItems(sid).find(i=>i.id==='children-db-item'),h=document.createElement('aside');h.id='live-audio-header';h.style.cssText='position:fixed;top:0;left:0;width:540px;max-width:100vw;z-index:9999;background:var(--ui-surface-panel);padding:10px;box-sizing:border-box';h.innerHTML=renderPresenterBoardItemAudioControls(sid,{item,index:0,timingEntries:state.presenter.slides.map(slide=>({slide}))},{manager:true});document.body.append(h);window.audioHeaderBefore=JSON.stringify({songs:state.songs,items:state.serviceItems});window.liveAudio=state.serviceMusic.audio;window.loadCount=0;window.realLoad=liveAudio.load;liveAudio.load=function(){loadCount++;return realLoad.call(this)};MindexSongTiming.updateTransport(liveAudio)}""")
    header=page.locator('#live-audio-header');bar=header.locator('[data-song-timing-seek]')
    assert header.locator('audio').count()==0

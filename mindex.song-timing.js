@@ -392,14 +392,15 @@
     runPresenterAction('jump', serviceId, {index, scroll:false});
     const sync = state.presenter.slides[state.presenter.index]?.syncTimeline;
     if (!sync?.localTiming) return;
-    const audio = getServiceMusicAudio();
+    const prepared = presenterPreparedAudio.get(sync.audioSrc);
+    const audio = getServiceMusicAudio(sync.audioSrc);
     setServiceMusicSource(audio, sync.audioSrc, 'presenter-audio', {loop:false, repeatAllowed:false}, sync.audioTitle);
     // Explicit restart rebuilds the media pipeline. WebKit can stall on a backward
     // seek after output disconnection, leaving play() pending at HAVE_CURRENT_DATA.
     // Resume/pause controls do not use this path and retain their current position.
     state.serviceMusic.autoSyncSuspended = false;
     state.serviceMusic.timingGroupId = sync.groupId;
-    audio.load();
+    if (audio !== prepared) audio.load();
     state.serviceMusic.repeat = false;
     return runServiceMusicAction('toggle');
   }

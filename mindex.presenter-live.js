@@ -15,14 +15,48 @@ function currentPresenterAudioContext(serviceId = state.presenter.serviceId) {
   };
 }
 
-function getServiceMusicAudio() {
-  if (!state.serviceMusic.audio) {
+// Detached elements buffer only the open service and never own playback until selected.
+const presenterPreparedAudio = new Map();
+function prepareServiceAudio(sources) {
+  const connection = navigator.connection;
+  const wanted = new Set((connection?.saveData || /(^|-)2g$/.test(connection?.effectiveType || "") ? [] :
+    [...new Set(sources.map(normalizePresenterMediaSource).filter(s =>
+      s && !presenterMediaSourceIsYoutube(s) && s !== state.serviceMusic.sourceKey))]).slice(0, 8));
+  for (const [source, audio] of presenterPreparedAudio) {
+    if (wanted.has(source) && !audio.error) continue;
+    presenterPreparedAudio.delete(source);
+    audio.removeAttribute("src");
+    audio.load();
+  }
+  for (const source of wanted) {
+    if (presenterPreparedAudio.has(source)) continue;
     const audio = new Audio();
     audio.preload = "auto";
-    audio.addEventListener("pause", () => {
+    presenterPreparedAudio.set(source, audio);
+    audio.src = source;
+  }
+}
+
+function getServiceMusicAudio(source = "") {
+  const prepared = presenterPreparedAudio.get(source);
+  const adopt = prepared && !prepared.error && !state.serviceMusic.pending
+    && (!state.serviceMusic.audio || state.serviceMusic.audio.paused);
+  if (!state.serviceMusic.audio || adopt) {
+    const audio = adopt ? prepared : new Audio();
+    if (adopt) {
+      presenterPreparedAudio.delete(source);
+      const previous = state.serviceMusic.audio;
+      previous?.removeAttribute?.("src");
+      previous?.load?.();
+    }
+    const on = (event, handle) => audio.addEventListener(event, () => {
+      if (state.serviceMusic.audio === audio) handle();
+    });
+    audio.preload = "auto";
+    on("pause", () => {
       scheduleServiceMusicResume("pause");
     });
-    audio.addEventListener("ended", () => {
+    on("ended", () => {
       cancelServiceMusicFadeStop();
       state.serviceMusic.playSerial += 1;
       state.serviceMusic.pending = false;
@@ -37,13 +71,13 @@ function getServiceMusicAudio() {
       renderPresenterControlState();
     });
     for (const event of ["loadedmetadata", "durationchange", "emptied"]) {
-      audio.addEventListener(event, () => globalThis.MindexSongTiming?.updateTransport(audio));
+      on(event, () => globalThis.MindexSongTiming?.updateTransport(audio));
     }
-    audio.addEventListener("seeked", () => {
+    on("seeked", () => {
       if (state.serviceMusic.pending) state.serviceMusic.pendingStartTime = audio.currentTime;
       globalThis.MindexSongTiming?.updateTransport(audio);
     });
-    audio.addEventListener("timeupdate", () => {
+    on("timeupdate", () => {
       // Some native decoders advance after resume without settling play().
       // A seek alone is not playback: require forward progress while unpaused.
       if (state.serviceMusic.pending && !audio.seeking
@@ -145,7 +179,7 @@ function setServiceMusicSource(audio, source, mode, playback = null, label = "")
   state.serviceMusic.repeat = Boolean(playback?.loop);
   allowIntentionalServiceMusicPause();
   audio.pause();
-  audio.src = source;
+  if (audio.getAttribute?.("src") !== source || audio.error) audio.src = source;
   audio.loop = Boolean(playback?.loop);
   state.serviceMusic.autoSyncSuspended = false;
   state.serviceMusic.sourceKey = source;
@@ -265,7 +299,6 @@ function runServiceMusicAction(action, binding = null) {
     return;
   }
   if (action !== "toggle") return;
-  const audio = getServiceMusicAudio();
   const context = currentPresenterAudioContext();
   if (boundActive && (state.serviceMusic.playing || state.serviceMusic.pending)) {
     stopServiceMusicPlayback({ render: true });
@@ -290,6 +323,7 @@ function runServiceMusicAction(action, binding = null) {
     showToast("YouTube 링크는 아직 컨트롤러 내 재생 대신 별도 영상/오디오 파일로 등록해 주세요.", "error");
     return;
   }
+  const audio = getServiceMusicAudio(source);
   setServiceMusicSource(audio, source, mode, playback, label);
   state.serviceMusic.ownerServiceId = boundSource ? owner : "";
   const serial = ++state.serviceMusic.playSerial;
@@ -689,12 +723,17 @@ function formatLiveScriptureReference(reference, translation = selectedPresenter
   return `${bookName} ${bibleChapterDisplayLabel(reference.book,reference.chapter)}:${verseRange}`;
 }
 
-function renderServiceSlotMusic(context) {
+function presenterSlotMusicConfig(context) {
   const item = context?.item, slot = item?._worshipSlotKey;
   const dawn = worshipAppServiceTypeId(context?.service?.type_id || "") === "holy-week-dawn";
   const freePrayer = slot === "response.prayer" || compactSearchValue(item?.label || "") === "자율기도";
   if (dawn && freePrayer && hasServiceAsset(parseServiceItemMemo(item?.memo).audioAsset)) return "";
   const config = SERVICE_SLOT_MUSIC[dawn && freePrayer ? "dawn.free" : slot];
+  return config;
+}
+
+function renderServiceSlotMusic(context) {
+  const config = presenterSlotMusicConfig(context);
   if (!config) return "";
   return renderServiceMusicPlayer({ ...config, serviceId: context.service?.id || "" });
 }

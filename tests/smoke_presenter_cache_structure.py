@@ -26,7 +26,7 @@ def main():
                     };
                     items.forEach((item,index)=>{
                       if(entries.some(({slide})=>belongs(slide,item)))return;
-                      const slide={...presenterSectionForServiceItem(item,index,serviceItemDisplayText(item)),id:`${item.id}:editor-only`,controllerEditorOnly:true,label:item.label||'',title:serviceItemDisplayText(item),text:''};
+                      const slide={...presenterSectionForServiceItem(item,index,serviceItemDisplayText(item)),id:`${item.id}:editor-only`,controllerEditorOnly:true,label:item.label||'',title:serviceItemDisplayText(item),text:'',warnings:serviceOutlineMissingState(item,slides,service)?['입력 필요']:[]};
                       const next=entries.findIndex(e=>items.slice(index+1).some(i=>belongs(e.slide,i)));
                       entries.splice(next<0?entries.length:next,0,{slide,slideIndex:-1});
                     });return entries;
@@ -76,7 +76,7 @@ def main():
                     {id:'third-video',type:'video',elementType:'video',layout:'media',videoSrc:'third.mp4'},
                   ];
                   preloadPresenterOutputImage=(source,options)=>{imageWarmups.push({source,options});return Promise.resolve()};
-                  warmPresenterOutputVideoMetadata=source=>{videoWarmups.push(source);return null};
+                  warmPresenterOutputVideoMetadata=(source,options)=>{assert(options?.firstFrame,'only video metadata warmed');videoWarmups.push(source);return null};
                   const warmed=warmPresenterServiceAssets('preload');
                   assert(warmed.images===imageWarmups.length&&warmed.images<=PRESENTER_SERVICE_ASSET_PRELOAD_LIMIT,'asset image warmup limit missed');
                   assert(JSON.stringify(videoWarmups)===JSON.stringify(['first.mp4','second.mp4']),'asset video warmup scope missed');
