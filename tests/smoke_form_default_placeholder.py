@@ -67,7 +67,7 @@ try:
     const unionSlide=repeated[0], beforeUnion=JSON.stringify(unionSlide);
     const unionHtml=renderPresenterSlideFrame(unionSlide,{noChromakey:true,serviceId:unionId});
     check(unionHtml.includes('presenter-lyric-song-name')&&!unionHtml.includes('presenter-lyric-song-steps')&&!unionHtml.includes('♬'),'union lyrics omit form and note');
-    check(unionHtml.includes('presenter-lyric-service-name">ON FIRE</div>'),'union service footer');
+    check(unionHtml.includes('<span>ON FIRE</span>')&&unionHtml.includes('viewBox="0 0 48 100"'),'union service footer');
     check(JSON.stringify(unionSlide)===beforeUnion,'union view preserves stored slide');
     const ordinaryHtml=renderPresenterSlideFrame(unionSlide,{noChromakey:true,serviceId:'unrelated'});
     check(ordinaryHtml.includes('presenter-lyric-song-steps')&&ordinaryHtml.includes('♬'),'ordinary metadata retained');

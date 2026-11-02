@@ -5537,7 +5537,8 @@ atomic service path; names, annual dates, order, chromakey and audio stay intact
 
 The explicitly requested union service `99df9e1b-1716-41fb-9ea0-f5ca4c99ee45`
 shows only the song name above clean lyric output, without its note or bottom
-form sequence. Its clean lyric footer shows the requested service name ON FIRE.
+form sequence. Its clean lyric footer shows the requested service name ON FIRE in poster rust
+`#ae3a1d`, beside a tapered inline vector cross.
 Preview and output receive the same service identity. Other
 services retain their metadata; title slides retain their note. No stored lyrics,
 forms, versions or worship records are rewritten.
