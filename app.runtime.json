@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261102-daniel-paired-branding",
+  "version": "20261102-box-alignment-audio",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "fd63ccb28a68359e20a188f2953d7053cb790999ce3656564c436df0cbffe3ec",
-  "runtime_sha256": "482a6c60cc0fd8ede2358c0b7dfd49cb6e4f6f4383286511e5490aaa37e7163b",
-  "source_bytes": 1356236,
-  "runtime_bytes": 967865,
-  "source_gzip": 310818,
-  "runtime_gzip": 243706
+  "source_sha256": "3cba8d9d222de11cf2d8b5a7c924e9b9b6ef72fe768893781d9fd222489236f3",
+  "runtime_sha256": "1813a955dac32f84792c78f8d10abe6700de9e855a30497e67c4f2ab43e32852",
+  "source_bytes": 1357037,
+  "runtime_bytes": 968456,
+  "source_gzip": 311012,
+  "runtime_gzip": 243871
 }
