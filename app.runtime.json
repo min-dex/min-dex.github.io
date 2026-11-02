@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261102-worship-bulletin-design",
+  "version": "20261102-slide-position-label",
   "options": {
     "compress": false,
     "mangle": {
