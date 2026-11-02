@@ -243,6 +243,7 @@ SMOKES = (
     "smoke_control_rhythm.py",
     "smoke_editor_field_system.py",
     "smoke_deferred_board_scroll.py",
+    "smoke_outline_late_scripture.py",
     "smoke_presenter_font_cache.py",
     "smoke_startup_bootstrap.py",
     "smoke_atomic_save_runtime.py",

@@ -1015,7 +1015,7 @@ function restorePresenterViewportSnapshot(snapshot) {
     const root = document.getElementById("servicePresenterControls");
     let restored = false;
     if (root?.isConnected) {
-      const target = presenterViewportRestoreTarget(root, snapshot);
+      const target = resolveMountedPresenterViewportAnchor(root, snapshot);
       if (target) {
         const paneRect = pane.getBoundingClientRect();
         const targetRect = target.getBoundingClientRect();

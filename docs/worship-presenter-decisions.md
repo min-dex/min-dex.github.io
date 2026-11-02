@@ -5552,3 +5552,5 @@ operation and stays an unsaved edit until the operator saves. A pending pick sav
 or uncommitted text draft defers undo. Diverging order or changed target fields
 invalidate history rather than overwriting newer work. Native text undo retains
 priority. This shortcut does not publish slides or request a database rollback.
+
+When delayed scripture expands the board, restore the visible slide by its stable identity, mounting its deferred section before measuring its position. Manual scrolling before the refresh selects the visible anchor independently of the outline selection.

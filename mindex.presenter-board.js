@@ -152,6 +152,21 @@ function hydrateDeferredPresenterBoardSectionForSlide(root, serviceId, slideInde
   return hydrateDeferredPresenterBoardSection(root, serviceId, slides, groupIndex);
 }
 
+// A late scripture read can push a previously mounted anchor into a deferred section.
+function resolveMountedPresenterViewportAnchor(root, snapshot) {
+  if ((snapshot.slideId || snapshot.elementId) && root.querySelector("[data-presenter-deferred-board-section]")) {
+    const slides = presenterSlidesForService(snapshot.serviceId);
+    const index = slides.findIndex(slide => slide.id === snapshot.slideId);
+    if (index >= 0) hydrateDeferredPresenterBoardSectionForSlide(root, snapshot.serviceId, index);
+    else if (snapshot.elementId) {
+      const group = groupPresenterSlidesBySection(slides, snapshot.serviceId)
+        .findIndex(section => section.subgroups?.some(subgroup => subgroup.id === snapshot.elementId));
+      if (group >= 0) hydrateDeferredPresenterBoardSection(root, snapshot.serviceId, slides, group);
+    }
+  }
+  return presenterViewportRestoreTarget(root, snapshot);
+}
+
 function serviceOutlineItemForIndex(serviceId, itemIndex) {
   const index = Number(itemIndex);
   const service = state.services.find((svc) => svc.id === serviceId);
