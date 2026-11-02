@@ -4533,6 +4533,7 @@ async function loadWorshipData() {
 
   const resolvedTypes = types.length ? types : defaultWorshipServiceTypes();
   state.serviceTypes = resolvedTypes.map(normalizeWorshipServiceType);
+  serviceEditHistory.clear();
   state.services = services.map(normalizeWorshipService);
   state.templateElementSuppressions.clear();
   state.worshipTemplates = [];
@@ -7175,6 +7176,7 @@ async function reopenWorshipConflict(review, isOpen = () => true) {
       .forEach(row => state.templateElementSuppressions.delete(row.id));
     state.worshipSections = state.worshipSections.filter(row => row.service_id !== id).concat(latest.sections);
     state.worshipElements = state.worshipElements.filter(row => !sectionIds.has(row.section_id)).concat(latest.elements);
+    serviceEditHistory.delete(id);
     state.services = state.services.map(row => row.id === id ? service : row);
     state.serviceItems[id] = items;
     state.loadedWorshipServiceIds.add(id);
@@ -12832,13 +12834,7 @@ function selectServiceSongForItem(index, songId) {
   if (serviceSongHasMultipleSelectableVersions(song, item, service)) {
     showServiceSongVersionChoiceNotice([songServiceOptionLabel(song) || song.title || item.label || "찬양"]);
   }
-  const entry = rememberServiceEdit(service, before, [item], servicePickFields);
-  const done = saveCommittedServiceItem(index, serviceId);
-  if (entry) {
-    entry.pending = true;
-    Promise.resolve(done).then(() => { entry.pending = false; }, () => { entry.pending = false; });
-  }
-  recentSongSelectionSave.set(service, { itemId:item.id, songId:song.id, done });
+  saveUndoableServiceSongPick(service, item, index, before);
 }
 
 function getActiveServiceTypeId() {

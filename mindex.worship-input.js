@@ -1935,14 +1935,19 @@ async function consumeSongSelectionSave(serviceId, itemIndex) {
 }
 
 // Only explicit picks and moves own undo entries. Never snapshot lyrics, media or the service.
-const serviceEditHistory = new WeakMap();
+const serviceEditHistory = new Map();
 const serviceMoveFields = ["sort_order", "label", "_worshipSectionId", "_worshipSectionKey",
   "_worshipSectionTitle", "_worshipSectionOrder", "_worshipElementOrder", "_worshipSlotKey",
   "_worshipElementTemplateModified", "_worshipTemplatePlaceholder"];
 const servicePickFields = ["song_id", "version_id", "song_version_id", "raw_title"];
 
+function serviceEditField(item, key) {
+  // Editor normalization stores the version under version_id only.
+  return key === "song_version_id" ? item.song_version_id || item.version_id || null : item[key];
+}
+
 function serviceEditSnapshot(items, fields) {
-  return items.map(item => Object.fromEntries(["id", ...fields].map(key => [key, item[key]])));
+  return items.map(item => Object.fromEntries(["id", ...fields].map(key => [key, serviceEditField(item, key)])));
 }
 
 function rememberServiceEdit(service, before, after, fields) {
@@ -1953,16 +1958,17 @@ function rememberServiceEdit(service, before, after, fields) {
     const old = previous.get(item.id);
     if (!old || !item.id) return null;
     for (const field of fields) {
-      if (old[field] !== item[field]) changes.push({id:item.id, field, before:old[field], after:item[field]});
+      const value = serviceEditField(item, field);
+      if (old[field] !== value) changes.push({id:item.id, field, before:old[field], after:value});
     }
   }
   const moved = fields === serviceMoveFields && before.some((row, i) => row.id !== after[i].id);
   if (!changes.length && !moved) return null;
   const entry = { changes, beforeOrder:moved && before.map(row => row.id), afterOrder:moved && after.map(row => row.id) };
-  const history = serviceEditHistory.get(service) || [];
+  const history = serviceEditHistory.get(service.id) || [];
   history.push(entry);
   if (history.length > 30) history.shift();
-  serviceEditHistory.set(service, history);
+  serviceEditHistory.set(service.id, history);
   return entry;
 }
 
@@ -1970,7 +1976,7 @@ function reverseServiceEdit(entry, items) {
   const rows = new Map(items.map(item => [item.id, item]));
   if (entry.afterOrder && (entry.afterOrder.length !== items.length ||
       entry.afterOrder.some((id, i) => items[i].id !== id))) return null;
-  if (entry.changes.some(change => !rows.has(change.id) || rows.get(change.id)[change.field] !== change.after)) return null;
+  if (entry.changes.some(change => !rows.has(change.id) || serviceEditField(rows.get(change.id), change.field) !== change.after)) return null;
   for (const change of entry.changes) {
     rows.set(change.id, {...rows.get(change.id), [change.field]:change.before});
   }
@@ -1982,9 +1988,11 @@ function handleServiceEditUndo(event) {
       || event.key?.toLowerCase() !== "z" || event.isComposing || event.keyCode === 229) return false;
   if ([event.target, document.activeElement].some(node => node?.isContentEditable ||
       node?.closest?.('input, textarea, select, [role="textbox"]'))) return false;
-  if (!["service","presenter"].includes(state.module) || !refs.detailPane?.querySelector("[data-service-item-field]")) return false;
+  if (!["service","presenter"].includes(state.module)) return false;
+  const board = refs.detailPane?.querySelector("#servicePresenterControls");
+  if (board?.dataset.serviceId !== state.selectedServiceId && !refs.detailPane?.querySelector("[data-service-item-field]")) return false;
   const service = selectedServiceForEditor();
-  const history = service && serviceEditHistory.get(service);
+  const history = service && serviceEditHistory.get(service.id);
   const entry = history?.at(-1);
   if (!entry || service.id !== state.selectedServiceId) return false;
   event.preventDefault();
@@ -1992,8 +2000,8 @@ function handleServiceEditUndo(event) {
     showToast("저장이 끝난 뒤 다시 실행 취소해 주세요.", "info");
     return true;
   }
-  const draftFields = refs.detailPane.querySelectorAll("input[data-service-item-field], textarea[data-service-item-field]");
-  if ([...draftFields].some(field => field.dataset.initialValue !== undefined && field.value !== field.dataset.initialValue)) {
+  const draftFields = document.querySelectorAll("input[data-service-item-field], textarea[data-service-item-field]");
+  if ([...draftFields].some(field => (field.dataset.serviceId || state.selectedServiceId) === service.id && field.dataset.initialValue !== undefined && field.value !== field.dataset.initialValue)) {
     showToast("입력 중인 내용을 먼저 확정해 주세요.", "info");
     return true;
   }
@@ -2015,4 +2023,14 @@ function handleServiceEditUndo(event) {
   updateSaveState();
   showToast("변경을 되돌렸습니다. 저장하면 반영됩니다.", "info");
   return true;
+}
+
+function saveUndoableServiceSongPick(service, item, index, before) {
+  const entry = rememberServiceEdit(service, before, [item], servicePickFields);
+  const done = saveCommittedServiceItem(index, service.id);
+  if (entry) {
+    entry.pending = true;
+    Promise.resolve(done).then(() => { entry.pending = false; }, () => { entry.pending = false; });
+  }
+  recentSongSelectionSave.set(service, { itemId:item.id, songId:item.song_id, done });
 }

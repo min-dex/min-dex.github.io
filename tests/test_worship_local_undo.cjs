@@ -15,7 +15,7 @@ const reversed = reverseServiceEdit(move,current);
 globalThis.result = [
   reversed[0].id, reversed[0].memo, reverseServiceEdit(pick,reversed)[0].song_id,
   reverseServiceEdit(move,picked), reverseServiceEdit(pick,[{...picked[0],song_id:"else"}]),
-  current[1].sort_order, serviceEditHistory.get(service).length
+  current[1].sort_order, serviceEditHistory.get(service.id).length
 ];
 `, sandbox);
 assert.deepEqual(Array.from(sandbox.result), ["a","modified lyrics/medley/audio","old",null,null,2,2]);
