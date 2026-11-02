@@ -19,7 +19,13 @@ try:
     state.serviceTypes.push({id:'holy-week-dawn',name:'특별새벽기도회'});
     rows.push({id:'dawn',date:'2026-11-04',type_id:'holy_week_dawn',alias:'감사 특별새벽기도회 <야외> & 긴 별명 (모임)'});
     window.before=JSON.stringify(rows);state.services=rows;state.selectedServiceId='b';
-    window.expected=['청년부 예배 (야외예배)','주일예배 [3부] (온세대 찬양예배)','수요예배 (다니엘기도회)','수요예배','주일오후예배 (다니엘기도회)','주일오후예배 (특별 모임)','주일오후예배','새벽기도회 (감사 특별새벽기도회 <야외> & 긴 별명 (모임))'];
+    window.expected=['야외예배 (청년부 예배)','온세대 찬양예배 (주일예배 [3부])','다니엘기도회 (수요예배)','수요예배','다니엘기도회 (주일오후예배)','특별 모임 (주일오후예배)','주일오후예배','감사 특별새벽기도회 <야외> & 긴 별명 (모임) (새벽기도회)'];
+    const external={id:'school',date:'2026-11-01',type_id:'external',alias:'학교 채플'};
+    state.services=[external,...rows];
+    for(const shortcuts of [getUpcomingServiceShortcuts,getHomeSidebarRecentServiceShortcuts]){
+      const list=shortcuts(1,new Date(2026,10,1));if(list.length!==1||list[0].id==='school')throw Error('external took upcoming slot');
+    }
+    if(!getServicesByType('external').includes(external))throw Error('external missing from service list');
     if(serviceNavigationName(rows[1])!=='온세대 찬양예배')throw Error('other screen naming changed');
     const old=document.createElement('div');old.innerHTML=renderServiceSidebarDateGroups(rows);if(old.querySelector('.is-upcoming')||old.querySelectorAll('.service-sidebar-title')[1].textContent!=='온세대 찬양예배')throw Error('search result layout/name changed');
     document.body.innerHTML='<aside id="fixture" style="width:260px;max-width:100%;padding:15px;box-sizing:border-box">'+renderServiceSidebarDateGroups(rows,{upcoming:true})+'</aside>';

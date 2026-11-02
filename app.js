@@ -15235,7 +15235,7 @@ function syncPraiseCreateControls() {
 const SERVICE_CATEGORIES = {
   public: ["sunday-first","sunday-second","sunday-main","sunday-afternoon","wednesday","friday","monthly"],
   ministry: ["nursery","children","youth","young-adult"],
-  special: ["special","holy-week-dawn","omer"],
+  special: ["special","holy-week-dawn","omer","external"],
 };
 
 // Ministry services remain independently configurable, but youth services use a
@@ -15261,6 +15261,7 @@ const SERVICE_TYPE_DISPLAY_NAMES = {
   youth: "청소년부 예배",
   "young-adult": "청년부 예배",
   special: "특별예배",
+  external: "외부 예배",
   "holy-week-dawn": "새벽기도회",
   omer: "오멜세기기도회",
 };
@@ -24253,7 +24254,7 @@ function getRecentServiceShortcuts(limit = 8) {
 function getUpcomingServiceShortcuts(limit = 8, baseDate = new Date()) {
   const today = upcomingServiceBaseDate(baseDate);
   return sortServicesByDate(state.services.filter((service) => {
-    return worshipServicePeriod(service, today).end >= toLocalDateStr(today);
+    return worshipAppServiceTypeId(service.type_id) !== "external" && worshipServicePeriod(service, today).end >= toLocalDateStr(today);
   })).slice(0, limit);
 }
 
@@ -24268,7 +24269,7 @@ function homeSidebarServiceWeekRange(baseDate = new Date()) {
 function getHomeSidebarRecentServiceShortcuts(limit = 8, baseDate = new Date()) {
   const { start, end } = homeSidebarServiceWeekRange(baseDate);
   return sortServicesByDate(state.services.filter((service) => {
-    return worshipServiceOverlapsDates(service, start, end);
+    return worshipAppServiceTypeId(service.type_id) !== "external" && worshipServiceOverlapsDates(service, start, end);
   })).slice(0, limit);
 }
 
@@ -24502,8 +24503,8 @@ function renderServiceSidebarCard(service, options = {}) {
   const active = !noGathering && service.id === state.selectedServiceId ? " active" : "";
   const showDate = options.showDate !== false;
   const { base, name } = serviceNavigationDetails(service);
-  const title = options.upcoming ? base : name;
-  const alias = options.upcoming && compactSearchValue(base) !== compactSearchValue(name) ? `(${name})` : "";
+  const title = name;
+  const alias = options.upcoming && compactSearchValue(base) !== compactSearchValue(name) ? `(${base})` : "";
   const cardButton = `
     <button
       class="service-sidebar-card${showDate ? "" : " service-sidebar-card--compact"}${active}${noGathering ? " is-no-gathering" : ""}"
