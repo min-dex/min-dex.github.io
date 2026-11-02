@@ -682,3 +682,21 @@ function renderPresenterSongPosition(slide, options = {}) {
     `<span${i === position.index ? ' aria-current="step"' : ""}>${escapeHtml(label)}</span>`);
   return heading + `<div class="presenter-lyric-song-steps" aria-label="송폼">${steps.join('<i aria-hidden="true">-</i>')}</div>`;
 }
+
+function presenterMorphSongTitle(activeLayer, nextLayer, frameState, animated) {
+    const fromTitle = activeLayer.querySelector('.presenter-slide--fullscreen-song-title .presenter-title-content-title, .presenter-slide--song-title .presenter-section-song-title-name, .presenter-slide--song-title > .presenter-slide-text');
+    const toTitle = nextLayer.querySelector('.presenter-lyric-song-name');
+    const titleKey = node => String(node?.textContent || '').replace(PRESENTER_SONG_NOTE_PATTERN, '').trim();
+    if (animated && frameState.noChromakey && fromTitle && toTitle && nextLayer.dataset.songMorphKey
+        && nextLayer.dataset.songMorphKey === activeLayer.dataset.songMorphKey && titleKey(fromTitle) === titleKey(toTitle)
+        && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const from = fromTitle.getBoundingClientRect(), to = toTitle.getBoundingClientRect();
+      if (from.width && from.height && to.width && to.height) {
+        toTitle.animate([
+          { transformOrigin: 'center center', transform: `translate(${from.x + from.width / 2 - to.x - to.width / 2}px, ${from.y + from.height / 2 - to.y - to.height / 2}px) scale(${from.width / to.width}, ${from.height / to.height})` },
+          { transformOrigin: 'center center', transform: 'none' }
+        ], { duration: 360, easing: 'cubic-bezier(.2,.7,.2,1)' });
+      }
+    }
+
+}
