@@ -5502,3 +5502,16 @@ poster has a taller layout than the user's example; preserve its proportions
 and use small black side margins inside a 1920×1080 frame rather than distorting
 the artwork. Keep the existing waiting element ID, displayed name and order.
 The common-prayer image and its four prayer topics remain unchanged.
+
+
+## 2026-11-02 — Daniel paired branding images
+
+The original poster crop remains uniformly fitted at 1701×1080, x109; its
+109/110px side regions now reveal the supplied blue geometric background,
+without stretching, redrawing lettering or cropping the slogan/date/footer.
+The common-prayer image preserves its centered original template and all four
+church topics. Official Daniel artwork is upper left and the existing white
+church typographic logo upper right. Both use the fullscreen shared horizontal
+inset (7.5cqw =144px at1920) and 7cqh top inset (76px rounded).
+Versioned1920×1080 PNGs replace only the two existing image URLs through the
+atomic service path; names, annual dates, order, chromakey and audio stay intact.
