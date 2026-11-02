@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261103-bulletin-restraint",
+  "version": "20261103-native-security-stability",
   "options": {
     "compress": false,
     "mangle": {

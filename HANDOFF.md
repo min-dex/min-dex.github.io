@@ -1,3 +1,7 @@
+## 2026-11-03 native packaging security candidate (publication pending)
+
+Candidate branch `codex/native-security-stability` follows published bulletin restraint d2f99523. Original reviewed components: 4a76ffe7, c9d8c1c6; official pinned minimatch11.0.1, private legacy call-shape bridge only. Local offline packaging/compatibility and Cloud partition/failure/Pages/scope tests passed. No audit exclusions or age-policy exceptions. Both Mac and Windows unsigned installer CI must succeed on the final exact SHA before main; formal Dawn1.0 activation, signing/notarization, real installation/upgrade, YouTube and alpha/device checks remain separate. No production data writes or actual playback/output. FIFO ticket `0585a8cd31754bf39d69c71aa309ac88` waits behind the current owner's normal return; do not steal or add scope to their gate. Preserve all existing source and unsaved data.
+
 # Mindex Handoff
 
 Last updated: 2026-10-13
