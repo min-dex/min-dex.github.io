@@ -1,3 +1,7 @@
+## 2026-11-03 실사용 마감 후보 (공개 검증 대기)
+
+`codex/use-readiness`: 최신 dfd6dc20 위에 승인된 7e5b4ca0(늦은 성경 로딩 후 사이드바 위치 복원)와 2ac8b26f(우측 정지 미리보기 paint 선명도)를 공동 통합. 기존 예배/본문/송출 상태 변경 없이 anchor section을 먼저 mount하고 offset을 복원한다. 양엔진 late load/수동 스크롤/포커스·송출 index 보존 및 preview lifecycle/3DPR 경계 픽셀 검사 PASS. 최종 exact SHA 필수4·Pages·공개 재검증 전 완료로 보고하지 않는다. FIFO2f70fbf2bd1e45e0ae25c5a32ae38030 root 소유. 실제 Chrome의 홈/감사특새/곡번호·첫소절/판본/말씀/주보/교회력·콘티/매뉴얼/Remote 진입을 read-only 점검했다. 실예배 내용을 고쳐 저장하거나 재생·송출하지 않았으며, 실제저장성공/현장장비 인증과 구분한다. Mac 잠금 해제가 필요한 설치 앱 실검증과 정식서명·YouTube/alpha 통합·장비 검증은 미완료.
+
 ## 2026-11-03 native packaging security candidate (publication pending)
 
 Candidate branch `codex/native-security-stability` follows published bulletin restraint d2f99523. Original reviewed components: 4a76ffe7, c9d8c1c6; official pinned minimatch11.0.1, private legacy call-shape bridge only. Local offline packaging/compatibility and Cloud partition/failure/Pages/scope tests passed. No audit exclusions or age-policy exceptions. Both Mac and Windows unsigned installer CI must succeed on the final exact SHA before main; formal Dawn1.0 activation, signing/notarization, real installation/upgrade, YouTube and alpha/device checks remain separate. No production data writes or actual playback/output. FIFO ticket `0585a8cd31754bf39d69c71aa309ac88` waits behind the current owner's normal return; do not steal or add scope to their gate. Preserve all existing source and unsaved data.

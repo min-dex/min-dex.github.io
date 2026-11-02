@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261103-native-security-stability",
+  "version": "20261103-use-readiness",
   "options": {
     "compress": false,
     "mangle": {
