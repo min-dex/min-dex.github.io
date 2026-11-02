@@ -12928,7 +12928,7 @@ function runServiceItemActionUnscoped(action, index, label = "", title = "") {
   );
   state.selectedServiceItemIndex = Number.isFinite(nextSelectedIndex) && nextSelectedIndex >= 0 ? nextSelectedIndex : null;
   state.dirty.service = true;
-  rememberServiceEdit(state.services.find(row => row.id === serviceId), beforeMove, state.serviceItems[serviceId], serviceMoveFields);
+  rememberServiceMove(serviceId, beforeMove);
   markServiceStructureDirty(serviceId);
   refreshPresenterForService(serviceId);
   renderCurrentServiceModuleDetail();
@@ -13013,7 +13013,7 @@ function runPresenterSectionItemAction(action, index) {
     normalizeMainPraiseSlots(service, items),
   );
   state.dirty.service = true;
-  rememberServiceEdit(state.services.find(row => row.id === serviceId), beforeMove, state.serviceItems[serviceId], serviceMoveFields);
+  rememberServiceMove(serviceId, beforeMove);
   markServiceStructureDirty(serviceId);
   refreshPresenterForService(serviceId);
   renderCurrentServiceModuleDetail();

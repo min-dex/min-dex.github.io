@@ -2034,3 +2034,7 @@ function saveUndoableServiceSongPick(service, item, index, before) {
   }
   recentSongSelectionSave.set(service, { itemId:item.id, songId:item.song_id, done });
 }
+
+function rememberServiceMove(serviceId, before) {
+  if (before) rememberServiceEdit(state.services.find(row => row.id === serviceId), before, state.serviceItems[serviceId], serviceMoveFields);
+}
