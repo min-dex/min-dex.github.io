@@ -12454,7 +12454,7 @@ async function hydratePresenterServiceData(serviceId = state.selectedServiceId) 
   }
   const hydrationPromise = (async () => {
     await loadServiceItems(targetServiceId);
-    if (state.services.find(service => service.id === targetServiceId)?._worshipSourceRefPartial) await ensureFullServiceSourceRef(targetServiceId);
+    await ensureFullServiceSourceRef(targetServiceId);
     const outputItems = getServiceOutputItems(targetServiceId);
     const songIds = outputItems.map((item) => item.song_id).filter(Boolean);
     await loadSongsForIds(songIds);
