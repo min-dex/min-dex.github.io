@@ -5479,3 +5479,5 @@ Fullscreen praise lyric slides center the song title above the lyrics and the wo
 있다. 이 경우 같은 origin의 실제 송출 Window가 원래 opener로 해당 본체를
 가리키고 URL의 outputSession이 일치하며 배타 lock도 확보된 경우만 회복한다.
 다른 새 탭·복제 탭은 이 이행 경로로 소유권을 가져갈 수 없다.
+
+음원 재생 컨트롤은 슬라이드 위에 둔다. 자율기도는 음원 이름·재생·정지·볼륨·진행 시간을 한 줄에 배치하고 좁은 화면에서만 줄을 나눈다.

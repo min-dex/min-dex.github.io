@@ -264,7 +264,7 @@ function renderServiceSlotMusic(context) {
   return renderServiceMusicPlayer({ ...config, label: serviceFreePrayerAudioLabel(context.service), serviceId: context.service?.id || "" });
 }
 
-// One transport location for item media, regardless of its source or service.
+// Audio stays with its controls above the grid; video and decks use the side rail.
 // Move existing nodes once: listeners, focus, media ownership and clocks survive.
 function arrangePresenterBoardMediaControls(host = document) {
   const groups = new Set(host.querySelectorAll('.svc-board-subgroup'));
@@ -275,7 +275,7 @@ function arrangePresenterBoardMediaControls(host = document) {
     if (!grid) continue;
     let layout = group.querySelector(':scope > .svc-board-media-layout');
     let rail = layout?.querySelector(':scope > .svc-board-media-rail');
-    const controls = [...group.querySelectorAll('.svc-music-player--inline, .svc-input-media-controls, .svc-deck-playback')]
+    const controls = [...group.querySelectorAll('[data-input-video-controls], .svc-deck-playback')]
       .filter(node => node.closest('.svc-board-subgroup') === group && !rail?.contains(node));
     if (!controls.length) continue;
     if (!layout) {
