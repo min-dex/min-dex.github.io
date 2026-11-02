@@ -188,9 +188,9 @@ try:
    first=float(bar.input_value())
    page.wait_for_function("Number(document.querySelector('#live-audio-header [data-song-timing-seek]').value)>"+str(first+.15))
    assert '남은' in header.locator('[data-song-timing-clock]').inner_text()
-   header.locator('[data-input-audio-controls] button').click();page.wait_for_function('!state.serviceMusic.playing && liveAudio.paused')
+   header.locator('[data-input-audio-controls] .svc-music-toggle').click();page.wait_for_function('!state.serviceMusic.playing && liveAudio.paused')
    paused=page.evaluate('liveAudio.currentTime')
-   header.locator('[data-input-audio-controls] button').click();page.wait_for_function('state.serviceMusic.playing && !liveAudio.paused')
+   header.locator('[data-input-audio-controls] .svc-music-toggle').click();page.wait_for_function('state.serviceMusic.playing && !liveAudio.paused')
    assert page.evaluate("state.serviceMusic.mode==='presenter-audio' && state.serviceMusic.audio===liveAudio && loadCount===0")
    assert page.evaluate('liveAudio.currentTime')>=paused
    bar.evaluate("e=>{e.value=2.2;e.dispatchEvent(new Event('input',{bubbles:true}))}")

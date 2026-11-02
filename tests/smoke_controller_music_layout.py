@@ -46,30 +46,26 @@ try:
       if(style().color===normal)throw Error('disabled ink overridden');
       button.disabled=false;button.setAttribute('aria-pressed','false');
     }""")
-    page.locator('.svc-music-toggle').evaluate("e=>e.setAttribute('aria-pressed','true')")
-    page.locator('.svc-music-toggle').hover()
-    assert page.locator('.svc-music-toggle').evaluate("e=>getComputedStyle(e).borderColor===getComputedStyle(e).color")
-    page.locator('.svc-music-toggle').evaluate("e=>e.setAttribute('aria-pressed','false')")
+    page.locator('.svc-music-toggle').first.evaluate("e=>e.setAttribute('aria-pressed','true')")
+    page.locator('.svc-music-toggle').first.hover()
+    assert page.locator('.svc-music-toggle').first.evaluate("e=>getComputedStyle(e).borderColor===getComputedStyle(e).color")
+    page.locator('.svc-music-toggle').first.evaluate("e=>e.setAttribute('aria-pressed','false')")
     page.keyboard.press('Tab')
-    page.locator('.svc-music-toggle').focus()
-    assert page.locator('.svc-music-toggle').evaluate('(e)=>getComputedStyle(e).outlineOffset')=='-2px'
+    page.locator('.svc-music-toggle').first.focus()
+    assert page.locator('.svc-music-toggle').first.evaluate('(e)=>getComputedStyle(e).outlineOffset')=='-2px'
 
     for width in (1000,600,390,254):
      page.locator('#music-layout').evaluate('(e,w)=>e.style.width=w+"px"',width)
      assert page.locator('#music-layout').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
      assert page.locator('.svc-children-audio').evaluate('(e)=>getComputedStyle(e).display')=='flex'
-     assert page.locator('.svc-music-player--inline').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
+     assert page.locator('.svc-music-player--inline').first.evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
      assert page.locator('.svc-children-audio').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
-     assert page.locator('.svc-children-audio').evaluate("(e)=>e.querySelector('[data-input-audio-controls]').getBoundingClientRect().top>=e.querySelector('strong').getBoundingClientRect().bottom")
-     if width >= 600:
-      assert page.locator('.svc-children-audio').evaluate("""e=>{
-        const rect=s=>e.querySelector(s).getBoundingClientRect();
-        return rect('.svc-children-audio-hint').bottom <= rect('[data-input-audio-controls]').top
-          && rect('.svc-board-subgroup-audio-actions').top < rect('strong').bottom;
-      }"""), 'filename, shortcut and timing action should share a compact header'
-     page.locator('.svc-music-label').evaluate("e=>e.textContent='A very long music filename with additional details and a long unbroken name '+ 'x'.repeat(80)")
+     assert page.locator('.svc-children-audio .svc-music-label').inner_text()=='어린이부 찬양 음원'
+     assert page.locator('.svc-children-audio [data-input-audio-stop]').is_disabled()
+     assert page.locator('.svc-children-audio [data-service-music-volume]').count()==1
+     page.locator('.svc-music-label').first.evaluate("e=>e.textContent='A very long music filename with additional details and a long unbroken name '+ 'x'.repeat(80)")
      assert page.locator('#music-layout').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
-     page.locator('.svc-music-label').evaluate("e=>e.textContent='자율기도 음악'")
+     page.locator('.svc-music-label').first.evaluate("e=>e.textContent='자율기도 음악'")
    page.locator('#music-layout').evaluate('(e)=>e.style.width="600px"')
    if os.environ.get('MINDEX_CAPTURE_MUSIC_LAYOUT'):
     Path(os.environ['MINDEX_CAPTURE_MUSIC_LAYOUT']).mkdir(parents=True,exist_ok=True)

@@ -146,14 +146,16 @@ function syncPresenterInputMediaButton(button, playing, disabled, label, pending
 }
 
 function renderPresenterInputAudioControls(source, label, serviceId, elementId, timed = false) {
-  return `<div class="svc-input-media-controls" data-input-audio-controls data-source="${escapeAttr(source)}" data-label="${escapeAttr(label)}" data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(elementId)}" data-timed="${Boolean(timed)}" aria-label="${escapeAttr(`${label} 재생 제어`)}"><button type="button" class="icon-btn" onclick="void runPresenterInputAudioAction(this)" aria-label="음원 재생"><i data-lucide="play"></i></button>${globalThis.MindexSongTiming?.transport({source,serviceId,elementId,remaining:true}) || ""}</div>`;
+  return renderServiceMusicPlayer({ source, label, serviceId, elementId, timed, repeatAllowed:false });
 }
 
 function syncPresenterInputAudioControls() {
   const music = state.serviceMusic;
   for (const row of document.querySelectorAll('[data-input-audio-controls]')) {
     const active = globalThis.MindexSongTiming?.ownsTransport(row.dataset.source, row.dataset.serviceId, row.dataset.elementId);
-    syncPresenterInputMediaButton(row.querySelector('button'), Boolean(active && music.playing), !active && Boolean(music.playing || music.pending), '음원', active && music.pending);
+    const stop = row.querySelector('[data-input-audio-stop]');
+    if (stop) stop.disabled = !(active && (music.pending || music.playing || music.audio?.currentTime));
+    syncPresenterInputMediaButton(row.querySelector('.svc-music-toggle'), Boolean(active && music.playing), !active && Boolean(music.playing || music.pending), '음원', active && music.pending);
   }
 }
 
@@ -162,7 +164,9 @@ async function runPresenterInputAudioAction(button) {
   if (!row?.isConnected) return;
   const {source,serviceId,elementId,label,timed} = row.dataset;
   const binding = {serviceMusicSource:source,serviceMusicServiceId:serviceId,serviceMusicLabel:label,serviceMusicRepeatAllowed:'false'};
-  if (globalThis.MindexSongTiming?.ownsTransport(source,serviceId,elementId)) return runServiceMusicAction('toggle', state.serviceMusic.mode === 'presenter-audio' ? null : binding);
+  const active = globalThis.MindexSongTiming?.ownsTransport(source,serviceId,elementId);
+  if (button.hasAttribute('data-input-audio-stop')) return active && requestServiceMusicUserStop();
+  if (active) return runServiceMusicAction('toggle', state.serviceMusic.mode === 'presenter-audio' ? null : binding);
   if (timed === 'true') {
     const sameSource = presenterSlidesForService(serviceId).some(s => (s.songTimingElementId || s.progressionParentId || s.elementId) === elementId && s.syncTimeline?.localTiming && s.syncTimeline.audioSrc === source);
     if (sameSource) return globalThis.MindexSongTiming?.play(serviceId,elementId);
@@ -325,13 +329,10 @@ function renderPresenterBoardItemAudioControls(serviceId, context = {}, options 
   const timingAudio = globalThis.MindexSongTiming?.audioFor(entries, context.item.id);
   const source = String(audioAsset.url || timingAudio?.url || "").trim();
   if (Boolean(source) !== Boolean(options.manager)) return "";
-  const label = serviceItemIsFreePrayer(context.item, context.service)
-    ? serviceFreePrayerAudioLabel(context.service)
-    : audioAsset.url ? audioAsset.name || "연결된 음원" : timingAudio?.name || "연결된 음원";
+  const label = (audioAsset.url ? audioAsset.name : timingAudio?.name) || "연결된 음원";
   return `
     <div class="svc-board-subgroup-audio${source ? " has-audio svc-audio-manager" : ""}${childrenAudio ? " svc-children-audio" : ""}" aria-label="${escapeAttr(`${context.item.label || "찬양"} 음원 관리`)}">
       ${source ? `
-        <strong title="${escapeAttr(label)}">${escapeHtml(label)}</strong>
         ${renderPresenterInputAudioControls(source, label, serviceId, context.item.id, entries.some(({slide}) => slide.syncTimeline?.localTiming))}` : ""}
       ${childrenAudio ? globalThis.MindexSongTiming?.statusMarkup(context, entries) || (source ? '<span class="svc-children-audio-hint">송출 중 제목에서 <kbd>P</kbd> 재생</span>' : "") : ""}
       <div class="svc-board-subgroup-audio-actions">

@@ -29902,12 +29902,18 @@ function renderServiceMusicPlayer(options = {}) {
   const fileLabel = activeLabel || context.label || (music.fileName ? music.fileName : uiText("presenter.music.default"));
   const hasSource = Boolean(options.source || music.sourceKey || context.source || music.objectUrl);
   const inline = Boolean(options.source);
-  const active = !inline || options.source === music.sourceKey && options.serviceId === music.ownerServiceId;
+  const attached = Boolean(options.elementId);
+  const binding = attached
+    ? `data-input-audio-controls data-source="${escapeAttr(options.source)}" data-label="${escapeAttr(options.label)}" data-service-id="${escapeAttr(options.serviceId)}" data-element-id="${escapeAttr(options.elementId)}" data-timed="${Boolean(options.timed)}"`
+    : `data-service-music-player data-service-music-service-id="${escapeAttr(options.serviceId || "")}" data-service-music-source="${escapeAttr(options.source || "")}" data-service-music-label="${escapeAttr(options.label || "")}" data-service-music-repeat-allowed="${options.repeatAllowed !== false}"`;
+  const toggle = attached ? 'onclick="void runPresenterInputAudioAction(this)"' : 'data-service-music-action="toggle"';
+  const stop = attached ? 'data-input-audio-stop onclick="void runPresenterInputAudioAction(this)"' : 'data-service-music-action="stop"';
+  const active = attached ? globalThis.MindexSongTiming?.ownsTransport(options.source, options.serviceId, options.elementId) : !inline || options.source === music.sourceKey && options.serviceId === music.ownerServiceId;
   const pending = active && music.pending;
   const playing = active && !pending && music.playing;
   const key = pending ? "loading" : playing ? "playing" : "idle";
   return `
-    <span class="svc-music-player${inline ? " svc-music-player--inline" : ""}" data-service-music-player data-service-music-service-id="${escapeAttr(options.serviceId || "")}" data-service-music-source="${escapeAttr(options.source || "")}" data-service-music-label="${escapeAttr(options.label || "")}" data-service-music-repeat-allowed="${options.repeatAllowed !== false}">
+    <span class="svc-music-player${inline ? " svc-music-player--inline" : ""}" ${binding}>
       ${inline ? `<span class="svc-music-label">${escapeHtml(options.label)}</span>` : `
       <input class="svc-music-file" type="file" accept="audio/*" data-service-music-file hidden />
       <button class="svc-music-name" type="button" data-service-music-action="choose" title="음악 선택">
@@ -29917,14 +29923,14 @@ function renderServiceMusicPlayer(options = {}) {
       `}
       <span class="svc-music-transport">
       ${hasSource ? `
-        <button class="icon-btn svc-music-toggle" type="button" data-service-music-action="toggle" data-playback-state="${key}" aria-busy="${Boolean(pending)}" aria-pressed="${Boolean(playing)}" aria-label="${pending ? "음악 준비 중, 누르면 취소" : playing ? "일시정지" : "재생"}">
+        <button class="icon-btn svc-music-toggle" type="button" ${toggle} ${attached && !active && (music.playing || music.pending) ? "disabled" : ""} data-playback-state="${key}" aria-busy="${Boolean(pending)}" aria-pressed="${Boolean(playing)}" aria-label="${pending ? "음악 준비 중, 누르면 취소" : playing ? "일시정지" : "재생"}">
           <i data-lucide="${pending ? "loader-circle" : playing ? "pause" : "play"}"></i>${inline ? pending ? "준비 중" : playing ? "일시정지" : "재생" : ""}
         </button>
-        ${inline ? `<button type="button" class="icon-btn" data-service-music-action="stop" aria-label="음원 정지" ${active && (music.pending || music.playing || music.audio?.currentTime) ? "" : "disabled"}><i data-lucide="square"></i><span>정지</span></button>` : ""}
+        ${inline ? `<button type="button" class="icon-btn" ${stop} aria-label="음원 정지" ${active && (music.pending || music.playing || music.audio?.currentTime) ? "" : "disabled"}><i data-lucide="square"></i><span>정지</span></button>` : ""}
         ${options.repeatAllowed !== false && music.repeatAllowed !== false ? `<button class="icon-btn svc-music-repeat" type="button" data-service-music-action="repeat" aria-label="음악 반복 재생" aria-pressed="${Boolean(music.repeat ?? context.playback?.loop)}"><i data-lucide="repeat"></i></button>` : ""}
         ${renderServiceMusicVolumeControl()}` : ""}
       </span>
-      ${inline ? globalThis.MindexSongTiming?.transport({ source: options.source, serviceId: options.serviceId }) || "" : ""}
+      ${inline ? globalThis.MindexSongTiming?.transport({ source: options.source, serviceId: options.serviceId, elementId: options.elementId, remaining: attached }) || "" : ""}
     </span>`;
 }
 
