@@ -25,14 +25,16 @@ def run(browser, url):
       const storage=safeStorageSet;
       safeStorageSet=(scope,key,value)=>drop&&key.startsWith(PRESENTER_STORAGE_KEY)
         ? true:storage(scope,key,value);
-      window.fixture={serviceId:'receipt-test',serviceType:'sunday-afternoon',chromakey:true,
+      state.presenter.outputSessionId='receipt-test-output';
+      MindexPresenterLifetime.claim(state.presenter.outputSessionId);
+      window.fixture={outputSessionId:state.presenter.outputSessionId,serviceId:'receipt-test',serviceType:'sunday-afternoon',chromakey:true,
         slides:Array.from({length:4},(_,i)=>({id:'receipt:'+i,type:'title-assignee',
           title:'Receipt '+i,text:'Receipt '+i,elementType:'title_assignee',layout:'lower-bar-text'})),
         index:0,safetyBlank:false,updatedAt:Date.now()};
       publishPresenterPayload(fixture);
     }''')
     output = context.new_page()
-    output.goto(url + '?output=presenter', wait_until='domcontentloaded')
+    output.goto(url + '?output=presenter&outputSession=receipt-test-output', wait_until='domcontentloaded')
     output.wait_for_function("document.querySelector('#presenterOutputRoot')?.textContent.includes('Receipt 0')")
     output.wait_for_function("typeof state !== 'undefined' && !document.body.classList.contains('ui-booting')")
     output.evaluate('''() => {

@@ -71,7 +71,9 @@ def run(browser, url, engine):
       host.dataset.presenterVideoHealth='';host.dataset.serviceId='video-health-test';
       document.body.append(host);
       bindDetailInteractionRoot(host);
-      window.fixture={serviceId:'video-health-test',serviceType:'sunday-afternoon',chromakey:true,
+      state.presenter.outputSessionId='video-health-test-output';
+      MindexPresenterLifetime.claim(state.presenter.outputSessionId);
+      window.fixture={outputSessionId:state.presenter.outputSessionId,serviceId:'video-health-test',serviceType:'sunday-afternoon',chromakey:true,
         slides:[{id:'video',type:'video',elementType:'video',layout:'media',
           videoSrc:'probe-health.mp4',playback:{autoplay:true,muted:true,loop:true}}],
         index:0,safetyBlank:false,updatedAt:Date.now()};
@@ -80,7 +82,7 @@ def run(browser, url, engine):
     output = context.new_page()
     VideoHealthHandler.failed = True
     VideoHealthHandler.media_statuses = []
-    output.goto(url+'?output=presenter', wait_until='domcontentloaded')
+    output.goto(url+'?output=presenter&outputSession=video-health-test-output', wait_until='domcontentloaded')
     controller.wait_for_function("state.presenter.videoHealth?.status === 'error'")
     assert controller.locator('[data-presenter-video-health]').inner_text().strip() == '영상 재생 실패', repr(controller.locator('[data-presenter-video-health]').inner_text())
     output.evaluate('''() => {

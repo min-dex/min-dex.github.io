@@ -4,11 +4,29 @@ from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 def run(browser, url):
     context = browser.new_context()
     context.route('**/*supabase*/**', lambda route: route.abort())
+    # This transport fixture uses a shared test store for its two snapshot keys.
+    def serve_test_store(route):
+        response = route.fetch()
+        route.fulfill(response=response, body=response.text() + """
+        ;(() => {
+          const store=MINDEX_SERVER_STORAGE, get=store.getItem, queue=store.queue;
+          const shared=key=>['mindex.presenter.state','mindex.presenter.state.navigation'].includes(key);
+          store.getItem=(scope,key,fallback)=>shared(key)?localStorage.getItem(key)??fallback:get(scope,key,fallback);
+          store.queue=(scope,key,value)=>{
+            if(!shared(key))return queue(scope,key,value);
+            localStorage.setItem(key,value);return true;
+          };
+        })();""")
+    context.route('**/mindex.server-storage.js*', serve_test_store)
     controller = context.new_page()
     controller.goto(url, wait_until='domcontentloaded')
-    controller.wait_for_function("typeof publishPresenterPayload === 'function'")
+    controller.wait_for_function("typeof state !== 'undefined' && !document.body.classList.contains('ui-booting')")
+    controller.evaluate("""() => {
+      state.presenter.outputSessionId='transport-test-output';
+      MindexPresenterLifetime.claim(state.presenter.outputSessionId);
+    }""")
     output = context.new_page()
-    output.goto(url + '?output=presenter', wait_until='domcontentloaded')
+    output.goto(url + '?output=presenter&outputSession=transport-test-output', wait_until='domcontentloaded')
     output.wait_for_selector('#presenterOutputRoot', state='attached')
     # Let the output's ready/heartbeat handshake settle before replacing the
     # renderer and publishing this test's isolated fixture.
@@ -24,7 +42,7 @@ def run(browser, url):
       window.sent=[];
       state.presenter.channel={postMessage(message){sent.push(message);transportChannel.postMessage(message)}};
       state.presenter.outputTransportVersion=1;
-      window.fixture={serviceId:'transport-test',serviceType:'sunday-afternoon',chromakey:true,
+      window.fixture={outputSessionId:state.presenter.outputSessionId,serviceId:'transport-test',serviceType:'sunday-afternoon',chromakey:true,
         slides:Array.from({length:120},(_,i)=>({id:'test:'+i,type:'title-assignee',title:'Slide '+i,
           text:'Slide '+i+' '+'Test '.repeat(100),elementType:'title_assignee',layout:'lower-bar-text'})),
         index:0,safetyBlank:false,liveScripture:null,updatedAt:Date.now()};

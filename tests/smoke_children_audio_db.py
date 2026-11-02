@@ -148,7 +148,10 @@ try:
     input.dispatchEvent(new KeyboardEvent('keydown',{key:'p',code:'KeyP',bubbles:true}));
     if(calls!==1)throw Error('typing P started playback');input.remove();
     if(playPresenterChildrenTitle({serviceId:sid,index:titleIndex,groupId:'stale'}))throw Error('stale output shortcut accepted');
-    handlePresenterControllerMessage({type:'presenter-control',action:'children-play',serviceId:sid,index:titleIndex,groupId:state.presenter.slides[titleIndex].syncTimeline.groupId});
+    state.presenter.outputSessionId='children-audio-output';
+    state.presenter.outputClientId='children-audio-client';
+    MindexPresenterLifetime.claim(state.presenter.outputSessionId);
+    handlePresenterControllerMessage({type:'presenter-control',action:'children-play',outputSessionId:state.presenter.outputSessionId,clientId:state.presenter.outputClientId,serviceId:sid,index:titleIndex,groupId:state.presenter.slides[titleIndex].syncTimeline.groupId});
     if(calls!==2)throw Error('output title P not routed to controller');
     state.serviceMusic.pending=true;key();state.serviceMusic.pending=false;
     if(calls!==2)throw Error('pending audio restarted');

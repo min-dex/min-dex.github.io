@@ -7483,6 +7483,7 @@ def main() -> int:
                         MindexPresenterFreshness.beforeOpen = originalPreflight;
                         // This isolated blocked-popup case must not invalidate the live output fixture.
                         state.presenter.outputSessionId = outputSessionId;
+                        if (outputSessionId) MindexPresenterLifetime.claim(outputSessionId);
                       }
                       return {
                         openCalls: window.__mindexPresenterOpenCalls || 0,
@@ -9113,6 +9114,7 @@ def main() -> int:
                         MindexPresenterFreshness.beforeOpen = previousPreflight;
                         hydratePresenterOutputInBackground = previousHydrate;
                         state.presenter.outputSessionId = previousSessionId;
+                        if (previousSessionId) MindexPresenterLifetime.claim(previousSessionId);
                         if (previousElectron === undefined) delete window.mindexElectron;
                         else window.mindexElectron = previousElectron;
                         window.open = previousOpen;
@@ -10842,6 +10844,7 @@ def main() -> int:
                       state.presenter.outputClientId = "";
                       state.presenter.outputStopAt = 0;
                       state.presenter.outputSessionId = crypto.randomUUID();
+                      MindexPresenterLifetime.claim(state.presenter.outputSessionId);
                       stopPresenterOutputWindowMonitor();
                       publishPresenterState({ force: true });
                       renderPresenterDetail();

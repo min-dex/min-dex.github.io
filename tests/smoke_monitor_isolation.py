@@ -26,7 +26,9 @@ def main():
                     print(engine, controller.evaluate('''async () => {
                       const check=(v,m)=>{if(!v)throw Error(m)};
                       const slides=Array.from({length:300},(_,i)=>({id:'s'+i,type:'title-assignee',text:'Slide '+i,layout:'lower-bar-text'}));
-                      const payload={serviceId:'monitor-perf',chromakey:true,slides,index:0};
+                      state.presenter.outputSessionId='monitor-output';
+                      MindexPresenterLifetime.claim(state.presenter.outputSessionId);
+                      const payload={outputSessionId:state.presenter.outputSessionId,serviceId:'monitor-perf',chromakey:true,slides,index:0};
                       state.services=[{id:'monitor-perf',date:'2026-09-13',type_id:'sunday-main'}];
                       state.presenter.serviceId='monitor-perf';state.presenter.slides=slides;state.presenter.index=0;
                       window.requests=0;

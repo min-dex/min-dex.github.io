@@ -17,6 +17,7 @@ try:
    host.evaluate('''()=>{
     const sid='remote-video';state.presenter.serviceId=sid;state.selectedServiceId=sid;
     state.presenter.outputSessionId='video-session';state.presenter.index=0;state.presenter.safetyBlank=false;state.presenter.liveScripture=null;
+    MindexPresenterLifetime.claim(state.presenter.outputSessionId);
     markPresenterOutputConnected=()=>{};restorePresenterControllerSession=()=> 'restored';
     presenterControllerIsLive=()=>true;isPresenterOutputWindowOpen=()=>true;
     state.presenter.outputWindow={closed:false,postMessage(message){state.presenter.channel.postMessage(message)}};
