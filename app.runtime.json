@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261102-daniel-template-restored",
+  "version": "20261102-worship-bulletin-design",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "105ce3b4ea13f02d20f0fe375bc2387064e1304de5de1bd61c65614794ceb258",
-  "runtime_sha256": "c0e4a7be9728fa6691bebd22071efe3ca1f17497ae69c36f782fad7e5f2c69c4",
-  "source_bytes": 1356083,
-  "runtime_bytes": 967734,
-  "source_gzip": 310784,
-  "runtime_gzip": 243674
+  "source_sha256": "12bae601e58693f6d031ba464e4b3067e5f83421635b0a8f36bb1cf85a5153e2",
+  "runtime_sha256": "49692f72b43b29679d1b70206825482f9886244e6ffdbc2f24164c4b638b5876",
+  "source_bytes": 1356215,
+  "runtime_bytes": 967855,
+  "source_gzip": 310813,
+  "runtime_gzip": 243699
 }
