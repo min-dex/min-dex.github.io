@@ -11,3 +11,9 @@ overrides:
   # Security fixes within the existing transitive major versions (Oct 2026).
   'undici@6.29.0': 6.29.1
   'fast-uri@3.1.8': 3.1.9
+
+  # Isolated experiment: official patched engine; legacy call shape bridge only.
+  'minimatch@3.1.5': file:tools/minimatch-compat
+  'minimatch@5.1.9': file:tools/minimatch-compat
+  'minimatch@9.0.9': 11.0.1
+  'minimatch@10.2.6': 11.0.1
