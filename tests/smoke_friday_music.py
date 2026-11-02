@@ -20,7 +20,7 @@ try:
  const dawn={id:'dawn-fixture',type_id:'holy_week_dawn'};
  const dawnItem={label:'자율기도',_worshipSlotKey:'prayer.meeting.free',memo:serializeServiceItemMemo({elementType:'title'})};
  const dawnMarkup=renderServiceSlotMusic({service:dawn,item:dawnItem});
- check(dawnMarkup.includes('dawn-free-prayer.mp3')&&!dawnMarkup.includes('friday-free-prayer'),'dawn source wrong');
+ check(dawnMarkup.includes('dawn-free-prayer-9b2f77451de5.mp3')&&!dawnMarkup.includes('friday-free-prayer'),'dawn source wrong');
  check(!renderServiceSlotMusic({service:dawn,item:{label:'기도',_worshipSlotKey:'prayer.opening'}}),'opening prayer received music');
  check(!renderServiceSlotMusic({service:{id:'other',type_id:'wednesday'},item:dawnItem}),'other service received dawn music');
  const explicit={...dawnItem,memo:serializeServiceItemMemo({audioAsset:{url:'https://example.invalid/preserved.mp3',name:'별도 음원'}})};
@@ -92,9 +92,9 @@ try:
  m.innerHTML=renderServiceSlotMusic({service:{id:'dawn-fixture',type_id:'holy_week_dawn'},item:{_worshipSlotKey:'prayer.meeting.free',label:'자율기도',memo:serializeServiceItemMemo({elementType:'title'})}});
  const binding=m.querySelector('[data-service-music-player]').dataset,a=state.serviceMusic.audio;
  await runServiceMusicAction('toggle',binding);
- check(a.src.includes('dawn-free-prayer.mp3')&&state.serviceMusic.ownerServiceId==='dawn-fixture'&&state.serviceMusic.playing,'dawn explicit playback failed');
+ check(a.src.includes('dawn-free-prayer-9b2f77451de5.mp3')&&state.serviceMusic.ownerServiceId==='dawn-fixture'&&state.serviceMusic.playing,'dawn explicit playback failed');
  renderServiceSlotMusic({service:{id:'friday',type_id:'friday'},item:{_worshipSlotKey:'prayer.meeting.free'}});
- check(a.src.includes('dawn-free-prayer.mp3')&&state.serviceMusic.playing,'navigation interrupted dawn');
+ check(a.src.includes('dawn-free-prayer-9b2f77451de5.mp3')&&state.serviceMusic.playing,'navigation interrupted dawn');
  runServiceMusicAction('stop',binding);check(a.paused&&a.currentTime===0,'dawn stop failed');clearServiceMusicSyncTimer();return 'PASS dawn explicit playback/owner/navigation/stop';
 }"""),flush=True)
             page.locator('#music-test').screenshot(path='/tmp/mindex-prayer-controls-'+engine+'.png')

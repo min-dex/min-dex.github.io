@@ -1143,3 +1143,20 @@ or create daily/yearly copies. Unmarked services retain their persisted dates.
 instance without changing the service type. `free_prayer_audio_key` may select an
 existing built-in track (`dawn.free` or `prayer.meeting.free`) while retaining the
 same shared free-prayer element and slot. No DB schema or permission change.
+
+## Replacement navigation and reusable common prayer · 2026-11-02
+
+A canceled service may name its actual replacement with
+`source_ref.replacement_service_id`. Read navigation follows that UUID while
+retaining the original absence/date metadata; it never starts presenter output.
+Without an explicit UUID, a matching replacement name on the same date (including
+annual date windows) selects the earliest meeting time, then a stable ID tie-break.
+Explicit meeting times precede dawn defaults: ordinary 05:00, Holy Week 04:50,
+and Thanksgiving special dawn 04:55.
+
+Thanksgiving's new default core order is representative prayer, special song,
+announcements, scripture reading, sermon with an empty optional citation, and free
+prayer. Authored older praise rows/documents require separate review before any
+removal. The common dawn audio key uses the approved silent-prayer recording;
+Friday's independent key remains unchanged. Daniel common prayer is one image
+element with two 16:9 pages, placed before the shared free-prayer element.

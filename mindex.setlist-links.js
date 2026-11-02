@@ -114,7 +114,8 @@
       const id = "worship:" + service.id;
       sources.push({id, service_id: service.id, source_kind: "worship", source_name: service.title || "",
         service_date: service.service_date, service_type_id: service.service_type_id,
-        leader: service.praise_leader || "", aliases:service.service_alias || "", status: service.status});
+        leader: service.praise_leader || "", aliases:service.service_alias || "", status: service.status,
+        ...(service.replacement_service_id ? {replacement_service_id:service.replacement_service_id} : {})});
       rows.sort((a,b) => (Number(a.section.sort_order)||0)-(Number(b.section.sort_order)||0)
         || String(a.section.id).localeCompare(String(b.section.id))
         || (Number(a.element.sort_order)||0)-(Number(b.element.sort_order)||0)

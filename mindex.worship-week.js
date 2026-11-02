@@ -40,7 +40,7 @@
         if(e.candidates.length)return {...e,slotName:name};
         const saved=scheduled.find(s=>s.id===(e.source.service_id||e.source.id)) || scheduled.find(s=>s.service_date===e.source.service_date&&type(s.service_type_id)===id);
         const noGathering=absent(e.source)||absent(saved);
-        return {...e,slotName:name,weeklyStatus:e.source.weekly_status||(noGathering?'집회 없음':'콘티 미등록'),weeklyReason:e.source.weekly_reason||(noGathering?(saved?.service_alias||saved?.title||''):'찬양 목록이 아직 등록되지 않았습니다')};
+        return {...e,...(saved?.replacement_service_id ? {source:{...e.source,replacement_service_id:saved.replacement_service_id}} : {}),slotName:name,weeklyStatus:e.source.weekly_status||(noGathering?'집회 없음':'콘티 미등록'),weeklyReason:e.source.weekly_reason||(noGathering?(saved?.service_alias||saved?.title||''):'찬양 목록이 아직 등록되지 않았습니다')};
       });
       for(const saved of scheduled) {
         if(saved.id&&actual.some(e=>e.source.service_id===saved.id||e.source.id===saved.id||e.source.id==='worship:'+saved.id))continue;
@@ -88,4 +88,21 @@ function renderWorshipSetlistWeekLayout(entries) {
   const layout=window.MindexWorshipWeek.layout(entries);
   const row=(cells,label)=>`<div class="svc-setlist-week-row" aria-label="${label}">${cells.map(cell=>`<div class="svc-setlist-week-slot" data-setlist-slot="${cell.id}">${cell.entries.length?cell.entries.map(card).join(''):`<div class="svc-setlist-slot-empty"><strong>${escapeHtml(cell.name)}</strong><span>등록된 예배 없음</span></div>`}</div>`).join('')}</div>`;
   return `<div class="svc-setlist-week-layout">${row(layout.public,'공예배')}${row(layout.departments,'부서 예배')}${layout.special.length?`<div class="svc-setlist-week-row" aria-label="기타 예배">${layout.special.map(card).join('')}</div>`:''}</div>`;
+}
+
+function serviceNavigationTargetId(service = {}) {
+  const explicit = worshipReplacementServiceId(service);
+  if (explicit) return explicit;
+  if (!serviceIsNoGathering(service)) return service.id || '';
+  const name = String(service.alias || service.service_alias || '').split('대체')[0].trim();
+  if (!name || !String(service.alias || service.service_alias || '').includes('대체')) return service.id || '';
+  const day = service.date || service.service_date || '';
+  const targets = state.services.filter(candidate => candidate.id !== service.id && !serviceIsNoGathering(candidate)
+    && [candidate.alias, candidate.service_alias, candidate.title].some(value => String(value || '').trim() === name)
+    && worshipServiceOverlapsDates(candidate, day, day));
+  targets.sort((a, b) => serviceStartSortMinutes(a) - serviceStartSortMinutes(b) || String(a.id).localeCompare(String(b.id)));
+  return targets[0]?.id || service.id || '';
+}
+function resolveServiceNavigationId(id) {
+  return serviceNavigationTargetId(state.services.find(service => service.id === id) || {id});
 }

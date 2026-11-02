@@ -4160,7 +4160,7 @@ async function fetchWorshipSetlistServices() {
   await ensureSingleSongActivation();
   // Only card metadata; do not load lyrics, slides, or full source documents.
   const results = await Promise.allSettled([
-    fetchSupabasePaged("mindex_worship_services", "id,service_type_id,service_date,title,service_alias,status,praise_leader,worship_leader,no_gathering:source_ref->no_gathering,no_gathering_reason:source_ref->>no_gathering_reason", q => q.order("id")),
+    fetchSupabasePaged("mindex_worship_services", "id,service_type_id,service_date,title,service_alias,status,praise_leader,worship_leader,no_gathering:source_ref->no_gathering,no_gathering_reason:source_ref->>no_gathering_reason,replacement_service_id:source_ref->>replacement_service_id", q => q.order("id")),
     fetchSupabasePaged("mindex_worship_sections", "id,service_id,sort_order,section_key,title", q => q.order("id")),
     fetchSupabasePaged("mindex_worship_elements", `id,section_id,sort_order,element_type,title,song_id,${state.singleSongCatalog ? "praise_record_id," : ""}label:source_ref->>label,template_suppressed:config->templateSuppressed,legacy_template_suppressed:config->template_suppressed,connectedPraise:config->connectedPraise,connected_praise:config->connected_praise,source_connectedPraise:source_ref->connectedPraise,source_connected_praise:source_ref->connected_praise`, q => q.eq("element_type", "praise").order("id")),
   ]);
@@ -23218,7 +23218,7 @@ function sortServicesByDate(services, direction = "asc") {
 
 function serviceStartSortMinutes(service = {}) {
   const typeId = worshipAppServiceTypeId(service?.type_id);
-  const time = SERVICE_TIME_WINDOWS[typeId]?.start || "";
+  const time = worshipServiceTimeRange(service, SERVICE_TIME_WINDOWS[typeId])?.start || "";
   const match = String(time).match(/^(\d{1,2}):(\d{2})$/);
   if (!match) return Number.MAX_SAFE_INTEGER;
   return (Number(match[1]) * 60) + Number(match[2]);
@@ -23437,7 +23437,8 @@ function serviceNavigationBlocked(serviceId) {
 
 function renderNoGatheringServiceDetail(service) {
   setRightSidebarContent("");
-  refs.detailPane.innerHTML = `<div class="empty-detail"><div class="empty-detail-inner"><h2>${escapeHtml(serviceNavigationName(service))}</h2><p>${escapeHtml(formatServiceDate(service))} · 집회 없음</p></div></div>`;
+  const targetId = worshipReplacementServiceId(service);
+  refs.detailPane.innerHTML = `<div class="empty-detail"><div class="empty-detail-inner"><h2>${escapeHtml(serviceNavigationName(service))}</h2><p>${escapeHtml(formatServiceDate(service))} · 집회 없음</p>${targetId ? `<button class="btn secondary" data-open-presenter-service="${escapeAttr(targetId)}">대체 예배 열기</button>` : ""}</div></div>`;
 }
 
 function serviceOrderTemplate(typeId, options = {}) {
@@ -24167,7 +24168,7 @@ function serviceTimeWindow(service, baseDate = new Date()) {
   const period = worshipServicePeriod(service, baseDate, true);
   const day = parseLocalDate(period.start);
   if (Number.isNaN(day.getTime())) return null;
-  const range = SERVICE_TIME_WINDOWS[worshipAppServiceTypeId(service?.type_id)];
+  const range = worshipServiceTimeRange(service, SERVICE_TIME_WINDOWS[worshipAppServiceTypeId(service?.type_id)]);
   if (!range) {
     const finalDay = parseLocalDate(period.end);
     finalDay.setHours(23, 59, 59, 999);
@@ -24496,7 +24497,8 @@ function serviceSidebarDateKey(service) {
 }
 
 function renderServiceSidebarCard(service, options = {}) {
-  const noGathering = serviceIsNoGathering(service);
+  const targetId = serviceNavigationTargetId(service);
+  const noGathering = serviceIsNoGathering(service) && targetId === service.id;
   const active = !noGathering && service.id === state.selectedServiceId ? " active" : "";
   const showDate = options.showDate !== false;
   const { base, name } = serviceNavigationDetails(service);
@@ -24506,7 +24508,7 @@ function renderServiceSidebarCard(service, options = {}) {
     <button
       class="service-sidebar-card${showDate ? "" : " service-sidebar-card--compact"}${active}${noGathering ? " is-no-gathering" : ""}"
       type="button"
-      ${noGathering ? 'disabled aria-disabled="true"' : `data-service-id="${escapeAttr(service.id)}"`}
+      ${noGathering ? 'disabled aria-disabled="true"' : `data-service-id="${escapeAttr(targetId)}"`}
       aria-label="${escapeAttr(`${formatServiceDate(service, { compact: true })} ${alias ? title + " " + alias : title} ${noGathering ? "집회 없음" : "열기"}`)}"
     >
       ${showDate ? `<span class="service-sidebar-date">${escapeHtml(formatServiceDate(service, { compact: true }))}</span>` : ""}
@@ -25182,7 +25184,7 @@ function renderWorshipWeekStatus(entry) {
   const details = serviceNavigationDetails(worshipSetlistNavigationService(entry.source));
   const status = entry.weeklyStatus;
   const kind = status === "집회 없음" ? "absent" : status === "콘티 미등록" ? "missing" : "unknown";
-  const serviceId = kind === "missing" ? worshipSetlistArchiveServiceId(entry.source) : "";
+  const serviceId = worshipReplacementServiceId(entry.source) || (kind === "missing" ? worshipSetlistArchiveServiceId(entry.source) : "");
   const heading = serviceId
     ? `<button type="button" class="svc-setlist-service-link" data-setlist-open-service="${escapeAttr(serviceId)}" aria-label="${escapeAttr(`${entry.source.service_date} ${entry.slotName} 열기`)}">${escapeHtml(title)}</button>`
     : `<strong>${escapeHtml(title)}</strong>`;
@@ -27647,7 +27649,8 @@ function renderServiceWeekDay(date, services) {
 }
 
 function renderServiceWeekCard(service) {
-  const noGathering = serviceIsNoGathering(service);
+  const targetId = serviceNavigationTargetId(service);
+  const noGathering = serviceIsNoGathering(service) && targetId === service.id;
   const preview = serviceItemPreviewParts(service.id, { compact: true });
   const variant = serviceVariantDisplayName(service);
   const details = serviceNavigationDetails(service);
@@ -27656,7 +27659,7 @@ function renderServiceWeekCard(service) {
     <button
       class="service-week-card"
       type="button"
-      ${noGathering ? 'disabled aria-disabled="true"' : `data-service-id="${escapeAttr(service.id)}"`}
+      ${noGathering ? 'disabled aria-disabled="true"' : `data-service-id="${escapeAttr(targetId)}"`}
     >
       <strong>${escapeHtml(serviceName)}</strong>
       ${details.context ? `<span class="service-week-card-preview">${escapeHtml(details.context)}</span>` : ""}
@@ -27667,7 +27670,8 @@ function renderServiceWeekCard(service) {
 }
 
 function renderServiceDateCard(service, options = {}) {
-  const noGathering = serviceIsNoGathering(service);
+  const targetId = serviceNavigationTargetId(service);
+  const noGathering = serviceIsNoGathering(service) && targetId === service.id;
   const preview = serviceItemPreviewParts(service.id);
   const calendarRow = (state.calendarData || []).find((row) => String(row?.date || "").trim() === String(service?.date || "").trim());
   const variant = serviceVariantDisplayName(service);
@@ -27683,7 +27687,7 @@ function renderServiceDateCard(service, options = {}) {
     <button
       class="service-date-card ${serviceDateStatus(service).key === "past" ? "is-past" : ""}"
       type="button"
-      ${noGathering ? 'disabled aria-disabled="true"' : `data-service-id="${escapeAttr(service.id)}"`}
+      ${noGathering ? 'disabled aria-disabled="true"' : `data-service-id="${escapeAttr(targetId)}"`}
       aria-label="${escapeAttr(`${formatServiceDate(service, { compact: true })} ${cleanList([serviceName, details.context]).join(" ")} ${noGathering ? "집회 없음" : "열기"}`)}"
     >
       <span class="service-date-card-top">
@@ -29941,7 +29945,7 @@ function renderLiveScriptureControl(serviceId) {
 }
 
 const SERVICE_SLOT_MUSIC = Object.freeze({
-  "dawn.free": { source: "./assets/presenter/dawn-free-prayer.mp3", label: "새벽기도 자율기도 음악", repeatAllowed: false },
+  "dawn.free": { source: "./assets/presenter/dawn-free-prayer-9b2f77451de5.mp3", label: "새벽기도 자율기도 음악", repeatAllowed: false },
   "prayer.meeting.free": { source: "./assets/presenter/friday-free-prayer.m4a?v=faststart-20260919", label: "자율기도 음악", repeatAllowed: false },
 });
 

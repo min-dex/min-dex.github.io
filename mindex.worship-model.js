@@ -675,8 +675,11 @@ function worshipServiceHasDawnFreePrayer(service = {}) {
 }
 function worshipFreePrayerTemplate(steps, service) {
   if (!service || !worshipServiceHasDawnFreePrayer(service)) return steps;
-  return steps.map(step => step?.config?.slotKey === 'response.prayer'
-    ? { label: '자율기도', name: '자율기도', required: false, sectionKey: 'free_prayer', elements: [worshipFreePrayerElement()] } : step);
+  return [
+    publicWorshipPrayerStep(), publicWorshipSpecialSongStep(), publicWorshipAnnouncementsStep(),
+    publicWorshipScriptureReadingStep(), publicWorshipSermonStep({ typeId: 'holy-week-dawn', service }),
+    { label: '자율기도', name: '자율기도', required: false, sectionKey: 'free_prayer', elements: [worshipFreePrayerElement()] },
+  ];
 }
 function worshipFreePrayerAudioKey(typeId) {
   const service = typeId && typeof typeId === 'object' ? typeId : {};
@@ -740,4 +743,26 @@ function worshipServiceDateGroups(services, start, end) {
 function worshipServiceOutputContext(service = {}) {
   const source = service?._worshipSourceRef || service?.source_ref || {};
   return ['chromakey','clean'].includes(source.presenter_output_context) ? source.presenter_output_context : '';
+}
+
+function worshipReplacementServiceId(service = {}) {
+  const source = service?._worshipSourceRef || service?.source_ref || {};
+  const id = source.replacement_service_id || service?.replacement_service_id || '';
+  return typeof id === 'string' && /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(id) && id.toLowerCase() !== String(service?.id || '').toLowerCase() ? id.toLowerCase() : '';
+}
+
+// Explicit meeting times win; dawn variants have distinct published start times.
+function worshipServiceTimeRange(service = {}, fallback = null) {
+  const source = service._worshipSourceRef || service.source_ref || {};
+  const valid = value => /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(String(value || ''));
+  const explicit = [service.start_time, service.service_time, source.start_time, source.service_time, source.mindexServiceDocument?.startTime].find(valid);
+  const type = WORSHIP_SERVICE_TYPE_ALIASES[service.type_id || service.service_type_id] || service.type_id || service.service_type_id;
+  let range = fallback;
+  if (type === 'holy-week-dawn') {
+    const name = [service.title, service.alias, service.service_alias, source.mindexServiceDocument?.serviceAlias].filter(Boolean).join('').replace(/\s+/g, '');
+    const start = name.includes('감사특별새벽기도회') ? '04:55' : name.includes('고난주간') ? '04:50' : '05:00';
+    range = { start, end: '06:00' };
+  }
+  if (!explicit) return range;
+  return { start: explicit, end: valid(source.end_time) ? source.end_time : range?.end || explicit };
 }

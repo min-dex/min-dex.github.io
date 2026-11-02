@@ -2565,6 +2565,7 @@ async function deleteService(serviceId) {
 }
 
 function selectService(id) {
+  id = resolveServiceNavigationId(id);
   if (serviceNavigationBlocked(id)) return;
   if (state.module === "home") {
     void openServiceInPresenter(id);
@@ -2618,6 +2619,7 @@ async function openHomeNextService(action = "presenter", serviceId = "") {
 }
 
 async function openServiceInPresenter(id) {
+  id = resolveServiceNavigationId(id);
   if (!id) return;
   if (serviceNavigationBlocked(id)) return;
   window.MINDEX_SERVICE_ENTRY?.invalidate();
