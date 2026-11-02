@@ -77,13 +77,32 @@
 .svc-board-media-layout > .svc-board-media-rail { flex:0 1 200px; min-width:0; max-width:100%; display:flex; flex-direction:column; gap:10px; }
 .svc-board-media-layout > .svc-board-grid { flex:1 1 240px; min-width:0; margin:0; }
 .svc-board-media-rail > strong { font-size:var(--ui-meta-size); overflow-wrap:anywhere; }
-/* Free prayer uses one compact toolbar above the full-width slide grid. */
-.svc-board-subgroup > .svc-music-player--inline { width:fit-content; gap:4px 8px; padding-block:2px; }
-.svc-board-subgroup > .svc-music-player--inline .svc-music-label { flex:0 1 auto; font-size:var(--ui-meta-size); }
-.svc-board-subgroup > .svc-music-player--inline .icon-btn { width:auto; flex:0 0 auto; min-height:28px; height:28px; padding-inline:6px; background:transparent; border-color:transparent; }
-.svc-board-subgroup > .svc-music-player--inline > .song-timing-seek { flex:0 1 180px; min-width:0; }
+/* One player above the slide grid. The play button anchors the track title. */
+.svc-board-subgroup > .svc-music-player--inline {
+  display:flex; width:fit-content; max-width:100%; box-sizing:border-box;
+  align-items:center; gap:4px 8px; padding:4px 10px 4px 4px;
+  background:var(--ui-surface-panel); border:1px solid var(--line); border-radius:18px;
+}
+.svc-board-subgroup > .svc-music-player--inline .svc-music-transport:not([hidden]) { display:contents; }
+.svc-board-subgroup > .svc-music-player--inline .svc-music-label {
+  order:1; flex:0 1 auto; font-size:var(--ui-meta-size); font-weight:600;
+}
+.svc-board-subgroup > .svc-music-player--inline .icon-btn {
+  order:2; flex:0 0 28px; width:28px; height:28px; min-height:28px; padding:0; gap:0;
+  background:transparent; border:0; border-radius:50%; font-size:0;
+}
+.svc-board-subgroup > .svc-music-player--inline .svc-music-toggle {
+  order:0; color:var(--ink); background:var(--ui-surface-field);
+}
+.svc-board-subgroup > .svc-music-player--inline .icon-btn svg { width:15px; height:15px; }
+.svc-board-subgroup > .svc-music-player--inline .svc-volume-control {
+  order:3; border:0; border-inline-start:1px solid var(--line);
+  border-radius:0; background:transparent; padding-inline:8px 0;
+}
+.svc-board-subgroup > .svc-music-player--inline > .song-timing-seek { order:4; flex:0 1 160px; min-width:0; }
 .svc-board-subgroup > .svc-music-player--inline > .song-timing-seek:has([data-song-timing-seek]:disabled) { display:none; }
 .svc-board-subgroup > .svc-music-player--inline [data-song-timing-clock] { min-width:0; }
+.svc-board-subgroup > .svc-music-player--inline [data-song-timing-resume] { order:5; }
 #servicePresenterControls[data-focus-view="true"] .svc-board-subgroup > .svc-music-player--inline { display:none; }
 .svc-board-media-rail .svc-deck-playback { flex-direction:column; align-items:flex-start; }
 #servicePresenterControls[data-focus-view="true"] .svc-board-media-layout { display:contents; }
