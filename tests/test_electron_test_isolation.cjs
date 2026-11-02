@@ -11,7 +11,7 @@ test('test isolation is opt-in, rejects real packages and blocks before renderer
 });
 
 test('native security changes trigger unsigned platform validation before main',()=>{
- const workflow=fs.readFileSync('.github/workflows/desktop-release.yml','utf8');
+ const workflow=fs.readFileSync('.github/workflows/desktop-release.yml','utf8').replace(/\r\n/g,'\n');
  assert.match(workflow,/branches: \[main, codex\/mindex-presenter-handoff, codex\/native-\*\]/);
  for(const entry of ['tools/minimatch-compat/**','tests/test_minimatch_compat.cjs','tests/test_electron_test_isolation.cjs']) assert.ok(workflow.includes('      - '+entry+'\n'),entry);
  assert.match(workflow,/run: pnpm audit --audit-level=moderate/);
