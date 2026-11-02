@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261102-storage-undo-stability",
+  "version": "20261102-union-cross-package",
   "options": {
     "compress": false,
     "mangle": {
