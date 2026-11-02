@@ -180,7 +180,8 @@
         const detail=document.createElement('p');detail.className='monitor-environment';
         const device = item.position === '송출 대기'
           ? item.device?.replace(/ · 송출 대기$/, '') : item.device;
-        detail.textContent=[device,item.position,/^\d{4}$/.test(item.code)&&token?'송출 코드 '+item.code:''].filter(Boolean).join(' · ');
+        const position = /^\d+\s*\/\s*\d+$/.test(item.position) ? `슬라이드 ${item.position}` : item.position;
+        detail.textContent=[device,position,/^\d{4}$/.test(item.code)&&token?'송출 코드 '+item.code:''].filter(Boolean).join(' · ');
         row.append(title,detail);return row;
       });
       $('[data-outputs]').replaceChildren(...(rows.length?rows:['현재 등록된 송출이 없습니다.']));

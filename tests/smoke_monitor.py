@@ -40,11 +40,11 @@ def main():
                     assert page.locator('.monitor-panel').is_visible()
                     page.locator('[data-outputs]').get_by_text('주일예배 [3부]').wait_for()
                     assert '0123' not in page.locator('[data-outputs]').inner_text()
-                    assert '93 / 224' in page.locator('[data-outputs]').inner_text()
+                    assert '슬라이드 93 / 224' in page.locator('[data-outputs]').inner_text()
                     assert page.locator('[data-outputs]').inner_text().count('송출 대기') == 1
                     page.click('[data-show-codes]');page.fill('[data-pin]','1111');page.click('[data-check-pin]')
                     page.wait_for_function("document.querySelector('[data-outputs]').textContent.includes('송출 코드 0123')")
-                    assert '93 / 224' in page.locator('[data-outputs]').inner_text()
+                    assert '슬라이드 93 / 224' in page.locator('[data-outputs]').inner_text()
                     page.click('[data-show-codes]');assert '0123' not in page.locator('[data-outputs]').inner_text()
                     page.set_viewport_size({'width':390,'height':430})
                     header=page.locator('.monitor-panel header')

@@ -77,7 +77,8 @@ async function listOutputs(){
    title.textContent=output.title||'예배';code.hidden=!token;code.textContent=token?(output.code?'코드 '+output.code:'코드 준비 중'):'';
    const device = output.position === '송출 대기'
      ? output.device?.replace(/ · 송출 대기$/, '') : output.device;
-   detail.textContent=[device,output.position].filter(Boolean).join(' · ');
+   const position = /^\d+\s*\/\s*\d+$/.test(output.position) ? `슬라이드 ${output.position}` : output.position;
+   detail.textContent=[device,position].filter(Boolean).join(' · ');
   }
 
  }catch(e){$('status').textContent=token?e.message:'예배 목록을 불러오지 못했어요. 연결을 확인하면 자동으로 다시 불러와요.';if(e.code==='expired'){adminToken=null;$('outputList').replaceChildren();delete $('outputList').dataset.signature;connectionForms();}}
