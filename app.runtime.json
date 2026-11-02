@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261102-union-cross-package",
+  "version": "20261103-bulletin-restraint",
   "options": {
     "compress": false,
     "mangle": {
