@@ -3,7 +3,7 @@ from smoke_presenter_focus import setup
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 
-def check(page, url):
+def check(page, url, shortcut):
     page.add_init_script("""const listen=window.addEventListener;window.addEventListener=function(type,fn,...opts){if(type==='keydown' && String(fn).includes('handleServiceEditUndo')) window.undoBound=true; return listen.call(this,type,fn,...opts)}""")
     setup(page, url)
     page.evaluate("if (!window.undoBound) bindStaticEvents()")
@@ -31,7 +31,7 @@ def check(page, url):
     page.evaluate("""()=>{const left=document.createElement('aside');document.body.prepend(left);
       refs.detailPane.querySelectorAll('[data-service-item-field]').forEach(el=>left.append(el));
       if (!left.childElementCount) throw Error('fixture did not render editor fields')}""")
-    page.keyboard.press("Meta+z")
+    page.keyboard.press(shortcut)
     state = page.evaluate("""()=>{const row=getServiceItems(state.selectedServiceId).find(r=>r.id==='item-0');
       return [row.song_id,row.version_id,row.memo===window.undoMemo,window.undoSaves]}""")
     assert state == ["old","old-v",True,1], state
@@ -43,7 +43,10 @@ def main():
         with sync_playwright() as p:
             for engine in ('chromium','webkit'):
                 browser = launch_chromium(p) if engine=='chromium' else p.webkit.launch()
-                check(browser.new_page(viewport={"width":1440,"height":900}),url)
+                for shortcut in ('Meta+z','Control+z'):
+                    page=browser.new_page(viewport={"width":1440,"height":900})
+                    check(page,url,shortcut)
+                    page.close()
                 browser.close()
                 print('PASS picker undo after normalized save and field-free focused presenter',engine)
     finally:
