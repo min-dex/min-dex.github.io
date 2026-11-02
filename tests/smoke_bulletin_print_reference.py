@@ -12,7 +12,7 @@ try:
    browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
    page=browser.new_page(viewport={'width':1600,'height':1200})
    page.route('**/*',lambda r:r.continue_() if r.request.method=='GET' and urlsplit(r.request.url).netloc==urlsplit(url).netloc else r.abort())
-   page.route('**/print-reference-fixture.html',lambda r:r.fulfill(content_type='text/html',body='<meta charset="utf-8"><style>body{margin:0}svg{width:1600px;display:block}</style><script src="/mindex.inline-text.js"></script><script src="/mindex.bulletin.js"></script><main></main>'))
+   page.route('**/print-reference-fixture.html',lambda r:r.fulfill(content_type='text/html',body='<meta charset="utf-8"><style>body{margin:0}svg{width:1600px;display:block}</style><script src="/mindex.inline-text.js"></script><script src="/mindex.bulletin-forest.js"></script><script src="/mindex.bulletin.js"></script><main></main>'))
    page.goto(url.rsplit('/',1)[0]+'/print-reference-fixture.html')
    result=page.evaluate(r'''async()=>{
     const B=MindexBulletin;await B.readyAssets();await document.fonts.ready;

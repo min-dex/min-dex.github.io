@@ -18,7 +18,20 @@ assert.deepEqual(plain(restored.settings.appearance),plain(style));assert.equal(
 assert.equal(restored.fields.coverTitle,'');assert.equal(restored.fields.news,'작성한 광고');
 assert.throws(()=>B.normalizeTemplate({...row,department:'young-adult'}),/공통 양식/);
 assert.throws(()=>B.applyTemplate({...doc,source:{...source,department:'young-adult'}},row),/다른 부서/);
-assert.throws(()=>B.normalizeTemplate({...row,layout:{design:'simple'}}),/어린이부/);
+assert.throws(()=>B.normalizeTemplate({...row,layout:{design:'simple'}}),/부서 공통/);
 const bad=B.normalizeSnapshot({settings:{design:'children-forest'},frames:[{id:'newsTitle',family:'url(evil)',weight:999}]});
 assert.equal(bad.frames[0].family,undefined);assert.notEqual(bad.frames[0].weight,999);
 console.log('PASS server appearance validation, department identity, content/blank/month preservation and template-key/font roundtrip');
+
+for(const design of ['simple','editorial','ink','panels','children','children-forest']){
+ const department=design.startsWith('children')?'children':'young-adult';
+ const d={...B.normalizeSnapshot({settings:{design,appearance:{palette:{ink:'#123456'},labels:{newsTitle:'',unknown:'discard'},assets:{logo:'javascript:evil'}}},fields:{welcome:'',news:'authored'},inherited:{common:{staff:'inherited'},months:{}},months:{'2026-11':'my month'}}),source:{...source,department}};
+ const v=B.templateValue(d),r={template_key:B.TEMPLATE_KEYS[department],revision:1,...v};
+ assert.equal(v.layout.design,design);assert.equal(v.layout.appearance.labels.newsTitle,'');
+ assert.equal(v.layout.appearance.palette.ink,'#123456');assert.ok(!v.layout.appearance.assets.logo.startsWith('javascript:'));
+ const before=JSON.stringify({fields:d.fields,inherited:d.inherited,months:d.months,source:d.source});
+ B.applyTemplate(d,r,{common:false});
+ assert.equal(JSON.stringify({fields:d.fields,inherited:d.inherited,months:d.months,source:d.source}),before);
+ assert.equal(B.normalizeSnapshot(B.storedValue(d).content).fields.welcome,'');
+}
+console.log('PASS all six design defaults, safe appearance and layout-only content preservation');

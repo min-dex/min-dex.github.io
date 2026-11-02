@@ -5,7 +5,7 @@ const {chromium}=require('playwright');
 const root=path.resolve(__dirname,'..');
 const server=http.createServer((req,res)=>{
  const route=new URL(req.url,'http://localhost').pathname;
- if(route==='/'){res.setHeader('Content-Type','text/html');res.end('<meta charset="utf-8"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/styles.bulletin.css"><script src="/mindex.inline-text.js"></script><script src="/mindex.bulletin.js"></script><main id="host" style="height:calc(100dvh - 40px);margin:20px"></main>');return;}
+ if(route==='/'){res.setHeader('Content-Type','text/html');res.end('<meta charset="utf-8"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/styles.bulletin.css"><script src="/mindex.inline-text.js"></script><script src="/mindex.bulletin-forest.js"></script><script src="/mindex.bulletin.js"></script><main id="host" style="height:calc(100dvh - 40px);margin:20px"></main>');return;}
  const file=path.resolve(root,route.slice(1));
  if(!file.startsWith(root+path.sep)||!fs.existsSync(file)||fs.statSync(file).isDirectory()){res.writeHead(404);res.end();return;}
  res.setHeader('Content-Type',({'.js':'application/javascript','.css':'text/css','.svg':'image/svg+xml'})[path.extname(file)]||'application/octet-stream');res.end(fs.readFileSync(file));

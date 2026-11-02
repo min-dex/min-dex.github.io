@@ -86,7 +86,7 @@ try:
    assert page.evaluate("docs.get('future').settings.appearance.palette.cover==='#dceafb'&&template.revision===2&&sent.length===2&&!docs.get('future').dirty&&!editor.canApplyUpdate()")
    page.locator('[data-bulletin-service]').select_option('youth');page.wait_for_function("docs.get('youth')?.source?.department==='young-adult'")
    page.locator('[data-bulletin-template-edit]').click();page.wait_for_function("document.querySelector('[data-bulletin-setting=itemGap]')?.disabled===false")
-   assert page.locator('[data-bulletin-design-color]').count()==0
+   assert page.locator('[data-bulletin-design-color]').count()==8
    page.get_by_role('button',name='내용',exact=True).click()
    assert page.locator('[data-bulletin-field=welcome]').input_value()=='청년 공통 환영'
    page.locator('[data-bulletin-template-exit]').click();page.wait_for_function("document.querySelector('[data-bulletin-service]')?.disabled===false")
@@ -99,5 +99,47 @@ try:
    # Untrusted persisted style keys cannot inject markup, CSS or executable assets.
    assert page.evaluate("(()=>{const a=MindexBulletinForest.normalizeAppearance({palette:{ink:'url(javascript:evil)'},assets:{logo:'javascript:evil'},visible:{unknown:true}});return a.palette.ink==='#294b3b'&&a.assets.logo.startsWith('assets/')&&!Object.hasOwn(a.visible,'unknown')})()")
    print('PASS server children design: appearance/labels/visibility/frames CAS, issue isolation, explicit apply, reload, future inheritance, conflict retention, safe schema',engine,flush=True)
+   # Every supported department and old/new renderer uses the same server design workflow.
+   for design in ('simple','editorial','ink','panels','children','children-forest'):
+    page.evaluate(r'''design=>{
+     editor.destroy();window.docs=new Map();window.rows={};window.template=null;window.templateSent=[];window.sent=[];
+     const B=MindexBulletin,department=design.startsWith('children')?'children':'young-adult';
+     window.allSource=id=>({...getSource(id),department,id,events:'원래 월 일정',common:{welcome:'상속된 환영'},order:[{id:'sermon',label:'설교',content:'주간 말씀',person:'담당자'}]});
+     const initial={...B.normalizeSnapshot({fields:{news:'원래 소식',welcome:'',motto:'직접 쓴 표어',outline:'원래 요점'},settings:{design,theme:''},months:{'2026-11':'내 일정'},inherited:{common:{staff:'상속된 섬김이'}}}),source:allSource('saved')};
+     rows.saved={revision:3,...B.storedValue(initial)};window.original=JSON.stringify(rows.saved.content);
+     window.editor=B.mount(document.getElementById('host'),{scope:'all-design-'+design,documents:docs,serviceId:'saved',services:[{id:'saved',label:'기존 주보'},{id:'new',label:'새 주보'}],loadSource:async id=>allSource(id),loadDraft:async id=>structuredClone(rows[id]||null),saveDraft:async(id,value,revision)=>{if(revision!==(rows[id]?.revision||0))throw Error('CAS');sent.push(value);return rows[id]={revision:revision+1,...structuredClone(value)}},loadTemplate:async()=>structuredClone(template),saveTemplate:async(key,value,revision)=>{if(revision!==(template?.revision||0))throw Error('CAS');templateSent.push(value);return template={template_key:key,revision:revision+1,...structuredClone(value)}}});
+    }''',design)
+    page.wait_for_function("docs.get('saved')?.dbLoaded&&document.querySelector('[data-bulletin-template-edit]')?.disabled===false")
+    page.locator('[data-bulletin-template-edit]').click()
+    page.wait_for_function("document.querySelector('[data-bulletin-design-color=ink]')?.disabled===false")
+    assert page.locator('[data-bulletin-setting=design]').input_value()==design,'Seeding keeps the selected existing design'
+    if design=='simple':assert page.locator('[data-frame-id=motto] text').first.get_attribute('font-weight')=='500','Default template must preserve existing simple font weight'
+    page.locator('[data-bulletin-frame]').select_option('newsTitle')
+    page.locator('[data-bulletin-design-label=newsTitle]').fill('서버에서 바꾼 제목')
+    page.locator('[data-bulletin-dimension=size]').select_option('10')
+    page.locator('[data-bulletin-family]').select_option('MindexChildrenTheme')
+    page.get_by_text('색상',exact=True).click()
+    page.locator('[data-bulletin-design-color=ink]').fill('#123456')
+    page.get_by_text('로고와 그림',exact=True).click()
+    page.locator('[data-bulletin-design-image=logo]').set_input_files({'name':'logo.png','mimeType':'image/png','buffer':Path('assets/bulletin/children-mark-2026-11.png').read_bytes()})
+    page.wait_for_function("document.querySelector('[data-bulletin-print]')?.disabled===false")
+    page.locator('[data-bulletin-save]').click();page.wait_for_function('template?.revision===1')
+    assert page.evaluate("JSON.stringify(rows.saved.content)===original&&sent.length===0&&template.layout.appearance.labels.newsTitle==='서버에서 바꾼 제목'&&template.layout.appearance.palette.ink==='#123456'")
+    assert page.locator('.bulletin-canvas').inner_text().find('서버에서 바꾼 제목')>=0
+    assert page.evaluate("[...document.querySelectorAll('.bulletin-canvas image')].some(n=>n.getAttribute('href').startsWith('data:image/png'))")
+    assert page.evaluate("[...document.querySelectorAll('.bulletin-canvas [fill]')].some(n=>n.getAttribute('fill')==='#123456')")
+    page.locator('[data-bulletin-template-exit]').click();page.wait_for_function("document.querySelector('[data-bulletin-template-edit]')?.disabled===false")
+    page.locator('[data-bulletin-template-edit]').click();page.wait_for_function("document.querySelector('.bulletin-status').textContent==='공통 양식 편집 · 저장됨'")
+    assert page.locator('[data-bulletin-save]').is_disabled()
+    page.locator('[data-bulletin-template-exit]').click();page.wait_for_function("document.querySelector('[data-bulletin-template-edit]')?.disabled===false")
+    page.evaluate("window.copyBefore=JSON.stringify({fields:docs.get('saved').fields,inherited:docs.get('saved').inherited,months:docs.get('saved').months,sourceSnapshot:docs.get('saved').sourceSnapshot})")
+    page.locator('[data-bulletin-template-apply]').click();page.wait_for_function("docs.get('saved').settings.templateRevision===1&&document.querySelector('[data-bulletin-print]')?.disabled===false")
+    assert page.evaluate("copyBefore===JSON.stringify({fields:docs.get('saved').fields,inherited:docs.get('saved').inherited,months:docs.get('saved').months,sourceSnapshot:docs.get('saved').sourceSnapshot})"),'Explicit apply must preserve every authored/blank/inherited/month/source value'
+    page.locator('[data-bulletin-save]').click();page.wait_for_function('sent.length===1')
+    page.evaluate('editor.reload()');page.wait_for_function("document.querySelector('[data-bulletin-print]')?.disabled===false")
+    assert page.evaluate("docs.get('saved').settings.appearance.palette.ink==='#123456'&&docs.get('saved').fields.welcome===''&&docs.get('saved').frames.find(f=>f.id==='newsTitle').family==='MindexChildrenTheme'")
+    page.locator('[data-bulletin-service]').select_option('new');page.wait_for_function("docs.get('new')?.settings.templateRevision===1&&document.querySelector('[data-bulletin-print]')?.disabled===false")
+    assert page.evaluate("docs.get('new').settings.appearance.palette.ink==='#123456'&&JSON.stringify(rows.saved.content)!==original")
+    print('PASS all-department design: seed/save/reopen/layout-only apply/content preservation/reload/new inheritance',design,engine,flush=True)
    browser.close()
 finally:server.shutdown()

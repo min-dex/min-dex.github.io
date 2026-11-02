@@ -7,7 +7,7 @@ const fixture=require('./fixtures/bulletin-20260920.json');
 const root=path.resolve(__dirname,'..');
 const server=http.createServer((req,res)=>{
   const pathname=new URL(req.url,'http://localhost').pathname;
-  if(pathname==='/'){res.setHeader('Content-Type','text/html');res.end('<meta charset="utf-8"><script src="/mindex.inline-text.js"></script><script src="/mindex.bulletin.js"></script>');return;}
+  if(pathname==='/'){res.setHeader('Content-Type','text/html');res.end('<meta charset="utf-8"><script src="/mindex.inline-text.js"></script><script src="/mindex.bulletin-forest.js"></script><script src="/mindex.bulletin.js"></script>');return;}
   const file=path.resolve(root,pathname.slice(1));
   if(!file.startsWith(root+path.sep)||!fs.existsSync(file)||fs.statSync(file).isDirectory()){res.writeHead(404);res.end();return;}
   if(file.endsWith('.svg'))res.setHeader('Content-Type','image/svg+xml');
@@ -83,7 +83,7 @@ const server=http.createServer((req,res)=>{
   await page.locator('[data-bulletin-template-apply]').click();
   await page.waitForFunction(()=>audit.documents.get('week-a').settings.templateRevision===2);
   assert.equal(await page.locator('[data-bulletin-field="news"]').inputValue(),'① 이번 주만 바꾸는 소식');
-  assert.equal((await get()).welcome,'2027 함께 예배해요');
+  assert.equal((await get()).welcome,'공통 환영 인사','Explicit design apply preserves authored and inherited copy');
   // A conflicting template save must leave edits and all dated records intact.
   await page.locator('[data-bulletin-template-edit]').click();
   await page.locator('[data-bulletin-mode="content"]').click();

@@ -12,7 +12,7 @@ try:
    browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
    page=browser.new_page(viewport={'width':1400,'height':1000})
    page.route('**/*',lambda r:r.continue_() if r.request.method=='GET' and urlsplit(r.request.url).netloc==urlsplit(url).netloc else r.abort())
-   page.route('**/bulletin-liturgy-fixture.html',lambda r:r.fulfill(content_type='text/html',body='<meta charset="utf-8"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/styles.bulletin.css"><script src="/mindex.inline-text.js"></script><script src="/mindex.bulletin.js"></script><main id="rendered"></main><iframe id="print-view"></iframe>'))
+   page.route('**/bulletin-liturgy-fixture.html',lambda r:r.fulfill(content_type='text/html',body='<meta charset="utf-8"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/styles.bulletin.css"><script src="/mindex.inline-text.js"></script><script src="/mindex.bulletin-forest.js"></script><script src="/mindex.bulletin.js"></script><main id="rendered"></main><iframe id="print-view"></iframe>'))
    page.goto(base+'/bulletin-liturgy-fixture.html')
    page.wait_for_function('!!window.MindexBulletin')
    result=page.evaluate('''async()=>{

@@ -508,3 +508,14 @@ A4 가로 양면 반접지(각 297×210mm)를 유지한다. 겉면은 소식·�
 
 공통 양식 편집 버튼의 고정 문구는 상태 갱신 때 다시 만들지 않는다.
 WebKit에서도 누름/뗌 사이 서버 초안 응답이 와도 클릭을 유지하도록 실제 입력 E2E에서 강제 재현한다.
+
+## All bulletin designs · 2026-11-02
+
+Both supported departments (children and young-adult) share server design editing for all six renderers.
+Existing department keys and CAS are retained; cross-department designs are rejected. New common templates
+start from the currently selected layout and frames. Existing defaults and records are not redesigned automatically.
+All explicit latest-template applications are layout-only: authored/blank/inherited copy, months and sourceSnapshot
+remain exact. New issues inherit the server template. No worship rows or unsupported departments are migrated.
+The existing image validation and size constraints apply to every renderer.
+`smoke_bulletin_server_design.py` covers six layouts in Chromium/WebKit, including save/reopen, content preservation,
+explicit apply/reload and new issue inheritance. The youth template regression follows the same layout-only contract.

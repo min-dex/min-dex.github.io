@@ -3,6 +3,7 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 const c=vm.createContext({window:{}});
 vm.runInContext(fs.readFileSync('mindex.inline-text.js','utf8'),c);
+vm.runInContext(fs.readFileSync('mindex.bulletin-forest.js','utf8'),c);
 vm.runInContext(fs.readFileSync('mindex.bulletin.js','utf8'),c);
 const fixture={service:{id:'service',service_date:'2026-09-20',worship_leader:'인도자'},
   sections:[{id:'s',service_id:'service',title:'찬양',section_key:'praise',sort_order:1},

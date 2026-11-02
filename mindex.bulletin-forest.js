@@ -6,24 +6,24 @@
   const redundant=new Set(['coverTheme','readingHelp','readingFooter','insideChurch','insideBrand']);
   const logo='assets/bulletin/children-mark-2026-11.png';
   const colorNames={paper:'종이',cover:'표지',ink:'본문',accent:'강조',soft:'연한 배경',peach:'안내 배경',line:'구분선',muted:'보조 글자'};
-  function normalizeAppearance(value={}){
-    const result={version:1,palette:{...palette},labels:{},visible:{},assets:{logo,artwork}};
-    for(const f of frames()){
+  function normalizeAppearance(value={},defaults={}){
+    const result={version:1,palette:{...(defaults.palette||palette)},labels:{},visible:{},assets:{...(defaults.assets||{logo,artwork})}};
+    for(const f of defaults.frames||frames()){
       result.visible[f.id]=!redundant.has(f.id);
       if(f.binding.startsWith('label:')&&f.type==='text')result.labels[f.id]=f.binding.slice(6);
     }
-    for(const key of Object.keys(palette))if(/^#[0-9a-f]{6}$/i.test(value?.palette?.[key]||''))result.palette[key]=value.palette[key];
+    for(const key of Object.keys(result.palette))if(/^#[0-9a-f]{6}$/i.test(value?.palette?.[key]||''))result.palette[key]=value.palette[key];
     for(const key of Object.keys(result.labels))if(typeof value?.labels?.[key]==='string'&&value.labels[key].length<=200)result.labels[key]=value.labels[key];
     for(const key of Object.keys(result.visible))if(typeof value?.visible?.[key]==='boolean')result.visible[key]=value.visible[key];
     for(const key of ['logo','artwork']){
       const asset=value?.assets?.[key];
-      if(typeof asset==='string'&&( /^assets\/bulletin\/[a-z0-9_.-]+$/i.test(asset)||(/^data:image\/(png|jpeg|webp);base64,[a-z0-9+/=]+$/i.test(asset)&&asset.length<=700000)))result.assets[key]=asset;
+      if(typeof asset==='string'&&((asset===''&&!!defaults.assets)|| /^assets\/bulletin\/[a-z0-9_.-]+$/i.test(asset)||(/^data:image\/(png|jpeg|webp);base64,[a-z0-9+/=]+$/i.test(asset)&&asset.length<=700000)))result.assets[key]=asset;
     }
     return result;
   }
   const visibleFrame=(frame,appearance)=>normalizeAppearance(appearance).visible[frame.id]!==false;
-  function controls(doc,selected,escape){
-    const value=normalizeAppearance(doc.settings.appearance);
+  function controls(doc,selected,escape,defaults){
+    const value=normalizeAppearance(doc.settings.appearance,defaults);
     return `${Object.hasOwn(value.labels,selected)?`<label>고정 문구<input data-bulletin-design-label="${selected}" maxlength="200" value="${escape(value.labels[selected])}"></label>`:''}<details class="bulletin-property-section" data-bulletin-section="design-colors"><summary>색상</summary>${Object.entries(colorNames).map(([key,name])=>`<label>${name}<input type="color" data-bulletin-design-color="${key}" value="${value.palette[key]}"></label>`).join('')}</details><details class="bulletin-property-section" data-bulletin-section="design-images"><summary>로고와 그림</summary>${[['logo','로고'],['artwork','표지 그림']].map(([key,name])=>`<label>${name}<input type="file" data-bulletin-design-image="${key}" accept="image/png,image/jpeg,image/webp"></label><button type="button" data-bulletin-design-image-reset="${key}">${name} 기본값</button>`).join('')}</details>`;
   }
   const artwork='assets/bulletin/children-forest.svg';
