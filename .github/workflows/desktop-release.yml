@@ -8,7 +8,7 @@ on:
         type: boolean
         default: false
   push:
-    branches: [main, codex/mindex-presenter-handoff]
+    branches: [main, codex/mindex-presenter-handoff, codex/native-*]
     paths:
       - .github/workflows/desktop-release.yml
       - electron-builder.test.cjs
@@ -16,6 +16,9 @@ on:
       - pnpm-lock.yaml
       - pnpm-workspace.yaml
       - electron/**
+      - tools/minimatch-compat/**
+      - tests/test_minimatch_compat.cjs
+      - tests/test_electron_test_isolation.cjs
       - tests/test_electron_runtime_files.py
       - scripts/verify-release.mjs
       - scripts/product-identity.cjs
