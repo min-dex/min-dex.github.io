@@ -66,7 +66,10 @@ try:
    click_save(page,4);page.evaluate('respond[3](true)');page.wait_for_function('!docs.get(a).dirty')
    assert page.evaluate('store[a].content.fields.leader')=='새 인도자'
    # The shared-template editor remains editable while its own request is pending.
-   page.locator('[data-bulletin-template-edit]').click();page.wait_for_function("!document.querySelector('[data-bulletin-template-exit]').hidden")
+   edit=page.locator('[data-bulletin-template-edit]');edit.scroll_into_view_if_needed();box=edit.bounding_box()
+   page.mouse.move(box['x']+box['width']/2,box['y']+box['height']/2);page.mouse.down()
+   page.evaluate("window.dispatchEvent(new Event('mindex-server-state-settled'))");page.mouse.up()
+   page.wait_for_function("!document.querySelector('[data-bulletin-template-exit]').hidden")
    page.locator('[data-bulletin-mode=content]').click();welcome=page.locator('[data-bulletin-field=welcome]');welcome.fill('저장할 공통 환영');welcome.press('Control+s');page.wait_for_function('sent.length===5')
    assert page.evaluate('sent[4].table')=='mindex_bulletin_templates'
    welcome.fill('저장 중 새 공통 환영');welcome.evaluate('e=>{window.templateInput=e;e.setSelectionRange(5,5)}');page.evaluate('respond[4](true)')

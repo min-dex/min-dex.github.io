@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261102-worship-stability",
+  "version": "20261102-daniel-template-restored",
   "options": {
     "compress": false,
     "mangle": {

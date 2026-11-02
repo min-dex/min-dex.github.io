@@ -5481,3 +5481,13 @@ Fullscreen praise lyric slides center the song title above the lyrics and the wo
 다른 새 탭·복제 탭은 이 이행 경로로 소유권을 가져갈 수 없다.
 
 음원 재생 컨트롤은 슬라이드 위에 둔다. 자율기도는 음원 이름·재생·정지·볼륨·진행 시간을 한 줄에 배치하고 좁은 화면에서만 줄을 나눈다.
+
+### Daniel common-prayer artwork · 2026-11-02
+
+The supplied Daniel prayer template owns the layout: retain its centered white
+header, centered light-blue prayer heading, and white numbered body on the blue
+geometric background. Replace only the church prayer content, placing all four
+topics in one 16:9 PNG; retain the requested official wordmark at upper right.
+Do not move the header/heading to a new left-aligned layout. Keep opaque text
+fills in the raster output. A correction replaces only the existing common-prayer
+element asset/config URL and matching source link, preserving its ID and order.

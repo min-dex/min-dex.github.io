@@ -1,10 +1,31 @@
 // A4 half-fold children's forest layout. Only the presentation changes.
 (() => {
   'use strict';
-  const palette=Object.freeze({paper:'#fffdf5',cover:'#f0f2df',ink:'#294b3b',accent:'#4c785b',soft:'#e9efdf',peach:'#f7eadb',line:'#cad8c6',muted:'#627262'});
+  const palette=Object.freeze({paper:'#fffdf5',cover:'#f0f2df',ink:'#294b3b',accent:'#4c785b',soft:'#e9efdf',peach:'#f7eadb',line:'#cad8c6',muted:'#294b3b'});
   // Keep stored frames and authored values; omit repeated print furniture.
   const redundant=new Set(['coverTheme','readingHelp','readingFooter','insideChurch','insideBrand']);
-  const visibleFrame=frame=>!redundant.has(frame.id);
+  const logo='assets/bulletin/children-mark-2026-11.png';
+  const colorNames={paper:'종이',cover:'표지',ink:'본문',accent:'강조',soft:'연한 배경',peach:'안내 배경',line:'구분선',muted:'보조 글자'};
+  function normalizeAppearance(value={}){
+    const result={version:1,palette:{...palette},labels:{},visible:{},assets:{logo,artwork}};
+    for(const f of frames()){
+      result.visible[f.id]=!redundant.has(f.id);
+      if(f.binding.startsWith('label:')&&f.type==='text')result.labels[f.id]=f.binding.slice(6);
+    }
+    for(const key of Object.keys(palette))if(/^#[0-9a-f]{6}$/i.test(value?.palette?.[key]||''))result.palette[key]=value.palette[key];
+    for(const key of Object.keys(result.labels))if(typeof value?.labels?.[key]==='string'&&value.labels[key].length<=200)result.labels[key]=value.labels[key];
+    for(const key of Object.keys(result.visible))if(typeof value?.visible?.[key]==='boolean')result.visible[key]=value.visible[key];
+    for(const key of ['logo','artwork']){
+      const asset=value?.assets?.[key];
+      if(typeof asset==='string'&&( /^assets\/bulletin\/[a-z0-9_.-]+$/i.test(asset)||(/^data:image\/(png|jpeg|webp);base64,[a-z0-9+/=]+$/i.test(asset)&&asset.length<=700000)))result.assets[key]=asset;
+    }
+    return result;
+  }
+  const visibleFrame=(frame,appearance)=>normalizeAppearance(appearance).visible[frame.id]!==false;
+  function controls(doc,selected,escape){
+    const value=normalizeAppearance(doc.settings.appearance);
+    return `${Object.hasOwn(value.labels,selected)?`<label>고정 문구<input data-bulletin-design-label="${selected}" maxlength="200" value="${escape(value.labels[selected])}"></label>`:''}<details class="bulletin-property-section" data-bulletin-section="design-colors"><summary>색상</summary>${Object.entries(colorNames).map(([key,name])=>`<label>${name}<input type="color" data-bulletin-design-color="${key}" value="${value.palette[key]}"></label>`).join('')}</details><details class="bulletin-property-section" data-bulletin-section="design-images"><summary>로고와 그림</summary>${[['logo','로고'],['artwork','표지 그림']].map(([key,name])=>`<label>${name}<input type="file" data-bulletin-design-image="${key}" accept="image/png,image/jpeg,image/webp"></label><button type="button" data-bulletin-design-image-reset="${key}">${name} 기본값</button>`).join('')}</details>`;
+  }
   const artwork='assets/bulletin/children-forest.svg';
   function frames(){
     const result=[];
@@ -56,6 +77,7 @@
     return items;
   }
   function news(group,value,f,issues,a){
+    const palette=a.palette;
     let y=f.y;
     paragraphs(value).forEach((text,i)=>{
       const body=a.svg('g'),runs=a.runs(text);
@@ -68,6 +90,7 @@
     });
   }
   function events(group,value,f,issues,a){
+    const palette=a.palette;
     let y=f.y;
     for(const line of String(value||'').split('\n').filter(Boolean)){
       const match=line.match(/^(.+?) \| (.+)$/)||line.match(/^(\d+월 \d+일)\s+(.+)$/);
@@ -80,6 +103,7 @@
     }
   }
   function order(group,doc,f,issues,a){
+    const palette=a.palette;
     const rows=[];
     for(const original of a.order(doc.source)){
       const row={...original,person:a.person(original.label==='광고'?a.value(doc,'announcer'):original.person)};
@@ -103,6 +127,7 @@
     }
   }
   function reading(group,value,f,issues,a){
+    const palette=a.palette;
     const lines=String(value||'').split('\n').filter(Boolean),cols=lines.length>8?3:2,rows=Math.ceil(lines.length/cols),w=(f.w-4*(cols-1))/cols,step=10;
     lines.forEach((text,i)=>{
       const col=i%cols,row=Math.floor(i/cols),x=f.x+col*(w+4),y=f.y+row*step;
@@ -113,6 +138,8 @@
     if(rows*step-1.5>f.h+.01)issues.add(f.id);
   }
   function render(doc,mode,selected,a){
+    const appearance=normalizeAppearance(doc.settings.appearance),palette=appearance.palette;
+    a={...a,palette};
     const issues=new Set(),pages=[];
     for(let page=0;page<2;page++){
       const root=a.svg('svg',{viewBox:'0 0 297 210',class:'bulletin-sheet',role:'img','aria-label':page?'주보 안쪽':'주보 겉면','data-bulletin-design':'children-forest'});
@@ -120,9 +147,9 @@
       if(!page)root.append(a.svg('rect',{x:148.5,width:148.5,height:210,fill:palette.cover}));
       const month=doc.frames.find(f=>f.id==='monthlyTheme');
       if(page&&month&&!month.hidden)root.append(a.svg('rect',{x:month.x-6,y:month.y-15,width:month.w+12,height:month.h+21,rx:7,fill:palette.soft}));
-      for(const f of doc.frames.filter(f=>f.page===page&&visibleFrame(f)&&(!f.hidden||mode==='layout'))){
-        const group=a.svg('g',{'data-frame-id':f.id}),check=f.hidden?new Set():issues,box={...f,color:palette.ink},value=a.bound(doc,f);
-        if(f.type==='logo'||f.type==='art')group.append(a.svg('image',{href:new URL(f.type==='logo'?a.logo:artwork,document.baseURI).href,x:f.x,y:f.y,width:f.w,height:f.h,preserveAspectRatio:'xMinYMid meet'}));
+      for(const f of doc.frames.filter(f=>f.page===page&&appearance.visible[f.id]!==false&&(!f.hidden||mode==='layout'))){
+        const group=a.svg('g',{'data-frame-id':f.id}),check=f.hidden?new Set():issues,box={...f,color:['eventsMonth','themeMonth','liturgical','staff','address','website','memoryReference'].includes(f.id)?palette.muted:palette.ink},value=Object.hasOwn(appearance.labels,f.id)?appearance.labels[f.id]:a.bound(doc,f);
+        if(f.type==='logo'||f.type==='art')group.append(a.svg('image',{href:new URL(f.type==='logo'?appearance.assets.logo:appearance.assets.artwork,document.baseURI).href,x:f.x,y:f.y,width:f.w,height:f.h,preserveAspectRatio:'xMinYMid meet'}));
         else if(f.id==='coverTitle')a.text(group,String(value).replace(/^(\S{2,8})[ \t]+(\S{2,8})$/u,'$1\n$2'),{...box,leading:40},check,f.id);
         else if(f.id==='coverTheme')a.text(group,value,{...box,size:12.5,leading:17.5,color:palette.accent},check,f.id);
         else if(f.type==='news')news(group,value,box,check,a);
@@ -148,5 +175,5 @@
     }
     return {pages,issues};
   }
-  window.MindexBulletinForest=Object.freeze({frames,render,artwork,visibleFrame});
+  window.MindexBulletinForest=Object.freeze({frames,render,artwork,visibleFrame,normalizeAppearance,controls});
 })();
