@@ -115,6 +115,7 @@
       if (reserved) {
         // This newly reserved popup must not inherit a stopped output session.
         state.presenter.outputSessionId = crypto.randomUUID();
+        globalThis.MindexPresenterLifetime?.claim(state.presenter.outputSessionId);
         state.presenter.outputClientId = '';
         const url = new URL(presenterOutputUrl());url.searchParams.set('fullscreen', 'start');
         reserved.location.replace(url.toString());state.presenter.outputWindow = reserved;

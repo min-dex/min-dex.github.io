@@ -232,6 +232,7 @@ SMOKES = (
     "smoke_preparation_form_default.py",
     "smoke_presenter_focus.py",
     "smoke_output_session_isolation.py",
+    "smoke_output_tab_lifetime.py",
     "smoke_output_restart.py",
     "smoke_disclosure_feedback.py",
     "smoke_control_rhythm.py",

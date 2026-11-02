@@ -502,6 +502,7 @@ async function openPresenterOutput(serviceId = state.selectedServiceId, options 
     state.presenter.outputSessionId = crypto.randomUUID();
     state.presenter.outputClientId = "";
   }
+  globalThis.MindexPresenterLifetime?.claim(state.presenter.outputSessionId);
   const outputGeneration = beginPresenterOutputGeneration(serviceId);
   publishPresenterState({ force: true });
   state.presenter.outputStopAt = 0;

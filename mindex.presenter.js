@@ -1618,7 +1618,7 @@ function restorePresenterControllerSession() {
   if (state.presenter.serviceId || !isPresenterOutputHeartbeatOpen()) return "none";
 
   const payload = state.presenter.restorePayload || readPresenterControllerRestorePayload();
-  if (!payload) return "none";
+  if (!payload || (globalThis.MindexPresenterLifetime && !MindexPresenterLifetime.owns(payload.outputSessionId))) return "none";
 
   const service = state.services.find((candidate) => candidate.id === payload.serviceId);
   if (!service || !state.serviceItems[service.id]) return "pending";
@@ -1682,7 +1682,9 @@ function bindPresenterChannel() {
   state.presenter.channel.onmessage = (event) => handlePresenterControllerMessage(event.data);
   // The output can stay open while the controller reloads. Ask it to announce
   // itself again so sidebar clicks immediately return to live-output behavior.
-  state.presenter.channel.postMessage({ type: "presenter-controller-ready" });
+  const announce = () => state.presenter.channel?.postMessage({ type: "presenter-controller-ready" });
+  if (globalThis.MindexPresenterLifetime) MindexPresenterLifetime.onOwner(announce);
+  else announce();
 }
 
 const retiredPresenterOutputClients = new Set();
@@ -1690,6 +1692,7 @@ const retiredPresenterOutputClients = new Set();
 function acceptsPresenterOutputMessage(message) {
   if (!message.type?.startsWith("presenter-")) return false;
   if (state.presenter.outputStopAt) return false;
+  if (globalThis.MindexPresenterLifetime && !MindexPresenterLifetime.owns(message.outputSessionId)) return false;
   const expected = state.presenter.outputSessionId
     || readPresenterStoredPayload()?.outputSessionId;
   if (expected && message.outputSessionId !== expected) return false;
@@ -1876,6 +1879,7 @@ function readPresenterStoredPayload() {
 }
 
 function publishPresenterPayload(payload, options = {}) {
+  if (globalThis.MindexPresenterLifetime && !MindexPresenterLifetime.owns(payload.outputSessionId)) return;
   const { index, slideAnchor, pptxProgress, safetyBlank, safetyBlankMode, liveScripture, livePraise, updatedAt,
     snapshotId: previousSnapshotId, messageId: previousMessageId, ...content } = payload;
   const contentKey = JSON.stringify(content);
@@ -2243,7 +2247,7 @@ function initPresenterOutputCore() {
   const receivedMessages = new Set();
   const receivedSequences = new Map();
   const applyPayload = (payload) => {
-    if (outputSessionId && payload?.outputSessionId && payload.outputSessionId !== outputSessionId) return;
+    if (outputSessionId && payload?.outputSessionId !== outputSessionId) return;
     if (payload?.messageId && receivedMessages.has(payload.messageId)) return;
     if (payload?.messageId) {
       const split = payload.messageId.lastIndexOf(":");
@@ -2288,7 +2292,9 @@ function initPresenterOutputCore() {
   if (keynoteRoot) keynoteRoot._onKeynoteAcknowledgement = postHeartbeat;
   const releaseMediaStateEvents = bindPresenterOutputMediaState(() => !outputStopping, postHeartbeat);
   presenterOutputImageWarmupState.onProgress = postHeartbeat;
+  let releaseMainLifetime = () => {};
   const closeOutputChannel = () => {
+    releaseMainLifetime();
     if (keynoteRoot) delete keynoteRoot._onKeynoteAcknowledgement;
     releaseMediaStateEvents();
     if (heartbeatTimer) {
@@ -2300,6 +2306,9 @@ function initPresenterOutputCore() {
     presenterOutputImageWarmupState.onProgress = null;
     clearPresenterOutputVideoWarmup();
   };
+  releaseMainLifetime = globalThis.MindexPresenterLifetime?.monitorOutput(() => {
+    outputStopping = true; closeOutputChannel(); void closePresenterOutputBrowserWindow();
+  }) || (() => {});
   const canCloseOutputWindow = () => {
     try {
       return Boolean(window.opener && !window.opener.closed);
@@ -2422,32 +2431,7 @@ function initPresenterOutputCore() {
   }
   if (channel) {
     renderStoredState(true);
-    channel.onmessage = (event) => {
-      if (["presenter-tools", "presenter-video-retry", "presenter-video-command"].includes(event.data?.type)) {
-        handleOutputSignalMessage(event.data);
-        return;
-      }
-      if (event.data?.type === "presenter-navigation") {
-        handleOutputSignalMessage(event.data);
-        return;
-      }
-      if (event.data?.type === "presenter-state") {
-        applyInitialPresenterState(event.data.payload);
-        return;
-      }
-      if (event.data?.type === "presenter-controller-ready") {
-        sendControllerMessage({ type: "presenter-ready", clientId: outputClientId });
-        postHeartbeat();
-        return;
-      }
-      if (event.data?.type === "presenter-output-close") {
-        if (outputSessionId && event.data.outputSessionId !== outputSessionId) return;
-        window.setTimeout(() => {
-          closeOutputChannel();
-          void closePresenterOutputBrowserWindow();
-        }, 40);
-      }
-    };
+    channel.onmessage = (event) => handleOutputSignalMessage(event.data || {});
     window.setTimeout(() => {
       sendControllerMessage({ type: "presenter-ready", clientId: outputClientId });
       postHeartbeat();
