@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261102-union-lyrics-morph",
+  "version": "20261102-storage-undo-stability",
   "options": {
     "compress": false,
     "mangle": {
