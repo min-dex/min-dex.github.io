@@ -67,9 +67,11 @@ try:
     const unionSlide=repeated[0], beforeUnion=JSON.stringify(unionSlide);
     const unionHtml=renderPresenterSlideFrame(unionSlide,{noChromakey:true,serviceId:unionId});
     check(unionHtml.includes('presenter-lyric-song-name')&&!unionHtml.includes('presenter-lyric-song-steps')&&!unionHtml.includes('♬'),'union lyrics omit form and note');
+    check(unionHtml.includes('presenter-lyric-service-name">ON FIRE</div>'),'union service footer');
     check(JSON.stringify(unionSlide)===beforeUnion,'union view preserves stored slide');
     const ordinaryHtml=renderPresenterSlideFrame(unionSlide,{noChromakey:true,serviceId:'unrelated'});
     check(ordinaryHtml.includes('presenter-lyric-song-steps')&&ordinaryHtml.includes('♬'),'ordinary metadata retained');
+    check(!ordinaryHtml.includes('presenter-lyric-service-name'),'ordinary service has no union footer');
     const unionTitle={type:'song-title',elementType:'praise',layout:'lower_bar_text',title:native.title,text:'♬ '+native.title};
     check(renderPresenterSlideFrame(unionTitle,{noChromakey:true,serviceId:unionId}).includes('♬'),'union title note retained');
     const noMatch={...native,versions:[{...version,id:'other'}]};

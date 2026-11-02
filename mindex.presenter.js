@@ -2916,7 +2916,7 @@ function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState =
     root._restoreSongPosition?.();
     presenterMorphSongTitle(activeLayer, nextLayer, frameState, animated);
     if (animated && nextLayer.dataset.songPositionKey && nextLayer.dataset.songPositionKey === activeLayer.dataset.songPositionKey) {
-      const selector = ".presenter-lyric-song-name, .presenter-lyric-song-steps";
+      const selector = ".presenter-lyric-song-name, .presenter-lyric-song-steps, .presenter-lyric-service-name";
       const nodes = [...nextLayer.querySelectorAll(selector)];
       if (nodes.length) {
         const frame = nodes[0].parentElement;
