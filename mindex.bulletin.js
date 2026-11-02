@@ -1293,7 +1293,7 @@
     }
     function backup(target=doc){
       const savedAt=Date.now(),value=snapshot(target);
-      target.backupPending=true;
+      target.backupSignature=draftSignature(value);target.backupPending=true;
       const accepted=window.MINDEX_SERVER_STORAGE?.queue("local",target.sessionDraftKey||(target.sessionDraftKey=target.key+":draft:"+crypto.randomUUID()),JSON.stringify({version:3,...value,savedAt,...(templateSession&&target===doc?{templateDirty:target.dirty,templateRevision:target.revision}:{})}));
       if(!accepted){target.backupPending=false;target.backupUnavailable=true;}
       if(target.dirty)window.MINDEX_DRAFT_HANDOFF?.publish(templateSession&&target===doc?'bulletin-template':'bulletin',templateSession&&target===doc?templateKey():String(target.id),{schema:1,revision:target.revision,value},target.source?.title||'주보 초안');
@@ -1405,7 +1405,7 @@
     function status(){
       if(doc?.backupPending){
         const confirmed=readLocal(doc.sessionDraftKey||doc.key);
-        if(confirmed?.savedAt&&JSON.stringify(normalizeSnapshot(confirmed))===JSON.stringify(snapshot(doc))){doc.savedAt=confirmed.savedAt;doc.backupPending=false;doc.backupUnavailable=false;}
+        if(confirmed?.savedAt&&draftSignature(confirmed)===(doc.backupSignature||draftSignature(doc))){doc.savedAt=confirmed.savedAt;doc.backupPending=false;doc.backupUnavailable=false;}
       }
 
       const text=error||saveError||printError||(loading?"저장된 예배 자료를 불러오는 중…":!assetLoaded?"글꼴과 이미지를 준비하는 중…":
@@ -1514,7 +1514,10 @@
           const row=await options.loadDraft(id);if(request!==serial||signal.aborted)return;
           if(JSON.stringify(snapshot(target))!==beforeRead)throw Error("불러오는 동안 입력이 바뀌어 현재 입력을 유지했습니다.");
           if(row){
-            if(target.localDraft&&!readLocal(target.key+":recovery"))await retainRecovery(target,target.localDraft);
+            // A draft identical to the canonical row is already safely stored.
+            // Do not turn read-only entry into a recovery write or block it on storage.
+            const stored={...target};applyStored(stored,row);
+            if(target.localDraft&&draftSignature(target.localDraft)!==draftSignature(stored)&&!readLocal(target.key+":recovery"))await retainRecovery(target,target.localDraft);
             if(request!==serial||signal.aborted)return;
             if(JSON.stringify(snapshot(target))!==beforeRead)throw Error("초안을 보관하는 동안 입력이 바뀌어 현재 입력을 유지했습니다.");
             applyStored(target,row);
@@ -1741,7 +1744,8 @@
         if(stale())return false;
         const positions=[".bulletin-canvas",".bulletin-inspector"].map(selector=>[selector,q(selector).scrollTop,q(selector).scrollLeft]);
         Object.assign(target,next);if(isTemplate)templateRow=normalizeTemplate(row);
-        backup(target);properties();preview();status();
+        // Remote adoption is a canonical read, not an authored local draft.
+        properties();preview();status();
         for(const [selector,top,left] of positions){q(selector).scrollTop=top;q(selector).scrollLeft=left;}
         return true;
       }finally{remoteBusy=false;}

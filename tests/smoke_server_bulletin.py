@@ -97,6 +97,58 @@ try:
     if(!await restoreServiceSourceText(service.id,'other source'))throw Error('source restore failed');
     return area.value==='other source'&&MINDEX_SERVER_STORAGE.keys('local').some(k=>k.startsWith('mindex.source.recovery.v1:')&&JSON.parse(MINDEX_SERVER_STORAGE.getItem('local',k)).current==='same source');
    }""")
-   print('PASS',engine,'failed recovery blocks replacement; late edit retained; paired draft revision guard and explicit resume',flush=True)
+   # Read-only canonical adoption must not create recovery/server-draft writes.
+   page.evaluate("""()=>{
+    editor.destroy();const B=MindexBulletin;window.readCache=new Map();window.readWrites=[];window.readQueues=[];window.readPublications=[];
+    window.MINDEX_SERVER_STORAGE={ready:true,getItem:(_,k)=>window.holdReadConfirmation&&readQueues.includes(k)?null:readCache.get(k),keys:()=>[...readCache.keys()],setItem:async(_,k,v)=>{readWrites.push(k);if(window.rejectReadWrites)throw Error('Unnecessary recovery write');readCache.set(k,v)},queue:(_,k,v)=>{readQueues.push(k);readCache.set(k,v);return true}};
+    window.MINDEX_DRAFT_HANDOFF={publish:(...args)=>readPublications.push(args)};
+    window.readSource=B.resolveSource({service:{id:'read-only',service_type_id:'young_adult',service_date:'2026-11-29'},sections:[],elements:[]});
+    window.readRow={revision:7,...B.storedValue({...B.normalizeSnapshot({fields:{news:'Saved weekly',leader:''},settings:{design:'simple',theme:''}}),source:readSource})};
+    const saved={};B.applyStored(saved,readRow);window.savedRead=structuredClone(B.normalizeSnapshot(saved));
+    window.readTemplate={template_key:B.TEMPLATE_KEY,revision:1,...B.templateValue({...savedRead,source:readSource})};
+    window.readKey='mindex.bulletin.v1:read-only:read-only';
+    readCache.set(readKey+':draft:old',JSON.stringify({version:3,...savedRead,savedAt:1}));
+    window.rejectReadWrites=true;window.readHost=document.createElement('div');readHost.style.height='800px';document.body.replaceChildren(readHost);
+    window.mountRead=()=>{window.readDocs=new Map();window.readEditor=B.mount(readHost,{documents:readDocs,serviceId:'read-only',scope:'read-only',services:[{id:'read-only',label:'저장된 주보'}],loadDraft:async()=>structuredClone(readRow),loadSource:async()=>structuredClone(readSource),loadTemplate:async()=>structuredClone(readTemplate),saveTemplate:async()=>{throw Error('Unexpected template commit')},saveDraft:async()=>{throw Error('Unexpected commit')}})};mountRead();
+   }""")
+   page.wait_for_function("readDocs.get('read-only')?.dbLoaded&&document.querySelector('[data-bulletin-reload]')?.disabled===false")
+   assert page.evaluate("!readDocs.get('read-only').dirty&&readDocs.get('read-only').revision===7&&readWrites.length===0&&readQueues.length===0&&readPublications.length===0")
+   assert page.locator('[data-bulletin-save]').is_disabled()
+   # A newer remote save is a read too, while an actual input still queues/publishes.
+   page.evaluate("readRow.revision=8;readRow.content.fields.news='Remote saved weekly'")
+   assert page.evaluate("()=>readEditor.refreshRemote('bulletin','read-only')") is True
+   assert page.evaluate("readDocs.get('read-only').fields.news==='Remote saved weekly'&&!readDocs.get('read-only').dirty&&readWrites.length===0&&readQueues.length===0&&readPublications.length===0")
+   page.evaluate('window.holdReadConfirmation=true')
+   page.locator('[data-bulletin-field=news]').fill('Actual unsaved input')
+   assert page.evaluate("readDocs.get('read-only').dirty&&readQueues.length===1&&readPublications.length===1")
+   page.locator('[data-bulletin-field=news]').blur()
+   assert page.evaluate("()=>readEditor.refreshRemote('bulletin','read-only')") is False
+   assert page.locator('[data-bulletin-field=news]').input_value()=='Actual unsaved input'
+   # Simulate a canonical save settling before its private queue acknowledgement.
+   # A newer remote row must not strand the earlier backup's pending status.
+   page.evaluate("readDocs.get('read-only').dirty=false;readRow.revision=9;readRow.content.fields.news='Remote saved weekly'")
+   assert page.evaluate("()=>readEditor.refreshRemote('bulletin','read-only')") is True
+   assert page.evaluate("readDocs.get('read-only').backupPending&&readQueues.length===1&&readPublications.length===1")
+   page.evaluate("window.holdReadConfirmation=false;window.dispatchEvent(new Event('mindex-server-state-settled'))")
+   assert page.evaluate("!readDocs.get('read-only').backupPending&&readDocs.get('read-only').fields.news==='Remote saved weekly'")
+   # Different old drafts still need confirmed recovery and remain available after load.
+   page.evaluate("""()=>{readEditor.destroy();readCache.clear();readWrites.length=0;readQueues.length=0;readPublications.length=0;rejectReadWrites=false;readCache.set(readKey+':draft:different',JSON.stringify({version:3,...savedRead,fields:{...savedRead.fields,news:'Different preserved draft'},savedAt:2}));mountRead()}""")
+   page.wait_for_function("readDocs.get('read-only')?.dbLoaded&&document.querySelector('[data-bulletin-reload]')?.disabled===false")
+   assert page.evaluate("readWrites.length===2&&readQueues.length===0&&readPublications.length===0&&!readDocs.get('read-only').dirty&&JSON.parse(readCache.get(readKey+':recovery')).fields.news==='Different preserved draft'")
+   assert page.locator('[data-bulletin-field=news]').input_value()=='Remote saved weekly'
+   page.locator('[data-bulletin-local]').click()
+   assert 'Different preserved draft' in page.get_by_label('복구할 내용',exact=True).input_value()
+   page.get_by_role('button',name='닫기',exact=True).click()
+   # The same no-write guarantee applies to a remote common-template revision.
+   page.locator('[data-bulletin-template-edit]').click()
+   page.wait_for_function("readEditor.remoteIdentity()?.kind==='bulletin-template'&&document.querySelector('[data-bulletin-save]')?.disabled")
+   page.evaluate("readTemplate.revision=2;readTemplate.common.welcome='Remote common welcome'")
+   assert page.evaluate("()=>readEditor.refreshRemote('bulletin-template',MindexBulletin.TEMPLATE_KEY)") is True
+   assert page.evaluate("readWrites.length===2&&readQueues.length===0&&readPublications.length===0")
+   assert page.locator('[data-bulletin-save]').is_disabled()
+   page.locator('[data-bulletin-mode=content]').click()
+   page.locator('[data-bulletin-field=welcome]').fill('Actual common edit')
+   assert page.evaluate("readQueues.length===1&&readPublications.length===1&&readPublications[0][0]==='bulletin-template'")
+   print('PASS',engine,'failed recovery blocks replacement; late edit retained; paired draft revision guard and explicit resume; identical entry + remote weekly/template writes 0, real edits preserved',flush=True)
    context.close();browser.close()
 finally:server.shutdown()

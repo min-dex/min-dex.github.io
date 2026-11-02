@@ -537,3 +537,14 @@ Alignment measures rendered SVG content with loaded fonts, keeps handles and ful
 moves multiline copy/lists/rows as one block. Images use the corresponding aspect-ratio alignment. Overflow
 remains an error rather than shrinking or clipping content. Empty frames stay empty. Auto-flow frames align
 within their computed height. No authored fields, source snapshots, month content or worship rows are changed.
+
+## 읽기 전용 저장본과 초안 보관 · 2026-11-02
+
+저장본 첫 진입 시 기존 초안이 정규화된 DB 저장본과 같으면 새 복구본을 서버에
+기록하지 않는다. 다른 초안은 기존처럼 복구 보관 확인 뒤 저장본을 표시하며 원본을
+삭제하지 않는다. 깨끗한 주보·공통 양식에 원격 저장본을 반영하는 동작도 새 초안
+보관·기기 간 초안 발행을 만들지 않는다. 실제 입력·명시적 복구·저장 경로와
+미저장 입력·조회 중 입력·인쇄 보호는 유지한다. 저장되지 않은 예배에서 새 주보를
+여는 경우의 ‘저장 전/수정 중’ 상태는 저장된 주보의 첫 진입과 구분한다.
+초안 보관의 확인은 큐에 보낸 내용의 signature와 대조한다. 보관 응답을 기다리는
+동안 더 새 저장본을 읽었더라도 이전 요청의 완료를 현재 내용과 혼동하지 않는다.
