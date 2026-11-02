@@ -37,9 +37,9 @@ state.services=[dawn];const authoredBefore=JSON.stringify(authored),visible=proj
 assert.equal(JSON.stringify(authored),authoredBefore,'Default order must not rewrite authored praise');
 for(const item of authored){const restored=visible.find(x=>x.id===item.id);assert.ok(restored);assert.equal(restored.raw_title,item.raw_title);assert.equal(restored.memo,item.memo);}
 const sermon=steps.find(s=>s.sectionKey==='sermon');assert.ok(sermon.elements.some(e=>e.label==='인용 구절'&&!e.default_text));
-const common={id:crypto.randomUUID(),service_id:target,label:'공동기도',raw_title:'공동기도',_worshipSectionKey:'corporate_prayer',_worshipSectionId:crypto.randomUUID(),_worshipSectionTitle:'공동기도',_worshipElementTemplateModified:true,memo:serializeServiceItemMemo({elementType:'image',inputMode:'asset',asset:{kind:'image',name:'다니엘기도회 공동기도.png',url:'./assets/presenter/daniel-common-prayer-single-369782273567.png'}})};
+const common={id:crypto.randomUUID(),service_id:target,label:'공동기도',raw_title:'공동기도',_worshipSectionKey:'corporate_prayer',_worshipSectionId:crypto.randomUUID(),_worshipSectionTitle:'공동기도',_worshipElementTemplateModified:true,memo:serializeServiceItemMemo({elementType:'image',inputMode:'asset',asset:{kind:'image',name:'다니엘기도회 공동기도.png',url:'./assets/presenter/daniel-common-prayer-template-7473226f8525.png'}})};
 const deck=presenterElementSlideFromMemoCore(common,{},0,parseServiceItemMemo(common.memo),'공동기도');
-assert.equal(deck.type,'image');assert.equal(deck.label,'공동기도');assert.ok(deck.imageSrc.includes('daniel-common-prayer-single-'));
+assert.equal(deck.type,'image');assert.equal(deck.label,'공동기도');assert.ok(deck.imageSrc.includes('daniel-common-prayer-template-'));
 assert.ok(SERVICE_SLOT_MUSIC['dawn.free'].source.endsWith('9b2f77451de5.mp3'));
 assert.ok(!SERVICE_SLOT_MUSIC['prayer.meeting.free'].source.includes('9b2f77451de5'));
 console.log('PASS linked replacements preserve absence, route all three card layouts and setlist status to the actual service');
