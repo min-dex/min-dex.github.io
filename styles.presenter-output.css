@@ -1792,8 +1792,8 @@ span.presenter-announcement-paren,
   pointer-events: none;
 }
 .presenter-lyric-song-name {
-  top: 5%; left: 5%;
-  max-width: 90%;
+  top: 5%; left: 5%; right: 5%;
+  text-align: center;
   font-size: 2.1cqw;
   opacity: .82;
 }
@@ -1802,9 +1802,14 @@ span.presenter-announcement-paren,
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  column-gap: .55em;
+  column-gap: 0;
   font-size: 1.65cqw;
 }
 .presenter-lyric-song-steps > * { opacity: .55; }
 .presenter-lyric-song-steps i { font-style: normal; }
 .presenter-lyric-song-steps [aria-current="step"] { opacity: 1; font-weight: 750; }
+
+.presenter-output-root > .presenter-song-position-overlay {
+  position: absolute; inset: 0; z-index: 5; pointer-events: none;
+  color: var(--presenter-output-fg);
+}

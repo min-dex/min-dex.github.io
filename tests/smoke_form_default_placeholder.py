@@ -36,6 +36,25 @@ try:
       check(nodes.map(n=>n.textContent).join('-')==='C-V1-C-C' && nodes[i].getAttribute('aria-current')==='step' && nodes.filter(n=>n.hasAttribute('aria-current')).length===1,'lyric occurrence '+i);
       check(!renderPresenterSlideFrame(s,{noChromakey:false}).includes('presenter-lyric-song-steps'),'chromakey label');
     });
+    const stage=document.createElement('div');
+    stage.className='presenter-output-root no-chromakey';document.body.append(stage);
+    const swap=(slide,clean=true)=>{
+      const token=++presenterOutputRenderState.token;
+      commitPresenterOutputFrame(stage,{serviceId:service.id,index:token,slides:[slide]},slide,
+        {cleanOutput:clean,noChromakey:clean},token);
+      return stage.querySelector(':scope > .presenter-song-position-overlay');
+    };
+    check(!swap(repeated[0]),'first song transition');
+    const stable=swap(repeated[2]);
+    check(stable && stable.querySelector('.presenter-lyric-song-steps').textContent==='C-V1-C-C'
+      && getComputedStyle(stable.querySelector('.presenter-lyric-song-name')).textAlign==='center'
+      && stage.querySelector('.is-active.is-entering'),'metadata stays while lyric layer transitions');
+    check(swap(repeated[3]).querySelector('span[aria-current]').previousElementSibling
+      && stage.querySelector('.presenter-lyric-song-steps span:last-child[aria-current]'),'last repeated occurrence');
+    check(!swap({...repeated[0],songPosition:{...repeated[0].songPosition,versionId:'other'}}),'different edition transitions');
+    check(!swap({...repeated[0],elementId:'another-song'}),'different song transitions');
+    check(!swap(repeated[0],false) && !stage.querySelector('.is-active .presenter-lyric-song-name'),'chromakey clean');
+    stage.remove();
     const noMatch={...native,versions:[{...version,id:'other'}]};
     check(serviceItemLinkedVersion(nativeItem,noMatch)===null,'never borrow another record content');
     state.songs=[song];

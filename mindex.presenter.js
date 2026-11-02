@@ -2847,6 +2847,8 @@ function commitPresenterOutputFrame(root, payload, slide, frameState, token, opt
       nextLayer.dataset.presenterFrameToken = String(token);
     }
     nextLayer.dataset.presenterFrameKey = frameKey;
+    nextLayer.dataset.songPositionKey = frameState.noChromakey && slide?.songPosition && slide.elementId
+      ? JSON.stringify([payload.serviceId, slide.elementId, slide.songPosition.versionId, slide.songPosition.title]) : "";
     nextLayer.classList.add("is-next");
     activatePresenterOutputLayer(root, layers.active, nextLayer, frameState, token, () => {
       fitPresenterChromakeyScriptureText(nextLayer, frameState);
@@ -2915,6 +2917,29 @@ function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState =
   const transitionEntryDelay = 220;
   const swap = () => {
     if (token !== presenterOutputRenderState.token) return;
+    // Return the previous metadata to its frame before reusing either layer.
+    root._restoreSongPosition?.();
+    if (animated && nextLayer.dataset.songPositionKey && nextLayer.dataset.songPositionKey === activeLayer.dataset.songPositionKey) {
+      const selector = ".presenter-lyric-song-name, .presenter-lyric-song-steps";
+      const nodes = [...nextLayer.querySelectorAll(selector)];
+      if (nodes.length) {
+        const frame = nodes[0].parentElement;
+        const overlay = document.createElement("div");
+        overlay.className = "presenter-song-position-overlay";
+        overlay.style.color = getComputedStyle(nodes[0]).color;
+        activeLayer.querySelectorAll(selector).forEach(node => node.remove());
+        overlay.append(...nodes);
+        root.append(overlay);
+        const restore = () => {
+          if (root._restoreSongPosition !== restore) return;
+          frame.append(...nodes);
+          overlay.remove();
+          delete root._restoreSongPosition;
+        };
+        root._restoreSongPosition = restore;
+        window.setTimeout(restore, transitionEntryDelay + 160);
+      }
+    }
     root.classList.toggle("is-video-end-transition", videoEndFade);
     if (animated) {
       root.classList.add("is-transitioning");

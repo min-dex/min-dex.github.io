@@ -658,7 +658,7 @@ function setPresenterDetailContent(markup, serviceId) {
   } else refs.detailPane.innerHTML = markup;
 }
 
-function presenterSongPositionSlides(slides, title) {
+function presenterSongPositionSlides(slides, title, versionId) {
   const steps = new Map();
   for (const slide of slides) {
     if (!slide.formKey || steps.has(slide.formKey) || !["lyrics", "blank"].includes(slide.type)) continue;
@@ -667,7 +667,7 @@ function presenterSongPositionSlides(slides, title) {
   }
   const labels = [...steps.values()].map(step => step.label);
   return slides.map(slide => slide.type === "lyrics" && slide.elementType === PRESENTER_ELEMENT_TYPES.PRAISE
-    ? { ...slide, songPosition: { title, labels, index: steps.get(slide.formKey)?.index ?? -1 } }
+    ? { ...slide, songPosition: { title, versionId, labels, index: steps.get(slide.formKey)?.index ?? -1 } }
     : slide);
 }
 
@@ -678,5 +678,5 @@ function renderPresenterSongPosition(slide) {
   if (position.index < 0) return heading;
   const steps = position.labels.map((label, i) =>
     `<span${i === position.index ? ' aria-current="step"' : ""}>${escapeHtml(label)}</span>`);
-  return heading + `<div class="presenter-lyric-song-steps" aria-label="송폼">${steps.join('<i aria-hidden="true">·</i>')}</div>`;
+  return heading + `<div class="presenter-lyric-song-steps" aria-label="송폼">${steps.join('<i aria-hidden="true">-</i>')}</div>`;
 }

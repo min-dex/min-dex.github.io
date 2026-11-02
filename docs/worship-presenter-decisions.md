@@ -5475,3 +5475,4 @@ Web Locks의 배타 소유권으로 복제 탭이 그 토큰을 함께 갖더라
 본체 새로고침·백그라운드·타이머 지연·통신 끊김만으로 송출을 닫지 않는다.
 Web Locks 조회 실패/미지원 또는 opener 없는 수동 송출창은 확실한 종료 근거가
 없으므로 자동 종료하지 않는다. 기존 명시적 종료·출력 세션·클라이언트 검증은 유지한다.
+Fullscreen praise lyric slides center the song title above the lyrics and the worship form below. The form uses canonical tokens separated by hyphens, with the current occurrence highlighted. Metadata stays steady across lyric pages of the same worship element and edition while lyrics transition. Song and edition changes use the ordinary frame transition.
