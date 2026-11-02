@@ -2309,13 +2309,6 @@ function initPresenterOutputCore() {
   releaseMainLifetime = globalThis.MindexPresenterLifetime?.monitorOutput(() => {
     outputStopping = true; closeOutputChannel(); void closePresenterOutputBrowserWindow();
   }) || (() => {});
-  const canCloseOutputWindow = () => {
-    try {
-      return Boolean(window.opener && !window.opener.closed);
-    } catch {
-      return false;
-    }
-  };
   const requestPresenterOutputStop = () => {
     if (outputStopping) return;
     outputStopping = true;
@@ -2332,7 +2325,7 @@ function initPresenterOutputCore() {
     sendControllerMessage(payload);
     window.setTimeout(() => {
       closeOutputChannel();
-      if (canCloseOutputWindow()) void closePresenterOutputBrowserWindow();
+      void closePresenterOutputBrowserWindow();
     }, 120);
   };
   const applyPresenterOutputActionLocally = (action, detail = {}) => {
