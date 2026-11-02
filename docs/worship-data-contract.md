@@ -1159,4 +1159,6 @@ announcements, scripture reading, sermon with an empty optional citation, and fr
 prayer. Authored older praise rows/documents require separate review before any
 removal. The common dawn audio key uses the approved silent-prayer recording;
 Friday's independent key remains unchanged. Daniel common prayer is one image
-element with two 16:9 pages, placed before the shared free-prayer element.
+element with one 16:9 PNG containing all four church prayer topics, placed before
+the shared free-prayer element. The headline uses an opaque fill with no text
+stroke; the upper-right logo is the unchanged official website wordmark.
