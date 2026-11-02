@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261102-daniel-waiting-polish",
+  "version": "20261102-daniel-paired-branding",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "12bae601e58693f6d031ba464e4b3067e5f83421635b0a8f36bb1cf85a5153e2",
-  "runtime_sha256": "49692f72b43b29679d1b70206825482f9886244e6ffdbc2f24164c4b638b5876",
-  "source_bytes": 1356215,
-  "runtime_bytes": 967855,
-  "source_gzip": 310813,
-  "runtime_gzip": 243699
+  "source_sha256": "fd63ccb28a68359e20a188f2953d7053cb790999ce3656564c436df0cbffe3ec",
+  "runtime_sha256": "482a6c60cc0fd8ede2358c0b7dfd49cb6e4f6f4383286511e5490aaa37e7163b",
+  "source_bytes": 1356236,
+  "runtime_bytes": 967865,
+  "source_gzip": 310818,
+  "runtime_gzip": 243706
 }
