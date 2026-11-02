@@ -519,3 +519,11 @@ remain exact. New issues inherit the server template. No worship rows or unsuppo
 The existing image validation and size constraints apply to every renderer.
 `smoke_bulletin_server_design.py` covers six layouts in Chromium/WebKit, including save/reopen, content preservation,
 explicit apply/reload and new issue inheritance. The youth template regression follows the same layout-only contract.
+
+## Existing editor finishing · 2026-11-02
+
+Design controls keep the existing actions and stored values. Color swatches use a compact
+2-column arrangement, numeric geometry uses aligned tabular figures, automatic read-only
+geometry is visually quieter, and native file buttons share the editor control rhythm.
+Template/save actions stay on readable rows in narrow editor widths. This is scoped editor
+CSS only: renderer coordinates, printed typography, authored copy and persistence are unchanged.

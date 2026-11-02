@@ -93,3 +93,26 @@ body:has(.bulletin-workbench) .right-sidebar{display:none}
 .bulletin-properties textarea{resize:none;overflow-y:auto;max-height:420px;min-height:35px}
 .bulletin-properties [data-bulletin-field="news"]{min-height:100px}
 .bulletin-input-help{grid-column:1/-1;font-size:var(--ui-meta-size);font-weight:500;color:var(--ink-3)}
+
+/* Finish existing design controls without changing document data or print geometry. */
+.bulletin-toolbar{flex-wrap:wrap}
+.bulletin-toolbar :is([data-bulletin-template-edit],[data-bulletin-template-exit],[data-bulletin-save]){flex-shrink:0;white-space:nowrap}
+.bulletin-properties>h3{margin:5px 0 10px;font-size:var(--ui-card-title-size);line-height:1.5;color:var(--ink)}
+.bulletin-properties>button{margin-bottom:10px}
+.bulletin-number-grid{align-items:start}
+.bulletin-number-grid input{font-variant-numeric:tabular-nums;text-align:right}
+.bulletin-properties input[readonly]{color:var(--ink-3);background:var(--panel);cursor:default}
+.bulletin-properties label:has([data-bulletin-design-color]){display:inline-grid;width:calc(50% - 5px);grid-template-columns:minmax(0,1fr) 35px;align-items:center;gap:5px;margin-bottom:10px;color:var(--ink-2)}
+.bulletin-properties [data-bulletin-section=design-colors]>label:nth-of-type(odd){margin-right:10px}
+.bulletin-properties input[type=color]{width:35px;height:35px;min-height:35px;padding:5px;cursor:pointer;border:1px solid var(--line-2);background:var(--control-surface)}
+.bulletin-properties input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+.bulletin-properties input[type=color]::-webkit-color-swatch{border:0;border-radius:var(--r)}
+.bulletin-properties input[type=color]::-moz-color-swatch{border:0;border-radius:var(--r)}
+.bulletin-properties input[type=file]{padding:0;border:0;background:transparent;font-size:var(--ui-meta-size);line-height:35px}
+.bulletin-properties input[type=file]::file-selector-button{height:35px;margin-right:10px;padding:5px 10px;border:1px solid var(--line-2);border-radius:var(--r);font:inherit;color:var(--ink);background:var(--control-surface);cursor:pointer}
+.bulletin-properties input[type=file]::file-selector-button:hover{background:var(--panel)}
+.bulletin-properties [data-bulletin-design-image-reset]{min-height:30px;margin-bottom:15px}
+@container bulletin (max-width:600px){
+  .bulletin-toolbar :is([data-bulletin-template-edit],[data-bulletin-template-exit]){grid-column:1/-1;justify-self:start}
+  .bulletin-toolbar select{min-width:0}
+}
