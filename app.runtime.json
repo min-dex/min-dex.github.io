@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261102-worship-stability",
+  "version": "20261102-server-bulletin-design",
   "options": {
     "compress": false,
     "mangle": {
