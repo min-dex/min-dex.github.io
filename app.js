@@ -5990,21 +5990,22 @@ function serviceViewHasProtectedSurface(serviceId) {
 function serviceViewIsLoading(serviceId) {
   if (!serviceId || serviceViewHasProtectedSurface(serviceId)) return false;
   return !state.loadedWorshipServiceIds.has(serviceId)
+    || state.services.find(service => service.id === serviceId)?._worshipSourceRefPartial
     || serviceItemLoadPromises.has(serviceId)
     || presenterServiceHydrationPromises.has(serviceId)
     || (state.serviceItems[serviceId] || []).some(item => linkedSongLoadPromises.has(item.song_id));
 }
 
 function renderServiceViewLoadState(service) {
-  const failed = serviceViewLoadErrors.has(service.id);
-  if (!failed) return `<section class="service-view-loading" data-service-view-loading="${escapeAttr(service.id)}" aria-busy="true">${renderLoadingRow("예배 자료 불러오는 중…")}<p>${escapeHtml(serviceNavigationName(service))}</p></section>`;
-  return `<section class="service-view-loading" data-service-view-loading="${escapeAttr(service.id)}" aria-busy="${!failed}">
-    ${failed ? '<i data-lucide="cloud-off" aria-hidden="true"></i>' : '<span class="service-view-loading-spinner" aria-hidden="true"></span>'}
-    <h2>${failed ? "예배 자료를 불러오지 못했습니다" : "예배를 준비하고 있어요"}</h2>
-    <p>${escapeHtml(serviceNavigationName(service))}</p>
-    <span class="service-view-loading-message" role="status">${failed ? "연결을 확인한 뒤 다시 시도해 주세요." : "예배 순서와 연결된 찬양 자료를 불러오는 중입니다."}</span>
-    ${failed ? `<button class="btn secondary" type="button" data-service-load-retry="${escapeAttr(service.id)}">다시 시도</button>` : ""}
-  </section>`;
+  const name = escapeHtml(serviceNavigationName(service));
+  const attributes = `class="service-view-loading" data-service-view-loading="${escapeAttr(service.id)}"`;
+  if (serviceViewLoadErrors.has(service.id)) return `<section ${attributes} aria-busy="false">
+    <i data-lucide="cloud-off" aria-hidden="true"></i><h2>예배 자료를 불러오지 못했습니다</h2>
+    <p>${name}</p><span class="service-view-loading-message" role="status">연결을 확인한 뒤 다시 시도해 주세요.</span>
+    <button class="btn secondary" type="button" data-service-load-retry="${escapeAttr(service.id)}">다시 시도</button></section>`;
+  const brand = document.querySelector("#bootStatus .mindex-boot-cross")?.outerHTML || "";
+  return `<section ${attributes} aria-busy="true">${brand}<span class="mindex-boot-wordmark" aria-hidden="true">MINDEX</span>
+    <p>${name}</p>${renderLoadingRow("예배 순서와 슬라이드를 준비하고 있어요…")}</section>`;
 }
 
 function renderServiceViewLoadingIfNeeded(service) {
@@ -6096,8 +6097,7 @@ async function loadServiceItems(serviceId) {
         serviceId,
       });
     }
-    warmWorshipScriptureReferencesForService(serviceId);
-    warmServiceItemScriptureReferencesForService(serviceId);
+    if (!presenterServiceHydrationPromises.has(serviceId)) await preloadPresenterServiceScripturesBeforeOutput(serviceId);
   })();
   serviceItemLoadPromises.set(serviceId, loadPromise);
   renderLoadingStatus();
@@ -12454,6 +12454,7 @@ async function hydratePresenterServiceData(serviceId = state.selectedServiceId) 
   }
   const hydrationPromise = (async () => {
     await loadServiceItems(targetServiceId);
+    await ensureFullServiceSourceRef(targetServiceId);
     const outputItems = getServiceOutputItems(targetServiceId);
     const songIds = outputItems.map((item) => item.song_id).filter(Boolean);
     await loadSongsForIds(songIds);
@@ -12467,15 +12468,11 @@ async function hydratePresenterServiceData(serviceId = state.selectedServiceId) 
         console.warn("Could not load hymn score manifest before presenter hydration.", error);
       }
     }
+    await Promise.all([preloadPresenterServiceScripturesBeforeOutput(targetServiceId), worshipPresenterSlideLoadPromises.get(targetServiceId)]);
     refreshPresenterForService(targetServiceId, { renderControls: false });
     // Asset warmup stays read-only and does not delay preparation or output.
     void Promise.resolve(preloadPresenterServiceAssetsBeforeOutput(targetServiceId)).catch((error) => {
       console.warn("Could not warm presenter assets in background.", error);
-    });
-    void preloadPresenterServiceScripturesBeforeOutput(targetServiceId).then((loaded) => {
-      if (loaded) schedulePresenterRefreshForService(targetServiceId);
-    }).catch((error) => {
-      console.warn("Could not warm presenter scriptures in background.", error);
     });
     if (
       !hymnScoreManifestLoadPromise
@@ -12503,6 +12500,9 @@ async function hydratePresenterServiceData(serviceId = state.selectedServiceId) 
       && state.selectedServiceId === targetServiceId && (state.module === "presenter" || state.module === "service")) {
       renderCurrentServiceModuleDetail();
       renderServiceList();
+      if (!serviceViewLoadErrors.has(targetServiceId) && !refs.detailPane.querySelector("[data-service-view-loading]")) {
+        showToast("예배 화면 준비 완료");
+      }
     }
   }
 }

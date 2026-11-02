@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261101-daniel-bulletin",
+  "version": "20261102-worship-stability",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "e5f7824b763e6ceb7d9fb4ecec300c69ec63483525e9711d2ba2ad9ac28ede99",
-  "runtime_sha256": "c57fe405ad37cbfe3d7d26050a78dd964d4f620ee66bcfbb45f1965e35bb074f",
-  "source_bytes": 1356028,
-  "runtime_bytes": 967707,
-  "source_gzip": 310680,
-  "runtime_gzip": 243584
+  "source_sha256": "105ce3b4ea13f02d20f0fe375bc2387064e1304de5de1bd61c65614794ceb258",
+  "runtime_sha256": "c0e4a7be9728fa6691bebd22071efe3ca1f17497ae69c36f782fad7e5f2c69c4",
+  "source_bytes": 1356083,
+  "runtime_bytes": 967734,
+  "source_gzip": 310784,
+  "runtime_gzip": 243674
 }

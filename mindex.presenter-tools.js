@@ -34,7 +34,7 @@ const presenterTools = (() => {
     }
     if (spot) {
       const mask=document.createElementNS(ns,'path'), cx=spot[0]*1600, cy=spot[1]*900;
-      mask.setAttribute('d',`M0 0h1600v900H0z M${cx-112} ${cy}a112 112 0 1 0 224 0a112 112 0 1 0 -224 0z`);
+      mask.setAttribute('d',`M0 0h1600v900H0z M${cx-120} ${cy}a120 120 0 1 0 240 0a120 120 0 1 0 -240 0z`);
       mask.setAttribute('fill-rule','evenodd'); mask.setAttribute('fill','rgba(0,0,0,.68)');fragment.append(mask);
     }
     svg.replaceChildren(fragment);

@@ -2202,14 +2202,12 @@ field bindings, playback ownership, keyboard focus and output are preserved.
 Before an opened service has its stored rows and linked songs, show a dedicated
 예배를 준비하고 있어요 status in its content pane and a compact loading notice
 in its outline. Projected template placeholders are not missing-input warnings
-until readiness completes. No artificial minimum animation or global boot logo
-is used; already loaded services reopen immediately.
+until readiness completes. The content pane shows the startup cross, MINDEX wordmark, service name and spinner until its saved document, linked songs, scripture and pending slide reads settle. Cached services reopen immediately.
 
 Failures expose retry with aria-busy=false. Completion only replaces the selected
 service's loading view; navigating elsewhere cannot be undone by an old request.
 Local drafts and an existing live controller are protected from loading/error
-replacement. Audio and output ownership remain unchanged. Asset/scripture
-background warmup retains its own loading behavior and does not block this gate.
+replacement. Audio and output ownership remain unchanged. Media prefetch continues in the background. The selected cold view announces completion when the ready screen replaces the loader.
 Offline Chromium/WebKit checks cover delayed rows/songs, genuine missing input
 after completion, cached revisits, failure/retry, stale completion and live controls.
 
@@ -5413,7 +5411,7 @@ WebP로 생성한다. 운영 예배·주보·저장 배경·OneDrive 원본은 �
 
 ### 발표자 보기의 화면 강조 도구
 현재 화면에서 형광펜·밑줄을 드래그하거나, 스포트라이트로 포인터 주변만 밝게
-보여 준다. 현재 화면 위에서 Ctrl 또는 ⌘를 누르고 휠을 움직이면 커서 위치를 기준으로 100~300% 확대·축소한다. 스포트라이트 원의 중심은 커서를 따라가고 지름은 배율과 관계없이 화면 너비의 14%로 고정하며, 일반 휠은 스크롤에 사용한다. 확대 후 드래그로 위치를 옮기며, 축소·한 획 취소·초기화할 수 있다.
+보여 준다. 현재 화면 위에서 Ctrl 또는 ⌘를 누르고 휠을 움직이면 커서 위치를 기준으로 100~300% 확대·축소한다. 스포트라이트 원의 중심은 커서를 따라가고 지름은 배율과 관계없이 화면 너비의 15%로 고정하며, 일반 휠은 스크롤에 사용한다. 확대 후 드래그로 위치를 옮기며, 축소·한 획 취소·초기화할 수 있다.
 송출 중 같은 예배·화면에만 반영하고, 대기 중에는 미리보기에서만 연습한다.
 다음 화면 미리보기에는 적용하지 않는다. 화면 변경·암전·발표자 보기 종료 시
 강조를 해제한다. 원본 슬라이드나 저장 데이터에는 기록하지 않는다.

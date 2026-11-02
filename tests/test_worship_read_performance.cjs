@@ -39,6 +39,7 @@ vm.runInContext('const servicePraiseLookupNamesCache = new WeakMap()',c);
  let reads=0,sourceReads=0,release;
  const aggregate={service:{id:'s',source_ref:{history:['preserved']}},sections:[],elements:[]};
  c.state={client:{},services:[{id:'s',_worshipSourceRefPartial:true}],loadedWorshipServiceIds:new Set(),dirty:{service:false},selectedServiceId:'s',module:'presenter',worshipSections:[],worshipElements:[],serviceItems:{}};
+ c.ensureSingleSongActivation=async()=>{};c.presenterServiceHydrationPromises=new Map();c.preloadPresenterServiceScripturesBeforeOutput=async()=>false;
  c.serviceViewLoadErrors=new Map();c.serviceItemLoadPromises=new Map();c.worshipAtomicClient=async()=>({read:async()=>{reads++;await new Promise(r=>release=r);return aggregate}});
  c.sundayEditSyncHasLocalDraft=()=>false;c.normalizeWorshipService=s=>({id:s.id,_worshipSourceRef:s.source_ref,_worshipSourceRefPartial:false});
  c.loadFullServiceSourceRefInBackground=()=>sourceReads++;
