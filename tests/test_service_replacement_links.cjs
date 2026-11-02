@@ -31,7 +31,11 @@ const dawn={id:crypto.randomUUID(),type_id:'holy-week-dawn',title:'감사 특별
 assert.equal(serviceStartSortMinutes(dawn),295);
 assert.equal(serviceStartSortMinutes({...dawn,_worshipSourceRef:{start_time:'04:40'}}),280);
 const steps=serviceOrderTemplate(dawn.type_id,{service:dawn}).filter(s=>s.sectionKey!=='ready'&&s.sectionKey!=='closing_visual');
-assert.equal(steps.map(s=>s.label).join('|'),'대표기도|특송|광고|성경봉독|설교|자율기도');
+assert.equal(steps.map(s=>s.label).join('|'),'찬양|대표기도|특송|광고|성경봉독|설교|자율기도');
+const authored=[1,2].map(n=>normalizeServiceItem({id:crypto.randomUUID(),service_id:dawn.id,label:'찬양 '+n,raw_title:'작성된 찬양 '+n,_worshipSectionKey:'praise',_worshipSectionId:'10000000-0000-4000-8000-000000000020',_worshipSectionTitle:'찬양',_worshipElementOrder:n,_worshipElementTemplateModified:true,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'audio_praise',slides:['사용자 가사 '+n],formPreset:{forms:['V2','C','C'],strength:'manual'}})},n-1));
+state.services=[dawn];const authoredBefore=JSON.stringify(authored),visible=projectWorshipServiceItemsFromTemplate(dawn,authored);
+assert.equal(JSON.stringify(authored),authoredBefore,'Default order must not rewrite authored praise');
+for(const item of authored){const restored=visible.find(x=>x.id===item.id);assert.ok(restored);assert.equal(restored.raw_title,item.raw_title);assert.equal(restored.memo,item.memo);}
 const sermon=steps.find(s=>s.sectionKey==='sermon');assert.ok(sermon.elements.some(e=>e.label==='인용 구절'&&!e.default_text));
 const common={id:crypto.randomUUID(),service_id:target,label:'공동기도',raw_title:'공동기도',_worshipSectionKey:'corporate_prayer',_worshipSectionId:crypto.randomUUID(),_worshipSectionTitle:'공동기도',_worshipElementTemplateModified:true,memo:serializeServiceItemMemo({elementType:'image',inputMode:'asset',asset:{kind:'file',name:'공동기도.pdf',url:'./assets/presenter/daniel-common-prayer.pdf',slides:[1,2].map(n=>({url:'./assets/presenter/daniel-common-prayer-'+n+'.png',name:'공동기도 '+n}))}})};
 const deck=presenterElementSlideFromMemoCore(common,{},0,parseServiceItemMemo(common.memo),'공동기도');

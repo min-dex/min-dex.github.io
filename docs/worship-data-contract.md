@@ -1154,7 +1154,7 @@ annual date windows) selects the earliest meeting time, then a stable ID tie-bre
 Explicit meeting times precede dawn defaults: ordinary 05:00, Holy Week 04:50,
 and Thanksgiving special dawn 04:55.
 
-Thanksgiving's new default core order is representative prayer, special song,
+Thanksgiving's default order retains praise before representative prayer, special song,
 announcements, scripture reading, sermon with an empty optional citation, and free
 prayer. Authored older praise rows/documents require separate review before any
 removal. The common dawn audio key uses the approved silent-prayer recording;

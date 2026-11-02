@@ -676,6 +676,7 @@ function worshipServiceHasDawnFreePrayer(service = {}) {
 function worshipFreePrayerTemplate(steps, service) {
   if (!service || !worshipServiceHasDawnFreePrayer(service)) return steps;
   return [
+    ...steps.filter(step => typeof step === 'string' ? step === '찬양' : ['ready','praise'].includes(step?.sectionKey)),
     publicWorshipPrayerStep(), publicWorshipSpecialSongStep(), publicWorshipAnnouncementsStep(),
     publicWorshipScriptureReadingStep(), publicWorshipSermonStep({ typeId: 'holy-week-dawn', service }),
     { label: '자율기도', name: '자율기도', required: false, sectionKey: 'free_prayer', elements: [worshipFreePrayerElement()] },
