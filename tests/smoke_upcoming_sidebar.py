@@ -19,7 +19,13 @@ try:
     state.serviceTypes.push({id:'holy-week-dawn',name:'특별새벽기도회'});
     rows.push({id:'dawn',date:'2026-11-04',type_id:'holy_week_dawn',alias:'감사 특별새벽기도회 <야외> & 긴 별명 (모임)'});
     window.before=JSON.stringify(rows);state.services=rows;state.selectedServiceId='b';
-    window.expected=['야외예배 (청년부 예배)','온세대 찬양예배 (주일예배 [3부])','다니엘기도회 (수요예배)','수요예배','다니엘기도회 (주일오후예배)','특별 모임 (주일오후예배)','주일오후예배','감사 특별새벽기도회 <야외> & 긴 별명 (모임) (새벽기도회)'];
+    window.expected=['청년부 예배 (야외예배)','주일예배 [3부] (온세대 찬양예배)','수요예배 (다니엘기도회)','수요예배','주일오후예배 (다니엘기도회)','주일오후예배 (특별 모임)','주일오후예배','새벽기도회 (감사 특별새벽기도회 <야외> & 긴 별명 (모임))'];
+    // List-only metadata and the subsequently loaded aggregate must keep the same label.
+    const raw={id:'loading',service_type_id:'wed',service_date:'2026-11-04',service_alias:'다니엘기도회',source_ref:{no_gathering:true,replacement_service_id:'annual'}};
+    const light=normalizeWorshipService({...raw,has_service_document:true});
+    const full=normalizeWorshipService({...raw,source_ref:{...raw.source_ref,mindexServiceDocument:{serviceAlias:'오래된 문서 별명'}}});
+    const readLabel=service=>{const host=document.createElement('div');host.innerHTML=renderServiceSidebarCard(service,{showDate:false,upcoming:true});return [host.querySelector('.service-sidebar-title').textContent,host.querySelector('button').getAttribute('aria-label')];};
+    if(JSON.stringify(readLabel(light))!==JSON.stringify(readLabel(full))||readLabel(full)[0]!=='수요예배 (다니엘기도회)')throw Error('label changed after hydration');
     const external={id:'school',date:'2026-11-01',type_id:'external',alias:'학교 채플'};
     state.services=[external,...rows];
     for(const shortcuts of [getUpcomingServiceShortcuts,getHomeSidebarRecentServiceShortcuts]){

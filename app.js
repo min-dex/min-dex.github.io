@@ -24502,9 +24502,9 @@ function renderServiceSidebarCard(service, options = {}) {
   const noGathering = serviceIsNoGathering(service) && targetId === service.id;
   const active = !noGathering && service.id === state.selectedServiceId ? " active" : "";
   const showDate = options.showDate !== false;
-  const { base, name } = serviceNavigationDetails(service);
-  const title = name;
-  const alias = options.upcoming && compactSearchValue(base) !== compactSearchValue(name) ? `(${base})` : "";
+  const label = options.upcoming ? serviceUpcomingNavigationDetails(service) : {title:serviceNavigationName(service), alias:""};
+  const title = label.title;
+  const alias = label.alias ? `(${label.alias})` : "";
   const cardButton = `
     <button
       class="service-sidebar-card${showDate ? "" : " service-sidebar-card--compact"}${active}${noGathering ? " is-no-gathering" : ""}"

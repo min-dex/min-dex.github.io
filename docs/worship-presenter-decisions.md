@@ -5515,3 +5515,13 @@ church typographic logo upper right. Both use the fullscreen shared horizontal
 inset (7.5cqw =144px at1920) and 7cqh top inset (76px rounded).
 Versioned1920×1080 PNGs replace only the two existing image URLs through the
 atomic service path; names, annual dates, order, chromakey and audio stay intact.
+## 다가오는 예배 이름 순서 통일 · 2026-11-02
+
+사용자 정정에 따라 홈·예배·미선택 컨트롤러의 다가오는 예배 카드는
+원래 예배명 뒤에 별명을 괄호로 표시한다. 예: `수요예배 (다니엘기도회)`,
+`주일오후예배 (다니엘기도회)`, `새벽기도회 (감사 특별새벽기도회)`.
+`serviceUpcomingNavigationDetails` 한 함수가 주제목과 별명을 제공하며
+목록 전용 데이터와 상세 데이터 로딩 후에도 같은 규칙을 적용한다.
+별명이 없거나 원래 이름과 같으면 괄호를 생략한다. 작은 괄호 별도 줄,
+기존 대체 예배 이동·집회 없음 상태·검색 결과 이름은 유지한다.
+저장된 이름·원문·송출 제목·예배 연결을 수정하지 않는다.

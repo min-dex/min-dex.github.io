@@ -74,6 +74,11 @@ function serviceNavigationDetails(service = {}) {
   return {base, name, context:replacement ? `${base} 대체` : name !== base ? base : "", replacement, absent};
 }
 function serviceNavigationName(service = {}) { return serviceNavigationDetails(service).name; }
+// Every upcoming surface uses the service type first, followed by its alias.
+function serviceUpcomingNavigationDetails(service = {}) {
+  const {base, name} = serviceNavigationDetails(service);
+  return {title:base, alias:compactSearchValue(base) !== compactSearchValue(name) ? name : ""};
+}
 function serviceNavigationTypeName(typeId) { return serviceNavigationName({ type_id: typeId }); }
 function worshipSetlistNavigationService(source = {}) {
   const aliases = Array.isArray(source.aliases) ? source.aliases : [source.aliases || source.service_alias || ""];
