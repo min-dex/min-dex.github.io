@@ -671,9 +671,11 @@ function presenterSongPositionSlides(slides, title, versionId) {
     : slide);
 }
 
-function renderPresenterSongPosition(slide) {
+function renderPresenterSongPosition(slide, options = {}) {
   const position = slide.songPosition;
   if (slide.type !== "lyrics" || !position) return "";
+  const unionService = options.serviceId === "99df9e1b-1716-41fb-9ea0-f5ca4c99ee45";
+  if (unionService) return position.title ? `<div class="presenter-lyric-song-name">${escapeHtml(position.title)}</div>` : "";
   const heading = position.title ? `<div class="presenter-lyric-song-name">♬ ${escapeHtml(position.title)}</div>` : "";
   if (position.index < 0) return heading;
   const steps = position.labels.map((label, i) =>

@@ -1530,7 +1530,7 @@ function renderPresenterSlideMiniPreview(slide, serviceId = state.presenter.serv
   return `
     <span class="${escapeAttr(outputClasses)}">
       <span class="${escapeAttr(canvasClasses)}" data-output-theme="${escapeAttr(theme)}" ${presenterBackgroundInkAttributes(frameState)}${backgroundStyle}>
-        ${renderPresenterSlideFrame(previewSlide, { noChromakey: frameState.noChromakey, previewStage: true, transitionLogo: serviceRawSourceRef(service).transitionLogo, presentationDesign: serviceRawSourceRef(service).presentationDesign })}
+        ${renderPresenterSlideFrame(previewSlide, { noChromakey: frameState.noChromakey, serviceId: service.id, previewStage: true, transitionLogo: serviceRawSourceRef(service).transitionLogo, presentationDesign: serviceRawSourceRef(service).presentationDesign })}
       </span>
     </span>`;
 }

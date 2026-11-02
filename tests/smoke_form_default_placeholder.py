@@ -54,7 +54,24 @@ try:
     check(!swap({...repeated[0],songPosition:{...repeated[0].songPosition,versionId:'other'}}),'different edition transitions');
     check(!swap({...repeated[0],elementId:'another-song'}),'different song transitions');
     check(!swap(repeated[0],false) && !stage.querySelector('.is-active .presenter-lyric-song-name'),'chromakey clean');
+    stage.style.cssText='position:fixed;inset:0;width:1280px;height:720px;container-type:size';
+    const morphTitle={...repeated[0],type:'song-title',title:native.title,text:'♬ '+native.title,songPosition:null};
+    swap(morphTitle);
+    swap(repeated[0]);
+    check(stage.querySelector('.is-active .presenter-lyric-song-name').getAnimations().length===1,'same praise title morph');
+    swap({...morphTitle,elementId:'different'});
+    swap(repeated[0]);
+    check(stage.querySelector('.is-active .presenter-lyric-song-name').getAnimations().length===0,'other praise never morphs');
     stage.remove();
+    const unionId='99df9e1b-1716-41fb-9ea0-f5ca4c99ee45';
+    const unionSlide=repeated[0], beforeUnion=JSON.stringify(unionSlide);
+    const unionHtml=renderPresenterSlideFrame(unionSlide,{noChromakey:true,serviceId:unionId});
+    check(unionHtml.includes('presenter-lyric-song-name')&&!unionHtml.includes('presenter-lyric-song-steps')&&!unionHtml.includes('♬'),'union lyrics omit form and note');
+    check(JSON.stringify(unionSlide)===beforeUnion,'union view preserves stored slide');
+    const ordinaryHtml=renderPresenterSlideFrame(unionSlide,{noChromakey:true,serviceId:'unrelated'});
+    check(ordinaryHtml.includes('presenter-lyric-song-steps')&&ordinaryHtml.includes('♬'),'ordinary metadata retained');
+    const unionTitle={type:'song-title',elementType:'praise',layout:'lower_bar_text',title:native.title,text:'♬ '+native.title};
+    check(renderPresenterSlideFrame(unionTitle,{noChromakey:true,serviceId:unionId}).includes('♬'),'union title note retained');
     const noMatch={...native,versions:[{...version,id:'other'}]};
     check(serviceItemLinkedVersion(nativeItem,noMatch)===null,'never borrow another record content');
     state.songs=[song];
@@ -138,7 +155,7 @@ try:
       const ratio=parseFloat(getComputedStyle(heading).fontSize)/parseFloat(getComputedStyle(stage.querySelector('.presenter-title-content-title')).fontSize);
       check(Math.abs(ratio-.80)<.005,'separate note ratio '+ratio);
      }
-     stage.remove();
+    stage.remove();
     }
     const proxyCache=new WeakMap();
     const readOnly=value=>{

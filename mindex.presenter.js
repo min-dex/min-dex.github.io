@@ -2818,7 +2818,7 @@ function presenterOutputFrameBackgroundStyle(frameState = {}) {
 }
 
 function commitPresenterOutputFrame(root, payload, slide, frameState, token, options = {}) {
-  const html = slide ? renderPresenterSlideFrame(slide, { noChromakey: frameState.noChromakey, transitionLogo: payload.transitionLogo, presentationDesign: payload.presentationDesign }) : "";
+  const html = slide ? renderPresenterSlideFrame(slide, { noChromakey: frameState.noChromakey, serviceId: payload.serviceId, transitionLogo: payload.transitionLogo, presentationDesign: payload.presentationDesign }) : "";
   const activeImageSource = presenterSlideImageSource(slide);
   const frameKey = presenterOutputFrameKey(payload, slide, frameState);
   const commit = () => {
@@ -2841,6 +2841,7 @@ function commitPresenterOutputFrame(root, payload, slide, frameState, token, opt
       nextLayer.dataset.presenterFrameToken = String(token);
     }
     nextLayer.dataset.presenterFrameKey = frameKey;
+    nextLayer.dataset.songMorphKey = slide?.elementId ? JSON.stringify([payload.serviceId, slide.elementId]) : "";
     nextLayer.dataset.songPositionKey = frameState.noChromakey && slide?.songPosition && slide.elementId
       ? JSON.stringify([payload.serviceId, slide.elementId, slide.songPosition.versionId, slide.songPosition.title]) : "";
     nextLayer.classList.add("is-next");
@@ -2913,6 +2914,21 @@ function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState =
     if (token !== presenterOutputRenderState.token) return;
     // Return the previous metadata to its frame before reusing either layer.
     root._restoreSongPosition?.();
+    const fromTitle = activeLayer.querySelector('.presenter-slide--fullscreen-song-title .presenter-title-content-title, .presenter-slide--song-title .presenter-section-song-title-name, .presenter-slide--song-title > .presenter-slide-text');
+    const toTitle = nextLayer.querySelector('.presenter-lyric-song-name');
+    const titleKey = node => String(node?.textContent || '').replace(PRESENTER_SONG_NOTE_PATTERN, '').trim();
+    if (animated && frameState.noChromakey && fromTitle && toTitle && nextLayer.dataset.songMorphKey
+        && nextLayer.dataset.songMorphKey === activeLayer.dataset.songMorphKey && titleKey(fromTitle) === titleKey(toTitle)
+        && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const from = fromTitle.getBoundingClientRect(), to = toTitle.getBoundingClientRect();
+      if (from.width && from.height && to.width && to.height) {
+        toTitle.animate([
+          { transformOrigin: 'center center', transform: `translate(${from.x + from.width / 2 - to.x - to.width / 2}px, ${from.y + from.height / 2 - to.y - to.height / 2}px) scale(${from.width / to.width}, ${from.height / to.height})` },
+          { transformOrigin: 'center center', transform: 'none' }
+        ], { duration: 360, easing: 'cubic-bezier(.2,.7,.2,1)' });
+      }
+    }
+
     if (animated && nextLayer.dataset.songPositionKey && nextLayer.dataset.songPositionKey === activeLayer.dataset.songPositionKey) {
       const selector = ".presenter-lyric-song-name, .presenter-lyric-song-steps";
       const nodes = [...nextLayer.querySelectorAll(selector)];
@@ -4199,7 +4215,7 @@ function renderPresenterSlideFrame(slide, options = {}) {
       ${renderPresenterSlideMeta(slide)}
       ${options.previewStage && presenterSlideBackgroundVideoSource(slide, options.noChromakey) ? `<video class="presenter-output-background-video" src="${escapeAttr(presenterSlideBackgroundVideoSource(slide, options.noChromakey))}" muted playsinline preload="metadata" aria-hidden="true"></video>` : ""}
       ${body}
-      ${options.noChromakey && !transitionLogo ? renderPresenterSongPosition(slide) : ""}
+      ${options.noChromakey && !transitionLogo ? renderPresenterSongPosition(slide, options) : ""}
     </section>
   `;
 }

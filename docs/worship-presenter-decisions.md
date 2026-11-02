@@ -5531,3 +5531,15 @@ atomic service path; names, annual dates, order, chromakey and audio stay intact
 예배 순서에 연결된 음원은 출처에 관계없이 슬라이드 위 공통 플레이어에서
 재생·정지·볼륨·재생 위치를 표시한다. 첨부 파일과 DB 음원에는 연결된 음원의
 이름을 표시한다. 동기화된 음원은 해당 순서의 타이밍으로 재생한다.
+
+
+## Union service lyric exception and praise title morph ·2026-11-02
+
+The explicitly requested union service `99df9e1b-1716-41fb-9ea0-f5ca4c99ee45`
+shows only the song name above clean lyric output, without its note or bottom
+form sequence. Preview and output receive the same service identity. Other
+services retain their metadata; title slides retain their note. No stored lyrics,
+forms, versions or worship records are rewritten.
+Clean output morphs a matching praise title into the lyric heading only within
+the same service element. Chromakey and reduced-motion preferences retain their
+existing transition policy.
