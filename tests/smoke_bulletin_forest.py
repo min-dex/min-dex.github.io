@@ -32,6 +32,8 @@ try:
      for(const phrase of ['첫 번째 찬양','두 번째 찬양','세 번째 찬양','네 번째 찬양','다니엘기도회'])if(!text.includes(phrase))throw Error('lost source '+phrase);
      if(/숨겨야 할|원문 고백 전문|원문 기도 전문/.test(text))throw Error('liturgy bodies returned');
      if(mode==='layout'&&!r.pages[0].querySelector('[data-frame-hit=news]'))throw Error('layout handles missing');
+     if(r.pages.some(p=>p.querySelector('rect[rx]')))throw Error('removed decorative cards returned');
+     if(!r.pages[1].querySelector('[data-frame-id=readingPlan] rect'))throw Error('reading checkboxes lost');
      document.getElementById('proof').replaceChildren(...r.pages);cases.push(mode);
     }
     if(JSON.stringify(doc)!==before)throw Error('render mutated authored values');

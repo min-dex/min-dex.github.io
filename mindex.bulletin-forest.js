@@ -83,7 +83,6 @@
       const body=a.svg('g'),runs=a.runs(text);
       const used=a.styled(body,runs,{...f,x:f.x+12.5,y:y+3,w:f.w-17.5,h:f.y+f.h-y-6,color:palette.ink},issues,f.id);
       const h=Math.max(17.5,used+7.5);
-      group.append(a.svg('rect',{x:f.x,y,width:f.w,height:h,rx:4,fill:i%2?palette.soft:palette.peach}));
       a.text(group,String(i+1),{...f,x:f.x+2.5,y:y+3,w:7.5,h:10,size:15,weight:700,align:'center',color:palette.accent},issues,f.id);
       group.append(body);y+=h+3.5;
       if(y-3.5>f.y+f.h+.01)issues.add(f.id);
@@ -131,7 +130,6 @@
     const lines=String(value||'').split('\n').filter(Boolean),cols=lines.length>8?3:2,rows=Math.ceil(lines.length/cols),w=(f.w-4*(cols-1))/cols,step=10;
     lines.forEach((text,i)=>{
       const col=i%cols,row=Math.floor(i/cols),x=f.x+col*(w+4),y=f.y+row*step;
-      group.append(a.svg('rect',{x,y,width:w,height:8.5,rx:2,fill:palette.paper,stroke:palette.line,'stroke-width':.3}));
       group.append(a.svg('rect',{x:x+2.5,y:y+2.5,width:2.5,height:2.5,fill:'none',stroke:palette.accent,'stroke-width':.25}));
       a.text(group,text,{...f,x:x+7.5,y:y+.5,w:w-10,h:8,leading:12.5,color:palette.ink},issues,f.id);
     });
@@ -145,8 +143,6 @@
       const root=a.svg('svg',{viewBox:'0 0 297 210',class:'bulletin-sheet',role:'img','aria-label':page?'주보 안쪽':'주보 겉면','data-bulletin-design':'children-forest'});
       root.append(a.svg('rect',{width:297,height:210,fill:palette.paper}));
       if(!page)root.append(a.svg('rect',{x:148.5,width:148.5,height:210,fill:palette.cover}));
-      const month=doc.frames.find(f=>f.id==='monthlyTheme');
-      if(page&&month&&!month.hidden)root.append(a.svg('rect',{x:month.x-6,y:month.y-15,width:month.w+12,height:month.h+21,rx:7,fill:palette.soft}));
       for(const f of doc.frames.filter(f=>f.page===page&&appearance.visible[f.id]!==false&&(!f.hidden||mode==='layout'))){
         const group=a.svg('g',{'data-frame-id':f.id}),check=f.hidden?new Set():issues,box={...f,color:['eventsMonth','themeMonth','liturgical','staff','address','website','memoryReference'].includes(f.id)?palette.muted:palette.ink},value=Object.hasOwn(appearance.labels,f.id)?appearance.labels[f.id]:a.bound(doc,f);
         if(f.type==='logo'||f.type==='art')group.append(a.svg('image',{href:new URL(f.type==='logo'?appearance.assets.logo:appearance.assets.artwork,document.baseURI).href,x:f.x,y:f.y,width:f.w,height:f.h,preserveAspectRatio:'xMinYMid meet'}));
@@ -160,7 +156,6 @@
           const lines=String(value).split('\n');
           a.styled(group,lines.map((text,i)=>({text:(i?'\n':'')+text,size:i?12.5:f.size,weight:i?500:700})),{...box,leading:17.5},check,f.id);
         }else if(f.id==='motto'||f.id==='notices'){
-          group.append(a.svg('rect',{x:f.x-1.5,y:f.y-1.5,width:f.w+3,height:f.h+3,rx:4,fill:f.id==='motto'?palette.peach:palette.soft}));
           a.styled(group,a.runs(value),box,check,f.id);
         }else if(f.binding==='leader'){const leader=a.value(doc,'leader');if(leader)a.styled(group,[{text:'인도 · ',size:f.size},...a.personRuns(leader,f.size)],box,check,f.id);}
         else if(f.binding.startsWith('month:'))a.text(group,String(value).replace('\n',' '),box,check,f.id);

@@ -185,7 +185,8 @@ try:
       if(design==='children-forest'){
        doc.frames.forEach(f=>f.hidden=f.id!=='notices');const note=doc.frames.find(f=>f.id==='notices');note.verticalAlign='middle';note.h=40;
        container.replaceChildren(...B.renderPages(doc,'layout','notices').pages);
-       const group=container.querySelector('[data-frame-id=notices]');if(Number(group.querySelector(':scope>rect:not([data-frame-hit])').getAttribute('y'))!==note.y-1.5)throw Error('background moved with text');
+       const group=container.querySelector('[data-frame-id=notices]');if(group.querySelector(':scope>rect:not([data-frame-hit]):not([data-resize])'))throw Error('removed notice decoration returned');
+       if(!group.querySelector('[data-frame-content]'))throw Error('notice alignment lost');
        doc.frames.forEach(f=>f.hidden=f.id!=='forestLogo');doc.frames.find(f=>f.id==='forestLogo').verticalAlign='bottom';container.replaceChildren(...B.renderPages(doc,'print').pages);
        if(!container.querySelector('[data-frame-id=forestLogo] image').getAttribute('preserveAspectRatio').includes('YMax'))throw Error('image alignment missing');
       }
