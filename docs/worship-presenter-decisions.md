@@ -5543,3 +5543,10 @@ forms, versions or worship records are rewritten.
 Clean output morphs a matching praise title into the lyric heading only within
 the same service element. Chromakey and reduced-motion preferences retain their
 existing transition policy.
+### Worship editor undo
+Ctrl/Cmd+Z outside text fields can reverse an explicit song pick or an up/down
+item move in the selected service. The inverse changes only fields owned by that
+operation and stays an unsaved edit until the operator saves. A pending pick save
+or uncommitted text draft defers undo. Diverging order or changed target fields
+invalidate history rather than overwriting newer work. Native text undo retains
+priority. This shortcut does not publish slides or request a database rollback.

@@ -1582,6 +1582,7 @@ function bindStaticEvents() {
     const isCopy = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "c";
     if (isCopy && copySelectedBibleVersesFromShortcut(event)) return;
 
+    if (handleServiceEditUndo(event)) return;
     if (handleServicePrepEditorKeydown(event)) return;
 
     if (handlePresenterSorterKeydown(event)) return;
@@ -12817,6 +12818,7 @@ function selectServiceSongForItem(index, songId) {
     clearDeferredServiceTextPreview(queryField);
     queryField.dataset.initialValue = queryField.value;
   }
+  const before = serviceEditSnapshot([item], servicePickFields);
   item.song_id = song.id;
   item.raw_title = "";
   item.version_id = defaultServiceSongVersion(song, item, service)?.id || null;
@@ -12830,7 +12832,13 @@ function selectServiceSongForItem(index, songId) {
   if (serviceSongHasMultipleSelectableVersions(song, item, service)) {
     showServiceSongVersionChoiceNotice([songServiceOptionLabel(song) || song.title || item.label || "찬양"]);
   }
-  recentSongSelectionSave.set(service, { itemId:item.id, songId:song.id, done:saveCommittedServiceItem(index, serviceId) });
+  const entry = rememberServiceEdit(service, before, [item], servicePickFields);
+  const done = saveCommittedServiceItem(index, serviceId);
+  if (entry) {
+    entry.pending = true;
+    Promise.resolve(done).then(() => { entry.pending = false; }, () => { entry.pending = false; });
+  }
+  recentSongSelectionSave.set(service, { itemId:item.id, songId:song.id, done });
 }
 
 function getActiveServiceTypeId() {
@@ -12874,6 +12882,7 @@ function runServiceItemActionUnscoped(action, index, label = "", title = "") {
   if (!serviceId) return;
   const typeId = state.services.find((service) => service.id === serviceId)?.type_id || state.selectedServiceTypeId;
   const items = normalizeServiceItems(getServiceItems(serviceId));
+  const beforeMove = ["up","down"].includes(action) ? serviceEditSnapshot(items, serviceMoveFields) : null;
   let nextSelectedIndex = Number.isInteger(Number(state.selectedServiceItemIndex)) ? Number(state.selectedServiceItemIndex) : index;
 
   if (action === "add") {
@@ -12923,6 +12932,7 @@ function runServiceItemActionUnscoped(action, index, label = "", title = "") {
   );
   state.selectedServiceItemIndex = Number.isFinite(nextSelectedIndex) && nextSelectedIndex >= 0 ? nextSelectedIndex : null;
   state.dirty.service = true;
+  rememberServiceEdit(state.services.find(row => row.id === serviceId), beforeMove, state.serviceItems[serviceId], serviceMoveFields);
   markServiceStructureDirty(serviceId);
   refreshPresenterForService(serviceId);
   renderCurrentServiceModuleDetail();
@@ -12938,6 +12948,7 @@ function runPresenterSectionItemAction(action, index) {
   const context = presenterSectionEditorContext(service);
   if (!context) return;
   const items = normalizeServiceItemsInCurrentOrder(state.serviceItems[serviceId]);
+  const beforeMove = ["up","down"].includes(action) ? serviceEditSnapshot(items, serviceMoveFields) : null;
   const sectionIndexes = context.sectionItems
     .map((item) => Number(item._origIndex))
     .filter((itemIndex) => Number.isInteger(itemIndex) && items[itemIndex]);
@@ -13006,6 +13017,7 @@ function runPresenterSectionItemAction(action, index) {
     normalizeMainPraiseSlots(service, items),
   );
   state.dirty.service = true;
+  rememberServiceEdit(state.services.find(row => row.id === serviceId), beforeMove, state.serviceItems[serviceId], serviceMoveFields);
   markServiceStructureDirty(serviceId);
   refreshPresenterForService(serviceId);
   renderCurrentServiceModuleDetail();

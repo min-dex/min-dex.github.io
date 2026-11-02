@@ -1933,3 +1933,86 @@ async function consumeSongSelectionSave(serviceId, itemIndex) {
   return Boolean(await selected.done) && !state.dirtyServiceElementIds.get(serviceId)?.has(item.id)
     && !state.dirtyServiceStructureIds.has(serviceId);
 }
+
+// Only explicit picks and moves own undo entries. Never snapshot lyrics, media or the service.
+const serviceEditHistory = new WeakMap();
+const serviceMoveFields = ["sort_order", "label", "_worshipSectionId", "_worshipSectionKey",
+  "_worshipSectionTitle", "_worshipSectionOrder", "_worshipElementOrder", "_worshipSlotKey",
+  "_worshipElementTemplateModified", "_worshipTemplatePlaceholder"];
+const servicePickFields = ["song_id", "version_id", "song_version_id", "raw_title"];
+
+function serviceEditSnapshot(items, fields) {
+  return items.map(item => Object.fromEntries(["id", ...fields].map(key => [key, item[key]])));
+}
+
+function rememberServiceEdit(service, before, after, fields) {
+  if (!service || !before || before.length !== after.length) return null;
+  const previous = new Map(before.map(row => [row.id, row]));
+  const changes = [];
+  for (const item of after) {
+    const old = previous.get(item.id);
+    if (!old || !item.id) return null;
+    for (const field of fields) {
+      if (old[field] !== item[field]) changes.push({id:item.id, field, before:old[field], after:item[field]});
+    }
+  }
+  const moved = fields === serviceMoveFields && before.some((row, i) => row.id !== after[i].id);
+  if (!changes.length && !moved) return null;
+  const entry = { changes, beforeOrder:moved && before.map(row => row.id), afterOrder:moved && after.map(row => row.id) };
+  const history = serviceEditHistory.get(service) || [];
+  history.push(entry);
+  if (history.length > 30) history.shift();
+  serviceEditHistory.set(service, history);
+  return entry;
+}
+
+function reverseServiceEdit(entry, items) {
+  const rows = new Map(items.map(item => [item.id, item]));
+  if (entry.afterOrder && (entry.afterOrder.length !== items.length ||
+      entry.afterOrder.some((id, i) => items[i].id !== id))) return null;
+  if (entry.changes.some(change => !rows.has(change.id) || rows.get(change.id)[change.field] !== change.after)) return null;
+  for (const change of entry.changes) {
+    rows.set(change.id, {...rows.get(change.id), [change.field]:change.before});
+  }
+  return (entry.beforeOrder || items.map(item => item.id)).map(id => rows.get(id));
+}
+
+function handleServiceEditUndo(event) {
+  if (event.defaultPrevented || event.repeat || event.altKey || event.shiftKey || !(event.ctrlKey || event.metaKey)
+      || event.key?.toLowerCase() !== "z" || event.isComposing || event.keyCode === 229) return false;
+  if ([event.target, document.activeElement].some(node => node?.isContentEditable ||
+      node?.closest?.('input, textarea, select, [role="textbox"]'))) return false;
+  if (!["service","presenter"].includes(state.module) || !refs.detailPane?.querySelector("[data-service-item-field]")) return false;
+  const service = selectedServiceForEditor();
+  const history = service && serviceEditHistory.get(service);
+  const entry = history?.at(-1);
+  if (!entry || service.id !== state.selectedServiceId) return false;
+  event.preventDefault();
+  if (entry.pending || activeServiceSavePromise) {
+    showToast("저장이 끝난 뒤 다시 실행 취소해 주세요.", "info");
+    return true;
+  }
+  const draftFields = refs.detailPane.querySelectorAll("input[data-service-item-field], textarea[data-service-item-field]");
+  if ([...draftFields].some(field => field.dataset.initialValue !== undefined && field.value !== field.dataset.initialValue)) {
+    showToast("입력 중인 내용을 먼저 확정해 주세요.", "info");
+    return true;
+  }
+  const items = reverseServiceEdit(entry, state.serviceItems[service.id] || []);
+  history.pop();
+  if (!items) {
+    history.length = 0;
+    showToast("편집 내용이 달라져 실행 취소할 수 없습니다.", "info");
+    return true;
+  }
+  const selected = state.serviceItems[service.id][state.selectedServiceItemIndex]?.id;
+  state.serviceItems[service.id] = items;
+  if (selected) state.selectedServiceItemIndex = items.findIndex(row => row.id === selected);
+  if (entry.beforeOrder) markServiceStructureDirty(service.id);
+  for (const {id} of entry.changes) markServiceElementDirty(service.id, {id});
+  state.dirty.service = true;
+  refreshPresenterForService(service.id, {publish:false, renderControls:false});
+  renderCurrentServiceModuleDetail();
+  updateSaveState();
+  showToast("변경을 되돌렸습니다. 저장하면 반영됩니다.", "info");
+  return true;
+}
