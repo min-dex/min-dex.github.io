@@ -1822,3 +1822,14 @@ span.presenter-announcement-paren,
   line-height: 1.25; pointer-events: none;
 }
 .presenter-lyric-service-name svg { width: 1.73cqw; height: 3.6cqw; fill: currentColor; flex: none; }
+
+/* Paint the sidebar stage at its displayed size, including text and image sampling. */
+@supports (zoom: 0.5) {
+  .svc-presenter-live-preview .svc-slide-mini-canvas.presenter-output-root:not(:has(video)) {
+    zoom: var(--presenter-preview-scale, 1);
+    transform: translate(-50%, -50%);
+    transform-style: flat;
+    backface-visibility: visible;
+    will-change: auto;
+  }
+}
