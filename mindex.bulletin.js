@@ -929,9 +929,41 @@
     }
     return result;
   }
+  function alignFrameContents(doc,result) {
+    const frames=doc.frames.filter(f=>["top","middle","bottom"].includes(f.verticalAlign));
+    if(!frames.length)return result;
+    const measure=document.createElement("div");
+    measure.style.cssText="position:fixed;left:-10000px;top:0;width:1123px;height:794px;visibility:hidden;pointer-events:none";
+    measure.setAttribute("aria-hidden","true");document.body.append(measure);
+    try{
+      result.pages.forEach((root,page)=>{
+        if(!frames.some(f=>f.page===page))return;
+        measure.append(root);
+        for(const f of frames.filter(f=>f.page===page)){
+          const group=root.querySelector(`[data-frame-id="${f.id}"]`);if(!group)continue;
+          const content=svg("g",{"data-frame-content":f.id});
+          for(const node of [...group.children]){
+            if(node.matches("[data-frame-hit],[data-resize]"))continue;
+            // Full frame furniture stays fixed; rows, bullets and their cards move together.
+            if(node.tagName.toLowerCase()==="rect"&&Number(node.getAttribute("width"))>=f.w&&Number(node.getAttribute("height"))>=f.h&&f.type!=="news")continue;
+            content.append(node);
+          }
+          group.insertBefore(content,group.querySelector("[data-frame-hit]")||null);
+          for(const image of content.querySelectorAll("image"))image.setAttribute("preserveAspectRatio",`x${f.align==="right"?"Max":f.align==="center"?"Mid":"Min"}Y${f.verticalAlign==="top"?"Min":f.verticalAlign==="bottom"?"Max":"Mid"} meet`);
+          const box=content.getBBox();if(!box.height)continue;
+          if(box.height>f.h+.01){if(!f.hidden)result.issues.add(f.id);continue;}
+          const ratio=f.verticalAlign==="bottom"?1:f.verticalAlign==="middle"?.5:0;
+          const offset=f.y+(f.h-box.height)*ratio-box.y;
+          if(Math.abs(offset)>.0001)content.setAttribute("transform",`translate(0 ${Number(offset.toFixed(4))})`);
+        }
+        measure.replaceChildren();
+      });
+    }finally{measure.remove();}
+    return result;
+  }
   function renderPages(doc,mode,selected) {
     if(doc.settings?.design==="simple")doc=simpleFlow(doc);
-    const result=renderAppearance(doc,renderPageContent(doc,mode,selected));
+    const result=alignFrameContents(doc,renderAppearance(doc,renderPageContent(doc,mode,selected)));
     // Advertising frames must not cover other populated copy on the same page.
     const frames=doc.frames.filter(f=>!f.hidden&&['news','notices','welcome','newsTitle','events','eventsTitle','eventsMonth','staff'].includes(f.id)&&String(boundText(doc,f)).trim());
     for(let i=0;i<frames.length;i++)for(let j=i+1;j<frames.length;j++){
@@ -1096,7 +1128,7 @@
       if(patch&&value.settings?.design==="children"){
         const old=legacyChildrenFrames().find(p=>p.id===f.id);
         // Upgrade only an untouched old default; preserve every custom frame.
-        if(old&&["x","y","w","h","size","align"].every(key=>patch[key]===old[key])&&!patch.hidden)patch=null;
+        if(old&&["x","y","w","h","size","align"].every(key=>patch[key]===old[key])&&!patch.hidden&&!["top","middle","bottom"].includes(patch.verticalAlign))patch=null;
       }
       if(!patch)continue;
       for(const key of ["x","y","w","h","size"]){
@@ -1109,6 +1141,7 @@
       if(["MindexBulletin","MindexChildrenTheme"].includes(patch.family))f.family=patch.family;
       if(f.family==="MindexChildrenTheme")f.weight=400;else if(f.weight===400)f.weight=500;
       f.hidden=patch.hidden===true;if(["left","center","right"].includes(patch.align))f.align=patch.align;
+      if(["top","middle","bottom"].includes(patch.verticalAlign))f.verticalAlign=patch.verticalAlign;
     }
     for(const [month,text] of Object.entries(isRecord(value.months)?value.months:{}))if(validMonth(month)&&typeof text==="string")months[month]=text;
     for(const key of profileKeys)if(typeof value.inherited?.common?.[key]==="string")inherited.common[key]=value.inherited.common[key];
@@ -1445,7 +1478,8 @@
           [["x","가로 위치"],["y","세로 위치"],["w","너비"],["h","높이"]].map(([key,label])=>`<label>${label} (mm)<input type="number" step="2.5" data-bulletin-dimension="${key}" ${isFlowFrame(doc,f.id)&&["y","h"].includes(key)?'readonly title="내용에 따라 자동 계산"':""} value="${isFlowFrame(doc,f.id)?Number(simpleFlow(doc).frames.find(item=>item.id===f.id)[key].toFixed(2)):f[key]}"></label>`).join("")+`</div>
           <label>글자 크기 (pt)<select data-bulletin-dimension="size">${[...new Set([...TOKENS.fontSizes,f.size])].sort((a,b)=>a-b).map(n=>`<option ${f.size===n?"selected":""}>${n}</option>`).join("")}</select></label>
           ${f.type==="text"?`<label>글꼴<select data-bulletin-family>${[["MindexBulletin","Freesentation"],["MindexChildrenTheme","던파 비트비트"]].map(([key,name])=>`<option value="${key}" ${(f.family||"MindexBulletin")===key?"selected":""}>${name}</option>`).join("")}</select></label><label>굵기<select data-bulletin-dimension="weight">${(f.family==="MindexChildrenTheme"?[400]:[500,700,800]).map(n=>`<option value="${n}" ${(f.weight||500)===n?"selected":""}>${n===400||n===500?"보통":n===700?"굵게":"아주 굵게"}</option>`).join("")}</select></label>`:""}
-          <label>정렬<select data-bulletin-align>${[["left","왼쪽"],["center","가운데"],["right","오른쪽"]].map(([v,t])=>`<option value="${v}" ${f.align===v?"selected":""}>${t}</option>`).join("")}</select></label>
+          <label>가로 정렬<select data-bulletin-align>${[["left","왼쪽"],["center","가운데"],["right","오른쪽"]].map(([v,t])=>`<option value="${v}" ${f.align===v?"selected":""}>${t}</option>`).join("")}</select></label>
+          <label>세로 정렬<select data-bulletin-vertical-align>${[["","기존 배치"],["top","위쪽"],["middle","가운데"],["bottom","아래쪽"]].map(([v,t])=>`<option value="${v}" ${(f.verticalAlign||"")===v?"selected":""}>${t}</option>`).join("")}</select></label>
           <details class="bulletin-property-section" data-bulletin-section="layout-help" ${window.MindexDisclosure?.attrs(["bulletin",doc.id,"layout-help"])||""}><summary>편집 도움말</summary><p class="bulletin-help">드래그로 이동하고 모서리로 크기를 조절합니다. 방향키는 2.5mm씩 이동합니다.</p><p class="bulletin-help">광고·안내·일정·섬김이는 내용에 맞춰 자동 배치됩니다.</p><p class="bulletin-help">순서 간추리기는 준비·마침·교제·보조 성구와 고백 전문을 생략하고 같은 순서를 묶습니다.</p>${templateSession?'<p class="bulletin-help">광고·설교는 예시입니다. 11월부터 새 주보에 적용되며, 저장된 주보는 유지됩니다.</p>':""}</details>`;
       }
       if(mode==="layout"){
@@ -1572,6 +1606,7 @@
       if(t.hasAttribute("data-bulletin-family")){if(!["MindexBulletin","MindexChildrenTheme"].includes(t.value))return;remember();f.family=t.value;f.weight=t.value==="MindexChildrenTheme"?400:500;persist();properties();preview();return;}
       if(t.dataset.bulletinDimension){const n=Number(t.value);if(!t.value.trim()||!Number.isFinite(n)){t.value=String(f[t.dataset.bulletinDimension]);return;}remember();if(t.dataset.bulletinDimension==="weight")f.family=f.family||"MindexBulletin";setDimension(f,t.dataset.bulletinDimension,n);persist();properties();preview();}
       if(t.matches("[data-bulletin-align]")){remember();f.align=t.value;persist();preview();}
+      if(t.matches("[data-bulletin-vertical-align]")){if(!["","top","middle","bottom"].includes(t.value))return;remember();if(t.value)f.verticalAlign=t.value;else delete f.verticalAlign;persist();preview();}
     });
     on(root,"click",async event=>{
       if(mode==="content"){

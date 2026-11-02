@@ -118,13 +118,17 @@ try:
     page.locator('[data-bulletin-design-label=newsTitle]').fill('서버에서 바꾼 제목')
     page.locator('[data-bulletin-dimension=size]').select_option('10')
     page.locator('[data-bulletin-family]').select_option('MindexChildrenTheme')
+    page.locator('[data-bulletin-vertical-align]').select_option('middle')
+    page.locator('[data-bulletin-vertical-align]').select_option('bottom')
+    page.locator('[data-bulletin-undo]').click()
+    page.wait_for_function("document.querySelector('[data-bulletin-vertical-align]')?.value==='middle'")
     page.get_by_text('색상',exact=True).click()
     page.locator('[data-bulletin-design-color=ink]').fill('#123456')
     page.get_by_text('로고와 그림',exact=True).click()
     page.locator('[data-bulletin-design-image=logo]').set_input_files({'name':'logo.png','mimeType':'image/png','buffer':Path('assets/bulletin/children-mark-2026-11.png').read_bytes()})
     page.wait_for_function("document.querySelector('[data-bulletin-print]')?.disabled===false")
     page.locator('[data-bulletin-save]').click();page.wait_for_function('template?.revision===1')
-    assert page.evaluate("JSON.stringify(rows.saved.content)===original&&sent.length===0&&template.layout.appearance.labels.newsTitle==='서버에서 바꾼 제목'&&template.layout.appearance.palette.ink==='#123456'")
+    assert page.evaluate("JSON.stringify(rows.saved.content)===original&&sent.length===0&&template.layout.appearance.labels.newsTitle==='서버에서 바꾼 제목'&&template.layout.appearance.palette.ink==='#123456'&&template.layout.frames.find(f=>f.id==='newsTitle').verticalAlign==='middle'")
     assert page.locator('.bulletin-canvas').inner_text().find('서버에서 바꾼 제목')>=0
     assert page.evaluate("[...document.querySelectorAll('.bulletin-canvas image')].some(n=>n.getAttribute('href').startsWith('data:image/png'))")
     assert page.evaluate("[...document.querySelectorAll('.bulletin-canvas [fill]')].some(n=>n.getAttribute('fill')==='#123456')")
@@ -137,9 +141,59 @@ try:
     assert page.evaluate("copyBefore===JSON.stringify({fields:docs.get('saved').fields,inherited:docs.get('saved').inherited,months:docs.get('saved').months,sourceSnapshot:docs.get('saved').sourceSnapshot})"),'Explicit apply must preserve every authored/blank/inherited/month/source value'
     page.locator('[data-bulletin-save]').click();page.wait_for_function('sent.length===1')
     page.evaluate('editor.reload()');page.wait_for_function("document.querySelector('[data-bulletin-print]')?.disabled===false")
-    assert page.evaluate("docs.get('saved').settings.appearance.palette.ink==='#123456'&&docs.get('saved').fields.welcome===''&&docs.get('saved').frames.find(f=>f.id==='newsTitle').family==='MindexChildrenTheme'")
+    assert page.evaluate("docs.get('saved').settings.appearance.palette.ink==='#123456'&&docs.get('saved').fields.welcome===''&&docs.get('saved').frames.find(f=>f.id==='newsTitle').family==='MindexChildrenTheme'&&docs.get('saved').frames.find(f=>f.id==='newsTitle').verticalAlign==='middle'")
     page.locator('[data-bulletin-service]').select_option('new');page.wait_for_function("docs.get('new')?.settings.templateRevision===1&&document.querySelector('[data-bulletin-print]')?.disabled===false")
-    assert page.evaluate("docs.get('new').settings.appearance.palette.ink==='#123456'&&JSON.stringify(rows.saved.content)!==original")
+    assert page.evaluate("docs.get('new').settings.appearance.palette.ink==='#123456'&&docs.get('new').frames.find(f=>f.id==='newsTitle').verticalAlign==='middle'&&JSON.stringify(rows.saved.content)!==original")
     print('PASS all-department design: seed/save/reopen/layout-only apply/content preservation/reload/new inheritance',design,engine,flush=True)
+   geometry=page.evaluate(r'''()=>{
+    const B=MindexBulletin,container=document.createElement('div');document.body.append(container);let cases=0;
+    try{
+     for(const design of ['simple','editorial','ink','panels','children','children-forest']){
+      const department=design.startsWith('children')?'children':'young-adult';
+      const doc={...B.normalizeSnapshot({settings:{design,theme:'',appearance:{labels:{newsTitle:'첫째 줄\n둘째 줄'}}},fields:{news:'① 첫 번째 안내\n② 두 번째 안내',notices:'고정 배경 안의 안내'}}),source:{...getSource('saved'),department}};
+      doc.frames.forEach(f=>f.hidden=f.id!=='newsTitle');const frame=doc.frames.find(f=>f.id==='newsTitle');Object.assign(frame,{x:10,y:20,w:100,h:40,size:15});
+      const original=JSON.stringify(doc),plain=B.renderPages(doc,'print').pages.map(p=>p.outerHTML);
+      if(JSON.stringify(doc)!==original)throw Error('default render mutated document');
+      if(plain.some(s=>s.includes('data-frame-content')))throw Error('default output acquired alignment wrapper');
+      for(const verticalAlign of ['top','middle','bottom']){
+       frame.verticalAlign=verticalAlign;const before=JSON.stringify(doc),offsets=[];
+       for(const mode of ['preview','layout','print']){
+        const result=B.renderPages(doc,mode,'newsTitle');container.replaceChildren(...result.pages);
+        const group=container.querySelector('[data-frame-id=newsTitle]'),content=group.querySelector('[data-frame-content]'),box=content.getBBox(),offset=content.transform.baseVal.consolidate()?.matrix.f||0;
+        const expected=frame.y+(frame.h-box.height)*({top:0,middle:.5,bottom:1}[verticalAlign]);
+        if(Math.abs(box.y+offset-expected)>.02)throw Error('wrong vertical position '+design+'/'+verticalAlign+'/'+mode);
+        if(result.issues.has('newsTitle'))throw Error('fitting text wrongly blocked');
+        const handle=group.querySelector('[data-frame-hit]');if(handle&&Number(handle.getAttribute('y'))!==frame.y)throw Error('frame handle moved');
+        offsets.push(offset);cases++;
+       }
+       if(!offsets.every(n=>Math.abs(n-offsets[0])<.001))throw Error('preview/print alignment differs');
+       if(JSON.stringify(doc)!==before)throw Error('alignment render mutated authored values');
+      }
+      delete frame.verticalAlign;if(JSON.stringify(B.renderPages(doc,'print').pages.map(p=>p.outerHTML))!==JSON.stringify(plain))throw Error('existing placement did not restore exactly');
+      frame.verticalAlign='bottom';doc.settings.appearance.labels.newsTitle='';container.replaceChildren(...B.renderPages(doc,'print').pages);
+      if(container.querySelector('[data-frame-content=newsTitle]').textContent)throw Error('blank replaced');
+      doc.settings.appearance.labels.newsTitle='넘치는 글';frame.h=5;frame.size=45;
+      if(!B.renderPages(doc,'print').issues.has('newsTitle'))throw Error('overflow no longer blocks printing');
+      for(const id of ['news','order']){
+       doc.frames.forEach(f=>f.hidden=f.id!==id);const list=doc.frames.find(f=>f.id===id);Object.assign(list,{verticalAlign:'middle',h:150,y:30});
+       container.replaceChildren(...B.renderPages(doc,'layout',id).pages);
+       const group=container.querySelector('[data-frame-id='+id+']'),content=group.querySelector('[data-frame-content]'),box=content.getBBox(),handle=group.querySelector('[data-frame-hit]'),offset=content.transform.baseVal.consolidate()?.matrix.f||0;
+       const y=Number(handle.getAttribute('y')),h=Number(handle.getAttribute('height'));
+       if(box.height<=h&&Math.abs(box.y+offset-(y+(h-box.height)/2))>.02)throw Error('multi-element block alignment '+design+'/'+id);
+       if(Number(handle.getAttribute('y'))!==y)throw Error('list frame moved');
+      }
+      if(design==='children-forest'){
+       doc.frames.forEach(f=>f.hidden=f.id!=='notices');const note=doc.frames.find(f=>f.id==='notices');note.verticalAlign='middle';note.h=40;
+       container.replaceChildren(...B.renderPages(doc,'layout','notices').pages);
+       const group=container.querySelector('[data-frame-id=notices]');if(Number(group.querySelector(':scope>rect:not([data-frame-hit])').getAttribute('y'))!==note.y-1.5)throw Error('background moved with text');
+       doc.frames.forEach(f=>f.hidden=f.id!=='forestLogo');doc.frames.find(f=>f.id==='forestLogo').verticalAlign='bottom';container.replaceChildren(...B.renderPages(doc,'print').pages);
+       if(!container.querySelector('[data-frame-id=forestLogo] image').getAttribute('preserveAspectRatio').includes('YMax'))throw Error('image alignment missing');
+      }
+     }
+     return cases;
+    }finally{container.remove();}
+   }''')
+   assert geometry==54
+   print('PASS box alignment geometry: six layouts x three positions x preview/layout/print; handles/background fixed; blank/overflow/default preserved',engine,flush=True)
    browser.close()
 finally:server.shutdown()

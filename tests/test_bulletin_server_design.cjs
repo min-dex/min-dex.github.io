@@ -35,3 +35,15 @@ for(const design of ['simple','editorial','ink','panels','children','children-fo
  assert.equal(B.normalizeSnapshot(B.storedValue(d).content).fields.welcome,'');
 }
 console.log('PASS all six design defaults, safe appearance and layout-only content preservation');
+
+for(const verticalAlign of ['top','middle','bottom']){
+ const d={...B.normalizeSnapshot({settings:{design:'children-forest'},frames:[{id:'newsTitle',verticalAlign}]}),source};
+ assert.equal(d.frames.find(f=>f.id==='newsTitle').verticalAlign,verticalAlign);
+ const restored={};B.applyStored(restored,{revision:2,...B.storedValue(d)});
+ assert.equal(restored.frames.find(f=>f.id==='newsTitle').verticalAlign,verticalAlign);
+ const template={template_key:'children-forest',revision:2,...B.templateValue(d)};
+ assert.equal(B.normalizeTemplate(template).layout.frames.find(f=>f.id==='newsTitle').verticalAlign,verticalAlign);
+}
+assert.equal(B.normalizeSnapshot({frames:[{id:'newsTitle',verticalAlign:'url(evil)'}]}).frames.find(f=>f.id==='newsTitle').verticalAlign,undefined);
+assert.equal(B.normalizeSnapshot().frames.find(f=>f.id==='newsTitle').verticalAlign,undefined);
+console.log('PASS frame vertical alignment enum, issue/template roundtrip and unchanged default');

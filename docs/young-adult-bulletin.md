@@ -527,3 +527,13 @@ Design controls keep the existing actions and stored values. Color swatches use 
 geometry is visually quieter, and native file buttons share the editor control rhythm.
 Template/save actions stay on readable rows in narrow editor widths. This is scoped editor
 CSS only: renderer coordinates, printed typography, authored copy and persistence are unchanged.
+
+## Box content alignment · 2026-11-02
+
+Every frame exposes horizontal alignment and vertical alignment (existing placement/top/middle/bottom).
+Only explicit vertical choices store `layout.frames[].verticalAlign`; missing values preserve the original output
+byte-for-byte. Common templates and dated issue layouts use the existing revision/CAS, undo and draft paths.
+Alignment measures rendered SVG content with loaded fonts, keeps handles and full-frame decoration fixed, and
+moves multiline copy/lists/rows as one block. Images use the corresponding aspect-ratio alignment. Overflow
+remains an error rather than shrinking or clipping content. Empty frames stay empty. Auto-flow frames align
+within their computed height. No authored fields, source snapshots, month content or worship rows are changed.
