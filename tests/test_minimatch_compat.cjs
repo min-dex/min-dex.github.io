@@ -16,6 +16,7 @@ const legacy = from('glob')('minimatch');
 test('only the pinned official patched engine performs matching', () => {
   const req = createRequire(from('glob').resolve('minimatch'));
   assert.equal(req('minimatch/package.json').version, '11.0.1');
+  assert.equal(typeof req('minimatch').Minimatch.prototype.mergeRows, 'function');
   assert.equal(typeof legacy, 'function');
   assert.equal(typeof legacy.Minimatch.prototype.mergeRows, 'function');
   const mm = new legacy.Minimatch('{a*,b*}');
