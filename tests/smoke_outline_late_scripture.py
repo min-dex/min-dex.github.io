@@ -9,7 +9,7 @@ SCRIPT = """async manual => {
     id:'s-'+i+'-'+j,sectionId:'sect-'+i,sectionTitle:labels[i],elementId:items[i].id,
     type:'lyrics',layout:'center-text',title:labels[i],text:labels[i]+' '+j
   })));
-  let slides=makeSlides(6);
+  let slides=makeSlides(manual==="loaded"?32:6);
   state.module='presenter';state.selectedServiceId=id;state.services=[service];state.serviceItems={[id]:items};
   state.presenter.serviceId=id;state.presenter.index=0;state.presenter.slides=slides;
   presenterSlidesForService=()=>slides;getServiceOutlineItems=()=>items;
@@ -17,10 +17,18 @@ SCRIPT = """async manual => {
   const render=()=>{refs.detailPane.innerHTML=renderServicePresenterControls(service,slides,true,0);
     mountDeferredPresenterBoardSections(document.getElementById('servicePresenterControls'),id,slides)};
   const wait=ms=>new Promise(r=>setTimeout(r,ms));
-  render(); refs.songList.innerHTML='<div class="service-outline-list">'+renderServiceOutlineChildRow(service,items[3],3,42,slides)+'</div>';
+  const list=refs.songList.cloneNode(false);refs.songList.replaceWith(list);refs.songList=list;bindStaticEvents();
+  render(); refs.songList.innerHTML='<div class="service-outline-list">'+renderServiceOutlineChildRow(service,items[3],3,-1,slides)+'</div>';
   const button=refs.songList.querySelector('[data-service-outline-item-id="item-3"]');
   if (!button) throw Error('sermon outline missing');
-  button.focus(); handleServiceOutlineSlideClick(button);await wait(80);
+  button.focus(); button.click();await wait(250);
+  if(manual==="loaded"){
+    const el=refs.detailPane.querySelector('[data-service-element-id="item-3"]');
+    const offset=el?.getBoundingClientRect().top-refs.detailPane.getBoundingClientRect().top;
+    if(!button.classList.contains("selected") || button.dataset.serviceOutlineSlide!=="68" || state.presenter.index!==0)throw Error("selection or output changed");
+    if(!(offset>=0 && offset<120))throw Error("loaded click offset "+offset);
+    return {offset};
+  }
   if(manual) {
     const reading=refs.detailPane.querySelector('[data-service-element-id="item-2"]');
     scrollWithinPresenterViewport(reading,{block:'start',behavior:'auto'});
@@ -48,11 +56,11 @@ def main():
         with sync_playwright() as p:
             for name in ('chromium','webkit'):
                 b=launch_chromium(p) if name=='chromium' else p.webkit.launch()
-                page=b.new_page(viewport={'width':1440,'height':900})
+                page=b.new_page(viewport={'width':1200,'height':900})
                 page.route('**/*supabase*/**',lambda route:route.abort())
                 page.goto(url+'?mindexSmokeRaw=1',wait_until='load')
                 page.wait_for_function("typeof renderServicePresenterControls==='function' && !document.body.classList.contains('ui-booting')")
-                for manual in (False,True):
+                for manual in ("loaded",False,True):
                     print(name,manual,page.evaluate(SCRIPT,manual),flush=True)
                 b.close()
     finally:

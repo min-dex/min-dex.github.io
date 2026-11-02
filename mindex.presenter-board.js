@@ -136,7 +136,19 @@ function hydrateDeferredPresenterBoardSectionUnscoped(root, serviceId, slides, g
   const activeIndex = presenterBoardActiveIndex(slides, state.presenter.serviceId === serviceId, state.presenter.index);
   const template = document.createElement("template");
   template.innerHTML = renderPresenterBoardSection(group, activeIndex, serviceId).trim();
+  // An estimated section above the viewport can grow after an outline jump.
+  // Keep the following content stationary when the real thumbnails replace it.
+  const pane = refs.detailPane;
+  const next = placeholder.nextElementSibling;
+  const keep = next && pane && root.dataset.focusView !== "true"
+    && placeholder.getBoundingClientRect().bottom <= pane.getBoundingClientRect().top + presenterViewportStickyTopOffset(pane);
+  const top = keep ? next.getBoundingClientRect().top : 0;
   placeholder.replaceWith(template.content.firstElementChild);
+  if (keep) {
+    const shift = next.getBoundingClientRect().top - top;
+    if (getComputedStyle(pane).overflowY === "visible") window.scrollBy(0, shift);
+    else pane.scrollTop += shift;
+  }
   syncPresenterBoardSelectionClasses(root);
   refreshIcons();
   observePresenterPreviewScaleFrames(root);
