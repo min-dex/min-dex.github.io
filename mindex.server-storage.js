@@ -4,6 +4,22 @@
  const refreshing=new Set(),refreshWanted=new Set();
  const ephemeral=new Map(),queued=new Map(),failures=new Map(),writers=new Map();
  let connection=null,ready=false,timer=null,flushing=null,stores=null,initializing=null,live=null,refreshTimer=null,localChannel=null;
+ let recoveryTimer=null,recoveryAttempts=0,retrying=null;
+ const recoveryDelays=[1000,4000,12000];
+ const temporaryFailure=error=>/57014|PGRST003|timeout|timed out|statement timeout|failed to fetch|network|offline|fetch failed|connection.*(?:closed|reset)|AbortError/i.test([error?.code,error?.name,error?.message].filter(Boolean).join(' '));
+ const category=id=>/mindex\.atomic\./.test(id)?'예배 저장 복구 정보':/mindex\.editor\.draft\./.test(id)?'편집 초안':/mindex\.bulletin\./.test(id)?'주보 초안·복구본':/mindex\.worshipRecovery/.test(id)?'예배 복구본':/mindex\.(?:ui\.|theme|music\.|presenter\.)/.test(id)?'화면·재생 설정':'앱 보관 정보';
+ function recoverableIds(){
+  const conflicts=new Set(Object.entries(stores||{}).flatMap(([name,store])=>store.conflictKeys().map(key=>name+':'+key)));
+  return new Set([...failures].filter(([id,error])=>!conflicts.has(id)&&temporaryFailure(error)).map(([id])=>id));
+ }
+ function scheduleRecovery(){
+  if(!failures.size){if(recoveryTimer!==null)clearTimeout(recoveryTimer);recoveryTimer=null;recoveryAttempts=0;return}
+  if(!ready||recoveryTimer!==null||retrying||recoveryAttempts>=recoveryDelays.length||!recoverableIds().size)return;
+  if(typeof navigator!=='undefined'&&navigator.onLine===false)return;
+  if(document.hidden)return;
+  const captured=connection;
+  recoveryTimer=setTimeout(()=>{recoveryTimer=null;if(connection!==captured)return;recoveryAttempts++;void retry({automatic:true}).catch(()=>{});},recoveryDelays[recoveryAttempts]);
+ }
  const transient=key=>/^(mindex\.(?:bible\.|supabase\.static\.|serviceListView\.missingUntil$)|mindex\.monitor\.tab\.)/.test(key);
  const transport=key=>/^mindex\.presenter\.(?:state(?:\.navigation)?|signal)$/.test(key);
  const recoveryKey=key=>key.replace('mindex.presenter.state','mindex.presenter.recovery');
@@ -13,11 +29,16 @@
  function status(){
   let node=document.getElementById('serverStorageStatus');
   // Routine background persistence is silent; failures still require action.
-  if(!failures.size){if(node){node.hidden=true;node.textContent=''}return}
+  if(!failures.size){if(node){node.hidden=true;node.textContent='';node._storageStatusSignature=null}return}
   if(!node){node=document.createElement('div');node.id='serverStorageStatus';node.setAttribute('role','status');document.body.append(node);}
   node.hidden=false;
   const conflict=Object.entries(stores||{}).flatMap(([name,store])=>store.conflictKeys().map(key=>({name,key})))[0];
-  node.textContent=conflict?'다른 창의 저장본과 내용이 다릅니다. 양쪽 내용을 확인해 주세요.':'서버에 보관하지 못한 내용이 있습니다. 연결을 확인하고 이 화면을 유지해 주세요.';
+  const kinds=[...new Set([...failures.keys()].map(category))].join(', ');
+  const text=conflict?`${category(conflict.name+':'+conflict.key)}의 내용이 다른 창의 저장본과 다릅니다. 양쪽 내용을 확인해 주세요.`:`${kinds}: 서버에 보관하지 못한 내용이 있습니다. 현재 화면을 유지해 주세요.`;
+  const signature=JSON.stringify([text,conflict?.name,conflict?.key]);
+  // A background write must not replace the focused retry/review button.
+  if(node._storageStatusSignature===signature)return;
+  node._storageStatusSignature=signature;node.textContent=text;
   if(conflict){const button=document.createElement('button');button.type='button';button.className='btn secondary';button.textContent='충돌 확인';button.onclick=()=>void reviewConflict(conflict.name,conflict.key);node.append(button);return}
   if(failures.size){const button=document.createElement('button');button.type='button';button.className='btn secondary';button.textContent='다시 보관';button.onclick=()=>void retry();node.append(button)}
  }
@@ -83,7 +104,7 @@
    announce(namespace(scope,key));
    return true;
   }).catch(error=>{failures.set(id,error);throw error}).finally(()=>{
-   if(writers.get(id)===task)writers.delete(id);status();
+   if(writers.get(id)===task)writers.delete(id);status();scheduleRecovery();
    for(const scope of refreshWanted)if(!stores[scope].pending)void refreshScope(scope);
    window.dispatchEvent?.(new Event("mindex-server-state-settled"));
   });
@@ -106,29 +127,39 @@
   queued.set(entryId(scope,key),{scope,key,value});status();schedule();
   return true; // Dispatch acceptance only. Never use this as a save receipt.
  }
- function flush(){
+ function flush(allowedIds=null){
   if(flushing)return flushing;
-  const batch=[...queued];
+  const batch=[...queued].filter(([id])=>!allowedIds||allowedIds.has(id));
   flushing=(async()=>{
    for(const [id,entry] of batch){
     try{await setItem(entry.scope,entry.key,entry.value);if(queued.get(id)===entry)queued.delete(id)}catch{}
    }
   })().finally(()=>{
    flushing=null;status();
-   // An edit arriving during a request needs another pass; unchanged failures
-   // wait for explicit retry/online and must not cause an endless retry loop.
-   if([...queued].some(([id,entry])=>!batch.some(([oldId,old])=>id===oldId&&entry===old)))schedule();
+   // New edits get another pass. Unchanged failures use bounded recovery or
+   // explicit retry/online, never an endless flush loop.
+   if([...queued].some(([id,entry])=>(!allowedIds||allowedIds.has(id))&&!batch.some(([oldId,old])=>id===oldId&&entry===old)))schedule();
   });
   return flushing;
  }
- async function retry(){
+ function retry({automatic=false}={}){
+  if(retrying)return retrying;
+  retrying=retryPending(automatic).finally(()=>{retrying=null;scheduleRecovery()});
+  return retrying;
+ }
+ async function retryPending(automatic){
   if(!ready)throw Error('SERVER_STORAGE_NOT_READY');
+  if(flushing)await flushing;
   await Promise.allSettled([...writers.values()]);
+  const allowed=automatic?recoverableIds():null,failed=new Set();
   for(const [name,store] of Object.entries(stores))for(const key of store.pendingKeys()){
    const id=name+':'+key;
-   try{await store.retry(key);failures.delete(id);announce(name)}catch(error){failures.set(id,error)}
+   if(allowed&&!allowed.has(id))continue;
+   try{await store.retry(key);failures.delete(id);announce(name)}catch(error){failures.set(id,error);failed.add(id)}
   }
-  await flush();status();
+  // Do not replay a timed-out journal twice in one retry pass.
+  const dispatch=new Set([...queued.keys()].filter(id=>(!allowed||allowed.has(id))&&!failed.has(id)));
+  await flush(dispatch);status();
   window.dispatchEvent?.(new Event("mindex-server-state-settled"));
   return !pending();
  }

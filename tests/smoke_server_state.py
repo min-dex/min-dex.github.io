@@ -19,17 +19,21 @@ def main():
         with sync_playwright() as p:
             for engine in ('chromium','webkit'):
                 browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
-                db={};control={'offline':False,'hold':False};held=[]
+                db={};control={'offline':False,'hold':False,'timeoutKey':None};held=[];requests=[]
                 def route_request(route):
                     request=route.request
                     if '/state-fixture/' in request.url:
                         if control['hold'] and request.url.endswith('mindex_state_write_v1'):
                             held.append(route);return
                         args=json.loads(request.post_data)
+                        if request.url.endswith('mindex_state_write_v1'):requests.append(args)
                         owner='shared' if args['p_scope']=='shared' else args['p_token']
                         scope=(owner,args['p_scope'])
                         if request.url.endswith('mindex_state_read_v1'):
                             data=[value for key,value in db.items() if key[:2]==scope]
+                        elif args['p_key']==control['timeoutKey']:
+                            control['timeoutKey']=None
+                            route.fulfill(json={'error':'canceling statement due to statement timeout'});return
                         elif control['offline']:
                             route.fulfill(json={'error':'offline'});return
                         else:
@@ -63,6 +67,15 @@ def main():
                     for held_route in held: route_request(held_route)
                     held.clear()
                     page.evaluate('()=>window.quietSave')
+                    # A temporary timeout recovers without user action or a new request ID.
+                    control['timeoutKey']='mindex.editor.draft.test-timeout'
+                    error=page.evaluate("async()=>{try{await MINDEX_SERVER_STORAGE.setItem('local','mindex.editor.draft.test-timeout','preserved');return ''}catch(e){return e.message}}")
+                    assert 'timeout' in error
+                    assert '편집 초안' in page.locator('#serverStorageStatus').inner_text()
+                    page.wait_for_function("MINDEX_SERVER_STORAGE.getItem('local','mindex.editor.draft.test-timeout')==='preserved'",timeout=10000)
+                    attempts=[r for r in requests if r['p_key']=='mindex.editor.draft.test-timeout']
+                    assert len(attempts)==2 and attempts[0]['p_request_id']==attempts[1]['p_request_id']
+                    assert page.locator('#serverStorageStatus').is_visible() is False
                     page.wait_for_function('!!window.MINDEX_EDITOR_DRAFTS')
                     draft_result=page.evaluate("""async()=>{
                       cacheRefs();state.module='scripture';state.selectedScriptureId='fixture';
@@ -91,6 +104,9 @@ def main():
                     assert page.evaluate("safeStorageGet('local','mindex.worshipRecoverySnapshot.latest.v1.fixture')")=='recovery'
                     assert page.locator('#serverStorageStatus').is_visible()
                     assert page.get_by_role('button',name='다시 보관',exact=True).count()==1
+                    page.evaluate("window.retryButton=document.querySelector('#serverStorageStatus button');retryButton.focus()")
+                    page.evaluate("async()=>{try{await persistServerValue('local','mindex.worshipRecoverySnapshot.latest.v1.fixture','newer')}catch{}}")
+                    assert page.evaluate("document.activeElement===retryButton&&document.querySelector('#serverStorageStatus button')===retryButton")
                     page.screenshot(path='/tmp/mindex-quiet-failure-'+engine+'.png')
                     control['offline']=False
                     assert page.evaluate('()=>window.MINDEX_SERVER_STORAGE.retry()')

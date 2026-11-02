@@ -379,3 +379,17 @@ wrapper: synthetic large state spills 1,345 blocks before the change and zero
 afterward. Ordered output, null tombstones, private isolation, ACL/body/row
 preservation, write CAS/replay and rollback/reapplication are verified. Original
 server-state DB tests also pass. Runtime/client code is unchanged.
+
+
+## 일시 보관 실패 회복 · 2026-11-02
+
+시간 초과·일시 연결 실패는 기존 요청 ID와 미확정 journal을 그대로 유지하여
+1초·4초·12초 간격으로 최대 세 번 자동 재시도한다. 같은 retry pass에서
+미확정 요청을 두 번 재전송하지 않는다. 응답이 유실돼도 새 요청 ID를 만들지
+않으며, 서버의 기존 idempotent receipt를 재확인한다. 권한·형식 오류와 확인된
+내용 충돌은 자동 재시도 대상이 아니다. 입력·초안·양쪽 충돌본은 삭제하지 않는다.
+
+실패 안내는 편집 초안·주보 복구본·예배 저장 복구 정보·화면 설정을 구분한다.
+동일 오류의 상태 갱신이 재시도/충돌 확인 버튼의 DOM과 키보드 포커스를
+반복 교체하지 않는다. 보관 성공 또는 충돌 해소 후에만 실패 안내를 없앤다.
+이 회복은 보관 요청 확인이며 예배 저장 RPC나 편집 내용의 자동 적용을 뜻하지 않는다.
