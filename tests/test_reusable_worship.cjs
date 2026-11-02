@@ -29,7 +29,7 @@ assert.equal(getHomeNextService(new Date('2027-11-10T12:00:00')).id,sid);
 assert.equal(presenterServiceUsesChromakey(service),true);
 assert.equal(presenterServiceUsesChromakey({...service,_worshipSourceRef:{}}),false);
 const free=worshipFreePrayerElement();
-const items=[{id:'10000000-0000-4000-8000-000000000011',service_id:sid,label:'대기 화면',raw_title:'',sort_order:1,_worshipSectionKey:'ready',_worshipSectionTitle:'준비',_worshipSectionId:'10000000-0000-4000-8000-000000000021',_worshipElementTemplateModified:true,memo:serializeServiceItemMemo({elementType:'image',inputMode:'asset',presenterRole:'ready',asset:{kind:'image',url:'./assets/presenter/daniel-waiting.png',name:'다니엘기도회 대기 화면.png'}})},
+const items=[{id:'10000000-0000-4000-8000-000000000011',service_id:sid,label:'대기 화면',raw_title:'',sort_order:1,_worshipSectionKey:'ready',_worshipSectionTitle:'준비',_worshipSectionId:'10000000-0000-4000-8000-000000000021',_worshipElementTemplateModified:true,memo:serializeServiceItemMemo({elementType:'image',inputMode:'asset',presenterRole:'ready',asset:{kind:'image',url:'./assets/presenter/daniel-waiting-poster-2de69513ca74.png',name:'다니엘기도회 대기 화면.png'}})},
 {id:'10000000-0000-4000-8000-000000000012',service_id:sid,label:free.label,raw_title:'자율기도',sort_order:2,_worshipSectionKey:'free_prayer',_worshipSectionTitle:'자율기도',_worshipSectionId:'10000000-0000-4000-8000-000000000022',_worshipSlotKey:free.config.slotKey,_worshipElementTemplateModified:true,memo:serializeServiceItemMemo({elementType:free.elementType,inputMode:'text'})}];
 state.serviceItems={[sid]:items};
 const rows=buildWorshipPersistenceRows(service,items,{}, {},{elementTypedStateColumns:{inputMode:true,contentState:true}});
@@ -40,8 +40,8 @@ assert.equal(worshipFreePrayerAudioKey('friday'),'prayer.meeting.free');
 assert.equal(presenterSlotMusicConfig({service,item:items[1]}).source,SERVICE_SLOT_MUSIC['dawn.free'].source);
 assert.equal(getServiceOutputItems(sid).length,2,'Do not append a generic special-service order');
 const slides=presenterSlidesForService(sid);
-assert.ok(slides.some(s=>s.image?.includes('daniel-waiting.png')||s.imageUrl?.includes('daniel-waiting.png')||s.asset?.url?.includes('daniel-waiting.png')),'Preserve explicit waiting artwork');
+assert.ok(slides.some(s=>s.image?.includes('daniel-waiting-poster-2de69513ca74.png')||s.imageUrl?.includes('daniel-waiting-poster-2de69513ca74.png')||s.asset?.url?.includes('daniel-waiting-poster-2de69513ca74.png')),'Preserve explicit waiting artwork');
 assert.ok(slides.some(s=>s.text==='자율기도'||s.title==='자율기도'));
 console.log('PASS one annual reusable service, boundary dates, two common elements, explicit chromakey and preserved assets');
 `,c);
-const png=fs.readFileSync('assets/presenter/daniel-waiting.png');assert.equal(png.readUInt32BE(16),1920);assert.equal(png.readUInt32BE(20),1080);
+const png=fs.readFileSync('assets/presenter/daniel-waiting-poster-2de69513ca74.png');assert.equal(png.readUInt32BE(16),1920);assert.equal(png.readUInt32BE(20),1080);

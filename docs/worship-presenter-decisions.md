@@ -5491,3 +5491,14 @@ topics in one 16:9 PNG; retain the requested official wordmark at upper right.
 Do not move the header/heading to a new left-aligned layout. Keep opaque text
 fills in the raster output. A correction replaces only the existing common-prayer
 element asset/config URL and matching source link, preserving its ID and order.
+
+
+### Daniel waiting-image crop · 2026-11-02
+
+The waiting image uses the supplied original poster PDF, including the upper
+slogan, 2026 wordmark, November 1–21 dates, meeting time and lower three themes.
+Crop that entire region without redrawing or altering any text. The source
+poster has a taller layout than the user's example; preserve its proportions
+and use small black side margins inside a 1920×1080 frame rather than distorting
+the artwork. Keep the existing waiting element ID, displayed name and order.
+The common-prayer image and its four prayer topics remain unchanged.
