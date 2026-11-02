@@ -1,3 +1,7 @@
+## 2026-11-03 실제 DOM 클릭 후 지연 썸네일 확장 보정 후보
+
+46176b7f 필수4/Pages/공개12파일·양엔진fixture는 통과했으나 실제Chrome1200px에서 설교69 선택 후 앞쪽 성경봉독 placeholder 확장으로 설교top1058.5px인 잔여 결함을 확인했다. 완료 처리하지 않고 root FIFO2f70을 유지했다. 후속8347ff45는 viewport보다 위쪽 placeholder 교체 전후 다음 요소 좌표 차만 보정한다. 실제DOM click/이미86장/1200px 회귀를 추가해 양엔진offset77.5/78.5, late load·수동스크롤 유지 및 가로/세로 급스크롤PASS. 실본문·포커스·송출 index 보존. 새exact SHA gate·공개실UI 재검증 전 완료 보고 금지. 이전 사용자 탭/예배 내용 변경 없음.
+
 ## 2026-11-03 실사용 마감 후보 (공개 검증 대기)
 
 `codex/use-readiness`: 최신 dfd6dc20 위에 승인된 7e5b4ca0(늦은 성경 로딩 후 사이드바 위치 복원)와 2ac8b26f(우측 정지 미리보기 paint 선명도)를 공동 통합. 기존 예배/본문/송출 상태 변경 없이 anchor section을 먼저 mount하고 offset을 복원한다. 양엔진 late load/수동 스크롤/포커스·송출 index 보존 및 preview lifecycle/3DPR 경계 픽셀 검사 PASS. 최종 exact SHA 필수4·Pages·공개 재검증 전 완료로 보고하지 않는다. FIFO2f70fbf2bd1e45e0ae25c5a32ae38030 root 소유. 실제 Chrome의 홈/감사특새/곡번호·첫소절/판본/말씀/주보/교회력·콘티/매뉴얼/Remote 진입을 read-only 점검했다. 실예배 내용을 고쳐 저장하거나 재생·송출하지 않았으며, 실제저장성공/현장장비 인증과 구분한다. Mac 잠금 해제가 필요한 설치 앱 실검증과 정식서명·YouTube/alpha 통합·장비 검증은 미완료.
