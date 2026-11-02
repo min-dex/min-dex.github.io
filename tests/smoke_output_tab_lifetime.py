@@ -48,7 +48,13 @@ try:
    prepare_server_state_fixture(main);main.evaluate(fixture,False)
    main.wait_for_function('(id)=>MindexPresenterLifetime.owns(id)&&state.presenter.serviceId===svc.id&&state.presenter.index===2',arg=session)
    assert output.evaluate("document.body.textContent.includes('TWO')")
-   print(engine,'PASS new/duplicate/reloaded passive tabs do not publish; owning controller reload recovers frame',flush=True)
+   # A pre-upgrade controller has no resume token. Only its original output Window can attest it.
+   main.evaluate("()=>{for(const key of Object.keys(sessionStorage))if(key.startsWith('mindex.presenter.lifetime:'))sessionStorage.removeItem(key)}")
+   main.reload();main.wait_for_function("!!window.MindexPresenterLifetime&&!document.body.classList.contains('ui-booting')")
+   prepare_server_state_fixture(main);main.evaluate(fixture,False)
+   main.wait_for_function('(id)=>MindexPresenterLifetime.owns(id)&&state.presenter.serviceId===svc.id&&state.presenter.index===2',arg=session)
+   assert second.evaluate('(id)=>!MindexPresenterLifetime.owns(id)',session)
+   print(engine,'PASS new/duplicate/reloaded passive tabs do not publish; owner reload and pre-upgrade original-opener migration recover frame',flush=True)
    # The original opener can close while another main stays open, even with no heartbeat responses.
    await_fullscreen='async()=>{await presenterOutputFullscreenTask?.catch(()=>{});if(document.fullscreenElement)await document.exitFullscreen()}'
    output.evaluate(await_fullscreen);main.close();second.close()

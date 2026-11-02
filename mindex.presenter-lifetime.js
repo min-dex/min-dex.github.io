@@ -20,6 +20,7 @@
     locks.request(`${prefix}:owner:${id}`, { ifAvailable: true }, lock => {
       if (!lock || attempt !== generation) { if (attempt === generation) owned = false; return; }
       owned = true;
+      try { sessionStorage.setItem(tokenKey, id); } catch {}
       for (const notify of listeners) notify();
       return new Promise(resolve => { ownerRelease = resolve; });
     }).catch(() => { if (attempt === generation) owned = false; });
@@ -65,6 +66,15 @@
     claim: id => claim(id, true),
     owns: id => output ? id === url.searchParams.get('outputSession') : Boolean(id && owned && session === id),
     onOwner(notify) { listeners.add(notify); if (owned) notify(); },
+    attachFromOpener(id, source) {
+      if (output || owned || !id || (stored() && stored() !== id)) return;
+      try {
+        const candidate = new URL(source.location.href);
+        if (source !== window && !source.closed && source.opener === window
+          && candidate.searchParams.get('output') === 'presenter'
+          && candidate.searchParams.get('outputSession') === id) claim(id);
+      } catch {} // Only a proven original opener can migrate an older live session.
+    },
     monitorOutput,
   };
   if (!output) { enter(); addEventListener('pagehide', leave); addEventListener('pageshow', enter); }

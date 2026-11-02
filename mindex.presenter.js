@@ -1664,8 +1664,9 @@ function restorePresenterControllerSession() {
 function bindPresenterChannel() {
   window.addEventListener("message", (event) => {
     if (event.origin !== window.location.origin || !event.source
-      || !event.data?.type?.startsWith("presenter-")
-      || !acceptsPresenterOutputMessage(event.data)) return;
+      || !event.data?.type?.startsWith("presenter-")) return;
+    globalThis.MindexPresenterLifetime?.attachFromOpener(event.data.outputSessionId, event.source);
+    if (!acceptsPresenterOutputMessage(event.data)) return;
     // Recover the real Window reference after a controller reload, without opening anything.
     if(state.presenter.outputWindow&&state.presenter.outputWindow!==event.source) return;
     state.presenter.outputWindow = event.source;

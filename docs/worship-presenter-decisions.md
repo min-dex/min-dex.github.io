@@ -5474,3 +5474,8 @@ Web Locks의 배타 소유권으로 복제 탭이 그 토큰을 함께 갖더라
 Web Locks 조회 실패/미지원 또는 opener 없는 수동 송출창은 확실한 종료 근거가
 없으므로 자동 종료하지 않는다. 기존 명시적 종료·출력 세션·클라이언트 검증은 유지한다.
 Fullscreen praise lyric slides center the song title above the lyrics and the worship form below. The form uses canonical tokens separated by hyphens, with the current occurrence highlighted. Metadata stays steady across lyric pages of the same worship element and edition while lyrics transition. Song and edition changes use the ordinary frame transition.
+
+기능 도입 전부터 열려 있던 송출은 본체가 새로고침될 때 resume token이 없을 수
+있다. 이 경우 같은 origin의 실제 송출 Window가 원래 opener로 해당 본체를
+가리키고 URL의 outputSession이 일치하며 배타 lock도 확보된 경우만 회복한다.
+다른 새 탭·복제 탭은 이 이행 경로로 소유권을 가져갈 수 없다.
