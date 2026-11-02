@@ -78,10 +78,12 @@
 .svc-board-media-layout > .svc-board-grid { flex:1 1 240px; min-width:0; margin:0; }
 .svc-board-media-rail > strong { font-size:var(--ui-meta-size); overflow-wrap:anywhere; }
 /* Free prayer uses one compact toolbar above the full-width slide grid. */
-.svc-board-subgroup > .svc-music-player--inline { gap:4px 8px; }
+.svc-board-subgroup > .svc-music-player--inline { width:fit-content; gap:4px 8px; padding-block:2px; }
 .svc-board-subgroup > .svc-music-player--inline .svc-music-label { flex:0 1 auto; font-size:var(--ui-meta-size); }
-.svc-board-subgroup > .svc-music-player--inline [data-service-music-action="stop"] { flex:0 0 auto; width:auto; padding-inline:8px; }
-.svc-board-subgroup > .svc-music-player--inline > .song-timing-seek { flex:1 1 150px; max-width:260px; min-width:0; }
+.svc-board-subgroup > .svc-music-player--inline .icon-btn { width:auto; flex:0 0 auto; min-height:28px; height:28px; padding-inline:6px; background:transparent; border-color:transparent; }
+.svc-board-subgroup > .svc-music-player--inline > .song-timing-seek { flex:0 1 180px; min-width:0; }
+.svc-board-subgroup > .svc-music-player--inline > .song-timing-seek:has([data-song-timing-seek]:disabled) { display:none; }
+.svc-board-subgroup > .svc-music-player--inline [data-song-timing-clock] { min-width:0; }
 #servicePresenterControls[data-focus-view="true"] .svc-board-subgroup > .svc-music-player--inline { display:none; }
 .svc-board-media-rail .svc-deck-playback { flex-direction:column; align-items:flex-start; }
 #servicePresenterControls[data-focus-view="true"] .svc-board-media-layout { display:contents; }
