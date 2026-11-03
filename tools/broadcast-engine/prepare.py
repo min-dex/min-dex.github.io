@@ -1,4 +1,5 @@
 """Stage verified FFmpeg binaries by target architecture before desktop packaging."""
+import argparse
 import hashlib
 import pathlib
 import shutil
@@ -12,8 +13,11 @@ targets = {
     'mac-x64': ('macosx_10_9_x86_64', '9d2baaf867088508d4a3458e61eeb30e945c4ad8016025545f66c4b5aaef0a61'),
     'win-x64': ('win_amd64', '02fa47c83703c37df6bfe4896aab339013f62bf02c5ebf2dce6da56af04ffc0a'),
 }
+parser = argparse.ArgumentParser()
+parser.add_argument("--target", choices=targets, help="Stage a specific architecture for packaging inspection")
+selected = parser.parse_args().target
 for target, (platform, digest) in targets.items():
-    if not target.startswith('win' if sys.platform == 'win32' else 'mac'):
+    if (target != selected if selected else not target.startswith('win' if sys.platform == 'win32' else 'mac')):
         continue
     dest = pathlib.Path('.cache/broadcast-engine') / target
     dest.mkdir(parents=True, exist_ok=True)

@@ -1,3 +1,7 @@
+## 2026-11-03 설치 앱 유튜브 직접 송출 후보
+
+공개 main 0a9358f8을 로컬 후보에 통합했다. 방송 메뉴의 키 입력·TLS 전송·차단과 복원·연결 끊김을 검사하는 독립 수신 시험은 `tests/test_desktop_youtube_local.cjs`에 있다. 운영 공개판과 후보를 구분하며 실채널·현장 CH8·서명 배포 승인은 별도다. [사용 방법 및 OS별 검증 범위](docs/youtube-desktop-candidate.md).
+
 ## 2026-11-03 Paperlogy self-hosted webfont candidate
 
 UI/Remote/default projection now use the pinned official Paperlogy WOFF2 faces
