@@ -1,4 +1,6 @@
 """Offline fullscreen praise title, video settings and background lifecycle."""
+import os
+os.environ["MINDEX_SMOKE_OFFLINE"]="1"
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 
@@ -73,6 +75,19 @@ def main():
                   await video.play();await new Promise(resolve=>setTimeout(resolve,180));
                   check(!video.paused&&video.currentTime>0,'background did not play');
                   applyPresenterBackgroundVideo(root,vf.backgroundVideo);check(video===root.querySelector('video'),'lyric change restarts video');
+                  const instrumental=presenterLyricsSlidesForServiceItem({item:{id:'song'},section:{backgroundVideo:presentation.backgroundVideo},index:0,forms:[presenterBlankFormPresetItem('Int',normalizePresenterFormPresetLabel('Int'))],formWarnings:[]})[0];
+                  check(instrumental.songInstrumental&&instrumental.type==='blank'&&!instrumental.text,'instrumental identity/lyrics');
+                  const portable=normalizeServiceDocumentSlides([instrumental])[0];
+                  check(serviceDocumentSlideToPresenterSlide(portable,0).songInstrumental,'document projection lost instrumental');
+                  const manual=buildPresenterCustomSlides({id:'manual',label:'찬양',memo:serializeServiceItemMemo({slides:['[간주]']})},{backgroundVideo:presentation.backgroundVideo},0).find(s=>s.songInstrumental);
+                  check(manual&&presenterSlideBackgroundVideoSource(manual,true)===presentation.backgroundVideo,'manual instrumental missing');
+                  const inf=presenterOutputFrameStateForSlide(instrumental,payload);
+                  check(inf.backgroundVideo===vf.backgroundVideo&&!inf.blankOutput,'instrumental lost video or kept transition overlay');
+                  const time=video.currentTime;applyPresenterOutputFrameState(root,inf);check(!root.classList.contains("is-blank"),"instrumental transition overlay");
+                  check(root.querySelector('video')===video&&video.currentTime>=time,'instrumental restarted video');
+                  await new Promise(resolve=>setTimeout(resolve,100));check(video.currentTime>time,'instrumental froze video');
+                  check(!presenterOutputFrameStateForSlide({...instrumental,autoTrailingBlank:true},payload).backgroundVideo,'trailing blank inherited video');
+                  check(!presenterOutputFrameStateForSlide({...instrumental,outputContext:'chromakey'},payload).backgroundVideo,'instrumental key leak');
                   applyPresenterBackgroundVideo(root,'');check(!root.querySelector('video'),'video not removed');
                   const item={id:'fixture',label:'찬양',memo:serializeServiceItemMemo({elementType:'praise'})};
                   const controls=renderPresenterPresentationControls(item,0,'fixture');

@@ -1162,3 +1162,8 @@ Friday's independent key remains unchanged. Daniel common prayer is one image
 element with one 16:9 PNG containing all four church prayer topics, placed before
 the shared free-prayer element. The headline uses an opaque fill with no text
 stroke; the upper-right logo is the unchanged official website wordmark.
+
+
+### Derived praise transition identity ·2026-11-03
+
+Document slide projections may carry `praiseTransitionBlank: true` on generated praise trailing blanks. The optional boolean preserves the praise blank visual context when the ordinary element/section captions are cleared. Restored presenter slides retain it; absent/false projections remain compatible. It changes no song, lyric, form, timing, source text or instance schema.

@@ -5542,9 +5542,8 @@ form sequence. Its clean lyric footer shows the requested service name ON FIRE i
 Preview and output receive the same service identity. Other
 services retain their metadata; title slides retain their note. No stored lyrics,
 forms, versions or worship records are rewritten.
-Clean output morphs a matching praise title into the lyric heading only within
-the same service element, easing in and out over one second. Chromakey and reduced-motion preferences retain their
-existing transition policy.
+As requested on 2026-11-03, praise titles do not morph into lyric headings.
+The existing slide transition and stable same-song metadata remain unchanged.
 ### Worship editor undo
 Ctrl/Cmd+Z outside text fields can reverse an explicit song pick or an up/down
 item move in the selected service. The inverse changes only fields owned by that
@@ -5601,3 +5600,42 @@ webfont across computers. Preserve the existing stage sizes, weights, fitting
 and explicit service/artwork/reading typefaces; retain full Korean glyph fallback.
 No worship record, lyrics, form, audio timing or background attachment is rewritten.
 See design-system.md for file provenance and installation-free delivery.
+
+## Union-only Paperlogy and instrumental video continuity ·2026-11-03
+
+This supersedes the default-Paperlogy rollout: only service
+99df9e1b-1716-41fb-9ea0-f5ca4c99ee45 uses the self-hosted Paperlogy font in
+its shared preview/output frames, including chromakey. Other services and app/
+Remote controls retain their prior Pretendard/Freesentation defaults. Explicit
+service artwork/reading font choices remain authoritative.
+
+Song-form Int/instrumental screens (and direct authored instrumental blocks) keep
+their song's video background in clean output with no lyric/transition overlay.
+The same video node/currentTime survives lyrics→instrumental→lyrics. This does
+not extend to trailing transition blanks, safety blackout, chromakey, photo cues
+or unrelated media. Instrumental identity survives document projection. No
+lyrics, song forms, timing, stored worship data or audio behavior is rewritten.
+
+
+## Union service white note and blank cross ·2026-11-03
+
+The union service99df9e1b-1716-41fb-9ea0-f5ca4c99ee45 explicitly uses white praise-note headings and a white blank-screen cross. Its transparent transition cross image is rendered white by a scoped filter; source artwork, geometry, reveal animation, other services and chromakey output remain unchanged. This supersedes the prior orange ON FIRE note accent for this service.
+## Emergency scripture label boxes ·2026-11-03
+
+In emergency mode, scripture reference and reader labels retain white text on
+black without their white SVG tab backgrounds, rounded boxes or shadows.
+Reference, verse body and reader names remain intact; disabling emergency mode
+restores the ordinary chromakey boxes. Preview/output use the same scoped CSS.
+No scripture, worship record or slide content is rewritten.
+
+
+## Union blank contexts and service cross motion ·2026-11-03
+
+Union99df clean service blanks show only the red transition cross centered on white. Praise trailing blanks retain a black stage and white cross; instrumental blanks with BGV continue the video. A derived praiseTransitionBlank flag survives document projection, without changing lyrics, order or forms. Safety, emergency, chromakey, media and photo frames retain their existing behavior.
+
+Only transitions between a white service title cross and its white blank cross animate that cross position/size for850ms ease-in-out, in both directions. Other text never morphs; controller thumbnails and reduced-motion do not animate. The lyric footer uses the bundled Mindex Service Display serif and ON/cross/FIRE ordering. Union translation labels render at78% of their reference size.
+
+
+## Union accent foreground boundary ·2026-11-03
+
+The clean praise footer ON/cross/FIRE uses white, matching white praise-note headings and black-stage blank crosses. Red service artwork accents remain on the authored white service frames and white default blank; the praise footer no longer uses red over footage or a dark stage. Song content, BGV and the footer layout/typeface remain unchanged.

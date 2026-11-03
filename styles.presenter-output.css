@@ -129,7 +129,7 @@
   --presenter-output-bar: linear-gradient(180deg, #000A64 0%, #000A32 100%);
   --presenter-output-bar-edge: #000A32;
   --presenter-output-stroke: #000;
-  --presenter-font-family: var(--font-presenter, "Paperlogy", "Mindex Presenter", "Freesentation", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif);
+  --presenter-font-family: var(--font-presenter, "Mindex Presenter", "Freesentation", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif);
   --presenter-scripture-font: var(--presenter-font-family);
   --presenter-reading-font-family: "Eulyoo1945", "을유1945", "AppleMyungjo", "Nanum Myeongjo", serif;
   --presenter-weight-support: 600;
@@ -1818,7 +1818,7 @@ span.presenter-announcement-paren,
 .presenter-lyric-service-name {
   position: absolute; bottom: 4%; left: 5%; right: 5%; z-index: 2;
   display: flex; align-items: center; justify-content: center; gap: .8cqw;
-  color: #ae3a1d; font-size: 1.65cqw; font-weight: 600; letter-spacing: .09em;
+  color: #fff; font-size: 1.65cqw; font-weight: 600; letter-spacing: .09em;
   line-height: 1.25; pointer-events: none;
 }
 .presenter-lyric-service-name svg { width: 1.73cqw; height: 3.6cqw; fill: currentColor; flex: none; }
@@ -1834,9 +1834,15 @@ span.presenter-announcement-paren,
   }
 }
 
-/* ON FIRE title notes share the poster cross accent. */
+/* Union service notes and the blank-screen cross use white. */
 .presenter-output-root.no-chromakey .presenter-slide--on-fire .presenter-song-note,
-.presenter-output-root.no-chromakey .presenter-slide--on-fire .presenter-fullscreen-song-heading[aria-label="찬양"] { color: #ae3a1d; }
+.presenter-output-root.no-chromakey .presenter-slide--on-fire .presenter-fullscreen-song-heading[aria-label="찬양"] { color: #fff; }
+
+.presenter-output-root.no-chromakey .presenter-slide--on-fire.presenter-slide--blank { --presenter-blank-cross-color: #fff; }
+.presenter-output-root.no-chromakey .presenter-slide--on-fire .presenter-transition-logo { filter: brightness(0) invert(1); }
+
+/* Paperlogy is an explicit exception for this union service only. */
+.presenter-slide--on-fire { --font-presenter: "Paperlogy", "Mindex Presenter", "Freesentation", sans-serif; --presenter-font-family: var(--font-presenter); --presenter-scripture-font: var(--presenter-font-family); font-family: var(--presenter-font-family); }
 
 /* Temporary black stage with the existing chromakey caption layout. */
 .presenter-output-root.is-emergency-mode {
@@ -1848,3 +1854,18 @@ span.presenter-announcement-paren,
 }
 
 .presenter-output-body.is-emergency-mode { background: #000; }
+
+/* Emergency scripture/reader labels keep their text without the white tabs. */
+.presenter-output-root.is-emergency-mode .presenter-citation-tab {
+  color: #fff; background: transparent; border-radius: 0; box-shadow: none;
+}
+.presenter-output-root.is-emergency-mode .presenter-tab-background { display: none; }
+
+/* White service blank and black praise blank are separate union frames. */
+.presenter-output-root.no-chromakey .presenter-slide--union-service-blank { background: #fff; }
+.presenter-output-root.no-chromakey .presenter-slide--union-praise-blank { background: #000; }
+.presenter-output-root.no-chromakey .presenter-slide--union-service-blank .presenter-transition-logo {
+  filter: none; animation: none; transform: scale(1);
+}
+.presenter-lyric-service-name { font-family: "Mindex Service Display", "Mindex Service Serif", serif; font-weight: 500; }
+.presenter-slide--on-fire .presenter-scripture-reading-version { font-size: calc(var(--presenter-scripture-reading-ref-size) * .78); }

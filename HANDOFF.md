@@ -1,6 +1,17 @@
 ## 2026-11-03 설치 앱 유튜브 직접 송출 후보
 
-공개 main 0a9358f8을 로컬 후보에 통합했다. 방송 메뉴의 키 입력·TLS 전송·차단과 복원·연결 끊김을 검사하는 독립 수신 시험은 `tests/test_desktop_youtube_local.cjs`에 있다. 운영 공개판과 후보를 구분하며 실채널·현장 CH8·서명 배포 승인은 별도다. [사용 방법 및 OS별 검증 범위](docs/youtube-desktop-candidate.md).
+공개 main c9563ca1을 로컬 후보에 통합했다. 방송 메뉴의 키 입력·TLS 전송·차단과 복원·연결 끊김을 검사하는 독립 수신 시험은 `tests/test_desktop_youtube_local.cjs`에 있다. 운영 공개판과 후보를 구분하며 실채널·현장 CH8·서명 배포 승인은 별도다. [사용 방법 및 OS별 검증 범위](docs/youtube-desktop-candidate.md).
+
+## 2026-11-03 Union-only font and instrumental background candidate
+
+User correction supersedes the global Paperlogy default below: service99df only
+uses Paperlogy in preview/output, while other services and app/Remote UI return
+to their prior fonts. Int/direct instrumental blanks retain the song video with
+no lyrics or transition overlay; trailing blanks/key/photo cues remain isolated.
+Scoped Chromium/WebKit font/cache72cases, fullscreen video continuity/manual/
+document restore, boot/preload and title-songform preservation PASS; Node remote
+and SOLID PASS. No operational data writes. Required final gate/Pages/public
+readback pending; FIFO684f1cdc556a42038b8b48bc4ff768d6 waiting behind root.
 
 ## 2026-11-03 Paperlogy self-hosted webfont candidate
 
