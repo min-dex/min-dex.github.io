@@ -44,6 +44,7 @@ FIXTURE = r"""async()=>{
                         inlineFixture.attempts++;
                         if(inlineFixture.delay)await new Promise(resolve=>inlineFixture.release=resolve);
                         if(inlineFixture.failure)return {error:{code:'P0001',message:'INJECTED_FAILURE'}};
+                        if(inlineFixture.conflict)return {error:{code:'P0001',message:'REVISION_CONFLICT'}};
                         check(req.expectedRevision===db.revision,'stale token');writes.push(structuredClone(req));
                         for(const [key,patches] of [['sections',req.sectionPatches],['elements',req.elementPatches]]) {
                           for(const change of patches){const row=db[key].find(x=>x.id===change.id);Object.assign(row,change.patch);
@@ -263,6 +264,19 @@ def exercise(page, url, engine):
     assert not panel(2).is_visible(), 'unchanged editor did not close'
     check("inlineFixture.assert(inlineFixture.attempts===inlineFixture.cleanAttempts,'unchanged editor sent a redundant save');inlineFixture.checkQuiet()")
     print(engine,'PASS empty-field deletion, concurrent different-row real saves, queued later input, real reload and clean no-op save',flush=True)
+
+    # Explicit quiet inline saves must expose the real conflict recovery UI.
+    toggle(2).click()
+    field(2, '설교 제목').fill('충돌 시 보존할 제목')
+    page.evaluate('inlineFixture.conflict=true')
+    panel(2).locator('[data-presenter-inline-apply]').click()
+    conflict = page.get_by_role('dialog')
+    conflict.wait_for(state='visible')
+    assert '서버에 새 저장본이 있습니다' in conflict.inner_text()
+    conflict.get_by_role('button', name='편집 계속하기', exact=True).click()
+    assert field(2, '설교 제목').input_value() == '충돌 시 보존할 제목'
+    check("inlineFixture.checkQuiet()")
+    print(engine, 'PASS explicit inline conflict comparison and unchanged draft/output/audio', flush=True)
 
     page.unroute_all(behavior='wait')
 

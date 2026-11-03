@@ -475,3 +475,7 @@ is mounted in the left sidebar; input parsing and atomic persistence stay with
 their existing owners. Active editor DOM is retained through same-service refreshes
 to preserve composition and selection. This replaces the right-panel bottom-input
 layout regression with `smoke_presenter_left_input.py` and its atomic-save companion.
+
+Presenter emergency mode derives temporary text views and frame classes in
+`mindex.presenter-ui.js`; the control-board render key lives with those view helpers.
+The controller owns the reversible session toggle, and output payloads carry it.

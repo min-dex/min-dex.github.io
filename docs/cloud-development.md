@@ -320,3 +320,24 @@ reuse it on main, verify Pages/public files and return the coordinator's ticket.
 Record original component commits plus the deployed SHA so each owner can finish
 without launching another release. Never steal another ticket or cancel an
 unrelated running check. This changes batching, not required test coverage.
+
+## 운영: 최신 코드와 테스트 기준 동시 유지 ·2026-11-03
+
+사용자가 일일이 git pull이나 테스트 기대값 수정을 요청하지 않도록 작업 담당이
+최신 main 확인·안전한 통합·테스트 최신화를 책임진다. 작업 시작/재개, 공동 배포
+후속 준비, 다른 담당의 배포 완료 시 fetch/reconcile하고 미저장 입력과 dirty
+checkout을 보존한다. 무조건적인 pull/reset, 자동 충돌 덮어쓰기나 사용자 작업
+중인 앱의 강제 새로고침은 하지 않는다.
+
+승인된 동작·기본값·표시값 수정은 같은 변경에서 계약과 영향받는 fixture/기대값을
+함께 갱신하고, 변경 직후 실제 수정 소스와 compiled runtime으로 관련 검사를
+실행한다. READY 전에 영향 화면과 테스트 등록 누락도 확인한다. 운영 데이터만
+수정한 경우 별도 readback하고, 규칙이 달라진 경우에만 합성 fixture에 반영한다.
+실데이터·가사·성경·백업을 공개 테스트 자료로 복사하지 않는다.
+
+뒤늦은 실패를 줄이기 위한 규칙이지 검사를 약화하는 규칙이 아니다. 새 승인 기준과
+기대값이 다른지 근거로 판단하고, 설명되지 않은 실패는 버그로 조사한다. 회귀
+검사 삭제/skip/완화는 하지 않는다. final gate 시작 후에는 범위를 동결하고 새
+수정·기대값 변경은 다음 후보로 분리한다. 배포 완료 SHA와 계약/검사 변경을
+참여 채팅에 전달하고 다음 작업이 최신 기준에서 이어지도록 한다. 자세한
+운영 책임은 AGENTS.md의 Continuous synchronization and test upkeep를 따른다.

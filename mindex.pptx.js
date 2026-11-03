@@ -575,19 +575,17 @@ async function importPresenterPptx(input, existingItem = null) {
   };
   try {
     const isKeynote = /\.key$/i.test(file.name);
+    if (!window.confirm(`${file.name}\n\n이 예배에 불러올까요? 원본 파일(메모·숨긴 장 포함)은 공개 자료 저장소에 보관됩니다.`)) return false;
+    showToast("파일을 불러오고 있습니다.", "info");
     const bytes = new Uint8Array(await file.arrayBuffer());
     const sha256 = await presenterPptxDigest(bytes);
     let deck, runtime;
     if (!isKeynote) {
-      showToast("PPT를 검사하고 있습니다.", "info");
+      showToast("슬라이드를 준비하고 있습니다.", "info");
       parsed = await parsePresenterPptx(bytes);
       ({ deck, runtime } = parsed);
     }
     if (isKeynote) automaticKeynoteFiles = await preparePresenterKeynoteBrowserFile(file, unchanged);
-    const details = isKeynote
-      ? `Keynote 원본을 그대로 보존하고, 준비한 슬라이드 ${JSON.parse(await automaticKeynoteFiles.find(row => row.webkitRelativePath.endsWith('/manifest.json')).text()).pages}장과 재생 자료를 함께 연결합니다.`
-      : `${deck.slides.length}장 · 기본 효과와 포함된 영상·음원을 재생합니다. 복잡한 효과·글꼴은 PowerPoint와 다를 수 있어 송출 전 확인이 필요합니다.`;
-    if (!window.confirm(`${file.name}\n\n${details}\n\n원본 파일(메모·숨긴 장 포함)${isKeynote ? '' : '과 미리보기'}을 기존 공개 자료 저장소에 올려 이 예배에 연결할까요?`)) return false;
     if (!unchanged()) throw new Error("자료를 준비하는 동안 예배나 입력이 변경됐습니다. 다시 선택해 주세요.");
     const sourceUrl = await uploadPresenterPptxSource(file, upload);
     const original = { format: isKeynote ? "key" : "pptx", url: sourceUrl, name: file.name, size: file.size, sha256 };
@@ -600,7 +598,7 @@ async function importPresenterPptx(input, existingItem = null) {
       slides.push({ url, name: `${page + 1}번 슬라이드`, order: page + 1, pptx: {
         page, mediaCount: presenterPptxMediaElements(slide).length, clicks: Math.max(0, groups.length - (slide.animations?.[0]?.autoStart ? 1 : 0)), hidden: Boolean(slide.hidden),
       } });
-      if (page === 0 || (page + 1) % 10 === 0) showToast(`PPT 준비 중 · ${page + 1}/${deck.slides.length}장`, "info");
+      if (page === 0 || (page + 1) % 10 === 0) showToast(`슬라이드 준비 중 · ${page + 1}/${deck.slides.length}장`, "info");
     }
     if (!unchanged()) throw new Error("자료를 준비하는 동안 예배나 입력이 변경됐습니다. 다시 선택해 주세요.");
     if (item) {
@@ -626,7 +624,7 @@ async function importPresenterPptx(input, existingItem = null) {
     const saved = await saveServiceItemMutation(serviceId, index, { silent: true, renderAfterSave: false, throwOnError: true });
     if (!saved) throw new Error("예배 저장을 완료하지 못했습니다. 저장 상태를 확인하고 다시 저장해 주세요.");
     if (isKeynote) automaticKeynoteItem = item.id;
-    showToast(isKeynote ? "Keynote 원본을 보존했고 슬라이드를 연결하고 있습니다." : `PPT ${slides.length}장을 연결했습니다. 다음 버튼으로 클릭 효과를 진행할 수 있습니다.`);
+    if (!isKeynote) showToast(`슬라이드 ${slides.length}장을 불러왔습니다.`);
     return true;
   } catch (error) {
     // An RPC timeout may already have committed. Keep its immutable media and

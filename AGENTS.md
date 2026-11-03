@@ -57,3 +57,33 @@ another owner's slot or cancel its run. Existing runs are not retroactively lock
 If main changes outside this cooperative queue, reconcile and verify again;
 never reuse another SHA or weaken required checks. Separate clones/hosts need
 explicit coordination: this local queue cannot serialize them.
+
+## Continuous synchronization and test upkeep ·2026-11-03
+
+Agents own source synchronization; do not leave routine `git pull`, candidate
+reconciliation or test-fixture refresh as user work. Fetch current main when
+starting/resuming work, before preparing a shared batch and after a cooperating
+release completes. Reconcile in the owned worktree without discarding unrelated
+changes or unsaved inputs; a dirty shared checkout is not permission to reset,
+force-pull or silently switch its branch. Record any unresolved divergence.
+
+Reviewed behavior/default/value changes must update the relevant contract and
+affected fixtures/expectations in the same change. Run focused unit/browser
+checks immediately against the actual updated source/runtime, not only when the
+final release gate begins. For operational data-only edits, verify independent
+readback and update synthetic fixtures when the reviewed rule changes; never
+copy production backups, lyrics or scripture corpora into public tests.
+
+Before declaring READY, inspect affected screens, field labels, modes, values,
+source/compiled runtime and test entry-point registration. A test failing against
+a newly approved rule requires reviewing its expectation and preservation checks.
+Do not rewrite expectations merely to make failures pass, delete regression
+coverage, loosen checks or bypass CI. An unexplained failure is a defect to
+investigate; unchanged behavior must retain its existing protection.
+
+Keep participating chats informed of the included SHA, revised contract and
+validation status. Final-gate scope stays frozen: changes discovered afterward
+become a separate candidate; do not inject updated code/tests into a running
+gate. After publication, verify same-SHA Pages/public files/UI and notify owners
+to reconcile before their next candidate. Source, local verification, operational
+data application and public deployment must be reported separately.

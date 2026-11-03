@@ -207,6 +207,7 @@ function renderPresenterScreenManagement(serviceId, slides = []) {
       ${renderPresenterAlwaysOnTopControl({ buttonStyle: true })}
       ${toggle('black', '암전', 'eye-off')}
       ${toggle('transparent', '투명', 'layers')}
+      <button type="button" class="icon-btn svc-presenter-emergency" data-presenter-action="emergency" data-service-id="${escapeAttr(serviceId)}" aria-pressed="${Boolean(own && state.presenter.emergencyMode)}" aria-label="비상 모드${own && state.presenter.emergencyMode ? ' 해제' : ''}" title="검은 배경 · 크로마키 양식" ${own && slides.length ? '' : 'disabled'}><i data-lucide="triangle-alert" aria-hidden="true"></i><span>비상 모드${own && state.presenter.emergencyMode ? ' 켜짐' : ''}</span></button>
     </div>
   </section>`;
 }
@@ -429,7 +430,7 @@ async function commitPresenterInlineInput(panel) {
     // A clean, unchanged editor can close immediately. Dirty/uncertain saves
     // still go through the normal journal and atomic retry path.
     const saved = !changed && !state.dirty.service && !state.saving
-      ? true : await saveService(serviceId, {silent:true, renderAfterSave:false});
+      ? true : await saveService(serviceId, {silent:true, renderAfterSave:false, reviewConflict:true});
     if (!saved) return false;
     const mounted = [...(refs.songList?.querySelectorAll('.svc-outline-editor') || [])].find(row => row.dataset.serviceId === serviceId && row.dataset.inlineItemId === itemId);
     if (mounted && JSON.stringify(presenterPreparationRenderedFields(mounted, service)) === snapshot) {
@@ -699,8 +700,69 @@ function presenterMorphSongTitle(activeLayer, nextLayer, frameState, animated) {
         toTitle.animate([
           { transformOrigin: 'center center', transform: `translate(${from.x + from.width / 2 - to.x - to.width / 2}px, ${from.y + from.height / 2 - to.y - to.height / 2}px) scale(${from.width / to.width}, ${from.height / to.height})` },
           { transformOrigin: 'center center', transform: 'none' }
-        ], { duration: 360, easing: 'cubic-bezier(.2,.7,.2,1)' });
+        ], { duration: 1000, easing: 'ease-in-out' });
       }
     }
 
+}
+
+function presenterControlBoardKey(service, slides = [], active = false, chromakey = true) {
+  const theme = presenterOutputTheme(service?.type_id);
+  const slideKey = slides.map((slide, index) => [
+    index,
+    slide?.id || "",
+    slide?.type || "",
+    presenterSlideElementType(slide),
+    presenterSlideLayout(slide),
+    slide?.formKey || "",
+    slide?.marker || "",
+    slide?.imageSrc || "",
+    slide?.videoSrc || "",
+    slide?.audioSrc || "",
+    presenterSlideRenderKeyText(slide),
+  ].join(":")).join("|");
+  const scriptureDraftKey = [...deferredServiceScriptureReferenceDrafts.entries()]
+    .filter(([key]) => key.startsWith(`${service?.id || ""}:`))
+    .map(([key, value]) => `${key}=${value}`)
+    .join("|");
+  // Escape control characters before round-tripping this key through HTML attributes.
+  return JSON.stringify([
+    service?.id || "",
+    theme,
+    chromakey ? "chroma" : "clean",
+    state.presenter.serviceId === service?.id && state.presenter.emergencyMode ? "emergency" : "normal",
+    active ? "active" : "preview",
+    presenterControllerIsLive(service?.id) ? "live" : "offline",
+    globalThis.MindexSongTiming?.revision || 0,
+    slides.length,
+    slideKey,
+    scriptureDraftKey,
+  ]);
+}
+
+
+// A temporary view only: authored slides and service output settings stay intact.
+function presenterEmergencySlideView(slide, enabled = false) {
+  if (!enabled || !slide || String(slide.id || "").startsWith("presenter:safety-")) return slide;
+  const type = presenterSlideElementType(slide);
+  if (presenterSlideIsScoreLike(slide) || [PRESENTER_ELEMENT_TYPES.IMAGE, PRESENTER_ELEMENT_TYPES.VIDEO,
+    PRESENTER_ELEMENT_TYPES.FILE, PRESENTER_ELEMENT_TYPES.AUDIO].includes(type)) return slide;
+  const context = slide.scriptureContext === "reading" || slide.scriptureContext === "sermon" ? "sermon-chromakey"
+    : slide.scriptureContext === "citation" ? "citation-chromakey" : slide.scriptureContext;
+  return normalizeChromakeyPresenterSlideLayout({ ...slide, outputContext: "chromakey",
+    scriptureContext: context, scriptureReadingFinal: false, suppressBackgroundImage: true,
+    noBackgroundImage: true, formBackgroundImage: "" });
+}
+
+
+function presenterOutputFrameClassNames(frameState = {}) {
+  return [
+    frameState.noChromakey ? "no-chromakey" : "",
+    frameState.emergencyMode ? "is-emergency-mode" : "",
+    frameState.mediaOutput ? "is-media-output" : "",
+    frameState.showBackground ? "has-background" : "",
+    frameState.formBackground ? "has-form-background" : "",
+    frameState.blankOutput ? "is-blank" : "",
+    frameState.blackoutOutput ? "is-blackout" : "",
+  ].filter(Boolean).join(" ");
 }
