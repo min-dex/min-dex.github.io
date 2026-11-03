@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261103-paperlogy-webfont",
+  "version": "20261103-ready-followups",
   "options": {
     "compress": false,
     "mangle": {

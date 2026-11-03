@@ -648,3 +648,14 @@ shared gate/publication is pending. See version-name-preservation.md.
 ## 2026-11-03 ON FIRE 설교 저장 장애 해결 (운영 적용 완료)
 
 사용자 관리자점검·원인수정·제목저장 승인 후 Supabase로그에서 SQLSTATE57014 context가 mindex_state_write_v1의 id_alias_mapping 생성임을 확인. records1659개payload에서previousIds60개를 매복구본쓰기마다 생성하던 병목. private state_id_alias_cache + records insert/update/delete trigger 및 기존mappingAPI의동일결과캐시를 적용. 원예배/곡데이터직접SQL수정없음, anon/authenticated읽기권한0/기존공개mapping권한0. rollback시험·commit시험에서기존alias결과동일/동기화3종PASS, 1MiBguard17.911ms. 기존UIatomic으로 It's NEW/이태엽목사 revision300저장, 독립RPC+공개화면PASS. ID·순서·가사본문·담당·음원영상URL·song/version/reference연결보존. fullsave의Title→T/slotKey/legacy inputMode/emptyasset/sourceTextcanonical재생성은발생해byte동일저장은아님. 증거root output/sermon-save-20261103/verification.json. privatebefore/after원문은/tmp에만보존. 운영소유권반환, BGV에rev300기준CAS재개통지. DB수정은운영적용완료이나 source migration및75a0dedd/5b11285f UI충돌후속은아직Pages미배포이며 e37ec12f와구분한다.
+
+## 2026-11-03 준비된 후속 공동 배포 후보
+
+Root FIFO 2b44bc1569a24875973aad9553eb12b4, branch codex/ready-followups.
+동결 구성: inline 충돌 비교/timeout 안내(75a0dedd,5b11285f), 운영 적용된
+ID검사cache 소스·검증(bcb04765), 최신코드/테스트 운영규칙(88f5bcd8),
+비상모드(b66dadab+f2014f9e), 제목모핑1초(93e593cc), 파일불러오기 안내
+간소화(85f69a31). 이전 글꼴 d5fb8140과 통합 후 양엔진 scoped checks,
+새 inline 실제충돌 회귀, font cache72cases, runtime/solid/governance PASS.
+final gate 이후 범위 추가 금지. 운영 DB 신규쓰기/실재생/송출/인쇄 없음.
+필수4shard·동일SHA main/Pages·공개파일/UI 검증 전 완료 보고 금지.
