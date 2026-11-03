@@ -5600,3 +5600,18 @@ webfont across computers. Preserve the existing stage sizes, weights, fitting
 and explicit service/artwork/reading typefaces; retain full Korean glyph fallback.
 No worship record, lyrics, form, audio timing or background attachment is rewritten.
 See design-system.md for file provenance and installation-free delivery.
+
+## Union-only Paperlogy and instrumental video continuity ·2026-11-03
+
+This supersedes the default-Paperlogy rollout: only service
+99df9e1b-1716-41fb-9ea0-f5ca4c99ee45 uses the self-hosted Paperlogy font in
+its shared preview/output frames, including chromakey. Other services and app/
+Remote controls retain their prior Pretendard/Freesentation defaults. Explicit
+service artwork/reading font choices remain authoritative.
+
+Song-form Int/instrumental screens (and direct authored instrumental blocks) keep
+their song's video background in clean output with no lyric/transition overlay.
+The same video node/currentTime survives lyrics→instrumental→lyrics. This does
+not extend to trailing transition blanks, safety blackout, chromakey, photo cues
+or unrelated media. Instrumental identity survives document projection. No
+lyrics, song forms, timing, stored worship data or audio behavior is rewritten.

@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261103-ready-followups",
+  "version": "20261103-union-font-interlude",
   "options": {
     "compress": false,
     "mangle": {

@@ -1522,7 +1522,7 @@ function serviceDocumentSlideToPresenterSlide(slide = {}, index = 0, service = n
     marker: slide.title || slide.elementLabel || "",
     text: slide.text || "",
     outputContext: normalizePresenterOutputContext(slide.outputContext) || "",
-    backgroundVideo: normalizeServicePresentation({ backgroundVideo: slide.backgroundVideo })?.backgroundVideo || "",
+    backgroundVideo: normalizeServicePresentation({ backgroundVideo: slide.backgroundVideo })?.backgroundVideo || "", songInstrumental: Boolean(slide.songInstrumental),
     hiddenInPresentation: Boolean(slide.hidden),
     autoTrailingBlank: Boolean(slide.autoTrailingBlank),
     serviceDocumentFallback: true,

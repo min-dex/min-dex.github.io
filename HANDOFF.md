@@ -1,3 +1,14 @@
+## 2026-11-03 Union-only font and instrumental background candidate
+
+User correction supersedes the global Paperlogy default below: service99df only
+uses Paperlogy in preview/output, while other services and app/Remote UI return
+to their prior fonts. Int/direct instrumental blanks retain the song video with
+no lyrics or transition overlay; trailing blanks/key/photo cues remain isolated.
+Scoped Chromium/WebKit font/cache72cases, fullscreen video continuity/manual/
+document restore, boot/preload and title-songform preservation PASS; Node remote
+and SOLID PASS. No operational data writes. Required final gate/Pages/public
+readback pending; FIFO684f1cdc556a42038b8b48bc4ff768d6 waiting behind root.
+
 ## 2026-11-03 Paperlogy self-hosted webfont candidate
 
 UI/Remote/default projection now use the pinned official Paperlogy WOFF2 faces
