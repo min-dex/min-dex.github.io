@@ -5542,9 +5542,8 @@ form sequence. Its clean lyric footer shows the requested service name ON FIRE i
 Preview and output receive the same service identity. Other
 services retain their metadata; title slides retain their note. No stored lyrics,
 forms, versions or worship records are rewritten.
-Clean output morphs a matching praise title into the lyric heading only within
-the same service element, easing in and out over one second. Chromakey and reduced-motion preferences retain their
-existing transition policy.
+As requested on 2026-11-03, praise titles do not morph into lyric headings.
+The existing slide transition and stable same-song metadata remain unchanged.
 ### Worship editor undo
 Ctrl/Cmd+Z outside text fields can reverse an explicit song pick or an up/down
 item move in the selected service. The inverse changes only fields owned by that

@@ -1491,7 +1491,8 @@ body[data-theme="dark"] .service-week-card:hover {
 .svc-song-picker-result {
   display: inline-flex;
   min-height: 26px;
-  max-width: 220px;
+  max-width: 100%;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
   border: 0;
@@ -1509,9 +1510,9 @@ body[data-theme="dark"] .service-week-card:hover {
 .svc-song-picker-result strong,
 .svc-song-picker-result span {
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 .svc-song-picker-result strong {
   font-size: var(--ui-meta-size);
@@ -3865,7 +3866,7 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
 }
 .svc-board-subgroup-controls .svc-song-picker-result {
   min-height: 24px;
-  max-width: 180px;
+  max-width: 100%;
   padding: 0 7px;
 }
 .svc-board-subgroup-controls .svc-song-picker-result strong {

@@ -68,6 +68,7 @@ Read `HANDOFF.md` first. This file is the short UI contract for Codex threads so
 
 ## Navigation
 
+- Worship song search results use available width for the title and first-line metadata; narrow screens wrap instead of imposing a fixed-width ellipsis.
 - Global search Enter navigation consumes result objects, not rendered markup.
   Ignore IME composition confirmation and stale queries after async lookup.
 - Scripture result labels and click navigation retain the ending verse.
