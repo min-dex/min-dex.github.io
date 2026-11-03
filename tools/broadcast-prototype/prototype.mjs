@@ -171,11 +171,11 @@ $('prepareAudio').onclick=async()=>{
 
 captureInput=mountCaptureInput({policy:()=>outputPolicy.read(),video,onStart(){
  generation++;mediaLoad?.abort();video.pause();video.removeAttribute('src');video.load();if(url)URL.revokeObjectURL(url);url='';source='capture';paused=false;$('pause').textContent='실시간 입력';$('pause').disabled=true;$('sourceState').textContent='캡처보드 입력';
-},onStop(){if(source==='capture'){source='test';paused=false;$('pause').textContent='일시정지';$('pause').disabled=false;$('sourceState').textContent='테스트 영상';}}});
+},onStop(){if(source==='capture'){abortOnLostInput();source='test';paused=false;$('pause').textContent='일시정지';$('pause').disabled=false;$('sourceState').textContent='테스트 영상';}}});
 
 const stopHallOutput=mountHallOutput({getFrame(){if(disposed)return null;if(document.hidden)render(performance.now(),false);return canvas;}});
 
-mountYoutube(async () => {
+const abortOnLostInput = mountYoutube(async () => {
  if (!captureInput.active()) await $('prepareAudio').onclick();
  const bus = captureInput.active() ? captureInput.broadcastStream() : broadcastAudio?.stream;
  const stream = broadcast.captureStream(30);

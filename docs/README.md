@@ -6,6 +6,8 @@ stale document in the same change.
 
 ## Current Contracts
 
+- [설치 앱 유튜브 직접 송출 후보](youtube-desktop-candidate.md)
+
 - `live-web-updates.md`: 켜 둔 웹/PWA 앱의 새 버전 감지와 편집·저장·인쇄·송출 보호.
 
 - `presenter-remote-design.md`: 배포된 원격 조작의 현행 연결·명령·복구 계약과 실기기 검증 한계.

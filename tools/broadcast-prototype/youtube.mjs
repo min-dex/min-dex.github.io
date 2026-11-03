@@ -1,6 +1,6 @@
 export function mountYoutube(acquireStream) {
   const engine = window.youtubeOutput;
-  if (!engine) return;
+  if (!engine) return () => {};
   const el = id => document.getElementById(id);
   el('youtube').hidden = false;
   let active;
@@ -70,4 +70,5 @@ export function mountYoutube(acquireStream) {
     if (run.recorder?.state === 'recording') run.recorder.stop();
     else { await engine.abort(); finish(run,'송출 종료'); }
   };
+  return () => { if (active) void fail(active); };
 }
