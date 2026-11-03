@@ -2,6 +2,12 @@
 
 Read `HANDOFF.md` first, then `docs/worship-presenter-decisions.md`. Use this file as the short guide when a thread is mostly about Worship, service elements, presenter controls, presenter output, or order/PPT matching.
 
+## 예배 작업 시작 전
+
+[예배 제작·수정·현장 마감 가이드](worship-production-runbook.md)를 먼저 읽는다.
+운영 설정과 코드 배포를 구분하고, 저장 담당·원본 보존·앞뒤 장 디자인·독립 readback·
+전체 로딩 후 미리보기/송출 비교·완료 보고 범위를 이 절차에 맞춘다.
+
 ## Decision Log Discipline
 
 `docs/worship-presenter-decisions.md` is the source for reviewed operational

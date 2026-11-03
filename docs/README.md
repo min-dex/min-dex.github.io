@@ -38,6 +38,9 @@ stale document in the same change.
 
 ## Operational Runbooks
 
+- [예배 제작·수정·현장 마감](worship-production-runbook.md): 설정/코드 분리, 단독 저장 담당,
+  원본 배경 고정, 앞뒤 장 디자인, 독립 readback·전체 화면 비교와 완료 기준.
+
 - `audio-lyrics-sync-runbook.md`: 실제 음원 박자·가사 진입 기준 싱킹, 예배 저장,
   사진·타이밍 편집 바로가기, 음악 관리·페이드아웃 기본값, 전체 재생 검증과 임시 파일 정리.
 - `manuals/operations.md`: 예배 이해·부서별 원문 순서, 현장 준비·진행·마무리, 최신 민덱스 사용법. `mindex.manuals.js`에서 자동 생성.
