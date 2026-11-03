@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261103-no-title-morph",
+  "version": "20261103-emergency-unboxed-scripture",
   "options": {
     "compress": false,
     "mangle": {
