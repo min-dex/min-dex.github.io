@@ -1526,6 +1526,7 @@ function serviceDocumentSlideToPresenterSlide(slide = {}, index = 0, service = n
     hiddenInPresentation: Boolean(slide.hidden),
     autoTrailingBlank: Boolean(slide.autoTrailingBlank),
     praiseTransitionBlank: Boolean(slide.praiseTransitionBlank),
+    transitionBlankTone: ["light", "dark"].includes(slide.transitionBlankTone) ? slide.transitionBlankTone : "",
     serviceDocumentFallback: true,
     sort: index,
   };
@@ -1650,7 +1651,13 @@ function withPresenterElementTrailingBlanks(slides = [], service = null) {
   slides.filter(Boolean).forEach((slide, index, list) => {
     prepared.push(slide);
     if (!shouldAppendPresenterElementTrailingBlank(slide, list[index + 1], { service, slides: list })) return;
-    prepared.push(presenterElementTrailingBlankSlide(slide, prepared.length, service));
+    const tones = presenterElementTransitionBlankTones(slide, service);
+    (tones.length ? tones : [""]).forEach((tone, toneIndex) => {
+      const blank = presenterElementTrailingBlankSlide(slide, prepared.length, service);
+      if (tone) blank.transitionBlankTone = tone;
+      if (toneIndex) blank.id += `:${toneIndex + 1}`;
+      prepared.push(blank);
+    });
   });
   return prepared;
 }

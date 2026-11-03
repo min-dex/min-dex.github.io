@@ -670,14 +670,14 @@ function presenterSongPositionSlides(slides, title, versionId) {
     if (label) steps.set(slide.formKey, { index: steps.size, label });
   }
   const labels = [...steps.values()].map(step => step.label);
-  return slides.map(slide => slide.type === "lyrics" && slide.elementType === PRESENTER_ELEMENT_TYPES.PRAISE
+  return slides.map(slide => ((slide.type === "lyrics" && slide.elementType === PRESENTER_ELEMENT_TYPES.PRAISE) || slide.songInstrumental) && !slide.autoTrailingBlank
     ? { ...slide, songPosition: { title, versionId, labels, index: steps.get(slide.formKey)?.index ?? -1 } }
     : slide);
 }
 
 function renderPresenterSongPosition(slide, options = {}) {
   const position = slide.songPosition;
-  if (slide.type !== "lyrics" || !position) return "";
+  if ((slide.type !== "lyrics" && !(slide.songInstrumental && !slide.autoTrailingBlank && options.serviceId === "99df9e1b-1716-41fb-9ea0-f5ca4c99ee45")) || !position) return "";
   const unionService = options.serviceId === "99df9e1b-1716-41fb-9ea0-f5ca4c99ee45";
   if (unionService) return (position.title ? `<div class="presenter-lyric-song-name">${escapeHtml(position.title)}</div>` : "")
     + `<div class="presenter-lyric-service-name" aria-label="ON FIRE"><span>ON</span><svg viewBox="0 0 48 100" aria-hidden="true" focusable="false"><path d="M24 0 C25 16 25 25 26 27 C30 28 40 28 48 29 C40 30 30 30 26 31 C25 35 25 80 24 100 C23 80 23 35 22 31 C18 30 8 30 0 29 C8 28 18 28 22 27 C23 25 23 16 24 0Z"/></svg><span>FIRE</span></div>`;
@@ -783,11 +783,36 @@ function preparePresenterServiceBlankCrossMorph(root, previous, next) {
   };
 }
 
+const PRESENTER_UNION_STARLIGHT_VIDEO = "https://tdulobbnppmpiqqxbvqy.supabase.co/storage/v1/object/public/mindex-worship-media/services/99df9e1b-1716-41fb-9ea0-f5ca4c99ee45/a883cc8a-0324-416e-a95a-cffcd39e23b7/1793668489949-quiet-starlight-loop-v10.mp4";
+
+function presenterUnionStarlightView(slide, options = {}) {
+  if (!slide || options.serviceId !== "99df9e1b-1716-41fb-9ea0-f5ca4c99ee45" || !options.noChromakey
+    || options.emergencyMode || String(slide.id || "").startsWith("presenter:safety-")
+    || slide.formBackgroundImage || slide.backgroundVideo || slide.imageSrc || slide.videoSrc || slide.pptx?.url
+    || presenterSlideIsScoreLike(slide) || presenterPayloadBackgroundImages(options).length
+    || presenterServiceDesignForSlide(slide, options) || slide.scriptureContext === "reading") return slide;
+  const layout = presenterSlideLayout(slide);
+  if (layout === PRESENTER_SLIDE_LAYOUTS.BLANK) {
+    if (presenterUnionBlankKind(slide, options) !== "praise") return slide;
+  } else if (![PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT, PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT].includes(layout)) return slide;
+  return { ...slide, backgroundVideo: PRESENTER_UNION_STARLIGHT_VIDEO, unionStarlightFallback: true };
+}
+
 function presenterUnionBlankKind(slide, options = {}) {
   if (options.serviceId !== "99df9e1b-1716-41fb-9ea0-f5ca4c99ee45" || !options.noChromakey || options.emergencyMode
     || String(slide?.id || "").startsWith("presenter:safety-") || slide?.formBackgroundImage
     || presenterSlideLayout(slide) !== PRESENTER_SLIDE_LAYOUTS.BLANK
-    || presenterSlideBackgroundVideoSource(slide, true)) return "";
+    || (!slide?.unionStarlightFallback && presenterSlideBackgroundVideoSource(slide, true))) return "";
+  if (slide.transitionBlankTone === "light") return "service";
+  if (slide.transitionBlankTone === "dark") return "praise";
   return slide.praiseTransitionBlank || slide.songInstrumental || isPresenterMainPraiseSlide(slide)
     || presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE ? "praise" : "service";
+}
+
+function presenterOutputTransitionTiming(root, frameState = {}, videoEndFade = false) {
+  const calm = Boolean(frameState.calmDissolve);
+  root.style.setProperty("--presenter-dissolve-duration", calm ? "800ms" : "150ms");
+  root.style.setProperty("--presenter-video-end-dissolve-duration", calm ? "1000ms" : "500ms");
+  root.style.setProperty("--presenter-dissolve-easing", calm ? "ease-in-out" : "ease");
+  return { calm, transitionClearDelay: videoEndFade ? (calm ? 1060 : 520) : (calm ? 860 : 260), transitionEntryDelay: calm ? 800 : 220 };
 }

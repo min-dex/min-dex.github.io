@@ -147,6 +147,7 @@ function normalizeServiceDocumentSlides(slides = []) {
     };
     if (slide.songInstrumental) payload.songInstrumental = true;
     if (slide.praiseTransitionBlank) payload.praiseTransitionBlank = true;
+    if (["light", "dark"].includes(slide.transitionBlankTone)) payload.transitionBlankTone = slide.transitionBlankTone;
     if (asset.name || asset.url || asset.kind) payload.asset = asset;
     if (slide.pptx?.url) payload.pptx = { ...slide.pptx };
     if (slide.imageSrc || slide.image_src) payload.imageSrc = String(slide.imageSrc || slide.image_src || "").trim();
@@ -982,3 +983,12 @@ function serviceElementSourceRefForSave(existingSourceRef = {}, item = {}, parse
   }
   return sourceRef;
 }
+
+// Authored per-element display plan; never edits element rows or song forms.
+function presenterElementTransitionBlankTones(slide, service) {
+  if (service?.id !== "99df9e1b-1716-41fb-9ea0-f5ca4c99ee45") return [];
+  const tones = serviceRawSourceRef(service).transitionBlankTones?.[slide?.elementId];
+  return Array.isArray(tones) && tones.length > 0 && tones.length <= 2
+    && tones.every(tone => tone === "light" || tone === "dark") ? tones : [];
+}
+

@@ -1167,3 +1167,13 @@ stroke; the upper-right logo is the unchanged official website wordmark.
 ### Derived praise transition identity ·2026-11-03
 
 Document slide projections may carry `praiseTransitionBlank: true` on generated praise trailing blanks. The optional boolean preserves the praise blank visual context when the ordinary element/section captions are cleared. Restored presenter slides retain it; absent/false projections remain compatible. It changes no song, lyric, form, timing, source text or instance schema.
+
+### Union element blank tone plan ·2026-11-03
+
+Optional service `source_ref.transitionBlankTones` is an element-ID keyed display
+plan, with one or two ordered strings `light` or `dark` per entry. It is consumed
+only for union99df generated trailing blanks, with invalid values ignored. Derived
+slides carry optional `transitionBlankTone` through document normalization and
+restore; absent values retain older behavior. This is JSON metadata, with no new
+schema, element row, song form or source-text mutation. A second blank has a
+stable `:2` suffix distinct from the first blank's existing identity.

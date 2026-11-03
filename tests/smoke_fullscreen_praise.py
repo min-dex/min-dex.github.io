@@ -62,6 +62,11 @@ def main():
                   const keyed=renderPresenterSlideFrame(song,{noChromakey:false,presentationDesign:{songTitleStyle:'note-title'}});
                   check(!keyed.includes('presenter-slide--song-note-title'),'fullscreen choice leaked into keyed output');
                   const videoSlide={...song,backgroundVideo:presentation.backgroundVideo};
+                  const mini=document.createElement('div');mini.className='presenter-output-root no-chromakey';mini.style.cssText='position:fixed;width:1920px;height:1080px;--presenter-stage-unit:1px';
+                  mini.innerHTML=renderPresenterSlideFrame({...videoSlide,songTitle:'',songTitleContent:null,type:'lyrics',elementType:'praise',songPosition:{title:'곡명',labels:[],index:-1}},{noChromakey:true,previewStage:true,serviceId:'99df9e1b-1716-41fb-9ea0-f5ca4c99ee45'});document.body.append(mini);
+                  const name=mini.querySelector('.presenter-lyric-song-name'),footer=mini.querySelector('.presenter-lyric-service-name');
+                  check(getComputedStyle(name).position==='absolute'&&getComputedStyle(footer).position==='absolute','video preview displaced metadata');
+                  check(name.getBoundingClientRect().bottom<footer.getBoundingClientRect().top,'preview metadata overlap');mini.remove();
                   const vf=presenterOutputFrameStateForSlide(videoSlide,payload);
                   check(vf.backgroundVideo===presentation.backgroundVideo,'video missing');
                   check(!presenterOutputFrameStateForSlide({...videoSlide,outputContext:'chromakey'},payload).backgroundVideo,'video leaked into key');
@@ -77,6 +82,11 @@ def main():
                   applyPresenterBackgroundVideo(root,vf.backgroundVideo);check(video===root.querySelector('video'),'lyric change restarts video');
                   const instrumental=presenterLyricsSlidesForServiceItem({item:{id:'song'},section:{backgroundVideo:presentation.backgroundVideo},index:0,forms:[presenterBlankFormPresetItem('Int',normalizePresenterFormPresetLabel('Int'))],formWarnings:[]})[0];
                   check(instrumental.songInstrumental&&instrumental.type==='blank'&&!instrumental.text,'instrumental identity/lyrics');
+                  const labeled=presenterSongPositionSlides([instrumental],'곡명','v')[0];
+                  const ih=renderPresenterSlideFrame(labeled,{noChromakey:true,serviceId:'99df9e1b-1716-41fb-9ea0-f5ca4c99ee45'});
+                  check(ih.includes('presenter-lyric-song-name')&&ih.includes('presenter-lyric-service-name'),'instrumental labels absent');
+                  check(!renderPresenterSongPosition({...labeled,autoTrailingBlank:true},{serviceId:'99df9e1b-1716-41fb-9ea0-f5ca4c99ee45'}),'trailing blank labels leaked');
+                  check(!renderPresenterSongPosition(labeled,{serviceId:'other'}),'other service instrumental changed');
                   const portable=normalizeServiceDocumentSlides([instrumental])[0];
                   check(serviceDocumentSlideToPresenterSlide(portable,0).songInstrumental,'document projection lost instrumental');
                   const manual=buildPresenterCustomSlides({id:'manual',label:'찬양',memo:serializeServiceItemMemo({slides:['[간주]']})},{backgroundVideo:presentation.backgroundVideo},0).find(s=>s.songInstrumental);

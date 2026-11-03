@@ -2737,6 +2737,7 @@ function presenterOutputFrameStateForSlide(slide, payload = {}) {
   const blackoutOutput = slide?.id === "presenter:safety-blank";
   const slideChromakey = !blackoutOutput && presenterFrameSlideOutputContext(slide, fallbackChromakey) === "chromakey";
   const cleanOutput = !slideChromakey;
+  slide = presenterUnionStarlightView(slide, { ...payload, noChromakey: cleanOutput, emergencyMode });
   const generatedReadyOutput = slide?.type === "ready" && cleanOutput;
   const blankSlide = presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.BLANK;
   const unionBlankKind = presenterUnionBlankKind(slide, { ...payload, noChromakey: cleanOutput, emergencyMode });
@@ -2748,6 +2749,7 @@ function presenterOutputFrameStateForSlide(slide, payload = {}) {
   const showBackground = Boolean(!unionBlankKind && !emergencyMode && !blackoutOutput && backgroundImages.length && cleanOutput && presenterSlideUsesServiceBackground(slide));
   return {
     cleanOutput,
+    calmDissolve: payload?.serviceId === "99df9e1b-1716-41fb-9ea0-f5ca4c99ee45",
     emergencyMode,
     mediaOutput: Boolean(!generatedReadyOutput && (slide?.pptx?.url || (presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.MEDIA
       && [PRESENTER_ELEMENT_TYPES.IMAGE, PRESENTER_ELEMENT_TYPES.VIDEO].includes(presenterSlideElementType(slide))))),
@@ -2813,7 +2815,7 @@ function presenterOutputFrameBackgroundStyle(frameState = {}) {
 }
 
 function commitPresenterOutputFrame(root, payload, slide, frameState, token, options = {}) {
-  const html = slide ? renderPresenterSlideFrame(slide, { noChromakey: frameState.noChromakey, emergencyMode: frameState.emergencyMode, serviceId: payload.serviceId, transitionLogo: payload.transitionLogo, presentationDesign: payload.presentationDesign }) : "";
+  const html = slide ? renderPresenterSlideFrame(slide, { noChromakey: frameState.noChromakey, emergencyMode: frameState.emergencyMode, serviceId: payload.serviceId, transitionLogo: payload.transitionLogo, presentationDesign: payload.presentationDesign, backgroundImages: payload.backgroundImages, backgroundImage: payload.backgroundImage }) : "";
   const activeImageSource = presenterSlideImageSource(slide);
   const frameKey = presenterOutputFrameKey(payload, slide, frameState);
   const commit = () => {
@@ -2902,8 +2904,7 @@ function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState =
   // Blending video pixels into the key color creates unkeyed intermediate colors.
   const videoEndFade = Boolean(frameState.videoEndFade && frameState.noChromakey && !frameState.blackoutOutput && !frameState.blankOutput);
   const animated = videoEndFade || presenterOutputShouldAnimateFrameTransition(root, frameState);
-  const transitionClearDelay = videoEndFade ? 520 : 260;
-  const transitionEntryDelay = 220;
+  const { calm, transitionClearDelay, transitionEntryDelay } = presenterOutputTransitionTiming(root, frameState, videoEndFade);
   const swap = () => {
     if (token !== presenterOutputRenderState.token) return;
     const startCrossMorph = preparePresenterServiceBlankCrossMorph(root, activeLayer, nextLayer);
@@ -2947,7 +2948,7 @@ function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState =
     activeLayer.classList.remove("is-active");
     activeLayer.classList.remove("is-next");
     nextLayer.classList.add("is-active");
-    if (animated && !videoEndFade) nextLayer.classList.add("is-entering");
+    if (animated && !videoEndFade && !calm) nextLayer.classList.add("is-entering");
     nextLayer.classList.remove("is-next");
     // Keep composited media layers attached while swapping their visibility.
     applyPresenterOutputFrameState(root, frameState);
@@ -3009,7 +3010,7 @@ function presenterOutputFrameKey(payload = {}, slide = null, frameState = {}) {
     slide.elementType || "",
     slide.outputContext || slide.output_context || "",
     frameState.noChromakey ? JSON.stringify(slide.songPosition || "clean") : "chromakey",
-    frameState.blankOutput ? `blank:${slide.praiseTransitionBlank ? "praise" : "service"}` : "",
+    frameState.blankOutput ? `blank:${slide.transitionBlankTone || (slide.praiseTransitionBlank ? "praise" : "service")}` : "",
     frameState.emergencyMode && !frameState.mediaOutput && !frameState.videoOutput && !frameState.scoreOutput ? "emergency" : "",
     frameState.backgroundImage || "",
     frameState.backgroundVideo || "",
@@ -4178,6 +4179,7 @@ function presenterFullscreenSongTitleView(slide, options = {}) {
 
 function renderPresenterSlideFrame(slide, options = {}) {
   slide = presenterEmergencySlideView(slide, options.emergencyMode);
+  slide = presenterUnionStarlightView(slide, options);
   slide = presenterFullscreenSongTitleView(slide, options);
   const design = presenterServiceDesignForSlide(slide, options);
   if (design) {
@@ -4187,7 +4189,7 @@ function renderPresenterSlideFrame(slide, options = {}) {
   const slideClass = presenterSlideRenderClass(slide);
   const transitionLogo = slide?.songInstrumental && presenterSlideBackgroundVideoSource(slide, options.noChromakey) ? "" : renderPresenterTransitionLogo(slide, options);
   const blankKind = presenterUnionBlankKind(slide, options);
-  const extraClasses = [blankKind ? `presenter-slide--union-${blankKind}-blank` : "", presenterSlideExtraClasses(slide), options.serviceId === "99df9e1b-1716-41fb-9ea0-f5ca4c99ee45" ? "presenter-slide--on-fire" : "", transitionLogo ? "has-transition-logo" : "", design ? "presenter-slide--service-design" : ""].filter(Boolean).join(" ");
+  const extraClasses = [slide?.unionStarlightFallback ? "presenter-slide--union-starlight" : "", blankKind ? `presenter-slide--union-${blankKind}-blank` : "", presenterSlideExtraClasses(slide), options.serviceId === "99df9e1b-1716-41fb-9ea0-f5ca4c99ee45" ? "presenter-slide--on-fire" : "", transitionLogo ? "has-transition-logo" : "", design ? "presenter-slide--service-design" : ""].filter(Boolean).join(" ");
   const body = transitionLogo || renderPresenterSlideBody(slide, options);
   const sectionKey = String(slide?.sectionKey || slide?.section_key || "").trim();
   const presenterRole = normalizeServicePresenterRole(slide?.presenterRole);
@@ -4201,7 +4203,7 @@ function renderPresenterSlideFrame(slide, options = {}) {
       ${renderPresenterSlideMeta(slide)}
       ${options.previewStage && presenterSlideBackgroundVideoSource(slide, options.noChromakey) ? `<video class="presenter-output-background-video" src="${escapeAttr(presenterSlideBackgroundVideoSource(slide, options.noChromakey))}" muted playsinline preload="metadata" aria-hidden="true"></video>` : ""}
       ${body}
-      ${options.noChromakey && !transitionLogo ? renderPresenterSongPosition(slide, options) : ""}
+      ${options.noChromakey && (!transitionLogo || slide?.songInstrumental) ? renderPresenterSongPosition(slide, options) : ""}
     </section>
   `;
 }
@@ -5108,13 +5110,11 @@ async function uploadPresenterPraiseBackground(input) {
   } catch (error) { showToast(error.message || "배경 영상을 저장하지 못했습니다. 다시 시도해 주세요.", "error"); }
   finally { input.disabled = false; input.value = ""; }
 }
-
 function presenterSlideBackgroundVideoSource(slide, noChromakey) {
-  if (!noChromakey || slide?.formBackgroundImage || slide?.autoTrailingBlank) return "";
-  if (![PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT, PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT].includes(presenterSlideLayout(slide)) && !(slide?.songInstrumental && presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.BLANK)) return "";
+  if (!noChromakey || slide?.formBackgroundImage || (slide?.autoTrailingBlank && !slide.unionStarlightFallback)) return "";
+  if (![PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT, PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT].includes(presenterSlideLayout(slide)) && !((slide?.songInstrumental || slide?.unionStarlightFallback) && presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.BLANK)) return "";
   return normalizeServicePresentation({ backgroundVideo: slide?.backgroundVideo })?.backgroundVideo || "";
 }
-
 function applyPresenterBackgroundVideo(root, source = "") {
   let video = root.querySelector(":scope > .presenter-output-background-video");
   if (!source) { if (video) { video.pause(); video.removeAttribute("src"); video.load(); video.remove(); } delete root.dataset.backgroundVideoError; return; }
