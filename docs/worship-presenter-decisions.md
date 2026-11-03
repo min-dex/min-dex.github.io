@@ -5627,3 +5627,10 @@ black without their white SVG tab backgrounds, rounded boxes or shadows.
 Reference, verse body and reader names remain intact; disabling emergency mode
 restores the ordinary chromakey boxes. Preview/output use the same scoped CSS.
 No scripture, worship record or slide content is rewritten.
+
+
+## Union blank contexts and service cross motion ·2026-11-03
+
+Union99df clean service blanks show only the red transition cross centered on white. Praise trailing blanks retain a black stage and white cross; instrumental blanks with BGV continue the video. A derived praiseTransitionBlank flag survives document projection, without changing lyrics, order or forms. Safety, emergency, chromakey, media and photo frames retain their existing behavior.
+
+Only transitions between a white service title cross and its white blank cross animate that cross position/size for850ms ease-in-out, in both directions. Other text never morphs; controller thumbnails and reduced-motion do not animate. The lyric footer uses the bundled Mindex Service Display serif and ON/cross/FIRE ordering. Union translation labels render at78% of their reference size.

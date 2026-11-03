@@ -67,7 +67,14 @@ try:
     const unionSlide=repeated[0], beforeUnion=JSON.stringify(unionSlide);
     const unionHtml=renderPresenterSlideFrame(unionSlide,{noChromakey:true,serviceId:unionId});
     check(unionHtml.includes('presenter-lyric-song-name')&&!unionHtml.includes('presenter-lyric-song-steps')&&!unionHtml.includes('♬'),'union lyrics omit form and note');
-    check(unionHtml.includes('<span>ON FIRE</span>')&&unionHtml.includes('viewBox="0 0 48 100"'),'union service footer');
+    check(unionHtml.includes('<span>ON</span><svg')&&unionHtml.includes('</svg><span>FIRE</span>')&&unionHtml.includes('viewBox="0 0 48 100"'),'union service footer');
+    const unionStage=document.createElement('div');unionStage.className='presenter-output-root no-chromakey';unionStage.innerHTML=unionHtml;document.body.append(unionStage);
+    const footer=unionStage.querySelector('.presenter-lyric-service-name');
+    check([...footer.children].map(n=>n.tagName.toLowerCase()).join(',')==='span,svg,span'&&footer.firstElementChild.textContent==='ON'&&footer.lastElementChild.textContent==='FIRE','footer cross not between words');
+    check(getComputedStyle(footer).fontFamily.includes('Mindex Service Display'),'footer does not use service display font');
+    unionStage.innerHTML=renderPresenterSlideFrame({type:'scripture',layout:'lower_bar_text',elementType:'scripture_text',scriptureContext:'reading',referenceBook:'요한복음',referenceRange:'3:16',translationLabel:'개역개정',text:'16 하나님이 세상을 이처럼 사랑하사'},{noChromakey:true,serviceId:unionId});
+    const refSize=parseFloat(getComputedStyle(unionStage.querySelector('.presenter-scripture-reading-ref')).fontSize),versionSize=parseFloat(getComputedStyle(unionStage.querySelector('.presenter-scripture-reading-version')).fontSize);
+    check(Math.abs(versionSize/refSize-.78)<.01,'translation label size');unionStage.remove();
     check(JSON.stringify(unionSlide)===beforeUnion,'union view preserves stored slide');
     const ordinaryHtml=renderPresenterSlideFrame(unionSlide,{noChromakey:true,serviceId:'unrelated'});
     check(ordinaryHtml.includes('presenter-lyric-song-steps')&&ordinaryHtml.includes('♬'),'ordinary metadata retained');

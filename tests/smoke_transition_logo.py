@@ -46,6 +46,40 @@ def main():
                   check(samples[0]===0 && samples[1]>0 && samples[1]<1 && samples[2]===1,'pointed silhouette did not grow from intersection');
                   check(getComputedStyle(root.querySelector('section'),'::before').display==='none','default cross overlays custom logo');
                   root.classList.add('svc-slide-mini-canvas');await new Promise(requestAnimationFrame);check(getComputedStyle(logo).animationName==='none','thumbnail animation');
+                  const union={serviceId:'99df9e1b-1716-41fb-9ea0-f5ca4c99ee45',chromakey:false,transitionLogo:config,presentationDesign:{sectionKeys:['sermon'],logo:config.url,background:'#ffffff',accent:'#ad371d'}};
+                  const options={...union,noChromakey:true};
+                  const title={id:'sermon',elementId:'sermon',type:'title-content',elementType:'title_content',layout:'center-text',sectionKey:'sermon',title:'설교',text:'설교'};
+                  const serviceBlank=presenterElementTrailingBlankSlide(title,0,{id:union.serviceId});
+                  const praiseBlank=presenterElementTrailingBlankSlide({...title,sectionKey:'praise',elementType:'praise'},1,{id:union.serviceId});
+                  check(praiseBlank.praiseTransitionBlank&&!serviceBlank.praiseTransitionBlank,'trailing blank context lost');
+                  const normalized=normalizeServiceDocumentSlides([praiseBlank])[0];
+                  check(serviceDocumentSlideToPresenterSlide(normalized,0,{id:union.serviceId}).praiseTransitionBlank,'document blank context lost');
+                  check(presenterUnionBlankKind(serviceBlank,options)==='service'&&presenterUnionBlankKind(praiseBlank,options)==='praise','blank kind');
+                  check(!presenterUnionBlankKind(serviceBlank,{...options,noChromakey:false})&&!presenterUnionBlankKind(serviceBlank,{...options,emergencyMode:true}),'key/emergency blank theme leak');
+                  const stage=document.createElement('div');stage.className='presenter-output-root no-chromakey';stage.style.cssText='position:fixed;inset:0;width:1920px;height:1080px;transform:none;--presenter-stage-unit:1px';document.body.append(stage);
+                  stage.innerHTML='<div class="presenter-output-layer is-active">'+renderPresenterSlideFrame(title,options)+'</div><div class="presenter-output-layer is-next">'+renderPresenterSlideFrame(serviceBlank,options)+'</div>';
+                  await Promise.all([...stage.querySelectorAll('img')].map(image=>image.decode()));
+                  const [oldLayer,newLayer]=stage.children;
+                  const whiteBlank=newLayer.querySelector('section'),cross=newLayer.querySelector('img');
+                  check(getComputedStyle(whiteBlank).backgroundColor==='rgb(255, 255, 255)'&&getComputedStyle(cross).filter==='none','service blank not white/red');
+                  check(!whiteBlank.textContent.trim(),'service blank contains text');
+                  const beforeCross=oldLayer.querySelector('img').getBoundingClientRect(),afterCross=cross.getBoundingClientRect();
+                  activatePresenterOutputLayer(stage,oldLayer,newLayer,presenterOutputFrameStateForSlide(serviceBlank,union));
+                  const moving=stage.querySelector('.presenter-service-cross-morph');check(moving,'blank-only cross morph did not start');
+                  const morph=moving.getAnimations()[0];morph.pause();
+                  for(const t of [0,425,850]) {morph.currentTime=t;await new Promise(requestAnimationFrame);const box=moving.getBoundingClientRect();
+                    if(t===0)check(Math.abs(box.width-beforeCross.width)<1,'cross morph start');
+                    if(t===425)check(box.width>beforeCross.width&&box.width<afterCross.width,'cross morph midpoint');
+                    if(t===850)check(Math.abs(box.width-afterCross.width)<1&&Math.abs(box.top-afterCross.top)<1,'cross morph end');}
+                  morph.finish();await new Promise(requestAnimationFrame);check(!stage.querySelector('.presenter-service-cross-morph')&&cross.style.visibility==='','cross morph cleanup');
+                  const backLayer=oldLayer;backLayer.innerHTML=renderPresenterSlideFrame(title,options);
+                  activatePresenterOutputLayer(stage,newLayer,backLayer,presenterOutputFrameStateForSlide(title,union));
+                  check(stage.querySelector('.presenter-service-cross-morph'),'reverse blank cross morph missing');stage._cancelServiceCrossMorph();
+                  stage.innerHTML=renderPresenterSlideFrame(praiseBlank,options);check(getComputedStyle(stage.querySelector('section')).backgroundColor==='rgb(0, 0, 0)'&&getComputedStyle(stage.querySelector('img')).filter==='brightness(0) invert(1)','praise blank not black/white');
+                  check(!preparePresenterServiceBlankCrossMorph(stage,stage,stage),'praise blank acquired service morph');
+                  const withVideo={...praiseBlank,autoTrailingBlank:false,songInstrumental:true,backgroundVideo:'tests/fixtures/praise-background.webm'};
+                  check(!presenterUnionBlankKind(withVideo,options),'instrumental video replaced by cross');
+                  stage.remove();
                   return 'PASS payload, origin, reveal progress, cache, chromakey, safety, default and thumbnails';
                 }""")
                 page.emulate_media(reduced_motion="reduce")

@@ -1860,3 +1860,12 @@ span.presenter-announcement-paren,
   color: #fff; background: transparent; border-radius: 0; box-shadow: none;
 }
 .presenter-output-root.is-emergency-mode .presenter-tab-background { display: none; }
+
+/* White service blank and black praise blank are separate union frames. */
+.presenter-output-root.no-chromakey .presenter-slide--union-service-blank { background: #fff; }
+.presenter-output-root.no-chromakey .presenter-slide--union-praise-blank { background: #000; }
+.presenter-output-root.no-chromakey .presenter-slide--union-service-blank .presenter-transition-logo {
+  filter: none; animation: none; transform: scale(1);
+}
+.presenter-lyric-service-name { font-family: "Mindex Service Display", "Mindex Service Serif", serif; font-weight: 500; }
+.presenter-slide--on-fire .presenter-scripture-reading-version { font-size: calc(var(--presenter-scripture-reading-ref-size) * .78); }

@@ -2739,12 +2739,13 @@ function presenterOutputFrameStateForSlide(slide, payload = {}) {
   const cleanOutput = !slideChromakey;
   const generatedReadyOutput = slide?.type === "ready" && cleanOutput;
   const blankSlide = presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.BLANK;
+  const unionBlankKind = presenterUnionBlankKind(slide, { ...payload, noChromakey: cleanOutput, emergencyMode });
   const scoreOutput = presenterSlideIsScoreLike(slide);
   const videoOutput = presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.VIDEO || Boolean(slide?.videoSrc);
   const scriptureReadingOutput = slide?.scriptureContext === "reading";
   // A fullscreen blank stays inside the service visual system: retain the same
   // background while the cross draws over it. Chromakey remains background-free.
-  const showBackground = Boolean(!emergencyMode && !blackoutOutput && backgroundImages.length && cleanOutput && presenterSlideUsesServiceBackground(slide));
+  const showBackground = Boolean(!unionBlankKind && !emergencyMode && !blackoutOutput && backgroundImages.length && cleanOutput && presenterSlideUsesServiceBackground(slide));
   return {
     cleanOutput,
     emergencyMode,
@@ -2905,6 +2906,7 @@ function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState =
   const transitionEntryDelay = 220;
   const swap = () => {
     if (token !== presenterOutputRenderState.token) return;
+    const startCrossMorph = preparePresenterServiceBlankCrossMorph(root, activeLayer, nextLayer);
     // Return the previous metadata to its frame before reusing either layer.
     root._restoreSongPosition?.();
     if (animated && nextLayer.dataset.songPositionKey && nextLayer.dataset.songPositionKey === activeLayer.dataset.songPositionKey) {
@@ -2958,6 +2960,7 @@ function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState =
       }, transitionEntryDelay);
     }
     activeLayer._pptxSession?.pause();
+    startCrossMorph?.();
     onActivated?.();
     const clearPreviousLayer = () => {
       if (token !== presenterOutputRenderState.token) return;
@@ -3006,7 +3009,7 @@ function presenterOutputFrameKey(payload = {}, slide = null, frameState = {}) {
     slide.elementType || "",
     slide.outputContext || slide.output_context || "",
     frameState.noChromakey ? JSON.stringify(slide.songPosition || "clean") : "chromakey",
-    frameState.blankOutput ? "blank" : "",
+    frameState.blankOutput ? `blank:${slide.praiseTransitionBlank ? "praise" : "service"}` : "",
     frameState.emergencyMode && !frameState.mediaOutput && !frameState.videoOutput && !frameState.scoreOutput ? "emergency" : "",
     frameState.backgroundImage || "",
     frameState.backgroundVideo || "",
@@ -4183,7 +4186,8 @@ function renderPresenterSlideFrame(slide, options = {}) {
   }
   const slideClass = presenterSlideRenderClass(slide);
   const transitionLogo = slide?.songInstrumental && presenterSlideBackgroundVideoSource(slide, options.noChromakey) ? "" : renderPresenterTransitionLogo(slide, options);
-  const extraClasses = [presenterSlideExtraClasses(slide), options.serviceId === "99df9e1b-1716-41fb-9ea0-f5ca4c99ee45" ? "presenter-slide--on-fire" : "", transitionLogo ? "has-transition-logo" : "", design ? "presenter-slide--service-design" : ""].filter(Boolean).join(" ");
+  const blankKind = presenterUnionBlankKind(slide, options);
+  const extraClasses = [blankKind ? `presenter-slide--union-${blankKind}-blank` : "", presenterSlideExtraClasses(slide), options.serviceId === "99df9e1b-1716-41fb-9ea0-f5ca4c99ee45" ? "presenter-slide--on-fire" : "", transitionLogo ? "has-transition-logo" : "", design ? "presenter-slide--service-design" : ""].filter(Boolean).join(" ");
   const body = transitionLogo || renderPresenterSlideBody(slide, options);
   const sectionKey = String(slide?.sectionKey || slide?.section_key || "").trim();
   const presenterRole = normalizeServicePresenterRole(slide?.presenterRole);

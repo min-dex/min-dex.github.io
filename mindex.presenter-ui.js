@@ -680,7 +680,7 @@ function renderPresenterSongPosition(slide, options = {}) {
   if (slide.type !== "lyrics" || !position) return "";
   const unionService = options.serviceId === "99df9e1b-1716-41fb-9ea0-f5ca4c99ee45";
   if (unionService) return (position.title ? `<div class="presenter-lyric-song-name">${escapeHtml(position.title)}</div>` : "")
-    + `<div class="presenter-lyric-service-name"><svg viewBox="0 0 48 100" aria-hidden="true" focusable="false"><path d="M24 0 C25 16 25 25 26 27 C30 28 40 28 48 29 C40 30 30 30 26 31 C25 35 25 80 24 100 C23 80 23 35 22 31 C18 30 8 30 0 29 C8 28 18 28 22 27 C23 25 23 16 24 0Z"/></svg><span>ON FIRE</span></div>`;
+    + `<div class="presenter-lyric-service-name" aria-label="ON FIRE"><span>ON</span><svg viewBox="0 0 48 100" aria-hidden="true" focusable="false"><path d="M24 0 C25 16 25 25 26 27 C30 28 40 28 48 29 C40 30 30 30 26 31 C25 35 25 80 24 100 C23 80 23 35 22 31 C18 30 8 30 0 29 C8 28 18 28 22 27 C23 25 23 16 24 0Z"/></svg><span>FIRE</span></div>`;
   const heading = position.title ? `<div class="presenter-lyric-song-name">♬ ${escapeHtml(position.title)}</div>` : "";
   if (position.index < 0) return heading;
   const steps = position.labels.map((label, i) =>
@@ -747,4 +747,47 @@ function presenterOutputFrameClassNames(frameState = {}) {
     frameState.blankOutput ? "is-blank" : "",
     frameState.blackoutOutput ? "is-blackout" : "",
   ].filter(Boolean).join(" ");
+}
+
+// Only the union service's red cross moves between its white title and blank.
+function preparePresenterServiceBlankCrossMorph(root, previous, next) {
+  root._cancelServiceCrossMorph?.();
+  if (root.classList.contains("svc-slide-mini-canvas") || matchMedia("(prefers-reduced-motion: reduce)").matches) return null;
+  const blank = ".presenter-slide--union-service-blank .presenter-transition-logo";
+  const heading = ".presenter-slide--on-fire.presenter-slide--service-design .presenter-service-design-mark";
+  const from = previous.querySelector(blank) || (next.querySelector(blank) && previous.querySelector(heading));
+  const to = next.querySelector(blank) || (previous.querySelector(blank) && next.querySelector(heading));
+  if (!from || !to) return null;
+  const bounds = root.getBoundingClientRect();
+  if (!bounds.width) return null;
+  const scale = root.clientWidth / bounds.width;
+  const position = node => {
+    const box = node.getBoundingClientRect();
+    return { left: `${(box.left - bounds.left) * scale}px`, top: `${(box.top - bounds.top) * scale}px`, width: `${box.width * scale}px`, height: `${box.height * scale}px` };
+  };
+  const first = position(from), last = position(to), targetVisibility = to.style.visibility;
+  const image = from.cloneNode(false);
+  image.className = "presenter-service-cross-morph";
+  image.style.cssText = "position:absolute;z-index:12;pointer-events:none;object-fit:fill;max-width:none;transform:none;filter:none;animation:none";
+  Object.assign(image.style, first);root.append(image);to.style.visibility = "hidden";
+  let animation;
+  const cleanup = () => {
+    to.style.visibility = targetVisibility;image.remove();
+    if (root._cancelServiceCrossMorph === cancel) delete root._cancelServiceCrossMorph;
+  };
+  const cancel = () => { animation?.cancel();cleanup(); };
+  root._cancelServiceCrossMorph = cancel;
+  return () => {
+    animation = image.animate([first, last], { duration: 850, easing: "ease-in-out", fill: "both" });
+    animation.finished.then(cleanup, cleanup);
+  };
+}
+
+function presenterUnionBlankKind(slide, options = {}) {
+  if (options.serviceId !== "99df9e1b-1716-41fb-9ea0-f5ca4c99ee45" || !options.noChromakey || options.emergencyMode
+    || String(slide?.id || "").startsWith("presenter:safety-") || slide?.formBackgroundImage
+    || presenterSlideLayout(slide) !== PRESENTER_SLIDE_LAYOUTS.BLANK
+    || presenterSlideBackgroundVideoSource(slide, true)) return "";
+  return slide.praiseTransitionBlank || slide.songInstrumental || isPresenterMainPraiseSlide(slide)
+    || presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE ? "praise" : "service";
 }

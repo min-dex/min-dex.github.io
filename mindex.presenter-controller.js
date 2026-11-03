@@ -1525,6 +1525,7 @@ function serviceDocumentSlideToPresenterSlide(slide = {}, index = 0, service = n
     backgroundVideo: normalizeServicePresentation({ backgroundVideo: slide.backgroundVideo })?.backgroundVideo || "", songInstrumental: Boolean(slide.songInstrumental),
     hiddenInPresentation: Boolean(slide.hidden),
     autoTrailingBlank: Boolean(slide.autoTrailingBlank),
+    praiseTransitionBlank: Boolean(slide.praiseTransitionBlank),
     serviceDocumentFallback: true,
     sort: index,
   };
@@ -1749,6 +1750,7 @@ function presenterElementTrailingBlankSlide(slide, index, service = null) {
     hidden_in_presentation: false,
     hidden: false,
     autoTrailingBlank: true,
+    praiseTransitionBlank: Boolean(isPresenterMainPraiseSlide(slide) || slide.songPosition || presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE),
     // A transition must never inherit the fullscreen song-title adapter.
     songTitle: "",
     songTitleContent: null,
