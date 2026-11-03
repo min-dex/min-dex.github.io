@@ -5615,3 +5615,8 @@ The same video node/currentTime survives lyrics→instrumental→lyrics. This do
 not extend to trailing transition blanks, safety blackout, chromakey, photo cues
 or unrelated media. Instrumental identity survives document projection. No
 lyrics, song forms, timing, stored worship data or audio behavior is rewritten.
+
+
+## Union service white note and blank cross ·2026-11-03
+
+The union service99df9e1b-1716-41fb-9ea0-f5ca4c99ee45 explicitly uses white praise-note headings and a white blank-screen cross. Its transparent transition cross image is rendered white by a scoped filter; source artwork, geometry, reveal animation, other services and chromakey output remain unchanged. This supersedes the prior orange ON FIRE note accent for this service.

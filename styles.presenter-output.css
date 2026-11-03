@@ -1834,9 +1834,12 @@ span.presenter-announcement-paren,
   }
 }
 
-/* ON FIRE title notes share the poster cross accent. */
+/* Union service notes and the blank-screen cross use white. */
 .presenter-output-root.no-chromakey .presenter-slide--on-fire .presenter-song-note,
-.presenter-output-root.no-chromakey .presenter-slide--on-fire .presenter-fullscreen-song-heading[aria-label="찬양"] { color: #ae3a1d; }
+.presenter-output-root.no-chromakey .presenter-slide--on-fire .presenter-fullscreen-song-heading[aria-label="찬양"] { color: #fff; }
+
+.presenter-output-root.no-chromakey .presenter-slide--on-fire.presenter-slide--blank { --presenter-blank-cross-color: #fff; }
+.presenter-output-root.no-chromakey .presenter-slide--on-fire .presenter-transition-logo { filter: brightness(0) invert(1); }
 
 /* Paperlogy is an explicit exception for this union service only. */
 .presenter-slide--on-fire { --font-presenter: "Paperlogy", "Mindex Presenter", "Freesentation", sans-serif; --presenter-font-family: var(--font-presenter); --presenter-scripture-font: var(--presenter-font-family); font-family: var(--presenter-font-family); }
