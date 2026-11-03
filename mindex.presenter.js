@@ -2835,7 +2835,6 @@ function commitPresenterOutputFrame(root, payload, slide, frameState, token, opt
       nextLayer.dataset.presenterFrameToken = String(token);
     }
     nextLayer.dataset.presenterFrameKey = frameKey;
-    nextLayer.dataset.songMorphKey = slide?.elementId ? JSON.stringify([payload.serviceId, slide.elementId]) : "";
     nextLayer.dataset.songPositionKey = frameState.noChromakey && slide?.songPosition && slide.elementId
       ? JSON.stringify([payload.serviceId, slide.elementId, slide.songPosition.versionId, slide.songPosition.title]) : "";
     nextLayer.classList.add("is-next");
@@ -2908,7 +2907,6 @@ function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState =
     if (token !== presenterOutputRenderState.token) return;
     // Return the previous metadata to its frame before reusing either layer.
     root._restoreSongPosition?.();
-    presenterMorphSongTitle(activeLayer, nextLayer, frameState, animated);
     if (animated && nextLayer.dataset.songPositionKey && nextLayer.dataset.songPositionKey === activeLayer.dataset.songPositionKey) {
       const selector = ".presenter-lyric-song-name, .presenter-lyric-song-steps, .presenter-lyric-service-name";
       const nodes = [...nextLayer.querySelectorAll(selector)];
