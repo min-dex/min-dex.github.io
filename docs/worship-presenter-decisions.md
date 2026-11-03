@@ -5651,3 +5651,8 @@ morph, changes no stored lyrics/forms, and does not restart background media.
 ## Video thumbnail metadata positioning ·2026-11-03
 
 Video preview foreground stacking preserves the absolute top song label and bottom service footer positions. Only flow content becomes relative above the video; metadata must not collapse into the lyric body or overlap. Preview frame state carries the same service identity as output.
+
+
+## Union instrumental labels ·2026-11-03
+
+Union instrumental blanks retain the same upper song title and lower white ON/cross/FIRE footer as lyrics. They remain lyric-free and keep BGV continuity. Trailing transition blanks and other services retain their prior blank behavior.
