@@ -5543,7 +5543,7 @@ Preview and output receive the same service identity. Other
 services retain their metadata; title slides retain their note. No stored lyrics,
 forms, versions or worship records are rewritten.
 Clean output morphs a matching praise title into the lyric heading only within
-the same service element. Chromakey and reduced-motion preferences retain their
+the same service element, easing in and out over one second. Chromakey and reduced-motion preferences retain their
 existing transition policy.
 ### Worship editor undo
 Ctrl/Cmd+Z outside text fields can reverse an explicit song pick or an up/down
@@ -5580,6 +5580,20 @@ other services, chromakey and stored slide content. Lyric titles remain note-fre
 
 기도찬양(번호가 붙은 순서 포함)은 일반 찬양의 제목 장 규칙을 따른다. 자동 송폼의 제목 장에는 곡 제목을 표시하며, 지정 송폼은 T의 유무와 위치를 그대로 따른다.
 
+## Presenter emergency mode ·2026-11-03
+
+The live service screen-management panel offers a reversible 비상 모드 toggle.
+It uses the existing chromakey caption layout over pure black, without service
+artwork, lyric BGV, generated waiting loops or clean-layout decorations. Explicit
+video, image, score and file slides retain their media. Preview and output share
+the same derived view. Toggling preserves slide index, live scripture, authored
+content, drafts and audio; it does not save worship data. Safety black/transparent
+commands take precedence. The mode survives an acknowledged controller restore
+for the same live session and resets on stop or switching the output service.
+
+## 2026-11-03 파일 불러오기 안내 간소화
+
+KEY/PPTX는 파일 선택 후 공개 저장소 보관 확인을 먼저 한 번 받고 준비·연결을 이어서 진행한다. 취소하면 변환이나 업로드를 시작하지 않는다. 기본 화면에는 슬라이드 준비와 연결 상태 및 최종 완료만 안내하며 원본 저장과 재생 자료 연결의 내부 단계는 성공 알림으로 따로 노출하지 않는다. 최초 Mac 연결·자동화 허용과 실패 시 필요한 조치는 유지한다. 원본 다운로드와 수동 폴더 연결은 자료 관리에 유지하며, 원본만 연결된 경우 불러오기 다시 시도로 복구한다. 기존 atomic 저장, 변경 감지, 불확실한 저장 결과의 자료 보존은 그대로 유지한다.
 ## Paperlogy default projection ·2026-11-03
 
 Default controller and projection text now share the same self-hosted Paperlogy

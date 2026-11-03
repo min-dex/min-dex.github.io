@@ -1837,3 +1837,14 @@ span.presenter-announcement-paren,
 /* ON FIRE title notes share the poster cross accent. */
 .presenter-output-root.no-chromakey .presenter-slide--on-fire .presenter-song-note,
 .presenter-output-root.no-chromakey .presenter-slide--on-fire .presenter-fullscreen-song-heading[aria-label="찬양"] { color: #ae3a1d; }
+
+/* Temporary black stage with the existing chromakey caption layout. */
+.presenter-output-root.is-emergency-mode {
+  --presenter-chromakey: #000;
+  --presenter-output-bg: #000;
+  --presenter-output-bar: #000;
+  --presenter-output-bar-edge: #000;
+  background: #000;
+}
+
+.presenter-output-body.is-emergency-mode { background: #000; }

@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261103-paperlogy-webfont",
+  "version": "20261103-ready-followups",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "287917910d6737293b2607add0e0d0f9f0fdfbd7d50204257408fc168ec32b94",
-  "runtime_sha256": "e4270c73d8ecee3aaf798ab70c1d235e512e4e092ceb96f52cac60c711642200",
-  "source_bytes": 1357620,
-  "runtime_bytes": 968712,
-  "source_gzip": 311229,
-  "runtime_gzip": 243972
+  "source_sha256": "53a0ca8d8aab4efba9db7e0fe2245d8019c4d7abd141a42bd963b5892ffbf46f",
+  "runtime_sha256": "27fbc4b4785726ec1f1e02eb714105bc793a89111cbf72d5d0878a8eefeb9947",
+  "source_bytes": 1356789,
+  "runtime_bytes": 968314,
+  "source_gzip": 310987,
+  "runtime_gzip": 243847
 }

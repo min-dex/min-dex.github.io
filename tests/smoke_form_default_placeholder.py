@@ -59,6 +59,8 @@ try:
     swap(morphTitle);
     swap(repeated[0]);
     check(stage.querySelector('.is-active .presenter-lyric-song-name').getAnimations().length===1,'same praise title morph');
+    const timing=stage.querySelector('.is-active .presenter-lyric-song-name').getAnimations()[0].effect.getTiming();
+    check(timing.duration===1000 && timing.easing==='ease-in-out','one-second smooth title movement');
     swap({...morphTitle,elementId:'different'});
     swap(repeated[0]);
     check(stage.querySelector('.is-active .presenter-lyric-song-name').getAnimations().length===0,'other praise never morphs');

@@ -275,7 +275,7 @@ function presenterKeynoteHtmlPageLabel(asset, serviceId, itemId) {
 function renderPresenterKeynoteHtmlControls(asset, serviceId, itemId, download = '') {
   if (asset.original?.format !== 'key') return '';
   const identity = `data-service-id="${escapeAttr(serviceId)}" data-keynote-item-id="${escapeAttr(itemId)}" data-keynote-source-hash="${escapeAttr(asset.original.sha256)}"`;
-  const automatic = `<button class="btn secondary" type="button" data-keynote-auto-connect ${identity}>${asset.keynoteHtml ? '슬라이드 다시 준비' : '슬라이드 자동 연결'}</button>`;
+  const automatic = `<button class="btn secondary" type="button" data-keynote-auto-connect ${identity}>${asset.keynoteHtml ? '슬라이드 다시 준비' : '불러오기 다시 시도'}</button>`;
   const controls = asset.keynoteHtml ? `<span class="svc-deck-status" data-keynote-page data-keynote-item-id="${escapeAttr(itemId)}">${presenterKeynoteHtmlPageLabel(asset, serviceId, itemId)}</span><button class="btn secondary" type="button" data-keynote-html-action="play" ${identity}>음원·영상 재생</button><button class="btn secondary" type="button" data-keynote-html-action="pause" ${identity}>일시정지</button>` : automatic;
   return `<div class="svc-deck-controls"><div class="svc-deck-playback">${controls}</div><details class="svc-deck-more"><summary>자료 관리</summary><div class="svc-deck-menu">${download}${asset.keynoteHtml ? `<button class="btn secondary" type="button" data-keynote-html-action="status" ${identity}>재연결</button>${automatic}` : ''}<label class="svc-reference-media-upload">폴더로 연결<input type="file" webkitdirectory multiple hidden data-keynote-html-files ${identity} aria-label="Keynote 재생 폴더 연결"></label></div></details></div>`;
 }
@@ -325,7 +325,7 @@ async function importPresenterKeynoteHtml(input, options = {}) {
         try {
           const { error } = await bucket.upload(path, file, { contentType: mime(name), cacheControl: PRESENTER_MEDIA_CACHE_CONTROL, upsert: false });
           if (error) throw error;uploaded.push(path);finished++;
-          if (finished === 1 || finished % 20 === 0) showToast(`Keynote 재생 자료 연결 중 · ${finished}/${entries.length}`, 'info');
+          if (finished === 1 || finished % 20 === 0) showToast('파일을 연결하고 있습니다.', 'info');
         } catch (error) { failure = error; }
       }
     };
@@ -341,7 +341,7 @@ async function importPresenterKeynoteHtml(input, options = {}) {
     if (index < 0) throw Error('자료를 연결할 항목을 확인해 주세요.');
     saveAttempted = true;
     if (!await saveServiceItemMutation(serviceId, index, { silent:true, renderAfterSave:false, throwOnError:true })) throw Error('저장 상태를 확인한 후 다시 저장해 주세요.');
-    showToast(`Keynote ${manifest.pages}장 재생 자료를 연결했습니다.`);return true;
+    showToast(`슬라이드 ${manifest.pages}장을 불러왔습니다.`);return true;
   } catch (error) {
     if (!saveAttempted && uploaded.length) { try { await bucket.remove(uploaded); } catch {} }
     showToast(error.message || 'Keynote 재생 자료 연결에 실패했습니다.', 'error');return false;

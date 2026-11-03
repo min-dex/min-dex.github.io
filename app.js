@@ -540,6 +540,7 @@ const state = {
     sourceItems: null,
     sourceSignature: "",
     index: 0,
+    emergencyMode: false,
     safetyBlank: false,
     jumpDraft: "",
     exitArmedAt: 0,
@@ -7086,6 +7087,9 @@ async function saveScripture() {
 function serviceSaveErrorMessage(error) {
   const message = String(error?.message || (typeof error === "string" ? error : "") || "").trim();
   const code = String(error?.code || error?.name || "").trim();
+  if (code === "57014" || /canceling statement due to statement timeout/i.test(message)) {
+    return "서버 처리 시간이 초과되어 저장하지 못했습니다. 입력은 유지됩니다. 잠시 후 다시 저장해 주세요.";
+  }
   if (message === "JOURNAL_NOT_CONFIRMED") {
     if (error.journalPhase === "cleanup") return "예배 저장 응답은 받았지만 복구 기록 정리를 확인하지 못했습니다. 입력과 요청은 유지됩니다. 다시 저장하면 기존 요청의 결과부터 확인합니다.";
     const cause = String(error?.cause?.message || "");
@@ -7435,7 +7439,7 @@ async function runServiceSave(options, save) {
     console.warn("Worship save failed", { code: error?.code || error?.name || "UNKNOWN_SAVE_ERROR", message });
     // Silent saves suppress success notices, not errors needed to recover a draft.
     showToast(message, "error");
-    if (!options.silent && /REVISION_CONFLICT|ATOMIC_(?:RELOAD_REQUIRED|RETRY_COMMITTED_RELOAD_REQUIRED)/.test(String(error?.message || ""))) {
+    if ((!options.silent || options.reviewConflict) && /REVISION_CONFLICT|ATOMIC_(?:RELOAD_REQUIRED|RETRY_COMMITTED_RELOAD_REQUIRED)/.test(String(error?.message || ""))) {
       void openWorshipConflictReview(options.feedbackServiceId).catch(reviewError => console.warn("Could not open conflict review.", reviewError));
     }
     if (options.throwOnError) throw new Error(message);
@@ -29839,39 +29843,6 @@ function presenterSlideRenderKeyText(slide = {}) {
   const value = `${slide?.title || ""}\u0000${slide?.text || ""}\u0000${slide?.bodyText || ""}`;
   if (value.length <= 96) return value;
   return `${value.length}:${value.slice(0, 64)}:${value.slice(-24)}`;
-}
-
-function presenterControlBoardKey(service, slides = [], active = false, chromakey = true) {
-  const theme = presenterOutputTheme(service?.type_id);
-  const slideKey = slides.map((slide, index) => [
-    index,
-    slide?.id || "",
-    slide?.type || "",
-    presenterSlideElementType(slide),
-    presenterSlideLayout(slide),
-    slide?.formKey || "",
-    slide?.marker || "",
-    slide?.imageSrc || "",
-    slide?.videoSrc || "",
-    slide?.audioSrc || "",
-    presenterSlideRenderKeyText(slide),
-  ].join(":")).join("|");
-  const scriptureDraftKey = [...deferredServiceScriptureReferenceDrafts.entries()]
-    .filter(([key]) => key.startsWith(`${service?.id || ""}:`))
-    .map(([key, value]) => `${key}=${value}`)
-    .join("|");
-  // Escape control characters before round-tripping this key through HTML attributes.
-  return JSON.stringify([
-    service?.id || "",
-    theme,
-    chromakey ? "chroma" : "clean",
-    active ? "active" : "preview",
-    presenterControllerIsLive(service?.id) ? "live" : "offline",
-    globalThis.MindexSongTiming?.revision || 0,
-    slides.length,
-    slideKey,
-    scriptureDraftKey,
-  ]);
 }
 
 function presenterOutputWarmupUiState(serviceId, options = {}) {

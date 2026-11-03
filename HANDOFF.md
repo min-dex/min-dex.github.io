@@ -1635,3 +1635,30 @@ pending; no operational writes, playback, output or printing were performed.
 ## 2026-11-03 입력·저장 병목 수정 후보
 
 `codex/order-save-flow`: 항목 저장 실패 후 전체 예배 저장으로 자동 재시도하던 중복 경로 제거. 기존 patch 경로 내부의 구조 변경/신규 ID/명시적 unsupported fallback은 유지. 깨끗한 예배의 변경 없는 펜 입력 저장은 서버 요청 없이 닫는다. dirty/저장 중/불확실 요청은 기존 atomic 경로를 유지한다. Node routing/atomic client 및 Chromium·WebKit 실제 inline 입력·IME·커서·실패/재시도·동시 항목·지연 응답·추가입력·재조회·no-op PASS. 실제 운영 데이터 저장/송출 조작 없음. 필수 GitHub gate·Pages·공개 검증 전이며 배포 완료로 보고하지 않는다.
+
+## 2026-11-03 ON FIRE 설교 저장 장애 (미해결)
+
+사용자 It's NEW 설교 입력 저장 실패 실재현. 원사용자Chrome447797753/예배99df9e1b-1716-41fb-9ea0-f5ca4c99ee45/설교e5fc3620-3fca-434c-abc4-19240e8a41b4. 최초 REVISION_CONFLICT, 비교창에서 local 제목/에베소서4:23–30 vs 서버 제목없음/별도인용 이사야61:1·BGV차이 확인. archive-before-adopt UI 후에도 입력값 유지, 중앙 단건 저장 exact toast canceling statement due to statement timeout + 예배복구본 충돌. 독립 public anon get_worship_service_v1 readback revision299/title빈값/person이태엽목사, 저장완료 아님. 새로 만든447797757 중복QA탭 닫음, 원사용자탭 유지. 추가 운영쓰기 중단. 관리자 dashboard 접근 auto-review가 구체승인없어 거절; 사용자에게 read-only 관리자 로그/함수 접근 승인 요청. 우회 금지. 후속75a0dedd는 펜 저장충돌 비교창 노출 수정, 별도 SQL timeout 한국어안내 추가. 기존 배포 e37ec12f scope에는 미포함. 전체 서버 timeout 해결로 주장 금지.
+
+## 2026-11-03 ON FIRE 설교 저장 장애 해결 (운영 적용 완료)
+
+사용자 관리자점검·원인수정·제목저장 승인 후 Supabase로그에서 SQLSTATE57014 context가 mindex_state_write_v1의 id_alias_mapping 생성임을 확인. records1659개payload에서previousIds60개를 매복구본쓰기마다 생성하던 병목. private state_id_alias_cache + records insert/update/delete trigger 및 기존mappingAPI의동일결과캐시를 적용. 원예배/곡데이터직접SQL수정없음, anon/authenticated읽기권한0/기존공개mapping권한0. rollback시험·commit시험에서기존alias결과동일/동기화3종PASS, 1MiBguard17.911ms. 기존UIatomic으로 It's NEW/이태엽목사 revision300저장, 독립RPC+공개화면PASS. ID·순서·가사본문·담당·음원영상URL·song/version/reference연결보존. fullsave의Title→T/slotKey/legacy inputMode/emptyasset/sourceTextcanonical재생성은발생해byte동일저장은아님. 증거root output/sermon-save-20261103/verification.json. privatebefore/after원문은/tmp에만보존. 운영소유권반환, BGV에rev300기준CAS재개통지. DB수정은운영적용완료이나 source migration및75a0dedd/5b11285f UI충돌후속은아직Pages미배포이며 e37ec12f와구분한다.
+
+## 2026-11-03 최신 코드·테스트 동시 유지 운영 규칙
+
+AGENTS.md와 docs/cloud-development.md에 명시: 사용자에게 routine git pull이나
+fixture 갱신을 맡기지 않고 담당이 시작/재개/공동배포 후 최신 main을 안전하게
+조율한다. 승인 변경·계약·fixture/기대값을 같은 변경에 반영하고 focused 검사를
+즉시 실행한다. dirty/미저장 입력 보존, 근거 없는 기대값 완화 금지, final gate
+범위 동결과 exact-SHA 공개 검증 유지. 자동 강제 새로고침이나 일정 자동화 추가 아님.
+
+## 2026-11-03 준비된 후속 공동 배포 후보
+
+Root FIFO 2b44bc1569a24875973aad9553eb12b4, branch codex/ready-followups.
+동결 구성: inline 충돌 비교/timeout 안내(75a0dedd,5b11285f), 운영 적용된
+ID검사cache 소스·검증(bcb04765), 최신코드/테스트 운영규칙(88f5bcd8),
+비상모드(b66dadab+f2014f9e), 제목모핑1초(93e593cc), 파일불러오기 안내
+간소화(85f69a31). 이전 글꼴 d5fb8140과 통합 후 양엔진 scoped checks,
+새 inline 실제충돌 회귀, font cache72cases, runtime/solid/governance PASS.
+final gate 이후 범위 추가 금지. 운영 DB 신규쓰기/실재생/송출/인쇄 없음.
+필수4shard·동일SHA main/Pages·공개파일/UI 검증 전 완료 보고 금지.
