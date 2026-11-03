@@ -1871,3 +1871,7 @@ span.presenter-announcement-paren,
 .presenter-slide--on-fire .presenter-scripture-reading-version { font-size: calc(var(--presenter-scripture-reading-ref-size) * .78); }
 
 .presenter-output-root.no-chromakey .presenter-slide--union-starlight { background: transparent; }
+
+/* Keep the union frame opaque below the incoming fade to avoid a black dip. */
+.presenter-output-root.has-calm-dissolve.is-transitioning > .presenter-output-layer.is-exiting { opacity: 1; z-index: 2; }
+.presenter-output-root.has-calm-dissolve.is-transitioning > .presenter-output-layer.is-active { z-index: 3; }

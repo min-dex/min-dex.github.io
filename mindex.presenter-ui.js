@@ -809,8 +809,12 @@ function presenterUnionBlankKind(slide, options = {}) {
     || presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE ? "praise" : "service";
 }
 
-function presenterOutputTransitionTiming(root, frameState = {}, videoEndFade = false) {
+function presenterOutputTransitionTiming(root, frameState = {}, videoEndFade = false, nextLayer = null) {
   const calm = Boolean(frameState.calmDissolve);
+  const surface = nextLayer?.querySelector(".presenter-slide") || nextLayer;
+  const opaque = surface && (surface.matches(".presenter-slide--image, .presenter-slide--video")
+    || !["transparent", "rgba(0, 0, 0, 0)"].includes(getComputedStyle(surface).backgroundColor));
+  root.classList.toggle("has-calm-dissolve", Boolean(calm && opaque));
   root.style.setProperty("--presenter-dissolve-duration", calm ? "800ms" : "150ms");
   root.style.setProperty("--presenter-video-end-dissolve-duration", calm ? "1000ms" : "500ms");
   root.style.setProperty("--presenter-dissolve-easing", calm ? "ease-in-out" : "ease");

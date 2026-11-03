@@ -2904,7 +2904,7 @@ function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState =
   // Blending video pixels into the key color creates unkeyed intermediate colors.
   const videoEndFade = Boolean(frameState.videoEndFade && frameState.noChromakey && !frameState.blackoutOutput && !frameState.blankOutput);
   const animated = videoEndFade || presenterOutputShouldAnimateFrameTransition(root, frameState);
-  const { calm, transitionClearDelay, transitionEntryDelay } = presenterOutputTransitionTiming(root, frameState, videoEndFade);
+  const { calm, transitionClearDelay, transitionEntryDelay } = presenterOutputTransitionTiming(root, frameState, videoEndFade, nextLayer);
   const swap = () => {
     if (token !== presenterOutputRenderState.token) return;
     const startCrossMorph = preparePresenterServiceBlankCrossMorph(root, activeLayer, nextLayer);

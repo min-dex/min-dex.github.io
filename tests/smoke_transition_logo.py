@@ -1,4 +1,6 @@
 """Offline logo origin/reveal contract; never opens native output/fullscreen."""
+import io
+from PIL import Image
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 
@@ -106,7 +108,7 @@ def main():
 
                   stage.remove();
                   const dissolve=document.createElement('div');dissolve.className='presenter-output-root no-chromakey';
-                  dissolve.innerHTML='<div class="presenter-output-layer is-active">before</div><div class="presenter-output-layer is-next">after</div>';
+                  dissolve.innerHTML='<div class="presenter-output-layer is-active" style="background:white">before</div><div class="presenter-output-layer is-next" style="background:white">after</div>';
                   document.body.append(dissolve);
                   const [previous,following]=dissolve.children;
                   check(getComputedStyle(previous).opacity==='1','initial outgoing visibility');
@@ -116,16 +118,29 @@ def main():
                   check(!following.classList.contains('is-entering'),'calm incoming frame must not wait for outgoing frame');
                   check(getComputedStyle(previous).transitionDuration==='0.8s' && getComputedStyle(following).transitionDuration==='0.8s','both frames use 800ms');
                   const transitions=[...previous.getAnimations(),...following.getAnimations()];
-                  check(transitions.length===2,'both outgoing and incoming opacity must animate');
+                  check(previous.getAnimations().length===0&&following.getAnimations().length===1,'only incoming opacity must animate');
                   transitions.forEach(animation=>{animation.pause();animation.currentTime=400;});
                   await new Promise(requestAnimationFrame);
-                  check(Number(getComputedStyle(previous).opacity)>.2 && Number(getComputedStyle(following).opacity)>.2,'crossfade midpoint retains both frames');
-                  check(presenterOutputTransitionTiming(dissolve,calmState,true).transitionClearDelay===1060,'video end retains frame for full one-second dissolve');
+                  check(getComputedStyle(previous).opacity==='1' && Number(getComputedStyle(following).opacity)>.2,'outgoing stays fully opaque at midpoint');
+                  check(Number(getComputedStyle(following).zIndex)>Number(getComputedStyle(previous).zIndex),'incoming must cover outgoing');
+                  check(presenterOutputTransitionTiming(dissolve,calmState,true,following).transitionClearDelay===1060,'video end retains frame for full one-second dissolve');
+                  following.style.background='transparent';presenterOutputTransitionTiming(dissolve,calmState,false,following);
+                  check(!dissolve.classList.contains('has-calm-dissolve'),'transparent lyric layers must retain their text crossfade');
                   const regular=presenterOutputFrameStateForSlide({type:'lyrics'}, {serviceId:'regular',chromakey:false});
                   check(!regular.calmDissolve && presenterOutputTransitionTiming(dissolve,regular).transitionClearDelay===260,'other services keep existing timing');
                   transitions.forEach(animation=>animation.cancel());dissolve.remove();
                   return 'PASS payload, origin, reveal progress, cache, chromakey, safety, default and thumbnails';
                 }""")
+                page.evaluate("""async()=>{
+                  const r=document.createElement('div');r.id='brightness-check';r.className='presenter-output-root no-chromakey';r.style.cssText='position:fixed;inset:0;width:1920px;height:1080px;transform:none;z-index:100001;background:black';
+                  r.innerHTML='<div class="presenter-output-layer is-active" style="background:white"></div><div class="presenter-output-layer is-next" style="background:white"></div>';document.body.append(r);
+                  activatePresenterOutputLayer(r,r.children[0],r.children[1],{cleanOutput:true,noChromakey:true,calmDissolve:true});
+                  await new Promise(requestAnimationFrame);await new Promise(requestAnimationFrame);
+                  r.children[1].getAnimations().forEach(a=>{a.pause();a.currentTime=400});await new Promise(requestAnimationFrame);
+                }""")
+                pixel=Image.open(io.BytesIO(page.screenshot())).convert('RGB').getpixel((960,540))
+                assert min(pixel)>=250, ('white-to-white darkened at midpoint',engine,pixel)
+                page.evaluate("document.getElementById('brightness-check').remove()")
                 page.emulate_media(reduced_motion="reduce")
                 assert page.evaluate("getComputedStyle(document.querySelector('#transition-test img')).animationName") == "none"
                 print(engine, result)

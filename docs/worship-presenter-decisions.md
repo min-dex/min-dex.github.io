@@ -5676,3 +5676,8 @@ and ordinary black text frames receive the fallback without saving song content.
 ## Union instrumental labels ·2026-11-03
 
 Union instrumental blanks retain the same upper song title and lower white ON/cross/FIRE footer as lyrics. They remain lyric-free and keep BGV continuity. Trailing transition blanks and other services retain their prior blank behavior.
+
+
+## Union dissolve brightness preservation ·2026-11-04
+
+For service99df only, an opaque incoming surface keeps the outgoing frame fully opaque below it. Transparent lyric layers retain their text crossfade above the unchanged shared video/background, so outgoing lyrics do not remain fully visible beneath the new lyrics. Only the incoming frame fades in, retaining800ms ordinary and1000ms video-end durations. This supersedes simultaneous outgoing/incoming opacity changes, which exposed the black stage at mid-transition. Other services, chromakey, blackout, exclusions and layer cleanup retain their prior rules. Browser regression samples actual white-to-white pixels at the transition midpoint.
