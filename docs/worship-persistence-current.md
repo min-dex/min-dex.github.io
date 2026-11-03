@@ -568,3 +568,13 @@ Title→T and empty asset shapes; these are not claimed byte-identical row stora
 Source: `migrations/2026-11-03-state-alias-guard-cache.sql`. Explicit opt-in,
 rollback verification: `tests/fixtures/state-alias-cache-verification.sql`.
 This already-applied operational repair is separate from web Pages publication.
+
+The original cache repair omitted its existing `mindex_single_writer` caller.
+Explicit user-approved SELECT plus a role-specific SELECT RLS policy restores
+only that caller's already-authorized derived mapping read. It has no table
+write grant; anon/authenticated remain blocked and mapping stays invoker-rights.
+A real create→save(revision2)→get RPC test succeeded inside ROLLBACK. Independent
+post-rollback lookup returned no fixture, and record/issued-ID/receipt counts plus
+allocation-counter hash matched the pre-test values. The initial SET ROLE test
+was rejected and rolled back; validation uses the real SECURITY DEFINER RPC path
+instead, without changing role memberships.

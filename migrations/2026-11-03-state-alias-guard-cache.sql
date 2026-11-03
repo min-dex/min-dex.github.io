@@ -7,6 +7,19 @@ create table if not exists mindex_single_song.state_id_alias_cache (
 );
 alter table mindex_single_song.state_id_alias_cache enable row level security;
 revoke all on mindex_single_song.state_id_alias_cache from public,anon,authenticated;
+-- The existing song RPC owner can already read source records and execute the
+-- mapping. Give it only the equivalent derived read; never public table access.
+do $writer$
+begin
+ if not has_table_privilege('mindex_single_writer','mindex_single_song.records','SELECT')
+ or not has_function_privilege('mindex_single_writer','mindex_single_song.id_alias_mapping()','EXECUTE')
+ then raise exception 'EXISTING_WRITER_AUTHORITY_REQUIRED'; end if;
+ if not exists(select from pg_policy where polrelid='mindex_single_song.state_id_alias_cache'::regclass
+   and polname='state_alias_writer_read') then
+  execute 'create policy state_alias_writer_read on mindex_single_song.state_id_alias_cache for select to mindex_single_writer using(true)';
+ end if;
+end $writer$;
+grant select on mindex_single_song.state_id_alias_cache to mindex_single_writer;
 delete from mindex_single_song.state_id_alias_cache;
 insert into mindex_single_song.state_id_alias_cache
  select distinct a,r.id from mindex_single_song.records r

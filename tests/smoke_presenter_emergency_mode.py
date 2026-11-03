@@ -1,3 +1,5 @@
+from pathlib import Path
+import tempfile
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 
@@ -77,7 +79,7 @@ def main():
                   return true;
                 }""")
                 if engine == 'chromium':
-                    page.screenshot(path='/private/tmp/mindex-emergency-mode-preview.png')
+                    page.screenshot(path=str(Path(tempfile.gettempdir()) / 'mindex-emergency-mode-preview.png'))
                 page.evaluate("renderPresenterOutput({...emergencyLivePayload,emergencyMode:false},{animate:false})")
                 page.wait_for_selector('#presenterOutputRoot.no-chromakey:not(.is-emergency-mode) .presenter-slide--lyrics')
                 print(engine, 'PASS real output on/off, preview parity and live-only button state')
