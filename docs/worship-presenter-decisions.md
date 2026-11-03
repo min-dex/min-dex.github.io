@@ -5563,3 +5563,11 @@ Video input names and their existing transport controls stay above the slide gri
 matching audio placement. Only deck controls use the side rail. Preserve the same
 DOM controls, acknowledged output ownership, clocks and disabled waiting state.
 No playback or stored worship data changes.
+
+
+## Preview/output geometry parity ·2026-11-03
+
+Preview canvases use the same aspect-preserving fit as output. Remove the extra
+one-pixel overscan, which enlarged and cropped preview content relative to output.
+Keep centered 16:9 composition through sidebar replacement and fractional resize;
+retain existing font fitting, playback, output ownership and stored slide content.

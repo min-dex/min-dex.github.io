@@ -2115,13 +2115,8 @@ function presenterPreviewScaleForBox(width, height, stageWidth = 1920, stageHeig
   if (!Number.isFinite(boxWidth) || !Number.isFinite(boxHeight) || boxWidth <= 0 || boxHeight <= 0) {
     return fittedScale;
   }
-  // A transformed 1920x1080 stage can be rasterized one device pixel short at
-  // fractional scales. Overscan by one CSS pixel so its own paint always reaches
-  // the clipped preview edge rather than exposing the parent backing.
-  return Math.min(1, Math.max(
-    (boxWidth + 1) / stageWidth,
-    (boxHeight + 1) / stageHeight,
-  ));
+  // Match the output fit exactly; overscan changes scale and crops preview edges.
+  return fittedScale;
 }
 
 function applyPresenterOutputViewportScale(root = document.getElementById("presenterOutputRoot")) {
