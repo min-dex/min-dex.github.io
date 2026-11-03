@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261103-calm-dissolve-thumbnails",
+  "version": "20261103-instrumental-labels",
   "options": {
     "compress": false,
     "mangle": {
