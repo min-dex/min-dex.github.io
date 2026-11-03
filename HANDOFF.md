@@ -1630,3 +1630,11 @@ pending; no operational writes, playback, output or printing were performed.
 ## 2026-11-03 ON FIRE 설교 저장 장애 해결 (운영 적용 완료)
 
 사용자 관리자점검·원인수정·제목저장 승인 후 Supabase로그에서 SQLSTATE57014 context가 mindex_state_write_v1의 id_alias_mapping 생성임을 확인. records1659개payload에서previousIds60개를 매복구본쓰기마다 생성하던 병목. private state_id_alias_cache + records insert/update/delete trigger 및 기존mappingAPI의동일결과캐시를 적용. 원예배/곡데이터직접SQL수정없음, anon/authenticated읽기권한0/기존공개mapping권한0. rollback시험·commit시험에서기존alias결과동일/동기화3종PASS, 1MiBguard17.911ms. 기존UIatomic으로 It's NEW/이태엽목사 revision300저장, 독립RPC+공개화면PASS. ID·순서·가사본문·담당·음원영상URL·song/version/reference연결보존. fullsave의Title→T/slotKey/legacy inputMode/emptyasset/sourceTextcanonical재생성은발생해byte동일저장은아님. 증거root output/sermon-save-20261103/verification.json. privatebefore/after원문은/tmp에만보존. 운영소유권반환, BGV에rev300기준CAS재개통지. DB수정은운영적용완료이나 source migration및75a0dedd/5b11285f UI충돌후속은아직Pages미배포이며 e37ec12f와구분한다.
+
+## 2026-11-03 최신 코드·테스트 동시 유지 운영 규칙
+
+AGENTS.md와 docs/cloud-development.md에 명시: 사용자에게 routine git pull이나
+fixture 갱신을 맡기지 않고 담당이 시작/재개/공동배포 후 최신 main을 안전하게
+조율한다. 승인 변경·계약·fixture/기대값을 같은 변경에 반영하고 focused 검사를
+즉시 실행한다. dirty/미저장 입력 보존, 근거 없는 기대값 완화 금지, final gate
+범위 동결과 exact-SHA 공개 검증 유지. 자동 강제 새로고침이나 일정 자동화 추가 아님.
