@@ -35,7 +35,7 @@ async function main() {
     await once(server,'listening');
     app = await _electron.launch({executablePath:desktop,args:['--no-first-run'],env:{...process.env,MINDEX_ISOLATED_TEST:'1',MINDEX_QA_RTMPS_PORT:String(server.address().port),MINDEX_QA_RTMPS_CA:file('qa.pem')}});
     await app.firstWindow();
-    assert(await app.evaluate(({app}) => require('node:fs').existsSync(require('node:path').join(app.getPath('userData'),'..','sessionData')) && !!globalThis.__mindexTestIsolation?.networkBlocked), 'Requires isolated QA package');
+    assert(await app.evaluate(({app}) => app.getPath('userData').includes('mindex-isolated-') && !!globalThis.__mindexTestIsolation?.networkBlocked), 'Requires isolated QA package');
     const opened = app.waitForEvent('window');
     await app.evaluate(({Menu})=>Menu.getApplicationMenu().items.find(x=>x.label==='방송').submenu.items[0].click());
     const panel = await opened;
