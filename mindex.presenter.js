@@ -2920,7 +2920,7 @@ function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState =
         const frame = nodes[0].parentElement;
         const overlay = document.createElement("div");
         overlay.className = "presenter-song-position-overlay";
-        overlay.style.color = getComputedStyle(nodes[0]).color;
+        overlay.style.color = getComputedStyle(nodes[0]).color; overlay.style.fontFamily = getComputedStyle(nodes[0]).fontFamily;
         activeLayer.querySelectorAll(selector).forEach(node => node.remove());
         overlay.append(...nodes);
         root.append(overlay);

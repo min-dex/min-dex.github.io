@@ -51,7 +51,15 @@ try:
       }
       probe.remove();document.fonts.delete(expected);
      }
-     const root=document.createElement('div');root.className='presenter-output-root';document.body.append(root);if(!getComputedStyle(root).fontFamily.startsWith('\"Mindex Presenter\"'))throw Error('Other service font changed');root.innerHTML=renderPresenterSlideFrame({type:'lyrics',elementType:'praise',layout:'lower_bar_text',text:'찬양'},{noChromakey:true,serviceId:'99df9e1b-1716-41fb-9ea0-f5ca4c99ee45'});if(!getComputedStyle(root.firstElementChild).fontFamily.startsWith('Paperlogy'))throw Error('Union font missing');root.innerHTML=renderPresenterSlideFrame({type:'lyrics',elementType:'praise',layout:'lower_bar_text',text:'찬양'},{noChromakey:false,serviceId:'99df9e1b-1716-41fb-9ea0-f5ca4c99ee45'});if(!getComputedStyle(root.firstElementChild).fontFamily.startsWith('Paperlogy'))throw Error('Union caption font missing');root.innerHTML=renderPresenterSlideFrame({type:'lyrics',elementType:'praise',layout:'lower_bar_text',text:'찬양'},{noChromakey:true,serviceId:'another'});if(getComputedStyle(root.firstElementChild).fontFamily.includes('Paperlogy'))throw Error('Union font leaked');root.remove();
+     const root=document.createElement('div');root.className='presenter-output-root';document.body.append(root);if(!getComputedStyle(root).fontFamily.startsWith('\"Mindex Presenter\"'))throw Error('Other service font changed');root.innerHTML=renderPresenterSlideFrame({type:'lyrics',elementType:'praise',layout:'lower_bar_text',text:'찬양'},{noChromakey:true,serviceId:'99df9e1b-1716-41fb-9ea0-f5ca4c99ee45'});if(!getComputedStyle(root.firstElementChild).fontFamily.startsWith('Paperlogy'))throw Error('Union font missing');
+     const lyric={type:'lyrics',elementType:'praise',layout:'lower_bar_text',text:'찬양',songPosition:{title:'시험',labels:['V','C'],index:0}};
+     const frame=renderPresenterSlideFrame(lyric,{noChromakey:true,serviceId:'99df9e1b-1716-41fb-9ea0-f5ca4c99ee45'});
+     root.innerHTML='<div class="presenter-output-layer is-active">'+frame+'</div><div class="presenter-output-layer is-next">'+frame+'</div>';
+     const [active,next]=root.children;active.dataset.songPositionKey=next.dataset.songPositionKey='same';
+     activatePresenterOutputLayer(root,active,next,{cleanOutput:true,noChromakey:true},presenterOutputRenderState.token);
+     const overlay=root.querySelector('.presenter-song-position-overlay');if(!overlay||!getComputedStyle(overlay.querySelector('.presenter-lyric-song-name')).fontFamily.startsWith('Paperlogy'))throw Error('Portal metadata lost scoped font');
+     root._restoreSongPosition?.();
+     root.innerHTML=renderPresenterSlideFrame({type:'lyrics',elementType:'praise',layout:'lower_bar_text',text:'찬양'},{noChromakey:false,serviceId:'99df9e1b-1716-41fb-9ea0-f5ca4c99ee45'});if(!getComputedStyle(root.firstElementChild).fontFamily.startsWith('Paperlogy'))throw Error('Union caption font missing');root.innerHTML=renderPresenterSlideFrame({type:'lyrics',elementType:'praise',layout:'lower_bar_text',text:'찬양'},{noChromakey:true,serviceId:'another'});if(getComputedStyle(root.firstElementChild).fontFamily.includes('Paperlogy'))throw Error('Union font leaked');root.remove();
      return checks;
     }''',records)
     assert checks==72
