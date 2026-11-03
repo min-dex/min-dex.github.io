@@ -815,6 +815,11 @@ function presenterOutputTransitionTiming(root, frameState = {}, videoEndFade = f
   const opaque = surface && (surface.matches(".presenter-slide--image, .presenter-slide--video")
     || !["transparent", "rgba(0, 0, 0, 0)"].includes(getComputedStyle(surface).backgroundColor));
   root.classList.toggle("has-calm-dissolve", Boolean(calm && opaque));
+  const previous = root.querySelector(":scope > .presenter-output-layer.is-active .presenter-slide");
+  const pair = previous && surface && ((previous.matches(".presenter-slide--service-design") && surface.matches(".presenter-slide--service-design"))
+    || (previous.matches(".presenter-slide--image") && surface.matches(".presenter-slide--image")));
+  root.classList.toggle("has-calm-white-pair", Boolean(calm && !frameState.emergencyMode && pair));
+
   root.style.setProperty("--presenter-dissolve-duration", calm ? "800ms" : "150ms");
   root.style.setProperty("--presenter-video-end-dissolve-duration", calm ? "1000ms" : "500ms");
   root.style.setProperty("--presenter-dissolve-easing", calm ? "ease-in-out" : "ease");

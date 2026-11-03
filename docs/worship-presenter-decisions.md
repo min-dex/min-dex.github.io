@@ -5691,3 +5691,5 @@ must not silently select/create a different song. Applying a resolved first line
 retains the canonical linked song identity and normal output title. Search aliases
 never populate display subtitles, rewrite lyrics, rename versions or alter timings.
 See `firstline-subtitle-audit-20261104.md` for the read-only catalog scope and limits.
+
+For this union service, consecutive authored white-design frames (including scripture reading) and consecutive still-image frames also use this brightness-preserving dissolve. Other scripture/media exclusions remain unchanged; keyed/emergency/safety frames and video transitions retain their guards.

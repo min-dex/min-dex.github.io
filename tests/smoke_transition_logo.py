@@ -128,6 +128,15 @@ def main():
                   check(!dissolve.classList.contains('has-calm-dissolve'),'transparent lyric layers must retain their text crossfade');
                   const regular=presenterOutputFrameStateForSlide({type:'lyrics'}, {serviceId:'regular',chromakey:false});
                   check(!regular.calmDissolve && presenterOutputTransitionTiming(dissolve,regular).transitionClearDelay===260,'other services keep existing timing');
+                  for(const kind of ['service-design','image']) {
+                    const pair=document.createElement('div');pair.className='presenter-output-root no-chromakey';
+                    pair.innerHTML=`<div class="presenter-output-layer is-active"><section class="presenter-slide presenter-slide--${kind}" style="background:white"></section></div><div class="presenter-output-layer is-next"><section class="presenter-slide presenter-slide--${kind}" style="background:white"></section></div>`;document.body.append(pair);
+                    activatePresenterOutputLayer(pair,pair.children[0],pair.children[1],{...calmState,scriptureReadingOutput:kind==='service-design'});
+                    check(pair.classList.contains('is-transitioning')&&pair.classList.contains('has-calm-white-pair'),'white pair cut instead of dissolve');
+                    check(getComputedStyle(pair.children[1]).transitionDuration==='0.8s','white pair timing');
+                    check(!presenterOutputShouldAnimateFrameTransition(pair,{...calmState,cleanOutput:false}),'key white-pair blend');
+                    check(!presenterOutputShouldAnimateFrameTransition(pair,{...calmState,blackoutOutput:true}),'safety white-pair blend');pair.remove();
+                  }
                   transitions.forEach(animation=>animation.cancel());dissolve.remove();
                   return 'PASS payload, origin, reveal progress, cache, chromakey, safety, default and thumbnails';
                 }""")

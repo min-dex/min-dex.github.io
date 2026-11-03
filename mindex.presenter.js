@@ -2903,8 +2903,8 @@ function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState =
   if (!activeLayer || !nextLayer) return;
   // Blending video pixels into the key color creates unkeyed intermediate colors.
   const videoEndFade = Boolean(frameState.videoEndFade && frameState.noChromakey && !frameState.blackoutOutput && !frameState.blankOutput);
-  const animated = videoEndFade || presenterOutputShouldAnimateFrameTransition(root, frameState);
   const { calm, transitionClearDelay, transitionEntryDelay } = presenterOutputTransitionTiming(root, frameState, videoEndFade, nextLayer);
+  const animated = videoEndFade || presenterOutputShouldAnimateFrameTransition(root, frameState);
   const swap = () => {
     if (token !== presenterOutputRenderState.token) return;
     const startCrossMorph = preparePresenterServiceBlankCrossMorph(root, activeLayer, nextLayer);
@@ -3026,6 +3026,7 @@ function presenterOutputFrameKey(payload = {}, slide = null, frameState = {}) {
 function presenterOutputShouldAnimateFrameTransition(root, frameState = {}) {
   if (!frameState.cleanOutput || frameState.formBackground) return false;
   if (frameState.videoOutput) return false;
+  if (frameState.calmDissolve && !frameState.scoreOutput && !frameState.blankOutput && !frameState.blackoutOutput && !frameState.emergencyMode && root?.classList?.contains("has-calm-white-pair")) return true;
   // Self-contained media must not blend with the previous slide's visual theme.
   if (root?.querySelector?.(":scope > .presenter-output-layer :is([data-slide-layout='media'], [data-slide-layout='file'])")) return false;
   if (frameState.scoreOutput) return false;
