@@ -49,3 +49,4 @@ module.exports = function openPanel(parent) {
     ? {action:'allow',overrideBrowserWindowOptions:{parent:panel,webPreferences:{sandbox:true,preload:undefined}}} : {action:'deny'});
   panel.loadFile(entry).catch(() => panel?.close());
 };
+module.exports.isActive = () => Boolean(owner);

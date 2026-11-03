@@ -197,7 +197,7 @@ function configureAutoUpdater() {
     updateController = createUpdateController({
       updater: autoUpdater,
       enabled: updatesEnabled,
-      presenterOpen: () => Boolean(presenterWindow && !presenterWindow.isDestroyed()),
+      presenterOpen: () => Boolean(presenterWindow && !presenterWindow.isDestroyed()) || require('./youtube-window').isActive(),
       notify: (state) => {
         if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send("mindex:update-state", state);
       },
