@@ -266,10 +266,10 @@
   animation: none;
 }
 .presenter-output-root.is-transitioning > .presenter-output-layer {
-  transition: opacity 150ms ease;
+  transition: opacity var(--presenter-dissolve-duration, 150ms) var(--presenter-dissolve-easing, ease);
 }
 .presenter-output-root.is-video-end-transition > .presenter-output-layer {
-  transition: opacity 500ms ease;
+  transition: opacity var(--presenter-video-end-dissolve-duration, 500ms) var(--presenter-dissolve-easing, ease);
 }
 .presenter-output-root.no-chromakey {
   --presenter-output-bg: #050807;

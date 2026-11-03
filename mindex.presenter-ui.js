@@ -791,3 +791,11 @@ function presenterUnionBlankKind(slide, options = {}) {
   return slide.praiseTransitionBlank || slide.songInstrumental || isPresenterMainPraiseSlide(slide)
     || presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE ? "praise" : "service";
 }
+
+function presenterOutputTransitionTiming(root, frameState = {}, videoEndFade = false) {
+  const calm = Boolean(frameState.calmDissolve);
+  root.style.setProperty("--presenter-dissolve-duration", calm ? "800ms" : "150ms");
+  root.style.setProperty("--presenter-video-end-dissolve-duration", calm ? "1000ms" : "500ms");
+  root.style.setProperty("--presenter-dissolve-easing", calm ? "ease-in-out" : "ease");
+  return { calm, transitionClearDelay: videoEndFade ? (calm ? 1060 : 520) : (calm ? 860 : 260), transitionEntryDelay: calm ? 800 : 220 };
+}

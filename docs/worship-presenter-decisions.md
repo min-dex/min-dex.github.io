@@ -5639,3 +5639,10 @@ Only transitions between a white service title cross and its white blank cross a
 ## Union accent foreground boundary ·2026-11-03
 
 The clean praise footer ON/cross/FIRE uses white, matching white praise-note headings and black-stage blank crosses. Red service artwork accents remain on the authored white service frames and white default blank; the praise footer no longer uses red over footage or a dark stage. Song content, BGV and the footer layout/typeface remain unchanged.
+
+## Union calm dissolve ·2026-11-03
+
+Service 99df clean output crossfades both layers together over 800ms (1000ms
+for video end). Other services keep their existing timing. Chromakey hard cuts,
+reduced motion and safety states retain their guards. This adds no praise title
+morph, changes no stored lyrics/forms, and does not restart background media.

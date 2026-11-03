@@ -2748,6 +2748,7 @@ function presenterOutputFrameStateForSlide(slide, payload = {}) {
   const showBackground = Boolean(!unionBlankKind && !emergencyMode && !blackoutOutput && backgroundImages.length && cleanOutput && presenterSlideUsesServiceBackground(slide));
   return {
     cleanOutput,
+    calmDissolve: payload?.serviceId === "99df9e1b-1716-41fb-9ea0-f5ca4c99ee45",
     emergencyMode,
     mediaOutput: Boolean(!generatedReadyOutput && (slide?.pptx?.url || (presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.MEDIA
       && [PRESENTER_ELEMENT_TYPES.IMAGE, PRESENTER_ELEMENT_TYPES.VIDEO].includes(presenterSlideElementType(slide))))),
@@ -2902,8 +2903,7 @@ function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState =
   // Blending video pixels into the key color creates unkeyed intermediate colors.
   const videoEndFade = Boolean(frameState.videoEndFade && frameState.noChromakey && !frameState.blackoutOutput && !frameState.blankOutput);
   const animated = videoEndFade || presenterOutputShouldAnimateFrameTransition(root, frameState);
-  const transitionClearDelay = videoEndFade ? 520 : 260;
-  const transitionEntryDelay = 220;
+  const { calm, transitionClearDelay, transitionEntryDelay } = presenterOutputTransitionTiming(root, frameState, videoEndFade);
   const swap = () => {
     if (token !== presenterOutputRenderState.token) return;
     const startCrossMorph = preparePresenterServiceBlankCrossMorph(root, activeLayer, nextLayer);
@@ -2947,7 +2947,7 @@ function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState =
     activeLayer.classList.remove("is-active");
     activeLayer.classList.remove("is-next");
     nextLayer.classList.add("is-active");
-    if (animated && !videoEndFade) nextLayer.classList.add("is-entering");
+    if (animated && !videoEndFade && !calm) nextLayer.classList.add("is-entering");
     nextLayer.classList.remove("is-next");
     // Keep composited media layers attached while swapping their visibility.
     applyPresenterOutputFrameState(root, frameState);

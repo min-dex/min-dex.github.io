@@ -80,6 +80,25 @@ def main():
                   const withVideo={...praiseBlank,autoTrailingBlank:false,songInstrumental:true,backgroundVideo:'tests/fixtures/praise-background.webm'};
                   check(!presenterUnionBlankKind(withVideo,options),'instrumental video replaced by cross');
                   stage.remove();
+                  const dissolve=document.createElement('div');dissolve.className='presenter-output-root no-chromakey';
+                  dissolve.innerHTML='<div class="presenter-output-layer is-active">before</div><div class="presenter-output-layer is-next">after</div>';
+                  document.body.append(dissolve);
+                  const [previous,following]=dissolve.children;
+                  check(getComputedStyle(previous).opacity==='1','initial outgoing visibility');
+                  const calmState=presenterOutputFrameStateForSlide({type:'lyrics',text:'fixture'},union);
+                  activatePresenterOutputLayer(dissolve,previous,following,calmState);
+                  await new Promise(requestAnimationFrame);await new Promise(requestAnimationFrame);
+                  check(!following.classList.contains('is-entering'),'calm incoming frame must not wait for outgoing frame');
+                  check(getComputedStyle(previous).transitionDuration==='0.8s' && getComputedStyle(following).transitionDuration==='0.8s','both frames use 800ms');
+                  const transitions=[...previous.getAnimations(),...following.getAnimations()];
+                  check(transitions.length===2,'both outgoing and incoming opacity must animate');
+                  transitions.forEach(animation=>{animation.pause();animation.currentTime=400;});
+                  await new Promise(requestAnimationFrame);
+                  check(Number(getComputedStyle(previous).opacity)>.2 && Number(getComputedStyle(following).opacity)>.2,'crossfade midpoint retains both frames');
+                  check(presenterOutputTransitionTiming(dissolve,calmState,true).transitionClearDelay===1060,'video end retains frame for full one-second dissolve');
+                  const regular=presenterOutputFrameStateForSlide({type:'lyrics'}, {serviceId:'regular',chromakey:false});
+                  check(!regular.calmDissolve && presenterOutputTransitionTiming(dissolve,regular).transitionClearDelay===260,'other services keep existing timing');
+                  transitions.forEach(animation=>animation.cancel());dissolve.remove();
                   return 'PASS payload, origin, reveal progress, cache, chromakey, safety, default and thumbnails';
                 }""")
                 page.emulate_media(reduced_motion="reduce")
