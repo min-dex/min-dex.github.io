@@ -1,3 +1,16 @@
+## 2026-11-03 Paperlogy self-hosted webfont candidate
+
+UI/Remote/default projection now use the pinned official Paperlogy WOFF2 faces
+100–900 with immutable hashes and preserved OFL. No local-font lookup/CDN; all
+11,172 modern Hangul syllables verified in every face. Explicit service reading/
+artwork/bulletin fonts retained. Scoped Chromium/WebKit: nine faces, 72 exact
+common/rare wrapping cases, cache across release changes, preload, 32 lyric-fit
+cases, meta typography and retained presenter fallback pass. Remote/runtime Node
+checks pass. Final required GitHub gate/Pages/public verification pending.
+Queue ticket fc8bc412ba6049fc82c33efe85056528 owned by codex/paperlogy-webfont.
+No worship/data writes in this source change; separate BGV readability file is
+prepared locally and operational replacement waits for root's 99df save-path repair.
+
 # MINDEX Current
 
 ## Current web checkpoint ·2026-10-24
