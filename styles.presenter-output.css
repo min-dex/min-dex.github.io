@@ -1818,7 +1818,7 @@ span.presenter-announcement-paren,
 .presenter-lyric-service-name {
   position: absolute; bottom: 4%; left: 5%; right: 5%; z-index: 2;
   display: flex; align-items: center; justify-content: center; gap: .8cqw;
-  color: #ae3a1d; font-size: 1.65cqw; font-weight: 600; letter-spacing: .09em;
+  color: #fff; font-size: 1.65cqw; font-weight: 600; letter-spacing: .09em;
   line-height: 1.25; pointer-events: none;
 }
 .presenter-lyric-service-name svg { width: 1.73cqw; height: 3.6cqw; fill: currentColor; flex: none; }
