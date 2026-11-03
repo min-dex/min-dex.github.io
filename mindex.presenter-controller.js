@@ -1,5 +1,12 @@
 function runPresenterAction(action, serviceId = state.selectedServiceId, options = {}) {
   const p = state.presenter;
+  if (action === "emergency") {
+    if (!presenterControllerIsLive(serviceId) || !p.slides.length) return;
+    p.emergencyMode = !p.emergencyMode;
+    publishPresenterState();
+    renderPresenterControlState(serviceId);
+    return;
+  }
   if (action === "blackout" || action === "transparent") {
     if (!presenterControllerIsLive(serviceId) || !p.slides.length) return;
     const mode = action === "transparent" ? "transparent" : "black";
@@ -385,6 +392,7 @@ function stopPresenterOutput(serviceId = state.presenter.serviceId) {
   state.presenter.pptxProgress = null;
   clearPresenterBoardSelection({ render: false });
   state.presenter.exitArmedAt = 0;
+  state.presenter.emergencyMode = false;
   state.presenter.safetyBlank = false;
   state.presenter.liveScripture = {
     ...state.presenter.liveScripture,
@@ -1118,6 +1126,7 @@ function preparePresenterService(serviceId = state.selectedServiceId) {
   const signature = presenterSlideBuildSourceSignature(serviceId);
   const slides = buildServicePresenterSlides(serviceId, signature);
   if (previousServiceId !== serviceId) {
+    state.presenter.emergencyMode = false;
     state.presenter.restorePayload = null;
     if (!state.serviceMusic.playing) {
       stopServiceMusicPlayback({ clearSource: true, mode: "manual", render: false });

@@ -5579,3 +5579,14 @@ as its footer cross. Apply by service identity in preview and output; preserve
 other services, chromakey and stored slide content. Lyric titles remain note-free.
 
 기도찬양(번호가 붙은 순서 포함)은 일반 찬양의 제목 장 규칙을 따른다. 자동 송폼의 제목 장에는 곡 제목을 표시하며, 지정 송폼은 T의 유무와 위치를 그대로 따른다.
+
+## Presenter emergency mode ·2026-11-03
+
+The live service screen-management panel offers a reversible 비상 모드 toggle.
+It uses the existing chromakey caption layout over pure black, without service
+artwork, lyric BGV, generated waiting loops or clean-layout decorations. Explicit
+video, image, score and file slides retain their media. Preview and output share
+the same derived view. Toggling preserves slide index, live scripture, authored
+content, drafts and audio; it does not save worship data. Safety black/transparent
+commands take precedence. The mode survives an acknowledged controller restore
+for the same live session and resets on stop or switching the output service.

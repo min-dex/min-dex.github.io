@@ -1584,6 +1584,7 @@ function presenterStatePayload(serviceId = state.presenter.serviceId) {
     transitionLogo: normalizePresenterTransitionLogo(serviceRawSourceRef(service).transitionLogo),
     presentationDesign: normalizePresenterServiceDesign(serviceRawSourceRef(service).presentationDesign),
     chromakey: serviceChromakey,
+    emergencyMode: Boolean(state.presenter.emergencyMode),
     outputTheme: presenterOutputTheme(service?.type_id),
     backgroundImage: backgroundImages[0] || "",
     backgroundImages,
@@ -1637,6 +1638,7 @@ function restorePresenterControllerSession() {
     payload.index,
   );
   state.presenter.pptxProgress = payload.pptxProgress || null;
+  state.presenter.emergencyMode = Boolean(payload.emergencyMode);
   state.presenter.safetyBlank = Boolean(payload.safetyBlank);
   state.presenter.safetyBlankMode = payload.safetyBlankMode === "transparent" ? "transparent" : "black";
   state.presenter.jumpDraft = "";
@@ -2554,6 +2556,7 @@ function normalizePresenterPayload(payload) {
     serviceTitle: payload?.serviceTitle || "",
     serviceDate: payload?.serviceDate || payload?.service_date || "",
     chromakey: Boolean(payload?.chromakey),
+    emergencyMode: Boolean(payload?.emergencyMode),
     transitionLogo: normalizePresenterTransitionLogo(payload?.transitionLogo),
     presentationDesign: normalizePresenterServiceDesign(payload?.presentationDesign),
     outputTheme: payload?.outputTheme || presenterOutputTheme(payload?.serviceType),
@@ -2644,9 +2647,9 @@ function renderPresenterOutput(payload, options = {}) {
   clearPresenterOutputAutoAdvanceTimer();
   const slides = Array.isArray(payload?.slides) ? payload.slides : [];
   const liveSlide = payload?.liveScripture?.active ? payload.liveScripture.slide : null;
-  const slide = payload?.safetyBlank
+  const slide = presenterEmergencySlideView(payload?.safetyBlank
     ? presenterSafetyBlankSlide(payload.safetyBlankMode)
-    : liveSlide || slides[clampPresenterIndex(payload?.index, slides.length)];
+    : liveSlide || slides[clampPresenterIndex(payload?.index, slides.length)], payload?.emergencyMode && !payload?.safetyBlank);
   const frameState = presenterOutputFrameStateForSlide(slide, payload);
   presenterTools.outputFrame(root, slide && !payload.safetyBlank ? presenterTools.key(payload.serviceId, payload.index, slide, !!liveSlide) : "");
   if (renderPresenterKeynoteHtmlOutput(root, payload)) return;
@@ -2724,7 +2727,23 @@ function presenterSlideUsesServiceBackground(slide) {
   ].includes(type) && Boolean(slide.elementType || ["title", "title-content", "title-assignee", "lyrics", "song-title", "scripture", "liturgical-body", "component"].includes(slide.type));
 }
 
+// A temporary view only: authored slides and service output settings stay intact.
+function presenterEmergencySlideView(slide, enabled = false) {
+  if (!enabled || !slide || String(slide.id || "").startsWith("presenter:safety-")) return slide;
+  const type = presenterSlideElementType(slide);
+  if (presenterSlideIsScoreLike(slide) || [PRESENTER_ELEMENT_TYPES.IMAGE, PRESENTER_ELEMENT_TYPES.VIDEO,
+    PRESENTER_ELEMENT_TYPES.FILE, PRESENTER_ELEMENT_TYPES.AUDIO].includes(type)) return slide;
+  const context = slide.scriptureContext === "reading" || slide.scriptureContext === "sermon" ? "sermon-chromakey"
+    : slide.scriptureContext === "citation" ? "citation-chromakey" : slide.scriptureContext;
+  return normalizeChromakeyPresenterSlideLayout({ ...slide, outputContext: "chromakey",
+    scriptureContext: context, scriptureReadingFinal: false, suppressBackgroundImage: true,
+    noBackgroundImage: true, formBackgroundImage: "" });
+}
+
 function presenterOutputFrameStateForSlide(slide, payload = {}) {
+  const emergencyMode = Boolean(payload?.emergencyMode && !payload?.safetyBlank
+    && !String(slide?.id || "").startsWith("presenter:safety-"));
+  slide = presenterEmergencySlideView(slide, emergencyMode);
   const backgroundImages = slide?.formBackgroundImage
     ? [slide.formBackgroundImage] : presenterPayloadBackgroundImages(payload);
   const fallbackChromakey = Boolean(payload?.chromakey);
@@ -2738,9 +2757,10 @@ function presenterOutputFrameStateForSlide(slide, payload = {}) {
   const scriptureReadingOutput = slide?.scriptureContext === "reading";
   // A fullscreen blank stays inside the service visual system: retain the same
   // background while the cross draws over it. Chromakey remains background-free.
-  const showBackground = Boolean(!blackoutOutput && backgroundImages.length && cleanOutput && presenterSlideUsesServiceBackground(slide));
+  const showBackground = Boolean(!emergencyMode && !blackoutOutput && backgroundImages.length && cleanOutput && presenterSlideUsesServiceBackground(slide));
   return {
     cleanOutput,
+    emergencyMode,
     mediaOutput: Boolean(!generatedReadyOutput && (slide?.pptx?.url || (presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.MEDIA
       && [PRESENTER_ELEMENT_TYPES.IMAGE, PRESENTER_ELEMENT_TYPES.VIDEO].includes(presenterSlideElementType(slide))))),
     formBackground: Boolean(slide?.formBackgroundImage),
@@ -2750,7 +2770,7 @@ function presenterOutputFrameStateForSlide(slide, payload = {}) {
     scoreOutput,
     videoOutput,
     scriptureReadingOutput,
-    backgroundVideo: blackoutOutput ? "" : presenterSlideBackgroundVideoSource(slide, cleanOutput),
+    backgroundVideo: blackoutOutput || emergencyMode ? "" : presenterSlideBackgroundVideoSource(slide, cleanOutput),
     backgroundImage: backgroundImages[0] || "",
     backgroundImages,
     serviceType: payload?.serviceType || "",
@@ -2798,6 +2818,7 @@ function presenterFrameNormalizeOutputContext(value = "") {
 function presenterOutputFrameClassNames(frameState = {}) {
   return [
     frameState.noChromakey ? "no-chromakey" : "",
+    frameState.emergencyMode ? "is-emergency-mode" : "",
     frameState.mediaOutput ? "is-media-output" : "",
     frameState.showBackground ? "has-background" : "",
     frameState.formBackground ? "has-form-background" : "",
@@ -2816,7 +2837,7 @@ function presenterOutputFrameBackgroundStyle(frameState = {}) {
 }
 
 function commitPresenterOutputFrame(root, payload, slide, frameState, token, options = {}) {
-  const html = slide ? renderPresenterSlideFrame(slide, { noChromakey: frameState.noChromakey, serviceId: payload.serviceId, transitionLogo: payload.transitionLogo, presentationDesign: payload.presentationDesign }) : "";
+  const html = slide ? renderPresenterSlideFrame(slide, { noChromakey: frameState.noChromakey, emergencyMode: frameState.emergencyMode, serviceId: payload.serviceId, transitionLogo: payload.transitionLogo, presentationDesign: payload.presentationDesign }) : "";
   const activeImageSource = presenterSlideImageSource(slide);
   const frameKey = presenterOutputFrameKey(payload, slide, frameState);
   const commit = () => {
@@ -3013,6 +3034,7 @@ function presenterOutputFrameKey(payload = {}, slide = null, frameState = {}) {
     slide.outputContext || slide.output_context || "",
     frameState.noChromakey ? JSON.stringify(slide.songPosition || "clean") : "chromakey",
     frameState.blankOutput ? "blank" : "",
+    frameState.emergencyMode && !frameState.mediaOutput && !frameState.videoOutput && !frameState.scoreOutput ? "emergency" : "",
     frameState.backgroundImage || "",
     frameState.backgroundVideo || "",
     presenterMediaSourceIdentity(presenterSlideImageSource(slide)),
@@ -3464,6 +3486,8 @@ function applyPresenterOutputFrameState(root, frameState = {}) {
   document.body.classList.toggle("has-background", Boolean(frameState.showBackground));
   document.body.classList.toggle("is-blank", Boolean(frameState.blankOutput));
   root.classList.toggle("no-chromakey", Boolean(frameState.noChromakey));
+  root.classList.toggle("is-emergency-mode", Boolean(frameState.emergencyMode));
+  document.body.classList.toggle("is-emergency-mode", Boolean(frameState.emergencyMode));
   root.classList.toggle("is-media-output", Boolean(frameState.mediaOutput));
   root.classList.toggle("has-background", Boolean(frameState.showBackground));
   root.classList.toggle("has-form-background", Boolean(frameState.formBackground));
@@ -4177,6 +4201,7 @@ function presenterFullscreenSongTitleView(slide, options = {}) {
 }
 
 function renderPresenterSlideFrame(slide, options = {}) {
+  slide = presenterEmergencySlideView(slide, options.emergencyMode);
   slide = presenterFullscreenSongTitleView(slide, options);
   const design = presenterServiceDesignForSlide(slide, options);
   if (design) {
@@ -4251,7 +4276,7 @@ function renderPresenterSlideBody(slide, options = {}) {
   const layout = presenterSlideLayout(slide);
   const elementType = presenterSlideElementType(slide);
   if (slide?.type === "ready" && options.noChromakey) return renderPresenterFullscreenReadySlide(slide);
-  if (presenterSlideUsesGeneratedWaitingLoop(slide, options)) return renderPresenterGeneratedWaitingLoopSlide(slide);
+  if (!options.emergencyMode && presenterSlideUsesGeneratedWaitingLoop(slide, options)) return renderPresenterGeneratedWaitingLoopSlide(slide);
   if (elementType === PRESENTER_ELEMENT_TYPES.AUDIO) return "";
   if (layout === PRESENTER_SLIDE_LAYOUTS.MEDIA && elementType === PRESENTER_ELEMENT_TYPES.VIDEO) {
     if (options.staticVideoPreview) return renderPresenterStaticVideoPreviewSlide(slide);

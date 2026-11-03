@@ -1526,13 +1526,15 @@ function presenterPreviewBackgroundSource(source) {
 function renderPresenterSlideMiniPreview(slide, serviceId = state.presenter.serviceId) {
   const service = state.services.find((svc) => svc.id === serviceId);
   const serviceChromakey = presenterServiceUsesChromakey(service);
-  const previewSlide = normalizePresenterMiniPreviewSlide(slide, serviceChromakey);
+  const emergencyMode = state.presenter.serviceId === serviceId && Boolean(state.presenter.emergencyMode);
+  const previewSlide = presenterEmergencySlideView(normalizePresenterMiniPreviewSlide(slide, serviceChromakey), emergencyMode);
   const backgroundImages = presenterBackgroundSourcesForService(service, {
     includeChromakeyCleanSlides: presenterSlideOutputContext(previewSlide, serviceChromakey) === "clean",
   });
   const theme = presenterOutputTheme(service?.type_id);
   const frameState = presenterOutputFrameStateForSlide(previewSlide, {
     chromakey: serviceChromakey,
+    emergencyMode,
     backgroundImages,
     serviceType: service?.type_id || "",
     outputTheme: theme,
@@ -1557,7 +1559,7 @@ function renderPresenterSlideMiniPreview(slide, serviceId = state.presenter.serv
   return `
     <span class="${escapeAttr(outputClasses)}">
       <span class="${escapeAttr(canvasClasses)}" data-output-theme="${escapeAttr(theme)}" ${presenterBackgroundInkAttributes(frameState)}${backgroundStyle}>
-        ${renderPresenterSlideFrame(previewSlide, { noChromakey: frameState.noChromakey, serviceId: service?.id, previewStage: true, transitionLogo: serviceRawSourceRef(service).transitionLogo, presentationDesign: serviceRawSourceRef(service).presentationDesign })}
+        ${renderPresenterSlideFrame(previewSlide, { noChromakey: frameState.noChromakey, emergencyMode: frameState.emergencyMode, serviceId: service?.id, previewStage: true, transitionLogo: serviceRawSourceRef(service).transitionLogo, presentationDesign: serviceRawSourceRef(service).presentationDesign })}
       </span>
     </span>`;
 }
