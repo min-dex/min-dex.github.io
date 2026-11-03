@@ -7435,7 +7435,7 @@ async function runServiceSave(options, save) {
     console.warn("Worship save failed", { code: error?.code || error?.name || "UNKNOWN_SAVE_ERROR", message });
     // Silent saves suppress success notices, not errors needed to recover a draft.
     showToast(message, "error");
-    if (!options.silent && /REVISION_CONFLICT|ATOMIC_(?:RELOAD_REQUIRED|RETRY_COMMITTED_RELOAD_REQUIRED)/.test(String(error?.message || ""))) {
+    if ((!options.silent || options.reviewConflict) && /REVISION_CONFLICT|ATOMIC_(?:RELOAD_REQUIRED|RETRY_COMMITTED_RELOAD_REQUIRED)/.test(String(error?.message || ""))) {
       void openWorshipConflictReview(options.feedbackServiceId).catch(reviewError => console.warn("Could not open conflict review.", reviewError));
     }
     if (options.throwOnError) throw new Error(message);

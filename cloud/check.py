@@ -35,6 +35,7 @@ NODE_TESTS = (
     "test_worship_store.mjs",
     "test_worship_atomic_client.mjs",
     "test_service_save_routing.mjs",
+    "test_inline_conflict_review.mjs",
     "test_domain_boundaries.cjs",
     "test_form_input_normalization.cjs",
     "test_worship_form_model.cjs",

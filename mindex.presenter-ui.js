@@ -429,7 +429,7 @@ async function commitPresenterInlineInput(panel) {
     // A clean, unchanged editor can close immediately. Dirty/uncertain saves
     // still go through the normal journal and atomic retry path.
     const saved = !changed && !state.dirty.service && !state.saving
-      ? true : await saveService(serviceId, {silent:true, renderAfterSave:false});
+      ? true : await saveService(serviceId, {silent:true, renderAfterSave:false, reviewConflict:true});
     if (!saved) return false;
     const mounted = [...(refs.songList?.querySelectorAll('.svc-outline-editor') || [])].find(row => row.dataset.serviceId === serviceId && row.dataset.inlineItemId === itemId);
     if (mounted && JSON.stringify(presenterPreparationRenderedFields(mounted, service)) === snapshot) {

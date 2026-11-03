@@ -534,3 +534,11 @@ journal confirmation or atomic revision checks.
 An unchanged inline editor closes without a write only when the service is clean
 and no save is active. Dirty drafts and uncertain outcomes still use the normal
 save path; this is not a replacement for server acknowledgment.
+
+## Inline conflict review (2026-11-03)
+
+An explicit inline Save requests conflict review even when success toasts are
+quiet. Revision/reload-required conflicts open the existing comparison and
+archive-before-adopt flow instead of inviting repeated blind saves. Network
+errors retain the existing retry behavior; no automatic overwrite or baseline
+adoption is introduced.
