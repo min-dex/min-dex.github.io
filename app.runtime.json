@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261104-union-bright-dissolve",
+  "version": "20261104-bright-dissolve-ci-window",
   "options": {
     "compress": false,
     "mangle": {

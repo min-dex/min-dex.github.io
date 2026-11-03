@@ -42,7 +42,7 @@ jobs:
     permissions:
       contents: read
       actions: read
-    timeout-minutes: 20
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:

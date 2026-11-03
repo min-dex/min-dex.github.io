@@ -20,6 +20,7 @@ class PagesGate(unittest.TestCase):
         deploy = workflow['jobs']['deploy-pages']
         scope = workflow['jobs']['scope']
         self.assertEqual(check['needs'], 'scope')
+        self.assertEqual(check['timeout-minutes'], 40)
         self.assertEqual(scope['steps'][1]['run'], 'python3 cloud/check_scope.py')
         self.assertEqual(scope['steps'][2]['name'], 'Scope proof: ${{ steps.plan.outputs.signature }}')
         self.assertEqual(check['env']['MINDEX_CHECK_PROFILE'], '${{ needs.scope.outputs.profile }}')
