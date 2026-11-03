@@ -30,6 +30,24 @@ def run(browser, url, engine):
           throw Error('Existing artist must distinguish homonyms without changing IDs or records');
       } finally {state.songs=songs;}
     }""")
+    page.evaluate("""() => {
+      const host=document.createElement('div');
+      host.className='svc-board-subgroup-controls';
+      host.style.cssText='position:fixed;left:0;top:0';
+      host.innerHTML='<div class="svc-song-picker" role="listbox">'+
+        renderServiceSongPickerResult({id:'search-fixture',title:'채우소서',subtitle:'우리 연약함을 아시고',versions:[]},0)+'</div>';
+      document.body.append(host);
+      try {
+        for(const width of [1100,288]) {
+          host.style.width=width+'px';
+          const button=host.querySelector('button'),box=button.getBoundingClientRect();
+          if(box.right>host.getBoundingClientRect().right+1
+            || [...button.querySelectorAll('strong,span')].some(e=>e.scrollWidth>e.clientWidth+1))
+            throw Error('Song result must show its title and first line within available width: '+width);
+          if(width===1100 && box.width<=180) throw Error('Song result retains the obsolete narrow cap');
+        }
+      } finally {host.remove();}
+    }""")
     for width in (1440, 1024, 768, 390, 320):
         page.set_viewport_size({'width': width, 'height': 900})
         if width <= 560:
