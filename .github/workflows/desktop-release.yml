@@ -43,6 +43,9 @@ jobs:
           - platform: win
             os: windows-latest
     steps:
+      - name: Preserve source bytes on Windows
+        if: runner.os == 'Windows'
+        run: git config --global core.autocrlf false
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
@@ -62,6 +65,24 @@ jobs:
         run: pnpm electron:test:${{ matrix.platform }}
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Verify candidate renderer and exercise local RTMPS
+        if: ${{ !inputs.publish_release }}
+        shell: bash
+        run: |
+          npm install --prefix "$RUNNER_TEMP/mindex-qa" --ignore-scripts --no-audit --no-fund playwright@1.58.0
+          export NODE_PATH="$(node -p 'require("path").join(process.env.RUNNER_TEMP, "mindex-qa", "node_modules")')"
+          if [[ "$RUNNER_OS" == Windows ]]; then
+            resources="dist/test/win-unpacked/resources"
+            node tests/verify_candidate_package.cjs "$resources" win-x64
+            node tests/test_desktop_youtube_local.cjs "$PWD/dist/test/win-unpacked/Mindex Test.exe" "$PWD/$resources/broadcast-engine/ffmpeg.exe"
+          else
+            arm="dist/test/mac-arm64/Mindex Test.app/Contents"
+            intel="dist/test/mac/Mindex Test.app/Contents"
+            node tests/verify_candidate_package.cjs "$arm/Resources" mac-arm64
+            node tests/verify_candidate_package.cjs "$intel/Resources" mac-x64
+            if [[ "$(uname -m)" == arm64 ]]; then app="$arm"; else app="$intel"; fi
+            node tests/test_desktop_youtube_local.cjs "$PWD/$app/MacOS/Mindex Test" "$PWD/$app/Resources/broadcast-engine/ffmpeg"
+          fi
       - name: Build signed packages (no public release)
         if: ${{ inputs.publish_release }}
         shell: bash
