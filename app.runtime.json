@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261104-bright-dissolve-ci-window",
+  "version": "20261104-bright-dissolve-lifecycle",
   "options": {
     "compress": false,
     "mangle": {

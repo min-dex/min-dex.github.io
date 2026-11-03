@@ -5693,3 +5693,5 @@ never populate display subtitles, rewrite lyrics, rename versions or alter timin
 See `firstline-subtitle-audit-20261104.md` for the read-only catalog scope and limits.
 
 For this union service, consecutive authored white-design frames (including scripture reading) and consecutive still-image frames also use this brightness-preserving dissolve. Other scripture/media exclusions remain unchanged; keyed/emergency/safety frames and video transitions retain their guards.
+
+The inline scripture audit distinguishes focused-rail refresh (raw input must survive) from closing the editor, moving focus out, reloading the aggregate and reopening (persisted canonical reference must be displayed). Both exact-value assertions and no-additional-write checks are required; this is a fixture lifecycle correction, not a scripture normalization change.
