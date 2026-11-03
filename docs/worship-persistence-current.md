@@ -542,3 +542,29 @@ quiet. Revision/reload-required conflicts open the existing comparison and
 archive-before-adopt flow instead of inviting repeated blind saves. Network
 errors retain the existing retry behavior; no automatic overwrite or baseline
 adoption is introduced.
+
+## Legacy-ID guard cache operational repair (2026-11-03)
+
+Approved administrator investigation of the ON FIRE sermon save found SQLSTATE
+57014 inside `mindex_state_write_v1` while constructing `id_alias_mapping()`.
+Every private draft/journal write scanned the 1,659 full song payloads to derive
+only 60 prior IDs. The private derived `state_id_alias_cache` now supplies that
+identical mapping and guard. A trigger synchronizes record insert, payload/ID
+update and deletion. Existing mapping signature, legacy-ID rejection, revision
+checks, namespace quota, immutable requests and public privileges remain intact.
+The cache has RLS and no anon/authenticated access. Unknown function definitions
+abort the migration; it never edits worship or song payloads.
+
+Operational SQL was validated with rollback first: exact alias parity and a
+temporary fixture's insert/update/delete synchronization passed. Committed
+application repeated those assertions. The 1MiB guard scan inspected 60 cache
+rows in 17.911ms. This measures the guard, not end-to-end network latency. The
+existing UI atomic save then confirmed sermon `It's NEW`/이태엽 목사 at revision
+300. Independent RPC readback matched; sections/slides, all record identities,
+lyrics, references, media URLs and song/version links were retained. Full-save
+canonical metadata normalization also materialized slot keys, praise_db→lyrics_db,
+Title→T and empty asset shapes; these are not claimed byte-identical row storage.
+
+Source: `migrations/2026-11-03-state-alias-guard-cache.sql`. Explicit opt-in,
+rollback verification: `tests/fixtures/state-alias-cache-verification.sql`.
+This already-applied operational repair is separate from web Pages publication.

@@ -631,3 +631,7 @@ editing remains in song information. Worship group expansion requires an explici
 variant choice before the existing save path. No production rows are migrated.
 Scoped two-engine grouping/search/selection/draft/audio preservation tests pass;
 shared gate/publication is pending. See version-name-preservation.md.
+
+## 2026-11-03 ON FIRE 설교 저장 장애 해결 (운영 적용 완료)
+
+사용자 관리자점검·원인수정·제목저장 승인 후 Supabase로그에서 SQLSTATE57014 context가 mindex_state_write_v1의 id_alias_mapping 생성임을 확인. records1659개payload에서previousIds60개를 매복구본쓰기마다 생성하던 병목. private state_id_alias_cache + records insert/update/delete trigger 및 기존mappingAPI의동일결과캐시를 적용. 원예배/곡데이터직접SQL수정없음, anon/authenticated읽기권한0/기존공개mapping권한0. rollback시험·commit시험에서기존alias결과동일/동기화3종PASS, 1MiBguard17.911ms. 기존UIatomic으로 It's NEW/이태엽목사 revision300저장, 독립RPC+공개화면PASS. ID·순서·가사본문·담당·음원영상URL·song/version/reference연결보존. fullsave의Title→T/slotKey/legacy inputMode/emptyasset/sourceTextcanonical재생성은발생해byte동일저장은아님. 증거root output/sermon-save-20261103/verification.json. privatebefore/after원문은/tmp에만보존. 운영소유권반환, BGV에rev300기준CAS재개통지. DB수정은운영적용완료이나 source migration및75a0dedd/5b11285f UI충돌후속은아직Pages미배포이며 e37ec12f와구분한다.
