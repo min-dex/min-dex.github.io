@@ -1833,3 +1833,7 @@ span.presenter-announcement-paren,
     will-change: auto;
   }
 }
+
+/* ON FIRE title notes share the poster cross accent. */
+.presenter-output-root.no-chromakey .presenter-slide--on-fire .presenter-song-note,
+.presenter-output-root.no-chromakey .presenter-slide--on-fire .presenter-fullscreen-song-heading[aria-label="찬양"] { color: #ae3a1d; }

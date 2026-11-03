@@ -5571,3 +5571,9 @@ Preview canvases use the same aspect-preserving fit as output. Remove the extra
 one-pixel overscan, which enlarged and cropped preview content relative to output.
 Keep centered 16:9 composition through sidebar replacement and fractional resize;
 retain existing font fitting, playback, output ownership and stored slide content.
+
+## ON FIRE title note accent ·2026-11-03
+
+The union service clean-output title notes use the same poster rust `#ae3a1d`
+as its footer cross. Apply by service identity in preview and output; preserve
+other services, chromakey and stored slide content. Lyric titles remain note-free.
