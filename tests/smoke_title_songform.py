@@ -50,6 +50,16 @@ try:
       const host=document.createElement('div');host.innerHTML=renderPresenterSlideFrame(content,{noChromakey});
       check(host.textContent.includes('♬')&&!host.textContent.includes('♪'),'content title shared note');
     }
+    for (const [key,label] of [['prayer_meeting_praise','기도찬양'],['source-기도회','기도찬양 2']]) {
+      const prayer={...item,label,_worshipSectionKey:key};
+      for (const [hint,count] of [['',1],['T-V1-C',1],['V1-C',0]]) {
+        prayer.memo=serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db',...(hint?{formHint:hint,formPreset:{forms:hint.split('-'),strength:'manual',titleSequence:true}}:{})});
+        const plan=presenterFormPlanForServiceItem(version,prayer,song);
+        const slides=presenterLyricsSlidesForServiceItem({item:prayer,section:{sectionKey:key},song,version,index:0,displayText:song.title,label,forms:plan.forms,formWarnings:plan.warnings});
+        check(slides.filter(s=>s.formLabel==='T').length===count,'prayer title count '+key+hint);
+        if(count)check(slides[0].type==='song-title' && slides[0].title===song.title,'prayer song heading '+key);
+      }
+    }
     const fresh={...item};
     applyServiceItemMetadataField(fresh,{dataset:{serviceItemField:'form_hint'},value:'V1-C'},{});
     check(presenterFormPlanForServiceItem(version,fresh,song).forms.every(f=>!f._presenterTitle),'first edit can omit Title');

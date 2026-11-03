@@ -5571,3 +5571,5 @@ Preview canvases use the same aspect-preserving fit as output. Remove the extra
 one-pixel overscan, which enlarged and cropped preview content relative to output.
 Keep centered 16:9 composition through sidebar replacement and fractional resize;
 retain existing font fitting, playback, output ownership and stored slide content.
+
+기도찬양(번호가 붙은 순서 포함)은 일반 찬양의 제목 장 규칙을 따른다. 자동 송폼의 제목 장에는 곡 제목을 표시하며, 지정 송폼은 T의 유무와 위치를 그대로 따른다.
