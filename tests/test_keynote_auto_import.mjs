@@ -7,11 +7,11 @@ import {webcrypto} from 'node:crypto';
 test('KEY upload automatically attaches prepared slides, keeps authored fields and stops on save uncertainty/edit/project races',async()=>{
   for(const mode of ['success','conversion-failure','source-uncertain','sidecar-uncertain','edit','project','cancel']) {
     const item={id:'item',raw_title:'keep title',memo:JSON.stringify({note:'keep note',lyrics:['keep'],timing:[1,2],offeringVariants:{praise:'keep'}})};
-    const authored=JSON.parse(item.memo);let saves=0,attaches=0,uploads=0,removed=0,prepared=false;
+    const authored=JSON.parse(item.memo);let saves=0,attaches=0,uploads=0,removed=0,prepared=false,confirmations=0;
     const state={selectedServiceId:'service',services:[{id:'service'}],config:{url:'project'},dirty:{service:false},client:{storage:{from:()=>({remove:async paths=>{removed+=paths.length;}})}}};
     const manifest=new File([JSON.stringify({pages:20})],'manifest.json');Object.defineProperty(manifest,'webkitRelativePath',{value:'playback/manifest.json'});
     const ctx=vm.createContext({console,File,Blob,URL,Map,Set,Uint8Array,TextDecoder,crypto:webcrypto,Promise,JSON,Number,Error,
-      window:{confirm:()=>mode!=='cancel'},state,
+      window:{confirm:()=>{confirmations++;assert.equal(prepared,false,'ask before conversion');return mode!=='cancel';}},state,
       input:{files:[new File(['selected KEY'],'slides.key')],dataset:{serviceId:'service'},disabled:false,value:'selected'},
       getServiceItems:()=>[item],parseServiceItemMemo:JSON.parse,serializeServiceItemMemo:JSON.stringify,normalizeServiceAsset:x=>x,
       showToast(){},markServiceElementDirty(){},renderCurrentServiceModuleDetail(){},renderServiceList(){},updateSaveState(){},
@@ -27,6 +27,7 @@ test('KEY upload automatically attaches prepared slides, keeps authored fields a
     assert.equal(result,mode==='success');
     const content=JSON.parse(item.memo);for(const key of Object.keys(authored))assert.deepEqual(content[key],authored[key]);
     assert.equal(item.raw_title,'keep title');assert.equal(ctx.input.disabled,false);assert.equal(vm.runInContext('presenterPptxImports.size',ctx),0);
+    assert.equal(confirmations,1);assert.equal(prepared,!['conversion-failure','cancel'].includes(mode));
     assert.equal(uploads,['conversion-failure','cancel'].includes(mode)?0:1);
     assert.equal(attaches,['success','sidecar-uncertain'].includes(mode)?1:0);
     assert.equal(saves,['conversion-failure','cancel'].includes(mode)?0:1);assert.equal(removed,0,'uncertain committed media must remain');
