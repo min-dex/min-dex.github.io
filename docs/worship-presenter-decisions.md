@@ -5671,3 +5671,8 @@ Derive this fallback in shared preview/output rendering only. Preserve explicit
 video/still/photo/score/file backgrounds, white service artwork/reading, manual
 blackout, emergency and chromakey. Unassigned praise titles/lyrics/instrumentals
 and ordinary black text frames receive the fallback without saving song content.
+
+
+## Union instrumental labels ·2026-11-03
+
+Union instrumental blanks retain the same upper song title and lower white ON/cross/FIRE footer as lyrics. They remain lyric-free and keep BGV continuity. Trailing transition blanks and other services retain their prior blank behavior.

@@ -4203,7 +4203,7 @@ function renderPresenterSlideFrame(slide, options = {}) {
       ${renderPresenterSlideMeta(slide)}
       ${options.previewStage && presenterSlideBackgroundVideoSource(slide, options.noChromakey) ? `<video class="presenter-output-background-video" src="${escapeAttr(presenterSlideBackgroundVideoSource(slide, options.noChromakey))}" muted playsinline preload="metadata" aria-hidden="true"></video>` : ""}
       ${body}
-      ${options.noChromakey && !transitionLogo ? renderPresenterSongPosition(slide, options) : ""}
+      ${options.noChromakey && (!transitionLogo || slide?.songInstrumental) ? renderPresenterSongPosition(slide, options) : ""}
     </section>
   `;
 }
