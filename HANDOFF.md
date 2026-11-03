@@ -1618,3 +1618,7 @@ frame ratios/focus/output preservation and block grouping checks pass.
 Candidate queue ticket bdc7ab921c9149009ed22aa465448fdd is owned by
 codex/worship-controls-followup. Required GitHub gate/Pages/public readback are
 pending; no operational writes, playback, output or printing were performed.
+
+## 2026-11-03 입력·저장 병목 수정 후보
+
+`codex/order-save-flow`: 항목 저장 실패 후 전체 예배 저장으로 자동 재시도하던 중복 경로 제거. 기존 patch 경로 내부의 구조 변경/신규 ID/명시적 unsupported fallback은 유지. 깨끗한 예배의 변경 없는 펜 입력 저장은 서버 요청 없이 닫는다. dirty/저장 중/불확실 요청은 기존 atomic 경로를 유지한다. Node routing/atomic client 및 Chromium·WebKit 실제 inline 입력·IME·커서·실패/재시도·동시 항목·지연 응답·추가입력·재조회·no-op PASS. 실제 운영 데이터 저장/송출 조작 없음. 필수 GitHub gate·Pages·공개 검증 전이며 배포 완료로 보고하지 않는다.

@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261103-prayer-praise-title",
+  "version": "20261103-on-fire-note-save-flow",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "5f32f265a51b7ddc9b7b27ac505e2ffd6bf4b233b679f95d9fd75b1e24b0094f",
-  "runtime_sha256": "4d1208a22a167195abdd66a090665ec6c4cee3a9c84e9a7965ae692a7b91f264",
-  "source_bytes": 1357464,
-  "runtime_bytes": 968760,
-  "source_gzip": 311126,
-  "runtime_gzip": 243986
+  "source_sha256": "287917910d6737293b2607add0e0d0f9f0fdfbd7d50204257408fc168ec32b94",
+  "runtime_sha256": "e4270c73d8ecee3aaf798ab70c1d235e512e4e092ceb96f52cac60c711642200",
+  "source_bytes": 1357620,
+  "runtime_bytes": 968712,
+  "source_gzip": 311229,
+  "runtime_gzip": 243972
 }

@@ -7758,9 +7758,10 @@ async function saveServiceItemPatch(serviceId = state.selectedServiceId, index =
 }
 
 async function saveServiceItemMutation(serviceId = state.selectedServiceId, index = -1, options = {}) {
-  const saved = await saveServiceItemPatch(serviceId, index, options);
-  if (saved) return true;
-  return saveService(serviceId, options);
+  // The patch path already selects a full save for structural changes. A false
+  // result is a failed/blocked save, not permission to retry the whole service
+  // (which could also commit unrelated drafts after an uncertain response).
+  return saveServiceItemPatch(serviceId, index, options);
 }
 
 async function saveWorshipServiceElementPatch(service, itemId, options = {}) {

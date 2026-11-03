@@ -257,8 +257,12 @@ def exercise(page, url, engine):
     toggle(2).click()
     assert field(2,'설교 제목').input_value()=='두 번째 요청 뒤 추가 입력', 'server reload lost confirmed text'
     assert field(2,'설교자').input_value()=='새 담당자', 'server reload lost confirmed person'
-    check("inlineFixture.checkQuiet()")
-    print(engine,'PASS empty-field deletion, concurrent different-row real saves, queued later input and real reload',flush=True)
+    check("inlineFixture.checkQuiet();inlineFixture.cleanAttempts=inlineFixture.attempts")
+    panel(2).locator('[data-presenter-inline-apply]').click()
+    settled()
+    assert not panel(2).is_visible(), 'unchanged editor did not close'
+    check("inlineFixture.assert(inlineFixture.attempts===inlineFixture.cleanAttempts,'unchanged editor sent a redundant save');inlineFixture.checkQuiet()")
+    print(engine,'PASS empty-field deletion, concurrent different-row real saves, queued later input, real reload and clean no-op save',flush=True)
 
     page.unroute_all(behavior='wait')
 

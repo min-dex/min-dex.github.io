@@ -520,3 +520,17 @@ independent existing identities during normal edits.
 The default offline gate runs `test_worship_slot_identity.cjs` and the three-case
 `smoke_holy_week_prayers.py` on Chromium/WebKit. The full template save matrix
 remains an explicit audit in `smoke_inline_template_save_audit.py`.
+
+## Item-save failure stays scoped (2026-11-03)
+
+`saveServiceItemMutation` delegates once to the existing patch path. That path
+already selects a full save for new identities, structural changes or an explicit
+unsupported-patch result. A failed, blocked or uncertain save must not trigger a
+second whole-service attempt. Retain the draft and immutable pending request for
+the existing explicit retry/reconciliation flow; do not save sibling drafts as an
+implicit fallback. This removes redundant failure latency without bypassing any
+journal confirmation or atomic revision checks.
+
+An unchanged inline editor closes without a write only when the service is clean
+and no save is active. Dirty drafts and uncertain outcomes still use the normal
+save path; this is not a replacement for server acknowledgment.

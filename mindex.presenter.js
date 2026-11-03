@@ -4185,7 +4185,7 @@ function renderPresenterSlideFrame(slide, options = {}) {
   }
   const slideClass = presenterSlideRenderClass(slide);
   const transitionLogo = renderPresenterTransitionLogo(slide, options);
-  const extraClasses = [presenterSlideExtraClasses(slide), transitionLogo ? "has-transition-logo" : "", design ? "presenter-slide--service-design" : ""].filter(Boolean).join(" ");
+  const extraClasses = [presenterSlideExtraClasses(slide), options.noChromakey && options.serviceId === "99df9e1b-1716-41fb-9ea0-f5ca4c99ee45" ? "presenter-slide--on-fire" : "", transitionLogo ? "has-transition-logo" : "", design ? "presenter-slide--service-design" : ""].filter(Boolean).join(" ");
   const body = transitionLogo || renderPresenterSlideBody(slide, options);
   const sectionKey = String(slide?.sectionKey || slide?.section_key || "").trim();
   const presenterRole = normalizeServicePresenterRole(slide?.presenterRole);
