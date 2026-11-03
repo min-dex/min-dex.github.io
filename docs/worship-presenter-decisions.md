@@ -5616,3 +5616,11 @@ The same video node/currentTime survives lyrics→instrumental→lyrics. This do
 not extend to trailing transition blanks, safety blackout, chromakey, photo cues
 or unrelated media. Instrumental identity survives document projection. No
 lyrics, song forms, timing, stored worship data or audio behavior is rewritten.
+
+## Emergency scripture label boxes ·2026-11-03
+
+In emergency mode, scripture reference and reader labels retain white text on
+black without their white SVG tab backgrounds, rounded boxes or shadows.
+Reference, verse body and reader names remain intact; disabling emergency mode
+restores the ordinary chromakey boxes. Preview/output use the same scoped CSS.
+No scripture, worship record or slide content is rewritten.

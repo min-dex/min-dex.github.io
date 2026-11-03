@@ -1851,3 +1851,9 @@ span.presenter-announcement-paren,
 }
 
 .presenter-output-body.is-emergency-mode { background: #000; }
+
+/* Emergency scripture/reader labels keep their text without the white tabs. */
+.presenter-output-root.is-emergency-mode .presenter-citation-tab {
+  color: #fff; background: transparent; border-radius: 0; box-shadow: none;
+}
+.presenter-output-root.is-emergency-mode .presenter-tab-background { display: none; }
