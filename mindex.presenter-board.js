@@ -1533,6 +1533,7 @@ function renderPresenterSlideMiniPreview(slide, serviceId = state.presenter.serv
   });
   const theme = presenterOutputTheme(service?.type_id);
   const frameState = presenterOutputFrameStateForSlide(previewSlide, {
+    serviceId,
     chromakey: serviceChromakey,
     emergencyMode,
     backgroundImages,

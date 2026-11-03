@@ -5646,3 +5646,8 @@ Service 99df clean output crossfades both layers together over 800ms (1000ms
 for video end). Other services keep their existing timing. Chromakey hard cuts,
 reduced motion and safety states retain their guards. This adds no praise title
 morph, changes no stored lyrics/forms, and does not restart background media.
+
+
+## Video thumbnail metadata positioning ·2026-11-03
+
+Video preview foreground stacking preserves the absolute top song label and bottom service footer positions. Only flow content becomes relative above the video; metadata must not collapse into the lyric body or overlap. Preview frame state carries the same service identity as output.
