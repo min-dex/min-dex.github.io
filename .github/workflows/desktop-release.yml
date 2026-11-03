@@ -15,6 +15,8 @@ on:
       - package.json
       - pnpm-lock.yaml
       - pnpm-workspace.yaml
+      - tools/broadcast-engine/**
+      - tools/broadcast-prototype/**
       - electron/**
       - tools/minimatch-compat/**
       - tests/test_minimatch_compat.cjs
@@ -53,6 +55,7 @@ jobs:
           python-version: '3.12'
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level=moderate
+      - run: python tools/broadcast-engine/prepare.py
       - run: pnpm electron:check
       - name: Build isolated unsigned test installers
         if: ${{ !inputs.publish_release }}

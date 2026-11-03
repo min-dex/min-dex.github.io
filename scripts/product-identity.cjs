@@ -45,6 +45,10 @@ function sameRelease(previous,next){
 }
 async function beforePack(context){
  const root=context.packager.projectDir;
+ const os=context.electronPlatformName === 'win32' ? 'win' : 'mac';
+ const arch=({1:'x64',3:'arm64'})[context.arch];
+ const exe=os==='win'?'ffmpeg.exe':'ffmpeg';
+ fs.accessSync(path.join(root,'.cache','broadcast-engine',os+'-'+arch,exe));
  const test=context.packager.config.extraMetadata?.mindexTestBuild===true;
  const record=identity(root,{test});validateWorkingRuntime(root,record);writeIdentity(root,root,{test});
 }

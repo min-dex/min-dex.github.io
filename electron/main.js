@@ -220,6 +220,8 @@ function bindUpdateMenu() {
       mainWindow.webContents.send("mindex:check-update-requested");
     },
   }] }));
+  const openBroadcast = require('./youtube-window');
+  menu.append(new MenuItem({label:'방송',submenu:[{label:'유튜브 송출',click:()=>openBroadcast(mainWindow)}]}));
   Menu.setApplicationMenu(menu);
 }
 

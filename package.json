@@ -130,7 +130,8 @@
       "mindex.product-info.js",
       "mindex-build.json",
       "product-release.json",
-      "!data/**/*"
+      "!data/**/*",
+      "tools/broadcast-prototype/**/*"
     ],
     "mac": {
       "target": [
@@ -151,7 +152,13 @@
       "allowToChangeInstallationDirectory": false
     },
     "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
-    "beforePack": "scripts/product-identity.cjs"
+    "beforePack": "scripts/product-identity.cjs",
+    "extraResources": [
+      {
+        "from": ".cache/broadcast-engine/${os}-${arch}",
+        "to": "broadcast-engine"
+      }
+    ]
   },
   "devDependencies": {
     "electron": "43.8.1",
