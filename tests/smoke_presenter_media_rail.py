@@ -39,16 +39,16 @@ try:
     const identity=JSON.stringify({source:state.serviceMusic.sourceKey,owner:state.serviceMusic.ownerServiceId,playing:state.serviceMusic.playing});
     for(const theme of ['light','dark'])for(const width of [1000,600,254]){
      document.body.dataset.theme=theme;host.style.width=width+'px';arrangePresenterBoardMediaControls(host);await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
-     check(host.querySelectorAll('.svc-board-media-rail').length===2,'only video and deck get a rail');
-     check(players.every((x,i)=>x.isConnected&&Boolean(x.closest('.svc-board-media-rail'))===(i>=2)),'transport not moved');
-     check(videoEditor.closest('.svc-board-media-rail')&&videoInput.isConnected,'video name separated from transport');
+     check(host.querySelectorAll('.svc-board-media-rail').length===1,'only decks get a rail');
+     check(players.every((x,i)=>x.isConnected&&Boolean(x.closest('.svc-board-media-rail'))===(i>=3)),'transport not moved');
+     check(!videoEditor.closest('.svc-board-media-rail')&&videoInput.isConnected,'video name separated from transport');
      check(getComputedStyle(emptyToolbar).display==='none','empty toolbar reserved space');
      check(videoInput.getBoundingClientRect().bottom<=players[2].getBoundingClientRect().top+1,'transport not below name');
      check(players[2].getBoundingClientRect().top-videoInput.getBoundingClientRect().bottom<=15,'excessive gap below media name');
      for(const group of host.querySelectorAll('.svc-board-subgroup')){
       check(group.scrollWidth<=group.clientWidth+1,'overflow '+width+' '+group.querySelector('h3').textContent+' '+group.scrollWidth+'/'+group.clientWidth+' '+[...group.querySelectorAll('*')].filter(x=>x.getBoundingClientRect().right>group.getBoundingClientRect().right+1).map(x=>x.className).join(',')+' dimensions '+[...group.querySelectorAll('.editor,.editor>input,.svc-board-media-layout,.svc-board-media-rail,.svc-music-player,.svc-music-transport,.svc-volume-control,.song-timing-seek,.svc-board-grid')].map(x=>[x.className,x.clientWidth,x.scrollWidth,getComputedStyle(x).minWidth]).join(';'));
       const grid=group.querySelector('.svc-board-grid').getBoundingClientRect(),side=group.querySelector('.svc-board-media-rail');
-      if(!side){const audio=group.querySelector('.svc-music-player--inline,[data-input-audio-controls]');check(audio.getBoundingClientRect().bottom<=grid.top+1,'audio not above slides');continue;}
+      if(!side){const audio=group.querySelector('.svc-music-player--inline,[data-input-audio-controls],[data-input-video-controls]');check(audio.getBoundingClientRect().bottom<=grid.top+1,'audio not above slides');continue;}
       const rail=side.getBoundingClientRect();
       if(width>=600)check(rail.right<=grid.left+1,'not left '+width);else check(rail.bottom<=grid.top+1,'narrow order');
      }
