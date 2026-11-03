@@ -700,7 +700,7 @@ function presenterMorphSongTitle(activeLayer, nextLayer, frameState, animated) {
         toTitle.animate([
           { transformOrigin: 'center center', transform: `translate(${from.x + from.width / 2 - to.x - to.width / 2}px, ${from.y + from.height / 2 - to.y - to.height / 2}px) scale(${from.width / to.width}, ${from.height / to.height})` },
           { transformOrigin: 'center center', transform: 'none' }
-        ], { duration: 360, easing: 'cubic-bezier(.2,.7,.2,1)' });
+        ], { duration: 1000, easing: 'ease-in-out' });
       }
     }
 

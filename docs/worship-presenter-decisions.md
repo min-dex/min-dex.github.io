@@ -5543,7 +5543,7 @@ Preview and output receive the same service identity. Other
 services retain their metadata; title slides retain their note. No stored lyrics,
 forms, versions or worship records are rewritten.
 Clean output morphs a matching praise title into the lyric heading only within
-the same service element. Chromakey and reduced-motion preferences retain their
+the same service element, easing in and out over one second. Chromakey and reduced-motion preferences retain their
 existing transition policy.
 ### Worship editor undo
 Ctrl/Cmd+Z outside text fields can reverse an explicit song pick or an up/down
