@@ -30,6 +30,7 @@ async function main() {
         const sample=Buffer.concat([previous,data]); matchingKey=sample.includes(Buffer.from(key)); previous=sample.subarray(-key.length);
       });
       receiver.on('error',()=>socket.destroy());socket.on('error',()=>receiver.destroy());
+      socket.on('close',()=>receiver.destroy());
       receiver.pipe(socket).pipe(receiver);
     }).listen(0,'127.0.0.1');
     await once(server,'listening');
@@ -79,6 +80,6 @@ async function main() {
     assert.equal(publishes,2);
     console.log('PASS receiver disconnect releases controls without automatic publication');
     console.log('PASS desktop menu, key entry, authenticated TLS receiver, caption + tone → slate + silence → restored, CH8 retained, clean stop');
-  }finally{if(app)await app.close();peer?.destroy();server?.close();sink?.kill();fs.rmSync(tmp,{recursive:true,force:true});}
+  }finally{if(app)await app.close();peer?.destroy();server?.close();sink?.kill('SIGKILL');fs.rmSync(tmp,{recursive:true,force:true});}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});
