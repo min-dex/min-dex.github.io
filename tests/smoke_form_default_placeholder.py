@@ -78,7 +78,7 @@ try:
     check(serviceItemLinkedVersion(nativeItem,noMatch)===null,'never borrow another record content');
     state.songs=[song];
     check(serviceItemLinkedVersion({...nativeItem,song_id:song.id},song)===null,'legacy unresolved selection remains unresolved');
-    for(const [label,key,hasTitle] of [['찬양 1','praise',true],['특송','special_song',true],['봉헌특송','offering',true],['파송찬양','sending',false],['결단찬양','response_song',false]]) {
+    for(const [label,key,hasTitle] of [['찬양 1','praise',true],['기도찬양 1','prayer_meeting_praise',true],['특송','special_song',true],['봉헌특송','offering',true],['파송찬양','sending',false],['결단찬양','response_song',false]]) {
      const item={id:key,service_id:service.id,song_id:song.id,version_id:version.id,label,_worshipSectionKey:key,raw_title:song.title,memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db'})};
      const before=JSON.stringify({item,song});
      const field=input(item);check(field.value==='' && field.placeholder===(hasTitle?'T-V-C':'V-C'),'default must be placeholder '+label+' '+field.outerHTML);
@@ -105,6 +105,15 @@ try:
          ...(mode==='score_db'?{asset:{kind:'score',slides:[{url:'/assets/icon-192.png',formLabel:'V1'},{url:'/assets/icon-512.png',formLabel:'C'}]}}:{}),
          ...(sequence?{formPreset:{forms:sequence,titleSequence:true,strength:'manual'}}:{})})};
        const original=JSON.stringify(item),slides=buildPresenterSlidesForServiceItem(item,service,0,{allowHydration:false});
+       if(key==='prayer_meeting_praise') {
+        const titles=slides.filter(s=>s.type==='song-title');
+        const count=sequence || mode!=='score_db' ? 1 : 0;
+        check(titles.length===count && titles.every(s=>s.title===expectedTitle),'prayer song title '+mode+'/'+sequence);
+        check(!slides.some(s=>s.orderTitle && s.contentTitle),'prayer element heading '+mode);
+        if(count)check((slides[0]===titles[0])===(!sequence || sequence[0]==='T'),'prayer title position '+mode+'/'+sequence);
+        check(JSON.stringify(item)===original,'prayer title rewrote data');
+        continue;
+       }
        const headings=slides.filter(slide=>slide.orderTitle && slide.contentTitle);
        check(headings.length===1 && headings[0].contentTitle==='♬ '+expectedTitle,'content heading missing/duplicate '+label+'/'+mode+'/'+sequence);
        check(!slides.some(slide=>slide.type==='song-title'),'non-main got main Title '+label+'/'+mode+'/'+sequence+' '+JSON.stringify(slides.map(s=>({type:s.type,label:s.label,sectionKey:s.sectionKey,sectionRole:s.sectionRole,order:s.orderTitle,content:s.contentTitle,form:s.formLabel,reason:s.missingReason}))));
