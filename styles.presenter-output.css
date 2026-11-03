@@ -129,7 +129,7 @@
   --presenter-output-bar: linear-gradient(180deg, #000A64 0%, #000A32 100%);
   --presenter-output-bar-edge: #000A32;
   --presenter-output-stroke: #000;
-  --presenter-font-family: var(--font-presenter, "Mindex Presenter", "Freesentation", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif);
+  --presenter-font-family: var(--font-presenter, "Paperlogy", "Mindex Presenter", "Freesentation", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif);
   --presenter-scripture-font: var(--presenter-font-family);
   --presenter-reading-font-family: "Eulyoo1945", "을유1945", "AppleMyungjo", "Nanum Myeongjo", serif;
   --presenter-weight-support: 600;

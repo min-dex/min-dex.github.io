@@ -5594,3 +5594,10 @@ for the same live session and resets on stop or switching the output service.
 ## 2026-11-03 파일 불러오기 안내 간소화
 
 KEY/PPTX는 파일 선택 후 공개 저장소 보관 확인을 먼저 한 번 받고 준비·연결을 이어서 진행한다. 취소하면 변환이나 업로드를 시작하지 않는다. 기본 화면에는 슬라이드 준비와 연결 상태 및 최종 완료만 안내하며 원본 저장과 재생 자료 연결의 내부 단계는 성공 알림으로 따로 노출하지 않는다. 최초 Mac 연결·자동화 허용과 실패 시 필요한 조치는 유지한다. 원본 다운로드와 수동 폴더 연결은 자료 관리에 유지하며, 원본만 연결된 경우 불러오기 다시 시도로 복구한다. 기존 atomic 저장, 변경 감지, 불확실한 저장 결과의 자료 보존은 그대로 유지한다.
+## Paperlogy default projection ·2026-11-03
+
+Default controller and projection text now share the same self-hosted Paperlogy
+webfont across computers. Preserve the existing stage sizes, weights, fitting
+and explicit service/artwork/reading typefaces; retain full Korean glyph fallback.
+No worship record, lyrics, form, audio timing or background attachment is rewritten.
+See design-system.md for file provenance and installation-free delivery.

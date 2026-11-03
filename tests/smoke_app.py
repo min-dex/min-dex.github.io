@@ -10899,8 +10899,8 @@ def main() -> int:
                 # Rapid module switching may leave intentionally preloaded presenter
                 # font weights unused. Match only that advisory; load failures still fail.
                 and not re.fullmatch(
-                    r"warning: The resource http://127\.0\.0\.1:\d+/vendor/fonts/freesentation/"
-                    r"MindexPresenterCommon-(?:500|600|700|800)-[0-9a-f]{16}\.woff2 was preloaded using link preload "
+                    r"warning: The resource http://127\.0\.0\.1:\d+/vendor/fonts/(?:freesentation|paperlogy)/"
+                    r"(?:MindexPresenterCommon-(?:500|600|700|800)|Paperlogy-[4-8](?:Regular|Medium|SemiBold|Bold|ExtraBold))-[0-9a-f]{16}\.woff2 was preloaded using link preload "
                     r"but not used within a few seconds from the window's load event\. Please make sure it has an "
                     r"appropriate `as` value and it is preloaded intentionally\.", item,
                 )

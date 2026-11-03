@@ -1,0 +1,78 @@
+{
+  "source": "https://github.com/Freesentation/paperlogy",
+  "commit": "8ef35f53b318c7ca914c52b1b382b9a8bad07a61",
+  "fonts": [
+    {
+      "weight": 100,
+      "file": "Paperlogy-1Thin-90f939d17b28c759.woff2",
+      "source": "Paperlogy-1Thin.woff2",
+      "sha256": "90f939d17b28c75907831d73d10f41f4e4dfed84e95701cf91cc8f4bcd6e2213",
+      "bytes": 432068,
+      "modern_hangul_syllables": 11172
+    },
+    {
+      "weight": 200,
+      "file": "Paperlogy-2ExtraLight-5eda200e48154386.woff2",
+      "source": "Paperlogy-2ExtraLight.woff2",
+      "sha256": "5eda200e4815438662e29aa9c38d6f2219b495fa9ac960418ec4a4e93ea01fb1",
+      "bytes": 428912,
+      "modern_hangul_syllables": 11172
+    },
+    {
+      "weight": 300,
+      "file": "Paperlogy-3Light-8928201d46a25204.woff2",
+      "source": "Paperlogy-3Light.woff2",
+      "sha256": "8928201d46a252048ef31ea9c43f808897bbb469c8e1a84d95726fa7195d4d6d",
+      "bytes": 434052,
+      "modern_hangul_syllables": 11172
+    },
+    {
+      "weight": 400,
+      "file": "Paperlogy-4Regular-4b2e0fda11329198.woff2",
+      "source": "Paperlogy-4Regular.woff2",
+      "sha256": "4b2e0fda1132919826d68682f13868f217cc26fafc073c390cfc06ab9073b7ed",
+      "bytes": 438072,
+      "modern_hangul_syllables": 11172
+    },
+    {
+      "weight": 500,
+      "file": "Paperlogy-5Medium-83f2ba8b73f385f0.woff2",
+      "source": "Paperlogy-5Medium.woff2",
+      "sha256": "83f2ba8b73f385f0732ec7326b3a031b6aa326cbd37fa41a2558dbbe121281b3",
+      "bytes": 439492,
+      "modern_hangul_syllables": 11172
+    },
+    {
+      "weight": 600,
+      "file": "Paperlogy-6SemiBold-416702a9fe2215de.woff2",
+      "source": "Paperlogy-6SemiBold.woff2",
+      "sha256": "416702a9fe2215de762cf47ed5b83fbfef65a0cc99a50ab8f26f74e878a0aa16",
+      "bytes": 440828,
+      "modern_hangul_syllables": 11172
+    },
+    {
+      "weight": 700,
+      "file": "Paperlogy-7Bold-39daa190bc0ccaa7.woff2",
+      "source": "Paperlogy-7Bold.woff2",
+      "sha256": "39daa190bc0ccaa7dfe8bb55716953fc56acdad812da6701a6e31a4a051173af",
+      "bytes": 440468,
+      "modern_hangul_syllables": 11172
+    },
+    {
+      "weight": 800,
+      "file": "Paperlogy-8ExtraBold-5047db061c39ec5e.woff2",
+      "source": "Paperlogy-8ExtraBold.woff2",
+      "sha256": "5047db061c39ec5ed5c9d0b71c7aaad4b9547ed15ce48d1cd74090169f132bc0",
+      "bytes": 430124,
+      "modern_hangul_syllables": 11172
+    },
+    {
+      "weight": 900,
+      "file": "Paperlogy-9Black-864a3a6eca726101.woff2",
+      "source": "Paperlogy-9Black.woff2",
+      "sha256": "864a3a6eca7261014910a75451144680d0668129cc3040d8f480c1a83cbf3abd",
+      "bytes": 446224,
+      "modern_hangul_syllables": 11172
+    }
+  ]
+}

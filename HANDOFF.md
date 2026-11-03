@@ -1,3 +1,16 @@
+## 2026-11-03 Paperlogy self-hosted webfont candidate
+
+UI/Remote/default projection now use the pinned official Paperlogy WOFF2 faces
+100–900 with immutable hashes and preserved OFL. No local-font lookup/CDN; all
+11,172 modern Hangul syllables verified in every face. Explicit service reading/
+artwork/bulletin fonts retained. Scoped Chromium/WebKit: nine faces, 72 exact
+common/rare wrapping cases, cache across release changes, preload, 32 lyric-fit
+cases, meta typography and retained presenter fallback pass. Remote/runtime Node
+checks pass. Final required GitHub gate/Pages/public verification pending.
+Queue ticket fc8bc412ba6049fc82c33efe85056528 owned by codex/paperlogy-webfont.
+No worship/data writes in this source change; separate BGV readability file is
+prepared locally and operational replacement waits for root's 99df save-path repair.
+
 ## 2026-11-03 실제 DOM 클릭 후 지연 썸네일 확장 보정 후보
 
 46176b7f 필수4/Pages/공개12파일·양엔진fixture는 통과했으나 실제Chrome1200px에서 설교69 선택 후 앞쪽 성경봉독 placeholder 확장으로 설교top1058.5px인 잔여 결함을 확인했다. 완료 처리하지 않고 root FIFO2f70을 유지했다. 후속8347ff45는 viewport보다 위쪽 placeholder 교체 전후 다음 요소 좌표 차만 보정한다. 실제DOM click/이미86장/1200px 회귀를 추가해 양엔진offset77.5/78.5, late load·수동스크롤 유지 및 가로/세로 급스크롤PASS. 실본문·포커스·송출 index 보존. 새exact SHA gate·공개실UI 재검증 전 완료 보고 금지. 이전 사용자 탭/예배 내용 변경 없음.

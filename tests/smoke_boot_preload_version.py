@@ -34,7 +34,7 @@ try:
    assert any('/app.js?' in u for u in executed) and not any('/app.runtime.js?' in u for u in executed),executed
    assert page.evaluate("MINDEX_RELEASE==='test-resolved-release'")
    page.evaluate('MINDEX_PRELOAD_PRESENTER_FONTS();MINDEX_PRELOAD_PRESENTER_FONTS()')
-   assert page.locator('link[as=font][href*=freesentation]').count()==4
+   assert page.locator('link[as=font][href*=paperlogy]').count()==5
    print('PASS speculative downloads, resolved-only execution, stylesheet gate and deduplicated font preload',engine,flush=True)
    browser.close()
 finally:server.shutdown()

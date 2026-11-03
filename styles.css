@@ -1,5 +1,5 @@
-/* Full-font fallback covers only supported characters outside the common segments.
-   Disjoint ranges prevent WebKit from fetching 2 MB for common/unsupported glyphs. */
+@import url("./vendor/fonts/paperlogy/paperlogy-47123310c71e206b.css");
+/* Disjoint fallback ranges avoid full legacy font fetches for common/unsupported glyphs. */
 @font-face {
   font-family: "Pretendard Variable";
   src: url("./vendor/fonts/pretendard/PretendardVariable.woff2") format("woff2-variations");
@@ -391,8 +391,8 @@
   --rail-motion: 120ms cubic-bezier(.2, 0, .2, 1);
   --module-tab-w: 180px;
   --topbar-compact-w: calc((var(--topbar-btn-size) * var(--topbar-action-slot-count)) + (var(--shell-edge-inset) * 2) + 50px);
-  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-presenter: "Mindex Presenter", "Freesentation", sans-serif;
+  --font-sans: "Paperlogy", "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-presenter: "Paperlogy", "Mindex Presenter", "Freesentation", sans-serif;
   font-family: var(--font-sans);
   font-size: 14px;
 }
