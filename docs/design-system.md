@@ -235,3 +235,11 @@ bulletin font choices retain their own typography. Font loading still invalidate
 presenter fitting; lyrics, forms, timing and operational data are unchanged.
 School computers need no font installation; the app must finish loading its
 font files before use. This is browser verification, not school-device proof.
+
+### Scope correction ·2026-11-03
+
+Paperlogy is now an explicit preview/output exception only for union service
+99df9e1b-1716-41fb-9ea0-f5ca4c99ee45. The app/Remote UI and other services
+retain their existing default fonts; vendored Paperlogy faces remain available
+without local installation for that service. This supersedes the global default
+paragraph above and does not change authored service/bulletin/reading typefaces.

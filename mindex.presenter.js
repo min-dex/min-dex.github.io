@@ -794,7 +794,7 @@ function buildPresenterCustomSlides(item, section, index) {
       type: parsed.blank ? "blank" : songLikeItem ? "lyrics" : "component",
       label,
       title: section.sectionTitle || item.raw_title || label || "Slide",
-      marker: parsed.marker,
+      marker: parsed.marker, songInstrumental: Boolean(parsed.blank && songLikeItem),
       formKey: `custom:${blockIndex}`,
       text: parsed.text,
       sort: index + blockIndex / 100,
@@ -811,7 +811,7 @@ function buildPresenterCustomSlides(item, section, index) {
       const blocks = !form._presenterBlank && normalizePresenterFormPresetLabel(form.label).type === "lyrics"
         ? presenterLyricsBlocksFromForms([form]) : [form.lyrics || ""];
       return blocks.map((text, page) => ({ ...lyricSlides[0], id: `${item.id || index}:custom-sequence:${position}:${page}`,
-        type: form._presenterBlank ? "blank" : "lyrics", text,
+        type: form._presenterBlank ? "blank" : "lyrics", text, songInstrumental: Boolean(form._presenterBlank && form._presenterToken === "instrumental"),
         elementType: form._presenterBlank ? PRESENTER_ELEMENT_TYPES.BLANK : PRESENTER_ELEMENT_TYPES.PRAISE,
         layout: form._presenterBlank ? PRESENTER_SLIDE_LAYOUTS.BLANK : PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT,
         marker: form.label, formKey: `custom:${position}`, sort: index + position / 100 + page / 10000 }));
@@ -2745,7 +2745,7 @@ function presenterOutputFrameStateForSlide(slide, payload = {}) {
       && [PRESENTER_ELEMENT_TYPES.IMAGE, PRESENTER_ELEMENT_TYPES.VIDEO].includes(presenterSlideElementType(slide))))),
     formBackground: Boolean(slide?.formBackgroundImage),
     showBackground,
-    blankOutput: Boolean(blankSlide && cleanOutput && !blackoutOutput && !slide?.formBackgroundImage),
+    blankOutput: Boolean(blankSlide && cleanOutput && !blackoutOutput && !slide?.formBackgroundImage && !presenterSlideBackgroundVideoSource(slide, cleanOutput)),
     blackoutOutput,
     scoreOutput,
     videoOutput,
@@ -4184,8 +4184,8 @@ function renderPresenterSlideFrame(slide, options = {}) {
     options = { ...options, serviceDesignActive: true };
   }
   const slideClass = presenterSlideRenderClass(slide);
-  const transitionLogo = renderPresenterTransitionLogo(slide, options);
-  const extraClasses = [presenterSlideExtraClasses(slide), options.noChromakey && options.serviceId === "99df9e1b-1716-41fb-9ea0-f5ca4c99ee45" ? "presenter-slide--on-fire" : "", transitionLogo ? "has-transition-logo" : "", design ? "presenter-slide--service-design" : ""].filter(Boolean).join(" ");
+  const transitionLogo = slide?.songInstrumental && presenterSlideBackgroundVideoSource(slide, options.noChromakey) ? "" : renderPresenterTransitionLogo(slide, options);
+  const extraClasses = [presenterSlideExtraClasses(slide), options.serviceId === "99df9e1b-1716-41fb-9ea0-f5ca4c99ee45" ? "presenter-slide--on-fire" : "", transitionLogo ? "has-transition-logo" : "", design ? "presenter-slide--service-design" : ""].filter(Boolean).join(" ");
   const body = transitionLogo || renderPresenterSlideBody(slide, options);
   const sectionKey = String(slide?.sectionKey || slide?.section_key || "").trim();
   const presenterRole = normalizeServicePresenterRole(slide?.presenterRole);
@@ -5108,8 +5108,8 @@ async function uploadPresenterPraiseBackground(input) {
 }
 
 function presenterSlideBackgroundVideoSource(slide, noChromakey) {
-  if (!noChromakey || slide?.formBackgroundImage || presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.BLANK) return "";
-  if (![PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT, PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT].includes(presenterSlideLayout(slide))) return "";
+  if (!noChromakey || slide?.formBackgroundImage || slide?.autoTrailingBlank) return "";
+  if (![PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT, PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT].includes(presenterSlideLayout(slide)) && !(slide?.songInstrumental && presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.BLANK)) return "";
   return normalizeServicePresentation({ backgroundVideo: slide?.backgroundVideo })?.backgroundVideo || "";
 }
 

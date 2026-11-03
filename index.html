@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="MINDEX" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <link rel="preload" href="./vendor/fonts/paperlogy/Paperlogy-4Regular-4b2e0fda11329198.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="./vendor/fonts/pretendard/MindexSans-7030aecb3aac8126.woff2" as="font" type="font/woff2" crossorigin />
     <style>
       html,
       body {
@@ -113,10 +113,10 @@
           document.documentElement.classList.add("presenter-output-document", "presenter-output-pending");
         }
         window.MINDEX_PRELOAD_PRESENTER_FONTS = ({ controller = true } = {}) => {
-          const weights = controller ? [500, 600, 700, 800] : [600, 700, 800];
-          const commonFonts = {"500":"Paperlogy-5Medium-83f2ba8b73f385f0.woff2","600":"Paperlogy-6SemiBold-416702a9fe2215de.woff2","700":"Paperlogy-7Bold-39daa190bc0ccaa7.woff2","800":"Paperlogy-8ExtraBold-5047db061c39ec5e.woff2"};
+          const weights = controller ? ["5Medium", "6SemiBold", "7Bold", "8ExtraBold"] : ["6SemiBold", "7Bold", "8ExtraBold"];
+          const commonFonts = {"5Medium":"MindexPresenterCommon-500-6adbca4cec793e77.woff2","6SemiBold":"MindexPresenterCommon-600-2a64611ab2151043.woff2","7Bold":"MindexPresenterCommon-700-bcbb2a5ba50e8fbe.woff2","8ExtraBold":"MindexPresenterCommon-800-15cd6ce3c77e9f74.woff2"};
           for (const weight of weights) {
-            const href = `./vendor/fonts/paperlogy/${commonFonts[weight]}`;
+            const href = `./vendor/fonts/freesentation/${commonFonts[weight]}`;
             if ([...document.querySelectorAll('link[as="font"]')].some(link => link.getAttribute("href") === href)) continue;
             const font = document.createElement("link");
             font.rel = "preload"; font.as = "font"; font.type = "font/woff2"; font.crossOrigin = "anonymous";

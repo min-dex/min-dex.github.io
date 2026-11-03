@@ -32,7 +32,7 @@ try:
     urls=page.locator('script[src]').evaluate_all('(nodes)=>nodes.map(n=>n.src)')
     assert all('/vendor/' in u or 'v='+version in u for u in urls),urls
     checks=page.evaluate('''async records=>{
-     if(!getComputedStyle(document.body).fontFamily.startsWith('Paperlogy'))throw Error('Wrong UI default');
+     if(!getComputedStyle(document.body).fontFamily.startsWith('\"Pretendard Variable\"'))throw Error('Wrong UI default');
      const samples=['우리 살아가는 모든 날들이','세상 모든 민족이 구원을 얻기까지','AV To W’ A” · (찬양) [말씀] 0123456789','똠힣'];
      let checks=0;
      for(const record of records){
@@ -51,7 +51,7 @@ try:
       }
       probe.remove();document.fonts.delete(expected);
      }
-     const root=document.createElement('div');root.className='presenter-output-root';document.body.append(root);if(!getComputedStyle(root).fontFamily.startsWith('Paperlogy'))throw Error('Output font differs');root.remove();
+     const root=document.createElement('div');root.className='presenter-output-root';document.body.append(root);if(!getComputedStyle(root).fontFamily.startsWith('\"Mindex Presenter\"'))throw Error('Other service font changed');root.innerHTML=renderPresenterSlideFrame({type:'lyrics',elementType:'praise',layout:'lower_bar_text',text:'찬양'},{noChromakey:true,serviceId:'99df9e1b-1716-41fb-9ea0-f5ca4c99ee45'});if(!getComputedStyle(root.firstElementChild).fontFamily.startsWith('Paperlogy'))throw Error('Union font missing');root.innerHTML=renderPresenterSlideFrame({type:'lyrics',elementType:'praise',layout:'lower_bar_text',text:'찬양'},{noChromakey:false,serviceId:'99df9e1b-1716-41fb-9ea0-f5ca4c99ee45'});if(!getComputedStyle(root.firstElementChild).fontFamily.startsWith('Paperlogy'))throw Error('Union caption font missing');root.innerHTML=renderPresenterSlideFrame({type:'lyrics',elementType:'praise',layout:'lower_bar_text',text:'찬양'},{noChromakey:true,serviceId:'another'});if(getComputedStyle(root.firstElementChild).fontFamily.includes('Paperlogy'))throw Error('Union font leaked');root.remove();
      return checks;
     }''',records)
     assert checks==72

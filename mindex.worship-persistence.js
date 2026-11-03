@@ -145,6 +145,7 @@ function normalizeServiceDocumentSlides(slides = []) {
       autoTrailingBlank: Boolean(slide.autoTrailingBlank || slide.auto_trailing_blank),
       linkedSource,
     };
+    if (slide.songInstrumental) payload.songInstrumental = true;
     if (asset.name || asset.url || asset.kind) payload.asset = asset;
     if (slide.pptx?.url) payload.pptx = { ...slide.pptx };
     if (slide.imageSrc || slide.image_src) payload.imageSrc = String(slide.imageSrc || slide.image_src || "").trim();

@@ -160,7 +160,7 @@ function presenterLyricsSlidesForServiceItem({
         type: "blank",
         label,
         title: form.label || "빈 화면",
-        formLabel: form.label || "",
+        formLabel: form.label || "", songInstrumental: form._presenterToken === "instrumental",
         marker: "",
         formKey: `blank:${form._presenterToken || formIndex}:${formIndex}`,
         segment: "",
