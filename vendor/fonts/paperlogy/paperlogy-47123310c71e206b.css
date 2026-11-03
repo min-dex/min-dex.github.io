@@ -1,0 +1,47 @@
+/* Self-hosted Paperlogy: identical source faces on every computer; no local() lookup. */
+@font-face {
+  font-family: "Paperlogy";
+  src: url("./Paperlogy-1Thin-90f939d17b28c759.woff2") format("woff2");
+  font-weight: 100; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Paperlogy";
+  src: url("./Paperlogy-2ExtraLight-5eda200e48154386.woff2") format("woff2");
+  font-weight: 200; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Paperlogy";
+  src: url("./Paperlogy-3Light-8928201d46a25204.woff2") format("woff2");
+  font-weight: 300; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Paperlogy";
+  src: url("./Paperlogy-4Regular-4b2e0fda11329198.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Paperlogy";
+  src: url("./Paperlogy-5Medium-83f2ba8b73f385f0.woff2") format("woff2");
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Paperlogy";
+  src: url("./Paperlogy-6SemiBold-416702a9fe2215de.woff2") format("woff2");
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Paperlogy";
+  src: url("./Paperlogy-7Bold-39daa190bc0ccaa7.woff2") format("woff2");
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Paperlogy";
+  src: url("./Paperlogy-8ExtraBold-5047db061c39ec5e.woff2") format("woff2");
+  font-weight: 800; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Paperlogy";
+  src: url("./Paperlogy-9Black-864a3a6eca726101.woff2") format("woff2");
+  font-weight: 900; font-style: normal; font-display: swap;
+}
+

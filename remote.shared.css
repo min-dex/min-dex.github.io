@@ -1,49 +1,5 @@
 /* Generated from styles.css by tools/build_remote_theme.cjs. Do not edit. */
-@font-face {
-  font-family: "Paperlogy";
-  src: url("./vendor/fonts/paperlogy/Paperlogy-1Thin-90f939d17b28c759.woff2") format("woff2");
-  font-weight: 100; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: "Paperlogy";
-  src: url("./vendor/fonts/paperlogy/Paperlogy-2ExtraLight-5eda200e48154386.woff2") format("woff2");
-  font-weight: 200; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: "Paperlogy";
-  src: url("./vendor/fonts/paperlogy/Paperlogy-3Light-8928201d46a25204.woff2") format("woff2");
-  font-weight: 300; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: "Paperlogy";
-  src: url("./vendor/fonts/paperlogy/Paperlogy-4Regular-4b2e0fda11329198.woff2") format("woff2");
-  font-weight: 400; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: "Paperlogy";
-  src: url("./vendor/fonts/paperlogy/Paperlogy-5Medium-83f2ba8b73f385f0.woff2") format("woff2");
-  font-weight: 500; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: "Paperlogy";
-  src: url("./vendor/fonts/paperlogy/Paperlogy-6SemiBold-416702a9fe2215de.woff2") format("woff2");
-  font-weight: 600; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: "Paperlogy";
-  src: url("./vendor/fonts/paperlogy/Paperlogy-7Bold-39daa190bc0ccaa7.woff2") format("woff2");
-  font-weight: 700; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: "Paperlogy";
-  src: url("./vendor/fonts/paperlogy/Paperlogy-8ExtraBold-5047db061c39ec5e.woff2") format("woff2");
-  font-weight: 800; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: "Paperlogy";
-  src: url("./vendor/fonts/paperlogy/Paperlogy-9Black-864a3a6eca726101.woff2") format("woff2");
-  font-weight: 900; font-style: normal; font-display: swap;
-}
+@import url("./vendor/fonts/paperlogy/paperlogy-47123310c71e206b.css");
 @font-face {
   font-family: "Pretendard Variable";
   src: url("./vendor/fonts/pretendard/PretendardVariable.woff2") format("woff2-variations");
