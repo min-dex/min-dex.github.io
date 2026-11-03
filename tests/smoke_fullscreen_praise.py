@@ -83,7 +83,7 @@ def main():
                   check(manual&&presenterSlideBackgroundVideoSource(manual,true)===presentation.backgroundVideo,'manual instrumental missing');
                   const inf=presenterOutputFrameStateForSlide(instrumental,payload);
                   check(inf.backgroundVideo===vf.backgroundVideo&&!inf.blankOutput,'instrumental lost video or kept transition overlay');
-                  const time=video.currentTime;applyPresenterBackgroundVideo(root,inf.backgroundVideo);
+                  const time=video.currentTime;applyPresenterOutputFrameState(root,inf);check(!root.classList.contains("is-blank"),"instrumental transition overlay");
                   check(root.querySelector('video')===video&&video.currentTime>=time,'instrumental restarted video');
                   await new Promise(resolve=>setTimeout(resolve,100));check(video.currentTime>time,'instrumental froze video');
                   check(!presenterOutputFrameStateForSlide({...instrumental,autoTrailingBlank:true},payload).backgroundVideo,'trailing blank inherited video');
