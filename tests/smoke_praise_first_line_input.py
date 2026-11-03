@@ -7,7 +7,7 @@ from smoke_app import start_local_app_server,sync_playwright,launch_chromium,pre
 server,url=start_local_app_server()
 try:
  with sync_playwright() as p:
-  for engine in ('chromium','webkit'):
+  for engine,part_type in (('chromium','Verse'),('chromium','Lyrics'),('webkit','Verse'),('webkit','Lyrics')):
    browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
    try:
     page=browser.new_page()
@@ -17,11 +17,11 @@ try:
     page.route('**/app.runtime.js*',lambda r:r.fulfill(path=str(Path(__file__).resolve().parents[1]/'app.js'),content_type='text/javascript'))
     page.goto(url+'?mindexSmokeRaw=1');page.wait_for_function("typeof saveWorshipServiceInstance==='function' && !!refs.songList && !document.body.classList.contains('ui-booting')")
     prepare_server_state_fixture(page)
-    print(engine,page.evaluate('''async()=>{
+    print(engine,part_type,page.evaluate('''async(partType)=>{
                       const check=(ok,msg)=>{if(!ok)throw Error(msg)};
                       const uid=()=>crypto.randomUUID(),sid=uid();
                       const service={id:sid,type_id:'fixture',date:'2026-10-30',title:'Fixture',_worshipSourceRef:{}};
-                      const version={id:uid(),name:'새찬송가',hymn_no:'382',praise_types:['hymn'],forms:[{id:uid(),part_type:'Verse',part_number:1,lyrics:'보존할 첫 줄\\n둘째 줄',sort_order:1}]};
+                      const version={id:uid(),name:'새찬송가',hymn_no:'382',praise_types:['hymn'],forms:[{id:uid(),part_type:partType,part_number:1,lyrics:'보존할 첫 줄\\n둘째 줄',sort_order:1}]};
                       const hymn=MindexSingleSong.fromLegacySong({id:uid(),title:'너 근심 걱정 말아라',hymn_no:'382',praise_types:['hymn'],versions:[version]},version,'SONG-HYMN-N382-0001');
                       const bad=MindexSingleSong.fromLegacySong({id:uid(),title:'382',praise_types:['ccm']},{id:uid(),name:'기본',forms:[]},'SONG-CONT-0445-0001');
                       hymn.revision=1;bad.revision=1;
@@ -105,9 +105,11 @@ try:
                       const marked={versions:[{forms:[
                         {part_type:'Verse',lyrics:'  \\n[Verse 1]\\n1. <b>첫 소절!</b>\\n다음 줄'},
                         {part_type:'Chorus',lyrics:'\\nSing to the Lord\\nsecond line'},
+                        {part_type:'Lyrics',lyrics:'가사형식 첫 줄'},
                         {part_type:'Bridge',lyrics:'제외할 브리지'},
+                        {part_type:'Coda',lyrics:'제외할 코다'},
                         {part_type:'Chorus',lyrics:''}]}]};
-                      check(JSON.stringify(praiseFirstLineAliases(marked))===JSON.stringify(['첫 소절!','Sing to the Lord']),'marker/multilingual/empty handling');
+                      check(JSON.stringify(praiseFirstLineAliases(marked))===JSON.stringify(['첫 소절!','Sing to the Lord','가사형식 첫 줄']),'marker/multilingual/empty handling');
                       state.module='presenter';state.serviceTypes=[{id:'fixture',name:'검증 예배'}];state.serviceError='';state.connectionError='';state.search='';
                       document.body.dataset.module='presenter';document.body.classList.remove('ui-booting');
                       renderServiceList();renderPresenterDetail();
@@ -124,6 +126,7 @@ try:
                       state.songs=[];clearSearchCaches();songCatalogLoaded=false;
                       check(await applyPresenterPreparationInput(sid),'real apply failed');
                       check(state.serviceItems[sid][0].song_id===hymn.id,'apply selected false numeric title');
+                      check(presenterPraiseTitle(song,'보존할 첫 줄',song.versions[0])==='너 근심 걱정 말아라','incipit leaked into canonical output title');
                       const draftBefore=JSON.stringify(state.serviceItems[sid]);failure=true;
                       try{await saveWorshipServiceInstance(service);throw Error('failure accepted')}catch(e){check(e.message==='INJECTED_FAILURE',e.message)}
                       check(JSON.stringify(state.serviceItems[sid])===draftBefore,'failure lost input');
@@ -166,7 +169,7 @@ try:
 
 
                       return 'PASS real first-line input / apply / native atomic failure retry / rehydrate; no praise writes';
-    }'''),flush=True)
+    }''',part_type),flush=True)
     page.unroute_all(behavior='wait')
    finally:browser.close()
 finally:server.shutdown()

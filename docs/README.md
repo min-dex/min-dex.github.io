@@ -60,6 +60,9 @@ stale document in the same change.
 
 ## Data Review Evidence
 
+- [첫소절·부제 1,659판본 읽기 감사](firstline-subtitle-audit-20261104.md): 전체 분모·의도 보존·
+  미확정 범위, Lyrics 첫소절 검색 보완의 로컬 검증과 운영 무변경 근거.
+
 - `handoff-worship-service-list-payload.md`: UX->Data handoff for the light service
   list read and the Data thread response (view, source_ref guard, history size).
 - `design-worship-service-history-storage.md`: design only (not applied) for the size of
