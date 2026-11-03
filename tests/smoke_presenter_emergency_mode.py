@@ -32,6 +32,24 @@ def main():
                     check(root.textContent.includes(slide.title==='설교 제목'?'설교 제목':slide.text),'content lost');
                     const normal=presenterOutputFrameStateForSlide(slide,{...payload,emergencyMode:false});check(!normal.emergencyMode,'normal mode leaked');
                   }
+                  const citation={id:'citation',type:'scripture',elementType:'scripture_text',layout:'lower_bar_text',scriptureContext:'citation-chromakey',title:'요한복음 1:1',referenceBook:'요한복음',referenceRange:'1:1',text:'요한복음 1:1  말씀 본문',citationBodyText:'말씀 본문'};
+                  const reader={id:'reader',type:'title-assignee',elementType:'title_assignee',layout:'lower_bar_text',sectionKey:'scripture_reading',label:'성경봉독',title:'성경봉독',scriptureReadingAssignee:'봉독자',assignee:'다같이'};
+                  for(const slide of [citation,reader]) {
+                    const stored=JSON.stringify(slide);let normalText='';
+                    for(const emergencyMode of [false,true,false]) {
+                      const f=presenterOutputFrameStateForSlide(slide,{chromakey:true,emergencyMode});
+                      root.className='presenter-output-root '+presenterOutputFrameClassNames(f);
+                      root.innerHTML=renderPresenterSlideFrame(slide,{noChromakey:f.noChromakey,emergencyMode});
+                      const tab=root.querySelector('.presenter-citation-tab'),box=tab?.querySelector('.presenter-tab-background');
+                      check(tab&&box,'missing scripture/reader fixture');
+                      check(getComputedStyle(box).display===(emergencyMode?'none':'block'),'tab box not reversible');
+                      check(getComputedStyle(tab).color===(emergencyMode?'rgb(255, 255, 255)':'rgb(0, 0, 0)'),'label contrast');
+                      check(getComputedStyle(tab).backgroundColor==='rgba(0, 0, 0, 0)','label background leaked');
+                      if(!normalText) normalText=root.textContent;
+                      check(root.textContent===normalText,'scripture/reader text changed');
+                    }
+                    check(JSON.stringify(slide)===stored,'scripture source changed');
+                  }
                   check(JSON.stringify(slides)===before,'authored slides changed');
                   const safety=presenterSafetyBlankSlide('transparent');check(!presenterOutputFrameStateForSlide(safety,payload).emergencyMode,'transparent overridden');
                   const media={id:'video',type:'video',elementType:'video',layout:'media',videoSrc:'fixture.mp4',text:'fixture.mp4'};
@@ -46,7 +64,7 @@ def main():
                   try {runPresenterAction('emergency',sid);check(state.presenter.emergencyMode&&sent===1,'toggle on failed');runPresenterAction('emergency','other');check(sent===1,'foreign service toggled');runPresenterAction('emergency',sid);check(!state.presenter.emergencyMode&&sent===2,'toggle off failed');}
                   finally {presenterControllerIsLive=oldLive;publishPresenterState=oldPublish;renderPresenterControlState=oldRender;}
                   check(state.presenter.index===1&&state.presenter.liveScripture===live&&state.serviceMusic.audio===music&&JSON.stringify(state.serviceItems)===items,'toggle changed output/content/audio');
-                  root.remove();return 'PASS black chromakey views, background suppression, media identity, safety precedence, payload and reversible controller toggle';
+                  root.remove();return 'PASS black chromakey views, unboxed scripture/reader labels, background suppression, media identity, safety precedence, payload and reversible controller toggle';
                 }'''))
                 page.evaluate("""() => {
                   const sid='emergency-live-fixture';

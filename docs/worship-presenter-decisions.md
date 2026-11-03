@@ -5620,3 +5620,10 @@ lyrics, song forms, timing, stored worship data or audio behavior is rewritten.
 ## Union service white note and blank cross ·2026-11-03
 
 The union service99df9e1b-1716-41fb-9ea0-f5ca4c99ee45 explicitly uses white praise-note headings and a white blank-screen cross. Its transparent transition cross image is rendered white by a scoped filter; source artwork, geometry, reveal animation, other services and chromakey output remain unchanged. This supersedes the prior orange ON FIRE note accent for this service.
+## Emergency scripture label boxes ·2026-11-03
+
+In emergency mode, scripture reference and reader labels retain white text on
+black without their white SVG tab backgrounds, rounded boxes or shadows.
+Reference, verse body and reader names remain intact; disabling emergency mode
+restores the ordinary chromakey boxes. Preview/output use the same scoped CSS.
+No scripture, worship record or slide content is rewritten.
