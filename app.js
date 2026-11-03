@@ -7086,6 +7086,9 @@ async function saveScripture() {
 function serviceSaveErrorMessage(error) {
   const message = String(error?.message || (typeof error === "string" ? error : "") || "").trim();
   const code = String(error?.code || error?.name || "").trim();
+  if (code === "57014" || /canceling statement due to statement timeout/i.test(message)) {
+    return "서버 처리 시간이 초과되어 저장하지 못했습니다. 입력은 유지됩니다. 잠시 후 다시 저장해 주세요.";
+  }
   if (message === "JOURNAL_NOT_CONFIRMED") {
     if (error.journalPhase === "cleanup") return "예배 저장 응답은 받았지만 복구 기록 정리를 확인하지 못했습니다. 입력과 요청은 유지됩니다. 다시 저장하면 기존 요청의 결과부터 확인합니다.";
     const cause = String(error?.cause?.message || "");

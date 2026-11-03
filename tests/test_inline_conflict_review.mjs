@@ -16,3 +16,10 @@ test('explicit inline save opens conflict review despite quiet success feedback'
   assert.equal(calls.includes('review:service'),review);assert.equal(state.saving,false);
  }
 });
+
+test('database statement timeout is actionable and does not claim success',()=>{
+ const start=source.indexOf('function serviceSaveErrorMessage('),end=source.indexOf('let worshipConflictReview',start);
+ const ctx=vm.createContext({String});vm.runInContext(source.slice(start,end),ctx);
+ const message=vm.runInContext('serviceSaveErrorMessage({code:"57014",message:"canceling statement due to statement timeout"})',ctx);
+ assert.match(message,/서버 처리 시간이 초과/);assert.match(message,/입력은 유지/);
+});

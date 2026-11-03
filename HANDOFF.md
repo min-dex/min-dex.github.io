@@ -1622,3 +1622,7 @@ pending; no operational writes, playback, output or printing were performed.
 ## 2026-11-03 입력·저장 병목 수정 후보
 
 `codex/order-save-flow`: 항목 저장 실패 후 전체 예배 저장으로 자동 재시도하던 중복 경로 제거. 기존 patch 경로 내부의 구조 변경/신규 ID/명시적 unsupported fallback은 유지. 깨끗한 예배의 변경 없는 펜 입력 저장은 서버 요청 없이 닫는다. dirty/저장 중/불확실 요청은 기존 atomic 경로를 유지한다. Node routing/atomic client 및 Chromium·WebKit 실제 inline 입력·IME·커서·실패/재시도·동시 항목·지연 응답·추가입력·재조회·no-op PASS. 실제 운영 데이터 저장/송출 조작 없음. 필수 GitHub gate·Pages·공개 검증 전이며 배포 완료로 보고하지 않는다.
+
+## 2026-11-03 ON FIRE 설교 저장 장애 (미해결)
+
+사용자 It's NEW 설교 입력 저장 실패 실재현. 원사용자Chrome447797753/예배99df9e1b-1716-41fb-9ea0-f5ca4c99ee45/설교e5fc3620-3fca-434c-abc4-19240e8a41b4. 최초 REVISION_CONFLICT, 비교창에서 local 제목/에베소서4:23–30 vs 서버 제목없음/별도인용 이사야61:1·BGV차이 확인. archive-before-adopt UI 후에도 입력값 유지, 중앙 단건 저장 exact toast canceling statement due to statement timeout + 예배복구본 충돌. 독립 public anon get_worship_service_v1 readback revision299/title빈값/person이태엽목사, 저장완료 아님. 새로 만든447797757 중복QA탭 닫음, 원사용자탭 유지. 추가 운영쓰기 중단. 관리자 dashboard 접근 auto-review가 구체승인없어 거절; 사용자에게 read-only 관리자 로그/함수 접근 승인 요청. 우회 금지. 후속75a0dedd는 펜 저장충돌 비교창 노출 수정, 별도 SQL timeout 한국어안내 추가. 기존 배포 e37ec12f scope에는 미포함. 전체 서버 timeout 해결로 주장 금지.
