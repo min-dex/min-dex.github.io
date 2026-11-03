@@ -589,7 +589,7 @@ function presenterDefaultTitleForServiceItem(item = {}, song = null, version = n
   if (isServiceConnectedPraiseSecondaryItem(item)) return false;
   if (isPresenterSpecialSongItem(item)) return true;
   if (presenterSongTitleUsesSectionHeading(item)) return false;
-  if (!isMainPraiseServiceItem(item, { allowUnlabeled: true })) return false;
+  if (!isMainPraiseServiceItem(item, { allowUnlabeled: true }) && !isPresenterPrayerPraiseItem(item)) return false;
   const memo = parseServiceItemMemo(item.memo);
   const scoreOutput = score || serviceItemOutputMode(item, memo) === "score";
   return !(scoreOutput && versionEffectivePraiseTypes(song, version).includes("hymn"));

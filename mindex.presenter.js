@@ -1184,7 +1184,6 @@ function presenterSongTitleNormalizedHeading(heading = "", sectionKey = "") {
     doxology: "송영",
     sending: "파송",
     response_song: "결단",
-    prayer_meeting_praise: "기도회",
     closing_hymn: "폐회",
     closing_visual: "폐회",
     closing_song: "폐회",
@@ -1195,7 +1194,6 @@ function presenterSongTitleNormalizedHeading(heading = "", sectionKey = "") {
     doxology: "송영",
     sending: "송영",
     response_song: "결단찬양",
-    prayer_meeting_praise: "기도찬양",
     closing_hymn: "폐회찬송",
     closing_visual: "폐회찬송",
     closing_song: "폐회찬송",
@@ -1205,10 +1203,16 @@ function presenterSongTitleNormalizedHeading(heading = "", sectionKey = "") {
   return raw;
 }
 
+function isPresenterPrayerPraiseItem(item = {}, section = {}) {
+  const sectionKey = section.sectionKey || item._worshipSectionKey;
+  const label = compactSearchValue(item.label || section.elementLabel || section.sectionLabel || "");
+  return sectionKey === "prayer_meeting_praise" || /^기도(?:회)?찬양\d*$/.test(label);
+}
+
 function presenterSongTitleUsesSectionHeading(item = {}, section = {}) {
-  if (isPresenterSpecialSongItem(item, section)) return false;
+  if (isPresenterSpecialSongItem(item, section) || isPresenterPrayerPraiseItem(item, section)) return false;
   const compact = compactSearchValue(item?.label || section.elementLabel || section.sectionLabel || "");
-  if (/^(입례찬양|성경봉독전찬양|송영|파송|봉헌|봉헌찬송|봉헌찬양|파송찬양|파송찬송|결단|결단찬송|결단찬양|기도찬양|기도회찬양|폐회|폐회찬송)$/.test(compact)) return true;
+  if (/^(입례찬양|성경봉독전찬양|송영|파송|봉헌|봉헌찬송|봉헌찬양|파송찬양|파송찬송|결단|결단찬송|결단찬양|폐회|폐회찬송)$/.test(compact)) return true;
   if (section.sectionRole === "main-praise") return false;
   const sectionKey = String(section.sectionKey || item?._worshipSectionKey || "").trim();
   if ([
@@ -1219,7 +1223,6 @@ function presenterSongTitleUsesSectionHeading(item = {}, section = {}) {
     "doxology",
     "sending",
     "response_song",
-    "prayer_meeting_praise",
     "closing_song",
     "closing_hymn",
     "closing_visual",
