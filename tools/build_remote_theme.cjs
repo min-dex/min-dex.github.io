@@ -3,7 +3,7 @@ const fs=require('node:fs'),path=require('node:path');
 const root=path.resolve(__dirname,'..');
 function build(){
  const source=fs.readFileSync(path.join(root,'styles.css'),'utf8');
- const fonts=source.match(/@font-face\s*\{[^}]*\}/g).filter(block=>block.includes('font-family: "Pretendard Variable"'));
+ const fonts=source.match(/@font-face\s*\{[^}]*\}/g).filter(block=>block.includes('font-family: "Pretendard Variable"') || block.includes('font-family: "Paperlogy"'));
  const light=source.match(/:root \{[^}]*\}/)[0];
  const dark=source.match(/body\[data-theme="dark"\] \{[^}]*\}/)[0].replace('body[',':root[');
  return '/* Generated from styles.css by tools/build_remote_theme.cjs. Do not edit. */\n'+[...fonts,light,dark].join('\n')+'\n';

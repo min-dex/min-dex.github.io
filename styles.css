@@ -1,3 +1,50 @@
+/* Self-hosted Paperlogy: identical source faces on every computer; no local() lookup. */
+@font-face {
+  font-family: "Paperlogy";
+  src: url("./vendor/fonts/paperlogy/Paperlogy-1Thin-90f939d17b28c759.woff2") format("woff2");
+  font-weight: 100; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Paperlogy";
+  src: url("./vendor/fonts/paperlogy/Paperlogy-2ExtraLight-5eda200e48154386.woff2") format("woff2");
+  font-weight: 200; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Paperlogy";
+  src: url("./vendor/fonts/paperlogy/Paperlogy-3Light-8928201d46a25204.woff2") format("woff2");
+  font-weight: 300; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Paperlogy";
+  src: url("./vendor/fonts/paperlogy/Paperlogy-4Regular-4b2e0fda11329198.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Paperlogy";
+  src: url("./vendor/fonts/paperlogy/Paperlogy-5Medium-83f2ba8b73f385f0.woff2") format("woff2");
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Paperlogy";
+  src: url("./vendor/fonts/paperlogy/Paperlogy-6SemiBold-416702a9fe2215de.woff2") format("woff2");
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Paperlogy";
+  src: url("./vendor/fonts/paperlogy/Paperlogy-7Bold-39daa190bc0ccaa7.woff2") format("woff2");
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Paperlogy";
+  src: url("./vendor/fonts/paperlogy/Paperlogy-8ExtraBold-5047db061c39ec5e.woff2") format("woff2");
+  font-weight: 800; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Paperlogy";
+  src: url("./vendor/fonts/paperlogy/Paperlogy-9Black-864a3a6eca726101.woff2") format("woff2");
+  font-weight: 900; font-style: normal; font-display: swap;
+}
+
 /* Full-font fallback covers only supported characters outside the common segments.
    Disjoint ranges prevent WebKit from fetching 2 MB for common/unsupported glyphs. */
 @font-face {
@@ -391,8 +438,8 @@
   --rail-motion: 120ms cubic-bezier(.2, 0, .2, 1);
   --module-tab-w: 180px;
   --topbar-compact-w: calc((var(--topbar-btn-size) * var(--topbar-action-slot-count)) + (var(--shell-edge-inset) * 2) + 50px);
-  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-presenter: "Mindex Presenter", "Freesentation", sans-serif;
+  --font-sans: "Paperlogy", "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-presenter: "Paperlogy", "Mindex Presenter", "Freesentation", sans-serif;
   font-family: var(--font-sans);
   font-size: 14px;
 }

@@ -222,3 +222,16 @@ The connection-status dialog shares the Remote dialog shell: token radius (`--r`
 20px insets at desktop and phone widths, card-title size/weight, and a non-wrapping
 header with 10px gap and 20px bottom margin. Close and refresh retain the standard
 35px icon target with 16px/1.5 Lucide icons. Presence and refresh behavior are unchanged.
+
+## Default webfont ·2026-11-03
+
+The app shell, Remote and default presenter text use self-hosted Paperlogy
+WOFF2 faces (100–900). Face URLs contain their SHA256 prefix and never use
+`local()`, so an installed font cannot silently select another version. Both
+controller and output preloads reference these exact same files. The pinned official WOFF2 faces cover all 11,172 modern Hangul syllables.
+Existing Pretendard/Freesentation fallback remains available for other characters
+Paperlogy does not include. Explicit service artwork, scripture reading and
+bulletin font choices retain their own typography. Font loading still invalidates
+presenter fitting; lyrics, forms, timing and operational data are unchanged.
+School computers need no font installation; the app must finish loading its
+font files before use. This is browser verification, not school-device proof.

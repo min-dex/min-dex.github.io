@@ -5573,3 +5573,11 @@ Keep centered 16:9 composition through sidebar replacement and fractional resize
 retain existing font fitting, playback, output ownership and stored slide content.
 
 기도찬양(번호가 붙은 순서 포함)은 일반 찬양의 제목 장 규칙을 따른다. 자동 송폼의 제목 장에는 곡 제목을 표시하며, 지정 송폼은 T의 유무와 위치를 그대로 따른다.
+
+## Paperlogy default projection ·2026-11-03
+
+Default controller and projection text now share the same self-hosted Paperlogy
+webfont across computers. Preserve the existing stage sizes, weights, fitting
+and explicit service/artwork/reading typefaces; retain full Korean glyph fallback.
+No worship record, lyrics, form, audio timing or background attachment is rewritten.
+See design-system.md for file provenance and installation-free delivery.
