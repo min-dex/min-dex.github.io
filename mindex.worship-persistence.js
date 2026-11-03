@@ -983,3 +983,12 @@ function serviceElementSourceRefForSave(existingSourceRef = {}, item = {}, parse
   }
   return sourceRef;
 }
+
+// Authored per-element display plan; never edits element rows or song forms.
+function presenterElementTransitionBlankTones(slide, service) {
+  if (service?.id !== "99df9e1b-1716-41fb-9ea0-f5ca4c99ee45") return [];
+  const tones = serviceRawSourceRef(service).transitionBlankTones?.[slide?.elementId];
+  return Array.isArray(tones) && tones.length > 0 && tones.length <= 2
+    && tones.every(tone => tone === "light" || tone === "dark") ? tones : [];
+}
+

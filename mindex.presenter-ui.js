@@ -783,14 +783,6 @@ function preparePresenterServiceBlankCrossMorph(root, previous, next) {
   };
 }
 
-// Authored per-element display plan; never edits element rows or song forms.
-function presenterElementTransitionBlankTones(slide, service) {
-  if (service?.id !== "99df9e1b-1716-41fb-9ea0-f5ca4c99ee45") return [];
-  const tones = serviceRawSourceRef(service).transitionBlankTones?.[slide?.elementId];
-  return Array.isArray(tones) && tones.length > 0 && tones.length <= 2
-    && tones.every(tone => tone === "light" || tone === "dark") ? tones : [];
-}
-
 const PRESENTER_UNION_STARLIGHT_VIDEO = "https://tdulobbnppmpiqqxbvqy.supabase.co/storage/v1/object/public/mindex-worship-media/services/99df9e1b-1716-41fb-9ea0-f5ca4c99ee45/a883cc8a-0324-416e-a95a-cffcd39e23b7/1793668489949-quiet-starlight-loop-v10.mp4";
 
 function presenterUnionStarlightView(slide, options = {}) {
