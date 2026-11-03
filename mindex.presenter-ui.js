@@ -783,11 +783,36 @@ function preparePresenterServiceBlankCrossMorph(root, previous, next) {
   };
 }
 
+// Authored per-element display plan; never edits element rows or song forms.
+function presenterElementTransitionBlankTones(slide, service) {
+  if (service?.id !== "99df9e1b-1716-41fb-9ea0-f5ca4c99ee45") return [];
+  const tones = serviceRawSourceRef(service).transitionBlankTones?.[slide?.elementId];
+  return Array.isArray(tones) && tones.length > 0 && tones.length <= 2
+    && tones.every(tone => tone === "light" || tone === "dark") ? tones : [];
+}
+
+const PRESENTER_UNION_STARLIGHT_VIDEO = "https://tdulobbnppmpiqqxbvqy.supabase.co/storage/v1/object/public/mindex-worship-media/services/99df9e1b-1716-41fb-9ea0-f5ca4c99ee45/a883cc8a-0324-416e-a95a-cffcd39e23b7/1793668489949-quiet-starlight-loop-v10.mp4";
+
+function presenterUnionStarlightView(slide, options = {}) {
+  if (!slide || options.serviceId !== "99df9e1b-1716-41fb-9ea0-f5ca4c99ee45" || !options.noChromakey
+    || options.emergencyMode || String(slide.id || "").startsWith("presenter:safety-")
+    || slide.formBackgroundImage || slide.backgroundVideo || slide.imageSrc || slide.videoSrc || slide.pptx?.url
+    || presenterSlideIsScoreLike(slide) || presenterPayloadBackgroundImages(options).length
+    || presenterServiceDesignForSlide(slide, options) || slide.scriptureContext === "reading") return slide;
+  const layout = presenterSlideLayout(slide);
+  if (layout === PRESENTER_SLIDE_LAYOUTS.BLANK) {
+    if (presenterUnionBlankKind(slide, options) !== "praise") return slide;
+  } else if (![PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT, PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT].includes(layout)) return slide;
+  return { ...slide, backgroundVideo: PRESENTER_UNION_STARLIGHT_VIDEO, unionStarlightFallback: true };
+}
+
 function presenterUnionBlankKind(slide, options = {}) {
   if (options.serviceId !== "99df9e1b-1716-41fb-9ea0-f5ca4c99ee45" || !options.noChromakey || options.emergencyMode
     || String(slide?.id || "").startsWith("presenter:safety-") || slide?.formBackgroundImage
     || presenterSlideLayout(slide) !== PRESENTER_SLIDE_LAYOUTS.BLANK
-    || presenterSlideBackgroundVideoSource(slide, true)) return "";
+    || (!slide?.unionStarlightFallback && presenterSlideBackgroundVideoSource(slide, true))) return "";
+  if (slide.transitionBlankTone === "light") return "service";
+  if (slide.transitionBlankTone === "dark") return "praise";
   return slide.praiseTransitionBlank || slide.songInstrumental || isPresenterMainPraiseSlide(slide)
     || presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE ? "praise" : "service";
 }

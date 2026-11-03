@@ -5651,3 +5651,23 @@ morph, changes no stored lyrics/forms, and does not restart background media.
 ## Video thumbnail metadata positioning ·2026-11-03
 
 Video preview foreground stacking preserves the absolute top song label and bottom service footer positions. Only flow content becomes relative above the video; metadata must not collapse into the lyric body or overlap. Preview frame state carries the same service identity as output.
+
+## Union per-element transition blanks ·2026-11-03
+
+For service99df, `source_ref.transitionBlankTones` maps an element ID to one or
+two ordered `light` / `dark` tones. Generated trailing blanks use white/red for
+light and black/white for dark; thumbnails and output share the same plan. The
+opening image uses dark then light, allowing the white cross on black to dissolve
+into the red cross on white. Praise/video and black text frames use dark; authored
+white images, reading and sermon use light. Explicit media, instrumental BGV,
+photo-only forms, safety, emergency and chromakey retain their existing behavior.
+Missing/invalid plans retain prior defaults; other services ignore this map.
+No song forms, lyrics, element order or element rows change.
+
+The later same-day union request replaces otherwise background-free black
+content and dark transition blanks with the existing quiet-starlight video.
+Dark blanks retain the white cross above that video; light blanks remain white/red.
+Derive this fallback in shared preview/output rendering only. Preserve explicit
+video/still/photo/score/file backgrounds, white service artwork/reading, manual
+blackout, emergency and chromakey. Unassigned praise titles/lyrics/instrumentals
+and ordinary black text frames receive the fallback without saving song content.
