@@ -705,3 +705,64 @@ function presenterMorphSongTitle(activeLayer, nextLayer, frameState, animated) {
     }
 
 }
+
+function presenterControlBoardKey(service, slides = [], active = false, chromakey = true) {
+  const theme = presenterOutputTheme(service?.type_id);
+  const slideKey = slides.map((slide, index) => [
+    index,
+    slide?.id || "",
+    slide?.type || "",
+    presenterSlideElementType(slide),
+    presenterSlideLayout(slide),
+    slide?.formKey || "",
+    slide?.marker || "",
+    slide?.imageSrc || "",
+    slide?.videoSrc || "",
+    slide?.audioSrc || "",
+    presenterSlideRenderKeyText(slide),
+  ].join(":")).join("|");
+  const scriptureDraftKey = [...deferredServiceScriptureReferenceDrafts.entries()]
+    .filter(([key]) => key.startsWith(`${service?.id || ""}:`))
+    .map(([key, value]) => `${key}=${value}`)
+    .join("|");
+  // Escape control characters before round-tripping this key through HTML attributes.
+  return JSON.stringify([
+    service?.id || "",
+    theme,
+    chromakey ? "chroma" : "clean",
+    state.presenter.serviceId === service?.id && state.presenter.emergencyMode ? "emergency" : "normal",
+    active ? "active" : "preview",
+    presenterControllerIsLive(service?.id) ? "live" : "offline",
+    globalThis.MindexSongTiming?.revision || 0,
+    slides.length,
+    slideKey,
+    scriptureDraftKey,
+  ]);
+}
+
+
+// A temporary view only: authored slides and service output settings stay intact.
+function presenterEmergencySlideView(slide, enabled = false) {
+  if (!enabled || !slide || String(slide.id || "").startsWith("presenter:safety-")) return slide;
+  const type = presenterSlideElementType(slide);
+  if (presenterSlideIsScoreLike(slide) || [PRESENTER_ELEMENT_TYPES.IMAGE, PRESENTER_ELEMENT_TYPES.VIDEO,
+    PRESENTER_ELEMENT_TYPES.FILE, PRESENTER_ELEMENT_TYPES.AUDIO].includes(type)) return slide;
+  const context = slide.scriptureContext === "reading" || slide.scriptureContext === "sermon" ? "sermon-chromakey"
+    : slide.scriptureContext === "citation" ? "citation-chromakey" : slide.scriptureContext;
+  return normalizeChromakeyPresenterSlideLayout({ ...slide, outputContext: "chromakey",
+    scriptureContext: context, scriptureReadingFinal: false, suppressBackgroundImage: true,
+    noBackgroundImage: true, formBackgroundImage: "" });
+}
+
+
+function presenterOutputFrameClassNames(frameState = {}) {
+  return [
+    frameState.noChromakey ? "no-chromakey" : "",
+    frameState.emergencyMode ? "is-emergency-mode" : "",
+    frameState.mediaOutput ? "is-media-output" : "",
+    frameState.showBackground ? "has-background" : "",
+    frameState.formBackground ? "has-form-background" : "",
+    frameState.blankOutput ? "is-blank" : "",
+    frameState.blackoutOutput ? "is-blackout" : "",
+  ].filter(Boolean).join(" ");
+}

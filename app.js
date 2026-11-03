@@ -29845,40 +29845,6 @@ function presenterSlideRenderKeyText(slide = {}) {
   return `${value.length}:${value.slice(0, 64)}:${value.slice(-24)}`;
 }
 
-function presenterControlBoardKey(service, slides = [], active = false, chromakey = true) {
-  const theme = presenterOutputTheme(service?.type_id);
-  const slideKey = slides.map((slide, index) => [
-    index,
-    slide?.id || "",
-    slide?.type || "",
-    presenterSlideElementType(slide),
-    presenterSlideLayout(slide),
-    slide?.formKey || "",
-    slide?.marker || "",
-    slide?.imageSrc || "",
-    slide?.videoSrc || "",
-    slide?.audioSrc || "",
-    presenterSlideRenderKeyText(slide),
-  ].join(":")).join("|");
-  const scriptureDraftKey = [...deferredServiceScriptureReferenceDrafts.entries()]
-    .filter(([key]) => key.startsWith(`${service?.id || ""}:`))
-    .map(([key, value]) => `${key}=${value}`)
-    .join("|");
-  // Escape control characters before round-tripping this key through HTML attributes.
-  return JSON.stringify([
-    service?.id || "",
-    theme,
-    chromakey ? "chroma" : "clean",
-    state.presenter.serviceId === service?.id && state.presenter.emergencyMode ? "emergency" : "normal",
-    active ? "active" : "preview",
-    presenterControllerIsLive(service?.id) ? "live" : "offline",
-    globalThis.MindexSongTiming?.revision || 0,
-    slides.length,
-    slideKey,
-    scriptureDraftKey,
-  ]);
-}
-
 function presenterOutputWarmupUiState(serviceId, options = {}) {
   const warmup = state.presenter.outputWarmup;
   if (!options.active || !options.outputOpen || !warmup) return null;

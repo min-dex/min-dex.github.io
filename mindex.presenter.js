@@ -2727,19 +2727,6 @@ function presenterSlideUsesServiceBackground(slide) {
   ].includes(type) && Boolean(slide.elementType || ["title", "title-content", "title-assignee", "lyrics", "song-title", "scripture", "liturgical-body", "component"].includes(slide.type));
 }
 
-// A temporary view only: authored slides and service output settings stay intact.
-function presenterEmergencySlideView(slide, enabled = false) {
-  if (!enabled || !slide || String(slide.id || "").startsWith("presenter:safety-")) return slide;
-  const type = presenterSlideElementType(slide);
-  if (presenterSlideIsScoreLike(slide) || [PRESENTER_ELEMENT_TYPES.IMAGE, PRESENTER_ELEMENT_TYPES.VIDEO,
-    PRESENTER_ELEMENT_TYPES.FILE, PRESENTER_ELEMENT_TYPES.AUDIO].includes(type)) return slide;
-  const context = slide.scriptureContext === "reading" || slide.scriptureContext === "sermon" ? "sermon-chromakey"
-    : slide.scriptureContext === "citation" ? "citation-chromakey" : slide.scriptureContext;
-  return normalizeChromakeyPresenterSlideLayout({ ...slide, outputContext: "chromakey",
-    scriptureContext: context, scriptureReadingFinal: false, suppressBackgroundImage: true,
-    noBackgroundImage: true, formBackgroundImage: "" });
-}
-
 function presenterOutputFrameStateForSlide(slide, payload = {}) {
   const emergencyMode = Boolean(payload?.emergencyMode && !payload?.safetyBlank
     && !String(slide?.id || "").startsWith("presenter:safety-"));
@@ -2813,18 +2800,6 @@ function presenterFrameNormalizeOutputContext(value = "") {
   if (["chromakey", "chroma", "key", "green", "greenkey", "크로마키"].includes(key)) return "chromakey";
   if (["clean", "fullscreen", "full", "media", "image", "video", "score", "nochromakey", "no-chromakey", "풀스크린", "전체화면"].includes(key)) return "clean";
   return "";
-}
-
-function presenterOutputFrameClassNames(frameState = {}) {
-  return [
-    frameState.noChromakey ? "no-chromakey" : "",
-    frameState.emergencyMode ? "is-emergency-mode" : "",
-    frameState.mediaOutput ? "is-media-output" : "",
-    frameState.showBackground ? "has-background" : "",
-    frameState.formBackground ? "has-form-background" : "",
-    frameState.blankOutput ? "is-blank" : "",
-    frameState.blackoutOutput ? "is-blackout" : "",
-  ].filter(Boolean).join(" ");
 }
 
 function presenterOutputFrameBackgroundStyle(frameState = {}) {
