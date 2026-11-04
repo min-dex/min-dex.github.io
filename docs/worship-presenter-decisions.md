@@ -5712,3 +5712,21 @@ uses immediate replacement. No service receives inferred or automatically copied
 BGV, and source lyrics/forms/timing/media settings remain unchanged. A medley
 inside one element naturally keeps its background; adjacent elements can share
 an explicitly assigned URL without restarting the loop.
+
+## Output freeze and current-service refresh ·2026-11-04
+
+Freeze holds slide/content navigation for the current output session; video and
+audio continue. Controller, Remote and output-local/automatic navigation respect
+the same flag. Blackout, transparent, emergency and stop remain usable.
+
+Screen refresh reads only the current service aggregate and its linked songs; it
+does not reload the page or rewrite operational data. It stages reads before
+adoption and automatically releases its temporary hold on completion or failure,
+retaining an existing manual freeze. Dirty inputs, pending saves, context changes
+and failed/late reads preserve the old frame and local data. The wait is bounded
+to15 seconds; late results never adopt. Existing image decode gates keep the old
+frame until replacement assets are ready. A physical browser reload remains a
+separate lifecycle and may recreate controller-owned media.
+
+Freeze and refresh controls occupy their own two-button row. The existing four
+window/safety icons retain their single row in both presenter views.

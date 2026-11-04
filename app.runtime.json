@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261104-bright-dissolve-lifecycle",
+  "version": "20261104-presenter-freeze-refresh",
   "options": {
     "compress": false,
     "mangle": {

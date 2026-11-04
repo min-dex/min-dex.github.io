@@ -1,4 +1,5 @@
 function runPresenterAction(action, serviceId = state.selectedServiceId, options = {}) {
+  if (globalThis.MindexPresenterRefresh?.action(action, serviceId, options)) return;
   const p = state.presenter;
   if (action === "emergency") {
     if (!presenterControllerIsLive(serviceId) || !p.slides.length) return;
