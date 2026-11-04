@@ -6395,3 +6395,6 @@ body[data-module="presenter"] .svc-presenter-toolbar::before {
 .praise-selection-next li { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; font-size: 12px; }
 .praise-selection-key { color: var(--sidebar-sub); }
 @media (max-width: 640px) { .praise-selection > summary span { display: block; margin: 5px 0 0; } .praise-selection-entry dl { flex-direction: column; } }
+
+/* Empty setlist reasons keep Korean words together without truncating copy. */
+.svc-setlist-week-status { word-break: keep-all; overflow-wrap: anywhere; }

@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261104-song-registration-ready",
+  "version": "20261105-ui-polish",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "e8eb358e64a6d70f411606c0af755d143d005f8cf9c9b1addafaaf4ccae48301",
-  "runtime_sha256": "655a624ca62adf9ea1f726b1b876ae36389312c099d25e5facad24c62cb4e483",
-  "source_bytes": 1356512,
-  "runtime_bytes": 968249,
-  "source_gzip": 311006,
-  "runtime_gzip": 243925
+  "source_sha256": "b55535441116adbe0507c4b9c7b7a3bb0e912b95405f53149c34e1cf3ac25e95",
+  "runtime_sha256": "bd2eae0209f232543ef2807ed97a5e63b05463f7aa368d98530623bf1edf5067",
+  "source_bytes": 1356457,
+  "runtime_bytes": 968324,
+  "source_gzip": 310994,
+  "runtime_gzip": 243943
 }

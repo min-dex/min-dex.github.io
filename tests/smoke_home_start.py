@@ -209,6 +209,14 @@ try:
     } finally {state.client=originalClient;canUseClientData=originalCanRead;homeOverviewStats=null;}
    }""")
    print(engine,result,flush=True)
+   page.evaluate("""async()=>{
+    const old={catalog:state.singleSongCatalog,client:state.client,read:canUseClientData,activation:ensureSingleSongActivation};
+    const rows=['SONG-CONT-9000-0001','SONG-CONT-9000-0002','SONG-CONT-9001-0001'].map((id,i)=>({id,metadata:{title:'검증 곡 '+i},content:{forms:[]},relations:{same_song:i<2?['SONG-CONT-9000-0001','SONG-CONT-9000-0002'].filter(x=>x!==id):[]}}));
+    let calls=0;try{state.singleSongCatalog=MindexSingleSong.createCatalog(rows);state.client={from:()=>{calls++;return {select(){return this},eq(){return this},abortSignal:async()=>({data:[],error:null})}}};canUseClientData=()=>true;ensureSingleSongActivation=async()=>{};homeOverviewStats=null;
+     const before=JSON.stringify(state.songs);await loadHomeOverviewStats({force:true});
+     if(homeOverviewStats.songs!==2||calls!==1||before!==JSON.stringify(state.songs))throw Error('Home must count complete logical groups without loading lyric records');
+    }finally{state.singleSongCatalog=old.catalog;state.client=old.client;canUseClientData=old.read;ensureSingleSongActivation=old.activation;homeOverviewStats=null;}
+   }""")
    result=page.evaluate("""async()=>{
     const original=state.client,canRead=canUseClientData;
     const calls=[];

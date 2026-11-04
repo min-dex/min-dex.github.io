@@ -42,6 +42,20 @@ const deck=presenterElementSlideFromMemoCore(common,{},0,parseServiceItemMemo(co
 assert.equal(deck.type,'image');assert.equal(deck.label,'공동기도');assert.ok(deck.imageSrc.includes('daniel-common-prayer-template-'));
 assert.ok(SERVICE_SLOT_MUSIC['dawn.free'].source.endsWith('7838168016b7.mp3'));
 assert.ok(!SERVICE_SLOT_MUSIC['prayer.meeting.free'].source.includes('7838168016b7'));
+// Only an explicitly reviewed duplicate is projected away; original rows stay intact.
+const fri={id:'10000000-0000-4000-8000-000000000098',type_id:'friday',date:'2026-11-06',alias:'온세대 월삭예배',_worshipSourceRef:{created_from:'mindex_template'}};
+const monthly={id:'10000000-0000-4000-8000-000000000099',type_id:'monthly',date:fri.date,alias:fri.alias,_worshipSourceRef:{navigation_duplicate_of:fri.id}};
+state.services=[fri,monthly];const originalPair=JSON.stringify(state.services);
+assert.equal(serviceUpcomingDisplayServices(state.services).length,1);assert.equal(serviceUpcomingDisplayServices(state.services)[0].id,fri.id);
+assert.equal(getHomeNextService(new Date('2026-11-06T12:00:00')).id,fri.id);
+assert.equal(JSON.stringify(state.services),originalPair);
+for(const changed of [{...monthly,alias:'다른 예배'},{...monthly,date:'2026-11-07'},{...monthly,_worshipSourceRef:{...monthly._worshipSourceRef,start_time:'19:00'}},{...monthly,_worshipSourceRef:{navigation_duplicate_of:'missing'}},{...monthly,_worshipSourceRef:{}}]){
+ state.services=[fri,changed];assert.equal(serviceUpcomingDisplayServices(state.services).length,2,'A distinct or unreviewed service must remain visible');
+}
+state.services=[fri];assert.equal(worshipServiceExistsForTarget({typeId:'monthly',date:fri.date,alias:fri.alias}),true);
+assert.equal(worshipServiceExistsForTarget({typeId:'monthly',date:fri.date,alias:'다른 월삭예배'}),false);
+assert.equal(worshipServiceExistsForTarget({typeId:'monthly',date:fri.date,alias:''}),false);
+state.services=[{...fri,_worshipSourceRef:{start_time:'05:00'}}];assert.equal(worshipServiceExistsForTarget({typeId:'monthly',date:fri.date,alias:fri.alias}),false);
 console.log('PASS linked replacements preserve absence, route all three card layouts and setlist status to the actual service');
 `,c);
 

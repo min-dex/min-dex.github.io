@@ -4477,9 +4477,7 @@ function worshipServiceExistsForTarget(target = {}) {
   const targetTypeId = worshipAppServiceTypeId(target.typeId);
   const targetDate = String(target.date || "").trim();
   if (!targetTypeId || !targetDate) return true;
-  return state.services.some((service) =>
-    worshipAppServiceTypeId(service.type_id) === targetTypeId
-    && String(service.date || "").trim() === targetDate);
+  return state.services.some(service => worshipServiceMatchesAutoTarget(service, target));
 }
 
 function autoWorshipServicePayload(target = {}) {
@@ -16412,7 +16410,7 @@ async function loadHomeOverviewStats({ force = false } = {}) {
   stats.promise = (async () => {
     await ensureSingleSongActivation();
     const results = await Promise.allSettled([
-      state.singleSongCatalog ? Promise.resolve({count:state.singleSongCatalog.ids().length}) : client.from("mindex_songs").select("id", { count:"exact", head:true }).abortSignal(abort.signal),
+      state.singleSongCatalog ? Promise.resolve({count:state.singleSongCatalog.displayCount()}) : client.from("mindex_songs").select("id", { count:"exact", head:true }).abortSignal(abort.signal),
       client.from("mindex_bible_translations").select("id,name,language,canonical_source:metadata->canonical_source").eq("is_active", true).abortSignal(abort.signal),
     ]);
     if (state.client !== client || homeOverviewStats !== stats) return;
@@ -16438,12 +16436,12 @@ async function loadHomeOverviewStats({ force = false } = {}) {
 function renderHomeStart() {
   const now = new Date();
   const stats = homeOverviewStats?.client === state.client ? homeOverviewStats : null;
-  const songCount = stats?.songs ?? (songCatalogLoaded ? state.songs.length : null);
+  const songCount = stats?.songs ?? (songCatalogLoaded ? groupPraiseSongs(state.songs.filter(isSelectablePraiseSong)).length : null);
   const editionCount = stats?.editions ?? (state.bibleTranslations.length ? state.bibleTranslations.length : null);
   const editionNames = stats?.editions != null ? stats.names : homeBibleEditionNames(state.bibleTranslations);
   const week = recentServiceWeeks(now)[0];
   const servicesReady = state.serviceTypes.length > 0 && !state.serviceError;
-  const services = state.services.filter(service => !service._expected && !serviceIsNoGathering(service));
+  const services = serviceUpcomingDisplayServices(state.services).filter(service => !service._expected && !serviceIsNoGathering(service));
   const thisWeek = services.filter(service => service.date >= toLocalDateStr(week.start) && service.date <= toLocalDateStr(week.end));
   const next = getHomeNextService(now);
   const bulletins = services.filter(serviceSupportsBulletin);
@@ -19757,11 +19755,7 @@ function cleanSongTitleForSave(song) {
 // Retired duplicates remain readable by ID for historical worship output.
 // Only an explicit, valid same-song successor suppresses new selection.
 function isSelectablePraiseSong(song) {
-  const targetId = song?.metadata?.retiredInto;
-  if (!song?._singleSongRecord || typeof targetId !== "string" || targetId === song.id) return true;
-  const target = songById(targetId);
-  return !(target?._singleSongRecord && !target.metadata?.retiredInto
-    && (song.same_song_ids || []).includes(targetId));
+  return globalThis.MindexSingleSong.isSelectableSong(song, songById);
 }
 
 function getFilteredSongs() {
@@ -24146,7 +24140,7 @@ function getServiceDashboardServices(base = new Date()) {
   const weeks = recentServiceWeeks(base);
   const start = weeks[0].start;
   const end = weeks[1].end;
-  const upcoming = getFilteredServices().filter((service) => {
+  const upcoming = serviceUpcomingDisplayServices(getFilteredServices()).filter((service) => {
     return worshipServiceOverlapsDates(service, start, end);
   });
   return sortServicesByDate([...upcoming, ...getExpectedServicesInRange(start, end)]);
@@ -24174,7 +24168,7 @@ function serviceTimeWindow(service, baseDate = new Date()) {
 function getHomeNextService(baseDate = new Date()) {
   const now = new Date(baseDate);
   if (Number.isNaN(now.getTime())) return null;
-  const candidates = state.services
+  const candidates = serviceUpcomingDisplayServices(state.services)
     .filter(service => !serviceIsNoGathering(service))
     .map((service) => ({ service, window: serviceTimeWindow(service, baseDate) }))
     .filter(({ window }) => window && window.end >= now);
@@ -24228,7 +24222,7 @@ function getServiceSidebarServices() {
   const today = upcomingServiceBaseDate();
   const end = new Date(today);
   end.setDate(today.getDate() + SERVICE_FUTURE_LOOKAHEAD_DAYS);
-  const upcoming = getFilteredServices().filter((service) => {
+  const upcoming = serviceUpcomingDisplayServices(getFilteredServices()).filter((service) => {
     return worshipServiceOverlapsDates(service, today, end);
   });
   return sortServicesByDate([...upcoming, ...getExpectedServicesInRange(today, end)]).slice(0, 36);
@@ -24240,7 +24234,7 @@ function getRecentServiceShortcuts(limit = 8) {
 
 function getUpcomingServiceShortcuts(limit = 8, baseDate = new Date()) {
   const today = upcomingServiceBaseDate(baseDate);
-  return sortServicesByDate(state.services.filter((service) => {
+  return sortServicesByDate(serviceUpcomingDisplayServices(state.services).filter((service) => {
     return worshipAppServiceTypeId(service.type_id) !== "external" && worshipServicePeriod(service, today).end >= toLocalDateStr(today);
   })).slice(0, limit);
 }
@@ -24255,7 +24249,7 @@ function homeSidebarServiceWeekRange(baseDate = new Date()) {
 
 function getHomeSidebarRecentServiceShortcuts(limit = 8, baseDate = new Date()) {
   const { start, end } = homeSidebarServiceWeekRange(baseDate);
-  return sortServicesByDate(state.services.filter((service) => {
+  return sortServicesByDate(serviceUpcomingDisplayServices(state.services).filter((service) => {
     return worshipAppServiceTypeId(service.type_id) !== "external" && worshipServiceOverlapsDates(service, start, end);
   })).slice(0, limit);
 }
@@ -25183,7 +25177,7 @@ function renderWorshipWeekStatus(entry) {
       ${!details.replacement && details.context ? `<span class="svc-setlist-leader">${escapeHtml(details.context)}</span>` : ""}
     </div></header>
     <div class="svc-setlist-week-status"><strong>${escapeHtml(details.replacement ? details.context : status === "기록 없음" ? "집회 여부 미확인" : status)}</strong>
-      ${!details.replacement && entry.weeklyReason && entry.weeklyReason !== "집회 여부 미확인" && entry.weeklyReason !== details.name ? `<span>${escapeHtml(entry.weeklyReason)}</span>` : ""}
+      ${!details.replacement && entry.weeklyReason && entry.weeklyReason !== "집회 여부 미확인" && entry.weeklyReason !== details.name ? `<span>${escapeHtml(worshipSetlistStatusReason(entry))}</span>` : ""}
       ${serviceId ? `<button type="button" class="svc-setlist-status-open" data-setlist-open-service="${escapeAttr(serviceId)}">예배 열기 →</button>` : ""}</div>
   </article>`;
 }
@@ -25435,10 +25429,10 @@ function renderServiceTemplatesDetail() {
         </div>
       </div>
       <div class="svc-template-level-grid">
-        ${renderWorshipTemplateLevelCard("Service", summary.levelCounts.service)}
-        ${renderWorshipTemplateLevelCard("Section", summary.levelCounts.section)}
-        ${renderWorshipTemplateLevelCard("Element", summary.levelCounts.element)}
-        ${renderWorshipTemplateLevelCard("Slide", summary.levelCounts.slide)}
+        ${renderWorshipTemplateLevelCard("예배", summary.levelCounts.service)}
+        ${renderWorshipTemplateLevelCard("섹션", summary.levelCounts.section)}
+        ${renderWorshipTemplateLevelCard("항목", summary.levelCounts.element)}
+        ${renderWorshipTemplateLevelCard("슬라이드", summary.levelCounts.slide)}
       </div>
       ${summary.templateTotal ? renderWorshipTemplateInventory() : ""}
       <div class="svc-template-draft-grid">
@@ -25459,7 +25453,7 @@ function buildWorshipTemplateDraftSummary(types = []) {
     if (!service) return;
     const typeId = service.type_id;
     if (!sectionsByType[typeId]) sectionsByType[typeId] = new Map();
-    const title = String(section.title || section.section_key || "Section").trim();
+    const title = String(section.title || section.section_key || "섹션").trim();
     const current = sectionsByType[typeId].get(title) || { title, count: 0, orderTotal: 0 };
     current.count += 1;
     current.orderTotal += Number(section.sort_order) || 0;
@@ -25576,7 +25570,7 @@ function renderWorshipTemplateSectionRow(item, index, templatesById, itemsByTemp
       <span class="svc-template-inventory-no">${index + 1}</span>
       <div class="svc-template-inventory-section-main">
         <div class="svc-template-inventory-section-title">
-          <strong title="${escapeAttr(section.name || item.default_title || "Section")}">${escapeHtml(section.name || item.default_title || "Section")}</strong>
+          <strong title="${escapeAttr(section.name || item.default_title || "섹션")}">${escapeHtml(section.name || item.default_title || "섹션")}</strong>
           ${flags ? `<small>${escapeHtml(flags)}</small>` : ""}
         </div>
         <div class="svc-template-chip-list">${elementChips}</div>
@@ -26586,7 +26580,7 @@ function renderPresenterSectionEditorLayer(service) {
       <section class="presenter-section-editor" role="dialog" aria-label="${escapeAttr(`${context.sectionTitle} 수정`)}">
         <header class="presenter-section-editor-head">
           <div>
-            <span class="svc-prep-editor-kicker">Section</span>
+            <span class="svc-prep-editor-kicker">섹션</span>
             <h3>${escapeHtml(context.sectionTitle)}</h3>
           </div>
           <button class="icon-btn" type="button" data-presenter-section-editor-close aria-label="편집기 닫기" title="편집기 닫기">
@@ -26679,8 +26673,8 @@ function renderServicePrepEditorDialog(service) {
         ${renderPastServiceEditingNotice(service)}
         <div class="svc-prep-editor-body">
           <div class="svc-authoring-tools">
-            ${renderServiceAuthoringPanel("Service", "예배 정보", renderServiceMetaEditor(service))}
-            ${renderServiceAuthoringPanel("Section", "기본 섹션 추가", renderServiceOrderTemplate(typeObj))}
+            ${renderServiceAuthoringPanel("예배", "예배 정보", renderServiceMetaEditor(service))}
+            ${renderServiceAuthoringPanel("섹션", "기본 섹션 추가", renderServiceOrderTemplate(typeObj))}
           </div>
           <section class="svc-prep-editor-section" aria-label="예배 순서 편집">
             ${renderServiceEditorHeader("")}

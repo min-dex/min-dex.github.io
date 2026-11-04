@@ -45,6 +45,12 @@
       timingKey: JSON.stringify([String(song.id), String(version.id)]) } };
   }
   // Read-only display groups. Identity, saves and worship references remain record-owned.
+  function isSelectableSong(song, lookup) {
+    const id = song?.metadata?.retiredInto;
+    if (!song?._singleSongRecord || typeof id !== 'string' || id === song.id) return true;
+    const target = lookup(id);
+    return !(target?._singleSongRecord && !target.metadata?.retiredInto && (song.same_song_ids || []).includes(id));
+  }
   function groupSongs(songs) {
     const byId = new Map(songs.map(song => [song.id, song])), edges = new Map();
     for (const song of songs) {
@@ -155,6 +161,12 @@
       return fields;
     }
     return Object.freeze({ get, resolve, appSong, singleItem, legacyElement, nativeElement, sourceFields,
+      displayCount: () => {
+        const rows = [...byId.values()].map(r => ({id:r.id, _singleSongRecord:true,
+          metadata:r.metadata.metadata || {}, same_song_ids:r.relations?.same_song || []}));
+        const lookup = new Map(rows.map(row => [row.id,row]));
+        return groupSongs(rows.filter(row => isSelectableSong(row,id=>lookup.get(id)))).length;
+      },
       ids: () => [...byId.keys()] });
   }
   // Transport must supply a single-record CAS transaction; no direct-table fallback.
@@ -324,7 +336,7 @@
     for (const line of lines) { if (/^\[/.test(line)) flush(); block.push(line); }
     flush(); return {text:out.join(eol),pending};
   }
-  const api = Object.freeze({isId:code,praiseTypes,hasAudio,recordForWrite,groupSongs,fromLegacySong,createCatalog,createRepository,createRpcRepository,loadActivation,rewriteStructured,rewriteSource,parseMemo});
+  const api = Object.freeze({isId:code,praiseTypes,hasAudio,recordForWrite,isSelectableSong,groupSongs,fromLegacySong,createCatalog,createRepository,createRpcRepository,loadActivation,rewriteStructured,rewriteSource,parseMemo});
   root.MindexSingleSong=api;
   if (typeof module!=='undefined' && module.exports) module.exports=api;
 })(typeof globalThis!=='undefined' ? globalThis : this);

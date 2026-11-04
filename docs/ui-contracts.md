@@ -1197,3 +1197,22 @@ alignment and explicit metadata remain intact. Same-song edition selectors use
 an inline label/control beside the form toolbar on wide screens and stack on
 narrow screens. Source values, selection, draft inputs and playback ownership
 are unchanged; this is CSS layout only.
+
+
+## Consistent counts and reviewed duplicate navigation ·2026-11-05
+
+Home Praise counts the same selectable explicit same_song groups as the complete
+Praise list, excluding only valid retiredInto sources. Native counting uses the
+existing catalogue's ID/relation metadata, never a second lyric/audio payload
+fetch. Category filters still show their own subset. Service/Section/Element/Slide
+UI labels read 예배/섹션/항목/슬라이드. Default empty setlist reasons use concise
+copy and keep words together; authored reasons and stored source text stay intact.
+
+A reviewed duplicate can carry source_ref.navigation_duplicate_of. Upcoming/home
+projection hides it only when its target exists, date/Friday-monthly family,
+nonempty alias and effective time range match; missing/changed targets fail open.
+Both IDs and all history/data remain available in the ordinary archive. This is
+independent of no_gathering and replacement navigation. Monthly auto-generation
+also recognizes an already saved Friday with the exact target alias and ordinary
+monthly time range, preventing that duplicate creation path. Other times, names
+and service types remain separate.
