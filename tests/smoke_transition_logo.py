@@ -102,8 +102,10 @@ def main():
                   check(presenterUnionStarlightView(darkContent,{...options,serviceId:'other'})===darkContent,'other service starlight leak');
                   check(presenterUnionStarlightView(darkContent,{...options,noChromakey:false})===darkContent&&presenterUnionStarlightView(darkContent,{...options,emergencyMode:true})===darkContent,'key/emergency starlight leak');
                   check(!presenterOutputFrameStateForSlide({...praiseBlank,id:'presenter:safety-blank'},union).backgroundVideo,'manual blackout changed');
+                  const beforePreview=JSON.stringify(roundtrip[1]);
                   stage.innerHTML=renderPresenterSlideFrame(roundtrip[1],{...options,previewStage:true});
-                  check(stage.querySelector('video')?.getAttribute('src')===PRESENTER_UNION_STARLIGHT_VIDEO,'preview starlight missing');
+                  check(stage.querySelector('video')?.getAttribute('src')===PRESENTER_UNION_STARLIGHT_VIDEO+'?mindexPreview=1','preview starlight stable cache key missing');
+                  check(JSON.stringify(roundtrip[1])===beforePreview,'preview changed persisted slide/source');
                   check(getComputedStyle(stage.querySelector('img')).position==='absolute','preview cross displaced by video');
 
                   stage.remove();
