@@ -4,7 +4,9 @@ The candidate now includes main `ff65ef9b`: output freeze, staged current-servic
 refresh and the preserved four-icon window-control row. Native YouTube composition,
 local RTMPS acceptance and isolated TEST installation/upgrade preservation remain
 included. Windows fixture lookup uses native path joining to avoid MSYS rewriting.
-The combined commit requires a fresh full web and native gate; prior component
+The candidate also includes approved web candidate `9fe4b755` for device-scoped
+controller scale. Native upgrade fixtures verify its namespace, raw value and
+app readback across restarts. The combined commit requires a fresh full web and native gate; prior component
 results do not certify this combined source. Development channel remains active;
 no real YouTube broadcast, production data write or formal publication is authorized.
 

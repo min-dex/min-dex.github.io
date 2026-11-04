@@ -21,6 +21,7 @@ async function main(){
   const info=await page.evaluate(()=>window.mindexElectron.getBuildInfo());
   assert(info.testBuild);assert.equal(info.build.sourceCommit,sha);
   await page.exposeFunction('fixtureRpc',(name,args)=>{
+   if(args.p_key==='mindex.ui.presenterThumbScale')assert.equal(args.p_scope,'device');
    const scope=args.p_scope==='shared'?'shared':args.p_scope+':'+args.p_token;
    const rows=record.rows[scope]||{};
    if(name==='mindex_state_read_v1')return {data:Object.values(rows),error:null};
@@ -42,11 +43,12 @@ async function main(){
    const values={
     'mindex.editor.draft.v2:service:fixture-worship:rehearsal':JSON.stringify(draft),
     'mindex.editor.recovery.v1:service:fixture-worship:rehearsal':JSON.stringify({schema:1,module:'service',id:service.id,draft,current:{service,items:[],serviceTypes:[]},createdAt:'2026-11-04T00:00:00.000Z'}),
-    'mindex.theme':'dark','mindex.music.fadeStop':'true'
+    'mindex.theme':'dark','mindex.music.fadeStop':'true','mindex.ui.presenterThumbScale':'1.5'
    };
    if(seed)for(const [key,value]of Object.entries(values))await storage.setItem('local',key,value);
    const actual=Object.fromEntries(Object.keys(values).map(key=>[key,storage.getItem('local',key)]));
    for(const key in values)if(actual[key]!==values[key])throw Error('Raw fixture mismatch: '+key);
+   if(readPresenterThumbScale()!=='1.5')throw Error('Controller scale recovery mismatch');
    const restored=JSON.parse(actual[Object.keys(values)[0]]);
    if(restored.value.items[0].raw_body!==draft.value.items[0].raw_body)throw Error('Draft text recovery mismatch');
    return {worship:await fetchWorshipServiceListRows(),values:actual,recoveredText:restored.value.items[0].raw_body,identity:localStorage.getItem('mindex.server.identity:upgrade-fixture')};
