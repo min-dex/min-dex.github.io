@@ -21,3 +21,43 @@
 .svc-song-group-choice > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .svc-song-group-choice[open] { display: grid; gap: 4px; }
 .svc-song-group-choice .svc-song-picker-result { margin: 3px 6px; max-width: 100%; }
+
+/* One edition needs no shared comparison tracks or a separate selector row. */
+.praise-forms-panel:has(> .single-song-version-picker) {
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 15px;
+}
+.praise-forms-panel > .single-song-version-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0;
+}
+.single-song-version-picker > span { flex: 0 0 auto; }
+.single-song-version-picker > select { width: 200px; min-width: 0; max-width: 100%; }
+.praise-forms-panel:has(> .single-song-version-picker) > .form-toolbar {
+  justify-content: flex-end;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+.praise-forms-panel:has(> .single-song-version-picker) > .version-compare-grid { grid-column: 1 / -1; }
+.praise-forms-panel .single-version > .version-compare-head { grid-template-rows: auto; }
+body[data-module="praise"] .praise-forms-panel .single-version .version-compare-head > .version-compare-title {
+  grid-row: auto;
+  grid-template-rows: auto;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+.praise-forms-panel .single-version .version-title-main { grid-column: 1 / -1; }
+.praise-forms-panel .single-version .version-title-main:not(:has(*)) { display: none; }
+.praise-forms-panel .single-version .version-title-actions { grid-column: 2; align-self: start; }
+.praise-forms-panel .single-version .version-audio-summary { grid-column: 1 / -1; }
+.praise-forms-panel .single-version .version-compare-title:not(:has(> .version-title-main > *)) > .version-title-actions { grid-row: 1; }
+.praise-forms-panel .single-version .version-compare-title:not(:has(> .version-title-main > *)) > .praise-version-media { grid-column: 1; grid-row: 1; }
+.praise-forms-panel .single-version .praise-version-media > summary { max-width: 100%; }
+@media (max-width: 750px) {
+  .praise-forms-panel:has(> .single-song-version-picker) { grid-template-columns: minmax(0, 1fr); }
+  .praise-forms-panel:has(> .single-song-version-picker) > .form-toolbar { justify-content: flex-start; }
+}

@@ -1185,3 +1185,14 @@ PC로 원격 송출을 시작하는 별도 연결 수명 확장은 이 변경의
 파일명, URL, 제목 본문과 typed slot identity를 자동 재작성하지 않는다.
 
 다가오는 예배 사이드바는 별명을 먼저 표시하고 다른 기본 이름은 괄호 안에 표시한다. 외부 예배 유형은 이 바로가기에서 제외하며 전체 예배의 기타 예배에서 조회한다.
+
+## Compact catalog edition controls ·2026-11-04
+
+Single-edition lyric headers do not reserve the four shared tracks used by the
+multi-edition comparison. When the native heading has no content, collapsed
+score/audio disclosure and version-management buttons share one compact row.
+Opening media expands naturally and keeps actions reachable. Multi-edition row
+alignment and explicit metadata remain intact. Same-song edition selectors use
+an inline label/control beside the form toolbar on wide screens and stack on
+narrow screens. Source values, selection, draft inputs and playback ownership
+are unchanged; this is CSS layout only.
