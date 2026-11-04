@@ -16,7 +16,8 @@ c.linkServiceItemToPraiseSong=(item,song)=>{item.song_id=song.id;item.version_id
 c.state.client={from:()=>({insert:payload=>{inserts++;return {select:()=>({single:async()=>({data:{id:'new-song',...payload}})})}}})};
 vm.createContext(c);
 vm.runInContext(take('function renderServiceSongPicker(', '\nfunction renderServiceSongVersionPicker'),c);
-vm.runInContext(take('function serviceSongRegistrationState(', '\nfunction serviceSongPickerResults'),c);
+const inputSource=fs.readFileSync(require('node:path').join(__dirname,'../mindex.worship-input.js'),'utf8');
+vm.runInContext(inputSource.slice(inputSource.indexOf('function serviceSongRegistrationState(')),c);
 vm.runInContext(take('function renderServicePraiseLinkControl(', '\nfunction renderServiceItemLinkControl'),c);
 vm.runInContext(take('async function createPraiseSongFromServiceItem(', '\nfunction selectServiceSongForItem'),c);
 (async()=>{

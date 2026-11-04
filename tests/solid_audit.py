@@ -17,13 +17,13 @@ STYLES_CSS = APP_DIR / "styles.css"
 # target architecture sizes.
 # Ratchets lowered after unused runtime cleanup on 2026-10-13.
 # Lower a limit when code is extracted; do not raise one without documenting why.
-MAX_APP_JS_LINES = 30_160
+MAX_APP_JS_LINES = 30_115
 MAX_PRESENTER_JS_LINES = 5_130
 MAX_STYLES_LINES = 3_300
 MAX_FUNCTION_LINES = 450
 MAX_APP_FUNCTION_COUNT = 1_640
 MAX_PRESENTER_FUNCTION_COUNT = 290
-MAX_GLOBAL_COUPLING_MARKERS = 2_970
+MAX_GLOBAL_COUPLING_MARKERS = 2_967
 
 WATCHED_FUNCTION_LIMITS = {
     "handleDetailClick": 440,
@@ -112,7 +112,7 @@ def main() -> int:
                 failures.append(f"{name}:{function['name']} exceeds function budget")
     total_coupling = sum(count_matches(GLOBAL_COUPLING_PATTERN, read_lines(APP_DIR / name))
                          for name in ['app.js', 'mindex.presenter-live.js', 'mindex.presenter-board.js', 'mindex.presenter-controller.js'])
-    if total_coupling > 3552:
+    if total_coupling > 3549:
         failures.append('aggregate app/controller coupling exceeds pre-extraction baseline')
     if len(read_lines(APP_DIR / 'styles.workspace.css')) > 6460:
         failures.append('styles.workspace.css exceeds extracted owner budget')
@@ -201,7 +201,7 @@ def main() -> int:
         f"{len(presenter_functions)} / {MAX_PRESENTER_FUNCTION_COUNT}"
     )
     print(f"- global coupling markers: {global_coupling} / {MAX_GLOBAL_COUPLING_MARKERS}")
-    print(f"- aggregate app/controller coupling: {total_coupling} / 3552")
+    print(f"- aggregate app/controller coupling: {total_coupling} / 3549")
     print(f"- cross-file function collisions: {len(cross_file_duplicates)}")
     print("- largest functions:")
     for function in largest:

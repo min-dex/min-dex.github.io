@@ -5767,3 +5767,8 @@ action. Delayed search completions must still own the same field/query/item and
 may not overwrite newer input results. The creation handler rechecks readiness
 after its existing duplicate-resolution load. Existing native save, linked song,
 forms, worship rows and output are untouched by search previews.
+
+The draft search lifecycle and registration readiness belong to the existing
+`mindex.worship-input.js` input owner. The app retains only event wiring, picker
+rendering and the existing creation/save boundary. Architecture ratchets are
+lowered after the extraction; they are not raised to accommodate this change.

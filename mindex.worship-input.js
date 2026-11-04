@@ -2038,3 +2038,71 @@ function saveUndoableServiceSongPick(service, item, index, before) {
 function rememberServiceMove(serviceId, before) {
   if (before) rememberServiceEdit(state.services.find(row => row.id === serviceId), before, state.serviceItems[serviceId], serviceMoveFields);
 }
+
+
+// Draft-only DB search lifecycle; no worship saves or output publication.
+const serviceSongComposingFields = new WeakSet();
+const serviceSongPreviewRequests = new WeakMap();
+
+function handleServiceSongComposition(event) {
+  const field = event.target.closest?.('[data-service-item-field="raw_title"]');
+  if (!field || !isServiceSongTitleInputField(field)) return;
+  if (event.type === "compositionstart") serviceSongComposingFields.add(field);
+  else serviceSongComposingFields.delete(field);
+  scheduleServiceSongPickerPreview(field);
+}
+
+// Search the input draft without committing it to the service or live output.
+function scheduleServiceSongPickerPreview(field, { composing = false } = {}) {
+  const key = deferredServiceTextPreviewKey(field);
+  clearDeferredServiceTextPreview(field);
+  const serviceId = field.dataset.serviceId || state.selectedServiceId;
+  const index = Number(field.dataset.serviceItemIndex);
+  const itemId = getServiceItems(serviceId)[index]?.id;
+  const query = field.value;
+  const request = Symbol();
+  serviceSongPreviewRequests.set(field, request);
+  const isCurrent = () => field.isConnected && state.selectedServiceId === serviceId
+    && serviceSongPreviewRequests.get(field) === request && field.value === query;
+  const picker = () => field.closest(".svc-edit-title-wrap")?.querySelector(".svc-song-picker");
+  // Remove a previous registration action immediately, including during IME composition.
+  if (picker()) picker().outerHTML = '<div class="svc-song-picker" hidden></div>';
+  if (composing || serviceSongComposingFields.has(field)) return;
+  const renderPreview = (message = "") => {
+    if (!isCurrent() || serviceSongComposingFields.has(field)) return;
+    const item = getServiceItems(serviceId)[index];
+    if (!item || item.id !== itemId) return;
+    const picker = field.closest(".svc-edit-title-wrap")?.querySelector(".svc-song-picker");
+    if (!picker) return;
+    const service = state.services.find((candidate) => candidate.id === serviceId);
+    const draft = { ...item, raw_title: field.value, song_id: null, version_id: null, song_version_id: null };
+    const model = { ...serviceItemEditorModel(draft, { service }), linkedSong: null, songVersions: [] };
+    picker.outerHTML = message
+      ? `<div class="svc-song-picker"><span class="svc-song-picker-hint">${escapeHtml(message)}</span></div>`
+      : renderServiceSongPicker(draft, index, model);
+  };
+  deferredServiceTextPreviewTimers.set(key, window.setTimeout(async () => {
+    deferredServiceTextPreviewTimers.delete(key);
+    if (!isCurrent() || serviceSongComposingFields.has(field)) return;
+    if (String(query).trim() && !songCatalogLoaded && canUseClientData()) {
+      renderPreview("찬양 목록 불러오는 중");
+      try {
+        await loadSongs({ searchOnly: true });
+      } catch (error) {
+        renderPreview("찬양 목록을 불러오지 못했습니다. 다시 입력해 주세요.");
+        return;
+      }
+    }
+    renderPreview();
+  }, 150));
+}
+
+
+function serviceSongRegistrationState(query, item, service) {
+  const text = String(query || "").trim();
+  if (!text || /[ㄱ-ㅎㅏ-ㅣ]/u.test(text)) return "typing";
+  if (!songCatalogLoaded || songLoadPromise
+    || (serviceItemRequiresNewHymnalScoreSong(item) && !state.hymnScoreManifestLoaded)) return "loading";
+  if (presenterPreparationNumberOnlyHymnReference(presenterPreparationSongContent(text))) return "hymn";
+  return serviceSongPickerResults(text, item, service, 1, { unrestricted: true }).length ? "existing" : "ready";
+}
