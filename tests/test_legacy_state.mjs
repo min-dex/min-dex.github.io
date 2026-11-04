@@ -13,6 +13,8 @@ const rpc=async(name,args)=>{
 const stores=Object.fromEntries(['device','session','shared'].map(scope=>[scope,createServerState({rpc,token:'test',scope})]));
 await Promise.all(Object.values(stores).map(s=>s.load()));
 const project='fixture';
+assert.equal(legacyStateDestination('local','mindex.ui.presenterThumbScale',project),'device');
+assert.equal(legacyStateDestination('session','mindex.ui.presenterThumbScale',project),'session');
 for(const key of ['mindex.supabase.anonKey','mindex.server.identity:fixture','mindex.monitor.deviceReporter','mindex.bible.chapter.v3.x','mindex.atomic.pending.v1:service'])assert.equal(legacyStateDestination('local',key,project),null);
 assert.equal(legacyStateDestination('session','mindex.atomic.pending.v2:["other","s"]',project),null);
 const entries=[{scope:'local',key:'mindex.theme',value:'dark'},

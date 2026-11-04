@@ -1,5 +1,5 @@
 // Receives only caller-filtered application entries; never reads browser credentials.
-const shared=new Set(['mindex.worshipBackgroundRegistry','mindex.theme','mindex.ui.presenterThumbScale','mindex.music.fadeStop']);
+const shared=new Set(['mindex.worshipBackgroundRegistry','mindex.theme','mindex.music.fadeStop']);
 export function legacyStateDestination(scope,key,project){
  if(shared.has(key))return 'shared';
  if(/^mindex\.atomic\.pending\.v2:/.test(key)||/^mindex\.department\.pending\.v1:/.test(key)){
