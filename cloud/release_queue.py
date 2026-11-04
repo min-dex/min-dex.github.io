@@ -115,7 +115,25 @@ def timing_report(data):
         if seconds < 0:
             raise ValueError('Clock moved backwards; do not infer duration')
         totals[row['phase']] = totals.get(row['phase'], 0) + seconds
+    pending = {}
+    queue_seconds = 0
+    for row in data['events']:
+        ticket = row.get('ticket')
+        if row['event'] == 'joined':
+            pending[ticket] = row['at']
+        elif row['event'] in ('claimed', 'slot_released') and ticket in pending:
+            value = (datetime.fromisoformat(row['at']) - datetime.fromisoformat(pending.pop(ticket))).total_seconds()
+            if value < 0:
+                raise ValueError('Clock moved backwards; do not infer queue duration')
+            queue_seconds += value
+    for started in pending.values():
+        value = (datetime.fromisoformat(now) - datetime.fromisoformat(started)).total_seconds()
+        if value < 0:
+            raise ValueError('Clock moved backwards; do not infer queue duration')
+        queue_seconds += value
     return {'release': data['release'], 'closed': data.get('closed', False),
+            'queueWallSeconds': round(queue_seconds, 3),
+            'queueWallNote': 'Join-to-claim/cancel wall time includes overlapping local work; do not add to phase totals',
             'observedSeconds': round(sum(totals.values()), 3),
             'phasesSeconds': {k: round(v, 3) for k, v in totals.items()},
             'runningAttempt': data.get('running'),

@@ -61,6 +61,19 @@ class ReleaseTiming(unittest.TestCase):
         data['events'][-1]['at']='2026-11-03T00:00:00+00:00'
         with self.assertRaises(ValueError): queue.timing_report(data)
 
+    def test_queue_wall_retains_parallel_local_work(self):
+        data={'release':'a'*32,'closed':True,'events':[
+            {'at':'2026-11-04T00:00:00+00:00','event':'started','phase':'preparing'},
+            {'at':'2026-11-04T00:00:10+00:00','event':'joined','phase':'queue_wait','ticket':'one'},
+            {'at':'2026-11-04T00:00:20+00:00','event':'command_started','phase':'local_checks'},
+            {'at':'2026-11-04T00:00:50+00:00','event':'claimed','phase':'preparing','ticket':'one'},
+            {'at':'2026-11-04T00:01:00+00:00','event':'slot_released','ticket':'one'},
+            {'at':'2026-11-04T00:01:00+00:00','event':'finished'}]}
+        report=queue.timing_report(data)
+        self.assertEqual(report['observedSeconds'],60)
+        self.assertEqual(report['queueWallSeconds'],40)
+        self.assertEqual(report['phasesSeconds']['queue_wait'],10)
+
     def test_running_command_requires_explicit_recovery_not_silent_success(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
