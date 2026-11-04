@@ -159,9 +159,14 @@ def main():
                   applyPresenterBackgroundVideo(root,second);
                   const incoming=root._presenterBackgroundVideo;
                   check(incoming!==video&&video.isConnected&&!video.paused,'outgoing video removed before replacement ready');
+                  const trace=[];
+                  const record=event=>trace.push({event,time:performance.now(),ready:incoming.readyState,opacity:incoming.style.opacity,generation:root._presenterBackgroundGeneration});
+                  for(const event of ['loadeddata','playing','canplay','error'])incoming.addEventListener(event,()=>record(event));
                   await incoming.play();
+                  record('play-resolved');
                   await new Promise(resolve=>setTimeout(resolve,950));
-                  check(incoming.isConnected&&!video.isConnected&&root.querySelectorAll('video').length===1,'crossfade did not retire old footage');
+                  check(incoming.isConnected&&!video.isConnected&&root.querySelectorAll('video').length===1,'crossfade did not retire old footage '+JSON.stringify({trace,old:video.isConnected,next:incoming.isConnected,ready:incoming.readyState,opacity:incoming.style.opacity,error:root.dataset.backgroundVideoError}));
+                  check(getComputedStyle(incoming).transitionDuration==='0.8s','background dissolve duration changed');
                   applyPresenterBackgroundVideo(root,presentation.backgroundVideo+'?element=third');
                   applyPresenterBackgroundVideo(root,presentation.backgroundVideo+'?element=fourth');
                   const latest=root._presenterBackgroundVideo;

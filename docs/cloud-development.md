@@ -347,6 +347,15 @@ checkout을 보존한다. 무조건적인 pull/reset, 자동 충돌 덮어쓰기
 
 Offline-web jobs allow40minutes after repeated20minute cancellations during otherwise passing full-suite execution (41705937306 shard0, GitHub maximum-execution-time annotation). All four shards, per-test180s timeout, fail propagation, exact-SHA reuse and Pages prerequisites remain unchanged. This extends execution budget without dropping or bypassing checks. The corrected candidate must complete all four jobs before publication.
 
+## Native media HTTP fixture ·2026-11-04
+
+The smoke server serves single media byte ranges with206/Content-Range and exact
+bounded bodies, HEAD without a body, and416 for unsatisfiable ranges. Other/static
+requests retain their existing behavior. Linux WebKit/GStreamer must consume a
+real seekable HTTP stream, matching public hosting rather than a full200 response
+to every Range request. `test_smoke_media_http.py` is registered in the complete
+gate; original MP3 hash, duration, decoding and muted playback assertions remain.
+
 ## 검사·배포 지연 재발 방지 · 2026-11-04
 
 이번 연합예배 묶음의 원인과 개선은 [지연 회고](release-delay-review-20261104.md)에
