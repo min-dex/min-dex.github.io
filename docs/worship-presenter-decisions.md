@@ -5696,6 +5696,34 @@ For this union service, consecutive authored white-design frames (including scri
 
 The inline scripture audit distinguishes focused-rail refresh (raw input must survive) from closing the editor, moving focus out, reloading the aggregate and reopening (persisted canonical reference must be displayed). Both exact-value assertions and no-additional-write checks are required; this is a fixture lifecycle correction, not a scripture normalization change.
 
+## Element-owned praise backgrounds · 2026-11-04
+
+User approved the element as the background ownership boundary for ordinary
+church worship too. An explicitly assigned BGV persists through that element's
+title, lyrics, instrumental and generated trailing blank; it does not stop at
+individual slide boundaries. The next element's first selected frame selects its
+own background. Identical URLs retain playback even between elements; a changed
+URL decodes before an800ms incoming-over-outgoing dissolve, without fading both
+to black. Rapid jumps cancel stale readiness/cleanup. Failed footage falls back
+to the existing stage rather than retaining the previous element's video.
+Explicit light blanks, form photos, chromakey, safety blackout and emergency
+retain priority; key/safety/emergency remove video immediately. Reduced motion
+uses immediate replacement. No service receives inferred or automatically copied
+BGV, and source lyrics/forms/timing/media settings remain unchanged. A medley
+inside one element naturally keeps its background; adjacent elements can share
+an explicitly assigned URL without restarting the loop.
+
+Cold background loading waits up to30 seconds per attempt, with at most one
+retry for a readiness timeout, media error or interrupted play request. Browsers
+can report an initial failed network request as an unsupported source, so this
+case also gets one bounded retry.
+An eight-second cutoff must not discard a still-loading first video. The decoded
+outgoing footage remains visible throughout pending readiness and retry; only a
+decoded incoming frame starts the dissolve. A second failed attempt falls back
+without reviving stale events; unsupported/invalid sources never retry indefinitely.
+Safety/key/emergency cancellation still removes pending media immediately. These
+local playback retries do not reload the page or write operational data.
+
 ## Output freeze and current-service refresh ·2026-11-04
 
 Freeze holds slide/content navigation for the current output session; video and

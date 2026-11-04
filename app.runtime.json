@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261104-device-view-scale",
+  "version": "20261104-worship-media-recovery",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "53a0ca8d8aab4efba9db7e0fe2245d8019c4d7abd141a42bd963b5892ffbf46f",
-  "runtime_sha256": "27fbc4b4785726ec1f1e02eb714105bc793a89111cbf72d5d0878a8eefeb9947",
+  "source_sha256": "8a1b12725f44b57f1bf5d20c01645719dd5ffd7cd5eeb614ef81a06406de96ae",
+  "runtime_sha256": "4bf9c98daa7ec1f28093a37e97e6a7b07aae782add77d54bc5e5ebb4a72c1402",
   "source_bytes": 1356789,
   "runtime_bytes": 968314,
-  "source_gzip": 310987,
+  "source_gzip": 310988,
   "runtime_gzip": 243847
 }

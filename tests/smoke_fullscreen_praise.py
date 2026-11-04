@@ -2,6 +2,56 @@
 import os
 os.environ["MINDEX_SMOKE_OFFLINE"]="1"
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
+from pathlib import Path
+
+
+def check_background_startup(browser, url):
+    page = browser.new_page()
+    page.route('**/*supabase*/**', lambda route: route.abort())
+    page.goto(url+'?output=presenter')
+    page.wait_for_function("typeof applyPresenterBackgroundVideo === 'function'")
+    page.clock.install()
+    held = []
+    page.route('**/praise-background.webm?startup=*', lambda route: held.append(route))
+    page.evaluate("""() => {
+      window.startupRoot=document.createElement('main');document.body.append(startupRoot);
+      window.startupSource=kind=>'tests/fixtures/praise-background.webm?startup='+kind;
+      applyPresenterBackgroundVideo(startupRoot,startupSource('slow'));
+      window.firstStartup=startupRoot._presenterBackgroundVideo;
+    }""")
+    page.wait_for_timeout(50)
+    page.clock.fast_forward(9000)
+    assert page.evaluate('firstStartup.isConnected && startupRoot._presenterBackgroundVideo===firstStartup'), 'healthy cold load abandoned before decode'
+    held.pop().fulfill(path=str(Path(__file__).parent/'fixtures/praise-background.webm'))
+    page.wait_for_function('firstStartup.readyState>=2 && !firstStartup.paused')
+    page.wait_for_function("getComputedStyle(firstStartup).opacity==='1'", timeout=3000)
+
+    page.evaluate("applyPresenterBackgroundVideo(startupRoot,startupSource('retry'));window.retryStartup=startupRoot._presenterBackgroundVideo")
+    page.wait_for_timeout(50)
+    held.pop().abort('connectionreset')
+    page.wait_for_function('startupRoot._presenterBackgroundVideo===retryStartup && retryStartup.isConnected')
+    page.wait_for_timeout(150)
+    assert held, 'transient network error did not retry'
+    assert page.evaluate('firstStartup.isConnected && !firstStartup.paused'), 'retry discarded decoded outgoing footage'
+    held.pop().fulfill(path=str(Path(__file__).parent/'fixtures/praise-background.webm'))
+    page.wait_for_function('retryStartup.readyState>=2 && !retryStartup.paused')
+    page.wait_for_function('!firstStartup.isConnected && retryStartup.isConnected', timeout=3000)
+
+    page.evaluate("applyPresenterBackgroundVideo(startupRoot,startupSource('timeout'));window.timedStartup=startupRoot._presenterBackgroundVideo")
+    page.wait_for_timeout(50)
+    page.clock.fast_forward(31000)
+    assert page.evaluate('timedStartup.isConnected && retryStartup.isConnected'), 'first readiness timeout removed outgoing footage'
+    page.clock.fast_forward(31000)
+    assert page.evaluate("!startupRoot.querySelector('video') && startupRoot.dataset.backgroundVideoError==='true'"), 'bounded readiness failure did not fall back'
+    page.evaluate("timedStartup.dispatchEvent(new Event('loadeddata'));timedStartup.dispatchEvent(new Event('playing'))")
+    assert page.evaluate("!startupRoot.querySelector('video')"), 'late failed generation revived footage'
+    for route in held:
+        try:
+            route.abort()
+        except Exception:
+            pass  # The media retry may already have cancelled this request.
+    page.unroute_all(behavior='ignoreErrors')
+    page.close()
 
 
 def main():
@@ -71,7 +121,7 @@ def main():
                   check(vf.backgroundVideo===presentation.backgroundVideo,'video missing');
                   check(!presenterOutputFrameStateForSlide({...videoSlide,outputContext:'chromakey'},payload).backgroundVideo,'video leaked into key');
                   check(!presenterOutputFrameStateForSlide({...videoSlide,formBackgroundImage:'photo.png'},payload).backgroundVideo,'video covers photo');
-                  check(!presenterOutputFrameStateForSlide({...videoSlide,type:'blank',layout:PRESENTER_SLIDE_LAYOUTS.BLANK},payload).backgroundVideo,'video leaked into blank');
+                  check(presenterOutputFrameStateForSlide({...videoSlide,type:'blank',layout:PRESENTER_SLIDE_LAYOUTS.BLANK},payload).backgroundVideo===presentation.backgroundVideo,'authored blank lost element video');
                   check(presenterOutputFrameKey(payload,videoSlide,vf)!==presenterOutputFrameKey(payload,song,presenterOutputFrameStateForSlide(song,payload)),'cache ignores video');
                   const root=document.createElement('div');root.className='presenter-output-root';const still=document.createElement('div');still.className='presenter-output-background';root.append(still);document.body.append(root);
                   applyPresenterBackgroundVideo(root,vf.backgroundVideo);const video=root.querySelector('video');
@@ -96,9 +146,37 @@ def main():
                   const time=video.currentTime;applyPresenterOutputFrameState(root,inf);check(!root.classList.contains("is-blank"),"instrumental transition overlay");
                   check(root.querySelector('video')===video&&video.currentTime>=time,'instrumental restarted video');
                   await new Promise(resolve=>setTimeout(resolve,100));check(video.currentTime>time,'instrumental froze video');
-                  check(!presenterOutputFrameStateForSlide({...instrumental,autoTrailingBlank:true},payload).backgroundVideo,'trailing blank inherited video');
+                  const trailing=presenterElementTrailingBlankSlide({...instrumental,elementId:'song'},0,{type_id:'special'});
+                  check(trailing.elementId==='song'&&trailing.backgroundVideo===presentation.backgroundVideo,'trailing blank lost element ownership');
+                  const trailingFrame=presenterOutputFrameStateForSlide(trailing,payload);
+                  check(trailingFrame.backgroundVideo===presentation.backgroundVideo,'trailing blank dropped element video');
+                  applyPresenterOutputFrameState(root,trailingFrame);
+                  check(root._presenterBackgroundVideo===video&&video.currentTime>=time,'trailing blank restarted footage');
+                  check(!presenterOutputFrameStateForSlide({...trailing,transitionBlankTone:'light'},payload).backgroundVideo,'explicit light blank overridden');
+                  const restored=serviceDocumentSlideToPresenterSlide(normalizeServiceDocumentSlides([trailing])[0],0);
+                  check(restored.elementId==='song'&&restored.backgroundVideo===presentation.backgroundVideo,'saved blank lost element video');
+                  const second=presentation.backgroundVideo+'?element=second';
+                  applyPresenterBackgroundVideo(root,second);
+                  const incoming=root._presenterBackgroundVideo;
+                  check(incoming!==video&&video.isConnected&&!video.paused,'outgoing video removed before replacement ready');
+                  await incoming.play();
+                  await new Promise(resolve=>setTimeout(resolve,950));
+                  check(incoming.isConnected&&!video.isConnected&&root.querySelectorAll('video').length===1,'crossfade did not retire old footage');
+                  applyPresenterBackgroundVideo(root,presentation.backgroundVideo+'?element=third');
+                  applyPresenterBackgroundVideo(root,presentation.backgroundVideo+'?element=fourth');
+                  const latest=root._presenterBackgroundVideo;
+                  await latest.play();await new Promise(resolve=>setTimeout(resolve,950));
+                  check(root.querySelectorAll('video').length===1&&latest.isConnected,'rapid element jumps retained stale players');
+                  applyPresenterOutputFrameState(root,{noChromakey:false});
+                  check(!root.querySelector('video'),'keyed output retained background during fade');
+                  applyPresenterBackgroundVideo(root,presentation.backgroundVideo);
+                  applyPresenterOutputFrameState(root,{noChromakey:true,emergencyMode:true});
+                  check(!root.querySelector('video'),'emergency did not clear pending background immediately');
                   check(!presenterOutputFrameStateForSlide({...instrumental,outputContext:'chromakey'},payload).backgroundVideo,'instrumental key leak');
-                  applyPresenterBackgroundVideo(root,'');check(!root.querySelector('video'),'video not removed');
+                  applyPresenterBackgroundVideo(root,presentation.backgroundVideo+'?element=failed');
+                  const failedVideo=root._presenterBackgroundVideo;failedVideo.dispatchEvent(new Event('error'));failedVideo.dispatchEvent(new Event('loadeddata'));
+                  check(root.dataset.backgroundVideoError==='true'&&!root.querySelector('video'),'failed next element retained stale background');
+                  applyPresenterBackgroundVideo(root,'',{immediate:true});check(!root.querySelector('video'),'video not removed');
                   const item={id:'fixture',label:'찬양',memo:serializeServiceItemMemo({elementType:'praise'})};
                   const controls=renderPresenterPresentationControls(item,0,'fixture');
                   check(!controls.includes('카메라 자막')&&controls.includes('data-praise-background-file'),'editable controls');
@@ -120,6 +198,8 @@ def main():
                   return 'PASS fullscreen title, video config/source roundtrip, playback/isolation/reuse and upload preservation';
                 }''')
                 print(engine, result)
+                check_background_startup(browser, url)
+                print(engine, 'PASS delayed cold decode, transient network retry, retained outgoing frame and bounded stale-safe failure')
                 browser.close()
     finally:
         server.shutdown()

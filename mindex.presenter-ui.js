@@ -826,3 +826,95 @@ function presenterOutputTransitionTiming(root, frameState = {}, videoEndFade = f
   root.style.setProperty("--presenter-dissolve-easing", calm ? "ease-in-out" : "ease");
   return { calm, transitionClearDelay: videoEndFade ? (calm ? 1060 : 520) : (calm ? 860 : 260), transitionEntryDelay: calm ? 800 : 220 };
 }
+
+// Root-owned BGV playback is independent of the changing content layers.
+function applyPresenterBackgroundVideo(root, source = "", options = {}) {
+  const selector = ":scope > .presenter-output-background-video";
+  const videos = () => [...root.querySelectorAll(selector)];
+  const dispose = video => { video.pause(); video.removeAttribute("src"); video.load(); video.remove(); };
+  const current = root._presenterBackgroundVideo;
+  if (current?.getAttribute("src") === source && source) return;
+  // Cancel readiness listeners and delayed cleanup from superseded element changes.
+  const generation = (root._presenterBackgroundGeneration || 0) + 1;
+  root._presenterBackgroundGeneration = generation;
+  root._cancelPresenterBackgroundTransition?.();
+  delete root._cancelPresenterBackgroundTransition;
+  const immediate = options.immediate || globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  const duration = immediate ? 0 : 800;
+  let timer;
+  const finish = keep => {
+    if (root._presenterBackgroundGeneration !== generation) return;
+    videos().filter(video => video !== keep).forEach(dispose);
+    delete root._cancelPresenterBackgroundTransition;
+  };
+  if (!source) {
+    delete root._presenterBackgroundVideo;
+    delete root.dataset.backgroundVideoError;
+    videos().forEach(video => { video.style.transition = `opacity ${duration}ms ease-in-out`; video.style.opacity = "0"; });
+    if (!duration) finish(null);
+    else {
+      timer = window.setTimeout(() => finish(null), duration);
+      root._cancelPresenterBackgroundTransition = () => window.clearTimeout(timer);
+    }
+    return;
+  }
+  // Keep the decoded outgoing footage until the incoming element can paint.
+  const video = document.createElement("video");
+  video.className = "presenter-output-background-video";
+  video.muted = true; video.defaultMuted = true; video.loop = true; video.autoplay = true; video.playsInline = true; video.preload = "auto";
+  video.style.opacity = "0";
+  video.setAttribute("aria-hidden", "true"); video.setAttribute("src", source);
+  root._presenterBackgroundVideo = video;
+  let revealed = false;
+  let retried = false;
+  let attempt = 0;
+  const reveal = () => {
+    if (revealed || video.readyState < 2 || root._presenterBackgroundGeneration !== generation) return;
+    revealed = true;
+    window.clearTimeout(timer);
+    delete root.dataset.backgroundVideoError;
+    // Fading the incoming opaque frame over the still-visible old video avoids a black dip.
+    void video.offsetWidth;
+    video.style.transition = `opacity ${duration}ms ease-in-out`;
+    video.style.opacity = "1";
+    timer = window.setTimeout(() => finish(video), duration);
+  };
+  video.addEventListener("loadeddata", reveal);
+  video.addEventListener("playing", reveal);
+  const failed = (retryable = false) => {
+    if (root._presenterBackgroundGeneration !== generation) return;
+    window.clearTimeout(timer);
+    if (retryable && !revealed && !retried) {
+      retried = true;
+      video.load();
+      start();
+      return;
+    }
+    root.dataset.backgroundVideoError = "true";
+    root._presenterBackgroundGeneration = generation + 1;
+    videos().forEach(dispose);
+    delete root._presenterBackgroundVideo;
+    delete root._cancelPresenterBackgroundTransition;
+  };
+  // Browsers may report a failed first network request as SRC_NOT_SUPPORTED.
+  video.addEventListener("error", () => failed(Boolean(video.error?.code)));
+  root._cancelPresenterBackgroundTransition = () => {
+    window.clearTimeout(timer);
+    video.removeEventListener("loadeddata", reveal); video.removeEventListener("playing", reveal);
+    if (!revealed) dispose(video);
+  };
+  // New footage is above existing background videos but below the content layers.
+  const previous = videos().filter(node => node !== video).at(-1);
+  if (previous) previous.after(video); else root.prepend(video);
+  const start = () => {
+    const loadingAttempt = ++attempt;
+    // Cold media requests can exceed eight seconds; keep decoded outgoing footage
+    // during the bounded wait and one retry instead of abandoning a healthy load.
+    timer = window.setTimeout(() => failed(true), 30000);
+    video.play()?.catch(error => {
+      if (loadingAttempt !== attempt || revealed) return;
+      failed(["AbortError", "NetworkError", "NotSupportedError"].includes(error?.name));
+    });
+  };
+  start();
+}

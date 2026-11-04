@@ -225,6 +225,7 @@ SMOKES = (
     "smoke_offering_toggle.py",
     "smoke_offering_layout.py",
     "smoke_global_playback.py",
+    "smoke_friday_music.py",
     "smoke_presenter_focus_view.py",
     "smoke_presenter_emergency_mode.py",
     "smoke_presenter_left_input.py",

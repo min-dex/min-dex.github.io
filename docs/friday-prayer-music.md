@@ -27,11 +27,14 @@
 
 ## Audio
 
-- Dawn music (user approved public upload on 2026-11-01): unchanged supplied MP3,
-  `assets/presenter/dawn-free-prayer.mp3`, 55,081,269 bytes, 3417.12 seconds,
-  stereo 48kHz. SHA-256:
-  `b8939186c2434d0280e787d02103cbfd136c77ea73b2096faa01a85ab026f7d9`.
-  No transcoding, trimming, automatic playback or worship-record mutation.
+- Dawn music (user-approved final edit, 2026-11-04):
+  `assets/presenter/dawn-free-prayer-69c12c677944.mp3`, 79,675,315 bytes, 3143.9335 seconds,
+  stereo 44.1kHz. SHA-256:
+  `69c12c677944b1dc38ee666e2758f26631ef6075a2d88202d2567e0ca8bfe0f5`.
+  This is the supplied final MP3, copied byte-for-byte. The reviewed edit
+  overlaps 12 transitions with a short incoming fade and outgoing tail.
+  The `dawn.free` key resolves to this immutable asset; explicit attached audio
+  retains precedence. Playback still requires an operator action.
 
 - Original supplied M4A, unchanged, approximately 46 minutes 42 seconds.
 - SHA-256: `8c888a525cde94b7fbd91046f0ee774a7ba8fda06a199646112b201eb57f72da`
