@@ -156,6 +156,13 @@ def update(root, action, *, ticket=None, owner=None, release=None):
             ticket = uuid.uuid4().hex
             if release:
                 data = load_journal(root, release)
+                existing = ([state['active']] if state['active'] else []) + state['waiting']
+                found = next((entry for entry in existing if entry.get('release') == release), None)
+                if found:
+                    if found['owner'] != owner:
+                        raise ValueError('Timing owner mismatch')
+                    position = 0 if found is state['active'] else state['waiting'].index(found) + 1
+                    return {'ticket': found['ticket'], 'release': release, 'position': position, 'active': state['active']}
             else:
                 release = ticket
                 data = new_journal(release, owner)
@@ -206,10 +213,13 @@ def run_recorded(root, release, phase, command):
     if phase not in PHASES or not command:
         raise ValueError('A valid phase and command are required')
     attempt = uuid.uuid4().hex
-    with transaction(root):
+    with transaction(root) as state:
         data = load_journal(root, release)
         if data.get('running'):
             raise ValueError('A recorded command is already running; recover explicitly')
+        if phase in ('push', 'ci', 'integration', 'pages', 'public_readback') and not (
+                state['active'] and state['active'].get('release') == release):
+            raise ValueError('Final release stages require the owned claimed FIFO ticket')
         event(data, 'command_started', phase, attempt=attempt)
         data['running'] = attempt
         save_journal(root, data)

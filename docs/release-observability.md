@@ -30,7 +30,9 @@ python3 cloud/release_queue.py join --owner codex/my-task --release "$MINDEX_REL
 
 join→첫 성공 claim의 큐 대기는 자동 기록된다. `queueWallSeconds`는 대기 중
 로컬 검사와 겹친 시간도 포함하는 별도 축이며, 전체 phase 합계에 더하지 않는다. claim을 반복 확인해도 대기 시작이나
-성공 시각을 덮지 않는다. 기존 FIFO/ticket/소유권 규칙은 그대로다. join에 release
+성공 시각을 덮지 않는다. 같은 release ID로 join을 반복해도 기존 ticket을
+반환하여 중복 대기를 만들지 않는다. push·CI·integration·Pages·공개 확인 phase는
+이 release의 ticket이 실제 claim된 경우에만 실행된다. 기존 FIFO/ticket/소유권 규칙은 그대로다. join에 release
 ID를 생략해도 새 ticket을 ID로 한 기록을 자동 생성하지만, 개발·수정·인증 대기와
 재입장을 한 번에 비교하려면 처음 만든 ID를 계속 사용한다.
 

@@ -49,6 +49,23 @@ class ReleaseTiming(unittest.TestCase):
             self.assertIn('auth_wait', report['phasesSeconds'])
             self.assertIn('repair_wait', report['phasesSeconds'])
 
+    def test_repeated_join_keeps_original_wait_and_final_stages_require_slot(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)
+            release=queue.update(root,'start',owner='test')['release']
+            with self.assertRaises(ValueError):
+                queue.run_recorded(root,release,'push',['never-run'])
+            first=queue.update(root,'join',owner='test',release=release)
+            before=queue.load_journal(root,release)
+            second=queue.update(root,'join',owner='test',release=release)
+            self.assertEqual(first['ticket'],second['ticket'])
+            self.assertEqual(before,queue.load_journal(root,release))
+            self.assertEqual(len(queue.update(root,'status')['waiting']),1)
+            queue.update(root,'claim',ticket=first['ticket'])
+            again=queue.update(root,'join',owner='test',release=release)
+            self.assertEqual(again['position'],0)
+            self.assertEqual(again['ticket'],first['ticket'])
+
     def test_phase_intervals_cover_all_observed_time_without_overlap(self):
         data = {'release': 'a'*32, 'closed': True, 'events': [
             {'at':'2026-11-04T00:00:00+00:00','event':'started','phase':'queue_wait'},
