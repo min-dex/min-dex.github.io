@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261105-ui-polish",
+  "version": "20261105-ui-prayer-v5",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "40a8452bfda27d25358b2bf65ee9054a1190baaac9c755e2bb12751a431aa850",
-  "runtime_sha256": "2343fcf49f3e8077b4e94814ab28873bceecdff8b94f1445159d7ad117c843a6",
+  "source_sha256": "cc9658ea79b4f8def78dc40d1084b939ecaf8f294d141af31fc060f50e51393f",
+  "runtime_sha256": "2de6aad02521c1490c6e2fbe5f034ef37e5de8ade511605b61cffa7409127bb3",
   "source_bytes": 1356461,
   "runtime_bytes": 968328,
-  "source_gzip": 310998,
-  "runtime_gzip": 243945
+  "source_gzip": 310995,
+  "runtime_gzip": 243940
 }

@@ -40,8 +40,8 @@ const sermon=steps.find(s=>s.sectionKey==='sermon');assert.ok(sermon.elements.so
 const common={id:crypto.randomUUID(),service_id:target,label:'공동기도',raw_title:'공동기도',_worshipSectionKey:'corporate_prayer',_worshipSectionId:crypto.randomUUID(),_worshipSectionTitle:'공동기도',_worshipElementTemplateModified:true,memo:serializeServiceItemMemo({elementType:'image',inputMode:'asset',asset:{kind:'image',name:'다니엘기도회 공동기도.png',url:'./assets/presenter/daniel-common-prayer-template-7473226f8525.png'}})};
 const deck=presenterElementSlideFromMemoCore(common,{},0,parseServiceItemMemo(common.memo),'공동기도');
 assert.equal(deck.type,'image');assert.equal(deck.label,'공동기도');assert.ok(deck.imageSrc.includes('daniel-common-prayer-template-'));
-assert.ok(SERVICE_SLOT_MUSIC['dawn.free'].source.endsWith('7838168016b7.mp3'));
-assert.ok(!SERVICE_SLOT_MUSIC['prayer.meeting.free'].source.includes('7838168016b7'));
+assert.ok(SERVICE_SLOT_MUSIC['dawn.free'].source.endsWith('bac443d20c02.mp3'));
+assert.ok(!SERVICE_SLOT_MUSIC['prayer.meeting.free'].source.includes('bac443d20c02'));
 // Only an explicitly reviewed duplicate is projected away; original rows stay intact.
 const fri={id:'10000000-0000-4000-8000-000000000098',type_id:'friday',date:'2026-11-06',alias:'온세대 월삭예배',_worshipSourceRef:{created_from:'mindex_template'}};
 const monthly={id:'10000000-0000-4000-8000-000000000099',type_id:'monthly',date:fri.date,alias:fri.alias,_worshipSourceRef:{navigation_duplicate_of:fri.id}};
@@ -59,7 +59,7 @@ state.services=[{...fri,_worshipSourceRef:{start_time:'05:00'}}];assert.equal(wo
 console.log('PASS linked replacements preserve absence, route all three card layouts and setlist status to the actual service');
 `,c);
 
-assert.equal(require('node:crypto').createHash('sha256').update(fs.readFileSync('assets/presenter/dawn-free-prayer-7838168016b7.mp3')).digest('hex'),'7838168016b7452d8f6a7939a0736966d33cbcde29106bc052cf481e9500734c','Restored dawn audio must match the verified candidate');
+assert.equal(require('node:crypto').createHash('sha256').update(fs.readFileSync('assets/presenter/dawn-free-prayer-bac443d20c02.mp3')).digest('hex'),'bac443d20c0228b70fd8df3fc5b978c6616efda0026b086d3185c524ce40ad87','Restored dawn audio must match the verified candidate');
 
 // Lossless packet preservation: only 144 silent MP3 frames were removed.
 {

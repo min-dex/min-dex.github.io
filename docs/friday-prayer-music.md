@@ -27,23 +27,26 @@
 
 ## Audio
 
-- Dawn music restoration (2026-11-04):
-  `assets/presenter/dawn-free-prayer-7838168016b7.mp3`, 55,067,636 bytes,
-  3413.627375 seconds decoded, stereo 48kHz. SHA-256:
-  `7838168016b7452d8f6a7939a0736966d33cbcde29106bc052cf481e9500734c`.
-  Restored from the first supplied `dawn-free-prayer.mp3` (SHA-256
+- Dawn prayer audio (2026-11-05):
+  `assets/presenter/dawn-free-prayer-bac443d20c02.mp3`, 87,865,148 bytes, 3169.543625 seconds decoded,
+  stereo48kHz. SHA-256 `bac443d20c0228b70fd8df3fc5b978c6616efda0026b086d3185c524ce40ad87`.
+  Built from the first supplied original (SHA-256
   `b8939186c2434d0280e787d02103cbfd136c77ea73b2096faa01a85ab026f7d9`).
-  The former 52-minute edit is superseded: it altered internal passages.
-  No normalization, gain envelope, crossfade over music or re-encoding is used.
-  Only 144 MP3 frames (3.456 seconds) wholly inside the digital-zero interval
-  between the vocal and instrumental sets were removed. Original sample range
-  1706.136979–1709.592979 seconds was all zero in both channels.
-  Every retained decoded stereo sample matches the original exactly; the
-  existing continuous musical transitions and song-internal pauses remain.
-  Gapless delay/end padding and the Xing/LAME header checksum are preserved
-  or updated appropriately. Tests assert every retained audio packet verbatim.
-  `dawn.free` resolves to this immutable asset; explicit attached audio retains
-  precedence. This change does not rewrite any worship record or media timing.
+  User-approved scope is inter-song transitions for congregational prayer;
+  song interiors, their rests, performances and levels remain original.
+  Ten explicit boundary windows are edited; three instrumental transitions remain
+  original. No amplitude-triggered cutting, whole-file normalization, EQ or time
+  stretching. Eleven retained PCM spans including the ending exactly match source
+  before MP3 quality0 delivery encoding. Delivery is lossy, not packet-identical.
+  Rejected earlier candidates are not selected. Version5 restores the complete
+  incoming phrase at transition4 (incoming source starts882.8s), and transition3
+  ends its outgoing tail before the incoming first phrase. Complete source phrases
+  are preserved in unchanged master spans at both repaired transitions; local
+  source/output transcription is supporting evidence, not human auditory review.
+  Full decode, source preservation and player/source-isolation checks are separate
+  from release/public readback. Private maps and evidence remain outside Git.
+  `dawn.free` selects the immutable file. Explicit attachments keep precedence.
+  No worship records, audio synchronization or media links are rewritten.
 
 - Original supplied M4A, unchanged, approximately 46 minutes 42 seconds.
 - SHA-256: `8c888a525cde94b7fbd91046f0ee774a7ba8fda06a199646112b201eb57f72da`
