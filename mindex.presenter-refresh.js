@@ -108,7 +108,7 @@
       state.serviceItems[id] = items;
       const map = new Map(state.songs.map(song => [song.id, song]));songs.forEach(song => map.set(song.id, song));state.songs = [...map.values()];
       state.loadedWorshipServiceIds.add(id);
-      restoreSession = MindexPresenterFreshness.adoptRefresh(id, aggregate.revision, songs);
+      if (live(id)) restoreSession = MindexPresenterFreshness.adoptRefresh(id, aggregate.revision, songs);
       clearSearchCaches();presenterSlideBuildCache.delete(id);
       refreshPresenterForService(id, { publish: false, renderControls: false });
       if (state.selectedServiceId === id) captureCleanFingerprint('service');

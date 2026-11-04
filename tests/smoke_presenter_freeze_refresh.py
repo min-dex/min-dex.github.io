@@ -88,6 +88,11 @@ try:
     check(!await MindexPresenterRefresh.refresh(sid),'duplicate refresh started');done();check(await first,'final refresh failed');
     check(!MindexPresenterRefresh.frozen(sid),'automatic hold not released');
     check(JSON.stringify(state.serviceItems[sid])===originalItems,'unchanged server content drifted');
+    // Refreshing a standby service cannot replace another live service's verified song snapshot.
+    state.presenter.serviceId='other-live';state.presenter.outputSessionId='other-session';delay=null;
+    MindexPresenterFreshness.adoptRefresh('other-live','5',[{id:'sentinel',title:'현재 송출 판본'}]);
+    check(await MindexPresenterRefresh.refresh(sid),'standby refresh failed');
+    check(MindexPresenterFreshness.song('sentinel','other-live')?.title==='현재 송출 판본','standby refresh changed the live song snapshot');
     renderPresenterControlState=originalRender;state.presenter.outputWindow=null;
     return 'PASS manual/automatic hold, safety restore, output-side navigation, media node, read failure, late drafts, duplicate clicks and original rows';
    }'''))
