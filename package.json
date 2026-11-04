@@ -65,6 +65,7 @@
       "mindex.service-list-live.js",
       "mindex.archive-live.js",
       "mindex.single-song.js",
+      "mindex.praise-selection.js",
       "mindex.praise-storage.js",
       "mindex.constants.js",
       "scripture-editions.js",

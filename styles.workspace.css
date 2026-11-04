@@ -6376,3 +6376,22 @@ body[data-module="presenter"] .svc-presenter-toolbar::before {
 }
 
 .svc-presenter-refresh-tools { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:10px; }
+
+/* Source guidance remains separate from editable lyrics and performance settings. */
+.praise-selection { border-block: 1px solid var(--line); margin: 0 0 15px; padding: 12px 0; }
+.praise-selection > summary { cursor: pointer; font-weight: 600; }
+.praise-selection > summary span { font-size: 12px; font-weight: 400; color: var(--sidebar-sub); margin-left: 12px; }
+.praise-selection-entries { display: grid; gap: 15px; padding-top: 15px; }
+.praise-selection-entry { min-width: 0; }
+.praise-selection-entry + .praise-selection-entry { border-top: 1px solid var(--line-soft); padding-top: 15px; }
+.praise-selection-entry dl { display: flex; flex-wrap: wrap; gap: 12px 30px; margin: 0; }
+.praise-selection-entry dl > div { display: flex; gap: 10px; min-width: 0; }
+.praise-selection-entry dt, .praise-selection-entry small { color: var(--sidebar-sub); }
+.praise-selection-entry dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.praise-selection-entry small { display: block; margin-top: 12px; font-size: 12px; }
+.praise-selection-next h4 { margin: 12px 0 5px; font-size: 14px; }
+.praise-selection-next p { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; font-size: 14px; }
+.praise-selection-next ul { display: flex; flex-wrap: wrap; gap: 10px 15px; list-style: none; padding: 0; margin: 10px 0 0; }
+.praise-selection-next li { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; font-size: 12px; }
+.praise-selection-key { color: var(--sidebar-sub); }
+@media (max-width: 640px) { .praise-selection > summary span { display: block; margin: 5px 0 0; } .praise-selection-entry dl { flex-direction: column; } }

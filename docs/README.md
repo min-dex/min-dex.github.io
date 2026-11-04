@@ -7,6 +7,7 @@ stale document in the same change.
 ## Current Contracts
 
 - [설치 앱 유튜브 직접 송출 후보](youtube-desktop-candidate.md)
+- `praise-selection-guidance.md`: 출처 기반 추천 키·주제·리듬과 단방향 이어 부르기.
 
 - `live-web-updates.md`: 켜 둔 웹/PWA 앱의 새 버전 감지와 편집·저장·인쇄·송출 보호.
 
