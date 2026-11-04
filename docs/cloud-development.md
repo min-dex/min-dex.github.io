@@ -346,3 +346,30 @@ checkout을 보존한다. 무조건적인 pull/reset, 자동 충돌 덮어쓰기
 ## Complete gate execution window ·2026-11-04
 
 Offline-web jobs allow40minutes after repeated20minute cancellations during otherwise passing full-suite execution (41705937306 shard0, GitHub maximum-execution-time annotation). All four shards, per-test180s timeout, fail propagation, exact-SHA reuse and Pages prerequisites remain unchanged. This extends execution budget without dropping or bypassing checks. The corrected candidate must complete all four jobs before publication.
+
+## 검사·배포 지연 재발 방지 · 2026-11-04
+
+이번 연합예배 묶음의 원인과 개선은 [지연 회고](release-delay-review-20261104.md)에
+기록한다. 시작 전에 `python3 cloud/plan_checks.py`로 실제 full gate의 네 shard별
+항목 수·과거 smoke 예상 시간·미측정 항목을 확인한다. 실행/다운로드/운영 접근은
+하지 않는다. 출력은 검증 영수증이나 완료 예정 시각이 아니다. 큐·설치·unit/manual·
+Pages·공개 확인은 별도이며, 시간표가 오래됐으면 완료된 동일 환경 로그의 DONE
+기록을 근거로 후속 조정한다. 분배표를 고칠 때는 전 항목 exactly-once/실패 전파
+검사와 네 shard의 실제 CI 통과가 필요하다.
+
+- 대기열, runner 배정, setup, 테스트 실패/시간초과, Pages, 공개 확인을 구분해
+  알린다. 대기 중에는 focused 검사·fixture 정비를 끝내되 final gate를 중복 시작하지 않는다.
+- 후보를 동결한 후 같은 브랜치에 추가 push하면 진행 중 검사가 취소될 수 있다.
+  후속 수정은 별도 후보로 보존한다. 필수 수정으로 SHA가 바뀌면 재검사가 필요하다.
+- 입력 테스트는 편집 중 raw draft와 저장 후 canonical 값을 구분한다.
+  실제 close → focusout → 새 read → reopen 수명주기로 검증하고, 집중 상태의
+  입력 보존·저장 원문·추가 쓰기 없음도 함께 검사한다. sleep/기대값 완화로 해결하지 않는다.
+- job 시간초과는 개별 assertion 실패와 구분한다. 현행40분 job budget과
+  개별180초 제한을 유지한다. 제한 연장 자체를 속도 개선으로 보고하지 않는다.
+- 재실행 API403/로그인 불가는 제품 결함이 아니다. 인증 상태/허용 경로를 확인하고
+  무의미한 재시도를 멈춘다. 검사 우회·다른 소유자 run 취소는 하지 않는다.
+- 공개 확인은 공개 파일의 exact-SHA 대조와 synthetic UI를 기본으로 한다.
+  비공개 전체 자료 검증은 로컬에서 수행하고 공개 페이지에 주입하지 않는다.
+  승인 검토가 거부한 경로를 다른 도구로 재시도하지 않는다.
+- 기존 exact-SHA 검증 재사용은 SHA·scope·필수 성공 조건이 일치할 때만 사용한다.
+  코드가 바뀐 후보, 개별 component PASS나 로컬 PASS에는 확대 적용하지 않는다.
