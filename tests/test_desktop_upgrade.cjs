@@ -20,6 +20,36 @@ async function main(){
   await page.waitForFunction(()=>typeof fetchWorshipServiceListRows==='function'&&!!window.MINDEX_SERVER_STORAGE);
   const info=await page.evaluate(()=>window.mindexElectron.getBuildInfo());
   assert(info.testBuild);assert.equal(info.build.sourceCommit,sha);
+  let bundledAudio = null;
+  if(phase==='upgrade'){
+   assert(await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().every(w=>w.webContents.isAudioMuted())));
+   bundledAudio=await page.evaluate(async()=>{
+    const url=new URL('./assets/presenter/dawn-free-prayer-69c12c677944.mp3',location.href);
+    if(url.protocol!=='file:')throw Error('Installed audio must use the bundled local protocol');
+    const audio=new Audio();audio.muted=true;audio.preload='metadata';
+    let timer;
+    const waitFor=(event)=>new Promise((resolve,reject)=>{
+     audio.addEventListener(event,resolve,{once:true});
+     audio.addEventListener('error',()=>reject(Error('Bundled MP3 error '+audio.error?.code)),{once:true});
+    });
+    try{
+     return await Promise.race([(async()=>{
+      const ready=waitFor('loadedmetadata');audio.src=url.href;audio.load();await ready;
+      const duration=audio.duration;
+      if(Math.abs(duration-3143.9335)>0.1)throw Error('Bundled MP3 duration mismatch');
+      const progressing=waitFor('timeupdate');await audio.play();await progressing;
+      if(audio.paused||audio.currentTime<=0||!audio.muted)throw Error('Bundled MP3 did not advance muted');
+      const progressed=audio.currentTime;
+      const seeking=waitFor('seeked');audio.currentTime=duration-2;await seeking;
+      if(Math.abs(audio.currentTime-(duration-2))>0.5)throw Error('Bundled MP3 end seek failed');
+      const emptied=waitFor('emptied');audio.pause();audio.removeAttribute('src');audio.load();await emptied;
+      // Chromium retains the last currentSrc after emptied; selected source and decoder state are authoritative.
+      if(!audio.paused||audio.hasAttribute('src')||audio.readyState!==audio.HAVE_NOTHING||![audio.NETWORK_EMPTY,audio.NETWORK_NO_SOURCE].includes(audio.networkState))throw Error('Bundled MP3 was not released '+JSON.stringify({paused:audio.paused,src:audio.getAttribute('src'),currentSrc:audio.currentSrc,ready:audio.readyState,network:audio.networkState}));
+      return {protocol:url.protocol,duration,progressed,seekedNearEnd:true,muted:true,released:true};
+     })(),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Bundled MP3 acceptance timeout')),30000);})]);
+    }finally{clearTimeout(timer);audio.pause();audio.removeAttribute('src');audio.load();}
+   });
+  }
   await page.exposeFunction('fixtureRpc',(name,args)=>{
    if(args.p_key==='mindex.ui.presenterThumbScale')assert.equal(args.p_scope,'device');
    const scope=args.p_scope==='shared'?'shared':args.p_scope+':'+args.p_token;
@@ -76,7 +106,7 @@ async function main(){
   const draft=JSON.parse(record.data.values['mindex.editor.draft.v2:service:fixture-worship:rehearsal']);
   assert.deepEqual(restored.items,draft.value.items);assert(restored.dirty);
   for(const [scope,rows]of Object.entries(beforeRestore))for(const [key,row]of Object.entries(rows))assert.deepEqual(record.rows[scope][key],row);
-  console.log(JSON.stringify({phase,source:sha,version,profile:native.profile,appId:'kr.mindex.app.test',networkBlocked:true,restoredByApp:true,hashes:record.hashes,valueHashes:Object.fromEntries(Object.entries(data.values).map(([k,v])=>[k,hash(v)]))}));
+  console.log(JSON.stringify({phase,source:sha,version,profile:native.profile,appId:'kr.mindex.app.test',networkBlocked:true,restoredByApp:true,bundledAudio,hashes:record.hashes,valueHashes:Object.fromEntries(Object.entries(data.values).map(([k,v])=>[k,hash(v)]))}));
  }finally{
   // Test teardown discards only the recovered synthetic editor, not persisted records.
   for(const page of app.windows())await page.close({runBeforeUnload:false});
