@@ -21,7 +21,19 @@ async function main(){
   const info=await page.evaluate(()=>window.mindexElectron.getBuildInfo());
   assert(info.testBuild);assert.equal(info.build.sourceCommit,sha);
   let bundledAudio = null;
+  let previewCacheContract = null;
   if(phase==='upgrade'){
+   previewCacheContract=await page.evaluate(()=>{
+    const source='https://fixture.supabase.co/storage/v1/object/public/media/loop.mp4?keep=value';
+    const slide={backgroundVideo:source};const before=JSON.stringify(slide);
+    const preview=presenterBackgroundVideoPreviewSource(source);
+    if(preview!==source+'&mindexPreview=1'||presenterBackgroundVideoPreviewSource(preview)!==preview)throw Error('Installed preview cache key mismatch');
+    if(presenterSlideBackgroundVideoSource(slide,true)!==source||JSON.stringify(slide)!==before)throw Error('Installed output source changed');
+    for(const other of ['relative.mp4','https://example.invalid/video.mp4?keep=value','https://fixture.supabase.co/storage/v1/object/sign/media/loop.mp4?token=synthetic']){
+     if(presenterBackgroundVideoPreviewSource(other)!==other)throw Error('Installed non-public source changed');
+    }
+    return {stablePreviewKey:true,canonicalOutput:true,slideUnchanged:true,nonPublicUnchanged:true};
+   });
    assert(await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().every(w=>w.webContents.isAudioMuted())));
    bundledAudio=await page.evaluate(async()=>{
     const url=new URL('./assets/presenter/dawn-free-prayer-69c12c677944.mp3',location.href);
@@ -106,7 +118,7 @@ async function main(){
   const draft=JSON.parse(record.data.values['mindex.editor.draft.v2:service:fixture-worship:rehearsal']);
   assert.deepEqual(restored.items,draft.value.items);assert(restored.dirty);
   for(const [scope,rows]of Object.entries(beforeRestore))for(const [key,row]of Object.entries(rows))assert.deepEqual(record.rows[scope][key],row);
-  console.log(JSON.stringify({phase,source:sha,version,profile:native.profile,appId:'kr.mindex.app.test',networkBlocked:true,restoredByApp:true,bundledAudio,hashes:record.hashes,valueHashes:Object.fromEntries(Object.entries(data.values).map(([k,v])=>[k,hash(v)]))}));
+  console.log(JSON.stringify({phase,source:sha,version,profile:native.profile,appId:'kr.mindex.app.test',networkBlocked:true,restoredByApp:true,bundledAudio,previewCacheContract,hashes:record.hashes,valueHashes:Object.fromEntries(Object.entries(data.values).map(([k,v])=>[k,hash(v)]))}));
  }finally{
   // Test teardown discards only the recovered synthetic editor, not persisted records.
   for(const page of app.windows())await page.close({runBeforeUnload:false});

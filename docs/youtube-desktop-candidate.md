@@ -6,7 +6,9 @@ retries; the supplied final dawn MP3 remains byte-identical. Package acceptance
 checks its pinned SHA-256 as well as every tracked renderer blob. The installed
 TEST app also loads the bundled MP3 through its file protocol, verifies duration
 and muted playback progress, seeks near the end and releases the source within
-a bounded 30-second check. External network and native audio output stay blocked. Full web/native
+a bounded 30-second check. The installed renderer also verifies the stable public
+preview key, canonical output URL, unchanged slide and untouched signed/external
+sources without loading any external media. External network and native audio output stay blocked. Full web/native
 checks and isolated TEST upgrade preservation must pass on the combined SHA.
 Actual YouTube broadcasting, production data writes, signing/notarization and
 formal publication remain excluded. Web publication is confirmed separately.
