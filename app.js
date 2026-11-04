@@ -29935,7 +29935,7 @@ function renderLiveScriptureControl(serviceId) {
 }
 
 const SERVICE_SLOT_MUSIC = Object.freeze({
-  "dawn.free": { source: "./assets/presenter/dawn-free-prayer-69c12c677944.mp3", label: "새벽기도 자율기도 음악", repeatAllowed: false },
+  "dawn.free": { source: "./assets/presenter/dawn-free-prayer-7838168016b7.mp3", label: "새벽기도 자율기도 음악", repeatAllowed: false },
   "prayer.meeting.free": { source: "./assets/presenter/friday-free-prayer.m4a?v=faststart-20260919", label: "자율기도 음악", repeatAllowed: false },
 });
 

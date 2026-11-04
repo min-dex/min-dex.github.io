@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261104-compact-praise-controls",
+  "version": "20261104-prayer-original-restored",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "a9632e17da9f4123342f7a7e9f7284201605fc700872a6cd381a4bba35ad136d",
-  "runtime_sha256": "2d842ad54e4da9202663bfe954b78982b0340b6b09e8701b20e723f631467d31",
+  "source_sha256": "7119506c8cdaa9ec7af7d01c3fc0313be51e5ae28037e4619c2583474067ed74",
+  "runtime_sha256": "560261ad7cced1d25f737e7ec6171b37212f780905a846585f76a2bfefaec441",
   "source_bytes": 1357113,
   "runtime_bytes": 968595,
-  "source_gzip": 311085,
+  "source_gzip": 311087,
   "runtime_gzip": 243946
 }

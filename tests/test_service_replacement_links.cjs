@@ -40,9 +40,17 @@ const sermon=steps.find(s=>s.sectionKey==='sermon');assert.ok(sermon.elements.so
 const common={id:crypto.randomUUID(),service_id:target,label:'공동기도',raw_title:'공동기도',_worshipSectionKey:'corporate_prayer',_worshipSectionId:crypto.randomUUID(),_worshipSectionTitle:'공동기도',_worshipElementTemplateModified:true,memo:serializeServiceItemMemo({elementType:'image',inputMode:'asset',asset:{kind:'image',name:'다니엘기도회 공동기도.png',url:'./assets/presenter/daniel-common-prayer-template-7473226f8525.png'}})};
 const deck=presenterElementSlideFromMemoCore(common,{},0,parseServiceItemMemo(common.memo),'공동기도');
 assert.equal(deck.type,'image');assert.equal(deck.label,'공동기도');assert.ok(deck.imageSrc.includes('daniel-common-prayer-template-'));
-assert.ok(SERVICE_SLOT_MUSIC['dawn.free'].source.endsWith('69c12c677944.mp3'));
-assert.ok(!SERVICE_SLOT_MUSIC['prayer.meeting.free'].source.includes('69c12c677944'));
+assert.ok(SERVICE_SLOT_MUSIC['dawn.free'].source.endsWith('7838168016b7.mp3'));
+assert.ok(!SERVICE_SLOT_MUSIC['prayer.meeting.free'].source.includes('7838168016b7'));
 console.log('PASS linked replacements preserve absence, route all three card layouts and setlist status to the actual service');
 `,c);
 
-assert.equal(require('node:crypto').createHash('sha256').update(fs.readFileSync('assets/presenter/dawn-free-prayer-69c12c677944.mp3')).digest('hex'),'69c12c677944b1dc38ee666e2758f26631ef6075a2d88202d2567e0ca8bfe0f5','Approved final dawn audio must match the supplied file');
+assert.equal(require('node:crypto').createHash('sha256').update(fs.readFileSync('assets/presenter/dawn-free-prayer-7838168016b7.mp3')).digest('hex'),'7838168016b7452d8f6a7939a0736966d33cbcde29106bc052cf481e9500734c','Restored dawn audio must match the verified candidate');
+
+// Lossless packet preservation: only 144 silent MP3 frames were removed.
+{
+ const original = fs.readFileSync('assets/presenter/dawn-free-prayer.mp3');
+ const restored = fs.readFileSync('assets/presenter/dawn-free-prayer-7838168016b7.mp3');
+ assert.equal(require('node:crypto').createHash('sha256').update(original).digest('hex'), 'b8939186c2434d0280e787d02103cbfd136c77ea73b2096faa01a85ab026f7d9');
+ assert.deepEqual(restored.subarray(428), Buffer.concat([original.subarray(237,27630669), original.subarray(27644493)]), 'Every retained original audio packet must be byte-identical');
+}

@@ -27,14 +27,23 @@
 
 ## Audio
 
-- Dawn music (user-approved final edit, 2026-11-04):
-  `assets/presenter/dawn-free-prayer-69c12c677944.mp3`, 79,675,315 bytes, 3143.9335 seconds,
-  stereo 44.1kHz. SHA-256:
-  `69c12c677944b1dc38ee666e2758f26631ef6075a2d88202d2567e0ca8bfe0f5`.
-  This is the supplied final MP3, copied byte-for-byte. The reviewed edit
-  overlaps 12 transitions with a short incoming fade and outgoing tail.
-  The `dawn.free` key resolves to this immutable asset; explicit attached audio
-  retains precedence. Playback still requires an operator action.
+- Dawn music restoration (2026-11-04):
+  `assets/presenter/dawn-free-prayer-7838168016b7.mp3`, 55,067,636 bytes,
+  3413.627375 seconds decoded, stereo 48kHz. SHA-256:
+  `7838168016b7452d8f6a7939a0736966d33cbcde29106bc052cf481e9500734c`.
+  Restored from the first supplied `dawn-free-prayer.mp3` (SHA-256
+  `b8939186c2434d0280e787d02103cbfd136c77ea73b2096faa01a85ab026f7d9`).
+  The former 52-minute edit is superseded: it altered internal passages.
+  No normalization, gain envelope, crossfade over music or re-encoding is used.
+  Only 144 MP3 frames (3.456 seconds) wholly inside the digital-zero interval
+  between the vocal and instrumental sets were removed. Original sample range
+  1706.136979–1709.592979 seconds was all zero in both channels.
+  Every retained decoded stereo sample matches the original exactly; the
+  existing continuous musical transitions and song-internal pauses remain.
+  Gapless delay/end padding and the Xing/LAME header checksum are preserved
+  or updated appropriately. Tests assert every retained audio packet verbatim.
+  `dawn.free` resolves to this immutable asset; explicit attached audio retains
+  precedence. This change does not rewrite any worship record or media timing.
 
 - Original supplied M4A, unchanged, approximately 46 minutes 42 seconds.
 - SHA-256: `8c888a525cde94b7fbd91046f0ee774a7ba8fda06a199646112b201eb57f72da`
