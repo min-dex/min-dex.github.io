@@ -167,3 +167,6 @@ records above for the retained repair evidence and Git reference.
 - `worship-data-contract.md`의 Praise classification owner: 어린이 분류 제거·음원 유무 표시·분류 단일 저장 후보와 운영 적용 순서. 배포/운영 정규화는 별도 검증.
 
 - `praise-id-transition.md`: CHLD→CONT 오프라인 전환 도구와 미완료 운영 적용 경계.
+
+- [2026-11-04 검사·배포 지연 회고](release-delay-review-20261104.md): 확인된 병목,
+  이미 적용된 수정, 사전 분배 확인 도구와 재발 방지 절차.
