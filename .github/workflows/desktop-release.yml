@@ -27,6 +27,8 @@ on:
       - tests/test_minimatch_compat.cjs
       - tests/test_electron_test_isolation.cjs
       - tests/test_electron_runtime_files.py
+      - scripts/release-electron.mjs
+      - tests/test_release_preflight.mjs
       - scripts/verify-release.mjs
       - scripts/product-identity.cjs
       - product-release.json

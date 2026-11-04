@@ -1,3 +1,13 @@
+## 2026-11-04 Latest web and signing preparation candidate
+
+Merged public web source `8849ecfa` into the native candidate after verified
+`32aff00a`. Added an explicit `--no-publish` signed-build path; signing/notary,
+reviewed channel, unused version and clean-checkout requirements remain intact.
+Certificates are not yet available/confirmed. Actual signing, signed-updater
+acceptance, live broadcasting and formal publication remain unperformed.
+Offline preflight and scoped UI checks are separate from the new exact-SHA
+web/native gate. See docs/electron-packaging-plan.md for first-release acceptance.
+
 ## 2026-11-04 Background/audio follow-up candidate
 
 Approved shared web candidate `d702a6cd` (including `6947c5bf`, `d2f58911`, `d6e757d8` preview-cache isolation and source-based praise selection guidance) is integrated after verified native candidate

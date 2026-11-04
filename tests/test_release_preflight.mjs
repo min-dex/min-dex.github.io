@@ -27,3 +27,20 @@ test('test installers are isolated, unsigned and cannot join the update channel'
  assert.equal(config.win.signAndEditExecutable,false);
  assert.match(config.directories.output,/test/);
 });
+
+
+test('sign-only builds never publish but retain signature and platform requirements', async () => {
+ const {signedBuildArgs} = await import('../scripts/release-electron.mjs');
+ for (const platform of ['mac', 'win']) {
+   const args = signedBuildArgs(platform, {publish:false});
+   assert.equal(args[args.indexOf('--publish') + 1], 'never');
+   assert.ok(args.includes('-c.forceCodeSigning=true'));
+   assert.equal(signedBuildArgs(platform)[signedBuildArgs(platform).indexOf('--publish') + 1], 'always');
+ }
+ assert.throws(() => signedBuildArgs('linux'), /Unsupported/);
+ const certs = {CSC_LINK:'fixture', CSC_KEY_PASSWORD:'fixture'};
+ assert.deepEqual(releaseProblems(pkg, certs, 'win', {publish:false}), []);
+ assert.ok(releaseProblems(pkg, certs, 'win').includes('GH_TOKEN'));
+ assert.ok(releaseProblems(pkg, {}, 'win', {publish:false}).some(p => p.includes('CSC_LINK')));
+ assert.ok(releaseProblems(pkg, certs, 'mac', {publish:false}).some(p => p.includes('notarytool')));
+});

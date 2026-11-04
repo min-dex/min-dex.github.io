@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 
-export function releaseProblems(pkg, env = {}, platform = 'mac') {
+export function releaseProblems(pkg, env = {}, platform = 'mac', { publish = true } = {}) {
   const missing = [];
   const hasAll = names => names.every(name => String(env[name] || '').trim());
   if (!['mac', 'win'].includes(platform)) missing.push('supported platform: mac or win');
@@ -11,7 +11,7 @@ export function releaseProblems(pkg, env = {}, platform = 'mac') {
   if (!pkg.build.mac.target.includes('dmg')) missing.push('mac DMG installer target');
   if (!pkg.build.win.target.includes('nsis')) missing.push('Windows NSIS update target');
   if (!pkg.build.publish.some(p => p.provider === 'github' && p.owner === 'min-dex' && p.repo === 'min-dex.github.io')) missing.push('GitHub update provider');
-  if (!hasAll(['GH_TOKEN'])) missing.push('GH_TOKEN');
+  if (publish && !hasAll(['GH_TOKEN'])) missing.push('GH_TOKEN');
   if (!hasAll(['CSC_LINK','CSC_KEY_PASSWORD'])) missing.push('CSC_LINK + CSC_KEY_PASSWORD');
   // Pinned builder 26 supports notarytool API credentials or a keychain profile.
   // Its APPLE_ID path is legacy; do not advertise it as a release-ready option.
@@ -23,10 +23,10 @@ export function releaseProblems(pkg, env = {}, platform = 'mac') {
   return missing;
 }
 
-export function verifyRelease({ offline = false, platform = process.platform === 'darwin' ? 'mac' : 'win' } = {}) {
+export function verifyRelease({ offline = false, publish = true, platform = process.platform === 'darwin' ? 'mac' : 'win' } = {}) {
   const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url)));
   const env = offline ? { GH_TOKEN:'fixture', CSC_LINK:'fixture', CSC_KEY_PASSWORD:'fixture', APPLE_KEYCHAIN_PROFILE:'fixture' } : process.env;
-  const problems = releaseProblems(pkg, env, platform);
+  const problems = releaseProblems(pkg, env, platform, { publish });
   if (!offline) {
     const policy = JSON.parse(readFileSync(new URL('../product-release.json', import.meta.url)));
     if (policy.channel !== 'release') problems.push('reviewed product release channel');

@@ -1,5 +1,57 @@
 # Mindex Electron Packaging Plan
 
+## 1.0.0 signing preparation ·2026-11-04
+
+Latest approved web source `8849ecfa` is merged into the native candidate after
+`32aff00a`. Previous Windows/macOS installation, preservation, bundled MP3,
+preview cache and local RTMPS receipts certify `32aff00a` only; the merged source
+needs its own final gate. Keep `product-release.json` on development for now.
+No actual broadcast or formal publication is authorized.
+
+The owner has no confirmed Apple Developer ID or Windows signing certificate.
+Do not inspect credentials/keychains or attempt signing to discover availability.
+Public GitHub Releases returned an empty list on 2026-11-04; this does not certify
+private drafts or the history of installations outside GitHub. Treat 1.0.0 as a
+first-release candidate unless an actual prior signed installer is supplied.
+The synthetic `0.9.0-test` upgrade proves data preservation, not a historical
+production upgrade or signed updater delivery.
+
+Preparation and later acceptance:
+
+1. Run `node scripts/verify-release.mjs --offline` now; this uses synthetic
+   credential values and does not sign, upload, or modify installed user data.
+2. Later obtain platform certificates through the owner's release environment.
+   Keep certificate passwords/private keys out of source and chat. For Mac,
+   Developer ID signing and notarization credentials are both required.
+3. Only after explicit signing authorization, review the release channel/version
+   and clean exact source. On each matching host run
+   `node scripts/release-electron.mjs --platform=mac --no-publish` or
+   `node scripts/release-electron.mjs --platform=win --no-publish`.
+   This retains signing, notarization, clean-source, unused-version and reviewed
+   release-channel requirements, but uses `--publish never` and needs no
+   publishing token. It can contact Apple's notarization service; it is not an
+   offline test. It creates no GitHub Release/tag. Existing release commands
+   without `--no-publish` still publish: do not run them for candidate acceptance.
+4. Verify the generated installer/app signature and expected publisher using
+   the target OS, Mac notarization acceptance, exact source identity and updater
+   file size/hash. Keep installers, ZIPs, blockmaps and latest YAML together.
+5. Install on isolated accounts/profiles with synthetic records. Check restart,
+   original drafts/recovery/settings, bundled assets and local-only RTMPS.
+   Never use real worship profiles or a live YouTube destination for this test.
+6. For first release, establish a signed baseline; then qualify a genuinely newer
+   signed candidate through a controlled update feed without publishing it to
+   users. Cover download failure/retry, delayed installation during output or
+   unsaved work, restart and independent data readback. Do not claim real signed
+   updates from a same-source test version bump. Mac Intel execution remains
+   separate from package-content parity on an ARM runner.
+7. Record per-platform exact source/artifact hashes, signature/publisher and
+   update evidence. Obtain separate formal-publication approval after these
+   checks and physical capture/audio/output acceptance pass.
+
+The manual `Desktop Packages` workflow with `publish_release=true` still creates
+a DRAFT release after signing. It is not the no-publication path above. Ordinary
+candidate pushes retain unsigned isolated TEST builds and no release creation.
+
 ## Product release policy · 2026-10-30
 
 The user requests installed packages and meaningful versioned updates as the
@@ -93,7 +145,7 @@ Credentials are supplied by the release environment, never stored in this repo:
   must be appropriate to that platform).
 - macOS: Developer ID Application certificate, plus notarytool API credentials
   (`APPLE_API_KEY`, `APPLE_API_KEY_ID`, `APPLE_API_ISSUER`) or
-  `APPLE_KEYCHAIN_PROFILE`. The pinned builder 24 uses a legacy path for
+  `APPLE_KEYCHAIN_PROFILE`. The pinned builder 26 uses a legacy path for
   `APPLE_ID`/`APPLE_APP_SPECIFIC_PASSWORD`; unset those for this release path.
 - Windows does not require Apple credentials. The certificate is still required
   by this project's release gate and `forceCodeSigning`.
