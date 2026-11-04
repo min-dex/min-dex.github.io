@@ -1,3 +1,20 @@
+## Verified in-session catalog reuse ·2026-11-05
+
+The native bootstrap still completes and validates the entire catalog before home
+or service projection. Within the same client session, a fresh successful
+`get_praise_storage_status_v1` response with matching protocol, epoch, manifest and
+recordCount can reuse that validated snapshot. This is not an offline/TTL cache.
+Concurrent activation reads coalesce; every consumer gets independent records and
+a repository. Changed status refetches all pages with the existing bounded timeout
+retry and final manifest check. Failure/maintenance clears trust and fails closed.
+
+The initial Praise list can use its installed full catalog after the same fresh
+status check instead of rereading every record. Replacement catalog/repository,
+client changes, saves or dirty input disqualify this shortcut. Check those guards
+again after the status response. Explicit record reads and presenter preflight
+remain authoritative; no changes to saves, lyric/form normalization or media state.
+Synthetic regression coverage is registered in `smoke_single_song_activation.py`.
+
 ## Production checkpoint ·2026-10-25
 
 Native activation completed:1662 records, epoch2, 4-4-4-4. Compatible client
