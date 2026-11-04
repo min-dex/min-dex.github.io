@@ -1885,7 +1885,7 @@ function praiseFirstLineAliases(song, versions = song?.versions || []) {
   for (const version of versions) {
     for (const form of version.forms || []) {
       const type = normalizeFormPartType(form.part_type);
-      if (type !== "Verse" && type !== "Chorus") continue;
+      if (!["Verse", "Chorus", "Lyrics"].includes(type)) continue;
       const line = splitFreeShowLines(normalizeLyricsForCopy(form.lyrics))
         .map(text => text.replace(/<[^>]*>/g, "").trim())
         .map(text => presenterLyricLineWithoutInlineVerseNumber(text,

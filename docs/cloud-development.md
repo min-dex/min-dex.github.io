@@ -341,3 +341,8 @@ checkout을 보존한다. 무조건적인 pull/reset, 자동 충돌 덮어쓰기
 수정·기대값 변경은 다음 후보로 분리한다. 배포 완료 SHA와 계약/검사 변경을
 참여 채팅에 전달하고 다음 작업이 최신 기준에서 이어지도록 한다. 자세한
 운영 책임은 AGENTS.md의 Continuous synchronization and test upkeep를 따른다.
+
+
+## Complete gate execution window ·2026-11-04
+
+Offline-web jobs allow40minutes after repeated20minute cancellations during otherwise passing full-suite execution (41705937306 shard0, GitHub maximum-execution-time annotation). All four shards, per-test180s timeout, fail propagation, exact-SHA reuse and Pages prerequisites remain unchanged. This extends execution budget without dropping or bypassing checks. The corrected candidate must complete all four jobs before publication.

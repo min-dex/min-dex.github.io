@@ -1177,3 +1177,10 @@ slides carry optional `transitionBlankTone` through document normalization and
 restore; absent values retain older behavior. This is JSON metadata, with no new
 schema, element row, song form or source-text mutation. A second blank has a
 stable `:2` suffix distinct from the first blank's existing identity.
+
+### Derived incipit aliases include Lyrics ·2026-11-04
+
+Verse/Chorus/Lyrics first lines are derived search aliases, not persisted title or
+subtitle values. Existing Lyrics form identity, body, ordering, timing and version
+links remain unchanged. Empty forms and whitespace-only versions remain empty;
+expanding search support does not authorize filling or removing those records.

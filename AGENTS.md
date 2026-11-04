@@ -3,6 +3,8 @@
 Respond in concise Korean, with short English technical terms when useful.
 Read CURRENT.md, HANDOFF.md and docs/README.md, then the relevant current contract.
 Mindex is an independent church operations app, not an EX-series app.
+For Worship/Presenter tasks, also read docs/thread-worship-presenter.md and
+docs/worship-production-runbook.md before editing or operational saves.
 
 Preserve unrelated changes and source evidence. Never read or print .env files,
 credentials or private keys. Never bulk-upload backups or scripture corpora to

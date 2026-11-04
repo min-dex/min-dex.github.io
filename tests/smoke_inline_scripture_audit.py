@@ -96,9 +96,21 @@ def exercise(page, url, scenario):
         settled()
 
     def reload_expect(value):
+        writes_before_reload = report()['writes']
+        # A focused rail intentionally preserves its raw input during refresh.
+        # Check that protection separately, then exercise a real closed-editor reload.
+        opened()
+        raw = field.input_value()
+        field.click()
+        page.evaluate('renderPresenterDetail()')
+        assert field.input_value() == raw, ('focused raw input changed', report())
+        toggle.click()
+        panel.wait_for(state='hidden')
+        page.locator('body').click(position={'x': 1435, 'y': 895})
         page.evaluate("async()=>{const id=inlineFixture.sid;state.loadedWorshipServiceIds.delete(id);await loadServiceItems(id);renderServiceList();renderPresenterDetail()}")
         opened()
         assert field.input_value() == value, ('real reload mismatch', report())
+        assert report()['writes'] == writes_before_reload, ('reload wrote operational content', report())
         page.evaluate('inlineFixture.checkQuiet()')
 
     opened()
