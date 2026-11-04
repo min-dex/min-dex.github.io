@@ -866,8 +866,10 @@ function applyPresenterBackgroundVideo(root, source = "", options = {}) {
   video.setAttribute("aria-hidden", "true"); video.setAttribute("src", source);
   root._presenterBackgroundVideo = video;
   let revealed = false;
+  let retried = false;
+  let attempt = 0;
   const reveal = () => {
-    if (revealed || root._presenterBackgroundGeneration !== generation) return;
+    if (revealed || video.readyState < 2 || root._presenterBackgroundGeneration !== generation) return;
     revealed = true;
     window.clearTimeout(timer);
     delete root.dataset.backgroundVideoError;
@@ -879,16 +881,23 @@ function applyPresenterBackgroundVideo(root, source = "", options = {}) {
   };
   video.addEventListener("loadeddata", reveal);
   video.addEventListener("playing", reveal);
-  const failed = () => {
+  const failed = (retryable = false) => {
     if (root._presenterBackgroundGeneration !== generation) return;
     window.clearTimeout(timer);
+    if (retryable && !revealed && !retried) {
+      retried = true;
+      video.load();
+      start();
+      return;
+    }
     root.dataset.backgroundVideoError = "true";
     root._presenterBackgroundGeneration = generation + 1;
     videos().forEach(dispose);
     delete root._presenterBackgroundVideo;
     delete root._cancelPresenterBackgroundTransition;
   };
-  video.addEventListener("error", failed);
+  // Browsers may report a failed first network request as SRC_NOT_SUPPORTED.
+  video.addEventListener("error", () => failed(Boolean(video.error?.code)));
   root._cancelPresenterBackgroundTransition = () => {
     window.clearTimeout(timer);
     video.removeEventListener("loadeddata", reveal); video.removeEventListener("playing", reveal);
@@ -897,6 +906,15 @@ function applyPresenterBackgroundVideo(root, source = "", options = {}) {
   // New footage is above existing background videos but below the content layers.
   const previous = videos().filter(node => node !== video).at(-1);
   if (previous) previous.after(video); else root.prepend(video);
-  timer = window.setTimeout(failed, 8000);
-  video.play()?.catch(failed);
+  const start = () => {
+    const loadingAttempt = ++attempt;
+    // Cold media requests can exceed eight seconds; keep decoded outgoing footage
+    // during the bounded wait and one retry instead of abandoning a healthy load.
+    timer = window.setTimeout(() => failed(true), 30000);
+    video.play()?.catch(error => {
+      if (loadingAttempt !== attempt || revealed) return;
+      failed(["AbortError", "NetworkError", "NotSupportedError"].includes(error?.name));
+    });
+  };
+  start();
 }

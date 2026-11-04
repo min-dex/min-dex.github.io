@@ -2,6 +2,55 @@
 import os
 os.environ["MINDEX_SMOKE_OFFLINE"]="1"
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
+from pathlib import Path
+
+
+def check_background_startup(browser, url):
+    page = browser.new_page()
+    page.goto(url)
+    page.wait_for_function("typeof applyPresenterBackgroundVideo === 'function'")
+    page.clock.install()
+    held = []
+    page.route('**/praise-background.webm?startup=*', lambda route: held.append(route))
+    page.evaluate("""() => {
+      window.startupRoot=document.createElement('main');document.body.append(startupRoot);
+      window.startupSource=kind=>'tests/fixtures/praise-background.webm?startup='+kind;
+      applyPresenterBackgroundVideo(startupRoot,startupSource('slow'));
+      window.firstStartup=startupRoot._presenterBackgroundVideo;
+    }""")
+    page.wait_for_timeout(50)
+    page.clock.fast_forward(9000)
+    assert page.evaluate('firstStartup.isConnected && startupRoot._presenterBackgroundVideo===firstStartup'), 'healthy cold load abandoned before decode'
+    held.pop().fulfill(path=str(Path(__file__).parent/'fixtures/praise-background.webm'))
+    page.wait_for_function('firstStartup.readyState>=2 && !firstStartup.paused')
+    page.wait_for_function("getComputedStyle(firstStartup).opacity==='1'", timeout=3000)
+
+    page.evaluate("applyPresenterBackgroundVideo(startupRoot,startupSource('retry'));window.retryStartup=startupRoot._presenterBackgroundVideo")
+    page.wait_for_timeout(50)
+    held.pop().abort('connectionreset')
+    page.wait_for_function('startupRoot._presenterBackgroundVideo===retryStartup && retryStartup.isConnected')
+    page.wait_for_timeout(150)
+    assert held, 'transient network error did not retry'
+    assert page.evaluate('firstStartup.isConnected && !firstStartup.paused'), 'retry discarded decoded outgoing footage'
+    held.pop().fulfill(path=str(Path(__file__).parent/'fixtures/praise-background.webm'))
+    page.wait_for_function('retryStartup.readyState>=2 && !retryStartup.paused')
+    page.wait_for_function('!firstStartup.isConnected && retryStartup.isConnected', timeout=3000)
+
+    page.evaluate("applyPresenterBackgroundVideo(startupRoot,startupSource('timeout'));window.timedStartup=startupRoot._presenterBackgroundVideo")
+    page.wait_for_timeout(50)
+    page.clock.fast_forward(31000)
+    assert page.evaluate('timedStartup.isConnected && retryStartup.isConnected'), 'first readiness timeout removed outgoing footage'
+    page.clock.fast_forward(31000)
+    assert page.evaluate("!startupRoot.querySelector('video') && startupRoot.dataset.backgroundVideoError==='true'"), 'bounded readiness failure did not fall back'
+    page.evaluate("timedStartup.dispatchEvent(new Event('loadeddata'));timedStartup.dispatchEvent(new Event('playing'))")
+    assert page.evaluate("!startupRoot.querySelector('video')"), 'late failed generation revived footage'
+    for route in held:
+        try:
+            route.abort()
+        except Exception:
+            pass  # The media retry may already have cancelled this request.
+    page.unroute_all(behavior='ignoreErrors')
+    page.close()
 
 
 def main():
@@ -148,6 +197,8 @@ def main():
                   return 'PASS fullscreen title, video config/source roundtrip, playback/isolation/reuse and upload preservation';
                 }''')
                 print(engine, result)
+                check_background_startup(browser, url)
+                print(engine, 'PASS delayed cold decode, transient network retry, retained outgoing frame and bounded stale-safe failure')
                 browser.close()
     finally:
         server.shutdown()

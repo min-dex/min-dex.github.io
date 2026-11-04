@@ -5713,6 +5713,17 @@ BGV, and source lyrics/forms/timing/media settings remain unchanged. A medley
 inside one element naturally keeps its background; adjacent elements can share
 an explicitly assigned URL without restarting the loop.
 
+Cold background loading waits up to30 seconds per attempt, with at most one
+retry for a readiness timeout, media error or interrupted play request. Browsers
+can report an initial failed network request as an unsupported source, so this
+case also gets one bounded retry.
+An eight-second cutoff must not discard a still-loading first video. The decoded
+outgoing footage remains visible throughout pending readiness and retry; only a
+decoded incoming frame starts the dissolve. A second failed attempt falls back
+without reviving stale events; unsupported/invalid sources never retry indefinitely.
+Safety/key/emergency cancellation still removes pending media immediately. These
+local playback retries do not reload the page or write operational data.
+
 ## Output freeze and current-service refresh ·2026-11-04
 
 Freeze holds slide/content navigation for the current output session; video and
