@@ -79,6 +79,7 @@ console.log('PASS existing audio timing lookup key retained');
  const rows=[r,other].map(x=>structuredClone(x));rows[0].relations={same_song:[rows[1].id]};
  const extra=structuredClone(rows[0]);extra.id='SONG-CONT-9998-0001';extra.legacy={};extra.relations={same_song:[]};rows.push(extra);
  const untouched=JSON.stringify(rows),c=api.createCatalog(rows);assert.equal(c.displayCount(),2);
+ const cloneBefore=globalThis.structuredClone;try{globalThis.structuredClone=()=>{throw Error('Count must not clone lyric/audio payloads')};assert.equal(c.displayCount(),2);}finally{globalThis.structuredClone=cloneBefore;}
  assert.equal(c.displayCount(),api.groupSongs(c.ids().map(id=>c.appSong(id)).filter(song=>api.isSelectableSong(song,id=>c.appSong(id)))).length);
  assert.equal(JSON.stringify(rows),untouched);
  rows[0].metadata.metadata={retiredInto:rows[1].id};assert.equal(api.createCatalog(rows).displayCount(),2);
