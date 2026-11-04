@@ -48,12 +48,22 @@ try:
                             assert page.locator('[data-praise-audio-error]').is_visible()
                         page.screenshot(path=str(out/f'{engine}-{theme}-{width}-{surface}.png'),full_page=True)
                         report=page.evaluate("""()=>({theme:document.documentElement.dataset.theme,width:innerWidth,overflow:document.documentElement.scrollWidth>innerWidth,
-                          native:Boolean(getSelectedSong()?._singleSongRecord),bodyTheme:document.body.dataset.theme,bodyClass:document.body.className,headerRects:[...document.querySelector('.version-compare-title').children].map(e=>{const r=e.getBoundingClientRect();return {cls:e.className,top:r.top,bottom:r.bottom,height:r.height}}),controls:[...document.querySelectorAll('#detailPane input,#detailPane textarea,#detailPane button,.metadata-popover input,.metadata-popover button')].filter(e=>e.getClientRects().length).map(e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect();return {tag:e.tagName,cls:e.className,label:e.getAttribute('aria-label')||e.title||e.textContent.trim().slice(0,45),size:s.fontSize,weight:s.fontWeight,height:r.height,padding:s.padding,color:s.color,background:s.backgroundColor,disabled:e.disabled,x:r.x,right:r.right}})})""")
+                          native:Boolean(getSelectedSong()?._singleSongRecord),bodyTheme:document.body.dataset.theme,bodyClass:document.body.className,headerRects:[...document.querySelector('.version-compare-title').children].map(e=>{const r=e.getBoundingClientRect();return {cls:e.className,left:r.left,right:r.right,top:r.top,bottom:r.bottom,height:r.height}}),controls:[...document.querySelectorAll('#detailPane input,#detailPane textarea,#detailPane button,.metadata-popover input,.metadata-popover button')].filter(e=>e.getClientRects().length).map(e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect();return {tag:e.tagName,cls:e.className,label:e.getAttribute('aria-label')||e.title||e.textContent.trim().slice(0,45),size:s.fontSize,weight:s.fontWeight,height:r.height,padding:s.padding,color:s.color,background:s.backgroundColor,disabled:e.disabled,x:r.x,right:r.right}})})""")
                         (out/f'{engine}-{theme}-{width}-{surface}.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
                         assert page.evaluate("protectedLayoutState===JSON.stringify({forms:state.forms,audio:getSelectedVersion().audio_set,relations:state.singleSongCatalog.get(state.selectedSongId).relations,items:state.serviceItems})")
                         rects=[r for r in report['headerRects'] if r['height']>0]
-                        for previous,current in zip(rects,rects[1:]):
-                            if current['top']<previous['bottom']-0.5:failures.append((engine,theme,width,surface,previous['cls'],current['cls']))
+                        # A compact header intentionally shares a row between media
+                        # and actions. Check actual 2D collisions across every pair,
+                        # not DOM-order vertical stacking, including the saved summary.
+                        for index,previous in enumerate(rects):
+                            for current in rects[index+1:]:
+                                overlap_x=min(previous['right'],current['right'])-max(previous['left'],current['left'])
+                                overlap_y=min(previous['bottom'],current['bottom'])-max(previous['top'],current['top'])
+                                if overlap_x>0.5 and overlap_y>0.5:
+                                    failures.append((engine,theme,width,surface,previous['cls'],current['cls']))
+                        actions=next(r for r in rects if r['cls']=='version-title-actions')
+                        media=next(r for r in rects if r['cls']=='praise-version-media')
+                        assert abs(actions['top']-media['top'])<10,(engine,theme,width,surface,rects)
                         print(engine,theme,width,surface,'checked',flush=True)
             browser.close()
 finally:
