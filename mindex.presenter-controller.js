@@ -1747,11 +1747,11 @@ function presenterElementTrailingBlankSlide(slide, index, service = null) {
     translationLabel: "",
     suppressBackgroundImage: false,
     noBackgroundImage: false,
-    // A transition blank belongs to the service output, never to the preceding element.
+    // Blank output context follows the service; an authored BGV still belongs to its element.
     // This keeps fullscreen services clean even when the preceding item has an explicit
     // chromakey context (for example a special-song element).
     outputContext: serviceChromakey ? "chromakey" : "clean",
-    backgroundVideo: "",
+    backgroundVideo: slide.backgroundVideo || "",
     // Hiding an element hides its content, not its required transition blank.
     hiddenInPresentation: false,
     hidden_in_presentation: false,

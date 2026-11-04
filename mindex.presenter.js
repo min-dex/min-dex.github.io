@@ -3472,7 +3472,7 @@ function applyPresenterOutputFrameState(root, frameState = {}) {
   root.classList.toggle("is-blank", Boolean(frameState.blankOutput));
   document.body.classList.toggle("is-blackout", Boolean(frameState.blackoutOutput));
   root.classList.toggle("is-blackout", Boolean(frameState.blackoutOutput));
-  applyPresenterBackgroundVideo(root, frameState.backgroundVideo);
+  applyPresenterBackgroundVideo(root, frameState.backgroundVideo, { immediate: frameState.blackoutOutput || frameState.emergencyMode || !frameState.noChromakey });
   root.dataset.serviceType = frameState.serviceType || "";
   root.dataset.outputTheme = frameState.outputTheme || presenterOutputTheme(frameState.serviceType);
   const inkSource = presenterBackgroundInkSource(frameState);
@@ -5112,19 +5112,7 @@ async function uploadPresenterPraiseBackground(input) {
   finally { input.disabled = false; input.value = ""; }
 }
 function presenterSlideBackgroundVideoSource(slide, noChromakey) {
-  if (!noChromakey || slide?.formBackgroundImage || (slide?.autoTrailingBlank && !slide.unionStarlightFallback)) return "";
-  if (![PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT, PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT].includes(presenterSlideLayout(slide)) && !((slide?.songInstrumental || slide?.unionStarlightFallback) && presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.BLANK)) return "";
+  if (!noChromakey || slide?.formBackgroundImage || slide?.transitionBlankTone === "light") return "";
+  if (![PRESENTER_SLIDE_LAYOUTS.CENTER_TEXT, PRESENTER_SLIDE_LAYOUTS.LOWER_BAR_TEXT].includes(presenterSlideLayout(slide)) && !(presenterSlideLayout(slide) === PRESENTER_SLIDE_LAYOUTS.BLANK && (slide?.backgroundVideo || slide?.songInstrumental || slide?.unionStarlightFallback))) return "";
   return normalizeServicePresentation({ backgroundVideo: slide?.backgroundVideo })?.backgroundVideo || "";
-}
-function applyPresenterBackgroundVideo(root, source = "") {
-  let video = root.querySelector(":scope > .presenter-output-background-video");
-  if (!source) { if (video) { video.pause(); video.removeAttribute("src"); video.load(); video.remove(); } delete root.dataset.backgroundVideoError; return; }
-  if (video?.getAttribute("src") === source) return;
-  if (video) { video.pause(); video.remove(); }
-  video = document.createElement("video"); video.className = "presenter-output-background-video";
-  video.muted = true; video.defaultMuted = true; video.loop = true; video.autoplay = true; video.playsInline = true; video.preload = "auto";
-  video.setAttribute("aria-hidden", "true"); video.setAttribute("src", source);
-  video.addEventListener("error", () => { root.dataset.backgroundVideoError = "true"; });
-  video.addEventListener("playing", () => { delete root.dataset.backgroundVideoError; });
-  root.prepend(video); video.play()?.catch(() => { root.dataset.backgroundVideoError = "true"; });
 }

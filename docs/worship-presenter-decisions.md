@@ -5695,3 +5695,20 @@ See `firstline-subtitle-audit-20261104.md` for the read-only catalog scope and l
 For this union service, consecutive authored white-design frames (including scripture reading) and consecutive still-image frames also use this brightness-preserving dissolve. Other scripture/media exclusions remain unchanged; keyed/emergency/safety frames and video transitions retain their guards.
 
 The inline scripture audit distinguishes focused-rail refresh (raw input must survive) from closing the editor, moving focus out, reloading the aggregate and reopening (persisted canonical reference must be displayed). Both exact-value assertions and no-additional-write checks are required; this is a fixture lifecycle correction, not a scripture normalization change.
+
+## Element-owned praise backgrounds · 2026-11-04
+
+User approved the element as the background ownership boundary for ordinary
+church worship too. An explicitly assigned BGV persists through that element's
+title, lyrics, instrumental and generated trailing blank; it does not stop at
+individual slide boundaries. The next element's first selected frame selects its
+own background. Identical URLs retain playback even between elements; a changed
+URL decodes before an800ms incoming-over-outgoing dissolve, without fading both
+to black. Rapid jumps cancel stale readiness/cleanup. Failed footage falls back
+to the existing stage rather than retaining the previous element's video.
+Explicit light blanks, form photos, chromakey, safety blackout and emergency
+retain priority; key/safety/emergency remove video immediately. Reduced motion
+uses immediate replacement. No service receives inferred or automatically copied
+BGV, and source lyrics/forms/timing/media settings remain unchanged. A medley
+inside one element naturally keeps its background; adjacent elements can share
+an explicitly assigned URL without restarting the loop.

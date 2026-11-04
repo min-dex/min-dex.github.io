@@ -1184,3 +1184,12 @@ Verse/Chorus/Lyrics first lines are derived search aliases, not persisted title 
 subtitle values. Existing Lyrics form identity, body, ordering, timing and version
 links remain unchanged. Empty forms and whitespace-only versions remain empty;
 expanding search support does not authorize filling or removing those records.
+
+## Element BGV ownership · 2026-11-04
+
+Existing element `config.presentation.backgroundVideo`/memo presentation remains
+the only authored BGV setting; no new schema or production migration. Its slide
+projection is also retained on generated trailing blanks (same elementId), and
+existing portable slide `backgroundVideo` restores it. A light transition tone
+can suppress BGV in rendering without erasing the authored URL. Cross-element
+replacement is playback state, never a write back into Praise or Worship data.
