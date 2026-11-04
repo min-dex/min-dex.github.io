@@ -40,12 +40,12 @@ const sermon=steps.find(s=>s.sectionKey==='sermon');assert.ok(sermon.elements.so
 const common={id:crypto.randomUUID(),service_id:target,label:'공동기도',raw_title:'공동기도',_worshipSectionKey:'corporate_prayer',_worshipSectionId:crypto.randomUUID(),_worshipSectionTitle:'공동기도',_worshipElementTemplateModified:true,memo:serializeServiceItemMemo({elementType:'image',inputMode:'asset',asset:{kind:'image',name:'다니엘기도회 공동기도.png',url:'./assets/presenter/daniel-common-prayer-template-7473226f8525.png'}})};
 const deck=presenterElementSlideFromMemoCore(common,{},0,parseServiceItemMemo(common.memo),'공동기도');
 assert.equal(deck.type,'image');assert.equal(deck.label,'공동기도');assert.ok(deck.imageSrc.includes('daniel-common-prayer-template-'));
-assert.ok(SERVICE_SLOT_MUSIC['dawn.free'].source.endsWith('7838168016b7.mp3'));
-assert.ok(!SERVICE_SLOT_MUSIC['prayer.meeting.free'].source.includes('7838168016b7'));
+assert.ok(SERVICE_SLOT_MUSIC['dawn.free'].source.endsWith('6ecd6f876b46.mp3'));
+assert.ok(!SERVICE_SLOT_MUSIC['prayer.meeting.free'].source.includes('6ecd6f876b46'));
 console.log('PASS linked replacements preserve absence, route all three card layouts and setlist status to the actual service');
 `,c);
 
-assert.equal(require('node:crypto').createHash('sha256').update(fs.readFileSync('assets/presenter/dawn-free-prayer-7838168016b7.mp3')).digest('hex'),'7838168016b7452d8f6a7939a0736966d33cbcde29106bc052cf481e9500734c','Restored dawn audio must match the verified candidate');
+assert.equal(require('node:crypto').createHash('sha256').update(fs.readFileSync('assets/presenter/dawn-free-prayer-6ecd6f876b46.mp3')).digest('hex'),'6ecd6f876b46ac1f938ef5dc52990d4668a17a33cc7e0f93e50f9e8f2d8c94be','Restored dawn audio must match the verified candidate');
 
 // Lossless packet preservation: only 144 silent MP3 frames were removed.
 {

@@ -27,23 +27,27 @@
 
 ## Audio
 
-- Dawn music restoration (2026-11-04):
-  `assets/presenter/dawn-free-prayer-7838168016b7.mp3`, 55,067,636 bytes,
-  3413.627375 seconds decoded, stereo 48kHz. SHA-256:
-  `7838168016b7452d8f6a7939a0736966d33cbcde29106bc052cf481e9500734c`.
-  Restored from the first supplied `dawn-free-prayer.mp3` (SHA-256
+- Dawn music selective restoration (2026-11-04):
+  `assets/presenter/dawn-free-prayer-6ecd6f876b46.mp3`, 69,140,612 bytes,
+  3203.029625 seconds decoded, stereo 48kHz. SHA-256:
+  `6ecd6f876b46ac1f938ef5dc52990d4668a17a33cc7e0f93e50f9e8f2d8c94be`.
+  Built from the first supplied original (SHA-256
   `b8939186c2434d0280e787d02103cbfd136c77ea73b2096faa01a85ab026f7d9`).
-  The former 52-minute edit is superseded: it altered internal passages.
-  No normalization, gain envelope, crossfade over music or re-encoding is used.
-  Only 144 MP3 frames (3.456 seconds) wholly inside the digital-zero interval
-  between the vocal and instrumental sets were removed. Original sample range
-  1706.136979–1709.592979 seconds was all zero in both channels.
-  Every retained decoded stereo sample matches the original exactly; the
-  existing continuous musical transitions and song-internal pauses remain.
-  Gapless delay/end padding and the Xing/LAME header checksum are preserved
-  or updated appropriately. Tests assert every retained audio packet verbatim.
+  The user clarified that useful song-to-song editing should remain; reverting
+  every musical transition was too broad. Ten explicitly mapped transitions
+  retain the former 3.2-second outgoing / 0.4-second incoming envelope. Adjacent
+  lyric entries are protected. No low-volume/onset-triggered automatic cutting
+  is used; former internal cuts and twelve momentary gain dips are removed.
+  All eleven spans outside the listed transitions match original float PCM
+  sample-for-sample before delivery encoding. The complete third song's sung
+  passage (original448.98–628.30s) is preserved as one uninterrupted span.
+  MP3 delivery is re-encoded (LAME quality2), not packet-identical. Full decoding,
+  source alignment and outside-transition waveform checks are technical evidence,
+  not a claim of human listening or physical church sound verification.
+  Private edit map, source and validation remain in the local selective-audio
+  evidence directory; the prior restoration asset is retained for recovery.
   `dawn.free` resolves to this immutable asset; explicit attached audio retains
-  precedence. This change does not rewrite any worship record or media timing.
+  precedence. No worship record, linked media or synchronization timing changes.
 
 - Original supplied M4A, unchanged, approximately 46 minutes 42 seconds.
 - SHA-256: `8c888a525cde94b7fbd91046f0ee774a7ba8fda06a199646112b201eb57f72da`

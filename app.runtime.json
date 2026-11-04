@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261105-app-loading-catalog",
+  "version": "20261105-loading-prayer-batch",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "2a5d0e46098982572729aea6a385e3eedc6fa95bac5d9a8a99cb1451acbbd2a5",
-  "runtime_sha256": "eb48a432587f11d024210558a638a9de324d88030b2493b82b8973fc95841d46",
+  "source_sha256": "09ea3e0331713e24aa225c7ceb1db6b77a9b0eea00a25cdde4835a13e2e09983",
+  "runtime_sha256": "50ad1c94c9d1e9379733fd6c5f7080d1226d19573e7cbf28fe6b56e0eaec76dd",
   "source_bytes": 1356562,
   "runtime_bytes": 968297,
-  "source_gzip": 311022,
-  "runtime_gzip": 243943
+  "source_gzip": 311021,
+  "runtime_gzip": 243937
 }
