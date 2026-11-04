@@ -1,0 +1,20 @@
+const assert = require('node:assert/strict');
+const selection = require('../mindex.praise-selection.js');
+const entry = {id:'fixture:1',source:'선곡 시험 자료',source_date:'2026-01',key:'D–E',category:'2',theme:'위로',transition_note:'E 다음 곡 (3절)\n> G 마지막 곡',next:[{title:'다음 곡',song_id:'SONG-CONT-0002-0001',key:'E',note:'3절'}],future:{preserve:true}};
+const song={id:'SONG-CONT-0001-0001',metadata:{selection_guidance:[entry]}};
+assert.deepEqual(selection.normalize(null),[]);
+assert.deepEqual(selection.normalize([null,{},entry]),[entry]);
+assert.deepEqual(selection.normalize(selection.normalize([entry])),[entry]);
+const saved=structuredClone(song),target={id:'SONG-CONT-0002-0001'};
+const html=selection.render(song,[song,target]);
+assert.ok(html.includes('data-open-song="SONG-CONT-0002-0001"'));
+assert.ok(html.includes('3절')&&html.includes('&gt; G 마지막 곡'));
+assert.ok(!selection.render(song,[song]).includes('data-open-song'));
+assert.equal(selection.render(target,[song,target]),''); // never infer reverse edges
+assert.deepEqual(song,saved);
+assert.ok(selection.searchText([entry]).includes('위로'));
+assert.ok(selection.searchText([entry]).includes('D–E'));
+const injected=structuredClone(song);injected.metadata.selection_guidance[0].transition_note='<img src=x onerror=alert(1)>';
+assert.ok(!selection.render(injected).includes('<img'));
+assert.ok(selection.render(injected).includes('&lt;img'));
+console.log('PASS selection normalization, provenance, directed links, unavailable targets, escaping, search and preservation');

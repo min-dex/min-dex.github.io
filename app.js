@@ -17129,6 +17129,7 @@ function renderDetail() {
         </div>
       </header>
 
+      ${globalThis.MindexPraiseSelection?.render(song, songById) || ""}
       ${renderFormsTab(song)}
       ${state.metadataPopupOpen ? renderSongMetadataDialog(song) : ""}
     </div>
@@ -20210,6 +20211,7 @@ function getSongSearchFields(song, options = {}) {
     searchField("meta", metadata.translator, 54, "번역"),
     searchField("meta", metadata.album, 48, "앨범"),
     searchField("meta", metadata.track, 32, "트랙"),
+    ...(globalThis.MindexPraiseSelection?.searchText(metadata.selection_guidance) || []).map(text => searchField("meta", text, 42, "선곡 정보")),
   ];
 
   for (const version of song.versions || []) {
@@ -20777,6 +20779,7 @@ function normalizeSongMetadata(value) {
     album: nullIfBlank(source.album),
     track: nullIfBlank(source.track),
     presenter_form: presenterForm,
+    selection_guidance: globalThis.MindexPraiseSelection?.normalize(source.selection_guidance) || [],
   };
   return Object.fromEntries(Object.entries(metadata).filter(([, item]) => (Array.isArray(item) ? item.length : item)));
 }
