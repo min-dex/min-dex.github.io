@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261104-presenter-freeze-refresh",
+  "version": "20261104-background-startup-recovery",
   "options": {
     "compress": false,
     "mangle": {

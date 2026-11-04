@@ -7,7 +7,8 @@ from pathlib import Path
 
 def check_background_startup(browser, url):
     page = browser.new_page()
-    page.goto(url)
+    page.route('**/*supabase*/**', lambda route: route.abort())
+    page.goto(url+'?output=presenter')
     page.wait_for_function("typeof applyPresenterBackgroundVideo === 'function'")
     page.clock.install()
     held = []
