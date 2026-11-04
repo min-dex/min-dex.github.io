@@ -1,7 +1,12 @@
 """Offline freeze/navigation and read-only staged refresh; no real output/media."""
 import os
+import io, wave
+from pathlib import Path
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from smoke_app import launch_chromium,start_local_app_server,sync_playwright
+wave_data=io.BytesIO()
+with wave.open(wave_data,'wb') as wav:
+ wav.setnchannels(1);wav.setsampwidth(2);wav.setframerate(8000);wav.writeframes(b'\0\0'*(8000*8))
 server,url=start_local_app_server()
 try:
  with sync_playwright() as pw:
@@ -9,6 +14,8 @@ try:
    browser=launch_chromium(pw) if engine=='chromium' else pw.webkit.launch()
    page=browser.new_page();page.route('**/*supabase*/**',lambda r:r.abort())
    page.goto(url+'?mindexSmokeRaw=1');page.wait_for_function("!!globalThis.MindexPresenterRefresh && !document.body.classList.contains('ui-booting')")
+   page.route('**/freeze-audio-fixture.wav',lambda r:r.fulfill(body=wave_data.getvalue(),content_type='audio/wav'))
+   page.route('**/freeze-video-fixture.webm',lambda r:r.fulfill(body=(Path(__file__).parent/'fixtures/praise-background.webm').read_bytes(),content_type='video/webm'))
    print(engine,page.evaluate('''async()=>{
     const check=(v,m)=>{if(!v)throw Error(m)};
     const sid=crypto.randomUUID(),eid=crypto.randomUUID();
@@ -31,7 +38,8 @@ try:
     worshipAtomicClient=async()=>atomic;MindexPresenterFreshness.freshSongs=async()=>[];
     state.client={fixture:true};state.config.url='https://fixture.invalid';
     const originalRender=renderPresenterControlState;renderPresenterControlState=()=>{};
-    const audio={paused:false,ended:false,currentTime:37.5,pause(){throw Error('audio stopped')},play(){throw Error('audio restarted')}};
+    const audio=new Audio('/freeze-audio-fixture.wav');audio.muted=true;audio.loop=true;await audio.play();audio.currentTime=.375;
+    const audioStart=audio.currentTime;
     state.serviceMusic.audio=audio;state.serviceMusic.playing=true;state.serviceMusic.autoSyncSuspended=true;
     state.serviceMusic.ownerServiceId=sid;state.serviceMusic.sourceKey='fixture.wav';state.serviceMusic.mode='presenter-audio';
     const transport=publishPresenterPayload;const sent=[];publishPresenterPayload=(payload,options)=>{sent.push(structuredClone(payload));transport(payload,options)};
@@ -44,7 +52,9 @@ try:
     runPresenterAction('blackout',sid);check(state.presenter.safetyBlank,'freeze blocked safety');
     runPresenterAction('blackout',sid);check(!state.presenter.safetyBlank,'freeze blocked safety restore');
     const dom=document.createElement('main');dom.className='presenter-output-root';dom.innerHTML='<div class="presenter-output-layer is-active"><video muted></video></div>';
-    const video=dom.querySelector('video');MindexPresenterRefresh.output(dom,{...frozen,outputFrozen:false});
+    const video=dom.querySelector('video');video.muted=true;video.loop=true;video.playsInline=true;video.src='/freeze-video-fixture.webm';document.body.append(dom);await video.play();
+    let loadStarts=0;video.addEventListener('loadstart',()=>loadStarts++);
+    MindexPresenterRefresh.output(dom,{...frozen,outputFrozen:false});
     check(MindexPresenterRefresh.output(dom,frozen)&&dom.querySelector('video')===video,'freeze replaced running video node');
     const stage=document.createElement('main');stage.id='presenterOutputRoot';stage.className='presenter-output-root';document.body.append(stage);
     const output={...frozen,outputFrozen:false,chromakey:false,backgroundImages:[],backgroundImage:'',slides:[{id:'held',type:'title-content',elementType:'title_content',layout:'center_text',title:'현재 송출',bodyText:'보존'}],index:0};
@@ -57,7 +67,8 @@ try:
     remote.service.title='갱신한 예배명';
     check(await MindexPresenterRefresh.refresh(sid),'manual refresh failed');
     check(state.services[0].title==='갱신한 예배명','fresh aggregate was not adopted');
-    check(state.serviceMusic.audio===audio&&audio.currentTime===37.5&&!audio.paused,'refresh reset audio');
+    check(state.serviceMusic.audio===audio&&audio.currentTime>=audioStart&&!audio.paused,'refresh reset audio');
+    check(dom.querySelector('video')===video&&!video.paused&&loadStarts===0,'refresh recreated/reloaded the running video');
     check(reads===1&&adopts===1&&MindexPresenterRefresh.frozen(sid),'manual freeze not retained');
     runPresenterAction('freeze',sid);check(!MindexPresenterRefresh.frozen(sid),'manual unfreeze missing');
     // Failed reads leave every authored/local row intact and auto-unfreeze.
@@ -93,7 +104,7 @@ try:
     MindexPresenterFreshness.adoptRefresh('other-live','5',[{id:'sentinel',title:'현재 송출 판본'}]);
     check(await MindexPresenterRefresh.refresh(sid),'standby refresh failed');
     check(MindexPresenterFreshness.song('sentinel','other-live')?.title==='현재 송출 판본','standby refresh changed the live song snapshot');
-    renderPresenterControlState=originalRender;state.presenter.outputWindow=null;
+    renderPresenterControlState=originalRender;state.presenter.outputWindow=null;audio.pause();video.pause();dom.remove();
     return 'PASS manual/automatic hold, safety restore, output-side navigation, media node, read failure, late drafts, duplicate clicks and original rows';
    }'''))
    browser.close()
