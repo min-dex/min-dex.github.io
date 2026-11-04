@@ -1,6 +1,6 @@
 ## 2026-11-04 Background/audio follow-up candidate
 
-Approved web candidate `d6e757d8` (including `6947c5bf`, the `d2f58911` readiness/HTTP Range fixes and stable controller-preview cache isolation) is integrated after verified native candidate
+Approved shared web candidate `d702a6cd` (including `6947c5bf`, `d2f58911`, `d6e757d8` preview-cache isolation and source-based praise selection guidance) is integrated after verified native candidate
 `e4905211`. Element-owned backgrounds retain playback and bounded cold-load
 retries; the supplied final dawn MP3 remains byte-identical. Package acceptance
 checks its pinned SHA-256 as well as every tracked renderer blob. The installed
