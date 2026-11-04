@@ -26,6 +26,7 @@ NODE_TESTS = (
     "test_linked_song_parallel_load.cjs",
     "test_draft_handoff.mjs",
     "test_audio_db_only.cjs",
+    "test_unlinked_praise_create.cjs",
     "test_server_state.mjs",
     "test_editor_draft_merge.mjs",
     "test_editor_draft_recovery.cjs",

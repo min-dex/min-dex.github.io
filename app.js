@@ -1617,6 +1617,8 @@ function bindDetailInteractionRoot(root, options = {}) {
   if (options.presenterBoard) root.addEventListener("dblclick", handlePresenterBoardDoubleClick);
   root.addEventListener("keydown", handleDetailKeydown, { capture: true });
   root.addEventListener("input", handleDetailInput);
+  root.addEventListener("compositionstart", handleServiceSongComposition);
+  root.addEventListener("compositionend", handleServiceSongComposition);
   root.addEventListener("focusin", (event) => {
     warmServiceSlotMusic(event.target);
     if (event.target?.matches?.("[data-presenter-preparation-field]")) {
@@ -9586,7 +9588,7 @@ function handleDetailInput(event) {
     syncServiceScriptureInputError(serviceField);
     if (isDeferredServiceTextInput(serviceField)) {
       if (isServiceSongTitleInputField(serviceField)) {
-        scheduleServiceSongPickerPreview(serviceField);
+        scheduleServiceSongPickerPreview(serviceField, { composing: event.isComposing });
         return;
       }
       if (isPresenterEnterCommittedServiceInput(serviceField)) {
@@ -10524,41 +10526,6 @@ function clearDeferredServiceTextPreview(field) {
   deferredServiceTextPreviewTimers.delete(key);
 }
 
-// Search the input draft without committing it to the service or live output.
-function scheduleServiceSongPickerPreview(field) {
-  const key = deferredServiceTextPreviewKey(field);
-  clearDeferredServiceTextPreview(field);
-  const serviceId = field.dataset.serviceId || state.selectedServiceId;
-  const index = Number(field.dataset.serviceItemIndex);
-  const itemId = getServiceItems(serviceId)[index]?.id;
-  const renderPreview = (message = "") => {
-    if (!field.isConnected || state.selectedServiceId !== serviceId) return;
-    const item = getServiceItems(serviceId)[index];
-    if (!item || item.id !== itemId) return;
-    const picker = field.closest(".svc-edit-title-wrap")?.querySelector(".svc-song-picker");
-    if (!picker) return;
-    const service = state.services.find((candidate) => candidate.id === serviceId);
-    const draft = { ...item, raw_title: field.value, song_id: null, version_id: null, song_version_id: null };
-    const model = { ...serviceItemEditorModel(draft, { service }), linkedSong: null, songVersions: [] };
-    picker.outerHTML = message
-      ? `<div class="svc-song-picker"><span class="svc-song-picker-hint">${escapeHtml(message)}</span></div>`
-      : renderServiceSongPicker(draft, index, model);
-  };
-  deferredServiceTextPreviewTimers.set(key, window.setTimeout(async () => {
-    deferredServiceTextPreviewTimers.delete(key);
-    if (!field.isConnected) return;
-    if (String(field.value).trim() && !songCatalogLoaded && canUseClientData()) {
-      renderPreview("찬양 목록 불러오는 중");
-      try {
-        await loadSongs({ searchOnly: true });
-      } catch (error) {
-        renderPreview("찬양 목록을 불러오지 못했습니다. 다시 입력해 주세요.");
-        return;
-      }
-    }
-    renderPreview();
-  }, 150));
-}
 
 function scheduleDeferredServiceTextPreview(field) {
   if (!field?.isConnected || isDeferredServiceScriptureReferenceInput(field)) return;
@@ -12770,7 +12737,7 @@ async function createPraiseSongFromServiceItem(index) {
   const field = () => findDeferredServiceTextInput(serviceId,index,"raw_title");
   const inputTitle = String(field()?.value ?? item.raw_title ?? "").trim()
     || String(window.prompt("새 곡 제목을 입력해 주세요.","") || "").trim();
-  if (!inputTitle) return;
+  if (!inputTitle || serviceSongComposingFields.has(field()) || /[ㄱ-ㅎㅏ-ㅣ]/u.test(inputTitle)) return;
   if (presenterPreparationSongContentHasConnection(inputTitle)) { showToast("연결곡은 찬양 DB에 새 곡으로 만들지 않고 예배 항목에만 둡니다.","info"); return; }
   const client = state.client, project = state.config.url;
   const before = JSON.stringify(item), fieldBefore = field()?.value;
@@ -12786,6 +12753,10 @@ async function createPraiseSongFromServiceItem(index) {
     if (!song) {
       if (presenterPreparationNumberOnlyHymnReference(presenterPreparationSongContent(inputTitle))) {
         throw new Error("해당 번호의 찬송가를 찾지 못했습니다. 번호와 판본을 확인해 주세요. 입력은 유지됩니다.");
+      }
+      if (serviceSongRegistrationState(inputTitle, item, service) !== "ready") {
+        showToast("새 곡 등록 전에 찬양 목록과 입력 유형을 확인해 주세요. 입력은 유지됩니다.", "info");
+        return;
       }
       if (!requireClient()) return;
       const title = stripHymnNo(presenterPreparationSongContent(inputTitle)).title.trim();
@@ -27156,6 +27127,15 @@ function renderServiceSongPicker(item, index, model = serviceItemEditorModel(ite
   if (!query) return `<div class="svc-song-picker" hidden></div>`;
   const results = serviceSongPickerResults(query, item, model.service);
   if (!results.length) {
+    const availability = serviceSongRegistrationState(query, item, model.service);
+    if (availability === "typing") return `<div class="svc-song-picker" hidden></div>`;
+    if (availability !== "ready") {
+      const message = availability === "existing"
+        ? "검색된 곡에 이 유형의 자료가 없습니다."
+        : availability === "hymn" ? "해당 번호의 찬송가를 찾지 못했습니다. 번호와 판본을 확인해 주세요."
+        : "찬양 목록 확인이 필요합니다.";
+      return `<div class="svc-song-picker"><span class="svc-song-picker-hint">${message}</span></div>`;
+    }
     return `<div class="svc-song-picker"><span class="svc-song-picker-warning">검색 결과 없음</span><button class="svc-song-create" type="button" data-service-song-create="${index}">새 곡 등록</button></div>`;
   }
   return `
@@ -27233,13 +27213,14 @@ function renderServiceManualPraiseLyricsEditor(item, index, options = {}) {
     </label>`;
 }
 
-function serviceSongPickerResults(query, item = {}, service = selectedServiceForEditor(), limit = 6) {
+
+function serviceSongPickerResults(query, item = {}, service = selectedServiceForEditor(), limit = 6, { unrestricted = false } = {}) {
   const normalizedQuery = presenterPreparationSongContent(query);
   const directMatch = resolveExistingPraiseSongForServiceInput(normalizedQuery, item, service);
   const tokens = getSearchTokens(normalizedQuery);
   if (!tokens.length) return [];
-  const requiresNewHymnal = serviceItemRequiresNewHymnalScoreSong(item);
-  const requiresChildren = servicePraiseInputMode(item, parseServiceItemMemo(item.memo), service) === "children_audio";
+  const requiresNewHymnal = !unrestricted && serviceItemRequiresNewHymnalScoreSong(item);
+  const requiresChildren = !unrestricted && servicePraiseInputMode(item, parseServiceItemMemo(item.memo), service) === "children_audio";
   if (presenterPreparationNumberOnlyHymnReference(normalizedQuery)) {
     return directMatch && isSelectablePraiseSong(directMatch)
       && (!requiresNewHymnal || serviceSongHasScore(directMatch)) ? [songForHymnNumberResult(directMatch)] : [];
