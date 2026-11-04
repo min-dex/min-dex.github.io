@@ -7,6 +7,7 @@ async function main(){
  assert(['seed','restart','upgrade'].includes(phase));
  let record=phase==='seed'?{token:crypto.randomBytes(16).toString('hex'),rows:{}}:JSON.parse(fs.readFileSync(proof));
  const originalRows=JSON.stringify(record.rows);
+ let restoring=false;
  const app=await _electron.launch({executablePath:path.resolve(exe),env:{...process.env,MINDEX_ISOLATED_TEST:'1',MINDEX_TEST_PROFILE_TOKEN:record.token}});
  try {
   const native=await app.evaluate(({app})=>({profile:app.getPath('userData'),version:app.getVersion(),isolation:globalThis.__mindexTestIsolation,packaged:app.isPackaged}));
@@ -23,7 +24,7 @@ async function main(){
    const scope=args.p_scope==='shared'?'shared':args.p_scope+':'+args.p_token;
    const rows=record.rows[scope]||{};
    if(name==='mindex_state_read_v1')return {data:Object.values(rows),error:null};
-   assert.equal(name,'mindex_state_write_v1');assert.equal(phase,'seed','Readback must not mutate saved records');
+   assert.equal(name,'mindex_state_write_v1');assert(phase==='seed'||restoring,'Readback must not mutate saved records');
    assert.equal(args.p_revision,'0');assert(!rows[args.p_key]);
    const row={key:args.p_key,value:args.p_value,revision:'1',requestId:args.p_request_id};
    (record.rows[scope]||= {})[row.key]=row;return {data:row,error:null};
@@ -47,9 +48,8 @@ async function main(){
    const actual=Object.fromEntries(Object.keys(values).map(key=>[key,storage.getItem('local',key)]));
    for(const key in values)if(actual[key]!==values[key])throw Error('Raw fixture mismatch: '+key);
    const restored=JSON.parse(actual[Object.keys(values)[0]]);
-   const textarea=document.createElement('textarea');textarea.value=restored.value.items[0].raw_body;document.body.append(textarea);
-   if(textarea.value!==draft.value.items[0].raw_body)throw Error('Draft text recovery mismatch');
-   return {worship:await fetchWorshipServiceListRows(),values:actual,recoveredText:textarea.value,identity:localStorage.getItem('mindex.server.identity:upgrade-fixture')};
+   if(restored.value.items[0].raw_body!==draft.value.items[0].raw_body)throw Error('Draft text recovery mismatch');
+   return {worship:await fetchWorshipServiceListRows(),values:actual,recoveredText:restored.value.items[0].raw_body,identity:localStorage.getItem('mindex.server.identity:upgrade-fixture')};
   },phase==='seed');
   assert.equal(data.identity.length,64);
   if(phase==='seed'){
@@ -59,7 +59,22 @@ async function main(){
    assert.deepEqual(data,record.data);assert.equal(JSON.stringify(record.rows),originalRows);
    assert.deepEqual(Object.fromEntries(Object.entries(data).map(([k,v])=>[k,hash(v)])),record.hashes);
   }
-  console.log(JSON.stringify({phase,source:sha,version,profile:native.profile,appId:'kr.mindex.app.test',networkBlocked:true,hashes:record.hashes}));
+  const beforeRestore=structuredClone(record.rows);
+  restoring=true;
+  page.once('dialog',dialog=>dialog.accept());
+  const restored=await page.evaluate(async()=>{
+   const key='mindex.editor.draft.v2:service:fixture-worship:rehearsal';
+   const draft=JSON.parse(MINDEX_SERVER_STORAGE.getItem('local',key));
+   Object.assign(state,{module:'service',selectedServiceId:draft.id,services:[draft.value.service],serviceItems:{[draft.id]:[]},serviceTypes:[]});
+   state.dirty.service=false;
+   const ok=await MINDEX_EDITOR_DRAFTS.restoreDraft(draft);
+   if(!ok)throw Error('Real draft restore rejected');
+   return {items:state.serviceItems[draft.id],dirty:state.dirty.service};
+  });
+  const draft=JSON.parse(record.data.values['mindex.editor.draft.v2:service:fixture-worship:rehearsal']);
+  assert.deepEqual(restored.items,draft.value.items);assert(restored.dirty);
+  for(const [scope,rows]of Object.entries(beforeRestore))for(const [key,row]of Object.entries(rows))assert.deepEqual(record.rows[scope][key],row);
+  console.log(JSON.stringify({phase,source:sha,version,profile:native.profile,appId:'kr.mindex.app.test',networkBlocked:true,restoredByApp:true,hashes:record.hashes,valueHashes:Object.fromEntries(Object.entries(data.values).map(([k,v])=>[k,hash(v)]))}));
  }finally{await app.close();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});
