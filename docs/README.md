@@ -173,3 +173,6 @@ records above for the retained repair evidence and Git reference.
 
 - [2026-11-04 검사·배포 지연 회고](release-delay-review-20261104.md): 확인된 병목,
   이미 적용된 수정, 사전 분배 확인 도구와 재발 방지 절차.
+
+- [배포 다운로드·시간 기록 계약](release-observability.md): 작은 checkout 후 검증
+  재사용, FIFO·인증·수정·CI·공개 확인의 지속 시간 기록과 비교 기준.
