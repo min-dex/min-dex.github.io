@@ -54,3 +54,12 @@ test('persistent fixture is test-only, token-scoped and rejects symlink paths',(
   assert.throws(()=>configureTestIsolation({app},{mindexTestBuild:true},env),/Unrecognized/);
  } finally {fs.rmSync(profile,{recursive:true,force:true});}
 });
+
+
+test('Windows shell fixture lookup uses native path joining without POSIX suffix conversion',()=>{
+ const workflow=fs.readFileSync('.github/workflows/desktop-release.yml','utf8');
+ assert.equal(workflow.split('require("path").join(process.env.RUNNER_TEMP,"install-fixture.json")').length-1,2);
+ assert.ok(!workflow.includes('process.env.RUNNER_TEMP+"/install-fixture.json"'));
+ const path=require('node:path');
+ assert.equal(path.win32.join('D:\\a\\_temp','install-fixture.json'),'D:\\a\\_temp\\install-fixture.json');
+});

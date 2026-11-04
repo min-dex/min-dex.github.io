@@ -82,7 +82,7 @@ jobs:
             installer="dist/prior-test/Mindex-Test-0.9.0-test-mac-$arch.dmg"
           fi
           python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/install-fixture.json"
-          exe="$(node -p 'JSON.parse(require("fs").readFileSync(process.env.RUNNER_TEMP+"/install-fixture.json")).exe')"
+          exe="$(node -p 'JSON.parse(require("fs").readFileSync(require("path").join(process.env.RUNNER_TEMP,"install-fixture.json"))).exe')"
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/upgrade-proof.json" seed "$GITHUB_SHA" 0.9.0-test
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/upgrade-proof.json" restart "$GITHUB_SHA" 0.9.0-test
           rm -rf dist/prior-test
@@ -120,7 +120,7 @@ jobs:
             installer="dist/test/Mindex-Test-1.0.0-test-mac-$(node -p process.arch).dmg"
           fi
           python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/install-fixture.json"
-          exe="$(node -p 'JSON.parse(require("fs").readFileSync(process.env.RUNNER_TEMP+"/install-fixture.json")).exe')"
+          exe="$(node -p 'JSON.parse(require("fs").readFileSync(require("path").join(process.env.RUNNER_TEMP,"install-fixture.json"))).exe')"
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/upgrade-proof.json" upgrade "$GITHUB_SHA" 1.0.0-test
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/upgrade-proof.json" restart "$GITHUB_SHA" 1.0.0-test
       - name: Build signed packages (no public release)
