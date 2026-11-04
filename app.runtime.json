@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261104-worship-media-cache",
+  "version": "20261104-compact-praise-controls",
   "options": {
     "compress": false,
     "mangle": {
