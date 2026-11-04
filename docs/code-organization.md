@@ -302,6 +302,11 @@ loaded before app.js; hooks execute after bootstrap. Output orchestration stays
 in app.js, song selection stays in mindex.presenter-praise.js and existing live modules
 forward change notifications without rewriting service records.
 
+`mindex.presenter-refresh.js` owns the session-local navigation hold and staged
+read-only refresh of the selected service. It uses the existing atomic read and
+adoption API, never reloads the document, and never writes worship records.
+
+
 
 ## Presenter display projection ·2026-10-24
 

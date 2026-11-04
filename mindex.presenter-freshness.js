@@ -147,5 +147,10 @@
     catch { /* Keep current output on network loss; next preparation remains strict. */ }
     finally { checking = false; }
   }
-  globalThis.MindexPresenterFreshness = { beforeOpen, verify, prepareNext, freshSongs, song, notify, checkLiveRevision };
+  function adoptRefresh(serviceId, revision, songs) {
+    const previous = session;
+    session = { serviceId, revision: String(revision), songs: new Map(songs.map(song => [song.id, structuredClone(song)])), notified: false };
+    return () => { session = previous; };
+  }
+  globalThis.MindexPresenterFreshness = { adoptRefresh, beforeOpen, verify, prepareNext, freshSongs, song, notify, checkLiveRevision };
 })();

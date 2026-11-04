@@ -117,6 +117,7 @@
       "!node_modules/electron-builder/**/*",
       "mindex.draft-handoff.js",
       "mindex.presenter-freshness.js",
+      "mindex.presenter-refresh.js",
       "mindex.hymn-structure.js",
       "mindex.hymn-structure.runtime.json",
       "mindex.keynote-html.js",
